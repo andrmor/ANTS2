@@ -205,7 +205,7 @@ public slots:
     void on_pbTrackStack_clicked();
     void on_pbGenerateLight_clicked();
     void on_pbParticleSourcesSimulate_clicked();    
-    void RefreshPhotSimOnTimer(int Progress, double msPerEv);
+    void RefreshOnProgressReport(int Progress, double msPerEv);
     void PMscriptSuccess();
     void onGDMLstatusChage(bool fGDMLactivated);
     void updateLoaded(int events, int progress);

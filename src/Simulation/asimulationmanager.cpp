@@ -18,17 +18,16 @@
 #include <QFile>
 #include <QTextStream>
 
-ASimulationManager::ASimulationManager(EventsDataClass * EventsDataHub, DetectorClass * Detector)
+ASimulationManager::ASimulationManager(EventsDataClass & EventsDataHub, DetectorClass & Detector) :
+    QObject(nullptr),
+    EventsDataHub(EventsDataHub), Detector(Detector)
 {
-    this->EventsDataHub = EventsDataHub;
-    this->Detector = Detector;
-
-    ParticleSources = new ASourceParticleGenerator(Detector, Detector->RandGen);
-    FileParticleGenerator = new AFileParticleGenerator(*Detector->MpCollection);
-    ScriptParticleGenerator = new AScriptParticleGenerator(*Detector->MpCollection, Detector->RandGen);
+    ParticleSources = new ASourceParticleGenerator(&Detector, Detector.RandGen);
+    FileParticleGenerator = new AFileParticleGenerator(*Detector.MpCollection);
+    ScriptParticleGenerator = new AScriptParticleGenerator(*Detector.MpCollection, Detector.RandGen);
     ScriptParticleGenerator->SetProcessInterval(200);
 
-    Runner = new ASimulatorRunner(Detector, EventsDataHub, this);
+    Runner = new ASimulatorRunner(Detector, EventsDataHub, *this);
 
     QObject::connect(Runner, &ASimulatorRunner::simulationFinished, this, &ASimulationManager::onSimulationFinished);
     QObject::connect(this, &ASimulationManager::RequestStopSimulation, Runner, &ASimulatorRunner::requestStop, Qt::DirectConnection);
@@ -36,10 +35,9 @@ ASimulationManager::ASimulationManager(EventsDataClass * EventsDataHub, Detector
     Runner->moveToThread(&simRunnerThread); //Move to background thread, as it always runs synchronously even in MT
     QObject::connect(&simRunnerThread, &QThread::started, Runner, &ASimulatorRunner::simulate); //Connect thread to simulation start
 
-    //GUI update
+    //GUI and websocket update
     simTimerGuiUpdate.setInterval(1000);
-    QObject::connect(&simTimerGuiUpdate, &QTimer::timeout, Runner, &ASimulatorRunner::updateGui, Qt::DirectConnection);
-    QObject::connect(Runner, &ASimulatorRunner::updateReady, this, &ASimulationManager::ProgressReport);
+    QObject::connect(&simTimerGuiUpdate, &QTimer::timeout, this, &ASimulationManager::updateGui, Qt::DirectConnection);
 }
 
 ASimulationManager::~ASimulationManager()
@@ -55,6 +53,11 @@ ASimulationManager::~ASimulationManager()
     delete ParticleSources;
 }
 
+bool ASimulationManager::isSimulationAborted() const
+{
+    return Runner->isStoppedByUser();
+}
+
 void ASimulationManager::StartSimulation(QJsonObject& json, int threads, bool fFromGui)
 {
     fFinished = false;
@@ -67,7 +70,7 @@ void ASimulationManager::StartSimulation(QJsonObject& json, int threads, bool fF
         threads = MaxThreads;
     }
 
-    bool bOK = Runner->setup(json, threads, fFromGui);
+    bool bOK = Runner->setup(json, threads);
     if (!bOK)
     {
         QTimer::singleShot(100, this, &ASimulationManager::onSimFailedToStart); // timer is to allow the start cycle to finish in the main thread
@@ -78,6 +81,8 @@ void ASimulationManager::StartSimulation(QJsonObject& json, int threads, bool fF
         if (fStartedFromGui) simTimerGuiUpdate.start();
     }
 }
+
+
 
 void ASimulationManager::onSimFailedToStart()
 {
@@ -116,7 +121,7 @@ void ASimulationManager::onSimulationFinished()
         if (LastSimType == 0)
         {
             APointSourceSimulator *lastPointSrcSimulator = static_cast< APointSourceSimulator *>(simulators.last());
-            EventsDataHub->ScanNumberOfRuns = lastPointSrcSimulator->getNumRuns();
+            EventsDataHub.ScanNumberOfRuns = lastPointSrcSimulator->getNumRuns();
 
             SiPMpixels = lastPointSrcSimulator->getLastEvent()->SiPMpixels; //only makes sense if there was only 1 event
         }
@@ -147,15 +152,15 @@ void ASimulationManager::onSimulationFinished()
     Runner->clearWorkers();
 
     if (fHardAborted)
-        EventsDataHub->clear(); //data are not valid!
+        EventsDataHub.clear(); //data are not valid!
     else
     {
         //before was limited to the mode whenlocations are limited to a certain object in the detector geometry
         //scan and custom nodes might have nodes outside of the limiting object - they are still present but marked with 1e10 X and Y true coordinates
-        EventsDataHub->purge1e10events(); //purging events with "true" positions x==1e10 && y==1e10
+        EventsDataHub.purge1e10events(); //purging events with "true" positions x==1e10 && y==1e10
     }
 
-    Detector->BuildDetector(true, true);  // <- still needed on Windows
+    Detector.BuildDetector(true, true);  // <- still needed on Windows
     //Detector->GeoManager->CleanGarbage();
 
     if (fStartedFromGui) emit SimulationFinished();
@@ -247,4 +252,21 @@ const QString ASimulationManager::loadNodesFromFile(const QString &fileName)
 void ASimulationManager::StopSimulation()
 {
     emit RequestStopSimulation();
+}
+
+void ASimulationManager::updateGui()
+{
+    switch (Runner->getSimState())
+    {
+    case ASimulatorRunner::SClean:
+    case ASimulatorRunner::SSetup:
+        return;
+    case ASimulatorRunner::SRunning:
+        Runner->updateStats();
+        emit updateReady(Runner->progress, Runner->usPerEvent);
+        emit ProgressReport(Runner->progress);
+        break;
+    case ASimulatorRunner::SFinished:
+        qDebug()<<"Simulation has emitted finish, but updateGui() is still being called";
+    }
 }

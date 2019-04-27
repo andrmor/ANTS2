@@ -25,7 +25,6 @@
 #include "credits.h"
 #include "detectorclass.h"
 #include "asimulationmanager.h"
-#include "asimulatorrunner.h"
 #include "aparticlesourcesimulator.h"
 #include "areconstructionmanager.h"
 #include "apmtype.h"
@@ -3751,12 +3750,12 @@ void MainWindow::simulationFinished()
 
         MIwindow->UpdateActiveMaterials(); //to update tmpMaterial
 
-        if (!SimulationManager->fSuccess)
+        if (!SimulationManager->isSimulationSuccess())
         {
             //qDebug() << "Sim manager reported fail!";
             ui->leEventsPerSec->setText("n.a.");
-            QString report = SimulationManager->Runner->getErrorMessages();
-            if (report != "Simulation stopped by user") message(report, this);
+            if (!SimulationManager->isSimulationAborted())
+                message(SimulationManager->getErrorString(), this);
         }
 
         bool showTracks = false;
@@ -3766,7 +3765,7 @@ void MainWindow::simulationFinished()
             clearGeoMarkers();
             Rwindow->ShowPositions(1, true);
 
-            if (ui->twSingleScan->currentIndex() == 0 && SimulationManager->fSuccess)
+            if (ui->twSingleScan->currentIndex() == 0 && SimulationManager->isSimulationSuccess())
                 if (EventsDataHub->Events.size() == 1) Owindow->SiPMpixels = SimulationManager->SiPMpixels;
         }
         if (SimulationManager->LastSimType == 1) //ParticleSources sim
@@ -3811,31 +3810,31 @@ void MainWindow::simulationFinished()
           //qDebug()  << "==>Checked the available data, default Recon data created, basic filters applied";
         //Owindow->SetCurrentEvent(0);
         WindowNavigator->BusyOff(false);
-    }
 
-    //warning for G4ants sim
-    if (ui->twSourcePhotonsParticles->currentIndex()==1 && ui->cbGeant4ParticleTracking->isChecked() && SimulationManager->fSuccess)
-    {
-        QString s;
-        double totalEdepo = SimulationManager->DepoByRegistered + SimulationManager->DepoByNotRegistered;
-        if (totalEdepo == 0)
-            s += "Total energy deposition in sensitive volumes is zero!\n\n";
-
-        if (SimulationManager->DepoByNotRegistered > 0)
+        //warning for G4ants sim
+        if (ui->twSourcePhotonsParticles->currentIndex()==1 && ui->cbGeant4ParticleTracking->isChecked() && SimulationManager->isSimulationSuccess())
         {
-            //double limit = 0.001;
-            //if (SimulationManager->DepoByNotRegistered > limit * totalEdepo)
+            QString s;
+            double totalEdepo = SimulationManager->DepoByRegistered + SimulationManager->DepoByNotRegistered;
+            if (totalEdepo == 0)
+                s += "Total energy deposition in sensitive volumes is zero!\n\n";
+
+            if (SimulationManager->DepoByNotRegistered > 0)
             {
-                s += QString("Deposition by not registered particles constitutes\n");
-                s += QString::number(100.0 * SimulationManager->DepoByNotRegistered / totalEdepo, 'g', 4) + " %";
-                s += "\nof the total energy deposition in the sensitive volume(s).\n\n";
-                s += "The following not registered particles were seen during Geant4 simulation:\n";
-                for (const QString & pn : SimulationManager->SeenNonRegisteredParticles)
-                    s += pn + ", ";
-                s.chop(2);
+                //double limit = 0.001;
+                //if (SimulationManager->DepoByNotRegistered > limit * totalEdepo)
+                {
+                    s += QString("Deposition by not registered particles constitutes\n");
+                    s += QString::number(100.0 * SimulationManager->DepoByNotRegistered / totalEdepo, 'g', 4) + " %";
+                    s += "\nof the total energy deposition in the sensitive volume(s).\n\n";
+                    s += "The following not registered particles were seen during Geant4 simulation:\n";
+                    for (const QString & pn : SimulationManager->SeenNonRegisteredParticles)
+                        s += pn + ", ";
+                    s.chop(2);
+                }
+                //qDebug() << SimulationManager->SeenNonRegisteredParticles;
+                message(s, this);
             }
-            //qDebug() << SimulationManager->SeenNonRegisteredParticles;
-            message(s, this);
         }
     }
 
@@ -3975,21 +3974,13 @@ void MainWindow::on_pbGenerateLight_clicked()
     delete pss;
 }
 
-void MainWindow::RefreshPhotSimOnTimer(int Progress, double msPerEv)
+void MainWindow::RefreshOnProgressReport(int Progress, double msPerEv)
 {
   ui->prScan->setValue(Progress);
   WindowNavigator->setProgress(Progress);
   ui->leEventsPerSec->setText( (msPerEv==0) ? "n.a." : QString::number(msPerEv, 'g', 4));
 
   qApp->processEvents();
-  /*
-  if (ui->pbStopScan->isChecked())
-    {
-      //emit StopRequested();
-      SimulationManager->StopSimulation();
-      return;
-    }
-  */
 }
 
 void MainWindow::on_pbGDML_clicked()

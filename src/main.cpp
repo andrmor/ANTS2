@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
     qDebug() << "Detector created";
 
 #ifdef SIM
-    ASimulationManager SimulationManager(&EventsDataHub, &Detector);
+    ASimulationManager SimulationManager(EventsDataHub, Detector);
     Config.SetParticleSources(SimulationManager.ParticleSources);
     qDebug() << "Simulation manager created";
 #endif
@@ -326,7 +326,7 @@ int main(int argc, char *argv[])
             if ( parser.isSet(maxThreadsOption) )
             {
                 int max = parser.value(maxThreadsOption).toInt();
-                SimulationManager.MaxThreads = max;
+                SimulationManager.setMaxThreads(max);
                 ReconstructionManager.setMaxThread(max);
             }
             QHostAddress ip = QHostAddress::Null;

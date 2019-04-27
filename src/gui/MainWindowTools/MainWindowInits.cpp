@@ -19,7 +19,6 @@
 #include "amaterialparticlecolection.h"
 #include "detectorclass.h"
 #include "asimulationmanager.h"
-#include "asimulatorrunner.h"
 #include "areconstructionmanager.h"
 #include "afileparticlegenerator.h"
 #include "ascriptparticlegenerator.h"
@@ -210,10 +209,10 @@ MainWindow::MainWindow(DetectorClass *Detector,
 #endif
 
     //Busy status updates
-    QObject::connect(WindowNavigator, SIGNAL(BusyStatusChanged(bool)), newLrfWindow, SLOT(onBusyStatusChanged(bool)));
+    QObject::connect(WindowNavigator, &WindowNavigatorClass::BusyStatusChanged, newLrfWindow, &ALrfWindow::onBusyStatusChanged);
 
-    QObject::connect(SimulationManager->Runner, SIGNAL(updateReady(int, double)), this, SLOT(RefreshPhotSimOnTimer(int, double))); //Simulation interface refresh/update stuff
-    QObject::connect(SimulationManager, &ASimulationManager::SimulationFinished, this, &MainWindow::simulationFinished); //Simulation finished
+    QObject::connect(SimulationManager, &ASimulationManager::updateReady, this, &MainWindow::RefreshOnProgressReport);
+    QObject::connect(SimulationManager, &ASimulationManager::SimulationFinished, this, &MainWindow::simulationFinished);
 
     QObject::connect(this, &MainWindow::RequestUpdateSimConfig, this, &MainWindow::on_pbUpdateSimConfig_clicked, Qt::QueuedConnection);
 

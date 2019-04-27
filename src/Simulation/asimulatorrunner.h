@@ -26,27 +26,27 @@ class ASimulatorRunner : public QObject
 {
     Q_OBJECT
 public:
-    enum State { SClean, SSetup, SRunning, SFinished/*, SStopRequest*/ };
+    enum State { SClean, SSetup, SRunning, SFinished };
     QString modeSetup;
     GeneralSimSettings simSettings; //to move to simManager
 
-    explicit ASimulatorRunner(DetectorClass * detector, EventsDataClass * dataHub, ASimulationManager * simMan, QObject * parent = 0);
+    ASimulatorRunner(DetectorClass & detector, EventsDataClass & dataHub, ASimulationManager & simMan);
     virtual ~ASimulatorRunner();
 
-    bool setup(QJsonObject & json, int threadCount, bool bFromGui); // main processing of the configuration is here
+    bool setup(QJsonObject & json, int threadCount); // main processing of the configuration is here
 
     void updateGeoManager();
-    bool getStoppedByUser() const { return fStopRequested; /*simState == SStopRequest;*/ }
+    bool isStoppedByUser() const { return fStopRequested; }
     void updateStats();
     double getProgress() const { return progress; }
     bool wasSuccessful() const;
     bool wasHardAborted() const;
     bool isFinished() const {return simState == SFinished;}
     void setFinished() {simState = SFinished;}
-    QString getErrorMessages() const;
     //Use as read-only. Anything else is undefined behaviour! If your toast gets burnt, it's not my fault!
     //Also remember that simulators will be deleted on setup()!
     QVector<ASimulator *> getWorkers() { return workers; }
+    State getSimState() const {return simState;}
 
     //Use this with caution too, e.g. after simulation finished! We need to expose this to clear memory after simulation,
     //since we provide extra information of simulators to the outside (and it's actually used). In a way this is a hack
@@ -57,10 +57,14 @@ public:
     void setG4Sim_OnlyGenerateFiles(bool flag) {bOnlyFileExport = flag;}
 
 private:
+    DetectorClass      & detector;
+    EventsDataClass    & dataHub;
+    ASimulationManager & simMan;
+
     //Manager's state
     enum State simState;
     bool fStopRequested;
-    bool bRunFromGui;
+    //bool bRunFromGui;
 
     //Threads
     QVector<ASimulator *> workers;
@@ -71,10 +75,7 @@ private:
 #endif
     ASimulator * backgroundWorker;
 
-    //External settings
-    DetectorClass * detector = 0;
-    EventsDataClass * dataHub = 0;
-    ASimulationManager * simMan = 0;
+
 
     //Time
     QTime startTime;
@@ -83,22 +84,20 @@ private:
     int lastProgress;
     int lastEventsDone;
 
-    //Stats
-    double progress;
-    double usPerEvent;
-
-    QString ErrorString;
 
     bool bNextSimExternal = false;
     bool bOnlyFileExport = false;
 
+public:
+    //Stats for gui report
+    double progress;
+    double usPerEvent;
+
 public slots:
     void simulate();
     void requestStop();
-    void updateGui();
 
 signals:
-    void updateReady(int Progress, double msPerEvent);
     void simulationFinished();
 };
 

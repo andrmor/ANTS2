@@ -54,8 +54,9 @@ static void *SimulationManagerRunWorker(void *workerSimulator)
     return NULL;
 }
 
-ASimulatorRunner::ASimulatorRunner(DetectorClass *detector, EventsDataClass *dataHub, ASimulationManager *simMan, QObject *parent) :
-    QObject(parent), detector(detector), dataHub(dataHub), simMan(simMan)
+ASimulatorRunner::ASimulatorRunner(DetectorClass & detector, EventsDataClass & dataHub, ASimulationManager & simMan) :
+    QObject(nullptr),
+    detector(detector), dataHub(dataHub), simMan(simMan)
 {
     startTime.start(); //can restart be done without start() ?
     simState = SClean;
@@ -69,15 +70,14 @@ ASimulatorRunner::~ASimulatorRunner()
     threads.clear();
 }
 
-bool ASimulatorRunner::setup(QJsonObject &json, int threadCount, bool bFromGui)
+bool ASimulatorRunner::setup(QJsonObject &json, int threadCount)
 {
-    bRunFromGui = bFromGui;
     threadCount = std::max(threadCount, 1);
     //qDebug() << "\n\n is multi?"<< detector->GeoManager->IsMultiThread();
 
     if (!json.contains("SimulationConfig"))
     {
-        ErrorString = "Json does not contain simulation config!";
+        simMan.ErrorString = "Json does not contain simulation config!";
         return false;
     }
     QJsonObject jsSimSet = json["SimulationConfig"].toObject();
@@ -92,7 +92,7 @@ bool ASimulatorRunner::setup(QJsonObject &json, int threadCount, bool bFromGui)
     bool bOK = simSettings.readFromJson(jsSimSet);
     if (!bOK)
     {
-        ErrorString = simSettings.ErrorString;
+        simMan.ErrorString = simSettings.ErrorString;
         return false;
     }
 
@@ -111,19 +111,19 @@ bool ASimulatorRunner::setup(QJsonObject &json, int threadCount, bool bFromGui)
         bool bLogHistory = simSettings.fLogsStat;
         int  maxTracks = simSettings.TrackBuildOptions.MaxParticleTracks / threadCount + 1;
 
-        bool bOK = detector->generateG4interfaceFiles(simSettings.G4SimSet, threadCount, bBuildTracks, bLogHistory, maxTracks);
+        bool bOK = detector.generateG4interfaceFiles(simSettings.G4SimSet, threadCount, bBuildTracks, bLogHistory, maxTracks);
         if (!bOK)
         {
-            ErrorString = "Failed to create Ants2 <-> Geant4 interface files";
+            simMan.ErrorString = "Failed to create Ants2 <-> Geant4 interface files";
             return false;
         }
     }
     else
     {
 #ifndef __USE_ANTS_NCRYSTAL__
-        if ( modeSetup != "PointSim" && detector->MpCollection->isNCrystalInUse())
+        if ( modeSetup != "PointSim" && detector.MpCollection->isNCrystalInUse())
         {
-            ErrorString = "NCrystal library is in use by material collection, but ANTS2 was compiled without this library!";
+            simMan.ErrorString = "NCrystal library is in use by material collection, but ANTS2 was compiled without this library!";
             return false;
         }
 #endif
@@ -136,23 +136,23 @@ bool ASimulatorRunner::setup(QJsonObject &json, int threadCount, bool bFromGui)
 
         int simMode = psc["ControlOptions"].toObject()["Single_Scan_Flood"].toInt();
 
-        if (simMode != 4) simMan->clearNodes(); // script will have the nodes already defined
+        if (simMode != 4) simMan.clearNodes(); // script will have the nodes already defined
 
         if (simMode == 3)
         {
             QString fileName = psc["CustomNodesOptions"].toObject()["FileWithNodes"].toString();
-            const QString err = simMan->loadNodesFromFile(fileName);
+            const QString err = simMan.loadNodesFromFile(fileName);
             if (!err.isEmpty())
             {
-                ErrorString = err;
+                simMan.ErrorString = err;
                 return false;
             }
             //qDebug() << "Custom nodes loaded from files, top nodes:"<<simMan->Nodes.size();
         }
     }
 
-    dataHub->clear();
-    dataHub->initializeSimStat(detector->Sandwich->MonitorsRecords, simSettings.DetStatNumBins, (simSettings.fWaveResolved ? simSettings.WaveNodes : 0) );
+    dataHub.clear();
+    dataHub.initializeSimStat(detector.Sandwich->MonitorsRecords, simSettings.DetStatNumBins, (simSettings.fWaveResolved ? simSettings.WaveNodes : 0) );
 
     //qDebug() << "-------------";
     //qDebug() << "Setup to run with "<<(fRunTThreads ? "TThreads" : "QThread");
@@ -160,12 +160,12 @@ bool ASimulatorRunner::setup(QJsonObject &json, int threadCount, bool bFromGui)
     //qDebug() << "Monitors:"<<dataHub->SimStat->Monitors.size();
 
     //qDebug() << "Updating PMs module according to sim settings";
-    detector->PMs->configure(&simSettings); //Setup pms module and QEaccelerator if needed
+    detector.PMs->configure(&simSettings); //Setup pms module and QEaccelerator if needed
     //qDebug() << "Updating MaterialColecftion module according to sim settings";
-    detector->MpCollection->UpdateRuntimePropertiesAndWavelengthBinning(&simSettings, detector->RandGen, threadCount); //update wave-resolved properties of materials and runtime properties for neutrons
+    detector.MpCollection->UpdateRuntimePropertiesAndWavelengthBinning(&simSettings, detector.RandGen, threadCount); //update wave-resolved properties of materials and runtime properties for neutrons
 
-    ErrorString = detector->MpCollection->CheckOverrides();
-    if (!ErrorString.isEmpty()) return false;
+    simMan.ErrorString = detector.MpCollection->CheckOverrides();
+    if (!simMan.ErrorString.isEmpty()) return false;
 
     clearWorkers();
 
@@ -173,10 +173,10 @@ bool ASimulatorRunner::setup(QJsonObject &json, int threadCount, bool bFromGui)
     {
         ASimulator *worker;
         if (modeSetup == "PointSim") //Photon simulator
-            worker = new APointSourceSimulator(detector, simMan, i);
+            worker = new APointSourceSimulator(&detector, &simMan, i);
         else //Particle simulator
         {
-            AParticleSourceSimulator* pss = new AParticleSourceSimulator(detector, simMan, i);
+            AParticleSourceSimulator* pss = new AParticleSourceSimulator(&detector, &simMan, i);
             if (bGeant4ParticleSim && bOnlyFileExport)
             {
                 qDebug() << "--- only file export, external/internal sim will not be started! ---";
@@ -187,12 +187,12 @@ bool ASimulatorRunner::setup(QJsonObject &json, int threadCount, bool bFromGui)
         bOnlyFileExport = false; //single session trigger from script
 
         worker->setSimSettings(&simSettings);
-        int seed = detector->RandGen->Rndm() * 100000;
+        int seed = detector.RandGen->Rndm() * 100000;
         worker->setRngSeed(seed);
         bool bOK = worker->setup(jsSimSet);
         if (!bOK)
         {
-            ErrorString = worker->getErrorString();
+            simMan.ErrorString = worker->getErrorString();
             delete worker;
             clearWorkers();
             return false;
@@ -216,7 +216,7 @@ bool ASimulatorRunner::setup(QJsonObject &json, int threadCount, bool bFromGui)
     {
         backgroundWorker = 0;
         //Assumes that detector always adds default navigator. Otherwise we need to add it ourselves!
-        detector->GeoManager->SetMaxThreads(workers.count());
+        detector.GeoManager->SetMaxThreads(workers.count());
 #if ROOT_VERSION_CODE < ROOT_VERSION(6,11,1)
         //Create any missing TThreads, they are all the same, they only differ in run() call
         while(workers.count() > threads.count())
@@ -288,16 +288,6 @@ bool ASimulatorRunner::wasHardAborted() const
     return false;
 }
 
-QString ASimulatorRunner::getErrorMessages() const
-{
-    QString msg;
-    if(simState != SFinished)
-        return "Simulation not finished yet";
-    if(fStopRequested)
-        return "Simulation stopped by user";
-    return ErrorString;
-}
-
 void ASimulatorRunner::clearWorkers()
 {
     for(int i = 0; i < workers.count(); i++)
@@ -325,16 +315,10 @@ void ASimulatorRunner::simulate()
     usPerEvent = 0;
     simState = SRunning;
     //qDebug()<<"Emitting update ready to reset progress";
-    if (bRunFromGui) emit updateReady(0, 0);
+    emit simMan.updateReady(0, 0);
     startTime.restart();
-    if(backgroundWorker)
-    {
-        //qDebug()<<"Launching background worker";
-        //SimulationManagerRunWorker(backgroundWorker); // *** Andr
-        //qDebug() << "List of navigators:" << detector->GeoManager->GetListOfNavigators();
-        //if (detector->GeoManager->GetListOfNavigators()) qDebug() << detector->GeoManager->GetListOfNavigators()->GetEntries();
-        backgroundWorker->simulate();                   // *** Andr
-    }
+    if (backgroundWorker)
+        backgroundWorker->simulate();
     else
     {
 #if ROOT_VERSION_CODE < ROOT_VERSION(6,11,1)
@@ -368,25 +352,25 @@ void ASimulatorRunner::simulate()
     simState = SFinished;
     progress = 100;
     usPerEvent = startTime.elapsed() / (double)totalEventCount;
-    if (bRunFromGui) emit updateReady(100.0, usPerEvent);
+    emit simMan.updateReady(100.0, usPerEvent);
 
     //Merging data from the workers
-    dataHub->fSimulatedData = true;
-    dataHub->LastSimSet = simSettings;
-    ErrorString.clear();
-    simMan->SeenNonRegisteredParticles.clear();
-    simMan->DepoByNotRegistered = 0;
-    simMan->DepoByRegistered = 0;
+    dataHub.fSimulatedData = true;
+    dataHub.LastSimSet = simSettings;
+    simMan.ErrorString.clear();
+    simMan.SeenNonRegisteredParticles.clear();
+    simMan.DepoByNotRegistered = 0;
+    simMan.DepoByRegistered = 0;
     for(int i = 0; i < workers.count(); i++)
     {
-        workers[i]->appendToDataHub(dataHub);
+        workers[i]->appendToDataHub(&dataHub);
         QString err = workers.at(i)->getErrorString();
         if (!err.isEmpty())
-            ErrorString += QString("Thread %1 reported error: %2\n").arg(i).arg(err);
+            simMan.ErrorString += QString("Thread %1 reported error: %2\n").arg(i).arg(err);
 
-        simMan->SeenNonRegisteredParticles += workers[i]->SeenNonRegisteredParticles;
-        simMan->DepoByNotRegistered += workers[i]->DepoByNotRegistered;
-        simMan->DepoByRegistered += workers[i]->DepoByRegistered;
+        simMan.SeenNonRegisteredParticles += workers[i]->SeenNonRegisteredParticles;
+        simMan.DepoByNotRegistered += workers[i]->DepoByNotRegistered;
+        simMan.DepoByRegistered += workers[i]->DepoByRegistered;
     }
 
     //qDebug()<<"Sim runner reports simulation finished!";
@@ -417,18 +401,3 @@ void ASimulatorRunner::requestStop()
         workers[i]->requestStop();
 }
 
-void ASimulatorRunner::updateGui()
-{
-    switch(simState)
-    {
-    case SClean:
-    case SSetup:
-        return;
-    case SRunning:
-        updateStats();
-        emit updateReady(progress, usPerEvent);
-        break;
-    case SFinished:
-        qDebug()<<"Simulation has emitted finish, but updateGui() is still being called";
-    }
-}

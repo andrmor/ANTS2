@@ -25,21 +25,14 @@ class ASimulationManager : public QObject
 {
     Q_OBJECT
 public:
-    ASimulationManager(EventsDataClass * EventsDataHub, DetectorClass * Detector);
+    ASimulationManager(EventsDataClass & EventsDataHub, DetectorClass & Detector);
     ~ASimulationManager();
 
-    ASimulatorRunner * Runner;
-    QThread simRunnerThread;
-    QTimer simTimerGuiUpdate;
+    bool isSimulationSuccess() const {return fSuccess;}
+    bool isSimulationFinished() const {return fFinished;}
+    bool isSimulationAborted() const;
 
-    bool fFinished;
-    bool fSuccess;
-    bool fHardAborted;
-
-    bool fStartedFromGui;
     int LastSimType; // -1 - undefined, 0 - PointSources, 1 - ParticleSources
-
-    int MaxThreads = -1;
 
     //last event info
     QVector< QBitArray > SiPMpixels;
@@ -50,14 +43,17 @@ public:
 
     void StartSimulation(QJsonObject & json, int threads, bool fStartedFromGui);
 
+    const QString & getErrorString() {return ErrorString;}
+
     void clearTracks();
     void clearNodes();
     void clearEnergyVector();
 
+    void setMaxThreads(int maxThreads) {MaxThreads = maxThreads;}
     const QString loadNodesFromFile(const QString & fileName);
 
-    // Next three: Simulators use their own local copies constructed using configuration in JSON
-    ASourceParticleGenerator * ParticleSources = 0;         //used to update JSON on config changes and in GUI to configure
+    // Next three: Simulator workers use their own local copies constructed using configuration json
+    ASourceParticleGenerator * ParticleSources = 0;         //used to update json on config changes and in GUI to configure
     AFileParticleGenerator   * FileParticleGenerator = 0;   //only for gui, simulation threads use their own
     AScriptParticleGenerator * ScriptParticleGenerator = 0; //only for gui, simulation threads use their own
 
@@ -68,18 +64,33 @@ public:
     double DepoByNotRegistered;
     double DepoByRegistered;
 
+    QString ErrorString; //temporary public!
+
 private:
-    EventsDataClass * EventsDataHub;    //external
-    DetectorClass   * Detector;         //external
+    EventsDataClass & EventsDataHub;
+    DetectorClass   & Detector;
+
+    ASimulatorRunner * Runner;
+
+    QThread simRunnerThread;
+    QTimer simTimerGuiUpdate;
+
+    int  MaxThreads = -1;
+    bool fStartedFromGui = false;
+    bool fHardAborted = false;
+    bool fFinished;
+    bool fSuccess;
 
 public slots:
     void onSimulationFinished(); //processing of simulation results!
     void StopSimulation();
 
 private slots:
-    void onSimFailedToStart();
+    void onSimFailedToStart();    
+    void updateGui();
 
 signals:
+    void updateReady(int Progress, double msPerEvent);
     void RequestStopSimulation();
     void SimulationFinished();
 

@@ -1,6 +1,5 @@
 #include "asim_si.h"
 #include "asimulationmanager.h"
-#include "asimulatorrunner.h"
 #include "eventsdataclass.h"
 #include "aglobalsettings.h"
 #include "aconfiguration.h"
@@ -78,11 +77,11 @@ bool ASim_SI::RunPhotonSources(int NumThreads, bool AllowGuiUpdate)
         QThread::usleep(100);
         qApp->processEvents();
     }
-    while (!SimulationManager->fFinished);
+    while (!SimulationManager->isSimulationFinished());
 
-    if (!SimulationManager->fSuccess)
-        abort(SimulationManager->Runner->getErrorMessages());
-    return SimulationManager->fSuccess;
+    if (!SimulationManager->isSimulationSuccess())
+        abort(SimulationManager->getErrorString());
+    return true;
 }
 
 bool ASim_SI::RunParticleSources(int NumThreads, bool AllowGuiUpdate)
@@ -101,8 +100,8 @@ bool ASim_SI::RunParticleSources(int NumThreads, bool AllowGuiUpdate)
         QThread::usleep(100);
         qApp->processEvents();
     }
-    while (!SimulationManager->fFinished);
-    return SimulationManager->fSuccess;
+    while (!SimulationManager->isSimulationFinished());
+    return SimulationManager->isSimulationSuccess();
 }
 
 void ASim_SI::SetSeed(long seed)

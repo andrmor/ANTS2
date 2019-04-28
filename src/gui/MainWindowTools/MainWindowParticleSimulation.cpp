@@ -598,38 +598,41 @@ void MainWindow::on_pbAddParticleToStack_clicked()
     int iparticle = ui->cobParticleToStack->currentIndex();
     QList<QString> mats;
 
-    for (int imat=0; imat<MpCollection->countMaterials(); imat++)
-      {
-//        qDebug()<<imat;
-//        qDebug()<<" mat:"<<(*MaterialCollection)[imat]->name;
-        if ( !(*MpCollection)[imat]->MatParticle[iparticle].TrackingAllowed )
-          {
-//            qDebug()<<"  tracking not allowed";
-            continue;
-          }
-        if ( (*MpCollection)[imat]->MatParticle[iparticle].MaterialIsTransparent )
-          {
-//            qDebug()<<"  user set as transparent for this particle!";
-            continue;
-          }
+    if (MpCollection->getNeutronIndex() != iparticle) //neutron has another system now
+    {
+        for (int imat=0; imat<MpCollection->countMaterials(); imat++)
+        {
+    //        qDebug()<<imat;
+    //        qDebug()<<" mat:"<<(*MaterialCollection)[imat]->name;
+            if ( !(*MpCollection)[imat]->MatParticle[iparticle].TrackingAllowed )
+              {
+    //            qDebug()<<"  tracking not allowed";
+                continue;
+              }
+            if ( (*MpCollection)[imat]->MatParticle[iparticle].MaterialIsTransparent )
+              {
+    //            qDebug()<<"  user set as transparent for this particle!";
+                continue;
+              }
 
-//        qDebug()<<" getting energy range...";
-        if ((*MpCollection)[imat]->MatParticle[iparticle].InteractionDataX.isEmpty())
-          {
-//           qDebug()<<"  Interaction data are not loaded!";
-           mats << (*MpCollection)[imat]->name;
-           continue;
-          }
-        double minE = (*MpCollection)[imat]->MatParticle[iparticle].InteractionDataX.first();
-//        qDebug()<<"  min energy:"<<minE;
-        double maxE = (*MpCollection)[imat]->MatParticle[iparticle].InteractionDataX.last();
-//        qDebug()<<"  max energy:"<<maxE;
+    //        qDebug()<<" getting energy range...";
+            if ((*MpCollection)[imat]->MatParticle[iparticle].InteractionDataX.isEmpty())
+              {
+    //           qDebug()<<"  Interaction data are not loaded!";
+               mats << (*MpCollection)[imat]->name;
+               continue;
+              }
+            double minE = (*MpCollection)[imat]->MatParticle[iparticle].InteractionDataX.first();
+    //        qDebug()<<"  min energy:"<<minE;
+            double maxE = (*MpCollection)[imat]->MatParticle[iparticle].InteractionDataX.last();
+    //        qDebug()<<"  max energy:"<<maxE;
 
-        if (energy<minE || energy>maxE) mats << (*MpCollection)[imat]->name;
-//        qDebug()<<"->"<<mats;
-      }
-//    qDebug()<<"reporting...";
+            if (energy<minE || energy>maxE) mats << (*MpCollection)[imat]->name;
+    //        qDebug()<<"->"<<mats;
+        }
+    }
 
+    //    qDebug()<<"reporting...";
     if (mats.size()>0)
       {
         //QString str = Detector->ParticleCollection[iparticle]->ParticleName;

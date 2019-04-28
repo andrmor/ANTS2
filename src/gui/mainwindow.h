@@ -13,7 +13,6 @@
 // forward declarations
 class AConfiguration;
 class AGlobalSettings;
-struct AEnergyDepositionCell;
 class GeoMarkerClass;
 class AParticleRecord;
 class AMaterialParticleCollection;
@@ -123,7 +122,6 @@ public:
     ASlabListWidget* lw = 0;
 
     //local data, just for GUI
-    QVector<AEnergyDepositionCell*> EnergyVector;
     QVector<GeoMarkerClass*> GeoMarkers;
     QVector<AParticleRecord*> ParticleStack;
 
@@ -140,7 +138,7 @@ public:
     void startRootUpdate();  // starts timer which in regular intervals process Root events
     void stopRootUpdate();   // stops timer which in regular intervals process Root events
 
-    void ClearData(); //clear status, disconnect reconstruction
+    void ClearData(bool bKeepEnergyVector = false); //clear status, disconnect reconstruction
 
     //detector constructor
     void ReconstructDetector(bool fKeepData = false);
@@ -383,7 +381,6 @@ public:
     void SaveSimulationDataAsText();
     void setFloodZposition(double Z);
     void CalculateIndividualQEPDE(); //Public for use in scripting
-    void clearEnergyVector();
     void ShowSource(const AParticleSourceRecord *p, bool clear = true);
     void TestParticleGun(AParticleGun *ParticleSources, int numParticles);
 

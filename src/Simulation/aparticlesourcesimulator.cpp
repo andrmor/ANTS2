@@ -364,6 +364,7 @@ bool AParticleSourceSimulator::standaloneGenerateLight(QVector<AEnergyDeposition
         return false;
     }
     EnergyVector = *energyVector; //copy pointers to EnergyDepositionCells
+    energyVector->clear();
 
     EnergyVectorToScan();
 

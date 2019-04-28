@@ -284,8 +284,10 @@ void MainWindow::on_pbShowCheckUpWindow_clicked()
   CheckUpWindow->show();
 }
 
+#include "asimulationmanager.h"
 void MainWindow::on_pbShowEnergyDeposition_clicked()
 {
+  QVector<AEnergyDepositionCell *> & EnergyVector = SimulationManager->EnergyVector;
   if (EventsDataHub->EventHistory.isEmpty())
     {
       message("No data available!", this);

@@ -496,16 +496,17 @@ void ReconstructionWindow::DotActualPositions()
   if (!EventsDataHub->isScanEmpty()) ReconstructionWindow::VisualizeScan();  
 }
 
+#include "asimulationmanager.h"
 void ReconstructionWindow::VisualizeEnergyVector(int eventId)
 {
-  if (MW->EnergyVector.isEmpty()) return;
-
-//  qDebug()<<"EnergyVector contains "<<MW->EnergyVector.size()<<" cells";
+  QVector<AEnergyDepositionCell *> & EnergyVector = MW->SimulationManager->EnergyVector;
+  if (EnergyVector.isEmpty()) return;
+  //  qDebug()<<"EnergyVector contains "<<EnergyVector.size()<<" cells";
 
   QVector<AEnergyDepositionCell*> EV;
   EV.resize(0);
-  for (int i=0; i<MW->EnergyVector.size(); i++)
-    if (MW->EnergyVector.at(i)->eventId == eventId) EV.append(MW->EnergyVector.at(i));
+  for (int i=0; i<EnergyVector.size(); i++)
+    if (EnergyVector.at(i)->eventId == eventId) EV.append(EnergyVector.at(i));
 
 //  qDebug()<<"This event ( "<< eventId <<" ) has "<<EV.size()<<" associated cells";
 

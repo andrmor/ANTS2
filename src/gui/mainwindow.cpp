@@ -101,7 +101,6 @@ MainWindow::~MainWindow()
 
     qDebug() << "<-Clearing containers with dynamic objects";
     clearGeoMarkers();
-    clearEnergyVector();
 
     qDebug() << "<-Deleting ui";
     delete ui;
@@ -147,7 +146,7 @@ void MainWindow::stopRootUpdate()
 }
 
 static bool DontAskAgainPlease = false;
-void MainWindow::ClearData()
+void MainWindow::ClearData(bool bKeepEnergyVector)
 {   
    //   qDebug() << "---Before clear";
    if (msBox) return; //not yet confirmed clear status - this was called due to focus out.
@@ -171,7 +170,7 @@ void MainWindow::ClearData()
      }
    fSimDataNotSaved = false;
 
-   clearEnergyVector();
+   if (!bKeepEnergyVector) SimulationManager->clearEnergyVector();
    EventsDataHub->clear();
    //gui updated will be automatically triggered
 }
@@ -180,7 +179,7 @@ void MainWindow::onRequestUpdateGuiForClearData()
 {
     //  qDebug() << ">>> Main window: OnClear signal received";
     clearGeoMarkers();
-    clearEnergyVector();
+    //SimulationManager->clearEnergyVector();
     ui->leoLoadedEvents->setText("");
     ui->leoTotalLoadedEvents->setText("");
     ui->lwLoadedSims->clear();
@@ -194,12 +193,6 @@ void MainWindow::onRequestUpdateGuiForClearData()
     ui->lwLoadedEventsFiles->clear();
     LoadedTreeFiles.clear();
     //  qDebug()  << ">>> Main window: Clear done";
-}
-
-void MainWindow::clearEnergyVector()
-{
-    for (int i=0; i<EnergyVector.size(); i++) delete EnergyVector[i];
-    EnergyVector.clear();
 }
 
 void MainWindow::closeEvent(QCloseEvent *)
@@ -3771,9 +3764,6 @@ void MainWindow::simulationFinished()
         else
         {
             showTracks = SimulationManager->TrackBuildOptions.bBuildParticleTracks || SimulationManager->TrackBuildOptions.bBuildPhotonTracks;
-            clearEnergyVector();
-            EnergyVector = SimulationManager->EnergyVector; // TODO skip local EnergyVector?
-            SimulationManager->EnergyVector.clear(); // to avoid clearing the energy vector cells
         }
 
         //prepare TGeoTracks
@@ -3880,7 +3870,7 @@ void MainWindow::on_pbTrackStack_clicked()
 
     //============ run stack =========
     bool fOK = pss->standaloneTrackStack(&ParticleStack);
-      //qDebug() << "Standalone tracker reported:"<<fOK<<pss->getErrorString();
+    //  qDebug() << "Standalone tracker reported:"<<fOK<<pss->getErrorString();
 
     //============   gui update   ============
     WindowNavigator->BusyOff();
@@ -3889,10 +3879,10 @@ void MainWindow::on_pbTrackStack_clicked()
     else
     {
         //--- Retrieve results ---
-        clearEnergyVector(); // just in case clear procedures change
-        EnergyVector = pss->getEnergyVector();
+        SimulationManager->clearEnergyVector();
+        SimulationManager->EnergyVector = pss->getEnergyVector();
         pss->ClearEnergyVectorButKeepObjects(); //disconnected this copy so delete of the simulator does not kill the vector
-          //qDebug() << "-------------En vector size:"<<EnergyVector.size();
+        //  qDebug() << "-------------En vector size:"<<SimulationManager->EnergyVector.size();
 
         //track handling
         //if (ui->cbBuildParticleTrackstester->isChecked())
@@ -3943,11 +3933,11 @@ void MainWindow::on_pbTrackStack_clicked()
 void MainWindow::on_pbGenerateLight_clicked()
 {
     fSimDataNotSaved = false; // to disable the warning
-    MainWindow::ClearData();
+    MainWindow::ClearData(true);
     GeneralSimSettings simSettings;
     AParticleSourceSimulator *pss = setupParticleTestSimulation(simSettings);
     Detector->PMs->configure(&simSettings); //also configures accelerators!!!
-    bool fOK = pss->standaloneGenerateLight(&EnergyVector);
+    bool fOK = pss->standaloneGenerateLight(&SimulationManager->EnergyVector);
 
     //============   gui update   ============
     WindowNavigator->BusyOff();

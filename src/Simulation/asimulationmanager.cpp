@@ -206,7 +206,6 @@ void ASimulationManager::onSimulationFinished()
 
     if (fStartedFromGui) emit SimulationFinished();
 
-    clearEnergyVector(); // main window copied if needed
     SiPMpixels.clear();  // main window copied if needed
     //qDebug() << "SimManager: Sim finished";
 }

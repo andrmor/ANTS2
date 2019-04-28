@@ -45,7 +45,7 @@ public:
   bool   bDoPhotonHistoryLog = false; //detailed photon history, activated by "photon" script!
   int    NumThreads;
 
-  int    DetStatNumBins;        //number of bins in fetection statistics
+  int    DetStatNumBins;        //number of bins in detection statistics
 
   int    SecScintGenMode = 0;
   //TH1D *SecScintThetaHist;

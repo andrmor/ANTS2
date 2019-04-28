@@ -72,7 +72,6 @@ ASimulatorRunner::~ASimulatorRunner()
 
 bool ASimulatorRunner::setup(int threadCount, bool bPhotonSourceSim)
 {
-    //qDebug() << "\n\n is multi?"<< detector->GeoManager->IsMultiThread();
     totalEventCount = 0;
     lastProgress = 0;
     lastEventsDone = 0;
@@ -80,11 +79,13 @@ bool ASimulatorRunner::setup(int threadCount, bool bPhotonSourceSim)
     usPerEvent = 0;
     fStopRequested = false;
 
+    /*
     dataHub.clear();
     dataHub.initializeSimStat(detector.Sandwich->MonitorsRecords, simMan.simSettings.DetStatNumBins, (simMan.simSettings.fWaveResolved ? simMan.simSettings.WaveNodes : 0) );
 
     detector.PMs->configure(&simMan.simSettings); //Setup pms module and QEaccelerator if needed
     detector.MpCollection->UpdateRuntimePropertiesAndWavelengthBinning(&simMan.simSettings, detector.RandGen, threadCount); //update wave-resolved properties of materials and runtime properties for neutrons
+    */
 
     clearWorkers();
 
@@ -113,7 +114,7 @@ bool ASimulatorRunner::setup(int threadCount, bool bPhotonSourceSim)
         bool bOK = worker->setup(simMan.jsSimSet);
         if (!bOK)
         {
-            simMan.ErrorString = worker->getErrorString();
+            simMan.setErrorString( worker->getErrorString() );
             delete worker;
             clearWorkers();
             return false;
@@ -151,12 +152,6 @@ bool ASimulatorRunner::setup(int threadCount, bool bPhotonSourceSim)
     return true;
 }
 
-void ASimulatorRunner::updateGeoManager()  // *** obsolete!
-{
-    for(int i = 0; i < workers.count(); i++)
-        workers[i]->updateGeoManager();
-}
-
 void ASimulatorRunner::updateStats()
 {
     int refreshTimeElapsed = startTime.elapsed();
@@ -166,23 +161,17 @@ void ASimulatorRunner::updateStats()
     {
         int progressThread = workers[i]->progress;
         int events = workers[i]->getEventsDone();
-        //qDebug()<<"progress["<<i+1<<"]"<<progressThread << " events done:"<<events;
         eventsDone += events;
         progress += progressThread;
     }
     progress /= workers.count();
-    //int deltaProgress = progress - lastProgress;
+
     int deltaEventsDone = eventsDone - lastEventsDone;
     double deltaRefreshTime = refreshTimeElapsed - lastRefreshTime;
-    //if (deltaProgress>0 && deltaRefreshTime>0)
-
-    //qDebug() << "---Time passed:"<<refreshTimeElapsed<<"Events done:"<<eventsDone<< " progress:"<<progress << "deltaEventsDone:"<<deltaEventsDone << "Delta time:"<<deltaRefreshTime;
 
     if (deltaEventsDone>0 && deltaRefreshTime>0)
     {
-        //usPerEvent = deltaRefreshTime / (deltaProgress/100.0*totalEventCount);
         usPerEvent = deltaRefreshTime / (double)deltaEventsDone;
-        //qDebug()<<"-------\nTotal progress:"<<progress<<"  Current us/ev:"<<usPerEvent;
         lastRefreshTime = refreshTimeElapsed;
         lastEventsDone = eventsDone;
         lastProgress = progress;
@@ -214,7 +203,7 @@ void ASimulatorRunner::clearWorkers()
 
 void ASimulatorRunner::simulate()
 {
-    switch(simState)
+    switch (simState)
     {
     case SClean:
     case SFinished:
@@ -227,13 +216,14 @@ void ASimulatorRunner::simulate()
         qWarning()<<"Simulation already running!";
         return;
     }
-    //dataHub->clear();
+
     progress = 0;
     usPerEvent = 0;
     simState = SRunning;
-    //qDebug()<<"Emitting update ready to reset progress";
-    emit simMan.updateReady(0, 0);
+    emit simMan.updateReady(0, 0); // set progress to 0 in GUI
+
     startTime.restart();
+
     if (backgroundWorker)
         backgroundWorker->simulate();
     else
@@ -268,45 +258,9 @@ void ASimulatorRunner::simulate()
     }
 
     simState = SFinished;
-    progress = 100;
+    progress = 100.0;
     usPerEvent = startTime.elapsed() / (double)totalEventCount;
     emit simMan.updateReady(100.0, usPerEvent);
-
-    //Merging data from the workers
-    dataHub.fSimulatedData = true;
-    dataHub.LastSimSet = simMan.simSettings;
-    simMan.ErrorString.clear();
-    simMan.SeenNonRegisteredParticles.clear();
-    simMan.DepoByNotRegistered = 0;
-    simMan.DepoByRegistered = 0;
-    simMan.clearTrackingHistory();
-    for (int i = 0; i < workers.count(); i++)
-    {
-        workers[i]->appendToDataHub(&dataHub);
-        workers[i]->mergeData();
-
-        QString err = workers.at(i)->getErrorString();
-        if (!err.isEmpty())
-            simMan.ErrorString += QString("Thread %1 reported error: %2\n").arg(i).arg(err);
-    }
-
-    //qDebug()<<"Sim runner reports simulation finished!";
-
-    //    qDebug() << "\n Pointer of the List of navigators: "<< detector->GeoManager->GetListOfNavigators();
-    //    if (detector->GeoManager->IsMultiThread())
-    //      {
-    //        qDebug() << "We are in multithread mode";
-    //        //qDebug() << "Set multithread off";
-    //        //detector->GeoManager->SetMultiThread(kFALSE);
-    //        qDebug() << "List of navigators:"<< detector->GeoManager->GetListOfNavigators();
-    //        detector->GeoManager->ClearNavigators();
-    //      }
-    //    if (!detector->GeoManager->GetListOfNavigators())
-    //      {
-    //        qDebug() << "Adding navigator";
-    //        detector->GeoManager->AddNavigator();
-    //      }
-    //    qDebug() << "\n navigators before leaving sim manager: "<< detector->GeoManager->GetListOfNavigators()->GetEntries();
 
     emit simulationFinished();
 }
@@ -317,4 +271,3 @@ void ASimulatorRunner::requestStop()
     for(int i = 0; i < workers.count(); i++)
         workers[i]->requestStop();
 }
-

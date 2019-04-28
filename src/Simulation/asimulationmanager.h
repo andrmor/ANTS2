@@ -49,6 +49,7 @@ public:
     void StartSimulation(QJsonObject & json, int threads, bool fStartedFromGui);
 
     const QString & getErrorString() {return ErrorString;}
+    void setErrorString(const QString & err) {ErrorString = err;}
 
     void clearTracks();
     void clearNodes();
@@ -73,8 +74,6 @@ public:
     double DepoByNotRegistered;
     double DepoByRegistered;
 
-    QString ErrorString; //temporary public!
-
     GeneralSimSettings simSettings;
     QJsonObject jsSimSet;   // to be removed
     bool bPhotonSourceSim;  // if false -> particle source sim
@@ -86,6 +85,8 @@ private:
     ASimulatorRunner * Runner;
     QThread simRunnerThread;
     QTimer simTimerGuiUpdate;
+
+    QString ErrorString; //temporary public!
 
     int  MaxThreads = -1;
     bool fStartedFromGui = false;
@@ -112,6 +113,8 @@ signals:
 
 private:
     bool setup(const QJsonObject & json, int threads);
+    void clearG4data();
+    void copyDataFromWorkers();
 };
 
 #endif // ASIMULATIONMANAGER_H

@@ -88,6 +88,8 @@ void ASimulationManager::StartSimulation(QJsonObject& json, int threads, bool fF
     }
 }
 
+#include "asandwich.h"
+#include "apmhub.h"
 bool ASimulationManager::setup(const QJsonObject & json, int threads)
 {
     if ( !json.contains("SimulationConfig") )
@@ -151,6 +153,13 @@ bool ASimulationManager::setup(const QJsonObject & json, int threads)
         }
 #endif
     }
+
+    EventsDataHub.clear();
+    EventsDataHub.initializeSimStat(Detector.Sandwich->MonitorsRecords, simSettings.DetStatNumBins, (simSettings.fWaveResolved ? simSettings.WaveNodes : 0) );
+
+    Detector.PMs->configure(&simSettings); //Setup pms module and QEaccelerator if needed
+    Detector.MpCollection->UpdateRuntimePropertiesAndWavelengthBinning(&simSettings, Detector.RandGen, threads); //update wave-resolved properties of materials and runtime properties for neutrons
+
     return true;
 }
 
@@ -176,43 +185,10 @@ void ASimulationManager::onSimulationFinished()
     fSuccess = Runner->wasSuccessful();
     fHardAborted = Runner->wasHardAborted();
 
-    //clear data containers -> they will be loaded with new data from workers
-    clearEnergyVector();
-    SiPMpixels.clear();
-    clearTracks();
+    EventsDataHub.fSimulatedData = true;
+    EventsDataHub.LastSimSet = simSettings;
 
-    QVector<ASimulator *> simulators = Runner->getWorkers();
-    if (!simulators.isEmpty() && !fHardAborted)
-    {
-        if (bPhotonSourceSim)
-        {
-            APointSourceSimulator *lastPointSrcSimulator = static_cast< APointSourceSimulator *>(simulators.last());
-            EventsDataHub.ScanNumberOfRuns = lastPointSrcSimulator->getNumRuns();
-
-            SiPMpixels = lastPointSrcSimulator->getLastEvent()->SiPMpixels; //only makes sense if there was only 1 event
-        }
-        else
-        {
-            AParticleSourceSimulator *lastPartSrcSimulator = static_cast< AParticleSourceSimulator *>(simulators.last());
-            EnergyVector = lastPartSrcSimulator->getEnergyVector();
-            lastPartSrcSimulator->ClearEnergyVectorButKeepObjects(); // to avoid clearing the energy vector cells
-        }
-
-        for (ASimulator * sim : simulators)
-        {
-            //Tracks += sim->tracks;
-            Tracks.insert( Tracks.end(),
-                           std::make_move_iterator(sim->tracks.begin()),
-                           std::make_move_iterator(sim->tracks.end()) );
-            sim->tracks.clear();  //to avoid delete objects on simulator delete
-        }
-        while (Tracks.size() > simSettings.TrackBuildOptions.MaxParticleTracks)  // obsolete?
-        {
-            if (Tracks.empty()) break;
-            delete Tracks.at(Tracks.size()-1);
-            Tracks.resize(Tracks.size()-1); // max number of resizes will be small (~ num treads)
-        }
-    }
+    copyDataFromWorkers();
 
     Runner->clearWorkers();
 
@@ -233,6 +209,54 @@ void ASimulationManager::onSimulationFinished()
     clearEnergyVector(); // main window copied if needed
     SiPMpixels.clear();  // main window copied if needed
     //qDebug() << "SimManager: Sim finished";
+}
+
+void ASimulationManager::clearG4data()
+{
+    SeenNonRegisteredParticles.clear();
+    DepoByNotRegistered = 0;
+    DepoByRegistered = 0;
+    clearTrackingHistory();
+}
+
+void ASimulationManager::copyDataFromWorkers()
+{
+    //Merging data from the workers
+    QVector<ASimulator *> workers = Runner->getWorkers();
+
+    clearG4data();
+    clearTracks();
+    for (int i = 0; i < workers.count(); i++)
+    {
+        workers[i]->appendToDataHub(&EventsDataHub); //EventsDataHub should be already cleared in setup
+        workers[i]->mergeData();
+
+        QString err = workers.at(i)->getErrorString();
+        if (!err.isEmpty()) ErrorString += QString("Thread %1 reported error: %2\n").arg(i).arg(err);
+
+        Tracks.insert( Tracks.end(),
+                       std::make_move_iterator(workers[i]->tracks.begin()),
+                       std::make_move_iterator(workers[i]->tracks.end()) );
+        workers[i]->tracks.clear();  //to avoid delete objects on simulator delete
+    }
+
+    SiPMpixels.clear();
+    clearEnergyVector();
+    if (!workers.isEmpty() && !fHardAborted)
+    {
+        if (bPhotonSourceSim)
+        {
+            APointSourceSimulator *lastPointSrcSimulator = static_cast< APointSourceSimulator *>(workers.last());
+            EventsDataHub.ScanNumberOfRuns = lastPointSrcSimulator->getNumRuns();
+            SiPMpixels = lastPointSrcSimulator->getLastEvent()->SiPMpixels; //only the last event!
+        }
+        else
+        {
+            AParticleSourceSimulator *lastPartSrcSimulator = static_cast< AParticleSourceSimulator *>(workers.last());
+            EnergyVector = lastPartSrcSimulator->getEnergyVector();
+            lastPartSrcSimulator->ClearEnergyVectorButKeepObjects(); // to avoid clearing the energy vector cells
+        }
+    }
 }
 
 void ASimulationManager::clearTracks()

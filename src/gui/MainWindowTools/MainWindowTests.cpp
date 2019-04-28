@@ -31,8 +31,31 @@
 #include "acommonfunctions.h"
 #include "TH1D.h"
 #include "TH1.h"
+#include "TGeoManager.h"
+#include "TGeoNavigator.h"
+#include "TGeoVolume.h"
+#include "TGeoNode.h"
+#include "TGeoMaterial.h"
 void MainWindow::on_pobTest_clicked()
 {
+    TH1D* h = new TH1D("t", "", 11,0,10);
+
+    TGeoNavigator * n = gGeoManager->GetCurrentNavigator();
+    if (!n) return;
+    for (int i=0; i<1000000; i++)
+    {
+        TGeoNode * nod = n->FindNode(-150.0 + 300.0*Detector->RandGen->Rndm(),
+                                     -150.0 + 300.0*Detector->RandGen->Rndm(),
+                                     //-20.0 + 35.0*Detector->RandGen->Rndm());
+                                     -20.0 );
+        if (!nod) continue;
+        int mat = nod->GetVolume()->GetMaterial()->GetIndex();
+        h->Fill(mat);
+    }
+    qDebug() << "Done!";
+    GraphWindow->Draw(h, "hist");
+
+    /*
     TH1D * hist = new TH1D("", "", 5, 0, 5);
     for (int i=0; i<5; i++)
         hist->Fill(i, 1.0+i);
@@ -42,6 +65,7 @@ void MainWindow::on_pobTest_clicked()
     //for (int i=0; i<100000; i++) h->Fill( GetRandomFromHist(hist, Detector->RandGen) );
     for (int i=0; i<100000; i++) h->Fill( GetRandomBinFromHist(hist, Detector->RandGen) );
     GraphWindow->Draw(h, "hist");
+    */
 
 //    double tau1 = 100.0;
 //    double tau2 = 100.0;

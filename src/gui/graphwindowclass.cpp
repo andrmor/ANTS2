@@ -2628,6 +2628,8 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
   QAction* titleX = 0;
   QAction* titleY = 0;
   QAction* splineFit = 0;
+  QAction* projX = 0;
+  QAction* projY = 0;
 
   if (temp)
     {
@@ -2653,6 +2655,11 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
       {
              gaussFit = BasketMenu.addAction("Fit with Gauss");
              drawIntegral = BasketMenu.addAction("Draw integral");
+      }
+      if (Basket.at(row).Type.startsWith("TH2"))
+      {
+             projX = BasketMenu.addAction("X projection");
+             projY = BasketMenu.addAction("Y projection");
       }
       if (Basket.at(row).Type == "TGraph" || Basket.at(row).Type == "TProfile")
       {
@@ -2985,6 +2992,18 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
       BasketMode = 0;
       RedrawAll();
       ui->lwBasket->clearSelection();
+  }
+  else if (selectedItem == projX || selectedItem == projY)
+  {
+      TH2* h = static_cast<TH2*>(Basket[row].DrawObjects.first().getPointer());
+      TH1D* proj;
+      if (selectedItem == projX)
+          proj = h->ProjectionX();
+      else
+          proj = h->ProjectionY();
+
+      qDebug() << proj;
+      if (proj) Draw(proj, "hist");
   }
   else if (selectedItem == gaussFit)
   {

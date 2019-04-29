@@ -3001,8 +3001,6 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
           proj = h->ProjectionX();
       else
           proj = h->ProjectionY();
-
-      qDebug() << proj;
       if (proj) Draw(proj, "hist");
   }
   else if (selectedItem == gaussFit)

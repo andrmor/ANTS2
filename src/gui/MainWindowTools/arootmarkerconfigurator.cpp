@@ -42,7 +42,7 @@ ARootMarkerConfigurator::ARootMarkerConfigurator(int* Color, int* Size, int* Sty
     lay->addWidget(labW);
 
     sbSize = new QSpinBox();
-    sbSize->setMinimum(1);
+    sbSize->setMinimum(0);
     sbSize->setValue(*Size);
     lay->addWidget(sbSize);
 

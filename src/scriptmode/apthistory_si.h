@@ -11,6 +11,7 @@
 
 class ASimulationManager;
 class AEventTrackingRecord;
+class AParticleTrackingRecord;
 
 class APTHistory_SI : public AScriptInterface
 {
@@ -28,9 +29,19 @@ public slots:
     int countPrimaries(int iEvent);
     QString printRecord(int iEvent, int iPrimary, bool includeSecondaries);
 
+    void cd_set(int iEvent, int iPrimary);
+    QVariantList cd_getTrackRecord();
+    bool cd_step();
+    void cd_firstStep();
+    void cd_lastStep();
+    QVariantList cd_getStepRecord();
+
 private:
     const ASimulationManager & SM;
     const std::vector<AEventTrackingRecord *> & TH;
+
+    const AParticleTrackingRecord * Rec = nullptr; //current record for cd
+    int Step = 0;  //current step for cd
 
 };
 

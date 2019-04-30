@@ -7,6 +7,7 @@
 class AParticleTrackingRecord;
 class TrackHolderClass;
 class ATrackBuildOptions;
+class TGeoNode;
 
 class ATrackingStepData
 {
@@ -25,6 +26,8 @@ public:
     float   Time;
     float   DepositedEnergy;
     QString Process;          //step defining process
+    TGeoNode * GeoNode = nullptr;
+
 private:
     std::vector<AParticleTrackingRecord *> Secondaries; //secondaries created in this step - does not own
 

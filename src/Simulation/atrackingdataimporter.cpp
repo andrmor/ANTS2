@@ -7,6 +7,9 @@
 #include <QTextStream>
 #include <QDebug>
 
+#include "TGeoManager.h"
+#include "TGeoNode.h"
+
 ATrackingDataImporter::ATrackingDataImporter(const ATrackBuildOptions & TrackBuildOptions,
                                              const QStringList & ParticleNames,
                                              std::vector<AEventTrackingRecord *> * History,
@@ -224,6 +227,10 @@ void ATrackingDataImporter::processNewStep()
                                                          f.at(3).toFloat(), // time
                                                          f.at(4).toFloat(), // depoE
                                                          f.at(5));          // pr
+
+        if (step->Process != "T" && step->Process != "O")
+            step->GeoNode = gGeoManager->FindNode(step->Position[0], step->Position[1], step->Position[2]);
+
         CurrentParticleRecord->addStep(step);
 
         if (f.size() > 6)

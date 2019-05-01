@@ -47,6 +47,8 @@ public:
     void logToString(QString & str, int offset, bool bExpandSecondaries) const;
     void makeTrack(std::vector<TrackHolderClass *> & Tracks, const QStringList & ParticleNames, const ATrackBuildOptions & TrackBuildOptions, bool bWithSecondaries) const;
 
+    void updateGeoNodes();
+
     ~AParticleTrackingRecord();
 
     // prevent creation on the stack and copy/move
@@ -78,7 +80,7 @@ public:
     bool   isEmpty() const {return PrimaryParticleRecords.empty();}
     int    countPrimaries() const;
 
-    const std::vector<AParticleTrackingRecord *> getPrimaryParticleRecords() const {return PrimaryParticleRecords;}
+    const std::vector<AParticleTrackingRecord *> & getPrimaryParticleRecords() const {return PrimaryParticleRecords;}
 
     ~AEventTrackingRecord();
 

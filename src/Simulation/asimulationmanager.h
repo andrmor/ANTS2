@@ -115,6 +115,7 @@ private:
     bool setup(const QJsonObject & json, int threads);
     void clearG4data();
     void copyDataFromWorkers();
+    void findGeoNodes();
 };
 
 #endif // ASIMULATIONMANAGER_H

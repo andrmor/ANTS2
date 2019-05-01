@@ -13,6 +13,8 @@
 #include "aoneevent.h"
 #include "amaterialparticlecolection.h"
 #include "aeventtrackingrecord.h"
+#include "asandwich.h"
+#include "apmhub.h"
 
 #include <QDebug>
 #include <QJsonObject>
@@ -88,8 +90,6 @@ void ASimulationManager::StartSimulation(QJsonObject& json, int threads, bool fF
     }
 }
 
-#include "asandwich.h"
-#include "apmhub.h"
 bool ASimulationManager::setup(const QJsonObject & json, int threads)
 {
     if ( !json.contains("SimulationConfig") )
@@ -204,6 +204,8 @@ void ASimulationManager::onSimulationFinished()
     Detector.BuildDetector(true, true);  // <- still needed on Windows
     //Detector->GeoManager->CleanGarbage();
 
+    if (!TrackingHistory.empty()) findGeoNodes(); // should be called after GeoManager was recreated!
+
     if (fStartedFromGui) emit SimulationFinished();
 
     SiPMpixels.clear();  // main window copied if needed
@@ -255,6 +257,15 @@ void ASimulationManager::copyDataFromWorkers()
             EnergyVector = lastPartSrcSimulator->getEnergyVector();
             lastPartSrcSimulator->ClearEnergyVectorButKeepObjects(); // to avoid clearing the energy vector cells
         }
+    }
+}
+
+void ASimulationManager::findGeoNodes()
+{
+    for (AEventTrackingRecord * e : TrackingHistory)
+    {
+        for (AParticleTrackingRecord * pr : e->getPrimaryParticleRecords())
+            pr->updateGeoNodes();
     }
 }
 

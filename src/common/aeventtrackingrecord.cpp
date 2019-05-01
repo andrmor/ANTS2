@@ -108,6 +108,25 @@ void AParticleTrackingRecord::makeTrack(std::vector<TrackHolderClass *> & Tracks
             sec->makeTrack(Tracks, ParticleNames, TrackBuildOptions, bWithSecondaries);
 }
 
+void AParticleTrackingRecord::updateGeoNodes()
+{
+    for (size_t iStep = 0; iStep < Steps.size(); iStep++)
+    {
+        ATrackingStepData * Step = Steps[iStep];
+        if (Step->Process == "T" && iStep != 0)
+        {
+            ATrackingStepData * prevStep = Steps[iStep-1];
+            Step->GeoNode = gGeoManager->FindNode( 0.5*(Step->Position[0] + prevStep->Position[0]),
+                                                   0.5*(Step->Position[1] + prevStep->Position[1]),
+                                                   0.5*(Step->Position[2] + prevStep->Position[2]));
+        }
+        else Step->GeoNode = gGeoManager->FindNode(Step->Position[0], Step->Position[1], Step->Position[2]);
+    }
+
+    for (AParticleTrackingRecord * sec : Secondaries)
+        sec->updateGeoNodes();
+}
+
 // ============= Event ==============
 
 AEventTrackingRecord * AEventTrackingRecord::create()

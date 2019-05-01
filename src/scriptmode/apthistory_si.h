@@ -35,6 +35,9 @@ public slots:
     void cd_firstStep();
     void cd_lastStep();
     QVariantList cd_getStepRecord();
+    int  cd_countSecondaries();
+    void cd_in(int indexOfSecondary);
+    bool cd_out();
 
 private:
     const ASimulationManager & SM;

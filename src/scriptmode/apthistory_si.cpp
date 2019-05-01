@@ -129,7 +129,6 @@ QVariantList APTHistory_SI::cd_getStepRecord()
         if (Step < (int)Rec->getSteps().size())
         {
             ATrackingStepData * s = Rec->getSteps().at(Step);
-            qDebug() << s;
             vl.push_back( QVariantList() << s->Position[0] << s->Position[1] << s->Position[2] );
             vl << s->Time;
             QVariantList vnode;
@@ -152,4 +151,44 @@ QVariantList APTHistory_SI::cd_getStepRecord()
     else abort("record not set: use cd_set command");
 
     return vl;
+}
+
+int APTHistory_SI::cd_countSecondaries()
+{
+    if (Rec)
+    {
+        return Rec->getSecondaries().size();
+    }
+    else
+    {
+        abort("record not set: use cd_set command");
+        return 0;
+    }
+}
+
+void APTHistory_SI::cd_in(int indexOfSecondary)
+{
+    if (Rec)
+    {
+        if (indexOfSecondary > -1 && indexOfSecondary < Rec->getSecondaries().size())
+        {
+            Rec = Rec->getSecondaries().at(indexOfSecondary);
+            Step = 0;
+        }
+        else abort("bad index of secondary");
+    }
+    else abort("record not set: use cd_set command");
+}
+
+bool APTHistory_SI::cd_out()
+{
+    if (Rec)
+    {
+        if (Rec->getSecondaryOf() == nullptr) return false;
+        Rec = Rec->getSecondaryOf();
+        Step = 0;
+        return true;
+    }
+    abort("record not set: use cd_set command");
+    return false;
 }

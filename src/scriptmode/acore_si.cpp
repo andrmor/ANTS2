@@ -95,19 +95,59 @@ int ACore_SI::elapsedTimeInMilliseconds()
     return ScriptManager->getElapsedTime();
 }
 
+/*
 void ACore_SI::print(QString text)
 {
     emit ScriptManager->showMessage(text);
 }
+*/
 
-void ACore_SI::printPlain(QString text)
+void ACore_SI::addQVariantToString(const QVariant & var, QString & string) const
 {
-    emit ScriptManager->showPlainTextMessage(text);
+    switch (var.type())
+    {
+    case QVariant::Map:
+      {
+        string += '{';
+        const QMap<QString, QVariant> map = var.toMap();
+        for (const QString & k : map.keys())
+        {
+            string += QString("\"%1\":").arg(k);
+            addQVariantToString(map.value(k), string);
+            string += ", ";
+        }
+        if (string.endsWith(", ")) string.chop(2);
+        string += '}';
+        break;
+      }
+    case QVariant::List:
+        string += '[';
+        for (const QVariant & v : var.toList())
+        {
+            addQVariantToString(v, string);
+            string += ", ";
+        }
+        if (string.endsWith(", ")) string.chop(2);
+        string += ']';
+        break;
+    default:
+        // implicit convertion to string
+        string += var.toString();
+    }
 }
 
-void ACore_SI::printHTML(QString text)
+void ACore_SI::print(QVariant message)
 {
-    emit ScriptManager->showMessage(text);
+    QString s;
+    addQVariantToString(message, s);
+    emit ScriptManager->showPlainTextMessage(s);
+}
+
+void ACore_SI::printHTML(QVariant message)
+{
+    QString s;
+    addQVariantToString(message, s);
+    emit ScriptManager->showMessage(s);
 }
 
 void ACore_SI::clearText()

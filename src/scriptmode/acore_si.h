@@ -33,9 +33,9 @@ public slots:
   int           elapsedTimeInMilliseconds();
 
   //output part of the script window
-  void print(QString text);
-  void printPlain(QString text);
-  void printHTML(QString text);
+  //void print(QString text);
+  void print(QVariant message);
+  void printHTML(QVariant message);
   void clearText();
   QString str(double value, int precision);
   bool strIncludes(QString str, QString pattern);
@@ -92,6 +92,8 @@ private:
   QString         Finder_NamePattern = "*.*";
 
   CurveFit* CurF = 0;
+
+  void addQVariantToString(const QVariant & var, QString & string) const;
 
 };
 

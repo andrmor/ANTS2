@@ -4,6 +4,11 @@
 
 #include <QDebug>
 
+#include "TGeoManager.h"
+#include "TGeoNode.h"
+#include "TGeoVolume.h"
+#include "TGeoMaterial.h"
+
 APTHistory_SI::APTHistory_SI(ASimulationManager & SimulationManager) :
     AScriptInterface(), SM(SimulationManager), TH(SimulationManager.TrackingHistory)
 {}
@@ -61,9 +66,9 @@ QVariantList APTHistory_SI::cd_getTrackRecord()
     QVariantList vl;
     if (Rec)
     {
-        vl << Rec->ParticleName << Rec->StartEnergy
-           << Rec->StartPosition[0] << Rec->StartPosition[1] << Rec->StartPosition[2]
-           << Rec->StartTime
+        vl << Rec->ParticleName << Rec->StartEnergy;
+        vl.push_back( QVariantList() << Rec->StartPosition[0] << Rec->StartPosition[1] << Rec->StartPosition[2]);
+        vl << Rec->StartTime
            << (bool)Rec->getSecondaryOf()
            << (int)Rec->getSecondaries().size();
     }
@@ -122,14 +127,37 @@ QVariantList APTHistory_SI::cd_getStepRecord()
 
     if (Rec)
     {
-        if (Step < 0) Step = 0; //like a forced step
+        qDebug() << Step << Rec->getSteps().size();
+
+        if (Step < 0) Step = 0; //forced first step
         if (Step < (int)Rec->getSteps().size())
         {
-            const ATrackingStepData * s = Rec->getSteps().at(Step);
-            vl << s->Position[0] << s->Position[1] << s->Position[2]
-               << s->Time
-               << s->DepositedEnergy
-               << s->Process;
+            /*
+            float   Position[3];
+            float   Time;
+            float   DepositedEnergy;
+            QString Process;
+            TGeoNode * GeoNode;
+            std::vector<AParticleTrackingRecord *> Secondaries
+            */
+
+            ATrackingStepData * s = Rec->getSteps().at(Step);
+            qDebug() << s;
+            vl.push_back( QVariantList() << s->Position[0] << s->Position[1] << s->Position[2] );
+            vl << s->Time;
+            QVariantList vnode;
+
+            if (!s->GeoNode)
+                s->GeoNode = gGeoManager->FindNode(s->Position[0], s->Position[1], s->Position[2]);
+            if (s->GeoNode)
+            {
+                vnode << s->GeoNode->GetVolume()->GetMaterial()->GetIndex();
+                vnode << s->GeoNode->GetVolume()->GetName();
+                vnode << s->GeoNode->GetIndex();
+            }
+            vl.push_back(vnode);
+            vl << s->DepositedEnergy;
+            vl << s->Process;
                //<< (int)s->getSecondaries().size(); //also TGeoNode stuff?
 
         }

@@ -228,8 +228,9 @@ void ATrackingDataImporter::processNewStep()
                                                          f.at(4).toFloat(), // depoE
                                                          f.at(5));          // pr
 
-        if (step->Process != "T" && step->Process != "O")
-            step->GeoNode = gGeoManager->FindNode(step->Position[0], step->Position[1], step->Position[2]);
+        //if (step->Process != "T" && step->Process != "O")
+        //    step->GeoNode = gGeoManager->FindNode(step->Position[0], step->Position[1], step->Position[2]);
+        // cannot do it here - gGeoManager will be recreated after end of the simulation
 
         CurrentParticleRecord->addStep(step);
 

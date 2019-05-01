@@ -27,7 +27,7 @@ public:
 public slots:
     int countEvents();
     int countPrimaries(int iEvent);
-    QString printRecord(int iEvent, int iPrimary, bool includeSecondaries);
+    QString recordToString(int iEvent, int iPrimary, bool includeSecondaries);
 
     void cd_set(int iEvent, int iPrimary);
     QVariantList cd_getTrackRecord();

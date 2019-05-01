@@ -154,14 +154,19 @@ void ATrackingDataImporter::processNewTrack()
         int parTrIndex = f.at(1).toInt();
         if (parTrIndex == 0)
         {
-            AParticleTrackingRecord * r = AParticleTrackingRecord::create(f.at(2),            // p_name
-                                                                          f.at(7).toFloat(),  // E
-                                                                          f.at(3).toFloat(),  // X
-                                                                          f.at(4).toFloat(),  // Y
-                                                                          f.at(5).toFloat(),  // Z
-                                                                          f.at(6).toFloat()); // time
-            CurrentParticleRecord = r;
+            AParticleTrackingRecord * r = AParticleTrackingRecord::create(f.at(2)); // p_name
+
+            //float x, float y, float z, float time, float energy, float depositedEnergy, const QString & process
+            ATrackingStepData * step = new ATrackingStepData(f.at(3).toFloat(), // X
+                                                             f.at(4).toFloat(), // Y
+                                                             f.at(5).toFloat(), // Z
+                                                             f.at(6).toFloat(), // time
+                                                             f.at(7).toFloat(), // E
+                                                             0,                 // depoE
+                                                             "C");              // pr = 'C' which is "Creation"
+            r->addStep(step);
             CurrentEventRecord->addPrimaryRecord(r);
+            CurrentParticleRecord = r;
         }
         else
         {
@@ -171,12 +176,12 @@ void ATrackingDataImporter::processNewTrack()
                 Error = "Promised secondary not found!";
                 return;
             }
-            secrec->update(f.at(2),            // p_name
-                           f.at(7).toFloat(),  // E
-                           f.at(3).toFloat(),  // X
-                           f.at(4).toFloat(),  // Y
-                           f.at(5).toFloat(),  // Z
-                           f.at(6).toFloat()); // time
+            secrec->updatePromisedSecondary(f.at(2),            // p_name
+                                            f.at(7).toFloat(),  // E
+                                            f.at(3).toFloat(),  // X
+                                            f.at(4).toFloat(),  // Y
+                                            f.at(5).toFloat(),  // Z
+                                            f.at(6).toFloat()); // time
             CurrentParticleRecord = secrec;
             PromisedSecondaries.remove(trIndex);
         }
@@ -188,11 +193,11 @@ void ATrackingDataImporter::processNewTrack()
 void ATrackingDataImporter::processNewStep()
 {
     //qDebug() << "PS:"<<currentLine;
-    //x y z time dE proc {secondaries}
-    //0 1 2   3  4   5       ...
+    //x y z time E dE proc {secondaries}
+    //0 1 2   3  4  5  6     ...
 
     QStringList f = currentLine.split(' ', QString::SkipEmptyParts);
-    if (f.size() < 6)
+    if (f.size() < 7)
     {
         Error = "Bad format in track line";
         return;
@@ -206,7 +211,7 @@ void ATrackingDataImporter::processNewStep()
             return;
         }
 
-        if (f.at(5) != "T") // skip Transportation (escape out of world is marked with "O")
+        if (f.at(6) != "T") // skip Transportation (escape out of world is marked with "O")
         {
             //qDebug() << "  Adding node";
             CurrentTrack->Nodes << TrackNodeStruct(f.at(0).toDouble(), f.at(1).toDouble(), f.at(2).toDouble());  // need time?
@@ -225,18 +230,15 @@ void ATrackingDataImporter::processNewStep()
                                                          f.at(1).toFloat(), // Y
                                                          f.at(2).toFloat(), // Z
                                                          f.at(3).toFloat(), // time
-                                                         f.at(4).toFloat(), // depoE
-                                                         f.at(5));          // pr
-
-        //if (step->Process != "T" && step->Process != "O")
-        //    step->GeoNode = gGeoManager->FindNode(step->Position[0], step->Position[1], step->Position[2]);
-        // cannot do it here - gGeoManager will be recreated after end of the simulation
+                                                         f.at(4).toFloat(), // energy
+                                                         f.at(5).toFloat(), // depoE
+                                                         f.at(6));          // pr
 
         CurrentParticleRecord->addStep(step);
 
-        if (f.size() > 6)
+        if (f.size() > 7)
         {
-            for (int i=6; i<f.size(); i++)
+            for (int i=7; i<f.size(); i++)
             {
                 int index = f.at(i).toInt();
                 if (PromisedSecondaries.contains(index))
@@ -245,7 +247,7 @@ void ATrackingDataImporter::processNewStep()
                     return;
                 }
                 AParticleTrackingRecord * sr = AParticleTrackingRecord::create(); //empty!
-                step->addSecondary(sr);
+                step->Secondaries.push_back(CurrentParticleRecord->countSecondaries());
                 CurrentParticleRecord->addSecondary(sr);
                 PromisedSecondaries.insert(index, sr);
             }

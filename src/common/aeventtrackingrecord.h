@@ -12,41 +12,29 @@ class TGeoNode;
 class ATrackingStepData
 {
 public:
-    ATrackingStepData(float * position, float time, float depositedEnergy, const QString & process);
-    ATrackingStepData(float x, float y, float z, float time, float depositedEnergy, const QString & process);
+    ATrackingStepData(float * position, float time, float energy, float depositedEnergy, const QString & process);
+    ATrackingStepData(float x, float y, float z, float time, float energy, float depositedEnergy, const QString & process);
 
-    void  addSecondary(AParticleTrackingRecord * sec);
-    const std::vector<AParticleTrackingRecord *> & getSecondaries() {return Secondaries;}
-
-    int   countSecondaries() const;
     void  logToString(QString & str, int offset) const;
 
 public:
     float   Position[3];
     float   Time;
+    float   Energy;
     float   DepositedEnergy;
-    QString Process;          //step defining process
+    QString Process;              //step defining process
     TGeoNode * GeoNode = nullptr;
-
-private:
-    std::vector<AParticleTrackingRecord *> Secondaries; //secondaries created in this step - does not own
+    std::vector<int> Secondaries; //secondaries created in this step - indexes in the parent record
 
 };
 
 class AParticleTrackingRecord
 {
 public:
-    static AParticleTrackingRecord* create(const QString & Particle, double StartEnergy, double * StartPosition, double Time);
-    static AParticleTrackingRecord* create(const QString & Particle, float  StartEnergy, float  * StartPosition, float  Time);
-    static AParticleTrackingRecord* create(const QString & Particle,
-                                           float  StartEnergy,
-                                           float  StartX,
-                                           float  StartY,
-                                           float  StartZ,
-                                           float  Time);
-    static AParticleTrackingRecord* create(); // avoid if possible: empty record -> ParticleId will be set to -1
+    static AParticleTrackingRecord* create(const QString & Particle);
+    static AParticleTrackingRecord* create(); // try to avoid this
 
-    void update(const QString & particle, float  startEnergy, float  startX, float  startY, float  startZ, float  time);
+    void updatePromisedSecondary(const QString & particle, float startEnergy, float startX, float startY, float startZ, float startTime);
     void addStep(ATrackingStepData * step);
 
     void addSecondary(AParticleTrackingRecord * sec);
@@ -63,13 +51,7 @@ public:
 
     // prevent creation on the stack and copy/move
 private:
-    AParticleTrackingRecord(const QString & particle, float startEnergy, float * startPosition, float time);
-    AParticleTrackingRecord(const QString & particle,
-                            float startEnergy,
-                            float startX,
-                            float startY,
-                            float startZ,
-                            float time);
+    AParticleTrackingRecord(const QString & particle) : ParticleName(particle) {}
 
     AParticleTrackingRecord(const AParticleTrackingRecord &) = delete;
     AParticleTrackingRecord & operator=(const AParticleTrackingRecord &) = delete;
@@ -78,10 +60,7 @@ private:
 
 public:
     //int     ParticleId;                       // ants ID of the particle
-    QString ParticleName;                     //
-    float   StartEnergy;                      // initial kinetic energy
-    float   StartPosition[3];                 // initial position
-    float   StartTime;                        // time of creation
+    QString ParticleName;
 
 private:
     std::vector<ATrackingStepData *> Steps;   // tracking steps

@@ -28,7 +28,7 @@ int APTHistory_SI::countPrimaries(int iEvent)
     return TH.at(iEvent)->countPrimaries();
 }
 
-QString APTHistory_SI::printRecord(int iEvent, int iPrimary, bool includeSecondaries)
+QString APTHistory_SI::recordToString(int iEvent, int iPrimary, bool includeSecondaries)
 {
     if (iEvent < 0 || iEvent >= TH.size())
     {
@@ -66,9 +66,7 @@ QVariantList APTHistory_SI::cd_getTrackRecord()
     QVariantList vl;
     if (Rec)
     {
-        vl << Rec->ParticleName << Rec->StartEnergy;
-        vl.push_back( QVariantList() << Rec->StartPosition[0] << Rec->StartPosition[1] << Rec->StartPosition[2]);
-        vl << Rec->StartTime
+        vl << Rec->ParticleName
            << (bool)Rec->getSecondaryOf()
            << (int)Rec->getSecondaries().size();
     }
@@ -127,28 +125,14 @@ QVariantList APTHistory_SI::cd_getStepRecord()
 
     if (Rec)
     {
-        qDebug() << Step << Rec->getSteps().size();
-
         if (Step < 0) Step = 0; //forced first step
         if (Step < (int)Rec->getSteps().size())
         {
-            /*
-            float   Position[3];
-            float   Time;
-            float   DepositedEnergy;
-            QString Process;
-            TGeoNode * GeoNode;
-            std::vector<AParticleTrackingRecord *> Secondaries
-            */
-
             ATrackingStepData * s = Rec->getSteps().at(Step);
             qDebug() << s;
             vl.push_back( QVariantList() << s->Position[0] << s->Position[1] << s->Position[2] );
             vl << s->Time;
             QVariantList vnode;
-
-            if (!s->GeoNode)
-                s->GeoNode = gGeoManager->FindNode(s->Position[0], s->Position[1], s->Position[2]);
             if (s->GeoNode)
             {
                 vnode << s->GeoNode->GetVolume()->GetMaterial()->GetIndex();
@@ -156,10 +140,12 @@ QVariantList APTHistory_SI::cd_getStepRecord()
                 vnode << s->GeoNode->GetIndex();
             }
             vl.push_back(vnode);
+            vl << s->Energy;
             vl << s->DepositedEnergy;
             vl << s->Process;
-               //<< (int)s->getSecondaries().size(); //also TGeoNode stuff?
-
+            QVariantList svl;
+            for (int & iSec : s->Secondaries) svl << iSec;
+            vl.push_back(svl);
         }
         else abort("Error: bad current step!");
     }

@@ -69,8 +69,7 @@ void AJavaScriptManager::addQVariantToString(const QVariant & var, QString & str
         string += ']';
         break;
     default:
-        // implicit convertion to string
-        string += var.toString();
+        string += var.toString();// implicit convertion to string
     }
 }
 

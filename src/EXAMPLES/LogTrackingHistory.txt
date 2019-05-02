@@ -1,0 +1,46 @@
+// --- Warning! ---
+//  This script prints a lot of text. 
+// Recommended to start with < 100 events
+
+function outText(depth)
+{
+       var pr = ptHistory.cd_getTrackRecord()
+       core.print("--> " + pr[0])
+       while (ptHistory.cd_step())
+       {
+              var tr = ptHistory.cd_getStepRecord()
+              core.print(tr)
+       }
+       
+       var numSec = ptHistory.cd_countSecondaries()
+       for (var iSec=0; iSec<numSec; iSec++)
+       {
+              var str = depth
+              if (str.length > 0) str += ":"
+              str += iSec
+              core.printHTML("<font color='teal'>" +  "Secondary #" + str + "</font> ")
+              ptHistory.cd_in(iSec)
+              outText(str)
+              ptHistory.cd_out()
+       }       
+}
+
+var numEvents = ptHistory.countEvents()
+if (numEvents === 0) core.abort("No data!")
+
+core.clearText()
+core.print("Tracking step report format:\n[X, Y, Z], Time, [iMaterial, Volume, Index], EnergyAfterStep, DirectlyDepositedEnergy, Process, CreatedSecondaries\n")
+core.print("Custom process names:\n'C' - creation\n'T' - transportation\n'O' - exit outside defined geometry")
+
+for (var iEv=0; iEv<numEvents; iEv++)
+{
+       core.print("")
+       core.printHTML("<font color='blue'>" +  "Event #" + iEv + "</font> ")
+       var numPrim = ptHistory.countPrimaries(iEv)
+       for (var iPr=0; iPr<numPrim; iPr++)
+       {
+              core.printHTML("<font color='green'>" +  "Primary #" + iPr + "</font> ")
+              ptHistory.cd_set(iEv, iPr)
+              outText("")
+       }       
+}

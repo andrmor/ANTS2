@@ -80,6 +80,8 @@ public:
     bool   isEmpty() const {return PrimaryParticleRecords.empty();}
     int    countPrimaries() const;
 
+    void updateGeoNodes();
+
     const std::vector<AParticleTrackingRecord *> & getPrimaryParticleRecords() const {return PrimaryParticleRecords;}
 
     ~AEventTrackingRecord();

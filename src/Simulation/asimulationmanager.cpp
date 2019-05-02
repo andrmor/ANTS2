@@ -263,10 +263,7 @@ void ASimulationManager::copyDataFromWorkers()
 void ASimulationManager::findGeoNodes()
 {
     for (AEventTrackingRecord * e : TrackingHistory)
-    {
-        for (AParticleTrackingRecord * pr : e->getPrimaryParticleRecords())
-            pr->updateGeoNodes();
-    }
+        e->updateGeoNodes();
 }
 
 void ASimulationManager::clearTracks()

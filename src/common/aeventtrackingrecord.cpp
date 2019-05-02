@@ -116,9 +116,12 @@ void AParticleTrackingRecord::updateGeoNodes()
         if (Step->Process == "T" && iStep != 0)
         {
             ATrackingStepData * prevStep = Steps[iStep-1];
-            Step->GeoNode = gGeoManager->FindNode( 0.5*(Step->Position[0] + prevStep->Position[0]),
-                                                   0.5*(Step->Position[1] + prevStep->Position[1]),
-                                                   0.5*(Step->Position[2] + prevStep->Position[2]));
+            if (prevStep->Process != "T")
+                Step->GeoNode = gGeoManager->FindNode(prevStep->Position[0], prevStep->Position[1], prevStep->Position[2]);
+            else
+                Step->GeoNode = gGeoManager->FindNode( 0.99*Step->Position[0] + 0.01*prevStep->Position[0],
+                                                       0.99*Step->Position[1] + 0.01*prevStep->Position[1],
+                                                       0.99*Step->Position[2] + 0.01*prevStep->Position[2] );
         }
         else Step->GeoNode = gGeoManager->FindNode(Step->Position[0], Step->Position[1], Step->Position[2]);
     }
@@ -147,3 +150,9 @@ void AEventTrackingRecord::addPrimaryRecord(AParticleTrackingRecord *rec)
 }
 
 int AEventTrackingRecord::countPrimaries() const { return static_cast<int>(PrimaryParticleRecords.size()); }
+
+void AEventTrackingRecord::updateGeoNodes()
+{
+    for (AParticleTrackingRecord * pr : PrimaryParticleRecords)
+        pr->updateGeoNodes();
+}

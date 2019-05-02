@@ -39,6 +39,8 @@ public slots:
     void cd_in(int indexOfSecondary);
     bool cd_out();
 
+    void test();
+
 private:
     const ASimulationManager & SM;
     const std::vector<AEventTrackingRecord *> & TH;

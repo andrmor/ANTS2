@@ -192,3 +192,21 @@ bool APTHistory_SI::cd_out()
     abort("record not set: use cd_set command");
     return false;
 }
+
+#include "atrackinghistorycrawler.h"
+void APTHistory_SI::test()
+{
+    ATrackingHistoryCrawler tc(SM.TrackingHistory);
+
+    AFindRecordSelector criteria;
+    criteria.bSecondary = true;
+
+    std::vector<AHistorySearchProcessor*> processors;
+
+    AHistorySearchProcessor_findParticles* p = new AHistorySearchProcessor_findParticles();
+    processors.push_back(p);
+
+    tc.find(criteria, processors);
+
+    p->report();
+}

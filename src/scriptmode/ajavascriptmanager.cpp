@@ -40,6 +40,40 @@ AJavaScriptManager::~AJavaScriptManager()
 #endif
 }
 
+void AJavaScriptManager::addQVariantToString(const QVariant & var, QString & string)
+{
+    switch (var.type())
+    {
+    case QVariant::Map:
+      {
+        string += '{';
+        const QMap<QString, QVariant> map = var.toMap();
+        for (const QString & k : map.keys())
+        {
+            string += QString("\"%1\":").arg(k);
+            addQVariantToString(map.value(k), string);
+            string += ", ";
+        }
+        if (string.endsWith(", ")) string.chop(2);
+        string += '}';
+        break;
+      }
+    case QVariant::List:
+        string += '[';
+        for (const QVariant & v : var.toList())
+        {
+            addQVariantToString(v, string);
+            string += ", ";
+        }
+        if (string.endsWith(", ")) string.chop(2);
+        string += ']';
+        break;
+    default:
+        // implicit convertion to string
+        string += var.toString();
+    }
+}
+
 QString AJavaScriptManager::Evaluate(const QString& Script)
 {
     LastError.clear();
@@ -71,7 +105,14 @@ QString AJavaScriptManager::Evaluate(const QString& Script)
     timerEvalTookMs = timer->elapsed();
     delete timer; timer = 0;
 
-    QString result = EvaluationResult.toString();
+    QString result;
+    if (EvaluationResult.isArray() || EvaluationResult.isObject())
+    {
+        QVariant resVar = EvaluationResult.toVariant();
+        addQVariantToString(resVar, result);
+    }
+    else result = EvaluationResult.toString();
+
     emit onFinish(result);
     return result;
 }

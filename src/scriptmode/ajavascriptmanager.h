@@ -70,6 +70,7 @@ private:
 
 private:
     void doRegister(AScriptInterface *interface, const QString &name);
+    void addQVariantToString(const QVariant &var, QString &string);
 };
 
 #endif // AJAVASCRIPTMANAGER_H

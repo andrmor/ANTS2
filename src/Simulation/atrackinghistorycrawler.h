@@ -9,19 +9,29 @@
 #include "TString.h"
 
 /*
-class AHistorySearchValidator
+// --- Search conditions ---
+class AHistorySearchCondition
 {
 public:
-    enum eLevel {Particle, Step, Border};
+    virtual ~AHistorySearchCondition(){}
 
-    eLevel Level;
+   // false = validation failed
+    virtual bool validateParticle(const AParticleTrackingRecord & pr) {return true;}
+    virtual bool validateStep(const ATrackingStepData & step) {return true;}
+    virtual bool validateTransition(const ATrackingStepData & from, const ATrackingStepData & to) {return true;}
+};
 
-    AHistorySearchValidator(eLevel level) {Level = level;}
-    virtual ~AHistorySearchValidator(){}
+class AHistorySearchCondition_particle : public AHistorySearchCondition
+{
+public:
+    virtual ~AHistorySearchCondition(){}
 
-    virtual bool validate() = 0;  // false - record will be NOT considered
+   // false = validation failed
+    virtual bool validateParticle(const AParticleTrackingRecord & pr) = 0;
 };
 */
+
+// --- Search processors ---
 
 class AHistorySearchProcessor
 {
@@ -71,6 +81,20 @@ public:
     QString Particle;
     bool bPrimary = false;
     bool bSecondary = false;
+
+  //transportation
+    bool bFromMat = false;
+    int FromMat = 0;
+    bool bToMat = false;
+    int ToMat = 0;
+    bool bFromVolume = false;
+    TString FromVolume;
+    bool bToVolume = false;
+    TString ToVolume;
+    bool bFromVolIndex = false;
+    int FromVolIndex = 0;
+    bool bToVolIndex = false;
+    int ToVolIndex = 0;
 
   //step level
     bool bMaterial = false;

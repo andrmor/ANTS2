@@ -54,8 +54,13 @@ void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, 
 
         for (AHistorySearchProcessor * hp : processors)
         {
+            //if (thisStep->Process != "T")
             hp->onStep(*thisStep);
-            //if "T" hp->onBorder(thisStep, nextStep);
+            //else
+            //{
+            //    const ATrackingStepData * nextStep = steps[iStep+1];
+            //    hp->onBorder(thisStep, nextStep);
+            //}
         }
     }
 

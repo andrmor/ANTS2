@@ -5,6 +5,7 @@
 
 #include <QString>
 #include <QSet>
+#include <QMap>
 
 #include "TString.h"
 
@@ -40,7 +41,7 @@ public:
 
     virtual void onParticle(const AParticleTrackingRecord & ){}
     virtual void onStep(const ATrackingStepData & ){}
-    virtual void confirm() = 0;
+    virtual void onTrackEnd() = 0;
     virtual void report(){}
 };
 
@@ -50,13 +51,13 @@ public:
     virtual ~AHistorySearchProcessor_findParticles(){}
 
     virtual void onParticle(const AParticleTrackingRecord & pr);
-    //virtual void onStep(const ATrackingStepData & tr) override{}
-    virtual void confirm() override;
+    virtual void onStep(const ATrackingStepData & tr) override;
+    virtual void onTrackEnd() override;
     virtual void report() override;
 
-private:
-    QString candidate;
-    QSet<QString> FoundParticles;
+    QString Candidate;
+    bool bConfirmed = false;
+    QMap<QString, int> FoundParticles;
 };
 
 class AHistorySearchProcessor_findMaterials : public AHistorySearchProcessor
@@ -66,7 +67,7 @@ public:
 
     //virtual void onParticle(const AParticleTrackingRecord & pr);
     virtual void onStep(const ATrackingStepData & tr) override;
-    //virtual void confirm() override;
+    //virtual void onTrackEnd() override;
     virtual void report() override;
 
 private:

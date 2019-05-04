@@ -1,6 +1,7 @@
 #include "apthistory_si.h"
 #include "asimulationmanager.h"
 #include "aeventtrackingrecord.h"
+#include "atrackinghistorycrawler.h"
 
 #include <QDebug>
 
@@ -11,7 +12,18 @@
 
 APTHistory_SI::APTHistory_SI(ASimulationManager & SimulationManager) :
     AScriptInterface(), SM(SimulationManager), TH(SimulationManager.TrackingHistory)
-{}
+{
+    Crawler = new ATrackingHistoryCrawler(SM.TrackingHistory);
+    Criteria = new AFindRecordSelector();
+}
+
+APTHistory_SI::~APTHistory_SI()
+{
+    delete Criteria;
+    for (auto & p : Processors) delete p;
+    Processors.clear();
+    delete Crawler;
+}
 
 int APTHistory_SI::countEvents()
 {
@@ -193,20 +205,49 @@ bool APTHistory_SI::cd_out()
     return false;
 }
 
-#include "atrackinghistorycrawler.h"
-void APTHistory_SI::test()
+void APTHistory_SI::clearCriteria()
 {
-    ATrackingHistoryCrawler tc(SM.TrackingHistory);
-
-    AFindRecordSelector criteria;
-    criteria.bSecondary = true;
-
-    std::vector<AHistorySearchProcessor*> processors;
-
-    AHistorySearchProcessor_findParticles* p = new AHistorySearchProcessor_findParticles();
-    processors.push_back(p);
-
-    tc.find(criteria, processors);
-
-    p->report();
+    delete Criteria;
+    Criteria = new AFindRecordSelector();
 }
+
+void APTHistory_SI::setParticle(QString particleName)
+{
+    Criteria->bParticle = true;
+    Criteria->Particle = particleName;
+}
+
+void APTHistory_SI::setOnlyPrimary()
+{
+    Criteria->bPrimary = true;
+}
+
+void APTHistory_SI::setOnlySecondary()
+{
+    Criteria->bSecondary = true;
+}
+
+void APTHistory_SI::setMaterial(int matIndex)
+{
+    Criteria->bMaterial = true;
+    Criteria->Material = matIndex;
+}
+
+QVariantList APTHistory_SI::findParticles()
+{
+    AHistorySearchProcessor_findParticles* p = new AHistorySearchProcessor_findParticles();
+    Processors.push_back(p);
+    Crawler->find(*Criteria, Processors);
+
+    QVariantList vl;
+    QMap<QString, int>::const_iterator it = p->FoundParticles.constBegin();
+    while (it != p->FoundParticles.constEnd())
+    {
+        QVariantList el;
+        el << it.key() << it.value();
+        vl.push_back(el);
+        ++it;
+    }
+    return vl;
+}
+

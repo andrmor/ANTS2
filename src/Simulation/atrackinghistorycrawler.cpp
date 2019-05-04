@@ -64,17 +64,32 @@ void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, 
         }
     }
 
-    for (AHistorySearchProcessor * hp : processors) hp->confirm();
+    //here integral collector-based criteria can be checked -> next line activated only if "pass"
+
+    for (AHistorySearchProcessor * hp : processors) hp->onTrackEnd();
 }
 
 void AHistorySearchProcessor_findParticles::onParticle(const AParticleTrackingRecord &pr)
 {
-    candidate = pr.ParticleName;
+    Candidate = pr.ParticleName;
+    bConfirmed = false;
 }
 
-void AHistorySearchProcessor_findParticles::confirm()
+void AHistorySearchProcessor_findParticles::onStep(const ATrackingStepData & )
 {
-    FoundParticles.insert(candidate);
+    bConfirmed = true;
+}
+
+void AHistorySearchProcessor_findParticles::onTrackEnd()
+{
+    if (bConfirmed && !Candidate.isEmpty())
+    {
+        QMap<QString, int>::iterator it = FoundParticles.find(Candidate);
+        if (it == FoundParticles.end())
+            FoundParticles.insert(Candidate, 1);
+        else it.value()++;
+        Candidate.clear();
+    }
 }
 
 void AHistorySearchProcessor_findParticles::report()

@@ -1,8 +1,9 @@
 #include "atrackinghistorycrawler.h"
 
-#include "TGeoNode.h"
-
 #include <QDebug>
+
+#include "TGeoNode.h"
+#include "TH1D.h"
 
 ATrackingHistoryCrawler::ATrackingHistoryCrawler(const std::vector<AEventTrackingRecord *> &History) :
     History(History) {}
@@ -92,18 +93,35 @@ void AHistorySearchProcessor_findParticles::onTrackEnd()
     }
 }
 
-void AHistorySearchProcessor_findParticles::report()
-{
-    qDebug() << FoundParticles;
-}
-
 void AHistorySearchProcessor_findMaterials::onStep(const ATrackingStepData &tr)
 {
     if (tr.GeoNode)
         FoundMaterials.insert(tr.GeoNode->GetVolume()->GetMaterial()->GetIndex());
 }
 
-void AHistorySearchProcessor_findMaterials::report()
+AHistorySearchProcessor_findDepositedEnergy::AHistorySearchProcessor_findDepositedEnergy(int bins, double from, double to)
 {
-    qDebug() << FoundMaterials;
+    Hist = new TH1D("", "Travelled distance", bins, from, to);
+    Hist->GetXaxis()->SetTitle("Distance, mm");
+}
+
+AHistorySearchProcessor_findDepositedEnergy::~AHistorySearchProcessor_findDepositedEnergy()
+{
+    delete Hist;
+}
+
+void AHistorySearchProcessor_findDepositedEnergy::onParticle(const AParticleTrackingRecord & pr)
+{
+    Depo = 0;
+}
+
+void AHistorySearchProcessor_findDepositedEnergy::onStep(const ATrackingStepData & tr)
+{
+    Depo += tr.DepositedEnergy;
+}
+
+void AHistorySearchProcessor_findDepositedEnergy::onTrackEnd()
+{
+    if (Depo > 0) Hist->Fill(Depo);
+    Depo = 0;
 }

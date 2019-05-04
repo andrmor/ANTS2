@@ -9,6 +9,8 @@
 
 #include "TString.h"
 
+class TH1D;
+
 /*
 // --- Search conditions ---
 class AHistorySearchCondition
@@ -42,7 +44,6 @@ public:
     virtual void onParticle(const AParticleTrackingRecord & ){}
     virtual void onStep(const ATrackingStepData & ){}
     virtual void onTrackEnd() = 0;
-    virtual void report(){}
 };
 
 class AHistorySearchProcessor_findParticles : public AHistorySearchProcessor
@@ -53,11 +54,24 @@ public:
     virtual void onParticle(const AParticleTrackingRecord & pr);
     virtual void onStep(const ATrackingStepData & tr) override;
     virtual void onTrackEnd() override;
-    virtual void report() override;
 
     QString Candidate;
     bool bConfirmed = false;
     QMap<QString, int> FoundParticles;
+};
+
+class AHistorySearchProcessor_findDepositedEnergy : public AHistorySearchProcessor
+{
+public:
+    AHistorySearchProcessor_findDepositedEnergy(int bins, double from = 0, double to = 0);
+    virtual ~AHistorySearchProcessor_findDepositedEnergy();
+
+    virtual void onParticle(const AParticleTrackingRecord & pr);
+    virtual void onStep(const ATrackingStepData & tr) override;
+    virtual void onTrackEnd() override;
+
+    double Depo = 0;
+    TH1D * Hist = nullptr;
 };
 
 class AHistorySearchProcessor_findMaterials : public AHistorySearchProcessor
@@ -68,7 +82,6 @@ public:
     //virtual void onParticle(const AParticleTrackingRecord & pr);
     virtual void onStep(const ATrackingStepData & tr) override;
     //virtual void onTrackEnd() override;
-    virtual void report() override;
 
 private:
     QSet<int> FoundMaterials;

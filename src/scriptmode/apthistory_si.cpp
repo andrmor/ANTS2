@@ -9,6 +9,8 @@
 #include "TGeoNode.h"
 #include "TGeoVolume.h"
 #include "TGeoMaterial.h"
+#include "TH1.h"
+#include "TH1D.h"
 
 APTHistory_SI::APTHistory_SI(ASimulationManager & SimulationManager) :
     AScriptInterface(), SM(SimulationManager), TH(SimulationManager.TrackingHistory)
@@ -247,6 +249,23 @@ QVariantList APTHistory_SI::findParticles()
         el << it.key() << it.value();
         vl.push_back(el);
         ++it;
+    }
+    return vl;
+}
+
+QVariantList APTHistory_SI::findDepositedEnergyPerParticle(int bins, double from, double to)
+{
+    AHistorySearchProcessor_findDepositedEnergy* p = new AHistorySearchProcessor_findDepositedEnergy(bins, from, to);
+    Processors.push_back(p);
+    Crawler->find(*Criteria, Processors);
+
+    QVariantList vl;
+    int numBins = p->Hist->GetXaxis()->GetNbins();
+    for (int iBin=1; iBin<numBins+1; iBin++)
+    {
+        QVariantList el;
+        el << p->Hist->GetBinCenter(iBin) << p->Hist->GetBinContent(iBin);
+        vl.push_back(el);
     }
     return vl;
 }

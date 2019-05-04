@@ -49,6 +49,7 @@ public slots:
     void setMaterial(int matIndex);
 
     QVariantList findParticles();
+    QVariantList findDepositedEnergyPerParticle(int bins, double from, double to);
 
 private:
     const ASimulationManager & SM;

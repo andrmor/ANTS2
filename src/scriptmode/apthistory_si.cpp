@@ -265,7 +265,26 @@ QVariantList APTHistory_SI::findParticles()
     return vl;
 }
 
-QVariantList APTHistory_SI::findDepositedEnergyPerParticle(int bins, double from, double to)
+QVariantList APTHistory_SI::findProcesses()
+{
+    clearProcessors();
+    AHistorySearchProcessor_findProcesses* p = new AHistorySearchProcessor_findProcesses();
+    Processors.push_back(p);
+    Crawler->find(*Criteria, Processors);
+
+    QVariantList vl;
+    QMap<QString, int>::const_iterator it = p->FoundProcesses.constBegin();
+    while (it != p->FoundProcesses.constEnd())
+    {
+        QVariantList el;
+        el << it.key() << it.value();
+        vl.push_back(el);
+        ++it;
+    }
+    return vl;
+}
+
+QVariantList APTHistory_SI::findDepositedEnergies(int bins, double from, double to)
 {
     clearProcessors();
     AHistorySearchProcessor_findDepositedEnergy* p = new AHistorySearchProcessor_findDepositedEnergy(bins, from, to);

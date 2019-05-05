@@ -50,7 +50,8 @@ public slots:
     void setVolume(QString volumeName);
 
     QVariantList findParticles();
-    QVariantList findDepositedEnergyPerParticle(int bins, double from, double to);
+    QVariantList findProcesses();
+    QVariantList findDepositedEnergies(int bins, double from, double to);
     QVariantList findTravelledDistances(int bins, double from, double to);
 
 private:

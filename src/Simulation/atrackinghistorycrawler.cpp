@@ -248,3 +248,12 @@ void AHistorySearchProcessor_findTravelledDistances::onTrackEnd()
     if (Distance > 0) Hist->Fill(Distance);
     Distance = 0;
 }
+
+void AHistorySearchProcessor_findProcesses::onLocalStep(const ATrackingStepData &tr)
+{
+    const QString & Proc = tr.Process;
+    QMap<QString, int>::iterator it = FoundProcesses.find(Proc);
+    if (it == FoundProcesses.end())
+        FoundProcesses.insert(Proc, 1);
+    else it.value()++;
+}

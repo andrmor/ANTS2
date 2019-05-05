@@ -47,7 +47,7 @@ public:
     enum Direction {OUT, IN, OUT_IN};
     virtual void onTransition(const ATrackingStepData & , Direction ){} // "from" step
 
-    virtual void onTrackEnd() = 0;
+    virtual void onTrackEnd(){}
 
 };
 
@@ -63,6 +63,18 @@ public:
     QString Candidate;
     bool bConfirmed = false;
     QMap<QString, int> FoundParticles;
+};
+
+class AHistorySearchProcessor_findProcesses : public AHistorySearchProcessor
+{
+public:
+    //virtual ~AHistorySearchProcessor_findProcesses(){}
+
+    //virtual void onParticle(const AParticleTrackingRecord & pr);
+    virtual void onLocalStep(const ATrackingStepData & tr) override;
+    //virtual void onTrackEnd() override;
+
+    QMap<QString, int> FoundProcesses;
 };
 
 class AHistorySearchProcessor_findDepositedEnergy : public AHistorySearchProcessor

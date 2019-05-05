@@ -4,6 +4,7 @@
 
 #include "TGeoNode.h"
 #include "TH1D.h"
+#include "TTree.h"
 
 ATrackingHistoryCrawler::ATrackingHistoryCrawler(const std::vector<AEventTrackingRecord *> &History) :
     History(History) {}
@@ -158,12 +159,6 @@ void AHistorySearchProcessor_findParticles::onTrackEnd()
     }
 }
 
-void AHistorySearchProcessor_findMaterials::onLocalStep(const ATrackingStepData &tr)
-{
-    if (tr.GeoNode)
-        FoundMaterials.insert(tr.GeoNode->GetVolume()->GetMaterial()->GetIndex());
-}
-
 AHistorySearchProcessor_findDepositedEnergy::AHistorySearchProcessor_findDepositedEnergy(int bins, double from, double to)
 {
     Hist = new TH1D("", "Deposited energy", bins, from, to);
@@ -257,3 +252,31 @@ void AHistorySearchProcessor_findProcesses::onLocalStep(const ATrackingStepData 
         FoundProcesses.insert(Proc, 1);
     else it.value()++;
 }
+
+AHistorySearchProcessor_Border::AHistorySearchProcessor_Border()
+{
+    T = new TTree("T","Border pass");
+
+    T->Branch("x", &x,"x/F");
+    T->Branch("y", &y,"y/F");
+    T->Branch("z", &z,"z/F");
+    T->Branch("time", &time,"time/F");
+    T->Branch("energy", &energy,"energy/F");
+}
+
+AHistorySearchProcessor_Border::~AHistorySearchProcessor_Border()
+{
+    delete T;
+}
+
+void AHistorySearchProcessor_Border::onTransition(const ATrackingStepData & tr, AHistorySearchProcessor::Direction)
+{
+    x = tr.Position[0];
+    y = tr.Position[1];
+    z = tr.Position[2];
+    time = tr.Time;
+    energy = tr.Energy;
+
+    T->Fill();
+}
+

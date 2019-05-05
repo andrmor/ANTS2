@@ -10,6 +10,7 @@
 #include "TString.h"
 
 class TH1D;
+class TTree;
 
 /*
 // --- Search conditions ---
@@ -108,18 +109,28 @@ public:
     TH1D * Hist = nullptr;
 };
 
-class AHistorySearchProcessor_findMaterials : public AHistorySearchProcessor
+
+class AHistorySearchProcessor_Border : public AHistorySearchProcessor
 {
 public:
-    virtual ~AHistorySearchProcessor_findMaterials(){}
+    AHistorySearchProcessor_Border();
+    virtual ~AHistorySearchProcessor_Border();
 
-    //virtual void onParticle(const AParticleTrackingRecord & pr);
-    virtual void onLocalStep(const ATrackingStepData & tr) override;
-    //virtual void onTrackEnd() override;
+    //virtual void onParticle(const AParticleTrackingRecord & ){}
 
-private:
-    QSet<int> FoundMaterials;
+    virtual void onTransition(const ATrackingStepData & tr, Direction ) override; // "from" step
+
+    //virtual void onTrackEnd(){}
+
+    TTree * T = nullptr;
+
+    float   x, y, z;
+    float   time;
+    float   energy;
 };
+
+
+// --------------------------------------
 
 class AFindRecordSelector
 {

@@ -49,10 +49,18 @@ public slots:
     void setMaterial(int matIndex);
     void setVolume(QString volumeName);
 
+    void setFromMaterial(int matIndex);
+    void setToMaterial(int matIndex);
+    void setFromVolume(QString volumeName);
+    void setToVolume(QString volumeName);
+    void setFromIndex(int volumeIndex);
+    void setToIndex(int volumeIndex);
+
     QVariantList findParticles();
     QVariantList findProcesses();
     QVariantList findDepositedEnergies(int bins, double from, double to);
     QVariantList findTravelledDistances(int bins, double from, double to);
+    QVariantList findOnBorder(QString what, QString cuts);
 
 private:
     const ASimulationManager & SM;

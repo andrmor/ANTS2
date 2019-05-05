@@ -42,8 +42,13 @@ public:
     virtual ~AHistorySearchProcessor(){}
 
     virtual void onParticle(const AParticleTrackingRecord & ){}
-    virtual void onStep(const ATrackingStepData & ){}
+
+    virtual void onLocalStep(const ATrackingStepData & ){} // anything but transportation
+    enum Direction {OUT, IN, OUT_IN};
+    virtual void onTransition(const ATrackingStepData & , Direction ){} // "from" step
+
     virtual void onTrackEnd() = 0;
+
 };
 
 class AHistorySearchProcessor_findParticles : public AHistorySearchProcessor
@@ -52,7 +57,7 @@ public:
     virtual ~AHistorySearchProcessor_findParticles(){}
 
     virtual void onParticle(const AParticleTrackingRecord & pr);
-    virtual void onStep(const ATrackingStepData & tr) override;
+    virtual void onLocalStep(const ATrackingStepData & tr) override;
     virtual void onTrackEnd() override;
 
     QString Candidate;
@@ -67,10 +72,27 @@ public:
     virtual ~AHistorySearchProcessor_findDepositedEnergy();
 
     virtual void onParticle(const AParticleTrackingRecord & pr);
-    virtual void onStep(const ATrackingStepData & tr) override;
+    virtual void onLocalStep(const ATrackingStepData & tr) override;
     virtual void onTrackEnd() override;
 
     double Depo = 0;
+    TH1D * Hist = nullptr;
+};
+
+class AHistorySearchProcessor_findTravelledDistances : public AHistorySearchProcessor
+{
+public:
+    AHistorySearchProcessor_findTravelledDistances(int bins, double from = 0, double to = 0);
+    virtual ~AHistorySearchProcessor_findTravelledDistances();
+
+    virtual void onParticle(const AParticleTrackingRecord & pr);
+    virtual void onLocalStep(const ATrackingStepData & tr) override;
+    virtual void onTransition(const ATrackingStepData & tr, Direction direction); // "from" step
+    virtual void onTrackEnd() override;
+
+    float Distance = 0;
+    float LastPosition[3];
+    bool bStarted = false;
     TH1D * Hist = nullptr;
 };
 
@@ -80,7 +102,7 @@ public:
     virtual ~AHistorySearchProcessor_findMaterials(){}
 
     //virtual void onParticle(const AParticleTrackingRecord & pr);
-    virtual void onStep(const ATrackingStepData & tr) override;
+    virtual void onLocalStep(const ATrackingStepData & tr) override;
     //virtual void onTrackEnd() override;
 
 private:
@@ -97,18 +119,21 @@ public:
     bool bSecondary = false;
 
   //transportation
+    bool bInOutSeparately = false; // if true, "in" and "out" conditions will be checked independently (both can trigger processor call)
+    //from
     bool bFromMat = false;
-    int FromMat = 0;
-    bool bToMat = false;
-    int ToMat = 0;
     bool bFromVolume = false;
-    TString FromVolume;
-    bool bToVolume = false;
-    TString ToVolume;
     bool bFromVolIndex = false;
-    int FromVolIndex = 0;
+    int  FromMat = 0;
+    TString FromVolume;
+    int  FromVolIndex = 0;
+    //to
+    bool bToMat = false;
+    bool bToVolume = false;
     bool bToVolIndex = false;
-    int ToVolIndex = 0;
+    int  ToMat = 0;
+    TString ToVolume;
+    int  ToVolIndex = 0;
 
   //step level
     bool bMaterial = false;
@@ -131,6 +156,8 @@ public:
 
 private:
     const std::vector<AEventTrackingRecord*> & History;
+
+    enum ProcessType {Creation, Local, NormalTransportation, ExitingWorld};
 
     void findRecursive(const AParticleTrackingRecord & pr, const AFindRecordSelector &opt, std::vector<AHistorySearchProcessor*> & processors) const;
 };

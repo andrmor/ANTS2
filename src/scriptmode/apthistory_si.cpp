@@ -21,10 +21,15 @@ APTHistory_SI::APTHistory_SI(ASimulationManager & SimulationManager) :
 
 APTHistory_SI::~APTHistory_SI()
 {
+    clearProcessors();
     delete Criteria;
+    delete Crawler;
+}
+
+void APTHistory_SI::clearProcessors()
+{
     for (auto & p : Processors) delete p;
     Processors.clear();
-    delete Crawler;
 }
 
 int APTHistory_SI::countEvents()
@@ -235,8 +240,15 @@ void APTHistory_SI::setMaterial(int matIndex)
     Criteria->Material = matIndex;
 }
 
+void APTHistory_SI::setVolume(QString volumeName)
+{
+    Criteria->bVolume = true;
+    Criteria->Volume = volumeName.toLocal8Bit().data();
+}
+
 QVariantList APTHistory_SI::findParticles()
 {
+    clearProcessors();
     AHistorySearchProcessor_findParticles* p = new AHistorySearchProcessor_findParticles();
     Processors.push_back(p);
     Crawler->find(*Criteria, Processors);
@@ -255,6 +267,7 @@ QVariantList APTHistory_SI::findParticles()
 
 QVariantList APTHistory_SI::findDepositedEnergyPerParticle(int bins, double from, double to)
 {
+    clearProcessors();
     AHistorySearchProcessor_findDepositedEnergy* p = new AHistorySearchProcessor_findDepositedEnergy(bins, from, to);
     Processors.push_back(p);
     Crawler->find(*Criteria, Processors);
@@ -267,6 +280,47 @@ QVariantList APTHistory_SI::findDepositedEnergyPerParticle(int bins, double from
         el << p->Hist->GetBinCenter(iBin) << p->Hist->GetBinContent(iBin);
         vl.push_back(el);
     }
+    return vl;
+}
+
+QVariantList APTHistory_SI::findTravelledDistances(int bins, double from, double to)
+{
+    clearProcessors();
+    AHistorySearchProcessor_findTravelledDistances* p = new AHistorySearchProcessor_findTravelledDistances(bins, from, to);
+    Processors.push_back(p);
+
+    AFindRecordSelector tmp = *Criteria;
+
+    //updating criteria to have independent entrance/exit checks
+    Criteria->bInOutSeparately = true;
+    //copy good volume parameters to both from and in
+    Criteria->bFromMat = Criteria->bMaterial;
+    Criteria->bToMat   = Criteria->bMaterial;
+    Criteria->FromMat = Criteria->Material;
+    Criteria->ToMat   = Criteria->Material;
+
+    Criteria->bFromVolume = Criteria->bVolume;
+    Criteria->bToVolume   = Criteria->bVolume;
+    Criteria->FromVolume = Criteria->Volume;
+    Criteria->ToVolume   = Criteria->Volume;
+
+    Criteria->bFromVolIndex = Criteria->bVolumeIndex;
+    Criteria->bToVolIndex   = Criteria->bVolumeIndex;
+    Criteria->FromVolIndex = Criteria->VolumeIndex;
+    Criteria->ToVolIndex   = Criteria->VolumeIndex;
+
+    Crawler->find(*Criteria, Processors);
+
+    QVariantList vl;
+    int numBins = p->Hist->GetXaxis()->GetNbins();
+    for (int iBin=1; iBin<numBins+1; iBin++)
+    {
+        QVariantList el;
+        el << p->Hist->GetBinCenter(iBin) << p->Hist->GetBinContent(iBin);
+        vl.push_back(el);
+    }
+
+    *Criteria = tmp;
     return vl;
 }
 

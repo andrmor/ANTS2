@@ -47,9 +47,11 @@ public slots:
     void setOnlyPrimary();
     void setOnlySecondary();
     void setMaterial(int matIndex);
+    void setVolume(QString volumeName);
 
     QVariantList findParticles();
     QVariantList findDepositedEnergyPerParticle(int bins, double from, double to);
+    QVariantList findTravelledDistances(int bins, double from, double to);
 
 private:
     const ASimulationManager & SM;
@@ -62,6 +64,7 @@ private:
     const AParticleTrackingRecord * Rec = nullptr; //current record for cd
     int Step = 0;  //current step for cd
 
+    void clearProcessors();
 };
 
 

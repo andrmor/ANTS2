@@ -492,7 +492,23 @@ QVariantList APTHistory_SI::findOnBorder(QString what, QString cuts)
                //delete tmpHist2D;
                return;
            }
-             */
+           */
+
+           int numX = tmpHist2D->GetXaxis()->GetNbins();
+           int numY = tmpHist2D->GetYaxis()->GetNbins();
+           for (int iX=1; iX<numX+1; iX++)
+           {
+               double x = tmpHist2D->GetXaxis()->GetBinCenter(iX);
+               for (int iY=1; iY<numY+1; iY++)
+               {
+                   QVariantList el;
+                   el << x
+                      << tmpHist2D->GetYaxis()->GetBinCenter(iY)
+                      << tmpHist2D->GetBinContent(iX, iY);
+                   vl.push_back(el);
+               }
+           }
+
            break;
          }
        case 3:

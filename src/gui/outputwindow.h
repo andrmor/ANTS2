@@ -29,7 +29,7 @@ public:
     void SetCurrentEvent(int iev);
 
     void OutTextClear();
-    void OutText(QString str);
+    void OutText(const QString & str);
 
     void SetTab(int index);
 
@@ -62,7 +62,6 @@ private slots:
     void on_pbNumTransitionsSpectrum_clicked();
     void on_sbEvent_valueChanged(int arg1);
     void on_pbResetViewport_clicked();
-    void on_pbClearText_clicked();
     void on_pbAverageSignals_clicked();
     void on_pbShowParticldeLog_clicked();
     void on_pbShowPhotonLog_clicked();
@@ -93,6 +92,11 @@ private slots:
     void on_cbPTHistOnlyPrim_clicked(bool checked);
     void on_cbPTHistOnlySec_clicked(bool checked);
 
+
+    void on_cobPTHistVolRequestWhat_currentIndexChanged(int index);
+
+    void on_twPTHistType_currentChanged(int index);
+
 private:
     Ui::OutputWindow *ui;
     MainWindow* MW;
@@ -110,6 +114,13 @@ private:
 
     bool bForbidUpdate;
 
+    int binsEnergy = 100;
+    double fromEnergy = 0;
+    double toEnergy = 0;
+    int binsDistance = 100;
+    double fromDistance = 0;
+    double toDistance = 0;
+
     void clearGrItems();
     void updateSignalLabels(float MaxSignal);
     void addPMitems  (const QVector<float>* vector, float MaxSignal, DynamicPassivesHandler *Passives);
@@ -119,6 +130,7 @@ private:
     void showParticleHistString(int iRec, int level);
     void addParticleHistoryLogLine(int iRec, int level);
     void updateMonitors();
+    void updatePTHistoryBinControl();
 };
 
 #endif // OUTPUTWINDOW_H

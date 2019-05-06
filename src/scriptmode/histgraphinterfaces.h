@@ -47,6 +47,7 @@ public slots:
   const QVariant FitGaussWithInit(const QString& HistName, const QVariant InitialParValues, const QString options = "");
   const QVariant FindPeaks(const QString& HistName, double sigma, double threshold);
 
+  int            GetNumberOfEntries(const QString& HistName);
   double         GetIntegral(const QString& HistName, bool MultiplyByBinWidth = false);
   double         GetMaximum(const QString& HistName);
   void           Scale(const QString& HistName, double ScaleIntegralTo, bool DividedByBinWidth = false);

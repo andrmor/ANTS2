@@ -32,6 +32,7 @@ public:
     void Smooth(int times);
     void Scale(double ScaleIntegralTo, bool bDividedByBinWidth = false);
     double GetIntegral(bool bMultipliedByBinWidth = false);
+    int  GetEntries();
     double GetMaximum();
 
     const QVector<double> FitGauss(const QString& options = "");

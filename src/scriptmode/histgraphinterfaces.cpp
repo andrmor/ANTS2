@@ -381,6 +381,18 @@ const QVariant AInterfaceToHist::FindPeaks(const QString &HistName, double sigma
     return res;
 }
 
+int AInterfaceToHist::GetNumberOfEntries(const QString &HistName)
+{
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    if (!r)
+    {
+        abort("Histogram " + HistName + " not found!");
+        return 1.0;
+    }
+    else
+        return r->GetEntries();
+}
+
 double AInterfaceToHist::GetIntegral(const QString &HistName, bool MultiplyByBinWidth)
 {
     ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));

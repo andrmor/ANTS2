@@ -161,6 +161,13 @@ double ARootHistRecord::GetIntegral(bool bMultipliedByBinWidth)
     return ( bMultipliedByBinWidth ? h->Integral("width") : h->Integral() );
 }
 
+int ARootHistRecord::GetEntries()
+{
+    TH1* h = dynamic_cast<TH1*>(Object);
+    if (!h) return 0;
+    return h->GetEntries();
+}
+
 double ARootHistRecord::GetMaximum()
 {
     TH1* h = dynamic_cast<TH1*>(Object);

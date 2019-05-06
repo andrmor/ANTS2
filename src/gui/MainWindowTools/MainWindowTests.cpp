@@ -367,5 +367,5 @@ void MainWindow::on_pbShowDetailedLog_clicked()
     Owindow->raise();
     Owindow->activateWindow();
     Owindow->ShowEventHistoryLog();
-    Owindow->SetTab(3);
+    Owindow->SetTab(4);
 }

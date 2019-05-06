@@ -21,15 +21,8 @@ APTHistory_SI::APTHistory_SI(ASimulationManager & SimulationManager) :
 
 APTHistory_SI::~APTHistory_SI()
 {
-    clearProcessors();
     delete Criteria;
     delete Crawler;
-}
-
-void APTHistory_SI::clearProcessors()
-{
-    for (auto & p : Processors) delete p;
-    Processors.clear();
 }
 
 int APTHistory_SI::countEvents()
@@ -284,14 +277,12 @@ void APTHistory_SI::setToIndex(int volumeIndex)
 
 QVariantList APTHistory_SI::findParticles()
 {
-    clearProcessors();
-    AHistorySearchProcessor_findParticles* p = new AHistorySearchProcessor_findParticles();
-    Processors.push_back(p);
-    Crawler->find(*Criteria, Processors);
+    AHistorySearchProcessor_findParticles p;
+    Crawler->find(*Criteria, p);
 
     QVariantList vl;
-    QMap<QString, int>::const_iterator it = p->FoundParticles.constBegin();
-    while (it != p->FoundParticles.constEnd())
+    QMap<QString, int>::const_iterator it = p.FoundParticles.constBegin();
+    while (it != p.FoundParticles.constEnd())
     {
         QVariantList el;
         el << it.key() << it.value();
@@ -303,14 +294,12 @@ QVariantList APTHistory_SI::findParticles()
 
 QVariantList APTHistory_SI::findProcesses()
 {
-    clearProcessors();
-    AHistorySearchProcessor_findProcesses* p = new AHistorySearchProcessor_findProcesses();
-    Processors.push_back(p);
-    Crawler->find(*Criteria, Processors);
+    AHistorySearchProcessor_findProcesses p;
+    Crawler->find(*Criteria, p);
 
     QVariantList vl;
-    QMap<QString, int>::const_iterator it = p->FoundProcesses.constBegin();
-    while (it != p->FoundProcesses.constEnd())
+    QMap<QString, int>::const_iterator it = p.FoundProcesses.constBegin();
+    while (it != p.FoundProcesses.constEnd())
     {
         QVariantList el;
         el << it.key() << it.value();
@@ -322,17 +311,15 @@ QVariantList APTHistory_SI::findProcesses()
 
 QVariantList APTHistory_SI::findDepositedEnergies(int bins, double from, double to)
 {
-    clearProcessors();
-    AHistorySearchProcessor_findDepositedEnergy* p = new AHistorySearchProcessor_findDepositedEnergy(bins, from, to);
-    Processors.push_back(p);
-    Crawler->find(*Criteria, Processors);
+    AHistorySearchProcessor_findDepositedEnergy p(bins, from, to);
+    Crawler->find(*Criteria, p);
 
     QVariantList vl;
-    int numBins = p->Hist->GetXaxis()->GetNbins();
+    int numBins = p.Hist->GetXaxis()->GetNbins();
     for (int iBin=1; iBin<numBins+1; iBin++)
     {
         QVariantList el;
-        el << p->Hist->GetBinCenter(iBin) << p->Hist->GetBinContent(iBin);
+        el << p.Hist->GetBinCenter(iBin) << p.Hist->GetBinContent(iBin);
         vl.push_back(el);
     }
     return vl;
@@ -340,9 +327,7 @@ QVariantList APTHistory_SI::findDepositedEnergies(int bins, double from, double 
 
 QVariantList APTHistory_SI::findTravelledDistances(int bins, double from, double to)
 {
-    clearProcessors();
-    AHistorySearchProcessor_findTravelledDistances* p = new AHistorySearchProcessor_findTravelledDistances(bins, from, to);
-    Processors.push_back(p);
+    AHistorySearchProcessor_findTravelledDistances p(bins, from, to);
 
     AFindRecordSelector tmp = *Criteria;
 
@@ -364,14 +349,14 @@ QVariantList APTHistory_SI::findTravelledDistances(int bins, double from, double
     Criteria->FromVolIndex = Criteria->VolumeIndex;
     Criteria->ToVolIndex   = Criteria->VolumeIndex;
 
-    Crawler->find(*Criteria, Processors);
+    Crawler->find(*Criteria, p);
 
     QVariantList vl;
-    int numBins = p->Hist->GetXaxis()->GetNbins();
+    int numBins = p.Hist->GetXaxis()->GetNbins();
     for (int iBin=1; iBin<numBins+1; iBin++)
     {
         QVariantList el;
-        el << p->Hist->GetBinCenter(iBin) << p->Hist->GetBinContent(iBin);
+        el << p.Hist->GetBinCenter(iBin) << p.Hist->GetBinContent(iBin);
         vl.push_back(el);
     }
 
@@ -393,11 +378,8 @@ QVariantList APTHistory_SI::findOnBorder(QString what, QString cuts)
         return vl;
     }
 
-    clearProcessors();
-    AHistorySearchProcessor_Border* p = new AHistorySearchProcessor_Border();
-    Processors.push_back(p);
-
-    Crawler->find(*Criteria, Processors);
+    AHistorySearchProcessor_Border p;
+    Crawler->find(*Criteria, p);
 
     QByteArray baw;
     QString str = what+">>htemp(";
@@ -430,7 +412,7 @@ QVariantList APTHistory_SI::findOnBorder(QString what, QString cuts)
          gDirectory->RecursiveRemove(oldObj);
      }
      TH1::AddDirectory(true);
-     p->T->Draw(What, Cond, HowAdj);
+     p.T->Draw(What, Cond, HowAdj);
      TH1::AddDirectory(false);
 
      switch (num)

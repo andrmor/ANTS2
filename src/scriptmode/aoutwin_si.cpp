@@ -19,7 +19,7 @@ void AOutWin_SI::ShowOutputWindow(bool flag, int tab)
       }
     else MW->Owindow->hide();
 
-    if (tab>-1 && tab<4) MW->Owindow->SetTab(tab);
+    if (tab>-1 && tab<5) MW->Owindow->SetTab(tab);
     qApp->processEvents();
 }
 

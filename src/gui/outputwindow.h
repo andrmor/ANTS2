@@ -89,6 +89,10 @@ private slots:
     void on_pbSaveLog_clicked();
     void on_pbHelpWithSaveToTree_clicked();
 
+    void on_pbPTHistRequest_clicked();
+    void on_cbPTHistOnlyPrim_clicked(bool checked);
+    void on_cbPTHistOnlySec_clicked(bool checked);
+
 private:
     Ui::OutputWindow *ui;
     MainWindow* MW;

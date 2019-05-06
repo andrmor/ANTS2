@@ -54,8 +54,12 @@ OutputWindow::OutputWindow(QWidget *parent, MainWindow *mw, EventsDataClass *eve
 
     modelPMhits = 0;
 
-    ui->pbSiPMpixels->setEnabled(false);
-    ui->sbTimeBin->setEnabled(false);
+    QVector<QWidget*> vecDis;
+    vecDis << ui->pbSiPMpixels << ui->sbTimeBin
+           << ui->lePTHistParticle << ui->cobPTHistVolMat << ui->lePTHistVolVolume << ui->sbPTHistVolIndex;
+    for (QWidget * w : vecDis) w->setEnabled(false);
+
+    ui->cobPTHistVolPlus->setVisible(false);
     ui->pbRefreshViz->setVisible(false);
 
     //Graphics view
@@ -75,6 +79,8 @@ OutputWindow::OutputWindow(QWidget *parent, MainWindow *mw, EventsDataClass *eve
     gvOut->setRenderHints(QPainter::Antialiasing);  
 
     ui->tabwinDiagnose->setCurrentIndex(0);
+
+    SetTab(2);
 }
 
 OutputWindow::~OutputWindow()
@@ -479,7 +485,7 @@ void OutputWindow::InitWindow()
 {
   bool shown = this->isVisible();
   this->showNormal();
-  SetTab(2);
+  //SetTab(2);
   RefreshData();
   OutputWindow::resizeEvent(0);
   //SetTab(0);
@@ -1225,13 +1231,19 @@ void OutputWindow::ShowPhotonLossLog()
 
 void OutputWindow::UpdateMaterials()
 {
-   int old = ui->cobShowMaterial->currentIndex();
+    QVector<QComboBox*> vec;
+    vec << ui->cobShowMaterial << ui->cobPTHistVolMat;
 
-   ui->cobShowMaterial->clear();
-   for (int i=0; i<MW->MpCollection->countMaterials(); i++)
-      ui->cobShowMaterial->addItem( (*MW->MpCollection)[i]->name );
+    QStringList mats = MW->MpCollection->getListOfMaterialNames();
+    for (QComboBox * c : vec)
+    {
+        int old = c->currentIndex();
+        c->clear();
+        c->addItems(mats);
 
-   if (old < ui->cobShowMaterial->count()) ui->cobShowMaterial->setCurrentIndex(old);
+        if (old < 0) old = 0;
+        if (old < c->count()) c->setCurrentIndex(old);
+    }
 }
 
 void OutputWindow::UpdateParticles()
@@ -1643,4 +1655,132 @@ void OutputWindow::on_pbHelpWithSaveToTree_clicked()
     s += "vol_distance -> distance travelled in the volume\n";
 
     ui->pteOut->appendPlainText(s);
+}
+
+// --------- particle tracking history ----------
+
+#include "asimulationmanager.h"
+#include "aeventtrackingrecord.h"
+#include "atrackinghistorycrawler.h"
+
+void OutputWindow::on_pbPTHistRequest_clicked()
+{
+    if (MW->SimulationManager->TrackingHistory.empty())
+    {
+        message("Tracking history is empty!", this);
+        return;
+    }
+
+    AFindRecordSelector Opt;
+    ATrackingHistoryCrawler Crawler(MW->SimulationManager->TrackingHistory);
+
+    Opt.bParticle = ui->cbPTHistParticle->isChecked();
+    Opt.Particle = ui->lePTHistParticle->text();
+    Opt.bPrimary = ui->cbPTHistOnlyPrim->isChecked();
+    Opt.bSecondary = ui->cbPTHistOnlySec->isChecked();
+
+    int Selector = ui->twPTHistType->currentIndex(); // 0 - Vol, 1 - Boundary
+    if (Selector == 0)
+    {
+        Opt.bMaterial = ui->cbPTHistVolMat->isChecked();
+        Opt.Material = ui->cobPTHistVolMat->currentIndex();
+        Opt.bVolume = ui->cbPTHistVolVolume->isChecked();
+        Opt.Volume = ui->lePTHistVolVolume->text().toLocal8Bit().data();
+        Opt.bVolumeIndex = ui->cbPTHistVolIndex->isChecked();
+        Opt.VolumeIndex = ui->sbPTHistVolIndex->value();
+
+        int What = ui->cobPTHistVolRequestWhat->currentIndex();
+        switch (What)
+        {
+        case 0:
+          {
+            AHistorySearchProcessor_findParticles p;
+            Crawler.find(Opt, p);
+            QMap<QString, int>::const_iterator it = p.FoundParticles.constBegin();
+            ui->ptePTHist->clear();
+            ui->ptePTHist->appendPlainText("Particles found:\n");
+            while (it != p.FoundParticles.constEnd())
+            {
+                ui->ptePTHist->appendPlainText(QString("%1   %2 times").arg(it.key()).arg(it.value()));
+                ++it;
+            }
+            break;
+          }
+        case 1:
+          {
+            AHistorySearchProcessor_findProcesses p;
+            Crawler.find(Opt, p);
+
+            QMap<QString, int>::const_iterator it = p.FoundProcesses.constBegin();
+            ui->ptePTHist->clear();
+            ui->ptePTHist->appendPlainText("Particles found:\n");
+            while (it != p.FoundProcesses.constEnd())
+            {
+                ui->ptePTHist->appendPlainText(QString("%1   %2 times").arg(it.key()).arg(it.value()));
+                ++it;
+            }
+          }
+            break;
+        case 2:
+          {
+            AHistorySearchProcessor_findTravelledDistances p(100, 0, 0);
+
+            //updating criteria to have independent entrance/exit checks
+            Opt.bInOutSeparately = true;
+            //copy good volume parameters to both from and in
+            Opt.bFromMat = Opt.bMaterial;
+            Opt.bToMat   = Opt.bMaterial;
+            Opt.FromMat = Opt.Material;
+            Opt.ToMat   = Opt.Material;
+
+            Opt.bFromVolume = Opt.bVolume;
+            Opt.bToVolume   = Opt.bVolume;
+            Opt.FromVolume = Opt.Volume;
+            Opt.ToVolume   = Opt.Volume;
+
+            Opt.bFromVolIndex = Opt.bVolumeIndex;
+            Opt.bToVolIndex   = Opt.bVolumeIndex;
+            Opt.FromVolIndex = Opt.VolumeIndex;
+            Opt.ToVolIndex   = Opt.VolumeIndex;
+
+            Crawler.find(Opt, p);
+
+            if (p.Hist->GetEntries() == 0)
+                message("No trajectories found", this);
+            else
+            {
+                MW->GraphWindow->Draw(p.Hist);
+                p.Hist = nullptr;
+            }
+          }
+            break;
+        case 3:
+          {
+            AHistorySearchProcessor_findDepositedEnergy p(100, 0, 0);
+            Crawler.find(Opt, p);
+
+            if (p.Hist->GetEntries() == 0)
+                message("No deposition detected", this);
+            else
+            {
+                MW->GraphWindow->Draw(p.Hist);
+                p.Hist = nullptr;
+            }
+          }
+            break;
+        default:
+            qWarning() << "Unknown type of volume request";
+        }
+    }
+
+}
+
+void OutputWindow::on_cbPTHistOnlyPrim_clicked(bool checked)
+{
+    if (checked) ui->cbPTHistOnlySec->setChecked(false);
+}
+
+void OutputWindow::on_cbPTHistOnlySec_clicked(bool checked)
+{
+    if (checked) ui->cbPTHistOnlyPrim->setChecked(false);
 }

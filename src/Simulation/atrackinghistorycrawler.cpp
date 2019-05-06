@@ -9,7 +9,7 @@
 ATrackingHistoryCrawler::ATrackingHistoryCrawler(const std::vector<AEventTrackingRecord *> &History) :
     History(History) {}
 
-void ATrackingHistoryCrawler::find(const AFindRecordSelector & criteria, std::vector<AHistorySearchProcessor*> & processors) const
+void ATrackingHistoryCrawler::find(const AFindRecordSelector & criteria, AHistorySearchProcessor & processor) const
 {
     //int iEv = 0;
     for (const AEventTrackingRecord * e : History)
@@ -17,18 +17,18 @@ void ATrackingHistoryCrawler::find(const AFindRecordSelector & criteria, std::ve
         //qDebug() << "Event #"<<iEv++;
         const std::vector<AParticleTrackingRecord *> & prim = e->getPrimaryParticleRecords();
         for (const AParticleTrackingRecord * p : prim)
-            findRecursive(*p, criteria, processors);
+            findRecursive(*p, criteria, processor);
     }
 }
 
-void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, const AFindRecordSelector & opt, std::vector<AHistorySearchProcessor *> &processors) const
+void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, const AFindRecordSelector & opt, AHistorySearchProcessor & processor) const
 {
     //int iSec = 0;
     const std::vector<AParticleTrackingRecord *> & secondaries = pr.getSecondaries();
     for (AParticleTrackingRecord * sec : secondaries)
     {
         //qDebug() << "Sec #"<<iSec;
-        findRecursive(*sec, opt, processors);
+        findRecursive(*sec, opt, processor);
         //qDebug() << "Sec done"<<iSec++;
     }
 
@@ -38,7 +38,7 @@ void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, 
     if (opt.bPrimary && pr.getSecondaryOf() ) return;
     if (opt.bSecondary && !pr.getSecondaryOf() ) return;
 
-    for (AHistorySearchProcessor * hp : processors) hp->onParticle(pr);
+    processor.onParticle(pr);
 
     const std::vector<ATrackingStepData *> & steps = pr.getSteps();
     for (size_t iStep = 0; iStep < steps.size(); iStep++)
@@ -95,14 +95,14 @@ void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, 
             if (opt.bInOutSeparately)
             {
                 if (bExitValidated)
-                    for (AHistorySearchProcessor * hp : processors) hp->onTransition(*thisStep, AHistorySearchProcessor::OUT);
+                    processor.onTransition(*thisStep, AHistorySearchProcessor::OUT);
                 if (bEntranceValidated )
-                    for (AHistorySearchProcessor * hp : processors) hp->onTransition(*thisStep, AHistorySearchProcessor::IN);
+                    processor.onTransition(*thisStep, AHistorySearchProcessor::IN);
             }
             else
             {
                 if (bExitValidated && bEntranceValidated)
-                    for (AHistorySearchProcessor * hp : processors) hp->onTransition(*thisStep, AHistorySearchProcessor::OUT_IN);
+                    processor.onTransition(*thisStep, AHistorySearchProcessor::OUT_IN);
             }
         }
 
@@ -126,14 +126,13 @@ void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, 
                 if (opt.VolumeIndex != thisStep->GeoNode->GetIndex()) continue;
             }
 
-            for (AHistorySearchProcessor * hp : processors)
-                hp->onLocalStep(*thisStep);
+            processor.onLocalStep(*thisStep);
         }
     }
 
     //here integral collector-based criteria can be checked -> next line activated only if "pass"
 
-    for (AHistorySearchProcessor * hp : processors) hp->onTrackEnd();
+    processor.onTrackEnd();
 }
 
 void AHistorySearchProcessor_findParticles::onParticle(const AParticleTrackingRecord &pr)

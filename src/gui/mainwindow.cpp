@@ -4529,7 +4529,7 @@ void MainWindow::on_bpResults_clicked()
    Owindow->show();
    Owindow->raise();
    Owindow->activateWindow();
-   Owindow->SetTab(1);
+   //Owindow->SetTab(1);
 }
 
 void MainWindow::ShowGeometrySlot()
@@ -4542,7 +4542,7 @@ void MainWindow::on_bpResults_2_clicked()
   Owindow->show();
   Owindow->raise();
   Owindow->activateWindow();
-  Owindow->SetTab(3);
+  //Owindow->SetTab(3);
 }
 
 void MainWindow::on_cobPartPerEvent_currentIndexChanged(int index)

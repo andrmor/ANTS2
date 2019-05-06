@@ -13,7 +13,6 @@ class ASimulationManager;
 class AEventTrackingRecord;
 class AParticleTrackingRecord;
 class ATrackingHistoryCrawler;
-class AHistorySearchProcessor;
 class AFindRecordSelector;
 
 class APTHistory_SI : public AScriptInterface
@@ -67,13 +66,11 @@ private:
     const std::vector<AEventTrackingRecord *> & TH;
 
     ATrackingHistoryCrawler * Crawler;
-    std::vector<AHistorySearchProcessor*> Processors;
     AFindRecordSelector * Criteria = nullptr;
 
     const AParticleTrackingRecord * Rec = nullptr; //current record for cd
     int Step = 0;  //current step for cd
 
-    void clearProcessors();
 };
 
 

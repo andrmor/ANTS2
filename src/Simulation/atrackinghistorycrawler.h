@@ -175,14 +175,14 @@ class ATrackingHistoryCrawler
 public:
     ATrackingHistoryCrawler(const std::vector<AEventTrackingRecord*> & History);
 
-    void find(const AFindRecordSelector & criteria, std::vector<AHistorySearchProcessor*> & processors) const;
+    void find(const AFindRecordSelector & criteria, AHistorySearchProcessor & processor) const;
 
 private:
     const std::vector<AEventTrackingRecord*> & History;
 
     enum ProcessType {Creation, Local, NormalTransportation, ExitingWorld};
 
-    void findRecursive(const AParticleTrackingRecord & pr, const AFindRecordSelector &opt, std::vector<AHistorySearchProcessor*> & processors) const;
+    void findRecursive(const AParticleTrackingRecord & pr, const AFindRecordSelector &opt, AHistorySearchProcessor & processor) const;
 };
 
 #endif // ATRACKINGHISTORYCRAWLER_H

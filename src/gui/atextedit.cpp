@@ -300,10 +300,49 @@ void ATextEdit::keyPressEvent(QKeyEvent *e)
         // The following keys are forwarded by the completer to the widget
         switch (e->key())
         {
+        case Qt::Key_Tab:
+          {
+            //qDebug() << "Tab pressed when completer is active";
+            //QString startsWith = c->completionPrefix();
+            int i = 0;
+            QAbstractItemModel * m = c->completionModel();
+            QStringList sl;
+            while (m->hasIndex(i, 0)) sl << m->data(m->index(i++, 0)).toString();
+            if (sl.size() < 2)
+            {
+                e->ignore(); // let the completer do default behavior
+                return;
+            }
+            QString root = sl.first();
+            for (int isl=1; isl<sl.size(); isl++)
+            {
+                const QString & item = sl.at(isl);
+                if (root.length() > item.length())
+                    root.truncate(item.length());
+                for (int i = 0; i < root.length(); ++i)
+                {
+                    if (root[i] != item[i])
+                    {
+                        root.truncate(i);
+                        break;
+                    }
+                }
+            }
+            //qDebug() << root;
+            if (root.isEmpty())
+            {
+                //do nothing
+            }
+            else
+            {
+                insertCompletion(root);
+                c->popup()->setCurrentIndex(c->completionModel()->index(0, 0));
+            }
+            return;
+          }
         case Qt::Key_Enter:
         case Qt::Key_Return:
         case Qt::Key_Escape:
-        case Qt::Key_Tab:
         case Qt::Key_Backtab:
             e->ignore(); // let the completer do default behavior
             return;

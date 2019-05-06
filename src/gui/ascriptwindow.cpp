@@ -1289,6 +1289,7 @@ AScriptWindowTabItem::AScriptWindowTabItem(const QStringList& functions, AScript
     completer->setCompletionMode(QCompleter::UnfilteredPopupCompletion);
     //completer->setCompletionMode(QCompleter::PopupCompletion);
     completer->setFilterMode(Qt::MatchContains);
+    //completer->setFilterMode(Qt::MatchStartsWith);
     completer->setModelSorting(QCompleter::CaseSensitivelySortedModel);
     completer->setCaseSensitivity(Qt::CaseSensitive);
     completer->setWrapAround(false);

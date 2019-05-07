@@ -42,13 +42,15 @@ class AHistorySearchProcessor
 public:
     virtual ~AHistorySearchProcessor(){}
 
-    virtual void onParticle(const AParticleTrackingRecord & ){}
+    virtual void onNewEvent(){}
+    virtual void onNewTrack(const AParticleTrackingRecord & ){}
 
     virtual void onLocalStep(const ATrackingStepData & ){} // anything but transportation
     enum Direction {OUT, IN, OUT_IN};
     virtual void onTransition(const ATrackingStepData & , Direction ){} // "from" step
 
     virtual void onTrackEnd(){}
+    virtual void onEventEnd(){}
 
 };
 
@@ -57,7 +59,7 @@ class AHistorySearchProcessor_findParticles : public AHistorySearchProcessor
 public:
     virtual ~AHistorySearchProcessor_findParticles(){}
 
-    virtual void onParticle(const AParticleTrackingRecord & pr);
+    virtual void onNewTrack(const AParticleTrackingRecord & pr);
     virtual void onLocalStep(const ATrackingStepData & tr) override;
     virtual void onTrackEnd() override;
 
@@ -81,14 +83,20 @@ public:
 class AHistorySearchProcessor_findDepositedEnergy : public AHistorySearchProcessor
 {
 public:
-    AHistorySearchProcessor_findDepositedEnergy(int bins, double from = 0, double to = 0);
+    enum CollectionMode {Individual, WithSecondaries, OverEvent};
+
+    AHistorySearchProcessor_findDepositedEnergy(CollectionMode mode, int bins, double from = 0, double to = 0);
     virtual ~AHistorySearchProcessor_findDepositedEnergy();
 
-    virtual void onParticle(const AParticleTrackingRecord & pr);
+    virtual void onNewEvent() override;
+    virtual void onNewTrack(const AParticleTrackingRecord & pr);
     virtual void onLocalStep(const ATrackingStepData & tr) override;
     virtual void onTrackEnd() override;
+    virtual void onEventEnd() override;
 
+    CollectionMode Mode;
     double Depo = 0;
+    bool bRunningSecondaries = false;
     TH1D * Hist = nullptr;
 };
 
@@ -98,7 +106,7 @@ public:
     AHistorySearchProcessor_findTravelledDistances(int bins, double from = 0, double to = 0);
     virtual ~AHistorySearchProcessor_findTravelledDistances();
 
-    virtual void onParticle(const AParticleTrackingRecord & pr);
+    virtual void onNewTrack(const AParticleTrackingRecord & pr);
     virtual void onLocalStep(const ATrackingStepData & tr) override;
     virtual void onTransition(const ATrackingStepData & tr, Direction direction); // "from" step
     virtual void onTrackEnd() override;
@@ -127,6 +135,34 @@ public:
     float   x, y, z;
     float   time;
     float   energy;
+};
+
+class TFormula;
+class TH2D;
+class AHistorySearchProcessor_Border2 : public AHistorySearchProcessor
+{
+public:
+    AHistorySearchProcessor_Border2(const QString & what, const QString & cuts, int bins, double from, double to);
+    AHistorySearchProcessor_Border2(const QString & what, const QString & vsWhat, const QString & cuts, int bins1, double from1, double to1, int bins2, double from2, double to2);
+    virtual ~AHistorySearchProcessor_Border2();
+
+    virtual void onTransition(const ATrackingStepData & tr, Direction ) override; // "from" step
+
+    QString ErrorString;  // after constructor, valid if ErrorString is empty
+    bool bRequiresDirections = false;
+
+    TFormula * formulaWhat1 = nullptr;
+    TFormula * formulaWhat2 = nullptr;
+    TFormula * formulaCuts = nullptr;
+
+    //double  x, y, z, time, energy, vx, vy, vz
+    //        0  1  2    3     4      5   6   7
+    double par[8];
+    TH1D * Hist1D = nullptr;
+    TH2D * Hist2D = nullptr;
+
+private:
+    TFormula * parse(QString & expr);
 };
 
 

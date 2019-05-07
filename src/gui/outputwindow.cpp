@@ -1763,7 +1763,20 @@ void OutputWindow::on_pbPTHistRequest_clicked()
           }
         case 3:
           {
-            AHistorySearchProcessor_findDepositedEnergy p(bins, from, to);
+            int mode = ui->cobPTHistVolPlus->currentIndex();
+            if (mode <0 || mode >2)
+            {
+                message("Unknown energy deposition collection mode", this);
+                return;
+            }
+            if (mode == 1)
+            {
+                message("Not yet implemented mode!", this);
+                return;
+            }
+            AHistorySearchProcessor_findDepositedEnergy::CollectionMode edm = static_cast<AHistorySearchProcessor_findDepositedEnergy::CollectionMode>(mode);
+
+            AHistorySearchProcessor_findDepositedEnergy p(edm, bins, from, to);
             Crawler.find(Opt, p);
 
             if (p.Hist->GetEntries() == 0)
@@ -1776,6 +1789,7 @@ void OutputWindow::on_pbPTHistRequest_clicked()
             binsEnergy = bins;
             fromEnergy = from;
             toEnergy = to;
+            selectedModeForEnergyDepo = mode;
 
             break;
           }
@@ -1811,7 +1825,12 @@ void OutputWindow::on_cobPTHistVolRequestWhat_currentIndexChanged(int index)
         ui->sbPTHistBinsX->setValue(binsEnergy);
         ui->ledPTHistFromX->setText(QString::number(fromEnergy));
         ui->ledPTHistToX->setText(QString::number(toEnergy));
+
+        ui->cobPTHistVolPlus->clear();
+        ui->cobPTHistVolPlus->addItems(QStringList() << "Individual"<<"With secondaries"<<"Over event");
+        ui->cobPTHistVolPlus->setCurrentIndex(selectedModeForEnergyDepo);
     }
+    ui->cobPTHistVolPlus->setVisible(index == 3);
 }
 
 void OutputWindow::on_twPTHistType_currentChanged(int)

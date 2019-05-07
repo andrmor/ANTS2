@@ -311,7 +311,7 @@ QVariantList APTHistory_SI::findProcesses()
 
 QVariantList APTHistory_SI::findDepositedEnergies(int bins, double from, double to)
 {
-    AHistorySearchProcessor_findDepositedEnergy p(bins, from, to);
+    AHistorySearchProcessor_findDepositedEnergy p(AHistorySearchProcessor_findDepositedEnergy::Individual, bins, from, to);
     Crawler->find(*Criteria, p);
 
     QVariantList vl;
@@ -367,9 +367,57 @@ QVariantList APTHistory_SI::findTravelledDistances(int bins, double from, double
 #include "TTree.h"
 #include "TH2.h"
 #include "TH3.h"
-QVariantList APTHistory_SI::findOnBorder(QString what, QString cuts)
+QVariantList APTHistory_SI::findOnBorder(QString what, QString cuts, int bins, double from, double to)
 {
     QVariantList vl;
+
+    AHistorySearchProcessor_Border2 p(what, cuts, bins, from, to);
+    if (!p.ErrorString.isEmpty())
+        abort(p.ErrorString);
+    else
+    {
+        Crawler->find(*Criteria, p);
+
+        int numBins = p.Hist1D->GetXaxis()->GetNbins();
+        for (int iBin=1; iBin<numBins+1; iBin++)
+        {
+            QVariantList el;
+            el << p.Hist1D->GetBinCenter(iBin) << p.Hist1D->GetBinContent(iBin);
+            vl.push_back(el);
+        }
+    }
+    return vl;
+}
+
+QVariantList APTHistory_SI::findOnBorder(QString what, QString vsWhat, QString cuts, int bins1, double from1, double to1, int bins2, double from2, double to2)
+{
+    QVariantList vl;
+
+    AHistorySearchProcessor_Border2 p(what, vsWhat, cuts, bins1, from1, to1, bins2, from2, to2);
+    if (!p.ErrorString.isEmpty())
+        abort(p.ErrorString);
+    else
+    {
+        Crawler->find(*Criteria, p);
+
+        int numX = p.Hist2D->GetXaxis()->GetNbins();
+        int numY = p.Hist2D->GetYaxis()->GetNbins();
+        for (int iX=1; iX<numX+1; iX++)
+        {
+            double x = p.Hist2D->GetXaxis()->GetBinCenter(iX);
+            for (int iY=1; iY<numY+1; iY++)
+            {
+                QVariantList el;
+                el << x
+                   << p.Hist2D->GetYaxis()->GetBinCenter(iY)
+                   << p.Hist2D->GetBinContent(iX, iY);
+                vl.push_back(el);
+            }
+        }
+    }
+    return vl;
+
+/*
     QStringList fields = what.split(":", QString::SkipEmptyParts);
     int num = fields.size();
     if (num > 3)
@@ -377,6 +425,7 @@ QVariantList APTHistory_SI::findOnBorder(QString what, QString cuts)
         abort("Too many fields in'what' field");
         return vl;
     }
+    return vl;
 
     AHistorySearchProcessor_Border p;
     Crawler->find(*Criteria, p);
@@ -430,16 +479,14 @@ QVariantList APTHistory_SI::findOnBorder(QString what, QString cuts)
            int size = tmpHist1D->GetEntries();
            qDebug() << "Size of 1D result:"<<size;
 
-           /*
-           if (size>0) MW->GraphWindow->Draw(tmpHist1D, How, true, false);
-           else
-           {
-               message("There is no data to show!", this);
-               MW->GraphWindow->close();
-               //delete tmpHist1D;
-               return;
-           }
-           */
+//           if (size>0) MW->GraphWindow->Draw(tmpHist1D, How, true, false);
+//           else
+//           {
+//               message("There is no data to show!", this);
+//               MW->GraphWindow->close();
+//               //delete tmpHist1D;
+//               return;
+//           }
            int numBins = tmpHist1D->GetXaxis()->GetNbins();
            for (int iBin=1; iBin<numBins+1; iBin++)
            {
@@ -465,16 +512,14 @@ QVariantList APTHistory_SI::findOnBorder(QString what, QString cuts)
            int size = tmpHist2D->GetEntries();
            qDebug() << "Size of 2D result:"<<size;
 
-           /*
-           if (size>0) MW->GraphWindow->Draw(tmpHist2D, How, true, false);
-           else
-           {
-               message("There is no data to show!", this);
-               MW->GraphWindow->close();
-               //delete tmpHist2D;
-               return;
-           }
-           */
+//           if (size>0) MW->GraphWindow->Draw(tmpHist2D, How, true, false);
+//           else
+//           {
+//               message("There is no data to show!", this);
+//               MW->GraphWindow->close();
+//               //delete tmpHist2D;
+//               return;
+//           }
 
            int numX = tmpHist2D->GetXaxis()->GetNbins();
            int numY = tmpHist2D->GetYaxis()->GetNbins();
@@ -511,19 +556,17 @@ QVariantList APTHistory_SI::findOnBorder(QString what, QString cuts)
            int size = tmpHist3D->GetEntries();
            qDebug() << "Size of 3D result:"<<size;
 
-           /*
-           if (size>0) MW->GraphWindow->Draw(tmpHist3D, How, true, false);
-           else
-           {
-               message("There is no data to show!", this);
-               MW->GraphWindow->close();
-               //delete tmpHist3D;
-               return;
-           }
-           */
+//           if (size>0) MW->GraphWindow->Draw(tmpHist3D, How, true, false);
+//           else
+//           {
+//               message("There is no data to show!", this);
+//               MW->GraphWindow->close();
+//               //delete tmpHist3D;
+//               return;
+//           }
            break;
          }
        }
-    return vl;
+     return vl;
+*/
 }
-

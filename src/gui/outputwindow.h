@@ -117,6 +117,7 @@ private:
     int binsEnergy = 100;
     double fromEnergy = 0;
     double toEnergy = 0;
+    int selectedModeForEnergyDepo = 0;
     int binsDistance = 100;
     double fromDistance = 0;
     double toDistance = 0;

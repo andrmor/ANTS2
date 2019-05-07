@@ -15,9 +15,13 @@ void ATrackingHistoryCrawler::find(const AFindRecordSelector & criteria, AHistor
     for (const AEventTrackingRecord * e : History)
     {
         //qDebug() << "Event #"<<iEv++;
+        processor.onNewEvent();
+
         const std::vector<AParticleTrackingRecord *> & prim = e->getPrimaryParticleRecords();
         for (const AParticleTrackingRecord * p : prim)
             findRecursive(*p, criteria, processor);
+
+        processor.onEventEnd();
     }
 }
 
@@ -38,7 +42,7 @@ void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, 
     if (opt.bPrimary && pr.getSecondaryOf() ) return;
     if (opt.bSecondary && !pr.getSecondaryOf() ) return;
 
-    processor.onParticle(pr);
+    processor.onNewTrack(pr);
 
     const std::vector<ATrackingStepData *> & steps = pr.getSteps();
     for (size_t iStep = 0; iStep < steps.size(); iStep++)
@@ -130,12 +134,10 @@ void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, 
         }
     }
 
-    //here integral collector-based criteria can be checked -> next line activated only if "pass"
-
     processor.onTrackEnd();
 }
 
-void AHistorySearchProcessor_findParticles::onParticle(const AParticleTrackingRecord &pr)
+void AHistorySearchProcessor_findParticles::onNewTrack(const AParticleTrackingRecord &pr)
 {
     Candidate = pr.ParticleName;
     bConfirmed = false;
@@ -158,8 +160,10 @@ void AHistorySearchProcessor_findParticles::onTrackEnd()
     }
 }
 
-AHistorySearchProcessor_findDepositedEnergy::AHistorySearchProcessor_findDepositedEnergy(int bins, double from, double to)
+AHistorySearchProcessor_findDepositedEnergy::AHistorySearchProcessor_findDepositedEnergy(CollectionMode mode, int bins, double from, double to)
 {
+    //qDebug() << mode;
+    Mode = mode;
     Hist = new TH1D("", "Deposited energy", bins, from, to);
     Hist->GetXaxis()->SetTitle("Energy, keV");
 }
@@ -169,9 +173,25 @@ AHistorySearchProcessor_findDepositedEnergy::~AHistorySearchProcessor_findDeposi
     delete Hist;
 }
 
-void AHistorySearchProcessor_findDepositedEnergy::onParticle(const AParticleTrackingRecord & )
+void AHistorySearchProcessor_findDepositedEnergy::onNewEvent()
 {
-    Depo = 0;
+    if (Mode == OverEvent) Depo = 0;
+}
+
+void AHistorySearchProcessor_findDepositedEnergy::onNewTrack(const AParticleTrackingRecord & )
+{
+    switch (Mode)
+    {
+    case Individual:
+        Depo = 0;
+        break;
+    case WithSecondaries:
+
+        break;
+    case OverEvent:
+
+        break;
+    }
 }
 
 void AHistorySearchProcessor_findDepositedEnergy::onLocalStep(const ATrackingStepData & tr)
@@ -181,8 +201,28 @@ void AHistorySearchProcessor_findDepositedEnergy::onLocalStep(const ATrackingSte
 
 void AHistorySearchProcessor_findDepositedEnergy::onTrackEnd()
 {
-    if (Depo > 0) Hist->Fill(Depo);
-    Depo = 0;
+    switch (Mode)
+    {
+    case Individual:
+        if (Depo > 0) Hist->Fill(Depo);
+        Depo = 0;
+        break;
+    case WithSecondaries:
+
+        break;
+    case OverEvent:
+
+        break;
+    }
+}
+
+void AHistorySearchProcessor_findDepositedEnergy::onEventEnd()
+{
+    if (Mode == OverEvent)
+    {
+        if (Depo > 0) Hist->Fill(Depo);
+        Depo = 0;
+    }
 }
 
 AHistorySearchProcessor_findTravelledDistances::AHistorySearchProcessor_findTravelledDistances(int bins, double from, double to)
@@ -196,7 +236,7 @@ AHistorySearchProcessor_findTravelledDistances::~AHistorySearchProcessor_findTra
     delete Hist;
 }
 
-void AHistorySearchProcessor_findTravelledDistances::onParticle(const AParticleTrackingRecord &pr)
+void AHistorySearchProcessor_findTravelledDistances::onNewTrack(const AParticleTrackingRecord &)
 {
     Distance = 0;
 }
@@ -279,3 +319,124 @@ void AHistorySearchProcessor_Border::onTransition(const ATrackingStepData & tr, 
     T->Fill();
 }
 
+#include "TFormula.h"
+AHistorySearchProcessor_Border2::AHistorySearchProcessor_Border2(const QString &what, const QString &cuts, int bins, double from, double to)
+{
+    QString s = what;
+    formulaWhat1 = parse(s);
+    if (!formulaWhat1->IsValid())
+        ErrorString = "Invalid formula for 'what'";
+    else
+    {
+        if (!cuts.isEmpty())
+        {
+            QString s = cuts;
+            formulaCuts = parse(s);
+            if (!formulaCuts)
+                ErrorString = "Invalid formula for cuts";
+        }
+
+        if (formulaCuts || cuts.isEmpty())
+            Hist1D = new TH1D("", "", bins, from, to);
+    }
+}
+
+#include "TH2D.h"
+#include "TH2.h"
+AHistorySearchProcessor_Border2::AHistorySearchProcessor_Border2(const QString &what, const QString &vsWhat, const QString &cuts, int bins1, double from1, double to1, int bins2, double from2, double to2)
+{
+    QString s = what;
+    formulaWhat1 = parse(s);
+    if (!formulaWhat1)
+        ErrorString = "Invalid formula for 'what'";
+    else
+    {
+        s = vsWhat;
+        formulaWhat2 = parse(s);
+        if (!formulaWhat2)
+            ErrorString = "Invalid formula for 'vsWwhat'";
+        else
+        {
+            if (!cuts.isEmpty())
+            {
+                s = cuts;
+                formulaCuts = parse(s);
+                if (!formulaCuts)
+                    ErrorString = "Invalid formula for cuts";
+            }
+
+            if (formulaCuts || cuts.isEmpty())
+                Hist2D = new TH2D("", "", bins1, from1, to1, bins2, from2, to2);
+        }
+    }
+}
+
+AHistorySearchProcessor_Border2::~AHistorySearchProcessor_Border2()
+{
+    delete formulaWhat1;
+    delete formulaWhat2;
+    delete formulaCuts;
+    delete Hist1D;
+    delete Hist2D;
+}
+
+void AHistorySearchProcessor_Border2::onTransition(const ATrackingStepData &tr, AHistorySearchProcessor::Direction)
+{
+    par[0] = tr.Position[0];
+    par[1] = tr.Position[1];
+    par[2] = tr.Position[2];
+    par[3] = tr.Time;
+    par[4] = tr.Energy;
+
+    if (bRequiresDirections)
+    {
+        //get direction
+    }
+
+    if (formulaCuts)
+    {
+        bool bPass = formulaCuts->EvalPar(nullptr, par);
+        if (!bPass) return;
+    }
+
+    if (formulaWhat2)
+    {
+        //2D case
+        double res1 = formulaWhat1->EvalPar(nullptr, par);
+        double res2 = formulaWhat2->EvalPar(nullptr, par);
+        Hist2D->Fill(res1, res2);
+    }
+    else
+    {
+        //1D case
+        double res = formulaWhat1->EvalPar(nullptr, par);
+        Hist1D->Fill(res);
+    }
+}
+
+TFormula *AHistorySearchProcessor_Border2::parse(QString & expr)
+{
+    //double  x, y, z, time, energy, vx, vy, vz
+    //        0  1  2    3     4      5   6   7
+    if (expr.contains("VX") || expr.contains("VY") || expr.contains("VZ")) bRequiresDirections = true;
+    if (expr.contains("Vx") || expr.contains("Vy") || expr.contains("Vz")) bRequiresDirections = true;
+    expr.replace("Vx", "[5]");
+    expr.replace("VX", "[5]");
+    expr.replace("Vy", "[6]");
+    expr.replace("VY", "[6]");
+    expr.replace("Vz", "[7]");
+    expr.replace("VZ", "[7]");
+    expr.replace("X", "[0]");
+    expr.replace("Y", "[1]");
+    expr.replace("Z", "[2]");
+    expr.replace("Time", "[3]");
+    expr.replace("time", "[3]");
+    expr.replace("Energy", "[4]");
+    expr.replace("energy", "[4]");
+
+    TFormula * f = new TFormula("", expr.toLocal8Bit().data());
+    if (f && f->IsValid()) return f;
+
+    delete f;
+    return nullptr;
+}

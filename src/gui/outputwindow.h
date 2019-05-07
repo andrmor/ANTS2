@@ -97,6 +97,8 @@ private slots:
 
     void on_twPTHistType_currentChanged(int index);
 
+    void on_cbPTHistBordVs_toggled(bool checked);
+
 private:
     Ui::OutputWindow *ui;
     MainWindow* MW;
@@ -121,6 +123,12 @@ private:
     int binsDistance = 100;
     double fromDistance = 0;
     double toDistance = 0;
+    int binsB1 = 100;
+    double fromB1 = 0;
+    double toB1 = 0;
+    int binsB2 = 100;
+    double fromB2 = 0;
+    double toB2 = 0;
 
     void clearGrItems();
     void updateSignalLabels(float MaxSignal);

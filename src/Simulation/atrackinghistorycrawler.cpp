@@ -4,7 +4,10 @@
 
 #include "TGeoNode.h"
 #include "TH1D.h"
+#include "TH2D.h"
+#include "TH2.h"
 #include "TTree.h"
+#include "TFormula.h"
 
 ATrackingHistoryCrawler::ATrackingHistoryCrawler(const std::vector<AEventTrackingRecord *> &History) :
     History(History) {}
@@ -292,34 +295,6 @@ void AHistorySearchProcessor_findProcesses::onLocalStep(const ATrackingStepData 
     else it.value()++;
 }
 
-AHistorySearchProcessor_Border::AHistorySearchProcessor_Border()
-{
-    T = new TTree("T","Border pass");
-
-    T->Branch("x", &x,"x/F");
-    T->Branch("y", &y,"y/F");
-    T->Branch("z", &z,"z/F");
-    T->Branch("time", &time,"time/F");
-    T->Branch("energy", &energy,"energy/F");
-}
-
-AHistorySearchProcessor_Border::~AHistorySearchProcessor_Border()
-{
-    delete T;
-}
-
-void AHistorySearchProcessor_Border::onTransition(const ATrackingStepData & tr, AHistorySearchProcessor::Direction)
-{
-    x = tr.Position[0];
-    y = tr.Position[1];
-    z = tr.Position[2];
-    time = tr.Time;
-    energy = tr.Energy;
-
-    T->Fill();
-}
-
-#include "TFormula.h"
 AHistorySearchProcessor_Border2::AHistorySearchProcessor_Border2(const QString &what, const QString &cuts, int bins, double from, double to)
 {
     QString s = what;
@@ -337,12 +312,17 @@ AHistorySearchProcessor_Border2::AHistorySearchProcessor_Border2(const QString &
         }
 
         if (formulaCuts || cuts.isEmpty())
+        {
             Hist1D = new TH1D("", "", bins, from, to);
+            TString title = what.toLocal8Bit().data();
+            Hist1D->GetXaxis()->SetTitle(title);
+            title += " cuts:";
+            title += cuts.toLocal8Bit().data();
+            Hist1D->SetTitle(title);
+        }
     }
 }
 
-#include "TH2D.h"
-#include "TH2.h"
 AHistorySearchProcessor_Border2::AHistorySearchProcessor_Border2(const QString &what, const QString &vsWhat, const QString &cuts, int bins1, double from1, double to1, int bins2, double from2, double to2)
 {
     QString s = what;
@@ -366,7 +346,21 @@ AHistorySearchProcessor_Border2::AHistorySearchProcessor_Border2(const QString &
             }
 
             if (formulaCuts || cuts.isEmpty())
+            {
                 Hist2D = new TH2D("", "", bins1, from1, to1, bins2, from2, to2);
+                TString titleY = what.toLocal8Bit().data();
+                Hist2D->GetYaxis()->SetTitle(titleY);
+                TString titleX = vsWhat.toLocal8Bit().data();
+                Hist2D->GetXaxis()->SetTitle(titleX);
+                TString title = titleY + " vs " + titleX;
+                if (!cuts.isEmpty())
+                {
+                    title += "  (";
+                    title += cuts.toLocal8Bit().data();
+                    title += ")";
+                }
+                Hist2D->SetTitle(title);
+            }
         }
     }
 }
@@ -404,7 +398,7 @@ void AHistorySearchProcessor_Border2::onTransition(const ATrackingStepData &tr, 
         //2D case
         double res1 = formulaWhat1->EvalPar(nullptr, par);
         double res2 = formulaWhat2->EvalPar(nullptr, par);
-        Hist2D->Fill(res1, res2);
+        Hist2D->Fill(res2, res1);
     }
     else
     {

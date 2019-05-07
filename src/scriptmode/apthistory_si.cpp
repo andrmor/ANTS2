@@ -11,6 +11,7 @@
 #include "TGeoMaterial.h"
 #include "TH1.h"
 #include "TH1D.h"
+#include "TH2.h"
 
 APTHistory_SI::APTHistory_SI(ASimulationManager & SimulationManager) :
     AScriptInterface(), SM(SimulationManager), TH(SimulationManager.TrackingHistory)
@@ -364,9 +365,6 @@ QVariantList APTHistory_SI::findTravelledDistances(int bins, double from, double
     return vl;
 }
 
-#include "TTree.h"
-#include "TH2.h"
-#include "TH3.h"
 QVariantList APTHistory_SI::findOnBorder(QString what, QString cuts, int bins, double from, double to)
 {
     QVariantList vl;
@@ -416,157 +414,4 @@ QVariantList APTHistory_SI::findOnBorder(QString what, QString vsWhat, QString c
         }
     }
     return vl;
-
-/*
-    QStringList fields = what.split(":", QString::SkipEmptyParts);
-    int num = fields.size();
-    if (num > 3)
-    {
-        abort("Too many fields in'what' field");
-        return vl;
-    }
-    return vl;
-
-    AHistorySearchProcessor_Border p;
-    Crawler->find(*Criteria, p);
-
-    QByteArray baw;
-    QString str = what+">>htemp(";
-//    for (int i=0; i<num; i++)
-//      {
-//        if (ui->cbCustomBinning->isChecked())dims[i].updateBins();
-//        if (ui->cbCustomRanges->isChecked()) dims[i].updateRanges(); //else 0
-//        str += QString::number(dims[i].bins)+","+QString::number(dims[i].from)+","+QString::number(dims[i].to)+",";
-//      }
-//    str.chop(1);
-    str += ")";
-    baw = str.toLocal8Bit();
-
-    const char *What = baw.data();
-     QByteArray bac = cuts.toLocal8Bit();
-     const char *Cond = (cuts == "") ? "" : bac.data();
-     QString how = "";
-     QByteArray bah = how.toLocal8Bit();
-     const char *How = (how == "") ? "" : bah.data();
-     QString howAdj;
-     if (how == "") howAdj = "goff";
-     else howAdj = "goff,"+how;
-     QByteArray baha = howAdj.toLocal8Bit();
-     const char *HowAdj = baha.data();
-
-     TObject* oldObj = gDirectory->FindObject("htemp");
-     if (oldObj)
-     {
-         qDebug() << "Old htemp found!"<<oldObj->GetName();
-         gDirectory->RecursiveRemove(oldObj);
-     }
-     TH1::AddDirectory(true);
-     p.T->Draw(What, Cond, HowAdj);
-     TH1::AddDirectory(false);
-
-     switch (num)
-     {
-       case 1:
-         {
-           TH1* tmpHist1D = (TH1*)gDirectory->Get("htemp");
-           if (!tmpHist1D)
-           {
-               abort("Root has not generated any data!");
-               break;
-           }
-           QByteArray tmp = fields[0].toLocal8Bit();
-           tmpHist1D->GetXaxis()->SetTitle(tmp.data());
-           int size = tmpHist1D->GetEntries();
-           qDebug() << "Size of 1D result:"<<size;
-
-//           if (size>0) MW->GraphWindow->Draw(tmpHist1D, How, true, false);
-//           else
-//           {
-//               message("There is no data to show!", this);
-//               MW->GraphWindow->close();
-//               //delete tmpHist1D;
-//               return;
-//           }
-           int numBins = tmpHist1D->GetXaxis()->GetNbins();
-           for (int iBin=1; iBin<numBins+1; iBin++)
-           {
-               QVariantList el;
-               el << tmpHist1D->GetBinCenter(iBin) << tmpHist1D->GetBinContent(iBin);
-               vl.push_back(el);
-           }
-           break;
-       }
-       case 2:
-         {
-           TH2* tmpHist2D = (TH2*)gDirectory->Get("htemp");
-           if (!tmpHist2D)
-           {
-               abort("Root has not generated any data!");
-               break;
-           }
-           QByteArray tmp1 = fields[0].toLocal8Bit();
-           tmpHist2D->GetYaxis()->SetTitle(tmp1.data());
-           QByteArray tmp2 = fields[1].toLocal8Bit();
-           tmpHist2D->GetXaxis()->SetTitle(tmp2.data());
-
-           int size = tmpHist2D->GetEntries();
-           qDebug() << "Size of 2D result:"<<size;
-
-//           if (size>0) MW->GraphWindow->Draw(tmpHist2D, How, true, false);
-//           else
-//           {
-//               message("There is no data to show!", this);
-//               MW->GraphWindow->close();
-//               //delete tmpHist2D;
-//               return;
-//           }
-
-           int numX = tmpHist2D->GetXaxis()->GetNbins();
-           int numY = tmpHist2D->GetYaxis()->GetNbins();
-           for (int iX=1; iX<numX+1; iX++)
-           {
-               double x = tmpHist2D->GetXaxis()->GetBinCenter(iX);
-               for (int iY=1; iY<numY+1; iY++)
-               {
-                   QVariantList el;
-                   el << x
-                      << tmpHist2D->GetYaxis()->GetBinCenter(iY)
-                      << tmpHist2D->GetBinContent(iX, iY);
-                   vl.push_back(el);
-               }
-           }
-
-           break;
-         }
-       case 3:
-         {
-           TH3* tmpHist3D = (TH3*)gDirectory->Get("htemp");
-           if (!tmpHist3D)
-           {
-               abort("Root has not generated any data!");
-               break;
-           }
-           QByteArray tmp1 = fields[0].toLocal8Bit();
-           tmpHist3D->GetZaxis()->SetTitle(tmp1.data());
-           QByteArray tmp2 = fields[1].toLocal8Bit();
-           tmpHist3D->GetYaxis()->SetTitle(tmp2.data());
-           QByteArray tmp3 = fields[2].toLocal8Bit();
-           tmpHist3D->GetXaxis()->SetTitle(tmp3.data());
-
-           int size = tmpHist3D->GetEntries();
-           qDebug() << "Size of 3D result:"<<size;
-
-//           if (size>0) MW->GraphWindow->Draw(tmpHist3D, How, true, false);
-//           else
-//           {
-//               message("There is no data to show!", this);
-//               MW->GraphWindow->close();
-//               //delete tmpHist3D;
-//               return;
-//           }
-           break;
-         }
-       }
-     return vl;
-*/
 }

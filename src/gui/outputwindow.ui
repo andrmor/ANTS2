@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>632</width>
-    <height>592</height>
+    <width>635</width>
+    <height>687</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -742,7 +742,7 @@ over all events</string>
         <item>
          <widget class="QLabel" name="label_15">
           <property name="text">
-           <string>Experimental: Applies for tracking performed with G4ants</string>
+           <string>Work in progress: Applies for tracking performed with G4ants</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -875,7 +875,7 @@ over all events</string>
            </size>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="tab_3">
            <attribute name="title">
@@ -1032,6 +1032,201 @@ over all events</string>
            <attribute name="title">
             <string>On the borders</string>
            </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_28">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_20">
+              <item>
+               <widget class="QLineEdit" name="lePTHistBordWhat">
+                <property name="toolTip">
+                 <string>X, Y, Z, Time, Energy, Vx, Vy, Vz
+and any mathematical/logical operations
+See ROOT TFormula description</string>
+                </property>
+                <property name="text">
+                 <string>Energy</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="cbPTHistBordVs">
+                <property name="text">
+                 <string>vs:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="lePTHistBordVsWhat">
+                <property name="toolTip">
+                 <string>X, Y, Z, Time, Energy, Vx, Vy, Vz
+and any mathematical/logical operations
+See ROOT TFormula description</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_3">
+              <item>
+               <widget class="QLabel" name="label_21">
+                <property name="text">
+                 <string>Conditions:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="lePTHistBordCuts">
+                <property name="toolTip">
+                 <string>X, Y, Z, Time, Energy, Vx, Vy, Vz
+and any mathematical/logical operations
+See ROOT TFormula description</string>
+                </property>
+                <property name="text">
+                 <string>Z&lt;0 &amp;&amp; (Energy &lt; 2.49e-5 || Energy &gt; 2.51e-5)</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="Line" name="line_4">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_26">
+              <item>
+               <spacer name="horizontalSpacer_24">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <layout class="QVBoxLayout" name="verticalLayout_24">
+                <property name="spacing">
+                 <number>3</number>
+                </property>
+                <item>
+                 <widget class="QCheckBox" name="cbPTHistVolMatFrom">
+                  <property name="text">
+                   <string>Limit material from:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="cbPTHistVolVolumeFrom">
+                  <property name="text">
+                   <string>Limit volume from:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="cbPTHistVolIndexFrom">
+                  <property name="text">
+                   <string>Limit vol index from:</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QVBoxLayout" name="verticalLayout_25">
+                <property name="spacing">
+                 <number>3</number>
+                </property>
+                <item>
+                 <widget class="QComboBox" name="cobPTHistVolMatFrom"/>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="lePTHistVolVolumeFrom"/>
+                </item>
+                <item>
+                 <widget class="QSpinBox" name="sbPTHistVolIndexFrom"/>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_26">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <layout class="QVBoxLayout" name="verticalLayout_26">
+                <property name="spacing">
+                 <number>3</number>
+                </property>
+                <item>
+                 <widget class="QCheckBox" name="cbPTHistVolMatTo">
+                  <property name="text">
+                   <string>Limit material to:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="cbPTHistVolVolumeTo">
+                  <property name="text">
+                   <string>Limit volume to:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="cbPTHistVolIndexTo">
+                  <property name="text">
+                   <string>Limit volume index to:</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QVBoxLayout" name="verticalLayout_27">
+                <property name="spacing">
+                 <number>3</number>
+                </property>
+                <item>
+                 <widget class="QComboBox" name="cobPTHistVolMatTo"/>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="lePTHistVolVolumeTo"/>
+                </item>
+                <item>
+                 <widget class="QSpinBox" name="sbPTHistVolIndexTo"/>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_25">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+           </layout>
           </widget>
          </widget>
         </item>
@@ -1081,7 +1276,7 @@ over all events</string>
            <item>
             <widget class="QLabel" name="label_18">
              <property name="text">
-              <string>Bins:</string>
+              <string>- Bins:</string>
              </property>
             </widget>
            </item>
@@ -1140,6 +1335,125 @@ over all events</string>
            </item>
            <item>
             <spacer name="horizontalSpacer_21">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>103</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QFrame" name="frPTHistY">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_25">
+           <property name="spacing">
+            <number>3</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <spacer name="horizontalSpacer_22">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>103</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_22">
+             <property name="text">
+              <string>| Bins:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="sbPTHistBinsY">
+             <property name="minimum">
+              <number>1</number>
+             </property>
+             <property name="maximum">
+              <number>100000</number>
+             </property>
+             <property name="value">
+              <number>100</number>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_23">
+             <property name="text">
+              <string>from:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="ledPTHistFromY">
+             <property name="maximumSize">
+              <size>
+               <width>100</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>0</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_24">
+             <property name="text">
+              <string>to:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="ledPTHistToY">
+             <property name="maximumSize">
+              <size>
+               <width>100</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>0</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_23">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
@@ -2192,12 +2506,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>216</x>
-     <y>289</y>
+     <x>133</x>
+     <y>270</y>
     </hint>
     <hint type="destinationlabel">
-     <x>374</x>
-     <y>292</y>
+     <x>375</x>
+     <y>288</y>
     </hint>
    </hints>
   </connection>
@@ -2208,12 +2522,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>216</x>
-     <y>318</y>
+     <x>133</x>
+     <y>301</y>
     </hint>
     <hint type="destinationlabel">
-     <x>374</x>
-     <y>321</y>
+     <x>375</x>
+     <y>319</y>
     </hint>
    </hints>
   </connection>
@@ -2224,12 +2538,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>266</x>
-     <y>267</y>
+     <x>267</x>
+     <y>311</y>
     </hint>
     <hint type="destinationlabel">
-     <x>369</x>
-     <y>268</y>
+     <x>370</x>
+     <y>312</y>
     </hint>
    </hints>
   </connection>
@@ -2240,12 +2554,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>241</x>
-     <y>290</y>
+     <x>242</x>
+     <y>334</y>
     </hint>
     <hint type="destinationlabel">
-     <x>407</x>
-     <y>294</y>
+     <x>408</x>
+     <y>338</y>
     </hint>
    </hints>
   </connection>
@@ -2256,12 +2570,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>279</x>
-     <y>316</y>
+     <x>280</x>
+     <y>360</y>
     </hint>
     <hint type="destinationlabel">
-     <x>483</x>
-     <y>343</y>
+     <x>484</x>
+     <y>387</y>
     </hint>
    </hints>
   </connection>
@@ -2288,12 +2602,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>343</x>
-     <y>532</y>
+     <x>154</x>
+     <y>637</y>
     </hint>
     <hint type="destinationlabel">
-     <x>358</x>
-     <y>400</y>
+     <x>363</x>
+     <y>367</y>
     </hint>
    </hints>
   </connection>

@@ -99,6 +99,8 @@ private slots:
 
     void on_cbPTHistBordVs_toggled(bool checked);
 
+    void on_cbPTHistBordAndVs_toggled(bool checked);
+
 private:
     Ui::OutputWindow *ui;
     MainWindow* MW;

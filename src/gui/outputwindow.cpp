@@ -1816,34 +1816,21 @@ void OutputWindow::on_pbPTHistRequest_clicked()
 
         QString what = ui->lePTHistBordWhat->text();
         QString vsWhat = ui->lePTHistBordVsWhat->text();
+        QString andVsWhat = ui->lePTHistBordAndVsWhat->text();
         QString cuts = ui->lePTHistBordCuts->text();
-        bool b2D = ui->cbPTHistBordVs->isChecked();
 
-        if (b2D)
-        {
-            int bins2 = ui->sbPTHistBinsY->value();
-            double from2 = ui->ledPTHistFromY->text().toDouble();
-            double to2   = ui->ledPTHistToY  ->text().toDouble();
-            AHistorySearchProcessor_Border2 p(what, vsWhat, cuts, bins, from, to, bins2, from2, to2);
-            Crawler.find(Opt, p);
+        bool bVs = ui->cbPTHistBordVs->isChecked();
+        bool bVsVs = ui->cbPTHistBordAndVs->isChecked();
+        bool bStat = ui->cbPTHistBordAsStat->isChecked();
 
-            if (p.Hist2D->GetEntries() == 0)
-                message("No data", this);
-            else
-            {
-                MW->GraphWindow->Draw(p.Hist2D);
-                p.Hist2D = nullptr;
-            }
-            binsB1 = bins;
-            fromB1 = from;
-            toB1 = to;
-            binsB2 = bins2;
-            fromB2 = from2;
-            toB2 = to2;
-        }
-        else //1D
+        int bins2 = ui->sbPTHistBinsY->value();
+        double from2 = ui->ledPTHistFromY->text().toDouble();
+        double to2   = ui->ledPTHistToY  ->text().toDouble();
+
+        if (!bVs)
         {
-            AHistorySearchProcessor_Border2 p(what, cuts, bins, from, to);
+            //1D stat
+            AHistorySearchProcessor_Border p(what, cuts, bins, from, to);
             Crawler.find(Opt, p);
 
             if (p.Hist1D->GetEntries() == 0)
@@ -1853,11 +1840,63 @@ void OutputWindow::on_pbPTHistRequest_clicked()
                 MW->GraphWindow->Draw(p.Hist1D);
                 p.Hist1D = nullptr;
             }
-            binsB1 = bins;
-            fromB1 = from;
-            toB1 = to;
         }
+        else
+        {
+            // "vs" is activated
+            if (!bVsVs && !bStat)
+            {
+                //1D vs
+                AHistorySearchProcessor_Border p(what, vsWhat, cuts, bins, from, to);
+                Crawler.find(Opt, p);
 
+                if (p.Hist1D->GetEntries() == 0)
+                    message("No data", this);
+                else
+                {
+                    MW->GraphWindow->Draw(p.Hist1D);
+                    p.Hist1D = nullptr;
+                }
+            }
+            else if (!bVsVs && bStat)
+            {
+                //2D stat
+                AHistorySearchProcessor_Border p(what, vsWhat, cuts, bins, from, to, bins2, from2, to2);
+                Crawler.find(Opt, p);
+
+                if (p.Hist2D->GetEntries() == 0)
+                    message("No data", this);
+                else
+                {
+                    MW->GraphWindow->Draw(p.Hist2D);
+                    p.Hist2D = nullptr;
+                }
+                binsB2 = bins2;
+                fromB2 = from2;
+                toB2 = to2;
+            }
+            else if (bVsVs)
+            {
+                //2D vsvs
+                AHistorySearchProcessor_Border p(what, vsWhat, andVsWhat, cuts, bins, from, to, bins2, from2, to2);
+                Crawler.find(Opt, p);
+
+                if (p.Hist2D->GetEntries() == 0)
+                    message("No data", this);
+                else
+                {
+                    MW->GraphWindow->Draw(p.Hist2D);
+                    p.Hist2D = nullptr;
+                }
+                binsB2 = bins2;
+                fromB2 = from2;
+                toB2 = to2;
+            }
+            else message("Unexpected mode!", this);
+        }
+        binsB1 = bins;
+        fromB1 = from;
+        toB1 = to;
     }
 }
 
@@ -1921,12 +1960,27 @@ void OutputWindow::updatePTHistoryBinControl()
     else
     {
         //Border
+        bool bVs = ui->cbPTHistBordVs->isChecked();
+        ui->cbPTHistBordAndVs->setEnabled(bVs);
+        ui->lePTHistBordAndVsWhat->setEnabled(bVs);
+        if (!bVs) ui->cbPTHistBordAndVs->setChecked(false);
+
+        bool bVsVs = ui->cbPTHistBordAndVs->isChecked();
+        if (bVsVs) ui->cbPTHistBordAsStat->setChecked(false);
+        ui->cbPTHistBordAsStat->setEnabled(bVs && ! bVsVs);
+        bool bStat = ui->cbPTHistBordAsStat->isChecked();
+
         ui->frPTHistX->setVisible(true);
-        ui->frPTHistY->setVisible(ui->cbPTHistBordVs->isChecked());
+        ui->frPTHistY->setVisible(bVsVs || (bVs && bStat));
     }
 }
 
 void OutputWindow::on_cbPTHistBordVs_toggled(bool)
+{
+    updatePTHistoryBinControl();
+}
+
+void OutputWindow::on_cbPTHistBordAndVs_toggled(bool)
 {
     updatePTHistoryBinControl();
 }

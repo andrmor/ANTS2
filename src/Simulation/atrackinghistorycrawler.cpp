@@ -295,7 +295,9 @@ void AHistorySearchProcessor_findProcesses::onLocalStep(const ATrackingStepData 
     else it.value()++;
 }
 
-AHistorySearchProcessor_Border2::AHistorySearchProcessor_Border2(const QString &what, const QString &cuts, int bins, double from, double to)
+AHistorySearchProcessor_Border::AHistorySearchProcessor_Border(const QString &what,
+                                                               const QString &cuts,
+                                                               int bins, double from, double to)
 {
     QString s = what;
     formulaWhat1 = parse(s);
@@ -316,14 +318,57 @@ AHistorySearchProcessor_Border2::AHistorySearchProcessor_Border2(const QString &
             Hist1D = new TH1D("", "", bins, from, to);
             TString title = what.toLocal8Bit().data();
             Hist1D->GetXaxis()->SetTitle(title);
-            title += " cuts:";
+            title += ", with ";
             title += cuts.toLocal8Bit().data();
             Hist1D->SetTitle(title);
         }
     }
 }
 
-AHistorySearchProcessor_Border2::AHistorySearchProcessor_Border2(const QString &what, const QString &vsWhat, const QString &cuts, int bins1, double from1, double to1, int bins2, double from2, double to2)
+AHistorySearchProcessor_Border::AHistorySearchProcessor_Border(const QString &what, const QString &vsWhat,
+                                                               const QString &cuts,
+                                                               int bins, double from, double to)
+{
+    QString s = what;
+    formulaWhat1 = parse(s);
+    if (!formulaWhat1->IsValid())
+        ErrorString = "Invalid formula for 'what'";
+    else
+    {
+        s = vsWhat;
+        formulaWhat2 = parse(s);
+        if (!formulaWhat2)
+            ErrorString = "Invalid formula for 'vsWhat'";
+        else
+        {
+            if (!cuts.isEmpty())
+            {
+                QString s = cuts;
+                formulaCuts = parse(s);
+                if (!formulaCuts)
+                    ErrorString = "Invalid formula for cuts";
+            }
+
+            if (formulaCuts || cuts.isEmpty())
+            {
+                Hist1D = new TH1D("", "", bins, from, to);
+                TString titleY = what.toLocal8Bit().data();
+                Hist1D->GetYaxis()->SetTitle(titleY);
+                TString titleX = vsWhat.toLocal8Bit().data();
+                Hist1D->GetXaxis()->SetTitle(titleX);
+                TString title = titleY + " vs " + titleX;
+                title += ", with ";
+                title += cuts.toLocal8Bit().data();
+                Hist1D->SetTitle(title);
+            }
+        }
+    }
+}
+
+AHistorySearchProcessor_Border::AHistorySearchProcessor_Border(const QString &what, const QString &vsWhat,
+                                                               const QString &cuts,
+                                                               int bins1, double from1, double to1,
+                                                               int bins2, double from2, double to2)
 {
     QString s = what;
     formulaWhat1 = parse(s);
@@ -334,7 +379,7 @@ AHistorySearchProcessor_Border2::AHistorySearchProcessor_Border2(const QString &
         s = vsWhat;
         formulaWhat2 = parse(s);
         if (!formulaWhat2)
-            ErrorString = "Invalid formula for 'vsWwhat'";
+            ErrorString = "Invalid formula for 'vsWhat'";
         else
         {
             if (!cuts.isEmpty())
@@ -355,9 +400,8 @@ AHistorySearchProcessor_Border2::AHistorySearchProcessor_Border2(const QString &
                 TString title = titleY + " vs " + titleX;
                 if (!cuts.isEmpty())
                 {
-                    title += "  (";
+                    title += ", with ";
                     title += cuts.toLocal8Bit().data();
-                    title += ")";
                 }
                 Hist2D->SetTitle(title);
             }
@@ -365,7 +409,60 @@ AHistorySearchProcessor_Border2::AHistorySearchProcessor_Border2(const QString &
     }
 }
 
-AHistorySearchProcessor_Border2::~AHistorySearchProcessor_Border2()
+AHistorySearchProcessor_Border::AHistorySearchProcessor_Border(const QString &what, const QString &vsWhat, const QString &andVsWhat,
+                                                               const QString &cuts,
+                                                               int bins1, double from1, double to1,
+                                                               int bins2, double from2, double to2)
+{
+    QString s = what;
+    formulaWhat1 = parse(s);
+    if (!formulaWhat1)
+        ErrorString = "Invalid formula for 'what'";
+    else
+    {
+        s = vsWhat;
+        formulaWhat2 = parse(s);
+        if (!formulaWhat2)
+            ErrorString = "Invalid formula for 'vsWhat'";
+        else
+        {
+            s = andVsWhat;
+            formulaWhat3 = parse(s);
+            if (!formulaWhat3)
+                ErrorString = "Invalid formula for 'andVsWhat'";
+            else
+            {
+                if (!cuts.isEmpty())
+                {
+                    s = cuts;
+                    formulaCuts = parse(s);
+                    if (!formulaCuts)
+                        ErrorString = "Invalid formula for cuts";
+                }
+
+                if (formulaCuts || cuts.isEmpty())
+                {
+                    Hist2D = new TH2D("", "", bins1, from1, to1, bins2, from2, to2);
+                    TString titleZ = what.toLocal8Bit().data();
+                    Hist2D->GetZaxis()->SetTitle(titleZ);
+                    TString titleX = vsWhat.toLocal8Bit().data();
+                    Hist2D->GetXaxis()->SetTitle(titleX);
+                    TString titleY = andVsWhat.toLocal8Bit().data();
+                    Hist2D->GetYaxis()->SetTitle(titleY);
+                    TString title = titleZ + " vs " + titleX + " and " + titleY;
+                    if (!cuts.isEmpty())
+                    {
+                        title += ", with ";
+                        title += cuts.toLocal8Bit().data();
+                    }
+                    Hist2D->SetTitle(title);
+                }
+            }
+        }
+    }
+}
+
+AHistorySearchProcessor_Border::~AHistorySearchProcessor_Border()
 {
     delete formulaWhat1;
     delete formulaWhat2;
@@ -374,7 +471,7 @@ AHistorySearchProcessor_Border2::~AHistorySearchProcessor_Border2()
     delete Hist2D;
 }
 
-void AHistorySearchProcessor_Border2::onTransition(const ATrackingStepData &tr, AHistorySearchProcessor::Direction)
+void AHistorySearchProcessor_Border::onTransition(const ATrackingStepData &tr, AHistorySearchProcessor::Direction)
 {
     par[0] = tr.Position[0];
     par[1] = tr.Position[1];
@@ -393,22 +490,38 @@ void AHistorySearchProcessor_Border2::onTransition(const ATrackingStepData &tr, 
         if (!bPass) return;
     }
 
-    if (formulaWhat2)
-    {
-        //2D case
-        double res1 = formulaWhat1->EvalPar(nullptr, par);
-        double res2 = formulaWhat2->EvalPar(nullptr, par);
-        Hist2D->Fill(res2, res1);
-    }
-    else
+    if (Hist1D)
     {
         //1D case
         double res = formulaWhat1->EvalPar(nullptr, par);
-        Hist1D->Fill(res);
+        if (formulaWhat2)
+        {
+            double resX = formulaWhat2->EvalPar(nullptr, par);
+            Hist1D->Fill(resX, res);
+        }
+        else Hist1D->Fill(res);
+    }
+    else
+    {
+        if (formulaWhat3)
+        {
+            //3D case
+            double res1 = formulaWhat1->EvalPar(nullptr, par);
+            double res2 = formulaWhat2->EvalPar(nullptr, par);
+            double res3 = formulaWhat3->EvalPar(nullptr, par);
+            Hist2D->Fill(res2, res3, res1);
+        }
+        else
+        {
+            //2D case
+            double res1 = formulaWhat1->EvalPar(nullptr, par);
+            double res2 = formulaWhat2->EvalPar(nullptr, par);
+            Hist2D->Fill(res2, res1);
+        }
     }
 }
 
-TFormula *AHistorySearchProcessor_Border2::parse(QString & expr)
+TFormula *AHistorySearchProcessor_Border::parse(QString & expr)
 {
     //double  x, y, z, time, energy, vx, vy, vz
     //        0  1  2    3     4      5   6   7

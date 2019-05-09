@@ -369,7 +369,7 @@ QVariantList APTHistory_SI::findOnBorder(QString what, QString cuts, int bins, d
 {
     QVariantList vl;
 
-    AHistorySearchProcessor_Border2 p(what, cuts, bins, from, to);
+    AHistorySearchProcessor_Border p(what, cuts, bins, from, to);
     if (!p.ErrorString.isEmpty())
         abort(p.ErrorString);
     else
@@ -391,7 +391,7 @@ QVariantList APTHistory_SI::findOnBorder(QString what, QString vsWhat, QString c
 {
     QVariantList vl;
 
-    AHistorySearchProcessor_Border2 p(what, vsWhat, cuts, bins1, from1, to1, bins2, from2, to2);
+    AHistorySearchProcessor_Border p(what, vsWhat, cuts, bins1, from1, to1, bins2, from2, to2);
     if (!p.ErrorString.isEmpty())
         abort(p.ErrorString);
     else

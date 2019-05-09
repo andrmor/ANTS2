@@ -118,12 +118,24 @@ public:
     TH1D * Hist = nullptr;
 };
 
-class AHistorySearchProcessor_Border2 : public AHistorySearchProcessor
+class AHistorySearchProcessor_Border : public AHistorySearchProcessor
 {
 public:
-    AHistorySearchProcessor_Border2(const QString & what, const QString & cuts, int bins, double from, double to);
-    AHistorySearchProcessor_Border2(const QString & what, const QString & vsWhat, const QString & cuts, int bins1, double from1, double to1, int bins2, double from2, double to2);
-    virtual ~AHistorySearchProcessor_Border2();
+    AHistorySearchProcessor_Border(const QString & what,
+                                   const QString & cuts,
+                                   int bins, double from, double to);
+    AHistorySearchProcessor_Border(const QString & what, const QString & vsWhat,
+                                   const QString & cuts,
+                                   int bins, double from, double to);
+    AHistorySearchProcessor_Border(const QString & what, const QString & vsWhat,
+                                   const QString & cuts,
+                                   int bins1, double from1, double to1,
+                                   int bins2, double from2, double to2);
+    AHistorySearchProcessor_Border(const QString & what, const QString & vsWhat, const QString & andVsWhat,
+                                   const QString & cuts,
+                                   int bins1, double from1, double to1,
+                                   int bins2, double from2, double to2);
+    virtual ~AHistorySearchProcessor_Border();
 
     virtual void onTransition(const ATrackingStepData & tr, Direction ) override; // "from" step
 
@@ -132,6 +144,7 @@ public:
 
     TFormula * formulaWhat1 = nullptr;
     TFormula * formulaWhat2 = nullptr;
+    TFormula * formulaWhat3 = nullptr;
     TFormula * formulaCuts = nullptr;
 
     //double  x, y, z, time, energy, vx, vy, vz

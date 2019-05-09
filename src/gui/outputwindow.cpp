@@ -1837,7 +1837,7 @@ void OutputWindow::on_pbPTHistRequest_clicked()
                 message("No data", this);
             else
             {
-                MW->GraphWindow->Draw(p.Hist1D);
+                MW->GraphWindow->Draw(p.Hist1D, "hist");
                 p.Hist1D = nullptr;
             }
         }
@@ -1854,7 +1854,7 @@ void OutputWindow::on_pbPTHistRequest_clicked()
                     message("No data", this);
                 else
                 {
-                    MW->GraphWindow->Draw(p.Hist1D);
+                    MW->GraphWindow->Draw(p.Hist1D, "hist");
                     p.Hist1D = nullptr;
                 }
             }
@@ -1868,7 +1868,7 @@ void OutputWindow::on_pbPTHistRequest_clicked()
                     message("No data", this);
                 else
                 {
-                    MW->GraphWindow->Draw(p.Hist2D);
+                    MW->GraphWindow->Draw(p.Hist2D, "colz");
                     p.Hist2D = nullptr;
                 }
                 binsB2 = bins2;
@@ -1885,7 +1885,7 @@ void OutputWindow::on_pbPTHistRequest_clicked()
                     message("No data", this);
                 else
                 {
-                    MW->GraphWindow->Draw(p.Hist2D);
+                    MW->GraphWindow->Draw(p.Hist2D, "colz");
                     p.Hist2D = nullptr;
                 }
                 binsB2 = bins2;

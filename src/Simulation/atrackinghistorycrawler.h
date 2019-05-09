@@ -139,6 +139,8 @@ public:
 
     virtual void onTransition(const ATrackingStepData & tr, Direction ) override; // "from" step
 
+    void finalizeBeforeExtraction();
+
     QString ErrorString;  // after constructor, valid if ErrorString is empty
     bool bRequiresDirections = false;
 
@@ -151,7 +153,9 @@ public:
     //        0  1  2    3     4      5   6   7
     double par[8];
     TH1D * Hist1D = nullptr;
+    TH1D * Hist1Dnum = nullptr;
     TH2D * Hist2D = nullptr;
+    TH2D * Hist2Dnum = nullptr;
 
 private:
     TFormula * parse(QString & expr);

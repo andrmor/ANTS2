@@ -360,6 +360,8 @@ AHistorySearchProcessor_Border::AHistorySearchProcessor_Border(const QString &wh
                 title += ", with ";
                 title += cuts.toLocal8Bit().data();
                 Hist1D->SetTitle(title);
+
+                Hist1Dnum = new TH1D("", "", bins, from, to);
             }
         }
     }
@@ -456,6 +458,8 @@ AHistorySearchProcessor_Border::AHistorySearchProcessor_Border(const QString &wh
                         title += cuts.toLocal8Bit().data();
                     }
                     Hist2D->SetTitle(title);
+
+                    Hist2Dnum = new TH2D("", "", bins1, from1, to1, bins2, from2, to2);
                 }
             }
         }
@@ -498,6 +502,7 @@ void AHistorySearchProcessor_Border::onTransition(const ATrackingStepData &tr, A
         {
             double resX = formulaWhat2->EvalPar(nullptr, par);
             Hist1D->Fill(resX, res);
+            Hist1Dnum->Fill(resX);
         }
         else Hist1D->Fill(res);
     }
@@ -510,6 +515,7 @@ void AHistorySearchProcessor_Border::onTransition(const ATrackingStepData &tr, A
             double res2 = formulaWhat2->EvalPar(nullptr, par);
             double res3 = formulaWhat3->EvalPar(nullptr, par);
             Hist2D->Fill(res2, res3, res1);
+            Hist2Dnum->Fill(res2, res3);
         }
         else
         {
@@ -517,6 +523,25 @@ void AHistorySearchProcessor_Border::onTransition(const ATrackingStepData &tr, A
             double res1 = formulaWhat1->EvalPar(nullptr, par);
             double res2 = formulaWhat2->EvalPar(nullptr, par);
             Hist2D->Fill(res2, res1);
+        }
+    }
+}
+
+void AHistorySearchProcessor_Border::finalizeBeforeExtraction()
+{
+    if (Hist1D)
+    {
+        //1D case
+        if (formulaWhat2)
+        {
+            *Hist1D = *Hist1D / *Hist1Dnum;
+        }
+    }
+    else
+    {
+        if (formulaWhat3)
+        {
+            *Hist2D = *Hist2D / *Hist2Dnum;
         }
     }
 }

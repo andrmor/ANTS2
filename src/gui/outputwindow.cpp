@@ -1961,6 +1961,7 @@ void OutputWindow::updatePTHistoryBinControl()
     {
         //Border
         bool bVs = ui->cbPTHistBordVs->isChecked();
+        ui->lePTHistBordVsWhat->setEnabled(bVs);
         ui->cbPTHistBordAndVs->setEnabled(bVs);
         ui->lePTHistBordAndVsWhat->setEnabled(bVs);
         if (!bVs) ui->cbPTHistBordAndVs->setChecked(false);

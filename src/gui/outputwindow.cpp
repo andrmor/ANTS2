@@ -56,7 +56,9 @@ OutputWindow::OutputWindow(QWidget *parent, MainWindow *mw, EventsDataClass *eve
 
     QVector<QWidget*> vecDis;
     vecDis << ui->pbSiPMpixels << ui->sbTimeBin
-           << ui->lePTHistParticle << ui->cobPTHistVolMat << ui->lePTHistVolVolume << ui->sbPTHistVolIndex;
+           << ui->lePTHistParticle << ui->cobPTHistVolMat << ui->lePTHistVolVolume << ui->sbPTHistVolIndex
+           << ui->cobPTHistVolMatFrom << ui->cobPTHistVolMatTo << ui->lePTHistVolVolumeFrom << ui->lePTHistVolVolumeTo
+           << ui->sbPTHistVolIndexFrom << ui->sbPTHistVolIndexTo;
     for (QWidget * w : vecDis) w->setEnabled(false);
 
     QVector<QWidget*> vecInv;
@@ -1821,7 +1823,7 @@ void OutputWindow::on_pbPTHistRequest_clicked()
 
         bool bVs = ui->cbPTHistBordVs->isChecked();
         bool bVsVs = ui->cbPTHistBordAndVs->isChecked();
-        bool bStat = ui->cbPTHistBordAsStat->isChecked();
+        bool bAveraged = ui->cbPTHistBordAsStat->isChecked();
 
         int bins2 = ui->sbPTHistBinsY->value();
         double from2 = ui->ledPTHistFromY->text().toDouble();
@@ -1844,7 +1846,7 @@ void OutputWindow::on_pbPTHistRequest_clicked()
         else
         {
             // "vs" is activated
-            if (!bVsVs && !bStat)
+            if (!bVsVs && bAveraged)
             {
                 //1D vs
                 AHistorySearchProcessor_Border p(what, vsWhat, cuts, bins, from, to);
@@ -1854,11 +1856,12 @@ void OutputWindow::on_pbPTHistRequest_clicked()
                     message("No data", this);
                 else
                 {
+                    p.calculateAverage();
                     MW->GraphWindow->Draw(p.Hist1D, "hist");
                     p.Hist1D = nullptr;
                 }
             }
-            else if (!bVsVs && bStat)
+            else if (!bVsVs && !bAveraged)
             {
                 //2D stat
                 AHistorySearchProcessor_Border p(what, vsWhat, cuts, bins, from, to, bins2, from2, to2);
@@ -1885,6 +1888,7 @@ void OutputWindow::on_pbPTHistRequest_clicked()
                     message("No data", this);
                 else
                 {
+                    p.calculateAverage();
                     MW->GraphWindow->Draw(p.Hist2D, "colz");
                     p.Hist2D = nullptr;
                 }
@@ -1956,6 +1960,7 @@ void OutputWindow::updatePTHistoryBinControl()
     {
         //Volume
         ui->frPTHistX->setVisible( ui->cobPTHistVolRequestWhat->currentIndex() > 1 );
+        ui->frPTHistY->setVisible(false);
     }
     else
     {
@@ -1967,12 +1972,12 @@ void OutputWindow::updatePTHistoryBinControl()
         if (!bVs) ui->cbPTHistBordAndVs->setChecked(false);
 
         bool bVsVs = ui->cbPTHistBordAndVs->isChecked();
-        if (bVsVs) ui->cbPTHistBordAsStat->setChecked(false);
-        ui->cbPTHistBordAsStat->setEnabled(bVs && ! bVsVs);
-        bool bStat = ui->cbPTHistBordAsStat->isChecked();
+        if (bVsVs) ui->cbPTHistBordAsStat->setChecked(true);
+        ui->cbPTHistBordAsStat->setEnabled(bVs && !bVsVs);
+        bool bAveraged = ui->cbPTHistBordAsStat->isChecked();
 
         ui->frPTHistX->setVisible(true);
-        ui->frPTHistY->setVisible(bVsVs || (bVs && bStat));
+        ui->frPTHistY->setVisible(bVsVs || (bVs && !bAveraged));
     }
 }
 
@@ -1982,6 +1987,11 @@ void OutputWindow::on_cbPTHistBordVs_toggled(bool)
 }
 
 void OutputWindow::on_cbPTHistBordAndVs_toggled(bool)
+{
+    updatePTHistoryBinControl();
+}
+
+void OutputWindow::on_cbPTHistBordAsStat_toggled(bool)
 {
     updatePTHistoryBinControl();
 }

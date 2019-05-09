@@ -139,7 +139,7 @@ public:
 
     virtual void onTransition(const ATrackingStepData & tr, Direction ) override; // "from" step
 
-    void finalizeBeforeExtraction();
+    void calculateAverage();
 
     QString ErrorString;  // after constructor, valid if ErrorString is empty
     bool bRequiresDirections = false;

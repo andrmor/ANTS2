@@ -101,6 +101,8 @@ private slots:
 
     void on_cbPTHistBordAndVs_toggled(bool checked);
 
+    void on_cbPTHistBordAsStat_toggled(bool checked);
+
 private:
     Ui::OutputWindow *ui;
     MainWindow* MW;

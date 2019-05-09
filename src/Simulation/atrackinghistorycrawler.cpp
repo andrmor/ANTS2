@@ -502,7 +502,7 @@ void AHistorySearchProcessor_Border::onTransition(const ATrackingStepData &tr, A
         {
             double resX = formulaWhat2->EvalPar(nullptr, par);
             Hist1D->Fill(resX, res);
-            Hist1Dnum->Fill(resX);
+            Hist1Dnum->Fill(resX, 1.0);
         }
         else Hist1D->Fill(res);
     }
@@ -515,7 +515,7 @@ void AHistorySearchProcessor_Border::onTransition(const ATrackingStepData &tr, A
             double res2 = formulaWhat2->EvalPar(nullptr, par);
             double res3 = formulaWhat3->EvalPar(nullptr, par);
             Hist2D->Fill(res2, res3, res1);
-            Hist2Dnum->Fill(res2, res3);
+            Hist2Dnum->Fill(res2, res3, 1.0);
         }
         else
         {
@@ -527,7 +527,7 @@ void AHistorySearchProcessor_Border::onTransition(const ATrackingStepData &tr, A
     }
 }
 
-void AHistorySearchProcessor_Border::finalizeBeforeExtraction()
+void AHistorySearchProcessor_Border::calculateAverage()
 {
     if (Hist1D)
     {

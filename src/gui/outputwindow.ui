@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>635</width>
+    <width>1115</width>
     <height>687</height>
    </rect>
   </property>
@@ -875,7 +875,7 @@ over all events</string>
            </size>
           </property>
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="tab_3">
            <attribute name="title">
@@ -1051,85 +1051,76 @@ over all events</string>
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_20">
               <item>
-               <widget class="QLineEdit" name="lePTHistBordWhat">
-                <property name="toolTip">
-                 <string>X, Y, Z, Time, Energy, Vx, Vy, Vz
+               <layout class="QVBoxLayout" name="verticalLayout_31">
+                <property name="leftMargin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QLineEdit" name="lePTHistBordWhat">
+                  <property name="toolTip">
+                   <string>X, Y, Z, Time, Energy, Vx, Vy, Vz
 and any mathematical/logical operations
 See ROOT TFormula description</string>
-                </property>
-                <property name="text">
-                 <string>Energy</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QCheckBox" name="cbPTHistBordVs">
-                <property name="text">
-                 <string>vs:</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="lePTHistBordVsWhat">
-                <property name="toolTip">
-                 <string>X, Y, Z, Time, Energy, Vx, Vy, Vz
-and any mathematical/logical operations
-See ROOT TFormula description</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QCheckBox" name="cbPTHistBordAsStat">
-                <property name="toolTip">
-                 <string>Collects statistics and shows as the 3rd dimension:
+                  </property>
+                  <property name="text">
+                   <string>Energy</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="cbPTHistBordAsStat">
+                  <property name="toolTip">
+                   <string>Collects statistics and shows as the 3rd dimension:
 For example, X vsY will show a map of how many times a particular (X,Y) appears in the data</string>
+                  </property>
+                  <property name="text">
+                   <string>average per bin</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QVBoxLayout" name="verticalLayout_29">
+                <property name="leftMargin">
+                 <number>0</number>
                 </property>
-                <property name="text">
-                 <string>as statistics</string>
+                <item>
+                 <widget class="QCheckBox" name="cbPTHistBordVs">
+                  <property name="text">
+                   <string>vs:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="cbPTHistBordAndVs">
+                  <property name="text">
+                   <string>and vs (3D):</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QVBoxLayout" name="verticalLayout_30">
+                <property name="leftMargin">
+                 <number>0</number>
                 </property>
-               </widget>
+                <item>
+                 <widget class="QLineEdit" name="lePTHistBordVsWhat">
+                  <property name="toolTip">
+                   <string>X, Y, Z, Time, Energy, Vx, Vy, Vz
+and any mathematical/logical operations
+See ROOT TFormula description</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="lePTHistBordAndVsWhat"/>
+                </item>
+               </layout>
               </item>
              </layout>
-            </item>
-            <item>
-             <widget class="QFrame" name="frame_4">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="frameShape">
-               <enum>QFrame::NoFrame</enum>
-              </property>
-              <property name="frameShadow">
-               <enum>QFrame::Raised</enum>
-              </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_28">
-               <property name="leftMargin">
-                <number>0</number>
-               </property>
-               <property name="topMargin">
-                <number>0</number>
-               </property>
-               <property name="rightMargin">
-                <number>0</number>
-               </property>
-               <property name="bottomMargin">
-                <number>0</number>
-               </property>
-               <item>
-                <widget class="QCheckBox" name="cbPTHistBordAndVs">
-                 <property name="text">
-                  <string>and vs (3D):</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLineEdit" name="lePTHistBordAndVsWhat"/>
-               </item>
-              </layout>
-             </widget>
             </item>
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -1221,6 +1212,45 @@ See ROOT TFormula description</string>
                </layout>
               </item>
               <item>
+               <spacer name="horizontalSpacer_27">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_28">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_29">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
                <spacer name="horizontalSpacer_26">
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
@@ -1255,7 +1285,7 @@ See ROOT TFormula description</string>
                 <item>
                  <widget class="QCheckBox" name="cbPTHistVolIndexTo">
                   <property name="text">
-                   <string>Limit volume index to:</string>
+                   <string>Limit vol index to:</string>
                   </property>
                  </widget>
                 </item>
@@ -1556,7 +1586,7 @@ See ROOT TFormula description</string>
            <widget class="QPushButton" name="pbPTHistRequest">
             <property name="minimumSize">
              <size>
-              <width>150</width>
+              <width>200</width>
               <height>0</height>
              </size>
             </property>
@@ -2604,12 +2634,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>124</x>
-     <y>257</y>
+     <x>61</x>
+     <y>229</y>
     </hint>
     <hint type="destinationlabel">
-     <x>124</x>
-     <y>257</y>
+     <x>98</x>
+     <y>229</y>
     </hint>
    </hints>
   </connection>
@@ -2620,12 +2650,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>124</x>
-     <y>257</y>
+     <x>61</x>
+     <y>231</y>
     </hint>
     <hint type="destinationlabel">
-     <x>124</x>
-     <y>257</y>
+     <x>98</x>
+     <y>231</y>
     </hint>
    </hints>
   </connection>
@@ -2636,12 +2666,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>124</x>
-     <y>257</y>
+     <x>61</x>
+     <y>232</y>
     </hint>
     <hint type="destinationlabel">
-     <x>124</x>
-     <y>257</y>
+     <x>98</x>
+     <y>232</y>
     </hint>
    </hints>
   </connection>
@@ -2674,6 +2704,102 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
     <hint type="destinationlabel">
      <x>363</x>
      <y>367</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbPTHistVolMatFrom</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>cobPTHistVolMatFrom</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>151</x>
+     <y>335</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>243</x>
+     <y>332</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbPTHistVolVolumeFrom</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lePTHistVolVolumeFrom</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>138</x>
+     <y>364</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>245</x>
+     <y>365</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbPTHistVolIndexFrom</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>sbPTHistVolIndexFrom</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>153</x>
+     <y>395</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>253</x>
+     <y>393</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbPTHistVolMatTo</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>cobPTHistVolMatTo</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>420</x>
+     <y>339</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>557</x>
+     <y>335</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbPTHistVolVolumeTo</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lePTHistVolVolumeTo</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>436</x>
+     <y>358</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>564</x>
+     <y>357</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbPTHistVolIndexTo</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>sbPTHistVolIndexTo</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>437</x>
+     <y>393</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>537</x>
+     <y>391</y>
     </hint>
    </hints>
   </connection>

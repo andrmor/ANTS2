@@ -1968,11 +1968,11 @@ void OutputWindow::updatePTHistoryBinControl()
         bool bVs = ui->cbPTHistBordVs->isChecked();
         ui->lePTHistBordVsWhat->setEnabled(bVs);
         ui->cbPTHistBordAndVs->setEnabled(bVs);
-        ui->lePTHistBordAndVsWhat->setEnabled(bVs);
         if (!bVs) ui->cbPTHistBordAndVs->setChecked(false);
 
         bool bVsVs = ui->cbPTHistBordAndVs->isChecked();
         if (bVsVs) ui->cbPTHistBordAsStat->setChecked(true);
+        ui->lePTHistBordAndVsWhat->setEnabled(bVs && bVsVs);
         ui->cbPTHistBordAsStat->setEnabled(bVs && !bVsVs);
         bool bAveraged = ui->cbPTHistBordAsStat->isChecked();
 

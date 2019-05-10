@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1115</width>
-    <height>687</height>
+    <width>717</width>
+    <height>709</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -875,7 +875,7 @@ over all events</string>
            </size>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="tab_3">
            <attribute name="title">

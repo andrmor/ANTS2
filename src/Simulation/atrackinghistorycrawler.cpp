@@ -553,14 +553,18 @@ void AHistorySearchProcessor_Border::afterSearch()
         //1D case
         if (formulaWhat2)
         {
+            int numEntr = Hist1D->GetEntries();
             *Hist1D = *Hist1D / *Hist1Dnum;
+            Hist1D->SetEntries(numEntr);
         }
     }
     else
     {
         if (formulaWhat3)
         {
+            int numEntr = Hist2D->GetEntries();
             *Hist2D = *Hist2D / *Hist2Dnum;
+            Hist2D->SetEntries(numEntr);
         }
     }
 }

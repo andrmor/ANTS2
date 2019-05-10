@@ -329,27 +329,6 @@ QVariantList APTHistory_SI::findDepositedEnergies(int bins, double from, double 
 QVariantList APTHistory_SI::findTravelledDistances(int bins, double from, double to)
 {
     AHistorySearchProcessor_findTravelledDistances p(bins, from, to);
-
-    AFindRecordSelector tmp = *Criteria;
-
-    //updating criteria to have independent entrance/exit checks
-    Criteria->bInOutSeparately = true;
-    //copy good volume parameters to both from and in
-    Criteria->bFromMat = Criteria->bMaterial;
-    Criteria->bToMat   = Criteria->bMaterial;
-    Criteria->FromMat = Criteria->Material;
-    Criteria->ToMat   = Criteria->Material;
-
-    Criteria->bFromVolume = Criteria->bVolume;
-    Criteria->bToVolume   = Criteria->bVolume;
-    Criteria->FromVolume = Criteria->Volume;
-    Criteria->ToVolume   = Criteria->Volume;
-
-    Criteria->bFromVolIndex = Criteria->bVolumeIndex;
-    Criteria->bToVolIndex   = Criteria->bVolumeIndex;
-    Criteria->FromVolIndex = Criteria->VolumeIndex;
-    Criteria->ToVolIndex   = Criteria->VolumeIndex;
-
     Crawler->find(*Criteria, p);
 
     QVariantList vl;
@@ -360,8 +339,6 @@ QVariantList APTHistory_SI::findTravelledDistances(int bins, double from, double
         el << p.Hist->GetBinCenter(iBin) << p.Hist->GetBinContent(iBin);
         vl.push_back(el);
     }
-
-    *Criteria = tmp;
     return vl;
 }
 

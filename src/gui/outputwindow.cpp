@@ -1718,7 +1718,7 @@ void OutputWindow::on_pbPTHistRequest_clicked()
 
             QMap<QString, int>::const_iterator it = p.FoundProcesses.constBegin();
             ui->ptePTHist->clear();
-            ui->ptePTHist->appendPlainText("Particles found:\n");
+            ui->ptePTHist->appendPlainText("Processes found:\n");
             while (it != p.FoundProcesses.constEnd())
             {
                 ui->ptePTHist->appendPlainText(QString("%1   %2 times").arg(it.key()).arg(it.value()));
@@ -1729,25 +1729,6 @@ void OutputWindow::on_pbPTHistRequest_clicked()
         case 2:
           {
             AHistorySearchProcessor_findTravelledDistances p(bins, from, to);
-
-            //updating criteria to have independent entrance/exit checks
-            Opt.bInOutSeparately = true;
-            //copy good volume parameters to both from and in
-            Opt.bFromMat = Opt.bMaterial;
-            Opt.bToMat   = Opt.bMaterial;
-            Opt.FromMat = Opt.Material;
-            Opt.ToMat   = Opt.Material;
-
-            Opt.bFromVolume = Opt.bVolume;
-            Opt.bToVolume   = Opt.bVolume;
-            Opt.FromVolume = Opt.Volume;
-            Opt.ToVolume   = Opt.Volume;
-
-            Opt.bFromVolIndex = Opt.bVolumeIndex;
-            Opt.bToVolIndex   = Opt.bVolumeIndex;
-            Opt.FromVolIndex = Opt.VolumeIndex;
-            Opt.ToVolIndex   = Opt.VolumeIndex;
-
             Crawler.find(Opt, p);
 
             if (p.Hist->GetEntries() == 0)

@@ -43,6 +43,11 @@ class AHistorySearchProcessor
 public:
     virtual ~AHistorySearchProcessor(){}
 
+    virtual void beforeSearch(){}
+    virtual void afterSearch(){}
+
+    // ---------------
+
     virtual void onNewEvent(){}
     virtual void onNewTrack(const AParticleTrackingRecord & ){}
 
@@ -54,7 +59,6 @@ public:
 
     virtual void onTrackEnd(){}
     virtual void onEventEnd(){}
-
 };
 
 class AHistorySearchProcessor_findParticles : public AHistorySearchProcessor
@@ -74,11 +78,14 @@ public:
 class AHistorySearchProcessor_findProcesses : public AHistorySearchProcessor
 {
 public:
-    //virtual ~AHistorySearchProcessor_findProcesses(){}
+    virtual ~AHistorySearchProcessor_findProcesses(){}
 
-    //virtual void onParticle(const AParticleTrackingRecord & pr);
+    virtual void beforeSearch();
+    virtual void afterSearch();
+
     virtual void onLocalStep(const ATrackingStepData & tr) override;
-    //virtual void onTrackEnd() override;
+    virtual void onTransitionOut(const ATrackingStepData & );
+    virtual void onTransitionIn (const ATrackingStepData & );
 
     QMap<QString, int> FoundProcesses;
 };
@@ -178,7 +185,6 @@ public:
     bool bSecondary = false;
 
   //transportation
-    bool bInOutSeparately = false; // if true, "in" and "out" conditions will be checked independently (both can trigger processor call)
     //from
     bool bFromMat = false;
     bool bFromVolume = false;

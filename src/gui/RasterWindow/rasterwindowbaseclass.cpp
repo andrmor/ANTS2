@@ -28,6 +28,8 @@ RasterWindowBaseClass::RasterWindowBaseClass(QMainWindow *MasterWindow) : QWidge
   //TQObject::Connect("TGPopupMenu", "PoppedDown()", "TCanvas", fCanvas, "Update()");
 
   fCanvas->SetBorderMode(0);
+  //fCanvas->SetRightMargin(0.10);
+  //fCanvas->SetLeftMargin(0.10);
   fCanvas->SetFillColor(0);
 
   qDebug() << "  ->Root canvas created";

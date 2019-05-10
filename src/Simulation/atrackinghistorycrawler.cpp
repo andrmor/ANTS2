@@ -14,6 +14,8 @@ ATrackingHistoryCrawler::ATrackingHistoryCrawler(const std::vector<AEventTrackin
 
 void ATrackingHistoryCrawler::find(const AFindRecordSelector & criteria, AHistorySearchProcessor & processor) const
 {
+    processor.beforeSearch();
+
     //int iEv = 0;
     for (const AEventTrackingRecord * e : History)
     {
@@ -26,6 +28,8 @@ void ATrackingHistoryCrawler::find(const AFindRecordSelector & criteria, AHistor
 
         processor.onEventEnd();
     }
+
+    processor.afterSearch();
 }
 
 void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, const AFindRecordSelector & opt, AHistorySearchProcessor & processor) const
@@ -52,8 +56,8 @@ void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, 
     {
         const ATrackingStepData * thisStep = steps[iStep];
 
-        //different handling of Transportation ("T", "O") and other processes
-        // Creation ("C") is checked as both "Transportation" and "Other" type process
+        // different handling of Transportation ("T", "O") and all other processes
+        // Creation ("C") is checked as both "Transportation" and all other type process
 
         ProcessType ProcType;
         if      (thisStep->Process == "C") ProcType = Creation;
@@ -63,6 +67,10 @@ void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, 
 
         if (ProcType == Creation || ProcType == NormalTransportation || ProcType == ExitingWorld)
         {
+            // two different checks:
+            // 1. for specific transitions from - to
+            // 2. for enter / exit of the defined volume/mat/index
+
             bool bExitValidated;
             if (ProcType != Creation)
             {
@@ -87,7 +95,7 @@ void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, 
             if (bCheckingEnter)
             {
                 //const ATrackingStepData * nextStep = (ProcType == ExitingWorld ? nullptr : steps[iStep+1]);
-                const ATrackingStepData * nextStep = (iStep == steps.size()-1 ? nullptr : steps[iStep+1]); // there could be "T" as the last step!
+                const ATrackingStepData * nextStep = (iStep == steps.size()-1 ? nullptr : steps[iStep+1]); // there could be "T" as the last step or exit from world
                 if (nextStep && thisStep->GeoNode)
                 {
                     const bool bRejectedByMaterial = (opt.bToMat      && opt.ToMat      != nextStep->GeoNode->GetVolume()->GetMaterial()->GetIndex());
@@ -99,23 +107,58 @@ void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, 
             }
             else bEntranceValidated = true;
 
-            if (opt.bInOutSeparately)
-            {
-                if (bExitValidated)
-                    processor.onTransitionOut(*thisStep);
-                if (bEntranceValidated )
-                    processor.onTransitionIn(*thisStep);
-            }
-            else
-            {
-                const ATrackingStepData * prevStep = (iStep == 0 ? nullptr : steps[iStep-1]); // to safe-guard against handling "Creation" here
+            // if transition validated, calling onTransition (+paranoic test on existence of the prevStep - for Creation exit is always not validated
+            const ATrackingStepData * prevStep = (iStep == 0 ? nullptr : steps[iStep-1]);
+            if (bExitValidated && bEntranceValidated && prevStep)
+                processor.onTransition(*prevStep, *thisStep); // not the "next" step here! this is just to extract direction information
 
-                if (bExitValidated && bEntranceValidated && prevStep)
-                    processor.onTransition(*prevStep, *thisStep); // not the "next" step here! this is just to extract direction information
+
+            //checking for specific material/volume/index for enter/exit
+            //out
+            if (ProcType != Creation)
+            {
+                const bool bCheckingExit = (opt.bMaterial || opt.bVolume || opt.bVolumeIndex);
+                if (bCheckingExit)
+                {
+                    if (thisStep->GeoNode)
+                    {
+                        const bool bRejectedByMaterial = (opt.bMaterial    && opt.Material    != thisStep->GeoNode->GetVolume()->GetMaterial()->GetIndex());
+                        const bool bRejectedByVolName  = (opt.bVolume      && opt.Volume      != thisStep->GeoNode->GetVolume()->GetName());
+                        const bool bRejectedByVolIndex = (opt.bVolumeIndex && opt.VolumeIndex != thisStep->GeoNode->GetIndex());
+                        bExitValidated = !(bRejectedByMaterial || bRejectedByVolName || bRejectedByVolIndex);
+                    }
+                    else bExitValidated = false;
+                }
+                else bExitValidated = true;
+
+                if (bExitValidated) processor.onTransitionOut(*thisStep);
+            }
+            //in
+            if (ProcType != ExitingWorld)
+            {
+                bool bEntranceValidated;
+                const bool bCheckingEnter = (opt.bMaterial || opt.bVolume || opt.bVolumeIndex);
+                if (bCheckingEnter)
+                {
+                    //const ATrackingStepData * nextStep = (ProcType == ExitingWorld ? nullptr : steps[iStep+1]);
+                    const ATrackingStepData * nextStep = (iStep == steps.size()-1 ? nullptr : steps[iStep+1]); // there could be "T" as the last step!
+                    if (nextStep && thisStep->GeoNode)
+                    {
+                        const bool bRejectedByMaterial = (opt.bMaterial    && opt.Material    != nextStep->GeoNode->GetVolume()->GetMaterial()->GetIndex());
+                        const bool bRejectedByVolName  = (opt.bVolume      && opt.Volume      != nextStep->GeoNode->GetVolume()->GetName());
+                        const bool bRejectedByVolIndex = (opt.bVolumeIndex && opt.VolumeIndex != nextStep->GeoNode->GetIndex());
+                        bEntranceValidated = !(bRejectedByMaterial || bRejectedByVolName || bRejectedByVolIndex);
+                    }
+                    else bEntranceValidated = false;
+                }
+                else bEntranceValidated = true;
+
+                if (bEntranceValidated ) processor.onTransitionIn(*thisStep);
             }
         }
 
-        if (ProcType != NormalTransportation && ProcType != ExitingWorld)
+        // Local step or Creation (Creation is treated again -> this time as it would be a local step)
+        if (ProcType == Local || ProcType == Creation)
         {
             if (opt.bMaterial)
             {
@@ -286,12 +329,38 @@ void AHistorySearchProcessor_findTravelledDistances::onTrackEnd()
     Distance = 0;
 }
 
+void AHistorySearchProcessor_findProcesses::beforeSearch()
+{
+
+}
+
+void AHistorySearchProcessor_findProcesses::afterSearch()
+{
+
+}
+
 void AHistorySearchProcessor_findProcesses::onLocalStep(const ATrackingStepData &tr)
 {
     const QString & Proc = tr.Process;
     QMap<QString, int>::iterator it = FoundProcesses.find(Proc);
     if (it == FoundProcesses.end())
         FoundProcesses.insert(Proc, 1);
+    else it.value()++;
+}
+
+void AHistorySearchProcessor_findProcesses::onTransitionOut(const ATrackingStepData &)
+{
+    QMap<QString, int>::iterator it = FoundProcesses.find("Out");
+    if (it == FoundProcesses.end())
+        FoundProcesses.insert("Out", 1);
+    else it.value()++;
+}
+
+void AHistorySearchProcessor_findProcesses::onTransitionIn(const ATrackingStepData &)
+{
+    QMap<QString, int>::iterator it = FoundProcesses.find("In");
+    if (it == FoundProcesses.end())
+        FoundProcesses.insert("In", 1);
     else it.value()++;
 }
 

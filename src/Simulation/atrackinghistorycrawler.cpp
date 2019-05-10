@@ -544,6 +544,27 @@ AHistorySearchProcessor_Border::~AHistorySearchProcessor_Border()
     delete Hist2D;
 }
 
+void AHistorySearchProcessor_Border::afterSearch()
+{
+    //calculating average of the bins for two cases
+
+    if (Hist1D)
+    {
+        //1D case
+        if (formulaWhat2)
+        {
+            *Hist1D = *Hist1D / *Hist1Dnum;
+        }
+    }
+    else
+    {
+        if (formulaWhat3)
+        {
+            *Hist2D = *Hist2D / *Hist2Dnum;
+        }
+    }
+}
+
 void AHistorySearchProcessor_Border::onTransition(const ATrackingStepData &fromfromTr, const ATrackingStepData &fromTr)
 {
     //double  x, y, z, time, energy, vx, vy, vz
@@ -613,25 +634,6 @@ void AHistorySearchProcessor_Border::onTransition(const ATrackingStepData &fromf
             double res1 = formulaWhat1->EvalPar(nullptr, par);
             double res2 = formulaWhat2->EvalPar(nullptr, par);
             Hist2D->Fill(res2, res1);
-        }
-    }
-}
-
-void AHistorySearchProcessor_Border::calculateAverage()
-{
-    if (Hist1D)
-    {
-        //1D case
-        if (formulaWhat2)
-        {
-            *Hist1D = *Hist1D / *Hist1Dnum;
-        }
-    }
-    else
-    {
-        if (formulaWhat3)
-        {
-            *Hist2D = *Hist2D / *Hist2Dnum;
         }
     }
 }

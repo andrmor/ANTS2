@@ -147,10 +147,10 @@ public:
                                    int bins2, double from2, double to2);
     virtual ~AHistorySearchProcessor_Border();
 
+    virtual void afterSearch();
+
     // direction info can be [0,0,0] !!!
     virtual void onTransition(const ATrackingStepData & fromfromTr, const ATrackingStepData & fromTr) override; // "from" step
-
-    void calculateAverage();
 
     QString ErrorString;  // after constructor, valid if ErrorString is empty
     bool bRequiresDirections = false;

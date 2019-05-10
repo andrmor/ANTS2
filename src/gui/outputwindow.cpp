@@ -1837,7 +1837,6 @@ void OutputWindow::on_pbPTHistRequest_clicked()
                     message("No data", this);
                 else
                 {
-                    p.calculateAverage();
                     MW->GraphWindow->Draw(p.Hist1D, "hist");
                     p.Hist1D = nullptr;
                 }
@@ -1869,7 +1868,6 @@ void OutputWindow::on_pbPTHistRequest_clicked()
                     message("No data", this);
                 else
                 {
-                    p.calculateAverage();
                     MW->GraphWindow->Draw(p.Hist2D, "colz");
                     p.Hist2D = nullptr;
                 }

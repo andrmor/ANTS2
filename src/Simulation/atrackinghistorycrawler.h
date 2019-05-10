@@ -47,8 +47,10 @@ public:
     virtual void onNewTrack(const AParticleTrackingRecord & ){}
 
     virtual void onLocalStep(const ATrackingStepData & ){} // anything but transportation
-    enum Direction {OUT, IN, OUT_IN};
-    virtual void onTransition(const ATrackingStepData & , Direction ){} // "from" step
+
+    virtual void onTransitionOut(const ATrackingStepData & ){} // "from" step
+    virtual void onTransitionIn (const ATrackingStepData & ){} // "from" step
+    virtual void onTransition(const ATrackingStepData & , const ATrackingStepData & ){} // "fromfrom" step, "from" step - "Creation" step cannot call this method!
 
     virtual void onTrackEnd(){}
     virtual void onEventEnd(){}
@@ -109,7 +111,8 @@ public:
 
     virtual void onNewTrack(const AParticleTrackingRecord & pr);
     virtual void onLocalStep(const ATrackingStepData & tr) override;
-    virtual void onTransition(const ATrackingStepData & tr, Direction direction); // "from" step
+    virtual void onTransitionOut(const ATrackingStepData & tr); // "from" step
+    virtual void onTransitionIn (const ATrackingStepData & tr); // "from" step
     virtual void onTrackEnd() override;
 
     float Distance = 0;
@@ -137,7 +140,8 @@ public:
                                    int bins2, double from2, double to2);
     virtual ~AHistorySearchProcessor_Border();
 
-    virtual void onTransition(const ATrackingStepData & tr, Direction ) override; // "from" step
+    // direction info can be [0,0,0] !!!
+    virtual void onTransition(const ATrackingStepData & fromfromTr, const ATrackingStepData & fromTr) override; // "from" step
 
     void calculateAverage();
 

@@ -102,14 +102,16 @@ void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, 
             if (opt.bInOutSeparately)
             {
                 if (bExitValidated)
-                    processor.onTransition(*thisStep, AHistorySearchProcessor::OUT);
+                    processor.onTransitionOut(*thisStep);
                 if (bEntranceValidated )
-                    processor.onTransition(*thisStep, AHistorySearchProcessor::IN);
+                    processor.onTransitionIn(*thisStep);
             }
             else
             {
-                if (bExitValidated && bEntranceValidated)
-                    processor.onTransition(*thisStep, AHistorySearchProcessor::OUT_IN);
+                const ATrackingStepData * prevStep = (iStep == 0 ? nullptr : steps[iStep-1]); // to safe-guard against handling "Creation" here
+
+                if (bExitValidated && bEntranceValidated && prevStep)
+                    processor.onTransition(*prevStep, *thisStep); // not the "next" step here! this is just to extract direction information
             }
         }
 
@@ -259,25 +261,23 @@ void AHistorySearchProcessor_findTravelledDistances::onLocalStep(const ATracking
     }
 }
 
-void AHistorySearchProcessor_findTravelledDistances::onTransition(const ATrackingStepData &tr, AHistorySearchProcessor::Direction direction)
+void AHistorySearchProcessor_findTravelledDistances::onTransitionOut(const ATrackingStepData &tr)
 {
-    if (direction == IN)
+    bStarted = false;
+    float d2 = 0;
+    for (int i=0; i<3; i++)
     {
-        bStarted = true;
-        for (int i=0; i<3; i++)
-            LastPosition[i] = tr.Position[i];
+        const float delta = LastPosition[i] - tr.Position[i];
+        d2 += delta * delta;
     }
-    else if (direction == OUT)
-    {
-        bStarted = false;
-        float d2 = 0;
-        for (int i=0; i<3; i++)
-        {
-            const float delta = LastPosition[i] - tr.Position[i];
-            d2 += delta * delta;
-        }
-        Distance += sqrt(d2);
-    }
+    Distance += sqrt(d2);
+}
+
+void AHistorySearchProcessor_findTravelledDistances::onTransitionIn(const ATrackingStepData &tr)
+{
+    bStarted = true;
+    for (int i=0; i<3; i++)
+        LastPosition[i] = tr.Position[i];
 }
 
 void AHistorySearchProcessor_findTravelledDistances::onTrackEnd()
@@ -475,17 +475,38 @@ AHistorySearchProcessor_Border::~AHistorySearchProcessor_Border()
     delete Hist2D;
 }
 
-void AHistorySearchProcessor_Border::onTransition(const ATrackingStepData &tr, AHistorySearchProcessor::Direction)
+void AHistorySearchProcessor_Border::onTransition(const ATrackingStepData &fromfromTr, const ATrackingStepData &fromTr)
 {
-    par[0] = tr.Position[0];
-    par[1] = tr.Position[1];
-    par[2] = tr.Position[2];
-    par[3] = tr.Time;
-    par[4] = tr.Energy;
+    //double  x, y, z, time, energy, vx, vy, vz
+    //        0  1  2    3     4      5   6   7
+
+    par[0] = fromTr.Position[0];
+    par[1] = fromTr.Position[1];
+    par[2] = fromTr.Position[2];
+    par[3] = fromTr.Time;
+    par[4] = fromTr.Energy;
 
     if (bRequiresDirections)
     {
-        //get direction
+        double sum2 = 0;
+        for (int i=0; i<3; i++)
+        {
+            const double delta = fromTr.Position[i] - fromfromTr.Position[i];
+            sum2 += delta * delta;
+        }
+        double length = sqrt(sum2);
+
+        if (length == 0)
+        {
+            par[5] = 0;
+            par[6] = 0;
+            par[7] = 0;
+        }
+        else
+        {
+            for (int i=0; i<3; i++)
+                par[5+i] = (fromTr.Position[i] - fromfromTr.Position[i]) / length;
+        }
     }
 
     if (formulaCuts)
@@ -550,6 +571,18 @@ TFormula *AHistorySearchProcessor_Border::parse(QString & expr)
 {
     //double  x, y, z, time, energy, vx, vy, vz
     //        0  1  2    3     4      5   6   7
+
+    expr.replace("X", "[0]");
+    expr.replace("Y", "[1]");
+    expr.replace("Z", "[2]");
+
+    expr.replace("Time", "[3]");
+    expr.replace("time", "[3]");
+
+    expr.replace("Energy", "[4]");
+    expr.replace("energy", "[4]");
+
+    bRequiresDirections = false;
     if (expr.contains("VX") || expr.contains("VY") || expr.contains("VZ")) bRequiresDirections = true;
     if (expr.contains("Vx") || expr.contains("Vy") || expr.contains("Vz")) bRequiresDirections = true;
     expr.replace("Vx", "[5]");
@@ -558,13 +591,6 @@ TFormula *AHistorySearchProcessor_Border::parse(QString & expr)
     expr.replace("VY", "[6]");
     expr.replace("Vz", "[7]");
     expr.replace("VZ", "[7]");
-    expr.replace("X", "[0]");
-    expr.replace("Y", "[1]");
-    expr.replace("Z", "[2]");
-    expr.replace("Time", "[3]");
-    expr.replace("time", "[3]");
-    expr.replace("Energy", "[4]");
-    expr.replace("energy", "[4]");
 
     TFormula * f = new TFormula("", expr.toLocal8Bit().data());
     if (f && f->IsValid()) return f;

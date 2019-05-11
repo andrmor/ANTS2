@@ -34,155 +34,159 @@ void ATrackingHistoryCrawler::find(const AFindRecordSelector & criteria, AHistor
 
 void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, const AFindRecordSelector & opt, AHistorySearchProcessor & processor) const
 {
-    //int iSec = 0;
-    const std::vector<AParticleTrackingRecord *> & secondaries = pr.getSecondaries();
-    for (AParticleTrackingRecord * sec : secondaries)
+    bool bDoTrack = true;
+    if      (opt.bParticle && opt.Particle != pr.ParticleName) bDoTrack = false;
+    else if (opt.bPrimary && pr.getSecondaryOf() ) bDoTrack = false;
+    else if (opt.bSecondary && !pr.getSecondaryOf() ) bDoTrack = false;
+
+    bool bSkipTrackingOfSecondaries = false;
+    AParticleTrackingRecord * lastSecondaryToTrack = nullptr;
+
+    if (bDoTrack)
     {
-        //qDebug() << "Sec #"<<iSec;
-        findRecursive(*sec, opt, processor);
-        //qDebug() << "Sec done"<<iSec++;
-    }
+        processor.onNewTrack(pr);
 
-    //qDebug() << pr.ParticleName;
-
-    if (opt.bParticle && opt.Particle != pr.ParticleName) return;
-    if (opt.bPrimary && pr.getSecondaryOf() ) return;
-    if (opt.bSecondary && !pr.getSecondaryOf() ) return;
-
-    processor.onNewTrack(pr);
-
-    const std::vector<ATrackingStepData *> & steps = pr.getSteps();
-    for (size_t iStep = 0; iStep < steps.size(); iStep++)
-    {
-        const ATrackingStepData * thisStep = steps[iStep];
-
-        // different handling of Transportation ("T", "O") and all other processes
-        // Creation ("C") is checked as both "Transportation" and all other type process
-
-        ProcessType ProcType;
-        if      (thisStep->Process == "C") ProcType = Creation;
-        else if (thisStep->Process == "T") ProcType = NormalTransportation;
-        else if (thisStep->Process == "O") ProcType = ExitingWorld;
-        else                               ProcType = Local;
-
-        if (ProcType == Creation || ProcType == NormalTransportation || ProcType == ExitingWorld)
+        const std::vector<ATrackingStepData *> & steps = pr.getSteps();
+        for (size_t iStep = 0; iStep < steps.size(); iStep++)
         {
-            // two different checks:
-            // 1. for specific transitions from - to
-            // 2. for enter / exit of the defined volume/mat/index
+            const ATrackingStepData * thisStep = steps[iStep];
 
-            bool bExitValidated;
-            if (ProcType != Creation)
+            // different handling of Transportation ("T", "O") and all other processes
+            // Creation ("C") is checked as both "Transportation" and all other type process
+
+            ProcessType ProcType;
+            if      (thisStep->Process == "C") ProcType = Creation;
+            else if (thisStep->Process == "T") ProcType = NormalTransportation;
+            else if (thisStep->Process == "O") ProcType = ExitingWorld;
+            else                               ProcType = Local;
+
+            if (ProcType == Creation || ProcType == NormalTransportation || ProcType == ExitingWorld)
             {
-                const bool bCheckingExit = (opt.bFromMat || opt.bFromVolume || opt.bFromVolIndex);
-                if (bCheckingExit)
+                // two different checks:
+                // 1. for specific transitions from - to
+                // 2. for enter / exit of the defined volume/mat/index
+
+                bool bExitValidated;
+                if (ProcType != Creation)
                 {
-                    if (thisStep->GeoNode)
+                    const bool bCheckingExit = (opt.bFromMat || opt.bFromVolume || opt.bFromVolIndex);
+                    if (bCheckingExit)
                     {
-                        const bool bRejectedByMaterial = (opt.bFromMat      && opt.FromMat      != thisStep->GeoNode->GetVolume()->GetMaterial()->GetIndex());
-                        const bool bRejectedByVolName  = (opt.bFromVolume   && opt.FromVolume   != thisStep->GeoNode->GetVolume()->GetName());
-                        const bool bRejectedByVolIndex = (opt.bFromVolIndex && opt.FromVolIndex != thisStep->GeoNode->GetIndex());
-                        bExitValidated = !(bRejectedByMaterial || bRejectedByVolName || bRejectedByVolIndex);
+                        if (thisStep->GeoNode)
+                        {
+                            const bool bRejectedByMaterial = (opt.bFromMat      && opt.FromMat      != thisStep->GeoNode->GetVolume()->GetMaterial()->GetIndex());
+                            const bool bRejectedByVolName  = (opt.bFromVolume   && opt.FromVolume   != thisStep->GeoNode->GetVolume()->GetName());
+                            const bool bRejectedByVolIndex = (opt.bFromVolIndex && opt.FromVolIndex != thisStep->GeoNode->GetIndex());
+                            bExitValidated = !(bRejectedByMaterial || bRejectedByVolName || bRejectedByVolIndex);
+                        }
+                        else bExitValidated = false;
                     }
-                    else bExitValidated = false;
+                    else bExitValidated = true;
                 }
-                else bExitValidated = true;
-            }
-            else bExitValidated = false;
+                else bExitValidated = false;
 
-            bool bEntranceValidated;
-            const bool bCheckingEnter = (opt.bToMat || opt.bToVolume || opt.bToVolIndex);
-            if (bCheckingEnter)
-            {
-                //const ATrackingStepData * nextStep = (ProcType == ExitingWorld ? nullptr : steps[iStep+1]);
-                const ATrackingStepData * nextStep = (iStep == steps.size()-1 ? nullptr : steps[iStep+1]); // there could be "T" as the last step or exit from world
-                if (nextStep && thisStep->GeoNode)
-                {
-                    const bool bRejectedByMaterial = (opt.bToMat      && opt.ToMat      != nextStep->GeoNode->GetVolume()->GetMaterial()->GetIndex());
-                    const bool bRejectedByVolName  = (opt.bToVolume   && opt.ToVolume   != nextStep->GeoNode->GetVolume()->GetName());
-                    const bool bRejectedByVolIndex = (opt.bToVolIndex && opt.ToVolIndex != nextStep->GeoNode->GetIndex());
-                    bEntranceValidated = !(bRejectedByMaterial || bRejectedByVolName || bRejectedByVolIndex);
-                }
-                else bEntranceValidated = false;
-            }
-            else bEntranceValidated = true;
-
-            // if transition validated, calling onTransition (+paranoic test on existence of the prevStep - for Creation exit is always not validated
-            const ATrackingStepData * prevStep = (iStep == 0 ? nullptr : steps[iStep-1]);
-            if (bExitValidated && bEntranceValidated && prevStep)
-                processor.onTransition(*prevStep, *thisStep); // not the "next" step here! this is just to extract direction information
-
-
-            //checking for specific material/volume/index for enter/exit
-            //out
-            if (ProcType != Creation)
-            {
-                const bool bCheckingExit = (opt.bMaterial || opt.bVolume || opt.bVolumeIndex);
-                if (bCheckingExit)
-                {
-                    if (thisStep->GeoNode)
-                    {
-                        const bool bRejectedByMaterial = (opt.bMaterial    && opt.Material    != thisStep->GeoNode->GetVolume()->GetMaterial()->GetIndex());
-                        const bool bRejectedByVolName  = (opt.bVolume      && opt.Volume      != thisStep->GeoNode->GetVolume()->GetName());
-                        const bool bRejectedByVolIndex = (opt.bVolumeIndex && opt.VolumeIndex != thisStep->GeoNode->GetIndex());
-                        bExitValidated = !(bRejectedByMaterial || bRejectedByVolName || bRejectedByVolIndex);
-                    }
-                    else bExitValidated = false;
-                }
-                else bExitValidated = true;
-
-                if (bExitValidated) processor.onTransitionOut(*thisStep);
-            }
-            //in
-            if (ProcType != ExitingWorld)
-            {
                 bool bEntranceValidated;
-                const bool bCheckingEnter = (opt.bMaterial || opt.bVolume || opt.bVolumeIndex);
+                const bool bCheckingEnter = (opt.bToMat || opt.bToVolume || opt.bToVolIndex);
                 if (bCheckingEnter)
                 {
                     //const ATrackingStepData * nextStep = (ProcType == ExitingWorld ? nullptr : steps[iStep+1]);
-                    const ATrackingStepData * nextStep = (iStep == steps.size()-1 ? nullptr : steps[iStep+1]); // there could be "T" as the last step!
+                    const ATrackingStepData * nextStep = (iStep == steps.size()-1 ? nullptr : steps[iStep+1]); // there could be "T" as the last step or exit from world
                     if (nextStep && thisStep->GeoNode)
                     {
-                        const bool bRejectedByMaterial = (opt.bMaterial    && opt.Material    != nextStep->GeoNode->GetVolume()->GetMaterial()->GetIndex());
-                        const bool bRejectedByVolName  = (opt.bVolume      && opt.Volume      != nextStep->GeoNode->GetVolume()->GetName());
-                        const bool bRejectedByVolIndex = (opt.bVolumeIndex && opt.VolumeIndex != nextStep->GeoNode->GetIndex());
+                        const bool bRejectedByMaterial = (opt.bToMat      && opt.ToMat      != nextStep->GeoNode->GetVolume()->GetMaterial()->GetIndex());
+                        const bool bRejectedByVolName  = (opt.bToVolume   && opt.ToVolume   != nextStep->GeoNode->GetVolume()->GetName());
+                        const bool bRejectedByVolIndex = (opt.bToVolIndex && opt.ToVolIndex != nextStep->GeoNode->GetIndex());
                         bEntranceValidated = !(bRejectedByMaterial || bRejectedByVolName || bRejectedByVolIndex);
                     }
                     else bEntranceValidated = false;
                 }
                 else bEntranceValidated = true;
 
-                if (bEntranceValidated ) processor.onTransitionIn(*thisStep);
+                // if transition validated, calling onTransition (+paranoic test on existence of the prevStep - for Creation exit is always not validated
+                const ATrackingStepData * prevStep = (iStep == 0 ? nullptr : steps[iStep-1]);
+                if (bExitValidated && bEntranceValidated && prevStep)
+                    processor.onTransition(*prevStep, *thisStep); // not the "next" step here! this is just to extract direction information
+
+
+                //checking for specific material/volume/index for enter/exit
+                //out
+                if (ProcType != Creation)
+                {
+                    const bool bCheckingExit = (opt.bMaterial || opt.bVolume || opt.bVolumeIndex);
+                    if (bCheckingExit)
+                    {
+                        if (thisStep->GeoNode)
+                        {
+                            const bool bRejectedByMaterial = (opt.bMaterial    && opt.Material    != thisStep->GeoNode->GetVolume()->GetMaterial()->GetIndex());
+                            const bool bRejectedByVolName  = (opt.bVolume      && opt.Volume      != thisStep->GeoNode->GetVolume()->GetName());
+                            const bool bRejectedByVolIndex = (opt.bVolumeIndex && opt.VolumeIndex != thisStep->GeoNode->GetIndex());
+                            bExitValidated = !(bRejectedByMaterial || bRejectedByVolName || bRejectedByVolIndex);
+                        }
+                        else bExitValidated = false;
+                    }
+                    else bExitValidated = true;
+
+                    if (bExitValidated) processor.onTransitionOut(*thisStep);
+                }
+                //in
+                if (ProcType != ExitingWorld)
+                {
+                    bool bEntranceValidated;
+                    const bool bCheckingEnter = (opt.bMaterial || opt.bVolume || opt.bVolumeIndex);
+                    if (bCheckingEnter)
+                    {
+                        //const ATrackingStepData * nextStep = (ProcType == ExitingWorld ? nullptr : steps[iStep+1]);
+                        const ATrackingStepData * nextStep = (iStep == steps.size()-1 ? nullptr : steps[iStep+1]); // there could be "T" as the last step!
+                        if (nextStep && thisStep->GeoNode)
+                        {
+                            const bool bRejectedByMaterial = (opt.bMaterial    && opt.Material    != nextStep->GeoNode->GetVolume()->GetMaterial()->GetIndex());
+                            const bool bRejectedByVolName  = (opt.bVolume      && opt.Volume      != nextStep->GeoNode->GetVolume()->GetName());
+                            const bool bRejectedByVolIndex = (opt.bVolumeIndex && opt.VolumeIndex != nextStep->GeoNode->GetIndex());
+                            bEntranceValidated = !(bRejectedByMaterial || bRejectedByVolName || bRejectedByVolIndex);
+                        }
+                        else bEntranceValidated = false;
+                    }
+                    else bEntranceValidated = true;
+
+                    if (bEntranceValidated ) processor.onTransitionIn(*thisStep);
+                }
+            }
+
+            // Local step or Creation (Creation is treated again -> this time as it would be a local step)
+            if (ProcType == Local || ProcType == Creation)
+            {
+                bool bSkipThisStep = false;
+                if (opt.bMaterial || opt.bVolume || opt.bVolumeIndex)
+                {
+                    if (!thisStep->GeoNode) bSkipThisStep = true;
+                    else if (opt.bMaterial    && opt.Material != thisStep->GeoNode->GetVolume()->GetMaterial()->GetIndex()) bSkipThisStep = true;
+                    else if (opt.bVolumeIndex && opt.VolumeIndex != thisStep->GeoNode->GetIndex()) bSkipThisStep = true;
+                    else if (opt.bVolume      && opt.Volume != thisStep->GeoNode->GetVolume()->GetName()) bSkipThisStep = true;
+                }
+
+                if (!bSkipThisStep) processor.onLocalStep(*thisStep);
+
+                if (!pr.getSecondaryOf() && opt.bLimitToFirstInteractionOfPrimary && ProcType != Creation)
+                {
+                    if (thisStep->Secondaries.empty()) bSkipTrackingOfSecondaries = true;
+                    else lastSecondaryToTrack = pr.getSecondaries().at( thisStep->Secondaries.back() );
+                    break;
+                }
             }
         }
 
-        // Local step or Creation (Creation is treated again -> this time as it would be a local step)
-        if (ProcType == Local || ProcType == Creation)
-        {
-            if (opt.bMaterial)
-            {
-                if (!thisStep->GeoNode) continue;
-                if (opt.Material != thisStep->GeoNode->GetVolume()->GetMaterial()->GetIndex()) continue;
-            }
-
-            if (opt.bVolume)
-            {
-                if (!thisStep->GeoNode) continue;
-                if (opt.Volume != thisStep->GeoNode->GetVolume()->GetName()) continue;
-            }
-
-            if (opt.bVolumeIndex)
-            {
-                if (!thisStep->GeoNode) continue;
-                if (opt.VolumeIndex != thisStep->GeoNode->GetIndex()) continue;
-            }
-
-            processor.onLocalStep(*thisStep);
-        }
+        processor.onTrackEnd();
     }
 
-    processor.onTrackEnd();
+    if (!bSkipTrackingOfSecondaries)
+    {
+        const std::vector<AParticleTrackingRecord *> & secondaries = pr.getSecondaries();
+        for (AParticleTrackingRecord * sec : secondaries)
+        {
+            findRecursive(*sec, opt, processor);
+            if (sec == lastSecondaryToTrack) break;
+        }
+    }
 }
 
 void AHistorySearchProcessor_findParticles::onNewTrack(const AParticleTrackingRecord &pr)
@@ -237,7 +241,7 @@ void AHistorySearchProcessor_findDepositedEnergy::onNewTrack(const AParticleTrac
 
         break;
     case OverEvent:
-
+        // no need to do anything - Depo is reset on new event
         break;
     }
 }
@@ -327,16 +331,6 @@ void AHistorySearchProcessor_findTravelledDistances::onTrackEnd()
 {
     if (Distance > 0) Hist->Fill(Distance);
     Distance = 0;
-}
-
-void AHistorySearchProcessor_findProcesses::beforeSearch()
-{
-
-}
-
-void AHistorySearchProcessor_findProcesses::afterSearch()
-{
-
 }
 
 void AHistorySearchProcessor_findProcesses::onLocalStep(const ATrackingStepData &tr)

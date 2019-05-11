@@ -80,9 +80,6 @@ class AHistorySearchProcessor_findProcesses : public AHistorySearchProcessor
 public:
     virtual ~AHistorySearchProcessor_findProcesses(){}
 
-    virtual void beforeSearch();
-    virtual void afterSearch();
-
     virtual void onLocalStep(const ATrackingStepData & tr) override;
     virtual void onTransitionOut(const ATrackingStepData & );
     virtual void onTransitionIn (const ATrackingStepData & );
@@ -183,6 +180,7 @@ public:
     QString Particle;
     bool bPrimary = false;
     bool bSecondary = false;
+    bool bLimitToFirstInteractionOfPrimary = false;
 
   //transportation
     //from

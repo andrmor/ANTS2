@@ -1679,6 +1679,7 @@ void OutputWindow::on_pbPTHistRequest_clicked()
     Opt.Particle = ui->lePTHistParticle->text();
     Opt.bPrimary = ui->cbPTHistOnlyPrim->isChecked();
     Opt.bSecondary = ui->cbPTHistOnlySec->isChecked();
+    Opt.bLimitToFirstInteractionOfPrimary = ui->cbPTHistLimitToFirst->isChecked();
 
     int bins = ui->sbPTHistBinsX->value();
     double from = ui->ledPTHistFromX->text().toDouble();

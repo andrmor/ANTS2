@@ -102,7 +102,7 @@ bool PrimaryParticleTracker::TrackParticlesOnStack(int eventId)
           //delete the particle record and remove from the stack
           delete ParticleStack->at(0);
           ParticleStack->remove(0);
-          return true;
+          return true; //continue?
         }
 
       //What is the starting material?

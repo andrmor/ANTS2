@@ -11,6 +11,7 @@
 #include "TGeoMaterial.h"
 #include "TH1.h"
 #include "TH1D.h"
+#include "TH2.h"
 
 APTHistory_SI::APTHistory_SI(ASimulationManager & SimulationManager) :
     AScriptInterface(), SM(SimulationManager), TH(SimulationManager.TrackingHistory)
@@ -21,15 +22,8 @@ APTHistory_SI::APTHistory_SI(ASimulationManager & SimulationManager) :
 
 APTHistory_SI::~APTHistory_SI()
 {
-    clearProcessors();
     delete Criteria;
     delete Crawler;
-}
-
-void APTHistory_SI::clearProcessors()
-{
-    for (auto & p : Processors) delete p;
-    Processors.clear();
 }
 
 int APTHistory_SI::countEvents()
@@ -284,14 +278,12 @@ void APTHistory_SI::setToIndex(int volumeIndex)
 
 QVariantList APTHistory_SI::findParticles()
 {
-    clearProcessors();
-    AHistorySearchProcessor_findParticles* p = new AHistorySearchProcessor_findParticles();
-    Processors.push_back(p);
-    Crawler->find(*Criteria, Processors);
+    AHistorySearchProcessor_findParticles p;
+    Crawler->find(*Criteria, p);
 
     QVariantList vl;
-    QMap<QString, int>::const_iterator it = p->FoundParticles.constBegin();
-    while (it != p->FoundParticles.constEnd())
+    QMap<QString, int>::const_iterator it = p.FoundParticles.constBegin();
+    while (it != p.FoundParticles.constEnd())
     {
         QVariantList el;
         el << it.key() << it.value();
@@ -303,14 +295,12 @@ QVariantList APTHistory_SI::findParticles()
 
 QVariantList APTHistory_SI::findProcesses()
 {
-    clearProcessors();
-    AHistorySearchProcessor_findProcesses* p = new AHistorySearchProcessor_findProcesses();
-    Processors.push_back(p);
-    Crawler->find(*Criteria, Processors);
+    AHistorySearchProcessor_findProcesses p;
+    Crawler->find(*Criteria, p);
 
     QVariantList vl;
-    QMap<QString, int>::const_iterator it = p->FoundProcesses.constBegin();
-    while (it != p->FoundProcesses.constEnd())
+    QMap<QString, int>::const_iterator it = p.FoundProcesses.constBegin();
+    while (it != p.FoundProcesses.constEnd())
     {
         QVariantList el;
         el << it.key() << it.value();
@@ -322,17 +312,15 @@ QVariantList APTHistory_SI::findProcesses()
 
 QVariantList APTHistory_SI::findDepositedEnergies(int bins, double from, double to)
 {
-    clearProcessors();
-    AHistorySearchProcessor_findDepositedEnergy* p = new AHistorySearchProcessor_findDepositedEnergy(bins, from, to);
-    Processors.push_back(p);
-    Crawler->find(*Criteria, Processors);
+    AHistorySearchProcessor_findDepositedEnergy p(AHistorySearchProcessor_findDepositedEnergy::Individual, bins, from, to);
+    Crawler->find(*Criteria, p);
 
     QVariantList vl;
-    int numBins = p->Hist->GetXaxis()->GetNbins();
+    int numBins = p.Hist->GetXaxis()->GetNbins();
     for (int iBin=1; iBin<numBins+1; iBin++)
     {
         QVariantList el;
-        el << p->Hist->GetBinCenter(iBin) << p->Hist->GetBinContent(iBin);
+        el << p.Hist->GetBinCenter(iBin) << p.Hist->GetBinContent(iBin);
         vl.push_back(el);
     }
     return vl;
@@ -340,208 +328,67 @@ QVariantList APTHistory_SI::findDepositedEnergies(int bins, double from, double 
 
 QVariantList APTHistory_SI::findTravelledDistances(int bins, double from, double to)
 {
-    clearProcessors();
-    AHistorySearchProcessor_findTravelledDistances* p = new AHistorySearchProcessor_findTravelledDistances(bins, from, to);
-    Processors.push_back(p);
-
-    AFindRecordSelector tmp = *Criteria;
-
-    //updating criteria to have independent entrance/exit checks
-    Criteria->bInOutSeparately = true;
-    //copy good volume parameters to both from and in
-    Criteria->bFromMat = Criteria->bMaterial;
-    Criteria->bToMat   = Criteria->bMaterial;
-    Criteria->FromMat = Criteria->Material;
-    Criteria->ToMat   = Criteria->Material;
-
-    Criteria->bFromVolume = Criteria->bVolume;
-    Criteria->bToVolume   = Criteria->bVolume;
-    Criteria->FromVolume = Criteria->Volume;
-    Criteria->ToVolume   = Criteria->Volume;
-
-    Criteria->bFromVolIndex = Criteria->bVolumeIndex;
-    Criteria->bToVolIndex   = Criteria->bVolumeIndex;
-    Criteria->FromVolIndex = Criteria->VolumeIndex;
-    Criteria->ToVolIndex   = Criteria->VolumeIndex;
-
-    Crawler->find(*Criteria, Processors);
+    AHistorySearchProcessor_findTravelledDistances p(bins, from, to);
+    Crawler->find(*Criteria, p);
 
     QVariantList vl;
-    int numBins = p->Hist->GetXaxis()->GetNbins();
+    int numBins = p.Hist->GetXaxis()->GetNbins();
     for (int iBin=1; iBin<numBins+1; iBin++)
     {
         QVariantList el;
-        el << p->Hist->GetBinCenter(iBin) << p->Hist->GetBinContent(iBin);
+        el << p.Hist->GetBinCenter(iBin) << p.Hist->GetBinContent(iBin);
         vl.push_back(el);
     }
-
-    *Criteria = tmp;
     return vl;
 }
 
-#include "TTree.h"
-#include "TH2.h"
-#include "TH3.h"
-QVariantList APTHistory_SI::findOnBorder(QString what, QString cuts)
+QVariantList APTHistory_SI::findOnBorder(QString what, QString cuts, int bins, double from, double to)
 {
     QVariantList vl;
-    QStringList fields = what.split(":", QString::SkipEmptyParts);
-    int num = fields.size();
-    if (num > 3)
+
+    AHistorySearchProcessor_Border p(what, cuts, bins, from, to);
+    if (!p.ErrorString.isEmpty())
+        abort(p.ErrorString);
+    else
     {
-        abort("Too many fields in'what' field");
-        return vl;
+        Crawler->find(*Criteria, p);
+
+        int numBins = p.Hist1D->GetXaxis()->GetNbins();
+        for (int iBin=1; iBin<numBins+1; iBin++)
+        {
+            QVariantList el;
+            el << p.Hist1D->GetBinCenter(iBin) << p.Hist1D->GetBinContent(iBin);
+            vl.push_back(el);
+        }
     }
-
-    clearProcessors();
-    AHistorySearchProcessor_Border* p = new AHistorySearchProcessor_Border();
-    Processors.push_back(p);
-
-    Crawler->find(*Criteria, Processors);
-
-    QByteArray baw;
-    QString str = what+">>htemp(";
-//    for (int i=0; i<num; i++)
-//      {
-//        if (ui->cbCustomBinning->isChecked())dims[i].updateBins();
-//        if (ui->cbCustomRanges->isChecked()) dims[i].updateRanges(); //else 0
-//        str += QString::number(dims[i].bins)+","+QString::number(dims[i].from)+","+QString::number(dims[i].to)+",";
-//      }
-//    str.chop(1);
-    str += ")";
-    baw = str.toLocal8Bit();
-
-    const char *What = baw.data();
-     QByteArray bac = cuts.toLocal8Bit();
-     const char *Cond = (cuts == "") ? "" : bac.data();
-     QString how = "";
-     QByteArray bah = how.toLocal8Bit();
-     const char *How = (how == "") ? "" : bah.data();
-     QString howAdj;
-     if (how == "") howAdj = "goff";
-     else howAdj = "goff,"+how;
-     QByteArray baha = howAdj.toLocal8Bit();
-     const char *HowAdj = baha.data();
-
-     TObject* oldObj = gDirectory->FindObject("htemp");
-     if (oldObj)
-     {
-         qDebug() << "Old htemp found!"<<oldObj->GetName();
-         gDirectory->RecursiveRemove(oldObj);
-     }
-     TH1::AddDirectory(true);
-     p->T->Draw(What, Cond, HowAdj);
-     TH1::AddDirectory(false);
-
-     switch (num)
-     {
-       case 1:
-         {
-           TH1* tmpHist1D = (TH1*)gDirectory->Get("htemp");
-           if (!tmpHist1D)
-           {
-               abort("Root has not generated any data!");
-               break;
-           }
-           QByteArray tmp = fields[0].toLocal8Bit();
-           tmpHist1D->GetXaxis()->SetTitle(tmp.data());
-           int size = tmpHist1D->GetEntries();
-           qDebug() << "Size of 1D result:"<<size;
-
-           /*
-           if (size>0) MW->GraphWindow->Draw(tmpHist1D, How, true, false);
-           else
-           {
-               message("There is no data to show!", this);
-               MW->GraphWindow->close();
-               //delete tmpHist1D;
-               return;
-           }
-           */
-           int numBins = tmpHist1D->GetXaxis()->GetNbins();
-           for (int iBin=1; iBin<numBins+1; iBin++)
-           {
-               QVariantList el;
-               el << tmpHist1D->GetBinCenter(iBin) << tmpHist1D->GetBinContent(iBin);
-               vl.push_back(el);
-           }
-           break;
-       }
-       case 2:
-         {
-           TH2* tmpHist2D = (TH2*)gDirectory->Get("htemp");
-           if (!tmpHist2D)
-           {
-               abort("Root has not generated any data!");
-               break;
-           }
-           QByteArray tmp1 = fields[0].toLocal8Bit();
-           tmpHist2D->GetYaxis()->SetTitle(tmp1.data());
-           QByteArray tmp2 = fields[1].toLocal8Bit();
-           tmpHist2D->GetXaxis()->SetTitle(tmp2.data());
-
-           int size = tmpHist2D->GetEntries();
-           qDebug() << "Size of 2D result:"<<size;
-
-           /*
-           if (size>0) MW->GraphWindow->Draw(tmpHist2D, How, true, false);
-           else
-           {
-               message("There is no data to show!", this);
-               MW->GraphWindow->close();
-               //delete tmpHist2D;
-               return;
-           }
-           */
-
-           int numX = tmpHist2D->GetXaxis()->GetNbins();
-           int numY = tmpHist2D->GetYaxis()->GetNbins();
-           for (int iX=1; iX<numX+1; iX++)
-           {
-               double x = tmpHist2D->GetXaxis()->GetBinCenter(iX);
-               for (int iY=1; iY<numY+1; iY++)
-               {
-                   QVariantList el;
-                   el << x
-                      << tmpHist2D->GetYaxis()->GetBinCenter(iY)
-                      << tmpHist2D->GetBinContent(iX, iY);
-                   vl.push_back(el);
-               }
-           }
-
-           break;
-         }
-       case 3:
-         {
-           TH3* tmpHist3D = (TH3*)gDirectory->Get("htemp");
-           if (!tmpHist3D)
-           {
-               abort("Root has not generated any data!");
-               break;
-           }
-           QByteArray tmp1 = fields[0].toLocal8Bit();
-           tmpHist3D->GetZaxis()->SetTitle(tmp1.data());
-           QByteArray tmp2 = fields[1].toLocal8Bit();
-           tmpHist3D->GetYaxis()->SetTitle(tmp2.data());
-           QByteArray tmp3 = fields[2].toLocal8Bit();
-           tmpHist3D->GetXaxis()->SetTitle(tmp3.data());
-
-           int size = tmpHist3D->GetEntries();
-           qDebug() << "Size of 3D result:"<<size;
-
-           /*
-           if (size>0) MW->GraphWindow->Draw(tmpHist3D, How, true, false);
-           else
-           {
-               message("There is no data to show!", this);
-               MW->GraphWindow->close();
-               //delete tmpHist3D;
-               return;
-           }
-           */
-           break;
-         }
-       }
     return vl;
 }
 
+QVariantList APTHistory_SI::findOnBorder(QString what, QString vsWhat, QString cuts, int bins1, double from1, double to1, int bins2, double from2, double to2)
+{
+    QVariantList vl;
+
+    AHistorySearchProcessor_Border p(what, vsWhat, cuts, bins1, from1, to1, bins2, from2, to2);
+    if (!p.ErrorString.isEmpty())
+        abort(p.ErrorString);
+    else
+    {
+        Crawler->find(*Criteria, p);
+
+        int numX = p.Hist2D->GetXaxis()->GetNbins();
+        int numY = p.Hist2D->GetYaxis()->GetNbins();
+        for (int iX=1; iX<numX+1; iX++)
+        {
+            double x = p.Hist2D->GetXaxis()->GetBinCenter(iX);
+            for (int iY=1; iY<numY+1; iY++)
+            {
+                QVariantList el;
+                el << x
+                   << p.Hist2D->GetYaxis()->GetBinCenter(iY)
+                   << p.Hist2D->GetBinContent(iX, iY);
+                vl.push_back(el);
+            }
+        }
+    }
+    return vl;
+}

@@ -13,7 +13,6 @@ class ASimulationManager;
 class AEventTrackingRecord;
 class AParticleTrackingRecord;
 class ATrackingHistoryCrawler;
-class AHistorySearchProcessor;
 class AFindRecordSelector;
 
 class APTHistory_SI : public AScriptInterface
@@ -60,20 +59,19 @@ public slots:
     QVariantList findProcesses();
     QVariantList findDepositedEnergies(int bins, double from, double to);
     QVariantList findTravelledDistances(int bins, double from, double to);
-    QVariantList findOnBorder(QString what, QString cuts);
+    QVariantList findOnBorder(QString what, QString cuts, int bins, double from, double to);
+    QVariantList findOnBorder(QString what, QString vsWhat, QString cuts, int bins1, double from1, double to1, int bins2, double from2, double to2);
 
 private:
     const ASimulationManager & SM;
     const std::vector<AEventTrackingRecord *> & TH;
 
     ATrackingHistoryCrawler * Crawler;
-    std::vector<AHistorySearchProcessor*> Processors;
     AFindRecordSelector * Criteria = nullptr;
 
     const AParticleTrackingRecord * Rec = nullptr; //current record for cd
     int Step = 0;  //current step for cd
 
-    void clearProcessors();
 };
 
 

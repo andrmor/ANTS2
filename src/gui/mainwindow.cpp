@@ -3811,19 +3811,19 @@ void MainWindow::simulationFinished()
 
             if (SimulationManager->DepoByNotRegistered > 0)
             {
-                //double limit = 0.001;
-                //if (SimulationManager->DepoByNotRegistered > limit * totalEdepo)
+                double limit = 0.0001;
+                if (SimulationManager->DepoByNotRegistered > limit * totalEdepo)
                 {
-                    s += QString("Deposition by not registered particles constitutes\n");
+                    s += QString("Deposition by particles not registered in ANTS2 configuration\nconstitutes ");
                     s += QString::number(100.0 * SimulationManager->DepoByNotRegistered / totalEdepo, 'g', 4) + " %";
                     s += "\nof the total energy deposition in the sensitive volume(s).\n\n";
                     s += "The following not registered particles were seen during Geant4 simulation:\n";
                     for (const QString & pn : SimulationManager->SeenNonRegisteredParticles)
                         s += pn + ", ";
                     s.chop(2);
+                    qDebug() << SimulationManager->SeenNonRegisteredParticles;
+                    message(s, this);
                 }
-                //qDebug() << SimulationManager->SeenNonRegisteredParticles;
-                message(s, this);
             }
         }
     }
@@ -4529,7 +4529,7 @@ void MainWindow::on_bpResults_clicked()
    Owindow->show();
    Owindow->raise();
    Owindow->activateWindow();
-   Owindow->SetTab(1);
+   //Owindow->SetTab(1);
 }
 
 void MainWindow::ShowGeometrySlot()
@@ -4542,7 +4542,7 @@ void MainWindow::on_bpResults_2_clicked()
   Owindow->show();
   Owindow->raise();
   Owindow->activateWindow();
-  Owindow->SetTab(3);
+  //Owindow->SetTab(3);
 }
 
 void MainWindow::on_cobPartPerEvent_currentIndexChanged(int index)

@@ -29,7 +29,7 @@ public:
     void SetCurrentEvent(int iev);
 
     void OutTextClear();
-    void OutText(QString str);
+    void OutText(const QString & str);
 
     void SetTab(int index);
 
@@ -62,7 +62,6 @@ private slots:
     void on_pbNumTransitionsSpectrum_clicked();
     void on_sbEvent_valueChanged(int arg1);
     void on_pbResetViewport_clicked();
-    void on_pbClearText_clicked();
     void on_pbAverageSignals_clicked();
     void on_pbShowParticldeLog_clicked();
     void on_pbShowPhotonLog_clicked();
@@ -89,6 +88,21 @@ private slots:
     void on_pbSaveLog_clicked();
     void on_pbHelpWithSaveToTree_clicked();
 
+    void on_pbPTHistRequest_clicked();
+    void on_cbPTHistOnlyPrim_clicked(bool checked);
+    void on_cbPTHistOnlySec_clicked(bool checked);
+
+
+    void on_cobPTHistVolRequestWhat_currentIndexChanged(int index);
+
+    void on_twPTHistType_currentChanged(int index);
+
+    void on_cbPTHistBordVs_toggled(bool checked);
+
+    void on_cbPTHistBordAndVs_toggled(bool checked);
+
+    void on_cbPTHistBordAsStat_toggled(bool checked);
+
 private:
     Ui::OutputWindow *ui;
     MainWindow* MW;
@@ -106,6 +120,20 @@ private:
 
     bool bForbidUpdate;
 
+    int binsEnergy = 100;
+    double fromEnergy = 0;
+    double toEnergy = 0;
+    int selectedModeForEnergyDepo = 0;
+    int binsDistance = 100;
+    double fromDistance = 0;
+    double toDistance = 0;
+    int binsB1 = 100;
+    double fromB1 = 0;
+    double toB1 = 0;
+    int binsB2 = 100;
+    double fromB2 = 0;
+    double toB2 = 0;
+
     void clearGrItems();
     void updateSignalLabels(float MaxSignal);
     void addPMitems  (const QVector<float>* vector, float MaxSignal, DynamicPassivesHandler *Passives);
@@ -115,6 +143,7 @@ private:
     void showParticleHistString(int iRec, int level);
     void addParticleHistoryLogLine(int iRec, int level);
     void updateMonitors();
+    void updatePTHistoryBinControl();
 };
 
 #endif // OUTPUTWINDOW_H

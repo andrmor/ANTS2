@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>632</width>
-    <height>514</height>
+    <width>717</width>
+    <height>709</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -94,24 +94,27 @@
        </palette>
       </property>
       <property name="currentIndex">
-       <number>4</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="tabText">
        <attribute name="title">
         <string>Text log</string>
        </attribute>
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <layout class="QVBoxLayout" name="verticalLayout_23">
+        <property name="spacing">
+         <number>1</number>
+        </property>
         <property name="leftMargin">
-         <number>3</number>
+         <number>0</number>
         </property>
         <property name="topMargin">
-         <number>3</number>
+         <number>0</number>
         </property>
         <property name="rightMargin">
-         <number>3</number>
+         <number>0</number>
         </property>
         <property name="bottomMargin">
-         <number>3</number>
+         <number>0</number>
         </property>
         <item>
          <widget class="QTextEdit" name="teOut">
@@ -160,6 +163,19 @@
           </property>
           <property name="frameShape">
            <enum>QFrame::Box</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pbClearText">
+          <property name="minimumSize">
+           <size>
+            <width>150</width>
+            <height>21</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Clear text</string>
           </property>
          </widget>
         </item>
@@ -717,6 +733,910 @@ over all events</string>
          </property>
         </widget>
        </widget>
+      </widget>
+      <widget class="QWidget" name="tab_2">
+       <attribute name="title">
+        <string>ParticleTracking</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_18">
+        <item>
+         <widget class="QLabel" name="label_15">
+          <property name="text">
+           <string>Work in progress: Applies for tracking performed with G4ants</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_17">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_23">
+          <item>
+           <spacer name="horizontalSpacer_18">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_21">
+            <property name="spacing">
+             <number>3</number>
+            </property>
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>2</number>
+            </property>
+            <item>
+             <widget class="QCheckBox" name="cbPTHistParticle">
+              <property name="text">
+               <string>Limit to particle:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="cbPTHistOnlyPrim">
+              <property name="text">
+               <string>Only primaries</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="cbPTHistOnlySec">
+              <property name="text">
+               <string>Only secondaries</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_22">
+            <property name="spacing">
+             <number>3</number>
+            </property>
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QLineEdit" name="lePTHistParticle"/>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="cbPTHistLimitToFirst">
+              <property name="text">
+               <string>Limit to the first interaction of the primary</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_25">
+              <property name="text">
+               <string>  </string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_20">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_22">
+          <item>
+           <spacer name="horizontalSpacer_19">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_17">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QTabWidget" name="twPTHistType">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <widget class="QWidget" name="tab_3">
+           <attribute name="title">
+            <string>In volumes</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_20">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_18">
+              <item>
+               <spacer name="horizontalSpacer_10">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_16">
+                <property name="text">
+                 <string>Request what:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="cobPTHistVolRequestWhat">
+                <property name="font">
+                 <font>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>Get particles</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Get processes</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Get travelled distances</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Get deposited energies</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="cobPTHistVolPlus"/>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_15">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_19">
+              <item>
+               <spacer name="horizontalSpacer_12">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <layout class="QVBoxLayout" name="verticalLayout_17">
+                <property name="spacing">
+                 <number>3</number>
+                </property>
+                <item>
+                 <widget class="QCheckBox" name="cbPTHistVolMat">
+                  <property name="text">
+                   <string>Limit to material:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="cbPTHistVolVolume">
+                  <property name="text">
+                   <string>Limit to volume:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="cbPTHistVolIndex">
+                  <property name="text">
+                   <string>Limit to volume index:</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QVBoxLayout" name="verticalLayout_19">
+                <property name="spacing">
+                 <number>3</number>
+                </property>
+                <item>
+                 <widget class="QComboBox" name="cobPTHistVolMat"/>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="lePTHistVolVolume"/>
+                </item>
+                <item>
+                 <widget class="QSpinBox" name="sbPTHistVolIndex"/>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_11">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="tab_4">
+           <attribute name="title">
+            <string>On the borders</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_28">
+            <property name="spacing">
+             <number>3</number>
+            </property>
+            <property name="leftMargin">
+             <number>6</number>
+            </property>
+            <property name="topMargin">
+             <number>6</number>
+            </property>
+            <property name="rightMargin">
+             <number>6</number>
+            </property>
+            <property name="bottomMargin">
+             <number>6</number>
+            </property>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_20">
+              <item>
+               <layout class="QVBoxLayout" name="verticalLayout_31">
+                <property name="leftMargin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QLineEdit" name="lePTHistBordWhat">
+                  <property name="toolTip">
+                   <string>X, Y, Z, Time, Energy, Vx, Vy, Vz
+and any mathematical/logical operations
+See ROOT TFormula description</string>
+                  </property>
+                  <property name="text">
+                   <string>Energy*1e6</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="cbPTHistBordAsStat">
+                  <property name="toolTip">
+                   <string>Collects statistics and shows as the 3rd dimension:
+For example, X vsY will show a map of how many times a particular (X,Y) appears in the data</string>
+                  </property>
+                  <property name="text">
+                   <string>average per bin</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QVBoxLayout" name="verticalLayout_29">
+                <property name="leftMargin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QCheckBox" name="cbPTHistBordVs">
+                  <property name="text">
+                   <string>vs:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="cbPTHistBordAndVs">
+                  <property name="text">
+                   <string>and vs (3D):</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QVBoxLayout" name="verticalLayout_30">
+                <property name="leftMargin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QLineEdit" name="lePTHistBordVsWhat">
+                  <property name="toolTip">
+                   <string>X, Y, Z, Time, Energy, Vx, Vy, Vz
+and any mathematical/logical operations
+See ROOT TFormula description</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="lePTHistBordAndVsWhat"/>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_3">
+              <item>
+               <widget class="QLabel" name="label_21">
+                <property name="text">
+                 <string>Conditions:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="lePTHistBordCuts">
+                <property name="toolTip">
+                 <string>X, Y, Z, Time, Energy, Vx, Vy, Vz
+and any mathematical/logical operations
+See ROOT TFormula description</string>
+                </property>
+                <property name="text">
+                 <string>Z&lt;0 &amp;&amp; (Energy &lt; 2.49e-5 || Energy &gt; 2.51e-5)</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="Line" name="line_4">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_26">
+              <item>
+               <spacer name="horizontalSpacer_24">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <layout class="QVBoxLayout" name="verticalLayout_24">
+                <property name="spacing">
+                 <number>3</number>
+                </property>
+                <item>
+                 <widget class="QCheckBox" name="cbPTHistVolMatFrom">
+                  <property name="text">
+                   <string>Limit material from:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="cbPTHistVolVolumeFrom">
+                  <property name="text">
+                   <string>Limit volume from:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="cbPTHistVolIndexFrom">
+                  <property name="text">
+                   <string>Limit vol index from:</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QVBoxLayout" name="verticalLayout_25">
+                <property name="spacing">
+                 <number>3</number>
+                </property>
+                <item>
+                 <widget class="QComboBox" name="cobPTHistVolMatFrom"/>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="lePTHistVolVolumeFrom"/>
+                </item>
+                <item>
+                 <widget class="QSpinBox" name="sbPTHistVolIndexFrom"/>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_27">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_28">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_29">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_26">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <layout class="QVBoxLayout" name="verticalLayout_26">
+                <property name="spacing">
+                 <number>3</number>
+                </property>
+                <item>
+                 <widget class="QCheckBox" name="cbPTHistVolMatTo">
+                  <property name="text">
+                   <string>Limit material to:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="cbPTHistVolVolumeTo">
+                  <property name="text">
+                   <string>Limit volume to:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="cbPTHistVolIndexTo">
+                  <property name="text">
+                   <string>Limit vol index to:</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QVBoxLayout" name="verticalLayout_27">
+                <property name="spacing">
+                 <number>3</number>
+                </property>
+                <item>
+                 <widget class="QComboBox" name="cobPTHistVolMatTo"/>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="lePTHistVolVolumeTo"/>
+                </item>
+                <item>
+                 <widget class="QSpinBox" name="sbPTHistVolIndexTo"/>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_25">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+        <item>
+         <widget class="QFrame" name="frPTHistX">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_21">
+           <property name="spacing">
+            <number>3</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <spacer name="horizontalSpacer_16">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>103</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_18">
+             <property name="text">
+              <string>- Bins:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="sbPTHistBinsX">
+             <property name="minimum">
+              <number>1</number>
+             </property>
+             <property name="maximum">
+              <number>100000</number>
+             </property>
+             <property name="value">
+              <number>100</number>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_19">
+             <property name="text">
+              <string>from:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="ledPTHistFromX">
+             <property name="maximumSize">
+              <size>
+               <width>100</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>0</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_20">
+             <property name="text">
+              <string>to:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="ledPTHistToX">
+             <property name="maximumSize">
+              <size>
+               <width>100</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>0</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_21">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>103</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QFrame" name="frPTHistY">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_25">
+           <property name="spacing">
+            <number>3</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <spacer name="horizontalSpacer_22">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>103</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_22">
+             <property name="text">
+              <string>| Bins:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="sbPTHistBinsY">
+             <property name="minimum">
+              <number>1</number>
+             </property>
+             <property name="maximum">
+              <number>100000</number>
+             </property>
+             <property name="value">
+              <number>100</number>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_23">
+             <property name="text">
+              <string>from:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="ledPTHistFromY">
+             <property name="maximumSize">
+              <size>
+               <width>100</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>0</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_24">
+             <property name="text">
+              <string>to:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="ledPTHistToY">
+             <property name="maximumSize">
+              <size>
+               <width>100</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>0</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_23">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>103</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_24">
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <spacer name="horizontalSpacer_13">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pbPTHistRequest">
+            <property name="minimumSize">
+             <size>
+              <width>200</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Request</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_14">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QPlainTextEdit" name="ptePTHist"/>
+        </item>
+       </layout>
       </widget>
       <widget class="QWidget" name="tabPhStatistics">
        <attribute name="title">
@@ -1647,19 +2567,6 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
          </layout>
         </widget>
        </item>
-       <item>
-        <widget class="QPushButton" name="pbClearText">
-         <property name="minimumSize">
-          <size>
-           <width>150</width>
-           <height>21</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Clear text</string>
-         </property>
-        </widget>
-       </item>
       </layout>
      </widget>
     </item>
@@ -1680,8 +2587,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>450</x>
-     <y>105</y>
+     <x>455</x>
+     <y>131</y>
     </hint>
     <hint type="destinationlabel">
      <x>85</x>
@@ -1696,12 +2603,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>452</x>
-     <y>77</y>
+     <x>457</x>
+     <y>110</y>
     </hint>
     <hint type="destinationlabel">
-     <x>458</x>
-     <y>41</y>
+     <x>463</x>
+     <y>75</y>
     </hint>
    </hints>
   </connection>
@@ -1712,12 +2619,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>206</x>
-     <y>242</y>
+     <x>133</x>
+     <y>270</y>
     </hint>
     <hint type="destinationlabel">
-     <x>253</x>
-     <y>240</y>
+     <x>375</x>
+     <y>288</y>
     </hint>
    </hints>
   </connection>
@@ -1728,12 +2635,188 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>193</x>
-     <y>265</y>
+     <x>133</x>
+     <y>301</y>
     </hint>
     <hint type="destinationlabel">
-     <x>279</x>
-     <y>262</y>
+     <x>375</x>
+     <y>319</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbPTHistVolMat</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>cobPTHistVolMat</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>61</x>
+     <y>229</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>98</x>
+     <y>229</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbPTHistVolVolume</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lePTHistVolVolume</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>61</x>
+     <y>231</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>98</x>
+     <y>231</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbPTHistVolIndex</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>sbPTHistVolIndex</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>61</x>
+     <y>232</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>98</x>
+     <y>232</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbPTHistParticle</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lePTHistParticle</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>268</x>
+     <y>108</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>365</x>
+     <y>102</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pbClearText</sender>
+   <signal>clicked()</signal>
+   <receiver>teOut</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>154</x>
+     <y>637</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>363</x>
+     <y>367</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbPTHistVolMatFrom</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>cobPTHistVolMatFrom</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>151</x>
+     <y>335</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>243</x>
+     <y>332</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbPTHistVolVolumeFrom</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lePTHistVolVolumeFrom</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>138</x>
+     <y>364</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>245</x>
+     <y>365</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbPTHistVolIndexFrom</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>sbPTHistVolIndexFrom</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>153</x>
+     <y>395</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>253</x>
+     <y>393</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbPTHistVolMatTo</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>cobPTHistVolMatTo</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>420</x>
+     <y>339</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>557</x>
+     <y>335</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbPTHistVolVolumeTo</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lePTHistVolVolumeTo</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>436</x>
+     <y>358</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>564</x>
+     <y>357</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbPTHistVolIndexTo</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>sbPTHistVolIndexTo</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>437</x>
+     <y>393</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>537</x>
+     <y>391</y>
     </hint>
    </hints>
   </connection>

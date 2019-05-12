@@ -10,30 +10,8 @@
 #include "TString.h"
 
 class TH1D;
-class TTree;
-
-/*
-// --- Search conditions ---
-class AHistorySearchCondition
-{
-public:
-    virtual ~AHistorySearchCondition(){}
-
-   // false = validation failed
-    virtual bool validateParticle(const AParticleTrackingRecord & pr) {return true;}
-    virtual bool validateStep(const ATrackingStepData & step) {return true;}
-    virtual bool validateTransition(const ATrackingStepData & from, const ATrackingStepData & to) {return true;}
-};
-
-class AHistorySearchCondition_particle : public AHistorySearchCondition
-{
-public:
-    virtual ~AHistorySearchCondition(){}
-
-   // false = validation failed
-    virtual bool validateParticle(const AParticleTrackingRecord & pr) = 0;
-};
-*/
+class TH2D;
+class TFormula;
 
 // --- Search processors ---
 
@@ -42,14 +20,29 @@ class AHistorySearchProcessor
 public:
     virtual ~AHistorySearchProcessor(){}
 
-    virtual void onParticle(const AParticleTrackingRecord & ){}
+    virtual void beforeSearch(){}
+    virtual void afterSearch(){}
+
+    // ---------------
+
+    virtual void onNewEvent(){}
+    virtual bool onNewTrack(const AParticleTrackingRecord & ){return false;} // master track control - the bool flag will be returned in the onTrackEnd
 
     virtual void onLocalStep(const ATrackingStepData & ){} // anything but transportation
-    enum Direction {OUT, IN, OUT_IN};
-    virtual void onTransition(const ATrackingStepData & , Direction ){} // "from" step
 
-    virtual void onTrackEnd(){}
+    virtual void onTransitionOut(const ATrackingStepData & ){} // "from" step
+    virtual void onTransitionIn (const ATrackingStepData & ){} // "from" step
+    virtual void onTransition(const ATrackingStepData & , const ATrackingStepData & ){} // "fromfrom" step, "from" step - "Creation" step cannot call this method!
 
+    virtual void onTrackEnd(bool /*bMaster*/){} // flag is the value returned by onNewTrack()
+    virtual void onEventEnd(){}
+
+    bool isInlineSecondaryProcessing() {return bInlineSecondaryProcessing;}
+    bool isIgnoreParticleSelectors()   {return bIgnoreParticleSelectors;}
+
+protected:
+    bool bInlineSecondaryProcessing = false;
+    bool bIgnoreParticleSelectors   = false;
 };
 
 class AHistorySearchProcessor_findParticles : public AHistorySearchProcessor
@@ -57,9 +50,9 @@ class AHistorySearchProcessor_findParticles : public AHistorySearchProcessor
 public:
     virtual ~AHistorySearchProcessor_findParticles(){}
 
-    virtual void onParticle(const AParticleTrackingRecord & pr);
+    virtual bool onNewTrack(const AParticleTrackingRecord & pr) override;
     virtual void onLocalStep(const ATrackingStepData & tr) override;
-    virtual void onTrackEnd() override;
+    virtual void onTrackEnd(bool) override;
 
     QString Candidate;
     bool bConfirmed = false;
@@ -69,11 +62,11 @@ public:
 class AHistorySearchProcessor_findProcesses : public AHistorySearchProcessor
 {
 public:
-    //virtual ~AHistorySearchProcessor_findProcesses(){}
+    virtual ~AHistorySearchProcessor_findProcesses(){}
 
-    //virtual void onParticle(const AParticleTrackingRecord & pr);
     virtual void onLocalStep(const ATrackingStepData & tr) override;
-    //virtual void onTrackEnd() override;
+    virtual void onTransitionOut(const ATrackingStepData & ) override;
+    virtual void onTransitionIn (const ATrackingStepData & ) override;
 
     QMap<QString, int> FoundProcesses;
 };
@@ -81,15 +74,21 @@ public:
 class AHistorySearchProcessor_findDepositedEnergy : public AHistorySearchProcessor
 {
 public:
-    AHistorySearchProcessor_findDepositedEnergy(int bins, double from = 0, double to = 0);
+    enum CollectionMode {Individual, WithSecondaries, OverEvent};
+
+    AHistorySearchProcessor_findDepositedEnergy(CollectionMode mode, int bins, double from = 0, double to = 0);
     virtual ~AHistorySearchProcessor_findDepositedEnergy();
 
-    virtual void onParticle(const AParticleTrackingRecord & pr);
+    virtual void onNewEvent() override;
+    virtual bool onNewTrack(const AParticleTrackingRecord & pr) override;
     virtual void onLocalStep(const ATrackingStepData & tr) override;
-    virtual void onTrackEnd() override;
+    virtual void onTrackEnd(bool bMaster) override;
+    virtual void onEventEnd() override;
 
+    CollectionMode Mode;
     double Depo = 0;
     TH1D * Hist = nullptr;
+    bool bSecondaryTrackingStarted = false;
 };
 
 class AHistorySearchProcessor_findTravelledDistances : public AHistorySearchProcessor
@@ -98,10 +97,11 @@ public:
     AHistorySearchProcessor_findTravelledDistances(int bins, double from = 0, double to = 0);
     virtual ~AHistorySearchProcessor_findTravelledDistances();
 
-    virtual void onParticle(const AParticleTrackingRecord & pr);
+    virtual bool onNewTrack(const AParticleTrackingRecord & pr) override;
     virtual void onLocalStep(const ATrackingStepData & tr) override;
-    virtual void onTransition(const ATrackingStepData & tr, Direction direction); // "from" step
-    virtual void onTrackEnd() override;
+    virtual void onTransitionOut(const ATrackingStepData & tr) override; // "from" step
+    virtual void onTransitionIn (const ATrackingStepData & tr) override; // "from" step
+    virtual void onTrackEnd(bool) override;
 
     float Distance = 0;
     float LastPosition[3];
@@ -109,24 +109,48 @@ public:
     TH1D * Hist = nullptr;
 };
 
-
 class AHistorySearchProcessor_Border : public AHistorySearchProcessor
 {
 public:
-    AHistorySearchProcessor_Border();
+    AHistorySearchProcessor_Border(const QString & what,
+                                   const QString & cuts,
+                                   int bins, double from, double to);
+    AHistorySearchProcessor_Border(const QString & what, const QString & vsWhat,
+                                   const QString & cuts,
+                                   int bins, double from, double to);
+    AHistorySearchProcessor_Border(const QString & what, const QString & vsWhat,
+                                   const QString & cuts,
+                                   int bins1, double from1, double to1,
+                                   int bins2, double from2, double to2);
+    AHistorySearchProcessor_Border(const QString & what, const QString & vsWhat, const QString & andVsWhat,
+                                   const QString & cuts,
+                                   int bins1, double from1, double to1,
+                                   int bins2, double from2, double to2);
     virtual ~AHistorySearchProcessor_Border();
 
-    //virtual void onParticle(const AParticleTrackingRecord & ){}
+    virtual void afterSearch() override;
 
-    virtual void onTransition(const ATrackingStepData & tr, Direction ) override; // "from" step
+    // direction info can be [0,0,0] !!!
+    virtual void onTransition(const ATrackingStepData & fromfromTr, const ATrackingStepData & fromTr) override; // "from" step
 
-    //virtual void onTrackEnd(){}
+    QString ErrorString;  // after constructor, valid if ErrorString is empty
+    bool bRequiresDirections = false;
 
-    TTree * T = nullptr;
+    TFormula * formulaWhat1 = nullptr;
+    TFormula * formulaWhat2 = nullptr;
+    TFormula * formulaWhat3 = nullptr;
+    TFormula * formulaCuts = nullptr;
 
-    float   x, y, z;
-    float   time;
-    float   energy;
+    //double  x, y, z, time, energy, vx, vy, vz
+    //        0  1  2    3     4      5   6   7
+    double par[8];
+    TH1D * Hist1D = nullptr;
+    TH1D * Hist1Dnum = nullptr;
+    TH2D * Hist2D = nullptr;
+    TH2D * Hist2Dnum = nullptr;
+
+private:
+    TFormula * parse(QString & expr);
 };
 
 
@@ -140,9 +164,9 @@ public:
     QString Particle;
     bool bPrimary = false;
     bool bSecondary = false;
+    bool bLimitToFirstInteractionOfPrimary = false;
 
   //transportation
-    bool bInOutSeparately = false; // if true, "in" and "out" conditions will be checked independently (both can trigger processor call)
     //from
     bool bFromMat = false;
     bool bFromVolume = false;
@@ -175,14 +199,14 @@ class ATrackingHistoryCrawler
 public:
     ATrackingHistoryCrawler(const std::vector<AEventTrackingRecord*> & History);
 
-    void find(const AFindRecordSelector & criteria, std::vector<AHistorySearchProcessor*> & processors) const;
+    void find(const AFindRecordSelector & criteria, AHistorySearchProcessor & processor) const;
 
 private:
     const std::vector<AEventTrackingRecord*> & History;
 
     enum ProcessType {Creation, Local, NormalTransportation, ExitingWorld};
 
-    void findRecursive(const AParticleTrackingRecord & pr, const AFindRecordSelector &opt, std::vector<AHistorySearchProcessor*> & processors) const;
+    void findRecursive(const AParticleTrackingRecord & pr, const AFindRecordSelector &opt, AHistorySearchProcessor & processor) const;
 };
 
 #endif // ATRACKINGHISTORYCRAWLER_H

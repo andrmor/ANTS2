@@ -15,6 +15,12 @@ ATrackingStepData::ATrackingStepData(float *position, float time, float energy, 
     for (int i=0; i<3; i++) Position[i] = position[i];
 }
 
+ATrackingStepData::ATrackingStepData(double *position, double time, double energy, double depositedEnergy, const QString &process) :
+    Time(time), Energy(energy), DepositedEnergy(depositedEnergy), Process(process)
+{
+    for (int i=0; i<3; i++) Position[i] = position[i];
+}
+
 ATrackingStepData::ATrackingStepData(float x, float y, float z, float time, float energy, float depositedEnergy, const QString &process) :
     Time(time), Energy(energy), DepositedEnergy(depositedEnergy), Process(process)
 {

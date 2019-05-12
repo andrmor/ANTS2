@@ -13,6 +13,7 @@ class ATrackingStepData
 {
 public:
     ATrackingStepData(float * position, float time, float energy, float depositedEnergy, const QString & process);
+    ATrackingStepData(double * position, double time, double energy, double depositedEnergy, const QString & process);
     ATrackingStepData(float x, float y, float z, float time, float energy, float depositedEnergy, const QString & process);
 
     void  logToString(QString & str, int offset) const;

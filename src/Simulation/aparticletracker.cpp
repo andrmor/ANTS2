@@ -58,20 +58,22 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
         AParticleRecord * thisParticle = ParticleStack.at(0);
 
         AParticleTrackingRecord * thisParticleRecord = nullptr;
-        if (SimSet->fLogsStat)  //hide in method:
+        if (SimSet->fLogsStat)
         {
-            // maybe move to the end - can skip history if no depo? //have to solve the problem with monitors first!
-            thisParticleRecord = AParticleTrackingRecord::create( MpCollection.getParticleName( thisParticle->Id ) );
+            if (thisParticle->ParticleRecord)
+            {
+                //this is secondary locally created
+                thisParticleRecord = thisParticle->ParticleRecord;
+            }
+            else
+            {
+                //new primary
+                thisParticleRecord = AParticleTrackingRecord::create( MpCollection.getParticleName( thisParticle->Id ) );
+                EventRecord->addPrimaryRecord(thisParticleRecord); // this is primary
+            }
 
             ATrackingStepData * step = new ATrackingStepData(thisParticle->r, thisParticle->time, thisParticle->energy, 0, "C");
             thisParticleRecord->addStep(step);
-
-            if (thisParticle->secondaryOf == -1)
-                EventRecord->addPrimaryRecord(thisParticleRecord);
-            else
-            {
-                //TODO - handling of secondaries!!!!!!!!!!!! ***!!!
-            }
         }
 
         //setting current position, direction vector, energy and time
@@ -124,9 +126,9 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
         {
             if (ParticleTracksAdded < MaxTracks)
             {
-                if (SimSet->TrackBuildOptions.bSkipPrimaries && ParticleStack.at(0)->secondaryOf == -1)
+                if (SimSet->TrackBuildOptions.bSkipPrimaries && thisParticle->secondaryOf == -1)
                     bBuildThisTrack = false;
-                else if (SimSet->TrackBuildOptions.bSkipSecondaries && ParticleStack.at(0)->secondaryOf != -1)
+                else if (SimSet->TrackBuildOptions.bSkipSecondaries && thisParticle->secondaryOf != -1)
                     bBuildThisTrack = false;
                 else
                 {
@@ -143,24 +145,10 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
             }
         }
 
-        //--------------------- loop over tracking-allowed materials on the path --------------------------
+        //--------------------- loop over volumes on the path --------------------------
         do
         {
             //qDebug()<<"cycle starts for the new material at:" << gGeoManager->GetPath();
-            double energyHistory = 0; //need for no-depo detection
-
-            const double * global = navigator->GetCurrentPoint();
-            for (int j=0; j<3; j++)
-                r[j] = global[j]; //current position
-
-            if (navigator->IsOutside())
-            {
-                //              qDebug()<<"Escaped from the defined geometry!";
-                ATrackingStepData * step = new ATrackingStepData(r, time, energy, 0, "O");
-                thisParticleRecord->addStep(step);
-                bFinished = true;
-                break; //do-break
-            }
 
             //monitors
             if (!SimStat.Monitors.isEmpty())
@@ -175,8 +163,8 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
                         if (  ( bPrimary && SimStat.Monitors.at(iMon)->isPrimary() ) ||
                               (!bPrimary && SimStat.Monitors.at(iMon)->isSecondary()) )
                         {
-                            Double_t local[3];
-                            navigator->MasterToLocal(global, local);
+                            double local[3];
+                            navigator->MasterToLocal(r, local);
                             //qDebug()<<local[0]<<local[1];
                             if ( (local[2]>0 && SimStat.Monitors.at(iMon)->isUpperSensitive()) || (local[2]<0 && SimStat.Monitors.at(iMon)->isLowerSensitive()) )
                             {
@@ -186,8 +174,11 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
                                 SimStat.Monitors[iMon]->fillForParticle(local[0], local[1], time, 180.0/3.1415926535*TMath::ACos(cosAngle), energy);
                                 if (SimStat.Monitors.at(iMon)->isStopsTracking())
                                 {
-                                    ATrackingStepData * step = new ATrackingStepData(r, time, energy, 0, "MonitorStop");
-                                    thisParticleRecord->addStep(step);
+                                    if (SimSet->fLogsStat)
+                                    {
+                                        ATrackingStepData * step = new ATrackingStepData(r, time, energy, 0, "MonitorStop");
+                                        thisParticleRecord->addStep(step);
+                                    }
                                     bFinished = true;
                                     break; //do-break
                                 }
@@ -200,8 +191,11 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
             if ( !MpCollection[MatId]->MatParticle[ParticleId].TrackingAllowed )
             {
                 //              qDebug()<<"Found medium where tracking is not allowed!";
-                ATrackingStepData * step = new ATrackingStepData(r, time, energy, 0, "TrackingForbidden");
-                thisParticleRecord->addStep(step);
+                if (SimSet->fLogsStat)
+                {
+                    ATrackingStepData * step = new ATrackingStepData(r, time, energy, 0, "TrackingForbidden");
+                    thisParticleRecord->addStep(step);
+                }
                 bFinished = true;
                 break; //do-break
             }
@@ -214,6 +208,7 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
             {
                 // pass this medium
                 //distanceHistory = MaxLength;
+                //should enter the next volume after "do" is over
             }
             else
             {
@@ -247,11 +242,12 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
                             //                       qDebug()<<"boundary reached!";
                             RecStep = MaxLength - distanceHistory - SimSet->Safety;
                             flagDone = true;
-                            terminationStatus = EventHistoryStructure::NotFinished;//0 //should enter the next material after "do" is over
+                            //should enter the next volume after "do" is over
+                            bFinished = false;
                         }
                         //doing the step
                         navigator->SetStep(RecStep);
-                        navigator->Step(kTRUE, kFALSE);
+                        navigator->Step(true, false);
                         //                  qDebug() << "Asked for:"<<RecStep<<"Did:"<<navigator->GetStep();  //actual step is less by a fixed value (safity?)
                         RecStep = navigator->GetStep();
                         //energy loss?
@@ -265,7 +261,8 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
                         {
                             //qDebug() << "  Dissipated below low limit!";
                             flagDone = true;
-                            terminationStatus = EventHistoryStructure::AllEnergyDisspated;//2;
+                            //terminationStatus = EventHistoryStructure::AllEnergyDisspated;//2;
+                            bFinished = true;
                             dE += energy;
                         }
 
@@ -274,14 +271,19 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
                         AEnergyDepositionCell* tc = new AEnergyDepositionCell(r, RecStep, time, dE, ParticleId, MatId, counter, eventId);
                         EnergyVector.push_back(tc);
 
+                        if (SimSet->fLogsStat)
+                        {
+                            ATrackingStepData * step = new ATrackingStepData(r, time, energy, dE, "hIoni");
+                            thisParticleRecord->addStep(step);
+                        }
+
                         distanceHistory += RecStep;
-                        energyHistory += dE;
                     }
                     while (!flagDone);
                 }
                 //================ END: charged particle =================
                 else
-                    //================ Neutral particle =================
+                //================ Neutral particle =================
                 {
                     //how many processes?
                     const int numProcesses = MpCollection[MatId]->MatParticle[ParticleId].Terminators.size();
@@ -290,14 +292,15 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
                     {
                         double SoFarShortestId = 0;
                         double SoFarShortest = 1.0e10;
-                        double TotalCrossSection; //used by neutrons - elastic scattering or absorption
+                        double TotalCrossSection; //used by neutrons - elastic scattering or absorption  //obsolete? ***!!!
                         for (int iProcess=0; iProcess<numProcesses; iProcess++)
                         {
                             //        qDebug()<<"---Process #:"<<iProcess;
                             //calculating (random) how much this particle would travel before this kind of interaction happens
 
                             bool bUseNCrystal = false;
-                            //for neutrons have additional flags to suppress capture and elastic and if it NCrystal lib which handles scattering
+                            //for neutrons there are additional flags to suppress capture and elastic
+                            //and for the case of the NCrystal lib which handles scattering
                             if (ParticleType == AParticle::_neutron_)
                             {
                                 if (MpCollection[MatId]->MatParticle[ParticleId].Terminators[iProcess].Type == NeutralTerminatorStructure::Absorption)
@@ -356,18 +359,19 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
                         if (SoFarShortest >= MaxLength)
                         {
                             //nothing was triggered in this medium
-                            //                       qDebug()<<"Passed the volume - no interaction";
-                            distanceHistory = MaxLength;
-                            energyHistory = 0;
-                            terminationStatus = EventHistoryStructure::NotFinished;//0
+                            //qDebug()<<"Passed the volume - no interaction";
+                            //distanceHistory = MaxLength;
+                            //terminationStatus = EventHistoryStructure::NotFinished;//0
+                            bFinished = false;
                         }
                         else
                         {
                             //termination scenario Id was triggered at the distance SoFarShortest
                             //doing the proper step
                             navigator->SetStep(SoFarShortest);
-                            navigator->Step(kTRUE, kFALSE);
-                            for (int j=0; j<3; j++) r[j] = navigator->GetCurrentPoint()[j];  //new current point
+                            navigator->Step(true, false);
+                            for (int j=0; j<3; j++)
+                                r[j] = navigator->GetCurrentPoint()[j];  //new current point
 
                             //triggering the process
                             const NeutralTerminatorStructure& term = MpCollection[MatId]->MatParticle[ParticleId].Terminators.at(SoFarShortestId);
@@ -377,11 +381,16 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
                             {
                                 //                           qDebug()<<"Photoelectric";
                                 AEnergyDepositionCell* tc = new AEnergyDepositionCell(r, 0, time, energy, ParticleId, MatId, counter, eventId);
-                                EnergyVector.append(tc);
+                                EnergyVector.push_back(tc);
 
-                                terminationStatus = EventHistoryStructure::Photoelectric;//3
-                                distanceHistory = SoFarShortest;
-                                energyHistory = energy;
+                                //terminationStatus = EventHistoryStructure::Photoelectric;//3
+                                if (SimSet->fLogsStat)
+                                {
+                                    ATrackingStepData * step = new ATrackingStepData(r, time, 0, energy, "phot");
+                                    thisParticleRecord->addStep(step);
+                                }
+
+                                //distanceHistory = SoFarShortest;
                                 break; //switch-break
                             }
                             case (NeutralTerminatorStructure::ComptonScattering): //1
@@ -393,14 +402,28 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
                                 G0.direction = dir;
                                 //qDebug()<<dir[0]<<dir[1]<<dir[2];
 
-                                GammaStructure G1 = Compton(&G0, RandGen); // new gamma
+                                GammaStructure G1 = Compton(&G0, &RandGen); // new gamma
                                 //qDebug()<<"energy"<<G1.energy<<" "<<G1.direction[0]<<G1.direction[1]<<G1.direction[2];
                                 AEnergyDepositionCell* tc = new AEnergyDepositionCell(r, 0, time, G0.energy - G1.energy, ParticleId, MatId, counter, eventId);
-                                EnergyVector.append(tc);
+                                EnergyVector.push_back(tc);
+
+                                // ***!!! make the same way as in Geant4 and continue with gamma?
 
                                 //creating gamma and putting it on stack
-                                AParticleRecord *tmp = new AParticleRecord(ParticleId, r[0],r[1],r[2], G1.direction[0], G1.direction[1], G1.direction[2], time, G1.energy, counter);
+                                AParticleRecord * tmp = new AParticleRecord(ParticleId, r[0],r[1],r[2], G1.direction[0], G1.direction[1], G1.direction[2], time, G1.energy, counter);
                                 ParticleStack.append(tmp);
+
+                                if (SimSet->fLogsStat)
+                                {
+                                    ATrackingStepData * step = new ATrackingStepData(r, time, 0, G0.energy - G1.energy, "compt");
+                                    thisParticleRecord->addStep(step);
+
+                                    AParticleTrackingRecord * secTR = AParticleTrackingRecord::create( "gamma" );
+                                    tmp->ParticleRecord = secTR;
+                                    thisParticleRecord->addSecondary(secTR);
+                                    step->Secondaries.push_back( thisParticleRecord->countSecondaries()-1 );
+                                }
+
                                 //creating electron
                                 //int IdElectron =
                                 //double ElectronEnergy = G0.energy - G1.energy;
@@ -409,9 +432,9 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
                                 //tmp = new ParticleOnStack(IdElectron, r[0],r[1],r[2], eDirection[0], eDirection[1], eDirection[2], time, ElectronEnergy, 1);
                                 //ParticleStack->append(tmp);
 
-                                terminationStatus = EventHistoryStructure::ComptonScattering;//4
-                                distanceHistory = SoFarShortest;
-                                energyHistory = tc->dE;
+                                //terminationStatus = EventHistoryStructure::ComptonScattering;//4
+                                bFinished = true;
+                                //distanceHistory = SoFarShortest;
                                 break;//switch-break
                             }
                             case (NeutralTerminatorStructure::Absorption): //2
@@ -487,8 +510,8 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
                                             double vv[3]; //generated direction of the particle
                                             for (int igp=0; igp<reaction.GeneratedParticles.size(); igp++)
                                             {
-                                                const int&   ParticleId = reaction.GeneratedParticles.at(igp).ParticleId;
-                                                const double& energy    = reaction.GeneratedParticles.at(igp).Energy;
+                                                const int    & ParticleId = reaction.GeneratedParticles.at(igp).ParticleId;
+                                                const double & energy     = reaction.GeneratedParticles.at(igp).Energy;
                                                 //      qDebug() << "  generating particle with Id"<<ParticleId << "and energy"<<energy;
                                                 if (igp>0 && reaction.GeneratedParticles.at(igp).bOpositeDirectionWithPrevious)
                                                 {
@@ -511,9 +534,14 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
                                     qWarning() << "||| No absorption elements are defined for" << MpCollection[MatId]->name;
                                 }
 
-                                terminationStatus = EventHistoryStructure::NeutronAbsorption;//5
-                                distanceHistory = SoFarShortest;
-                                energyHistory = 0;
+                                //terminationStatus = EventHistoryStructure::NeutronAbsorption;//5
+                                if (SimSet->fLogsStat)
+                                {
+                                    ATrackingStepData * step = new ATrackingStepData(r, time, 0, 0, "nCapture");
+                                    thisParticleRecord->addStep(step);
+                                }
+                                bFinished = true;
+                                //distanceHistory = SoFarShortest;
                                 break; //switch-break
                             }
                             case (NeutralTerminatorStructure::PairProduction): //3
@@ -526,14 +554,30 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
                                 //creating two gammas from positron anihilation and putting it on stack
                                 double vv[3];
                                 generateRandomDirection(vv);
-                                AParticleRecord* tmp = new AParticleRecord(ParticleId, r[0],r[1],r[2], vv[0], vv[1], vv[2], time, 511, counter);
-                                ParticleStack.append(tmp);
-                                tmp = new AParticleRecord(ParticleId, r[0],r[1],r[2], -vv[0], -vv[1], -vv[2], time, 511, counter);
-                                ParticleStack.append(tmp);
+                                AParticleRecord * tmp1 = new AParticleRecord(ParticleId, r[0],r[1],r[2], vv[0], vv[1], vv[2], time, 511, counter);
+                                ParticleStack.append(tmp1);
+                                AParticleRecord * tmp2 = new AParticleRecord(ParticleId, r[0],r[1],r[2], -vv[0], -vv[1], -vv[2], time, 511, counter);
+                                ParticleStack.append(tmp2);
 
-                                terminationStatus = EventHistoryStructure::PairProduction;//9
-                                distanceHistory = SoFarShortest;
-                                energyHistory = depo;
+                                if (SimSet->fLogsStat)
+                                {
+                                    ATrackingStepData * step = new ATrackingStepData(r, time, 0, depo, "pair");
+                                    thisParticleRecord->addStep(step);
+
+                                    AParticleTrackingRecord * secTR = AParticleTrackingRecord::create( "gamma" );
+                                    tmp1->ParticleRecord = secTR;
+                                    thisParticleRecord->addSecondary(secTR);
+                                    step->Secondaries.push_back( thisParticleRecord->countSecondaries()-1 );
+
+                                    secTR = AParticleTrackingRecord::create( "gamma" );
+                                    tmp2->ParticleRecord = secTR;
+                                    thisParticleRecord->addSecondary(secTR);
+                                    step->Secondaries.push_back( thisParticleRecord->countSecondaries()-1 );
+                                }
+
+                                //terminationStatus = EventHistoryStructure::PairProduction;//9
+                                bFinished = true;
+                                //distanceHistory = SoFarShortest;
                                 break; //switch-break
                             }
                             case (NeutralTerminatorStructure::ElasticScattering): //4
@@ -651,22 +695,38 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
                                     newEnergy = energy + deltaE;
                                 }
 
+                                double depE;
+                                AParticleRecord * tmp = nullptr;
                                 if (newEnergy > SimSet->MinEnergyNeutrons * 1.0e-6) // meV -> keV to compare
                                 {
-                                    AParticleRecord *tmp = new AParticleRecord(ParticleId, r[0],r[1], r[2], vnew[0]/vnewMod, vnew[1]/vnewMod, vnew[2]/vnewMod, time, newEnergy, counter);
+                                    tmp = new AParticleRecord(ParticleId, r[0],r[1], r[2], vnew[0]/vnewMod, vnew[1]/vnewMod, vnew[2]/vnewMod, time, newEnergy, counter);
                                     ParticleStack.append(tmp);
-                                    energyHistory = energy - newEnergy;
+                                    depE = energy - newEnergy;
                                 }
                                 else
                                 {
                                     qDebug() << "Elastic scattering: Neutron energy" << newEnergy * 1.0e6 <<
                                                 "is below the lower limit (" << SimSet->MinEnergyNeutrons<<
                                                 "meV) - tracking skipped for this neutron";
-                                    energyHistory = energy;
+                                    depE = energy;
                                 }
 
-                                terminationStatus = EventHistoryStructure::ElasticScattering;
-                                distanceHistory = SoFarShortest;
+                                //terminationStatus = EventHistoryStructure::ElasticScattering;
+                                if (SimSet->fLogsStat)
+                                {
+                                    ATrackingStepData * step = new ATrackingStepData(r, time, 0, depE, "nElastic");
+                                    thisParticleRecord->addStep(step);
+
+                                    if (tmp)
+                                    {
+                                        AParticleTrackingRecord * secTR = AParticleTrackingRecord::create( "neutron" );
+                                        tmp->ParticleRecord = secTR;
+                                        thisParticleRecord->addSecondary(secTR);
+                                        step->Secondaries.push_back( thisParticleRecord->countSecondaries()-1 );
+                                    }
+                                }
+                                bFinished = true;
+                                //distanceHistory = SoFarShortest;
 
                                 break; //switch-break
                             }
@@ -677,22 +737,44 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
                     {
                         //no processes - error!
                         qWarning() << "No processes are defined for neutron in" << MpCollection.getMaterialName(MatId);
-                        distanceHistory = MaxLength;
+                        //distanceHistory = MaxLength;
                         //return false;
                     }
                 }
                 //================ END: neutral particle ===================
             } //end block - interaction data defined
 
-            if (SimSet->fLogsStat) History->Deposition.append(MaterialHistoryStructure(MatId,energyHistory,distanceHistory)); //if continue to the next volume
-
             //was particle killed in this material?
-            if (terminationStatus != EventHistoryStructure::NotFinished) break;  //0, do-break
+            //if (terminationStatus != EventHistoryStructure::NotFinished) break;  //0, do-break
+            if (bFinished) break;  //0, do-break
 
             //stepping to check the next medium
             navigator->FindNextBoundaryAndStep();
-            MatId = navigator->GetCurrentVolume()->GetMaterial()->GetIndex();
-            //            qDebug()<<"Next material id: "<<MatId;
+
+            const double * global = navigator->GetCurrentPoint();
+            for (int j=0; j<3; j++)
+                r[j] = global[j];
+
+            if (navigator->IsOutside())
+            {
+                //              qDebug()<<"Escaped from the defined geometry!";
+                if (SimSet->fLogsStat)
+                {
+                    ATrackingStepData * step = new ATrackingStepData(r, time, energy, 0, "O");
+                    thisParticleRecord->addStep(step);
+                }
+                bFinished = true;
+            }
+            else
+            {
+                if (SimSet->fLogsStat)
+                {
+                    ATrackingStepData * step = new ATrackingStepData(r, time, energy, 0, "T");
+                    thisParticleRecord->addStep(step);
+                }
+                MatId = navigator->GetCurrentVolume()->GetMaterial()->GetIndex();
+                //            qDebug()<<"Next material id: "<<MatId;
+            }
         }
         while (!bFinished);
         //--------------- END of do-cycle over tracking-allowed materials on the path-------------------
@@ -703,12 +785,6 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
             track->Nodes.append(TrackNodeStruct(r, time));
             TrackCandidates.push_back(track);
             ParticleTracksAdded++;
-        }
-        //finalizing diagnostics
-        if (SimSet->fLogsStat)
-        {
-            History->Termination = terminationStatus;
-            EventHistory->append(History);
         }
 
         //delete the particle record and remove from the stack

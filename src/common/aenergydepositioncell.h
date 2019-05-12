@@ -1,10 +1,12 @@
 #ifndef AENERGYDEPOSITIONCELL
 #define AENERGYDEPOSITIONCELL
 
+// ***!!! index / eventId - check what is not needed anymore
+
 struct AEnergyDepositionCell  //element of the EnergyVector QVector
     {
         double r[3];  // x,y,z -coordinates of the cell
-        double cellLength; //cell length for charged particles
+        double cellLength; //cell length for charged particles   // ***!!! obsolete?
         double time;
         double dE; //energy deposited in this cell
         int ParticleId;          // index of the particle form the particle list

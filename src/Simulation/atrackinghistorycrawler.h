@@ -13,29 +13,6 @@ class TH1D;
 class TH2D;
 class TFormula;
 
-/*
-// --- Search conditions ---
-class AHistorySearchCondition
-{
-public:
-    virtual ~AHistorySearchCondition(){}
-
-   // false = validation failed
-    virtual bool validateParticle(const AParticleTrackingRecord & pr) {return true;}
-    virtual bool validateStep(const ATrackingStepData & step) {return true;}
-    virtual bool validateTransition(const ATrackingStepData & from, const ATrackingStepData & to) {return true;}
-};
-
-class AHistorySearchCondition_particle : public AHistorySearchCondition
-{
-public:
-    virtual ~AHistorySearchCondition(){}
-
-   // false = validation failed
-    virtual bool validateParticle(const AParticleTrackingRecord & pr) = 0;
-};
-*/
-
 // --- Search processors ---
 
 class AHistorySearchProcessor
@@ -49,7 +26,7 @@ public:
     // ---------------
 
     virtual void onNewEvent(){}
-    virtual void onNewTrack(const AParticleTrackingRecord & ){}
+    virtual bool onNewTrack(const AParticleTrackingRecord & ){return false;} // master track control - the bool flag will be returned in the onTrackEnd
 
     virtual void onLocalStep(const ATrackingStepData & ){} // anything but transportation
 
@@ -57,8 +34,15 @@ public:
     virtual void onTransitionIn (const ATrackingStepData & ){} // "from" step
     virtual void onTransition(const ATrackingStepData & , const ATrackingStepData & ){} // "fromfrom" step, "from" step - "Creation" step cannot call this method!
 
-    virtual void onTrackEnd(){}
+    virtual void onTrackEnd(bool /*bMaster*/){} // flag is the value returned by onNewTrack()
     virtual void onEventEnd(){}
+
+    bool isInlineSecondaryProcessing() {return bInlineSecondaryProcessing;}
+    bool isIgnoreParticleSelectors()   {return bIgnoreParticleSelectors;}
+
+protected:
+    bool bInlineSecondaryProcessing = false;
+    bool bIgnoreParticleSelectors   = false;
 };
 
 class AHistorySearchProcessor_findParticles : public AHistorySearchProcessor
@@ -66,9 +50,9 @@ class AHistorySearchProcessor_findParticles : public AHistorySearchProcessor
 public:
     virtual ~AHistorySearchProcessor_findParticles(){}
 
-    virtual void onNewTrack(const AParticleTrackingRecord & pr);
+    virtual bool onNewTrack(const AParticleTrackingRecord & pr) override;
     virtual void onLocalStep(const ATrackingStepData & tr) override;
-    virtual void onTrackEnd() override;
+    virtual void onTrackEnd(bool) override;
 
     QString Candidate;
     bool bConfirmed = false;
@@ -81,8 +65,8 @@ public:
     virtual ~AHistorySearchProcessor_findProcesses(){}
 
     virtual void onLocalStep(const ATrackingStepData & tr) override;
-    virtual void onTransitionOut(const ATrackingStepData & );
-    virtual void onTransitionIn (const ATrackingStepData & );
+    virtual void onTransitionOut(const ATrackingStepData & ) override;
+    virtual void onTransitionIn (const ATrackingStepData & ) override;
 
     QMap<QString, int> FoundProcesses;
 };
@@ -96,15 +80,15 @@ public:
     virtual ~AHistorySearchProcessor_findDepositedEnergy();
 
     virtual void onNewEvent() override;
-    virtual void onNewTrack(const AParticleTrackingRecord & pr);
+    virtual bool onNewTrack(const AParticleTrackingRecord & pr) override;
     virtual void onLocalStep(const ATrackingStepData & tr) override;
-    virtual void onTrackEnd() override;
+    virtual void onTrackEnd(bool bMaster) override;
     virtual void onEventEnd() override;
 
     CollectionMode Mode;
     double Depo = 0;
-    bool bRunningSecondaries = false;
     TH1D * Hist = nullptr;
+    bool bSecondaryTrackingStarted = false;
 };
 
 class AHistorySearchProcessor_findTravelledDistances : public AHistorySearchProcessor
@@ -113,11 +97,11 @@ public:
     AHistorySearchProcessor_findTravelledDistances(int bins, double from = 0, double to = 0);
     virtual ~AHistorySearchProcessor_findTravelledDistances();
 
-    virtual void onNewTrack(const AParticleTrackingRecord & pr);
+    virtual bool onNewTrack(const AParticleTrackingRecord & pr) override;
     virtual void onLocalStep(const ATrackingStepData & tr) override;
-    virtual void onTransitionOut(const ATrackingStepData & tr); // "from" step
-    virtual void onTransitionIn (const ATrackingStepData & tr); // "from" step
-    virtual void onTrackEnd() override;
+    virtual void onTransitionOut(const ATrackingStepData & tr) override; // "from" step
+    virtual void onTransitionIn (const ATrackingStepData & tr) override; // "from" step
+    virtual void onTrackEnd(bool) override;
 
     float Distance = 0;
     float LastPosition[3];
@@ -144,7 +128,7 @@ public:
                                    int bins2, double from2, double to2);
     virtual ~AHistorySearchProcessor_Border();
 
-    virtual void afterSearch();
+    virtual void afterSearch() override;
 
     // direction info can be [0,0,0] !!!
     virtual void onTransition(const ATrackingStepData & fromfromTr, const ATrackingStepData & fromTr) override; // "from" step

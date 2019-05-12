@@ -35,16 +35,22 @@ void ATrackingHistoryCrawler::find(const AFindRecordSelector & criteria, AHistor
 void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, const AFindRecordSelector & opt, AHistorySearchProcessor & processor) const
 {
     bool bDoTrack = true;
-    if      (opt.bParticle && opt.Particle != pr.ParticleName) bDoTrack = false;
-    else if (opt.bPrimary && pr.getSecondaryOf() ) bDoTrack = false;
-    else if (opt.bSecondary && !pr.getSecondaryOf() ) bDoTrack = false;
 
+    if (!processor.isIgnoreParticleSelectors())
+    {
+        if      (opt.bParticle  && opt.Particle != pr.ParticleName) bDoTrack = false;
+        else if (opt.bPrimary   && pr.getSecondaryOf() ) bDoTrack = false;
+        else if (opt.bSecondary && !pr.getSecondaryOf() ) bDoTrack = false;
+    }
+
+    bool bInlineTrackingOfSecondaries = processor.isInlineSecondaryProcessing();
     bool bSkipTrackingOfSecondaries = false;
     AParticleTrackingRecord * lastSecondaryToTrack = nullptr;
 
     if (bDoTrack)
     {
-        processor.onNewTrack(pr);
+        bool bMaster = processor.onNewTrack(pr);
+        bInlineTrackingOfSecondaries = processor.isInlineSecondaryProcessing(); // give a possibility to change the mode
 
         const std::vector<ATrackingStepData *> & steps = pr.getSteps();
         for (size_t iStep = 0; iStep < steps.size(); iStep++)
@@ -166,33 +172,49 @@ void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, 
 
                 if (!bSkipThisStep) processor.onLocalStep(*thisStep);
 
-                if (!pr.getSecondaryOf() && opt.bLimitToFirstInteractionOfPrimary && ProcType != Creation)
+                if (bInlineTrackingOfSecondaries)
                 {
-                    if (thisStep->Secondaries.empty()) bSkipTrackingOfSecondaries = true;
-                    else lastSecondaryToTrack = pr.getSecondaries().at( thisStep->Secondaries.back() );
-                    break;
+                    for (int iSec : thisStep->Secondaries)
+                        findRecursive(*pr.getSecondaries().at(iSec), opt, processor);
+
+                    if (!pr.getSecondaryOf() && opt.bLimitToFirstInteractionOfPrimary && ProcType != Creation)
+                        break;
                 }
+                else
+                {
+                    if (!pr.getSecondaryOf() && opt.bLimitToFirstInteractionOfPrimary && ProcType != Creation)
+                    {
+                        if (thisStep->Secondaries.empty()) bSkipTrackingOfSecondaries = true;
+                        else lastSecondaryToTrack = pr.getSecondaries().at( thisStep->Secondaries.back() );
+                        break;
+                    }
+                }
+
             }
         }
 
-        processor.onTrackEnd();
+        processor.onTrackEnd(bMaster);
     }
 
-    if (!bSkipTrackingOfSecondaries)
+    if (!bInlineTrackingOfSecondaries)
     {
-        const std::vector<AParticleTrackingRecord *> & secondaries = pr.getSecondaries();
-        for (AParticleTrackingRecord * sec : secondaries)
+        if (!bSkipTrackingOfSecondaries)
         {
-            findRecursive(*sec, opt, processor);
-            if (sec == lastSecondaryToTrack) break;
+            const std::vector<AParticleTrackingRecord *> & secondaries = pr.getSecondaries();
+            for (AParticleTrackingRecord * sec : secondaries)
+            {
+                findRecursive(*sec, opt, processor);
+                if (sec == lastSecondaryToTrack) break;
+            }
         }
     }
 }
 
-void AHistorySearchProcessor_findParticles::onNewTrack(const AParticleTrackingRecord &pr)
+bool AHistorySearchProcessor_findParticles::onNewTrack(const AParticleTrackingRecord &pr)
 {
     Candidate = pr.ParticleName;
     bConfirmed = false;
+    return false;
 }
 
 void AHistorySearchProcessor_findParticles::onLocalStep(const ATrackingStepData & )
@@ -200,7 +222,7 @@ void AHistorySearchProcessor_findParticles::onLocalStep(const ATrackingStepData 
     bConfirmed = true;
 }
 
-void AHistorySearchProcessor_findParticles::onTrackEnd()
+void AHistorySearchProcessor_findParticles::onTrackEnd(bool)
 {
     if (bConfirmed && !Candidate.isEmpty())
     {
@@ -214,10 +236,11 @@ void AHistorySearchProcessor_findParticles::onTrackEnd()
 
 AHistorySearchProcessor_findDepositedEnergy::AHistorySearchProcessor_findDepositedEnergy(CollectionMode mode, int bins, double from, double to)
 {
-    //qDebug() << mode;
     Mode = mode;
     Hist = new TH1D("", "Deposited energy", bins, from, to);
     Hist->GetXaxis()->SetTitle("Energy, keV");
+
+    bInlineSecondaryProcessing = false; // on start it is default non-inline mode even in WithSecondaries mode
 }
 
 AHistorySearchProcessor_findDepositedEnergy::~AHistorySearchProcessor_findDepositedEnergy()
@@ -230,20 +253,30 @@ void AHistorySearchProcessor_findDepositedEnergy::onNewEvent()
     if (Mode == OverEvent) Depo = 0;
 }
 
-void AHistorySearchProcessor_findDepositedEnergy::onNewTrack(const AParticleTrackingRecord & )
+bool AHistorySearchProcessor_findDepositedEnergy::onNewTrack(const AParticleTrackingRecord & )
 {
     switch (Mode)
     {
     case Individual:
         Depo = 0;
-        break;
+        return false;
     case WithSecondaries:
-
-        break;
+        if (bSecondaryTrackingStarted)
+            return false;
+        else
+        {
+            Depo = 0;
+            bSecondaryTrackingStarted  = true;
+            bInlineSecondaryProcessing = true; // change to inline secondaries mode
+            bIgnoreParticleSelectors   = true; // to allow secondaries even not allowed by the selection
+            return true;
+        }
     case OverEvent:
         // no need to do anything - Depo is reset on new event
-        break;
+        return false;
     }
+
+    return false;
 }
 
 void AHistorySearchProcessor_findDepositedEnergy::onLocalStep(const ATrackingStepData & tr)
@@ -251,7 +284,7 @@ void AHistorySearchProcessor_findDepositedEnergy::onLocalStep(const ATrackingSte
     Depo += tr.DepositedEnergy;
 }
 
-void AHistorySearchProcessor_findDepositedEnergy::onTrackEnd()
+void AHistorySearchProcessor_findDepositedEnergy::onTrackEnd(bool bMaster)
 {
     switch (Mode)
     {
@@ -260,10 +293,17 @@ void AHistorySearchProcessor_findDepositedEnergy::onTrackEnd()
         Depo = 0;
         break;
     case WithSecondaries:
-
+        if (bMaster)
+        {
+            if (Depo > 0) Hist->Fill(Depo);
+            Depo = 0;
+            bSecondaryTrackingStarted  = false;
+            bInlineSecondaryProcessing = false; // back to default non-inline mode!
+            bIgnoreParticleSelectors   = false; // back to normal mode
+        }
         break;
     case OverEvent:
-
+        // nothing to do - waiting for the end of the event
         break;
     }
 }
@@ -288,9 +328,10 @@ AHistorySearchProcessor_findTravelledDistances::~AHistorySearchProcessor_findTra
     delete Hist;
 }
 
-void AHistorySearchProcessor_findTravelledDistances::onNewTrack(const AParticleTrackingRecord &)
+bool AHistorySearchProcessor_findTravelledDistances::onNewTrack(const AParticleTrackingRecord &)
 {
     Distance = 0;
+    return false;
 }
 
 void AHistorySearchProcessor_findTravelledDistances::onLocalStep(const ATrackingStepData &tr)
@@ -327,7 +368,7 @@ void AHistorySearchProcessor_findTravelledDistances::onTransitionIn(const ATrack
         LastPosition[i] = tr.Position[i];
 }
 
-void AHistorySearchProcessor_findTravelledDistances::onTrackEnd()
+void AHistorySearchProcessor_findTravelledDistances::onTrackEnd(bool)
 {
     if (Distance > 0) Hist->Fill(Distance);
     Distance = 0;

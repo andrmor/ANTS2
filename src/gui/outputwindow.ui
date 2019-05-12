@@ -779,6 +779,9 @@ over all events</string>
             <property name="leftMargin">
              <number>0</number>
             </property>
+            <property name="topMargin">
+             <number>2</number>
+            </property>
             <item>
              <widget class="QCheckBox" name="cbPTHistParticle">
               <property name="text">
@@ -790,6 +793,13 @@ over all events</string>
              <widget class="QCheckBox" name="cbPTHistOnlyPrim">
               <property name="text">
                <string>Only primaries</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="cbPTHistOnlySec">
+              <property name="text">
+               <string>Only secondaries</string>
               </property>
              </widget>
             </item>
@@ -807,9 +817,16 @@ over all events</string>
              <widget class="QLineEdit" name="lePTHistParticle"/>
             </item>
             <item>
-             <widget class="QCheckBox" name="cbPTHistOnlySec">
+             <widget class="QCheckBox" name="cbPTHistLimitToFirst">
               <property name="text">
-               <string>Only secondaries</string>
+               <string>Limit to the first interaction of the primary</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_25">
+              <property name="text">
+               <string>  </string>
               </property>
              </widget>
             </item>
@@ -846,13 +863,6 @@ over all events</string>
            </spacer>
           </item>
           <item>
-           <widget class="QCheckBox" name="cbPTHistLimitToFirst">
-            <property name="text">
-             <string>Limit to the first interaction of the primary</string>
-            </property>
-           </widget>
-          </item>
-          <item>
            <spacer name="horizontalSpacer_17">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -882,7 +892,7 @@ over all events</string>
            </size>
           </property>
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="tab_3">
            <attribute name="title">
@@ -1070,7 +1080,7 @@ and any mathematical/logical operations
 See ROOT TFormula description</string>
                   </property>
                   <property name="text">
-                   <string>Energy</string>
+                   <string>Energy*1e6</string>
                   </property>
                  </widget>
                 </item>

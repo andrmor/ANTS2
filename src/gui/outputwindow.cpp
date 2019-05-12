@@ -1753,11 +1753,6 @@ void OutputWindow::on_pbPTHistRequest_clicked()
                 message("Unknown energy deposition collection mode", this);
                 return;
             }
-            if (mode == 1)
-            {
-                message("Not yet implemented mode!", this);
-                return;
-            }
             AHistorySearchProcessor_findDepositedEnergy::CollectionMode edm = static_cast<AHistorySearchProcessor_findDepositedEnergy::CollectionMode>(mode);
 
             AHistorySearchProcessor_findDepositedEnergy p(edm, bins, from, to);

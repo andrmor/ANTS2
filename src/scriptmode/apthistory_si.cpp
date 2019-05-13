@@ -18,6 +18,10 @@ APTHistory_SI::APTHistory_SI(ASimulationManager & SimulationManager) :
 {
     Crawler = new ATrackingHistoryCrawler(SM.TrackingHistory);
     Criteria = new AFindRecordSelector();
+
+    H["cd_getTrackRecord"] = "returns [string_ParticleName, bool_IsSecondary, int_NumberOfSecondaries, int_NumberOfTrackingSteps]";
+    H["cd_getStepRecord"] = "returns [ [X,Y,Z], Time, [MatIndex, VolumeName, VolumeIndex], Energy, DepositedEnergy, ProcessName], indexesOfSecondaries[] ]\n"
+            "XYZ in mm, Time in ns, Energies in keV, [MatVolIndex] array is empty if node does not exist, indexesOfSec is array with ints";
 }
 
 APTHistory_SI::~APTHistory_SI()
@@ -81,7 +85,8 @@ QVariantList APTHistory_SI::cd_getTrackRecord()
     {
         vl << Rec->ParticleName
            << (bool)Rec->getSecondaryOf()
-           << (int)Rec->getSecondaries().size();
+           << (int)Rec->getSecondaries().size()
+           << (int)Rec->getSteps().size();
     }
     else abort("record not set: use cd_set command");
 
@@ -120,6 +125,14 @@ bool APTHistory_SI::cd_step(int iStep)
         abort("record not set: use cd_set command");
 
     return false;
+}
+
+int APTHistory_SI::cd_getCurrentStep()
+{
+    if (Rec) return Step;
+
+    abort("record not set: use cd_set command");
+    return 0;
 }
 
 void APTHistory_SI::cd_firstStep()

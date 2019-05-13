@@ -37,6 +37,7 @@ public slots:
     QVariantList cd_getTrackRecord();
     bool cd_step();
     bool cd_step(int iStep);
+    int  cd_getCurrentStep();
     void cd_firstStep();
     void cd_lastStep();
     QVariantList cd_getStepRecord();

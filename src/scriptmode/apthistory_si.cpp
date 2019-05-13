@@ -104,6 +104,24 @@ bool APTHistory_SI::cd_step()
     return false;
 }
 
+bool APTHistory_SI::cd_step(int iStep)
+{
+    if (Rec)
+    {
+        if (iStep<0 || iStep>=(int)Rec->getSteps().size())
+            abort("bad step number");
+        else
+        {
+            Step = iStep;
+            return true;
+        }
+    }
+    else
+        abort("record not set: use cd_set command");
+
+    return false;
+}
+
 void APTHistory_SI::cd_firstStep()
 {
     if (Rec)
@@ -228,6 +246,11 @@ void APTHistory_SI::setOnlySecondary()
     Criteria->bSecondary = true;
 }
 
+void APTHistory_SI::setLimitToFirstInteractionOfPrimary()
+{
+    Criteria->bLimitToFirstInteractionOfPrimary = true;
+}
+
 void APTHistory_SI::setMaterial(int matIndex)
 {
     Criteria->bMaterial = true;
@@ -238,6 +261,12 @@ void APTHistory_SI::setVolume(QString volumeName)
 {
     Criteria->bVolume = true;
     Criteria->Volume = volumeName.toLocal8Bit().data();
+}
+
+void APTHistory_SI::setVolumeIndex(int volumeIndex)
+{
+    Criteria->bVolumeIndex = true;
+    Criteria->VolumeIndex = volumeIndex;
 }
 
 void APTHistory_SI::setFromMaterial(int matIndex)
@@ -310,9 +339,8 @@ QVariantList APTHistory_SI::findProcesses()
     return vl;
 }
 
-QVariantList APTHistory_SI::findDepositedEnergies(int bins, double from, double to)
+QVariantList APTHistory_SI::findDepE(AHistorySearchProcessor_findDepositedEnergy & p)
 {
-    AHistorySearchProcessor_findDepositedEnergy p(AHistorySearchProcessor_findDepositedEnergy::Individual, bins, from, to);
     Crawler->find(*Criteria, p);
 
     QVariantList vl;
@@ -324,6 +352,24 @@ QVariantList APTHistory_SI::findDepositedEnergies(int bins, double from, double 
         vl.push_back(el);
     }
     return vl;
+}
+
+QVariantList APTHistory_SI::findDepositedEnergies(int bins, double from, double to)
+{
+    AHistorySearchProcessor_findDepositedEnergy p(AHistorySearchProcessor_findDepositedEnergy::Individual, bins, from, to);
+    return findDepE(p);
+}
+
+QVariantList APTHistory_SI::findDepositedEnergiesWithSecondaries(int bins, double from, double to)
+{
+    AHistorySearchProcessor_findDepositedEnergy p(AHistorySearchProcessor_findDepositedEnergy::WithSecondaries, bins, from, to);
+    return findDepE(p);
+}
+
+QVariantList APTHistory_SI::findDepositedEnergiesOverEvent(int bins, double from, double to)
+{
+    AHistorySearchProcessor_findDepositedEnergy p(AHistorySearchProcessor_findDepositedEnergy::OverEvent, bins, from, to);
+    return findDepE(p);
 }
 
 QVariantList APTHistory_SI::findTravelledDistances(int bins, double from, double to)
@@ -342,22 +388,63 @@ QVariantList APTHistory_SI::findTravelledDistances(int bins, double from, double
     return vl;
 }
 
-QVariantList APTHistory_SI::findOnBorder(QString what, QString cuts, int bins, double from, double to)
+const QVariantList APTHistory_SI::findOB_1D(AHistorySearchProcessor_Border & p)
 {
     QVariantList vl;
 
+    Crawler->find(*Criteria, p);
+
+    int numBins = p.Hist1D->GetXaxis()->GetNbins();
+    for (int iBin=1; iBin<numBins+1; iBin++)
+    {
+        QVariantList el;
+        el << p.Hist1D->GetBinCenter(iBin) << p.Hist1D->GetBinContent(iBin);
+        vl.push_back(el);
+    }
+    return vl;
+}
+
+QVariantList APTHistory_SI::findOnBorder(QString what, QString cuts, int bins, double from, double to)
+{
     AHistorySearchProcessor_Border p(what, cuts, bins, from, to);
     if (!p.ErrorString.isEmpty())
-        abort(p.ErrorString);
-    else
     {
-        Crawler->find(*Criteria, p);
+        abort(p.ErrorString);
+        return QVariantList();
+    }
+    else
+        return findOB_1D(p);
+}
 
-        int numBins = p.Hist1D->GetXaxis()->GetNbins();
-        for (int iBin=1; iBin<numBins+1; iBin++)
+QVariantList APTHistory_SI::findOnBorder(QString what, QString vsWhat, QString cuts, int bins, double from, double to)
+{
+    AHistorySearchProcessor_Border p(what, vsWhat, cuts, bins, from, to);
+    if (!p.ErrorString.isEmpty())
+    {
+        abort(p.ErrorString);
+        return QVariantList();
+    }
+    else
+        return findOB_1D(p);
+}
+
+const QVariantList APTHistory_SI::findOB_2D(AHistorySearchProcessor_Border & p)
+{
+    QVariantList vl;
+
+    Crawler->find(*Criteria, p);
+
+    int numX = p.Hist2D->GetXaxis()->GetNbins();
+    int numY = p.Hist2D->GetYaxis()->GetNbins();
+    for (int iX=1; iX<numX+1; iX++)
+    {
+        double x = p.Hist2D->GetXaxis()->GetBinCenter(iX);
+        for (int iY=1; iY<numY+1; iY++)
         {
             QVariantList el;
-            el << p.Hist1D->GetBinCenter(iBin) << p.Hist1D->GetBinContent(iBin);
+            el << x
+               << p.Hist2D->GetYaxis()->GetBinCenter(iY)
+               << p.Hist2D->GetBinContent(iX, iY);
             vl.push_back(el);
         }
     }
@@ -366,29 +453,24 @@ QVariantList APTHistory_SI::findOnBorder(QString what, QString cuts, int bins, d
 
 QVariantList APTHistory_SI::findOnBorder(QString what, QString vsWhat, QString cuts, int bins1, double from1, double to1, int bins2, double from2, double to2)
 {
-    QVariantList vl;
-
     AHistorySearchProcessor_Border p(what, vsWhat, cuts, bins1, from1, to1, bins2, from2, to2);
     if (!p.ErrorString.isEmpty())
-        abort(p.ErrorString);
-    else
     {
-        Crawler->find(*Criteria, p);
-
-        int numX = p.Hist2D->GetXaxis()->GetNbins();
-        int numY = p.Hist2D->GetYaxis()->GetNbins();
-        for (int iX=1; iX<numX+1; iX++)
-        {
-            double x = p.Hist2D->GetXaxis()->GetBinCenter(iX);
-            for (int iY=1; iY<numY+1; iY++)
-            {
-                QVariantList el;
-                el << x
-                   << p.Hist2D->GetYaxis()->GetBinCenter(iY)
-                   << p.Hist2D->GetBinContent(iX, iY);
-                vl.push_back(el);
-            }
-        }
+        abort(p.ErrorString);
+        return QVariantList();
     }
-    return vl;
+    else
+        return findOB_2D(p);
+}
+
+QVariantList APTHistory_SI::findOnBorder(QString what, QString vsWhat, QString andVsWhat, QString cuts, int bins1, double from1, double to1, int bins2, double from2, double to2)
+{
+    AHistorySearchProcessor_Border p(what, vsWhat, andVsWhat, cuts, bins1, from1, to1, bins2, from2, to2);
+    if (!p.ErrorString.isEmpty())
+    {
+        abort(p.ErrorString);
+        return QVariantList();
+    }
+    else
+        return findOB_2D(p);
 }

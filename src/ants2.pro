@@ -555,7 +555,6 @@ ants2_SIM {
     DEFINES += SIM
 
     SOURCES += common/asimulationstatistics.cpp \
-    modules/primaryparticletracker.cpp \
     modules/s1_generator.cpp \
     modules/photon_generator.cpp \
     modules/s2_generator.cpp \
@@ -580,7 +579,6 @@ ants2_SIM {
     common/aenergydepositioncell.h \
     common/ahistoryrecords.h \
     common/asimulationstatistics.h \
-    modules/primaryparticletracker.h \
     modules/s1_generator.h \
     modules/photon_generator.h \
     modules/s2_generator.h \

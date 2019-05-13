@@ -3,7 +3,7 @@
 #include "asimulationmanager.h"
 #include "amaterialparticlecolection.h"
 #include "eventsdataclass.h"
-//#include "primaryparticletracker.h"
+#include "aparticlerecord.h"
 #include "aparticletracker.h"
 #include "aphotontracer.h"
 #include "aoneevent.h"
@@ -300,16 +300,6 @@ void AParticleSourceSimulator::appendToDataHub(EventsDataClass *dataHub)
 {
     //qDebug() << "Thread #"<<ID << " PartSim ---> appending data";
     ASimulator::appendToDataHub(dataHub);
-    int oldSize = dataHub->EventHistory.count();
-    dataHub->EventHistory.reserve(oldSize + this->dataHub->EventHistory.count());
-    for(int i = 0; i < this->dataHub->EventHistory.count(); i++)
-    {
-        EventHistoryStructure *hist = new EventHistoryStructure;
-        *hist = *this->dataHub->EventHistory[i];
-        hist->index += oldSize;
-        if (hist->SecondaryOf > -1) hist->SecondaryOf += oldSize;
-        dataHub->EventHistory.append(hist);
-    }
     dataHub->GeneratedPhotonsHistory << this->dataHub->GeneratedPhotonsHistory;
     dataHub->ScanNumberOfRuns = 1;
 }

@@ -66,8 +66,6 @@ void EventsDataClass::clear()
 #ifdef SIM
   for (auto* pr : TrackingHistory) delete pr;
   TrackingHistory.clear();
-  for (int i=0; i<EventHistory.size(); i++) delete EventHistory[i];
-  EventHistory.clear();
   GeneratedPhotonsHistory.clear();
   SimStat->initialize();
 #endif
@@ -368,7 +366,6 @@ void EventsDataClass::squeeze()
     ReconstructionData.squeeze();
 #ifdef SIM
     TrackingHistory.shrink_to_fit();
-    EventHistory.squeeze();
     GeneratedPhotonsHistory.squeeze();
 #endif
 }

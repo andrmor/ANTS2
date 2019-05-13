@@ -51,7 +51,6 @@ public:
 #ifdef SIM
     // Logs
     std::vector<AEventTrackingRecord *> TrackingHistory;
-    QVector<EventHistoryStructure*> EventHistory; // to be replaced with TrackingHistory everywhere //obsolete
     QVector<GeneratedPhotonsHistoryStructure> GeneratedPhotonsHistory;
 
     //Detection statistics

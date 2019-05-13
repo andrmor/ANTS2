@@ -330,93 +330,10 @@ void OutputWindow::on_sbTimeBin_valueChanged(int arg1)
    OutputWindow::on_pbSiPMpixels_clicked();
 }
 
-void OutputWindow::showParticleHistString(int iRec, int level)
-{
-    const EventHistoryStructure* h = EventsDataHub->EventHistory.at(iRec);
-
-    QString s = QString("+").repeated(level);
-
-    s += QString::number(iRec);
-    s += "> " + MW->Detector->MpCollection->getParticleName(h->ParticleId);// + " (id: "+QString::number(h->ParticleId)+")";
-
-    for (int m=0; m < h->Deposition.size(); m++)
-    {
-        if (m != 0) s += " ->";
-        int MatId = h->Deposition[m].MaterialId;
-        s += " " + (*MW->MpCollection)[MatId]->name +"_";
-        s += QString::number(h->Deposition[m].Distance, 'g', MW->GlobSet.TextLogPrecision)+"_mm";
-        double depo = h->Deposition[m].DepositedEnergy;
-        if (depo>0)
-        {
-            s += "_";
-            s += "<b>";
-            s += QString::number(depo, 'g', MW->GlobSet.TextLogPrecision);
-            s += "</b>";
-            s += "_keV";
-            TotalEnergyDeposited += depo;
-        }
-    }
-    s += " ";
-    switch (h->Termination)
-      {
-      case EventHistoryStructure::Escaped:                  s += "escaped"; break;
-      case EventHistoryStructure::AllEnergyDisspated:       s += "stopped"; break;
-      case EventHistoryStructure::Photoelectric:            s += "photoelectric"; break;
-      case EventHistoryStructure::ComptonScattering:        s += "compton"; break;
-      case EventHistoryStructure::NeutronAbsorption:                  s += "capture"; break;
-      case EventHistoryStructure::ElasticScattering:       s += "elastic"; break;
-      case EventHistoryStructure::CreatedOutside:           s += "created outside the defined geometry"; break;
-      case EventHistoryStructure::FoundUntrackableMaterial: s += "found untrackable material"; break;
-      case EventHistoryStructure::PairProduction:           s += "pair production"; break;
-      case EventHistoryStructure::StoppedOnMonitor:         s += "stopped on monitor"; break;
-      default:                                              s += "UNKNOWN TYPE"; break;
-      }
-    ui->pteOut->appendHtml(s);
-}
-
 void OutputWindow::addParticleHistoryLogLine(int iRec, int level)
 {
-    showParticleHistString(iRec, level);
     for (int i=0; i<secs.at(iRec).size(); i++)
         addParticleHistoryLogLine(secs.at(iRec).at(i), level+1);
-}
-
-void OutputWindow::ShowEventHistoryLog()
-{  
-  if (EventsDataHub->EventHistory.isEmpty())
-    {
-     message("Particle log is empty!\n"
-             "Simulation_options/Accelerators/Do_logs_and_statistics has to be activated before simulation!", this);
-     return;
-    }
-
-  int size = EventsDataHub->EventHistory.size();
-  //preparing list of secondaries
-  secs.resize(size);
-  for (QVector<int>& v : secs) v.clear();
-  for (int i=0; i<size; i++)
-  {
-      const int& secOf = EventsDataHub->EventHistory.at(i)->SecondaryOf;
-      if (secOf>-1) secs[secOf] << i;
-  }
-
-  QString s = "\n=====================\n"
-              "Log of particle interactions\n"
-              "---------------------";
-  //OutText(s);
-  ui->pteOut->appendPlainText(s);
-
-  TotalEnergyDeposited=0;
-  for (int i=0; i<size; i++)
-    {
-      if (EventsDataHub->EventHistory.at(i)->SecondaryOf > -1) continue; //secondary are already shown
-      addParticleHistoryLogLine(i, 0);
-    }
-  s  = "---------------------\n";
-  s += "Total energy deposited: " + QString::number(TotalEnergyDeposited, 'g', MW->GlobSet.TextLogPrecision) + " keV\n";
-  s += "=====================\n";
-  //SetTab(0);
-  ui->pteOut->appendPlainText(s);
 }
 
 void OutputWindow::updateSignalTableWidth()
@@ -1154,11 +1071,6 @@ void OutputWindow::ShowGeneratedPhotonsLog()
     ui->pteOut->appendPlainText(s);
 }
 
-void OutputWindow::on_pbShowParticldeLog_clicked()
-{
-    ShowEventHistoryLog();
-}
-
 void OutputWindow::on_pbShowPhotonLog_clicked()
 {
     ShowGeneratedPhotonsLog();
@@ -1233,7 +1145,7 @@ void OutputWindow::ShowPhotonLossLog()
 void OutputWindow::UpdateMaterials()
 {
     QVector<QComboBox*> vec;
-    vec << ui->cobShowMaterial << ui->cobPTHistVolMat << ui->cobPTHistVolMatFrom << ui->cobPTHistVolMatTo;
+    vec << ui->cobPTHistVolMat << ui->cobPTHistVolMatFrom << ui->cobPTHistVolMatTo;
 
     QStringList mats = MW->MpCollection->getListOfMaterialNames();
     for (QComboBox * c : vec)
@@ -1249,226 +1161,13 @@ void OutputWindow::UpdateMaterials()
 
 void OutputWindow::UpdateParticles()
 {
-  int old = ui->cobShowParticle->currentIndex();
+//  int old = ui->cobShowParticle->currentIndex();
 
-  ui->cobShowParticle->clear();
-  for (int i=0; i<MW->Detector->MpCollection->countParticles(); i++)
-      ui->cobShowParticle->addItem( MW->Detector->MpCollection->getParticleName(i) );
+//  ui->cobShowParticle->clear();
+//  for (int i=0; i<MW->Detector->MpCollection->countParticles(); i++)
+//      ui->cobShowParticle->addItem( MW->Detector->MpCollection->getParticleName(i) );
 
-  if (old < ui->cobShowParticle->count()) ui->cobShowParticle->setCurrentIndex(old);
-}
-
-void OutputWindow::on_pbShowSelected_clicked()
-{
-  if (EventsDataHub->EventHistory.isEmpty())
-    {
-      message("No data available!", this);
-      return;
-    }
-
-  int particleId = ui->cobShowParticle->currentIndex();
-  int materialId = ui->cobShowMaterial->currentIndex();
-  bool fSelectiveParticleType = ui->cobShowParticleType->currentIndex() == 0 ? false : true;
-  //int particleType = ui->cobShowParticleType->currentIndex() - 1;  // 0-primary, 1-secondary  //cob:0-all,1-prim,2-sec
-  bool fUseSecondary = ( ui->cobShowParticleType->currentIndex() == 2);
-  ui->pteOut->clear();
-
-  int counter=0;
-  TH1D* hist1 = 0;
-  switch (ui->cobWhatToShow->currentIndex())
-  {
-  case (0):
-    {
-      //Statistics: energy deposition
-      hist1 = new TH1D("DepEnergyHist","Deposited energy",ui->sbShowBins->value(),0,0);
-      hist1->GetXaxis()->SetTitle("Deposited energy, keV");
-
-      for (int i=0; i<EventsDataHub->EventHistory.size(); i++)
-      {
-          if (ui->cbCheckerParticle->isChecked() && particleId != EventsDataHub->EventHistory[i]->ParticleId) continue;  //wrong particle
-
-          if (MW->Detector->MpCollection->getParticleType( EventsDataHub->EventHistory[i]->ParticleId ) == AParticle::_neutron_ ) continue; //to prevent overflow, we know neutrons cannot deposit energy anyway
-          if (fSelectiveParticleType)
-              //if (particleType != EventsDataHub->EventHistory[i]->SecondaryOf) continue; //wrong type
-              if (fUseSecondary != EventsDataHub->EventHistory[i]->isSecondary()) continue; //wrong type
-          for (int m=0; m < EventsDataHub->EventHistory[i]->Deposition.size(); m++)
-          {
-              if (ui->cbCheckerMaterial->isChecked() && materialId != EventsDataHub->EventHistory[i]->Deposition[m].MaterialId) continue; //wrong material
-              //all filters OK
-              if (EventsDataHub->EventHistory[i]->Deposition[m].DepositedEnergy>0) hist1->Fill(EventsDataHub->EventHistory[i]->Deposition[m].DepositedEnergy);
-              counter++;
-          }
-      }
-      break; //draw below
-    }
-
-  case (1):
-    {
-      //Statistics: travelled distance
-      hist1 = new TH1D("TravDistHist","Travelled distance",ui->sbShowBins->value(),0,0);
-      hist1->GetXaxis()->SetTitle("Travelled distance, mm");
-
-      for (int i=0; i < EventsDataHub->EventHistory.size(); i++)
-      {
-          if (ui->cbCheckerParticle->isChecked() && particleId != EventsDataHub->EventHistory[i]->ParticleId) continue;  //wrong particle
-          if (fSelectiveParticleType)
-              //if (particleType != EventsDataHub->EventHistory[i]->SecondaryOf) continue; //wrong type
-              if (fUseSecondary != EventsDataHub->EventHistory[i]->isSecondary()) continue; //wrong type
-          for (int m=0; m < EventsDataHub->EventHistory[i]->Deposition.size(); m++)
-          {
-              if (ui->cbCheckerMaterial->isChecked() && materialId != EventsDataHub->EventHistory[i]->Deposition[m].MaterialId) continue; //wrong material
-              //all filters OK
-              hist1->Fill(EventsDataHub->EventHistory[i]->Deposition[m].Distance);
-              counter++;
-          }
-      }
-      break; //draw below
-    }
-  case (2):
-      {
-        //Statistics: angle vs Z axis
-        hist1 = new TH1D("AnglZHist","Angle distribution",ui->sbShowBins->value(),0,0);
-        hist1->GetXaxis()->SetTitle("Angle with Z, degrees");
-
-        //qDebug() << EnergyVector.size() << EventsDataHub->EventHistory.size();
-        for (int i=0; i < EventsDataHub->EventHistory.size(); i++)
-        {
-            if (ui->cbCheckerParticle->isChecked() && particleId != EventsDataHub->EventHistory[i]->ParticleId) continue;  //wrong particle
-            if (fSelectiveParticleType)
-                //if (particleType != EventsDataHub->EventHistory[i]->SecondaryOf) continue; //wrong type
-                if (fUseSecondary != EventsDataHub->EventHistory[i]->isSecondary()) continue; //wrong type
-            for (int m=0; m < EventsDataHub->EventHistory[i]->Deposition.size(); m++)
-            {
-                if (ui->cbCheckerMaterial->isChecked() && materialId != EventsDataHub->EventHistory[i]->Deposition[m].MaterialId) continue; //wrong material
-                //all filters OK
-                float& dx = EventsDataHub->EventHistory[i]->dx;
-                float& dy = EventsDataHub->EventHistory[i]->dy;
-                float& dz = EventsDataHub->EventHistory[i]->dz;
-                float trans2 = dx*dx + dy*dy;
-                float angle =  ( fabs(dz) < 1e-10 ? 0 : atan( sqrt(trans2)/dz )*180.0/3.1415926 );
-
-                hist1->Fill(angle);
-                counter++;
-            }
-        }
-        break; //draw below
-      }
-  case (3):
-    {
-      //interaction probability in this material for this particle
-      int total = 0;
-      int interactions = 0;
-
-      for (int i=0; i<EventsDataHub->EventHistory.size(); i++)
-      {
-          if (ui->cbCheckerParticle->isChecked() && particleId != EventsDataHub->EventHistory[i]->ParticleId) continue;  //wrong particle
-          if (fSelectiveParticleType)
-              //if (particleType != EventsDataHub->EventHistory[i]->SecondaryOf) continue; //wrong type
-              if (fUseSecondary != EventsDataHub->EventHistory[i]->isSecondary()) continue; //wrong type
-          bool flagFound = false;
-          bool flagInteraction = false;
-          for (int m=0; m < EventsDataHub->EventHistory[i]->Deposition.size(); m++)
-          {
-              //could be several layers with the same material, so make a flag
-              if (ui->cbCheckerMaterial->isChecked() && materialId != EventsDataHub->EventHistory[i]->Deposition[m].MaterialId) continue; //wrong material
-              //all filters OK
-              flagFound = true;
-              if (EventsDataHub->EventHistory[i]->Deposition[m].DepositedEnergy > 0) flagInteraction = true; //takes care of all but neutron capture - they do not deposit energy directly
-          }
-          if (flagFound) total++; //this particle was in this material
-          if (flagInteraction) interactions++; //this particle had intreaction inside this material
-
-          //if (Detector->ParticleCollection.at( EventsDataHub->EventHistory[i]->ParticleId )->type == AParticle::_neutron_ )
-          if (MW->Detector->MpCollection->getParticleType( EventsDataHub->EventHistory[i]->ParticleId ) == AParticle::_neutron_ )
-          {
-              if (EventsDataHub->EventHistory[i]->Termination != EventHistoryStructure::NeutronAbsorption) continue;
-              //last medium?
-              if (EventsDataHub->EventHistory[i]->Deposition[EventsDataHub->EventHistory[i]->Deposition.size()-1].MaterialId != materialId) continue;
-              interactions++;
-          }
-      }
-
-      double InterProbability = 0;
-      if (total != 0 ) InterProbability = 1.0*interactions / total;
-      QString str, str1;
-      str = "Total: ";
-      str1.setNum(total);
-      str += str1 + " Interacted: ";
-      str1.setNum(interactions);
-      str += str1;
-      ui->pteOut->appendPlainText(str);
-      str.setNum(InterProbability*100.0, 'g', 4);
-      ui->pteOut->appendPlainText("Interaction probability: "+str+ " %");
-      return;
-      //break;
-    }
-    case (4):
-      {
-        //deposited energy in this material for this particle more than a certain value
-        int total = 0;
-        int interactions = 0;
-        double threshold = ui->ledShowThreshold->text().toDouble();
-
-        for (int i=0; i < EventsDataHub->EventHistory.size(); i++)
-          {
-            if (ui->cbCheckerParticle->isChecked() && particleId != EventsDataHub->EventHistory[i]->ParticleId) continue;  //wrong particle
-            if (fSelectiveParticleType)
-                //if (particleType != EventsDataHub->EventHistory[i]->SecondaryOf) continue; //wrong type
-                if (fUseSecondary != EventsDataHub->EventHistory[i]->isSecondary()) continue; //wrong type
-            bool flagFound = false;
-            bool flagInteraction = false;
-            for (int m=0; m < EventsDataHub->EventHistory[i]->Deposition.size(); m++)
-              {
-                //could be several layers with the same material, so make a flag
-                if (ui->cbCheckerMaterial->isChecked() && materialId != EventsDataHub->EventHistory[i]->Deposition[m].MaterialId) continue; //wrong material
-                //all filters OK
-                flagFound = true;
-                if (EventsDataHub->EventHistory[i]->Deposition[m].DepositedEnergy > threshold) flagInteraction = true; //neutrons do not deposit directly anyway
-              }
-            if (flagFound) total++; //this particle was in this material
-            if (flagInteraction) interactions++; //this particle had interaction inside this material
-          }
-
-        double Fraction = 0;
-        if (total != 0 ) Fraction = 1.0*interactions / total;
-        QString str, str1;
-        str = "Total: ";
-        str1.setNum(total);
-        str += str1 + " Deposited above threshold (" + QString::number(threshold) + " keV): ";
-        str1.setNum(interactions);
-        str += str1;
-        ui->pteOut->appendPlainText(str);
-        str.setNum(Fraction*100.0, 'g', 4);
-        ui->pteOut->appendPlainText("Fraction: "+str+ " %");
-        return;
-      }
-  }
-
-
-  if (counter == 0)
-  {
-      message("No data was found for the given selection", this);
-      return;
-  }
-  //drawing histogram:
-  MW->GraphWindow->Draw(hist1);
-}
-
-void OutputWindow::on_cobWhatToShow_currentIndexChanged(int index)
-{
-  switch (index)
-    {
-    case 0:
-    case 1:
-    case 2:
-      ui->swShowPrPData->setCurrentIndex(0);
-      break;
-    case 3:
-      ui->swShowPrPData->setCurrentIndex(1);
-    break;
-    case 4:
-      ui->swShowPrPData->setCurrentIndex(2);
-    }
+//  if (old < ui->cobShowParticle->count()) ui->cobShowParticle->setCurrentIndex(old);
 }
 
 void OutputWindow::on_pbNextEvent_clicked()
@@ -1615,47 +1314,6 @@ void OutputWindow::on_pbShowAverageOverAll_clicked()
     if (ui->cbShowPMsignals->isChecked())
       addTextitems(&sums, MaxSignal, 0); //add icons with signal text to the scene
     updateSignalScale();
-}
-
-void OutputWindow::on_pbSaveLog_clicked()
-{
-    if (EventsDataHub->EventHistory.isEmpty())
-    {
-        message("Log is empty! Make sure to acivate 'Do logs and statistics'\nin MainWindow->Simulation->Accelerators before running a simulation!", this);
-        return;
-    }
-
-    QString fileName = QFileDialog::getSaveFileName(this, "Save particle tracking log to ROOT tree", MW->GlobSet.LastOpenDir, "TTree files (*.root)");
-    if (fileName.isEmpty()) return;
-    MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-    QFileInfo file(fileName);
-    if (file.suffix().isEmpty()) fileName += ".root";
-    EventsDataHub->saveEventHistoryToTree(fileName);
-}
-
-void OutputWindow::on_pbHelpWithSaveToTree_clicked()
-{
-    QStringList sl = EventHistoryStructure::getAllDefinedTerminationTypes();
-
-    QString s = "";
-
-    s += "index -> particle#\n";
-    s += "partId -> index (type) of the particle\n";
-    s += "secondaryOf -> -1 if primary, otherwise particle# of the parent\n";
-    s += "initialPosition -> vector with the generation position\n";
-    s += "direction -> direction of the particle (unit vector)\n";
-    s += "initialEnergy -> energy on start\n";
-    s += "termination -> how the particle tracking has ended\n";
-    for (int i=0; i<sl.size(); i++)
-        s += QString("    %1 = %2\n").arg(i).arg(sl.at(i));
-    s += "The next tree parameters give info related to the geometry volumes the particle passed during tracking.\n";
-    s += "The information is given by vectors, first elements corresponds to the volume where the particle was created\n";
-    s += "and the last to the one where the tracking has stopped.\n";
-    s += "vol_materialId -> material index of the volume\n";
-    s += "vol_depositedEnergy -> energy depsoited in the volume\n";
-    s += "vol_distance -> distance travelled in the volume\n";
-
-    ui->pteOut->appendPlainText(s);
 }
 
 // --------- particle tracking history ----------

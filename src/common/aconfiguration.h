@@ -66,7 +66,6 @@ signals:
   void IsParticleInUseBySources(int particleId, bool& bInUse, QString& s);
   void IsParticleInUseByMonitors(int particleId, bool& bInUse, QString& s);
   void RequestRemoveParticle(int particleId);
-  void RequestClearParticleStack();
 
 public slots:
 

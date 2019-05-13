@@ -14,16 +14,12 @@
 class AConfiguration;
 class AGlobalSettings;
 class GeoMarkerClass;
-class AParticleRecord;
 class AMaterialParticleCollection;
 class EventsDataClass;
-class GeneralSimSettings;
 class GeometryWindowClass;
 class GraphWindowClass;
-class RasterWindow;
 class LRFwindow;
 class ReconstructionWindow;
-class SensorLRFs;
 class ExamplesWindow;
 class CheckUpWindowClass;
 class DetectorAddOnsWindow;
@@ -35,14 +31,11 @@ class QComboBox;
 class TH1D;
 class TH1I;
 class WindowNavigatorClass;
-class GeometryWindowAddOn;
 class GlobalSettingsWindowClass;
 class GainEvaluatorWindowClass;
 class TApplication;
 class Viewer2DarrayObject;
 class DetectorClass;
-class ASimulatorRunner;
-class AParticleSourceSimulator;
 class TmpObjHubClass;
 class ASlabListWidget;
 class InterfaceToPMscript;
@@ -123,7 +116,6 @@ public:
 
     //local data, just for GUI
     QVector<GeoMarkerClass*> GeoMarkers;
-    QVector<AParticleRecord*> ParticleStack;
 
     InterfaceToPMscript* PMscriptInterface = 0;       // if created -> managed by the script manager
 
@@ -200,24 +192,18 @@ public slots:
     void LoadEventsListContextMenu(const QPoint &pos);
     void LRF_ModuleReadySlot(bool ready);
     void on_pbSimulate_clicked();
-    void on_pbTrackStack_clicked();
-    void on_pbGenerateLight_clicked();
     void on_pbParticleSourcesSimulate_clicked();    
     void RefreshOnProgressReport(int Progress, double msPerEv);
     void PMscriptSuccess();
     void onGDMLstatusChage(bool fGDMLactivated);
     void updateLoaded(int events, int progress);
     void on_pbSingleSourceShow_clicked();
-    void on_pbClearAllStack_clicked();
-    void on_pbRefreshStack_clicked();
     void ShowGeometrySlot();
 
 private slots:
     void updateFileParticleGeneratorGui();
     void updateScriptParticleGeneratorGui();
 
-    void on_pbAddParticleToStack_clicked();
-    void on_pbRemoveFromStack_clicked();
     void on_pbRefreshMaterials_clicked();
     void on_cbXbyYarray_stateChanged(int arg1);
     void on_cbRingsArray_stateChanged(int arg1);
@@ -401,7 +387,7 @@ private:
     int LoadSPePHSfile(QString fileName, QVector<double>* SPePHS_x, QVector<double>* SPePHS);                   ///see MainWindowDiskIO.cpp    
     QStringList LoadedEventFiles, LoadedTreeFiles;
 
-    QString CheckerScript;
+//    QString CheckerScript; //obsolete?
     QString PreprocessingFileName;
 
     int PreviousNumberPMs = 0;
@@ -476,8 +462,6 @@ private slots:
     /************************* Simulation *************************/
 public:
     void startSimulation(QJsonObject &json);
-private:
-    AParticleSourceSimulator *setupParticleTestSimulation(GeneralSimSettings &simSettings); //Single thread only!
 signals:
     void StopRequested();
 private slots:
@@ -491,7 +475,6 @@ private slots:
     void on_pbShowColorCoding_released();
     void on_actionOpen_settings_triggered();
     void on_actionSave_Load_windows_status_on_Exit_Init_toggled(bool arg1);
-    void on_pbShowEnergyDeposition_clicked();
     void on_pbUpdateElectronics_clicked();
     void on_pbOverlay_clicked();
     void on_pbScalePDE_clicked();
@@ -503,7 +486,6 @@ private slots:
     void on_pbPDEFromWavelength_clicked();
     void on_cobLoadDataType_customContextMenuRequested(const QPoint &pos);
     void on_pbManuscriptExtractNames_clicked();
-    void on_pbShowDetailedLog_clicked();
     void on_actionGlobal_script_triggered();
     void on_pbLockGui_clicked();
     void on_pbUnlockGui_clicked();
@@ -520,7 +502,6 @@ private slots:
     void on_cbLimitNodesOutsideObject_toggled(bool checked);
     void on_bpResults_clicked();
     void on_pobTest_2_clicked();
-    void on_bpResults_2_clicked();
     void on_actionScript_window_triggered();
     void on_actionQuick_save_1_triggered();
     void on_actionQuick_save_2_triggered();
@@ -551,7 +532,6 @@ private slots:
     void on_actionGrid_triggered();
     void on_pbOpenTrackProperties_Phot_clicked();
     void on_pbTrackOptionsGun_clicked();
-    void on_pbTrackOptionsStack_clicked();
     void on_pbQEacceleratorWarning_clicked();
     void on_ledSphericalPMAngle_editingFinished();
     void on_pbEditOverride_clicked();

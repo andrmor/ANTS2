@@ -37,7 +37,6 @@ public:
     void ResetViewport(); //auto-size and center viewing area
     void InitWindow();
 
-    void ShowEventHistoryLog();
     void ShowGeneratedPhotonsLog();
     void ShowOneEventLog(int iev);    
     void ShowPhotonProcessesLog();
@@ -63,14 +62,11 @@ private slots:
     void on_sbEvent_valueChanged(int arg1);
     void on_pbResetViewport_clicked();
     void on_pbAverageSignals_clicked();
-    void on_pbShowParticldeLog_clicked();
     void on_pbShowPhotonLog_clicked();
     void on_pbShowSumSignals_clicked();
     void on_pbShowSignals_clicked();
     void on_pbShowPhotonProcessesLog_clicked();
     void on_pbShowPhotonLossLog_clicked();    
-    void on_pbShowSelected_clicked();
-    void on_cobWhatToShow_currentIndexChanged(int index);
     void on_pbNextEvent_clicked();
 
     void on_tabwinDiagnose_tabBarClicked(int index);
@@ -85,8 +81,6 @@ private slots:
     void on_cobMonitor_activated(int index);
     void on_pbShowAverageOverAll_clicked();
     void on_pbShowWavelength_clicked();
-    void on_pbSaveLog_clicked();
-    void on_pbHelpWithSaveToTree_clicked();
 
     void on_pbPTHistRequest_clicked();
     void on_cbPTHistOnlyPrim_clicked(bool checked);
@@ -140,7 +134,6 @@ private:
     void addTextitems(const QVector<float>* vector, float MaxSignal, DynamicPassivesHandler *Passives);
     void updateSignalScale();    
     void updateSignalTableWidth();
-    void showParticleHistString(int iRec, int level);
     void addParticleHistoryLogLine(int iRec, int level);
     void updateMonitors();
     void updatePTHistoryBinControl();

@@ -201,8 +201,6 @@ MainWindow::MainWindow(DetectorClass *Detector,
 
     QObject::connect(Rwindow, SIGNAL(StopRequested()), ReconstructionManager, SLOT(requestStop()));
 
-    QObject::connect(Config, &AConfiguration::RequestClearParticleStack, this, &MainWindow::on_pbClearAllStack_clicked);
-
 #ifdef ANTS_FANN
     QObject::connect(ReconstructionManager->ANNmodule,SIGNAL(status(QString)),NNwindow,SLOT(status(QString)));
     QObject::connect(NNwindow,SIGNAL(train_stop()),ReconstructionManager->ANNmodule,SLOT(train_stop()));
@@ -282,7 +280,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
     ui->twSourcePhotonsParticles->setCurrentIndex(0);
     QList<QWidget*> invis;
     invis << ui->pbRefreshParticles << ui->pbRefreshOverrides << ui->pbUpdatePreprocessingSettings
-     << ui->pbRefreshStack << ui->pbShowPMsArrayRegularData << ui->pbRefreshPMArrayData << ui->pbUpdateElectronics
+     << ui->pbShowPMsArrayRegularData << ui->pbRefreshPMArrayData << ui->pbUpdateElectronics
      << ui->pbRefreshPMproperties << ui->pbUpdatePMproperties << ui->pbRefreshMaterials << ui->pbStopLoad
      << ui->pbIndPMshowInfo << ui->pbUpdateToFixedZ << ui->pbUpdateSimConfig
      << ui->pbUpdateToFullCustom << ui->pbElUpdateIndication << ui->pbUnlockGui << ui->fScanFloodTotProb

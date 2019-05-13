@@ -50,9 +50,8 @@ public:
 
 #ifdef SIM
     // Logs
-    std::vector<AEventTrackingRecord *> TrackingHistory; // for now only for Geant4 delegated sims
-      QVector<EventHistoryStructure*> EventHistory; // to be replaced with TrackingHistory everywhere
-      void saveEventHistoryToTree(const QString& fileName) const;
+    std::vector<AEventTrackingRecord *> TrackingHistory;
+    QVector<EventHistoryStructure*> EventHistory; // to be replaced with TrackingHistory everywhere //obsolete
     QVector<GeneratedPhotonsHistoryStructure> GeneratedPhotonsHistory;
 
     //Detection statistics

@@ -379,7 +379,6 @@ SOURCES += main.cpp \
     Simulation/ag4simulationsettings.cpp \
     gui/ageant4configdialog.cpp \
     scriptmode/asim_si.cpp \
-    scriptmode/adepo_si.cpp \
     scriptmode/amath_si.cpp \
     scriptmode/atree_si.cpp \
     scriptmode/aphoton_si.cpp \
@@ -388,7 +387,6 @@ SOURCES += main.cpp \
     scriptmode/aserver_si.cpp \
     scriptmode/aweb_si.cpp \
     scriptmode/athreads_si.cpp \
-    scriptmode/atracklog_si.cpp \
     scriptmode/aparticlegenerator_si.cpp \
     scriptmode/agstyle_si.cpp \
     scriptmode/aconfig_si.cpp \
@@ -532,7 +530,6 @@ HEADERS  += common/CorrelationFilters.h \
     Simulation/ag4simulationsettings.h \
     gui/ageant4configdialog.h \
     scriptmode/asim_si.h \
-    scriptmode/adepo_si.h \
     scriptmode/amath_si.h \
     scriptmode/atree_si.h \
     scriptmode/aphoton_si.h \
@@ -541,7 +538,6 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/aserver_si.h \
     scriptmode/aweb_si.h \
     scriptmode/athreads_si.h \
-    scriptmode/atracklog_si.h \
     scriptmode/aparticlegenerator_si.h \
     scriptmode/agstyle_si.h \
     scriptmode/aconfig_si.h \

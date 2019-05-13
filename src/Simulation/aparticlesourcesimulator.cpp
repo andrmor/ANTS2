@@ -333,59 +333,6 @@ void AParticleSourceSimulator::mergeData()
     TrackingHistory.clear();
 }
 
-bool AParticleSourceSimulator::standaloneTrackStack(QVector<AParticleRecord *> *particleStack)
-{
-    if (particleStack->isEmpty())
-    {
-        ErrorString = "Particle stack is empty!";
-        return false;
-    }
-    //qDebug() << ">Standalone particle stack tracker received stack size:"<<particleStack->size();
-    clearParticleStack();
-    //qDebug() << ">Cleared stack";
-    for (int i=0; i<particleStack->size(); i++)
-        ParticleStack.append(particleStack->at(i)->clone());
-    //qDebug() << ">Cloned";
-    ParticleTracker->setRemoveTracksIfNoEnergyDepo(false);
-    //qDebug() << ">Start tracking...";
-    return ParticleTracker->TrackParticlesOnStack();
-}
-
-bool AParticleSourceSimulator::standaloneGenerateLight(QVector<AEnergyDepositionCell *> *energyVector)
-{
-    if (energyVector->isEmpty())
-    {
-        ErrorString = "No energy deposition data provided!";
-        return false;
-    }
-    EnergyVector = *energyVector; //copy pointers to EnergyDepositionCells
-    energyVector->clear();
-
-    EnergyVectorToScan();
-
-    if (fDoS1 && !S1generator->Generate())
-    {
-        ErrorString = "Error executing S1 generation!";
-        return false;
-    }
-
-    if (fDoS2 && !S2generator->Generate())
-    {
-        ErrorString = "Error executing S2 generation!";
-        return false;
-    }
-
-    dataHub->Events.resize(0);
-    dataHub->TimedEvents.resize(0);
-
-    //qDebug() << "Total hits recorded:" << OneEvent->PMhits;
-
-    OneEvent->HitsToSignal();
-    dataHub->Events.append(OneEvent->PMsignals);
-    if(timeRange != 0) dataHub->TimedEvents.append(OneEvent->TimedPMsignals);
-    return true;
-}
-
 void AParticleSourceSimulator::hardAbort()
 {
     //qDebug() << "HARD abort"<<ID;

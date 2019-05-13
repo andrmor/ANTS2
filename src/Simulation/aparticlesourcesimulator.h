@@ -22,8 +22,8 @@ public:
     explicit AParticleSourceSimulator(const DetectorClass * detector, ASimulationManager * simMan, int ID);
     ~AParticleSourceSimulator();
 
-    const QVector<AEnergyDepositionCell*> &getEnergyVector() const { return EnergyVector; }
-    void ClearEnergyVectorButKeepObjects() {EnergyVector.resize(0);} //to avoid clear of objects stored in the vector
+    const QVector<AEnergyDepositionCell*> &getEnergyVector() const { return EnergyVector; }  //obsolete
+    void ClearEnergyVectorButKeepObjects() {EnergyVector.resize(0);} //to avoid clear of objects stored in the vector  //obsolete
 
     virtual int getEventCount() const override { return eventEnd - eventBegin; }
     virtual int getEventsDone() const override { return eventCurrent - eventBegin; }
@@ -33,10 +33,6 @@ public:
     virtual void simulate() override;
     virtual void appendToDataHub(EventsDataClass * dataHub) override;
     virtual void mergeData() override;
-
-    //test purposes - direct tracking with provided stack or photon generation from provided energy deposition
-    bool standaloneTrackStack(QVector<AParticleRecord*>* particleStack);
-    bool standaloneGenerateLight(QVector<AEnergyDepositionCell*>* energyVector);
 
     void setOnlySavePrimaries() {bOnlySavePrimariesToFile = true;} // for G4ants mode
 

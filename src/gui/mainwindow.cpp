@@ -183,7 +183,6 @@ void MainWindow::onRequestUpdateGuiForClearData()
     ui->leoLoadedEvents->setText("");
     ui->leoTotalLoadedEvents->setText("");
     ui->lwLoadedSims->clear();
-    ui->pbGenerateLight->setEnabled(false);
     Owindow->SiPMpixels.clear();
     Owindow->RefreshData();
     WindowNavigator->ResetAllProgressBars();
@@ -3833,137 +3832,6 @@ void MainWindow::simulationFinished()
     //qDebug() << "---Procedure triggered by SimulationFinished signal has ended successfully---";
 }
 
-AParticleSourceSimulator *MainWindow::setupParticleTestSimulation(GeneralSimSettings &simSettings) //Single thread only!
-{
-    //============ prepare config ============
-    QJsonObject json;
-    SimGeneralConfigToJson(json);
-    SimParticleSourcesConfigToJson(json);    
-    json["Mode"] = "StackSim";
-    json["DoGuiUpdate"] = true;
-    //SaveJsonToFile(json, "ThisSimConfig.json");
-    simSettings.readFromJson(json);
-    simSettings.fLogsStat = true; //force to report logs
-
-    //============  prepare  gui  ============
-    WindowNavigator->BusyOn(); //go busy mode, most of gui controls disabled
-    qApp->processEvents();
-
-    //========== prepare simulator ==========
-    AParticleSourceSimulator *pss = new AParticleSourceSimulator(Detector, SimulationManager, 0);
-
-    pss->setSimSettings(&simSettings);
-    //pss->setupStandalone(json);
-    pss->setup(json);
-    pss->initSimStat();
-    pss->setRngSeed(Detector->RandGen->Rndm()*1000000);
-    return pss;
-}
-
-void MainWindow::on_pbTrackStack_clicked()
-{
-    fSimDataNotSaved = false; // to disable the warning
-    MainWindow::ClearData();
-    GeneralSimSettings simSettings;
-    AParticleSourceSimulator *pss = setupParticleTestSimulation(simSettings);
-    EventsDataHub->SimStat->initialize(Detector->Sandwich->MonitorsRecords);
-
-    //============ run stack =========
-    bool fOK = pss->standaloneTrackStack(&ParticleStack);
-    //  qDebug() << "Standalone tracker reported:"<<fOK<<pss->getErrorString();
-
-    //============   gui update   ============
-    WindowNavigator->BusyOff();
-    ui->pbStopScan->setEnabled(false);
-    if (!fOK) message(pss->getErrorString(), this);
-    else
-    {
-        //--- Retrieve results ---
-        SimulationManager->clearEnergyVector();
-        SimulationManager->EnergyVector = pss->getEnergyVector();
-        pss->ClearEnergyVectorButKeepObjects(); //disconnected this copy so delete of the simulator does not kill the vector
-        //  qDebug() << "-------------En vector size:"<<SimulationManager->EnergyVector.size();
-
-        //track handling
-        //if (ui->cbBuildParticleTrackstester->isChecked())
-        if (SimulationManager->TrackBuildOptions.bBuildParticleTracks)
-          {
-            //int numTracks = 0;
-              //qDebug() << "Tracks collected:"<<pss->tracks.size();
-            for (int iTr=0; iTr<pss->tracks.size(); iTr++)
-            {
-                const TrackHolderClass* th = pss->tracks[iTr];
-
-                //if (numTracks<GlobSet.MaxNumberOfTracks)
-                //{
-                    TGeoTrack* track = new TGeoTrack(1, th->UserIndex);
-                    track->SetLineColor(th->Color);
-                    track->SetLineWidth(th->Width);
-                    track->SetLineStyle(th->Style);
-                    for (int iNode=0; iNode<th->Nodes.size(); iNode++)
-                      track->AddPoint(th->Nodes[iNode].R[0], th->Nodes[iNode].R[1], th->Nodes[iNode].R[2], th->Nodes[iNode].Time);
-
-                    if (track->GetNpoints()>1)
-                      {
-                        //numTracks++;
-                        Detector->GeoManager->AddTrack(track);
-                      }
-                    else delete track;
-                //}
-                delete th;
-            }
-            pss->tracks.clear();
-          }
-        //if tracks are visible, show them
-        if (GeometryWindow->isVisible())
-        {
-            GeometryWindow->ShowGeometry();
-            if (SimulationManager->TrackBuildOptions.bBuildParticleTracks) GeometryWindow->DrawTracks();
-        }
-        //report data saved in history
-        pss->appendToDataHub(EventsDataHub);
-          //qDebug() << "Event history imported";
-
-        ui->pbGenerateLight->setEnabled(true);
-        Owindow->SetCurrentEvent(0);
-    }
-    delete pss;
-}
-
-void MainWindow::on_pbGenerateLight_clicked()
-{
-    fSimDataNotSaved = false; // to disable the warning
-    MainWindow::ClearData(true);
-    GeneralSimSettings simSettings;
-    AParticleSourceSimulator *pss = setupParticleTestSimulation(simSettings);
-    Detector->PMs->configure(&simSettings); //also configures accelerators!!!
-    bool fOK = pss->standaloneGenerateLight(&SimulationManager->EnergyVector);
-
-    //============   gui update   ============
-    WindowNavigator->BusyOff();
-    ui->pbStopScan->setEnabled(false);
-    if (!fOK) message(pss->getErrorString(), this);
-    else
-    {
-        //---- Retrieve results ----
-        //EnergyVector = SPaS.getEnergyVector();  no need for energyVector in this case!
-        //EventHistory = SPaS.getEventHistory();
-        //EventsDataHub->GeneratedPhotonsHistory = SPaS.getGeneratedPhotonsHistory();
-        //GenHistory is in EventsDataHub
-
-        if (GeometryWindow->isVisible())
-        {
-            GeometryWindow->ShowGeometry();
-            if (SimulationManager->TrackBuildOptions.bBuildParticleTracks) GeometryWindow->DrawTracks();
-        }
-        pss->appendToDataHub(EventsDataHub);
-        //Owindow->SetCurrentEvent(0);
-        //Owindow->ShowGeneratedPhotonsLog();
-        Rwindow->OnEventsDataAdded();
-    }
-    delete pss;
-}
-
 void MainWindow::RefreshOnProgressReport(int Progress, double msPerEv)
 {
   ui->prScan->setValue(Progress);
@@ -4537,14 +4405,6 @@ void MainWindow::ShowGeometrySlot()
     GeometryWindow->ShowGeometry(false, false);
 }
 
-void MainWindow::on_bpResults_2_clicked()
-{
-  Owindow->show();
-  Owindow->raise();
-  Owindow->activateWindow();
-  //Owindow->SetTab(3);
-}
-
 void MainWindow::on_cobPartPerEvent_currentIndexChanged(int index)
 {
     QString s;
@@ -4748,11 +4608,6 @@ void MainWindow::on_pbOpenTrackProperties_Phot_customContextMenuRequested(const 
 
     SimulationManager->TrackBuildOptions.bBuildPhotonTracks = !SimulationManager->TrackBuildOptions.bBuildPhotonTracks;
     on_pbUpdateSimConfig_clicked();
-}
-
-void MainWindow::on_pbTrackOptionsStack_clicked()
-{
-    on_pbOpenTrackProperties_Phot_clicked();
 }
 
 void MainWindow::on_pbQEacceleratorWarning_clicked()

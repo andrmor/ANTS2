@@ -139,19 +139,9 @@ void MainWindow::writeExtraGuiToJson(QJsonObject &json)
   jsMW["ConfigGuiLocked"] = fConfigGuiLocked;
   jmain["MW"] = jsMW;
 
-  QJsonObject js;
-  js["Particle"] = ui->cobParticleToStack->currentIndex();
-  js["Copies"] = ui->sbNumCopies->value();
-  js["X"] = ui->ledParticleStackX->text().toDouble();
-  js["Y"] = ui->ledParticleStackY->text().toDouble();
-  js["Z"] = ui->ledParticleStackZ->text().toDouble();
-  js["dX"] = ui->ledParticleStackVx->text().toDouble();
-  js["dY"] = ui->ledParticleStackVy->text().toDouble();
-  js["dZ"] = ui->ledParticleStackVz->text().toDouble();
-  js["Energy"] = ui->ledParticleStackEnergy->text().toDouble();
-  js["Time"] = ui->ledParticleStackTime->text().toDouble();
-  js["ScriptEV"] = CheckerScript;
-  jmain["PartcleStackChecker"] = js;
+//  QJsonObject js;
+//  js["ScriptEV"] = CheckerScript;
+//  jmain["PartcleStackChecker"] = js;
 
   QJsonObject jeom;
   jeom["ZoomLevel"] = GeometryWindow->ZoomLevel;
@@ -176,23 +166,11 @@ void MainWindow::readExtraGuiFromJson(QJsonObject &json)
     }
   onGuiEnableStatus(fConfigGuiLocked);
 
-  QJsonObject js = jmain["PartcleStackChecker"].toObject();
-  if (!js.isEmpty())
-    {
-      JsonToComboBox(js, "Particle", ui->cobParticleToStack);
-      JsonToSpinBox(js, "Copies", ui->sbNumCopies);
-      JsonToLineEditDouble(js, "X", ui->ledParticleStackX);
-      JsonToLineEditDouble(js, "Y", ui->ledParticleStackY);
-      JsonToLineEditDouble(js, "Z", ui->ledParticleStackZ);
-      JsonToLineEditDouble(js, "dX", ui->ledParticleStackVx);
-      JsonToLineEditDouble(js, "dY", ui->ledParticleStackVy);
-      JsonToLineEditDouble(js, "dZ", ui->ledParticleStackVz);
-      JsonToLineEditDouble(js, "Energy", ui->ledParticleStackEnergy);
-      JsonToLineEditDouble(js, "Time", ui->ledParticleStackTime);
-      parseJson(js, "ScriptEV", CheckerScript);
-    }
+//  QJsonObject js = jmain["PartcleStackChecker"].toObject();
+//  if (!js.isEmpty())
+//      parseJson(js, "ScriptEV", CheckerScript);
 
-  js = jmain["GeometryWindow"].toObject();
+  QJsonObject js = jmain["GeometryWindow"].toObject();
   if (js.contains("ZoomLevel"))
     {
       GeometryWindow->ZoomLevel = js["ZoomLevel"].toInt();
@@ -288,12 +266,6 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
   ui->pbScanDistrShow->setEnabled(false);
   ui->pbScanDistrDelete->setEnabled(false);
   populateTable = true;
-  if (ParticleStack.size()>0)
-  {
-      for (int i=0; i<ParticleStack.size(); i++)
-          delete ParticleStack[i];
-      ParticleStack.resize(0);
-  }
 
   DoNotUpdateGeometry = true;
   BulkUpdate = true;
@@ -541,9 +513,7 @@ if (scj.contains("CustomDistrib"))
             ui->cobPartPerEvent->setCurrentIndex(0);
             JsonToComboBox(csjs, "TypeParticlesPerEvent", ui->cobPartPerEvent);
             JsonToCheckbox(csjs, "DoS1", ui->cbGunDoS1);
-            JsonToCheckbox(csjs, "DoS1", ui->cbDoS1tester);
             JsonToCheckbox(csjs, "DoS2", ui->cbGunDoS2);
-            JsonToCheckbox(csjs, "DoS2", ui->cbDoS2tester);
             ui->cbIgnoreEventsWithNoHits->setChecked(false);//compatibility
             JsonToCheckbox(csjs, "IgnoreNoHitsEvents", ui->cbIgnoreEventsWithNoHits);
             ui->cbIgnoreEventsWithNoEnergyDepo->setChecked(false);
@@ -601,7 +571,6 @@ if (scj.contains("CustomDistrib"))
   //MainWindow::on_cbTimeResolved_toggled(ui->cbTimeResolved->isChecked());
 
   //update indication
-  on_pbRefreshStack_clicked();
   on_pbYellow_clicked(); //yellow marker for activated advanced options in point source sim
 
   UpdateTestWavelengthProperties();

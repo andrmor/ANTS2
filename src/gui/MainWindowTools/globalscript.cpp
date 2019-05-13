@@ -6,7 +6,6 @@
 #include "scriptminimizer.h"
 #include "histgraphinterfaces.h"
 #include "ageo_si.h"
-#include "adepo_si.h"
 #include "aconfiguration.h"
 #include "areconstructionmanager.h"
 #include "asimulationmanager.h"
@@ -17,7 +16,6 @@
 #include "athreads_si.h"
 #include "agui_si.h"
 #include "atree_si.h"
-#include "atracklog_si.h"
 #include "asim_si.h"
 #include "apthistory_si.h"
 #include "aconfig_si.h"
@@ -127,12 +125,6 @@ void MainWindow::createScriptWindow()
 
     APhoton_SI* photon = new APhoton_SI(Config, EventsDataHub);
     ScriptWindow->RegisterInterface(photon, "photon");
-
-    ADepo_SI* depo = new ADepo_SI(Detector, EventsDataHub);
-    ScriptWindow->RegisterInterface(depo, "depo");
-
-    ATrackLog_SI* pth = new ATrackLog_SI(*EventsDataHub);
-    ScriptWindow->RegisterInterface(pth, "tracklog");
 
 #ifdef ANTS_FLANN
     AKnn_SI* knn = new AKnn_SI(ReconstructionManager->KNNmodule);

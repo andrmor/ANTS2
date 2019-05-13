@@ -77,10 +77,10 @@ void updateParticleCOB(QComboBox* cob, DetectorClass* Detector)
 
 void MainWindow::on_pbRefreshParticles_clicked()
 {
-  QList< QComboBox* > cobs;
-  cobs << ui->cobParticleToStack;
-  foreach (QComboBox* cob, cobs)
-    updateParticleCOB(cob, Detector);
+//  QList< QComboBox* > cobs;
+//  cobs << ui->cobParticleToStack;
+//  foreach (QComboBox* cob, cobs)
+//    updateParticleCOB(cob, Detector);
 
   Owindow->UpdateParticles();
 }

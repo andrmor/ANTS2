@@ -3,7 +3,8 @@
 #include "asimulationmanager.h"
 #include "amaterialparticlecolection.h"
 #include "eventsdataclass.h"
-#include "primaryparticletracker.h"
+//#include "primaryparticletracker.h"
+#include "aparticletracker.h"
 #include "aphotontracer.h"
 #include "aoneevent.h"
 #include "s1_generator.h"
@@ -32,17 +33,11 @@
 AParticleSourceSimulator::AParticleSourceSimulator(const DetectorClass *detector, ASimulationManager *simMan, int ID) :
     ASimulator(detector, simMan, ID)
 {
-    if (simMan == 0) qDebug() << "simMan is nullptr" ;
+    if (!simMan) qDebug() << "simMan is nullptr" ;  // ***obsolete?
     detector->MpCollection->updateRandomGenForThread(ID, RandGen);
 
-    ParticleTracker = new PrimaryParticleTracker(detector->GeoManager,
-                                                 RandGen,
-                                                 detector->MpCollection,
-                                                 &ParticleStack,
-                                                 &EnergyVector,
-                                                 &dataHub->EventHistory,
-                                                 dataHub->SimStat,
-                                                 ID);
+    //ParticleTracker = new PrimaryParticleTracker(detector->GeoManager, RandGen, detector->MpCollection, &ParticleStack, &EnergyVector, &dataHub->EventHistory, dataHub->SimStat, ID);
+    ParticleTracker = new AParticleTracker(*RandGen, *detector->MpCollection, ParticleStack, EnergyVector, TrackingHistory, *dataHub->SimStat, ID);
     S1generator = new S1_Generator(photonGenerator, photonTracker, detector->MpCollection, &EnergyVector, &dataHub->GeneratedPhotonsHistory, RandGen);
     S2generator = new S2_Generator(photonGenerator, photonTracker, &EnergyVector, RandGen, detector->GeoManager, detector->MpCollection, &dataHub->GeneratedPhotonsHistory);
 
@@ -179,7 +174,7 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
 
 void AParticleSourceSimulator::updateGeoManager()
 {
-    ParticleTracker->UpdateGeoManager(detector->GeoManager);
+    //ParticleTracker->UpdateGeoManager(detector->GeoManager);
     S2generator->UpdateGeoManager(detector->GeoManager);
 }
 

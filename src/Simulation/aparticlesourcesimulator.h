@@ -9,7 +9,7 @@
 
 class AEnergyDepositionCell;
 class AParticleRecord;
-class PrimaryParticleTracker;
+class AParticleTracker;// PrimaryParticleTracker;
 class S1_Generator;
 class S2_Generator;
 class AParticleGun;
@@ -57,7 +57,8 @@ private:
     bool geant4TrackAndProcess();
 
     //local objects
-    PrimaryParticleTracker* ParticleTracker = 0;
+    //PrimaryParticleTracker* ParticleTracker = 0;
+    AParticleTracker* ParticleTracker = 0;
     S1_Generator* S1generator = 0;
     S2_Generator* S2generator = 0;
     AParticleGun* ParticleGun = 0;

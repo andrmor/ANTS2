@@ -21,6 +21,7 @@ public:
     explicit AParticleTracker(TRandom2 & RandomGenerator,
                               AMaterialParticleCollection & MpCollection,
                               QVector<AParticleRecord*> & particleStack,
+                              QVector<AEnergyDepositionCell*> & energyVector,
                               std::vector<AEventTrackingRecord *> & TrackingHistory,
                               ASimulationStatistics & simStat,
                               int ThreadIndex);
@@ -47,11 +48,10 @@ private:
     TRandom2 & RandGen;
     AMaterialParticleCollection & MpCollection;
     QVector<AParticleRecord*> & ParticleStack;   // TODO --> std::vector
+    QVector<AEnergyDepositionCell*> & EnergyVector; // TODO --> std::vector
     std::vector<AEventTrackingRecord *> & TrackingHistory;
     ASimulationStatistics & SimStat;
     int ThreadIndex = 0;
-
-    std::vector<AEnergyDepositionCell*> EnergyVector;
 
     const GeneralSimSettings* SimSet;
     bool BuildTracks = false;
@@ -64,7 +64,6 @@ private:
     int counter = -1;          //particle "serial" number - can be reset from outside  // obsolete!
 
     void generateRandomDirection(double* vv);
-    void clearEnergyVector();
 };
 
 #endif // APARTICLETRACKER_H

@@ -21,16 +21,15 @@
 AParticleTracker::AParticleTracker(TRandom2 & RandomGenerator,
                                    AMaterialParticleCollection & MpCollection,
                                    QVector<AParticleRecord *> & particleStack,
+                                   QVector<AEnergyDepositionCell*> & energyVector,
                                    std::vector<AEventTrackingRecord *> & TrackingHistory,
                                    ASimulationStatistics & simStat,
                                    int ThreadIndex) :
-    RandGen(RandomGenerator), MpCollection(MpCollection), ParticleStack(particleStack),
+    RandGen(RandomGenerator), MpCollection(MpCollection),
+    ParticleStack(particleStack), EnergyVector(energyVector),
     TrackingHistory(TrackingHistory), SimStat(simStat), ThreadIndex(ThreadIndex) {}
 
-AParticleTracker::~AParticleTracker()
-{
-    clearEnergyVector();
-}
+AParticleTracker::~AParticleTracker() {}
 
 void AParticleTracker::configure(const GeneralSimSettings* simSet, bool fbuildTracks, std::vector<TrackHolderClass *> * tracks, bool fremoveEmptyTracks)
 {
@@ -44,8 +43,6 @@ void AParticleTracker::configure(const GeneralSimSettings* simSet, bool fbuildTr
 
 bool AParticleTracker::TrackParticlesOnStack(int eventId)
 {
-    clearEnergyVector();
-
     AEventTrackingRecord * EventRecord = (SimSet->fLogsStat ? AEventTrackingRecord::create() : nullptr);
 
     while ( !ParticleStack.empty() )
@@ -54,8 +51,8 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
 
         bool bFinished = false;
 
-        //reading data for the top particle at the stack --- TODO change to the last in the stack!
-        AParticleRecord * thisParticle = ParticleStack.at(0);
+        AParticleRecord * thisParticle = ParticleStack.last();
+        ParticleStack.removeLast();
 
         AParticleTrackingRecord * thisParticleRecord = nullptr;
         if (SimSet->fLogsStat)
@@ -112,7 +109,6 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
             }
             //delete the particle record and remove from the stack
             delete thisParticle;
-            ParticleStack.remove(0); // ***!!!
             continue;
         }
 
@@ -159,7 +155,7 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
                     //qDebug() << "Monitor #:"<< iMon << "Total monitors:"<< SimStat->Monitors.size();
                     if (SimStat.Monitors.at(iMon)->isForParticles() && SimStat.Monitors.at(iMon)->getParticleIndex()==ParticleId)
                     {
-                        const bool bPrimary = (ParticleStack.at(0)->secondaryOf == -1);
+                        const bool bPrimary = (thisParticle->secondaryOf == -1);
                         if (  ( bPrimary && SimStat.Monitors.at(iMon)->isPrimary() ) ||
                               (!bPrimary && SimStat.Monitors.at(iMon)->isSecondary()) )
                         {
@@ -395,7 +391,8 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
                             }
                             case (NeutralTerminatorStructure::ComptonScattering): //1
                             {
-                                //                           qDebug()<<"Compton";
+                                qDebug()<<"Compton"<<ParticleId;
+
                                 GammaStructure G0;
                                 G0.energy = energy;
                                 TVector3 dir(v);
@@ -475,6 +472,11 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
                                     if (el.DecayScenarios.isEmpty())
                                     {
                                         //      qDebug() << "No decay scenarios following neutron capture are defined";
+                                        if (SimSet->fLogsStat)
+                                        {
+                                            ATrackingStepData * step = new ATrackingStepData(r, time, 0, 0, "nCapture");
+                                            thisParticleRecord->addStep(step);
+                                        }
                                     }
                                     else
                                     {
@@ -498,15 +500,32 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
                                         {
                                             // TODO ***!!!
                                             qDebug() << "Direct depo model!";
+                                            if (SimSet->fLogsStat)
+                                            {
+                                                double depoE = 0; // ***!!! generate energy depo here
+                                                ATrackingStepData * step = new ATrackingStepData(r, time, 0, depoE, "nDirect");
+                                                thisParticleRecord->addStep(step);
+                                            }
                                         }
-
                                         //generating particles if defined
-                                        if (reaction.GeneratedParticles.isEmpty())
+                                        else if (reaction.GeneratedParticles.isEmpty())
                                         {
                                             //      qDebug() << "In this scenario there is no emission of secondary particles";
+                                            if (SimSet->fLogsStat)
+                                            {
+                                                ATrackingStepData * step = new ATrackingStepData(r, time, 0, 0, "nCapture");
+                                                thisParticleRecord->addStep(step);
+                                            }
                                         }
                                         else
                                         {
+                                            ATrackingStepData * step;
+                                            if (SimSet->fLogsStat)
+                                            {
+                                                step = new ATrackingStepData(r, time, 0, 0, "neutronInelastic");
+                                                thisParticleRecord->addStep(step);
+                                            }
+
                                             double vv[3]; //generated direction of the particle
                                             for (int igp=0; igp<reaction.GeneratedParticles.size(); igp++)
                                             {
@@ -523,8 +542,16 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
                                                     generateRandomDirection(vv);
                                                     //      qDebug() << "   in random direction";
                                                 }
-                                                AParticleRecord* pp = new AParticleRecord(ParticleId, r[0], r[1], r[2], vv[0], vv[1], vv[2], time, energy, counter);
+                                                AParticleRecord * pp = new AParticleRecord(ParticleId, r[0], r[1], r[2], vv[0], vv[1], vv[2], time, energy, counter);
                                                 ParticleStack.append(pp);
+
+                                                if (SimSet->fLogsStat)
+                                                {
+                                                    AParticleTrackingRecord * secTR = AParticleTrackingRecord::create( MpCollection.getParticleName(ParticleId) );
+                                                    pp->ParticleRecord = secTR;
+                                                    thisParticleRecord->addSecondary(secTR);
+                                                    step->Secondaries.push_back( thisParticleRecord->countSecondaries()-1 );
+                                                }
                                             }
                                         }
                                     }
@@ -532,14 +559,15 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
                                 else
                                 {
                                     qWarning() << "||| No absorption elements are defined for" << MpCollection[MatId]->name;
+                                    if (SimSet->fLogsStat)
+                                    {
+                                        ATrackingStepData * step = new ATrackingStepData(r, time, 0, 0, "nCapture");
+                                        thisParticleRecord->addStep(step);
+                                    }
                                 }
 
                                 //terminationStatus = EventHistoryStructure::NeutronAbsorption;//5
-                                if (SimSet->fLogsStat)
-                                {
-                                    ATrackingStepData * step = new ATrackingStepData(r, time, 0, 0, "nCapture");
-                                    thisParticleRecord->addStep(step);
-                                }
+
                                 bFinished = true;
                                 //distanceHistory = SoFarShortest;
                                 break; //switch-break
@@ -787,9 +815,8 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
             ParticleTracksAdded++;
         }
 
-        //delete the particle record and remove from the stack
+        //delete the current particle record
         delete thisParticle;
-        ParticleStack.remove(0); // ***!!!
     }
     // end of while-cycle over the particles on the stack
 
@@ -812,7 +839,9 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
         TrackCandidates.clear();
     }// delete later when creating GeoManager tracks
 
-    clearEnergyVector();
+    // TODO - if vector is empty and RemoveTracksIfNoEnergyDepo = true - do not add event to history    Monitors?
+    if (SimSet->fLogsStat)
+        TrackingHistory.push_back(EventRecord);
 
     return true; //success
 }
@@ -831,10 +860,4 @@ void AParticleTracker::generateRandomDirection(double *vv)
     double scale = 8.0 * TMath::Sqrt(0.25 - r2);
     vv[0] = a*scale;
     vv[1] = b*scale;
-}
-
-void AParticleTracker::clearEnergyVector()
-{
-    for (AEnergyDepositionCell * el : EnergyVector) delete el;
-    EnergyVector.clear();
 }

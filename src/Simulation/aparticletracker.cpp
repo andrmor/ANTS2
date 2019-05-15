@@ -288,8 +288,8 @@ bool AParticleTracker::trackCharged_isKilled()
     double distanceHistory = 0;
     const double MaxLength = navigator->GetStep();
 
-    bool bFinished;
-    bool flagDone;
+    bool bKilled;
+    bool flagDone = false;
     do
     {
         //    qDebug() << "-->On step start energy:"<<energy;
@@ -313,7 +313,7 @@ bool AParticleTracker::trackCharged_isKilled()
             RecStep = MaxLength - distanceHistory - SimSet->Safety;
             flagDone = true;
             //should enter the next volume after "do" is over
-            bFinished = false;
+            bKilled = false;
         }
         //doing the step
         navigator->SetStep(RecStep);
@@ -332,7 +332,7 @@ bool AParticleTracker::trackCharged_isKilled()
             //qDebug() << "  Dissipated below low limit!";
             flagDone = true;
             //terminationStatus = EventHistoryStructure::AllEnergyDisspated;//2;
-            bFinished = true;
+            bKilled = true;
             dE += p->energy;
         }
 
@@ -350,7 +350,8 @@ bool AParticleTracker::trackCharged_isKilled()
         distanceHistory += RecStep;
     }
     while (!flagDone);
-    return bFinished;
+
+    return bKilled;
 }
 
 bool AParticleTracker::trackNeutral_isKilled()
@@ -682,7 +683,7 @@ bool AParticleTracker::processPairProduction_isKilled()
 
     if (SimSet->fLogsStat)
     {
-        ATrackingStepData * step = new ATrackingStepData(p->r, p->time, 0, depo, "conv");
+        ATrackingStepData * step = new ATrackingStepData(p->r, p->time, 0, depo, "pair");
         thisParticleRecord->addStep(step);
 
         AParticleTrackingRecord * secTR = AParticleTrackingRecord::create( "gamma" );

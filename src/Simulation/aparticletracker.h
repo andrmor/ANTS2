@@ -14,6 +14,11 @@ class AMaterialParticleCollection;
 class GeneralSimSettings;
 class TrackHolderClass;
 class ASimulationStatistics;
+class AEventTrackingRecord;
+class AParticleTrackingRecord;
+class TGeoNavigator;
+struct MatParticleStructure;
+struct NeutralTerminatorStructure;
 
 class AParticleTracker
 {
@@ -26,22 +31,15 @@ public:
                               ASimulationStatistics & simStat,
                               int ThreadIndex);
 
-    ~AParticleTracker();
-
-    //main usage
     bool TrackParticlesOnStack(int eventId = 0);
 
-    //configure
-    void setBuildTracks(bool opt){ BuildTracks = opt;}  // to remove
-    void setRemoveTracksIfNoEnergyDepo(bool opt){ RemoveTracksIfNoEnergyDepo = opt;} // to remove
-      //configure all
     void configure(const GeneralSimSettings *simSet,
                    bool fbuildTrackes,
                    std::vector<TrackHolderClass *> * tracks,
-                   bool fremoveEmptyTracks = true);
+                   bool fRemoveEmptyTracks = true);
 
 
-    void resetCounter() {counter = -1;}  //will be absolute
+    void resetCounter() {counter = -1;}
     void setMaxTracks(int maxTracks) {MaxTracks = maxTracks;}
 
 private:
@@ -61,9 +59,39 @@ private:
     std::vector<TrackHolderClass *> TrackCandidates;
     std::vector<TrackHolderClass *> * Tracks;
 
-    int counter = -1;          //particle "serial" number - can be reset from outside  // obsolete!
+    int counter = -1;          //particle "serial" number - can be reset from outside  // obsolete?
+    int EventId;
+
+    // --- runtime ---
+
+    AParticleRecord * p = nullptr; //current particle
+
+    int thisMatId;
+    AMaterial * thisMaterial = nullptr;
+    MatParticleStructure * thisMatParticle = nullptr;
+
+    TGeoNavigator * navigator = nullptr;
+
+    TrackHolderClass * track = nullptr;
+    AEventTrackingRecord * EventRecord = nullptr;
+    AParticleTrackingRecord * thisParticleRecord = nullptr;
+
+    bool bBuildThisTrack = false;
 
     void generateRandomDirection(double* vv);
+    void initLog();
+    void initTrack();
+
+    bool checkMonitors_isKilled(); // return true if the particle is stopped by monitor
+
+    bool trackCharged_isKilled();
+    bool trackNeutral_isKilled();
+
+    bool processPhotoelectric_isKilled();
+    bool processCompton_isKilled();
+    bool processNeutronAbsorption_isKilled(const NeutralTerminatorStructure & term);
+    bool processPairProduction_isKilled();
+    bool processNeutronElastic_isKilled(const NeutralTerminatorStructure & term);
 };
 
 #endif // APARTICLETRACKER_H

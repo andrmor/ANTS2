@@ -90,6 +90,9 @@ OutputWindow::OutputWindow(QWidget *parent, MainWindow *mw, EventsDataClass *eve
     ui->tabwinDiagnose->setCurrentIndex(0);
     updatePTHistoryBinControl();
     SetTab(2);
+
+    ui->cobEVkin->setCurrentIndex(1);
+    ui->cobEVdepo->setCurrentIndex(1);
 }
 
 OutputWindow::~OutputWindow()
@@ -1627,4 +1630,118 @@ void OutputWindow::on_cbPTHistBordAndVs_toggled(bool)
 void OutputWindow::on_cbPTHistBordAsStat_toggled(bool)
 {
     updatePTHistoryBinControl();
+}
+
+#include "TGeoNode.h"
+void OutputWindow::fillEvTabViewRecord(QTreeWidgetItem * item, const AParticleTrackingRecord * pr) const
+{
+    item->setText(0, pr->ParticleName);
+    //item->setFlags(w->flags() & ~Qt::ItemIsDragEnabled);// & ~Qt::ItemIsSelectable);
+
+    int precision = ui->sbEVprecision->value();
+    bool bHideTransp = ui->cbEVhideTrans->isChecked();
+
+    bool bPos = ui->cbEVpos->isChecked();
+    bool bTime = ui->cbEVtime->isChecked();
+    double timeUnits = 1.0;
+    switch (ui->cobEVtime->currentIndex())
+    {
+    case 0: break;
+    case 1: timeUnits *= 0.001; break;
+    case 2: timeUnits *= 1.0e-6; break;
+    }
+    bool bVolume = ui->cbEVvol->isChecked();
+    bool bKin = ui->cbEVkin->isChecked();
+    bool bDepo = ui->cbEVdepo->isChecked();
+    double kinUnits = 1.0;
+    switch (ui->cobEVkin->currentIndex())
+    {
+    case 0: kinUnits *= 1.0e6;
+    case 1: break;
+    case 2: kinUnits *= 1.0e-3; break;
+    }
+    double depoUnits = 1.0;
+    switch (ui->cobEVdepo->currentIndex())
+    {
+    case 0: depoUnits *= 1.0e6;
+    case 1: break;
+    case 2: depoUnits *= 1.0e-3; break;
+    }
+    bool bIndex = ui->cbEVvi->isChecked();
+    bool bMat = ui->cbEVmat->isChecked();
+
+    for (ATrackingStepData * step : pr->getSteps())
+    {
+        if (bHideTransp && step->Process == "T") continue;
+
+        QTreeWidgetItem * it = new QTreeWidgetItem(item);
+        QString s = step->Process;
+        if (bPos) s += QString("  (%1, %2, %3)").arg(step->Position[0], 0, 'g', precision).arg(step->Position[1], 0, 'g', precision).arg(step->Position[2], 0, 'g', precision);
+        if (bVolume && step->GeoNode) s += QString("  %1").arg(step->GeoNode->GetVolume()->GetName());
+        if (bIndex && step->GeoNode) s += QString("  %1").arg(step->GeoNode->GetIndex());
+        if (bMat && step->GeoNode) s += QString("  %1").arg( MW->MpCollection->getMaterialName( step->GeoNode->GetVolume()->GetMaterial()->GetIndex() ));
+        if (bTime) s += QString("  t = %1").arg(step->Time * timeUnits, 0, 'g', precision);
+        if (bKin)  s += QString("  E = %1").arg(step->Energy * kinUnits, 0, 'g', precision);
+        if (bDepo)  s += QString("  depo = %1").arg(step->DepositedEnergy * depoUnits, 0, 'g', precision);
+
+        it->setText(0, s);
+
+        for (int iSec : step->Secondaries)
+        {
+            QTreeWidgetItem * subItem = new QTreeWidgetItem(it);
+            fillEvTabViewRecord(subItem, pr->getSecondaries().at(iSec));
+        }
+    }
+
+
+}
+
+void OutputWindow::on_pbEventView_ShowTree_clicked()
+{
+    std::vector<AEventTrackingRecord *> & TH = MW->SimulationManager->TrackingHistory;
+    if (TH.empty()) return;
+
+    int iEv = ui->sbEvent->value();
+    if (iEv >= (int)TH.size()) return;
+
+    ui->trwEventView->clear();
+
+    AEventTrackingRecord * er = TH.at(iEv);
+    for (AParticleTrackingRecord* pr : er->getPrimaryParticleRecords())
+    {
+        QTreeWidgetItem * item = new QTreeWidgetItem(ui->trwEventView);
+        fillEvTabViewRecord(item, pr);
+    }
+
+    ui->trwEventView->expandAll();
+}
+
+void OutputWindow::on_pvEV_Next_clicked()
+{
+    int iEv = ui->sbEvent->value();
+    if (iEv >= (int)MW->SimulationManager->TrackingHistory.size()) return;
+    iEv++;
+    ui->sbEvent->setValue(iEv);
+
+    on_pbEVshow_clicked();
+}
+
+void OutputWindow::on_pbEVshow_clicked()
+{
+    on_pbEventView_ShowTree_clicked();
+    on_pbEVgeo_clicked();
+}
+
+#include "geometrywindowclass.h"
+void OutputWindow::on_pbEVgeo_clicked()
+{
+    MW->SimulationManager->clearTracks();
+    MW->GeometryWindow->ClearTracks(false);
+
+    int iEv = ui->sbEvent->value();
+    if (ui->cbEVtracks->isChecked()) MW->GeometryWindow->ShowEvent_Particles(iEv, !ui->cbEVsupressSec->isChecked());
+
+    if (ui->cbEVpmSig->isChecked()) MW->GeometryWindow->ShowPMsignals(iEv, false);
+
+    MW->GeometryWindow->DrawTracks();
 }

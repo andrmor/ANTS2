@@ -10,6 +10,8 @@ class QStandardItemModel;
 struct AReconRecord;
 class EventsDataClass;
 class DynamicPassivesHandler;
+class QTreeWidgetItem;
+class AParticleTrackingRecord;
 
 namespace Ui {
 class OutputWindow;
@@ -97,6 +99,14 @@ private slots:
 
     void on_cbPTHistBordAsStat_toggled(bool checked);
 
+    void on_pbEventView_ShowTree_clicked();
+
+    void on_pvEV_Next_clicked();
+
+    void on_pbEVshow_clicked();
+
+    void on_pbEVgeo_clicked();
+
 private:
     Ui::OutputWindow *ui;
     MainWindow* MW;
@@ -137,6 +147,7 @@ private:
     void addParticleHistoryLogLine(int iRec, int level);
     void updateMonitors();
     void updatePTHistoryBinControl();
+    void fillEvTabViewRecord(QTreeWidgetItem *item, const AParticleTrackingRecord *pr) const;
 };
 
 #endif // OUTPUTWINDOW_H

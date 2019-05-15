@@ -162,3 +162,9 @@ void AEventTrackingRecord::updateGeoNodes()
     for (AParticleTrackingRecord * pr : PrimaryParticleRecords)
         pr->updateGeoNodes();
 }
+
+void AEventTrackingRecord::makeTracks(std::vector<TrackHolderClass *> &Tracks, const QStringList &ParticleNames, const ATrackBuildOptions &TrackBuildOptions, bool bWithSecondaries) const
+{
+    for (AParticleTrackingRecord * r : PrimaryParticleRecords)
+        r->makeTrack(Tracks, ParticleNames, TrackBuildOptions, bWithSecondaries);
+}

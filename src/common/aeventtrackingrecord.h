@@ -8,6 +8,7 @@ class AParticleTrackingRecord;
 class TrackHolderClass;
 class ATrackBuildOptions;
 class TGeoNode;
+class TrackHolderClass;
 
 class ATrackingStepData
 {
@@ -82,6 +83,8 @@ public:
     int    countPrimaries() const;
 
     void updateGeoNodes();
+
+    void makeTracks(std::vector<TrackHolderClass *> & Tracks, const QStringList & ParticleNames, const ATrackBuildOptions & TrackBuildOptions, bool bWithSecondaries) const;
 
     const std::vector<AParticleTrackingRecord *> & getPrimaryParticleRecords() const {return PrimaryParticleRecords;}
 

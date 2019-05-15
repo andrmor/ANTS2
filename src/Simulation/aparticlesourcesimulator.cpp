@@ -677,7 +677,7 @@ bool AParticleSourceSimulator::geant4TrackAndProcess()
                 return false;
             }
             AEnergyDepositionCell* cell = new AEnergyDepositionCell(fields[3].toDouble(), fields[4].toDouble(), fields[5].toDouble(), //x y z
-                                                                    0, fields[6].toDouble(), fields[2].toDouble(),  // length time dE
+                                                                    fields[6].toDouble(), fields[2].toDouble(),  //time dE
                                                                     fields[0].toInt(), fields[1].toInt(), 0, eventCurrent); //part mat sernum event
             EnergyVector << cell;
         }

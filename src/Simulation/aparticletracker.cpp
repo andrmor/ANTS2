@@ -300,28 +300,29 @@ bool AParticleTracker::trackCharged_isKilled()
                                                                                MpCollection.fLogLogInterpolation);
 
         //recommended step: (RecFraction - suggested decrease of energy per step)
-        double RecStep = (dEdX < 1.0e-25 ? 1.0e25 : SimSet->dE * p->energy/dEdX);
+        double Step = (dEdX < 1.0e-25 ? 1.0e25 : SimSet->dE * p->energy/dEdX);
         //    qDebug()<<dEdX<<RecStep;
 
-        if (RecStep > SimSet->MaxStep) RecStep = SimSet->MaxStep;
-        if (RecStep < SimSet->MinStep) RecStep = SimSet->MinStep;
+        if (Step > SimSet->MaxStep) Step = SimSet->MaxStep;
+        if (Step < SimSet->MinStep) Step = SimSet->MinStep;
 
         //will pass to another volume?
-        if (distanceHistory + RecStep > MaxLength - SimSet->Safety)
+        if (distanceHistory + Step > MaxLength - SimSet->Safety)
         {
             //                       qDebug()<<"boundary reached!";
-            RecStep = MaxLength - distanceHistory - SimSet->Safety;
+            Step = MaxLength - distanceHistory - SimSet->Safety;
             flagDone = true;
             //should enter the next volume after "do" is over
             bKilled = false;
         }
+
         //doing the step
-        navigator->SetStep(RecStep);
+        navigator->SetStep(Step);
         navigator->Step(true, false);
-        //                  qDebug() << "Asked for:"<<RecStep<<"Did:"<<navigator->GetStep();  //actual step is less by a fixed value (safity?)
-        RecStep = navigator->GetStep();
+        Step = navigator->GetStep();
+
         //energy loss?
-        double dE = dEdX*RecStep;
+        double dE = dEdX * Step;
         //                   qDebug()<<"     Step:"<<RecStep<<" would result in dE of"<<dE;
         if (dE > p->energy) dE = p->energy;
         p->energy -= dE;
@@ -338,7 +339,7 @@ bool AParticleTracker::trackCharged_isKilled()
 
         for (int j=0; j<3; j++) p->r[j] = navigator->GetCurrentPoint()[j];  //new current point
         //                   qDebug()<<"Step"<<RecStep<<"dE"<<dE<<"New energy"<<energy;
-        AEnergyDepositionCell* tc = new AEnergyDepositionCell(p->r, RecStep, p->time, dE, p->Id, thisMatId, counter, EventId);
+        AEnergyDepositionCell* tc = new AEnergyDepositionCell(p->r, p->time, dE, p->Id, thisMatId, counter, EventId);
         EnergyVector.push_back(tc);
 
         if (SimSet->fLogsStat)
@@ -347,7 +348,7 @@ bool AParticleTracker::trackCharged_isKilled()
             thisParticleRecord->addStep(step);
         }
 
-        distanceHistory += RecStep;
+        distanceHistory += Step;
     }
     while (!flagDone);
 
@@ -478,7 +479,7 @@ bool AParticleTracker::trackNeutral_isKilled()
 bool AParticleTracker::processPhotoelectric_isKilled()
 {
     // qDebug()<<"Photoelectric";
-    AEnergyDepositionCell* tc = new AEnergyDepositionCell(p->r, 0, p->time, p->energy, p->Id, thisMatId, counter, EventId);
+    AEnergyDepositionCell* tc = new AEnergyDepositionCell(p->r, p->time, p->energy, p->Id, thisMatId, counter, EventId);
     EnergyVector.push_back(tc);
 
     if (SimSet->fLogsStat)
@@ -500,7 +501,7 @@ bool AParticleTracker::processCompton_isKilled()
 
     GammaStructure G1 = Compton(&G0, &RandGen); // new gamma
     // qDebug()<<"energy"<<G1.energy<<" "<<G1.direction[0]<<G1.direction[1]<<G1.direction[2];
-    AEnergyDepositionCell* tc = new AEnergyDepositionCell(p->r, 0, p->time, G0.energy - G1.energy, p->Id, thisMatId, counter, EventId);
+    AEnergyDepositionCell* tc = new AEnergyDepositionCell(p->r, p->time, G0.energy - G1.energy, p->Id, thisMatId, counter, EventId);
     EnergyVector.push_back(tc);
 
     // ***!!! make the same way as in Geant4 and continue with gamma?
@@ -670,7 +671,7 @@ bool AParticleTracker::processPairProduction_isKilled()
 {
     // qDebug()<<"pair production";
     const double depo = p->energy - 1022.0; //directly deposited energy (kinetic energies), assuming electron and positron do not travel far
-    AEnergyDepositionCell* tc = new AEnergyDepositionCell(p->r, 0, p->time, depo, p->Id, thisMatId, counter, EventId);
+    AEnergyDepositionCell* tc = new AEnergyDepositionCell(p->r, p->time, depo, p->Id, thisMatId, counter, EventId);
     EnergyVector.push_back(tc);
 
     //creating two gammas from positron anihilation and putting it on stack

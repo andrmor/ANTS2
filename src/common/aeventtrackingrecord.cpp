@@ -79,6 +79,22 @@ int AParticleTrackingRecord::countSecondaries() const
     return static_cast<int>(Secondaries.size());
 }
 
+bool AParticleTrackingRecord::isHaveProcesses(const QStringList & Proc, bool bOnlyPrimary)
+{
+    for (ATrackingStepData * s : Steps)
+        for (const QString & p : Proc)
+            if (p == s->Process) return true;
+
+    if (!bOnlyPrimary)
+    {
+        for (AParticleTrackingRecord * sec : Secondaries)
+            if (sec->isHaveProcesses(Proc, bOnlyPrimary))
+                return true;
+    }
+
+    return false;
+}
+
 void AParticleTrackingRecord::logToString(QString & str, int offset, bool bExpandSecondaries) const
 {
     str += QString(' ').repeated(offset) + '>';
@@ -155,7 +171,18 @@ void AEventTrackingRecord::addPrimaryRecord(AParticleTrackingRecord *rec)
     PrimaryParticleRecords.push_back(rec);
 }
 
-int AEventTrackingRecord::countPrimaries() const { return static_cast<int>(PrimaryParticleRecords.size()); }
+int AEventTrackingRecord::countPrimaries() const
+{
+    return static_cast<int>(PrimaryParticleRecords.size());
+}
+
+bool AEventTrackingRecord::isHaveProcesses(const QStringList & Proc, bool bOnlyPrimary) const
+{
+    for (AParticleTrackingRecord * pr : PrimaryParticleRecords)
+        if (pr->isHaveProcesses(Proc, bOnlyPrimary)) return true;
+
+    return false;
+}
 
 void AEventTrackingRecord::updateGeoNodes()
 {

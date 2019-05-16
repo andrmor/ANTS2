@@ -58,12 +58,13 @@ OutputWindow::OutputWindow(QWidget *parent, MainWindow *mw, EventsDataClass *eve
     vecDis << ui->pbSiPMpixels << ui->sbTimeBin
            << ui->lePTHistParticle << ui->cobPTHistVolMat << ui->lePTHistVolVolume << ui->sbPTHistVolIndex
            << ui->cobPTHistVolMatFrom << ui->cobPTHistVolMatTo << ui->lePTHistVolVolumeFrom << ui->lePTHistVolVolumeTo
-           << ui->sbPTHistVolIndexFrom << ui->sbPTHistVolIndexTo;
+           << ui->sbPTHistVolIndexFrom << ui->sbPTHistVolIndexTo
+           << ui->leEVlimitToProc << ui->cbEVlimitToProcPrim << ui->leEVexcludeProc << ui->cbEVexcludeProcPrim;
     for (QWidget * w : vecDis) w->setEnabled(false);
 
     QVector<QWidget*> vecInv;
     vecInv << ui->cobPTHistVolPlus << ui->pbRefreshViz << ui->frPTHistX << ui->frPTHistY
-           << ui->pbEventView_ShowTree << ui->pbEVgeo;
+           << ui->pbEventView_ShowTree << ui->pbEVgeo << ui->frEventFilters;
     for (QWidget * w : vecInv) w->setVisible(false);
 
     QDoubleValidator* dv = new QDoubleValidator(this);
@@ -1703,16 +1704,61 @@ void OutputWindow::EV_showGeo()
     MW->GeometryWindow->DrawTracks();
 }
 
+int OutputWindow::findEventWithFilters(int currentEv, bool bUp)
+{
+    std::vector<AEventTrackingRecord *> & TH = MW->SimulationManager->TrackingHistory;
+    if (TH.empty()) return -1;
+    if (currentEv == 0 && !bUp) return -1;
+    if (currentEv >= (int)TH.size() && bUp) return -1;
+
+    const QRegularExpression rx = QRegularExpression("(\\ |\\,|\\:|\\t)"); //separators: ' ' or ',' or ':' or '\t'
+
+
+    bool bLimProc = ui->cbEVlimToProc->isChecked();
+    bool bLimProc_prim = ui->cbEVlimitToProcPrim->isChecked();
+    QStringList LimProc = ui->leEVlimitToProc->text().split(rx, QString::SkipEmptyParts);
+
+    bool bExclProc = ui->cbEVexcludeProc->isChecked();
+    bool bExclProc_prim = ui->cbEVexcludeProcPrim->isChecked();
+    QStringList ExclProc = ui->leEVexcludeProc->text().split(rx, QString::SkipEmptyParts);
+
+    if (currentEv > (int)TH.size()) currentEv = (int)TH.size();
+
+    bUp ? currentEv++ : currentEv--;
+    while (currentEv >= 0 && currentEv < (int)TH.size())
+    {
+        const AEventTrackingRecord * er = TH.at(currentEv);
+
+        bool bGood = true;
+        if (bLimProc)
+        {
+            bGood = er->isHaveProcesses(LimProc, bLimProc_prim);
+        }
+        if (bGood && bExclProc)
+        {
+            bGood = !er->isHaveProcesses(ExclProc, bExclProc_prim);
+        }
+        if (bGood) return currentEv;
+
+        bUp ? currentEv++ : currentEv--;
+    };
+    return -1;
+}
+
 void OutputWindow::on_pbNextEvent_clicked()
 {
     QWidget * cw = ui->tabwinDiagnose->currentWidget();
     int i = ui->sbEvent->value();
     if (cw == ui->tabEventViewer)
     {
-        i++;
+        int newi = findEventWithFilters(i, true);
+        if (newi == -1 && i != MW->EventsDataHub->countEvents()-1)
+            message("There are no events according to the selected criteria", this);
+        else i = newi;
     }
     else i++;
-    if (i < MW->EventsDataHub->countEvents()) ui->sbEvent->setValue(i);
+
+    if (i >= 0 &&i < MW->EventsDataHub->countEvents()) ui->sbEvent->setValue(i);
 }
 
 void OutputWindow::on_pbPreviousEvent_clicked()
@@ -1721,10 +1767,13 @@ void OutputWindow::on_pbPreviousEvent_clicked()
     int i = ui->sbEvent->value();
     if (cw == ui->tabEventViewer)
     {
-        i--;
+        int newi = findEventWithFilters(i, false);
+        if (newi == -1 && i != 0)
+            message("There are no events according to the selected criteria", this);
+        else i = newi;
     }
     else i--;
-    if (i > 0) ui->sbEvent->setValue(i);
+    if (i >= 0) ui->sbEvent->setValue(i);
 }
 
 void OutputWindow::on_sbEvent_valueChanged(int i)

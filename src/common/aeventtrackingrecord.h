@@ -2,6 +2,7 @@
 #define AEVENTTRACKINGRECORD_H
 
 #include <QString>
+#include <QStringList>
 #include <vector>
 
 class AParticleTrackingRecord;
@@ -46,6 +47,8 @@ public:
     const AParticleTrackingRecord * getSecondaryOf() const {return SecondaryOf;}
     const std::vector<AParticleTrackingRecord *> & getSecondaries() const {return Secondaries;}
 
+    bool isHaveProcesses(const QStringList & Proc, bool bOnlyPrimary);
+
     void logToString(QString & str, int offset, bool bExpandSecondaries) const;
     void makeTrack(std::vector<TrackHolderClass *> & Tracks, const QStringList & ParticleNames, const ATrackBuildOptions & TrackBuildOptions, bool bWithSecondaries) const;
 
@@ -82,9 +85,11 @@ public:
     bool   isEmpty() const {return PrimaryParticleRecords.empty();}
     int    countPrimaries() const;
 
-    void updateGeoNodes();
+    bool   isHaveProcesses(const QStringList & Proc, bool bOnlyPrimary) const;
 
-    void makeTracks(std::vector<TrackHolderClass *> & Tracks, const QStringList & ParticleNames, const ATrackBuildOptions & TrackBuildOptions, bool bWithSecondaries) const;
+    void   updateGeoNodes();
+
+    void   makeTracks(std::vector<TrackHolderClass *> & Tracks, const QStringList & ParticleNames, const ATrackBuildOptions & TrackBuildOptions, bool bWithSecondaries) const;
 
     const std::vector<AParticleTrackingRecord *> & getPrimaryParticleRecords() const {return PrimaryParticleRecords;}
 

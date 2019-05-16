@@ -775,15 +775,98 @@ over all events</string>
              <property name="minimumSize">
               <size>
                <width>0</width>
-               <height>100</height>
+               <height>0</height>
               </size>
              </property>
              <property name="frameShape">
-              <enum>QFrame::StyledPanel</enum>
+              <enum>QFrame::Panel</enum>
              </property>
              <property name="frameShadow">
               <enum>QFrame::Raised</enum>
              </property>
+             <layout class="QVBoxLayout" name="verticalLayout_38">
+              <property name="spacing">
+               <number>3</number>
+              </property>
+              <property name="leftMargin">
+               <number>3</number>
+              </property>
+              <property name="topMargin">
+               <number>3</number>
+              </property>
+              <property name="rightMargin">
+               <number>3</number>
+              </property>
+              <property name="bottomMargin">
+               <number>3</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="label_28">
+                <property name="text">
+                 <string>Limit events to ones which have (or should not have) these processes:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_5">
+                <item>
+                 <layout class="QVBoxLayout" name="verticalLayout_35">
+                  <property name="spacing">
+                   <number>1</number>
+                  </property>
+                  <item>
+                   <widget class="QCheckBox" name="cbEVlimToProc">
+                    <property name="text">
+                     <string>Limit to:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QCheckBox" name="cbEVexcludeProc">
+                    <property name="text">
+                     <string>Exclude:</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QVBoxLayout" name="verticalLayout_37">
+                  <property name="spacing">
+                   <number>1</number>
+                  </property>
+                  <item>
+                   <widget class="QLineEdit" name="leEVlimitToProc"/>
+                  </item>
+                  <item>
+                   <widget class="QLineEdit" name="leEVexcludeProc"/>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QVBoxLayout" name="verticalLayout_36">
+                  <property name="spacing">
+                   <number>1</number>
+                  </property>
+                  <item>
+                   <widget class="QCheckBox" name="cbEVlimitToProcPrim">
+                    <property name="text">
+                     <string>for the primaries</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QCheckBox" name="cbEVexcludeProcPrim">
+                    <property name="text">
+                     <string>for the primaries</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </item>
+             </layout>
             </widget>
            </item>
            <item>
@@ -2571,7 +2654,7 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
     <item>
      <widget class="QFrame" name="frEventNumber">
       <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
+       <enum>QFrame::Panel</enum>
       </property>
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
@@ -3113,7 +3196,7 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
     </hint>
     <hint type="destinationlabel">
      <x>62</x>
-     <y>222</y>
+     <y>209</y>
     </hint>
    </hints>
   </connection>
@@ -3145,7 +3228,7 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
     </hint>
     <hint type="destinationlabel">
      <x>47</x>
-     <y>222</y>
+     <y>209</y>
     </hint>
    </hints>
   </connection>
@@ -3162,6 +3245,70 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
     <hint type="destinationlabel">
      <x>73</x>
      <y>97</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbEVlimToProc</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>leEVlimitToProc</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>90</x>
+     <y>112</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>169</x>
+     <y>111</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbEVlimToProc</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>cbEVlimitToProcPrim</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>98</x>
+     <y>119</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>564</x>
+     <y>115</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbEVexcludeProc</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>leEVexcludeProc</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>109</x>
+     <y>132</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>137</x>
+     <y>132</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbEVexcludeProc</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>cbEVexcludeProcPrim</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>102</x>
+     <y>140</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>576</x>
+     <y>140</y>
     </hint>
    </hints>
   </connection>

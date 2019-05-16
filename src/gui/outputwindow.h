@@ -139,6 +139,7 @@ private:
     void EV_show();
     void EV_showTree();
     void EV_showGeo();
+    int findEventWithFilters(int currentEv, bool bUp);
 };
 
 #endif // OUTPUTWINDOW_H

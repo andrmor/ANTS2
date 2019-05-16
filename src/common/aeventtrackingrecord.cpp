@@ -161,13 +161,15 @@ void AParticleTrackingRecord::fillELDD(ATrackingStepData *IdByStep, std::vector<
         ATrackingStepData * ts = Steps.at(iStep);
         if (ts->Process == "T" || ts->Process == "O") break;
 
-        float D = 0;
+        float Delta = 0;
         for (int i=0; i<3; i++)
-            D += (ts->Position[i] - ps->Position[i]) * (ts->Position[i] - ps->Position[i]);
+            Delta += (ts->Position[i] - ps->Position[i]) * (ts->Position[i] - ps->Position[i]);
+        Delta = sqrt(Delta);
 
-        totDist += sqrt(D);
+        totDist += Delta;
+
         dist.push_back(totDist);
-        ELDD.push_back(ts->DepositedEnergy);
+        ELDD.push_back(ts->DepositedEnergy/Delta);
     }
     while(true);
 }

@@ -22,6 +22,7 @@ class ASourceParticleGenerator;
 class AFileParticleGenerator;
 class AScriptParticleGenerator;
 class AEventTrackingRecord;
+class TObject;
 
 //class QJsonObject;
 #include <QJsonObject>  // temporary
@@ -54,7 +55,7 @@ public:
     void clearTracks();
     void clearNodes();
     void clearEnergyVector();
-    void clearTrackingHistory(); //temporary here - History to be transferred to datahub
+    void clearTrackingHistory();
 
     void setMaxThreads(int maxThreads) {MaxThreads = maxThreads;}
     const QString loadNodesFromFile(const QString & fileName);
@@ -94,12 +95,15 @@ private:
     bool fFinished = true;
     bool fSuccess = false;
 
+    bool bGuardTrackingHistory = false;
+
     // G4ants
     bool bOnlyFileExport = false; // single trigger flag
 
 public slots:
     void onSimulationFinished(); //processing of simulation results!
     void StopSimulation();
+    void onNewGeoManager(TObject*); // Nodes in history will be invalid after that!
 
 private slots:
     void onSimFailedToStart();    

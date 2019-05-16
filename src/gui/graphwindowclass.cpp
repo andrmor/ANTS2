@@ -222,10 +222,37 @@ TGraph *GraphWindowClass::ConstructTGraph(const QVector<double> &x, const QVecto
   return gr;
 }
 
+TGraph *GraphWindowClass::ConstructTGraph(const std::vector<float> &x, const std::vector<float> &y) const
+{
+    int numEl = (int)x.size();
+    TVectorD xx(numEl);
+    TVectorD yy(numEl);
+    for (int i=0; i < numEl; i++)
+    {
+        xx[i] = x.at(i);
+        yy[i] = y.at(i);
+    }
+
+    TGraph* gr = new TGraph(xx,yy);
+    gr->SetFillStyle(0);
+    gr->SetFillColor(0);
+    return gr;
+}
+
 TGraph *GraphWindowClass::ConstructTGraph(const QVector<double> &x, const QVector<double> &y,
                                           const char *Title, const char *XTitle, const char *YTitle,
                                           Color_t MarkerColor, int MarkerStyle, int MarkerSize,
                                           Color_t LineColor, int LineStyle, int LineWidth) const
+{
+    TGraph* gr = ConstructTGraph(x,y);
+    gr->SetTitle(Title); gr->GetXaxis()->SetTitle(XTitle); gr->GetYaxis()->SetTitle(YTitle);
+    gr->SetMarkerStyle(MarkerStyle); gr->SetMarkerColor(MarkerColor); gr->SetMarkerSize(MarkerSize);
+    gr->SetEditable(false); gr->GetYaxis()->SetTitleOffset((Float_t)1.30);
+    gr->SetLineWidth(LineWidth); gr->SetLineColor(LineColor); gr->SetLineStyle(LineStyle);
+    return gr;
+}
+
+TGraph *GraphWindowClass::ConstructTGraph(const std::vector<float> &x, const std::vector<float> &y, const char *Title, const char *XTitle, const char *YTitle, Color_t MarkerColor, int MarkerStyle, int MarkerSize, Color_t LineColor, int LineStyle, int LineWidth) const
 {
     TGraph* gr = ConstructTGraph(x,y);
     gr->SetTitle(Title); gr->GetXaxis()->SetTitle(XTitle); gr->GetYaxis()->SetTitle(YTitle);

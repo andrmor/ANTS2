@@ -135,7 +135,7 @@ bool DetectorClass::BuildDetector(bool SkipSimGuiUpdate, bool bSkipAllUpdates)
 {
   if (bSkipAllUpdates) SkipSimGuiUpdate = true;
 
-    //qDebug() << "Remake detector triggered"  ;
+  // qDebug() << "Remake detector triggered"  ;
   if (Config->JSON.isEmpty())
   {
       qCritical() << "!!!Cannot construct detector: Config is empty";

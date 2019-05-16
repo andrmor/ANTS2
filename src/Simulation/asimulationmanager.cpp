@@ -201,10 +201,14 @@ void ASimulationManager::onSimulationFinished()
         EventsDataHub.purge1e10events(); //purging events with "true" positions x==1e10 && y==1e10
     }
 
+    bGuardTrackingHistory = true;
     Detector.BuildDetector(true, true);  // <- still needed on Windows
+    bGuardTrackingHistory = false;
+
     //Detector->GeoManager->CleanGarbage();
 
-    if (!TrackingHistory.empty()) findGeoNodes(); // should be called after GeoManager was recreated!
+    if (!TrackingHistory.empty())
+        findGeoNodes(); // should be called after GeoManager was recreated!
 
     if (fStartedFromGui) emit SimulationFinished();
 
@@ -264,6 +268,7 @@ void ASimulationManager::findGeoNodes()
 {
     for (AEventTrackingRecord * e : TrackingHistory)
         e->updateGeoNodes();
+    qDebug() << "GeoNodes updated";
 }
 
 void ASimulationManager::clearTracks()
@@ -286,6 +291,7 @@ void ASimulationManager::clearEnergyVector()
 
 void ASimulationManager::clearTrackingHistory()
 {
+    if (bGuardTrackingHistory) return;
     for (auto & r : TrackingHistory) delete r;
     TrackingHistory.clear();
 }
@@ -353,6 +359,11 @@ const QString ASimulationManager::loadNodesFromFile(const QString &fileName)
 void ASimulationManager::StopSimulation()
 {
     emit RequestStopSimulation();
+}
+
+void ASimulationManager::onNewGeoManager(TObject *)
+{
+    clearTrackingHistory();
 }
 
 void ASimulationManager::updateGui()

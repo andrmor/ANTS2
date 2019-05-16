@@ -59,7 +59,7 @@ void EventsDataClass::clearResolutionTree()
 
 void EventsDataClass::clear()
 {
-  //    qDebug() << "--->EventsDatHub: Clear";
+  // qDebug() << "--->EventsDatHub: Clear";
   Events.clear();
   TimedEvents.clear();  
   fLoadedEventsHaveEnergyInfo = false;

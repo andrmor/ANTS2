@@ -1893,7 +1893,6 @@ void OutputWindow::on_sbEVexpansionLevel_valueChanged(int)
 }
 
 #include <QMenu>
-#include "TVectorD.h"
 #include "TGraph.h"
 void OutputWindow::on_trwEventView_customContextMenuRequested(const QPoint &pos)
 {
@@ -1930,20 +1929,9 @@ void OutputWindow::on_trwEventView_customContextMenuRequested(const QPoint &pos)
 
         if (!dist.empty())
         {
-            int numEl = dist.size();
-            TVectorD xx(numEl);
-            TVectorD yy(numEl);
-            for (int i=0; i < numEl; i++)
-            {
-                xx[i] = dist.at(i);
-                yy[i] = ELDD.at(i);
-            }
-
-            TGraph * g = new TGraph(xx,yy);
-            g->SetFillStyle(0);
-            g->SetFillColor(0);
-
-            MW->GraphWindow->Draw(g);
+            TGraph * g = MW->GraphWindow->ConstructTGraph(dist, ELDD, "Deposited energy: linear density", "Distance, mm", "Linear density, keV/mm", 4, 20, 1, 4);
+            MW->GraphWindow->Draw(g, "APL");
+            //MW->GraphWindow->UpdateRootCanvas();
         }
     }
 }

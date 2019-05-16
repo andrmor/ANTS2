@@ -13,6 +13,7 @@ public:
 
     bool bTrackParticles = false;
 
+    QString     PhysicsList;
     QStringList SensitiveVolumes; //later will be filled automatically
     QStringList Commands;
 

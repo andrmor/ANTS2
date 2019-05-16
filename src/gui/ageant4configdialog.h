@@ -28,6 +28,10 @@ private slots:
 
     void on_pbRemoveVolume_clicked();
 
+    void on_pbSelectReferencePhList_clicked();
+
+    void on_lePhysicsList_editingFinished();
+
 private:
     AG4SimulationSettings & G4SimSet;
     Ui::AGeant4ConfigDialog *ui;

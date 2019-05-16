@@ -18,6 +18,8 @@ void AG4SimulationSettings::writeToJson(QJsonObject &json) const
 {
     json["TrackParticles"] = bTrackParticles;
 
+    json["PhysicsList"] = PhysicsList;
+
     QJsonArray arSV;
     for (auto & v : SensitiveVolumes)
         arSV.append(v);
@@ -33,6 +35,8 @@ void AG4SimulationSettings::writeToJson(QJsonObject &json) const
 void AG4SimulationSettings::readFromJson(const QJsonObject &json)
 {
     parseJson(json, "TrackParticles", bTrackParticles);
+
+    parseJson(json, "PhysicsList", PhysicsList);
 
     QJsonArray arSV;
     SensitiveVolumes.clear();

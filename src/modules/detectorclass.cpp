@@ -1226,6 +1226,8 @@ bool DetectorClass::generateG4interfaceFiles(const AG4SimulationSettings & G4Sim
 
     QJsonObject json;
 
+    json["PhysicsList"] = G4SimSet.PhysicsList;
+
     QJsonArray Parr;
     //const QStringList Particles = MpCollection->getListOfParticleNames();
     //for (auto & pname : Particles ) Parr << pname;

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>448</width>
-    <height>465</height>
+    <width>607</width>
+    <height>543</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,6 +26,140 @@
    <property name="bottomMargin">
     <number>3</number>
    </property>
+   <item>
+    <widget class="QLabel" name="label_3">
+     <property name="text">
+      <string>Physics list</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLineEdit" name="lePhysicsList"/>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <item>
+      <spacer name="horizontalSpacer_7">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QComboBox" name="cobRefPhysLists">
+       <item>
+        <property name="text">
+         <string>QGSP_BIC</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>QGSP_BIC_HP</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>QGSP_BIC_AllHP</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>QGSP_BERT</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>QGSP_BERT_HP</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>QGSP_FTFP_BERT</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>QGSP_INCLXX</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>QGSP_INCLXX_HP</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>FTFP_BERT</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>FTFP_BERT_ATL</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>FTFP_BERT_HP</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>FTFP_BERT_TRV</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>FTFP_INCLXX</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>FTFP_INCLXX_HP</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pbSelectReferencePhList">
+       <property name="text">
+        <string>Use this</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_8">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="Line" name="line_3">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
    <item>
     <widget class="QLabel" name="label">
      <property name="text">

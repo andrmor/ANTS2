@@ -11,6 +11,8 @@ AGeant4ConfigDialog::AGeant4ConfigDialog(AG4SimulationSettings & G4SimSet, QWidg
 {
     ui->setupUi(this);
 
+    ui->lePhysicsList->setText(G4SimSet.PhysicsList);
+
     ui->lwCommands->setDragDropMode(QAbstractItemView::InternalMove);
     ui->lwSensitiveVolumes->setDragDropMode(QAbstractItemView::InternalMove);
 
@@ -96,4 +98,15 @@ void AGeant4ConfigDialog::on_pbAccept_clicked()
     G4SimSet.SensitiveVolumes = sv;
 
     accept();
+}
+
+void AGeant4ConfigDialog::on_pbSelectReferencePhList_clicked()
+{
+    G4SimSet.PhysicsList = ui->cobRefPhysLists->currentText();
+    ui->lePhysicsList->setText(G4SimSet.PhysicsList);
+}
+
+void AGeant4ConfigDialog::on_lePhysicsList_editingFinished()
+{
+    G4SimSet.PhysicsList = ui->cobRefPhysLists->currentText();
 }

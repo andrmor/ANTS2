@@ -1603,10 +1603,13 @@ void OutputWindow::on_cbPTHistBordAsStat_toggled(bool)
 }
 
 #include "TGeoNode.h"
-void OutputWindow::fillEvTabViewRecord(QTreeWidgetItem * item, const AParticleTrackingRecord * pr) const
+void OutputWindow::fillEvTabViewRecord(QTreeWidgetItem * item, const AParticleTrackingRecord * pr, int ExpansionLevel) const
 {
     item->setText(0, pr->ParticleName);
     //item->setFlags(w->flags() & ~Qt::ItemIsDragEnabled);// & ~Qt::ItemIsSelectable);
+
+    if (ExpansionLevel > 0) ui->trwEventView->expandItem(item);
+    ExpansionLevel--;
 
     int precision = ui->sbEVprecision->value();
     bool bHideTransp = ui->cbEVhideTrans->isChecked();
@@ -1656,10 +1659,12 @@ void OutputWindow::fillEvTabViewRecord(QTreeWidgetItem * item, const AParticleTr
 
         it->setText(0, s);
 
+        if (ExpansionLevel > 0) ui->trwEventView->expandItem(it);
+
         for (int iSec : step->Secondaries)
         {
             QTreeWidgetItem * subItem = new QTreeWidgetItem(it);
-            fillEvTabViewRecord(subItem, pr->getSecondaries().at(iSec));
+            fillEvTabViewRecord(subItem, pr->getSecondaries().at(iSec), ExpansionLevel-1);
         }
     }
 }
@@ -1674,14 +1679,14 @@ void OutputWindow::EV_showTree()
 
     ui->trwEventView->clear();
 
+    int ExpLevel = ui->sbEVexpansionLevel->value();
+
     AEventTrackingRecord * er = TH.at(iEv);
     for (AParticleTrackingRecord* pr : er->getPrimaryParticleRecords())
     {
         QTreeWidgetItem * item = new QTreeWidgetItem(ui->trwEventView);
-        fillEvTabViewRecord(item, pr);
+        fillEvTabViewRecord(item, pr, ExpLevel);
     }
-
-    ui->trwEventView->expandAll();
 }
 
 void OutputWindow::EV_show()
@@ -1833,10 +1838,48 @@ void OutputWindow::on_tabwinDiagnose_currentChanged(int)
 
 void OutputWindow::on_pbEventView_ShowTree_clicked()
 {
+    ExpandedItems.clear();
+    int counter = 0;
+    for (int i=0; i<ui->trwEventView->topLevelItemCount(); i++)
+    {
+        QTreeWidgetItem * item = ui->trwEventView->topLevelItem(i);
+        doProcessExpandedStatus(item, counter, true);
+    }
+
     EV_showTree();
+
+    for (int i=0; i<ui->trwEventView->topLevelItemCount(); i++)
+    {
+        QTreeWidgetItem * item = ui->trwEventView->topLevelItem(i);
+        doProcessExpandedStatus(item, counter, false);
+    }
+}
+
+void OutputWindow::doProcessExpandedStatus(QTreeWidgetItem * item, int & counter, bool bStore)
+{
+    if (bStore)
+    {
+        ExpandedItems << item->isExpanded();
+        for (int i=0; i<item->childCount(); i++)
+            doProcessExpandedStatus(item->child(i), counter, bStore);
+    }
+    else
+    {
+        if (counter >= ExpandedItems.size()) return; // not expected
+        if (ExpandedItems.at(counter)) ui->trwEventView->expandItem(item);
+        else ui->trwEventView->collapseItem(item);
+        counter++;
+        for (int i=0; i<item->childCount(); i++)
+            doProcessExpandedStatus(item->child(i), counter, bStore);
+    }
 }
 
 void OutputWindow::on_pbEVgeo_clicked()
 {
     EV_showGeo();
+}
+
+void OutputWindow::on_sbEVexpansionLevel_valueChanged(int)
+{
+    EV_showTree();
 }

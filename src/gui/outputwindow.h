@@ -95,6 +95,8 @@ private slots:
     void on_pbEventView_ShowTree_clicked();
     void on_pbEVgeo_clicked();
 
+    void on_sbEVexpansionLevel_valueChanged(int arg1);
+
 private:
     Ui::OutputWindow *ui;
     MainWindow* MW;
@@ -126,6 +128,8 @@ private:
     double fromB2 = 0;
     double toB2 = 0;
 
+    QVector<bool> ExpandedItems;
+
     void clearGrItems();
     void updateSignalLabels(float MaxSignal);
     void addPMitems  (const QVector<float>* vector, float MaxSignal, DynamicPassivesHandler *Passives);
@@ -135,11 +139,12 @@ private:
     void addParticleHistoryLogLine(int iRec, int level);
     void updateMonitors();
     void updatePTHistoryBinControl();
-    void fillEvTabViewRecord(QTreeWidgetItem *item, const AParticleTrackingRecord *pr) const;
+    void fillEvTabViewRecord(QTreeWidgetItem *item, const AParticleTrackingRecord *pr, int ExpansionLevel) const;
     void EV_show();
     void EV_showTree();
     void EV_showGeo();
     int findEventWithFilters(int currentEv, bool bUp);
+    void doProcessExpandedStatus(QTreeWidgetItem *item, int &counter, bool bStore);
 };
 
 #endif // OUTPUTWINDOW_H

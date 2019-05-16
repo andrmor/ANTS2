@@ -506,7 +506,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tabViz">
+      <widget class="QWidget" name="tabPmHitViz">
        <attribute name="title">
         <string>PM signals viz</string>
        </attribute>
@@ -734,7 +734,7 @@ over all events</string>
         </widget>
        </widget>
       </widget>
-      <widget class="QWidget" name="tab_5">
+      <widget class="QWidget" name="tabEventViewer">
        <attribute name="title">
         <string>Event viewer</string>
        </attribute>
@@ -764,7 +764,14 @@ over all events</string>
             <number>3</number>
            </property>
            <item>
-            <widget class="QFrame" name="frame_4">
+            <widget class="QCheckBox" name="checkBox">
+             <property name="text">
+              <string>Show event filters (affect 'Next' and 'Previous' navigation buttons at the bottom)</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QFrame" name="frEventFilters">
              <property name="minimumSize">
               <size>
                <width>0</width>
@@ -780,36 +787,18 @@ over all events</string>
             </widget>
            </item>
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_27">
-             <item>
-              <widget class="QPushButton" name="pbEVshow">
-               <property name="text">
-                <string>Show</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pbEventView_ShowTree">
-               <property name="text">
-                <string>ShowTree</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pbEVgeo">
-               <property name="text">
-                <string>Show geo</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pvEV_Next">
-               <property name="text">
-                <string>Next</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
+            <widget class="QPushButton" name="pbEventView_ShowTree">
+             <property name="text">
+              <string>...ShowTree</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pbEVgeo">
+             <property name="text">
+              <string>...Show geo</string>
+             </property>
+            </widget>
            </item>
            <item>
             <widget class="QTreeWidget" name="trwEventView">
@@ -857,13 +846,6 @@ over all events</string>
                 </size>
                </property>
               </spacer>
-             </item>
-             <item>
-              <widget class="Line" name="line_3">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-              </widget>
              </item>
              <item>
               <widget class="QLabel" name="label_27">
@@ -1251,7 +1233,7 @@ over all events</string>
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_2">
+      <widget class="QWidget" name="tabParticleLog">
        <attribute name="title">
         <string>Particle log</string>
        </attribute>
@@ -2155,7 +2137,7 @@ See ROOT TFormula description</string>
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tabPhStatistics">
+      <widget class="QWidget" name="tabPhotonLog">
        <attribute name="title">
         <string>Photon log</string>
        </attribute>
@@ -2309,7 +2291,7 @@ See ROOT TFormula description</string>
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab">
+      <widget class="QWidget" name="tabMonitors">
        <attribute name="title">
         <string>Monitors</string>
        </attribute>
@@ -2587,117 +2569,124 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      </widget>
     </item>
     <item>
-     <widget class="QFrame" name="fSelector">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>16777215</width>
-        <height>40</height>
-       </size>
-      </property>
+     <widget class="QFrame" name="frEventNumber">
       <property name="frameShape">
-       <enum>QFrame::NoFrame</enum>
+       <enum>QFrame::StyledPanel</enum>
       </property>
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
       </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_5">
-       <property name="spacing">
-        <number>6</number>
-       </property>
-       <property name="leftMargin">
-        <number>3</number>
-       </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_14">
        <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
         <number>3</number>
        </property>
        <property name="bottomMargin">
-        <number>0</number>
+        <number>3</number>
        </property>
        <item>
-        <widget class="QFrame" name="frEventNumber">
-         <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
+        <spacer name="horizontalSpacer_40">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
          </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
          </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_14">
-          <property name="topMargin">
-           <number>3</number>
-          </property>
-          <property name="bottomMargin">
-           <number>3</number>
-          </property>
-          <item>
-           <widget class="QLabel" name="label_14">
-            <property name="text">
-             <string>Inspect event:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QSpinBox" name="sbEvent">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>23</height>
-             </size>
-            </property>
-            <property name="keyboardTracking">
-             <bool>false</bool>
-            </property>
-            <property name="maximum">
-             <number>10000000</number>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pbNextEvent">
-            <property name="text">
-             <string>Next</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>Available events:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="labTotal">
-            <property name="maximumSize">
-             <size>
-              <width>70</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>0</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-         </layout>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_14">
+         <property name="text">
+          <string>Inspect event:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
         </widget>
+       </item>
+       <item>
+        <widget class="QSpinBox" name="sbEvent">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>23</height>
+          </size>
+         </property>
+         <property name="keyboardTracking">
+          <bool>false</bool>
+         </property>
+         <property name="maximum">
+          <number>10000000</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pbPreviousEvent">
+         <property name="text">
+          <string>Previous</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pbNextEvent">
+         <property name="text">
+          <string>Next</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_39">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>Number of events:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="labTotal">
+         <property name="maximumSize">
+          <size>
+           <width>70</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_41">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>
@@ -2931,24 +2920,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>492</y>
     </hint>
     <hint type="destinationlabel">
-     <x>278</x>
-     <y>152</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>sbEVprecision</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbEventView_ShowTree</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>565</x>
-     <y>486</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>289</x>
-     <y>153</y>
+     <x>49</x>
+     <y>176</y>
     </hint>
    </hints>
   </connection>
@@ -2963,136 +2936,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>519</y>
     </hint>
     <hint type="destinationlabel">
-     <x>271</x>
-     <y>151</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbEVvol</sender>
-   <signal>clicked()</signal>
-   <receiver>pbEventView_ShowTree</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>161</x>
-     <y>545</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>336</x>
-     <y>159</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbEVvi</sender>
-   <signal>clicked()</signal>
-   <receiver>pbEventView_ShowTree</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>137</x>
-     <y>568</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>318</x>
-     <y>154</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbEVmat</sender>
-   <signal>clicked()</signal>
-   <receiver>pbEventView_ShowTree</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>255</x>
-     <y>521</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>237</x>
-     <y>156</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbEVtime</sender>
-   <signal>clicked()</signal>
-   <receiver>pbEventView_ShowTree</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>268</x>
-     <y>542</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>268</x>
-     <y>158</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cobEVtime</sender>
-   <signal>activated(int)</signal>
-   <receiver>pbEventView_ShowTree</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>317</x>
-     <y>544</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>304</x>
-     <y>157</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbEVkin</sender>
-   <signal>clicked()</signal>
-   <receiver>pbEventView_ShowTree</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>478</x>
-     <y>525</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>327</x>
-     <y>154</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbEVdepo</sender>
-   <signal>clicked()</signal>
-   <receiver>pbEventView_ShowTree</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>436</x>
-     <y>550</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>339</x>
-     <y>163</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cobEVkin</sender>
-   <signal>activated(int)</signal>
-   <receiver>pbEventView_ShowTree</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>595</x>
-     <y>521</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>317</x>
-     <y>155</y>
+     <x>42</x>
+     <y>175</y>
     </hint>
    </hints>
   </connection>
@@ -3107,8 +2952,152 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>556</y>
     </hint>
     <hint type="destinationlabel">
-     <x>337</x>
-     <y>162</y>
+     <x>108</x>
+     <y>186</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sbEVprecision</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbEventView_ShowTree</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>565</x>
+     <y>486</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>60</x>
+     <y>177</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbEVvi</sender>
+   <signal>clicked()</signal>
+   <receiver>pbEventView_ShowTree</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>137</x>
+     <y>568</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>89</x>
+     <y>178</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbEVmat</sender>
+   <signal>clicked()</signal>
+   <receiver>pbEventView_ShowTree</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>255</x>
+     <y>521</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>65</x>
+     <y>180</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbEVvol</sender>
+   <signal>clicked()</signal>
+   <receiver>pbEventView_ShowTree</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>161</x>
+     <y>545</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>107</x>
+     <y>183</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cobEVtime</sender>
+   <signal>activated(int)</signal>
+   <receiver>pbEventView_ShowTree</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>317</x>
+     <y>544</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>75</x>
+     <y>181</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbEVtime</sender>
+   <signal>clicked()</signal>
+   <receiver>pbEventView_ShowTree</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>268</x>
+     <y>542</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>39</x>
+     <y>182</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbEVdepo</sender>
+   <signal>clicked()</signal>
+   <receiver>pbEventView_ShowTree</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>436</x>
+     <y>550</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>110</x>
+     <y>187</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbEVkin</sender>
+   <signal>clicked()</signal>
+   <receiver>pbEventView_ShowTree</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>478</x>
+     <y>525</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>98</x>
+     <y>178</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cobEVkin</sender>
+   <signal>activated(int)</signal>
+   <receiver>pbEventView_ShowTree</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>595</x>
+     <y>521</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>88</x>
+     <y>179</y>
     </hint>
    </hints>
   </connection>
@@ -3123,8 +3112,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>606</y>
     </hint>
     <hint type="destinationlabel">
-     <x>406</x>
-     <y>168</y>
+     <x>62</x>
+     <y>222</y>
     </hint>
    </hints>
   </connection>
@@ -3139,8 +3128,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>642</y>
     </hint>
     <hint type="destinationlabel">
-     <x>496</x>
-     <y>152</y>
+     <x>38</x>
+     <y>206</y>
     </hint>
    </hints>
   </connection>
@@ -3155,8 +3144,24 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>617</y>
     </hint>
     <hint type="destinationlabel">
-     <x>505</x>
-     <y>168</y>
+     <x>47</x>
+     <y>222</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>frEventFilters</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>72</x>
+     <y>59</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>73</x>
+     <y>97</y>
     </hint>
    </hints>
   </connection>

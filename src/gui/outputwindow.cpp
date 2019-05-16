@@ -62,8 +62,8 @@ OutputWindow::OutputWindow(QWidget *parent, MainWindow *mw, EventsDataClass *eve
     for (QWidget * w : vecDis) w->setEnabled(false);
 
     QVector<QWidget*> vecInv;
-    vecInv << ui->cobPTHistVolPlus << ui->pbRefreshViz
-           << ui->frPTHistX << ui->frPTHistY;
+    vecInv << ui->cobPTHistVolPlus << ui->pbRefreshViz << ui->frPTHistX << ui->frPTHistY
+           << ui->pbEventView_ShowTree << ui->pbEVgeo;
     for (QWidget * w : vecInv) w->setVisible(false);
 
     QDoubleValidator* dv = new QDoubleValidator(this);
@@ -77,7 +77,7 @@ OutputWindow::OutputWindow(QWidget *parent, MainWindow *mw, EventsDataClass *eve
 
     scene = new QGraphicsScene(this);
     //qDebug() << "This scene pointer:"<<scene;
-    gvOut = new myQGraphicsView(ui->tabViz);
+    gvOut = new myQGraphicsView(ui->tabPmHitViz);
     gvOut->setGeometry(0,0,325,325);
     gvOut->setScene(scene);
 
@@ -696,13 +696,6 @@ void OutputWindow::updateSignalLabels(float MaxSignal)
   else ui->labHighMid->setText("");
 }
 
-void OutputWindow::on_tabwinDiagnose_currentChanged(int index)
-{
-    if (index == 2) on_pbRefreshViz_clicked();
-    ui->frEventNumber->setVisible( index < 3);
-    gvOut->update();
-}
-
 void OutputWindow::on_pbWaveSpectrum_clicked()
 {
   ASimulationStatistics* d = EventsDataHub->SimStat;
@@ -811,25 +804,6 @@ void OutputWindow::on_pbNumTransitionsSpectrum_clicked()
    spec->GetXaxis()->SetTitle("Number of cycles in tracking");
    spec->SetTitle("Number of tracking cycles for detected photons");
    MW->GraphWindow->Draw(spec, "", true, false);
-}
-
-void OutputWindow::on_sbEvent_valueChanged(int arg1)
-{
-  if (arg1 == 0 && EventsDataHub->Events.isEmpty()) return;
-  if (EventsDataHub->Events.isEmpty()) //protection
-    {      
-      ui->sbEvent->setValue(0);
-      return;
-    }
-
-  if (arg1 > EventsDataHub->Events.size()-1)
-    {
-      ui->sbEvent->setValue(0);
-      return; //already triggered "on change" = this procedure
-    } 
-
-  if (ui->tabwinDiagnose->currentIndex() == 0 && !bForbidUpdate) ShowOneEventLog(arg1);
-  else on_pbRefreshViz_clicked();
 }
 
 void OutputWindow::on_pbResetViewport_clicked()
@@ -1171,11 +1145,6 @@ void OutputWindow::UpdateParticles()
 //      ui->cobShowParticle->addItem( MW->Detector->MpCollection->getParticleName(i) );
 
 //  if (old < ui->cobShowParticle->count()) ui->cobShowParticle->setCurrentIndex(old);
-}
-
-void OutputWindow::on_pbNextEvent_clicked()
-{
-    ui->sbEvent->setValue(ui->sbEvent->value()+1);
 }
 
 void OutputWindow::on_tabwinDiagnose_tabBarClicked(int index)
@@ -1692,11 +1661,9 @@ void OutputWindow::fillEvTabViewRecord(QTreeWidgetItem * item, const AParticleTr
             fillEvTabViewRecord(subItem, pr->getSecondaries().at(iSec));
         }
     }
-
-
 }
 
-void OutputWindow::on_pbEventView_ShowTree_clicked()
+void OutputWindow::EV_showTree()
 {
     std::vector<AEventTrackingRecord *> & TH = MW->SimulationManager->TrackingHistory;
     if (TH.empty()) return;
@@ -1716,24 +1683,14 @@ void OutputWindow::on_pbEventView_ShowTree_clicked()
     ui->trwEventView->expandAll();
 }
 
-void OutputWindow::on_pvEV_Next_clicked()
+void OutputWindow::EV_show()
 {
-    int iEv = ui->sbEvent->value();
-    if (iEv >= (int)MW->SimulationManager->TrackingHistory.size()) return;
-    iEv++;
-    ui->sbEvent->setValue(iEv);
-
-    on_pbEVshow_clicked();
-}
-
-void OutputWindow::on_pbEVshow_clicked()
-{
-    on_pbEventView_ShowTree_clicked();
-    on_pbEVgeo_clicked();
+    EV_showTree();
+    EV_showGeo();
 }
 
 #include "geometrywindowclass.h"
-void OutputWindow::on_pbEVgeo_clicked()
+void OutputWindow::EV_showGeo()
 {
     MW->SimulationManager->clearTracks();
     MW->GeometryWindow->ClearTracks(false);
@@ -1744,4 +1701,93 @@ void OutputWindow::on_pbEVgeo_clicked()
     if (ui->cbEVpmSig->isChecked()) MW->GeometryWindow->ShowPMsignals(iEv, false);
 
     MW->GeometryWindow->DrawTracks();
+}
+
+void OutputWindow::on_pbNextEvent_clicked()
+{
+    QWidget * cw = ui->tabwinDiagnose->currentWidget();
+    int i = ui->sbEvent->value();
+    if (cw == ui->tabEventViewer)
+    {
+        i++;
+    }
+    else i++;
+    if (i < MW->EventsDataHub->countEvents()) ui->sbEvent->setValue(i);
+}
+
+void OutputWindow::on_pbPreviousEvent_clicked()
+{
+    QWidget * cw = ui->tabwinDiagnose->currentWidget();
+    int i = ui->sbEvent->value();
+    if (cw == ui->tabEventViewer)
+    {
+        i--;
+    }
+    else i--;
+    if (i > 0) ui->sbEvent->setValue(i);
+}
+
+void OutputWindow::on_sbEvent_valueChanged(int i)
+{
+    if (EventsDataHub->Events.isEmpty())
+        ui->sbEvent->setValue(0);
+    else if (i >= EventsDataHub->Events.size())
+        ui->sbEvent->setValue(EventsDataHub->Events.size()-1); //will retrigger this method
+    else
+    {
+        QWidget * cw = ui->tabwinDiagnose->currentWidget();
+
+        if (cw == ui->tabText && !bForbidUpdate) ShowOneEventLog(i);
+        else if (cw == ui->tabPMhits || cw == ui->tabPmHitViz) on_pbRefreshViz_clicked();
+        else if (cw == ui->tabEventViewer) EV_show();
+    }
+}
+
+void OutputWindow::on_tabwinDiagnose_currentChanged(int)
+{
+    QWidget * cw = ui->tabwinDiagnose->currentWidget();
+    bool bShowEventNum = false;
+
+    if (cw == ui->tabText)
+    {
+        bShowEventNum = true;
+    }
+    else if (cw == ui->tabPMhits)
+    {
+        bShowEventNum = true;
+    }
+    else if (cw == ui->tabPmHitViz)
+    {
+        bShowEventNum = true;
+        gvOut->update();
+    }
+    else if (cw == ui->tabEventViewer)
+    {
+        bShowEventNum = true;
+        EV_showTree();
+    }
+    else if (cw == ui->tabParticleLog)
+    {
+
+    }
+    else if (cw == ui->tabPhotonLog)
+    {
+
+    }
+    else if (cw == ui->tabMonitors)
+    {
+
+    }
+
+    ui->frEventNumber->setVisible( bShowEventNum );
+}
+
+void OutputWindow::on_pbEventView_ShowTree_clicked()
+{
+    EV_showTree();
+}
+
+void OutputWindow::on_pbEVgeo_clicked()
+{
+    EV_showGeo();
 }

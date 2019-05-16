@@ -70,6 +70,7 @@ private slots:
     void on_pbShowPhotonProcessesLog_clicked();
     void on_pbShowPhotonLossLog_clicked();    
     void on_pbNextEvent_clicked();
+    void on_pbPreviousEvent_clicked();
 
     void on_tabwinDiagnose_tabBarClicked(int index);
     void RefreshPMhitsTable();
@@ -83,28 +84,15 @@ private slots:
     void on_cobMonitor_activated(int index);
     void on_pbShowAverageOverAll_clicked();
     void on_pbShowWavelength_clicked();
-
     void on_pbPTHistRequest_clicked();
     void on_cbPTHistOnlyPrim_clicked(bool checked);
     void on_cbPTHistOnlySec_clicked(bool checked);
-
-
     void on_cobPTHistVolRequestWhat_currentIndexChanged(int index);
-
     void on_twPTHistType_currentChanged(int index);
-
     void on_cbPTHistBordVs_toggled(bool checked);
-
     void on_cbPTHistBordAndVs_toggled(bool checked);
-
     void on_cbPTHistBordAsStat_toggled(bool checked);
-
     void on_pbEventView_ShowTree_clicked();
-
-    void on_pvEV_Next_clicked();
-
-    void on_pbEVshow_clicked();
-
     void on_pbEVgeo_clicked();
 
 private:
@@ -148,6 +136,9 @@ private:
     void updateMonitors();
     void updatePTHistoryBinControl();
     void fillEvTabViewRecord(QTreeWidgetItem *item, const AParticleTrackingRecord *pr) const;
+    void EV_show();
+    void EV_showTree();
+    void EV_showGeo();
 };
 
 #endif // OUTPUTWINDOW_H

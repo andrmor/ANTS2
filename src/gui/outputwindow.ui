@@ -885,6 +885,9 @@ over all events</string>
            </item>
            <item>
             <widget class="QTreeWidget" name="trwEventView">
+             <property name="contextMenuPolicy">
+              <enum>Qt::CustomContextMenu</enum>
+             </property>
              <column>
               <property name="text">
                <string>Particle tracking history</string>

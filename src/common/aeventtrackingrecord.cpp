@@ -130,6 +130,48 @@ void AParticleTrackingRecord::makeTrack(std::vector<TrackHolderClass *> & Tracks
             sec->makeTrack(Tracks, ParticleNames, TrackBuildOptions, bWithSecondaries);
 }
 
+void AParticleTrackingRecord::fillELDD(ATrackingStepData *IdByStep, std::vector<float> &dist, std::vector<float> &ELDD) const
+{
+    dist.clear();
+    ELDD.clear();
+
+    int iStep = 0;
+    int iMatStart = -1;
+    bool bFound = false;
+    for (; iStep<Steps.size(); iStep++)
+    {
+        QString Proc = Steps.at(iStep)->Process;
+        if (Proc == "C" || Proc == "T") iMatStart = iStep;
+
+        if (Steps.at(iStep) == IdByStep)
+        {
+            bFound = true;
+            break;
+        }
+    }
+    if (!bFound) return;
+
+    float totDist = 0;
+    iStep = iMatStart;
+    do
+    {
+        ATrackingStepData * ps = Steps.at(iStep);
+        iStep++;
+        if (iStep >= (int)Steps.size()) break;
+        ATrackingStepData * ts = Steps.at(iStep);
+        if (ts->Process == "T" || ts->Process == "O") break;
+
+        float D = 0;
+        for (int i=0; i<3; i++)
+            D += (ts->Position[i] - ps->Position[i]) * (ts->Position[i] - ps->Position[i]);
+
+        totDist += sqrt(D);
+        dist.push_back(totDist);
+        ELDD.push_back(ts->DepositedEnergy);
+    }
+    while(true);
+}
+
 void AParticleTrackingRecord::updateGeoNodes()
 {
     for (size_t iStep = 0; iStep < Steps.size(); iStep++)

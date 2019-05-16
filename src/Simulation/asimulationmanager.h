@@ -54,7 +54,7 @@ public:
     void clearTracks();
     void clearNodes();
     void clearEnergyVector();
-    void clearTrackingHistory();
+    void clearTrackingHistory(); //temporary here - History to be transferred to datahub
 
     void setMaxThreads(int maxThreads) {MaxThreads = maxThreads;}
     const QString loadNodesFromFile(const QString & fileName);

@@ -97,6 +97,8 @@ private slots:
 
     void on_sbEVexpansionLevel_valueChanged(int arg1);
 
+    void on_trwEventView_customContextMenuRequested(const QPoint &pos);
+
 private:
     Ui::OutputWindow *ui;
     MainWindow* MW;

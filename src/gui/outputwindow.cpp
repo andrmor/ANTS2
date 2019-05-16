@@ -492,6 +492,8 @@ void OutputWindow::RefreshData()
   //Monitors
   updateMonitors();
 
+  EV_showTree();
+
   delete Passives;
 }
 
@@ -1606,6 +1608,8 @@ void OutputWindow::on_cbPTHistBordAsStat_toggled(bool)
 void OutputWindow::fillEvTabViewRecord(QTreeWidgetItem * item, const AParticleTrackingRecord * pr, int ExpansionLevel) const
 {
     item->setText(0, pr->ParticleName);
+    qlonglong poi = reinterpret_cast<qlonglong>(pr);
+    item->setText(1, QString("%1").arg(poi));
     //item->setFlags(w->flags() & ~Qt::ItemIsDragEnabled);// & ~Qt::ItemIsSelectable);
 
     if (ExpansionLevel > 0) ui->trwEventView->expandItem(item);
@@ -1658,6 +1662,10 @@ void OutputWindow::fillEvTabViewRecord(QTreeWidgetItem * item, const AParticleTr
         if (bDepo)  s += QString("  depo = %1").arg(step->DepositedEnergy * depoUnits, 0, 'g', precision);
 
         it->setText(0, s);
+        qlonglong poi = reinterpret_cast<qlonglong>(pr);
+        it->setText(1, QString("%1").arg(poi));
+        poi = reinterpret_cast<qlonglong>(step);
+        it->setText(2, QString("%1").arg(poi));
 
         if (ExpansionLevel > 0) ui->trwEventView->expandItem(it);
 
@@ -1671,13 +1679,13 @@ void OutputWindow::fillEvTabViewRecord(QTreeWidgetItem * item, const AParticleTr
 
 void OutputWindow::EV_showTree()
 {
+    ui->trwEventView->clear();
+
     std::vector<AEventTrackingRecord *> & TH = MW->SimulationManager->TrackingHistory;
     if (TH.empty()) return;
 
     int iEv = ui->sbEvent->value();
     if (iEv >= (int)TH.size()) return;
-
-    ui->trwEventView->clear();
 
     int ExpLevel = ui->sbEVexpansionLevel->value();
 
@@ -1818,7 +1826,7 @@ void OutputWindow::on_tabwinDiagnose_currentChanged(int)
     else if (cw == ui->tabEventViewer)
     {
         bShowEventNum = true;
-        EV_showTree();
+        //EV_showTree();
     }
     else if (cw == ui->tabParticleLog)
     {
@@ -1882,4 +1890,60 @@ void OutputWindow::on_pbEVgeo_clicked()
 void OutputWindow::on_sbEVexpansionLevel_valueChanged(int)
 {
     EV_showTree();
+}
+
+#include <QMenu>
+#include "TVectorD.h"
+#include "TGraph.h"
+void OutputWindow::on_trwEventView_customContextMenuRequested(const QPoint &pos)
+{
+    QTreeWidgetItem * item = ui->trwEventView->currentItem();
+    if (!item) return;
+
+    AParticleTrackingRecord * pr = nullptr;
+    QString s = item->text(1);
+    if (!s.isEmpty())
+    {
+        qlonglong sp = s.toLongLong();
+        pr = reinterpret_cast<AParticleTrackingRecord*>(sp);
+    }
+    ATrackingStepData * st = nullptr;
+    s = item->text(2);
+    if (!s.isEmpty())
+    {
+        qlonglong sp = s.toLongLong();
+        st = reinterpret_cast<ATrackingStepData*>(sp);
+    }
+
+    if (!pr) return;
+
+    QMenu BasketMenu;
+    QAction * showELDD = BasketMenu.addAction("Show energy linear deposition density");
+    //BasketMenu.addSeparator();
+    QAction* selectedItem = BasketMenu.exec(ui->trwEventView->mapToGlobal(pos));
+    if (!selectedItem) return; //nothing was selected
+    if (selectedItem == showELDD)
+    {
+        std::vector<float> dist;
+        std::vector<float> ELDD;
+        pr->fillELDD(st, dist, ELDD);
+
+        if (!dist.empty())
+        {
+            int numEl = dist.size();
+            TVectorD xx(numEl);
+            TVectorD yy(numEl);
+            for (int i=0; i < numEl; i++)
+            {
+                xx[i] = dist.at(i);
+                yy[i] = ELDD.at(i);
+            }
+
+            TGraph * g = new TGraph(xx,yy);
+            g->SetFillStyle(0);
+            g->SetFillColor(0);
+
+            MW->GraphWindow->Draw(g);
+        }
+    }
 }

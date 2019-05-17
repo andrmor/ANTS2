@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>607</width>
-    <height>543</height>
+    <width>587</width>
+    <height>455</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,6 +26,53 @@
    <property name="bottomMargin">
     <number>3</number>
    </property>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QPushButton" name="pbAccept">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Accept changes</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pbCancel">
+       <property name="text">
+        <string>Cancel</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <spacer name="verticalSpacer_3">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
    <item>
     <widget class="QLabel" name="label_3">
      <property name="text">
@@ -56,6 +103,13 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>Click and select one of the standard lists:</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QComboBox" name="cobRefPhysLists">
@@ -132,13 +186,6 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pbSelectReferencePhList">
-       <property name="text">
-        <string>Use this</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <spacer name="horizontalSpacer_8">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -159,6 +206,19 @@
       <enum>Qt::Horizontal</enum>
      </property>
     </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
    </item>
    <item>
     <widget class="QLabel" name="label">
@@ -190,6 +250,12 @@
      </item>
      <item>
       <widget class="QPushButton" name="pbAddCommand">
+       <property name="minimumSize">
+        <size>
+         <width>150</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="text">
         <string>Add new</string>
        </property>
@@ -210,6 +276,12 @@
      </item>
      <item>
       <widget class="QPushButton" name="pbRemoveCommand">
+       <property name="minimumSize">
+        <size>
+         <width>150</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="text">
         <string>Remove selected</string>
        </property>
@@ -236,6 +308,19 @@
       <enum>Qt::Horizontal</enum>
      </property>
     </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
    </item>
    <item>
     <widget class="QLabel" name="label_2">
@@ -267,6 +352,12 @@
      </item>
      <item>
       <widget class="QPushButton" name="pbAddVolume">
+       <property name="minimumSize">
+        <size>
+         <width>150</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="text">
         <string>Add new</string>
        </property>
@@ -287,6 +378,12 @@
      </item>
      <item>
       <widget class="QPushButton" name="pbRemoveVolume">
+       <property name="minimumSize">
+        <size>
+         <width>150</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="text">
         <string>Remove selected</string>
        </property>
@@ -306,26 +403,6 @@
       </spacer>
      </item>
     </layout>
-   </item>
-   <item>
-    <widget class="Line" name="line">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QPushButton" name="pbAccept">
-     <property name="font">
-      <font>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>Accept changes</string>
-     </property>
-    </widget>
    </item>
   </layout>
  </widget>

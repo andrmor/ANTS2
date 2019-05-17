@@ -13,7 +13,7 @@ public:
 
     bool bTrackParticles = false;
 
-    QString     PhysicsList;
+    QString     PhysicsList = "QGSP_BERT_HP";
     QStringList SensitiveVolumes; //later will be filled automatically
     QStringList Commands;
 

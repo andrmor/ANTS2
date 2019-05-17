@@ -4,14 +4,20 @@
 #include "amessage.h"
 
 #include <QListWidget>
+#include <QDebug>
 
 AGeant4ConfigDialog::AGeant4ConfigDialog(AG4SimulationSettings & G4SimSet, QWidget *parent) :
     QDialog(parent), G4SimSet(G4SimSet),
     ui(new Ui::AGeant4ConfigDialog)
 {
+    //setWindowFlags(Qt::Dialog);
+    //setWindowFlags(windowFlags() & ~Qt::WindowCloseButtonHint);
+    setWindowFlags(Qt::Dialog | Qt::WindowTitleHint);
+
     ui->setupUi(this);
 
     ui->lePhysicsList->setText(G4SimSet.PhysicsList);
+    ui->cobRefPhysLists->setCurrentIndex(-1);
 
     ui->lwCommands->setDragDropMode(QAbstractItemView::InternalMove);
     ui->lwSensitiveVolumes->setDragDropMode(QAbstractItemView::InternalMove);
@@ -100,13 +106,18 @@ void AGeant4ConfigDialog::on_pbAccept_clicked()
     accept();
 }
 
-void AGeant4ConfigDialog::on_pbSelectReferencePhList_clicked()
-{
-    G4SimSet.PhysicsList = ui->cobRefPhysLists->currentText();
-    ui->lePhysicsList->setText(G4SimSet.PhysicsList);
-}
-
 void AGeant4ConfigDialog::on_lePhysicsList_editingFinished()
 {
-    G4SimSet.PhysicsList = ui->cobRefPhysLists->currentText();
+    G4SimSet.PhysicsList = ui->lePhysicsList->text();
+}
+
+void AGeant4ConfigDialog::on_cobRefPhysLists_activated(int index)
+{
+     ui->lePhysicsList->setText( ui->cobRefPhysLists->itemText(index) );
+     on_lePhysicsList_editingFinished();
+}
+
+void AGeant4ConfigDialog::on_pbCancel_clicked()
+{
+    reject();
 }

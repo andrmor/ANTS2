@@ -28,9 +28,11 @@ private slots:
 
     void on_pbRemoveVolume_clicked();
 
-    void on_pbSelectReferencePhList_clicked();
-
     void on_lePhysicsList_editingFinished();
+
+    void on_cobRefPhysLists_activated(int index);
+
+    void on_pbCancel_clicked();
 
 private:
     AG4SimulationSettings & G4SimSet;

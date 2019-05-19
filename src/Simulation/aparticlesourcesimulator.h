@@ -7,6 +7,9 @@
 
 #include <QVector>
 
+#include <QObject>
+#include <QProcess>
+
 class AEnergyDepositionCell;
 class AParticleRecord;
 class AParticleTracker;// PrimaryParticleTracker;
@@ -15,6 +18,7 @@ class S2_Generator;
 class AParticleGun;
 class QProcess;
 class AEventTrackingRecord;
+class AExternalProcessHandler;
 
 class AParticleSourceSimulator : public ASimulator
 {
@@ -29,6 +33,7 @@ public:
     virtual int getEventsDone() const override { return eventCurrent - eventBegin; }
     virtual int getTotalEventCount() const override { return totalEventCount; }
     virtual bool setup(QJsonObject & json) override;
+    virtual bool finalizeConfig() override;
     virtual void updateGeoManager() override;
     virtual void simulate() override;
     virtual void appendToDataHub(EventsDataClass * dataHub) override;
@@ -41,6 +46,7 @@ public:
 protected:
     virtual void updateMaxTracks(int maxPhotonTracks, int maxParticleTracks) override;
 
+
 private:
     void EnergyVectorToScan();
     void clearParticleStack();
@@ -51,6 +57,7 @@ private:
     bool choosePrimariesForThisEvent(int numPrimaries);
     bool generateAndTrackPhotons();
     bool geant4TrackAndProcess();
+    bool runGeant4Handler();
 
     //local objects
     //PrimaryParticleTracker* ParticleTracker = 0;
@@ -80,8 +87,8 @@ private:
     double ClusterMergeRadius2 = 1.0; //scan cluster merge radius [mm] in square - used by EnergyVectorToScan()
 
     //Geant4 interface
+    AExternalProcessHandler * G4handler = nullptr;
     bool bOnlySavePrimariesToFile = false;
-    QProcess * G4antsProcess = 0;
     bool bG4isRunning = false;
     QSet<QString> SeenNonRegisteredParticles;
     double DepoByNotRegistered;

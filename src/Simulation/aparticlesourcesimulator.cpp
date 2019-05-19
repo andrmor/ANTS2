@@ -17,15 +17,16 @@
 #include "atrackingdataimporter.h"
 #include "aenergydepositioncell.h"
 #include "ajsontools.h"
+#include "aexternalprocesshandler.h"
 
 #include <memory>
 #include <algorithm>
 
 #include <QDebug>
 #include <QJsonObject>
+#include <QJsonArray>
 #include <QFile>
 #include <QTextStream>
-#include <QProcess>
 
 #include "TRandom2.h"
 #include "TGeoManager.h"
@@ -169,6 +170,31 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
     S2generator->setDoTextLog(simSettings->fLogsStat);
     S2generator->setOnlySecondary(!fDoS1);
 
+    return true;
+}
+
+bool AParticleSourceSimulator::finalizeConfig()
+{
+    const AG4SimulationSettings & G4SimSet = simSettings->G4SimSet;
+
+    if (G4SimSet.bTrackParticles)
+    {
+        QJsonObject json;
+        simMan->generateG4antsConfigCommon(json, ID);
+
+        json["NumEvents"] = getEventCount();
+
+        const bool & bBuildTracks = simSettings->TrackBuildOptions.bBuildParticleTracks;
+        json["BuildTracks"] = bBuildTracks;
+        if (bBuildTracks) json["MaxTracks"] = maxParticleTracks;
+
+        bool bOK = SaveJsonToFile(json, G4SimSet.getConfigFileName(ID));
+        if (!bOK)
+        {
+            ErrorString = "Failed to create Ants2 <-> Geant4 interface files";
+            return false;
+        }
+    }
     return true;
 }
 
@@ -329,7 +355,7 @@ void AParticleSourceSimulator::hardAbort()
     ASimulator::hardAbort();
 
     ParticleGun->abort();
-    if (bG4isRunning && G4antsProcess) G4antsProcess->kill();
+    if (bG4isRunning && G4handler) G4handler->abort();
 }
 
 void AParticleSourceSimulator::updateMaxTracks(int maxPhotonTracks, int maxParticleTracks)
@@ -556,50 +582,13 @@ bool AParticleSourceSimulator::generateAndTrackPhotons()
 
 bool AParticleSourceSimulator::geant4TrackAndProcess()
 {
-    const QString exe = AGlobalSettings::getInstance().G4antsExec;
-    const QString confFile = simSettings->G4SimSet.getConfigFileName(ID); // FilePath + QString("aga-%1.json").arg(ID);
-
-    QStringList ar;
-    ar << confFile;
-
-    G4antsProcess = new QProcess();
-    //QObject::connect(G4antsProcess, static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished), [&isRunning](){isRunning = false; qDebug() << "----FINISHED!-----";});//this, &MainWindow::on_cameraControlExit);
-    bG4isRunning = true;
-        G4antsProcess->start(exe, ar);
-        bool bStartedOK = G4antsProcess->waitForStarted(1000);
-        if (bStartedOK) G4antsProcess->waitForFinished(-1);
-    bG4isRunning = false;
-
-    QString err = G4antsProcess->errorString();
-
-    if (!bStartedOK)
-    {
-        ErrorString = "Failed to start G4ants executable\n" + err;
-        return false;
-    }
-
-    QProcess::ExitStatus exitStat = G4antsProcess->exitStatus();
-
-    //qDebug() << "g4---->"<<err<<(int)exitStat;
-
-    delete G4antsProcess; G4antsProcess = 0;
-    if (fHardAbortWasTriggered) return false;
-
-    if (err.contains("No such file or directory"))
-    {
-        ErrorString = "Cannot find G4ants executable";
-        return false;
-    }
-    if (exitStat == QProcess::CrashExit)
-    {
-        ErrorString = "G4ants executable crashed:\nCheck that it was compiled with correct environment variables.\nDo you use the correct version of Geant4?";
-        return false;
-    }
+    bool bOK = runGeant4Handler();
+    if (!bOK) return false;
 
     // read receipt file, stop if not "OK"
     QString receipeFileName = simSettings->G4SimSet.getReceitFileName(ID); // FilePath + QString("receipt-%1.txt").arg(ID);
     QJsonObject jrec;
-    bool bOK = LoadJsonFromFile(jrec, receipeFileName);
+    bOK = LoadJsonFromFile(jrec, receipeFileName);
     //qDebug() << jrec;
     if (!bOK)
     {
@@ -715,5 +704,48 @@ bool AParticleSourceSimulator::geant4TrackAndProcess()
         if (!ErrorString.isEmpty()) return false;
     }
 
+    return true;
+}
+
+bool AParticleSourceSimulator::runGeant4Handler()
+{
+    const QString exe = AGlobalSettings::getInstance().G4antsExec;
+    const QString confFile = simSettings->G4SimSet.getConfigFileName(ID); // FilePath + QString("aga-%1.json").arg(ID);
+    QStringList ar;
+    ar << confFile;
+
+    if (G4handler) delete G4handler;
+    G4handler = new AExternalProcessHandler(exe, ar);
+    G4handler->setVerbose();
+    G4handler->setProgressCounter(&progress);
+
+    bG4isRunning = true;
+    G4handler->startAndWait();
+    bG4isRunning = false;
+
+    QString err = G4handler->ErrorString;
+
+    if (!err.isEmpty())
+    {
+        ErrorString = "Failed to start G4ants executable\n" + err;
+        return false;
+    }
+
+    //QProcess::ExitStatus exitStat = G4antsProcess->exitStatus();
+    //qDebug() << "g4---->"<<err<<(int)exitStat;
+
+    if (fHardAbortWasTriggered) return false;
+/*
+    if (err.contains("No such file or directory"))
+    {
+        ErrorString = "Cannot find G4ants executable";
+        return false;
+    }
+    if (exitStat == QProcess::CrashExit)
+    {
+        ErrorString = "G4ants executable crashed:\nCheck that it was compiled with correct environment variables.\nDo you use the correct version of Geant4?";
+        return false;
+    }
+    */
     return true;
 }

@@ -30,7 +30,7 @@ public:
     const QString getErrorString() const { return ErrorString; }
     virtual int getEventsDone() const = 0;
 
-    char progress = 0;
+    int progress = 0; // progress in percents
 
     std::vector<TrackHolderClass *> tracks;  //temporary container for track data
 
@@ -48,6 +48,7 @@ public:
 
     void divideThreadWork(int threadId, int threadCount);
     virtual bool setup(QJsonObject & json);
+    virtual bool finalizeConfig() {return true;} //called after setup and divide work
     virtual void simulate() = 0;
     virtual void appendToDataHub(EventsDataClass * dataHub);
     virtual void mergeData() = 0;

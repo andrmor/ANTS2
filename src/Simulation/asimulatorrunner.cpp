@@ -79,16 +79,7 @@ bool ASimulatorRunner::setup(int threadCount, bool bPhotonSourceSim)
     usPerEvent = 0;
     fStopRequested = false;
 
-    /*
-    dataHub.clear();
-    dataHub.initializeSimStat(detector.Sandwich->MonitorsRecords, simMan.simSettings.DetStatNumBins, (simMan.simSettings.fWaveResolved ? simMan.simSettings.WaveNodes : 0) );
-
-    detector.PMs->configure(&simMan.simSettings); //Setup pms module and QEaccelerator if needed
-    detector.MpCollection->UpdateRuntimePropertiesAndWavelengthBinning(&simMan.simSettings, detector.RandGen, threadCount); //update wave-resolved properties of materials and runtime properties for neutrons
-    */
-
     clearWorkers();
-
     bool fRunThreads = threadCount > 0;
 
     for (int i = 0; i < threadCount; i++)
@@ -111,6 +102,7 @@ bool ASimulatorRunner::setup(int threadCount, bool bPhotonSourceSim)
         worker->setSimSettings(&simMan.simSettings);
         int seed = detector.RandGen->Rndm() * 10000000;
         worker->setRngSeed(seed);
+
         bool bOK = worker->setup(simMan.jsSimSet);
         if (!bOK)
         {
@@ -129,6 +121,16 @@ bool ASimulatorRunner::setup(int threadCount, bool bPhotonSourceSim)
             break;
         }
         totalEventCount += worker->getEventCount();
+
+        bOK = worker->finalizeConfig();
+        if (!bOK)
+        {
+            simMan.setErrorString( worker->getErrorString() );
+            delete worker;
+            clearWorkers();
+            return false;
+        }
+
         workers.append(worker);
     }
 

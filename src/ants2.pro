@@ -397,7 +397,8 @@ SOURCES += main.cpp \
     common/aeventtrackingrecord.cpp \
     scriptmode/apthistory_si.cpp \
     Simulation/atrackinghistorycrawler.cpp \
-    Simulation/aparticletracker.cpp
+    Simulation/aparticletracker.cpp \
+    common/aexternalprocesshandler.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -548,7 +549,8 @@ HEADERS  += common/CorrelationFilters.h \
     common/aeventtrackingrecord.h \
     scriptmode/apthistory_si.h \
     Simulation/atrackinghistorycrawler.h \
-    Simulation/aparticletracker.h
+    Simulation/aparticletracker.h \
+    common/aexternalprocesshandler.h
 
 # --- SIM ---
 ants2_SIM {

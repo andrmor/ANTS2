@@ -62,6 +62,7 @@ public:
 
     void setG4Sim_OnlyGenerateFiles(bool flag) {bOnlyFileExport = flag;}
     bool isG4Sim_OnlyGenerateFiles() const {return bOnlyFileExport;}
+    void generateG4antsConfigCommon(QJsonObject & json, int ThreadId);
 
     // Next three: Simulator workers use their own local copies constructed using configuration json
     ASourceParticleGenerator * ParticleSources = 0;         //used to update json on config changes and in GUI to configure
@@ -120,6 +121,7 @@ private:
     void clearG4data();
     void copyDataFromWorkers();
     void findGeoNodes();
+    void removeOldFile(const QString &fileName, const QString &txt);
 };
 
 #endif // ASIMULATIONMANAGER_H

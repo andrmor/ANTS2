@@ -19,7 +19,7 @@ public:
     void abort();
 
     void setVerbose() {bVerbose = true;}
-    void setProgressCounter(int * progressPercent) {ExeProgress = progressPercent;}
+    void setProgressVariable(int * progressPercent) {ExeProgress = progressPercent;}
     const QString & getOutput() {return output;}
 
 public:

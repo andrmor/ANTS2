@@ -35,7 +35,9 @@ public:
     virtual bool setup(QJsonObject & json) override;
     virtual bool finalizeConfig() override;
     virtual void updateGeoManager() override;
+
     virtual void simulate() override;
+
     virtual void appendToDataHub(EventsDataClass * dataHub) override;
     virtual void mergeData() override;
 

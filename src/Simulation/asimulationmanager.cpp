@@ -267,7 +267,7 @@ void ASimulationManager::findGeoNodes()
 {
     for (AEventTrackingRecord * e : TrackingHistory)
         e->updateGeoNodes();
-    qDebug() << "GeoNodes updated";
+    //qDebug() << "GeoNodes updated";
 }
 
 void ASimulationManager::clearTracks()

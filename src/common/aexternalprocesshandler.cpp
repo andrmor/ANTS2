@@ -31,6 +31,20 @@ bool AExternalProcessHandler::startAndWait()
     bool bStartedOK = Process->waitForStarted(1000);
     if (bStartedOK) Process->waitForFinished(-1);
 
+    QProcess::ExitStatus exitStat = Process->exitStatus();
+    //qDebug() << "g4---->"<<err<<(int)exitStat;
+
+    if (output.contains("No such file or directory"))
+    {
+        ErrorString = "Cannot find G4ants executable: " + Program;
+        return false;
+    }
+    if (exitStat == QProcess::CrashExit)
+    {
+        ErrorString = "G4ants executable crashed!";
+        return false;
+    }
+
     return true;
 }
 

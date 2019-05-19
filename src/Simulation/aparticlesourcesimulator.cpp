@@ -583,7 +583,7 @@ bool AParticleSourceSimulator::geant4TrackAndProcess()
     bool bOK = runGeant4Handler();
     if (!bOK) return false;
 
-    // read receipt file, stop if not "OK"
+    // read receipt file, stop if not OK
     QString receipeFileName = simSettings.G4SimSet.getReceitFileName(ID); // FilePath + QString("receipt-%1.txt").arg(ID);
     QJsonObject jrec;
     bOK = LoadJsonFromFile(jrec, receipeFileName);
@@ -681,7 +681,7 @@ bool AParticleSourceSimulator::geant4TrackAndProcess()
         dataHub->Events.append(OneEvent->PMsignals);
         if (timeRange != 0) dataHub->TimedEvents.append(OneEvent->TimedPMsignals);
 
-        EnergyVectorToScan(); // TODO another version of conversion have to be written ***!!!
+        EnergyVectorToScan();
 
         progress = (eventCurrent - eventBegin + 1) * updateFactor;
     }
@@ -714,8 +714,8 @@ bool AParticleSourceSimulator::runGeant4Handler()
 
     if (G4handler) delete G4handler;
     G4handler = new AExternalProcessHandler(exe, ar);
-    G4handler->setVerbose();
-    G4handler->setProgressCounter(&progress);
+    //G4handler->setVerbose();
+    G4handler->setProgressVariable(&progress);
 
     bG4isRunning = true;
     G4handler->startAndWait();
@@ -729,21 +729,7 @@ bool AParticleSourceSimulator::runGeant4Handler()
         return false;
     }
 
-    //QProcess::ExitStatus exitStat = G4antsProcess->exitStatus();
-    //qDebug() << "g4---->"<<err<<(int)exitStat;
-
     if (fHardAbortWasTriggered) return false;
-/*
-    if (err.contains("No such file or directory"))
-    {
-        ErrorString = "Cannot find G4ants executable";
-        return false;
-    }
-    if (exitStat == QProcess::CrashExit)
-    {
-        ErrorString = "G4ants executable crashed:\nCheck that it was compiled with correct environment variables.\nDo you use the correct version of Geant4?";
-        return false;
-    }
-    */
+
     return true;
 }

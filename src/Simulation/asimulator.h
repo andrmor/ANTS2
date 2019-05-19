@@ -23,10 +23,9 @@ class TRandom2;
 class ASimulator
 {
 public:
-    ASimulator(const DetectorClass * detector, ASimulationManager * simMan, const int ID);
+    ASimulator(ASimulationManager & simMan, int ID);
     virtual ~ASimulator();
 
-    const DetectorClass *getDetector() { return detector; }
     const QString getErrorString() const { return ErrorString; }
     virtual int getEventsDone() const = 0;
 
@@ -41,9 +40,7 @@ public:
     bool wasSuccessful() const { return (fSuccess && !fHardAbortWasTriggered); }
     bool wasHardAborted() const { return fHardAbortWasTriggered; }
     virtual void updateGeoManager();
-    void setSimSettings(const GeneralSimSettings * settings);
     void initSimStat();
-    void setRngSeed(int seed);
     void requestStop();
 
     void divideThreadWork(int threadId, int threadCount);
@@ -60,17 +57,20 @@ protected:
     int evenDivisionOfLabor(int totalEventCount);
     virtual void updateMaxTracks(int maxPhotonTracks, int maxParticleTracks);
 
-    const DetectorClass *detector;          // external
-    ASimulationManager *simMan;             // external
-    const GeneralSimSettings *simSettings;  // external
-    TRandom2 *RandGen;                      // local
-    AOneEvent* OneEvent;                    // local         //PM hit data for one event is stored here
-    EventsDataClass *dataHub;               // local
-    Photon_Generator *photonGenerator;      // local
-    APhotonTracer* photonTracker;           // local
+    ASimulationManager & simMan;
+    int ID;
+
+    const DetectorClass & detector;
+    const GeneralSimSettings & simSettings;
+
+    // local resources
+    TRandom2 *RandGen;
+    AOneEvent* OneEvent; //PM hit data for one event is stored here
+    EventsDataClass *dataHub;
+    Photon_Generator *photonGenerator;
+    APhotonTracer* photonTracker;
 
     QString ErrorString; //last error
-    int ID;
 
     //state control
     int eventBegin = 0;
@@ -86,6 +86,9 @@ protected:
 
     int maxPhotonTracks = 1000;
     int maxParticleTracks = 1000;
+
+protected:
+    void checkNavigatorPresent();
 
 };
 

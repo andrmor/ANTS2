@@ -51,10 +51,10 @@ void AExternalProcessHandler::onReadReady()
     QString in = Process->readAllStandardOutput();
     if (bVerbose) qDebug() << in;
 
-    if (in.startsWith("$$progress>") && in.endsWith("<$$"))
+    if (in.startsWith("$$progress>") && in.endsWith("<$$\n"))
     {
         in.remove("$$progress>");
-        in.remove("<$$");
+        in.remove("<$$\n");
         bool bOK;
         int pr = in.toInt(&bOK);
         if (bOK)

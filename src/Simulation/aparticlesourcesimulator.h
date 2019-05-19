@@ -23,7 +23,7 @@ class AExternalProcessHandler;
 class AParticleSourceSimulator : public ASimulator
 {
 public:
-    explicit AParticleSourceSimulator(const DetectorClass * detector, ASimulationManager * simMan, int ID);
+    explicit AParticleSourceSimulator(ASimulationManager & simMan, int ID);
     ~AParticleSourceSimulator();
 
     const QVector<AEnergyDepositionCell*> &getEnergyVector() const { return EnergyVector; }  //obsolete

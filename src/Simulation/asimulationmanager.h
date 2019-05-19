@@ -64,6 +64,8 @@ public:
     bool isG4Sim_OnlyGenerateFiles() const {return bOnlyFileExport;}
     void generateG4antsConfigCommon(QJsonObject & json, int ThreadId);
 
+    const DetectorClass & getDetector() {return Detector;}
+
     // Next three: Simulator workers use their own local copies constructed using configuration json
     ASourceParticleGenerator * ParticleSources = 0;         //used to update json on config changes and in GUI to configure
     AFileParticleGenerator   * FileParticleGenerator = 0;   //only for gui, simulation threads use their own
@@ -81,8 +83,8 @@ public:
     bool bPhotonSourceSim;  // if false -> particle source sim
 
 private:
-    EventsDataClass & EventsDataHub;
     DetectorClass   & Detector;
+    EventsDataClass & EventsDataHub;
 
     ASimulatorRunner * Runner;
     QThread simRunnerThread;

@@ -30,6 +30,14 @@ void AG4SimulationSettings::writeToJson(QJsonObject &json) const
         arC.append(c);
     json["Commands"] = arC;
 
+    QJsonArray arSL;
+    for (auto & key : StepLimits.keys())
+    {
+        QJsonArray el;
+        el << key << StepLimits.value(key);
+        arSL.push_back(el);
+    }
+    json["StepLimits"] = arSL;
 }
 
 void AG4SimulationSettings::readFromJson(const QJsonObject &json)
@@ -50,6 +58,19 @@ void AG4SimulationSettings::readFromJson(const QJsonObject &json)
     for (int i=0; i<arC.size(); i++)
         Commands << arC.at(i).toString();
 
+    QJsonArray arSL;
+    StepLimits.clear();
+    parseJson(json, "StepLimits", arSL);
+    for (int i=0; i<arSL.size(); i++)
+    {
+        QJsonArray el = arSL[i].toArray();
+        if (el.size() > 1)
+        {
+            QString vol = el[0].toString();
+            double step = el[1].toDouble();
+            StepLimits[vol] = step;
+        }
+    }
 }
 
 const QString AG4SimulationSettings::getPrimariesFileName(int iThreadNum) const

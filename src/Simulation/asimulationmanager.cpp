@@ -428,6 +428,15 @@ void ASimulationManager::generateG4antsConfigCommon(QJsonObject & json, int Thre
 
     json["GDML"] = G4SimSet.getGdmlFileName();
 
+    QJsonArray arSL;
+    for (auto & key : G4SimSet.StepLimits.keys())
+    {
+        QJsonArray el;
+        el << key << G4SimSet.StepLimits.value(key);
+        arSL.push_back(el);
+    }
+    json["StepLimits"] = arSL;
+
     QJsonArray Carr;
     for (auto & c : G4SimSet.Commands ) Carr << c;
     json["Commands"] = Carr;

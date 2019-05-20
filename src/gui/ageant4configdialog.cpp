@@ -24,6 +24,10 @@ AGeant4ConfigDialog::AGeant4ConfigDialog(AG4SimulationSettings & G4SimSet, QWidg
 
     for (auto& s : G4SimSet.SensitiveVolumes)
         ui->pteSensitiveVolumes->appendPlainText(s);
+
+    ui->pteStepLimits->clear();
+    for (auto & key : G4SimSet.StepLimits.keys())
+        ui->pteStepLimits->appendPlainText( QString("%1 %2").arg(key).arg(G4SimSet.StepLimits.value(key)) );
 }
 
 AGeant4ConfigDialog::~AGeant4ConfigDialog()
@@ -34,6 +38,8 @@ AGeant4ConfigDialog::~AGeant4ConfigDialog()
 void AGeant4ConfigDialog::on_pbAccept_clicked()
 {
     const QRegularExpression rx = QRegularExpression("(\\ |\\,|\\n|\\t)"); //separators: ' ' or ',' or 'n' or '\t'
+    const QRegularExpression rx2 = QRegularExpression("(\\ |\\t)"); //separators: ' ' or '\t'
+
     QString t = ui->pteSensitiveVolumes->document()->toPlainText();
     QStringList sl = t.split(rx, QString::SkipEmptyParts);
     if (sl.isEmpty())
@@ -43,6 +49,28 @@ void AGeant4ConfigDialog::on_pbAccept_clicked()
     G4SimSet.Commands = t.split('\n', QString::SkipEmptyParts);
 
     G4SimSet.SensitiveVolumes = sl;
+
+    t = ui->pteStepLimits->document()->toPlainText();
+    sl = t.split('\n', QString::SkipEmptyParts);
+    for (const QString & str : sl)
+    {
+        QStringList f = str.split(rx2, QString::SkipEmptyParts);
+        if (f.size() != 2)
+        {
+            message("Bad format of step limits, it should be (new line for each):\nVolume_name Step_Limit");
+            return;
+        }
+        QString vol = f[0];
+        bool bOK;
+        double step = f[1].toDouble(&bOK);
+        if (!bOK)
+        {
+            message("Bad format of step limits: failed to convert to double value: " + f[1]);
+            return;
+        }
+        G4SimSet.StepLimits[vol] = step;
+    }
+
     accept();
 }
 

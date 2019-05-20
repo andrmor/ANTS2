@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>644</width>
+    <width>631</width>
     <height>578</height>
    </rect>
   </property>
@@ -79,6 +79,9 @@
      </item>
      <item>
       <widget class="QComboBox" name="cobRefPhysLists">
+       <property name="toolTip">
+        <string>AllHP list requires to download G4ENDL library and set environmental variable G4PARTICLEHPDATA</string>
+       </property>
        <item>
         <property name="text">
          <string>QGSP_BIC</string>
@@ -197,7 +200,11 @@
     </widget>
    </item>
    <item>
-    <widget class="QPlainTextEdit" name="pteCommands"/>
+    <widget class="QPlainTextEdit" name="pteCommands">
+     <property name="toolTip">
+      <string>Commands run in Geant4 before simulation start</string>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="Line" name="line_2">
@@ -220,17 +227,92 @@
     </spacer>
    </item>
    <item>
-    <widget class="QLabel" name="label_2">
-     <property name="text">
-      <string>Sensitive volumes:</string>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="topMargin">
+      <number>0</number>
      </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QPlainTextEdit" name="pteSensitiveVolumes"/>
+     <item>
+      <widget class="QFrame" name="frame">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>200</height>
+        </size>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::Box</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QLabel" name="label_2">
+          <property name="toolTip">
+           <string>List of volumes where deposition information will be collected</string>
+          </property>
+          <property name="text">
+           <string>Sensitive volumes:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPlainTextEdit" name="pteSensitiveVolumes">
+          <property name="toolTip">
+           <string>List of volumes where deposition information will be collected</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QFrame" name="frame_3">
+       <property name="minimumSize">
+        <size>
+         <width>200</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::Box</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QLabel" name="label_5">
+          <property name="toolTip">
+           <string>Each line configures the maximum tracking step for a volume.
+Format: Volume_name  Step_in_mm</string>
+          </property>
+          <property name="text">
+           <string>Step limits (Volume_name   step_mm):</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPlainTextEdit" name="pteStepLimits">
+          <property name="toolTip">
+           <string>Each line configures the maximum tracking step for a volume.
+Format: Volume_name  Step_in_mm</string>
+          </property>
+          <property name="plainText">
+           <string/>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <spacer name="verticalSpacer_4">

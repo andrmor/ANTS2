@@ -99,6 +99,10 @@ private slots:
 
     void on_trwEventView_customContextMenuRequested(const QPoint &pos);
 
+    void on_cbEVhideTrans_clicked();
+
+    void on_cbEVhideTransPrim_clicked();
+
 private:
     Ui::OutputWindow *ui;
     MainWindow* MW;

@@ -43,6 +43,8 @@ public:
     void addSecondary(AParticleTrackingRecord * sec);
     int  countSecondaries() const;
 
+    bool isPrimary() const {return !SecondaryOf;}
+    bool isSecondary() const {return (bool)SecondaryOf;}
     const std::vector<ATrackingStepData *> & getSteps() const {return Steps;}
     const AParticleTrackingRecord * getSecondaryOf() const {return SecondaryOf;}
     const std::vector<AParticleTrackingRecord *> & getSecondaries() const {return Secondaries;}

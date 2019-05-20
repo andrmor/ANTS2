@@ -1617,6 +1617,7 @@ void OutputWindow::fillEvTabViewRecord(QTreeWidgetItem * item, const AParticleTr
 
     int precision = ui->sbEVprecision->value();
     bool bHideTransp = ui->cbEVhideTrans->isChecked();
+    bool bHideTranspPrim = ui->cbEVhideTransPrim->isChecked();
 
     bool bPos = ui->cbEVpos->isChecked();
     bool bStep = ui->cbEVstep->isChecked();
@@ -1651,7 +1652,11 @@ void OutputWindow::fillEvTabViewRecord(QTreeWidgetItem * item, const AParticleTr
     for (size_t iStep = 0; iStep < pr->getSteps().size(); iStep++)
     {
         ATrackingStepData * step = pr->getSteps().at(iStep);
-        if (bHideTransp && step->Process == "T") continue;
+        if (step->Process == "T")
+        {
+            if (bHideTransp) continue;
+            if (bHideTranspPrim && pr->isPrimary()) continue;
+        }
 
         QTreeWidgetItem * it = new QTreeWidgetItem(item);
         QString s = step->Process;
@@ -1659,7 +1664,7 @@ void OutputWindow::fillEvTabViewRecord(QTreeWidgetItem * item, const AParticleTr
         if (bStep)
         {
             double delta = 0;
-            if (iStep != 0)
+            if (iStep != 0 && step->Process != "T" && step->Process != "C" && step->Process != "O")
             {
                 ATrackingStepData * prev = pr->getSteps().at(iStep-1);
                 for (int i=0; i<3; i++)
@@ -1668,12 +1673,32 @@ void OutputWindow::fillEvTabViewRecord(QTreeWidgetItem * item, const AParticleTr
             }
             s += QString("  %1mm").arg(delta, 0, 'g', precision);
         }
-        if (bVolume && step->GeoNode) s += QString("  %1").arg(step->GeoNode->GetVolume()->GetName());
+        if (bVolume && step->GeoNode)
+        {
+            QString str = QString("  %1").arg(step->GeoNode->GetVolume()->GetName());
+            if (step->Process == "T" && iStep != pr->getSteps().size()-1)
+            {
+                ATrackingStepData * next = pr->getSteps().at(iStep+1);
+                if (next->GeoNode)
+                    str += QString("->%1").arg(next->GeoNode->GetVolume()->GetName());
+            }
+            s += str;
+        }
         if (bIndex && step->GeoNode) s += QString("  %1").arg(step->GeoNode->GetIndex());
-        if (bMat && step->GeoNode) s += QString("  %1").arg( MW->MpCollection->getMaterialName( step->GeoNode->GetVolume()->GetMaterial()->GetIndex() ));
-        if (bTime) s += QString("  t = %1").arg(step->Time * timeUnits, 0, 'g', precision);
-        if (bKin)  s += QString("  E = %1").arg(step->Energy * kinUnits, 0, 'g', precision);
-        if (bDepo)  s += QString("  depo = %1").arg(step->DepositedEnergy * depoUnits, 0, 'g', precision);
+        if (bMat && step->GeoNode)
+        {
+            QString str = QString("  %1").arg( MW->MpCollection->getMaterialName( step->GeoNode->GetVolume()->GetMaterial()->GetIndex() ));
+            if (step->Process == "T" && iStep != pr->getSteps().size()-1)
+            {
+                ATrackingStepData * next = pr->getSteps().at(iStep+1);
+                if (next->GeoNode)
+                    str += QString("->%1").arg( MW->MpCollection->getMaterialName( next->GeoNode->GetVolume()->GetMaterial()->GetIndex()) );
+            }
+            s += str;
+        }
+        if (bTime) s += QString("  t=%1").arg(step->Time * timeUnits, 0, 'g', precision);
+        if (bDepo) s += QString("  depo=%1").arg(step->DepositedEnergy * depoUnits, 0, 'g', precision);
+        if (bKin)  s += QString("  E=%1").arg(step->Energy * kinUnits, 0, 'g', precision);
 
         it->setText(0, s);
         qlonglong poi = reinterpret_cast<qlonglong>(pr);
@@ -1948,4 +1973,14 @@ void OutputWindow::on_trwEventView_customContextMenuRequested(const QPoint &pos)
             //MW->GraphWindow->UpdateRootCanvas();
         }
     }
+}
+
+void OutputWindow::on_cbEVhideTrans_clicked()
+{
+    EV_showTree();
+}
+
+void OutputWindow::on_cbEVhideTransPrim_clicked()
+{
+    EV_showTree();
 }

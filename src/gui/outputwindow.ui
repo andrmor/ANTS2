@@ -914,11 +914,28 @@ over all events</string>
               </spacer>
              </item>
              <item>
-              <widget class="QCheckBox" name="cbEVhideTrans">
-               <property name="text">
-                <string>Hide transportation steps</string>
+              <layout class="QVBoxLayout" name="verticalLayout_39">
+               <property name="spacing">
+                <number>1</number>
                </property>
-              </widget>
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QCheckBox" name="cbEVhideTrans">
+                 <property name="text">
+                  <string>Hide all transportation steps</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="cbEVhideTransPrim">
+                 <property name="text">
+                  <string>Hide transportation of primaries</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
              <item>
               <spacer name="horizontalSpacer_34">
@@ -3026,22 +3043,6 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    </hints>
   </connection>
   <connection>
-   <sender>cbEVhideTrans</sender>
-   <signal>clicked()</signal>
-   <receiver>pbEventView_ShowTree</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>230</x>
-     <y>492</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>49</x>
-     <y>176</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>cbEVpos</sender>
    <signal>clicked()</signal>
    <receiver>pbEventView_ShowTree</receiver>
@@ -3080,8 +3081,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>411</x>
-     <y>503</y>
+     <x>434</x>
+     <y>493</y>
     </hint>
     <hint type="destinationlabel">
      <x>60</x>
@@ -3358,6 +3359,22 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
     <hint type="destinationlabel">
      <x>136</x>
      <y>170</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbEVhideTrans</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>cbEVhideTransPrim</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>188</x>
+     <y>470</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>189</x>
+     <y>494</y>
     </hint>
    </hints>
   </connection>

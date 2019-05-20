@@ -1619,6 +1619,7 @@ void OutputWindow::fillEvTabViewRecord(QTreeWidgetItem * item, const AParticleTr
     bool bHideTransp = ui->cbEVhideTrans->isChecked();
 
     bool bPos = ui->cbEVpos->isChecked();
+    bool bStep = ui->cbEVstep->isChecked();
     bool bTime = ui->cbEVtime->isChecked();
     double timeUnits = 1.0;
     switch (ui->cobEVtime->currentIndex())
@@ -1647,13 +1648,26 @@ void OutputWindow::fillEvTabViewRecord(QTreeWidgetItem * item, const AParticleTr
     bool bIndex = ui->cbEVvi->isChecked();
     bool bMat = ui->cbEVmat->isChecked();
 
-    for (ATrackingStepData * step : pr->getSteps())
+    for (size_t iStep = 0; iStep < pr->getSteps().size(); iStep++)
     {
+        ATrackingStepData * step = pr->getSteps().at(iStep);
         if (bHideTransp && step->Process == "T") continue;
 
         QTreeWidgetItem * it = new QTreeWidgetItem(item);
         QString s = step->Process;
         if (bPos) s += QString("  (%1, %2, %3)").arg(step->Position[0], 0, 'g', precision).arg(step->Position[1], 0, 'g', precision).arg(step->Position[2], 0, 'g', precision);
+        if (bStep)
+        {
+            double delta = 0;
+            if (iStep != 0)
+            {
+                ATrackingStepData * prev = pr->getSteps().at(iStep-1);
+                for (int i=0; i<3; i++)
+                    delta += (step->Position[i] - prev->Position[i]) * (step->Position[i] - prev->Position[i]);
+                delta = sqrt(delta);
+            }
+            s += QString("  %1mm").arg(delta, 0, 'g', precision);
+        }
         if (bVolume && step->GeoNode) s += QString("  %1").arg(step->GeoNode->GetVolume()->GetName());
         if (bIndex && step->GeoNode) s += QString("  %1").arg(step->GeoNode->GetIndex());
         if (bMat && step->GeoNode) s += QString("  %1").arg( MW->MpCollection->getMaterialName( step->GeoNode->GetVolume()->GetMaterial()->GetIndex() ));

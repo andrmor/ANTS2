@@ -168,8 +168,8 @@ void AParticleTrackingRecord::fillELDD(ATrackingStepData *IdByStep, std::vector<
 
         totDist += Delta;
 
-        dist.push_back(totDist);
-        ELDD.push_back(ts->DepositedEnergy/Delta);
+        dist.push_back(totDist - 0.5*Delta);
+        ELDD.push_back( Delta == 0 ? ts->DepositedEnergy : ts->DepositedEnergy/Delta);
     }
     while(true);
 }

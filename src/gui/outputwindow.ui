@@ -1037,9 +1037,12 @@ over all events</string>
                 </widget>
                </item>
                <item>
-                <widget class="QCheckBox" name="cbEVvi">
+                <widget class="QCheckBox" name="cbEVmat">
                  <property name="text">
-                  <string>Volume index</string>
+                  <string>Material</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
                  </property>
                 </widget>
                </item>
@@ -1064,12 +1067,19 @@ over all events</string>
                 <number>1</number>
                </property>
                <item>
-                <widget class="QCheckBox" name="cbEVmat">
+                <widget class="QCheckBox" name="cbEVstep">
                  <property name="text">
-                  <string>Material</string>
+                  <string>Step, mm</string>
                  </property>
                  <property name="checked">
                   <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="cbEVvi">
+                 <property name="text">
+                  <string>Volume index</string>
                  </property>
                 </widget>
                </item>
@@ -1114,13 +1124,6 @@ over all events</string>
                   </widget>
                  </item>
                 </layout>
-               </item>
-               <item>
-                <widget class="QLabel" name="label_8">
-                 <property name="text">
-                  <string> </string>
-                 </property>
-                </widget>
                </item>
               </layout>
              </item>
@@ -1232,7 +1235,7 @@ over all events</string>
                <item>
                 <widget class="QLabel" name="label_26">
                  <property name="text">
-                  <string> </string>
+                  <string/>
                  </property>
                 </widget>
                </item>
@@ -3077,8 +3080,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>565</x>
-     <y>486</y>
+     <x>411</x>
+     <y>503</y>
     </hint>
     <hint type="destinationlabel">
      <x>60</x>
@@ -3093,8 +3096,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>137</x>
-     <y>568</y>
+     <x>357</x>
+     <y>560</y>
     </hint>
     <hint type="destinationlabel">
      <x>89</x>
@@ -3109,8 +3112,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>255</x>
-     <y>521</y>
+     <x>182</x>
+     <y>589</y>
     </hint>
     <hint type="destinationlabel">
      <x>65</x>
@@ -3141,8 +3144,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>317</x>
-     <y>544</y>
+     <x>374</x>
+     <y>590</y>
     </hint>
     <hint type="destinationlabel">
      <x>75</x>
@@ -3157,8 +3160,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>268</x>
-     <y>542</y>
+     <x>293</x>
+     <y>587</y>
     </hint>
     <hint type="destinationlabel">
      <x>39</x>
@@ -3339,6 +3342,22 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
     <hint type="destinationlabel">
      <x>576</x>
      <y>140</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbEVstep</sender>
+   <signal>clicked()</signal>
+   <receiver>pbEventView_ShowTree</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>263</x>
+     <y>525</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>136</x>
+     <y>170</y>
     </hint>
    </hints>
   </connection>

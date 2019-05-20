@@ -60,7 +60,8 @@ public:
   AParticle::ParticleType getParticleType(int particleIndex) const;
   const AParticle* getParticle(int particleIndex) const;
   AParticle* getParticle(int particleIndex);
-  const QStringList getListOfParticleNames() const;
+  const QStringList getListOfParticleNames() const;  
+  void ReplaceParticle(int iPart, const AParticle & p);
 
   //Material handling
   void AddNewMaterial(bool fSuppressChangedSignal = false);

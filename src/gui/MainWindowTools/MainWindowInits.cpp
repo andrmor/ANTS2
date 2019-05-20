@@ -284,7 +284,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
      << ui->pbRefreshPMproperties << ui->pbUpdatePMproperties << ui->pbRefreshMaterials << ui->pbStopLoad
      << ui->pbIndPMshowInfo << ui->pbUpdateToFixedZ << ui->pbUpdateSimConfig
      << ui->pbUpdateToFullCustom << ui->pbElUpdateIndication << ui->pbUnlockGui << ui->fScanFloodTotProb
-     << ui->fSecondaryScintLoadProfile << ui->pbUpdateSourcesIndication << ui->frIon
+     << ui->fSecondaryScintLoadProfile << ui->pbUpdateSourcesIndication
      << ui->sbPMtype << ui->fUpperLowerArrays << ui->sbPMtypeForGroup
      << ui->pbRebuildDetector << ui->fReloadRequired << ui->pbYellow << ui->pbGDML << ui->fGunMultipleEvents;
     for (int i=0;i<invis.length();i++) invis[i]->setVisible(false);

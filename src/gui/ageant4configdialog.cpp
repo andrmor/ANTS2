@@ -44,12 +44,12 @@ void AGeant4ConfigDialog::on_pbAccept_clicked()
     QStringList sl = t.split(rx, QString::SkipEmptyParts);
     if (sl.isEmpty())
         if (!confirm("Warning: no sensitive volumes are defined!\nNo deposition information will be collected in Geant4", this)) return;
+    G4SimSet.SensitiveVolumes = sl;
 
     t = ui->pteCommands->document()->toPlainText();
     G4SimSet.Commands = t.split('\n', QString::SkipEmptyParts);
 
-    G4SimSet.SensitiveVolumes = sl;
-
+    G4SimSet.StepLimits.clear();
     t = ui->pteStepLimits->document()->toPlainText();
     sl = t.split('\n', QString::SkipEmptyParts);
     for (const QString & str : sl)

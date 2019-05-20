@@ -87,6 +87,8 @@ void MainWindow::on_pbRefreshParticles_clicked()
 
 void MainWindow::on_lwParticles_currentRowChanged(int currentRow)
 {
+    ui->pbConvertToIon->setEnabled(false);
+
     if (currentRow < 0) return;
 
     if (currentRow < Detector->MpCollection->countParticles())
@@ -97,7 +99,12 @@ void MainWindow::on_lwParticles_currentRowChanged(int currentRow)
         ui->leiMass->setText(QString::number(p->ionA));
 
         bool bIon = (p->ionZ != -1);
-        ui->frIon->setVisible(bIon);
+        ui->stwParticleCustIon->setCurrentIndex(bIon ? 1 : 0);
+
+        QList<QString> NL;
+        NL << "gamma"<< "neutron" << "e+" << "e-" << "electron" << "positron";
+        bool bDis = NL.contains(p->ParticleName);
+        ui->pbConvertToIon->setEnabled(!bDis);
 
         bool bCanRename = !bIon &&
                           p->type != AParticle::_gamma_ &&

@@ -5306,7 +5306,7 @@ of the refracted beam:</string>
        </rect>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tabParticles">
        <attribute name="title">
@@ -5429,9 +5429,9 @@ of the refracted beam:</string>
        <widget class="QPushButton" name="pbShowColorCoding">
         <property name="geometry">
          <rect>
-          <x>254</x>
+          <x>191</x>
           <y>152</y>
-          <width>210</width>
+          <width>321</width>
           <height>25</height>
          </rect>
         </property>
@@ -5439,13 +5439,13 @@ of the refracted beam:</string>
          <string>Press and hold to see color coding</string>
         </property>
         <property name="text">
-         <string>Show color coding for tracks</string>
+         <string>Press to show color coding for tracks</string>
         </property>
        </widget>
        <widget class="QComboBox" name="cobAddNewParticle">
         <property name="geometry">
          <rect>
-          <x>241</x>
+          <x>242</x>
           <y>75</y>
           <width>117</width>
           <height>23</height>
@@ -5455,7 +5455,7 @@ of the refracted beam:</string>
        <widget class="QComboBox" name="cobAddIon">
         <property name="geometry">
          <rect>
-          <x>241</x>
+          <x>242</x>
           <y>105</y>
           <width>54</width>
           <height>23</height>
@@ -5513,86 +5513,6 @@ of the refracted beam:</string>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
-       </widget>
-       <widget class="QFrame" name="frIon">
-        <property name="geometry">
-         <rect>
-          <x>178</x>
-          <y>35</y>
-          <width>204</width>
-          <height>27</height>
-         </rect>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::NoFrame</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
-        </property>
-        <widget class="QLineEdit" name="leiIonZ">
-         <property name="geometry">
-          <rect>
-           <x>83</x>
-           <y>2</y>
-           <width>36</width>
-           <height>22</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>0</string>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_47">
-         <property name="geometry">
-          <rect>
-           <x>117</x>
-           <y>2</y>
-           <width>26</width>
-           <height>20</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>A=</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_27">
-         <property name="geometry">
-          <rect>
-           <x>50</x>
-           <y>4</y>
-           <width>31</width>
-           <height>17</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Z=</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-        <widget class="QLineEdit" name="leiMass">
-         <property name="geometry">
-          <rect>
-           <x>144</x>
-           <y>2</y>
-           <width>36</width>
-           <height>22</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>0</string>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
        </widget>
        <widget class="QLabel" name="label_12">
         <property name="geometry">
@@ -5658,6 +5578,104 @@ of the refracted beam:</string>
          <string>Rename</string>
         </property>
        </widget>
+       <widget class="QStackedWidget" name="stwParticleCustIon">
+        <property name="geometry">
+         <rect>
+          <x>182</x>
+          <y>37</y>
+          <width>224</width>
+          <height>26</height>
+         </rect>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="page_13">
+         <widget class="QPushButton" name="pbConvertToIon">
+          <property name="geometry">
+           <rect>
+            <x>60</x>
+            <y>2</y>
+            <width>116</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="toolTip">
+           <string>Can be used to provide compatibility with Geant4 simulations
+Select the ion configuration below and click 'Convert'</string>
+          </property>
+          <property name="text">
+           <string>Convert to ion</string>
+          </property>
+         </widget>
+        </widget>
+        <widget class="QWidget" name="page_14">
+         <widget class="QLineEdit" name="leiMass">
+          <property name="geometry">
+           <rect>
+            <x>139</x>
+            <y>2</y>
+            <width>36</width>
+            <height>22</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>0</string>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="leiIonZ">
+          <property name="geometry">
+           <rect>
+            <x>77</x>
+            <y>2</y>
+            <width>36</width>
+            <height>22</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>0</string>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_47">
+          <property name="geometry">
+           <rect>
+            <x>112</x>
+            <y>2</y>
+            <width>26</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>A=</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_27">
+          <property name="geometry">
+           <rect>
+            <x>44</x>
+            <y>4</y>
+            <width>31</width>
+            <height>17</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Z=</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </widget>
+       </widget>
        <zorder>lwParticles</zorder>
        <zorder>label</zorder>
        <zorder>label_39</zorder>
@@ -5673,11 +5691,11 @@ of the refracted beam:</string>
        <zorder>pbAddIon</zorder>
        <zorder>leiAddIonMass</zorder>
        <zorder>line_2</zorder>
-       <zorder>frIon</zorder>
        <zorder>label_12</zorder>
        <zorder>label_149</zorder>
        <zorder>label_77</zorder>
        <zorder>pbRenameParticle</zorder>
+       <zorder>stwParticleCustIon</zorder>
       </widget>
       <widget class="QWidget" name="tabMaterials">
        <attribute name="title">

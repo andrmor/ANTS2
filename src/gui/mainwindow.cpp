@@ -4848,3 +4848,51 @@ void MainWindow::on_pbNodesFromFileCheckShow_clicked()
 
     message(QString("The file containes %1 top nodes\n(%2 nodes counting subnodes)").arg(numTop).arg(numTotal), this);
 }
+
+#include "aisotopeabundancehandler.h"
+void MainWindow::on_pbConvertToIon_clicked()
+{
+    int iPart = ui->lwParticles->currentRow();
+    if (iPart < 0)
+    {
+        message("Select a particle to convert", this);
+        return;
+    }
+
+    QString newName = ui->cobAddIon->currentText();
+    if (newName.isEmpty())
+    {
+        message("Select symbol", this);
+        return;
+    }
+    QString massStr = ui->leiAddIonMass->text();
+    int mass = massStr.toInt();
+    if (massStr.isEmpty() || mass == 0)
+    {
+        message("Enter mass of the ion", this);
+        return;
+    }
+
+    int Z = GlobSet.getIsotopeAbundanceHandler().getZ(newName);
+    if (Z == 0)
+    {
+        message(QString("Symbol '%1' is not a valid element").arg(newName), this);
+        return;
+    }
+
+    newName += massStr;
+    int Id = MpCollection->getParticleId(newName);
+    if (Id != -1)
+    {
+        message( QString("Particle name %1 already defined").arg(newName), this);
+        return;
+    }
+
+    QString s = QString("Convert %1 to ion %2?\nWarning! This operation cannot be undone.\nBetter save the current config first.").arg(MpCollection->getParticleName(iPart)).arg(newName);
+    if (!confirm(s, this)) return;
+
+    AParticle p(newName, AParticle::_charged_, Z, mass);
+    MpCollection->ReplaceParticle(iPart, p);
+    onRequestDetectorGuiUpdate();
+    ui->lwParticles->setCurrentRow(iPart);
+}

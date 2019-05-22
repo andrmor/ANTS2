@@ -43,6 +43,7 @@ AParticleSourceSimulator::AParticleSourceSimulator(ASimulationManager & simMan, 
 
 AParticleSourceSimulator::~AParticleSourceSimulator()
 {
+    delete G4handler;
     delete S2generator;
     delete S1generator;
     delete ParticleTracker;
@@ -712,7 +713,7 @@ bool AParticleSourceSimulator::runGeant4Handler()
     QStringList ar;
     ar << confFile;
 
-    if (G4handler) delete G4handler;
+    delete G4handler;
     G4handler = new AExternalProcessHandler(exe, ar);
     //G4handler->setVerbose();
     G4handler->setProgressVariable(&progress);

@@ -26,7 +26,7 @@ public:
     float   Energy;
     float   DepositedEnergy;
     QString Process;              //step defining process
-    TGeoNode * GeoNode = nullptr;
+    TGeoNode * GeoNode = nullptr; //external
     std::vector<int> Secondaries; //secondaries created in this step - indexes in the parent record
 
 };

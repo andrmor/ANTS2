@@ -204,7 +204,7 @@ void ASimulationManager::onSimulationFinished()
     Detector.BuildDetector(true, true);  // <- still needed on Windows
     bGuardTrackingHistory = false;
 
-    //Detector->GeoManager->CleanGarbage();
+    //Detector.GeoManager->CleanGarbage();
 
     if (!TrackingHistory.empty())
         findGeoNodes(); // should be called after GeoManager was recreated!
@@ -263,8 +263,15 @@ void ASimulationManager::copyDataFromWorkers()
     }
 }
 
+#include "TGeoManager.h"
 void ASimulationManager::findGeoNodes()
 {
+    if (!Detector.GeoManager->GetCurrentNavigator())
+    {
+        qDebug() << "No navigator found, adding";
+        Detector.GeoManager->AddNavigator();
+    }
+
     for (AEventTrackingRecord * e : TrackingHistory)
         e->updateGeoNodes();
     //qDebug() << "GeoNodes updated";
@@ -291,7 +298,7 @@ void ASimulationManager::clearEnergyVector()
 void ASimulationManager::clearTrackingHistory()
 {
     if (bGuardTrackingHistory) return;
-    for (auto & r : TrackingHistory) delete r;
+    for (AEventTrackingRecord * r : TrackingHistory) delete r;
     TrackingHistory.clear();
 }
 

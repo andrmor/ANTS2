@@ -3283,7 +3283,7 @@ void GraphWindowClass::AppendBasket()
       QStringList sl = text.split(QRegExp("[\r\n]"),QString::SkipEmptyParts);
 
       int numLines = sl.size();
-      //qDebug() << "Lines: "<<numLines;
+      qDebug() << "Description lists" << numLines/2 << "objects";
 
       bool ok = true;
       int indexFileObject = 0;
@@ -3292,7 +3292,7 @@ void GraphWindowClass::AppendBasket()
           //qDebug() << "Ok, even number of lines";
           for (int iDrawObject=0; iDrawObject<numLines/2; iDrawObject++ )
             {
-              //qDebug() << iDrawObject<<">-----";
+              qDebug() << ">>>>" << "Object #"<< iDrawObject;
               QString name = sl[iDrawObject*2];
               bool ok;
               QStringList fields = sl[iDrawObject*2+1].split("|");
@@ -3311,17 +3311,32 @@ void GraphWindowClass::AppendBasket()
                   break;
                 }
 
-              //qDebug() << "name:"<< name;
-              //qDebug() << "objects:"<< numObj;
+              qDebug() << "Name:"<< name << "objects:"<< numObj;
 
+              bool bLegendsFirst = false;
+              bool bFirstNonLegend = false;
               QVector<DrawObjectStructure>* drawObjects = new QVector<DrawObjectStructure>;
               for (int i=0; i<numObj; i++)
                 {
                   TKey *key = (TKey*)f->GetListOfKeys()->At(indexFileObject);
+                  key->SetMotherDir(0);
                   indexFileObject++;
                   QString type = key->GetClassName();
-                  //TString objName = key->GetName();
-                  //qDebug() << "-->"<< i<<"   "<<objName<<"  "<<type<<"   "<<fields[i+1];
+                  TString objName = key->GetName();
+                  qDebug() << "-->"<< i<<"   "<<objName<<"  "<<type<<"   "<<fields[i+1];
+
+                  if (type == "TLegend")
+                  {
+                      if (drawObjects->isEmpty()) bLegendsFirst = true;
+                      //nothing to do for all next TLegends or TLegends after non-Legend objects
+                  }
+                  else
+                  {
+                      if (bLegendsFirst) bFirstNonLegend = true;
+                      else bFirstNonLegend = false;
+                      bLegendsFirst = false;
+                  }
+
                   TObject *p = 0;
 
                   if (type=="TH1D") p = (TH1D*)key->ReadObj();
@@ -3351,7 +3366,10 @@ void GraphWindowClass::AppendBasket()
                   if (p)
                     {
                       //qDebug() << p->GetName();
-                      drawObjects->append(DrawObjectStructure(p, fields[i+1]));
+                      if (bFirstNonLegend)
+                          drawObjects->insert(0, DrawObjectStructure(p, fields[i+1]));
+                      else
+                          drawObjects->append(DrawObjectStructure(p, fields[i+1]));
                     }
                   else
                     {

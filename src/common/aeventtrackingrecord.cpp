@@ -43,8 +43,11 @@ void ATrackingStepData::logToString(QString & str, int offset) const
 
 AParticleTrackingRecord::~AParticleTrackingRecord()
 {
-    for (auto* step : Steps) delete step;
-    for (auto* sec  : Secondaries) delete sec;
+    for (ATrackingStepData * step : Steps) delete step;
+    Steps.clear();
+
+    for (AParticleTrackingRecord * sec  : Secondaries) delete sec;
+    Secondaries.clear();
 }
 
 AParticleTrackingRecord *AParticleTrackingRecord::create(const QString & Particle)
@@ -185,9 +188,9 @@ void AParticleTrackingRecord::updateGeoNodes()
             if (prevStep->Process != "T")
                 Step->GeoNode = gGeoManager->FindNode(prevStep->Position[0], prevStep->Position[1], prevStep->Position[2]);
             else
-                Step->GeoNode = gGeoManager->FindNode( 0.99*Step->Position[0] + 0.01*prevStep->Position[0],
-                                                       0.99*Step->Position[1] + 0.01*prevStep->Position[1],
-                                                       0.99*Step->Position[2] + 0.01*prevStep->Position[2] );
+                Step->GeoNode = gGeoManager->FindNode( 0.5*Step->Position[0] + 0.5*prevStep->Position[0],
+                                                       0.5*Step->Position[1] + 0.5*prevStep->Position[1],
+                                                       0.5*Step->Position[2] + 0.5*prevStep->Position[2] );
         }
         else Step->GeoNode = gGeoManager->FindNode(Step->Position[0], Step->Position[1], Step->Position[2]);
     }
@@ -203,11 +206,12 @@ AEventTrackingRecord * AEventTrackingRecord::create()
     return new AEventTrackingRecord();
 }
 
-AEventTrackingRecord::AEventTrackingRecord() {}
+AEventTrackingRecord::AEventTrackingRecord(){}
 
 AEventTrackingRecord::~AEventTrackingRecord()
 {
-    for (auto* pr : PrimaryParticleRecords) delete pr;
+    for (AParticleTrackingRecord * pr : PrimaryParticleRecords) delete pr;
+    PrimaryParticleRecords.clear();
 }
 
 void AEventTrackingRecord::addPrimaryRecord(AParticleTrackingRecord *rec)

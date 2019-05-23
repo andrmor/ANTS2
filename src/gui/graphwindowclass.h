@@ -305,8 +305,11 @@ private:
     void UpdateBasketGUI();    
     void ExportData(bool fUseBinCenters=true);
     void exportTextForTH2(TH2 *h);
+
     void SaveBasket();
     void AppendBasket();
+    void Basket_DrawOnTop(int row);
+
     void AppendRootHistsOrGraphs();
     QVector<DrawObjectStructure> *getCurrentDrawObjects();
     void ShowProjection(QString type);

@@ -2879,32 +2879,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
       UpdateBasketGUI();
     }
   else if (selectedItem == onTop)
-    {
-      if (row == -1) return; //protection
-      if (DrawObjects.isEmpty()) return; //protection
-
-      //gStyle->SetOptTitle(0);
-      qDebug() << "Item"<<row<<"was requested to be drawn on top of currently draw";
-
-      //TObject* secondPointer = Basket[row].DrawObjects.first().getPointer();
-      //DrawObjects.append(DrawObjectStructure(secondPointer, "same"));  //adding only ther first
-      for (int i=0; i<Basket[row].DrawObjects.size(); i++)
-        {
-          TString CName = Basket[row].DrawObjects[i].getPointer()->ClassName();          
-          if ( CName== "TLegend" || CName == "TPaveText") continue;
-          //qDebug() << CName;
-          QString options = Basket[row].DrawObjects[i].getOptions();
-          options.replace("same", "");
-          options.replace("SAME", "");
-          options.replace("a", "");
-          options.replace("A", "");
-          TString safe = "same";
-          safe += options.toLatin1().data();
-          DrawObjects.append(DrawObjectStructure(Basket[row].DrawObjects[i].getPointer(), safe));
-        }
-      CurrentBasketItem = -2; //forcing to "basket off, tmp graph" mode
-      RedrawAll();
-    }
+      Basket_DrawOnTop(row);
   else if (selectedItem == scale)
     {
       if (row == -1) return; //protection
@@ -3225,171 +3200,204 @@ void GraphWindowClass::on_actionInverted_dark_body_triggered()
 
 void GraphWindowClass::SaveBasket()
 {
-  qDebug() << "Saving basket";
+    //qDebug() << "Saving basket";
+    QString fileName = QFileDialog::getSaveFileName(this, "Save Basket objects to file", MW->GlobSet.LastOpenDir, "Root files (*.root)");
+    if (fileName.isEmpty()) return;
+    MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+    if(QFileInfo(fileName).suffix().isEmpty()) fileName += ".root";
 
-  QString fileName = QFileDialog::getSaveFileName(this, "Save Basket objects to file", MW->GlobSet.LastOpenDir, "Root files (*.root)");
-  if (fileName.isEmpty()) return;
-  MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-  if(QFileInfo(fileName).suffix().isEmpty()) fileName += ".root";
+    QString str;
+    TFile f(fileName.toLocal8Bit(),"RECREATE");
 
-  QString str;
-  TFile f(fileName.toLocal8Bit(),"RECREATE");
-
-  int index = 0;
-  for (int ib=0; ib<Basket.size(); ib++)
+    //qDebug() << "----Items:"<<Basket.size()<<"----";
+    int index = 0;
+    for (int ib=0; ib<Basket.size(); ib++)
     {
-      str += Basket[ib].Name + "\n";
-      str += QString::number( Basket[ib].DrawObjects.size() );
+        //qDebug() << ib<<">"<<Basket[ib].Name;
+        str += Basket[ib].Name + '\n';
+        str += QString::number( Basket[ib].DrawObjects.size() );
 
-      for (int i=0; i<Basket[ib].DrawObjects.size(); i++)
+        QVector<DrawObjectStructure> & DrawObjects = Basket[ib].DrawObjects;
+        for (int i = 0; i < DrawObjects.size(); i++)
         {
-          TString name = "";
-          name += index;
-          index++;
-          TNamed* no = dynamic_cast<TNamed*>(Basket[ib].DrawObjects[i].getPointer());
-          if (no) no->SetName(name);
-          Basket[ib].DrawObjects[i].getPointer()->Write();
-          str += "|"+Basket[ib].DrawObjects[i].getOptions();
+            DrawObjectStructure & Obj = DrawObjects[i];
+            //qDebug() << "   >>"<<i<<Obj.getPointer()->GetName()<<Obj.getPointer()->ClassName();
+            TString name = "";
+            name += index;
+            index++;
+            TNamed* no = dynamic_cast<TNamed*>(Obj.getPointer());
+            if (no) no->SetName(name);
+
+            TString KeyName = "#";
+            Obj.getPointer()->Write(KeyName + (index-1));
+
+            str += '|' + Obj.getOptions();
         }
 
-      str += "\n";
+        str += '\n';
     }
 
-  TNamed desc;
-  desc.SetTitle(str.toLocal8Bit().data());
-  desc.Write("BasketDescription");
+    TNamed desc;
+    desc.SetTitle(str.toLocal8Bit().data());
+    desc.Write("BasketDescription");
 
-  f.Close();
+    //qDebug()  << "Descr:" << str;
+
+    f.Close();
 }
 
 void GraphWindowClass::AppendBasket()
 {
-  QString fileName = QFileDialog::getOpenFileName(this, "Append objects from Basket file", MW->GlobSet.LastOpenDir, "Root files (*.root)");
-  if (fileName.isEmpty()) return;
-  MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-  //if(QFileInfo(fileName).suffix().isEmpty()) fileName += ".root";
+    //qDebug() << "\n\nAppending basket";
+    QString fileName = QFileDialog::getOpenFileName(this, "Append objects from Basket file", MW->GlobSet.LastOpenDir, "Root files (*.root)");
+    if (fileName.isEmpty()) return;
+    MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
-  QByteArray ba = fileName.toLocal8Bit();
-  const char *c_str = ba.data();
-  TFile* f = new TFile(c_str);
+    QByteArray ba = fileName.toLocal8Bit();
+    const char *c_str = ba.data();
+    TFile* f = new TFile(c_str);
 
-  TNamed* desc = (TNamed*)f->Get("BasketDescription");
-  QString text = desc->GetTitle();
-  //qDebug() << text;
-
-  if (desc)
+    /*
+    int numKeys = f->GetListOfKeys()->GetEntries();
+    qDebug() << "Number of keys:"<<numKeys;
+    for (int i=0; i<numKeys; i++)
     {
-      //qDebug()<<"Proper basket file!";
-      QStringList sl = text.split(QRegExp("[\r\n]"),QString::SkipEmptyParts);
+        TKey *key = (TKey*)f->GetListOfKeys()->At(i);
+        QString type = key->GetClassName();
+        TString objName = key->GetName();
+        qDebug() << "-->"<< i<<"   "<<objName<<"  "<<type<<key->GetTitle();
+    }
+    */
 
-      int numLines = sl.size();
-      qDebug() << "Description lists" << numLines/2 << "objects";
+    TNamed* desc = (TNamed*)f->Get("BasketDescription");
+    if (!desc)
+    {
+        message("This is not a valid ANTS2 basket file!", this);
+        return;
+    }
 
-      bool ok = true;
-      int indexFileObject = 0;
-      if (numLines % 2 == 0 )
+    QString text = desc->GetTitle();
+    //qDebug() << "Basket description:"<<text;
+    //qDebug() << "Number of keys:"<<f->GetListOfKeys()->GetEntries();
+
+    QStringList sl = text.split('\n',QString::SkipEmptyParts);
+
+    int numLines = sl.size();
+    int basketSize =  numLines/2;
+    //qDebug() << "Description lists" << basketSize << "objects in the basket";
+
+    bool ok = true;
+    int indexFileObject = 0;
+    if (numLines % 2 == 0 ) // should be even number of lines
+    {
+        for (int iDrawObject = 0; iDrawObject < basketSize; iDrawObject++ )
         {
-          //qDebug() << "Ok, even number of lines";
-          for (int iDrawObject=0; iDrawObject<numLines/2; iDrawObject++ )
+            //qDebug() << ">>>>Object #"<< iDrawObject;
+            QString name = sl[iDrawObject*2];
+            bool ok;
+            QStringList fields = sl[iDrawObject*2+1].split('|');
+            if (fields.size()<2)
             {
-              qDebug() << ">>>>" << "Object #"<< iDrawObject;
-              QString name = sl[iDrawObject*2];
-              bool ok;
-              QStringList fields = sl[iDrawObject*2+1].split("|");
-              if (fields.size()<2)
-                {
-                  qWarning()<<"Too short descr line";
-                  ok=false;
-                  break;
-                }
-              int numObj = fields[0].toInt(&ok);
-              if (!ok) break;
-              if (numObj != fields.size()-1)
-                {
-                  qWarning()<<"Number of objects vs option strings mismatch:"<<numObj<<fields.size()-1;
-                  ok=false;
-                  break;
-                }
-
-              qDebug() << "Name:"<< name << "objects:"<< numObj;
-
-              bool bLegendsFirst = false;
-              bool bFirstNonLegend = false;
-              QVector<DrawObjectStructure>* drawObjects = new QVector<DrawObjectStructure>;
-              for (int i=0; i<numObj; i++)
-                {
-                  TKey *key = (TKey*)f->GetListOfKeys()->At(indexFileObject);
-                  key->SetMotherDir(0);
-                  indexFileObject++;
-                  QString type = key->GetClassName();
-                  TString objName = key->GetName();
-                  qDebug() << "-->"<< i<<"   "<<objName<<"  "<<type<<"   "<<fields[i+1];
-
-                  if (type == "TLegend")
-                  {
-                      if (drawObjects->isEmpty()) bLegendsFirst = true;
-                      //nothing to do for all next TLegends or TLegends after non-Legend objects
-                  }
-                  else
-                  {
-                      if (bLegendsFirst) bFirstNonLegend = true;
-                      else bFirstNonLegend = false;
-                      bLegendsFirst = false;
-                  }
-
-                  TObject *p = 0;
-
-                  if (type=="TH1D") p = (TH1D*)key->ReadObj();
-                  if (type=="TH1I") p = (TH1I*)key->ReadObj();
-                  if (type=="TH1F") p = (TH1F*)key->ReadObj();
-                  if (type=="TH2D") p = (TH2D*)key->ReadObj();
-                  if (type=="TH2F") p = (TH2F*)key->ReadObj();
-                  if (type=="TH2I") p = (TH2I*)key->ReadObj();
-
-                  if (type=="TProfile") p = (TProfile*)key->ReadObj();
-                  if (type=="TProfile2D") p = (TProfile2D*)key->ReadObj();
-
-                  if (type=="TEllipse") p = (TEllipse*)key->ReadObj();
-                  if (type=="TBox") p = (TBox*)key->ReadObj();
-                  if (type=="TPolyLine") p = (TPolyLine*)key->ReadObj();
-                  if (type=="TLine") p = (TLine*)key->ReadObj();
-
-                  if (type=="TF1") p = (TF1*)key->ReadObj();
-                  if (type=="TF2") p = (TF2*)key->ReadObj();
-
-                  if (type=="TGraph2D") p = (TGraph2D*)key->ReadObj();
-                  if (type=="TGraph") p = (TGraph*)key->ReadObj();
-                  if (type=="TGraphErrors") p = (TGraphErrors*)key->ReadObj();
-
-                  if (type=="TLegend") p = (TLegend*)key->ReadObj();
-
-                  if (p)
-                    {
-                      //qDebug() << p->GetName();
-                      if (bFirstNonLegend)
-                          drawObjects->insert(0, DrawObjectStructure(p, fields[i+1]));
-                      else
-                          drawObjects->append(DrawObjectStructure(p, fields[i+1]));
-                    }
-                  else
-                    {
-                      qWarning() << "Unregistered object type" << type <<"for load basket from file!";
-                    }
-                }
-              if (!drawObjects->isEmpty()) Basket.append(BasketItemClass(name, drawObjects));
-
+                qWarning()<<"Too short descr line";
+                ok=false;
+                break;
             }
-        }
-      else ok = false;
 
-      if (ok) qDebug() << "Append successful";
-      else    qDebug() << "Corrupted basked file";
+            const QString sNumber = fields[0];
+
+            int numObj = sNumber.toInt(&ok);
+            if (!ok)
+            {
+                qWarning() << "Num obj convertion error!";
+                ok=false;
+                break;
+            }
+            if (numObj != fields.size()-1)
+            {
+                qWarning()<<"Number of objects vs option strings mismatch:"<<numObj<<fields.size()-1;
+                ok=false;
+                break;
+            }
+
+            //qDebug() << "Name:"<< name << "objects:"<< numObj;
+
+            QVector<DrawObjectStructure>* drawObjects = new QVector<DrawObjectStructure>;
+            for (int iDrawObj = 0; iDrawObj < numObj; iDrawObj++)
+            {
+                TKey *key = (TKey*)f->GetListOfKeys()->At(indexFileObject++);
+                //key->SetMotherDir(0);
+                QString type = key->GetClassName();
+                //TString objName = key->GetName();
+                //qDebug() << "-->"<< i<<"   "<<objName<<"  "<<type<<"   "<<fields[i+1];
+
+                TObject *p = 0;
+
+                if (type=="TH1D") p = (TH1D*)key->ReadObj();
+                if (type=="TH1I") p = (TH1I*)key->ReadObj();
+                if (type=="TH1F") p = (TH1F*)key->ReadObj();
+
+                if (type=="TH2D") p = (TH2D*)key->ReadObj();
+                if (type=="TH2I") p = (TH2I*)key->ReadObj();
+                if (type=="TH2F") p = (TH2F*)key->ReadObj();
+
+                if (type=="TProfile")   p =   (TProfile*)key->ReadObj();
+                if (type=="TProfile2D") p = (TProfile2D*)key->ReadObj();
+
+                if (type=="TEllipse")  p =  (TEllipse*)key->ReadObj();
+                if (type=="TBox")      p =      (TBox*)key->ReadObj();
+                if (type=="TPolyLine") p = (TPolyLine*)key->ReadObj();
+                if (type=="TLine")     p =     (TLine*)key->ReadObj();
+
+                if (type=="TF1") p = (TF1*)key->ReadObj();
+                if (type=="TF2") p = (TF2*)key->ReadObj();
+
+                if (type=="TGraph")       p =       (TGraph*)key->ReadObj();
+                if (type=="TGraph2D")     p =     (TGraph2D*)key->ReadObj();
+                if (type=="TGraphErrors") p = (TGraphErrors*)key->ReadObj();
+
+                if (type=="TLegend")   p =   (TLegend*)key->ReadObj();
+                if (type=="TPaveText") p = (TPaveText*)key->ReadObj();
+
+                if (p)
+                    drawObjects->append(DrawObjectStructure(p, fields[iDrawObj+1]));
+                else
+                {
+                    qWarning() << "Unregistered object type" << type <<"for load basket from file!";
+                }
+            }
+            if (!drawObjects->isEmpty()) Basket.append(BasketItemClass(name, drawObjects));
+
+        }
     }
-  else
+    else ok = false;
+
+    if (!ok) message("Corrupted basket file", this);
+
+    f->Close();
+}
+
+void GraphWindowClass::Basket_DrawOnTop(int row)
+{
+    if (row == -1) return;
+    if (DrawObjects.isEmpty()) return;
+
+    qDebug() << "Basket item"<<row<<"was requested to be drawn on top of the current draw";
+
+    for (int i=0; i<Basket[row].DrawObjects.size(); i++)
     {
-      message("It is not a proper Basket file!", this);
+        TString CName = Basket[row].DrawObjects[i].getPointer()->ClassName();
+        if ( CName== "TLegend" || CName == "TPaveText") continue;
+        //qDebug() << CName;
+        QString options = Basket[row].DrawObjects[i].getOptions();
+        options.replace("same", "", Qt::CaseInsensitive);
+        options.replace("a", "", Qt::CaseInsensitive);
+        TString safe = "same";
+        safe += options.toLatin1().data();
+        //qDebug() << "New options:"<<safe;
+        DrawObjects.append(DrawObjectStructure(Basket[row].DrawObjects[i].getPointer(), safe));
     }
-  f->Close();
+    CurrentBasketItem = -2; //forcing to "basket off, tmp graph" mode
+    RedrawAll();
 }
 
 void GraphWindowClass::AppendRootHistsOrGraphs()

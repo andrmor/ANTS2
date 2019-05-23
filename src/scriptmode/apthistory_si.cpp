@@ -180,7 +180,7 @@ QVariantList APTHistory_SI::cd_getStepRecord()
             {
                 vnode << s->GeoNode->GetVolume()->GetMaterial()->GetIndex();
                 vnode << s->GeoNode->GetVolume()->GetName();
-                vnode << s->GeoNode->GetIndex();
+                vnode << s->GeoNode->GetNumber();
             }
             vl.push_back(vnode);
             vl << s->Energy;

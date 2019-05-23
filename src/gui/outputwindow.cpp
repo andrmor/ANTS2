@@ -1684,7 +1684,7 @@ void OutputWindow::fillEvTabViewRecord(QTreeWidgetItem * item, const AParticleTr
             }
             s += str;
         }
-        if (bIndex && step->GeoNode) s += QString("  %1").arg(step->GeoNode->GetIndex());
+        if (bIndex && step->GeoNode) s += QString("  %1").arg(step->GeoNode->GetNumber());
         if (bMat && step->GeoNode)
         {
             QString str = QString("  %1").arg( MW->MpCollection->getMaterialName( step->GeoNode->GetVolume()->GetMaterial()->GetIndex() ));

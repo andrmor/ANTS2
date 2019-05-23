@@ -83,8 +83,8 @@ public:
     bool bPhotonSourceSim;  // if false -> particle source sim
 
 private:
-    DetectorClass   & Detector;
     EventsDataClass & EventsDataHub;
+    DetectorClass   & Detector;
 
     ASimulatorRunner * Runner;
     QThread simRunnerThread;

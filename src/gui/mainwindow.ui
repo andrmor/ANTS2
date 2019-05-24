@@ -6607,9 +6607,9 @@ Constructor is disabled!</string>
        <widget class="QLabel" name="label_52">
         <property name="geometry">
          <rect>
-          <x>20</x>
+          <x>2</x>
           <y>8</y>
-          <width>55</width>
+          <width>75</width>
           <height>13</height>
          </rect>
         </property>
@@ -6623,9 +6623,9 @@ Constructor is disabled!</string>
        <widget class="QLabel" name="label_54">
         <property name="geometry">
          <rect>
-          <x>21</x>
+          <x>0</x>
           <y>31</y>
-          <width>54</width>
+          <width>78</width>
           <height>13</height>
          </rect>
         </property>
@@ -6641,7 +6641,7 @@ Constructor is disabled!</string>
          <rect>
           <x>165</x>
           <y>3</y>
-          <width>101</width>
+          <width>106</width>
           <height>31</height>
          </rect>
         </property>
@@ -6698,9 +6698,9 @@ charged particles:</string>
        <widget class="QLabel" name="label_58">
         <property name="geometry">
          <rect>
-          <x>384</x>
+          <x>382</x>
           <y>18</y>
-          <width>58</width>
+          <width>63</width>
           <height>13</height>
          </rect>
         </property>
@@ -6727,9 +6727,9 @@ charged particles:</string>
        <widget class="QLabel" name="label_209">
         <property name="geometry">
          <rect>
-          <x>144</x>
+          <x>142</x>
           <y>9</y>
-          <width>30</width>
+          <width>32</width>
           <height>13</height>
          </rect>
         </property>
@@ -6740,9 +6740,9 @@ charged particles:</string>
        <widget class="QLabel" name="label_210">
         <property name="geometry">
          <rect>
-          <x>144</x>
+          <x>142</x>
           <y>31</y>
-          <width>23</width>
+          <width>25</width>
           <height>13</height>
          </rect>
         </property>
@@ -6781,7 +6781,7 @@ charged particles:</string>
          <rect>
           <x>164</x>
           <y>30</y>
-          <width>101</width>
+          <width>103</width>
           <height>31</height>
          </rect>
         </property>
@@ -6817,6 +6817,19 @@ thermal neutrons:</string>
         </property>
         <property name="text">
          <string>0.01</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_2">
+        <property name="geometry">
+         <rect>
+          <x>381</x>
+          <y>49</y>
+          <width>151</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>ANTS2 tracking only!</string>
         </property>
        </widget>
       </widget>
@@ -6891,7 +6904,7 @@ thermal neutrons:</string>
          <string>Slows down simulations and uses a lot of memory!</string>
         </property>
         <property name="text">
-         <string>Do logs and statistics</string>
+         <string>Collect logs and statistics</string>
         </property>
         <property name="checked">
          <bool>false</bool>
@@ -7272,7 +7285,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <property name="documentMode">
        <bool>false</bool>
@@ -9057,7 +9070,7 @@ sim.RunPhotonSources()</string>
            <rect>
             <x>370</x>
             <y>208</y>
-            <width>111</width>
+            <width>120</width>
             <height>21</height>
            </rect>
           </property>
@@ -9075,7 +9088,7 @@ sim.RunPhotonSources()</string>
 Right click: toggle build photon tracks. Also switches of building particle tracks</string>
           </property>
           <property name="text">
-           <string>track options</string>
+           <string>tracks options</string>
           </property>
          </widget>
          <widget class="QLabel" name="labPhTracksOn">
@@ -10228,9 +10241,9 @@ Right click: toggle build photon tracks. Also switches of building particle trac
           </property>
           <property name="geometry">
            <rect>
-            <x>264</x>
+            <x>255</x>
             <y>66</y>
-            <width>152</width>
+            <width>159</width>
             <height>17</height>
            </rect>
           </property>
@@ -10286,15 +10299,15 @@ Right click: toggle build photon tracks. Also switches of building particle trac
 Right click: toggle build particle tracks. Also switch off building photon tracks</string>
           </property>
           <property name="text">
-           <string>track options</string>
+           <string>tracks options</string>
           </property>
          </widget>
          <widget class="QCheckBox" name="cbGunDoS1">
           <property name="geometry">
            <rect>
-            <x>264</x>
+            <x>255</x>
             <y>46</y>
-            <width>154</width>
+            <width>158</width>
             <height>17</height>
            </rect>
           </property>
@@ -10769,7 +10782,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
       <property name="geometry">
        <rect>
         <x>-10</x>
-        <y>500</y>
+        <y>478</y>
         <width>130</width>
         <height>50</height>
        </rect>

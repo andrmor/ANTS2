@@ -315,6 +315,7 @@ private:
     void ShowProjection(QString type);
     double runScaleDialog();
     const QPair<double, double> runShiftDialog();
+    void calculateFractionTH1(int row);
 };
 
 #endif // GRAPHWINDOWCLASS_H

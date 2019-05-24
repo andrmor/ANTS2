@@ -2127,6 +2127,167 @@ const QPair<double, double> GraphWindowClass::runShiftDialog()
     return res;
 }
 
+//#include <QInputDialog>
+void GraphWindowClass::calculateFractionTH1(int row)
+{
+    if (row == -1) return;
+
+    TH1* h = dynamic_cast<TH1*>(Basket[row].DrawObjects.first().getPointer());
+    if (!h)
+    {
+        message("This operation requires TH1 ROOT object", this);
+        return;
+    }
+    TH1* cum = h->GetCumulative(true);
+
+    double integral = h->Integral();
+
+    QDialog D(this);
+    D.setWindowTitle("Integral / fraction calculator");
+
+    QVBoxLayout *l = new QVBoxLayout();
+        QPushButton * pbD = new QPushButton("Dummy");
+    l->addWidget(pbD);
+        QHBoxLayout * hh = new QHBoxLayout();
+            QLabel * lab = new QLabel("Enter threshold:");
+        hh->addWidget(lab);
+            QLineEdit* tT = new QLineEdit();
+        hh->addWidget(tT);
+    l->addLayout(hh);
+        QFrame * f = new QFrame();
+            f->setFrameShape(QFrame::HLine);
+    l->addWidget(f);
+        hh = new QHBoxLayout();
+            lab = new QLabel("Interpolated sum before:");
+        hh->addWidget(lab);
+            QLineEdit* tIb = new QLineEdit();
+        hh->addWidget(tIb);
+            lab = new QLabel("Fraction:");
+        hh->addWidget(lab);
+            QLineEdit* tIbf = new QLineEdit();
+        hh->addWidget(tIbf);
+    l->addLayout(hh);
+        hh = new QHBoxLayout();
+            lab = new QLabel("Interpolated sum after:");
+        hh->addWidget(lab);
+            QLineEdit* tIa = new QLineEdit();
+        hh->addWidget(tIa);
+            lab = new QLabel("Fraction:");
+        hh->addWidget(lab);
+            QLineEdit* tIaf = new QLineEdit();
+        hh->addWidget(tIaf);
+    l->addLayout(hh);
+        hh = new QHBoxLayout();
+            lab = new QLabel("Total sum of bins:");
+        hh->addWidget(lab);
+            QLineEdit* tI = new QLineEdit(QString::number(integral));
+            tI->setReadOnly(true);
+        hh->addWidget(tI);
+    l->addLayout(hh);
+        QPushButton * pb = new QPushButton("Close");
+    l->addWidget(pb);
+    D.setLayout(l);
+
+    pbD->setVisible(false);
+
+    QObject::connect(pb, &QPushButton::clicked, &D, &QDialog::reject);
+    QObject::connect(tT, &QLineEdit::editingFinished, [h, cum, integral, tT, tIb, tIbf, tIa, tIaf]()
+    {
+        bool bOK;
+        double val = tT->text().toDouble(&bOK);
+        if (bOK)
+        {
+            int bins = cum->GetNbinsX();
+            TAxis * ax = cum->GetXaxis();
+            int bin = ax->FindBin(val);
+
+            double result = 0;
+            if (bin > bins)
+                result = cum->GetBinContent(bins);
+            else
+            {
+                double width = h->GetBinWidth(bin);
+                double delta = val - h->GetBinLowEdge(bin);
+
+                double thisBinAdds = h->GetBinContent(bin) * delta / width;
+
+                double prev = (bin == 1 ? 0 : cum->GetBinContent(bin-1));
+                result = prev + thisBinAdds;
+            }
+            tIb->setText(QString::number(result));
+            tIbf->setText(QString::number(result/integral));
+            if (integral != 0) tIa->setText(QString::number(integral - result));
+            else tIa->setText("");
+            if (integral != 0) tIaf->setText(QString::number( (integral - result)/integral ));
+            else tIa->setText("");
+        }
+        else
+        {
+            tIa->clear();
+            tIb->clear();
+        }
+    });
+
+    D.exec();
+
+    delete cum;
+
+    /*
+    const bool bFromLeft = bBefore;
+    const bool bFromRight = !bBefore;
+
+    bool ok;
+    QString text = QInputDialog::getText(this, "Input",
+                                         "Threshold value:", QLineEdit::Normal,
+                                         "", &ok);
+    if (!ok || text.isEmpty()) return;
+
+    double val = text.toDouble(&ok);
+    if (!ok) return;
+
+
+    TH1* cum = h->GetCumulative(bBefore);
+    int bins = cum->GetNbinsX();
+
+    TAxis * ax = cum->GetXaxis();
+    int bin = ax->FindBin(val);
+    Draw(cum, "hist");
+    qDebug() << bin;
+
+    double result = 0;
+    if (bin < 1)
+    {
+        if (bFromRight) result = cum->GetBinContent(1);
+    }
+    else if (bin > bins)
+    {
+        if (bFromLeft) result = cum->GetBinContent(bins);
+    }
+    else
+    {
+        double width = h->GetBinWidth(bin);
+        double delta = val - h->GetBinLowEdge(bin);
+
+        if (bFromLeft)
+        {
+            double thisBinAdds = h->GetBinContent(bin) * delta / width;
+
+            double prev = (bin == 1 ? 0 : cum->GetBinContent(bin-1));
+            result = prev + thisBinAdds;
+        }
+        else //from right
+        {
+            delta =  width - delta;
+            double thisBinAdds = h->GetBinContent(bin) * delta / width;
+
+            double prev = (bin == bins ? 0 : cum->GetBinContent(bin+1));
+            result = prev + thisBinAdds;
+        }
+    }
+    qDebug() << "Result:"<<result;
+    */
+}
+
 void GraphWindowClass::EnforceOverlayOff()
 {
    ui->cbToolBox->setChecked(false); //update is in on_toggle
@@ -2657,6 +2818,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
   QAction* splineFit = 0;
   QAction* projX = 0;
   QAction* projY = 0;
+  QAction* fraction = 0;
 
   if (temp)
     {
@@ -2682,6 +2844,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
       {
              gaussFit = BasketMenu.addAction("Fit with Gauss");
              drawIntegral = BasketMenu.addAction("Draw integral");
+             fraction = BasketMenu.addAction("Calculate fraction before/after");
       }
       if (Basket.at(row).Type.startsWith("TH2"))
       {
@@ -3089,6 +3252,10 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
           hi->SetBinContent(i, prev);
         }
       Draw(hi, "");
+  }
+  else if (selectedItem == fraction)
+  {
+      calculateFractionTH1(row);
   }
   else if (selectedItem == titleX || selectedItem == titleY)
   {

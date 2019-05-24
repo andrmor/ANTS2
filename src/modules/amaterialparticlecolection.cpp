@@ -163,6 +163,13 @@ const QStringList AMaterialParticleCollection::getListOfParticleNames() const
     return l;
 }
 
+void AMaterialParticleCollection::ReplaceParticle(int iPart, const AParticle &p)
+{
+    if (iPart < 0 || iPart > ParticleCollection.size()) return;
+
+    *ParticleCollection[iPart] = p;
+}
+
 void AMaterialParticleCollection::clearMaterialCollection()
 {
   for (int i=0; i<MaterialCollectionData.size(); i++)

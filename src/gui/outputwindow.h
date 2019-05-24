@@ -10,6 +10,8 @@ class QStandardItemModel;
 struct AReconRecord;
 class EventsDataClass;
 class DynamicPassivesHandler;
+class QTreeWidgetItem;
+class AParticleTrackingRecord;
 
 namespace Ui {
 class OutputWindow;
@@ -37,7 +39,6 @@ public:
     void ResetViewport(); //auto-size and center viewing area
     void InitWindow();
 
-    void ShowEventHistoryLog();
     void ShowGeneratedPhotonsLog();
     void ShowOneEventLog(int iev);    
     void ShowPhotonProcessesLog();
@@ -63,15 +64,13 @@ private slots:
     void on_sbEvent_valueChanged(int arg1);
     void on_pbResetViewport_clicked();
     void on_pbAverageSignals_clicked();
-    void on_pbShowParticldeLog_clicked();
     void on_pbShowPhotonLog_clicked();
     void on_pbShowSumSignals_clicked();
     void on_pbShowSignals_clicked();
     void on_pbShowPhotonProcessesLog_clicked();
     void on_pbShowPhotonLossLog_clicked();    
-    void on_pbShowSelected_clicked();
-    void on_cobWhatToShow_currentIndexChanged(int index);
     void on_pbNextEvent_clicked();
+    void on_pbPreviousEvent_clicked();
 
     void on_tabwinDiagnose_tabBarClicked(int index);
     void RefreshPMhitsTable();
@@ -85,23 +84,24 @@ private slots:
     void on_cobMonitor_activated(int index);
     void on_pbShowAverageOverAll_clicked();
     void on_pbShowWavelength_clicked();
-    void on_pbSaveLog_clicked();
-    void on_pbHelpWithSaveToTree_clicked();
-
     void on_pbPTHistRequest_clicked();
     void on_cbPTHistOnlyPrim_clicked(bool checked);
     void on_cbPTHistOnlySec_clicked(bool checked);
-
-
     void on_cobPTHistVolRequestWhat_currentIndexChanged(int index);
-
     void on_twPTHistType_currentChanged(int index);
-
     void on_cbPTHistBordVs_toggled(bool checked);
-
     void on_cbPTHistBordAndVs_toggled(bool checked);
-
     void on_cbPTHistBordAsStat_toggled(bool checked);
+    void on_pbEventView_ShowTree_clicked();
+    void on_pbEVgeo_clicked();
+
+    void on_sbEVexpansionLevel_valueChanged(int arg1);
+
+    void on_trwEventView_customContextMenuRequested(const QPoint &pos);
+
+    void on_cbEVhideTrans_clicked();
+
+    void on_cbEVhideTransPrim_clicked();
 
 private:
     Ui::OutputWindow *ui;
@@ -134,16 +134,23 @@ private:
     double fromB2 = 0;
     double toB2 = 0;
 
+    QVector<bool> ExpandedItems;
+
     void clearGrItems();
     void updateSignalLabels(float MaxSignal);
     void addPMitems  (const QVector<float>* vector, float MaxSignal, DynamicPassivesHandler *Passives);
     void addTextitems(const QVector<float>* vector, float MaxSignal, DynamicPassivesHandler *Passives);
     void updateSignalScale();    
     void updateSignalTableWidth();
-    void showParticleHistString(int iRec, int level);
     void addParticleHistoryLogLine(int iRec, int level);
     void updateMonitors();
     void updatePTHistoryBinControl();
+    void fillEvTabViewRecord(QTreeWidgetItem *item, const AParticleTrackingRecord *pr, int ExpansionLevel) const;
+    void EV_show();
+    void EV_showTree();
+    void EV_showGeo();
+    int findEventWithFilters(int currentEv, bool bUp);
+    void doProcessExpandedStatus(QTreeWidgetItem *item, int &counter, bool bStore);
 };
 
 #endif // OUTPUTWINDOW_H

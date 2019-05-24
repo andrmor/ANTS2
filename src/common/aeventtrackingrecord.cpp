@@ -15,6 +15,12 @@ ATrackingStepData::ATrackingStepData(float *position, float time, float energy, 
     for (int i=0; i<3; i++) Position[i] = position[i];
 }
 
+ATrackingStepData::ATrackingStepData(double *position, double time, double energy, double depositedEnergy, const QString &process) :
+    Time(time), Energy(energy), DepositedEnergy(depositedEnergy), Process(process)
+{
+    for (int i=0; i<3; i++) Position[i] = position[i];
+}
+
 ATrackingStepData::ATrackingStepData(float x, float y, float z, float time, float energy, float depositedEnergy, const QString &process) :
     Time(time), Energy(energy), DepositedEnergy(depositedEnergy), Process(process)
 {
@@ -37,8 +43,11 @@ void ATrackingStepData::logToString(QString & str, int offset) const
 
 AParticleTrackingRecord::~AParticleTrackingRecord()
 {
-    for (auto* step : Steps) delete step;
-    for (auto* sec  : Secondaries) delete sec;
+    for (ATrackingStepData * step : Steps) delete step;
+    Steps.clear();
+
+    for (AParticleTrackingRecord * sec  : Secondaries) delete sec;
+    Secondaries.clear();
 }
 
 AParticleTrackingRecord *AParticleTrackingRecord::create(const QString & Particle)
@@ -71,6 +80,22 @@ void AParticleTrackingRecord::addSecondary(AParticleTrackingRecord *sec)
 int AParticleTrackingRecord::countSecondaries() const
 {
     return static_cast<int>(Secondaries.size());
+}
+
+bool AParticleTrackingRecord::isHaveProcesses(const QStringList & Proc, bool bOnlyPrimary)
+{
+    for (ATrackingStepData * s : Steps)
+        for (const QString & p : Proc)
+            if (p == s->Process) return true;
+
+    if (!bOnlyPrimary)
+    {
+        for (AParticleTrackingRecord * sec : Secondaries)
+            if (sec->isHaveProcesses(Proc, bOnlyPrimary))
+                return true;
+    }
+
+    return false;
 }
 
 void AParticleTrackingRecord::logToString(QString & str, int offset, bool bExpandSecondaries) const
@@ -108,6 +133,50 @@ void AParticleTrackingRecord::makeTrack(std::vector<TrackHolderClass *> & Tracks
             sec->makeTrack(Tracks, ParticleNames, TrackBuildOptions, bWithSecondaries);
 }
 
+void AParticleTrackingRecord::fillELDD(ATrackingStepData *IdByStep, std::vector<float> &dist, std::vector<float> &ELDD) const
+{
+    dist.clear();
+    ELDD.clear();
+
+    int iStep = 0;
+    int iMatStart = -1;
+    bool bFound = false;
+    for (; iStep<Steps.size(); iStep++)
+    {
+        QString Proc = Steps.at(iStep)->Process;
+        if (Proc == "C" || Proc == "T") iMatStart = iStep;
+
+        if (Steps.at(iStep) == IdByStep)
+        {
+            bFound = true;
+            break;
+        }
+    }
+    if (!bFound) return;
+
+    float totDist = 0;
+    iStep = iMatStart;
+    do
+    {
+        ATrackingStepData * ps = Steps.at(iStep);
+        iStep++;
+        if (iStep >= (int)Steps.size()) break;
+        ATrackingStepData * ts = Steps.at(iStep);
+        if (ts->Process == "T" || ts->Process == "O") break;
+
+        float Delta = 0;
+        for (int i=0; i<3; i++)
+            Delta += (ts->Position[i] - ps->Position[i]) * (ts->Position[i] - ps->Position[i]);
+        Delta = sqrt(Delta);
+
+        totDist += Delta;
+
+        dist.push_back(totDist - 0.5*Delta);
+        ELDD.push_back( Delta == 0 ? ts->DepositedEnergy : ts->DepositedEnergy/Delta);
+    }
+    while(true);
+}
+
 void AParticleTrackingRecord::updateGeoNodes()
 {
     for (size_t iStep = 0; iStep < Steps.size(); iStep++)
@@ -119,9 +188,9 @@ void AParticleTrackingRecord::updateGeoNodes()
             if (prevStep->Process != "T")
                 Step->GeoNode = gGeoManager->FindNode(prevStep->Position[0], prevStep->Position[1], prevStep->Position[2]);
             else
-                Step->GeoNode = gGeoManager->FindNode( 0.99*Step->Position[0] + 0.01*prevStep->Position[0],
-                                                       0.99*Step->Position[1] + 0.01*prevStep->Position[1],
-                                                       0.99*Step->Position[2] + 0.01*prevStep->Position[2] );
+                Step->GeoNode = gGeoManager->FindNode( 0.5*Step->Position[0] + 0.5*prevStep->Position[0],
+                                                       0.5*Step->Position[1] + 0.5*prevStep->Position[1],
+                                                       0.5*Step->Position[2] + 0.5*prevStep->Position[2] );
         }
         else Step->GeoNode = gGeoManager->FindNode(Step->Position[0], Step->Position[1], Step->Position[2]);
     }
@@ -137,11 +206,12 @@ AEventTrackingRecord * AEventTrackingRecord::create()
     return new AEventTrackingRecord();
 }
 
-AEventTrackingRecord::AEventTrackingRecord() {}
+AEventTrackingRecord::AEventTrackingRecord(){}
 
 AEventTrackingRecord::~AEventTrackingRecord()
 {
-    for (auto* pr : PrimaryParticleRecords) delete pr;
+    for (AParticleTrackingRecord * pr : PrimaryParticleRecords) delete pr;
+    PrimaryParticleRecords.clear();
 }
 
 void AEventTrackingRecord::addPrimaryRecord(AParticleTrackingRecord *rec)
@@ -149,10 +219,27 @@ void AEventTrackingRecord::addPrimaryRecord(AParticleTrackingRecord *rec)
     PrimaryParticleRecords.push_back(rec);
 }
 
-int AEventTrackingRecord::countPrimaries() const { return static_cast<int>(PrimaryParticleRecords.size()); }
+int AEventTrackingRecord::countPrimaries() const
+{
+    return static_cast<int>(PrimaryParticleRecords.size());
+}
+
+bool AEventTrackingRecord::isHaveProcesses(const QStringList & Proc, bool bOnlyPrimary) const
+{
+    for (AParticleTrackingRecord * pr : PrimaryParticleRecords)
+        if (pr->isHaveProcesses(Proc, bOnlyPrimary)) return true;
+
+    return false;
+}
 
 void AEventTrackingRecord::updateGeoNodes()
 {
     for (AParticleTrackingRecord * pr : PrimaryParticleRecords)
         pr->updateGeoNodes();
+}
+
+void AEventTrackingRecord::makeTracks(std::vector<TrackHolderClass *> &Tracks, const QStringList &ParticleNames, const ATrackBuildOptions &TrackBuildOptions, bool bWithSecondaries) const
+{
+    for (AParticleTrackingRecord * r : PrimaryParticleRecords)
+        r->makeTrack(Tracks, ParticleNames, TrackBuildOptions, bWithSecondaries);
 }

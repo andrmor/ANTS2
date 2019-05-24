@@ -4,29 +4,30 @@
 #include "amessage.h"
 
 #include <QListWidget>
+#include <QDebug>
 
 AGeant4ConfigDialog::AGeant4ConfigDialog(AG4SimulationSettings & G4SimSet, QWidget *parent) :
     QDialog(parent), G4SimSet(G4SimSet),
     ui(new Ui::AGeant4ConfigDialog)
 {
+    //setWindowFlags(Qt::Dialog);
+    //setWindowFlags(windowFlags() & ~Qt::WindowCloseButtonHint);
+    setWindowFlags(Qt::Dialog | Qt::WindowTitleHint);
+
     ui->setupUi(this);
 
-    ui->lwCommands->setDragDropMode(QAbstractItemView::InternalMove);
-    ui->lwSensitiveVolumes->setDragDropMode(QAbstractItemView::InternalMove);
+    ui->lePhysicsList->setText(G4SimSet.PhysicsList);
+    ui->cobRefPhysLists->setCurrentIndex(-1);
 
     for (auto& s : G4SimSet.Commands)
-    {
-        QListWidgetItem* item = new QListWidgetItem(s);
-        item->setFlags (item->flags () | Qt::ItemIsEditable);
-        ui->lwCommands->addItem(item);
-    }
+        ui->pteCommands->appendPlainText(s);
 
     for (auto& s : G4SimSet.SensitiveVolumes)
-    {
-        QListWidgetItem* item = new QListWidgetItem(s);
-        item->setFlags (item->flags () | Qt::ItemIsEditable);
-        ui->lwSensitiveVolumes->addItem(item);
-    }
+        ui->pteSensitiveVolumes->appendPlainText(s);
+
+    ui->pteStepLimits->clear();
+    for (auto & key : G4SimSet.StepLimits.keys())
+        ui->pteStepLimits->appendPlainText( QString("%1 %2").arg(key).arg(G4SimSet.StepLimits.value(key)) );
 }
 
 AGeant4ConfigDialog::~AGeant4ConfigDialog()
@@ -34,66 +35,57 @@ AGeant4ConfigDialog::~AGeant4ConfigDialog()
     delete ui;
 }
 
-void AGeant4ConfigDialog::on_pbAddCommand_clicked()
-{
-    int cr = ui->lwCommands->currentRow();
-    int row = (cr == -1 ? ui->lwCommands->count() : cr+1);
-    if (row < 0) row = 0;
-    if (row > ui->lwCommands->count()) row = ui->lwCommands->count();
-    QListWidgetItem* item = new QListWidgetItem("new_text");
-    item->setFlags (item->flags () | Qt::ItemIsEditable);
-    ui->lwCommands->insertItem(row, item);
-    ui->lwCommands->editItem(ui->lwCommands->item(row));
-}
-
-void AGeant4ConfigDialog::on_pbRemoveCommand_clicked()
-{
-    int cr = ui->lwCommands->currentRow();
-    if (cr == -1)
-    {
-        message("Select an item to remove", this);
-        return;
-    }
-    delete ui->lwCommands->takeItem(cr);
-}
-
-void AGeant4ConfigDialog::on_pbAddVolume_clicked()
-{
-    int cr = ui->lwSensitiveVolumes->currentRow();
-    int row = (cr == -1 ? ui->lwSensitiveVolumes->count() : cr+1);
-    if (row < 0) row = 0;
-    if (row > ui->lwSensitiveVolumes->count()) row = ui->lwSensitiveVolumes->count();
-    QListWidgetItem* item = new QListWidgetItem("new_text");
-    item->setFlags (item->flags () | Qt::ItemIsEditable);
-    ui->lwSensitiveVolumes->insertItem(row, item);
-    ui->lwSensitiveVolumes->editItem(ui->lwSensitiveVolumes->item(row));
-}
-
-void AGeant4ConfigDialog::on_pbRemoveVolume_clicked()
-{
-    int cr = ui->lwSensitiveVolumes->currentRow();
-    if (cr == -1)
-    {
-        message("Select an item to remove", this);
-        return;
-    }
-    delete ui->lwSensitiveVolumes->takeItem(cr);
-}
-
 void AGeant4ConfigDialog::on_pbAccept_clicked()
 {
-    QStringList com;
-    for (int i=0; i<ui->lwCommands->count(); i++)
-        com << ui->lwCommands->item(i)->text();
-    G4SimSet.Commands = com;
+    const QRegularExpression rx = QRegularExpression("(\\ |\\,|\\n|\\t)"); //separators: ' ' or ',' or 'n' or '\t'
+    const QRegularExpression rx2 = QRegularExpression("(\\ |\\t)"); //separators: ' ' or '\t'
 
-    QStringList sv;
-    for (int i=0; i<ui->lwSensitiveVolumes->count(); i++)
-        sv << ui->lwSensitiveVolumes->item(i)->text();
-    if (sv.isEmpty())
-        message("Warning: no sensitive volumes are defined!\nNo deposition information will be collected in Geant4", this);
+    QString t = ui->pteSensitiveVolumes->document()->toPlainText();
+    QStringList sl = t.split(rx, QString::SkipEmptyParts);
+    if (sl.isEmpty())
+        if (!confirm("Warning: no sensitive volumes are defined!\nNo deposition information will be collected in Geant4", this)) return;
+    G4SimSet.SensitiveVolumes = sl;
 
-    G4SimSet.SensitiveVolumes = sv;
+    t = ui->pteCommands->document()->toPlainText();
+    G4SimSet.Commands = t.split('\n', QString::SkipEmptyParts);
+
+    G4SimSet.StepLimits.clear();
+    t = ui->pteStepLimits->document()->toPlainText();
+    sl = t.split('\n', QString::SkipEmptyParts);
+    for (const QString & str : sl)
+    {
+        QStringList f = str.split(rx2, QString::SkipEmptyParts);
+        if (f.size() != 2)
+        {
+            message("Bad format of step limits, it should be (new line for each):\nVolume_name Step_Limit");
+            return;
+        }
+        QString vol = f[0];
+        bool bOK;
+        double step = f[1].toDouble(&bOK);
+        if (!bOK)
+        {
+            message("Bad format of step limits: failed to convert to double value: " + f[1]);
+            return;
+        }
+        G4SimSet.StepLimits[vol] = step;
+    }
 
     accept();
+}
+
+void AGeant4ConfigDialog::on_lePhysicsList_editingFinished()
+{
+    G4SimSet.PhysicsList = ui->lePhysicsList->text();
+}
+
+void AGeant4ConfigDialog::on_cobRefPhysLists_activated(int index)
+{
+     ui->lePhysicsList->setText( ui->cobRefPhysLists->itemText(index) );
+     on_lePhysicsList_editingFinished();
+}
+
+void AGeant4ConfigDialog::on_pbCancel_clicked()
+{
+    reject();
 }

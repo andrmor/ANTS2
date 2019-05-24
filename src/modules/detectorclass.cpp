@@ -135,7 +135,7 @@ bool DetectorClass::BuildDetector(bool SkipSimGuiUpdate, bool bSkipAllUpdates)
 {
   if (bSkipAllUpdates) SkipSimGuiUpdate = true;
 
-    //qDebug() << "Remake detector triggered"  ;
+  // qDebug() << "Remake detector triggered"  ;
   if (Config->JSON.isEmpty())
   {
       qCritical() << "!!!Cannot construct detector: Config is empty";
@@ -1223,88 +1223,4 @@ void DetectorClass::updatePreprocessingAddMultySize()
         js1["LoadExpDataConfig"] = js;
         Config->JSON["DetectorConfig"] = js1;
     }
-}
-
-void removeOldFile(const QString & fileName, const QString & txt)
-{
-    QFile f(fileName);
-    if (f.exists())
-    {
-        //qDebug() << "Removing old file with" << txt << ":" << fileName;
-        bool bOK = f.remove();
-        if (!bOK) qWarning() << "Was unable to remove old file with" << txt << ":" << fileName;
-    }
-}
-
-#include "ag4simulationsettings.h"
-bool DetectorClass::generateG4interfaceFiles(const AG4SimulationSettings & G4SimSet, int numThreads, bool bBuildTracks, bool bLogHistory, int maxTracks)
-{
-    QString gdmlName = G4SimSet.getGdmlFileName();
-    QString err = exportToGDML(gdmlName);
-    if ( !err.isEmpty() ) return false;
-
-    QJsonObject json;
-
-    QJsonArray Parr;
-    //const QStringList Particles = MpCollection->getListOfParticleNames();
-    //for (auto & pname : Particles ) Parr << pname;
-    const int numPart = MpCollection->countParticles();
-    for (int iP=0; iP<numPart; iP++)
-    {
-        const AParticle * part = MpCollection->getParticle(iP);
-        if (part->isIon())
-        {
-            QJsonArray ar;
-            ar << part->ParticleName << part->ionZ << part->ionA;
-            Parr << ar;
-        }
-        else Parr << part->ParticleName;
-    }
-    json["Particles"] = Parr;
-
-    const QStringList Materials = MpCollection->getListOfMaterialNames();
-    QJsonArray Marr;
-    for (auto & mname : Materials ) Marr << mname;
-    json["Materials"] = Marr;
-
-    QJsonArray SVarr;
-    for (auto & v : G4SimSet.SensitiveVolumes ) SVarr << v;
-    json["SensitiveVolumes"] = SVarr;
-
-    json["GDML"] = gdmlName;
-
-    QJsonArray Carr;
-    for (auto & c : G4SimSet.Commands ) Carr << c;
-    json["Commands"] = Carr;
-
-    json["GuiMode"] = false;
-
-    json["LogHistory"] = bLogHistory;
-    json["BuildTracks"] = bBuildTracks;
-    if (bBuildTracks) json["MaxTracks"] = maxTracks;
-
-    for (int i=0; i<numThreads; i++)
-    {
-        json["Seed"] = static_cast<int>(RandGen->Rndm()*10000000);
-
-        QString primFN = G4SimSet.getPrimariesFileName(i);
-        json["File_Primaries"] = primFN;
-        removeOldFile(primFN, "primaries");
-
-        QString depoFN = G4SimSet.getDepositionFileName(i);
-        json["File_Deposition"] = depoFN;
-        removeOldFile(depoFN, "deposition");
-
-        QString recFN = G4SimSet.getReceitFileName(i);
-        json["File_Receipt"] = recFN;
-        removeOldFile(recFN, "receipt");
-
-        QString tracFN = G4SimSet.getTracksFileName(i);
-        json["File_Tracks"] = tracFN;
-        removeOldFile(tracFN, "tracking");
-
-        SaveJsonToFile(json, G4SimSet.getConfigFileName(i));
-    }
-
-    return true;
 }

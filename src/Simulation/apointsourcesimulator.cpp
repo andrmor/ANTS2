@@ -24,8 +24,8 @@
 #include "TGeoManager.h"
 #include "TGeoNavigator.h"
 
-APointSourceSimulator::APointSourceSimulator(const DetectorClass *detector, ASimulationManager *simMan, int ID) :
-    ASimulator(detector, simMan, ID) {}
+APointSourceSimulator::APointSourceSimulator(ASimulationManager & simMan, int ID) :
+    ASimulator(simMan, ID) {}
 
 APointSourceSimulator::~APointSourceSimulator()
 {
@@ -58,7 +58,7 @@ bool APointSourceSimulator::setup(QJsonObject &json)
     fLimitNodesToObject = false;
     if (cjson.contains("GenerateOnlyInPrimary"))  //just in case it is an old config file run directly
     {
-        if (detector->Sandwich->World->findObjectByName("PrScint"))
+        if (detector.Sandwich->World->findObjectByName("PrScint"))
         {
             fLimitNodesToObject = true;
             LimitNodesToObject = "PrScint";
@@ -72,7 +72,7 @@ bool APointSourceSimulator::setup(QJsonObject &json)
             fLimitNodesToObject = true;  //semi-old
         QString Obj = cjson["LimitNodesTo"].toString();
 
-        if (fLimitNodesToObject && !Obj.isEmpty() && detector->Sandwich->World->findObjectByName(Obj))
+        if (fLimitNodesToObject && !Obj.isEmpty() && detector.Sandwich->World->findObjectByName(Obj))
         {
             fLimitNodesToObject = true;
             LimitNodesToObject = Obj.toLocal8Bit().data();
@@ -126,7 +126,7 @@ bool APointSourceSimulator::setup(QJsonObject &json)
     fUseGivenWaveIndex = false; //compatibility
     parseJson(wdjson, "UseFixedWavelength", fUseGivenWaveIndex);
     PhotonOnStart.waveIndex = wdjson["WaveIndex"].toInt();
-    if (!simSettings->fWaveResolved) PhotonOnStart.waveIndex = -1;
+    if (!simSettings.fWaveResolved) PhotonOnStart.waveIndex = -1;
 
     //reading direction info
     QJsonObject pdjson = js["PhotonDirectionOptions"].toObject();
@@ -190,10 +190,10 @@ bool APointSourceSimulator::setup(QJsonObject &json)
     case 3:
         simOptions = js["CustomNodesOptions"].toObject();
         //totalEventCount = simOptions["Nodes"].toArray().size();//progress reporting knows we do NumRuns per each node
-        totalEventCount = simMan->Nodes.size();
+        totalEventCount = simMan.Nodes.size();
         break;
     case 4:
-        totalEventCount = simMan->Nodes.size();
+        totalEventCount = simMan.Nodes.size();
         break;
     default:
         ErrorString = "Unknown or not implemented simulation mode: "+QString().number(PointSimMode);
@@ -204,6 +204,8 @@ bool APointSourceSimulator::setup(QJsonObject &json)
 
 void APointSourceSimulator::simulate()
 {
+    checkNavigatorPresent();
+
     fStopRequested = false;
     fHardAbortWasTriggered = false;
 
@@ -420,7 +422,7 @@ bool APointSourceSimulator::SimulateCustomNodes()
 
     for (int inode = 0; inode < nodeCount; inode++)
     {
-        ANodeRecord * thisNode = simMan->Nodes.at(currentNode);
+        ANodeRecord * thisNode = simMan.Nodes.at(currentNode);
 
         for (int irun = 0; irun<NumRuns; irun++)
         {
@@ -511,14 +513,14 @@ void APointSourceSimulator::GenerateTraceNphotons(AScanRecord *scs, double time0
 
         //configure  wavelength index and emission time
         PhotonOnStart.time = time0;   //reset time offset
-        TGeoNavigator *navigator = detector->GeoManager->GetCurrentNavigator();
+        TGeoNavigator *navigator = detector.GeoManager->GetCurrentNavigator();
 
         int thisMatIndex;
         TGeoNode* node = navigator->FindNode(PhotonOnStart.r[0], PhotonOnStart.r[1], PhotonOnStart.r[2]);
         if (!node)
         {
             //PhotonOnStart.waveIndex = -1;
-            thisMatIndex = detector->top->GetMaterial()->GetIndex(); //get material of the world
+            thisMatIndex = detector.top->GetMaterial()->GetIndex(); //get material of the world
             //qWarning() << "Node not found when generating photons (photon sources) - assuming material of the world!"<<thisMatIndex;
         }
         else
@@ -552,7 +554,7 @@ void APointSourceSimulator::GenerateTraceNphotons(AScanRecord *scs, double time0
 
 bool APointSourceSimulator::FindSecScintBounds(double *r, double & z1, double & z2, double & timeOfDrift, double & driftSpeedInSecScint)
 {
-    TGeoNavigator *navigator = detector->GeoManager->GetCurrentNavigator();
+    TGeoNavigator *navigator = detector.GeoManager->GetCurrentNavigator();
     navigator->SetCurrentPoint(r);
     navigator->SetCurrentDirection(0, 0, 1.0);
     TGeoNode * node = navigator->FindNode();
@@ -566,7 +568,7 @@ bool APointSourceSimulator::FindSecScintBounds(double *r, double & z1, double & 
         navigator->FindNextBoundaryAndStep();
         if (navigator->IsOutside()) return false;
 
-        double DriftVelocity = detector->MpCollection->getDriftSpeed(iMat); // still previous iMat
+        double DriftVelocity = detector.MpCollection->getDriftSpeed(iMat); // still previous iMat
         iMat = navigator->GetCurrentVolume()->GetMaterial()->GetIndex();    // next iMat
         if (DriftVelocity != 0)
         {
@@ -576,7 +578,7 @@ bool APointSourceSimulator::FindSecScintBounds(double *r, double & z1, double & 
     }
     while (navigator->GetCurrentVolume()->GetName() != SecScintName);
 
-    driftSpeedInSecScint = detector->MpCollection->getDriftSpeed(iMat);
+    driftSpeedInSecScint = detector.MpCollection->getDriftSpeed(iMat);
     z1 = navigator->GetCurrentPoint()[2];
     navigator->FindNextBoundary(); //does not step - we are still inside SecScint!
     double SecScintWidth = navigator->GetStep();
@@ -609,7 +611,7 @@ void APointSourceSimulator::OneNode(ANodeRecord & node)
             sr->Points[iPoint].energy = 0;
         }
 
-        if (!simSettings->fLRFsim)
+        if (!simSettings.fLRFsim)
         {
             GenerateTraceNphotons(sr, thisNode->Time);
         }
@@ -619,16 +621,16 @@ void APointSourceSimulator::OneNode(ANodeRecord & node)
             {
                 // NumPhotElPerLrfUnity - scaling: LRF of 1.0 corresponds to NumPhotElPerLrfUnity photo-electrons
                 int numPhots = sr->Points[iPoint].energy;  // photons (before scaling) to generate at this node
-                double energy = 1.0 * numPhots / simSettings->NumPhotsForLrfUnity; // NumPhotsForLRFunity corresponds to the total number of photons per event for unitary LRF
+                double energy = 1.0 * numPhots / simSettings.NumPhotsForLrfUnity; // NumPhotsForLRFunity corresponds to the total number of photons per event for unitary LRF
 
                 //Generating events
-                for (int ipm = 0; ipm < detector->PMs->count(); ipm++)
+                for (int ipm = 0; ipm < detector.PMs->count(); ipm++)
                 {
-                    double avSignal = detector->LRFs->getLRF(ipm, thisNode->R) * energy;
-                    double avPhotEl = avSignal * simSettings->NumPhotElPerLrfUnity;
+                    double avSignal = detector.LRFs->getLRF(ipm, thisNode->R) * energy;
+                    double avPhotEl = avSignal * simSettings.NumPhotElPerLrfUnity;
                     double numPhotEl = RandGen->Poisson(avPhotEl);
 
-                    double signal = numPhotEl / simSettings->NumPhotElPerLrfUnity;  // back to LRF units
+                    double signal = numPhotEl / simSettings.NumPhotElPerLrfUnity;  // back to LRF units
                     OneEvent->PMsignals[ipm] += signal;
                 }
             }
@@ -640,10 +642,10 @@ void APointSourceSimulator::OneNode(ANodeRecord & node)
     }
     while (thisNode);
 
-    if (!simSettings->fLRFsim) OneEvent->HitsToSignal();
+    if (!simSettings.fLRFsim) OneEvent->HitsToSignal();
 
     dataHub->Events.append(OneEvent->PMsignals);
-    if (simSettings->fTimeResolved)
+    if (simSettings.fTimeResolved)
         dataHub->TimedEvents.append(OneEvent->TimedPMsignals);  //LRF sim for time-resolved will give all zeroes!
 
     dataHub->Scan.append(sr);
@@ -657,7 +659,7 @@ bool APointSourceSimulator::isInsideLimitingObject(const double *r)
     //    TString VolName = navigator->GetCurrentVolume()->GetName();
     //    return (VolName == LimitNodesToObject);
 
-    TGeoNavigator *navigator = detector->GeoManager->GetCurrentNavigator();
+    TGeoNavigator *navigator = detector.GeoManager->GetCurrentNavigator();
     TGeoNode* node = navigator->FindNode(r[0], r[1], r[2]);
     return (node && node->GetVolume()->GetName()==LimitNodesToObject);
 }

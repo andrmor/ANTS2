@@ -22,6 +22,8 @@
 #include <QFile>
 #include <QTextStream>
 
+#include "TRandom2.h"
+
 ASimulationManager::ASimulationManager(EventsDataClass & EventsDataHub, DetectorClass & Detector) :
     QObject(nullptr),
     EventsDataHub(EventsDataHub), Detector(Detector)
@@ -133,14 +135,11 @@ bool ASimulationManager::setup(const QJsonObject & json, int threads)
     {
         if (simSettings.G4SimSet.bTrackParticles)
         {
-            const bool & bBuildTracks = simSettings.TrackBuildOptions.bBuildParticleTracks;
-            const bool & bLogHistory = simSettings.fLogsStat;
-            int maxTracks = simSettings.TrackBuildOptions.MaxParticleTracks / threads + 1;
-
-            bool bOK = Detector.generateG4interfaceFiles(simSettings.G4SimSet, threads, bBuildTracks, bLogHistory, maxTracks);
-            if (!bOK)
+            const QString gdmlName = simSettings.G4SimSet.getGdmlFileName();
+            QString err = Detector.exportToGDML(gdmlName);
+            if ( !err.isEmpty() )
             {
-                ErrorString = "Failed to create Ants2 <-> Geant4 interface files";
+                ErrorString = err;
                 return false;
             }
         }
@@ -201,10 +200,14 @@ void ASimulationManager::onSimulationFinished()
         EventsDataHub.purge1e10events(); //purging events with "true" positions x==1e10 && y==1e10
     }
 
+    bGuardTrackingHistory = true;
     Detector.BuildDetector(true, true);  // <- still needed on Windows
-    //Detector->GeoManager->CleanGarbage();
+    bGuardTrackingHistory = false;
 
-    if (!TrackingHistory.empty()) findGeoNodes(); // should be called after GeoManager was recreated!
+    //Detector.GeoManager->CleanGarbage();
+
+    if (!TrackingHistory.empty())
+        findGeoNodes(); // should be called after GeoManager was recreated!
 
     if (fStartedFromGui) emit SimulationFinished();
 
@@ -260,10 +263,18 @@ void ASimulationManager::copyDataFromWorkers()
     }
 }
 
+#include "TGeoManager.h"
 void ASimulationManager::findGeoNodes()
 {
+    if (!Detector.GeoManager->GetCurrentNavigator())
+    {
+        qDebug() << "No navigator found, adding";
+        Detector.GeoManager->AddNavigator();
+    }
+
     for (AEventTrackingRecord * e : TrackingHistory)
         e->updateGeoNodes();
+    //qDebug() << "GeoNodes updated";
 }
 
 void ASimulationManager::clearTracks()
@@ -286,7 +297,8 @@ void ASimulationManager::clearEnergyVector()
 
 void ASimulationManager::clearTrackingHistory()
 {
-    for (auto & r : TrackingHistory) delete r;
+    if (bGuardTrackingHistory) return;
+    for (AEventTrackingRecord * r : TrackingHistory) delete r;
     TrackingHistory.clear();
 }
 
@@ -355,6 +367,11 @@ void ASimulationManager::StopSimulation()
     emit RequestStopSimulation();
 }
 
+void ASimulationManager::onNewGeoManager(TObject *)
+{
+    clearTrackingHistory();
+}
+
 void ASimulationManager::updateGui()
 {
     switch (Runner->getSimState())
@@ -370,4 +387,84 @@ void ASimulationManager::updateGui()
     case ASimulatorRunner::SFinished:
         qDebug()<<"Simulation has emitted finish, but updateGui() is still being called";
     }
+}
+
+void ASimulationManager::removeOldFile(const QString & fileName, const QString & txt)
+{
+    QFile f(fileName);
+    if (f.exists())
+    {
+        //qDebug() << "Removing old file with" << txt << ":" << fileName;
+        bool bOK = f.remove();
+        if (!bOK) qWarning() << "Was unable to remove old file with" << txt << ":" << fileName;
+    }
+}
+
+void ASimulationManager::generateG4antsConfigCommon(QJsonObject & json, int ThreadId)
+{
+    const AG4SimulationSettings & G4SimSet = simSettings.G4SimSet;
+    const AMaterialParticleCollection & MpCollection = *Detector.MpCollection;
+
+    json["PhysicsList"] = G4SimSet.PhysicsList;
+
+    json["LogHistory"] = simSettings.fLogsStat;
+
+    QJsonArray Parr;
+    const int numPart = MpCollection.countParticles();
+    for (int iP=0; iP<numPart; iP++)
+    {
+        const AParticle * part = MpCollection.getParticle(iP);
+        if (part->isIon())
+        {
+            QJsonArray ar;
+            ar << part->ParticleName << part->ionZ << part->ionA;
+            Parr << ar;
+        }
+        else Parr << part->ParticleName;
+    }
+    json["Particles"] = Parr;
+
+    const QStringList Materials = MpCollection.getListOfMaterialNames();
+    QJsonArray Marr;
+    for (auto & mname : Materials ) Marr << mname;
+    json["Materials"] = Marr;
+
+    QJsonArray SVarr;
+    for (auto & v : G4SimSet.SensitiveVolumes ) SVarr << v;
+    json["SensitiveVolumes"] = SVarr;
+
+    json["GDML"] = G4SimSet.getGdmlFileName();
+
+    QJsonArray arSL;
+    for (auto & key : G4SimSet.StepLimits.keys())
+    {
+        QJsonArray el;
+        el << key << G4SimSet.StepLimits.value(key);
+        arSL.push_back(el);
+    }
+    json["StepLimits"] = arSL;
+
+    QJsonArray Carr;
+    for (auto & c : G4SimSet.Commands ) Carr << c;
+    json["Commands"] = Carr;
+
+    json["GuiMode"] = false;
+
+    json["Seed"] = static_cast<int>(Detector.RandGen->Rndm()*10000000);
+
+    QString primFN = G4SimSet.getPrimariesFileName(ThreadId);
+    json["File_Primaries"] = primFN;
+    removeOldFile(primFN, "primaries");
+
+    QString depoFN = G4SimSet.getDepositionFileName(ThreadId);
+    json["File_Deposition"] = depoFN;
+    removeOldFile(depoFN, "deposition");
+
+    QString recFN = G4SimSet.getReceitFileName(ThreadId);
+    json["File_Receipt"] = recFN;
+    removeOldFile(recFN, "receipt");
+
+    QString tracFN = G4SimSet.getTracksFileName(ThreadId);
+    json["File_Tracks"] = tracFN;
+    removeOldFile(tracFN, "tracking");
 }

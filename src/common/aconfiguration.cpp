@@ -324,7 +324,6 @@ const QString AConfiguration::RemoveParticle(int particleId)
   //updating gui if present
   emit requestDetectorGuiUpdate();
   emit requestSimulationGuiUpdate();
-  emit RequestClearParticleStack(); //clear defined ParticleStack in GUI
 
   return "";
 }

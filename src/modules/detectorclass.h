@@ -22,7 +22,6 @@ class APreprocessingSettings;
 class ASandwich;
 class APmGroupsManager;
 class APmType;
-class AG4SimulationSettings;
 
 struct PMdummyStructure
 {
@@ -98,8 +97,7 @@ public:
 
   const QString exportToGDML(const QString &fileName) const; //returns error string, empty if all is fine  
   const QString exportToROOT(const QString& fileName) const;
-  bool generateG4interfaceFiles(const AG4SimulationSettings & G4SimSet, int numThreads, bool bBuildTracks, bool bLogHistory, int maxTracks);
-
+  
 public slots:
   void onRequestRegisterGeoManager();
 

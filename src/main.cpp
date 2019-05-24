@@ -17,12 +17,10 @@
 #include "asandwich.h"
 #include "amessageoutput.h"
 #include "amessage.h"
-#include "adepo_si.h"
 #include "aphoton_si.h"
 #include "athreads_si.h"
 #include "aweb_si.h"
 #include "aserver_si.h"
-#include "atracklog_si.h"
 #include "asim_si.h"
 #include "aconfig_si.h"
 #include "aevents_si.h"
@@ -127,6 +125,8 @@ int main(int argc, char *argv[])
 #ifdef SIM
     ASimulationManager SimulationManager(EventsDataHub, Detector);
     Config.SetParticleSources(SimulationManager.ParticleSources);
+    QObject::connect(&EventsDataHub, &EventsDataClass::cleared, &SimulationManager, &ASimulationManager::clearTrackingHistory);
+    QObject::connect(&Detector, &DetectorClass::newGeoManager, &SimulationManager, &ASimulationManager::onNewGeoManager);
     qDebug() << "Simulation manager created";
 #endif
 
@@ -273,12 +273,8 @@ int main(int argc, char *argv[])
         SM.RegisterInterface(tree, "tree");
         APhoton_SI* photon = new APhoton_SI(&Config, &EventsDataHub);
         SM.RegisterInterface(photon, "photon");
-        ADepo_SI* depo = new ADepo_SI(&Detector, &EventsDataHub);
-        SM.RegisterInterface(depo, "depo");
         AThreads_SI* threads = new AThreads_SI(&SM);
         SM.RegisterInterface(threads, "threads");
-        ATrackLog_SI* pth = new ATrackLog_SI(EventsDataHub);
-        SM.RegisterInterface(pth, "tracklog");
         AWeb_SI* web = new AWeb_SI(&EventsDataHub);
         SM.RegisterInterface(web, "web");
         AServer_SI* server = new AServer_SI(*Network.WebSocketServer, &EventsDataHub);

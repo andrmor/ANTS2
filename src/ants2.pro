@@ -1,6 +1,6 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 4
-ANTS2_MINOR = 17
+ANTS2_MINOR = 18
 
 #Optional libraries
 #CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
@@ -9,7 +9,7 @@ ANTS2_MINOR = 17
 CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra - highly recommended! Installation requires only to copy files!
 CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 #CONFIG += ants2_Python      #enable Python scripting
-#CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering): see https://github.com/mctools/ncrystal
+CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering): see https://github.com/mctools/ncrystal
 
 # You may need to modify paths for CERN ROOT and the enabled libraries! See the corresponding sections below
 
@@ -379,7 +379,6 @@ SOURCES += main.cpp \
     Simulation/ag4simulationsettings.cpp \
     gui/ageant4configdialog.cpp \
     scriptmode/asim_si.cpp \
-    scriptmode/adepo_si.cpp \
     scriptmode/amath_si.cpp \
     scriptmode/atree_si.cpp \
     scriptmode/aphoton_si.cpp \
@@ -388,7 +387,6 @@ SOURCES += main.cpp \
     scriptmode/aserver_si.cpp \
     scriptmode/aweb_si.cpp \
     scriptmode/athreads_si.cpp \
-    scriptmode/atracklog_si.cpp \
     scriptmode/aparticlegenerator_si.cpp \
     scriptmode/agstyle_si.cpp \
     scriptmode/aconfig_si.cpp \
@@ -398,7 +396,9 @@ SOURCES += main.cpp \
     scriptmode/alrf_si.cpp \
     common/aeventtrackingrecord.cpp \
     scriptmode/apthistory_si.cpp \
-    Simulation/atrackinghistorycrawler.cpp
+    Simulation/atrackinghistorycrawler.cpp \
+    Simulation/aparticletracker.cpp \
+    common/aexternalprocesshandler.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -531,7 +531,6 @@ HEADERS  += common/CorrelationFilters.h \
     Simulation/ag4simulationsettings.h \
     gui/ageant4configdialog.h \
     scriptmode/asim_si.h \
-    scriptmode/adepo_si.h \
     scriptmode/amath_si.h \
     scriptmode/atree_si.h \
     scriptmode/aphoton_si.h \
@@ -540,7 +539,6 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/aserver_si.h \
     scriptmode/aweb_si.h \
     scriptmode/athreads_si.h \
-    scriptmode/atracklog_si.h \
     scriptmode/aparticlegenerator_si.h \
     scriptmode/agstyle_si.h \
     scriptmode/aconfig_si.h \
@@ -550,14 +548,15 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/alrf_si.h \
     common/aeventtrackingrecord.h \
     scriptmode/apthistory_si.h \
-    Simulation/atrackinghistorycrawler.h
+    Simulation/atrackinghistorycrawler.h \
+    Simulation/aparticletracker.h \
+    common/aexternalprocesshandler.h
 
 # --- SIM ---
 ants2_SIM {
     DEFINES += SIM
 
     SOURCES += common/asimulationstatistics.cpp \
-    modules/primaryparticletracker.cpp \
     modules/s1_generator.cpp \
     modules/photon_generator.cpp \
     modules/s2_generator.cpp \
@@ -582,7 +581,6 @@ ants2_SIM {
     common/aenergydepositioncell.h \
     common/ahistoryrecords.h \
     common/asimulationstatistics.h \
-    modules/primaryparticletracker.h \
     modules/s1_generator.h \
     modules/photon_generator.h \
     modules/s2_generator.h \

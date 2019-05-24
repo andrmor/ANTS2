@@ -16,7 +16,7 @@ class TH1I; // change to TH1D?
 class APointSourceSimulator : public ASimulator
 {
 public:
-    explicit APointSourceSimulator(const DetectorClass *detector, ASimulationManager *simMan, int ID);
+    explicit APointSourceSimulator(ASimulationManager & simMan, int ID);
     ~APointSourceSimulator();
 
     virtual int getEventCount() const;

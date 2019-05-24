@@ -8,7 +8,6 @@
 #include "scriptminimizer.h"
 #include "histgraphinterfaces.h"
 #include "ageo_si.h"
-#include "adepo_si.h"
 #include "graphwindowclass.h"
 #include "geometrywindowclass.h"
 #include "aconfiguration.h"
@@ -24,7 +23,6 @@
 #include "aphoton_si.h"
 #include "athreads_si.h"
 #include "atree_si.h"
-#include "atracklog_si.h"
 #include "asim_si.h"
 #include "apthistory_si.h"
 #include "aconfig_si.h"
@@ -111,12 +109,6 @@ void MainWindow::createPythonScriptWindow()
 
   APhoton_SI* photon = new APhoton_SI(Config, EventsDataHub);
   PythonScriptWindow->RegisterInterface(photon, "photon");
-
-  ADepo_SI* depo = new ADepo_SI(Detector, EventsDataHub);
-  PythonScriptWindow->RegisterInterface(depo, "depo");
-
-  ATrackLog_SI* pth = new ATrackLog_SI(*EventsDataHub);
-  ScriptWindow->RegisterInterface(pth, "tracklog");
 
 #ifdef ANTS_FLANN
   AKnn_SI* knn = new AKnn_SI(ReconstructionManager->KNNmodule);

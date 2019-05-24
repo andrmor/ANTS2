@@ -3,6 +3,7 @@
 
 #include <QString>
 #include <QStringList>
+#include <QMap>
 
 class QJsonObject;
 
@@ -13,8 +14,10 @@ public:
 
     bool bTrackParticles = false;
 
-    QStringList SensitiveVolumes; //later will be filled automatically
-    QStringList Commands;
+    QString               PhysicsList = "QGSP_BERT_HP";
+    QStringList           SensitiveVolumes; //later will be filled automatically
+    QStringList           Commands;
+    QMap<QString, double> StepLimits;
 
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);

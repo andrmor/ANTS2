@@ -129,7 +129,12 @@ public:
 
     //use this to only construct!
     TGraph* ConstructTGraph(const QVector<double>& x, const QVector<double>& y) const;
+    TGraph* ConstructTGraph(const std::vector<float>& x, const std::vector<float>& y) const;
     TGraph* ConstructTGraph(const QVector<double>& x, const QVector<double>& y,
+                            const char *Title, const char *XTitle, const char *YTitle,
+                            Color_t MarkerColor=2, int MarkerStyle=20, int MarkerSize=1,
+                            Color_t LineColor=2,   int LineStyle=1,    int LineWidth=2) const;
+    TGraph* ConstructTGraph(const std::vector<float>& x, const std::vector<float>& y,
                             const char *Title, const char *XTitle, const char *YTitle,
                             Color_t MarkerColor=2, int MarkerStyle=20, int MarkerSize=1,
                             Color_t LineColor=2,   int LineStyle=1,    int LineWidth=2) const;
@@ -300,13 +305,17 @@ private:
     void UpdateBasketGUI();    
     void ExportData(bool fUseBinCenters=true);
     void exportTextForTH2(TH2 *h);
+
     void SaveBasket();
     void AppendBasket();
+    void Basket_DrawOnTop(int row);
+
     void AppendRootHistsOrGraphs();
     QVector<DrawObjectStructure> *getCurrentDrawObjects();
     void ShowProjection(QString type);
     double runScaleDialog();
     const QPair<double, double> runShiftDialog();
+    void calculateFractionTH1(int row);
 };
 
 #endif // GRAPHWINDOWCLASS_H

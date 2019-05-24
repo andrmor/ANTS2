@@ -2,17 +2,20 @@
 #define AEVENTTRACKINGRECORD_H
 
 #include <QString>
+#include <QStringList>
 #include <vector>
 
 class AParticleTrackingRecord;
 class TrackHolderClass;
 class ATrackBuildOptions;
 class TGeoNode;
+class TrackHolderClass;
 
 class ATrackingStepData
 {
 public:
     ATrackingStepData(float * position, float time, float energy, float depositedEnergy, const QString & process);
+    ATrackingStepData(double * position, double time, double energy, double depositedEnergy, const QString & process);
     ATrackingStepData(float x, float y, float z, float time, float energy, float depositedEnergy, const QString & process);
 
     void  logToString(QString & str, int offset) const;
@@ -23,7 +26,7 @@ public:
     float   Energy;
     float   DepositedEnergy;
     QString Process;              //step defining process
-    TGeoNode * GeoNode = nullptr;
+    TGeoNode * GeoNode = nullptr; //external
     std::vector<int> Secondaries; //secondaries created in this step - indexes in the parent record
 
 };
@@ -40,12 +43,17 @@ public:
     void addSecondary(AParticleTrackingRecord * sec);
     int  countSecondaries() const;
 
+    bool isPrimary() const {return !SecondaryOf;}
+    bool isSecondary() const {return (bool)SecondaryOf;}
     const std::vector<ATrackingStepData *> & getSteps() const {return Steps;}
     const AParticleTrackingRecord * getSecondaryOf() const {return SecondaryOf;}
     const std::vector<AParticleTrackingRecord *> & getSecondaries() const {return Secondaries;}
 
+    bool isHaveProcesses(const QStringList & Proc, bool bOnlyPrimary);
+
     void logToString(QString & str, int offset, bool bExpandSecondaries) const;
     void makeTrack(std::vector<TrackHolderClass *> & Tracks, const QStringList & ParticleNames, const ATrackBuildOptions & TrackBuildOptions, bool bWithSecondaries) const;
+    void fillELDD(ATrackingStepData * IdByStep, std::vector<float> & dist, std::vector<float> & ELDD) const;
 
     void updateGeoNodes();
 
@@ -80,7 +88,11 @@ public:
     bool   isEmpty() const {return PrimaryParticleRecords.empty();}
     int    countPrimaries() const;
 
-    void updateGeoNodes();
+    bool   isHaveProcesses(const QStringList & Proc, bool bOnlyPrimary) const;
+
+    void   updateGeoNodes();
+
+    void   makeTracks(std::vector<TrackHolderClass *> & Tracks, const QStringList & ParticleNames, const ATrackBuildOptions & TrackBuildOptions, bool bWithSecondaries) const;
 
     const std::vector<AParticleTrackingRecord *> & getPrimaryParticleRecords() const {return PrimaryParticleRecords;}
 

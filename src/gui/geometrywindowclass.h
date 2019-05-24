@@ -56,6 +56,10 @@ public:
   bool IsWorldVisible();
 
   void ShowGeometry(bool ActivateWindow = true, bool SAME = true, bool ColorUpdateAllowed = true);
+  void ShowEvent_Particles(size_t iEvent, bool withSecondaries);
+  void ShowPMsignals(int iEvent, bool bFullCycle = true);
+
+  void ClearTracks(bool bRefreshWindow = true);
 
 protected:
     bool event(QEvent *event);
@@ -65,7 +69,7 @@ public slots:
     void DrawTracks();
     void ShowPMnumbers();
     void ShowMonitorIndexes();
-    void ShowText(const QVector<QString> & strData, Color_t color, bool onPMs = true); //false - on monitors
+    void ShowText(const QVector<QString> & strData, Color_t color, bool onPMs = true, bool bFullCycle = true); //false - on monitors
     void on_pbTop_clicked();
     void on_pbFront_clicked();
     void onRasterWindowChange(double centerX, double centerY, double hWidth, double hHeight, double phi, double theta);

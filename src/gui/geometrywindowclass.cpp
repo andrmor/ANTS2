@@ -263,7 +263,7 @@ void findMotherNode(const TGeoNode * node, const TGeoNode* & motherNode)
 //    else qDebug() << "--- search failed!";
 }
 
-void GeometryWindowClass::ShowText(const QVector<QString> &strData, Color_t color, bool onPMs)
+void GeometryWindowClass::ShowText(const QVector<QString> &strData, Color_t color, bool onPMs, bool bFullCycle)
 {
     const APmHub & PMs = *MW->PMs;
     const QVector<const AGeoObject*> & Mons = MW->Detector->Sandwich->MonitorsRecords;
@@ -276,7 +276,7 @@ void GeometryWindowClass::ShowText(const QVector<QString> &strData, Color_t colo
     }
     //qDebug() << "Objects:"<<numObj;
 
-    MW->Detector->GeoManager->ClearTracks();
+    if (bFullCycle) MW->Detector->GeoManager->ClearTracks();
     if (!isVisible()) showNormal();
 
     //font size
@@ -498,9 +498,12 @@ void GeometryWindowClass::ShowText(const QVector<QString> &strData, Color_t colo
         //break;
     }
 
-    ShowGeometry(false);
-    MW->Detector->GeoManager->DrawTracks();
-    UpdateRootCanvas();
+    if (bFullCycle)
+    {
+        ShowGeometry(false);
+        MW->Detector->GeoManager->DrawTracks();
+        UpdateRootCanvas();
+    }
 }
 
 void GeometryWindowClass::AddLineToGeometry(QPointF& start, QPointF& end, Color_t color, int width)
@@ -577,6 +580,57 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
     //drawing dots
     MW->ShowGeoMarkers();
     UpdateRootCanvas();
+}
+
+#include "aeventtrackingrecord.h"
+#include "asimulationmanager.h"
+#include "amaterialparticlecolection.h"
+#include "TGeoTrack.h"
+#include "atrackrecords.h"
+void GeometryWindowClass::ShowEvent_Particles(size_t iEvent, bool withSecondaries)
+{
+    if (iEvent < MW->SimulationManager->TrackingHistory.size())
+    {
+        const AEventTrackingRecord * er = MW->SimulationManager->TrackingHistory.at(iEvent);
+        er->makeTracks(MW->SimulationManager->Tracks, MW->MpCollection->getListOfParticleNames(), MW->SimulationManager->TrackBuildOptions, withSecondaries);
+
+        for (int iTr=0; iTr<MW->SimulationManager->Tracks.size(); iTr++)
+        {
+            const TrackHolderClass* th = MW->SimulationManager->Tracks.at(iTr);
+            TGeoTrack* track = new TGeoTrack(1, th->UserIndex);
+            track->SetLineColor(th->Color);
+            track->SetLineWidth(th->Width);
+            track->SetLineStyle(th->Style);
+            for (int iNode=0; iNode<th->Nodes.size(); iNode++)
+                track->AddPoint(th->Nodes[iNode].R[0], th->Nodes[iNode].R[1], th->Nodes[iNode].R[2], th->Nodes[iNode].Time);
+            if (track->GetNpoints()>1)
+                MW->Detector->GeoManager->AddTrack(track);
+            else delete track;
+        }
+    }
+
+    DrawTracks();
+}
+
+#include "eventsdataclass.h"
+void GeometryWindowClass::ShowPMsignals(int iEvent, bool bFullCycle)
+{
+    if (iEvent < 0 || iEvent >= MW->EventsDataHub->countEvents()) return;
+
+    QVector<QString> tmp;
+    for (int i=0; i<MW->PMs->count(); i++)
+        tmp.append( QString::number(MW->EventsDataHub->Events.at(iEvent).at(i)) );
+    ShowText(tmp, kBlack, true, bFullCycle);
+}
+
+void GeometryWindowClass::ClearTracks(bool bRefreshWindow)
+{
+    MW->Detector->GeoManager->ClearTracks();
+    if (bRefreshWindow)
+    {
+        SetAsActiveRootWindow();
+        UpdateRootCanvas();
+    }
 }
 
 void GeometryWindowClass::on_pbShowGeometry_clicked()

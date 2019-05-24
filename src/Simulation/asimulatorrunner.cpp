@@ -36,13 +36,6 @@ static void *SimulationManagerRunWorker(void *workerSimulator)
     //if (simulator->getDetector()->GeoManager->GetListOfNavigators())
     //  qDebug() << nameID<<"|||||||||||| already defined navigators:"<<simulator->getDetector()->GeoManager->GetListOfNavigators()->GetEntries();
 
-    //simulator->getDetector()->GeoManager->AddNavigator();
-    if (!simulator->getDetector()->GeoManager->GetCurrentNavigator())
-    {
-        //qDebug() << "No current navigator for this thread, adding one";
-        simulator->getDetector()->GeoManager->AddNavigator();
-    }
-
     //qDebug() << nameID<<"Navigator added";
     //qDebug() << nameID<<"List?"<< simulator->getDetector()->GeoManager->GetListOfNavigators();  /// List contains one navigator now
     //qDebug() << nameID<<"entries?"<<simulator->getDetector()->GeoManager->GetListOfNavigators()->GetEntries();
@@ -79,26 +72,17 @@ bool ASimulatorRunner::setup(int threadCount, bool bPhotonSourceSim)
     usPerEvent = 0;
     fStopRequested = false;
 
-    /*
-    dataHub.clear();
-    dataHub.initializeSimStat(detector.Sandwich->MonitorsRecords, simMan.simSettings.DetStatNumBins, (simMan.simSettings.fWaveResolved ? simMan.simSettings.WaveNodes : 0) );
-
-    detector.PMs->configure(&simMan.simSettings); //Setup pms module and QEaccelerator if needed
-    detector.MpCollection->UpdateRuntimePropertiesAndWavelengthBinning(&simMan.simSettings, detector.RandGen, threadCount); //update wave-resolved properties of materials and runtime properties for neutrons
-    */
-
     clearWorkers();
-
     bool fRunThreads = threadCount > 0;
 
     for (int i = 0; i < threadCount; i++)
     {
         ASimulator *worker;
 
-        if (bPhotonSourceSim) worker = new APointSourceSimulator(&detector, &simMan, i);
+        if (bPhotonSourceSim) worker = new APointSourceSimulator(simMan, i);
         else //Particle simulator
         {
-            AParticleSourceSimulator* pss = new AParticleSourceSimulator(&detector, &simMan, i);
+            AParticleSourceSimulator* pss = new AParticleSourceSimulator(simMan, i);
             if (simMan.simSettings.TrackBuildOptions.bBuildParticleTracks && simMan.isG4Sim_OnlyGenerateFiles())
             {
                 qDebug() << "--- only file export, external/internal sim will not be started! ---";
@@ -108,9 +92,6 @@ bool ASimulatorRunner::setup(int threadCount, bool bPhotonSourceSim)
         }
         simMan.setG4Sim_OnlyGenerateFiles(false); //this is single trigger flag
 
-        worker->setSimSettings(&simMan.simSettings);
-        int seed = detector.RandGen->Rndm() * 10000000;
-        worker->setRngSeed(seed);
         bool bOK = worker->setup(simMan.jsSimSet);
         if (!bOK)
         {
@@ -129,6 +110,16 @@ bool ASimulatorRunner::setup(int threadCount, bool bPhotonSourceSim)
             break;
         }
         totalEventCount += worker->getEventCount();
+
+        bOK = worker->finalizeConfig();
+        if (!bOK)
+        {
+            simMan.setErrorString( worker->getErrorString() );
+            delete worker;
+            clearWorkers();
+            return false;
+        }
+
         workers.append(worker);
     }
 

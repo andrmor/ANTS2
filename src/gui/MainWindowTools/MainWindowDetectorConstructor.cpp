@@ -216,11 +216,9 @@ void MainWindow::CheckPresenseOfSecScintillator()
     {
       ui->cobScintTypePointSource->setCurrentIndex(0);
       ui->cbGunDoS2->setChecked(false);
-      ui->cbDoS2tester->setChecked(false);
     }
   ui->cobScintTypePointSource->setEnabled(Detector->fSecScintPresent);
   ui->cbGunDoS2->setEnabled(Detector->fSecScintPresent);
-  ui->cbDoS2tester->setEnabled(Detector->fSecScintPresent);
 }
 
 void MainWindow::NumberOfPMsHaveChanged()

@@ -18,15 +18,13 @@ public:
     ~AGeant4ConfigDialog();
 
 private slots:
-    void on_pbAddCommand_clicked();
-
-    void on_pbRemoveCommand_clicked();
-
     void on_pbAccept_clicked();
 
-    void on_pbAddVolume_clicked();
+    void on_lePhysicsList_editingFinished();
 
-    void on_pbRemoveVolume_clicked();
+    void on_cobRefPhysLists_activated(int index);
+
+    void on_pbCancel_clicked();
 
 private:
     AG4SimulationSettings & G4SimSet;

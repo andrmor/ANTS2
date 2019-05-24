@@ -22,6 +22,7 @@ class ASourceParticleGenerator;
 class AFileParticleGenerator;
 class AScriptParticleGenerator;
 class AEventTrackingRecord;
+class TObject;
 
 //class QJsonObject;
 #include <QJsonObject>  // temporary
@@ -61,6 +62,9 @@ public:
 
     void setG4Sim_OnlyGenerateFiles(bool flag) {bOnlyFileExport = flag;}
     bool isG4Sim_OnlyGenerateFiles() const {return bOnlyFileExport;}
+    void generateG4antsConfigCommon(QJsonObject & json, int ThreadId);
+
+    const DetectorClass & getDetector() {return Detector;}
 
     // Next three: Simulator workers use their own local copies constructed using configuration json
     ASourceParticleGenerator * ParticleSources = 0;         //used to update json on config changes and in GUI to configure
@@ -94,12 +98,15 @@ private:
     bool fFinished = true;
     bool fSuccess = false;
 
+    bool bGuardTrackingHistory = false;
+
     // G4ants
     bool bOnlyFileExport = false; // single trigger flag
 
 public slots:
     void onSimulationFinished(); //processing of simulation results!
     void StopSimulation();
+    void onNewGeoManager(TObject*); // Nodes in history will be invalid after that!
 
 private slots:
     void onSimFailedToStart();    
@@ -116,6 +123,7 @@ private:
     void clearG4data();
     void copyDataFromWorkers();
     void findGeoNodes();
+    void removeOldFile(const QString &fileName, const QString &txt);
 };
 
 #endif // ASIMULATIONMANAGER_H

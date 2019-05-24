@@ -82,7 +82,7 @@ void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, 
                         {
                             const bool bRejectedByMaterial = (opt.bFromMat      && opt.FromMat      != thisStep->GeoNode->GetVolume()->GetMaterial()->GetIndex());
                             const bool bRejectedByVolName  = (opt.bFromVolume   && opt.FromVolume   != thisStep->GeoNode->GetVolume()->GetName());
-                            const bool bRejectedByVolIndex = (opt.bFromVolIndex && opt.FromVolIndex != thisStep->GeoNode->GetIndex());
+                            const bool bRejectedByVolIndex = (opt.bFromVolIndex && opt.FromVolIndex != thisStep->GeoNode->GetNumber());
                             bExitValidated = !(bRejectedByMaterial || bRejectedByVolName || bRejectedByVolIndex);
                         }
                         else bExitValidated = false;
@@ -101,7 +101,7 @@ void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, 
                     {
                         const bool bRejectedByMaterial = (opt.bToMat      && opt.ToMat      != nextStep->GeoNode->GetVolume()->GetMaterial()->GetIndex());
                         const bool bRejectedByVolName  = (opt.bToVolume   && opt.ToVolume   != nextStep->GeoNode->GetVolume()->GetName());
-                        const bool bRejectedByVolIndex = (opt.bToVolIndex && opt.ToVolIndex != nextStep->GeoNode->GetIndex());
+                        const bool bRejectedByVolIndex = (opt.bToVolIndex && opt.ToVolIndex != nextStep->GeoNode->GetNumber());
                         bEntranceValidated = !(bRejectedByMaterial || bRejectedByVolName || bRejectedByVolIndex);
                     }
                     else bEntranceValidated = false;
@@ -112,7 +112,6 @@ void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, 
                 const ATrackingStepData * prevStep = (iStep == 0 ? nullptr : steps[iStep-1]);
                 if (bExitValidated && bEntranceValidated && prevStep)
                     processor.onTransition(*prevStep, *thisStep); // not the "next" step here! this is just to extract direction information
-
 
                 //checking for specific material/volume/index for enter/exit
                 //out
@@ -125,7 +124,7 @@ void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, 
                         {
                             const bool bRejectedByMaterial = (opt.bMaterial    && opt.Material    != thisStep->GeoNode->GetVolume()->GetMaterial()->GetIndex());
                             const bool bRejectedByVolName  = (opt.bVolume      && opt.Volume      != thisStep->GeoNode->GetVolume()->GetName());
-                            const bool bRejectedByVolIndex = (opt.bVolumeIndex && opt.VolumeIndex != thisStep->GeoNode->GetIndex());
+                            const bool bRejectedByVolIndex = (opt.bVolumeIndex && opt.VolumeIndex != thisStep->GeoNode->GetNumber());
                             bExitValidated = !(bRejectedByMaterial || bRejectedByVolName || bRejectedByVolIndex);
                         }
                         else bExitValidated = false;
@@ -143,11 +142,11 @@ void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, 
                     {
                         //const ATrackingStepData * nextStep = (ProcType == ExitingWorld ? nullptr : steps[iStep+1]);
                         const ATrackingStepData * nextStep = (iStep == steps.size()-1 ? nullptr : steps[iStep+1]); // there could be "T" as the last step!
-                        if (nextStep && thisStep->GeoNode)
+                        if (nextStep && nextStep->GeoNode)
                         {
                             const bool bRejectedByMaterial = (opt.bMaterial    && opt.Material    != nextStep->GeoNode->GetVolume()->GetMaterial()->GetIndex());
                             const bool bRejectedByVolName  = (opt.bVolume      && opt.Volume      != nextStep->GeoNode->GetVolume()->GetName());
-                            const bool bRejectedByVolIndex = (opt.bVolumeIndex && opt.VolumeIndex != nextStep->GeoNode->GetIndex());
+                            const bool bRejectedByVolIndex = (opt.bVolumeIndex && opt.VolumeIndex != nextStep->GeoNode->GetNumber());
                             bEntranceValidated = !(bRejectedByMaterial || bRejectedByVolName || bRejectedByVolIndex);
                         }
                         else bEntranceValidated = false;
@@ -166,7 +165,7 @@ void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, 
                 {
                     if (!thisStep->GeoNode) bSkipThisStep = true;
                     else if (opt.bMaterial    && opt.Material != thisStep->GeoNode->GetVolume()->GetMaterial()->GetIndex()) bSkipThisStep = true;
-                    else if (opt.bVolumeIndex && opt.VolumeIndex != thisStep->GeoNode->GetIndex()) bSkipThisStep = true;
+                    else if (opt.bVolumeIndex && opt.VolumeIndex != thisStep->GeoNode->GetNumber()) bSkipThisStep = true;
                     else if (opt.bVolume      && opt.Volume != thisStep->GeoNode->GetVolume()->GetName()) bSkipThisStep = true;
                 }
 

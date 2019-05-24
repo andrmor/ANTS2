@@ -15,7 +15,7 @@ class Photon_Generator : public QObject
 {
     Q_OBJECT
 public:
-    explicit Photon_Generator(const DetectorClass* Detector, TRandom2* RandGen, QObject *parent = 0);
+    explicit Photon_Generator(const DetectorClass & Detector, TRandom2* RandGen, QObject *parent = 0);
     ~Photon_Generator();
 
     void GenerateDirectionPrimary(APhoton *Photon);
@@ -31,7 +31,7 @@ public:
     const GeneralSimSettings* SimSet;
 
 private:
-    const DetectorClass *Detector;
+    const DetectorClass & Detector;
     TRandom2* RandGen;
 };
 

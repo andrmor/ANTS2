@@ -59,15 +59,13 @@ void EventsDataClass::clearResolutionTree()
 
 void EventsDataClass::clear()
 {
-  //    qDebug() << "--->EventsDatHub: Clear";
+  // qDebug() << "--->EventsDatHub: Clear";
   Events.clear();
   TimedEvents.clear();  
   fLoadedEventsHaveEnergyInfo = false;
 #ifdef SIM
   for (auto* pr : TrackingHistory) delete pr;
   TrackingHistory.clear();
-  for (int i=0; i<EventHistory.size(); i++) delete EventHistory[i];
-  EventHistory.clear();
   GeneratedPhotonsHistory.clear();
   SimStat->initialize();
 #endif
@@ -368,7 +366,6 @@ void EventsDataClass::squeeze()
     ReconstructionData.squeeze();
 #ifdef SIM
     TrackingHistory.shrink_to_fit();
-    EventHistory.squeeze();
     GeneratedPhotonsHistory.squeeze();
 #endif
 }
@@ -449,58 +446,6 @@ const QVector<float> *EventsDataClass::getEvent(int iev) const
 const QVector<QVector<float> > *EventsDataClass::getTimedEvent(int iev)
 {
     return &TimedEvents.at(iev);
-}
-
-void EventsDataClass::saveEventHistoryToTree(const QString &fileName) const
-{
-    TFile f(fileName.toLatin1().data(),"RECREATE");
-
-    TTree t("Log","Particle tracking log");
-
-    int     index;
-    int     particleId;
-    int     secondaryOf;
-    std::vector<float> pos; pos.resize(3);
-    std::vector<float> dir; dir.resize(3);
-    float   initialEnergy;
-    int     termination;
-
-    std::vector<int>    Vol_MaterialId;
-    std::vector<float> Vol_DepositedEnergy;
-    std::vector<float> Vol_TravelledDistance;
-
-    t.Branch("index", &index, "index/I");
-    t.Branch("partId", &particleId, "partId/I");
-    t.Branch("secondaryOf", &secondaryOf, "secondaryOf/I");
-    t.Branch("initialPosition", &pos);
-    t.Branch("direction", &dir);
-    t.Branch("initialEnergy", &initialEnergy, "initialEnergy/F");
-    t.Branch("termination", &termination, "termination/I");
-    t.Branch("vol_materialId", &Vol_MaterialId);
-    t.Branch("vol_depositedEnergy", &Vol_DepositedEnergy);
-    t.Branch("vol_distance", &Vol_TravelledDistance);
-
-    for (const EventHistoryStructure* h : EventHistory)
-    {
-        index = h->index;
-        particleId = h->ParticleId;
-        secondaryOf = h->SecondaryOf;
-        pos[0] = h->x;  pos[1] = h->y;  pos[2] = h->z;
-        dir[0] = h->dx; dir[1] = h->dy; dir[2] = h->dz;
-        initialEnergy = h->initialEnergy;
-        termination = h->Termination;
-
-        Vol_MaterialId.clear(); Vol_DepositedEnergy.clear(); Vol_TravelledDistance.clear();
-        for (const MaterialHistoryStructure& d : h->Deposition)
-        {
-            Vol_MaterialId.push_back(d.MaterialId);
-            Vol_DepositedEnergy.push_back(d.DepositedEnergy);
-            Vol_TravelledDistance.push_back(d.Distance);
-        }
-        t.Fill();
-    }
-    t.Write();
-    f.Close();
 }
 
 int EventsDataClass::countGoodEvents(int igroup) const //counts events passing all filters

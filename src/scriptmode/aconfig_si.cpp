@@ -506,3 +506,10 @@ void AConfig_SI::ExportToGDML(QString FileName)
     abort(err);
 }
 
+void AConfig_SI::ExportToROOT(QString FileName)
+{
+    QString err = Config->GetDetector()->exportToROOT(FileName);
+    if (err.isEmpty()) return;
+    abort(err);
+}
+

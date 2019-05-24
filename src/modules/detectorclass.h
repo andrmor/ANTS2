@@ -96,7 +96,8 @@ public:
   void changeLineWidthOfVolumes(int delta);
 
   const QString exportToGDML(const QString &fileName) const; //returns error string, empty if all is fine  
-
+  const QString exportToROOT(const QString& fileName) const;
+  
 public slots:
   void onRequestRegisterGeoManager();
 

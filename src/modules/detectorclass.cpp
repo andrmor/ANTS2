@@ -247,6 +247,20 @@ const QString DetectorClass::exportToGDML(const QString& fileName) const
     return "Error during cm->mm conversion stage!";
 }
 
+const QString DetectorClass::exportToROOT(const QString& fileName) const
+{
+    QFileInfo fi(fileName);
+    if (fi.suffix().compare("root", Qt::CaseInsensitive))
+        return "Error: file name should have .root extension";
+
+    QByteArray ba = fileName.toLocal8Bit();
+    const char *c_str = ba.data();
+    GeoManager->SetName("geometry");
+    GeoManager->Export(c_str);
+
+    return "";
+}
+
 void DetectorClass::writePMarraysToJson(QJsonObject &json)
 {
   QJsonArray arr;
@@ -363,6 +377,11 @@ void DetectorClass::constructDetector()
       //(*MpCollection)[i]->GeoMat = new TGeoMaterial(cname, (*MpCollection)[i]->p1, (*MpCollection)[i]->p2, (*MpCollection)[i]->p3);
       (*MpCollection)[i]->generateTGeoMat();
       (*MpCollection)[i]->GeoMed = new TGeoMedium (cname, i, (*MpCollection)[i]->GeoMat);
+      (*MpCollection)[i]->GeoMed->SetParam(0, (*MpCollection)[i]->n ); // refractive index
+ // param[1] reserved for k
+      (*MpCollection)[i]->GeoMed->SetParam(2, (*MpCollection)[i]->abs ); // abcorption coefficient (mm^-1)
+      (*MpCollection)[i]->GeoMed->SetParam(3, (*MpCollection)[i]->reemissionProb ); // re-emission probability
+      (*MpCollection)[i]->GeoMed->SetParam(4, (*MpCollection)[i]->rayleighMFP ); // Rayleigh MFP (mm)
     }
 
   //calculate Z of slabs in ASandwich, copy Z edges

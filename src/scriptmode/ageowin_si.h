@@ -62,6 +62,11 @@ public slots:
 
   void SaveImage(QString fileName);
 
+  // VS
+  int AddTrack();
+  void AddNodeToTrack(int trk, float x, float y, float z);
+  void DeleteAllTracks();
+
 private:
   MainWindow* MW;
   ASimulationManager* SimManager;

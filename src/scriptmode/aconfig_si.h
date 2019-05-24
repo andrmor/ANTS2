@@ -34,6 +34,7 @@ public slots:
   bool SetConfig(const QVariant& conf);
 
   void ExportToGDML(QString FileName);
+  void ExportToROOT(QString FileName);
 
   bool Replace(QString Key, QVariant val);
   QVariant GetKeyValue(QString Key);

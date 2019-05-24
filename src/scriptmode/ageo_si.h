@@ -60,6 +60,8 @@ public slots:
 
   void UpdateGeometry(bool CheckOverlaps = true);
 
+  QString printOverrides();
+
 signals:
   void clearRequested();
   void requestShowCheckUpWindow();

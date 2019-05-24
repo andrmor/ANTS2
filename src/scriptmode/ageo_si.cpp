@@ -726,3 +726,24 @@ void AGeo_SI::clearGeoObjects()
     GeoObjects.clear();
 }
 
+#include "aopticaloverride.h"
+QString AGeo_SI::printOverrides()
+{
+    QString s("");
+    int nmat = Detector->MpCollection->countMaterials();
+    s += QString("%1\n").arg(nmat);
+
+    for (int i=0; i<nmat; i++) {
+    QVector<AOpticalOverride*> VecOvr = (*(Detector->MpCollection))[i]->OpticalOverrides;
+    if (VecOvr.size() > 0)
+        for (int j=0; j<VecOvr.size(); j++) {
+            if (VecOvr[j]) {
+                  s = s + QString("%1 ").arg(i) + QString("%1 ").arg(j);
+//                  s = s + VecOvr[j]->getType() + " "
+                  s = s + VecOvr[j]->getReportLine() + QString("\n");
+             }
+        }
+    }
+    return s;
+}
+

@@ -209,6 +209,25 @@ void AGeoWin_SI::ShowTracks(int num, int OnlyColor)
   MW->GeometryWindow->DrawTracks();
 }
 
+int AGeoWin_SI::AddTrack()
+{
+    SimManager->Tracks.push_back(new TrackHolderClass());
+    return SimManager->Tracks.size() - 1;
+}
+
+void AGeoWin_SI::AddNodeToTrack(int trk, float x, float y, float z)
+{
+    TrackHolderClass* th = SimManager->Tracks.at(trk);
+    th->Nodes.push_back(TrackNodeStruct(x, y, z));
+    th->Width = 1;
+    th->Color = kBlue;
+}
+
+void AGeoWin_SI::DeleteAllTracks()
+{
+    SimManager->Tracks.erase(SimManager->Tracks.begin(), SimManager->Tracks.end());
+}
+
 void AGeoWin_SI::ShowCustomNodes(int firstN)
 {
     MW->clearGeoMarkers();

@@ -711,7 +711,7 @@ bool ATextEdit::TryShowFunctionTooltip(QTextCursor* cursor)
 
     if (fFound)
     {
-        QToolTip::showText( mapToGlobal( QPoint(cursorRect(*cursor).topRight().x(), cursorRect(*cursor).topRight().y()-2.2*fh) ),
+        QToolTip::showText( mapToGlobal( QPoint(cursorRect(*cursor).topRight().x(), cursorRect(*cursor).topRight().y()) ),
                                     tmp,
                                     this,
                                     QRect(),

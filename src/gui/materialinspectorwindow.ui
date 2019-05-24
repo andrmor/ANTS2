@@ -2093,7 +2093,7 @@ Can be used to automatically configure gamma interaction cross-sections and neut
            <item>
             <widget class="QStackedWidget" name="swMainMatParticle">
              <property name="currentIndex">
-              <number>1</number>
+              <number>0</number>
              </property>
              <widget class="QWidget" name="pageCharged">
               <layout class="QVBoxLayout" name="verticalLayout_10">
@@ -2338,25 +2338,9 @@ Can be used to automatically configure gamma interaction cross-sections and neut
                 </spacer>
                </item>
               </layout>
-              <zorder>leiStopPowerUnits</zorder>
-              <zorder>pbImportStoppingPowerFromTrim</zorder>
-              <zorder>label_31</zorder>
-              <zorder>label_32</zorder>
-              <zorder>pbShowStoppingPower</zorder>
-              <zorder>pbLoadDeDr</zorder>
-              <zorder>cobStoppingPowerUnits</zorder>
               <zorder>label_30</zorder>
-              <zorder>label_50</zorder>
-              <zorder>label_51</zorder>
-              <zorder>ledMFPenergy_2</zorder>
-              <zorder>leMFP_2</zorder>
-              <zorder>pbComputeRangeCharged</zorder>
-              <zorder>horizontalSpacer_31</zorder>
-              <zorder>horizontalSpacer_34</zorder>
               <zorder>verticalSpacer_5</zorder>
               <zorder>verticalSpacer_6</zorder>
-              <zorder>horizontalSpacer_35</zorder>
-              <zorder>horizontalSpacer_37</zorder>
               <zorder>verticalSpacer_7</zorder>
              </widget>
              <widget class="QWidget" name="pageNeutral">

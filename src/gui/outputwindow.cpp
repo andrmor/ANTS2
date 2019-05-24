@@ -1803,6 +1803,11 @@ void OutputWindow::on_pbNextEvent_clicked()
     int i = ui->sbEvent->value();
     if (cw == ui->tabEventViewer)
     {
+        if (MW->SimulationManager->TrackingHistory.empty())
+        {
+            message("Tracking history is empty!", this);
+            return;
+        }
         int newi = findEventWithFilters(i, true);
         if (newi == -1 && i != MW->EventsDataHub->countEvents()-1)
             message("There are no events according to the selected criteria", this);
@@ -1819,6 +1824,11 @@ void OutputWindow::on_pbPreviousEvent_clicked()
     int i = ui->sbEvent->value();
     if (cw == ui->tabEventViewer)
     {
+        if (MW->SimulationManager->TrackingHistory.empty())
+        {
+            message("Tracking history is empty!", this);
+            return;
+        }
         int newi = findEventWithFilters(i, false);
         if (newi == -1 && i != 0)
             message("There are no events according to the selected criteria", this);

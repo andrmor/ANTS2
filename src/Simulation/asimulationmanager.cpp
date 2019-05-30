@@ -272,9 +272,14 @@ void ASimulationManager::findGeoNodes()
         Detector.GeoManager->AddNavigator();
     }
 
-    for (AEventTrackingRecord * e : TrackingHistory)
+    for (size_t iEvent = 0; iEvent < TrackingHistory.size(); iEvent++)
+    {
+        AEventTrackingRecord * e = TrackingHistory[iEvent];
         e->updateGeoNodes();
-    //qDebug() << "GeoNodes updated";
+        bool bOK = e->checkNodes();
+        if (!bOK)
+            qWarning() << "GeoNode error(s) in event #" << iEvent << "detected";
+    }
 }
 
 void ASimulationManager::clearTracks()

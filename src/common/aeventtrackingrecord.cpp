@@ -199,6 +199,60 @@ void AParticleTrackingRecord::updateGeoNodes()
         sec->updateGeoNodes();
 }
 
+bool AParticleTrackingRecord::checkNodes()
+{
+    bool bOK = true;
+
+    if (Steps.size() > 1)
+    {
+        TGeoNode * PrevNone = Steps[0]->GeoNode;
+        bool bLastWasTransition = false;
+
+        for (size_t iStep = 1; iStep < Steps.size(); iStep++)
+        {
+            ATrackingStepData * Step = Steps[iStep];
+            if (Step->Process == "T")
+            {
+                if (bLastWasTransition) PrevNone = Step->GeoNode;
+                bLastWasTransition = true;
+            }
+            else
+            {
+                if (bLastWasTransition)
+                {
+                    if (Step->GeoNode == PrevNone)
+                    {
+                        qWarning() << "Transition without node change detected!"<<iStep;
+                        bOK = false;
+                    }
+                }
+                else
+                {
+                    if (Step->GeoNode != PrevNone)
+                    {
+                        qWarning() << "Non-transition step with node change detected!"<<iStep;
+                        bOK = false;
+                    }
+                }
+                PrevNone = Step->GeoNode;
+
+                if (!PrevNone && Step->Process != "O")
+                {
+                    qWarning() << "Non-transition step without node detected!"<<iStep;
+                    bOK = false;
+                }
+
+                bLastWasTransition = false;
+            }
+        }
+    }
+
+    for (AParticleTrackingRecord * sec : Secondaries)
+        bOK = sec->checkNodes() && bOK;
+
+    return bOK;
+}
+
 // ============= Event ==============
 
 AEventTrackingRecord * AEventTrackingRecord::create()
@@ -236,6 +290,15 @@ void AEventTrackingRecord::updateGeoNodes()
 {
     for (AParticleTrackingRecord * pr : PrimaryParticleRecords)
         pr->updateGeoNodes();
+}
+
+bool AEventTrackingRecord::checkNodes()
+{
+    bool bOK = true;
+    for (AParticleTrackingRecord * pr : PrimaryParticleRecords)
+        bOK = pr->checkNodes() && bOK;
+
+    return bOK;
 }
 
 void AEventTrackingRecord::makeTracks(std::vector<TrackHolderClass *> &Tracks, const QStringList &ParticleNames, const ATrackBuildOptions &TrackBuildOptions, bool bWithSecondaries) const

@@ -1664,7 +1664,8 @@ void OutputWindow::fillEvTabViewRecord(QTreeWidgetItem * item, const AParticleTr
         if (bStep)
         {
             double delta = 0;
-            if (iStep != 0 && step->Process != "T" && step->Process != "C" && step->Process != "O")
+            //if (iStep != 0 && step->Process != "T" && step->Process != "C" && step->Process != "O")
+            if (iStep != 0)
             {
                 ATrackingStepData * prev = pr->getSteps().at(iStep-1);
                 for (int i=0; i<3; i++)

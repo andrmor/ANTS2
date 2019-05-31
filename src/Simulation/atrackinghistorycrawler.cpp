@@ -283,6 +283,11 @@ void AHistorySearchProcessor_findDepositedEnergy::onLocalStep(const ATrackingSte
     Depo += tr.DepositedEnergy;
 }
 
+void AHistorySearchProcessor_findDepositedEnergy::onTransitionOut(const ATrackingStepData & tr)
+{
+    Depo += tr.DepositedEnergy;
+}
+
 void AHistorySearchProcessor_findDepositedEnergy::onTrackEnd(bool bMaster)
 {
     switch (Mode)

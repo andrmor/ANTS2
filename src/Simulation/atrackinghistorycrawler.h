@@ -37,8 +37,8 @@ public:
     virtual void onTrackEnd(bool /*bMaster*/){} // flag is the value returned by onNewTrack()
     virtual void onEventEnd(){}
 
-    bool isInlineSecondaryProcessing() {return bInlineSecondaryProcessing;}
-    bool isIgnoreParticleSelectors()   {return bIgnoreParticleSelectors;}
+    bool isInlineSecondaryProcessing() const {return bInlineSecondaryProcessing;}
+    bool isIgnoreParticleSelectors()   const {return bIgnoreParticleSelectors;}
 
 protected:
     bool bInlineSecondaryProcessing = false;
@@ -82,6 +82,7 @@ public:
     virtual void onNewEvent() override;
     virtual bool onNewTrack(const AParticleTrackingRecord & pr) override;
     virtual void onLocalStep(const ATrackingStepData & tr) override;
+    virtual void onTransitionOut(const ATrackingStepData & tr) override; // in Geant4 energy loss can happen on transition
     virtual void onTrackEnd(bool bMaster) override;
     virtual void onEventEnd() override;
 

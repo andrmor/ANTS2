@@ -15,9 +15,10 @@ public:
     bool bTrackParticles = false;
 
     QString               PhysicsList = "QGSP_BERT_HP";
-    QStringList           SensitiveVolumes; //later will be filled automatically
+    QStringList           SensitiveVolumes;
     QStringList           Commands;
     QMap<QString, double> StepLimits;
+    int                   PositionPrecision = 10;
 
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);

@@ -19,11 +19,8 @@ public:
 
 private slots:
     void on_pbAccept_clicked();
-
     void on_lePhysicsList_editingFinished();
-
     void on_cobRefPhysLists_activated(int index);
-
     void on_pbCancel_clicked();
 
 private:

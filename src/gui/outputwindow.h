@@ -47,6 +47,9 @@ public:
     void UpdateMaterials();
     void UpdateParticles();
 
+    void SaveGuiToJson(QJsonObject & json) const;
+    void LoadGuiFromJson(const QJsonObject & json);
+
 protected:
     void resizeEvent(QResizeEvent *event);
     
@@ -94,13 +97,11 @@ private slots:
     void on_cbPTHistBordAsStat_toggled(bool checked);
     void on_pbEventView_ShowTree_clicked();
     void on_pbEVgeo_clicked();
-
     void on_sbEVexpansionLevel_valueChanged(int arg1);
 
     void on_trwEventView_customContextMenuRequested(const QPoint &pos);
 
     void on_cbEVhideTrans_clicked();
-
     void on_cbEVhideTransPrim_clicked();
 
 private:
@@ -149,8 +150,11 @@ private:
     void EV_show();
     void EV_showTree();
     void EV_showGeo();
-    int findEventWithFilters(int currentEv, bool bUp);
+    int  findEventWithFilters(int currentEv, bool bUp);
     void doProcessExpandedStatus(QTreeWidgetItem *item, int &counter, bool bStore);
+
+    void saveEventViewerSettings(QJsonObject & json) const;
+    void loadEventViewerSettings(const QJsonObject & json);
 };
 
 #endif // OUTPUTWINDOW_H

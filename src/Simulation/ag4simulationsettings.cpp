@@ -38,6 +38,8 @@ void AG4SimulationSettings::writeToJson(QJsonObject &json) const
         arSL.push_back(el);
     }
     json["StepLimits"] = arSL;
+
+    json["PositionPrecision"] = PositionPrecision;
 }
 
 void AG4SimulationSettings::readFromJson(const QJsonObject &json)
@@ -71,6 +73,8 @@ void AG4SimulationSettings::readFromJson(const QJsonObject &json)
             StepLimits[vol] = step;
         }
     }
+
+    parseJson(json, "PositionPrecision", PositionPrecision);
 }
 
 const QString AG4SimulationSettings::getPrimariesFileName(int iThreadNum) const

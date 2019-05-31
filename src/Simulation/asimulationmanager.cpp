@@ -472,4 +472,6 @@ void ASimulationManager::generateG4antsConfigCommon(QJsonObject & json, int Thre
     QString tracFN = G4SimSet.getTracksFileName(ThreadId);
     json["File_Tracks"] = tracFN;
     removeOldFile(tracFN, "tracking");
+
+    json["PositionPrecision"] = G4SimSet.PositionPrecision;
 }

@@ -28,6 +28,8 @@ AGeant4ConfigDialog::AGeant4ConfigDialog(AG4SimulationSettings & G4SimSet, QWidg
     ui->pteStepLimits->clear();
     for (auto & key : G4SimSet.StepLimits.keys())
         ui->pteStepLimits->appendPlainText( QString("%1 %2").arg(key).arg(G4SimSet.StepLimits.value(key)) );
+
+    ui->sbPositionPrecision->setValue(G4SimSet.PositionPrecision);
 }
 
 AGeant4ConfigDialog::~AGeant4ConfigDialog()
@@ -70,6 +72,8 @@ void AGeant4ConfigDialog::on_pbAccept_clicked()
         }
         G4SimSet.StepLimits[vol] = step;
     }
+
+    G4SimSet.PositionPrecision = ui->sbPositionPrecision->value();
 
     accept();
 }

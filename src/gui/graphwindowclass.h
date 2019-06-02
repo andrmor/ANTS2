@@ -134,6 +134,10 @@ public:
                             const char *Title, const char *XTitle, const char *YTitle,
                             Color_t MarkerColor=2, int MarkerStyle=20, int MarkerSize=1,
                             Color_t LineColor=2,   int LineStyle=1,    int LineWidth=2) const;
+    TGraph* ConstructTGraph(const QVector<double>& x, const QVector<double>& y,
+                            const QString & Title, const QString & XTitle, const QString & YTitle,
+                            Color_t MarkerColor=2, int MarkerStyle=20, int MarkerSize=1,
+                            Color_t LineColor=2,   int LineStyle=1,    int LineWidth=2) const;
     TGraph* ConstructTGraph(const std::vector<float>& x, const std::vector<float>& y,
                             const char *Title, const char *XTitle, const char *YTitle,
                             Color_t MarkerColor=2, int MarkerStyle=20, int MarkerSize=1,

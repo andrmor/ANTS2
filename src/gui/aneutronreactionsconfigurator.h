@@ -28,6 +28,9 @@ private slots:
 public slots:
     void onResizeRequest();
 
+signals:
+    void RequestDraw(const QVector<double> & x, const QVector<double> & y, const QString & titleX, const QString & titleY);
+
 private:
     Ui::ANeutronReactionsConfigurator *ui;
     ANeutronInteractionElement* Element;

@@ -14,6 +14,7 @@ class AAbsorptionGeneratedParticle;
 class QComboBox;
 class QLineEdit;
 class QCheckBox;
+class QVBoxLayout;
 
 class ANeutronReactionWidget : public QFrame
 {
@@ -30,15 +31,35 @@ private slots:
 
     void on_ledBranching_textChanged(const QString &arg1);
 
+    void on_cobModel_activated(int index);
+    void on_cobGenModel_activated(int index);
+
+    void on_ledConstDepo_editingFinished();
+
+    void on_ledAvDepo_editingFinished();
+
+    void on_ledSigma_editingFinished();
+
+    void on_pbLoadCustom_clicked();
+
+    void on_pbShowCustom_clicked();
+
 private:
     Ui::ANeutronReactionWidget *ui;
     ADecayScenario* Reaction;
     QStringList DefinedParticles;
 
-    void updateParticleList();
+    QVBoxLayout * ParLay;
+
+    QVector<QWidget*> Delegates;
+
+private:
+    void updateGUI();
+    void clearDelegates();
 
 signals:
     void RequestParentResize();
+    void RequestDraw(const QVector<double> & x, const QVector<double> & y, const QString & titleX, const QString & titleY);
 };
 
 class AGeneratedParticleDelegate : public QFrame

@@ -53,6 +53,7 @@ private slots:
     void onAddIsotope(AChemicalElement *element);
     void onRemoveIsotope(AChemicalElement* element, int isotopeIndexInElement);
     void IsotopePropertiesChanged(const AChemicalElement* element, int isotopeIndexInElement);
+    void onRequestDraw(const QVector<double> & x, const QVector<double> & y, const QString & titleX, const QString & titleY);
 
     //on user input    
     void on_pbUpdateInteractionIndication_clicked();  // interaction indication update

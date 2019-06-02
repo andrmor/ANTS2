@@ -33,8 +33,8 @@ public:
     QVector<AAbsorptionGeneratedParticle> GeneratedParticles;
 
     //simplified model
-    enum DirectDepoSelected { NotActive = 0, ConstModel = 1, GaussModel = 2, CustomDistModel = 3};
-    DirectDepoSelected eDirectDepo = NotActive; //if any other than NotActive is selected, GeneratedParticles are ignored!
+    enum DirectDepoSelected { ParticleGeneration = 0, ConstModel = 1, GaussModel = 2, CustomDistModel = 3};
+    DirectDepoSelected eDirectDepo = ParticleGeneration; //if any other than NotActive is selected, GeneratedParticles are ignored!
     double DirectAverage = 1000.0; // keV
     double DirectSigma = 10.0; //keV
     QVector<double> DirectCustomEn;

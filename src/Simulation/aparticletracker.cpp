@@ -17,6 +17,8 @@
 #include "TGeoManager.h"
 #include "TRandom2.h"
 #include "TGeoTrack.h"
+#include "TH1.h"
+#include "TH1D.h"
 
 AParticleTracker::AParticleTracker(TRandom2 & RandomGenerator,
                                    AMaterialParticleCollection & MpCollection,
@@ -596,13 +598,37 @@ bool AParticleTracker::processNeutronAbsorption_isKilled(const NeutralTerminator
             const ADecayScenario & reaction = el.DecayScenarios.at(iScenario);
 
             //simplistic model?
-            if (reaction.eDirectDepo != ADecayScenario::NotActive)
+            if (reaction.eDirectDepo != ADecayScenario::ParticleGeneration)
             {
-                // TODO ***!!!
-                qDebug() << "Direct neutron depo model!";
+                double depoE;
+                switch (reaction.eDirectDepo)
+                {
+                case ADecayScenario::ConstModel:
+                    depoE = reaction.DirectAverage;
+                    break;
+                case ADecayScenario::GaussModel:
+                    depoE = RandGen.Gaus(reaction.DirectAverage, reaction.DirectSigma);
+                    break;
+                case ADecayScenario::CustomDistModel:
+                    {
+                        TH1D * hh = const_cast<TH1D*>(reaction.DirectCustomDist); //sorry, but ROOT needs it (both get integral and fo binary search). However, Integral is calculated before run time, so it is safe
+                        depoE = GetRandomFromHist( hh, &RandGen);
+                    }
+                    break;
+                default:
+                    depoE = 0;
+                    qWarning() << "Unknown decay scenario model";
+                    break;
+                }
+
+                if (depoE > 0)
+                {
+                    AEnergyDepositionCell* tc = new AEnergyDepositionCell(p->r, p->time, depoE, p->Id, thisMatId, counter, EventId);
+                    EnergyVector.push_back(tc);
+                }
+
                 if (SimSet->fLogsStat)
                 {
-                    double depoE = 0; // ***!!! generate energy depo here
                     ATrackingStepData * step = new ATrackingStepData(p->r, p->time, 0, depoE, "nDirect");
                     thisParticleRecord->addStep(step);
                 }

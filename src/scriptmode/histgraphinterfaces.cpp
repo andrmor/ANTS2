@@ -16,6 +16,8 @@
 #include "TF2.h"
 #include "TGraph.h"
 #include "TF1.h"
+#include "TFile.h"
+#include "TKey.h"
 
 //----------------- HIST  -----------------
 AInterfaceToHist::AInterfaceToHist(TmpObjHubClass* TmpHub)
@@ -443,6 +445,64 @@ void AInterfaceToHist::Save(const QString &HistName, const QString& fileName)
     ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
     if (!r) abort("Histogram " + HistName + " not found!");
     else    r->Save(fileName);
+}
+
+void AInterfaceToHist::Load(const QString &HistName, const QString &fileName)
+{
+    if (!bGuiThread)
+    {
+        abort("Threads cannot load histograms!");
+        return;
+    }
+
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    if (r && bAbortIfExists)
+    {
+        abort("Histogram " + HistName + " already exists!");
+        return;
+    }
+
+    TFile* f = new TFile(fileName.toLatin1());
+    if (!f)
+    {
+        abort("File not found or cannot be opened: " + fileName);
+        return;
+    }
+
+    const int numKeys = f->GetListOfKeys()->GetEntries();
+    qDebug() << "File contains" << numKeys << "TKeys";
+
+    ARootHistRecord * rec = nullptr;
+    for (int i=0; i<numKeys; i++)
+    {
+        TKey *key = (TKey*)f->GetListOfKeys()->At(i);
+        QString Type = key->GetClassName();
+        QString Name = key->GetName();
+        qDebug() << i << Type << Name;
+
+        if (Type == "TH1D")
+        {
+            TH1D * hist = (TH1D*)key->ReadObj();
+            rec = new ARootHistRecord(hist, HistName, "TH1D");
+            hist->GetYaxis()->SetTitleOffset(1.30f);
+            break;
+            //else if (Type=="TProfile") p = (TProfile*)key->ReadObj();
+            //else if (Type=="TProfile2D") p = (TProfile2D*)key->ReadObj();
+        }
+    }
+    f->Close();
+    delete f;
+
+    if (!rec) abort("Not found histograms with supported types in the file.\nCurrently supported: TH1D");
+    else
+    {
+        bool bOK = TmpHub->Hists.append(HistName, rec, false);
+        if (!bOK)
+        {
+            delete rec;
+            abort("Load histogram from file " + fileName + " failed!");
+        }
+    }
 }
 
 bool AInterfaceToHist::Delete(const QString &HistName)

@@ -241,6 +241,7 @@ bool ARootHistRecord::GetContent(QVector<double> &x, QVector<double> &y) const
 {
     QMutexLocker locker(&Mutex);
 
+    if (!Type.startsWith("TH1")) return false;
     TH1* h = dynamic_cast<TH1*>(Object);
     if (!h) return false;
 
@@ -255,6 +256,7 @@ bool ARootHistRecord::GetContent(QVector<double> &x, QVector<double> &y) const
 
 bool ARootHistRecord::GetUnderflow(double & undeflow) const
 {
+    if (!Type.startsWith("TH1")) return false;
     TH1* h = dynamic_cast<TH1*>(Object);
     if (!h) return false;
 
@@ -264,6 +266,7 @@ bool ARootHistRecord::GetUnderflow(double & undeflow) const
 
 bool ARootHistRecord::GetOverflow(double & overflow) const
 {
+    if (!Type.startsWith("TH1")) return false;
     TH1* h = dynamic_cast<TH1*>(Object);
     if (!h) return false;
 

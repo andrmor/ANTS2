@@ -146,6 +146,18 @@ void AInterfaceToHist::Smooth(const QString &HistName, int times)
     }
 }
 
+void AInterfaceToHist::ApplyMedianFilter(const QString &HistName, int span)
+{
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    if (!r)
+        abort("Histogram " + HistName + " not found!");
+    else
+    {
+        bool bOK = r->MedianFilter(span);
+        if (!bOK) abort("Failed - Median filter is currently implemented only for 1D histograms (TH1)");
+    }
+}
+
 void AInterfaceToHist::FillArr(const QString &HistName, const QVariant Array)
 {
     ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
@@ -458,6 +470,53 @@ void AInterfaceToHist::Draw(const QString &HistName, const QString options)
         abort("Histogram " + HistName + " not found!");
     else
         emit RequestDraw(r->GetObject(), options, true);
+}
+
+QVariantList AInterfaceToHist::GetContent(const QString& HistName)
+{
+    QVariantList vl;
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    if (!r) abort("Histogram " + HistName + " not found!");
+    else
+    {
+        QVector<double> x, y;
+        const bool bOK = r->GetContent(x, y);
+        if (bOK)
+        {
+            for (int i=0; i<x.size(); i++)
+            {
+                QVariantList el;
+                el << x.at(i) << y.at(i);
+                vl.push_back(el);
+            }
+        }
+        else abort("GetBins method is currently implemented only for 1D histograms (TH1)");
+    }
+    return vl;
+}
+
+double AInterfaceToHist::GetUnderflowBin(const QString& HistName)
+{
+    double val = 0;
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    if (!r) abort("Histogram " + HistName + " not found!");
+    else
+    {
+        if (!r->GetUnderflow(val)) abort("Failed to get undeflow - the method is curretly implemented only for TH1");
+    }
+    return val;
+}
+
+double AInterfaceToHist::GetOverflowBin(const QString& HistName)
+{
+    double val = 0;
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    if (!r) abort("Histogram " + HistName + " not found!");
+    else
+    {
+        if (!r->GetOverflow(val)) abort("Failed to get overflow - the method is curretly implemented only for TH1");
+    }
+    return val;
 }
 
 // --------------------- End of HIST ------------------------

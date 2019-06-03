@@ -5,6 +5,7 @@
 
 #include <QString>
 #include <QVariant>
+#include <QVariantList>
 
 class TmpObjHubClass;
 class TObject;
@@ -42,7 +43,12 @@ public slots:
 
   void           Draw(const QString& HistName, const QString options = "");
 
+  QVariantList   GetContent(const QString& HistName);
+  double         GetUnderflowBin(const QString& HistName);
+  double         GetOverflowBin(const QString& HistName);
+
   void           Smooth(const QString& HistName, int times);
+  void           ApplyMedianFilter(const QString& HistName, int span);
   const QVariant FitGauss(const QString& HistName, const QString options = "");
   const QVariant FitGaussWithInit(const QString& HistName, const QVariant InitialParValues, const QString options = "");
   const QVariant FindPeaks(const QString& HistName, double sigma, double threshold);

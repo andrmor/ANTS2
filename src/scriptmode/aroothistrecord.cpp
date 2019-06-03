@@ -1,6 +1,8 @@
 #include "aroothistrecord.h"
 #include "apeakfinder.h"
 
+#include <QDebug>
+
 #include "TH1D.h"
 #include "TH2D.h"
 #include "TF1.h"
@@ -154,6 +156,44 @@ void ARootHistRecord::Scale(double ScaleIntegralTo, bool bDividedByBinWidth)
     }
 }
 
+bool ARootHistRecord::MedianFilter(int span)
+{
+    QMutexLocker locker(&Mutex);
+
+    int deltaLeft  = ( span % 2 == 0 ? span / 2 - 1 : span / 2 );
+    int deltaRight = span / 2;
+    qDebug() << span << deltaLeft << deltaRight;
+
+    TH1* h = dynamic_cast<TH1*>(Object);
+    if (!h) return false;
+
+    QVector<double> Filtered;
+    int num = h->GetNbinsX();
+    for (int iThisBin = 1; iThisBin <= num; iThisBin++)  // 0-> underflow; num+1 -> overflow
+    {
+        QVector<double> content;
+        for (int i = iThisBin - deltaLeft; i <= iThisBin + deltaRight; i++)
+        {
+            if (i < 1 || i > num) continue;
+            content << h->GetBinContent(i);
+        }
+
+        std::sort(content.begin(), content.end());
+        int size = content.size();
+        double val;
+        if (size == 0) val = 0;
+        else val = ( size % 2 == 0 ? (content[size / 2 - 1] + content[size / 2]) / 2 : content[size / 2] );
+
+        Filtered.append(val);
+    }
+    qDebug() << "Result:" << Filtered;
+
+    for (int iThisBin = 1; iThisBin <= num; iThisBin++)
+        h->SetBinContent(iThisBin, Filtered.at(iThisBin-1));
+
+    return true;
+}
+
 double ARootHistRecord::GetIntegral(bool bMultipliedByBinWidth)
 {
     TH1* h = dynamic_cast<TH1*>(Object);
@@ -173,6 +213,41 @@ double ARootHistRecord::GetMaximum()
     TH1* h = dynamic_cast<TH1*>(Object);
     if (!h) return 1.0;
     return h->GetMaximum();
+}
+
+bool ARootHistRecord::GetContent(QVector<double> &x, QVector<double> &y) const
+{
+    QMutexLocker locker(&Mutex);
+
+    TH1* h = dynamic_cast<TH1*>(Object);
+    if (!h) return false;
+
+    int num = h->GetNbinsX();
+    for (int i = 1; i <= num; i++)
+    {
+        x.append(h->GetBinCenter(i));
+        y.append(h->GetBinContent(i));
+    }
+    return true;
+}
+
+bool ARootHistRecord::GetUnderflow(double & undeflow) const
+{
+    TH1* h = dynamic_cast<TH1*>(Object);
+    if (!h) return false;
+
+    undeflow = h->GetBinContent(0);
+    return true;
+}
+
+bool ARootHistRecord::GetOverflow(double & overflow) const
+{
+    TH1* h = dynamic_cast<TH1*>(Object);
+    if (!h) return false;
+
+    int num = h->GetNbinsX();
+    overflow = h->GetBinContent(num+1);
+    return true;
 }
 
 const QVector<double> ARootHistRecord::FitGaussWithInit(const QVector<double> &InitialParValues, const QString options)

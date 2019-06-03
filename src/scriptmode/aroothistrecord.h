@@ -27,6 +27,8 @@ public:
     void FillArr(const QVector<double>& val, const QVector<double>& weight);
     void Fill2DArr(const QVector<double>& x, const QVector<double>& y, const QVector<double>& weight);
 
+    void Save(const QString & fileName) const;
+
     bool Divide(ARootHistRecord* other);
 
     void   Smooth(int times);

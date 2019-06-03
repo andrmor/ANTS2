@@ -58,6 +58,8 @@ public slots:
   double         GetMaximum(const QString& HistName);
   void           Scale(const QString& HistName, double ScaleIntegralTo, bool DividedByBinWidth = false);
 
+  void           Save(const QString& HistName, const QString &fileName);
+
   bool           Delete(const QString& HistName);
   void           DeleteAllHist();
 

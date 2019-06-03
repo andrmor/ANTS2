@@ -438,6 +438,13 @@ void AInterfaceToHist::Scale(const QString& HistName, double ScaleIntegralTo, bo
         r->Scale(ScaleIntegralTo, DividedByBinWidth);
 }
 
+void AInterfaceToHist::Save(const QString &HistName, const QString& fileName)
+{
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    if (!r) abort("Histogram " + HistName + " not found!");
+    else    r->Save(fileName);
+}
+
 bool AInterfaceToHist::Delete(const QString &HistName)
 {
     if (!bGuiThread)

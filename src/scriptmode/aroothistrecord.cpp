@@ -113,6 +113,28 @@ void ARootHistRecord::Fill2DArr(const QVector<double> &x, const QVector<double> 
     }
 }
 
+void ARootHistRecord::Save(const QString &fileName) const
+{
+    QMutexLocker locker(&Mutex);
+
+    if (Type == "TH1D")
+    {
+        TH1D* h = static_cast<TH1D*>(Object);
+        TH1D* hc = new TH1D(*h);
+        locker.unlock();
+        hc->SaveAs(fileName.toLatin1());
+        delete hc;
+    }
+    else //if (Type == "TH2D")
+    {
+        TH2D* h = static_cast<TH2D*>(Object);
+        TH2D* hc = new TH2D(*h);
+        locker.unlock();
+        hc->SaveAs(fileName.toLatin1());
+        delete hc;
+    }
+}
+
 bool ARootHistRecord::Divide(ARootHistRecord *other)
 {
     other->externalLock();

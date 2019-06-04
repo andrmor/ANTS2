@@ -1722,8 +1722,8 @@ void OutputWindow::fillEvTabViewRecord(QTreeWidgetItem * item, const AParticleTr
     bool bMat = ui->cbEVmat->isChecked();
 
     QString curVolume;
-    int curVolIndex;
-    int curMat;
+    int     curVolIndex;
+    int     curMat;
 
     for (size_t iStep = 0; iStep < pr->getSteps().size(); iStep++)
     {
@@ -1743,9 +1743,9 @@ void OutputWindow::fillEvTabViewRecord(QTreeWidgetItem * item, const AParticleTr
             ATransportationStepData * trStep = dynamic_cast<ATransportationStepData*>(step);
             if (bHideTransp || (bHideTranspPrim && pr->isPrimary()) )
             {
-                curVolume = trStep->VolName;
+                curVolume   = trStep->VolName;
                 curVolIndex = trStep->VolIndex;
-                curMat = trStep->MatIndex;
+                curMat      = trStep->MatIndex;
                 continue;
             }
 
@@ -1773,9 +1773,14 @@ void OutputWindow::fillEvTabViewRecord(QTreeWidgetItem * item, const AParticleTr
             }
             s += QString("  %1mm").arg(delta, 0, 'g', precision);
         }
-        if (bVolume) s += QString("  %1").arg(curVolume);
-        if (bIndex)  s += QString("  %1").arg(curVolIndex);
-        if (bMat)    s += QString("  %1").arg( MW->MpCollection->getMaterialName( curVolIndex ));
+
+        if (step->Process != "O")
+        {
+            if (bVolume) s += QString("  %1").arg(curVolume);
+            if (bIndex)  s += QString("  %1").arg(curVolIndex);
+            if (bMat)    s += QString("  %1").arg( MW->MpCollection->getMaterialName( curVolIndex ));
+        }
+
         if (bTime)   s += QString("  t=%1").arg(step->Time * timeUnits, 0, 'g', precision);
         if (bDepo)   s += QString("  depo=%1").arg(step->DepositedEnergy * depoUnits, 0, 'g', precision);
         if (bKin)    s += QString("  E=%1").arg(step->Energy * kinUnits, 0, 'g', precision);

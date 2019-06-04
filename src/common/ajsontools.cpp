@@ -95,13 +95,13 @@ bool parseJson(const QJsonObject &json, const QString &key, QJsonObject &obj)
 }
 
 #ifdef GUI
-void JsonToCheckbox(QJsonObject &json, QString key, QCheckBox *cb)
+void JsonToCheckbox(const QJsonObject &json, QString key, QCheckBox *cb)
 {
   if (json.contains(key))
     cb->setChecked(json[key].toBool());
 }
 
-void JsonToSpinBox(QJsonObject &json, QString key, QSpinBox *sb)
+void JsonToSpinBox(const QJsonObject &json, QString key, QSpinBox *sb)
 {
   if (json.contains(key))
     {
@@ -111,25 +111,25 @@ void JsonToSpinBox(QJsonObject &json, QString key, QSpinBox *sb)
     }
 }
 
-void JsonToLineEditDouble(QJsonObject &json, QString key, QLineEdit *le)
+void JsonToLineEditDouble(const QJsonObject &json, QString key, QLineEdit *le)
 {
   if (json.contains(key))
     le->setText( QString::number(json[key].toDouble()) );
 }
 
-void JsonToLineEditInt(QJsonObject &json, QString key, QLineEdit *le)
+void JsonToLineEditInt(const QJsonObject &json, QString key, QLineEdit *le)
 {
     if (json.contains(key))
         le->setText( QString::number(json[key].toInt()) );
 }
 
-void JsonToLineEditText(QJsonObject &json, QString key, QLineEdit *le)
+void JsonToLineEditText(const QJsonObject &json, QString key, QLineEdit *le)
 {
     if (json.contains(key))
       le->setText( json[key].toString() );
 }
 
-void JsonToComboBox(QJsonObject &json, QString key, QComboBox *qb)
+void JsonToComboBox(const QJsonObject &json, QString key, QComboBox *qb)
 {
   if (json.contains(key))
     {

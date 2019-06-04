@@ -17,6 +17,8 @@
 #include "TGeoManager.h"
 #include "TRandom2.h"
 #include "TGeoTrack.h"
+#include "TH1.h"
+#include "TH1D.h"
 
 AParticleTracker::AParticleTracker(TRandom2 & RandomGenerator,
                                    AMaterialParticleCollection & MpCollection,
@@ -535,7 +537,6 @@ bool AParticleTracker::processCompton_isKilled()
 bool AParticleTracker::processNeutronAbsorption_isKilled(const NeutralTerminatorStructure & term)
 {
     // qDebug() << "neutron absorption";
-
     // Unless direct energy depsoition model is triggered, nothing is added to the EnergyVector
 
     //select which of the isotopes interacted with the neutron
@@ -568,7 +569,7 @@ bool AParticleTracker::processNeutronAbsorption_isKilled(const NeutralTerminator
         const ANeutronInteractionElement & el = elements.at(iselected);
         //      qDebug() << "Absorption triggered for"<<el.Name<<"-"<<el.Mass;
 
-        // post-capture effect
+        // post-capture effects
         if (el.DecayScenarios.isEmpty())
         {
             // qDebug() << "No decay scenarios following neutron capture are defined";
@@ -595,31 +596,62 @@ bool AParticleTracker::processNeutronAbsorption_isKilled(const NeutralTerminator
             // qDebug() << "Decay scenario #" << iScenario << "was triggered";
             const ADecayScenario & reaction = el.DecayScenarios.at(iScenario);
 
-            //simplistic model?
-            if (reaction.eDirectDepo != ADecayScenario::NotActive)
+            switch (reaction.InteractionModel)
             {
-                // TODO ***!!!
-                qDebug() << "Direct neutron depo model!";
-                if (SimSet->fLogsStat)
-                {
-                    double depoE = 0; // ***!!! generate energy depo here
-                    ATrackingStepData * step = new ATrackingStepData(p->r, p->time, 0, depoE, "nDirect");
-                    thisParticleRecord->addStep(step);
-                }
-            }
-            else if (reaction.GeneratedParticles.isEmpty())
-            {
-                //      qDebug() << "In this scenario there is no emission of secondary particles";
+            case ADecayScenario::Loss:
+              {
+                //  qDebug() << "In this scenario there is no emission of secondary particles";
                 if (SimSet->fLogsStat)
                 {
                     ATrackingStepData * step = new ATrackingStepData(p->r, p->time, 0, 0, "nCapture");
                     thisParticleRecord->addStep(step);
                 }
-            }
-            else //generating particles if they are defined
-            {
-                ATrackingStepData * step;
+              }
+                break;
+
+            case ADecayScenario::Direct:
+              {
+                //  qDebug() << "Direct depo";
+                double depoE;
+                switch (reaction.DirectModel)
+                {
+                case ADecayScenario::ConstModel:
+                    depoE = reaction.DirectConst;
+                    break;
+                case ADecayScenario::GaussModel:
+                    depoE = RandGen.Gaus(reaction.DirectAverage, reaction.DirectSigma);
+                    break;
+                case ADecayScenario::CustomDistModel:
+                {
+                    TH1D * hh = const_cast<TH1D*>(reaction.DirectCustomDist); //sorry, but ROOT needs it (both get integral and fo binary search). However, Integral is calculated before run time, so it is safe
+                    depoE = GetRandomFromHist( hh, &RandGen);
+                }
+                    break;
+                default:
+                    depoE = 0;
+                    qWarning() << "Unknown decay scenario model";
+                    break;
+                }
+
+                if (depoE > 0)
+                {
+                    AEnergyDepositionCell* tc = new AEnergyDepositionCell(p->r, p->time, depoE, p->Id, thisMatId, counter, EventId);
+                    EnergyVector.push_back(tc);
+                }
+
                 if (SimSet->fLogsStat)
+                {
+                    ATrackingStepData * step = new ATrackingStepData(p->r, p->time, 0, depoE, "nDirect");
+                    thisParticleRecord->addStep(step);
+                }
+              }
+                break;
+
+            case ADecayScenario::FissionFragments:
+              {
+                //  qDebug() << "Fission";
+                ATrackingStepData * step;
+                if (SimSet->fLogsStat && !reaction.GeneratedParticles.empty())
                 {
                     step = new ATrackingStepData(p->r, p->time, 0, 0, "neutronInelastic");
                     thisParticleRecord->addStep(step);
@@ -652,12 +684,13 @@ bool AParticleTracker::processNeutronAbsorption_isKilled(const NeutralTerminator
                         step->Secondaries.push_back( thisParticleRecord->countSecondaries()-1 );
                     }
                 }
-            }
+              }
+            } // switch end
         }
     }
     else
     {
-        qWarning() << "||| Error: No isotopes are defined for" << thisMaterial->name;
+        qWarning() << "||| Warning: No isotopes are defined for" << thisMaterial->name;
         if (SimSet->fLogsStat)
         {
             ATrackingStepData * step = new ATrackingStepData(p->r, p->time, 0, 0, "nCapture");

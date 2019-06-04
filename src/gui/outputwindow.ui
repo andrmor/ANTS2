@@ -764,7 +764,7 @@ over all events</string>
             <number>3</number>
            </property>
            <item>
-            <widget class="QCheckBox" name="checkBox">
+            <widget class="QCheckBox" name="cbEVshowFilters">
              <property name="text">
               <string>Show event filters (affect 'Next' and 'Previous' navigation buttons at the bottom)</string>
              </property>
@@ -3267,7 +3267,7 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    </hints>
   </connection>
   <connection>
-   <sender>checkBox</sender>
+   <sender>cbEVshowFilters</sender>
    <signal>toggled(bool)</signal>
    <receiver>frEventFilters</receiver>
    <slot>setVisible(bool)</slot>

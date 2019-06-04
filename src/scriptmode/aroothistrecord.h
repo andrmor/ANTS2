@@ -27,13 +27,20 @@ public:
     void FillArr(const QVector<double>& val, const QVector<double>& weight);
     void Fill2DArr(const QVector<double>& x, const QVector<double>& y, const QVector<double>& weight);
 
+    void Save(const QString & fileName) const;
+
     bool Divide(ARootHistRecord* other);
 
-    void Smooth(int times);
-    void Scale(double ScaleIntegralTo, bool bDividedByBinWidth = false);
+    void   Smooth(int times);
+    void   Scale(double ScaleIntegralTo, bool bDividedByBinWidth = false);
+    bool   MedianFilter(int span);
+
     double GetIntegral(bool bMultipliedByBinWidth = false);
-    int  GetEntries();
+    int    GetEntries();
     double GetMaximum();
+    bool   GetContent(QVector<double> & x, QVector<double> & y) const;
+    bool   GetUnderflow(double & undeflow) const;
+    bool   GetOverflow (double & overflow) const;
 
     const QVector<double> FitGauss(const QString& options = "");
     const QVector<double> FitGaussWithInit(const QVector<double>& InitialParValues, const QString options = "");

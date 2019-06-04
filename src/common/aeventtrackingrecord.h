@@ -56,6 +56,7 @@ public:
     void fillELDD(ATrackingStepData * IdByStep, std::vector<float> & dist, std::vector<float> & ELDD) const;
 
     void updateGeoNodes();
+    bool checkNodes();
 
     ~AParticleTrackingRecord();
 
@@ -91,6 +92,7 @@ public:
     bool   isHaveProcesses(const QStringList & Proc, bool bOnlyPrimary) const;
 
     void   updateGeoNodes();
+    bool   checkNodes();
 
     void   makeTracks(std::vector<TrackHolderClass *> & Tracks, const QStringList & ParticleNames, const ATrackBuildOptions & TrackBuildOptions, bool bWithSecondaries) const;
 

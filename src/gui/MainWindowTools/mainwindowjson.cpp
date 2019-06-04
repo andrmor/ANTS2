@@ -133,51 +133,50 @@ void MainWindow::initOverridesAfterLoad()
    // extra GUI-specific settings
 void MainWindow::writeExtraGuiToJson(QJsonObject &json)
 {
-  QJsonObject jmain;
+    QJsonObject jmain;
 
-  QJsonObject jsMW;
-  jsMW["ConfigGuiLocked"] = fConfigGuiLocked;
-  jmain["MW"] = jsMW;
+        QJsonObject jsMW;
+        jsMW["ConfigGuiLocked"] = fConfigGuiLocked;
+        jmain["MW"] = jsMW;
 
-//  QJsonObject js;
-//  js["ScriptEV"] = CheckerScript;
-//  jmain["PartcleStackChecker"] = js;
+        QJsonObject jeom;
+        jeom["ZoomLevel"] = GeometryWindow->ZoomLevel;
+        jmain["GeometryWindow"] = jeom;
 
-  QJsonObject jeom;
-  jeom["ZoomLevel"] = GeometryWindow->ZoomLevel;
-  jmain["GeometryWindow"] = jeom;
+        Rwindow->writeMiscGUIsettingsToJson(jmain);  //Misc setting (PlotXY, blur)
 
-  //Misc setting (PlotXY, blur)
-  Rwindow->writeMiscGUIsettingsToJson(jmain);
+        QJsonObject jOW;
+        Owindow->SaveGuiToJson(jOW);
+        jmain["OutputWindow"] = jOW;
 
-  json["GUI"] = jmain;
+    json["GUI"] = jmain;
 }
 
 void MainWindow::readExtraGuiFromJson(QJsonObject &json)
 {
-  if (!json.contains("GUI")) return;
-  QJsonObject jmain = json["GUI"].toObject();
+    if (!json.contains("GUI")) return;
+    QJsonObject jmain = json["GUI"].toObject();
 
-  fConfigGuiLocked = false;
-  if (jmain.contains("MW"))
+    fConfigGuiLocked = false;
+    if (jmain.contains("MW"))
     {
-       QJsonObject jsMW = jmain["MW"].toObject();
-       parseJson(jsMW, "ConfigGuiLocked", fConfigGuiLocked);
+        QJsonObject jsMW = jmain["MW"].toObject();
+        parseJson(jsMW, "ConfigGuiLocked", fConfigGuiLocked);
     }
-  onGuiEnableStatus(fConfigGuiLocked);
+    onGuiEnableStatus(fConfigGuiLocked);
 
-//  QJsonObject js = jmain["PartcleStackChecker"].toObject();
-//  if (!js.isEmpty())
-//      parseJson(js, "ScriptEV", CheckerScript);
-
-  QJsonObject js = jmain["GeometryWindow"].toObject();
-  if (js.contains("ZoomLevel"))
+    QJsonObject js = jmain["GeometryWindow"].toObject();
+    if (js.contains("ZoomLevel"))
     {
-      GeometryWindow->ZoomLevel = js["ZoomLevel"].toInt();
-      GeometryWindow->Zoom(true);
+        GeometryWindow->ZoomLevel = js["ZoomLevel"].toInt();
+        GeometryWindow->Zoom(true);
     }
-  if (jmain.contains("ReconstructionWindow"))
-      Rwindow->readMiscGUIsettingsFromJson(jmain);
+    if (jmain.contains("ReconstructionWindow"))
+        Rwindow->readMiscGUIsettingsFromJson(jmain);
+
+    QJsonObject jOW;
+    parseJson(jmain, "OutputWindow", jOW);
+    if (!jOW.isEmpty()) Owindow->LoadGuiFromJson(jOW);
 }
 
 void MainWindow::writeLoadExpDataConfigToJson(QJsonObject &json)

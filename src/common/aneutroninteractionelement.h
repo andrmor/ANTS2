@@ -29,12 +29,16 @@ class ADecayScenario
 public:
     double Branching;
 
-    //full model
+    //model
+    enum eInteractionModels { Loss = 0, FissionFragments = 1, Direct = 2};
+    enum eDirectModels {ConstModel = 0, GaussModel = 1, CustomDistModel = 2};
+
+    eInteractionModels InteractionModel = Loss;
+
     QVector<AAbsorptionGeneratedParticle> GeneratedParticles;
 
-    //simplified model
-    enum DirectDepoSelected { NotActive = 0, ConstModel = 1, GaussModel = 2, CustomDistModel = 3};
-    DirectDepoSelected eDirectDepo = NotActive; //if any other than NotActive is selected, GeneratedParticles are ignored!
+    eDirectModels DirectModel = ConstModel;
+    double DirectConst = 1000.0; // keV
     double DirectAverage = 1000.0; // keV
     double DirectSigma = 10.0; //keV
     QVector<double> DirectCustomEn;

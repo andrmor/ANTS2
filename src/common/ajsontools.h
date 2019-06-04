@@ -22,12 +22,12 @@ bool parseJson(const QJsonObject &json, const QString &key, QString &var);
 bool parseJson(const QJsonObject &json, const QString &key, QJsonArray &var);
 bool parseJson(const QJsonObject &json, const QString &key, QJsonObject &obj);
 
-void JsonToCheckbox(QJsonObject& json, QString key, QCheckBox* cb);
-void JsonToSpinBox(QJsonObject& json, QString key, QSpinBox* sb);
-void JsonToLineEditDouble(QJsonObject& json, QString key, QLineEdit* le);
-void JsonToLineEditInt(QJsonObject& json, QString key, QLineEdit* le);
-void JsonToLineEditText(QJsonObject& json, QString key, QLineEdit* le);
-void JsonToComboBox(QJsonObject& json, QString key, QComboBox* qb);
+void JsonToCheckbox      (const QJsonObject & json, QString key, QCheckBox * cb);
+void JsonToSpinBox       (const QJsonObject & json, QString key, QSpinBox  * sb);
+void JsonToLineEditDouble(const QJsonObject & json, QString key, QLineEdit * le);
+void JsonToLineEditInt   (const QJsonObject & json, QString key, QLineEdit * le);
+void JsonToLineEditText  (const QJsonObject & json, QString key, QLineEdit * le);
+void JsonToComboBox      (const QJsonObject & json, QString key, QComboBox * qb);
 
 bool writeTwoQVectorsToJArray(const QVector<double> &x, const QVector<double> &y, QJsonArray &ar);
 bool readTwoQVectorsFromJArray(QJsonArray &ar, QVector<double> &x, QVector<double> &y);

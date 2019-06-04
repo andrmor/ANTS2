@@ -19,6 +19,7 @@
 #include "asandwich.h"
 #include "ageoobject.h"
 #include "detectoraddonswindow.h"
+#include "ajsontools.h"
 
 //ROOT
 #include "TGraph2D.h"
@@ -1147,7 +1148,79 @@ void OutputWindow::UpdateParticles()
 //  for (int i=0; i<MW->Detector->MpCollection->countParticles(); i++)
 //      ui->cobShowParticle->addItem( MW->Detector->MpCollection->getParticleName(i) );
 
-//  if (old < ui->cobShowParticle->count()) ui->cobShowParticle->setCurrentIndex(old);
+    //  if (old < ui->cobShowParticle->count()) ui->cobShowParticle->setCurrentIndex(old);
+}
+
+void OutputWindow::SaveGuiToJson(QJsonObject &json) const
+{
+    QJsonObject js;
+    saveEventViewerSettings(js);
+    json["EventViewer"] = js;
+}
+
+void OutputWindow::LoadGuiFromJson(const QJsonObject &json)
+{
+    QJsonObject js;
+    parseJson(json, "EventViewer", js);
+    if (!js.isEmpty()) loadEventViewerSettings(js);
+}
+
+void OutputWindow::saveEventViewerSettings(QJsonObject & json) const
+{
+    json["HideAllTransport"] = ui->cbEVhideTrans->isChecked();
+    json["HidePrimTransport"] = ui->cbEVhideTransPrim->isChecked();
+    json["Precision"] = ui->sbEVprecision->value();
+    json["Expansion"] = ui->sbEVexpansionLevel->value();
+    json["Position"] = ui->cbEVpos->isChecked();
+    json["Step"] = ui->cbEVstep->isChecked();
+    json["KinEn"] = ui->cbEVkin->isChecked();
+    json["DepoEn"] = ui->cbEVdepo->isChecked();
+    json["Volume"] = ui->cbEVvol->isChecked();
+    json["VolIndex"] = ui->cbEVvi->isChecked();
+    json["Material"] = ui->cbEVmat->isChecked();
+    json["Time"] = ui->cbEVtime->isChecked();
+    json["ShowTracks"] = ui->cbEVtracks->isChecked();
+    json["SuppressSec"] = ui->cbEVsupressSec->isChecked();
+    json["ShowPMsig"] = ui->cbEVpmSig->isChecked();
+
+    json["ShowFilters"] = ui->cbEVshowFilters->isChecked();
+
+    json["LimToProcActive"] = ui->cbEVlimToProc->isChecked();
+    json["LimToProc"] = ui->leEVlimitToProc->text();
+    json["LimToProcPrim"] = ui->cbEVlimitToProcPrim->isChecked();
+
+    json["ExclProcActive"] = ui->cbEVexcludeProc->isChecked();
+    json["ExclToProc"] = ui->leEVexcludeProc->text();
+    json["ExclToProcPrim"] = ui->cbEVexcludeProcPrim->isChecked();
+}
+
+void OutputWindow::loadEventViewerSettings(const QJsonObject & json)
+{
+    JsonToCheckbox(json, "HideAllTransport", ui->cbEVhideTrans);
+    JsonToCheckbox(json, "HidePrimTransport", ui->cbEVhideTransPrim);
+    JsonToSpinBox (json, "Precision", ui->sbEVprecision);
+    JsonToSpinBox (json, "Expansion", ui->sbEVexpansionLevel);
+    JsonToCheckbox(json, "Position", ui->cbEVpos);
+    JsonToCheckbox(json, "Step", ui->cbEVstep);
+    JsonToCheckbox(json, "KinEn", ui->cbEVkin);
+    JsonToCheckbox(json, "DepoEn", ui->cbEVdepo);
+    JsonToCheckbox(json, "Volume", ui->cbEVvol);
+    JsonToCheckbox(json, "VolIndex", ui->cbEVvi);
+    JsonToCheckbox(json, "Material", ui->cbEVmat);
+    JsonToCheckbox(json, "Time", ui->cbEVtime);
+    JsonToCheckbox(json, "ShowTracks", ui->cbEVtracks);
+    JsonToCheckbox(json, "SuppressSec", ui->cbEVsupressSec);
+    JsonToCheckbox(json, "ShowPMsig", ui->cbEVpmSig);
+
+    JsonToCheckbox(json, "ShowFilters", ui->cbEVshowFilters);
+
+    JsonToCheckbox    (json, "LimToProcActive", ui->cbEVlimToProc);
+    JsonToLineEditText(json, "LimToProc", ui->leEVlimitToProc);
+    JsonToCheckbox    (json, "LimToProcPrim", ui->cbEVlimitToProcPrim);
+
+    JsonToCheckbox    (json, "ExclProcActive", ui->cbEVexcludeProc);
+    JsonToLineEditText(json, "ExclToProc", ui->leEVexcludeProc);
+    JsonToCheckbox    (json, "ExclToProcPrim", ui->cbEVexcludeProcPrim);
 }
 
 void OutputWindow::on_tabwinDiagnose_tabBarClicked(int index)
@@ -1664,7 +1737,8 @@ void OutputWindow::fillEvTabViewRecord(QTreeWidgetItem * item, const AParticleTr
         if (bStep)
         {
             double delta = 0;
-            if (iStep != 0 && step->Process != "T" && step->Process != "C" && step->Process != "O")
+            //if (iStep != 0 && step->Process != "T" && step->Process != "C" && step->Process != "O")
+            if (iStep != 0)
             {
                 ATrackingStepData * prev = pr->getSteps().at(iStep-1);
                 for (int i=0; i<3; i++)

@@ -2147,6 +2147,13 @@ void MaterialInspectorWindow::IsotopePropertiesChanged(const AChemicalElement * 
     on_pbWasModified_clicked();
 }
 
+void MaterialInspectorWindow::onRequestDraw(const QVector<double> &x, const QVector<double> &y, const QString &titleX, const QString &titleY)
+{
+    TGraph * g = MW->GraphWindow->ConstructTGraph(x, y, "", titleX, titleY, 4, 20, 1, 4, 1, 2);
+    MW->GraphWindow->Draw(g, "APL");
+    MW->GraphWindow->UpdateRootCanvas();
+}
+
 void MaterialInspectorWindow::on_pbShowStatisticsOnElastic_clicked()
 {
     AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
@@ -2632,6 +2639,7 @@ void MaterialInspectorWindow::onTabwNeutronsActionRequest(int iEl, int iIso, con
         QStringList DefinedParticles;
         MW->MpCollection->OnRequestListOfParticles(DefinedParticles);
         ANeutronReactionsConfigurator* d = new ANeutronReactionsConfigurator(&Terminators[0].IsotopeRecords[iIndex], DefinedParticles, this);
+        QObject::connect(d, &ANeutronReactionsConfigurator::RequestDraw, this, &MaterialInspectorWindow::onRequestDraw);
         int res = d->exec();
         delete d;
         if (res != 0)

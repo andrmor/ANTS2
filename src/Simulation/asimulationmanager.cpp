@@ -451,6 +451,5 @@ void ASimulationManager::generateG4antsConfigCommon(QJsonObject & json, int Thre
     json["File_Tracks"] = tracFN;
     removeOldFile(tracFN, "tracking");
 
-    json["PrecisionXYZ"] = G4SimSet.PositionPrecision;
     json["Precision"]    = G4SimSet.Precision;
 }

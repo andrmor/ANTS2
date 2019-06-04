@@ -39,7 +39,6 @@ void AG4SimulationSettings::writeToJson(QJsonObject &json) const
     }
     json["StepLimits"] = arSL;
 
-    json["PositionPrecision"] = PositionPrecision;
     json["Precision"]         = Precision;
 }
 
@@ -75,7 +74,6 @@ void AG4SimulationSettings::readFromJson(const QJsonObject &json)
         }
     }
 
-    parseJson(json, "PositionPrecision", PositionPrecision);
     parseJson(json, "Precision", Precision);
 }
 

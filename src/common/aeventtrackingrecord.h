@@ -18,7 +18,7 @@ public:
     ATrackingStepData(double * position, double time, double energy, double depositedEnergy, const QString & process);
     ATrackingStepData(float x, float y, float z, float time, float energy, float depositedEnergy, const QString & process);
 
-    void  logToString(QString & str, int offset) const;
+    virtual void logToString(QString & str, int offset) const;
 
 public:
     float   Position[3];
@@ -26,9 +26,24 @@ public:
     float   Energy;
     float   DepositedEnergy;
     QString Process;              //step defining process
-    TGeoNode * GeoNode = nullptr; //external
     std::vector<int> Secondaries; //secondaries created in this step - indexes in the parent record
+};
 
+class ATransportationStepData : public ATrackingStepData
+{
+public:
+    ATransportationStepData(float x, float y, float z, float time, float energy, float depositedEnergy, const QString & process);
+    ATransportationStepData(double * position, double time, double energy, double depositedEnergy, const QString & process);
+
+    void setVolumeInfo(const QString & volName, int volIndex, int matIndex);
+
+public:
+    // for "T" step it is for the next volume, for "C" step it is for the current
+    QString VolName;
+    int VolIndex;
+    int MatIndex;
+
+    virtual void logToString(QString & str, int offset) const override;
 };
 
 class AParticleTrackingRecord
@@ -37,7 +52,7 @@ public:
     static AParticleTrackingRecord* create(const QString & Particle);
     static AParticleTrackingRecord* create(); // try to avoid this
 
-    void updatePromisedSecondary(const QString & particle, float startEnergy, float startX, float startY, float startZ, float startTime);
+    void updatePromisedSecondary(const QString & particle, float startEnergy, float startX, float startY, float startZ, float startTime, const QString& volName, int volIndex, int matIndex);
     void addStep(ATrackingStepData * step);
 
     void addSecondary(AParticleTrackingRecord * sec);
@@ -54,9 +69,6 @@ public:
     void logToString(QString & str, int offset, bool bExpandSecondaries) const;
     void makeTrack(std::vector<TrackHolderClass *> & Tracks, const QStringList & ParticleNames, const ATrackBuildOptions & TrackBuildOptions, bool bWithSecondaries) const;
     void fillELDD(ATrackingStepData * IdByStep, std::vector<float> & dist, std::vector<float> & ELDD) const;
-
-    void updateGeoNodes();
-    bool checkNodes();
 
     ~AParticleTrackingRecord();
 
@@ -90,9 +102,6 @@ public:
     int    countPrimaries() const;
 
     bool   isHaveProcesses(const QStringList & Proc, bool bOnlyPrimary) const;
-
-    void   updateGeoNodes();
-    bool   checkNodes();
 
     void   makeTracks(std::vector<TrackHolderClass *> & Tracks, const QStringList & ParticleNames, const ATrackBuildOptions & TrackBuildOptions, bool bWithSecondaries) const;
 

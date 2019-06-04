@@ -95,10 +95,10 @@ void ATrackingDataImporter::processNewTrack()
 {
     //qDebug() << "NT:"<<currentLine;
     currentLine.remove(0, 1);
-    //Id ParentId Part x y z time E
-    //0      1     2   3 4 5   6  7
+    //TrackID ParentTrackID ParticleId X Y Z Time E iMat VolName VolIndex
+    //   0           1           2     3 4 5   6  7   8     9       10
     QStringList f = currentLine.split(' ', QString::SkipEmptyParts);
-    if (f.size() != 8)
+    if (f.size() != 11)
     {
         Error = "Bad format in new track line";
         return;
@@ -157,13 +157,15 @@ void ATrackingDataImporter::processNewTrack()
             AParticleTrackingRecord * r = AParticleTrackingRecord::create(f.at(2)); // p_name
 
             //float x, float y, float z, float time, float energy, float depositedEnergy, const QString & process
-            ATrackingStepData * step = new ATrackingStepData(f.at(3).toFloat(), // X
-                                                             f.at(4).toFloat(), // Y
-                                                             f.at(5).toFloat(), // Z
-                                                             f.at(6).toFloat(), // time
-                                                             f.at(7).toFloat(), // E
-                                                             0,                 // depoE
-                                                             "C");              // pr = 'C' which is "Creation"
+            ATransportationStepData * step = new ATransportationStepData(f.at(3).toFloat(), // X
+                                                                         f.at(4).toFloat(), // Y
+                                                                         f.at(5).toFloat(), // Z
+                                                                         f.at(6).toFloat(), // time
+                                                                         f.at(7).toFloat(), // E
+                                                                         0,                 // depoE
+                                                                         "C");              // pr = 'C' which is "Creation"
+            step->setVolumeInfo(f.at(9), f.at(10).toInt(), f.at(8).toInt());
+
             r->addStep(step);
             CurrentEventRecord->addPrimaryRecord(r);
             CurrentParticleRecord = r;
@@ -181,7 +183,11 @@ void ATrackingDataImporter::processNewTrack()
                                             f.at(3).toFloat(),  // X
                                             f.at(4).toFloat(),  // Y
                                             f.at(5).toFloat(),  // Z
-                                            f.at(6).toFloat()); // time
+                                            f.at(6).toFloat(),  // time
+                                            f.at(9),            //VolName
+                                            f.at(10).toInt(),   //VolIndex
+                                            f.at(8).toInt()     //MatIndex
+                                            );
             CurrentParticleRecord = secrec;
             PromisedSecondaries.remove(trIndex);
         }
@@ -193,8 +199,15 @@ void ATrackingDataImporter::processNewTrack()
 void ATrackingDataImporter::processNewStep()
 {
     //qDebug() << "PS:"<<currentLine;
-    //x y z time E dE proc {secondaries}
-    //0 1 2   3  4  5  6     ...
+
+    // format for "T" processes:
+    // ProcName X Y Z Time KinE DirectDepoE iMatTo VolNameTo VolIndexTo [secondaries]
+    //     0    1 2 3   4    5      6          7       8           9             ...
+    // not that if energy depo is present on T step, it is in the previous volume!
+
+    // format for all other processes:
+    // ProcName X Y Z Time KinE DirectDepoE [secondaries]
+    //     0    1 2 3   4    5      6           ...
 
     QStringList f = currentLine.split(' ', QString::SkipEmptyParts);
     if (f.size() < 7)
@@ -211,10 +224,10 @@ void ATrackingDataImporter::processNewStep()
             return;
         }
 
-        if (f.at(6) != "T") // skip Transportation (escape out of world is marked with "O")
+        if (f.at(0) != "T") // skip Transportation (escape out of world is marked with "O")
         {
             //qDebug() << "  Adding node";
-            CurrentTrack->Nodes << TrackNodeStruct(f.at(0).toDouble(), f.at(1).toDouble(), f.at(2).toDouble());  // need time?
+            CurrentTrack->Nodes << TrackNodeStruct(f.at(1).toDouble(), f.at(2).toDouble(), f.at(3).toDouble());  // need time?
         }
     }
 
@@ -226,19 +239,45 @@ void ATrackingDataImporter::processNewStep()
             return;
         }
 
-        ATrackingStepData * step = new ATrackingStepData(f.at(0).toFloat(), // X
-                                                         f.at(1).toFloat(), // Y
-                                                         f.at(2).toFloat(), // Z
-                                                         f.at(3).toFloat(), // time
-                                                         f.at(4).toFloat(), // energy
-                                                         f.at(5).toFloat(), // depoE
-                                                         f.at(6));          // pr
+        const QString & Process = f.at(0);
+        ATrackingStepData * step;
+        int secIndex;
+
+        if (Process == "T")
+        {
+            if (f.size() < 10)
+            {
+                Error = "Bad format in tracking line (transportation step)";
+                return;
+            }
+
+            step = new ATransportationStepData(f.at(1).toFloat(), // X
+                                               f.at(2).toFloat(), // Y
+                                               f.at(3).toFloat(), // Z
+                                               f.at(4).toFloat(), // time
+                                               f.at(5).toFloat(), // energy
+                                               f.at(6).toFloat(), // depoE
+                                               f.at(0));          // pr
+            (static_cast<ATransportationStepData*>(step))->setVolumeInfo(f.at(8), f.at(9).toInt(), f.at(7).toInt());
+            secIndex = 10;
+        }
+        else
+        {
+            step = new ATrackingStepData(f.at(1).toFloat(), // X
+                                         f.at(2).toFloat(), // Y
+                                         f.at(3).toFloat(), // Z
+                                         f.at(4).toFloat(), // time
+                                         f.at(5).toFloat(), // energy
+                                         f.at(6).toFloat(), // depoE
+                                         f.at(0));          // pr
+            secIndex = 7;
+        }
 
         CurrentParticleRecord->addStep(step);
 
-        if (f.size() > 7)
+        if (f.size() > secIndex)
         {
-            for (int i=7; i<f.size(); i++)
+            for (int i = secIndex; i < f.size(); i++)
             {
                 int index = f.at(i).toInt();
                 if (PromisedSecondaries.contains(index))

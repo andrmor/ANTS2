@@ -1677,7 +1677,6 @@ void OutputWindow::on_cbPTHistBordAsStat_toggled(bool)
     updatePTHistoryBinControl();
 }
 
-#include "TGeoNode.h"
 void OutputWindow::fillEvTabViewRecord(QTreeWidgetItem * item, const AParticleTrackingRecord * pr, int ExpansionLevel) const
 {
     item->setText(0, pr->ParticleName);
@@ -1722,22 +1721,49 @@ void OutputWindow::fillEvTabViewRecord(QTreeWidgetItem * item, const AParticleTr
     bool bIndex = ui->cbEVvi->isChecked();
     bool bMat = ui->cbEVmat->isChecked();
 
+    QString curVolume;
+    int curVolIndex;
+    int curMat;
+
     for (size_t iStep = 0; iStep < pr->getSteps().size(); iStep++)
     {
         ATrackingStepData * step = pr->getSteps().at(iStep);
-        if (step->Process == "T")
+
+        QString s = step->Process;
+
+        if (step->Process == "C")
         {
-            if (bHideTransp) continue;
-            if (bHideTranspPrim && pr->isPrimary()) continue;
+            ATransportationStepData * trStep = static_cast<ATransportationStepData*>(step);
+            curVolume = trStep->VolName;
+            curVolIndex = trStep->VolIndex;
+            curMat = trStep->MatIndex;
+        }
+        else if (step->Process == "T")
+        {
+            ATransportationStepData * trStep = dynamic_cast<ATransportationStepData*>(step);
+            if (bHideTransp || (bHideTranspPrim && pr->isPrimary()) )
+            {
+                curVolume = trStep->VolName;
+                curVolIndex = trStep->VolIndex;
+                curMat = trStep->MatIndex;
+                continue;
+            }
+
+            s += QString("  %1 (#%2, %3) -> %4 (#%5, %6)").arg(curVolume)
+                                                          .arg(curVolIndex)
+                                                          .arg(MW->MpCollection->getMaterialName(curMat))
+                                                          .arg(trStep->VolName)
+                                                          .arg(trStep->VolIndex)
+                                                          .arg(MW->MpCollection->getMaterialName(trStep->MatIndex));
+            curVolume = trStep->VolName;
+            curVolIndex = trStep->VolIndex;
+            curMat = trStep->MatIndex;
         }
 
-        QTreeWidgetItem * it = new QTreeWidgetItem(item);
-        QString s = step->Process;
         if (bPos) s += QString("  (%1, %2, %3)").arg(step->Position[0], 0, 'g', precision).arg(step->Position[1], 0, 'g', precision).arg(step->Position[2], 0, 'g', precision);
         if (bStep)
         {
             double delta = 0;
-            //if (iStep != 0 && step->Process != "T" && step->Process != "C" && step->Process != "O")
             if (iStep != 0)
             {
                 ATrackingStepData * prev = pr->getSteps().at(iStep-1);
@@ -1747,33 +1773,14 @@ void OutputWindow::fillEvTabViewRecord(QTreeWidgetItem * item, const AParticleTr
             }
             s += QString("  %1mm").arg(delta, 0, 'g', precision);
         }
-        if (bVolume && step->GeoNode)
-        {
-            QString str = QString("  %1").arg(step->GeoNode->GetVolume()->GetName());
-            if (step->Process == "T" && iStep != pr->getSteps().size()-1)
-            {
-                ATrackingStepData * next = pr->getSteps().at(iStep+1);
-                if (next->GeoNode)
-                    str += QString("->%1").arg(next->GeoNode->GetVolume()->GetName());
-            }
-            s += str;
-        }
-        if (bIndex && step->GeoNode) s += QString("  %1").arg(step->GeoNode->GetNumber());
-        if (bMat && step->GeoNode)
-        {
-            QString str = QString("  %1").arg( MW->MpCollection->getMaterialName( step->GeoNode->GetVolume()->GetMaterial()->GetIndex() ));
-            if (step->Process == "T" && iStep != pr->getSteps().size()-1)
-            {
-                ATrackingStepData * next = pr->getSteps().at(iStep+1);
-                if (next->GeoNode)
-                    str += QString("->%1").arg( MW->MpCollection->getMaterialName( next->GeoNode->GetVolume()->GetMaterial()->GetIndex()) );
-            }
-            s += str;
-        }
-        if (bTime) s += QString("  t=%1").arg(step->Time * timeUnits, 0, 'g', precision);
-        if (bDepo) s += QString("  depo=%1").arg(step->DepositedEnergy * depoUnits, 0, 'g', precision);
-        if (bKin)  s += QString("  E=%1").arg(step->Energy * kinUnits, 0, 'g', precision);
+        if (bVolume) s += QString("  %1").arg(curVolume);
+        if (bIndex)  s += QString("  %1").arg(curVolIndex);
+        if (bMat)    s += QString("  %1").arg( MW->MpCollection->getMaterialName( curVolIndex ));
+        if (bTime)   s += QString("  t=%1").arg(step->Time * timeUnits, 0, 'g', precision);
+        if (bDepo)   s += QString("  depo=%1").arg(step->DepositedEnergy * depoUnits, 0, 'g', precision);
+        if (bKin)    s += QString("  E=%1").arg(step->Energy * kinUnits, 0, 'g', precision);
 
+        QTreeWidgetItem * it = new QTreeWidgetItem(item);
         it->setText(0, s);
         qlonglong poi = reinterpret_cast<qlonglong>(pr);
         it->setText(1, QString("%1").arg(poi));

@@ -5,10 +5,6 @@
 
 #include <QDebug>
 
-#include "TGeoManager.h"
-#include "TGeoNode.h"
-#include "TGeoVolume.h"
-#include "TGeoMaterial.h"
 #include "TH1.h"
 #include "TH1D.h"
 #include "TH2.h"
@@ -37,7 +33,7 @@ int APTHistory_SI::countEvents()
 
 int APTHistory_SI::countPrimaries(int iEvent)
 {
-    if (iEvent < 0 || iEvent >= TH.size())
+    if (iEvent < 0 || iEvent >= (int)TH.size())
     {
         abort("Bad event number");
         return 0;
@@ -47,7 +43,7 @@ int APTHistory_SI::countPrimaries(int iEvent)
 
 QString APTHistory_SI::recordToString(int iEvent, int iPrimary, bool includeSecondaries)
 {
-    if (iEvent < 0 || iEvent >= TH.size())
+    if (iEvent < 0 || iEvent >= (int)TH.size())
     {
         abort("Bad event number");
         return "";
@@ -64,7 +60,7 @@ QString APTHistory_SI::recordToString(int iEvent, int iPrimary, bool includeSeco
 
 void APTHistory_SI::cd_set(int iEvent, int iPrimary)
 {
-    if (iEvent < 0 || iEvent >= TH.size())
+    if (iEvent < 0 || iEvent >= (int)TH.size())
     {
         abort("Bad event number");
         return;
@@ -176,11 +172,20 @@ QVariantList APTHistory_SI::cd_getStepRecord()
             vl.push_back( QVariantList() << s->Position[0] << s->Position[1] << s->Position[2] );
             vl << s->Time;
             QVariantList vnode;
-            if (s->GeoNode)
+            for (int iStep = Step; iStep > -2; iStep--)
             {
-                vnode << s->GeoNode->GetVolume()->GetMaterial()->GetIndex();
-                vnode << s->GeoNode->GetVolume()->GetName();
-                vnode << s->GeoNode->GetNumber();
+                if (iStep < 0)
+                {
+                    abort("Corrupted tracking history!");
+                    return vl;
+                }
+                ATransportationStepData * trans = dynamic_cast<ATransportationStepData*>(Rec->getSteps().at(iStep));
+                if (!trans) continue;
+
+                vnode << trans->MatIndex;
+                vnode << trans->VolName;
+                vnode << trans->VolIndex;
+                break;
             }
             vl.push_back(vnode);
             vl << s->Energy;
@@ -214,7 +219,7 @@ void APTHistory_SI::cd_in(int indexOfSecondary)
 {
     if (Rec)
     {
-        if (indexOfSecondary > -1 && indexOfSecondary < Rec->getSecondaries().size())
+        if (indexOfSecondary > -1 && indexOfSecondary < (int)Rec->getSecondaries().size())
         {
             Rec = Rec->getSecondaries().at(indexOfSecondary);
             Step = 0;

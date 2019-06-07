@@ -37,6 +37,7 @@ public:
 
     double GetIntegral(bool bMultipliedByBinWidth = false);
     int    GetEntries();
+    int    SetEntries(int num);
     double GetMaximum();
     bool   GetContent(QVector<double> & x, QVector<double> & y) const;
     bool   GetUnderflow(double & undeflow) const;

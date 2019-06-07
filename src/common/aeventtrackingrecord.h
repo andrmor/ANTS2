@@ -41,7 +41,7 @@ public:
     // for "T" step it is for the next volume, for "C" step it is for the current
     QString VolName;
     int VolIndex;
-    int MatIndex;
+    int iMaterial;
 
     virtual void logToString(QString & str, int offset) const override;
 };

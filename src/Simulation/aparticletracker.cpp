@@ -342,6 +342,7 @@ bool AParticleTracker::trackCharged_isKilled()
             //terminationStatus = EventHistoryStructure::AllEnergyDisspated;//2;
             bKilled = true;
             dE += p->energy;
+            p->energy = 0;
         }
 
         for (int j=0; j<3; j++) p->r[j] = navigator->GetCurrentPoint()[j];  //new current point

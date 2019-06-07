@@ -48,7 +48,7 @@ void ATransportationStepData::setVolumeInfo(const QString & volName, int volInde
 {
     VolName  = volName;
     VolIndex = volIndex;
-    MatIndex = matIndex;
+    iMaterial = matIndex;
 }
 
 void ATransportationStepData::logToString(QString &str, int offset) const
@@ -56,14 +56,14 @@ void ATransportationStepData::logToString(QString &str, int offset) const
     if (Process == "C")
     {
         str += QString(' ').repeated(offset);
-        str += QString("C at %1 %2 (mat %3)").arg(VolName).arg(VolIndex).arg(MatIndex);
+        str += QString("C at %1 %2 (mat %3)").arg(VolName).arg(VolIndex).arg(iMaterial);
         str += QString(" [%1, %2, %3]mm t=%4ns E=%5keV").arg(Position[0]).arg(Position[1]).arg(Position[2]).arg(Time).arg(Energy);
         str += '\n';
     }
     else if (Process == "T")
     {
         str += QString(' ').repeated(offset);
-        str += QString("T to %1 %2 (mat %3)").arg(VolName).arg(VolIndex).arg(MatIndex);
+        str += QString("T to %1 %2 (mat %3)").arg(VolName).arg(VolIndex).arg(iMaterial);
         str += QString(" [%1, %2, %3]mm t=%4ns depo=%5keV E=%6keV").arg(Position[0]).arg(Position[1]).arg(Position[2]).arg(Time).arg(DepositedEnergy).arg(Energy);
         if (Secondaries.size() > 0)  str += QString("  #sec:%1").arg(Secondaries.size());
         str += '\n';

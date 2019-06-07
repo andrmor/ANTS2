@@ -182,7 +182,7 @@ QVariantList APTHistory_SI::cd_getStepRecord()
                 ATransportationStepData * trans = dynamic_cast<ATransportationStepData*>(Rec->getSteps().at(iStep));
                 if (!trans) continue;
 
-                vnode << trans->MatIndex;
+                vnode << trans->iMaterial;
                 vnode << trans->VolName;
                 vnode << trans->VolIndex;
                 break;

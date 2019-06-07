@@ -1736,7 +1736,7 @@ void OutputWindow::fillEvTabViewRecord(QTreeWidgetItem * item, const AParticleTr
             ATransportationStepData * trStep = static_cast<ATransportationStepData*>(step);
             curVolume = trStep->VolName;
             curVolIndex = trStep->VolIndex;
-            curMat = trStep->MatIndex;
+            curMat = trStep->iMaterial;
         }
         else if (step->Process == "T")
         {
@@ -1745,7 +1745,7 @@ void OutputWindow::fillEvTabViewRecord(QTreeWidgetItem * item, const AParticleTr
             {
                 curVolume   = trStep->VolName;
                 curVolIndex = trStep->VolIndex;
-                curMat      = trStep->MatIndex;
+                curMat      = trStep->iMaterial;
                 continue;
             }
 
@@ -1754,10 +1754,8 @@ void OutputWindow::fillEvTabViewRecord(QTreeWidgetItem * item, const AParticleTr
                                                           .arg(MW->MpCollection->getMaterialName(curMat))
                                                           .arg(trStep->VolName)
                                                           .arg(trStep->VolIndex)
-                                                          .arg(MW->MpCollection->getMaterialName(trStep->MatIndex));
-            curVolume = trStep->VolName;
-            curVolIndex = trStep->VolIndex;
-            curMat = trStep->MatIndex;
+                                                          .arg(MW->MpCollection->getMaterialName(trStep->iMaterial));
+            //cannot set currents yet - the indication should still show the "from" values - remember about energy deposition during "T" step!
         }
 
         if (bPos) s += QString("  (%1, %2, %3)").arg(step->Position[0], 0, 'g', precision).arg(step->Position[1], 0, 'g', precision).arg(step->Position[2], 0, 'g', precision);
@@ -1774,11 +1772,11 @@ void OutputWindow::fillEvTabViewRecord(QTreeWidgetItem * item, const AParticleTr
             s += QString("  %1mm").arg(delta, 0, 'g', precision);
         }
 
-        if (step->Process != "O")
+        if (step->Process != "O" && step->Process != "T")
         {
             if (bVolume) s += QString("  %1").arg(curVolume);
             if (bIndex)  s += QString("  %1").arg(curVolIndex);
-            if (bMat)    s += QString("  %1").arg( MW->MpCollection->getMaterialName( curVolIndex ));
+            if (bMat)    s += QString("  %1").arg( MW->MpCollection->getMaterialName( curMat ));
         }
 
         if (bTime)   s += QString("  t=%1").arg(step->Time * timeUnits, 0, 'g', precision);
@@ -1798,6 +1796,14 @@ void OutputWindow::fillEvTabViewRecord(QTreeWidgetItem * item, const AParticleTr
         {
             QTreeWidgetItem * subItem = new QTreeWidgetItem(it);
             fillEvTabViewRecord(subItem, pr->getSecondaries().at(iSec), ExpansionLevel-1);
+        }
+
+        if (step->Process == "T")
+        {
+            ATransportationStepData * trStep = dynamic_cast<ATransportationStepData*>(step);
+            curVolume = trStep->VolName;
+            curVolIndex = trStep->VolIndex;
+            curMat = trStep->iMaterial;
         }
     }
 }

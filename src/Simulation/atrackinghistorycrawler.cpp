@@ -72,7 +72,7 @@ void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, 
                 const ATransportationStepData * trStep = static_cast<const ATransportationStepData*>(thisStep);
                 curVolume = trStep->VolName;
                 curVolIndex = trStep->VolIndex;
-                curMat = trStep->MatIndex;
+                curMat = trStep->iMaterial;
             }
             else if (thisStep->Process == "T") ProcType = NormalTransportation;
             else if (thisStep->Process == "O") ProcType = ExitingWorld;
@@ -105,7 +105,7 @@ void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, 
                 {
                     const ATransportationStepData * trStep = static_cast<const ATransportationStepData*>(thisStep); // "O" should not see this line!
                     {
-                        const bool bRejectedByMaterial = (opt.bToMat      && opt.ToMat      != trStep->MatIndex);
+                        const bool bRejectedByMaterial = (opt.bToMat      && opt.ToMat      != trStep->iMaterial);
                         const bool bRejectedByVolName  = (opt.bToVolume   && opt.ToVolume   != trStep->VolName);
                         const bool bRejectedByVolIndex = (opt.bToVolIndex && opt.ToVolIndex != trStep->VolIndex);
                         bEntranceValidated = !(bRejectedByMaterial || bRejectedByVolName || bRejectedByVolIndex);
@@ -142,7 +142,7 @@ void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, 
                     if (bCheckingEnter)
                     {
                         const ATransportationStepData * trStep = static_cast<const ATransportationStepData*>(thisStep); // "O" should not see this line!
-                        const bool bRejectedByMaterial = (opt.bMaterial    && opt.Material    != trStep->MatIndex);
+                        const bool bRejectedByMaterial = (opt.bMaterial    && opt.Material    != trStep->iMaterial);
                         const bool bRejectedByVolName  = (opt.bVolume      && opt.Volume      != trStep->VolName);
                         const bool bRejectedByVolIndex = (opt.bVolumeIndex && opt.VolumeIndex != trStep->VolIndex);
                         bEntranceValidated = !(bRejectedByMaterial || bRejectedByVolName || bRejectedByVolIndex);
@@ -158,7 +158,7 @@ void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, 
                     const ATransportationStepData * trStep = static_cast<const ATransportationStepData*>(thisStep);
                     curVolume = trStep->VolName;
                     curVolIndex = trStep->VolIndex;
-                    curMat = trStep->MatIndex;
+                    curMat = trStep->iMaterial;
                 }
             }
 

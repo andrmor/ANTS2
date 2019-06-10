@@ -15,6 +15,12 @@
 #include <QDebug>
 #include <QFileDialog>
 #include <QDesktopServices>
+#include <QVBoxLayout>
+
+#ifdef __USE_ANTS_JSROOT__
+    #include <QWebEngineView>
+    #include <QWebEnginePage>
+#endif
 
 #include "TView3D.h"
 #include "TView.h"
@@ -25,28 +31,43 @@ GeometryWindowClass::GeometryWindowClass(QWidget *parent, MainWindow *mw) :
   AGuiWindow(parent), MW(mw),
   ui(new Ui::GeometryWindowClass)
 {    
-  ui->setupUi(this);
+    ui->setupUi(this);
 
-  Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
-  windowFlags |= Qt::WindowCloseButtonHint;
-  windowFlags |= Qt::WindowMinimizeButtonHint;
-  windowFlags |= Qt::WindowMaximizeButtonHint;
-  windowFlags |= Qt::Tool;
-  this->setWindowFlags( windowFlags );
+    Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
+    windowFlags |= Qt::WindowCloseButtonHint;
+    windowFlags |= Qt::WindowMinimizeButtonHint;
+    windowFlags |= Qt::WindowMaximizeButtonHint;
+    windowFlags |= Qt::Tool;
+    this->setWindowFlags( windowFlags );
 
-  this->setMinimumWidth(200);
-  RasterWindow = new RasterWindowBaseClass(this);
-  //RasterWindow->resize(400, 400);
-  centralWidget()->layout()->addWidget(RasterWindow);
-  //RasterWindow->ForceResize();
+    this->setMinimumWidth(200);
 
-  connect(RasterWindow, &RasterWindowBaseClass::UserChangedWindow, this, &GeometryWindowClass::onRasterWindowChange);
+    RasterWindow = new RasterWindowBaseClass(this);
+    //centralWidget()->layout()->addWidget(RasterWindow);
+    connect(RasterWindow, &RasterWindowBaseClass::UserChangedWindow, this, &GeometryWindowClass::onRasterWindowChange);
 
-  QActionGroup* group = new QActionGroup( this );
-  ui->actionSmall_dot->setActionGroup(group);
-  ui->actionLarge_dot->setActionGroup(group);
-  ui->actionSmall_cross->setActionGroup(group);
-  ui->actionLarge_cross->setActionGroup(group);
+    QVBoxLayout * layV = new QVBoxLayout();
+    layV->setContentsMargins(0,0,0,0);
+    layV->addWidget(RasterWindow);
+    ui->swViewers->widget(0)->setLayout(layV);
+
+#ifdef __USE_ANTS_JSROOT__
+    QApplication::setAttribute(Qt::AA_UseSoftwareOpenGL);  // temporary!
+    //QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+
+    WebView = new QWebEngineView(this);
+    layV = new QVBoxLayout();
+        layV->setContentsMargins(0,0,0,0);
+        layV->addWidget(WebView);
+    ui->swViewers->widget(1)->setLayout(layV);
+    WebView->load(QUrl("http://localhost:8080/?nobrowser&item=[Objects/GeoWorld/WorldBox_1,Objects/GeoTracks/TObjArray]&opt=dray;all;tracks;transp50"));
+#endif
+
+    QActionGroup* group = new QActionGroup( this );
+    ui->actionSmall_dot->setActionGroup(group);
+    ui->actionLarge_dot->setActionGroup(group);
+    ui->actionSmall_cross->setActionGroup(group);
+    ui->actionLarge_cross->setActionGroup(group);
 }
 
 GeometryWindowClass::~GeometryWindowClass()
@@ -524,62 +545,90 @@ void GeometryWindowClass::AddPolygonfToGeometry(QPolygonF& poly, Color_t color, 
     AddLineToGeometry(poly[i], poly[i+1], color, width);
 }
 
+#include <QStringList>
 void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool ColorUpdateAllowed)
 // default:  ActivateWindow = true,  SAME = true,  ColorUpdateAllowed = true
 {
     //qDebug()<<"  ----Showing geometry----"<<GeometryDrawDisabled;
     if (MW->GeometryDrawDisabled) return;
 
-    //setting this window as active pad in root
-    //with or without activation (focussing) of this window
-    if (ActivateWindow) ShowAndFocus(); //window is activated (focused)
-    else SetAsActiveRootWindow(); //no activation in this mode
-    MW->Detector->GeoManager->SetNsegments(MW->GlobSet.NumSegments);
-    int level = ui->sbLimitVisibility->value();
-    if (!ui->cbLimitVisibility->isChecked()) level = -1;
-    MW->Detector->GeoManager->SetVisLevel(level);
+    if (ui->cobViewer->currentIndex() == 0)
+    {
+        //setting this window as active pad in root
+        //with or without activation (focussing) of this window
+        if (ActivateWindow) ShowAndFocus(); //window is activated (focused)
+        else SetAsActiveRootWindow(); //no activation in this mode
+        MW->Detector->GeoManager->SetNsegments(MW->GlobSet.NumSegments);
+        int level = ui->sbLimitVisibility->value();
+        if (!ui->cbLimitVisibility->isChecked()) level = -1;
+        MW->Detector->GeoManager->SetVisLevel(level);
 
-    //coloring volumes
-    if (ColorUpdateAllowed)
-      {
-        if (ColorByMaterial) MW->Detector->colorVolumes(1);
-        else MW->Detector->colorVolumes(0);
-      }
-    //top volume visibility
-    if (ShowTop) MW->Detector->GeoManager->SetTopVisible(true); // the TOP is generally invisible
-    else MW->Detector->GeoManager->SetTopVisible(false);
+        //coloring volumes
+        if (ColorUpdateAllowed)
+          {
+            if (ColorByMaterial) MW->Detector->colorVolumes(1);
+            else MW->Detector->colorVolumes(0);
+          }
+        //top volume visibility
+        if (ShowTop) MW->Detector->GeoManager->SetTopVisible(true); // the TOP is generally invisible
+        else MW->Detector->GeoManager->SetTopVisible(false);
 
-    //transparency setup
-    int totNodes = MW->Detector->top->GetNdaughters();
-    for (int i=0; i<totNodes; i++)
-      {
-        TGeoNode* thisNode = (TGeoNode*)MW->Detector->top->GetNodes()->At(i);
-        thisNode->GetVolume()->SetTransparency(0);
-      }
+        //transparency setup
+        int totNodes = MW->Detector->top->GetNdaughters();
+        for (int i=0; i<totNodes; i++)
+          {
+            TGeoNode* thisNode = (TGeoNode*)MW->Detector->top->GetNodes()->At(i);
+            thisNode->GetVolume()->SetTransparency(0);
+          }
 
-    //making contaners visible
-    MW->Detector->top->SetVisContainers(true);
+        //making contaners visible
+        MW->Detector->top->SetVisContainers(true);
 
-    //DRAW
-    fNeedZoom = true;
-    setHideUpdate(true);
-    ClearRootCanvas();
-    if (SAME)
-      {
- //       qDebug()<<"keeping";
-        MW->Detector->top->Draw("SAME");
-      }
+        //DRAW
+        fNeedZoom = true;
+        setHideUpdate(true);
+        ClearRootCanvas();
+        if (SAME) MW->Detector->top->Draw("SAME");
+        else      MW->Detector->top->Draw("");
+        PostDraw();
+
+        //drawing dots
+        MW->ShowGeoMarkers();
+        UpdateRootCanvas();
+    }
     else
-      {
- //       qDebug()<<"new";
-        //GeometryWindow->ResetView();
-        MW->Detector->top->Draw("");
-      }
-    PostDraw();
+    {
+#ifdef __USE_ANTS_JSROOT__
+        QWebEnginePage * page = WebView->page();
+        page->runJavaScript("JSROOT.GetMainPainter(\"onlineGUI_drawing\").produceCameraUrl()", [page](const QVariant &v)
+        {
+            QString reply = v.toString();
+            qDebug() << reply; // let's ask Sergey to make JSON with this data
+            QStringList sl = reply.split(',', QString::SkipEmptyParts); //quick parse just for now
+            if (sl.size() > 2)
+            {
+                //QString rotyS = sl.at(0); rotyS.remove(0, 4);
+                //QString rotzS = sl.at(1); rotzS.remove(0, 4);
+                //QString zoomS = sl.at(2); zoomS.remove(0, 4);
+                //double roty = rotyS.toDouble();
+                //double rotz = rotzS.toDouble();
+                //double zoom = zoomS.toDouble();
+                //qDebug() << roty << rotz << zoom;
+                QString s;
+                //s += "roty" + ui->leY->text() + ",";
+                s += sl.at(0) + ",";
+                //s += "rotz" + ui->leZ->text() + ",";
+                s += sl.at(1) + ",";
+                //s += "zoom" + ui->leZoom->text() + ",";
+                s += sl.at(2) + ",";
+                s += "dray";
+                s += "all,tracks,transp50";
 
-    //drawing dots
-    MW->ShowGeoMarkers();
-    UpdateRootCanvas();
+                page->runJavaScript("JSROOT.redraw(\"onlineGUI_drawing\", JSROOT.GetMainPainter(\"onlineGUI_drawing\").GetObject(), \"" + s + "\");");
+            }
+        });
+#endif
+    }
 }
 
 #include "aeventtrackingrecord.h"
@@ -723,13 +772,41 @@ void GeometryWindowClass::on_pbShowGLview_clicked()
 
 void GeometryWindowClass::on_pbTop_clicked()
 {
-  SetAsActiveRootWindow();
-  TView *v = RasterWindow->fCanvas->GetView();
-  v->Top();
+    if (ui->cobViewer->currentIndex() == 0)
+    {
+        SetAsActiveRootWindow();
+        TView *v = RasterWindow->fCanvas->GetView();
+        v->Top();
+        RasterWindow->fCanvas->Modified();
+        RasterWindow->fCanvas->Update();
+        readRasterWindowProperties();
+    }
+    else
+    {
+#ifdef __USE_ANTS_JSROOT__
 
-  RasterWindow->fCanvas->Modified();
-  RasterWindow->fCanvas->Update();
-  readRasterWindowProperties();
+        QWebEnginePage * page = WebView->page();
+        page->runJavaScript("JSROOT.GetMainPainter(\"onlineGUI_drawing\").produceCameraUrl()", [page](const QVariant &v)
+        {
+            QString reply = v.toString();
+            qDebug() << reply; // let's ask Sergey to make JSON with this data
+            QStringList sl = reply.split(',', QString::SkipEmptyParts); //quick parse just for now
+            if (sl.size() > 2)
+            {
+                QString s;
+                //s += "roty" + ui->leY->text() + ",";
+                s += "roty90,";
+                //s += "rotz" + ui->leZ->text() + ",";
+                s += "rotz0,";
+                //s += "zoom" + ui->leZoom->text() + ",";
+                s += sl.at(2) + ",";
+                s += "dray";
+                s += "all,tracks,transp50";
+                page->runJavaScript("JSROOT.redraw(\"onlineGUI_drawing\", JSROOT.GetMainPainter(\"onlineGUI_drawing\").GetObject(), \"" + s + "\");");
+            }
+        });
+#endif
+    }
 }
 
 void GeometryWindowClass::on_pbFront_clicked()
@@ -954,5 +1031,26 @@ void GeometryWindowClass::on_pbWebViewer_clicked()
 #else
     message("ANTS2 has to be compiled with the activated option in ants2.pro:"
             "\nCONFIG += ants2_RootServer\n", this);
+#endif
+}
+
+void GeometryWindowClass::on_cobViewer_currentIndexChanged(int index)
+{
+#ifdef __USE_ANTS_JSROOT__
+    if (index == 0)
+    {
+        ui->swViewers->setCurrentIndex(0);
+        on_pbShowGeometry_clicked();
+    }
+    else
+    {
+        ui->swViewers->setCurrentIndex(1);
+        WebView->load(QUrl("http://localhost:8080/?nobrowser&item=[Objects/GeoWorld/WorldBox_1,Objects/GeoTracks/TObjArray]&opt=dray;all;tracks;transp50"));
+        WebView->show();
+    }
+
+#else
+    ui->cobViewer->setCurrentIndex(0);
+    message("Enable ants2_jsroot in ants2.pro and rebuild", this);
 #endif
 }

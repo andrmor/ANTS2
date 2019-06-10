@@ -6,6 +6,8 @@
 
 class MainWindow;
 class RasterWindowBaseClass;
+class QWebEngineView;
+class QVariant;
 
 namespace Ui {
   class GeometryWindowClass;
@@ -103,10 +105,16 @@ private slots:
 
     void on_pbShowMonitorIndexes_clicked();
 
+    void on_cobViewer_currentIndexChanged(int index);
+
 private:
   MainWindow* MW;
   Ui::GeometryWindowClass *ui;
   RasterWindowBaseClass *RasterWindow = 0;
+
+#ifdef __USE_ANTS_JSROOT__
+    QWebEngineView * WebView = nullptr;
+#endif
 
   bool TMPignore = false;
 

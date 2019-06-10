@@ -116,6 +116,12 @@ void GlobalSettingsWindowClass::updateNetGui()
       QString url = "http://localhost:" + sPort;
       ui->leRootServerURL->setText(url);
     }
+  else
+  {
+      ui->leJSROOT->setText(MW->GlobSet.ExternalJSROOT);
+      ui->leRootServerPort->setText( QString::number(MW->GlobSet.DefaultRootServerPort) );
+      ui->leRootServerURL->setText("");
+  }
 #else
   ui->cbRunRootServer->setChecked(false);
   ui->cbRunRootServer->setEnabled(false);
@@ -451,17 +457,22 @@ void GlobalSettingsWindowClass::on_cbAutoRunRootServer_clicked()
 
 void GlobalSettingsWindowClass::on_leRootServerPort_editingFinished()
 {
-  int oldp = MW->GlobSet.DefaultRootServerPort;
-  int newp = ui->leRootServerPort->text().toInt();
-  if (oldp == newp) return;
-  MW->GlobSet.DefaultRootServerPort = newp;
+    int oldp = MW->GlobSet.DefaultRootServerPort;
+    int newp = ui->leRootServerPort->text().toInt();
+    if (oldp == newp) return;
+    MW->GlobSet.DefaultRootServerPort = newp;
 
-  ui->cbRunRootServer->setChecked(false);
+    ui->cbRunRootServer->setChecked(false);
 }
 
 void GlobalSettingsWindowClass::on_leJSROOT_editingFinished()
 {
-  MW->GlobSet.ExternalJSROOT = ui->leJSROOT->text();
+    const QString & olda = MW->GlobSet.ExternalJSROOT;
+    QString newa = ui->leJSROOT->text();
+    if (olda == newa) return;
+    MW->GlobSet.ExternalJSROOT = newa;
+
+    ui->cbRunRootServer->setChecked(false);
 }
 
 void GlobalSettingsWindowClass::on_cbRunWebSocketServer_toggled(bool checked)

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>711</width>
-    <height>668</height>
+    <height>699</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -54,6 +54,33 @@
        <property name="spacing">
         <number>3</number>
        </property>
+       <item>
+        <widget class="QComboBox" name="cobViewer">
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <item>
+          <property name="text">
+           <string>TGeo viewer</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>JSROOT viewer</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="Line" name="line">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
        <item>
         <widget class="QPushButton" name="pbShowGeometry">
          <property name="minimumSize">
@@ -110,6 +137,9 @@
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
+         <property name="spacing">
+          <number>3</number>
+         </property>
          <item>
           <widget class="QCheckBox" name="cbLimitVisibility">
            <property name="toolTip">
@@ -185,14 +215,14 @@
        <item>
         <widget class="QPushButton" name="pbClearTracks">
          <property name="text">
-          <string>Clear all tracks</string>
+          <string>Clear tracks</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="pbClearDots">
          <property name="text">
-          <string>Clear all dots</string>
+          <string>Clear markers</string>
          </property>
         </widget>
        </item>
@@ -236,6 +266,9 @@
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <property name="spacing">
+          <number>3</number>
+         </property>
          <item>
           <widget class="QLabel" name="label_2">
            <property name="text">
@@ -313,6 +346,15 @@
         </spacer>
        </item>
       </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QStackedWidget" name="swViewers">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="geo"/>
+      <widget class="QWidget" name="jsroot"/>
      </widget>
     </item>
    </layout>
@@ -443,12 +485,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>32</x>
-     <y>517</y>
+     <x>42</x>
+     <y>237</y>
     </hint>
     <hint type="destinationlabel">
-     <x>67</x>
-     <y>529</y>
+     <x>149</x>
+     <y>240</y>
     </hint>
    </hints>
   </connection>
@@ -459,12 +501,12 @@
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>67</x>
-     <y>509</y>
+     <x>77</x>
+     <y>237</y>
     </hint>
     <hint type="destinationlabel">
-     <x>83</x>
-     <y>69</y>
+     <x>92</x>
+     <y>104</y>
     </hint>
    </hints>
   </connection>
@@ -475,8 +517,8 @@
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>71</x>
-     <y>539</y>
+     <x>149</x>
+     <y>240</y>
     </hint>
     <hint type="destinationlabel">
      <x>93</x>

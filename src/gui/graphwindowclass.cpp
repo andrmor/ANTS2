@@ -3401,14 +3401,16 @@ void GraphWindowClass::SaveBasket()
             //qDebug() << "   >>"<<i<<Obj.getPointer()->GetName()<<Obj.getPointer()->ClassName();
             TString name = "";
             name += index;
-            index++;
-            TNamed* no = dynamic_cast<TNamed*>(Obj.getPointer());
-            if (no) no->SetName(name);
+            TNamed* nameO = dynamic_cast<TNamed*>(Obj.getPointer());
+            if (nameO) nameO->SetName(name);
 
             TString KeyName = "#";
-            Obj.getPointer()->Write(KeyName + (index-1));
+            KeyName += index;
+            Obj.getPointer()->Write(KeyName);
 
             str += '|' + Obj.getOptions();
+
+            index++;
         }
 
         str += '\n';

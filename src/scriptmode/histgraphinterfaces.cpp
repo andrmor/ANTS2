@@ -407,6 +407,13 @@ int AInterfaceToHist::GetNumberOfEntries(const QString &HistName)
         return r->GetEntries();
 }
 
+void AInterfaceToHist::SetNumberOfEntries(const QString &HistName, int numEntries)
+{
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    if (!r) abort("Histogram " + HistName + " not found!");
+    else r->SetEntries(numEntries);
+}
+
 double AInterfaceToHist::GetIntegral(const QString &HistName, bool MultiplyByBinWidth)
 {
     ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));

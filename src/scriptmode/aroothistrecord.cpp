@@ -230,6 +230,13 @@ int ARootHistRecord::GetEntries()
     return h->GetEntries();
 }
 
+int ARootHistRecord::SetEntries(int num)
+{
+    TH1* h = dynamic_cast<TH1*>(Object);
+    if (!h) return 0;
+    h->SetEntries(num);
+}
+
 double ARootHistRecord::GetMaximum()
 {
     TH1* h = dynamic_cast<TH1*>(Object);

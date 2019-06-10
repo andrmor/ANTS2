@@ -52,6 +52,10 @@ void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, 
         bool bMaster = processor.onNewTrack(pr);
         bInlineTrackingOfSecondaries = processor.isInlineSecondaryProcessing(); // give a possibility to change the mode
 
+        QString curVolume;
+        int     curVolIndex;
+        int     curMat;
+
         const std::vector<ATrackingStepData *> & steps = pr.getSteps();
         for (size_t iStep = 0; iStep < steps.size(); iStep++)
         {
@@ -61,7 +65,15 @@ void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, 
             // Creation ("C") is checked as both "Transportation" and all other type process
 
             ProcessType ProcType;
-            if      (thisStep->Process == "C") ProcType = Creation;
+            if      (thisStep->Process == "C")
+            {
+                ProcType = Creation;
+
+                const ATransportationStepData * trStep = static_cast<const ATransportationStepData*>(thisStep);
+                curVolume = trStep->VolName;
+                curVolIndex = trStep->VolIndex;
+                curMat = trStep->iMaterial;
+            }
             else if (thisStep->Process == "T") ProcType = NormalTransportation;
             else if (thisStep->Process == "O") ProcType = ExitingWorld;
             else                               ProcType = Local;
@@ -73,38 +85,31 @@ void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, 
                 // 2. for enter / exit of the defined volume/mat/index
 
                 bool bExitValidated;
-                if (ProcType != Creation)
+                if (ProcType == Creation) bExitValidated = false;
+                else
                 {
                     const bool bCheckingExit = (opt.bFromMat || opt.bFromVolume || opt.bFromVolIndex);
                     if (bCheckingExit)
                     {
-                        if (thisStep->GeoNode)
-                        {
-                            const bool bRejectedByMaterial = (opt.bFromMat      && opt.FromMat      != thisStep->GeoNode->GetVolume()->GetMaterial()->GetIndex());
-                            const bool bRejectedByVolName  = (opt.bFromVolume   && opt.FromVolume   != thisStep->GeoNode->GetVolume()->GetName());
-                            const bool bRejectedByVolIndex = (opt.bFromVolIndex && opt.FromVolIndex != thisStep->GeoNode->GetNumber());
-                            bExitValidated = !(bRejectedByMaterial || bRejectedByVolName || bRejectedByVolIndex);
-                        }
-                        else bExitValidated = false;
+                        const bool bRejectedByMaterial = (opt.bFromMat      && opt.FromMat      != curMat);
+                        const bool bRejectedByVolName  = (opt.bFromVolume   && opt.FromVolume   != curVolume);
+                        const bool bRejectedByVolIndex = (opt.bFromVolIndex && opt.FromVolIndex != curVolIndex);
+                        bExitValidated = !(bRejectedByMaterial || bRejectedByVolName || bRejectedByVolIndex);
                     }
                     else bExitValidated = true;
                 }
-                else bExitValidated = false;
 
                 bool bEntranceValidated;
-                const bool bCheckingEnter = (opt.bToMat || opt.bToVolume || opt.bToVolIndex);
+                const bool bCheckingEnter = (opt.bToMat || opt.bToVolume || opt.bToVolIndex) && (thisStep->Process != "O");
                 if (bCheckingEnter)
                 {
-                    //const ATrackingStepData * nextStep = (ProcType == ExitingWorld ? nullptr : steps[iStep+1]);
-                    const ATrackingStepData * nextStep = (iStep == steps.size()-1 ? nullptr : steps[iStep+1]); // there could be "T" as the last step or exit from world
-                    if (nextStep && thisStep->GeoNode)
+                    const ATransportationStepData * trStep = static_cast<const ATransportationStepData*>(thisStep); // "O" should not see this line!
                     {
-                        const bool bRejectedByMaterial = (opt.bToMat      && opt.ToMat      != nextStep->GeoNode->GetVolume()->GetMaterial()->GetIndex());
-                        const bool bRejectedByVolName  = (opt.bToVolume   && opt.ToVolume   != nextStep->GeoNode->GetVolume()->GetName());
-                        const bool bRejectedByVolIndex = (opt.bToVolIndex && opt.ToVolIndex != nextStep->GeoNode->GetNumber());
+                        const bool bRejectedByMaterial = (opt.bToMat      && opt.ToMat      != trStep->iMaterial);
+                        const bool bRejectedByVolName  = (opt.bToVolume   && opt.ToVolume   != trStep->VolName);
+                        const bool bRejectedByVolIndex = (opt.bToVolIndex && opt.ToVolIndex != trStep->VolIndex);
                         bEntranceValidated = !(bRejectedByMaterial || bRejectedByVolName || bRejectedByVolIndex);
                     }
-                    else bEntranceValidated = false;
                 }
                 else bEntranceValidated = true;
 
@@ -120,14 +125,10 @@ void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, 
                     const bool bCheckingExit = (opt.bMaterial || opt.bVolume || opt.bVolumeIndex);
                     if (bCheckingExit)
                     {
-                        if (thisStep->GeoNode)
-                        {
-                            const bool bRejectedByMaterial = (opt.bMaterial    && opt.Material    != thisStep->GeoNode->GetVolume()->GetMaterial()->GetIndex());
-                            const bool bRejectedByVolName  = (opt.bVolume      && opt.Volume      != thisStep->GeoNode->GetVolume()->GetName());
-                            const bool bRejectedByVolIndex = (opt.bVolumeIndex && opt.VolumeIndex != thisStep->GeoNode->GetNumber());
-                            bExitValidated = !(bRejectedByMaterial || bRejectedByVolName || bRejectedByVolIndex);
-                        }
-                        else bExitValidated = false;
+                        const bool bRejectedByMaterial = (opt.bMaterial    && opt.Material    != curMat);
+                        const bool bRejectedByVolName  = (opt.bVolume      && opt.Volume      != curVolume);
+                        const bool bRejectedByVolIndex = (opt.bVolumeIndex && opt.VolumeIndex != curVolIndex);
+                        bExitValidated = !(bRejectedByMaterial || bRejectedByVolName || bRejectedByVolIndex);
                     }
                     else bExitValidated = true;
 
@@ -140,20 +141,24 @@ void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, 
                     const bool bCheckingEnter = (opt.bMaterial || opt.bVolume || opt.bVolumeIndex);
                     if (bCheckingEnter)
                     {
-                        //const ATrackingStepData * nextStep = (ProcType == ExitingWorld ? nullptr : steps[iStep+1]);
-                        const ATrackingStepData * nextStep = (iStep == steps.size()-1 ? nullptr : steps[iStep+1]); // there could be "T" as the last step!
-                        if (nextStep && nextStep->GeoNode)
-                        {
-                            const bool bRejectedByMaterial = (opt.bMaterial    && opt.Material    != nextStep->GeoNode->GetVolume()->GetMaterial()->GetIndex());
-                            const bool bRejectedByVolName  = (opt.bVolume      && opt.Volume      != nextStep->GeoNode->GetVolume()->GetName());
-                            const bool bRejectedByVolIndex = (opt.bVolumeIndex && opt.VolumeIndex != nextStep->GeoNode->GetNumber());
-                            bEntranceValidated = !(bRejectedByMaterial || bRejectedByVolName || bRejectedByVolIndex);
-                        }
-                        else bEntranceValidated = false;
+                        const ATransportationStepData * trStep = static_cast<const ATransportationStepData*>(thisStep); // "O" should not see this line!
+                        const bool bRejectedByMaterial = (opt.bMaterial    && opt.Material    != trStep->iMaterial);
+                        const bool bRejectedByVolName  = (opt.bVolume      && opt.Volume      != trStep->VolName);
+                        const bool bRejectedByVolIndex = (opt.bVolumeIndex && opt.VolumeIndex != trStep->VolIndex);
+                        bEntranceValidated = !(bRejectedByMaterial || bRejectedByVolName || bRejectedByVolIndex);
                     }
                     else bEntranceValidated = true;
 
                     if (bEntranceValidated ) processor.onTransitionIn(*thisStep);
+                }
+
+                //now can update current volume info for transition step
+                if (thisStep->Process == "T")
+                {
+                    const ATransportationStepData * trStep = static_cast<const ATransportationStepData*>(thisStep);
+                    curVolume = trStep->VolName;
+                    curVolIndex = trStep->VolIndex;
+                    curMat = trStep->iMaterial;
                 }
             }
 
@@ -163,12 +168,10 @@ void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, 
                 bool bSkipThisStep = false;
                 if (opt.bMaterial || opt.bVolume || opt.bVolumeIndex)
                 {
-                    if (!thisStep->GeoNode) bSkipThisStep = true;
-                    else if (opt.bMaterial    && opt.Material != thisStep->GeoNode->GetVolume()->GetMaterial()->GetIndex()) bSkipThisStep = true;
-                    else if (opt.bVolumeIndex && opt.VolumeIndex != thisStep->GeoNode->GetNumber()) bSkipThisStep = true;
-                    else if (opt.bVolume      && opt.Volume != thisStep->GeoNode->GetVolume()->GetName()) bSkipThisStep = true;
+                         if (opt.bMaterial    && opt.Material    != curMat) bSkipThisStep = true;
+                    else if (opt.bVolumeIndex && opt.VolumeIndex != curVolIndex) bSkipThisStep = true;
+                    else if (opt.bVolume      && opt.Volume      != curVolume) bSkipThisStep = true;
                 }
-
                 if (!bSkipThisStep) processor.onLocalStep(*thisStep);
 
                 if (bInlineTrackingOfSecondaries)

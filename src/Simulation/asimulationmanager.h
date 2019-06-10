@@ -122,7 +122,6 @@ private:
     bool setup(const QJsonObject & json, int threads);
     void clearG4data();
     void copyDataFromWorkers();
-    void findGeoNodes();
     void removeOldFile(const QString &fileName, const QString &txt);
 };
 

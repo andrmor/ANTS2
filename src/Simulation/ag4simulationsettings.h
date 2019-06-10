@@ -18,7 +18,6 @@ public:
     QStringList           SensitiveVolumes;
     QStringList           Commands;
     QMap<QString, double> StepLimits;
-    int                   PositionPrecision = 10;
     int                   Precision = 6;
 
     void writeToJson(QJsonObject & json) const;

@@ -54,6 +54,7 @@ public slots:
   const QVariant FindPeaks(const QString& HistName, double sigma, double threshold);
 
   int            GetNumberOfEntries(const QString& HistName);
+  void           SetNumberOfEntries(const QString& HistName, int numEntries);
   double         GetIntegral(const QString& HistName, bool MultiplyByBinWidth = false);
   double         GetMaximum(const QString& HistName);
   void           Scale(const QString& HistName, double ScaleIntegralTo, bool DividedByBinWidth = false);

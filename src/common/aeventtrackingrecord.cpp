@@ -32,11 +32,43 @@ ATrackingStepData::ATrackingStepData(float x, float y, float z, float time, floa
 void ATrackingStepData::logToString(QString & str, int offset) const
 {
     str += QString(' ').repeated(offset);
-    //str += QString("E=%1keV %2 depo=%3keV at [%4, %5, %6] t=%7ns").arg(Energy).arg(Process).arg(DepositedEnergy).arg(Position[0]).arg(Position[1]).arg(Position[2]).arg(Time);
-    str += QString("At [%4, %5, %6]mm t=%7ns   %2   depo=%3keV E=%1keV").arg(Energy).arg(Process).arg(DepositedEnergy).arg(Position[0]).arg(Position[1]).arg(Position[2]).arg(Time);
+    str += QString("%2 at [%4, %5, %6]mm t=%7ns depo=%3keV E=%1keV").arg(Energy).arg(Process).arg(DepositedEnergy).arg(Position[0]).arg(Position[1]).arg(Position[2]).arg(Time);
     if (Secondaries.size() > 0)
         str += QString("  #sec:%1").arg(Secondaries.size());
     str += '\n';
+}
+
+ATransportationStepData::ATransportationStepData(float x, float y, float z, float time, float energy, float depositedEnergy, const QString &process) :
+    ATrackingStepData(x,y,z, time, energy, depositedEnergy, process) {}
+
+ATransportationStepData::ATransportationStepData(double *position, double time, double energy, double depositedEnergy, const QString &process) :
+    ATrackingStepData(position, time, energy, depositedEnergy, process) {}
+
+void ATransportationStepData::setVolumeInfo(const QString & volName, int volIndex, int matIndex)
+{
+    VolName  = volName;
+    VolIndex = volIndex;
+    iMaterial = matIndex;
+}
+
+void ATransportationStepData::logToString(QString &str, int offset) const
+{
+    if (Process == "C")
+    {
+        str += QString(' ').repeated(offset);
+        str += QString("C at %1 %2 (mat %3)").arg(VolName).arg(VolIndex).arg(iMaterial);
+        str += QString(" [%1, %2, %3]mm t=%4ns E=%5keV").arg(Position[0]).arg(Position[1]).arg(Position[2]).arg(Time).arg(Energy);
+        str += '\n';
+    }
+    else if (Process == "T")
+    {
+        str += QString(' ').repeated(offset);
+        str += QString("T to %1 %2 (mat %3)").arg(VolName).arg(VolIndex).arg(iMaterial);
+        str += QString(" [%1, %2, %3]mm t=%4ns depo=%5keV E=%6keV").arg(Position[0]).arg(Position[1]).arg(Position[2]).arg(Time).arg(DepositedEnergy).arg(Energy);
+        if (Secondaries.size() > 0)  str += QString("  #sec:%1").arg(Secondaries.size());
+        str += '\n';
+    }
+    else ATrackingStepData::logToString(str, offset);
 }
 
 // ============= Track ==============
@@ -60,10 +92,12 @@ AParticleTrackingRecord *AParticleTrackingRecord::create()
     return new AParticleTrackingRecord("undefined");
 }
 
-void AParticleTrackingRecord::updatePromisedSecondary(const QString & particle, float startEnergy, float startX, float startY, float startZ, float startTime)
+void AParticleTrackingRecord::updatePromisedSecondary(const QString & particle, float startEnergy, float startX, float startY, float startZ, float startTime, const QString& volName, int volIndex, int matIndex)
 {
     ParticleName = particle;
-    Steps.push_back(new ATrackingStepData(startX, startY, startZ, startTime, startEnergy, 0, "C"));
+    ATransportationStepData * st = new ATransportationStepData(startX, startY, startZ, startTime, startEnergy, 0, "C");
+    st->setVolumeInfo(volName, volIndex, matIndex);
+    Steps.push_back(st);
 }
 
 void AParticleTrackingRecord::addStep(ATrackingStepData * step)
@@ -177,82 +211,6 @@ void AParticleTrackingRecord::fillELDD(ATrackingStepData *IdByStep, std::vector<
     while(true);
 }
 
-void AParticleTrackingRecord::updateGeoNodes()
-{
-    for (size_t iStep = 0; iStep < Steps.size(); iStep++)
-    {
-        ATrackingStepData * Step = Steps[iStep];
-        if (Step->Process == "T" && iStep != 0)
-        {
-            ATrackingStepData * prevStep = Steps[iStep-1];
-            if (prevStep->Process != "T")
-                Step->GeoNode = gGeoManager->FindNode(prevStep->Position[0], prevStep->Position[1], prevStep->Position[2]);
-            else
-                Step->GeoNode = gGeoManager->FindNode( 0.5*Step->Position[0] + 0.5*prevStep->Position[0],
-                                                       0.5*Step->Position[1] + 0.5*prevStep->Position[1],
-                                                       0.5*Step->Position[2] + 0.5*prevStep->Position[2] );
-        }
-        else Step->GeoNode = gGeoManager->FindNode(Step->Position[0], Step->Position[1], Step->Position[2]);
-    }
-
-    for (AParticleTrackingRecord * sec : Secondaries)
-        sec->updateGeoNodes();
-}
-
-bool AParticleTrackingRecord::checkNodes()
-{
-    bool bOK = true;
-
-    if (Steps.size() > 1)
-    {
-        TGeoNode * PrevNone = Steps[0]->GeoNode;
-        bool bLastWasTransition = false;
-
-        for (size_t iStep = 1; iStep < Steps.size(); iStep++)
-        {
-            ATrackingStepData * Step = Steps[iStep];
-            if (Step->Process == "T")
-            {
-                if (bLastWasTransition) PrevNone = Step->GeoNode;
-                bLastWasTransition = true;
-            }
-            else
-            {
-                if (bLastWasTransition)
-                {
-                    if (Step->GeoNode == PrevNone)
-                    {
-                        qWarning() << "Transition without node change detected!"<<iStep;
-                        bOK = false;
-                    }
-                }
-                else
-                {
-                    if (Step->GeoNode != PrevNone)
-                    {
-                        qWarning() << "Non-transition step with node change detected!"<<iStep;
-                        bOK = false;
-                    }
-                }
-                PrevNone = Step->GeoNode;
-
-                if (!PrevNone && Step->Process != "O")
-                {
-                    qWarning() << "Non-transition step without node detected!"<<iStep;
-                    bOK = false;
-                }
-
-                bLastWasTransition = false;
-            }
-        }
-    }
-
-    for (AParticleTrackingRecord * sec : Secondaries)
-        bOK = sec->checkNodes() && bOK;
-
-    return bOK;
-}
-
 // ============= Event ==============
 
 AEventTrackingRecord * AEventTrackingRecord::create()
@@ -284,21 +242,6 @@ bool AEventTrackingRecord::isHaveProcesses(const QStringList & Proc, bool bOnlyP
         if (pr->isHaveProcesses(Proc, bOnlyPrimary)) return true;
 
     return false;
-}
-
-void AEventTrackingRecord::updateGeoNodes()
-{
-    for (AParticleTrackingRecord * pr : PrimaryParticleRecords)
-        pr->updateGeoNodes();
-}
-
-bool AEventTrackingRecord::checkNodes()
-{
-    bool bOK = true;
-    for (AParticleTrackingRecord * pr : PrimaryParticleRecords)
-        bOK = pr->checkNodes() && bOK;
-
-    return bOK;
 }
 
 void AEventTrackingRecord::makeTracks(std::vector<TrackHolderClass *> &Tracks, const QStringList &ParticleNames, const ATrackBuildOptions &TrackBuildOptions, bool bWithSecondaries) const

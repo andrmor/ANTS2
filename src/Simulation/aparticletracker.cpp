@@ -60,13 +60,14 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
         ParticleStack.removeLast();
         counter++;
 
-        if (SimSet->fLogsStat) initLog();
         NormalizeVector(p->v); //normalization of the starting vector
         const AParticle::ParticleType ParticleType = MpCollection.getParticleType(p->Id);
 
         navigator->SetCurrentPoint(p->r);
         navigator->SetCurrentDirection(p->v);
         navigator->FindNode();
+
+        if (SimSet->fLogsStat) initLog();
 
         //was this particle created outside the defined World?
         if (navigator->IsOutside())
@@ -99,7 +100,7 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
                 //qDebug()<<"Found medium where tracking is not allowed!";
                 if (SimSet->fLogsStat)
                 {
-                    ATrackingStepData * step = new ATrackingStepData(p->r, p->time, p->energy, 0, "TrackingForbidden");
+                    ATrackingStepData * step = new ATrackingStepData(p->r, p->time, p->energy, 0, "S");
                     thisParticleRecord->addStep(step);
                 }
                 break;
@@ -139,7 +140,9 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
             {
                 if (SimSet->fLogsStat)
                 {
-                    ATrackingStepData * step = new ATrackingStepData(p->r, p->time, p->energy, 0, "T");
+                    ATransportationStepData * step = new ATransportationStepData(p->r, p->time, p->energy, 0, "T");
+                    TGeoNode * node = navigator->GetCurrentNode();
+                    step->setVolumeInfo(node->GetVolume()->GetName(), node->GetNumber(), node->GetVolume()->GetMaterial()->GetIndex());
                     thisParticleRecord->addStep(step);
                 }
             }
@@ -220,7 +223,9 @@ void AParticleTracker::initLog()
         EventRecord->addPrimaryRecord(thisParticleRecord);
     }
 
-    ATrackingStepData * step = new ATrackingStepData(p->r, p->time, p->energy, 0, "C");
+    ATransportationStepData * step = new ATransportationStepData(p->r, p->time, p->energy, 0, "C");
+    TGeoNode * node = navigator->GetCurrentNode();
+    step->setVolumeInfo(node->GetVolume()->GetName(), node->GetNumber(), node->GetVolume()->GetMaterial()->GetIndex());
     thisParticleRecord->addStep(step);
 }
 
@@ -337,6 +342,7 @@ bool AParticleTracker::trackCharged_isKilled()
             //terminationStatus = EventHistoryStructure::AllEnergyDisspated;//2;
             bKilled = true;
             dE += p->energy;
+            p->energy = 0;
         }
 
         for (int j=0; j<3; j++) p->r[j] = navigator->GetCurrentPoint()[j];  //new current point

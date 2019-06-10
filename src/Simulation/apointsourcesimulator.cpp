@@ -660,6 +660,13 @@ bool APointSourceSimulator::isInsideLimitingObject(const double *r)
     //    return (VolName == LimitNodesToObject);
 
     TGeoNavigator *navigator = detector.GeoManager->GetCurrentNavigator();
+
+    if (!navigator)
+    {
+        qWarning() << "Navigator not found!";
+        detector.GeoManager->AddNavigator();
+    }
+
     TGeoNode* node = navigator->FindNode(r[0], r[1], r[2]);
     return (node && node->GetVolume()->GetName()==LimitNodesToObject);
 }

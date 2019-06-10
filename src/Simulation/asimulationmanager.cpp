@@ -206,9 +206,6 @@ void ASimulationManager::onSimulationFinished()
 
     //Detector.GeoManager->CleanGarbage();
 
-    if (!TrackingHistory.empty())
-        findGeoNodes(); // should be called after GeoManager was recreated!
-
     if (fStartedFromGui) emit SimulationFinished();
 
     SiPMpixels.clear();  // main window copied if needed
@@ -260,25 +257,6 @@ void ASimulationManager::copyDataFromWorkers()
             EnergyVector = lastPartSrcSimulator->getEnergyVector();
             lastPartSrcSimulator->ClearEnergyVectorButKeepObjects(); // to avoid clearing the energy vector cells
         }
-    }
-}
-
-#include "TGeoManager.h"
-void ASimulationManager::findGeoNodes()
-{
-    if (!Detector.GeoManager->GetCurrentNavigator())
-    {
-        qDebug() << "No navigator found, adding";
-        Detector.GeoManager->AddNavigator();
-    }
-
-    for (size_t iEvent = 0; iEvent < TrackingHistory.size(); iEvent++)
-    {
-        AEventTrackingRecord * e = TrackingHistory[iEvent];
-        e->updateGeoNodes();
-        bool bOK = e->checkNodes();
-        if (!bOK)
-            qWarning() << "GeoNode error(s) in event #" << iEvent << "detected";
     }
 }
 
@@ -473,6 +451,5 @@ void ASimulationManager::generateG4antsConfigCommon(QJsonObject & json, int Thre
     json["File_Tracks"] = tracFN;
     removeOldFile(tracFN, "tracking");
 
-    json["PrecisionXYZ"] = G4SimSet.PositionPrecision;
     json["Precision"]    = G4SimSet.Precision;
 }

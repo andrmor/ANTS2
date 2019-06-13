@@ -52,7 +52,7 @@ GeometryWindowClass::GeometryWindowClass(QWidget *parent, MainWindow *mw) :
     ui->swViewers->widget(0)->setLayout(layV);
 
 #ifdef __USE_ANTS_JSROOT__
-    QApplication::setAttribute(Qt::AA_UseSoftwareOpenGL);  // temporary!
+    //QApplication::setAttribute(Qt::AA_UseSoftwareOpenGL);  // temporary!
     //QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
     WebView = new QWebEngineView(this);
@@ -621,8 +621,7 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
                 s += sl.at(1) + ",";
                 //s += "zoom" + ui->leZoom->text() + ",";
                 s += sl.at(2) + ",";
-                s += "dray";
-                s += "all,tracks,transp50";
+                s += "dray,nohighlight,all,tracks,transp50";
 
                 page->runJavaScript("JSROOT.redraw(\"onlineGUI_drawing\", JSROOT.GetMainPainter(\"onlineGUI_drawing\").GetObject(), \"" + s + "\");");
             }
@@ -800,8 +799,7 @@ void GeometryWindowClass::on_pbTop_clicked()
                 s += "rotz0,";
                 //s += "zoom" + ui->leZoom->text() + ",";
                 s += sl.at(2) + ",";
-                s += "dray";
-                s += "all,tracks,transp50";
+                s += "dray,nohighlight,all,tracks,transp50";
                 page->runJavaScript("JSROOT.redraw(\"onlineGUI_drawing\", JSROOT.GetMainPainter(\"onlineGUI_drawing\").GetObject(), \"" + s + "\");");
             }
         });
@@ -1045,7 +1043,7 @@ void GeometryWindowClass::on_cobViewer_currentIndexChanged(int index)
     else
     {
         ui->swViewers->setCurrentIndex(1);
-        WebView->load(QUrl("http://localhost:8080/?nobrowser&item=[Objects/GeoWorld/WorldBox_1,Objects/GeoTracks/TObjArray]&opt=dray;all;tracks;transp50"));
+        WebView->load(QUrl("http://localhost:8080/?nobrowser&item=[Objects/GeoWorld/WorldBox_1,Objects/GeoTracks/TObjArray]&opt=nohighlight;dray;all;tracks;transp50"));
         WebView->show();
     }
 

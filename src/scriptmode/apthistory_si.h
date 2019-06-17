@@ -33,6 +33,8 @@ public slots:
     int countPrimaries(int iEvent);
     QString recordToString(int iEvent, int iPrimary, bool includeSecondaries);
 
+    void clearHistory();
+
     void cd_set(int iEvent, int iPrimary);
     QVariantList cd_getTrackRecord();
     bool cd_step();
@@ -75,7 +77,7 @@ public slots:
 
 private:
     const ASimulationManager & SM;
-    const std::vector<AEventTrackingRecord *> & TH;
+    std::vector<AEventTrackingRecord *> & TH;
 
     ATrackingHistoryCrawler * Crawler;
     AFindRecordSelector * Criteria = nullptr;

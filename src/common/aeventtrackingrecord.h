@@ -18,6 +18,8 @@ public:
     ATrackingStepData(double * position, double time, double energy, double depositedEnergy, const QString & process);
     ATrackingStepData(float x, float y, float z, float time, float energy, float depositedEnergy, const QString & process);
 
+    virtual ~ATrackingStepData();
+
     virtual void logToString(QString & str, int offset) const;
 
 public:
@@ -70,7 +72,7 @@ public:
     void makeTrack(std::vector<TrackHolderClass *> & Tracks, const QStringList & ParticleNames, const ATrackBuildOptions & TrackBuildOptions, bool bWithSecondaries) const;
     void fillELDD(ATrackingStepData * IdByStep, std::vector<float> & dist, std::vector<float> & ELDD) const;
 
-    ~AParticleTrackingRecord();
+    virtual ~AParticleTrackingRecord();
 
     // prevent creation on the stack and copy/move
 private:
@@ -107,7 +109,7 @@ public:
 
     const std::vector<AParticleTrackingRecord *> & getPrimaryParticleRecords() const {return PrimaryParticleRecords;}
 
-    ~AEventTrackingRecord();
+    virtual ~AEventTrackingRecord();
 
     // prevent creation on the stack and copy/move
 private:

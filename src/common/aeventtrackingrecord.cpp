@@ -29,6 +29,8 @@ ATrackingStepData::ATrackingStepData(float x, float y, float z, float time, floa
     Position[2] = z;
 }
 
+ATrackingStepData::~ATrackingStepData(){}
+
 void ATrackingStepData::logToString(QString & str, int offset) const
 {
     str += QString(' ').repeated(offset);

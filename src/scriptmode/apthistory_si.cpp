@@ -58,6 +58,12 @@ QString APTHistory_SI::recordToString(int iEvent, int iPrimary, bool includeSeco
     return s;
 }
 
+void APTHistory_SI::clearHistory()
+{
+    for (auto * r : TH) delete r;
+    TH.clear();
+}
+
 void APTHistory_SI::cd_set(int iEvent, int iPrimary)
 {
     if (iEvent < 0 || iEvent >= (int)TH.size())

@@ -723,6 +723,12 @@ ANeutronInteractionElement *NeutralTerminatorStructure::getNeutronInteractionEle
     return &IsotopeRecords[index];
 }
 
+const ANeutronInteractionElement *NeutralTerminatorStructure::getNeutronInteractionElement(int index) const
+{
+    if (index<0 || index>=IsotopeRecords.size()) return 0;
+    return &IsotopeRecords[index];
+}
+
 static int fixCounter = 0;
 void NeutralTerminatorStructure::UpdateRunTimeProperties(bool bUseLogLog, TRandom2* RandGen, int numThreads, double temp)
 {

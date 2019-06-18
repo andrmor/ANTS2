@@ -2322,20 +2322,21 @@ void flagButton(QPushButton* pb, bool flag)
 
 void MaterialInspectorWindow::FillNeutronTable()
 {
+    //      qDebug() << "Filling neutron table";
     int particleId = ui->cobParticle->currentIndex();
     if (particleId != MW->MpCollection->getNeutronIndex()) return;
 
-    //      qDebug() << "Filling neutron table";
     ui->tabwNeutron->clearContents();
     ui->tabwNeutron->setRowCount(0);
     ui->tabwNeutron->setColumnCount(0);
 
-    bool bCapture = ui->cbCapture->isChecked();
-    bool bElastic = ui->cbEnableScatter->isChecked() && !ui->cbUseNCrystal->isChecked();
-    if (!bCapture && !bElastic) return;
+    const AMaterial & tmpMaterial = MW->MpCollection->tmpMaterial;
+    const MatParticleStructure & mp = tmpMaterial.MatParticle.at(particleId);
+    const QVector<NeutralTerminatorStructure> & Terminators = mp.Terminators;
 
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-    QVector<NeutralTerminatorStructure>& Terminators = tmpMaterial.MatParticle[particleId].Terminators;
+    const bool bCapture = mp.bCaptureEnabled;
+    const bool bElastic = mp.bElasticEnabled && !mp.bUseNCrystal;
+    if (!bCapture && !bElastic) return;
 
     int numElements = tmpMaterial.ChemicalComposition.countElements();
     int numIso = tmpMaterial.ChemicalComposition.countIsotopes();
@@ -2364,7 +2365,7 @@ void MaterialInspectorWindow::FillNeutronTable()
     }
 
     int row = 0;
-    bool bIgnore = tmpMaterial.MatParticle[particleId].bAllowAbsentCsData;
+    bool bIgnore = mp.bAllowAbsentCsData;
     bool bFoundMissing = false;
     for (int iElement=0; iElement<numElements; iElement++)
     {
@@ -2378,8 +2379,8 @@ void MaterialInspectorWindow::FillNeutronTable()
             ui->tabwNeutron->setItem(row, 0, twi);
             if (bCapture)
             {
-                NeutralTerminatorStructure& t = Terminators.first();
-                ANeutronInteractionElement* absEl = t.getNeutronInteractionElement(row);
+                const NeutralTerminatorStructure & t = Terminators.first();
+                const ANeutronInteractionElement * absEl = t.getNeutronInteractionElement(row);
                 //      qDebug() << "index:"<<row << "Defined absorption elements:" << t.IsotopeRecords.size();
                 if (!absEl)
                 {
@@ -2418,8 +2419,8 @@ void MaterialInspectorWindow::FillNeutronTable()
             }
             if (bElastic)
             {
-                NeutralTerminatorStructure& t = Terminators.last();
-                ANeutronInteractionElement* scatEl = t.getNeutronInteractionElement(row);
+                const NeutralTerminatorStructure & t = Terminators.last();
+                const ANeutronInteractionElement * scatEl = t.getNeutronInteractionElement(row);
                 //      qDebug() << "index:"<<row << "Defined scatter elements:" << t.IsotopeRecords.size();
                 if (!scatEl)
                 {
@@ -2459,7 +2460,7 @@ void MaterialInspectorWindow::FillNeutronTable()
     ui->tabwNeutron->resizeColumnsToContents();
     ui->tabwNeutron->resizeRowsToContents();
 
-    tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation, Detector->RandGen);
+    MW->MpCollection->tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation, Detector->RandGen); //need to be here? counter-intuitive in indication!
 }
 
 int MaterialInspectorWindow::autoloadMissingCrossSectionData()

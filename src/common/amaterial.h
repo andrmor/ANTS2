@@ -126,6 +126,7 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
   void ClearProperties();
 
   ANeutronInteractionElement* getNeutronInteractionElement(int index);  //0 if wrong index
+  const ANeutronInteractionElement* getNeutronInteractionElement(int index) const;  //0 if wrong index
 
   void writeToJson (QJsonObject &json, AMaterialParticleCollection* MpCollection) const;
   void readFromJson(const QJsonObject &json, AMaterialParticleCollection* MpCollection);

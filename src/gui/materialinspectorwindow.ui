@@ -248,7 +248,7 @@
     <item>
      <widget class="QTabWidget" name="twProperties">
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tab_6">
        <attribute name="title">
@@ -2093,7 +2093,7 @@ Can be used to automatically configure gamma interaction cross-sections and neut
            <item>
             <widget class="QStackedWidget" name="swMainMatParticle">
              <property name="currentIndex">
-              <number>0</number>
+              <number>1</number>
              </property>
              <widget class="QWidget" name="pageCharged">
               <layout class="QVBoxLayout" name="verticalLayout_10">
@@ -2363,7 +2363,7 @@ Can be used to automatically configure gamma interaction cross-sections and neut
                   <enum>QFrame::NoFrame</enum>
                  </property>
                  <property name="currentIndex">
-                  <number>0</number>
+                  <number>1</number>
                  </property>
                  <widget class="QWidget" name="pageGamma">
                   <layout class="QVBoxLayout" name="verticalLayout_30">
@@ -3680,8 +3680,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>371</x>
-     <y>298</y>
+     <x>370</x>
+     <y>288</y>
     </hint>
     <hint type="destinationlabel">
      <x>483</x>
@@ -3696,8 +3696,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>461</x>
-     <y>438</y>
+     <x>458</x>
+     <y>437</y>
     </hint>
     <hint type="destinationlabel">
      <x>483</x>
@@ -3712,8 +3712,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>461</x>
-     <y>504</y>
+     <x>458</x>
+     <y>501</y>
     </hint>
     <hint type="destinationlabel">
      <x>483</x>
@@ -3728,8 +3728,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>461</x>
-     <y>537</y>
+     <x>458</x>
+     <y>533</y>
     </hint>
     <hint type="destinationlabel">
      <x>483</x>
@@ -3744,8 +3744,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>461</x>
-     <y>471</y>
+     <x>458</x>
+     <y>469</y>
     </hint>
     <hint type="destinationlabel">
      <x>483</x>
@@ -3760,8 +3760,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>371</x>
-     <y>298</y>
+     <x>370</x>
+     <y>288</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -3776,8 +3776,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>461</x>
-     <y>438</y>
+     <x>458</x>
+     <y>437</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -3792,8 +3792,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>461</x>
-     <y>471</y>
+     <x>458</x>
+     <y>469</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -3808,8 +3808,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>461</x>
-     <y>504</y>
+     <x>458</x>
+     <y>501</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -3824,8 +3824,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>461</x>
-     <y>537</y>
+     <x>458</x>
+     <y>533</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -3840,8 +3840,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>614</x>
-     <y>270</y>
+     <x>618</x>
+     <y>262</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -3856,8 +3856,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>103</x>
-     <y>300</y>
+     <x>113</x>
+     <y>291</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -3872,8 +3872,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>614</x>
-     <y>270</y>
+     <x>618</x>
+     <y>262</y>
     </hint>
     <hint type="destinationlabel">
      <x>530</x>
@@ -3888,8 +3888,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>414</x>
-     <y>271</y>
+     <x>416</x>
+     <y>263</y>
     </hint>
     <hint type="destinationlabel">
      <x>323</x>
@@ -3904,8 +3904,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>86</x>
-     <y>339</y>
+     <x>101</x>
+     <y>329</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -3920,8 +3920,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>154</x>
-     <y>369</y>
+     <x>169</x>
+     <y>358</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -3936,8 +3936,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>86</x>
-     <y>339</y>
+     <x>101</x>
+     <y>329</y>
     </hint>
     <hint type="destinationlabel">
      <x>530</x>
@@ -3952,8 +3952,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>154</x>
-     <y>369</y>
+     <x>169</x>
+     <y>358</y>
     </hint>
     <hint type="destinationlabel">
      <x>530</x>
@@ -3972,8 +3972,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
      <y>732</y>
     </hint>
     <hint type="destinationlabel">
-     <x>530</x>
-     <y>732</y>
+     <x>517</x>
+     <y>735</y>
     </hint>
    </hints>
   </connection>
@@ -3988,8 +3988,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
      <y>672</y>
     </hint>
     <hint type="destinationlabel">
-     <x>625</x>
-     <y>140</y>
+     <x>628</x>
+     <y>136</y>
     </hint>
    </hints>
   </connection>
@@ -4016,8 +4016,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>258</x>
-     <y>617</y>
+     <x>312</x>
+     <y>616</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -4032,8 +4032,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>290</x>
-     <y>463</y>
+     <x>312</x>
+     <y>461</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -4048,8 +4048,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>290</x>
-     <y>428</y>
+     <x>312</x>
+     <y>425</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -4064,8 +4064,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>424</x>
-     <y>428</y>
+     <x>448</x>
+     <y>425</y>
     </hint>
     <hint type="destinationlabel">
      <x>530</x>
@@ -4080,8 +4080,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>290</x>
-     <y>428</y>
+     <x>312</x>
+     <y>425</y>
     </hint>
     <hint type="destinationlabel">
      <x>530</x>
@@ -4096,8 +4096,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>274</x>
-     <y>365</y>
+     <x>312</x>
+     <y>361</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -4112,8 +4112,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>263</x>
-     <y>302</y>
+     <x>312</x>
+     <y>296</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -4128,8 +4128,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>266</x>
-     <y>463</y>
+     <x>312</x>
+     <y>461</y>
     </hint>
     <hint type="destinationlabel">
      <x>483</x>
@@ -4144,8 +4144,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>290</x>
-     <y>365</y>
+     <x>312</x>
+     <y>361</y>
     </hint>
     <hint type="destinationlabel">
      <x>483</x>
@@ -4180,8 +4180,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
      <y>644</y>
     </hint>
     <hint type="destinationlabel">
-     <x>100</x>
-     <y>140</y>
+     <x>109</x>
+     <y>136</y>
     </hint>
    </hints>
   </connection>
@@ -4196,8 +4196,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
      <y>644</y>
     </hint>
     <hint type="destinationlabel">
-     <x>625</x>
-     <y>140</y>
+     <x>628</x>
+     <y>136</y>
     </hint>
    </hints>
   </connection>
@@ -4224,12 +4224,12 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>70</x>
-     <y>369</y>
+     <x>85</x>
+     <y>358</y>
     </hint>
     <hint type="destinationlabel">
-     <x>610</x>
-     <y>369</y>
+     <x>614</x>
+     <y>358</y>
     </hint>
    </hints>
   </connection>
@@ -4240,12 +4240,12 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>610</x>
-     <y>369</y>
+     <x>614</x>
+     <y>358</y>
     </hint>
     <hint type="destinationlabel">
-     <x>131</x>
-     <y>444</y>
+     <x>145</x>
+     <y>432</y>
     </hint>
    </hints>
   </connection>
@@ -4256,12 +4256,12 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>396</x>
-     <y>333</y>
+     <x>395</x>
+     <y>322</y>
     </hint>
     <hint type="destinationlabel">
-     <x>625</x>
-     <y>140</y>
+     <x>628</x>
+     <y>136</y>
     </hint>
    </hints>
   </connection>
@@ -4272,8 +4272,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>396</x>
-     <y>333</y>
+     <x>395</x>
+     <y>322</y>
     </hint>
     <hint type="destinationlabel">
      <x>71</x>
@@ -4288,12 +4288,12 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>205</x>
-     <y>439</y>
+     <x>194</x>
+     <y>427</y>
     </hint>
     <hint type="destinationlabel">
-     <x>109</x>
-     <y>140</y>
+     <x>118</x>
+     <y>136</y>
     </hint>
    </hints>
   </connection>
@@ -4304,12 +4304,12 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>495</x>
-     <y>439</y>
+     <x>487</x>
+     <y>427</y>
     </hint>
     <hint type="destinationlabel">
-     <x>52</x>
-     <y>140</y>
+     <x>61</x>
+     <y>136</y>
     </hint>
    </hints>
   </connection>
@@ -4320,12 +4320,12 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>610</x>
-     <y>369</y>
+     <x>614</x>
+     <y>358</y>
     </hint>
     <hint type="destinationlabel">
-     <x>29</x>
-     <y>140</y>
+     <x>38</x>
+     <y>136</y>
     </hint>
    </hints>
   </connection>
@@ -4336,8 +4336,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>287</x>
-     <y>410</y>
+     <x>344</x>
+     <y>399</y>
     </hint>
     <hint type="destinationlabel">
      <x>530</x>
@@ -4352,8 +4352,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>491</x>
-     <y>410</y>
+     <x>513</x>
+     <y>399</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>

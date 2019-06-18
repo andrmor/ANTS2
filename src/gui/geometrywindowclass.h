@@ -107,6 +107,8 @@ private slots:
 
     void on_cobViewer_currentIndexChanged(int index);
 
+    void on_pbTest_clicked();
+
 private:
   MainWindow* MW;
   Ui::GeometryWindowClass *ui;

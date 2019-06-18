@@ -22,6 +22,7 @@ ARootHttpServer::~ARootHttpServer()
     delete server;
 }
 
+#include "TSeqCollection.h"
 void ARootHttpServer::UpdateGeoWorld(TObject *NewGeoWorld)
 {
     //qDebug() << "In root html server: registering new TopNode and GeoTracks";
@@ -35,6 +36,10 @@ void ARootHttpServer::UpdateGeoWorld(TObject *NewGeoWorld)
     if (GeoTracks) server->Unregister(GeoTracks);
     server->Register("GeoTracks", GeoManager->GetListOfTracks());
     GeoTracks = GeoManager->GetListOfTracks();
+
+    qDebug() << "Num tracks:"<< ((TSeqCollection*)GeoTracks)->GetEntries();
+
+
 }
 
 void ARootHttpServer::Register(QString name, TObject *obj)

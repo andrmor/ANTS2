@@ -221,12 +221,15 @@ bool GeometryWindowClass::event(QEvent *event)
   return AGuiWindow::event(event);
 }
 
+#include "anetworkmodule.h"
 void GeometryWindowClass::ShowPMnumbers()
 {
    QVector<QString> tmp;
    for (int i=0; i<MW->PMs->count(); i++)
        tmp.append( QString::number(i) );
    ShowText(tmp, kBlack, true);
+
+   MW->NetModule->onNewGeoManagerCreated(gGeoManager);
 }
 
 void GeometryWindowClass::ShowMonitorIndexes()
@@ -628,6 +631,38 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
         });
 #endif
     }
+}
+
+void GeometryWindowClass::on_pbTest_clicked()
+{
+    //[shell] wget http://localhost:8080/Objects/subfolder/obj/root.json
+    //Objects/subfolder/obj/fTitle/root.json
+    // /Objects/GeoWorld/WorldBox_1
+
+    QWebEnginePage * page = WebView->page();
+    page->runJavaScript(
+/*
+    "JSROOT.NewHttpRequest(\"http://localhost:8080/Objects/GeoWorld/WorldBox_1/root.json\", \"object\","
+    //"JSROOT.NewHttpRequest(\"http://localhost:8080/Objects/GeoTracks/TObjArray/root.json\", \"object\","
+    "function(res) {"
+        //"if (res) console.log('Retrieve object', res._typename);"
+        //    "else console.error('Fail to get object');"
+        //  "JSROOT.cleanup();"
+
+          //"JSROOT.redraw(\"onlineGUI_drawing\", res, \"transp50,tracks\");"
+          "JSROOT.redraw(\"onlineGUI_drawing\", res, \"transp50,tracks\");"
+    "}).send();");
+*/
+
+                "var xhr = JSROOT.NewHttpRequest('http://localhost:8080/multi.json?number=1', 'multi', function(res)"
+                                                        "{"
+                                                            "if (!res) return;"
+                                                            "JSROOT.draw('onlineGUI_drawing', res[0], 'transp50');"
+                                                        "}"
+                                                ");"
+                 //"xhr.send(\"Objects/GeoWorld/WorldBox_1/root.json\n/Objects/GeoTracks/TObjArray/root.json\n\");"
+                "xhr.send('Objects/GeoWorld/WorldBox_1/root.json\n');"
+                );
 }
 
 #include "aeventtrackingrecord.h"
@@ -1043,7 +1078,8 @@ void GeometryWindowClass::on_cobViewer_currentIndexChanged(int index)
     else
     {
         ui->swViewers->setCurrentIndex(1);
-        WebView->load(QUrl("http://localhost:8080/?nobrowser&item=[Objects/GeoWorld/WorldBox_1,Objects/GeoTracks/TObjArray]&opt=nohighlight;dray;all;tracks;transp50"));
+        //WebView->load(QUrl("http://localhost:8080/?nobrowser&item=[Objects/GeoWorld/WorldBox_1,Objects/GeoTracks/TObjArray]&opt=nohighlight;dray;all;tracks;transp50"));
+        WebView->load(QUrl("http://localhost:8080/?item=[Objects/GeoWorld/WorldBox_1,Objects/GeoTracks/TObjArray]&opt=nohighlight;dray;all;tracks;transp50"));
         WebView->show();
     }
 

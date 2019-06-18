@@ -6,6 +6,7 @@
 #include "TH1D.h"
 #include "TH2D.h"
 #include "TF1.h"
+#include "TAxis.h"
 
 ARootHistRecord::ARootHistRecord(TObject *hist, const QString &title, const QString &type) :
      ARootObjBase(hist, title, type) {}
@@ -65,6 +66,78 @@ void ARootHistRecord::SetMarkerProperties(int MarkerColor, int MarkerStyle, doub
     }
 }
 
+void ARootHistRecord::SetFillColor(int Color)
+{
+    TH1* h = dynamic_cast<TH1*>(Object);
+    if (h) h->SetFillColor(Color);
+}
+
+void ARootHistRecord::SetXLabels(const QVector<QString> &labels)
+{
+    int numLabels = labels.size();
+
+    TH1* h = dynamic_cast<TH1*>(Object);
+    if (h)
+    {
+        TAxis * axis = h->GetXaxis();
+        if (!axis) return;
+
+        int numBins = axis->GetNbins();
+        for (int i=1; i <= numLabels && i <= numBins ; i++)
+            axis->SetBinLabel(i, labels.at(i-1).toLatin1().data());
+    }
+}
+
+void ARootHistRecord::SetXDivisions(int primary, int secondary, int tertiary, bool canOptimize)
+{
+    TH1* h = dynamic_cast<TH1*>(Object);
+    if (h)
+    {
+        TAxis * axis = h->GetXaxis();
+        if (!axis) return;
+
+        axis->SetNdivisions(primary, secondary, tertiary, canOptimize);
+    }
+}
+
+void ARootHistRecord::SetYDivisions(int primary, int secondary, int tertiary, bool canOptimize)
+{
+    TH1* h = dynamic_cast<TH1*>(Object);
+    if (h)
+    {
+        TAxis * axis = h->GetYaxis();
+        if (!axis) return;
+
+        axis->SetNdivisions(primary, secondary, tertiary, canOptimize);
+    }
+}
+
+void ARootHistRecord::SetXLabelProperties(double size, double offset)
+{
+    TH1* h = dynamic_cast<TH1*>(Object);
+    if (h)
+    {
+        TAxis * axis = h->GetXaxis();
+        if (!axis) return;
+
+        axis->SetLabelSize(size);
+        axis->SetLabelOffset(offset);
+    }
+}
+
+void ARootHistRecord::SetYLabelProperties(double size, double offset)
+{
+    TH1* h = dynamic_cast<TH1*>(Object);
+    if (h)
+    {
+        TAxis * axis = h->GetYaxis();
+        if (!axis) return;
+
+        axis->SetLabelSize(size);
+        axis->SetLabelOffset(offset);
+    }
+}
+
 void ARootHistRecord::Fill(double val, double weight)
 {
     QMutexLocker locker(&Mutex);
@@ -111,6 +184,18 @@ void ARootHistRecord::Fill2DArr(const QVector<double> &x, const QVector<double> 
         for (int i=0; i<x.size(); i++)
             h->Fill(x.at(i), y.at(i), weight.at(i));
     }
+}
+
+void ARootHistRecord::SetMax(double max)
+{
+    TH1* h = dynamic_cast<TH1*>(Object);
+    if (h) h->SetMaximum(max);
+}
+
+void ARootHistRecord::SetMin(double min)
+{
+    TH1* h = dynamic_cast<TH1*>(Object);
+    if (h) h->SetMinimum(min);
 }
 
 void ARootHistRecord::Save(const QString &fileName) const
@@ -227,13 +312,15 @@ int ARootHistRecord::GetEntries()
 {
     TH1* h = dynamic_cast<TH1*>(Object);
     if (!h) return 0;
+
     return h->GetEntries();
 }
 
-int ARootHistRecord::SetEntries(int num)
+void ARootHistRecord::SetEntries(int num)
 {
     TH1* h = dynamic_cast<TH1*>(Object);
-    if (!h) return 0;
+    if (!h) return;
+
     h->SetEntries(num);
 }
 
@@ -241,6 +328,7 @@ double ARootHistRecord::GetMaximum()
 {
     TH1* h = dynamic_cast<TH1*>(Object);
     if (!h) return 1.0;
+
     return h->GetMaximum();
 }
 

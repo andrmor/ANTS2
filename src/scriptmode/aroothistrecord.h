@@ -20,12 +20,21 @@ public:
     void SetAxisTitles(const QString X_Title, const QString Y_Title, const QString Z_Title = "");
     void SetLineProperties(int LineColor, int LineStyle, int LineWidth);
     void SetMarkerProperties(int MarkerColor, int MarkerStyle, double MarkerSize);
+    void SetFillColor(int Color);
+    void SetXLabels(const QVector<QString> & labels);
+    void SetXDivisions(int primary, int secondary, int tertiary, bool canOptimize);
+    void SetYDivisions(int primary, int secondary, int tertiary, bool canOptimize);
+    void SetXLabelProperties(double size, double offset);
+    void SetYLabelProperties(double size, double offset);
 
     void Fill(double val, double weight);
     void Fill2D(double x, double y, double weight);
 
     void FillArr(const QVector<double>& val, const QVector<double>& weight);
     void Fill2DArr(const QVector<double>& x, const QVector<double>& y, const QVector<double>& weight);
+
+    void SetMax(double max);
+    void SetMin(double min);
 
     void Save(const QString & fileName) const;
 
@@ -37,7 +46,7 @@ public:
 
     double GetIntegral(bool bMultipliedByBinWidth = false);
     int    GetEntries();
-    int    SetEntries(int num);
+    void   SetEntries(int num);
     double GetMaximum();
     bool   GetContent(QVector<double> & x, QVector<double> & y) const;
     bool   GetUnderflow(double & undeflow) const;

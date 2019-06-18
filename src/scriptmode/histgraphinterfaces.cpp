@@ -82,6 +82,25 @@ void AInterfaceToHist::NewHist2D(const QString& HistName, int binsX, double star
     }
 }
 
+void AInterfaceToHist::SetXCustomLabels(const QString &HistName, QVariantList Labels)
+{
+    if (!bGuiThread)
+    {
+        abort("Cannot perform this operation in non-GUI thread!");
+        return;
+    }
+
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    if (!r) abort("Histogram " + HistName + " not found!");
+    else
+    {
+        QVector<QString> lab;
+        for (int i=0; i<Labels.size(); i++)
+            lab << Labels.at(i).toString();
+        r->SetXLabels(lab);
+    }
+}
+
 void AInterfaceToHist::SetTitle(const QString &HistName, const QString &Title)
 {
     ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
@@ -116,6 +135,55 @@ void AInterfaceToHist::SetMarkerProperties(const QString &HistName, int MarkerCo
         abort("Histogram " + HistName + " not found!");
     else
         r->SetMarkerProperties(MarkerColor, MarkerStyle, MarkerSize);
+}
+
+void AInterfaceToHist::SetFillColor(const QString &HistName, int Color)
+{
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    if (!r) abort("Histogram " + HistName + " not found!");
+    else    r->SetFillColor(Color);
+}
+
+void AInterfaceToHist::SetMaximum(const QString &HistName, double max)
+{
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    if (!r) abort("Histogram " + HistName + " not found!");
+    else    r->SetMax(max);
+}
+
+void AInterfaceToHist::SetMinimum(const QString &HistName, double min)
+{
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    if (!r) abort("Histogram " + HistName + " not found!");
+    else    r->SetMin(min);
+}
+
+void AInterfaceToHist::SetXDivisions(const QString &HistName, int primary, int secondary, int tertiary, bool canOptimize)
+{
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    if (!r) abort("Histogram " + HistName + " not found!");
+    else    r->SetXDivisions(primary, secondary, tertiary, canOptimize);
+}
+
+void AInterfaceToHist::SetYDivisions(const QString &HistName, int primary, int secondary, int tertiary, bool canOptimize)
+{
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    if (!r) abort("Histogram " + HistName + " not found!");
+    else    r->SetYDivisions(primary, secondary, tertiary, canOptimize);
+}
+
+void AInterfaceToHist::SetXLabelProperties(const QString &HistName, double size, double offset)
+{
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    if (!r) abort("Histogram " + HistName + " not found!");
+    else    r->SetXLabelProperties(size, offset);
+}
+
+void AInterfaceToHist::SetYLabelProperties(const QString &HistName, double size, double offset)
+{
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    if (!r) abort("Histogram " + HistName + " not found!");
+    else    r->SetYLabelProperties(size, offset);
 }
 
 void AInterfaceToHist::Fill(const QString &HistName, double val, double weight)
@@ -160,14 +228,14 @@ void AInterfaceToHist::ApplyMedianFilter(const QString &HistName, int span)
     }
 }
 
-void AInterfaceToHist::FillArr(const QString &HistName, const QVariant Array)
+void AInterfaceToHist::FillArr(const QString &HistName, const QVariant XY_Array)
 {
     ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
     if (!r)
         abort("Histogram " + HistName + " not found!");
     else
     {
-        QVariantList VarList = Array.toList();
+        QVariantList VarList = XY_Array.toList();
         if (VarList.isEmpty())
         {
             abort("Array (or array of arrays) is expected as the second argument in hist.FillArr()");
@@ -214,6 +282,44 @@ void AInterfaceToHist::FillArr(const QString &HistName, const QVariant Array)
 
         r->FillArr(val, weight);
     }
+}
+
+void AInterfaceToHist::FillArr(const QString &HistName, const QVariantList X_Array, const QVariantList Y_Array)
+{
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+
+    if (!r)
+    {
+        abort("Histogram " + HistName + " not found!");
+        return;
+    }
+
+    const int size = X_Array.size();
+    if (size == 0) return;
+    if (size != Y_Array.size())
+    {
+        abort("Mismatch in array sizes in FillArr");
+        return;
+    }
+
+    QVector<double> val, weight;
+    bool bOK1, bOK2;
+    for (int i=0; i < size; i++)
+    {
+        double v = X_Array.at(i).toDouble(&bOK1);
+        double w = Y_Array.at(i).toDouble(&bOK2);
+        if (!bOK1 || !bOK2)
+        {
+            abort("FillArr: Error in conversion to number");
+            return;
+        }
+
+        val << v;
+        weight << w;
+        continue;
+    }
+
+    r->FillArr(val, weight);
 }
 
 void AInterfaceToHist::Fill2DArr(const QString &HistName, const QVariant Array)

@@ -28,15 +28,25 @@ public slots:
   void           NewHist(const QString& HistName, int bins, double start, double stop);
   void           NewHist2D(const QString &HistName, int binsX, double startX, double stopX, int binsY, double startY, double stopY);
 
+  void           SetXCustomLabels(const QString &HistName, QVariantList Labels);
+
   void           SetTitle(const QString& HistName, const QString& Title);
   void           SetTitles(const QString& HistName, QString X_Title, QString Y_Title, QString Z_Title = "");
   void           SetLineProperties(const QString& HistName, int LineColor, int LineStyle, int LineWidth);
   void           SetMarkerProperties(const QString& HistName, int MarkerColor, int MarkerStyle, double MarkerSize);
+  void           SetFillColor(const QString& HistName, int Color);
+  void           SetMaximum(const QString& HistName, double max);
+  void           SetMinimum(const QString& HistName, double min);
+  void           SetXDivisions(const QString& HistName, int primary, int secondary, int tertiary, bool canOptimize);
+  void           SetYDivisions(const QString& HistName, int primary, int secondary, int tertiary, bool canOptimize);
+  void           SetXLabelProperties(const QString& HistName, double size, double offset);
+  void           SetYLabelProperties(const QString& HistName, double size, double offset);
 
   void           Fill(const QString& HistName, double val, double weight);
   void           Fill2D(const QString& HistName, double x, double y, double weight);
 
-  void           FillArr(const QString& HistName, const QVariant Array);
+  void           FillArr(const QString& HistName, const QVariant XY_Array);
+  void           FillArr(const QString& HistName, const QVariantList X_Array, const QVariantList Y_Array);
   void           Fill2DArr(const QString& HistName, const QVariant Array);
 
   void           Divide(const QString& HistName, const QString& HistToDivideWith);

@@ -649,7 +649,10 @@ void AInterfaceToHist::Draw(const QString &HistName, const QString options)
     if (!r)
         abort("Histogram " + HistName + " not found!");
     else
-        emit RequestDraw(r->GetObject(), options, true);
+    {
+        TObject * copy = r->GetObject()->Clone(r->GetObject()->GetName());
+        emit RequestDraw(copy, options, true);
+    }
 }
 
 QVariantList AInterfaceToHist::GetContent(const QString& HistName)
@@ -923,7 +926,8 @@ void AInterfaceToGraph::Draw(QString GraphName, QString options)
         abort("Graph "+GraphName+" not found!");
     else
     {
-        emit RequestDraw(r->GetObject(), options, true);
+        TObject * copy = r->GetObject()->Clone(r->GetObject()->GetName());
+        emit RequestDraw(copy, options, true);
         r->LastDrawOption = options;
     }
 }

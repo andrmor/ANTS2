@@ -16,7 +16,7 @@ APTHistory_SI::APTHistory_SI(ASimulationManager & SimulationManager) :
     Criteria = new AFindRecordSelector();
 
     H["cd_getTrackRecord"] = "returns [string_ParticleName, bool_IsSecondary, int_NumberOfSecondaries, int_NumberOfTrackingSteps]";
-    H["cd_getStepRecord"] = "returns [ [X,Y,Z], Time, [MatIndex, VolumeName, VolumeIndex], Energy, DepositedEnergy, ProcessName], indexesOfSecondaries[] ]\n"
+    H["cd_getStepRecord"] = "returns [ [X,Y,Z], Time, [MatIndex, VolumeName, VolumeIndex], Energy, DepositedEnergy, ProcessName, indexesOfSecondaries[] ]\n"
             "XYZ in mm, Time in ns, Energies in keV, [MatVolIndex] array is empty if node does not exist, indexesOfSec is array with ints";
 }
 

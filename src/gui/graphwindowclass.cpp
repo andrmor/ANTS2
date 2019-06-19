@@ -1192,10 +1192,10 @@ void GraphWindowClass::on_pbUnzoom_clicked()
 
 void GraphWindowClass::on_leOptions_editingFinished()
 {   
-    ui->pbUnzoom->setFocus();
+   ui->pbUnzoom->setFocus();
    QString newOptions = ui->leOptions->text();
    //preventing redraw just because of refocus
-   if (old_option == newOptions) return;
+   //if (old_option == newOptions) return;
    old_option = newOptions;
 
    if (DrawObjects.isEmpty()) return;
@@ -1234,69 +1234,67 @@ void GraphWindowClass::UpdateControls()
   ui->cbGridX->setChecked(c->GetGridx());
   ui->cbGridY->setChecked(c->GetGridy());
 
-  //TObject* obj = DrawObjects.first().getPointer();
   TObject* obj = getCurrentDrawObjects()->first().getPointer();
+  if (!obj)
+  {
+      qWarning() << "Cannot update graph window rang controls - object does not exist";
+      return;
+  }
   QString PlotType = obj->ClassName();
-  //const char* PlotOptions = DrawObjects.first().Options;
+  QString opt = getCurrentDrawObjects()->first().getOptions();
+  //qDebug() << "PlotType:"<< PlotType << "Opt:"<<opt;
 
   zmin = 0; zmax = 0;
-
-  //QString opt = DrawObjects.first().getOptions();
-  QString opt = getCurrentDrawObjects()->first().getOptions();
-//  qDebug()<<"here opt = "<<opt;
-
-  //histograms
   if (PlotType.startsWith("TH1") || PlotType.startsWith("TH2") || PlotType =="TProfile")
-    {
+  {
       c->GetRangeAxis(xmin, ymin, xmax, ymax);
       if (c->GetLogx())
-        {
+      {
           xmin = TMath::Power(10.0, xmin);
           xmax = TMath::Power(10.0, xmax);
-        }
+      }
       if (c->GetLogy())
-        {
+      {
           ymin = TMath::Power(10.0, ymin);
           ymax = TMath::Power(10.0, ymax);
-        }
+      }
 
       if (PlotType.startsWith("TH2") )
-        {
+      {
            if (ui->leOptions->text().startsWith("col"))
-             {
+           {
                //it is color contour - 2D plot
                zmin = ((TH2*) obj)->GetMinimum();
                zmax = ((TH2*) obj)->GetMaximum();
                ui->ledZfrom->setText( QString::number(zmin, 'g', 4) );
                ui->ledZto->setText( QString::number(zmax, 'g', 4) );
-             }
+           }
            else
-             {
+           {
                //3D plot
                float min[3], max[3];
                TView* v = c->GetView();
                if (v && !MW->ShutDown)
-                 {
+               {
                    v->GetRange(min, max);                   
                    ui->ledZfrom->setText( QString::number(min[2], 'g', 4) );
                    ui->ledZto->setText( QString::number(max[2], 'g', 4) );
-                 }
+               }
                else
-                 {
+               {
                    ui->ledZfrom->setText("");
                    ui->ledZto->setText("");
-                 }
-             }
-        }
-    }
-  if (PlotType.startsWith("TH3"))
-    {
+               }
+           }
+      }
+  }
+  else if (PlotType.startsWith("TH3"))
+  {
           ui->ledZfrom->setText( "" );   //   ui->ledZfrom->setText( QString::number(zmin, 'g', 4) );
           ui->ledZto->setText( "" ); // ui->ledZto->setText( QString::number(zmax, 'g', 4) );
-    }
-
-  if (PlotType.startsWith("TProfile2D"))
-    {
+  }
+  else if (PlotType.startsWith("TProfile2D"))
+  {
         if (opt == "" || opt == "prof" || opt.contains("col") || opt.contains("colz"))
         {
             c->GetRangeAxis(xmin, ymin, xmax, ymax);
@@ -1313,11 +1311,9 @@ void GraphWindowClass::UpdateControls()
         }
           ui->ledZfrom->setText( "" );   //   ui->ledZfrom->setText( QString::number(zmin, 'g', 4) );
           ui->ledZto->setText( "" ); // ui->ledZto->setText( QString::number(zmax, 'g', 4) );
-    }
-
-  //functions
-  if (PlotType.startsWith("TF1") )
-    {
+  }
+  else if (PlotType.startsWith("TF1") )
+  {
       //cannot use GetRange - y is reported 0 always
 //      xmin = ((TF1*) obj)->GetXmin();
 //      xmax = ((TF1*) obj)->GetXmax();
@@ -1335,9 +1331,9 @@ void GraphWindowClass::UpdateControls()
           ymax = TMath::Power(10.0, ymax);
         }
 
-    }
-  if (PlotType.startsWith("TF2"))
-    {
+  }
+  else if (PlotType.startsWith("TF2"))
+  {
       ((TF2*) obj)->GetRange(xmin, ymin, xmax, ymax);
       //  zmin = ((TF2*) obj)->GetMinimum();  -- too slow, it involves minimizer!
       //  zmax = ((TF2*) obj)->GetMaximum();
@@ -1354,11 +1350,9 @@ void GraphWindowClass::UpdateControls()
           ui->ledZfrom->setText("");
           ui->ledZto->setText("");
         }      
-    }
-
-  //graph
-  if (PlotType == "TGraph" || PlotType == "TGraphErrors" || PlotType == "TMultiGraph")
-    {
+  }
+  else if (PlotType == "TGraph" || PlotType == "TGraphErrors" || PlotType == "TMultiGraph")
+  {
       c->GetRangeAxis(xmin, ymin, xmax, ymax);
       if (c->GetLogx())
         {
@@ -1371,10 +1365,9 @@ void GraphWindowClass::UpdateControls()
           ymax = TMath::Power(10.0, ymax);
         }
        //   qDebug()<<"---Ymin:"<<ymin;
-    }
-
-  if (PlotType == "TGraph2D")
-    {
+  }
+  else if (PlotType == "TGraph2D")
+  {
       //xmin = ((TGraph2D*) obj)->GetHistogram()->GetXaxis()->GetXmin();
       //xmax = ((TGraph2D*) obj)->GetHistogram()->GetXaxis()->GetXmax();
        //xmin = ((TGraph2D*) obj)->GetXmin();
@@ -1400,8 +1393,9 @@ void GraphWindowClass::UpdateControls()
 
 //      qDebug()<<"from object:"<<xmin<<xmax<<ymin<<ymax<<zmin<<zmax;
       //ui->leOptions->setEnabled(false);
-    }
-  else ui->leOptions->setEnabled(true);
+  }
+
+  //else ui->leOptions->setEnabled(true);
 
   ui->ledXfrom->setText( QString::number(xmin, 'g', 4) );
   xmin = ui->ledXfrom->text().toDouble();  //to have consistent rounding
@@ -1416,12 +1410,12 @@ void GraphWindowClass::UpdateControls()
   zmax = ui->ledZto->text().toDouble();
 
   if (fFirstTime)
-    {
+  {
       xmin0 = xmin; xmax0 = xmax;
       ymin0 = ymin; ymax0 = ymax;
       zmin0 = zmin; zmax0 = zmax;
       //qDebug() << "minmax0 XYZ"<<xmin0<<xmax0<<ymin0<<ymax0<<zmin0<<zmax0;
-    }
+  }
 
   TMPignore = false;
   //qDebug()<<"  GraphWindow: updating toolbar done";
@@ -1434,13 +1428,13 @@ void GraphWindowClass::DoSaveGraph(QString name)
 
 void GraphWindowClass::DrawStrOpt(TObject *obj, QString options, bool DoUpdate)
 {
-  if (!obj)
+    if (!obj)
     {
-      //TGraph is bad, it needs update to show the title axes :)
-      RedrawAll();
-      return;
+        //TGraph is bad, it needs update to show the title axes :)
+        RedrawAll();
+        return;
     }
-  Draw(obj, options.toLatin1().data(), DoUpdate, false);
+    Draw(obj, options.toLatin1().data(), DoUpdate, true); // changed to register - now hist/graph scripts make a copy to draw
 }
 
 void GraphWindowClass::onDrawRequest(TObject *obj, const QString options, bool transferOwnership, bool focusWindow)

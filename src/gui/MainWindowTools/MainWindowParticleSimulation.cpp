@@ -579,16 +579,7 @@ void MainWindow::on_pbSingleSourceShow_clicked()
     r[0] = ui->ledSingleX->text().toDouble();
     r[1] = ui->ledSingleY->text().toDouble();
     r[2] = ui->ledSingleZ->text().toDouble();
-
-    clearGeoMarkers();
-    GeoMarkerClass* marks = new GeoMarkerClass("Source", 3, 10, kBlack);
-    marks->SetNextPoint(r[0], r[1], r[2]);   
-    GeoMarkers.append(marks);
-    GeoMarkerClass* marks1 = new GeoMarkerClass("Source", 4, 3, kRed);
-    marks1->SetNextPoint(r[0], r[1], r[2]);    
-    GeoMarkers.append(marks1);
-
-    GeometryWindow->ShowGeometry(false);
+    GeometryWindow->ShowPoint(r);
 }
 
 void MainWindow::on_pbEditParticleSource_clicked()

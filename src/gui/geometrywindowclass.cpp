@@ -678,6 +678,22 @@ void GeometryWindowClass::DrawTracks()
     UpdateRootCanvas();
 }
 
+#include "ageomarkerclass.h"
+void GeometryWindowClass::ShowPoint(double * r, bool keepTracks)
+{
+    MW->clearGeoMarkers();
+
+    GeoMarkerClass* marks = new GeoMarkerClass("Source", 3, 10, kBlack);
+    marks->SetNextPoint(r[0], r[1], r[2]);
+    MW->GeoMarkers.append(marks);
+    GeoMarkerClass* marks1 = new GeoMarkerClass("Source", 4, 3, kRed);
+    marks1->SetNextPoint(r[0], r[1], r[2]);
+    MW->GeoMarkers.append(marks1);
+
+    ShowGeometry(false);
+    if (keepTracks) DrawTracks();
+}
+
 void GeometryWindowClass::on_pbClearTracks_clicked()
 {
   MW->Detector->GeoManager->ClearTracks();

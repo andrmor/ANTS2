@@ -2057,10 +2057,11 @@ void OutputWindow::on_trwEventView_customContextMenuRequested(const QPoint &pos)
 
     if (!pr) return;
 
-    QMenu BasketMenu;
-    QAction * showELDD = BasketMenu.addAction("Show energy linear deposition density");
-    //BasketMenu.addSeparator();
-    QAction* selectedItem = BasketMenu.exec(ui->trwEventView->mapToGlobal(pos));
+    QMenu Menu;
+    QAction * showPosition = Menu.addAction("Show position");
+    Menu.addSeparator();
+    QAction * showELDD = Menu.addAction("Show energy linear deposition density");
+    QAction* selectedItem = Menu.exec(ui->trwEventView->mapToGlobal(pos));
     if (!selectedItem) return; //nothing was selected
     if (selectedItem == showELDD)
     {
@@ -2074,6 +2075,12 @@ void OutputWindow::on_trwEventView_customContextMenuRequested(const QPoint &pos)
             MW->GraphWindow->Draw(g, "APL");
             //MW->GraphWindow->UpdateRootCanvas();
         }
+    }
+    else if (selectedItem == showPosition)
+    {
+        double pos[3];
+        for (int i=0; i<3; i++) pos[i] = st->Position[i];
+        MW->GeometryWindow->ShowPoint(pos, true);
     }
 }
 

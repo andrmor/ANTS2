@@ -258,32 +258,32 @@ void AParticleTracker::initTrack()
 bool AParticleTracker::checkMonitors_isKilled()
 {
     const int iMon = navigator->GetCurrentNode()->GetNumber();
+    AMonitor * m = SimStat.Monitors[iMon];
     //qDebug() << "Monitor #:"<< iMon << "Total monitors:"<< SimStat->Monitors.size();
-    if (SimStat.Monitors.at(iMon)->isForParticles() && SimStat.Monitors.at(iMon)->getParticleIndex() == p->Id)
+
+    if (m->isForParticles() && m->getParticleIndex() == p->Id)
     {
-        const bool bPrimary = (p->secondaryOf == -1);
-        if (  ( bPrimary && SimStat.Monitors.at(iMon)->isPrimary() ) ||
-              (!bPrimary && SimStat.Monitors.at(iMon)->isSecondary()) )
+        if (  p->bInteracted &&  !m->isIndirect() ) return false;  // do not accept interacted
+        if ( !p->bInteracted &&  !m->isDirect() )   return false;  // do not accept direct
+
+        double local[3];
+        navigator->MasterToLocal(p->r, local);
+        //qDebug()<<local[0]<<local[1];
+        if ( (local[2] > 0  &&  m->isUpperSensitive()) ||
+             (local[2] < 0  &&  m->isLowerSensitive()) )
         {
-            double local[3];
-            navigator->MasterToLocal(p->r, local);
-            //qDebug()<<local[0]<<local[1];
-            if ( (local[2] > 0  &&  SimStat.Monitors.at(iMon)->isUpperSensitive()) ||
-                 (local[2] < 0  &&  SimStat.Monitors.at(iMon)->isLowerSensitive()) )
+            const double * N = navigator->FindNormal(false);
+            double cosAngle = 0;
+            for (int i=0; i<3; i++) cosAngle += N[i] * p->v[i];  //assuming v never changes!
+            m->fillForParticle(local[0], local[1], p->time, 180.0/3.1415926535*TMath::ACos(cosAngle), p->energy);
+            if (m->isStopsTracking())
             {
-                const double * N = navigator->FindNormal(false);
-                double cosAngle = 0;
-                for (int i=0; i<3; i++) cosAngle += N[i] * p->v[i];  //assuming v never changes!
-                SimStat.Monitors[iMon]->fillForParticle(local[0], local[1], p->time, 180.0/3.1415926535*TMath::ACos(cosAngle), p->energy);
-                if (SimStat.Monitors.at(iMon)->isStopsTracking())
+                if (SimSet->fLogsStat)
                 {
-                    if (SimSet->fLogsStat)
-                    {
-                        ATrackingStepData * step = new ATrackingStepData(p->r, p->time, p->energy, 0, "MonitorStop");
-                        thisParticleRecord->addStep(step);
-                    }
-                    return true; // particle is stopped
+                    ATrackingStepData * step = new ATrackingStepData(p->r, p->time, p->energy, 0, "MonitorStop");
+                    thisParticleRecord->addStep(step);
                 }
+                return true; // particle is stopped
             }
         }
     }
@@ -487,6 +487,7 @@ bool AParticleTracker::trackNeutral_isKilled()
         }
 
         //not yet finished with this particle
+        p->bInteracted = true;
         navigator->FindNextBoundary();
     }
     while (true);

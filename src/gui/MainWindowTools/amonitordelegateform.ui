@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>404</width>
-    <height>398</height>
+    <width>462</width>
+    <height>477</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -631,19 +631,22 @@ changed</string>
           <height>16777215</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Direct = gammas and neutrons having no prior scattering</string>
+        </property>
         <item>
          <property name="text">
-          <string>Primary</string>
+          <string>Direct</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>Secondary</string>
+          <string>Indirect</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>Primary+secondary</string>
+          <string>Direct+Indirect</string>
          </property>
         </item>
        </widget>

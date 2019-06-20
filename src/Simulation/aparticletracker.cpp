@@ -365,26 +365,30 @@ bool AParticleTracker::trackCharged_isKilled()
 
 bool AParticleTracker::trackNeutral_isKilled()
 {
-    const double MaxLength  = navigator->GetStep();
     const double & Density = thisMaterial->density;
     const AParticle::ParticleType ParticleType = MpCollection.getParticleType(p->Id);
     QVector<NeutralTerminatorStructure> & Terminators = thisMatParticle->Terminators; //const?
 
-    //how many processes?
     const int numProcesses = Terminators.size();
-    if (numProcesses != 0)
+    if (numProcesses == 0)
     {
+        qWarning() << "||| No processes are defined for" << MpCollection.getParticleName(p->Id) << "in" << MpCollection.getMaterialName(thisMatId);
+        return false;
+    }
+
+    while (true)  // escape from this cycle is when the particle killed or should be transferred to the next volume
+    {
+        const double MaxLength  = navigator->GetStep();
         double SoFarShortestId = 0;
         double SoFarShortest = 1.0e10;
-        //double TotalCrossSection; //used by neutrons - elastic scattering or absorption  //obsolete? ***!!!
-        for (int iProcess=0; iProcess<numProcesses; iProcess++)
+        for (int iProcess = 0; iProcess < numProcesses; iProcess++)
         {
             //        qDebug()<<"---Process #:"<<iProcess;
-            //calculating (random) how much this particle would travel before this kind of interaction happens
+            //calculating (random) how much this particle need to travel before this type of interaction is triggered
 
             bool bUseNCrystal = false;
             //for neutrons there are additional flags to suppress capture and elastic
-            //and for the case of the NCrystal lib which handles scattering
+            //and for the case of using the NCrystal lib which handles scattering
             if (ParticleType == AParticle::_neutron_)
             {
                 if (Terminators[iProcess].Type == NeutralTerminatorStructure::Absorption)
@@ -442,7 +446,7 @@ bool AParticleTracker::trackNeutral_isKilled()
         }
         //qDebug()<<SoFarShortest<<SoFarShortestId;
 
-        if (SoFarShortest >= MaxLength)
+        if (SoFarShortest > MaxLength)
         {
             //nothing was triggered in this medium
             //qDebug()<<"Passed the volume - no interaction";
@@ -462,25 +466,30 @@ bool AParticleTracker::trackNeutral_isKilled()
             switch ( term.Type)
             {
             case (NeutralTerminatorStructure::Photoelectric):
-                return processPhotoelectric_isKilled();
+                if (processPhotoelectric_isKilled()) return true;
+                break;
             case (NeutralTerminatorStructure::ComptonScattering):
-                return processCompton_isKilled();
+                if (processCompton_isKilled()) return true;
+                break;
             case (NeutralTerminatorStructure::Absorption):
-                return processNeutronAbsorption_isKilled(term);
+                if (processNeutronAbsorption_isKilled(term)) return true;
+                break;
             case (NeutralTerminatorStructure::PairProduction):
-                return processPairProduction_isKilled();
+                if (processPairProduction_isKilled()) return true;
+                break;
             case (NeutralTerminatorStructure::ElasticScattering):
-                return processNeutronElastic_isKilled(term);
+                if (processNeutronElastic_isKilled(term)) return true;
+                break;
             default:
                 qWarning() << "||| Unknown terminator type for"<<MpCollection.getParticleName(p->Id) << "in" << MpCollection.getMaterialName(thisMatId);
+                return false;
             }
         }
+
+        //not yet finished with this particle
+        navigator->FindNextBoundary();
     }
-    else
-    {
-        //no processes - error!
-        qWarning() << "||| No processes are defined for" << MpCollection.getParticleName(p->Id) << "in" << MpCollection.getMaterialName(thisMatId);
-    }
+    while (true);
     return false;
 }
 
@@ -512,32 +521,37 @@ bool AParticleTracker::processCompton_isKilled()
     AEnergyDepositionCell* tc = new AEnergyDepositionCell(p->r, p->time, G0.energy - G1.energy, p->Id, thisMatId, counter, EventId);
     EnergyVector.push_back(tc);
 
-    // ***!!! make the same way as in Geant4 and continue with gamma?
-
+    /*
     //creating gamma and putting it on stack
     AParticleRecord * tmp = new AParticleRecord(p->Id, p->r[0],p->r[1],p->r[2], G1.direction[0], G1.direction[1], G1.direction[2], p->time, G1.energy, counter);
     ParticleStack.append(tmp);
+    */
+
+    for (int i = 0; i < 3; i++) p->v[i] = G1.direction[i];
+    navigator->SetCurrentDirection(p->v);
+    p->energy = G1.energy;
 
     if (SimSet->fLogsStat)
     {
+        /*
         ATrackingStepData * step = new ATrackingStepData(p->r, p->time, 0, G0.energy - G1.energy, "compt");
         thisParticleRecord->addStep(step);
-
         AParticleTrackingRecord * secTR = AParticleTrackingRecord::create( "gamma" );
         tmp->ParticleRecord = secTR;
         thisParticleRecord->addSecondary(secTR);
         step->Secondaries.push_back( thisParticleRecord->countSecondaries()-1 );
+        */
+
+        ATrackingStepData * step = new ATrackingStepData(p->r, p->time, G1.energy, G0.energy - G1.energy, "compt");
+        thisParticleRecord->addStep(step);
     }
 
-    //creating electron
-    //int IdElectron =
-    //double ElectronEnergy = G0.energy - G1.energy;
-    //TVector3 eDirection = G0.energy*G0.direction - G1.energy*G1.direction;
-    //eDirection = eDirection.Unit();
-    //tmp = new ParticleOnStack(IdElectron, r[0],r[1],r[2], eDirection[0], eDirection[1], eDirection[2], time, ElectronEnergy, 1);
-    //ParticleStack->append(tmp);
+    if (bBuildThisTrack) track->Nodes.append(TrackNodeStruct(p->r, p->time));
 
+    /*
     return true;
+    */
+    return false;
 }
 
 bool AParticleTracker::processNeutronAbsorption_isKilled(const NeutralTerminatorStructure & term)
@@ -857,9 +871,10 @@ bool AParticleTracker::processNeutronElastic_isKilled(const NeutralTerminatorStr
         bCoherent = (deltaE == 0);
     }
 
+     /*
     double depE;
     AParticleRecord * tmp = nullptr;
-    if (newEnergy > SimSet->MinEnergyNeutrons * 1.0e-6) // meV -> keV to compare
+    if (newEnergy > SimSet->MinEnergyNeutrons * 1.0e-6) // meV -> keV
     {
         tmp = new AParticleRecord(p->Id, p->r[0],p->r[1], p->r[2], vnew[0]/vnewMod, vnew[1]/vnewMod, vnew[2]/vnewMod, p->time, newEnergy, counter);
         ParticleStack.append(tmp);
@@ -869,11 +884,10 @@ bool AParticleTracker::processNeutronElastic_isKilled(const NeutralTerminatorStr
     {
         qDebug() << "Elastic scattering: Neutron energy" << newEnergy * 1.0e6 <<
                     "is below the lower limit (" << SimSet->MinEnergyNeutrons<<
-                    "meV) - tracking skipped for this neutron";
+                    "meV) - tracking stopped for this neutron";
         depE = p->energy;
     }
 
-    //terminationStatus = EventHistoryStructure::ElasticScattering;
     if (SimSet->fLogsStat)
     {
         ATrackingStepData * step = new ATrackingStepData(p->r, p->time, 0, depE, (bCoherent ? "nElasticCoherent" : "nElastic") );
@@ -888,4 +902,37 @@ bool AParticleTracker::processNeutronElastic_isKilled(const NeutralTerminatorStr
         }
     }
     return true;
+     */
+
+    double depE;
+    bool   bKilled;
+    if (newEnergy > SimSet->MinEnergyNeutrons * 1.0e-6) // meV -> keV
+    {
+        bKilled = false;
+        depE    = p->energy - newEnergy;
+
+        for (int i = 0; i < 3; i++) p->v[i] = vnew[i] / vnewMod;
+        navigator->SetCurrentDirection(p->v);
+        p->energy = newEnergy;
+
+        if (bBuildThisTrack) track->Nodes.append(TrackNodeStruct(p->r, p->time));
+    }
+    else
+    {
+        bKilled   = true;
+        depE      = p->energy;
+        newEnergy = 0;
+
+        qDebug() << "Elastic scattering: Neutron energy" << newEnergy * 1.0e6 <<
+                    "is below the lower limit (" << SimSet->MinEnergyNeutrons<<
+                    "meV) - tracking stopped for this neutron";
+    }
+
+    if (SimSet->fLogsStat)
+    {
+        ATrackingStepData * step = new ATrackingStepData(p->r, p->time, newEnergy, depE, (bCoherent ? "nElasticCoherent" : "nElastic") );
+        thisParticleRecord->addStep(step);
+    }
+
+    return bKilled;
 }

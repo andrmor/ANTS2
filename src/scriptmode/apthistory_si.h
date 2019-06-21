@@ -39,11 +39,15 @@ public slots:
     QVariantList cd_getTrackRecord();
     bool cd_step();
     bool cd_step(int iStep);
+    bool cd_stepToProcess(QString processName);
     int  cd_getCurrentStep();
     void cd_firstStep();
+    bool cd_firstNonTransportationStep();
     void cd_lastStep();
     QVariantList cd_getStepRecord();
+    int  cd_countSteps();
     int  cd_countSecondaries();
+    bool cd_hadPriorInteraction();
     void cd_in(int indexOfSecondary); // TODO - keep Step in a "Stack"
     bool cd_out(); // TODO - keep Step in a "Stack"
 

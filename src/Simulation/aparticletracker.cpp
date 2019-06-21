@@ -321,6 +321,7 @@ bool AParticleTracker::trackCharged_isKilled()
             flagDone = true;
             //should enter the next volume after "do" is over
             bKilled = false;
+            p->bInteracted = true;
         }
 
         //doing the step

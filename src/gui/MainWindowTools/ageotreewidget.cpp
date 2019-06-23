@@ -111,6 +111,14 @@ void AGeoTreeWidget::SelectObjects(QStringList ObjectNames)
 void AGeoTreeWidget::UpdateGui(QString selected)
 {
   if (!World) return;
+
+  //qDebug() << "Update, selected = "<<selected;
+  if (selected.isEmpty() && currentItem())
+  {
+      //qDebug() << currentItem()->text(0);
+      selected = currentItem()->text(0);
+  }
+
   clear();
 
   //World
@@ -135,10 +143,12 @@ void AGeoTreeWidget::UpdateGui(QString selected)
     {
       //qDebug() << "Selection:"<<selected;
       QList<QTreeWidgetItem*> list = findItems(selected, Qt::MatchExactly | Qt::MatchRecursive);
+      //qDebug() << list.size();
         if (!list.isEmpty())
         {
            //qDebug() << "Attempting to focus:"<<list.first()->text(0);
            list.first()->setSelected(true);
+           setCurrentItem(list.first());
         }
   }
 }

@@ -136,13 +136,23 @@ void AMonitorDelegateForm::updateObject(AGeoObject *obj)
     if (ui->cobMonitoring->currentIndex() == 1)
     {
         config.ParticleIndex = ui->cobParticle->currentIndex();
+
         int prsec =  ui->cobPrimarySecondary->currentIndex();
         switch (prsec)
+        {
+        case 0: config.bPrimary = true; config.bSecondary = false; break;
+        case 1: config.bPrimary = false; config.bSecondary = true; break;
+        case 2: config.bPrimary = true; config.bSecondary = true; break;
+        default: qWarning() << "Bad primary/secondary selector";
+        }
+
+        int dirin =  ui->cobDirectIndirect->currentIndex();
+        switch (dirin)
         {
         case 0: config.bDirect = true;  config.bIndirect = false; break;
         case 1: config.bDirect = false; config.bIndirect = true;  break;
         case 2: config.bDirect = true;  config.bIndirect = true;  break;
-        default: qWarning() << "bad primary/secondary selector";
+        default: qWarning() << "Bad direct/indirect selector";
         }
     }
 

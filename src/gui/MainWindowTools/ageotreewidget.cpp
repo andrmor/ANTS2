@@ -2449,8 +2449,9 @@ AMonitorDelegate::AMonitorDelegate(QStringList definedParticles)
     palette.setColor( backgroundRole(), QColor( 255, 255, 255 ) );
     frMainFrame->setPalette( palette );
     frMainFrame->setAutoFillBackground( true );
-    frMainFrame->setMinimumHeight(340);
-    frMainFrame->setMaximumHeight(340);
+    frMainFrame->setMinimumHeight(380);
+    frMainFrame->setMaximumHeight(380);
+    //frMainFrame->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
 
     QVBoxLayout* vl = new QVBoxLayout();
     vl->setContentsMargins(0,0,0,0);
@@ -2486,4 +2487,5 @@ void AMonitorDelegate::Update(const AGeoObject *obj)
 void AMonitorDelegate::onContentChanged()
 {
     emit ContentChanged();
+    Widget->layout()->activate();
 }

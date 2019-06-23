@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>714</width>
-    <height>457</height>
+    <width>740</width>
+    <height>460</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -61,8 +61,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>286</width>
-               <height>384</height>
+               <width>315</width>
+               <height>379</height>
               </rect>
              </property>
             </widget>
@@ -127,13 +127,13 @@
            <widget class="QFrame" name="frObjectEditor">
             <property name="minimumSize">
              <size>
-              <width>400</width>
+              <width>450</width>
               <height>344</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>400</width>
+              <width>450</width>
               <height>17700</height>
              </size>
             </property>

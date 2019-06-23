@@ -526,9 +526,9 @@ void OutputWindow::updateMonitors()
                     numDet = EventsDataHub->SimStat->Monitors.at(imon)->getXY()->GetEntries();
             ui->leDetections->setText( QString::number(numDet) );
 
-            bool bPhotonMode = mon->config.PhotonOrParticle == 0;
+            bool bPhotonMode = (mon->config.PhotonOrParticle == 0);
             ui->pbMonitorShowWave->setVisible(bPhotonMode);
-            ui->pbMonitorShowTime->setVisible(bPhotonMode);
+            ui->pbShowWavelength->setVisible(bPhotonMode);
             ui->pbMonitorShowEnergy->setVisible(!bPhotonMode);
         }
         else
@@ -1248,7 +1248,7 @@ void OutputWindow::on_pbMonitorShowTime_clicked()
 
     MW->GraphWindow->ShowAndFocus();
     TH1D* h = new TH1D(*EventsDataHub->SimStat->Monitors[imon]->getTime());
-    MW->GraphWindow->Draw(h, "", true, true);
+    MW->GraphWindow->Draw(h, "hist", true, true);
 }
 
 void OutputWindow::on_pbMonitorShowAngle_clicked()
@@ -1258,7 +1258,7 @@ void OutputWindow::on_pbMonitorShowAngle_clicked()
 
     MW->GraphWindow->ShowAndFocus();
     TH1D* h = new TH1D(*EventsDataHub->SimStat->Monitors[imon]->getAngle());
-    MW->GraphWindow->Draw(h, "", true, true);
+    MW->GraphWindow->Draw(h, "hist", true, true);
 }
 
 void OutputWindow::on_pbMonitorShowWave_clicked()
@@ -1324,7 +1324,7 @@ void OutputWindow::on_pbMonitorShowEnergy_clicked()
 
     MW->GraphWindow->ShowAndFocus();
     TH1D* h = new TH1D(*EventsDataHub->SimStat->Monitors[imon]->getEnergy());
-    MW->GraphWindow->Draw(h, "", true, true);
+    MW->GraphWindow->Draw(h, "hist", true, true);
 }
 
 void OutputWindow::on_pbShowProperties_clicked()

@@ -64,10 +64,16 @@ bool AMonitorDelegateForm::updateGUI(const AGeoObject *obj)
     if (config.PhotonOrParticle == 1)
     {
         ui->cobParticle->setCurrentIndex(config.ParticleIndex);
+
         int prsec = 0;
-             if (config.bIndirect && !config.bDirect) prsec = 1;
-        else if (config.bIndirect &&  config.bDirect) prsec = 2;
+        if (config.bSecondary && !config.bPrimary) prsec = 1;
+        else if (config.bSecondary && config.bPrimary) prsec = 2;
         ui->cobPrimarySecondary->setCurrentIndex(prsec);
+
+        int dirin = 0;
+             if (config.bIndirect && !config.bDirect) dirin = 1;
+        else if (config.bIndirect &&  config.bDirect) dirin = 2;
+        ui->cobDirectIndirect->setCurrentIndex(dirin);
     }
 
     ui->sbXbins->setValue(config.xbins);

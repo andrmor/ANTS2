@@ -20,14 +20,16 @@ public:
   void fillForParticle(double x, double y, double Time, double Angle, double Energy);
   void fillForPhoton(double x, double y, double Time, double Angle, int waveIndex);
 
-  inline bool isForPhotons() const     {return config.PhotonOrParticle == 0;}
-  inline bool isForParticles() const   {return config.PhotonOrParticle != 0;}
-  inline bool isUpperSensitive() const {return config.bUpper;}
-  inline bool isLowerSensitive() const {return config.bLower;}
-  inline bool isStopsTracking() const  {return config.bStopTracking;}
-  inline int  getParticleIndex() const {return config.ParticleIndex;}
-  inline bool isDirect() const         {return config.bDirect;}
-  inline bool isIndirect() const       {return config.bIndirect;}
+  inline bool isForPhotons() const         {return config.PhotonOrParticle == 0;}
+  inline bool isForParticles() const       {return config.PhotonOrParticle != 0;}
+  inline bool isUpperSensitive() const     {return config.bUpper;}
+  inline bool isLowerSensitive() const     {return config.bLower;}
+  inline bool isStopsTracking() const      {return config.bStopTracking;}
+  inline int  getParticleIndex() const     {return config.ParticleIndex;}
+  inline bool isAcceptingPrimary() const   {return config.bPrimary;}
+  inline bool isAcceptingSecondary() const {return config.bSecondary;}
+  inline bool isAcceptingDirect() const    {return config.bDirect;}
+  inline bool isAcceptingIndirect() const  {return config.bIndirect;}
 
 //configuration
   bool readFromGeoObject(const AGeoObject* MonitorRecord);

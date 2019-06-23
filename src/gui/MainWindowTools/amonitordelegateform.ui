@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>462</width>
-    <height>477</height>
+    <width>534</width>
+    <height>533</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -614,7 +614,7 @@ changed</string>
       <item>
        <widget class="QComboBox" name="cobPrimarySecondary">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -625,14 +625,36 @@ changed</string>
           <height>22</height>
          </size>
         </property>
-        <property name="maximumSize">
+        <property name="toolTip">
+         <string/>
+        </property>
+        <item>
+         <property name="text">
+          <string>Primary</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Secondary</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Prim+Sec</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="cobDirectIndirect">
+        <property name="minimumSize">
          <size>
-          <width>150</width>
-          <height>16777215</height>
+          <width>0</width>
+          <height>22</height>
          </size>
         </property>
         <property name="toolTip">
-         <string>Direct = gammas and neutrons having no prior scattering</string>
+         <string>Direct = particles which have no prior scattering (neutral) or energy deposition (charged)</string>
         </property>
         <item>
          <property name="text">
@@ -646,7 +668,7 @@ changed</string>
         </item>
         <item>
          <property name="text">
-          <string>Direct+Indirect</string>
+          <string>Dir+Indir</string>
          </property>
         </item>
        </widget>
@@ -889,7 +911,7 @@ changed</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>50</width>
+             <width>60</width>
              <height>0</height>
             </size>
            </property>
@@ -975,7 +997,7 @@ changed</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>50</width>
+             <width>60</width>
              <height>0</height>
             </size>
            </property>
@@ -1064,7 +1086,7 @@ changed</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>50</width>
+             <width>60</width>
              <height>0</height>
             </size>
            </property>
@@ -1153,7 +1175,7 @@ changed</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>50</width>
+             <width>60</width>
              <height>0</height>
             </size>
            </property>

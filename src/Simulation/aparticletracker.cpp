@@ -263,8 +263,12 @@ bool AParticleTracker::checkMonitors_isKilled()
 
     if (m->isForParticles() && m->getParticleIndex() == p->Id)
     {
-        if (  p->bInteracted &&  !m->isIndirect() ) return false;  // do not accept interacted
-        if ( !p->bInteracted &&  !m->isDirect() )   return false;  // do not accept direct
+        if (  p->bInteracted && !m->isAcceptingIndirect() ) return false;  // do not accept interacted
+        if ( !p->bInteracted && !m->isAcceptingDirect() )   return false;  // do not accept direct
+
+        const bool bPrimary = (p->secondaryOf == -1);
+        if (  bPrimary && !m->isAcceptingPrimary()   ) return false;
+        if ( !bPrimary && !m->isAcceptingSecondary() ) return false;
 
         double local[3];
         navigator->MasterToLocal(p->r, local);

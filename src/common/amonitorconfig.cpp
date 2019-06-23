@@ -16,8 +16,10 @@ void AMonitorConfig::writeToJson(QJsonObject &json)
    json["bStopTracking"] = bStopTracking;
 
    json["ParticleIndex"] = ParticleIndex;
-   json["bDirect"] = bDirect;
-   json["bIndirect"] = bIndirect;
+   json["bPrimary"]   = bPrimary;
+   json["bSecondary"] = bSecondary;
+   json["bDirect"]    = bDirect;
+   json["bIndirect"]  = bIndirect;
 
    json["xbins"] = xbins;
    json["ybins"] = ybins;
@@ -53,9 +55,9 @@ void AMonitorConfig::readFromJson(QJsonObject &json)
     parseJson(json, "bStopTracking", bStopTracking);
 
     parseJson(json, "ParticleIndex", ParticleIndex);
-    parseJson(json, "bPrimary", bDirect); // compatibility
-    parseJson(json, "bDirect",  bDirect);
-    parseJson(json, "bSecondary", bIndirect);
+    parseJson(json, "bPrimary",   bPrimary);
+    parseJson(json, "bSecondary", bSecondary);
+    parseJson(json, "bDirect",    bDirect);
     parseJson(json, "bIndirect",  bIndirect);
 
     parseJson(json, "xbins", xbins);

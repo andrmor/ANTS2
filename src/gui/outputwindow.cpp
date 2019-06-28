@@ -2058,7 +2058,8 @@ void OutputWindow::on_trwEventView_customContextMenuRequested(const QPoint &pos)
     if (!pr) return;
 
     QMenu Menu;
-    QAction * showPosition = Menu.addAction("Show position");
+    QAction * showPosition;
+    if (st) showPosition = Menu.addAction("Show position");
     Menu.addSeparator();
     QAction * showELDD = Menu.addAction("Show energy linear deposition density");
     QAction* selectedItem = Menu.exec(ui->trwEventView->mapToGlobal(pos));

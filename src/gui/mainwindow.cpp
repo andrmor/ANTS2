@@ -4896,3 +4896,8 @@ void MainWindow::on_pbConvertToIon_clicked()
     onRequestDetectorGuiUpdate();
     ui->lwParticles->setCurrentRow(iPart);
 }
+
+void MainWindow::on_actionExit_triggered()
+{
+    close();
+}

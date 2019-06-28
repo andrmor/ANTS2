@@ -12624,6 +12624,8 @@ multiply to loaded data</string>
     <addaction name="actionQuick_load_3"/>
     <addaction name="separator"/>
     <addaction name="actionLoad_last_config"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuWindows">
     <property name="title">
@@ -12895,6 +12897,11 @@ multiply to loaded data</string>
   <action name="actionGrid">
    <property name="text">
     <string>Grid</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
    </property>
   </action>
  </widget>

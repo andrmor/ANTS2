@@ -64,10 +64,16 @@ bool AMonitorDelegateForm::updateGUI(const AGeoObject *obj)
     if (config.PhotonOrParticle == 1)
     {
         ui->cobParticle->setCurrentIndex(config.ParticleIndex);
+
         int prsec = 0;
         if (config.bSecondary && !config.bPrimary) prsec = 1;
         else if (config.bSecondary && config.bPrimary) prsec = 2;
         ui->cobPrimarySecondary->setCurrentIndex(prsec);
+
+        int dirin = 0;
+             if (config.bIndirect && !config.bDirect) dirin = 1;
+        else if (config.bIndirect &&  config.bDirect) dirin = 2;
+        ui->cobDirectIndirect->setCurrentIndex(dirin);
     }
 
     ui->sbXbins->setValue(config.xbins);
@@ -130,13 +136,23 @@ void AMonitorDelegateForm::updateObject(AGeoObject *obj)
     if (ui->cobMonitoring->currentIndex() == 1)
     {
         config.ParticleIndex = ui->cobParticle->currentIndex();
+
         int prsec =  ui->cobPrimarySecondary->currentIndex();
         switch (prsec)
         {
         case 0: config.bPrimary = true; config.bSecondary = false; break;
         case 1: config.bPrimary = false; config.bSecondary = true; break;
         case 2: config.bPrimary = true; config.bSecondary = true; break;
-        default: qWarning() << "bad primary/secondary selector";
+        default: qWarning() << "Bad primary/secondary selector";
+        }
+
+        int dirin =  ui->cobDirectIndirect->currentIndex();
+        switch (dirin)
+        {
+        case 0: config.bDirect = true;  config.bIndirect = false; break;
+        case 1: config.bDirect = false; config.bIndirect = true;  break;
+        case 2: config.bDirect = true;  config.bIndirect = true;  break;
+        default: qWarning() << "Bad direct/indirect selector";
         }
     }
 

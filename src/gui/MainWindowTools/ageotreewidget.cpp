@@ -111,6 +111,14 @@ void AGeoTreeWidget::SelectObjects(QStringList ObjectNames)
 void AGeoTreeWidget::UpdateGui(QString selected)
 {
   if (!World) return;
+
+  //qDebug() << "Update, selected = "<<selected;
+  if (selected.isEmpty() && currentItem())
+  {
+      //qDebug() << currentItem()->text(0);
+      selected = currentItem()->text(0);
+  }
+
   clear();
 
   //World
@@ -135,10 +143,12 @@ void AGeoTreeWidget::UpdateGui(QString selected)
     {
       //qDebug() << "Selection:"<<selected;
       QList<QTreeWidgetItem*> list = findItems(selected, Qt::MatchExactly | Qt::MatchRecursive);
+      //qDebug() << list.size();
         if (!list.isEmpty())
         {
            //qDebug() << "Attempting to focus:"<<list.first()->text(0);
            list.first()->setSelected(true);
+           setCurrentItem(list.first());
         }
   }
 }
@@ -2449,8 +2459,9 @@ AMonitorDelegate::AMonitorDelegate(QStringList definedParticles)
     palette.setColor( backgroundRole(), QColor( 255, 255, 255 ) );
     frMainFrame->setPalette( palette );
     frMainFrame->setAutoFillBackground( true );
-    frMainFrame->setMinimumHeight(340);
-    frMainFrame->setMaximumHeight(340);
+    frMainFrame->setMinimumHeight(380);
+    frMainFrame->setMaximumHeight(380);
+    //frMainFrame->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
 
     QVBoxLayout* vl = new QVBoxLayout();
     vl->setContentsMargins(0,0,0,0);
@@ -2486,4 +2497,5 @@ void AMonitorDelegate::Update(const AGeoObject *obj)
 void AMonitorDelegate::onContentChanged()
 {
     emit ContentChanged();
+    Widget->layout()->activate();
 }

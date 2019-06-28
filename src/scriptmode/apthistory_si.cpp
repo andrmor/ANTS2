@@ -90,7 +90,7 @@ QVariantList APTHistory_SI::cd_getTrackRecord()
            << (int)Rec->getSecondaries().size()
            << (int)Rec->getSteps().size();
     }
-    else abort("record not set: use cd_set command");
+    else abort("Record not set: use cd_set command");
 
     return vl;
 }
@@ -107,7 +107,7 @@ bool APTHistory_SI::cd_step()
         else return false;
     }
 
-    abort("record not set: use cd_set command");
+    abort("Record not set: use cd_set command");
     return false;
 }
 
@@ -124,7 +124,22 @@ bool APTHistory_SI::cd_step(int iStep)
         }
     }
     else
-        abort("record not set: use cd_set command");
+        abort("Record not set: use cd_set command");
+
+    return false;
+}
+
+bool APTHistory_SI::cd_stepToProcess(QString processName)
+{
+    if (Rec)
+    {
+        while ( Step < (int)Rec->getSteps().size() - 1)
+        {
+            Step++;
+            if (Rec->getSteps().at(Step)->Process == processName) return true;
+        }
+    }
+    else abort("Record not set: use cd_set command");
 
     return false;
 }
@@ -133,7 +148,7 @@ int APTHistory_SI::cd_getCurrentStep()
 {
     if (Rec) return Step;
 
-    abort("record not set: use cd_set command");
+    abort("Record not set: use cd_set command");
     return 0;
 }
 
@@ -148,7 +163,30 @@ void APTHistory_SI::cd_firstStep()
         }
         Step = 0;
     }
-    else abort("record not set: use cd_set command");
+    else abort("Record not set: use cd_set command");
+}
+
+bool APTHistory_SI::cd_firstNonTransportationStep()
+{
+    if (Rec)
+    {
+        if (Rec->getSteps().empty())
+        {
+            abort("Error: container with steps is empty!");
+            return false;
+        }
+        Step = 0;
+
+        const int last = (int)Rec->getSteps().size() - 1;
+        while (Step < last)
+        {
+            Step++;
+            if (Step == last) return false;
+            if (Rec->getSteps().at(Step)->Process != "T") return true;
+        }
+    }
+    else abort("Record not set: use cd_set command");
+    return false;
 }
 
 void APTHistory_SI::cd_lastStep()
@@ -162,7 +200,7 @@ void APTHistory_SI::cd_lastStep()
         }
         Step = (int)Rec->getSteps().size() - 1;
     }
-    else abort("record not set: use cd_set command");
+    else abort("Record not set: use cd_set command");
 }
 
 QVariantList APTHistory_SI::cd_getStepRecord()
@@ -203,9 +241,16 @@ QVariantList APTHistory_SI::cd_getStepRecord()
         }
         else abort("Error: bad current step!");
     }
-    else abort("record not set: use cd_set command");
+    else abort("Record not set: use cd_set command");
 
     return vl;
+}
+
+int APTHistory_SI::cd_countSteps()
+{
+    if (Rec) return Rec->getSteps().size();
+    else     abort("Record not set: use cd_set command");
+    return 0;
 }
 
 int APTHistory_SI::cd_countSecondaries()
@@ -216,9 +261,24 @@ int APTHistory_SI::cd_countSecondaries()
     }
     else
     {
-        abort("record not set: use cd_set command");
+        abort("Record not set: use cd_set command");
         return 0;
     }
+}
+
+bool APTHistory_SI::cd_hadPriorInteraction()
+{
+    if (Rec)
+    {
+        while ( Step > 2 && Step < (int)Rec->getSteps().size() ) // note Step-- below: no need to test Step=0 and the last step
+        {
+            Step--;
+            const QString & Proc = Rec->getSteps().at(Step)->Process;
+            if (Proc != "T") return true;
+        }
+    }
+    else abort("Record not set: use cd_set command");
+    return false;
 }
 
 void APTHistory_SI::cd_in(int indexOfSecondary)
@@ -232,7 +292,7 @@ void APTHistory_SI::cd_in(int indexOfSecondary)
         }
         else abort("bad index of secondary");
     }
-    else abort("record not set: use cd_set command");
+    else abort("Record not set: use cd_set command");
 }
 
 bool APTHistory_SI::cd_out()
@@ -244,7 +304,7 @@ bool APTHistory_SI::cd_out()
         Step = 0;
         return true;
     }
-    abort("record not set: use cd_set command");
+    abort("Record not set: use cd_set command");
     return false;
 }
 

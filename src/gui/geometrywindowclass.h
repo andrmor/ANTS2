@@ -67,6 +67,7 @@ protected:
 public slots:
     void on_pbShowGeometry_clicked();
     void DrawTracks();
+    void ShowPoint(double * r, bool keepTracks = false);
     void ShowPMnumbers();
     void ShowMonitorIndexes();
     void ShowText(const QVector<QString> & strData, Color_t color, bool onPMs = true, bool bFullCycle = true); //false - on monitors

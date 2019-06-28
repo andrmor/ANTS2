@@ -27,6 +27,7 @@ public:
 
     // runtime properties
     AParticleTrackingRecord * ParticleRecord = nullptr; // used only of log is on!  it is != nullptr if secondary
+    bool bInteracted = false;
 };
 
 #endif // APARTICLERECORD_H

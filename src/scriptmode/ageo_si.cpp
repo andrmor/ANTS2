@@ -265,7 +265,7 @@ void AGeo_SI::Monitor_ConfigureForPhotons(QString MonitorName, QVariant Position
     }
 }
 
-void AGeo_SI::Monitor_ConfigureForParticles(QString MonitorName, int ParticleIndex, bool SensitivePrimary, bool SensitiveSecondary,
+void AGeo_SI::Monitor_ConfigureForParticles(QString MonitorName, int ParticleIndex, bool SensitiveDirect, bool SensitiveIndirect,
                                                             QVariant Position, QVariant Time, QVariant Angle, QVariant Energy)
 {
     AGeoObject* o = 0;
@@ -293,8 +293,8 @@ void AGeo_SI::Monitor_ConfigureForParticles(QString MonitorName, int ParticleInd
 
     mc.PhotonOrParticle = 1;
     mc.ParticleIndex = ParticleIndex;
-    mc.bPrimary = SensitivePrimary;
-    mc.bSecondary = SensitiveSecondary;
+    mc.bDirect = SensitiveDirect;
+    mc.bIndirect = SensitiveIndirect;
 
     QVariantList pos = Position.toList();
     if (!pos.isEmpty())

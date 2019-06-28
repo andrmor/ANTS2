@@ -282,10 +282,71 @@ double AEvents_SI::GetReconstructedZ(int ievent)
   return EventsDataHub->ReconstructionData.at(0).at(ievent)->Points[0].r[2];
 }
 
+QVariantList AEvents_SI::GetReconstructedXYZ(int ievent)
+{
+    QVariantList vl;
+    if (checkEventNumber(ievent))
+        for (int i=0; i<3; i++)
+            vl.append(EventsDataHub->ReconstructionData.at(0).at(ievent)->Points[0].r[i]);
+
+    return vl;
+}
+
+QVariantList AEvents_SI::GetReconstructedXYZE(int ievent)
+{
+    QVariantList vl;
+    if (checkEventNumber(ievent))
+    {
+        for (int i=0; i<3; i++)
+            vl.append(EventsDataHub->ReconstructionData.at(0).at(ievent)->Points[0].r[i]);
+        vl.append(EventsDataHub->ReconstructionData.at(0).at(ievent)->Points[0].energy);
+    }
+
+    return vl;
+}
+
 double AEvents_SI::GetReconstructedZ(int igroup, int ievent, int ipoint)
 {
   if (!checkEventNumber(igroup, ievent, ipoint)) return 0; //anyway aborted
   return EventsDataHub->ReconstructionData.at(igroup).at(ievent)->Points[ipoint].r[2];
+}
+
+QVariantList AEvents_SI::GetReconstructedPoints(int ievent)
+{
+    QVariantList list;
+
+    if (!checkEventNumber(0, ievent, 0)) return list;
+
+    const APositionEnergyBuffer& p = EventsDataHub->ReconstructionData.at(0).at(ievent)->Points;
+    for (int i=0; i<p.size(); i++)
+    {
+        QVariantList el;
+        el << p.at(i).r[0];
+        el << p.at(i).r[1];
+        el << p.at(i).r[2];
+        el << p.at(i).energy;
+        list.push_back(el);
+    }
+    return list;
+}
+
+QVariantList AEvents_SI::GetReconstructedPoints(int igroup, int ievent)
+{
+    QVariantList list;
+
+    if (!checkEventNumber(igroup, ievent, 0)) return list;
+
+    const APositionEnergyBuffer& p = EventsDataHub->ReconstructionData.at(igroup).at(ievent)->Points;
+    for (int i=0; i<p.size(); i++)
+    {
+        QVariantList el;
+        el << p.at(i).r[0];
+        el << p.at(i).r[1];
+        el << p.at(i).r[2];
+        el << p.at(i).energy;
+        list.push_back(el);
+    }
+    return list;
 }
 
 double AEvents_SI::GetRho(int ievent, int iPM)

@@ -37,6 +37,8 @@ public slots:
   double GetReconstructedX(int ievent);
   double GetReconstructedY(int ievent);
   double GetReconstructedZ(int ievent);
+  QVariantList GetReconstructedXYZ(int ievent);
+  QVariantList GetReconstructedXYZE(int ievent);
   double GetRho(int ievent, int iPM);
   double GetRho2(int ievent, int iPM);
   double GetReconstructedEnergy(int ievent);
@@ -45,6 +47,8 @@ public slots:
   double GetReconstructedX(int igroup, int ievent, int ipoint);
   double GetReconstructedY(int igroup, int ievent, int ipoint);
   double GetReconstructedZ(int igroup, int ievent, int ipoint);
+  QVariantList GetReconstructedPoints(int ievent);
+  QVariantList GetReconstructedPoints(int igroup, int ievent);
   double GetRho(int igroup, int ievent, int ipoint, int iPM);
   double GetRho2(int igroup, int ievent, int ipoint, int iPM);
   double GetReconstructedEnergy(int igroup, int ievent, int ipoint);

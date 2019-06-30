@@ -650,19 +650,22 @@ void GeometryWindowClass::on_pbTest_clicked()
         //  "JSROOT.cleanup();"
 
           //"JSROOT.redraw(\"onlineGUI_drawing\", res, \"transp50,tracks\");"
-          "JSROOT.redraw(\"onlineGUI_drawing\", res, \"transp50,tracks\");"
+          //"JSROOT.redraw(\"onlineGUI_drawing\", res, \"transp50,tracks\");"
+          "JSROOT.draw(\"onlineGUI_drawing\", res, \"transp50,tracks\");"
     "}).send();");
 */
 
-                "var xhr = JSROOT.NewHttpRequest('http://localhost:8080/multi.json?number=1', 'multi', function(res)"
+
+                "var xhr = JSROOT.NewHttpRequest('http://localhost:8080/multi.json?number=2', 'multi', function(res)"
                                                         "{"
                                                             "if (!res) return;"
                                                             "JSROOT.draw('onlineGUI_drawing', res[0], 'transp50');"
                                                         "}"
                                                 ");"
-                 //"xhr.send(\"Objects/GeoWorld/WorldBox_1/root.json\n/Objects/GeoTracks/TObjArray/root.json\n\");"
-                "xhr.send('Objects/GeoWorld/WorldBox_1/root.json\n');"
+                "xhr.send('Objects/GeoWorld/WorldBox_1/root.json\nObjects/GeoTracks/TObjArray/root.json\n');"
+                //"xhr.send('/Objects/GeoWorld/WorldBox_1/root.json\n');"
                 );
+
 }
 
 #include "aeventtrackingrecord.h"
@@ -1078,8 +1081,8 @@ void GeometryWindowClass::on_cobViewer_currentIndexChanged(int index)
     else
     {
         ui->swViewers->setCurrentIndex(1);
-        //WebView->load(QUrl("http://localhost:8080/?nobrowser&item=[Objects/GeoWorld/WorldBox_1,Objects/GeoTracks/TObjArray]&opt=nohighlight;dray;all;tracks;transp50"));
-        WebView->load(QUrl("http://localhost:8080/?item=[Objects/GeoWorld/WorldBox_1,Objects/GeoTracks/TObjArray]&opt=nohighlight;dray;all;tracks;transp50"));
+        WebView->load(QUrl("http://localhost:8080/?nobrowser&item=[Objects/GeoWorld/WorldBox_1,Objects/GeoTracks/TObjArray]&opt=nohighlight;dray;all;tracks;transp50"));
+        //WebView->load(QUrl("http://localhost:8080/?item=[Objects/GeoWorld/WorldBox_1,Objects/GeoTracks/TObjArray]&opt=nohighlight;dray;all;tracks;transp50"));
         WebView->show();
     }
 

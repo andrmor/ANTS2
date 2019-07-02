@@ -70,7 +70,7 @@ public slots:
   void           Scale(const QString& HistName, double ScaleIntegralTo, bool DividedByBinWidth = false);
 
   void           Save(const QString& HistName, const QString &fileName);
-  void           Load(const QString& HistName, const QString &fileName);
+  void           Load(const QString& HistName, const QString &fileName, const QString histNameInFile = "");
 
   bool           Delete(const QString& HistName);
   void           DeleteAllHist();

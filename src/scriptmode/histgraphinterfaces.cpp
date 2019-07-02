@@ -560,7 +560,7 @@ void AInterfaceToHist::Save(const QString &HistName, const QString& fileName)
     else    r->Save(fileName);
 }
 
-void AInterfaceToHist::Load(const QString &HistName, const QString &fileName)
+void AInterfaceToHist::Load(const QString &HistName, const QString &fileName, const QString histNameInFile)
 {
     if (!bGuiThread)
     {
@@ -586,12 +586,16 @@ void AInterfaceToHist::Load(const QString &HistName, const QString &fileName)
     qDebug() << "File contains" << numKeys << "TKeys";
 
     ARootHistRecord * rec = nullptr;
+    bool bFound = false;
     for (int i=0; i<numKeys; i++)
     {
         TKey *key = (TKey*)f->GetListOfKeys()->At(i);
         QString Type = key->GetClassName();
         QString Name = key->GetName();
         qDebug() << i << Type << Name;
+
+        if (!histNameInFile.isEmpty() && Name != histNameInFile) continue;
+        bFound = true;
 
         if (Type == "TH1D")
         {
@@ -606,7 +610,13 @@ void AInterfaceToHist::Load(const QString &HistName, const QString &fileName)
     f->Close();
     delete f;
 
-    if (!rec) abort("Not found histograms with supported types in the file.\nCurrently supported: TH1D");
+    if (!rec)
+    {
+        if (!histNameInFile.isEmpty() && !bFound)
+            abort("Histogram with name " + histNameInFile + " not found in file " + fileName);
+        else
+            abort("Error loading histogram.\nNote that currently supported histogram type is only TH1D");
+    }
     else
     {
         bool bOK = TmpHub->Hists.append(HistName, rec, false);

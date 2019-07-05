@@ -366,7 +366,6 @@ public:
     void SaveSimulationDataTree();
     void SaveSimulationDataAsText();
     void setFloodZposition(double Z);
-    void CalculateIndividualQEPDE(); //Public for use in scripting
     void ShowSource(const AParticleSourceRecord *p, bool clear = true);
     void TestParticleGun(AParticleGun *ParticleSources, int numParticles);
 
@@ -406,7 +405,6 @@ private:
 
     void clearPreprocessingData();
     void updateCOBsWithPMtypeNames();
-    void ViewChangeRelFactors(QString options);    
 
 private slots:
     void timerTimeout(); //timer-based update of Root events
@@ -422,9 +420,6 @@ private slots:
     void on_pbLoadPMcenters_clicked();
     void on_pbSavePMcenters_clicked();
     void on_pbSetPMtype_clicked();    
-    void on_pbViewChangeRelQEfactors_clicked();
-    void on_pbLoadRelQEfactors_clicked();
-    void on_pbViewChangeRelELfactors_clicked();
     void on_pbLoadRelELfactors_clicked();
     void on_pbRandomScaleELaverages_clicked();
     void on_pbSetELaveragesToUnity_clicked();
@@ -566,8 +561,6 @@ private slots:
 
     void on_pteParticleGenerationScript_customContextMenuRequested(const QPoint &pos);
 
-    void on_pbClearRelQEfactors_clicked();
-
     void on_pbRelQERandomScaleELaverages_clicked();
 
     void on_pbRelQESetELaveragesToUnity_clicked();
@@ -599,6 +592,8 @@ private slots:
     void on_pbConvertToIon_clicked();
 
     void on_actionExit_triggered();
+
+    void on_pbShowPDEfactors_clicked();
 
 public slots:
     void on_pbRebuildDetector_clicked();

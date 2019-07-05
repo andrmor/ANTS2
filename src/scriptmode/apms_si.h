@@ -36,6 +36,11 @@ public slots:
   bool     AddPM(int UpperLower, int type, double X, double Y, double Z, double phi, double theta, double psi);
   void     SetAllArraysFullyCustom();
 
+  void     SetPDE_factor(int ipm, double value);
+  void     SetPDE_factors(QVariantList ArrayWithFactors);
+
+  double   GetPDE(int ipm, int WaveIndex = -1, double Angle = 0, double Xlocal = 0, double Ylocal = 0);
+
 private:
   AConfiguration* Config;
   APmHub* PMs;

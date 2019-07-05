@@ -1684,18 +1684,21 @@ void MainWindow::on_pbIndPMshowInfo_clicked()
     QString str;
     APmType* type = PMs->getType(p->type);
     if (eDE == -1)
-      {
+    {
         str.setNum(type->EffectivePDE);
         ui->labIndDEStatus->setText("Inherited:");
-        //ui->pbIndRestoreEffectiveDE->setEnabled(false);
-      }
+    }
     else
-      {
+    {
         str.setNum(eDE, 'g', 4);
         ui->labIndDEStatus->setText("<b>Override:</b>");
-        //ui->pbIndRestoreEffectiveDE->setEnabled(true);
-      }
+    }
     ui->ledIndEffectiveDE->setText(str);
+    ui->lePDEfactorInExplorer->setText( QString::number(PMs->at(ipm).relQE_PDE, 'g', 4) );
+    ui->leActualPDE_Scalar->setText( QString::number(PMs->getActualPDE(ipm, -1), 'g', 4) );
+
+    ui->frPDEscaled->setEnabled(!PMs->isAllPDEfactorsUnity());
+
     //wave-resolved DE
     if (PMs->isPDEwaveOverriden(ipm))
       {
@@ -1977,19 +1980,39 @@ void MainWindow::on_pbIndRestoreEffectiveDE_clicked()
 
 void MainWindow::on_pbIndShowDE_clicked()
 {  
-  int ipm = ui->sbIndPMnumber->value();
-  int typ = ui->cobPMtypeInExplorers->currentIndex();
+    const int ipm = ui->sbIndPMnumber->value();
 
-  const TString tit = ( PMs->isSiPM(ipm) ? "Photon detection efficiency" : "Quantum efficiency" );
-  if (PMs->isPDEwaveOverriden(ipm))
-      GraphWindow->MakeGraph(&PMs->at(ipm).PDE_lambda, &PMs->at(ipm).PDE, kRed, "Wavelength, nm", tit);
-  else
-      GraphWindow->MakeGraph(&PMs->getType(typ)->PDE_lambda, &PMs->getType(typ)->PDE, kRed, "Wavelength, nm", tit);
+    const TString tit = ( PMs->isSiPM(ipm) ? "Photon detection efficiency" : "Quantum efficiency" );
+    const APm & pm = PMs->at(ipm);
+
+    QVector<double> x, y;
+    if (PMs->isPDEwaveOverriden(ipm))
+    {
+        x = pm.PDE_lambda;
+        y = pm.PDE;
+    }
+    else
+    {
+        const APmType * typ = PMs->getTypeForPM(ipm);
+        x = typ->PDE_lambda;
+        y = typ->PDE;
+    }
+
+    for (int i=0; i<y.size(); i++)
+        y[i] *= pm.relQE_PDE;
+
+    TGraph * g = GraphWindow->ConstructTGraph(x, y,
+                                              TString("PM #")+ipm, "Wavelength, nm", tit,
+                                              kRed, 20, 1, kRed);
+    GraphWindow->ShowAndFocus();
+    GraphWindow->Draw(g, "APL");
 }
 
 void MainWindow::on_pbIndRestoreDE_clicked()
 {
     const int ipm = ui->sbIndPMnumber->value();
+
+    PMs->at(ipm).effectivePDE = -1.0;
 
     PMs->at(ipm).PDE.clear();
     PMs->at(ipm).PDE_lambda.clear();
@@ -2030,22 +2053,34 @@ void MainWindow::on_pbIndLoadDE_clicked()
 
 void MainWindow::on_pbIndShowDEbinned_clicked()
 {
-  if (!ui->cbWaveResolved->isChecked())
-    {      
-      message("First activate wavelength resolved simulation option", this);
-      return;
+    if (!ui->cbWaveResolved->isChecked())
+    {
+        message("Activate wavelength resolved simulation option", this);
+        return;
     }
 
-  int ipm = ui->sbIndPMnumber->value();
-  int typ = ui->cobPMtypeInExplorers->currentIndex();
+    const int ipm = ui->sbIndPMnumber->value();
 
-  QVector<double> x;
-  for (int i=0; i<WaveNodes; i++) x.append(WaveFrom + WaveStep*i);
+    const TString tit = ( PMs->isSiPM(ipm) ? "Photon detection efficiency" : "Quantum efficiency" );
+    const APm & pm = PMs->at(ipm);
 
-  if (PMs->at(ipm).PDEbinned.size() > 0)
-    GraphWindow->MakeGraph(&x, &PMs->at(ipm).PDEbinned, kRed, "Wavelength, nm", "PDE");
-  else
-    GraphWindow->MakeGraph(&x, &PMs->getType(typ)->PDEbinned, kRed, "Wavelength, nm", "PDE");
+    QVector<double> x, y;
+    for (int i=0; i<WaveNodes; i++)
+        x.append(WaveFrom + WaveStep*i);
+
+    if (PMs->at(ipm).PDEbinned.size() > 0)
+        y = pm.PDEbinned;
+    else
+        y = PMs->getTypeForPM(ipm)->PDEbinned;
+
+    for (int i=0; i<y.size(); i++)
+        y[i] *= pm.relQE_PDE;
+
+    TGraph * g = GraphWindow->ConstructTGraph(x, y,
+                                              TString("PM #")+ipm, "Wavelength, nm", tit,
+                                              kRed, 20, 1, kRed);
+    GraphWindow->ShowAndFocus();
+    GraphWindow->Draw(g, "APL");
 }
 
 void MainWindow::on_pbAddPM_clicked()
@@ -3109,150 +3144,6 @@ void MainWindow::on_pbSetPMtype_clicked()
   if (counter>0) MainWindow::ReconstructDetector();
 }
 
-void MainWindow::on_pbViewChangeRelQEfactors_clicked()
-{
-  MainWindow::ViewChangeRelFactors("QE");
-}
-
-void MainWindow::on_pbViewChangeRelELfactors_clicked()
-{
-  MainWindow::ViewChangeRelFactors("EL");
-}
-
-void MainWindow::ViewChangeRelFactors(QString options)
-{
-  QDialog* dialog = new QDialog(this);
-  dialog->resize(350,380);
-  dialog->move(this->x()+100, this->y()+100);
-
-  if (options == "QE") dialog->setWindowTitle("Relative QE/PDE factors");
-  else if (options == "EL") dialog->setWindowTitle("Relative factors of electronic channels");
-
-  QPushButton *okButton = new QPushButton("Confirm");
-  connect(okButton,SIGNAL(clicked()),dialog,SLOT(accept()));
-  QPushButton *cancelButton = new QPushButton("Cancel");
-  connect(cancelButton,SIGNAL(clicked()),dialog,SLOT(reject()));
-  QHBoxLayout *buttonsLayout = new QHBoxLayout;
-  buttonsLayout->addStretch(1);
-  buttonsLayout->addWidget(okButton);
-  buttonsLayout->addStretch(1);
-  buttonsLayout->addWidget(cancelButton);
-  buttonsLayout->addStretch(1);
-
-  QTableWidget *tw = new QTableWidget();
-  tw->clearContents();
-  //tw->setShowGrid(false);
-  int rows = PMs->count();
-  tw->setRowCount(rows);
-
-  int columns = 1;
-  tw->setColumnCount(columns);
-  if (options == "QE") tw->setHorizontalHeaderItem(0, new QTableWidgetItem("Relative QE/PDE"));
-  else if (options == "EL") tw->setHorizontalHeaderItem(0, new QTableWidgetItem("Relative factors"));
-
-  for (int i=0; i<rows; i++)
-    {
-      tw->setVerticalHeaderItem(i, new QTableWidgetItem("PM#"+QString::number(i)));
-      if (options == "QE") tw->setItem(i, 0, new QTableWidgetItem(QString::number(PMs->at(i).relQE_PDE)));
-      else if (options == "EL") tw->setItem(i, 0, new QTableWidgetItem(QString::number(PMs->at(i).AverageSigPerPhE)));
-    }
-
-  tw->setItemDelegate(new TableDoubleDelegateClass(tw)); //accept only doubles
-
-  QVBoxLayout *mainLayout = new QVBoxLayout;
-  mainLayout->addWidget(tw);
-  mainLayout->addLayout(buttonsLayout);
-
-  dialog->setLayout(mainLayout);
-  int result = dialog->exec();
-  //qDebug()<<"dialog reports:"<<result;
-
-  if (result == 1)
-    {
-      Detector->PMs->setDoPHS( true );  // *** should be in "EL" ?
-      if (options == "QE")
-        {
-          //updating data
-          for (int i=0; i<rows; i++) PMs->at(i).relQE_PDE = tw->item(i, 0)->text().toDouble();
-
-          MainWindow::CalculateIndividualQEPDE();
-          ReconstructDetector(true);
-        }
-      else if (options == "EL")
-        {
-          //updating data
-          for (int i=0; i<rows; i++) PMs->at(i).relElStrength = tw->item(i, 0)->text().toDouble();
-
-          PMs->CalculateElChannelsStrength();
-          ui->cbEnableSPePHS->setChecked(true);
-          ReconstructDetector(true);          
-        }
-    }
-  delete dialog;  
-}
-
-void MainWindow::CalculateIndividualQEPDE()
-{
-  for (int ipm = 0; ipm<PMs->count(); ipm++)
-    {
-      double factor = PMs->at(ipm).relQE_PDE;
-      int itype = PMs->at(ipm).type;
-
-      //scalar value
-      double fromType = PMs->getType(itype)->EffectivePDE;
-      PMs->at(ipm).effectivePDE = fromType * factor;
-
-      //Wavelength resolved data
-      QVector<double> tmp = PMs->getType(itype)->PDE;
-      QVector<double> tmp_lambda = PMs->getType(itype)->PDE_lambda;
-      if (!tmp.isEmpty())
-        {
-          for (int i=0; i<tmp.size(); i++) tmp[i] *= factor;
-
-          PMs->setPDEwave(ipm, &tmp_lambda, &tmp);
-          PMs->RebinPDEsForPM(ipm);
-        }
-    }
-}
-
-void MainWindow::on_pbLoadRelQEfactors_clicked()
-{
-  QString fileName = QFileDialog::getOpenFileName(this, "Load relative QE / PDE factors", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
-  qDebug()<<fileName;
-
-  if (fileName.isEmpty()) return;
-  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-
-  Detector->PMs->setDoPHS( true );
-
-  QVector<double> x;
-  int ok = LoadDoubleVectorsFromFile(fileName, &x);
-
-  if (ok != 0) return;
-  if (x.size() != PMs->count())
-    {
-      message("Wrong number of PMs!", this);
-      return;
-    }
-
-  for (int i=0; i<x.size(); i++) PMs->at(i).relQE_PDE = x[i];
-  MainWindow::CalculateIndividualQEPDE();
-  ReconstructDetector(true);
-}
-
-void MainWindow::on_pbClearRelQEfactors_clicked()
-{
-    for (int ipm = 0; ipm < PMs->count(); ipm++)
-    {
-        PMs->at(ipm).effectivePDE = -1.0;
-
-        PMs->at(ipm).PDE.clear();
-        PMs->at(ipm).PDE_lambda.clear();
-        PMs->at(ipm).PDEbinned.clear();
-    }
-    ReconstructDetector(true);
-}
-
 void MainWindow::on_pbLoadRelELfactors_clicked()
 {
   QString fileName = QFileDialog::getOpenFileName(this, "Load relative strength of electronic channels", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
@@ -3332,7 +3223,6 @@ void MainWindow::on_pbRelQERandomScaleELaverages_clicked()
         PMs->at(ipm).relQE_PDE = factor;
     }
 
-    CalculateIndividualQEPDE();
     ReconstructDetector(true);
 }
 
@@ -3342,7 +3232,6 @@ void MainWindow::on_pbRelQESetELaveragesToUnity_clicked()
     for (int ipm = 0; ipm < PMs->count(); ipm++)
         PMs->at(ipm).relQE_PDE = val;
 
-    CalculateIndividualQEPDE();
     ReconstructDetector(true);
 }
 
@@ -3357,45 +3246,49 @@ void MainWindow::on_pbSetELaveragesToUnity_clicked()
     ReconstructDetector(true);
 }
 
+void MainWindow::on_pbShowPDEfactors_clicked()
+{
+    QDialog * d = new QDialog(this);
+    d->setWindowTitle("PDE factors");
+    QVBoxLayout * v = new QVBoxLayout();
+    d->setLayout(v);
+        QPlainTextEdit * e = new QPlainTextEdit();
+        e->setReadOnly(true);
+        e->appendPlainText("PM\tPDE_factor");
+    v->addWidget(e);
+        QPushButton * b = new QPushButton("Close");
+        QObject::connect(b, &QPushButton::clicked, d, &QDialog::accept);
+    v->addWidget(b);
+
+    QVector<QString> tmp;
+    for (int ipm = 0; ipm < PMs->count(); ipm++)
+    {
+        double PDE = PMs->at(ipm).relQE_PDE;
+        tmp.append( QString::number(PDE, 'g', 3) );
+        e->appendPlainText( QString("pm#%1\t%2").arg(ipm).arg(PDE) );
+    }
+    GeometryWindow->ShowText(tmp, kRed);
+    d->exec();
+}
+
 void MainWindow::on_pbShowRelGains_clicked()
 {
-  Owindow->show();
-  Owindow->raise();
-  Owindow->activateWindow();
-  Owindow->SetTab(0);
-
-  double max = -1e20;
-  for (int ipm = 0; ipm<PMs->count(); ipm++)
+    double max = -1e20;
+    for (int ipm = 0; ipm<PMs->count(); ipm++)
     {
-      double QE = PMs->at(ipm).effectivePDE;
-      if (QE == -1.0) QE = PMs->getType( PMs->at(ipm).type )->EffectivePDE;
-      double AvSig = 1.0;
-      if (ui->cbEnableSPePHS->isChecked()) AvSig =  PMs->at(ipm).AverageSigPerPhE;
-      double relStr = QE * AvSig;
-      if (relStr > max) max = relStr;
+        double v = PMs->at(ipm).relQE_PDE * PMs->at(ipm).relElStrength;
+        if (v > max) max = v;
     }
-  if (fabs(max)<1.0e-20) max = 1.0;
+    if (fabs(max) < 1.0e-20) max = 1.0;
 
-  QVector<QString> tmp(0);
-  Owindow->OutText("");
-  Owindow->OutText("PM  Relative_QE   Average_signal_per_photoelectron   Relative_gain");
-  for (int ipm = 0; ipm < PMs->count(); ipm++)
+    QVector<QString> tmp;
+    for (int ipm = 0; ipm < PMs->count(); ipm++)
     {
-      double QE = PMs->at(ipm).effectivePDE;
-      if (QE == -1.0) QE = PMs->getType( PMs->at(ipm).type )->EffectivePDE;
-      QString str = "PM#" + QString::number(ipm) +"> "+ QString::number(QE, 'g', 3);
-
-      double AvSig = 1.0;
-      if (ui->cbEnableSPePHS->isChecked()) AvSig =  PMs->at(ipm).AverageSigPerPhE;
-      str += "  " + QString::number(AvSig, 'g', 3);
-
-      double relStr = QE * AvSig / max;
-      str += "  " + QString::number(relStr, 'g', 3);
-      Owindow->OutText(str);
-      tmp.append( QString::number(relStr, 'g', 3) );
+        double v = PMs->at(ipm).relQE_PDE * PMs->at(ipm).relElStrength / max;
+        tmp.append( QString::number(v, 'g', 3) );
     }
 
-  GeometryWindow->ShowText(tmp, kRed);
+    GeometryWindow->ShowText(tmp, kRed);
 }
 
 void MainWindow::on_pbSaveResults_clicked()

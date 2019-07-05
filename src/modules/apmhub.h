@@ -95,6 +95,7 @@ public:
     void   writePDEwaveToJson(QJsonObject &json);
     bool   readPDEwaveFromJson(QJsonObject &json);
     void   setPDEwave(int ipm, QVector<double>* x, QVector<double>* y);
+    bool   isAllPDEfactorsUnity();
 
     //Angular response
     bool   isAngularOverriden(int ipm) const;

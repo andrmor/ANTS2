@@ -39,7 +39,7 @@
      <enum>QTabWidget::Rounded</enum>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tabConfig">
      <attribute name="title">
@@ -55,7 +55,7 @@
        </rect>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="tabDetector">
        <attribute name="title">
@@ -2795,14 +2795,17 @@ Three columns (XYZ) for 'fully custom' array</string>
           <widget class="QPushButton" name="pbIndRestoreDE">
            <property name="geometry">
             <rect>
-             <x>472</x>
-             <y>41</y>
-             <width>18</width>
+             <x>410</x>
+             <y>0</y>
+             <width>91</width>
              <height>23</height>
             </rect>
            </property>
+           <property name="toolTip">
+            <string>Clear override to use type </string>
+           </property>
            <property name="text">
-            <string>X</string>
+            <string>Use inherited</string>
            </property>
           </widget>
           <widget class="QPushButton" name="pbIndShowDEbinned">
@@ -2882,19 +2885,6 @@ Three columns (XYZ) for 'fully custom' array</string>
             </property>
            </widget>
           </widget>
-          <widget class="QPushButton" name="pbIndRestoreEffectiveDE">
-           <property name="geometry">
-            <rect>
-             <x>206</x>
-             <y>10</y>
-             <width>18</width>
-             <height>23</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>X</string>
-           </property>
-          </widget>
           <widget class="QLabel" name="label_202">
            <property name="geometry">
             <rect>
@@ -2921,18 +2911,85 @@ Three columns (XYZ) for 'fully custom' array</string>
             <string>1</string>
            </property>
           </widget>
-          <widget class="QLabel" name="label_145">
+          <widget class="QFrame" name="frPDEscaled">
            <property name="geometry">
             <rect>
-             <x>230</x>
-             <y>12</y>
-             <width>271</width>
-             <height>16</height>
+             <x>204</x>
+             <y>9</y>
+             <width>186</width>
+             <height>26</height>
             </rect>
            </property>
-           <property name="text">
-            <string>(used when wavelength is not defined)</string>
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
            </property>
+           <property name="frameShadow">
+            <enum>QFrame::Raised</enum>
+           </property>
+           <widget class="QLineEdit" name="leActualPDE_Scalar">
+            <property name="geometry">
+             <rect>
+              <x>100</x>
+              <y>2</y>
+              <width>50</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="toolTip">
+             <string>Photon detection efficiency to be used in simulations in wavelength not resolved mode or for photons generated without wavelength</string>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+           <widget class="QLineEdit" name="lePDEfactorInExplorer">
+            <property name="geometry">
+             <rect>
+              <x>24</x>
+              <y>2</y>
+              <width>50</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="toolTip">
+             <string>factor defined in the &quot;Gains&quot; tab</string>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_103">
+            <property name="geometry">
+             <rect>
+              <x>80</x>
+              <y>2</y>
+              <width>14</width>
+              <height>17</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>=</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_102">
+            <property name="geometry">
+             <rect>
+              <x>4</x>
+              <y>3</y>
+              <width>16</width>
+              <height>17</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>x</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
           </widget>
          </widget>
          <widget class="QWidget" name="tabPMtypeAngularSens_2">
@@ -3206,14 +3263,14 @@ of the refracted beam:</string>
         <widget class="QPushButton" name="pbSetAllInherited">
          <property name="geometry">
           <rect>
-           <x>190</x>
+           <x>139</x>
            <y>236</y>
-           <width>140</width>
+           <width>261</width>
            <height>23</height>
           </rect>
          </property>
          <property name="text">
-          <string>Set all inherited</string>
+          <string>Use inherited properties for all PMs</string>
          </property>
         </widget>
        </widget>
@@ -4692,10 +4749,10 @@ of the refracted beam:</string>
         <widget class="QLabel" name="labQE_PDE">
          <property name="geometry">
           <rect>
-           <x>65</x>
+           <x>5</x>
            <y>5</y>
-           <width>131</width>
-           <height>16</height>
+           <width>241</width>
+           <height>20</height>
           </rect>
          </property>
          <property name="font">
@@ -4705,52 +4762,10 @@ of the refracted beam:</string>
           </font>
          </property>
          <property name="text">
-          <string>Quantum efficiencies</string>
+          <string>Photon det. efficiency factors</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbLoadRelQEfactors">
-         <property name="geometry">
-          <rect>
-           <x>120</x>
-           <y>64</y>
-           <width>120</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Load factors</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbViewChangeRelQEfactors">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>33</y>
-           <width>230</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>View / change relative factors</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbClearRelQEfactors">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>64</y>
-           <width>100</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="toolTip">
-          <string>Use base properties of the type for all PMs</string>
-         </property>
-         <property name="text">
-          <string>Use PM type</string>
          </property>
         </widget>
         <widget class="Line" name="line_63">
@@ -4770,22 +4785,22 @@ of the refracted beam:</string>
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>179</y>
+           <y>29</y>
            <width>170</width>
-           <height>23</height>
+           <height>25</height>
           </rect>
          </property>
          <property name="text">
-          <string>Set all gains to:</string>
+          <string>Set all to:</string>
          </property>
         </widget>
         <widget class="QPushButton" name="pbRelQERandomScaleELaverages">
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>100</y>
+           <y>101</y>
            <width>81</width>
-           <height>31</height>
+           <height>25</height>
           </rect>
          </property>
          <property name="text">
@@ -4855,9 +4870,9 @@ of the refracted beam:</string>
            <property name="geometry">
             <rect>
              <x>10</x>
-             <y>6</y>
+             <y>4</y>
              <width>35</width>
-             <height>13</height>
+             <height>15</height>
             </rect>
            </property>
            <property name="text">
@@ -4870,7 +4885,7 @@ of the refracted beam:</string>
              <x>10</x>
              <y>25</y>
              <width>35</width>
-             <height>13</height>
+             <height>15</height>
             </rect>
            </property>
            <property name="text">
@@ -4909,9 +4924,9 @@ of the refracted beam:</string>
            <property name="geometry">
             <rect>
              <x>0</x>
-             <y>6</y>
+             <y>4</y>
              <width>48</width>
-             <height>13</height>
+             <height>15</height>
             </rect>
            </property>
            <property name="text">
@@ -4922,9 +4937,9 @@ of the refracted beam:</string>
            <property name="geometry">
             <rect>
              <x>0</x>
-             <y>25</y>
+             <y>23</y>
              <width>48</width>
-             <height>13</height>
+             <height>18</height>
             </rect>
            </property>
            <property name="text">
@@ -4937,13 +4952,69 @@ of the refracted beam:</string>
          <property name="geometry">
           <rect>
            <x>190</x>
-           <y>180</y>
+           <y>31</y>
            <width>50</width>
            <height>20</height>
           </rect>
          </property>
          <property name="text">
           <string>1.0</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_51">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>58</y>
+           <width>251</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Script command pms.SetPDE_factors()
+can be used to manipulate the values</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pbShowPDEfactors">
+         <property name="geometry">
+          <rect>
+           <x>60</x>
+           <y>181</y>
+           <width>141</width>
+           <height>25</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Show factors</string>
+         </property>
+        </widget>
+        <widget class="Line" name="line_65">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>170</y>
+           <width>211</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+        <widget class="QLabel" name="labPDEfactors_notAllUnity">
+         <property name="geometry">
+          <rect>
+           <x>38</x>
+           <y>185</y>
+           <width>18</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>--</string>
          </property>
         </widget>
        </widget>
@@ -4965,10 +5036,10 @@ of the refracted beam:</string>
         <widget class="QLabel" name="label_35">
          <property name="geometry">
           <rect>
-           <x>20</x>
+           <x>0</x>
            <y>4</y>
-           <width>211</width>
-           <height>16</height>
+           <width>251</width>
+           <height>20</height>
           </rect>
          </property>
          <property name="font">
@@ -4978,20 +5049,7 @@ of the refracted beam:</string>
           </font>
          </property>
          <property name="text">
-          <string>Relative gains of electronic channels</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbViewChangeRelELfactors">
-         <property name="geometry">
-          <rect>
-           <x>9</x>
-           <y>33</y>
-           <width>230</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>View / change relative factors</string>
+          <string>Factors of gain of electronic channels</string>
          </property>
         </widget>
         <widget class="QPushButton" name="pbLoadRelELfactors">
@@ -5011,9 +5069,9 @@ of the refracted beam:</string>
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>100</y>
+           <y>102</y>
            <width>81</width>
-           <height>31</height>
+           <height>25</height>
           </rect>
          </property>
          <property name="text">
@@ -5037,9 +5095,9 @@ of the refracted beam:</string>
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>179</y>
+           <y>28</y>
            <width>170</width>
-           <height>23</height>
+           <height>25</height>
           </rect>
          </property>
          <property name="text">
@@ -5109,9 +5167,9 @@ of the refracted beam:</string>
            <property name="geometry">
             <rect>
              <x>10</x>
-             <y>6</y>
+             <y>3</y>
              <width>35</width>
-             <height>13</height>
+             <height>16</height>
             </rect>
            </property>
            <property name="text">
@@ -5122,9 +5180,9 @@ of the refracted beam:</string>
            <property name="geometry">
             <rect>
              <x>10</x>
-             <y>25</y>
+             <y>24</y>
              <width>35</width>
-             <height>13</height>
+             <height>16</height>
             </rect>
            </property>
            <property name="text">
@@ -5163,9 +5221,9 @@ of the refracted beam:</string>
            <property name="geometry">
             <rect>
              <x>0</x>
-             <y>6</y>
+             <y>3</y>
              <width>48</width>
-             <height>13</height>
+             <height>17</height>
             </rect>
            </property>
            <property name="text">
@@ -5176,9 +5234,9 @@ of the refracted beam:</string>
            <property name="geometry">
             <rect>
              <x>0</x>
-             <y>25</y>
+             <y>23</y>
              <width>48</width>
-             <height>13</height>
+             <height>20</height>
             </rect>
            </property>
            <property name="text">
@@ -5191,7 +5249,7 @@ of the refracted beam:</string>
          <property name="geometry">
           <rect>
            <x>190</x>
-           <y>180</y>
+           <y>30</y>
            <width>50</width>
            <height>20</height>
           </rect>
@@ -5201,7 +5259,6 @@ of the refracted beam:</string>
          </property>
         </widget>
         <zorder>label_35</zorder>
-        <zorder>pbViewChangeRelELfactors</zorder>
         <zorder>pbLoadRelELfactors</zorder>
         <zorder>line_61</zorder>
         <zorder>pbSetELaveragesToUnity</zorder>
@@ -5213,14 +5270,14 @@ of the refracted beam:</string>
        <widget class="QPushButton" name="pbShowRelGains">
         <property name="geometry">
          <rect>
-          <x>163</x>
+          <x>153</x>
           <y>258</y>
-          <width>211</width>
+          <width>231</width>
           <height>31</height>
          </rect>
         </property>
         <property name="text">
-         <string>Show relative gains</string>
+         <string>Show relative strength</string>
         </property>
        </widget>
        <widget class="Line" name="line_60">
@@ -12947,8 +13004,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>221</x>
-     <y>540</y>
+     <x>223</x>
+     <y>571</y>
     </hint>
     <hint type="destinationlabel">
      <x>280</x>
@@ -13539,8 +13596,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>295</x>
-     <y>382</y>
+     <x>301</x>
+     <y>413</y>
     </hint>
     <hint type="destinationlabel">
      <x>471</x>
@@ -13555,8 +13612,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>179</x>
-     <y>474</y>
+     <x>181</x>
+     <y>505</y>
     </hint>
     <hint type="destinationlabel">
      <x>464</x>
@@ -13571,8 +13628,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>441</x>
-     <y>443</y>
+     <x>443</x>
+     <y>474</y>
     </hint>
     <hint type="destinationlabel">
      <x>451</x>
@@ -13587,8 +13644,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>441</x>
-     <y>472</y>
+     <x>443</x>
+     <y>503</y>
     </hint>
     <hint type="destinationlabel">
      <x>504</x>
@@ -13603,8 +13660,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>441</x>
-     <y>472</y>
+     <x>443</x>
+     <y>503</y>
     </hint>
     <hint type="destinationlabel">
      <x>506</x>
@@ -13619,8 +13676,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>293</x>
-     <y>382</y>
+     <x>295</x>
+     <y>413</y>
     </hint>
     <hint type="destinationlabel">
      <x>468</x>
@@ -13635,8 +13692,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>165</x>
-     <y>382</y>
+     <x>171</x>
+     <y>413</y>
     </hint>
     <hint type="destinationlabel">
      <x>468</x>
@@ -13651,8 +13708,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>317</x>
-     <y>442</y>
+     <x>319</x>
+     <y>473</y>
     </hint>
     <hint type="destinationlabel">
      <x>514</x>
@@ -13992,7 +14049,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14008,7 +14065,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14024,7 +14081,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14040,7 +14097,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14056,7 +14113,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14072,7 +14129,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14088,7 +14145,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14104,7 +14161,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14120,7 +14177,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14136,7 +14193,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14152,7 +14209,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14168,7 +14225,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14184,7 +14241,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14200,7 +14257,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14216,7 +14273,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14232,7 +14289,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14248,7 +14305,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14264,7 +14321,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14280,7 +14337,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14296,7 +14353,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14312,7 +14369,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14328,7 +14385,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14344,7 +14401,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14360,7 +14417,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14376,7 +14433,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14392,7 +14449,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14408,7 +14465,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14424,7 +14481,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14440,7 +14497,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14456,7 +14513,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14472,7 +14529,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14488,7 +14545,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14504,7 +14561,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14520,7 +14577,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14536,7 +14593,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14552,7 +14609,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14568,7 +14625,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14584,7 +14641,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14600,7 +14657,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14616,7 +14673,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14632,7 +14689,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14648,7 +14705,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14664,7 +14721,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14680,7 +14737,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14696,7 +14753,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14712,7 +14769,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14728,7 +14785,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14744,7 +14801,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14760,7 +14817,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14776,7 +14833,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14792,7 +14849,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14808,7 +14865,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14824,7 +14881,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14840,7 +14897,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14856,7 +14913,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14872,7 +14929,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14888,7 +14945,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14904,7 +14961,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14920,7 +14977,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14936,7 +14993,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14952,7 +15009,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14968,7 +15025,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -14984,7 +15041,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -15000,7 +15057,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -15016,7 +15073,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -15032,7 +15089,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -15048,7 +15105,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -15064,7 +15121,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -15080,7 +15137,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -15096,7 +15153,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -15112,7 +15169,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -15128,7 +15185,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -15144,7 +15201,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -15160,7 +15217,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -15176,7 +15233,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -15192,7 +15249,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -15208,7 +15265,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -15219,12 +15276,12 @@ multiply to loaded data</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>179</x>
-     <y>474</y>
+     <x>181</x>
+     <y>505</y>
     </hint>
     <hint type="destinationlabel">
-     <x>310</x>
-     <y>453</y>
+     <x>316</x>
+     <y>506</y>
     </hint>
    </hints>
   </connection>
@@ -15251,8 +15308,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>249</x>
-     <y>472</y>
+     <x>251</x>
+     <y>503</y>
     </hint>
     <hint type="destinationlabel">
      <x>502</x>
@@ -15267,8 +15324,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>233</x>
-     <y>458</y>
+     <x>235</x>
+     <y>489</y>
     </hint>
     <hint type="destinationlabel">
      <x>489</x>
@@ -15283,8 +15340,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>233</x>
-     <y>496</y>
+     <x>235</x>
+     <y>527</y>
     </hint>
     <hint type="destinationlabel">
      <x>503</x>
@@ -15299,8 +15356,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>190</x>
-     <y>382</y>
+     <x>196</x>
+     <y>413</y>
     </hint>
     <hint type="destinationlabel">
      <x>428</x>
@@ -15315,12 +15372,12 @@ multiply to loaded data</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>239</x>
-     <y>442</y>
+     <x>241</x>
+     <y>473</y>
     </hint>
     <hint type="destinationlabel">
-     <x>427</x>
-     <y>458</y>
+     <x>433</x>
+     <y>539</y>
     </hint>
    </hints>
   </connection>
@@ -15331,8 +15388,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>390</x>
-     <y>479</y>
+     <x>392</x>
+     <y>510</y>
     </hint>
     <hint type="destinationlabel">
      <x>490</x>
@@ -15347,8 +15404,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>239</x>
-     <y>442</y>
+     <x>241</x>
+     <y>473</y>
     </hint>
     <hint type="destinationlabel">
      <x>447</x>
@@ -15368,7 +15425,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -15400,7 +15457,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -15416,7 +15473,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -15432,7 +15489,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -15459,8 +15516,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>249</x>
-     <y>495</y>
+     <x>251</x>
+     <y>526</y>
     </hint>
     <hint type="destinationlabel">
      <x>416</x>
@@ -15475,8 +15532,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>146</x>
-     <y>382</y>
+     <x>152</x>
+     <y>413</y>
     </hint>
     <hint type="destinationlabel">
      <x>403</x>
@@ -15491,8 +15548,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>308</x>
-     <y>474</y>
+     <x>314</x>
+     <y>505</y>
     </hint>
     <hint type="destinationlabel">
      <x>438</x>
@@ -15528,7 +15585,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -15592,7 +15649,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -15608,7 +15665,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -15624,7 +15681,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>614</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -15641,6 +15698,22 @@ multiply to loaded data</string>
     <hint type="destinationlabel">
      <x>62</x>
      <y>582</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cobRelQEScaleGainsUniNorm</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>swRelQEGainUniNorm</receiver>
+   <slot>setCurrentIndex(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>157</x>
+     <y>449</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>166</x>
+     <y>467</y>
     </hint>
    </hints>
   </connection>

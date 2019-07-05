@@ -666,49 +666,42 @@ void APmHub::RecalculateAngularForPM(int ipm)
 
 double APmHub::getActualPDE(int ipm, int WaveIndex) const
 {  
-    /*
-  qDebug()<<"------------";
-  qDebug()<<"Wave-resolved:"<<WavelengthResolved<<"WaveIndex:"<<WaveIndex<<" PM# "<<ipm;
-  qDebug()<<"Overrides-> Effective=" <<effectivePDE[ipm]<<" size ofWaveRes="<<PDEbinned[ipm].size();
-  if (PDEbinned[ipm].size()>0) qDebug()<<"   overridePDE at waveindex="<<PDEbinned[ipm][WaveIndex];
-  qDebug()<<"Type-> Effective="<<PMtypeProperties[PMtype[ipm]].effectivePDE<<" size of WaveRes="<<PMtypeProperties[PMtype[ipm]].PDEbinned.size();
-  if (PMtypeProperties[PMtype[ipm]].PDEbinned.size() > 0) qDebug()<<"   typePDE at this waveindex="<<PMtypeProperties[PMtype[ipm]].PDEbinned[WaveIndex];
-    */
-
+    const APm & pm = PMs.at(ipm);
     double PDE;
+
     if (!WavelengthResolved || WaveIndex == -1)
     {
         //Case: Not wavelength-resolved or no spectral data during this photon generation
 
-        if (PMs.at(ipm).effectivePDE != -1.0)
-             PDE = PMs.at(ipm).effectivePDE; //override exists
-        else PDE = PMtypes.at( PMs.at(ipm).type )->EffectivePDE;
+        if (pm.effectivePDE != -1.0)                        // use override if exists
+            PDE = pm.effectivePDE;
+        else                                                // otherwise use type info
+            PDE = PMtypes.at( pm.type )->EffectivePDE;
     }
     else
     {
-        //Case: Wavelength-resolved AND there is proper waveindex
+        //Case: Wavelength-resolved AND waveindex is defined
 
-        //if wave-resolved override exists, use it:
-        if ( !PMs.at(ipm).PDEbinned.isEmpty() )
-             PDE = PMs.at(ipm).PDEbinned.at(WaveIndex);
+        if ( !pm.PDEbinned.isEmpty() )                      // if wave-resolved override exists, use it
+             PDE = pm.PDEbinned.at(WaveIndex);
         else
         {
-            //if effective PDE is overriden, use it
-            if (PMs.at(ipm).effectivePDE != -1.0)
-                 PDE = PMs.at(ipm).effectivePDE;
+            const int& iType = PMs.at(ipm).type;
+
+            if (PMtypes.at(iType)->PDEbinned.size() > 0)    // if the type holds wave-resolved info, use it
+                PDE = PMtypes.at(iType)->PDEbinned.at(WaveIndex);
             else
             {
-                //if type hold wave-resolved info, use it
-                const int& iType = PMs.at(ipm).type;
-                if (PMtypes.at(iType)->PDEbinned.size() > 0)
-                     PDE = PMtypes.at(iType)->PDEbinned.at(WaveIndex);
-                else PDE = PMtypes.at(iType)->EffectivePDE; //last resort :)
+                if (pm.effectivePDE != -1.0)                // use scalar override if exists
+                    PDE = pm.effectivePDE;
+                else                                        // use type scalar as the last resort
+                    PDE = PMtypes.at(iType)->EffectivePDE;
             }
         }
     }
     //  qDebug()<<"reporting PDE of "<<PDE;
 
-    return PDE;
+    return PDE * pm.relQE_PDE;
 }
 
 double APmHub::getActualAngularResponse(int ipm, double cosAngle) const
@@ -1010,6 +1003,14 @@ void APmHub::setPDEwave(int ipm, QVector<double> *x, QVector<double> *y)
 {
     PMs[ipm].PDE_lambda = *x;
     PMs[ipm].PDE = *y;
+}
+
+bool APmHub::isAllPDEfactorsUnity()
+{
+    for (int ipm=0; ipm<count(); ipm++)
+        if (PMs[ipm].relQE_PDE != 1.0) return false;
+
+    return true;
 }
 
 bool APmHub::isAngularOverriden(int ipm) const

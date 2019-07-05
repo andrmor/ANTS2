@@ -35,12 +35,12 @@ APms_SI::APms_SI(AConfiguration *Config)
 
 bool APms_SI::checkValidPM(int ipm)
 {
-  if (ipm<0 || ipm>PMs->count()-1)
+    if (ipm < 0 || ipm >= PMs->count())
     {
-      abort("Wrong PM number!");
-      return false;
+        abort("Wrong PM index: " + ipm);
+        return false;
     }
-  return true;
+    return true;
 }
 
 bool APms_SI::checkAddPmCommon(int UpperLower, int type)
@@ -195,4 +195,51 @@ void APms_SI::SetAllArraysFullyCustom()
     for (int i=0; i<Config->GetDetector()->PMarrays.size(); i++)
         Config->GetDetector()->PMarrays[i].Regularity = 2;
     Config->GetDetector()->writeToJson(Config->JSON);
+}
+
+void APms_SI::SetPDE_factor(int ipm, double value)
+{
+    if (!checkValidPM(ipm)) return;
+
+    if (value < 0) abort("Cannot use negative PDE factor");
+    else
+    {
+        PMs->at(ipm).relQE_PDE = value;
+        Config->GetDetector()->writeToJson(Config->JSON);
+        Config->GetDetector()->BuildDetector();
+    }
+}
+
+void APms_SI::SetPDE_factors(QVariantList ArrayWithFactors)
+{
+    if (ArrayWithFactors.size() < PMs->count())
+    {
+        abort("Too short array with PDE factors");
+        return;
+    }
+
+    bool bOK;
+    for (int ipm = 0; ipm < PMs->count(); ipm++)
+    {
+        double val = ArrayWithFactors.at(ipm).toDouble(&bOK);
+        if (!bOK || val < 0)
+        {
+            abort("Array of PDE gactors should contain non-negative values");
+            return;
+        }
+    }
+
+    for (int ipm = 0; ipm < PMs->count(); ipm++)
+        PMs->at(ipm).relQE_PDE = ArrayWithFactors.at(ipm).toDouble();
+
+    Config->GetDetector()->writeToJson(Config->JSON);
+    Config->GetDetector()->BuildDetector();
+}
+
+double APms_SI::GetPDE(int ipm, int WaveIndex, double Angle, double Xlocal, double Ylocal)
+{
+    if (!checkValidPM(ipm)) return 0;
+
+    Config->UpdateSimSettingsOfDetector();
+    return PMs->getActualPDE(ipm, WaveIndex) * PMs->getActualAngularResponse(ipm, cos(Angle)) * PMs->getActualAreaResponse(ipm, Xlocal, Ylocal);
 }

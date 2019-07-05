@@ -4794,3 +4794,11 @@ void MainWindow::on_actionExit_triggered()
 {
     close();
 }
+
+void MainWindow::on_pbGainsUpdateGUI_clicked()
+{
+    bool bAll_PDE_1 = PMs->isAllPDEfactorsUnity();
+
+    ui->tabWidget->setTabIcon(5, ( bAll_PDE_1 ? QIcon() : Rwindow->YellowIcon ) );
+    ui->labPDEfactors_notAllUnity->setVisible( !bAll_PDE_1 );
+}

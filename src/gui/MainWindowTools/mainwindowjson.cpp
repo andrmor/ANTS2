@@ -58,21 +58,21 @@ void MainWindow::onRequestDetectorGuiUpdate()
 
   DoNotUpdateGeometry = true;
   //Particles
-  MainWindow::ListActiveParticles();
+  ListActiveParticles();
   //Materials
-  MainWindow::on_pbRefreshMaterials_clicked();
+  on_pbRefreshMaterials_clicked();
   //MIwindow->UpdateActiveMaterials(); //refresh indication on Material Inspector window
   MIwindow->setLogLog(Detector->MpCollection->fLogLogInterpolation);
   //Optical overrides
-  MainWindow::on_pbRefreshOverrides_clicked();
+  on_pbRefreshOverrides_clicked();
   //PM types
   if (ui->sbPMtype->value() > PMs->countPMtypes()-1) ui->sbPMtype->setValue(0);
-  MainWindow::updateCOBsWithPMtypeNames();
-  MainWindow::on_pbRefreshPMproperties_clicked();
+  updateCOBsWithPMtypeNames();
+  on_pbRefreshPMproperties_clicked();
   //PM arrays
   ui->cbUPM->setChecked(Detector->PMarrays[0].fActive);
   ui->cbLPM->setChecked(Detector->PMarrays[1].fActive);
-  MainWindow::on_pbShowPMsArrayRegularData_clicked(); //update regular array fields
+  on_pbShowPMsArrayRegularData_clicked(); //update regular array fields
   //Detector addon window updates
   DAwindow->UpdateGUI();
   if (Detector->PMdummies.size()>0) DAwindow->UpdateDummyPMindication();
@@ -84,13 +84,15 @@ void MainWindow::onRequestDetectorGuiUpdate()
   ui->ledTopSizeZ->setText( QString::number(2.0*Detector->WorldSizeZ, 'g', 4) );
   ui->cbFixedTopSize->setChecked( Detector->fWorldSizeFixed );
   //misc
-  MainWindow::ShowPMcount();
-  MainWindow::CheckPresenseOfSecScintillator(); //checks if SecScint present, and update selectors of primary/secondary scintillation
+  ShowPMcount();
+  CheckPresenseOfSecScintillator(); //checks if SecScint present, and update selectors of primary/secondary scintillation
   //Sandwich - now automatic
   //PM explore
-  MainWindow::on_pbIndPMshowInfo_clicked();
+  on_pbIndPMshowInfo_clicked();
   //Electronics
-  MainWindow::on_pbElUpdateIndication_clicked();
+  on_pbElUpdateIndication_clicked();
+  //Gains
+  on_pbGainsUpdateGUI_clicked();
   //GDML?
   onGDMLstatusChage(!Detector->isGDMLempty());
 

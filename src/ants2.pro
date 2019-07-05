@@ -1,6 +1,6 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 4
-ANTS2_MINOR = 18
+ANTS2_MINOR = 19
 
 #Optional libraries
 #CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
@@ -15,6 +15,7 @@ CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 
 #Optional features enabled in Docker version   
 ants2_docker {
+    CONFIG += ANTS_DOCKER
     CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library: see https://github.com/mariusmuja/flann
     CONFIG += ants2_fann        #enables FANN (fast neural network) library: see https://github.com/libfann/fann
     CONFIG += ants2_RootServer  #enable cern CERN ROOT html server

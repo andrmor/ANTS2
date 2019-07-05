@@ -27,6 +27,12 @@ AGlobalSettings::AGlobalSettings()
     RecNumTreads = QThread::idealThreadCount() - 1;
     if (RecNumTreads < 1) RecNumTreads = 1;
 
+// Default Geant4 settings for docker installation
+#ifdef ANTS_DOCKER
+    G4antsExec = "/G4ants/G4ants";
+    G4ExchangeFolder = "/ants_config/ants2/Tmp";
+#endif
+
     //default font size
 #ifdef Q_OS_LINUX // fix font size on Linux
     FontSize = 8;

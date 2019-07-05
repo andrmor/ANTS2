@@ -1005,10 +1005,25 @@ void APmHub::setPDEwave(int ipm, QVector<double> *x, QVector<double> *y)
     PMs[ipm].PDE = *y;
 }
 
-bool APmHub::isAllPDEfactorsUnity()
+bool APmHub::isAllPDEfactorsUnity() const
 {
     for (int ipm=0; ipm<count(); ipm++)
         if (PMs[ipm].relQE_PDE != 1.0) return false;
+
+    return true;
+}
+
+bool APmHub::isAllPDEfactorsSame(double &value) const
+{
+    if (count() == 0)
+    {
+        value = 0;
+        return true;
+    }
+
+    value = PMs[0].relQE_PDE;
+    for (int ipm=1; ipm<count(); ipm++)
+        if (PMs[ipm].relQE_PDE != value) return false;
 
     return true;
 }

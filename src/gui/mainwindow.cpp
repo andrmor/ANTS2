@@ -4801,4 +4801,10 @@ void MainWindow::on_pbGainsUpdateGUI_clicked()
 
     ui->tabWidget->setTabIcon(5, ( bAll_PDE_1 ? QIcon() : Rwindow->YellowIcon ) );
     ui->labPDEfactors_notAllUnity->setVisible( !bAll_PDE_1 );
+
+    double same;
+    QString str;
+    if ( PMs->isAllPDEfactorsSame(same) ) str = QString("All factors = %1").arg(same);
+    else str = "Different factors";
+    ui->labPDEfactors->setText(str);
 }

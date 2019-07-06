@@ -2611,107 +2611,109 @@ void MainWindow::on_sbElPMnumber_valueChanged(int arg1)
 
 void MainWindow::on_pbElUpdateIndication_clicked()
 {
-  //qDebug() << "----Electronics GUI update -----------";
-  bool tmpBulk = BulkUpdate;
-  BulkUpdate = true;
+    //qDebug() << "----Electronics GUI update -----------";
+    bool tmpBulk = BulkUpdate;
+    BulkUpdate = true;
 
-  ui->cbEnableSPePHS->setChecked(Detector->PMs->isDoPHS());
-  ui->cbEnableMCcrosstalk->setChecked(Detector->PMs->isDoMCcrosstalk());
-  ui->cbEnableElNoise->setChecked(Detector->PMs->isDoElNoise());
-  ui->cbEnableADC->setChecked(Detector->PMs->isDoADC());
-  ui->cbDarkCounts_Enable->setChecked(Detector->PMs->fDoDarkCounts);
+    ui->cbEnableSPePHS->setChecked(Detector->PMs->isDoPHS());
+    ui->cbEnableMCcrosstalk->setChecked(Detector->PMs->isDoMCcrosstalk());
+    ui->cbEnableElNoise->setChecked(Detector->PMs->isDoElNoise());
+    ui->cbEnableADC->setChecked(Detector->PMs->isDoADC());
+    ui->cbDarkCounts_Enable->setChecked(Detector->PMs->fDoDarkCounts);
 
-  int ipm = ui->sbElPMnumber->value();
-  int NumPMs = PMs->count();
-  if (ipm>NumPMs-1 && ipm != 0)
+    const int ipm = ui->sbElPMnumber->value();
+    const int NumPMs = PMs->count();
+    if (ipm >= NumPMs && ipm != 0)
     {
-      ui->sbElPMnumber->setValue(0);
-      return; //update on_change
+        ui->sbElPMnumber->setValue(0);
+        return; //update on_change
+    }
+    if (NumPMs == 0)
+    {
+        ui->twElectronics->setEnabled(false);
+        return;
     }
 
-  if (NumPMs != 0)
+    ui->twElectronics->setEnabled(true);
+    const APm & pm = PMs->at(ipm);
+
+    ui->labElType->setText(PMs->getType(pm.type)->Name);
+    QString str, str1;
+    str.setNum( pm.AverageSigPerPhE );
+    ui->ledAverageSigPhotEl->setText(str);
+    str.setNum( pm.SPePHSsigma);
+    ui->ledElsigma->setText(str);
+    str.setNum( pm.SPePHSshape);
+    ui->ledElShape->setText(str);
+    ui->pbElGainShowDistr->setEnabled( pm.SPePHShist );
+
+    ui->leSPEfactor->setText( QString::number( pm.relElStrength ) );
+    ui->labSPEfactorNotUnity->setVisible( pm.relElStrength != 1.0 );
+
+    //MCcrosstalk
+    ui->cobMCcrosstalk_Model->setCurrentIndex( pm.MCmodel );
+    if ( pm.MCmodel == 0)
     {
-      ui->twElectronics->setEnabled(true);
-
-      ui->labElType->setText(PMs->getType(PMs->at(ipm).type)->Name);
-      QString str, str1;
-      str.setNum( PMs->at(ipm).AverageSigPerPhE );
-      ui->ledAverageSigPhotEl->setText(str);
-      str.setNum(PMs->at(ipm).SPePHSsigma);
-      ui->ledElsigma->setText(str);
-      str.setNum(PMs->at(ipm).SPePHSshape);
-      ui->ledElShape->setText(str);
-      ui->pbElGainShowDistr->setEnabled( PMs->at(ipm).SPePHShist );
-
-      //MCcrosstalk      
-      ui->cobMCcrosstalk_Model->setCurrentIndex( PMs->at(ipm).MCmodel );
-      if (PMs->at(ipm).MCmodel == 0)
-      {
-          ui->tabMCcrosstalk->clearContents();
-          QVector<double> vals = PMs->at(ipm).MCcrosstalk;
-          if (vals.isEmpty()) vals << 1.0;
-          while (vals.size()<3) vals << 0;
-          ui->tabMCcrosstalk->setColumnCount(vals.size());
-          ui->tabMCcrosstalk->setRowCount(1);
-          QStringList header;
-          for (int i=0; i<vals.size(); i++)
-            {
-              QTableWidgetItem* item = new QTableWidgetItem(QString::number(vals.at(i)));
-              item->setTextAlignment(Qt::AlignCenter);
-              ui->tabMCcrosstalk->setItem(0, i, item);
-              header << QString::number(i+1)+" ph.e.";
-            }
-          ui->tabMCcrosstalk->setVerticalHeaderLabels(QStringList("Probability"));
-          ui->tabMCcrosstalk->setHorizontalHeaderLabels(header);
-          ui->tabMCcrosstalk->resizeColumnsToContents();
-          ui->tabMCcrosstalk->resizeRowsToContents();
-      }
-      else
-      {
-          ui->ledMCcrosstalkTriggerProb->setText( QString::number(PMs->at(ipm).MCtriggerProb) );
-
-          double br = 1 - PMs->at(ipm).MCtriggerProb;
-          double Epsilon = 1 - br*br*br*br;   //  1-epsilon = (1-p)^n    model with n = 4
-          ui->labMCtotalProb->setText( QString::number(Epsilon, 'g', 4) );
-          double np = 4.0*PMs->at(ipm).MCtriggerProb;
-          double MCmeanCells = 1.0 + np + np*np;  // Average num triggered cells = 1 + np + (np)^2 + o(p^2)  model with n = 4
-          ui->labMCmean->setText( QString::number(MCmeanCells, 'g', 4) );
-      }
-
-      ui->ledTimeOfOneMeasurement->setText( QString::number(PMs->at(ipm).MeasurementTime) );
-      ui->swDarkCounts_Time->setCurrentIndex( ui->cbTimeResolved->isChecked() ? 1 : 0 );
-      ui->cobDarkCounts_Model->setCurrentIndex( PMs->at(ipm).DarkCounts_Model );
-      const bool bHaveDist = !PMs->at(ipm).DarkCounts_Distribution.isEmpty();
-      ui->pbDarkCounts_Show->setEnabled(bHaveDist);
-      ui->pbDarkCounts_Delete->setEnabled(bHaveDist);
-
-      str.setNum(PMs->at(ipm).ElNoiseSigma);
-      ui->ledElNoiseSigma->setText(str);
-      str.setNum(PMs->at(ipm).ElNoiseSigma_StatSigma);
-      ui->ledElNoiseSigma_Stat->setText(str);
-      str.setNum(PMs->at(ipm).ElNoiseSigma_StatNorm);
-      ui->ledElNoiseSigma_Norm->setText(str);
-
-      //str.setNum(PMs->at(ipm).ADCmax);
-      ui->ledADCmax->setText( QString::number(PMs->at(ipm).ADCmax) );
-      ui->sbADCbits->setValue( PMs->at(ipm).ADCbits );
-
-      str.setNum(PMs->at(ipm).ADClevels + 1);
-      str = "levels: " + str;
-      str1.setNum(PMs->at(ipm).ADCstep);
-      str += "  signal/level: "+str1;
-      ui->leoADCInfo->setText(str);
-
-      const int& mode = PMs->at(ipm).SPePHSmode;
-      if (mode == 3) ui->ledAverageSigPhotEl->setReadOnly(true);
-      else ui->ledAverageSigPhotEl->setReadOnly(false);
-      ui->cobPMampGainModel->setCurrentIndex(mode);
+        ui->tabMCcrosstalk->clearContents();
+        QVector<double> vals = pm.MCcrosstalk;
+        if (vals.isEmpty()) vals << 1.0;
+        while (vals.size() < 3) vals << 0;
+        ui->tabMCcrosstalk->setColumnCount(vals.size());
+        ui->tabMCcrosstalk->setRowCount(1);
+        QStringList header;
+        for (int i = 0; i < vals.size(); i++)
+        {
+            QTableWidgetItem* item = new QTableWidgetItem(QString::number(vals.at(i)));
+            item->setTextAlignment(Qt::AlignCenter);
+            ui->tabMCcrosstalk->setItem(0, i, item);
+            header << QString::number(i + 1) + " ph.e.";
+        }
+        ui->tabMCcrosstalk->setVerticalHeaderLabels(QStringList("Probability"));
+        ui->tabMCcrosstalk->setHorizontalHeaderLabels(header);
+        ui->tabMCcrosstalk->resizeColumnsToContents();
+        ui->tabMCcrosstalk->resizeRowsToContents();
     }
-  else ui->twElectronics->setEnabled(false);
+    else
+    {
+        ui->ledMCcrosstalkTriggerProb->setText( QString::number( pm.MCtriggerProb ) );
 
-  //ui->ledTimeOfOneMeasurement->setText( QString::number(Detector->PMs->at(ipm).MeasurementTime) );
+        double br = 1 - pm.MCtriggerProb;
+        double Epsilon = 1 - br*br*br*br;   //  1-epsilon = (1-p)^n    model with n = 4
+        ui->labMCtotalProb->setText( QString::number(Epsilon, 'g', 4) );
+        double np = 4.0 * pm.MCtriggerProb;
+        double MCmeanCells = 1.0 + np + np*np;  // Average num triggered cells = 1 + np + (np)^2 + o(p^2)  model with n = 4
+        ui->labMCmean->setText( QString::number(MCmeanCells, 'g', 4) );
+    }
 
-  BulkUpdate = tmpBulk;
+    ui->ledTimeOfOneMeasurement->setText( QString::number( pm.MeasurementTime ) );
+    ui->swDarkCounts_Time->setCurrentIndex( ui->cbTimeResolved->isChecked() ? 1 : 0 );
+    ui->cobDarkCounts_Model->setCurrentIndex( pm.DarkCounts_Model );
+    const bool bHaveDist = !pm.DarkCounts_Distribution.isEmpty();
+    ui->pbDarkCounts_Show->setEnabled(bHaveDist);
+    ui->pbDarkCounts_Delete->setEnabled(bHaveDist);
+
+    str.setNum( pm.ElNoiseSigma );
+    ui->ledElNoiseSigma->setText(str);
+    str.setNum( pm.ElNoiseSigma_StatSigma );
+    ui->ledElNoiseSigma_Stat->setText(str);
+    str.setNum( pm.ElNoiseSigma_StatNorm );
+    ui->ledElNoiseSigma_Norm->setText(str);
+
+    ui->ledADCmax->setText( QString::number( pm.ADCmax ) );
+    ui->sbADCbits->setValue( pm.ADCbits );
+
+    str.setNum( pm.ADClevels + 1 );
+    str = "levels: " + str;
+    str1.setNum( pm.ADCstep );
+    str += "  signal/level: " + str1;
+    ui->leoADCInfo->setText(str);
+
+    const int & mode = pm.SPePHSmode;
+    if (mode == 3) ui->ledAverageSigPhotEl->setReadOnly(true);
+    else ui->ledAverageSigPhotEl->setReadOnly(false);
+    ui->cobPMampGainModel->setCurrentIndex(mode);
+
+    BulkUpdate = tmpBulk;
 }
 
 void MainWindow::on_pbElCopyGainData_clicked()

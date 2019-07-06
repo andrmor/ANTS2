@@ -272,6 +272,9 @@ MainWindow::MainWindow(DetectorClass *Detector,
     ui->labPhTracksOn_1->setVisible(false);
     ui->labPartTracksOn->setPixmap(Rwindow->YellowIcon.pixmap(8,8));
     ui->labPartTracksOn->setVisible(false);
+    ui->labPDEfactors_notAllUnity->setPixmap(Rwindow->YellowIcon.pixmap(16,16));
+    ui->labSPEfactors_ActiveAndNotAllUnity->setPixmap(Rwindow->YellowIcon.pixmap(16,16));
+    ui->labSPEfactorNotUnity->setPixmap(Rwindow->YellowIcon.pixmap(16,16));
       //misc gui inits
     ui->swPMTvsSiPM->setCurrentIndex(ui->cobPMdeviceType->currentIndex());
     MainWindow::on_pbRefreshPMproperties_clicked(); //indication of PM properties
@@ -308,8 +311,6 @@ MainWindow::MainWindow(DetectorClass *Detector,
     ui->cobAddIon->addItems(slIons);
     ui->cobAddIon->setMaxVisibleItems(10);
     ui->cobAddIon->setCurrentText("He");
-    ui->labPDEfactors_notAllUnity->setPixmap(Rwindow->YellowIcon.pixmap(16,16));
-    ui->labSPEfactors_ActiveAndNotAllUnity->setPixmap(Rwindow->YellowIcon.pixmap(16,16));
     ui->cobPDE->setCurrentIndex(1); ui->cobSPE->setCurrentIndex(1);
     qDebug() << ">GUI initialized";
 

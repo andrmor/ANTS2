@@ -508,21 +508,29 @@ void APmHub::updateADClevels()
 
 double APmHub::GenerateSignalFromOnePhotoelectron(int ipm)
 {
-    switch ( PMs.at(ipm).SPePHSmode )
+    double val = 0;
+    const APm & pm = PMs.at(ipm);
+
+    switch ( pm.SPePHSmode )
     {
-      case 0: return PMs.at(ipm).AverageSigPerPhE;
-      case 1: return RandGen->Gaus( PMs.at(ipm).AverageSigPerPhE, PMs.at(ipm).SPePHSsigma );
-      case 2: return GammaRandomGen->getGamma( PMs.at(ipm).SPePHSshape, PMs.at(ipm).AverageSigPerPhE / PMs.at(ipm).SPePHSshape );
-      case 3:
-       {
-         if (PMs.at(ipm).SPePHShist) return PMs[ipm].SPePHShist->GetRandom();
-         else return 0;
-       }
-      default:;
+    case 0:
+        val = pm.AverageSigPerPhE;
+        break;
+    case 1:
+        val = RandGen->Gaus( pm.AverageSigPerPhE, pm.SPePHSsigma );
+        break;
+    case 2:
+        val = GammaRandomGen->getGamma( pm.SPePHSshape, pm.AverageSigPerPhE / pm.SPePHSshape );
+        break;
+    case 3:
+        if ( pm.SPePHShist )
+            val = pm.SPePHShist->GetRandom();
+        break;
+    default:
+        qWarning() << "Error: unrecognized type in signal per photoelectron generation";
     }
 
-    qWarning() << "Error: unrecognized type in signal per photoelectron generation";
-    return 0;
+    return val * pm.relElStrength;
 }
 
 void APmHub::RebinPDEsForType(int itype)

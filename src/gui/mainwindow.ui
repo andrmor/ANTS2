@@ -55,7 +55,7 @@
        </rect>
       </property>
       <property name="currentIndex">
-       <number>5</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tabDetector">
        <attribute name="title">
@@ -3392,14 +3392,14 @@ of the refracted beam:</string>
            <property name="geometry">
             <rect>
              <x>10</x>
-             <y>37</y>
+             <y>30</y>
              <width>161</width>
              <height>22</height>
             </rect>
            </property>
            <item>
             <property name="text">
-             <string>Constant factor</string>
+             <string>Constant</string>
             </property>
            </item>
            <item>
@@ -3421,14 +3421,17 @@ of the refracted beam:</string>
           <widget class="QLabel" name="label_230">
            <property name="geometry">
             <rect>
-             <x>193</x>
-             <y>9</y>
-             <width>171</width>
-             <height>16</height>
+             <x>180</x>
+             <y>6</y>
+             <width>230</width>
+             <height>20</height>
             </rect>
            </property>
            <property name="text">
             <string>Average signal per photoelectron:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
           </widget>
           <widget class="QStackedWidget" name="swElSignalModel">
@@ -3448,20 +3451,23 @@ of the refracted beam:</string>
             <widget class="QLabel" name="label_231">
              <property name="geometry">
               <rect>
-               <x>149</x>
-               <y>8</y>
-               <width>46</width>
-               <height>13</height>
+               <x>130</x>
+               <y>7</y>
+               <width>105</width>
+               <height>17</height>
               </rect>
              </property>
              <property name="text">
               <string>Sigma:</string>
              </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
             </widget>
             <widget class="QLineEdit" name="ledElsigma">
              <property name="geometry">
               <rect>
-               <x>187</x>
+               <x>237</x>
                <y>5</y>
                <width>71</width>
                <height>20</height>
@@ -3477,19 +3483,22 @@ of the refracted beam:</string>
              <property name="geometry">
               <rect>
                <x>97</x>
-               <y>5</y>
-               <width>91</width>
-               <height>16</height>
+               <y>4</y>
+               <width>139</width>
+               <height>20</height>
               </rect>
              </property>
              <property name="text">
               <string>Shape parameter:</string>
              </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
             </widget>
             <widget class="QLineEdit" name="ledElShape">
              <property name="geometry">
               <rect>
-               <x>187</x>
+               <x>236</x>
                <y>5</y>
                <width>71</width>
                <height>20</height>
@@ -3541,7 +3550,7 @@ of the refracted beam:</string>
           <widget class="QLineEdit" name="ledAverageSigPhotEl">
            <property name="geometry">
             <rect>
-             <x>362</x>
+             <x>412</x>
              <y>8</y>
              <width>71</width>
              <height>20</height>
@@ -3554,9 +3563,9 @@ of the refracted beam:</string>
           <widget class="QSpinBox" name="sbElTestGeneratorEvents">
            <property name="geometry">
             <rect>
-             <x>363</x>
+             <x>362</x>
              <y>65</y>
-             <width>71</width>
+             <width>121</width>
              <height>22</height>
             </rect>
            </property>
@@ -3571,7 +3580,7 @@ of the refracted beam:</string>
            <property name="geometry">
             <rect>
              <x>16</x>
-             <y>19</y>
+             <y>12</y>
              <width>46</width>
              <height>13</height>
             </rect>
@@ -3599,14 +3608,59 @@ of the refracted beam:</string>
            </property>
            <property name="geometry">
             <rect>
-             <x>237</x>
+             <x>227</x>
              <y>64</y>
-             <width>121</width>
+             <width>131</width>
              <height>23</height>
             </rect>
            </property>
            <property name="text">
             <string>Test generator</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_104">
+           <property name="geometry">
+            <rect>
+             <x>23</x>
+             <y>63</y>
+             <width>63</width>
+             <height>17</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Factor:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="leSPEfactor">
+           <property name="geometry">
+            <rect>
+             <x>91</x>
+             <y>62</y>
+             <width>71</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>1.0</string>
+           </property>
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+          </widget>
+          <widget class="QLabel" name="labSPEfactorNotUnity">
+           <property name="geometry">
+            <rect>
+             <x>20</x>
+             <y>64</y>
+             <width>18</width>
+             <height>17</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>--</string>
            </property>
           </widget>
          </widget>

@@ -312,6 +312,11 @@ MainWindow::MainWindow(DetectorClass *Detector,
     ui->cobAddIon->setMaxVisibleItems(10);
     ui->cobAddIon->setCurrentText("He");
     ui->cobPDE->setCurrentIndex(1); ui->cobSPE->setCurrentIndex(1);
+    //QPalette palette;
+    //palette.setColor(QPalette::Base, Qt::lightGray);
+    //palette.setColor(QPalette::Background, Qt::lightGray);
+    //ui->lePDEfactorInExplorer->setPalette(palette);
+
     qDebug() << ">GUI initialized";
 
     //change font size for all windows

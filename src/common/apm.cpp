@@ -142,7 +142,6 @@ void APm::copyADCdata(const APm& from)
 
 void APm::resetOverrides()
 {
-    effectivePDE = -1.0;
     PDE_lambda.clear();
     PDE.clear();
     PDEbinned.clear();

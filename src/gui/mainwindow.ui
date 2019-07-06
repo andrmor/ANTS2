@@ -5035,7 +5035,7 @@ of the refracted beam:</string>
          </property>
         </widget>
        </widget>
-       <widget class="QFrame" name="frame_9">
+       <widget class="QFrame" name="frSPEfactors">
         <property name="geometry">
          <rect>
           <x>276</x>

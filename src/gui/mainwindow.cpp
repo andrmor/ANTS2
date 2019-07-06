@@ -4823,4 +4823,7 @@ void MainWindow::on_pbGainsUpdateGUI_clicked()
 
     // "Gains" warning control
     ui->tabWidget->setTabIcon(5, ( !bAll_PDE_1 || (bSPEactive && !bAll_SPE_1) ? Rwindow->YellowIcon : QIcon()) );
+
+    // TEST FEATURE - disable the whole frame if SPE in electronics is not activated
+    ui->frSPEfactors->setEnabled(bSPEactive);
 }

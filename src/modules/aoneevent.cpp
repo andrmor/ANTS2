@@ -235,15 +235,12 @@ void AOneEvent::HitsToSignal()
 
     if (SimSet->fTimeResolved)
     {
-        //TimedPMsignals.resize(SimSet->TimeBins);
-        //for (int itime = 0; itime < SimSet->TimeBins; itime++) TimedPMsignals[itime].resize(numPMs);
-        //for (int ipm = 0; ipm < numPMs; ipm++) PMsignals[ipm] = 0;
-
         for (int itime = 0; itime < SimSet->TimeBins; itime++)
         {
             convertHitsToSignal(TimedPMhits.at(itime), TimedPMsignals[itime]);
 
-            for (int ipm = 0; ipm < numPMs; ipm++) PMsignals[ipm] += TimedPMsignals.at(itime).at(ipm);
+            for (int ipm = 0; ipm < numPMs; ipm++)
+                PMsignals[ipm] += TimedPMsignals.at(itime).at(ipm);
         }
     }
     else convertHitsToSignal(PMhits, PMsignals);
@@ -255,7 +252,7 @@ void AOneEvent::convertHitsToSignal(const QVector<float> & pmHits, QVector<float
     {
         const APm & pm = PMs->at(ipm);
 
-        // hits to signal
+        // SPE
         if ( PMs->isDoPHS() )
         {
             switch (pm.SPePHSmode)
@@ -264,40 +261,38 @@ void AOneEvent::convertHitsToSignal(const QVector<float> & pmHits, QVector<float
                 pmSignals[ipm] = pm.AverageSigPerPhE * pmHits.at(ipm);
                 break;
             case 1:
-            {
+              {
                 double mean =  pm.AverageSigPerPhE * pmHits.at(ipm);
                 double sigma = pm.SPePHSsigma * TMath::Sqrt( pmHits.at(ipm) );
                 pmSignals[ipm] = RandGen->Gaus(mean, sigma);
                 break;
-            }
+              }
             case 2:
-            {
+              {
                 double k = pm.SPePHSshape;
                 double theta = pm.AverageSigPerPhE / k;
                 k *= pmHits.at(ipm); //for sum distribution
                 pmSignals[ipm] = GammaRandomGen->getGamma(k, theta);
                 break;
-            }
+              }
             case 3:
-            {
+              {
                 pmSignals[ipm] = 0;
                 if ( pm.SPePHShist )
                 {
                     for (int j = 0; j < pmHits.at(ipm); j++)
                         pmSignals[ipm] += pm.SPePHShist->GetRandom();
                 }
+              }
             }
-            }
+
+            pmSignals[ipm] *= pm.relElStrength;
         }
         else pmSignals[ipm] = pmHits.at(ipm);
 
-        pmSignals[ipm] *= pm.relElStrength;
-
-        // adding electronic noise
+        // electronic noise
         if (PMs->isDoElNoise())
         {
-            //pmSignals[ipm] += RandGen->Gaus(0, PMs->at(ipm).ElNoiseSigma);
-
             const double& sigma_const = pm.ElNoiseSigma;
             const double& sigma_stat  = pm.ElNoiseSigma_StatSigma;
             const double& sigma_norm  = pm.ElNoiseSigma_StatNorm;
@@ -306,7 +301,7 @@ void AOneEvent::convertHitsToSignal(const QVector<float> & pmHits, QVector<float
             pmSignals[ipm] += RandGen->Gaus(0, sigma);
         }
 
-        // doing ADC sim
+        // ADC simulation
         if (PMs->isDoADC())
         {
             if (pmSignals[ipm] < 0) pmSignals[ipm] = 0;
@@ -318,135 +313,6 @@ void AOneEvent::convertHitsToSignal(const QVector<float> & pmHits, QVector<float
         }
     }
 }
-
-/*
-void OneEventClass::HitsToSignal()
-{
-  OneEventClass::AddDarkCounts(); //add dark counts for all SiPMs
-
-  PMsignals.resize(numPMs);  //protection
-  if (SimSet->fTimeResolved)
-  {
-      //preparing the container
-      TimedPMsignals.resize(SimSet->TimeBins);
-      for (int itime =0; itime < SimSet->TimeBins; itime++) TimedPMsignals[itime].resize(numPMs);
-
-      //converting hits to signal
-      for (int ipm=0; ipm<numPMs; ipm++)
-      {
-          if (SimSet->fTimeResolved)
-          {
-              PMsignals[ipm] = 0; //this will be accumulator
-              for (int t=0; t<SimSet->TimeBins; t++)
-              {
-                  if ( PMs->isDoPHS() )
-                  {
-                      switch ( PMs->at(ipm).SPePHSmode )
-                      {
-                        case 0:
-                          TimedPMsignals[t][ipm] = PMs->at(ipm).AverageSigPerPhE * TimedPMhits[t][ipm];
-                          break;
-                        case 1:
-                        {
-                          double mean = PMs->at(ipm).AverageSigPerPhE * TimedPMhits[t][ipm];
-                          double sigma = TMath::Sqrt(TimedPMhits[t][ipm]) * PMs->at(ipm).SPePHSsigma;
-                          TimedPMsignals[t][ipm] = RandGen->Gaus(mean, sigma);
-                          break;
-                        }
-                        case 2:
-                        {
-                          double k = PMs->at(ipm).SPePHSshape;
-                          double theta = PMs->at(ipm).AverageSigPerPhE / k;
-                          k *= TimedPMhits[t][ipm]; //for sum distribution
-                          TimedPMsignals[t][ipm] = GammaRandomGen->getGamma(k, theta);
-                          break;
-                        }
-                        case 3:
-                        {
-                          TimedPMsignals[t][ipm] = 0;
-                          if ( PMs->at(ipm).SPePHShist )
-                            for (int j=0; j<TimedPMhits[t][ipm]; j++)
-                                TimedPMsignals[t][ipm] += PMs->at(ipm).SPePHShist->GetRandom();
-                        }
-                      }
-                  }
-                  else TimedPMsignals[t][ipm] = TimedPMhits[t][ipm];
-
-                  //Electronic noise
-                  if (PMs->isDoElNoise())
-                      TimedPMsignals[t][ipm] += RandGen->Gaus(0, PMs->at(ipm).ElNoiseSigma);
-
-                  //ADC sim
-                  if (PMs->isDoADC())
-                    {
-                      if (TimedPMsignals[t][ipm]<0) TimedPMsignals[t][ipm]=0;
-                      else
-                        {
-                          if (TimedPMsignals[t][ipm] > PMs->at(ipm).ADCmax) TimedPMsignals[t][ipm] = PMs->at(ipm).ADClevels;
-                          else TimedPMsignals[t][ipm] = (int)( TimedPMsignals[t][ipm] / PMs->at(ipm).ADCstep );
-                        }
-                    }
-
-                  PMsignals[ipm] += TimedPMsignals[t][ipm];
-              } // end cycle by time bins
-          }
-      } //end cycle by PMs
-  } //end time resolved case  -- total signals are calculated later!
-  else
-  { //not time resolved case
-      for (int ipm=0; ipm<numPMs; ipm++)
-      {
-          if ( PMs->isDoPHS() )
-          {
-              switch ( PMs->at(ipm).SPePHSmode )
-              {
-                case 0:
-                  PMsignals[ipm] = PMs->at(ipm).AverageSigPerPhE * PMhitsTotal[ipm];
-                  break;
-                case 1:
-                {
-                  double mean =  PMs->at(ipm).AverageSigPerPhE * PMhitsTotal[ipm];
-                  double sigma = PMs->at(ipm).SPePHSsigma * TMath::Sqrt( PMhitsTotal[ipm] );
-                  PMsignals[ipm] = RandGen->Gaus(mean, sigma);
-                  break;
-                }
-                case 2:
-                {
-                  double k = PMs->at(ipm).SPePHSshape;
-                  double theta = PMs->at(ipm).AverageSigPerPhE / k;
-                  k *= PMhitsTotal[ipm]; //for sum distribution
-                  PMsignals[ipm] = GammaRandomGen->getGamma(k, theta);
-                  break;
-                }
-                case 3:
-                {
-                  PMsignals[ipm] = 0;
-                  if ( PMs->at(ipm).SPePHShist )
-                    for (int j=0; j<PMhitsTotal[ipm]; j++)
-                      PMsignals[ipm] += PMs->at(ipm).SPePHShist->GetRandom();
-                }
-              }
-          }
-          else PMsignals[ipm] = PMhitsTotal[ipm];
-
-          //Electronic noise
-          if (PMs->isDoElNoise())
-              PMsignals[ipm] += RandGen->Gaus(0, PMs->at(ipm).ElNoiseSigma);
-
-          //ADC sim
-          if (PMs->isDoADC())
-          {
-              if (PMsignals[ipm]<0) PMsignals[ipm]=0;
-              else
-                {
-                  if (PMsignals[ipm] > PMs->at(ipm).ADCmax) PMsignals[ipm] = PMs->at(ipm).ADClevels;
-                  else PMsignals[ipm] = (int)( PMsignals[ipm] / PMs->at(ipm).ADCstep );
-                }
-          }
-      } //end cycle by PMs
-    }//end not-time resolved case
-}
-*/
 
 void AOneEvent::AddDarkCounts() //currently applicable only for SiPMs!
 {

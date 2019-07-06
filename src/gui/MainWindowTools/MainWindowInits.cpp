@@ -287,7 +287,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
      << ui->fSecondaryScintLoadProfile << ui->pbUpdateSourcesIndication
      << ui->sbPMtype << ui->fUpperLowerArrays << ui->sbPMtypeForGroup
      << ui->pbRebuildDetector << ui->fReloadRequired << ui->pbYellow << ui->pbGDML << ui->fGunMultipleEvents
-     << ui->labPDEfactors_notAllUnity << ui->pbGainsUpdateGUI;
+     << ui->labPDEfactors_notAllUnity << ui->labSPEfactors_ActiveAndNotAllUnity << ui->pbGainsUpdateGUI;
     for (int i=0;i<invis.length();i++) invis[i]->setVisible(false);
     QList<QWidget*> disables;
     disables << ui->fFixedDir << ui->fFixedWorldSize;
@@ -309,6 +309,8 @@ MainWindow::MainWindow(DetectorClass *Detector,
     ui->cobAddIon->setMaxVisibleItems(10);
     ui->cobAddIon->setCurrentText("He");
     ui->labPDEfactors_notAllUnity->setPixmap(Rwindow->YellowIcon.pixmap(16,16));
+    ui->labSPEfactors_ActiveAndNotAllUnity->setPixmap(Rwindow->YellowIcon.pixmap(16,16));
+    ui->cobPDE->setCurrentIndex(1); ui->cobSPE->setCurrentIndex(1);
     qDebug() << ">GUI initialized";
 
     //change font size for all windows

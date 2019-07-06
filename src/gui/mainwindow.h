@@ -420,10 +420,7 @@ private slots:
     void on_pbLoadPMcenters_clicked();
     void on_pbSavePMcenters_clicked();
     void on_pbSetPMtype_clicked();    
-    void on_pbLoadRelELfactors_clicked();
-    void on_pbRandomScaleELaverages_clicked();
-    void on_pbSetELaveragesToUnity_clicked();
-    void on_pbShowRelGains_clicked();
+    void on_pbSetSPEfactors_clicked();
     void on_actionSave_configuration_triggered();
     void on_actionLoad_configuration_triggered();
     void on_pbRemoveParticle_clicked();
@@ -561,9 +558,7 @@ private slots:
 
     void on_pteParticleGenerationScript_customContextMenuRequested(const QPoint &pos);
 
-    void on_pbRelQERandomScaleELaverages_clicked();
-
-    void on_pbRelQESetELaveragesToUnity_clicked();
+    void on_pbSetPDEfactors_clicked();
 
     void on_pnShowHideAdvanced_Particle_toggled(bool checked);
 
@@ -597,6 +592,12 @@ private slots:
 
     void on_pbGainsUpdateGUI_clicked();
 
+    void on_pbShowSPEfactors_clicked();
+
+    void on_pbRandomizePDEfactors_clicked();
+
+    void on_pbRandomizeSPEfactors_clicked();
+
 public slots:
     void on_pbRebuildDetector_clicked();
     void onRequestDetectorGuiUpdate();     // called to update GUI related to Detector
@@ -613,6 +614,8 @@ private:
     void initDetectorSandwich();
     void onGuiEnableStatus(bool fLocked);
     void ShowParticleSource_noFocus();
+    void showPDEorSPEfactors(bool bShowPDE);
+    void randomizePDEorSPEfactors(bool bDoPDE, bool bUniform, double min, double max, double mean, double sigma);
 
 #ifdef __USE_ANTS_PYTHON__
     void createPythonScriptWindow();

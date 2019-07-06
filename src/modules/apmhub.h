@@ -97,6 +97,8 @@ public:
     void   setPDEwave(int ipm, QVector<double>* x, QVector<double>* y);
     bool   isAllPDEfactorsUnity() const;
     bool   isAllPDEfactorsSame(double & value) const;
+    bool   isAllSPEfactorsUnity() const;
+    bool   isAllSPEfactorsSame(double & value) const;
 
     //Angular response
     bool   isAngularOverriden(int ipm) const;
@@ -128,8 +130,6 @@ public:
     void updateTypeAngularN1(int typ, double val);
     void updateTypeArea(int typ, QVector<QVector <double> > *vec, double xStep, double yStep);
     void clearTypeArea(int typ);
-
-    void CalculateElChannelsStrength();
 
     void setDoPHS(bool flag) {fDoPHS = flag;}
     void setDoMCcrosstalk(bool flag) {fDoMCcrosstalk = flag;}

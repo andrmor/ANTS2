@@ -206,34 +206,78 @@ void APms_SI::SetPDE_factor(int ipm, double value)
     {
         PMs->at(ipm).relQE_PDE = value;
         Config->GetDetector()->writeToJson(Config->JSON);
-        Config->GetDetector()->BuildDetector();
+        //Config->GetDetector()->BuildDetector();
     }
 }
 
-void APms_SI::SetPDE_factors(QVariantList ArrayWithFactors)
+void APms_SI::SetSPE_factor(int ipm, double value)
 {
-    if (ArrayWithFactors.size() < PMs->count())
-    {
-        abort("Too short array with PDE factors");
-        return;
-    }
+    if (!checkValidPM(ipm)) return;
 
-    bool bOK;
-    for (int ipm = 0; ipm < PMs->count(); ipm++)
+    if (value < 0) abort("Cannot use negative PDE factor");
+    else
     {
-        double val = ArrayWithFactors.at(ipm).toDouble(&bOK);
-        if (!bOK || val < 0)
+        PMs->at(ipm).relElStrength = value;
+        Config->GetDetector()->writeToJson(Config->JSON);
+        //Config->GetDetector()->BuildDetector();
+    }
+}
+
+void APms_SI::SetPDE_factors(QVariant CommonValue_or_Array)
+{
+    setFactors(CommonValue_or_Array, true);
+}
+
+void APms_SI::SetSPE_factors(QVariant CommonValue_or_Array)
+{
+    setFactors(CommonValue_or_Array, false);
+}
+
+void APms_SI::setFactors(QVariant CommonValue_or_Array, bool bDoPDE)
+{
+    if (CommonValue_or_Array.type() == QVariant::List)
+    {
+        QVariantList vl = CommonValue_or_Array.toList();
+        if (vl.size() < PMs->count())
         {
-            abort("Array of PDE gactors should contain non-negative values");
+            abort("Too short array with factors");
             return;
         }
+
+        bool bOK;
+        for (int ipm = 0; ipm < PMs->count(); ipm++)
+        {
+            double val = vl.at(ipm).toDouble(&bOK);
+            if (!bOK || val < 0)
+            {
+                abort("Array of factors should contain only non-negative numeric values");
+                return;
+            }
+        }
+
+        if (bDoPDE)
+            for (int ipm = 0; ipm < PMs->count(); ipm++) PMs->at(ipm).relQE_PDE = vl.at(ipm).toDouble();
+        else
+            for (int ipm = 0; ipm < PMs->count(); ipm++) PMs->at(ipm).relElStrength = vl.at(ipm).toDouble();
+    }
+    else
+    {
+        bool bOK;
+        const double val = CommonValue_or_Array.toDouble(&bOK);
+        if (!bOK)
+        {
+            abort("Error converting factor to double value");
+            return;
+        }
+
+        if (bDoPDE)
+            for (int ipm = 0; ipm < PMs->count(); ipm++) PMs->at(ipm).relQE_PDE = val;
+        else
+            for (int ipm = 0; ipm < PMs->count(); ipm++) PMs->at(ipm).relElStrength = val;
     }
 
-    for (int ipm = 0; ipm < PMs->count(); ipm++)
-        PMs->at(ipm).relQE_PDE = ArrayWithFactors.at(ipm).toDouble();
-
     Config->GetDetector()->writeToJson(Config->JSON);
-    Config->GetDetector()->BuildDetector();
+    //Config->GetDetector()->BuildDetector();
 }
 
 double APms_SI::GetPDE(int ipm, int WaveIndex, double Angle, double Xlocal, double Ylocal)

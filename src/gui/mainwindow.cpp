@@ -3144,70 +3144,51 @@ void MainWindow::on_pbSetPMtype_clicked()
   if (counter>0) MainWindow::ReconstructDetector();
 }
 
-void MainWindow::on_pbLoadRelELfactors_clicked()
+void MainWindow::on_pbRandomizePDEfactors_clicked()
 {
-  QString fileName = QFileDialog::getOpenFileName(this, "Load relative strength of electronic channels", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
-  qDebug()<<fileName;
+    bool bUniform = ( ui->cobPDE->currentIndex() == 0 );
+    double min =      ui->ledPDEmin->text().toDouble();
+    double max =      ui->ledPDEmax->text().toDouble();
+    double mean =     ui->ledPDEmean->text().toDouble();
+    double sigma =    ui->ledPDEsigma->text().toDouble();
 
-  if (fileName.isEmpty()) return;
-  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-
-  Detector->PMs->setDoPHS( true );
-
-  QVector<double> x;
-  int ok = LoadDoubleVectorsFromFile(fileName, &x);
-
-  if (ok != 0) return;
-  if (x.size() != PMs->count())
-    {
-      message("Wrong number of PMs!", this);
-      return;
-    }
-
-  for (int i=0; i<x.size(); i++) PMs->at(i).relElStrength = x[i];
-  PMs->CalculateElChannelsStrength();
-
-  //ui->cbEnableSPePHS->setChecked(true);
-  ReconstructDetector(true);
-  //MainWindow::on_pbElUpdateIndication_clicked();
+    randomizePDEorSPEfactors(true, bUniform, min, max, mean, sigma);
 }
 
-void MainWindow::on_pbRandomScaleELaverages_clicked()
+void MainWindow::on_pbRandomizeSPEfactors_clicked()
 {
-  Detector->PMs->setDoPHS( true );
+    bool bUniform = ( ui->cobSPE->currentIndex() == 0 );
+    double min =      ui->ledSPEmin->text().toDouble();
+    double max =      ui->ledSPEmax->text().toDouble();
+    double mean =     ui->ledSPEmean->text().toDouble();
+    double sigma =    ui->ledSPEsigma->text().toDouble();
 
-  bool bUniform = ( ui->cobScaleGainsUniNorm->currentIndex() == 0 );
-  double min = ui->ledELavScaleMin->text().toDouble();
-  double max = ui->ledELavScaleMax->text().toDouble();
-  if (bUniform && min >= max) return;
-  double mean = ui->ledELavScaleMean->text().toDouble();
-  double sigma = ui->ledELavScaleSigma->text().toDouble();
+    randomizePDEorSPEfactors(false, bUniform, min, max, mean, sigma);
+}
 
-  for (int ipm = 0; ipm<PMs->count(); ipm++)
+void MainWindow::randomizePDEorSPEfactors(bool bDoPDE, bool bUniform, double min, double max, double mean, double sigma)
+{
+    if (bUniform)
     {
-      double factor;
-      if (bUniform)
+        if (min < 0 || max < 0)
         {
-          factor = Detector->RandGen->Rndm();
-          factor = min + (max-min)*factor;
+            message("Min and max should be positive", this);
+            return;
         }
-      else
-          factor = Detector->RandGen->Gaus(mean, sigma);
-
-      PMs->at(ipm).scaleSPePHS(factor);
+        if (max < min)
+        {
+            message("Max cannot be smaller than min", this);
+            return;
+        }
     }
-
-  ReconstructDetector(true);
-}
-
-void MainWindow::on_pbRelQERandomScaleELaverages_clicked()
-{
-    bool bUniform = ( ui->cobRelQEScaleGainsUniNorm->currentIndex() == 0 );
-    double min = ui->ledRelQEELavScaleMin->text().toDouble();
-    double max = ui->ledRelQEELavScaleMax->text().toDouble();
-    if (bUniform && min >= max) return;
-    double mean = ui->ledRelQEELavScaleMean->text().toDouble();
-    double sigma = ui->ledRelQEELavScaleSigma->text().toDouble();
+    else
+    {
+        if (mean < 0 || sigma < 0)
+        {
+            message("Mean and sigma should be positive", this);
+            return;
+        }
+    }
 
     for (int ipm = 0; ipm < PMs->count(); ipm++)
     {
@@ -3215,46 +3196,58 @@ void MainWindow::on_pbRelQERandomScaleELaverages_clicked()
         if (bUniform)
         {
             factor = Detector->RandGen->Rndm();
-            factor = min + (max-min)*factor;
+            factor = min + (max - min) * factor;
         }
         else
             factor = Detector->RandGen->Gaus(mean, sigma);
 
-        PMs->at(ipm).relQE_PDE = factor;
+        if (bDoPDE) PMs->at(ipm).relQE_PDE     = factor;
+        else        PMs->at(ipm).relElStrength = factor;
     }
+
+    if (!bDoPDE) Detector->PMs->setDoPHS( true );
 
     ReconstructDetector(true);
 }
 
-void MainWindow::on_pbRelQESetELaveragesToUnity_clicked()
+void MainWindow::on_pbSetPDEfactors_clicked()
 {
-    double val = ui->ledRelQEvalue->text().toDouble();
+    double val = ui->ledPDEfactor->text().toDouble();
     for (int ipm = 0; ipm < PMs->count(); ipm++)
         PMs->at(ipm).relQE_PDE = val;
 
     ReconstructDetector(true);
 }
 
-void MainWindow::on_pbSetELaveragesToUnity_clicked()
+void MainWindow::on_pbSetSPEfactors_clicked()
 {
-    Detector->PMs->setDoPHS( true );
-
-    double val = ui->ledELEvalue->text().toDouble();
+    double val = ui->ledSPEfactor->text().toDouble();
     for (int ipm = 0; ipm<PMs->count(); ipm++)
-        PMs->at(ipm).scaleSPePHS(val);
+        PMs->at(ipm).relElStrength = val;
 
+    Detector->PMs->setDoPHS(true);
     ReconstructDetector(true);
 }
 
 void MainWindow::on_pbShowPDEfactors_clicked()
 {
+    showPDEorSPEfactors(true);
+}
+
+void MainWindow::on_pbShowSPEfactors_clicked()
+{
+    showPDEorSPEfactors(false);
+}
+
+void MainWindow::showPDEorSPEfactors(bool bShowPDE)
+{
     QDialog * d = new QDialog(this);
-    d->setWindowTitle("PDE factors");
+    d->setWindowTitle( bShowPDE ? "PDE factors" : "SPE signal factgors" );
     QVBoxLayout * v = new QVBoxLayout();
     d->setLayout(v);
         QPlainTextEdit * e = new QPlainTextEdit();
         e->setReadOnly(true);
-        e->appendPlainText("PM\tPDE_factor");
+        e->appendPlainText( bShowPDE ? "PM\tPDE_factor" : "PM\tSPE_factor" );
     v->addWidget(e);
         QPushButton * b = new QPushButton("Close");
         QObject::connect(b, &QPushButton::clicked, d, &QDialog::accept);
@@ -3263,14 +3256,19 @@ void MainWindow::on_pbShowPDEfactors_clicked()
     QVector<QString> tmp;
     for (int ipm = 0; ipm < PMs->count(); ipm++)
     {
-        double PDE = PMs->at(ipm).relQE_PDE;
-        tmp.append( QString::number(PDE, 'g', 3) );
-        e->appendPlainText( QString("pm#%1\t%2").arg(ipm).arg(PDE) );
+        double v = ( bShowPDE ? PMs->at(ipm).relQE_PDE : PMs->at(ipm).relElStrength );
+        tmp.append( QString::number(v, 'g', 3) );
+        e->appendPlainText( QString("%1\t%2").arg(ipm).arg(v) );
     }
+    QTextCursor textCursor = e->textCursor();
+    textCursor.movePosition(QTextCursor::Start, QTextCursor::MoveAnchor,1);
+    e->setTextCursor(textCursor);
+
     GeometryWindow->ShowText(tmp, kRed);
     d->exec();
 }
 
+/*
 void MainWindow::on_pbShowRelGains_clicked()
 {
     double max = -1e20;
@@ -3290,6 +3288,7 @@ void MainWindow::on_pbShowRelGains_clicked()
 
     GeometryWindow->ShowText(tmp, kRed);
 }
+*/
 
 void MainWindow::on_pbSaveResults_clicked()
 {
@@ -4797,14 +4796,31 @@ void MainWindow::on_actionExit_triggered()
 
 void MainWindow::on_pbGainsUpdateGUI_clicked()
 {
+    // PDE factors
     bool bAll_PDE_1 = PMs->isAllPDEfactorsUnity();
 
-    ui->tabWidget->setTabIcon(5, ( bAll_PDE_1 ? QIcon() : Rwindow->YellowIcon ) );
+    double same;
+    QString str = "Status: ";
+    if ( PMs->isAllPDEfactorsSame(same) ) str += QString("all factors = %1").arg(same);
+    else                                  str += "different factors";
+    ui->labPDEfactors->setText(str);
     ui->labPDEfactors_notAllUnity->setVisible( !bAll_PDE_1 );
 
-    double same;
-    QString str;
-    if ( PMs->isAllPDEfactorsSame(same) ) str = QString("All factors = %1").arg(same);
-    else str = "Different factors";
-    ui->labPDEfactors->setText(str);
+    // SPE factors
+    bool bSPEactive = PMs->isDoPHS();
+    bool bAll_SPE_1 = PMs->isAllSPEfactorsUnity();
+
+    if (bSPEactive)
+    {
+        str = "Status: ";
+        if ( PMs->isAllSPEfactorsSame(same) ) str += QString("all factors = %1").arg(same);
+        else                                  str += "different factors";
+    }
+    else str = "NOT active: ph.e -> signal disabled";
+
+    ui->labSPEfactors->setText(str);
+    ui->labSPEfactors_ActiveAndNotAllUnity->setVisible( bSPEactive && !bAll_SPE_1 );
+
+    // "Gains" warning control
+    ui->tabWidget->setTabIcon(5, ( !bAll_PDE_1 || (bSPEactive && !bAll_SPE_1) ? Rwindow->YellowIcon : QIcon()) );
 }

@@ -249,29 +249,31 @@ void AOneEvent::HitsToSignal()
     else convertHitsToSignal(PMhits, PMsignals);
 }
 
-void AOneEvent::convertHitsToSignal(const QVector<float>& pmHits, QVector<float>& pmSignals)
+void AOneEvent::convertHitsToSignal(const QVector<float> & pmHits, QVector<float> & pmSignals)
 {
     for (int ipm = 0; ipm < numPMs; ipm++)
     {
+        const APm & pm = PMs->at(ipm);
+
         // hits to signal
         if ( PMs->isDoPHS() )
         {
-            switch ( PMs->at(ipm).SPePHSmode )
+            switch (pm.SPePHSmode)
             {
             case 0:
-                pmSignals[ipm] = PMs->at(ipm).AverageSigPerPhE * pmHits.at(ipm);
+                pmSignals[ipm] = pm.AverageSigPerPhE * pmHits.at(ipm);
                 break;
             case 1:
             {
-                double mean =  PMs->at(ipm).AverageSigPerPhE * pmHits.at(ipm);
-                double sigma = PMs->at(ipm).SPePHSsigma * TMath::Sqrt( pmHits.at(ipm) );
+                double mean =  pm.AverageSigPerPhE * pmHits.at(ipm);
+                double sigma = pm.SPePHSsigma * TMath::Sqrt( pmHits.at(ipm) );
                 pmSignals[ipm] = RandGen->Gaus(mean, sigma);
                 break;
             }
             case 2:
             {
-                double k = PMs->at(ipm).SPePHSshape;
-                double theta = PMs->at(ipm).AverageSigPerPhE / k;
+                double k = pm.SPePHSshape;
+                double theta = pm.AverageSigPerPhE / k;
                 k *= pmHits.at(ipm); //for sum distribution
                 pmSignals[ipm] = GammaRandomGen->getGamma(k, theta);
                 break;
@@ -279,22 +281,26 @@ void AOneEvent::convertHitsToSignal(const QVector<float>& pmHits, QVector<float>
             case 3:
             {
                 pmSignals[ipm] = 0;
-                if ( PMs->at(ipm).SPePHShist )
+                if ( pm.SPePHShist )
+                {
                     for (int j = 0; j < pmHits.at(ipm); j++)
-                        pmSignals[ipm] += PMs->at(ipm).SPePHShist->GetRandom();
+                        pmSignals[ipm] += pm.SPePHShist->GetRandom();
+                }
             }
             }
         }
         else pmSignals[ipm] = pmHits.at(ipm);
+
+        pmSignals[ipm] *= pm.relElStrength;
 
         // adding electronic noise
         if (PMs->isDoElNoise())
         {
             //pmSignals[ipm] += RandGen->Gaus(0, PMs->at(ipm).ElNoiseSigma);
 
-            const double& sigma_const = PMs->at(ipm).ElNoiseSigma;
-            const double& sigma_stat  = PMs->at(ipm).ElNoiseSigma_StatSigma;
-            const double& sigma_norm  = PMs->at(ipm).ElNoiseSigma_StatNorm;
+            const double& sigma_const = pm.ElNoiseSigma;
+            const double& sigma_stat  = pm.ElNoiseSigma_StatSigma;
+            const double& sigma_norm  = pm.ElNoiseSigma_StatNorm;
 
             const double sigma = (sigma_stat == 0 ? sigma_const : sqrt( sigma_const*sigma_const  +  sigma_stat*sigma_stat * pmSignals.at(ipm) / sigma_norm) );
             pmSignals[ipm] += RandGen->Gaus(0, sigma);
@@ -306,8 +312,7 @@ void AOneEvent::convertHitsToSignal(const QVector<float>& pmHits, QVector<float>
             if (pmSignals[ipm] < 0) pmSignals[ipm] = 0;
             else
             {
-                if (pmSignals[ipm] > PMs->at(ipm).ADCmax)
-                    pmSignals[ipm] = PMs->at(ipm).ADClevels;
+                if (pmSignals[ipm] > pm.ADCmax) pmSignals[ipm] = pm.ADClevels;
                 else pmSignals[ipm] = static_cast<int>( pmSignals.at(ipm) / PMs->at(ipm).ADCstep );
             }
         }

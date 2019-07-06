@@ -506,12 +506,6 @@ void APmHub::updateADClevels()
   }
 }
 
-void APmHub::CalculateElChannelsStrength()
-{
-    for (int ipm = 0; ipm<PMs.size(); ipm++)
-        PMs[ipm].scaleSPePHS( PMs.at(ipm).relElStrength );
-}
-
 double APmHub::GenerateSignalFromOnePhotoelectron(int ipm)
 {
     switch ( PMs.at(ipm).SPePHSmode )
@@ -1024,6 +1018,29 @@ bool APmHub::isAllPDEfactorsSame(double &value) const
     value = PMs[0].relQE_PDE;
     for (int ipm=1; ipm<count(); ipm++)
         if (PMs[ipm].relQE_PDE != value) return false;
+
+    return true;
+}
+
+bool APmHub::isAllSPEfactorsUnity() const
+{
+    for (int ipm=0; ipm<count(); ipm++)
+        if (PMs[ipm].relElStrength != 1.0) return false;
+
+    return true;
+}
+
+bool APmHub::isAllSPEfactorsSame(double &value) const
+{
+    if (count() == 0)
+    {
+        value = 0;
+        return true;
+    }
+
+    value = PMs[0].relElStrength;
+    for (int ipm=1; ipm<count(); ipm++)
+        if (PMs[ipm].relElStrength != value) return false;
 
     return true;
 }

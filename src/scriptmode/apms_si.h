@@ -37,7 +37,10 @@ public slots:
   void     SetAllArraysFullyCustom();
 
   void     SetPDE_factor(int ipm, double value);
-  void     SetPDE_factors(QVariantList ArrayWithFactors);
+  void     SetPDE_factors(QVariant CommonValue_or_Array);
+
+  void     SetSPE_factor(int ipm, double value);
+  void     SetSPE_factors(QVariant CommonValue_or_Array);
 
   double   GetPDE(int ipm, int WaveIndex = -1, double Angle = 0, double Xlocal = 0, double Ylocal = 0);
 
@@ -47,6 +50,7 @@ private:
 
   bool checkValidPM(int ipm);
   bool checkAddPmCommon(int UpperLower, int type);
+  void setFactors(QVariant CommonValue_or_Array, bool bDoPDE);
 };
 
 #endif // APMS_SI_H

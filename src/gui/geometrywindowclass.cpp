@@ -603,20 +603,13 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
     {
 #ifdef __USE_ANTS_JSROOT__
         QWebEnginePage * page = WebView->page();
-        page->runJavaScript("JSROOT.GetMainPainter(\"onlineGUI_drawing\").produceCameraUrl()", [page](const QVariant &v)
+        page->runJavaScript("JSROOT.GetMainPainter(\"onlineGUI_drawing\").produceCameraUrl(6)", [page](const QVariant &v)
         {
             QString reply = v.toString();
-            qDebug() << reply; // let's ask Sergey to make JSON with this data
+            qDebug() << reply;
             QStringList sl = reply.split(',', QString::SkipEmptyParts); //quick parse just for now
             if (sl.size() > 2)
             {
-                //QString rotyS = sl.at(0); rotyS.remove(0, 4);
-                //QString rotzS = sl.at(1); rotzS.remove(0, 4);
-                //QString zoomS = sl.at(2); zoomS.remove(0, 4);
-                //double roty = rotyS.toDouble();
-                //double rotz = rotzS.toDouble();
-                //double zoom = zoomS.toDouble();
-                //qDebug() << roty << rotz << zoom;
                 QString s;
                 //s += "roty" + ui->leY->text() + ",";
                 s += sl.at(0) + ",";
@@ -625,6 +618,7 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
                 //s += "zoom" + ui->leZoom->text() + ",";
                 s += sl.at(2) + ",";
                 s += "dray,nohighlight,all,tracks,transp50";
+                qDebug() << s;
 
                 page->runJavaScript("JSROOT.redraw(\"onlineGUI_drawing\", JSROOT.GetMainPainter(\"onlineGUI_drawing\").GetObject(), \"" + s + "\");");
             }
@@ -659,10 +653,10 @@ void GeometryWindowClass::on_pbTest_clicked()
                 "var xhr = JSROOT.NewHttpRequest('http://localhost:8080/multi.json?number=2', 'multi', function(res)"
                                                         "{"
                                                             "if (!res) return;"
-                                                            "JSROOT.draw('onlineGUI_drawing', res[0], 'transp50');"
+                                                            "JSROOT.redraw('onlineGUI_drawing', res[0], 'transp50;tracks');"
                                                         "}"
                                                 ");"
-                "xhr.send('Objects/GeoWorld/WorldBox_1/root.json\nObjects/GeoTracks/TObjArray/root.json\n');"
+                "xhr.send('Objects/GeoWorld/WorldBox_1/root.json\\nObjects/GeoTracks/TObjArray/root.json\\n');"
                 //"xhr.send('/Objects/GeoWorld/WorldBox_1/root.json\n');"
                 );
 
@@ -721,7 +715,7 @@ void GeometryWindowClass::ClearTracks(bool bRefreshWindow)
 
 void GeometryWindowClass::on_pbShowGeometry_clicked()
 {
-  GeometryWindowClass::ShowAndFocus();
+  ShowAndFocus();
   RasterWindow->ForceResize();
   fRecallWindow = false;
 

@@ -63,7 +63,7 @@ public:
     double PreprocessingMultiply = 1.0;
 
     // photon detection efficiency
-    //double effectivePDE = -1.0; // -1 = undefined
+    double effectivePDE = -1.0; // -1 = undefined
     QVector<double> PDE;        // ***!!! use single container
     QVector<double> PDE_lambda; // ***!!! use single container
     QVector<double> PDEbinned;

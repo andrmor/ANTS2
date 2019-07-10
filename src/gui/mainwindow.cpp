@@ -1666,8 +1666,7 @@ void MainWindow::on_pbIndPMshowInfo_clicked()
     Detector->findPM(ipm, ul, index);
     if (index<0) return;
     APmPosAngTypeRecord *p = &Detector->PMarrays[ul].PositionsAnglesTypes[index];
-    APm * PM = &PMs->at(ipm);
-    APmType * type = PMs->getType(p->type);
+    APm *PM = &PMs->at(ipm);
 
     //format should be the same in MainWindow::on_pbUpdateToFixedZ_clicked() and MainWindow::on_pbUpdateToFullCustom_clicked()
     ui->ledIndPMx->setText(QString::number(PM->x, 'g', 4));
@@ -1679,7 +1678,22 @@ void MainWindow::on_pbIndPMshowInfo_clicked()
     ui->ledIndPMpsi->setText(QString::number(PM->psi, 'g', 4));
     ui->cobPMtypeInExplorers->setCurrentIndex(PM->type);
 
-    ui->ledIndEffectiveDE->setText( QString::number(type->EffectivePDE) );
+    //-- overrides --
+    //effective DE    
+    double eDE = PMs->at(ipm).effectivePDE;
+    QString str;
+    APmType* type = PMs->getType(p->type);
+    if (eDE == -1)
+    {
+        str.setNum(type->EffectivePDE);
+        ui->labIndDEStatus->setText("Inherited:");
+    }
+    else
+    {
+        str.setNum(eDE, 'g', 4);
+        ui->labIndDEStatus->setText("<b>Override:</b>");
+    }
+    ui->ledIndEffectiveDE->setText(str);
     ui->lePDEfactorInExplorer->setText( QString::number(PMs->at(ipm).relQE_PDE, 'g', 4) );
     ui->leActualPDE_Scalar->setText( QString::number(PMs->getActualPDE(ipm, -1), 'g', 4) );
 
@@ -1687,31 +1701,30 @@ void MainWindow::on_pbIndPMshowInfo_clicked()
 
     //wave-resolved DE
     if (PMs->isPDEwaveOverriden(ipm))
-    {
-        ui->labIndDEwaveStatus->setText("<b>Override</b>");
+      {
+        ui->labIndDEwaveStatus->setText("<b>Override:</b>");
+        ui->pbIndRestoreDE->setEnabled(true);
         ui->pbIndShowDE->setEnabled(true);
         if (ui->cbWaveResolved->isChecked()) ui->pbIndShowDEbinned->setEnabled(true);
         else ui->pbIndShowDEbinned->setEnabled(false);
-        ui->pbIndRestoreDE->setEnabled(true);
-    }
+      }
     else
-    {
-       if (type->PDE.size() > 0)
-       {
-          ui->labIndDEwaveStatus->setText("Inherited");
+      {       
+       ui->pbIndRestoreDE->setEnabled(false);
+       if (type->PDE.size()>0)
+         {
+          ui->labIndDEwaveStatus->setText("Inherited:");
           ui->pbIndShowDE->setEnabled(true);          
           if (ui->cbWaveResolved->isChecked()) ui->pbIndShowDEbinned->setEnabled(true);
           else ui->pbIndShowDEbinned->setEnabled(false);
-       }
+         }
        else
-       {
+         {
           ui->labIndDEwaveStatus->setText("Not defined");
           ui->pbIndShowDE->setEnabled(false);
           ui->pbIndShowDEbinned->setEnabled(false);
-       }
-       ui->pbIndRestoreDE->setEnabled(false);
+         }
     }
-
     //Angular
     if (PMs->isAngularOverriden(ipm))
       {
@@ -1947,6 +1960,24 @@ void MainWindow::on_pbIndShowType_clicked()
   ui->sbPMtype->setValue(ui->cobPMtypeInExplorers->currentIndex());
 }
 
+void MainWindow::on_ledIndEffectiveDE_editingFinished()
+{
+    const int ipm = ui->sbIndPMnumber->value();
+    const double val = ui->ledIndEffectiveDE->text().toDouble();
+
+    PMs->at(ipm).effectivePDE = val;
+
+    ReconstructDetector(true);
+    //MainWindow::on_pbIndPMshowInfo_clicked();
+}
+
+void MainWindow::on_pbIndRestoreEffectiveDE_clicked()
+{
+    const int ipm = ui->sbIndPMnumber->value();
+    PMs->at(ipm).effectivePDE = -1.0;
+    ReconstructDetector(true);
+}
+
 void MainWindow::on_pbIndShowDE_clicked()
 {  
     const int ipm = ui->sbIndPMnumber->value();
@@ -1980,6 +2011,8 @@ void MainWindow::on_pbIndShowDE_clicked()
 void MainWindow::on_pbIndRestoreDE_clicked()
 {
     const int ipm = ui->sbIndPMnumber->value();
+
+    PMs->at(ipm).effectivePDE = -1.0;
 
     PMs->at(ipm).PDE.clear();
     PMs->at(ipm).PDE_lambda.clear();

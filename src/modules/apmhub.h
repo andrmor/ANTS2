@@ -89,6 +89,8 @@ public:
     //PDE
     bool   isPDEwaveOverriden(int ipm) const;
     bool   isPDEwaveOverriden() const;
+    bool   isPDEeffectiveOverriden() const;
+    void   writePDEeffectiveToJson(QJsonObject &json);
     bool   readPDEeffectiveFromJson(QJsonObject &json);
     void   writePDEwaveToJson(QJsonObject &json);
     bool   readPDEwaveFromJson(QJsonObject &json);

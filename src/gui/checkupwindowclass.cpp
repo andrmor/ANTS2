@@ -516,14 +516,9 @@ TriState SecondaryScintCheckUpItem::doCheckUp() {
     return (state = TriStateOk);
 }
 
-const QString DESCheckUpItem::getToolTip() const
-{
-    return state == TriStateWarning ? "Other PMs have overriden scalars, but this one does not" : "";
-}
-
+const QString DESCheckUpItem::getToolTip() const  { return state == TriStateWarning ? "Other PMs have overriden scalars, but this one does not" : ""; }
 TriState DESCheckUpItem::doCheckUp()
 {
-    /*
     const double effPDE = MW->PMs->at( row() ).effectivePDE;
     if(effPDE != -1)
         return setState(TriStateOk, QString::number(effPDE, 'g', 4));
@@ -533,11 +528,7 @@ TriState DESCheckUpItem::doCheckUp()
     for(; ipm < MW->PMs->count(); ipm++)
         if( MW->PMs->at(ipm).effectivePDE != -1.0 && ipm != row())
             break;
-
     return setState((ipm == MW->PMs->count()) ? TriStateOk : TriStateWarning, QString::number(pmtype->EffectivePDE, 'g', 4));
-    */
-
-    return setState(TriStateOk, "OK");
 }
 
 const QString DEWCheckUpItem::getToolTip() const  { return "Overriden DE" + CheckUpItem::wavelenToolTips[overriden] + " and Inherited DE" + CheckUpItem::wavelenToolTips[inherited]; }

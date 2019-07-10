@@ -37,14 +37,19 @@ APmHub::~APmHub()
 
 void APmHub::writeInividualOverridesToJson(QJsonObject &json)
 {
-    QJsonObject js;
+  QJsonObject js;
 
+  //if (isPDEeffectiveOverriden())
+    writePDEeffectiveToJson(js);  // scalar PDEs
+  //if (isPDEwaveOverriden())
     writePDEwaveToJson(js);       // wave-resolved PDE
+  //if (isAngularOverriden())
     writeAngularToJson(js);       // angular response
+  //if (isAreaOverriden())
     writeAreaToJson(js);          // area response
-    writeRelQE_PDE(js);             // relative factors used to adjust gains
+  writeRelQE_PDE(js);             // relative factors used to adjust gains
 
-    json["IndividualPMoverrides"] = js;
+  json["IndividualPMoverrides"] = js;
 }
 
 bool APmHub::readInividualOverridesFromJson(QJsonObject &json)
@@ -669,7 +674,11 @@ double APmHub::getActualPDE(int ipm, int WaveIndex) const
     if (!WavelengthResolved || WaveIndex == -1)
     {
         //Case: Not wavelength-resolved or no spectral data during this photon generation
-        PDE = PMtypes.at( pm.type )->EffectivePDE;
+
+        if (pm.effectivePDE != -1.0)                        // use override if exists
+            PDE = pm.effectivePDE;
+        else                                                // otherwise use type info
+            PDE = PMtypes.at( pm.type )->EffectivePDE;
     }
     else
     {
@@ -684,7 +693,12 @@ double APmHub::getActualPDE(int ipm, int WaveIndex) const
             if (PMtypes.at(iType)->PDEbinned.size() > 0)    // if the type holds wave-resolved info, use it
                 PDE = PMtypes.at(iType)->PDEbinned.at(WaveIndex);
             else
-                PDE = PMtypes.at(iType)->EffectivePDE;
+            {
+                if (pm.effectivePDE != -1.0)                // use scalar override if exists
+                    PDE = pm.effectivePDE;
+                else                                        // use type scalar as the last resort
+                    PDE = PMtypes.at(iType)->EffectivePDE;
+            }
         }
     }
     //  qDebug()<<"reporting PDE of "<<PDE;
@@ -891,6 +905,21 @@ bool APmHub::isPDEwaveOverriden() const
   return false;
 }
 
+bool APmHub::isPDEeffectiveOverriden() const
+{
+  for (int ipm = 0; ipm < numPMs; ipm++)
+    if (PMs.at(ipm).effectivePDE != -1.0) return true;
+  return false;
+}
+
+void APmHub::writePDEeffectiveToJson(QJsonObject &json)
+{
+  QJsonArray arr;
+  for (int ipm = 0; ipm < numPMs; ipm++)
+      arr.append( PMs.at(ipm).effectivePDE );
+  json["PDEeffective"] = arr;
+}
+
 void APmHub::writeRelQE_PDE(QJsonObject &json)
 {
   QJsonArray arr;
@@ -936,10 +965,7 @@ bool APmHub::readPDEeffectiveFromJson(QJsonObject &json)
           return false;
         }
       for (int ipm = 0; ipm < numPMs; ipm++)
-      {
-          //PMs[ipm].effectivePDE = arr[ipm].toDouble();
-          qDebug() << arr[ipm].toDouble();
-      }
+          PMs[ipm].effectivePDE = arr[ipm].toDouble();
     }
   return true;
 }

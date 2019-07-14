@@ -267,20 +267,12 @@ private slots:
     void on_pbUpdateToFixedZ_clicked();
     void on_pbIndPmRemove_clicked();
     void on_pbIndShowType_clicked();
-    void on_ledIndEffectiveDE_editingFinished();
     void on_pbIndRestoreEffectiveDE_clicked();
     void on_pbIndShowDE_clicked();
-    void on_pbIndRestoreDE_clicked();
-    void on_pbIndLoadDE_clicked();
     void on_pbIndShowDEbinned_clicked();
     void on_pbAddPM_clicked();
-    void on_pbIndLoadAngular_clicked();
-    void on_pbIndRestoreAngular_clicked();
     void on_pbIndShowAngular_clicked();
     void on_pbIndShowEffectiveAngular_clicked();
-    void on_ledIndMediumRefrIndex_editingFinished();
-    void on_pbIndLoadArea_clicked();
-    void on_pbIndRestoreArea_clicked();
     void on_pbIndShowArea_clicked();
     void on_cbGunAllowMultipleEvents_toggled(bool checked);
     void LoadPMsignalsRequested();
@@ -574,8 +566,6 @@ private slots:
 
     void on_pbRenameParticle_clicked();
 
-    void on_pbSetAllInherited_clicked();
-
     void on_pbLoadExampleFileFromFileGen_clicked();
 
     void on_pbNodesFromFileHelp_clicked();
@@ -597,6 +587,14 @@ private slots:
     void on_pbRandomizePDEfactors_clicked();
 
     void on_pbRandomizeSPEfactors_clicked();
+
+    void on_pbCearOverridePDEscalar_clicked();
+
+    void on_pbCearOverridePDEwave_clicked();
+
+    void on_pbCearOverrideAngular_clicked();
+
+    void on_pbCearOverrideArea_clicked();
 
 public slots:
     void on_pbRebuildDetector_clicked();

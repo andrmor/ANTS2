@@ -1678,104 +1678,113 @@ void MainWindow::on_pbIndPMshowInfo_clicked()
     ui->ledIndPMpsi->setText(QString::number(PM->psi, 'g', 4));
     ui->cobPMtypeInExplorers->setCurrentIndex(PM->type);
 
-    //-- overrides --
-    //effective DE    
-    double eDE = PMs->at(ipm).effectivePDE;
+    //Effective PDE
+    double ePDE = PMs->at(ipm).effectivePDE;
     QString str;
     APmType* type = PMs->getType(p->type);
-    if (eDE == -1)
+    if (ePDE == -1)
     {
-        str.setNum(type->EffectivePDE);
-        ui->labIndDEStatus->setText("Inherited:");
+        QString lab = "From PM type";
+        const double & factor = PMs->at(ipm).relQE_PDE;
+        if (factor != 1.0)
+        {
+            str.setNum(type->EffectivePDE * factor, 'g', 4);
+            lab += " * " + QString::number(factor);//, 'g', 4);
+        }
+        else
+            str.setNum(type->EffectivePDE, 'g', 4);
+
+        ui->labIndDEStatus->setText(lab);
     }
     else
     {
-        str.setNum(eDE, 'g', 4);
-        ui->labIndDEStatus->setText("<b>Override:</b>");
+        str.setNum(ePDE, 'g', 4);
+        ui->labIndDEStatus->setText("<b>Override</b>");
     }
     ui->ledIndEffectiveDE->setText(str);
-    ui->lePDEfactorInExplorer->setText( QString::number(PMs->at(ipm).relQE_PDE, 'g', 4) );
-    ui->leActualPDE_Scalar->setText( QString::number(PMs->getActualPDE(ipm, -1), 'g', 4) );
+    //ui->lePDEfactorInExplorer->setText( QString::number(PMs->at(ipm).relQE_PDE, 'g', 4) );
+    //ui->leActualPDE_Scalar->setText( QString::number(PMs->getActualPDE(ipm, -1), 'g', 4) );
 
-    ui->frPDEscaled->setEnabled(!PMs->isAllPDEfactorsUnity());
-
-    //wave-resolved DE
+    //Wave-resolved PDE
     if (PMs->isPDEwaveOverriden(ipm))
-      {
-        ui->labIndDEwaveStatus->setText("<b>Override:</b>");
-        ui->pbIndRestoreDE->setEnabled(true);
+    {
+        ui->labIndDEwaveStatus->setText("<b>Override</b>");
         ui->pbIndShowDE->setEnabled(true);
         if (ui->cbWaveResolved->isChecked()) ui->pbIndShowDEbinned->setEnabled(true);
         else ui->pbIndShowDEbinned->setEnabled(false);
-      }
+    }
     else
-      {       
-       ui->pbIndRestoreDE->setEnabled(false);
-       if (type->PDE.size()>0)
-         {
-          ui->labIndDEwaveStatus->setText("Inherited:");
-          ui->pbIndShowDE->setEnabled(true);          
-          if (ui->cbWaveResolved->isChecked()) ui->pbIndShowDEbinned->setEnabled(true);
-          else ui->pbIndShowDEbinned->setEnabled(false);
-         }
+    {
+       if (!type->PDE.isEmpty())
+       {
+            QString str = "From PM type";
+            if (PMs->at(ipm).relQE_PDE != 1.0)
+                str += " * " + QString::number(PMs->at(ipm).relQE_PDE);//, 'g', 4);
+            ui->labIndDEwaveStatus->setText(str);
+
+            ui->pbIndShowDE->setEnabled(true);
+            ui->pbIndShowDEbinned->setEnabled(ui->cbWaveResolved->isChecked());
+       }
        else
-         {
+       {
           ui->labIndDEwaveStatus->setText("Not defined");
           ui->pbIndShowDE->setEnabled(false);
           ui->pbIndShowDEbinned->setEnabled(false);
-         }
+       }
     }
+    ui->pbCearOverridePDEscalar->setEnabled(PMs->isPDEeffectiveOverriden());
+    ui->pbCearOverridePDEwave->setEnabled(PMs->isPDEwaveOverriden());
+
     //Angular
     if (PMs->isAngularOverriden(ipm))
-      {
-        ui->labIndAngularStatus->setText("<b>Override:</b>");
-        ui->pbIndRestoreAngular->setEnabled(true);
+    {
+        ui->labIndAngularStatus->setText("<b>Override</b>");
         ui->pbIndShowAngular->setEnabled(true);
         if (ui->cbAngularSensitive->isChecked()) ui->pbIndShowEffectiveAngular->setEnabled(true);
         else ui->pbIndShowEffectiveAngular->setEnabled(false);
-      }
+    }
     else
-      {
-        ui->pbIndRestoreAngular->setEnabled(false);
-        if (type->AngularSensitivity.size()>0)
-          {
-           ui->labIndAngularStatus->setText("Inherited:");
+    {
+        if (!type->AngularSensitivity.isEmpty())
+        {
+           ui->labIndAngularStatus->setText("From PM type");
            ui->pbIndShowAngular->setEnabled(true);
            if (ui->cbAngularSensitive->isChecked()) ui->pbIndShowEffectiveAngular->setEnabled(true);
            else ui->pbIndShowEffectiveAngular->setEnabled(false);
-          }
+        }
         else
-          {
+        {
            ui->labIndAngularStatus->setText("Not defined");
            ui->pbIndShowAngular->setEnabled(false);
            ui->pbIndShowEffectiveAngular->setEnabled(false);
-          }
-      }
+        }
+    }
+    ui->pbCearOverrideAngular->setEnabled(PMs->isAngularOverriden());
+
     //Area
     if (PMs->isAreaOverriden(ipm))
-      {
-         ui->labIndAreaStatus->setText("<b>Override:</b>");
-         ui->pbIndRestoreArea->setEnabled(true);
+    {
+         ui->labIndAreaStatus->setText("<b>Override</b>");
          ui->pbIndShowArea->setEnabled(true);
-      }
+    }
     else
-      {         
-         ui->pbIndRestoreArea->setEnabled(false);
-         if (type->AreaSensitivity.size()>0)
-           {
-             ui->labIndAreaStatus->setText("Inherited:");
+    {
+         if (!type->AreaSensitivity.isEmpty())
+         {
+             ui->labIndAreaStatus->setText("From PM type");
              ui->pbIndShowArea->setEnabled(true);
-           }
+         }
          else
-           {
+         {
              ui->labIndAreaStatus->setText("Not defined");
              ui->pbIndShowArea->setEnabled(false);
-           }
-      }
+         }
+    }
+    ui->pbCearOverrideArea->setEnabled(PMs->isAreaOverriden());
 
     //show this PM
     if (ui->tabWidget->currentIndex()==3 && ui->tabwidMain->currentIndex()==0)
-      {        
+    {
         Detector->GeoManager->ClearTracks();      
         double length = type->SizeX*0.5;
         Int_t track_index = Detector->GeoManager->AddTrack(1,22);
@@ -1804,7 +1813,7 @@ void MainWindow::on_pbIndPMshowInfo_clicked()
         track->SetLineColor(kRed);
 
         GeometryWindow->DrawTracks();
-      }
+    }
 }
 
 void MainWindow::on_tabWidget_currentChanged(int index)
@@ -1960,17 +1969,6 @@ void MainWindow::on_pbIndShowType_clicked()
   ui->sbPMtype->setValue(ui->cobPMtypeInExplorers->currentIndex());
 }
 
-void MainWindow::on_ledIndEffectiveDE_editingFinished()
-{
-    const int ipm = ui->sbIndPMnumber->value();
-    const double val = ui->ledIndEffectiveDE->text().toDouble();
-
-    PMs->at(ipm).effectivePDE = val;
-
-    ReconstructDetector(true);
-    //MainWindow::on_pbIndPMshowInfo_clicked();
-}
-
 void MainWindow::on_pbIndRestoreEffectiveDE_clicked()
 {
     const int ipm = ui->sbIndPMnumber->value();
@@ -2006,49 +2004,6 @@ void MainWindow::on_pbIndShowDE_clicked()
                                               kRed, 20, 1, kRed);
     GraphWindow->ShowAndFocus();
     GraphWindow->Draw(g, "APL");
-}
-
-void MainWindow::on_pbIndRestoreDE_clicked()
-{
-    const int ipm = ui->sbIndPMnumber->value();
-
-    PMs->at(ipm).effectivePDE = -1.0;
-
-    PMs->at(ipm).PDE.clear();
-    PMs->at(ipm).PDE_lambda.clear();
-    PMs->at(ipm).PDEbinned.clear();
-
-    ReconstructDetector(true);
-}
-
-void MainWindow::on_pbIndLoadDE_clicked()
-{
-  int ipm = ui->sbIndPMnumber->value();
-
-  QString fileName;
-  if (PMs->isSiPM(ipm))
-     fileName = QFileDialog::getOpenFileName(this, "Load photon detection efficiency vs wavelength", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
-  else
-     fileName = QFileDialog::getOpenFileName(this, "Load quantum efficiency vs wavelength", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
-
-  if (fileName.isEmpty()) return;
-  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-
-  QVector<double> x,y;
-  LoadDoubleVectorsFromFile(fileName, &x, &y);
-
-  for (int i=0; i<y.size(); i++)
-    if (y[i]<0 || y[i]>1)
-      {
-        message("Quantum Efficiency and Photon Detection Probability should be in the range from 0 to 1", this);
-        return;
-      }
-
-  PMs->setPDEwave(ipm, &x, &y);
-  PMs->RebinPDEsForPM(ipm);
-  ReconstructDetector(true);
-
-  MainWindow::on_pbIndPMshowInfo_clicked();
 }
 
 void MainWindow::on_pbIndShowDEbinned_clicked()
@@ -2095,63 +2050,6 @@ void MainWindow::on_pbAddPM_clicked()
   ui->tabWidget->setCurrentIndex(3);
 }
 
-void MainWindow::on_pbIndLoadAngular_clicked()
-{
-  QString fileName;
-  fileName = QFileDialog::getOpenFileName(this, "Load angular response (0 - 90 degrees)", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
-  if (fileName.isEmpty()) return;
-  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-
-  QVector<double> x,y;
-  LoadDoubleVectorsFromFile(fileName, &x, &y);
-
-  if (x[0] !=0 || x[x.size()-1] != 90)
-      {
-        message("Data should start at 0 and end at 90 degrees!", this);
-        return;
-      }
-
-  for (int i=0; i<x.size(); i++)
-      if (y[i] < 0)
-       {
-         message("Data should be positive!", this);
-         return;
-       }
-
-  if (y[0] <1e-10)
-    {
-      message("Response for normal incidence cannot be 0 (due to the auto-scale it to 1)!", this);
-      return;
-    }
-
-  double norm = y[0];
-  if (norm != 1)
-    {
-      for (int i=0; i<x.size(); i++) y[i] = y[i]/norm;
-      message("Data were scaled to have response of unity at normal incidence", this);
-    }
-
-  int ipm = ui->sbIndPMnumber->value();
-  PMs->setAngular(ipm, &x, &y);
-  PMs->at(ipm).AngularN1 = ui->ledIndMediumRefrIndex->text().toDouble();
-
-  PMs->RecalculateAngularForPM(ipm);
-  ReconstructDetector(true);
-  //MainWindow::on_pbIndPMshowInfo_clicked();
-}
-
-void MainWindow::on_pbIndRestoreAngular_clicked()
-{
-  const int ipm = ui->sbIndPMnumber->value();
-
-  PMs->at(ipm).AngularSensitivity_lambda.clear();
-  PMs->at(ipm).AngularSensitivity.clear();
-  PMs->at(ipm).AngularSensitivityCosRefracted.clear();
-
-  ReconstructDetector(true);
-  //MainWindow::on_pbIndPMshowInfo_clicked();
-}
-
 void MainWindow::on_pbIndShowAngular_clicked()
 {  
   const int ipm = ui->sbIndPMnumber->value();
@@ -2182,45 +2080,6 @@ void MainWindow::on_pbIndShowEffectiveAngular_clicked()
     GraphWindow->MakeGraph(&x, &PMs->at(ipm).AngularSensitivityCosRefracted, kRed, "Cosine of refracted beam", "Response");
   else
     GraphWindow->MakeGraph(&x, &PMs->getType(typ)->AngularSensitivityCosRefracted, kRed, "Cosine of refracted beam", "Response");
-}
-
-void MainWindow::on_ledIndMediumRefrIndex_editingFinished()
-{
-    const int ipm = ui->sbIndPMnumber->value();
-
-    PMs->at(ipm).AngularN1 = ui->ledIndMediumRefrIndex->text().toDouble();
-
-    PMs->RecalculateAngularForPM(ipm);
-    ReconstructDetector(true);
-    //MainWindow::on_pbIndPMshowInfo_clicked();
-}
-
-void MainWindow::on_pbIndLoadArea_clicked()
-{
-    QString fileName;
-    fileName = QFileDialog::getOpenFileName(this, "Load area response", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
-    if (fileName.isEmpty()) return;
-    GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-
-    int ipm = ui->sbIndPMnumber->value();
-    QVector< QVector <double> > tmp;
-    double xStep, yStep;
-    int error = MainWindow::LoadAreaResponse(fileName, &tmp, &xStep, &yStep);
-
-    if (error == 0) PMs->setArea(ipm, &tmp, xStep, yStep);
-    //if (error == 1) message("Error reading the file - cannot open!", this);
-    //if (error == 2) message("Error reading the file - wrong format!", this);
-    ReconstructDetector(true);
-
-    MainWindow::on_pbIndPMshowInfo_clicked();
-}
-
-void MainWindow::on_pbIndRestoreArea_clicked()
-{
-    int ipm = ui->sbIndPMnumber->value();
-    QVector<QVector<double> > tmp;
-    PMs->setArea(ipm, &tmp, 123.0, 123.0); //strange step deliberately
-    ReconstructDetector(true);
 }
 
 void MainWindow::on_pbIndShowArea_clicked()
@@ -4671,12 +4530,6 @@ void MainWindow::on_pbG4Settings_clicked()
     }
 }
 
-void MainWindow::on_pbSetAllInherited_clicked()
-{
-    PMs->resetOverrides();
-    ReconstructDetector(true);
-}
-
 #include "afileparticlegenerator.h"
 void MainWindow::on_pbLoadExampleFileFromFileGen_clicked()
 {
@@ -4828,4 +4681,43 @@ void MainWindow::on_pbGainsUpdateGUI_clicked()
 
     // TEST FEATURE - disable the whole frame if SPE in electronics is not activated
     ui->frSPEfactors->setEnabled(bSPEactive);
+}
+
+void MainWindow::on_pbCearOverridePDEscalar_clicked()
+{
+    for (int ipm = 0; ipm < PMs->count(); ipm++)
+        PMs->at(ipm).effectivePDE = -1.0;
+    ReconstructDetector(true);
+}
+
+void MainWindow::on_pbCearOverridePDEwave_clicked()
+{
+    for (int ipm = 0; ipm < PMs->count(); ipm++)
+    {
+        APm & pm = PMs->at(ipm);
+        pm.PDE.clear();
+        pm.PDE_lambda.clear();
+        pm.PDEbinned.clear();
+    }
+    ReconstructDetector(true);
+}
+
+void MainWindow::on_pbCearOverrideAngular_clicked()
+{
+    for (int ipm = 0; ipm < PMs->count(); ipm++)
+    {
+        APm & pm = PMs->at(ipm);
+        pm.AngularSensitivity_lambda.clear();
+        pm.AngularSensitivity.clear();
+        pm.AngularSensitivityCosRefracted.clear();
+    }
+    ReconstructDetector(true);
+}
+
+void MainWindow::on_pbCearOverrideArea_clicked()
+{
+    QVector<QVector<double> > tmp;
+    for (int ipm = 0; ipm < PMs->count(); ipm++)
+        PMs->setArea(ipm, &tmp, 123.0, 123.0); //strange step deliberately
+    ReconstructDetector(true);
 }

@@ -550,9 +550,10 @@ void GeometryWindowClass::AddPolygonfToGeometry(QPolygonF& poly, Color_t color, 
 }
 
 #include <QStringList>
+#include "ageomarkerclass.h"
 void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool ColorUpdateAllowed)
 {
-    qDebug()<<"  ----Showing geometry----" << MW->GeometryDrawDisabled;
+    //qDebug()<<"  ----Showing geometry----" << MW->GeometryDrawDisabled;
     if (MW->GeometryDrawDisabled) return;
 
     int Mode = ui->cobViewer->currentIndex(); // 0 - standard, 1 - jsroot
@@ -608,6 +609,26 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
     else
     {
 #ifdef __USE_ANTS_JSROOT__
+
+        //MW->Detector->GeoManager->SetTopVisible(true);
+
+        if (!MW->GeoMarkers.isEmpty())
+        {
+            for (int i=0; i<MW->GeoMarkers.size(); i++)
+            {
+                GeoMarkerClass* gm = MW->GeoMarkers[i];
+                //overrides
+                if (gm->Type == "Recon" || gm->Type == "Scan" || gm->Type == "Nodes")
+                {
+                    gm->SetMarkerStyle(GeoMarkerStyle);
+                    gm->SetMarkerSize(GeoMarkerSize);
+                }
+
+                TPolyMarker3D * mark = new TPolyMarker3D(*gm);
+                gGeoManager->GetListOfTracks()->Add(mark);
+
+            }
+        }
 
         MW->NetModule->onNewGeoManagerCreated();
 
@@ -1058,9 +1079,8 @@ void GeometryWindowClass::on_pbWebViewer_clicked()
 #ifdef USE_ROOT_HTML
     if (MW->NetModule->isRootServerRunning())
       {
-        //QString t = "http://localhost:8080/?nobrowser&item=Objects/GeoWorld/World_1&opt=dray;all;tracks";
-        //[Objects/GeoWorld/World_1,Objects/GeoTracks]
-        QString t = "http://localhost:8080/?nobrowser&item=[Objects/GeoWorld/WorldBox_1,Objects/GeoTracks/TObjArray]&opt=dray;all;tracks";
+        //QString t = "http://localhost:8080/?nobrowser&item=[Objects/GeoWorld/WorldBox_1,Objects/GeoTracks/TObjArray]&opt=dray;all;tracks";
+        QString t = "http://localhost:8080/?nobrowser&item=Objects/GeoWorld/world&opt=dray;all;tracks";
         t += ";transp"+QString::number(ui->sbTransparency->value());
         if (ui->cbShowAxes->isChecked()) t += ";axis";
 
@@ -1089,8 +1109,10 @@ void GeometryWindowClass::on_cobViewer_currentIndexChanged(int index)
     else
     {
         ui->swViewers->setCurrentIndex(1);
-        WebView->load(QUrl("http://localhost:8080/?nobrowser&item=[Objects/GeoWorld/WorldBox_1,Objects/GeoTracks/TObjArray]&opt=nohighlight;dray;all;tracks;transp50"));
+        //WebView->load(QUrl("http://localhost:8080/?nobrowser&item=[Objects/GeoWorld/WorldBox_1,Objects/GeoTracks/TObjArray]&opt=nohighlight;dray;all;tracks;transp50"));
         //WebView->load(QUrl("http://localhost:8080/?item=[Objects/GeoWorld/WorldBox_1,Objects/GeoTracks/TObjArray]&opt=nohighlight;dray;all;tracks;transp50"));
+        //WebView->load(QUrl("http://localhost:8080/?item=[Objects/GeoWorld/world,Objects/GeoTracks/TObjArray]&opt=nohighlight;dray;all;tracks;transp50"));
+        WebView->load(QUrl("http://localhost:8080/?item=Objects/GeoWorld/world&opt=nohighlight;dray;all;tracks;transp50"));
         WebView->show();
     }
 

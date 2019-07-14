@@ -28,14 +28,15 @@ void ARootHttpServer::UpdateGeo(TGeoManager * GeoManager)
     //qDebug() << "In root html server: registering new TopNode and GeoTracks";
 
     if (GeoWorld) server->Unregister(GeoWorld);
-    server->Register("GeoWorld", GeoManager->GetTopNode());
-    GeoWorld = GeoManager->GetTopNode();
+    GeoManager->SetName("world");
+    server->Register("GeoWorld", GeoManager);//->GetTopNode());
+    GeoWorld = GeoManager;//->GetTopNode();
 
-    if (GeoTracks) server->Unregister(GeoTracks);
-    server->Register("GeoTracks", GeoManager->GetListOfTracks());
-    GeoTracks = GeoManager->GetListOfTracks();
+    //if (GeoTracks) server->Unregister(GeoTracks);
+    //server->Register("GeoTracks", GeoManager->GetListOfTracks());
+    //GeoTracks = GeoManager->GetListOfTracks();
 
-    qDebug() << "Num tracks:"<< GeoTracks->GetEntries();
+    //qDebug() << "Num tracks:"<< GeoTracks->GetEntries();
 
     //server->SetItemField("/","_drawitem","world");
     //server->SetItemField("/","_drawopt","tracks");

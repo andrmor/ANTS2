@@ -20,7 +20,8 @@ public:
 
 private:
     THttpServer* server;
-    TGeoNode* GeoWorld;
+    //TGeoNode* GeoWorld;
+    TGeoManager* GeoWorld;
     TObjArray* GeoTracks;
 };
 

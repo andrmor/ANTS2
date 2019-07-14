@@ -229,7 +229,8 @@ void GeometryWindowClass::ShowPMnumbers()
        tmp.append( QString::number(i) );
    ShowText(tmp, kBlack, true);
 
-   MW->NetModule->onNewGeoManagerCreated(gGeoManager);
+   MW->NetModule->onNewGeoManagerCreated();
+
 }
 
 void GeometryWindowClass::ShowMonitorIndexes()
@@ -550,42 +551,47 @@ void GeometryWindowClass::AddPolygonfToGeometry(QPolygonF& poly, Color_t color, 
 
 #include <QStringList>
 void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool ColorUpdateAllowed)
-// default:  ActivateWindow = true,  SAME = true,  ColorUpdateAllowed = true
 {
-    //qDebug()<<"  ----Showing geometry----"<<GeometryDrawDisabled;
+    qDebug()<<"  ----Showing geometry----" << MW->GeometryDrawDisabled;
     if (MW->GeometryDrawDisabled) return;
 
-    if (ui->cobViewer->currentIndex() == 0)
+    int Mode = ui->cobViewer->currentIndex(); // 0 - standard, 1 - jsroot
+
+    //root segments for roundish objects
+    MW->Detector->GeoManager->SetNsegments(MW->GlobSet.NumSegments);
+
+    //control ov visibility of inner volumes
+    int level = ui->sbLimitVisibility->value();
+    if (!ui->cbLimitVisibility->isChecked()) level = -1;
+    MW->Detector->GeoManager->SetVisLevel(level);
+
+    //coloring volumes
+    if (ColorUpdateAllowed)
     {
-        //setting this window as active pad in root
-        //with or without activation (focussing) of this window
+        if (ColorByMaterial) MW->Detector->colorVolumes(1);
+        else MW->Detector->colorVolumes(0);
+    }
+
+    //top volume visibility
+    MW->Detector->GeoManager->SetTopVisible(ui->cbShowTop->isChecked());
+
+    //transparency setup
+    int totNodes = MW->Detector->top->GetNdaughters();
+    int transp = ui->sbTransparency->value();
+    for (int i=0; i<totNodes; i++)
+    {
+        TGeoNode* thisNode = (TGeoNode*)MW->Detector->top->GetNodes()->At(i);
+        thisNode->GetVolume()->SetTransparency(Mode == 0 ? 0 : transp);
+    }
+
+    //making contaners visible
+    MW->Detector->top->SetVisContainers(true);
+
+
+    if (Mode == 0)
+    {
         if (ActivateWindow) ShowAndFocus(); //window is activated (focused)
         else SetAsActiveRootWindow(); //no activation in this mode
-        MW->Detector->GeoManager->SetNsegments(MW->GlobSet.NumSegments);
-        int level = ui->sbLimitVisibility->value();
-        if (!ui->cbLimitVisibility->isChecked()) level = -1;
-        MW->Detector->GeoManager->SetVisLevel(level);
-
-        //coloring volumes
-        if (ColorUpdateAllowed)
-          {
-            if (ColorByMaterial) MW->Detector->colorVolumes(1);
-            else MW->Detector->colorVolumes(0);
-          }
-        //top volume visibility
-        if (ShowTop) MW->Detector->GeoManager->SetTopVisible(true); // the TOP is generally invisible
-        else MW->Detector->GeoManager->SetTopVisible(false);
-
-        //transparency setup
-        int totNodes = MW->Detector->top->GetNdaughters();
-        for (int i=0; i<totNodes; i++)
-          {
-            TGeoNode* thisNode = (TGeoNode*)MW->Detector->top->GetNodes()->At(i);
-            thisNode->GetVolume()->SetTransparency(0);
-          }
-
-        //making contaners visible
-        MW->Detector->top->SetVisContainers(true);
 
         //DRAW
         fNeedZoom = true;
@@ -602,30 +608,37 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
     else
     {
 #ifdef __USE_ANTS_JSROOT__
-        QWebEnginePage * page = WebView->page();
-        page->runJavaScript("JSROOT.GetMainPainter(\"onlineGUI_drawing\").produceCameraUrl(6)", [page](const QVariant &v)
-        {
-            QString reply = v.toString();
-            qDebug() << reply;
-            QStringList sl = reply.split(',', QString::SkipEmptyParts); //quick parse just for now
-            if (sl.size() > 2)
-            {
-                QString s;
-                //s += "roty" + ui->leY->text() + ",";
-                s += sl.at(0) + ",";
-                //s += "rotz" + ui->leZ->text() + ",";
-                s += sl.at(1) + ",";
-                //s += "zoom" + ui->leZoom->text() + ",";
-                s += sl.at(2) + ",";
-                s += "dray,nohighlight,all,tracks,transp50";
-                qDebug() << s;
 
-                page->runJavaScript("JSROOT.redraw(\"onlineGUI_drawing\", JSROOT.GetMainPainter(\"onlineGUI_drawing\").GetObject(), \"" + s + "\");");
-            }
-        });
+        MW->NetModule->onNewGeoManagerCreated();
+
+        QWebEnginePage * page = WebView->page();
+        page->runJavaScript("if (JSROOT.hpainter) JSROOT.hpainter.updateAll();");
 #endif
     }
 }
+
+/*
+page->runJavaScript("JSROOT.GetMainPainter(\"onlineGUI_drawing\").produceCameraUrl(6)", [page](const QVariant &v)
+{
+    QString reply = v.toString();
+    qDebug() << reply;
+    QStringList sl = reply.split(',', QString::SkipEmptyParts); //quick parse just for now
+    if (sl.size() > 2)
+    {
+        QString s;
+        //s += "roty" + ui->leY->text() + ",";
+        s += sl.at(0) + ",";
+        //s += "rotz" + ui->leZ->text() + ",";
+        s += sl.at(1) + ",";
+        //s += "zoom" + ui->leZoom->text() + ",";
+        s += sl.at(2) + ",";
+        s += "dray,nohighlight,all,tracks,transp50";
+        qDebug() << s;
+
+        page->runJavaScript("JSROOT.redraw(\"onlineGUI_drawing\", JSROOT.GetMainPainter(\"onlineGUI_drawing\").GetObject(), \"" + s + "\");");
+    }
+});
+*/
 
 void GeometryWindowClass::on_pbTest_clicked()
 {
@@ -715,17 +728,17 @@ void GeometryWindowClass::ClearTracks(bool bRefreshWindow)
 
 void GeometryWindowClass::on_pbShowGeometry_clicked()
 {
-  ShowAndFocus();
-  RasterWindow->ForceResize();
-  fRecallWindow = false;
+    //qDebug() << "Redraw triggered!";
+    ShowAndFocus();
+    RasterWindow->ForceResize();
+    fRecallWindow = false;
 
-  ShowGeometry(true, false); //not doing "same" option!
+    ShowGeometry(true, false); //not doing "same" option!
 }
 
-void GeometryWindowClass::on_cbShowTop_toggled(bool checked)
+void GeometryWindowClass::on_cbShowTop_toggled(bool)
 {
-  ShowTop = checked;
-  ShowGeometry(true, false);
+    ShowGeometry(true, false);
 }
 
 void GeometryWindowClass::on_cbColor_toggled(bool checked)
@@ -737,7 +750,7 @@ void GeometryWindowClass::on_cbColor_toggled(bool checked)
 
 void GeometryWindowClass::on_pbShowPMnumbers_clicked()
 {
-  ShowPMnumbers();
+    ShowPMnumbers();
 }
 
 void GeometryWindowClass::on_pbShowMonitorIndexes_clicked()
@@ -1064,6 +1077,7 @@ void GeometryWindowClass::on_pbWebViewer_clicked()
 #endif
 }
 
+#include "aroothttpserver.h"
 void GeometryWindowClass::on_cobViewer_currentIndexChanged(int index)
 {
 #ifdef __USE_ANTS_JSROOT__

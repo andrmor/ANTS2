@@ -6,6 +6,7 @@
 
 #include "THttpServer.h"
 #include "TGeoManager.h"
+#include "TObjArray.h"
 
 ARootHttpServer::ARootHttpServer(unsigned int port, QString OptionalUrlJsRoot)
 {
@@ -22,12 +23,9 @@ ARootHttpServer::~ARootHttpServer()
     delete server;
 }
 
-#include "TSeqCollection.h"
-void ARootHttpServer::UpdateGeoWorld(TObject *NewGeoWorld)
+void ARootHttpServer::UpdateGeo(TGeoManager * GeoManager)
 {
     //qDebug() << "In root html server: registering new TopNode and GeoTracks";
-
-    TGeoManager* GeoManager = dynamic_cast<TGeoManager*>(NewGeoWorld);
 
     if (GeoWorld) server->Unregister(GeoWorld);
     server->Register("GeoWorld", GeoManager->GetTopNode());
@@ -37,19 +35,11 @@ void ARootHttpServer::UpdateGeoWorld(TObject *NewGeoWorld)
     server->Register("GeoTracks", GeoManager->GetListOfTracks());
     GeoTracks = GeoManager->GetListOfTracks();
 
-    qDebug() << "Num tracks:"<< ((TSeqCollection*)GeoTracks)->GetEntries();
+    qDebug() << "Num tracks:"<< GeoTracks->GetEntries();
 
-
-}
-
-void ARootHttpServer::Register(QString name, TObject *obj)
-{
-    server->Register(name.toLatin1(), obj);
-}
-
-void ARootHttpServer::Unregister(TObject *obj)
-{
-    server->Unregister(obj);
+    //server->SetItemField("/","_drawitem","world");
+    //server->SetItemField("/","_drawopt","tracks");
 }
 
 #endif
+

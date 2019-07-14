@@ -71,7 +71,7 @@ public slots:
     void DrawTracks();
     void ShowPMnumbers();
     void ShowMonitorIndexes();
-    void ShowText(const QVector<QString> & strData, Color_t color, bool onPMs = true, bool bFullCycle = true); //false - on monitors
+    void ShowText(const QVector<QString> & strData, Color_t color, bool onPMs = true, bool bFullCycle = true); //onPMs=false -> srawing on monitors
     void on_pbTop_clicked();
     void on_pbFront_clicked();
     void onRasterWindowChange(double centerX, double centerY, double hWidth, double hHeight, double phi, double theta);

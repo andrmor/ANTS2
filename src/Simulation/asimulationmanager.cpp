@@ -350,7 +350,7 @@ void ASimulationManager::StopSimulation()
     emit RequestStopSimulation();
 }
 
-void ASimulationManager::onNewGeoManager(TObject *)
+void ASimulationManager::onNewGeoManager()
 {
     clearTrackingHistory();
 }

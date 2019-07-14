@@ -6,7 +6,9 @@
 #include <QString>
 
 class THttpServer;
-class TObject;
+class TGeoManager;
+class TGeoNode;
+class TObjArray;
 
 class ARootHttpServer
 {
@@ -14,14 +16,12 @@ public:
     ARootHttpServer(unsigned int port, QString OptionalUrlJsRoot = "");
     ~ARootHttpServer();
 
-    void UpdateGeoWorld(TObject* NewGeoWorld);
-    void Register(QString name, TObject* obj);
-    void Unregister(TObject* obj);
+    void UpdateGeo(TGeoManager* GeoManager);
 
 private:
     THttpServer* server;
-    TObject* GeoWorld;
-    TObject* GeoTracks;
+    TGeoNode* GeoWorld;
+    TObjArray* GeoTracks;
 };
 
 #endif // AROOTHTTPSERVER_H

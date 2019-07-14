@@ -9,6 +9,8 @@
 
 #include <QDebug>
 
+#include "TGeoManager.h"
+
 ANetworkModule::ANetworkModule()
 {
     WebSocketServer = new AWebSocketSessionServer();
@@ -120,11 +122,11 @@ void ANetworkModule::StopRootHttpServer()
 #endif
 }
 
-void ANetworkModule::onNewGeoManagerCreated(TObject *GeoManager)
+void ANetworkModule::onNewGeoManagerCreated()
 {
 #ifdef USE_ROOT_HTML
     if (!RootHttpServer) return;
-    RootHttpServer->UpdateGeoWorld(GeoManager);
+    RootHttpServer->UpdateGeo(gGeoManager);
 #endif
 }
 

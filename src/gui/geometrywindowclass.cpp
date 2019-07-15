@@ -631,9 +631,16 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
         }
 
         MW->NetModule->onNewGeoManagerCreated();
-
         QWebEnginePage * page = WebView->page();
-        page->runJavaScript("if (JSROOT.hpainter) JSROOT.hpainter.updateAll();");
+        QString js = "JSROOT.GEO.GradPerSegm = 25;";
+        if (ui->cbShowAxes->isChecked())
+        {
+            js += "var painter = JSROOT.GetMainPainter(\"onlineGUI_drawing\");";
+            js += "painter.setWireFrame(true);";
+            js += "painter.setAxisDraw(true);";
+        }
+        js += "if (JSROOT.hpainter) JSROOT.hpainter.updateAll();";
+        page->runJavaScript(js);
 #endif
     }
 }
@@ -849,8 +856,13 @@ void GeometryWindowClass::on_pbTop_clicked()
     else
     {
 #ifdef __USE_ANTS_JSROOT__
-
         QWebEnginePage * page = WebView->page();
+        QString js = ""
+        "var painter = JSROOT.GetMainPainter(\"onlineGUI_drawing\");"
+        "painter.setCameraPosition(90,0);";
+        page->runJavaScript(js);
+
+        /*
         page->runJavaScript("JSROOT.GetMainPainter(\"onlineGUI_drawing\").produceCameraUrl()", [page](const QVariant &v)
         {
             QString reply = v.toString();
@@ -869,18 +881,32 @@ void GeometryWindowClass::on_pbTop_clicked()
                 page->runJavaScript("JSROOT.redraw(\"onlineGUI_drawing\", JSROOT.GetMainPainter(\"onlineGUI_drawing\").GetObject(), \"" + s + "\");");
             }
         });
+        */
 #endif
     }
 }
 
 void GeometryWindowClass::on_pbFront_clicked()
 {
-  SetAsActiveRootWindow();
-  TView *v = RasterWindow->fCanvas->GetView();
-  v->Front();
-  RasterWindow->fCanvas->Modified();
-  RasterWindow->fCanvas->Update();
-  readRasterWindowProperties();
+    if (ui->cobViewer->currentIndex() == 0)
+    {
+        SetAsActiveRootWindow();
+        TView *v = RasterWindow->fCanvas->GetView();
+        v->Front();
+        RasterWindow->fCanvas->Modified();
+        RasterWindow->fCanvas->Update();
+        readRasterWindowProperties();
+    }
+    else
+    {
+#ifdef __USE_ANTS_JSROOT__
+        QWebEnginePage * page = WebView->page();
+        QString js = ""
+        "var painter = JSROOT.GetMainPainter(\"onlineGUI_drawing\");"
+        "painter.setCameraPosition(90,90);";
+        page->runJavaScript(js);
+#endif
+    }
 }
 
 void GeometryWindowClass::onRasterWindowChange(double centerX, double centerY, double hWidth, double hHeight, double phi, double theta)
@@ -902,12 +928,25 @@ void GeometryWindowClass::readRasterWindowProperties()
 
 void GeometryWindowClass::on_pbSide_clicked()
 {
-  SetAsActiveRootWindow();
-  TView *v = RasterWindow->fCanvas->GetView();
-  v->Side();
-  RasterWindow->fCanvas->Modified();
-  RasterWindow->fCanvas->Update();
-  readRasterWindowProperties();
+    if (ui->cobViewer->currentIndex() == 0)
+    {
+        SetAsActiveRootWindow();
+        TView *v = RasterWindow->fCanvas->GetView();
+        v->Side();
+        RasterWindow->fCanvas->Modified();
+        RasterWindow->fCanvas->Update();
+        readRasterWindowProperties();
+    }
+    else
+    {
+#ifdef __USE_ANTS_JSROOT__
+        QWebEnginePage * page = WebView->page();
+        QString js = ""
+                     "var painter = JSROOT.GetMainPainter(\"onlineGUI_drawing\");"
+                     "painter.setCameraPosition(180,180);";
+        page->runJavaScript(js);
+#endif
+    }
 }
 
 void GeometryWindowClass::on_cobViewType_currentIndexChanged(int index)

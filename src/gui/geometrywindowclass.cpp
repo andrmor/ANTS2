@@ -636,8 +636,8 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
         if (ui->cbShowAxes->isChecked())
         {
             js += "var painter = JSROOT.GetMainPainter(\"onlineGUI_drawing\");";
-            js += "painter.setWireFrame(true);";
-            js += "painter.setAxisDraw(true);";
+            js += "painter.toggleWireFrame();";
+            js += "painter.toggleAxisDraw();";
         }
         js += "if (JSROOT.hpainter) JSROOT.hpainter.updateAll();";
         page->runJavaScript(js);

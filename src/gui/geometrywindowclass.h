@@ -111,6 +111,10 @@ private slots:
 
     void on_cbWireFrame_toggled(bool checked);
 
+    void on_cbLimitVisibility_clicked();
+
+    void on_sbLimitVisibility_editingFinished();
+
 private:
   MainWindow* MW;
   Ui::GeometryWindowClass *ui;
@@ -129,6 +133,8 @@ private:
 
 private:
   void doChangeLineWidth(int deltaWidth);
+  void showWebView();
+  void prepareGeoManager(bool ColorUpdateAllowed = true);
 };
 
 #endif // GEOMETRYWINDOWCLASS_H

@@ -496,34 +496,18 @@
    </hints>
   </connection>
   <connection>
-   <sender>cbLimitVisibility</sender>
-   <signal>clicked()</signal>
-   <receiver>pbShowGeometry</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>70</x>
-     <y>281</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>92</x>
-     <y>74</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>sbLimitVisibility</sender>
+   <sender>sbTransparency</sender>
    <signal>editingFinished()</signal>
    <receiver>pbShowGeometry</receiver>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>135</x>
-     <y>283</y>
+     <x>104</x>
+     <y>245</y>
     </hint>
     <hint type="destinationlabel">
-     <x>101</x>
-     <y>103</y>
+     <x>119</x>
+     <y>74</y>
     </hint>
    </hints>
   </connection>

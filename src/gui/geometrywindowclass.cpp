@@ -78,11 +78,8 @@ GeometryWindowClass::~GeometryWindowClass()
   delete ui;
 }
 
-void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool ColorUpdateAllowed)
+void GeometryWindowClass::prepareGeoManager(bool ColorUpdateAllowed)
 {
-    //qDebug()<<"  ----Showing geometry----" << MW->GeometryDrawDisabled;
-    if (MW->GeometryDrawDisabled) return;
-
     int Mode = ui->cobViewer->currentIndex(); // 0 - standard, 1 - jsroot
 
     //root segments for roundish objects
@@ -114,7 +111,16 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
 
     //making contaners visible
     MW->Detector->top->SetVisContainers(true);
+}
 
+void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool ColorUpdateAllowed)
+{
+    //qDebug()<<"  ----Showing geometry----" << MW->GeometryDrawDisabled;
+    if (MW->GeometryDrawDisabled) return;
+
+    prepareGeoManager(ColorUpdateAllowed);
+
+    int Mode = ui->cobViewer->currentIndex(); // 0 - standard, 1 - jsroot
 
     if (Mode == 0)
     {
@@ -137,8 +143,7 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
     {
 #ifdef __USE_ANTS_JSROOT__
 
-        //MW->Detector->GeoManager->SetTopVisible(true);
-        MW->NetModule->RootHttpServer->SetShowTop(ui->cbShowTop->isChecked());
+        //MW->NetModule->RootHttpServer->SetShowTop(ui->cbShowTop->isChecked());
 
         if (!MW->GeoMarkers.isEmpty())
         {
@@ -720,11 +725,6 @@ void GeometryWindowClass::on_pbShowGeometry_clicked()
     ShowGeometry(true, false); //not doing "same" option!
 }
 
-void GeometryWindowClass::on_cbShowTop_toggled(bool)
-{
-    ShowGeometry(true, false);
-}
-
 void GeometryWindowClass::on_cbColor_toggled(bool checked)
 {
   ColorByMaterial = checked;
@@ -765,22 +765,6 @@ void GeometryWindowClass::on_pbClearDots_clicked()
 { 
   MW->clearGeoMarkers();
   ShowGeometry(true, false);
-}
-
-void GeometryWindowClass::on_pbSaveAs_clicked()
-{
-  QFileDialog *fileDialog = new QFileDialog;
-  fileDialog->setDefaultSuffix("png");
-  QString fileName = fileDialog->getSaveFileName(this, "Save image as file", MW->GlobSet.LastOpenDir, "png (*.png);;gif (*.gif);;Jpg (*.jpg)");
-  if (fileName.isEmpty()) return;
-  MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-
-  QFileInfo file(fileName);
-  if(file.suffix().isEmpty()) fileName += ".png";
-
-  GeometryWindowClass::SaveAs(fileName);
-
-  if (MW->GlobSet.fOpenImageExternalEditor) QDesktopServices::openUrl(QUrl("file:"+fileName, QUrl::TolerantMode));
 }
 
 void GeometryWindowClass::on_pbTop_clicked()
@@ -1057,6 +1041,20 @@ void GeometryWindowClass::doChangeLineWidth(int deltaWidth)
     on_pbShowGeometry_clicked();
 }
 
+void GeometryWindowClass::showWebView()
+{
+    //WebView->load(QUrl("http://localhost:8080/?nobrowser&item=[Objects/GeoWorld/WorldBox_1,Objects/GeoTracks/TObjArray]&opt=nohighlight;dray;all;tracks;transp50"));
+    //WebView->load(QUrl("http://localhost:8080/?item=[Objects/GeoWorld/WorldBox_1,Objects/GeoTracks/TObjArray]&opt=nohighlight;dray;all;tracks;transp50"));
+    //WebView->load(QUrl("http://localhost:8080/?item=[Objects/GeoWorld/world,Objects/GeoTracks/TObjArray]&opt=nohighlight;dray;all;tracks;transp50"));
+
+    QString s = "http://localhost:8080/?nobrowser&item=Objects/GeoWorld/world&opt=nohighlight;dray;all;tracks";
+    if (ui->cbShowTop->isChecked()) s += ";showtop";
+    s += QString(";transp%1").arg(ui->sbTransparency->value());
+
+    WebView->load(QUrl(s));
+    WebView->show();
+}
+
 #include "aroothttpserver.h"
 void GeometryWindowClass::on_cobViewer_currentIndexChanged(int index)
 {
@@ -1069,11 +1067,7 @@ void GeometryWindowClass::on_cobViewer_currentIndexChanged(int index)
     else
     {
         ui->swViewers->setCurrentIndex(1);
-        //WebView->load(QUrl("http://localhost:8080/?nobrowser&item=[Objects/GeoWorld/WorldBox_1,Objects/GeoTracks/TObjArray]&opt=nohighlight;dray;all;tracks;transp50"));
-        //WebView->load(QUrl("http://localhost:8080/?item=[Objects/GeoWorld/WorldBox_1,Objects/GeoTracks/TObjArray]&opt=nohighlight;dray;all;tracks;transp50"));
-        //WebView->load(QUrl("http://localhost:8080/?item=[Objects/GeoWorld/world,Objects/GeoTracks/TObjArray]&opt=nohighlight;dray;all;tracks;transp50"));
-        WebView->load(QUrl("http://localhost:8080/?item=Objects/GeoWorld/world&opt=nohighlight;dray;all;tracks;transp50"));
-        WebView->show();
+        showWebView();
     }
     ui->cbWireFrame->setVisible(index == 1);
 #else
@@ -1156,4 +1150,55 @@ void GeometryWindowClass::on_actionJSROOT_in_browser_triggered()
 void GeometryWindowClass::on_cbWireFrame_toggled(bool)
 {
     ShowGeometry(true, false);
+}
+
+void GeometryWindowClass::on_cbLimitVisibility_clicked()
+{
+    int Mode = ui->cobViewer->currentIndex(); // 0 - standard, 1 - jsroot
+    if (Mode == 0)
+        ShowGeometry(true, false);
+    else
+    {
+        prepareGeoManager();
+        showWebView();
+        ShowGeometry(true, false);
+    }
+}
+
+void GeometryWindowClass::on_sbLimitVisibility_editingFinished()
+{
+    on_cbLimitVisibility_clicked();
+}
+
+void GeometryWindowClass::on_cbShowTop_toggled(bool)
+{
+    int Mode = ui->cobViewer->currentIndex(); // 0 - standard, 1 - jsroot
+    if (Mode == 0)
+        ShowGeometry(true, false);
+    else
+    {
+        prepareGeoManager();
+        showWebView();
+        ShowGeometry(true, false);
+    }
+}
+
+void GeometryWindowClass::on_pbSaveAs_clicked()
+{
+  QFileDialog *fileDialog = new QFileDialog;
+  fileDialog->setDefaultSuffix("png");
+  QString fileName = fileDialog->getSaveFileName(this, "Save image as file", MW->GlobSet.LastOpenDir, "png (*.png);;gif (*.gif);;Jpg (*.jpg)");
+  if (fileName.isEmpty()) return;
+  MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+
+  QFileInfo file(fileName);
+  if(file.suffix().isEmpty()) fileName += ".png";
+
+  int Mode = ui->cobViewer->currentIndex(); // 0 - standard, 1 - jsroot
+  if (Mode == 0)
+    GeometryWindowClass::SaveAs(fileName);
+  else
+      ;
+
+  if (MW->GlobSet.fOpenImageExternalEditor) QDesktopServices::openUrl(QUrl("file:"+fileName, QUrl::TolerantMode));
 }

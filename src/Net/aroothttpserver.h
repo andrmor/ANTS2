@@ -18,6 +18,8 @@ public:
 
     void UpdateGeo(TGeoManager* GeoManager);
 
+    void SetShowTop(bool flag);
+
 private:
     THttpServer* server;
     //TGeoNode* GeoWorld;

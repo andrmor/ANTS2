@@ -38,9 +38,16 @@ void ARootHttpServer::UpdateGeo(TGeoManager * GeoManager)
 
     //qDebug() << "Num tracks:"<< GeoTracks->GetEntries();
 
-    //server->SetItemField("/","_drawitem","world");
+    server->SetItemField("/","_drawitem","world");
     //server->SetItemField("/","_drawopt","tracks");
 }
 
 #endif
 
+void ARootHttpServer::SetShowTop(bool flag)
+{
+    QString opt = "tracks";
+    if (flag) opt += ";showtop";
+    //server->SetItemField("/","_drawopt", opt.toLocal8Bit().data());
+    server->SetItemField("/","_drawopt", "showtop");
+}

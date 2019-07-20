@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>711</width>
-    <height>699</height>
+    <width>854</width>
+    <height>754</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -75,13 +75,6 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pbTest">
-         <property name="text">
-          <string>test</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="Line" name="line">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -122,6 +115,13 @@
         </widget>
        </item>
        <item>
+        <widget class="QCheckBox" name="cbWireFrame">
+         <property name="text">
+          <string>Wire-frame</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QCheckBox" name="cbShowTop">
          <property name="text">
           <string>Show world</string>
@@ -141,6 +141,36 @@
           <string>Show axes</string>
          </property>
         </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <property name="spacing">
+          <number>3</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>Transp:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="sbTransparency">
+           <property name="toolTip">
+            <string>Transparency of volumes (0 = not transparent)</string>
+           </property>
+           <property name="singleStep">
+            <number>0</number>
+           </property>
+           <property name="value">
+            <number>50</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
@@ -248,60 +278,6 @@
         </widget>
        </item>
        <item>
-        <widget class="Line" name="line_7">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pbShowGLview">
-         <property name="text">
-          <string>Open GL viewer</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pbWebViewer">
-         <property name="toolTip">
-          <string>View geometry using JSROOT</string>
-         </property>
-         <property name="text">
-          <string>JSROOT</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_3">
-         <property name="spacing">
-          <number>3</number>
-         </property>
-         <item>
-          <widget class="QLabel" name="label_2">
-           <property name="text">
-            <string>Transp:</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QSpinBox" name="sbTransparency">
-           <property name="toolTip">
-            <string>Transparency of volumes (0 = not transparent)</string>
-           </property>
-           <property name="singleStep">
-            <number>0</number>
-           </property>
-           <property name="value">
-            <number>50</number>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
         <widget class="Line" name="line_6">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -311,7 +287,7 @@
        <item>
         <widget class="QLabel" name="label_3">
          <property name="text">
-          <string>Switch view:</string>
+          <string>Switch to view:</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -371,7 +347,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>711</width>
+     <width>854</width>
      <height>25</height>
     </rect>
    </property>
@@ -402,6 +378,14 @@
     <addaction name="actionSet_line_width_for_objects"/>
     <addaction name="actionDecrease_line_width"/>
    </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="actionOpen_GL_viewer"/>
+    <addaction name="actionJSROOT_in_browser"/>
+   </widget>
+   <addaction name="menuView"/>
    <addaction name="menuMarkers"/>
    <addaction name="menuLines"/>
    <addaction name="menuZoom"/>
@@ -482,6 +466,16 @@
     <string>Decrease line width</string>
    </property>
   </action>
+  <action name="actionOpen_GL_viewer">
+   <property name="text">
+    <string>Open GL viewer</string>
+   </property>
+  </action>
+  <action name="actionJSROOT_in_browser">
+   <property name="text">
+    <string>JSROOT in browser</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections>
@@ -492,12 +486,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>42</x>
-     <y>237</y>
+     <x>51</x>
+     <y>281</y>
     </hint>
     <hint type="destinationlabel">
-     <x>149</x>
-     <y>240</y>
+     <x>135</x>
+     <y>283</y>
     </hint>
    </hints>
   </connection>
@@ -508,12 +502,12 @@
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>77</x>
-     <y>237</y>
+     <x>70</x>
+     <y>281</y>
     </hint>
     <hint type="destinationlabel">
      <x>92</x>
-     <y>104</y>
+     <y>74</y>
     </hint>
    </hints>
   </connection>
@@ -524,12 +518,12 @@
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>149</x>
-     <y>240</y>
+     <x>135</x>
+     <y>283</y>
     </hint>
     <hint type="destinationlabel">
-     <x>93</x>
-     <y>73</y>
+     <x>101</x>
+     <y>103</y>
     </hint>
    </hints>
   </connection>

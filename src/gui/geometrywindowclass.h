@@ -86,7 +86,6 @@ private slots:
     void on_cbShowTop_toggled(bool checked);
     void on_cbColor_toggled(bool checked);
     void on_pbSaveAs_clicked();
-    void on_pbShowGLview_clicked();
     void on_pbSide_clicked();
     void on_cobViewType_currentIndexChanged(int index);
     void on_cbShowAxes_toggled(bool checked);
@@ -101,13 +100,16 @@ private slots:
     void on_actionDefault_zoom_to_0_triggered();
     void on_actionSet_line_width_for_objects_triggered();
     void on_actionDecrease_line_width_triggered();
-    void on_pbWebViewer_clicked();
 
     void on_pbShowMonitorIndexes_clicked();
 
     void on_cobViewer_currentIndexChanged(int index);
 
-    void on_pbTest_clicked();
+    void on_actionOpen_GL_viewer_triggered();
+
+    void on_actionJSROOT_in_browser_triggered();
+
+    void on_cbWireFrame_toggled(bool checked);
 
 private:
   MainWindow* MW;

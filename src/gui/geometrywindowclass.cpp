@@ -345,7 +345,6 @@ void GeometryWindowClass::ShowPMnumbers()
    ShowText(tmp, kBlack, true);
 
    MW->NetModule->onNewGeoManagerCreated();
-
 }
 
 void GeometryWindowClass::ShowMonitorIndexes()
@@ -874,31 +873,6 @@ void GeometryWindowClass::on_pbSide_clicked()
     }
 }
 
-void GeometryWindowClass::on_cobViewType_currentIndexChanged(int index)
-{
-  if (TMPignore) return;
-
-  TView *v = RasterWindow->fCanvas->GetView();
-  if (index == 0)
-    {
-      ModePerspective = true;
-      v->SetPerspective();
-    }
-  else
-    {
-      ModePerspective = false;
-      v->SetParallel();
-    }
-
-  RasterWindow->fCanvas->Modified();
-  RasterWindow->fCanvas->Update();
-  readRasterWindowProperties();
-
-#if ROOT_VERSION_CODE < ROOT_VERSION(6,11,1)
-  RasterWindow->setInvertedXYforDrag( index==1 );
-#endif
-}
-
 void GeometryWindowClass::on_cbShowAxes_toggled(bool /*checked*/)
 {
     if (ui->cobViewer->currentIndex() == 0)
@@ -1048,11 +1022,16 @@ void GeometryWindowClass::showWebView()
     //WebView->load(QUrl("http://localhost:8080/?item=[Objects/GeoWorld/world,Objects/GeoTracks/TObjArray]&opt=nohighlight;dray;all;tracks;transp50"));
 
     QString s = "http://localhost:8080/?nobrowser&item=Objects/GeoWorld/world&opt=nohighlight;dray;all;tracks";
-    if (ui->cbShowTop->isChecked()) s += ";showtop";
+    if (ui->cbShowTop->isChecked())
+        s += ";showtop";
+    if (ui->cobViewType->currentIndex() == 1)
+        s += ";ortho_camera_rotate";
     s += QString(";transp%1").arg(ui->sbTransparency->value());
 
     WebView->load(QUrl(s));
     WebView->show();
+
+    ShowGeometry(true, false);
 }
 
 #include "aroothttpserver.h"
@@ -1159,9 +1138,14 @@ void GeometryWindowClass::on_cbLimitVisibility_clicked()
         ShowGeometry(true, false);
     else
     {
+        int level = ui->sbLimitVisibility->value();
+        if (!ui->cbLimitVisibility->isChecked()) level = -1;
+        MW->Detector->GeoManager->SetVisLevel(level);
+        MW->NetModule->onNewGeoManagerCreated();
+
         prepareGeoManager();
         showWebView();
-        ShowGeometry(true, false);
+        //ShowGeometry(true, false);
     }
 }
 
@@ -1170,16 +1154,55 @@ void GeometryWindowClass::on_sbLimitVisibility_editingFinished()
     on_cbLimitVisibility_clicked();
 }
 
-void GeometryWindowClass::on_cbShowTop_toggled(bool)
+void GeometryWindowClass::on_cbShowTop_toggled(bool checked)
 {
     int Mode = ui->cobViewer->currentIndex(); // 0 - standard, 1 - jsroot
     if (Mode == 0)
         ShowGeometry(true, false);
     else
     {
+        //MW->Detector->GeoManager->SetTopVisible(checked);
+        prepareGeoManager();
+        MW->NetModule->onNewGeoManagerCreated();
+
         prepareGeoManager();
         showWebView();
-        ShowGeometry(true, false);
+        //ShowGeometry(true, false);
+    }
+}
+
+void GeometryWindowClass::on_cobViewType_currentIndexChanged(int index)
+{
+    if (TMPignore) return;
+
+    int Mode = ui->cobViewer->currentIndex(); // 0 - standard, 1 - jsroot
+    if (Mode == 0)
+    {
+        TView *v = RasterWindow->fCanvas->GetView();
+        if (index == 0)
+        {
+            ModePerspective = true;
+            v->SetPerspective();
+        }
+        else
+        {
+            ModePerspective = false;
+            v->SetParallel();
+        }
+
+        RasterWindow->fCanvas->Modified();
+        RasterWindow->fCanvas->Update();
+        readRasterWindowProperties();
+
+#if ROOT_VERSION_CODE < ROOT_VERSION(6,11,1)
+        RasterWindow->setInvertedXYforDrag( index==1 );
+#endif
+    }
+    else
+    {
+        prepareGeoManager();
+        showWebView();
+       // ShowGeometry(true, false);
     }
 }
 

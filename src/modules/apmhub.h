@@ -23,6 +23,8 @@ public:
 
     void configure(GeneralSimSettings* SimSet); // must do before simulation
 
+    const QString checkBeforeSimulation() const; //returns error - empty if all is OK
+
     // top level json save/load
     void writePMtypesToJson(QJsonObject &json);
     bool readPMtypesFromJson(QJsonObject &json);

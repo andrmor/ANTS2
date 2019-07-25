@@ -314,6 +314,46 @@ void APmHub::configure(GeneralSimSettings *SimSet)
     prepareMCcrosstalk();
 }
 
+const QString APmHub::checkBeforeSimulation() const
+{
+    QString err;
+
+    //check effective PDE override
+    int numOverriden = 0;
+    for (int ipm = 0; ipm < numPMs; ipm++)
+        if (PMs.at(ipm).effectivePDE != -1.0) numOverriden++;
+    if (numOverriden != 0)
+        if (numOverriden != numPMs)
+            err += QString("\nPDE override is defined only for %1 PM%2\n"
+                           "Clear PDE overrides or define them for all PMs\n").arg(numOverriden).arg(numOverriden > 1 ? "s" : "");
+
+    numOverriden = 0;
+    for (int ipm = 0; ipm < numPMs; ipm++)
+        if (!PMs.at(ipm).PDE.isEmpty()) numOverriden++;
+    if (numOverriden != 0)
+        if (numOverriden != numPMs)
+            err += QString("\nWavelength-resolved PDE override is defined only for %1 PM%2\n"
+                           "Clear wavelength-resolved PDE overrides or define them for all PMs\n").arg(numOverriden).arg(numOverriden > 1 ? "s" : "");
+
+    numOverriden = 0;
+    for (int ipm = 0; ipm < numPMs; ipm++)
+        if (!PMs.at(ipm).AngularSensitivity.isEmpty()) numOverriden++;
+    if (numOverriden != 0)
+        if (numOverriden != numPMs)
+            err += QString("\nOverride for angular dependence of PDE is defined only for %1 PM%2\n"
+                           "Clear overrides or define them for all PMs\n").arg(numOverriden).arg(numOverriden > 1 ? "s" : "");
+
+    numOverriden = 0;
+    for (int ipm = 0; ipm < numPMs; ipm++)
+        if (!PMs.at(ipm).AreaSensitivity.isEmpty()) numOverriden++;
+    if (numOverriden != 0)
+        if (numOverriden != numPMs)
+            err += QString("\nOverride for area dependence of PDE is defined only for %1 PM%2\n"
+                           "Clear overrides or define them for all PMs\n").arg(numOverriden).arg(numOverriden > 1 ? "s" : "");
+
+    return err;
+}
+
 void APmHub::calculateMaxQEs()
 {
     //calculating maxQE for accelerator

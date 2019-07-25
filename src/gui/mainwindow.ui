@@ -2400,7 +2400,7 @@ Three columns (XYZ) for 'fully custom' array</string>
           <x>6</x>
           <y>33</y>
           <width>541</width>
-          <height>228</height>
+          <height>224</height>
          </rect>
         </property>
         <property name="frameShape">
@@ -2760,7 +2760,7 @@ Three columns (XYZ) for 'fully custom' array</string>
          <property name="geometry">
           <rect>
            <x>6</x>
-           <y>131</y>
+           <y>133</y>
            <width>91</width>
            <height>17</height>
           </rect>
@@ -2773,7 +2773,7 @@ Three columns (XYZ) for 'fully custom' array</string>
          <property name="geometry">
           <rect>
            <x>390</x>
-           <y>126</y>
+           <y>131</y>
            <width>101</width>
            <height>23</height>
           </rect>
@@ -2786,7 +2786,7 @@ Three columns (XYZ) for 'fully custom' array</string>
          <property name="geometry">
           <rect>
            <x>318</x>
-           <y>126</y>
+           <y>131</y>
            <width>61</width>
            <height>23</height>
           </rect>
@@ -2831,7 +2831,7 @@ Three columns (XYZ) for 'fully custom' array</string>
          <property name="geometry">
           <rect>
            <x>140</x>
-           <y>130</y>
+           <y>132</y>
            <width>161</width>
            <height>21</height>
           </rect>
@@ -2863,7 +2863,7 @@ Three columns (XYZ) for 'fully custom' array</string>
          <property name="geometry">
           <rect>
            <x>6</x>
-           <y>165</y>
+           <y>167</y>
            <width>126</width>
            <height>17</height>
           </rect>
@@ -2876,7 +2876,7 @@ Three columns (XYZ) for 'fully custom' array</string>
          <property name="geometry">
           <rect>
            <x>6</x>
-           <y>200</y>
+           <y>199</y>
            <width>123</width>
            <height>17</height>
           </rect>
@@ -2924,7 +2924,7 @@ Three columns (XYZ) for 'fully custom' array</string>
          <property name="geometry">
           <rect>
            <x>318</x>
-           <y>197</y>
+           <y>196</y>
            <width>61</width>
            <height>23</height>
           </rect>
@@ -2937,7 +2937,7 @@ Three columns (XYZ) for 'fully custom' array</string>
          <property name="geometry">
           <rect>
            <x>140</x>
-           <y>160</y>
+           <y>165</y>
            <width>161</width>
            <height>21</height>
           </rect>
@@ -2969,7 +2969,7 @@ Three columns (XYZ) for 'fully custom' array</string>
          <property name="geometry">
           <rect>
            <x>318</x>
-           <y>158</y>
+           <y>164</y>
            <width>61</width>
            <height>23</height>
           </rect>
@@ -2984,7 +2984,7 @@ Three columns (XYZ) for 'fully custom' array</string>
            <x>318</x>
            <y>100</y>
            <width>61</width>
-           <height>20</height>
+           <height>21</height>
           </rect>
          </property>
          <property name="text">
@@ -2998,7 +2998,7 @@ Three columns (XYZ) for 'fully custom' array</string>
          <property name="geometry">
           <rect>
            <x>390</x>
-           <y>158</y>
+           <y>164</y>
            <width>100</width>
            <height>23</height>
           </rect>
@@ -3090,7 +3090,7 @@ Three columns (XYZ) for 'fully custom' array</string>
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>257</y>
+          <y>254</y>
           <width>511</width>
           <height>16</height>
          </rect>

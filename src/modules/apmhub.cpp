@@ -318,7 +318,6 @@ const QString APmHub::checkBeforeSimulation() const
 {
     QString err;
 
-    //check effective PDE override
     int numOverriden = 0;
     for (int ipm = 0; ipm < numPMs; ipm++)
         if (PMs.at(ipm).effectivePDE != -1.0) numOverriden++;

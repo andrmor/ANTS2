@@ -24,6 +24,8 @@
 #ifdef __USE_ANTS_JSROOT__
     #include <QWebEngineView>
     #include <QWebEnginePage>
+    #include <QWebEngineProfile>
+    #include <QWebEngineDownloadItem>
 #endif
 
 #include "TView3D.h"
@@ -62,6 +64,8 @@ GeometryWindowClass::GeometryWindowClass(QWidget *parent, MainWindow *mw) :
         layV->addWidget(WebView);
     ui->swViewers->widget(1)->setLayout(layV);
     //WebView->load(QUrl("http://localhost:8080/?nobrowser&item=Objects/GeoWorld/world&opt=dray;all;tracks;transp50"));
+    QWebEngineProfile::defaultProfile()->connect(QWebEngineProfile::defaultProfile(), &QWebEngineProfile::downloadRequested,
+                                                 this, &GeometryWindowClass::onDownloadPngRequested);
 #endif
 
     QActionGroup* group = new QActionGroup( this );
@@ -78,8 +82,28 @@ GeometryWindowClass::~GeometryWindowClass()
   delete ui;
 }
 
+void GeometryWindowClass::adjustGeoAttributes(TGeoVolume * vol, int Mode, int transp, bool adjustVis, int visLevel, int currentLevel)
+{
+    const int totNodes = vol->GetNdaughters();
+    for (int i=0; i<totNodes; i++)
+    {
+        TGeoNode* thisNode = (TGeoNode*)vol->GetNodes()->At(i);
+        TGeoVolume * v = thisNode->GetVolume();
+        v->SetTransparency(Mode == 0 ? 0 : transp);
+        if (Mode != 0 && adjustVis)
+        {
+            //qDebug() << v->GetName() << currentLevel << visLevel;
+            v->SetAttBit(TGeoAtt::kVisOnScreen, (currentLevel < visLevel) );
+        }
+
+        adjustGeoAttributes(v, Mode, transp, adjustVis, visLevel, currentLevel+1);
+    }
+}
+
 void GeometryWindowClass::prepareGeoManager(bool ColorUpdateAllowed)
 {
+    if (!MW->Detector->top) return;
+
     int Mode = ui->cobViewer->currentIndex(); // 0 - standard, 1 - jsroot
 
     //root segments for roundish objects
@@ -101,13 +125,16 @@ void GeometryWindowClass::prepareGeoManager(bool ColorUpdateAllowed)
     MW->Detector->GeoManager->SetTopVisible(ui->cbShowTop->isChecked());
 
     //transparency setup
-    int totNodes = MW->Detector->top->GetNdaughters();
+//    int totNodes = MW->Detector->top->GetNdaughters();
     int transp = ui->sbTransparency->value();
-    for (int i=0; i<totNodes; i++)
-    {
-        TGeoNode* thisNode = (TGeoNode*)MW->Detector->top->GetNodes()->At(i);
-        thisNode->GetVolume()->SetTransparency(Mode == 0 ? 0 : transp);
-    }
+//    for (int i=0; i<totNodes; i++)
+//    {
+//        TGeoNode* thisNode = (TGeoNode*)MW->Detector->top->GetNodes()->At(i);
+//        thisNode->GetVolume()->SetTransparency(Mode == 0 ? 0 : transp);
+//        thisNode->GetVolume()->SetAttBit(TGeoAtt::kVisOnScreen, false);
+//    }
+    MW->Detector->top->SetTransparency(Mode == 0 ? 0 : transp);
+    adjustGeoAttributes(MW->Detector->top, Mode, transp, ui->cbLimitVisibility->isChecked(), level, 0);
 
     //making contaners visible
     MW->Detector->top->SetVisContainers(true);
@@ -1161,13 +1188,12 @@ void GeometryWindowClass::on_cbShowTop_toggled(bool checked)
         ShowGeometry(true, false);
     else
     {
-        //MW->Detector->GeoManager->SetTopVisible(checked);
-        prepareGeoManager();
-        MW->NetModule->onNewGeoManagerCreated();
-
-        prepareGeoManager();
-        showWebView();
-        //ShowGeometry(true, false);
+        ShowGeometry(true, false);
+        QWebEnginePage * page = WebView->page();
+        QString js = "var painter = JSROOT.GetMainPainter(\"onlineGUI_drawing\");";
+        js += QString("painter.options.showtop = %1;").arg(checked ? "true" : "false");
+        qDebug() << js;
+        page->runJavaScript(js);
     }
 }
 
@@ -1224,4 +1250,18 @@ void GeometryWindowClass::on_pbSaveAs_clicked()
       ;
 
   if (MW->GlobSet.fOpenImageExternalEditor) QDesktopServices::openUrl(QUrl("file:"+fileName, QUrl::TolerantMode));
+}
+
+void GeometryWindowClass::onDownloadPngRequested(QWebEngineDownloadItem *item)
+{
+#ifdef __USE_ANTS_JSROOT__
+    QString fileName = QFileDialog::getSaveFileName(this, "Select file name to safe image");
+    if (fileName.isEmpty())
+    {
+        item->cancel();
+        return;
+    }
+    item->setPath(fileName);
+    item->accept();
+#endif
 }

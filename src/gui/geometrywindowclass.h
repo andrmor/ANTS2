@@ -8,6 +8,8 @@ class MainWindow;
 class RasterWindowBaseClass;
 class QWebEngineView;
 class QVariant;
+class QWebEngineDownloadItem;
+class TGeoVolume;
 
 namespace Ui {
   class GeometryWindowClass;
@@ -83,6 +85,9 @@ public slots:
     void on_pbClearDots_clicked();
 
 private slots:
+    void onDownloadPngRequested(QWebEngineDownloadItem *item);
+
+private slots:
     void on_cbShowTop_toggled(bool checked);
     void on_cbColor_toggled(bool checked);
     void on_pbSaveAs_clicked();
@@ -100,19 +105,12 @@ private slots:
     void on_actionDefault_zoom_to_0_triggered();
     void on_actionSet_line_width_for_objects_triggered();
     void on_actionDecrease_line_width_triggered();
-
     void on_pbShowMonitorIndexes_clicked();
-
     void on_cobViewer_currentIndexChanged(int index);
-
     void on_actionOpen_GL_viewer_triggered();
-
     void on_actionJSROOT_in_browser_triggered();
-
     void on_cbWireFrame_toggled(bool checked);
-
     void on_cbLimitVisibility_clicked();
-
     void on_sbLimitVisibility_editingFinished();
 
 private:
@@ -135,6 +133,7 @@ private:
   void doChangeLineWidth(int deltaWidth);
   void showWebView();
   void prepareGeoManager(bool ColorUpdateAllowed = true);
+  void adjustGeoAttributes(TGeoVolume *vol, int Mode, int transp, bool adjustVis, int visLevel, int currentLevel);
 };
 
 #endif // GEOMETRYWINDOWCLASS_H

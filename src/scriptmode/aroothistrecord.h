@@ -49,8 +49,12 @@ public:
     void   SetEntries(int num);
     double GetMaximum();
     bool   GetContent(QVector<double> & x, QVector<double> & y) const;
+    bool   GetContent2D(QVector<double> & x, QVector<double> & y, QVector<double> & z) const;
     bool   GetUnderflow(double & undeflow) const;
     bool   GetOverflow (double & overflow) const;
+
+    bool   is1D() const;
+    bool   is2D() const;
 
     const QVector<double> FitGauss(const QString& options = "");
     const QVector<double> FitGaussWithInit(const QVector<double>& InitialParValues, const QString options = "");

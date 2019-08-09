@@ -919,11 +919,19 @@ void ATextEdit::convertTabToSpaces(QString& line)
 int ATextEdit::getSectionCounterChange(const QString& line) const
 {
     int counter = 0;
+    int bComment = false;
     for (int i=0; i<line.size(); i++)
     {
-        // ***!!! add ignore commented: // and inside /* */
-        if      (line.at(i) == '{' ) counter++;
-        else if (line.at(i) == '}' ) counter--;
+        const QChar & ch = line.at(i);
+        // ***!!! add ignore commented inside /* */
+        if      (ch == '{' ) counter++;
+        else if (ch == '}' ) counter--;
+        else if (ch == "/")
+        {
+            if (bComment) break;
+            else bComment = true;
+        }
+        else bComment = false;
     }
     return counter;
 }
@@ -986,15 +994,23 @@ void ATextEdit::align()
     for (QString& s : list) convertTabToSpaces(s);
 
     int currentIndent = getIndent(list.first());
-
-    for (int i=1; i<list.size(); i++)
+    const int size = list.size();
+    for (int i = 1; i <= size; i++)
     {
         int deltaSections = getSectionCounterChange(list.at(i-1));
-        currentIndent += deltaSections * TabInSpaces;
 
-        if (list.at(i).trimmed().startsWith('}')) currentIndent -= TabInSpaces;
-
-        if (currentIndent < 0) currentIndent = 0;
+        if (deltaSections >= 0)
+        {
+            currentIndent += deltaSections * TabInSpaces;
+            //no need to adjust the previous line
+        }
+        else
+        {
+            currentIndent += deltaSections * TabInSpaces;
+            if (currentIndent < 0) currentIndent = 0;
+            setIndent(list[i-1], currentIndent);
+            if (i == size) break;
+        }
         setIndent(list[i], currentIndent);
     }
 

@@ -399,7 +399,9 @@ SOURCES += main.cpp \
     scriptmode/apthistory_si.cpp \
     Simulation/atrackinghistorycrawler.cpp \
     Simulation/aparticletracker.cpp \
-    common/aexternalprocesshandler.cpp
+    common/aexternalprocesshandler.cpp \
+    gui/MainWindowTools/alogconfigdialog.cpp \
+    Simulation/alogsandstatisticsoptions.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -551,7 +553,9 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/apthistory_si.h \
     Simulation/atrackinghistorycrawler.h \
     Simulation/aparticletracker.h \
-    common/aexternalprocesshandler.h
+    common/aexternalprocesshandler.h \
+    gui/MainWindowTools/alogconfigdialog.h \
+    Simulation/alogsandstatisticsoptions.h
 
 # --- SIM ---
 ants2_SIM {
@@ -901,5 +905,6 @@ unix {
 #------------
 
 FORMS += \
-    gui/ageant4configdialog.ui
+    gui/ageant4configdialog.ui \
+    gui/MainWindowTools/alogconfigdialog.ui
 

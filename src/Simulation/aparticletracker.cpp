@@ -43,7 +43,7 @@ void AParticleTracker::configure(const GeneralSimSettings* simSet, bool fbuildTr
 
 bool AParticleTracker::TrackParticlesOnStack(int eventId)
 {
-    if (SimSet->fLogsStat) EventRecord = AEventTrackingRecord::create();
+    if (SimSet->LogsStatOptions.bParticleTransportLog) EventRecord = AEventTrackingRecord::create();
     const bool bCheckMonitors = !SimStat.Monitors.isEmpty();
     navigator = gGeoManager->GetCurrentNavigator();
     if (!navigator)
@@ -67,12 +67,12 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
         navigator->SetCurrentDirection(p->v);
         navigator->FindNode();
 
-        if (SimSet->fLogsStat) initLog();
+        if (SimSet->LogsStatOptions.bParticleTransportLog) initLog();
 
         //was this particle created outside the defined World?
         if (navigator->IsOutside())
         {
-            if (SimSet->fLogsStat)
+            if (SimSet->LogsStatOptions.bParticleTransportLog)
             {
                 ATrackingStepData * step = new ATrackingStepData(p->r, p->time, p->energy, 0, "O");
                 thisParticleRecord->addStep(step);
@@ -98,7 +98,7 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
             if ( !thisMatParticle->TrackingAllowed )
             {
                 //qDebug()<<"Found medium where tracking is not allowed!";
-                if (SimSet->fLogsStat)
+                if (SimSet->LogsStatOptions.bParticleTransportLog)
                 {
                     ATrackingStepData * step = new ATrackingStepData(p->r, p->time, p->energy, 0, "S");
                     thisParticleRecord->addStep(step);
@@ -129,7 +129,7 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
 
             if (navigator->IsOutside())
             {
-                if (SimSet->fLogsStat)
+                if (SimSet->LogsStatOptions.bParticleTransportLog)
                 {
                     ATrackingStepData * step = new ATrackingStepData(p->r, p->time, p->energy, 0, "O");
                     thisParticleRecord->addStep(step);
@@ -138,7 +138,7 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
             }
             else
             {
-                if (SimSet->fLogsStat)
+                if (SimSet->LogsStatOptions.bParticleTransportLog)
                 {
                     ATransportationStepData * step = new ATransportationStepData(p->r, p->time, p->energy, 0, "T");
                     TGeoNode * node = navigator->GetCurrentNode();
@@ -181,7 +181,7 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
         TrackCandidates.clear();
     }
 
-    if (SimSet->fLogsStat)
+    if (SimSet->LogsStatOptions.bParticleTransportLog)
     {
         if (RemoveTracksIfNoEnergyDepo && EnergyVector.empty() ) delete EventRecord;
         else TrackingHistory.push_back(EventRecord);
@@ -282,7 +282,7 @@ bool AParticleTracker::checkMonitors_isKilled()
             m->fillForParticle(local[0], local[1], p->time, 180.0/3.1415926535*TMath::ACos(cosAngle), p->energy);
             if (m->isStopsTracking())
             {
-                if (SimSet->fLogsStat)
+                if (SimSet->LogsStatOptions.bParticleTransportLog)
                 {
                     ATrackingStepData * step = new ATrackingStepData(p->r, p->time, p->energy, 0, "MonitorStop");
                     thisParticleRecord->addStep(step);
@@ -355,7 +355,7 @@ bool AParticleTracker::trackCharged_isKilled()
         AEnergyDepositionCell* tc = new AEnergyDepositionCell(p->r, p->time, dE, p->Id, thisMatId, counter, EventId);
         EnergyVector.push_back(tc);
 
-        if (SimSet->fLogsStat)
+        if (SimSet->LogsStatOptions.bParticleTransportLog)
         {
             ATrackingStepData * step = new ATrackingStepData(p->r, p->time, p->energy, dE, "hIoni");
             thisParticleRecord->addStep(step);
@@ -505,7 +505,7 @@ bool AParticleTracker::processPhotoelectric_isKilled()
     AEnergyDepositionCell* tc = new AEnergyDepositionCell(p->r, p->time, p->energy, p->Id, thisMatId, counter, EventId);
     EnergyVector.push_back(tc);
 
-    if (SimSet->fLogsStat)
+    if (SimSet->LogsStatOptions.bParticleTransportLog)
     {
         ATrackingStepData * step = new ATrackingStepData(p->r, p->time, 0, p->energy, "phot");
         thisParticleRecord->addStep(step);
@@ -537,7 +537,7 @@ bool AParticleTracker::processCompton_isKilled()
     navigator->SetCurrentDirection(p->v);
     p->energy = G1.energy;
 
-    if (SimSet->fLogsStat)
+    if (SimSet->LogsStatOptions.bParticleTransportLog)
     {
         /*
         ATrackingStepData * step = new ATrackingStepData(p->r, p->time, 0, G0.energy - G1.energy, "compt");
@@ -599,7 +599,7 @@ bool AParticleTracker::processNeutronAbsorption_isKilled(const NeutralTerminator
         if (el.DecayScenarios.isEmpty())
         {
             // qDebug() << "No decay scenarios following neutron capture are defined";
-            if (SimSet->fLogsStat)
+            if (SimSet->LogsStatOptions.bParticleTransportLog)
             {
                 ATrackingStepData * step = new ATrackingStepData(p->r, p->time, 0, 0, "nCapture");
                 thisParticleRecord->addStep(step);
@@ -627,7 +627,7 @@ bool AParticleTracker::processNeutronAbsorption_isKilled(const NeutralTerminator
             case ADecayScenario::Loss:
               {
                 //  qDebug() << "In this scenario there is no emission of secondary particles";
-                if (SimSet->fLogsStat)
+                if (SimSet->LogsStatOptions.bParticleTransportLog)
                 {
                     ATrackingStepData * step = new ATrackingStepData(p->r, p->time, 0, 0, "nCapture");
                     thisParticleRecord->addStep(step);
@@ -665,7 +665,7 @@ bool AParticleTracker::processNeutronAbsorption_isKilled(const NeutralTerminator
                     EnergyVector.push_back(tc);
                 }
 
-                if (SimSet->fLogsStat)
+                if (SimSet->LogsStatOptions.bParticleTransportLog)
                 {
                     ATrackingStepData * step = new ATrackingStepData(p->r, p->time, 0, depoE, "nDirect");
                     thisParticleRecord->addStep(step);
@@ -677,7 +677,7 @@ bool AParticleTracker::processNeutronAbsorption_isKilled(const NeutralTerminator
               {
                 //  qDebug() << "Fission";
                 ATrackingStepData * step;
-                if (SimSet->fLogsStat && !reaction.GeneratedParticles.empty())
+                if (SimSet->LogsStatOptions.bParticleTransportLog && !reaction.GeneratedParticles.empty())
                 {
                     step = new ATrackingStepData(p->r, p->time, 0, 0, "neutronInelastic");
                     thisParticleRecord->addStep(step);
@@ -702,7 +702,7 @@ bool AParticleTracker::processNeutronAbsorption_isKilled(const NeutralTerminator
                     AParticleRecord * pp = new AParticleRecord(ParticleId, p->r[0], p->r[1], p->r[2], vv[0], vv[1], vv[2], p->time, energy, counter);
                     ParticleStack.append(pp);
 
-                    if (SimSet->fLogsStat)
+                    if (SimSet->LogsStatOptions.bParticleTransportLog)
                     {
                         AParticleTrackingRecord * secTR = AParticleTrackingRecord::create( MpCollection.getParticleName(ParticleId) );
                         pp->ParticleRecord = secTR;
@@ -717,7 +717,7 @@ bool AParticleTracker::processNeutronAbsorption_isKilled(const NeutralTerminator
     else
     {
         qWarning() << "||| Warning: No isotopes are defined for" << thisMaterial->name;
-        if (SimSet->fLogsStat)
+        if (SimSet->LogsStatOptions.bParticleTransportLog)
         {
             ATrackingStepData * step = new ATrackingStepData(p->r, p->time, 0, 0, "nCapture");
             thisParticleRecord->addStep(step);
@@ -741,7 +741,7 @@ bool AParticleTracker::processPairProduction_isKilled()
     AParticleRecord * tmp2 = new AParticleRecord(p->Id, p->r[0],p->r[1],p->r[2], -vv[0], -vv[1], -vv[2], p->time, 511, counter);
     ParticleStack.append(tmp2);
 
-    if (SimSet->fLogsStat)
+    if (SimSet->LogsStatOptions.bParticleTransportLog)
     {
         ATrackingStepData * step = new ATrackingStepData(p->r, p->time, 0, depo, "pair");
         thisParticleRecord->addStep(step);
@@ -934,7 +934,7 @@ bool AParticleTracker::processNeutronElastic_isKilled(const NeutralTerminatorStr
                     "meV) - tracking stopped for this neutron";
     }
 
-    if (SimSet->fLogsStat)
+    if (SimSet->LogsStatOptions.bParticleTransportLog)
     {
         ATrackingStepData * step = new ATrackingStepData(p->r, p->time, newEnergy, depE, (bCoherent ? "nElasticCoherent" : "nElastic") );
         thisParticleRecord->addStep(step);

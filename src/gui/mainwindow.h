@@ -453,7 +453,6 @@ private slots:
     void on_actionNew_detector_triggered();
     void on_pbReloadTreeData_clicked();
     void on_pbStopLoad_clicked();
-    void on_pbConfigureNumberOfThreads_clicked();
     void on_cobFixedDirOrCone_currentIndexChanged(int index);
     void on_pbShowComptonAngles_clicked();
     void on_pbShowComptonEnergies_clicked();
@@ -599,6 +598,10 @@ private slots:
     void on_pbConvertToIon_clicked();
 
     void on_actionExit_triggered();
+
+    void on_pbOpenLogOptions_clicked();
+
+    void on_pbOpenLogOptions2_clicked();
 
 public slots:
     void on_pbRebuildDetector_clicked();

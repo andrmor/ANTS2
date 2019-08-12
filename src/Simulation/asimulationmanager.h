@@ -3,6 +3,7 @@
 
 #include "generalsimsettings.h"
 #include "atrackbuildoptions.h"
+#include "alogsandstatisticsoptions.h"
 
 #include <vector>
 
@@ -72,6 +73,7 @@ public:
     AScriptParticleGenerator * ScriptParticleGenerator = 0; //only for gui, simulation threads use their own
 
     ATrackBuildOptions TrackBuildOptions;
+    ALogsAndStatisticsOptions LogsStatOptions;
 
     //for G4ants sims
     QSet<QString> SeenNonRegisteredParticles;

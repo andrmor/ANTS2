@@ -390,7 +390,7 @@ void ASimulationManager::generateG4antsConfigCommon(QJsonObject & json, int Thre
 
     json["PhysicsList"] = G4SimSet.PhysicsList;
 
-    json["LogHistory"] = simSettings.fLogsStat;
+    json["LogHistory"] = simSettings.LogsStatOptions.bParticleTransportLog;
 
     QJsonArray Parr;
     const int numPart = MpCollection.countParticles();

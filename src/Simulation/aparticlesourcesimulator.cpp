@@ -163,8 +163,8 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
     //inits
     ParticleTracker->configure(&simSettings, fBuildParticleTracks, &tracks, fIgnoreNoDepoEvents);
     ParticleTracker->resetCounter();
-    S1generator->setDoTextLog(simSettings.fLogsStat);
-    S2generator->setDoTextLog(simSettings.fLogsStat);
+    S1generator->setDoTextLog(simSettings.LogsStatOptions.bPhotonGenerationLog);
+    S2generator->setDoTextLog(simSettings.LogsStatOptions.bPhotonGenerationLog);
     S2generator->setOnlySecondary(!fDoS1);
 
     return true;
@@ -691,11 +691,11 @@ bool AParticleSourceSimulator::geant4TrackAndProcess()
 
 
     //read tracks
-    if (simSettings.TrackBuildOptions.bBuildParticleTracks || simSettings.fLogsStat)
+    if (simSettings.TrackBuildOptions.bBuildParticleTracks || simSettings.LogsStatOptions.bParticleTransportLog)
     {
         ATrackingDataImporter ti(simSettings.TrackBuildOptions,
                                  detector.MpCollection->getListOfParticleNames(),
-                                 (simSettings.fLogsStat ? &TrackingHistory : nullptr),
+                                 (simSettings.LogsStatOptions.bParticleTransportLog ? &TrackingHistory : nullptr),
                                  (simSettings.TrackBuildOptions.bBuildParticleTracks ? &tracks : nullptr),
                                  maxParticleTracks);
         QString TrackingFileName = simSettings.G4SimSet.getTracksFileName(ID);

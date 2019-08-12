@@ -4196,14 +4196,6 @@ void MainWindow::on_pbStopLoad_clicked()
     emit RequestStopLoad();
 }
 
-void MainWindow::on_pbConfigureNumberOfThreads_clicked()
-{
-    GlobSetWindow->show();
-    GlobSetWindow->raise();
-    GlobSetWindow->activateWindow();
-    GlobSetWindow->SetTab(1);
-}
-
 void MainWindow::on_cobFixedDirOrCone_currentIndexChanged(int index)
 {
     ui->fConeForPhotonGen->setEnabled(index==1);
@@ -4900,4 +4892,20 @@ void MainWindow::on_pbConvertToIon_clicked()
 void MainWindow::on_actionExit_triggered()
 {
     close();
+}
+
+#include "alogconfigdialog.h"
+void MainWindow::on_pbOpenLogOptions_clicked()
+{
+    ALogConfigDialog* d = new ALogConfigDialog(SimulationManager->LogsStatOptions, this);
+    d->exec();
+    delete d;
+    on_pbUpdateSimConfig_clicked();
+}
+
+void MainWindow::on_pbOpenLogOptions2_clicked()
+{
+    ALogConfigDialog* d = new ALogConfigDialog(SimulationManager->LogsStatOptions, this);
+    d->exec();
+    on_pbUpdateSimConfig_clicked();
 }

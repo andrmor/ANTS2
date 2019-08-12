@@ -12,7 +12,6 @@ ALogConfigDialog::ALogConfigDialog(ALogsAndStatisticsOptions & LogStatOpt, QWidg
 
     ui->cbParticleTransport->setChecked(LogStatOpt.bParticleTransportLog);
     ui->cbDetectionStatistics->setChecked(LogStatOpt.bPhotonDetectionStat);
-    ui->cbPhotonProcesses->setChecked(LogStatOpt.bPhotonProcessesStat);
     ui->cbPhotonGeneration->setChecked(LogStatOpt.bPhotonGenerationLog);
 }
 
@@ -25,7 +24,6 @@ void ALogConfigDialog::on_pbAccept_clicked()
 {
     LogStatOpt.bParticleTransportLog = ui->cbParticleTransport->isChecked();
     LogStatOpt.bPhotonDetectionStat  = ui->cbDetectionStatistics->isChecked();
-    LogStatOpt.bPhotonProcessesStat  = ui->cbPhotonProcesses->isChecked();
     LogStatOpt.bPhotonGenerationLog  = ui->cbPhotonGeneration->isChecked();
 
     accept();

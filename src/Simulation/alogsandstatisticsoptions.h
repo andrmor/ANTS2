@@ -9,7 +9,6 @@ public:
     bool bParticleTransportLog = false;
 
     bool bPhotonDetectionStat = false;
-    bool bPhotonProcessesStat = false;
     bool bPhotonGenerationLog = false;
 
     void writeToJson(QJsonObject & json) const;

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>477</width>
-    <height>256</height>
+    <height>207</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -33,7 +33,7 @@
      <item>
       <widget class="QCheckBox" name="cbParticleTransport">
        <property name="text">
-        <string>Particle transport (log)</string>
+        <string>Particle transport log</string>
        </property>
       </widget>
      </item>
@@ -59,21 +59,14 @@
    <item>
     <widget class="QCheckBox" name="cbDetectionStatistics">
      <property name="text">
-      <string>Properties of detected photons (statistics)</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QCheckBox" name="cbPhotonProcesses">
-     <property name="text">
-      <string>Photon processes (statistics)</string>
+      <string>Statistics on detected photons</string>
      </property>
     </widget>
    </item>
    <item>
     <widget class="QCheckBox" name="cbPhotonGeneration">
      <property name="text">
-      <string>Photon generation (log)</string>
+      <string>Photon generation log</string>
      </property>
     </widget>
    </item>

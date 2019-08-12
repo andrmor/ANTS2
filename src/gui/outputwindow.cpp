@@ -713,8 +713,9 @@ void OutputWindow::on_pbWaveSpectrum_clicked()
   if (!spec || spec->GetEntries() == 0 || spec->Integral()==0)
     {
       message("Wavelength data are empty!\n\n"
-              "Or make sure the following is set before simulation:\n"
-              "* Simulation_options/Wave/Wavelength-resolved is checked", this);
+              "Before starting a simulation check that\n"
+              "'Statistics on detected photons' is activated:\n"
+              "use the 'logs' button on the right side of the 'Simulate' button.", this);
       return;
     }
 
@@ -753,8 +754,8 @@ void OutputWindow::on_pbTimeSpectrum_clicked()
   if (!spec || spec->GetEntries() == 0 || spec->Integral()==0)
     {
       message("Time data are empty!\n"
-              "Make sure the following is set before simulation:\n"
-              "Simulation_options/Accelerators/Do_logs_and_statistics is checked\n", this);
+              "'Statistics on detected photons' has to be activated before simulation!\n"
+              "Use the 'logs' button on the right side of the 'Simulate' button.", this);
       return;
     }
 
@@ -775,10 +776,11 @@ void OutputWindow::on_pbAngleSpectrum_clicked()
   TH1D* spec = d->getAngularDistr();
   if (!spec || spec->GetEntries() == 0 || spec->Integral()==0)
     {
-      message("Angle of incidence data are empty!\n"
-              "Make sure the following settings were configured before simulation:\n"
-              "* Simulation_options/Accelerators/Do_logs_and_statistics is checked\n"
-              "* Simulation_options/Angule/Take_into_account_PM_angular_response is checked", this);
+      message("Angle of incidence data are empty!\n\n"
+              "Before starting a simulation, check that:\n"
+              "1) Simulation_options/Angle/Take_into_account_PM_angular_response is checked;\n"
+              "2) 'Statistics on detected photons' is activated:\n"
+              "   use the 'logs' button on the right side of the 'Simulate' button.", this);
       return;
     }
 
@@ -801,7 +803,8 @@ void OutputWindow::on_pbNumTransitionsSpectrum_clicked()
    if (!spec || spec->GetEntries() == 0 || spec->Integral()==0)
      {
        message("Transition data are empty!\n"
-               "Simulation_options/Accelerators/Do_logs_and_statistics has to be activated before simulation!\n", this);
+               "'Statistics on detected photons' has to be activated before simulation!\n"
+               "Use the 'logs' button on the right side of the 'Simulate' button.", this);
        return;
      }
 
@@ -1014,8 +1017,9 @@ void OutputWindow::ShowGeneratedPhotonsLog()
     if (EventsDataHub->GeneratedPhotonsHistory.isEmpty())
     {
         message("Photon history log is empty!\n"
-                "Simulation_options/Accelerators/Do_logs_and_statistics has to be activated before simulation!\n"
-                "Also, photon sources simulations do not generate this log!", this);
+                "Activate 'Photon generation log' before starting a simulation!\n"
+                "Use the button on the right side of the 'Simulate' button.\n"
+                "\nNote that simulations in the 'Only photons' mode do not generate this log!", this);
         return;
     }
 

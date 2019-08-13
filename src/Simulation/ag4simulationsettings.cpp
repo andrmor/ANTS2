@@ -4,6 +4,10 @@
 
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QDir>
+#include <QFile>
+#include <QFileInfo>
+#include <QDebug>
 
 AG4SimulationSettings::AG4SimulationSettings()
 {
@@ -105,6 +109,74 @@ const QString AG4SimulationSettings::getTracksFileName(int iThreadNum) const
 const QString AG4SimulationSettings::getGdmlFileName() const
 {
     return getPath() + "Detector.gdml";
+}
+
+bool AG4SimulationSettings::checkPathValid() const
+{
+    const QString & path = AGlobalSettings::getInstance().G4ExchangeFolder;
+    return QDir(path).exists();
+}
+
+bool AG4SimulationSettings::checkExecutableExists() const
+{
+    const QString & exec = AGlobalSettings::getInstance().G4antsExec;
+    return QFile::exists(exec);
+}
+
+bool AG4SimulationSettings::checkExecutablePermission() const
+{
+    const QString & exec = AGlobalSettings::getInstance().G4antsExec;
+    return QFileInfo(exec).isExecutable();
+}
+
+#include "TGeoManager.h"
+const QString AG4SimulationSettings::checkSensitiveVolumes() const
+{
+    if (SensitiveVolumes.isEmpty()) return ""; //can be empty
+
+    QStringList NotFoundVolumes;
+    TObjArray * va = gGeoManager->GetListOfVolumes();
+    const int numVol = va->GetEntries();
+
+    for (int i=0; i<SensitiveVolumes.size(); i++)
+    {
+        QString s = SensitiveVolumes.at(i);
+
+        bool bWild = false;
+        if (s.endsWith('*'))
+        {
+            s.chop(1);
+            bWild = true;
+        }
+
+        bool bFound = false;
+        for (int iV=0; iV<numVol; iV++)
+        {
+            const TString tname = ((TGeoVolume*)va->At(iV))->GetName();
+            const QString sname(tname.Data());
+
+            if (bWild)
+            {
+                if (sname.startsWith(s))
+                {
+                    bFound = true;
+                    break;
+                }
+            }
+            else
+            {
+                if (sname == s)
+                {
+                    bFound = true;
+                    break;
+                }
+            }
+        }
+        if (!bFound) NotFoundVolumes << s;
+    }
+
+    if (NotFoundVolumes.isEmpty()) return "";
+    else return QString("The following sensitive volumes/widlcards do not identify any volumes in the geometry:\n%1").arg(NotFoundVolumes.join(", "));
 }
 
 const QString AG4SimulationSettings::getPath() const

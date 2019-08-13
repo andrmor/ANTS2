@@ -30,6 +30,12 @@ public:
     const QString getTracksFileName(int iThreadNum) const;
     const QString getGdmlFileName() const;
 
+    bool  checkPathValid() const;
+    bool  checkExecutableExists() const;
+    bool  checkExecutablePermission() const;
+
+    const QString checkSensitiveVolumes() const;
+
 private:
     const QString getPath() const;
 

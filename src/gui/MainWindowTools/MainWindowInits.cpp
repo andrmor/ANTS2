@@ -272,6 +272,8 @@ MainWindow::MainWindow(DetectorClass *Detector,
     ui->labPhTracksOn_1->setVisible(false);
     ui->labPartTracksOn->setPixmap(Rwindow->YellowIcon.pixmap(8,8));
     ui->labPartTracksOn->setVisible(false);
+    ui->labPartLogOn->setPixmap(Rwindow->YellowIcon.pixmap(8,8));
+    ui->labPartLogOn->setVisible(false);
       //misc gui inits
     ui->swPMTvsSiPM->setCurrentIndex(ui->cobPMdeviceType->currentIndex());
     MainWindow::on_pbRefreshPMproperties_clicked(); //indication of PM properties

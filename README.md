@@ -4,9 +4,9 @@ ANTS2 is a simulation and experimental data processing package for Anger camera-
 + Optimization and development of event reconstruction techniques
 + Adaptive (iterative) reconstruction of response of light sensors using flood field illumination data
 + Reconstruction and filtering of events for experimental/simulation data using 
-  +Statistical methods(including GPU-based implementations)
-  +Artificial Neural Networks
-  +kNN-based methods
+  * Statistical methods(including GPU-based implementations)
+  * Artificial Neural Networks
+  * kNN-based methods
 
 + GUI + JavaScript / Pythin scripting 
 + Particle simulations can be automatically delegated to Geant4

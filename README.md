@@ -8,10 +8,13 @@ ANTS2 is a simulation and experimental data processing package for Anger camera-
   * Artificial Neural Networks
   * kNN-based methods
 
-+ GUI + JavaScript / Pythin scripting 
-+ Particle simulations can be automatically delegated to Geant4
-+ Distributed simulation/reconstruction is supported.
+Highlights:
 
++ Tools for semi-supervised optimization
++ GUI + JavaScript / Pythin scripting 
++ Particle simulations can be delegated to Geant4 (automatic interface)
++ Implementation of NCrystal library for coherent neutron scattering
++ Distributed simulation/reconstruction is supported
 + Docker version (inlcudes Geant4 installation and X-win GUI) is available
 
 It is an open source package developed using CERN ROOT and Qt framework (C++). Currently we are working on implementation of gemetry visualization using JSROOT library.

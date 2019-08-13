@@ -1009,9 +1009,9 @@ void ATextEdit::align()
             currentIndent += deltaSections * TabInSpaces;
             if (currentIndent < 0) currentIndent = 0;
             setIndent(list[i-1], currentIndent);
-            if (i == size) break;
         }
-        setIndent(list[i], currentIndent);
+        if (i != size)
+            setIndent(list[i], currentIndent);
     }
 
     QString res = list.join('\n');

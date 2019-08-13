@@ -1192,7 +1192,7 @@ void GeometryWindowClass::on_cbShowTop_toggled(bool checked)
         QWebEnginePage * page = WebView->page();
         QString js = "var painter = JSROOT.GetMainPainter(\"onlineGUI_drawing\");";
         js += QString("painter.options.showtop = %1;").arg(checked ? "true" : "false");
-        qDebug() << js;
+        js += "painter.startDrawGeometry();";
         page->runJavaScript(js);
     }
 }
@@ -1234,22 +1234,27 @@ void GeometryWindowClass::on_cobViewType_currentIndexChanged(int index)
 
 void GeometryWindowClass::on_pbSaveAs_clicked()
 {
-  QFileDialog *fileDialog = new QFileDialog;
-  fileDialog->setDefaultSuffix("png");
-  QString fileName = fileDialog->getSaveFileName(this, "Save image as file", MW->GlobSet.LastOpenDir, "png (*.png);;gif (*.gif);;Jpg (*.jpg)");
-  if (fileName.isEmpty()) return;
-  MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+    int Mode = ui->cobViewer->currentIndex(); // 0 - standard, 1 - jsroot
+    if (Mode == 0)
+    {
+        QFileDialog *fileDialog = new QFileDialog;
+        fileDialog->setDefaultSuffix("png");
+        QString fileName = fileDialog->getSaveFileName(this, "Save image as file", MW->GlobSet.LastOpenDir, "png (*.png);;gif (*.gif);;Jpg (*.jpg)");
+        if (fileName.isEmpty()) return;
+        MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
-  QFileInfo file(fileName);
-  if(file.suffix().isEmpty()) fileName += ".png";
-
-  int Mode = ui->cobViewer->currentIndex(); // 0 - standard, 1 - jsroot
-  if (Mode == 0)
-    GeometryWindowClass::SaveAs(fileName);
-  else
-      ;
-
-  if (MW->GlobSet.fOpenImageExternalEditor) QDesktopServices::openUrl(QUrl("file:"+fileName, QUrl::TolerantMode));
+        QFileInfo file(fileName);
+        if(file.suffix().isEmpty()) fileName += ".png";
+        GeometryWindowClass::SaveAs(fileName);
+        if (MW->GlobSet.fOpenImageExternalEditor) QDesktopServices::openUrl(QUrl("file:"+fileName, QUrl::TolerantMode));
+    }
+    else
+    {
+        QWebEnginePage * page = WebView->page();
+        QString js = "var painter = JSROOT.GetMainPainter(\"onlineGUI_drawing\");";
+        js += QString("painter.createSnapshot('dummy.png')");
+        page->runJavaScript(js);
+    }
 }
 
 void GeometryWindowClass::onDownloadPngRequested(QWebEngineDownloadItem *item)

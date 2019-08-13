@@ -886,7 +886,7 @@ void ATextEdit::setTextCursorSilently(const QTextCursor &tc)
 
 int ATextEdit::getIndent(const QString& line) const
 {
-    int indent = -1;
+    int indent = 0;
     if (!line.isEmpty())
     {
         for (indent = 0; indent<line.size(); indent++)
@@ -989,7 +989,7 @@ void ATextEdit::align()
     if (text.isEmpty()) return;
 
     QStringList list = text.split('\n');
-    if (list.size() == 1) return;
+    if (list.size() <= 1) return;
 
     for (QString& s : list) convertTabToSpaces(s);
 

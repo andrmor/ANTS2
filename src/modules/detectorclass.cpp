@@ -11,6 +11,7 @@
 #include "asandwich.h"
 #include "aslab.h"
 #include "ageoobject.h"
+#include "afiletools.h"
 #include "modules/lrf_v3/corelrfstypes.h"
 #include "modules/lrf_v3/alrftypemanager.h"
 #include "modules/lrf_v3/alrftypemanagerinterface.h"
@@ -31,6 +32,7 @@
 #include "TGeoPcon.h"
 #include "TGeoPgon.h"
 #include "TGeoCompositeShape.h"
+#include "TNamed.h"
 
 static void autoLoadPlugins() {
   typedef void (*LrfPluginSetupFn)(LRF::ALrfTypeManagerInterface &manager);
@@ -129,14 +131,16 @@ bool DetectorClass::MakeDetectorFromJson(QJsonObject &json)
   return BuildDetector();
 }
 
-bool DetectorClass::BuildDetector(bool SkipSimGuiUpdate)
-{  
-    //qDebug() << "Remake detector triggered"  ;
+bool DetectorClass::BuildDetector(bool SkipSimGuiUpdate, bool bSkipAllUpdates)
+{
+  if (bSkipAllUpdates) SkipSimGuiUpdate = true;
+
+  // qDebug() << "Remake detector triggered"  ;
   if (Config->JSON.isEmpty())
-    {
+  {
       qCritical() << "!!!Cannot construct detector: Config is empty";
       return false;
-    }
+  }
 
   int numPMs = pmCount(); //number of PMs before new detector is constructed
 
@@ -147,10 +151,10 @@ bool DetectorClass::BuildDetector(bool SkipSimGuiUpdate)
   //handling GDML if present
   QJsonObject js = Config->JSON["DetectorConfig"].toObject();
   if (js.contains("GDML"))
-    {
+  {
       QString gdml = js["GDML"].toString();
       fOK = importGDML(gdml);  //if failed, it is reported and sandwich is rebuilt
-    }
+  }
 
   Config->UpdateSimSettingsOfDetector(); //otherwise some sim data will be lost due to remake of PMs and MPcollection
 
@@ -159,12 +163,12 @@ bool DetectorClass::BuildDetector(bool SkipSimGuiUpdate)
       LRFs->clear(PMs->count()); // clear LRFs if number of PMs changed
       updatePreprocessingAddMultySize();
       PMgroups->onNumberOfPMsChanged();
-      emit requestGroupsGuiUpdate();
+      if (!bSkipAllUpdates) emit requestGroupsGuiUpdate();
       //emit requestClearPreprocessingSettings();
   }
 
   //request GUI update
-  Config->AskForDetectorGuiUpdate(); //save in batch mode too, just emits a signal
+  if (!bSkipAllUpdates)  Config->AskForDetectorGuiUpdate(); //save in batch mode too, just emits a signal
   if (!SkipSimGuiUpdate) Config->AskForSimulationGuiUpdate();
   //emit requestClearEventsData();
 
@@ -214,6 +218,47 @@ void DetectorClass::writePreprocessingToJson(QJsonObject &json)
 void DetectorClass::changeLineWidthOfVolumes(int delta)
 {
     Sandwich->changeLineWidthOfVolumes(delta);
+}
+
+const QString DetectorClass::exportToGDML(const QString& fileName) const
+{
+    QFileInfo fi(fileName);
+    if (fi.suffix().compare("gdml", Qt::CaseInsensitive))
+        return "Error: file name should have .gdml extension";
+
+    QByteArray ba = fileName.toLocal8Bit();
+    const char *c_str = ba.data();
+    GeoManager->SetName("geometry");
+    GeoManager->Export(c_str);
+
+    QFile f(fileName);
+    if (f.open(QFile::ReadOnly | QFile::Text))
+    {
+        QTextStream in(&f);
+        QString txt = in.readAll();
+
+        if (f.remove())
+        {
+            txt.replace("unit=\"cm\"", "unit=\"mm\"");
+            bool bOK = SaveTextToFile(fileName, txt);
+            if (bOK) return "";
+        }
+    }
+    return "Error during cm->mm conversion stage!";
+}
+
+const QString DetectorClass::exportToROOT(const QString& fileName) const
+{
+    QFileInfo fi(fileName);
+    if (fi.suffix().compare("root", Qt::CaseInsensitive))
+        return "Error: file name should have .root extension";
+
+    QByteArray ba = fileName.toLocal8Bit();
+    const char *c_str = ba.data();
+    GeoManager->SetName("geometry");
+    GeoManager->Export(c_str);
+
+    return "";
 }
 
 void DetectorClass::writePMarraysToJson(QJsonObject &json)
@@ -329,8 +374,14 @@ void DetectorClass::constructDetector()
       QString tmpStr = (*MpCollection)[i]->name;
       QByteArray ba = tmpStr.toLocal8Bit();
       char *cname = ba.data();
-      (*MpCollection)[i]->GeoMat = new TGeoMaterial(cname, (*MpCollection)[i]->p1, (*MpCollection)[i]->p2, (*MpCollection)[i]->p3);
+      //(*MpCollection)[i]->GeoMat = new TGeoMaterial(cname, (*MpCollection)[i]->p1, (*MpCollection)[i]->p2, (*MpCollection)[i]->p3);
+      (*MpCollection)[i]->generateTGeoMat();
       (*MpCollection)[i]->GeoMed = new TGeoMedium (cname, i, (*MpCollection)[i]->GeoMat);
+      (*MpCollection)[i]->GeoMed->SetParam(0, (*MpCollection)[i]->n ); // refractive index
+ // param[1] reserved for k
+      (*MpCollection)[i]->GeoMed->SetParam(2, (*MpCollection)[i]->abs ); // abcorption coefficient (mm^-1)
+      (*MpCollection)[i]->GeoMed->SetParam(3, (*MpCollection)[i]->reemissionProb ); // re-emission probability
+      (*MpCollection)[i]->GeoMed->SetParam(4, (*MpCollection)[i]->rayleighMFP ); // Rayleigh MFP (mm)
     }
 
   //calculate Z of slabs in ASandwich, copy Z edges
@@ -356,8 +407,7 @@ void DetectorClass::constructDetector()
   //qDebug() << "    World size XYmax:"<<WorldSizeXY<<"Zmax:"<<WorldSizeZ;
 
   //qDebug() << "--> Creating top volume";
-  top = GeoManager->MakeBox("World", (*MpCollection)[Sandwich->World->Material]->GeoMed, WorldSizeXY, WorldSizeXY, WorldSizeZ);
-  //Detector->top->SetLineColor(kGreen);
+  top = GeoManager->MakeBox("WorldBox", (*MpCollection)[Sandwich->World->Material]->GeoMed, WorldSizeXY, WorldSizeXY, WorldSizeZ);
   GeoManager->SetTopVolume(top);
   GeoManager->SetTopVisible(true);
   //qDebug() << "--> Positioning sandwich layers";
@@ -380,6 +430,7 @@ void DetectorClass::constructDetector()
       //qDebug() << "--> Positioning dummy PMs";
       positionDummies();
     }
+  top->SetName("World");
   //qDebug() << "--> Closing geometry";
   GeoManager->CloseGeometry();
   emit newGeoManager(GeoManager);
@@ -735,25 +786,43 @@ int DetectorClass::pmCount() const
 
 void DetectorClass::findPM(int ipm, int &ul, int &index)
 {
-  if (ipm<PMarrays[0].PositionsAnglesTypes.size())
+    if (PMarrays[0].fActive)
     {
-      ul=0;
-      index = ipm;
-      return;
+        if (ipm < PMarrays[0].PositionsAnglesTypes.size())
+        {
+            ul = 0;
+            index = ipm;
+            return;
+        }
+        if (PMarrays[1].fActive)
+        {
+            index = ipm - PMarrays[0].PositionsAnglesTypes.size();
+            if (index < PMarrays[1].PositionsAnglesTypes.size())
+            {
+                ul = 1;
+                return;
+            }
+        }
     }
-  index = ipm - PMarrays[0].PositionsAnglesTypes.size();
-  if (index<PMarrays[1].PositionsAnglesTypes.size())
+    else
     {
-      ul=1;
-      return;
+        if (PMarrays[1].fActive)
+        {
+            if (ipm < PMarrays[1].PositionsAnglesTypes.size())
+            {
+                ul = 1;
+                index = ipm;
+                return;
+            }
+        }
     }
-  index = -1; //bad ipm
-  return;
+    index = -1; //bad ipm
+    return;
 }
 
 const QString DetectorClass::removePMtype(int itype)
 {
-    if (PMs->countPMtypes() <= 1) return "Cannot remove the last type";
+    if (PMs->countPMtypes() < 2) return "Cannot remove the last type";
 
     //no need to check PMarrays -> if type is in use, PMs module will report it
     for (const PMdummyStructure& ad : PMdummies)
@@ -765,12 +834,12 @@ const QString DetectorClass::removePMtype(int itype)
     //shifting data in the arrays
     for (APmArrayData& ad : PMarrays)
     {
-        if (ad.PMtype > itype) ad.PMtype--;
+        if (ad.PMtype >= itype) ad.PMtype--;  // >= i used to shift non-existent type to previous in inactive arrays
         for (APmPosAngTypeRecord& r : ad.PositionsAnglesTypes)
-            if (r.type > itype) r.type--;
+            if (r.type >= itype) r.type--;
     }
     for (PMdummyStructure& ad : PMdummies)
-        if (ad.PMtype > itype) ad.PMtype--;
+        if (ad.PMtype >= itype) ad.PMtype--;
 
     return "";
 }
@@ -824,27 +893,36 @@ TGeoVolume *DetectorClass::generatePmVolume(TString Name, TGeoMedium *Medium, co
 
 void DetectorClass::populatePMs()
 {
-  PMs->clear();
-  for (int ul=0; ul<2; ul++)
+    PMs->clear();
+    for (int ul=0; ul<2; ul++)
     {
-      if (PMarrays[ul].fActive)
+        if (PMarrays[ul].fActive)
         {
-          // calculate XY positions for regular array and create the record with positions (otherwise already there)
-          if (PMarrays[ul].Regularity == 0) calculatePmsXY(ul);
-          // calculate Z position for regular and auto-z array
-          if (PMarrays[ul].Regularity < 2)
+            // calculate XY positions for regular array and create the record with positions (otherwise already there)
+            if (PMarrays[ul].Regularity == 0) calculatePmsXY(ul);
+            // calculate Z position for regular and auto-z array
+            if (PMarrays[ul].Regularity < 2)
             {
-              for (int ipm=0; ipm<PMarrays[ul].PositionsAnglesTypes.size(); ipm++)
-              {
-                int itype = PMarrays[ul].PositionsAnglesTypes.at(ipm).type;
-                double halfWidth = ( PMs->getType(itype)->Shape == 3 ? PMs->getType(itype)->getHalfHeightSpherical() : 0.5*PMs->getType(itype)->SizeZ);
-                double Z = (ul == 0) ? UpperEdge+halfWidth : LowerEdge-halfWidth;
-                PMarrays[ul].PositionsAnglesTypes[ipm].z = Z;
-              }
+                const int numTypes = PMs->countPMtypes();
+                for (int ipm=0; ipm<PMarrays[ul].PositionsAnglesTypes.size(); ipm++)
+                {
+                    int itype = PMarrays[ul].PositionsAnglesTypes.at(ipm).type;
+                    if (itype >= numTypes)
+                    {
+                        qWarning() << "Unknown type detected, changed to type 0";
+                        PMarrays[ul].PositionsAnglesTypes[ipm].type = 0;
+                        itype = 0;
+                    }
+
+                    const APmType* pType = PMs->getType(itype);
+                    double halfWidth = ( pType->Shape == 3 ? pType->getHalfHeightSpherical() : 0.5*pType->SizeZ );
+                    double Z = ( ul == 0 ? UpperEdge + halfWidth : LowerEdge - halfWidth );
+                    PMarrays[ul].PositionsAnglesTypes[ipm].z = Z;
+                }
             }
-          //registering PMTs in PMs module
-          for (int ipm=0; ipm<PMarrays[ul].PositionsAnglesTypes.size(); ipm++)
-              PMs->add(ul, &PMarrays[ul].PositionsAnglesTypes[ipm]);
+            //registering PMTs in PMs module
+            for (int ipm=0; ipm<PMarrays[ul].PositionsAnglesTypes.size(); ipm++)
+                PMs->add(ul, &PMarrays[ul].PositionsAnglesTypes[ipm]);
         }
     }
 }

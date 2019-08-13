@@ -26,7 +26,7 @@ public:
                           AMaterialParticleCollection* materialCollection,
                           QVector<GeneratedPhotonsHistoryStructure>* PhotonsHistory,
                           QObject *parent = 0);
-    void UpdateGeoManager(TGeoManager* NewGeoManager) {GeoManager = NewGeoManager;}
+    void UpdateGeoManager(TGeoManager* NewGeoManager) {GeoManager = NewGeoManager;} // *** obsolete?
     
     bool Generate(); //uses EnergyVector as the input parameter
 

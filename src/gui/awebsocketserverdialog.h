@@ -29,8 +29,8 @@ private slots:
     void on_pbSettings_clicked();
 
 private:
-    Ui::AWebSocketServerDialog *ui;
     MainWindow* MW;
+    Ui::AWebSocketServerDialog *ui;
 };
 
 #endif // AWEBSOCKETSERVERDIALOG_H

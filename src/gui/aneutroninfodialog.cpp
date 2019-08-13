@@ -1,6 +1,7 @@
 #include "aneutroninfodialog.h"
 #include "ui_aneutroninfodialog.h"
 #include "amaterial.h"
+#include "achemicalelement.h"
 #include "acommonfunctions.h"
 #include "graphwindowclass.h"
 #include "amessage.h"

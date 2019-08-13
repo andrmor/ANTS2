@@ -18,5 +18,10 @@ void message(QString text)
 }
 #endif
 
-
-
+bool confirm(const QString & text, QWidget * parent)
+{
+    QMessageBox::StandardButton reply = QMessageBox::question(parent, "Confirmation request", text,
+                                    QMessageBox::Yes|QMessageBox::Cancel, QMessageBox::Yes);
+    if (reply == QMessageBox::Yes) return true;
+    return false;
+}

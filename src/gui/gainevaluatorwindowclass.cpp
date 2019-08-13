@@ -2474,11 +2474,6 @@ double GainEvaluatorWindowClass::CalculateAreaFraction(int ipm1, int ipm2) //ret
       return 0;
     }
 
-//  MW->ShowGeometry();
-//  MW->GeoManager->DrawTracks();
-//  MW->GeometryWindow->UpdateRootCanvas();
-//  MW->GeometryWindow->raise();
-
   return area1/area2;
 }
 

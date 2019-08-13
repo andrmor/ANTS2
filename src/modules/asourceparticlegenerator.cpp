@@ -250,7 +250,7 @@ bool ASourceParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & Generat
 
                   AParticleRecord* ps = new AParticleRecord();
                   ps->Id = ParticleSourcesData[isource]->GunParticles[thisParticle]->ParticleId;
-                  ps->energy = ParticleSourcesData[isource]->GunParticles[thisParticle]->generateEnergy();
+                  ps->energy = ParticleSourcesData[isource]->GunParticles[thisParticle]->generateEnergy(RandGen);
                   ps->v[0] = -GeneratedParticles.at(index)->v[0];
                   ps->v[1] = -GeneratedParticles.at(index)->v[1];
                   ps->v[2] = -GeneratedParticles.at(index)->v[2];
@@ -397,7 +397,7 @@ void ASourceParticleGenerator::AddParticleInCone(int isource, int iparticle, QVe
   AParticleRecord* ps = new AParticleRecord();
 
   ps->Id = ParticleSourcesData[isource]->GunParticles[iparticle]->ParticleId;
-  ps->energy = ParticleSourcesData[isource]->GunParticles[iparticle]->generateEnergy();
+  ps->energy = ParticleSourcesData[isource]->GunParticles[iparticle]->generateEnergy(RandGen);
     //generating random direction inside the collimation cone
     double spread = ParticleSourcesData[isource]->Spread*3.1415926535/180.0; //max angle away from generation diretion
     double cosTheta = cos(spread);

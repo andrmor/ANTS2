@@ -43,9 +43,15 @@ namespace Widgets = LRF::LrfWindowWidgets;
 using namespace LRF;
 
 ALrfWindow::ALrfWindow(QWidget *parent, MainWindow *mw, ARepository *lrf_repo) :
-  QMainWindow(parent), mw(mw), repo(lrf_repo)
+  AGuiWindow(parent), mw(mw), repo(lrf_repo)
 {
   setupUi(this);
+
+  Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
+  windowFlags |= Qt::WindowCloseButtonHint;
+  windowFlags |= Qt::Tool;
+  this->setWindowFlags( windowFlags );
+
   connect(repo, &ARepository::currentLrfsChangedReadyStatus, this, &ALrfWindow::onReadyStatusChanged);
   lw_instructions->setDragEnabled(false);
 
@@ -158,7 +164,7 @@ void ALrfWindow::onRequestShowPMs(QString selection)
        Text[ipm] = QString::number(ipm);
    }
 
-   mw->GeometryWindow->ShowTextOnPMs(Text, kBlack);
+   mw->GeometryWindow->ShowText(Text, kBlack);
 }
 
 void ALrfWindow::onReadyStatusChanged(bool fReady)
@@ -188,16 +194,6 @@ void ALrfWindow::on_pbUpdateInstructionsJson_clicked()
     writeInstructionsToJson(js);
     repo->setNextUpdateConfig(js);
     mw->Config->UpdateLRFv3makeJson();
-}
-
-bool ALrfWindow::event(QEvent *event)
-{
-    if (!mw->WindowNavigator) return QMainWindow::event(event);
-
-    if (event->type() == QEvent::Hide) mw->WindowNavigator->HideWindowTriggered("newLrf");
-    if (event->type() == QEvent::Show) mw->WindowNavigator->ShowWindowTriggered("newLrf");
-
-    return QMainWindow::event(event);
 }
 
 void ALrfWindow::setSplitterRightColumn(QWidget *new_widget)
@@ -231,7 +227,7 @@ void ALrfWindow::addWidgetToInstructionList(QListWidget *list, Widgets::AInstruc
   widget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
   connect(widget, &Widgets::AInstructionListWidgetItem::requestShowPMs, this, &ALrfWindow::onRequestShowPMs);
   connect(widget, &Widgets::AInstructionListWidgetItem::requestShowTextOnSensors, [=](QVector<QString> text) {
-    mw->GeometryWindow->ShowTextOnPMs(text, kBlack);
+    mw->GeometryWindow->ShowText(text, kBlack);
   });
 
   connect(widget, &LrfWindowWidgets::AInstructionListWidgetItem::elementChanged, this, &ALrfWindow::on_pbUpdateInstructionsJson_clicked);

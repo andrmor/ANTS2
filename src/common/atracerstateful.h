@@ -8,7 +8,7 @@ class QScriptEngine;
 class QObject;
 class AMaterialParticleCollection;
 class AOpticalOverrideScriptInterface;
-class AMathScriptInterface;
+class AMath_SI;
 
 //random generator is external
 //script engine is owned by this class, but created only if needed (there are script overrides)
@@ -30,7 +30,7 @@ public:
     TRandom2 * RandGen = 0;                                 //external
     QScriptEngine * ScriptEngine = 0;                       //local
     AOpticalOverrideScriptInterface* overrideInterface = 0; //local
-    AMathScriptInterface* mathInterface = 0;                //local
+    AMath_SI* mathInterface = 0;                //local
 };
 
 #endif // ATRACERSTATEFUL_H

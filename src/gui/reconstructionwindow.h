@@ -1,7 +1,7 @@
 #ifndef RECONSTRUCTIONWINDOW_H
 #define RECONSTRUCTIONWINDOW_H
 
-#include <QMainWindow>
+#include "aguiwindow.h"
 #include <QStandardItemModel>
 
 #include "TMathBase.h"
@@ -60,7 +60,7 @@ struct TreeViewStruct
     void fillCustom(bool fCustomBins, bool fCustomRanges, QVector<linkCustomClass> &cus);
 };
 
-class ReconstructionWindow : public QMainWindow
+class ReconstructionWindow : public AGuiWindow
 {
   Q_OBJECT
   
@@ -536,9 +536,6 @@ private slots:
   void on_cobCGstartOption_currentIndexChanged(int index);
 
   void on_ledFromPeaksThreshold_editingFinished();
-
-protected:
-    bool event(QEvent *event);
 
 private:
   Ui::ReconstructionWindow *ui;

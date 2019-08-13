@@ -495,10 +495,10 @@
     <widget class="QLabel" name="label_ready">
      <property name="geometry">
       <rect>
-       <x>85</x>
-       <y>11</y>
-       <width>71</width>
-       <height>16</height>
+       <x>90</x>
+       <y>9</y>
+       <width>101</width>
+       <height>20</height>
       </rect>
      </property>
      <property name="font">
@@ -1455,7 +1455,7 @@
       <rect>
        <x>572</x>
        <y>440</y>
-       <width>70</width>
+       <width>111</width>
        <height>17</height>
       </rect>
      </property>
@@ -1484,7 +1484,7 @@
       <rect>
        <x>572</x>
        <y>459</y>
-       <width>111</width>
+       <width>131</width>
        <height>17</height>
       </rect>
      </property>
@@ -1977,7 +1977,7 @@ only events passing all event filters are used to calculate LRFs.</string>
        <rect>
         <x>5</x>
         <y>21</y>
-        <width>141</width>
+        <width>191</width>
         <height>17</height>
        </rect>
       </property>
@@ -2256,7 +2256,7 @@ only events passing all event filters are used to calculate LRFs.</string>
      <x>0</x>
      <y>0</y>
      <width>711</width>
-     <height>21</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuShow">

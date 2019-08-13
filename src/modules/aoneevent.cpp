@@ -98,7 +98,7 @@ bool AOneEvent::CheckPMThit(int ipm, double time, int WaveIndex, double x, doubl
   if (rnd > DetProbability)  //random number is provided by the tracker - done for the accelerator function
       return false;
 
-  if (SimSet->fLogsStat) CollectStatistics(WaveIndex, time, cosAngle, Transitions);
+  if (SimSet->LogsStatOptions.bPhotonDetectionStat) CollectStatistics(WaveIndex, time, cosAngle, Transitions);
 
   PMhits[ipm] += 1.0f;
   if (SimSet->fTimeResolved) TimedPMhits[iTime][ipm] += 1.0f;
@@ -126,7 +126,7 @@ bool AOneEvent::CheckSiPMhit(int ipm, double time, int WaveIndex, double x, doub
   if (rnd > DetProbability) //random number is provided by the tracker - done for the accelerator function
       return false;
 
-  if (SimSet->fLogsStat) CollectStatistics(WaveIndex, time, cosAngle, Transitions);
+  if (SimSet->LogsStatOptions.bPhotonDetectionStat) CollectStatistics(WaveIndex, time, cosAngle, Transitions);
 
   //    qDebug()<<"Detected!";
   const int itype = PMs->at(ipm).type;

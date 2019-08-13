@@ -273,7 +273,7 @@ void ReconstructionWindow::on_sbEventNumberInspect_valueChanged(int arg1)
           MW->GeoMarkers.append(marks);
         }
       MW->GeometryWindow->ShowGeometry(false);  //to clear view
-      MW->ShowTracks(); //has to use ShowTracks since if there is continuos energy deposition - tracks are used for inidication
+      MW->GeometryWindow->DrawTracks(); //has to use ShowTracks since if there is continuos energy deposition - tracks are used for inidication
     }
 }
 
@@ -362,7 +362,7 @@ const QString ReconstructionWindow::ShowPositions(int Rec_True, bool fOnlyIfWind
         numEvents = EventsDataHub->ReconstructionData[CurrentGroup].size();
         marks = new GeoMarkerClass("Recon", 6, 2, kRed);
     }
-    else if (Rec_True == 1)
+    else
     {
         if (EventsDataHub->isScanEmpty()) return "There are no data to show!";
         numEvents = EventsDataHub->Scan.size();
@@ -430,7 +430,7 @@ const QString ReconstructionWindow::ShowPositions(int Rec_True, bool fOnlyIfWind
     MW->GeometryWindow->raise();
     MW->GeometryWindow->activateWindow();
     MW->GeometryWindow->ShowGeometry(false);
-    MW->ShowTracks();
+    MW->GeometryWindow->DrawTracks();
     return "";
 }
 
@@ -496,16 +496,17 @@ void ReconstructionWindow::DotActualPositions()
   if (!EventsDataHub->isScanEmpty()) ReconstructionWindow::VisualizeScan();  
 }
 
+#include "asimulationmanager.h"
 void ReconstructionWindow::VisualizeEnergyVector(int eventId)
 {
-  if (MW->EnergyVector.isEmpty()) return;
-
-//  qDebug()<<"EnergyVector contains "<<MW->EnergyVector.size()<<" cells";
+  QVector<AEnergyDepositionCell *> & EnergyVector = MW->SimulationManager->EnergyVector;
+  if (EnergyVector.isEmpty()) return;
+  //  qDebug()<<"EnergyVector contains "<<EnergyVector.size()<<" cells";
 
   QVector<AEnergyDepositionCell*> EV;
   EV.resize(0);
-  for (int i=0; i<MW->EnergyVector.size(); i++)
-    if (MW->EnergyVector.at(i)->eventId == eventId) EV.append(MW->EnergyVector.at(i));
+  for (int i=0; i<EnergyVector.size(); i++)
+    if (EnergyVector.at(i)->eventId == eventId) EV.append(EnergyVector.at(i));
 
 //  qDebug()<<"This event ( "<< eventId <<" ) has "<<EV.size()<<" associated cells";
 
@@ -1346,23 +1347,6 @@ void ReconstructionWindow::on_cobHowToAverageZ_currentIndexChanged(int index)
   ui->fAverageZ->setVisible((bool)index);
 }
 
-bool ReconstructionWindow::event(QEvent *event)
-{
-  if (!MW->WindowNavigator) return QMainWindow::event(event);
-
-  if (event->type() == QEvent::Hide)
-    {      
-      MW->WindowNavigator->HideWindowTriggered("recon");
-      return true;
-    }
-  if (event->type() == QEvent::Show)
-    {
-      MW->WindowNavigator->ShowWindowTriggered("recon");
-    }
-
-  return QMainWindow::event(event);
-}
-
 bool ReconstructionWindow::ShowVsXY(QString strIn) //false - error
 {    
   if (EventsDataHub->isEmpty())
@@ -1665,7 +1649,7 @@ void ReconstructionWindow::on_pbShowSpatialFilter_clicked()
         ReconstructionWindow::DrawPolygon(ui->ledSpFfromZ->text().toDouble());
         ReconstructionWindow::DrawPolygon(ui->ledSpFtoZ->text().toDouble());
       }
-    MW->ShowTracks();
+    MW->GeometryWindow->DrawTracks();
 }
 
 void ReconstructionWindow::DrawPolygon(double z)
@@ -1969,7 +1953,7 @@ void ReconstructionWindow::on_pbShowPassivePMs_clicked()
             track->SetLineColor(30);
         }
     }
-    MW->ShowTracks();
+    MW->GeometryWindow->DrawTracks();
 }
 
 void ReconstructionWindow::on_pbAllPMsActive_clicked()
@@ -2221,7 +2205,7 @@ void ReconstructionWindow::on_pbShowAllGainsForGroup_clicked()
       else str = "";
       tmp.append( str );
     }
-  MW->GeometryWindow->ShowTextOnPMs(tmp, kBlue);
+  MW->GeometryWindow->ShowText(tmp, kBlue);
 }
 
 void ReconstructionWindow::on_pbGainsToUnity_clicked()
@@ -6211,7 +6195,7 @@ void ReconstructionWindow::on_pbShowUnassigned_clicked()
    MW->GeometryWindow->show();
    MW->GeometryWindow->raise();
    MW->GeometryWindow->activateWindow();
-   MW->GeometryWindow->ShowTextOnPMs(tmp, kBlack);
+   MW->GeometryWindow->ShowText(tmp, kBlack);
 }
 
 void ReconstructionWindow::on_lwPMgroups_activated(const QModelIndex &index)
@@ -6318,7 +6302,7 @@ void ReconstructionWindow::showSensorGroup(int igroup)
     MW->GeometryWindow->show();
     MW->GeometryWindow->raise();
     MW->GeometryWindow->activateWindow();
-    MW->GeometryWindow->ShowTextOnPMs(tmp, kRed);
+    MW->GeometryWindow->ShowText(tmp, kRed);
 }
 
 void ReconstructionWindow::on_leSpF_LimitToObject_textChanged(const QString &/*arg1*/)

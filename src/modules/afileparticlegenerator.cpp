@@ -59,7 +59,7 @@ bool AFileParticleGenerator::Init()
             const QString line = Stream->readLine();
             QStringList f = line.split(rx, QString::SkipEmptyParts);
 
-            if (f.size() < 8) continue;
+            if (f.size() < 9) continue;
 
             bool bOK;
             int    pId = f.at(0).toInt(&bOK);
@@ -79,11 +79,12 @@ bool AFileParticleGenerator::Init()
             double vx =     f.at(5).toDouble();
             double vy =     f.at(6).toDouble();
             double vz =     f.at(7).toDouble();
+            double t  =     f.at(8).toDouble();
             */
 
             if (!bContinueEvent) NumEventsInFile++;
 
-            if (f.size() > 8 && f.at(8) == '*')
+            if (f.size() > 9 && f.at(9) == '*')
             {
                 if (!bContinueEvent) statNumMultipleEvents++;
                 bContinueEvent = true;
@@ -107,9 +108,10 @@ bool AFileParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & Generated
         if (bAbortRequested) return false;
         const QString line = Stream->readLine();
         QStringList f = line.split(rx, QString::SkipEmptyParts);
-        //format: ParticleId Energy X Y Z VX VY VZ *  //'*' is optional - indicates event not finished yet
+        //format: ParticleId Energy X Y Z VX VY VZ Time *  //'*' is optional - indicates event not finished yet
 
-        if (f.size() < 8) continue;
+        if (f.size() < 9) continue;
+        if (f.at(0) == '#') continue;
 
         bool bOK;
         int    pId    = f.at(0).toInt(&bOK);
@@ -123,15 +125,16 @@ bool AFileParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & Generated
         double vx =     f.at(5).toDouble();
         double vy =     f.at(6).toDouble();
         double vz =     f.at(7).toDouble();
+        double t  =     f.at(8).toDouble();
 
         AParticleRecord* p = new AParticleRecord(pId,
                                                  x, y, z,
                                                  vx, vy, vz,
-                                                 0, energy);
+                                                 t, energy);
         p->ensureUnitaryLength();
         GeneratedParticles << p;
 
-        if (f.size() > 8 && f.at(8) == '*') continue; //this is multiple event!
+        if (f.size() > 9 && f.at(9) == '*') continue; //this is multiple event!
         return true; //normal termination
     }
 
@@ -176,14 +179,15 @@ void AFileParticleGenerator::SetStartEvent(int startEvent)
         {
             const QString line = Stream->readLine();
             QStringList f = line.split(rx, QString::SkipEmptyParts);
-            if (f.size() < 8) continue;
+            if (f.size() < 9) continue;
+            if (f.at(0) == '#') continue;
             bool bOK;
             f.at(0).toInt(&bOK);
             if (!bOK) continue; //assuming this is a comment line
 
             if (!bContinueEvent) event++;
 
-            if (f.size() > 8 && f.at(8) == '*')
+            if (f.size() > 9 && f.at(9) == '*')
                 bContinueEvent = true;
             else
             {
@@ -218,7 +222,8 @@ const QString AFileParticleGenerator::GetEventRecords(int fromEvent, int toEvent
         {
             const QString line = Stream->readLine();
             QStringList f = line.split(rx, QString::SkipEmptyParts);
-            if (f.size() < 8) continue;
+            if (f.size() < 9) continue;
+            if (f.at(0) == '#') continue;  //comment line
             bool bOK;
             f.at(0).toInt(&bOK);
             if (!bOK) continue; //assuming this is a comment line
@@ -227,7 +232,7 @@ const QString AFileParticleGenerator::GetEventRecords(int fromEvent, int toEvent
 
             if (event >= fromEvent && event < toEvent) s += line;
 
-            if (f.size() > 8 && f.at(8) == '*')
+            if (f.size() > 9 && f.at(9) == '*')
                 bContinueEvent = true;
             else
                 bContinueEvent = false;
@@ -243,5 +248,8 @@ void AFileParticleGenerator::clearFileStat()
 
     NumEventsInFile = 0;
     statNumMultipleEvents = 0;
-    statParticleQuantity = QVector<int>(RegisteredParticleCount, 0);
+
+    statParticleQuantity.clear();
+    if (RegisteredParticleCount >= 0)
+        statParticleQuantity =  QVector<int>(RegisteredParticleCount, 0);
 }

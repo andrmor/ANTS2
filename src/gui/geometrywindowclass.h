@@ -1,7 +1,7 @@
 #ifndef GEOMETRYWINDOWCLASS_H
 #define GEOMETRYWINDOWCLASS_H
 
-#include <QMainWindow>
+#include "aguiwindow.h"
 #include "TMathBase.h"
 
 class MainWindow;
@@ -11,7 +11,7 @@ namespace Ui {
   class GeometryWindowClass;
 }
 
-class GeometryWindowClass : public QMainWindow
+class GeometryWindowClass : public AGuiWindow
 {
   Q_OBJECT
 
@@ -56,16 +56,21 @@ public:
   bool IsWorldVisible();
 
   void ShowGeometry(bool ActivateWindow = true, bool SAME = true, bool ColorUpdateAllowed = true);
+  void ShowEvent_Particles(size_t iEvent, bool withSecondaries);
+  void ShowPMsignals(int iEvent, bool bFullCycle = true);
+
+  void ClearTracks(bool bRefreshWindow = true);
 
 protected:
-    void resizeEvent(QResizeEvent *event);
     bool event(QEvent *event);
 
 public slots:
     void on_pbShowGeometry_clicked();
     void DrawTracks();
+    void ShowPoint(double * r, bool keepTracks = false);
     void ShowPMnumbers();
-    void ShowTextOnPMs(QVector<QString> strData, Color_t color);
+    void ShowMonitorIndexes();
+    void ShowText(const QVector<QString> & strData, Color_t color, bool onPMs = true, bool bFullCycle = true); //false - on monitors
     void on_pbTop_clicked();
     void on_pbFront_clicked();
     void onRasterWindowChange(double centerX, double centerY, double hWidth, double hHeight, double phi, double theta);
@@ -97,9 +102,11 @@ private slots:
     void on_actionDecrease_line_width_triggered();
     void on_pbWebViewer_clicked();
 
+    void on_pbShowMonitorIndexes_clicked();
+
 private:
-  Ui::GeometryWindowClass *ui;
   MainWindow* MW;
+  Ui::GeometryWindowClass *ui;
   RasterWindowBaseClass *RasterWindow = 0;
 
   bool TMPignore = false;

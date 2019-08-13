@@ -23,7 +23,7 @@
 
 
 WindowNavigatorClass::WindowNavigatorClass(QWidget *parent, MainWindow *mw) :
-  QMainWindow(parent),
+  AGuiWindow(parent),
   ui(new Ui::WindowNavigatorClass)
 {
   ui->setupUi(this);
@@ -33,6 +33,7 @@ WindowNavigatorClass::WindowNavigatorClass(QWidget *parent, MainWindow *mw) :
   Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
   windowFlags |= Qt::WindowCloseButtonHint;
   windowFlags |= Qt::WindowStaysOnTopHint;
+  windowFlags |= Qt::Tool;
   this->setWindowFlags( windowFlags );
 
   MainOn = false;
@@ -179,7 +180,10 @@ void WindowNavigatorClass::setProgress(int percent)
 
 void WindowNavigatorClass::HideWindowTriggered(QString w)
 {
+  if (MW->ShutDown) return;
   if (DisableBSupdate) return;
+
+  //qDebug() << "WinNav: hide win"<<w;
 
   if (w == "main") MainOn = false;
   if (w == "recon") ReconOn = false;
@@ -207,6 +211,8 @@ void WindowNavigatorClass::HideWindowTriggered(QString w)
 
 void WindowNavigatorClass::ShowWindowTriggered(QString w)
 {
+    if (MW->ShutDown) return;
+
   if (w == "main") MainOn = true;
   if (w == "recon") ReconOn = true;
   if (w == "out") OutOn = true;
@@ -388,12 +394,14 @@ void WindowNavigatorClass::on_pbMaxAll_clicked()
     {
       MW->GeometryWindow->showNormal();
       MW->GeometryWindow->raise();
+      MW->GeometryWindow->ShowGeometry();
+      MW->GeometryWindow->DrawTracks();
     }
   if (GraphOn)
-    if (MW->GraphWindow)
     {
       MW->GraphWindow->showNormal();
       MW->GraphWindow->raise();
+      MW->GraphWindow->UpdateRootCanvas();
     }
   if (ScriptOn)
     if (MW->ScriptWindow)
@@ -497,7 +505,7 @@ void WindowNavigatorClass::on_pbGeometry_clicked()
       MW->GeometryWindow->showNormal();
       MW->GeometryWindow->raise();
       MW->GeometryWindow->ShowGeometry();
-      MW->ShowTracks();
+      MW->GeometryWindow->DrawTracks();
     }
   else MW->GeometryWindow->hide();
 

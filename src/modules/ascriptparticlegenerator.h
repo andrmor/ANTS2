@@ -8,8 +8,8 @@
 class AMaterialParticleCollection;
 class TRandom2;
 class QScriptEngine;
-class AParticleGeneratorInterface;
-class AMathScriptInterface;
+class AParticleGenerator_SI;
+class AMath_SI;
 
 class AScriptParticleGenerator : public AParticleGun
 {
@@ -42,8 +42,8 @@ private:
     QString Script;
     QScriptEngine * ScriptEngine = 0;  // creates only on Init - only if from script mode was selected!
                                        //TODO make external (e.g. Simulator class can host it for sim)
-    AParticleGeneratorInterface * ScriptInterface = 0; // creates only on Init - only if from script mode was selected!
-    AMathScriptInterface * mathInterface = 0; // creates only on Init - only if from script mode was selected!
+    AParticleGenerator_SI * ScriptInterface = 0; // creates only on Init - only if from script mode was selected!
+    AMath_SI * mathInterface = 0; // creates only on Init - only if from script mode was selected!
 
     int processInterval = -1; //ms; if -1 processing of events during evaluation is disabled
 };

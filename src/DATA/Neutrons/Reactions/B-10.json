@@ -7,30 +7,30 @@
 				"Energy": 1470,
 				"OpositeDirectionWithPrevious": false,
 				"Particle": {
-					"Charge": 2,
-					"Mass": 4,
-					"Name": "alpha",
-					"Type": 1
+					"A": -1,
+                    "Name": "alpha",
+                    "Type": 1,
+                    "Z": -1
 				}
 			},
 			{
 				"Energy": 840,
 				"OpositeDirectionWithPrevious": true,
 				"Particle": {
-					"Charge": 3,
-					"Mass": 7,
-					"Name": "lithium",
-					"Type": 1
+                    "A": 7,
+                    "Name": "Li7",
+                    "Type": 1,
+                    "Z": 3
 				}
 			},
 			{
 				"Energy": 478,
 				"OpositeDirectionWithPrevious": false,
 				"Particle": {
-					"Charge": 0,
-					"Mass": 0,
-					"Name": "gamma",
-					"Type": 0
+                    "A": -1,
+                    "Name": "gamma",
+                    "Type": 0,
+                    "Z": -1
 				}
 			}
 		]
@@ -42,20 +42,20 @@
 				"Energy": 1780,
 				"OpositeDirectionWithPrevious": false,
 				"Particle": {
-					"Charge": 2,
-					"Mass": 4,
-					"Name": "alpha",
-					"Type": 1
+					"A": -1,
+                    "Name": "alpha",
+                    "Type": 1,
+                    "Z": -1
 				}
 			},
 			{
 				"Energy": 1010,
 				"OpositeDirectionWithPrevious": true,
 				"Particle": {
-					"Charge": 3,
-					"Mass": 7,
-					"Name": "lithium",
-					"Type": 1
+                    "A": 7,
+                    "Name": "Li7",
+                    "Type": 1,
+                    "Z": 3
 				}
 			}
 		]

@@ -2,6 +2,7 @@
 #include "aparticle.h"
 #include "ajsontools.h"
 #include "amaterialparticlecolection.h"
+#include "achemicalelement.h"
 #include "acommonfunctions.h"
 #include "afiletools.h"
 
@@ -19,7 +20,16 @@
 
 AMaterial::AMaterial()
 {
-  clear();
+    clear();
+}
+
+double AMaterial::getPhotonYield(int iParticle) const
+{
+    if (iParticle < 0 || iParticle >= MatParticle.size()) return PhotonYieldDefault;
+
+    const double & py = MatParticle.at(iParticle).PhYield;
+    if (py == -1) return PhotonYieldDefault;
+    return py;
 }
 
 double AMaterial::getRefractiveIndex(int iWave) const
@@ -42,6 +52,11 @@ double AMaterial::getReemissionProbability(int iWave) const
     return reemissionProbBinned.at(iWave);
 }
 
+void AMaterial::generateTGeoMat()
+{
+    GeoMat = ChemicalComposition.generateTGeoMaterial(name.toLocal8Bit().data(), density);
+}
+
 double AMaterial::FT(double td, double tr, double t) const
 {
     return 1.0 - ((tr + td) / td) * exp(- t / td) + (tr / td) * exp(- t * (1.0 / tr + 1.0 / td));
@@ -60,7 +75,7 @@ double AMaterial::GeneratePrimScintTime(TRandom2 *RandGen) const
         // --- "Sum" model ---
 
         //delay due to raise time
-        double tau;
+        double tau = 0;
         if (PriScint_Raise.size() == 1)
             tau = PriScint_Raise.first().value;
         else
@@ -108,7 +123,7 @@ double AMaterial::GeneratePrimScintTime(TRandom2 *RandGen) const
     {
        //Shao model, upgraded to have several decay components
 
-       double td;
+       double td = 0;
        //selecting decay component
        if (PriScint_Decay.size() == 1)
            td = PriScint_Decay.first().value;
@@ -128,7 +143,7 @@ double AMaterial::GeneratePrimScintTime(TRandom2 *RandGen) const
            }
        }
 
-       double tr;
+       double tr = 0;
        //selecting raise component
        if (PriScint_Raise.size() == 1)
            tr = PriScint_Raise.first().value;
@@ -308,6 +323,8 @@ void AMaterial::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCo
   json["RayleighWave"] = rayleighWave;
   json["ReemissionProb"] = reemissionProb;
 
+  json["PhotonYieldDefault"] = PhotonYieldDefault;
+
   json["PrimScint_Model"] = PriScintModel;
   {
     QJsonArray ar;
@@ -442,6 +459,7 @@ bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpC
   parseJson(json, "RayleighMFP", rayleighMFP);
   parseJson(json, "RayleighWave", rayleighWave);
   parseJson(json, "ReemissionProb", reemissionProb);
+  //PhotonYieldDefault for compatibility at the end
 
   parseJson(json, "PrimScint_Model", PriScintModel);
   if (json.contains("PrimScint_Tau")) //compatibility
@@ -589,7 +607,7 @@ bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpC
       QJsonObject jMatParticle = jParticleEntries[index].toObject();
 
       QJsonObject jparticle = jMatParticle["*Particle"].toObject();
-      int ip = MpCollection->findOrCreateParticle(jparticle);
+      int ip = MpCollection->findOrAddParticle(jparticle);
 
       parseJson(jMatParticle, "TrackingAllowed", MatParticle[ip].TrackingAllowed);
       parseJson(jMatParticle, "MatIsTransparent", MatParticle[ip].MaterialIsTransparent);
@@ -645,6 +663,24 @@ bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpC
           }
       }
     }
+
+  if (!parseJson(json, "PhotonYieldDefault", PhotonYieldDefault))
+  {
+      //qDebug() << "Compatibility mode: no PhotonYieldDefault found";
+      PhotonYieldDefault = 0;
+      if (numParticles != 0)
+      {
+          bool bAllSame = true;
+          for (int iP = 1; iP < numParticles; iP++)
+              if (MatParticle.at(iP).PhYield != MatParticle.at(0).PhYield)
+              {
+                  bAllSame = false;
+                  break;
+              }
+          if (bAllSame) PhotonYieldDefault = MatParticle.at(0).PhYield;
+      }
+  }
+
   return true;
 }
 
@@ -682,6 +718,12 @@ void MatParticleStructure::Clear()
 }
 
 ANeutronInteractionElement *NeutralTerminatorStructure::getNeutronInteractionElement(int index)
+{
+    if (index<0 || index>=IsotopeRecords.size()) return 0;
+    return &IsotopeRecords[index];
+}
+
+const ANeutronInteractionElement *NeutralTerminatorStructure::getNeutronInteractionElement(int index) const
 {
     if (index<0 || index>=IsotopeRecords.size()) return 0;
     return &IsotopeRecords[index];
@@ -742,6 +784,10 @@ void NeutralTerminatorStructure::UpdateRunTimeProperties(bool bUseLogLog, TRando
             {
                 ANeutronInteractionElement& nie = IsotopeRecords[iElement];
                 //  qDebug() << nie.Name << "-" << nie.Mass << "  with molar fraction:"<<nie.MolarFraction;
+
+                //updating neutron absorption runtime properties (can be custom distr of deposited energy)
+                nie.updateRuntimeProperties();
+
                 //  qDebug() << "size of cross-section dataset"<<nie.Energy.size() << nie.CrossSection.size();
                 if (nie.Energy.isEmpty()) continue;
                 if (PartialCrossSectionEnergy.isEmpty())

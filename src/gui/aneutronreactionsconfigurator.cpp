@@ -96,6 +96,7 @@ void ANeutronReactionsConfigurator::updateDecayScenarios()
    {
        ANeutronReactionWidget* del = new ANeutronReactionWidget(&Element_LocalCopy.DecayScenarios[i], DefinedParticles);
        QObject::connect(del, &ANeutronReactionWidget::RequestParentResize, this, &ANeutronReactionsConfigurator::onResizeRequest);
+       QObject::connect(del, &ANeutronReactionWidget::RequestDraw, this, &ANeutronReactionsConfigurator::RequestDraw);
        QListWidgetItem* lwi = new QListWidgetItem;
        lwi->setSizeHint( del->sizeHint() );
        ui->lwReactions->addItem(lwi);

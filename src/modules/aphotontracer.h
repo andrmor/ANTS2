@@ -4,6 +4,7 @@
 #include "aphotonhistorylog.h"
 
 #include <QVector>
+#include <vector>
 
 #include "TMathBase.h"
 
@@ -32,7 +33,7 @@ public:
     ~APhotonTracer();
 
     void UpdateGeoManager(TGeoManager* NewGeoManager) {GeoManager = NewGeoManager;}//will be obsolete with new simulation system soon
-    void configure(const GeneralSimSettings *simSet, AOneEvent* oneEvent, bool fBuildTracks, QVector<TrackHolderClass *> *tracks);
+    void configure(const GeneralSimSettings *simSet, AOneEvent* oneEvent, bool fBuildTracks, std::vector<TrackHolderClass *> * tracks);
 
     void TracePhoton(const APhoton* Photon);
 
@@ -50,7 +51,7 @@ private:
     APmHub* PMs;
     const QList<AGridElementRecord*>* grids;
     AOneEvent* OneEvent; //PM signals for this event are collected here
-    QVector<TrackHolderClass*>* Tracks;
+    std::vector<TrackHolderClass *> * Tracks;
     TrackHolderClass* track;
     QVector<APhotonHistoryLog> PhLog;
     ATracerStateful* ResourcesForOverrides;

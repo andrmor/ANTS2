@@ -1,9 +1,10 @@
 #include "aglobalsettings.h"
+#include "aisotopeabundancehandler.h"
 #include "ajsontools.h"
 #include "anetworkmodule.h"
 #include "ajavascriptmanager.h"
 #include "amessage.h"
-#include "ainterfacetogstylescript.h"
+#include "agstyle_si.h"
 
 #ifdef GUI
 #include "globalsettingswindowclass.h"
@@ -25,6 +26,12 @@ AGlobalSettings::AGlobalSettings()
 {
     RecNumTreads = QThread::idealThreadCount() - 1;
     if (RecNumTreads < 1) RecNumTreads = 1;
+
+// Default Geant4 settings for docker installation
+#ifdef ANTS_DOCKER
+    G4antsExec = "/G4ants/G4ants";
+    G4ExchangeFolder = "/ants_config/ants2/Tmp";
+#endif
 
     //default font size
 #ifdef Q_OS_LINUX // fix font size on Linux
@@ -49,6 +56,8 @@ AGlobalSettings::AGlobalSettings()
     if (!QDir(QuicksaveDir).exists()) QDir().mkdir(QuicksaveDir);
     ExamplesDir = QDir::current().absolutePath() + "/EXAMPLES"; //dir where examples will be copied
     ResourcesDir = QDir::current().absolutePath() + "/DATA";//dir where data will be copied
+
+    IsotopeAbundanceHandler = new AIsotopeAbundanceHandler( ResourcesDir + "/Neutrons/IsotopeNaturalAbundances.txt" );
 
 #ifdef Q_OS_WIN32
     if (!QDir(ExamplesDir).exists())  //direct call of ants2.exe
@@ -87,12 +96,17 @@ AGlobalSettings::AGlobalSettings()
     {
         //running root TStyle script
         AJavaScriptManager* SM = new AJavaScriptManager(0);
-        AInterfaceToGStyleScript* GStyleInterface  = new  AInterfaceToGStyleScript(); //deleted by the SM
+        AGStyle_SI* GStyleInterface  = new  AGStyle_SI(); //deleted by the SM
         SM->RegisterInterfaceAsGlobal(GStyleInterface);
         SM->Evaluate(RootStyleScript);
         SM->deleteLater();
     }
 #endif
+}
+
+AGlobalSettings::~AGlobalSettings()
+{
+    delete IsotopeAbundanceHandler; IsotopeAbundanceHandler = 0;
 }
 
 void AGlobalSettings::writeToJson(QJsonObject &json) const
@@ -142,6 +156,9 @@ void AGlobalSettings::writeToJson(QJsonObject &json) const
     js["ExternalJSROOT"] = ExternalJSROOT;
 
     js["RemoteServers"] = RemoteServers;
+
+    js["G4ants"] = G4antsExec;
+    js["G4ExchangeFolder"] = G4ExchangeFolder;
 
     json["ANTS2config"] = js;
 }
@@ -198,6 +215,11 @@ void AGlobalSettings::readFromJson(const QJsonObject &json)
     parseJson(js, "RunRootServerOnStart", fRunRootServerOnStart);
 
     parseJson(js, "RemoteServers", RemoteServers);
+
+    parseJson(js, "G4ants", G4antsExec);
+    parseJson(js, "G4ExchangeFolder", G4ExchangeFolder);
+    if (G4ExchangeFolder.isEmpty())
+        G4ExchangeFolder = TmpDir;
 
     QString tmp;
     parseJson(js, "ExternalJSROOT", tmp);

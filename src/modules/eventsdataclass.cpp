@@ -3,6 +3,7 @@
 #include "apositionenergyrecords.h"
 #include "apreprocessingsettings.h"
 #include "apmhub.h"
+#include "aeventtrackingrecord.h"
 
 //Root
 #include "TTree.h"
@@ -58,13 +59,13 @@ void EventsDataClass::clearResolutionTree()
 
 void EventsDataClass::clear()
 {
-  //    qDebug() << "--->EventsDatHub: Clear";
+  // qDebug() << "--->EventsDatHub: Clear";
   Events.clear();
   TimedEvents.clear();  
   fLoadedEventsHaveEnergyInfo = false;
 #ifdef SIM
-  for (int i=0; i<EventHistory.size(); i++) delete EventHistory[i];
-  EventHistory.clear();
+  for (auto* pr : TrackingHistory) delete pr;
+  TrackingHistory.clear();
   GeneratedPhotonsHistory.clear();
   SimStat->initialize();
 #endif
@@ -146,19 +147,18 @@ void EventsDataClass::purge1e10events()
   bool fTime = ( TimedEvents.size() == Events.size() );
 
   int i = 0;
-  while (i<Scan.size())
-    {
-      //qDebug() << Scan.at(i)->Points[0].r[0] << Scan.at(i)->Points[0].r[1];
-      if (Scan.at(i)->Points[0].r[0] == 1e10 && Scan.at(i)->Points[0].r[1] == 1e10 )
-        {
+  while (i < Scan.size())  // reverse order? ***!!!
+  {
+      if (Scan.at(i)->Points.size() != 0 && Scan.at(i)->Points[0].r[0] == 1e10 && Scan.at(i)->Points[0].r[1] == 1e10 )
+      {
           //qDebug() << "Found one";
           Scan.removeAt(i);
           Events.removeAt(i);
           if (fTime) TimedEvents.removeAt(i);
-        }
+      }
       else
         i++;
-    }
+  }
 }
 
 bool EventsDataClass::BlurReconstructionData(int type, double sigma, TRandom2* RandGen, int igroup)
@@ -365,7 +365,7 @@ void EventsDataClass::squeeze()
     for (int i=0; i<ReconstructionData.size(); i++) ReconstructionData[i].squeeze();
     ReconstructionData.squeeze();
 #ifdef SIM
-    EventHistory.squeeze();
+    TrackingHistory.shrink_to_fit();
     GeneratedPhotonsHistory.squeeze();
 #endif
 }
@@ -448,59 +448,7 @@ const QVector<QVector<float> > *EventsDataClass::getTimedEvent(int iev)
     return &TimedEvents.at(iev);
 }
 
-void EventsDataClass::saveEventHistoryToTree(const QString &fileName) const
-{
-    TFile f(fileName.toLatin1().data(),"RECREATE");
-
-    TTree t("Log","Particle tracking log");
-
-    int     index;
-    int     particleId;
-    int     secondaryOf;
-    std::vector<float> pos; pos.resize(3);
-    std::vector<float> dir; dir.resize(3);
-    float   initialEnergy;
-    int     termination;
-
-    std::vector<int>    Vol_MaterialId;
-    std::vector<float> Vol_DepositedEnergy;
-    std::vector<float> Vol_TravelledDistance;
-
-    t.Branch("index", &index, "index/I");
-    t.Branch("partId", &particleId, "partId/I");
-    t.Branch("secondaryOf", &secondaryOf, "secondaryOf/I");
-    t.Branch("initialPosition", &pos);
-    t.Branch("direction", &dir);
-    t.Branch("initialEnergy", &initialEnergy, "initialEnergy/F");
-    t.Branch("termination", &termination, "termination/I");
-    t.Branch("vol_materialId", &Vol_MaterialId);
-    t.Branch("vol_depositedEnergy", &Vol_DepositedEnergy);
-    t.Branch("vol_distance", &Vol_TravelledDistance);
-
-    for (const EventHistoryStructure* h : EventHistory)
-    {
-        index = h->index;
-        particleId = h->ParticleId;
-        secondaryOf = h->SecondaryOf;
-        pos[0] = h->x;  pos[1] = h->y;  pos[2] = h->z;
-        dir[0] = h->dx; dir[1] = h->dy; dir[2] = h->dz;
-        initialEnergy = h->initialEnergy;
-        termination = h->Termination;
-
-        Vol_MaterialId.clear(); Vol_DepositedEnergy.clear(); Vol_TravelledDistance.clear();
-        for (const MaterialHistoryStructure& d : h->Deposition)
-        {
-            Vol_MaterialId.push_back(d.MaterialId);
-            Vol_DepositedEnergy.push_back(d.DepositedEnergy);
-            Vol_TravelledDistance.push_back(d.Distance);
-        }
-        t.Fill();
-    }
-    t.Write();
-    f.Close();
-}
-
-int EventsDataClass::countGoodEvents(int igroup) //counts events passing all filters
+int EventsDataClass::countGoodEvents(int igroup) const //counts events passing all filters
 {
     if (igroup > ReconstructionData.size()-1)
     {

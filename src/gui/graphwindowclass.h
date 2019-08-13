@@ -1,7 +1,7 @@
 #ifndef GRAPHWINDOWCLASS_H
 #define GRAPHWINDOWCLASS_H
 
-#include <QMainWindow>
+#include "aguiwindow.h"
 #include <QVariantList>
 
 #include "TMathBase.h"
@@ -55,7 +55,7 @@ namespace Ui {
 class GraphWindowClass;
 }
 
-class GraphWindowClass : public QMainWindow
+class GraphWindowClass : public AGuiWindow
 {
     Q_OBJECT
 
@@ -129,7 +129,16 @@ public:
 
     //use this to only construct!
     TGraph* ConstructTGraph(const QVector<double>& x, const QVector<double>& y) const;
+    TGraph* ConstructTGraph(const std::vector<float>& x, const std::vector<float>& y) const;
     TGraph* ConstructTGraph(const QVector<double>& x, const QVector<double>& y,
+                            const char *Title, const char *XTitle, const char *YTitle,
+                            Color_t MarkerColor=2, int MarkerStyle=20, int MarkerSize=1,
+                            Color_t LineColor=2,   int LineStyle=1,    int LineWidth=2) const;
+    TGraph* ConstructTGraph(const QVector<double>& x, const QVector<double>& y,
+                            const QString & Title, const QString & XTitle, const QString & YTitle,
+                            Color_t MarkerColor=2, int MarkerStyle=20, int MarkerSize=1,
+                            Color_t LineColor=2,   int LineStyle=1,    int LineWidth=2) const;
+    TGraph* ConstructTGraph(const std::vector<float>& x, const std::vector<float>& y,
                             const char *Title, const char *XTitle, const char *YTitle,
                             Color_t MarkerColor=2, int MarkerStyle=20, int MarkerSize=1,
                             Color_t LineColor=2,   int LineStyle=1,    int LineWidth=2) const;
@@ -146,6 +155,7 @@ public:
 
     bool Extraction();
 
+    bool isBasketOn() const;
     void switchOffBasket();
     void ClearBasket();
     TObject *GetMainPlottedObject();
@@ -259,8 +269,8 @@ private slots:
     void on_actionToggle_toolbar_triggered(bool checked);
 
 private:
-    Ui::GraphWindowClass *ui;
     MainWindow *MW;
+    Ui::GraphWindowClass *ui;
     RasterWindowGraphClass *RasterWindow = 0;
     //QWidget *QWinContainer = 0;
     bool ExtractionCanceled = false;
@@ -299,13 +309,17 @@ private:
     void UpdateBasketGUI();    
     void ExportData(bool fUseBinCenters=true);
     void exportTextForTH2(TH2 *h);
+
     void SaveBasket();
     void AppendBasket();
+    void Basket_DrawOnTop(int row);
+
     void AppendRootHistsOrGraphs();
     QVector<DrawObjectStructure> *getCurrentDrawObjects();
     void ShowProjection(QString type);
     double runScaleDialog();
     const QPair<double, double> runShiftDialog();
+    void calculateFractionTH1(int row);
 };
 
 #endif // GRAPHWINDOWCLASS_H

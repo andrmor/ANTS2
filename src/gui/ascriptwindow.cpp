@@ -4,10 +4,10 @@
 #include "atextedit.h"
 #include "ascriptinterface.h"
 #include "localscriptinterfaces.h"
-#include "acorescriptinterface.h"
-#include "amathscriptinterface.h"
+#include "acore_si.h"
+#include "amath_si.h"
+#include "aconfig_si.h"
 #include "histgraphinterfaces.h"
-#include "interfacetoglobscript.h"
 #include "amessage.h"
 #include "ascriptexampleexplorer.h"
 #include "aconfiguration.h"
@@ -51,7 +51,7 @@
 #include <QHeaderView>
 
 AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWidget *parent) :
-    QMainWindow(parent), ScriptManager(ScriptManager), bLightMode(LightMode),
+    AGuiWindow(parent), ScriptManager(ScriptManager), bLightMode(LightMode),
     ui(new Ui::AScriptWindow), GlobSet(AGlobalSettings::getInstance())
 {
     if ( dynamic_cast<AJavaScriptManager*>(ScriptManager) )
@@ -70,10 +70,12 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWid
         //not a standalone window
         Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
         windowFlags |= Qt::WindowCloseButtonHint;
+        windowFlags |= Qt::Tool;
         this->setWindowFlags( windowFlags );
     }
 
     QObject::connect(ScriptManager, &AScriptManager::showMessage, this, &AScriptWindow::ShowText);
+    QObject::connect(ScriptManager, &AScriptManager::showPlainTextMessage, this, &AScriptWindow::ShowPlainText);
     QObject::connect(ScriptManager, &AScriptManager::requestHighlightErrorLine, this, &AScriptWindow::HighlightErrorLine);
     QObject::connect(ScriptManager, &AScriptManager::clearText, this, &AScriptWindow::ClearText);
     //retranslators:
@@ -345,12 +347,12 @@ void AScriptWindow::RegisterCoreInterfaces(bool bCore, bool bMath)
 
     if (bCore)
     {
-        ACoreScriptInterface core(0); //dummy to extract method names
+        ACore_SI core(0); //dummy to extract method names
         doRegister(&core, "core");
     }
     if (bMath)
     {
-        AMathScriptInterface math(0); //dummy to extract method names
+        AMath_SI math(0); //dummy to extract method names
         QString mathName = (ScriptLanguage == _JavaScript_ ? "math" : "MATH");
         doRegister(&math, mathName);
     }
@@ -555,8 +557,14 @@ void AScriptWindow::EnableAcceptReject()
 
 void AScriptWindow::ShowText(QString text)
 {
-  pteOut->appendHtml(text);
-  qApp->processEvents();
+    pteOut->appendHtml(text);
+    qApp->processEvents();
+}
+
+void AScriptWindow::ShowPlainText(QString text)
+{
+    pteOut->appendPlainText(text);
+    qApp->processEvents();
 }
 
 void AScriptWindow::ClearText()
@@ -860,7 +868,7 @@ void AScriptWindow::fillHelper(QObject* obj, QString module)
       QString retVal = "Help not provided";
       QString funcNoArgs = Fshort.remove(QRegExp("\\((.*)\\)"));
       if (!module.isEmpty()) funcNoArgs.remove(0, module.length()+1); //remove name.
-      if (obj->metaObject()->indexOfMethod("help(QString)") != -1)
+      if (obj && obj->metaObject()->indexOfMethod("help(QString)") != -1)
         {
           QMetaObject::invokeMethod(obj, "help", Qt::DirectConnection,
                               Q_RETURN_ARG(QString, retVal),
@@ -887,7 +895,7 @@ void AScriptWindow::updateJsonTree()
 
   for (int i=0; i<ScriptManager->interfaces.size(); i++)
     {
-      AInterfaceToConfig* inter = dynamic_cast<AInterfaceToConfig*>(ScriptManager->interfaces[i]);
+      AConfig_SI* inter = dynamic_cast<AConfig_SI*>(ScriptManager->interfaces[i]);
       if (!inter) continue;
 
       QJsonObject json = inter->Config->JSON;
@@ -1160,17 +1168,17 @@ bool AScriptWindow::event(QEvent *e)
             case QEvent::Hide :
                 //qDebug() << "Script window: hide event";
                 ScriptManager->hideMsgDialogs();
-                emit WindowHidden( ScriptLanguage == _JavaScript_ ? "script" : "python" );
+                //emit WindowHidden( ScriptLanguage == _JavaScript_ ? "script" : "python" );
                 break;
             case QEvent::Show :
                 //qDebug() << "Script window: show event";
                 ScriptManager->restoreMsgDialogs();
-                emit WindowShown( ScriptLanguage == _JavaScript_ ? "script" : "python" );
+                //emit WindowShown( ScriptLanguage == _JavaScript_ ? "script" : "python" );
                 break;
             default:;
         };
 
-    return QMainWindow::event(e) ;
+    return AGuiWindow::event(e);
 }
 
 void AScriptWindow::receivedOnAbort()
@@ -1205,6 +1213,7 @@ void AScriptWindow::onProgressChanged(int percent)
 QStringList AScriptWindow::getListOfMethods(QObject *obj, QString ObjName, bool fWithArguments)
 {
   QStringList commands;
+  if (!obj) return commands;
   int methods = obj->metaObject()->methodCount();
   for (int i=0; i<methods; i++)
     {
@@ -1280,6 +1289,7 @@ AScriptWindowTabItem::AScriptWindowTabItem(const QStringList& functions, AScript
     completer->setCompletionMode(QCompleter::UnfilteredPopupCompletion);
     //completer->setCompletionMode(QCompleter::PopupCompletion);
     completer->setFilterMode(Qt::MatchContains);
+    //completer->setFilterMode(Qt::MatchStartsWith);
     completer->setModelSorting(QCompleter::CaseSensitivelySortedModel);
     completer->setCaseSensitivity(Qt::CaseSensitive);
     completer->setWrapAround(false);

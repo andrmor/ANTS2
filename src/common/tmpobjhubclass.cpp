@@ -1,15 +1,8 @@
 #include "tmpobjhubclass.h"
-#include "atrackrecords.h"
 
 #include <QDebug>
 
 #include "TH1D.h"
-
-void TmpObjHubClass::ClearTracks()
-{
-    for (int i=0; i<TrackInfo.size(); i++) delete TrackInfo[i];
-    TrackInfo.clear();
-}
 
 void TmpObjHubClass::ClearTmpHistsPeaks()
 {
@@ -29,7 +22,6 @@ void TmpObjHubClass::Clear()
 
     //do not clear script data
 
-    ClearTracks();
     ClearTmpHistsPeaks();
     ClearTmpHistsSigma2();
     FoundPeaks.clear();

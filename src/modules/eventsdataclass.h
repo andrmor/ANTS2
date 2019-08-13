@@ -13,6 +13,7 @@
 #include <QVector>
 #include <QObject>
 #include <TString.h>
+#include <vector>
 
 class TTree;
 class APmHub;
@@ -20,6 +21,7 @@ struct AScanRecord;
 struct AReconRecord;
 class TRandom2;
 class QJsonObject;
+class AEventTrackingRecord;
 
 class EventsDataClass : public QObject
 {
@@ -31,7 +33,7 @@ public:
     // True/calibration positions
     QVector<AScanRecord*> Scan;
     int ScanNumberOfRuns; //number of runs performed at each position (node) - see simulation module
-    bool isScanEmpty() {return Scan.isEmpty();}
+    bool isScanEmpty() const {return Scan.isEmpty();}
     void clearScan();
     void purge1e10events();  //added after introduction of multithread to remove nodes outside the defined volume - they are marked as true x and y = 1e10
 
@@ -48,13 +50,12 @@ public:
 
 #ifdef SIM
     // Logs
-    QVector<EventHistoryStructure*> EventHistory;
-    void saveEventHistoryToTree(const QString& fileName) const;
+    std::vector<AEventTrackingRecord *> TrackingHistory;
     QVector<GeneratedPhotonsHistoryStructure> GeneratedPhotonsHistory;
 
     //Detection statistics
     ASimulationStatistics* SimStat;
-    bool isStatEmpty() {return SimStat->isEmpty();}
+    bool isStatEmpty() const {return SimStat->isEmpty();}
     void initializeSimStat(QVector<const AGeoObject *> monitorRecords, int numBins, int waveNodes);
 #endif
 
@@ -72,7 +73,7 @@ public:
     bool BlurReconstructionDataZ(int type, double sigma, TRandom2 *RandGen, int igroup = -1); // 0 - uniform, 1 - gauss; igroup<0 -> apply to all groups
     void PurgeFilteredEvents(int igroup = 0);
     void Purge(int OnePer, int igroup = 0);    
-    int  countGoodEvents(int igroup = 0);
+    int  countGoodEvents(int igroup = 0) const;
     void copyTrueToReconstructed(int igroup = 0);
     void copyReconstructedToTrue(int igroup = 0);
     void prepareStatisticsForEvents(const bool isAllLRFsDefined, int &GoodEvents, double &AvChi2, double &AvDeviation, int igroup = 0);

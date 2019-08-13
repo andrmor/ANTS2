@@ -7,6 +7,7 @@
 #ifdef GUI
 class QWidget;
 void message(QString text, QWidget* parent = 0);
+bool confirm(const QString &text, QWidget* parent = 0);
 #else
 void message(QString text);
 #endif

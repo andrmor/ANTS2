@@ -10,7 +10,7 @@
 #include "asourceparticlegenerator.h"
 #include "aglobalsettings.h"
 #include "aparticlesourcerecord.h"
-#include "simulationmanager.h"
+#include "asimulationmanager.h"
 
 #include <QTableWidget>
 #include <QTableWidgetItem>

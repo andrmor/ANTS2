@@ -3,27 +3,34 @@
 #include "aglobalsettings.h"
 #include "detectorclass.h"
 #include "eventsdataclass.h"
-#include "interfacetoglobscript.h"
 #include "scriptminimizer.h"
 #include "histgraphinterfaces.h"
-#include "ainterfacetoaddobjscript.h"
-#include "ainterfacetodeposcript.h"
+#include "ageo_si.h"
 #include "aconfiguration.h"
 #include "areconstructionmanager.h"
-#include "simulationmanager.h"
-#include "ainterfacetowebsocket.h"
-#include "awebserverinterface.h"
+#include "asimulationmanager.h"
+#include "aweb_si.h"
+#include "aserver_si.h"
 #include "anetworkmodule.h"
-#include "ainterfacetophotonscript.h"
-#include "ainterfacetomultithread.h"
-#include "ainterfacetoguiscript.h"
-#include "ainterfacetottree.h"
-#include "aparticletrackinghistoryinterface.h"
+#include "aphoton_si.h"
+#include "athreads_si.h"
+#include "agui_si.h"
+#include "atree_si.h"
+#include "asim_si.h"
+#include "apthistory_si.h"
+#include "aconfig_si.h"
+#include "aevents_si.h"
+#include "arec_si.h"
+#include "apms_si.h"
+#include "alrf_si.h"
+#include "ageowin_si.h"
+#include "agraphwin_si.h"
+#include "aoutwin_si.h"
 
 #include "mainwindow.h"
 #include "graphwindowclass.h"
 #include "geometrywindowclass.h"
-#include "ainterfacetomessagewindow.h"
+#include "amsg_si.h"
 #include "reconstructionwindow.h"
 #include "windownavigatorclass.h"
 #include "lrfwindow.h"
@@ -31,11 +38,11 @@
 #include "checkupwindowclass.h"
 
 #ifdef ANTS_FLANN
-  #include "ainterfacetoknnscript.h"
+  #include "aknn_si.h"
 #endif
 
 #ifdef ANTS_FANN
-  #include "ainterfacetoannscript.h"
+  #include "aann_si.h"
 #endif
 
 #include <QDebug>
@@ -51,44 +58,48 @@ void MainWindow::createScriptWindow()
     //connect(SM, &AScriptManager::reportProgress, WindowNavigator, &WindowNavigatorClass::setProgress);
     connect(SM, &AScriptManager::reportProgress, ScriptWindow, &AScriptWindow::onProgressChanged);
     NetModule->SetScriptManager(SM);
+    ScriptWindow->connectToNavigator(WindowNavigator, "script");
 
     // interface objects are owned after this by the ScriptManager!
 
     ScriptWindow->RegisterCoreInterfaces();
 
-    AInterfaceToMultiThread* threads = new AInterfaceToMultiThread(SM);
+    AThreads_SI* threads = new AThreads_SI(SM);
     ScriptWindow->RegisterInterface(threads, "threads");
 
-    AInterfaceToConfig* conf = new AInterfaceToConfig(Config);
+    AConfig_SI* conf = new AConfig_SI(Config);
     QObject::connect(conf, SIGNAL(requestReadRasterGeometry()), GeometryWindow, SLOT(readRasterWindowProperties()));
     ScriptWindow->RegisterInterface(conf, "config");
 
-    AInterfaceToAddObjScript* geo = new AInterfaceToAddObjScript(Detector);
+    AGeo_SI* geo = new AGeo_SI(Detector);
     connect(geo, SIGNAL(requestShowCheckUpWindow()), CheckUpWindow, SLOT(showNormal()));
     ScriptWindow->RegisterInterface(geo, "geo");
 
-    AInterfaceToMinimizerJavaScript* mini = new AInterfaceToMinimizerJavaScript(SM);
+    AMini_JavaScript_SI* mini = new AMini_JavaScript_SI(SM);
     ScriptWindow->RegisterInterface(mini, "mini");  //mini should be before sim to handle abort correctly
 
-    AInterfaceToData* dat = new AInterfaceToData(Config, EventsDataHub);
+    AEvents_SI* dat = new AEvents_SI(Config, EventsDataHub);
     QObject::connect(dat, SIGNAL(RequestEventsGuiUpdate()), Rwindow, SLOT(onRequestEventsGuiUpdate()));
     ScriptWindow->RegisterInterface(dat, "events");
 
-    InterfaceToSim* sim = new InterfaceToSim(SimulationManager, EventsDataHub, Config, GlobSet.RecNumTreads);
+    ASim_SI* sim = new ASim_SI(SimulationManager, EventsDataHub, Config);
     QObject::connect(sim, SIGNAL(requestStopSimulation()), SimulationManager, SLOT(StopSimulation()));
     ScriptWindow->RegisterInterface(sim, "sim");
 
-    InterfaceToReconstructor* rec = new InterfaceToReconstructor(ReconstructionManager, Config, EventsDataHub, TmpHub, GlobSet.RecNumTreads);
+    APTHistory_SI * ptHistory = new APTHistory_SI(*SimulationManager);
+    ScriptWindow->RegisterInterface(ptHistory, "ptHistory");
+
+    ARec_SI* rec = new ARec_SI(ReconstructionManager, Config, EventsDataHub, TmpHub);
     QObject::connect(rec, SIGNAL(RequestStopReconstruction()), ReconstructionManager, SLOT(requestStop()));
     QObject::connect(rec, SIGNAL(RequestUpdateGuiForManifest()), Rwindow, SLOT(onManifestItemsGuiUpdate()));
     ScriptWindow->RegisterInterface(rec, "rec");
 
-    AInterfaceToLRF* lrf = new AInterfaceToLRF(Config, EventsDataHub);
+    ALrf_SI* lrf = new ALrf_SI(Config, EventsDataHub);
     ScriptWindow->RegisterInterface(lrf, "lrf");
-    ALrfScriptInterface* newLrf = new ALrfScriptInterface(Detector, EventsDataHub);
+    ALrfRaim_SI* newLrf = new ALrfRaim_SI(Detector, EventsDataHub);
     ScriptWindow->RegisterInterface(newLrf, "newLrf");
 
-    AInterfaceToPMs* pmS = new AInterfaceToPMs(Config);
+    APms_SI* pmS = new APms_SI(Config);
     ScriptWindow->RegisterInterface(pmS, "pms");
 
     AInterfaceToGraph* graph = new AInterfaceToGraph(TmpHub);
@@ -97,52 +108,46 @@ void MainWindow::createScriptWindow()
     AInterfaceToHist* hist = new AInterfaceToHist(TmpHub);
     ScriptWindow->RegisterInterface(hist, "hist");
 
-    AInterfaceToTTree* tree = new AInterfaceToTTree(TmpHub);
+    ATree_SI* tree = new ATree_SI(TmpHub);
     ScriptWindow->RegisterInterface(tree, "tree");
-    connect(tree, &AInterfaceToTTree::RequestTreeDraw, GraphWindow, &GraphWindowClass::DrawTree);
+    connect(tree, &ATree_SI::RequestTreeDraw, GraphWindow, &GraphWindowClass::DrawTree);
 
-    AInterfaceToMessageWindow* txt = new AInterfaceToMessageWindow(SM, ScriptWindow);
+    AMsg_SI* txt = new AMsg_SI(SM, ScriptWindow);
     ScriptWindow->RegisterInterface(txt, "msg");
 
-    AInterfaceToWebSocket* web = new AInterfaceToWebSocket(EventsDataHub);
-    QObject::connect(web, &AInterfaceToWebSocket::showTextOnMessageWindow, txt, &AInterfaceToMessageWindow::Append); // make sure this line is after AInterfaceToMessageWindow init
-    QObject::connect(web, &AInterfaceToWebSocket::clearTextOnMessageWindow, txt, &AInterfaceToMessageWindow::Clear); // make sure this line is after AInterfaceToMessageWindow init
+    AWeb_SI* web = new AWeb_SI(EventsDataHub);
+    QObject::connect(web, &AWeb_SI::showTextOnMessageWindow, txt, &AMsg_SI::Append); // make sure this line is after AInterfaceToMessageWindow init
+    QObject::connect(web, &AWeb_SI::clearTextOnMessageWindow, txt, &AMsg_SI::Clear); // make sure this line is after AInterfaceToMessageWindow init
     ScriptWindow->RegisterInterface(web, "web");
 
-    AWebServerInterface* server = new AWebServerInterface(*NetModule->WebSocketServer, EventsDataHub);
+    AServer_SI* server = new AServer_SI(*NetModule->WebSocketServer, EventsDataHub);
     ScriptWindow->RegisterInterface(server, "server");
 
-    AInterfaceToPhotonScript* photon = new AInterfaceToPhotonScript(Config, EventsDataHub);
+    APhoton_SI* photon = new APhoton_SI(Config, EventsDataHub);
     ScriptWindow->RegisterInterface(photon, "photon");
 
-    AInterfaceToDepoScript* depo = new AInterfaceToDepoScript(Detector, EventsDataHub);
-    ScriptWindow->RegisterInterface(depo, "depo");
-
-    AParticleTrackingHistoryInterface* pth = new AParticleTrackingHistoryInterface(*EventsDataHub);
-    ScriptWindow->RegisterInterface(pth, "tracklog");
-
 #ifdef ANTS_FLANN
-    AInterfaceToKnnScript* knn = new AInterfaceToKnnScript(ReconstructionManager->KNNmodule);
+    AKnn_SI* knn = new AKnn_SI(ReconstructionManager->KNNmodule);
     ScriptWindow->RegisterInterface(knn, "knn");
 #endif
 
 #ifdef ANTS_FANN
-    //AInterfaceToANNScript* ann = new AInterfaceToANNScript();
+    //AAnn_SI* ann = new AAnn_SI();
     //ScriptWindow->RegisterInterface(ann, "ann");
 #endif
 
     // Interfaces which rely on MainWindow
 
-    InterfaceToGeoWin* geowin = new InterfaceToGeoWin(this, TmpHub);
+    AGeoWin_SI* geowin = new AGeoWin_SI(this, SimulationManager);
     ScriptWindow->RegisterInterface(geowin, "geowin");
 
-    InterfaceToGraphWin* grwin = new InterfaceToGraphWin(this);
+    AGraphWin_SI* grwin = new AGraphWin_SI(this);
     ScriptWindow->RegisterInterface(grwin, "grwin");
 
-    AInterfaceToGuiScript* gui = new AInterfaceToGuiScript(SM);
+    AGui_SI* gui = new AGui_SI(SM);
     ScriptWindow->RegisterInterface(gui, "gui");
 
-    AInterfaceToOutputWin* out = new AInterfaceToOutputWin(this);
+    AOutWin_SI* out = new AOutWin_SI(this);
     ScriptWindow->RegisterInterface(out, "outwin");
 
     // window inits

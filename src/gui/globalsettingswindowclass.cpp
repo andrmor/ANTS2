@@ -8,7 +8,7 @@
 #include "amessage.h"
 #include "anetworkmodule.h"
 #include "geometrywindowclass.h"
-#include "ainterfacetogstylescript.h"
+#include "agstyle_si.h"
 
 //Qt
 #include <QFileDialog>
@@ -80,6 +80,9 @@ void GlobalSettingsWindowClass::updateGUI()
   ui->cbSaveSimAsText_IncludeNumPhotons->setChecked(MW->GlobSet.SimTextSave_IncludeNumPhotons);
   ui->cbSaveSimAsText_IncludePositions->setChecked(MW->GlobSet.SimTextSave_IncludePositions);
 
+  ui->leGeant4exec->setText(MW->GlobSet.G4antsExec);
+  ui->leGeant4ExchangeFolder->setText(MW->GlobSet.G4ExchangeFolder);
+
   updateNetGui();
 }
 
@@ -129,6 +132,13 @@ void GlobalSettingsWindowClass::SetTab(int iTab)
     ui->twMain->setCurrentIndex(iTab);
 }
 
+bool GlobalSettingsWindowClass::event(QEvent *event)
+{
+    if (event->type() == QEvent::WindowActivate) updateGUI();
+
+    return QMainWindow::event(event);
+}
+
 void GlobalSettingsWindowClass::on_pbgStyleScript_clicked()
 {
     MW->extractGeometryOfLocalScriptWindow();
@@ -145,7 +155,7 @@ void GlobalSettingsWindowClass::on_pbgStyleScript_clicked()
                               "Script to set ROOT's gStyle",
                               example);
 
-    GStyleInterface = new AInterfaceToGStyleScript();
+    GStyleInterface = new AGStyle_SI();
     MW->GenScriptWindow->RegisterInterfaceAsGlobal(GStyleInterface);
     MW->GenScriptWindow->UpdateGui();
 
@@ -467,4 +477,31 @@ void GlobalSettingsWindowClass::on_cbSaveSimAsText_IncludeNumPhotons_clicked(boo
 void GlobalSettingsWindowClass::on_cbSaveSimAsText_IncludePositions_clicked(bool checked)
 {
     MW->GlobSet.SimTextSave_IncludePositions = checked;
+}
+
+void GlobalSettingsWindowClass::on_pbGeant4exec_clicked()
+{
+    QString fn = QFileDialog::getOpenFileName(this, "G4ants executable", MW->GlobSet.G4antsExec);
+    if (fn.isEmpty()) return;
+    ui->leGeant4exec->setText(fn);
+    MW->GlobSet.G4antsExec = fn;
+}
+
+void GlobalSettingsWindowClass::on_leGeant4exec_editingFinished()
+{
+    MW->GlobSet.G4antsExec = ui->leGeant4exec->text();
+}
+
+void GlobalSettingsWindowClass::on_pbGeant4ExchangeFolder_clicked()
+{
+    QString starter = MW->GlobSet.G4ExchangeFolder;
+    QString dir = QFileDialog::getExistingDirectory(this, "Select folder for Ants2<->Geant4 file exchange",starter,QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    if (dir.isEmpty()) return;
+    ui->leGeant4ExchangeFolder->setText(dir);
+    MW->GlobSet.G4ExchangeFolder = ui->leGeant4ExchangeFolder->text();
+}
+
+void GlobalSettingsWindowClass::on_leGeant4ExchangeFolder_editingFinished()
+{
+    MW->GlobSet.G4ExchangeFolder = ui->leGeant4ExchangeFolder->text();
 }

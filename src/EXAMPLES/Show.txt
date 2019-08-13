@@ -1,17 +1,20 @@
-var tc = 2000;
+var tc = 2000
 
-outwin.Hide()
-
-geowin.Show()
 config.Load(core.GetExamplesDir() + "/det0.json")
+
+geowin.SetWindowGeometry([40,40,900,800]) // geometry window position and size
+geowin.Show()
 geowin.ShowGeometry()
 geowin.SetZoom(1)
 
-msg.SetTransparent(true)
-msg.SetFontSize(20)
+outwin.Hide()
+outwin.SetWindowGeometry([240,140,680,650])
+
+msg.Clear()
+msg.SetFontSize(15)
+msg.Resize(600, 300)
+msg.Move(950, 40)    //text window position
 msg.Show("A model of compact scintillation camera")
-msg.Move(geowin.GetX()+200 , geowin.GetY()+50)
-msg.Resize(800, 200)
 core.sleep(0.5*tc)
 
 geowin.SetParallel(false)
@@ -44,27 +47,40 @@ core.sleep(tc)
 geowin.Rotate(100, 0, 20)
 core.sleep(0.5*tc)
 geowin.Rotate(-100, 0, 20)
-//geowin.ShowPMnumbers()
 
 core.sleep(tc)
 geowin.UpdateView()
 core.sleep(0.5*tc)
 
 config.Replace("SimulationConfig.GeneralSimConfig.AcceleratorConfig.CheckBeforeTrack", false)
-config.Replace("SimulationConfig.GeneralSimConfig.BuildPhotonTracks", true)
 config.Replace("SimulationConfig.PointSourcesConfig.PhotPerNodeOptions.PhotPerNodeConstant", 4000)
 config.Replace("SimulationConfig.PointSourcesConfig.SinglePositionOptions.SingleX", 0)
 config.Replace("SimulationConfig.PointSourcesConfig.SinglePositionOptions.SingleY", 0)
 
-msg.Show("Tracing photons emitted from a point source<br>  at the center of the scintillator")
+msg.Show("Now we will trace photons emitted from a point source<br>  at the center of the scintillator<br>")
+msg.Append("We will show just a few of them (typically thousands of photons are emitted)")
+geowin.ShowSPS_position()
+core.sleep(tc)
+
 sim.RunPhotonSources()
 geowin.ShowTracksMovie(20, 10, 1, 1, 1, 1, 9)
 core.sleep(tc)
 geowin.Rotate(60-geowin.GetTheta(), 0, 20)
 core.sleep(tc)
 
+msg.Show("Only those photons which hit the photosensors can be detected")
+
 geowin.ShowTracks(20)
 core.sleep(tc)
+
+msg.Append("<br>Trajectories of these photons are shown by red lines")
+msg.Append("All other photons are shown by blue lines")
+core.sleep(tc)
+
+geowin.ShowTracks(20)
+core.sleep(2*tc)
+
+msg.Append("<br>Now we will show a more realistic number of photons")
 
 geowin.ShowGeometry()
 for (var i=0; i<1000; i+=50)
@@ -74,7 +90,8 @@ for (var i=0; i<1000; i+=50)
 }
 core.sleep(tc)
 
-msg.Show("We are interested only in the photons which hit the photosensors, which can be detected")
+msg.Show("We can remove all 'blue' photons - detector does not see them")
+core.sleep(tc)
 geowin.ShowGeometry()
 geowin.ShowTracks(1000, 2)  //Show only red
 core.sleep(tc)
@@ -83,12 +100,11 @@ geowin.Rotate(70, -geowin.GetPhi(), 50)
 geowin.Rotate(-geowin.GetTheta(), -geowin.GetPhi()-90, 50)
 core.sleep(tc)
 
-msg.Clear()
-msg.Append("This is the distribution of the detected signals over the photosensor array")
+msg.Show("This is the distribution of the detected signals over the photosensor array")
 outwin.ShowOutputWindow(true, 2)
 core.sleep(tc*2)
 outwin.ShowOutputWindow(false)
-msg.Show("Let us see what distributuion will be obtained<br>  when the source position is shifted")
+msg.Append("<br>Let us see what distributuion will be obtained<br>  when the source position is shifted")
 geowin.ShowSPS_position()
 core.sleep(tc)
 
@@ -102,10 +118,12 @@ for (var i=50; i<4000; i+=50)
   geowin.ShowTracks(i,2)
   core.sleep(0.01*tc)
 }
-//core.sleep(tc)
+core.sleep(tc)
 outwin.ShowOutputWindow(true, 2)
-msg.Clear()
-core.sleep(tc*2)
+core.sleep(tc)
+outwin.Hide()
+msg.Show("This is the end of the demo")
+
 
 
 

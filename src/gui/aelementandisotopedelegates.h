@@ -39,8 +39,8 @@ public:
 
 private:
     AChemicalElement *element;
-    bool* bClearInProgress;
     int isotopeIndexInElement;
+    bool* bClearInProgress;
 
     QLineEdit* leiMass;
     QLineEdit* ledAbund;

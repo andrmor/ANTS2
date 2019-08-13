@@ -9,7 +9,7 @@
 #include "ascriptwindow.h"
 #include "detectorclass.h"
 #include "aglobalsettings.h"
-#include "ainterfacetoaddobjscript.h"
+#include "ageo_si.h"
 #include "asandwich.h"
 #include "aslab.h"
 #include "slabdelegate.h"
@@ -21,6 +21,7 @@
 #include "amaterialparticlecolection.h"
 #include "aconfiguration.h"
 #include "ajsontools.h"
+#include "afiletools.h"
 
 #include <QDebug>
 #include <QFileDialog>
@@ -39,12 +40,17 @@
 #include "TGeoCompositeShape.h"
 
 DetectorAddOnsWindow::DetectorAddOnsWindow(MainWindow *parent, DetectorClass *detector) :
-  QMainWindow(parent),
+  AGuiWindow(parent),
   ui(new Ui::DetectorAddOnsWindow)
 {
   MW = parent;
   Detector = detector;
   ui->setupUi(this);
+
+  Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
+  windowFlags |= Qt::Tool;
+  windowFlags |= Qt::WindowCloseButtonHint;
+  this->setWindowFlags( windowFlags );
 
   ui->pbBackToSandwich->setEnabled(false);
 
@@ -129,69 +135,73 @@ void DetectorAddOnsWindow::SetTab(int tab)
 
 void DetectorAddOnsWindow::on_pbConvertToDummies_clicked()
 {
-  QList<int> ToAdd;
-  bool ok = ExtractNumbersFromQString(ui->lePMlist->text(), &ToAdd);
-  if (!ok)
+    QList<int> ToAdd;
+    bool ok = ExtractNumbersFromQString(ui->lePMlist->text(), &ToAdd);
+    if (!ok)
     {
-      message("Input error!", this);
-      return;
-    }
-
-  int iMaxPM = MW->PMs->count()-1;
-  for (int i=0; i<ToAdd.size(); i++)
-    if (ToAdd[i] >iMaxPM )
-      {
-        message("Range error!", this);
+        message("Input error!", this);
         return;
-      }
-
-  //---converting PMs to dummies---
-  bool SawLower = false;
-  bool SawUpper = false;
-  qSort(ToAdd.begin(), ToAdd.end()); //sorted - starts from smallest
-  for (int iadd=ToAdd.size()-1; iadd>-1; iadd--)
-    {
-       //adding dummy
-       PMdummyStructure dpm;
-
-       int ipm = ToAdd[iadd];
-//       qDebug()<<"PM->dummy  ToAddindex="<<iadd<<"pm number="<<ipm;
-
-       const APm &PM = MW->PMs->at(ipm);
-       dpm.r[0] = PM.x;
-       dpm.r[1] = PM.y;
-       dpm.r[2] = PM.z;
-
-       dpm.Angle[0] = PM.phi;
-       dpm.Angle[1] = PM.theta;
-       dpm.Angle[2] = PM.psi;
-
-       dpm.PMtype = PM.type;
-       dpm.UpperLower = PM.upperLower;
-
-       Detector->PMdummies.append(dpm);
-//       qDebug()<<"dummy added";
-
-       //deleting PM          
-       int ul, index;
-       Detector->findPM(ipm, ul, index);
-       Detector->PMarrays[ul].PositionsAnglesTypes.remove(index);
-//       qDebug()<<"PM removed";
-       if (ul == 0) SawUpper = true;
-       if (ul == 1) SawLower = true;
     }
-//  qDebug()<<"All list done!";
 
-  //updating array type  
-  if (SawUpper)
-    if (MW->PMArrayType(0) == 0) MW->SetPMarrayType(0, 1);
-  if (SawLower)
-    if (MW->PMArrayType(1) == 0) MW->SetPMarrayType(1, 1);
+    int iMaxPM = MW->PMs->count()-1;
+    for (int & i : ToAdd)
+        if (i < 0 || i > iMaxPM)
+        {
+            message("Range error!", this);
+            return;
+        }
 
-  MW->updatePMArrayDataIndication();
-  MW->NumberOfPMsHaveChanged();
-  //DetectorAddOnsWindow::UpdateDummyPMindication();
-  MW->ReconstructDetector();
+    bool SawLower = false;
+    bool SawUpper = false;
+    qSort(ToAdd.begin(), ToAdd.end()); //sorted - starts from smallest
+
+    for (int iadd=ToAdd.size()-1; iadd>-1; iadd--)
+    {
+        //adding dummy
+        PMdummyStructure dpm;
+
+        int ipm = ToAdd[iadd];
+        //       qDebug()<<"PM->dummy  ToAddindex="<<iadd<<"pm number="<<ipm;
+
+        const APm &PM = MW->PMs->at(ipm);
+        dpm.r[0] = PM.x;
+        dpm.r[1] = PM.y;
+        dpm.r[2] = PM.z;
+
+        dpm.Angle[0] = PM.phi;
+        dpm.Angle[1] = PM.theta;
+        dpm.Angle[2] = PM.psi;
+
+        dpm.PMtype = PM.type;
+        dpm.UpperLower = PM.upperLower;
+
+        Detector->PMdummies.append(dpm);
+        //       qDebug()<<"dummy added";
+
+        //deleting PM
+        int ul, index;
+        Detector->findPM(ipm, ul, index);
+        if (index == -1)
+        {
+            message("Something went wrong...", this);
+            return;
+        }
+        Detector->PMarrays[ul].PositionsAnglesTypes.remove(index);
+        //       qDebug()<<"PM removed";
+        if (ul == 0) SawUpper = true;
+        if (ul == 1) SawLower = true;
+    }
+    //  qDebug()<<"All list done!";
+
+    //updating array type
+    if (SawUpper)
+        if (MW->PMArrayType(0) == 0) MW->SetPMarrayType(0, 1);
+    if (SawLower)
+        if (MW->PMArrayType(1) == 0) MW->SetPMarrayType(1, 1);
+
+    MW->updatePMArrayDataIndication();
+    MW->NumberOfPMsHaveChanged();
+    MW->ReconstructDetector();
 }
 
 void DetectorAddOnsWindow::on_sbDummyPMindex_valueChanged(int arg1)
@@ -490,7 +500,7 @@ void DetectorAddOnsWindow::OnrequestShowMonitor(const AGeoObject *mon)
         track->SetLineWidth(4);
         track->SetLineColor(kRed);
     }
-    MW->ShowTracks();
+    MW->GeometryWindow->DrawTracks();
 }
 
 void DetectorAddOnsWindow::HighlightVolume(QString VolName)
@@ -537,12 +547,12 @@ void DetectorAddOnsWindow::on_pbUseScriptToAddObj_clicked()
     QString title = ( ObjectScriptTarget.isEmpty() ? "Add objects script" : QString("Add objects script. Script will be stored in object ") + ObjectScriptTarget );
     MW->GenScriptWindow->ConfigureForLightMode(&Detector->AddObjPositioningScript, title, example);
 
-    AddObjScriptInterface = new AInterfaceToAddObjScript(Detector);
+    AddObjScriptInterface = new AGeo_SI(Detector);
     MW->GenScriptWindow->RegisterInterfaceAsGlobal(AddObjScriptInterface);
     MW->GenScriptWindow->RegisterCoreInterfaces();
 
-    connect(AddObjScriptInterface, &AInterfaceToAddObjScript::AbortScriptEvaluation, this, &DetectorAddOnsWindow::ReportScriptError);
-    connect(AddObjScriptInterface, &AInterfaceToAddObjScript::requestShowCheckUpWindow, MW->CheckUpWindow, &CheckUpWindowClass::showNormal);
+    connect(AddObjScriptInterface, &AGeo_SI::AbortScriptEvaluation, this, &DetectorAddOnsWindow::ReportScriptError);
+    connect(AddObjScriptInterface, &AGeo_SI::requestShowCheckUpWindow, MW->CheckUpWindow, &CheckUpWindowClass::showNormal);
     connect(MW->GenScriptWindow, &AScriptWindow::success, this, &DetectorAddOnsWindow::AddObjScriptSuccess);
 
     MW->recallGeometryOfLocalScriptWindow();
@@ -611,22 +621,13 @@ void DetectorAddOnsWindow::on_pbSaveTGeo_clicked()
   QString starter = MW->GlobSet.LastOpenDir;
   QFileDialog *fileDialog = new QFileDialog;
   fileDialog->setDefaultSuffix("gdml");
-  QString fileName = fileDialog->getSaveFileName(this, "Export detector geometry", starter, "GDML files (*.gdml);;Root files (*.root)");
+  QString fileName = fileDialog->getSaveFileName(this, "Export detector geometry", starter, "GDML files (*.gdml)");
   if (fileName.isEmpty()) return;
   MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
-  QFileInfo fi(fileName);
-  if (fi.suffix().isEmpty()) fileName += ".gdml";
-  if (fi.suffix().compare("root") && fi.suffix().compare("gdml"))
-    {
-      message("Only ROOT and GDML files can be created!", this);
-      return;
-    }
+  QString err = Detector->exportToGDML(fileName);
 
-  QByteArray ba = fileName.toLocal8Bit();
-  const char *c_str = ba.data();
-  Detector->GeoManager->SetName("geometry");
-  Detector->GeoManager->Export(c_str);
+  if (!err.isEmpty()) message(err, this);
 }
 
 void ShowNodes(const TGeoNode* node, int level)
@@ -901,6 +902,36 @@ void readGeoObjectTree(AGeoObject* obj, const TGeoNode* node,
     }    
 }
 
+bool DetectorAddOnsWindow::GDMLtoTGeo(const QString& fileName)
+{
+    QString txt;
+    bool bOK = LoadTextFromFile(fileName, txt);
+    if (!bOK)
+    {
+        message("Cannot read the file", this);
+        return false;
+    }
+
+    if (txt.contains("unit=\"cm\"") || txt.contains("unit=\"m\""))
+    {
+        message("Cannot load GDML files with length units other than \"mm\"", this);
+        return false;
+    }
+
+    txt.replace("unit=\"mm\"", "unit=\"cm\"");
+    QString tmpFileName = MW->GlobSet.TmpDir + "/gdmlTMP.gdml";
+    bOK = SaveTextToFile(tmpFileName, txt);
+    if (!bOK)
+    {
+        message("Conversion failed - tmp file cannot be allocated", this);
+        return false;
+    }
+
+    Detector->GeoManager = TGeoManager::Import(tmpFileName.toLatin1());
+    QFile(tmpFileName).remove();
+    return true;
+}
+
 void DetectorAddOnsWindow::on_pmParseInGeometryFromGDML_clicked()
 {
     QString fileName = QFileDialog::getOpenFileName(this, "Load GDML file", MW->GlobSet.LastOpenDir, "GDML files (*.gdml)");
@@ -918,7 +949,8 @@ void DetectorAddOnsWindow::on_pmParseInGeometryFromGDML_clicked()
     QString PMtemplate = ui->lePMtemplate->text();
     if (Detector->GeoManager) delete Detector->GeoManager;
     Detector->GeoManager = 0;
-    Detector->GeoManager = TGeoManager::Import(fileName.toLatin1());
+    //Detector->GeoManager = TGeoManager::Import(fileName.toLatin1());
+    GDMLtoTGeo(fileName.toLatin1());
     if (!Detector->GeoManager || !Detector->GeoManager->IsClosed())
     {
         message("Load failed!", this);
@@ -1011,8 +1043,8 @@ void DetectorAddOnsWindow::on_pmParseInGeometryFromGDML_clicked()
     }
     else Detector->fWorldSizeFixed = false;
 
-    Detector->GeoManager->GetCurrentNavigator()->FindNode(0,0,0);
-    //qDebug() << "----------------------------"<<Detector->GeoManager->GetCurrentNavigator()->GetPath();
+    Detector->GeoManager->FindNode(0,0,0);
+    //qDebug() << "----------------------------"<<Detector->GeoManager->GetPath();
 
     Detector->writeToJson(MW->Config->JSON);
     //SaveJsonToFile(MW->Config->JSON, "D:/temp/CONFIGJSON.json");
@@ -1020,37 +1052,49 @@ void DetectorAddOnsWindow::on_pmParseInGeometryFromGDML_clicked()
     Detector->BuildDetector(); 
 }
 
+const QString DetectorAddOnsWindow::loadGDML(const QString& fileName, QString& gdml)
+{
+    QFileInfo fi(fileName);
+    if (fi.suffix() != "gdml")
+        return "Only GDML files are accepted!";
+
+    QFile f(fileName);
+    if (!f.open(QFile::ReadOnly | QFile::Text))
+        return QString("Cannot open file %1").arg(fileName);
+
+    QTextStream in(&f);
+    gdml = in.readAll();
+
+    if (gdml.contains("unit=\"cm\"") || gdml.contains("unit=\"m\""))
+        return "Cannot load GDML files with length units other than \"mm\"";
+
+    gdml.replace("unit=\"mm\"", "unit=\"cm\"");
+    return "";
+}
+
 void DetectorAddOnsWindow::on_pbLoadTGeo_clicked()
 {
+    QString gdml;
+
     QString fileName = QFileDialog::getOpenFileName(this, "Load GDML file", MW->GlobSet.LastOpenDir, "GDML files (*.gdml)");
     if (fileName.isEmpty()) return;
     MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
-    QFileInfo fi(fileName);
-    if (fi.suffix() != "gdml")
-      {
-        message("Only GDML files are accepted!", this);
+    const QString err = loadGDML(fileName, gdml);
+    if (!err.isEmpty())
+    {
+        message(err, this);
         return;
-      }
-
-    QFile f(fileName);
-    if (!f.open(QFile::ReadOnly | QFile::Text))
-      {
-        message("Cannot open file!", this);
-        return;
-      }
-    QTextStream in(&f);
-    QString gdml = in.readAll();
+    }
 
     //attempting to load and validity check
     bool fOK = Detector->importGDML(gdml);
-
     if (fOK)
-      {
+    {
         //qDebug() << "--> GDML successfully registered";
         MW->NumberOfPMsHaveChanged();
         MW->GeometryWindow->ShowGeometry();
-      }
+    }
     else message(Detector->ErrorString, this);
 
     MW->onGDMLstatusChage(fOK); //update MW GUI
@@ -1165,7 +1209,7 @@ void DetectorAddOnsWindow::on_pbRunTestParticle_clicked()
        }
 
        MW->GeometryWindow->ShowGeometry(false);
-       MW->ShowTracks();
+       MW->GeometryWindow->DrawTracks();
    }
 }
 

@@ -46,7 +46,7 @@ ARootLineConfigurator::ARootLineConfigurator(int* color, int* width, int* style,
     lay->addWidget(labW);
 
     sbWidth = new QSpinBox();
-    sbWidth->setMinimum(1);
+    sbWidth->setMinimum(0);
     sbWidth->setValue(*width);
     lay->addWidget(sbWidth);
 

@@ -117,13 +117,13 @@ protected:
   virtual ROOT::Math::Functor* configureFunctor() = 0;
 };
 
-class AInterfaceToMinimizerJavaScript : public AInterfaceToMinimizerScript
+class AMini_JavaScript_SI : public AInterfaceToMinimizerScript
 {
   Q_OBJECT
 
 public:
-  AInterfaceToMinimizerJavaScript(AJavaScriptManager* ScriptManager);
-  AInterfaceToMinimizerJavaScript(const AInterfaceToMinimizerJavaScript& other);
+  AMini_JavaScript_SI(AJavaScriptManager* ScriptManager);
+  AMini_JavaScript_SI(const AMini_JavaScript_SI& other);
 
   void SetScriptManager(AJavaScriptManager* NewScriptManager);
 
@@ -134,12 +134,12 @@ public:
 #ifdef __USE_ANTS_PYTHON__
 class APythonScriptManager;
 
-class AInterfaceToMinimizerPythonScript : public AInterfaceToMinimizerScript
+class AMini_Python_SI : public AInterfaceToMinimizerScript
 {
   Q_OBJECT
 
 public:
-  AInterfaceToMinimizerPythonScript(APythonScriptManager *ScriptManager);
+  AMini_Python_SI(APythonScriptManager *ScriptManager);
 
   virtual ROOT::Math::Functor*  configureFunctor() override;
 

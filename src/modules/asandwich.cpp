@@ -490,7 +490,7 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
         if (obj->ObjectType->isMonitor())
           {
             if (obj->Container)
-              iMat = obj->Container->Material;
+              iMat = obj->Container->getMaterial();
             else qWarning() << "Monitor without container detected!";
             //qDebug() << "Monitor:"<<obj->Name<<"mat:"<<iMat;
           }
@@ -551,18 +551,27 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
 
         //positioning node
         if (obj->ObjectType->isGrid())
-          {
+        {
             int GridCounter = GridRecords.size();
             GridRecords.append(obj->createGridRecord());
             parent->AddNode(vol, GridCounter, lTrans);            
-          }
+        }
         else if (obj->ObjectType->isMonitor())
-          {
+        {
             int MonitorCounter = MonitorsRecords.size();
             MonitorsRecords.append(obj);
             (static_cast<ATypeMonitorObject*>(obj->ObjectType))->index = MonitorCounter;
             parent->AddNode(vol, MonitorCounter, lTrans);
-          }
+
+            MonitorIdNames.append(QString("%1_%2").arg(vol->GetName()).arg(MonitorCounter));
+
+            TObjArray * nList = parent->GetNodes();
+            int numNodes = nList->GetEntries();
+            TGeoNode * node = (TGeoNode*)nList->At(numNodes-1);
+            //qDebug() << nList << numNodes;
+            //qDebug() << "      " <<node;//->GetUniqueID();
+            MonitorNodes.append(node);
+        }
         else parent->AddNode(vol, forcedNodeNumber, lTrans);
     }    
 
@@ -652,7 +661,9 @@ void ASandwich::clearGridRecords()
 
 void ASandwich::clearMonitorRecords()
 {
-    MonitorsRecords.clear(); //dno delete - it is just pointers to world tree objects
+    MonitorsRecords.clear(); //dont delete - it is just pointers to world tree objects
+    MonitorIdNames.clear();
+    MonitorNodes.clear();
 }
 
 void ASandwich::positionArrayElement(int ix, int iy, int iz, AGeoObject* el, AGeoObject* arrayObj,
@@ -793,7 +804,7 @@ bool ASandwich::CalculateZofSlabs()
   LastError = "";
 
   // find the Z=0 slab
-  int iZeroSlab;
+  int iZeroSlab = 0;
   int FoundActiveLayers = 0;
   int i;
   for (i=0; i<World->HostedObjects.size(); i++)

@@ -2,6 +2,7 @@
 #define APARTICLERECORD_H
 
 class TRandom2;
+class AParticleTrackingRecord;
 
 class AParticleRecord
 {
@@ -18,11 +19,15 @@ public:
     double  v[3];        //starting vector
     double  time = 0;        //time on start
     double  energy;      //staring energy
-    int     secondaryOf = -1; //use in primary tracker to designate secondary particles and link to their primary
+    int     secondaryOf = -1; //use in primary tracker to designate secondary particles and link to their primary ***!!! to change to bool
 
     AParticleRecord * clone(); // TODO no need?
     void ensureUnitaryLength();
     void randomDir(TRandom2 * RandGen);
+
+    // runtime properties
+    AParticleTrackingRecord * ParticleRecord = nullptr; // used only of log is on!  it is != nullptr if secondary
+    bool bInteracted = false;
 };
 
 #endif // APARTICLERECORD_H

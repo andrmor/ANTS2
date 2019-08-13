@@ -312,18 +312,18 @@ void AInterfaceToMinimizerScript::AVarRecordUpperLimited::Debug() const
   qDebug() << "UpperLimited"<<Value<<Step<<Max;
 }
 
-AInterfaceToMinimizerJavaScript::AInterfaceToMinimizerJavaScript(AJavaScriptManager *ScriptManager) :
+AMini_JavaScript_SI::AMini_JavaScript_SI(AJavaScriptManager *ScriptManager) :
   AInterfaceToMinimizerScript( dynamic_cast<AScriptManager*>(ScriptManager) ) {}
 
-AInterfaceToMinimizerJavaScript::AInterfaceToMinimizerJavaScript(const AInterfaceToMinimizerJavaScript & /*other*/) :
+AMini_JavaScript_SI::AMini_JavaScript_SI(const AMini_JavaScript_SI & /*other*/) :
   AInterfaceToMinimizerScript(0) { }
 
-void AInterfaceToMinimizerJavaScript::SetScriptManager(AJavaScriptManager *NewScriptManager)
+void AMini_JavaScript_SI::SetScriptManager(AJavaScriptManager *NewScriptManager)
 {
   ScriptManager = dynamic_cast<AScriptManager*>(NewScriptManager);
 }
 
-ROOT::Math::Functor* AInterfaceToMinimizerJavaScript::configureFunctor()
+ROOT::Math::Functor* AMini_JavaScript_SI::configureFunctor()
 {
   AJavaScriptManager* jsm = static_cast<AJavaScriptManager*>(ScriptManager);
   QScriptValue sv = jsm->getMinimalizationFunction();
@@ -412,10 +412,10 @@ double PythonScriptFunctor(const double *p) //last parameter contains the pointe
     return result;
 }
 
-AInterfaceToMinimizerPythonScript::AInterfaceToMinimizerPythonScript(APythonScriptManager *ScriptManager) :
+AMini_Python_SI::AMini_Python_SI(APythonScriptManager *ScriptManager) :
   AInterfaceToMinimizerScript( dynamic_cast<AScriptManager*>(ScriptManager) ) {}
 
-ROOT::Math::Functor *AInterfaceToMinimizerPythonScript::configureFunctor()
+ROOT::Math::Functor *AMini_Python_SI::configureFunctor()
 {
    APythonScriptManager* psm = static_cast<APythonScriptManager*>(ScriptManager);
 

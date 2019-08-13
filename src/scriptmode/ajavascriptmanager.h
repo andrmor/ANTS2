@@ -14,7 +14,7 @@ class QScriptEngine;
 class TRandom2;
 class QDialog;
 #ifdef GUI
-class AInterfaceToMessageWindow;
+class AMsg_SI;
 #endif
 
 class AJavaScriptManager : public AScriptManager
@@ -53,7 +53,7 @@ public:
     QScriptValue    getProperty(const QString& properyName) const;
     QScriptValue    registerNewVariant(const QVariant &Variant);
     QScriptValue    EvaluationResult;
-    ACoreScriptInterface* coreObj = 0;  //core interface - to forward evaluate-script-in-script
+    ACore_SI* coreObj = 0;  //core interface - to forward evaluate-script-in-script
 
 public slots:
 #ifdef GUI
@@ -70,6 +70,7 @@ private:
 
 private:
     void doRegister(AScriptInterface *interface, const QString &name);
+    void addQVariantToString(const QVariant &var, QString &string);
 };
 
 #endif // AJAVASCRIPTMANAGER_H

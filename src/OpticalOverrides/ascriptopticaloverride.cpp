@@ -2,7 +2,7 @@
 #include "amaterialparticlecolection.h"
 #include "atracerstateful.h"
 #include "aopticaloverridescriptinterface.h"
-#include "amathscriptinterface.h"
+#include "amath_si.h"
 #include "ajsontools.h"
 
 #ifdef GUI
@@ -129,7 +129,7 @@ void AScriptOpticalOverride::openScriptWindow(QWidget *caller)
     interfaceObject->configure(&phot, normal, MatFrom, MatTo);
     interfaceObject->setObjectName("photon");
     sw->RegisterInterface(interfaceObject, "photon"); //takes ownership
-    AMathScriptInterface* math = new AMathScriptInterface(RandGen);
+    AMath_SI* math = new AMath_SI(RandGen);
     math->setObjectName("math");
     sw->RegisterInterface(math, "math"); //takes ownership
 

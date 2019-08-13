@@ -1,11 +1,11 @@
 #ifndef DETECTORADDONSWINDOW_H
 #define DETECTORADDONSWINDOW_H
 
-#include <QMainWindow>
+#include "aguiwindow.h"
 
 class MainWindow;
 class DetectorClass;
-class AInterfaceToAddObjScript;
+class AGeo_SI;
 class AGeoTreeWidget;
 class AGeoObject;
 
@@ -13,7 +13,7 @@ namespace Ui {
   class DetectorAddOnsWindow;
 }
 
-class DetectorAddOnsWindow : public QMainWindow
+class DetectorAddOnsWindow : public AGuiWindow
 {
   Q_OBJECT
   
@@ -26,7 +26,7 @@ public:
   void UpdateDummyPMindication();
   void HighlightVolume(QString VolName);
 
-  AInterfaceToAddObjScript* AddObjScriptInterface = 0;  // if created -> owned by the script manager
+  AGeo_SI* AddObjScriptInterface = 0;  // if created -> owned by the script manager
   AGeoTreeWidget* twGeo;  // WorldTree widget
 
 private slots:
@@ -85,7 +85,9 @@ private:
   QString makeScriptString_groupObjectStart(AGeoObject *obj);
   QString makeScriptString_stackObjectEnd(AGeoObject *obj);
   QString makeLinePropertiesString(AGeoObject *obj);
-  void objectMembersToScript(AGeoObject *Master, QString &script, int ident);
+  void objectMembersToScript(AGeoObject *Master, QString &script, int ident);  
+  bool GDMLtoTGeo(const QString &fileName);
+  const QString loadGDML(const QString &fileName, QString &gdml);  //returns error string - empty if OK
 
 public slots:
   void UpdateGeoTree(QString name = "");

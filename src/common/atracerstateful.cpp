@@ -1,7 +1,7 @@
 #include "atracerstateful.h"
 #include "amaterialparticlecolection.h"
 #include "aopticaloverridescriptinterface.h"
-#include "amathscriptinterface.h"
+#include "amath_si.h"
 
 #include <QObject>
 #include <QScriptEngine>
@@ -46,7 +46,7 @@ void ATracerStateful::generateScriptInfrastructure(const AMaterialParticleCollec
 
     QObject::connect(overrideInterface, &AOpticalOverrideScriptInterface::requestAbort, ScriptEngine, &QScriptEngine::abortEvaluation, Qt::DirectConnection);
 
-    mathInterface = new AMathScriptInterface(RandGen);
+    mathInterface = new AMath_SI(RandGen);
     mathInterface->setObjectName("math");
     val = ScriptEngine->newQObject(mathInterface, QScriptEngine::QtOwnership);
     ScriptEngine->globalObject().setProperty(mathInterface->objectName(), val);

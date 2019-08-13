@@ -43,6 +43,10 @@ public:
   QVector<APair_ValueAndWeight> PriScint_Raise;
   int PriScintModel = 0; //0=sum, 1=Shao
 
+  double PhotonYieldDefault = 0;
+  double getPhotonYield(int iParticle) const;
+  bool   bSamePrYieldForAll = false;
+
   double SecScintDecayTime;
   QString Comments;
 
@@ -74,8 +78,9 @@ public:
   QVector<double> SecondarySpectrum;
   TH1D* SecondarySpectrumHist = 0;
 
-  TGeoMaterial* GeoMat = 0; // handled by TGEoManager
-  TGeoMedium* GeoMed = 0;   // handled by TGEoManager
+  TGeoMaterial* GeoMat = 0; // handled by TGeoManager
+  TGeoMedium* GeoMed = 0;   // handled by TGeoManager
+  void generateTGeoMat();
 
   double GeneratePrimScintTime(TRandom2* RandGen) const;
 
@@ -90,7 +95,7 @@ public:
 
   const QString CheckMaterial(int iPart, const AMaterialParticleCollection *MpCollection) const;
 
-  bool isNCrystalInUse() const;
+  bool isNCrystalInUse() const;  
 
 private:
   //run-time properties
@@ -121,6 +126,7 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
   void ClearProperties();
 
   ANeutronInteractionElement* getNeutronInteractionElement(int index);  //0 if wrong index
+  const ANeutronInteractionElement* getNeutronInteractionElement(int index) const;  //0 if wrong index
 
   void writeToJson (QJsonObject &json, AMaterialParticleCollection* MpCollection) const;
   void readFromJson(const QJsonObject &json, AMaterialParticleCollection* MpCollection);

@@ -153,6 +153,13 @@
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="pbShowMonitorIndexes">
+         <property name="text">
+          <string>Show mon #</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="pbShowTracks">
          <property name="text">
           <string>Show tracks</string>
@@ -316,7 +323,7 @@
      <x>0</x>
      <y>0</y>
      <width>711</width>
-     <height>21</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuMarkers">

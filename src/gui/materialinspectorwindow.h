@@ -1,7 +1,7 @@
 #ifndef MATERIALINSPECTORWINDOW_H
 #define MATERIALINSPECTORWINDOW_H
 
-#include <QMainWindow>
+#include "aguiwindow.h"
 
 class QTextStream;
 class MainWindow;
@@ -19,7 +19,7 @@ namespace Ui {
 class MaterialInspectorWindow;
 }
 
-class MaterialInspectorWindow : public QMainWindow
+class MaterialInspectorWindow : public AGuiWindow
 {
     Q_OBJECT
 
@@ -53,6 +53,7 @@ private slots:
     void onAddIsotope(AChemicalElement *element);
     void onRemoveIsotope(AChemicalElement* element, int isotopeIndexInElement);
     void IsotopePropertiesChanged(const AChemicalElement* element, int isotopeIndexInElement);
+    void onRequestDraw(const QVector<double> & x, const QVector<double> & y, const QString & titleX, const QString & titleY);
 
     //on user input    
     void on_pbUpdateInteractionIndication_clicked();  // interaction indication update
@@ -88,7 +89,6 @@ private slots:
     void on_pbShowUsage_clicked();
     void on_pbNistPage_clicked();
     void on_pbRename_clicked();
-    void on_ledMFPenergy_2_editingFinished();  //fix me!!! no button
     void on_pbAddNewMaterial_clicked();
     void on_ledIntEnergyRes_editingFinished();
     void on_cbTransparentMaterial_clicked();
@@ -100,11 +100,36 @@ private slots:
     void on_cobYieldForParticle_activated(int index);
     void on_pbShowPairProduction_clicked();
     void on_pbShowStatisticsOnElastic_clicked();
+    void on_lePriT_raise_editingFinished();
+    void on_pbNew_clicked();
+    void on_pbComputeRangeCharged_clicked();
+    void on_pbCopyPrYieldToAll_clicked();
+    void on_cbTrackingAllowed_clicked();
+    void on_pbModifyChemicalComposition_clicked();
+    void on_cbShowIsotopes_clicked();
+    void on_cbCapture_clicked();
+    void on_cbEnableScatter_clicked();
+    void on_pbMaterialInfo_clicked();
+    void on_cbAllowAbsentCsData_clicked();
+    void on_pbHelpNeutron_clicked();
+    void on_pbAutoLoadMissingNeutronCrossSections_clicked();
+    void on_trwChemicalComposition_doubleClicked(const QModelIndex &index);
+    void on_pbShowReemProbLambda_clicked();
+    void on_pbLoadReemisProbLambda_clicked();
+    void on_pbDeleteReemisProbLambda_clicked();
+    void on_lePriT_editingFinished();
+    void on_pbPriThelp_clicked();
+    void on_pbPriT_test_clicked();
+    void on_pbShowNcmat_clicked();
+    void on_pbLoadNcmat_clicked();
+    void on_ledNCmatDcutoff_editingFinished();
+    void on_ledNcmatPacking_editingFinished();
+    void on_cbUseNCrystal_clicked(bool checked);
 
     //user or code controlled change - safe or only GUI
     void on_ledRayleigh_textChanged(const QString &arg1);
-    void on_cbTrackingAllowed_toggled(bool checked);
     void on_ledPrimaryYield_textChanged(const QString &arg1);
+    void on_cbUseNCrystal_toggled(bool checked);
 
     //menu actions
     void on_actionSave_material_triggered();
@@ -112,60 +137,11 @@ private slots:
     void on_actionClear_Interaction_for_this_particle_triggered();
     void on_actionClear_interaction_for_all_particles_triggered();
     void on_actionUse_log_log_interpolation_triggered();
-
-    //new auto-generated, not cathegorized
-
-    void on_pbModifyChemicalComposition_clicked();
-
-    void on_cbShowIsotopes_clicked();
-
     void on_tabwNeutron_customContextMenuRequested(const QPoint &pos);
-
-    void on_cbCapture_clicked();
-
-    void on_cbEnableScatter_clicked();
-
     void onTabwNeutronsActionRequest(int iEl, int iIso, const QString Action);
-
-    void on_pbMaterialInfo_clicked();
-
-    void on_cbAllowAbsentCsData_clicked();
-
-    void on_pbHelpNeutron_clicked();
-
-    void on_pbAutoLoadMissingNeutronCrossSections_clicked();
-
-    void on_trwChemicalComposition_doubleClicked(const QModelIndex &index);
-
-    void on_pbShowReemProbLambda_clicked();
-
-    void on_pbLoadReemisProbLambda_clicked();
-
-    void on_pbDeleteReemisProbLambda_clicked();
-
-    void on_lePriT_editingFinished();
-
-    void on_pbPriThelp_clicked();
-
-    void on_pbPriT_test_clicked();
-
     void on_actionNeutrons_triggered();
 
-    void on_pbShowNcmat_clicked();
-
-    void on_pbLoadNcmat_clicked();
-
-    void on_ledNCmatDcutoff_editingFinished();
-
-    void on_ledNcmatPacking_editingFinished();
-
-    void on_cbUseNCrystal_clicked(bool checked);
-
-    void on_cbUseNCrystal_toggled(bool checked);
-
-    void on_lePriT_raise_editingFinished();
-
-    void on_pbNew_clicked();
+    //new auto-generated, not cathegorized
 
 private:
     Ui::MaterialInspectorWindow *ui;
@@ -189,7 +165,6 @@ private:
     void showProcessIntCoefficient(int particleId, int TermScenario);
     TGraph* constructInterpolationGraph(QVector<double> X, QVector<double> Y);
     bool importXCOM(QTextStream &in, int particleId);
-    bool isAllSameYield(double val);
 
     bool autoLoadCrossSection(ANeutronInteractionElement *element, QString target); //target = "absorption" or "elastic scattering" - replace with dynamic_cast!!!
     bool doLoadCrossSection(ANeutronInteractionElement *element, QString fileName);
@@ -202,6 +177,7 @@ private:
     void updateWarningIcons();
     int autoLoadReaction(ANeutronInteractionElement &element); //returns number of particles added to the collection
     void updateTmpMatOnPartCollChange(int newPartAdded);
+    void updateEnableStatus();  // gui update for tracking allow / transparent
 };
 
 #endif // MATERIALINSPECTORWINDOW_H

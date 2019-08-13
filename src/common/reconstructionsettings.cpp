@@ -79,7 +79,7 @@ bool ReconstructionSettings::readFromJson(QJsonObject &RecJson)
   CoGIgnoreThresholdHigh = 1.0e10; //compatibility
   if (cogjson.contains("IgnoreThresholdHigh")) CoGIgnoreThresholdHigh = cogjson["IgnoreThresholdHigh"].toDouble();
   fCoGIgnoreFar = false; //compatibility
-  fCoGIgnoreFar = cogjson["IgnoreFar"].toBool();
+  if (cogjson.contains("IgnoreFar")) fCoGIgnoreFar = cogjson["IgnoreFar"].toBool();
   if (fCoGIgnoreFar)
     {
       CoGIgnoreDistance = cogjson["IgnoreDistance"].toDouble();

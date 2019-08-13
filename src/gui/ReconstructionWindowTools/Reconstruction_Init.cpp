@@ -24,8 +24,8 @@
 #include "TEllipse.h"
 #include "TPolyLine.h"
 
-ReconstructionWindow::ReconstructionWindow(QWidget *parent, MainWindow *mw, EventsDataClass* eventsDataHub) :
-  QMainWindow(parent),
+ReconstructionWindow::ReconstructionWindow(QWidget * parent, MainWindow * mw, EventsDataClass * eventsDataHub) :
+  AGuiWindow(parent),
   ui(new Ui::ReconstructionWindow)
 {
   MW = mw;
@@ -62,6 +62,7 @@ ReconstructionWindow::ReconstructionWindow(QWidget *parent, MainWindow *mw, Even
 
   Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
   windowFlags |= Qt::WindowCloseButtonHint;
+  windowFlags |= Qt::Tool;
   this->setWindowFlags( windowFlags );
 
   ForbidUpdate = false;  

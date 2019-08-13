@@ -1,0 +1,16 @@
+config.Replace( ".Single_Scan_Flood" , 4)
+
+//sim.ClearNodes() - no need since nodes are cleared on script evaluation start
+sim.AddNode(100,100,0, 0, 50000) // Format:   x, y, z, time(optional), numberPhotonsOverride(optional)
+sim.AddNode(100,-100,0)
+sim.AddSubNode(110,-110,0) // will not start a new event - adds another point source to the previous one
+sim.AddSubNode(120,-120,0)
+
+core.print("Number of events: " + sim.CountNodes(true))
+core.print("Total number of nodes: " + sim.CountNodes(false))
+
+sim.RunPhotonSources()
+
+geowin.ShowCustomNodes()
+
+

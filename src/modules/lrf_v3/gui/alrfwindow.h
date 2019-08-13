@@ -2,6 +2,7 @@
 #define ALRFWINDOW_H
 
 #include "ui_alrfwindow.h"
+#include "aguiwindow.h"
 
 #include <map>
 #include <memory>
@@ -37,7 +38,7 @@ public:
   }
 };
 
-class ALrfWindow : public QMainWindow, private Ui::ALrfWindow
+class ALrfWindow : public AGuiWindow, private Ui::ALrfWindow
 {
   Q_OBJECT
   int right_column_last_size;
@@ -58,9 +59,6 @@ public slots:
   void onReadyStatusChanged(bool fReady);
   void onBusyStatusChanged(bool fStatus);
   void on_pbUpdateInstructionsJson_clicked();
-
-protected:
-  bool event(QEvent *event);
 
 private:
   void setSplitterRightColumn(QWidget *new_widget = nullptr);

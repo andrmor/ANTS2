@@ -28,10 +28,14 @@ ASimulationStatistics::~ASimulationStatistics()
 
 void ASimulationStatistics::clearAll()
 {
-    if (WaveSpectrum) delete WaveSpectrum; WaveSpectrum = 0;
-    if (TimeSpectrum) delete TimeSpectrum; TimeSpectrum = 0;
-    if (AngularDistr) delete AngularDistr; AngularDistr = 0;
-    if (TransitionSpectrum) delete TransitionSpectrum; TransitionSpectrum = 0;
+    if (WaveSpectrum) delete WaveSpectrum;
+    WaveSpectrum = 0;
+    if (TimeSpectrum) delete TimeSpectrum;
+    TimeSpectrum = 0;
+    if (AngularDistr) delete AngularDistr;
+    AngularDistr = 0;
+    if (TransitionSpectrum) delete TransitionSpectrum;
+    TransitionSpectrum = 0;
     clearMonitors();
 }
 

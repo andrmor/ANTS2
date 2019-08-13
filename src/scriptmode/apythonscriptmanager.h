@@ -9,7 +9,7 @@
 class QScriptEngine;
 class TRandom2;
 class QDialog;
-class AInterfaceToMessageWindow;
+class AMsg_SI;
 class PythonQtObjectPtr;
 
 class APythonScriptManager : public AScriptManager

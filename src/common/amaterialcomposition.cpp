@@ -1,5 +1,7 @@
 #include "amaterialcomposition.h"
-
+#include "achemicalelement.h"
+#include "aglobalsettings.h"
+#include "aisotopeabundancehandler.h"
 #include "afiletools.h"
 #include "ajsontools.h"
 
@@ -7,46 +9,17 @@
 #include <QJsonArray>
 #include <QList>
 #include <QDebug>
+#include <QVector>
 
-AMaterialComposition::AMaterialComposition()
-{
-    AllPossibleElements<<"H"<<"He"<<"Li"<<"Be"<<"B"<<"C"<<"N"<<"O"<<"F"<<"Ne"<<"Na"<<"Mg"<<"Al"<<"Si"<<"P"<<"S"<<"Cl"<<"Ar"<<"K"<<"Ca"<<"Sc"<<"Ti"<<"V"<<"Cr"<<"Mn"<<"Fe"<<"Co"<<"Ni"<<"Cu"<<"Zn"<<"Ga"<<"Ge"<<"As"<<"Se"<<"Br"<<"Kr"<<"Rb"<<"Sr"<<"Y"<<"Zr"<<"Nb"<<"Mo"<<"Tc"<<"Ru"<<"Rh"<<"Pd"<<"Ag"<<"Cd"<<"In"<<"Sn"<<"Sb"<<"Te"<<"I"<<"Xe"<<"Cs"<<"Ba"<<"La"<<"Ce"<<"Pr"<<"Nd"<<"Pm"<<"Sm"<<"Eu"<<"Gd"<<"Tb"<<"Dy"<<"Ho"<<"Er"<<"Tm"<<"Yb"<<"Lu"<<"Hf"<<"Ta"<<"W"<<"Re"<<"Os"<<"Ir"<<"Pt"<<"Au"<<"Hg"<<"Tl"<<"Pb"<<"Bi"<<"Po"<<"At"<<"Rn"<<"Fr"<<"Ra"<<"Ac"<<"Th"<<"Pa"<<"U"<<"Np"<<"Pu"<<"Am"<<"Cm"<<"Bk"<<"Cf"<<"Es";
-}
-
-void AMaterialComposition::configureNaturalAbunances(const QString FileName_NaturalAbundancies)
-{
-    QString NaturalAbundances;
-    bool bOK = LoadTextFromFile(FileName_NaturalAbundancies, NaturalAbundances);
-    if (!bOK) qWarning() << "Cannot load file with natural abundances: " + FileName_NaturalAbundancies;
-    else
-    {
-        NaturalAbundancies.clear();
-        QStringList SL = NaturalAbundances.split(QRegExp("[\r\n]"), QString::SkipEmptyParts);
-        for (QString s : SL)
-        {
-            QStringList f = s.split(QRegExp("\\s+"), QString::SkipEmptyParts);
-            if (f.size() != 2) continue;
-            bool bOK = true;
-            double Abundancy = (f.last()).toDouble(&bOK);
-            if (!bOK) continue;
-            QString mass = f.first();
-            mass.remove(QRegExp("[a-zA-Z]"));
-            int Mass = mass.toInt(&bOK);
-            if (!bOK) continue;
-            QString Element = f.first();
-            Element.remove(QRegExp("[0-9]"));
-            //qDebug() << Element << Mass << Abundancy;
-            QVector<QPair<int, double> > tmp;
-            tmp << QPair<int, double>(Mass, Abundancy);
-            if (NaturalAbundancies.contains(Element)) (NaturalAbundancies[Element]) << tmp;
-            else NaturalAbundancies[Element] = tmp;
-        }
-    }
-}
+#include "TString.h"
+#include "TGeoMaterial.h"
 
 QString AMaterialComposition::setCompositionString(const QString composition, bool KeepIsotopComposition)
 {
-    if (NaturalAbundancies.isEmpty()) return "Configuration error: Table with natural abundancies was not loaded";
+    const AIsotopeAbundanceHandler & IsoAbHandler = AGlobalSettings::getInstance().getIsotopeAbundanceHandler();
+
+    if ( IsoAbHandler.isNaturalAbundanceTableEmpty() )
+        return "Configuration error: Table with natural abundancies was not loaded";
 
     QVector<AChemicalElement> OldElementComposition = ElementComposition;
 
@@ -143,7 +116,9 @@ QString AMaterialComposition::setCompositionString(const QString composition, bo
     //checking elements
     for (const QString& el : ListOfElements)
     {
-        if (!AllPossibleElements.contains(el)) return QString("Unknown element: ")+el;
+        if (!IsoAbHandler.isElementExist(el))
+            return QString("Unknown element: %1").arg(el);
+
         sumFractions += map[el];
     }
     if (sumFractions == 0) return "No elements defined!";
@@ -174,7 +149,7 @@ QString AMaterialComposition::setCompositionString(const QString composition, bo
         if ( bMakeNew )
         {
             element = AChemicalElement(ElementName, MolarFraction);
-            QString error = fillIsotopesWithNaturalAbundances(element);
+            QString error = IsoAbHandler.fillIsotopesWithNaturalAbundances(element);
             if (!error.isEmpty()) return error;
         }
 
@@ -218,6 +193,34 @@ const QString AMaterialComposition::checkForErrors() const
     }
 
     return "";
+}
+
+TGeoMaterial *AMaterialComposition::generateTGeoMaterial(const QString &MatName, const double& density) const
+{
+    const AIsotopeAbundanceHandler & IsoAbHandler = AGlobalSettings::getInstance().getIsotopeAbundanceHandler();
+
+    TString tName = MatName.toLocal8Bit().data();
+
+    int numElements = countElements();
+    int numIsotopes = countIsotopes();
+
+    if (numElements == 0)
+        return new TGeoMaterial(tName, 1.0, 1, 1.0e-29);
+    else if (numIsotopes == 1)
+        return new TGeoMaterial(tName, IsoAbHandler.generateTGeoElement(getElement(0), tName), density);
+    else
+    {
+        TGeoMixture* mix = new TGeoMixture(tName, numElements, density);
+
+        double totWeight = 0;
+        for (const AChemicalElement& el : ElementComposition)
+            totWeight += el.getFractionWeight() * el.MolarFraction;
+
+        for (const AChemicalElement& el : ElementComposition)
+            mix->AddElement(IsoAbHandler.generateTGeoElement(&el, tName), el.getFractionWeight() * el.MolarFraction / totWeight);
+
+        return mix;
+    }
 }
 
 int AMaterialComposition::countIsotopes() const
@@ -293,72 +296,4 @@ void AMaterialComposition::readFromJson(const QJsonObject &json)
     }
 
     parseJson(json, "MeanAtomMass", MeanAtomMass);
-}
-
-const QString AChemicalElement::print() const
-{
-    QString str = "Element: " + Symbol;
-    str += "  Relative fraction: " + QString::number(MolarFraction) + "\n";
-    str += "Isotopes and their abundances (%):\n";
-    for (const AIsotope& iso : Isotopes)
-        str += "  " + iso.Symbol + "-" + QString::number(iso.Mass) + "   " + QString::number(iso.Abundancy) + "\n";
-    return str;
-}
-
-void AChemicalElement::writeToJson(QJsonObject &json) const
-{
-    json["Symbol"] = Symbol;
-    json["MolarFraction"] = MolarFraction;
-
-    QJsonArray ar;
-    for (const AIsotope& iso : Isotopes)
-    {
-        QJsonObject js;
-        iso.writeToJson(js);
-        ar << js;
-    }
-    json["Isotopes"] = ar;
-}
-
-void AChemicalElement::readFromJson(const QJsonObject &json)
-{
-    parseJson(json, "Symbol", Symbol);
-    parseJson(json, "MolarFraction", MolarFraction);
-    QJsonArray ar;
-    parseJson(json, "Isotopes", ar);
-
-    Isotopes.clear();
-    for (int i=0; i<ar.size(); i++)
-    {
-        QJsonObject js = ar[i].toObject();
-        AIsotope iso;
-        iso.readFromJson(js);
-        Isotopes << iso;
-    }
-}
-
-const QString AMaterialComposition::fillIsotopesWithNaturalAbundances(AChemicalElement& element) const
-{
-    QString& name = element.Symbol;
-    if (!NaturalAbundancies.contains(name)) return QString("Element ") + name + " not found in dataset of natural abundances";
-
-    element.Isotopes.clear();
-    QVector<QPair<int, double> > list = NaturalAbundancies[name];
-    for (auto& pair : list)
-        element.Isotopes << AIsotope(name, pair.first, pair.second);
-    return "";
-}
-
-void AIsotope::writeToJson(QJsonObject &json) const
-{
-    json["Symbol"] = Symbol;
-    json["Mass"] = Mass;
-    json["Abundancy"] = Abundancy;
-}
-
-void AIsotope::readFromJson(const QJsonObject &json)
-{
-    parseJson(json, "Symbol", Symbol);
-    parseJson(json, "Mass", Mass);
-    parseJson(json, "Abundancy", Abundancy);
 }

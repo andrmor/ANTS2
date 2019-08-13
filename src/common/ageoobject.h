@@ -29,6 +29,8 @@ public:
   bool readShapeFromString(QString GenerationString, bool OnlyCheck = false); // using parameter values taken from gui generation string
   void DeleteMaterialIndex(int imat);
   void makeItWorld();
+  bool isWorld() const;
+  int  getMaterial() const;
 
   //json for a single object
   void writeToJson(QJsonObject& json);
@@ -84,7 +86,7 @@ public:
   void changeLineWidthRecursive(int delta);
   bool isNameExists(const QString name);
   bool isContainsLocked();
-  bool isDisabled();
+  bool isDisabled() const;
   void enableUp();
   bool isFirstSlab(); //slab or lightguide
   bool isLastSlab();  //slab or lightguide
@@ -107,7 +109,8 @@ public:
   void updateStack();  //called on one object of the set - it is used to calculate positions of other members!
   void clearAll();
   void updateWorldSize(double& XYm, double& Zm);
-  bool isMaterialInUse(int imat);
+  bool isMaterialInUse(int imat) const;  //including disabled objects
+  bool isMaterialInActiveUse(int imat) const;  //excluding disabled objects
 
   //service propertie
   QString tmpContName; //used only during load:
@@ -134,7 +137,6 @@ public:
 
   static AGeoShape* GeoShapeFactory(const QString ShapeType);  // SHAPE FACTORY !!!
   static QList<AGeoShape*> GetAvailableShapes();               // list of available shapes for generation of help and highlighter: do not forget to add new here!
-
 };
 
 // ============== Object type ==============
@@ -144,10 +146,10 @@ class ATypeObject
 public:
     virtual ~ATypeObject() {}
 
-    bool isHandlingStatic() const   {return Handling == "Static";}
+    bool isHandlingStatic() const   {return Handling == "Static";}      //World
     bool isHandlingStandard() const {return Handling == "Standard";}
-    bool isHandlingSet() const      {return Handling == "Set";}
-    bool isHandlingArray() const    {return Handling == "Array";}
+    bool isHandlingSet() const      {return Handling == "Set";}         //Group, Stack, Composite container
+    bool isHandlingArray() const    {return Handling == "Array";}       //Array
 
     bool isWorld() const            {return Type == "World";}
     bool isSlab() const             {return Type == "Slab" || Type == "Lightguide";}  //lightguide is also Slab!
@@ -306,7 +308,7 @@ public:
     bool isParticleInUse(int partId) const;
 
     //runtime
-    int index;  //index of monitor to fill and acess statistics
+    int index;  //index of monitor to fill and access statistics
 };
 
 
@@ -330,6 +332,7 @@ public:
   virtual double getHeight() {return 0;}  //if 0, cannot be used for stack  ***!!!
   virtual void setHeight(double /*dz*/) {}
   virtual double maxSize() {return 0;} //for world size evaluation
+  virtual double minSize() {return 0;} //for monitors only!
 
   //json
   virtual void writeToJson(QJsonObject& /*json*/) {}
@@ -480,7 +483,7 @@ struct APolyCGsection
   APolyCGsection(double z, double rmin, double rmax) : z(z), rmin(rmin), rmax(rmax) {}
 
   bool fromString(QString string);
-  QString toString() const;
+  const QString toString() const;
   void writeToJson(QJsonObject& json) const;
   void readFromJson(QJsonObject& json);
 };
@@ -574,8 +577,8 @@ public:
     dx1(15), dx2(5), dy1(10), dy2(20), dz(10) {}
   virtual ~AGeoTrd2() {}
 
-  virtual const QString getShapeType() {return "AGeoTrd2";}
-  virtual const QString getShapeTemplate() {return "AGeoTrd2( dx1, dx2, dy1, dy2, dz )";}
+  virtual const QString getShapeType() {return "TGeoTrd2";}
+  virtual const QString getShapeTemplate() {return "TGeoTrd2( dx1, dx2, dy1, dy2, dz )";}
   virtual const QString getHelp();
 
   virtual bool readFromString(QString GenerationString);
@@ -617,6 +620,7 @@ public:
   virtual void setHeight(double dz) {this->dz = dz;}
   virtual const QString getGenerationString() const;
   virtual double maxSize();
+  virtual double minSize() override;
 
   virtual void writeToJson(QJsonObject& json);
   virtual void readFromJson(QJsonObject& json);
@@ -772,6 +776,7 @@ public:
   virtual void setHeight(double dz) {this->dz = dz;}
   virtual const QString getGenerationString() const;
   virtual double maxSize();
+  virtual double minSize() override;
 
   virtual void writeToJson(QJsonObject& json);
   virtual void readFromJson(QJsonObject& json);

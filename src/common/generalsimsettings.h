@@ -2,6 +2,8 @@
 #define GENERALSIMSETTINGS_H
 
 #include "atrackbuildoptions.h"
+#include "alogsandstatisticsoptions.h"
+#include "ag4simulationsettings.h"
 
 #include <QJsonObject>
 #include <QJsonArray>
@@ -40,16 +42,18 @@ public:
 
   int    MaxNumTrans = 500;  
   bool   fQEaccelerator = false;
-  bool   fLogsStat = false;             //generate logs and statistics of detected photons
+  //bool   fLogsStat = false;             //generate logs and statistics
   bool   bDoPhotonHistoryLog = false; //detailed photon history, activated by "photon" script!
-  int    NumThreads;
+  //int    NumThreads;
 
-  int    DetStatNumBins;        //number of bins in fetection statistics
+  int    DetStatNumBins;        //number of bins in detection statistics
 
   int    SecScintGenMode = 0;
   //TH1D *SecScintThetaHist;
 
   ATrackBuildOptions TrackBuildOptions;
+  ALogsAndStatisticsOptions LogsStatOptions;
+  AG4SimulationSettings G4SimSet;
 
   //utility
   QString ErrorString;

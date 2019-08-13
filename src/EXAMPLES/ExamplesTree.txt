@@ -7,11 +7,12 @@ define: Startup
 
 -------
 
-define:Gamma cameras :SiPM-based
-define:Gamma  cameras:PMT-based
+define:Gamma cameras:SiPM-based
+define:Gamma cameras:PMT-based
 
 define:Neutrons:Gas
 define:Neutrons:Converter
+define:Neutrons:Anger
 
 define:Dark matter:LUX
 
@@ -43,7 +44,9 @@ add:Gamma cameras:SiPM-based:SiPM_16.json:30x30x5 mm3 LYSO crystal with 16 PMTs 
 add:Gamma cameras:PMT-based:Med37.json:Medical gamma camera GE MaxiCamera 400T; Na-22 and Co-57 sources
 
 add:Neutrons:Gas:AngerGSPC19.json:GSPC19 detector
-add:Neutrons:Converter:B4C_multigap.json:Multigap RPC neutron detector
+add:Neutrons:Converter:B10RPC-1hd.json:Boron-10 hybrid double-gap RPC
+add:Neutrons:Converter:B10RPC-10hd.json:Boron-10 hybrid double-gap RPC with 20 converter layers (10 double gaps)
+add:Neutrons:Anger:dSiPMcam.json:Prototype of a neutron Anger camera with GS20 scintillator and digital SiPMs
 
 add:Dark matter:LUX:LUX.json:A model of LUX - a dual-phase detector for dark matter search 
 add:Neutrinos:RED:RED100.json:A model of RED100 - a dual-phase neutrino detector

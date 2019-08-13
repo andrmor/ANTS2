@@ -70,7 +70,7 @@ public:
   ~DetectorClass();
 
   bool MakeDetectorFromJson(QJsonObject &json);
-  bool BuildDetector(bool SkipSimGuiUpdate = false);   // build detector from JSON //on load config, set SkipSimGuiUpdate = true since json is still old!
+  bool BuildDetector(bool SkipSimGuiUpdate = false, bool bSkipAllUpdates = false);   // build detector from JSON //on load config, set SkipSimGuiUpdate = true since json is still old!
   bool BuildDetector_CallFromScript(); // save current detector to JSON, then call BuildDetector()
 
   void writeToJson(QJsonObject &json);
@@ -95,6 +95,9 @@ public:
 
   void changeLineWidthOfVolumes(int delta);
 
+  const QString exportToGDML(const QString &fileName) const; //returns error string, empty if all is fine  
+  const QString exportToROOT(const QString& fileName) const;
+  
 public slots:
   void onRequestRegisterGeoManager();
 

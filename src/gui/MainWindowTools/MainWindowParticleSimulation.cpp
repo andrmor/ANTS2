@@ -22,7 +22,7 @@
 #include "acommonfunctions.h"
 #include "guiutils.h"
 #include "aparticlesourcedialog.h"
-#include "simulationmanager.h"
+#include "asimulationmanager.h"
 #include "exampleswindow.h"
 #include "aconfiguration.h"
 
@@ -60,6 +60,7 @@ void MainWindow::SimParticleSourcesConfigToJson(QJsonObject &json)
             cjs["DoS2"] = ui->cbGunDoS2->isChecked();
             cjs["IgnoreNoHitsEvents"] = ui->cbIgnoreEventsWithNoHits->isChecked();
             cjs["IgnoreNoDepoEvents"] = ui->cbIgnoreEventsWithNoEnergyDepo->isChecked();
+            cjs["ClusterMergeRadius"] = ui->ledClusterRadius->text().toDouble();
         psjs["SourceControlOptions"] = cjs;
 
         //Particle generation
@@ -242,7 +243,7 @@ void MainWindow::ShowSource(const AParticleSourceRecord* p, bool clear)
       track->SetLineColor(9);
   }
 
-  MainWindow::ShowTracks();
+  GeometryWindow->DrawTracks();
   Detector->GeoManager->SetCurrentPoint(X0,Y0,Z0);
   //Detector->GeoManager->DrawCurrentPoint(9);
   GeometryWindow->UpdateRootCanvas();
@@ -336,7 +337,7 @@ void MainWindow::TestParticleGun(AParticleGun* Gun, int numParticles)
         }
         GP.clear();
     }
-    ShowTracks();
+    GeometryWindow->DrawTracks();
     ShowGeoMarkers();
 }
 
@@ -578,165 +579,7 @@ void MainWindow::on_pbSingleSourceShow_clicked()
     r[0] = ui->ledSingleX->text().toDouble();
     r[1] = ui->ledSingleY->text().toDouble();
     r[2] = ui->ledSingleZ->text().toDouble();
-
-    clearGeoMarkers();
-    GeoMarkerClass* marks = new GeoMarkerClass("Source", 3, 10, kBlack);
-    marks->SetNextPoint(r[0], r[1], r[2]);   
-    GeoMarkers.append(marks);
-    GeoMarkerClass* marks1 = new GeoMarkerClass("Source", 4, 3, kRed);
-    marks1->SetNextPoint(r[0], r[1], r[2]);    
-    GeoMarkers.append(marks1);
-
-    GeometryWindow->ShowGeometry(false);
-}
-
-void MainWindow::on_pbAddParticleToStack_clicked()
-{
-    //check is this particle's energy in the defined range?
-    double energy = ui->ledParticleStackEnergy->text().toDouble();
-    int iparticle = ui->cobParticleToStack->currentIndex();
-    QList<QString> mats;
-
-    for (int imat=0; imat<MpCollection->countMaterials(); imat++)
-      {
-//        qDebug()<<imat;
-//        qDebug()<<" mat:"<<(*MaterialCollection)[imat]->name;
-        if ( !(*MpCollection)[imat]->MatParticle[iparticle].TrackingAllowed )
-          {
-//            qDebug()<<"  tracking not allowed";
-            continue;
-          }
-        if ( (*MpCollection)[imat]->MatParticle[iparticle].MaterialIsTransparent )
-          {
-//            qDebug()<<"  user set as transparent for this particle!";
-            continue;
-          }
-
-//        qDebug()<<" getting energy range...";
-        if ((*MpCollection)[imat]->MatParticle[iparticle].InteractionDataX.isEmpty())
-          {
-//           qDebug()<<"  Interaction data are not loaded!";
-           mats << (*MpCollection)[imat]->name;
-           continue;
-          }
-        double minE = (*MpCollection)[imat]->MatParticle[iparticle].InteractionDataX.first();
-//        qDebug()<<"  min energy:"<<minE;
-        double maxE = (*MpCollection)[imat]->MatParticle[iparticle].InteractionDataX.last();
-//        qDebug()<<"  max energy:"<<maxE;
-
-        if (energy<minE || energy>maxE) mats << (*MpCollection)[imat]->name;
-//        qDebug()<<"->"<<mats;
-      }
-//    qDebug()<<"reporting...";
-
-    if (mats.size()>0)
-      {
-        //QString str = Detector->ParticleCollection[iparticle]->ParticleName;
-        QString str = Detector->MpCollection->getParticleName(iparticle);
-        str += " energy (" + ui->ledParticleStackEnergy->text() + " keV) ";
-        str += "is conflicting with the defined interaction energy range of material";
-        if (mats.size()>1) str += "s";
-        str += ": ";
-        for (int i=0; i<mats.size(); i++)
-            str += mats[i]+", ";
-
-        str.chop(2);
-        message(str,this);
-      }
-
-    WindowNavigator->BusyOn();
-    int numCopies = ui->sbNumCopies->value();
-    ParticleStack.reserve(ParticleStack.size() + numCopies);
-    for (int i=0; i<numCopies; i++)
-    {
-       AParticleRecord *tmp = new AParticleRecord(ui->cobParticleToStack->currentIndex(),
-                                                  ui->ledParticleStackX->text().toDouble(), ui->ledParticleStackY->text().toDouble(), ui->ledParticleStackZ->text().toDouble(),
-                                                  ui->ledParticleStackVx->text().toDouble(), ui->ledParticleStackVy->text().toDouble(), ui->ledParticleStackVz->text().toDouble(),
-                                                  ui->ledParticleStackTime->text().toDouble(), ui->ledParticleStackEnergy->text().toDouble());
-       ParticleStack.append(tmp);
-    }
-    MainWindow::on_pbRefreshStack_clicked();
-    WindowNavigator->BusyOff(false);
-}
-
-void MainWindow::on_pbRefreshStack_clicked()
-{
-  ui->teParticleStack->clear();
-  int elements = ParticleStack.size();
-
-  if (ui->cbHideStackText->isChecked())
-  {
-     QString str;
-     str.setNum(elements);
-     str = "Stack contains "+str;
-     if (elements == 1) str += " particle"; else str += " particles";
-     ui->teParticleStack->append(str);
-  }
-  else
-  {
-    QString record, lastRecord;
-    int counter = 0; //0 since it will inc on i==0
-    int first = 0;
-    for (int i=0; i<elements; i++)
-      {
-        //record = Detector->ParticleCollection[ParticleStack[i]->Id]->ParticleName + "   ";
-        record = Detector->MpCollection->getParticleName(ParticleStack[i]->Id) + "   ";
-        record += "x,y,z: (" + QString::number(ParticleStack[i]->r[0]) + ","
-                             + QString::number(ParticleStack[i]->r[1]) + ","
-                             + QString::number(ParticleStack[i]->r[2]) + ")   ";
-        record += "i,j,k: (" + QString::number(ParticleStack[i]->v[0]) + ","
-                             + QString::number(ParticleStack[i]->v[1]) + ","
-                             + QString::number(ParticleStack[i]->v[2]) + ")   ";
-        record += "e: " + QString::number(ParticleStack[i]->energy) + " keV   ";
-        record += "t: " + QString::number(ParticleStack[i]->time);
-
-        if (i == 0) lastRecord = record;
-
-        if (record == lastRecord) counter++;
-        else
-          {
-            QString out = QString::number(first);
-            if (counter > 1) out += "-" + QString::number(first + counter - 1);
-            out += "> " + lastRecord;
-            ui->teParticleStack->append(out);
-            counter = 1;
-            first = i;
-            lastRecord = record;
-          }
-      }
-
-    if (!record.isEmpty())
-      {
-        QString out = QString::number(first);
-        if (counter > 1) out += "-" + QString::number(first + counter - 1);
-        out += "> " + lastRecord;
-        ui->teParticleStack->append(out);
-      }
-  }
-
-  ui->sbStackElement->setValue(elements-1);
-  ui->pbTrackStack->setEnabled(elements!=0);
-}
-
-void MainWindow::on_pbRemoveFromStack_clicked()
-{
-    int element = ui->sbStackElement->value();
-    int StackSize = ParticleStack.size();
-    if (element > StackSize-1) return;
-    delete ParticleStack[element];
-    ParticleStack.remove(element);
-    MainWindow::on_pbRefreshStack_clicked();
-}
-
-void MainWindow::on_pbClearAllStack_clicked()
-{
-    //qDebug() << "Clear particle stack triggered";
-    //EventsDataHub->clear();
-
-    for (int i=0; i<ParticleStack.size(); i++)
-        delete ParticleStack[i];
-    ParticleStack.clear();
-    MainWindow::on_pbRefreshStack_clicked();
+    GeometryWindow->ShowPoint(r);
 }
 
 void MainWindow::on_pbEditParticleSource_clicked()
@@ -793,23 +636,77 @@ void MainWindow::on_pbEditParticleSource_clicked()
     if (ui->pbGunShowSource->isChecked()) ShowParticleSource_noFocus();
 }
 
+#include "ageoobject.h"
+void containsMonsGrids(const AGeoObject * obj, bool & bGrid, bool & bMon)
+{
+    if (obj->isDisabled()) return;
+
+    if (obj->ObjectType->isMonitor()) bMon = true;
+    if (obj->ObjectType->isGrid()) bGrid = true;
+
+    for (const AGeoObject * o : obj->HostedObjects)
+        containsMonsGrids(o, bGrid, bMon);
+}
+
+#include "asandwich.h"
 void MainWindow::on_pbParticleSourcesSimulate_clicked()
 {
+    MainWindow::writeSimSettingsToJson(Config->JSON);
+
     ELwindow->QuickSave(0);
     fStartedFromGUI = true;
     fSimDataNotSaved = false; // to disable the warning
 
-    MainWindow::writeSimSettingsToJson(Config->JSON);
-    startSimulation(Config->JSON);
-}
+    //-- test G4 settings
+    if (G4SimSet.bTrackParticles)
+    {
+        QString Errors, Warnings, txt;
 
-void MainWindow::on_twParticleGenerationMode_currentChanged(int)
-{
-    /*
-    ui->sbGunEvents->setVisible(index != 1);
-    ui->labEventsPS->setVisible(index != 1);
-    ui->linePS->setVisible(index != 1);
-    */
+        if (G4SimSet.SensitiveVolumes.isEmpty())
+            txt += "Sensitive volumes are not set!\n"
+                       "Geant4 simulation will not collect any deposition information\n"
+                       "There will be no photon generation in Ants2\n\n";
+
+        bool bMonitors = false;
+        bool bGrids = false;
+        containsMonsGrids(Detector->Sandwich->World, bGrids, bMonitors);
+        if (bMonitors)
+            Warnings+= "\nConfig contains active Monitor(s).\n"
+                       "Monitors will be treated as normal volumes\n";
+        if (bGrids)
+            Warnings+= "\nConfig contains optical grids.\n"
+                       "The grid will NOT be expanded:\n"
+                       "Geant4 will see only the elementary cell of the grid.\n";
+
+        MpCollection->CheckReadyForGeant4Sim(Errors, Warnings, Detector->Sandwich->World);
+
+        if (!Errors.isEmpty())
+        {
+            txt += QStringLiteral("\nERRORS:\n");
+            txt += Errors;
+            txt += '\n';
+        }
+
+        if (!Warnings.isEmpty())
+        {
+            txt += QStringLiteral("\nWarnings:\n");
+            txt += Warnings;
+        }
+
+        if (!txt.isEmpty())
+        {
+            QMessageBox msgBox(this);
+            msgBox.setText(txt);
+            msgBox.setInformativeText("Start simulation?");
+            msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
+            msgBox.setDefaultButton(QMessageBox::Yes);
+            int ret = msgBox.exec();
+            if (ret == QMessageBox::Cancel) return;
+        }
+    }
+    //
+
+    startSimulation(Config->JSON);
 }
 
 // ---- from file ----
@@ -818,10 +715,12 @@ void MainWindow::on_pbGenerateFromFile_Help_clicked()
 {
     QString s = "File should contain particle records, one line per particle.\n\n"
                 "Record format:\n"
-                "ParticleId  Energy  StartX  StartY  StartZ  DirX  DirY  DirZ  *\n\n"
+                "ParticleId  Energy  StartX  StartY  StartZ  DirX  DirY  DirZ Time *\n\n"
                 "where optional '*' indicates that the event is not finished:\n"
-                "the next particle will be generated within the same event.\n\n"
-                "If a line does not start with an integer, it is ignored.";
+                "the next particle will be generated within the same event.\n"
+                "Energy in keV, position in mm, direction is unitary vector and time in ns.\n\n"
+                "If a line does not start with an integer, it is ignored,\n"
+                "but it is recommended to start comments with '#' symbol.";
     message(s, this);
 }
 
@@ -830,6 +729,7 @@ void MainWindow::on_pbGenerateFromFile_Change_clicked()
     QString fileName = QFileDialog::getOpenFileName(this, "Select a file with particle generation data", GlobSet.LastOpenDir, "Data files (*.dat *.txt);;All files (*)");
     if (fileName.isEmpty()) return;
     GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+    ui->leGenerateFromFile_FileName->setText(fileName);
     on_leGenerateFromFile_FileName_editingFinished();
 }
 
@@ -895,8 +795,8 @@ void MainWindow::updateFileParticleGeneratorGui()
 
 #include "ajavascriptmanager.h"
 #include "ascriptwindow.h"
-#include "aparticlegeneratorinterface.h"
-#include "amathscriptinterface.h"
+#include "aparticlegenerator_si.h"
+#include "amath_si.h"
 
 void MainWindow::updateScriptParticleGeneratorGui()
 {
@@ -910,12 +810,12 @@ void MainWindow::on_pbParticleGenerationScript_clicked()
     AScriptWindow* sw = new AScriptWindow(sm, true, this);
     sw->EnableAcceptReject();
 
-    AParticleGeneratorInterface* gen = new AParticleGeneratorInterface(*Detector->MpCollection, Detector->RandGen);
+    AParticleGenerator_SI* gen = new AParticleGenerator_SI(*Detector->MpCollection, Detector->RandGen);
     QVector<AParticleRecord*> GP;
     gen->configure(&GP);
     gen->setObjectName("gen");
     sw->RegisterInterface(gen, "gen"); //takes ownership
-    AMathScriptInterface* math = new AMathScriptInterface(Detector->RandGen);
+    AMath_SI* math = new AMath_SI(Detector->RandGen);
     math->setObjectName("math");
     sw->RegisterInterface(math, "math"); //takes ownership
 

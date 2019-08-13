@@ -13,7 +13,7 @@
 #include "TMath.h"
 #include "TH1D.h"
 
-Photon_Generator::Photon_Generator(const DetectorClass* Detector, TRandom2* RandGen, QObject *parent) :
+Photon_Generator::Photon_Generator(const DetectorClass &Detector, TRandom2* RandGen, QObject *parent) :
     QObject(parent), Detector(Detector), RandGen(RandGen) {}
 
 Photon_Generator::~Photon_Generator()
@@ -79,7 +79,7 @@ void Photon_Generator::GenerateDirectionSecondary(APhoton *Photon)
 
 void Photon_Generator::GenerateWave(APhoton *Photon, int materialId)
 {
-    const AMaterial* Material = (*Detector->MpCollection)[materialId];
+    const AMaterial* Material = (*Detector.MpCollection)[materialId];
     //  qDebug()<<"name:"<<Material->name;
     //  qDebug()<<"WaveFrom:"<<SimSet->WaveFrom<<"Wave step:"<<SimSet->WaveStep;
 
@@ -107,7 +107,7 @@ void Photon_Generator::GenerateWave(APhoton *Photon, int materialId)
 
 void Photon_Generator::GenerateTime(APhoton *Photon, int materialId)
 {
-    const AMaterial* Material = (*Detector->MpCollection)[materialId];
+    const AMaterial* Material = (*Detector.MpCollection)[materialId];
     //  qDebug()<<"name:"<<Material->name;
     //  qDebug()<<Photon->time;
 
@@ -124,9 +124,9 @@ void Photon_Generator::GenerateSignalsForLrfMode(int NumPhotons, double* r, AOne
     double energy = 1.0 * NumPhotons / SimSet->NumPhotsForLrfUnity; // NumPhotsForLRFunity corresponds to the total number of photons per event for unitary LRF
 
     //Generating event
-    for (int ipm = 0; ipm < Detector->PMs->count(); ipm++)
+    for (int ipm = 0; ipm < Detector.PMs->count(); ipm++)
       {
-        double avSignal = Detector->LRFs->getLRF(ipm, r) * energy;
+        double avSignal = Detector.LRFs->getLRF(ipm, r) * energy;
         double avPhotEl = avSignal * SimSet->NumPhotElPerLrfUnity;
         double numPhotEl = RandGen->Poisson(avPhotEl);
 

@@ -1,14 +1,14 @@
 #include "ajavascriptmanager.h"
 
 #ifdef GUI
-#include "ainterfacetomessagewindow.h"
+#include "amsg_si.h"
 #endif
 
 #include "ascriptinterface.h"
-#include "acorescriptinterface.h"
-#include "amathscriptinterface.h"
+#include "acore_si.h"
+#include "amath_si.h"
 #include "ascriptinterfacefactory.h"
-#include "ainterfacetomultithread.h"
+#include "athreads_si.h"
 
 #include <QScriptEngine>
 #include <QDebug>
@@ -38,6 +38,39 @@ AJavaScriptManager::~AJavaScriptManager()
     }
     ThreadMessangerDialogs.clear();
 #endif
+}
+
+void AJavaScriptManager::addQVariantToString(const QVariant & var, QString & string)
+{
+    switch (var.type())
+    {
+    case QVariant::Map:
+      {
+        string += '{';
+        const QMap<QString, QVariant> map = var.toMap();
+        for (const QString & k : map.keys())
+        {
+            string += QString("\"%1\":").arg(k);
+            addQVariantToString(map.value(k), string);
+            string += ", ";
+        }
+        if (string.endsWith(", ")) string.chop(2);
+        string += '}';
+        break;
+      }
+    case QVariant::List:
+        string += '[';
+        for (const QVariant & v : var.toList())
+        {
+            addQVariantToString(v, string);
+            string += ", ";
+        }
+        if (string.endsWith(", ")) string.chop(2);
+        string += ']';
+        break;
+    default:
+        string += var.toString();// implicit convertion to string
+    }
 }
 
 QString AJavaScriptManager::Evaluate(const QString& Script)
@@ -71,7 +104,14 @@ QString AJavaScriptManager::Evaluate(const QString& Script)
     timerEvalTookMs = timer->elapsed();
     delete timer; timer = 0;
 
-    QString result = EvaluationResult.toString();
+    QString result;
+    if (EvaluationResult.isArray() || EvaluationResult.isObject())
+    {
+        QVariant resVar = EvaluationResult.toVariant();
+        addQVariantToString(resVar, result);
+    }
+    else result = EvaluationResult.toString();
+
     emit onFinish(result);
     return result;
 }
@@ -131,7 +171,7 @@ void AJavaScriptManager::clearUnusedMsgDialogs()
 {
     for (int i=0; i<interfaces.size(); i++)
     {
-        AInterfaceToMultiThread* t = dynamic_cast<AInterfaceToMultiThread*>(interfaces[i]);
+        AThreads_SI* t = dynamic_cast<AThreads_SI*>(interfaces[i]);
         if (t)
         {
             int numThreads = t->countAll();
@@ -222,7 +262,7 @@ void AJavaScriptManager::RegisterCoreInterfaces(bool bCore, bool bMath)
 {
     if (bCore)
     {
-        coreObj = new ACoreScriptInterface(this);
+        coreObj = new ACore_SI(this);
         QScriptValue coreVal = engine->newQObject(coreObj, QScriptEngine::QtOwnership);
         engine->globalObject().setProperty("core", coreVal);
         doRegister(coreObj, "core");
@@ -230,7 +270,7 @@ void AJavaScriptManager::RegisterCoreInterfaces(bool bCore, bool bMath)
 
     if (bMath)
     {
-        AMathScriptInterface* mathObj = new AMathScriptInterface(RandGen);
+        AMath_SI* mathObj = new AMath_SI(RandGen);
         QScriptValue mathVal = engine->newQObject(mathObj, QScriptEngine::QtOwnership);
         engine->globalObject().setProperty("math", mathVal);
         doRegister(mathObj, "math");
@@ -471,20 +511,20 @@ AJavaScriptManager *AJavaScriptManager::createNewScriptManager(int threadNumber,
             //  qDebug() << "Making available for multi-thread use: "<<io->objectName();
 
             //special for core unit
-            ACoreScriptInterface* core = dynamic_cast<ACoreScriptInterface*>(copy);
+            ACore_SI* core = dynamic_cast<ACore_SI*>(copy);
             if (core)
             {
                 //qDebug() << "--this is core";
                 core->SetScriptManager(sm);
             }
-            AInterfaceToMinimizerJavaScript* mini = dynamic_cast<AInterfaceToMinimizerJavaScript*>(copy);
+            AMini_JavaScript_SI* mini = dynamic_cast<AMini_JavaScript_SI*>(copy);
             if (mini)
             {
                 //qDebug() << "--this is mini";
                 mini->SetScriptManager(sm);
             }
 #ifdef GUI
-            AInterfaceToMessageWindow* msg = dynamic_cast<AInterfaceToMessageWindow*>(copy);
+            AMsg_SI* msg = dynamic_cast<AMsg_SI*>(copy);
             if (msg)
             {
                 //  qDebug() << "Handling messanger widget for thread#"<<threadNumber;
@@ -514,7 +554,7 @@ AJavaScriptManager *AJavaScriptManager::createNewScriptManager(int threadNumber,
             if (bAbortIsGlobal)
             {
                 AScriptInterface* base = dynamic_cast<AScriptInterface*>(copy);
-                if (base) connect(base, &AScriptInterface::AbortScriptEvaluation, coreObj, &ACoreScriptInterface::abort);
+                if (base) connect(base, &AScriptInterface::AbortScriptEvaluation, coreObj, &ACore_SI::abort);
             }
 
             sm->RegisterInterface(copy, si->objectName());
@@ -529,23 +569,23 @@ AJavaScriptManager *AJavaScriptManager::createNewScriptManager(int threadNumber,
 
 #ifdef GUI
     //connect web and msg
-    AInterfaceToWebSocket* web = 0;
-    AInterfaceToMessageWindow* msg = 0;
+    AWeb_SI* web = 0;
+    AMsg_SI* msg = 0;
     for (QObject* io : sm->interfaces)
     {
-        AInterfaceToMessageWindow* ob = dynamic_cast<AInterfaceToMessageWindow*>(io);
+        AMsg_SI* ob = dynamic_cast<AMsg_SI*>(io);
         if (ob) msg = ob;
         else
         {
-            AInterfaceToWebSocket* ob = dynamic_cast<AInterfaceToWebSocket*>(io);
+            AWeb_SI* ob = dynamic_cast<AWeb_SI*>(io);
             if (ob) web = ob;
         }
     }
 //    qDebug() << "-----------"<<msg << web;
     if (msg && web)
     {
-        QObject::connect(web, &AInterfaceToWebSocket::showTextOnMessageWindow, msg, &AInterfaceToMessageWindow::Append);
-        QObject::connect(web, &AInterfaceToWebSocket::clearTextOnMessageWindow, msg, &AInterfaceToMessageWindow::Clear);
+        QObject::connect(web, &AWeb_SI::showTextOnMessageWindow, msg, &AMsg_SI::Append);
+        QObject::connect(web, &AWeb_SI::clearTextOnMessageWindow, msg, &AMsg_SI::Clear);
     }
 #endif
 

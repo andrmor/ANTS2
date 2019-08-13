@@ -24,7 +24,8 @@
 #include "gainevaluatorwindowclass.h"
 #include "credits.h"
 #include "detectorclass.h"
-#include "simulationmanager.h"
+#include "asimulationmanager.h"
+#include "aparticlesourcesimulator.h"
 #include "areconstructionmanager.h"
 #include "apmtype.h"
 #include "globalsettingswindowclass.h"
@@ -100,8 +101,6 @@ MainWindow::~MainWindow()
 
     qDebug() << "<-Clearing containers with dynamic objects";
     clearGeoMarkers();
-    clearEnergyVector();
-    clearCustomScanNodes();
 
     qDebug() << "<-Deleting ui";
     delete ui;
@@ -147,7 +146,7 @@ void MainWindow::stopRootUpdate()
 }
 
 static bool DontAskAgainPlease = false;
-void MainWindow::ClearData()
+void MainWindow::ClearData(bool bKeepEnergyVector)
 {   
    //   qDebug() << "---Before clear";
    if (msBox) return; //not yet confirmed clear status - this was called due to focus out.
@@ -171,7 +170,7 @@ void MainWindow::ClearData()
      }
    fSimDataNotSaved = false;
 
-   clearEnergyVector();
+   if (!bKeepEnergyVector) SimulationManager->clearEnergyVector();
    EventsDataHub->clear();
    //gui updated will be automatically triggered
 }
@@ -180,11 +179,10 @@ void MainWindow::onRequestUpdateGuiForClearData()
 {
     //  qDebug() << ">>> Main window: OnClear signal received";
     clearGeoMarkers();
-    clearEnergyVector();
+    //SimulationManager->clearEnergyVector();
     ui->leoLoadedEvents->setText("");
     ui->leoTotalLoadedEvents->setText("");
     ui->lwLoadedSims->clear();
-    ui->pbGenerateLight->setEnabled(false);
     Owindow->SiPMpixels.clear();
     Owindow->RefreshData();
     WindowNavigator->ResetAllProgressBars();
@@ -194,12 +192,6 @@ void MainWindow::onRequestUpdateGuiForClearData()
     ui->lwLoadedEventsFiles->clear();
     LoadedTreeFiles.clear();
     //  qDebug()  << ">>> Main window: Clear done";
-}
-
-void MainWindow::clearEnergyVector()
-{
-    for (int i=0; i<EnergyVector.size(); i++) delete EnergyVector[i];
-    EnergyVector.clear();
 }
 
 void MainWindow::closeEvent(QCloseEvent *)
@@ -223,7 +215,22 @@ void MainWindow::closeEvent(QCloseEvent *)
        }
    */
 
-   ui->pbAddparticleToActive->setFocus(); //to finish editing whatever QLineEdit the user can be in - they call on_editing_finish
+   ui->pbShowColorCoding->setFocus(); //to finish editing whatever QLineEdit the user can be in - they call on_editing_finish
+
+   if (GraphWindow->isBasketOn())
+   {
+       bool bVis = GraphWindow->isVisible();
+       GraphWindow->showNormal();
+       GraphWindow->switchOffBasket();
+       GraphWindow->setVisible(bVis);
+   }
+
+   //if checked, save windows' status
+   if (ui->actionSave_Load_windows_status_on_Exit_Init->isChecked())
+     {
+       qDebug()<<"<Saving position/status of all windows";
+       MainWindow::on_actionSave_position_and_stratus_of_all_windows_triggered();
+     }
 
    qDebug() << "<Preparing graph window for shutdown";
    GraphWindow->close();
@@ -246,13 +253,6 @@ void MainWindow::closeEvent(QCloseEvent *)
 
    qDebug()<<"<Saving ANTS configuration";
    ELwindow->QuickSave(0);
-
-   //if checked, save windows' status
-   if (ui->actionSave_Load_windows_status_on_Exit_Init->isChecked())
-     {
-       qDebug()<<"<Saving position/status of all windows";
-       MainWindow::on_actionSave_position_and_stratus_of_all_windows_triggered();
-     }
 
    qDebug() << "<Stopping Root update timer-based cycle";
    RootUpdateTimer->stop();
@@ -289,12 +289,6 @@ void MainWindow::closeEvent(QCloseEvent *)
        qDebug() << "<-Deleting  lrf Window";
        delete lrfwindow->parent();
        lrfwindow = 0;
-   }
-   if (WindowNavigator)
-   {
-       qDebug() << "<-Deleting WindowNavigator";
-       delete WindowNavigator->parent();
-       WindowNavigator = 0;
    }
    if (GeometryWindow)
      {
@@ -363,6 +357,14 @@ void MainWindow::closeEvent(QCloseEvent *)
        RemoteWindow = 0;
    }
    //Gain evaluation window is deleted in ReconstructionWindow destructor!
+
+   // should be deleted last
+   if (WindowNavigator)
+   {
+       qDebug() << "<-Deleting WindowNavigator";
+       delete WindowNavigator->parent();
+       WindowNavigator = 0;
+   }
    qDebug() << "<MainWindow close event processing finished";
 }
 
@@ -374,7 +376,6 @@ bool MainWindow::event(QEvent *event)
      {
 //       qDebug()<<"Main window HIDE event";
        WindowNavigator->HideWindowTriggered("main");
-       //MainWindow::on_actionWindow_navigator_triggered();
        return true; //stop hadling
      }
 
@@ -397,13 +398,13 @@ bool MainWindow::event(QEvent *event)
          {
             if (this->isMinimized())
               {
+                //qDebug() << "main: minimized, so hiding all other windows";
                 WindowNavigator->TriggerHideButton();
-               // WindowNavigator->HideWindowTriggered("main");
+                //qDebug() << "main done";
               }
             else
               {
                 WindowNavigator->TriggerShowButton();
-               // WindowNavigator->ShowWindowTriggered("main");
                 if (this->isVisible()) this->activateWindow();
               }
             return true;
@@ -450,12 +451,6 @@ void MainWindow::clearGeoMarkers(int All_Rec_True)
   if (All_Rec_True == 0) GeoMarkers.clear();
 }
 
-void MainWindow::clearCustomScanNodes()
-{
-  for (int i=0; i<CustomScanNodes.size(); i++) delete CustomScanNodes[i];
-  CustomScanNodes.clear();
-}
-
 void MainWindow::ShowGeoMarkers()
 {
   if (!GeoMarkers.isEmpty())
@@ -479,11 +474,6 @@ void MainWindow::ShowGeoMarkers()
 void MainWindow::ShowGraphWindow()
 {
   GraphWindow->ShowAndFocus();  
-}
-
-void MainWindow::ShowTracks()
-{   
-  GeometryWindow->DrawTracks();
 }
 
 void MainWindow::on_pbRebuildDetector_clicked()
@@ -514,9 +504,11 @@ void MainWindow::on_pbRefreshMaterials_clicked()
     ui->cobMaterialForOverrides->clear();
     ui->cobMaterialTo->clear();
     ui->cobMaterialForWaveTests->clear();
-    int numMats = MpCollection->countMaterials();
-    for (int i=0; i<numMats; i++)
-        AddMaterialToCOBs( (*MpCollection)[i]->name );
+    const QStringList mn = MpCollection->getListOfMaterialNames();
+    ui->cobMatPM->addItems(mn);
+    ui->cobMaterialForOverrides->addItems(mn);
+    ui->cobMaterialTo->addItems(mn);
+    ui->cobMaterialForWaveTests->addItems(mn);
 
     MIwindow->UpdateActiveMaterials();
     Owindow->UpdateMaterials();
@@ -524,22 +516,13 @@ void MainWindow::on_pbRefreshMaterials_clicked()
     DoNotUpdateGeometry = tmpBool;
 
     //restore override material selection
+    int numMats = MpCollection->countMaterials();
     if (OvFrom>-1 && OvTo>-1)
         if (OvFrom<numMats && OvTo<numMats)
           {
             ui->cobMaterialForOverrides->setCurrentIndex(OvFrom);
             ui->cobMaterialTo->setCurrentIndex(OvTo);
           }
-}
-
-void MainWindow::AddMaterialToCOBs(QString s)
-{    
-    ui->cobMatPM->addItem(s);
-    ui->cobMaterialForOverrides->addItem(s);
-    ui->cobMaterialTo->addItem(s);
-    ui->cobMaterialForWaveTests->addItem(s);
-
-    MIwindow->AddMatToCobs(s);
 }
 
 void MainWindow::UpdateMaterialListEdit()
@@ -1061,27 +1044,9 @@ void MainWindow::on_cobUpperLowerPMs_currentIndexChanged(int index)
 void MainWindow::on_pbRemoveThisPMtype_clicked()
 {
     int itype = ui->sbPMtype->value();
-    int numTypes = PMs->countPMtypes();
-    //qDebug() << numTypes;
-    if (numTypes < 2)
-      {        
-        message("Cannot delete the last type", this);
-        return;
-      }
-
     const QString err = Detector->removePMtype(itype);
-    if (!err.isEmpty())
-        message(err, this);
-    else
-        ReconstructDetector();
-
-    /*
-    //tmpPMtype = PMs->getType(itype-1);
-    MainWindow::on_pbShowPMsArrayRegularData_clicked(); //refresh indication
-    ui->sbPMtype->setValue(itype-1);
-    //updating all comboboxes with PM type names
-    MainWindow::updateCOBsWithPMtypeNames();
-    */
+    if (!err.isEmpty()) message(err, this);
+    else ReconstructDetector();
 }
 
 void MainWindow::on_pbAddNewPMtype_clicked()
@@ -1148,12 +1113,6 @@ void MainWindow::on_cbLRFs_toggled(bool checked)
 {
    if (checked) ui->twOption->setTabIcon(7, Rwindow->YellowIcon);
    else         ui->twOption->setTabIcon(7, QIcon());
-
-   int i=0;
-   if (checked) i=1;
-
-   if (checked) ui->cbScanFloodAddNoise->setChecked(false);
-   ui->cbScanFloodAddNoise->setEnabled(!checked);
 }
 
 void MainWindow::on_cbAreaSensitive_toggled(bool checked)
@@ -1841,7 +1800,7 @@ void MainWindow::on_pbIndPMshowInfo_clicked()
         track->SetLineWidth(4);
         track->SetLineColor(kRed);
 
-        MainWindow::ShowTracks();
+        GeometryWindow->DrawTracks();
       }
 }
 
@@ -2225,12 +2184,8 @@ void MainWindow::on_pbIndRestoreArea_clicked()
 {
     int ipm = ui->sbIndPMnumber->value();
     QVector<QVector<double> > tmp;
-    tmp.resize(0);
-
     PMs->setArea(ipm, &tmp, 123.0, 123.0); //strange step deliberately
     ReconstructDetector(true);
-
-    MainWindow::on_pbIndPMshowInfo_clicked();
 }
 
 void MainWindow::on_pbIndShowArea_clicked()
@@ -2827,21 +2782,6 @@ void MainWindow::on_pbScanDistrDelete_clicked()
   ui->pbScanDistrShow->setEnabled(false);
   ui->pbScanDistrDelete->setEnabled(false);
   MainWindow::on_pbUpdateSimConfig_clicked();
-}
-
-void MainWindow::on_pbUpdateScanFloodTabWidget_clicked()
-{
-  MainWindow::PointSource_UpdateTabWidget();
-}
-
-void MainWindow::on_pbInitializeScanFloodNoise_clicked()
-{
-  MainWindow::PointSource_InitTabWidget();
-}
-
-void MainWindow::on_twSingleScan_currentChanged(int index)
-{  
-  ui->frLimitNodesTo->setVisible( index != 0 );
 }
 
 void MainWindow::on_cobSecScintillationGenType_currentIndexChanged(int index)
@@ -3455,7 +3395,7 @@ void MainWindow::on_pbShowRelGains_clicked()
       tmp.append( QString::number(relStr, 'g', 3) );
     }
 
-  GeometryWindow->ShowTextOnPMs(tmp, kRed);
+  GeometryWindow->ShowText(tmp, kRed);
 }
 
 void MainWindow::on_pbSaveResults_clicked()
@@ -3749,19 +3689,12 @@ void MainWindow::on_pbYellow_clicked()
      }
    else ui->twAdvSimOpt->tabBar()->setTabIcon(2, QIcon());
 
-   if (ui->cbScanFloodAddNoise->isChecked() && ui->leoScanFloodNoiseProbability->text()!="0")
+   if (ui->cobScintTypePointSource->currentIndex() != 0 )
      {
        fYellow = true;
        ui->twAdvSimOpt->tabBar()->setTabIcon(3, Rwindow->YellowIcon);
      }
    else ui->twAdvSimOpt->tabBar()->setTabIcon(3, QIcon());
-
-   if (ui->cobScintTypePointSource->currentIndex() != 0 )
-     {
-       fYellow = true;
-       ui->twAdvSimOpt->tabBar()->setTabIcon(4, Rwindow->YellowIcon);
-     }
-   else ui->twAdvSimOpt->tabBar()->setTabIcon(4, QIcon());
 
    ui->labAdvancedOn->setVisible(fYellow);
 }
@@ -3801,228 +3734,111 @@ void MainWindow::startSimulation(QJsonObject &json)
 
 void MainWindow::simulationFinished()
 {
-      //qDebug() << "---------Simulation finished. Events:"<<EventsDataHub->Events.size();
-    ui->pbStopScan->setEnabled(false);
-    ui->pbStopScan->setText("stop");
-
-    if (!SimulationManager->fSuccess)
-    {        
-        //qDebug() << "Sim manager reported fail!";
-        ui->leEventsPerSec->setText("n.a.");
-        QString report = SimulationManager->Runner->getErrorMessages();
-        if (report != "Simulation stopped by user") message(report, this);
-    }
-
-    bool showTracks = false;
-    if (SimulationManager->LastSimType == 0) //PointSources sim
-    {        
-        showTracks = SimulationManager->TrackBuildOptions.bBuildPhotonTracks;
-        clearGeoMarkers();
-        Rwindow->ShowPositions(1, true);
-
-        if (ui->twSingleScan->currentIndex() == 0 && SimulationManager->fSuccess)
-            if (EventsDataHub->Events.size() == 1) Owindow->SiPMpixels = SimulationManager->SiPMpixels;
-    }
-    if (SimulationManager->LastSimType == 1) //ParticleSources sim
+    //qDebug() << "---------Simulation finished. Events:"<<EventsDataHub->Events.size()<<"Was started from GUI:"<<fStartedFromGUI;
+    if (fStartedFromGUI)
     {
-        showTracks = SimulationManager->TrackBuildOptions.bBuildParticleTracks || SimulationManager->TrackBuildOptions.bBuildPhotonTracks;
-        clearEnergyVector();
-        EnergyVector = SimulationManager->EnergyVector;
-        SimulationManager->EnergyVector.clear(); // to avoid clearing the energy vector cells        
+        ui->pbStopScan->setEnabled(false);
+        ui->pbStopScan->setText("stop");
+
+        MIwindow->UpdateActiveMaterials(); //to update tmpMaterial
+
+        if (!SimulationManager->isSimulationSuccess())
+        {
+            //qDebug() << "Sim manager reported fail!";
+            ui->leEventsPerSec->setText("n.a.");
+            if (!SimulationManager->isSimulationAborted())
+                message(SimulationManager->getErrorString(), this);
+        }
+
+        bool showTracks = false;
+        if (SimulationManager->bPhotonSourceSim)
+        {
+            showTracks = SimulationManager->TrackBuildOptions.bBuildPhotonTracks;
+            clearGeoMarkers();
+            Rwindow->ShowPositions(1, true);
+
+            if (ui->twSingleScan->currentIndex() == 0 && SimulationManager->isSimulationSuccess())
+                if (EventsDataHub->Events.size() == 1) Owindow->SiPMpixels = SimulationManager->SiPMpixels;
+        }
+        else
+        {
+            showTracks = SimulationManager->TrackBuildOptions.bBuildParticleTracks || SimulationManager->TrackBuildOptions.bBuildPhotonTracks;
+        }
+
+        //prepare TGeoTracks
+        if (showTracks)
+        {
+            int numTracks = 0;
+            for (int iTr=0; iTr<SimulationManager->Tracks.size(); iTr++)
+            {
+                const TrackHolderClass* th = SimulationManager->Tracks.at(iTr);
+                TGeoTrack* track = new TGeoTrack(1, th->UserIndex);
+                track->SetLineColor(th->Color);
+                track->SetLineWidth(th->Width);
+                track->SetLineStyle(th->Style);
+                for (int iNode=0; iNode<th->Nodes.size(); iNode++)
+                    track->AddPoint(th->Nodes[iNode].R[0], th->Nodes[iNode].R[1], th->Nodes[iNode].R[2], th->Nodes[iNode].Time);
+                if (track->GetNpoints()>1)
+                {
+                    numTracks++;
+                    Detector->GeoManager->AddTrack(track);
+                }
+                else delete track;
+            }
+        }
+
+        //Additional GUI updates
+        if (GeometryWindow->isVisible())
+        {
+            GeometryWindow->ShowGeometry(false);
+            if (showTracks) GeometryWindow->DrawTracks();
+        }
+
+        //qDebug() << "==>After sim: OnEventsDataLoadOrClear";
+        Rwindow->OnEventsDataAdded();
+          //qDebug()  << "==>Checked the available data, default Recon data created, basic filters applied";
+        //Owindow->SetCurrentEvent(0);
+        WindowNavigator->BusyOff(false);
+
+        //warning for G4ants sim
+        if (ui->twSourcePhotonsParticles->currentIndex()==1 && ui->cbGeant4ParticleTracking->isChecked() && SimulationManager->isSimulationSuccess())
+        {
+            QString s;
+            double totalEdepo = SimulationManager->DepoByRegistered + SimulationManager->DepoByNotRegistered;
+            if (totalEdepo == 0)
+                s += "Total energy deposition in sensitive volumes is zero!\n\n";
+
+            if (SimulationManager->DepoByNotRegistered > 0)
+            {
+                double limit = 0.0001;
+                if (SimulationManager->DepoByNotRegistered > limit * totalEdepo)
+                {
+                    s += QString("Deposition by particles not registered in ANTS2 configuration\nconstitutes ");
+                    s += QString::number(100.0 * SimulationManager->DepoByNotRegistered / totalEdepo, 'g', 4) + " %";
+                    s += "\nof the total energy deposition in the sensitive volume(s).\n\n";
+                    s += "The following not registered particles were seen during Geant4 simulation:\n";
+                    for (const QString & pn : SimulationManager->SeenNonRegisteredParticles)
+                        s += pn + ", ";
+                    s.chop(2);
+                    qDebug() << SimulationManager->SeenNonRegisteredParticles;
+                    message(s, this);
+                }
+            }
+        }
     }
 
-    //tracks
-    if (showTracks)
-      {
-        TmpHub->ClearTracks();
-        TmpHub->TrackInfo = SimulationManager->Tracks; //transferred track info to the tmp object,can be accessed by script
-        SimulationManager->Tracks.clear(); //to avoid delete content
-
-        int numTracks = 0;
-        for (int iTr=0; iTr<TmpHub->TrackInfo.size() /* && numTracks<GlobSet.MaxNumberOfTracks */; iTr++)
-          {
-            const TrackHolderClass* th = TmpHub->TrackInfo.at(iTr);
-            TGeoTrack* track = new TGeoTrack(1, th->UserIndex);
-            track->SetLineColor(th->Color);
-            track->SetLineWidth(th->Width);
-            track->SetLineStyle(th->Style);
-            for (int iNode=0; iNode<th->Nodes.size(); iNode++)
-                track->AddPoint(th->Nodes[iNode].R[0], th->Nodes[iNode].R[1], th->Nodes[iNode].R[2], th->Nodes[iNode].Time);
-            if (track->GetNpoints()>1)
-            {
-                numTracks++;
-                Detector->GeoManager->AddTrack(track);
-            }
-            else delete track;
-          }
-      }
-
-    //Additional GUI updates
-    if (GeometryWindow->isVisible())
-      {
-        GeometryWindow->ShowGeometry(false);
-        if (showTracks) GeometryWindow->DrawTracks();
-      }
-      //qDebug() << "==>After sim: OnEventsDataLoadOrClear";
-    Rwindow->OnEventsDataAdded();
-      //qDebug()  << "==>Checked the available data, default Recon data created, basic filters applied";
-    Owindow->SetCurrentEvent(0);
-
-    if (fStartedFromGUI) WindowNavigator->BusyOff(false);
     fStartedFromGUI = false;
     fSimDataNotSaved = true;
-
     //qDebug() << "---Procedure triggered by SimulationFinished signal has ended successfully---";
 }
 
-ParticleSourceSimulator *MainWindow::setupParticleTestSimulation(GeneralSimSettings &simSettings) //Single thread only!
-{
-    //============ prepare config ============
-    QJsonObject json;
-    SimGeneralConfigToJson(json);
-    SimParticleSourcesConfigToJson(json);    
-    json["Mode"] = "StackSim";
-    json["DoGuiUpdate"] = true;
-    //SaveJsonToFile(json, "ThisSimConfig.json");
-    simSettings.readFromJson(json);
-    simSettings.fLogsStat = true; //force to report logs
-
-    //============  prepare  gui  ============
-    WindowNavigator->BusyOn(); //go busy mode, most of gui controls disabled
-    qApp->processEvents();
-
-    //========== prepare simulator ==========
-    ParticleSourceSimulator *pss = new ParticleSourceSimulator(Detector, 0);
-
-    pss->setSimSettings(&simSettings);
-    //pss->setupStandalone(json);
-    pss->setup(json);
-    pss->initSimStat();
-    pss->setRngSeed(Detector->RandGen->Rndm()*1000000);
-    return pss;
-}
-
-void MainWindow::on_pbTrackStack_clicked()
-{
-    fSimDataNotSaved = false; // to disable the warning
-    MainWindow::ClearData();
-    GeneralSimSettings simSettings;
-    ParticleSourceSimulator *pss = setupParticleTestSimulation(simSettings);
-    EventsDataHub->SimStat->initialize(Detector->Sandwich->MonitorsRecords);
-
-    //============ run stack =========
-    bool fOK = pss->standaloneTrackStack(&ParticleStack);
-      //qDebug() << "Standalone tracker reported:"<<fOK<<pss->getErrorString();
-
-    //============   gui update   ============
-    WindowNavigator->BusyOff();
-    ui->pbStopScan->setEnabled(false);
-    if (!fOK) message(pss->getErrorString(), this);
-    else
-    {
-        //--- Retrieve results ---
-        clearEnergyVector(); // just in case clear procedures change
-        EnergyVector = pss->getEnergyVector();
-        pss->ClearEnergyVectorButKeepObjects(); //disconnected this copy so delete of the simulator does not kill the vector
-          //qDebug() << "-------------En vector size:"<<EnergyVector.size();
-
-        //track handling
-        //if (ui->cbBuildParticleTrackstester->isChecked())
-        if (SimulationManager->TrackBuildOptions.bBuildParticleTracks)
-          {
-            //int numTracks = 0;
-              //qDebug() << "Tracks collected:"<<pss->tracks.size();
-            for (int iTr=0; iTr<pss->tracks.size(); iTr++)
-            {
-                const TrackHolderClass* th = pss->tracks[iTr];
-
-                //if (numTracks<GlobSet.MaxNumberOfTracks)
-                //{
-                    TGeoTrack* track = new TGeoTrack(1, th->UserIndex);
-                    track->SetLineColor(th->Color);
-                    track->SetLineWidth(th->Width);
-                    track->SetLineStyle(th->Style);
-                    for (int iNode=0; iNode<th->Nodes.size(); iNode++)
-                      track->AddPoint(th->Nodes[iNode].R[0], th->Nodes[iNode].R[1], th->Nodes[iNode].R[2], th->Nodes[iNode].Time);
-
-                    if (track->GetNpoints()>1)
-                      {
-                        //numTracks++;
-                        Detector->GeoManager->AddTrack(track);
-                      }
-                    else delete track;
-                //}
-                delete th;
-            }
-            pss->tracks.clear();
-          }
-        //if tracks are visible, show them
-        if (GeometryWindow->isVisible())
-        {
-            GeometryWindow->ShowGeometry();
-            //if (ui->cbBuildParticleTrackstester->isChecked()) MainWindow::ShowTracks();
-            if (SimulationManager->TrackBuildOptions.bBuildParticleTracks) MainWindow::ShowTracks();
-        }
-        //report data saved in history
-        pss->appendToDataHub(EventsDataHub);
-          //qDebug() << "Event history imported";
-
-        ui->pbGenerateLight->setEnabled(true);
-        Owindow->SetCurrentEvent(0);
-    }
-    delete pss;
-}
-
-void MainWindow::on_pbGenerateLight_clicked()
-{
-    fSimDataNotSaved = false; // to disable the warning
-    MainWindow::ClearData();
-    GeneralSimSettings simSettings;
-    ParticleSourceSimulator *pss = setupParticleTestSimulation(simSettings);
-    Detector->PMs->configure(&simSettings); //also configures accelerators!!!
-    bool fOK = pss->standaloneGenerateLight(&EnergyVector);
-
-    //============   gui update   ============
-    WindowNavigator->BusyOff();
-    ui->pbStopScan->setEnabled(false);
-    if (!fOK) message(pss->getErrorString(), this);
-    else
-    {
-        //---- Retrieve results ----
-        //EnergyVector = SPaS.getEnergyVector();  no need for energyVector in this case!
-        //EventHistory = SPaS.getEventHistory();
-        //EventsDataHub->GeneratedPhotonsHistory = SPaS.getGeneratedPhotonsHistory();
-        //GenHistory is in EventsDataHub
-
-        if (GeometryWindow->isVisible())
-        {
-            GeometryWindow->ShowGeometry();
-            //if (ui->cbBuildParticleTrackstester->isChecked()) MainWindow::ShowTracks();
-            if (SimulationManager->TrackBuildOptions.bBuildParticleTracks) MainWindow::ShowTracks();
-        }
-        pss->appendToDataHub(EventsDataHub);
-        //Owindow->SetCurrentEvent(0);
-        //Owindow->ShowGeneratedPhotonsLog();
-        Rwindow->OnEventsDataAdded();
-    }
-    delete pss;
-}
-
-void MainWindow::RefreshPhotSimOnTimer(int Progress, double msPerEv)
+void MainWindow::RefreshOnProgressReport(int Progress, double msPerEv)
 {
   ui->prScan->setValue(Progress);
   WindowNavigator->setProgress(Progress);
   ui->leEventsPerSec->setText( (msPerEv==0) ? "n.a." : QString::number(msPerEv, 'g', 4));
 
   qApp->processEvents();
-  /*
-  if (ui->pbStopScan->isChecked())
-    {
-      //emit StopRequested();
-      SimulationManager->StopSimulation();
-      return;
-    }
-  */
 }
 
 void MainWindow::on_pbGDML_clicked()
@@ -4096,67 +3912,6 @@ void MainWindow::on_pbLoadPMtype_clicked()
   MainWindow::on_pbRefreshPMproperties_clicked(); //to refresh indication (also buttons enable/disable)
 
   MainWindow::ReconstructDetector(); //rebuild detector
-}
-
-void MainWindow::on_pbLoadNodes_clicked()
-{
-  QFileDialog fileDialog;
-  QString fileName = fileDialog.getOpenFileName(this, "Load custom nodes", GlobSet.LastOpenDir, "Text files (*.txt);; All files (*.*)");
-  if (fileName.isEmpty()) return;
-  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-
-  QVector<double> x, y, z;
-  int err = LoadDoubleVectorsFromFile(fileName, &x, &y, &z);
-  if (err == 0)
-    {
-      clearCustomScanNodes();
-      for (int i=0; i<x.size(); i++)
-          CustomScanNodes.append( new QVector3D(x[i], y[i], z[i]));
-      on_pbUpdateSimConfig_clicked();
-    }
-  UpdateCustomScanNodesIndication();
-}
-
-void MainWindow::on_pbShowNodes_clicked()
-{
-   Detector->GeoManager->ClearTracks();  
-   clearGeoMarkers();
-   GeoMarkerClass* marks = new GeoMarkerClass("Nodes", 6, 2, kBlack);
-   for (int i=0; i<CustomScanNodes.size(); i++)
-     marks->SetNextPoint(CustomScanNodes[i]->x(), CustomScanNodes[i]->y(), CustomScanNodes[i]->z());
-   GeoMarkers.append(marks);
-   GeometryWindow->ShowGeometry();
-}
-
-void MainWindow::on_pbRunNodeScript_clicked()
-{
-  extractGeometryOfLocalScriptWindow();
-  delete GenScriptWindow; GenScriptWindow = 0;
-
-  AJavaScriptManager* jsm = new AJavaScriptManager(Detector->RandGen);
-  GenScriptWindow = new AScriptWindow(jsm, true, this);
-  GenScriptWindow->ConfigureForLightMode(&NodesScript, "Custom nodes", "clear();\nfor (var i=0; i<5; i++)\n  node(i*10, (i-2)*20, 0)\n\nnode(40, -20, 0)");
-
-  NodesScriptInterface = new InterfaceToNodesScript(CustomScanNodes);
-  GenScriptWindow->RegisterInterfaceAsGlobal(NodesScriptInterface);
-  GenScriptWindow->RegisterCoreInterfaces();
-  connect(GenScriptWindow, &AScriptWindow::success, this, &MainWindow::NodesScriptSuccess);
-
-  recallGeometryOfLocalScriptWindow();
-  GenScriptWindow->UpdateGui();
-  GenScriptWindow->show();
-}
-
-void MainWindow::NodesScriptSuccess()
-{
-  on_pbUpdateSimConfig_clicked();
-  UpdateCustomScanNodesIndication();
-}
-
-void MainWindow::UpdateCustomScanNodesIndication()
-{
-  ui->lScriptNodes->setText( QString::number(CustomScanNodes.size()) );
-  on_pbShowNodes_clicked();
 }
 
 void MainWindow::on_actionOpen_settings_triggered()
@@ -4441,14 +4196,6 @@ void MainWindow::on_pbStopLoad_clicked()
     emit RequestStopLoad();
 }
 
-void MainWindow::on_pbConfigureNumberOfThreads_clicked()
-{
-    GlobSetWindow->show();
-    GlobSetWindow->raise();
-    GlobSetWindow->activateWindow();
-    GlobSetWindow->SetTab(1);
-}
-
 void MainWindow::on_cobFixedDirOrCone_currentIndexChanged(int index)
 {
     ui->fConeForPhotonGen->setEnabled(index==1);
@@ -4642,20 +4389,12 @@ void MainWindow::on_bpResults_clicked()
    Owindow->show();
    Owindow->raise();
    Owindow->activateWindow();
-   Owindow->SetTab(1);
+   //Owindow->SetTab(1);
 }
 
 void MainWindow::ShowGeometrySlot()
 {
     GeometryWindow->ShowGeometry(false, false);
-}
-
-void MainWindow::on_bpResults_2_clicked()
-{
-  Owindow->show();
-  Owindow->raise();
-  Owindow->activateWindow();
-  Owindow->SetTab(3);
 }
 
 void MainWindow::on_cobPartPerEvent_currentIndexChanged(int index)
@@ -4863,11 +4602,6 @@ void MainWindow::on_pbOpenTrackProperties_Phot_customContextMenuRequested(const 
     on_pbUpdateSimConfig_clicked();
 }
 
-void MainWindow::on_pbTrackOptionsStack_clicked()
-{
-    on_pbOpenTrackProperties_Phot_clicked();
-}
-
 void MainWindow::on_pbQEacceleratorWarning_clicked()
 {
     QString s = "Activation of this option allows to speed up simulations\n"
@@ -5002,4 +4736,176 @@ void MainWindow::on_pbPMtypeHelp_clicked()
                 "   volume to the geometry and the PM object should\n"
                 "   represent the photocathode.";
     message(s, this);
+}
+
+void MainWindow::on_pnShowHideAdvanced_Particle_toggled(bool checked)
+{
+    if (checked) ui->swAdvancedSim_Particle->setCurrentIndex(1);
+            else ui->swAdvancedSim_Particle->setCurrentIndex(0);
+}
+
+void MainWindow::on_pbGoToConfigueG4ants_clicked()
+{
+    GlobSetWindow->showNormal();
+    GlobSetWindow->SetTab(6);
+}
+
+void MainWindow::on_cbGeant4ParticleTracking_toggled(bool checked)
+{
+    ui->swNormalOrGeant4->setCurrentIndex((int)checked);
+}
+
+#include "ageant4configdialog.h"
+void MainWindow::on_pbG4Settings_clicked()
+{
+    AGeant4ConfigDialog D(G4SimSet, this);
+    int res = D.exec();
+    if (res == 1)
+    {
+        //some watchdogs here?
+
+        //update sim setgtings
+        on_pbUpdateSimConfig_clicked();
+    }
+}
+
+void MainWindow::on_pbSetAllInherited_clicked()
+{
+    PMs->resetOverrides();
+    ReconstructDetector(true);
+}
+
+#include "afileparticlegenerator.h"
+void MainWindow::on_pbLoadExampleFileFromFileGen_clicked()
+{
+    QString epff = GlobSet.ExamplesDir + "/ExampleParticlesFromFile.dat";
+    SimulationManager->FileParticleGenerator->SetFileName(epff);
+    updateFileParticleGeneratorGui();
+}
+
+void MainWindow::on_pbNodesFromFileHelp_clicked()
+{
+    QString s;
+    s = "Each line in the file represents a single node.\n"
+        "The format is:\n\n"
+        "X Y Z [Time] [PhotNumberOverride] [*]\n\n"
+        "Arguments:\n\n"
+        "XYZ - position of the node\n\n"
+        "Optional arguments:\n\n"
+        "Time - photon generation time (0 is default)\n\n"
+        "PhotNumberOverride - the provided integer value\n"
+        "   overrides the standard number of photons configured for nodes.\n\n"
+        "* - if present, the next node will be added to the same event.\n"
+        "   '*' should be in the last position of the line.";
+    message(s, this);
+}
+
+void MainWindow::on_pbNodesFromFileChange_clicked()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, "Select a file with nodes data", GlobSet.LastOpenDir, "Data files (*.dat *.txt);;All files (*)");
+    if (fileName.isEmpty()) return;
+    GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+    ui->leNodesFromFile->setText(fileName);
+    on_pbUpdateSimConfig_clicked();
+}
+
+#include "anoderecord.h"
+void MainWindow::on_pbNodesFromFileCheckShow_clicked()
+{
+    QString fileName = ui->leNodesFromFile->text();
+    QString err = SimulationManager->loadNodesFromFile(fileName);
+
+    int numTop = 0;
+    int numTotal = 0;
+    if (!err.isEmpty()) message(err, this);
+    else
+    {
+        Detector->GeoManager->ClearTracks();
+        clearGeoMarkers();
+        GeoMarkerClass* marks = new GeoMarkerClass("Nodes", 6, 2, kBlack);
+        for (ANodeRecord * topNode : SimulationManager->Nodes)
+        {
+            numTop++;
+            ANodeRecord * node = topNode;
+            while (node)
+            {
+                numTotal++;
+                if (numTotal < 10000) marks->SetNextPoint(node->getX(), node->getY(), node->getZ());
+                node = node->getLinkedNode();
+            }
+        }
+        GeoMarkers.append(marks);
+        GeometryWindow->ShowGeometry();
+    }
+
+    message(QString("The file containes %1 top nodes\n(%2 nodes counting subnodes)").arg(numTop).arg(numTotal), this);
+}
+
+#include "aisotopeabundancehandler.h"
+void MainWindow::on_pbConvertToIon_clicked()
+{
+    int iPart = ui->lwParticles->currentRow();
+    if (iPart < 0)
+    {
+        message("Select a particle to convert", this);
+        return;
+    }
+
+    QString newName = ui->cobAddIon->currentText();
+    if (newName.isEmpty())
+    {
+        message("Select symbol", this);
+        return;
+    }
+    QString massStr = ui->leiAddIonMass->text();
+    int mass = massStr.toInt();
+    if (massStr.isEmpty() || mass == 0)
+    {
+        message("Enter mass of the ion", this);
+        return;
+    }
+
+    int Z = GlobSet.getIsotopeAbundanceHandler().getZ(newName);
+    if (Z == 0)
+    {
+        message(QString("Symbol '%1' is not a valid element").arg(newName), this);
+        return;
+    }
+
+    newName += massStr;
+    int Id = MpCollection->getParticleId(newName);
+    if (Id != -1)
+    {
+        message( QString("Particle name %1 already defined").arg(newName), this);
+        return;
+    }
+
+    QString s = QString("Convert %1 to ion %2?\nWarning! This operation cannot be undone.\nBetter save the current config first.").arg(MpCollection->getParticleName(iPart)).arg(newName);
+    if (!confirm(s, this)) return;
+
+    AParticle p(newName, AParticle::_charged_, Z, mass);
+    MpCollection->ReplaceParticle(iPart, p);
+    onRequestDetectorGuiUpdate();
+    ui->lwParticles->setCurrentRow(iPart);
+}
+
+void MainWindow::on_actionExit_triggered()
+{
+    close();
+}
+
+#include "alogconfigdialog.h"
+void MainWindow::on_pbOpenLogOptions_clicked()
+{
+    ALogConfigDialog* d = new ALogConfigDialog(SimulationManager->LogsStatOptions, this);
+    d->exec();
+    delete d;
+    on_pbUpdateSimConfig_clicked();
+}
+
+void MainWindow::on_pbOpenLogOptions2_clicked()
+{
+    ALogConfigDialog* d = new ALogConfigDialog(SimulationManager->LogsStatOptions, this);
+    d->exec();
+    on_pbUpdateSimConfig_clicked();
 }

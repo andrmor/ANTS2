@@ -5,7 +5,7 @@
 
 class MainWindow;
 class ANetworkModule;
-class AInterfaceToGStyleScript;
+class AGStyle_SI;
 
 namespace Ui {
   class GlobalSettingsWindowClass;
@@ -22,7 +22,10 @@ public:
   void updateGUI();
   void SetTab(int iTab);
 
-  AInterfaceToGStyleScript* GStyleInterface = 0;  // if created -> owned by the script manager
+  AGStyle_SI* GStyleInterface = 0;  // if created -> owned by the script manager
+
+protected:
+    bool event(QEvent *event);
 
 public slots:
   void updateNetGui();
@@ -106,6 +109,14 @@ private slots:
   void on_cbSaveSimAsText_IncludeNumPhotons_clicked(bool checked);
 
   void on_cbSaveSimAsText_IncludePositions_clicked(bool checked);
+
+  void on_pbGeant4exec_clicked();
+
+  void on_leGeant4exec_editingFinished();
+
+  void on_pbGeant4ExchangeFolder_clicked();
+
+  void on_leGeant4ExchangeFolder_editingFinished();
 
 private:
   Ui::GlobalSettingsWindowClass *ui;

@@ -182,6 +182,18 @@ void AGeoObject::makeItWorld()
     Container = 0;
 }
 
+bool AGeoObject::isWorld() const
+{
+    return ObjectType->isWorld();
+}
+
+int AGeoObject::getMaterial() const
+{
+    if (ObjectType->isHandlingArray() || ObjectType->isHandlingSet())
+        return Container->getMaterial();
+    return Material;
+}
+
 void AGeoObject::writeToJson(QJsonObject &json)
 {
   json["Name"] = Name;
@@ -538,7 +550,7 @@ bool AGeoObject::isContainsLocked()
   return false;
 }
 
-bool AGeoObject::isDisabled()
+bool AGeoObject::isDisabled() const
 {
     if (ObjectType->isWorld()) return false;
 
@@ -892,7 +904,7 @@ void AGeoObject::updateWorldSize(double &XYm, double &Zm)
         HostedObjects[i]->updateWorldSize(XYm, Zm);
 }
 
-bool AGeoObject::isMaterialInUse(int imat)
+bool AGeoObject::isMaterialInUse(int imat) const
 {
     //qDebug() << Name << "--->"<<Material;
 
@@ -909,6 +921,23 @@ bool AGeoObject::isMaterialInUse(int imat)
 
     for (int i=0; i<HostedObjects.size(); i++)
         if (HostedObjects[i]->isMaterialInUse(imat)) return true;
+
+    return false;
+}
+
+bool AGeoObject::isMaterialInActiveUse(int imat) const
+{
+    if (!fActive) return false;
+
+    if (ObjectType->isMonitor()) return false; //monitors are always made of Container's material and cannot host objects
+    if (Material == imat)
+    {
+        if ( !ObjectType->isGridElement() && !ObjectType->isCompositeContainer() )
+            return true;
+    }
+
+    for (int i=0; i<HostedObjects.size(); i++)
+        if (HostedObjects[i]->isMaterialInActiveUse(imat)) return true;
 
     return false;
 }
@@ -1219,6 +1248,11 @@ double AGeoBox::maxSize()
     double m = std::max(dx, dy);
     m = std::max(m, dz);
     return sqrt(3.0)*m;
+}
+
+double AGeoBox::minSize()
+{
+    return std::min(dx, dy);
 }
 
 TGeoShape *AGeoBox::createGeoShape(const QString shapeName)
@@ -1772,6 +1806,11 @@ double AGeoTube::maxSize()
     return sqrt(3.0)*m;
 }
 
+double AGeoTube::minSize()
+{
+    return rmax;
+}
+
 void AGeoTube::writeToJson(QJsonObject &json)
 {
   json["rmin"] = rmin;
@@ -2050,10 +2089,9 @@ const QString AGeoPgon::getGenerationString() const
                 QString::number(dphi) + ", "+
                 QString::number(nedges);
 
-  for (APolyCGsection s : Sections)
-                str += ", " + s.toString();
+  for (const APolyCGsection& s : Sections)  str += ", " + s.toString();
 
-                str +=" )";
+  str +=" )";
   return str;
 }
 
@@ -2803,10 +2841,9 @@ const QString AGeoPcon::getGenerationString() const
                 QString::number(phi)+", "+
                 QString::number(dphi);
 
-  for (APolyCGsection s : Sections)
-                str += ", " + s.toString();
+  for (const APolyCGsection& s : Sections) str += ", " + s.toString();
 
-                str +=" )";
+  str +=" )";
   return str;
 }
 
@@ -2903,7 +2940,7 @@ bool APolyCGsection::fromString(QString s)
   return true;
 }
 
-QString APolyCGsection::toString() const
+const QString APolyCGsection::toString() const
 {
   return QString("{ ") +
          QString::number(z) + " : " +

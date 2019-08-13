@@ -40,7 +40,7 @@
 #include "TGraph2D.h"
 
 LRFwindow::LRFwindow(QWidget *parent, MainWindow *mw, EventsDataClass *eventsDataHub) :
-  QMainWindow(parent),
+  AGuiWindow(parent),
   ui(new Ui::LRFwindow)
 {
   MW = mw;
@@ -57,6 +57,7 @@ LRFwindow::LRFwindow(QWidget *parent, MainWindow *mw, EventsDataClass *eventsDat
 
   Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
   windowFlags |= Qt::WindowCloseButtonHint;
+  windowFlags |= Qt::Tool;
   this->setWindowFlags( windowFlags );
 
   StopSignal = false;
@@ -143,16 +144,6 @@ void LRFwindow::on_pbStopLRFmake_clicked()
   StopSignal = true;
   ui->pbStopLRFmake->setText("stopping...");
   SensLRF->requestStop();
-}
-
-bool LRFwindow::event(QEvent *event)
-{
-  if (!MW->WindowNavigator) return QMainWindow::event(event);
-
-  if (event->type() == QEvent::Hide) MW->WindowNavigator->HideWindowTriggered("lrf");
-  if (event->type() == QEvent::Show) MW->WindowNavigator->ShowWindowTriggered("lrf");
-
-  return QMainWindow::event(event);
 }
 
 void LRFwindow::on_pbUpdateGUI_clicked()
@@ -1410,7 +1401,7 @@ void LRFwindow::on_pbShowSensorGroups_clicked()
   MW->clearGeoMarkers();
   MW->GeometryWindow->on_pbTop_clicked();
   MW->GeometryWindow->ShowGeometry();
-  MW->GeometryWindow->ShowTextOnPMs(tmp, kBlue);
+  MW->GeometryWindow->ShowText(tmp, kBlue);
 }
 
 void LRFwindow::on_pbShowSensorGains_clicked()
@@ -1426,7 +1417,7 @@ void LRFwindow::on_pbShowSensorGains_clicked()
     MW->clearGeoMarkers();
     MW->GeometryWindow->on_pbTop_clicked();
     MW->GeometryWindow->ShowGeometry();
-    MW->GeometryWindow->ShowTextOnPMs(tmp, kBlue);
+    MW->GeometryWindow->ShowText(tmp, kBlue);
 }
 
 void LRFwindow::on_led_compression_k_editingFinished()
@@ -1519,7 +1510,7 @@ void LRFwindow::on_actionPM_groups_triggered()
       for(unsigned int j = 0; j < sensors->size(); j++)
         tmp[(*sensors)[j].GetIndex()].append(QString::number(igrp,'g', 4));
   }
-  MW->GeometryWindow->ShowTextOnPMs(tmp, kBlue);
+  MW->GeometryWindow->ShowText(tmp, kBlue);
 }
 
 void LRFwindow::on_actionRelative_gain_triggered()
@@ -1529,7 +1520,7 @@ void LRFwindow::on_actionRelative_gain_triggered()
   for (int i=0; i<PMs->count(); i++)
       tmp.append(QString::number(SensLRF->getSensor(i)->GetGain(),'g', 4));
 
-  MW->GeometryWindow->ShowTextOnPMs(tmp, kBlue);
+  MW->GeometryWindow->ShowText(tmp, kBlue);
 }
 
 void LRFwindow::on_actionX_shift_triggered()
@@ -1559,7 +1550,7 @@ void LRFwindow::ShowTransform(int type)
         tmp.append(QString::number(t[type%3],'g', 4).append(flip ? "F" : ""));
     }
 
-    MW->GeometryWindow->ShowTextOnPMs(tmp, kBlue);
+    MW->GeometryWindow->ShowText(tmp, kBlue);
 }
 
 void LRFwindow::on_pbLRFexplorer_clicked()

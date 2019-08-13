@@ -19,7 +19,9 @@ public:
     //particle specific
     int    ParticleIndex = 0;
     bool   bPrimary = true;
-    bool   bSecondary = false;
+    bool   bSecondary = true;
+    bool   bDirect = true;
+    bool   bIndirect = true;
 
     //histogram properties
     int    xbins = 100;

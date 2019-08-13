@@ -5,6 +5,7 @@
 
 #include <QString>
 #include <QVariant>
+#include <QVariantList>
 
 class TmpObjHubClass;
 class TObject;
@@ -27,29 +28,49 @@ public slots:
   void           NewHist(const QString& HistName, int bins, double start, double stop);
   void           NewHist2D(const QString &HistName, int binsX, double startX, double stopX, int binsY, double startY, double stopY);
 
+  void           SetXCustomLabels(const QString &HistName, QVariantList Labels);
+
   void           SetTitle(const QString& HistName, const QString& Title);
   void           SetTitles(const QString& HistName, QString X_Title, QString Y_Title, QString Z_Title = "");
   void           SetLineProperties(const QString& HistName, int LineColor, int LineStyle, int LineWidth);
   void           SetMarkerProperties(const QString& HistName, int MarkerColor, int MarkerStyle, double MarkerSize);
+  void           SetFillColor(const QString& HistName, int Color);
+  void           SetMaximum(const QString& HistName, double max);
+  void           SetMinimum(const QString& HistName, double min);
+  void           SetXDivisions(const QString& HistName, int primary, int secondary, int tertiary, bool canOptimize);
+  void           SetYDivisions(const QString& HistName, int primary, int secondary, int tertiary, bool canOptimize);
+  void           SetXLabelProperties(const QString& HistName, double size, double offset);
+  void           SetYLabelProperties(const QString& HistName, double size, double offset);
 
   void           Fill(const QString& HistName, double val, double weight);
   void           Fill2D(const QString& HistName, double x, double y, double weight);
 
-  void           FillArr(const QString& HistName, const QVariant Array);
+  void           FillArr(const QString& HistName, const QVariant XY_Array);
+  void           FillArr(const QString& HistName, const QVariantList X_Array, const QVariantList Y_Array);
   void           Fill2DArr(const QString& HistName, const QVariant Array);
 
   void           Divide(const QString& HistName, const QString& HistToDivideWith);
 
   void           Draw(const QString& HistName, const QString options = "");
 
+  QVariantList   GetContent(const QString& HistName);
+  double         GetUnderflowBin(const QString& HistName);
+  double         GetOverflowBin(const QString& HistName);
+
   void           Smooth(const QString& HistName, int times);
+  void           ApplyMedianFilter(const QString& HistName, int span);
   const QVariant FitGauss(const QString& HistName, const QString options = "");
   const QVariant FitGaussWithInit(const QString& HistName, const QVariant InitialParValues, const QString options = "");
   const QVariant FindPeaks(const QString& HistName, double sigma, double threshold);
 
+  int            GetNumberOfEntries(const QString& HistName);
+  void           SetNumberOfEntries(const QString& HistName, int numEntries);
   double         GetIntegral(const QString& HistName, bool MultiplyByBinWidth = false);
   double         GetMaximum(const QString& HistName);
   void           Scale(const QString& HistName, double ScaleIntegralTo, bool DividedByBinWidth = false);
+
+  void           Save(const QString& HistName, const QString &fileName);
+  void           Load(const QString& HistName, const QString &fileName, const QString histNameInFile = "");
 
   bool           Delete(const QString& HistName);
   void           DeleteAllHist();

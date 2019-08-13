@@ -17,14 +17,16 @@
 #include <QDateTime>
 
 ExamplesWindow::ExamplesWindow(QWidget *parent, MainWindow *mw) :
-  QMainWindow(parent),
+  AGuiWindow(parent),
   ui(new Ui::ExamplesWindow)
 {  
   MW = mw;
   ui->setupUi(this);
-  this->setFixedSize(this->size());
+  //this->setFixedSize(this->size());
 
   Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
+  windowFlags |= Qt::Tool;
+  windowFlags |= Qt::WindowStaysOnTopHint;
   windowFlags |= Qt::WindowCloseButtonHint;
   this->setWindowFlags( windowFlags );
 
@@ -76,22 +78,6 @@ void ExamplesWindow::SaveConfig(QString fileName, bool DetConstructor, bool SimS
 void ExamplesWindow::on_cbDoNotShowExamplesOnStart_toggled(bool checked)
 {
   MW->GlobSet.ShowExamplesOnStart = !checked;
-}
-
-bool ExamplesWindow::event(QEvent *event)
-{
-  if (!MW->WindowNavigator) return QMainWindow::event(event);
-
-  if (event->type() == QEvent::Hide)
-    {
-      MW->WindowNavigator->HideWindowTriggered("examples");
-    }
-  if (event->type() == QEvent::Show)
-    {
-      MW->WindowNavigator->ShowWindowTriggered("examples");
-    }
-
-  return QMainWindow::event(event);
 }
 
 void ExamplesWindow::BuildExampleRecord()
@@ -358,21 +344,6 @@ QString ExamplesWindow::getQuickSlotMessage(int i)
     if (fi.exists())
         s = "Saved at " + fi.lastModified().toString("hh:mm:ss  on  dd MMM yyyy");
     return s;
-}
-
-void ExamplesWindow::on_pbQuickSave1_clicked()
-{
-  QuickSave(1);
-}
-
-void ExamplesWindow::on_pbQuickSave2_clicked()
-{
-  QuickSave(2);
-}
-
-void ExamplesWindow::on_pbQuickSave3_clicked()
-{
-  QuickSave(3);
 }
 
 void ExamplesWindow::QuickSave(int i)

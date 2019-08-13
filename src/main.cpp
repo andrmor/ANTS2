@@ -1,4 +1,3 @@
-//ANTS2
 #include "detectorclass.h"
 #include "eventsdataclass.h"
 #include "areconstructionmanager.h"
@@ -6,10 +5,9 @@
 #include "tmpobjhubclass.h"
 #include "aconfiguration.h"
 #include "ajavascriptmanager.h"
-#include "interfacetoglobscript.h"
-#include "ainterfacetoaddobjscript.h"
+#include "ageo_si.h"
 #include "histgraphinterfaces.h"
-#include "ainterfacetottree.h"
+#include "atree_si.h"
 #include "scriptminimizer.h"
 #include "aglobalsettings.h"
 #include "afiletools.h"
@@ -19,30 +17,34 @@
 #include "asandwich.h"
 #include "amessageoutput.h"
 #include "amessage.h"
-#include "ainterfacetodeposcript.h"
-#include "ainterfacetophotonscript.h"
-#include "ainterfacetomultithread.h"
-#include "ainterfacetowebsocket.h"
-#include "awebserverinterface.h"
-#include "aparticletrackinghistoryinterface.h"
+#include "aphoton_si.h"
+#include "athreads_si.h"
+#include "aweb_si.h"
+#include "aserver_si.h"
+#include "asim_si.h"
+#include "aconfig_si.h"
+#include "aevents_si.h"
+#include "arec_si.h"
+#include "apms_si.h"
+#include "alrf_si.h"
 
 #ifdef ANTS_FLANN
-  #include "ainterfacetoknnscript.h"
+  #include "aknn_si.h"
 #endif
 #ifdef ANTS_FANN
-  #include "ainterfacetoannscript.h"
+  #include "aann_si.h"
 #endif
 
 // SIM
 #ifdef SIM
-#include "simulationmanager.h"
+#include "asimulationmanager.h"
 #endif
 
 // GUI
 #ifdef GUI
 #include "mainwindow.h"
 #include "exampleswindow.h"
-#include "ainterfacetomessagewindow.h"
+#include "amsg_si.h"
 #endif
 
 //Qt
@@ -57,6 +59,7 @@
 #include <QtMessageHandler>
 #include <QCommandLineParser>
 #include <QHostAddress>
+#include <QTime>
 
 //Root
 #include "TApplication.h"
@@ -120,8 +123,10 @@ int main(int argc, char *argv[])
     qDebug() << "Detector created";
 
 #ifdef SIM
-    ASimulationManager SimulationManager(&EventsDataHub, &Detector);
+    ASimulationManager SimulationManager(EventsDataHub, Detector);
     Config.SetParticleSources(SimulationManager.ParticleSources);
+    QObject::connect(&EventsDataHub, &EventsDataClass::cleared, &SimulationManager, &ASimulationManager::clearTrackingHistory);
+    QObject::connect(&Detector, &DetectorClass::newGeoManager, &SimulationManager, &ASimulationManager::onNewGeoManager);
     qDebug() << "Simulation manager created";
 #endif
 
@@ -238,48 +243,44 @@ int main(int argc, char *argv[])
         AJavaScriptManager SM(Detector.RandGen);
         Network.SetScriptManager(&SM);
         SM.RegisterCoreInterfaces();
-        AInterfaceToConfig* conf = new AInterfaceToConfig(&Config);
+        AConfig_SI* conf = new AConfig_SI(&Config);
         SM.RegisterInterface(conf, "config");
-        AInterfaceToAddObjScript* geo = new AInterfaceToAddObjScript(&Detector);
+        AGeo_SI* geo = new AGeo_SI(&Detector);
         SM.RegisterInterface(geo, "geo");
-        AInterfaceToMinimizerJavaScript* mini = new AInterfaceToMinimizerJavaScript(&SM);
+        AMini_JavaScript_SI* mini = new AMini_JavaScript_SI(&SM);
         SM.RegisterInterface(mini, "mini");  //mini should be before sim to handle abort correctly
-        AInterfaceToData* dat = new AInterfaceToData(&Config, &EventsDataHub);
+        AEvents_SI* dat = new AEvents_SI(&Config, &EventsDataHub);
         SM.RegisterInterface(dat, "events");
 #ifdef SIM
-        InterfaceToSim* sim = new InterfaceToSim(&SimulationManager, &EventsDataHub, &Config, GlobSet.RecNumTreads, false);
+        ASim_SI* sim = new ASim_SI(&SimulationManager, &EventsDataHub, &Config, false);
         QObject::connect(sim, SIGNAL(requestStopSimulation()), &SimulationManager, SLOT(StopSimulation()));
         SM.RegisterInterface(sim, "sim");
 #endif
-        InterfaceToReconstructor* rec = new InterfaceToReconstructor(&ReconstructionManager, &Config, &EventsDataHub, &TmpHub, GlobSet.RecNumTreads);
+        ARec_SI* rec = new ARec_SI(&ReconstructionManager, &Config, &EventsDataHub, &TmpHub);
         QObject::connect(rec, SIGNAL(RequestStopReconstruction()), &ReconstructionManager, SLOT(requestStop()));
         SM.RegisterInterface(rec, "rec");
-        AInterfaceToLRF* lrf = new AInterfaceToLRF(&Config, &EventsDataHub);
+        ALrf_SI* lrf = new ALrf_SI(&Config, &EventsDataHub);
         SM.RegisterInterface(lrf, "lrf");
-        ALrfScriptInterface* newLrf = new ALrfScriptInterface(&Detector, &EventsDataHub);
+        ALrfRaim_SI* newLrf = new ALrfRaim_SI(&Detector, &EventsDataHub);
         SM.RegisterInterface(newLrf, "newLrf");
-        AInterfaceToPMs* pmS = new AInterfaceToPMs(&Config);
+        APms_SI* pmS = new APms_SI(&Config);
         SM.RegisterInterface(pmS, "pms");
         AInterfaceToGraph* graph = new AInterfaceToGraph(&TmpHub);
         SM.RegisterInterface(graph, "graph");
         AInterfaceToHist* hist = new AInterfaceToHist(&TmpHub);
         SM.RegisterInterface(hist, "hist");
-        AInterfaceToTTree* tree = new AInterfaceToTTree(&TmpHub);
+        ATree_SI* tree = new ATree_SI(&TmpHub);
         SM.RegisterInterface(tree, "tree");
-        AInterfaceToPhotonScript* photon = new AInterfaceToPhotonScript(&Config, &EventsDataHub);
+        APhoton_SI* photon = new APhoton_SI(&Config, &EventsDataHub);
         SM.RegisterInterface(photon, "photon");
-        AInterfaceToDepoScript* depo = new AInterfaceToDepoScript(&Detector, &EventsDataHub);
-        SM.RegisterInterface(depo, "depo");
-        AInterfaceToMultiThread* threads = new AInterfaceToMultiThread(&SM);
+        AThreads_SI* threads = new AThreads_SI(&SM);
         SM.RegisterInterface(threads, "threads");
-        AParticleTrackingHistoryInterface* pth = new AParticleTrackingHistoryInterface(EventsDataHub);
-        SM.RegisterInterface(pth, "tracklog");
-        AInterfaceToWebSocket* web = new AInterfaceToWebSocket(&EventsDataHub);
+        AWeb_SI* web = new AWeb_SI(&EventsDataHub);
         SM.RegisterInterface(web, "web");
-        AWebServerInterface* server = new AWebServerInterface(*Network.WebSocketServer, &EventsDataHub);
+        AServer_SI* server = new AServer_SI(*Network.WebSocketServer, &EventsDataHub);
         SM.RegisterInterface(server, "server");
 #ifdef ANTS_FLANN
-        AInterfaceToKnnScript* knn = new AInterfaceToKnnScript(ReconstructionManager.KNNmodule);
+        AKnn_SI* knn = new AKnn_SI(ReconstructionManager.KNNmodule);
         SM.RegisterInterface(knn, "knn");
 #endif
 #ifdef ANTS_FANN
@@ -321,7 +322,7 @@ int main(int argc, char *argv[])
             if ( parser.isSet(maxThreadsOption) )
             {
                 int max = parser.value(maxThreadsOption).toInt();
-                SimulationManager.MaxThreads = max;
+                SimulationManager.setMaxThreads(max);
                 ReconstructionManager.setMaxThread(max);
             }
             QHostAddress ip = QHostAddress::Null;

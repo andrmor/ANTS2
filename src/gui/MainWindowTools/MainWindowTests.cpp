@@ -28,8 +28,45 @@
 //#include "tmpobjhubclass.h"
 //#include "TAttMarker.h"
 
+#include "acommonfunctions.h"
+#include "TH1D.h"
+#include "TH1.h"
+#include "TGeoManager.h"
+#include "TGeoNavigator.h"
+#include "TGeoVolume.h"
+#include "TGeoNode.h"
+#include "TGeoMaterial.h"
 void MainWindow::on_pobTest_clicked()
 {
+    TH1D* h = new TH1D("t", "", 11,0,10);
+
+    TGeoNavigator * n = gGeoManager->GetCurrentNavigator();
+    if (!n) return;
+    for (int i=0; i<1000000; i++)
+    {
+        TGeoNode * nod = n->FindNode(-150.0 + 300.0*Detector->RandGen->Rndm(),
+                                     -150.0 + 300.0*Detector->RandGen->Rndm(),
+                                     //-20.0 + 35.0*Detector->RandGen->Rndm());
+                                     -20.0 );
+        if (!nod) continue;
+        int mat = nod->GetVolume()->GetMaterial()->GetIndex();
+        h->Fill(mat);
+    }
+    qDebug() << "Done!";
+    GraphWindow->Draw(h, "hist");
+
+    /*
+    TH1D * hist = new TH1D("", "", 5, 0, 5);
+    for (int i=0; i<5; i++)
+        hist->Fill(i, 1.0+i);
+    GraphWindow->Draw(hist, "hist");
+
+    TH1D * h = new TH1D("", "", 100, -2, 8);
+    //for (int i=0; i<100000; i++) h->Fill( GetRandomFromHist(hist, Detector->RandGen) );
+    for (int i=0; i<100000; i++) h->Fill( GetRandomBinFromHist(hist, Detector->RandGen) );
+    GraphWindow->Draw(h, "hist");
+    */
+
 //    double tau1 = 100.0;
 //    double tau2 = 100.0;
 //    int num = 10000000;
@@ -90,7 +127,6 @@ void MainWindow::on_pobTest_clicked()
 //include <QElapsedTimer>
 void MainWindow::on_pobTest_2_clicked()
 {
-
 //    std::vector<mydata> v;
 //    v.push_back( mydata(1.0, 100.0) );
 
@@ -270,64 +306,4 @@ void MainWindow::on_pbShowCheckUpWindow_clicked()
 {
   if (!CheckUpWindow) return;
   CheckUpWindow->show();
-}
-
-void MainWindow::on_pbShowEnergyDeposition_clicked()
-{
-  if (EventsDataHub->EventHistory.isEmpty())
-    {
-      message("No data available!", this);
-      return; //nothing to show
-    }
-  int index = ui->sbParticleIndexForShowDepEnergy->value();
-  int i=-1;
-  int Number;
-  do
-    {
-      i++;
-      if (i>EnergyVector.size()-1)
-        {
-          message("Deposition information not found for this particle", this);
-          return;
-        }
-      Number = EnergyVector.at(i)->index;
-    }
-  while(Number != index);
-  //on exit: i - first record with user-defined particle#
-
-  QVector<double> x,y;
-  x.resize(0);
-  y.resize(0);
-
-  double Length = 0;
-
-  //info on this particle starts at i
-  for (i; i<EnergyVector.size();i++)
-    {
-      if (EnergyVector[i]->index != index) break; //another particle starts here
-
-      double DeltaLength = EnergyVector[i]->cellLength;
-      Length += DeltaLength;
-      x.append(Length);
-      if (DeltaLength == 0) DeltaLength = 1; //0 protection for point deposition events
-      y.append(EnergyVector[i]->dE/DeltaLength);
-    }
-
-  if (x.size() == 0 )
-    {
-      message("This particle did not deposit any energy", this);
-      GraphWindow->hide();
-      return;
-   }
-
-  GraphWindow->MakeGraph(&x, &y, kBlue, "Distance, mm", "Deposited energy linear density, keV/mm");
-}
-
-void MainWindow::on_pbShowDetailedLog_clicked()
-{
-    Owindow->showNormal();
-    Owindow->raise();
-    Owindow->activateWindow();
-    Owindow->ShowEventHistoryLog();
-    Owindow->SetTab(3);
 }

@@ -19,6 +19,7 @@
 #include "asandwich.h"
 #include "ageoobject.h"
 #include "detectoraddonswindow.h"
+#include "ajsontools.h"
 
 //ROOT
 #include "TGraph2D.h"
@@ -36,7 +37,7 @@
 #include <QFileDialog>
 
 OutputWindow::OutputWindow(QWidget *parent, MainWindow *mw, EventsDataClass *eventsDataHub) :
-    QMainWindow(parent),
+    AGuiWindow(parent),
     ui(new Ui::OutputWindow)
 {
     MW = mw;
@@ -45,17 +46,32 @@ OutputWindow::OutputWindow(QWidget *parent, MainWindow *mw, EventsDataClass *eve
     ui->setupUi(this);
     bForbidUpdate = false;
 
-    this->setWindowTitle("Output");
+    this->setWindowTitle("Results/Output");
 
     Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
     windowFlags |= Qt::WindowCloseButtonHint;
+    windowFlags |= Qt::Tool;
     this->setWindowFlags( windowFlags );
 
     modelPMhits = 0;
 
-    ui->pbSiPMpixels->setEnabled(false);
-    ui->sbTimeBin->setEnabled(false);
-    ui->pbRefreshViz->setVisible(false);
+    QVector<QWidget*> vecDis;
+    vecDis << ui->pbSiPMpixels << ui->sbTimeBin
+           << ui->lePTHistParticle << ui->cobPTHistVolMat << ui->lePTHistVolVolume << ui->sbPTHistVolIndex
+           << ui->cobPTHistVolMatFrom << ui->cobPTHistVolMatTo << ui->lePTHistVolVolumeFrom << ui->lePTHistVolVolumeTo
+           << ui->sbPTHistVolIndexFrom << ui->sbPTHistVolIndexTo
+           << ui->leEVlimitToProc << ui->cbEVlimitToProcPrim << ui->leEVexcludeProc << ui->cbEVexcludeProcPrim;
+    for (QWidget * w : vecDis) w->setEnabled(false);
+
+    QVector<QWidget*> vecInv;
+    vecInv << ui->cobPTHistVolPlus << ui->pbRefreshViz << ui->frPTHistX << ui->frPTHistY
+           << ui->pbEventView_ShowTree << ui->pbEVgeo << ui->frEventFilters;
+    for (QWidget * w : vecInv) w->setVisible(false);
+
+    QDoubleValidator* dv = new QDoubleValidator(this);
+    dv->setNotation(QDoubleValidator::ScientificNotation);
+    QList<QLineEdit*> list = this->findChildren<QLineEdit *>();
+    foreach(QLineEdit *w, list) if (w->objectName().startsWith("led")) w->setValidator(dv);
 
     //Graphics view
     scaleScene = new QGraphicsScene(this);
@@ -63,7 +79,7 @@ OutputWindow::OutputWindow(QWidget *parent, MainWindow *mw, EventsDataClass *eve
 
     scene = new QGraphicsScene(this);
     //qDebug() << "This scene pointer:"<<scene;
-    gvOut = new myQGraphicsView(ui->tabViz);
+    gvOut = new myQGraphicsView(ui->tabPmHitViz);
     gvOut->setGeometry(0,0,325,325);
     gvOut->setScene(scene);
 
@@ -74,6 +90,11 @@ OutputWindow::OutputWindow(QWidget *parent, MainWindow *mw, EventsDataClass *eve
     gvOut->setRenderHints(QPainter::Antialiasing);  
 
     ui->tabwinDiagnose->setCurrentIndex(0);
+    updatePTHistoryBinControl();
+    SetTab(2);
+
+    ui->cobEVkin->setCurrentIndex(1);
+    ui->cobEVdepo->setCurrentIndex(1);
 }
 
 OutputWindow::~OutputWindow()
@@ -250,7 +271,7 @@ void OutputWindow::OutTextClear()
     ui->teOut->clear();
 }
 
-void OutputWindow::OutText(QString str)
+void OutputWindow::OutText(const QString & str)
 {
    ui->teOut->append(str);
 }
@@ -314,93 +335,10 @@ void OutputWindow::on_sbTimeBin_valueChanged(int arg1)
    OutputWindow::on_pbSiPMpixels_clicked();
 }
 
-void OutputWindow::showParticleHistString(int iRec, int level)
-{
-    const EventHistoryStructure* h = EventsDataHub->EventHistory.at(iRec);
-
-    QString s = QString("+").repeated(level);
-
-    s += QString::number(iRec);
-    s += "> " + MW->Detector->MpCollection->getParticleName(h->ParticleId);// + " (id: "+QString::number(h->ParticleId)+")";
-
-    for (int m=0; m < h->Deposition.size(); m++)
-    {
-        if (m != 0) s += " ->";
-        int MatId = h->Deposition[m].MaterialId;
-        s += " " + (*MW->MpCollection)[MatId]->name +"_";
-        s += QString::number(h->Deposition[m].Distance, 'g', MW->GlobSet.TextLogPrecision)+"_mm";
-        double depo = h->Deposition[m].DepositedEnergy;
-        if (depo>0)
-        {
-            s += "_";
-            s += "<b>";
-            s += QString::number(depo, 'g', MW->GlobSet.TextLogPrecision);
-            s += "</b>";
-            s += "_keV";
-            TotalEnergyDeposited += depo;
-        }
-    }
-    s += " ";
-    switch (h->Termination)
-      {
-      case EventHistoryStructure::Escaped:                  s += "escaped"; break;
-      case EventHistoryStructure::AllEnergyDisspated:       s += "stopped"; break;
-      case EventHistoryStructure::Photoelectric:            s += "photoelectric"; break;
-      case EventHistoryStructure::ComptonScattering:        s += "compton"; break;
-      case EventHistoryStructure::NeutronAbsorption:                  s += "capture"; break;
-      case EventHistoryStructure::ElasticScattering:       s += "elastic"; break;
-      case EventHistoryStructure::CreatedOutside:           s += "created outside the defined geometry"; break;
-      case EventHistoryStructure::FoundUntrackableMaterial: s += "found untrackable material"; break;
-      case EventHistoryStructure::PairProduction:           s += "pair production"; break;
-      case EventHistoryStructure::StoppedOnMonitor:         s += "stopped on monitor"; break;
-      default:                                              s += "UNKNOWN TYPE"; break;
-      }
-    ui->pteOut->appendHtml(s);
-}
-
 void OutputWindow::addParticleHistoryLogLine(int iRec, int level)
 {
-    showParticleHistString(iRec, level);
     for (int i=0; i<secs.at(iRec).size(); i++)
         addParticleHistoryLogLine(secs.at(iRec).at(i), level+1);
-}
-
-void OutputWindow::ShowEventHistoryLog()
-{  
-  if (EventsDataHub->EventHistory.isEmpty())
-    {
-     message("Particle log is empty!\n"
-             "Simulation_options/Accelerators/Do_logs_and_statistics has to be activated before simulation!", this);
-     return;
-    }
-
-  int size = EventsDataHub->EventHistory.size();
-  //preparing list of secondaries
-  secs.resize(size);
-  for (QVector<int>& v : secs) v.clear();
-  for (int i=0; i<size; i++)
-  {
-      const int& secOf = EventsDataHub->EventHistory.at(i)->SecondaryOf;
-      if (secOf>-1) secs[secOf] << i;
-  }
-
-  QString s = "\n=====================\n"
-              "Log of particle interactions\n"
-              "---------------------";
-  //OutText(s);
-  ui->pteOut->appendPlainText(s);
-
-  TotalEnergyDeposited=0;
-  for (int i=0; i<size; i++)
-    {
-      if (EventsDataHub->EventHistory.at(i)->SecondaryOf > -1) continue; //secondary are already shown
-      addParticleHistoryLogLine(i, 0);
-    }
-  s  = "---------------------\n";
-  s += "Total energy deposited: " + QString::number(TotalEnergyDeposited, 'g', MW->GlobSet.TextLogPrecision) + " keV\n";
-  s += "=====================\n";
-  //SetTab(0);
-  ui->pteOut->appendPlainText(s);
 }
 
 void OutputWindow::updateSignalTableWidth()
@@ -420,8 +358,10 @@ void OutputWindow::updateSignalTableWidth()
   ui->layPMhitsTable->invalidate();
 }
 
-void OutputWindow::resizeEvent(QResizeEvent *)
+void OutputWindow::resizeEvent(QResizeEvent * event)
 {
+    AGuiWindow::resizeEvent(event);
+
   if (!this->isVisible()) return;
 
   int GVsize = ui->tabwinDiagnose->height()-28;//325;
@@ -443,31 +383,40 @@ void OutputWindow::ResetViewport()
   double Xmax = -1e10;
   double Ymin =  1e10;
   double Ymax = -1e10;
-  for (int ipm=0; ipm<MW->PMs->count(); ipm++)
-    {
-      double x = MW->PMs->at(ipm).x;
-      double y = MW->PMs->at(ipm).y;
-      int type = MW->PMs->at(ipm).type;
-      double size = MW->PMs->getType(type)->SizeX;
+  for (int ipm = 0; ipm < MW->PMs->count(); ipm++)
+  {
+      const double & x =    MW->PMs->at(ipm).x;
+      double         y =   -MW->PMs->at(ipm).y;
+      const int & type =    MW->PMs->at(ipm).type;
+      const double & size = MW->PMs->getType(type)->SizeX;
 
-      if (x-size < Xmin) Xmin = x-size;
-      if (x+size > Xmax) Xmax = x+size;
-      if (y-size < Ymin) Ymin = y-size;
-      if (y+size > Ymax) Ymax = y+size;
-    }
+      if (x - size < Xmin) Xmin = x - size;
+      if (x + size > Xmax) Xmax = x + size;
+      if (y - size < Ymin) Ymin = y - size;
+      if (y + size > Ymax) Ymax = y + size;
+  }
 
-  double Xdelta = Xmax-Xmin;
-  double Ydelta = Ymax-Ymin;
+  double Xdelta = Xmax - Xmin;
+  double Ydelta = Ymax - Ymin;
 
-  scene->setSceneRect((Xmin - 0.5*Xdelta)*GVscale, (Ymin - 0.5*Ydelta)*GVscale, (Xmax-Xmin + 1.0*Xdelta)*GVscale, (Ymax-Ymin + 1.0*Ydelta)*GVscale);
-  gvOut->fitInView( (Xmin - 0.01*Xdelta)*GVscale, (Ymin - 0.01*Ydelta)*GVscale, (Xmax-Xmin + 0.02*Xdelta)*GVscale, (Ymax-Ymin + 0.02*Ydelta)*GVscale, Qt::KeepAspectRatio);
+  double frac = 1.05;
+  scene->setSceneRect( (Xmin - frac*Xdelta)*GVscale,
+                       (Ymin - frac*Ydelta)*GVscale,
+                       ( (2.0*frac + 1.0) * Xdelta)*GVscale,
+                       ( (2.0*frac + 1.0) * Ydelta)*GVscale );
+
+  gvOut->fitInView( (Xmin - 0.01*Xdelta)*GVscale,
+                    (Ymin - 0.01*Ydelta)*GVscale,
+                    (1.02*Xdelta)*GVscale,
+                    (1.02*Ydelta)*GVscale,
+                    Qt::KeepAspectRatio);
 }
 
 void OutputWindow::InitWindow()
 {
   bool shown = this->isVisible();
   this->showNormal();
-  SetTab(2);
+  //SetTab(2);
   RefreshData();
   OutputWindow::resizeEvent(0);
   //SetTab(0);
@@ -482,7 +431,6 @@ void OutputWindow::on_pbRefreshViz_clicked()
 void OutputWindow::RefreshData()
 {
   bool fHaveData = !EventsDataHub->isEmpty();
-
   if (!fHaveData) ui->labTotal->setText("-");
   else ui->labTotal->setText(QString::number(EventsDataHub->Events.size()));
 
@@ -522,18 +470,19 @@ void OutputWindow::RefreshData()
 
   //updating viz
   scene->clear();
-  double MaxSignal = 0.0;
+  float MaxSignal = 0.0;
   if (!fHaveData) MaxSignal = 1.0;
   else
     {
       for (int i=0; i<MW->PMs->count(); i++)
         if (Passives->isActive(i))
-          if ( EventsDataHub->Events[CurrentEvent][i] > MaxSignal) MaxSignal = EventsDataHub->Events[CurrentEvent][i];
+        {
+          if ( EventsDataHub->Events[CurrentEvent][i] > MaxSignal)
+              MaxSignal = EventsDataHub->Events[CurrentEvent][i];
+        }
     }
   if (MaxSignal<=1.0e-25) MaxSignal = 1.0;
   //qDebug()<<"MaxSignal="<<MaxSignal<<"  selector="<<selector;
-
-
 
   updateSignalLabels(MaxSignal);
   addPMitems( (fHaveData ? &EventsDataHub->Events.at(CurrentEvent) : 0), MaxSignal, Passives); //add icons with PMs to the scene
@@ -543,6 +492,8 @@ void OutputWindow::RefreshData()
 
   //Monitors
   updateMonitors();
+
+  EV_showTree();
 
   delete Passives;
 }
@@ -559,9 +510,14 @@ void OutputWindow::updateMonitors()
         for (int i=0; i<numMonitors; i++)
         {
             const AGeoObject* obj = MW->Detector->Sandwich->MonitorsRecords.at(i);
-            ui->cobMonitor->addItem(obj->Name);
+            ui->cobMonitor->addItem( QString("%1   index=%2").arg(obj->Name).arg(i));
         }
-        if (oldNum>-1 && oldNum<numMonitors) ui->cobMonitor->setCurrentIndex(oldNum);
+        if (oldNum>-1 && oldNum<numMonitors)
+        {
+            ui->cobMonitor->setCurrentIndex(oldNum);
+            ui->sbMonitorIndex->setValue(oldNum);
+        }
+        else ui->sbMonitorIndex->setValue(0);
 
         int imon = ui->cobMonitor->currentIndex();
         const AGeoObject* monObj = MW->Detector->Sandwich->MonitorsRecords.at(imon);
@@ -575,9 +531,9 @@ void OutputWindow::updateMonitors()
                     numDet = EventsDataHub->SimStat->Monitors.at(imon)->getXY()->GetEntries();
             ui->leDetections->setText( QString::number(numDet) );
 
-            bool bPhotonMode = mon->config.PhotonOrParticle == 0;
+            bool bPhotonMode = (mon->config.PhotonOrParticle == 0);
             ui->pbMonitorShowWave->setVisible(bPhotonMode);
-            ui->pbMonitorShowTime->setVisible(bPhotonMode);
+            ui->pbShowWavelength->setVisible(bPhotonMode);
             ui->pbMonitorShowEnergy->setVisible(!bPhotonMode);
         }
         else
@@ -588,7 +544,7 @@ void OutputWindow::updateMonitors()
     }
 }
 
-void OutputWindow::addPMitems(const QVector<float> *vector, double MaxSignal, DynamicPassivesHandler *Passives)
+void OutputWindow::addPMitems(const QVector<float> *vector, float MaxSignal, DynamicPassivesHandler *Passives)
 {
   for (int ipm=0; ipm<MW->PMs->count(); ipm++)
     {
@@ -600,7 +556,7 @@ void OutputWindow::addPMitems(const QVector<float> *vector, double MaxSignal, Dy
       //brush
       QBrush brush(Qt::white);
 
-      double sig = ( vector ? vector->at(ipm) : 0 );
+      float sig = ( vector ? vector->at(ipm) : 0 );
 
       if (sig > 0)
         {
@@ -662,17 +618,18 @@ void OutputWindow::addPMitems(const QVector<float> *vector, double MaxSignal, Dy
     }
 }
 
-void OutputWindow::addTextitems(const QVector<float> *vector, double MaxSignal, DynamicPassivesHandler *Passives)
+void OutputWindow::addTextitems(const QVector<float> *vector, float MaxSignal, DynamicPassivesHandler *Passives)
 {
+    const int prec = ui->sbDecimalPrecision->value();
   for (int ipm=0; ipm<MW->PMs->count(); ipm++)
     {
       const APm &PM = MW->PMs->at(ipm);
       double size = 0.5*MW->PMs->getType( PM.type )->SizeX;
       //io->setTextWidth(40);
 
-      double sig = ( vector ? vector->at(ipm) : 0 );
+      float sig = ( vector ? vector->at(ipm) : 0 );
       //qDebug()<<"sig="<<sig;
-      QString text = QString::number(sig, 'g', 6);
+      QString text = QString::number(sig, 'g', prec);
       //text = "<CENTER>" + text + "</CENTER>";
 
       //color correction for dark blue
@@ -686,8 +643,8 @@ void OutputWindow::addTextitems(const QVector<float> *vector, double MaxSignal, 
         io->setBrush(Qt::white);
 
       int wid = (io->boundingRect().width()-6)/6;
-      double x = ( PM.x -wid*size*0.125 -0.1*size )*GVscale;
-      double y = (-PM.y - 0.3*size  ) *GVscale; //minus y to invert the scale!!!
+      double x = ( PM.x -wid*size*0.125 -0.15*size )*GVscale;
+      double y = (-PM.y - 0.36*size  ) *GVscale; //minus y to invert the scale!!!
       io->setPos(x, y);
       io->setScale(0.4*size);
 
@@ -717,13 +674,13 @@ void OutputWindow::updateSignalScale()
     }
 }
 
-void OutputWindow::updateSignalLabels(double MaxSignal)
+void OutputWindow::updateSignalLabels(float MaxSignal)
 {
   QString str;
   str.setNum(MaxSignal, 'g', 4);
   ui->labHitsMax->setText(str);
 
-  double lowmid = 0.25*MaxSignal;
+  float lowmid = 0.25f * MaxSignal;
   if (lowmid>0)
     {
       str.setNum(lowmid, 'g', 4);
@@ -731,7 +688,7 @@ void OutputWindow::updateSignalLabels(double MaxSignal)
     }
   else ui->labLowMid->setText("");
 
-  double mid = 0.5*MaxSignal;
+  float mid = 0.5f * MaxSignal;
   if (mid > 0 && mid !=lowmid)
     {
       str.setNum(mid, 'g', 4);
@@ -739,32 +696,13 @@ void OutputWindow::updateSignalLabels(double MaxSignal)
     }
   else ui->labMid->setText("");
 
-  double highmid = 0.75*MaxSignal;
+  float highmid = 0.75f * MaxSignal;
   if (highmid > 0 && highmid !=mid)
     {
       str.setNum(highmid, 'g', 4);
       ui->labHighMid->setText(str);
     }
   else ui->labHighMid->setText("");
-}
-
-void OutputWindow::on_tabwinDiagnose_currentChanged(int index)
-{
-  if (index == 2) OutputWindow::on_pbRefreshViz_clicked();
-
-  ui->frEventNumber->setVisible( index != 3);
-  ui->pbClearText->setVisible( index==0 || index==3 );
-  gvOut->update();
-}
-
-bool OutputWindow::event(QEvent *event)
-{
-  if (!MW->WindowNavigator) return QMainWindow::event(event);
-
-  if (event->type() == QEvent::Hide) MW->WindowNavigator->HideWindowTriggered("out");
-  if (event->type() == QEvent::Show) MW->WindowNavigator->ShowWindowTriggered("out");
-
-  return QMainWindow::event(event);
 }
 
 void OutputWindow::on_pbWaveSpectrum_clicked()
@@ -780,8 +718,9 @@ void OutputWindow::on_pbWaveSpectrum_clicked()
   if (!spec || spec->GetEntries() == 0 || spec->Integral()==0)
     {
       message("Wavelength data are empty!\n\n"
-              "Or make sure the following is set before simulation:\n"
-              "* Simulation_options/Wave/Wavelength-resolved is checked", this);
+              "Before starting a simulation check that\n"
+              "'Statistics on detected photons' is activated:\n"
+              "use the 'logs' button on the right side of the 'Simulate' button.", this);
       return;
     }
 
@@ -820,8 +759,8 @@ void OutputWindow::on_pbTimeSpectrum_clicked()
   if (!spec || spec->GetEntries() == 0 || spec->Integral()==0)
     {
       message("Time data are empty!\n"
-              "Make sure the following is set before simulation:\n"
-              "Simulation_options/Accelerators/Do_logs_and_statistics is checked\n", this);
+              "'Statistics on detected photons' has to be activated before simulation!\n"
+              "Use the 'logs' button on the right side of the 'Simulate' button.", this);
       return;
     }
 
@@ -842,10 +781,11 @@ void OutputWindow::on_pbAngleSpectrum_clicked()
   TH1D* spec = d->getAngularDistr();
   if (!spec || spec->GetEntries() == 0 || spec->Integral()==0)
     {
-      message("Angle of incidence data are empty!\n"
-              "Make sure the following settings were configured before simulation:\n"
-              "* Simulation_options/Accelerators/Do_logs_and_statistics is checked\n"
-              "* Simulation_options/Angule/Take_into_account_PM_angular_response is checked", this);
+      message("Angle of incidence data are empty!\n\n"
+              "Before starting a simulation, check that:\n"
+              "1) Simulation_options/Angle/Take_into_account_PM_angular_response is checked;\n"
+              "2) 'Statistics on detected photons' is activated:\n"
+              "   use the 'logs' button on the right side of the 'Simulate' button.", this);
       return;
     }
 
@@ -868,7 +808,8 @@ void OutputWindow::on_pbNumTransitionsSpectrum_clicked()
    if (!spec || spec->GetEntries() == 0 || spec->Integral()==0)
      {
        message("Transition data are empty!\n"
-               "Simulation_options/Accelerators/Do_logs_and_statistics has to be activated before simulation!\n", this);
+               "'Statistics on detected photons' has to be activated before simulation!\n"
+               "Use the 'logs' button on the right side of the 'Simulate' button.", this);
        return;
      }
 
@@ -877,36 +818,10 @@ void OutputWindow::on_pbNumTransitionsSpectrum_clicked()
    MW->GraphWindow->Draw(spec, "", true, false);
 }
 
-void OutputWindow::on_sbEvent_valueChanged(int arg1)
-{
-  if (arg1 == 0 && EventsDataHub->Events.isEmpty()) return;
-  if (EventsDataHub->Events.isEmpty()) //protection
-    {      
-      ui->sbEvent->setValue(0);
-      return;
-    }
-
-  if (arg1 > EventsDataHub->Events.size()-1)
-    {
-      ui->sbEvent->setValue(0);
-      arg1 = 0;
-      return; //already triggered "on change" = this procedure
-    } 
-
-  if (ui->tabwinDiagnose->currentIndex() == 0 && !bForbidUpdate) ShowOneEventLog(arg1);
-  else on_pbRefreshViz_clicked();
-}
-
 void OutputWindow::on_pbResetViewport_clicked()
 {
     OutputWindow::RefreshData();
     OutputWindow::ResetViewport();
-}
-
-void OutputWindow::on_pbClearText_clicked()
-{
-    if (ui->tabwinDiagnose->currentIndex() == 3) ui->pteOut->clear();
-    else ui->teOut->clear();
 }
 
 void OutputWindow::ShowOneEventLog(int iev)
@@ -916,10 +831,6 @@ void OutputWindow::ShowOneEventLog(int iev)
 
   int precision = MW->GlobSet.TextLogPrecision;
   QString str = "Event# " + QString::number(iev);
-
-  if (!EventsDataHub->isScanEmpty())
-      if ( !EventsDataHub->Scan[iev]->GoodEvent )
-        str += "       'Bad' event: " + MW->NoiseTypeDescriptions[EventsDataHub->Scan[iev]->EventType].replace("\n", " ");
   OutText(str);
 
   QString str2;
@@ -1108,53 +1019,46 @@ void OutputWindow::on_pbAverageSignals_clicked()
 
 void OutputWindow::ShowGeneratedPhotonsLog()
 {
-  if (EventsDataHub->GeneratedPhotonsHistory.isEmpty())
-  {
-      message("Photon history log is empty!\n"
-              "Simulation_options/Accelerators/Do_logs_and_statistics has to be activated before simulation!\n"
-              "Also, photon sources simulations do not generate this log!", this);
-      return;
-  }
+    if (EventsDataHub->GeneratedPhotonsHistory.isEmpty())
+    {
+        message("Photon history log is empty!\n"
+                "Activate 'Photon generation log' before starting a simulation!\n"
+                "Use the button on the right side of the 'Simulate' button.\n"
+                "\nNote that simulations in the 'Only photons' mode do not generate this log!", this);
+        return;
+    }
 
-  QString s = "\n=====================\n"
-              "Log of genereated photons\n"
-              "---------------------\n";
-  for (int i=0; i<EventsDataHub->GeneratedPhotonsHistory.size(); i++)
-        {
-          QString out, str;
+    QString s = "\n=====================\n"
+                "Log of genereated photons\n"
+                "---------------------\n";
+    for (int i=0; i<EventsDataHub->GeneratedPhotonsHistory.size(); i++)
+    {
+        QString out, str;
 
-          str.setNum(EventsDataHub->GeneratedPhotonsHistory[i].event);
-          out = str + "/";
-          str.setNum(EventsDataHub->GeneratedPhotonsHistory[i].index);
-          out += str + "> ";
+        str.setNum(EventsDataHub->GeneratedPhotonsHistory[i].event);
+        out = str + "/";
+        str.setNum(EventsDataHub->GeneratedPhotonsHistory[i].index);
+        out += str + "> ";
 
-          //out += MW->Detector->ParticleCollection[EventsDataHub->GeneratedPhotonsHistory[i].ParticleId]->ParticleName;
-          out += MW->Detector->MpCollection->getParticleName(EventsDataHub->GeneratedPhotonsHistory[i].ParticleId);
-          out += " in " + (*MW->MpCollection)[EventsDataHub->GeneratedPhotonsHistory[i].MaterialId]->name;
+        out += MW->Detector->MpCollection->getParticleName(EventsDataHub->GeneratedPhotonsHistory[i].ParticleId);
+        out += " in " + (*MW->MpCollection)[EventsDataHub->GeneratedPhotonsHistory[i].MaterialId]->name;
 
-          str.setNum(EventsDataHub->GeneratedPhotonsHistory[i].Energy);
-          out += "  deposited: " + str + " keV";
+        str.setNum(EventsDataHub->GeneratedPhotonsHistory[i].Energy);
+        out += "  deposited: " + str + " keV";
 
-          out += "  Primary photons: ";
-          str.setNum(EventsDataHub->GeneratedPhotonsHistory[i].PrimaryPhotons);
-          out += str;
+        out += "  Primary photons: ";
+        str.setNum(EventsDataHub->GeneratedPhotonsHistory[i].PrimaryPhotons);
+        out += str;
 
-          out += "  Secondary photons: ";
-          str.setNum(EventsDataHub->GeneratedPhotonsHistory[i].SecondaryPhotons);
-          out += str;
+        out += "  Secondary photons: ";
+        str.setNum(EventsDataHub->GeneratedPhotonsHistory[i].SecondaryPhotons);
+        out += str;
 
-          s += out + "\n";
-        }
-  s += "=====================\n";
+        s += out + "\n";
+    }
+    s += "=====================\n";
 
-  //SetTab(0);
-  //OutText(s);
-  ui->pteOut->appendPlainText(s);
-}
-
-void OutputWindow::on_pbShowParticldeLog_clicked()
-{
-    ShowEventHistoryLog();
+    ui->pteOut->appendPlainText(s);
 }
 
 void OutputWindow::on_pbShowPhotonLog_clicked()
@@ -1230,242 +1134,102 @@ void OutputWindow::ShowPhotonLossLog()
 
 void OutputWindow::UpdateMaterials()
 {
-   int old = ui->cobShowMaterial->currentIndex();
+    QVector<QComboBox*> vec;
+    vec << ui->cobPTHistVolMat << ui->cobPTHistVolMatFrom << ui->cobPTHistVolMatTo;
 
-   ui->cobShowMaterial->clear();
-   for (int i=0; i<MW->MpCollection->countMaterials(); i++)
-      ui->cobShowMaterial->addItem( (*MW->MpCollection)[i]->name );
+    QStringList mats = MW->MpCollection->getListOfMaterialNames();
+    for (QComboBox * c : vec)
+    {
+        int old = c->currentIndex();
+        c->clear();
+        c->addItems(mats);
 
-   if (old < ui->cobShowMaterial->count()) ui->cobShowMaterial->setCurrentIndex(old);
+        if (old < 0) old = 0;
+        if (old < c->count()) c->setCurrentIndex(old);
+    }
 }
 
 void OutputWindow::UpdateParticles()
 {
-  int old = ui->cobShowParticle->currentIndex();
+//  int old = ui->cobShowParticle->currentIndex();
 
-  ui->cobShowParticle->clear();
-  for (int i=0; i<MW->Detector->MpCollection->countParticles(); i++)
-      ui->cobShowParticle->addItem( MW->Detector->MpCollection->getParticleName(i) );
+//  ui->cobShowParticle->clear();
+//  for (int i=0; i<MW->Detector->MpCollection->countParticles(); i++)
+//      ui->cobShowParticle->addItem( MW->Detector->MpCollection->getParticleName(i) );
 
-  if (old < ui->cobShowParticle->count()) ui->cobShowParticle->setCurrentIndex(old);
+    //  if (old < ui->cobShowParticle->count()) ui->cobShowParticle->setCurrentIndex(old);
 }
 
-void OutputWindow::on_pbShowSelected_clicked()
+void OutputWindow::SaveGuiToJson(QJsonObject &json) const
 {
-  if (EventsDataHub->EventHistory.isEmpty())
-    {
-      message("No data available!", this);
-      return;
-    }
-
-  int particleId = ui->cobShowParticle->currentIndex();
-  int materialId = ui->cobShowMaterial->currentIndex();
-  bool fSelectiveParticleType = ui->cobShowParticleType->currentIndex() == 0 ? false : true;
-  //int particleType = ui->cobShowParticleType->currentIndex() - 1;  // 0-primary, 1-secondary  //cob:0-all,1-prim,2-sec
-  bool fUseSecondary = ( ui->cobShowParticleType->currentIndex() == 2);
-  ui->pteOut->clear();
-
-  int counter=0;
-  TH1D* hist1 = 0;
-  switch (ui->cobWhatToShow->currentIndex())
-  {
-  case (0):
-    {
-      //Statistics: energy deposition
-      hist1 = new TH1D("DepEnergyHist","Deposited energy",ui->sbShowBins->value(),0,0);
-      hist1->GetXaxis()->SetTitle("Deposited energy, keV");
-
-      for (int i=0; i<EventsDataHub->EventHistory.size(); i++)
-      {
-          if (ui->cbCheckerParticle->isChecked() && particleId != EventsDataHub->EventHistory[i]->ParticleId) continue;  //wrong particle
-
-          if (MW->Detector->MpCollection->getParticleType( EventsDataHub->EventHistory[i]->ParticleId ) == AParticle::_neutron_ ) continue; //to prevent overflow, we know neutrons cannot deposit energy anyway
-          if (fSelectiveParticleType)
-              //if (particleType != EventsDataHub->EventHistory[i]->SecondaryOf) continue; //wrong type
-              if (fUseSecondary != EventsDataHub->EventHistory[i]->isSecondary()) continue; //wrong type
-          for (int m=0; m < EventsDataHub->EventHistory[i]->Deposition.size(); m++)
-          {
-              if (ui->cbCheckerMaterial->isChecked() && materialId != EventsDataHub->EventHistory[i]->Deposition[m].MaterialId) continue; //wrong material
-              //all filters OK
-              if (EventsDataHub->EventHistory[i]->Deposition[m].DepositedEnergy>0) hist1->Fill(EventsDataHub->EventHistory[i]->Deposition[m].DepositedEnergy);
-              counter++;
-          }
-      }
-      break; //draw below
-    }
-
-  case (1):
-    {
-      //Statistics: travelled distance
-      hist1 = new TH1D("TravDistHist","Travelled distance",ui->sbShowBins->value(),0,0);
-      hist1->GetXaxis()->SetTitle("Travelled distance, mm");
-
-      for (int i=0; i < EventsDataHub->EventHistory.size(); i++)
-      {
-          if (ui->cbCheckerParticle->isChecked() && particleId != EventsDataHub->EventHistory[i]->ParticleId) continue;  //wrong particle
-          if (fSelectiveParticleType)
-              //if (particleType != EventsDataHub->EventHistory[i]->SecondaryOf) continue; //wrong type
-              if (fUseSecondary != EventsDataHub->EventHistory[i]->isSecondary()) continue; //wrong type
-          for (int m=0; m < EventsDataHub->EventHistory[i]->Deposition.size(); m++)
-          {
-              if (ui->cbCheckerMaterial->isChecked() && materialId != EventsDataHub->EventHistory[i]->Deposition[m].MaterialId) continue; //wrong material
-              //all filters OK
-              hist1->Fill(EventsDataHub->EventHistory[i]->Deposition[m].Distance);
-              counter++;
-          }
-      }
-      break; //draw below
-    }
-  case (2):
-      {
-        //Statistics: angle vs Z axis
-        hist1 = new TH1D("AnglZHist","Angle distribution",ui->sbShowBins->value(),0,0);
-        hist1->GetXaxis()->SetTitle("Angle with Z, degrees");
-
-        //qDebug() << EnergyVector.size() << EventsDataHub->EventHistory.size();
-        for (int i=0; i < EventsDataHub->EventHistory.size(); i++)
-        {
-            if (ui->cbCheckerParticle->isChecked() && particleId != EventsDataHub->EventHistory[i]->ParticleId) continue;  //wrong particle
-            if (fSelectiveParticleType)
-                //if (particleType != EventsDataHub->EventHistory[i]->SecondaryOf) continue; //wrong type
-                if (fUseSecondary != EventsDataHub->EventHistory[i]->isSecondary()) continue; //wrong type
-            for (int m=0; m < EventsDataHub->EventHistory[i]->Deposition.size(); m++)
-            {
-                if (ui->cbCheckerMaterial->isChecked() && materialId != EventsDataHub->EventHistory[i]->Deposition[m].MaterialId) continue; //wrong material
-                //all filters OK
-                float& dx = EventsDataHub->EventHistory[i]->dx;
-                float& dy = EventsDataHub->EventHistory[i]->dy;
-                float& dz = EventsDataHub->EventHistory[i]->dz;
-                float trans2 = dx*dx + dy*dy;
-                float angle =  ( fabs(dz) < 1e-10 ? 0 : atan( sqrt(trans2)/dz )*180.0/3.1415926 );
-
-                hist1->Fill(angle);
-                counter++;
-            }
-        }
-        break; //draw below
-      }
-  case (3):
-    {
-      //interaction probability in this material for this particle
-      int total = 0;
-      int interactions = 0;
-
-      for (int i=0; i<EventsDataHub->EventHistory.size(); i++)
-      {
-          if (ui->cbCheckerParticle->isChecked() && particleId != EventsDataHub->EventHistory[i]->ParticleId) continue;  //wrong particle
-          if (fSelectiveParticleType)
-              //if (particleType != EventsDataHub->EventHistory[i]->SecondaryOf) continue; //wrong type
-              if (fUseSecondary != EventsDataHub->EventHistory[i]->isSecondary()) continue; //wrong type
-          bool flagFound = false;
-          bool flagInteraction = false;
-          for (int m=0; m < EventsDataHub->EventHistory[i]->Deposition.size(); m++)
-          {
-              //could be several layers with the same material, so make a flag
-              if (ui->cbCheckerMaterial->isChecked() && materialId != EventsDataHub->EventHistory[i]->Deposition[m].MaterialId) continue; //wrong material
-              //all filters OK
-              flagFound = true;
-              if (EventsDataHub->EventHistory[i]->Deposition[m].DepositedEnergy > 0) flagInteraction = true; //takes care of all but neutron capture - they do not deposit energy directly
-          }
-          if (flagFound) total++; //this particle was in this material
-          if (flagInteraction) interactions++; //this particle had intreaction inside this material
-
-          //if (Detector->ParticleCollection.at( EventsDataHub->EventHistory[i]->ParticleId )->type == AParticle::_neutron_ )
-          if (MW->Detector->MpCollection->getParticleType( EventsDataHub->EventHistory[i]->ParticleId ) == AParticle::_neutron_ )
-          {
-              if (EventsDataHub->EventHistory[i]->Termination != EventHistoryStructure::NeutronAbsorption) continue;
-              //last medium?
-              if (EventsDataHub->EventHistory[i]->Deposition[EventsDataHub->EventHistory[i]->Deposition.size()-1].MaterialId != materialId) continue;
-              interactions++;
-          }
-      }
-
-      double InterProbability = 0;
-      if (total != 0 ) InterProbability = 1.0*interactions / total;
-      QString str, str1;
-      str = "Total: ";
-      str1.setNum(total);
-      str += str1 + " Interacted: ";
-      str1.setNum(interactions);
-      str += str1;
-      ui->pteOut->appendPlainText(str);
-      str.setNum(InterProbability*100.0, 'g', 4);
-      ui->pteOut->appendPlainText("Interaction probability: "+str+ " %");
-      return;
-      //break;
-    }
-    case (4):
-      {
-        //deposited energy in this material for this particle more than a certain value
-        int total = 0;
-        int interactions = 0;
-        double threshold = ui->ledShowThreshold->text().toDouble();
-
-        for (int i=0; i < EventsDataHub->EventHistory.size(); i++)
-          {
-            if (ui->cbCheckerParticle->isChecked() && particleId != EventsDataHub->EventHistory[i]->ParticleId) continue;  //wrong particle
-            if (fSelectiveParticleType)
-                //if (particleType != EventsDataHub->EventHistory[i]->SecondaryOf) continue; //wrong type
-                if (fUseSecondary != EventsDataHub->EventHistory[i]->isSecondary()) continue; //wrong type
-            bool flagFound = false;
-            bool flagInteraction = false;
-            for (int m=0; m < EventsDataHub->EventHistory[i]->Deposition.size(); m++)
-              {
-                //could be several layers with the same material, so make a flag
-                if (ui->cbCheckerMaterial->isChecked() && materialId != EventsDataHub->EventHistory[i]->Deposition[m].MaterialId) continue; //wrong material
-                //all filters OK
-                flagFound = true;
-                if (EventsDataHub->EventHistory[i]->Deposition[m].DepositedEnergy > threshold) flagInteraction = true; //neutrons do not deposit directly anyway
-              }
-            if (flagFound) total++; //this particle was in this material
-            if (flagInteraction) interactions++; //this particle had interaction inside this material
-          }
-
-        double Fraction = 0;
-        if (total != 0 ) Fraction = 1.0*interactions / total;
-        QString str, str1;
-        str = "Total: ";
-        str1.setNum(total);
-        str += str1 + " Deposited above threshold (" + QString::number(threshold) + " keV): ";
-        str1.setNum(interactions);
-        str += str1;
-        ui->pteOut->appendPlainText(str);
-        str.setNum(Fraction*100.0, 'g', 4);
-        ui->pteOut->appendPlainText("Fraction: "+str+ " %");
-        return;
-      }
-  }
-
-
-  if (counter == 0)
-  {
-      message("No data was found for the given selection", this);
-      return;
-  }
-  //drawing histogram:
-  MW->GraphWindow->Draw(hist1);
+    QJsonObject js;
+    saveEventViewerSettings(js);
+    json["EventViewer"] = js;
 }
 
-void OutputWindow::on_cobWhatToShow_currentIndexChanged(int index)
+void OutputWindow::LoadGuiFromJson(const QJsonObject &json)
 {
-  switch (index)
-    {
-    case 0:
-    case 1:
-    case 2:
-      ui->swShowPrPData->setCurrentIndex(0);
-      break;
-    case 3:
-      ui->swShowPrPData->setCurrentIndex(1);
-    break;
-    case 4:
-      ui->swShowPrPData->setCurrentIndex(2);
-    }
+    QJsonObject js;
+    parseJson(json, "EventViewer", js);
+    if (!js.isEmpty()) loadEventViewerSettings(js);
 }
 
-void OutputWindow::on_pbNextEvent_clicked()
+void OutputWindow::saveEventViewerSettings(QJsonObject & json) const
 {
-    ui->sbEvent->setValue(ui->sbEvent->value()+1);
+    json["HideAllTransport"] = ui->cbEVhideTrans->isChecked();
+    json["HidePrimTransport"] = ui->cbEVhideTransPrim->isChecked();
+    json["Precision"] = ui->sbEVprecision->value();
+    json["Expansion"] = ui->sbEVexpansionLevel->value();
+    json["Position"] = ui->cbEVpos->isChecked();
+    json["Step"] = ui->cbEVstep->isChecked();
+    json["KinEn"] = ui->cbEVkin->isChecked();
+    json["DepoEn"] = ui->cbEVdepo->isChecked();
+    json["Volume"] = ui->cbEVvol->isChecked();
+    json["VolIndex"] = ui->cbEVvi->isChecked();
+    json["Material"] = ui->cbEVmat->isChecked();
+    json["Time"] = ui->cbEVtime->isChecked();
+    json["ShowTracks"] = ui->cbEVtracks->isChecked();
+    json["SuppressSec"] = ui->cbEVsupressSec->isChecked();
+    json["ShowPMsig"] = ui->cbEVpmSig->isChecked();
+
+    json["ShowFilters"] = ui->cbEVshowFilters->isChecked();
+
+    json["LimToProcActive"] = ui->cbEVlimToProc->isChecked();
+    json["LimToProc"] = ui->leEVlimitToProc->text();
+    json["LimToProcPrim"] = ui->cbEVlimitToProcPrim->isChecked();
+
+    json["ExclProcActive"] = ui->cbEVexcludeProc->isChecked();
+    json["ExclToProc"] = ui->leEVexcludeProc->text();
+    json["ExclToProcPrim"] = ui->cbEVexcludeProcPrim->isChecked();
+}
+
+void OutputWindow::loadEventViewerSettings(const QJsonObject & json)
+{
+    JsonToCheckbox(json, "HideAllTransport", ui->cbEVhideTrans);
+    JsonToCheckbox(json, "HidePrimTransport", ui->cbEVhideTransPrim);
+    JsonToSpinBox (json, "Precision", ui->sbEVprecision);
+    JsonToSpinBox (json, "Expansion", ui->sbEVexpansionLevel);
+    JsonToCheckbox(json, "Position", ui->cbEVpos);
+    JsonToCheckbox(json, "Step", ui->cbEVstep);
+    JsonToCheckbox(json, "KinEn", ui->cbEVkin);
+    JsonToCheckbox(json, "DepoEn", ui->cbEVdepo);
+    JsonToCheckbox(json, "Volume", ui->cbEVvol);
+    JsonToCheckbox(json, "VolIndex", ui->cbEVvi);
+    JsonToCheckbox(json, "Material", ui->cbEVmat);
+    JsonToCheckbox(json, "Time", ui->cbEVtime);
+    JsonToCheckbox(json, "ShowTracks", ui->cbEVtracks);
+    JsonToCheckbox(json, "SuppressSec", ui->cbEVsupressSec);
+    JsonToCheckbox(json, "ShowPMsig", ui->cbEVpmSig);
+
+    JsonToCheckbox(json, "ShowFilters", ui->cbEVshowFilters);
+
+    JsonToCheckbox    (json, "LimToProcActive", ui->cbEVlimToProc);
+    JsonToLineEditText(json, "LimToProc", ui->leEVlimitToProc);
+    JsonToCheckbox    (json, "LimToProcPrim", ui->cbEVlimitToProcPrim);
+
+    JsonToCheckbox    (json, "ExclProcActive", ui->cbEVexcludeProc);
+    JsonToLineEditText(json, "ExclToProc", ui->leEVexcludeProc);
+    JsonToCheckbox    (json, "ExclToProcPrim", ui->cbEVexcludeProcPrim);
 }
 
 void OutputWindow::on_tabwinDiagnose_tabBarClicked(int index)
@@ -1493,7 +1257,7 @@ void OutputWindow::on_pbMonitorShowTime_clicked()
 
     MW->GraphWindow->ShowAndFocus();
     TH1D* h = new TH1D(*EventsDataHub->SimStat->Monitors[imon]->getTime());
-    MW->GraphWindow->Draw(h, "", true, true);
+    MW->GraphWindow->Draw(h, "hist", true, true);
 }
 
 void OutputWindow::on_pbMonitorShowAngle_clicked()
@@ -1503,7 +1267,7 @@ void OutputWindow::on_pbMonitorShowAngle_clicked()
 
     MW->GraphWindow->ShowAndFocus();
     TH1D* h = new TH1D(*EventsDataHub->SimStat->Monitors[imon]->getAngle());
-    MW->GraphWindow->Draw(h, "", true, true);
+    MW->GraphWindow->Draw(h, "hist", true, true);
 }
 
 void OutputWindow::on_pbMonitorShowWave_clicked()
@@ -1569,7 +1333,7 @@ void OutputWindow::on_pbMonitorShowEnergy_clicked()
 
     MW->GraphWindow->ShowAndFocus();
     TH1D* h = new TH1D(*EventsDataHub->SimStat->Monitors[imon]->getEnergy());
-    MW->GraphWindow->Draw(h, "", true, true);
+    MW->GraphWindow->Draw(h, "hist", true, true);
 }
 
 void OutputWindow::on_pbShowProperties_clicked()
@@ -1609,43 +1373,752 @@ void OutputWindow::on_pbShowAverageOverAll_clicked()
     updateSignalScale();
 }
 
-void OutputWindow::on_pbSaveLog_clicked()
+// --------- particle tracking history ----------
+
+#include "asimulationmanager.h"
+#include "aeventtrackingrecord.h"
+#include "atrackinghistorycrawler.h"
+
+void OutputWindow::on_pbPTHistRequest_clicked()
 {
-    if (EventsDataHub->EventHistory.isEmpty())
+    if (MW->SimulationManager->TrackingHistory.empty())
     {
-        message("Log is empty! Make sure to acivate 'Do logs and statistics'\nin MainWindow->Simulation->Accelerators before running a simulation!", this);
+        message("Tracking history is empty!", this);
         return;
     }
 
-    QString fileName = QFileDialog::getSaveFileName(this, "Save particle tracking log to ROOT tree", MW->GlobSet.LastOpenDir, "TTree files (*.root)");
-    if (fileName.isEmpty()) return;
-    MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-    QFileInfo file(fileName);
-    if (file.suffix().isEmpty()) fileName += ".root";
-    EventsDataHub->saveEventHistoryToTree(fileName);
+    AFindRecordSelector Opt;
+    ATrackingHistoryCrawler Crawler(MW->SimulationManager->TrackingHistory);
+
+    Opt.bParticle = ui->cbPTHistParticle->isChecked();
+    Opt.Particle = ui->lePTHistParticle->text();
+    Opt.bPrimary = ui->cbPTHistOnlyPrim->isChecked();
+    Opt.bSecondary = ui->cbPTHistOnlySec->isChecked();
+    Opt.bLimitToFirstInteractionOfPrimary = ui->cbPTHistLimitToFirst->isChecked();
+
+    int bins = ui->sbPTHistBinsX->value();
+    double from = ui->ledPTHistFromX->text().toDouble();
+    double to   = ui->ledPTHistToX  ->text().toDouble();
+
+    int Selector = ui->twPTHistType->currentIndex(); // 0 - Vol, 1 - Boundary
+    if (Selector == 0)
+    {
+        Opt.bMaterial = ui->cbPTHistVolMat->isChecked();
+        Opt.Material = ui->cobPTHistVolMat->currentIndex();
+        Opt.bVolume = ui->cbPTHistVolVolume->isChecked();
+        Opt.Volume = ui->lePTHistVolVolume->text().toLocal8Bit().data();
+        Opt.bVolumeIndex = ui->cbPTHistVolIndex->isChecked();
+        Opt.VolumeIndex = ui->sbPTHistVolIndex->value();
+
+        int What = ui->cobPTHistVolRequestWhat->currentIndex();
+        switch (What)
+        {
+        case 0:
+          {
+            AHistorySearchProcessor_findParticles p;
+            Crawler.find(Opt, p);
+            QMap<QString, int>::const_iterator it = p.FoundParticles.constBegin();
+            ui->ptePTHist->clear();
+            ui->ptePTHist->appendPlainText("Particles found:\n");
+            while (it != p.FoundParticles.constEnd())
+            {
+                ui->ptePTHist->appendPlainText(QString("%1   %2 times").arg(it.key()).arg(it.value()));
+                ++it;
+            }
+            break;
+          }
+        case 1:
+          {
+            AHistorySearchProcessor_findProcesses p;
+            Crawler.find(Opt, p);
+
+            QMap<QString, int>::const_iterator it = p.FoundProcesses.constBegin();
+            ui->ptePTHist->clear();
+            ui->ptePTHist->appendPlainText("Processes found:\n");
+            while (it != p.FoundProcesses.constEnd())
+            {
+                ui->ptePTHist->appendPlainText(QString("%1   %2 times").arg(it.key()).arg(it.value()));
+                ++it;
+            }
+          }
+            break;
+        case 2:
+          {
+            AHistorySearchProcessor_findTravelledDistances p(bins, from, to);
+            Crawler.find(Opt, p);
+
+            if (p.Hist->GetEntries() == 0)
+                message("No trajectories found", this);
+            else
+            {
+                MW->GraphWindow->Draw(p.Hist);
+                p.Hist = nullptr;
+            }
+            binsDistance = bins;
+            fromDistance = from;
+            toDistance = to;
+
+            break;
+          }
+        case 3:
+          {
+            int mode = ui->cobPTHistVolPlus->currentIndex();
+            if (mode <0 || mode >2)
+            {
+                message("Unknown energy deposition collection mode", this);
+                return;
+            }
+            AHistorySearchProcessor_findDepositedEnergy::CollectionMode edm = static_cast<AHistorySearchProcessor_findDepositedEnergy::CollectionMode>(mode);
+
+            AHistorySearchProcessor_findDepositedEnergy p(edm, bins, from, to);
+            Crawler.find(Opt, p);
+
+            if (p.Hist->GetEntries() == 0)
+                message("No deposition detected", this);
+            else
+            {
+                MW->GraphWindow->Draw(p.Hist);
+                p.Hist = nullptr;
+            }
+            binsEnergy = bins;
+            fromEnergy = from;
+            toEnergy = to;
+            selectedModeForEnergyDepo = mode;
+
+            break;
+          }
+        default:
+            qWarning() << "Unknown type of volume request";
+        }
+    }
+    else
+    {
+        //Border
+        Opt.bFromMat = ui->cbPTHistVolMatFrom->isChecked();
+        Opt.FromMat = ui->cobPTHistVolMatFrom->currentIndex();
+        Opt.bFromVolume = ui->cbPTHistVolVolumeFrom->isChecked();
+        Opt.FromVolume = ui->lePTHistVolVolumeFrom->text().toLocal8Bit().data();
+        Opt.bFromVolIndex = ui->cbPTHistVolIndexFrom->isChecked();
+        Opt.FromVolIndex = ui->sbPTHistVolIndexFrom->value();
+
+        Opt.bToMat = ui->cbPTHistVolMatTo->isChecked();
+        Opt.ToMat = ui->cobPTHistVolMatTo->currentIndex();
+        Opt.bToVolume = ui->cbPTHistVolVolumeTo->isChecked();
+        Opt.ToVolume = ui->lePTHistVolVolumeTo->text().toLocal8Bit().data();
+        Opt.bToVolIndex = ui->cbPTHistVolIndexTo->isChecked();
+        Opt.ToVolIndex = ui->sbPTHistVolIndexTo->value();
+
+        QString what = ui->lePTHistBordWhat->text();
+        QString vsWhat = ui->lePTHistBordVsWhat->text();
+        QString andVsWhat = ui->lePTHistBordAndVsWhat->text();
+        QString cuts = ui->lePTHistBordCuts->text();
+
+        bool bVs = ui->cbPTHistBordVs->isChecked();
+        bool bVsVs = ui->cbPTHistBordAndVs->isChecked();
+        bool bAveraged = ui->cbPTHistBordAsStat->isChecked();
+
+        int bins2 = ui->sbPTHistBinsY->value();
+        double from2 = ui->ledPTHistFromY->text().toDouble();
+        double to2   = ui->ledPTHistToY  ->text().toDouble();
+
+        if (!bVs)
+        {
+            //1D stat
+            AHistorySearchProcessor_Border p(what, cuts, bins, from, to);
+            Crawler.find(Opt, p);
+
+            if (p.Hist1D->GetEntries() == 0)
+                message("No data", this);
+            else
+            {
+                MW->GraphWindow->Draw(p.Hist1D, "hist");
+                p.Hist1D = nullptr;
+            }
+        }
+        else
+        {
+            // "vs" is activated
+            if (!bVsVs && bAveraged)
+            {
+                //1D vs
+                AHistorySearchProcessor_Border p(what, vsWhat, cuts, bins, from, to);
+                Crawler.find(Opt, p);
+
+                if (p.Hist1D->GetEntries() == 0)
+                    message("No data", this);
+                else
+                {
+                    MW->GraphWindow->Draw(p.Hist1D, "hist");
+                    p.Hist1D = nullptr;
+                }
+            }
+            else if (!bVsVs && !bAveraged)
+            {
+                //2D stat
+                AHistorySearchProcessor_Border p(what, vsWhat, cuts, bins, from, to, bins2, from2, to2);
+                Crawler.find(Opt, p);
+
+                if (p.Hist2D->GetEntries() == 0)
+                    message("No data", this);
+                else
+                {
+                    MW->GraphWindow->Draw(p.Hist2D, "colz");
+                    p.Hist2D = nullptr;
+                }
+                binsB2 = bins2;
+                fromB2 = from2;
+                toB2 = to2;
+            }
+            else if (bVsVs)
+            {
+                //2D vsvs
+                AHistorySearchProcessor_Border p(what, vsWhat, andVsWhat, cuts, bins, from, to, bins2, from2, to2);
+                Crawler.find(Opt, p);
+
+                if (p.Hist2D->GetEntries() == 0)
+                    message("No data", this);
+                else
+                {
+                    MW->GraphWindow->Draw(p.Hist2D, "colz");
+                    p.Hist2D = nullptr;
+                }
+                binsB2 = bins2;
+                fromB2 = from2;
+                toB2 = to2;
+            }
+            else message("Unexpected mode!", this);
+        }
+        binsB1 = bins;
+        fromB1 = from;
+        toB1 = to;
+    }
 }
 
-void OutputWindow::on_pbHelpWithSaveToTree_clicked()
+void OutputWindow::on_cbPTHistOnlyPrim_clicked(bool checked)
 {
-    QStringList sl = EventHistoryStructure::getAllDefinedTerminationTypes();
+    if (checked) ui->cbPTHistOnlySec->setChecked(false);
+}
 
-    QString s = "";
+void OutputWindow::on_cbPTHistOnlySec_clicked(bool checked)
+{
+    if (checked) ui->cbPTHistOnlyPrim->setChecked(false);
+}
 
-    s += "index -> particle#\n";
-    s += "partId -> index (type) of the particle\n";
-    s += "secondaryOf -> -1 if primary, otherwise particle# of the parent\n";
-    s += "initialPosition -> vector with the generation position\n";
-    s += "direction -> direction of the particle (unit vector)\n";
-    s += "initialEnergy -> energy on start\n";
-    s += "termination -> how the particle tracking has ended\n";
-    for (int i=0; i<sl.size(); i++)
-        s += QString("    %1 = %2\n").arg(i).arg(sl.at(i));
-    s += "The next tree parameters give info related to the geometry volumes the particle passed during tracking.\n";
-    s += "The information is given by vectors, first elements corresponds to the volume where the particle was created\n";
-    s += "and the last to the one where the tracking has stopped.\n";
-    s += "vol_materialId -> material index of the volume\n";
-    s += "vol_depositedEnergy -> energy depsoited in the volume\n";
-    s += "vol_distance -> distance travelled in the volume\n";
+void OutputWindow::on_cobPTHistVolRequestWhat_currentIndexChanged(int index)
+{
+    updatePTHistoryBinControl();
 
-    ui->pteOut->appendPlainText(s);
+    if (index == 2)
+    {
+        ui->sbPTHistBinsX->setValue(binsDistance);
+        ui->ledPTHistFromX->setText(QString::number(fromDistance));
+        ui->ledPTHistToX->setText(QString::number(toDistance));
+    }
+    else if (index == 3)
+    {
+        ui->sbPTHistBinsX->setValue(binsEnergy);
+        ui->ledPTHistFromX->setText(QString::number(fromEnergy));
+        ui->ledPTHistToX->setText(QString::number(toEnergy));
+
+        ui->cobPTHistVolPlus->clear();
+        ui->cobPTHistVolPlus->addItems(QStringList() << "Individual"<<"With secondaries"<<"Over event");
+        ui->cobPTHistVolPlus->setCurrentIndex(selectedModeForEnergyDepo);
+    }
+    ui->cobPTHistVolPlus->setVisible(index == 3);
+}
+
+void OutputWindow::on_twPTHistType_currentChanged(int index)
+{
+    if (index == 0)
+        on_cobPTHistVolRequestWhat_currentIndexChanged(ui->cobPTHistVolRequestWhat->currentIndex());
+    else
+    {
+        ui->sbPTHistBinsX->setValue(binsB1);
+        ui->ledPTHistFromX->setText(QString::number(fromB1));
+        ui->ledPTHistToX->setText(QString::number(toB1));
+        ui->sbPTHistBinsY->setValue(binsB2);
+        ui->ledPTHistFromY->setText(QString::number(fromB2));
+        ui->ledPTHistToY->setText(QString::number(toB2));
+    }
+
+    updatePTHistoryBinControl();
+}
+
+void OutputWindow::updatePTHistoryBinControl()
+{
+    if (ui->twPTHistType->currentIndex() == 0)
+    {
+        //Volume
+        ui->frPTHistX->setVisible( ui->cobPTHistVolRequestWhat->currentIndex() > 1 );
+        ui->frPTHistY->setVisible(false);
+    }
+    else
+    {
+        //Border
+        bool bVs = ui->cbPTHistBordVs->isChecked();
+        ui->lePTHistBordVsWhat->setEnabled(bVs);
+        ui->cbPTHistBordAndVs->setEnabled(bVs);
+        if (!bVs) ui->cbPTHistBordAndVs->setChecked(false);
+
+        bool bVsVs = ui->cbPTHistBordAndVs->isChecked();
+        if (bVsVs) ui->cbPTHistBordAsStat->setChecked(true);
+        ui->lePTHistBordAndVsWhat->setEnabled(bVs && bVsVs);
+        ui->cbPTHistBordAsStat->setEnabled(bVs && !bVsVs);
+        bool bAveraged = ui->cbPTHistBordAsStat->isChecked();
+
+        ui->frPTHistX->setVisible(true);
+        ui->frPTHistY->setVisible(bVsVs || (bVs && !bAveraged));
+    }
+}
+
+void OutputWindow::on_cbPTHistBordVs_toggled(bool)
+{
+    updatePTHistoryBinControl();
+}
+
+void OutputWindow::on_cbPTHistBordAndVs_toggled(bool)
+{
+    updatePTHistoryBinControl();
+}
+
+void OutputWindow::on_cbPTHistBordAsStat_toggled(bool)
+{
+    updatePTHistoryBinControl();
+}
+
+void OutputWindow::fillEvTabViewRecord(QTreeWidgetItem * item, const AParticleTrackingRecord * pr, int ExpansionLevel) const
+{
+    item->setText(0, pr->ParticleName);
+    qlonglong poi = reinterpret_cast<qlonglong>(pr);
+    item->setText(1, QString("%1").arg(poi));
+    //item->setFlags(w->flags() & ~Qt::ItemIsDragEnabled);// & ~Qt::ItemIsSelectable);
+
+    if (ExpansionLevel > 0) ui->trwEventView->expandItem(item);
+    ExpansionLevel--;
+
+    int precision = ui->sbEVprecision->value();
+    bool bHideTransp = ui->cbEVhideTrans->isChecked();
+    bool bHideTranspPrim = ui->cbEVhideTransPrim->isChecked();
+
+    bool bPos = ui->cbEVpos->isChecked();
+    bool bStep = ui->cbEVstep->isChecked();
+    bool bTime = ui->cbEVtime->isChecked();
+    double timeUnits = 1.0;
+    switch (ui->cobEVtime->currentIndex())
+    {
+    case 0: break;
+    case 1: timeUnits *= 0.001; break;
+    case 2: timeUnits *= 1.0e-6; break;
+    }
+    bool bVolume = ui->cbEVvol->isChecked();
+    bool bKin = ui->cbEVkin->isChecked();
+    bool bDepo = ui->cbEVdepo->isChecked();
+    double kinUnits = 1.0;
+    switch (ui->cobEVkin->currentIndex())
+    {
+    case 0: kinUnits *= 1.0e6;
+    case 1: break;
+    case 2: kinUnits *= 1.0e-3; break;
+    }
+    double depoUnits = 1.0;
+    switch (ui->cobEVdepo->currentIndex())
+    {
+    case 0: depoUnits *= 1.0e6;
+    case 1: break;
+    case 2: depoUnits *= 1.0e-3; break;
+    }
+    bool bIndex = ui->cbEVvi->isChecked();
+    bool bMat = ui->cbEVmat->isChecked();
+
+    QString curVolume;
+    int     curVolIndex;
+    int     curMat;
+
+    for (size_t iStep = 0; iStep < pr->getSteps().size(); iStep++)
+    {
+        ATrackingStepData * step = pr->getSteps().at(iStep);
+
+        QString s = step->Process;
+
+        if (step->Process == "C")
+        {
+            ATransportationStepData * trStep = static_cast<ATransportationStepData*>(step);
+            curVolume = trStep->VolName;
+            curVolIndex = trStep->VolIndex;
+            curMat = trStep->iMaterial;
+        }
+        else if (step->Process == "T")
+        {
+            ATransportationStepData * trStep = dynamic_cast<ATransportationStepData*>(step);
+            if (bHideTransp || (bHideTranspPrim && pr->isPrimary()) )
+            {
+                curVolume   = trStep->VolName;
+                curVolIndex = trStep->VolIndex;
+                curMat      = trStep->iMaterial;
+                continue;
+            }
+
+            s += QString("  %1 (#%2, %3) -> %4 (#%5, %6)").arg(curVolume)
+                                                          .arg(curVolIndex)
+                                                          .arg(MW->MpCollection->getMaterialName(curMat))
+                                                          .arg(trStep->VolName)
+                                                          .arg(trStep->VolIndex)
+                                                          .arg(MW->MpCollection->getMaterialName(trStep->iMaterial));
+            //cannot set currents yet - the indication should still show the "from" values - remember about energy deposition during "T" step!
+        }
+
+        if (bPos) s += QString("  (%1, %2, %3)").arg(step->Position[0], 0, 'g', precision).arg(step->Position[1], 0, 'g', precision).arg(step->Position[2], 0, 'g', precision);
+        if (bStep)
+        {
+            double delta = 0;
+            if (iStep != 0)
+            {
+                ATrackingStepData * prev = pr->getSteps().at(iStep-1);
+                for (int i=0; i<3; i++)
+                    delta += (step->Position[i] - prev->Position[i]) * (step->Position[i] - prev->Position[i]);
+                delta = sqrt(delta);
+            }
+            s += QString("  %1mm").arg(delta, 0, 'g', precision);
+        }
+
+        if (step->Process != "O" && step->Process != "T")
+        {
+            if (bVolume) s += QString("  %1").arg(curVolume);
+            if (bIndex)  s += QString("  %1").arg(curVolIndex);
+            if (bMat)    s += QString("  %1").arg( MW->MpCollection->getMaterialName( curMat ));
+        }
+
+        if (bTime)   s += QString("  t=%1").arg(step->Time * timeUnits, 0, 'g', precision);
+        if (bDepo)   s += QString("  depo=%1").arg(step->DepositedEnergy * depoUnits, 0, 'g', precision);
+        if (bKin)    s += QString("  E=%1").arg(step->Energy * kinUnits, 0, 'g', precision);
+
+        QTreeWidgetItem * it = new QTreeWidgetItem(item);
+        it->setText(0, s);
+        qlonglong poi = reinterpret_cast<qlonglong>(pr);
+        it->setText(1, QString("%1").arg(poi));
+        poi = reinterpret_cast<qlonglong>(step);
+        it->setText(2, QString("%1").arg(poi));
+
+        if (ExpansionLevel > 0) ui->trwEventView->expandItem(it);
+
+        for (int iSec : step->Secondaries)
+        {
+            QTreeWidgetItem * subItem = new QTreeWidgetItem(it);
+            fillEvTabViewRecord(subItem, pr->getSecondaries().at(iSec), ExpansionLevel-1);
+        }
+
+        if (step->Process == "T")
+        {
+            ATransportationStepData * trStep = dynamic_cast<ATransportationStepData*>(step);
+            curVolume = trStep->VolName;
+            curVolIndex = trStep->VolIndex;
+            curMat = trStep->iMaterial;
+        }
+    }
+}
+
+void OutputWindow::EV_showTree()
+{
+    ui->trwEventView->clear();
+
+    std::vector<AEventTrackingRecord *> & TH = MW->SimulationManager->TrackingHistory;
+    if (TH.empty()) return;
+
+    int iEv = ui->sbEvent->value();
+    if (iEv >= (int)TH.size()) return;
+
+    int ExpLevel = ui->sbEVexpansionLevel->value();
+
+    AEventTrackingRecord * er = TH.at(iEv);
+    for (AParticleTrackingRecord* pr : er->getPrimaryParticleRecords())
+    {
+        QTreeWidgetItem * item = new QTreeWidgetItem(ui->trwEventView);
+        fillEvTabViewRecord(item, pr, ExpLevel);
+    }
+}
+
+void OutputWindow::EV_show()
+{
+    EV_showTree();
+    EV_showGeo();
+}
+
+#include "geometrywindowclass.h"
+void OutputWindow::EV_showGeo()
+{
+    MW->SimulationManager->clearTracks();
+    MW->GeometryWindow->ClearTracks(false);
+
+    int iEv = ui->sbEvent->value();
+    if (ui->cbEVtracks->isChecked()) MW->GeometryWindow->ShowEvent_Particles(iEv, !ui->cbEVsupressSec->isChecked());
+
+    if (ui->cbEVpmSig->isChecked()) MW->GeometryWindow->ShowPMsignals(iEv, false);
+
+    MW->GeometryWindow->DrawTracks();
+}
+
+int OutputWindow::findEventWithFilters(int currentEv, bool bUp)
+{
+    std::vector<AEventTrackingRecord *> & TH = MW->SimulationManager->TrackingHistory;
+    if (TH.empty()) return -1;
+    if (currentEv == 0 && !bUp) return -1;
+    if (currentEv >= (int)TH.size() && bUp) return -1;
+
+    const QRegularExpression rx = QRegularExpression("(\\ |\\,|\\:|\\t)"); //separators: ' ' or ',' or ':' or '\t'
+
+
+    bool bLimProc = ui->cbEVlimToProc->isChecked();
+    bool bLimProc_prim = ui->cbEVlimitToProcPrim->isChecked();
+    QStringList LimProc = ui->leEVlimitToProc->text().split(rx, QString::SkipEmptyParts);
+
+    bool bExclProc = ui->cbEVexcludeProc->isChecked();
+    bool bExclProc_prim = ui->cbEVexcludeProcPrim->isChecked();
+    QStringList ExclProc = ui->leEVexcludeProc->text().split(rx, QString::SkipEmptyParts);
+
+    if (currentEv > (int)TH.size()) currentEv = (int)TH.size();
+
+    bUp ? currentEv++ : currentEv--;
+    while (currentEv >= 0 && currentEv < (int)TH.size())
+    {
+        const AEventTrackingRecord * er = TH.at(currentEv);
+
+        bool bGood = true;
+        if (bLimProc)
+        {
+            bGood = er->isHaveProcesses(LimProc, bLimProc_prim);
+        }
+        if (bGood && bExclProc)
+        {
+            bGood = !er->isHaveProcesses(ExclProc, bExclProc_prim);
+        }
+        if (bGood) return currentEv;
+
+        bUp ? currentEv++ : currentEv--;
+    };
+    return -1;
+}
+
+void OutputWindow::on_pbNextEvent_clicked()
+{
+    QWidget * cw = ui->tabwinDiagnose->currentWidget();
+    int i = ui->sbEvent->value();
+    if (cw == ui->tabEventViewer)
+    {
+        if (MW->SimulationManager->TrackingHistory.empty())
+        {
+            message("Tracking history is empty!", this);
+            return;
+        }
+        int newi = findEventWithFilters(i, true);
+        if (newi == -1 && i != MW->EventsDataHub->countEvents()-1)
+            message("There are no events according to the selected criteria", this);
+        else i = newi;
+    }
+    else i++;
+
+    if (i >= 0 &&i < MW->EventsDataHub->countEvents()) ui->sbEvent->setValue(i);
+}
+
+void OutputWindow::on_pbPreviousEvent_clicked()
+{
+    QWidget * cw = ui->tabwinDiagnose->currentWidget();
+    int i = ui->sbEvent->value();
+    if (cw == ui->tabEventViewer)
+    {
+        if (MW->SimulationManager->TrackingHistory.empty())
+        {
+            message("Tracking history is empty!", this);
+            return;
+        }
+        int newi = findEventWithFilters(i, false);
+        if (newi == -1 && i != 0)
+            message("There are no events according to the selected criteria", this);
+        else i = newi;
+    }
+    else i--;
+    if (i >= 0) ui->sbEvent->setValue(i);
+}
+
+void OutputWindow::on_sbEvent_valueChanged(int i)
+{
+    if (EventsDataHub->Events.isEmpty())
+        ui->sbEvent->setValue(0);
+    else if (i >= EventsDataHub->Events.size())
+        ui->sbEvent->setValue(EventsDataHub->Events.size()-1); //will retrigger this method
+    else
+    {
+        QWidget * cw = ui->tabwinDiagnose->currentWidget();
+
+        if (cw == ui->tabText && !bForbidUpdate) ShowOneEventLog(i);
+        else if (cw == ui->tabPMhits || cw == ui->tabPmHitViz) on_pbRefreshViz_clicked();
+        else if (cw == ui->tabEventViewer) EV_show();
+    }
+}
+
+void OutputWindow::on_tabwinDiagnose_currentChanged(int)
+{
+    QWidget * cw = ui->tabwinDiagnose->currentWidget();
+    bool bShowEventNum = false;
+
+    if (cw == ui->tabText)
+    {
+        bShowEventNum = true;
+    }
+    else if (cw == ui->tabPMhits)
+    {
+        bShowEventNum = true;
+    }
+    else if (cw == ui->tabPmHitViz)
+    {
+        bShowEventNum = true;
+        gvOut->update();
+    }
+    else if (cw == ui->tabEventViewer)
+    {
+        bShowEventNum = true;
+        //EV_showTree();
+    }
+    else if (cw == ui->tabParticleLog)
+    {
+
+    }
+    else if (cw == ui->tabPhotonLog)
+    {
+
+    }
+    else if (cw == ui->tabMonitors)
+    {
+
+    }
+
+    ui->frEventNumber->setVisible( bShowEventNum );
+}
+
+void OutputWindow::on_pbEventView_ShowTree_clicked()
+{
+    ExpandedItems.clear();
+    int counter = 0;
+    for (int i=0; i<ui->trwEventView->topLevelItemCount(); i++)
+    {
+        QTreeWidgetItem * item = ui->trwEventView->topLevelItem(i);
+        doProcessExpandedStatus(item, counter, true);
+    }
+
+    EV_showTree();
+
+    for (int i=0; i<ui->trwEventView->topLevelItemCount(); i++)
+    {
+        QTreeWidgetItem * item = ui->trwEventView->topLevelItem(i);
+        doProcessExpandedStatus(item, counter, false);
+    }
+}
+
+void OutputWindow::doProcessExpandedStatus(QTreeWidgetItem * item, int & counter, bool bStore)
+{
+    if (bStore)
+    {
+        ExpandedItems << item->isExpanded();
+        for (int i=0; i<item->childCount(); i++)
+            doProcessExpandedStatus(item->child(i), counter, bStore);
+    }
+    else
+    {
+        if (counter >= ExpandedItems.size()) return; // not expected
+        if (ExpandedItems.at(counter)) ui->trwEventView->expandItem(item);
+        else ui->trwEventView->collapseItem(item);
+        counter++;
+        for (int i=0; i<item->childCount(); i++)
+            doProcessExpandedStatus(item->child(i), counter, bStore);
+    }
+}
+
+void OutputWindow::on_pbEVgeo_clicked()
+{
+    EV_showGeo();
+}
+
+void OutputWindow::on_sbEVexpansionLevel_valueChanged(int)
+{
+    EV_showTree();
+}
+
+#include <QMenu>
+#include "TGraph.h"
+void OutputWindow::on_trwEventView_customContextMenuRequested(const QPoint &pos)
+{
+    QTreeWidgetItem * item = ui->trwEventView->currentItem();
+    if (!item) return;
+
+    AParticleTrackingRecord * pr = nullptr;
+    QString s = item->text(1);
+    if (!s.isEmpty())
+    {
+        qlonglong sp = s.toLongLong();
+        pr = reinterpret_cast<AParticleTrackingRecord*>(sp);
+    }
+    ATrackingStepData * st = nullptr;
+    s = item->text(2);
+    if (!s.isEmpty())
+    {
+        qlonglong sp = s.toLongLong();
+        st = reinterpret_cast<ATrackingStepData*>(sp);
+    }
+
+    if (!pr) return;
+
+    QMenu Menu;
+    QAction * showPosition;
+    if (st) showPosition = Menu.addAction("Show position");
+    Menu.addSeparator();
+    QAction * showELDD = Menu.addAction("Show energy linear deposition density");
+    QAction* selectedItem = Menu.exec(ui->trwEventView->mapToGlobal(pos));
+    if (!selectedItem) return; //nothing was selected
+    if (selectedItem == showELDD)
+    {
+        std::vector<float> dist;
+        std::vector<float> ELDD;
+        pr->fillELDD(st, dist, ELDD);
+
+        if (!dist.empty())
+        {
+            TGraph * g = MW->GraphWindow->ConstructTGraph(dist, ELDD, "Deposited energy: linear density", "Distance, mm", "Linear density, keV/mm", 4, 20, 1, 4);
+            MW->GraphWindow->Draw(g, "APL");
+            //MW->GraphWindow->UpdateRootCanvas();
+        }
+    }
+    else if (selectedItem == showPosition)
+    {
+        double pos[3];
+        for (int i=0; i<3; i++) pos[i] = st->Position[i];
+        MW->GeometryWindow->ShowPoint(pos, true);
+    }
+}
+
+void OutputWindow::on_cbEVhideTrans_clicked()
+{
+    EV_showTree();
+}
+
+void OutputWindow::on_cbEVhideTransPrim_clicked()
+{
+    EV_showTree();
+}
+
+void OutputWindow::on_sbMonitorIndex_editingFinished()
+{
+    int mon = ui->sbMonitorIndex->value();
+    if (mon >= ui->cobMonitor->count()) mon = 0;
+    ui->sbMonitorIndex->setValue(mon);
+    if (mon < ui->cobMonitor->count()) ui->cobMonitor->setCurrentIndex(mon); //protection: can be empty
+    updateMonitors();
+}
+
+void OutputWindow::on_pbNextMonitor_clicked()
+{
+    int mon = ui->cobMonitor->currentIndex();
+    mon++;
+    if (mon >= ui->cobMonitor->count()) mon = 0;
+    ui->sbMonitorIndex->setValue(mon);
+    if (mon < ui->cobMonitor->count()) ui->cobMonitor->setCurrentIndex(mon); //protection: can be empty
+    updateMonitors();
 }

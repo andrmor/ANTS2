@@ -1,6 +1,6 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 4
-ANTS2_MINOR = 14
+ANTS2_MINOR = 20
 
 #Optional libraries
 #CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
@@ -11,10 +11,11 @@ CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 #CONFIG += ants2_Python      #enable Python scripting
 #CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering): see https://github.com/mctools/ncrystal
 
-# You may need to modify paths CERN ROOT and the enabled libraries! See the corresponding sections below
+# You may need to modify paths for CERN ROOT and the enabled libraries! See the corresponding sections below
 
 #Optional features enabled in Docker version   
 ants2_docker {
+    CONFIG += ANTS_DOCKER
     CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library: see https://github.com/mariusmuja/flann
     CONFIG += ants2_fann        #enables FANN (fast neural network) library: see https://github.com/libfann/fann
     CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
@@ -93,9 +94,9 @@ ants2_flann {
 
     HEADERS += modules/nnmoduleclass.h
     SOURCES += modules/nnmoduleclass.cpp
-
-    HEADERS += scriptmode/ainterfacetoknnscript.h
-    SOURCES += scriptmode/ainterfacetoknnscript.cpp
+      #interface to script module
+    HEADERS += scriptmode/aknn_si.h
+    SOURCES += scriptmode/aknn_si.cpp
 }
 #----------
 
@@ -119,8 +120,8 @@ ants2_fann {
     HEADERS += gui/neuralnetworkswindow.h
     SOURCES += gui/neuralnetworkswindow.cpp
       #interface to script module
-    HEADERS += scriptmode/ainterfacetoannscript.h
-    SOURCES += scriptmode/ainterfacetoannscript.cpp
+    HEADERS += scriptmode/aann_si.h
+    SOURCES += scriptmode/aann_si.cpp
 }
 #---------
 
@@ -211,11 +212,11 @@ ants2_Python{
                 INCLUDEPATH += /usr/include/PythonQt5/
                 LIBS += -lPythonQt-Qt5-Python3.6
             } else {
-                LIBS += $$system(python3.5-config --libs)
-                QMAKE_CXXFLAGS += $$system(python3.5-config --includes)
+                LIBS += $$system(python3-config --libs)
+                QMAKE_CXXFLAGS += $$system(python3-config --includes)
 
-                INCLUDEPATH += /home/andr/Work/PythonQt/src
-                LIBS += -L/home/andr/Work/PythonQt/lib -lPythonQt
+                INCLUDEPATH += /usr/include/PythonQt5/
+                LIBS += -lPythonQt-Qt5-Python3.6
             }
     }
 
@@ -307,7 +308,6 @@ SOURCES += main.cpp \
     modules/lrf_v2/lrffactory.cpp \
     modules/lrf_v2/alrffitsettings.cpp \
     CUDA/cudamanagerclass.cpp \
-    scriptmode/interfacetoglobscript.cpp \
     scriptmode/scriptminimizer.cpp \
     scriptmode/ascriptexample.cpp \
     scriptmode/ascriptexampledatabase.cpp \
@@ -328,11 +328,9 @@ SOURCES += main.cpp \
     common/aparticle.cpp \
     modules/amaterialparticlecolection.cpp\
     common/ascriptvalueconverter.cpp \
-    scriptmode/ainterfacetowebsocket.cpp \
     common/ainternetbrowser.cpp \
     Net/aroothttpserver.cpp \
     Net/anetworkmodule.cpp \
-    scriptmode/ainterfacetophotonscript.cpp \
     common/aphotonhistorylog.cpp \
     common/amonitor.cpp \
     common/aroothistappenders.cpp \
@@ -340,10 +338,8 @@ SOURCES += main.cpp \
     common/apeakfinder.cpp \
     common/amaterialcomposition.cpp \
     common/aneutroninteractionelement.cpp \
-    scriptmode/ainterfacetodeposcript.cpp \
     scriptmode/localscriptinterfaces.cpp \
     scriptmode/histgraphinterfaces.cpp \
-    scriptmode/ainterfacetomultithread.cpp \
     scriptmode/arootgraphrecord.cpp \
     scriptmode/aroothistrecord.cpp \
     common/arootobjcollection.cpp \
@@ -356,14 +352,10 @@ SOURCES += main.cpp \
     modules/apmhub.cpp \
     common/apmtype.cpp \
     modules/aoneevent.cpp \
-    scriptmode/ainterfacetottree.cpp \
     common/aroottreerecord.cpp \
-    scriptmode/ainterfacetoaddobjscript.cpp \
-    scriptmode/ainterfacetogstylescript.cpp \
     Net/awebsocketsessionserver.cpp \
     Net/awebsocketstandalonemessanger.cpp \
     Net/awebsocketsession.cpp \
-    scriptmode/awebserverinterface.cpp \
     common/agammarandomgenerator.cpp \
     Net/agridrunner.cpp \
     Net/aremoteserverrecord.cpp \
@@ -372,7 +364,6 @@ SOURCES += main.cpp \
     OpticalOverrides/ascriptopticaloverride.cpp \
     common/atracerstateful.cpp \
     common/aphoton.cpp \
-    scriptmode/amathscriptinterface.cpp \
     OpticalOverrides/fsnpopticaloverride.cpp \
     OpticalOverrides/awaveshifteroverride.cpp \
     OpticalOverrides/spectralbasicopticaloverride.cpp \
@@ -381,11 +372,36 @@ SOURCES += main.cpp \
     common/aparticlesourcerecord.cpp \
     modules/ascriptparticlegenerator.cpp \
     modules/afileparticlegenerator.cpp \
-    scriptmode/aparticlegeneratorinterface.cpp \
     common/aparticlerecord.cpp \
-    scriptmode/acorescriptinterface.cpp \
     modules/asourceparticlegenerator.cpp \
-    scriptmode/aparticletrackinghistoryinterface.cpp
+    common/aisotopeabundancehandler.cpp \
+    common/aisotope.cpp \
+    common/achemicalelement.cpp \
+    Simulation/ag4simulationsettings.cpp \
+    gui/ageant4configdialog.cpp \
+    scriptmode/asim_si.cpp \
+    scriptmode/amath_si.cpp \
+    scriptmode/atree_si.cpp \
+    scriptmode/aphoton_si.cpp \
+    scriptmode/acore_si.cpp \
+    scriptmode/ageo_si.cpp \
+    scriptmode/aserver_si.cpp \
+    scriptmode/aweb_si.cpp \
+    scriptmode/athreads_si.cpp \
+    scriptmode/aparticlegenerator_si.cpp \
+    scriptmode/agstyle_si.cpp \
+    scriptmode/aconfig_si.cpp \
+    scriptmode/aevents_si.cpp \
+    scriptmode/arec_si.cpp \
+    scriptmode/apms_si.cpp \
+    scriptmode/alrf_si.cpp \
+    common/aeventtrackingrecord.cpp \
+    scriptmode/apthistory_si.cpp \
+    Simulation/atrackinghistorycrawler.cpp \
+    Simulation/aparticletracker.cpp \
+    common/aexternalprocesshandler.cpp \
+    gui/MainWindowTools/alogconfigdialog.cpp \
+    Simulation/alogsandstatisticsoptions.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -432,7 +448,6 @@ HEADERS  += common/CorrelationFilters.h \
     modules/lrf_v2/lrffactory.h \
     modules/lrf_v2/alrffitsettings.h \
     CUDA/cudamanagerclass.h \
-    scriptmode/interfacetoglobscript.h \
     scriptmode/scriptminimizer.h \
     scriptmode/ascriptexample.h \
     scriptmode/ascriptexampledatabase.h \
@@ -465,12 +480,10 @@ HEADERS  += common/CorrelationFilters.h \
     common/aparticle.h \
     modules/amaterialparticlecolection.h\
     common/ascriptvalueconverter.h \
-    scriptmode/ainterfacetowebsocket.h \
     common/ainternetbrowser.h \
     Net/aroothttpserver.h \
     Net/anetworkmodule.h \
     SplineLibrary/eiquadprog.hpp \
-    scriptmode/ainterfacetophotonscript.h \
     common/aphotonhistorylog.h \
     common/amonitor.h \
     common/aroothistappenders.h \
@@ -478,11 +491,9 @@ HEADERS  += common/CorrelationFilters.h \
     common/apeakfinder.h \
     common/amaterialcomposition.h \
     common/aneutroninteractionelement.h \
-    scriptmode/ainterfacetodeposcript.h \
     scriptmode/localscriptinterfaces.h \
     scriptmode/histgraphinterfaces.h \
     common/amessageoutput.h \
-    scriptmode/ainterfacetomultithread.h \
     scriptmode/ascriptinterfacefactory.h \
     scriptmode/arootgraphrecord.h \
     common/arootobjcollection.h \
@@ -496,21 +507,16 @@ HEADERS  += common/CorrelationFilters.h \
     modules/apmhub.h \
     common/apmtype.h \
     modules/aoneevent.h \
-    scriptmode/ainterfacetottree.h \
     common/aroottreerecord.h \
-    scriptmode/ainterfacetoaddobjscript.h \
-    scriptmode/ainterfacetogstylescript.h \
     Net/awebsocketsessionserver.h \
     Net/awebsocketstandalonemessanger.h \
     Net/awebsocketsession.h \
-    scriptmode/awebserverinterface.h \
     Net/agridrunner.h \
     Net/aremoteserverrecord.h \
     common/atrackbuildoptions.h \
     OpticalOverrides/aopticaloverridescriptinterface.h \
     OpticalOverrides/ascriptopticaloverride.h \
     common/atracerstateful.h \
-    scriptmode/amathscriptinterface.h \
     OpticalOverrides/fsnpopticaloverride.h \
     OpticalOverrides/awaveshifteroverride.h \
     OpticalOverrides/spectralbasicopticaloverride.h \
@@ -520,30 +526,59 @@ HEADERS  += common/CorrelationFilters.h \
     common/aparticlegun.h \
     modules/ascriptparticlegenerator.h \
     modules/afileparticlegenerator.h \
-    scriptmode/aparticlegeneratorinterface.h \
     common/aparticlerecord.h \
-    scriptmode/acorescriptinterface.h \
     modules/asourceparticlegenerator.h \
-    scriptmode/aparticletrackinghistoryinterface.h
+    common/aisotopeabundancehandler.h \
+    common/aisotope.h \
+    common/achemicalelement.h \
+    Simulation/ag4simulationsettings.h \
+    gui/ageant4configdialog.h \
+    scriptmode/asim_si.h \
+    scriptmode/amath_si.h \
+    scriptmode/atree_si.h \
+    scriptmode/aphoton_si.h \
+    scriptmode/acore_si.h \
+    scriptmode/ageo_si.h \
+    scriptmode/aserver_si.h \
+    scriptmode/aweb_si.h \
+    scriptmode/athreads_si.h \
+    scriptmode/aparticlegenerator_si.h \
+    scriptmode/agstyle_si.h \
+    scriptmode/aconfig_si.h \
+    scriptmode/aevents_si.h \
+    scriptmode/arec_si.h \
+    scriptmode/apms_si.h \
+    scriptmode/alrf_si.h \
+    common/aeventtrackingrecord.h \
+    scriptmode/apthistory_si.h \
+    Simulation/atrackinghistorycrawler.h \
+    Simulation/aparticletracker.h \
+    common/aexternalprocesshandler.h \
+    gui/MainWindowTools/alogconfigdialog.h \
+    Simulation/alogsandstatisticsoptions.h
 
 # --- SIM ---
 ants2_SIM {
     DEFINES += SIM
 
     SOURCES += common/asimulationstatistics.cpp \
-    modules/primaryparticletracker.cpp \
     modules/s1_generator.cpp \
     modules/photon_generator.cpp \
     modules/s2_generator.cpp \
-    modules/simulationmanager.cpp \
     OpticalOverrides/phscatclaudiomodel.cpp \
     OpticalOverrides/scatteronmetal.cpp \
     modules/aphotontracer.cpp \
     modules/acompton.cpp \
-    modules/ageometrytester.cpp
+    modules/ageometrytester.cpp \
+    Simulation/atrackingdataimporter.cpp \
+    Simulation/anoderecord.cpp \
+    Simulation/asimulationmanager.cpp \
+    Simulation/asimulatorrunner.cpp \
+    Simulation/asimulator.cpp \
+    Simulation/apointsourcesimulator.cpp \
+    Simulation/aparticlesourcesimulator.cpp
 
     HEADERS  += common/agridelementrecord.h \
-    common/scanfloodstructure.h \
     common/aphoton.h \
     common/ageomarkerclass.h \
     common/atrackrecords.h \
@@ -551,16 +586,21 @@ ants2_SIM {
     common/aenergydepositioncell.h \
     common/ahistoryrecords.h \
     common/asimulationstatistics.h \
-    modules/primaryparticletracker.h \
     modules/s1_generator.h \
     modules/photon_generator.h \
     modules/s2_generator.h \
-    modules/simulationmanager.h \
     OpticalOverrides/phscatclaudiomodel.h \
     OpticalOverrides/scatteronmetal.h \
     modules/aphotontracer.h \
     modules/acompton.h \
-    modules/ageometrytester.h
+    modules/ageometrytester.h \
+    Simulation/atrackingdataimporter.h \
+    Simulation/anoderecord.h \
+    Simulation/asimulationmanager.h \
+    Simulation/asimulatorrunner.h \
+    Simulation/asimulator.h \
+    Simulation/apointsourcesimulator.h \
+    Simulation/aparticlesourcesimulator.h
 }
 
 # --- GUI ---
@@ -627,10 +667,8 @@ ants2_GUI {
     gui/aneutronreactionsconfigurator.cpp \
     gui/aneutronreactionwidget.cpp \
     gui/aneutroninfodialog.cpp \
-    scriptmode/ainterfacetomessagewindow.cpp \
     gui/GraphWindowTools/atoolboxscene.cpp \
     scriptmode/ascriptmessengerdialog.cpp \
-    scriptmode/ainterfacetoguiscript.cpp \
     gui/atextedit.cpp \
     gui/alineedit.cpp \
     gui/awebsocketserverdialog.cpp \
@@ -641,7 +679,13 @@ ants2_GUI {
     gui/aserverdelegate.cpp \
     gui/MainWindowTools/aopticaloverridedialog.cpp \
     gui/MainWindowTools/aopticaloverridetester.cpp \
-    gui/MainWindowTools/aparticlesourcedialog.cpp
+    scriptmode/amsg_si.cpp \
+    scriptmode/agui_si.cpp \
+    scriptmode/ageowin_si.cpp \
+    scriptmode/agraphwin_si.cpp \
+    scriptmode/aoutwin_si.cpp \
+    gui/MainWindowTools/aparticlesourcedialog.cpp \
+    gui/aguiwindow.cpp
 
 HEADERS  += gui/mainwindow.h \
     gui/materialinspectorwindow.h \
@@ -687,10 +731,8 @@ HEADERS  += gui/mainwindow.h \
     gui/aneutronreactionsconfigurator.h \
     gui/aneutronreactionwidget.h \
     gui/aneutroninfodialog.h \
-    scriptmode/ainterfacetomessagewindow.h \
     gui/GraphWindowTools/atoolboxscene.h \
     scriptmode/ascriptmessengerdialog.h \
-    scriptmode/ainterfacetoguiscript.h \
     gui/atextedit.h \
     gui/alineedit.h \
     gui/MainWindowTools/slabdelegate.h \
@@ -701,7 +743,13 @@ HEADERS  += gui/mainwindow.h \
     gui/aserverdelegate.h \
     gui/MainWindowTools/aopticaloverridedialog.h \
     gui/MainWindowTools/aopticaloverridetester.h \
-    gui/MainWindowTools/aparticlesourcedialog.h
+    scriptmode/amsg_si.h \
+    scriptmode/agui_si.h \
+    scriptmode/ageowin_si.h \
+    scriptmode/agraphwin_si.h \
+    scriptmode/aoutwin_si.h \
+    gui/MainWindowTools/aparticlesourcedialog.h \
+    gui/aguiwindow.h
 
 FORMS += gui/mainwindow.ui \
     gui/materialinspectorwindow.ui \
@@ -753,6 +801,7 @@ INCLUDEPATH += modules/lrf_v3
 INCLUDEPATH += common
 INCLUDEPATH += scriptmode
 INCLUDEPATH += Net
+INCLUDEPATH += Simulation
 
 RESOURCES += \
     Resources.qrc
@@ -854,4 +903,8 @@ unix {
    QMAKE_PRE_LINK = $$quote(cp -rf \"$${fromdir}\" \"$${todir}\"$$escape_expand(\n\t))
 }
 #------------
+
+FORMS += \
+    gui/ageant4configdialog.ui \
+    gui/MainWindowTools/alogconfigdialog.ui
 

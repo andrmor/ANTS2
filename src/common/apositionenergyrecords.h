@@ -2,11 +2,59 @@
 #define APOSITIONENERGYRECORDS
 
 #include <QDataStream>
+#include <QDebug>
 
 struct APositionEnergyRecord
 {
     double r[3];
     double energy;
+
+    APositionEnergyRecord& operator=(const APositionEnergyRecord& other)
+    {
+        if (this != &other)
+        {
+            energy = other.energy;
+            for (int i=0; i<3; i++)
+                r[i] = other.r[i];
+        }
+        return *this;
+    }
+
+    friend bool operator< (const APositionEnergyRecord& lhs, const APositionEnergyRecord& rhs)
+    {
+        return (lhs.energy < rhs.energy);
+    }
+
+    bool isCloser(double length2, const APositionEnergyRecord & other) const
+    {
+        double d2 = 0;
+        for (int i=0; i<3; i++)
+        {
+            double delta = r[i] - other.r[i];
+            d2 += delta * delta;
+        }
+        return d2 < length2;
+    }
+
+    void MergeWith(const double R[3], double E)
+    {
+        if (E > 0)
+        {
+            for (int i=0; i<3; i++)
+                r[i] = (r[i]*energy + R[i]*E) / (energy + E);
+            energy += E;
+        }
+    }
+
+    void MergeWith(const APositionEnergyRecord & other)
+    {
+        if (other.energy > 0)
+        {
+            for (int i=0; i<3; i++)
+                r[i] = (r[i]*energy + other.r[i]*other.energy) / (energy + other.energy);
+            energy += other.energy;
+        }
+    }
 };
 
 class APositionEnergyBuffer

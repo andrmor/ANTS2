@@ -94,7 +94,7 @@
        </palette>
       </property>
       <property name="currentIndex">
-       <number>5</number>
+       <number>6</number>
       </property>
       <widget class="QWidget" name="tabText">
        <attribute name="title">
@@ -2486,6 +2486,20 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="sbMonitorIndex">
+               <property name="maximum">
+                <number>100000</number>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pbNextMonitor">
+               <property name="text">
+                <string>Next</string>
                </property>
               </widget>
              </item>

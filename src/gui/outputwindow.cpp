@@ -512,7 +512,12 @@ void OutputWindow::updateMonitors()
             const AGeoObject* obj = MW->Detector->Sandwich->MonitorsRecords.at(i);
             ui->cobMonitor->addItem( QString("%1   index=%2").arg(obj->Name).arg(i));
         }
-        if (oldNum>-1 && oldNum<numMonitors) ui->cobMonitor->setCurrentIndex(oldNum);
+        if (oldNum>-1 && oldNum<numMonitors)
+        {
+            ui->cobMonitor->setCurrentIndex(oldNum);
+            ui->sbMonitorIndex->setValue(oldNum);
+        }
+        else ui->sbMonitorIndex->setValue(0);
 
         int imon = ui->cobMonitor->currentIndex();
         const AGeoObject* monObj = MW->Detector->Sandwich->MonitorsRecords.at(imon);
@@ -2097,4 +2102,23 @@ void OutputWindow::on_cbEVhideTrans_clicked()
 void OutputWindow::on_cbEVhideTransPrim_clicked()
 {
     EV_showTree();
+}
+
+void OutputWindow::on_sbMonitorIndex_editingFinished()
+{
+    int mon = ui->sbMonitorIndex->value();
+    if (mon >= ui->cobMonitor->count()) mon = 0;
+    ui->sbMonitorIndex->setValue(mon);
+    if (mon < ui->cobMonitor->count()) ui->cobMonitor->setCurrentIndex(mon); //protection: can be empty
+    updateMonitors();
+}
+
+void OutputWindow::on_pbNextMonitor_clicked()
+{
+    int mon = ui->cobMonitor->currentIndex();
+    mon++;
+    if (mon >= ui->cobMonitor->count()) mon = 0;
+    ui->sbMonitorIndex->setValue(mon);
+    if (mon < ui->cobMonitor->count()) ui->cobMonitor->setCurrentIndex(mon); //protection: can be empty
+    updateMonitors();
 }

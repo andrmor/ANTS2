@@ -4,9 +4,9 @@ ANTS2 is a simulation and experimental data processing package for Anger camera-
 + Optimization and development of event reconstruction techniques
 + Adaptive (iterative) reconstruction of response of light sensors using flood field illumination data
 + Reconstruction and filtering of events for experimental/simulation data using 
-++Statistical methods(including GPU-based implementations)
-++Artificial Neural Networks
-++kNN-based methods
+  +Statistical methods(including GPU-based implementations)
+  +Artificial Neural Networks
+  +kNN-based methods
 
 + GUI + JavaScript / Pythin scripting 
 + Particle simulations can be automatically delegated to Geant4
@@ -14,7 +14,7 @@ ANTS2 is a simulation and experimental data processing package for Anger camera-
 
 + Docker version (inlcudes Geant4 installation and X-win GUI) is available
 
-It is an open source package developed using CERN ROOT and Qt framework (C++).
+It is an open source package developed using CERN ROOT and Qt framework (C++). Currently we are working on implementation of gemetry visualization using JSROOT library.
 
 For installation guides see:
 https://github.com/andrmor/ANTS2/wiki/Ants2Install

@@ -2691,7 +2691,7 @@
             ],
             "IgnoreThresholds": {
                 "Activated": false,
-                "Max": 1e+10,
+                "Max": 10000000000,
                 "Min": 1
             },
             "LoadFirst": -1,
@@ -2732,10 +2732,10 @@
                     "MatParticles": [
                         {
                             "*Particle": {
-                                "Charge": 0,
-                                "Mass": 0,
+                                "A": -1,
                                 "Name": "gamma",
-                                "Type": 0
+                                "Type": 0,
+                                "Z": -1
                             },
                             "DataSource": "",
                             "DataString": "",
@@ -2750,10 +2750,10 @@
                         },
                         {
                             "*Particle": {
-                                "Charge": -1,
-                                "Mass": 0,
-                                "Name": "electron",
-                                "Type": 1
+                                "A": -1,
+                                "Name": "e-",
+                                "Type": 1,
+                                "Z": -1
                             },
                             "DataSource": "",
                             "DataString": "",
@@ -2765,6 +2765,7 @@
                             "TrackingAllowed": true
                         }
                     ],
+                    "PhotonYieldDefault": 0,
                     "PrimScintDecay": [
                         [
                             0,
@@ -2802,9 +2803,119 @@
                     ],
                     "ChemicalComposition": {
                         "ElementComposition": [
+                            {
+                                "Isotopes": [
+                                    {
+                                        "Abundancy": 96.941,
+                                        "Mass": 40,
+                                        "Symbol": "Ca"
+                                    },
+                                    {
+                                        "Abundancy": 0.647,
+                                        "Mass": 42,
+                                        "Symbol": "Ca"
+                                    },
+                                    {
+                                        "Abundancy": 0.135,
+                                        "Mass": 43,
+                                        "Symbol": "Ca"
+                                    },
+                                    {
+                                        "Abundancy": 2.086,
+                                        "Mass": 44,
+                                        "Symbol": "Ca"
+                                    },
+                                    {
+                                        "Abundancy": 0.004,
+                                        "Mass": 46,
+                                        "Symbol": "Ca"
+                                    },
+                                    {
+                                        "Abundancy": 0.187,
+                                        "Mass": 48,
+                                        "Symbol": "Ca"
+                                    }
+                                ],
+                                "MolarFraction": 0.031578947368421054,
+                                "Symbol": "Ca"
+                            },
+                            {
+                                "Isotopes": [
+                                    {
+                                        "Abundancy": 78.99,
+                                        "Mass": 24,
+                                        "Symbol": "Mg"
+                                    },
+                                    {
+                                        "Abundancy": 10,
+                                        "Mass": 25,
+                                        "Symbol": "Mg"
+                                    },
+                                    {
+                                        "Abundancy": 11.01,
+                                        "Mass": 26,
+                                        "Symbol": "Mg"
+                                    }
+                                ],
+                                "MolarFraction": 0.021052631578947368,
+                                "Symbol": "Mg"
+                            },
+                            {
+                                "Isotopes": [
+                                    {
+                                        "Abundancy": 100,
+                                        "Mass": 23,
+                                        "Symbol": "Na"
+                                    }
+                                ],
+                                "MolarFraction": 0.0912280701754386,
+                                "Symbol": "Na"
+                            },
+                            {
+                                "Isotopes": [
+                                    {
+                                        "Abundancy": 99.757,
+                                        "Mass": 16,
+                                        "Symbol": "O"
+                                    },
+                                    {
+                                        "Abundancy": 0.038,
+                                        "Mass": 17,
+                                        "Symbol": "O"
+                                    },
+                                    {
+                                        "Abundancy": 0.205,
+                                        "Mass": 18,
+                                        "Symbol": "O"
+                                    }
+                                ],
+                                "MolarFraction": 0.6035087719298246,
+                                "Symbol": "O"
+                            },
+                            {
+                                "Isotopes": [
+                                    {
+                                        "Abundancy": 92.2297,
+                                        "Mass": 28,
+                                        "Symbol": "Si"
+                                    },
+                                    {
+                                        "Abundancy": 4.6832,
+                                        "Mass": 29,
+                                        "Symbol": "Si"
+                                    },
+                                    {
+                                        "Abundancy": 3.0872,
+                                        "Mass": 30,
+                                        "Symbol": "Si"
+                                    }
+                                ],
+                                "MolarFraction": 0.25263157894736843,
+                                "Symbol": "Si"
+                            }
                         ],
-                        "ElementCompositionString": "",
-                        "MeanAtomMass": 0
+                        "ElementCompositionString": "SiO2:72 + MgO:6 + CaO:9 + Na2O:13",
+                        "MeanAtomMass": 20.637024273684208
                     },
                     "Comments": "",
                     "Density": 2.5,
@@ -2812,10 +2923,10 @@
                     "MatParticles": [
                         {
                             "*Particle": {
-                                "Charge": 0,
-                                "Mass": 0,
+                                "A": -1,
                                 "Name": "gamma",
-                                "Type": 0
+                                "Type": 0,
+                                "Z": -1
                             },
                             "DataSource": "",
                             "DataString": "",
@@ -2830,10 +2941,10 @@
                         },
                         {
                             "*Particle": {
-                                "Charge": -1,
-                                "Mass": 0,
-                                "Name": "electron",
-                                "Type": 1
+                                "A": -1,
+                                "Name": "e-",
+                                "Type": 1,
+                                "Z": -1
                             },
                             "DataSource": "",
                             "DataString": "",
@@ -2845,6 +2956,7 @@
                             "TrackingAllowed": true
                         }
                     ],
+                    "PhotonYieldDefault": 0,
                     "PrimScintDecay": [
                         [
                             5,
@@ -3326,9 +3438,78 @@
                     ],
                     "ChemicalComposition": {
                         "ElementComposition": [
+                            {
+                                "Isotopes": [
+                                    {
+                                        "Abundancy": 97.41,
+                                        "Mass": 175,
+                                        "Symbol": "Lu"
+                                    },
+                                    {
+                                        "Abundancy": 2.59,
+                                        "Mass": 176,
+                                        "Symbol": "Lu"
+                                    }
+                                ],
+                                "MolarFraction": 0.225,
+                                "Symbol": "Lu"
+                            },
+                            {
+                                "Isotopes": [
+                                    {
+                                        "Abundancy": 99.757,
+                                        "Mass": 16,
+                                        "Symbol": "O"
+                                    },
+                                    {
+                                        "Abundancy": 0.038,
+                                        "Mass": 17,
+                                        "Symbol": "O"
+                                    },
+                                    {
+                                        "Abundancy": 0.205,
+                                        "Mass": 18,
+                                        "Symbol": "O"
+                                    }
+                                ],
+                                "MolarFraction": 0.625,
+                                "Symbol": "O"
+                            },
+                            {
+                                "Isotopes": [
+                                    {
+                                        "Abundancy": 92.2297,
+                                        "Mass": 28,
+                                        "Symbol": "Si"
+                                    },
+                                    {
+                                        "Abundancy": 4.6832,
+                                        "Mass": 29,
+                                        "Symbol": "Si"
+                                    },
+                                    {
+                                        "Abundancy": 3.0872,
+                                        "Mass": 30,
+                                        "Symbol": "Si"
+                                    }
+                                ],
+                                "MolarFraction": 0.125,
+                                "Symbol": "Si"
+                            },
+                            {
+                                "Isotopes": [
+                                    {
+                                        "Abundancy": 100,
+                                        "Mass": 89,
+                                        "Symbol": "Y"
+                                    }
+                                ],
+                                "MolarFraction": 0.025,
+                                "Symbol": "Y"
+                            }
                         ],
-                        "ElementCompositionString": "",
-                        "MeanAtomMass": 4.481120648415865e-239
+                        "ElementCompositionString": "Lu:1.8 + Y:0.2 + SiO5",
+                        "MeanAtomMass": 55.12220300000001
                     },
                     "Comments": "",
                     "Density": 7.1,
@@ -3336,10 +3517,10 @@
                     "MatParticles": [
                         {
                             "*Particle": {
-                                "Charge": 0,
-                                "Mass": 0,
+                                "A": -1,
                                 "Name": "gamma",
-                                "Type": 0
+                                "Type": 0,
+                                "Z": -1
                             },
                             "DataSource": "",
                             "DataString": "",
@@ -3754,7 +3935,7 @@
                                             2.395e-06
                                         ],
                                         [
-                                            1e+06,
+                                            1000000,
                                             1.915e-06
                                         ],
                                         [
@@ -3762,63 +3943,63 @@
                                             1.276e-06
                                         ],
                                         [
-                                            2e+06,
+                                            2000000,
                                             9.564e-07
                                         ],
                                         [
-                                            3e+06,
+                                            3000000,
                                             6.374e-07
                                         ],
                                         [
-                                            4e+06,
+                                            4000000,
                                             4.778e-07
                                         ],
                                         [
-                                            5e+06,
+                                            5000000,
                                             3.823e-07
                                         ],
                                         [
-                                            6e+06,
+                                            6000000,
                                             3.186e-07
                                         ],
                                         [
-                                            8e+06,
+                                            8000000,
                                             2.389e-07
                                         ],
                                         [
-                                            1e+07,
+                                            10000000,
                                             1.911e-07
                                         ],
                                         [
-                                            1.5e+07,
+                                            15000000,
                                             1.274e-07
                                         ],
                                         [
-                                            2e+07,
+                                            20000000,
                                             9.552e-08
                                         ],
                                         [
-                                            3e+07,
+                                            30000000,
                                             6.369e-08
                                         ],
                                         [
-                                            4e+07,
+                                            40000000,
                                             4.776e-08
                                         ],
                                         [
-                                            5e+07,
+                                            50000000,
                                             3.821e-08
                                         ],
                                         [
-                                            6e+07,
+                                            60000000,
                                             3.183e-08
                                         ],
                                         [
-                                            8e+07,
+                                            80000000,
                                             2.388e-08
                                         ],
                                         [
-                                            1e+08,
+                                            100000000,
                                             1.91e-08
                                         ]
                                     ],
@@ -4233,7 +4414,7 @@
                                             0.0003678
                                         ],
                                         [
-                                            1e+06,
+                                            1000000,
                                             0.0003026
                                         ],
                                         [
@@ -4241,63 +4422,63 @@
                                             0.0002113
                                         ],
                                         [
-                                            2e+06,
+                                            2000000,
                                             0.0001636
                                         ],
                                         [
-                                            3e+06,
+                                            3000000,
                                             0.0001137
                                         ],
                                         [
-                                            4e+06,
+                                            4000000,
                                             8.778e-05
                                         ],
                                         [
-                                            5e+06,
+                                            5000000,
                                             7.177e-05
                                         ],
                                         [
-                                            6e+06,
+                                            6000000,
                                             6.086e-05
                                         ],
                                         [
-                                            8e+06,
+                                            8000000,
                                             4.688e-05
                                         ],
                                         [
-                                            1e+07,
+                                            10000000,
                                             3.827e-05
                                         ],
                                         [
-                                            1.5e+07,
+                                            15000000,
                                             2.646e-05
                                         ],
                                         [
-                                            2e+07,
+                                            20000000,
                                             2.034e-05
                                         ],
                                         [
-                                            3e+07,
+                                            30000000,
                                             1.403e-05
                                         ],
                                         [
-                                            4e+07,
+                                            40000000,
                                             1.077e-05
                                         ],
                                         [
-                                            5e+07,
+                                            50000000,
                                             8.77e-06
                                         ],
                                         [
-                                            6e+07,
+                                            60000000,
                                             7.414e-06
                                         ],
                                         [
-                                            8e+07,
+                                            80000000,
                                             5.684e-06
                                         ],
                                         [
-                                            1e+08,
+                                            100000000,
                                             4.625e-06
                                         ]
                                     ],
@@ -4712,7 +4893,7 @@
                                     0.000370195
                                 ],
                                 [
-                                    1e+06,
+                                    1000000,
                                     0.000304515
                                 ],
                                 [
@@ -4720,63 +4901,63 @@
                                     0.000212576
                                 ],
                                 [
-                                    2e+06,
+                                    2000000,
                                     0.000164556
                                 ],
                                 [
-                                    3e+06,
+                                    3000000,
                                     0.000114337
                                 ],
                                 [
-                                    4e+06,
+                                    4000000,
                                     8.82578e-05
                                 ],
                                 [
-                                    5e+06,
+                                    5000000,
                                     7.21523e-05
                                 ],
                                 [
-                                    6e+06,
+                                    6000000,
                                     6.11786e-05
                                 ],
                                 [
-                                    8e+06,
+                                    8000000,
                                     4.71189e-05
                                 ],
                                 [
-                                    1e+07,
+                                    10000000,
                                     3.84611e-05
                                 ],
                                 [
-                                    1.5e+07,
+                                    15000000,
                                     2.65874e-05
                                 ],
                                 [
-                                    2e+07,
+                                    20000000,
                                     2.04355e-05
                                 ],
                                 [
-                                    3e+07,
+                                    30000000,
                                     1.40937e-05
                                 ],
                                 [
-                                    4e+07,
+                                    40000000,
                                     1.08178e-05
                                 ],
                                 [
-                                    5e+07,
+                                    50000000,
                                     8.80821e-06
                                 ],
                                 [
-                                    6e+07,
+                                    60000000,
                                     7.44583e-06
                                 ],
                                 [
-                                    8e+07,
+                                    80000000,
                                     5.70788e-06
                                 ],
                                 [
-                                    1e+08,
+                                    100000000,
                                     4.6441e-06
                                 ]
                             ],
@@ -4784,10 +4965,10 @@
                         },
                         {
                             "*Particle": {
-                                "Charge": -1,
-                                "Mass": 0,
-                                "Name": "electron",
-                                "Type": 1
+                                "A": -1,
+                                "Name": "e-",
+                                "Type": 1,
+                                "Z": -1
                             },
                             "DataSource": "",
                             "DataString": "",
@@ -4797,16 +4978,17 @@
                             "TotalInteraction": [
                                 [
                                     0,
-                                    1e+10
+                                    10000000000
                                 ],
                                 [
                                     10000,
-                                    1e+10
+                                    10000000000
                                 ]
                             ],
                             "TrackingAllowed": true
                         }
                     ],
+                    "PhotonYieldDefault": 32,
                     "PrimScintDecay": [
                         [
                             45,
@@ -5138,10 +5320,10 @@
                     "MatParticles": [
                         {
                             "*Particle": {
-                                "Charge": 0,
-                                "Mass": 0,
+                                "A": -1,
                                 "Name": "gamma",
-                                "Type": 0
+                                "Type": 0,
+                                "Z": -1
                             },
                             "DataSource": "",
                             "DataString": "",
@@ -5156,10 +5338,10 @@
                         },
                         {
                             "*Particle": {
-                                "Charge": -1,
-                                "Mass": 0,
-                                "Name": "electron",
-                                "Type": 1
+                                "A": -1,
+                                "Name": "e-",
+                                "Type": 1,
+                                "Z": -1
                             },
                             "DataSource": "",
                             "DataString": "",
@@ -5171,6 +5353,7 @@
                             "TrackingAllowed": true
                         }
                     ],
+                    "PhotonYieldDefault": 0,
                     "PrimScintDecay": [
                         [
                             5,
@@ -5622,10 +5805,10 @@
                     "MatParticles": [
                         {
                             "*Particle": {
-                                "Charge": 0,
-                                "Mass": 0,
+                                "A": -1,
                                 "Name": "gamma",
-                                "Type": 0
+                                "Type": 0,
+                                "Z": -1
                             },
                             "DataSource": "",
                             "DataString": "",
@@ -5640,10 +5823,10 @@
                         },
                         {
                             "*Particle": {
-                                "Charge": -1,
-                                "Mass": 0,
-                                "Name": "electron",
-                                "Type": 1
+                                "A": -1,
+                                "Name": "e-",
+                                "Type": 1,
+                                "Z": -1
                             },
                             "DataSource": "",
                             "DataString": "",
@@ -5655,6 +5838,7 @@
                             "TrackingAllowed": true
                         }
                     ],
+                    "PhotonYieldDefault": 0,
                     "PrimScintDecay": [
                         [
                             5,
@@ -5702,10 +5886,10 @@
                     "MatParticles": [
                         {
                             "*Particle": {
-                                "Charge": 0,
-                                "Mass": 0,
+                                "A": -1,
                                 "Name": "gamma",
-                                "Type": 0
+                                "Type": 0,
+                                "Z": -1
                             },
                             "DataSource": "",
                             "DataString": "",
@@ -5720,10 +5904,10 @@
                         },
                         {
                             "*Particle": {
-                                "Charge": -1,
-                                "Mass": 0,
-                                "Name": "electron",
-                                "Type": 1
+                                "A": -1,
+                                "Name": "e-",
+                                "Type": 1,
+                                "Z": -1
                             },
                             "DataSource": "",
                             "DataString": "",
@@ -5735,6 +5919,7 @@
                             "TrackingAllowed": true
                         }
                     ],
+                    "PhotonYieldDefault": 0,
                     "PrimScintDecay": [
                         [
                             5,
@@ -5782,10 +5967,10 @@
                     "MatParticles": [
                         {
                             "*Particle": {
-                                "Charge": 0,
-                                "Mass": 0,
+                                "A": -1,
                                 "Name": "gamma",
-                                "Type": 0
+                                "Type": 0,
+                                "Z": -1
                             },
                             "DataSource": "",
                             "DataString": "",
@@ -5800,10 +5985,10 @@
                         },
                         {
                             "*Particle": {
-                                "Charge": -1,
-                                "Mass": 0,
-                                "Name": "electron",
-                                "Type": 1
+                                "A": -1,
+                                "Name": "e-",
+                                "Type": 1,
+                                "Z": -1
                             },
                             "DataSource": "",
                             "DataString": "",
@@ -5815,6 +6000,7 @@
                             "TrackingAllowed": true
                         }
                     ],
+                    "PhotonYieldDefault": 0,
                     "PrimScintDecay": [
                         [
                             5,
@@ -6334,7 +6520,7 @@
                     ]
                 },
                 "SiPMproperties": {
-                    "DarkCountRate": 1e+07,
+                    "DarkCountRate": 10000000,
                     "PixelsX": 62,
                     "PixelsY": 77,
                     "RecoveryTime": 50
@@ -6343,16 +6529,16 @@
         ],
         "ParticleCollection": [
             {
-                "Charge": 0,
-                "Mass": 0,
+                "A": -1,
                 "Name": "gamma",
-                "Type": 0
+                "Type": 0,
+                "Z": -1
             },
             {
-                "Charge": -1,
-                "Mass": 0,
-                "Name": "electron",
-                "Type": 1
+                "A": -1,
+                "Name": "e-",
+                "Type": 1,
+                "Z": -1
             }
         ],
         "Sandwich": {
@@ -6524,18 +6710,31 @@
         "MW": {
             "ConfigGuiLocked": false
         },
-        "PartcleStackChecker": {
-            "Copies": 1,
-            "Energy": 200,
-            "Particle": 0,
-            "ScriptEV": "",
-            "Time": 0,
-            "X": 0,
-            "Y": 0,
-            "Z": 0,
-            "dX": 1,
-            "dY": 0,
-            "dZ": 0
+        "OutputWindow": {
+            "EventViewer": {
+                "DepoEn": false,
+                "ExclProcActive": false,
+                "ExclToProc": "",
+                "ExclToProcPrim": false,
+                "Expansion": 2,
+                "HideAllTransport": false,
+                "HidePrimTransport": false,
+                "KinEn": true,
+                "LimToProc": "",
+                "LimToProcActive": false,
+                "LimToProcPrim": false,
+                "Material": true,
+                "Position": false,
+                "Precision": 4,
+                "ShowFilters": false,
+                "ShowPMsig": false,
+                "ShowTracks": true,
+                "Step": true,
+                "SuppressSec": false,
+                "Time": false,
+                "VolIndex": false,
+                "Volume": true
+            }
         },
         "ReconstructionWindow": {
             "Blur": {
@@ -9469,7 +9668,7 @@
             {
                 "Chi2": {
                     "Active": false,
-                    "Max": 1e+10,
+                    "Max": 10000000000,
                     "Min": 0
                 },
                 "Correlation": {
@@ -9521,13 +9720,13 @@
                 },
                 "LoadedEnergy": {
                     "Active": false,
-                    "Max": 1e+10,
+                    "Max": 10000000000,
                     "Min": 0
                 },
                 "MultipleScanEvents": false,
                 "ReconstructedEnergy": {
                     "Active": false,
-                    "Max": 1e+10,
+                    "Max": 10000000000,
                     "Min": 0
                 },
                 "SpatialCustom": {
@@ -9555,7 +9754,7 @@
                 },
                 "SumSignal": {
                     "Active": false,
-                    "Max": 1e+10,
+                    "Max": 10000000000,
                     "Min": 0,
                     "UseGains": false,
                     "UsePassives": true
@@ -9563,7 +9762,7 @@
                 "kNN": {
                     "Active": false,
                     "AverageOver": 10,
-                    "Max": 1e+10,
+                    "Max": 10000000000,
                     "Min": 0
                 }
             }
@@ -9629,7 +9828,7 @@
                         "IgnoreBySignal": true,
                         "IgnoreDistance": 100,
                         "IgnoreFar": false,
-                        "IgnoreThresholdHigh": 1e+10,
+                        "IgnoreThresholdHigh": 10000000000,
                         "IgnoreThresholdLow": 5,
                         "StretchX": 1.2,
                         "StretchY": 1.2,
@@ -9651,8 +9850,8 @@
                     "DistanceLimit": 15,
                     "IgnoreByDistance": true,
                     "IgnoreBySignal": false,
-                    "SignalLimitHigh": 1e+10,
-                    "SignalLimitLow": -1e+10
+                    "SignalLimitHigh": 10000000000,
+                    "SignalLimitLow": -10000000000
                 },
                 "General": {
                     "IncludePassives": false,
@@ -9675,260 +9874,260 @@
             {
                 "CutOffs": [
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ]
                 ],
                 "Gains": [
@@ -10138,7 +10337,6 @@
         "GeneralSimConfig": {
             "AcceleratorConfig": {
                 "CheckBeforeTrack": true,
-                "LogsStatistics": false,
                 "MaxNumTransitions": 500
             },
             "AngleConfig": {
@@ -10148,7 +10346,7 @@
             "AreaConfig": {
                 "AreaResolved": false
             },
-            "DetStatNumBins": 2000,
+            "DetStatNumBins": 100,
             "Geant4SimulationSettings": {
                 "Commands": [
                     "/process/em/fluo true",
@@ -10157,9 +10355,19 @@
                     "/process/em/pixe true",
                     "/run/setCut 0.01 mm"
                 ],
+                "PhysicsList": "QGSP_BERT_HP",
+                "Precision": 6,
                 "SensitiveVolumes": [
+                    "PrScint"
+                ],
+                "StepLimits": [
                 ],
                 "TrackParticles": false
+            },
+            "LogStatOptions": {
+                "ParticleTransportLog": false,
+                "PhotonDetectionStat": false,
+                "PhotonGenerationLog": false
             },
             "LrfBasedSim": {
                 "NumPhotElLRFunity": 1,
@@ -10176,7 +10384,7 @@
                 "TimeTo": 1000
             },
             "TrackBuildingOptions": {
-                "BuildParticleTracks": false,
+                "BuildParticleTracks": true,
                 "BuildPhotonTracks": false,
                 "GeneralPhoton_Attributes": {
                     "color": 7,
@@ -10268,10 +10476,10 @@
                             "LinkingOppositeDir": false,
                             "LinkingProbability": 0,
                             "Particle": {
-                                "charge": 0,
-                                "mass": 0,
-                                "name": "gamma",
-                                "type": 0
+                                "A": -1,
+                                "Name": "gamma",
+                                "Type": 0,
+                                "Z": -1
                             },
                             "PreferredUnits": "keV",
                             "StatWeight": 1.812,
@@ -10284,10 +10492,10 @@
                             "LinkingOppositeDir": false,
                             "LinkingProbability": 1,
                             "Particle": {
-                                "charge": 0,
-                                "mass": 0,
-                                "name": "gamma",
-                                "type": 0
+                                "A": -1,
+                                "Name": "gamma",
+                                "Type": 0,
+                                "Z": -1
                             },
                             "PreferredUnits": "keV",
                             "StatWeight": 1,
@@ -10300,10 +10508,10 @@
                             "LinkingOppositeDir": false,
                             "LinkingProbability": 0,
                             "Particle": {
-                                "charge": 0,
-                                "mass": 0,
-                                "name": "gamma",
-                                "type": 0
+                                "A": -1,
+                                "Name": "gamma",
+                                "Type": 0,
+                                "Z": -1
                             },
                             "PreferredUnits": "keV",
                             "StatWeight": 0.094,
@@ -10340,7 +10548,7 @@
                                 ],
                                 [
                                     10,
-                                    1.8237e+10
+                                    18237000000
                                 ],
                                 [
                                     20,
@@ -10380,7 +10588,7 @@
                                 ],
                                 [
                                     110,
-                                    5.1972e+10
+                                    51972000000
                                 ],
                                 [
                                     120,
@@ -10404,7 +10612,7 @@
                                 ],
                                 [
                                     170,
-                                    5.5894e+10
+                                    55894000000
                                 ],
                                 [
                                     180,
@@ -10428,7 +10636,7 @@
                                 ],
                                 [
                                     230,
-                                    5.3557e+10
+                                    53557000000
                                 ],
                                 [
                                     240,
@@ -10460,7 +10668,7 @@
                                 ],
                                 [
                                     310,
-                                    4.3455e+10
+                                    43455000000
                                 ],
                                 [
                                     320,
@@ -10480,7 +10688,7 @@
                                 ],
                                 [
                                     360,
-                                    3.4508e+10
+                                    34508000000
                                 ],
                                 [
                                     370,
@@ -10512,7 +10720,7 @@
                                 ],
                                 [
                                     440,
-                                    1.8801e+10
+                                    18801000000
                                 ],
                                 [
                                     450,
@@ -10584,14 +10792,14 @@
                             "LinkingOppositeDir": false,
                             "LinkingProbability": 0,
                             "Particle": {
-                                "charge": -1,
-                                "mass": 0,
-                                "name": "electron",
-                                "type": 1
+                                "A": -1,
+                                "Name": "e-",
+                                "Type": 1,
+                                "Z": -1
                             },
                             "PreferredUnits": "keV",
                             "StatWeight": 1,
-                            "UseFixedEnergy": true
+                            "UseFixedEnergy": false
                         },
                         {
                             "Energy": 307,
@@ -10600,10 +10808,10 @@
                             "LinkingOppositeDir": false,
                             "LinkingProbability": 0.94,
                             "Particle": {
-                                "charge": 0,
-                                "mass": 0,
-                                "name": "gamma",
-                                "type": 0
+                                "A": -1,
+                                "Name": "gamma",
+                                "Type": 0,
+                                "Z": -1
                             },
                             "PreferredUnits": "keV",
                             "StatWeight": 1,
@@ -10616,10 +10824,10 @@
                             "LinkingOppositeDir": false,
                             "LinkingProbability": 0.915,
                             "Particle": {
-                                "charge": 0,
-                                "mass": 0,
-                                "name": "gamma",
-                                "type": 0
+                                "A": -1,
+                                "Name": "gamma",
+                                "Type": 0,
+                                "Z": -1
                             },
                             "PreferredUnits": "keV",
                             "StatWeight": 1,
@@ -10632,10 +10840,10 @@
                             "LinkingOppositeDir": false,
                             "LinkingProbability": 0.145,
                             "Particle": {
-                                "charge": 0,
-                                "mass": 0,
-                                "name": "gamma",
-                                "type": 0
+                                "A": -1,
+                                "Name": "gamma",
+                                "Type": 0,
+                                "Z": -1
                             },
                             "PreferredUnits": "keV",
                             "StatWeight": 1,
@@ -10670,10 +10878,10 @@
                             "LinkingOppositeDir": false,
                             "LinkingProbability": 0,
                             "Particle": {
-                                "charge": 0,
-                                "mass": 0,
-                                "name": "gamma",
-                                "type": 0
+                                "A": -1,
+                                "Name": "gamma",
+                                "Type": 0,
+                                "Z": -1
                             },
                             "PreferredUnits": "keV",
                             "StatWeight": 0.856,
@@ -10686,10 +10894,10 @@
                             "LinkingOppositeDir": false,
                             "LinkingProbability": 0,
                             "Particle": {
-                                "charge": 0,
-                                "mass": 0,
-                                "name": "gamma",
-                                "type": 0
+                                "A": -1,
+                                "Name": "gamma",
+                                "Type": 0,
+                                "Z": -1
                             },
                             "PreferredUnits": "keV",
                             "StatWeight": 0.1068,
@@ -10718,7 +10926,7 @@
                 "ClusterMergeRadius": 1,
                 "DoS1": true,
                 "DoS2": false,
-                "EventsToDo": 1,
+                "EventsToDo": 10,
                 "IgnoreNoDepoEvents": false,
                 "IgnoreNoHitsEvents": false,
                 "ParticleGenerationMode": "Sources",
@@ -10726,55 +10934,6 @@
             }
         },
         "PointSourcesConfig": {
-            "BadEventOptions": {
-                "BadEvents": false,
-                "NoiseArray": [
-                    {
-                        "Active": false,
-                        "AverageValue": 100,
-                        "Description": "Noise signal in one PM",
-                        "Probability": 0.01,
-                        "Spread": 40
-                    },
-                    {
-                        "Active": false,
-                        "AverageValue": 100,
-                        "Description": "Noise signal in one PM\n(over a normal event)",
-                        "Probability": 0.01,
-                        "Spread": 40
-                    },
-                    {
-                        "Active": false,
-                        "AverageValue": 100,
-                        "Description": "Noise signal in all PMs",
-                        "Probability": 0.01,
-                        "Spread": 40
-                    },
-                    {
-                        "Active": false,
-                        "AverageValue": 100,
-                        "Description": "Noise signal in all PMs\n(over a normal event)",
-                        "Probability": 0.01,
-                        "Spread": 40
-                    },
-                    {
-                        "Active": false,
-                        "AverageValue": 0,
-                        "Description": "Double event\n(two independent)",
-                        "Probability": 0.01,
-                        "Spread": 0
-                    },
-                    {
-                        "Active": false,
-                        "AverageValue": 0.5,
-                        "Description": "Double event\n(# of photons is shared)",
-                        "Probability": 0.01,
-                        "Spread": 0.25
-                    }
-                ],
-                "Probability": 0,
-                "SigmaDouble": 10
-            },
             "ControlOptions": {
                 "LimitNodes": true,
                 "LimitNodesTo": "PrScint",
@@ -10784,9 +10943,7 @@
                 "Single_Scan_Flood": 2
             },
             "CustomNodesOptions": {
-                "Nodes": [
-                ],
-                "Script": ""
+                "FileWithNodes": ""
             },
             "FloodOptions": {
                 "CenterX": 0,

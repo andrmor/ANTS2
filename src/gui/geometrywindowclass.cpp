@@ -1254,12 +1254,14 @@ void GeometryWindowClass::on_cbShowTop_toggled(bool checked)
         ShowGeometry(true, false);
     else
     {
+#ifdef __USE_ANTS_JSROOT__
         ShowGeometry(true, false);
         QWebEnginePage * page = WebView->page();
         QString js = "var painter = JSROOT.GetMainPainter(\"onlineGUI_drawing\");";
         js += QString("painter.options.showtop = %1;").arg(checked ? "true" : "false");
         js += "painter.startDrawGeometry();";
         page->runJavaScript(js);
+#endif
     }
 }
 

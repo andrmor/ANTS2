@@ -26,6 +26,7 @@
     #include <QWebEnginePage>
     #include <QWebEngineProfile>
     #include <QWebEngineDownloadItem>
+    #include "aroothttpserver.h"
 #endif
 
 #include "TView3D.h"
@@ -1061,7 +1062,6 @@ void GeometryWindowClass::showWebView()
     ShowGeometry(true, false);
 }
 
-#include "aroothttpserver.h"
 void GeometryWindowClass::on_cobViewer_currentIndexChanged(int index)
 {
 #ifdef __USE_ANTS_JSROOT__
@@ -1072,6 +1072,9 @@ void GeometryWindowClass::on_cobViewer_currentIndexChanged(int index)
     }
     else
     {
+        if (!MW->NetModule->isRootServerRunning())
+            MW->NetModule->StartRootHttpServer();
+
         ui->swViewers->setCurrentIndex(1);
         showWebView();
     }

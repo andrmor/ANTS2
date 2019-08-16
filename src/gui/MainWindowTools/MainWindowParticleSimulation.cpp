@@ -244,9 +244,8 @@ void MainWindow::ShowSource(const AParticleSourceRecord* p, bool clear)
   }
 
   GeometryWindow->DrawTracks();
-  Detector->GeoManager->SetCurrentPoint(X0,Y0,Z0);
+  //Detector->GeoManager->SetCurrentPoint(X0,Y0,Z0);
   //Detector->GeoManager->DrawCurrentPoint(9);
-  GeometryWindow->UpdateRootCanvas();
 }
 
 void MainWindow::on_pbGunTest_clicked()

@@ -745,19 +745,25 @@ void GeometryWindowClass::ShowGeoMarkers()
 {
     if (!MW->GeoMarkers.isEmpty())
     {
-        SetAsActiveRootWindow();
-        for (int i=0; i<MW->GeoMarkers.size(); i++)
+        int Mode = ui->cobViewer->currentIndex(); // 0 - standard, 1 - jsroot
+        if (Mode == 0)
         {
-            GeoMarkerClass* gm = MW->GeoMarkers[i];
-            //overrides
-            if (gm->Type == "Recon" || gm->Type == "Scan" || gm->Type == "Nodes")
+            SetAsActiveRootWindow();
+            for (int i=0; i<MW->GeoMarkers.size(); i++)
             {
-                gm->SetMarkerStyle(GeoMarkerStyle);
-                gm->SetMarkerSize(GeoMarkerSize);
+                GeoMarkerClass* gm = MW->GeoMarkers[i];
+                //overrides
+                if (gm->Type == "Recon" || gm->Type == "Scan" || gm->Type == "Nodes")
+                {
+                    gm->SetMarkerStyle(GeoMarkerStyle);
+                    gm->SetMarkerSize(GeoMarkerSize);
+                }
+                gm->Draw("same");
             }
-            gm->Draw("same");
+            UpdateRootCanvas();
         }
-        UpdateRootCanvas();
+        else
+        ShowGeometry(false);
     }
 }
 
@@ -780,8 +786,13 @@ void GeometryWindowClass::ClearTracks(bool bRefreshWindow)
     MW->Detector->GeoManager->ClearTracks();
     if (bRefreshWindow)
     {
-        SetAsActiveRootWindow();
-        UpdateRootCanvas();
+        int Mode = ui->cobViewer->currentIndex(); // 0 - standard, 1 - jsroot
+        if (Mode == 0)
+        {
+            SetAsActiveRootWindow();
+            UpdateRootCanvas();
+        }
+        else ShowGeometry(false);
     }
 }
 
@@ -820,9 +831,15 @@ void GeometryWindowClass::on_pbShowTracks_clicked()
 void GeometryWindowClass::DrawTracks()
 {
     if (MW->GeometryDrawDisabled) return;
-    SetAsActiveRootWindow();
-    MW->Detector->GeoManager->DrawTracks();
-    UpdateRootCanvas();
+
+    int Mode = ui->cobViewer->currentIndex(); // 0 - standard, 1 - jsroot
+    if (Mode == 0)
+    {
+        SetAsActiveRootWindow();
+        MW->Detector->GeoManager->DrawTracks();
+        UpdateRootCanvas();
+    }
+    else ShowGeometry(false);
 }
 
 void GeometryWindowClass::on_pbClearTracks_clicked()

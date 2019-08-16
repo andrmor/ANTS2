@@ -1,5 +1,3 @@
-#ifdef USE_ROOT_HTML
-
 #ifndef AROOTHTTPSERVER_H
 #define AROOTHTTPSERVER_H
 
@@ -7,8 +5,6 @@
 
 class THttpServer;
 class TGeoManager;
-class TGeoNode;
-class TObjArray;
 
 class ARootHttpServer
 {
@@ -18,15 +14,9 @@ public:
 
     void UpdateGeo(TGeoManager* GeoManager);
 
-    void SetShowTop(bool flag);
-
 private:
-    THttpServer* server;
-    //TGeoNode* GeoWorld;
-    TGeoManager* GeoWorld;
-    TObjArray* GeoTracks;
+    THttpServer * server = nullptr;
+    TGeoManager * GeoWorld = nullptr;
 };
 
 #endif // AROOTHTTPSERVER_H
-
-#endif

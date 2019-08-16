@@ -260,6 +260,9 @@ ants2_jsroot{
 #---ROOT server---
 ants2_RootServer{
   DEFINES += USE_ROOT_HTML
+
+    SOURCES += Net/aroothttpserver.cpp
+    HEADERS += Net/aroothttpserver.h
 }
 #----------
 
@@ -336,7 +339,6 @@ SOURCES += main.cpp \
     modules/amaterialparticlecolection.cpp\
     common/ascriptvalueconverter.cpp \
     common/ainternetbrowser.cpp \
-    Net/aroothttpserver.cpp \
     Net/anetworkmodule.cpp \
     common/aphotonhistorylog.cpp \
     common/amonitor.cpp \
@@ -486,7 +488,6 @@ HEADERS  += common/CorrelationFilters.h \
     modules/amaterialparticlecolection.h\
     common/ascriptvalueconverter.h \
     common/ainternetbrowser.h \
-    Net/aroothttpserver.h \
     Net/anetworkmodule.h \
     SplineLibrary/eiquadprog.hpp \
     common/aphotonhistorylog.h \

@@ -110,30 +110,23 @@ void GeometryWindowClass::prepareGeoManager(bool ColorUpdateAllowed)
     //root segments for roundish objects
     MW->Detector->GeoManager->SetNsegments(MW->GlobSet.NumSegments);
 
-    //control ov visibility of inner volumes
+    //control of visibility of inner volumes
     int level = ui->sbLimitVisibility->value();
     if (!ui->cbLimitVisibility->isChecked()) level = -1;
     MW->Detector->GeoManager->SetVisLevel(level);
 
-    //coloring volumes
     if (ColorUpdateAllowed)
     {
         if (ColorByMaterial) MW->Detector->colorVolumes(1);
         else MW->Detector->colorVolumes(0);
     }
 
-    //top volume visibility
-    MW->Detector->GeoManager->SetTopVisible(ui->cbShowTop->isChecked());
+    //MW->Detector->GeoManager->SetTopVisible(ui->cbShowTop->isChecked());
+    //in this way jsroot have no problem to update visibility of top:
+    MW->Detector->GeoManager->SetTopVisible(true);
+    MW->Detector->top->SetVisibility(ui->cbShowTop->isChecked());
 
-    //transparency setup
-//    int totNodes = MW->Detector->top->GetNdaughters();
     int transp = ui->sbTransparency->value();
-//    for (int i=0; i<totNodes; i++)
-//    {
-//        TGeoNode* thisNode = (TGeoNode*)MW->Detector->top->GetNodes()->At(i);
-//        thisNode->GetVolume()->SetTransparency(Mode == 0 ? 0 : transp);
-//        thisNode->GetVolume()->SetAttBit(TGeoAtt::kVisOnScreen, false);
-//    }
     MW->Detector->top->SetTransparency(Mode == 0 ? 0 : transp);
     adjustGeoAttributes(MW->Detector->top, Mode, transp, ui->cbLimitVisibility->isChecked(), level, 0);
 
@@ -170,9 +163,6 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
     else
     {
 #ifdef __USE_ANTS_JSROOT__
-
-        //MW->NetModule->RootHttpServer->SetShowTop(ui->cbShowTop->isChecked());
-
         if (!MW->GeoMarkers.isEmpty())
         {
             for (int i=0; i<MW->GeoMarkers.size(); i++)
@@ -187,7 +177,6 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
 
                 TPolyMarker3D * mark = new TPolyMarker3D(*gm);
                 gGeoManager->GetListOfTracks()->Add(mark);
-
             }
         }
 

@@ -13,7 +13,6 @@
 #include "asandwich.h"
 #include "anetworkmodule.h"
 #include "ageomarkerclass.h"
-#include "aroothttpserver.h"
 
 #include <QStringList>
 #include <QDebug>
@@ -136,7 +135,7 @@ void GeometryWindowClass::prepareGeoManager(bool ColorUpdateAllowed)
 
 void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool ColorUpdateAllowed)
 {
-    qDebug()<<"  ----Showing geometry----" << MW->GeometryDrawDisabled;
+    //qDebug()<<"  ----Showing geometry----" << MW->GeometryDrawDisabled;
     if (MW->GeometryDrawDisabled) return;
 
     prepareGeoManager(ColorUpdateAllowed);
@@ -163,7 +162,7 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
     else
     {
 #ifdef __USE_ANTS_JSROOT__
-        qDebug() << "Before:" << gGeoManager->GetListOfTracks()->GetEntriesFast() << "markers: "<< MW->GeoMarkers.size();
+        //qDebug() << "Before:" << gGeoManager->GetListOfTracks()->GetEntriesFast() << "markers: "<< MW->GeoMarkers.size();
 
         //deleting old markers
         TObjArray * Arr = gGeoManager->GetListOfTracks();
@@ -173,7 +172,7 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
             if (!dynamic_cast<TVirtualGeoTrack*>(Arr->At(iObj))) break;
         if (iObj < numObj)
         {
-            qDebug() << "First non-track object:"<<iObj;
+            //qDebug() << "First non-track object:"<<iObj;
             for (int iMarker=iObj; iMarker<numObj; iMarker++)
             {
                 delete Arr->At(iMarker);
@@ -181,8 +180,7 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
             }
             Arr->Compress();
         }
-        qDebug() << "After filtering markers:"<<gGeoManager->GetListOfTracks()->GetEntriesFast();
-
+        //qDebug() << "After filtering markers:"<<gGeoManager->GetListOfTracks()->GetEntriesFast();
 
         if (!MW->GeoMarkers.isEmpty())
         {
@@ -200,7 +198,7 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
                 gGeoManager->GetListOfTracks()->Add(mark);
             }
         }
-        qDebug() << "After:" << gGeoManager->GetListOfTracks()->GetEntriesFast();
+        //qDebug() << "After:" << gGeoManager->GetListOfTracks()->GetEntriesFast();
 
         MW->NetModule->onNewGeoManagerCreated();
         QWebEnginePage * page = WebView->page();
@@ -743,6 +741,40 @@ void GeometryWindowClass::ShowPMsignals(int iEvent, bool bFullCycle)
     ShowText(tmp, kBlack, true, bFullCycle);
 }
 
+void GeometryWindowClass::ShowGeoMarkers()
+{
+    if (!MW->GeoMarkers.isEmpty())
+    {
+        SetAsActiveRootWindow();
+        for (int i=0; i<MW->GeoMarkers.size(); i++)
+        {
+            GeoMarkerClass* gm = MW->GeoMarkers[i];
+            //overrides
+            if (gm->Type == "Recon" || gm->Type == "Scan" || gm->Type == "Nodes")
+            {
+                gm->SetMarkerStyle(GeoMarkerStyle);
+                gm->SetMarkerSize(GeoMarkerSize);
+            }
+            gm->Draw("same");
+        }
+        UpdateRootCanvas();
+    }
+}
+
+void GeometryWindowClass::ShowTracksAndMarkers()
+{
+    int Mode = ui->cobViewer->currentIndex(); // 0 - standard, 1 - jsroot
+    if (Mode == 0)
+    {
+        DrawTracks();
+        ShowGeoMarkers();
+    }
+    else
+    {
+        ShowGeometry(true, false);
+    }
+}
+
 void GeometryWindowClass::ClearTracks(bool bRefreshWindow)
 {
     MW->Detector->GeoManager->ClearTracks();
@@ -1056,6 +1088,7 @@ void GeometryWindowClass::doChangeLineWidth(int deltaWidth)
 
 void GeometryWindowClass::showWebView()
 {
+#ifdef __USE_ANTS_JSROOT__
     //WebView->load(QUrl("http://localhost:8080/?nobrowser&item=[Objects/GeoWorld/WorldBox_1,Objects/GeoTracks/TObjArray]&opt=nohighlight;dray;all;tracks;transp50"));
     //WebView->load(QUrl("http://localhost:8080/?item=[Objects/GeoWorld/WorldBox_1,Objects/GeoTracks/TObjArray]&opt=nohighlight;dray;all;tracks;transp50"));
     //WebView->load(QUrl("http://localhost:8080/?item=[Objects/GeoWorld/world,Objects/GeoTracks/TObjArray]&opt=nohighlight;dray;all;tracks;transp50"));
@@ -1071,6 +1104,7 @@ void GeometryWindowClass::showWebView()
     WebView->show();
 
     ShowGeometry(true, false);
+#endif
 }
 
 void GeometryWindowClass::on_cobViewer_currentIndexChanged(int index)
@@ -1179,6 +1213,7 @@ void GeometryWindowClass::on_cbLimitVisibility_clicked()
         ShowGeometry(true, false);
     else
     {
+#ifdef __USE_ANTS_JSROOT__
         int level = ui->sbLimitVisibility->value();
         if (!ui->cbLimitVisibility->isChecked()) level = -1;
         MW->Detector->GeoManager->SetVisLevel(level);
@@ -1186,7 +1221,7 @@ void GeometryWindowClass::on_cbLimitVisibility_clicked()
 
         prepareGeoManager();
         showWebView();
-        //ShowGeometry(true, false);
+#endif
     }
 }
 
@@ -1264,10 +1299,12 @@ void GeometryWindowClass::on_pbSaveAs_clicked()
     }
     else
     {
+#ifdef __USE_ANTS_JSROOT__
         QWebEnginePage * page = WebView->page();
         QString js = "var painter = JSROOT.GetMainPainter(\"onlineGUI_drawing\");";
         js += QString("painter.createSnapshot('dummy.png')");
         page->runJavaScript(js);
+#endif
     }
 }
 
@@ -1284,3 +1321,4 @@ void GeometryWindowClass::onDownloadPngRequested(QWebEngineDownloadItem *item)
     item->accept();
 #endif
 }
+

@@ -453,22 +453,7 @@ void MainWindow::clearGeoMarkers(int All_Rec_True)
 
 void MainWindow::ShowGeoMarkers()
 {
-  if (!GeoMarkers.isEmpty())
-    {
-      GeometryWindow->SetAsActiveRootWindow();
-      for (int i=0; i<GeoMarkers.size(); i++)
-        {
-          GeoMarkerClass* gm = GeoMarkers[i];
-          //overrides
-          if (gm->Type == "Recon" || gm->Type == "Scan" || gm->Type == "Nodes")
-            {
-              gm->SetMarkerStyle(GeometryWindow->GeoMarkerStyle);
-              gm->SetMarkerSize(GeometryWindow->GeoMarkerSize);
-            }
-          gm->Draw("same");
-        }
-      GeometryWindow->UpdateRootCanvas();
-    }
+    GeometryWindow->ShowGeoMarkers();
 }
 
 void MainWindow::ShowGraphWindow()

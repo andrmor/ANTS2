@@ -62,6 +62,8 @@ public:
   void ShowGeometry(bool ActivateWindow = true, bool SAME = true, bool ColorUpdateAllowed = true);
   void ShowEvent_Particles(size_t iEvent, bool withSecondaries);
   void ShowPMsignals(int iEvent, bool bFullCycle = true);
+  void ShowGeoMarkers();
+  void ShowTracksAndMarkers();
 
   void ClearTracks(bool bRefreshWindow = true);
 

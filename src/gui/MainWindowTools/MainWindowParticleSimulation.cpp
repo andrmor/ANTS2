@@ -337,8 +337,8 @@ void MainWindow::TestParticleGun(AParticleGun* Gun, int numParticles)
         }
         GP.clear();
     }
-    GeometryWindow->DrawTracks();
-    ShowGeoMarkers();
+
+    GeometryWindow->ShowTracksAndMarkers();
 }
 
 void MainWindow::on_ledGunAverageNumPartperEvent_editingFinished()

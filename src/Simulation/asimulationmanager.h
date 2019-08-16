@@ -23,7 +23,6 @@ class ASourceParticleGenerator;
 class AFileParticleGenerator;
 class AScriptParticleGenerator;
 class AEventTrackingRecord;
-class TObject;
 
 //class QJsonObject;
 #include <QJsonObject>  // temporary
@@ -108,7 +107,7 @@ private:
 public slots:
     void onSimulationFinished(); //processing of simulation results!
     void StopSimulation();
-    void onNewGeoManager(TObject*); // Nodes in history will be invalid after that!
+    void onNewGeoManager(); // Nodes in history will be invalid after that!
 
 private slots:
     void onSimFailedToStart();    

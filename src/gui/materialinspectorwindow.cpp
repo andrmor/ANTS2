@@ -1516,6 +1516,8 @@ void MaterialInspectorWindow::on_pbShowUsage_clicked()
         }
     }
 
+  MW->Detector->GeoManager->ClearTracks();
+  MW->clearGeoMarkers();
   if (flagFound)
     {
       Detector->colorVolumes(2, index);

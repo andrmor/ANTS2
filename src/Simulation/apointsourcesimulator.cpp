@@ -653,12 +653,6 @@ void APointSourceSimulator::OneNode(ANodeRecord & node)
 
 bool APointSourceSimulator::isInsideLimitingObject(const double *r)
 {
-    //    TGeoNavigator *navigator = detector->GeoManager->GetCurrentNavigator();
-    //    navigator->SetCurrentPoint(r);
-    //    navigator->FindNode();
-    //    TString VolName = navigator->GetCurrentVolume()->GetName();
-    //    return (VolName == LimitNodesToObject);
-
     TGeoNavigator *navigator = detector.GeoManager->GetCurrentNavigator();
 
     if (!navigator)
@@ -668,7 +662,8 @@ bool APointSourceSimulator::isInsideLimitingObject(const double *r)
     }
 
     TGeoNode* node = navigator->FindNode(r[0], r[1], r[2]);
-    return (node && node->GetVolume()->GetName()==LimitNodesToObject);
+    if (!node) return false;
+    return (node->GetVolume() && node->GetVolume()->GetName()==LimitNodesToObject);
 }
 
 void APointSourceSimulator::ReserveSpace(int expectedNumEvents)

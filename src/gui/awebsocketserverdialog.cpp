@@ -72,7 +72,7 @@ void AWebSocketServerDialog::on_pbStopWS_clicked()
 
 void AWebSocketServerDialog::on_pbStartJSR_clicked()
 {
-    MW->GlobSet.getNetworkModule()->StartRootHttpServer(MW->GlobSet.DefaultRootServerPort, MW->GlobSet.ExternalJSROOT);  //does nothing if compilation flag is not set
+    MW->GlobSet.getNetworkModule()->StartRootHttpServer();  //does nothing if compilation flag is not set
 }
 
 void AWebSocketServerDialog::on_pbStopJSR_clicked()

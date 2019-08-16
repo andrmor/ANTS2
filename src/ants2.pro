@@ -11,6 +11,8 @@ CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 #CONFIG += ants2_Python      #enable Python scripting
 #CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering): see https://github.com/mctools/ncrystal
 
+#CONFIG += ants2_jsroot       #enables JSROOT visualisation at GeometryWindow. Automatically enables ants2_RootServer
+
 # You may need to modify paths for CERN ROOT and the enabled libraries! See the corresponding sections below
 
 #Optional features enabled in Docker version   
@@ -185,12 +187,6 @@ ants2_cuda {
      }
 }
 
-#---ROOT server---
-ants2_RootServer{
-  DEFINES += USE_ROOT_HTML
-}
-#----------
-
 #---Python---
 ants2_Python{
     DEFINES += __USE_ANTS_PYTHON__
@@ -254,7 +250,22 @@ ants2_NCrystal{
 }
 #----------
 
+#---JSROOT viewer---
+ants2_jsroot{
+    DEFINES += __USE_ANTS_JSROOT__
+    QT      += webenginewidgets
+    CONFIG  += ants2_RootServer
+}
+#----------
 
+#---ROOT server---
+ants2_RootServer{
+  DEFINES += USE_ROOT_HTML
+
+    SOURCES += Net/aroothttpserver.cpp
+    HEADERS += Net/aroothttpserver.h
+}
+#----------
 
 #Can be used as command line option to force-disable GUI
 Headless {
@@ -329,7 +340,6 @@ SOURCES += main.cpp \
     modules/amaterialparticlecolection.cpp\
     common/ascriptvalueconverter.cpp \
     common/ainternetbrowser.cpp \
-    Net/aroothttpserver.cpp \
     Net/anetworkmodule.cpp \
     common/aphotonhistorylog.cpp \
     common/amonitor.cpp \
@@ -481,7 +491,6 @@ HEADERS  += common/CorrelationFilters.h \
     modules/amaterialparticlecolection.h\
     common/ascriptvalueconverter.h \
     common/ainternetbrowser.h \
-    Net/aroothttpserver.h \
     Net/anetworkmodule.h \
     SplineLibrary/eiquadprog.hpp \
     common/aphotonhistorylog.h \

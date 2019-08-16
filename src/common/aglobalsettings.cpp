@@ -151,7 +151,7 @@ void AGlobalSettings::writeToJson(QJsonObject &json) const
 
     js["DefaultWebSocketPort"] = DefaultWebSocketPort;
     js["DefaultWebSocketIP"] = DefaultWebSocketIP;
-    js["DefaultRootServerPort"] = DefaultRootServerPort;
+    js["RootServerPort"] = RootServerPort;
     js["RunRootServerOnStart"] = fRunRootServerOnStart;
     js["ExternalJSROOT"] = ExternalJSROOT;
 
@@ -211,7 +211,8 @@ void AGlobalSettings::readFromJson(const QJsonObject &json)
     //network
     parseJson(js, "DefaultWebSocketPort", DefaultWebSocketPort);
     parseJson(js, "DefaultWebSocketIP", DefaultWebSocketIP);
-    parseJson(js, "DefaultRootServerPort", DefaultRootServerPort);
+    parseJson(js, "DefaultRootServerPort", RootServerPort); //compatibility
+    parseJson(js, "RootServerPort", RootServerPort);
     parseJson(js, "RunRootServerOnStart", fRunRootServerOnStart);
 
     parseJson(js, "RemoteServers", RemoteServers);

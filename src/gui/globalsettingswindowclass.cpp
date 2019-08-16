@@ -34,7 +34,7 @@ GlobalSettingsWindowClass::GlobalSettingsWindowClass(MainWindow *parent) :
   QObject::connect(MW->GlobSet.getNetworkModule(), &ANetworkModule::StatusChanged, this, &GlobalSettingsWindowClass::updateNetGui);
 
   if (MW->GlobSet.fRunRootServerOnStart)
-    MW->GlobSet.getNetworkModule()->StartRootHttpServer(MW->GlobSet.DefaultRootServerPort, MW->GlobSet.ExternalJSROOT);  //does nothing if compilation flag is not set
+    MW->GlobSet.getNetworkModule()->StartRootHttpServer();  //does nothing if compilation flag is not set
 }
 
 GlobalSettingsWindowClass::~GlobalSettingsWindowClass()
@@ -107,15 +107,11 @@ void GlobalSettingsWindowClass::updateNetGui()
   ui->cbAutoRunRootServer->setChecked( MW->GlobSet.fRunRootServerOnStart );
 
 #ifdef USE_ROOT_HTML
-  if (fRootServerRunning)
-    {
-      ui->leJSROOT->setText( Net->getJSROOTstring());
-      int port = Net->getRootServerPort();
-      QString sPort = QString::number(port);
-      ui->leRootServerPort->setText(sPort);
-      QString url = "http://localhost:" + sPort;
-      ui->leRootServerURL->setText(url);
-    }
+  ui->leJSROOT->setText(MW->GlobSet.ExternalJSROOT);
+  const QString sPort = QString::number(MW->GlobSet.RootServerPort);
+  ui->leRootServerPort->setText(sPort);
+  const QString url = ( fRootServerRunning ? "http://localhost:" + sPort : "" );
+  ui->leRootServerURL->setText(url);
 #else
   ui->cbRunRootServer->setChecked(false);
   ui->cbRunRootServer->setEnabled(false);
@@ -439,7 +435,7 @@ void GlobalSettingsWindowClass::on_cbRunRootServer_clicked(bool checked)
     ANetworkModule* Net = MW->GlobSet.getNetworkModule();
 
     if (checked)
-      Net->StartRootHttpServer(MW->GlobSet.DefaultRootServerPort, MW->GlobSet.ExternalJSROOT);  //does nothing if compilation flag is not set
+      Net->StartRootHttpServer();  //does nothing if compilation flag is not set
     else
       Net->StopRootHttpServer();
 }
@@ -451,17 +447,22 @@ void GlobalSettingsWindowClass::on_cbAutoRunRootServer_clicked()
 
 void GlobalSettingsWindowClass::on_leRootServerPort_editingFinished()
 {
-  int oldp = MW->GlobSet.DefaultRootServerPort;
-  int newp = ui->leRootServerPort->text().toInt();
-  if (oldp == newp) return;
-  MW->GlobSet.DefaultRootServerPort = newp;
+    int oldp = MW->GlobSet.RootServerPort;
+    int newp = ui->leRootServerPort->text().toInt();
+    if (oldp == newp) return;
+    MW->GlobSet.RootServerPort = newp;
 
-  ui->cbRunRootServer->setChecked(false);
+    ui->cbRunRootServer->setChecked(false);
 }
 
 void GlobalSettingsWindowClass::on_leJSROOT_editingFinished()
 {
-  MW->GlobSet.ExternalJSROOT = ui->leJSROOT->text();
+    const QString & olda = MW->GlobSet.ExternalJSROOT;
+    QString newa = ui->leJSROOT->text();
+    if (olda == newa) return;
+    MW->GlobSet.ExternalJSROOT = newa;
+
+    ui->cbRunRootServer->setChecked(false);
 }
 
 void GlobalSettingsWindowClass::on_cbRunWebSocketServer_toggled(bool checked)

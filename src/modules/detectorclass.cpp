@@ -433,14 +433,14 @@ void DetectorClass::constructDetector()
   top->SetName("World");
   //qDebug() << "--> Closing geometry";
   GeoManager->CloseGeometry();
-  emit newGeoManager(GeoManager);
+  emit newGeoManager();
   //qDebug() << "===> All done!";
 }
 
 void DetectorClass::onRequestRegisterGeoManager()
 {
     if (GeoManager)
-      emit newGeoManager(GeoManager);
+      emit newGeoManager();
 }
 
 bool DetectorClass::readDummyPMsFromJson(QJsonObject &json)

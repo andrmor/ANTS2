@@ -126,7 +126,7 @@ signals:
                                                   //0-normal, 1-by mat, 2-highlight mat (matId)
   void requestClearEventsData();
   void requestGroupsGuiUpdate();
-  void newGeoManager(TObject*);
+  void newGeoManager();
 };
 
 #endif // DETECTORCLASS_H

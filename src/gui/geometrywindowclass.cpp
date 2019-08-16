@@ -136,7 +136,7 @@ void GeometryWindowClass::prepareGeoManager(bool ColorUpdateAllowed)
 
 void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool ColorUpdateAllowed)
 {
-    //qDebug()<<"  ----Showing geometry----" << MW->GeometryDrawDisabled;
+    qDebug()<<"  ----Showing geometry----" << MW->GeometryDrawDisabled;
     if (MW->GeometryDrawDisabled) return;
 
     prepareGeoManager(ColorUpdateAllowed);
@@ -163,6 +163,27 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
     else
     {
 #ifdef __USE_ANTS_JSROOT__
+        qDebug() << "Before:" << gGeoManager->GetListOfTracks()->GetEntriesFast() << "markers: "<< MW->GeoMarkers.size();
+
+        //deleting old markers
+        TObjArray * Arr = gGeoManager->GetListOfTracks();
+        const int numObj = Arr->GetEntriesFast();
+        int iObj = 0;
+        for (; iObj<numObj; iObj++)
+            if (!dynamic_cast<TVirtualGeoTrack*>(Arr->At(iObj))) break;
+        if (iObj < numObj)
+        {
+            qDebug() << "First non-track object:"<<iObj;
+            for (int iMarker=iObj; iMarker<numObj; iMarker++)
+            {
+                delete Arr->At(iMarker);
+                (*Arr)[iMarker] = nullptr;
+            }
+            Arr->Compress();
+        }
+        qDebug() << "After filtering markers:"<<gGeoManager->GetListOfTracks()->GetEntriesFast();
+
+
         if (!MW->GeoMarkers.isEmpty())
         {
             for (int i=0; i<MW->GeoMarkers.size(); i++)
@@ -179,6 +200,7 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
                 gGeoManager->GetListOfTracks()->Add(mark);
             }
         }
+        qDebug() << "After:" << gGeoManager->GetListOfTracks()->GetEntriesFast();
 
         MW->NetModule->onNewGeoManagerCreated();
         QWebEnginePage * page = WebView->page();

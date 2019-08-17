@@ -1571,7 +1571,7 @@ void MainWindow::on_pbPMtypeShowArea_clicked()
 
   for (int iX=0; iX<xNum; iX++)
    for (int iY=0; iY<yNum; iY++)
-       hist2D->SetCellContent(iX+1, iY+1, PMs->getType(typ)->AreaSensitivity[iX][iY]);
+       hist2D->SetBinContent(iX+1, iY+1, PMs->getType(typ)->AreaSensitivity[iX][iY]);
 
   hist2D->SetXTitle("X, mm");
   hist2D->SetYTitle("Y, mm");
@@ -1663,101 +1663,113 @@ void MainWindow::on_pbIndPMshowInfo_clicked()
     ui->ledIndPMpsi->setText(QString::number(PM->psi, 'g', 4));
     ui->cobPMtypeInExplorers->setCurrentIndex(PM->type);
 
-    //-- overrides --
-    //effective DE    
-    double eDE = PMs->at(ipm).effectivePDE;
+    //Effective PDE
+    double ePDE = PMs->at(ipm).effectivePDE;
     QString str;
     APmType* type = PMs->getType(p->type);
-    if (eDE == -1)
-      {
-        str.setNum(type->EffectivePDE);
-        ui->labIndDEStatus->setText("Inherited:");
-        //ui->pbIndRestoreEffectiveDE->setEnabled(false);
-      }
+    if (ePDE == -1)
+    {
+        QString lab = "From PM type";
+        const double & factor = PMs->at(ipm).relQE_PDE;
+        if (factor != 1.0)
+        {
+            str.setNum(type->EffectivePDE * factor, 'g', 4);
+            lab += " * " + QString::number(factor);//, 'g', 4);
+        }
+        else
+            str.setNum(type->EffectivePDE, 'g', 4);
+
+        ui->labIndDEStatus->setText(lab);
+    }
     else
-      {
-        str.setNum(eDE, 'g', 4);
-        ui->labIndDEStatus->setText("<b>Override:</b>");
-        //ui->pbIndRestoreEffectiveDE->setEnabled(true);
-      }
+    {
+        str.setNum(ePDE, 'g', 4);
+        ui->labIndDEStatus->setText("<b>Override</b>");
+    }
     ui->ledIndEffectiveDE->setText(str);
-    //wave-resolved DE
+    //ui->lePDEfactorInExplorer->setText( QString::number(PMs->at(ipm).relQE_PDE, 'g', 4) );
+    //ui->leActualPDE_Scalar->setText( QString::number(PMs->getActualPDE(ipm, -1), 'g', 4) );
+
+    //Wave-resolved PDE
     if (PMs->isPDEwaveOverriden(ipm))
-      {
-        ui->labIndDEwaveStatus->setText("<b>Override:</b>");
-        ui->pbIndRestoreDE->setEnabled(true);
+    {
+        ui->labIndDEwaveStatus->setText("<b>Override</b>");
         ui->pbIndShowDE->setEnabled(true);
         if (ui->cbWaveResolved->isChecked()) ui->pbIndShowDEbinned->setEnabled(true);
         else ui->pbIndShowDEbinned->setEnabled(false);
-      }
+    }
     else
-      {       
-       ui->pbIndRestoreDE->setEnabled(false);
-       if (type->PDE.size()>0)
-         {
-          ui->labIndDEwaveStatus->setText("Inherited:");
-          ui->pbIndShowDE->setEnabled(true);          
-          if (ui->cbWaveResolved->isChecked()) ui->pbIndShowDEbinned->setEnabled(true);
-          else ui->pbIndShowDEbinned->setEnabled(false);
-         }
+    {
+       if (!type->PDE.isEmpty())
+       {
+            QString str = "From PM type";
+            if (PMs->at(ipm).relQE_PDE != 1.0)
+                str += " * " + QString::number(PMs->at(ipm).relQE_PDE);//, 'g', 4);
+            ui->labIndDEwaveStatus->setText(str);
+
+            ui->pbIndShowDE->setEnabled(true);
+            ui->pbIndShowDEbinned->setEnabled(ui->cbWaveResolved->isChecked());
+       }
        else
-         {
+       {
           ui->labIndDEwaveStatus->setText("Not defined");
           ui->pbIndShowDE->setEnabled(false);
           ui->pbIndShowDEbinned->setEnabled(false);
-         }
+       }
     }
+    ui->pbCearOverridePDEscalar->setEnabled(PMs->isPDEeffectiveOverriden());
+    ui->pbCearOverridePDEwave->setEnabled(PMs->isPDEwaveOverriden());
+
     //Angular
     if (PMs->isAngularOverriden(ipm))
-      {
-        ui->labIndAngularStatus->setText("<b>Override:</b>");
-        ui->pbIndRestoreAngular->setEnabled(true);
+    {
+        ui->labIndAngularStatus->setText("<b>Override</b>");
         ui->pbIndShowAngular->setEnabled(true);
         if (ui->cbAngularSensitive->isChecked()) ui->pbIndShowEffectiveAngular->setEnabled(true);
         else ui->pbIndShowEffectiveAngular->setEnabled(false);
-      }
+    }
     else
-      {
-        ui->pbIndRestoreAngular->setEnabled(false);
-        if (type->AngularSensitivity.size()>0)
-          {
-           ui->labIndAngularStatus->setText("Inherited:");
+    {
+        if (!type->AngularSensitivity.isEmpty())
+        {
+           ui->labIndAngularStatus->setText("From PM type");
            ui->pbIndShowAngular->setEnabled(true);
            if (ui->cbAngularSensitive->isChecked()) ui->pbIndShowEffectiveAngular->setEnabled(true);
            else ui->pbIndShowEffectiveAngular->setEnabled(false);
-          }
+        }
         else
-          {
+        {
            ui->labIndAngularStatus->setText("Not defined");
            ui->pbIndShowAngular->setEnabled(false);
            ui->pbIndShowEffectiveAngular->setEnabled(false);
-          }
-      }
+        }
+    }
+    ui->pbCearOverrideAngular->setEnabled(PMs->isAngularOverriden());
+
     //Area
     if (PMs->isAreaOverriden(ipm))
-      {
-         ui->labIndAreaStatus->setText("<b>Override:</b>");
-         ui->pbIndRestoreArea->setEnabled(true);
+    {
+         ui->labIndAreaStatus->setText("<b>Override</b>");
          ui->pbIndShowArea->setEnabled(true);
-      }
+    }
     else
-      {         
-         ui->pbIndRestoreArea->setEnabled(false);
-         if (type->AreaSensitivity.size()>0)
-           {
-             ui->labIndAreaStatus->setText("Inherited:");
+    {
+         if (!type->AreaSensitivity.isEmpty())
+         {
+             ui->labIndAreaStatus->setText("From PM type");
              ui->pbIndShowArea->setEnabled(true);
-           }
+         }
          else
-           {
+         {
              ui->labIndAreaStatus->setText("Not defined");
              ui->pbIndShowArea->setEnabled(false);
-           }
-      }
+         }
+    }
+    ui->pbCearOverrideArea->setEnabled(PMs->isAreaOverriden());
 
     //show this PM
     if (ui->tabWidget->currentIndex()==3 && ui->tabwidMain->currentIndex()==0)
-      {        
+    {
         Detector->GeoManager->ClearTracks();      
         double length = type->SizeX*0.5;
         Int_t track_index = Detector->GeoManager->AddTrack(1,22);
@@ -1786,7 +1798,7 @@ void MainWindow::on_pbIndPMshowInfo_clicked()
         track->SetLineColor(kRed);
 
         GeometryWindow->DrawTracks();
-      }
+    }
 }
 
 void MainWindow::on_tabWidget_currentChanged(int index)
@@ -1942,17 +1954,6 @@ void MainWindow::on_pbIndShowType_clicked()
   ui->sbPMtype->setValue(ui->cobPMtypeInExplorers->currentIndex());
 }
 
-void MainWindow::on_ledIndEffectiveDE_editingFinished()
-{
-    const int ipm = ui->sbIndPMnumber->value();
-    const double val = ui->ledIndEffectiveDE->text().toDouble();
-
-    PMs->at(ipm).effectivePDE = val;
-
-    ReconstructDetector(true);
-    //MainWindow::on_pbIndPMshowInfo_clicked();
-}
-
 void MainWindow::on_pbIndRestoreEffectiveDE_clicked()
 {
     const int ipm = ui->sbIndPMnumber->value();
@@ -1962,75 +1963,64 @@ void MainWindow::on_pbIndRestoreEffectiveDE_clicked()
 
 void MainWindow::on_pbIndShowDE_clicked()
 {  
-  int ipm = ui->sbIndPMnumber->value();
-  int typ = ui->cobPMtypeInExplorers->currentIndex();
-
-  const TString tit = ( PMs->isSiPM(ipm) ? "Photon detection efficiency" : "Quantum efficiency" );
-  if (PMs->isPDEwaveOverriden(ipm))
-      GraphWindow->MakeGraph(&PMs->at(ipm).PDE_lambda, &PMs->at(ipm).PDE, kRed, "Wavelength, nm", tit);
-  else
-      GraphWindow->MakeGraph(&PMs->getType(typ)->PDE_lambda, &PMs->getType(typ)->PDE, kRed, "Wavelength, nm", tit);
-}
-
-void MainWindow::on_pbIndRestoreDE_clicked()
-{
     const int ipm = ui->sbIndPMnumber->value();
 
-    PMs->at(ipm).PDE.clear();
-    PMs->at(ipm).PDE_lambda.clear();
-    PMs->at(ipm).PDEbinned.clear();
+    const TString tit = ( PMs->isSiPM(ipm) ? "Photon detection efficiency" : "Quantum efficiency" );
+    const APm & pm = PMs->at(ipm);
 
-    ReconstructDetector(true);
-}
+    QVector<double> x, y;
+    if (PMs->isPDEwaveOverriden(ipm))
+    {
+        x = pm.PDE_lambda;
+        y = pm.PDE;
+    }
+    else
+    {
+        const APmType * typ = PMs->getTypeForPM(ipm);
+        x = typ->PDE_lambda;
+        y = typ->PDE;
+    }
 
-void MainWindow::on_pbIndLoadDE_clicked()
-{
-  int ipm = ui->sbIndPMnumber->value();
+    for (int i=0; i<y.size(); i++)
+        y[i] *= pm.relQE_PDE;
 
-  QString fileName;
-  if (PMs->isSiPM(ipm))
-     fileName = QFileDialog::getOpenFileName(this, "Load photon detection efficiency vs wavelength", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
-  else
-     fileName = QFileDialog::getOpenFileName(this, "Load quantum efficiency vs wavelength", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
-
-  if (fileName.isEmpty()) return;
-  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-
-  QVector<double> x,y;
-  LoadDoubleVectorsFromFile(fileName, &x, &y);
-
-  for (int i=0; i<y.size(); i++)
-    if (y[i]<0 || y[i]>1)
-      {
-        message("Quantum Efficiency and Photon Detection Probability should be in the range from 0 to 1", this);
-        return;
-      }
-
-  PMs->setPDEwave(ipm, &x, &y);
-  PMs->RebinPDEsForPM(ipm);
-  ReconstructDetector(true);
-
-  MainWindow::on_pbIndPMshowInfo_clicked();
+    TGraph * g = GraphWindow->ConstructTGraph(x, y,
+                                              TString("PM #")+ipm, "Wavelength, nm", tit,
+                                              kRed, 20, 1, kRed);
+    GraphWindow->ShowAndFocus();
+    GraphWindow->Draw(g, "APL");
 }
 
 void MainWindow::on_pbIndShowDEbinned_clicked()
 {
-  if (!ui->cbWaveResolved->isChecked())
-    {      
-      message("First activate wavelength resolved simulation option", this);
-      return;
+    if (!ui->cbWaveResolved->isChecked())
+    {
+        message("Activate wavelength resolved simulation option", this);
+        return;
     }
 
-  int ipm = ui->sbIndPMnumber->value();
-  int typ = ui->cobPMtypeInExplorers->currentIndex();
+    const int ipm = ui->sbIndPMnumber->value();
 
-  QVector<double> x;
-  for (int i=0; i<WaveNodes; i++) x.append(WaveFrom + WaveStep*i);
+    const TString tit = ( PMs->isSiPM(ipm) ? "Photon detection efficiency" : "Quantum efficiency" );
+    const APm & pm = PMs->at(ipm);
 
-  if (PMs->at(ipm).PDEbinned.size() > 0)
-    GraphWindow->MakeGraph(&x, &PMs->at(ipm).PDEbinned, kRed, "Wavelength, nm", "PDE");
-  else
-    GraphWindow->MakeGraph(&x, &PMs->getType(typ)->PDEbinned, kRed, "Wavelength, nm", "PDE");
+    QVector<double> x, y;
+    for (int i=0; i<WaveNodes; i++)
+        x.append(WaveFrom + WaveStep*i);
+
+    if (PMs->at(ipm).PDEbinned.size() > 0)
+        y = pm.PDEbinned;
+    else
+        y = PMs->getTypeForPM(ipm)->PDEbinned;
+
+    for (int i=0; i<y.size(); i++)
+        y[i] *= pm.relQE_PDE;
+
+    TGraph * g = GraphWindow->ConstructTGraph(x, y,
+                                              TString("PM #")+ipm, "Wavelength, nm", tit,
+                                              kRed, 20, 1, kRed);
+    GraphWindow->ShowAndFocus();
+    GraphWindow->Draw(g, "APL");
 }
 
 void MainWindow::on_pbAddPM_clicked()
@@ -2043,63 +2033,6 @@ void MainWindow::on_pbAddPM_clicked()
                          Detector->PMarrays[0].PositionsAnglesTypes.size() + Detector->PMarrays[1].PositionsAnglesTypes.size()-1;
   ui->sbIndPMnumber->setValue(ipm);
   ui->tabWidget->setCurrentIndex(3);
-}
-
-void MainWindow::on_pbIndLoadAngular_clicked()
-{
-  QString fileName;
-  fileName = QFileDialog::getOpenFileName(this, "Load angular response (0 - 90 degrees)", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
-  if (fileName.isEmpty()) return;
-  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-
-  QVector<double> x,y;
-  LoadDoubleVectorsFromFile(fileName, &x, &y);
-
-  if (x[0] !=0 || x[x.size()-1] != 90)
-      {
-        message("Data should start at 0 and end at 90 degrees!", this);
-        return;
-      }
-
-  for (int i=0; i<x.size(); i++)
-      if (y[i] < 0)
-       {
-         message("Data should be positive!", this);
-         return;
-       }
-
-  if (y[0] <1e-10)
-    {
-      message("Response for normal incidence cannot be 0 (due to the auto-scale it to 1)!", this);
-      return;
-    }
-
-  double norm = y[0];
-  if (norm != 1)
-    {
-      for (int i=0; i<x.size(); i++) y[i] = y[i]/norm;
-      message("Data were scaled to have response of unity at normal incidence", this);
-    }
-
-  int ipm = ui->sbIndPMnumber->value();
-  PMs->setAngular(ipm, &x, &y);
-  PMs->at(ipm).AngularN1 = ui->ledIndMediumRefrIndex->text().toDouble();
-
-  PMs->RecalculateAngularForPM(ipm);
-  ReconstructDetector(true);
-  //MainWindow::on_pbIndPMshowInfo_clicked();
-}
-
-void MainWindow::on_pbIndRestoreAngular_clicked()
-{
-  const int ipm = ui->sbIndPMnumber->value();
-
-  PMs->at(ipm).AngularSensitivity_lambda.clear();
-  PMs->at(ipm).AngularSensitivity.clear();
-  PMs->at(ipm).AngularSensitivityCosRefracted.clear();
-
-  ReconstructDetector(true);
-  //MainWindow::on_pbIndPMshowInfo_clicked();
 }
 
 void MainWindow::on_pbIndShowAngular_clicked()
@@ -2134,45 +2067,6 @@ void MainWindow::on_pbIndShowEffectiveAngular_clicked()
     GraphWindow->MakeGraph(&x, &PMs->getType(typ)->AngularSensitivityCosRefracted, kRed, "Cosine of refracted beam", "Response");
 }
 
-void MainWindow::on_ledIndMediumRefrIndex_editingFinished()
-{
-    const int ipm = ui->sbIndPMnumber->value();
-
-    PMs->at(ipm).AngularN1 = ui->ledIndMediumRefrIndex->text().toDouble();
-
-    PMs->RecalculateAngularForPM(ipm);
-    ReconstructDetector(true);
-    //MainWindow::on_pbIndPMshowInfo_clicked();
-}
-
-void MainWindow::on_pbIndLoadArea_clicked()
-{
-    QString fileName;
-    fileName = QFileDialog::getOpenFileName(this, "Load area response", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
-    if (fileName.isEmpty()) return;
-    GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-
-    int ipm = ui->sbIndPMnumber->value();
-    QVector< QVector <double> > tmp;
-    double xStep, yStep;
-    int error = MainWindow::LoadAreaResponse(fileName, &tmp, &xStep, &yStep);
-
-    if (error == 0) PMs->setArea(ipm, &tmp, xStep, yStep);
-    //if (error == 1) message("Error reading the file - cannot open!", this);
-    //if (error == 2) message("Error reading the file - wrong format!", this);
-    ReconstructDetector(true);
-
-    MainWindow::on_pbIndPMshowInfo_clicked();
-}
-
-void MainWindow::on_pbIndRestoreArea_clicked()
-{
-    int ipm = ui->sbIndPMnumber->value();
-    QVector<QVector<double> > tmp;
-    PMs->setArea(ipm, &tmp, 123.0, 123.0); //strange step deliberately
-    ReconstructDetector(true);
-}
-
 void MainWindow::on_pbIndShowArea_clicked()
 {
     int ipm = ui->sbIndPMnumber->value();
@@ -2200,15 +2094,15 @@ void MainWindow::on_pbIndShowArea_clicked()
       }
 //    qDebug()<<xNum<<xStep<<yNum<<yStep;
 
-    auto hist2D = new TH2D("T-AreaSens","Response, %",xNum, -0.5*xNum*xStep, +0.5*xNum*xStep, yNum, -0.5*yNum*yStep, +0.5*yNum*yStep);
+    auto hist2D = new TH2D("T-AreaSens","Area response",xNum, -0.5*xNum*xStep, +0.5*xNum*xStep, yNum, -0.5*yNum*yStep, +0.5*yNum*yStep);
 
     for (int iX=0; iX<xNum; iX++)
      for (int iY=0; iY<yNum; iY++)
      {
         if (PMs->isAreaOverriden(ipm))
-            hist2D->SetCellContent(iX+1, iY+1, PMs->at(ipm).AreaSensitivity.at(iX).at(iY) * 100.0);
+            hist2D->SetBinContent(iX+1, iY+1, PMs->at(ipm).AreaSensitivity.at(iX).at(iY));
         else
-            hist2D->SetCellContent(iX+1, iY+1, PMs->getType(typ)->AreaSensitivity.at(iX).at(iY) * 100.0);
+            hist2D->SetBinContent(iX+1, iY+1, PMs->getType(typ)->AreaSensitivity.at(iX).at(iY));
      }
     hist2D->SetXTitle("X, mm");
     hist2D->SetYTitle("Y, mm");
@@ -2561,107 +2455,109 @@ void MainWindow::on_sbElPMnumber_valueChanged(int arg1)
 
 void MainWindow::on_pbElUpdateIndication_clicked()
 {
-  //qDebug() << "----Electronics GUI update -----------";
-  bool tmpBulk = BulkUpdate;
-  BulkUpdate = true;
+    //qDebug() << "----Electronics GUI update -----------";
+    bool tmpBulk = BulkUpdate;
+    BulkUpdate = true;
 
-  ui->cbEnableSPePHS->setChecked(Detector->PMs->isDoPHS());
-  ui->cbEnableMCcrosstalk->setChecked(Detector->PMs->isDoMCcrosstalk());
-  ui->cbEnableElNoise->setChecked(Detector->PMs->isDoElNoise());
-  ui->cbEnableADC->setChecked(Detector->PMs->isDoADC());
-  ui->cbDarkCounts_Enable->setChecked(Detector->PMs->fDoDarkCounts);
+    ui->cbEnableSPePHS->setChecked(Detector->PMs->isDoPHS());
+    ui->cbEnableMCcrosstalk->setChecked(Detector->PMs->isDoMCcrosstalk());
+    ui->cbEnableElNoise->setChecked(Detector->PMs->isDoElNoise());
+    ui->cbEnableADC->setChecked(Detector->PMs->isDoADC());
+    ui->cbDarkCounts_Enable->setChecked(Detector->PMs->fDoDarkCounts);
 
-  int ipm = ui->sbElPMnumber->value();
-  int NumPMs = PMs->count();
-  if (ipm>NumPMs-1 && ipm != 0)
+    const int ipm = ui->sbElPMnumber->value();
+    const int NumPMs = PMs->count();
+    if (ipm >= NumPMs && ipm != 0)
     {
-      ui->sbElPMnumber->setValue(0);
-      return; //update on_change
+        ui->sbElPMnumber->setValue(0);
+        return; //update on_change
+    }
+    if (NumPMs == 0)
+    {
+        ui->twElectronics->setEnabled(false);
+        return;
     }
 
-  if (NumPMs != 0)
+    ui->twElectronics->setEnabled(true);
+    const APm & pm = PMs->at(ipm);
+
+    ui->labElType->setText(PMs->getType(pm.type)->Name);
+    QString str, str1;
+    str.setNum( pm.AverageSigPerPhE );
+    ui->ledAverageSigPhotEl->setText(str);
+    str.setNum( pm.SPePHSsigma);
+    ui->ledElsigma->setText(str);
+    str.setNum( pm.SPePHSshape);
+    ui->ledElShape->setText(str);
+    ui->pbElGainShowDistr->setEnabled( pm.SPePHShist );
+
+    ui->leSPEfactor->setText( QString::number( pm.relElStrength ) );
+    ui->labSPEfactorNotUnity->setVisible( pm.relElStrength != 1.0 );
+
+    //MCcrosstalk
+    ui->cobMCcrosstalk_Model->setCurrentIndex( pm.MCmodel );
+    if ( pm.MCmodel == 0)
     {
-      ui->twElectronics->setEnabled(true);
-
-      ui->labElType->setText(PMs->getType(PMs->at(ipm).type)->Name);
-      QString str, str1;
-      str.setNum( PMs->at(ipm).AverageSigPerPhE );
-      ui->ledAverageSigPhotEl->setText(str);
-      str.setNum(PMs->at(ipm).SPePHSsigma);
-      ui->ledElsigma->setText(str);
-      str.setNum(PMs->at(ipm).SPePHSshape);
-      ui->ledElShape->setText(str);
-      ui->pbElGainShowDistr->setEnabled( PMs->at(ipm).SPePHShist );
-
-      //MCcrosstalk      
-      ui->cobMCcrosstalk_Model->setCurrentIndex( PMs->at(ipm).MCmodel );
-      if (PMs->at(ipm).MCmodel == 0)
-      {
-          ui->tabMCcrosstalk->clearContents();
-          QVector<double> vals = PMs->at(ipm).MCcrosstalk;
-          if (vals.isEmpty()) vals << 1.0;
-          while (vals.size()<3) vals << 0;
-          ui->tabMCcrosstalk->setColumnCount(vals.size());
-          ui->tabMCcrosstalk->setRowCount(1);
-          QStringList header;
-          for (int i=0; i<vals.size(); i++)
-            {
-              QTableWidgetItem* item = new QTableWidgetItem(QString::number(vals.at(i)));
-              item->setTextAlignment(Qt::AlignCenter);
-              ui->tabMCcrosstalk->setItem(0, i, item);
-              header << QString::number(i+1)+" ph.e.";
-            }
-          ui->tabMCcrosstalk->setVerticalHeaderLabels(QStringList("Probability"));
-          ui->tabMCcrosstalk->setHorizontalHeaderLabels(header);
-          ui->tabMCcrosstalk->resizeColumnsToContents();
-          ui->tabMCcrosstalk->resizeRowsToContents();
-      }
-      else
-      {
-          ui->ledMCcrosstalkTriggerProb->setText( QString::number(PMs->at(ipm).MCtriggerProb) );
-
-          double br = 1 - PMs->at(ipm).MCtriggerProb;
-          double Epsilon = 1 - br*br*br*br;   //  1-epsilon = (1-p)^n    model with n = 4
-          ui->labMCtotalProb->setText( QString::number(Epsilon, 'g', 4) );
-          double np = 4.0*PMs->at(ipm).MCtriggerProb;
-          double MCmeanCells = 1.0 + np + np*np;  // Average num triggered cells = 1 + np + (np)^2 + o(p^2)  model with n = 4
-          ui->labMCmean->setText( QString::number(MCmeanCells, 'g', 4) );
-      }
-
-      ui->ledTimeOfOneMeasurement->setText( QString::number(PMs->at(ipm).MeasurementTime) );
-      ui->swDarkCounts_Time->setCurrentIndex( ui->cbTimeResolved->isChecked() ? 1 : 0 );
-      ui->cobDarkCounts_Model->setCurrentIndex( PMs->at(ipm).DarkCounts_Model );
-      const bool bHaveDist = !PMs->at(ipm).DarkCounts_Distribution.isEmpty();
-      ui->pbDarkCounts_Show->setEnabled(bHaveDist);
-      ui->pbDarkCounts_Delete->setEnabled(bHaveDist);
-
-      str.setNum(PMs->at(ipm).ElNoiseSigma);
-      ui->ledElNoiseSigma->setText(str);
-      str.setNum(PMs->at(ipm).ElNoiseSigma_StatSigma);
-      ui->ledElNoiseSigma_Stat->setText(str);
-      str.setNum(PMs->at(ipm).ElNoiseSigma_StatNorm);
-      ui->ledElNoiseSigma_Norm->setText(str);
-
-      //str.setNum(PMs->at(ipm).ADCmax);
-      ui->ledADCmax->setText( QString::number(PMs->at(ipm).ADCmax) );
-      ui->sbADCbits->setValue( PMs->at(ipm).ADCbits );
-
-      str.setNum(PMs->at(ipm).ADClevels + 1);
-      str = "levels: " + str;
-      str1.setNum(PMs->at(ipm).ADCstep);
-      str += "  signal/level: "+str1;
-      ui->leoADCInfo->setText(str);
-
-      const int& mode = PMs->at(ipm).SPePHSmode;
-      if (mode == 3) ui->ledAverageSigPhotEl->setReadOnly(true);
-      else ui->ledAverageSigPhotEl->setReadOnly(false);
-      ui->cobPMampGainModel->setCurrentIndex(mode);
+        ui->tabMCcrosstalk->clearContents();
+        QVector<double> vals = pm.MCcrosstalk;
+        if (vals.isEmpty()) vals << 1.0;
+        while (vals.size() < 3) vals << 0;
+        ui->tabMCcrosstalk->setColumnCount(vals.size());
+        ui->tabMCcrosstalk->setRowCount(1);
+        QStringList header;
+        for (int i = 0; i < vals.size(); i++)
+        {
+            QTableWidgetItem* item = new QTableWidgetItem(QString::number(vals.at(i)));
+            item->setTextAlignment(Qt::AlignCenter);
+            ui->tabMCcrosstalk->setItem(0, i, item);
+            header << QString::number(i + 1) + " ph.e.";
+        }
+        ui->tabMCcrosstalk->setVerticalHeaderLabels(QStringList("Probability"));
+        ui->tabMCcrosstalk->setHorizontalHeaderLabels(header);
+        ui->tabMCcrosstalk->resizeColumnsToContents();
+        ui->tabMCcrosstalk->resizeRowsToContents();
     }
-  else ui->twElectronics->setEnabled(false);
+    else
+    {
+        ui->ledMCcrosstalkTriggerProb->setText( QString::number( pm.MCtriggerProb ) );
 
-  //ui->ledTimeOfOneMeasurement->setText( QString::number(Detector->PMs->at(ipm).MeasurementTime) );
+        double br = 1 - pm.MCtriggerProb;
+        double Epsilon = 1 - br*br*br*br;   //  1-epsilon = (1-p)^n    model with n = 4
+        ui->labMCtotalProb->setText( QString::number(Epsilon, 'g', 4) );
+        double np = 4.0 * pm.MCtriggerProb;
+        double MCmeanCells = 1.0 + np + np*np;  // Average num triggered cells = 1 + np + (np)^2 + o(p^2)  model with n = 4
+        ui->labMCmean->setText( QString::number(MCmeanCells, 'g', 4) );
+    }
 
-  BulkUpdate = tmpBulk;
+    ui->ledTimeOfOneMeasurement->setText( QString::number( pm.MeasurementTime ) );
+    ui->swDarkCounts_Time->setCurrentIndex( ui->cbTimeResolved->isChecked() ? 1 : 0 );
+    ui->cobDarkCounts_Model->setCurrentIndex( pm.DarkCounts_Model );
+    const bool bHaveDist = !pm.DarkCounts_Distribution.isEmpty();
+    ui->pbDarkCounts_Show->setEnabled(bHaveDist);
+    ui->pbDarkCounts_Delete->setEnabled(bHaveDist);
+
+    str.setNum( pm.ElNoiseSigma );
+    ui->ledElNoiseSigma->setText(str);
+    str.setNum( pm.ElNoiseSigma_StatSigma );
+    ui->ledElNoiseSigma_Stat->setText(str);
+    str.setNum( pm.ElNoiseSigma_StatNorm );
+    ui->ledElNoiseSigma_Norm->setText(str);
+
+    ui->ledADCmax->setText( QString::number( pm.ADCmax ) );
+    ui->sbADCbits->setValue( pm.ADCbits );
+
+    str.setNum( pm.ADClevels + 1 );
+    str = "levels: " + str;
+    str1.setNum( pm.ADCstep );
+    str += "  signal/level: " + str1;
+    ui->leoADCInfo->setText(str);
+
+    const int & mode = pm.SPePHSmode;
+    if (mode == 3) ui->ledAverageSigPhotEl->setReadOnly(true);
+    else ui->ledAverageSigPhotEl->setReadOnly(false);
+    ui->cobPMampGainModel->setCurrentIndex(mode);
+
+    BulkUpdate = tmpBulk;
 }
 
 void MainWindow::on_pbElCopyGainData_clicked()
@@ -3094,214 +2990,51 @@ void MainWindow::on_pbSetPMtype_clicked()
   if (counter>0) MainWindow::ReconstructDetector();
 }
 
-void MainWindow::on_pbViewChangeRelQEfactors_clicked()
+void MainWindow::on_pbRandomizePDEfactors_clicked()
 {
-  MainWindow::ViewChangeRelFactors("QE");
+    bool bUniform = ( ui->cobPDE->currentIndex() == 0 );
+    double min =      ui->ledPDEmin->text().toDouble();
+    double max =      ui->ledPDEmax->text().toDouble();
+    double mean =     ui->ledPDEmean->text().toDouble();
+    double sigma =    ui->ledPDEsigma->text().toDouble();
+
+    randomizePDEorSPEfactors(true, bUniform, min, max, mean, sigma);
 }
 
-void MainWindow::on_pbViewChangeRelELfactors_clicked()
+void MainWindow::on_pbRandomizeSPEfactors_clicked()
 {
-  MainWindow::ViewChangeRelFactors("EL");
+    bool bUniform = ( ui->cobSPE->currentIndex() == 0 );
+    double min =      ui->ledSPEmin->text().toDouble();
+    double max =      ui->ledSPEmax->text().toDouble();
+    double mean =     ui->ledSPEmean->text().toDouble();
+    double sigma =    ui->ledSPEsigma->text().toDouble();
+
+    randomizePDEorSPEfactors(false, bUniform, min, max, mean, sigma);
 }
 
-void MainWindow::ViewChangeRelFactors(QString options)
+void MainWindow::randomizePDEorSPEfactors(bool bDoPDE, bool bUniform, double min, double max, double mean, double sigma)
 {
-  QDialog* dialog = new QDialog(this);
-  dialog->resize(350,380);
-  dialog->move(this->x()+100, this->y()+100);
-
-  if (options == "QE") dialog->setWindowTitle("Relative QE/PDE factors");
-  else if (options == "EL") dialog->setWindowTitle("Relative factors of electronic channels");
-
-  QPushButton *okButton = new QPushButton("Confirm");
-  connect(okButton,SIGNAL(clicked()),dialog,SLOT(accept()));
-  QPushButton *cancelButton = new QPushButton("Cancel");
-  connect(cancelButton,SIGNAL(clicked()),dialog,SLOT(reject()));
-  QHBoxLayout *buttonsLayout = new QHBoxLayout;
-  buttonsLayout->addStretch(1);
-  buttonsLayout->addWidget(okButton);
-  buttonsLayout->addStretch(1);
-  buttonsLayout->addWidget(cancelButton);
-  buttonsLayout->addStretch(1);
-
-  QTableWidget *tw = new QTableWidget();
-  tw->clearContents();
-  //tw->setShowGrid(false);
-  int rows = PMs->count();
-  tw->setRowCount(rows);
-
-  int columns = 1;
-  tw->setColumnCount(columns);
-  if (options == "QE") tw->setHorizontalHeaderItem(0, new QTableWidgetItem("Relative QE/PDE"));
-  else if (options == "EL") tw->setHorizontalHeaderItem(0, new QTableWidgetItem("Relative factors"));
-
-  for (int i=0; i<rows; i++)
+    if (bUniform)
     {
-      tw->setVerticalHeaderItem(i, new QTableWidgetItem("PM#"+QString::number(i)));
-      if (options == "QE") tw->setItem(i, 0, new QTableWidgetItem(QString::number(PMs->at(i).relQE_PDE)));
-      else if (options == "EL") tw->setItem(i, 0, new QTableWidgetItem(QString::number(PMs->at(i).AverageSigPerPhE)));
-    }
-
-  tw->setItemDelegate(new TableDoubleDelegateClass(tw)); //accept only doubles
-
-  QVBoxLayout *mainLayout = new QVBoxLayout;
-  mainLayout->addWidget(tw);
-  mainLayout->addLayout(buttonsLayout);
-
-  dialog->setLayout(mainLayout);
-  int result = dialog->exec();
-  //qDebug()<<"dialog reports:"<<result;
-
-  if (result == 1)
-    {
-      Detector->PMs->setDoPHS( true );  // *** should be in "EL" ?
-      if (options == "QE")
+        if (min < 0 || max < 0)
         {
-          //updating data
-          for (int i=0; i<rows; i++) PMs->at(i).relQE_PDE = tw->item(i, 0)->text().toDouble();
-
-          MainWindow::CalculateIndividualQEPDE();
-          ReconstructDetector(true);
+            message("Min and max should be positive", this);
+            return;
         }
-      else if (options == "EL")
+        if (max < min)
         {
-          //updating data
-          for (int i=0; i<rows; i++) PMs->at(i).relElStrength = tw->item(i, 0)->text().toDouble();
-
-          PMs->CalculateElChannelsStrength();
-          ui->cbEnableSPePHS->setChecked(true);
-          ReconstructDetector(true);          
+            message("Max cannot be smaller than min", this);
+            return;
         }
     }
-  delete dialog;  
-}
-
-void MainWindow::CalculateIndividualQEPDE()
-{
-  for (int ipm = 0; ipm<PMs->count(); ipm++)
+    else
     {
-      double factor = PMs->at(ipm).relQE_PDE;
-      int itype = PMs->at(ipm).type;
-
-      //scalar value
-      double fromType = PMs->getType(itype)->EffectivePDE;
-      PMs->at(ipm).effectivePDE = fromType * factor;
-
-      //Wavelength resolved data
-      QVector<double> tmp = PMs->getType(itype)->PDE;
-      QVector<double> tmp_lambda = PMs->getType(itype)->PDE_lambda;
-      if (!tmp.isEmpty())
+        if (mean < 0 || sigma < 0)
         {
-          for (int i=0; i<tmp.size(); i++) tmp[i] *= factor;
-
-          PMs->setPDEwave(ipm, &tmp_lambda, &tmp);
-          PMs->RebinPDEsForPM(ipm);
+            message("Mean and sigma should be positive", this);
+            return;
         }
     }
-}
-
-void MainWindow::on_pbLoadRelQEfactors_clicked()
-{
-  QString fileName = QFileDialog::getOpenFileName(this, "Load relative QE / PDE factors", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
-  qDebug()<<fileName;
-
-  if (fileName.isEmpty()) return;
-  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-
-  Detector->PMs->setDoPHS( true );
-
-  QVector<double> x;
-  int ok = LoadDoubleVectorsFromFile(fileName, &x);
-
-  if (ok != 0) return;
-  if (x.size() != PMs->count())
-    {
-      message("Wrong number of PMs!", this);
-      return;
-    }
-
-  for (int i=0; i<x.size(); i++) PMs->at(i).relQE_PDE = x[i];
-  MainWindow::CalculateIndividualQEPDE();
-  ReconstructDetector(true);
-}
-
-void MainWindow::on_pbClearRelQEfactors_clicked()
-{
-    for (int ipm = 0; ipm < PMs->count(); ipm++)
-    {
-        PMs->at(ipm).effectivePDE = -1.0;
-
-        PMs->at(ipm).PDE.clear();
-        PMs->at(ipm).PDE_lambda.clear();
-        PMs->at(ipm).PDEbinned.clear();
-    }
-    ReconstructDetector(true);
-}
-
-void MainWindow::on_pbLoadRelELfactors_clicked()
-{
-  QString fileName = QFileDialog::getOpenFileName(this, "Load relative strength of electronic channels", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
-  qDebug()<<fileName;
-
-  if (fileName.isEmpty()) return;
-  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-
-  Detector->PMs->setDoPHS( true );
-
-  QVector<double> x;
-  int ok = LoadDoubleVectorsFromFile(fileName, &x);
-
-  if (ok != 0) return;
-  if (x.size() != PMs->count())
-    {
-      message("Wrong number of PMs!", this);
-      return;
-    }
-
-  for (int i=0; i<x.size(); i++) PMs->at(i).relElStrength = x[i];
-  PMs->CalculateElChannelsStrength();
-
-  //ui->cbEnableSPePHS->setChecked(true);
-  ReconstructDetector(true);
-  //MainWindow::on_pbElUpdateIndication_clicked();
-}
-
-void MainWindow::on_pbRandomScaleELaverages_clicked()
-{
-  Detector->PMs->setDoPHS( true );
-
-  bool bUniform = ( ui->cobScaleGainsUniNorm->currentIndex() == 0 );
-  double min = ui->ledELavScaleMin->text().toDouble();
-  double max = ui->ledELavScaleMax->text().toDouble();
-  if (bUniform && min >= max) return;
-  double mean = ui->ledELavScaleMean->text().toDouble();
-  double sigma = ui->ledELavScaleSigma->text().toDouble();
-
-  for (int ipm = 0; ipm<PMs->count(); ipm++)
-    {
-      double factor;
-      if (bUniform)
-        {
-          factor = Detector->RandGen->Rndm();
-          factor = min + (max-min)*factor;
-        }
-      else
-          factor = Detector->RandGen->Gaus(mean, sigma);
-
-      PMs->at(ipm).scaleSPePHS(factor);
-    }
-
-  ReconstructDetector(true);
-}
-
-void MainWindow::on_pbRelQERandomScaleELaverages_clicked()
-{
-    bool bUniform = ( ui->cobRelQEScaleGainsUniNorm->currentIndex() == 0 );
-    double min = ui->ledRelQEELavScaleMin->text().toDouble();
-    double max = ui->ledRelQEELavScaleMax->text().toDouble();
-    if (bUniform && min >= max) return;
-    double mean = ui->ledRelQEELavScaleMean->text().toDouble();
-    double sigma = ui->ledRelQEELavScaleSigma->text().toDouble();
 
     for (int ipm = 0; ipm < PMs->count(); ipm++)
     {
@@ -3309,79 +3042,99 @@ void MainWindow::on_pbRelQERandomScaleELaverages_clicked()
         if (bUniform)
         {
             factor = Detector->RandGen->Rndm();
-            factor = min + (max-min)*factor;
+            factor = min + (max - min) * factor;
         }
         else
             factor = Detector->RandGen->Gaus(mean, sigma);
 
-        PMs->at(ipm).relQE_PDE = factor;
+        if (bDoPDE) PMs->at(ipm).relQE_PDE     = factor;
+        else        PMs->at(ipm).relElStrength = factor;
     }
 
-    CalculateIndividualQEPDE();
+    if (!bDoPDE) Detector->PMs->setDoPHS( true );
+
     ReconstructDetector(true);
 }
 
-void MainWindow::on_pbRelQESetELaveragesToUnity_clicked()
+void MainWindow::on_pbSetPDEfactors_clicked()
 {
-    double val = ui->ledRelQEvalue->text().toDouble();
+    double val = ui->ledPDEfactor->text().toDouble();
     for (int ipm = 0; ipm < PMs->count(); ipm++)
         PMs->at(ipm).relQE_PDE = val;
 
-    CalculateIndividualQEPDE();
     ReconstructDetector(true);
 }
 
-void MainWindow::on_pbSetELaveragesToUnity_clicked()
+void MainWindow::on_pbSetSPEfactors_clicked()
 {
-    Detector->PMs->setDoPHS( true );
-
-    double val = ui->ledELEvalue->text().toDouble();
+    double val = ui->ledSPEfactor->text().toDouble();
     for (int ipm = 0; ipm<PMs->count(); ipm++)
-        PMs->at(ipm).scaleSPePHS(val);
+        PMs->at(ipm).relElStrength = val;
 
+    Detector->PMs->setDoPHS(true);
     ReconstructDetector(true);
 }
 
+void MainWindow::on_pbShowPDEfactors_clicked()
+{
+    showPDEorSPEfactors(true);
+}
+
+void MainWindow::on_pbShowSPEfactors_clicked()
+{
+    showPDEorSPEfactors(false);
+}
+
+void MainWindow::showPDEorSPEfactors(bool bShowPDE)
+{
+    QDialog * d = new QDialog(this);
+    d->setWindowTitle( bShowPDE ? "PDE factors" : "SPE signal factgors" );
+    QVBoxLayout * v = new QVBoxLayout();
+    d->setLayout(v);
+        QPlainTextEdit * e = new QPlainTextEdit();
+        e->setReadOnly(true);
+        e->appendPlainText( bShowPDE ? "PM\tPDE_factor" : "PM\tSPE_factor" );
+    v->addWidget(e);
+        QPushButton * b = new QPushButton("Close");
+        QObject::connect(b, &QPushButton::clicked, d, &QDialog::accept);
+    v->addWidget(b);
+
+    QVector<QString> tmp;
+    for (int ipm = 0; ipm < PMs->count(); ipm++)
+    {
+        double v = ( bShowPDE ? PMs->at(ipm).relQE_PDE : PMs->at(ipm).relElStrength );
+        tmp.append( QString::number(v, 'g', 3) );
+        e->appendPlainText( QString("%1\t%2").arg(ipm).arg(v) );
+    }
+    QTextCursor textCursor = e->textCursor();
+    textCursor.movePosition(QTextCursor::Start, QTextCursor::MoveAnchor,1);
+    e->setTextCursor(textCursor);
+
+    GeometryWindow->ShowText(tmp, kRed);
+    d->exec();
+}
+
+/*
 void MainWindow::on_pbShowRelGains_clicked()
 {
-  Owindow->show();
-  Owindow->raise();
-  Owindow->activateWindow();
-  Owindow->SetTab(0);
-
-  double max = -1e20;
-  for (int ipm = 0; ipm<PMs->count(); ipm++)
+    double max = -1e20;
+    for (int ipm = 0; ipm<PMs->count(); ipm++)
     {
-      double QE = PMs->at(ipm).effectivePDE;
-      if (QE == -1.0) QE = PMs->getType( PMs->at(ipm).type )->EffectivePDE;
-      double AvSig = 1.0;
-      if (ui->cbEnableSPePHS->isChecked()) AvSig =  PMs->at(ipm).AverageSigPerPhE;
-      double relStr = QE * AvSig;
-      if (relStr > max) max = relStr;
+        double v = PMs->at(ipm).relQE_PDE * PMs->at(ipm).relElStrength;
+        if (v > max) max = v;
     }
-  if (fabs(max)<1.0e-20) max = 1.0;
+    if (fabs(max) < 1.0e-20) max = 1.0;
 
-  QVector<QString> tmp(0);
-  Owindow->OutText("");
-  Owindow->OutText("PM  Relative_QE   Average_signal_per_photoelectron   Relative_gain");
-  for (int ipm = 0; ipm < PMs->count(); ipm++)
+    QVector<QString> tmp;
+    for (int ipm = 0; ipm < PMs->count(); ipm++)
     {
-      double QE = PMs->at(ipm).effectivePDE;
-      if (QE == -1.0) QE = PMs->getType( PMs->at(ipm).type )->EffectivePDE;
-      QString str = "PM#" + QString::number(ipm) +"> "+ QString::number(QE, 'g', 3);
-
-      double AvSig = 1.0;
-      if (ui->cbEnableSPePHS->isChecked()) AvSig =  PMs->at(ipm).AverageSigPerPhE;
-      str += "  " + QString::number(AvSig, 'g', 3);
-
-      double relStr = QE * AvSig / max;
-      str += "  " + QString::number(relStr, 'g', 3);
-      Owindow->OutText(str);
-      tmp.append( QString::number(relStr, 'g', 3) );
+        double v = PMs->at(ipm).relQE_PDE * PMs->at(ipm).relElStrength / max;
+        tmp.append( QString::number(v, 'g', 3) );
     }
 
-  GeometryWindow->ShowText(tmp, kRed);
+    GeometryWindow->ShowText(tmp, kRed);
 }
+*/
 
 void MainWindow::on_pbSaveResults_clicked()
 {
@@ -4754,12 +4507,6 @@ void MainWindow::on_pbG4Settings_clicked()
     }
 }
 
-void MainWindow::on_pbSetAllInherited_clicked()
-{
-    PMs->resetOverrides();
-    ReconstructDetector(true);
-}
-
 #include "afileparticlegenerator.h"
 void MainWindow::on_pbLoadExampleFileFromFileGen_clicked()
 {
@@ -4878,6 +4625,117 @@ void MainWindow::on_actionExit_triggered()
 {
     close();
 }
+
+void MainWindow::on_pbGainsUpdateGUI_clicked()
+{
+    // PDE factors
+    bool bAll_PDE_1 = PMs->isAllPDEfactorsUnity();
+
+    double same;
+    QString str = "Status: ";
+    if ( PMs->isAllPDEfactorsSame(same) ) str += QString("all factors = %1").arg(same);
+    else                                  str += "different factors";
+    ui->labPDEfactors->setText(str);
+    ui->labPDEfactors_notAllUnity->setVisible( !bAll_PDE_1 );
+
+    // SPE factors
+    bool bSPEactive = PMs->isDoPHS();
+    bool bAll_SPE_1 = PMs->isAllSPEfactorsUnity();
+
+    if (bSPEactive)
+    {
+        str = "Status: ";
+        if ( PMs->isAllSPEfactorsSame(same) ) str += QString("all factors = %1").arg(same);
+        else                                  str += "different factors";
+    }
+    else str = "NOT active: ph.e -> signal disabled";
+
+    ui->labSPEfactors->setText(str);
+    ui->labSPEfactors_ActiveAndNotAllUnity->setVisible( bSPEactive && !bAll_SPE_1 );
+
+    // "Gains" warning control
+    ui->tabWidget->setTabIcon(5, ( !bAll_PDE_1 || (bSPEactive && !bAll_SPE_1) ? Rwindow->YellowIcon : QIcon()) );
+
+    // TEST FEATURE - disable the whole frame if SPE in electronics is not activated
+    ui->frSPEfactors->setEnabled(bSPEactive);
+}
+
+void MainWindow::on_pbCearOverridePDEscalar_clicked()
+{
+    for (int ipm = 0; ipm < PMs->count(); ipm++)
+        PMs->at(ipm).effectivePDE = -1.0;
+    ReconstructDetector(true);
+}
+
+void MainWindow::on_pbCearOverridePDEwave_clicked()
+{
+    for (int ipm = 0; ipm < PMs->count(); ipm++)
+    {
+        APm & pm = PMs->at(ipm);
+        pm.PDE.clear();
+        pm.PDE_lambda.clear();
+        pm.PDEbinned.clear();
+    }
+    ReconstructDetector(true);
+}
+
+void MainWindow::on_pbCearOverrideAngular_clicked()
+{
+    for (int ipm = 0; ipm < PMs->count(); ipm++)
+    {
+        APm & pm = PMs->at(ipm);
+        pm.AngularSensitivity_lambda.clear();
+        pm.AngularSensitivity.clear();
+        pm.AngularSensitivityCosRefracted.clear();
+    }
+    ReconstructDetector(true);
+}
+
+void MainWindow::on_pbCearOverrideArea_clicked()
+{
+    QVector<QVector<double> > tmp;
+    for (int ipm = 0; ipm < PMs->count(); ipm++)
+        PMs->setArea(ipm, &tmp, 123.0, 123.0); //strange step deliberately
+    ReconstructDetector(true);
+}
+
+void MainWindow::on_pbHelpDetectionEfficiency_clicked()
+{
+    QString s = "Detection efficiency is caluclated as:\n\n"
+            "PDE = WaveR * AngleR * AreaR\n\n"
+            "WaveR:\n"
+            " 1) If simulation is not wavelength-resolved,\n"
+            "  or a photon has no wavelength (waveindex=-1)\n"
+            "  e.g. it was emitted from a materil with undefined emission spectrum,\n"
+            "  \"PDE\" value is used.\n"
+            "  If PM has individual override, the corresponding value is used.\n"
+            "  otherwise the PDE value defined for the corresponding PM-type,\n"
+            "  multiplied by the PDE gain factor of this particlal PM is used.\n"
+            " 2) For wavelength-resolved simulations, if photon has wavelength,\n"
+            "  the following logic is in effect:\n"
+            "  If there is individual override for \"PDE\" for this PM, it is used.\n"
+            "  If not defined, but the corresponding PM type\n"
+            "  has a defined \"PDE vs wavelength\", it is used\n"
+            "  (multiplied with the PDE gain factor of the corresponding PM)\n"
+            "  If PM type does not have \"PDE vs wavelength\", the Effective PDE\n"
+            "  is used as described above.\n"
+            "\n"
+            "AngleR:\n"
+            "  If simulation is not configured to be angle-sensitive, AngleR = 1.\n"
+            "  Otherwise, the individual override or, if absent, the value\n"
+            "  configured for the PM-type is used.\n"
+            "  If it is also not configured, AngleR = 1\n"
+            "  Note that ANTS2 will automatically compensate for the difference\n"
+            "  in the refractive indexes on the PM optical interface:\n"
+            "  AngleR measured for Air->PM is not the same as for Glass->PM.\n"
+            "  \n"
+            "AreaR:\n"
+            "  If simulation is not configured to be PM area-sensitive, AreaA = 1.\n"
+            "  Otherwise, the individual override or, if absent, the value\n"
+            "  configured for the PM-type is used.\n"
+            "  If it is also not configured, AreaR = 1\n"
+    "";
+    message(s, this);
 
 #include "alogconfigdialog.h"
 void MainWindow::on_pbOpenLogOptions_clicked()

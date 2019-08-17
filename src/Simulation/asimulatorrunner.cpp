@@ -73,6 +73,14 @@ bool ASimulatorRunner::setup(int threadCount, bool bPhotonSourceSim)
     fStopRequested = false;
 
     clearWorkers();
+
+    const QString err = detector.PMs->checkBeforeSimulation();
+    if (!err.isEmpty())
+    {
+        simMan.setErrorString(err);
+        return false;
+    }
+
     bool fRunThreads = threadCount > 0;
 
     for (int i = 0; i < threadCount; i++)

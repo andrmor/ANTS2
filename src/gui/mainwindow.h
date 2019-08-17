@@ -267,20 +267,12 @@ private slots:
     void on_pbUpdateToFixedZ_clicked();
     void on_pbIndPmRemove_clicked();
     void on_pbIndShowType_clicked();
-    void on_ledIndEffectiveDE_editingFinished();
     void on_pbIndRestoreEffectiveDE_clicked();
     void on_pbIndShowDE_clicked();
-    void on_pbIndRestoreDE_clicked();
-    void on_pbIndLoadDE_clicked();
     void on_pbIndShowDEbinned_clicked();
     void on_pbAddPM_clicked();
-    void on_pbIndLoadAngular_clicked();
-    void on_pbIndRestoreAngular_clicked();
     void on_pbIndShowAngular_clicked();
     void on_pbIndShowEffectiveAngular_clicked();
-    void on_ledIndMediumRefrIndex_editingFinished();
-    void on_pbIndLoadArea_clicked();
-    void on_pbIndRestoreArea_clicked();
     void on_pbIndShowArea_clicked();
     void on_cbGunAllowMultipleEvents_toggled(bool checked);
     void LoadPMsignalsRequested();
@@ -366,7 +358,6 @@ public:
     void SaveSimulationDataTree();
     void SaveSimulationDataAsText();
     void setFloodZposition(double Z);
-    void CalculateIndividualQEPDE(); //Public for use in scripting
     void ShowSource(const AParticleSourceRecord *p, bool clear = true);
     void TestParticleGun(AParticleGun *ParticleSources, int numParticles);
 
@@ -406,7 +397,6 @@ private:
 
     void clearPreprocessingData();
     void updateCOBsWithPMtypeNames();
-    void ViewChangeRelFactors(QString options);    
 
 private slots:
     void timerTimeout(); //timer-based update of Root events
@@ -422,13 +412,7 @@ private slots:
     void on_pbLoadPMcenters_clicked();
     void on_pbSavePMcenters_clicked();
     void on_pbSetPMtype_clicked();    
-    void on_pbViewChangeRelQEfactors_clicked();
-    void on_pbLoadRelQEfactors_clicked();
-    void on_pbViewChangeRelELfactors_clicked();
-    void on_pbLoadRelELfactors_clicked();
-    void on_pbRandomScaleELaverages_clicked();
-    void on_pbSetELaveragesToUnity_clicked();
-    void on_pbShowRelGains_clicked();
+    void on_pbSetSPEfactors_clicked();
     void on_actionSave_configuration_triggered();
     void on_actionLoad_configuration_triggered();
     void on_pbRemoveParticle_clicked();
@@ -565,11 +549,7 @@ private slots:
 
     void on_pteParticleGenerationScript_customContextMenuRequested(const QPoint &pos);
 
-    void on_pbClearRelQEfactors_clicked();
-
-    void on_pbRelQERandomScaleELaverages_clicked();
-
-    void on_pbRelQESetELaveragesToUnity_clicked();
+    void on_pbSetPDEfactors_clicked();
 
     void on_pnShowHideAdvanced_Particle_toggled(bool checked);
 
@@ -585,8 +565,6 @@ private slots:
 
     void on_pbRenameParticle_clicked();
 
-    void on_pbSetAllInherited_clicked();
-
     void on_pbLoadExampleFileFromFileGen_clicked();
 
     void on_pbNodesFromFileHelp_clicked();
@@ -599,9 +577,30 @@ private slots:
 
     void on_actionExit_triggered();
 
+    void on_pbShowPDEfactors_clicked();
+
+    void on_pbGainsUpdateGUI_clicked();
+
+    void on_pbShowSPEfactors_clicked();
+
+    void on_pbRandomizePDEfactors_clicked();
+
+    void on_pbRandomizeSPEfactors_clicked();
+
+    void on_pbCearOverridePDEscalar_clicked();
+
+    void on_pbCearOverridePDEwave_clicked();
+
+    void on_pbCearOverrideAngular_clicked();
+
+    void on_pbCearOverrideArea_clicked();
+
+    void on_pbHelpDetectionEfficiency_clicked();
+
     void on_pbOpenLogOptions_clicked();
 
     void on_pbOpenLogOptions2_clicked();
+
 
 public slots:
     void on_pbRebuildDetector_clicked();
@@ -619,6 +618,8 @@ private:
     void initDetectorSandwich();
     void onGuiEnableStatus(bool fLocked);
     void ShowParticleSource_noFocus();
+    void showPDEorSPEfactors(bool bShowPDE);
+    void randomizePDEorSPEfactors(bool bDoPDE, bool bUniform, double min, double max, double mean, double sigma);
 
 #ifdef __USE_ANTS_PYTHON__
     void createPythonScriptWindow();

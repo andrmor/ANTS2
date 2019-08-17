@@ -737,7 +737,7 @@ double APmHub::getActualPDE(int ipm, int WaveIndex) const
             if ( !PMtypes.at(iType)->PDEbinned.isEmpty() )
             {
                 // if the type holds wave-resolved info, use it
-                PDE = PMtypes.at(iType)->PDEbinned.at(WaveIndex);
+                PDE = PMtypes.at(iType)->PDEbinned.at(WaveIndex) * pm.relQE_PDE;
             }
             else
             {

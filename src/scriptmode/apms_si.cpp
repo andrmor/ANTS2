@@ -31,6 +31,20 @@ APms_SI::APms_SI(AConfiguration *Config)
     H["SetActivePM"] = "Set this PM status as active.";
 
     H["CountPMs"] = "Return number of PMs";
+
+    H["SetAreaResponse"] = "Set override for the area response multiplier of the PM. Response multiplier can be from 0 to 1.0"
+            "1st parameter: PM index\n"
+            "2nd parameter: matrix of responses multipliers:\n"
+            "  [ [R_x1yM, R_x2yM, ... , R_xNyM ], [R_x1yM-1, R_x2yM-1, ... , R_xNyM-1], ..., [R_x1y1, R_xNy1] ]\n"
+            "3rd parameter: size of cell in mm in X direction\n"
+            "4th parameter: size of cell in mm in Y direction.\n"
+            "x and y are indeces of the local coordinates in the PM's frame (0,0 is the center)";
+
+    H["SetAngularResponse"] = "Set angular response multiplier for the PM\n"
+            "1st parameter: PM index\n"
+            "2nd parameter: matrix of area responses multipliers:\n"
+            "[ [0, ResponseAt0], [Angle2, R2], [Angle3, R3], ... , [90, ResponseAt90] ]\n"
+            "The response multiplier values will be automatically scaled to have factor of 1.0 at 0 degrees";
 }
 
 bool APms_SI::checkValidPM(int ipm)
@@ -385,8 +399,6 @@ void APms_SI::SetAreaResponse(int ipm, QVariantList MatrixOfResponses, double St
         return;
     }
 
-    QVector< QVector<double> > vResponse;
-
     int sizeX;
     for (int iy=0; iy<sizeY; iy++)
     {
@@ -399,8 +411,18 @@ void APms_SI::SetAreaResponse(int ipm, QVariantList MatrixOfResponses, double St
             abort("Not matching number of elements per line in area response");
             return;
         }
+    }
 
-        QVector<double> vLine;
+    QVector< QVector<double> > vResponse;
+    vResponse.resize(sizeY);
+    for (int iy=0; iy<sizeY; iy++)
+        vResponse[iy].resize(sizeX);
+
+    for (int iy=0; iy<sizeY; iy++)
+    {
+        QVariant elv = MatrixOfResponses[iy];
+        QVariantList el = elv.toList();
+
         for (int ix=0; ix<sizeX; ix++)
         {
             bool bOK;
@@ -410,10 +432,8 @@ void APms_SI::SetAreaResponse(int ipm, QVariantList MatrixOfResponses, double St
                 abort("Responses should be non-negative numeric values");
                 return;
             }
-            vLine << response;
+            vResponse[ix][sizeY-1-iy] = response;
         }
-
-        vResponse.push_back(vLine);
     }
 
     PMs->setArea(ipm, &vResponse, StepX, StepY);

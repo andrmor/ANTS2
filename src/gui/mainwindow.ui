@@ -55,7 +55,7 @@
        </rect>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tabDetector">
        <attribute name="title">
@@ -3005,6 +3005,19 @@ Three columns (XYZ) for 'fully custom' array</string>
          </property>
          <property name="text">
           <string>Show vs cos</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pbHelpDetectionEfficiency">
+         <property name="geometry">
+          <rect>
+           <x>470</x>
+           <y>90</y>
+           <width>51</width>
+           <height>27</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>help</string>
          </property>
         </widget>
        </widget>

@@ -1586,7 +1586,7 @@ void MainWindow::on_pbPMtypeShowArea_clicked()
 
   for (int iX=0; iX<xNum; iX++)
    for (int iY=0; iY<yNum; iY++)
-       hist2D->SetCellContent(iX+1, iY+1, PMs->getType(typ)->AreaSensitivity[iX][iY]);
+       hist2D->SetBinContent(iX+1, iY+1, PMs->getType(typ)->AreaSensitivity[iX][iY]);
 
   hist2D->SetXTitle("X, mm");
   hist2D->SetYTitle("Y, mm");
@@ -2109,15 +2109,15 @@ void MainWindow::on_pbIndShowArea_clicked()
       }
 //    qDebug()<<xNum<<xStep<<yNum<<yStep;
 
-    auto hist2D = new TH2D("T-AreaSens","Response, %",xNum, -0.5*xNum*xStep, +0.5*xNum*xStep, yNum, -0.5*yNum*yStep, +0.5*yNum*yStep);
+    auto hist2D = new TH2D("T-AreaSens","Area response",xNum, -0.5*xNum*xStep, +0.5*xNum*xStep, yNum, -0.5*yNum*yStep, +0.5*yNum*yStep);
 
     for (int iX=0; iX<xNum; iX++)
      for (int iY=0; iY<yNum; iY++)
      {
         if (PMs->isAreaOverriden(ipm))
-            hist2D->SetCellContent(iX+1, iY+1, PMs->at(ipm).AreaSensitivity.at(iX).at(iY) * 100.0);
+            hist2D->SetBinContent(iX+1, iY+1, PMs->at(ipm).AreaSensitivity.at(iX).at(iY));
         else
-            hist2D->SetCellContent(iX+1, iY+1, PMs->getType(typ)->AreaSensitivity.at(iX).at(iY) * 100.0);
+            hist2D->SetBinContent(iX+1, iY+1, PMs->getType(typ)->AreaSensitivity.at(iX).at(iY));
      }
     hist2D->SetXTitle("X, mm");
     hist2D->SetYTitle("Y, mm");
@@ -4720,4 +4720,43 @@ void MainWindow::on_pbCearOverrideArea_clicked()
     for (int ipm = 0; ipm < PMs->count(); ipm++)
         PMs->setArea(ipm, &tmp, 123.0, 123.0); //strange step deliberately
     ReconstructDetector(true);
+}
+
+void MainWindow::on_pbHelpDetectionEfficiency_clicked()
+{
+    QString s = "Detection efficiency is caluclated as:\n\n"
+            "PDE = WaveR * AngleR * AreaR\n\n"
+            "WaveR:\n"
+            " 1) If simulation is not wavelength-resolved,\n"
+            "  or a photon has no wavelength (waveindex=-1)\n"
+            "  e.g. it was emitted from a materil with undefined emission spectrum,\n"
+            "  \"PDE\" value is used.\n"
+            "  If PM has individual override, the corresponding value is used.\n"
+            "  otherwise the PDE value defined for the corresponding PM-type,\n"
+            "  multiplied by the PDE gain factor of this particlal PM is used.\n"
+            " 2) For wavelength-resolved simulations, if photon has wavelength,\n"
+            "  the following logic is in effect:\n"
+            "  If there is individual override for \"PDE\" for this PM, it is used.\n"
+            "  If not defined, but the corresponding PM type\n"
+            "  has a defined \"PDE vs wavelength\", it is used\n"
+            "  (multiplied with the PDE gain factor of the corresponding PM)\n"
+            "  If PM type does not have \"PDE vs wavelength\", the Effective PDE\n"
+            "  is used as described above.\n"
+            "\n"
+            "AngleR:\n"
+            "  If simulation is not configured to be angle-sensitive, AngleR = 1.\n"
+            "  Otherwise, the individual override or, if absent, the value\n"
+            "  configured for the PM-type is used.\n"
+            "  If it is also not configured, AngleR = 1\n"
+            "  Note that ANTS2 will automatically compensate for the difference\n"
+            "  in the refractive indexes on the PM optical interface:\n"
+            "  AngleR measured for Air->PM is not the same as for Glass->PM.\n"
+            "  \n"
+            "AreaR:\n"
+            "  If simulation is not configured to be PM area-sensitive, AreaA = 1.\n"
+            "  Otherwise, the individual override or, if absent, the value\n"
+            "  configured for the PM-type is used.\n"
+            "  If it is also not configured, AreaR = 1\n"
+    "";
+    message(s, this);
 }

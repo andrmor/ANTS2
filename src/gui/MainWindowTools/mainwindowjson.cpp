@@ -315,9 +315,6 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
   QJsonObject acj = gjs["AcceleratorConfig"].toObject();
   JsonToSpinBox (acj, "MaxNumTransitions", ui->sbMaxNumbPhTransitions);
   JsonToCheckbox(acj, "CheckBeforeTrack", ui->cbRndCheckBeforeTrack);
-  //JsonToCheckbox(acj, "OnlyTracksOnPMs", ui->cbOnlyBuildTracksOnPMs);
-  JsonToCheckbox(acj, "LogsStatistics", ui->cbDoLogsAndStatistics);
-  //JsonToSpinBox(acj, "NumberThreads", ui->sbNumberThreads);
   //Sec scint
   QJsonObject scj = gjs["SecScintConfig"].toObject();
   JsonToComboBox(scj, "Type", ui->cobSecScintillationGenType);
@@ -346,6 +343,10 @@ if (scj.contains("CustomDistrib"))
   QJsonObject tbojs;
     parseJson(gjs, "TrackBuildingOptions", tbojs);
   SimulationManager->TrackBuildOptions.readFromJson(tbojs);
+
+  QJsonObject lsjs;
+    parseJson(gjs, "LogStatOptions", lsjs);
+  SimulationManager->LogsStatOptions.readFromJson(lsjs);
 
   G4SimSet = AG4SimulationSettings();
   QJsonObject g4js;
@@ -540,6 +541,7 @@ if (scj.contains("CustomDistrib"))
 
         ui->labPhTracksOn_1->setVisible(SimulationManager->TrackBuildOptions.bBuildPhotonTracks);
         ui->labPartTracksOn->setVisible(SimulationManager->TrackBuildOptions.bBuildParticleTracks);
+        ui->labPartLogOn->setVisible(SimulationManager->LogsStatOptions.bParticleTransportLog);
 
 
   //Window CONTROL

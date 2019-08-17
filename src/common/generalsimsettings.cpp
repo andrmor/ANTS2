@@ -64,8 +64,8 @@ bool GeneralSimSettings::readFromJson(const QJsonObject &Json)
   QJsonObject acjson = json["AcceleratorConfig"].toObject();
   MaxNumTrans = acjson["MaxNumTransitions"].toInt();
   fQEaccelerator = acjson["CheckBeforeTrack"].toBool();  
-  fLogsStat = acjson["LogsStatistics"].toBool();
-  NumThreads = acjson["NumberThreads"].toInt();
+  //fLogsStat = acjson["LogsStatistics"].toBool();
+  //NumThreads = acjson["NumberThreads"].toInt();
 
   DetStatNumBins = json["DetStatNumBins"].toInt(100);
 
@@ -73,6 +73,10 @@ bool GeneralSimSettings::readFromJson(const QJsonObject &Json)
   QJsonObject tbojs;
     parseJson(json, "TrackBuildingOptions", tbojs);
   TrackBuildOptions.readFromJson(tbojs);
+
+  QJsonObject lsjs;
+    parseJson(json, "LogStatOptions", lsjs);
+  LogsStatOptions.readFromJson(lsjs);
 
   //Geant4 simulation options
   QJsonObject g4js;

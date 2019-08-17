@@ -4,10 +4,12 @@
 //#include "awebsocketserver.h"
 #include "awebsocketsessionserver.h"
 #ifdef USE_ROOT_HTML
-#include "aroothttpserver.h"
+    #include "aroothttpserver.h"
 #endif
 
 #include <QDebug>
+
+#include "TGeoManager.h"
 
 ANetworkModule::ANetworkModule()
 {
@@ -51,11 +53,6 @@ const QString ANetworkModule::getWebSocketServerURL() const
   return WebSocketServer->GetUrl();
 }
 
-int ANetworkModule::getRootServerPort() const
-{
-    return RootServerPort;
-}
-
 const QString ANetworkModule::getWebSocketServerURL()
 {
     return WebSocketServer->GetUrl();
@@ -96,35 +93,37 @@ void ANetworkModule::StopWebSocketServer()
     emit StatusChanged();
 }
 
-void ANetworkModule::StartRootHttpServer(unsigned int port, QString OptionalUrlJsRoot)
+#include "aglobalsettings.h"
+void ANetworkModule::StartRootHttpServer()
 {
 #ifdef USE_ROOT_HTML
-    delete RootHttpServer;
-    RootHttpServer = new ARootHttpServer(port, OptionalUrlJsRoot);
+    const AGlobalSettings & GlobSet = AGlobalSettings::getInstance();
 
-    JSROOT = OptionalUrlJsRoot;
-    RootServerPort = port;
+    delete RootHttpServer;
+    RootHttpServer = new ARootHttpServer(GlobSet.RootServerPort, GlobSet.ExternalJSROOT);
+
     qDebug() << "ANTS2 root server is now listening";
     emit StatusChanged();
     emit RootServerStarted(); //to update current geometry on the server
 #endif
 }
+
 void ANetworkModule::StopRootHttpServer()
 {
 #ifdef USE_ROOT_HTML
     delete RootHttpServer;
-    RootHttpServer = 0;
+    RootHttpServer = nullptr;
 
     qDebug() << "ANTS2 root server has stopped listening";
     emit StatusChanged();
 #endif
 }
 
-void ANetworkModule::onNewGeoManagerCreated(TObject *GeoManager)
+void ANetworkModule::onNewGeoManagerCreated()
 {
 #ifdef USE_ROOT_HTML
     if (!RootHttpServer) return;
-    RootHttpServer->UpdateGeoWorld(GeoManager);
+    RootHttpServer->UpdateGeo(gGeoManager);
 #endif
 }
 

@@ -104,6 +104,10 @@ private slots:
     void on_cbEVhideTrans_clicked();
     void on_cbEVhideTransPrim_clicked();
 
+    void on_sbMonitorIndex_editingFinished();
+
+    void on_pbNextMonitor_clicked();
+
 private:
     Ui::OutputWindow *ui;
     MainWindow* MW;

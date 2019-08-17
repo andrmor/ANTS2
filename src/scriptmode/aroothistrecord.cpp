@@ -349,6 +349,26 @@ bool ARootHistRecord::GetContent(QVector<double> &x, QVector<double> &y) const
     return true;
 }
 
+bool ARootHistRecord::GetContent2D(QVector<double> & x, QVector<double> & y, QVector<double> & z) const
+{
+    QMutexLocker locker(&Mutex);
+
+    if (!Type.startsWith("TH2")) return false;
+    TH2* h = dynamic_cast<TH2*>(Object);
+    if (!h) return false;
+
+    int numX = h->GetNbinsX();
+    int numY = h->GetNbinsY();
+    for (int iy = 1; iy <= numY; iy++)
+        for (int ix = 1; ix <= numX; ix++)
+        {
+            x.append(h->GetXaxis()->GetBinCenter(ix));
+            y.append(h->GetYaxis()->GetBinCenter(iy));
+            z.append(h->GetBinContent(ix, iy));
+        }
+    return true;
+}
+
 bool ARootHistRecord::GetUnderflow(double & undeflow) const
 {
     if (!Type.startsWith("TH1")) return false;
@@ -368,6 +388,16 @@ bool ARootHistRecord::GetOverflow(double & overflow) const
     int num = h->GetNbinsX();
     overflow = h->GetBinContent(num+1);
     return true;
+}
+
+bool ARootHistRecord::is1D() const
+{
+    return Type.startsWith("TH1");
+}
+
+bool ARootHistRecord::is2D() const
+{
+    return Type.startsWith("TH2");
 }
 
 const QVector<double> ARootHistRecord::FitGaussWithInit(const QVector<double> &InitialParValues, const QString options)

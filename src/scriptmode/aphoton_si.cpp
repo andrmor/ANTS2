@@ -489,7 +489,7 @@ bool APhoton_SI::initTracer()
 
     simSet.bDoPhotonHistoryLog = true;
     simSet.fQEaccelerator = false;    
-    simSet.fLogsStat = true;
+    //simSet.fLogsStat = true;    // ***!!! check which log can be activated by default
     simSet.TrackBuildOptions.MaxParticleTracks = MaxNumberTracks - AlreadyStoredTracks;
 
     Event->configure(&simSet);

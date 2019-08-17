@@ -603,8 +603,15 @@ void AInterfaceToHist::Load(const QString &HistName, const QString &fileName, co
             rec = new ARootHistRecord(hist, HistName, "TH1D");
             hist->GetYaxis()->SetTitleOffset(1.30f);
             break;
+        }
             //else if (Type=="TProfile") p = (TProfile*)key->ReadObj();
             //else if (Type=="TProfile2D") p = (TProfile2D*)key->ReadObj();
+        else if (Type == "TH2D")
+        {
+            TH2D * hist = (TH2D*)key->ReadObj();
+            rec = new ARootHistRecord(hist, HistName, "TH2D");
+            //hist->GetYaxis()->SetTitleOffset(1.30f);
+            break;
         }
     }
     f->Close();
@@ -615,7 +622,7 @@ void AInterfaceToHist::Load(const QString &HistName, const QString &fileName, co
         if (!histNameInFile.isEmpty() && !bFound)
             abort("Histogram with name " + histNameInFile + " not found in file " + fileName);
         else
-            abort("Error loading histogram.\nNote that currently supported histogram type is only TH1D");
+            abort("Error loading histogram.\nNote that currently supported histogram types are TH1D and TH2D");
     }
     else
     {
@@ -672,18 +679,35 @@ QVariantList AInterfaceToHist::GetContent(const QString& HistName)
     if (!r) abort("Histogram " + HistName + " not found!");
     else
     {
-        QVector<double> x, y;
-        const bool bOK = r->GetContent(x, y);
-        if (bOK)
+        if (r->is1D())
         {
-            for (int i=0; i<x.size(); i++)
+            QVector<double> x, y;
+            const bool bOK = r->GetContent(x, y);
+            if (bOK)
             {
-                QVariantList el;
-                el << x.at(i) << y.at(i);
-                vl.push_back(el);
+                for (int i=0; i<x.size(); i++)
+                {
+                    QVariantList el;
+                    el << x.at(i) << y.at(i);
+                    vl.push_back(el);
+                }
             }
         }
-        else abort("GetBins method is currently implemented only for 1D histograms (TH1)");
+        else if (r->is2D())
+        {
+            QVector<double> x, y, z;
+            const bool bOK = r->GetContent2D(x, y, z);
+            if (bOK)
+            {
+                for (int i=0; i<x.size(); i++)
+                {
+                    QVariantList el;
+                    el << x.at(i) << y.at(i) << z.at(i);
+                    vl.push_back(el);
+                }
+            }
+        }
+        else abort("GetContent method is currently implemented only for TH1D and TH2D histograms");
     }
     return vl;
 }

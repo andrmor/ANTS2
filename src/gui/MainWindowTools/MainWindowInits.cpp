@@ -275,6 +275,9 @@ MainWindow::MainWindow(DetectorClass *Detector,
     ui->labPDEfactors_notAllUnity->setPixmap(Rwindow->YellowIcon.pixmap(16,16));
     ui->labSPEfactors_ActiveAndNotAllUnity->setPixmap(Rwindow->YellowIcon.pixmap(16,16));
     ui->labSPEfactorNotUnity->setPixmap(Rwindow->YellowIcon.pixmap(16,16));
+    ui->labPartLogOn->setPixmap(Rwindow->YellowIcon.pixmap(8,8));
+    ui->labPartLogOn->setVisible(false);
+
       //misc gui inits
     ui->swPMTvsSiPM->setCurrentIndex(ui->cobPMdeviceType->currentIndex());
     MainWindow::on_pbRefreshPMproperties_clicked(); //indication of PM properties

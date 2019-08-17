@@ -248,7 +248,7 @@
     <item>
      <widget class="QTabWidget" name="twProperties">
       <property name="currentIndex">
-       <number>2</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab_6">
        <attribute name="title">
@@ -1601,13 +1601,13 @@ Can be used to automatically configure gamma interaction cross-sections and neut
                <widget class="QLineEdit" name="lePriT">
                 <property name="minimumSize">
                  <size>
-                  <width>0</width>
+                  <width>150</width>
                   <height>21</height>
                  </size>
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>85</width>
+                  <width>150</width>
                   <height>16777215</height>
                  </size>
                 </property>
@@ -1697,13 +1697,13 @@ Can be used to automatically configure gamma interaction cross-sections and neut
                <widget class="QLineEdit" name="lePriT_raise">
                 <property name="minimumSize">
                  <size>
-                  <width>0</width>
+                  <width>150</width>
                   <height>21</height>
                  </size>
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>85</width>
+                  <width>150</width>
                   <height>16777215</height>
                  </size>
                 </property>

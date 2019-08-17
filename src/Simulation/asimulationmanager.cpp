@@ -75,7 +75,7 @@ void ASimulationManager::StartSimulation(QJsonObject& json, int threads, bool fF
 
     if (MaxThreads > 0 && threads > MaxThreads)
     {
-        qDebug() << "Simulation manager: Enforcing max threads to " << MaxThreads;
+        qDebug() << "Simulation manager: Limiting max threads to " << MaxThreads;
         threads = MaxThreads;
     }
 
@@ -135,8 +135,33 @@ bool ASimulationManager::setup(const QJsonObject & json, int threads)
     {
         if (simSettings.G4SimSet.bTrackParticles)
         {
+            if (!simSettings.G4SimSet.checkPathValid())
+            {
+                ErrorString = "Exchange path does not exist.\nCheck 'Geant4' options tab in ANTS2 global settings!";
+                return false;
+            }
+
+            if (!simSettings.G4SimSet.checkExecutableExists())
+            {
+                ErrorString = "File with the name configured for G4ants executable does not exist.\nCheck 'Geant4' options tab in ANTS2 global settings!";
+                return false;
+            }
+
+            if (!simSettings.G4SimSet.checkExecutablePermission())
+            {
+                ErrorString = "File with the name configured for G4ants executable has no execution permission.\nThe file name is specified in 'Geant4' options tab in ANTS2 global settings.";
+                return false;
+            }
+
+            QString err = simSettings.G4SimSet.checkSensitiveVolumes();
+            if ( !err.isEmpty() )
+            {
+                ErrorString = err;
+                return false;
+            }
+
             const QString gdmlName = simSettings.G4SimSet.getGdmlFileName();
-            QString err = Detector.exportToGDML(gdmlName);
+            err = Detector.exportToGDML(gdmlName);
             if ( !err.isEmpty() )
             {
                 ErrorString = err;
@@ -350,7 +375,7 @@ void ASimulationManager::StopSimulation()
     emit RequestStopSimulation();
 }
 
-void ASimulationManager::onNewGeoManager(TObject *)
+void ASimulationManager::onNewGeoManager()
 {
     clearTrackingHistory();
 }
@@ -390,7 +415,7 @@ void ASimulationManager::generateG4antsConfigCommon(QJsonObject & json, int Thre
 
     json["PhysicsList"] = G4SimSet.PhysicsList;
 
-    json["LogHistory"] = simSettings.fLogsStat;
+    json["LogHistory"] = simSettings.LogsStatOptions.bParticleTransportLog;
 
     QJsonArray Parr;
     const int numPart = MpCollection.countParticles();

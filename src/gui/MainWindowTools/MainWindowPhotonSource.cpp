@@ -5,6 +5,7 @@
 #include "ajsontools.h"
 #include "amessage.h"
 #include "asimulationmanager.h"
+#include "alogsandstatisticsoptions.h"
 
 //Qt
 #include <QDebug>
@@ -66,9 +67,6 @@ void MainWindow::SimGeneralConfigToJson(QJsonObject &jsonMaster)
   QJsonObject acjson;
   acjson["MaxNumTransitions"] = ui->sbMaxNumbPhTransitions->value();
   acjson["CheckBeforeTrack"] = ui->cbRndCheckBeforeTrack->isChecked();
-  //acjson["OnlyTracksOnPMs"] = ui->cbOnlyBuildTracksOnPMs->isChecked();
-  acjson["LogsStatistics"] = ui->cbDoLogsAndStatistics->isChecked();
-  //acjson["NumberThreads"] = ui->sbNumberThreads->value();
   json["AcceleratorConfig"] = acjson;
 
   //DetStat binning
@@ -93,6 +91,10 @@ void MainWindow::SimGeneralConfigToJson(QJsonObject &jsonMaster)
   QJsonObject tbojs;
     SimulationManager->TrackBuildOptions.writeToJson(tbojs);
   json["TrackBuildingOptions"] = tbojs;
+
+  QJsonObject lsjs;
+    SimulationManager->LogsStatOptions.writeToJson(lsjs);
+  json["LogStatOptions"] = lsjs;
 
   QJsonObject g4js;
     G4SimSet.bTrackParticles = ui->cbGeant4ParticleTracking->isChecked();

@@ -2817,6 +2817,8 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
   QAction* setMarker = 0;
   QAction* drawMenu = 0;
   QAction* drawIntegral = 0;
+  QAction* interpolate = 0;
+  QAction* median = 0;
   QAction* titleX = 0;
   QAction* titleY = 0;
   QAction* splineFit = 0;
@@ -2847,7 +2849,9 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
       if (Basket.at(row).Type.startsWith("TH1"))
       {
              gaussFit = BasketMenu.addAction("Fit with Gauss");
+             median = BasketMenu.addAction("Apply median filter");
              drawIntegral = BasketMenu.addAction("Draw integral");
+             interpolate = BasketMenu.addAction("Interpolate");
              fraction = BasketMenu.addAction("Calculate fraction before/after");
       }
       if (Basket.at(row).Type.startsWith("TH2"))
@@ -3256,6 +3260,131 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
           hi->SetBinContent(i, prev);
         }
       Draw(hi, "");
+  }
+  else if (selectedItem == interpolate)
+  {
+      TH1* hist = dynamic_cast<TH1*>(Basket[row].DrawObjects.first().getPointer());
+      if (!hist)
+      {
+          message("This operation requires TH1 ROOT object", this);
+          return;
+      }
+
+      QDialog d;
+      QVBoxLayout * lMain = new QVBoxLayout(&d);
+
+      QHBoxLayout* l = new QHBoxLayout();
+        QVBoxLayout * v = new QVBoxLayout();
+            QLabel* lab = new QLabel("From:");
+            v->addWidget(lab);
+            lab = new QLabel("Step:");
+            v->addWidget(lab);
+            lab = new QLabel("Steps:");
+            v->addWidget(lab);
+       l->addLayout(v);
+       v = new QVBoxLayout();
+            QLineEdit * leFrom = new QLineEdit("0");
+            v->addWidget(leFrom);
+            QLineEdit * leStep = new QLineEdit("10");
+            v->addWidget(leStep);
+            QLineEdit* leSteps = new QLineEdit("100");
+            v->addWidget(leSteps);
+       l->addLayout(v);
+      lMain->addLayout(l);
+
+      QPushButton * pb = new QPushButton("Interpolate");
+      lMain->addWidget(pb);
+
+      QObject::connect(pb, &QPushButton::clicked,
+                       [&d, hist, leFrom, leStep, leSteps, this]()
+      {
+          int steps = leSteps->text().toDouble();
+          int step  = leStep->text().toDouble();
+          int from  = leFrom->text().toDouble();
+
+          TH1D* hi = new TH1D("", "", steps, from, from + step*steps);
+          for (int i=0; i<steps; i++)
+          {
+              double x = from + step * i;
+              double val = hist->Interpolate(x);
+              hi->SetBinContent(i+1, val);
+          }
+          QString Xtitle = hist->GetXaxis()->GetTitle();
+          if (!Xtitle.isEmpty()) hi->GetXaxis()->SetTitle(Xtitle.toLocal8Bit().data());
+          this->Draw(hi, "");
+          d.accept();
+      }
+                       );
+
+      d.exec();
+  }
+  else if (selectedItem == median)
+  {
+      TH1* hist = dynamic_cast<TH1*>(Basket[row].DrawObjects.first().getPointer());
+      if (!hist)
+      {
+          message("This operation requires TH1 ROOT object", this);
+          return;
+      }
+
+      QDialog d;
+      QVBoxLayout * lMain = new QVBoxLayout(&d);
+
+      QHBoxLayout* l = new QHBoxLayout();
+            QLabel* lab = new QLabel("Span in bins:");
+            l->addWidget(lab);
+            QSpinBox * sbSpan = new QSpinBox();
+            sbSpan->setMinimum(2);
+            sbSpan->setValue(6);
+            l->addWidget(sbSpan);
+      lMain->addLayout(l);
+
+      QPushButton * pb = new QPushButton("Apply median filter");
+      lMain->addWidget(pb);
+
+      QObject::connect(pb, &QPushButton::clicked,
+                       [&d, hist, sbSpan, this]()
+      {
+          int span = sbSpan->value();
+
+          int deltaLeft  = ( span % 2 == 0 ? span / 2 - 1 : span / 2 );
+          int deltaRight = span / 2;
+
+          QVector<double> Filtered;
+          int num = hist->GetNbinsX();
+          for (int iThisBin = 1; iThisBin <= num; iThisBin++)  // 0-> underflow; num+1 -> overflow
+          {
+              QVector<double> content;
+              for (int i = iThisBin - deltaLeft; i <= iThisBin + deltaRight; i++)
+              {
+                  if (i < 1 || i > num) continue;
+                  content << hist->GetBinContent(i);
+              }
+
+              std::sort(content.begin(), content.end());
+              int size = content.size();
+              double val;
+              if (size == 0) val = 0;
+              else val = ( size % 2 == 0 ? (content[size / 2 - 1] + content[size / 2]) / 2 : content[size / 2] );
+
+              Filtered.append(val);
+          }
+
+          TH1 * hc = dynamic_cast<TH1*>(hist->Clone());
+          if (!hc)
+          {
+              qWarning() << "Failed to clone the histogram!";
+              return;
+          }
+          for (int iThisBin = 1; iThisBin <= num; iThisBin++)
+              hc->SetBinContent(iThisBin, Filtered.at(iThisBin-1));
+
+          this->Draw(hc, "hist");
+          d.accept();
+      }
+                       );
+
+      d.exec();
   }
   else if (selectedItem == fraction)
   {

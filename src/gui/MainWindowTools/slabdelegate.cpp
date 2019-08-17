@@ -23,12 +23,12 @@ ASlabXYDelegate::ASlabXYDelegate()
 
   // creating GUI
   QGridLayout* layXY = new QGridLayout(this);
-  layXY->setContentsMargins(5,4,5,4);
+  layXY->setContentsMargins(1,1,1,1);//5,4,5,4);
   layXY->setVerticalSpacing(1);
-  layXY->setHorizontalSpacing(3);
+  layXY->setHorizontalSpacing(2);
   comShape = new QComboBox();
   comShape->addItems(Shapes);
-  comShape->setMaximumHeight(20);
+  comShape->setMaximumHeight(22);
   comShape->setMinimumWidth(80);
   comShape->setMaximumWidth(100);
   comShape->setContextMenuPolicy(Qt::NoContextMenu);

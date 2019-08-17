@@ -711,7 +711,7 @@ bool ATextEdit::TryShowFunctionTooltip(QTextCursor* cursor)
 
     if (fFound)
     {
-        QToolTip::showText( mapToGlobal( QPoint(cursorRect(*cursor).topRight().x(), cursorRect(*cursor).topRight().y() +1.5*fh )),
+        QToolTip::showText( mapToGlobal( QPoint(cursorRect(*cursor).topRight().x(), cursorRect(*cursor).topRight().y() -3.0*fh )),
                                     tmp,
                                     this,
                                     QRect(),
@@ -886,7 +886,7 @@ void ATextEdit::setTextCursorSilently(const QTextCursor &tc)
 
 int ATextEdit::getIndent(const QString& line) const
 {
-    int indent = -1;
+    int indent = 0;
     if (!line.isEmpty())
     {
         for (indent = 0; indent<line.size(); indent++)
@@ -919,11 +919,19 @@ void ATextEdit::convertTabToSpaces(QString& line)
 int ATextEdit::getSectionCounterChange(const QString& line) const
 {
     int counter = 0;
+    int bComment = false;
     for (int i=0; i<line.size(); i++)
     {
-        // ***!!! add ignore commented: // and inside /* */
-        if      (line.at(i) == '{' ) counter++;
-        else if (line.at(i) == '}' ) counter--;
+        const QChar & ch = line.at(i);
+        // ***!!! add ignore commented inside /* */
+        if      (ch == '{' ) counter++;
+        else if (ch == '}' ) counter--;
+        else if (ch == "/")
+        {
+            if (bComment) break;
+            else bComment = true;
+        }
+        else bComment = false;
     }
     return counter;
 }
@@ -981,21 +989,29 @@ void ATextEdit::align()
     if (text.isEmpty()) return;
 
     QStringList list = text.split('\n');
-    if (list.size() == 1) return;
+    if (list.size() <= 1) return;
 
     for (QString& s : list) convertTabToSpaces(s);
 
     int currentIndent = getIndent(list.first());
-
-    for (int i=1; i<list.size(); i++)
+    const int size = list.size();
+    for (int i = 1; i <= size; i++)
     {
         int deltaSections = getSectionCounterChange(list.at(i-1));
-        currentIndent += deltaSections * TabInSpaces;
 
-        if (list.at(i).trimmed().startsWith('}')) currentIndent -= TabInSpaces;
-
-        if (currentIndent < 0) currentIndent = 0;
-        setIndent(list[i], currentIndent);
+        if (deltaSections >= 0)
+        {
+            currentIndent += deltaSections * TabInSpaces;
+            //no need to adjust the previous line
+        }
+        else
+        {
+            currentIndent += deltaSections * TabInSpaces;
+            if (currentIndent < 0) currentIndent = 0;
+            setIndent(list[i-1], currentIndent);
+        }
+        if (i != size)
+            setIndent(list[i], currentIndent);
     }
 
     QString res = list.join('\n');

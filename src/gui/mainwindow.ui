@@ -6808,8 +6808,8 @@ thermal neutrons:</string>
        <widget class="QSpinBox" name="sbMaxNumbPhTransitions">
         <property name="geometry">
          <rect>
-          <x>450</x>
-          <y>3</y>
+          <x>62</x>
+          <y>8</y>
           <width>71</width>
           <height>22</height>
          </rect>
@@ -6827,24 +6827,24 @@ thermal neutrons:</string>
        <widget class="QLabel" name="label_41">
         <property name="geometry">
          <rect>
-          <x>14</x>
-          <y>4</y>
+          <x>139</x>
+          <y>8</y>
           <width>436</width>
           <height>18</height>
          </rect>
         </property>
         <property name="text">
-         <string>Maximum number of transitions during tracking of a photon:</string>
+         <string>transitions during tracking of a photon: kill the photon</string>
         </property>
         <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
         </property>
        </widget>
        <widget class="QCheckBox" name="cbRndCheckBeforeTrack">
         <property name="geometry">
          <rect>
-          <x>30</x>
-          <y>52</y>
+          <x>19</x>
+          <y>37</y>
           <width>421</width>
           <height>17</height>
          </rect>
@@ -6853,49 +6853,17 @@ thermal neutrons:</string>
          <string>Do not use if PMs register light after wavelength shifting!</string>
         </property>
         <property name="text">
-         <string>Before photon tracking, test against max Q.E.</string>
+         <string>Before tracing a photon, test against max Q.E.</string>
         </property>
         <property name="checked">
          <bool>true</bool>
         </property>
        </widget>
-       <widget class="QCheckBox" name="cbDoLogsAndStatistics">
-        <property name="geometry">
-         <rect>
-          <x>287</x>
-          <y>29</y>
-          <width>240</width>
-          <height>17</height>
-         </rect>
-        </property>
-        <property name="toolTip">
-         <string>Slows down simulations and uses a lot of memory!</string>
-        </property>
-        <property name="text">
-         <string>Collect logs and statistics</string>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="pbConfigureNumberOfThreads">
-        <property name="geometry">
-         <rect>
-          <x>25</x>
-          <y>26</y>
-          <width>231</width>
-          <height>23</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Configure number of threads</string>
-        </property>
-       </widget>
        <widget class="QPushButton" name="pbQEacceleratorWarning">
         <property name="geometry">
          <rect>
-          <x>4</x>
-          <y>49</y>
+          <x>370</x>
+          <y>34</y>
           <width>22</width>
           <height>23</height>
          </rect>
@@ -6907,11 +6875,26 @@ thermal neutrons:</string>
          <string>!</string>
         </property>
        </widget>
+       <widget class="QLabel" name="label_51">
+        <property name="geometry">
+         <rect>
+          <x>6</x>
+          <y>10</y>
+          <width>50</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>After</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
        <zorder>label_41</zorder>
        <zorder>sbMaxNumbPhTransitions</zorder>
        <zorder>cbRndCheckBeforeTrack</zorder>
-       <zorder>cbDoLogsAndStatistics</zorder>
-       <zorder>pbConfigureNumberOfThreads</zorder>
+       <zorder>label_51</zorder>
        <zorder>pbQEacceleratorWarning</zorder>
       </widget>
       <widget class="QWidget" name="tab_4">
@@ -7253,7 +7236,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <property name="documentMode">
        <bool>false</bool>
@@ -9036,9 +9019,9 @@ sim.RunPhotonSources()</string>
          <widget class="QPushButton" name="pbOpenTrackProperties_Phot">
           <property name="geometry">
            <rect>
-            <x>370</x>
-            <y>208</y>
-            <width>120</width>
+            <x>395</x>
+            <y>198</y>
+            <width>80</width>
             <height>21</height>
            </rect>
           </property>
@@ -9056,14 +9039,14 @@ sim.RunPhotonSources()</string>
 Right click: toggle build photon tracks. Also switches of building particle tracks</string>
           </property>
           <property name="text">
-           <string>tracks options</string>
+           <string>tracks</string>
           </property>
          </widget>
          <widget class="QLabel" name="labPhTracksOn">
           <property name="geometry">
            <rect>
-            <x>359</x>
-            <y>210</y>
+            <x>384</x>
+            <y>200</y>
             <width>21</width>
             <height>16</height>
            </rect>
@@ -9072,11 +9055,38 @@ Right click: toggle build photon tracks. Also switches of building particle trac
            <string>--</string>
           </property>
          </widget>
+         <widget class="QPushButton" name="pbOpenLogOptions">
+          <property name="geometry">
+           <rect>
+            <x>395</x>
+            <y>218</y>
+            <width>80</width>
+            <height>21</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="contextMenuPolicy">
+           <enum>Qt::CustomContextMenu</enum>
+          </property>
+          <property name="toolTip">
+           <string>Click: Show / edit all track options
+Right click: toggle build photon tracks. Also switches of building particle tracks</string>
+          </property>
+          <property name="text">
+           <string>logs</string>
+          </property>
+         </widget>
          <zorder>twSingleScan</zorder>
          <zorder>pbSimulate</zorder>
          <zorder>frLimitNodesTo</zorder>
          <zorder>labPhTracksOn</zorder>
          <zorder>pbOpenTrackProperties_Phot</zorder>
+         <zorder>pbOpenLogOptions</zorder>
         </widget>
         <widget class="QWidget" name="page_7">
          <widget class="QFrame" name="fAdvOptionsSim">
@@ -10196,7 +10206,7 @@ Right click: toggle build photon tracks. Also switches of building particle trac
           <x>-1</x>
           <y>283</y>
           <width>534</width>
-          <height>83</height>
+          <height>87</height>
          </rect>
         </property>
         <property name="currentIndex">
@@ -10247,9 +10257,9 @@ Right click: toggle build photon tracks. Also switches of building particle trac
          <widget class="QPushButton" name="pbTrackOptionsGun">
           <property name="geometry">
            <rect>
-            <x>430</x>
-            <y>54</y>
-            <width>101</width>
+            <x>439</x>
+            <y>44</y>
+            <width>80</width>
             <height>21</height>
            </rect>
           </property>
@@ -10267,7 +10277,7 @@ Right click: toggle build photon tracks. Also switches of building particle trac
 Right click: toggle build particle tracks. Also switch off building photon tracks</string>
           </property>
           <property name="text">
-           <string>tracks options</string>
+           <string>tracks</string>
           </property>
          </widget>
          <widget class="QCheckBox" name="cbGunDoS1">
@@ -10295,8 +10305,8 @@ Right click: toggle build particle tracks. Also switch off building photon track
          <widget class="QLabel" name="labPhTracksOn_1">
           <property name="geometry">
            <rect>
-            <x>420</x>
-            <y>52</y>
+            <x>429</x>
+            <y>42</y>
             <width>21</width>
             <height>16</height>
            </rect>
@@ -10334,8 +10344,8 @@ Right click: toggle build particle tracks. Also switch off building photon track
          <widget class="QLabel" name="labPartTracksOn">
           <property name="geometry">
            <rect>
-            <x>420</x>
-            <y>61</y>
+            <x>429</x>
+            <y>51</y>
             <width>21</width>
             <height>16</height>
            </rect>
@@ -10476,6 +10486,45 @@ Right click: toggle build particle tracks. Also switch off building photon track
            </widget>
           </widget>
          </widget>
+         <widget class="QLabel" name="labPartLogOn">
+          <property name="geometry">
+           <rect>
+            <x>429</x>
+            <y>65</y>
+            <width>19</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>--</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="pbOpenLogOptions2">
+          <property name="geometry">
+           <rect>
+            <x>439</x>
+            <y>64</y>
+            <width>80</width>
+            <height>21</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="contextMenuPolicy">
+           <enum>Qt::CustomContextMenu</enum>
+          </property>
+          <property name="toolTip">
+           <string>Click: Show / edit all track options
+Right click: toggle build particle tracks. Also switch off building photon tracks</string>
+          </property>
+          <property name="text">
+           <string>logs</string>
+          </property>
+         </widget>
          <zorder>linePS</zorder>
          <zorder>cbGunDoS2</zorder>
          <zorder>sbGunEvents</zorder>
@@ -10486,6 +10535,8 @@ Right click: toggle build particle tracks. Also switch off building photon track
          <zorder>labEventsPS</zorder>
          <zorder>pbTrackOptionsGun</zorder>
          <zorder>swNormalOrGeant4</zorder>
+         <zorder>labPartLogOn</zorder>
+         <zorder>pbOpenLogOptions2</zorder>
         </widget>
         <widget class="QWidget" name="page_4">
          <widget class="QLineEdit" name="ledClusterRadius">
@@ -15123,8 +15174,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>195</x>
-     <y>433</y>
+     <x>201</x>
+     <y>464</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -15139,8 +15190,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>510</x>
-     <y>435</y>
+     <x>512</x>
+     <y>466</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -15395,8 +15446,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>285</x>
-     <y>434</y>
+     <x>291</x>
+     <y>465</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>

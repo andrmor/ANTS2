@@ -453,22 +453,7 @@ void MainWindow::clearGeoMarkers(int All_Rec_True)
 
 void MainWindow::ShowGeoMarkers()
 {
-  if (!GeoMarkers.isEmpty())
-    {
-      GeometryWindow->SetAsActiveRootWindow();
-      for (int i=0; i<GeoMarkers.size(); i++)
-        {
-          GeoMarkerClass* gm = GeoMarkers[i];
-          //overrides
-          if (gm->Type == "Recon" || gm->Type == "Scan" || gm->Type == "Nodes")
-            {
-              gm->SetMarkerStyle(GeometryWindow->GeoMarkerStyle);
-              gm->SetMarkerSize(GeometryWindow->GeoMarkerSize);
-            }
-          gm->Draw("same");
-        }
-      GeometryWindow->UpdateRootCanvas();
-    }
+    GeometryWindow->ShowGeoMarkers();
 }
 
 void MainWindow::ShowGraphWindow()
@@ -3949,14 +3934,6 @@ void MainWindow::on_pbStopLoad_clicked()
     emit RequestStopLoad();
 }
 
-void MainWindow::on_pbConfigureNumberOfThreads_clicked()
-{
-    GlobSetWindow->show();
-    GlobSetWindow->raise();
-    GlobSetWindow->activateWindow();
-    GlobSetWindow->SetTab(1);
-}
-
 void MainWindow::on_cobFixedDirOrCone_currentIndexChanged(int index)
 {
     ui->fConeForPhotonGen->setEnabled(index==1);
@@ -4759,4 +4736,19 @@ void MainWindow::on_pbHelpDetectionEfficiency_clicked()
             "  If it is also not configured, AreaR = 1\n"
     "";
     message(s, this);
+
+#include "alogconfigdialog.h"
+void MainWindow::on_pbOpenLogOptions_clicked()
+{
+    ALogConfigDialog* d = new ALogConfigDialog(SimulationManager->LogsStatOptions, this);
+    d->exec();
+    delete d;
+    on_pbUpdateSimConfig_clicked();
+}
+
+void MainWindow::on_pbOpenLogOptions2_clicked()
+{
+    ALogConfigDialog* d = new ALogConfigDialog(SimulationManager->LogsStatOptions, this);
+    d->exec();
+    on_pbUpdateSimConfig_clicked();
 }

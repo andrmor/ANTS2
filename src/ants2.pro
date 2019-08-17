@@ -1,6 +1,6 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 4
-ANTS2_MINOR = 19
+ANTS2_MINOR = 20
 
 #Optional libraries
 #CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
@@ -10,6 +10,8 @@ CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algeb
 CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 #CONFIG += ants2_Python      #enable Python scripting
 #CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering): see https://github.com/mctools/ncrystal
+
+#CONFIG += ants2_jsroot       #enables JSROOT visualisation at GeometryWindow. Automatically enables ants2_RootServer
 
 # You may need to modify paths for CERN ROOT and the enabled libraries! See the corresponding sections below
 
@@ -185,12 +187,6 @@ ants2_cuda {
      }
 }
 
-#---ROOT server---
-ants2_RootServer{
-  DEFINES += USE_ROOT_HTML
-}
-#----------
-
 #---Python---
 ants2_Python{
     DEFINES += __USE_ANTS_PYTHON__
@@ -254,7 +250,22 @@ ants2_NCrystal{
 }
 #----------
 
+#---JSROOT viewer---
+ants2_jsroot{
+    DEFINES += __USE_ANTS_JSROOT__
+    QT      += webenginewidgets
+    CONFIG  += ants2_RootServer
+}
+#----------
 
+#---ROOT server---
+ants2_RootServer{
+  DEFINES += USE_ROOT_HTML
+
+    SOURCES += Net/aroothttpserver.cpp
+    HEADERS += Net/aroothttpserver.h
+}
+#----------
 
 #Can be used as command line option to force-disable GUI
 Headless {
@@ -329,7 +340,6 @@ SOURCES += main.cpp \
     modules/amaterialparticlecolection.cpp\
     common/ascriptvalueconverter.cpp \
     common/ainternetbrowser.cpp \
-    Net/aroothttpserver.cpp \
     Net/anetworkmodule.cpp \
     common/aphotonhistorylog.cpp \
     common/amonitor.cpp \
@@ -399,7 +409,9 @@ SOURCES += main.cpp \
     scriptmode/apthistory_si.cpp \
     Simulation/atrackinghistorycrawler.cpp \
     Simulation/aparticletracker.cpp \
-    common/aexternalprocesshandler.cpp
+    common/aexternalprocesshandler.cpp \
+    gui/MainWindowTools/alogconfigdialog.cpp \
+    Simulation/alogsandstatisticsoptions.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -479,7 +491,6 @@ HEADERS  += common/CorrelationFilters.h \
     modules/amaterialparticlecolection.h\
     common/ascriptvalueconverter.h \
     common/ainternetbrowser.h \
-    Net/aroothttpserver.h \
     Net/anetworkmodule.h \
     SplineLibrary/eiquadprog.hpp \
     common/aphotonhistorylog.h \
@@ -551,7 +562,9 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/apthistory_si.h \
     Simulation/atrackinghistorycrawler.h \
     Simulation/aparticletracker.h \
-    common/aexternalprocesshandler.h
+    common/aexternalprocesshandler.h \
+    gui/MainWindowTools/alogconfigdialog.h \
+    Simulation/alogsandstatisticsoptions.h
 
 # --- SIM ---
 ants2_SIM {
@@ -901,5 +914,6 @@ unix {
 #------------
 
 FORMS += \
-    gui/ageant4configdialog.ui
+    gui/ageant4configdialog.ui \
+    gui/MainWindowTools/alogconfigdialog.ui
 

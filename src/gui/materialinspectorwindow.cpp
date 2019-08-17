@@ -1516,6 +1516,8 @@ void MaterialInspectorWindow::on_pbShowUsage_clicked()
         }
     }
 
+  MW->Detector->GeoManager->ClearTracks();
+  MW->clearGeoMarkers();
   if (flagFound)
     {
       Detector->colorVolumes(2, index);
@@ -2840,11 +2842,11 @@ void MaterialInspectorWindow::on_pbPriT_test_clicked()
     QMessageBox mb(this);
     if (ui->cobPriT_model->currentIndex() == 1)
     {
-        MW->WindowNavigator->BusyOn();
         mb.setWindowFlags(mb.windowFlags() | Qt::WindowStaysOnTopHint);
         mb.setStandardButtons(0);
         mb.setText("calculating...");
         mb.show();
+        MW->WindowNavigator->BusyOn();
         QCoreApplication::processEvents();
     }
 

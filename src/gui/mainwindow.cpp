@@ -4736,6 +4736,7 @@ void MainWindow::on_pbHelpDetectionEfficiency_clicked()
             "  If it is also not configured, AreaR = 1\n"
     "";
     message(s, this);
+}
 
 #include "alogconfigdialog.h"
 void MainWindow::on_pbOpenLogOptions_clicked()

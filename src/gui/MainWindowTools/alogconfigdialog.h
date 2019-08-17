@@ -1,6 +1,7 @@
 #ifndef ALOGCONFIGDIALOG_H
 #define ALOGCONFIGDIALOG_H
 
+#include <QObject>
 #include <QDialog>
 
 namespace Ui {

@@ -484,16 +484,24 @@ void MainWindow::on_pbRefreshMaterials_clicked()
     UpdateMaterialListEdit();
     bool tmpBool = DoNotUpdateGeometry;
     DoNotUpdateGeometry = true;
-    //updating material selectors on the Detector tab   
+
     ui->cobMatPM->clear();
     ui->cobMaterialForOverrides->clear();
     ui->cobMaterialTo->clear();
     ui->cobMaterialForWaveTests->clear();
+
+    int tmpIndex = ui->cobMaterialToEstimatePDE->currentIndex();
+    ui->cobMaterialToEstimatePDE->clear();
+
     const QStringList mn = MpCollection->getListOfMaterialNames();
+
     ui->cobMatPM->addItems(mn);
     ui->cobMaterialForOverrides->addItems(mn);
     ui->cobMaterialTo->addItems(mn);
     ui->cobMaterialForWaveTests->addItems(mn);
+    ui->cobMaterialToEstimatePDE->addItems(mn);
+
+    if (tmpIndex>-1 && tmpIndex<mn.size()) ui->cobMaterialToEstimatePDE->setCurrentIndex(tmpIndex);
 
     MIwindow->UpdateActiveMaterials();
     Owindow->UpdateMaterials();
@@ -3780,69 +3788,51 @@ void MainWindow::on_sbLoadASCIIpositionXchannel_valueChanged(int arg1)
 
 void MainWindow::on_pbPDEFromWavelength_clicked()
 {
-    //int prMat = Detector->Sandwich.Layers[Detector->Sandwich.ZeroLayer].Material; connot do it this way, geometry could be loaded from a GDML file!
-
-    //finding the material index of PrScint
-    TObjArray* vols = Detector->GeoManager->GetListOfVolumes();
-    TGeoVolume* PrScint = (TGeoVolume*)vols->FindObject("PrScint");
-    if (!PrScint)
-      {
-        message("Primary scintillator not found!", this);
+    int iMat = ui->cobMaterialToEstimatePDE->currentIndex();
+    if (iMat < 0 || iMat >= MpCollection->countMaterials() )
+    {
+        message("Material does not exist!", this);
         return;
-      }
-    //finding material
-    QString matName = PrScint->GetMaterial()->GetName();
-    qDebug() << "PrScint has material with name:"<<matName;
-    int iMat = Detector->MpCollection->FindMaterial(matName);
-    if (iMat == -1 )
-      {
-        message("Material of PrScint volume not found!", this);
+    }
+    if ((*MpCollection)[iMat]->PrimarySpectrum.isEmpty())
+    {
+        message(QString("Primary scintillation emission spectrum is not defined for %1").arg(ui->cobMaterialToEstimatePDE->currentText()), this);
         return;
-      }
-    qDebug() << "PrScint material index is "<< iMat;
-
-    if ((*Detector->MpCollection)[iMat]->PrimarySpectrum.isEmpty())
-      {
-        message("Primary scintillation emission spectrum is not defined for the material of the primary scintillator ('PrScint') volume!\n"
-                "Check material "+matName, this);
-        return;
-      }
+    }
     if (PMs->getType(ui->sbPMtype->value())->PDE.isEmpty())
-      {
-        message("Wavelength-resolved data are not defined for this PM type!", this);
+    {
+        message("Wavelength-resolved PDE is not defined for this PM type!", this);
         return;
-      }
+    }
 
-    //  const QVector<double> &prSpectrum = (*Detector->MaterialCollection)[prMat]->PrimarySpectrum; cannot do it this way - the data can have different binning!
-    //  const QVector<double> &pmTypePDE = PMs->getType(ui->sbPMtype->value())->PDE;
-
-    qDebug() << "Converting data to standart wavelength: From To Nodes"<<WaveFrom<<WaveTo<<WaveNodes;
+    //qDebug() << "Converting data to standart wavelength: From To Nodes"<<WaveFrom<<WaveTo<<WaveNodes;
     QVector<double> prSpectrum;
     ConvertToStandardWavelengthes(&(*Detector->MpCollection)[iMat]->PrimarySpectrum_lambda,
                                   &(*Detector->MpCollection)[iMat]->PrimarySpectrum,
                                   WaveFrom, WaveStep, WaveNodes,
                                   &prSpectrum);
     QVector<double> pmTypePDE;
-    ConvertToStandardWavelengthes(&PMs->getType(ui->sbPMtype->value())->PDE_lambda,
-                                  &PMs->getType(ui->sbPMtype->value())->PDE,
+    const int iType = ui->sbPMtype->value();
+    ConvertToStandardWavelengthes(&PMs->getType(iType)->PDE_lambda,
+                                  &PMs->getType(iType)->PDE,
                                   WaveFrom, WaveStep, WaveNodes,
                                   &pmTypePDE);
 
     double weightedSum = 0, sum = 0;
     for(int i = 0; i < prSpectrum.size(); i++)
-      {
+    {
         weightedSum += prSpectrum[i] * pmTypePDE[i];
         sum += prSpectrum[i];
-      }
+    }
 
     if (sum == 0)
-      {
-        message("Normalisation problem: sum = 0", this);
+    {
+        message("Error: the overlap is zero!", this);
         return;
-      }
+    }
 
     ui->ledPDE->setText(QString::number(weightedSum/sum, 'g', 4));
-    on_pbUpdatePMproperties_clicked(); //update detector
+    on_pbUpdatePMproperties_clicked();
 }
 
 void MainWindow::on_cobLoadDataType_customContextMenuRequested(const QPoint &/*pos*/)

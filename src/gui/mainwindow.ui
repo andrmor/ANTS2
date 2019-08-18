@@ -562,7 +562,7 @@
             </rect>
            </property>
            <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Estimate the wavelength-inedependent value of the detection efficiency using the emission spectrum of the primary scintillator material and the wavelength-resolved detection efficiency.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string>Estimate the effective PDE using primary scintillation emission spectrum of the material:</string>
            </property>
            <property name="text">
             <string>Estimate</string>
@@ -573,7 +573,7 @@
             <rect>
              <x>160</x>
              <y>15</y>
-             <width>70</width>
+             <width>150</width>
              <height>3</height>
             </rect>
            </property>
@@ -600,6 +600,16 @@
             <enum>Qt::Horizontal</enum>
            </property>
           </widget>
+          <widget class="QComboBox" name="cobMaterialToEstimatePDE">
+           <property name="geometry">
+            <rect>
+             <x>290</x>
+             <y>6</y>
+             <width>137</width>
+             <height>23</height>
+            </rect>
+           </property>
+          </widget>
           <zorder>line_41</zorder>
           <zorder>line_40</zorder>
           <zorder>ledPDE</zorder>
@@ -611,6 +621,7 @@
           <zorder>pbShowPDEbinned</zorder>
           <zorder>pbScalePDE</zorder>
           <zorder>pbPDEFromWavelength</zorder>
+          <zorder>cobMaterialToEstimatePDE</zorder>
          </widget>
          <widget class="QWidget" name="tabPMtypeAngularSens">
           <attribute name="title">
@@ -14104,22 +14115,6 @@ multiply to loaded data</string>
     <hint type="sourcelabel">
      <x>100</x>
      <y>179</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbDoLogsAndStatistics</sender>
-   <signal>clicked()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>453</x>
-     <y>156</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>

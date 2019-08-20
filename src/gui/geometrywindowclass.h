@@ -89,6 +89,7 @@ public slots:
 
 private slots:
     void onDownloadPngRequested(QWebEngineDownloadItem *item);
+    void onJsrootDrawReady();
 
 private slots:
     void on_cbShowTop_toggled(bool checked);

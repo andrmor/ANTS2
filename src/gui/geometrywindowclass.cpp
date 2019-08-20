@@ -206,6 +206,7 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
         js += QString("JSROOT.GEO.GradPerSegm = %1;").arg(ui->cbWireFrame->isChecked() ? 360 / MW->GlobSet.NumSegments : 6);
         js += QString("painter.setAxesDraw(%1);").arg(ui->cbShowAxes->isChecked());
         js += QString("painter.setWireFrame(%1);").arg(ui->cbWireFrame->isChecked());
+        js += QString("painter.setShowTop(%1);").arg(ui->cbShowTop->isChecked() ? "true" : "false");
         js += "if (JSROOT.hpainter) JSROOT.hpainter.updateAll();";
         page->runJavaScript(js);
 #endif
@@ -1119,6 +1120,7 @@ void GeometryWindowClass::doChangeLineWidth(int deltaWidth)
     on_pbShowGeometry_clicked();
 }
 
+#include <QElapsedTimer>
 void GeometryWindowClass::showWebView()
 {
 #ifdef __USE_ANTS_JSROOT__
@@ -1136,6 +1138,35 @@ void GeometryWindowClass::showWebView()
     WebView->load(QUrl(s));
     WebView->show();
 
+/*
+    QWebEnginePage * page = WebView->page();
+    QString js = ""
+    "var wait = true;"
+    "if (JSROOT && JSROOT.GetMainPainter)"
+    "{"
+    "   var p = JSROOT.GetMainPainter(\"onlineGUI_drawing\");"
+    "   if (p && p.isDrawingReady()) wait = false;"
+    "}"
+    "wait";
+
+    bool bWait = true;
+    QElapsedTimer timer;
+    timer.start();
+    do
+    {
+        qApp->processEvents();
+
+        page->runJavaScript(js, [&bWait](const QVariant &v)
+        {
+            bWait = v.toBool();
+        });
+        //qDebug() << bWait << timer.elapsed();
+    }
+    while (bWait && timer.elapsed() < 2000);
+
+    //qDebug() << "exit!";
+
+*/
     ShowGeometry(true, false);
 #endif
 }
@@ -1263,8 +1294,10 @@ void GeometryWindowClass::on_sbLimitVisibility_editingFinished()
     on_cbLimitVisibility_clicked();
 }
 
-void GeometryWindowClass::on_cbShowTop_toggled(bool checked)
+void GeometryWindowClass::on_cbShowTop_toggled(bool)
 {
+    ShowGeometry(true, false);
+/*
     int Mode = ui->cobViewer->currentIndex(); // 0 - standard, 1 - jsroot
     if (Mode == 0)
         ShowGeometry(true, false);
@@ -1274,11 +1307,13 @@ void GeometryWindowClass::on_cbShowTop_toggled(bool checked)
         ShowGeometry(true, false);
         QWebEnginePage * page = WebView->page();
         QString js = "var painter = JSROOT.GetMainPainter(\"onlineGUI_drawing\");";
-        js += QString("painter.options.showtop = %1;").arg(checked ? "true" : "false");
+        //js += QString("painter.options.showtop = %1;").arg(checked ? "true" : "false");
+        js += QString("painter.setShowTop(%1);").arg(checked ? "true" : "false");
         js += "painter.startDrawGeometry();";
         page->runJavaScript(js);
 #endif
     }
+*/
 }
 
 void GeometryWindowClass::on_cobViewType_currentIndexChanged(int index)
@@ -1354,6 +1389,13 @@ void GeometryWindowClass::onDownloadPngRequested(QWebEngineDownloadItem *item)
     }
     item->setPath(fileName);
     item->accept();
+#endif
+}
+
+void GeometryWindowClass::onJsrootDrawReady()
+{
+#ifdef __USE_ANTS_JSROOT__
+
 #endif
 }
 

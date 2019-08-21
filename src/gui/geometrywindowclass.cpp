@@ -205,11 +205,8 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
         QString js = "var painter = JSROOT.GetMainPainter(\"onlineGUI_drawing\");";
         js += QString("painter.setAxesDraw(%1);").arg(ui->cbShowAxes->isChecked());
         js += QString("painter.setWireFrame(%1);").arg(ui->cbWireFrame->isChecked());
-<<<<<<< Updated upstream
-        js += QString("painter.setShowTop(%1);").arg(ui->cbShowTop->isChecked() ? "true" : "false");
-=======
         js += QString("JSROOT.GEO.GradPerSegm = %1;").arg(ui->cbWireFrame->isChecked() ? 360 / MW->GlobSet.NumSegments : 6);
->>>>>>> Stashed changes
+        js += QString("painter.setShowTop(%1);").arg(ui->cbShowTop->isChecked() ? "true" : "false");
         js += "if (JSROOT.hpainter) JSROOT.hpainter.updateAll();";
         page->runJavaScript(js);
 #endif
@@ -1149,7 +1146,6 @@ void GeometryWindowClass::showWebView()
     WebView->load(QUrl(s));
     WebView->show();
 
-<<<<<<< Updated upstream
 /*
     QWebEnginePage * page = WebView->page();
     QString js = ""
@@ -1180,9 +1176,6 @@ void GeometryWindowClass::showWebView()
 
 */
     ShowGeometry(true, false);
-=======
-    ShowGeometry(false, false);
->>>>>>> Stashed changes
 #endif
 }
 
@@ -1416,14 +1409,3 @@ void GeometryWindowClass::onDownloadPngRequested(QWebEngineDownloadItem *item)
     item->accept();
 #endif
 }
-<<<<<<< Updated upstream
-
-void GeometryWindowClass::onJsrootDrawReady()
-{
-#ifdef __USE_ANTS_JSROOT__
-
-#endif
-}
-
-=======
->>>>>>> Stashed changes

@@ -39,7 +39,7 @@ public: ARootHttpServer* RootHttpServer = 0;
     void StopWebSocketServer();
 
 public slots:
-  void StartRootHttpServer();
+  bool StartRootHttpServer();
   void StopRootHttpServer();
 
   void onNewGeoManagerCreated();

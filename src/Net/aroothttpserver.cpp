@@ -27,3 +27,8 @@ void ARootHttpServer::UpdateGeo(TGeoManager * GeoManager)
 
     server->SetItemField("/","_drawitem","world");
 }
+
+bool ARootHttpServer::isRunning() const
+{
+    return server->IsAnyEngine();
+}

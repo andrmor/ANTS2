@@ -128,6 +128,13 @@ void GlobalSettingsWindowClass::SetTab(int iTab)
     ui->twMain->setCurrentIndex(iTab);
 }
 
+void GlobalSettingsWindowClass::ShowNetSettings()
+{
+    showNormal();
+    activateWindow();
+    SetTab(5);
+}
+
 bool GlobalSettingsWindowClass::event(QEvent *event)
 {
     if (event->type() == QEvent::WindowActivate) updateGUI();

@@ -13,6 +13,7 @@ public:
     ~ARootHttpServer();
 
     void UpdateGeo(TGeoManager* GeoManager);
+    bool isRunning() const;
 
 private:
     THttpServer * server = nullptr;

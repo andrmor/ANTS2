@@ -70,9 +70,12 @@ void AWebSocketServerDialog::on_pbStopWS_clicked()
      MW->GlobSet.getNetworkModule()->StopWebSocketServer();
 }
 
+#include "amessage.h"
 void AWebSocketServerDialog::on_pbStartJSR_clicked()
 {
-    MW->GlobSet.getNetworkModule()->StartRootHttpServer();  //does nothing if compilation flag is not set
+    bool bOK = MW->GlobSet.getNetworkModule()->StartRootHttpServer();  //does nothing if compilation flag is not set
+    if (!bOK)
+        message("Server failed to start listening.\nCheck if another server is already listening at this port.", this);
 }
 
 void AWebSocketServerDialog::on_pbStopJSR_clicked()

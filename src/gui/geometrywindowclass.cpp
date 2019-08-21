@@ -203,7 +203,6 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
         MW->NetModule->onNewGeoManagerCreated();
         QWebEnginePage * page = WebView->page();
         QString js = "var painter = JSROOT.GetMainPainter(\"onlineGUI_drawing\");";
-        js += QString("JSROOT.GEO.GradPerSegm = %1;").arg(ui->cbWireFrame->isChecked() ? 360 / MW->GlobSet.NumSegments : 6);
         js += QString("painter.setAxesDraw(%1);").arg(ui->cbShowAxes->isChecked());
         js += QString("painter.setWireFrame(%1);").arg(ui->cbWireFrame->isChecked());
         js += QString("painter.setShowTop(%1);").arg(ui->cbShowTop->isChecked() ? "true" : "false");
@@ -801,8 +800,13 @@ void GeometryWindowClass::on_pbShowGeometry_clicked()
 {
     //qDebug() << "Redraw triggered!";
     ShowAndFocus();
-    RasterWindow->ForceResize();
-    fRecallWindow = false;
+
+    int Mode = ui->cobViewer->currentIndex(); // 0 - standard, 1 - jsroot
+    if (Mode == 0)
+    {
+        RasterWindow->ForceResize();
+        fRecallWindow = false;
+    }
 
     ShowGeometry(true, false); //not doing "same" option!
 }
@@ -1129,6 +1133,9 @@ void GeometryWindowClass::showWebView()
     //WebView->load(QUrl("http://localhost:8080/?item=[Objects/GeoWorld/world,Objects/GeoTracks/TObjArray]&opt=nohighlight;dray;all;tracks;transp50"));
 
     QString s = "http://localhost:8080/?nobrowser&item=Objects/GeoWorld/world&opt=nohighlight;dray;all;tracks";
+    //QString s = "http://localhost:8080/?item=Objects/GeoWorld/world&opt=nohighlight;dray;all;tracks";
+    //QString s = "http://localhost:8080/home/andr/Work/jsroot-dev/index.htm/?nobrowser&item=Objects/GeoWorld/world&opt=nohighlight;dray;all;tracks";
+    //QString s = "http://localhost:8080/home/andr/Work/jsroot-dev/index.htm/?item=Objects/GeoWorld/world&opt=nohighlight;dray;all;tracks";
     if (ui->cbShowTop->isChecked())
         s += ";showtop";
     if (ui->cobViewType->currentIndex() == 1)
@@ -1171,6 +1178,7 @@ void GeometryWindowClass::showWebView()
 #endif
 }
 
+#include "globalsettingswindowclass.h"
 void GeometryWindowClass::on_cobViewer_currentIndexChanged(int index)
 {
 #ifdef __USE_ANTS_JSROOT__
@@ -1182,7 +1190,16 @@ void GeometryWindowClass::on_cobViewer_currentIndexChanged(int index)
     else
     {
         if (!MW->NetModule->isRootServerRunning())
-            MW->NetModule->StartRootHttpServer();
+        {
+            bool bOK = MW->NetModule->StartRootHttpServer();
+            if (!bOK)
+            {
+                ui->cobViewer->setCurrentIndex(0);
+                message("Failed to start root http server. Check if another server is running at the same port", this);
+                MW->GlobSetWindow->ShowNetSettings();
+                return;
+            }
+        }
 
         ui->swViewers->setCurrentIndex(1);
         showWebView();

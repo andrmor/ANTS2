@@ -94,7 +94,7 @@ void ANetworkModule::StopWebSocketServer()
 }
 
 #include "aglobalsettings.h"
-void ANetworkModule::StartRootHttpServer()
+bool ANetworkModule::StartRootHttpServer()
 {
 #ifdef USE_ROOT_HTML
     const AGlobalSettings & GlobSet = AGlobalSettings::getInstance();
@@ -102,9 +102,19 @@ void ANetworkModule::StartRootHttpServer()
     delete RootHttpServer;
     RootHttpServer = new ARootHttpServer(GlobSet.RootServerPort, GlobSet.ExternalJSROOT);
 
-    qDebug() << "ANTS2 root server is now listening";
-    emit StatusChanged();
-    emit RootServerStarted(); //to update current geometry on the server
+    if (RootHttpServer->isRunning())
+    {
+        qDebug() << RootHttpServer << "ANTS2 root server is now listening";
+        emit StatusChanged();
+        emit RootServerStarted(); //to update current geometry on the server
+        return true;
+    }
+    else
+    {
+        delete RootHttpServer; RootHttpServer = nullptr;
+        qDebug() << "Root http server failed to start!\nCheck if another server is already listening at this port";
+        return false;
+    }
 #endif
 }
 

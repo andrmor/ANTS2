@@ -1125,7 +1125,7 @@ void GeometryWindowClass::doChangeLineWidth(int deltaWidth)
     on_pbShowGeometry_clicked();
 }
 
-#include <QElapsedTimer>
+//#include <QElapsedTimer>
 void GeometryWindowClass::showWebView()
 {
 #ifdef __USE_ANTS_JSROOT__
@@ -1135,8 +1135,6 @@ void GeometryWindowClass::showWebView()
 
     QString s = "http://localhost:8080/?nobrowser&item=Objects/GeoWorld/world&opt=nohighlight;dray;all;tracks";
     //QString s = "http://localhost:8080/?item=Objects/GeoWorld/world&opt=nohighlight;dray;all;tracks";
-    //QString s = "http://localhost:8080/home/andr/Work/jsroot-dev/index.htm/?nobrowser&item=Objects/GeoWorld/world&opt=nohighlight;dray;all;tracks";
-    //QString s = "http://localhost:8080/home/andr/Work/jsroot-dev/index.htm/?item=Objects/GeoWorld/world&opt=nohighlight;dray;all;tracks";
     if (ui->cbShowTop->isChecked())
         s += ";showtop";
     if (ui->cobViewType->currentIndex() == 1)

@@ -1335,14 +1335,23 @@ void AGeoWidget::UpdateGui()
 
       if (CurrentObject->isCompositeMemeber())
           {
-            addInfoLabel("Logical object");
+            QLabel * lab = addInfoLabel("lll");
             GeoObjectDelegate = createAndAddGeoObjectDelegate(CurrentObject);
+            QString label = "Logical ";
+            QString extra = GeoObjectDelegate->getLabel();
+            if (extra.isEmpty()) label += "object";
+            else label += extra;
+            lab->setText(label);
           }
       else if (CurrentObject->ObjectType->isSingle())  // NORMAL
           {
-            addInfoLabel("Object"+getSuffix(contObj));
+            QLabel * lab = addInfoLabel("lll");
             GeoObjectDelegate = createAndAddGeoObjectDelegate(CurrentObject);
             connect(GeoObjectDelegate->Widget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(OnCustomContextMenuTriggered_forMainObject(QPoint)));
+            QString label = GeoObjectDelegate->getLabel();
+            if (label.isEmpty()) label = "Object";
+            label += getSuffix(contObj);
+            lab->setText(label);
           }
       else if (CurrentObject->ObjectType->isGrid())  // Grid
           {
@@ -1373,7 +1382,12 @@ void AGeoWidget::UpdateGui()
 
 AGeoObjectDelegate* AGeoWidget::createAndAddGeoObjectDelegate(AGeoObject* obj)
 {
-    AGeoObjectDelegate* Del = new AGeoObjectDelegate(obj->Name, tw->Sandwich->Materials);    
+    AGeoObjectDelegate * Del;
+    if (obj->Shape->getShapeType() == "TGeoBBox")
+        Del = new AGeoBoxDelegate(tw->Sandwich->Materials);
+    else
+        Del = new AGeoObjectDelegate(tw->Sandwich->Materials);
+
     Del->Update(obj);
     Del->Widget->setEnabled(!CurrentObject->fLocked);  //CurrentObject here!!!
     ObjectLayout->addWidget(Del->Widget);
@@ -1606,14 +1620,15 @@ void AGeoWidget::onMonitorRequestsShowSensitiveDirection()
     emit showMonitor(CurrentObject);
 }
 
-void AGeoWidget::addInfoLabel(QString text)
+QLabel * AGeoWidget::addInfoLabel(QString text)
 {
-  ObjectLayout->addStretch(0);
+    ObjectLayout->addStretch(0);
 
-  QLabel* l1 = new QLabel(text);
-  l1->setMaximumHeight(20);
-  l1->setAlignment(Qt::AlignCenter);
-  ObjectLayout->addWidget(l1);
+    QLabel* lab = new QLabel(text);
+    lab->setMaximumHeight(20);
+    lab->setAlignment(Qt::AlignCenter);
+    ObjectLayout->addWidget(lab);
+    return lab;
 }
 
 void AGeoWidget::exitEditingMode()
@@ -1928,7 +1943,7 @@ void AGeoWidget::onCancelPressed()
   tw->UpdateGui( (CurrentObject) ? CurrentObject->Name : "" );
 }
 
-AGeoObjectDelegate::AGeoObjectDelegate(QString name, QStringList materials)
+AGeoObjectDelegate::AGeoObjectDelegate(QStringList materials)
 {
   CurrentObject = 0;
 
@@ -1939,8 +1954,8 @@ AGeoObjectDelegate::AGeoObjectDelegate(QString name, QStringList materials)
   frMainFrame->setPalette( palette );
   frMainFrame->setAutoFillBackground( true );
   frMainFrame->setMinimumHeight(150);
-  frMainFrame->setMaximumHeight(200);
-    QVBoxLayout* lMF = new QVBoxLayout();
+  frMainFrame->setMaximumHeight(300);
+    lMF = new QVBoxLayout();
     lMF->setContentsMargins(5,5,5,2);
 
     //name and material line
@@ -2498,4 +2513,52 @@ void AMonitorDelegate::onContentChanged()
 {
     emit ContentChanged();
     Widget->layout()->activate();
+}
+
+AGeoBoxDelegate::AGeoBoxDelegate(QStringList materials)
+    : AGeoObjectDelegate(materials)
+{
+    QGridLayout * gr = new QGridLayout();
+    gr->setContentsMargins(50, 0, 50, 3);
+    gr->setVerticalSpacing(1);
+
+    gr->addWidget(new QLabel("Size in X:"), 0,0);
+    gr->addWidget(new QLabel("Size in Y:"), 1,0);
+    gr->addWidget(new QLabel("Size in Z:"), 2,0);
+
+    ex = new QLineEdit();
+    gr->addWidget(ex, 0,1);
+    ey = new QLineEdit();
+    gr->addWidget(ey, 1,1);
+    ez = new QLineEdit();
+    gr->addWidget(ez, 2,1);
+
+    gr->addWidget(new QLabel("mm"), 0,2);
+    gr->addWidget(new QLabel("mm"), 1,2);
+    gr->addWidget(new QLabel("mm"), 2,2);
+
+    lMF->insertLayout(2, gr);
+
+    QObject::connect(ex, &QLineEdit::textChanged, this, &AGeoBoxDelegate::onLocalParameterChange);
+    QObject::connect(ey, &QLineEdit::textChanged, this, &AGeoBoxDelegate::onLocalParameterChange);
+    QObject::connect(ez, &QLineEdit::textChanged, this, &AGeoBoxDelegate::onLocalParameterChange);
+}
+
+void AGeoBoxDelegate::Update(const AGeoObject *obj)
+{
+    AGeoObjectDelegate::Update(obj);
+
+    AGeoBox * box = dynamic_cast<AGeoBox*>(obj->Shape);
+    if (box)
+    {
+        ex->setText(QString::number(box->dx*2.0));
+        ey->setText(QString::number(box->dy*2.0));
+        ez->setText(QString::number(box->dz*2.0));
+    }
+}
+
+void AGeoBoxDelegate::onLocalParameterChange()
+{
+    pteShape->clear();
+    pteShape->appendPlainText(QString("TGeoBBox( %1, %2, %3 )").arg(0.5*ex->text().toDouble()).arg(0.5*ey->text().toDouble()).arg(0.5*ez->text().toDouble()));
 }

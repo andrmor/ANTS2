@@ -100,6 +100,7 @@ class ASlabDelegate;
 class ATypeCompositeObject;
 class TVector3;
 class AMonitorDelegateForm;
+class QHBoxLayout;
 
 class AGeoWidget : public QWidget
 {
@@ -152,7 +153,7 @@ private:
   void exitEditingMode();
   QString getSuffix(AGeoObject *objCont);
   //void convertToLG(int UpperLower); //0 - upper, 1 - lower
-  void addInfoLabel(QString text);
+  QLabel * addInfoLabel(QString text);
   AGeoObjectDelegate *createAndAddGeoObjectDelegate(AGeoObject *obj);
   ASlabDelegate *createAndAddSlabDelegate(AGeoObject *obj);
   AGridElementDelegate *createAndAddGridElementDelegate(AGeoObject *obj);
@@ -169,7 +170,8 @@ class AGeoObjectDelegate : public QWidget
   Q_OBJECT
 
 public:
-  AGeoObjectDelegate(QString name, QStringList materials);
+  AGeoObjectDelegate(QStringList materials);
+  virtual ~AGeoObjectDelegate(){}
 
   QFrame* Widget;
 
@@ -188,11 +190,14 @@ public:
   QLineEdit *ledX, *ledY, *ledZ;
   QLineEdit *ledPhi, *ledTheta, *ledPsi;
 
-private:
+  virtual const QString getLabel() const {return "";}
+
+protected:
   const AGeoObject* CurrentObject;
+  QVBoxLayout * lMF;  //main layout
 
 public slots:
-  void Update(const AGeoObject* obj);
+  virtual void Update(const AGeoObject* obj);
 
 private slots:
   void onContentChanged();  //only to enter editing mode! Object update only on confirm button!
@@ -202,6 +207,26 @@ private slots:
 signals:
   void ContentChanged();
 
+};
+
+class AGeoBoxDelegate : public AGeoObjectDelegate
+{
+    Q_OBJECT
+
+public:
+    AGeoBoxDelegate(QStringList materials);
+
+    QLineEdit * ex;
+    QLineEdit * ey;
+    QLineEdit * ez;
+
+    virtual const QString getLabel() const override {return "Box";}
+
+public slots:
+  virtual void Update(const AGeoObject* obj) override;
+
+private slots:
+    void onLocalParameterChange();
 };
 
 class AGridElementDelegate : public QWidget

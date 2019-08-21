@@ -1141,16 +1141,20 @@ void GeometryWindowClass::showWebView()
         s += ";showtop";
     if (ui->cobViewType->currentIndex() == 1)
         s += ";ortho_camera_rotate";
+    if (ui->cbWireFrame->isChecked())
+        s += ";wireframe";
     s += QString(";transp%1").arg(ui->sbTransparency->value());
+
+    prepareGeoManager(true);
 
     WebView->load(QUrl(s));
     WebView->show();
 
-/*
+    /*
     QWebEnginePage * page = WebView->page();
     QString js = ""
     "var wait = true;"
-    "if (JSROOT && JSROOT.GetMainPainter)"
+    "if ((typeof JSROOT != \"undefined\") && JSROOT.GetMainPainter)"
     "{"
     "   var p = JSROOT.GetMainPainter(\"onlineGUI_drawing\");"
     "   if (p && p.isDrawingReady()) wait = false;"
@@ -1172,10 +1176,10 @@ void GeometryWindowClass::showWebView()
     }
     while (bWait && timer.elapsed() < 2000);
 
-    //qDebug() << "exit!";
+    qDebug() << "exit!";
+    */
 
-*/
-    ShowGeometry(true, false);
+    //ShowGeometry(true, false);
 #endif
 }
 

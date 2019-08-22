@@ -1385,6 +1385,10 @@ AGeoObjectDelegate* AGeoWidget::createAndAddGeoObjectDelegate(AGeoObject* obj)
     AGeoObjectDelegate * Del;
     if (obj->Shape->getShapeType() == "TGeoBBox")
         Del = new AGeoBoxDelegate(tw->Sandwich->Materials);
+    else if (obj->Shape->getShapeType() == "TGeoTube")
+        Del = new AGeoTubeDelegate(tw->Sandwich->Materials);
+    else if (obj->Shape->getShapeType() == "TGeoPara")
+        Del = new AGeoParaDelegate(tw->Sandwich->Materials);
     else
         Del = new AGeoObjectDelegate(tw->Sandwich->Materials);
 
@@ -1440,7 +1444,7 @@ ASlabDelegate* AGeoWidget::createAndAddSlabDelegate(AGeoObject* obj)
 
 AGridElementDelegate *AGeoWidget::createAndAddGridElementDelegate(AGeoObject *obj)
 {
-    AGridElementDelegate* Del = new AGridElementDelegate(obj->Name);
+    AGridElementDelegate * Del = new AGridElementDelegate();
     Del->Update(obj);
     Del->Widget->setEnabled(!CurrentObject->fLocked);
     ObjectLayout->addWidget(Del->Widget);
@@ -1943,7 +1947,7 @@ void AGeoWidget::onCancelPressed()
   tw->UpdateGui( (CurrentObject) ? CurrentObject->Name : "" );
 }
 
-AGeoObjectDelegate::AGeoObjectDelegate(QStringList materials)
+AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials)
 {
   CurrentObject = 0;
 
@@ -1953,8 +1957,8 @@ AGeoObjectDelegate::AGeoObjectDelegate(QStringList materials)
   palette.setColor( backgroundRole(), QColor( 255, 255, 255 ) );
   frMainFrame->setPalette( palette );
   frMainFrame->setAutoFillBackground( true );
-  frMainFrame->setMinimumHeight(150);
-  frMainFrame->setMaximumHeight(300);
+  //frMainFrame->setMinimumHeight(150);
+  //frMainFrame->setMaximumHeight(300);
     lMF = new QVBoxLayout();
     lMF->setContentsMargins(5,5,5,2);
 
@@ -2317,7 +2321,7 @@ void AShapeHighlighter::highlightBlock(const QString &text)
     }
 }
 
-AGridElementDelegate::AGridElementDelegate(QString name)
+AGridElementDelegate::AGridElementDelegate()
 {
     CurrentObject = 0;
 
@@ -2464,7 +2468,7 @@ void AGridElementDelegate::onInstructionsForGridRequested()
     QMessageBox::information(this, "", s);
 }
 
-AMonitorDelegate::AMonitorDelegate(QStringList definedParticles)
+AMonitorDelegate::AMonitorDelegate(const QStringList & definedParticles)
 {
     CurrentObject = 0;
 
@@ -2515,27 +2519,24 @@ void AMonitorDelegate::onContentChanged()
     Widget->layout()->activate();
 }
 
-AGeoBoxDelegate::AGeoBoxDelegate(QStringList materials)
+AGeoBoxDelegate::AGeoBoxDelegate(const QStringList &materials)
     : AGeoObjectDelegate(materials)
 {
     QGridLayout * gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);
     gr->setVerticalSpacing(1);
 
-    gr->addWidget(new QLabel("Size in X:"), 0,0);
-    gr->addWidget(new QLabel("Size in Y:"), 1,0);
-    gr->addWidget(new QLabel("Size in Z:"), 2,0);
+    gr->addWidget(new QLabel("Size in X:"), 0, 0);
+    gr->addWidget(new QLabel("Size in Y:"), 1, 0);
+    gr->addWidget(new QLabel("Size in Z:"), 2, 0);
 
-    ex = new QLineEdit();
-    gr->addWidget(ex, 0,1);
-    ey = new QLineEdit();
-    gr->addWidget(ey, 1,1);
-    ez = new QLineEdit();
-    gr->addWidget(ez, 2,1);
+    ex = new QLineEdit(); gr->addWidget(ex, 0, 1);
+    ey = new QLineEdit(); gr->addWidget(ey, 1, 1);
+    ez = new QLineEdit(); gr->addWidget(ez, 2, 1);
 
-    gr->addWidget(new QLabel("mm"), 0,2);
-    gr->addWidget(new QLabel("mm"), 1,2);
-    gr->addWidget(new QLabel("mm"), 2,2);
+    gr->addWidget(new QLabel("mm"), 0, 2);
+    gr->addWidget(new QLabel("mm"), 1, 2);
+    gr->addWidget(new QLabel("mm"), 2, 2);
 
     lMF->insertLayout(2, gr);
 
@@ -2561,4 +2562,110 @@ void AGeoBoxDelegate::onLocalParameterChange()
 {
     pteShape->clear();
     pteShape->appendPlainText(QString("TGeoBBox( %1, %2, %3 )").arg(0.5*ex->text().toDouble()).arg(0.5*ey->text().toDouble()).arg(0.5*ez->text().toDouble()));
+}
+
+AGeoTubeDelegate::AGeoTubeDelegate(const QStringList & materials)
+    : AGeoObjectDelegate(materials)
+{
+    QGridLayout * gr = new QGridLayout();
+    gr->setContentsMargins(50, 0, 50, 3);
+    gr->setVerticalSpacing(1);
+
+    gr->addWidget(new QLabel("Outer diameter:"), 0, 0);
+    gr->addWidget(new QLabel("Inner diameter:"), 1, 0);
+    gr->addWidget(new QLabel("Height:"), 2,0);
+
+    eo = new QLineEdit(); gr->addWidget(eo, 0, 1);
+    ei = new QLineEdit(); gr->addWidget(ei, 1, 1);
+    ez = new QLineEdit(); gr->addWidget(ez, 2, 1);
+
+    gr->addWidget(new QLabel("mm"), 0, 2);
+    gr->addWidget(new QLabel("mm"), 1, 2);
+    gr->addWidget(new QLabel("mm"), 2, 2);
+
+    lMF->insertLayout(2, gr);
+
+    QObject::connect(eo, &QLineEdit::textChanged, this, &AGeoTubeDelegate::onLocalParameterChange);
+    QObject::connect(ei, &QLineEdit::textChanged, this, &AGeoTubeDelegate::onLocalParameterChange);
+    QObject::connect(ez, &QLineEdit::textChanged, this, &AGeoTubeDelegate::onLocalParameterChange);
+}
+
+void AGeoTubeDelegate::Update(const AGeoObject *obj)
+{
+    AGeoObjectDelegate::Update(obj);
+
+    AGeoTube * tube = dynamic_cast<AGeoTube*>(obj->Shape);
+    if (tube)
+    {
+        eo->setText(QString::number(tube->rmax*2.0));
+        ei->setText(QString::number(tube->rmin*2.0));
+        ez->setText(QString::number(tube->dz*2.0));
+    }
+}
+
+void AGeoTubeDelegate::onLocalParameterChange()
+{
+    pteShape->clear();
+    pteShape->appendPlainText(QString("TGeoTube( %1, %2, %3 )").arg(0.5*ei->text().toDouble()).arg(0.5*eo->text().toDouble()).arg(0.5*ez->text().toDouble()));
+}
+
+AGeoParaDelegate::AGeoParaDelegate(const QStringList & materials)
+    : AGeoObjectDelegate(materials)
+{
+    QGridLayout * gr = new QGridLayout();
+    gr->setContentsMargins(50, 0, 50, 3);
+    gr->setVerticalSpacing(1);
+
+    gr->addWidget(new QLabel("Size in X:"), 0, 0);
+    gr->addWidget(new QLabel("Size in Y:"), 1, 0);
+    gr->addWidget(new QLabel("Size in Z:"), 2, 0);
+    gr->addWidget(new QLabel("Alpha:"),     3, 0);
+    gr->addWidget(new QLabel("Theta:"),     4, 0);
+    gr->addWidget(new QLabel("Phi:"),       5, 0);
+
+    ex = new QLineEdit(); gr->addWidget(ex, 0, 1);
+    ey = new QLineEdit(); gr->addWidget(ey, 1, 1);
+    ez = new QLineEdit(); gr->addWidget(ez, 2, 1);
+    ea = new QLineEdit(); gr->addWidget(ea, 3, 1);
+    et = new QLineEdit(); gr->addWidget(et, 4, 1);
+    ep = new QLineEdit(); gr->addWidget(ep, 5, 1);
+
+    gr->addWidget(new QLabel("mm"), 0, 2);
+    gr->addWidget(new QLabel("mm"), 1, 2);
+    gr->addWidget(new QLabel("mm"), 2, 2);
+    gr->addWidget(new QLabel("°"),  3, 2);
+    gr->addWidget(new QLabel("°"),  4, 2);
+    gr->addWidget(new QLabel("°"),  5, 2);
+
+    lMF->insertLayout(2, gr);
+
+    QObject::connect(ex, &QLineEdit::textChanged, this, &AGeoParaDelegate::onLocalParameterChange);
+    QObject::connect(ey, &QLineEdit::textChanged, this, &AGeoParaDelegate::onLocalParameterChange);
+    QObject::connect(ez, &QLineEdit::textChanged, this, &AGeoParaDelegate::onLocalParameterChange);
+    QObject::connect(ea, &QLineEdit::textChanged, this, &AGeoParaDelegate::onLocalParameterChange);
+    QObject::connect(et, &QLineEdit::textChanged, this, &AGeoParaDelegate::onLocalParameterChange);
+    QObject::connect(ep, &QLineEdit::textChanged, this, &AGeoParaDelegate::onLocalParameterChange);
+}
+
+void AGeoParaDelegate::Update(const AGeoObject *obj)
+{
+    AGeoObjectDelegate::Update(obj);
+
+    AGeoPara * para = dynamic_cast<AGeoPara*>(obj->Shape);
+    if (para)
+    {
+        ex->setText(QString::number(para->dx*2.0));
+        ey->setText(QString::number(para->dy*2.0));
+        ez->setText(QString::number(para->dz*2.0));
+        ea->setText(QString::number(para->alpha));
+        et->setText(QString::number(para->theta));
+        ep->setText(QString::number(para->phi));
+    }
+}
+
+void AGeoParaDelegate::onLocalParameterChange()
+{
+    pteShape->clear();
+    pteShape->appendPlainText(QString("TGeoPara( %1, %2, %3, %4, %5, %6 )").arg(0.5*ex->text().toDouble()).arg(0.5*ey->text().toDouble()).arg(0.5*ez->text().toDouble())
+                                                                           .arg(ea->text()).arg(et->text()).arg(ep->text())  );
 }

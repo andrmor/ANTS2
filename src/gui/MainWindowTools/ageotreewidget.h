@@ -164,13 +164,12 @@ signals:
   void showMonitor(const AGeoObject* mon);
 };
 
-
 class AGeoObjectDelegate : public QWidget
 {
   Q_OBJECT
 
 public:
-  AGeoObjectDelegate(QStringList materials);
+  AGeoObjectDelegate(const QStringList & materials);
   virtual ~AGeoObjectDelegate(){}
 
   QFrame* Widget;
@@ -214,7 +213,7 @@ class AGeoBoxDelegate : public AGeoObjectDelegate
     Q_OBJECT
 
 public:
-    AGeoBoxDelegate(QStringList materials);
+    AGeoBoxDelegate(const QStringList & materials);
 
     QLineEdit * ex;
     QLineEdit * ey;
@@ -229,12 +228,55 @@ private slots:
     void onLocalParameterChange();
 };
 
+class AGeoTubeDelegate : public AGeoObjectDelegate
+{
+    Q_OBJECT
+
+public:
+    AGeoTubeDelegate(const QStringList & materials);
+
+    QLineEdit * ei;
+    QLineEdit * eo;
+    QLineEdit * ez;
+
+    virtual const QString getLabel() const override {return "Tube";}
+
+public slots:
+  virtual void Update(const AGeoObject* obj) override;
+
+private slots:
+    void onLocalParameterChange();
+};
+
+class AGeoParaDelegate : public AGeoObjectDelegate
+{
+    Q_OBJECT
+
+public:
+    AGeoParaDelegate(const QStringList & materials);
+
+    QLineEdit * ex;
+    QLineEdit * ey;
+    QLineEdit * ez;
+    QLineEdit * ea;
+    QLineEdit * et;
+    QLineEdit * ep;
+
+    virtual const QString getLabel() const override {return "Parallelepiped";}
+
+public slots:
+  virtual void Update(const AGeoObject* obj) override;
+
+private slots:
+    void onLocalParameterChange();
+};
+
 class AGridElementDelegate : public QWidget
 {
   Q_OBJECT
 
 public:
-   AGridElementDelegate(QString name);
+   AGridElementDelegate();
 
    QFrame* Widget;
 
@@ -266,7 +308,7 @@ class AMonitorDelegate : public QWidget
   Q_OBJECT
 
 public:
-   AMonitorDelegate(QStringList definedParticles);
+   AMonitorDelegate(const QStringList & definedParticles);
 
    QFrame* Widget;
    AMonitorDelegateForm* del;

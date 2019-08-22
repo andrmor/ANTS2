@@ -104,7 +104,7 @@ bool ANetworkModule::StartRootHttpServer()
 
     if (RootHttpServer->isRunning())
     {
-        qDebug() << RootHttpServer << "ANTS2 root server is now listening";
+        qDebug() << "ANTS2 root server is now listening";
         emit StatusChanged();
         emit RootServerStarted(); //to update current geometry on the server
         return true;

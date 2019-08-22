@@ -90,10 +90,12 @@ void GeometryWindowClass::adjustGeoAttributes(TGeoVolume * vol, int Mode, int tr
         TGeoNode* thisNode = (TGeoNode*)vol->GetNodes()->At(i);
         TGeoVolume * v = thisNode->GetVolume();
         v->SetTransparency(Mode == 0 ? 0 : transp);
-        if (Mode != 0 && adjustVis)
+        if (Mode != 0)
         {
-            //qDebug() << v->GetName() << currentLevel << visLevel;
-            v->SetAttBit(TGeoAtt::kVisOnScreen, (currentLevel < visLevel) );
+            if (adjustVis)
+                v->SetAttBit(TGeoAtt::kVisOnScreen, (currentLevel < visLevel) );
+            else
+                v->SetAttBit(TGeoAtt::kVisOnScreen, true );
         }
 
         adjustGeoAttributes(v, Mode, transp, adjustVis, visLevel, currentLevel+1);
@@ -120,10 +122,10 @@ void GeometryWindowClass::prepareGeoManager(bool ColorUpdateAllowed)
         else MW->Detector->colorVolumes(0);
     }
 
-    //MW->Detector->GeoManager->SetTopVisible(ui->cbShowTop->isChecked());
+    MW->Detector->GeoManager->SetTopVisible(ui->cbShowTop->isChecked());
     //in this way jsroot have no problem to update visibility of top:
-    MW->Detector->GeoManager->SetTopVisible(true);
-    MW->Detector->top->SetVisibility(ui->cbShowTop->isChecked());
+    //MW->Detector->GeoManager->SetTopVisible(true);
+    //MW->Detector->top->SetVisibility(ui->cbShowTop->isChecked());
 
     int transp = ui->sbTransparency->value();
     MW->Detector->top->SetTransparency(Mode == 0 ? 0 : transp);
@@ -201,6 +203,7 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
         //qDebug() << "After:" << gGeoManager->GetListOfTracks()->GetEntriesFast();
 
         MW->NetModule->onNewGeoManagerCreated();
+
         QWebEnginePage * page = WebView->page();
         QString js = "var painter = JSROOT.GetMainPainter(\"onlineGUI_drawing\");";
         js += QString("painter.setAxesDraw(%1);").arg(ui->cbShowAxes->isChecked());

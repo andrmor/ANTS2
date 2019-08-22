@@ -166,46 +166,48 @@ signals:
 
 class AGeoObjectDelegate : public QWidget
 {
-  Q_OBJECT
+    Q_OBJECT
 
 public:
-  AGeoObjectDelegate(const QStringList & materials);
-  virtual ~AGeoObjectDelegate(){}
+    AGeoObjectDelegate(const QStringList & materials);
+    virtual ~AGeoObjectDelegate(){}
 
-  QFrame* Widget;
+    QFrame* Widget;
 
-  QFrame* frMainFrame;  
-  QLineEdit* leName;
-  QComboBox* cobMat;
-  QPlainTextEdit* pteShape;
-  QWidget* PosOrient;
-  QWidget* ArrayWid;
-  QPushButton* pbHelp;
-  QLabel* lMat;
+    QFrame* frMainFrame;
+    QLineEdit* leName;
+    QComboBox* cobMat;
+    QPlainTextEdit* pteShape;
+    QWidget* PosOrient;
+    QWidget* ArrayWid;
+    QPushButton* pbHelp;
+    QLabel* lMat;
 
-  QSpinBox *sbNumX, *sbNumY, *sbNumZ;
-  QLineEdit *ledStepX, *ledStepY, *ledStepZ;
+    QSpinBox *sbNumX, *sbNumY, *sbNumZ;
+    QLineEdit *ledStepX, *ledStepY, *ledStepZ;
 
-  QLineEdit *ledX, *ledY, *ledZ;
-  QLineEdit *ledPhi, *ledTheta, *ledPsi;
+    QLineEdit *ledX, *ledY, *ledZ;
+    QLineEdit *ledPhi, *ledTheta, *ledPsi;
 
-  virtual const QString getLabel() const {return "";}
+    virtual const QString getLabel() const {return "";} // used to fill the label on top of the delegate
 
 protected:
-  const AGeoObject* CurrentObject;
-  QVBoxLayout * lMF;  //main layout
+    const AGeoObject * CurrentObject = nullptr;
+    QVBoxLayout * lMF = nullptr;      //main layout
 
 public slots:
-  virtual void Update(const AGeoObject* obj);
+    virtual void Update(const AGeoObject * obj);
 
 private slots:
-  void onContentChanged();  //only to enter editing mode! Object update only on confirm button!
-  void onHelpRequested();   //AGeoShape list is here!!!
-  void onCursorPositionChanged();
+    void onContentChanged();          // only to enter the editing mode! Object update is performed only on confirm button click!
+    void onHelpRequested();           // dialog with AGeoShape list can be accessed here
+    void onCursorPositionChanged();
+
+protected slots:
+    virtual void onLocalParameterChange() {}
 
 signals:
-  void ContentChanged();
-
+    void ContentChanged();
 };
 
 class AGeoBoxDelegate : public AGeoObjectDelegate
@@ -215,17 +217,17 @@ class AGeoBoxDelegate : public AGeoObjectDelegate
 public:
     AGeoBoxDelegate(const QStringList & materials);
 
-    QLineEdit * ex;
-    QLineEdit * ey;
-    QLineEdit * ez;
+    QLineEdit * ex = nullptr;
+    QLineEdit * ey = nullptr;
+    QLineEdit * ez = nullptr;
 
     virtual const QString getLabel() const override {return "Box";}
 
 public slots:
-  virtual void Update(const AGeoObject* obj) override;
+    virtual void Update(const AGeoObject * obj) override;
 
 private slots:
-    void onLocalParameterChange();
+    void onLocalParameterChange() override;
 };
 
 class AGeoTubeDelegate : public AGeoObjectDelegate
@@ -235,17 +237,17 @@ class AGeoTubeDelegate : public AGeoObjectDelegate
 public:
     AGeoTubeDelegate(const QStringList & materials);
 
-    QLineEdit * ei;
-    QLineEdit * eo;
-    QLineEdit * ez;
+    QLineEdit * ei = nullptr;
+    QLineEdit * eo = nullptr;
+    QLineEdit * ez = nullptr;
 
     virtual const QString getLabel() const override {return "Tube";}
 
 public slots:
-  virtual void Update(const AGeoObject* obj) override;
+    virtual void Update(const AGeoObject * obj) override;
 
 private slots:
-    void onLocalParameterChange();
+    void onLocalParameterChange() override;
 };
 
 class AGeoParaDelegate : public AGeoObjectDelegate
@@ -255,21 +257,68 @@ class AGeoParaDelegate : public AGeoObjectDelegate
 public:
     AGeoParaDelegate(const QStringList & materials);
 
-    QLineEdit * ex;
-    QLineEdit * ey;
-    QLineEdit * ez;
-    QLineEdit * ea;
-    QLineEdit * et;
-    QLineEdit * ep;
+    QLineEdit * ex = nullptr;
+    QLineEdit * ey = nullptr;
+    QLineEdit * ez = nullptr;
+    QLineEdit * ea = nullptr;
+    QLineEdit * et = nullptr;
+    QLineEdit * ep = nullptr;
 
     virtual const QString getLabel() const override {return "Parallelepiped";}
 
 public slots:
-  virtual void Update(const AGeoObject* obj) override;
+    virtual void Update(const AGeoObject * obj) override;
 
 private slots:
-    void onLocalParameterChange();
+    void onLocalParameterChange() override;
 };
+
+class AGeoSphereDelegate : public AGeoObjectDelegate
+{
+    Q_OBJECT
+
+public:
+    AGeoSphereDelegate(const QStringList & materials);
+
+    QLineEdit * eod = nullptr;
+    QLineEdit * eid = nullptr;
+    QLineEdit * et1 = nullptr;
+    QLineEdit * et2 = nullptr;
+    QLineEdit * ep1 = nullptr;
+    QLineEdit * ep2 = nullptr;
+
+    virtual const QString getLabel() const override {return "Sphere";}
+
+public slots:
+    virtual void Update(const AGeoObject * obj) override;
+
+private slots:
+    void onLocalParameterChange() override;
+};
+
+class AGeoConeDelegate : public AGeoObjectDelegate
+{
+    Q_OBJECT
+
+public:
+    AGeoConeDelegate(const QStringList & materials);
+
+    QLineEdit * ez  = nullptr;
+    QLineEdit * eli = nullptr;
+    QLineEdit * elo = nullptr;
+    QLineEdit * eui = nullptr;
+    QLineEdit * euo = nullptr;
+
+    virtual const QString getLabel() const override {return "Cone";}
+
+public slots:
+    virtual void Update(const AGeoObject * obj) override;
+
+protected slots:
+    void onLocalParameterChange() override;
+};
+
+// ---------------- Grid delegate ----------------
 
 class AGridElementDelegate : public QWidget
 {
@@ -302,6 +351,8 @@ signals:
   void ContentChanged();
   void RequestReshapeGrid(QString);
 };
+
+// ---------------- Monitor delegate ----------------
 
 class AMonitorDelegate : public QWidget
 {

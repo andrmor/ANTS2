@@ -1389,6 +1389,10 @@ AGeoObjectDelegate* AGeoWidget::createAndAddGeoObjectDelegate(AGeoObject* obj)
         Del = new AGeoTubeDelegate(tw->Sandwich->Materials);
     else if (obj->Shape->getShapeType() == "TGeoPara")
         Del = new AGeoParaDelegate(tw->Sandwich->Materials);
+    else if (obj->Shape->getShapeType() == "TGeoSphere")
+        Del = new AGeoSphereDelegate(tw->Sandwich->Materials);
+    else if (obj->Shape->getShapeType() == "TGeoCone")
+        Del = new AGeoConeDelegate(tw->Sandwich->Materials);
     else
         Del = new AGeoObjectDelegate(tw->Sandwich->Materials);
 
@@ -2540,9 +2544,9 @@ AGeoBoxDelegate::AGeoBoxDelegate(const QStringList &materials)
 
     lMF->insertLayout(2, gr);
 
-    QObject::connect(ex, &QLineEdit::textChanged, this, &AGeoBoxDelegate::onLocalParameterChange);
-    QObject::connect(ey, &QLineEdit::textChanged, this, &AGeoBoxDelegate::onLocalParameterChange);
-    QObject::connect(ez, &QLineEdit::textChanged, this, &AGeoBoxDelegate::onLocalParameterChange);
+    QVector<QLineEdit*> l = {ex, ey, ez};
+    for (QLineEdit * le : l)
+        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoBoxDelegate::onLocalParameterChange);
 }
 
 void AGeoBoxDelegate::Update(const AGeoObject *obj)
@@ -2585,9 +2589,9 @@ AGeoTubeDelegate::AGeoTubeDelegate(const QStringList & materials)
 
     lMF->insertLayout(2, gr);
 
-    QObject::connect(eo, &QLineEdit::textChanged, this, &AGeoTubeDelegate::onLocalParameterChange);
-    QObject::connect(ei, &QLineEdit::textChanged, this, &AGeoTubeDelegate::onLocalParameterChange);
-    QObject::connect(ez, &QLineEdit::textChanged, this, &AGeoTubeDelegate::onLocalParameterChange);
+    QVector<QLineEdit*> l = {eo, ei, ez};
+    for (QLineEdit * le : l)
+        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoTubeDelegate::onLocalParameterChange);
 }
 
 void AGeoTubeDelegate::Update(const AGeoObject *obj)
@@ -2639,12 +2643,9 @@ AGeoParaDelegate::AGeoParaDelegate(const QStringList & materials)
 
     lMF->insertLayout(2, gr);
 
-    QObject::connect(ex, &QLineEdit::textChanged, this, &AGeoParaDelegate::onLocalParameterChange);
-    QObject::connect(ey, &QLineEdit::textChanged, this, &AGeoParaDelegate::onLocalParameterChange);
-    QObject::connect(ez, &QLineEdit::textChanged, this, &AGeoParaDelegate::onLocalParameterChange);
-    QObject::connect(ea, &QLineEdit::textChanged, this, &AGeoParaDelegate::onLocalParameterChange);
-    QObject::connect(et, &QLineEdit::textChanged, this, &AGeoParaDelegate::onLocalParameterChange);
-    QObject::connect(ep, &QLineEdit::textChanged, this, &AGeoParaDelegate::onLocalParameterChange);
+    QVector<QLineEdit*> l = {ex, ey, ez, ea, et, ep};
+    for (QLineEdit * le : l)
+        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoParaDelegate::onLocalParameterChange);
 }
 
 void AGeoParaDelegate::Update(const AGeoObject *obj)
@@ -2668,4 +2669,118 @@ void AGeoParaDelegate::onLocalParameterChange()
     pteShape->clear();
     pteShape->appendPlainText(QString("TGeoPara( %1, %2, %3, %4, %5, %6 )").arg(0.5*ex->text().toDouble()).arg(0.5*ey->text().toDouble()).arg(0.5*ez->text().toDouble())
                                                                            .arg(ea->text()).arg(et->text()).arg(ep->text())  );
+}
+
+AGeoSphereDelegate::AGeoSphereDelegate(const QStringList & materials)
+    : AGeoObjectDelegate(materials)
+{
+    QGridLayout * gr = new QGridLayout();
+    gr->setContentsMargins(50, 0, 50, 3);
+    gr->setVerticalSpacing(1);
+
+    gr->addWidget(new QLabel("Outer diameter:"), 0, 0);
+    gr->addWidget(new QLabel("Inner diameter:"), 1, 0);
+    gr->addWidget(new QLabel("Theta from:"), 2, 0);
+    gr->addWidget(new QLabel("Theta to:"),     3, 0);
+    gr->addWidget(new QLabel("Phi from:"),     4, 0);
+    gr->addWidget(new QLabel("Phi to:"),       5, 0);
+
+    eod = new QLineEdit(); gr->addWidget(eod, 0, 1);
+    eid = new QLineEdit(); gr->addWidget(eid, 1, 1);
+    et1 = new QLineEdit(); gr->addWidget(et1, 2, 1);
+    et2 = new QLineEdit(); gr->addWidget(et2, 3, 1);
+    ep1 = new QLineEdit(); gr->addWidget(ep1, 4, 1);
+    ep2 = new QLineEdit(); gr->addWidget(ep2, 5, 1);
+
+    gr->addWidget(new QLabel("mm"), 0, 2);
+    gr->addWidget(new QLabel("mm"), 1, 2);
+    gr->addWidget(new QLabel("°"),  2, 2);
+    gr->addWidget(new QLabel("°"),  3, 2);
+    gr->addWidget(new QLabel("°"),  4, 2);
+    gr->addWidget(new QLabel("°"),  5, 2);
+
+    lMF->insertLayout(2, gr);
+
+    QVector<QLineEdit*> l = {eod, eid, et1, et2, ep1, ep2};
+    for (QLineEdit * le : l)
+        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoSphereDelegate::onLocalParameterChange);
+}
+
+void AGeoSphereDelegate::Update(const AGeoObject *obj)
+{
+    AGeoObjectDelegate::Update(obj);
+
+    AGeoSphere * sph = dynamic_cast<AGeoSphere*>(obj->Shape);
+    if (sph)
+    {
+        eid->setText(QString::number(sph->rmin*2.0));
+        eod->setText(QString::number(sph->rmax*2.0));
+        et1->setText(QString::number(sph->theta1));
+        et2->setText(QString::number(sph->theta2));
+        ep1->setText(QString::number(sph->phi1));
+        ep2->setText(QString::number(sph->phi2));
+    }
+}
+
+void AGeoSphereDelegate::onLocalParameterChange()
+{
+    pteShape->clear();
+    pteShape->appendPlainText(QString("TGeoSphere( %1, %2, %3, %4, %5, %6 )").arg(0.5*eid->text().toDouble()).arg(0.5*eod->text().toDouble())
+                                                                             .arg(et1->text()).arg(et2->text())
+                                                                             .arg(ep1->text()).arg(ep2->text())  );
+}
+
+AGeoConeDelegate::AGeoConeDelegate(const QStringList &materials)
+    : AGeoObjectDelegate(materials)
+{
+    QGridLayout * gr = new QGridLayout();
+    gr->setContentsMargins(50, 0, 50, 3);
+    gr->setVerticalSpacing(1);
+
+    gr->addWidget(new QLabel("Height:"),               0, 0);
+    gr->addWidget(new QLabel("Lower outer diameter:"), 1, 0);
+    gr->addWidget(new QLabel("Lower inner diameter:"), 2, 0);
+    gr->addWidget(new QLabel("Upper outer diameter:"), 3, 0);
+    gr->addWidget(new QLabel("Upper inner diameter:"), 4, 0);
+
+    ez  = new QLineEdit(); gr->addWidget(ez, 0, 1);
+    elo = new QLineEdit(); gr->addWidget(elo, 1, 1);
+    eli = new QLineEdit(); gr->addWidget(eli, 2, 1);
+    euo = new QLineEdit(); gr->addWidget(euo, 3, 1);
+    eui = new QLineEdit(); gr->addWidget(eui, 4, 1);
+
+    gr->addWidget(new QLabel("mm"), 0, 2);
+    gr->addWidget(new QLabel("mm"), 1, 2);
+    gr->addWidget(new QLabel("mm"), 2, 2);
+    gr->addWidget(new QLabel("mm"), 3, 2);
+    gr->addWidget(new QLabel("mm"), 4, 2);
+
+    lMF->insertLayout(2, gr);
+
+    QVector<QLineEdit*> l = {ez, eli, elo, eui, euo};
+    for (QLineEdit * le : l)
+        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoConeDelegate::onLocalParameterChange);
+}
+
+void AGeoConeDelegate::Update(const AGeoObject *obj)
+{
+    AGeoObjectDelegate::Update(obj);
+
+    AGeoCone * cone = dynamic_cast<AGeoCone*>(obj->Shape);
+    if (cone)
+    {
+        ez ->setText(QString::number(cone->dz*2.0));
+        eli->setText(QString::number(cone->rminL*2.0));
+        elo->setText(QString::number(cone->rmaxL*2.0));
+        eui->setText(QString::number(cone->rminU*2.0));
+        euo->setText(QString::number(cone->rmaxU*2.0));
+    }
+}
+
+void AGeoConeDelegate::onLocalParameterChange()
+{
+    pteShape->clear();
+    pteShape->appendPlainText(QString("TGeoCone( %1, %2, %3, %4, %5 )").arg(0.5*ez->text().toDouble())
+                              .arg(0.5*eli->text().toDouble()).arg(0.5*elo->text().toDouble())
+                              .arg(0.5*eui->text().toDouble()).arg(0.5*euo->text().toDouble()) );
 }

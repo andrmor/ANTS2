@@ -197,6 +197,8 @@ public:
 private:
     QVBoxLayout * lMF = nullptr;      //main layout
 
+    QPushButton * pbShapeInfo = nullptr;
+
     QPushButton * pbShow = nullptr;
     QPushButton * pbChangeAtt = nullptr;
     QPushButton * pbScriptLine = nullptr;
@@ -222,6 +224,7 @@ protected slots:
 
 protected:
     void addLocalLayout(QLayout * lay);
+    void updatePteShape(const QString & text);
 
 signals:
     void ContentChanged();
@@ -300,6 +303,27 @@ public:
     QLineEdit * eunx = nullptr;
     QLineEdit * euny = nullptr;
     QLineEdit * eunz = nullptr;
+
+public slots:
+    virtual void Update(const AGeoObject * obj) override;
+
+private slots:
+    void onLocalParameterChange() override;
+};
+
+class AGeoElTubeDelegate : public AGeoObjectDelegate
+{
+    Q_OBJECT
+
+public:
+    AGeoElTubeDelegate(const QStringList & materials, QWidget * parent);
+
+    QLineEdit * ex = nullptr;
+    QLineEdit * ey = nullptr;
+    QLineEdit * ez = nullptr;
+
+protected:
+    QGridLayout * gr = nullptr;
 
 public slots:
     virtual void Update(const AGeoObject * obj) override;

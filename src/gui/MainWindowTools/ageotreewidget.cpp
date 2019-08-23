@@ -8,6 +8,7 @@
 #include "asandwich.h"
 #include "agridelementdialog.h"
 #include "amonitordelegateform.h"
+#include "amessage.h"
 
 #include <QDropEvent>
 #include <QDebug>
@@ -1204,7 +1205,6 @@ AGeoWidget::AGeoWidget(AGeoObject *World, AGeoTreeWidget *tw) :
   sa->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
   sa->setWidgetResizable(true);
   sa->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-  sa->setToolTip("Use the context menu of the onbject box to manipulate it");
 
   QWidget* scrollAreaWidgetContents = new QWidget();
   scrollAreaWidgetContents->setGeometry(QRect(0, 0, 350, 200));
@@ -1384,6 +1384,8 @@ AGeoObjectDelegate* AGeoWidget::createAndAddGeoObjectDelegate(AGeoObject* obj, Q
         Del = new AGeoTubeSegDelegate(tw->Sandwich->Materials, parent);
     else if (obj->Shape->getShapeType() == "TGeoCtub")
         Del = new AGeoTubeSegCutDelegate(tw->Sandwich->Materials, parent);
+    else if (obj->Shape->getShapeType() == "TGeoEltu")
+        Del = new AGeoElTubeDelegate(tw->Sandwich->Materials, parent);
     else if (obj->Shape->getShapeType() == "TGeoPara")
         Del = new AGeoParaDelegate(tw->Sandwich->Materials, parent);
     else if (obj->Shape->getShapeType() == "TGeoSphere")
@@ -1985,8 +1987,6 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
   palette.setColor( backgroundRole(), QColor( 255, 255, 255 ) );
   frMainFrame->setPalette( palette );
   frMainFrame->setAutoFillBackground( true );
-  //frMainFrame->setMinimumHeight(150);
-  //frMainFrame->setMaximumHeight(300);
   lMF = new QVBoxLayout();
     lMF->setContentsMargins(5,5,5,2);
 
@@ -2112,7 +2112,7 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
         QPushButton * pbTransform = new QPushButton("Transform to ...");
         lht->addWidget(pbTransform);
         connect(pbTransform, &QPushButton::pressed, this, &AGeoObjectDelegate::onChangeShapePressed);
-        QPushButton * pbShapeInfo = new QPushButton("Info on this shape");
+        pbShapeInfo = new QPushButton("Info on this shape");
         connect(pbShapeInfo, &QPushButton::pressed, this, &AGeoObjectDelegate::onHelpRequested);
         lht->addWidget(pbShapeInfo);
     lMF->addLayout(lht);
@@ -2237,7 +2237,7 @@ void AGeoObjectDelegate::onChangeShapePressed()
     d->setWindowTitle("Select new shape");
 
     QStringList list;
-    list << "Box" << "Tube" << "Tube segment" << "Tube segment cut" << "Parallelepiped" << "Sphere" << "Cone";
+    list << "Box" << "Tube" << "Tube segment" << "Tube segment cut" << "Elliptical tube" << "Parallelepiped" << "Sphere" << "Cone";
 
     QVBoxLayout * l = new QVBoxLayout(d);
         QListWidget * w = new QListWidget();
@@ -2255,6 +2255,7 @@ void AGeoObjectDelegate::onChangeShapePressed()
                 else if (sel == "Tube")             emit RequestChangeShape(new AGeoTube());
                 else if (sel == "Tube segment")     emit RequestChangeShape(new AGeoTubeSeg());
                 else if (sel == "Tube segment cut") emit RequestChangeShape(new AGeoCtub());
+                else if (sel == "Elliptical tube")  emit RequestChangeShape(new AGeoEltu());
                 else if (sel == "Sphere")           emit RequestChangeShape(new AGeoSphere());
                 else if (sel == "Cone")             emit RequestChangeShape(new AGeoCone());
                 else qDebug() << "Unknown shape!";
@@ -2282,7 +2283,13 @@ void AGeoObjectDelegate::addLocalLayout(QLayout * lay)
     lMF->insertLayout(3, lay);
 }
 
-#include "amessage.h"
+void AGeoObjectDelegate::updatePteShape(const QString & text)
+{
+    pteShape->clear();
+    pteShape->appendPlainText(text);
+    pbShapeInfo->setToolTip(pteShape->document()->toPlainText());
+}
+
 void AGeoObjectDelegate::onHelpRequested()
 {
     //message(ShapeHelp, Widget);
@@ -2393,7 +2400,8 @@ void AGeoObjectDelegate::Update(const AGeoObject *obj)
 
 void AGeoObjectDelegate::onContentChanged()
 {
-  emit ContentChanged();
+    pbShapeInfo->setToolTip(pteShape->document()->toPlainText());
+    emit ContentChanged();
 }
 
 AShapeHighlighter::AShapeHighlighter(QTextDocument *parent) : QSyntaxHighlighter(parent)
@@ -2679,8 +2687,7 @@ void AGeoBoxDelegate::Update(const AGeoObject *obj)
 
 void AGeoBoxDelegate::onLocalParameterChange()
 {
-    pteShape->clear();
-    pteShape->appendPlainText(QString("TGeoBBox( %1, %2, %3 )").arg(0.5*ex->text().toDouble()).arg(0.5*ey->text().toDouble()).arg(0.5*ez->text().toDouble()));
+    updatePteShape(QString("TGeoBBox( %1, %2, %3 )").arg(0.5*ex->text().toDouble()).arg(0.5*ey->text().toDouble()).arg(0.5*ez->text().toDouble()));
 }
 
 AGeoTubeDelegate::AGeoTubeDelegate(const QStringList & materials, QWidget *parent)
@@ -2727,8 +2734,7 @@ void AGeoTubeDelegate::Update(const AGeoObject *obj)
 
 void AGeoTubeDelegate::onLocalParameterChange()
 {
-    pteShape->clear();
-    pteShape->appendPlainText(QString("TGeoTube( %1, %2, %3 )").arg(0.5*ei->text().toDouble()).arg(0.5*eo->text().toDouble()).arg(0.5*ez->text().toDouble()));
+    updatePteShape(QString("TGeoTube( %1, %2, %3 )").arg(0.5*ei->text().toDouble()).arg(0.5*eo->text().toDouble()).arg(0.5*ez->text().toDouble()));
 }
 
 AGeoTubeSegDelegate::AGeoTubeSegDelegate(const QStringList & materials, QWidget * parent) :
@@ -2768,9 +2774,8 @@ void AGeoTubeSegDelegate::Update(const AGeoObject *obj)
 
 void AGeoTubeSegDelegate::onLocalParameterChange()
 {
-    pteShape->clear();
-    pteShape->appendPlainText(QString("TGeoTubeSeg( %1, %2, %3, %4, %5 )").arg(0.5*ei->text().toDouble()).arg(0.5*eo->text().toDouble()).arg(0.5*ez->text().toDouble())
-                                                                          .arg(ep1->text()).arg(ep2->text()) );
+    updatePteShape(QString("TGeoTubeSeg( %1, %2, %3, %4, %5 )").arg(0.5*ei->text().toDouble()).arg(0.5*eo->text().toDouble()).arg(0.5*ez->text().toDouble())
+                                                               .arg(ep1->text()).arg(ep2->text()) );
 }
 
 AGeoTubeSegCutDelegate::AGeoTubeSegCutDelegate(const QStringList &materials, QWidget *parent) :
@@ -2821,8 +2826,7 @@ void AGeoTubeSegCutDelegate::Update(const AGeoObject *obj)
 
 void AGeoTubeSegCutDelegate::onLocalParameterChange()
 {
-    pteShape->clear();
-    pteShape->appendPlainText(QString("TGeoCtub( %1, %2, %3, %4, %5, %6, %7, %8, %9, %10, %11 )")
+    updatePteShape(QString("TGeoCtub( %1, %2, %3, %4, %5, %6, %7, %8, %9, %10, %11 )")
                               .arg(0.5*ei->text().toDouble()).arg(0.5*eo->text().toDouble()).arg(0.5*ez->text().toDouble())
                               .arg(ep1->text()).arg(ep2->text())
                               .arg(elnx->text()).arg(elny->text()).arg(elnz->text())
@@ -2885,9 +2889,8 @@ void AGeoParaDelegate::Update(const AGeoObject *obj)
 
 void AGeoParaDelegate::onLocalParameterChange()
 {
-    pteShape->clear();
-    pteShape->appendPlainText(QString("TGeoPara( %1, %2, %3, %4, %5, %6 )").arg(0.5*ex->text().toDouble()).arg(0.5*ey->text().toDouble()).arg(0.5*ez->text().toDouble())
-                                                                           .arg(ea->text()).arg(et->text()).arg(ep->text())  );
+    updatePteShape(QString("TGeoPara( %1, %2, %3, %4, %5, %6 )").arg(0.5*ex->text().toDouble()).arg(0.5*ey->text().toDouble()).arg(0.5*ez->text().toDouble())
+                                                                .arg(ea->text()).arg(et->text()).arg(ep->text())  );
 }
 
 AGeoSphereDelegate::AGeoSphereDelegate(const QStringList & materials, QWidget *parent)
@@ -2946,10 +2949,9 @@ void AGeoSphereDelegate::Update(const AGeoObject *obj)
 
 void AGeoSphereDelegate::onLocalParameterChange()
 {
-    pteShape->clear();
-    pteShape->appendPlainText(QString("TGeoSphere( %1, %2, %3, %4, %5, %6 )").arg(0.5*eid->text().toDouble()).arg(0.5*eod->text().toDouble())
-                                                                             .arg(et1->text()).arg(et2->text())
-                                                                             .arg(ep1->text()).arg(ep2->text())  );
+    updatePteShape(QString("TGeoSphere( %1, %2, %3, %4, %5, %6 )").arg(0.5*eid->text().toDouble()).arg(0.5*eod->text().toDouble())
+                                                                  .arg(et1->text()).arg(et2->text())
+                                                                  .arg(ep1->text()).arg(ep2->text())  );
 }
 
 AGeoConeDelegate::AGeoConeDelegate(const QStringList &materials, QWidget *parent)
@@ -3004,9 +3006,55 @@ void AGeoConeDelegate::Update(const AGeoObject *obj)
 
 void AGeoConeDelegate::onLocalParameterChange()
 {
-    pteShape->clear();
-    pteShape->appendPlainText(QString("TGeoCone( %1, %2, %3, %4, %5 )").arg(0.5*ez->text().toDouble())
-                              .arg(0.5*eli->text().toDouble()).arg(0.5*elo->text().toDouble())
-                              .arg(0.5*eui->text().toDouble()).arg(0.5*euo->text().toDouble()) );
+    updatePteShape(QString("TGeoCone( %1, %2, %3, %4, %5 )")
+                   .arg(0.5*ez->text().toDouble())
+                   .arg(0.5*eli->text().toDouble()).arg(0.5*elo->text().toDouble())
+                   .arg(0.5*eui->text().toDouble()).arg(0.5*euo->text().toDouble()) );
 }
 
+AGeoElTubeDelegate::AGeoElTubeDelegate(const QStringList &materials, QWidget *parent)
+    : AGeoObjectDelegate(materials, parent)
+{
+    DelegateTypeName = "Elliptical tube";
+    pteShape->setVisible(false);
+
+    gr = new QGridLayout();
+    gr->setContentsMargins(50, 0, 50, 3);
+    gr->setVerticalSpacing(1);
+
+    gr->addWidget(new QLabel("Size in X:"), 0, 0);
+    gr->addWidget(new QLabel("Size in Y:"), 1, 0);
+    gr->addWidget(new QLabel("Height:"), 2,0);
+
+    ex = new QLineEdit(); gr->addWidget(ex, 0, 1);
+    ey = new QLineEdit(); gr->addWidget(ey, 1, 1);
+    ez = new QLineEdit(); gr->addWidget(ez, 2, 1);
+
+    gr->addWidget(new QLabel("mm"), 0, 2);
+    gr->addWidget(new QLabel("mm"), 1, 2);
+    gr->addWidget(new QLabel("mm"), 2, 2);
+
+    addLocalLayout(gr);
+
+    QVector<QLineEdit*> l = {ex, ey, ez};
+    for (QLineEdit * le : l)
+        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoElTubeDelegate::onLocalParameterChange);
+}
+
+void AGeoElTubeDelegate::Update(const AGeoObject *obj)
+{
+    AGeoObjectDelegate::Update(obj);
+
+    AGeoEltu * tube = dynamic_cast<AGeoEltu*>(obj->Shape);
+    if (tube)
+    {
+        ex->setText(QString::number(tube->a*2.0));
+        ey->setText(QString::number(tube->b*2.0));
+        ez->setText(QString::number(tube->dz*2.0));
+    }
+}
+
+void AGeoElTubeDelegate::onLocalParameterChange()
+{
+    updatePteShape(QString("TGeoEltu( %1, %2, %3 )").arg(0.5*ex->text().toDouble()).arg(0.5*ey->text().toDouble()).arg(0.5*ez->text().toDouble()) );
+}

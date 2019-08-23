@@ -287,6 +287,27 @@ private slots:
     void onLocalParameterChange() override;
 };
 
+class AGeoTubeSegCutDelegate : public AGeoTubeSegDelegate
+{
+    Q_OBJECT
+
+public:
+    AGeoTubeSegCutDelegate(const QStringList & materials, QWidget * parent);
+
+    QLineEdit * elnx = nullptr;
+    QLineEdit * elny = nullptr;
+    QLineEdit * elnz = nullptr;
+    QLineEdit * eunx = nullptr;
+    QLineEdit * euny = nullptr;
+    QLineEdit * eunz = nullptr;
+
+public slots:
+    virtual void Update(const AGeoObject * obj) override;
+
+private slots:
+    void onLocalParameterChange() override;
+};
+
 class AGeoParaDelegate : public AGeoObjectDelegate
 {
     Q_OBJECT

@@ -1382,6 +1382,8 @@ AGeoObjectDelegate* AGeoWidget::createAndAddGeoObjectDelegate(AGeoObject* obj, Q
         Del = new AGeoTubeDelegate(tw->Sandwich->Materials, parent);
     else if (obj->Shape->getShapeType() == "TGeoTubeSeg")
         Del = new AGeoTubeSegDelegate(tw->Sandwich->Materials, parent);
+    else if (obj->Shape->getShapeType() == "TGeoCtub")
+        Del = new AGeoTubeSegCutDelegate(tw->Sandwich->Materials, parent);
     else if (obj->Shape->getShapeType() == "TGeoPara")
         Del = new AGeoParaDelegate(tw->Sandwich->Materials, parent);
     else if (obj->Shape->getShapeType() == "TGeoSphere")
@@ -2235,7 +2237,7 @@ void AGeoObjectDelegate::onChangeShapePressed()
     d->setWindowTitle("Select new shape");
 
     QStringList list;
-    list << "Box" << "Parallelepiped" << "Tube" << "Tube segment" << "Sphere" << "Cone";
+    list << "Box" << "Tube" << "Tube segment" << "Tube segment cut" << "Parallelepiped" << "Sphere" << "Cone";
 
     QVBoxLayout * l = new QVBoxLayout(d);
         QListWidget * w = new QListWidget();
@@ -2252,6 +2254,7 @@ void AGeoObjectDelegate::onChangeShapePressed()
                 else if (sel == "Parallelepiped")   emit RequestChangeShape(new AGeoPara());
                 else if (sel == "Tube")             emit RequestChangeShape(new AGeoTube());
                 else if (sel == "Tube segment")     emit RequestChangeShape(new AGeoTubeSeg());
+                else if (sel == "Tube segment cut") emit RequestChangeShape(new AGeoCtub());
                 else if (sel == "Sphere")           emit RequestChangeShape(new AGeoSphere());
                 else if (sel == "Cone")             emit RequestChangeShape(new AGeoCone());
                 else qDebug() << "Unknown shape!";
@@ -2768,6 +2771,62 @@ void AGeoTubeSegDelegate::onLocalParameterChange()
     pteShape->clear();
     pteShape->appendPlainText(QString("TGeoTubeSeg( %1, %2, %3, %4, %5 )").arg(0.5*ei->text().toDouble()).arg(0.5*eo->text().toDouble()).arg(0.5*ez->text().toDouble())
                                                                           .arg(ep1->text()).arg(ep2->text()) );
+}
+
+AGeoTubeSegCutDelegate::AGeoTubeSegCutDelegate(const QStringList &materials, QWidget *parent) :
+    AGeoTubeSegDelegate(materials, parent)
+{
+    DelegateTypeName = "Tube segment cut";
+    pteShape->setVisible(false);
+
+    gr->addWidget(new QLabel("Low Nx:"), 5, 0);
+    gr->addWidget(new QLabel("Low Ny:"), 6, 0);
+    gr->addWidget(new QLabel("Low Nz:"), 7, 0);
+    gr->addWidget(new QLabel("Up  Nx:"), 8, 0);
+    gr->addWidget(new QLabel("Up  Ny:"), 9, 0);
+    gr->addWidget(new QLabel("Up  Nz:"), 10, 0);
+
+    elnx = new QLineEdit(); gr->addWidget(elnx, 5, 1);
+    elny = new QLineEdit(); gr->addWidget(elny, 6, 1);
+    elnz = new QLineEdit(); gr->addWidget(elnz, 7, 1);
+    eunx = new QLineEdit(); gr->addWidget(eunx, 8, 1);
+    euny = new QLineEdit(); gr->addWidget(euny, 9, 1);
+    eunz = new QLineEdit(); gr->addWidget(eunz, 10, 1);
+
+    QVector<QLineEdit*> l = {elnx, elny, elnz, eunx, euny, eunz};
+    for (QLineEdit * le : l)
+        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoTubeSegCutDelegate::onLocalParameterChange);
+}
+
+void AGeoTubeSegCutDelegate::Update(const AGeoObject *obj)
+{
+    AGeoObjectDelegate::Update(obj);
+
+    AGeoCtub * seg = dynamic_cast<AGeoCtub*>(obj->Shape);
+    if (seg)
+    {
+        eo->setText (QString::number(seg->rmax*2.0));
+        ei->setText (QString::number(seg->rmin*2.0));
+        ez->setText (QString::number(seg->dz*2.0));
+        ep1->setText(QString::number(seg->phi1));
+        ep2->setText(QString::number(seg->phi2));
+        elnx->setText(QString::number(seg->nxlow));
+        elny->setText(QString::number(seg->nylow));
+        elnz->setText(QString::number(seg->nzlow));
+        eunx->setText(QString::number(seg->nxhi));
+        euny->setText(QString::number(seg->nyhi));
+        eunz->setText(QString::number(seg->nzhi));
+    }
+}
+
+void AGeoTubeSegCutDelegate::onLocalParameterChange()
+{
+    pteShape->clear();
+    pteShape->appendPlainText(QString("TGeoCtub( %1, %2, %3, %4, %5, %6, %7, %8, %9, %10, %11 )")
+                              .arg(0.5*ei->text().toDouble()).arg(0.5*eo->text().toDouble()).arg(0.5*ez->text().toDouble())
+                              .arg(ep1->text()).arg(ep2->text())
+                              .arg(elnx->text()).arg(elny->text()).arg(elnz->text())
+                              .arg(eunx->text()).arg(euny->text()).arg(eunz->text()) );
 }
 
 AGeoParaDelegate::AGeoParaDelegate(const QStringList & materials, QWidget *parent)

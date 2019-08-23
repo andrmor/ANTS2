@@ -1334,29 +1334,22 @@ void AGeoWidget::UpdateGui()
   {   // Normal AGeoObject based
 
       if (CurrentObject->isCompositeMemeber())
-          {
-            QLabel * lab = addInfoLabel("lll");
-            GeoObjectDelegate = createAndAddGeoObjectDelegate(CurrentObject);
-            QString label = "Logical ";
-            QString extra = GeoObjectDelegate->getLabel();
-            if (extra.isEmpty()) label += "object";
-            else label += extra;
-            lab->setText(label);
-          }
+      {
+            addInfoLabel("");
+            GeoObjectDelegate = createAndAddGeoObjectDelegate(CurrentObject, this);
+      }
       else if (CurrentObject->ObjectType->isSingle())  // NORMAL
-          {
-            QLabel * lab = addInfoLabel("lll");
-            GeoObjectDelegate = createAndAddGeoObjectDelegate(CurrentObject);
-            connect(GeoObjectDelegate->Widget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(OnCustomContextMenuTriggered_forMainObject(QPoint)));
-            QString label = GeoObjectDelegate->getLabel();
-            if (label.isEmpty()) label = "Object";
-            label += getSuffix(contObj);
-            lab->setText(label);
-          }
+      {
+            addInfoLabel("");
+            GeoObjectDelegate = createAndAddGeoObjectDelegate(CurrentObject, this);
+            connect(GeoObjectDelegate, &AGeoObjectDelegate::RequestChangeVisAttributes, this, &AGeoWidget::onRequestSetVisAttributes);
+            connect(GeoObjectDelegate, &AGeoObjectDelegate::RequestShow, this, &AGeoWidget::onRequestShowCurrentObject);
+            connect(GeoObjectDelegate, &AGeoObjectDelegate::RequestScriptToClipboard, this, &AGeoWidget::onRequestScriptLineToClipboard);
+      }
       else if (CurrentObject->ObjectType->isGrid())  // Grid
           {
             addInfoLabel("Grid bulk"+getSuffix(contObj));
-            GeoObjectDelegate = createAndAddGeoObjectDelegate(CurrentObject);
+            GeoObjectDelegate = createAndAddGeoObjectDelegate(CurrentObject, this);
             connect(GeoObjectDelegate->Widget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(OnCustomContextMenuTriggered_forMainObject(QPoint)));
           }
       else if (CurrentObject->ObjectType->isHandlingSet())  // SET
@@ -1364,43 +1357,44 @@ void AGeoWidget::UpdateGui()
             if (CurrentObject->ObjectType->isCompositeContainer()) return;
             QString str = ( CurrentObject->ObjectType->isStack() ? "Stack" : "Group" );
             addInfoLabel( str );
-            GeoObjectDelegate = createAndAddGeoObjectDelegate(CurrentObject);
+            GeoObjectDelegate = createAndAddGeoObjectDelegate(CurrentObject, this);
           }
       else if (CurrentObject->ObjectType->isComposite())
           {
             addInfoLabel("Composite object"+getSuffix(contObj));
-            GeoObjectDelegate = createAndAddGeoObjectDelegate(CurrentObject);
+            GeoObjectDelegate = createAndAddGeoObjectDelegate(CurrentObject, this);
             connect(GeoObjectDelegate->Widget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(OnCustomContextMenuTriggered_forMainObject(QPoint)));
           }
       else if (CurrentObject->ObjectType->isArray())
         {
           addInfoLabel("Array"+getSuffix(contObj));
-          GeoObjectDelegate = createAndAddGeoObjectDelegate(CurrentObject);
+          GeoObjectDelegate = createAndAddGeoObjectDelegate(CurrentObject, this);
         }
   }
 }
 
-AGeoObjectDelegate* AGeoWidget::createAndAddGeoObjectDelegate(AGeoObject* obj)
+AGeoObjectDelegate* AGeoWidget::createAndAddGeoObjectDelegate(AGeoObject* obj, QWidget * parent)
 {
     AGeoObjectDelegate * Del;
     if (obj->Shape->getShapeType() == "TGeoBBox")
-        Del = new AGeoBoxDelegate(tw->Sandwich->Materials);
+        Del = new AGeoBoxDelegate(tw->Sandwich->Materials, parent);
     else if (obj->Shape->getShapeType() == "TGeoTube")
-        Del = new AGeoTubeDelegate(tw->Sandwich->Materials);
+        Del = new AGeoTubeDelegate(tw->Sandwich->Materials, parent);
     else if (obj->Shape->getShapeType() == "TGeoPara")
-        Del = new AGeoParaDelegate(tw->Sandwich->Materials);
+        Del = new AGeoParaDelegate(tw->Sandwich->Materials, parent);
     else if (obj->Shape->getShapeType() == "TGeoSphere")
-        Del = new AGeoSphereDelegate(tw->Sandwich->Materials);
+        Del = new AGeoSphereDelegate(tw->Sandwich->Materials, parent);
     else if (obj->Shape->getShapeType() == "TGeoCone")
-        Del = new AGeoConeDelegate(tw->Sandwich->Materials);
+        Del = new AGeoConeDelegate(tw->Sandwich->Materials, parent);
     else
-        Del = new AGeoObjectDelegate(tw->Sandwich->Materials);
+        Del = new AGeoObjectDelegate(tw->Sandwich->Materials, parent);
 
     Del->Update(obj);
     Del->Widget->setEnabled(!CurrentObject->fLocked);  //CurrentObject here!!!
     ObjectLayout->addWidget(Del->Widget);
     ObjectLayout->addStretch();    
-    connect(Del, SIGNAL(ContentChanged()), this, SLOT(onStartEditing()));
+    connect(Del, &AGeoObjectDelegate::ContentChanged, this, &AGeoWidget::onStartEditing);
+    connect(Del, &AGeoObjectDelegate::RequestChangeShape, this, &AGeoWidget::onRequestChangeShape);
     return Del;
 }
 
@@ -1517,7 +1511,20 @@ void AGeoWidget::onStartEditing()
       f.setBold(true);
       pbConfirm->setFont(f);
       pbConfirm->setStyleSheet("QPushButton {color: red;}");
-  }  
+  }
+}
+
+void AGeoWidget::onRequestChangeShape(AGeoShape * NewShape)
+{
+    if (!GeoObjectDelegate) return;
+    if (!CurrentObject) return;
+    if (!NewShape) return;
+
+    delete CurrentObject->Shape;
+    CurrentObject->Shape = NewShape;
+    CurrentObject->removeCompositeStructure();
+    UpdateGui();
+    onConfirmPressed();
 }
 
 void AGeoWidget::OnCustomContextMenuTriggered_forMainObject(QPoint pos)
@@ -1581,46 +1588,58 @@ void AGeoWidget::OnCustomContextMenuTriggered_forMainObject(QPoint pos)
       emit tw->RequestRebuildDetector();
       tw->UpdateGui(name);
   }
-  else if (SelectedAction == showA)
-  {
-      QString name = CurrentObject->Name;
-      emit tw->RequestHighlightObject(name);
-      tw->UpdateGui(name);
-  }
-  else if (SelectedAction == clipA)
-  {
-      QString c = "TGeo( 'N_A_M_E', '" + CurrentObject->Shape->getGenerationString() + "', " +
-              QString::number(CurrentObject->Material) + ", " +
-              "'"+CurrentObject->Container->Name + "',   "+
-              QString::number(CurrentObject->Position[0]) + ", " +
-              QString::number(CurrentObject->Position[1]) + ", " +
-              QString::number(CurrentObject->Position[2]) + ",   " +
-              QString::number(CurrentObject->Orientation[0]) + ", " +
-              QString::number(CurrentObject->Orientation[1]) + ", " +
-              QString::number(CurrentObject->Orientation[2]) + " )";
+  else if (SelectedAction == showA) onRequestShowCurrentObject();
+  else if (SelectedAction == clipA) onRequestScriptLineToClipboard();
+  else if (SelectedAction == setLineA) onRequestSetVisAttributes();
+}
 
-      QClipboard *clipboard = QApplication::clipboard();
-      clipboard->setText(c);
-  }
-  else if (SelectedAction == setLineA)
+void AGeoWidget::onRequestShowCurrentObject()
+{
+    if (!CurrentObject) return;
+
+    QString name = CurrentObject->Name;
+    emit tw->RequestHighlightObject(name);
+    tw->UpdateGui(name);
+}
+
+void AGeoWidget::onRequestScriptLineToClipboard()
+{
+    if (!CurrentObject) return;
+
+    QString c = "TGeo( '" + CurrentObject->Name + "', '" + CurrentObject->Shape->getGenerationString() + "', " +
+            QString::number(CurrentObject->Material) + ", " +
+            "'"+CurrentObject->Container->Name + "',   "+
+            QString::number(CurrentObject->Position[0]) + ", " +
+            QString::number(CurrentObject->Position[1]) + ", " +
+            QString::number(CurrentObject->Position[2]) + ",   " +
+            QString::number(CurrentObject->Orientation[0]) + ", " +
+            QString::number(CurrentObject->Orientation[1]) + ", " +
+            QString::number(CurrentObject->Orientation[2]) + " )";
+
+    QClipboard *clipboard = QApplication::clipboard();
+    clipboard->setText(c);
+}
+
+void AGeoWidget::onRequestSetVisAttributes()
+{
+    if (!CurrentObject) return;
+
+    ARootLineConfigurator* rlc = new ARootLineConfigurator(&CurrentObject->color, &CurrentObject->width, &CurrentObject->style, this);
+    int res = rlc->exec();
+    if (res != 0)
     {
-          ARootLineConfigurator* rlc = new ARootLineConfigurator(&CurrentObject->color, &CurrentObject->width, &CurrentObject->style, this);
-          int res = rlc->exec();
-          if (res != 0)
-          {
-              if (CurrentObject->ObjectType->isSlab())
-              {
-                  ATypeSlabObject* slab = static_cast<ATypeSlabObject*>(CurrentObject->ObjectType);
-                  slab->SlabModel->color = CurrentObject->color;
-                  slab->SlabModel->width = CurrentObject->width;
-                  slab->SlabModel->style = CurrentObject->style;
-              }
-              QStringList names;
-              names << CurrentObject->Name;
-              emit tw->RequestRebuildDetector();
-              tw->SelectObjects(names);
-          }
-  }
+        if (CurrentObject->ObjectType->isSlab())
+        {
+            ATypeSlabObject* slab = static_cast<ATypeSlabObject*>(CurrentObject->ObjectType);
+            slab->SlabModel->color = CurrentObject->color;
+            slab->SlabModel->width = CurrentObject->width;
+            slab->SlabModel->style = CurrentObject->style;
+        }
+        QStringList names;
+        names << CurrentObject->Name;
+        emit tw->RequestRebuildDetector();
+        tw->SelectObjects(names);
+    }
 }
 
 void AGeoWidget::onMonitorRequestsShowSensitiveDirection()
@@ -1951,7 +1970,8 @@ void AGeoWidget::onCancelPressed()
   tw->UpdateGui( (CurrentObject) ? CurrentObject->Name : "" );
 }
 
-AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials)
+AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * ParentWidget) :
+    ParentWidget(ParentWidget)
 {
   CurrentObject = 0;
 
@@ -1963,8 +1983,16 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials)
   frMainFrame->setAutoFillBackground( true );
   //frMainFrame->setMinimumHeight(150);
   //frMainFrame->setMaximumHeight(300);
-    lMF = new QVBoxLayout();
+  lMF = new QVBoxLayout();
     lMF->setContentsMargins(5,5,5,2);
+
+    //object type
+    labType = new QLabel("");
+    labType->setAlignment(Qt::AlignCenter);
+    QFont font = labType->font();
+    font.setBold(true);
+    labType->setFont(font);
+    lMF->addWidget(labType);
 
     //name and material line
     QHBoxLayout* hl = new QHBoxLayout();
@@ -2004,12 +2032,6 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials)
       pteShape->setMaximumHeight(50);
       new AShapeHighlighter(pteShape->document());
       h2->addWidget(pteShape);
-
-      pbHelp = new QPushButton();
-      pbHelp->setText("Help");
-      pbHelp->setMaximumWidth(50);
-      connect(pbHelp, SIGNAL(pressed()), this, SLOT(onHelpRequested()));
-      h2->addWidget(pbHelp);
 
       //only for arrays
       QFrame* frArr = new QFrame();
@@ -2081,7 +2103,17 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials)
       h2->addWidget(ArrayWid);
     lMF->addLayout(h2);
 
+    // Transform block
+    QHBoxLayout * lht = new QHBoxLayout();
+        QPushButton * pbTransform = new QPushButton("Transform to ...");
+        lht->addWidget(pbTransform);
+        connect(pbTransform, &QPushButton::pressed, this, &AGeoObjectDelegate::onChangeShapePressed);
+        QPushButton * pbShapeInfo = new QPushButton("Info on this shape");
+        connect(pbShapeInfo, &QPushButton::pressed, this, &AGeoObjectDelegate::onHelpRequested);
+        lht->addWidget(pbShapeInfo);
+    lMF->addLayout(lht);
 
+    // Position and orientation block
     PosOrient = new QWidget();
     PosOrient->setContentsMargins(0,0,0,0);
     PosOrient->setMaximumHeight(80);
@@ -2137,6 +2169,20 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials)
 
     PosOrient->setLayout(gr);
     lMF->addWidget(PosOrient);
+
+    // bottom line buttons
+    QHBoxLayout * abl = new QHBoxLayout();
+        pbShow = new QPushButton("Show object");
+        QObject::connect(pbShow, &QPushButton::clicked, this, &AGeoObjectDelegate::RequestShow);
+        abl->addWidget(pbShow);
+        pbChangeAtt = new QPushButton("Color/line");
+        QObject::connect(pbChangeAtt, &QPushButton::clicked, this, &AGeoObjectDelegate::RequestChangeVisAttributes);
+        abl->addWidget(pbChangeAtt);
+        pbScriptLine = new QPushButton("Script to clipboard");
+        QObject::connect(pbScriptLine, &QPushButton::clicked, this, &AGeoObjectDelegate::RequestScriptToClipboard);
+        abl->addWidget(pbScriptLine);
+    lMF->addLayout(abl);
+
   frMainFrame->setLayout(lMF);
 
   //installing double validators for edit boxes
@@ -2178,33 +2224,85 @@ void AGeoObjectDelegate::onCursorPositionChanged()
                           100000);
       pteShape->setToolTip(templ);
       pteShape->setToolTipDuration(100000);
-    }
+  }
 }
 
+void AGeoObjectDelegate::onChangeShapePressed()
+{
+    QDialog * d = new QDialog(ParentWidget);
+    d->setWindowTitle("Select new shape");
+
+    QStringList list;
+    list << "Box" << "Parallelepiped" << "Tube" << "Sphere" << "Cone";
+
+    QVBoxLayout * l = new QVBoxLayout(d);
+        QListWidget * w = new QListWidget();
+        w->addItems(list);
+    l->addWidget(w);
+
+        QHBoxLayout * h = new QHBoxLayout();
+            QPushButton * pbAccept = new QPushButton("Change shape");
+            pbAccept->setEnabled(false);
+            QObject::connect(pbAccept, &QPushButton::clicked, [this, d, w]()
+            {
+                const QString sel = w->currentItem()->text();
+                if      (sel == "Box")              emit RequestChangeShape(new AGeoBox());
+                else if (sel == "Parallelepiped")   emit RequestChangeShape(new AGeoPara());
+                else if (sel == "Tube")             emit RequestChangeShape(new AGeoTube());
+                else if (sel == "Sphere")           emit RequestChangeShape(new AGeoSphere());
+                else if (sel == "Cone")             emit RequestChangeShape(new AGeoCone());
+                else qDebug() << "Unknown shape!";
+                d->accept();
+            });
+            h->addWidget(pbAccept);
+            QPushButton * pbCancel = new QPushButton("Cancel");
+            QObject::connect(pbCancel, &QPushButton::clicked, d, &QDialog::reject);
+            h->addWidget(pbCancel);
+    l->addLayout(h);
+
+    l->addWidget(new QLabel("Warning! There is no undo after change!"));
+
+    QObject::connect(w, &QListWidget::itemSelectionChanged, [pbAccept, w]()
+    {
+        pbAccept->setEnabled(w->currentRow() != -1);
+    });
+
+    d->exec();
+    delete d;
+}
+
+void AGeoObjectDelegate::addLocalLayout(QLayout * lay)
+{
+    lMF->insertLayout(3, lay);
+}
+
+#include "amessage.h"
 void AGeoObjectDelegate::onHelpRequested()
 {
-  QList<AGeoShape*> AvailableShapes = AGeoObject::GetAvailableShapes();
-  //AvailableShapes << new AGeoBox << new AGeoTrd1 << new AGeoTube << new AGeoSphere << new AGeoPara << new AGeoPgon << new AGeoComposite;
+    message(ShapeHelp, Widget);
 
-  AShapeHelpDialog* d = new AShapeHelpDialog(CurrentObject->Shape, AvailableShapes, this);
+/*
+    QList<AGeoShape*> AvailableShapes = AGeoObject::GetAvailableShapes();
 
-  int res = d->exec();
-  if (res == 1)
+    AShapeHelpDialog* d = new AShapeHelpDialog(CurrentObject->Shape, AvailableShapes, this);
+
+    int res = d->exec();
+    if (res == 1)
     {
-      QString templ = d->SelectedTemplate;
-      if (templ.startsWith("TGeoComposite") && CurrentObject->Shape->getShapeType()!="AGeoComposite")
+        QString templ = d->SelectedTemplate;
+        if (templ.startsWith("TGeoComposite") && CurrentObject->Shape->getShapeType()!="AGeoComposite")
         {
-          QMessageBox::information(Widget, "", "Cannot convert to composite in this way:\nUse context menu of the left panel.");
-          return;
+            QMessageBox::information(Widget, "", "Cannot convert to composite in this way:\nUse context menu of the left panel.");
+            return;
         }
 
-      pteShape->clear();
-      pteShape->appendPlainText(templ);
+        pteShape->clear();
+        pteShape->appendPlainText(templ);
     }
 
-  //d->setParent(0);
-  for (int i=0; i<AvailableShapes.size(); i++) delete AvailableShapes[i];
-  delete d;
+    for (int i=0; i<AvailableShapes.size(); i++) delete AvailableShapes[i];
+    delete d;
+*/
 }
 
 void AGeoObjectDelegate::Update(const AGeoObject *obj)
@@ -2261,12 +2359,12 @@ void AGeoObjectDelegate::Update(const AGeoObject *obj)
   ledPsi->setText(QString::number(obj->Orientation[2]));
 
   if (obj->Container && obj->Container->ObjectType->isStack())
-    {
+  {
       ledPhi->setEnabled(false);
       ledTheta->setEnabled(false);
       ledPhi->setText("0");
       ledTheta->setText("0");
-    }
+  }
 
   if (obj->isCompositeMemeber())
   {
@@ -2280,6 +2378,15 @@ void AGeoObjectDelegate::Update(const AGeoObject *obj)
       ledPhi->setText("0");
       ledTheta->setText("0");
   }
+
+  if (CurrentObject->isCompositeMemeber())
+  {
+      DelegateTypeName += " (logical)";
+      pbShow->setVisible(false);
+      pbChangeAtt->setVisible(false);
+      pbScriptLine->setVisible(false);
+  }
+  labType->setText(DelegateTypeName);
 }
 
 void AGeoObjectDelegate::onContentChanged()
@@ -2523,9 +2630,15 @@ void AMonitorDelegate::onContentChanged()
     Widget->layout()->activate();
 }
 
-AGeoBoxDelegate::AGeoBoxDelegate(const QStringList &materials)
-    : AGeoObjectDelegate(materials)
+AGeoBoxDelegate::AGeoBoxDelegate(const QStringList &materials, QWidget *parent)
+    : AGeoObjectDelegate(materials, parent)
 {
+    DelegateTypeName = "Box";
+    pteShape->setVisible(false);
+
+    ShapeHelp = "A box shape.\nSizeX, SizeY and SizeZ give full size in X, Y and Z direction, respectively\n"
+                "The XYZ position is given for the center of the box";
+
     QGridLayout * gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);
     gr->setVerticalSpacing(1);
@@ -2542,7 +2655,7 @@ AGeoBoxDelegate::AGeoBoxDelegate(const QStringList &materials)
     gr->addWidget(new QLabel("mm"), 1, 2);
     gr->addWidget(new QLabel("mm"), 2, 2);
 
-    lMF->insertLayout(2, gr);
+    addLocalLayout(gr);
 
     QVector<QLineEdit*> l = {ex, ey, ez};
     for (QLineEdit * le : l)
@@ -2568,9 +2681,12 @@ void AGeoBoxDelegate::onLocalParameterChange()
     pteShape->appendPlainText(QString("TGeoBBox( %1, %2, %3 )").arg(0.5*ex->text().toDouble()).arg(0.5*ey->text().toDouble()).arg(0.5*ez->text().toDouble()));
 }
 
-AGeoTubeDelegate::AGeoTubeDelegate(const QStringList & materials)
-    : AGeoObjectDelegate(materials)
+AGeoTubeDelegate::AGeoTubeDelegate(const QStringList & materials, QWidget *parent)
+    : AGeoObjectDelegate(materials, parent)
 {
+    DelegateTypeName = "Tube";
+    pteShape->setVisible(false);
+
     QGridLayout * gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);
     gr->setVerticalSpacing(1);
@@ -2587,7 +2703,7 @@ AGeoTubeDelegate::AGeoTubeDelegate(const QStringList & materials)
     gr->addWidget(new QLabel("mm"), 1, 2);
     gr->addWidget(new QLabel("mm"), 2, 2);
 
-    lMF->insertLayout(2, gr);
+    addLocalLayout(gr);
 
     QVector<QLineEdit*> l = {eo, ei, ez};
     for (QLineEdit * le : l)
@@ -2613,9 +2729,12 @@ void AGeoTubeDelegate::onLocalParameterChange()
     pteShape->appendPlainText(QString("TGeoTube( %1, %2, %3 )").arg(0.5*ei->text().toDouble()).arg(0.5*eo->text().toDouble()).arg(0.5*ez->text().toDouble()));
 }
 
-AGeoParaDelegate::AGeoParaDelegate(const QStringList & materials)
-    : AGeoObjectDelegate(materials)
+AGeoParaDelegate::AGeoParaDelegate(const QStringList & materials, QWidget *parent)
+    : AGeoObjectDelegate(materials, parent)
 {
+    DelegateTypeName = "Parallelepiped";
+    pteShape->setVisible(false);
+
     QGridLayout * gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);
     gr->setVerticalSpacing(1);
@@ -2641,7 +2760,7 @@ AGeoParaDelegate::AGeoParaDelegate(const QStringList & materials)
     gr->addWidget(new QLabel("°"),  4, 2);
     gr->addWidget(new QLabel("°"),  5, 2);
 
-    lMF->insertLayout(2, gr);
+    addLocalLayout(gr);
 
     QVector<QLineEdit*> l = {ex, ey, ez, ea, et, ep};
     for (QLineEdit * le : l)
@@ -2671,9 +2790,12 @@ void AGeoParaDelegate::onLocalParameterChange()
                                                                            .arg(ea->text()).arg(et->text()).arg(ep->text())  );
 }
 
-AGeoSphereDelegate::AGeoSphereDelegate(const QStringList & materials)
-    : AGeoObjectDelegate(materials)
+AGeoSphereDelegate::AGeoSphereDelegate(const QStringList & materials, QWidget *parent)
+    : AGeoObjectDelegate(materials, parent)
 {
+    DelegateTypeName = "Sphere";
+    pteShape->setVisible(false);
+
     QGridLayout * gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);
     gr->setVerticalSpacing(1);
@@ -2699,7 +2821,7 @@ AGeoSphereDelegate::AGeoSphereDelegate(const QStringList & materials)
     gr->addWidget(new QLabel("°"),  4, 2);
     gr->addWidget(new QLabel("°"),  5, 2);
 
-    lMF->insertLayout(2, gr);
+    addLocalLayout(gr);
 
     QVector<QLineEdit*> l = {eod, eid, et1, et2, ep1, ep2};
     for (QLineEdit * le : l)
@@ -2730,9 +2852,12 @@ void AGeoSphereDelegate::onLocalParameterChange()
                                                                              .arg(ep1->text()).arg(ep2->text())  );
 }
 
-AGeoConeDelegate::AGeoConeDelegate(const QStringList &materials)
-    : AGeoObjectDelegate(materials)
+AGeoConeDelegate::AGeoConeDelegate(const QStringList &materials, QWidget *parent)
+    : AGeoObjectDelegate(materials, parent)
 {
+    DelegateTypeName = "Cone";
+    pteShape->setVisible(false);
+
     QGridLayout * gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);
     gr->setVerticalSpacing(1);
@@ -2755,7 +2880,7 @@ AGeoConeDelegate::AGeoConeDelegate(const QStringList &materials)
     gr->addWidget(new QLabel("mm"), 3, 2);
     gr->addWidget(new QLabel("mm"), 4, 2);
 
-    lMF->insertLayout(2, gr);
+    addLocalLayout(gr);
 
     QVector<QLineEdit*> l = {ez, eli, elo, eui, euo};
     for (QLineEdit * le : l)

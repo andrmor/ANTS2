@@ -101,6 +101,7 @@ class ATypeCompositeObject;
 class TVector3;
 class AMonitorDelegateForm;
 class QHBoxLayout;
+class AGeoShape;
 
 class AGeoWidget : public QWidget
 {
@@ -135,8 +136,13 @@ private:
 public slots:
   void onObjectSelectionChanged(const QString SelectedObject); //starts GUI update
   void onStartEditing();
+  void onRequestChangeShape(AGeoShape * NewShape);
   void OnCustomContextMenuTriggered_forMainObject(QPoint pos);
   void onMonitorRequestsShowSensitiveDirection();
+
+  void onRequestShowCurrentObject();
+  void onRequestScriptLineToClipboard();
+  void onRequestSetVisAttributes();
 
 private slots:
   void onConfirmPressed();
@@ -154,10 +160,10 @@ private:
   QString getSuffix(AGeoObject *objCont);
   //void convertToLG(int UpperLower); //0 - upper, 1 - lower
   QLabel * addInfoLabel(QString text);
-  AGeoObjectDelegate *createAndAddGeoObjectDelegate(AGeoObject *obj);
-  ASlabDelegate *createAndAddSlabDelegate(AGeoObject *obj);
+  AGeoObjectDelegate   *createAndAddGeoObjectDelegate(AGeoObject *obj, QWidget *parent);
+  ASlabDelegate        *createAndAddSlabDelegate(AGeoObject *obj);
   AGridElementDelegate *createAndAddGridElementDelegate(AGeoObject *obj);
-  AMonitorDelegate *createAndAddMonitorDelegate(AGeoObject *obj, QStringList particles);
+  AMonitorDelegate     *createAndAddMonitorDelegate(AGeoObject *obj, QStringList particles);
   bool checkNonSlabObjectDelegateValidity(AGeoObject *obj);
 
 signals:
@@ -169,7 +175,7 @@ class AGeoObjectDelegate : public QWidget
     Q_OBJECT
 
 public:
-    AGeoObjectDelegate(const QStringList & materials);
+    AGeoObjectDelegate(const QStringList & materials, QWidget * ParentWidget = nullptr);
     virtual ~AGeoObjectDelegate(){}
 
     QFrame* Widget;
@@ -189,11 +195,19 @@ public:
     QLineEdit *ledX, *ledY, *ledZ;
     QLineEdit *ledPhi, *ledTheta, *ledPsi;
 
-    virtual const QString getLabel() const {return "";} // used to fill the label on top of the delegate
+private:
+    QVBoxLayout * lMF = nullptr;      //main layout
+
+    QPushButton * pbShow = nullptr;
+    QPushButton * pbChangeAtt = nullptr;
+    QPushButton * pbScriptLine = nullptr;
 
 protected:
+    QWidget * ParentWidget = nullptr;
     const AGeoObject * CurrentObject = nullptr;
-    QVBoxLayout * lMF = nullptr;      //main layout
+    QLabel * labType = nullptr;
+    QString DelegateTypeName = "Object";
+    QString ShapeHelp;
 
 public slots:
     virtual void Update(const AGeoObject * obj);
@@ -202,12 +216,20 @@ private slots:
     void onContentChanged();          // only to enter the editing mode! Object update is performed only on confirm button click!
     void onHelpRequested();           // dialog with AGeoShape list can be accessed here
     void onCursorPositionChanged();
+    void onChangeShapePressed();
 
 protected slots:
     virtual void onLocalParameterChange() {}
 
+protected:
+    void addLocalLayout(QLayout * lay);
+
 signals:
     void ContentChanged();
+    void RequestChangeShape(AGeoShape * newShape);
+    void RequestShow();
+    void RequestChangeVisAttributes();
+    void RequestScriptToClipboard();
 };
 
 class AGeoBoxDelegate : public AGeoObjectDelegate
@@ -215,13 +237,11 @@ class AGeoBoxDelegate : public AGeoObjectDelegate
     Q_OBJECT
 
 public:
-    AGeoBoxDelegate(const QStringList & materials);
+    AGeoBoxDelegate(const QStringList & materials, QWidget * parent);
 
     QLineEdit * ex = nullptr;
     QLineEdit * ey = nullptr;
     QLineEdit * ez = nullptr;
-
-    virtual const QString getLabel() const override {return "Box";}
 
 public slots:
     virtual void Update(const AGeoObject * obj) override;
@@ -235,13 +255,11 @@ class AGeoTubeDelegate : public AGeoObjectDelegate
     Q_OBJECT
 
 public:
-    AGeoTubeDelegate(const QStringList & materials);
+    AGeoTubeDelegate(const QStringList & materials, QWidget * parent);
 
     QLineEdit * ei = nullptr;
     QLineEdit * eo = nullptr;
     QLineEdit * ez = nullptr;
-
-    virtual const QString getLabel() const override {return "Tube";}
 
 public slots:
     virtual void Update(const AGeoObject * obj) override;
@@ -255,7 +273,7 @@ class AGeoParaDelegate : public AGeoObjectDelegate
     Q_OBJECT
 
 public:
-    AGeoParaDelegate(const QStringList & materials);
+    AGeoParaDelegate(const QStringList & materials, QWidget * parent);
 
     QLineEdit * ex = nullptr;
     QLineEdit * ey = nullptr;
@@ -263,8 +281,6 @@ public:
     QLineEdit * ea = nullptr;
     QLineEdit * et = nullptr;
     QLineEdit * ep = nullptr;
-
-    virtual const QString getLabel() const override {return "Parallelepiped";}
 
 public slots:
     virtual void Update(const AGeoObject * obj) override;
@@ -278,7 +294,7 @@ class AGeoSphereDelegate : public AGeoObjectDelegate
     Q_OBJECT
 
 public:
-    AGeoSphereDelegate(const QStringList & materials);
+    AGeoSphereDelegate(const QStringList & materials, QWidget * parent);
 
     QLineEdit * eod = nullptr;
     QLineEdit * eid = nullptr;
@@ -286,8 +302,6 @@ public:
     QLineEdit * et2 = nullptr;
     QLineEdit * ep1 = nullptr;
     QLineEdit * ep2 = nullptr;
-
-    virtual const QString getLabel() const override {return "Sphere";}
 
 public slots:
     virtual void Update(const AGeoObject * obj) override;
@@ -301,15 +315,13 @@ class AGeoConeDelegate : public AGeoObjectDelegate
     Q_OBJECT
 
 public:
-    AGeoConeDelegate(const QStringList & materials);
+    AGeoConeDelegate(const QStringList & materials, QWidget * parent);
 
     QLineEdit * ez  = nullptr;
     QLineEdit * eli = nullptr;
     QLineEdit * elo = nullptr;
     QLineEdit * eui = nullptr;
     QLineEdit * euo = nullptr;
-
-    virtual const QString getLabel() const override {return "Cone";}
 
 public slots:
     virtual void Update(const AGeoObject * obj) override;

@@ -464,6 +464,25 @@ void AGeoObject::clearCompositeMembers()
   logicals->HostedObjects.clear();
 }
 
+void AGeoObject::removeCompositeStructure()
+{
+    clearCompositeMembers();
+
+    delete ObjectType;
+    ObjectType = new ATypeSingleObject();
+
+    for (int i=0; i<HostedObjects.size(); i++)
+    {
+        AGeoObject* obj = HostedObjects[i];
+        if (obj->ObjectType->isCompositeContainer())
+        {
+            delete obj;
+            HostedObjects.removeAt(i);
+            return;
+        }
+    }
+}
+
 AGeoObject *AGeoObject::getGridElement()
 {
   if (!ObjectType->isGrid()) return 0;

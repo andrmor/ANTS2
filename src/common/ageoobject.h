@@ -71,6 +71,7 @@ public:
   void refreshShapeCompositeMembers(AGeoShape* ExternalShape = 0); //safe to use on any AGeoObject; if ExternalShape is provided , it is updated; otherwise, Objects's shape is updated
   bool isInUseByComposite(); //safe to use on any AGeoObject
   void clearCompositeMembers();
+  void removeCompositeStructure();
 
   //for grid
   AGeoObject* getGridElement();
@@ -417,7 +418,7 @@ public:
   AGeoCone(double dz, double rmaxL, double rmaxU) :
     dz(dz), rminL(0), rmaxL(rmaxL), rminU(0), rmaxU(rmaxU) {}
   AGeoCone() :
-    dz(10), rminL(0), rmaxL(20), rminU(0), rmaxU(20) {}
+    dz(10), rminL(0), rmaxL(20), rminU(0), rmaxU(0) {}
   virtual ~AGeoCone() {}
 
   virtual const QString getShapeType() {return "TGeoCone";}

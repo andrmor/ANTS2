@@ -126,6 +126,7 @@ void GeometryWindowClass::prepareGeoManager(bool ColorUpdateAllowed)
     //in this way jsroot have no problem to update visibility of top:
     //MW->Detector->GeoManager->SetTopVisible(true);
     //MW->Detector->top->SetVisibility(ui->cbShowTop->isChecked());
+    MW->Detector->top->SetAttBit(TGeoAtt::kVisOnScreen, ui->cbShowTop->isChecked());
 
     int transp = ui->sbTransparency->value();
     MW->Detector->top->SetTransparency(Mode == 0 ? 0 : transp);

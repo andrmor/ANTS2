@@ -1380,6 +1380,8 @@ AGeoObjectDelegate* AGeoWidget::createAndAddGeoObjectDelegate(AGeoObject* obj, Q
         Del = new AGeoBoxDelegate(tw->Sandwich->Materials, parent);
     else if (obj->Shape->getShapeType() == "TGeoTube")
         Del = new AGeoTubeDelegate(tw->Sandwich->Materials, parent);
+    else if (obj->Shape->getShapeType() == "TGeoTubeSeg")
+        Del = new AGeoTubeSegDelegate(tw->Sandwich->Materials, parent);
     else if (obj->Shape->getShapeType() == "TGeoPara")
         Del = new AGeoParaDelegate(tw->Sandwich->Materials, parent);
     else if (obj->Shape->getShapeType() == "TGeoSphere")
@@ -2003,7 +2005,7 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
       lname->setMaximumWidth(50);
       hl->addWidget(lname);
       leName = new QLineEdit();
-      connect(leName, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
+      connect(leName, &QLineEdit::textChanged, this, &AGeoObjectDelegate::onContentChanged);
       leName->setMaximumWidth(100);
       leName->setContextMenuPolicy(Qt::NoContextMenu);
       hl->addWidget(leName);
@@ -2233,7 +2235,7 @@ void AGeoObjectDelegate::onChangeShapePressed()
     d->setWindowTitle("Select new shape");
 
     QStringList list;
-    list << "Box" << "Parallelepiped" << "Tube" << "Sphere" << "Cone";
+    list << "Box" << "Parallelepiped" << "Tube" << "Tube segment" << "Sphere" << "Cone";
 
     QVBoxLayout * l = new QVBoxLayout(d);
         QListWidget * w = new QListWidget();
@@ -2249,6 +2251,7 @@ void AGeoObjectDelegate::onChangeShapePressed()
                 if      (sel == "Box")              emit RequestChangeShape(new AGeoBox());
                 else if (sel == "Parallelepiped")   emit RequestChangeShape(new AGeoPara());
                 else if (sel == "Tube")             emit RequestChangeShape(new AGeoTube());
+                else if (sel == "Tube segment")     emit RequestChangeShape(new AGeoTubeSeg());
                 else if (sel == "Sphere")           emit RequestChangeShape(new AGeoSphere());
                 else if (sel == "Cone")             emit RequestChangeShape(new AGeoCone());
                 else qDebug() << "Unknown shape!";
@@ -2279,9 +2282,8 @@ void AGeoObjectDelegate::addLocalLayout(QLayout * lay)
 #include "amessage.h"
 void AGeoObjectDelegate::onHelpRequested()
 {
-    message(ShapeHelp, Widget);
+    //message(ShapeHelp, Widget);
 
-/*
     QList<AGeoShape*> AvailableShapes = AGeoObject::GetAvailableShapes();
 
     AShapeHelpDialog* d = new AShapeHelpDialog(CurrentObject->Shape, AvailableShapes, this);
@@ -2302,11 +2304,10 @@ void AGeoObjectDelegate::onHelpRequested()
 
     for (int i=0; i<AvailableShapes.size(); i++) delete AvailableShapes[i];
     delete d;
-*/
 }
 
 void AGeoObjectDelegate::Update(const AGeoObject *obj)
-{  
+{
     CurrentObject = obj;
     leName->setText(obj->Name);
 
@@ -2315,7 +2316,6 @@ void AGeoObjectDelegate::Update(const AGeoObject *obj)
       pteShape->setVisible(false);
       lMat->setVisible(false);
       cobMat->setVisible(false);
-      pbHelp->setVisible(false);
       PosOrient->setVisible(false);
     }
 
@@ -2324,7 +2324,6 @@ void AGeoObjectDelegate::Update(const AGeoObject *obj)
     pteShape->setVisible(false);
     lMat->setVisible(false);
     cobMat->setVisible(false);
-    pbHelp->setVisible(false);
 
     ledPhi->setEnabled(false);
     ledTheta->setEnabled(false);
@@ -2341,7 +2340,7 @@ void AGeoObjectDelegate::Update(const AGeoObject *obj)
      ArrayWid->setVisible(false);
 
   int imat = obj->Material;
-  if (imat<0 || imat>cobMat->count()-1)
+  if (imat < 0 || imat >= cobMat->count())
   {
       qWarning() << "Material index out of bounds!";
       imat = -1;
@@ -2687,7 +2686,7 @@ AGeoTubeDelegate::AGeoTubeDelegate(const QStringList & materials, QWidget *paren
     DelegateTypeName = "Tube";
     pteShape->setVisible(false);
 
-    QGridLayout * gr = new QGridLayout();
+    gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);
     gr->setVerticalSpacing(1);
 
@@ -2727,6 +2726,48 @@ void AGeoTubeDelegate::onLocalParameterChange()
 {
     pteShape->clear();
     pteShape->appendPlainText(QString("TGeoTube( %1, %2, %3 )").arg(0.5*ei->text().toDouble()).arg(0.5*eo->text().toDouble()).arg(0.5*ez->text().toDouble()));
+}
+
+AGeoTubeSegDelegate::AGeoTubeSegDelegate(const QStringList & materials, QWidget * parent) :
+    AGeoTubeDelegate(materials, parent)
+{
+    DelegateTypeName = "Tube segment";
+    pteShape->setVisible(false);
+
+    gr->addWidget(new QLabel("Phi1:"), 3, 0);
+    gr->addWidget(new QLabel("Phi2:"), 4, 0);
+
+    ep1 = new QLineEdit(); gr->addWidget(ep1, 3, 1);
+    ep2 = new QLineEdit(); gr->addWidget(ep2, 4, 1);
+
+    gr->addWidget(new QLabel("°"), 3, 2);
+    gr->addWidget(new QLabel("°"), 4, 2);
+
+    QVector<QLineEdit*> l = {ep1, ep2};
+    for (QLineEdit * le : l)
+        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoTubeSegDelegate::onLocalParameterChange);
+}
+
+void AGeoTubeSegDelegate::Update(const AGeoObject *obj)
+{
+    AGeoObjectDelegate::Update(obj);
+
+    AGeoTubeSeg * seg = dynamic_cast<AGeoTubeSeg*>(obj->Shape);
+    if (seg)
+    {
+        eo->setText (QString::number(seg->rmax*2.0));
+        ei->setText (QString::number(seg->rmin*2.0));
+        ez->setText (QString::number(seg->dz*2.0));
+        ep1->setText(QString::number(seg->phi1));
+        ep2->setText(QString::number(seg->phi2));
+    }
+}
+
+void AGeoTubeSegDelegate::onLocalParameterChange()
+{
+    pteShape->clear();
+    pteShape->appendPlainText(QString("TGeoTubeSeg( %1, %2, %3, %4, %5 )").arg(0.5*ei->text().toDouble()).arg(0.5*eo->text().toDouble()).arg(0.5*ez->text().toDouble())
+                                                                          .arg(ep1->text()).arg(ep2->text()) );
 }
 
 AGeoParaDelegate::AGeoParaDelegate(const QStringList & materials, QWidget *parent)
@@ -2909,3 +2950,4 @@ void AGeoConeDelegate::onLocalParameterChange()
                               .arg(0.5*eli->text().toDouble()).arg(0.5*elo->text().toDouble())
                               .arg(0.5*eui->text().toDouble()).arg(0.5*euo->text().toDouble()) );
 }
+

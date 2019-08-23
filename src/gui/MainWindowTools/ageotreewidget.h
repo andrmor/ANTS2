@@ -186,7 +186,6 @@ public:
     QPlainTextEdit* pteShape;
     QWidget* PosOrient;
     QWidget* ArrayWid;
-    QPushButton* pbHelp;
     QLabel* lMat;
 
     QSpinBox *sbNumX, *sbNumY, *sbNumZ;
@@ -260,6 +259,26 @@ public:
     QLineEdit * ei = nullptr;
     QLineEdit * eo = nullptr;
     QLineEdit * ez = nullptr;
+
+protected:
+    QGridLayout * gr = nullptr;
+
+public slots:
+    virtual void Update(const AGeoObject * obj) override;
+
+private slots:
+    void onLocalParameterChange() override;
+};
+
+class AGeoTubeSegDelegate : public AGeoTubeDelegate
+{
+    Q_OBJECT
+
+public:
+    AGeoTubeSegDelegate(const QStringList & materials, QWidget * parent);
+
+    QLineEdit * ep1 = nullptr;
+    QLineEdit * ep2 = nullptr;
 
 public slots:
     virtual void Update(const AGeoObject * obj) override;

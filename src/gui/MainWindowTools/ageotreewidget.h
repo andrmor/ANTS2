@@ -232,6 +232,7 @@ protected slots:
 protected:
     void addLocalLayout(QLayout * lay);
     void updatePteShape(const QString & text);
+    const AGeoShape * getBaseShapeOfObject(const AGeoObject *obj);
 
 signals:
     void ContentChanged();

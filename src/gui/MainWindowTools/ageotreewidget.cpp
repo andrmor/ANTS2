@@ -1727,7 +1727,7 @@ void AGeoWidget::onConfirmPressed()
   //finalizing
   exitEditingMode();
   QString name = CurrentObject->Name;
-  tw->UpdateGui(name);
+  //tw->UpdateGui(name);
   emit tw->RequestRebuildDetector();
   tw->UpdateGui(name);
 }
@@ -1755,6 +1755,7 @@ void AGeoWidget::getValuesFromNonSlabDelegates(AGeoObject* objMain)
         }
 
         QString newShape = GeoObjectDelegate->pteShape->document()->toPlainText();
+        //qDebug() << "Geting shape values from the delegate"<<newShape;
         objMain->readShapeFromString(newShape);
 
         //if it is a set member, need old values of position and angle
@@ -2349,6 +2350,18 @@ void AGeoObjectDelegate::updatePteShape(const QString & text)
     pbShapeInfo->setToolTip(pteShape->document()->toPlainText());
 }
 
+const AGeoShape * AGeoObjectDelegate::getBaseShapeOfObject(const AGeoObject * obj)
+{
+    if (!obj && !obj->Shape) return nullptr;
+    AGeoScaledShape * scaledShape = dynamic_cast<AGeoScaledShape*>(obj->Shape);
+    if (!scaledShape) return nullptr;
+
+    AGeoShape * baseShape = AGeoObject::GeoShapeFactory(scaledShape->getBaseShapeType());
+    bool bOK = baseShape->readFromString( scaledShape->BaseShapeGenerationString );
+    if (!bOK) qDebug() << "Failed to read shape properties:" << scaledShape->BaseShapeGenerationString;
+    return baseShape;
+}
+
 void AGeoObjectDelegate::onHelpRequested()
 {
     //message(ShapeHelp, Widget);
@@ -2712,7 +2725,7 @@ AGeoBoxDelegate::AGeoBoxDelegate(const QStringList &materials, QWidget *parent)
     : AGeoObjectDelegate(materials, parent)
 {
     DelegateTypeName = "Box";
-    pteShape->setVisible(false);
+    //pteShape->setVisible(false);
 
     ShapeHelp = "A box shape.\nSizeX, SizeY and SizeZ give full size in X, Y and Z direction, respectively\n"
                 "The XYZ position is given for the center of the box";
@@ -2744,13 +2757,17 @@ void AGeoBoxDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
 
-    AGeoBox * box = dynamic_cast<AGeoBox*>(obj->Shape);
+    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
+
+    const AGeoBox * box = dynamic_cast<const AGeoBox *>(tmpShape ? tmpShape : obj->Shape);
     if (box)
     {
         ex->setText(QString::number(box->dx*2.0));
         ey->setText(QString::number(box->dy*2.0));
         ez->setText(QString::number(box->dz*2.0));
     }
+
+    delete tmpShape;
 }
 
 void AGeoBoxDelegate::onLocalShapeParameterChange()
@@ -2791,13 +2808,15 @@ void AGeoTubeDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
 
-    AGeoTube * tube = dynamic_cast<AGeoTube*>(obj->Shape);
+    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
+    const AGeoTube * tube = dynamic_cast<const AGeoTube*>(tmpShape ? tmpShape : obj->Shape);
     if (tube)
     {
         eo->setText(QString::number(tube->rmax*2.0));
         ei->setText(QString::number(tube->rmin*2.0));
         ez->setText(QString::number(tube->dz*2.0));
     }
+    delete tmpShape;
 }
 
 void AGeoTubeDelegate::onLocalShapeParameterChange()
@@ -2829,7 +2848,8 @@ void AGeoTubeSegDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
 
-    AGeoTubeSeg * seg = dynamic_cast<AGeoTubeSeg*>(obj->Shape);
+    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
+    const AGeoTubeSeg * seg = dynamic_cast<const AGeoTubeSeg*>(tmpShape ? tmpShape : obj->Shape);
     if (seg)
     {
         eo->setText (QString::number(seg->rmax*2.0));
@@ -2838,6 +2858,7 @@ void AGeoTubeSegDelegate::Update(const AGeoObject *obj)
         ep1->setText(QString::number(seg->phi1));
         ep2->setText(QString::number(seg->phi2));
     }
+    delete tmpShape;
 }
 
 void AGeoTubeSegDelegate::onLocalShapeParameterChange()
@@ -2875,7 +2896,8 @@ void AGeoTubeSegCutDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
 
-    AGeoCtub * seg = dynamic_cast<AGeoCtub*>(obj->Shape);
+    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
+    const AGeoCtub * seg = dynamic_cast<const AGeoCtub*>(tmpShape ? tmpShape : obj->Shape);
     if (seg)
     {
         eo->setText (QString::number(seg->rmax*2.0));
@@ -2890,6 +2912,7 @@ void AGeoTubeSegCutDelegate::Update(const AGeoObject *obj)
         euny->setText(QString::number(seg->nyhi));
         eunz->setText(QString::number(seg->nzhi));
     }
+    delete tmpShape;
 }
 
 void AGeoTubeSegCutDelegate::onLocalShapeParameterChange()
@@ -2943,7 +2966,8 @@ void AGeoParaDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
 
-    AGeoPara * para = dynamic_cast<AGeoPara*>(obj->Shape);
+    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
+    const AGeoPara * para = dynamic_cast<const AGeoPara*>(tmpShape ? tmpShape : obj->Shape);
     if (para)
     {
         ex->setText(QString::number(para->dx*2.0));
@@ -2953,6 +2977,7 @@ void AGeoParaDelegate::Update(const AGeoObject *obj)
         et->setText(QString::number(para->theta));
         ep->setText(QString::number(para->phi));
     }
+    delete tmpShape;
 }
 
 void AGeoParaDelegate::onLocalShapeParameterChange()
@@ -3003,7 +3028,8 @@ void AGeoSphereDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
 
-    AGeoSphere * sph = dynamic_cast<AGeoSphere*>(obj->Shape);
+    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
+    const AGeoSphere * sph = dynamic_cast<const AGeoSphere*>(tmpShape ? tmpShape : obj->Shape);
     if (sph)
     {
         eid->setText(QString::number(sph->rmin*2.0));
@@ -3013,6 +3039,7 @@ void AGeoSphereDelegate::Update(const AGeoObject *obj)
         ep1->setText(QString::number(sph->phi1));
         ep2->setText(QString::number(sph->phi2));
     }
+    delete tmpShape;
 }
 
 void AGeoSphereDelegate::onLocalShapeParameterChange()
@@ -3061,7 +3088,8 @@ void AGeoConeDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
 
-    AGeoCone * cone = dynamic_cast<AGeoCone*>(obj->Shape);
+    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
+    const AGeoCone * cone = dynamic_cast<const AGeoCone*>(tmpShape ? tmpShape : obj->Shape);
     if (cone)
     {
         ez ->setText(QString::number(cone->dz*2.0));
@@ -3070,6 +3098,7 @@ void AGeoConeDelegate::Update(const AGeoObject *obj)
         eui->setText(QString::number(cone->rminU*2.0));
         euo->setText(QString::number(cone->rmaxU*2.0));
     }
+    delete tmpShape;
 }
 
 void AGeoConeDelegate::onLocalShapeParameterChange()
@@ -3104,7 +3133,8 @@ void AGeoConeSegDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
 
-    AGeoConeSeg * cone = dynamic_cast<AGeoConeSeg*>(obj->Shape);
+    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
+    const AGeoConeSeg * cone = dynamic_cast<const AGeoConeSeg*>(tmpShape ? tmpShape : obj->Shape);
     if (cone)
     {
         ez ->setText(QString::number(cone->dz*2.0));
@@ -3115,6 +3145,7 @@ void AGeoConeSegDelegate::Update(const AGeoObject *obj)
         ep1->setText(QString::number(cone->phi1));
         ep2->setText(QString::number(cone->phi2));
     }
+    delete tmpShape;
 }
 
 void AGeoConeSegDelegate::onLocalShapeParameterChange()
@@ -3159,13 +3190,15 @@ void AGeoElTubeDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
 
-    AGeoEltu * tube = dynamic_cast<AGeoEltu*>(obj->Shape);
+    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
+    const AGeoEltu * tube = dynamic_cast<const AGeoEltu*>(tmpShape ? tmpShape : obj->Shape);
     if (tube)
     {
         ex->setText(QString::number(tube->a*2.0));
         ey->setText(QString::number(tube->b*2.0));
         ez->setText(QString::number(tube->dz*2.0));
     }
+    delete tmpShape;
 }
 
 void AGeoElTubeDelegate::onLocalShapeParameterChange()
@@ -3209,7 +3242,8 @@ void AGeoTrapXDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
 
-    AGeoTrd1 * trap = dynamic_cast<AGeoTrd1*>(obj->Shape);
+    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
+    const AGeoTrd1 * trap = dynamic_cast<const AGeoTrd1*>(tmpShape ? tmpShape : obj->Shape);
     if (trap)
     {
         exl->setText(QString::number(trap->dx1 * 2.0));
@@ -3217,6 +3251,7 @@ void AGeoTrapXDelegate::Update(const AGeoObject *obj)
         ey-> setText(QString::number(trap->dy  * 2.0));
         ez-> setText(QString::number(trap->dz  * 2.0));
     }
+    delete tmpShape;
 }
 
 void AGeoTrapXDelegate::onLocalShapeParameterChange()
@@ -3265,7 +3300,8 @@ void AGeoTrapXYDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
 
-    AGeoTrd2 * trap = dynamic_cast<AGeoTrd2*>(obj->Shape);
+    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
+    const AGeoTrd2 * trap = dynamic_cast<const AGeoTrd2*>(tmpShape ? tmpShape : obj->Shape);
     if (trap)
     {
         exl->setText(QString::number(trap->dx1 * 2.0));
@@ -3274,6 +3310,7 @@ void AGeoTrapXYDelegate::Update(const AGeoObject *obj)
         eyu->setText(QString::number(trap->dy2 * 2.0));
         ez-> setText(QString::number(trap->dz  * 2.0));
     }
+    delete tmpShape;
 }
 
 void AGeoTrapXYDelegate::onLocalShapeParameterChange()
@@ -3316,13 +3353,15 @@ void AGeoParaboloidDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
 
-    AGeoParaboloid * para = dynamic_cast<AGeoParaboloid*>(obj->Shape);
+    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
+    const AGeoParaboloid * para = dynamic_cast<const AGeoParaboloid*>(tmpShape ? tmpShape : obj->Shape);
     if (para)
     {
         el->setText(QString::number(para->rlo * 2.0));
         eu->setText(QString::number(para->rhi * 2.0));
         ez->setText(QString::number(para->dz  * 2.0));
     }
+    delete tmpShape;
 }
 
 void AGeoParaboloidDelegate::onLocalShapeParameterChange()
@@ -3372,7 +3411,8 @@ void AGeoTorusDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
 
-    AGeoTorus * tor = dynamic_cast<AGeoTorus*>(obj->Shape);
+    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
+    const AGeoTorus * tor = dynamic_cast<const AGeoTorus*>(tmpShape ? tmpShape : obj->Shape);
     if (tor)
     {
         ead->setText(QString::number(tor->R    * 2.0));
@@ -3381,6 +3421,7 @@ void AGeoTorusDelegate::Update(const AGeoObject *obj)
         ep0->setText(QString::number(tor->Phi1));
         epe->setText(QString::number(tor->Dphi));
     }
+    delete tmpShape;
 }
 
 void AGeoTorusDelegate::onLocalShapeParameterChange()
@@ -3438,7 +3479,8 @@ void AGeoPolygonDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
 
-    AGeoPolygon * pgon = dynamic_cast<AGeoPolygon*>(obj->Shape);
+    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
+    const AGeoPolygon * pgon = dynamic_cast<const AGeoPolygon*>(tmpShape ? tmpShape : obj->Shape);
     if (pgon)
     {
         sbn->setValue(pgon->nedges);
@@ -3449,6 +3491,7 @@ void AGeoPolygonDelegate::Update(const AGeoObject *obj)
         eui->setText(QString::number(pgon->rminU * 2.0));
         euo->setText(QString::number(pgon->rmaxU * 2.0));
     }
+    delete tmpShape;
 }
 
 void AGeoPolygonDelegate::onLocalShapeParameterChange()

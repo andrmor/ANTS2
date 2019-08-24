@@ -961,27 +961,6 @@ bool AGeoObject::isMaterialInActiveUse(int imat) const
     return false;
 }
 
-void AGeoShape::writeToJson(QJsonObject & json) const
-{
-    json["bScale"] = bScale;
-    json["ScaleX"] = ScaleX;
-    json["ScaleY"] = ScaleY;
-    json["ScaleZ"] = ScaleZ;
-}
-
-void AGeoShape::readFromJson(const QJsonObject & json)
-{
-    bScale = false;
-    ScaleX = 1.0;
-    ScaleY = 1.0;
-    ScaleZ = 1.0;
-
-    parseJson(json, "bScale", bScale);
-    parseJson(json, "ScaleX", ScaleX);
-    parseJson(json, "ScaleY", ScaleY);
-    parseJson(json, "ScaleZ", ScaleZ);
-}
-
 bool AGeoShape::extractParametersFromString(QString GenerationString, QStringList &parameters, int numParameters)
 {
   GenerationString = GenerationString.simplified();
@@ -2238,10 +2217,8 @@ double AGeoConeSeg::maxSize()
     return sqrt(3.0)*m;
 }
 
-void AGeoConeSeg::writeToJson(QJsonObject &json) const
+void AGeoConeSeg::writeToJson(QJsonObject &json)
 {    
-    AGeoShape::writeToJson(json);
-
     json["dz"] = dz;
     json["rminL"] = rminL;
     json["rmaxL"] = rmaxL;
@@ -2251,10 +2228,8 @@ void AGeoConeSeg::writeToJson(QJsonObject &json) const
     json["phi2"] = phi2;
 }
 
-void AGeoConeSeg::readFromJson(const QJsonObject &json)
+void AGeoConeSeg::readFromJson(QJsonObject &json)
 {    
-    AGeoShape::readFromJson(json);
-
     dz = json["dz"].toDouble();
     rminL = json["rminL"].toDouble();
     rmaxL = json["rmaxL"].toDouble();
@@ -2336,19 +2311,15 @@ double AGeoParaboloid::maxSize()
     return sqrt(3.0)*m;
 }
 
-void AGeoParaboloid::writeToJson(QJsonObject &json) const
+void AGeoParaboloid::writeToJson(QJsonObject &json)
 {
-    AGeoShape::writeToJson(json);
-
     json["rlo"] = rlo;
     json["rhi"] = rhi;
     json["dz"] = dz;
 }
 
-void AGeoParaboloid::readFromJson(const QJsonObject &json)
+void AGeoParaboloid::readFromJson(QJsonObject &json)
 {
-    AGeoShape::readFromJson(json);
-
     rlo = json["rlo"].toDouble();
     rhi = json["rhi"].toDouble();
     dz = json["dz"].toDouble();
@@ -2427,10 +2398,8 @@ double AGeoCone::maxSize()
     return sqrt(3.0)*m;
 }
 
-void AGeoCone::writeToJson(QJsonObject &json) const
+void AGeoCone::writeToJson(QJsonObject &json)
 {
-    AGeoShape::writeToJson(json);
-
     json["dz"] = dz;
     json["rminL"] = rminL;
     json["rmaxL"] = rmaxL;
@@ -2438,10 +2407,8 @@ void AGeoCone::writeToJson(QJsonObject &json) const
     json["rmaxU"] = rmaxU;
 }
 
-void AGeoCone::readFromJson(const QJsonObject &json)
+void AGeoCone::readFromJson(QJsonObject &json)
 {
-    AGeoShape::readFromJson(json);
-
     dz = json["dz"].toDouble();
     rminL = json["rminL"].toDouble();
     rmaxL = json["rmaxL"].toDouble();
@@ -3195,8 +3162,9 @@ bool AGeoScaledShape::readFromString(QString GenerationString)
   return true;
 }
 
-TGeoShape* AGeoScaledShape::generateBaseTGeoShape(QString BaseShapeGenerationString)
+TGeoShape* AGeoScaledShape::generateBaseTGeoShape(const QString & BaseShapeGenerationString) const
 {
+  //  qDebug() << "Generating base shape from "<< BaseShapeGenerationString;
   QString shapeType = BaseShapeGenerationString.left(BaseShapeGenerationString.indexOf('('));
   TGeoShape* Tshape = 0;
   AGeoShape* Ashape = AGeoObject::GeoShapeFactory(shapeType);

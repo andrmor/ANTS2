@@ -103,13 +103,13 @@ class AMonitorDelegateForm;
 class QHBoxLayout;
 class AGeoShape;
 
-class AGeoWidget : public QWidget
+class AGeoWidget : public QWidget  // ***!!! can get rid of the Widget here?
 {
   Q_OBJECT
 
 public:
   AGeoWidget(AGeoObject* World, AGeoTreeWidget* tw);
-  //destructor does not delete Widget - it is handled by layout
+  //destructor does not delete Widget - it is handled by the layout
 
 private:
   AGeoObject* World;
@@ -391,6 +391,45 @@ public slots:
     virtual void Update(const AGeoObject * obj) override;
 
 protected slots:
+    void onLocalParameterChange() override;
+};
+
+class AGeoTrapXDelegate : public AGeoObjectDelegate
+{
+    Q_OBJECT
+
+public:
+    AGeoTrapXDelegate(const QStringList & materials, QWidget * parent);
+
+    QLineEdit * exl = nullptr;
+    QLineEdit * exu = nullptr;
+    QLineEdit * ey = nullptr;
+    QLineEdit * ez = nullptr;
+
+public slots:
+    virtual void Update(const AGeoObject * obj) override;
+
+private slots:
+    void onLocalParameterChange() override;
+};
+
+class AGeoTrapXYDelegate : public AGeoObjectDelegate
+{
+    Q_OBJECT
+
+public:
+    AGeoTrapXYDelegate(const QStringList & materials, QWidget * parent);
+
+    QLineEdit * exl = nullptr;
+    QLineEdit * exu = nullptr;
+    QLineEdit * eyl = nullptr;
+    QLineEdit * eyu = nullptr;
+    QLineEdit * ez  = nullptr;
+
+public slots:
+    virtual void Update(const AGeoObject * obj) override;
+
+private slots:
     void onLocalParameterChange() override;
 };
 

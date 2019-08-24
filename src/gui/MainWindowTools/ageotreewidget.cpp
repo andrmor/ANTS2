@@ -1390,6 +1390,10 @@ AGeoObjectDelegate* AGeoWidget::createAndAddGeoObjectDelegate(AGeoObject* obj, Q
         Del = new AGeoParaDelegate(tw->Sandwich->Materials, parent);
     else if (obj->Shape->getShapeType() == "TGeoSphere")
         Del = new AGeoSphereDelegate(tw->Sandwich->Materials, parent);
+    else if (obj->Shape->getShapeType() == "TGeoTrd1")
+        Del = new AGeoTrapXDelegate(tw->Sandwich->Materials, parent);
+    else if (obj->Shape->getShapeType() == "TGeoTrd2")
+        Del = new AGeoTrapXYDelegate(tw->Sandwich->Materials, parent);
     else if (obj->Shape->getShapeType() == "TGeoCone")
         Del = new AGeoConeDelegate(tw->Sandwich->Materials, parent);
     else
@@ -2237,7 +2241,8 @@ void AGeoObjectDelegate::onChangeShapePressed()
     d->setWindowTitle("Select new shape");
 
     QStringList list;
-    list << "Box" << "Tube" << "Tube segment" << "Tube segment cut" << "Elliptical tube" << "Parallelepiped" << "Sphere" << "Cone";
+    list << "Box" << "Tube" << "Tube segment" << "Tube segment cut" << "Elliptical tube"
+         << "Parallelepiped" << "Sphere" << "Trapezoid simplified" << "Trapezoid" << "Cone";
 
     QVBoxLayout * l = new QVBoxLayout(d);
         QListWidget * w = new QListWidget();
@@ -2250,14 +2255,16 @@ void AGeoObjectDelegate::onChangeShapePressed()
             QObject::connect(pbAccept, &QPushButton::clicked, [this, d, w]()
             {
                 const QString sel = w->currentItem()->text();
-                if      (sel == "Box")              emit RequestChangeShape(new AGeoBox());
-                else if (sel == "Parallelepiped")   emit RequestChangeShape(new AGeoPara());
-                else if (sel == "Tube")             emit RequestChangeShape(new AGeoTube());
-                else if (sel == "Tube segment")     emit RequestChangeShape(new AGeoTubeSeg());
-                else if (sel == "Tube segment cut") emit RequestChangeShape(new AGeoCtub());
-                else if (sel == "Elliptical tube")  emit RequestChangeShape(new AGeoEltu());
-                else if (sel == "Sphere")           emit RequestChangeShape(new AGeoSphere());
-                else if (sel == "Cone")             emit RequestChangeShape(new AGeoCone());
+                if      (sel == "Box")                  emit RequestChangeShape(new AGeoBox());
+                else if (sel == "Parallelepiped")       emit RequestChangeShape(new AGeoPara());
+                else if (sel == "Tube")                 emit RequestChangeShape(new AGeoTube());
+                else if (sel == "Tube segment")         emit RequestChangeShape(new AGeoTubeSeg());
+                else if (sel == "Tube segment cut")     emit RequestChangeShape(new AGeoCtub());
+                else if (sel == "Elliptical tube")      emit RequestChangeShape(new AGeoEltu());
+                else if (sel == "Sphere")               emit RequestChangeShape(new AGeoSphere());
+                else if (sel == "Trapezoid simplified") emit RequestChangeShape(new AGeoTrd1());
+                else if (sel == "Trapezoid")            emit RequestChangeShape(new AGeoTrd2());
+                else if (sel == "Cone")                 emit RequestChangeShape(new AGeoCone());
                 else qDebug() << "Unknown shape!";
                 d->accept();
             });
@@ -2653,9 +2660,9 @@ AGeoBoxDelegate::AGeoBoxDelegate(const QStringList &materials, QWidget *parent)
     gr->setContentsMargins(50, 0, 50, 3);
     gr->setVerticalSpacing(1);
 
-    gr->addWidget(new QLabel("Size in X:"), 0, 0);
-    gr->addWidget(new QLabel("Size in Y:"), 1, 0);
-    gr->addWidget(new QLabel("Size in Z:"), 2, 0);
+    gr->addWidget(new QLabel("X full size:"), 0, 0);
+    gr->addWidget(new QLabel("Y full size:"), 1, 0);
+    gr->addWidget(new QLabel("Z full size:"), 2, 0);
 
     ex = new QLineEdit(); gr->addWidget(ex, 0, 1);
     ey = new QLineEdit(); gr->addWidget(ey, 1, 1);
@@ -2743,8 +2750,8 @@ AGeoTubeSegDelegate::AGeoTubeSegDelegate(const QStringList & materials, QWidget 
     DelegateTypeName = "Tube segment";
     pteShape->setVisible(false);
 
-    gr->addWidget(new QLabel("Phi1:"), 3, 0);
-    gr->addWidget(new QLabel("Phi2:"), 4, 0);
+    gr->addWidget(new QLabel("Phi from:"), 3, 0);
+    gr->addWidget(new QLabel("Phi to:"), 4, 0);
 
     ep1 = new QLineEdit(); gr->addWidget(ep1, 3, 1);
     ep2 = new QLineEdit(); gr->addWidget(ep2, 4, 1);
@@ -2843,9 +2850,9 @@ AGeoParaDelegate::AGeoParaDelegate(const QStringList & materials, QWidget *paren
     gr->setContentsMargins(50, 0, 50, 3);
     gr->setVerticalSpacing(1);
 
-    gr->addWidget(new QLabel("Size in X:"), 0, 0);
-    gr->addWidget(new QLabel("Size in Y:"), 1, 0);
-    gr->addWidget(new QLabel("Size in Z:"), 2, 0);
+    gr->addWidget(new QLabel("X full size:"), 0, 0);
+    gr->addWidget(new QLabel("Y full size:"), 1, 0);
+    gr->addWidget(new QLabel("Z full size:"), 2, 0);
     gr->addWidget(new QLabel("Alpha:"),     3, 0);
     gr->addWidget(new QLabel("Theta:"),     4, 0);
     gr->addWidget(new QLabel("Phi:"),       5, 0);
@@ -3022,9 +3029,9 @@ AGeoElTubeDelegate::AGeoElTubeDelegate(const QStringList &materials, QWidget *pa
     gr->setContentsMargins(50, 0, 50, 3);
     gr->setVerticalSpacing(1);
 
-    gr->addWidget(new QLabel("Size in X:"), 0, 0);
-    gr->addWidget(new QLabel("Size in Y:"), 1, 0);
-    gr->addWidget(new QLabel("Height:"), 2,0);
+    gr->addWidget(new QLabel("X full size:"), 0, 0);
+    gr->addWidget(new QLabel("Y full size:"), 1, 0);
+    gr->addWidget(new QLabel("Height:"),    2, 0);
 
     ex = new QLineEdit(); gr->addWidget(ex, 0, 1);
     ey = new QLineEdit(); gr->addWidget(ey, 1, 1);
@@ -3057,4 +3064,114 @@ void AGeoElTubeDelegate::Update(const AGeoObject *obj)
 void AGeoElTubeDelegate::onLocalParameterChange()
 {
     updatePteShape(QString("TGeoEltu( %1, %2, %3 )").arg(0.5*ex->text().toDouble()).arg(0.5*ey->text().toDouble()).arg(0.5*ez->text().toDouble()) );
+}
+
+AGeoTrapXDelegate::AGeoTrapXDelegate(const QStringList &materials, QWidget *parent)
+    : AGeoObjectDelegate(materials, parent)
+{
+    DelegateTypeName = "Trapezoid simplified";
+    pteShape->setVisible(false);
+
+    QGridLayout * gr = new QGridLayout();
+    gr->setContentsMargins(50, 0, 50, 3);
+    gr->setVerticalSpacing(1);
+
+    gr->addWidget(new QLabel("X lower size:"), 0, 0);
+    gr->addWidget(new QLabel("X upper size:"), 1, 0);
+    gr->addWidget(new QLabel("Y size:"),       2, 0);
+    gr->addWidget(new QLabel("Height:"),       3, 0);
+
+    exl = new QLineEdit(); gr->addWidget(exl, 0, 1);
+    exu = new QLineEdit(); gr->addWidget(exu, 1, 1);
+    ey  = new QLineEdit(); gr->addWidget(ey,  2, 1);
+    ez  = new QLineEdit(); gr->addWidget(ez,  3, 1);
+
+    gr->addWidget(new QLabel("mm"), 0, 2);
+    gr->addWidget(new QLabel("mm"), 1, 2);
+    gr->addWidget(new QLabel("mm"), 2, 2);
+    gr->addWidget(new QLabel("mm"), 3, 2);
+
+    addLocalLayout(gr);
+
+    QVector<QLineEdit*> l = {exl, exu, ey, ez};
+    for (QLineEdit * le : l)
+        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoTrapXDelegate::onLocalParameterChange);
+}
+
+void AGeoTrapXDelegate::Update(const AGeoObject *obj)
+{
+    AGeoObjectDelegate::Update(obj);
+
+    AGeoTrd1 * trap = dynamic_cast<AGeoTrd1*>(obj->Shape);
+    if (trap)
+    {
+        exl->setText(QString::number(trap->dx1 * 2.0));
+        exu->setText(QString::number(trap->dx2 * 2.0));
+        ey-> setText(QString::number(trap->dy  * 2.0));
+        ez-> setText(QString::number(trap->dz  * 2.0));
+    }
+}
+
+void AGeoTrapXDelegate::onLocalParameterChange()
+{
+    updatePteShape(QString("TGeoTrd1( %1, %2, %3, %4 )")
+                   .arg(0.5*exl->text().toDouble()).arg(0.5*exu->text().toDouble())
+                   .arg(0.5* ey->text().toDouble()).arg(0.5* ez->text().toDouble()) );
+}
+
+AGeoTrapXYDelegate::AGeoTrapXYDelegate(const QStringList &materials, QWidget *parent)
+    : AGeoObjectDelegate(materials, parent)
+{
+    DelegateTypeName = "Trapezoid";
+    pteShape->setVisible(false);
+
+    QGridLayout * gr = new QGridLayout();
+    gr->setContentsMargins(50, 0, 50, 3);
+    gr->setVerticalSpacing(1);
+
+    gr->addWidget(new QLabel("X lower size:"), 0, 0);
+    gr->addWidget(new QLabel("X upper size:"), 1, 0);
+    gr->addWidget(new QLabel("Y lower size:"), 2, 0);
+    gr->addWidget(new QLabel("Y upper size:"), 3, 0);
+    gr->addWidget(new QLabel("Height:"),       4, 0);
+
+    exl = new QLineEdit(); gr->addWidget(exl, 0, 1);
+    exu = new QLineEdit(); gr->addWidget(exu, 1, 1);
+    eyl = new QLineEdit(); gr->addWidget(eyl, 2, 1);
+    eyu = new QLineEdit(); gr->addWidget(eyu, 3, 1);
+    ez  = new QLineEdit(); gr->addWidget(ez,  4, 1);
+
+    gr->addWidget(new QLabel("mm"), 0, 2);
+    gr->addWidget(new QLabel("mm"), 1, 2);
+    gr->addWidget(new QLabel("mm"), 2, 2);
+    gr->addWidget(new QLabel("mm"), 3, 2);
+    gr->addWidget(new QLabel("mm"), 4, 2);
+
+    addLocalLayout(gr);
+
+    QVector<QLineEdit*> l = {exl, exu, eyl, eyu, ez};
+    for (QLineEdit * le : l)
+        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoTrapXYDelegate::onLocalParameterChange);
+}
+
+void AGeoTrapXYDelegate::Update(const AGeoObject *obj)
+{
+    AGeoObjectDelegate::Update(obj);
+
+    AGeoTrd2 * trap = dynamic_cast<AGeoTrd2*>(obj->Shape);
+    if (trap)
+    {
+        exl->setText(QString::number(trap->dx1 * 2.0));
+        exu->setText(QString::number(trap->dx2 * 2.0));
+        eyl->setText(QString::number(trap->dy1 * 2.0));
+        eyu->setText(QString::number(trap->dy2 * 2.0));
+        ez-> setText(QString::number(trap->dz  * 2.0));
+    }
+}
+
+void AGeoTrapXYDelegate::onLocalParameterChange()
+{
+    updatePteShape(QString("TGeoTrd2( %1, %2, %3, %4, %5)")
+                   .arg(0.5*exl->text().toDouble()).arg(0.5*exu->text().toDouble())
+                   .arg(0.5*eyl->text().toDouble()).arg(0.5*eyu->text().toDouble()).arg(0.5*ez->text().toDouble()) );
 }

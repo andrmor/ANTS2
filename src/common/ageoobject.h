@@ -385,7 +385,7 @@ public:
   AGeoConeSeg(double dz, double rminL, double rmaxL, double rminU, double rmaxU, double phi1, double phi2) :
     dz(dz), rminL(rminL), rmaxL(rmaxL), rminU(rminU), rmaxU(rmaxU), phi1(phi1), phi2(phi2) {}
   AGeoConeSeg() :
-    dz(10), rminL(0), rmaxL(20), rminU(0), rmaxU(20), phi1(0), phi2(360) {}
+    dz(10), rminL(0), rmaxL(20), rminU(0), rmaxU(5), phi1(0), phi2(180) {}
   virtual ~AGeoConeSeg() {}
 
   virtual const QString getShapeType() {return "TGeoConeSeg";}

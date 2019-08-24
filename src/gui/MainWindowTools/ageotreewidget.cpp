@@ -1396,6 +1396,8 @@ AGeoObjectDelegate* AGeoWidget::createAndAddGeoObjectDelegate(AGeoObject* obj, Q
         Del = new AGeoTrapXYDelegate(tw->Sandwich->Materials, parent);
     else if (obj->Shape->getShapeType() == "TGeoCone")
         Del = new AGeoConeDelegate(tw->Sandwich->Materials, parent);
+    else if (obj->Shape->getShapeType() == "TGeoConeSeg")
+        Del = new AGeoConeSegDelegate(tw->Sandwich->Materials, parent);
     else
         Del = new AGeoObjectDelegate(tw->Sandwich->Materials, parent);
 
@@ -2242,7 +2244,8 @@ void AGeoObjectDelegate::onChangeShapePressed()
 
     QStringList list;
     list << "Box" << "Tube" << "Tube segment" << "Tube segment cut" << "Elliptical tube"
-         << "Parallelepiped" << "Sphere" << "Trapezoid simplified" << "Trapezoid" << "Cone";
+         << "Parallelepiped" << "Sphere" << "Trapezoid simplified" << "Trapezoid"
+         << "Cone" << "Cone segment";
 
     QVBoxLayout * l = new QVBoxLayout(d);
         QListWidget * w = new QListWidget();
@@ -2265,6 +2268,7 @@ void AGeoObjectDelegate::onChangeShapePressed()
                 else if (sel == "Trapezoid simplified") emit RequestChangeShape(new AGeoTrd1());
                 else if (sel == "Trapezoid")            emit RequestChangeShape(new AGeoTrd2());
                 else if (sel == "Cone")                 emit RequestChangeShape(new AGeoCone());
+                else if (sel == "Cone segment")         emit RequestChangeShape(new AGeoConeSeg());
                 else qDebug() << "Unknown shape!";
                 d->accept();
             });
@@ -2967,7 +2971,7 @@ AGeoConeDelegate::AGeoConeDelegate(const QStringList &materials, QWidget *parent
     DelegateTypeName = "Cone";
     pteShape->setVisible(false);
 
-    QGridLayout * gr = new QGridLayout();
+    gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);
     gr->setVerticalSpacing(1);
 
@@ -3017,6 +3021,52 @@ void AGeoConeDelegate::onLocalParameterChange()
                    .arg(0.5*ez->text().toDouble())
                    .arg(0.5*eli->text().toDouble()).arg(0.5*elo->text().toDouble())
                    .arg(0.5*eui->text().toDouble()).arg(0.5*euo->text().toDouble()) );
+}
+
+AGeoConeSegDelegate::AGeoConeSegDelegate(const QStringList &materials, QWidget *parent)
+    : AGeoConeDelegate(materials, parent)
+{
+    DelegateTypeName = "Cone segment";
+    pteShape->setVisible(false);
+
+    gr->addWidget(new QLabel("Phi from:"), 5, 0);
+    gr->addWidget(new QLabel("Phi to:"),   6, 0);
+
+    ep1 = new QLineEdit(); gr->addWidget(ep1, 5, 1);
+    ep2 = new QLineEdit(); gr->addWidget(ep2, 6, 1);
+
+    gr->addWidget(new QLabel("°"), 5, 2);
+    gr->addWidget(new QLabel("°"), 6, 2);
+
+    QVector<QLineEdit*> l = {ep1, ep2};
+    for (QLineEdit * le : l)
+        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoConeSegDelegate::onLocalParameterChange);
+}
+
+void AGeoConeSegDelegate::Update(const AGeoObject *obj)
+{
+    AGeoObjectDelegate::Update(obj);
+
+    AGeoConeSeg * cone = dynamic_cast<AGeoConeSeg*>(obj->Shape);
+    if (cone)
+    {
+        ez ->setText(QString::number(cone->dz*2.0));
+        eli->setText(QString::number(cone->rminL*2.0));
+        elo->setText(QString::number(cone->rmaxL*2.0));
+        eui->setText(QString::number(cone->rminU*2.0));
+        euo->setText(QString::number(cone->rmaxU*2.0));
+        ep1->setText(QString::number(cone->phi1));
+        ep2->setText(QString::number(cone->phi2));
+    }
+}
+
+void AGeoConeSegDelegate::onLocalParameterChange()
+{
+    updatePteShape(QString("TGeoConeSeg( %1, %2, %3, %4, %5, %6, %7 )")
+                   .arg(0.5*ez->text().toDouble())
+                   .arg(0.5*eli->text().toDouble()).arg(0.5*elo->text().toDouble())
+                   .arg(0.5*eui->text().toDouble()).arg(0.5*euo->text().toDouble())
+                   .arg(ep1->text()).arg(ep2->text()) );
 }
 
 AGeoElTubeDelegate::AGeoElTubeDelegate(const QStringList &materials, QWidget *parent)
@@ -3175,3 +3225,5 @@ void AGeoTrapXYDelegate::onLocalParameterChange()
                    .arg(0.5*exl->text().toDouble()).arg(0.5*exu->text().toDouble())
                    .arg(0.5*eyl->text().toDouble()).arg(0.5*eyu->text().toDouble()).arg(0.5*ez->text().toDouble()) );
 }
+
+

@@ -387,6 +387,26 @@ public:
     QLineEdit * eui = nullptr;
     QLineEdit * euo = nullptr;
 
+protected:
+    QGridLayout * gr = nullptr;
+
+public slots:
+    virtual void Update(const AGeoObject * obj) override;
+
+protected slots:
+    void onLocalParameterChange() override;
+};
+
+class AGeoConeSegDelegate : public AGeoConeDelegate
+{
+    Q_OBJECT
+
+public:
+    AGeoConeSegDelegate(const QStringList & materials, QWidget * parent);
+
+    QLineEdit * ep1 = nullptr;
+    QLineEdit * ep2 = nullptr;
+
 public slots:
     virtual void Update(const AGeoObject * obj) override;
 

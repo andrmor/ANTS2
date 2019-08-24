@@ -1398,6 +1398,10 @@ AGeoObjectDelegate* AGeoWidget::createAndAddGeoObjectDelegate(AGeoObject* obj, Q
         Del = new AGeoConeDelegate(tw->Sandwich->Materials, parent);
     else if (obj->Shape->getShapeType() == "TGeoConeSeg")
         Del = new AGeoConeSegDelegate(tw->Sandwich->Materials, parent);
+    else if (obj->Shape->getShapeType() == "TGeoParaboloid")
+        Del = new AGeoParaboloidDelegate(tw->Sandwich->Materials, parent);
+    else if (obj->Shape->getShapeType() == "TGeoTorus")
+        Del = new AGeoTorusDelegate(tw->Sandwich->Materials, parent);
     else
         Del = new AGeoObjectDelegate(tw->Sandwich->Materials, parent);
 
@@ -2245,7 +2249,7 @@ void AGeoObjectDelegate::onChangeShapePressed()
     QStringList list;
     list << "Box" << "Tube" << "Tube segment" << "Tube segment cut" << "Elliptical tube"
          << "Parallelepiped" << "Sphere" << "Trapezoid simplified" << "Trapezoid"
-         << "Cone" << "Cone segment";
+         << "Cone" << "Cone segment" << "Paraboloid" << "Torus";
 
     QVBoxLayout * l = new QVBoxLayout(d);
         QListWidget * w = new QListWidget();
@@ -2269,6 +2273,8 @@ void AGeoObjectDelegate::onChangeShapePressed()
                 else if (sel == "Trapezoid")            emit RequestChangeShape(new AGeoTrd2());
                 else if (sel == "Cone")                 emit RequestChangeShape(new AGeoCone());
                 else if (sel == "Cone segment")         emit RequestChangeShape(new AGeoConeSeg());
+                else if (sel == "Paraboloid")           emit RequestChangeShape(new AGeoParaboloid());
+                else if (sel == "Torus")                emit RequestChangeShape(new AGeoTorus());
                 else qDebug() << "Unknown shape!";
                 d->accept();
             });
@@ -3226,4 +3232,112 @@ void AGeoTrapXYDelegate::onLocalParameterChange()
                    .arg(0.5*eyl->text().toDouble()).arg(0.5*eyu->text().toDouble()).arg(0.5*ez->text().toDouble()) );
 }
 
+AGeoParaboloidDelegate::AGeoParaboloidDelegate(const QStringList &materials, QWidget *parent)
+    : AGeoObjectDelegate(materials, parent)
+{
+    DelegateTypeName = "Paraboloid";
+    pteShape->setVisible(false);
 
+    QGridLayout * gr = new QGridLayout();
+    gr->setContentsMargins(50, 0, 50, 3);
+    gr->setVerticalSpacing(1);
+
+    gr->addWidget(new QLabel("Lower diameter:"), 0, 0);
+    gr->addWidget(new QLabel("Upper diameter:"), 1, 0);
+    gr->addWidget(new QLabel("Height:"),         2, 0);
+
+    el = new QLineEdit(); gr->addWidget(el, 0, 1);
+    eu = new QLineEdit(); gr->addWidget(eu, 1, 1);
+    ez = new QLineEdit(); gr->addWidget(ez, 2, 1);
+
+    gr->addWidget(new QLabel("mm"), 0, 2);
+    gr->addWidget(new QLabel("mm"), 1, 2);
+    gr->addWidget(new QLabel("mm"), 2, 2);
+
+    addLocalLayout(gr);
+
+    QVector<QLineEdit*> l = {el, eu, ez};
+    for (QLineEdit * le : l)
+        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoParaboloidDelegate::onLocalParameterChange);
+}
+
+void AGeoParaboloidDelegate::Update(const AGeoObject *obj)
+{
+    AGeoObjectDelegate::Update(obj);
+
+    AGeoParaboloid * para = dynamic_cast<AGeoParaboloid*>(obj->Shape);
+    if (para)
+    {
+        el->setText(QString::number(para->rlo * 2.0));
+        eu->setText(QString::number(para->rhi * 2.0));
+        ez->setText(QString::number(para->dz  * 2.0));
+    }
+}
+
+void AGeoParaboloidDelegate::onLocalParameterChange()
+{
+    updatePteShape(QString("TGeoParaboloid( %1, %2, %3)")
+                   .arg(0.5*el->text().toDouble())
+                   .arg(0.5*eu->text().toDouble())
+                   .arg(0.5*ez->text().toDouble()) );
+}
+
+AGeoTorusDelegate::AGeoTorusDelegate(const QStringList &materials, QWidget *parent)
+    : AGeoObjectDelegate(materials, parent)
+{
+    DelegateTypeName = "Paraboloid";
+    pteShape->setVisible(false);
+
+    QGridLayout * gr = new QGridLayout();
+    gr->setContentsMargins(50, 0, 50, 3);
+    gr->setVerticalSpacing(1);
+
+    gr->addWidget(new QLabel("Axial diameter:"), 0, 0);
+    gr->addWidget(new QLabel("Outer diameter:"), 1, 0);
+    gr->addWidget(new QLabel("Inner diameter:"), 2, 0);
+    gr->addWidget(new QLabel("Phi from:"),       3, 0);
+    gr->addWidget(new QLabel("Phi to:"),         4, 0);
+
+    ead = new QLineEdit(); gr->addWidget(ead, 0, 1);
+    edo = new QLineEdit(); gr->addWidget(edo, 1, 1);
+    edi = new QLineEdit(); gr->addWidget(edi, 2, 1);
+    ep0 = new QLineEdit(); gr->addWidget(ep0, 3, 1);
+    epe= new QLineEdit();  gr->addWidget(epe, 4, 1);
+
+    gr->addWidget(new QLabel("mm"), 0, 2);
+    gr->addWidget(new QLabel("mm"), 1, 2);
+    gr->addWidget(new QLabel("mm"), 2, 2);
+    gr->addWidget(new QLabel("°"),  3, 2);
+    gr->addWidget(new QLabel("°"),  4, 2);
+
+    addLocalLayout(gr);
+
+    QVector<QLineEdit*> l = {ead, edi, edo, ep0, epe};
+    for (QLineEdit * le : l)
+        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoTorusDelegate::onLocalParameterChange);
+}
+
+void AGeoTorusDelegate::Update(const AGeoObject *obj)
+{
+    AGeoObjectDelegate::Update(obj);
+
+    AGeoTorus * tor = dynamic_cast<AGeoTorus*>(obj->Shape);
+    if (tor)
+    {
+        ead->setText(QString::number(tor->R    * 2.0));
+        edi->setText(QString::number(tor->Rmin * 2.0));
+        edo->setText(QString::number(tor->Rmax * 2.0));
+        ep0->setText(QString::number(tor->Phi1));
+        epe->setText(QString::number(tor->Dphi));
+    }
+}
+
+void AGeoTorusDelegate::onLocalParameterChange()
+{
+    updatePteShape(QString("TGeoTorus( %1, %2, %3, %4, %5)")
+                   .arg(0.5*ead->text().toDouble())
+                   .arg(0.5*edi->text().toDouble())
+                   .arg(0.5*edo->text().toDouble())
+                   .arg(ep0->text())
+                   .arg(epe->text()) );
+}

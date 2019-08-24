@@ -933,9 +933,9 @@ public:
 
   virtual bool readFromTShape(TGeoShape* Tshape);
 
-  double R;
-  double Rmin, Rmax;
-  double Phi1, Dphi;
+  double R = 100.0;
+  double Rmin = 0, Rmax = 20.0;
+  double Phi1 = 0, Dphi = 360.0;
 };
 
 #endif // AGEOOBJECT_H

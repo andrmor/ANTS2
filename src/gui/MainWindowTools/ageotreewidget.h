@@ -453,6 +453,44 @@ private slots:
     void onLocalParameterChange() override;
 };
 
+class AGeoParaboloidDelegate : public AGeoObjectDelegate
+{
+    Q_OBJECT
+
+public:
+    AGeoParaboloidDelegate(const QStringList & materials, QWidget * parent);
+
+    QLineEdit * el = nullptr;
+    QLineEdit * eu = nullptr;
+    QLineEdit * ez = nullptr;
+
+public slots:
+    virtual void Update(const AGeoObject * obj) override;
+
+private slots:
+    void onLocalParameterChange() override;
+};
+
+class AGeoTorusDelegate : public AGeoObjectDelegate
+{
+    Q_OBJECT
+
+public:
+    AGeoTorusDelegate(const QStringList & materials, QWidget * parent);
+
+    QLineEdit * ead = nullptr;
+    QLineEdit * edi = nullptr;
+    QLineEdit * edo = nullptr;
+    QLineEdit * ep0 = nullptr;
+    QLineEdit * epe = nullptr;
+
+public slots:
+    virtual void Update(const AGeoObject * obj) override;
+
+private slots:
+    void onLocalParameterChange() override;
+};
+
 // ---------------- Grid delegate ----------------
 
 class AGridElementDelegate : public QWidget

@@ -320,6 +320,12 @@ class AGeoShape
 public:
   AGeoShape() {}
   virtual ~AGeoShape() {}
+
+  bool bScale = false;
+  double ScaleX = 1.0;
+  double ScaleY = 1.0;
+  double ScaleZ = 1.0;
+
   virtual bool readFromString(QString /*GenerationString*/) {return false;}
 
   //general: the same for all objects of the given shape
@@ -336,8 +342,8 @@ public:
   virtual double minSize() {return 0;} //for monitors only!
 
   //json
-  virtual void writeToJson(QJsonObject& /*json*/) {}
-  virtual void readFromJson(QJsonObject& /*json*/) {}
+  virtual void writeToJson(QJsonObject & json) const;
+  virtual void readFromJson(const QJsonObject & json);
 
   //from Tshape if geometry was loaded from GDML
   virtual bool readFromTShape(TGeoShape* /*Tshape*/) {return false;}
@@ -370,8 +376,8 @@ public:
   virtual const QString getGenerationString() const;
   virtual double maxSize();
 
-  virtual void writeToJson(QJsonObject& json);
-  virtual void readFromJson(QJsonObject& json);
+  virtual void writeToJson(QJsonObject& json) const;
+  virtual void readFromJson(const QJsonObject& json);
 
   virtual bool readFromTShape(TGeoShape* Tshape);
 
@@ -400,8 +406,8 @@ public:
   virtual const QString getGenerationString() const;
   virtual double maxSize();
 
-  virtual void writeToJson(QJsonObject& json);
-  virtual void readFromJson(QJsonObject& json);
+  virtual void writeToJson(QJsonObject& json) const;
+  virtual void readFromJson(const QJsonObject& json);
 
   virtual bool readFromTShape(TGeoShape *Tshape);
 
@@ -433,8 +439,8 @@ public:
   virtual const QString getGenerationString() const;
   virtual double maxSize();
 
-  virtual void writeToJson(QJsonObject& json);
-  virtual void readFromJson(QJsonObject& json);
+  virtual void writeToJson(QJsonObject& json) const;
+  virtual void readFromJson(const QJsonObject& json);
 
   virtual bool readFromTShape(TGeoShape* Tshape);
 
@@ -895,6 +901,8 @@ public:
   //virtual void setHeight(double /*dz*/) {}
   virtual const QString getGenerationString() const;
   virtual double maxSize() {return 0;}  //***!!!
+
+  const QString getBaseShapeType() const;
 
   virtual void writeToJson(QJsonObject& json);
   virtual void readFromJson(QJsonObject& json);

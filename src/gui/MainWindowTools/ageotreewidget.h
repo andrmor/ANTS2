@@ -102,6 +102,7 @@ class TVector3;
 class AMonitorDelegateForm;
 class QHBoxLayout;
 class AGeoShape;
+class QCheckBox;
 
 class AGeoWidget : public QWidget  // ***!!! can get rid of the Widget here?
 {
@@ -197,6 +198,12 @@ public:
 private:
     QVBoxLayout * lMF = nullptr;      //main layout
 
+    QWidget * scaleWidget = nullptr;
+    QCheckBox * cbScale = nullptr;
+    QLineEdit * ledScaleX = nullptr;
+    QLineEdit * ledScaleY = nullptr;
+    QLineEdit * ledScaleZ = nullptr;
+
     QPushButton * pbShapeInfo = nullptr;
 
     QPushButton * pbShow = nullptr;
@@ -220,7 +227,7 @@ private slots:
     void onChangeShapePressed();
 
 protected slots:
-    virtual void onLocalParameterChange() {}
+    virtual void onLocalShapeParameterChange() {}
 
 protected:
     void addLocalLayout(QLayout * lay);
@@ -249,7 +256,7 @@ public slots:
     virtual void Update(const AGeoObject * obj) override;
 
 private slots:
-    void onLocalParameterChange() override;
+    void onLocalShapeParameterChange() override;
 };
 
 class AGeoTubeDelegate : public AGeoObjectDelegate
@@ -270,7 +277,7 @@ public slots:
     virtual void Update(const AGeoObject * obj) override;
 
 private slots:
-    void onLocalParameterChange() override;
+    void onLocalShapeParameterChange() override;
 };
 
 class AGeoTubeSegDelegate : public AGeoTubeDelegate
@@ -287,7 +294,7 @@ public slots:
     virtual void Update(const AGeoObject * obj) override;
 
 private slots:
-    void onLocalParameterChange() override;
+    void onLocalShapeParameterChange() override;
 };
 
 class AGeoTubeSegCutDelegate : public AGeoTubeSegDelegate
@@ -308,7 +315,7 @@ public slots:
     virtual void Update(const AGeoObject * obj) override;
 
 private slots:
-    void onLocalParameterChange() override;
+    void onLocalShapeParameterChange() override;
 };
 
 class AGeoElTubeDelegate : public AGeoObjectDelegate
@@ -329,7 +336,7 @@ public slots:
     virtual void Update(const AGeoObject * obj) override;
 
 private slots:
-    void onLocalParameterChange() override;
+    void onLocalShapeParameterChange() override;
 };
 
 class AGeoParaDelegate : public AGeoObjectDelegate
@@ -350,7 +357,7 @@ public slots:
     virtual void Update(const AGeoObject * obj) override;
 
 private slots:
-    void onLocalParameterChange() override;
+    void onLocalShapeParameterChange() override;
 };
 
 class AGeoSphereDelegate : public AGeoObjectDelegate
@@ -371,7 +378,7 @@ public slots:
     virtual void Update(const AGeoObject * obj) override;
 
 private slots:
-    void onLocalParameterChange() override;
+    void onLocalShapeParameterChange() override;
 };
 
 class AGeoConeDelegate : public AGeoObjectDelegate
@@ -394,7 +401,7 @@ public slots:
     virtual void Update(const AGeoObject * obj) override;
 
 protected slots:
-    void onLocalParameterChange() override;
+    void onLocalShapeParameterChange() override;
 };
 
 class AGeoConeSegDelegate : public AGeoConeDelegate
@@ -411,7 +418,7 @@ public slots:
     virtual void Update(const AGeoObject * obj) override;
 
 protected slots:
-    void onLocalParameterChange() override;
+    void onLocalShapeParameterChange() override;
 };
 
 class AGeoTrapXDelegate : public AGeoObjectDelegate
@@ -430,7 +437,7 @@ public slots:
     virtual void Update(const AGeoObject * obj) override;
 
 private slots:
-    void onLocalParameterChange() override;
+    void onLocalShapeParameterChange() override;
 };
 
 class AGeoTrapXYDelegate : public AGeoObjectDelegate
@@ -450,7 +457,7 @@ public slots:
     virtual void Update(const AGeoObject * obj) override;
 
 private slots:
-    void onLocalParameterChange() override;
+    void onLocalShapeParameterChange() override;
 };
 
 class AGeoParaboloidDelegate : public AGeoObjectDelegate
@@ -468,7 +475,7 @@ public slots:
     virtual void Update(const AGeoObject * obj) override;
 
 private slots:
-    void onLocalParameterChange() override;
+    void onLocalShapeParameterChange() override;
 };
 
 class AGeoTorusDelegate : public AGeoObjectDelegate
@@ -488,7 +495,7 @@ public slots:
     virtual void Update(const AGeoObject * obj) override;
 
 private slots:
-    void onLocalParameterChange() override;
+    void onLocalShapeParameterChange() override;
 };
 
 class AGeoPolygonDelegate : public AGeoObjectDelegate
@@ -510,7 +517,7 @@ public slots:
     virtual void Update(const AGeoObject * obj) override;
 
 private slots:
-    void onLocalParameterChange() override;
+    void onLocalShapeParameterChange() override;
 };
 
 // ---------------- Grid delegate ----------------

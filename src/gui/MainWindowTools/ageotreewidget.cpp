@@ -1376,33 +1376,37 @@ void AGeoWidget::UpdateGui()
 AGeoObjectDelegate* AGeoWidget::createAndAddGeoObjectDelegate(AGeoObject* obj, QWidget * parent)
 {
     AGeoObjectDelegate * Del;
-    if (obj->Shape->getShapeType() == "TGeoBBox")
+
+    AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(obj->Shape);
+    const QString shape = (scaled ? scaled->getBaseShapeType() : obj->Shape->getShapeType());
+
+    if (shape == "TGeoBBox")
         Del = new AGeoBoxDelegate(tw->Sandwich->Materials, parent);
-    else if (obj->Shape->getShapeType() == "TGeoTube")
+    else if (shape == "TGeoTube")
         Del = new AGeoTubeDelegate(tw->Sandwich->Materials, parent);
-    else if (obj->Shape->getShapeType() == "TGeoTubeSeg")
+    else if (shape == "TGeoTubeSeg")
         Del = new AGeoTubeSegDelegate(tw->Sandwich->Materials, parent);
-    else if (obj->Shape->getShapeType() == "TGeoCtub")
+    else if (shape == "TGeoCtub")
         Del = new AGeoTubeSegCutDelegate(tw->Sandwich->Materials, parent);
-    else if (obj->Shape->getShapeType() == "TGeoEltu")
+    else if (shape == "TGeoEltu")
         Del = new AGeoElTubeDelegate(tw->Sandwich->Materials, parent);
-    else if (obj->Shape->getShapeType() == "TGeoPara")
+    else if (shape == "TGeoPara")
         Del = new AGeoParaDelegate(tw->Sandwich->Materials, parent);
-    else if (obj->Shape->getShapeType() == "TGeoSphere")
+    else if (shape == "TGeoSphere")
         Del = new AGeoSphereDelegate(tw->Sandwich->Materials, parent);
-    else if (obj->Shape->getShapeType() == "TGeoTrd1")
+    else if (shape == "TGeoTrd1")
         Del = new AGeoTrapXDelegate(tw->Sandwich->Materials, parent);
-    else if (obj->Shape->getShapeType() == "TGeoTrd2")
+    else if (shape == "TGeoTrd2")
         Del = new AGeoTrapXYDelegate(tw->Sandwich->Materials, parent);
-    else if (obj->Shape->getShapeType() == "TGeoCone")
+    else if (shape == "TGeoCone")
         Del = new AGeoConeDelegate(tw->Sandwich->Materials, parent);
-    else if (obj->Shape->getShapeType() == "TGeoConeSeg")
+    else if (shape == "TGeoConeSeg")
         Del = new AGeoConeSegDelegate(tw->Sandwich->Materials, parent);
-    else if (obj->Shape->getShapeType() == "TGeoParaboloid")
+    else if (shape == "TGeoParaboloid")
         Del = new AGeoParaboloidDelegate(tw->Sandwich->Materials, parent);
-    else if (obj->Shape->getShapeType() == "TGeoTorus")
+    else if (shape == "TGeoTorus")
         Del = new AGeoTorusDelegate(tw->Sandwich->Materials, parent);
-    else if (obj->Shape->getShapeType() == "TGeoPolygon")
+    else if (shape == "TGeoPolygon")
         Del = new AGeoPolygonDelegate(tw->Sandwich->Materials, parent);
     else
         Del = new AGeoObjectDelegate(tw->Sandwich->Materials, parent);
@@ -2119,6 +2123,35 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
       h2->addWidget(ArrayWid);
     lMF->addLayout(h2);
 
+    //scale widget
+    QHBoxLayout * hbs = new QHBoxLayout();
+    hbs->setContentsMargins(2,0,2,0);
+        hbs->addStretch();
+        cbScale = new QCheckBox("Apply scaling factors");
+        connect(cbScale, &QCheckBox::clicked, this, &AGeoObjectDelegate::onLocalShapeParameterChange);
+        connect(cbScale, &QCheckBox::clicked, this, &AGeoObjectDelegate::onContentChanged);
+        hbs->addWidget(cbScale);
+    scaleWidget = new QWidget();
+        QHBoxLayout * hbsw = new QHBoxLayout(scaleWidget);
+        hbsw->setContentsMargins(2,0,2,0);
+        hbsw->addWidget(new QLabel("in X:"));
+        ledScaleX = new QLineEdit("1.0"); hbsw->addWidget(ledScaleX);
+        connect(ledScaleX, &QLineEdit::textChanged, this, &AGeoObjectDelegate::onLocalShapeParameterChange);
+        connect(ledScaleX, &QLineEdit::textChanged, this, &AGeoObjectDelegate::onContentChanged);
+        hbsw->addWidget(new QLabel("in Y:"));
+        ledScaleY = new QLineEdit("1.0"); hbsw->addWidget(ledScaleY);
+        connect(ledScaleY, &QLineEdit::textChanged, this, &AGeoObjectDelegate::onLocalShapeParameterChange);
+        connect(ledScaleY, &QLineEdit::textChanged, this, &AGeoObjectDelegate::onContentChanged);
+        hbsw->addWidget(new QLabel("in Z:"));
+        ledScaleZ = new QLineEdit("1.0"); hbsw->addWidget(ledScaleZ);
+        connect(ledScaleZ, &QLineEdit::textChanged, this, &AGeoObjectDelegate::onLocalShapeParameterChange);
+        connect(ledScaleZ, &QLineEdit::textChanged, this, &AGeoObjectDelegate::onContentChanged);
+    hbs->addWidget(scaleWidget);
+    hbs->addStretch();
+    lMF->addLayout(hbs);
+    scaleWidget->setVisible(false);
+    QObject::connect(cbScale, &QCheckBox::toggled, scaleWidget, &QWidget::setVisible);
+
     // Transform block
     QHBoxLayout * lht = new QHBoxLayout();
         QPushButton * pbTransform = new QPushButton("Transform to ...");
@@ -2306,7 +2339,13 @@ void AGeoObjectDelegate::addLocalLayout(QLayout * lay)
 void AGeoObjectDelegate::updatePteShape(const QString & text)
 {
     pteShape->clear();
-    pteShape->appendPlainText(text);
+
+    QString str = text;
+    if (cbScale->isChecked())
+        str = QString("TGeoScaledShape( %1, %2, %3, %4 )").arg(text).arg(ledScaleX->text()).arg(ledScaleY->text()).arg(ledScaleZ->text());
+    else str = text;
+
+    pteShape->appendPlainText(str);
     pbShapeInfo->setToolTip(pteShape->document()->toPlainText());
 }
 
@@ -2416,6 +2455,15 @@ void AGeoObjectDelegate::Update(const AGeoObject *obj)
       pbScriptLine->setVisible(false);
   }
   labType->setText(DelegateTypeName);
+
+  AGeoScaledShape * scaledShape = dynamic_cast<AGeoScaledShape*>(CurrentObject->Shape);
+  cbScale->setChecked(scaledShape);
+  if (scaledShape)
+  {
+      ledScaleX->setText(QString::number(scaledShape->scaleX));
+      ledScaleY->setText(QString::number(scaledShape->scaleY));
+      ledScaleZ->setText(QString::number(scaledShape->scaleZ));
+  }
 }
 
 void AGeoObjectDelegate::onContentChanged()
@@ -2689,7 +2737,7 @@ AGeoBoxDelegate::AGeoBoxDelegate(const QStringList &materials, QWidget *parent)
 
     QVector<QLineEdit*> l = {ex, ey, ez};
     for (QLineEdit * le : l)
-        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoBoxDelegate::onLocalParameterChange);
+        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoBoxDelegate::onLocalShapeParameterChange);
 }
 
 void AGeoBoxDelegate::Update(const AGeoObject *obj)
@@ -2705,7 +2753,7 @@ void AGeoBoxDelegate::Update(const AGeoObject *obj)
     }
 }
 
-void AGeoBoxDelegate::onLocalParameterChange()
+void AGeoBoxDelegate::onLocalShapeParameterChange()
 {
     updatePteShape(QString("TGeoBBox( %1, %2, %3 )").arg(0.5*ex->text().toDouble()).arg(0.5*ey->text().toDouble()).arg(0.5*ez->text().toDouble()));
 }
@@ -2736,7 +2784,7 @@ AGeoTubeDelegate::AGeoTubeDelegate(const QStringList & materials, QWidget *paren
 
     QVector<QLineEdit*> l = {eo, ei, ez};
     for (QLineEdit * le : l)
-        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoTubeDelegate::onLocalParameterChange);
+        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoTubeDelegate::onLocalShapeParameterChange);
 }
 
 void AGeoTubeDelegate::Update(const AGeoObject *obj)
@@ -2752,7 +2800,7 @@ void AGeoTubeDelegate::Update(const AGeoObject *obj)
     }
 }
 
-void AGeoTubeDelegate::onLocalParameterChange()
+void AGeoTubeDelegate::onLocalShapeParameterChange()
 {
     updatePteShape(QString("TGeoTube( %1, %2, %3 )").arg(0.5*ei->text().toDouble()).arg(0.5*eo->text().toDouble()).arg(0.5*ez->text().toDouble()));
 }
@@ -2774,7 +2822,7 @@ AGeoTubeSegDelegate::AGeoTubeSegDelegate(const QStringList & materials, QWidget 
 
     QVector<QLineEdit*> l = {ep1, ep2};
     for (QLineEdit * le : l)
-        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoTubeSegDelegate::onLocalParameterChange);
+        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoTubeSegDelegate::onLocalShapeParameterChange);
 }
 
 void AGeoTubeSegDelegate::Update(const AGeoObject *obj)
@@ -2792,7 +2840,7 @@ void AGeoTubeSegDelegate::Update(const AGeoObject *obj)
     }
 }
 
-void AGeoTubeSegDelegate::onLocalParameterChange()
+void AGeoTubeSegDelegate::onLocalShapeParameterChange()
 {
     updatePteShape(QString("TGeoTubeSeg( %1, %2, %3, %4, %5 )").arg(0.5*ei->text().toDouble()).arg(0.5*eo->text().toDouble()).arg(0.5*ez->text().toDouble())
                                                                .arg(ep1->text()).arg(ep2->text()) );
@@ -2820,7 +2868,7 @@ AGeoTubeSegCutDelegate::AGeoTubeSegCutDelegate(const QStringList &materials, QWi
 
     QVector<QLineEdit*> l = {elnx, elny, elnz, eunx, euny, eunz};
     for (QLineEdit * le : l)
-        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoTubeSegCutDelegate::onLocalParameterChange);
+        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoTubeSegCutDelegate::onLocalShapeParameterChange);
 }
 
 void AGeoTubeSegCutDelegate::Update(const AGeoObject *obj)
@@ -2844,7 +2892,7 @@ void AGeoTubeSegCutDelegate::Update(const AGeoObject *obj)
     }
 }
 
-void AGeoTubeSegCutDelegate::onLocalParameterChange()
+void AGeoTubeSegCutDelegate::onLocalShapeParameterChange()
 {
     updatePteShape(QString("TGeoCtub( %1, %2, %3, %4, %5, %6, %7, %8, %9, %10, %11 )")
                               .arg(0.5*ei->text().toDouble()).arg(0.5*eo->text().toDouble()).arg(0.5*ez->text().toDouble())
@@ -2888,7 +2936,7 @@ AGeoParaDelegate::AGeoParaDelegate(const QStringList & materials, QWidget *paren
 
     QVector<QLineEdit*> l = {ex, ey, ez, ea, et, ep};
     for (QLineEdit * le : l)
-        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoParaDelegate::onLocalParameterChange);
+        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoParaDelegate::onLocalShapeParameterChange);
 }
 
 void AGeoParaDelegate::Update(const AGeoObject *obj)
@@ -2907,7 +2955,7 @@ void AGeoParaDelegate::Update(const AGeoObject *obj)
     }
 }
 
-void AGeoParaDelegate::onLocalParameterChange()
+void AGeoParaDelegate::onLocalShapeParameterChange()
 {
     updatePteShape(QString("TGeoPara( %1, %2, %3, %4, %5, %6 )").arg(0.5*ex->text().toDouble()).arg(0.5*ey->text().toDouble()).arg(0.5*ez->text().toDouble())
                                                                 .arg(ea->text()).arg(et->text()).arg(ep->text())  );
@@ -2948,7 +2996,7 @@ AGeoSphereDelegate::AGeoSphereDelegate(const QStringList & materials, QWidget *p
 
     QVector<QLineEdit*> l = {eod, eid, et1, et2, ep1, ep2};
     for (QLineEdit * le : l)
-        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoSphereDelegate::onLocalParameterChange);
+        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoSphereDelegate::onLocalShapeParameterChange);
 }
 
 void AGeoSphereDelegate::Update(const AGeoObject *obj)
@@ -2967,7 +3015,7 @@ void AGeoSphereDelegate::Update(const AGeoObject *obj)
     }
 }
 
-void AGeoSphereDelegate::onLocalParameterChange()
+void AGeoSphereDelegate::onLocalShapeParameterChange()
 {
     updatePteShape(QString("TGeoSphere( %1, %2, %3, %4, %5, %6 )").arg(0.5*eid->text().toDouble()).arg(0.5*eod->text().toDouble())
                                                                   .arg(et1->text()).arg(et2->text())
@@ -3006,7 +3054,7 @@ AGeoConeDelegate::AGeoConeDelegate(const QStringList &materials, QWidget *parent
 
     QVector<QLineEdit*> l = {ez, eli, elo, eui, euo};
     for (QLineEdit * le : l)
-        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoConeDelegate::onLocalParameterChange);
+        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoConeDelegate::onLocalShapeParameterChange);
 }
 
 void AGeoConeDelegate::Update(const AGeoObject *obj)
@@ -3024,7 +3072,7 @@ void AGeoConeDelegate::Update(const AGeoObject *obj)
     }
 }
 
-void AGeoConeDelegate::onLocalParameterChange()
+void AGeoConeDelegate::onLocalShapeParameterChange()
 {
     updatePteShape(QString("TGeoCone( %1, %2, %3, %4, %5 )")
                    .arg(0.5*ez->text().toDouble())
@@ -3049,7 +3097,7 @@ AGeoConeSegDelegate::AGeoConeSegDelegate(const QStringList &materials, QWidget *
 
     QVector<QLineEdit*> l = {ep1, ep2};
     for (QLineEdit * le : l)
-        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoConeSegDelegate::onLocalParameterChange);
+        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoConeSegDelegate::onLocalShapeParameterChange);
 }
 
 void AGeoConeSegDelegate::Update(const AGeoObject *obj)
@@ -3069,7 +3117,7 @@ void AGeoConeSegDelegate::Update(const AGeoObject *obj)
     }
 }
 
-void AGeoConeSegDelegate::onLocalParameterChange()
+void AGeoConeSegDelegate::onLocalShapeParameterChange()
 {
     updatePteShape(QString("TGeoConeSeg( %1, %2, %3, %4, %5, %6, %7 )")
                    .arg(0.5*ez->text().toDouble())
@@ -3104,7 +3152,7 @@ AGeoElTubeDelegate::AGeoElTubeDelegate(const QStringList &materials, QWidget *pa
 
     QVector<QLineEdit*> l = {ex, ey, ez};
     for (QLineEdit * le : l)
-        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoElTubeDelegate::onLocalParameterChange);
+        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoElTubeDelegate::onLocalShapeParameterChange);
 }
 
 void AGeoElTubeDelegate::Update(const AGeoObject *obj)
@@ -3120,7 +3168,7 @@ void AGeoElTubeDelegate::Update(const AGeoObject *obj)
     }
 }
 
-void AGeoElTubeDelegate::onLocalParameterChange()
+void AGeoElTubeDelegate::onLocalShapeParameterChange()
 {
     updatePteShape(QString("TGeoEltu( %1, %2, %3 )").arg(0.5*ex->text().toDouble()).arg(0.5*ey->text().toDouble()).arg(0.5*ez->text().toDouble()) );
 }
@@ -3154,7 +3202,7 @@ AGeoTrapXDelegate::AGeoTrapXDelegate(const QStringList &materials, QWidget *pare
 
     QVector<QLineEdit*> l = {exl, exu, ey, ez};
     for (QLineEdit * le : l)
-        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoTrapXDelegate::onLocalParameterChange);
+        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoTrapXDelegate::onLocalShapeParameterChange);
 }
 
 void AGeoTrapXDelegate::Update(const AGeoObject *obj)
@@ -3171,7 +3219,7 @@ void AGeoTrapXDelegate::Update(const AGeoObject *obj)
     }
 }
 
-void AGeoTrapXDelegate::onLocalParameterChange()
+void AGeoTrapXDelegate::onLocalShapeParameterChange()
 {
     updatePteShape(QString("TGeoTrd1( %1, %2, %3, %4 )")
                    .arg(0.5*exl->text().toDouble()).arg(0.5*exu->text().toDouble())
@@ -3210,7 +3258,7 @@ AGeoTrapXYDelegate::AGeoTrapXYDelegate(const QStringList &materials, QWidget *pa
 
     QVector<QLineEdit*> l = {exl, exu, eyl, eyu, ez};
     for (QLineEdit * le : l)
-        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoTrapXYDelegate::onLocalParameterChange);
+        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoTrapXYDelegate::onLocalShapeParameterChange);
 }
 
 void AGeoTrapXYDelegate::Update(const AGeoObject *obj)
@@ -3228,7 +3276,7 @@ void AGeoTrapXYDelegate::Update(const AGeoObject *obj)
     }
 }
 
-void AGeoTrapXYDelegate::onLocalParameterChange()
+void AGeoTrapXYDelegate::onLocalShapeParameterChange()
 {
     updatePteShape(QString("TGeoTrd2( %1, %2, %3, %4, %5)")
                    .arg(0.5*exl->text().toDouble()).arg(0.5*exu->text().toDouble())
@@ -3261,7 +3309,7 @@ AGeoParaboloidDelegate::AGeoParaboloidDelegate(const QStringList &materials, QWi
 
     QVector<QLineEdit*> l = {el, eu, ez};
     for (QLineEdit * le : l)
-        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoParaboloidDelegate::onLocalParameterChange);
+        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoParaboloidDelegate::onLocalShapeParameterChange);
 }
 
 void AGeoParaboloidDelegate::Update(const AGeoObject *obj)
@@ -3277,7 +3325,7 @@ void AGeoParaboloidDelegate::Update(const AGeoObject *obj)
     }
 }
 
-void AGeoParaboloidDelegate::onLocalParameterChange()
+void AGeoParaboloidDelegate::onLocalShapeParameterChange()
 {
     updatePteShape(QString("TGeoParaboloid( %1, %2, %3)")
                    .arg(0.5*el->text().toDouble())
@@ -3317,7 +3365,7 @@ AGeoTorusDelegate::AGeoTorusDelegate(const QStringList &materials, QWidget *pare
 
     QVector<QLineEdit*> l = {ead, edi, edo, ep0, epe};
     for (QLineEdit * le : l)
-        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoTorusDelegate::onLocalParameterChange);
+        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoTorusDelegate::onLocalShapeParameterChange);
 }
 
 void AGeoTorusDelegate::Update(const AGeoObject *obj)
@@ -3335,7 +3383,7 @@ void AGeoTorusDelegate::Update(const AGeoObject *obj)
     }
 }
 
-void AGeoTorusDelegate::onLocalParameterChange()
+void AGeoTorusDelegate::onLocalShapeParameterChange()
 {
     updatePteShape(QString("TGeoTorus( %1, %2, %3, %4, %5)")
                    .arg(0.5*ead->text().toDouble())
@@ -3380,10 +3428,10 @@ AGeoPolygonDelegate::AGeoPolygonDelegate(const QStringList &materials, QWidget *
 
     addLocalLayout(gr);
 
-    QObject::connect(sbn, SIGNAL(valueChanged(int)), this, SLOT(onLocalParameterChange()));
+    QObject::connect(sbn, SIGNAL(valueChanged(int)), this, SLOT(onLocalShapeParameterChange()));
     QVector<QLineEdit*> l = {edp, ez, eli, elo, eui, euo};
     for (QLineEdit * le : l)
-        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoPolygonDelegate::onLocalParameterChange);
+        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoPolygonDelegate::onLocalShapeParameterChange);
 }
 
 void AGeoPolygonDelegate::Update(const AGeoObject *obj)
@@ -3403,7 +3451,7 @@ void AGeoPolygonDelegate::Update(const AGeoObject *obj)
     }
 }
 
-void AGeoPolygonDelegate::onLocalParameterChange()
+void AGeoPolygonDelegate::onLocalShapeParameterChange()
 {
     updatePteShape(QString("TGeoPolygon( %1, %2, %3, %4, %5, %6, %7 )")
                    .arg(sbn->value())

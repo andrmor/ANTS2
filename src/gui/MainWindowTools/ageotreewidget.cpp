@@ -1402,6 +1402,8 @@ AGeoObjectDelegate* AGeoWidget::createAndAddGeoObjectDelegate(AGeoObject* obj, Q
         Del = new AGeoParaboloidDelegate(tw->Sandwich->Materials, parent);
     else if (obj->Shape->getShapeType() == "TGeoTorus")
         Del = new AGeoTorusDelegate(tw->Sandwich->Materials, parent);
+    else if (obj->Shape->getShapeType() == "TGeoPolygon")
+        Del = new AGeoPolygonDelegate(tw->Sandwich->Materials, parent);
     else
         Del = new AGeoObjectDelegate(tw->Sandwich->Materials, parent);
 
@@ -2249,7 +2251,7 @@ void AGeoObjectDelegate::onChangeShapePressed()
     QStringList list;
     list << "Box" << "Tube" << "Tube segment" << "Tube segment cut" << "Elliptical tube"
          << "Parallelepiped" << "Sphere" << "Trapezoid simplified" << "Trapezoid"
-         << "Cone" << "Cone segment" << "Paraboloid" << "Torus";
+         << "Cone" << "Cone segment" << "Paraboloid" << "Torus" << "Polygon simplified";
 
     QVBoxLayout * l = new QVBoxLayout(d);
         QListWidget * w = new QListWidget();
@@ -2275,6 +2277,7 @@ void AGeoObjectDelegate::onChangeShapePressed()
                 else if (sel == "Cone segment")         emit RequestChangeShape(new AGeoConeSeg());
                 else if (sel == "Paraboloid")           emit RequestChangeShape(new AGeoParaboloid());
                 else if (sel == "Torus")                emit RequestChangeShape(new AGeoTorus());
+                else if (sel == "Polygon simplified")   emit RequestChangeShape(new AGeoPolygon());
                 else qDebug() << "Unknown shape!";
                 d->accept();
             });
@@ -3340,4 +3343,74 @@ void AGeoTorusDelegate::onLocalParameterChange()
                    .arg(0.5*edo->text().toDouble())
                    .arg(ep0->text())
                    .arg(epe->text()) );
+}
+
+AGeoPolygonDelegate::AGeoPolygonDelegate(const QStringList &materials, QWidget *parent)
+    : AGeoObjectDelegate(materials, parent)
+{
+    DelegateTypeName = "Polygon (simplified)";
+    pteShape->setVisible(false);
+
+    QGridLayout * gr = new QGridLayout();
+    gr->setContentsMargins(50, 0, 50, 3);
+    gr->setVerticalSpacing(1);
+
+    gr->addWidget(new QLabel("Number of edges:"),      0, 0);
+    gr->addWidget(new QLabel("Height:"),               1, 0);
+    gr->addWidget(new QLabel("Lower inner diameter:"), 2, 0);
+    gr->addWidget(new QLabel("Lower outer diameter:"), 3, 0);
+    gr->addWidget(new QLabel("Upper inner diameter:"), 4, 0);
+    gr->addWidget(new QLabel("Upper outer diameter:"), 5, 0);
+    gr->addWidget(new QLabel("Angle:"),                6, 0);
+
+    sbn = new QSpinBox();  gr->addWidget(sbn, 0, 1); sbn->setMinimum(3);
+    ez  = new QLineEdit(); gr->addWidget(ez,  1, 1);
+    elo = new QLineEdit(); gr->addWidget(elo, 2, 1);
+    eli = new QLineEdit(); gr->addWidget(eli, 3, 1);
+    euo = new QLineEdit(); gr->addWidget(euo, 4, 1);
+    eui = new QLineEdit(); gr->addWidget(eui, 5, 1);
+    edp = new QLineEdit(); gr->addWidget(edp, 6, 1);
+
+    gr->addWidget(new QLabel("mm"), 1, 2);
+    gr->addWidget(new QLabel("mm"), 2, 2);
+    gr->addWidget(new QLabel("mm"), 3, 2);
+    gr->addWidget(new QLabel("mm"), 4, 2);
+    gr->addWidget(new QLabel("mm"), 5, 2);
+    gr->addWidget(new QLabel("°"),  5, 2);
+
+    addLocalLayout(gr);
+
+    QObject::connect(sbn, SIGNAL(valueChanged(int)), this, SLOT(onLocalParameterChange()));
+    QVector<QLineEdit*> l = {edp, ez, eli, elo, eui, euo};
+    for (QLineEdit * le : l)
+        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoPolygonDelegate::onLocalParameterChange);
+}
+
+void AGeoPolygonDelegate::Update(const AGeoObject *obj)
+{
+    AGeoObjectDelegate::Update(obj);
+
+    AGeoPolygon * pgon = dynamic_cast<AGeoPolygon*>(obj->Shape);
+    if (pgon)
+    {
+        sbn->setValue(pgon->nedges);
+        edp->setText(QString::number(pgon->dphi));
+        ez-> setText(QString::number(pgon->dz    * 2.0));
+        eli->setText(QString::number(pgon->rminL * 2.0));
+        elo->setText(QString::number(pgon->rmaxL * 2.0));
+        eui->setText(QString::number(pgon->rminU * 2.0));
+        euo->setText(QString::number(pgon->rmaxU * 2.0));
+    }
+}
+
+void AGeoPolygonDelegate::onLocalParameterChange()
+{
+    updatePteShape(QString("TGeoPolygon( %1, %2, %3, %4, %5, %6, %7 )")
+                   .arg(sbn->value())
+                   .arg(edp->text())
+                   .arg(0.5*ez->text().toDouble())
+                   .arg(0.5*eli->text().toDouble())
+                   .arg(0.5*elo->text().toDouble())
+                   .arg(0.5*eui->text().toDouble())
+                   .arg(0.5*euo->text().toDouble()) );
 }

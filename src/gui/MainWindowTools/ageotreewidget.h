@@ -491,6 +491,28 @@ private slots:
     void onLocalParameterChange() override;
 };
 
+class AGeoPolygonDelegate : public AGeoObjectDelegate
+{
+    Q_OBJECT
+
+public:
+    AGeoPolygonDelegate(const QStringList & materials, QWidget * parent);
+
+    QSpinBox  * sbn = nullptr;
+    QLineEdit * edp = nullptr;
+    QLineEdit * ez  = nullptr;
+    QLineEdit * elo = nullptr;
+    QLineEdit * eli = nullptr;
+    QLineEdit * euo = nullptr;
+    QLineEdit * eui = nullptr;
+
+public slots:
+    virtual void Update(const AGeoObject * obj) override;
+
+private slots:
+    void onLocalParameterChange() override;
+};
+
 // ---------------- Grid delegate ----------------
 
 class AGridElementDelegate : public QWidget

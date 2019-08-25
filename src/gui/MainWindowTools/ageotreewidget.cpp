@@ -1414,6 +1414,8 @@ AGeoObjectDelegate* AGeoWidget::createAndAddGeoObjectDelegate(AGeoObject* obj, Q
         Del = new AGeoPgonDelegate(tw->Sandwich->Materials, parent);
     else if (shape == "TGeoCompositeShape")
         Del = new AGeoCompositeDelegate(tw->Sandwich->Materials, parent);
+    else if (shape == "TGeoArb8")
+        Del = new AGeoArb8Delegate(tw->Sandwich->Materials, parent);
     else
         Del = new AGeoObjectDelegate(tw->Sandwich->Materials, parent);
 
@@ -2292,7 +2294,7 @@ void AGeoObjectDelegate::onChangeShapePressed()
     list << "Box" << "Tube" << "Tube segment" << "Tube segment cut" << "Elliptical tube"
          << "Parallelepiped" << "Sphere" << "Trapezoid simplified" << "Trapezoid"
          << "Cone" << "Cone segment" << "Paraboloid" << "Torus" << "Polygon simplified"
-         << "Polycone" << "Polygon";
+         << "Polycone" << "Polygon" << "Arb8";
 
     QVBoxLayout * l = new QVBoxLayout(d);
         QListWidget * w = new QListWidget();
@@ -2321,6 +2323,7 @@ void AGeoObjectDelegate::onChangeShapePressed()
                 else if (sel == "Polycone")             emit RequestChangeShape(new AGeoPcon());
                 else if (sel == "Polygon simplified")   emit RequestChangeShape(new AGeoPolygon());
                 else if (sel == "Polygon")              emit RequestChangeShape(new AGeoPgon());
+                else if (sel == "Arb8")                 emit RequestChangeShape(new AGeoArb8());
                 else qDebug() << "Unknown shape!";
                 d->accept();
             });
@@ -2353,7 +2356,6 @@ void AGeoObjectDelegate::updatePteShape(const QString & text)
     QString str = text;
     if (cbScale->isChecked())
         str = QString("TGeoScaledShape( %1, %2, %3, %4 )").arg(text).arg(ledScaleX->text()).arg(ledScaleY->text()).arg(ledScaleZ->text());
-    else str = text;
 
     pteShape->appendPlainText(str);
     pbShapeInfo->setToolTip(pteShape->document()->toPlainText());
@@ -3764,4 +3766,90 @@ void AGeoCompositeDelegate::Update(const AGeoObject *obj)
 void AGeoCompositeDelegate::onLocalShapeParameterChange()
 {
     updatePteShape(QString("TGeoCompositeShape( %1 )").arg(te->document()->toPlainText()));
+}
+
+AGeoArb8Delegate::AGeoArb8Delegate(const QStringList &materials, QWidget *parent)
+    : AGeoObjectDelegate(materials, parent)
+{
+    DelegateTypeName = "Arb8";
+    //pteShape->setVisible(false);
+
+    QVBoxLayout * v = new QVBoxLayout();
+    v->setContentsMargins(50, 0, 50, 0);
+    v->setSpacing(3);
+    QGridLayout * gr = new QGridLayout();
+        gr->setContentsMargins(0, 0, 0, 0);
+        gr->addWidget(new QLabel("Height:"), 0, 0);
+        ez = new QLineEdit(); gr->addWidget(ez,  0, 1);
+        connect(ez, &QLineEdit::textChanged, this, &AGeoArb8Delegate::onLocalShapeParameterChange);
+        gr->addWidget(new QLabel("mm"), 0, 2);
+    v->addLayout(gr);
+
+    ve.clear();
+    for (int iul = 0; iul < 2; iul++)
+    {
+        v->addWidget(new QLabel(iul == 0 ? "Lower plane (positions clockwise!):" : "Upper plane (positions clockwise!):"));
+
+        QVector<AEditEdit> tmpV(4);
+
+        QGridLayout * gri = new QGridLayout();
+        gri->setContentsMargins(0, 0, 0, 0);
+        gri->setVerticalSpacing(3);
+
+        for (int i=0; i < 4; i++)
+        {
+            gri->addWidget(new QLabel("  x:"),    i, 0);
+            tmpV[i].X = new QLineEdit("");
+            connect(tmpV[i].X, &QLineEdit::textChanged, this, &AGeoArb8Delegate::onLocalShapeParameterChange);
+            gri->addWidget(tmpV[i].X,             i, 1);
+            gri->addWidget(new QLabel("mm   y:"), i, 2);
+            tmpV[i].Y = new QLineEdit("");
+            connect(tmpV[i].Y, &QLineEdit::textChanged, this, &AGeoArb8Delegate::onLocalShapeParameterChange);
+            gri->addWidget(tmpV[i].Y,             i, 3);
+            gri->addWidget(new QLabel("mm"),      i, 4);
+        }
+        ve.push_back(tmpV);
+        v->addLayout(gri);
+    }
+    addLocalLayout(v);
+}
+
+void AGeoArb8Delegate::Update(const AGeoObject *obj)
+{
+    AGeoObjectDelegate::Update(obj);
+
+    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
+    const AGeoArb8 * arb = dynamic_cast<const AGeoArb8 *>(tmpShape ? tmpShape : obj->Shape);
+    if (arb)
+    {
+        ez->setText(QString::number(2.0 * arb->dz));
+
+        for (int iul = 0; iul < 2; iul++)
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                const int iInVert = iul * 4 + i;
+                const QPair<double, double> & V = arb->Vertices.at(iInVert);
+                AEditEdit & CEE = ve[iul][i];
+                CEE.X->setText(QString::number(V.first));
+                CEE.Y->setText(QString::number(V.second));
+            }
+        }
+    }
+    delete tmpShape;
+}
+
+void AGeoArb8Delegate::onLocalShapeParameterChange()
+{
+    QString s = QString("TGeoArb8( %1").arg(0.5 * ez->text().toDouble());
+    for (int iul = 0; iul < 2; iul++)
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            AEditEdit & CEE = ve[iul][i];
+            s += QString(", %1,%2").arg(CEE.X->text()).arg(CEE.Y->text());
+        }
+    }
+    s += ")";
+    updatePteShape(s);
 }

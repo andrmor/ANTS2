@@ -580,6 +580,30 @@ private slots:
     void onLocalShapeParameterChange() override;
 };
 
+struct AEditEdit
+{
+    QLineEdit * X = nullptr;
+    QLineEdit * Y = nullptr;
+};
+
+class AGeoArb8Delegate : public AGeoObjectDelegate
+{
+    Q_OBJECT
+
+public:
+    AGeoArb8Delegate(const QStringList & materials, QWidget * parent);
+
+    QLineEdit * ez = nullptr;
+    QVector< QVector<AEditEdit> > ve; //[0..1][0..3] - upper/lower, 4 points
+
+public slots:
+    virtual void Update(const AGeoObject * obj) override;
+
+private slots:
+    void onLocalShapeParameterChange() override;
+};
+
+
 // ---------------- Grid delegate ----------------
 
 class AGridElementDelegate : public QWidget

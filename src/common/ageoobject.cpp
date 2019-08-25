@@ -2679,8 +2679,8 @@ bool AGeoArb8::readFromTShape(TGeoShape *Tshape)
 
 void AGeoArb8::init()
 {  
-  Vertices << QPair<double,double>(0,0) << QPair<double,double>(10,0) << QPair<double,double>(15,-15) << QPair<double,double>(0,-5);
-  Vertices << QPair<double,double>(5,0) << QPair<double,double>(10,0) << QPair<double,double>(10,-10) << QPair<double,double>(10,-10);
+  Vertices << QPair<double,double>(-20,20) << QPair<double,double>(20,20) << QPair<double,double>(20,-20) << QPair<double,double>(-20,-20);
+  Vertices << QPair<double,double>(-10,10) << QPair<double,double>(10,10) << QPair<double,double>(10,-10) << QPair<double,double>(10,-10);
 }
 
 ATypeSlabObject::ATypeSlabObject()

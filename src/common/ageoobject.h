@@ -500,7 +500,7 @@ struct APolyCGsection
 class AGeoPcon : public AGeoShape
 {
 public:
-  AGeoPcon() : phi(0), dphi(360) {}
+  AGeoPcon();
   virtual ~AGeoPcon() {}
 
   virtual const QString getShapeType() {return "TGeoPcon";}

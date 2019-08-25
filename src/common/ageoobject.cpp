@@ -2051,6 +2051,7 @@ const QString AGeoPgon::getHelp()
 
 bool AGeoPgon::readFromString(QString GenerationString)
 {
+    Sections.clear();
   QStringList params;
   bool ok = extractParametersFromString(GenerationString, params, -1);
   if (!ok) return false;
@@ -2073,6 +2074,12 @@ bool AGeoPgon::readFromString(QString GenerationString)
       qWarning() << "Syntax error found during extracting parameters of TGeoPgon";
       return false;
     }
+  nedges = params[2].toInt(&ok);
+  if (!ok)
+    {
+      qWarning() << "Syntax error found during extracting parameters of TGeoPgon";
+      return false;
+    }
 
   for (int i=3; i<params.size(); i++)
     {
@@ -2084,8 +2091,27 @@ bool AGeoPgon::readFromString(QString GenerationString)
         }
       Sections << section;
     }
-  //qDebug() << phi<<dphi<<nedges;
-  //for (int i=0; i<Sections.size(); i++) qDebug() << Sections.at(i).toString();
+
+  bool bInc = true;
+  for (int i=1; i<Sections.size(); i++)
+  {
+    if (i == 1)
+        if (Sections.first().z > Sections.at(1).z)
+            bInc = false;
+
+    if (Sections.at(i).z <= Sections.at(i-1).z && bInc)
+    {
+        qWarning() << "Non consistent positions of polygon planes";
+        return false;
+    }
+
+    if (Sections.at(i).z >= Sections.at(i-1).z && !bInc)
+    {
+        qWarning() << "Non consistent positions of polygon planes";
+        return false;
+    }
+  }
+
   return true;
 }
 
@@ -2793,10 +2819,15 @@ ATypeObject *ATypeObject::TypeObjectFactory(const QString Type)
     }
 }
 
+AGeoPcon::AGeoPcon()
+    : phi(0), dphi(360)
+{
+    Sections << APolyCGsection(-5, 10, 20) <<  APolyCGsection(5, 20, 40);
+}
 
 const QString AGeoPcon::getHelp()
 {
-  return "TGeoPcon:\n"
+    return "TGeoPcon:\n"
          "phi - start angle [0, 360)\n"
          "dphi - range in angle (0, 360]\n"
          "{z : rmin : rmax} - arbitrary number of sections defined with z position, minimum and maximum radii";
@@ -2804,6 +2835,8 @@ const QString AGeoPcon::getHelp()
 
 bool AGeoPcon::readFromString(QString GenerationString)
 {
+    Sections.clear();
+
   QStringList params;
   bool ok = extractParametersFromString(GenerationString, params, -1);
   if (!ok) return false;

@@ -521,6 +521,30 @@ private slots:
     void onLocalShapeParameterChange() override;
 };
 
+class QTableWidget;
+class AGeoPgonDelegate : public AGeoObjectDelegate
+{
+    Q_OBJECT
+
+public:
+    AGeoPgonDelegate(const QStringList & materials, QWidget * parent);
+
+    QSpinBox  * sbn = nullptr;
+    QLineEdit * ep0 = nullptr;
+    QLineEdit * epe = nullptr;
+
+    QTableWidget * tab = nullptr;
+
+public slots:
+    virtual void Update(const AGeoObject * obj) override;
+
+private slots:
+    void onLocalShapeParameterChange() override;
+
+private:
+    const int rowHeight = 23;
+};
+
 // ---------------- Grid delegate ----------------
 
 class AGridElementDelegate : public QWidget

@@ -522,18 +522,20 @@ private slots:
 };
 
 class QTableWidget;
-class AGeoPgonDelegate : public AGeoObjectDelegate
+class AGeoPconDelegate : public AGeoObjectDelegate
 {
     Q_OBJECT
 
 public:
-    AGeoPgonDelegate(const QStringList & materials, QWidget * parent);
+    AGeoPconDelegate(const QStringList & materials, QWidget * parent);
 
-    QSpinBox  * sbn = nullptr;
     QLineEdit * ep0 = nullptr;
     QLineEdit * epe = nullptr;
 
     QTableWidget * tab = nullptr;
+
+protected:
+    QVBoxLayout * lay = nullptr;
 
 public slots:
     virtual void Update(const AGeoObject * obj) override;
@@ -541,8 +543,25 @@ public slots:
 private slots:
     void onLocalShapeParameterChange() override;
 
-private:
+protected:
     const int rowHeight = 23;
+};
+
+class AGeoPgonDelegate : public AGeoPconDelegate
+{
+    Q_OBJECT
+
+public:
+    AGeoPgonDelegate(const QStringList & materials, QWidget * parent);
+
+    QSpinBox  * sbn = nullptr;
+
+public slots:
+    virtual void Update(const AGeoObject * obj) override;
+
+private slots:
+    void onLocalShapeParameterChange() override;
+
 };
 
 // ---------------- Grid delegate ----------------

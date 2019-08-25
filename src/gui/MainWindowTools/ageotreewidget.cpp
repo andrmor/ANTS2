@@ -1408,6 +1408,8 @@ AGeoObjectDelegate* AGeoWidget::createAndAddGeoObjectDelegate(AGeoObject* obj, Q
         Del = new AGeoTorusDelegate(tw->Sandwich->Materials, parent);
     else if (shape == "TGeoPolygon")
         Del = new AGeoPolygonDelegate(tw->Sandwich->Materials, parent);
+    else if (shape == "TGeoPcon")
+        Del = new AGeoPconDelegate(tw->Sandwich->Materials, parent);
     else if (shape == "TGeoPgon")
         Del = new AGeoPgonDelegate(tw->Sandwich->Materials, parent);
     else
@@ -2288,7 +2290,7 @@ void AGeoObjectDelegate::onChangeShapePressed()
     list << "Box" << "Tube" << "Tube segment" << "Tube segment cut" << "Elliptical tube"
          << "Parallelepiped" << "Sphere" << "Trapezoid simplified" << "Trapezoid"
          << "Cone" << "Cone segment" << "Paraboloid" << "Torus" << "Polygon simplified"
-         << "Polygon";
+         << "Polycone" << "Polygon";
 
     QVBoxLayout * l = new QVBoxLayout(d);
         QListWidget * w = new QListWidget();
@@ -2314,6 +2316,7 @@ void AGeoObjectDelegate::onChangeShapePressed()
                 else if (sel == "Cone segment")         emit RequestChangeShape(new AGeoConeSeg());
                 else if (sel == "Paraboloid")           emit RequestChangeShape(new AGeoParaboloid());
                 else if (sel == "Torus")                emit RequestChangeShape(new AGeoTorus());
+                else if (sel == "Polycone")             emit RequestChangeShape(new AGeoPcon());
                 else if (sel == "Polygon simplified")   emit RequestChangeShape(new AGeoPolygon());
                 else if (sel == "Polygon")              emit RequestChangeShape(new AGeoPgon());
                 else qDebug() << "Unknown shape!";
@@ -3512,45 +3515,29 @@ void AGeoPolygonDelegate::onLocalShapeParameterChange()
 
 #include <QTableWidget>
 #include <QHeaderView>
-AGeoPgonDelegate::AGeoPgonDelegate(const QStringList &materials, QWidget *parent)
+AGeoPconDelegate::AGeoPconDelegate(const QStringList &materials, QWidget *parent)
     : AGeoObjectDelegate(materials, parent)
 {
-    DelegateTypeName = "Polygon";
-    //pteShape->setVisible(false);
+    DelegateTypeName = "Polycone";
+    pteShape->setVisible(false);
 
-    QVBoxLayout * lay = new QVBoxLayout();
-    lay->setContentsMargins(50, 0, 50, 3);
-    lay->setSpacing(1);
+    lay = new QVBoxLayout();
+    lay->setContentsMargins(50, 0, 50, 0);
+    lay->setSpacing(3);
 
-        QGridLayout * gr = new QGridLayout();
-        gr->setContentsMargins(0, 0, 0, 3);
-        gr->setVerticalSpacing(1);
-
-        gr->addWidget(new QLabel("Edges:"),    0, 0);
-        gr->addWidget(new QLabel("Phi from:"), 1, 0);
-        gr->addWidget(new QLabel("Phi to:"),   2, 0);
-
-        sbn = new QSpinBox();  gr->addWidget(sbn, 0, 1); sbn->setMinimum(3);
-        ep0 = new QLineEdit(); gr->addWidget(ep0, 1, 1);
-        epe = new QLineEdit(); gr->addWidget(epe, 2, 1);
-
-        gr->addWidget(new QLabel("°"),  1, 2);
-        gr->addWidget(new QLabel("°"),  2, 2);
-
-    lay->addLayout(gr);
-
-        lay->addWidget(new QLabel("Defined planes (monotonic in Z!):"));
+    lay->addWidget(new QLabel("Defined planes (should be monotonic in Z):"));
 
         tab = new QTableWidget();
         tab->setColumnCount(3);
-        tab->setHorizontalHeaderLabels(QStringList({"Z position, mm", "Outer size, mm", "Inner size, mm"}));
+        tab->setHorizontalHeaderLabels(QStringList({"Z position, mm", "Outer diameter, mm", "Inner diameter, mm"}));
         tab->setMaximumHeight(150);
         tab->verticalHeader()->setSectionsMovable(true);
-        connect(tab->verticalHeader(), &QHeaderView::sectionMoved, [this](int /*logicalIndex*/, int oldVisualIndex, int newVisualIndex)
+        QObject::connect(tab->verticalHeader(), &QHeaderView::sectionMoved, this, [this](int /*logicalIndex*/, int oldVisualIndex, int newVisualIndex)
         {
             //qDebug() << logicalIndex << oldVisualIndex << newVisualIndex;
             tab->verticalHeader()->blockSignals(true);
-            tab->verticalHeader()->swapSections(oldVisualIndex, newVisualIndex);
+            //tab->verticalHeader()->swapSections(oldVisualIndex, newVisualIndex);
+            tab->verticalHeader()->moveSection(newVisualIndex, oldVisualIndex);
             tab->verticalHeader()->blockSignals(false);
             //swap table rows oldVisualIndex and newVisualIndex
             for (int i=0; i<3; i++)
@@ -3560,8 +3547,8 @@ AGeoPgonDelegate::AGeoPgonDelegate(const QStringList &materials, QWidget *parent
                 tab->setItem(oldVisualIndex, i, to);
                 tab->setItem(newVisualIndex, i, from);
             }
-        });
-        connect(tab, &QTableWidget::cellChanged, this, &AGeoPgonDelegate::onLocalShapeParameterChange);
+        }, Qt::QueuedConnection);
+        connect(tab, &QTableWidget::cellChanged, this, &AGeoPconDelegate::onLocalShapeParameterChange);
 
     lay->addWidget(tab);
 
@@ -3600,32 +3587,45 @@ AGeoPgonDelegate::AGeoPgonDelegate(const QStringList &materials, QWidget *parent
 
     lay->addLayout(hl);
 
+    QGridLayout * gr = new QGridLayout();
+        gr->setContentsMargins(0, 0, 0, 3);
+        gr->setVerticalSpacing(1);
+
+        gr->addWidget(new QLabel("Phi from:"), 0, 0);
+        gr->addWidget(new QLabel("Phi to:"),   1, 0);
+
+        ep0 = new QLineEdit(); gr->addWidget(ep0, 0, 1);
+        epe = new QLineEdit(); gr->addWidget(epe, 1, 1);
+
+        gr->addWidget(new QLabel("°"),  0, 2);
+        gr->addWidget(new QLabel("°"),  1, 2);
+
+    lay->addLayout(gr);
+
     addLocalLayout(lay);
 
-    QObject::connect(sbn, SIGNAL(valueChanged(int)), this, SLOT(onLocalShapeParameterChange()));
     QVector<QLineEdit*> l = {ep0, epe};
     for (QLineEdit * le : l)
-        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoPgonDelegate::onLocalShapeParameterChange);
+        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoPconDelegate::onLocalShapeParameterChange);
 }
 
-void AGeoPgonDelegate::Update(const AGeoObject *obj)
+void AGeoPconDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
 
     const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
-    const AGeoPgon * pgon = dynamic_cast<const AGeoPgon*>(tmpShape ? tmpShape : obj->Shape);
-    if (pgon)
+    const AGeoPcon * pcon = dynamic_cast<const AGeoPcon*>(tmpShape ? tmpShape : obj->Shape);
+    if (pcon)
     {
-        sbn->setValue(pgon->nedges);
-        ep0->setText(QString::number(pgon->phi));
-        epe->setText(QString::number(pgon->dphi));
+        ep0->setText(QString::number(pcon->phi));
+        epe->setText(QString::number(pcon->dphi));
 
         tab->clearContents();
-        const int numPlanes = pgon->Sections.size();
+        const int numPlanes = pcon->Sections.size();
         tab->setRowCount(numPlanes);
         for (int iP = 0; iP < numPlanes; iP++)
         {
-            const APolyCGsection & Section = pgon->Sections.at(iP);
+            const APolyCGsection & Section = pcon->Sections.at(iP);
             QTableWidgetItem * item = new QTableWidgetItem(QString::number(Section.z)); item->setTextAlignment(Qt::AlignCenter);
             tab->setItem(iP, 0, item);
             item = new QTableWidgetItem(QString::number(Section.rmax * 2.0)); item->setTextAlignment(Qt::AlignCenter);
@@ -3635,6 +3635,61 @@ void AGeoPgonDelegate::Update(const AGeoObject *obj)
             tab->setRowHeight(iP, rowHeight);
         }
     }
+    delete tmpShape;
+}
+
+void AGeoPconDelegate::onLocalShapeParameterChange()
+{
+    QString s = QString("TGeoPcon( %1, %2")
+            .arg(ep0->text())
+            .arg(epe->text());
+
+    if (!tab) return;
+    const int rows = tab->rowCount();
+    for (int ir = 0; ir < rows; ir++)
+    {
+        if (!tab->item(ir, 0) || !tab->item(ir, 1) || !tab->item(ir, 2)) continue;
+        s += QString(", { %1 : %2 : %3 }")
+                .arg(tab->item(ir, 0)->text())
+                .arg(0.5*tab->item(ir, 2)->text().toDouble())
+                .arg(0.5*tab->item(ir, 1)->text().toDouble());
+    }
+    s += " )";
+
+    updatePteShape(s);
+}
+
+AGeoPgonDelegate::AGeoPgonDelegate(const QStringList &materials, QWidget *parent)
+    : AGeoPconDelegate(materials, parent)
+{
+    DelegateTypeName = "Polygon";
+
+    QHBoxLayout * h = new QHBoxLayout();
+    h->setContentsMargins(0, 0, 0, 1);
+    h->setSpacing(1);
+    QLabel * lab = new QLabel("Edges:");
+    h->addWidget(lab);
+        sbn = new QSpinBox();
+        sbn->setMinimum(3);
+        sbn->setMaximum(100000);
+    h->addWidget(sbn);
+    h->addStretch();
+
+    lay->insertLayout(0, h);
+
+    tab->setHorizontalHeaderLabels(QStringList({"Z position, mm", "Outer size, mm", "Inner size, mm"}));
+
+    QObject::connect(sbn, SIGNAL(valueChanged(int)), this, SLOT(onLocalShapeParameterChange()));
+}
+
+void AGeoPgonDelegate::Update(const AGeoObject *obj)
+{
+    AGeoPconDelegate::Update(obj);
+
+    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
+    const AGeoPgon * pgon = dynamic_cast<const AGeoPgon*>(tmpShape ? tmpShape : obj->Shape);
+    if (pgon)
+        sbn->setValue(pgon->nedges);
     delete tmpShape;
 }
 

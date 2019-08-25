@@ -1412,6 +1412,8 @@ AGeoObjectDelegate* AGeoWidget::createAndAddGeoObjectDelegate(AGeoObject* obj, Q
         Del = new AGeoPconDelegate(tw->Sandwich->Materials, parent);
     else if (shape == "TGeoPgon")
         Del = new AGeoPgonDelegate(tw->Sandwich->Materials, parent);
+    else if (shape == "TGeoCompositeShape")
+        Del = new AGeoCompositeDelegate(tw->Sandwich->Materials, parent);
     else
         Del = new AGeoObjectDelegate(tw->Sandwich->Materials, parent);
 
@@ -2732,7 +2734,7 @@ AGeoBoxDelegate::AGeoBoxDelegate(const QStringList &materials, QWidget *parent)
     : AGeoObjectDelegate(materials, parent)
 {
     DelegateTypeName = "Box";
-    //pteShape->setVisible(false);
+    pteShape->setVisible(false);
 
     ShapeHelp = "A box shape.\nSizeX, SizeY and SizeZ give full size in X, Y and Z direction, respectively\n"
                 "The XYZ position is given for the center of the box";
@@ -3713,4 +3715,53 @@ void AGeoPgonDelegate::onLocalShapeParameterChange()
     s += " )";
 
     updatePteShape(s);
+}
+
+#include <QFont>
+AGeoCompositeDelegate::AGeoCompositeDelegate(const QStringList &materials, QWidget *parent)
+    : AGeoObjectDelegate(materials, parent)
+{
+    DelegateTypeName = "Composite";
+    pteShape->setVisible(false);
+
+    QVBoxLayout * v = new QVBoxLayout();
+    v->setContentsMargins(50, 0, 50, 3);
+
+    v->addWidget(new QLabel("Use logical volume names and\n'+', '*', and '-' operands; brackets for nested"));
+        te = new QPlainTextEdit();
+        QFont font = te->font();
+        font.setPointSize(te->font().pointSize() + 2);
+        te->setFont(font);
+    v->addWidget(te);
+    connect(te, &QPlainTextEdit::textChanged, this, &AGeoCompositeDelegate::onLocalShapeParameterChange);
+
+    cbScale->setChecked(false);
+    cbScale->setVisible(false);
+
+    addLocalLayout(v);
+}
+
+void AGeoCompositeDelegate::Update(const AGeoObject *obj)
+{
+    AGeoObjectDelegate::Update(obj);
+
+    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
+
+    const AGeoComposite * combo = dynamic_cast<const AGeoComposite *>(tmpShape ? tmpShape : obj->Shape);
+    if (combo)
+    {
+        QString s = combo->getGenerationString().simplified();
+        s.remove("TGeoCompositeShape(");
+        s.chop(1);
+
+        te->clear();
+        te->appendPlainText(s.simplified());
+    }
+
+    delete tmpShape;
+}
+
+void AGeoCompositeDelegate::onLocalShapeParameterChange()
+{
+    updatePteShape(QString("TGeoCompositeShape( %1 )").arg(te->document()->toPlainText()));
 }

@@ -3197,24 +3197,26 @@ bool AGeoScaledShape::readFromString(QString GenerationString)
 
 TGeoShape* AGeoScaledShape::generateBaseTGeoShape(const QString & BaseShapeGenerationString) const
 {
-  //  qDebug() << "Generating base shape from "<< BaseShapeGenerationString;
-  QString shapeType = BaseShapeGenerationString.left(BaseShapeGenerationString.indexOf('('));
-  TGeoShape* Tshape = 0;
-  AGeoShape* Ashape = AGeoObject::GeoShapeFactory(shapeType);
-  if (Ashape)
+    //qDebug() << "SCALED->: Generating base shape from "<< BaseShapeGenerationString;
+    QString shapeType = BaseShapeGenerationString.left(BaseShapeGenerationString.indexOf('('));
+    //qDebug() << "SCALED->: base type:"<<shapeType;
+    TGeoShape* Tshape = 0;
+    AGeoShape* Ashape = AGeoObject::GeoShapeFactory(shapeType);
+    if (Ashape)
     {
-      bool fOK = Ashape->readFromString(BaseShapeGenerationString);
-      if (fOK)
+        //qDebug() << "SCALED->" << "Created AGeoShape of type" << Ashape->getShapeType();
+        bool fOK = Ashape->readFromString(BaseShapeGenerationString);
+        if (fOK)
         {
-          Tshape = Ashape->createGeoShape();
-          if (!Tshape) qWarning() << "TGeoScaledShape processing: Base shape generation fail!";
+            Tshape = Ashape->createGeoShape();
+            if (!Tshape) qWarning() << "TGeoScaledShape processing: Base shape generation fail!";
         }
-      else qWarning() << "TGeoScaledShape processing: failed to construct AGeoShape";
-      delete Ashape;
+        else qWarning() << "TGeoScaledShape processing: failed to construct AGeoShape";
+        delete Ashape;
     }
-  else qWarning() << "TGeoScaledShape processing: unknown base shape type "<< shapeType;
+    else qWarning() << "TGeoScaledShape processing: unknown base shape type "<< shapeType;
 
-  return Tshape;
+    return Tshape;
 }
 
 TGeoShape *AGeoScaledShape::createGeoShape(const QString shapeName)

@@ -199,7 +199,6 @@ private:
     QVBoxLayout * lMF = nullptr;      //main layout
 
     QWidget * scaleWidget = nullptr;
-    QCheckBox * cbScale = nullptr;
     QLineEdit * ledScaleX = nullptr;
     QLineEdit * ledScaleY = nullptr;
     QLineEdit * ledScaleZ = nullptr;
@@ -214,6 +213,7 @@ protected:
     QWidget * ParentWidget = nullptr;
     const AGeoObject * CurrentObject = nullptr;
     QLabel * labType = nullptr;
+    QCheckBox * cbScale = nullptr;
     QString DelegateTypeName = "Object";
     QString ShapeHelp;
 
@@ -562,6 +562,22 @@ public slots:
 private slots:
     void onLocalShapeParameterChange() override;
 
+};
+
+class AGeoCompositeDelegate : public AGeoObjectDelegate
+{
+    Q_OBJECT
+
+public:
+    AGeoCompositeDelegate(const QStringList & materials, QWidget * parent);
+
+    QPlainTextEdit * te = nullptr;
+
+public slots:
+    virtual void Update(const AGeoObject * obj) override;
+
+private slots:
+    void onLocalShapeParameterChange() override;
 };
 
 // ---------------- Grid delegate ----------------

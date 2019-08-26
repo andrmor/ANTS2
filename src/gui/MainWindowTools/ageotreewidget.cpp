@@ -43,7 +43,7 @@ AGeoTreeWidget::AGeoTreeWidget(ASandwich *Sandwich) : Sandwich(Sandwich)
   World = Sandwich->World;
 
   connect(this, SIGNAL(itemSelectionChanged()), this, SLOT(onItemSelectionChanged()));
-  setHeaderLabels(QStringList() << "Tree of geometry objects");
+  setHeaderLabels(QStringList() << "Tree of geometry objects: use context menu and drag-and-drop");
 
   setAcceptDrops(true);
   setDragEnabled(true);
@@ -2220,6 +2220,7 @@ void AGeoObjectDelegate::onChangeShapePressed()
         QListWidget * w = new QListWidget();
         w->addItems(list);
     l->addWidget(w);
+    d->resize(d->width(), 400);
 
         QHBoxLayout * h = new QHBoxLayout();
             QPushButton * pbAccept = new QPushButton("Change shape");

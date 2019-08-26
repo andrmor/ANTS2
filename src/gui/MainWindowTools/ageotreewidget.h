@@ -5,6 +5,7 @@
 #include <QSyntaxHighlighter>
 
 class AGeoObject;
+class AGeoShape;
 class AGeoWidget;
 class ASandwich;
 
@@ -55,7 +56,7 @@ private:
   void formSet(QList<QTreeWidgetItem *> selected, int option);
   void addLightguide(bool upper);
 
-  void menuActionAddNewObject(QString ContainerName);
+  void menuActionAddNewObject(QString ContainerName, AGeoShape * shape);
   void menuActionCopyObject(QString ObjToCopyName);
   void SetLineAttributes(QString ObjectName);
   void ShowObject(QString ObjectName);
@@ -104,7 +105,7 @@ class QHBoxLayout;
 class AGeoShape;
 class QCheckBox;
 
-class AGeoWidget : public QWidget  // ***!!! can get rid of the Widget here?
+class AGeoWidget : public QWidget
 {
   Q_OBJECT
 

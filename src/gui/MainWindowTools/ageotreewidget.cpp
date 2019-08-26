@@ -524,10 +524,32 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
 
   menu.addSeparator();
 
-  QAction* newA  = Action(menu, "Add object");
-  QFont f = newA->font();
-  f.setBold(true);
-  newA->setFont(f);
+  QMenu * addObjMenu = menu.addMenu("Add object");
+  //QFont f = addObjMenu->font();
+  //f.setBold(true);
+  //addObjMenu->setFont(f);
+    QAction* newBox  = addObjMenu->addAction("Box");
+    QMenu * addTubeMenu = addObjMenu->addMenu("Tube");
+        QAction* newTube =        addTubeMenu->addAction("Tube");
+        QAction* newTubeSegment = addTubeMenu->addAction("Tube segment");
+        QAction* newTubeSegCut =  addTubeMenu->addAction("Tube segment cut");
+        QAction* newTubeElli =    addTubeMenu->addAction("Elliptical tube");
+    QMenu * addTrapMenu = addObjMenu->addMenu("Trapezoid");
+        QAction* newTrapSim =     addTrapMenu->addAction("Trapezoid simplified");
+        QAction* newTrap    =     addTrapMenu->addAction("Trapezoid");
+    QAction* newPcon = addObjMenu->addAction("Polycone");
+    QMenu * addPgonMenu = addObjMenu->addMenu("Polygon");
+        QAction* newPgonSim =     addPgonMenu->addAction("Polygon simplified");
+        QAction* newPgon    =     addPgonMenu->addAction("Polygon");
+    QAction* newPara = addObjMenu->addAction("Parallelepiped");
+    QAction* newSphere = addObjMenu->addAction("Sphere");
+    QMenu * addConeMenu = addObjMenu->addMenu("Cone");
+        QAction* newCone =        addConeMenu->addAction("Cone");
+        QAction* newConeSeg =     addConeMenu->addAction("Cone segment");
+    QAction* newTor = addObjMenu->addAction("Torus");
+    QAction* newParabol = addObjMenu->addAction("Paraboloid");
+    QAction* newArb8 = addObjMenu->addAction("Arb8");
+
   QAction* newArrayA  = Action(menu, "Add array");
   QAction* newCompositeA  = Action(menu, "Add composite object");
   QAction* newGridA = Action(menu, "Add optical grid");
@@ -579,10 +601,10 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
       if (!obj) return;
       const ATypeObject& ObjectType = *obj->ObjectType;
 
-
       bool fNotGridNotMonitor = !ObjectType.isGrid() && !ObjectType.isMonitor();
 
-      newA->setEnabled(fNotGridNotMonitor);
+      //newA->setEnabled(fNotGridNotMonitor);
+      addObjMenu->setEnabled(fNotGridNotMonitor);
       enableDisableA->setEnabled(true);      
       enableDisableA->setText( (obj->isDisabled() ? "Enable object" : "Disable object" ) );
       if (obj->getSlabModel())
@@ -628,9 +650,26 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
      SetLineAttributes(selected.first()->text(0));
   else if (SelectedAction == enableDisableA)
      menuActionEnableDisable(selected.first()->text(0));
-  else if (SelectedAction == newA) // ADD NEW OBJECT
-     menuActionAddNewObject(selected.first()->text(0));
-  else if (SelectedAction == newCompositeA) //ADD NEW COMPOSITE
+  // ADD NEW OBJECT
+  else if (SelectedAction == newBox)         menuActionAddNewObject(selected.first()->text(0), new AGeoBox());
+  else if (SelectedAction == newTube)        menuActionAddNewObject(selected.first()->text(0), new AGeoTube());
+  else if (SelectedAction == newTubeSegment) menuActionAddNewObject(selected.first()->text(0), new AGeoTubeSeg());
+  else if (SelectedAction == newTubeSegCut)  menuActionAddNewObject(selected.first()->text(0), new AGeoCtub());
+  else if (SelectedAction == newTubeElli)    menuActionAddNewObject(selected.first()->text(0), new AGeoEltu());
+  else if (SelectedAction == newTrapSim)     menuActionAddNewObject(selected.first()->text(0), new AGeoTrd1());
+  else if (SelectedAction == newTrap)        menuActionAddNewObject(selected.first()->text(0), new AGeoTrd2());
+  else if (SelectedAction == newPcon)        menuActionAddNewObject(selected.first()->text(0), new AGeoPcon());
+  else if (SelectedAction == newPgonSim)     menuActionAddNewObject(selected.first()->text(0), new AGeoPolygon());
+  else if (SelectedAction == newPgon)        menuActionAddNewObject(selected.first()->text(0), new AGeoPgon());
+  else if (SelectedAction == newPara)        menuActionAddNewObject(selected.first()->text(0), new AGeoPara());
+  else if (SelectedAction == newSphere)      menuActionAddNewObject(selected.first()->text(0), new AGeoSphere());
+  else if (SelectedAction == newCone)        menuActionAddNewObject(selected.first()->text(0), new AGeoCone());
+  else if (SelectedAction == newConeSeg)     menuActionAddNewObject(selected.first()->text(0), new AGeoConeSeg());
+  else if (SelectedAction == newTor)         menuActionAddNewObject(selected.first()->text(0), new AGeoTorus());
+  else if (SelectedAction == newParabol)     menuActionAddNewObject(selected.first()->text(0), new AGeoParaboloid());
+  else if (SelectedAction == newArb8)        menuActionAddNewObject(selected.first()->text(0), new AGeoArb8());
+  //ADD NEW COMPOSITE
+  else if (SelectedAction == newCompositeA)
      menuActionAddNewComposite(selected.first()->text(0));
   else if (SelectedAction == newArrayA) //ADD NEW COMPOSITE
      menuActionAddNewArray(selected.first()->text(0));
@@ -878,7 +917,7 @@ void AGeoTreeWidget::menuActionCopyObject(QString ObjToCopyName)
   UpdateGui(name);
 }
 
-void AGeoTreeWidget::menuActionAddNewObject(QString ContainerName)
+void AGeoTreeWidget::menuActionAddNewObject(QString ContainerName, AGeoShape * shape)
 {
   AGeoObject* ContObj = World->findObjectByName(ContainerName);
   if (!ContObj) return;
@@ -886,6 +925,9 @@ void AGeoTreeWidget::menuActionAddNewObject(QString ContainerName)
   AGeoObject* newObj = new AGeoObject();
   while (World->isNameExists(newObj->Name))
     newObj->Name = AGeoObject::GenerateRandomObjectName();
+
+  delete newObj->Shape;
+  newObj->Shape = shape;
 
   newObj->color = 1;
   ContObj->addObjectFirst(newObj);  //inserts to the first position in the list of HostedObjects!
@@ -2162,10 +2204,17 @@ void AGeoObjectDelegate::onChangeShapePressed()
     d->setWindowTitle("Select new shape");
 
     QStringList list;
-    list << "Box" << "Tube" << "Tube segment" << "Tube segment cut" << "Elliptical tube"
-         << "Parallelepiped" << "Sphere" << "Trapezoid simplified" << "Trapezoid"
-         << "Cone" << "Cone segment" << "Paraboloid" << "Torus" << "Polygon simplified"
-         << "Polycone" << "Polygon" << "Arb8";
+    list << "Box"
+         << "Tube" << "Tube segment" << "Tube segment cut" << "Tube elliptical"
+         << "Trapezoid simplified" << "Trapezoid"
+         << "Polycone"
+         << "Polygon simplified" << "Polygon"
+         << "Parallelepiped"
+         << "Sphere"
+         << "Cone" << "Cone segment"
+         << "Torus"
+         << "Paraboloid"
+         << "Arb8";
 
     QVBoxLayout * l = new QVBoxLayout(d);
         QListWidget * w = new QListWidget();
@@ -2183,7 +2232,7 @@ void AGeoObjectDelegate::onChangeShapePressed()
                 else if (sel == "Tube")                 emit RequestChangeShape(new AGeoTube());
                 else if (sel == "Tube segment")         emit RequestChangeShape(new AGeoTubeSeg());
                 else if (sel == "Tube segment cut")     emit RequestChangeShape(new AGeoCtub());
-                else if (sel == "Elliptical tube")      emit RequestChangeShape(new AGeoEltu());
+                else if (sel == "Tube elliptical")      emit RequestChangeShape(new AGeoEltu());
                 else if (sel == "Sphere")               emit RequestChangeShape(new AGeoSphere());
                 else if (sel == "Trapezoid simplified") emit RequestChangeShape(new AGeoTrd1());
                 else if (sel == "Trapezoid")            emit RequestChangeShape(new AGeoTrd2());
@@ -2267,6 +2316,8 @@ void AGeoObjectDelegate::updateTypeLabel()
 
 void AGeoObjectDelegate::updateControlUI()
 {
+    pteShape->setVisible(false);
+
     if (CurrentObject->ObjectType->isHandlingSet())
     {
         pteShape->setVisible(false);
@@ -2605,7 +2656,6 @@ AGeoBoxDelegate::AGeoBoxDelegate(const QStringList &materials, QWidget *parent)
     : AGeoObjectDelegate(materials, parent)
 {
     DelegateTypeName = "Box";
-    pteShape->setVisible(false);
 
     ShapeHelp = "A box shape.\nSizeX, SizeY and SizeZ give full size in X, Y and Z direction, respectively\n"
                 "The XYZ position is given for the center of the box";
@@ -2659,7 +2709,6 @@ AGeoTubeDelegate::AGeoTubeDelegate(const QStringList & materials, QWidget *paren
     : AGeoObjectDelegate(materials, parent)
 {
     DelegateTypeName = "Tube";
-    pteShape->setVisible(false);
 
     gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);
@@ -2708,7 +2757,6 @@ AGeoTubeSegDelegate::AGeoTubeSegDelegate(const QStringList & materials, QWidget 
     AGeoTubeDelegate(materials, parent)
 {
     DelegateTypeName = "Tube segment";
-    pteShape->setVisible(false);
 
     gr->addWidget(new QLabel("Phi from:"), 3, 0);
     gr->addWidget(new QLabel("Phi to:"), 4, 0);
@@ -2751,7 +2799,6 @@ AGeoTubeSegCutDelegate::AGeoTubeSegCutDelegate(const QStringList &materials, QWi
     AGeoTubeSegDelegate(materials, parent)
 {
     DelegateTypeName = "Tube segment cut";
-    pteShape->setVisible(false);
 
     gr->addWidget(new QLabel("Low Nx:"), 5, 0);
     gr->addWidget(new QLabel("Low Ny:"), 6, 0);
@@ -2808,7 +2855,6 @@ AGeoParaDelegate::AGeoParaDelegate(const QStringList & materials, QWidget *paren
     : AGeoObjectDelegate(materials, parent)
 {
     DelegateTypeName = "Parallelepiped";
-    pteShape->setVisible(false);
 
     QGridLayout * gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);
@@ -2870,7 +2916,6 @@ AGeoSphereDelegate::AGeoSphereDelegate(const QStringList & materials, QWidget *p
     : AGeoObjectDelegate(materials, parent)
 {
     DelegateTypeName = "Sphere";
-    pteShape->setVisible(false);
 
     QGridLayout * gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);
@@ -2933,7 +2978,6 @@ AGeoConeDelegate::AGeoConeDelegate(const QStringList &materials, QWidget *parent
     : AGeoObjectDelegate(materials, parent)
 {
     DelegateTypeName = "Cone";
-    pteShape->setVisible(false);
 
     gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);
@@ -2993,7 +3037,6 @@ AGeoConeSegDelegate::AGeoConeSegDelegate(const QStringList &materials, QWidget *
     : AGeoConeDelegate(materials, parent)
 {
     DelegateTypeName = "Cone segment";
-    pteShape->setVisible(false);
 
     gr->addWidget(new QLabel("Phi from:"), 5, 0);
     gr->addWidget(new QLabel("Phi to:"),   6, 0);
@@ -3041,7 +3084,6 @@ AGeoElTubeDelegate::AGeoElTubeDelegate(const QStringList &materials, QWidget *pa
     : AGeoObjectDelegate(materials, parent)
 {
     DelegateTypeName = "Elliptical tube";
-    pteShape->setVisible(false);
 
     gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);
@@ -3090,7 +3132,6 @@ AGeoTrapXDelegate::AGeoTrapXDelegate(const QStringList &materials, QWidget *pare
     : AGeoObjectDelegate(materials, parent)
 {
     DelegateTypeName = "Trapezoid simplified";
-    pteShape->setVisible(false);
 
     QGridLayout * gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);
@@ -3145,7 +3186,6 @@ AGeoTrapXYDelegate::AGeoTrapXYDelegate(const QStringList &materials, QWidget *pa
     : AGeoObjectDelegate(materials, parent)
 {
     DelegateTypeName = "Trapezoid";
-    pteShape->setVisible(false);
 
     QGridLayout * gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);
@@ -3204,7 +3244,6 @@ AGeoParaboloidDelegate::AGeoParaboloidDelegate(const QStringList &materials, QWi
     : AGeoObjectDelegate(materials, parent)
 {
     DelegateTypeName = "Paraboloid";
-    pteShape->setVisible(false);
 
     QGridLayout * gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);
@@ -3256,7 +3295,6 @@ AGeoTorusDelegate::AGeoTorusDelegate(const QStringList &materials, QWidget *pare
     : AGeoObjectDelegate(materials, parent)
 {
     DelegateTypeName = "Paraboloid";
-    pteShape->setVisible(false);
 
     QGridLayout * gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);
@@ -3318,7 +3356,6 @@ AGeoPolygonDelegate::AGeoPolygonDelegate(const QStringList &materials, QWidget *
     : AGeoObjectDelegate(materials, parent)
 {
     DelegateTypeName = "Polygon (simplified)";
-    pteShape->setVisible(false);
 
     QGridLayout * gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);
@@ -3392,7 +3429,6 @@ AGeoPconDelegate::AGeoPconDelegate(const QStringList &materials, QWidget *parent
     : AGeoObjectDelegate(materials, parent)
 {
     DelegateTypeName = "Polycone";
-    pteShape->setVisible(false);
 
     lay = new QVBoxLayout();
     lay->setContentsMargins(50, 0, 50, 0);
@@ -3593,7 +3629,6 @@ AGeoCompositeDelegate::AGeoCompositeDelegate(const QStringList &materials, QWidg
     : AGeoObjectDelegate(materials, parent)
 {
     DelegateTypeName = "Composite";
-    pteShape->setVisible(false);
 
     QVBoxLayout * v = new QVBoxLayout();
     v->setContentsMargins(50, 0, 50, 3);
@@ -3639,7 +3674,6 @@ AGeoArb8Delegate::AGeoArb8Delegate(const QStringList &materials, QWidget *parent
     : AGeoObjectDelegate(materials, parent)
 {
     DelegateTypeName = "Arb8";
-    pteShape->setVisible(false);
 
     QVBoxLayout * v = new QVBoxLayout();
     v->setContentsMargins(50, 0, 50, 0);
@@ -3725,7 +3759,6 @@ AGeoArrayDelegate::AGeoArrayDelegate(const QStringList &materials, QWidget *pare
    : AGeoObjectDelegate(materials, parent)
 {
     DelegateTypeName = "Array";
-    pteShape->setVisible(false);
 
     QVBoxLayout * v = new QVBoxLayout();
     v->setContentsMargins(50, 0, 50, 0);
@@ -3828,8 +3861,6 @@ void AGeoArrayDelegate::Update(const AGeoObject * obj)
 AGeoSetDelegate::AGeoSetDelegate(const QStringList &materials, QWidget *parent)
    : AGeoObjectDelegate(materials, parent)
 {
-     pteShape->setVisible(false);
-
      pbTransform->setVisible(false);
      pbShapeInfo->setVisible(false);
      pbShow->setVisible(false);

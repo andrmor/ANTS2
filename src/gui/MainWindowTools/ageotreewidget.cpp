@@ -1333,11 +1333,13 @@ void AGeoWidget::UpdateGui()
   else
   {   // Normal AGeoObject based
 
-      if (CurrentObject->isCompositeMemeber())
-      {
-            addInfoLabel("");
+      if (CurrentObject->ObjectType->isGrid())  // Grid
+          {
+            addInfoLabel("Grid bulk"+getSuffix(contObj));
             GeoObjectDelegate = createAndAddGeoObjectDelegate(CurrentObject, this);
-      }
+            connect(GeoObjectDelegate->Widget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(OnCustomContextMenuTriggered_forMainObject(QPoint)));
+          }
+
       else if (CurrentObject->ObjectType->isSingle())  // NORMAL
       {
             addInfoLabel("");
@@ -1346,12 +1348,7 @@ void AGeoWidget::UpdateGui()
             connect(GeoObjectDelegate, &AGeoObjectDelegate::RequestShow, this, &AGeoWidget::onRequestShowCurrentObject);
             connect(GeoObjectDelegate, &AGeoObjectDelegate::RequestScriptToClipboard, this, &AGeoWidget::onRequestScriptLineToClipboard);
       }
-      else if (CurrentObject->ObjectType->isGrid())  // Grid
-          {
-            addInfoLabel("Grid bulk"+getSuffix(contObj));
-            GeoObjectDelegate = createAndAddGeoObjectDelegate(CurrentObject, this);
-            connect(GeoObjectDelegate->Widget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(OnCustomContextMenuTriggered_forMainObject(QPoint)));
-          }
+
       else if (CurrentObject->ObjectType->isHandlingSet())  // SET
           {
             if (CurrentObject->ObjectType->isCompositeContainer()) return;
@@ -2004,8 +2001,6 @@ void AGeoWidget::onCancelPressed()
 AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * ParentWidget) :
     ParentWidget(ParentWidget)
 {
-  CurrentObject = 0;
-
   frMainFrame = new QFrame();
   frMainFrame->setFrameShape(QFrame::Box);
   QPalette palette = frMainFrame->palette();
@@ -2057,7 +2052,6 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
       pteShape = new QPlainTextEdit();
       pteShape->setContextMenuPolicy(Qt::NoContextMenu);
       connect(pteShape, SIGNAL(textChanged()), this, SLOT(onContentChanged()));
-      connect(pteShape, SIGNAL(cursorPositionChanged()), this, SLOT(onCursorPositionChanged()));
       pteShape->setMaximumHeight(50);
       new AShapeHighlighter(pteShape->document());
       h2->addWidget(pteShape);
@@ -2257,34 +2251,6 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
   Widget->setContextMenuPolicy(Qt::CustomContextMenu);
 }
 
-void AGeoObjectDelegate::onCursorPositionChanged()
-{
-  QString text = pteShape->document()->toPlainText().simplified();
-  QList<AGeoShape*> AvailableShapes = AGeoObject::GetAvailableShapes();
-
-  QString templ = "";
-  for (AGeoShape* s : AvailableShapes)
-    {
-      QString type = s->getShapeType() + "(";
-      if (text.contains(type))
-        {
-          templ = s->getShapeTemplate();
-          break;
-        }
-    }
-
-  if (!templ.isEmpty())
-    {
-      QToolTip::showText( pteShape->viewport()->mapToGlobal( QPoint(pteShape->x(), pteShape->y()) ),
-                          templ,
-                          pteShape,
-                          pteShape->rect(),
-                          100000);
-      pteShape->setToolTip(templ);
-      pteShape->setToolTipDuration(100000);
-  }
-}
-
 void AGeoObjectDelegate::onChangeShapePressed()
 {
     QDialog * d = new QDialog(ParentWidget);
@@ -2373,6 +2339,64 @@ const AGeoShape * AGeoObjectDelegate::getBaseShapeOfObject(const AGeoObject * ob
     return baseShape;
 }
 
+void AGeoObjectDelegate::updateTypeLabel()
+{
+    //  if (CurrentObject->Container)
+    //  {
+    //      if (CurrentObject->Container->ObjectType->isHandlingSet())
+    //      {
+    //          if (CurrentObject->Container->ObjectType->isGroup())
+    //              DelegateTypeName += ", group member";
+    //          else
+    //              DelegateTypeName += ", stack member";
+    //      }
+    //  }
+
+    if (CurrentObject->isCompositeMemeber())
+        DelegateTypeName += " (logical)";
+
+    labType->setText(DelegateTypeName);
+}
+
+void AGeoObjectDelegate::updateControlUI()
+{
+    if (CurrentObject->ObjectType->isHandlingSet())
+    {
+        pteShape->setVisible(false);
+        lMat->setVisible(false);
+        cobMat->setVisible(false);
+        PosOrient->setVisible(false);
+    }
+
+    if (CurrentObject->Container && CurrentObject->Container->ObjectType->isStack())
+    {
+        ledPhi->setEnabled(false);
+        ledTheta->setEnabled(false);
+        ledPhi->setText("0");
+        ledTheta->setText("0");
+    }
+
+    if (CurrentObject->isCompositeMemeber())
+    {
+        cobMat->setEnabled(false);
+        cobMat->setCurrentIndex(-1);
+    }
+    if (CurrentObject->ObjectType->isArray())
+    {
+        ledPhi->setEnabled(false);
+        ledTheta->setEnabled(false);
+        ledPhi->setText("0");
+        ledTheta->setText("0");
+    }
+
+    if (CurrentObject->isCompositeMemeber())
+    {
+        pbShow->setVisible(false);
+        pbChangeAtt->setVisible(false);
+        pbScriptLine->setVisible(false);
+    }
+}
+
 void AGeoObjectDelegate::onHelpRequested()
 {
     //message(ShapeHelp, Widget);
@@ -2404,90 +2428,55 @@ void AGeoObjectDelegate::Update(const AGeoObject *obj)
     CurrentObject = obj;
     leName->setText(obj->Name);
 
-    if (obj->ObjectType->isHandlingSet())
+    int imat = obj->Material;
+    if (imat < 0 || imat >= cobMat->count())
     {
-      pteShape->setVisible(false);
-      lMat->setVisible(false);
-      cobMat->setVisible(false);
-      PosOrient->setVisible(false);
+        qWarning() << "Material index out of bounds!";
+        imat = -1;
     }
+    cobMat->setCurrentIndex(imat);
 
-  if (obj->ObjectType->isArray())
-  {
-    pteShape->setVisible(false);
-    lMat->setVisible(false);
-    cobMat->setVisible(false);
+    pteShape->setPlainText(obj->Shape->getGenerationString());
 
-    ledPhi->setEnabled(false);
-    ledTheta->setEnabled(false);
+    ledX->setText(QString::number(obj->Position[0]));
+    ledY->setText(QString::number(obj->Position[1]));
+    ledZ->setText(QString::number(obj->Position[2]));
 
-    ATypeArrayObject* array = static_cast<ATypeArrayObject*>(obj->ObjectType);
-    sbNumX->setValue(array->numX);
-    sbNumY->setValue(array->numY);
-    sbNumZ->setValue(array->numZ);
-    ledStepX->setText(QString::number(array->stepX));
-    ledStepY->setText(QString::number(array->stepY));
-    ledStepZ->setText(QString::number(array->stepZ));
-  }
-  else
-     ArrayWid->setVisible(false);
+    ledPhi->setText(QString::number(obj->Orientation[0]));
+    ledTheta->setText(QString::number(obj->Orientation[1]));
+    ledPsi->setText(QString::number(obj->Orientation[2]));
 
-  int imat = obj->Material;
-  if (imat < 0 || imat >= cobMat->count())
-  {
-      qWarning() << "Material index out of bounds!";
-      imat = -1;
-  }
-  cobMat->setCurrentIndex(imat);
+    if (obj->ObjectType->isArray())
+    {
+        pteShape->setVisible(false);
+        lMat->setVisible(false);
+        cobMat->setVisible(false);
 
-  pteShape->setPlainText(obj->Shape->getGenerationString());
+        ledPhi->setEnabled(false);
+        ledTheta->setEnabled(false);
 
-  ledX->setText(QString::number(obj->Position[0]));
-  ledY->setText(QString::number(obj->Position[1]));
-  ledZ->setText(QString::number(obj->Position[2]));
+        ATypeArrayObject* array = static_cast<ATypeArrayObject*>(obj->ObjectType);
+        sbNumX->setValue(array->numX);
+        sbNumY->setValue(array->numY);
+        sbNumZ->setValue(array->numZ);
+        ledStepX->setText(QString::number(array->stepX));
+        ledStepY->setText(QString::number(array->stepY));
+        ledStepZ->setText(QString::number(array->stepZ));
+    }
+    else
+        ArrayWid->setVisible(false);
 
-  ledPhi->setText(QString::number(obj->Orientation[0]));
-  ledTheta->setText(QString::number(obj->Orientation[1]));
-  ledPsi->setText(QString::number(obj->Orientation[2]));
+    updateTypeLabel();
+    updateControlUI();
 
-  if (obj->Container && obj->Container->ObjectType->isStack())
-  {
-      ledPhi->setEnabled(false);
-      ledTheta->setEnabled(false);
-      ledPhi->setText("0");
-      ledTheta->setText("0");
-  }
-
-  if (obj->isCompositeMemeber())
-  {
-      cobMat->setEnabled(false);
-      cobMat->setCurrentIndex(-1);      
-  }
-  if (obj->ObjectType->isArray())
-  {
-      ledPhi->setEnabled(false);
-      ledTheta->setEnabled(false);
-      ledPhi->setText("0");
-      ledTheta->setText("0");
-  }
-
-  if (CurrentObject->isCompositeMemeber())
-  {
-      DelegateTypeName += " (logical)";
-      pbShow->setVisible(false);
-      pbChangeAtt->setVisible(false);
-      pbScriptLine->setVisible(false);
-  }
-  labType->setText(DelegateTypeName);
-
-  AGeoScaledShape * scaledShape = dynamic_cast<AGeoScaledShape*>(CurrentObject->Shape);
-  cbScale->setChecked(scaledShape);
-  if (scaledShape)
-  {
-      ledScaleX->setText(QString::number(scaledShape->scaleX));
-      ledScaleY->setText(QString::number(scaledShape->scaleY));
-      ledScaleZ->setText(QString::number(scaledShape->scaleZ));
-  }
+    AGeoScaledShape * scaledShape = dynamic_cast<AGeoScaledShape*>(CurrentObject->Shape);
+    cbScale->setChecked(scaledShape);
+    if (scaledShape)
+    {
+        ledScaleX->setText(QString::number(scaledShape->scaleX));
+        ledScaleY->setText(QString::number(scaledShape->scaleY));
+        ledScaleZ->setText(QString::number(scaledShape->scaleZ));
+    }
 }
 
 void AGeoObjectDelegate::onContentChanged()
@@ -3748,7 +3737,6 @@ void AGeoCompositeDelegate::Update(const AGeoObject *obj)
     AGeoObjectDelegate::Update(obj);
 
     const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
-
     const AGeoComposite * combo = dynamic_cast<const AGeoComposite *>(tmpShape ? tmpShape : obj->Shape);
     if (combo)
     {
@@ -3759,7 +3747,6 @@ void AGeoCompositeDelegate::Update(const AGeoObject *obj)
         te->clear();
         te->appendPlainText(s.simplified());
     }
-
     delete tmpShape;
 }
 
@@ -3772,7 +3759,7 @@ AGeoArb8Delegate::AGeoArb8Delegate(const QStringList &materials, QWidget *parent
     : AGeoObjectDelegate(materials, parent)
 {
     DelegateTypeName = "Arb8";
-    //pteShape->setVisible(false);
+    pteShape->setVisible(false);
 
     QVBoxLayout * v = new QVBoxLayout();
     v->setContentsMargins(50, 0, 50, 0);
@@ -3852,4 +3839,15 @@ void AGeoArb8Delegate::onLocalShapeParameterChange()
     }
     s += ")";
     updatePteShape(s);
+}
+
+AGeoArrayDelegate::AGeoArrayDelegate(const QStringList &materials, QWidget *parent)
+   : AGeoObjectDelegate(materials, parent)
+{
+
+}
+
+void AGeoArrayDelegate::Update(const AGeoObject *obj)
+{
+
 }

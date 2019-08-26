@@ -223,7 +223,6 @@ public slots:
 private slots:
     void onContentChanged();          // only to enter the editing mode! Object update is performed only on confirm button click!
     void onHelpRequested();           // dialog with AGeoShape list can be accessed here
-    void onCursorPositionChanged();
     void onChangeShapePressed();
 
 protected slots:
@@ -233,6 +232,8 @@ protected:
     void addLocalLayout(QLayout * lay);
     void updatePteShape(const QString & text);
     const AGeoShape * getBaseShapeOfObject(const AGeoObject *obj);
+    void updateTypeLabel();
+    void updateControlUI();
 
 signals:
     void ContentChanged();
@@ -603,6 +604,18 @@ private slots:
     void onLocalShapeParameterChange() override;
 };
 
+class AGeoArrayDelegate : public AGeoObjectDelegate
+{
+    Q_OBJECT
+
+public:
+    AGeoArrayDelegate(const QStringList & materials, QWidget * parent);
+
+
+public slots:
+    virtual void Update(const AGeoObject * obj) override;
+
+};
 
 // ---------------- Grid delegate ----------------
 

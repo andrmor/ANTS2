@@ -2587,7 +2587,7 @@ bool AGeoArb8::readFromString(QString GenerationString)
         Vertices[i].first =  tmp[1+i*2];
         Vertices[i].second = tmp[2+i*2];
     }
-    qDebug() << dz << Vertices;
+    //  qDebug() << dz << Vertices;
 
     if (!AGeoObject::CheckPointsForArb8(Vertices))
       {

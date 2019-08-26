@@ -611,10 +611,19 @@ class AGeoArrayDelegate : public AGeoObjectDelegate
 public:
     AGeoArrayDelegate(const QStringList & materials, QWidget * parent);
 
+public slots:
+    virtual void Update(const AGeoObject * obj) override;
+};
+
+class AGeoSetDelegate : public AGeoObjectDelegate
+{
+    Q_OBJECT
+
+public:
+    AGeoSetDelegate(const QStringList & materials, QWidget * parent);
 
 public slots:
     virtual void Update(const AGeoObject * obj) override;
-
 };
 
 // ---------------- Grid delegate ----------------

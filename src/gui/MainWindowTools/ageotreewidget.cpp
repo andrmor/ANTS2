@@ -1331,35 +1331,12 @@ void AGeoWidget::UpdateGui()
         MonitorDelegate = createAndAddMonitorDelegate(CurrentObject, particles);
     }
   else
-  {   // Normal AGeoObject based
-
-      if (CurrentObject->ObjectType->isGrid())  // Grid
-          {
-            addInfoLabel("Grid bulk"+getSuffix(contObj));
-            GeoObjectDelegate = createAndAddGeoObjectDelegate(CurrentObject, this);
-            connect(GeoObjectDelegate->Widget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(OnCustomContextMenuTriggered_forMainObject(QPoint)));
-          }
-      else if (CurrentObject->ObjectType->isHandlingSet())  // SET
-          {
-            if (CurrentObject->ObjectType->isCompositeContainer()) return;
-            QString str = ( CurrentObject->ObjectType->isStack() ? "Stack" : "Group" );
-            addInfoLabel( str );
-            GeoObjectDelegate = createAndAddGeoObjectDelegate(CurrentObject, this);
-          }
-      else if (CurrentObject->ObjectType->isComposite())
-          {
-            addInfoLabel("Composite object"+getSuffix(contObj));
-            GeoObjectDelegate = createAndAddGeoObjectDelegate(CurrentObject, this);
-            connect(GeoObjectDelegate->Widget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(OnCustomContextMenuTriggered_forMainObject(QPoint)));
-          }
-      else // NORMAL
-      {
-            addInfoLabel("");
-            GeoObjectDelegate = createAndAddGeoObjectDelegate(CurrentObject, this);
-            connect(GeoObjectDelegate, &AGeoObjectDelegate::RequestChangeVisAttributes, this, &AGeoWidget::onRequestSetVisAttributes);
-            connect(GeoObjectDelegate, &AGeoObjectDelegate::RequestShow, this, &AGeoWidget::onRequestShowCurrentObject);
-            connect(GeoObjectDelegate, &AGeoObjectDelegate::RequestScriptToClipboard, this, &AGeoWidget::onRequestScriptLineToClipboard);
-      }
+  {
+      addInfoLabel("");
+      GeoObjectDelegate = createAndAddGeoObjectDelegate(CurrentObject, this);
+      connect(GeoObjectDelegate, &AGeoObjectDelegate::RequestChangeVisAttributes, this, &AGeoWidget::onRequestSetVisAttributes);
+      connect(GeoObjectDelegate, &AGeoObjectDelegate::RequestShow, this, &AGeoWidget::onRequestShowCurrentObject);
+      connect(GeoObjectDelegate, &AGeoObjectDelegate::RequestScriptToClipboard, this, &AGeoWidget::onRequestScriptLineToClipboard);
   }
 }
 
@@ -1370,8 +1347,10 @@ AGeoObjectDelegate* AGeoWidget::createAndAddGeoObjectDelegate(AGeoObject* obj, Q
     AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(obj->Shape);
     const QString shape = (scaled ? scaled->getBaseShapeType() : obj->Shape->getShapeType());
 
-    if (CurrentObject->ObjectType->isArray())
+    if (obj->ObjectType->isArray())
         Del = new AGeoArrayDelegate(tw->Sandwich->Materials, parent);
+    else if (obj->ObjectType->isHandlingSet())
+        Del = new AGeoSetDelegate(tw->Sandwich->Materials, parent);
     else if (shape == "TGeoBBox")
         Del = new AGeoBoxDelegate(tw->Sandwich->Materials, parent);
     else if (shape == "TGeoTube")
@@ -2267,19 +2246,21 @@ const AGeoShape * AGeoObjectDelegate::getBaseShapeOfObject(const AGeoObject * ob
 
 void AGeoObjectDelegate::updateTypeLabel()
 {
-      if (CurrentObject->Container)
-      {
-          if (CurrentObject->Container->ObjectType->isHandlingSet())
-          {
-              if (CurrentObject->Container->ObjectType->isGroup())
-                  DelegateTypeName += ",   groupped";
-              else
-                  DelegateTypeName += ",   stacked";
-          }
-      }
+    if (CurrentObject->ObjectType->isGrid())
+        DelegateTypeName = "Grid bulk, " + DelegateTypeName;
 
     if (CurrentObject->isCompositeMemeber())
         DelegateTypeName += " (logical)";
+    else if (CurrentObject->Container)
+    {
+        if (CurrentObject->Container->ObjectType->isHandlingSet())
+        {
+            if (CurrentObject->Container->ObjectType->isGroup())
+                DelegateTypeName += ",   groupped";
+            else
+                DelegateTypeName += ",   stacked";
+        }
+    }
 
     labType->setText(DelegateTypeName);
 }
@@ -3813,6 +3794,7 @@ AGeoArrayDelegate::AGeoArrayDelegate(const QStringList &materials, QWidget *pare
 
     cbScale->setChecked(false);
     cbScale->setVisible(false);
+
     lMat->setVisible(false);
     cobMat->setVisible(false);
     ledPhi->setText("0");
@@ -3841,4 +3823,26 @@ void AGeoArrayDelegate::Update(const AGeoObject * obj)
         ledStepY->setText(QString::number(array->stepY));
         ledStepZ->setText(QString::number(array->stepZ));
     }
+}
+
+AGeoSetDelegate::AGeoSetDelegate(const QStringList &materials, QWidget *parent)
+   : AGeoObjectDelegate(materials, parent)
+{
+     pteShape->setVisible(false);
+
+     pbTransform->setVisible(false);
+     pbShapeInfo->setVisible(false);
+     pbShow->setVisible(false);
+     pbChangeAtt->setVisible(false);
+     pbScriptLine->setVisible(false);
+
+     cbScale->setChecked(false);
+     cbScale->setVisible(false);
+}
+
+void AGeoSetDelegate::Update(const AGeoObject *obj)
+{
+    DelegateTypeName = ( obj->ObjectType->isStack() ? "Stack" : "Group" );
+
+    AGeoObjectDelegate::Update(obj);
 }

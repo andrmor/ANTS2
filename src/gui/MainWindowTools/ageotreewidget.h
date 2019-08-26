@@ -186,7 +186,6 @@ public:
     QComboBox* cobMat;
     QPlainTextEdit* pteShape;
     QWidget* PosOrient;
-    QWidget* ArrayWid;
     QLabel* lMat;
 
     QSpinBox *sbNumX, *sbNumY, *sbNumZ;
@@ -203,12 +202,6 @@ private:
     QLineEdit * ledScaleY = nullptr;
     QLineEdit * ledScaleZ = nullptr;
 
-    QPushButton * pbShapeInfo = nullptr;
-
-    QPushButton * pbShow = nullptr;
-    QPushButton * pbChangeAtt = nullptr;
-    QPushButton * pbScriptLine = nullptr;
-
 protected:
     QWidget * ParentWidget = nullptr;
     const AGeoObject * CurrentObject = nullptr;
@@ -216,6 +209,13 @@ protected:
     QCheckBox * cbScale = nullptr;
     QString DelegateTypeName = "Object";
     QString ShapeHelp;
+
+    QPushButton * pbTransform = nullptr;
+    QPushButton * pbShapeInfo = nullptr;
+
+    QPushButton * pbShow = nullptr;
+    QPushButton * pbChangeAtt = nullptr;
+    QPushButton * pbScriptLine = nullptr;
 
 public slots:
     virtual void Update(const AGeoObject * obj);

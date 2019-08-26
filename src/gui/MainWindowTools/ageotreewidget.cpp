@@ -1339,16 +1339,6 @@ void AGeoWidget::UpdateGui()
             GeoObjectDelegate = createAndAddGeoObjectDelegate(CurrentObject, this);
             connect(GeoObjectDelegate->Widget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(OnCustomContextMenuTriggered_forMainObject(QPoint)));
           }
-
-      else if (CurrentObject->ObjectType->isSingle())  // NORMAL
-      {
-            addInfoLabel("");
-            GeoObjectDelegate = createAndAddGeoObjectDelegate(CurrentObject, this);
-            connect(GeoObjectDelegate, &AGeoObjectDelegate::RequestChangeVisAttributes, this, &AGeoWidget::onRequestSetVisAttributes);
-            connect(GeoObjectDelegate, &AGeoObjectDelegate::RequestShow, this, &AGeoWidget::onRequestShowCurrentObject);
-            connect(GeoObjectDelegate, &AGeoObjectDelegate::RequestScriptToClipboard, this, &AGeoWidget::onRequestScriptLineToClipboard);
-      }
-
       else if (CurrentObject->ObjectType->isHandlingSet())  // SET
           {
             if (CurrentObject->ObjectType->isCompositeContainer()) return;
@@ -1362,11 +1352,14 @@ void AGeoWidget::UpdateGui()
             GeoObjectDelegate = createAndAddGeoObjectDelegate(CurrentObject, this);
             connect(GeoObjectDelegate->Widget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(OnCustomContextMenuTriggered_forMainObject(QPoint)));
           }
-      else if (CurrentObject->ObjectType->isArray())
-        {
-          addInfoLabel("Array"+getSuffix(contObj));
-          GeoObjectDelegate = createAndAddGeoObjectDelegate(CurrentObject, this);
-        }
+      else // NORMAL
+      {
+            addInfoLabel("");
+            GeoObjectDelegate = createAndAddGeoObjectDelegate(CurrentObject, this);
+            connect(GeoObjectDelegate, &AGeoObjectDelegate::RequestChangeVisAttributes, this, &AGeoWidget::onRequestSetVisAttributes);
+            connect(GeoObjectDelegate, &AGeoObjectDelegate::RequestShow, this, &AGeoWidget::onRequestShowCurrentObject);
+            connect(GeoObjectDelegate, &AGeoObjectDelegate::RequestScriptToClipboard, this, &AGeoWidget::onRequestScriptLineToClipboard);
+      }
   }
 }
 
@@ -1377,7 +1370,9 @@ AGeoObjectDelegate* AGeoWidget::createAndAddGeoObjectDelegate(AGeoObject* obj, Q
     AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(obj->Shape);
     const QString shape = (scaled ? scaled->getBaseShapeType() : obj->Shape->getShapeType());
 
-    if (shape == "TGeoBBox")
+    if (CurrentObject->ObjectType->isArray())
+        Del = new AGeoArrayDelegate(tw->Sandwich->Materials, parent);
+    else if (shape == "TGeoBBox")
         Del = new AGeoBoxDelegate(tw->Sandwich->Materials, parent);
     else if (shape == "TGeoTube")
         Del = new AGeoTubeDelegate(tw->Sandwich->Materials, parent);
@@ -2045,7 +2040,7 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
       hl->addWidget(cobMat);
     lMF->addLayout(hl);
 
-    //Shape box and help
+    //Shape box
     QHBoxLayout* h2 = new QHBoxLayout();
       h2->setContentsMargins(2,0,2,0);
 
@@ -2055,75 +2050,6 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
       pteShape->setMaximumHeight(50);
       new AShapeHighlighter(pteShape->document());
       h2->addWidget(pteShape);
-
-      //only for arrays
-      QFrame* frArr = new QFrame();
-      frArr->setFrameShape(QFrame::Box);
-      ArrayWid = frArr;
-      ArrayWid->setContentsMargins(0,0,0,0);
-      ArrayWid->setMaximumHeight(80);
-      QGridLayout *grAW = new QGridLayout();
-      grAW->setContentsMargins(5, 3, 5, 3);
-      grAW->setVerticalSpacing(0);
-
-      QLabel *la = new QLabel("Number in X:");
-      grAW->addWidget(la, 0, 0);
-      la = new QLabel("Number in Y:");
-      grAW->addWidget(la, 1, 0);
-      la = new QLabel("Number in Z:");
-      grAW->addWidget(la, 2, 0);
-      la = new QLabel("Step in X:");
-      la->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-      grAW->addWidget(la, 0, 2);
-      la = new QLabel("Step in Y:");
-      la->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-      grAW->addWidget(la, 1, 2);
-      la = new QLabel("Step in Z:");
-      la->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-      grAW->addWidget(la, 2, 2);
-      la = new QLabel("mm");
-      grAW->addWidget(la, 0, 4);
-      la = new QLabel("mm");
-      grAW->addWidget(la, 1, 4);
-      la = new QLabel("mm");
-      grAW->addWidget(la, 2, 4);
-
-      sbNumX = new QSpinBox(this);
-      sbNumX->setMaximum(100);
-      sbNumX->setMinimum(0);
-      sbNumX->setContextMenuPolicy(Qt::NoContextMenu);
-      grAW->addWidget(sbNumX, 0, 1);
-      connect(sbNumX, SIGNAL(valueChanged(int)), this, SLOT(onContentChanged()));
-      sbNumY = new QSpinBox(this);
-      sbNumY->setMaximum(100);
-      sbNumY->setMinimum(0);
-      sbNumY->setContextMenuPolicy(Qt::NoContextMenu);
-      grAW->addWidget(sbNumY, 1, 1);
-      connect(sbNumY, SIGNAL(valueChanged(int)), this, SLOT(onContentChanged()));
-      sbNumZ = new QSpinBox(this);
-      sbNumZ->setMaximum(100);
-      sbNumZ->setMinimum(0);
-      sbNumZ->setContextMenuPolicy(Qt::NoContextMenu);
-      grAW->addWidget(sbNumZ, 2, 1);
-      connect(sbNumZ, SIGNAL(valueChanged(int)), this, SLOT(onContentChanged()));
-      ledStepX = new QLineEdit(this);
-      ledStepX->setContextMenuPolicy(Qt::NoContextMenu);
-      ledStepX->setMaximumWidth(75);
-      connect(ledStepX, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
-      grAW->addWidget(ledStepX, 0, 3);
-      ledStepY = new QLineEdit(this);
-      ledStepY->setMaximumWidth(75);
-      ledStepY->setContextMenuPolicy(Qt::NoContextMenu);
-      connect(ledStepY, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
-      grAW->addWidget(ledStepY, 1, 3);
-      ledStepZ = new QLineEdit(this);
-      ledStepZ->setMaximumWidth(75);
-      ledStepZ->setContextMenuPolicy(Qt::NoContextMenu);
-      connect(ledStepZ, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
-      grAW->addWidget(ledStepZ, 2, 3);
-      ArrayWid->setLayout(grAW);
-
-      h2->addWidget(ArrayWid);
     lMF->addLayout(h2);
 
     //scale widget
@@ -2157,7 +2083,7 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
 
     // Transform block
     QHBoxLayout * lht = new QHBoxLayout();
-        QPushButton * pbTransform = new QPushButton("Transform to ...");
+        pbTransform = new QPushButton("Transform to ...");
         lht->addWidget(pbTransform);
         connect(pbTransform, &QPushButton::pressed, this, &AGeoObjectDelegate::onChangeShapePressed);
         pbShapeInfo = new QPushButton("Info on this shape");
@@ -2341,16 +2267,16 @@ const AGeoShape * AGeoObjectDelegate::getBaseShapeOfObject(const AGeoObject * ob
 
 void AGeoObjectDelegate::updateTypeLabel()
 {
-    //  if (CurrentObject->Container)
-    //  {
-    //      if (CurrentObject->Container->ObjectType->isHandlingSet())
-    //      {
-    //          if (CurrentObject->Container->ObjectType->isGroup())
-    //              DelegateTypeName += ", group member";
-    //          else
-    //              DelegateTypeName += ", stack member";
-    //      }
-    //  }
+      if (CurrentObject->Container)
+      {
+          if (CurrentObject->Container->ObjectType->isHandlingSet())
+          {
+              if (CurrentObject->Container->ObjectType->isGroup())
+                  DelegateTypeName += ",   groupped";
+              else
+                  DelegateTypeName += ",   stacked";
+          }
+      }
 
     if (CurrentObject->isCompositeMemeber())
         DelegateTypeName += " (logical)";
@@ -2380,13 +2306,6 @@ void AGeoObjectDelegate::updateControlUI()
     {
         cobMat->setEnabled(false);
         cobMat->setCurrentIndex(-1);
-    }
-    if (CurrentObject->ObjectType->isArray())
-    {
-        ledPhi->setEnabled(false);
-        ledTheta->setEnabled(false);
-        ledPhi->setText("0");
-        ledTheta->setText("0");
     }
 
     if (CurrentObject->isCompositeMemeber())
@@ -2445,26 +2364,6 @@ void AGeoObjectDelegate::Update(const AGeoObject *obj)
     ledPhi->setText(QString::number(obj->Orientation[0]));
     ledTheta->setText(QString::number(obj->Orientation[1]));
     ledPsi->setText(QString::number(obj->Orientation[2]));
-
-    if (obj->ObjectType->isArray())
-    {
-        pteShape->setVisible(false);
-        lMat->setVisible(false);
-        cobMat->setVisible(false);
-
-        ledPhi->setEnabled(false);
-        ledTheta->setEnabled(false);
-
-        ATypeArrayObject* array = static_cast<ATypeArrayObject*>(obj->ObjectType);
-        sbNumX->setValue(array->numX);
-        sbNumY->setValue(array->numY);
-        sbNumZ->setValue(array->numZ);
-        ledStepX->setText(QString::number(array->stepX));
-        ledStepY->setText(QString::number(array->stepY));
-        ledStepZ->setText(QString::number(array->stepZ));
-    }
-    else
-        ArrayWid->setVisible(false);
 
     updateTypeLabel();
     updateControlUI();
@@ -3844,10 +3743,102 @@ void AGeoArb8Delegate::onLocalShapeParameterChange()
 AGeoArrayDelegate::AGeoArrayDelegate(const QStringList &materials, QWidget *parent)
    : AGeoObjectDelegate(materials, parent)
 {
+    DelegateTypeName = "Array";
+    pteShape->setVisible(false);
 
+    QVBoxLayout * v = new QVBoxLayout();
+    v->setContentsMargins(50, 0, 50, 0);
+
+    QGridLayout *grAW = new QGridLayout();
+    grAW->setContentsMargins(5, 3, 5, 3);
+    grAW->setVerticalSpacing(0);
+
+    QLabel *la = new QLabel("Number in X:");
+    grAW->addWidget(la, 0, 0);
+    la = new QLabel("Number in Y:");
+    grAW->addWidget(la, 1, 0);
+    la = new QLabel("Number in Z:");
+    grAW->addWidget(la, 2, 0);
+    la = new QLabel("Step in X:");
+    la->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    grAW->addWidget(la, 0, 2);
+    la = new QLabel("Step in Y:");
+    la->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    grAW->addWidget(la, 1, 2);
+    la = new QLabel("Step in Z:");
+    la->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    grAW->addWidget(la, 2, 2);
+    la = new QLabel("mm");
+    grAW->addWidget(la, 0, 4);
+    la = new QLabel("mm");
+    grAW->addWidget(la, 1, 4);
+    la = new QLabel("mm");
+    grAW->addWidget(la, 2, 4);
+
+    sbNumX = new QSpinBox(this);
+    sbNumX->setMaximum(100);
+    sbNumX->setMinimum(0);
+    sbNumX->setContextMenuPolicy(Qt::NoContextMenu);
+    grAW->addWidget(sbNumX, 0, 1);
+    connect(sbNumX, SIGNAL(valueChanged(int)), this, SLOT(onContentChanged()));
+    sbNumY = new QSpinBox(this);
+    sbNumY->setMaximum(100);
+    sbNumY->setMinimum(0);
+    sbNumY->setContextMenuPolicy(Qt::NoContextMenu);
+    grAW->addWidget(sbNumY, 1, 1);
+    connect(sbNumY, SIGNAL(valueChanged(int)), this, SLOT(onContentChanged()));
+    sbNumZ = new QSpinBox(this);
+    sbNumZ->setMaximum(100);
+    sbNumZ->setMinimum(0);
+    sbNumZ->setContextMenuPolicy(Qt::NoContextMenu);
+    grAW->addWidget(sbNumZ, 2, 1);
+    connect(sbNumZ, SIGNAL(valueChanged(int)), this, SLOT(onContentChanged()));
+    ledStepX = new QLineEdit(this);
+    ledStepX->setContextMenuPolicy(Qt::NoContextMenu);
+    ledStepX->setMaximumWidth(75);
+    connect(ledStepX, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
+    grAW->addWidget(ledStepX, 0, 3);
+    ledStepY = new QLineEdit(this);
+    ledStepY->setMaximumWidth(75);
+    ledStepY->setContextMenuPolicy(Qt::NoContextMenu);
+    connect(ledStepY, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
+    grAW->addWidget(ledStepY, 1, 3);
+    ledStepZ = new QLineEdit(this);
+    ledStepZ->setMaximumWidth(75);
+    ledStepZ->setContextMenuPolicy(Qt::NoContextMenu);
+    connect(ledStepZ, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
+    grAW->addWidget(ledStepZ, 2, 3);
+
+    addLocalLayout(grAW);
+
+    cbScale->setChecked(false);
+    cbScale->setVisible(false);
+    lMat->setVisible(false);
+    cobMat->setVisible(false);
+    ledPhi->setText("0");
+    ledPhi->setEnabled(false);
+    ledTheta->setText("0");
+    ledTheta->setEnabled(false);
+
+    pbTransform->setVisible(false);
+    pbShapeInfo->setVisible(false);
+    pbShow->setVisible(false);
+    pbChangeAtt->setVisible(false);
+    pbScriptLine->setVisible(false);
 }
 
-void AGeoArrayDelegate::Update(const AGeoObject *obj)
+void AGeoArrayDelegate::Update(const AGeoObject * obj)
 {
+    AGeoObjectDelegate::Update(obj);
 
+    if (obj->ObjectType->isArray())
+    {
+        ATypeArrayObject* array = static_cast<ATypeArrayObject*>(obj->ObjectType);
+        sbNumX->setValue(array->numX);
+        sbNumY->setValue(array->numY);
+        sbNumZ->setValue(array->numZ);
+        ledStepX->setText(QString::number(array->stepX));
+        ledStepY->setText(QString::number(array->stepY));
+        ledStepZ->setText(QString::number(array->stepZ));
+    }
 }

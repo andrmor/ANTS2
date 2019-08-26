@@ -2350,8 +2350,9 @@ void AGeoObjectDelegate::updateControlUI()
 
 void AGeoObjectDelegate::onHelpRequested()
 {
-    //message(ShapeHelp, Widget);
+    message(ShapeHelp, Widget);
 
+    /*
     QList<AGeoShape*> AvailableShapes = AGeoObject::GetAvailableShapes();
 
     AShapeHelpDialog* d = new AShapeHelpDialog(CurrentObject->Shape, AvailableShapes, this);
@@ -2372,6 +2373,7 @@ void AGeoObjectDelegate::onHelpRequested()
 
     for (int i=0; i<AvailableShapes.size(); i++) delete AvailableShapes[i];
     delete d;
+    */
 }
 
 void AGeoObjectDelegate::Update(const AGeoObject *obj)
@@ -3294,7 +3296,7 @@ void AGeoParaboloidDelegate::onLocalShapeParameterChange()
 AGeoTorusDelegate::AGeoTorusDelegate(const QStringList &materials, QWidget *parent)
     : AGeoObjectDelegate(materials, parent)
 {
-    DelegateTypeName = "Paraboloid";
+    DelegateTypeName = "Torus";
 
     QGridLayout * gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);

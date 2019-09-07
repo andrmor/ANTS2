@@ -2660,8 +2660,13 @@ AGeoBoxDelegate::AGeoBoxDelegate(const QStringList &materials, QWidget *parent)
 {
     DelegateTypeName = "Box";
 
-    ShapeHelp = "A box shape.\nSizeX, SizeY and SizeZ give full size in X, Y and Z direction, respectively\n"
-                "The XYZ position is given for the center of the box";
+    ShapeHelp = "A box shape\n"
+            "\n"
+            "Parameters are the full sizes in X, Y and Z direction\n"
+            "\n"
+            "The XYZ position is given for the center point\n"
+            "\n"
+            "Implemented using TGeoBBox(half_size_X, half_size_Y, half_size_Z)";
 
     QGridLayout * gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);
@@ -2713,6 +2718,14 @@ AGeoTubeDelegate::AGeoTubeDelegate(const QStringList & materials, QWidget *paren
 {
     DelegateTypeName = "Tube";
 
+    ShapeHelp = "A cylinderical shape\n"
+            "\n"
+            "Parameters are the outer and inner diameters and the full height\n"
+            "\n"
+            "The XYZ position is given for the center point\n"
+            "\n"
+            "Implemented using TGeoTube(inner_radius, outer_radius, half_size_Z)";
+
     gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);
     gr->setVerticalSpacing(1);
@@ -2761,6 +2774,15 @@ AGeoTubeSegDelegate::AGeoTubeSegDelegate(const QStringList & materials, QWidget 
 {
     DelegateTypeName = "Tube segment";
 
+    ShapeHelp = "A cylinderical segment shape\n"
+            "\n"
+            "Parameters are the outer and inner diameters, the full height\n"
+            "and the segment angles from and to\n"
+            "\n"
+            "The XYZ position is given for the center point of the cylinder\n"
+            "\n"
+            "Implemented using TGeoTubeSeg(inner_radius, outer_radius, half_size_Z, phi_from, phi_to)";
+
     gr->addWidget(new QLabel("Phi from:"), 3, 0);
     gr->addWidget(new QLabel("Phi to:"), 4, 0);
 
@@ -2802,6 +2824,18 @@ AGeoTubeSegCutDelegate::AGeoTubeSegCutDelegate(const QStringList &materials, QWi
     AGeoTubeSegDelegate(materials, parent)
 {
     DelegateTypeName = "Tube segment cut";
+
+    ShapeHelp = "A cylinderical segment cut shape\n"
+            "\n"
+            "Parameters are the outer and inner diameters,\n"
+            "the full height in Z direction (from -dz to +dz in local coordinates),\n"
+            "the segment angles from and to,\n"
+            "and the unit vectors (Nx, Ny, Ny) of the normals for the lower\n"
+            "and the upper faces at (0,0,-dz) and (0,0,+dz) local coordinates\n"
+            "\n"
+            "The XYZ position is given for the point with (0,0,0) local coordinates\n"
+            "\n"
+            "Implemented using TGeoCtub shape";
 
     gr->addWidget(new QLabel("Low Nx:"), 5, 0);
     gr->addWidget(new QLabel("Low Ny:"), 6, 0);
@@ -3087,6 +3121,14 @@ AGeoElTubeDelegate::AGeoElTubeDelegate(const QStringList &materials, QWidget *pa
     : AGeoObjectDelegate(materials, parent)
 {
     DelegateTypeName = "Elliptical tube";
+
+    ShapeHelp = "An elliptical tube\n"
+            "\n"
+            "Parameters are the diameters in X and Y directions and the full height\n"
+            "\n"
+            "The XYZ position is given for the center point\n"
+            "\n"
+            "Implemented using TGeoEltu(radius_in_X, radius_in_Y, half_size_Z)";
 
     gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);

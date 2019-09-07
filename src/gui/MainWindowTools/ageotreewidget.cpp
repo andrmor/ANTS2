@@ -1715,42 +1715,41 @@ void AGeoWidget::exitEditingMode()
 
 void AGeoWidget::onConfirmPressed()
 {
-  if (SlabDelegate)
+    if (SlabDelegate)
     {
-      confirmChangesForSlab();  // SLAB including LIGHTGUIDE goes here
-      return;
+        confirmChangesForSlab();  // SLAB including LIGHTGUIDE goes here
+        return;
     }
-  else if (GridDelegate)
+    else if (GridDelegate)
     {
-      confirmChangesForGridDelegate(); // Grid element processed here
-      return;
+        confirmChangesForGridDelegate(); // Grid element processed here
+        return;
     }
-  else if (MonitorDelegate)
+    else if (MonitorDelegate)
     {
-      confirmChangesForMonitorDelegate(); // Monitor processed here
-      return;
+        confirmChangesForMonitorDelegate(); // Monitor processed here
+        return;
     }
-  else if (!GeoObjectDelegate)
+    else if (!GeoObjectDelegate)
     {
-      qWarning() << "|||---Confirm triggered without CurrentObject!";
-      exitEditingMode();
-      tw->UpdateGui();
-      return;
+        qWarning() << "|||---Confirm triggered without CurrentObject!";
+        exitEditingMode();
+        tw->UpdateGui();
+        return;
     }
 
-  //    qDebug() << "Validating update data for object" << CurrentObject->Name;
-  bool ok = checkNonSlabObjectDelegateValidity(CurrentObject);
-  if (!ok) return;
+    //    qDebug() << "Validating update data for object" << CurrentObject->Name;
+    bool ok = checkNonSlabObjectDelegateValidity(CurrentObject);
+    if (!ok) return;
 
-  //    qDebug() << "Validation success, can assign new values!";
-  getValuesFromNonSlabDelegates(CurrentObject);
+    //    qDebug() << "Validation success, can assign new values!";
+    getValuesFromNonSlabDelegates(CurrentObject);
 
-  //finalizing
-  exitEditingMode();
-  QString name = CurrentObject->Name;
-  //tw->UpdateGui(name);
-  emit tw->RequestRebuildDetector();
-  tw->UpdateGui(name);
+    exitEditingMode();
+    QString name = CurrentObject->Name;
+    //tw->UpdateGui(name);
+    emit tw->RequestRebuildDetector();
+    tw->UpdateGui(name);
 }
 
 void AGeoWidget::getValuesFromNonSlabDelegates(AGeoObject* objMain)
@@ -1940,7 +1939,7 @@ void AGeoWidget::confirmChangesForSlab()
 
   exitEditingMode();
   QString name = CurrentObject->Name;
-  tw->UpdateGui(name);
+  //tw->UpdateGui(name);
   emit tw->RequestRebuildDetector();
   tw->UpdateGui(name);
 }
@@ -1967,7 +1966,7 @@ void AGeoWidget::confirmChangesForGridDelegate()
 
     exitEditingMode();
     QString name = CurrentObject->Name;
-    tw->UpdateGui(name);
+    //tw->UpdateGui(name);
     emit tw->RequestRebuildDetector();
     tw->UpdateGui(name);
 }
@@ -1990,7 +1989,7 @@ void AGeoWidget::confirmChangesForMonitorDelegate()
 
   exitEditingMode();
 
-  tw->UpdateGui(newName);
+  //tw->UpdateGui(newName);
   emit tw->RequestRebuildDetector();
   tw->UpdateGui(newName);
 }

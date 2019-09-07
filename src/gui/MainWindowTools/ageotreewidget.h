@@ -678,6 +678,7 @@ public:
 
 private:
    const AGeoObject* CurrentObject;
+   QLabel * labType = nullptr;
 
 public slots:
   void Update(const AGeoObject* obj);

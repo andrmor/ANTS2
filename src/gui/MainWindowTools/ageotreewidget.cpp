@@ -1010,7 +1010,7 @@ void AGeoTreeWidget::menuActionAddNewMonitor(QString ContainerName)
     ContObj->addObjectFirst(newObj);
 
     QString name = newObj->Name;
-    UpdateGui(name);
+    //UpdateGui(name);
     emit RequestRebuildDetector();
     UpdateGui(name);
 }
@@ -1367,7 +1367,7 @@ void AGeoWidget::UpdateGui()
     }
   else if (CurrentObject->ObjectType->isMonitor())
     {
-        addInfoLabel("Monitor");
+        addInfoLabel("");
         QStringList particles;
         emit tw->RequestListOfParticles(particles);
         MonitorDelegate = createAndAddMonitorDelegate(CurrentObject, particles);
@@ -2613,12 +2613,20 @@ AMonitorDelegate::AMonitorDelegate(const QStringList & definedParticles)
     palette.setColor( backgroundRole(), QColor( 255, 255, 255 ) );
     frMainFrame->setPalette( palette );
     frMainFrame->setAutoFillBackground( true );
-    frMainFrame->setMinimumHeight(380);
-    frMainFrame->setMaximumHeight(380);
+    //frMainFrame->setMinimumHeight(380);
+    //frMainFrame->setMaximumHeight(380);
     //frMainFrame->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
 
     QVBoxLayout* vl = new QVBoxLayout();
-    vl->setContentsMargins(0,0,0,0);
+    vl->setContentsMargins(5,5,5,5);
+
+    //object type
+    labType = new QLabel("Monitor");
+    labType->setAlignment(Qt::AlignCenter);
+    QFont font = labType->font();
+    font.setBold(true);
+    labType->setFont(font);
+    vl->addWidget(labType);
 
     del = new AMonitorDelegateForm(definedParticles, this);
     del->UpdateVisibility();
@@ -2641,7 +2649,7 @@ void AMonitorDelegate::updateObject(AGeoObject *obj)
 }
 
 void AMonitorDelegate::Update(const AGeoObject *obj)
-{    
+{
     bool bOK = del->updateGUI(obj);
     if (!bOK) return;
 

@@ -138,7 +138,7 @@ public slots:
   void onObjectSelectionChanged(const QString SelectedObject); //starts GUI update
   void onStartEditing();
   void onRequestChangeShape(AGeoShape * NewShape);
-  void OnCustomContextMenuTriggered_forMainObject(QPoint pos);
+  //void OnCustomContextMenuTriggered_forMainObject(QPoint pos);
   void onMonitorRequestsShowSensitiveDirection();
 
   void onRequestShowCurrentObject();
@@ -150,16 +150,12 @@ private slots:
   void onCancelPressed();
 
 private:
-  void confirmChangesForSlab();
   void exitEditingMode();
-  QString getSuffix(AGeoObject *objCont);
-  //void convertToLG(int UpperLower); //0 - upper, 1 - lower
-  QLabel * addInfoLabel(QString text);
-  AGeoBaseDelegate * createAndAddSlabDelegate(AGeoObject *obj);
-  AGeoBaseDelegate * createAndAddGeoObjectDelegate(AGeoObject *obj);
-  AGeoBaseDelegate * createAndAddGridElementDelegate(AGeoObject *obj);
-  AGeoBaseDelegate * createAndAddMonitorDelegate(AGeoObject *obj, QStringList particles);
-  bool checkDelegateValidity(AGeoObject *obj);
+  AGeoBaseDelegate * createAndAddSlabDelegate();
+  AGeoBaseDelegate * createAndAddGeoObjectDelegate();
+  AGeoBaseDelegate * createAndAddGridElementDelegate();
+  AGeoBaseDelegate * createAndAddMonitorDelegate();
+  bool checkDelegateValidity();
 
 signals:
   void showMonitor(const AGeoObject* mon);

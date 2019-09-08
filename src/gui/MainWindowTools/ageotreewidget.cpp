@@ -1565,7 +1565,7 @@ void AGeoWidget::onRequestChangeShape(AGeoShape * NewShape)
 
     delete CurrentObject->Shape;
     CurrentObject->Shape = NewShape;
-    CurrentObject->removeCompositeStructure();
+    if (!CurrentObject->ObjectType->isGrid()) CurrentObject->removeCompositeStructure();
     UpdateGui();
     onConfirmPressed();
 }
@@ -2043,7 +2043,7 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
       hl->addWidget(lname);
       leName = new QLineEdit();
       connect(leName, &QLineEdit::textChanged, this, &AGeoObjectDelegate::onContentChanged);
-      leName->setMaximumWidth(100);
+      leName->setMaximumWidth(200);
       leName->setContextMenuPolicy(Qt::NoContextMenu);
       hl->addWidget(leName);
       lMat = new QLabel();
@@ -3680,7 +3680,7 @@ void AGeoPgonDelegate::onLocalShapeParameterChange()
 AGeoCompositeDelegate::AGeoCompositeDelegate(const QStringList &materials, QWidget *parent)
     : AGeoObjectDelegate(materials, parent)
 {
-    DelegateTypeName = "Composite";
+    DelegateTypeName = "Composite shape";
 
     QVBoxLayout * v = new QVBoxLayout();
     v->setContentsMargins(50, 0, 50, 3);

@@ -2018,8 +2018,12 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
 {
   frMainFrame = new QFrame();
   frMainFrame->setFrameShape(QFrame::Box);
+
+  Widget = frMainFrame;
+  Widget->setContextMenuPolicy(Qt::CustomContextMenu);
+
   QPalette palette = frMainFrame->palette();
-  palette.setColor( backgroundRole(), QColor( 255, 255, 255 ) );
+  palette.setColor( Widget->backgroundRole(), QColor( 255, 255, 255 ) );
   frMainFrame->setPalette( palette );
   frMainFrame->setAutoFillBackground( true );
   lMF = new QVBoxLayout();
@@ -2077,6 +2081,7 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
     hbs->setContentsMargins(2,0,2,0);
         hbs->addStretch();
         cbScale = new QCheckBox("Apply scaling factors");
+        cbScale->setToolTip("Use scaling only if it is the only choice, e.g. to make ellipsoid from a sphere");
         connect(cbScale, &QCheckBox::clicked, this, &AGeoObjectDelegate::onLocalShapeParameterChange);
         connect(cbScale, &QCheckBox::clicked, this, &AGeoObjectDelegate::onContentChanged);
         hbs->addWidget(cbScale);
@@ -2192,9 +2197,6 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
   ledPhi->setValidator(dv);
   ledTheta->setValidator(dv);
   ledPsi->setValidator(dv);
-
-  Widget = frMainFrame;
-  Widget->setContextMenuPolicy(Qt::CustomContextMenu);
 }
 
 void AGeoObjectDelegate::onChangeShapePressed()
@@ -3841,35 +3843,35 @@ AGeoArrayDelegate::AGeoArrayDelegate(const QStringList &materials, QWidget *pare
     la = new QLabel("mm");
     grAW->addWidget(la, 2, 4);
 
-    sbNumX = new QSpinBox(this);
+    sbNumX = new QSpinBox(Widget);
     sbNumX->setMaximum(100);
     sbNumX->setMinimum(0);
     sbNumX->setContextMenuPolicy(Qt::NoContextMenu);
     grAW->addWidget(sbNumX, 0, 1);
     connect(sbNumX, SIGNAL(valueChanged(int)), this, SLOT(onContentChanged()));
-    sbNumY = new QSpinBox(this);
+    sbNumY = new QSpinBox(Widget);
     sbNumY->setMaximum(100);
     sbNumY->setMinimum(0);
     sbNumY->setContextMenuPolicy(Qt::NoContextMenu);
     grAW->addWidget(sbNumY, 1, 1);
     connect(sbNumY, SIGNAL(valueChanged(int)), this, SLOT(onContentChanged()));
-    sbNumZ = new QSpinBox(this);
+    sbNumZ = new QSpinBox(Widget);
     sbNumZ->setMaximum(100);
     sbNumZ->setMinimum(0);
     sbNumZ->setContextMenuPolicy(Qt::NoContextMenu);
     grAW->addWidget(sbNumZ, 2, 1);
     connect(sbNumZ, SIGNAL(valueChanged(int)), this, SLOT(onContentChanged()));
-    ledStepX = new QLineEdit(this);
+    ledStepX = new QLineEdit(Widget);
     ledStepX->setContextMenuPolicy(Qt::NoContextMenu);
     ledStepX->setMaximumWidth(75);
     connect(ledStepX, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
     grAW->addWidget(ledStepX, 0, 3);
-    ledStepY = new QLineEdit(this);
+    ledStepY = new QLineEdit(Widget);
     ledStepY->setMaximumWidth(75);
     ledStepY->setContextMenuPolicy(Qt::NoContextMenu);
     connect(ledStepY, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
     grAW->addWidget(ledStepY, 1, 3);
-    ledStepZ = new QLineEdit(this);
+    ledStepZ = new QLineEdit(Widget);
     ledStepZ->setMaximumWidth(75);
     ledStepZ->setContextMenuPolicy(Qt::NoContextMenu);
     connect(ledStepZ, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));

@@ -3,6 +3,7 @@
 
 #include <QTreeWidget>
 #include <QSyntaxHighlighter>
+#include <QObject>
 
 class AGeoObject;
 class AGeoShape;
@@ -172,7 +173,7 @@ signals:
   void showMonitor(const AGeoObject* mon);
 };
 
-class AGeoObjectDelegate : public QWidget
+class AGeoObjectDelegate : public QObject
 {
     Q_OBJECT
 
@@ -180,7 +181,7 @@ public:
     AGeoObjectDelegate(const QStringList & materials, QWidget * ParentWidget = nullptr);
     virtual ~AGeoObjectDelegate(){}
 
-    QFrame* Widget;
+    QFrame* Widget = nullptr;
 
     QFrame* frMainFrame;
     QLineEdit* leName;

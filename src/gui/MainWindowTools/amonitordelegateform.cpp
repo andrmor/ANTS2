@@ -102,7 +102,7 @@ const QString AMonitorDelegateForm::getName() const
     return ui->leName->text();
 }
 
-void AMonitorDelegateForm::updateObject(AGeoObject *obj)
+void AMonitorDelegateForm::updateObject(AGeoObject *obj) const
 {
     obj->Name = ui->leName->text();
 

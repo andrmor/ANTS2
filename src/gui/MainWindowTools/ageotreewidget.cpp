@@ -1497,7 +1497,7 @@ AGridElementDelegate *AGeoWidget::createAndAddGridElementDelegate(AGeoObject *ob
 
 AMonitorDelegate *AGeoWidget::createAndAddMonitorDelegate(AGeoObject *obj, QStringList particles)
 {
-    AMonitorDelegate* Del = new AMonitorDelegate(particles);
+    AMonitorDelegate* Del = new AMonitorDelegate(particles, this);
     Del->Update(obj);
     Del->Widget->setEnabled(!CurrentObject->fLocked);
     ObjectLayout->addWidget(Del->Widget);
@@ -2629,12 +2629,16 @@ void AGridElementDelegate::onInstructionsForGridRequested()
     QMessageBox::information(this, "", s);
 }
 
-AMonitorDelegate::AMonitorDelegate(const QStringList & definedParticles)
+AMonitorDelegate::AMonitorDelegate(const QStringList & definedParticles, QWidget * ParentWidget) :
+    AGeoBaseDelegate(ParentWidget)
 {
-    QFrame* frMainFrame = new QFrame(this);
+    QFrame * frMainFrame = new QFrame();
     frMainFrame->setFrameShape(QFrame::Box);
+
+    Widget = frMainFrame;
+
     QPalette palette = frMainFrame->palette();
-    palette.setColor( backgroundRole(), QColor( 255, 255, 255 ) );
+    palette.setColor( frMainFrame->backgroundRole(), QColor( 255, 255, 255 ) );
     frMainFrame->setPalette( palette );
     frMainFrame->setAutoFillBackground( true );
     //frMainFrame->setMinimumHeight(380);
@@ -2652,14 +2656,13 @@ AMonitorDelegate::AMonitorDelegate(const QStringList & definedParticles)
     labType->setFont(font);
     vl->addWidget(labType);
 
-    del = new AMonitorDelegateForm(definedParticles, this);
+    del = new AMonitorDelegateForm(definedParticles, Widget);
     del->UpdateVisibility();
     connect(del, &AMonitorDelegateForm::contentChanged, this, &AMonitorDelegate::onContentChanged);
     connect(del, &AMonitorDelegateForm::showSensDirection, this, &AMonitorDelegate::requestShowSensitiveFaces);
     vl->addWidget(del);
 
     frMainFrame->setLayout(vl);
-    Widget = frMainFrame;
 }
 
 const QString AMonitorDelegate::getName() const
@@ -2667,7 +2670,12 @@ const QString AMonitorDelegate::getName() const
     return del->getName();
 }
 
-void AMonitorDelegate::updateObject(AGeoObject *obj)
+bool AMonitorDelegate::isValid(AGeoObject * /*obj*/)
+{
+    return true;
+}
+
+void AMonitorDelegate::updateObject(AGeoObject *obj) const
 {
     del->updateObject(obj);
 }

@@ -219,7 +219,6 @@ private:
     QLineEdit * ledScaleY = nullptr;
     QLineEdit * ledScaleZ = nullptr;
 
-    QComboBox* cobMat;
 protected:
     const AGeoObject * CurrentObject = nullptr;
     QLabel * labType = nullptr;
@@ -234,8 +233,8 @@ protected:
     QPushButton * pbChangeAtt = nullptr;
     QPushButton * pbScriptLine = nullptr;
 
-    //todo: move to private
     QLineEdit* leName;
+    QComboBox* cobMat;
     QPlainTextEdit* pteShape;
     QWidget* PosOrient;
     QLabel* lMat;
@@ -691,27 +690,27 @@ signals:
 
 // ---------------- Monitor delegate ----------------
 
-class AMonitorDelegate : public QWidget
+class AMonitorDelegate : public AGeoBaseDelegate
 {
   Q_OBJECT
 
 public:
-   AMonitorDelegate(const QStringList & definedParticles);
+   AMonitorDelegate(const QStringList & definedParticles, QWidget * ParentWidget);
 
-   QFrame* Widget;
-   AMonitorDelegateForm* del;
+   const QString getName() const override;
+   bool isValid(AGeoObject * obj) override;
+   void updateObject(AGeoObject * obj) const override;
 
-   const QString getName() const;
-   void updateObject(AGeoObject* obj);
+private:
+   AMonitorDelegateForm * del;
 
 public slots:
-  void Update(const AGeoObject* obj);
+  void Update(const AGeoObject * obj) override;
 
 private slots:
   void onContentChanged();  //only to enter editing mode! Object update only on confirm button!
 
 signals:
-  void ContentChanged();
   void requestShowSensitiveFaces();
 };
 

@@ -21,7 +21,7 @@ public:
 
     bool updateGUI(const AGeoObject *obj);
     const QString getName() const;
-    void updateObject(AGeoObject* obj);
+    void updateObject(AGeoObject* obj) const;
 
 public slots:
     void UpdateVisibility();

@@ -159,7 +159,7 @@ private:
   AGeoBaseDelegate * createAndAddGeoObjectDelegate(AGeoObject *obj);
   AGeoBaseDelegate * createAndAddGridElementDelegate(AGeoObject *obj);
   AGeoBaseDelegate * createAndAddMonitorDelegate(AGeoObject *obj, QStringList particles);
-  bool checkNonSlabObjectDelegateValidity(AGeoObject *obj);
+  bool checkDelegateValidity(AGeoObject *obj);
 
 signals:
   void showMonitor(const AGeoObject* mon);
@@ -691,7 +691,7 @@ class AGeoSlabDelegate : public AGeoBaseDelegate
   Q_OBJECT
 
 public:
-    AGeoSlabDelegate(const QStringList & definedParticles, int State, QWidget * ParentWidget);
+    AGeoSlabDelegate(const QStringList & definedMaterials, int State, QWidget * ParentWidget);
 
     const QString getName() const override;
     bool isValid(AGeoObject * obj) override;
@@ -706,7 +706,6 @@ public slots:
 
 private slots:
     void onContentChanged();
-
 };
 
 // ---------------- Monitor delegate ----------------

@@ -1403,46 +1403,7 @@ AGeoBaseDelegate * AGeoWidget::createAndAddGeoObjectDelegate(AGeoObject* obj)
 
 AGeoBaseDelegate * AGeoWidget::createAndAddSlabDelegate(AGeoObject* obj)
 {
-    /*
-    ASlabDelegate* Del = new ASlabDelegate();
-    Del->leName->setMinimumWidth(50);
-    QPalette palette = Del->frMain->palette();
-    palette.setColor( backgroundRole(), QColor( 255, 255, 255 ) );
-    Del->frMain->setPalette( palette );
-    Del->frMain->setAutoFillBackground( true );
-    Del->frMain->setMaximumHeight(80);
-    connect(Del->XYdelegate, SIGNAL(ContentChanged()), Del->XYdelegate, SLOT(updateComponentVisibility()));
-
-    switch (tw->Sandwich->SandwichState)
-      {
-      case (0): //ASandwich::CommonShapeSize
-        Del->XYdelegate->SetShowState(ASlabXYDelegate::ShowNothing); break;
-      case (1): //ASandwich::CommonShape
-        Del->XYdelegate->SetShowState(ASlabXYDelegate::ShowSize); break;
-      case (2): //ASandwich::Individual
-        Del->XYdelegate->SetShowState(ASlabXYDelegate::ShowAll); break;
-      default:
-        qWarning() << "Unknown DetectorSandwich state!"; break;
-      }
-
-    //updating material list
-    Del->comMaterial->clear();
-    Del->comMaterial->addItems(tw->Sandwich->Materials);
-
-    ASlabModel* SlabModel = (static_cast<ATypeSlabObject*>(obj->ObjectType))->SlabModel;
-    Del->UpdateGui(*SlabModel);
-
-    Del->frCenterZ->setVisible(false);
-    Del->fCenter = false;
-    Del->frColor->setVisible(false);
-    Del->cbOnOff->setEnabled(!SlabModel->fCenter);
-
-    Del->frMain->setMinimumHeight(75);
-    */
-
-    QStringList particles;
-    emit tw->RequestListOfParticles(particles);
-    AGeoSlabDelegate * Del = new AGeoSlabDelegate(particles, static_cast<int>(tw->Sandwich->SandwichState), this);
+    AGeoSlabDelegate * Del = new AGeoSlabDelegate(tw->Sandwich->Materials, static_cast<int>(tw->Sandwich->SandwichState), this);
     Del->Update(obj);
     Del->Widget->setEnabled(!CurrentObject->fLocked);
     ObjectLayout->addWidget(Del->Widget);
@@ -1695,7 +1656,7 @@ void AGeoWidget::onConfirmPressed()
     }
 
     //    qDebug() << "Validating update data for object" << CurrentObject->Name;
-    bool ok = checkNonSlabObjectDelegateValidity(CurrentObject);
+    bool ok = checkDelegateValidity(CurrentObject);
     if (!ok) return;
 
     GeoDelegate->updateObject(CurrentObject);
@@ -1707,7 +1668,7 @@ void AGeoWidget::onConfirmPressed()
     tw->UpdateGui(name);
 }
 
-bool AGeoWidget::checkNonSlabObjectDelegateValidity(AGeoObject* obj)
+bool AGeoWidget::checkDelegateValidity(AGeoObject* obj)
 {
     const QString newName = GeoDelegate->getName();
     if (newName != obj->Name && World->isNameExists(newName))
@@ -3925,7 +3886,7 @@ void AGeoSetDelegate::Update(const AGeoObject *obj)
 }
 
 #include "slabdelegate.h"
-AGeoSlabDelegate::AGeoSlabDelegate(const QStringList & definedParticles, int State, QWidget * ParentWidget)
+AGeoSlabDelegate::AGeoSlabDelegate(const QStringList & definedMaterials, int State, QWidget * ParentWidget)
     : AGeoBaseDelegate(ParentWidget)
 {
     QFrame * frMainFrame = new QFrame();
@@ -3970,8 +3931,9 @@ AGeoSlabDelegate::AGeoSlabDelegate(const QStringList & definedParticles, int Sta
         SlabDel->frMain->setMaximumHeight(80);
         SlabDel->frMain->setFrameShape(QFrame::NoFrame);
         connect(SlabDel->XYdelegate, SIGNAL(ContentChanged()), SlabDel->XYdelegate, SLOT(updateComponentVisibility()));
+        connect(SlabDel, &ASlabDelegate::ContentChanged, this, &AGeoSlabDelegate::onContentChanged);
 
-        SlabDel->comMaterial->addItems(definedParticles);
+        SlabDel->comMaterial->addItems(definedMaterials);
 
         SlabDel->frMain->setMinimumHeight(75);
 
@@ -3999,7 +3961,7 @@ void AGeoSlabDelegate::updateObject(AGeoObject * obj) const
 {
     ASlabModel * model = obj->getSlabModel();
 
-    obj->Name = model->name;
+    obj->Name = getName();
     bool fCenter = model->fCenter;
     SlabDel->UpdateModel(model);
     model->fCenter = fCenter; //delegate does not remember center status

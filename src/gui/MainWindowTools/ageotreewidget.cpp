@@ -1228,14 +1228,6 @@ void AGeoTreeWidget::updateIcon(QTreeWidgetItem* item, AGeoObject *obj)
 AGeoWidget::AGeoWidget(AGeoObject *World, AGeoTreeWidget *tw) :
   World(World), tw(tw)
 {
-  CurrentObject = 0;
-  GeoObjectDelegate = 0;
-  SlabDelegate = 0;
-  GridDelegate = 0;
-  MonitorDelegate = 0;
-  fIgnoreSignals = true;
-  fEditingMode = false;
-
   lMain = new QVBoxLayout(this);
   lMain->setContentsMargins(2,2,2,5);
   this->setLayout(lMain);
@@ -1288,100 +1280,82 @@ AGeoWidget::AGeoWidget(AGeoObject *World, AGeoTreeWidget *tw) :
 
 void AGeoWidget::ClearGui()
 {
-  //qDebug() << "Object widget clear triggered!";
-  fIgnoreSignals = true;
+    //qDebug() << "Object widget clear triggered!";
+    fIgnoreSignals = true;
 
-  while(ObjectLayout->count()>0)
+    while(ObjectLayout->count() > 0)
     {
         QLayoutItem* item = ObjectLayout->takeAt(0);
-//          if (item->layout()) {
-//              clearLayout(item->layout());
-//              delete item->layout();
-//          }
         if (item->widget())
-          delete item->widget();
+            delete item->widget();
         delete item;
     }
 
-
-  if (GeoObjectDelegate)
+    if (GeoDelegate)
     {
-      delete GeoObjectDelegate;
-      GeoObjectDelegate = 0;
-    }    
-  if (SlabDelegate)
-    {
-      delete SlabDelegate;
-      SlabDelegate = 0;
+        delete GeoDelegate;
+        GeoDelegate = nullptr;
     }
-  if (GridDelegate)
+    if (SlabDelegate)
     {
-      delete GridDelegate;
-      GridDelegate = 0;
-    }
-  if (MonitorDelegate)
-    {
-      delete MonitorDelegate;
-      MonitorDelegate = 0;
+        delete SlabDelegate;
+        SlabDelegate = 0;
     }
 
-  fIgnoreSignals = false;
+    fIgnoreSignals = false;
 
-  //if update triggered during editing
-  exitEditingMode();
+    //if update triggered during editing
+    exitEditingMode();
 }
 
 void AGeoWidget::UpdateGui()
 {  
-  //qDebug() << "UpdateGui triggered";
-  ClearGui(); //deletes CurrentObjectDelegate
+    //qDebug() << "UpdateGui triggered";
+    ClearGui(); //deletes Delegate!
 
-  if (!CurrentObject) return;
+    if (!CurrentObject) return;
 
-  pbConfirm->setEnabled(true);
-  pbCancel->setEnabled(true);
+    pbConfirm->setEnabled(true);
+    pbCancel->setEnabled(true);
 
-  AGeoObject* contObj = CurrentObject->Container;
-  if (!contObj) return; //true only for World
+    AGeoObject* contObj = CurrentObject->Container;
+    if (!contObj) return; //true only for World
 
-  if (CurrentObject->ObjectType->isSlab()) // SLAB and LIGHGUIDE
+    if (CurrentObject->ObjectType->isSlab()) // SLAB and LIGHGUIDE
     {   //Slab-based
         QString str = "Slab";
         if (CurrentObject->ObjectType->isLightguide())
-          {
+        {
             if (CurrentObject->ObjectType->isUpperLightguide()) str += ", Upper lightguide";
             else if (CurrentObject->ObjectType->isLowerLightguide()) str += ", Lower lightguide";
             else str = "Lightguide error!";
-          }
+        }
         addInfoLabel(str);
 
         SlabDelegate = createAndAddSlabDelegate(CurrentObject);
         SlabDelegate->frMain->setContextMenuPolicy(Qt::CustomContextMenu);
-        connect(SlabDelegate->frMain, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(OnCustomContextMenuTriggered_forMainObject(QPoint)));
+        connect(SlabDelegate->frMain, &QFrame::customContextMenuRequested, this, &AGeoWidget::OnCustomContextMenuTriggered_forMainObject);
     }
-  else if (CurrentObject->ObjectType->isGridElement())
+    else if (CurrentObject->ObjectType->isGridElement())
     {
         addInfoLabel("");
-        GridDelegate = createAndAddGridElementDelegate(CurrentObject);
+        GeoDelegate = createAndAddGridElementDelegate(CurrentObject);
     }
-  else if (CurrentObject->ObjectType->isMonitor())
+    else if (CurrentObject->ObjectType->isMonitor())
     {
         addInfoLabel("");
         QStringList particles;
         emit tw->RequestListOfParticles(particles);
-        MonitorDelegate = createAndAddMonitorDelegate(CurrentObject, particles);
+        GeoDelegate = createAndAddMonitorDelegate(CurrentObject, particles);
     }
-  else
-  {
-      addInfoLabel("");
-      GeoObjectDelegate = createAndAddGeoObjectDelegate(CurrentObject, this);
-      connect(GeoObjectDelegate, &AGeoObjectDelegate::RequestChangeVisAttributes, this, &AGeoWidget::onRequestSetVisAttributes);
-      connect(GeoObjectDelegate, &AGeoObjectDelegate::RequestShow, this, &AGeoWidget::onRequestShowCurrentObject);
-      connect(GeoObjectDelegate, &AGeoObjectDelegate::RequestScriptToClipboard, this, &AGeoWidget::onRequestScriptLineToClipboard);
-  }
+    else
+    {
+        addInfoLabel("");
+        GeoDelegate = createAndAddGeoObjectDelegate(CurrentObject);
+    }
 }
 
-AGeoObjectDelegate* AGeoWidget::createAndAddGeoObjectDelegate(AGeoObject* obj, QWidget * parent)
+AGeoBaseDelegate * AGeoWidget::createAndAddGeoObjectDelegate(AGeoObject* obj)
 {
     AGeoObjectDelegate * Del;
 
@@ -1389,47 +1363,47 @@ AGeoObjectDelegate* AGeoWidget::createAndAddGeoObjectDelegate(AGeoObject* obj, Q
     const QString shape = (scaled ? scaled->getBaseShapeType() : obj->Shape->getShapeType());
 
     if (obj->ObjectType->isArray())
-        Del = new AGeoArrayDelegate(tw->Sandwich->Materials, parent);
+        Del = new AGeoArrayDelegate(tw->Sandwich->Materials, this);
     else if (obj->ObjectType->isHandlingSet())
-        Del = new AGeoSetDelegate(tw->Sandwich->Materials, parent);
+        Del = new AGeoSetDelegate(tw->Sandwich->Materials, this);
     else if (shape == "TGeoBBox")
-        Del = new AGeoBoxDelegate(tw->Sandwich->Materials, parent);
+        Del = new AGeoBoxDelegate(tw->Sandwich->Materials, this);
     else if (shape == "TGeoTube")
-        Del = new AGeoTubeDelegate(tw->Sandwich->Materials, parent);
+        Del = new AGeoTubeDelegate(tw->Sandwich->Materials, this);
     else if (shape == "TGeoTubeSeg")
-        Del = new AGeoTubeSegDelegate(tw->Sandwich->Materials, parent);
+        Del = new AGeoTubeSegDelegate(tw->Sandwich->Materials, this);
     else if (shape == "TGeoCtub")
-        Del = new AGeoTubeSegCutDelegate(tw->Sandwich->Materials, parent);
+        Del = new AGeoTubeSegCutDelegate(tw->Sandwich->Materials, this);
     else if (shape == "TGeoEltu")
-        Del = new AGeoElTubeDelegate(tw->Sandwich->Materials, parent);
+        Del = new AGeoElTubeDelegate(tw->Sandwich->Materials, this);
     else if (shape == "TGeoPara")
-        Del = new AGeoParaDelegate(tw->Sandwich->Materials, parent);
+        Del = new AGeoParaDelegate(tw->Sandwich->Materials, this);
     else if (shape == "TGeoSphere")
-        Del = new AGeoSphereDelegate(tw->Sandwich->Materials, parent);
+        Del = new AGeoSphereDelegate(tw->Sandwich->Materials, this);
     else if (shape == "TGeoTrd1")
-        Del = new AGeoTrapXDelegate(tw->Sandwich->Materials, parent);
+        Del = new AGeoTrapXDelegate(tw->Sandwich->Materials, this);
     else if (shape == "TGeoTrd2")
-        Del = new AGeoTrapXYDelegate(tw->Sandwich->Materials, parent);
+        Del = new AGeoTrapXYDelegate(tw->Sandwich->Materials, this);
     else if (shape == "TGeoCone")
-        Del = new AGeoConeDelegate(tw->Sandwich->Materials, parent);
+        Del = new AGeoConeDelegate(tw->Sandwich->Materials, this);
     else if (shape == "TGeoConeSeg")
-        Del = new AGeoConeSegDelegate(tw->Sandwich->Materials, parent);
+        Del = new AGeoConeSegDelegate(tw->Sandwich->Materials, this);
     else if (shape == "TGeoParaboloid")
-        Del = new AGeoParaboloidDelegate(tw->Sandwich->Materials, parent);
+        Del = new AGeoParaboloidDelegate(tw->Sandwich->Materials, this);
     else if (shape == "TGeoTorus")
-        Del = new AGeoTorusDelegate(tw->Sandwich->Materials, parent);
+        Del = new AGeoTorusDelegate(tw->Sandwich->Materials, this);
     else if (shape == "TGeoPolygon")
-        Del = new AGeoPolygonDelegate(tw->Sandwich->Materials, parent);
+        Del = new AGeoPolygonDelegate(tw->Sandwich->Materials, this);
     else if (shape == "TGeoPcon")
-        Del = new AGeoPconDelegate(tw->Sandwich->Materials, parent);
+        Del = new AGeoPconDelegate(tw->Sandwich->Materials, this);
     else if (shape == "TGeoPgon")
-        Del = new AGeoPgonDelegate(tw->Sandwich->Materials, parent);
+        Del = new AGeoPgonDelegate(tw->Sandwich->Materials, this);
     else if (shape == "TGeoCompositeShape")
-        Del = new AGeoCompositeDelegate(tw->Sandwich->Materials, parent);
+        Del = new AGeoCompositeDelegate(tw->Sandwich->Materials, this);
     else if (shape == "TGeoArb8")
-        Del = new AGeoArb8Delegate(tw->Sandwich->Materials, parent);
+        Del = new AGeoArb8Delegate(tw->Sandwich->Materials, this);
     else
-        Del = new AGeoObjectDelegate(tw->Sandwich->Materials, parent);
+        Del = new AGeoObjectDelegate(tw->Sandwich->Materials, this);
 
     Del->Update(obj);
     Del->Widget->setEnabled(!CurrentObject->fLocked);  //CurrentObject here!!!
@@ -1437,6 +1411,10 @@ AGeoObjectDelegate* AGeoWidget::createAndAddGeoObjectDelegate(AGeoObject* obj, Q
     ObjectLayout->addStretch();    
     connect(Del, &AGeoObjectDelegate::ContentChanged, this, &AGeoWidget::onStartEditing);
     connect(Del, &AGeoObjectDelegate::RequestChangeShape, this, &AGeoWidget::onRequestChangeShape);
+    connect(Del, &AGeoObjectDelegate::RequestChangeVisAttributes, this, &AGeoWidget::onRequestSetVisAttributes);
+    connect(Del, &AGeoObjectDelegate::RequestShow, this, &AGeoWidget::onRequestShowCurrentObject);
+    connect(Del, &AGeoObjectDelegate::RequestScriptToClipboard, this, &AGeoWidget::onRequestScriptLineToClipboard);
+
     return Del;
 }
 
@@ -1482,7 +1460,7 @@ ASlabDelegate* AGeoWidget::createAndAddSlabDelegate(AGeoObject* obj)
     return Del;
 }
 
-AGridElementDelegate *AGeoWidget::createAndAddGridElementDelegate(AGeoObject *obj)
+AGeoBaseDelegate * AGeoWidget::createAndAddGridElementDelegate(AGeoObject *obj)
 {
     AGridElementDelegate * Del = new AGridElementDelegate(this);
     Del->Update(obj);
@@ -1494,7 +1472,7 @@ AGridElementDelegate *AGeoWidget::createAndAddGridElementDelegate(AGeoObject *ob
     return Del;
 }
 
-AMonitorDelegate *AGeoWidget::createAndAddMonitorDelegate(AGeoObject *obj, QStringList particles)
+AGeoBaseDelegate *AGeoWidget::createAndAddMonitorDelegate(AGeoObject *obj, QStringList particles)
 {
     AMonitorDelegate* Del = new AMonitorDelegate(particles, this);
     Del->Update(obj);
@@ -1558,7 +1536,7 @@ void AGeoWidget::onStartEditing()
 
 void AGeoWidget::onRequestChangeShape(AGeoShape * NewShape)
 {
-    if (!GeoObjectDelegate) return;
+    if (!GeoDelegate) return;
     if (!CurrentObject) return;
     if (!NewShape) return;
 
@@ -1719,19 +1697,9 @@ void AGeoWidget::onConfirmPressed()
         confirmChangesForSlab();  // SLAB including LIGHTGUIDE goes here
         return;
     }
-    else if (GridDelegate)
+    else if (!GeoDelegate)
     {
-        confirmChangesForGridDelegate(); // Grid element processed here
-        return;
-    }
-    else if (MonitorDelegate)
-    {
-        confirmChangesForMonitorDelegate(); // Monitor processed here
-        return;
-    }
-    else if (!GeoObjectDelegate)
-    {
-        qWarning() << "|||---Confirm triggered without CurrentObject!";
+        qWarning() << "|||---Confirm triggered without active Delegate!";
         exitEditingMode();
         tw->UpdateGui();
         return;
@@ -1741,8 +1709,7 @@ void AGeoWidget::onConfirmPressed()
     bool ok = checkNonSlabObjectDelegateValidity(CurrentObject);
     if (!ok) return;
 
-    //    qDebug() << "Validation success, can assign new values!";
-    getValuesFromNonSlabDelegates(CurrentObject);
+    GeoDelegate->updateObject(CurrentObject);
 
     exitEditingMode();
     QString name = CurrentObject->Name;
@@ -1751,21 +1718,16 @@ void AGeoWidget::onConfirmPressed()
     tw->UpdateGui(name);
 }
 
-void AGeoWidget::getValuesFromNonSlabDelegates(AGeoObject * objMain)
-{
-    GeoObjectDelegate->updateObject(objMain);
-}
-
 bool AGeoWidget::checkNonSlabObjectDelegateValidity(AGeoObject* obj)
 {
-    const QString newName = GeoObjectDelegate->getName();
+    const QString newName = GeoDelegate->getName();
     if (newName != obj->Name && World->isNameExists(newName))
     {
         QMessageBox::warning(this, "", QString("%1 name already exists").arg(newName));
         return false;
     }
 
-    return GeoObjectDelegate->isValid(obj);
+    return GeoDelegate->isValid(obj);
 }
 
 void AGeoWidget::confirmChangesForSlab()
@@ -1788,40 +1750,6 @@ void AGeoWidget::confirmChangesForSlab()
   //tw->UpdateGui(name);
   emit tw->RequestRebuildDetector();
   tw->UpdateGui(name);
-}
-
-void AGeoWidget::confirmChangesForGridDelegate()
-{
-    GridDelegate->updateObject(CurrentObject);
-
-    exitEditingMode();
-    QString name = CurrentObject->Name;
-    //tw->UpdateGui(name);
-    emit tw->RequestRebuildDetector();
-    tw->UpdateGui(name);
-}
-
-void AGeoWidget::confirmChangesForMonitorDelegate()
-{
-  if (!CurrentObject) return;
-  if (!CurrentObject->ObjectType->isMonitor()) return;
-
-
-  //verification
-  QString newName = MonitorDelegate->getName();
-  if (newName != CurrentObject->Name && World->isNameExists(newName))
-    {
-      QMessageBox::warning(this, "", "This name already exists: "+newName);
-      return;
-    }
-
-  MonitorDelegate->updateObject(CurrentObject);
-
-  exitEditingMode();
-
-  //tw->UpdateGui(newName);
-  emit tw->RequestRebuildDetector();
-  tw->UpdateGui(newName);
 }
 
 void AGeoWidget::onCancelPressed()

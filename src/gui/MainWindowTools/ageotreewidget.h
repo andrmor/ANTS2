@@ -105,6 +105,7 @@ class AMonitorDelegateForm;
 class QHBoxLayout;
 class AGeoShape;
 class QCheckBox;
+class AGeoBaseDelegate;
 
 class AGeoWidget : public QWidget
 {
@@ -118,20 +119,18 @@ private:
   AGeoObject* World;
   AGeoTreeWidget* tw;
 
-  AGeoObject* CurrentObject;
+  AGeoObject* CurrentObject = nullptr;
 
-  AGeoObjectDelegate* GeoObjectDelegate;
-  ASlabDelegate* SlabDelegate;
-  AGridElementDelegate* GridDelegate;
-  AMonitorDelegate* MonitorDelegate;
+  AGeoBaseDelegate* GeoDelegate = nullptr;
+  ASlabDelegate* SlabDelegate = nullptr;
 
   QVBoxLayout *lMain;
   QVBoxLayout *ObjectLayout;
   QFrame      *frBottom;
   QPushButton *pbConfirm, *pbCancel;
 
-  bool fIgnoreSignals;
-  bool fEditingMode;
+  bool fIgnoreSignals = true;
+  bool fEditingMode = false;
 
   void ClearGui();
   void UpdateGui();
@@ -152,19 +151,15 @@ private slots:
   void onCancelPressed();
 
 private:
-  void getValuesFromNonSlabDelegates(AGeoObject *objMain);
   void confirmChangesForSlab();
-  void confirmChangesForGridDelegate();
-  void confirmChangesForMonitorDelegate();
-
   void exitEditingMode();
   QString getSuffix(AGeoObject *objCont);
   //void convertToLG(int UpperLower); //0 - upper, 1 - lower
   QLabel * addInfoLabel(QString text);
-  AGeoObjectDelegate   *createAndAddGeoObjectDelegate(AGeoObject *obj, QWidget *parent);
-  ASlabDelegate        *createAndAddSlabDelegate(AGeoObject *obj);
-  AGridElementDelegate *createAndAddGridElementDelegate(AGeoObject *obj);
-  AMonitorDelegate     *createAndAddMonitorDelegate(AGeoObject *obj, QStringList particles);
+  ASlabDelegate    * createAndAddSlabDelegate(AGeoObject *obj);
+  AGeoBaseDelegate * createAndAddGeoObjectDelegate(AGeoObject *obj);
+  AGeoBaseDelegate * createAndAddGridElementDelegate(AGeoObject *obj);
+  AGeoBaseDelegate * createAndAddMonitorDelegate(AGeoObject *obj, QStringList particles);
   bool checkNonSlabObjectDelegateValidity(AGeoObject *obj);
 
 signals:

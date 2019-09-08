@@ -1361,8 +1361,7 @@ void AGeoWidget::UpdateGui()
     }
   else if (CurrentObject->ObjectType->isGridElement())
     {
-        // special for grid element delegate
-        addInfoLabel("Elementary block of the grid");
+        addInfoLabel("");
         GridDelegate = createAndAddGridElementDelegate(CurrentObject);
     }
   else if (CurrentObject->ObjectType->isMonitor())
@@ -1485,7 +1484,7 @@ ASlabDelegate* AGeoWidget::createAndAddSlabDelegate(AGeoObject* obj)
 
 AGridElementDelegate *AGeoWidget::createAndAddGridElementDelegate(AGeoObject *obj)
 {
-    AGridElementDelegate * Del = new AGridElementDelegate();
+    AGridElementDelegate * Del = new AGridElementDelegate(this);
     Del->Update(obj);
     Del->Widget->setEnabled(!CurrentObject->fLocked);
     ObjectLayout->addWidget(Del->Widget);
@@ -1793,23 +1792,7 @@ void AGeoWidget::confirmChangesForSlab()
 
 void AGeoWidget::confirmChangesForGridDelegate()
 {
-    if (!CurrentObject) return;
-    if (!CurrentObject->ObjectType->isGridElement()) return;
-
-    ATypeGridElementObject* GE = static_cast<ATypeGridElementObject*>(CurrentObject->ObjectType);
-    int shape = GridDelegate->cobShape->currentIndex();
-    if (shape == 0)
-    {
-        if (GE->shape == 2) GE->shape = 1;
-    }
-    else
-    {
-        if (GE->shape != 2) GE->shape = 2;
-    }
-    GE->dz = GridDelegate->ledDZ->text().toDouble();
-    GE->size1 = GridDelegate->ledDX->text().toDouble();
-    GE->size2 = GridDelegate->ledDY->text().toDouble();
-    CurrentObject->updateGridElementShape();
+    GridDelegate->updateObject(CurrentObject);
 
     exitEditingMode();
     QString name = CurrentObject->Name;
@@ -2482,20 +2465,30 @@ void AShapeHighlighter::highlightBlock(const QString &text)
     }
 }
 
-AGridElementDelegate::AGridElementDelegate()
+AGridElementDelegate::AGridElementDelegate(QWidget * ParentWidget)
+    : AGeoBaseDelegate(ParentWidget)
 {
-    CurrentObject = 0;
-
-    frMainFrame = new QFrame(this);
+    QFrame * frMainFrame = new QFrame();
     frMainFrame->setFrameShape(QFrame::Box);
+
+    Widget = frMainFrame;
+
     QPalette palette = frMainFrame->palette();
-    palette.setColor( backgroundRole(), QColor( 255, 255, 255 ) );
+    palette.setColor( frMainFrame->backgroundRole(), QColor( 255, 255, 255 ) );
     frMainFrame->setPalette( palette );
     frMainFrame->setAutoFillBackground( true );
-    frMainFrame->setMinimumHeight(150);
-    frMainFrame->setMaximumHeight(150);
+    //frMainFrame->setMinimumHeight(150);
+    //frMainFrame->setMaximumHeight(150);
 
     QVBoxLayout* vl = new QVBoxLayout();
+
+    //object type
+    QLabel * labType = new QLabel("Elementary block of the grid");
+    labType->setAlignment(Qt::AlignCenter);
+    QFont font = labType->font();
+    font.setBold(true);
+    labType->setFont(font);
+    vl->addWidget(labType);
 
     QGridLayout *lay = new QGridLayout();
     lay->setContentsMargins(20, 5, 20, 5);
@@ -2512,19 +2505,19 @@ AGridElementDelegate::AGridElementDelegate()
       lSize2->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
       lay->addWidget(lSize2, 1, 2);
 
-      cobShape = new QComboBox(this);
+      cobShape = new QComboBox();
       cobShape->addItem("Rectangular");
       cobShape->addItem("Hexagonal");
       connect(cobShape, SIGNAL(activated(int)), this, SLOT(onContentChanged()));
       lay->addWidget(cobShape, 0, 1);
 
-      ledDZ = new QLineEdit(this);
+      ledDZ = new QLineEdit();
       connect(ledDZ, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
       lay->addWidget(ledDZ, 0, 3);
-      ledDX = new QLineEdit(this);
+      ledDX = new QLineEdit();
       connect(ledDX, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
       lay->addWidget(ledDX, 1, 1);
-      ledDY = new QLineEdit(this);
+      ledDY = new QLineEdit();
       connect(ledDY, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
       lay->addWidget(ledDY, 1, 3);
 
@@ -2546,7 +2539,6 @@ AGridElementDelegate::AGridElementDelegate()
     vl->setAlignment(pbAuto, Qt::AlignHCenter);
 
     frMainFrame->setLayout(vl);
-    Widget = frMainFrame;
 
     //installing double validators for edit boxes
     QDoubleValidator* dv = new QDoubleValidator(this);
@@ -2554,6 +2546,39 @@ AGridElementDelegate::AGridElementDelegate()
     ledDX->setValidator(dv);
     ledDY->setValidator(dv);
     ledDZ->setValidator(dv);
+}
+
+const QString AGridElementDelegate::getName() const
+{
+    if (!CurrentObject) return "Undefined";
+    return CurrentObject->Name;
+}
+
+bool AGridElementDelegate::isValid(AGeoObject * /*obj*/)
+{
+    return true;
+}
+
+void AGridElementDelegate::updateObject(AGeoObject * obj) const
+{
+    if (!obj) return;
+    if (!obj->ObjectType->isGridElement()) return;
+
+    ATypeGridElementObject* GE = static_cast<ATypeGridElementObject*>(obj->ObjectType);
+    int shape = cobShape->currentIndex();
+    if (shape == 0)
+    {
+        if (GE->shape == 2) GE->shape = 1;
+    }
+    else
+    {
+        if (GE->shape != 2) GE->shape = 2;
+    }
+    GE->dz =    ledDZ->text().toDouble();
+    GE->size1 = ledDX->text().toDouble();
+    GE->size2 = ledDY->text().toDouble();
+
+    obj->updateGridElementShape();
 }
 
 void AGridElementDelegate::updateVisibility()
@@ -2626,7 +2651,7 @@ void AGridElementDelegate::onInstructionsForGridRequested()
                 "Press the \"Open generation/edit dialog\" button";
 
 
-    QMessageBox::information(this, "", s);
+    QMessageBox::information(Widget, "", s);
 }
 
 AMonitorDelegate::AMonitorDelegate(const QStringList & definedParticles, QWidget * ParentWidget) :
@@ -3955,7 +3980,10 @@ AGeoSetDelegate::AGeoSetDelegate(const QStringList &materials, QWidget *parent)
 
 void AGeoSetDelegate::Update(const AGeoObject *obj)
 {
-    DelegateTypeName = ( obj->ObjectType->isStack() ? "Stack" : "Group" );
+    if (obj->ObjectType->isCompositeContainer())
+        DelegateTypeName = "Container of logical shapes";
+    else
+        DelegateTypeName = ( obj->ObjectType->isStack() ? "Stack" : "Group" );
 
     AGeoObjectDelegate::Update(obj);
 }

@@ -656,27 +656,26 @@ public slots:
 
 // ---------------- Grid delegate ----------------
 
-class AGridElementDelegate : public QWidget
+class AGridElementDelegate : public AGeoBaseDelegate
 {
   Q_OBJECT
 
 public:
-   AGridElementDelegate();
+   AGridElementDelegate(QWidget * ParentWidget);
 
-   QFrame* Widget;
+   const QString getName() const override;
+   bool isValid(AGeoObject * obj) override;
+   void updateObject(AGeoObject * obj) const override;
 
-   QFrame* frMainFrame;
+private:
    QLineEdit *ledDX, *ledDY, *ledDZ;
    QComboBox *cobShape;
    QLabel *lSize1, *lSize2;
 
-private:
-   const AGeoObject* CurrentObject;
-
-   void updateVisibility();
+   const AGeoObject * CurrentObject = nullptr;
 
 public slots:
-  void Update(const AGeoObject* obj);
+  void Update(const AGeoObject* obj) override;
 
 private slots:
   void onContentChanged();  //only to enter editing mode! Object update only on confirm button!
@@ -684,8 +683,10 @@ private slots:
   void onInstructionsForGridRequested();
 
 signals:
-  void ContentChanged();
   void RequestReshapeGrid(QString);
+
+private:
+   void updateVisibility();
 };
 
 // ---------------- Monitor delegate ----------------

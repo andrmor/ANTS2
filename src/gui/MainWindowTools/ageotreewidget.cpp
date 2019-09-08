@@ -1291,16 +1291,7 @@ void AGeoWidget::ClearGui()
         delete item;
     }
 
-    if (GeoDelegate)
-    {
-        delete GeoDelegate;
-        GeoDelegate = nullptr;
-    }
-    if (SlabDelegate)
-    {
-        delete SlabDelegate;
-        SlabDelegate = 0;
-    }
+    delete GeoDelegate; GeoDelegate = nullptr;
 
     fIgnoreSignals = false;
 
@@ -1322,19 +1313,11 @@ void AGeoWidget::UpdateGui()
     if (!contObj) return; //true only for World
 
     if (CurrentObject->ObjectType->isSlab()) // SLAB and LIGHGUIDE
-    {   //Slab-based
-        QString str = "Slab";
-        if (CurrentObject->ObjectType->isLightguide())
-        {
-            if (CurrentObject->ObjectType->isUpperLightguide()) str += ", Upper lightguide";
-            else if (CurrentObject->ObjectType->isLowerLightguide()) str += ", Lower lightguide";
-            else str = "Lightguide error!";
-        }
-        addInfoLabel(str);
-
-        SlabDelegate = createAndAddSlabDelegate(CurrentObject);
-        SlabDelegate->frMain->setContextMenuPolicy(Qt::CustomContextMenu);
-        connect(SlabDelegate->frMain, &QFrame::customContextMenuRequested, this, &AGeoWidget::OnCustomContextMenuTriggered_forMainObject);
+    {
+        addInfoLabel("");
+        GeoDelegate = createAndAddSlabDelegate(CurrentObject);
+        //SlabDelegate->frMain->setContextMenuPolicy(Qt::CustomContextMenu);
+        //connect(SlabDelegate->frMain, &QFrame::customContextMenuRequested, this, &AGeoWidget::OnCustomContextMenuTriggered_forMainObject);
     }
     else if (CurrentObject->ObjectType->isGridElement())
     {
@@ -1418,8 +1401,9 @@ AGeoBaseDelegate * AGeoWidget::createAndAddGeoObjectDelegate(AGeoObject* obj)
     return Del;
 }
 
-ASlabDelegate* AGeoWidget::createAndAddSlabDelegate(AGeoObject* obj)
+AGeoBaseDelegate * AGeoWidget::createAndAddSlabDelegate(AGeoObject* obj)
 {
+    /*
     ASlabDelegate* Del = new ASlabDelegate();
     Del->leName->setMinimumWidth(50);
     QPalette palette = Del->frMain->palette();
@@ -1454,9 +1438,19 @@ ASlabDelegate* AGeoWidget::createAndAddSlabDelegate(AGeoObject* obj)
     Del->cbOnOff->setEnabled(!SlabModel->fCenter);
 
     Del->frMain->setMinimumHeight(75);
-    ObjectLayout->addWidget(Del->frMain);
+    */
+
+    QStringList particles;
+    emit tw->RequestListOfParticles(particles);
+    AGeoSlabDelegate * Del = new AGeoSlabDelegate(particles, static_cast<int>(tw->Sandwich->SandwichState), this);
+    Del->Update(obj);
+    Del->Widget->setEnabled(!CurrentObject->fLocked);
+    ObjectLayout->addWidget(Del->Widget);
     ObjectLayout->addStretch();
-    connect(Del, SIGNAL(ContentChanged()), this, SLOT(onStartEditing()));
+    connect(Del, &AGeoObjectDelegate::ContentChanged, this, &AGeoWidget::onStartEditing);
+    connect(Del, &AGeoObjectDelegate::RequestChangeVisAttributes, this, &AGeoWidget::onRequestSetVisAttributes);
+    connect(Del, &AGeoObjectDelegate::RequestShow, this, &AGeoWidget::onRequestShowCurrentObject);
+    connect(Del, &AGeoObjectDelegate::RequestScriptToClipboard, this, &AGeoWidget::onRequestScriptLineToClipboard);
     return Del;
 }
 
@@ -1692,12 +1686,7 @@ void AGeoWidget::exitEditingMode()
 
 void AGeoWidget::onConfirmPressed()
 {
-    if (SlabDelegate)
-    {
-        confirmChangesForSlab();  // SLAB including LIGHTGUIDE goes here
-        return;
-    }
-    else if (!GeoDelegate)
+    if (!GeoDelegate)
     {
         qWarning() << "|||---Confirm triggered without active Delegate!";
         exitEditingMode();
@@ -1733,6 +1722,7 @@ bool AGeoWidget::checkNonSlabObjectDelegateValidity(AGeoObject* obj)
 void AGeoWidget::confirmChangesForSlab()
 {
   //verification
+    /*
   QString newName = SlabDelegate->leName->text();
   if (newName!=CurrentObject->Name && World->isNameExists(newName))
     {
@@ -1750,6 +1740,7 @@ void AGeoWidget::confirmChangesForSlab()
   //tw->UpdateGui(name);
   emit tw->RequestRebuildDetector();
   tw->UpdateGui(name);
+  */
 }
 
 void AGeoWidget::onCancelPressed()
@@ -1761,9 +1752,23 @@ void AGeoWidget::onCancelPressed()
 // ---- base delegate ----
 
 AGeoBaseDelegate::AGeoBaseDelegate(QWidget * ParentWidget) :
-    ParentWidget(ParentWidget)
-{
+    ParentWidget(ParentWidget) {}
 
+QHBoxLayout * AGeoBaseDelegate::createBottomButtons()
+{
+    QHBoxLayout * abl = new QHBoxLayout();
+
+    pbShow = new QPushButton("Show object");
+    QObject::connect(pbShow, &QPushButton::clicked, this, &AGeoObjectDelegate::RequestShow);
+    abl->addWidget(pbShow);
+    pbChangeAtt = new QPushButton("Color/line");
+    QObject::connect(pbChangeAtt, &QPushButton::clicked, this, &AGeoObjectDelegate::RequestChangeVisAttributes);
+    abl->addWidget(pbChangeAtt);
+    pbScriptLine = new QPushButton("Script to clipboard");
+    QObject::connect(pbScriptLine, &QPushButton::clicked, this, &AGeoObjectDelegate::RequestScriptToClipboard);
+    abl->addWidget(pbScriptLine);
+
+    return abl;
 }
 
 // ---- object delegate ----
@@ -1929,7 +1934,9 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
     lMF->addWidget(PosOrient);
 
     // bottom line buttons
-    QHBoxLayout * abl = new QHBoxLayout();
+    QHBoxLayout * abl = createBottomButtons();
+    /*
+        QHBoxLayout * abl = new QHBoxLayout();
         pbShow = new QPushButton("Show object");
         QObject::connect(pbShow, &QPushButton::clicked, this, &AGeoObjectDelegate::RequestShow);
         abl->addWidget(pbShow);
@@ -1939,6 +1946,7 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
         pbScriptLine = new QPushButton("Script to clipboard");
         QObject::connect(pbScriptLine, &QPushButton::clicked, this, &AGeoObjectDelegate::RequestScriptToClipboard);
         abl->addWidget(pbScriptLine);
+    */
     lMF->addLayout(abl);
 
   frMainFrame->setLayout(lMF);
@@ -3914,4 +3922,110 @@ void AGeoSetDelegate::Update(const AGeoObject *obj)
         DelegateTypeName = ( obj->ObjectType->isStack() ? "Stack" : "Group" );
 
     AGeoObjectDelegate::Update(obj);
+}
+
+#include "slabdelegate.h"
+AGeoSlabDelegate::AGeoSlabDelegate(const QStringList & definedParticles, int State, QWidget * ParentWidget)
+    : AGeoBaseDelegate(ParentWidget)
+{
+    QFrame * frMainFrame = new QFrame();
+    frMainFrame->setFrameShape(QFrame::Box);
+
+    Widget = frMainFrame;
+    Widget->setContextMenuPolicy(Qt::CustomContextMenu);
+
+    QPalette palette = frMainFrame->palette();
+    palette.setColor( Widget->backgroundRole(), QColor( 255, 255, 255 ) );
+    frMainFrame->setPalette(palette);
+    frMainFrame->setAutoFillBackground( true );
+    QVBoxLayout * lMF = new QVBoxLayout();
+        lMF->setContentsMargins(0,5,0,5);
+
+        //object type
+        labType = new QLabel("Slab");
+        labType->setAlignment(Qt::AlignCenter);
+        QFont font = labType->font();
+        font.setBold(true);
+        labType->setFont(font);
+        lMF->addWidget(labType);
+
+        SlabDel = new ASlabDelegate();
+        SlabDel->leName->setMinimumWidth(50);
+
+        ASlabXYDelegate::ShowStates XYDelState = static_cast<ASlabXYDelegate::ShowStates>(State);
+        switch (XYDelState)
+        {
+        case (0): //ASandwich::CommonShapeSize
+            SlabDel->XYdelegate->SetShowState(ASlabXYDelegate::ShowNothing); break;
+        case (1): //ASandwich::CommonShape
+            SlabDel->XYdelegate->SetShowState(ASlabXYDelegate::ShowSize); break;
+        case (2): //ASandwich::Individual
+            SlabDel->XYdelegate->SetShowState(ASlabXYDelegate::ShowAll); break;
+        default:
+            qWarning() << "Unknown DetectorSandwich state!"; break;
+        }
+
+        SlabDel->frMain->setPalette( palette );
+        SlabDel->frMain->setAutoFillBackground( true );
+        SlabDel->frMain->setMaximumHeight(80);
+        SlabDel->frMain->setFrameShape(QFrame::NoFrame);
+        connect(SlabDel->XYdelegate, SIGNAL(ContentChanged()), SlabDel->XYdelegate, SLOT(updateComponentVisibility()));
+
+        SlabDel->comMaterial->addItems(definedParticles);
+
+        SlabDel->frMain->setMinimumHeight(75);
+
+     lMF->addWidget(SlabDel->frMain);
+
+     // bottom line buttons
+     QHBoxLayout * abl = createBottomButtons();
+     abl->setContentsMargins(5,0,5,0);
+     lMF->addLayout(abl);
+
+     Widget->setLayout(lMF);
+}
+
+const QString AGeoSlabDelegate::getName() const
+{
+    return SlabDel->leName->text();
+}
+
+bool AGeoSlabDelegate::isValid(AGeoObject * /*obj*/)
+{
+    return true;
+}
+
+void AGeoSlabDelegate::updateObject(AGeoObject * obj) const
+{
+    ASlabModel * model = obj->getSlabModel();
+
+    obj->Name = model->name;
+    bool fCenter = model->fCenter;
+    SlabDel->UpdateModel(model);
+    model->fCenter = fCenter; //delegate does not remember center status
+}
+
+void AGeoSlabDelegate::Update(const AGeoObject *obj)
+{
+    QString str = "Slab";
+    if (obj->ObjectType->isLightguide())
+    {
+        if (obj->ObjectType->isUpperLightguide()) str += ", Upper lightguide";
+        else if (obj->ObjectType->isLowerLightguide()) str += ", Lower lightguide";
+        else str = "Lightguide error!";
+    }
+    labType->setText(str);
+
+    ASlabModel* SlabModel = (static_cast<ATypeSlabObject*>(obj->ObjectType))->SlabModel;
+    SlabDel->UpdateGui(*SlabModel);
+
+    SlabDel->frCenterZ->setVisible(false);
+    SlabDel->fCenter = false;
+    SlabDel->frColor->setVisible(false);
+    SlabDel->cbOnOff->setEnabled(!SlabModel->fCenter);
+}
+
+void AGeoSlabDelegate::onContentChanged()
+{
+    emit ContentChanged();
 }

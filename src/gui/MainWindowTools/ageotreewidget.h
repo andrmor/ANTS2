@@ -122,7 +122,6 @@ private:
   AGeoObject* CurrentObject = nullptr;
 
   AGeoBaseDelegate* GeoDelegate = nullptr;
-  ASlabDelegate* SlabDelegate = nullptr;
 
   QVBoxLayout *lMain;
   QVBoxLayout *ObjectLayout;
@@ -156,7 +155,7 @@ private:
   QString getSuffix(AGeoObject *objCont);
   //void convertToLG(int UpperLower); //0 - upper, 1 - lower
   QLabel * addInfoLabel(QString text);
-  ASlabDelegate    * createAndAddSlabDelegate(AGeoObject *obj);
+  AGeoBaseDelegate * createAndAddSlabDelegate(AGeoObject *obj);
   AGeoBaseDelegate * createAndAddGeoObjectDelegate(AGeoObject *obj);
   AGeoBaseDelegate * createAndAddGridElementDelegate(AGeoObject *obj);
   AGeoBaseDelegate * createAndAddMonitorDelegate(AGeoObject *obj, QStringList particles);
@@ -175,9 +174,7 @@ public:
     virtual ~AGeoBaseDelegate(){}
 
     virtual const QString getName() const = 0;
-
     virtual bool isValid(AGeoObject * obj) = 0;
-
     virtual void updateObject(AGeoObject * obj) const = 0;
 
 public:
@@ -187,10 +184,20 @@ public slots:
     virtual void Update(const AGeoObject * obj) = 0;
 
 protected:
+    QPushButton * pbShow = nullptr;
+    QPushButton * pbChangeAtt = nullptr;
+    QPushButton * pbScriptLine = nullptr;
+
+    QHBoxLayout * createBottomButtons();
+
+protected:
     QWidget * ParentWidget = nullptr;
 
 signals:
     void ContentChanged();
+    void RequestShow();
+    void RequestChangeVisAttributes();
+    void RequestScriptToClipboard();
 };
 
 class AGeoObjectDelegate : public AGeoBaseDelegate
@@ -223,10 +230,6 @@ protected:
 
     QPushButton * pbTransform = nullptr;
     QPushButton * pbShapeInfo = nullptr;
-
-    QPushButton * pbShow = nullptr;
-    QPushButton * pbChangeAtt = nullptr;
-    QPushButton * pbScriptLine = nullptr;
 
     QLineEdit* leName;
     QComboBox* cobMat;
@@ -261,9 +264,6 @@ private:
 
 signals:
     void RequestChangeShape(AGeoShape * newShape);
-    void RequestShow();
-    void RequestChangeVisAttributes();
-    void RequestScriptToClipboard();
 };
 
 class AGeoBoxDelegate : public AGeoObjectDelegate
@@ -682,6 +682,31 @@ signals:
 
 private:
    void updateVisibility();
+};
+
+// ---- wrap for slab delegate ----
+
+class AGeoSlabDelegate : public AGeoBaseDelegate
+{
+  Q_OBJECT
+
+public:
+    AGeoSlabDelegate(const QStringList & definedParticles, int State, QWidget * ParentWidget);
+
+    const QString getName() const override;
+    bool isValid(AGeoObject * obj) override;
+    void updateObject(AGeoObject * obj) const override;
+
+private:
+    ASlabDelegate * SlabDel = nullptr;
+    QLabel * labType = nullptr;
+
+public slots:
+    void Update(const AGeoObject* obj) override;
+
+private slots:
+    void onContentChanged();
+
 };
 
 // ---------------- Monitor delegate ----------------

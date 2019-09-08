@@ -2506,6 +2506,10 @@ AMonitorDelegate::AMonitorDelegate(const QStringList & definedParticles, QWidget
     connect(del, &AMonitorDelegateForm::showSensDirection, this, &AMonitorDelegate::requestShowSensitiveFaces);
     vl->addWidget(del);
 
+    // bottom line buttons
+    QHBoxLayout * abl = createBottomButtons();
+    vl->addLayout(abl);
+
     frMainFrame->setLayout(vl);
 }
 

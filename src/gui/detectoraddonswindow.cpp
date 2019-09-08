@@ -514,8 +514,11 @@ void DetectorAddOnsWindow::HighlightVolume(QString VolName)
       if (!vol) break;
       QString name = vol->GetName();
 //      qDebug()<<"name: "<<name;
-      if (name == VolName) vol->SetLineColor(kRed);
-//      if (name == VolName) vol->SetLineWidth(3);
+      if (name == VolName)
+      {
+          vol->SetLineColor(kRed);
+          vol->SetLineWidth(3);
+      }
       else vol->SetLineColor(kGray);
     }
 }

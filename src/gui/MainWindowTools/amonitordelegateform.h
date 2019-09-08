@@ -20,7 +20,7 @@ public:
     Ui::AMonitorDelegateForm *ui;
 
     bool updateGUI(const AGeoObject *obj);
-    QString getName() const;
+    const QString getName() const;
     void updateObject(AGeoObject* obj);
 
 public slots:

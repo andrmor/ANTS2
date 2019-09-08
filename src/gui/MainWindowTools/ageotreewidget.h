@@ -152,8 +152,6 @@ private slots:
   void onCancelPressed();
 
 private:
-  void rotate(TVector3* v, double dPhi, double dTheta, double dPsi);
-
   void getValuesFromNonSlabDelegates(AGeoObject *objMain);
   void confirmChangesForSlab();
   void confirmChangesForGridDelegate();
@@ -173,7 +171,34 @@ signals:
   void showMonitor(const AGeoObject* mon);
 };
 
-class AGeoObjectDelegate : public QObject
+class AGeoBaseDelegate : public QObject
+{
+    Q_OBJECT
+
+public:
+    AGeoBaseDelegate(QWidget * ParentWidget);
+    virtual ~AGeoBaseDelegate(){}
+
+    virtual const QString getName() const = 0;
+
+    virtual bool isValid(AGeoObject * obj) = 0;
+
+    virtual void updateObject(AGeoObject * obj) const = 0;
+
+public:
+    QWidget * Widget = nullptr;
+
+public slots:
+    virtual void Update(const AGeoObject * obj) = 0;
+
+protected:
+    QWidget * ParentWidget = nullptr;
+
+signals:
+    void ContentChanged();
+};
+
+class AGeoObjectDelegate : public AGeoBaseDelegate
 {
     Q_OBJECT
 
@@ -181,31 +206,21 @@ public:
     AGeoObjectDelegate(const QStringList & materials, QWidget * ParentWidget = nullptr);
     virtual ~AGeoObjectDelegate(){}
 
-    QFrame* Widget = nullptr;
+    const QString getName() const override;
 
-    QFrame* frMainFrame;
-    QLineEdit* leName;
-    QComboBox* cobMat;
-    QPlainTextEdit* pteShape;
-    QWidget* PosOrient;
-    QLabel* lMat;
-
-    QSpinBox *sbNumX, *sbNumY, *sbNumZ;
-    QLineEdit *ledStepX, *ledStepY, *ledStepZ;
-
-    QLineEdit *ledX, *ledY, *ledZ;
-    QLineEdit *ledPhi, *ledTheta, *ledPsi;
+    bool isValid(AGeoObject * obj) override;
+    void updateObject(AGeoObject * obj) const override;
 
 private:
     QVBoxLayout * lMF = nullptr;      //main layout
 
-    QWidget * scaleWidget = nullptr;
+    QWidget   * scaleWidget = nullptr;
     QLineEdit * ledScaleX = nullptr;
     QLineEdit * ledScaleY = nullptr;
     QLineEdit * ledScaleZ = nullptr;
 
+    QComboBox* cobMat;
 protected:
-    QWidget * ParentWidget = nullptr;
     const AGeoObject * CurrentObject = nullptr;
     QLabel * labType = nullptr;
     QCheckBox * cbScale = nullptr;
@@ -219,8 +234,18 @@ protected:
     QPushButton * pbChangeAtt = nullptr;
     QPushButton * pbScriptLine = nullptr;
 
+    //todo: move to private
+    QLineEdit* leName;
+    QPlainTextEdit* pteShape;
+    QWidget* PosOrient;
+    QLabel* lMat;
+    QSpinBox *sbNumX, *sbNumY, *sbNumZ;
+    QLineEdit *ledStepX, *ledStepY, *ledStepZ;
+    QLineEdit *ledX, *ledY, *ledZ;
+    QLineEdit *ledPhi, *ledTheta, *ledPsi;
+
 public slots:
-    virtual void Update(const AGeoObject * obj);
+    void Update(const AGeoObject * obj) override;
 
 private slots:
     void onContentChanged();          // only to enter the editing mode! Object update is performed only on confirm button click!
@@ -237,8 +262,10 @@ protected:
     void updateTypeLabel();
     void updateControlUI();
 
+private:
+    void rotate(TVector3 & v, double dPhi, double dTheta, double dPsi) const;
+
 signals:
-    void ContentChanged();
     void RequestChangeShape(AGeoShape * newShape);
     void RequestShow();
     void RequestChangeVisAttributes();
@@ -674,12 +701,8 @@ public:
    QFrame* Widget;
    AMonitorDelegateForm* del;
 
-   QString getName() const;
+   const QString getName() const;
    void updateObject(AGeoObject* obj);
-
-private:
-   const AGeoObject* CurrentObject;
-   QLabel * labType = nullptr;
 
 public slots:
   void Update(const AGeoObject* obj);

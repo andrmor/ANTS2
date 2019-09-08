@@ -97,7 +97,7 @@ bool AMonitorDelegateForm::updateGUI(const AGeoObject *obj)
     return true;
 }
 
-QString AMonitorDelegateForm::getName() const
+const QString AMonitorDelegateForm::getName() const
 {
     return ui->leName->text();
 }

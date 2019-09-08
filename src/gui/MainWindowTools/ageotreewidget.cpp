@@ -1752,174 +1752,21 @@ void AGeoWidget::onConfirmPressed()
     tw->UpdateGui(name);
 }
 
-void AGeoWidget::getValuesFromNonSlabDelegates(AGeoObject* objMain)
+void AGeoWidget::getValuesFromNonSlabDelegates(AGeoObject * objMain)
 {
-    QString oldName = objMain->Name;
-    QString newName = GeoObjectDelegate->leName->text();
-    objMain->Name = newName;
-
-    if ( objMain->ObjectType->isHandlingSet() )
-      {
-        //set container object does not have material and shape
-      }
-    else
-      {
-        objMain->Material = GeoObjectDelegate->cobMat->currentIndex();
-        if (objMain->Material == -1) objMain->Material = 0; //protection
-
-        //inherit materials for composite members
-        if (objMain->isCompositeMemeber())
-        {
-           if (objMain->Container && objMain->Container->Container)
-             objMain->Material = objMain->Container->Container->Material;
-        }
-
-        QString newShape = GeoObjectDelegate->pteShape->document()->toPlainText();
-        //qDebug() << "Geting shape values from the delegate"<<newShape;
-        objMain->readShapeFromString(newShape);
-
-        //if it is a set member, need old values of position and angle
-        QVector<double> old;
-        old << objMain->Position[0]    << objMain->Position[1]    << objMain->Position[2]
-            << objMain->Orientation[0] << objMain->Orientation[1] << objMain->Orientation[2];
-
-        objMain->Position[0] = GeoObjectDelegate->ledX->text().toDouble();
-        objMain->Position[1] = GeoObjectDelegate->ledY->text().toDouble();
-        objMain->Position[2] = GeoObjectDelegate->ledZ->text().toDouble();
-        objMain->Orientation[0] = GeoObjectDelegate->ledPhi->text().toDouble();
-        objMain->Orientation[1] = GeoObjectDelegate->ledTheta->text().toDouble();
-        objMain->Orientation[2] = GeoObjectDelegate->ledPsi->text().toDouble();
-
-        // checking was there a rotation of the main object
-        bool fWasRotated = false;
-        for (int i=0; i<3; i++)
-          if (objMain->Orientation[i] != old[3+i])
-            {
-              fWasRotated =true;
-              break;
-            }
-        //qDebug() << "--Was rotated?"<< fWasRotated;
-
-        //for grouped object, taking into accound the shift
-        if (objMain->Container && objMain->Container->ObjectType->isGroup())
-          {
-            for (int iObj=0; iObj<objMain->Container->HostedObjects.size(); iObj++)
-              {
-                AGeoObject* obj = objMain->Container->HostedObjects[iObj];
-                if (obj == objMain) continue;
-
-                //center vector for rotation
-                //in TGeoRotation, first rotation iz around Z, then new X(manual is wrong!) and finally around new Z
-                TVector3 v(obj->Position[0]-old[0], obj->Position[1]-old[1], obj->Position[2]-old[2]);
-
-                //first rotate back to origin in rotation
-                rotate(&v, -old[3+0], 0, 0);
-                rotate(&v, 0, -old[3+1], 0);
-                rotate(&v, 0, 0, -old[3+2]);
-                rotate(&v, objMain->Orientation[0], objMain->Orientation[1], objMain->Orientation[2]);
-
-                for (int i=0; i<3; i++)
-                  {
-                    double delta = objMain->Position[i] - old[i]; //shift in position
-
-                    if (fWasRotated)
-                      {
-                        //shift due to rotation  +  global shift
-                        obj->Position[i] = old[i]+v[i] + delta;
-                        //rotation of the object
-                        double deltaAng = objMain->Orientation[i] - old[3+i];
-                        obj->Orientation[i] += deltaAng;
-                      }
-                    else
-                      obj->Position[i] += delta;
-                  }
-              }
-          }
-        //for stack:
-        if (objMain->Container && objMain->Container->ObjectType->isStack())
-            objMain->updateStack();
-      }
-
-    //additional post-processing
-    if ( objMain->ObjectType->isArray() )
-    {
-        //additional properties for array
-        ATypeArrayObject* array = static_cast<ATypeArrayObject*>(objMain->ObjectType);
-        array->numX = GeoObjectDelegate->sbNumX->value();
-        array->numY = GeoObjectDelegate->sbNumY->value();
-        array->numZ = GeoObjectDelegate->sbNumZ->value();
-        array->stepX = GeoObjectDelegate->ledStepX->text().toDouble();
-        array->stepY = GeoObjectDelegate->ledStepY->text().toDouble();
-        array->stepZ = GeoObjectDelegate->ledStepZ->text().toDouble();
-    }
-    else if (objMain->ObjectType->isComposite())
-    {
-        AGeoObject* logicals = objMain->getContainerWithLogical();
-        if (logicals)
-            logicals->Name = "CompositeSet_"+objMain->Name;
-    }
-    else if (objMain->ObjectType->isGrid())
-    {
-        AGeoObject* GE = objMain->getGridElement();
-        if (GE) 
-		{
-            GE->Name = "GridElement_"+objMain->Name;
-			GE->Material = objMain->Material;
-		}
-    }
-    else if (objMain->isCompositeMemeber())
-    {
-        AGeoObject* cont = objMain->Container;
-        if (cont)
-        {
-            if (cont->ObjectType->isCompositeContainer())
-            {
-                AGeoObject* Composite = cont->Container;
-                if (Composite)
-                { //updating Shape
-                    AGeoComposite* cs = dynamic_cast<AGeoComposite*>(Composite->Shape);
-                    if (cs)
-                    {
-                        cs->members.replaceInStrings(oldName, newName);
-                        cs->GenerationString.replace(oldName, newName);
-                    }
-                }
-            }
-        }
-    }   
+    GeoObjectDelegate->updateObject(objMain);
 }
 
 bool AGeoWidget::checkNonSlabObjectDelegateValidity(AGeoObject* obj)
 {
-    //name of the main object
-    QString newName = GeoObjectDelegate->leName->text();
-    if (newName!=obj->Name && World->isNameExists(newName))
-      {
-        QMessageBox::warning(this, "", "This name already exists: "+newName);
+    const QString newName = GeoObjectDelegate->getName();
+    if (newName != obj->Name && World->isNameExists(newName))
+    {
+        QMessageBox::warning(this, "", QString("%1 name already exists").arg(newName));
         return false;
-      }
+    }
 
-    if ( obj->ObjectType->isHandlingSet())
-      {
-        //for Set object there is no shape to check
-      }
-    else
-      { // this is normal or composite object then
-        //if composite, first check all members
-        QString newShape = GeoObjectDelegate->pteShape->document()->toPlainText();
-        //qDebug() << "--> attempt to set shape using string:"<< newShape;
-
-        bool fValid = obj->readShapeFromString(newShape, true); //only checks, no change!
-        if (!fValid)
-          {
-            if (newShape.simplified().startsWith("TGeoArb8"))
-              QMessageBox::warning(this, "", "Error parsing shape string for "+newName+"\nCould be non-clockwise order of nodes!");
-            else
-              QMessageBox::warning(this, "", "Error parsing shape string for "+newName);
-            return false;
-          }
-      }
-    return true;
+    return GeoObjectDelegate->isValid(obj);
 }
 
 void AGeoWidget::confirmChangesForSlab()
@@ -1994,29 +1841,26 @@ void AGeoWidget::confirmChangesForMonitorDelegate()
   tw->UpdateGui(newName);
 }
 
-void AGeoWidget::rotate(TVector3* v, double dPhi, double dTheta, double dPsi)
-{
-  v->RotateZ( TMath::Pi()/180.0* dPhi );
-  TVector3 X(1,0,0);
-  X.RotateZ( TMath::Pi()/180.0* dPhi );
-  //v.RotateX( TMath::Pi()/180.0* Theta);
-  v->Rotate( TMath::Pi()/180.0* dTheta, X);
-  TVector3 Z(0,0,1);
-  Z.Rotate( TMath::Pi()/180.0* dTheta, X);
- // v.RotateZ( TMath::Pi()/180.0* Psi );
-  v->Rotate( TMath::Pi()/180.0* dPsi, Z );
-}
-
 void AGeoWidget::onCancelPressed()
 {
   exitEditingMode();
   tw->UpdateGui( (CurrentObject) ? CurrentObject->Name : "" );
 }
 
-AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * ParentWidget) :
+// ---- base delegate ----
+
+AGeoBaseDelegate::AGeoBaseDelegate(QWidget * ParentWidget) :
     ParentWidget(ParentWidget)
 {
-  frMainFrame = new QFrame();
+
+}
+
+// ---- object delegate ----
+
+AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * ParentWidget) :
+    AGeoBaseDelegate(ParentWidget)
+{
+  QFrame * frMainFrame = new QFrame();
   frMainFrame->setFrameShape(QFrame::Box);
 
   Widget = frMainFrame;
@@ -2199,6 +2043,173 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
   ledPsi->setValidator(dv);
 }
 
+const QString AGeoObjectDelegate::getName() const
+{
+    return leName->text();
+}
+
+bool AGeoObjectDelegate::isValid(AGeoObject * obj)
+{
+    if ( obj->ObjectType->isHandlingSet())
+    {
+        //for Set object there is no shape to check
+    }
+    else
+    {
+        // this is normal or composite object then
+        //if composite, first check all members
+        QString newShape = pteShape->document()->toPlainText();
+        //qDebug() << "--> attempt to set shape using string:"<< newShape;
+
+        bool fValid = obj->readShapeFromString(newShape, true); //only checks, no change!
+        if (!fValid)
+        {
+            message(newShape.simplified().startsWith("TGeoArb8") ?
+                        "Error parsing shape!\nIt could be non-clockwise order of defined nodes!" :
+                        "Error parsing shape!", ParentWidget);
+            return false;
+        }
+    }
+    return true;
+}
+
+void AGeoObjectDelegate::updateObject(AGeoObject * obj) const
+{
+    const QString oldName = obj->Name;
+    const QString newName = leName->text();
+    obj->Name = newName;
+
+    if ( obj->ObjectType->isHandlingSet() )
+    {
+        //set container object does not have material and shape
+    }
+    else
+    {
+        obj->Material = cobMat->currentIndex();
+        if (obj->Material == -1) obj->Material = 0; //protection
+
+        //inherit materials for composite members
+        if (obj->isCompositeMemeber())
+        {
+            if (obj->Container && obj->Container->Container)
+                obj->Material = obj->Container->Container->Material;
+        }
+
+        QString newShape = pteShape->document()->toPlainText();
+        //qDebug() << "Geting shape values from the delegate"<<newShape;
+        obj->readShapeFromString(newShape);
+
+        //if it is a set member, need old values of position and angle
+        QVector<double> old;
+        old << obj->Position[0]    << obj->Position[1]    << obj->Position[2]
+                << obj->Orientation[0] << obj->Orientation[1] << obj->Orientation[2];
+
+        obj->Position[0] = ledX->text().toDouble();
+        obj->Position[1] = ledY->text().toDouble();
+        obj->Position[2] = ledZ->text().toDouble();
+        obj->Orientation[0] = ledPhi->text().toDouble();
+        obj->Orientation[1] = ledTheta->text().toDouble();
+        obj->Orientation[2] = ledPsi->text().toDouble();
+
+        // checking was there a rotation of the main object
+        bool fWasRotated = false;
+        for (int i=0; i<3; i++)
+            if (obj->Orientation[i] != old[3+i])
+            {
+                fWasRotated =true;
+                break;
+            }
+        //qDebug() << "--Was rotated?"<< fWasRotated;
+
+        //for grouped object, taking into accound the shift
+        if (obj->Container && obj->Container->ObjectType->isGroup())
+        {
+            for (int iObj = 0; iObj < obj->Container->HostedObjects.size(); iObj++)
+            {
+                AGeoObject* hostedObj = obj->Container->HostedObjects[iObj];
+                if (hostedObj == obj) continue;
+
+                //center vector for rotation
+                //in TGeoRotation, first rotation iz around Z, then new X(manual is wrong!) and finally around new Z
+                TVector3 v(hostedObj->Position[0]-old[0], hostedObj->Position[1]-old[1], hostedObj->Position[2]-old[2]);
+
+                //first rotate back to origin in rotation
+                rotate(v, -old[3+0], 0, 0);
+                rotate(v, 0, -old[3+1], 0);
+                rotate(v, 0, 0, -old[3+2]);
+                rotate(v, obj->Orientation[0], obj->Orientation[1], obj->Orientation[2]);
+
+                for (int i=0; i<3; i++)
+                {
+                    double delta = obj->Position[i] - old[i]; //shift in position
+
+                    if (fWasRotated)
+                    {
+                        //shift due to rotation  +  global shift
+                        hostedObj->Position[i] = old[i]+v[i] + delta;
+                        //rotation of the object
+                        double deltaAng = obj->Orientation[i] - old[3+i];
+                        hostedObj->Orientation[i] += deltaAng;
+                    }
+                    else
+                        hostedObj->Position[i] += delta;
+                }
+            }
+        }
+        //for stack:
+        if (obj->Container && obj->Container->ObjectType->isStack())
+            obj->updateStack();
+    }
+
+    //additional post-processing
+    if ( obj->ObjectType->isArray() )
+    {
+        //additional properties for array
+        ATypeArrayObject* array = static_cast<ATypeArrayObject*>(obj->ObjectType);
+        array->numX = sbNumX->value();
+        array->numY = sbNumY->value();
+        array->numZ = sbNumZ->value();
+        array->stepX = ledStepX->text().toDouble();
+        array->stepY = ledStepY->text().toDouble();
+        array->stepZ = ledStepZ->text().toDouble();
+    }
+    else if (obj->ObjectType->isComposite())
+    {
+        AGeoObject* logicals = obj->getContainerWithLogical();
+        if (logicals)
+            logicals->Name = "CompositeSet_"+obj->Name;
+    }
+    else if (obj->ObjectType->isGrid())
+    {
+        AGeoObject* GE = obj->getGridElement();
+        if (GE)
+        {
+            GE->Name = "GridElement_"+obj->Name;
+            GE->Material = obj->Material;
+        }
+    }
+    else if (obj->isCompositeMemeber())
+    {
+        AGeoObject* cont = obj->Container;
+        if (cont)
+        {
+            if (cont->ObjectType->isCompositeContainer())
+            {
+                AGeoObject* Composite = cont->Container;
+                if (Composite)
+                { //updating Shape
+                    AGeoComposite* cs = dynamic_cast<AGeoComposite*>(Composite->Shape);
+                    if (cs)
+                    {
+                        cs->members.replaceInStrings(oldName, newName);
+                        cs->GenerationString.replace(oldName, newName);
+                    }
+                }
+            }
+        }
+    }
+}
+
 void AGeoObjectDelegate::onChangeShapePressed()
 {
     QDialog * d = new QDialog(ParentWidget);
@@ -2348,6 +2359,19 @@ void AGeoObjectDelegate::updateControlUI()
         pbChangeAtt->setVisible(false);
         pbScriptLine->setVisible(false);
     }
+}
+
+void AGeoObjectDelegate::rotate(TVector3 & v, double dPhi, double dTheta, double dPsi) const
+{
+    v.RotateZ( TMath::Pi()/180.0* dPhi );
+    TVector3 X(1,0,0);
+    X.RotateZ( TMath::Pi()/180.0* dPhi );
+    //v.RotateX( TMath::Pi()/180.0* Theta);
+    v.Rotate( TMath::Pi()/180.0* dTheta, X);
+    TVector3 Z(0,0,1);
+    Z.Rotate( TMath::Pi()/180.0* dTheta, X);
+    // v.RotateZ( TMath::Pi()/180.0* Psi );
+    v.Rotate( TMath::Pi()/180.0* dPsi, Z );
 }
 
 void AGeoObjectDelegate::onHelpRequested()
@@ -2607,8 +2631,6 @@ void AGridElementDelegate::onInstructionsForGridRequested()
 
 AMonitorDelegate::AMonitorDelegate(const QStringList & definedParticles)
 {
-    CurrentObject = 0;
-
     QFrame* frMainFrame = new QFrame(this);
     frMainFrame->setFrameShape(QFrame::Box);
     QPalette palette = frMainFrame->palette();
@@ -2623,7 +2645,7 @@ AMonitorDelegate::AMonitorDelegate(const QStringList & definedParticles)
     vl->setContentsMargins(5,5,5,5);
 
     //object type
-    labType = new QLabel("Monitor");
+    QLabel * labType = new QLabel("Monitor");
     labType->setAlignment(Qt::AlignCenter);
     QFont font = labType->font();
     font.setBold(true);
@@ -2640,7 +2662,7 @@ AMonitorDelegate::AMonitorDelegate(const QStringList & definedParticles)
     Widget = frMainFrame;
 }
 
-QString AMonitorDelegate::getName() const
+const QString AMonitorDelegate::getName() const
 {
     return del->getName();
 }
@@ -2654,8 +2676,6 @@ void AMonitorDelegate::Update(const AGeoObject *obj)
 {
     bool bOK = del->updateGUI(obj);
     if (!bOK) return;
-
-    CurrentObject = obj;
 }
 
 void AMonitorDelegate::onContentChanged()

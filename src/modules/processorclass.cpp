@@ -231,8 +231,18 @@ RootMinReconstructorClass::RootMinReconstructorClass(APmHub* PMs,
     }
   else
     {
-      if (RecSet->fRMuseML) FunctorLSML = new ROOT::Math::Functor(&MLstatic, 5);
-      else FunctorLSML = new ROOT::Math::Functor(&Chi2static, 5);
+      if (RecSet->fRMuseML)
+      {
+          //FunctorLSML = new ROOT::Math::Functor(&MLstatic, 5);
+          AFunc_ML * func = new AFunc_ML(this);
+          FunctorLSML = new ROOT::Math::Functor(*func, 4);
+      }
+      else
+      {
+          //FunctorLSML = new ROOT::Math::Functor(&Chi2static, 5);
+          AFunc_Chi2 * func = new AFunc_Chi2(this);
+          FunctorLSML = new ROOT::Math::Functor(*func, 4);
+      }
     }
   RootMinimizer->SetFunction(*FunctorLSML);
 }
@@ -691,6 +701,29 @@ double Chi2static(const double *p) //0-x, 1-y, 2-z, 3-energy, 4-pointer to RootM
   return Reconstructor->LastMiniValue = sum;
 }
 
+double AFunc_Chi2::operator()(const double *p) //0-x, 1-y, 2-z, 3-energy
+{
+    double sum = 0;
+    for (int ipm = 0; ipm < Reconstructor->PMs->count(); ipm++)
+        if (Reconstructor->DynamicPassives->isActive(ipm))
+        {
+            double LRFhere = Reconstructor->LRFs.getLRF(ipm, p)*p[3];
+            if (LRFhere <= 0)
+                return Reconstructor->LastMiniValue *= 1.25; //if LRFs are not defined for this coordinates
+
+            double delta = (LRFhere - Reconstructor->PMsignals->at(ipm));
+            if (Reconstructor->RecSet->fWeightedChi2calculation)
+            {
+                double sigma2;
+                double err = Reconstructor->LRFs.getLRFErr(ipm, p)*p[3];
+                sigma2 = LRFhere + err*err; // if err is not calculated, 0 is returned
+                sum += delta*delta/sigma2;
+            }
+            else sum += delta*delta;
+        }
+    return Reconstructor->LastMiniValue = sum;
+}
+
 double Chi2staticGauss(const double *p)  //0-x, 1-y, 2-z, 3-energy, 4-pointer to RootMinReconstructorClass
 {
   double sum = 0;
@@ -804,6 +837,22 @@ double MLstatic(const double *p) //0-x, 1-y, 2-z, 3-energy, 4-pointer to RootMin
      }
     //qDebug() << "Log Likelihood = " << sum;
   return Reconstructor->LastMiniValue = -sum; //-probability, since we use minimizer
+}
+
+double AFunc_ML::operator()(const double *p) //0-x, 1-y, 2-z, 3-energy
+{
+    double sum = 0;
+    for (int ipm = 0; ipm < Reconstructor->PMs->count(); ipm++)
+        if (Reconstructor->DynamicPassives->isActive(ipm))
+        {
+            double LRFhere = Reconstructor->LRFs.getLRF(ipm, p)*p[3];
+            if (LRFhere <= 0)
+                //return Reconstructor->LastMiniValue += fabs(Reconstructor->LastMiniValue) * 0.25;
+                return Reconstructor->LastMiniValue + fabs(Reconstructor->LastMiniValue) * 0.25;
+
+            sum += Reconstructor->PMsignals->at(ipm)*log(LRFhere) - LRFhere; //measures probability
+        }
+    return Reconstructor->LastMiniValue = -sum; //-probability, since we use minimizer
 }
 
 double MLstaticGauss(const double *p)

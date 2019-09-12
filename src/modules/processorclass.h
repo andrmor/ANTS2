@@ -220,10 +220,28 @@ private:
 };
 
 //static functions to use with Root minimizer
-double Chi2static(const double *p);
+    //double Chi2static(const double *p);
+class AFunc_Chi2
+{
+public:
+    AFunc_Chi2(RootMinReconstructorClass * Reconstructor) : Reconstructor(Reconstructor) {}
+    double operator()(const double *p);
+private:
+    RootMinReconstructorClass * Reconstructor = nullptr;
+};
+
 double Chi2staticGauss(const double *p);
 double Chi2staticDouble(const double *p);
-double MLstatic(const double *p);
+    //double MLstatic(const double *p);
+class AFunc_ML
+{
+public:
+    AFunc_ML(RootMinReconstructorClass * Reconstructor) : Reconstructor(Reconstructor) {}
+    double operator()(const double *p);
+private:
+    RootMinReconstructorClass * Reconstructor = nullptr;
+};
+
 double MLstaticGauss(const double *p);
 double MLstaticDouble(const double *p);
 #endif // PROCESSORCLASS_H

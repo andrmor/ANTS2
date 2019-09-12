@@ -205,159 +205,165 @@ RootMinReconstructorClass::RootMinReconstructorClass(APmHub* PMs,
                                                      EventsDataClass *EventsDataHub,
                                                      ReconstructionSettings *RecSet,
                                                      int CurrentGroup,
-                                                     int EventsFrom, int EventsTo,
-                                                     bool UseGauss)
-  : ProcessorClass(PMs, PMgroups, LRFs, EventsDataHub, RecSet, CurrentGroup, EventsFrom, EventsTo)
+                                                     int EventsFrom, int EventsTo)
+    : ProcessorClass(PMs, PMgroups, LRFs, EventsDataHub, RecSet, CurrentGroup, EventsFrom, EventsTo)
 {    
-  switch (RecSet->RMminuitOption)
+    switch (RecSet->RMminuitOption)
     {
     case 0:
         //RootMinimizer = ROOT::Math::Factory::CreateMinimizer("Minuit2", "Migrad");
         RootMinimizer = new ROOT::Minuit2::Minuit2Minimizer(ROOT::Minuit2::kMigrad);
         break;
-    default: qDebug() << "Error: unknown or not-supported minuit minimizer";
+    default: qDebug() << "Error: unknown option for minimization algorithm!\nSwitching to Simplex";
     case 1:
         //RootMinimizer = ROOT::Math::Factory::CreateMinimizer("Minuit2", "Simplex");
         RootMinimizer = new ROOT::Minuit2::Minuit2Minimizer(ROOT::Minuit2::kSimplex);
         break;
     }
-  RootMinimizer->SetMaxFunctionCalls(RecSet->RMmaxCalls);
-  RootMinimizer->SetMaxIterations(1000);
-  RootMinimizer->SetTolerance(0.001);
-  if (UseGauss)
+    RootMinimizer->SetMaxFunctionCalls(RecSet->RMmaxCalls);
+    RootMinimizer->SetMaxIterations(1000);
+    RootMinimizer->SetTolerance(0.001);
+
+    if (RecSet->fRMuseML)
     {
-      if (RecSet->fRMuseML) FunctorLSML = new ROOT::Math::Functor(&MLstaticGauss, 5);
-      else FunctorLSML = new ROOT::Math::Functor(&Chi2staticGauss, 5);
+        AFunc_ML * func = new AFunc_ML(this);
+        FunctorLSML = new ROOT::Math::Functor(*func, 4);
     }
-  else
+    else
     {
-      if (RecSet->fRMuseML)
-      {
-          //FunctorLSML = new ROOT::Math::Functor(&MLstatic, 5);
-          AFunc_ML * func = new AFunc_ML(this);
-          FunctorLSML = new ROOT::Math::Functor(*func, 4);
-      }
-      else
-      {
-          //FunctorLSML = new ROOT::Math::Functor(&Chi2static, 5);
-          AFunc_Chi2 * func = new AFunc_Chi2(this);
-          FunctorLSML = new ROOT::Math::Functor(*func, 4);
-      }
+        AFunc_Chi2 * func = new AFunc_Chi2(this);
+        FunctorLSML = new ROOT::Math::Functor(*func, 4);
     }
-  RootMinimizer->SetFunction(*FunctorLSML);
+    RootMinimizer->SetFunction(*FunctorLSML);
 }
 
 RootMinReconstructorClass::~RootMinReconstructorClass()
 {
-  delete RootMinimizer;
-  delete FunctorLSML;
+    delete RootMinimizer;
+    delete FunctorLSML;
 }
 
 void RootMinReconstructorClass::execute()
 {
-  fFinished = false;
-  float Factor = 100.0/(EventsTo-EventsFrom);
-  eventsProcessed = 0;
-  //qDebug() << Id<<"> Starting RootMin reconstruction. Events from"<<EventsFrom<<" to "<<EventsTo-1;
+    fFinished = false;
+    float Factor = 100.0/(EventsTo-EventsFrom);
+    eventsProcessed = 0;
+    //qDebug() << Id<<"> Starting RootMin reconstruction. Events from"<<EventsFrom<<" to "<<EventsTo-1;
 
-  for (int iev=EventsFrom; iev<EventsTo; iev++)
+    for (int iev=EventsFrom; iev<EventsTo; iev++)
     {
-      if (fStopRequested) break;
-      AReconRecord *rec = EventsDataHub->ReconstructionData[ThisPmGroup][iev];
-      if (rec->ReconstructionOK)
+        if (fStopRequested) break;
+        AReconRecord *rec = EventsDataHub->ReconstructionData[ThisPmGroup][iev];
+        if (rec->ReconstructionOK)
         {
-          PMsignals = &EventsDataHub->Events[iev];
-          if (RecSet->fUseDynamicPassives) DynamicPassives->calculateDynamicPassives(iev, rec);
+            PMsignals = &EventsDataHub->Events[iev];
+            if (RecSet->fUseDynamicPassives) DynamicPassives->calculateDynamicPassives(iev, rec);
 
-          if (RecSet->fRMuseML)
+            if (RecSet->fRMuseML)
+                LastMiniValue = 1.e100; // reset for the new event
+            else
+                LastMiniValue = 1.e6; //reset for the new event
+            //set variables to minimize
+            if (RecSet->RMstartOption == 1)
             {
-              LastMiniValue = 1.e100; // reset for the new event
-              //RootMinimizer->SetFunction(f_ML); //moved to constructor
+                //starting from XY of the centre of the PM with max signal
+                RootMinimizer->SetVariable(0, "x", PMs->X(rec->iPMwithMaxSignal), RecSet->RMstepX);
+                RootMinimizer->SetVariable(1, "y", PMs->Y(rec->iPMwithMaxSignal), RecSet->RMstepY);
             }
-          else
+            else if (RecSet->RMstartOption == 2 && !EventsDataHub->isScanEmpty())
             {
-              LastMiniValue = 1.e6; //reset for the new event
-              //RootMinimizer->SetFunction(*f_LS);  //moved to constructor
+                //start from true XY position
+                RootMinimizer->SetVariable(0, "x", EventsDataHub->Scan[iev]->Points[0].r[0], RecSet->RMstepX);
+                RootMinimizer->SetVariable(1, "y", EventsDataHub->Scan[iev]->Points[0].r[1], RecSet->RMstepY);
             }
-          //set variables to minimize
-          if (RecSet->RMstartOption == 1)
+            else
             {
-              //starting from XY of the centre of the PM with max signal
-              RootMinimizer->SetVariable(0, "x", PMs->X(rec->iPMwithMaxSignal), RecSet->RMstepX);
-              RootMinimizer->SetVariable(1, "y", PMs->Y(rec->iPMwithMaxSignal), RecSet->RMstepY);
+                //else start from CoG data
+                RootMinimizer->SetVariable(0, "x", rec->xCoG, RecSet->RMstepX);
+                RootMinimizer->SetVariable(1, "y", rec->yCoG, RecSet->RMstepY);
             }
-          else if (RecSet->RMstartOption == 2 && !EventsDataHub->isScanEmpty())
-            {
-              //start from true XY position
-              RootMinimizer->SetVariable(0, "x", EventsDataHub->Scan[iev]->Points[0].r[0], RecSet->RMstepX);
-              RootMinimizer->SetVariable(1, "y", EventsDataHub->Scan[iev]->Points[0].r[1], RecSet->RMstepY);
-            }
-          else
-            {
-              //else start from CoG data
-              RootMinimizer->SetVariable(0, "x", rec->xCoG, RecSet->RMstepX);
-              RootMinimizer->SetVariable(1, "y", rec->yCoG, RecSet->RMstepY);
-            }
-          if (RecSet->fReconstructZ) RootMinimizer->SetVariable(2, "z", rec->zCoG, RecSet->RMstepZ);
-          else RootMinimizer->SetFixedVariable(2, "z", rec->zCoG);
-          if (RecSet->fReconstructEnergy) RootMinimizer->SetLowerLimitedVariable(3, "e", RecSet->SuggestedEnergy, RecSet->RMstepEnergy, 0.);
-          else RootMinimizer->SetFixedVariable(3, "e", RecSet->SuggestedEnergy);
-          //prepare to transfer pointer to this object (Raimundo changed to memcpy at march 7th)
-          //int intPoint = reinterpret_cast<int>(this);
-          double dPoint;// = intPoint;
-          void *thisvalue = this;
-          memcpy(&dPoint, &thisvalue, sizeof(void *));
-          //We need to fix for the possibility that double isn't enough to store void*
-          RootMinimizer->SetFixedVariable(4, "p", dPoint);
+            if (RecSet->fReconstructZ) RootMinimizer->SetVariable(2, "z", rec->zCoG, RecSet->RMstepZ);
+            else RootMinimizer->SetFixedVariable(2, "z", rec->zCoG);
+            if (RecSet->fReconstructEnergy) RootMinimizer->SetLowerLimitedVariable(3, "e", RecSet->SuggestedEnergy, RecSet->RMstepEnergy, 0.);
+            else RootMinimizer->SetFixedVariable(3, "e", RecSet->SuggestedEnergy);
 
-          // do the minimization
-          bool fOK = RootMinimizer->Minimize();
-          //double MinValue = RootMinimizer->MinValue();
-          //if (MinValue != MinValue)
-          //  qDebug()<<"nan detected! Minimization success? "<<fOK;
+            // do the minimization
+            bool fOK = RootMinimizer->Minimize();
+            //double MinValue = RootMinimizer->MinValue();
+            //if (MinValue != MinValue)
+            //  qDebug()<<"nan detected! Minimization success? "<<fOK;
 
-          if (fOK)
+            if (fOK)
             {
-              const double *xs = RootMinimizer->X();
-              rec->Points[0].r[0] = xs[0];
-              rec->Points[0].r[1] = xs[1];
-              rec->Points[0].r[2] = xs[2];
-              rec->Points[0].energy = xs[3];
-              //alread have "OK and Good" status from CoG
+                const double *xs = RootMinimizer->X();
+                rec->Points[0].r[0] = xs[0];
+                rec->Points[0].r[1] = xs[1];
+                rec->Points[0].r[2] = xs[2];
+                rec->Points[0].energy = xs[3];
+                //already have "OK and Good" status from CoG
             }
-          else
+            else
             {
-              rec->chi2 = -1.0; //signal for double event recon that cog rec was allright (default chi2=0)
-              rec->ReconstructionOK = false;
-              rec->GoodEvent = false;
+                rec->chi2 = -1.0; //signal for double event reconstructuion that cog rec was allright (default chi2=0)
+                rec->ReconstructionOK = false;
+                rec->GoodEvent = false;
             }
         }
-      //else CoG failed event
+        //else CoG failed event
 
-      eventsProcessed++;
-      Progress = eventsProcessed*Factor;
+        eventsProcessed++;
+        Progress = eventsProcessed*Factor;
     }
-  emit finished();
-  fFinished = true;
+    emit finished();
+    fFinished = true;
 }
 
 // -----Experimental-----
-RootMinRangedReconstructorClass::RootMinRangedReconstructorClass(APmHub *PMs, APmGroupsManager *PMgroups, ALrfModuleSelector *LRFs, EventsDataClass *EventsDataHub, ReconstructionSettings *RecSet, int ThisPmGroup, int EventsFrom, int EventsTo, double Range, bool UseGauss) :
-    RootMinReconstructorClass(PMs, PMgroups, LRFs, EventsDataHub, RecSet, ThisPmGroup, EventsFrom, EventsTo, UseGauss), Range(Range)
+RootMinRangedReconstructorClass::RootMinRangedReconstructorClass(APmHub *PMs, APmGroupsManager *PMgroups, ALrfModuleSelector *LRFs, EventsDataClass *EventsDataHub, ReconstructionSettings *RecSet, int ThisPmGroup, int EventsFrom, int EventsTo, double Range, bool UseGauss)
+//   : RootMinReconstructorClass(PMs, PMgroups, LRFs, EventsDataHub, RecSet, ThisPmGroup, EventsFrom, EventsTo, UseGauss), Range(Range)
+//{
+//    qDebug() << "Warning! Experimental feature activated - reconstruction by RootMin for ranged X or Y\nScanX or ScanY of 1e10 -> free search, otherwise within"<<Range<<"from ScanX or ScanY value";
+//}
+    : ProcessorClass(PMs, PMgroups, LRFs, EventsDataHub, RecSet, ThisPmGroup, EventsFrom, EventsTo), Range(Range), bUseGauss(UseGauss)
 {
-    qDebug() << "Warning! Experimental feature activated - reconstruction by RootMin for ranged X or Y\nScanX or ScanY of 1e10 -> free search, otherwise within"<<Range<<"from ScanX or ScanY value";
+    switch (RecSet->RMminuitOption)
+    {
+    case 0:
+        RootMinimizer = new ROOT::Minuit2::Minuit2Minimizer(ROOT::Minuit2::kMigrad);
+        break;
+    default: qDebug() << "Error: unknown minimization algorithm!\nSwitching to Simplex";
+    case 1:
+        RootMinimizer = new ROOT::Minuit2::Minuit2Minimizer(ROOT::Minuit2::kSimplex);
+        break;
+    }
+    RootMinimizer->SetMaxFunctionCalls(RecSet->RMmaxCalls);
+    RootMinimizer->SetMaxIterations(1000);
+    RootMinimizer->SetTolerance(0.001);
+    if (RecSet->fRMuseML)
+    {
+        AFunc_MLrange * func = new AFunc_MLrange(this);
+        FunctorLSML = new ROOT::Math::Functor(*func, 4);
+    }
+    else
+    {
+        AFunc_Chi2range * func = new AFunc_Chi2range(this);
+        FunctorLSML = new ROOT::Math::Functor(*func, 4);
+    }
+
+    RootMinimizer->SetFunction(*FunctorLSML);
 }
 
-RootMinRangedReconstructorClass::~RootMinRangedReconstructorClass() {}
+RootMinRangedReconstructorClass::~RootMinRangedReconstructorClass()
+{
+    delete RootMinimizer;
+    delete FunctorLSML;
+}
 
 void RootMinRangedReconstructorClass::execute()
 {
     fFinished = false;
     float Factor = 100.0/(EventsTo-EventsFrom);
     eventsProcessed = 0;
-    //qDebug() << Id<<"> Starting RootMinRanged reconstruction. Events from"<<EventsFrom<<" to "<<EventsTo-1;
-    //qDebug() << "Range:"<<Range<<"StepXY"<<RecSet->RMstepX<<RecSet->RMstepY<<"Start option:"<<RecSet->RMstartOption;
-    //qDebug() << "ML?"<<RecSet->fRMuseML<<"Z?"<<RecSet->fReconstructZ<<"En?"<<RecSet->fReconstructEnergy;
 
     for (int iev=EventsFrom; iev<EventsTo; iev++)
       {
@@ -422,13 +428,6 @@ void RootMinRangedReconstructorClass::execute()
             else RootMinimizer->SetFixedVariable(2, "z", rec->zCoG);
             if (RecSet->fReconstructEnergy) RootMinimizer->SetLowerLimitedVariable(3, "e", RecSet->SuggestedEnergy, RecSet->RMstepEnergy, 0.);
             else RootMinimizer->SetFixedVariable(3, "e", RecSet->SuggestedEnergy);
-            //prepare to transfer pointer to this object (Raimundo changed to memcpy at march 7th)
-            //int intPoint = reinterpret_cast<int>(this);
-            double dPoint;// = intPoint;
-            void *thisvalue = this;
-            memcpy(&dPoint, &thisvalue, sizeof(void *));
-            //We need to fix for the possibility that double isn't enough to store void*
-            RootMinimizer->SetFixedVariable(4, "p", dPoint);
 
             // do the minimization
             bool fOK = RootMinimizer->Minimize();
@@ -471,123 +470,125 @@ RootMinDoubleReconstructorClass::RootMinDoubleReconstructorClass(APmHub* PMs,
                                                                  int EventsFrom, int EventsTo)
     : ProcessorClass(PMs, PMgroups, LRFs, EventsDataHub, RecSet, CurrentGroup, EventsFrom, EventsTo)
 {
-  switch (RecSet->RMminuitOption)
+    switch (RecSet->RMminuitOption)
     {
     case 0:
         //RootMinimizer = ROOT::Math::Factory::CreateMinimizer("Minuit2", "Migrad");
         RootMinimizer = new ROOT::Minuit2::Minuit2Minimizer(ROOT::Minuit2::kMigrad);
         break;
-    default: qDebug() << "Error: unknown or not-supported minuit minimizer";
+    default: qDebug() << "Error: unknown minimization algorithm!\nSwitching to Simplex";
     case 1:
         //RootMinimizer = ROOT::Math::Factory::CreateMinimizer("Minuit2", "Simplex");
         RootMinimizer = new ROOT::Minuit2::Minuit2Minimizer(ROOT::Minuit2::kSimplex);
         break;
     }
-  RootMinimizer->SetMaxFunctionCalls(RecSet->RMmaxCalls);
-  RootMinimizer->SetMaxIterations(1000);
-  RootMinimizer->SetTolerance(0.001);
+    RootMinimizer->SetMaxFunctionCalls(RecSet->RMmaxCalls);
+    RootMinimizer->SetMaxIterations(1000);
+    RootMinimizer->SetTolerance(0.001);
 
-  if (RecSet->fRMuseML) FunctorLSML = new ROOT::Math::Functor(&MLstaticDouble, 9);
-  else FunctorLSML = new ROOT::Math::Functor(&Chi2staticDouble, 9);
-  RootMinimizer->SetFunction(*FunctorLSML);
+    if (RecSet->fRMuseML)
+    {
+        AFunc_MLdouble * func = new AFunc_MLdouble(this);
+        FunctorLSML = new ROOT::Math::Functor(*func, 8);
+    }
+    else
+    {
+        AFunc_Chi2double * func = new AFunc_Chi2double(this);
+        FunctorLSML = new ROOT::Math::Functor(*func, 8);
+    }
+    RootMinimizer->SetFunction(*FunctorLSML);
 }
+
 RootMinDoubleReconstructorClass::~RootMinDoubleReconstructorClass()
 {
-  delete RootMinimizer;
-  delete FunctorLSML;
+    delete RootMinimizer;
+    delete FunctorLSML;
 }
 
 void RootMinDoubleReconstructorClass::execute()
 {
-  fFinished = false;
-  float Factor = 100.0/(EventsTo-EventsFrom);
-  eventsProcessed = 0;
-  //qDebug() << Id<<"> Starting RootMin_2 reconstruction. Events from"<<EventsFrom<<" to "<<EventsTo-1;
+    fFinished = false;
+    float Factor = 100.0/(EventsTo-EventsFrom);
+    eventsProcessed = 0;
+    //qDebug() << Id<<"> Starting RootMin_2 reconstruction. Events from"<<EventsFrom<<" to "<<EventsTo-1;
 
-  for (int iev=EventsFrom; iev<EventsTo; iev++)
+    for (int iev=EventsFrom; iev<EventsTo; iev++)
     {
-      if (fStopRequested) break;
-      AReconRecord *rec = EventsDataHub->ReconstructionData[ThisPmGroup][iev];
-      if (rec->ReconstructionOK || rec->chi2 == -1) //chi2=-1 if single rec failed, but CoG was ok
+        if (fStopRequested) break;
+        AReconRecord *rec = EventsDataHub->ReconstructionData[ThisPmGroup][iev];
+        if (rec->ReconstructionOK || rec->chi2 == -1) //chi2=-1 if single rec failed, but CoG was ok
         {
-          PMsignals = &EventsDataHub->Events[iev];
-          if (RecSet->fUseDynamicPassives) DynamicPassives->calculateDynamicPassives(iev, rec);
+            PMsignals = &EventsDataHub->Events[iev];
+            if (RecSet->fUseDynamicPassives) DynamicPassives->calculateDynamicPassives(iev, rec);
 
-          //=== Reconstructing as double event ===
-          LastMiniValue = 1.0e6; //reset for the new event
+            //=== Reconstructing as double event ===
+            LastMiniValue = 1.0e6; //reset for the new event
 
-          // for the moment, have a weak procedure to find the second starting coordinate - XY of PM with the second strongest signal
-          int ipmWithSecondMaxSignal = 0;
-          double SecondMaxSignal = -1.0e10;
-          for (int ipm=0; ipm < PMsignals->count(); ipm++)
-            if (DynamicPassives->isStaticActive(ipm))
-             {
-               if (ipm == rec->iPMwithMaxSignal) continue;
-               //double sig = PMsignals->at(ipm) / Detector->PMs->at(ipm).relGain;
-               double sig = PMsignals->at(ipm) / PMgroups->Groups.at(ThisPmGroup)->PMS.at(ipm).gain;
-               if (sig > SecondMaxSignal)
-                 {
-                   SecondMaxSignal = sig;
-                   ipmWithSecondMaxSignal = ipm;
-                 }
-              }
-           //qDebug() << iPMwithMaxSignal << ipmWithSecondMaxSignal;
+            // for the moment, have a weak procedure to find the second starting coordinate - XY of PM with the second strongest signal
+            int ipmWithSecondMaxSignal = 0;
+            double SecondMaxSignal = -1.0e10;
+            for (int ipm=0; ipm < PMsignals->count(); ipm++)
+                if (DynamicPassives->isStaticActive(ipm))
+                {
+                    if (ipm == rec->iPMwithMaxSignal) continue;
+                    //double sig = PMsignals->at(ipm) / Detector->PMs->at(ipm).relGain;
+                    double sig = PMsignals->at(ipm) / PMgroups->Groups.at(ThisPmGroup)->PMS.at(ipm).gain;
+                    if (sig > SecondMaxSignal)
+                    {
+                        SecondMaxSignal = sig;
+                        ipmWithSecondMaxSignal = ipm;
+                    }
+                }
+            //qDebug() << iPMwithMaxSignal << ipmWithSecondMaxSignal;
 
-           RootMinimizer->SetVariable(0, "x1", PMs->X(rec->iPMwithMaxSignal), RecSet->RMstepX);
-           RootMinimizer->SetVariable(1, "y1", PMs->Y(rec->iPMwithMaxSignal), RecSet->RMstepY);
-           if (RecSet->fReconstructZ) RootMinimizer->SetVariable(2, "z1", rec->zCoG, RecSet->RMstepZ);
-           else RootMinimizer->SetFixedVariable(2, "z1", rec->zCoG);
-           if (RecSet->fReconstructEnergy) RootMinimizer->SetLowerLimitedVariable(3, "e1", 0.5*RecSet->SuggestedEnergy, RecSet->RMstepEnergy, 0.);
-           else RootMinimizer->SetFixedVariable(3, "e1", 1.0);
-           RootMinimizer->SetVariable(4, "x2", PMs->X(ipmWithSecondMaxSignal), RecSet->RMstepX);
-           RootMinimizer->SetVariable(5, "y2", PMs->Y(ipmWithSecondMaxSignal), RecSet->RMstepY);
-           if (RecSet->fReconstructZ) RootMinimizer->SetVariable(6, "z2", rec->zCoG, RecSet->RMstepZ);
-           else RootMinimizer->SetFixedVariable(6, "z2", rec->zCoG);
-           if (RecSet->fReconstructEnergy) RootMinimizer->SetLowerLimitedVariable(7, "e2", 0.5*RecSet->SuggestedEnergy, RecSet->RMstepEnergy, 0.);
-           else RootMinimizer->SetFixedVariable(7, "e2", 1.0);
-           //prepare to transfer pointer to this object (Raimundo changed to memcpy at march 7th)
-           //int intPoint = reinterpret_cast<int>(this);
-           double dPoint;// = intPoint;
-           void *thisvalue = this;
-           //We need to fix for the possibility that double isn't enough to store void*
-           memcpy(&dPoint, &thisvalue, sizeof(void *));
-           RootMinimizer->SetFixedVariable(8, "p", dPoint);
+            RootMinimizer->SetVariable(0, "x1", PMs->X(rec->iPMwithMaxSignal), RecSet->RMstepX);
+            RootMinimizer->SetVariable(1, "y1", PMs->Y(rec->iPMwithMaxSignal), RecSet->RMstepY);
+            if (RecSet->fReconstructZ) RootMinimizer->SetVariable(2, "z1", rec->zCoG, RecSet->RMstepZ);
+            else RootMinimizer->SetFixedVariable(2, "z1", rec->zCoG);
+            if (RecSet->fReconstructEnergy) RootMinimizer->SetLowerLimitedVariable(3, "e1", 0.5*RecSet->SuggestedEnergy, RecSet->RMstepEnergy, 0.);
+            else RootMinimizer->SetFixedVariable(3, "e1", 1.0);
+            RootMinimizer->SetVariable(4, "x2", PMs->X(ipmWithSecondMaxSignal), RecSet->RMstepX);
+            RootMinimizer->SetVariable(5, "y2", PMs->Y(ipmWithSecondMaxSignal), RecSet->RMstepY);
+            if (RecSet->fReconstructZ) RootMinimizer->SetVariable(6, "z2", rec->zCoG, RecSet->RMstepZ);
+            else RootMinimizer->SetFixedVariable(6, "z2", rec->zCoG);
+            if (RecSet->fReconstructEnergy) RootMinimizer->SetLowerLimitedVariable(7, "e2", 0.5*RecSet->SuggestedEnergy, RecSet->RMstepEnergy, 0.);
+            else RootMinimizer->SetFixedVariable(7, "e2", 1.0);
 
-           bool fOK = RootMinimizer->Minimize();
-           //qDebug()<<"-------------Minimization success? "<<fOK;
-           //double MinValue = RootMinimizer->MinValue();
-           //qDebug() << "MinValue:" << MinValue;
-           if (fOK)
-             {
-               //reconstruction success
-               const double *xs = RootMinimizer->X(); //results
-               //calculating Chi2 for double events
-               //qDebug() << "Starting chi2  calc for double";
-               double chi2double = calculateChi2DoubleEvent(xs);
-               //qDebug() << "done!";
+            bool fOK = RootMinimizer->Minimize();
+            //qDebug()<<"-------------Minimization success? "<<fOK;
+            //double MinValue = RootMinimizer->MinValue();
+            //qDebug() << "MinValue:" << MinValue;
+            if (fOK)
+            {
+                //reconstruction success
+                const double *xs = RootMinimizer->X(); //results
+                //calculating Chi2 for double events
+                //qDebug() << "Starting chi2  calc for double";
+                double chi2double = calculateChi2DoubleEvent(xs);
+                //qDebug() << "done!";
 
-               if (RecSet->MultipleEventOption == 1 || chi2double<rec->chi2) // == 2 - comparing two chi2
-                 {
-                   rec->Points[0].r[0] = xs[0];
-                   rec->Points[0].r[1] = xs[1];
-                   rec->Points[0].r[2] = xs[2];
-                   rec->Points[0].energy = xs[3];
-                   rec->Points.AddPoint(xs[4], xs[5], xs[6], xs[7]);
-                   rec->chi2 = chi2double;
-                   rec->ReconstructionOK = true;
-                 }
-               //else leaving the old record
-             }
-           else rec->ReconstructionOK = false;
+                if (RecSet->MultipleEventOption == 1 || chi2double<rec->chi2) // == 2 - comparing two chi2
+                {
+                    rec->Points[0].r[0] = xs[0];
+                    rec->Points[0].r[1] = xs[1];
+                    rec->Points[0].r[2] = xs[2];
+                    rec->Points[0].energy = xs[3];
+                    rec->Points.AddPoint(xs[4], xs[5], xs[6], xs[7]);
+                    rec->chi2 = chi2double;
+                    rec->ReconstructionOK = true;
+                }
+                //else leaving the old record
+            }
+            else rec->ReconstructionOK = false;
 
         }
-      //else CoG failed event
+        //else CoG failed event
 
-      eventsProcessed++;
-      Progress = eventsProcessed*Factor;
+        eventsProcessed++;
+        Progress = eventsProcessed*Factor;
     }
-  emit finished();
-  fFinished = true;
+    emit finished();
+    fFinished = true;
 }
 
 double RootMinDoubleReconstructorClass::calculateChi2DoubleEvent(const double *result)
@@ -669,6 +670,7 @@ double ProcessorClass::calculateMLfactor(int iev, AReconRecord *rec)
   return -sum; //-probability, since look for minimum in the caller code
 }
 
+/*
 double Chi2static(const double *p) //0-x, 1-y, 2-z, 3-energy, 4-pointer to RootMinReconstructorClass
 {
   double sum = 0;
@@ -700,6 +702,7 @@ double Chi2static(const double *p) //0-x, 1-y, 2-z, 3-energy, 4-pointer to RootM
     // qDebug() << "LS chi2 = " << sum;
   return Reconstructor->LastMiniValue = sum;
 }
+*/
 
 double AFunc_Chi2::operator()(const double *p) //0-x, 1-y, 2-z, 3-energy
 {
@@ -724,6 +727,7 @@ double AFunc_Chi2::operator()(const double *p) //0-x, 1-y, 2-z, 3-energy
     return Reconstructor->LastMiniValue = sum;
 }
 
+/*
 double Chi2staticGauss(const double *p)  //0-x, 1-y, 2-z, 3-energy, 4-pointer to RootMinReconstructorClass
 {
   double sum = 0;
@@ -770,7 +774,56 @@ double Chi2staticGauss(const double *p)  //0-x, 1-y, 2-z, 3-energy, 4-pointer to
 
   return Reconstructor->LastMiniValue = sum;
 }
+*/
 
+double AFunc_Chi2range::operator()(const double *p)
+{
+    double sum = 0;
+    for (int ipm = 0; ipm < Reconstructor->PMs->count(); ipm++)
+      if (Reconstructor->DynamicPassives->isActive(ipm))
+       {
+         double LRFhere = Reconstructor->LRFs.getLRF(ipm, p)*p[3];
+         if (LRFhere <= 0) return Reconstructor->LastMiniValue *= 1.25; //if LRFs are not defined for this coordinates
+
+         double delta = (LRFhere - Reconstructor->PMsignals->at(ipm));
+         if (Reconstructor->RecSet->fWeightedChi2calculation)
+           {
+              double sigma2;
+              double err = Reconstructor->LRFs.getLRFErr(ipm, p)*p[3];
+              sigma2 = LRFhere + err*err; // if err is not calculated, 0 is returned
+              sum += delta*delta/sigma2;
+           }
+         else sum += delta*delta;
+       }
+
+    if (Reconstructor->bUseGauss)
+    {
+        const double sigma = Reconstructor->Range/2.35482;
+        if ( fabs(sigma) > 1.0e-10)
+          {
+            if (Reconstructor->RangedX)
+              {
+                double po = (Reconstructor->CenterX - p[0]) / sigma;
+                po *= po;
+                double gauss = exp(-0.5*po);
+                if (gauss < 0.0001) gauss = 0.0001;
+                sum /= gauss;
+              }
+            if (Reconstructor->RangedY)
+              {
+                double po = (Reconstructor->CenterY - p[1]) / sigma;
+                po *= po;
+                double gauss = exp(-0.5*po);
+                if (gauss < 0.0001) gauss = 0.0001;
+                sum /= gauss;
+              }
+          }
+    }
+
+    return Reconstructor->LastMiniValue = sum;
+}
+
+/*
 double Chi2staticDouble(const double *p)
 {
   double sum = 0;
@@ -813,7 +866,45 @@ double Chi2staticDouble(const double *p)
   //qDebug()<<"Chi2:"<< sum;
   return Reconstructor->LastMiniValue = sum;
 }
+*/
 
+double AFunc_Chi2double::operator()(const double *p)
+{
+    double sum = 0;
+    const double & X1 = p[0];
+    const double & Y1 = p[1];
+    const double & Z1 = p[2];
+    const double & energy1 = p[3];
+    const double & X2 = p[4];
+    const double & Y2 = p[5];
+    const double & Z2 = p[6];
+    const double & energy2 = p[7];
+
+    for (int ipm = 0; ipm < Reconstructor->PMs->count(); ipm++)
+        if (Reconstructor->DynamicPassives->isActive(ipm))
+        {
+            double LRFhere1 = Reconstructor->LRFs.getLRF(ipm, X1, Y1, Z1) * energy1;
+            double LRFhere2 = Reconstructor->LRFs.getLRF(ipm, X2, Y2, Z2) * energy2;
+            if (LRFhere1 <= 0 || LRFhere2 <= 0)
+                return Reconstructor->LastMiniValue *= 1.25;  // if LRFs are not defined for these coordinates
+
+            double LRFhere = LRFhere1 + LRFhere2;
+            double delta = (LRFhere - Reconstructor->PMsignals->at(ipm));
+            if (Reconstructor->RecSet->fWeightedChi2calculation)
+            {
+                double sigma2;
+                double err1 = Reconstructor->LRFs.getLRFErr(ipm, X1, Y1, Z1) * energy1;
+                double err2 = Reconstructor->LRFs.getLRFErr(ipm, X2, Y2, Z2) * energy2;
+                sigma2 = LRFhere + err1*err1 + err2*err2; // if err is not calculated, 0 is returned
+                sum += delta*delta/sigma2;
+            }
+            else sum += delta*delta;
+        }
+
+    return Reconstructor->LastMiniValue = sum;
+}
+
+/*
 double MLstatic(const double *p) //0-x, 1-y, 2-z, 3-energy, 4-pointer to RootMinReconstructorClass
 {
   double sum = 0;
@@ -838,6 +929,7 @@ double MLstatic(const double *p) //0-x, 1-y, 2-z, 3-energy, 4-pointer to RootMin
     //qDebug() << "Log Likelihood = " << sum;
   return Reconstructor->LastMiniValue = -sum; //-probability, since we use minimizer
 }
+*/
 
 double AFunc_ML::operator()(const double *p) //0-x, 1-y, 2-z, 3-energy
 {
@@ -855,6 +947,7 @@ double AFunc_ML::operator()(const double *p) //0-x, 1-y, 2-z, 3-energy
     return Reconstructor->LastMiniValue = -sum; //-probability, since we use minimizer
 }
 
+/*
 double MLstaticGauss(const double *p)
 {
   double sum = 0;
@@ -891,7 +984,46 @@ double MLstaticGauss(const double *p)
 
   return Reconstructor->LastMiniValue = -sum; //-probability, since we use minimizer
 }
+*/
 
+double AFunc_MLrange::operator()(const double *p)
+{
+    double sum = 0;
+
+    for (int ipm = 0; ipm < Reconstructor->PMs->count(); ipm++)
+      if (Reconstructor->DynamicPassives->isActive(ipm))
+        {
+         double LRFhere = Reconstructor->LRFs.getLRF(ipm, p)*p[3];
+         if (LRFhere <= 0.)
+             return Reconstructor->LastMiniValue += fabs(Reconstructor->LastMiniValue) * 0.25;
+
+         sum += Reconstructor->PMsignals->at(ipm)*log(LRFhere) - LRFhere; //measures probability
+       }
+
+    if (Reconstructor->bUseGauss)
+    {
+        const double sigma = Reconstructor->Range/2.35482;
+        if ( fabs(sigma) > 1.0e-10)
+          {
+            if (Reconstructor->RangedX)
+              {
+                double po = (Reconstructor->CenterX - p[0]) / sigma;
+                po *= po;
+                sum *= exp(-0.5*po);
+              }
+            if (Reconstructor->RangedY)
+              {
+                double po = (Reconstructor->CenterY - p[1]) / sigma;
+                po *= po;
+                sum *= exp(-0.5*po);
+              }
+          }
+    }
+
+    return Reconstructor->LastMiniValue = -sum; //-probability, since using minimization
+}
+
+/*
 double MLstaticDouble(const double *p) //0-x, 1-y, 2-z, 3-energy, 4567 x1y1z1en1 8-pointer to RootMinDoubleReconstructorClass
 {
   double sum = 0;
@@ -924,6 +1056,34 @@ double MLstaticDouble(const double *p) //0-x, 1-y, 2-z, 3-energy, 4567 x1y1z1en1
      }
     //qDebug() << "Log Likelihood = " << sum;
   return Reconstructor->LastMiniValue = -sum; //-probability, since we use minimizer
+}
+*/
+
+double AFunc_MLdouble::operator()(const double *p)
+{
+    double sum = 0;
+    const double & X1 = p[0];
+    const double & Y1 = p[1];
+    const double & Z1 = p[2];
+    const double & energy1 = p[3];
+    const double & X2 = p[4];
+    const double & Y2 = p[5];
+    const double & Z2 = p[6];
+    const double & energy2 = p[7];
+
+    for (int ipm = 0; ipm < Reconstructor->PMs->count(); ipm++)
+        if (Reconstructor->DynamicPassives->isActive(ipm))
+        {
+            double LRFhere1 = Reconstructor->LRFs.getLRF(ipm, X1, Y1, Z1) * energy1;
+            double LRFhere2 = Reconstructor->LRFs.getLRF(ipm, X2, Y2, Z2) * energy2;
+            if (LRFhere1 <= 0.0 || LRFhere2 <= 0.0 )
+                return Reconstructor->LastMiniValue += fabs(Reconstructor->LastMiniValue) * 0.25;
+            double LRFhere = LRFhere1 + LRFhere2;
+
+            sum += Reconstructor->PMsignals->at(ipm)*log(LRFhere) - LRFhere;
+        }
+
+    return Reconstructor->LastMiniValue = -sum; //-probability, since doing minimization
 }
 
 void Chi2calculatorClass::execute()

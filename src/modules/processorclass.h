@@ -61,7 +61,7 @@ protected:
   double calculateMLfactor(int iev, AReconRecord *rec);
 };
 
-/// Center of Gravity
+// ------ Center of Gravity ------
 class CoGReconstructorClass : public ProcessorClass
 {
   Q_OBJECT
@@ -79,7 +79,7 @@ public slots:
   virtual void execute();
 };
 
-/// Contracting grids on CPU
+// ------ Contracting grids on CPU ------
 class CGonCPUreconstructorClass : public ProcessorClass
 {
   Q_OBJECT
@@ -105,32 +105,33 @@ private:
   double BestSlEnergy;
 };
 
-/// Root minimizer (Migrad2 or Simplex) for point events
+// ------ Root minimizer - single point events ------
 class RootMinReconstructorClass : public ProcessorClass
 {
-  Q_OBJECT
+    Q_OBJECT
 public:
-  RootMinReconstructorClass(APmHub* PMs,
-                            APmGroupsManager* PMgroups,
-                            ALrfModuleSelector* LRFs,
-                            EventsDataClass *EventsDataHub,
-                            ReconstructionSettings *RecSet,
-                            int ThisPmGroup,
-                            int EventsFrom, int EventsTo,
-                            bool UseGauss = false);
-  ~RootMinReconstructorClass();
- //public for static use
- double LastMiniValue;
- const QVector< float >* PMsignals;
+    RootMinReconstructorClass(APmHub* PMs,
+                              APmGroupsManager* PMgroups,
+                              ALrfModuleSelector* LRFs,
+                              EventsDataClass *EventsDataHub,
+                              ReconstructionSettings *RecSet,
+                              int ThisPmGroup,
+                              int EventsFrom, int EventsTo);
+    ~RootMinReconstructorClass();
+
+    double LastMiniValue;
+    const QVector< float >* PMsignals;
+
 public slots:
-  virtual void execute();
+    virtual void execute();
+
 protected:
-  ROOT::Math::Functor *FunctorLSML;
-  ROOT::Minuit2::Minuit2Minimizer* RootMinimizer;
+    ROOT::Math::Functor *FunctorLSML;
+    ROOT::Minuit2::Minuit2Minimizer* RootMinimizer;
 };
 
-/// Root minimizer (Migrad2 or Simplex) for point events with possibility that some events have known range in X or Y
-class RootMinRangedReconstructorClass : public RootMinReconstructorClass
+// ------ Root minimizer for single point events with possibility that some events have known range in X or Y ------
+class RootMinRangedReconstructorClass : public ProcessorClass
 {
   Q_OBJECT
 public:
@@ -144,18 +145,26 @@ public:
                                     double Range, bool UseGauss);
     ~RootMinRangedReconstructorClass();
 
+    double LastMiniValue;
+    const QVector< float >* PMsignals;
+
     double Range; // minimization will be within +-range around the true/scan value
 
     //internal - used by the minimizer in Gaussian mode
+    bool bUseGauss;
     bool RangedX, RangedY;
     double CenterX, CenterY;
 
 public slots:
     virtual void execute();
+
+protected:
+    ROOT::Math::Functor *FunctorLSML;
+    ROOT::Minuit2::Minuit2Minimizer* RootMinimizer;
 };
 
-/// Root minimizer (Migrad2 or Simplex) with double events
-/// RecSet->MultipleEventOption: 0-cannot be here, 1-only doubles+chi2, 2-does doubles+chi2 then copmares with already provided rec results for singles
+// ------ Root minimizer with double events ------
+// RecSet->MultipleEventOption: 0-cannot be here, 1-only doubles+chi2, 2-does doubles+chi2 then copmares with already provided rec results for singles
 class RootMinDoubleReconstructorClass : public ProcessorClass
 {
   Q_OBJECT
@@ -179,7 +188,7 @@ private:
   double calculateChi2DoubleEvent(const double *result);
 };
 
-/// Claculates chi2 for all events
+// ------ Claculates chi2 for all events ------
 class Chi2calculatorClass : public ProcessorClass
 {
   Q_OBJECT
@@ -197,7 +206,7 @@ public slots:
   virtual void execute();
 };
 
-/// Checks all filters which can be multithreaded
+// ------ Checks all filters which can be multithreaded ------
 class EventFilterClass : public ProcessorClass
 {
   Q_OBJECT
@@ -219,7 +228,6 @@ private:
    AEventFilteringSettings* FiltSet;
 };
 
-//static functions to use with Root minimizer
     //double Chi2static(const double *p);
 class AFunc_Chi2
 {
@@ -229,9 +237,24 @@ public:
 private:
     RootMinReconstructorClass * Reconstructor = nullptr;
 };
-
-double Chi2staticGauss(const double *p);
-double Chi2staticDouble(const double *p);
+    //double Chi2staticGauss(const double *p);
+class AFunc_Chi2range
+{
+public:
+    AFunc_Chi2range(RootMinRangedReconstructorClass * Reconstructor) : Reconstructor(Reconstructor) {}
+    double operator()(const double *p);
+private:
+    RootMinRangedReconstructorClass * Reconstructor = nullptr;
+};
+    //double Chi2staticDouble(const double *p);
+class AFunc_Chi2double
+{
+public:
+    AFunc_Chi2double(RootMinDoubleReconstructorClass * Reconstructor) : Reconstructor(Reconstructor) {}
+    double operator()(const double *p);
+private:
+    RootMinDoubleReconstructorClass * Reconstructor = nullptr;
+};
     //double MLstatic(const double *p);
 class AFunc_ML
 {
@@ -241,7 +264,23 @@ public:
 private:
     RootMinReconstructorClass * Reconstructor = nullptr;
 };
+    //double MLstaticGauss(const double *p);
+class AFunc_MLrange
+{
+public:
+    AFunc_MLrange(RootMinRangedReconstructorClass * Reconstructor) : Reconstructor(Reconstructor) {}
+    double operator()(const double *p);
+private:
+    RootMinRangedReconstructorClass * Reconstructor = nullptr;
+};
+    //double MLstaticDouble(const double *p);
+class AFunc_MLdouble
+{
+public:
+    AFunc_MLdouble(RootMinDoubleReconstructorClass * Reconstructor) : Reconstructor(Reconstructor) {}
+    double operator()(const double *p);
+private:
+    RootMinDoubleReconstructorClass * Reconstructor = nullptr;
+};
 
-double MLstaticGauss(const double *p);
-double MLstaticDouble(const double *p);
 #endif // PROCESSORCLASS_H

@@ -2778,6 +2778,22 @@ AGeoParaDelegate::AGeoParaDelegate(const QStringList & materials, QWidget *paren
 {
     DelegateTypeName = "Parallelepiped";
 
+    ShapeHelp = "A parallelepiped is a shape having 3 pairs of parallel faces\n"
+                "  out of which one is parallel with the XY plane (Z face).\n"
+                "All faces are parallelograms. The Z faces have 2 edges\n"
+                "  parallel to the X-axis.\n"
+                "\n"
+                "The shape has the center in the origin and is defined by\n"
+                "  the full lengths of the projections of the edges on X, Y and Z.\n"
+                "The lower Z face is positioned at -0.5*Zsize,\n"
+                "  while the upper at +0.5*Zsize.\n"
+                "Alpha: angle between the segment defined by the centers of the\n"
+                "  X-parallel edges and Y axis [-90,90] in degrees\n"
+                "Theta: theta angle of the segment defined by the centers of the Z faces\n"
+                "Phi: phi angle of the same segment\n"
+                "\n"
+                "Implemented using TGeoPara(0.5*SizeZ, 0.5*SizeY, 0.5*SizeZ, Alpha, Theta, Phi)";
+
     QGridLayout * gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);
     gr->setVerticalSpacing(1);
@@ -2838,6 +2854,18 @@ AGeoSphereDelegate::AGeoSphereDelegate(const QStringList & materials, QWidget *p
     : AGeoObjectDelegate(materials, parent)
 {
     DelegateTypeName = "Sphere";
+
+    ShapeHelp = "A spherical sector, defined by\n"
+                "the external and internal diameters,\n"
+                "and two pairs of polar angles (in degrees):\n"
+                "\n"
+                "Theta from: [0, 180)\n"
+                "Theta to:   (0, 180] with a condition theta_from < theta_to\n"
+                "\n"
+                "Phi from: [0, 360)\n"
+                "Phi to:   (0, 360] with a condition phi_from < phi_to\n"
+                "\n"
+                "Implemented using TGeoSphere(IntDiam, ExtDiam, ThetaFrom, ThetaTo, PhiFrom, PhiTo)";
 
     QGridLayout * gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);
@@ -2901,6 +2929,17 @@ AGeoConeDelegate::AGeoConeDelegate(const QStringList &materials, QWidget *parent
 {
     DelegateTypeName = "Cone";
 
+    ShapeHelp = "A conical shape with the axis parallel to Z,\n"
+                "  limited by two XY planes,\n"
+                "  one at Z = -0.5*height, and\n"
+                "  the other at Z = +0.5*height.\n"
+                "\n"
+                "The shape is also defined by two pairs\n"
+                " of external/internal diameters,\n"
+                " one pair at the lower plane and the other at the upper one.\n"
+                "\n"
+                "Implemented using TGeoCone(0.5*Height, 0.5*LowerIntDiam, 0.5*LowerExtDiam, 0.5*UpperIntDiam, 0.5*UpperExtDiam)";
+
     gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);
     gr->setVerticalSpacing(1);
@@ -2959,6 +2998,21 @@ AGeoConeSegDelegate::AGeoConeSegDelegate(const QStringList &materials, QWidget *
     : AGeoConeDelegate(materials, parent)
 {
     DelegateTypeName = "Cone segment";
+
+    ShapeHelp = "A conical segment shape with the axis parallel to Z,\n"
+                "  limited by two XY planes,\n"
+                "  one at Z = -0.5*height, and\n"
+                "  the other at Z = +0.5*height.\n"
+                "\n"
+                "The shape is also defined by two pairs\n"
+                " of external/internal diameters,\n"
+                " one pair at the lower plane and the other at the upper one.\n"
+                "\n"
+                "The segment angles are in degrees,\n"
+                "  Phi from:  in the range [0, 360)\n"
+                "  Phi to:    in the ramge (0, 360], should be smaller than Phi_from.\n"
+                "\n"
+                "Implemented using TGeoCone(0.5*Height, 0.5*LowerIntDiam, 0.5*LowerExtDiam, 0.5*UpperIntDiam, 0.5*UpperExtDiam, PhiFrom, PhiTo)";
 
     gr->addWidget(new QLabel("Phi from:"), 5, 0);
     gr->addWidget(new QLabel("Phi to:"),   6, 0);

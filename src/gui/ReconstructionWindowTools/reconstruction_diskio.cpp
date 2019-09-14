@@ -213,7 +213,7 @@ void ReconstructionWindow::on_pbSaveReconstructionAsText_clicked()
 
   QString path = QFileInfo(fileName).absoluteDir().absolutePath();
   QString suffix = QFileInfo(fileName).suffix();
-  if (suffix.isEmpty()) suffix = "dat";
+  if (suffix.isEmpty()) suffix = ".dat";
   fileName = QFileInfo(fileName).completeBaseName();
 
   int numGroups = PMgroups->countPMgroups();
@@ -287,7 +287,7 @@ void ReconstructionWindow::on_pbSaveReconstructionAsRootTree_clicked()
 
   QString path = QFileInfo(fileName).absoluteDir().absolutePath();
   QString suffix = QFileInfo(fileName).suffix();
-  if (suffix.isEmpty()) suffix = "root";
+  if (suffix.isEmpty()) suffix = ".root";
   fileName = QFileInfo(fileName).completeBaseName();
 
   MW->WindowNavigator->BusyOn();

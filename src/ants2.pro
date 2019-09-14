@@ -564,7 +564,8 @@ HEADERS  += common/CorrelationFilters.h \
     Simulation/aparticletracker.h \
     common/aexternalprocesshandler.h \
     gui/MainWindowTools/alogconfigdialog.h \
-    Simulation/alogsandstatisticsoptions.h
+    Simulation/alogsandstatisticsoptions.h \
+    Reconstruction/afunctorbase.h
 
 # --- SIM ---
 ants2_SIM {
@@ -811,6 +812,7 @@ INCLUDEPATH += common
 INCLUDEPATH += scriptmode
 INCLUDEPATH += Net
 INCLUDEPATH += Simulation
+INCLUDEPATH += Reconstruction
 
 RESOURCES += \
     Resources.qrc

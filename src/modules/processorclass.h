@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include "alrfmoduleselector.h"
+#include "afunctorbase.h"
 
 class ReconstructionSettings;
 class APmHub;
@@ -126,33 +127,39 @@ public slots:
     virtual void execute();
 
 protected:
-    ROOT::Math::Functor *FunctorLSML;
-    ROOT::Minuit2::Minuit2Minimizer* RootMinimizer;
+    ROOT::Math::Functor *FunctorLSML = nullptr;
+    ROOT::Minuit2::Minuit2Minimizer* RootMinimizer = nullptr;
+    AFunctorBase * Func = nullptr;
 };
 
 // ------ Root minimizer with double events ------
 // RecSet->MultipleEventOption: 0-cannot be here, 1-only doubles+chi2, 2-does doubles+chi2 then copmares with already provided rec results for singles
 class RootMinDoubleReconstructorClass : public ProcessorClass
 {
-  Q_OBJECT
+    Q_OBJECT
 public:
-  RootMinDoubleReconstructorClass(APmHub* PMs,
-                                  APmGroupsManager* PMgroups,
-                                  ALrfModuleSelector* LRFs,
-                                  EventsDataClass *EventsDataHub,
-                                  ReconstructionSettings *RecSet,
-                                  int ThisPmGroup,
-                                  int EventsFrom, int EventsTo);
-  ~RootMinDoubleReconstructorClass();
- //public for static use
- double LastMiniValue;
- const QVector< float >* PMsignals;
+    RootMinDoubleReconstructorClass(APmHub* PMs,
+                                    APmGroupsManager* PMgroups,
+                                    ALrfModuleSelector* LRFs,
+                                    EventsDataClass *EventsDataHub,
+                                    ReconstructionSettings *RecSet,
+                                    int ThisPmGroup,
+                                    int EventsFrom, int EventsTo);
+    ~RootMinDoubleReconstructorClass();
+
+    double LastMiniValue;
+    const QVector< float > * PMsignals;
+
 public slots:
-  virtual void execute();
+    virtual void execute();
+
 private:
-  ROOT::Math::Functor *FunctorLSML;
-  ROOT::Minuit2::Minuit2Minimizer* RootMinimizer;
-  double calculateChi2DoubleEvent(const double *result);
+    ROOT::Math::Functor * FunctorLSML = nullptr;
+    ROOT::Minuit2::Minuit2Minimizer * RootMinimizer = nullptr;
+    AFunctorBase * Func = nullptr;
+
+private:
+    double calculateChi2DoubleEvent(const double *result);
 };
 
 // ------ Claculates chi2 for all events ------
@@ -194,9 +201,8 @@ public slots:
 private:
    AEventFilteringSettings* FiltSet;
 };
-
     //double Chi2static(const double *p);
-class AFunc_Chi2
+class AFunc_Chi2 : public AFunctorBase
 {
 public:
     AFunc_Chi2(RootMinReconstructorClass * Reconstructor) : Reconstructor(Reconstructor) {}
@@ -205,7 +211,7 @@ private:
     RootMinReconstructorClass * Reconstructor = nullptr;
 };
     //double Chi2staticDouble(const double *p);
-class AFunc_Chi2double
+class AFunc_Chi2double : public AFunctorBase
 {
 public:
     AFunc_Chi2double(RootMinDoubleReconstructorClass * Reconstructor) : Reconstructor(Reconstructor) {}
@@ -214,7 +220,7 @@ private:
     RootMinDoubleReconstructorClass * Reconstructor = nullptr;
 };
     //double MLstatic(const double *p);
-class AFunc_ML
+class AFunc_ML : public AFunctorBase
 {
 public:
     AFunc_ML(RootMinReconstructorClass * Reconstructor) : Reconstructor(Reconstructor) {}
@@ -223,7 +229,7 @@ private:
     RootMinReconstructorClass * Reconstructor = nullptr;
 };
     //double MLstaticDouble(const double *p);
-class AFunc_MLdouble
+class AFunc_MLdouble : public AFunctorBase
 {
 public:
     AFunc_MLdouble(RootMinDoubleReconstructorClass * Reconstructor) : Reconstructor(Reconstructor) {}

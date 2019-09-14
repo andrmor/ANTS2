@@ -227,11 +227,13 @@ RootMinReconstructorClass::RootMinReconstructorClass(APmHub* PMs,
     if (RecSet->fRMuseML)
     {
         AFunc_ML * func = new AFunc_ML(this);
+        Func = func;
         FunctorLSML = new ROOT::Math::Functor(*func, 4);
     }
     else
     {
         AFunc_Chi2 * func = new AFunc_Chi2(this);
+        Func = func;
         FunctorLSML = new ROOT::Math::Functor(*func, 4);
     }
     RootMinimizer->SetFunction(*FunctorLSML);
@@ -241,6 +243,7 @@ RootMinReconstructorClass::~RootMinReconstructorClass()
 {
     delete RootMinimizer;
     delete FunctorLSML;
+    delete Func;
 }
 
 void RootMinReconstructorClass::execute()
@@ -346,11 +349,13 @@ RootMinDoubleReconstructorClass::RootMinDoubleReconstructorClass(APmHub* PMs,
     if (RecSet->fRMuseML)
     {
         AFunc_MLdouble * func = new AFunc_MLdouble(this);
+        Func = func;
         FunctorLSML = new ROOT::Math::Functor(*func, 8);
     }
     else
     {
         AFunc_Chi2double * func = new AFunc_Chi2double(this);
+        Func = func;
         FunctorLSML = new ROOT::Math::Functor(*func, 8);
     }
     RootMinimizer->SetFunction(*FunctorLSML);
@@ -360,6 +365,7 @@ RootMinDoubleReconstructorClass::~RootMinDoubleReconstructorClass()
 {
     delete RootMinimizer;
     delete FunctorLSML;
+    delete Func;
 }
 
 void RootMinDoubleReconstructorClass::execute()

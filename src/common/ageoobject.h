@@ -112,6 +112,7 @@ public:
   void updateWorldSize(double& XYm, double& Zm);
   bool isMaterialInUse(int imat) const;  //including disabled objects
   bool isMaterialInActiveUse(int imat) const;  //excluding disabled objects
+  void collectContainingObjects(QVector<AGeoObject*> & vec) const;
 
   //service propertie
   QString tmpContName; //used only during load:

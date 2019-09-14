@@ -386,13 +386,10 @@ void DetectorAddOnsWindow::on_pbLoadDummyPMs_clicked()
 
 void DetectorAddOnsWindow::ShowObject(QString name)
 {
-  DetectorAddOnsWindow::HighlightVolume(name);
-  MW->GeometryWindow->SetAsActiveRootWindow();
-  Detector->GeoManager->ClearTracks();
-  //Detector->top->Draw();
-  //MW->GeometryWindow->PostDraw();
-  MW->GeometryWindow->ShowGeometry(true, false, false);
-  //MW->GeometryWindow->UpdateRootCanvas();
+    DetectorAddOnsWindow::HighlightVolume(name);
+    MW->GeometryWindow->SetAsActiveRootWindow();
+    Detector->GeoManager->ClearTracks();
+    MW->GeometryWindow->ShowGeometry(true, false, false);
 }
 
 bool drawIfFound(TGeoNode* node, TString name)
@@ -503,23 +500,36 @@ void DetectorAddOnsWindow::OnrequestShowMonitor(const AGeoObject *mon)
     MW->GeometryWindow->DrawTracks();
 }
 
-void DetectorAddOnsWindow::HighlightVolume(QString VolName)
+void DetectorAddOnsWindow::HighlightVolume(const QString & VolName)
 {
-  TObjArray* list = Detector->GeoManager->GetListOfVolumes();
-  int size = list->GetEntries();
+    AGeoObject * obj = Detector->Sandwich->World->findObjectByName(VolName);
+    if (!obj) return;
 
-  for (int i=0; i<size; i++)
+    QSet<QString> set;
+    if (obj->ObjectType->isArray())
     {
-      TGeoVolume* vol = (TGeoVolume*)list->At(i);
-      if (!vol) break;
-      QString name = vol->GetName();
-//      qDebug()<<"name: "<<name;
-      if (name == VolName)
-      {
-          vol->SetLineColor(kRed);
-          vol->SetLineWidth(3);
-      }
-      else vol->SetLineColor(kGray);
+        QVector<AGeoObject*> vec;
+        obj->collectContainingObjects(vec);
+        for (AGeoObject * obj : vec)
+            set << obj->Name;
+    }
+    else
+        set << VolName;
+
+    TObjArray* list = Detector->GeoManager->GetListOfVolumes();
+    int size = list->GetEntries();
+
+    for (int iVol = 0; iVol < size; iVol++)
+    {
+        TGeoVolume* vol = (TGeoVolume*)list->At(iVol);
+        if (!vol) break;
+        const QString name = vol->GetName();
+        if (set.contains(name))
+        {
+            vol->SetLineColor(kRed);
+            vol->SetLineWidth(3);
+        }
+        else vol->SetLineColor(kGray);
     }
 }
 

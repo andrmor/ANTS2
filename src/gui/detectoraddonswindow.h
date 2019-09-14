@@ -24,7 +24,7 @@ public:
   void UpdateGUI(); //update gui controls
   void SetTab(int tab);
   void UpdateDummyPMindication();
-  void HighlightVolume(QString VolName);
+  void HighlightVolume(const QString & VolName);
 
   AGeo_SI* AddObjScriptInterface = 0;  // if created -> owned by the script manager
   AGeoTreeWidget* twGeo;  // WorldTree widget

@@ -1037,22 +1037,32 @@ void AGeoTreeWidget::menuActionAddNewComposite(QString ContainerName)
 
 void AGeoTreeWidget::SetLineAttributes(QString ObjectName)
 {
-  AGeoObject* obj = World->findObjectByName(ObjectName);
-  if (obj)
+    AGeoObject* obj = World->findObjectByName(ObjectName);
+    if (!obj) return;
+
+    ARootLineConfigurator* rlc = new ARootLineConfigurator(&obj->color, &obj->width, &obj->style, this);
+    int res = rlc->exec();
+    if (res != 0)
     {
-      ARootLineConfigurator* rlc = new ARootLineConfigurator(&obj->color, &obj->width, &obj->style, this);
-      int res = rlc->exec();
-      if (res != 0)
-      {
-          if (obj->ObjectType->isSlab())
+        if (obj->ObjectType->isSlab())
+        {
+            obj->getSlabModel()->color = obj->color;
+            obj->getSlabModel()->width = obj->width;
+            obj->getSlabModel()->style = obj->style;
+        }
+        if (obj->ObjectType->isArray())
+        {
+            QVector<AGeoObject*> vec;
+            obj->collectContainingObjects(vec);
+            for (AGeoObject * co : vec)
             {
-              obj->getSlabModel()->color = obj->color;
-              obj->getSlabModel()->width = obj->width;
-              obj->getSlabModel()->style = obj->style;
+                co->color = obj->color;
+                co->width = obj->width;
+                co->style = obj->style;
             }
-          emit RequestRebuildDetector();
-          UpdateGui(ObjectName);
-      }
+        }
+        emit RequestRebuildDetector();
+        //UpdateGui(ObjectName);
     }
 }
 

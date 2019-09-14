@@ -961,6 +961,15 @@ bool AGeoObject::isMaterialInActiveUse(int imat) const
     return false;
 }
 
+void AGeoObject::collectContainingObjects(QVector<AGeoObject *> & vec) const
+{
+    for (AGeoObject * obj : HostedObjects)
+    {
+        vec << obj;
+        obj->collectContainingObjects(vec);
+    }
+}
+
 bool AGeoShape::extractParametersFromString(QString GenerationString, QStringList &parameters, int numParameters)
 {
   GenerationString = GenerationString.simplified();

@@ -21,6 +21,7 @@ public:
   ASandwich *Sandwich;
 
   void SelectObjects(QStringList ObjectNames);
+  void SetLineAttributes(QString ObjectName);
 
 public slots:
   void UpdateGui(QString selected = "");
@@ -59,7 +60,6 @@ private:
 
   void menuActionAddNewObject(QString ContainerName, AGeoShape * shape);
   void menuActionCopyObject(QString ObjToCopyName);
-  void SetLineAttributes(QString ObjectName);
   void ShowObject(QString ObjectName);
   void ShowObjectRecursive(QString ObjectName);
   void ShowObjectOnly(QString ObjectName);

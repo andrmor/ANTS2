@@ -1566,6 +1566,9 @@ void AGeoWidget::onRequestSetVisAttributes()
 {
     if (!CurrentObject) return;
 
+    tw->SetLineAttributes(CurrentObject->Name);
+    /*
+
     ARootLineConfigurator* rlc = new ARootLineConfigurator(&CurrentObject->color, &CurrentObject->width, &CurrentObject->style, this);
     int res = rlc->exec();
     if (res != 0)
@@ -1582,6 +1585,7 @@ void AGeoWidget::onRequestSetVisAttributes()
         emit tw->RequestRebuildDetector();
         tw->SelectObjects(names);
     }
+    */
 }
 
 void AGeoWidget::onMonitorRequestsShowSensitiveDirection()
@@ -1828,18 +1832,6 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
 
     // bottom line buttons
     QHBoxLayout * abl = createBottomButtons();
-    /*
-        QHBoxLayout * abl = new QHBoxLayout();
-        pbShow = new QPushButton("Show object");
-        QObject::connect(pbShow, &QPushButton::clicked, this, &AGeoObjectDelegate::RequestShow);
-        abl->addWidget(pbShow);
-        pbChangeAtt = new QPushButton("Color/line");
-        QObject::connect(pbChangeAtt, &QPushButton::clicked, this, &AGeoObjectDelegate::RequestChangeVisAttributes);
-        abl->addWidget(pbChangeAtt);
-        pbScriptLine = new QPushButton("Script to clipboard");
-        QObject::connect(pbScriptLine, &QPushButton::clicked, this, &AGeoObjectDelegate::RequestScriptToClipboard);
-        abl->addWidget(pbScriptLine);
-    */
     lMF->addLayout(abl);
 
   frMainFrame->setLayout(lMF);
@@ -3831,9 +3823,6 @@ AGeoArrayDelegate::AGeoArrayDelegate(const QStringList &materials, QWidget *pare
 
     pbTransform->setVisible(false);
     pbShapeInfo->setVisible(false);
-    pbShow->setVisible(false);
-    pbChangeAtt->setVisible(false);
-    pbScriptLine->setVisible(false);
 }
 
 void AGeoArrayDelegate::Update(const AGeoObject * obj)

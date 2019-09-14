@@ -74,6 +74,7 @@ AGeoTreeWidget::AGeoTreeWidget(ASandwich *Sandwich) : Sandwich(Sandwich)
   connect(this, SIGNAL(ObjectSelectionChanged(QString)), EditWidget, SLOT(onObjectSelectionChanged(QString)));
   connect(this, SIGNAL(itemClicked(QTreeWidgetItem*,int)), this, SLOT(onItemClicked()));
   connect(EditWidget, &AGeoWidget::showMonitor, this, &AGeoTreeWidget::RequestShowMonitor);
+  connect(EditWidget, &AGeoWidget::requestBuildScript, this, &AGeoTreeWidget::objectToScript);
 
   QString style;
   style = "QTreeView::branch:has-siblings:!adjoins-item {"
@@ -1337,6 +1338,7 @@ void AGeoWidget::UpdateGui()
     connect(GeoDelegate, &AGeoBaseDelegate::RequestChangeVisAttributes, this, &AGeoWidget::onRequestSetVisAttributes);
     connect(GeoDelegate, &AGeoBaseDelegate::RequestShow,                this, &AGeoWidget::onRequestShowCurrentObject);
     connect(GeoDelegate, &AGeoBaseDelegate::RequestScriptToClipboard,   this, &AGeoWidget::onRequestScriptLineToClipboard);
+    connect(GeoDelegate, &AGeoBaseDelegate::RequestScriptRecursiveToClipboard,   this, &AGeoWidget::onRequestScriptRecursiveToClipboard);
 
     ObjectLayout->addStretch();
     ObjectLayout->addWidget(GeoDelegate->Widget);
@@ -1548,18 +1550,27 @@ void AGeoWidget::onRequestScriptLineToClipboard()
 {
     if (!CurrentObject) return;
 
-    QString c = "TGeo( '" + CurrentObject->Name + "', '" + CurrentObject->Shape->getGenerationString() + "', " +
-            QString::number(CurrentObject->Material) + ", " +
-            "'"+CurrentObject->Container->Name + "',   "+
-            QString::number(CurrentObject->Position[0]) + ", " +
-            QString::number(CurrentObject->Position[1]) + ", " +
-            QString::number(CurrentObject->Position[2]) + ",   " +
-            QString::number(CurrentObject->Orientation[0]) + ", " +
-            QString::number(CurrentObject->Orientation[1]) + ", " +
-            QString::number(CurrentObject->Orientation[2]) + " )";
+    QString script;
+    bool bNotRecursive = (CurrentObject->ObjectType->isSlab() || CurrentObject->ObjectType->isSingle() || CurrentObject->ObjectType->isComposite());
+    emit requestBuildScript(CurrentObject, script, 0, false, !bNotRecursive);
+
+    qDebug() << script;
 
     QClipboard *clipboard = QApplication::clipboard();
-    clipboard->setText(c);
+    clipboard->setText(script);
+}
+
+void AGeoWidget::onRequestScriptRecursiveToClipboard()
+{
+    if (!CurrentObject) return;
+
+    QString script;
+    emit requestBuildScript(CurrentObject, script, 0, false, true);
+
+    qDebug() << script;
+
+    QClipboard *clipboard = QApplication::clipboard();
+    clipboard->setText(script);
 }
 
 void AGeoWidget::onRequestSetVisAttributes()
@@ -1662,7 +1673,10 @@ QHBoxLayout * AGeoBaseDelegate::createBottomButtons()
     QObject::connect(pbChangeAtt, &QPushButton::clicked, this, &AGeoObjectDelegate::RequestChangeVisAttributes);
     abl->addWidget(pbChangeAtt);
     pbScriptLine = new QPushButton("Script to clipboard");
+    pbScriptLine->setToolTip("Click right mouse button to generate script recursively");
     QObject::connect(pbScriptLine, &QPushButton::clicked, this, &AGeoObjectDelegate::RequestScriptToClipboard);
+    pbScriptLine->setContextMenuPolicy(Qt::CustomContextMenu);
+    QObject::connect(pbScriptLine, &QPushButton::customContextMenuRequested, this, &AGeoObjectDelegate::RequestScriptRecursiveToClipboard);
     abl->addWidget(pbScriptLine);
 
     return abl;
@@ -3970,3 +3984,146 @@ void AGeoSlabDelegate::onContentChanged()
 {
     emit ContentChanged();
 }
+
+void AGeoTreeWidget::objectMembersToScript(AGeoObject* Master, QString &script, int ident, bool bExpandMaterial, bool bRecursive)
+{
+    for (AGeoObject* obj : Master->HostedObjects)
+        objectToScript(obj, script, ident, bExpandMaterial, bRecursive);
+}
+
+void AGeoTreeWidget::objectToScript(AGeoObject *obj, QString &script, int ident, bool bExpandMaterial, bool bRecursive)
+{
+    if (obj->ObjectType->isLogical())
+    {
+        script += "\n" + QString(" ").repeated(ident)+ makeScriptString_basicObject(obj, bExpandMaterial);
+    }
+    else if (obj->ObjectType->isCompositeContainer())
+    {
+         //nothing to do
+    }
+    else if (obj->ObjectType->isSlab() || obj->ObjectType->isSingle() )
+    {
+        script += "\n" + QString(" ").repeated(ident)+ makeScriptString_basicObject(obj, bExpandMaterial);
+        script += "\n" + QString(" ").repeated(ident)+ makeLinePropertiesString(obj);
+        if (obj->ObjectType->isLightguide())
+        {
+            script += "\n";
+            script += "\n" + QString(" ").repeated(ident)+ "//=== Lightguide object is not supported! ===";
+            script += "\n";
+        }
+        if (bRecursive) objectMembersToScript(obj, script, ident + 2, bExpandMaterial, bRecursive);
+    }
+    else if (obj->ObjectType->isComposite())
+    {
+        script += "\n" + QString(" ").repeated(ident) + "//-->-- logical volumes for " + obj->Name;
+        objectMembersToScript(obj->getContainerWithLogical(), script, ident + 4, bExpandMaterial, bRecursive);
+        script += "\n" + QString(" ").repeated(ident) + "//--<-- logical volumes end for " + obj->Name;
+
+        script += "\n" + QString(" ").repeated(ident)+ makeScriptString_basicObject(obj, bExpandMaterial);
+        script += "\n" + QString(" ").repeated(ident)+ makeLinePropertiesString(obj);
+        if (bRecursive) objectMembersToScript(obj, script, ident + 2, bExpandMaterial, bRecursive);
+    }
+    else if (obj->ObjectType->isArray())
+    {
+        script += "\n" + QString(" ").repeated(ident)+ makeScriptString_arrayObject(obj);
+        script += "\n" + QString(" ").repeated(ident)+ "//-->-- array elements for " + obj->Name;
+        objectMembersToScript(obj, script, ident + 2, bExpandMaterial, bRecursive);
+        script += "\n" + QString(" ").repeated(ident)+ "//--<-- array elements end for " + obj->Name;
+    }
+    else if (obj->ObjectType->isStack())
+    {
+        script += "\n" + QString(" ").repeated(ident)+ makeScriptString_stackObjectStart(obj);
+        script += "\n" + QString(" ").repeated(ident)+ "//-->-- stack elements for " + obj->Name;
+        script += "\n" + QString(" ").repeated(ident)+ "// Values of x, y, z only matter for the stack element, refered to at InitializeStack below";
+        script += "\n" + QString(" ").repeated(ident)+ "// For the rest of elements they are calculated automatically";
+        objectMembersToScript(obj, script, ident + 2, bExpandMaterial, bRecursive);
+        script += "\n" + QString(" ").repeated(ident)+ "//--<-- stack elements end for " + obj->Name;
+        if (!obj->HostedObjects.isEmpty())
+            script += "\n" + QString(" ").repeated(ident)+ makeScriptString_stackObjectEnd(obj);
+    }
+    else if (obj->ObjectType->isGroup())
+    {
+        script += "\n" + QString(" ").repeated(ident)+ makeScriptString_groupObjectStart(obj);
+        script += "\n" + QString(" ").repeated(ident)+ "//-->-- group elements for " + obj->Name;
+        objectMembersToScript(obj, script, ident + 2, bExpandMaterial, bRecursive);
+        script += "\n" + QString(" ").repeated(ident)+ "//--<-- group elements end for " + obj->Name;
+    }
+    else if (obj->ObjectType->isGrid())
+    {
+        script += "\n";
+        script += "\n" + QString(" ").repeated(ident)+ "//=== Optical grid object is not supported! Make a request to the developers ===";
+        script += "\n";
+    }
+}
+
+const QString AGeoTreeWidget::makeScriptString_basicObject(AGeoObject* obj, bool bExpandMaterials) const
+{
+    return  QString("geo.TGeo( ") +
+            "'" + obj->Name + "', " +
+            "'" + obj->Shape->getGenerationString() + "', " +
+            (bExpandMaterials && obj->Material < Sandwich->GetMaterials().size() ?
+                 Sandwich->GetMaterials().at(obj->Material) + "_mat" : QString::number(obj->Material)) + ", "
+            "'"+obj->Container->Name + "',   "+
+            QString::number(obj->Position[0]) + ", " +
+            QString::number(obj->Position[1]) + ", " +
+            QString::number(obj->Position[2]) + ",   " +
+            QString::number(obj->Orientation[0]) + ", " +
+            QString::number(obj->Orientation[1]) + ", " +
+            QString::number(obj->Orientation[2]) + " )";
+}
+
+QString AGeoTreeWidget::makeScriptString_arrayObject(AGeoObject *obj)
+{
+    ATypeArrayObject* a = dynamic_cast<ATypeArrayObject*>(obj->ObjectType);
+    if (!a)
+    {
+        qWarning() << "It is not an array!";
+        return "Error accessing object as array!";
+    }
+
+    return  QString("geo.Array( ") +
+            "'" + obj->Name + "', " +
+            QString::number(a->numX) + ", " +
+            QString::number(a->numY) + ", " +
+            QString::number(a->numZ) + ",   " +
+            QString::number(a->stepX) + ", " +
+            QString::number(a->stepY) + ", " +
+            QString::number(a->stepZ) + ", " +
+            "'" + obj->Container->Name + "',   " +
+            QString::number(obj->Position[0]) + ", " +
+            QString::number(obj->Position[1]) + ", " +
+            QString::number(obj->Position[2]) + ",   " +
+            QString::number(obj->Orientation[2]) + " )";
+}
+
+QString AGeoTreeWidget::makeScriptString_stackObjectStart(AGeoObject *obj)
+{
+    return  QString("geo.MakeStack(") +
+            "'" + obj->Name + "', " +
+            "'" + obj->Container->Name + "' )";
+}
+
+QString AGeoTreeWidget::makeScriptString_groupObjectStart(AGeoObject *obj)
+{
+    return  QString("geo.MakeGroup(") +
+            "'" + obj->Name + "', " +
+            "'" + obj->Container->Name + "' )";
+}
+
+QString AGeoTreeWidget::makeScriptString_stackObjectEnd(AGeoObject *obj)
+{
+    return QString("geo.InitializeStack( ") +
+           "'" + obj->Name + "',  " +
+           "'" + obj->HostedObjects.first()->Name + "' )";
+}
+
+QString AGeoTreeWidget::makeLinePropertiesString(AGeoObject *obj)
+{
+    return "geo.SetLine( '" +
+            obj->Name +
+            "',  " +
+            QString::number(obj->color) + ",  " +
+            QString::number(obj->width) + ",  " +
+            QString::number(obj->style) + " )";
+}
+

@@ -26,6 +26,8 @@ public:
 public slots:
   void UpdateGui(QString selected = "");
   void onGridReshapeRequested(QString objName);
+  void objectMembersToScript(AGeoObject *Master, QString &script, int ident, bool bExpandMaterial, bool bRecursive);
+  void objectToScript(AGeoObject *obj, QString &script, int ident, bool bExpandMaterial, bool bRecursive);
 
 private slots:
   void onItemSelectionChanged();
@@ -33,7 +35,7 @@ private slots:
   void onItemClicked(); //only to return to normal geo view mode!
 
   void onItemExpanded(QTreeWidgetItem* item);
-  void onItemCollapsed(QTreeWidgetItem* item);
+  void onItemCollapsed(QTreeWidgetItem* item);  
 
 protected:
   void dropEvent(QDropEvent *event);
@@ -76,6 +78,12 @@ private:
   void menuActionAddNewGrid(QString ContainerName);
   void menuActionAddNewMonitor(QString ContainerName);
 
+  const QString makeScriptString_basicObject(AGeoObject *obj, bool bExpandMaterials) const;
+  QString makeScriptString_arrayObject(AGeoObject *obj);
+  QString makeScriptString_stackObjectStart(AGeoObject *obj);
+  QString makeScriptString_groupObjectStart(AGeoObject *obj);
+  QString makeScriptString_stackObjectEnd(AGeoObject *obj);
+  QString makeLinePropertiesString(AGeoObject *obj);
 signals:
   void ObjectSelectionChanged(const QString); // should be fired with empty string if selection does not contain a single item  
   void RequestRebuildDetector();
@@ -143,6 +151,7 @@ public slots:
 
   void onRequestShowCurrentObject();
   void onRequestScriptLineToClipboard();
+  void onRequestScriptRecursiveToClipboard();
   void onRequestSetVisAttributes();
 
 private slots:
@@ -159,6 +168,7 @@ private:
 
 signals:
   void showMonitor(const AGeoObject* mon);
+  void requestBuildScript(AGeoObject *obj, QString &script, int ident, bool bExpandMaterial, bool bRecursive);
 };
 
 class AGeoBaseDelegate : public QObject
@@ -194,6 +204,7 @@ signals:
     void RequestShow();
     void RequestChangeVisAttributes();
     void RequestScriptToClipboard();
+    void RequestScriptRecursiveToClipboard();
 };
 
 class AGeoObjectDelegate : public AGeoBaseDelegate

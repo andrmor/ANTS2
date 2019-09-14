@@ -130,39 +130,6 @@ protected:
     ROOT::Minuit2::Minuit2Minimizer* RootMinimizer;
 };
 
-// ------ Root minimizer for single point events with possibility that some events have known range in X or Y ------
-class RootMinRangedReconstructorClass : public ProcessorClass
-{
-  Q_OBJECT
-public:
-    RootMinRangedReconstructorClass(APmHub* PMs,
-                                    APmGroupsManager* PMgroups,
-                                    ALrfModuleSelector* LRFs,
-                                    EventsDataClass *EventsDataHub,
-                                    ReconstructionSettings *RecSet,
-                                    int ThisPmGroup,
-                                    int EventsFrom, int EventsTo,
-                                    double Range, bool UseGauss);
-    ~RootMinRangedReconstructorClass();
-
-    double LastMiniValue;
-    const QVector< float >* PMsignals;
-
-    double Range; // minimization will be within +-range around the true/scan value
-
-    //internal - used by the minimizer in Gaussian mode
-    bool bUseGauss;
-    bool RangedX, RangedY;
-    double CenterX, CenterY;
-
-public slots:
-    virtual void execute();
-
-protected:
-    ROOT::Math::Functor *FunctorLSML;
-    ROOT::Minuit2::Minuit2Minimizer* RootMinimizer;
-};
-
 // ------ Root minimizer with double events ------
 // RecSet->MultipleEventOption: 0-cannot be here, 1-only doubles+chi2, 2-does doubles+chi2 then copmares with already provided rec results for singles
 class RootMinDoubleReconstructorClass : public ProcessorClass
@@ -237,15 +204,6 @@ public:
 private:
     RootMinReconstructorClass * Reconstructor = nullptr;
 };
-    //double Chi2staticGauss(const double *p);
-class AFunc_Chi2range
-{
-public:
-    AFunc_Chi2range(RootMinRangedReconstructorClass * Reconstructor) : Reconstructor(Reconstructor) {}
-    double operator()(const double *p);
-private:
-    RootMinRangedReconstructorClass * Reconstructor = nullptr;
-};
     //double Chi2staticDouble(const double *p);
 class AFunc_Chi2double
 {
@@ -263,15 +221,6 @@ public:
     double operator()(const double *p);
 private:
     RootMinReconstructorClass * Reconstructor = nullptr;
-};
-    //double MLstaticGauss(const double *p);
-class AFunc_MLrange
-{
-public:
-    AFunc_MLrange(RootMinRangedReconstructorClass * Reconstructor) : Reconstructor(Reconstructor) {}
-    double operator()(const double *p);
-private:
-    RootMinRangedReconstructorClass * Reconstructor = nullptr;
 };
     //double MLstaticDouble(const double *p);
 class AFunc_MLdouble

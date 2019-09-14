@@ -307,9 +307,7 @@ void AReconstructionManager::distributeWork(int Algorithm, QList<ProcessorClass*
           todo << new CGonCPUreconstructorClass(PMs, PMgroups, LRFs, EventsDataHub, &RecSet[CurrentGroup], CurrentGroup, from, to);
           break;
       case 2:
-          if (RecSet.at(CurrentGroup).fLimitSearchIfTrueIsSet)
-               todo << new RootMinRangedReconstructorClass(PMs, PMgroups, LRFs, EventsDataHub, &RecSet[CurrentGroup], CurrentGroup, from, to, RecSet.at(CurrentGroup).RangeForLimitSearchIfTrueSet, RecSet.at(CurrentGroup).LimitSearchGauss);
-          else if (RecSet.at(CurrentGroup).MultipleEventOption == 1) //in the case of 2(chose best single or double), first single is calculated
+          if (RecSet.at(CurrentGroup).MultipleEventOption == 1) //in the case of 2(chose best single or double), first single is calculated
                todo << new RootMinDoubleReconstructorClass(PMs, PMgroups, LRFs, EventsDataHub, &RecSet[CurrentGroup], CurrentGroup, from, to);
           else todo << new RootMinReconstructorClass(PMs, PMgroups, LRFs, EventsDataHub, &RecSet[CurrentGroup], CurrentGroup, from, to);
           break;

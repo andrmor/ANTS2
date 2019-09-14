@@ -958,13 +958,13 @@
          <string>Invert Y</string>
         </property>
        </widget>
-       <widget class="QWidget" name="">
+       <widget class="QWidget" name="layoutWidget">
         <property name="geometry">
          <rect>
           <x>176</x>
           <y>27</y>
-          <width>337</width>
-          <height>25</height>
+          <width>369</width>
+          <height>29</height>
          </rect>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout">
@@ -1036,6 +1036,7 @@
          </item>
         </layout>
        </widget>
+       <zorder>layoutWidget</zorder>
        <zorder>line_40</zorder>
        <zorder>label_16</zorder>
        <zorder>leoEventsPassingAllFilters</zorder>
@@ -1057,8 +1058,6 @@
        <zorder>cbPlotVsActualPosition</zorder>
        <zorder>label_18</zorder>
        <zorder>leoAverageDeviation</zorder>
-       <zorder>label_80</zorder>
-       <zorder>cbLimitNumberEvents</zorder>
        <zorder>cobShowWhat</zorder>
        <zorder>pbShowVsXY</zorder>
        <zorder>label</zorder>
@@ -1074,11 +1073,7 @@
        <zorder>ledXfrom</zorder>
        <zorder>ledYfrom</zorder>
        <zorder>cobHowToAverageZ</zorder>
-       <zorder>lShowFirst</zorder>
-       <zorder>sbLimitNumberEvents</zorder>
        <zorder>pbShowReconstructionPositions</zorder>
-       <zorder>sbShowEventsEvery</zorder>
-       <zorder>label_85</zorder>
        <zorder>ledXto</zorder>
        <zorder>ledYto</zorder>
        <zorder>pbPMTcol</zorder>
@@ -3324,8 +3319,8 @@
    <widget class="QPushButton" name="pbUpdateReconConfig">
     <property name="geometry">
      <rect>
-      <x>350</x>
-      <y>300</y>
+      <x>304</x>
+      <y>310</y>
       <width>210</width>
       <height>23</height>
      </rect>
@@ -9633,7 +9628,7 @@ Beware of bugs!</string>
           <property name="geometry">
            <rect>
             <x>290</x>
-            <y>140</y>
+            <y>131</y>
             <width>87</width>
             <height>21</height>
            </rect>
@@ -9646,7 +9641,7 @@ Beware of bugs!</string>
           <property name="geometry">
            <rect>
             <x>401</x>
-            <y>140</y>
+            <y>131</y>
             <width>87</width>
             <height>21</height>
            </rect>
@@ -9681,7 +9676,7 @@ Beware of bugs!</string>
           <property name="geometry">
            <rect>
             <x>36</x>
-            <y>140</y>
+            <y>131</y>
             <width>180</width>
             <height>21</height>
            </rect>
@@ -9806,9 +9801,9 @@ Beware of bugs!</string>
           <property name="geometry">
            <rect>
             <x>170</x>
-            <y>26</y>
+            <y>25</y>
             <width>31</width>
-            <height>16</height>
+            <height>18</height>
            </rect>
           </property>
           <property name="text">
@@ -9983,7 +9978,7 @@ Beware of bugs!</string>
            <rect>
             <x>46</x>
             <y>54</y>
-            <width>101</width>
+            <width>120</width>
             <height>20</height>
            </rect>
           </property>
@@ -9996,7 +9991,7 @@ Beware of bugs!</string>
            <rect>
             <x>44</x>
             <y>81</y>
-            <width>104</width>
+            <width>120</width>
             <height>23</height>
            </rect>
           </property>
@@ -10009,7 +10004,7 @@ Beware of bugs!</string>
            <rect>
             <x>44</x>
             <y>24</y>
-            <width>104</width>
+            <width>120</width>
             <height>23</height>
            </rect>
           </property>
@@ -10020,9 +10015,9 @@ Beware of bugs!</string>
          <widget class="QLabel" name="label_83">
           <property name="geometry">
            <rect>
-            <x>7</x>
+            <x>0</x>
             <y>55</y>
-            <width>41</width>
+            <width>45</width>
             <height>16</height>
            </rect>
           </property>
@@ -10033,9 +10028,9 @@ Beware of bugs!</string>
          <widget class="QPushButton" name="pbShowPassivePMs">
           <property name="geometry">
            <rect>
-            <x>100</x>
+            <x>80</x>
             <y>120</y>
-            <width>111</width>
+            <width>130</width>
             <height>31</height>
            </rect>
           </property>
@@ -10046,9 +10041,9 @@ Beware of bugs!</string>
          <widget class="QPushButton" name="pbAllPMsActive">
           <property name="geometry">
            <rect>
-            <x>168</x>
-            <y>82</y>
-            <width>117</width>
+            <x>170</x>
+            <y>81</y>
+            <width>120</width>
             <height>23</height>
            </rect>
           </property>
@@ -10081,7 +10076,7 @@ Beware of bugs!</string>
          <widget class="Line" name="line_31">
           <property name="geometry">
            <rect>
-            <x>94</x>
+            <x>100</x>
             <y>34</y>
             <width>3</width>
             <height>61</height>
@@ -10138,10 +10133,10 @@ Beware of bugs!</string>
          <widget class="QFrame" name="fWeightedChi2">
           <property name="geometry">
            <rect>
-            <x>110</x>
-            <y>33</y>
+            <x>140</x>
+            <y>26</y>
             <width>201</width>
-            <height>31</height>
+            <height>29</height>
            </rect>
           </property>
           <property name="frameShape">
@@ -10153,7 +10148,7 @@ Beware of bugs!</string>
           <widget class="QComboBox" name="comboBox">
            <property name="geometry">
             <rect>
-             <x>6</x>
+             <x>10</x>
              <y>2</y>
              <width>181</width>
              <height>22</height>
@@ -10170,8 +10165,8 @@ Beware of bugs!</string>
           <property name="geometry">
            <rect>
             <x>18</x>
-            <y>37</y>
-            <width>101</width>
+            <y>30</y>
+            <width>121</width>
             <height>17</height>
            </rect>
           </property>
@@ -10186,8 +10181,8 @@ Beware of bugs!</string>
           <property name="geometry">
            <rect>
             <x>18</x>
-            <y>10</y>
-            <width>381</width>
+            <y>6</y>
+            <width>461</width>
             <height>17</height>
            </rect>
           </property>
@@ -10205,7 +10200,7 @@ Beware of bugs!</string>
           <property name="geometry">
            <rect>
             <x>17</x>
-            <y>65</y>
+            <y>55</y>
             <width>293</width>
             <height>22</height>
            </rect>
@@ -10230,8 +10225,8 @@ Beware of bugs!</string>
           <property name="geometry">
            <rect>
             <x>20</x>
-            <y>95</y>
-            <width>211</width>
+            <y>85</y>
+            <width>311</width>
             <height>17</height>
            </rect>
           </property>
@@ -10243,9 +10238,9 @@ Beware of bugs!</string>
           <property name="geometry">
            <rect>
             <x>7</x>
-            <y>116</y>
+            <y>105</y>
             <width>301</width>
-            <height>61</height>
+            <height>53</height>
            </rect>
           </property>
           <property name="frameShape">
@@ -10272,7 +10267,7 @@ Beware of bugs!</string>
             <rect>
              <x>11</x>
              <y>4</y>
-             <width>91</width>
+             <width>110</width>
              <height>22</height>
             </rect>
            </property>
@@ -10290,9 +10285,9 @@ Beware of bugs!</string>
           <widget class="QLabel" name="label_15">
            <property name="geometry">
             <rect>
-             <x>111</x>
+             <x>130</x>
              <y>5</y>
-             <width>131</width>
+             <width>211</width>
              <height>16</height>
             </rect>
            </property>
@@ -10319,9 +10314,9 @@ Beware of bugs!</string>
           <widget class="QLabel" name="label_19">
            <property name="geometry">
             <rect>
-             <x>116</x>
+             <x>114</x>
              <y>31</y>
-             <width>20</width>
+             <width>28</width>
              <height>13</height>
             </rect>
            </property>
@@ -10349,7 +10344,7 @@ Beware of bugs!</string>
              <rect>
               <x>109</x>
               <y>6</y>
-              <width>20</width>
+              <width>40</width>
               <height>13</height>
              </rect>
             </property>
@@ -10383,75 +10378,6 @@ Beware of bugs!</string>
              <string>26.5</string>
             </property>
            </widget>
-          </widget>
-         </widget>
-         <widget class="QGroupBox" name="groupBox_3">
-          <property name="geometry">
-           <rect>
-            <x>326</x>
-            <y>8</y>
-            <width>176</width>
-            <height>131</height>
-           </rect>
-          </property>
-          <property name="title">
-           <string>Root-based reconstruction</string>
-          </property>
-          <widget class="QCheckBox" name="cbLimitSearchToVicinity">
-           <property name="geometry">
-            <rect>
-             <x>10</x>
-             <y>11</y>
-             <width>161</width>
-             <height>61</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>If there is scan data, and 
-xScan (or yScan) != 1e10,
-limit search in this direction
-to +- around the Scan value:</string>
-           </property>
-          </widget>
-          <widget class="QLineEdit" name="ledLimitSearchRange">
-           <property name="geometry">
-            <rect>
-             <x>30</x>
-             <y>72</y>
-             <width>51</width>
-             <height>20</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>1</string>
-           </property>
-          </widget>
-          <widget class="QLabel" name="label_194">
-           <property name="geometry">
-            <rect>
-             <x>87</x>
-             <y>75</y>
-             <width>47</width>
-             <height>13</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>mm</string>
-           </property>
-          </widget>
-          <widget class="QCheckBox" name="cbGaussWeightInMinimization">
-           <property name="geometry">
-            <rect>
-             <x>30</x>
-             <y>93</y>
-             <width>161</width>
-             <height>31</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>Gauss weight
-in minimization</string>
-           </property>
           </widget>
          </widget>
         </widget>
@@ -15482,54 +15408,6 @@ in minimization</string>
     <hint type="destinationlabel">
      <x>480</x>
      <y>491</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbLimitSearchToVicinity</sender>
-   <signal>clicked()</signal>
-   <receiver>pbUpdateReconConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>486</x>
-     <y>207</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>522</x>
-     <y>322</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledLimitSearchRange</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateReconConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>392</x>
-     <y>250</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>431</x>
-     <y>322</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbGaussWeightInMinimization</sender>
-   <signal>clicked()</signal>
-   <receiver>pbUpdateReconConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>375</x>
-     <y>279</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>404</x>
-     <y>322</y>
     </hint>
    </hints>
   </connection>

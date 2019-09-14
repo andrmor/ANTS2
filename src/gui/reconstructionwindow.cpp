@@ -4967,9 +4967,6 @@ void ReconstructionWindow::updateReconSettings()
     gjson["InitialZ"] = ui->ledSuggestedZ->text().toDouble();
     gjson["IncludePassives"] = ui->cbIncludePassives->isChecked();
     gjson["WeightedChi2"] = ui->cbWeightedChi2->isChecked();
-    gjson["LimitSearchIfTrueIsSet"] = ui->cbLimitSearchToVicinity->isChecked();
-    gjson["RangeForLimitSearchIfTrueSet"] = ui->ledLimitSearchRange->text().toDouble();
-    gjson["LimitSearchGauss"] = ui->cbGaussWeightInMinimization->isChecked();
   RecJson["General"] = gjson;
 
   //Algotithm
@@ -5129,10 +5126,6 @@ bool ReconstructionWindow::readReconSettingsFromJson(QJsonObject &jsonMaster)
   JsonToComboBox(gjson, "Zstrategy", ui->cobZ);
   JsonToCheckbox(gjson, "IncludePassives", ui->cbIncludePassives);
   JsonToCheckbox(gjson, "WeightedChi2", ui->cbWeightedChi2);  
-  ui->cbLimitSearchToVicinity->setChecked(false); //compatibility
-  JsonToCheckbox(gjson, "LimitSearchIfTrueIsSet", ui->cbLimitSearchToVicinity);
-  JsonToLineEditDouble(gjson, "RangeForLimitSearchIfTrueSet", ui->ledLimitSearchRange);  
-  JsonToCheckbox(gjson, "LimitSearchGauss", ui->cbGaussWeightInMinimization);
 
   //Dynamic passives - before algorithms for compatibility: CUDA settings can overrite them if old file is loaded
   if (RecJson.contains("DynamicPassives"))

@@ -7247,7 +7247,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <property name="documentMode">
        <bool>false</bool>
@@ -8942,8 +8942,8 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="text">
              <string>Use script unit 'sim' to define nodes, e.g.
 sim.AddNode(x,y,z)
-and then start simulation with
-sim.RunPhotonSources()</string>
+
+Multi-vertex events can be simulated using AddSubNode(x,y,z)</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>

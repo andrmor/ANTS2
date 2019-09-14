@@ -613,7 +613,7 @@ void APointSourceSimulator::OneNode(ANodeRecord & node)
 
         if (!simSettings.fLRFsim)
         {
-            GenerateTraceNphotons(sr, thisNode->Time);
+            GenerateTraceNphotons(sr, thisNode->Time, iPoint);
         }
         else
         {
@@ -639,8 +639,8 @@ void APointSourceSimulator::OneNode(ANodeRecord & node)
 
         //if exists, continue to work with the linked node(s)
         thisNode = thisNode->getLinkedNode();
+        if (!thisNode) break; //paranoic
     }
-    while (thisNode);
 
     if (!simSettings.fLRFsim) OneEvent->HitsToSignal();
 

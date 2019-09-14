@@ -261,7 +261,7 @@ bool AReconstructionManager::reconstructAll(QJsonObject &json, int numThreads, b
       //if multiple option = 2, have to do double rec and compare sigma with single
       if (RecSet.at(CurrentGroup).MultipleEventOption == 2)
       {
-          qDebug() << "--> Running double event reconstruction";
+          //qDebug() << "--> Running double event reconstruction";
           todo.clear();
           distributeWork(12, todo);
           fOK = run(todo);

@@ -2567,7 +2567,7 @@ AGeoBoxDelegate::AGeoBoxDelegate(const QStringList &materials, QWidget *parent)
             "\n"
             "The XYZ position is given for the center point\n"
             "\n"
-            "Implemented using TGeoBBox(half_size_X, half_size_Y, half_size_Z)";
+            "Implemented using TGeoBBox(0.5*X_size, 0.5*Y_size, 0.5*Z_size)";
 
     QGridLayout * gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);
@@ -2625,7 +2625,7 @@ AGeoTubeDelegate::AGeoTubeDelegate(const QStringList & materials, QWidget *paren
             "\n"
             "The XYZ position is given for the center point\n"
             "\n"
-            "Implemented using TGeoTube(inner_radius, outer_radius, half_size_Z)";
+            "Implemented using TGeoTube(0.5*Inner_diameter, 0.5*Outer_diameter, 0.5*Height)";
 
     gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);
@@ -2682,7 +2682,7 @@ AGeoTubeSegDelegate::AGeoTubeSegDelegate(const QStringList & materials, QWidget 
             "\n"
             "The XYZ position is given for the center point of the cylinder\n"
             "\n"
-            "Implemented using TGeoTubeSeg(inner_radius, outer_radius, half_size_Z, phi_from, phi_to)";
+            "Implemented using TGeoTubeSeg(0.5*Inner_diameter, 0.5*Outer_diameter, 0.5*Height, phi_from, phi_to)";
 
     gr->addWidget(new QLabel("Phi from:"), 3, 0);
     gr->addWidget(new QLabel("Phi to:"), 4, 0);
@@ -2736,7 +2736,7 @@ AGeoTubeSegCutDelegate::AGeoTubeSegCutDelegate(const QStringList &materials, QWi
             "\n"
             "The XYZ position is given for the point with (0,0,0) local coordinates\n"
             "\n"
-            "Implemented using TGeoCtub shape";
+            "Implemented using TGeoCtub(0.5*Inner_diameter, 0.5*Outer_diameter, 0.5*Height, phi_from, phi_to, LNx, LNy, LNz, UNx, UNy, UNz)";
 
     gr->addWidget(new QLabel("Low Nx:"), 5, 0);
     gr->addWidget(new QLabel("Low Ny:"), 6, 0);
@@ -2808,7 +2808,7 @@ AGeoParaDelegate::AGeoParaDelegate(const QStringList & materials, QWidget *paren
                 "Theta: theta angle of the segment defined by the centers of the Z faces\n"
                 "Phi: phi angle of the same segment\n"
                 "\n"
-                "Implemented using TGeoPara(0.5*SizeZ, 0.5*SizeY, 0.5*SizeZ, Alpha, Theta, Phi)";
+                "Implemented using TGeoPara(0.5*X_size, 0.5*Y_size, 0.5*Z_size, Alpha, Theta, Phi)";
 
     QGridLayout * gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);
@@ -2881,7 +2881,7 @@ AGeoSphereDelegate::AGeoSphereDelegate(const QStringList & materials, QWidget *p
                 "Phi from: [0, 360)\n"
                 "Phi to:   (0, 360] with a condition phi_from < phi_to\n"
                 "\n"
-                "Implemented using TGeoSphere(IntDiam, ExtDiam, ThetaFrom, ThetaTo, PhiFrom, PhiTo)";
+                "Implemented using TGeoSphere(0.5*Inner_Diameter, 0.5*Outer_Diameter, ThetaFrom, ThetaTo, PhiFrom, PhiTo)";
 
     QGridLayout * gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);
@@ -2954,7 +2954,7 @@ AGeoConeDelegate::AGeoConeDelegate(const QStringList &materials, QWidget *parent
                 " of external/internal diameters,\n"
                 " one pair at the lower plane and the other at the upper one.\n"
                 "\n"
-                "Implemented using TGeoCone(0.5*Height, 0.5*LowerIntDiam, 0.5*LowerExtDiam, 0.5*UpperIntDiam, 0.5*UpperExtDiam)";
+                "Implemented using TGeoCone(0.5*Height, 0.5*LowerInDiam, 0.5*LowerOutDiam, 0.5*UpperInDiam, 0.5*UpperOutDiam)";
 
     gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);
@@ -3028,7 +3028,7 @@ AGeoConeSegDelegate::AGeoConeSegDelegate(const QStringList &materials, QWidget *
                 "  Phi from:  in the range [0, 360)\n"
                 "  Phi to:    in the ramge (0, 360], should be smaller than Phi_from.\n"
                 "\n"
-                "Implemented using TGeoCone(0.5*Height, 0.5*LowerIntDiam, 0.5*LowerExtDiam, 0.5*UpperIntDiam, 0.5*UpperExtDiam, PhiFrom, PhiTo)";
+                "Implemented using TGeoCone(0.5*Height, 0.5*LowerInDiam, 0.5*LowerOutDiam, 0.5*UpperInDiam, 0.5*UpperoutDiam, PhiFrom, PhiTo)";
 
     gr->addWidget(new QLabel("Phi from:"), 5, 0);
     gr->addWidget(new QLabel("Phi to:"),   6, 0);
@@ -3083,7 +3083,7 @@ AGeoElTubeDelegate::AGeoElTubeDelegate(const QStringList &materials, QWidget *pa
             "\n"
             "The XYZ position is given for the center point\n"
             "\n"
-            "Implemented using TGeoEltu(radius_in_X, radius_in_Y, half_size_Z)";
+            "Implemented using TGeoEltu(0.5*X_full_size, 0.5*Y_full_size, 0.5*Height)";
 
     gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);
@@ -3132,6 +3132,14 @@ AGeoTrapXDelegate::AGeoTrapXDelegate(const QStringList &materials, QWidget *pare
     : AGeoObjectDelegate(materials, parent)
 {
     DelegateTypeName = "Trapezoid simplified";
+
+    ShapeHelp = "A trapezoid shape\n"
+            "\n"
+            "The two of the opposite faces are parallel to XY plane\n"
+            "  and are positioned in Z at ± 0.5*Height.\n"
+            "Full X size is given for the lower and upper planes.\n"
+            "\n"
+            "Implemented using TGeoTrd1(0.5*X_lower_size, 0.5*X_upper_size, 0.5*Y_size, 0.5*Height)";
 
     QGridLayout * gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);
@@ -3186,6 +3194,14 @@ AGeoTrapXYDelegate::AGeoTrapXYDelegate(const QStringList &materials, QWidget *pa
     : AGeoObjectDelegate(materials, parent)
 {
     DelegateTypeName = "Trapezoid";
+
+    ShapeHelp = "A trapezoid shape\n"
+            "\n"
+            "The two of the opposite faces are parallel to XY plane\n"
+            "  and are positioned in Z at ± 0.5*Height.\n"
+            "Full X and Y sizes are given for the lower and upper planes.\n"
+            "\n"
+            "Implemented using TGeoTrd2(0.5*X_lower_size, 0.5*X_upper_size, 0.5*Y_lower_size, 0.5*Y_upper_size, 0.5*Height)";
 
     QGridLayout * gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);
@@ -3245,6 +3261,20 @@ AGeoParaboloidDelegate::AGeoParaboloidDelegate(const QStringList &materials, QWi
 {
     DelegateTypeName = "Paraboloid";
 
+    ShapeHelp = "A paraboloid shape\n"
+            "\n"
+            "Defined by the revolution surface generated by a parabola\n"
+            "  and is bound by two planes perpendicular to Z axis.\n"
+            "The parabola equation is taken in the form: z = a*r^2 + b,\n"
+            "  where r^2 = x^2 + y^2.\n"
+            "The coefficients a and b are computed from the input values\n"
+            "  which are the diameters of the circular sections cut by\n"
+            "  two planes, lower at -0.5*Height, and the upper at +0.5*Height:\n"
+            "  a*(0.5*Lower_diameter)^2 + b   for the lower plane and\n"
+            "  a*(0.5*Upper_diameter)^2 + b   for the upper one.\n"
+            "\n"
+            "Implemented using TGeoParaboloid(0.5*Lower_diameter, 0.5*Upper_diameter, 0.5*Height)";
+
     QGridLayout * gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);
     gr->setVerticalSpacing(1);
@@ -3295,6 +3325,15 @@ AGeoTorusDelegate::AGeoTorusDelegate(const QStringList &materials, QWidget *pare
     : AGeoObjectDelegate(materials, parent)
 {
     DelegateTypeName = "Torus";
+
+    ShapeHelp = "A torus segment\n"
+            "\n"
+            "Defined by the axial, inner and outer diameters\n"
+            "  and the segment angles (in degrees)\n"
+            "Phi from: in the range [0, 360),\n"
+            "Phi to:   in the range (0, 360], Phi_to > Phi_from\n"
+            "\n"
+            "Implemented using TGeoTorus(0.5*Axial_diameter, 0.5*Inner_diameter, 0.5*Outer_diameter, Phi_from, Phi_to)";
 
     QGridLayout * gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);

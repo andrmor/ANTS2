@@ -4032,6 +4032,8 @@ void AGeoTreeWidget::objectMembersToScript(AGeoObject* Master, QString &script, 
 
 void AGeoTreeWidget::objectToScript(AGeoObject *obj, QString &script, int ident, bool bExpandMaterial, bool bRecursive)
 {
+    const QString Starter = "\n" + QString(" ").repeated(ident);
+
     if (obj->ObjectType->isLogical())
     {
         script += "\n" + QString(" ").repeated(ident)+ makeScriptString_basicObject(obj, bExpandMaterial);
@@ -4068,6 +4070,11 @@ void AGeoTreeWidget::objectToScript(AGeoObject *obj, QString &script, int ident,
         script += "\n" + QString(" ").repeated(ident)+ "//-->-- array elements for " + obj->Name;
         objectMembersToScript(obj, script, ident + 2, bExpandMaterial, bRecursive);
         script += "\n" + QString(" ").repeated(ident)+ "//--<-- array elements end for " + obj->Name;
+    }
+    else if (obj->ObjectType->isMonitor())
+    {
+        script += Starter + makeScriptString_monitorBaseObject(obj);
+        script += Starter + makeScriptString_monitorConfig(obj);
     }
     else if (obj->ObjectType->isStack())
     {
@@ -4133,6 +4140,84 @@ QString AGeoTreeWidget::makeScriptString_arrayObject(AGeoObject *obj)
             QString::number(obj->Position[1]) + ", " +
             QString::number(obj->Position[2]) + ",   " +
             QString::number(obj->Orientation[2]) + " )";
+}
+
+const QString AGeoTreeWidget::makeScriptString_monitorBaseObject(const AGeoObject * obj) const
+{
+    ATypeMonitorObject * m = dynamic_cast<ATypeMonitorObject*>(obj->ObjectType);
+    if (!m)
+    {
+        qWarning() << "It is not a monitor!";
+        return "Error accessing monitor!";
+    }
+    const AMonitorConfig & c = m->config;
+
+    // geo.Monitor( name,  shape,  size1,  size2,  container,  x,  y,  z,  phi,  theta,  psi,  SensitiveTop,  SensitiveBottom,  StopsTraking )
+    return QString("geo.Monitor( %1, %2,  %3, %4,  %5,   %6, %7, %8,   %9, %10, %11,   %12, %13,   %14 )")
+            .arg("'" + obj->Name + "'")
+            .arg(c.shape)
+            .arg(2.0*c.size1)
+            .arg(2.0*c.size2)
+            .arg("'" + obj->Container->Name + "'")
+            .arg(obj->Position[0])
+            .arg(obj->Position[1])
+            .arg(obj->Position[2])
+            .arg(obj->Orientation[0])
+            .arg(obj->Orientation[1])
+            .arg(obj->Orientation[2])
+            .arg(c.bUpper ? "true" : "false")
+            .arg(c.bLower ? "true" : "false")
+            .arg(c.bStopTracking ? "true" : "false");
+}
+
+const QString AGeoTreeWidget::makeScriptString_monitorConfig(const AGeoObject *obj) const
+{
+    ATypeMonitorObject * m = dynamic_cast<ATypeMonitorObject*>(obj->ObjectType);
+    if (!m)
+    {
+        qWarning() << "It is not a monitor!";
+        return "Error accessing monitor!";
+    }
+    const AMonitorConfig & c = m->config;
+
+    if (c.PhotonOrParticle == 0)
+    {
+        //geo.Monitor_ConfigureForPhotons( MonitorName,  Position,  Time,  Angle,  Wave )
+        return QString("geo.Monitor_ConfigureForPhotons( %1,  [%2, %3],  [%4, %5, %6],  [%7, %8, %9],  [%10, %11, %12] )")
+                .arg("'" + obj->Name + "'")
+                .arg(c.xbins)
+                .arg(c.ybins)
+                .arg(c.timeBins)
+                .arg(c.timeFrom)
+                .arg(c.timeTo)
+                .arg(c.angleBins)
+                .arg(c.angleFrom)
+                .arg(c.angleTo)
+                .arg(c.waveBins)
+                .arg(c.waveFrom)
+                .arg(c.waveTo);
+    }
+    else
+    {
+        //geo.Monitor_ConfigureForParticles( MonitorName,  ParticleIndex,  Both_Primary_Secondary,  Both_Direct_Indirect,  Position,  Time,  Angle,  Energy )
+        return QString("geo.Monitor_ConfigureForParticles( %1,  %2,  %3,  %4,   [%5, %6],  [%7, %8, %9],  [%10, %11, %12],  [%13, %14, %15, %16] )")
+                .arg("'" + obj->Name + "'")
+                .arg(c.ParticleIndex)
+                .arg(c.bPrimary && c.bSecondary ? 0 : (c.bPrimary ? 1 : 2))
+                .arg(c.bDirect  && c.bIndirect  ? 0 : (c.bDirect  ? 1 : 2))
+                .arg(c.xbins)
+                .arg(c.ybins)
+                .arg(c.timeBins)
+                .arg(c.timeFrom)
+                .arg(c.timeTo)
+                .arg(c.angleBins)
+                .arg(c.angleFrom)
+                .arg(c.angleTo)
+                .arg(c.energyBins)
+                .arg(c.energyFrom)
+                .arg(c.energyTo)
+                .arg(c.energyUnitsInHist);
+    }
 }
 
 QString AGeoTreeWidget::makeScriptString_stackObjectStart(AGeoObject *obj)

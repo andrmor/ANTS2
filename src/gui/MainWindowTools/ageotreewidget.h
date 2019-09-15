@@ -80,6 +80,8 @@ private:
 
   const QString makeScriptString_basicObject(AGeoObject *obj, bool bExpandMaterials) const;
   QString makeScriptString_arrayObject(AGeoObject *obj);
+  const QString makeScriptString_monitorBaseObject(const AGeoObject *obj) const;
+  const QString makeScriptString_monitorConfig(const AGeoObject *obj) const;
   QString makeScriptString_stackObjectStart(AGeoObject *obj);
   QString makeScriptString_groupObjectStart(AGeoObject *obj);
   QString makeScriptString_stackObjectEnd(AGeoObject *obj);

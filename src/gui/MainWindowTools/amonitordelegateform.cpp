@@ -61,20 +61,18 @@ bool AMonitorDelegateForm::updateGUI(const AGeoObject *obj)
 
     ui->cbStopTracking->setChecked(config.bStopTracking);
 
-    if (config.PhotonOrParticle == 1)
-    {
+    if (config.ParticleIndex > -1 && config.ParticleIndex < ui->cobParticle->count())
         ui->cobParticle->setCurrentIndex(config.ParticleIndex);
 
-        int prsec = 0;
-        if (config.bSecondary && !config.bPrimary) prsec = 1;
-        else if (config.bSecondary && config.bPrimary) prsec = 2;
-        ui->cobPrimarySecondary->setCurrentIndex(prsec);
+    int prsec = 0;
+    if (config.bSecondary && !config.bPrimary) prsec = 1;
+    else if (config.bSecondary && config.bPrimary) prsec = 2;
+    ui->cobPrimarySecondary->setCurrentIndex(prsec);
 
-        int dirin = 0;
-             if (config.bIndirect && !config.bDirect) dirin = 1;
-        else if (config.bIndirect &&  config.bDirect) dirin = 2;
-        ui->cobDirectIndirect->setCurrentIndex(dirin);
-    }
+    int dirin = 0;
+    if (config.bIndirect && !config.bDirect) dirin = 1;
+    else if (config.bIndirect &&  config.bDirect) dirin = 2;
+    ui->cobDirectIndirect->setCurrentIndex(dirin);
 
     ui->sbXbins->setValue(config.xbins);
     ui->sbYbins->setValue(config.ybins);

@@ -35,14 +35,17 @@ private slots:
   void onItemClicked(); //only to return to normal geo view mode!
 
   void onItemExpanded(QTreeWidgetItem* item);
-  void onItemCollapsed(QTreeWidgetItem* item);  
+  void onItemCollapsed(QTreeWidgetItem* item);
+
+  void onRemoveTriggered();
+  void onRemoveRecursiveTriggered();
 
 protected:
   void dropEvent(QDropEvent *event);
   void dragEnterEvent(QDragEnterEvent* event);
 //  void dragMoveEvent(QDragMoveEvent* event);
 
-private:  
+private:
   AGeoObject *World;
   AGeoWidget *EditWidget;
 

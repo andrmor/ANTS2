@@ -38,6 +38,8 @@
 #include "TMath.h"
 #include "TGeoShape.h"
 
+#include <QShortcut>
+
 AGeoTreeWidget::AGeoTreeWidget(ASandwich *Sandwich) : Sandwich(Sandwich)
 {
   World = Sandwich->World;
@@ -92,6 +94,12 @@ AGeoTreeWidget::AGeoTreeWidget(ASandwich *Sandwich) : Sandwich(Sandwich)
           "border-image: none;"
           "image: url(:/images/tw-branch-open.png);}";
   setStyleSheet(style);
+
+  QShortcut* Del = new QShortcut(QKeySequence::Delete, this);
+  connect(Del, &QShortcut::activated, this, &AGeoTreeWidget::onRemoveTriggered);
+
+  QShortcut* DelRec = new QShortcut(QKeySequence(Qt::Key_Backspace), this);
+  connect(DelRec, &QShortcut::activated, this, &AGeoTreeWidget::onRemoveRecursiveTriggered);
 }
 
 void AGeoTreeWidget::SelectObjects(QStringList ObjectNames)
@@ -563,7 +571,9 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
   menu.addSeparator();
 
   QAction* removeA = Action(menu, "Remove");
-  QAction* removeThisAndHostedA = Action(menu, "Remove object recursively");
+  removeA->setShortcut(QKeySequence::Delete);
+  QAction* removeThisAndHostedA = Action(menu, "Remove object and content");
+  removeThisAndHostedA->setShortcut(QKeySequence(Qt::Key_Backspace));
   QAction* removeHostedA = Action(menu, "Remove objects inside");
 
   menu.addSeparator();
@@ -724,17 +734,39 @@ void AGeoTreeWidget::onItemCollapsed(QTreeWidgetItem *item)
     if (obj) obj->fExpanded = false;
 }
 
+void AGeoTreeWidget::onRemoveTriggered()
+{
+    menuActionRemove();
+}
+
+void AGeoTreeWidget::onRemoveRecursiveTriggered()
+{
+    QList<QTreeWidgetItem*> selected = selectedItems();
+    if (selected.isEmpty()) return;
+
+    if (selected.size() > 1)
+    {
+        message("This action can be used when only ONE volume is selected", this);
+        return;
+    }
+
+    menuActionRemoveRecursively(selected.first()->text(0));
+}
+
 void AGeoTreeWidget::menuActionRemove()
 {
   QList<QTreeWidgetItem*> selected = selectedItems();
+  if (selected.isEmpty()) return;
 
   QMessageBox msgBox;
   msgBox.setIcon(QMessageBox::Question);
-  msgBox.setWindowTitle("Locked objects will NOT be removed!");
-  QString str = "\nThis command, executed on a slab or lightguide removes it too!";
-  if (selected.size() == 1)  msgBox.setText("Remove "+selected.first()->text(0)+"?"+str);
-  else msgBox.setText("Remove selected objects?"+str);
-  QPushButton *remove = msgBox.addButton("Remove", QMessageBox::ActionRole);
+  msgBox.setWindowTitle("Locked objects are NOT removed!");
+  QString str;// = "\nThis command, executed on a slab or lightguide removes it too!";
+  if (selected.size() == 1)  str = "Remove "+selected.first()->text(0)+"?";
+  else str = "Remove selected objects?";
+  str += "                                             ";
+  msgBox.setText(str);
+  QPushButton *remove = msgBox.addButton(QMessageBox::Yes);
   QPushButton *cancel = msgBox.addButton(QMessageBox::Cancel);
   msgBox.setDefaultButton(cancel);
 
@@ -762,9 +794,19 @@ void AGeoTreeWidget::menuActionRemoveRecursively(QString ObjectName)
 {
   QMessageBox msgBox;
   msgBox.setIcon(QMessageBox::Question);
-  msgBox.setWindowTitle("Locked objects will NOT be removed!");
-  msgBox.setText("Remove the object and all objects hosted inside?\nSlabs and lightguides are NOT removed.");
-  QPushButton *remove = msgBox.addButton("Remove", QMessageBox::ActionRole);
+  msgBox.setWindowTitle("Locked objects are NOT removed!");
+
+  QString str;
+  AGeoObject * obj = World->findObjectByName(ObjectName);
+  if (obj && obj->ObjectType->isSlab())
+      str = "Remove all objects hosted inside " + ObjectName + " slab?";
+  else if (obj && obj->ObjectType->isWorld())
+      str = "Remove all non-slab objects from the geometry?";
+  else
+      str = "Remove " + ObjectName + " and all objects hosted inside?";
+
+  msgBox.setText(str);
+  QPushButton *remove = msgBox.addButton(QMessageBox::Yes);
   QPushButton *cancel = msgBox.addButton(QMessageBox::Cancel);
   msgBox.setDefaultButton(cancel);
 
@@ -786,7 +828,7 @@ void AGeoTreeWidget::menuActionRemoveHostedObjects(QString ObjectName)
   msgBox.setIcon(QMessageBox::Question);
   msgBox.setWindowTitle("Locked objects will NOT be deleted!");
   msgBox.setText("Delete objects hosted inside " + ObjectName + "?\nSlabs and lightguides are NOT removed.");
-  QPushButton *remove = msgBox.addButton("Delete", QMessageBox::ActionRole);
+  QPushButton *remove = msgBox.addButton(QMessageBox::Yes);
   QPushButton *cancel = msgBox.addButton(QMessageBox::Cancel);
   msgBox.setDefaultButton(cancel);
 

@@ -265,7 +265,7 @@ void AGeo_SI::Monitor_ConfigureForPhotons(QString MonitorName, QVariant Position
     }
 }
 
-void AGeo_SI::Monitor_ConfigureForParticles(QString MonitorName, int ParticleIndex, bool SensitiveDirect, bool SensitiveIndirect,
+void AGeo_SI::Monitor_ConfigureForParticles(QString MonitorName, int ParticleIndex, int Both_Primary_Secondary, int Both_Direct_Indirect,
                                                             QVariant Position, QVariant Time, QVariant Angle, QVariant Energy)
 {
     AGeoObject* o = 0;
@@ -293,8 +293,21 @@ void AGeo_SI::Monitor_ConfigureForParticles(QString MonitorName, int ParticleInd
 
     mc.PhotonOrParticle = 1;
     mc.ParticleIndex = ParticleIndex;
-    mc.bDirect = SensitiveDirect;
-    mc.bIndirect = SensitiveIndirect;
+
+    switch (Both_Primary_Secondary)
+    {
+    case 0: mc.bPrimary = true;  mc.bSecondary = true;  break;
+    case 1: mc.bPrimary = true;  mc.bSecondary = false; break;
+    case 2: mc.bPrimary = false; mc.bSecondary = true;  break;
+    default: abort("Both_Primary_Secondary: 0 - sensitive to both, 1 - sensetive only to primary, 2 - sensitive only to secondary"); return;
+    }
+    switch (Both_Direct_Indirect)
+    {
+    case 0: mc.bDirect = true;  mc.bIndirect = true;  break;
+    case 1: mc.bDirect = true;  mc.bIndirect = false; break;
+    case 2: mc.bDirect = false; mc.bIndirect = true;  break;
+    default: abort("Both_Direct_Indirect: 0 - sensitive to both, 1 - sensitive only to direct, 2 - sensitive only to indirect"); return;
+    }
 
     QVariantList pos = Position.toList();
     if (!pos.isEmpty())
@@ -346,7 +359,7 @@ void AGeo_SI::Monitor_ConfigureForParticles(QString MonitorName, int ParticleInd
     QVariantList e = Energy.toList();
     if (!e.isEmpty())
     {
-        if (pos.size() == 4 && e.at(3).toInt() >= 0 && e.at(3).toInt() < 4)
+        if (e.size() == 4 && e.at(3).toInt() >= 0 && e.at(3).toInt() < 4)
         {
             mc.energyBins = e.at(0).toInt();
             mc.energyFrom = e.at(1).toDouble();

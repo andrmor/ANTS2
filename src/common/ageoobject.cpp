@@ -464,6 +464,25 @@ void AGeoObject::clearCompositeMembers()
   logicals->HostedObjects.clear();
 }
 
+void AGeoObject::removeCompositeStructure()
+{
+    clearCompositeMembers();
+
+    delete ObjectType;
+    ObjectType = new ATypeSingleObject();
+
+    for (int i=0; i<HostedObjects.size(); i++)
+    {
+        AGeoObject* obj = HostedObjects[i];
+        if (obj->ObjectType->isCompositeContainer())
+        {
+            delete obj;
+            HostedObjects.removeAt(i);
+            return;
+        }
+    }
+}
+
 AGeoObject *AGeoObject::getGridElement()
 {
   if (!ObjectType->isGrid()) return 0;
@@ -940,6 +959,15 @@ bool AGeoObject::isMaterialInActiveUse(int imat) const
         if (HostedObjects[i]->isMaterialInActiveUse(imat)) return true;
 
     return false;
+}
+
+void AGeoObject::collectContainingObjects(QVector<AGeoObject *> & vec) const
+{
+    for (AGeoObject * obj : HostedObjects)
+    {
+        vec << obj;
+        obj->collectContainingObjects(vec);
+    }
 }
 
 bool AGeoShape::extractParametersFromString(QString GenerationString, QStringList &parameters, int numParameters)
@@ -2032,6 +2060,7 @@ const QString AGeoPgon::getHelp()
 
 bool AGeoPgon::readFromString(QString GenerationString)
 {
+    Sections.clear();
   QStringList params;
   bool ok = extractParametersFromString(GenerationString, params, -1);
   if (!ok) return false;
@@ -2054,6 +2083,12 @@ bool AGeoPgon::readFromString(QString GenerationString)
       qWarning() << "Syntax error found during extracting parameters of TGeoPgon";
       return false;
     }
+  nedges = params[2].toInt(&ok);
+  if (!ok)
+    {
+      qWarning() << "Syntax error found during extracting parameters of TGeoPgon";
+      return false;
+    }
 
   for (int i=3; i<params.size(); i++)
     {
@@ -2065,8 +2100,27 @@ bool AGeoPgon::readFromString(QString GenerationString)
         }
       Sections << section;
     }
-  //qDebug() << phi<<dphi<<nedges;
-  //for (int i=0; i<Sections.size(); i++) qDebug() << Sections.at(i).toString();
+
+  bool bInc = true;
+  for (int i=1; i<Sections.size(); i++)
+  {
+    if (i == 1)
+        if (Sections.first().z > Sections.at(1).z)
+            bInc = false;
+
+    if (Sections.at(i).z <= Sections.at(i-1).z && bInc)
+    {
+        qWarning() << "Non consistent positions of polygon planes";
+        return false;
+    }
+
+    if (Sections.at(i).z >= Sections.at(i-1).z && !bInc)
+    {
+        qWarning() << "Non consistent positions of polygon planes";
+        return false;
+    }
+  }
+
   return true;
 }
 
@@ -2542,7 +2596,7 @@ bool AGeoArb8::readFromString(QString GenerationString)
         Vertices[i].first =  tmp[1+i*2];
         Vertices[i].second = tmp[2+i*2];
     }
-    qDebug() << dz << Vertices;
+    //  qDebug() << dz << Vertices;
 
     if (!AGeoObject::CheckPointsForArb8(Vertices))
       {
@@ -2634,8 +2688,8 @@ bool AGeoArb8::readFromTShape(TGeoShape *Tshape)
 
 void AGeoArb8::init()
 {  
-  Vertices << QPair<double,double>(0,0) << QPair<double,double>(10,0) << QPair<double,double>(15,-15) << QPair<double,double>(0,-5);
-  Vertices << QPair<double,double>(5,0) << QPair<double,double>(10,0) << QPair<double,double>(10,-10) << QPair<double,double>(10,-10);
+  Vertices << QPair<double,double>(-20,20) << QPair<double,double>(20,20) << QPair<double,double>(20,-20) << QPair<double,double>(-20,-20);
+  Vertices << QPair<double,double>(-10,10) << QPair<double,double>(10,10) << QPair<double,double>(10,-10) << QPair<double,double>(10,-10);
 }
 
 ATypeSlabObject::ATypeSlabObject()
@@ -2774,10 +2828,15 @@ ATypeObject *ATypeObject::TypeObjectFactory(const QString Type)
     }
 }
 
+AGeoPcon::AGeoPcon()
+    : phi(0), dphi(360)
+{
+    Sections << APolyCGsection(-5, 10, 20) <<  APolyCGsection(5, 20, 40);
+}
 
 const QString AGeoPcon::getHelp()
 {
-  return "TGeoPcon:\n"
+    return "TGeoPcon:\n"
          "phi - start angle [0, 360)\n"
          "dphi - range in angle (0, 360]\n"
          "{z : rmin : rmax} - arbitrary number of sections defined with z position, minimum and maximum radii";
@@ -2785,6 +2844,8 @@ const QString AGeoPcon::getHelp()
 
 bool AGeoPcon::readFromString(QString GenerationString)
 {
+    Sections.clear();
+
   QStringList params;
   bool ok = extractParametersFromString(GenerationString, params, -1);
   if (!ok) return false;
@@ -3143,25 +3204,28 @@ bool AGeoScaledShape::readFromString(QString GenerationString)
   return true;
 }
 
-TGeoShape* AGeoScaledShape::generateBaseTGeoShape(QString BaseShapeGenerationString)
+TGeoShape* AGeoScaledShape::generateBaseTGeoShape(const QString & BaseShapeGenerationString) const
 {
-  QString shapeType = BaseShapeGenerationString.left(BaseShapeGenerationString.indexOf('('));
-  TGeoShape* Tshape = 0;
-  AGeoShape* Ashape = AGeoObject::GeoShapeFactory(shapeType);
-  if (Ashape)
+    //qDebug() << "SCALED->: Generating base shape from "<< BaseShapeGenerationString;
+    QString shapeType = BaseShapeGenerationString.left(BaseShapeGenerationString.indexOf('('));
+    //qDebug() << "SCALED->: base type:"<<shapeType;
+    TGeoShape* Tshape = 0;
+    AGeoShape* Ashape = AGeoObject::GeoShapeFactory(shapeType);
+    if (Ashape)
     {
-      bool fOK = Ashape->readFromString(BaseShapeGenerationString);
-      if (fOK)
+        //qDebug() << "SCALED->" << "Created AGeoShape of type" << Ashape->getShapeType();
+        bool fOK = Ashape->readFromString(BaseShapeGenerationString);
+        if (fOK)
         {
-          Tshape = Ashape->createGeoShape();
-          if (!Tshape) qWarning() << "TGeoScaledShape processing: Base shape generation fail!";
+            Tshape = Ashape->createGeoShape();
+            if (!Tshape) qWarning() << "TGeoScaledShape processing: Base shape generation fail!";
         }
-      else qWarning() << "TGeoScaledShape processing: failed to construct AGeoShape";
-      delete Ashape;
+        else qWarning() << "TGeoScaledShape processing: failed to construct AGeoShape";
+        delete Ashape;
     }
-  else qWarning() << "TGeoScaledShape processing: unknown base shape type "<< shapeType;
+    else qWarning() << "TGeoScaledShape processing: unknown base shape type "<< shapeType;
 
-  return Tshape;
+    return Tshape;
 }
 
 TGeoShape *AGeoScaledShape::createGeoShape(const QString shapeName)
@@ -3187,7 +3251,15 @@ const QString AGeoScaledShape::getGenerationString() const
       QString::number(scaleX) + ", " +
       QString::number(scaleY) + ", " +
       QString::number(scaleZ) +
-      " )";
+          " )";
+}
+
+const QString AGeoScaledShape::getBaseShapeType() const
+{
+    QStringList sl = BaseShapeGenerationString.split('(', QString::SkipEmptyParts);
+
+    if (sl.size() < 1) return "";
+    return sl.first().simplified();
 }
 
 void AGeoScaledShape::writeToJson(QJsonObject &json)

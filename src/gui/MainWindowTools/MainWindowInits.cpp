@@ -221,8 +221,10 @@ MainWindow::MainWindow(DetectorClass *Detector,
 
     DoNotUpdateGeometry = false; //control
 
+    qDebug() << ">Intitializing slab gui...";
+    initDetectorSandwich(); //create detector sandwich control and link GUI signals/slots
     qDebug()<<">Loading default detector...";
-    bool fLoadedDefaultDetector = MainWindow::startupDetector();
+    bool fLoadedDefaultDetector = startupDetector();
     qDebug()<<">Default detector configured";
 
     //Environment

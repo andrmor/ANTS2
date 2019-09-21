@@ -34,7 +34,7 @@ public slots:
                QString container, double x, double y, double z, double phi, double theta, double psi,
                bool SensitiveTop, bool SensitiveBottom, bool StopsTraking);
   void Monitor_ConfigureForPhotons(QString MonitorName, QVariant Position, QVariant Time, QVariant Angle, QVariant Wave);
-  void Monitor_ConfigureForParticles(QString MonitorName, int ParticleIndex, bool SensitiveDirect, bool SensitiveIndirect,
+  void Monitor_ConfigureForParticles(QString MonitorName, int ParticleIndex, int Both_Primary_Secondary, int Both_Direct_Indirect,
                                      QVariant Position, QVariant Time, QVariant Angle, QVariant Energy);
 
   void TGeo(QString name, QString generationString, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi);

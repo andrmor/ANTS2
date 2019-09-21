@@ -24,7 +24,7 @@ public:
   void UpdateGUI(); //update gui controls
   void SetTab(int tab);
   void UpdateDummyPMindication();
-  void HighlightVolume(QString VolName);
+  void HighlightVolume(const QString & VolName);
 
   AGeo_SI* AddObjScriptInterface = 0;  // if created -> owned by the script manager
   AGeoTreeWidget* twGeo;  // WorldTree widget
@@ -79,13 +79,6 @@ private:
   QString ObjectScriptTarget;
 
   void ConvertDummyToPM(int idpm);  
-  QString makeScriptString_basicObject(AGeoObject *obj);
-  QString makeScriptString_arrayObject(AGeoObject *obj);
-  QString makeScriptString_stackObjectStart(AGeoObject *obj);
-  QString makeScriptString_groupObjectStart(AGeoObject *obj);
-  QString makeScriptString_stackObjectEnd(AGeoObject *obj);
-  QString makeLinePropertiesString(AGeoObject *obj);
-  void objectMembersToScript(AGeoObject *Master, QString &script, int ident);  
   bool GDMLtoTGeo(const QString &fileName);
   const QString loadGDML(const QString &fileName, QString &gdml);  //returns error string - empty if OK
 

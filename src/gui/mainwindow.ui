@@ -1734,7 +1734,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
          </rect>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="pageRegular">
          <widget class="QFrame" name="gbRegular">
@@ -1743,9 +1743,9 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           </property>
           <property name="geometry">
            <rect>
-            <x>51</x>
+            <x>20</x>
             <y>6</y>
-            <width>371</width>
+            <width>431</width>
             <height>154</height>
            </rect>
           </property>
@@ -1758,9 +1758,9 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QSpinBox" name="sbNumX">
            <property name="geometry">
             <rect>
-             <x>199</x>
-             <y>61</y>
-             <width>51</width>
+             <x>280</x>
+             <y>64</y>
+             <width>50</width>
              <height>22</height>
             </rect>
            </property>
@@ -1774,22 +1774,25 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QLabel" name="label_30">
            <property name="geometry">
             <rect>
-             <x>259</x>
-             <y>65</y>
-             <width>20</width>
+             <x>332</x>
+             <y>68</y>
+             <width>17</width>
              <height>13</height>
             </rect>
            </property>
            <property name="text">
-            <string>X</string>
+            <string>x</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
            </property>
           </widget>
           <widget class="QSpinBox" name="sbNumY">
            <property name="geometry">
             <rect>
-             <x>275</x>
-             <y>61</y>
-             <width>42</width>
+             <x>350</x>
+             <y>64</y>
+             <width>50</width>
              <height>22</height>
             </rect>
            </property>
@@ -1803,9 +1806,9 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QCheckBox" name="cbXbyYarray">
            <property name="geometry">
             <rect>
-             <x>100</x>
+             <x>150</x>
              <y>65</y>
-             <width>81</width>
+             <width>110</width>
              <height>17</height>
             </rect>
            </property>
@@ -1819,9 +1822,9 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QCheckBox" name="cbRingsArray">
            <property name="geometry">
             <rect>
-             <x>100</x>
+             <x>150</x>
              <y>95</y>
-             <width>101</width>
+             <width>128</width>
              <height>17</height>
             </rect>
            </property>
@@ -1835,8 +1838,8 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
            </property>
            <property name="geometry">
             <rect>
-             <x>200</x>
-             <y>92</y>
+             <x>280</x>
+             <y>94</y>
              <width>51</width>
              <height>22</height>
             </rect>
@@ -1848,10 +1851,10 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QLabel" name="label_18">
            <property name="geometry">
             <rect>
-             <x>5</x>
+             <x>19</x>
              <y>77</y>
-             <width>90</width>
-             <height>16</height>
+             <width>121</width>
+             <height>20</height>
             </rect>
            </property>
            <property name="text">
@@ -1864,7 +1867,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QComboBox" name="cobPacking">
            <property name="geometry">
             <rect>
-             <x>100</x>
+             <x>150</x>
              <y>31</y>
              <width>111</width>
              <height>22</height>
@@ -1884,7 +1887,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QLabel" name="label_33">
            <property name="geometry">
             <rect>
-             <x>155</x>
+             <x>214</x>
              <y>123</y>
              <width>46</width>
              <height>13</height>
@@ -1897,10 +1900,10 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QLabel" name="label_34">
            <property name="geometry">
             <rect>
-             <x>10</x>
-             <y>33</y>
+             <x>54</x>
+             <y>31</y>
              <width>86</width>
-             <height>16</height>
+             <height>20</height>
             </rect>
            </property>
            <property name="text">
@@ -1913,10 +1916,10 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QLabel" name="label_32">
            <property name="geometry">
             <rect>
-             <x>5</x>
-             <y>121</y>
-             <width>89</width>
-             <height>16</height>
+             <x>18</x>
+             <y>119</y>
+             <width>121</width>
+             <height>20</height>
             </rect>
            </property>
            <property name="text">
@@ -1929,9 +1932,9 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QLineEdit" name="ledCtC">
            <property name="geometry">
             <rect>
-             <x>100</x>
+             <x>150</x>
              <y>121</y>
-             <width>51</width>
+             <width>60</width>
              <height>20</height>
             </rect>
            </property>
@@ -1939,7 +1942,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="Line" name="line_77">
            <property name="geometry">
             <rect>
-             <x>106</x>
+             <x>160</x>
              <y>74</y>
              <width>2</width>
              <height>29</height>
@@ -1952,9 +1955,9 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QPushButton" name="pbPMtypeShowCurrent">
            <property name="geometry">
             <rect>
-             <x>218</x>
+             <x>263</x>
              <y>1</y>
-             <width>41</width>
+             <width>51</width>
              <height>23</height>
             </rect>
            </property>
@@ -1965,7 +1968,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="Line" name="line">
            <property name="geometry">
             <rect>
-             <x>126</x>
+             <x>171</x>
              <y>12</y>
              <width>118</width>
              <height>3</height>
@@ -1978,7 +1981,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QComboBox" name="cobPMtypeInArrays">
            <property name="geometry">
             <rect>
-             <x>100</x>
+             <x>150</x>
              <y>1</y>
              <width>111</width>
              <height>22</height>
@@ -1988,9 +1991,9 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QLabel" name="label_3">
            <property name="geometry">
             <rect>
-             <x>3</x>
+             <x>40</x>
              <y>3</y>
-             <width>90</width>
+             <width>100</width>
              <height>16</height>
             </rect>
            </property>
@@ -2010,7 +2013,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QSpinBox" name="sbPMtypeForGroup">
            <property name="geometry">
             <rect>
-             <x>129</x>
+             <x>174</x>
              <y>1</y>
              <width>51</width>
              <height>22</height>
@@ -2222,7 +2225,7 @@ Three columns (XYZ) for 'fully custom' array</string>
         <property name="geometry">
          <rect>
           <x>363</x>
-          <y>266</y>
+          <y>265</y>
           <width>41</width>
           <height>16</height>
          </rect>
@@ -2251,7 +2254,7 @@ Three columns (XYZ) for 'fully custom' array</string>
          </rect>
         </property>
         <property name="text">
-         <string>Total number of PMs in the detector:</string>
+         <string>Number of PMs in the detector:</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

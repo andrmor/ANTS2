@@ -1034,8 +1034,7 @@ QString AScriptWindow::getKeyPath(QTreeWidgetItem *item)
   }
   while (item);
 
-  path.chop(1);
-  path = " \""+path+"\" ";
+  path.chop(1);  
   return path;
 }
 
@@ -1104,19 +1103,25 @@ void AScriptWindow::onContextMenuRequestedByJsonTree(QPoint pos)
 
 void AScriptWindow::showContextMenuForJsonTree(QTreeWidgetItem *item, QPoint pos)
 {
-  QMenu menu;
+    QMenu menu;
 
-  QAction* showVtoClipboard = menu.addAction("Add Key path to clipboard");
-  //menu.addSeparator();
+    QAction* plainKey = menu.addAction("Add Key path to clipboard");
+    menu.addSeparator();
+    QAction* keyQuatation = menu.addAction("Add Key path to clipboard: in quatations");
+    QAction* keyGet = menu.addAction("Add Key path to clipboard: get key value command");
+    QAction* keySet = menu.addAction("Add Key path to clipboard: replace key value command");
+    //menu.addSeparator();
 
-  QAction* selectedItem = menu.exec(trwJson->mapToGlobal(pos));
-  if (!selectedItem) return; //nothing was selected
+    QAction* sa = menu.exec(trwJson->mapToGlobal(pos));
+    if (!sa) return;
 
-  if (selectedItem == showVtoClipboard)
-    {
-      QClipboard *clipboard = QApplication::clipboard();
-      clipboard->setText(getKeyPath(item));
-    }
+    QClipboard *clipboard = QApplication::clipboard();
+    QString text = getKeyPath(item);
+    if (sa == plainKey) ;
+    else if (sa == keyQuatation) text = "\"" + text + "\"";
+    else if (sa == keyGet) text = "config.GetKeyValue(\"" + text + "\")";
+    else if (sa == keySet) text = "config.Replace(\"" + text + "\",       )";
+    clipboard->setText(text);
 }
 
 void AScriptWindow::onContextMenuRequestedByHelp(QPoint pos)
@@ -2048,21 +2053,20 @@ void AScriptWindowTabItem::onCustomContextMenuRequested(const QPoint& pos)
 {
     QMenu menu;
 
-    QAction* findSel = menu.addAction("Find selected text (Ctrl + F)");
-    QAction* findFunct = menu.addAction("Find function definition (F2)");
-    QAction* findVar = menu.addAction("Find variable definition (F3)");
+    QAction* paste = menu.addAction("Paste"); paste->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_V));
+    QAction* copy  = menu.addAction("Copy");   copy->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_C));
+    QAction* cut   = menu.addAction("Cut");     cut->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_X));
     menu.addSeparator();
-    QAction* replaceSel = menu.addAction("Replace selected text (Ctrl + R)");
+    QAction* findSel =    menu.addAction("Find selected text");      findSel->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_F));
+    QAction* replaceSel = menu.addAction("Replace selected text");replaceSel->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_R));
     menu.addSeparator();
-    QAction* shiftBack = menu.addAction("Go back (Alt + Left)");
-    QAction* shiftForward = menu.addAction("Go forward (Alt + Right)");
+    QAction* findFunct = menu.addAction("Find function definition");      findFunct->setShortcut(QKeySequence(Qt::Key_F2));
+    QAction* findVar =   menu.addAction("Find variable definition (F3)");   findVar->setShortcut(QKeySequence(Qt::Key_F3));
     menu.addSeparator();
-    QAction* alignText = menu.addAction("Align selected text (Ctrl + I)");
+    QAction* shiftBack = menu.addAction("Go back");          shiftBack->setShortcut(QKeySequence(Qt::ALT + Qt::Key_Left));
+    QAction* shiftForward = menu.addAction("Go forward"); shiftForward->setShortcut(QKeySequence(Qt::ALT + Qt::Key_Right));
     menu.addSeparator();
-    QAction* cut = menu.addAction("Cut (Ctrl + X)");
-    QAction* copy = menu.addAction("Copy (Ctrl + C)");
-    QAction* paste = menu.addAction("Paste (Ctrl + V)");
-
+    QAction* alignText = menu.addAction("Align selected text"); alignText->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_I));
 
     QAction* selectedItem = menu.exec(TextEdit->mapToGlobal(pos));
     if (!selectedItem) return; //nothing was selected

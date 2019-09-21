@@ -53,8 +53,6 @@ void MainWindow::ReconstructDetector(bool fKeepData)
 
 bool MainWindow::startupDetector()
 {
-  MainWindow::initDetectorSandwich(); //create detector sandwich control and link GUI signals/slots
-  //    qDebug() << "-->DetectorSandwich initialized";
   if (QFile(GlobSet.ExamplesDir + "/StartupDetector.json").exists())
     {
       Config->LoadConfig(GlobSet.ExamplesDir + "/StartupDetector.json");
@@ -95,39 +93,41 @@ bool MainWindow::startupDetector()
 
 void MainWindow::initDetectorSandwich()
 {
-  //ListWidget for slabs
-  lw = new ASlabListWidget(Detector->Sandwich);
-  QVBoxLayout* laySandwich = new QVBoxLayout();
-    laySandwich->setContentsMargins(0,0,0,0);
-    ui->saSandwich->setLayout(laySandwich);
-    connect(Detector->Sandwich, SIGNAL(RequestGuiUpdate()), lw, SLOT(UpdateGui()));
+    //ListWidget for slabs
+    lw = new ASlabListWidget(Detector->Sandwich);
+    connect(Detector->Sandwich, &ASandwich::RequestGuiUpdate, lw, &ASlabListWidget::UpdateGui);
+    connect(lw, &ASlabListWidget::RequestHighlightObject, DAwindow, &DetectorAddOnsWindow::ShowObject);
+    connect(lw, &ASlabListWidget::SlabDoubleClicked, this, &MainWindow::OnSlabDoubleClicked);
     lw->UpdateGui();
-  laySandwich->addWidget(lw);
-  connect(lw, SIGNAL(RequestHighlightObject(QString)), DAwindow, SLOT(ShowObject(QString)));
 
-  //Default XY properties
-  ASlabXYDelegate* DefaultXY_delegate = lw->GetDefaultXYdelegate();
-  QHBoxLayout* xyl = new QHBoxLayout();
+    QVBoxLayout* laySandwich = new QVBoxLayout();
+    laySandwich->setContentsMargins(0,0,0,0);
+    laySandwich->addWidget(lw);
+    ui->saSandwich->setLayout(laySandwich);
+
+    //Default XY properties
+    ASlabXYDelegate* DefaultXY_delegate = lw->GetDefaultXYdelegate();
+
+    QHBoxLayout* xyl = new QHBoxLayout();
     xyl->setContentsMargins(0,0,0,0);
     xyl->addWidget(DefaultXY_delegate);
-  ui->fCommonXY->setLayout(xyl);
+    ui->fCommonXY->setLayout(xyl);
 
-  MainWindow::UpdateSandwichGui();
+    UpdateSandwichGui();
 
-  connect(Detector->Sandwich, SIGNAL(WarningMessage(QString)), this, SLOT(OnWarningMessage(QString)));
-  connect(Detector->Sandwich, SIGNAL(RequestGuiUpdate()), this, SLOT(UpdateSandwichGui()));
-  connect(Detector->Sandwich, SIGNAL(RequestRebuildDetector()), this, SLOT(on_pbRebuildDetector_clicked()));
-  connect(Detector, SIGNAL(ColorSchemeChanged(int,int)), this, SLOT(OnDetectorColorSchemeChanged(int,int)));
-  connect(lw, SIGNAL(SlabDoubleClicked(QString)), this, SLOT(OnSlabDoubleClicked(QString)));
+    connect(Detector->Sandwich, &ASandwich::WarningMessage,         this, &MainWindow::OnWarningMessage);
+    connect(Detector->Sandwich, &ASandwich::RequestGuiUpdate,       this, &MainWindow::UpdateSandwichGui);
+    connect(Detector->Sandwich, &ASandwich::RequestRebuildDetector, this, &MainWindow::on_pbRebuildDetector_clicked);
+    connect(Detector,           &DetectorClass::ColorSchemeChanged, this, &MainWindow::OnDetectorColorSchemeChanged);
 
-  QString help = "Basic detector consists of a stack of slabs.\n"
-      "Choose here whether all slabs have the same shape and size,\n"
-      "  have the same shape but allowed to have different size,\n"
-      "  or can have individual shape (and size).\n\n"
-      "Slab properties can be modified right clicking on the corresponding slab!\n"
-      "New slabs can be created also using the right-mouse-click menu.";
-  ui->cobXYtype->setToolTip(help);
-  ui->label_285->setToolTip(help);  
+    QString help = "Basic detector consists of a stack of slabs.\n"
+                   "Choose here whether all slabs have the same shape and size,\n"
+                   "  have the same shape but allowed to have different size,\n"
+                   "  or can have individual shape (and size).\n\n"
+                   "Slab properties can be modified right clicking on the corresponding slab!\n"
+                   "New slabs can be created also using the right-mouse-click menu.";
+    ui->cobXYtype->setToolTip(help);
+    ui->label_285->setToolTip(help);
 }
 
 void MainWindow::OnSlabDoubleClicked(QString SlabName)

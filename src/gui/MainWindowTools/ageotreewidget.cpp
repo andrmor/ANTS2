@@ -95,10 +95,10 @@ AGeoTreeWidget::AGeoTreeWidget(ASandwich *Sandwich) : Sandwich(Sandwich)
           "image: url(:/images/tw-branch-open.png);}";
   setStyleSheet(style);
 
-  QShortcut* Del = new QShortcut(QKeySequence::Delete, this);
+  QShortcut* Del = new QShortcut(Qt::Key_Backspace, this);
   connect(Del, &QShortcut::activated, this, &AGeoTreeWidget::onRemoveTriggered);
 
-  QShortcut* DelRec = new QShortcut(QKeySequence(Qt::Key_Backspace), this);
+  QShortcut* DelRec = new QShortcut(QKeySequence(QKeySequence::Delete), this);
   connect(DelRec, &QShortcut::activated, this, &AGeoTreeWidget::onRemoveRecursiveTriggered);
 }
 
@@ -570,11 +570,11 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
 
   menu.addSeparator();
 
-  QAction* removeA = Action(menu, "Remove");
-  removeA->setShortcut(QKeySequence::Delete);
   QAction* removeThisAndHostedA = Action(menu, "Remove object and content");
-  removeThisAndHostedA->setShortcut(QKeySequence(Qt::Key_Backspace));
-  QAction* removeHostedA = Action(menu, "Remove objects inside");
+  removeThisAndHostedA->setShortcut(QKeySequence(QKeySequence::Delete));
+  QAction* removeA = Action(menu, "Remove object, keep its content");
+  removeA->setShortcut(Qt::Key_Backspace);
+  QAction* removeHostedA = Action(menu, "Remove all objects inside");
 
   menu.addSeparator();
 
@@ -627,7 +627,8 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
       newGridA->setEnabled(fNotGridNotMonitor);
       copyA->setEnabled( ObjectType.isSingle() || ObjectType.isSlab() || ObjectType.isMonitor());  //supported so far only Single, Slab and Monitor
       removeHostedA->setEnabled(fNotGridNotMonitor);
-      removeThisAndHostedA->setEnabled(fNotGridNotMonitor);
+      //removeThisAndHostedA->setEnabled(fNotGridNotMonitor);
+      removeThisAndHostedA->setEnabled(!ObjectType.isWorld());
       removeA->setEnabled(!ObjectType.isWorld());
       lockA->setEnabled(!ObjectType.isHandlingStatic() || ObjectType.isLightguide());
       unlockA->setEnabled(true);
@@ -792,33 +793,38 @@ void AGeoTreeWidget::menuActionRemove()
 
 void AGeoTreeWidget::menuActionRemoveRecursively(QString ObjectName)
 {
-  QMessageBox msgBox;
-  msgBox.setIcon(QMessageBox::Question);
-  msgBox.setWindowTitle("Locked objects are NOT removed!");
-
-  QString str;
-  AGeoObject * obj = World->findObjectByName(ObjectName);
-  if (obj && obj->ObjectType->isSlab())
-      str = "Remove all objects hosted inside " + ObjectName + " slab?";
-  else if (obj && obj->ObjectType->isWorld())
-      str = "Remove all non-slab objects from the geometry?";
-  else
-      str = "Remove " + ObjectName + " and all objects hosted inside?";
-
-  msgBox.setText(str);
-  QPushButton *remove = msgBox.addButton(QMessageBox::Yes);
-  QPushButton *cancel = msgBox.addButton(QMessageBox::Cancel);
-  msgBox.setDefaultButton(cancel);
-
-  msgBox.exec();
-
-  if (msgBox.clickedButton() == remove)
+    AGeoObject * obj = World->findObjectByName(ObjectName);
+    if (!obj)
     {
-      //emit ObjectSelectionChanged("");
-      AGeoObject* obj = World->findObjectByName(ObjectName);
-      if (obj) obj->recursiveSuicide();
-      UpdateGui();
-      emit RequestRebuildDetector();
+        qWarning() << "Error: object" << ObjectName << "not found in the geometry!";
+        return;
+    }
+
+    QMessageBox msgBox;
+    msgBox.setIcon(QMessageBox::Question);
+    msgBox.setWindowTitle("Locked objects are NOT removed!");
+
+    QString str;
+    if (obj->ObjectType->isSlab())
+        str = "Remove all objects hosted inside " + ObjectName + " slab?";
+    else if (obj->ObjectType->isWorld())
+        str = "Remove all non-slab objects from the geometry?";
+    else
+        str = "Remove " + ObjectName + " and all objects hosted inside?";
+
+    msgBox.setText(str);
+    QPushButton *remove = msgBox.addButton(QMessageBox::Yes);
+    QPushButton *cancel = msgBox.addButton(QMessageBox::Cancel);
+    msgBox.setDefaultButton(cancel);
+
+    msgBox.exec();
+
+    if (msgBox.clickedButton() == remove)
+    {
+        //emit ObjectSelectionChanged("");
+        obj->recursiveSuicide();
+        //UpdateGui();
+        emit RequestRebuildDetector();
     }
 }
 

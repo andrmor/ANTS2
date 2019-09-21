@@ -458,6 +458,7 @@ void ASlabListWidget::customMenuRequested(const QPoint &pos)
       if (obj && !obj->HostedObjects.isEmpty())
       {
           QMessageBox::information(this, "", "Cannot remove slab which contains objects inside");
+          emit SlabDoubleClicked(obj->Name);
           return;
       }
       else if (obj)

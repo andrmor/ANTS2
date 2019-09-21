@@ -3743,6 +3743,24 @@ AGeoCompositeDelegate::AGeoCompositeDelegate(const QStringList &materials, QWidg
 {
     DelegateTypeName = "Composite shape";
 
+    ShapeHelp = "Composite shape\n"
+            "\n"
+            "Composite shapes are boolean combinations\n"
+            "  of two or more shape components. The supported operations are:\n"
+            "\n"
+            "  (+) - union\n"
+            "  (*) - intersection\n"
+            "  (-) - subtraction.\n"
+            "\n"
+            "If nested structures are needed, brackets can be used, e.g.,\n"
+            "   (Shape1 + Shape2) - (Shape3 * (Shape4 + Shape5))\n"
+            "\n"
+            "Implemented using TGeoCompositeShape\n"
+            "\n"
+            "WARNING!\n"
+            "Use composite shapes only as the last resort.\n"
+            "Navigation in geometries containing composite shapes are very inefficient!";
+
     QVBoxLayout * v = new QVBoxLayout();
     v->setContentsMargins(50, 0, 50, 3);
 

@@ -3444,6 +3444,18 @@ AGeoPolygonDelegate::AGeoPolygonDelegate(const QStringList &materials, QWidget *
 {
     DelegateTypeName = "Polygon (simplified)";
 
+    ShapeHelp = "A polygon section\n"
+            "\n"
+            "The shape is limited by the upper and lower planes,\n"
+            "  positioned in Z at +0.5*Height and -0.5*Height\n"
+            "For each plane are defined\n"
+            "  the outer and inner diameters of the circles,\n"
+            "  inscribed in the corresponding polygon.\n"
+            "\n"
+            "Section angle: in the range (0, 360] degrees\n"
+            "\n"
+            "Implemented using TGeoPgon";
+
     QGridLayout * gr = new QGridLayout();
     gr->setContentsMargins(50, 0, 50, 3);
     gr->setVerticalSpacing(1);
@@ -3517,15 +3529,28 @@ AGeoPconDelegate::AGeoPconDelegate(const QStringList &materials, QWidget *parent
 {
     DelegateTypeName = "Polycone";
 
+    ShapeHelp = "A shape constructed of an arbitrary number of cone sections\n"
+            "\n"
+            "A section is limited by the upper and lower planes,\n"
+            "  shared by the neighboring sections.\n"
+            "For each plane are defined:\n"
+            "  Z position, and\n"
+            "  outer and inner diameters.\n"
+            "\n"
+            "Phi from: in the range [0, 360) degrees,\n"
+            "Phi to:   in the range (0, 360] degrees, Phi_to > Phi_from\n"
+            "\n"
+            "Implemented using TGeoPcon";
+
     lay = new QVBoxLayout();
     lay->setContentsMargins(50, 0, 50, 0);
     lay->setSpacing(3);
 
-    lay->addWidget(new QLabel("Defined planes (should be monotonic in Z):"));
+    lay->addWidget(new QLabel("Defined planes (should be monotonic in Z), all in mm:"));
 
         tab = new QTableWidget();
         tab->setColumnCount(3);
-        tab->setHorizontalHeaderLabels(QStringList({"Z position, mm", "Outer diameter, mm", "Inner diameter, mm"}));
+        tab->setHorizontalHeaderLabels(QStringList({"Z position", "Outer diameter", "Inner diameter"}));
         tab->setMaximumHeight(150);
         tab->verticalHeader()->setSectionsMovable(true);
         QObject::connect(tab->verticalHeader(), &QHeaderView::sectionMoved, this, [this](int /*logicalIndex*/, int oldVisualIndex, int newVisualIndex)
@@ -3660,6 +3685,19 @@ AGeoPgonDelegate::AGeoPgonDelegate(const QStringList &materials, QWidget *parent
 {
     DelegateTypeName = "Polygon";
 
+    ShapeHelp = "A shape constructed of an arbitrary number of polygon sections\n"
+            "\n"
+            "A section is limited by the upper and lower planes,\n"
+            "  shared by the neighboring sections.\n"
+            "For each plane are defined:\n"
+            "  Z position, and\n"
+            "  outer and inner diameters of circles, inscribed in the polygon.\n"
+            "\n"
+            "Phi from: in the range [0, 360) degrees,\n"
+            "Phi to:   in the range (0, 360] degrees, Phi_to > Phi_from\n"
+            "\n"
+            "Implemented using TGeoPgon";
+
     QHBoxLayout * h = new QHBoxLayout();
     h->setContentsMargins(0, 0, 0, 1);
     h->setSpacing(1);
@@ -3673,7 +3711,7 @@ AGeoPgonDelegate::AGeoPgonDelegate(const QStringList &materials, QWidget *parent
 
     lay->insertLayout(0, h);
 
-    tab->setHorizontalHeaderLabels(QStringList({"Z position, mm", "Outer size, mm", "Inner size, mm"}));
+    tab->setHorizontalHeaderLabels(QStringList({"Z position", "Outer size", "Inner size"}));
 
     QObject::connect(sbn, SIGNAL(valueChanged(int)), this, SLOT(onLocalShapeParameterChange()));
 }

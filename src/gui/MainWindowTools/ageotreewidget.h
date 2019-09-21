@@ -212,6 +212,7 @@ signals:
     void RequestScriptRecursiveToClipboard();
 };
 
+class QListWidget;
 class AGeoObjectDelegate : public AGeoBaseDelegate
 {
     Q_OBJECT
@@ -273,6 +274,7 @@ protected:
 
 private:
     void rotate(TVector3 & v, double dPhi, double dTheta, double dPsi) const;
+    void onShapeDialogActivated(QDialog * d, QListWidget * w);
 
 signals:
     void RequestChangeShape(AGeoShape * newShape);

@@ -2103,29 +2103,8 @@ void AGeoObjectDelegate::onChangeShapePressed()
         QHBoxLayout * h = new QHBoxLayout();
             QPushButton * pbAccept = new QPushButton("Change shape");
             pbAccept->setEnabled(false);
-            QObject::connect(pbAccept, &QPushButton::clicked, [this, d, w]()
-            {
-                const QString sel = w->currentItem()->text();
-                if      (sel == "Box")                  emit RequestChangeShape(new AGeoBox());
-                else if (sel == "Parallelepiped")       emit RequestChangeShape(new AGeoPara());
-                else if (sel == "Tube")                 emit RequestChangeShape(new AGeoTube());
-                else if (sel == "Tube segment")         emit RequestChangeShape(new AGeoTubeSeg());
-                else if (sel == "Tube segment cut")     emit RequestChangeShape(new AGeoCtub());
-                else if (sel == "Tube elliptical")      emit RequestChangeShape(new AGeoEltu());
-                else if (sel == "Sphere")               emit RequestChangeShape(new AGeoSphere());
-                else if (sel == "Trapezoid simplified") emit RequestChangeShape(new AGeoTrd1());
-                else if (sel == "Trapezoid")            emit RequestChangeShape(new AGeoTrd2());
-                else if (sel == "Cone")                 emit RequestChangeShape(new AGeoCone());
-                else if (sel == "Cone segment")         emit RequestChangeShape(new AGeoConeSeg());
-                else if (sel == "Paraboloid")           emit RequestChangeShape(new AGeoParaboloid());
-                else if (sel == "Torus")                emit RequestChangeShape(new AGeoTorus());
-                else if (sel == "Polycone")             emit RequestChangeShape(new AGeoPcon());
-                else if (sel == "Polygon simplified")   emit RequestChangeShape(new AGeoPolygon());
-                else if (sel == "Polygon")              emit RequestChangeShape(new AGeoPgon());
-                else if (sel == "Arb8")                 emit RequestChangeShape(new AGeoArb8());
-                else qDebug() << "Unknown shape!";
-                d->accept();
-            });
+            QObject::connect(pbAccept, &QPushButton::clicked, [this, d, w](){this->onShapeDialogActivated(d, w);});
+            QObject::connect(w, &QListWidget::activated, [this, d, w](){this->onShapeDialogActivated(d, w);});
             h->addWidget(pbAccept);
             QPushButton * pbCancel = new QPushButton("Cancel");
             QObject::connect(pbCancel, &QPushButton::clicked, d, &QDialog::reject);
@@ -2238,6 +2217,34 @@ void AGeoObjectDelegate::rotate(TVector3 & v, double dPhi, double dTheta, double
     Z.Rotate( TMath::Pi()/180.0* dTheta, X);
     // v.RotateZ( TMath::Pi()/180.0* Psi );
     v.Rotate( TMath::Pi()/180.0* dPsi, Z );
+}
+
+void AGeoObjectDelegate::onShapeDialogActivated(QDialog * d, QListWidget * w)
+{
+    const QString sel = w->currentItem()->text();
+    if      (sel == "Box")                  emit RequestChangeShape(new AGeoBox());
+    else if (sel == "Parallelepiped")       emit RequestChangeShape(new AGeoPara());
+    else if (sel == "Tube")                 emit RequestChangeShape(new AGeoTube());
+    else if (sel == "Tube segment")         emit RequestChangeShape(new AGeoTubeSeg());
+    else if (sel == "Tube segment cut")     emit RequestChangeShape(new AGeoCtub());
+    else if (sel == "Tube elliptical")      emit RequestChangeShape(new AGeoEltu());
+    else if (sel == "Sphere")               emit RequestChangeShape(new AGeoSphere());
+    else if (sel == "Trapezoid simplified") emit RequestChangeShape(new AGeoTrd1());
+    else if (sel == "Trapezoid")            emit RequestChangeShape(new AGeoTrd2());
+    else if (sel == "Cone")                 emit RequestChangeShape(new AGeoCone());
+    else if (sel == "Cone segment")         emit RequestChangeShape(new AGeoConeSeg());
+    else if (sel == "Paraboloid")           emit RequestChangeShape(new AGeoParaboloid());
+    else if (sel == "Torus")                emit RequestChangeShape(new AGeoTorus());
+    else if (sel == "Polycone")             emit RequestChangeShape(new AGeoPcon());
+    else if (sel == "Polygon simplified")   emit RequestChangeShape(new AGeoPolygon());
+    else if (sel == "Polygon")              emit RequestChangeShape(new AGeoPgon());
+    else if (sel == "Arb8")                 emit RequestChangeShape(new AGeoArb8());
+    else
+    {
+        //nothing selected or unknown shape
+        return;
+    }
+    d->accept();
 }
 
 void AGeoObjectDelegate::onHelpRequested()

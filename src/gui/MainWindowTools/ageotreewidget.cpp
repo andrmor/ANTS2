@@ -1099,7 +1099,7 @@ void AGeoTreeWidget::SetLineAttributes(QString ObjectName)
             obj->getSlabModel()->width = obj->width;
             obj->getSlabModel()->style = obj->style;
         }
-        if (obj->ObjectType->isArray())
+        if (obj->ObjectType->isArray() || obj->ObjectType->isHandlingSet())
         {
             QVector<AGeoObject*> vec;
             obj->collectContainingObjects(vec);
@@ -1626,25 +1626,6 @@ void AGeoWidget::onRequestSetVisAttributes()
     if (!CurrentObject) return;
 
     tw->SetLineAttributes(CurrentObject->Name);
-    /*
-
-    ARootLineConfigurator* rlc = new ARootLineConfigurator(&CurrentObject->color, &CurrentObject->width, &CurrentObject->style, this);
-    int res = rlc->exec();
-    if (res != 0)
-    {
-        if (CurrentObject->ObjectType->isSlab())
-        {
-            ATypeSlabObject* slab = static_cast<ATypeSlabObject*>(CurrentObject->ObjectType);
-            slab->SlabModel->color = CurrentObject->color;
-            slab->SlabModel->width = CurrentObject->width;
-            slab->SlabModel->style = CurrentObject->style;
-        }
-        QStringList names;
-        names << CurrentObject->Name;
-        emit tw->RequestRebuildDetector();
-        tw->SelectObjects(names);
-    }
-    */
 }
 
 void AGeoWidget::onMonitorRequestsShowSensitiveDirection()
@@ -1714,7 +1695,7 @@ QHBoxLayout * AGeoBaseDelegate::createBottomButtons()
 {
     QHBoxLayout * abl = new QHBoxLayout();
 
-    pbShow = new QPushButton("Show object");
+    pbShow = new QPushButton("Show");
     QObject::connect(pbShow, &QPushButton::clicked, this, &AGeoObjectDelegate::RequestShow);
     abl->addWidget(pbShow);
     pbChangeAtt = new QPushButton("Color/line");
@@ -4022,9 +4003,6 @@ AGeoSetDelegate::AGeoSetDelegate(const QStringList &materials, QWidget *parent)
 {
      pbTransform->setVisible(false);
      pbShapeInfo->setVisible(false);
-     pbShow->setVisible(false);
-     pbChangeAtt->setVisible(false);
-     pbScriptLine->setVisible(false);
 
      cbScale->setChecked(false);
      cbScale->setVisible(false);
@@ -4033,7 +4011,12 @@ AGeoSetDelegate::AGeoSetDelegate(const QStringList &materials, QWidget *parent)
 void AGeoSetDelegate::Update(const AGeoObject *obj)
 {
     if (obj->ObjectType->isCompositeContainer())
+    {
         DelegateTypeName = "Container of logical shapes";
+        pbShow->setVisible(false);
+        pbChangeAtt->setVisible(false);
+        pbScriptLine->setVisible(false);
+    }
     else
         DelegateTypeName = ( obj->ObjectType->isStack() ? "Stack" : "Group" );
 

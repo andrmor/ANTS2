@@ -506,7 +506,7 @@ void DetectorAddOnsWindow::HighlightVolume(const QString & VolName)
     if (!obj) return;
 
     QSet<QString> set;
-    if (obj->ObjectType->isArray())
+    if (obj->ObjectType->isArray() || obj->ObjectType->isHandlingSet())
     {
         QVector<AGeoObject*> vec;
         obj->collectContainingObjects(vec);

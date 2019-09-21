@@ -3807,6 +3807,36 @@ AGeoArb8Delegate::AGeoArb8Delegate(const QStringList &materials, QWidget *parent
 {
     DelegateTypeName = "Arb8";
 
+    ShapeHelp = "An Arb8 shape of Cern Root\n"
+                "\n"
+                "The shape is defined by two quadrilaterals sitting on parallel planes,\n"
+                "   at +0.5*Height and -0.5*Height.\n"
+                "Quadrilaterals are defined each by 4 vertices\n"
+                "   with the coordinates (Xi,Yi,+/-0.5*Height), i from 0 to 3.\n"
+                "\n"
+                "The lateral surface of the Arb8 is defined by the 4 pairs of\n"
+                "   edges corresponding to vertices (i,i+1) on both planes.\n"
+                "If M and M' are the middles of the segments (i,i+1)\n"
+                "   at the different planes,\n"
+                "   a lateral surface is obtained by sweeping the edge at\n"
+                "   -0.5*Height along MM',\n"
+                "   so that it will match the corresponding one at +0.5*Height.\n"
+                "Since the points defining the edges are arbitrary,\n"
+                "   the lateral surfaces are not necessary planes –\n"
+                "   but twisted planes having a twist angle linear-dependent on Z.\n"
+                "\n"
+                "Vertices have to be defined clockwise in the XY pane at both planes!\n"
+                "\n"
+                "Any two or more vertices in each plane\n"
+                "   can have the same (X,Y) coordinates!\n"
+                "   It this case, the top and bottom quadrilaterals become triangles,\n"
+                "   segments or points.\n"
+                "\n"
+                "The lateral surfaces are not necessary defined by a pair of segments,\n"
+                "   but by pair segment-point (making a triangle)\n"
+                "   or point-point (making a line).\n"
+                "Any choice is valid as long as at one of the end-caps is at least a triangle.\n";
+
     QVBoxLayout * v = new QVBoxLayout();
     v->setContentsMargins(50, 0, 50, 0);
     v->setSpacing(3);

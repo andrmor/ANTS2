@@ -40,7 +40,8 @@ bool AScriptMessengerDialog::IsShown() const
 
 void AScriptMessengerDialog::RestoreWidget()
 {
-    D->show();
+    D->setVisible(true);
+    D->showNormal();
     D->raise();
 }
 

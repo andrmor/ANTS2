@@ -140,6 +140,6 @@ void AMsg_SI::HideWidget()
     if (bGuiThread)
     {
         if (DialogWidget->IsShown())
-            DialogWidget->Hide();
+            DialogWidget->HideWidget();
     }
 }

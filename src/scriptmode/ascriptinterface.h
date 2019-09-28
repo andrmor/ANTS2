@@ -24,17 +24,9 @@ public:
       return Description + (IsMultithreadCapable() ? "\nMultithread-capable" : "");
   }
 
-  //const QStringList getDeprecatedOrRemovedMethods() const;
   const QHash<QString, QString> & getDeprecatedOrRemovedMethods() const {return DepRem;}
 
-public slots:
-  const QString help(QString method) const  //automatically requested to obtain help strings
-  {
-      if (method.endsWith("()")) method.remove("()");
-      if (method.endsWith("(")) method.remove("(");
-      if (!H.contains(method)) return "";
-      return H[method];
-  }
+  const QString getMethodHelp(const QString & MethodName) const {return H[MethodName];}
 
 signals:
   void AbortScriptEvaluation(QString);      //abort request is automatically linked to abort slot of core unit

@@ -858,24 +858,22 @@ void AScriptWindow::fillHelper(QObject* obj, QString module)
       QStringList sl = functions.at(i).split("_:_");
       QString Fshort = sl.first();
       QString Flong  = sl.last();
-      //functionList << Fshort;
       functionList << Flong;
 
       QTreeWidgetItem *fItem = new QTreeWidgetItem(objItem);
       fItem->setText(0, Fshort);
       fItem->setText(1, Flong);
 
-      QString retVal = "Help not provided";
-      QString funcNoArgs = Fshort.remove(QRegExp("\\((.*)\\)"));
-      if (!module.isEmpty()) funcNoArgs.remove(0, module.length()+1); //remove name.
-      if (obj && obj->metaObject()->indexOfMethod("help(QString)") != -1)
-        {
-          QMetaObject::invokeMethod(obj, "help", Qt::DirectConnection,
-                              Q_RETURN_ARG(QString, retVal),
-                              Q_ARG(QString, funcNoArgs)
-                              );
-        }
-      fItem->setToolTip(0, retVal);
+      QString help = "Help not provided";
+      QString methodName = Fshort.remove(QRegExp("\\((.*)\\)"));
+      if (!module.isEmpty()) methodName.remove(0, module.length()+1); //remove module name and '.'
+      AScriptInterface * io = dynamic_cast<AScriptInterface*>(obj);
+      if (io)
+      {
+          const QString str = io->getMethodHelp(methodName);
+          if (!str.isEmpty()) help = str;
+      }
+      fItem->setToolTip(0, help);
     }
 }
 

@@ -537,6 +537,10 @@ private slots:
 
   void on_ledFromPeaksThreshold_editingFinished();
 
+  void on_pbRootConfigureCustom_clicked();
+
+  void on_cobLSminimizeWhat_currentIndexChanged(int index);
+
 private:
   Ui::ReconstructionWindow *ui;
 
@@ -573,6 +577,8 @@ private:
   QString FilterScript;
 
   int ManifestLineColor, ManifestLineStyle, ManifestLineWidth;
+
+  QString RootMinFormula = "-Signal * log(LRF) + LRF";
 
   void DrawPolygon(double z);  
   void PolygonToTable();

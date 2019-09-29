@@ -5003,6 +5003,7 @@ void ReconstructionWindow::updateReconSettings()
   QJsonObject rootJson;
         rootJson["StartOption"] = ui->cobLSstartingXY->currentIndex();
         rootJson["Minuit2Option"] = ui->cobMinuit2Option->currentIndex();
+        rootJson["Formula"] = RootMinFormula;
         rootJson["LSorLikelihood"] = ui->cobLSminimizeWhat->currentIndex();
         rootJson["StartStepX"] = ui->ledInitialStepX->text().toDouble();
         rootJson["StartStepY"] = ui->ledInitialStepY->text().toDouble();
@@ -6482,4 +6483,50 @@ void ReconstructionWindow::on_pbClearAllFilters_clicked()
 void ReconstructionWindow::on_cobCGstartOption_currentIndexChanged(int index)
 {
     ui->fCPUoffsets->setVisible(index == 2);
+}
+
+#include <QPlainTextEdit>
+#include "areconstructionworker.h"
+void ReconstructionWindow::on_pbRootConfigureCustom_clicked()
+{
+    QDialog D;
+    QVBoxLayout * v = new QVBoxLayout(&D);
+
+    QLabel * l = new QLabel("Minimization function will sum contributions for all active PMs");
+    v->addWidget(l);
+    l = new QLabel("Use TFormula from ROOT with the following parameters:\nLRF, Signal, Error, X, Y, Z, Energy");
+    v->addWidget(l);
+    l = new QLabel("For example, for ML minimization use:\n-Signal * Log(LRF) + LRF");
+    v->addWidget(l);
+    QPlainTextEdit * pte = new QPlainTextEdit();
+        pte->appendPlainText(RootMinFormula);
+    v->addWidget(pte);
+    QHBoxLayout * h = new QHBoxLayout();
+        QPushButton * yes = new QPushButton("Accept");
+        connect(yes, &QPushButton::clicked, [this, &D, pte]()
+        {
+            AFunc_TFormula form(0);
+            QString text = pte->document()->toPlainText().simplified();
+            bool bOK = form.parse(text);
+            if (bOK) emit D.accept();
+            else message("Invalid formula!", &D);
+        });
+        h->addWidget(yes);
+        QPushButton * no = new QPushButton("Cancel");
+        connect(no, &QPushButton::clicked, &D, &QDialog::reject);
+        h->addWidget(no);
+    v->addLayout(h);
+
+    int res = D.exec();
+
+    if (res == QDialog::Accepted)
+    {
+        RootMinFormula = pte->document()->toPlainText().simplified();
+        UpdateReconConfig();
+    }
+}
+
+void ReconstructionWindow::on_cobLSminimizeWhat_currentIndexChanged(int index)
+{
+    ui->pbRootConfigureCustom->setVisible(index == 2);
 }

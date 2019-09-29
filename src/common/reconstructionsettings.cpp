@@ -116,7 +116,9 @@ bool ReconstructionSettings::readFromJson(QJsonObject &RecJson)
   QJsonObject rootJson = ajson["RootMinimizerOptions"].toObject();
   RMstartOption = rootJson["StartOption"].toInt();
   RMminuitOption = rootJson["Minuit2Option"].toInt();
-  fRMuseML = rootJson["LSorLikelihood"].toInt();
+  RMtype  = rootJson["LSorLikelihood"].toInt();
+  RMformula.clear();
+  parseJson(rootJson, "Formula", RMformula);
   RMstepX = rootJson["StartStepX"].toDouble();
   RMstepY = rootJson["StartStepY"].toDouble();
   RMstepZ = rootJson["StartStepZ"].toDouble();

@@ -203,14 +203,15 @@ RootMinReconstructorClass::RootMinReconstructorClass(APmHub* PMs,
                                                      int CurrentGroup,
                                                      int EventsFrom, int EventsTo)
     : AReconstructionWorker(PMs, PMgroups, LRFs, EventsDataHub, RecSet, CurrentGroup, EventsFrom, EventsTo)
-{    
+{
+    //qDebug() << "Creating root min reconstruction worker";
     switch (RecSet->RMminuitOption)
     {
     case 0:
         //RootMinimizer = ROOT::Math::Factory::CreateMinimizer("Minuit2", "Migrad");
         RootMinimizer = new ROOT::Minuit2::Minuit2Minimizer(ROOT::Minuit2::kMigrad);
         break;
-    default: qDebug() << "Error: unknown option for minimization algorithm!\nSwitching to Simplex";
+    default: qWarning() << "Error: unknown option for minimization algorithm!\nSwitching to Simplex";
     case 1:
         //RootMinimizer = ROOT::Math::Factory::CreateMinimizer("Minuit2", "Simplex");
         RootMinimizer = new ROOT::Minuit2::Minuit2Minimizer(ROOT::Minuit2::kSimplex);
@@ -220,17 +221,31 @@ RootMinReconstructorClass::RootMinReconstructorClass(APmHub* PMs,
     RootMinimizer->SetMaxIterations(1000);
     RootMinimizer->SetTolerance(0.001);
 
-    if (RecSet->fRMuseML)
+    switch (RecSet->RMtype)
     {
-        AFunc_ML * func = new AFunc_ML(this);
-        Func = func;
-        FunctorLSML = new ROOT::Math::Functor(*func, 4);
-    }
-    else
-    {
+     default: qWarning() << "Error: invalid root minimizer setting!\nSwitching to minimization of Chi2";
+     case 0:
+      {
         AFunc_Chi2 * func = new AFunc_Chi2(this);
         Func = func;
         FunctorLSML = new ROOT::Math::Functor(*func, 4);
+        break;
+      }
+     case 1:
+      {
+        AFunc_ML * func = new AFunc_ML(this);
+        Func = func;
+        FunctorLSML = new ROOT::Math::Functor(*func, 4);
+        break;
+      }
+     case 2:
+      {
+        AFunc_TFormula * func = new AFunc_TFormula(this);
+        func->parse(RecSet->RMformula);
+        Func = func;
+        FunctorLSML = new ROOT::Math::Functor(*func, 4);
+        break;
+      }
     }
     RootMinimizer->SetFunction(*FunctorLSML);
 }
@@ -239,7 +254,7 @@ RootMinReconstructorClass::~RootMinReconstructorClass()
 {
     delete RootMinimizer;
     delete FunctorLSML;
-    delete Func;
+    //delete Func;  // seems ROOT deletes it automatically - otherwise double-delete does not work well on TFormula based functor
 }
 
 void RootMinReconstructorClass::execute()
@@ -258,7 +273,7 @@ void RootMinReconstructorClass::execute()
             PMsignals = &EventsDataHub->Events[iev];
             if (RecSet->fUseDynamicPassives) DynamicPassives->calculateDynamicPassives(iev, rec);
 
-            if (RecSet->fRMuseML)
+            if (RecSet->RMtype == 1)
                 LastMiniValue = 1.e100; // reset for the new event
             else
                 LastMiniValue = 1.e6; //reset for the new event
@@ -342,7 +357,7 @@ RootMinDoubleReconstructorClass::RootMinDoubleReconstructorClass(APmHub* PMs,
     RootMinimizer->SetMaxIterations(1000);
     RootMinimizer->SetTolerance(0.001);
 
-    if (RecSet->fRMuseML)
+    if (RecSet->RMtype == 1)
     {
         AFunc_MLdouble * func = new AFunc_MLdouble(this);
         Func = func;
@@ -1243,7 +1258,9 @@ void CGonCPUreconstructorClass::oneSlice(int iev, int iSlice)
 #include "TFormula.h"
 AFunc_TFormula::~AFunc_TFormula()
 {
-    delete tform;
+    //qDebug() << "Destructor for  AFunc_TFormula...";
+    delete tform; tform = nullptr;
+    //qDebug() << "Deleted!";
 }
 
 double AFunc_TFormula::operator()(const double *p)
@@ -1273,18 +1290,20 @@ double AFunc_TFormula::operator()(const double *p)
 
             sum += tform->EvalPar(nullptr, par);
         }
-    return Reconstructor->LastMiniValue = sum;
+    Reconstructor->LastMiniValue = sum;
+    return sum;
 }
 
 bool AFunc_TFormula::parse(const QString & formula)
 {
+    //qDebug() << "Parsing"<<formula;
     delete tform; tform = nullptr;
     QString str = formula;
 
     //double  x, y, z, Energy, LRF, Signal, Error
     //        0  1  2    3     4    5       6
 
-    str.replace("Enery", "[3]");
+    str.replace("Energy", "[3]");
     str.replace("LRF", "[4]");
     str.replace("Signal", "[5]");
     str.replace("Error", "[6]");
@@ -1292,6 +1311,8 @@ bool AFunc_TFormula::parse(const QString & formula)
     str.replace("X", "[0]");
     str.replace("Y", "[1]");
     str.replace("Z", "[2]");
+
+    //qDebug() << "After parse:"<<str;
 
     TFormula * f = new TFormula("", str.toLocal8Bit().data());
     if (!f || !f->IsValid())

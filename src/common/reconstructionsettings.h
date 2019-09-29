@@ -49,12 +49,13 @@ public:
   double LimitNodesSize1, LimitNodesSize2;
 
   //Root minimiser
-  bool   fRMuseML;
-  int    RMminuitOption;
-  double RMstepX, RMstepY, RMstepZ, RMstepEnergy;
-  int    RMmaxCalls;
-  int    RMstartOption; //0 - cog, 1 - PM with max signal
-  bool   fRMsuppressConsole;
+  int     RMtype;  //0 - LS, 1 - ML, 2 - TFormula
+  int     RMminuitOption;
+  double  RMstepX, RMstepY, RMstepZ, RMstepEnergy;
+  int     RMmaxCalls;
+  int     RMstartOption; //0 - cog, 1 - PM with max signal
+  bool    fRMsuppressConsole;
+  QString RMformula;
 
   //multiples
   int    MultipleEventOption;

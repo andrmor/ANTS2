@@ -1,4 +1,4 @@
-#include "processorclass.h"
+#include "areconstructionworker.h"
 #include "apmhub.h"
 #include "apmgroupsmanager.h"
 #include "eventsdataclass.h"
@@ -13,7 +13,7 @@
 #include "Math/Functor.h"
 #include "Minuit2/Minuit2Minimizer.h"
 
-ProcessorClass::ProcessorClass(APmHub* PMs,
+AReconstructionWorker::AReconstructionWorker(APmHub* PMs,
                APmGroupsManager* PMgroups,
                ALrfModuleSelector *LRFs,
                EventsDataClass *EventsDataHub,
@@ -22,20 +22,16 @@ ProcessorClass::ProcessorClass(APmHub* PMs,
                int EventsFrom, int EventsTo) :
     PMs(PMs), PMgroups(PMgroups), LRFs(*LRFs), EventsDataHub(EventsDataHub), RecSet(RecSet), ThisPmGroup(ThisPmGroup), EventsFrom(EventsFrom), EventsTo(EventsTo)
 { 
-  Progress = 0;
-  eventsProcessed = 0;
-  fFinished = false;
-  fStopRequested = false;  
-  DynamicPassives = new DynamicPassivesHandler(PMs, PMgroups, EventsDataHub);
-  DynamicPassives->init(RecSet, ThisPmGroup);
+    DynamicPassives = new DynamicPassivesHandler(PMs, PMgroups, EventsDataHub);
+    DynamicPassives->init(RecSet, ThisPmGroup);
 }
 
-ProcessorClass::~ProcessorClass()
+AReconstructionWorker::~AReconstructionWorker()
 {
-  delete DynamicPassives;
+    delete DynamicPassives;
 }
 
-void ProcessorClass::copyLrfsAndExecute()
+void AReconstructionWorker::copyLrfsAndExecute()
 {
   LRFs = LRFs.copyToCurrentThread();  
   emit lrfsCopied();
@@ -206,7 +202,7 @@ RootMinReconstructorClass::RootMinReconstructorClass(APmHub* PMs,
                                                      ReconstructionSettings *RecSet,
                                                      int CurrentGroup,
                                                      int EventsFrom, int EventsTo)
-    : ProcessorClass(PMs, PMgroups, LRFs, EventsDataHub, RecSet, CurrentGroup, EventsFrom, EventsTo)
+    : AReconstructionWorker(PMs, PMgroups, LRFs, EventsDataHub, RecSet, CurrentGroup, EventsFrom, EventsTo)
 {    
     switch (RecSet->RMminuitOption)
     {
@@ -328,7 +324,7 @@ RootMinDoubleReconstructorClass::RootMinDoubleReconstructorClass(APmHub* PMs,
                                                                  ReconstructionSettings *RecSet,
                                                                  int CurrentGroup,
                                                                  int EventsFrom, int EventsTo)
-    : ProcessorClass(PMs, PMgroups, LRFs, EventsDataHub, RecSet, CurrentGroup, EventsFrom, EventsTo)
+    : AReconstructionWorker(PMs, PMgroups, LRFs, EventsDataHub, RecSet, CurrentGroup, EventsFrom, EventsTo)
 {
     switch (RecSet->RMminuitOption)
     {
@@ -493,7 +489,7 @@ double RootMinDoubleReconstructorClass::calculateChi2DoubleEvent(const double *r
   return sum / DegFreedomDouble;
 }
 
-double ProcessorClass::calculateChi2NoDegFree(int iev, AReconRecord *rec)
+double AReconstructionWorker::calculateChi2NoDegFree(int iev, AReconRecord *rec)
 {
   if (RecSet->fUseDynamicPassives) DynamicPassives->calculateDynamicPassives(iev, rec);
   double sum = 0;
@@ -516,7 +512,7 @@ double ProcessorClass::calculateChi2NoDegFree(int iev, AReconRecord *rec)
   return sum;
 }
 
-double ProcessorClass::calculateMLfactor(int iev, AReconRecord *rec)
+double AReconstructionWorker::calculateMLfactor(int iev, AReconRecord *rec)
 {
   if (RecSet->fUseDynamicPassives) DynamicPassives->calculateDynamicPassives(iev, rec);
   double sum = 0;
@@ -1242,4 +1238,67 @@ void CGonCPUreconstructorClass::oneSlice(int iev, int iSlice)
             BestSlZ = bestZ;
             BestSlEnergy = bestEnergy;
           }
+}
+
+#include "TFormula.h"
+AFunc_TFormula::~AFunc_TFormula()
+{
+    delete tform;
+}
+
+double AFunc_TFormula::operator()(const double *p)
+{
+    if (!tform)
+    {
+        qWarning() << "TFormula is not set in AFunc_TFormula";
+        return 0;
+    }
+
+    // TODO: change xyze to variables ***!!!
+
+    //double  x, y, z, Energy, LRF, Signal, Error
+    //        0  1  2    3     4    5       6
+    double par[7];
+    for (int i=0; i<4; i++) par[i] = p[i];
+
+    double sum = 0;
+    for (int ipm = 0; ipm < Reconstructor->PMs->count(); ipm++)
+        if (Reconstructor->DynamicPassives->isActive(ipm))
+        {
+            par[4] = Reconstructor->LRFs.getLRF(ipm, p)*p[3];
+            if (par[4] <= 0)
+                return Reconstructor->LastMiniValue + fabs(Reconstructor->LastMiniValue) * 0.25;
+            par[5] = Reconstructor->PMsignals->at(ipm);
+            par[6] = Reconstructor->LRFs.getLRFErr(ipm, p);
+
+            sum += tform->EvalPar(nullptr, par);
+        }
+    return Reconstructor->LastMiniValue = sum;
+}
+
+bool AFunc_TFormula::parse(const QString & formula)
+{
+    delete tform; tform = nullptr;
+    QString str = formula;
+
+    //double  x, y, z, Energy, LRF, Signal, Error
+    //        0  1  2    3     4    5       6
+
+    str.replace("Enery", "[3]");
+    str.replace("LRF", "[4]");
+    str.replace("Signal", "[5]");
+    str.replace("Error", "[6]");
+
+    str.replace("X", "[0]");
+    str.replace("Y", "[1]");
+    str.replace("Z", "[2]");
+
+    TFormula * f = new TFormula("", str.toLocal8Bit().data());
+    if (!f || !f->IsValid())
+    {
+        delete f;
+        return false;
+    }
+    tform = f;
+    return true;
 }

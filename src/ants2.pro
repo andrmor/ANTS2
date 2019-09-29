@@ -295,7 +295,6 @@ SOURCES += main.cpp \
     modules/detectorclass.cpp \
     modules/eventsdataclass.cpp \
     modules/dynamicpassiveshandler.cpp \
-    modules/processorclass.cpp \
     modules/flatfield.cpp \
     modules/sensorlrfs.cpp \
     modules/manifesthandling.cpp \
@@ -355,7 +354,7 @@ SOURCES += main.cpp \
     common/arootobjcollection.cpp \
     common/arootobjbase.cpp \
     common/acalibratorsignalperphel.cpp \
-    modules/areconstructionmanager.cpp \
+    Reconstruction/areconstructionmanager.cpp \
     scriptmode/ajavascriptmanager.cpp \
     scriptmode/ascriptmanager.cpp \
     common/apm.cpp \
@@ -411,7 +410,8 @@ SOURCES += main.cpp \
     Simulation/aparticletracker.cpp \
     common/aexternalprocesshandler.cpp \
     gui/MainWindowTools/alogconfigdialog.cpp \
-    Simulation/alogsandstatisticsoptions.cpp
+    Simulation/alogsandstatisticsoptions.cpp \
+    Reconstruction/areconstructionworker.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -437,7 +437,6 @@ HEADERS  += common/CorrelationFilters.h \
     modules/sensorlrfs.h \
     modules/eventsdataclass.h \
     modules/dynamicpassiveshandler.h \
-    modules/processorclass.h \
     modules/manifesthandling.h \
     modules/apmgroupsmanager.h \
     SplineLibrary/spline.h \
@@ -509,7 +508,7 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/aroothistrecord.h \
     common/arootobjbase.h \
     common/acalibratorsignalperphel.h \
-    modules/areconstructionmanager.h \
+    Reconstruction/areconstructionmanager.h \
     scriptmode/ajavascriptmanager.h \
     scriptmode/ascriptmanager.h \
     common/apm.h \
@@ -565,7 +564,8 @@ HEADERS  += common/CorrelationFilters.h \
     common/aexternalprocesshandler.h \
     gui/MainWindowTools/alogconfigdialog.h \
     Simulation/alogsandstatisticsoptions.h \
-    Reconstruction/afunctorbase.h
+    Reconstruction/afunctorbase.h \
+    Reconstruction/areconstructionworker.h
 
 # --- SIM ---
 ants2_SIM {

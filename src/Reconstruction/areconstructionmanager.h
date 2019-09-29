@@ -22,7 +22,7 @@ class APmGroupsManager;
 class ALrfModuleSelector;
 class TmpObjHubClass;
 class DynamicPassivesHandler;
-class ProcessorClass;
+class AReconstructionWorker;
 class NNmoduleClass;
 class ACalibratorSignalPerPhEl_Stat;
 class ACalibratorSignalPerPhEl_Peaks;
@@ -34,7 +34,7 @@ class NeuralNetworksModule;
 class AReconstructionManager : public QObject
 {
   Q_OBJECT
-  friend class ProcessorClass;
+  friend class AReconstructionWorker;
   friend class CoGReconstructorClass;
   friend class CGonCPUreconstructorClass;
   friend class RootMinReconstructorClass;
@@ -87,7 +87,7 @@ private:
 
   std::atomic<bool> fDoingCopyLRFs;
  
-  bool run(QList<ProcessorClass*> reconstructorList);
+  bool run(QList<AReconstructionWorker*> reconstructorList);
 
   //misc
   QString ErrorString;
@@ -97,7 +97,7 @@ private:
 
   bool fillSettingsAndVerify(QJsonObject &json, bool fCheckLRFs);
   bool configureFilters(QJsonObject &json);
-  void distributeWork(int Algorithm, QList<ProcessorClass*> &todo);
+  void distributeWork(int Algorithm, QList<AReconstructionWorker*> &todo);
   void doFilters();
   void singleThreadEventFilters(); //used to process Volume-specific spatial, correlation and kNN filters which HAS to be one thread  
   void assureReconstructionDataContainersExist();

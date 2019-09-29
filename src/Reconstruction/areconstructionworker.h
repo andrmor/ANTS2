@@ -16,54 +16,58 @@ class AEventFilteringSettings;
 namespace ROOT { namespace Minuit2 { class Minuit2Minimizer; } }
 namespace ROOT { namespace Math { class Functor; } }
 
-class ProcessorClass : public QObject
+class AReconstructionWorker : public QObject
 {
-  Q_OBJECT
+    Q_OBJECT
 public:
-  ProcessorClass(APmHub* PMs,
-                 APmGroupsManager* PMgroups,
-                 ALrfModuleSelector* LRFs,
-                 EventsDataClass *EventsDataHub,
-                 ReconstructionSettings *RecSet,
-                 int ThisPmGroup,
-                 int EventsFrom, int EventsTo);
-  virtual ~ProcessorClass();
+    AReconstructionWorker(APmHub* PMs,
+                          APmGroupsManager* PMgroups,
+                          ALrfModuleSelector* LRFs,
+                          EventsDataClass *EventsDataHub,
+                          ReconstructionSettings *RecSet,
+                          int ThisPmGroup,
+                          int EventsFrom, int EventsTo);
+    virtual ~AReconstructionWorker();
 
-    // thread control
-  char Progress; //char - it is completely safe (?) to retrieve from thread
-  int eventsProcessed;
-  bool fFinished;
-  int Id;
-  bool fStopRequested;
+    // thread control - consider change to atomic
+    char Progress = 0;
+    int eventsProcessed = 0;
+    bool fFinished = false;
+    int Id;
+    bool fStopRequested = false;
 
-    // local object - for static use should be public
-  DynamicPassivesHandler *DynamicPassives;
+    // local objects used by minimizer
+    DynamicPassivesHandler * DynamicPassives = nullptr;
 
-    // pointers: for static use with minimizer, should be public:  
-  APmHub* PMs;
-  APmGroupsManager* PMgroups;
-  ALrfModuleSelector LRFs;
-  EventsDataClass *EventsDataHub;
-  ReconstructionSettings *RecSet;
+    // external objects used by minimizer
+    APmHub                 * PMs = nullptr;
+    APmGroupsManager       * PMgroups = nullptr;
+    ALrfModuleSelector       LRFs;  // copy(!) <- need if use Raimumdo's module with script LRFs
+    EventsDataClass        * EventsDataHub = nullptr;
+    ReconstructionSettings * RecSet = nullptr;
 
-  //this sensor group
-  int ThisPmGroup;
+    //this sensor group
+    int ThisPmGroup;
 
 public slots:
-  virtual void execute() = 0;
-  virtual void copyLrfsAndExecute();
+    virtual void execute() = 0;
+    virtual void copyLrfsAndExecute();
+
 signals:
-  void finished();
-  void lrfsCopied();
+    void finished();
+    void lrfsCopied();
 
 protected:
-  int EventsFrom, EventsTo;
-  double calculateChi2NoDegFree(int iev, AReconRecord *rec);
-  double calculateMLfactor(int iev, AReconRecord *rec);
+    int EventsFrom;
+    int EventsTo;
+
+protected:
+    double calculateChi2NoDegFree(int iev, AReconRecord *rec);
+    double calculateMLfactor(int iev, AReconRecord *rec);
 };
 
 // ------ Center of Gravity ------
-class CoGReconstructorClass : public ProcessorClass
+class CoGReconstructorClass : public AReconstructionWorker
 {
   Q_OBJECT
 public:
@@ -74,14 +78,14 @@ public:
                         ReconstructionSettings *RecSet,
                         int CurrentGroup,
                         int EventsFrom, int EventsTo)
-    : ProcessorClass(PMs, PMgroups, LRFs, EventsDataHub, RecSet, CurrentGroup, EventsFrom, EventsTo) {}
+    : AReconstructionWorker(PMs, PMgroups, LRFs, EventsDataHub, RecSet, CurrentGroup, EventsFrom, EventsTo) {}
   ~CoGReconstructorClass(){}
 public slots:
   virtual void execute();
 };
 
 // ------ Contracting grids on CPU ------
-class CGonCPUreconstructorClass : public ProcessorClass
+class CGonCPUreconstructorClass : public AReconstructionWorker
 {
   Q_OBJECT
 public:
@@ -92,7 +96,7 @@ public:
                             ReconstructionSettings *RecSet,
                             int CurrentGroup,
                             int EventsFrom, int EventsTo)
-    : ProcessorClass(PMs, PMgroups, LRFs, EventsDataHub, RecSet, CurrentGroup, EventsFrom, EventsTo) {}
+    : AReconstructionWorker(PMs, PMgroups, LRFs, EventsDataHub, RecSet, CurrentGroup, EventsFrom, EventsTo) {}
   ~CGonCPUreconstructorClass(){}
 public slots:
   virtual void execute();
@@ -107,7 +111,7 @@ private:
 };
 
 // ------ Root minimizer - single point events ------
-class RootMinReconstructorClass : public ProcessorClass
+class RootMinReconstructorClass : public AReconstructionWorker
 {
     Q_OBJECT
 public:
@@ -134,7 +138,7 @@ protected:
 
 // ------ Root minimizer with double events ------
 // RecSet->MultipleEventOption: 0-cannot be here, 1-only doubles+chi2, 2-does doubles+chi2 then copmares with already provided rec results for singles
-class RootMinDoubleReconstructorClass : public ProcessorClass
+class RootMinDoubleReconstructorClass : public AReconstructionWorker
 {
     Q_OBJECT
 public:
@@ -163,7 +167,7 @@ private:
 };
 
 // ------ Claculates chi2 for all events ------
-class Chi2calculatorClass : public ProcessorClass
+class Chi2calculatorClass : public AReconstructionWorker
 {
   Q_OBJECT
 public:
@@ -174,14 +178,14 @@ public:
                       ReconstructionSettings *RecSet,
                       int CurrentGroup,
                       int EventsFrom, int EventsTo)
-    : ProcessorClass(PMs, PMgroups, LRFs, EventsDataHub, RecSet, CurrentGroup, EventsFrom, EventsTo){}
+    : AReconstructionWorker(PMs, PMgroups, LRFs, EventsDataHub, RecSet, CurrentGroup, EventsFrom, EventsTo){}
   ~Chi2calculatorClass(){}
 public slots:
   virtual void execute();
 };
 
 // ------ Checks all filters which can be multithreaded ------
-class EventFilterClass : public ProcessorClass
+class EventFilterClass : public AReconstructionWorker
 {
   Q_OBJECT
 public:
@@ -193,7 +197,7 @@ public:
                      AEventFilteringSettings *FiltSet,
                      int CurrentGroup,
                      int EventsFrom, int EventsTo)
-        : ProcessorClass(PMs, PMgroups, LRFs, EventsDataHub, RecSet, CurrentGroup, EventsFrom, EventsTo), FiltSet(FiltSet) {}
+        : AReconstructionWorker(PMs, PMgroups, LRFs, EventsDataHub, RecSet, CurrentGroup, EventsFrom, EventsTo), FiltSet(FiltSet) {}
     ~EventFilterClass(){}
 public slots:
   virtual void execute();
@@ -236,6 +240,19 @@ public:
     double operator()(const double *p);
 private:
     RootMinDoubleReconstructorClass * Reconstructor = nullptr;
+};
+
+class TFormula;
+class AFunc_TFormula : public AFunctorBase
+{
+public:
+    AFunc_TFormula(RootMinReconstructorClass * Reconstructor) : Reconstructor(Reconstructor) {}
+    ~AFunc_TFormula();
+    double operator()(const double *p);
+    bool parse(const QString & formula);
+private:
+    RootMinReconstructorClass * Reconstructor = nullptr;
+    TFormula * tform = nullptr;
 };
 
 #endif // PROCESSORCLASS_H

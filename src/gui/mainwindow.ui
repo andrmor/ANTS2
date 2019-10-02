@@ -6072,7 +6072,7 @@ Constructor is disabled!</string>
        </rect>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>6</number>
       </property>
       <widget class="QWidget" name="tabTime">
        <attribute name="title">
@@ -6889,7 +6889,7 @@ thermal neutrons:</string>
          <string>!</string>
         </property>
        </widget>
-       <widget class="QLabel" name="label_51">
+       <widget class="QLabel" name="label_511">
         <property name="geometry">
          <rect>
           <x>6</x>
@@ -6908,7 +6908,7 @@ thermal neutrons:</string>
        <zorder>label_41</zorder>
        <zorder>sbMaxNumbPhTransitions</zorder>
        <zorder>cbRndCheckBeforeTrack</zorder>
-       <zorder>label_51</zorder>
+       <zorder>label_511</zorder>
        <zorder>pbQEacceleratorWarning</zorder>
       </widget>
       <widget class="QWidget" name="tab_4">

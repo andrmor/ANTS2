@@ -477,6 +477,10 @@ void ASimulationManager::generateG4antsConfigCommon(QJsonObject & json, int Thre
     json["File_Tracks"] = tracFN;
     removeOldFile(tracFN, "tracking");
 
+    QString monFeedbackFN = G4SimSet.getMonitorDataFileName(ThreadId);
+    json["File_Monitors"] = monFeedbackFN;
+    removeOldFile(monFeedbackFN, "monitor data");
+
     json["Precision"]    = G4SimSet.Precision;
 
     QJsonArray arMon;

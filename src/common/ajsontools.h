@@ -35,6 +35,7 @@ bool write2DQVectorToJArray(const QVector<QVector<double> > &xy, QJsonArray &ar)
 void read2DQVectorFromJArray(QJsonArray &ar, QVector<QVector<double> > &xy);
 
 bool LoadJsonFromFile(QJsonObject &json, const QString& fileName);
+bool LoadJsonArrayFromFile(QJsonArray &ar, const QString& fileName);
 bool SaveJsonToFile(const QJsonObject &json, const QString& fileName);
 
 bool writeTH1ItoJsonArr(TH1I *hist, QJsonArray &ja);

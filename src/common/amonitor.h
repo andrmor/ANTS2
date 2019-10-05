@@ -4,6 +4,7 @@
 #include "amonitorconfig.h"
 
 #include <QString>
+#include <QVector>
 
 class TH1D;
 class TH2D;
@@ -51,6 +52,9 @@ public:
   void configureWave(int waveBins, int waveFrom, int waveTo);
   void configureAngle(int angleBins, int angleFrom, int angleTo);
   void configureEnergy(int energyBins, int energyFrom, int energyTo);
+
+  void overrideEnergyData(const QVector<double> & vec); // vec contain underflow and overflow bins!
+  void overrideXYData(const QVector<QVector<double>> & vec); // vec contain underflow and overflow bins! [y][x] in increasing order
 
 // stat data handling
   void clearData();

@@ -579,6 +579,8 @@ bool AParticleSourceSimulator::generateAndTrackPhotons()
     return true;
 }
 
+#include "asandwich.h"
+#include "amonitor.h"
 bool AParticleSourceSimulator::geant4TrackAndProcess()
 {
     bool bOK = runGeant4Handler();
@@ -702,6 +704,66 @@ bool AParticleSourceSimulator::geant4TrackAndProcess()
         ErrorString = ti.processFile(TrackingFileName, eventBegin);
         if (!ErrorString.isEmpty()) return false;
     }
+
+    //read monitor data
+    int numMon = detector.Sandwich->MonitorsRecords.size();
+    if (numMon != 0)
+    {
+        QString monFileName = simSettings.G4SimSet.getMonitorDataFileName(ID);
+        QJsonArray ar;
+        bOK = LoadJsonArrayFromFile(ar, monFileName);
+        if (!bOK)
+        {
+            ErrorString = "Failed to read monitor data!";
+            return false;
+        }
+        if (ar.size() != numMon)
+        {
+            ErrorString = "Failed to read monitor data: mismatch in size!";
+            return false;
+        }
+        for (int iMon=0; iMon<numMon; iMon++)
+        {
+            AMonitor * mon = dataHub->SimStat->Monitors[iMon];
+
+            QJsonObject json = ar[iMon].toObject();
+
+            QJsonObject jEnergy = json["Energy"].toObject();
+            {
+                int bins =    jEnergy["bins"].toInt();
+                double from = jEnergy["from"].toDouble();
+                double to =   jEnergy["to"].toDouble();
+                QJsonArray data = jEnergy["data"].toArray();
+                QVector<double> vec;
+                for (int i=0; i<data.size(); i++)
+                    vec << data[i].toDouble();
+                mon->configureEnergy(bins, from, to);
+                mon->overrideEnergyData(vec);
+            }
+
+            QJsonObject jSpatial = json["Spatial"].toObject();
+            {
+                int xbins =    jSpatial["xbins"].toInt();
+                int ybins =    jSpatial["ybins"].toInt();
+                double size1 = jSpatial["size1"].toDouble();
+                double size2 = jSpatial["size2"].toDouble();
+                QJsonArray data = jSpatial["data"].toArray();
+                QVector<QVector<double>> vec;
+                vec.resize(ybins);
+                for (int iy=0; iy<ybins; iy++)
+                {
+                    QJsonArray raw = data[iy].toArray();
+                    vec[iy].resize(xbins);
+                    for (int ix=0; ix<xbins; ix++)
+                        vec[iy][ix] = raw[ix].toDouble();
+                }
+                mon->configureXY(xbins, ybins);
+                mon->overrideXYData(vec);
+            }
+
+        }
+    }
+
 
     return true;
 }

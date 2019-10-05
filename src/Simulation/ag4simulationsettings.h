@@ -28,6 +28,7 @@ public:
     const QString getReceitFileName(int iThreadNum) const;
     const QString getConfigFileName(int iThreadNum) const;
     const QString getTracksFileName(int iThreadNum) const;
+    const QString getMonitorDataFileName(int iThreadNum) const;
     const QString getGdmlFileName() const;
 
     bool  checkPathValid() const;

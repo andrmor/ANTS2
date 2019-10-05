@@ -128,6 +128,37 @@ void AMonitor::configureEnergy(int energyBins, int energyFrom, int energyTo)
     initEnergyHist();
 }
 
+void AMonitor::overrideEnergyData(const QVector<double> &vec)
+{
+    int size = energy->GetNbinsX();
+    int entries = 0;
+    for (int i=0; i<vec.size(); i++)
+    {
+        if (i > size+1) break;
+        const double val = vec.at(i);
+        energy->SetBinContent(i, val);
+        if (i>0 && i<size+1) entries += val;
+    }
+    energy->SetEntries(entries);
+}
+
+void AMonitor::overrideXYData(const QVector<QVector<double> > &vec)
+{
+    int sizeX = xy->GetNbinsX();
+    int sizeY = xy->GetNbinsY();
+    int entries = 0;
+    for (int iy=0; iy<sizeY; iy++)
+    {
+        for (int ix=0; ix<sizeX; ix++)
+        {
+            const double val = vec.at(iy).at(ix);
+            xy->SetBinContent(ix, iy, val);
+            if (ix>0 && ix<sizeX+1 && iy>0 && iy<sizeY+1 ) entries += val;
+        }
+    }
+    xy->SetEntries(entries);
+}
+
 void AMonitor::initXYHist()
 {
     delete xy;

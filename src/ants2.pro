@@ -379,10 +379,10 @@ SOURCES += main.cpp \
     OpticalOverrides/abasicopticaloverride.cpp \
     common/aglobalsettings.cpp \
     common/aparticlesourcerecord.cpp \
-    modules/ascriptparticlegenerator.cpp \
-    modules/afileparticlegenerator.cpp \
-    common/aparticlerecord.cpp \
-    modules/asourceparticlegenerator.cpp \
+    Simulation/ascriptparticlegenerator.cpp \
+    Simulation/afileparticlegenerator.cpp \
+    Simulation/aparticlerecord.cpp \
+    Simulation/asourceparticlegenerator.cpp \
     common/aisotopeabundancehandler.cpp \
     common/aisotope.cpp \
     common/achemicalelement.cpp \
@@ -531,11 +531,11 @@ HEADERS  += common/CorrelationFilters.h \
     OpticalOverrides/abasicopticaloverride.h \
     common/aglobalsettings.h \
     common/aparticlesourcerecord.h \
-    common/aparticlegun.h \
-    modules/ascriptparticlegenerator.h \
-    modules/afileparticlegenerator.h \
-    common/aparticlerecord.h \
-    modules/asourceparticlegenerator.h \
+    Simulation/aparticlegun.h \
+    Simulation/ascriptparticlegenerator.h \
+    Simulation/afileparticlegenerator.h \
+    Simulation/aparticlerecord.h \
+    Simulation/asourceparticlegenerator.h \
     common/aisotopeabundancehandler.h \
     common/aisotope.h \
     common/achemicalelement.h \

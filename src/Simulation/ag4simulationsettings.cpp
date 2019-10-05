@@ -43,7 +43,7 @@ void AG4SimulationSettings::writeToJson(QJsonObject &json) const
     }
     json["StepLimits"] = arSL;
 
-    json["Precision"]         = Precision;
+    json["Precision"]  = Precision;
 }
 
 void AG4SimulationSettings::readFromJson(const QJsonObject &json)

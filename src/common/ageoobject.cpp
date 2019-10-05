@@ -532,6 +532,15 @@ void AGeoObject::updateMonitorShape()
         Shape = new AGeoTube(0, mon->config.size1, mon->config.dz);
 }
 
+const AMonitorConfig * AGeoObject::getMonitorConfig() const
+{
+    if (!ObjectType) return nullptr;
+    ATypeMonitorObject * mon = dynamic_cast<ATypeMonitorObject*>(ObjectType);
+    if (!mon) return nullptr;
+
+    return &mon->config;
+}
+
 AGeoObject *AGeoObject::findObjectByName(const QString name)
 {
   if (Name == name)

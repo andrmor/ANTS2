@@ -40,8 +40,8 @@ public:
     double energyTo = 0;
     int    energyUnitsInHist = 2; // 0,1,2,3 -> meV, eV, keV, MeV;
 
-    void writeToJson(QJsonObject &json);
-    void readFromJson(QJsonObject &json);
+    void writeToJson(QJsonObject & json) const;
+    void readFromJson(const QJsonObject & json);
 };
 
 #endif // AMONITORCONFIG_H

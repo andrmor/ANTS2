@@ -98,7 +98,7 @@ const QString AG4SimulationSettings::getReceitFileName(int iThreadNum) const
 
 const QString AG4SimulationSettings::getConfigFileName(int iThreadNum) const
 {
-    return getPath() + QString("aga-%1.json").arg(iThreadNum);
+    return getPath() + QString("config-%1.json").arg(iThreadNum);
 }
 
 const QString AG4SimulationSettings::getTracksFileName(int iThreadNum) const

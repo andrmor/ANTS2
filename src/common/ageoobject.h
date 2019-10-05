@@ -80,6 +80,7 @@ public:
 
   //for monitor
   void updateMonitorShape();
+  const AMonitorConfig * getMonitorConfig() const; //returns nullptr if obj is not a monitor
 
   // the following checks are always done DOWN the chain
   // for global effect, the check has to be performed on World (Top) object

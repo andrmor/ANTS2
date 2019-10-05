@@ -15,6 +15,7 @@
 #include "aeventtrackingrecord.h"
 #include "asandwich.h"
 #include "apmhub.h"
+#include "ageoobject.h"
 
 #include <QDebug>
 #include <QJsonObject>
@@ -477,4 +478,25 @@ void ASimulationManager::generateG4antsConfigCommon(QJsonObject & json, int Thre
     removeOldFile(tracFN, "tracking");
 
     json["Precision"]    = G4SimSet.Precision;
+
+    QJsonArray arMon;
+        const QVector<const AGeoObject*> & MonitorsRecords = Detector.Sandwich->MonitorsRecords;
+        for (const AGeoObject * obj : MonitorsRecords)
+        {
+            QJsonObject mjs;
+            const AMonitorConfig * mc = obj->getMonitorConfig();
+            if (mc && mc->PhotonOrParticle == 1)
+            {
+                const QStringList ParticleList = Detector.MpCollection->getListOfParticleNames();
+                int pIndex = mc->ParticleIndex;
+                if ( pIndex >=0 && pIndex < ParticleList.size() )
+                {
+                    mc->writeToJson(mjs);
+                    mjs["Name"] = obj->Name;
+                    mjs["ParticleName"] = ParticleList.at(pIndex);
+                }
+            }
+            arMon.append(mjs);
+        }
+    json["Monitors"] = arMon;
 }

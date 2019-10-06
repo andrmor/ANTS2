@@ -142,8 +142,36 @@ void AMonitor::overrideEnergyData(const QVector<double> &vec)
     energy->SetEntries(entries);
 }
 
+/*
+class ATH1D : public TH1D
+{
+public:
+    ATH1D(const TH1D other) : TH1D(other) {}
+
+    void SetSumW (double val) {fTsumw  = val;}
+    void SetSumWX(double val) {fTsumwx = val;}
+};
+*/
+
 void AMonitor::overrideAngleData(const QVector<double> &vec)
 {
+    /*
+    ATH1D mycopy(*angle);
+    int size = mycopy.GetNbinsX();
+    int entries = 0;
+    for (int i=0; i<vec.size(); i++)
+    {
+        if (i > size+1) break;
+        const double val = vec.at(i);
+        mycopy.SetBinContent(i, val);
+        if (i>0 && i<size+1) entries += val;
+    }
+    mycopy.SetEntries(entries);
+    mycopy.SetSumW(100);
+    mycopy.SetSumWX(4500);
+    delete angle; angle = new TH1D(mycopy);// or just mycopy as pointer to angle
+    */
+
     int size = angle->GetNbinsX();
     int entries = 0;
     for (int i=0; i<vec.size(); i++)

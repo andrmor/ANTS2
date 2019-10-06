@@ -735,9 +735,17 @@ bool AParticleSourceSimulator::geant4TrackAndProcess()
                 double to =   jEnergy["to"].toDouble();
                 QJsonArray data = jEnergy["data"].toArray();
                 QVector<double> vec;
+                double multiplier = 1.0;
+                switch (mon->getConfig().energyUnitsInHist)
+                {
+                case 0:  multiplier = 1.0e6;  break;// keV -> meV
+                case 1:  multiplier = 1.0e3;  break;// keV -> eV
+                default: multiplier = 1.0;    break;// keV -> keV
+                case 3:  multiplier = 1.0e-3; break;// keV -> MeV
+                }
                 for (int i=0; i<data.size(); i++)
                     vec << data[i].toDouble();
-                mon->configureEnergy(bins, from, to);
+                mon->configureEnergy(bins, from * multiplier, to * multiplier);
                 mon->overrideEnergyData(vec);
             }
 

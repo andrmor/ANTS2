@@ -104,7 +104,7 @@ void AMonitor::configureXY(int xBins, int yBins)
     initXYHist();
 }
 
-void AMonitor::configureWave(int waveBins, int waveFrom, int waveTo)
+void AMonitor::configureWave(int waveBins, double waveFrom, double waveTo)
 {
     config.waveBins = waveBins;
     config.waveFrom = waveFrom;
@@ -112,7 +112,7 @@ void AMonitor::configureWave(int waveBins, int waveFrom, int waveTo)
     initWaveHist();
 }
 
-void AMonitor::configureAngle(int angleBins, int angleFrom, int angleTo)
+void AMonitor::configureAngle(int angleBins, double angleFrom, double angleTo)
 {
     config.angleBins = angleBins;
     config.angleFrom = angleFrom;
@@ -120,7 +120,7 @@ void AMonitor::configureAngle(int angleBins, int angleFrom, int angleTo)
     initAngleHist();
 }
 
-void AMonitor::configureEnergy(int energyBins, int energyFrom, int energyTo)
+void AMonitor::configureEnergy(int energyBins, double energyFrom, double energyTo)
 {
     config.energyBins = energyBins;
     config.energyFrom = energyFrom;

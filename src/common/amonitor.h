@@ -47,16 +47,16 @@ public:
   void setNoPrior(bool flag)           {config.bNoPriorInteractions = flag;}
   */
 
-  void configureTime(int timeBins, double timeFrom, double timeTo);
   void configureXY(int xBins, int yBins);
-  void configureWave(int waveBins, int waveFrom, int waveTo);
-  void configureAngle(int angleBins, int angleFrom, int angleTo);
-  void configureEnergy(int energyBins, int energyFrom, int energyTo);
+  void configureTime  (int timeBins,   double timeFrom,   double timeTo);
+  void configureWave  (int waveBins,   double waveFrom,   double waveTo);
+  void configureAngle (int angleBins,  double angleFrom,  double angleTo);
+  void configureEnergy(int energyBins, double energyFrom, double energyTo);
 
   void overrideEnergyData(const QVector<double> & vec); // vec contain underflow and overflow bins!
-  void overrideAngleData(const QVector<double> & vec);  // vec contain underflow and overflow bins!
-  void overrideTimeData(const QVector<double> & vec);   // vec contain underflow and overflow bins!
-  void overrideXYData(const QVector<QVector<double>> & vec); // vec contain underflow and overflow bins! [y][x] in increasing order
+  void overrideAngleData (const QVector<double> & vec);  // vec contain underflow and overflow bins!
+  void overrideTimeData  (const QVector<double> & vec);   // vec contain underflow and overflow bins!
+  void overrideXYData    (const QVector<QVector<double>> & vec); // vec contain underflow and overflow bins! [y][x] in increasing order
 
 // stat data handling
   void clearData();
@@ -71,6 +71,8 @@ public:
   const QString getName() const {return name;}
 
   void appendDataFromAnotherMonitor(AMonitor* from); // used to merge data from several threads
+
+  const AMonitorConfig & getConfig() const {return config;}
 
 private:
   QString name;

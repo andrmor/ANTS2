@@ -54,6 +54,8 @@ public:
   void configureEnergy(int energyBins, int energyFrom, int energyTo);
 
   void overrideEnergyData(const QVector<double> & vec); // vec contain underflow and overflow bins!
+  void overrideAngleData(const QVector<double> & vec);  // vec contain underflow and overflow bins!
+  void overrideTimeData(const QVector<double> & vec);   // vec contain underflow and overflow bins!
   void overrideXYData(const QVector<QVector<double>> & vec); // vec contain underflow and overflow bins! [y][x] in increasing order
 
 // stat data handling

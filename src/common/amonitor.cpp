@@ -142,6 +142,34 @@ void AMonitor::overrideEnergyData(const QVector<double> &vec)
     energy->SetEntries(entries);
 }
 
+void AMonitor::overrideAngleData(const QVector<double> &vec)
+{
+    int size = angle->GetNbinsX();
+    int entries = 0;
+    for (int i=0; i<vec.size(); i++)
+    {
+        if (i > size+1) break;
+        const double val = vec.at(i);
+        angle->SetBinContent(i, val);
+        if (i>0 && i<size+1) entries += val;
+    }
+    angle->SetEntries(entries);
+}
+
+void AMonitor::overrideTimeData(const QVector<double> &vec)
+{
+    int size = time->GetNbinsX();
+    int entries = 0;
+    for (int i=0; i<vec.size(); i++)
+    {
+        if (i > size+1) break;
+        const double val = vec.at(i);
+        time->SetBinContent(i, val);
+        if (i>0 && i<size+1) entries += val;
+    }
+    time->SetEntries(entries);
+}
+
 void AMonitor::overrideXYData(const QVector<QVector<double> > &vec)
 {
     int sizeX = xy->GetNbinsX();

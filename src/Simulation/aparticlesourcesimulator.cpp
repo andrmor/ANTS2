@@ -741,6 +741,32 @@ bool AParticleSourceSimulator::geant4TrackAndProcess()
                 mon->overrideEnergyData(vec);
             }
 
+            QJsonObject jAngle = json["Angle"].toObject();
+            {
+                int bins =    jAngle["bins"].toInt();
+                double from = jAngle["from"].toDouble();
+                double to =   jAngle["to"].toDouble();
+                QJsonArray data = jAngle["data"].toArray();
+                QVector<double> vec;
+                for (int i=0; i<data.size(); i++)
+                    vec << data[i].toDouble();
+                mon->configureAngle(bins, from, to);
+                mon->overrideAngleData(vec);
+            }
+
+            QJsonObject jTime = json["Time"].toObject();
+            {
+                int bins =    jTime["bins"].toInt();
+                double from = jTime["from"].toDouble();
+                double to =   jTime["to"].toDouble();
+                QJsonArray data = jTime["data"].toArray();
+                QVector<double> vec;
+                for (int i=0; i<data.size(); i++)
+                    vec << data[i].toDouble();
+                mon->configureTime(bins, from, to);
+                mon->overrideTimeData(vec);
+            }
+
             QJsonObject jSpatial = json["Spatial"].toObject();
             {
                 int xbins =    jSpatial["xbins"].toInt();
@@ -760,10 +786,8 @@ bool AParticleSourceSimulator::geant4TrackAndProcess()
                 mon->configureXY(xbins, ybins);
                 mon->overrideXYData(vec);
             }
-
         }
     }
-
 
     return true;
 }

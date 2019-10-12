@@ -411,7 +411,8 @@ SOURCES += main.cpp \
     common/aexternalprocesshandler.cpp \
     gui/MainWindowTools/alogconfigdialog.cpp \
     Simulation/alogsandstatisticsoptions.cpp \
-    Reconstruction/areconstructionworker.cpp
+    Reconstruction/areconstructionworker.cpp \
+    common/ahistogram.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -565,7 +566,8 @@ HEADERS  += common/CorrelationFilters.h \
     gui/MainWindowTools/alogconfigdialog.h \
     Simulation/alogsandstatisticsoptions.h \
     Reconstruction/afunctorbase.h \
-    Reconstruction/areconstructionworker.h
+    Reconstruction/areconstructionworker.h \
+    common/ahistogram.h
 
 # --- SIM ---
 ants2_SIM {

@@ -125,6 +125,7 @@ void MainWindow::on_pobTest_clicked()
 }
 
 //include <QElapsedTimer>
+#include <ahistogram.h>
 void MainWindow::on_pobTest_2_clicked()
 {
 //    std::vector<mydata> v;
@@ -137,7 +138,29 @@ void MainWindow::on_pobTest_2_clicked()
 //    int el = t.elapsed();
 //    qDebug() << el;
 
+    int numBins = 10;
+    AHistogram1D  ah(numBins, 0, 0);
+    ah.setBufferSize(10000);
+    TH1D         *rh = new TH1D("", "", numBins, 0, 0);
 
+    for (int i=0; i<10000; i++)
+    {
+        const double val = -10.0 + 20.0*Detector->RandGen->Rndm();
+        ah.Fill(val, 1.0);
+        rh->Fill(val, 1.0);
+    }
+
+    QVector<double> resA = ah.getContent();
+    QVector<double> resR;
+    for (int i=0; i<numBins+2; i++)
+        resR << rh->GetBinContent(i);
+
+    qDebug() << "A:"<<resA;
+    qDebug() << "R:"<<resR;
+
+    qDebug() << "A stat:"<<ah.getStat();
+
+    GraphWindow->Draw(rh, "hist");
 
 //    QByteArray ba;
 //    EventsDataHub->packReconstructedToByteArray(ba);

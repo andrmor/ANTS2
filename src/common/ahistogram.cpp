@@ -30,24 +30,24 @@ void AHistogram1D::Fill(double x, double val)
     }
     else
     {
-        buffer << QPair<double,double>(x, val);
+        buffer.push_back( std::pair<double,double>(x, val) );
         if (buffer.size() == bufferSize)
             processBuffer();
     }
 }
 
-const QVector<double> AHistogram1D::getContent()
+const std::vector<double> AHistogram1D::getContent()
 {
     if (!bFixedRange) processBuffer();
 
-    QVector<double> res;
+    std::vector<double> res;
     res.reserve(data.size());
     for (const double & bc : data)
-        res << bc;
+        res.push_back(bc);
     return res;
 }
 
-const QVector<double> AHistogram1D::getStat()
+const std::vector<double> AHistogram1D::getStat()
 {
     return {sumVal, sumVal2, sumValX, sumValX2, entries};
 }
@@ -55,13 +55,9 @@ const QVector<double> AHistogram1D::getStat()
 void AHistogram1D::fillFixed(double x, double val)
 {
     if (x < from)
-    {
         data[0] += val;
-    }
     else if (x > to)
-    {
         data[bins+1] += val;
-    }
     else
     {
         data[ 1 + (x - from)/deltaBin ] += val;
@@ -75,22 +71,22 @@ void AHistogram1D::fillFixed(double x, double val)
 
 void AHistogram1D::processBuffer()
 {
-    if (buffer.isEmpty()) return;
+    if (buffer.empty()) return;
 
-    from = to = buffer.first().first;
-    for (int i=1; i<buffer.size(); i++)
+    from = to = buffer[0].first;
+    for (size_t i=1; i<buffer.size(); i++)
     {
-        const double & x = buffer.at(i).first;
+        const double & x = buffer[i].first;
         if      (x < from) from = x;
         else if (x > to)   to   = x;
     }
 
     deltaBin = (to - from) / bins + std::numeric_limits<double>::epsilon();
 
-    for (int i=0; i<buffer.size(); i++)
+    for (size_t i=0; i<buffer.size(); i++)
     {
-        const double & x   = buffer.at(i).first;
-        const double & val = buffer.at(i).second;
+        const double & x   = buffer[i].first;
+        const double & val = buffer[i].second;
         fillFixed(x, val);
     }
 

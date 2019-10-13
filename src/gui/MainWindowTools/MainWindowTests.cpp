@@ -126,6 +126,7 @@ void MainWindow::on_pobTest_clicked()
 
 //include <QElapsedTimer>
 #include <ahistogram.h>
+#include "TH2D.h"
 void MainWindow::on_pobTest_2_clicked()
 {
 //    std::vector<mydata> v;
@@ -137,6 +138,33 @@ void MainWindow::on_pobTest_2_clicked()
 //        RandomNTime(100.0, v);
 //    int el = t.elapsed();
 //    qDebug() << el;
+
+    /*
+    int numBins = 10;
+    //AHistogram1D  ah(numBins, 0, 0);
+    //ah.setBufferSize(10000);
+    TH2D         *rh = new TH2D("", "", numBins, 0, 10,
+                                        numBins, 0, 10);
+
+    for (int i=0; i<10000; i++)
+    {
+        const double x = -10.0 + 20.0*Detector->RandGen->Rndm();
+        const double y = Detector->RandGen->Gaus(0, 2);
+        //ah.Fill(val, 1.0);
+        rh->Fill(x, y, 1.0);
+    }
+
+    //QVector<double> resA = ah.getContent();
+    //QVector<double> resR;
+    //for (int i=0; i<numBins+2; i++)   resR << rh->GetBinContent(i);
+
+    //qDebug() << "A:"<<resA;
+    //qDebug() << "R:"<<resR;
+
+    //qDebug() << "A stat:"<<ah.getStat();
+
+    GraphWindow->Draw(rh, "colz");
+    */
 
     int numBins = 10;
     AHistogram1D  ah(numBins, 0, 0);
@@ -150,7 +178,7 @@ void MainWindow::on_pobTest_2_clicked()
         rh->Fill(val, 1.0);
     }
 
-    QVector<double> resA = ah.getContent();
+    std::vector<double> resA = ah.getContent();
     QVector<double> resR;
     for (int i=0; i<numBins+2; i++)
         resR << rh->GetBinContent(i);
@@ -161,6 +189,7 @@ void MainWindow::on_pobTest_2_clicked()
     qDebug() << "A stat:"<<ah.getStat();
 
     GraphWindow->Draw(rh, "hist");
+
 
 //    QByteArray ba;
 //    EventsDataHub->packReconstructedToByteArray(ba);

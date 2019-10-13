@@ -1,19 +1,19 @@
 #ifndef AHISTOGRAM_H
 #define AHISTOGRAM_H
 
-#include <QVector>
-#include <QPair>
+#include <vector>
+#include <utility>
 
 class AHistogram1D
 {
 public:
     AHistogram1D(int Bins, double From, double To);
-    void setBufferSize(int size) {bufferSize = size;}
+    void setBufferSize(size_t size) {bufferSize = size;}
 
     void Fill(double x, double val);
 
-    const QVector<double> getContent(); // [0] - underflow, [1] - bin#0, ..., [bins] - bin#(bins-1), [bins+1] - overflow
-    const QVector<double> getStat();    // [0] - sumVals, [1] - sumVals2, [2] - sumValX, [3] - sumValX2, [4] - # entries
+    const std::vector<double> getContent(); // [0] - underflow, [1] - bin#0, ..., [bins] - bin#(bins-1), [bins+1] - overflow
+    const std::vector<double> getStat();    // [0] - sumVals, [1] - sumVals2, [2] - sumValX, [3] - sumValX2, [4] - # entries
 
 private:
     int    bins;
@@ -28,10 +28,10 @@ private:
     double sumValX2 = 0;
 
     bool   bFixedRange = true;
-    int    bufferSize = 1000;
+    size_t bufferSize = 1000;
 
-    QVector<double> data; // [0] - underflow, [bins+1] - overflow
-    QVector<QPair<double, double>> buffer;
+    std::vector<double> data; // [0] - underflow, [bins+1] - overflow
+    std::vector<std::pair<double, double>> buffer;
 
 private:
     void fillFixed(double x, double val);

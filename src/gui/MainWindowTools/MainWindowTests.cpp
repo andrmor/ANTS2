@@ -177,41 +177,31 @@ void MainWindow::on_pobTest_2_clicked()
     // /*
     //2D
     int numBinsX = 10;
-    int numBinsY = 20;
-    AHistogram2D  ah(numBinsX, 0, 10, numBinsY, 0, 5);
+    int numBinsY = 40;
+    AHistogram2D  ah(numBinsX, 0, 0, numBinsY, 0, 0);
     ah.setBufferSize(10000);
-    TH2D         *rh = new TH2D("", "", numBinsX, 0, 10, numBinsY, 0, 5);
+    TH2D         *rh = new TH2D("", "", numBinsX, 0, 0, numBinsY, 0, 0);
 
     for (int i=0; i<10000; i++)
     {
-        const double x = Detector->RandGen->Gaus(2.0, 3);
-        const double y = Detector->RandGen->Gaus(2.0, 2);
+        const double x = Detector->RandGen->Gaus(0, 3);
+        const double y = Detector->RandGen->Gaus(0, 6);
         ah.Fill(x, y, 1.0);
         rh->Fill(x, y, 1.0);
     }
-    ah.Fill(7,2,100);
-    rh->Fill(7,2,100);
+    ah.Fill(5,5,100);
+    rh->Fill(5,5,100);
 
-    /*
-    std::vector<double> resA = ah.getContent();
-    QVector<double> resR;
-    for (int i=0; i<numBins+2; i++)
-        resR << rh->GetBinContent(i);
-
-    qDebug() << "A:"<<resA;
-    qDebug() << "R:"<<resR;
-    */
-
-    qDebug() << "A stat:"<<ah.getStat();
+    //qDebug() << "A stat:"<<ah.getStat();
 
     GraphWindow->Draw(rh, "colz");
     GraphWindow->AddCurrentToBasket("Root");
 
-    ATH2D * arh = new ATH2D("", "", numBinsX, 0, 10, numBinsY, 0, 5);
+    ATH2D * arh = new ATH2D("", "", numBinsX, 0, 10, numBinsY, 0, 10);
     double xfrom, xto, yfrom, yto;
     ah.getLimits(xfrom, xto, yfrom, yto);
     QString err = arh->Import(xfrom, xto, yfrom, yto, ah.getContent(), ah.getStat());
-    qDebug() << "Import OK? " << err;
+    //qDebug() << "Import OK? " << err;
     GraphWindow->Draw(arh, "colz");
     GraphWindow->AddCurrentToBasket("ants");
     // */

@@ -242,7 +242,7 @@ const QString ATH2D::Import(double xfrom, double xto, double yfrom, double yto, 
 {
     const int ysize = binContent.size();
     if (ysize < 3) return QString("Number of bins should be at lreast 3 (1+under+over), here Y dimension has %1").arg(ysize);
-    const int xsize = binContent.size();
+    const int xsize = binContent[0].size();
     if (xsize < 3) return QString("Number of bins should be at lreast 3 (1+under+over), here X dimension has %1").arg(xsize);
     if (xfrom >= xto) return "'xfrom' has to be smaller than 'xto'";
     if (yfrom >= yto) return "'yfrom' has to be smaller than 'yto'";
@@ -258,5 +258,11 @@ const QString ATH2D::Import(double xfrom, double xto, double yfrom, double yto, 
 
 void ATH2D::SetStatistic(const std::vector<double> &stats)
 {
-
+    fTsumw   = stats[0];
+    fTsumw2  = stats[1];
+    fTsumwx  = stats[2];
+    fTsumwx2 = stats[3];
+    fTsumwy  = stats[4];
+    fTsumwy2 = stats[5];
+    SetEntries(stats[6]);
 }

@@ -38,6 +38,7 @@ win32 {
      ants2_RootServer {LIBS += -llibRHTTP}
 }
 linux-g++ || unix {
+     CONFIG += c++17
      INCLUDEPATH += $$system(root-config --incdir)
      LIBS += $$system(root-config --libs) -lGeom -lGeomPainter -lGeomBuilder -lMinuit2 -lSpectrum
      ants2_RootServer {LIBS += -lRHTTP  -lXMLIO}
@@ -411,7 +412,12 @@ SOURCES += main.cpp \
     Simulation/aparticletracker.cpp \
     common/aexternalprocesshandler.cpp \
     gui/MainWindowTools/alogconfigdialog.cpp \
-    Simulation/alogsandstatisticsoptions.cpp
+    Simulation/alogsandstatisticsoptions.cpp \
+    scriptmode/readDiffusionVolume.cpp \
+    scriptmode/diffusion.cpp \
+    scriptmode/hits2idealWaveform.cpp \
+    scriptmode/getImpulseResponse.cpp \
+    scriptmode/getWaveform.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -565,7 +571,12 @@ HEADERS  += common/CorrelationFilters.h \
     common/aexternalprocesshandler.h \
     gui/MainWindowTools/alogconfigdialog.h \
     Simulation/alogsandstatisticsoptions.h \
-    Reconstruction/afunctorbase.h
+    Reconstruction/afunctorbase.h \
+    scriptmode/readDiffusionVolume.h \
+    scriptmode/diffusion.h \
+    scriptmode/hits2idealWaveform.cpp \
+    scriptmode/getImpulseResponse.cpp \
+    scriptmode/getWaveform.cpp
 
 # --- SIM ---
 ants2_SIM {

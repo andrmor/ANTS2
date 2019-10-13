@@ -35,6 +35,20 @@ QString APhotonHistoryLog::Print(AMaterialParticleCollection *MpCollection) cons
   return s;
 }
 
+// =====================================================================
+// WATER'S FUNCTIONS ===================================================
+// =====================================================================
+
+bool APhotonHistoryLog::isDetected()
+{
+	if(process == Detected){
+		return true;
+	} else { 
+		return false;
+	}
+	
+}
+
 const QString APhotonHistoryLog::GetProcessName(int nodeType)
 {
   switch (nodeType)

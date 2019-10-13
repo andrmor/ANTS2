@@ -76,6 +76,45 @@ public slots:
     QString PrintAllDefinedProcessTypes();
     QString PrintAllDefinedRecordMemebers();
 
+	// WATER'S FUNCTIONS
+
+	QVariant getDetectingPMT_ID_time(int iPhoton, 
+	                                 int iRecord);
+	QVariant getListDetectedPMT_ID_time(int iPhotonStart,
+	                                    int iPhotonEnd);
+	QVariant getListDetectedPMT_ID_timeLite(int iPhotonStart,
+	                                        int iPhotonEnd);
+	QVariant testQVariantListQVariantList();
+	QVariant getPMsWithHits(int iPhotonStart,
+	                        int iPhotonEnd);
+	                        
+	bool TracePhotonsS2CutCone(int copies, double cut,
+                               double x, double y,
+                               double zStart, double zStop,
+                               int iWave, double time, double dZOverdT,
+                               bool AddToPreviousEvent = false);
+    
+    bool TracePhotonsS2Bottom(int copies, double cut,
+                             double x, double y,
+                             double zStart, double zStop,
+                             int iWave, double time, double dZOverdT,
+                             bool AddToPreviousEvent = false);
+
+	bool TracePhotonsS2IsotropicLite(int copies,
+                                 double x, double y,
+                                 double zStart, double zStop,
+                                 int iWave, double time, double dZOverdT,
+                                 bool AddToPreviousEvent = false);
+
+    QVariant TP_S2_ILiteTime(int copies,
+              double      x, double y,
+              double zStart, double zStop,
+           int iWave, double time, double dZOverdT,
+                        bool AddToPreviousEvent = false);
+
+    int countHistoryEntries();
+    void clearHistory();
+
 private:
     AConfiguration* Config;
     EventsDataClass *EventsDataHub;

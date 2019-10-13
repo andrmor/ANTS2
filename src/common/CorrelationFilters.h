@@ -5,6 +5,7 @@
 #include <QString>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QList>
 
 #include "TString.h"
 

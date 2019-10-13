@@ -42,6 +42,10 @@ public:
     void setMaxTracks(int maxTracks) {MaxTracks = maxTracks;}
 
     void hardAbort(); //before using it, give a chance to finish normally using abort at higher levels
+	
+	// WATER'S FUNCTIONS
+	
+	void TracePhotonLite(const APhoton* Photon);
 
 private:
     TRandom2* RandGen;
@@ -95,5 +99,9 @@ private:
     inline void ReturnFromGridShift();
     inline void AppendTrack();
     inline void AppendHistoryRecord();
+    
+    // WATER'S FUNCTIONS
+    
+    inline void AppendHistoryRecordLite();
 };
 #endif // APHOTONTRACER_H

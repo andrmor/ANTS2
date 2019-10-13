@@ -30,6 +30,13 @@ public:
     void registerAngle(double angle);
     void registerNumTrans(int NumTransitions);
 
+	// WATER'S FUNCTIONS
+	
+	void clearPhLogEntry(int iPhoton);
+	QVector<APhotonHistoryLog> takePhLogEntry(int iPhoton);
+	
+	void clearHistory();
+
     //since every thread has its own statistics container:
     void AppendSimulationStatistics(ASimulationStatistics *from);
 

@@ -6,6 +6,8 @@
 #include "curvefit.h"
 #endif
 
+#include "TRandom2.h"
+
 #ifdef _ALLOW_LAUNCH_EXTERNAL_PROCESS_
 #include <QProcess>
 #endif
@@ -22,6 +24,23 @@
 #include <QJsonArray>
 #include <QThread>
 #include <QRegularExpression>
+
+#include <QVector>
+
+// WATER'S INCLUDES
+
+#include "readDiffusionVolume.h"
+#include "diffusion.h"
+#include "hits2idealWaveform.h"
+#include "getImpulseResponse.h"
+#include "getWaveform.h"
+#include <iostream>
+#include <algorithm>
+
+//~ #include <vector> // MAY CAUSE PROBLEMS, REMOVE IF NECESSARY
+//~ #include <Eigen/Dense>
+
+// ------------------- CORE ----------------------
 
 ACore_SI::ACore_SI(AScriptManager* ScriptManager) :
     ScriptManager(ScriptManager)
@@ -700,6 +719,443 @@ bool ACore_SI::setCirrentDir(QString path)
 {
     return QDir::setCurrent(path);
 }
+
+// =====================================================================
+// WATER'S FUNCTIONS ===================================================
+// =====================================================================
+
+// -- getDiffusionVolume.h ---------------------------------------------
+
+//~ a_sentence AInterfaceToCore::makeSentenceWithWord(QString word, int times)
+//~ {
+	//~ a_sentence out;
+	//~ for(int i = 0 ; i < times ; i++){
+		//~ out.push_back(word);
+	//~ }
+	//~ return out;
+//~ }
+
+//~ QString AInterfaceToCore::repeatAndJoin(QString word, int times)
+//~ {
+	//~ a_sentence in = makeSentenceWithWord(word, times);
+	//~ QString out;
+	//~ for(int i = 0 ; i < in.size() ; i++){
+	
+		//~ out += in[i];
+	//~ }
+	
+	//~ return out;
+//~ }
+
+QVariant ACore_SI::giveMap()
+{
+	QVariantMap out;
+	
+	out["one"] = 1;
+	out["two"] = 2;
+	out["three"] = 3;
+	
+	return out;
+}
+
+QVariant ACore_SI::a_VolumeInfo2QVariant(a_VolumeInfo in)
+{
+	QVariantMap out;
+	
+	out["ID"] = in.ID;
+	out["entry_line"] = in.entry_line;
+	
+	QVariantList dV;
+	dV.push_back(in.dV[0]);
+	dV.push_back(in.dV[1]);
+	dV.push_back(in.dV[2]);
+	
+	QVariantList sz;
+	sz.push_back(in.sz[0]);
+	sz.push_back(in.sz[1]);
+	sz.push_back(in.sz[2]);
+	
+	out["dV"] = dV;
+	out["sz"] = sz;
+	
+	return out;
+}
+
+QVariant ACore_SI::a_Volume2QVariant(a_Volume in)
+{
+	QVariantMap out;
+	
+	out["V_info"] = a_VolumeInfo2QVariant(in.V_info);
+	
+	a_tensor V_tensor = in.V;
+	
+	QVariantList V_list;
+	
+	for (int ez ; ez < V_tensor.size() ; ez++){
+	
+		QVariantList plane;
+		for(int i = 0 ; i < V_tensor[ez].size() ; i++){
+	
+			QVariantList row;
+			for(int j = 0; j < V_tensor[ez][i].size() ; j++){
+				
+				row.push_back(V_tensor[ez][i][j]);
+			}
+			plane.push_back(row);
+			row.clear();
+		}
+		V_list.push_back(plane);
+		plane.clear();
+	}
+	
+	out["V"] = V_list;
+	
+	return out;	
+}
+
+QVariant ACore_SI::a_Slice2QVariant(a_Slice in)
+{
+	QVariantMap out;
+	
+	out["V_info"] = a_VolumeInfo2QVariant(in.V_info);
+	out["ID"] = in.ID;
+	
+	a_matrix S_matrix = in.S;
+	
+	QVariantList S_list;
+	
+	for(int i = 0 ; i < S_matrix.size() ; i++){
+	
+		QVariantList row;
+		for(int j = 0; j < S_matrix[i].size() ; j++){
+			
+			row.push_back(S_matrix[i][j]);
+		}
+		S_list.push_back(row);
+		row.clear();
+	}
+	
+	out["S"] = S_list;
+	
+	return out;
+}
+
+QVariant ACore_SI::antsGetVolumeInfo(int V_ID, QString q_filename)
+{
+	//QVariantMap out;
+	
+	std::string filename = q_filename.toUtf8().constData();
+	a_VolumeInfo vol_info_struct = getVolumeInfo(V_ID, filename);
+	//~ out = a_VolumeInfo2QVariant(vol_info_struct);
+	
+	//~ return out;
+	return a_VolumeInfo2QVariant(vol_info_struct);
+}
+
+QVariant ACore_SI::antsGetSlice(int V_ID, int S_ID, QString q_filename)
+{
+	QVariantMap out;
+	
+	std::string filename = q_filename.toUtf8().constData();
+	a_Slice slice_struct = getSlice(V_ID, S_ID, filename);
+	//stuff
+	
+	return a_Slice2QVariant(slice_struct);
+}
+
+QVariant ACore_SI::antsGetVolume(int V_ID, QString q_filename)
+{
+	QVariantMap out;
+	
+	std::string filename = q_filename.toUtf8().constData();
+	a_Volume volume_struct = getVolume(V_ID, filename);
+	//stuff
+	
+	return a_Volume2QVariant(volume_struct);
+}
+
+// -- diffusion.h ------------------------------------------------------
+
+QVariant ACore_SI::e_list2QVariantList(e_list in){
+	
+	QVariantList electronPos_list;
+	QVariantList electronPos_vec; // "vector" representing pos of e-
+	
+	for(int i = 0 ; i < in.rows() ; i++){
+		
+		electronPos_vec.push_back(in(i,0));
+		electronPos_vec.push_back(in(i,1));
+		electronPos_vec.push_back(in(i,2));
+		
+		electronPos_list.push_back(electronPos_vec);
+		
+		electronPos_vec.clear();
+		
+	}
+	
+	return electronPos_list;
+}
+
+QVariant ACore_SI::antsGetVolume(QString q_filename,
+                                          double depthFrac,
+                                          double h,
+                                          double v_d,
+                                          double sigma_Tcath,
+                                          double sigma_Lcath){
+
+	//QVariantList<QVariantList<double>> out;
+	
+	std::string filename = q_filename.toUtf8().constData();
+	
+	e_list diffusion_e_list = diffusion(filename,
+                                        depthFrac,
+                                        h,
+                                        v_d,
+                                        sigma_Tcath,
+                                        sigma_Lcath);
+	
+	return e_list2QVariantList(diffusion_e_list);
+
+}
+
+// -- hits2idealWaveform.h ---------------------------------------------
+
+QVariant ACore_SI::antsHits2idealWaveform(QVariant PMT_hits_lst,
+                                                    double ADC_reso){
+
+	QVariant out;
+	
+	std::cout << "antsH2IW: PMT_hits_lst type: " << getVarQtype(PMT_hits_lst).toUtf8().constData() << std::endl;
+	
+	std::cout << "antsH2IW: QVariant -> QVariantList" << std::endl;
+	
+	QVariantList PMT_hits_qvl;
+	QSequentialIterable it = PMT_hits_lst.value<QSequentialIterable>();
+	for (const QVariant &v : it){
+		PMT_hits_qvl << v;
+	}
+	
+	//~ QVariantList PMT_hits_qvl = PMT_hits_lst.toList();
+	
+	std::cout << "antsH2IW: PMT_hits_qvl.size() = " << PMT_hits_qvl.size() << std::endl;
+	
+	std::cout << "antsH2IW: QVariantList -> QList<double>" << std::endl;
+	
+	QList<double> PMT_hits_qvld;
+	foreach(QVariant v, PMT_hits_lst.value<QVariantList>()) {
+        PMT_hits_qvld << v.value<double>();
+    }
+	
+	std::cout << "antsH2IW: PMT_hits_qvld.size() = " << PMT_hits_qvld.size() << std::endl;
+	
+	std::cout << "antsH2IW: QList<double> -> QVector<double>" << std::endl;
+	
+	QVector<double> PMT_hits_qvec = QVector<double>::fromList(PMT_hits_qvld);
+	
+	std::cout << "antsH2IW: PMT_hits_qvec.size() = " << PMT_hits_qvec.size() << std::endl;
+	
+	std::cout << "antsH2IW: QVector<double> -> std::vector<double>" << std::endl;
+	
+	std::vector<double> PMT_hits_stdvec = PMT_hits_qvec.toStdVector();
+	
+	std::cout << "antsH2IW: PMT_hits_stdvec.size() = " << PMT_hits_stdvec.size() << std::endl;
+	
+	std::cout << "antsH2IW: doing the thing" << std::endl;
+	
+	std::vector<int> out_std = hits2IdealWaveform(PMT_hits_stdvec,
+	                                                 ADC_reso);
+	
+	std::cout << "antsH2IW: std::vector<int> -> QVector<int>" << std::endl;
+	
+	QVector<int> out_qvec = QVector<int>::fromStdVector(out_std);
+	
+	std::cout << "antsH2IW: QVector<int> -> QList<int>" << std::endl;
+	
+	QList<int> out_qlist_int = out_qvec.toList();
+	
+	
+	std::cout << "antsH2IW: QList<int> -> QVariant" << std::endl;
+	
+	out = QVariant::fromValue<QList<int>>(out_qlist_int);
+
+    std::cout << "antsH2IW: type of out: " << getVarQtype(out).toUtf8().constData() << std::endl;
+	
+	return out;
+
+}
+
+// -- getImpulseResponse.h ---------------------------------------------
+                                
+QVariant ACore_SI::antsGetImpulseResponse(QString PMTfilename,
+                                                   double ADC_reso){
+
+	//~ QVariant out;
+	
+	std::cout << "antsGIR: doing the thing" << std::endl;
+	std::string stdPMTfilename = PMTfilename.toUtf8().constData();
+	QVariantList out = getImpulseResponse(stdPMTfilename, ADC_reso);
+	//~ std::vector<double> out_std = getImpulseResponse(stdPMTfilename,
+	                                                 //~ ADC_reso);
+	//~ std::cout << "antsGIR: out_std.size() = " << out_std.size() << std::endl;
+	
+	//~ std::cout << "antsGIR: std::vector<double> -> QVector<double>" << std::endl;
+	
+	//~ QVector<double> out_qvec = QVector<double>::fromStdVector(out_std);
+	//~ std::cout << "antsGIR: out_qvec.size()" << out_qvec.size() << std::endl;
+	
+	//~ std::cout << "antsGIR: QVector<double> -> QList<double>" << std::endl;
+	
+	
+	//~ QList<double> out_qlist_double = out_qvec.toList();
+	
+	//~ std::cout << "antsGIR: out_qlist_double.size() = " << out_qlist_double.size() << std::endl;
+	
+	//~ std::cout << "antsGIR: QList<double> -> QVariant" << std::endl;
+	//~ std::cout << "antsGIR: out_qlist_double[10] - 0.5 = " <<  out_qlist_double[10] - 0.5 << std::endl;
+	
+	//~ out = QVariant::fromValue<QList<double>>(out_qlist_double);
+	
+	std::cout << "antsGIR: type of out: " << getVarQtype(out).toUtf8().constData() << std::endl;
+	
+	return out;
+
+}
+  
+// -- getWaveform.h ----------------------------------------------------  
+
+QVariant ACore_SI::antsGetWaveform(QVariant idealWaveform,
+                                           QVariant impulseResponse){
+
+	//~ QVariant out;
+	
+	//~ std::cout << "aGW: QVariant -> QVariantList" << std::endl;
+	
+	//~ QVariantList IWqvl;
+	//~ QSequentialIterable it1 = idealWaveform.value<QSequentialIterable>();
+	//~ for (const QVariant &v : it1){
+		//~ IWqvl << v;
+	//~ }
+	
+	//~ std::cout << "aGW: QVariantList -> QList<double>" << std::endl;
+	
+	//~ QList<double> IWqvld;
+	//~ foreach(QVariant v, idealWaveform.value<QVariantList>()) {
+        //~ IWqvld << v.value<double>();
+    //~ }
+	
+	//~ std::cout << "aGW: QList<double> -> QVector<double>" << std::endl;
+	
+	//~ QVector<double> IWqvec = QVector<double>::fromList(IWqvld);
+	//~ std::cout << "aGW: QVector<double> -> std::vector<double>" << std::endl;
+	//~ std::vector<double> IWstdvec = IWqvec.toStdVector();
+	
+	//~ std::cout << "aGW: QVariant -> QVariantList" << std::endl;
+	//~ QVariantList IRqvl;
+	//~ QSequentialIterable it2 = impulseResponse.value<QSequentialIterable>();
+	//~ for (const QVariant &v : it2){
+		//~ IRqvl << v;
+	//~ }
+	//~ std::cout << "aGW: QVariantList -> QList<double>" << std::endl;
+	//~ QList<double> IRqvld;
+	//~ foreach(QVariant v, impulseResponse.value<QVariantList>()) {
+        //~ IRqvld << v.value<double>();
+    //~ }
+    //~ std::cout << "aGW: QList<double> -> QVector<double>" << std::endl;
+	//~ QVector<double> IRqvec = QVector<double>::fromList(IRqvld);
+	//~ std::cout << "aGW: QVector<double> -> std::vector<double>" << std::endl;
+	//~ std::vector<double> IRstdvec = IRqvec.toStdVector();
+	
+	//~ std::cout << "aGW: doing the thing" << std::endl;
+	//~ std::vector<double> out_std = getWaveform(IWstdvec, IRstdvec);
+	//~ std::cout << "aGW: std::vector<double> -> QVector<double>" << std::endl;
+	//~ QVector<double> out_qvec = QVector<double>::fromStdVector(out_std);
+	//~ std::cout << "aGW: QVector<double> ->  QList<double>" << std::endl;
+	//~ QList<double> out_qlist_double = out_qvec.toList();
+	//~ std::cout << "aGW: QList<double> -> QVariant" << std::endl;
+	//~ out = QVariant::fromValue<QList<double>>(out_qlist_double);
+	
+	std::cout << "aGW: inputs to QVarianList" << std::endl;
+	
+	QVariantList IWqvl = idealWaveform.toList();
+	QVariantList IRqvl = impulseResponse.toList();
+	
+	std::cout << "aGW: doing the thing" << std::endl;
+	
+	QVariantList out = getWaveform(IWqvl, IRqvl);
+	
+	std::cout << "aGW: returning" << std::endl;
+	
+	return out;
+
+}
+
+double ACore_SI::minimumValueInList(QVariant in){
+
+	QVariantList in_qvl;
+	QSequentialIterable it = in.value<QSequentialIterable>();
+	for (const QVariant &v : it){
+		in_qvl << v;
+	}
+	
+	QList<double> in_qvld;
+	foreach(QVariant v, in.value<QVariantList>()) {
+        in_qvld << v.value<double>();
+    }
+	
+	QVector<double> in_qvec = QVector<double>::fromList(in_qvld);
+	
+	std::vector<double> in_stdvec = in_qvec.toStdVector();
+	
+	std::vector<double>::iterator result = std::min_element(std::begin(in_stdvec), std::end(in_stdvec));
+	
+	return in_stdvec[std::distance(std::begin(in_stdvec), result)];
+}
+
+//~ bool AInterfaceToCore::saveObj2Table(QString FileName, 
+                                    //~ QVariant Object, 
+                                        //~ bool CanOverride){
+
+    //~ QString type = Object.typeName();
+    //~ if (type != "QVariantMap")
+    //~ {
+        //~ qDebug() << "Not an object - cannot use saveObject function";
+        //~ return false;
+    //~ }
+
+    //~ if (QFileInfo(FileName).exists() && !CanOverride)
+    //~ {
+        //~ //abort("File already exists: " + fileName);
+        //~ qDebug() << "File already exists: " << FileName << " Skipping!";
+        //~ return false;
+    //~ }
+
+	//~ QList<QVariantList> out;
+
+    //~ QVariantMap mp = Object.toMap();
+    
+    //~ QList<QString> mp_keys = mp.keys();
+	
+	//~ out.push_back(mp_keys);
+	
+	//~ for(int i = 0; i < mp_keys.size(); i++){
+	
+		//~ out[]
+		
+	//~ }
+
+    //~ return saveArray(fileName, out);
+											
+//~ }
+
+void ACore_SI::shellMarker(QString in){
+	
+	std::cout << in.toUtf8().constData() << std::endl;
+	
+}
+
+// =====================================================================
+// END OF WATER'S FUNCTIONS ============================================
+// =====================================================================
 
 const QString ACore_SI::StartExternalProcess(QString command, QVariant argumentArray, bool waitToFinish, int milliseconds)
 {

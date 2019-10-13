@@ -19,6 +19,12 @@
 #include <QDebug>
 #include <QFileInfo>
 
+// WATER'S INCULDES
+
+#include <iostream>
+//#include <QtAlgorithms>
+#include <QElapsedTimer>
+
 APhoton_SI::APhoton_SI(AConfiguration* Config, EventsDataClass* EventsDataHub) :
     Config(Config), EventsDataHub(EventsDataHub), Detector(Config->GetDetector())
 {
@@ -472,6 +478,493 @@ void APhoton_SI::clearTrackHolder()
     Tracks.clear();
     Tracks.shrink_to_fit();
 }
+
+// =====================================================================
+// WATER'S FUNCTIONS ===================================================
+// =====================================================================
+
+QVariant APhoton_SI::getDetectingPMT_ID_time(int iPhoton, int iRecord)
+{
+	APhotonHistoryLog thisLog = EventsDataHub->SimStat->PhotonHistoryLog.at(iPhoton).at(iRecord);
+	bool detected = thisLog.isDetected();
+	
+	QString PM_ID;
+	QString time;
+	
+	QVariantList out;
+	
+	if(detected){ // Detected at a PM
+		
+		int number  = EventsDataHub->SimStat->PhotonHistoryLog.at(iPhoton).at(iRecord).number;
+		double when = EventsDataHub->SimStat->PhotonHistoryLog.at(iPhoton).at(iRecord).time;
+		
+		PM_ID = QString::number(number);
+		time  = QString::number(when);
+			
+	} else {
+	
+		PM_ID = "error";
+		time = "error";
+		
+	}
+	
+	out.push_back(PM_ID);
+	out.push_back(time);
+	return out;
+}
+
+QVariant APhoton_SI::getListDetectedPMT_ID_time(int iPhotonStart,
+	                                                          int iPhotonEnd){
+
+	//~ return "test getListDetectedPMT_ID_time";
+
+	QVariantList out; // QList<QList<QVariant>>
+	QVariantList ID_time; // (PMT ID, time)
+	
+	const QVector< QVector <APhotonHistoryLog> > &AllPhLog = EventsDataHub->SimStat->PhotonHistoryLog;
+	
+	int startFor = iPhotonStart;
+	if (AllPhLog.size() < startFor || startFor < 0){
+		startFor = 0;
+	}
+	
+	int endFor = iPhotonEnd;
+	if (AllPhLog.size() < endFor || endFor < 0 || startFor > endFor){
+		endFor = AllPhLog.size();
+	}
+	
+	std::cout << "gLDPMT_ID->startFor: " << startFor << std::endl;
+	std::cout << "gLDPMT_ID->endFor: "    << endFor << std::endl;
+	
+	for(int iPh = startFor ; iPh < endFor ; iPh++){
+		const APhotonHistoryLog &rec = AllPhLog.at(iPh).last();
+		
+		ID_time.push_back((double)rec.number); // (int, double) can't be
+		ID_time.push_back(rec.time);
+		
+		out.push_back(ID_time);
+		
+		ID_time.clear();
+	}
+	
+	return out;
+
+}
+
+QVariant APhoton_SI::getListDetectedPMT_ID_timeLite(int iPhotonStart,
+                                                                  int iPhotonEnd){
+	
+	QVariantList out; // QList<QList<QVariant>>
+	QVariantList ID_time; // (PMT ID, time)
+	
+	int startFor = 0;
+	//if (AllPhLog.size() < startFor || startFor < 0){
+	//	startFor = 0;
+	//}
+	
+	int endFor = EventsDataHub->SimStat->PhotonHistoryLog.size();
+	//if (AllPhLog.size() < endFor || endFor < 0 || startFor > endFor){
+	//	endFor = AllPhLog.size();
+	//}
+	
+	for(int iPh = startFor ; iPh < endFor ; iPh++){
+		
+		//std::cout << "test output" << std::endl;
+		
+		//~ if(iPh == startFor){
+		
+			//~ std::cout << "gLDPMT_ID_tL -> first taking" << std::endl;
+			
+		//~ }
+		
+		//~ if(iPh == startFor + 1){
+		
+			//~ std::cout << "gLDPMT_ID_tL -> second taking" << std::endl;
+			
+		//~ }
+		
+		//~ if(iPh == endFor - 1){
+		
+			//~ std::cout << "gLDPMT_ID_tL -> last taking" << std::endl;
+			
+		//~ }
+		
+		APhotonHistoryLog rec = EventsDataHub->SimStat->takePhLogEntry(startFor).last();
+		
+		//~ if(iPh == startFor){
+		
+			//~ std::cout << "gLDPMT_ID_tL -> first taking completed" << std::endl;
+			
+		//~ }
+		
+		//~ if(iPh == startFor + 1){
+		
+			//~ std::cout << "gLDPMT_ID_tL -> second taking completed" << std::endl;
+			
+		//~ }
+		
+		//~ if(iPh == endFor - 1){
+		
+			//~ std::cout << "gLDPMT_ID_tL -> last taking completed" << std::endl;
+			
+		//~ }
+		
+		ID_time.push_back((double)rec.number); // (int, double) can't be
+		ID_time.push_back(rec.time);
+		
+		out.push_back(ID_time);
+		
+		ID_time.clear();
+		
+		if(iPh % 1000 == 0){
+			
+			std::cout << "gLDPMT_ID_TL -> " << (double)iPh/(double)endFor * 100 << "% complete" << std::endl;
+		}
+	}
+	
+	return out;
+	
+}
+
+QVariant APhoton_SI::testQVariantListQVariantList(){
+	
+	QVariantList out;
+	
+	QVariantList a;
+	QVariantList b;
+	
+	a.push_back(1);
+	a.push_back(2);
+	b.push_back(3);
+	b.push_back(4);
+	
+	out.push_back(a);
+	out.push_back(b);
+
+	return out;
+
+}
+
+QVariant APhoton_SI::getPMsWithHits(int iPhotonStart,
+	                                              int iPhotonEnd){
+
+	QVariantList out;     // QList<QVariant> <-- items here are strings
+	QVariantList out_int; // QList<QVariant> <-- items here are ints
+
+	const QVector< QVector <APhotonHistoryLog> > &AllPhLog = EventsDataHub->SimStat->PhotonHistoryLog;
+	
+	int startFor = iPhotonStart;
+	if (AllPhLog.size() < startFor || startFor < 0){
+		startFor = 0;
+	}
+	
+	int endFor = iPhotonEnd;
+	if (AllPhLog.size() < endFor || endFor < 0 || startFor > endFor){
+		endFor = AllPhLog.size();
+	}
+	
+	std::cout << "gPMWH->startFor: " << startFor << std::endl;
+	std::cout << "gPMWH->endFor: "    << endFor << std::endl;
+	
+	for(int iPh = startFor; iPh < endFor ; iPh++){
+		
+		const APhotonHistoryLog &rec = AllPhLog.at(iPh).last();
+		
+		if( !out_int.contains(rec.number) ){
+			
+			out_int.push_back(rec.number);
+			out.push_back(out_int.last().toString().toUtf8().constData());
+
+		}
+	}
+	
+	return out;
+	
+}
+
+bool APhoton_SI::TracePhotonsS2CutCone(int copies, double cut, double x, double y, double zStart, double zStop, int iWave, double time, double dZmm_dTns, bool AddToPreviousEvent)
+{
+    if (!initTracer()) return false;
+
+    double r[3];
+    r[0]=x;
+    r[1]=y;
+    double zSpan = zStop-zStart;
+    if (zSpan < 0) return false;
+    double invVelo = 1.0 / dZmm_dTns;
+
+    double v[3];  //will be defined for each photon individually
+    APhoton* phot = new APhoton(r, v, iWave, time);
+    phot->SimStat = EventsDataHub->SimStat;
+
+    for (int i=0; i<copies; i++)
+    {
+        //Generating direction ('Sphere' function of Root)
+        double a=0, b=0, r2=1.0;
+        while (r2 > 0.25)
+          {
+              a  = Detector->RandGen->Rndm() - 0.5;
+              b  = Detector->RandGen->Rndm() - 0.5;
+              r2 =  a*a + b*b;
+          }
+        phot->v[2] = ( -1.0 + 8.0 * r2 );
+        double scale = 8.0 * TMath::Sqrt(0.25 - r2);
+        phot->v[0] = a*scale;
+        phot->v[1] = b*scale;
+
+        //generating z
+        double dz = zSpan * Detector->RandGen->Rndm();
+        phot->r[2] = zStart + dz;
+        phot->time = time + dz * invVelo;
+
+        //tracing photons
+        if( (-1.0 + 8.0 * r2) > cut){
+			Tracer->TracePhoton(phot);
+        }
+    }
+
+    handleEventData(AddToPreviousEvent);
+
+    delete phot;
+    return true;
+}
+
+bool APhoton_SI::TracePhotonsS2Bottom(int copies, double cut, double x, double y, double zStart, double zStop, int iWave, double time, double dZmm_dTns, bool AddToPreviousEvent)
+{
+    if (!initTracer()) return false;
+
+    double r[3];
+    r[0]=x;
+    r[1]=y;
+    double zSpan = zStop-zStart;
+    if (zSpan < 0) return false;
+    double invVelo = 1.0 / dZmm_dTns;
+
+    double v[3];  //will be defined for each photon individually
+    APhoton* phot = new APhoton(r, v, iWave, time);
+    phot->SimStat = EventsDataHub->SimStat;
+
+    for (int i=0; i<copies; i++)
+    {
+        //Generating direction ('Sphere' function of Root)
+        double a=0, b=0, r2=1.0;
+        while (r2 > 0.25)
+          {
+              a  = Detector->RandGen->Rndm() - 0.5;
+              b  = Detector->RandGen->Rndm() - 0.5;
+              r2 =  a*a + b*b;
+          }
+        phot->v[2] = ( -1.0 + 8.0 * r2 );
+        double scale = 8.0 * TMath::Sqrt(0.25 - r2);
+        phot->v[0] = a*scale;
+        phot->v[1] = b*scale;
+
+        //generating z
+        double dz = zSpan * Detector->RandGen->Rndm();
+        phot->r[2] = zStart + dz;
+        phot->time = time + dz * invVelo;
+
+        //tracing photons
+        if( (-1.0 + 8.0 * r2) < cut){
+			Tracer->TracePhoton(phot);
+        }
+    }
+
+    handleEventData(AddToPreviousEvent);
+
+    delete phot;
+    return true;
+}
+
+bool APhoton_SI::TracePhotonsS2IsotropicLite(int copies,
+                                  double      x, double y,
+                                  double zStart, double zStop,
+                                             int iWave,
+                                          double time,
+                                          double dZmm_dTns,
+                                            bool AddToPreviousEvent)
+{
+
+    if (!initTracer()) return false;
+
+    double r[3];
+    r[0]=x;
+    r[1]=y;
+    double zSpan = zStop-zStart;
+    if (zSpan < 0) return false;
+    double invVelo = 1.0 / dZmm_dTns;
+
+    double v[3];  //will be defined for each photon individually
+    APhoton* phot = new APhoton(r, v, iWave, time);
+    phot->SimStat = EventsDataHub->SimStat;
+
+    for (int i=0; i<copies; i++)
+    {
+        //Generating direction ('Sphere' function of Root)
+        double a=0, b=0, r2=1.0;
+        while (r2 > 0.25)
+          {
+              a  = Detector->RandGen->Rndm() - 0.5;
+              b  = Detector->RandGen->Rndm() - 0.5;
+              r2 =  a*a + b*b;
+          }
+        phot->v[2] = ( -1.0 + 8.0 * r2 );
+        double scale = 8.0 * TMath::Sqrt(0.25 - r2);
+        phot->v[0] = a*scale;
+        phot->v[1] = b*scale;
+
+        //generating z
+        double dz = zSpan * Detector->RandGen->Rndm();
+        phot->r[2] = zStart + dz;
+        phot->time = time + dz * invVelo;
+
+        //tracing photons
+        //Tracer->TracePhoton(phot);
+        Tracer->TracePhotonLite(phot);
+    }
+
+    handleEventData(AddToPreviousEvent);
+	
+	//QVector<APhotonHistoryLog> lastHistoryElem;
+	
+	//lastHistoryElem.append(EventsDataHub->SimStat->PhotonHistoryLog.last().last());
+
+	//EventsDataHub->SimStat->PhotonHistoryLog.last() = lastHistoryElem;
+
+	//EventsDataHub->SimStat->PhotonHistoryLog.squeeze();
+
+    delete phot;
+    return true;
+}
+
+QVariant APhoton_SI::TP_S2_ILiteTime(int copies,
+                      double      x, double y,
+                      double zStart, double zStop,
+                                 int iWave,
+                              double time,
+                              double dZmm_dTns,
+                                bool AddToPreviousEvent)
+{
+
+    QVariantList out;
+
+    if (!initTracer()) return false;
+
+    QElapsedTimer timer;
+
+    qint64 t_dir_now = 0;
+    qint64 t_genz_now  = 0;
+    qint64 t_trace_now = 0;
+
+    timer.start();
+
+    double r[3];
+    r[0]=x;
+    r[1]=y;
+    double zSpan = zStop-zStart;
+    if (zSpan < 0) return false;
+    double invVelo = 1.0 / dZmm_dTns;
+
+    double v[3];  //will be defined for each photon individually
+    APhoton* phot = new APhoton(r, v, iWave, time);
+    phot->SimStat = EventsDataHub->SimStat;
+
+    qint64 t_init_now = timer.nsecsElapsed(); // timing
+
+    for (int i=0; i<copies; i++)
+    {
+
+        timer.start();
+
+        //Generating direction ('Sphere' function of Root)
+        double a=0, b=0, r2=1.0;
+        while (r2 > 0.25)
+          {
+              a  = Detector->RandGen->Rndm() - 0.5;
+              b  = Detector->RandGen->Rndm() - 0.5;
+              r2 =  a*a + b*b;
+          }
+        phot->v[2] = ( -1.0 + 8.0 * r2 );
+        double scale = 8.0 * TMath::Sqrt(0.25 - r2);
+        phot->v[0] = a*scale;
+        phot->v[1] = b*scale;
+
+        t_dir_now += timer.nsecsElapsed(); // timing
+
+        timer.start();
+
+        //generating z
+        double dz = zSpan * Detector->RandGen->Rndm();
+        phot->r[2] = zStart + dz;
+        phot->time = time + dz * invVelo;
+
+        t_genz_now += timer.nsecsElapsed(); // timing
+
+        timer.start();
+
+        //tracing photons
+        //Tracer->TracePhoton(phot);
+        Tracer->TracePhotonLite(phot);
+
+        t_trace_now += timer.nsecsElapsed(); // timing
+    }
+
+    timer.start();
+
+    handleEventData(AddToPreviousEvent);
+
+    qint64 t_handle_now = timer.nsecsElapsed(); // timing
+
+    //QVector<APhotonHistoryLog> lastHistoryElem;
+
+    //lastHistoryElem.append(EventsDataHub->SimStat->PhotonHistoryLog.last().last());
+
+    //EventsDataHub->SimStat->PhotonHistoryLog.last() = lastHistoryElem;
+
+    //EventsDataHub->SimStat->PhotonHistoryLog.squeeze();
+
+    /*
+    qDebug() << "t_init_now   = " << t_init_now;
+    qDebug() << "t_dir_now    = " << t_dir_now;
+    qDebug() << "t_genz_now   = " << t_genz_now;
+    qDebug() << "t_trace_now  = " << t_trace_now;
+    qDebug() << "t_handle_now = " << t_handle_now;
+    */
+
+    out.push_back((double)t_init_now  /1000000000.0);
+    out.push_back((double)t_dir_now   /1000000000.0);
+    out.push_back((double)t_genz_now  /1000000000.0);
+    out.push_back((double)t_trace_now /1000000000.0);
+    out.push_back((double)t_handle_now/1000000000.0);
+
+    delete phot;
+    return out;
+}
+
+int APhoton_SI::countHistoryEntries(){
+	
+	int out = 0;
+	
+	for(int i = 0; i < EventsDataHub->SimStat->PhotonHistoryLog.size(); i++){
+		
+		out += EventsDataHub->SimStat->PhotonHistoryLog.at(i).size();
+		
+	}
+	
+	return out;
+	
+}
+
+void APhoton_SI::clearHistory(){
+	
+	EventsDataHub->SimStat->clearHistory();
+	
+}
+
+// =====================================================================
+// END WATER'S FUNCTIONS ===============================================
+// =====================================================================
+
 
 bool APhoton_SI::initTracer()
 {

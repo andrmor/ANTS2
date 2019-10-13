@@ -8,6 +8,10 @@
 #include "TH1I.h"
 #include "TH1D.h"
 
+// WATER'S INCLUDES
+
+#include <iostream>
+
 ASimulationStatistics::ASimulationStatistics(const TString nameID)
 {
     WaveSpectrum = 0;
@@ -159,3 +163,30 @@ void ASimulationStatistics::clearMonitors()
     Monitors.clear();
 }
 
+// WATER'S FUNCTIONS
+
+void ASimulationStatistics::clearPhLogEntry(int iPhoton){
+
+	
+	PhotonHistoryLog.removeAt(iPhoton);
+	PhotonHistoryLog.squeeze();
+	
+}
+
+QVector<APhotonHistoryLog> ASimulationStatistics::takePhLogEntry(int iPhoton){
+
+	
+	//~ std::cout << "tPHLe -> taking the entry at " << iPhoton << std::endl;
+	QVector<APhotonHistoryLog> out = PhotonHistoryLog.takeAt(iPhoton);
+	//~ std::cout << "tPHLe -> squeezing PhotonHistoryLog" << std::endl;
+	PhotonHistoryLog.squeeze();
+	//~ std::cout << "tPHLe -> exiting" << std::endl;
+	return out;
+}
+
+void ASimulationStatistics::clearHistory(){
+
+	QVector<QVector<APhotonHistoryLog>>().swap(PhotonHistoryLog);
+	Q_ASSERT(PhotonHistoryLog.capacity() == 0);
+	
+}

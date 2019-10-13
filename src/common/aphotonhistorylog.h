@@ -32,6 +32,10 @@ public:
     int iWave;          //photon wave index
 
     QString Print(AMaterialParticleCollection* MpCollection) const;
+    
+    // WATER'S FUNCTIONS
+    
+    bool isDetected();
 
     static const QString GetProcessName(int nodeType);
     static const QString PrintAllProcessTypes();

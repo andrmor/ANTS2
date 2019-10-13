@@ -139,33 +139,7 @@ void MainWindow::on_pobTest_2_clicked()
 //    int el = t.elapsed();
 //    qDebug() << el;
 
-    /*
-    int numBins = 10;
-    //AHistogram1D  ah(numBins, 0, 0);
-    //ah.setBufferSize(10000);
-    TH2D         *rh = new TH2D("", "", numBins, 0, 10,
-                                        numBins, 0, 10);
-
-    for (int i=0; i<10000; i++)
-    {
-        const double x = -10.0 + 20.0*Detector->RandGen->Rndm();
-        const double y = Detector->RandGen->Gaus(0, 2);
-        //ah.Fill(val, 1.0);
-        rh->Fill(x, y, 1.0);
-    }
-
-    //QVector<double> resA = ah.getContent();
-    //QVector<double> resR;
-    //for (int i=0; i<numBins+2; i++)   resR << rh->GetBinContent(i);
-
-    //qDebug() << "A:"<<resA;
-    //qDebug() << "R:"<<resR;
-
-    //qDebug() << "A stat:"<<ah.getStat();
-
-    GraphWindow->Draw(rh, "colz");
-    */
-
+    /*// 1D
     int numBins = 10;
     AHistogram1D  ah(numBins, 0, 0);
     ah.setBufferSize(10000);
@@ -173,7 +147,7 @@ void MainWindow::on_pobTest_2_clicked()
 
     for (int i=0; i<10000; i++)
     {
-        const double val = -10.0 + 20.0*Detector->RandGen->Rndm();
+        const double val = -20.0 + 40.0*Detector->RandGen->Rndm();
         ah.Fill(val, 1.0);
         rh->Fill(val, 1.0);
     }
@@ -189,6 +163,58 @@ void MainWindow::on_pobTest_2_clicked()
     qDebug() << "A stat:"<<ah.getStat();
 
     GraphWindow->Draw(rh, "hist");
+    GraphWindow->AddCurrentToBasket("Root");
+
+    ATH1D * arh = new ATH1D("", "", numBins, 0, 0);
+    double from, to;
+    ah.getLimits(from, to);
+    QString err = arh->Import(from, to, ah.getContent(), ah.getStat());
+    qDebug() << "Import OK? " << err;
+    GraphWindow->Draw(arh, "hist");
+    GraphWindow->AddCurrentToBasket("ants");
+    */
+
+    // /*
+    //2D
+    int numBinsX = 10;
+    int numBinsY = 20;
+    AHistogram2D  ah(numBinsX, 0, 10, numBinsY, 0, 5);
+    ah.setBufferSize(10000);
+    TH2D         *rh = new TH2D("", "", numBinsX, 0, 10, numBinsY, 0, 5);
+
+    for (int i=0; i<10000; i++)
+    {
+        const double x = Detector->RandGen->Gaus(2.0, 3);
+        const double y = Detector->RandGen->Gaus(2.0, 2);
+        ah.Fill(x, y, 1.0);
+        rh->Fill(x, y, 1.0);
+    }
+    ah.Fill(7,2,100);
+    rh->Fill(7,2,100);
+
+    /*
+    std::vector<double> resA = ah.getContent();
+    QVector<double> resR;
+    for (int i=0; i<numBins+2; i++)
+        resR << rh->GetBinContent(i);
+
+    qDebug() << "A:"<<resA;
+    qDebug() << "R:"<<resR;
+    */
+
+    qDebug() << "A stat:"<<ah.getStat();
+
+    GraphWindow->Draw(rh, "colz");
+    GraphWindow->AddCurrentToBasket("Root");
+
+    ATH2D * arh = new ATH2D("", "", numBinsX, 0, 10, numBinsY, 0, 5);
+    double xfrom, xto, yfrom, yto;
+    ah.getLimits(xfrom, xto, yfrom, yto);
+    QString err = arh->Import(xfrom, xto, yfrom, yto, ah.getContent(), ah.getStat());
+    qDebug() << "Import OK? " << err;
+    GraphWindow->Draw(arh, "colz");
+    GraphWindow->AddCurrentToBasket("ants");
+    // */
 
 
 //    QByteArray ba;

@@ -724,9 +724,10 @@ bool AParticleSourceSimulator::geant4TrackAndProcess()
         }
         for (int iMon=0; iMon<numMon; iMon++)
         {
-            AMonitor * mon = dataHub->SimStat->Monitors[iMon];
-
             QJsonObject json = ar[iMon].toObject();
+            if (json.isEmpty()) continue;
+
+            AMonitor * mon = dataHub->SimStat->Monitors[iMon];
 
             QJsonObject jEnergy = json["Energy"].toObject();
             {

@@ -15,6 +15,7 @@
 #include "TH2.h"
 #include "TF2.h"
 #include "TGraph.h"
+#include "TGraphErrors.h".h"
 #include "TF1.h"
 #include "TFile.h"
 #include "TKey.h"
@@ -781,6 +782,30 @@ void AInterfaceToGraph::NewGraph(const QString &GraphName)
     }
 }
 
+void AInterfaceToGraph::NewGraphErrors(const QString &GraphName)
+{
+    if (!bGuiThread)
+    {
+        abort("Threads cannot create/delete/draw graphs!");
+        return;
+    }
+
+    TGraphErrors * gr = new TGraphErrors();
+    ARootGraphRecord* rec = new ARootGraphRecord(gr, GraphName, "TGraphErrors");
+    bool bOK = TmpHub->Graphs.append(GraphName, rec, bAbortIfExists);
+    if (!bOK)
+    {
+        delete gr;
+        delete rec;
+        abort("Graph "+GraphName+" already exists!");
+    }
+    else
+    {
+        gr->SetFillColor(0);
+        gr->SetFillStyle(0);
+    }
+}
+
 void AInterfaceToGraph::SetMarkerProperties(QString GraphName, int MarkerColor, int MarkerStyle, double MarkerSize)
 {
     ARootGraphRecord* r = dynamic_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
@@ -815,6 +840,15 @@ void AInterfaceToGraph::AddPoint(QString GraphName, double x, double y)
         abort("Graph "+GraphName+" not found!");
     else
         r->AddPoint(x, y);
+}
+
+void AInterfaceToGraph::AddPoint(QString GraphName, double x, double y, double errorX, double errorY)
+{
+    ARootGraphRecord* r = dynamic_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
+    if (!r)
+        abort("Graph "+GraphName+" not found!");
+    else
+        r->AddPoint(x, y, errorX, errorY);
 }
 
 void AInterfaceToGraph::AddPoints(QString GraphName, QVariant xArray, QVariant yArray)

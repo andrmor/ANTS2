@@ -62,7 +62,7 @@ public:
 
     void setG4Sim_OnlyGenerateFiles(bool flag) {bOnlyFileExport = flag;}
     bool isG4Sim_OnlyGenerateFiles() const {return bOnlyFileExport;}
-    void generateG4antsConfigCommon(QJsonObject & json, int ThreadId);
+    void generateG4antsConfigCommon(QJsonObject & json, int ThreadId);  // !!! G4ants files common
 
     const DetectorClass & getDetector() {return Detector;}
 

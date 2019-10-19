@@ -728,73 +728,7 @@ bool AParticleSourceSimulator::geant4TrackAndProcess()
             if (json.isEmpty()) continue;
 
             AMonitor * mon = dataHub->SimStat->Monitors[iMon];
-
-            QJsonObject jEnergy = json["Energy"].toObject();
-            {
-                int bins =    jEnergy["bins"].toInt();
-                double from = jEnergy["from"].toDouble();
-                double to =   jEnergy["to"].toDouble();
-                QJsonArray data = jEnergy["data"].toArray();
-                QVector<double> vec;
-                double multiplier = 1.0;
-                switch (mon->getConfig().energyUnitsInHist)
-                {
-                case 0:  multiplier = 1.0e6;  break;// keV -> meV
-                case 1:  multiplier = 1.0e3;  break;// keV -> eV
-                default: multiplier = 1.0;    break;// keV -> keV
-                case 3:  multiplier = 1.0e-3; break;// keV -> MeV
-                }
-                for (int i=0; i<data.size(); i++)
-                    vec << data[i].toDouble();
-                mon->configureEnergy(bins, from * multiplier, to * multiplier);
-                mon->overrideEnergyData(vec);
-            }
-
-            QJsonObject jAngle = json["Angle"].toObject();
-            {
-                int bins =    jAngle["bins"].toInt();
-                double from = jAngle["from"].toDouble();
-                double to =   jAngle["to"].toDouble();
-                QJsonArray data = jAngle["data"].toArray();
-                QVector<double> vec;
-                for (int i=0; i<data.size(); i++)
-                    vec << data[i].toDouble();
-                mon->configureAngle(bins, from, to);
-                mon->overrideAngleData(vec);
-            }
-
-            QJsonObject jTime = json["Time"].toObject();
-            {
-                int bins =    jTime["bins"].toInt();
-                double from = jTime["from"].toDouble();
-                double to =   jTime["to"].toDouble();
-                QJsonArray data = jTime["data"].toArray();
-                QVector<double> vec;
-                for (int i=0; i<data.size(); i++)
-                    vec << data[i].toDouble();
-                mon->configureTime(bins, from, to);
-                mon->overrideTimeData(vec);
-            }
-
-            QJsonObject jSpatial = json["Spatial"].toObject();
-            {
-                int xbins =    jSpatial["xbins"].toInt();
-                int ybins =    jSpatial["ybins"].toInt();
-                double size1 = jSpatial["size1"].toDouble();
-                double size2 = jSpatial["size2"].toDouble();
-                QJsonArray data = jSpatial["data"].toArray();
-                QVector<QVector<double>> vec;
-                vec.resize(ybins);
-                for (int iy=0; iy<ybins; iy++)
-                {
-                    QJsonArray raw = data[iy].toArray();
-                    vec[iy].resize(xbins);
-                    for (int ix=0; ix<xbins; ix++)
-                        vec[iy][ix] = raw[ix].toDouble();
-                }
-                mon->configureXY(xbins, ybins);
-                mon->overrideXYData(vec);
-            }
+            mon->overrideDataFromJson(json);
         }
     }
 

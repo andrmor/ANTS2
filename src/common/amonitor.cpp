@@ -128,8 +128,143 @@ void AMonitor::configureEnergy(int energyBins, double energyFrom, double energyT
     initEnergyHist();
 }
 
-void AMonitor::overrideEnergyData(const QVector<double> &vec)
+#include "ahistogram.h"
+#include <QJsonObject>
+#include <QJsonArray>
+void AMonitor::overrideDataFromJson(const QJsonObject &json)
 {
+    QJsonObject jEnergy = json["Energy"].toObject();
+    delete energy; energy = create1D(jEnergy, true);
+   /*
+    {
+        int bins =    jEnergy["bins"].toInt();
+        double from = jEnergy["from"].toDouble();
+        double to =   jEnergy["to"].toDouble();
+        QJsonArray data = jEnergy["data"].toArray();
+        std::vector<double> vec;
+        double multiplier = 1.0;
+        switch (config.energyUnitsInHist)
+        {
+        case 0:  multiplier = 1.0e6;  break;// keV -> meV
+        case 1:  multiplier = 1.0e3;  break;// keV -> eV
+        default: multiplier = 1.0;    break;// keV -> keV
+        case 3:  multiplier = 1.0e-3; break;// keV -> MeV
+        }
+        for (int i=0; i<data.size(); i++)
+            vec.push_back(data[i].toDouble());
+        ATH1D * hist = new ATH1D("", "", 100, 0, 1.0);
+        hist->Import(from * multiplier, to * multiplier, vec, {100,100,100,100,123});
+        delete energy;
+        energy = hist;
+    }
+    */
+
+    QJsonObject jAngle = json["Angle"].toObject();
+    delete angle; angle = create1D(jAngle, false);
+    /*
+    {
+        int bins =    jAngle["bins"].toInt();
+        double from = jAngle["from"].toDouble();
+        double to =   jAngle["to"].toDouble();
+        QJsonArray data = jAngle["data"].toArray();
+        QVector<double> vec;
+        for (int i=0; i<data.size(); i++)
+            vec << data[i].toDouble();
+        mon->configureAngle(bins, from, to);
+        mon->overrideAngleData(vec);
+    }
+    */
+
+    QJsonObject jTime = json["Time"].toObject();
+    delete time; time = create1D(jTime, false);
+    /*
+    {
+        int bins =    jTime["bins"].toInt();
+        double from = jTime["from"].toDouble();
+        double to =   jTime["to"].toDouble();
+        QJsonArray data = jTime["data"].toArray();
+        QVector<double> vec;
+        for (int i=0; i<data.size(); i++)
+            vec << data[i].toDouble();
+        mon->configureTime(bins, from, to);
+        mon->overrideTimeData(vec);
+    }
+    */
+
+    QJsonObject jSpatial = json["Spatial"].toObject();
+    {
+        //int xbins =    jSpatial["xbins"].toInt();
+        //int ybins =    jSpatial["ybins"].toInt();
+        double xfrom = jSpatial["xfrom"].toDouble();
+        double xto   = jSpatial["xto"].toDouble();
+        double yfrom = jSpatial["yfrom"].toDouble();
+        double yto   = jSpatial["yto"].toDouble();
+
+        QJsonArray dataAr = jSpatial["data"].toArray();
+        int ybins = dataAr.size();
+        std::vector<std::vector<double>> dataVec;
+        dataVec.resize(ybins);
+        for (int iy=0; iy<ybins; iy++)
+        {
+            QJsonArray row = dataAr[iy].toArray();
+            int xbins = row.size();
+            dataVec[iy].resize(xbins);
+            for (int ix=0; ix<xbins; ix++)
+                dataVec[iy][ix] = row[ix].toDouble();
+        }
+
+        QJsonArray statAr = jSpatial["stat"].toArray();
+        std::vector<double> statVec;
+        for (int i=0; i<statAr.size(); i++)
+            statVec.push_back(statAr[i].toDouble());
+
+        //mon->configureXY(xbins, ybins);
+        ATH2D * hist = new ATH2D("", "", 100, 0, 1.0, 100, 0, 1.0);
+        hist->Import(xfrom, xto, yfrom, yto, dataVec, statVec);
+        delete xy; xy = hist;
+        //mon->overrideXYData(dataVec);
+    }
+}
+
+TH1D * AMonitor::create1D(const QJsonObject & json, bool bEnergy)
+{
+    double from = json["from"].toDouble();
+    double to =   json["to"].toDouble();
+
+    QJsonArray dataAr = json["data"].toArray();
+    std::vector<double> dataVec;
+    for (int i=0; i<dataAr.size(); i++)
+        dataVec.push_back(dataAr[i].toDouble());
+
+    QJsonArray statAr = json["stat"].toArray();
+    std::vector<double> statVec;
+    for (int i=0; i<statAr.size(); i++)
+        statVec.push_back(statAr[i].toDouble());
+
+    double multiplier = 1.0;
+    if (bEnergy)
+    {
+        switch (config.energyUnitsInHist)
+        {
+        case 0:  multiplier = 1.0e6;  break;// keV -> meV
+        case 1:  multiplier = 1.0e3;  break;// keV -> eV
+        default: multiplier = 1.0;    break;// keV -> keV
+        case 3:  multiplier = 1.0e-3; break;// keV -> MeV
+        }
+    }
+
+    ATH1D * hist = new ATH1D("", "", 100, 0, 1.0);
+    hist->Import(from * multiplier, to * multiplier, dataVec, statVec);
+    return hist;
+}
+
+
+void AMonitor::overrideEnergyData(double from, double to, const std::vector<double> & binContent, const std::vector<double> & stats)
+{
+
+    ATH1D * hist = new ATH1D("", "", 100, 0, 1.0);
+    hist->Import(from, to, binContent, stats);
+    /*
     int size = energy->GetNbinsX();
     int entries = 0;
     for (int i=0; i<vec.size(); i++)
@@ -140,18 +275,10 @@ void AMonitor::overrideEnergyData(const QVector<double> &vec)
         if (i>0 && i<size+1) entries += val;
     }
     energy->SetEntries(entries);
+    */
+    delete energy;
+    energy = hist;
 }
-
-/*
-class ATH1D : public TH1D
-{
-public:
-    ATH1D(const TH1D other) : TH1D(other) {}
-
-    void SetSumW (double val) {fTsumw  = val;}
-    void SetSumWX(double val) {fTsumwx = val;}
-};
-*/
 
 void AMonitor::overrideAngleData(const QVector<double> &vec)
 {

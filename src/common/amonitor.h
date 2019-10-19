@@ -5,10 +5,12 @@
 
 #include <QString>
 #include <QVector>
+#include <vector>
 
 class TH1D;
 class TH2D;
 class AGeoObject;
+class QJsonObject;
 
 class AMonitor
 {
@@ -53,7 +55,8 @@ public:
   void configureAngle (int angleBins,  double angleFrom,  double angleTo);
   void configureEnergy(int energyBins, double energyFrom, double energyTo);
 
-  void overrideEnergyData(const QVector<double> & vec); // vec contain underflow and overflow bins!
+  void overrideDataFromJson(const QJsonObject & json);
+  void overrideEnergyData(double from, double to, const std::vector<double> &binContent, const std::vector<double> &stats); // vec contain underflow and overflow bins!
   void overrideAngleData (const QVector<double> & vec);  // vec contain underflow and overflow bins!
   void overrideTimeData  (const QVector<double> & vec);   // vec contain underflow and overflow bins!
   void overrideXYData    (const QVector<QVector<double>> & vec); // vec contain underflow and overflow bins! [y][x] in increasing order
@@ -90,7 +93,7 @@ private:
   void initWaveHist();
   void initAngleHist();
   void initEnergyHist();
-
+  TH1D *create1D(const QJsonObject &json, bool bEnergy = false);
 };
 
 #endif // AMONITOR_H

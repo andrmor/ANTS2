@@ -669,9 +669,11 @@ void MainWindow::on_pbParticleSourcesSimulate_clicked()
         bool bMonitors = false;
         bool bGrids = false;
         containsMonsGrids(Detector->Sandwich->World, bGrids, bMonitors);
+        /*
         if (bMonitors)
             Warnings+= "\nConfig contains active Monitor(s).\n"
                        "Monitors will be treated as normal volumes\n";
+        */
         if (bGrids)
             Warnings+= "\nConfig contains optical grids.\n"
                        "The grid will NOT be expanded:\n"

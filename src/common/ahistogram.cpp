@@ -246,7 +246,7 @@ const QString ATH2D::Import(double xfrom, double xto, double yfrom, double yto, 
     if (xsize < 3) return QString("Number of bins should be at lreast 3 (1+under+over), here X dimension has %1").arg(xsize);
     if (xfrom >= xto) return "'xfrom' has to be smaller than 'xto'";
     if (yfrom >= yto) return "'yfrom' has to be smaller than 'yto'";
-    if (stats.size() != 7) return "stats should have size of 5";
+    if (stats.size() != 7) return "stats should have size of 7";
 
     SetBins(xsize-2, xfrom, xto, ysize-2, yfrom, yto);
     for (int iy=0; iy<ysize; iy++)

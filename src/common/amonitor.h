@@ -4,7 +4,6 @@
 #include "amonitorconfig.h"
 
 #include <QString>
-#include <QVector>
 #include <vector>
 
 class TH1D;
@@ -37,29 +36,7 @@ public:
 //configuration
   bool readFromGeoObject(const AGeoObject* MonitorRecord);
 
-  /*
-  void setForPhoton()                  {config.PhotonOrParticle = 0;}
-  void setForparticles()               {config.PhotonOrParticle = 1;}
-  void setUpperIsSensitive(bool flag)  {config.bUpper = flag;}
-  void setLowerIsSensitive(bool flag)  {config.bLower = flag;}
-  void setStopsTracking(bool flag)     {config.bStopTracking = flag;}
-  void setParticle(int particleIndex)  {config.ParticleIndex = particleIndex;}
-  void setPrimaryEnabled(bool flag)    {config.bPrimary = flag;}
-  void setSecondaryEnabled(bool flag)  {config.bSecondary = flag;}
-  void setNoPrior(bool flag)           {config.bNoPriorInteractions = flag;}
-  */
-
-  void configureXY(int xBins, int yBins);
-  void configureTime  (int timeBins,   double timeFrom,   double timeTo);
-  void configureWave  (int waveBins,   double waveFrom,   double waveTo);
-  void configureAngle (int angleBins,  double angleFrom,  double angleTo);
-  void configureEnergy(int energyBins, double energyFrom, double energyTo);
-
   void overrideDataFromJson(const QJsonObject & json);
-  void overrideEnergyData(double from, double to, const std::vector<double> &binContent, const std::vector<double> &stats); // vec contain underflow and overflow bins!
-  void overrideAngleData (const QVector<double> & vec);  // vec contain underflow and overflow bins!
-  void overrideTimeData  (const QVector<double> & vec);   // vec contain underflow and overflow bins!
-  void overrideXYData    (const QVector<QVector<double>> & vec); // vec contain underflow and overflow bins! [y][x] in increasing order
 
 // stat data handling
   void clearData();

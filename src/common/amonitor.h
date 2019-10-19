@@ -70,7 +70,8 @@ private:
   void initWaveHist();
   void initAngleHist();
   void initEnergyHist();
-  TH1D *create1D(const QJsonObject &json, bool bEnergy = false);
+
+  void update1D(const QJsonObject &json, TH1D *& old);
 };
 
 #endif // AMONITOR_H

@@ -492,12 +492,12 @@ void ASimulationManager::generateG4antsConfigCommon(QJsonObject & json, int Thre
             if (mc && mc->PhotonOrParticle == 1)
             {
                 const QStringList ParticleList = Detector.MpCollection->getListOfParticleNames();
-                int pIndex = mc->ParticleIndex;
-                if ( pIndex >=0 && pIndex < ParticleList.size() )
+                const int pIndex = mc->ParticleIndex;
+                if ( pIndex >= -1 && pIndex < ParticleList.size() )
                 {
                     mc->writeToJson(mjs);
                     mjs["Name"] = obj->Name;
-                    mjs["ParticleName"] = ParticleList.at(pIndex);
+                    mjs["ParticleName"] = ( pIndex == -1 ? "" : ParticleList.at(pIndex) );
                 }
             }
             arMon.append(mjs);

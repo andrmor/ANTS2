@@ -10,6 +10,7 @@ AMonitorDelegateForm::AMonitorDelegateForm(QStringList particles, QWidget *paren
 {
     ui->setupUi(this);
 
+    particles.insert(0, "All particles");
     ui->cobParticle->addItems(particles);
     ui->pbContentChanged->setVisible(false);
 
@@ -61,8 +62,9 @@ bool AMonitorDelegateForm::updateGUI(const AGeoObject *obj)
 
     ui->cbStopTracking->setChecked(config.bStopTracking);
 
-    if (config.ParticleIndex > -1 && config.ParticleIndex < ui->cobParticle->count())
-        ui->cobParticle->setCurrentIndex(config.ParticleIndex);
+    const int effIndex = config.ParticleIndex + 1; // shifting -1 (is for "all particles") to 0
+    if (effIndex > -1 && effIndex < ui->cobParticle->count())
+        ui->cobParticle->setCurrentIndex(effIndex);
 
     int prsec = 0;
     if (config.bSecondary && !config.bPrimary) prsec = 1;
@@ -133,7 +135,7 @@ void AMonitorDelegateForm::updateObject(AGeoObject *obj) const
 
     if (ui->cobMonitoring->currentIndex() == 1)
     {
-        config.ParticleIndex = ui->cobParticle->currentIndex();
+        config.ParticleIndex = ui->cobParticle->currentIndex() - 1; // shift!
 
         int prsec =  ui->cobPrimarySecondary->currentIndex();
         switch (prsec)

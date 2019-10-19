@@ -212,6 +212,9 @@ void AHistogram2D::processBuffer()
 ATH1D::ATH1D(const char *name, const char *title, int bins, double from, double to) :
     TH1D(name, title, bins, from, to) {}
 
+ATH1D::ATH1D(const TH1D &other) :
+    TH1D(other) {}
+
 const QString ATH1D::Import(double from, double to, const std::vector<double> & binContent, const std::vector<double> & stats)
 {
     const int size = binContent.size();

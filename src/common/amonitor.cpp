@@ -95,13 +95,13 @@ void AMonitor::appendDataFromAnotherMonitor(AMonitor *from)
 void AMonitor::overrideDataFromJson(const QJsonObject &json)
 {
     QJsonObject jEnergy = json["Energy"].toObject();
-    delete energy; energy = create1D(jEnergy, true);
+    update1D(jEnergy, energy);
 
     QJsonObject jAngle = json["Angle"].toObject();
-    delete angle; angle = create1D(jAngle, false);
+    update1D(jAngle, angle);
 
     QJsonObject jTime = json["Time"].toObject();
-    delete time; time = create1D(jTime, false);
+    update1D(jTime, time);
 
     QJsonObject jSpatial = json["Spatial"].toObject();
     double xfrom = jSpatial["xfrom"].toDouble();
@@ -130,7 +130,7 @@ void AMonitor::overrideDataFromJson(const QJsonObject &json)
     delete xy; xy = hist;
 }
 
-TH1D * AMonitor::create1D(const QJsonObject & json, bool bEnergy)
+void AMonitor::update1D(const QJsonObject & json, TH1D* & old)
 {
     double from = json["from"].toDouble();
     double to =   json["to"].toDouble();
@@ -146,7 +146,7 @@ TH1D * AMonitor::create1D(const QJsonObject & json, bool bEnergy)
         statVec.push_back(statAr[i].toDouble());
 
     double multiplier = 1.0;
-    if (bEnergy)
+    if (old == energy)
     {
         switch (config.energyUnitsInHist)
         {
@@ -157,9 +157,10 @@ TH1D * AMonitor::create1D(const QJsonObject & json, bool bEnergy)
         }
     }
 
-    ATH1D * hist = new ATH1D("", "", 100, 0, 1.0);
+    ATH1D * hist = new ATH1D(*old); //to inherit all properties, including the axis titles
     hist->Import(from * multiplier, to * multiplier, dataVec, statVec);
-    return hist;
+    delete old;
+    old = hist;
 }
 
 void AMonitor::initXYHist()

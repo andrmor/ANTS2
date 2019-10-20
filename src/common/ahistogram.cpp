@@ -74,6 +74,12 @@ void AHistogram1D::processBuffer()
         else if (x > to)   to   = x;
     }
 
+    if (from == to)
+    {
+        from *= 0.995;
+        to   *= 1.005;
+    }
+
     deltaBin = (to - from) / bins + std::numeric_limits<double>::epsilon();
 
     for (size_t i=0; i<buffer.size(); i++)

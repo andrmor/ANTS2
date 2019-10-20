@@ -712,26 +712,34 @@ bool AParticleSourceSimulator::geant4TrackAndProcess()
         QString monFileName = simSettings.G4SimSet.getMonitorDataFileName(ID);
         QJsonArray ar;
         bOK = LoadJsonArrayFromFile(ar, monFileName);
-        if (!bOK)
+        if (bOK)
         {
-            ErrorString = "Failed to read monitor data!";
-            return false;
+            for (int i=0; i<ar.size(); i++)
+            {
+                QJsonObject json = ar[i].toObject();
+                int iMon;
+                bool bOK = parseJson(json, "MonitorIndex", iMon);
+                if (!bOK)
+                {
+                    ErrorString = "Failed to read monitor data: Monitor index not found";
+                    return false;
+                }
+                if (iMon < 0 || iMon >= numMon)
+                {
+                    ErrorString = "Failed to read monitor data: Bad monitor index";
+                    return false;
+                }
+                AMonitor * mon = dataHub->SimStat->Monitors[iMon];
+                mon->overrideDataFromJson(json);
+            }
         }
-        if (ar.size() != numMon)
-        {
-            ErrorString = "Failed to read monitor data: mismatch in size!";
-            return false;
-        }
-        for (int iMon=0; iMon<numMon; iMon++)
-        {
-            QJsonObject json = ar[iMon].toObject();
-            if (json.isEmpty()) continue;
-
-            AMonitor * mon = dataHub->SimStat->Monitors[iMon];
-            mon->overrideDataFromJson(json);
-        }
+        else qWarning() << "Failed to read monitor data";
+        //if (!bOK)  //restore it later, when compatibility is not an issue with G$ants anymore
+        //{
+        //    ErrorString = "Failed to read monitor data!";
+        //    return false;
+        //}
     }
-
     return true;
 }
 

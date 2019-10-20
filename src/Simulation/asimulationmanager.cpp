@@ -484,23 +484,25 @@ void ASimulationManager::generateG4antsConfigCommon(QJsonObject & json, int Thre
     json["Precision"]    = G4SimSet.Precision;
 
     QJsonArray arMon;
-        const QVector<const AGeoObject*> & MonitorsRecords = Detector.Sandwich->MonitorsRecords;
-        for (const AGeoObject * obj : MonitorsRecords)
+    const QVector<const AGeoObject*> & MonitorsRecords = Detector.Sandwich->MonitorsRecords;
+    for (int iMon = 0; iMon <  MonitorsRecords.size(); iMon++)
+    {
+        const AGeoObject * obj = MonitorsRecords.at(iMon);
+        const AMonitorConfig * mc = obj->getMonitorConfig();
+        if (mc && mc->PhotonOrParticle == 1)
         {
-            QJsonObject mjs;
-            const AMonitorConfig * mc = obj->getMonitorConfig();
-            if (mc && mc->PhotonOrParticle == 1)
+            const QStringList ParticleList = Detector.MpCollection->getListOfParticleNames();
+            const int particleIndex = mc->ParticleIndex;
+            if ( particleIndex >= -1 && particleIndex < ParticleList.size() )
             {
-                const QStringList ParticleList = Detector.MpCollection->getListOfParticleNames();
-                const int pIndex = mc->ParticleIndex;
-                if ( pIndex >= -1 && pIndex < ParticleList.size() )
-                {
-                    mc->writeToJson(mjs);
-                    mjs["Name"] = obj->Name;
-                    mjs["ParticleName"] = ( pIndex == -1 ? "" : ParticleList.at(pIndex) );
-                }
+                QJsonObject mjs;
+                mc->writeToJson(mjs);
+                mjs["Name"] = obj->Name;
+                mjs["ParticleName"] = ( particleIndex == -1 ? "" : ParticleList.at(particleIndex) );
+                mjs["MonitorIndex"] = iMon;
+                arMon.append(mjs);
             }
-            arMon.append(mjs);
         }
+    }
     json["Monitors"] = arMon;
 }

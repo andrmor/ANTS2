@@ -108,7 +108,7 @@ const QString AG4SimulationSettings::getTracksFileName(int iThreadNum) const
 
 const QString AG4SimulationSettings::getMonitorDataFileName(int iThreadNum) const
 {
-    return getPath() + QString("monitors-%1.txt").arg(iThreadNum);
+    return getPath() + QString("monitors-%1.json").arg(iThreadNum);
 }
 
 const QString AG4SimulationSettings::getGdmlFileName() const

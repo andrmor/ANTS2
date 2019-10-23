@@ -261,7 +261,7 @@ bool AParticleTracker::checkMonitors_isKilled()
     AMonitor * m = SimStat.Monitors[iMon];
     //qDebug() << "Monitor #:"<< iMon << "Total monitors:"<< SimStat->Monitors.size();
 
-    if (m->isForParticles() && m->getParticleIndex() == p->Id)
+    if ( m->isForParticles()  &&  ( m->getParticleIndex() == -1 || m->getParticleIndex() == p->Id ) )
     {
         if (  p->bInteracted && !m->isAcceptingIndirect() ) return false;  // do not accept interacted
         if ( !p->bInteracted && !m->isAcceptingDirect() )   return false;  // do not accept direct

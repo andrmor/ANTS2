@@ -10,6 +10,7 @@ AMonitorDelegateForm::AMonitorDelegateForm(QStringList particles, QWidget *paren
 {
     ui->setupUi(this);
 
+    particles.insert(0, "All particles");
     ui->cobParticle->addItems(particles);
     ui->pbContentChanged->setVisible(false);
 
@@ -61,20 +62,19 @@ bool AMonitorDelegateForm::updateGUI(const AGeoObject *obj)
 
     ui->cbStopTracking->setChecked(config.bStopTracking);
 
-    if (config.PhotonOrParticle == 1)
-    {
-        ui->cobParticle->setCurrentIndex(config.ParticleIndex);
+    const int effIndex = config.ParticleIndex + 1; // shifting -1 (is for "all particles") to 0
+    if (effIndex > -1 && effIndex < ui->cobParticle->count())
+        ui->cobParticle->setCurrentIndex(effIndex);
 
-        int prsec = 0;
-        if (config.bSecondary && !config.bPrimary) prsec = 1;
-        else if (config.bSecondary && config.bPrimary) prsec = 2;
-        ui->cobPrimarySecondary->setCurrentIndex(prsec);
+    int prsec = 0;
+    if (config.bSecondary && !config.bPrimary) prsec = 1;
+    else if (config.bSecondary && config.bPrimary) prsec = 2;
+    ui->cobPrimarySecondary->setCurrentIndex(prsec);
 
-        int dirin = 0;
-             if (config.bIndirect && !config.bDirect) dirin = 1;
-        else if (config.bIndirect &&  config.bDirect) dirin = 2;
-        ui->cobDirectIndirect->setCurrentIndex(dirin);
-    }
+    int dirin = 0;
+    if (config.bIndirect && !config.bDirect) dirin = 1;
+    else if (config.bIndirect &&  config.bDirect) dirin = 2;
+    ui->cobDirectIndirect->setCurrentIndex(dirin);
 
     ui->sbXbins->setValue(config.xbins);
     ui->sbYbins->setValue(config.ybins);
@@ -97,12 +97,12 @@ bool AMonitorDelegateForm::updateGUI(const AGeoObject *obj)
     return true;
 }
 
-QString AMonitorDelegateForm::getName() const
+const QString AMonitorDelegateForm::getName() const
 {
     return ui->leName->text();
 }
 
-void AMonitorDelegateForm::updateObject(AGeoObject *obj)
+void AMonitorDelegateForm::updateObject(AGeoObject *obj) const
 {
     obj->Name = ui->leName->text();
 
@@ -135,7 +135,7 @@ void AMonitorDelegateForm::updateObject(AGeoObject *obj)
 
     if (ui->cobMonitoring->currentIndex() == 1)
     {
-        config.ParticleIndex = ui->cobParticle->currentIndex();
+        config.ParticleIndex = ui->cobParticle->currentIndex() - 1; // shift!
 
         int prsec =  ui->cobPrimarySecondary->currentIndex();
         switch (prsec)

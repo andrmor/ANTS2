@@ -579,6 +579,8 @@ bool AParticleSourceSimulator::generateAndTrackPhotons()
     return true;
 }
 
+#include "asandwich.h"
+#include "amonitor.h"
 bool AParticleSourceSimulator::geant4TrackAndProcess()
 {
     bool bOK = runGeant4Handler();
@@ -703,6 +705,41 @@ bool AParticleSourceSimulator::geant4TrackAndProcess()
         if (!ErrorString.isEmpty()) return false;
     }
 
+    //read monitor data
+    int numMon = detector.Sandwich->MonitorsRecords.size();
+    if (numMon != 0)
+    {
+        QString monFileName = simSettings.G4SimSet.getMonitorDataFileName(ID);
+        QJsonArray ar;
+        bOK = LoadJsonArrayFromFile(ar, monFileName);
+        if (bOK)
+        {
+            for (int i=0; i<ar.size(); i++)
+            {
+                QJsonObject json = ar[i].toObject();
+                int iMon;
+                bool bOK = parseJson(json, "MonitorIndex", iMon);
+                if (!bOK)
+                {
+                    ErrorString = "Failed to read monitor data: Monitor index not found";
+                    return false;
+                }
+                if (iMon < 0 || iMon >= numMon)
+                {
+                    ErrorString = "Failed to read monitor data: Bad monitor index";
+                    return false;
+                }
+                AMonitor * mon = dataHub->SimStat->Monitors[iMon];
+                mon->overrideDataFromJson(json);
+            }
+        }
+        else qWarning() << "Failed to read monitor data";
+        //if (!bOK)  //restore it later, when compatibility is not an issue with G$ants anymore
+        //{
+        //    ErrorString = "Failed to read monitor data!";
+        //    return false;
+        //}
+    }
     return true;
 }
 

@@ -244,9 +244,8 @@ void MainWindow::ShowSource(const AParticleSourceRecord* p, bool clear)
   }
 
   GeometryWindow->DrawTracks();
-  Detector->GeoManager->SetCurrentPoint(X0,Y0,Z0);
+  //Detector->GeoManager->SetCurrentPoint(X0,Y0,Z0);
   //Detector->GeoManager->DrawCurrentPoint(9);
-  GeometryWindow->UpdateRootCanvas();
 }
 
 void MainWindow::on_pbGunTest_clicked()
@@ -337,8 +336,8 @@ void MainWindow::TestParticleGun(AParticleGun* Gun, int numParticles)
         }
         GP.clear();
     }
-    GeometryWindow->DrawTracks();
-    ShowGeoMarkers();
+
+    GeometryWindow->ShowTracksAndMarkers();
 }
 
 void MainWindow::on_ledGunAverageNumPartperEvent_editingFinished()
@@ -670,9 +669,11 @@ void MainWindow::on_pbParticleSourcesSimulate_clicked()
         bool bMonitors = false;
         bool bGrids = false;
         containsMonsGrids(Detector->Sandwich->World, bGrids, bMonitors);
+        /*
         if (bMonitors)
             Warnings+= "\nConfig contains active Monitor(s).\n"
                        "Monitors will be treated as normal volumes\n";
+        */
         if (bGrids)
             Warnings+= "\nConfig contains optical grids.\n"
                        "The grid will NOT be expanded:\n"

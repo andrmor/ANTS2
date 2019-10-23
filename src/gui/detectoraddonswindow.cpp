@@ -386,13 +386,10 @@ void DetectorAddOnsWindow::on_pbLoadDummyPMs_clicked()
 
 void DetectorAddOnsWindow::ShowObject(QString name)
 {
-  DetectorAddOnsWindow::HighlightVolume(name);
-  MW->GeometryWindow->SetAsActiveRootWindow();
-  Detector->GeoManager->ClearTracks();
-  //Detector->top->Draw();
-  //MW->GeometryWindow->PostDraw();
-  MW->GeometryWindow->ShowGeometry(true, false, false);
-  //MW->GeometryWindow->UpdateRootCanvas();
+    DetectorAddOnsWindow::HighlightVolume(name);
+    MW->GeometryWindow->SetAsActiveRootWindow();
+    Detector->GeoManager->ClearTracks();
+    MW->GeometryWindow->ShowGeometry(true, false, false);
 }
 
 bool drawIfFound(TGeoNode* node, TString name)
@@ -503,20 +500,36 @@ void DetectorAddOnsWindow::OnrequestShowMonitor(const AGeoObject *mon)
     MW->GeometryWindow->DrawTracks();
 }
 
-void DetectorAddOnsWindow::HighlightVolume(QString VolName)
+void DetectorAddOnsWindow::HighlightVolume(const QString & VolName)
 {
-  TObjArray* list = Detector->GeoManager->GetListOfVolumes();
-  int size = list->GetEntries();
+    AGeoObject * obj = Detector->Sandwich->World->findObjectByName(VolName);
+    if (!obj) return;
 
-  for (int i=0; i<size; i++)
+    QSet<QString> set;
+    if (obj->ObjectType->isArray() || obj->ObjectType->isHandlingSet())
     {
-      TGeoVolume* vol = (TGeoVolume*)list->At(i);
-      if (!vol) break;
-      QString name = vol->GetName();
-//      qDebug()<<"name: "<<name;
-      if (name == VolName) vol->SetLineColor(kRed);
-//      if (name == VolName) vol->SetLineWidth(3);
-      else vol->SetLineColor(kGray);
+        QVector<AGeoObject*> vec;
+        obj->collectContainingObjects(vec);
+        for (AGeoObject * obj : vec)
+            set << obj->Name;
+    }
+    else
+        set << VolName;
+
+    TObjArray* list = Detector->GeoManager->GetListOfVolumes();
+    int size = list->GetEntries();
+
+    for (int iVol = 0; iVol < size; iVol++)
+    {
+        TGeoVolume* vol = (TGeoVolume*)list->At(iVol);
+        if (!vol) break;
+        const QString name = vol->GetName();
+        if (set.contains(name))
+        {
+            vol->SetLineColor(kRed);
+            vol->SetLineWidth(3);
+        }
+        else vol->SetLineColor(kGray);
     }
 }
 
@@ -1241,7 +1254,7 @@ void DetectorAddOnsWindow::on_pbConvertToScript_clicked()
 
     AGeoObject* World = Detector->Sandwich->World;
 
-    objectMembersToScript(World, script, 2);
+    twGeo->objectMembersToScript(World, script, 2, true, true);
 
     script += "\n\n  geo.UpdateGeometry(true)";
 
@@ -1252,140 +1265,4 @@ void DetectorAddOnsWindow::on_pbConvertToScript_clicked()
     MW->ScriptWindow->showNormal();
     MW->ScriptWindow->raise();
     MW->ScriptWindow->activateWindow();
-}
-
-void DetectorAddOnsWindow::objectMembersToScript(AGeoObject* Master, QString &script, int ident)
-{
-    for (AGeoObject* obj : Master->HostedObjects)
-    {
-        if (obj->ObjectType->isLogical())
-        {
-            script += "\n" + QString(" ").repeated(ident)+ makeScriptString_basicObject(obj);
-        }
-        else if (obj->ObjectType->isCompositeContainer()) {} //nothing to do
-        else if (obj->ObjectType->isSlab() || obj->ObjectType->isSingle() )
-        {
-            script += "\n" + QString(" ").repeated(ident)+ makeScriptString_basicObject(obj);
-            script += "\n" + QString(" ").repeated(ident)+ makeLinePropertiesString(obj);
-            if (obj->ObjectType->isLightguide())
-            {
-                script += "\n";
-                script += "\n" + QString(" ").repeated(ident)+ "//=== Lightguide object is not supported! ===";
-                script += "\n";
-            }
-            objectMembersToScript(obj, script, ident + 2);            
-        }
-        else if (obj->ObjectType->isComposite())
-        {
-            script += "\n" + QString(" ").repeated(ident) + "//-->-- logical volumes for " + obj->Name;
-            objectMembersToScript(obj->getContainerWithLogical(), script, ident + 4);
-            script += "\n" + QString(" ").repeated(ident) + "//--<-- logical volumes end for " + obj->Name;
-
-            script += "\n" + QString(" ").repeated(ident)+ makeScriptString_basicObject(obj);
-            script += "\n" + QString(" ").repeated(ident)+ makeLinePropertiesString(obj);
-            objectMembersToScript(obj, script, ident + 2);
-        }
-        else if (obj->ObjectType->isArray())
-        {
-            script += "\n" + QString(" ").repeated(ident)+ makeScriptString_arrayObject(obj);
-            script += "\n" + QString(" ").repeated(ident)+ "//-->-- array elements for " + obj->Name;
-            objectMembersToScript(obj, script, ident + 2);
-            script += "\n" + QString(" ").repeated(ident)+ "//--<-- array elements end for " + obj->Name;
-        }
-        else if (obj->ObjectType->isStack())
-        {
-            script += "\n" + QString(" ").repeated(ident)+ makeScriptString_stackObjectStart(obj);
-            script += "\n" + QString(" ").repeated(ident)+ "//-->-- stack elements for " + obj->Name;
-            script += "\n" + QString(" ").repeated(ident)+ "// Values of x, y, z only matter for the stack element, refered to at InitializeStack below";
-            script += "\n" + QString(" ").repeated(ident)+ "// For the rest of elements they are calculated automatically";
-            objectMembersToScript(obj, script, ident + 2);
-            script += "\n" + QString(" ").repeated(ident)+ "//--<-- stack elements end for " + obj->Name;
-            if (!obj->HostedObjects.isEmpty())
-                script += "\n" + QString(" ").repeated(ident)+ makeScriptString_stackObjectEnd(obj);
-        }
-        else if (obj->ObjectType->isGroup())
-        {
-            script += "\n" + QString(" ").repeated(ident)+ makeScriptString_groupObjectStart(obj);
-            script += "\n" + QString(" ").repeated(ident)+ "//-->-- group elements for " + obj->Name;
-            objectMembersToScript(obj, script, ident + 2);
-            script += "\n" + QString(" ").repeated(ident)+ "//--<-- group elements end for " + obj->Name;
-        }
-        else if (obj->ObjectType->isGrid())
-        {
-            script += "\n";
-            script += "\n" + QString(" ").repeated(ident)+ "//=== Optical grid object is not supported! Make a request to the developers ===";
-            script += "\n";
-        }
-
-    }
-}
-
-QString DetectorAddOnsWindow::makeScriptString_basicObject(AGeoObject* obj)
-{
-    return  QString("geo.TGeo( ") +
-            "'" + obj->Name + "', " +
-            "'" + obj->Shape->getGenerationString() + "', " +
-            Detector->MpCollection->getMaterialName(obj->Material) + "_mat, " +  //QString::number(obj->Material) + ", " +
-            "'"+obj->Container->Name + "',   "+
-            QString::number(obj->Position[0]) + ", " +
-            QString::number(obj->Position[1]) + ", " +
-            QString::number(obj->Position[2]) + ",   " +
-            QString::number(obj->Orientation[0]) + ", " +
-            QString::number(obj->Orientation[1]) + ", " +
-            QString::number(obj->Orientation[2]) + " )";
-}
-
-QString DetectorAddOnsWindow::makeScriptString_arrayObject(AGeoObject *obj)
-{
-    ATypeArrayObject* a = dynamic_cast<ATypeArrayObject*>(obj->ObjectType);
-    if (!a)
-    {
-        qWarning() << "It is not an array!";
-        return "Error accessing object as array!";
-    }
-
-    return  QString("geo.Array( ") +
-            "'" + obj->Name + "', " +
-            QString::number(a->numX) + ", " +
-            QString::number(a->numY) + ", " +
-            QString::number(a->numZ) + ",   " +
-            QString::number(a->stepX) + ", " +
-            QString::number(a->stepY) + ", " +
-            QString::number(a->stepZ) + ", " +
-            "'" + obj->Container->Name + "',   " +
-            QString::number(obj->Position[0]) + ", " +
-            QString::number(obj->Position[1]) + ", " +
-            QString::number(obj->Position[2]) + ",   " +
-            QString::number(obj->Orientation[2]) + " )";
-}
-
-QString DetectorAddOnsWindow::makeScriptString_stackObjectStart(AGeoObject *obj)
-{
-    return  QString("geo.MakeStack(") +
-            "'" + obj->Name + "', " +
-            "'" + obj->Container->Name + "' )";
-}
-
-QString DetectorAddOnsWindow::makeScriptString_groupObjectStart(AGeoObject *obj)
-{
-    return  QString("geo.MakeGroup(") +
-            "'" + obj->Name + "', " +
-            "'" + obj->Container->Name + "' )";
-}
-
-QString DetectorAddOnsWindow::makeScriptString_stackObjectEnd(AGeoObject *obj)
-{
-    return QString("geo.InitializeStack( ") +
-           "'" + obj->Name + "',  " +
-           "'" + obj->HostedObjects.first()->Name + "' )";
-}
-
-QString DetectorAddOnsWindow::makeLinePropertiesString(AGeoObject *obj)
-{
-    return "geo.SetLine( '" +
-            obj->Name +
-            "',  " +
-            QString::number(obj->color) + ",  " +
-            QString::number(obj->width) + ",  " +
-            QString::number(obj->style) + " )";
 }

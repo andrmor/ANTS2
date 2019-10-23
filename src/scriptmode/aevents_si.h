@@ -28,6 +28,7 @@ public slots:
   int countTimeBins();
   double GetPMsignal(int ievent, int ipm);
   QVariant GetPMsignals(int ievent);
+  const QVariantList GetPMsignals() const;
   void SetPMsignal(int ievent, int ipm, double value);
   double GetPMsignalTimed(int ievent, int ipm, int iTimeBin);
   QVariant GetPMsignalVsTime(int ievent, int ipm);

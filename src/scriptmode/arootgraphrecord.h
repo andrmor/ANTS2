@@ -22,7 +22,7 @@ public:
     void     SetTitles(const QString& titleX, const QString& titleY, const QString graphTitle = "");
 
     // Protected by Mutex
-    void     AddPoint(double x, double y);
+    void     AddPoint(double x, double y, double errorX = 0, double errorY = 0);
     void     AddPoints(const QVector<double> &xArr, const QVector<double> &yArr);
     void     Sort();
     void     SetYRange(double min, double max);

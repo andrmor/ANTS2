@@ -3,7 +3,7 @@
 
 #include <QJsonObject>
 
-void AMonitorConfig::writeToJson(QJsonObject &json)
+void AMonitorConfig::writeToJson(QJsonObject &json) const
 {
    json["shape"] = shape;
    json["size1"] = size1;
@@ -42,7 +42,7 @@ void AMonitorConfig::writeToJson(QJsonObject &json)
    json["energyUnitsInHist"] = energyUnitsInHist;
 }
 
-void AMonitorConfig::readFromJson(QJsonObject &json)
+void AMonitorConfig::readFromJson(const QJsonObject & json)
 {
     parseJson(json, "shape", shape);
     parseJson(json, "size1", size1);

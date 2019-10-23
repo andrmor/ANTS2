@@ -17,7 +17,6 @@ public:
     ANetworkModule();
     ~ANetworkModule();
 
-    void SetDebug(bool flag) {fDebug = flag;}
     void SetScriptManager(AJavaScriptManager* man);
 
     bool isWebSocketServerRunning() const;
@@ -25,8 +24,6 @@ public:
     const QString getWebSocketServerURL() const;
 
     bool isRootServerRunning() const;
-    int getRootServerPort() const;
-    const QString getJSROOTstring() const {return JSROOT;}
 
     const QString getWebSocketServerURL();
 
@@ -42,10 +39,10 @@ public: ARootHttpServer* RootHttpServer = 0;
     void StopWebSocketServer();
 
 public slots:
-  void StartRootHttpServer(unsigned int port = 8080, QString OptionalUrlJsRoot = "https://root.cern/js/latest/");
+  bool StartRootHttpServer();
   void StopRootHttpServer();
 
-  void onNewGeoManagerCreated(TObject* GeoManager);
+  void onNewGeoManagerCreated();
   void OnWebSocketTextMessageReceived(QString message);
   void OnClientDisconnected();
 
@@ -59,10 +56,7 @@ private slots:
   void onIdleTimerTriggered();
 
 private:
-  AJavaScriptManager* ScriptManager = 0;
-  bool fDebug = true;
-  QString JSROOT = "https://root.cern/js/latest/";
-  unsigned int RootServerPort = 0;
+  AJavaScriptManager* ScriptManager = nullptr;
 
   QString Ticket;
   bool bTicketChecked = true;

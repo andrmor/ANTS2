@@ -15,6 +15,7 @@
 #include "aeventtrackingrecord.h"
 #include "asandwich.h"
 #include "apmhub.h"
+#include "ageoobject.h"
 
 #include <QDebug>
 #include <QJsonObject>
@@ -375,7 +376,7 @@ void ASimulationManager::StopSimulation()
     emit RequestStopSimulation();
 }
 
-void ASimulationManager::onNewGeoManager(TObject *)
+void ASimulationManager::onNewGeoManager()
 {
     clearTrackingHistory();
 }
@@ -476,5 +477,32 @@ void ASimulationManager::generateG4antsConfigCommon(QJsonObject & json, int Thre
     json["File_Tracks"] = tracFN;
     removeOldFile(tracFN, "tracking");
 
+    QString monFeedbackFN = G4SimSet.getMonitorDataFileName(ThreadId);
+    json["File_Monitors"] = monFeedbackFN;
+    removeOldFile(monFeedbackFN, "monitor data");
+
     json["Precision"]    = G4SimSet.Precision;
+
+    QJsonArray arMon;
+    const QVector<const AGeoObject*> & MonitorsRecords = Detector.Sandwich->MonitorsRecords;
+    for (int iMon = 0; iMon <  MonitorsRecords.size(); iMon++)
+    {
+        const AGeoObject * obj = MonitorsRecords.at(iMon);
+        const AMonitorConfig * mc = obj->getMonitorConfig();
+        if (mc && mc->PhotonOrParticle == 1)
+        {
+            const QStringList ParticleList = Detector.MpCollection->getListOfParticleNames();
+            const int particleIndex = mc->ParticleIndex;
+            if ( particleIndex >= -1 && particleIndex < ParticleList.size() )
+            {
+                QJsonObject mjs;
+                mc->writeToJson(mjs);
+                mjs["Name"] = obj->Name;
+                mjs["ParticleName"] = ( particleIndex == -1 ? "" : ParticleList.at(particleIndex) );
+                mjs["MonitorIndex"] = iMon;
+                arMon.append(mjs);
+            }
+        }
+    }
+    json["Monitors"] = arMon;
 }

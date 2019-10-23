@@ -60,10 +60,12 @@ PMsensorGroup &PMsensorGroup::operator=(const PMsensorGroup &copy)
 
 QVector<PMsensorGroup> PMsensorGroup::mkFromSensorsAndLRFs(QVector<int> gids, QVector<PMsensor> sensors, QVector<LRF2*> lrfs)
 {
-  int maxGid = 0;
-  for(int i = 0; i < sensors.size(); i++)
-    if(gids[i] > maxGid)
-      maxGid = gids[i];
+    int maxGid = 0;
+    for(int i = 0; i < sensors.size(); i++)
+    {
+        if(gids[i] > maxGid)
+            maxGid = gids[i];
+    }
 
     QVector<PMsensorGroup> groups(maxGid+1);
     for(int i = 0; i < sensors.size(); i++)

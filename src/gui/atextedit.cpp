@@ -960,7 +960,8 @@ void ATextEdit::paste()
         QString toInsert;
         for (int i=0; i<lines.size(); i++)
         {
-            QString modLine = lines.at(i) + "\n";
+            QString modLine = lines.at(i);
+            if (i != lines.size()-1) modLine += "\n";
             if (i != 0) modLine = QString(newIdent, ' ') + modLine;
             toInsert += modLine;
         }

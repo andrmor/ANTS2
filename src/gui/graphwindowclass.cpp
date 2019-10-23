@@ -1214,9 +1214,8 @@ QVector<DrawObjectStructure>* GraphWindowClass::getCurrentDrawObjects()
 
 void GraphWindowClass::SaveGraph(QString fileName)
 {
-  QFileInfo file(fileName);
-  if(file.suffix().isEmpty()) fileName += ".png";
-
+  //QFileInfo file(fileName);
+  //if(file.suffix().isEmpty()) fileName += ".png";
   //qDebug() << "Saving graph:" << fileName;
   RasterWindow->SaveAs(fileName);
 }
@@ -3441,6 +3440,9 @@ void GraphWindowClass::on_actionSave_image_triggered()
   QString fileName = fileDialog->getSaveFileName(this, "Save image as file", MW->GlobSet.LastOpenDir, "png (*.png);;gif (*.gif);;Jpg (*.jpg)");
   if (fileName.isEmpty()) return;
   MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+
+  QFileInfo file(fileName);
+  if (file.suffix().isEmpty()) fileName += ".png";
 
   GraphWindowClass::SaveGraph(fileName);
   if (MW->GlobSet.fOpenImageExternalEditor) QDesktopServices::openUrl(QUrl("file:"+fileName, QUrl::TolerantMode));

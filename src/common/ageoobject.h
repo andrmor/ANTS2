@@ -71,6 +71,7 @@ public:
   void refreshShapeCompositeMembers(AGeoShape* ExternalShape = 0); //safe to use on any AGeoObject; if ExternalShape is provided , it is updated; otherwise, Objects's shape is updated
   bool isInUseByComposite(); //safe to use on any AGeoObject
   void clearCompositeMembers();
+  void removeCompositeStructure();
 
   //for grid
   AGeoObject* getGridElement();
@@ -79,6 +80,7 @@ public:
 
   //for monitor
   void updateMonitorShape();
+  const AMonitorConfig * getMonitorConfig() const; //returns nullptr if obj is not a monitor
 
   // the following checks are always done DOWN the chain
   // for global effect, the check has to be performed on World (Top) object
@@ -111,6 +113,7 @@ public:
   void updateWorldSize(double& XYm, double& Zm);
   bool isMaterialInUse(int imat) const;  //including disabled objects
   bool isMaterialInActiveUse(int imat) const;  //excluding disabled objects
+  void collectContainingObjects(QVector<AGeoObject*> & vec) const;
 
   //service propertie
   QString tmpContName; //used only during load:
@@ -319,6 +322,14 @@ class AGeoShape
 public:
   AGeoShape() {}
   virtual ~AGeoShape() {}
+
+  /*
+  bool bScale = false;
+  double ScaleX = 1.0;
+  double ScaleY = 1.0;
+  double ScaleZ = 1.0;
+  */
+
   virtual bool readFromString(QString /*GenerationString*/) {return false;}
 
   //general: the same for all objects of the given shape
@@ -335,8 +346,8 @@ public:
   virtual double minSize() {return 0;} //for monitors only!
 
   //json
-  virtual void writeToJson(QJsonObject& /*json*/) {}
-  virtual void readFromJson(QJsonObject& /*json*/) {}
+  virtual void writeToJson(QJsonObject &/*json*/){}
+  virtual void readFromJson(QJsonObject &/*json*/){}
 
   //from Tshape if geometry was loaded from GDML
   virtual bool readFromTShape(TGeoShape* /*Tshape*/) {return false;}
@@ -369,8 +380,8 @@ public:
   virtual const QString getGenerationString() const;
   virtual double maxSize();
 
-  virtual void writeToJson(QJsonObject& json);
-  virtual void readFromJson(QJsonObject& json);
+  virtual void writeToJson(QJsonObject &json);
+  virtual void readFromJson( QJsonObject &json);
 
   virtual bool readFromTShape(TGeoShape* Tshape);
 
@@ -384,7 +395,7 @@ public:
   AGeoConeSeg(double dz, double rminL, double rmaxL, double rminU, double rmaxU, double phi1, double phi2) :
     dz(dz), rminL(rminL), rmaxL(rmaxL), rminU(rminU), rmaxU(rmaxU), phi1(phi1), phi2(phi2) {}
   AGeoConeSeg() :
-    dz(10), rminL(0), rmaxL(20), rminU(0), rmaxU(20), phi1(0), phi2(360) {}
+    dz(10), rminL(0), rmaxL(20), rminU(0), rmaxU(5), phi1(0), phi2(180) {}
   virtual ~AGeoConeSeg() {}
 
   virtual const QString getShapeType() {return "TGeoConeSeg";}
@@ -417,7 +428,7 @@ public:
   AGeoCone(double dz, double rmaxL, double rmaxU) :
     dz(dz), rminL(0), rmaxL(rmaxL), rminU(0), rmaxU(rmaxU) {}
   AGeoCone() :
-    dz(10), rminL(0), rmaxL(20), rminU(0), rmaxU(20) {}
+    dz(10), rminL(0), rmaxL(20), rminU(0), rmaxU(0) {}
   virtual ~AGeoCone() {}
 
   virtual const QString getShapeType() {return "TGeoCone";}
@@ -433,7 +444,7 @@ public:
   virtual double maxSize();
 
   virtual void writeToJson(QJsonObject& json);
-  virtual void readFromJson(QJsonObject& json);
+  virtual void readFromJson(QJsonObject &json);
 
   virtual bool readFromTShape(TGeoShape* Tshape);
 
@@ -491,7 +502,7 @@ struct APolyCGsection
 class AGeoPcon : public AGeoShape
 {
 public:
-  AGeoPcon() : phi(0), dphi(360) {}
+  AGeoPcon();
   virtual ~AGeoPcon() {}
 
   virtual const QString getShapeType() {return "TGeoPcon";}
@@ -778,8 +789,8 @@ public:
   virtual double maxSize();
   virtual double minSize() override;
 
-  virtual void writeToJson(QJsonObject& json);
-  virtual void readFromJson(QJsonObject& json);
+  virtual void writeToJson(QJsonObject& json) override;
+  virtual void readFromJson(QJsonObject& json) override;
 
   virtual bool readFromTShape(TGeoShape* Tshape);
 
@@ -895,6 +906,9 @@ public:
   virtual const QString getGenerationString() const;
   virtual double maxSize() {return 0;}  //***!!!
 
+  const QString getBaseShapeType() const;
+  TGeoShape * generateBaseTGeoShape(const QString & BaseShapeGenerationString) const;
+
   virtual void writeToJson(QJsonObject& json);
   virtual void readFromJson(QJsonObject& json);
 
@@ -903,8 +917,6 @@ public:
   QString BaseShapeGenerationString;
   double scaleX, scaleY, scaleZ;
 
-private:
-  TGeoShape* generateBaseTGeoShape(QString BaseShapeGenerationString);
 };
 
 class AGeoTorus  : public AGeoShape
@@ -932,9 +944,9 @@ public:
 
   virtual bool readFromTShape(TGeoShape* Tshape);
 
-  double R;
-  double Rmin, Rmax;
-  double Phi1, Dphi;
+  double R = 100.0;
+  double Rmin = 0, Rmax = 20.0;
+  double Phi1 = 0, Dphi = 360.0;
 };
 
 #endif // AGEOOBJECT_H

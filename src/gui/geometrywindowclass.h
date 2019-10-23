@@ -6,6 +6,10 @@
 
 class MainWindow;
 class RasterWindowBaseClass;
+class QWebEngineView;
+class QVariant;
+class QWebEngineDownloadItem;
+class TGeoVolume;
 
 namespace Ui {
   class GeometryWindowClass;
@@ -58,6 +62,8 @@ public:
   void ShowGeometry(bool ActivateWindow = true, bool SAME = true, bool ColorUpdateAllowed = true);
   void ShowEvent_Particles(size_t iEvent, bool withSecondaries);
   void ShowPMsignals(int iEvent, bool bFullCycle = true);
+  void ShowGeoMarkers();
+  void ShowTracksAndMarkers();
 
   void ClearTracks(bool bRefreshWindow = true);
 
@@ -70,7 +76,7 @@ public slots:
     void ShowPoint(double * r, bool keepTracks = false);
     void ShowPMnumbers();
     void ShowMonitorIndexes();
-    void ShowText(const QVector<QString> & strData, Color_t color, bool onPMs = true, bool bFullCycle = true); //false - on monitors
+    void ShowText(const QVector<QString> & strData, Color_t color, bool onPMs = true, bool bFullCycle = true); //onPMs=false -> srawing on monitors
     void on_pbTop_clicked();
     void on_pbFront_clicked();
     void onRasterWindowChange(double centerX, double centerY, double hWidth, double hHeight, double phi, double theta);
@@ -82,10 +88,12 @@ public slots:
     void on_pbClearDots_clicked();
 
 private slots:
+    void onDownloadPngRequested(QWebEngineDownloadItem *item);
+
+private slots:
     void on_cbShowTop_toggled(bool checked);
     void on_cbColor_toggled(bool checked);
     void on_pbSaveAs_clicked();
-    void on_pbShowGLview_clicked();
     void on_pbSide_clicked();
     void on_cobViewType_currentIndexChanged(int index);
     void on_cbShowAxes_toggled(bool checked);
@@ -100,14 +108,22 @@ private slots:
     void on_actionDefault_zoom_to_0_triggered();
     void on_actionSet_line_width_for_objects_triggered();
     void on_actionDecrease_line_width_triggered();
-    void on_pbWebViewer_clicked();
-
     void on_pbShowMonitorIndexes_clicked();
+    void on_cobViewer_currentIndexChanged(int index);
+    void on_actionOpen_GL_viewer_triggered();
+    void on_actionJSROOT_in_browser_triggered();
+    void on_cbWireFrame_toggled(bool checked);
+    void on_cbLimitVisibility_clicked();
+    void on_sbLimitVisibility_editingFinished();
 
 private:
   MainWindow* MW;
   Ui::GeometryWindowClass *ui;
   RasterWindowBaseClass *RasterWindow = 0;
+
+#ifdef __USE_ANTS_JSROOT__
+    QWebEngineView * WebView = nullptr;
+#endif
 
   bool TMPignore = false;
 
@@ -118,6 +134,9 @@ private:
 
 private:
   void doChangeLineWidth(int deltaWidth);
+  void showWebView();
+  void prepareGeoManager(bool ColorUpdateAllowed = true);
+  void adjustGeoAttributes(TGeoVolume *vol, int Mode, int transp, bool adjustVis, int visLevel, int currentLevel);
 };
 
 #endif // GEOMETRYWINDOWCLASS_H

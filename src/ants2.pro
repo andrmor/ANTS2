@@ -1,6 +1,6 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 4
-ANTS2_MINOR = 20
+ANTS2_MINOR = 22
 
 #Optional libraries
 #CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
@@ -10,6 +10,8 @@ CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algeb
 CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 #CONFIG += ants2_Python      #enable Python scripting
 #CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering): see https://github.com/mctools/ncrystal
+
+CONFIG += ants2_jsroot       #enables JSROOT visualisation at GeometryWindow. Automatically enables ants2_RootServer
 
 # You may need to modify paths for CERN ROOT and the enabled libraries! See the corresponding sections below
 
@@ -185,12 +187,6 @@ ants2_cuda {
      }
 }
 
-#---ROOT server---
-ants2_RootServer{
-  DEFINES += USE_ROOT_HTML
-}
-#----------
-
 #---Python---
 ants2_Python{
     DEFINES += __USE_ANTS_PYTHON__
@@ -254,7 +250,22 @@ ants2_NCrystal{
 }
 #----------
 
+#---JSROOT viewer---
+ants2_jsroot{
+    DEFINES += __USE_ANTS_JSROOT__
+    QT      += webenginewidgets
+    CONFIG  += ants2_RootServer
+}
+#----------
 
+#---ROOT server---
+ants2_RootServer{
+  DEFINES += USE_ROOT_HTML
+
+    SOURCES += Net/aroothttpserver.cpp
+    HEADERS += Net/aroothttpserver.h
+}
+#----------
 
 #Can be used as command line option to force-disable GUI
 Headless {
@@ -284,7 +295,6 @@ SOURCES += main.cpp \
     modules/detectorclass.cpp \
     modules/eventsdataclass.cpp \
     modules/dynamicpassiveshandler.cpp \
-    modules/processorclass.cpp \
     modules/flatfield.cpp \
     modules/sensorlrfs.cpp \
     modules/manifesthandling.cpp \
@@ -329,7 +339,6 @@ SOURCES += main.cpp \
     modules/amaterialparticlecolection.cpp\
     common/ascriptvalueconverter.cpp \
     common/ainternetbrowser.cpp \
-    Net/aroothttpserver.cpp \
     Net/anetworkmodule.cpp \
     common/aphotonhistorylog.cpp \
     common/amonitor.cpp \
@@ -345,7 +354,7 @@ SOURCES += main.cpp \
     common/arootobjcollection.cpp \
     common/arootobjbase.cpp \
     common/acalibratorsignalperphel.cpp \
-    modules/areconstructionmanager.cpp \
+    Reconstruction/areconstructionmanager.cpp \
     scriptmode/ajavascriptmanager.cpp \
     scriptmode/ascriptmanager.cpp \
     common/apm.cpp \
@@ -370,10 +379,10 @@ SOURCES += main.cpp \
     OpticalOverrides/abasicopticaloverride.cpp \
     common/aglobalsettings.cpp \
     common/aparticlesourcerecord.cpp \
-    modules/ascriptparticlegenerator.cpp \
-    modules/afileparticlegenerator.cpp \
-    common/aparticlerecord.cpp \
-    modules/asourceparticlegenerator.cpp \
+    Simulation/ascriptparticlegenerator.cpp \
+    Simulation/afileparticlegenerator.cpp \
+    Simulation/aparticlerecord.cpp \
+    Simulation/asourceparticlegenerator.cpp \
     common/aisotopeabundancehandler.cpp \
     common/aisotope.cpp \
     common/achemicalelement.cpp \
@@ -401,7 +410,9 @@ SOURCES += main.cpp \
     Simulation/aparticletracker.cpp \
     common/aexternalprocesshandler.cpp \
     gui/MainWindowTools/alogconfigdialog.cpp \
-    Simulation/alogsandstatisticsoptions.cpp
+    Simulation/alogsandstatisticsoptions.cpp \
+    Reconstruction/areconstructionworker.cpp \
+    common/ahistogram.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -427,7 +438,6 @@ HEADERS  += common/CorrelationFilters.h \
     modules/sensorlrfs.h \
     modules/eventsdataclass.h \
     modules/dynamicpassiveshandler.h \
-    modules/processorclass.h \
     modules/manifesthandling.h \
     modules/apmgroupsmanager.h \
     SplineLibrary/spline.h \
@@ -481,7 +491,6 @@ HEADERS  += common/CorrelationFilters.h \
     modules/amaterialparticlecolection.h\
     common/ascriptvalueconverter.h \
     common/ainternetbrowser.h \
-    Net/aroothttpserver.h \
     Net/anetworkmodule.h \
     SplineLibrary/eiquadprog.hpp \
     common/aphotonhistorylog.h \
@@ -500,7 +509,7 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/aroothistrecord.h \
     common/arootobjbase.h \
     common/acalibratorsignalperphel.h \
-    modules/areconstructionmanager.h \
+    Reconstruction/areconstructionmanager.h \
     scriptmode/ajavascriptmanager.h \
     scriptmode/ascriptmanager.h \
     common/apm.h \
@@ -523,11 +532,11 @@ HEADERS  += common/CorrelationFilters.h \
     OpticalOverrides/abasicopticaloverride.h \
     common/aglobalsettings.h \
     common/aparticlesourcerecord.h \
-    common/aparticlegun.h \
-    modules/ascriptparticlegenerator.h \
-    modules/afileparticlegenerator.h \
-    common/aparticlerecord.h \
-    modules/asourceparticlegenerator.h \
+    Simulation/aparticlegun.h \
+    Simulation/ascriptparticlegenerator.h \
+    Simulation/afileparticlegenerator.h \
+    Simulation/aparticlerecord.h \
+    Simulation/asourceparticlegenerator.h \
     common/aisotopeabundancehandler.h \
     common/aisotope.h \
     common/achemicalelement.h \
@@ -555,7 +564,10 @@ HEADERS  += common/CorrelationFilters.h \
     Simulation/aparticletracker.h \
     common/aexternalprocesshandler.h \
     gui/MainWindowTools/alogconfigdialog.h \
-    Simulation/alogsandstatisticsoptions.h
+    Simulation/alogsandstatisticsoptions.h \
+    Reconstruction/afunctorbase.h \
+    Reconstruction/areconstructionworker.h \
+    common/ahistogram.h
 
 # --- SIM ---
 ants2_SIM {
@@ -802,6 +814,7 @@ INCLUDEPATH += common
 INCLUDEPATH += scriptmode
 INCLUDEPATH += Net
 INCLUDEPATH += Simulation
+INCLUDEPATH += Reconstruction
 
 RESOURCES += \
     Resources.qrc

@@ -289,3 +289,18 @@ const QString jsonToString(const QJsonObject &json)
     QString s( doc.toJson(QJsonDocument::Compact) );
     return s;
 }
+
+bool LoadJsonArrayFromFile(QJsonArray &ar, const QString &fileName)
+{
+    QFile loadFile(fileName);
+    if (loadFile.open(QIODevice::ReadOnly))
+    {
+        QByteArray saveData = loadFile.readAll();
+        QJsonDocument loadDoc(QJsonDocument::fromJson(saveData));
+        ar = loadDoc.array();
+        loadFile.close();
+        return true;
+    }
+    else
+        return false;
+}

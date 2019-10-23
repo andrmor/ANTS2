@@ -38,6 +38,9 @@ void ASandwich::clearWorld()
     for (int i=0; i<World->HostedObjects.size(); i++)
         World->HostedObjects[i]->clearAll();
     World->HostedObjects.clear();
+
+    clearGridRecords();
+    clearMonitorRecords();
 }
 
 void ASandwich::appendSlab(ASlabModel *slab)

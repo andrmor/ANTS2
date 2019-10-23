@@ -43,7 +43,7 @@ void AG4SimulationSettings::writeToJson(QJsonObject &json) const
     }
     json["StepLimits"] = arSL;
 
-    json["Precision"]         = Precision;
+    json["Precision"]  = Precision;
 }
 
 void AG4SimulationSettings::readFromJson(const QJsonObject &json)
@@ -98,12 +98,17 @@ const QString AG4SimulationSettings::getReceitFileName(int iThreadNum) const
 
 const QString AG4SimulationSettings::getConfigFileName(int iThreadNum) const
 {
-    return getPath() + QString("aga-%1.json").arg(iThreadNum);
+    return getPath() + QString("config-%1.json").arg(iThreadNum);
 }
 
 const QString AG4SimulationSettings::getTracksFileName(int iThreadNum) const
 {
     return getPath() + QString("tracks-%1.txt").arg(iThreadNum);
+}
+
+const QString AG4SimulationSettings::getMonitorDataFileName(int iThreadNum) const
+{
+    return getPath() + QString("monitors-%1.json").arg(iThreadNum);
 }
 
 const QString AG4SimulationSettings::getGdmlFileName() const

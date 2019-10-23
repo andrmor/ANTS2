@@ -4,7 +4,7 @@
 #include "alrfmoduleselector.h"
 #include "sensorlrfs.h"     // TEMPORARY! see cuda
 #include "ajsontools.h"
-#include "processorclass.h"
+#include "areconstructionworker.h"
 #include "ageoobject.h"
 #include "apositionenergyrecords.h"
 #include "apmhub.h"
@@ -98,7 +98,7 @@ bool AReconstructionManager::reconstructAll(QJsonObject &json, int numThreads, b
   QTime timer;
   timer.start();
 
-  QList<ProcessorClass*> todo;
+  QList<AReconstructionWorker*> todo;
   bBusy = true;
   for (CurrentGroup=0; CurrentGroup<RecSet.size(); CurrentGroup++)
   {
@@ -261,7 +261,7 @@ bool AReconstructionManager::reconstructAll(QJsonObject &json, int numThreads, b
       //if multiple option = 2, have to do double rec and compare sigma with single
       if (RecSet.at(CurrentGroup).MultipleEventOption == 2)
       {
-          qDebug() << "--> Running double event reconstruction";
+          //qDebug() << "--> Running double event reconstruction";
           todo.clear();
           distributeWork(12, todo);
           fOK = run(todo);
@@ -282,7 +282,7 @@ bool AReconstructionManager::reconstructAll(QJsonObject &json, int numThreads, b
   return true;
 }
 
-void AReconstructionManager::distributeWork(int Algorithm, QList<ProcessorClass*> &todo)
+void AReconstructionManager::distributeWork(int Algorithm, QList<AReconstructionWorker*> &todo)
 // Algorithm options:
 //0 - CoG reconstruction, 1 - MG, 2 - RootMini
 //10 - Calculate Chi2, 11 - process event filters
@@ -307,9 +307,7 @@ void AReconstructionManager::distributeWork(int Algorithm, QList<ProcessorClass*
           todo << new CGonCPUreconstructorClass(PMs, PMgroups, LRFs, EventsDataHub, &RecSet[CurrentGroup], CurrentGroup, from, to);
           break;
       case 2:
-          if (RecSet.at(CurrentGroup).fLimitSearchIfTrueIsSet)
-               todo << new RootMinRangedReconstructorClass(PMs, PMgroups, LRFs, EventsDataHub, &RecSet[CurrentGroup], CurrentGroup, from, to, RecSet.at(CurrentGroup).RangeForLimitSearchIfTrueSet, RecSet.at(CurrentGroup).LimitSearchGauss);
-          else if (RecSet.at(CurrentGroup).MultipleEventOption == 1) //in the case of 2(chose best single or double), first single is calculated
+          if (RecSet.at(CurrentGroup).MultipleEventOption == 1) //in the case of 2(chose best single or double), first single is calculated
                todo << new RootMinDoubleReconstructorClass(PMs, PMgroups, LRFs, EventsDataHub, &RecSet[CurrentGroup], CurrentGroup, from, to);
           else todo << new RootMinReconstructorClass(PMs, PMgroups, LRFs, EventsDataHub, &RecSet[CurrentGroup], CurrentGroup, from, to);
           break;
@@ -333,7 +331,7 @@ void AReconstructionManager::distributeWork(int Algorithm, QList<ProcessorClass*
 
 void AReconstructionManager::doFilters()
 {
-    QList<ProcessorClass*> todo;
+    QList<AReconstructionWorker*> todo;
 
     bBusy = true;
     for (CurrentGroup=0; CurrentGroup<FiltSet.size(); CurrentGroup++)
@@ -541,7 +539,7 @@ void AReconstructionManager::onRequestFilterAndAskToUpdateGui()
 }
 
 #include <QThread>
-bool AReconstructionManager::run(QList<ProcessorClass *> reconstructorList)
+bool AReconstructionManager::run(QList<AReconstructionWorker *> reconstructorList)
 {    
   fStopRequested = false;
   QList<QThread*> threads;  
@@ -549,7 +547,7 @@ bool AReconstructionManager::run(QList<ProcessorClass *> reconstructorList)
     {
       fDoingCopyLRFs.store(true);
       threads.append(new QThread());
-      QObject::connect(threads.last(), &QThread::started, reconstructorList[ithread], &ProcessorClass::copyLrfsAndExecute);
+      QObject::connect(threads.last(), &QThread::started, reconstructorList[ithread], &AReconstructionWorker::copyLrfsAndExecute);
       QObject::connect(reconstructorList[ithread], SIGNAL(lrfsCopied()), this, SLOT(onLRFsCopied()), Qt::DirectConnection);
       QObject::connect(reconstructorList[ithread], SIGNAL(finished()), threads.last(), SLOT(quit()));
       QObject::connect(threads.last(), SIGNAL(finished()), threads.last(), SLOT(deleteLater()));
@@ -658,7 +656,7 @@ void AReconstructionManager::assureReconstructionDataContainersExist()
            EventsDataHub->createDefaultReconstructionData(CurrentGroup);
 
            //qDebug() << "Running CoG to fill created ReconstructionData";
-           QList<ProcessorClass*> todo;
+           QList<AReconstructionWorker*> todo;
            distributeWork(0, todo);
            run(todo);
        }

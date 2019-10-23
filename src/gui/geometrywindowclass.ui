@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>711</width>
-    <height>668</height>
+    <width>854</width>
+    <height>754</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -55,6 +55,33 @@
         <number>3</number>
        </property>
        <item>
+        <widget class="QComboBox" name="cobViewer">
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <item>
+          <property name="text">
+           <string>TGeo viewer</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>JSROOT viewer</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="Line" name="line">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="pbShowGeometry">
          <property name="minimumSize">
           <size>
@@ -88,6 +115,13 @@
         </widget>
        </item>
        <item>
+        <widget class="QCheckBox" name="cbWireFrame">
+         <property name="text">
+          <string>Wire-frame</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QCheckBox" name="cbShowTop">
          <property name="text">
           <string>Show world</string>
@@ -109,7 +143,40 @@
         </widget>
        </item>
        <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <property name="spacing">
+          <number>3</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>Transp:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="sbTransparency">
+           <property name="toolTip">
+            <string>Transparency of volumes (0 = not transparent)</string>
+           </property>
+           <property name="singleStep">
+            <number>0</number>
+           </property>
+           <property name="value">
+            <number>50</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
+         <property name="spacing">
+          <number>3</number>
+         </property>
          <item>
           <widget class="QCheckBox" name="cbLimitVisibility">
            <property name="toolTip">
@@ -185,14 +252,14 @@
        <item>
         <widget class="QPushButton" name="pbClearTracks">
          <property name="text">
-          <string>Clear all tracks</string>
+          <string>Clear tracks</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="pbClearDots">
          <property name="text">
-          <string>Clear all dots</string>
+          <string>Clear markers</string>
          </property>
         </widget>
        </item>
@@ -211,57 +278,6 @@
         </widget>
        </item>
        <item>
-        <widget class="Line" name="line_7">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pbShowGLview">
-         <property name="text">
-          <string>Open GL viewer</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pbWebViewer">
-         <property name="toolTip">
-          <string>View geometry using JSROOT</string>
-         </property>
-         <property name="text">
-          <string>JSROOT</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_3">
-         <item>
-          <widget class="QLabel" name="label_2">
-           <property name="text">
-            <string>Transp:</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QSpinBox" name="sbTransparency">
-           <property name="toolTip">
-            <string>Transparency of volumes (0 = not transparent)</string>
-           </property>
-           <property name="singleStep">
-            <number>0</number>
-           </property>
-           <property name="value">
-            <number>50</number>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
         <widget class="Line" name="line_6">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -271,7 +287,7 @@
        <item>
         <widget class="QLabel" name="label_3">
          <property name="text">
-          <string>Switch view:</string>
+          <string>Switch to view:</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -315,6 +331,15 @@
       </layout>
      </widget>
     </item>
+    <item>
+     <widget class="QStackedWidget" name="swViewers">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="geo"/>
+      <widget class="QWidget" name="jsroot"/>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -322,7 +347,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>711</width>
+     <width>854</width>
      <height>25</height>
     </rect>
    </property>
@@ -353,6 +378,14 @@
     <addaction name="actionSet_line_width_for_objects"/>
     <addaction name="actionDecrease_line_width"/>
    </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="actionOpen_GL_viewer"/>
+    <addaction name="actionJSROOT_in_browser"/>
+   </widget>
+   <addaction name="menuView"/>
    <addaction name="menuMarkers"/>
    <addaction name="menuLines"/>
    <addaction name="menuZoom"/>
@@ -433,6 +466,16 @@
     <string>Decrease line width</string>
    </property>
   </action>
+  <action name="actionOpen_GL_viewer">
+   <property name="text">
+    <string>Open GL viewer</string>
+   </property>
+  </action>
+  <action name="actionJSROOT_in_browser">
+   <property name="text">
+    <string>JSROOT in browser</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections>
@@ -443,44 +486,28 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>32</x>
-     <y>517</y>
+     <x>51</x>
+     <y>281</y>
     </hint>
     <hint type="destinationlabel">
-     <x>67</x>
-     <y>529</y>
+     <x>135</x>
+     <y>283</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>cbLimitVisibility</sender>
-   <signal>clicked()</signal>
-   <receiver>pbShowGeometry</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>67</x>
-     <y>509</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>83</x>
-     <y>69</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>sbLimitVisibility</sender>
+   <sender>sbTransparency</sender>
    <signal>editingFinished()</signal>
    <receiver>pbShowGeometry</receiver>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>71</x>
-     <y>539</y>
+     <x>104</x>
+     <y>245</y>
     </hint>
     <hint type="destinationlabel">
-     <x>93</x>
-     <y>73</y>
+     <x>119</x>
+     <y>74</y>
     </hint>
    </hints>
   </connection>

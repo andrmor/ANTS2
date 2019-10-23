@@ -21,6 +21,7 @@ public:
 
   void updateGUI();
   void SetTab(int iTab);
+  void ShowNetSettings();
 
   AGStyle_SI* GStyleInterface = 0;  // if created -> owned by the script manager
 

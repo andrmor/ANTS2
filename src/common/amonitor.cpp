@@ -89,43 +89,78 @@ void AMonitor::appendDataFromAnotherMonitor(AMonitor *from)
     appendTH1D(energy, from->getEnergy());
 }
 
-void AMonitor::configureTime(int timeBins, double timeFrom, double timeTo)
+#include "ahistogram.h"
+#include <QJsonObject>
+#include <QJsonArray>
+void AMonitor::overrideDataFromJson(const QJsonObject &json)
 {
-    config.timeBins = timeBins;
-    config.timeFrom = timeFrom;
-    config.timeTo = timeTo;
-    initTimeHist();
+    QJsonObject jEnergy = json["Energy"].toObject();
+    update1D(jEnergy, energy);
+
+    QJsonObject jAngle = json["Angle"].toObject();
+    update1D(jAngle, angle);
+
+    QJsonObject jTime = json["Time"].toObject();
+    update1D(jTime, time);
+
+    QJsonObject jSpatial = json["Spatial"].toObject();
+    double xfrom = jSpatial["xfrom"].toDouble();
+    double xto   = jSpatial["xto"].toDouble();
+    double yfrom = jSpatial["yfrom"].toDouble();
+    double yto   = jSpatial["yto"].toDouble();
+
+    QJsonArray dataAr = jSpatial["data"].toArray();
+    int ybins = dataAr.size();
+    std::vector<std::vector<double>> dataVec;
+    dataVec.resize(ybins);
+    for (int iy=0; iy<ybins; iy++)
+    {
+        QJsonArray row = dataAr[iy].toArray();
+        int xbins = row.size();
+        dataVec[iy].resize(xbins);
+        for (int ix=0; ix<xbins; ix++)
+            dataVec[iy][ix] = row[ix].toDouble();
+    }
+    QJsonArray statAr = jSpatial["stat"].toArray();
+    std::vector<double> statVec;
+    for (int i=0; i<statAr.size(); i++)
+        statVec.push_back(statAr[i].toDouble());
+    ATH2D * hist = new ATH2D("", "", 100, 0, 1.0, 100, 0, 1.0);
+    hist->Import(xfrom, xto, yfrom, yto, dataVec, statVec);
+    delete xy; xy = hist;
 }
 
-void AMonitor::configureXY(int xBins, int yBins)
+void AMonitor::update1D(const QJsonObject & json, TH1D* & old)
 {
-    config.xbins = xBins;
-    config.ybins = yBins;
-    initXYHist();
-}
+    double from = json["from"].toDouble();
+    double to =   json["to"].toDouble();
 
-void AMonitor::configureWave(int waveBins, int waveFrom, int waveTo)
-{
-    config.waveBins = waveBins;
-    config.waveFrom = waveFrom;
-    config.waveTo = waveTo;
-    initWaveHist();
-}
+    QJsonArray dataAr = json["data"].toArray();
+    std::vector<double> dataVec;
+    for (int i=0; i<dataAr.size(); i++)
+        dataVec.push_back(dataAr[i].toDouble());
 
-void AMonitor::configureAngle(int angleBins, int angleFrom, int angleTo)
-{
-    config.angleBins = angleBins;
-    config.angleFrom = angleFrom;
-    config.angleTo = angleTo;
-    initAngleHist();
-}
+    QJsonArray statAr = json["stat"].toArray();
+    std::vector<double> statVec;
+    for (int i=0; i<statAr.size(); i++)
+        statVec.push_back(statAr[i].toDouble());
 
-void AMonitor::configureEnergy(int energyBins, int energyFrom, int energyTo)
-{
-    config.energyBins = energyBins;
-    config.energyFrom = energyFrom;
-    config.energyTo = energyTo;
-    initEnergyHist();
+    double multiplier = 1.0;
+    if (old == energy)
+    {
+        switch (config.energyUnitsInHist)
+        {
+        case 0:  multiplier = 1.0e6;  break;// keV -> meV
+        case 1:  multiplier = 1.0e3;  break;// keV -> eV
+        default: multiplier = 1.0;    break;// keV -> keV
+        case 3:  multiplier = 1.0e-3; break;// keV -> MeV
+        }
+    }
+
+    ATH1D * hist = new ATH1D(*old); //to inherit all properties, including the axis titles
+    hist->Import(from * multiplier, to * multiplier, dataVec, statVec);
+    delete old;
+    old = hist;
 }
 
 void AMonitor::initXYHist()

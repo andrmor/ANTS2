@@ -39,7 +39,7 @@
      <enum>QTabWidget::Rounded</enum>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tabConfig">
      <attribute name="title">
@@ -408,9 +408,9 @@
         <widget class="QTabWidget" name="twPMtypeProperties">
          <property name="geometry">
           <rect>
-           <x>27</x>
+           <x>7</x>
            <y>160</y>
-           <width>481</width>
+           <width>511</width>
            <height>90</height>
           </rect>
          </property>
@@ -419,7 +419,7 @@
          </property>
          <widget class="QWidget" name="tabDetectionProbability">
           <attribute name="title">
-           <string>Quantum efficiency</string>
+           <string>Photon detection efficiency</string>
           </attribute>
           <widget class="QLineEdit" name="ledPDE">
            <property name="geometry">
@@ -447,7 +447,7 @@
             </rect>
            </property>
            <property name="text">
-            <string>QE:</string>
+            <string>PDE:</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -501,7 +501,7 @@
             </rect>
            </property>
            <property name="text">
-            <string>QE vs. wavelength:</string>
+            <string>PDE vs. wavelength:</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -562,7 +562,7 @@
             </rect>
            </property>
            <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Estimate the wavelength-inedependent value of the detection efficiency using the emission spectrum of the primary scintillator material and the wavelength-resolved detection efficiency.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string>Estimate the effective PDE using primary scintillation emission spectrum of the material:</string>
            </property>
            <property name="text">
             <string>Estimate</string>
@@ -573,7 +573,7 @@
             <rect>
              <x>160</x>
              <y>15</y>
-             <width>70</width>
+             <width>150</width>
              <height>3</height>
             </rect>
            </property>
@@ -600,6 +600,16 @@
             <enum>Qt::Horizontal</enum>
            </property>
           </widget>
+          <widget class="QComboBox" name="cobMaterialToEstimatePDE">
+           <property name="geometry">
+            <rect>
+             <x>290</x>
+             <y>6</y>
+             <width>137</width>
+             <height>23</height>
+            </rect>
+           </property>
+          </widget>
           <zorder>line_41</zorder>
           <zorder>line_40</zorder>
           <zorder>ledPDE</zorder>
@@ -611,6 +621,7 @@
           <zorder>pbShowPDEbinned</zorder>
           <zorder>pbScalePDE</zorder>
           <zorder>pbPDEFromWavelength</zorder>
+          <zorder>cobMaterialToEstimatePDE</zorder>
          </widget>
          <widget class="QWidget" name="tabPMtypeAngularSens">
           <attribute name="title">
@@ -619,7 +630,7 @@
           <widget class="QPushButton" name="pbPMtypeShowAngular">
            <property name="geometry">
             <rect>
-             <x>9</x>
+             <x>40</x>
              <y>9</y>
              <width>91</width>
              <height>23</height>
@@ -632,7 +643,7 @@
           <widget class="QPushButton" name="pbPMtypeLoadAngular">
            <property name="geometry">
             <rect>
-             <x>109</x>
+             <x>140</x>
              <y>9</y>
              <width>91</width>
              <height>23</height>
@@ -654,7 +665,7 @@
           <widget class="QPushButton" name="pbPMtypeDeleteAngular">
            <property name="geometry">
             <rect>
-             <x>209</x>
+             <x>240</x>
              <y>9</y>
              <width>20</width>
              <height>23</height>
@@ -667,9 +678,9 @@
           <widget class="QLabel" name="label_137">
            <property name="geometry">
             <rect>
-             <x>307</x>
+             <x>303</x>
              <y>0</y>
-             <width>151</width>
+             <width>201</width>
              <height>31</height>
             </rect>
            </property>
@@ -684,7 +695,7 @@ of the refracted beam:</string>
           <widget class="QPushButton" name="pbPMtypeShowEffectiveAngular">
            <property name="geometry">
             <rect>
-             <x>334</x>
+             <x>360</x>
              <y>32</y>
              <width>91</width>
              <height>23</height>
@@ -730,7 +741,7 @@ of the refracted beam:</string>
             </rect>
            </property>
            <property name="text">
-            <string>Measured in medium with the refractive index of:</string>
+            <string>Measured in medium with refr. index of:</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1723,7 +1734,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
          </rect>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="pageRegular">
          <widget class="QFrame" name="gbRegular">
@@ -1732,9 +1743,9 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           </property>
           <property name="geometry">
            <rect>
-            <x>51</x>
+            <x>20</x>
             <y>6</y>
-            <width>371</width>
+            <width>431</width>
             <height>154</height>
            </rect>
           </property>
@@ -1747,9 +1758,9 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QSpinBox" name="sbNumX">
            <property name="geometry">
             <rect>
-             <x>199</x>
-             <y>61</y>
-             <width>51</width>
+             <x>280</x>
+             <y>64</y>
+             <width>50</width>
              <height>22</height>
             </rect>
            </property>
@@ -1763,22 +1774,25 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QLabel" name="label_30">
            <property name="geometry">
             <rect>
-             <x>259</x>
-             <y>65</y>
-             <width>20</width>
+             <x>332</x>
+             <y>68</y>
+             <width>17</width>
              <height>13</height>
             </rect>
            </property>
            <property name="text">
-            <string>X</string>
+            <string>x</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
            </property>
           </widget>
           <widget class="QSpinBox" name="sbNumY">
            <property name="geometry">
             <rect>
-             <x>275</x>
-             <y>61</y>
-             <width>42</width>
+             <x>350</x>
+             <y>64</y>
+             <width>50</width>
              <height>22</height>
             </rect>
            </property>
@@ -1792,9 +1806,9 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QCheckBox" name="cbXbyYarray">
            <property name="geometry">
             <rect>
-             <x>100</x>
+             <x>150</x>
              <y>65</y>
-             <width>81</width>
+             <width>110</width>
              <height>17</height>
             </rect>
            </property>
@@ -1808,9 +1822,9 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QCheckBox" name="cbRingsArray">
            <property name="geometry">
             <rect>
-             <x>100</x>
+             <x>150</x>
              <y>95</y>
-             <width>101</width>
+             <width>128</width>
              <height>17</height>
             </rect>
            </property>
@@ -1824,8 +1838,8 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
            </property>
            <property name="geometry">
             <rect>
-             <x>200</x>
-             <y>92</y>
+             <x>280</x>
+             <y>94</y>
              <width>51</width>
              <height>22</height>
             </rect>
@@ -1837,10 +1851,10 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QLabel" name="label_18">
            <property name="geometry">
             <rect>
-             <x>5</x>
+             <x>19</x>
              <y>77</y>
-             <width>90</width>
-             <height>16</height>
+             <width>121</width>
+             <height>20</height>
             </rect>
            </property>
            <property name="text">
@@ -1853,7 +1867,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QComboBox" name="cobPacking">
            <property name="geometry">
             <rect>
-             <x>100</x>
+             <x>150</x>
              <y>31</y>
              <width>111</width>
              <height>22</height>
@@ -1873,7 +1887,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QLabel" name="label_33">
            <property name="geometry">
             <rect>
-             <x>155</x>
+             <x>214</x>
              <y>123</y>
              <width>46</width>
              <height>13</height>
@@ -1886,10 +1900,10 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QLabel" name="label_34">
            <property name="geometry">
             <rect>
-             <x>10</x>
-             <y>33</y>
+             <x>54</x>
+             <y>31</y>
              <width>86</width>
-             <height>16</height>
+             <height>20</height>
             </rect>
            </property>
            <property name="text">
@@ -1902,10 +1916,10 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QLabel" name="label_32">
            <property name="geometry">
             <rect>
-             <x>5</x>
-             <y>121</y>
-             <width>89</width>
-             <height>16</height>
+             <x>18</x>
+             <y>119</y>
+             <width>121</width>
+             <height>20</height>
             </rect>
            </property>
            <property name="text">
@@ -1918,9 +1932,9 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QLineEdit" name="ledCtC">
            <property name="geometry">
             <rect>
-             <x>100</x>
+             <x>150</x>
              <y>121</y>
-             <width>51</width>
+             <width>60</width>
              <height>20</height>
             </rect>
            </property>
@@ -1928,7 +1942,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="Line" name="line_77">
            <property name="geometry">
             <rect>
-             <x>106</x>
+             <x>160</x>
              <y>74</y>
              <width>2</width>
              <height>29</height>
@@ -1941,9 +1955,9 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QPushButton" name="pbPMtypeShowCurrent">
            <property name="geometry">
             <rect>
-             <x>218</x>
+             <x>263</x>
              <y>1</y>
-             <width>41</width>
+             <width>51</width>
              <height>23</height>
             </rect>
            </property>
@@ -1954,7 +1968,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="Line" name="line">
            <property name="geometry">
             <rect>
-             <x>126</x>
+             <x>171</x>
              <y>12</y>
              <width>118</width>
              <height>3</height>
@@ -1967,7 +1981,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QComboBox" name="cobPMtypeInArrays">
            <property name="geometry">
             <rect>
-             <x>100</x>
+             <x>150</x>
              <y>1</y>
              <width>111</width>
              <height>22</height>
@@ -1977,9 +1991,9 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QLabel" name="label_3">
            <property name="geometry">
             <rect>
-             <x>3</x>
+             <x>40</x>
              <y>3</y>
-             <width>90</width>
+             <width>100</width>
              <height>16</height>
             </rect>
            </property>
@@ -1999,7 +2013,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QSpinBox" name="sbPMtypeForGroup">
            <property name="geometry">
             <rect>
-             <x>129</x>
+             <x>174</x>
              <y>1</y>
              <width>51</width>
              <height>22</height>
@@ -2211,7 +2225,7 @@ Three columns (XYZ) for 'fully custom' array</string>
         <property name="geometry">
          <rect>
           <x>363</x>
-          <y>266</y>
+          <y>265</y>
           <width>41</width>
           <height>16</height>
          </rect>
@@ -2240,7 +2254,7 @@ Three columns (XYZ) for 'fully custom' array</string>
          </rect>
         </property>
         <property name="text">
-         <string>Total number of PMs in the detector:</string>
+         <string>Number of PMs in the detector:</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -2397,10 +2411,10 @@ Three columns (XYZ) for 'fully custom' array</string>
        <widget class="QFrame" name="fIndPM">
         <property name="geometry">
          <rect>
-          <x>10</x>
+          <x>6</x>
           <y>33</y>
-          <width>537</width>
-          <height>260</height>
+          <width>541</width>
+          <height>224</height>
          </rect>
         </property>
         <property name="frameShape">
@@ -2437,14 +2451,17 @@ Three columns (XYZ) for 'fully custom' array</string>
          <widget class="QLabel" name="label_200">
           <property name="geometry">
            <rect>
-            <x>205</x>
+            <x>180</x>
             <y>29</y>
-            <width>16</width>
+            <width>46</width>
             <height>16</height>
            </rect>
           </property>
           <property name="text">
            <string>Phi:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
          </widget>
          <widget class="QLabel" name="label_189">
@@ -2485,27 +2502,33 @@ Three columns (XYZ) for 'fully custom' array</string>
          <widget class="QLabel" name="label_193">
           <property name="geometry">
            <rect>
-            <x>42</x>
+            <x>22</x>
             <y>69</y>
-            <width>16</width>
+            <width>32</width>
             <height>16</height>
            </rect>
           </property>
           <property name="text">
            <string>Z:</string>
           </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
          </widget>
          <widget class="QLabel" name="label_195">
           <property name="geometry">
            <rect>
-            <x>207</x>
+            <x>180</x>
             <y>68</y>
-            <width>16</width>
+            <width>46</width>
             <height>16</height>
            </rect>
           </property>
           <property name="text">
            <string>Psi:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
          </widget>
          <widget class="QLineEdit" name="ledIndPMtheta">
@@ -2521,27 +2544,33 @@ Three columns (XYZ) for 'fully custom' array</string>
          <widget class="QLabel" name="label_141">
           <property name="geometry">
            <rect>
-            <x>42</x>
+            <x>22</x>
             <y>29</y>
-            <width>16</width>
+            <width>32</width>
             <height>16</height>
            </rect>
           </property>
           <property name="text">
            <string>X:</string>
           </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
          </widget>
          <widget class="QLabel" name="label_199">
           <property name="geometry">
            <rect>
-            <x>192</x>
+            <x>165</x>
             <y>49</y>
-            <width>31</width>
+            <width>61</width>
             <height>16</height>
            </rect>
           </property>
           <property name="text">
            <string>Theta:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
          </widget>
          <widget class="QLabel" name="label_190">
@@ -2625,14 +2654,17 @@ Three columns (XYZ) for 'fully custom' array</string>
          <widget class="QLabel" name="label_191">
           <property name="geometry">
            <rect>
-            <x>42</x>
+            <x>22</x>
             <y>49</y>
-            <width>16</width>
+            <width>32</width>
             <height>16</height>
            </rect>
           </property>
           <property name="text">
            <string>Y:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
          </widget>
          <widget class="QLineEdit" name="ledIndPMpsi">
@@ -2725,495 +2757,281 @@ Three columns (XYZ) for 'fully custom' array</string>
          <zorder>cobPMtypeInExplorers</zorder>
          <zorder>pbIndShowType</zorder>
         </widget>
-        <widget class="QTabWidget" name="twIndPMproperties">
+        <widget class="QLabel" name="label_105">
          <property name="geometry">
           <rect>
-           <x>8</x>
-           <y>111</y>
-           <width>508</width>
-           <height>101</height>
-          </rect>
-         </property>
-         <property name="currentIndex">
-          <number>0</number>
-         </property>
-         <widget class="QWidget" name="tabDetectionProbability_2">
-          <attribute name="title">
-           <string>Quantum efficiency</string>
-          </attribute>
-          <widget class="QPushButton" name="pbIndShowDE">
-           <property name="geometry">
-            <rect>
-             <x>219</x>
-             <y>41</y>
-             <width>61</width>
-             <height>23</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>Show</string>
-           </property>
-          </widget>
-          <widget class="QPushButton" name="pbIndLoadDE">
-           <property name="geometry">
-            <rect>
-             <x>385</x>
-             <y>41</y>
-             <width>81</width>
-             <height>23</height>
-            </rect>
-           </property>
-           <property name="font">
-            <font>
-             <weight>75</weight>
-             <bold>true</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string>Load</string>
-           </property>
-           <property name="checkable">
-            <bool>false</bool>
-           </property>
-          </widget>
-          <widget class="QLabel" name="labPDE_2">
-           <property name="geometry">
-            <rect>
-             <x>122</x>
-             <y>42</y>
-             <width>101</width>
-             <height>20</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>QE vs. wave:</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-           </property>
-          </widget>
-          <widget class="QPushButton" name="pbIndRestoreDE">
-           <property name="geometry">
-            <rect>
-             <x>472</x>
-             <y>41</y>
-             <width>18</width>
-             <height>23</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>X</string>
-           </property>
-          </widget>
-          <widget class="QPushButton" name="pbIndShowDEbinned">
-           <property name="geometry">
-            <rect>
-             <x>282</x>
-             <y>41</y>
-             <width>101</width>
-             <height>23</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>Show binned</string>
-           </property>
-          </widget>
-          <widget class="QFrame" name="frame_4">
-           <property name="geometry">
-            <rect>
-             <x>18</x>
-             <y>42</y>
-             <width>91</width>
-             <height>21</height>
-            </rect>
-           </property>
-           <property name="frameShape">
-            <enum>QFrame::Box</enum>
-           </property>
-           <property name="frameShadow">
-            <enum>QFrame::Raised</enum>
-           </property>
-           <widget class="QLabel" name="labIndDEwaveStatus">
-            <property name="geometry">
-             <rect>
-              <x>10</x>
-              <y>0</y>
-              <width>71</width>
-              <height>20</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Inherited:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </widget>
-          <widget class="QFrame" name="frame_5">
-           <property name="geometry">
-            <rect>
-             <x>17</x>
-             <y>10</y>
-             <width>91</width>
-             <height>21</height>
-            </rect>
-           </property>
-           <property name="frameShape">
-            <enum>QFrame::Box</enum>
-           </property>
-           <property name="frameShadow">
-            <enum>QFrame::Raised</enum>
-           </property>
-           <widget class="QLabel" name="labIndDEStatus">
-            <property name="geometry">
-             <rect>
-              <x>12</x>
-              <y>0</y>
-              <width>71</width>
-              <height>20</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Inherited:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </widget>
-          <widget class="QPushButton" name="pbIndRestoreEffectiveDE">
-           <property name="geometry">
-            <rect>
-             <x>206</x>
-             <y>10</y>
-             <width>18</width>
-             <height>23</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>X</string>
-           </property>
-          </widget>
-          <widget class="QLabel" name="label_202">
-           <property name="geometry">
-            <rect>
-             <x>122</x>
-             <y>12</y>
-             <width>31</width>
-             <height>16</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>QE:</string>
-           </property>
-          </widget>
-          <widget class="QLineEdit" name="ledIndEffectiveDE">
-           <property name="geometry">
-            <rect>
-             <x>151</x>
-             <y>11</y>
-             <width>51</width>
-             <height>20</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>1</string>
-           </property>
-          </widget>
-          <widget class="QLabel" name="label_145">
-           <property name="geometry">
-            <rect>
-             <x>230</x>
-             <y>12</y>
-             <width>271</width>
-             <height>16</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>(used when wavelength is not defined)</string>
-           </property>
-          </widget>
-         </widget>
-         <widget class="QWidget" name="tabPMtypeAngularSens_2">
-          <attribute name="title">
-           <string>Angular response</string>
-          </attribute>
-          <widget class="QPushButton" name="pbIndShowAngular">
-           <property name="geometry">
-            <rect>
-             <x>127</x>
-             <y>17</y>
-             <width>81</width>
-             <height>23</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>Show</string>
-           </property>
-          </widget>
-          <widget class="QPushButton" name="pbIndLoadAngular">
-           <property name="geometry">
-            <rect>
-             <x>217</x>
-             <y>17</y>
-             <width>91</width>
-             <height>23</height>
-            </rect>
-           </property>
-           <property name="font">
-            <font>
-             <weight>75</weight>
-             <bold>true</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string>Load</string>
-           </property>
-          </widget>
-          <widget class="QPushButton" name="pbIndRestoreAngular">
-           <property name="geometry">
-            <rect>
-             <x>317</x>
-             <y>17</y>
-             <width>20</width>
-             <height>23</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>X</string>
-           </property>
-          </widget>
-          <widget class="QLabel" name="label_203">
-           <property name="geometry">
-            <rect>
-             <x>353</x>
-             <y>11</y>
-             <width>150</width>
-             <height>31</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>Angular response vs cosine
-of the refracted beam:</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-          <widget class="QPushButton" name="pbIndShowEffectiveAngular">
-           <property name="geometry">
-            <rect>
-             <x>379</x>
-             <y>43</y>
-             <width>91</width>
-             <height>23</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>Show</string>
-           </property>
-          </widget>
-          <widget class="Line" name="line_29">
-           <property name="geometry">
-            <rect>
-             <x>350</x>
-             <y>0</y>
-             <width>3</width>
-             <height>76</height>
-            </rect>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-          </widget>
-          <widget class="QLineEdit" name="ledIndMediumRefrIndex">
-           <property name="geometry">
-            <rect>
-             <x>291</x>
-             <y>43</y>
-             <width>41</width>
-             <height>20</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>1</string>
-           </property>
-          </widget>
-          <widget class="QLabel" name="label_204">
-           <property name="geometry">
-            <rect>
-             <x>0</x>
-             <y>44</y>
-             <width>288</width>
-             <height>16</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>Measured in medium with the refractive index of:</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
-          </widget>
-          <widget class="QFrame" name="frame_6">
-           <property name="geometry">
-            <rect>
-             <x>7</x>
-             <y>18</y>
-             <width>91</width>
-             <height>21</height>
-            </rect>
-           </property>
-           <property name="frameShape">
-            <enum>QFrame::Box</enum>
-           </property>
-           <property name="frameShadow">
-            <enum>QFrame::Raised</enum>
-           </property>
-           <widget class="QLabel" name="labIndAngularStatus">
-            <property name="geometry">
-             <rect>
-              <x>-1</x>
-              <y>0</y>
-              <width>90</width>
-              <height>20</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Inherited:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </widget>
-          <zorder>pbIndShowAngular</zorder>
-          <zorder>pbIndLoadAngular</zorder>
-          <zorder>pbIndRestoreAngular</zorder>
-          <zorder>label_203</zorder>
-          <zorder>pbIndShowEffectiveAngular</zorder>
-          <zorder>line_29</zorder>
-          <zorder>label_204</zorder>
-          <zorder>frame_6</zorder>
-          <zorder>ledIndMediumRefrIndex</zorder>
-         </widget>
-         <widget class="QWidget" name="tabAreaResp_2">
-          <attribute name="title">
-           <string>Area response</string>
-          </attribute>
-          <widget class="QPushButton" name="pbIndLoadArea">
-           <property name="geometry">
-            <rect>
-             <x>264</x>
-             <y>28</y>
-             <width>111</width>
-             <height>23</height>
-            </rect>
-           </property>
-           <property name="font">
-            <font>
-             <weight>75</weight>
-             <bold>true</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string>Load</string>
-           </property>
-          </widget>
-          <widget class="QPushButton" name="pbIndShowArea">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="geometry">
-            <rect>
-             <x>174</x>
-             <y>28</y>
-             <width>75</width>
-             <height>23</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>Show</string>
-           </property>
-          </widget>
-          <widget class="QPushButton" name="pbIndRestoreArea">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="geometry">
-            <rect>
-             <x>389</x>
-             <y>28</y>
-             <width>20</width>
-             <height>23</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>X</string>
-           </property>
-          </widget>
-          <widget class="QFrame" name="frame_7">
-           <property name="geometry">
-            <rect>
-             <x>32</x>
-             <y>28</y>
-             <width>91</width>
-             <height>21</height>
-            </rect>
-           </property>
-           <property name="frameShape">
-            <enum>QFrame::Box</enum>
-           </property>
-           <property name="frameShadow">
-            <enum>QFrame::Raised</enum>
-           </property>
-           <widget class="QLabel" name="labIndAreaStatus">
-            <property name="geometry">
-             <rect>
-              <x>12</x>
-              <y>0</y>
-              <width>71</width>
-              <height>20</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Inherited:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </widget>
-         </widget>
-        </widget>
-        <widget class="QLabel" name="label_22">
-         <property name="geometry">
-          <rect>
-           <x>5</x>
-           <y>214</y>
-           <width>501</width>
-           <height>18</height>
+           <x>6</x>
+           <y>100</y>
+           <width>67</width>
+           <height>17</height>
           </rect>
          </property>
          <property name="text">
-          <string>Inherited = using the properties defined for the base PM type </string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
+          <string>PDE:</string>
          </property>
         </widget>
-        <widget class="QPushButton" name="pbSetAllInherited">
+        <widget class="QLabel" name="label_106">
          <property name="geometry">
           <rect>
-           <x>190</x>
-           <y>236</y>
-           <width>140</width>
+           <x>6</x>
+           <y>133</y>
+           <width>91</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>PDE vs wave:</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pbIndShowDEbinned">
+         <property name="geometry">
+          <rect>
+           <x>390</x>
+           <y>131</y>
+           <width>101</width>
            <height>23</height>
           </rect>
          </property>
          <property name="text">
-          <string>Set all inherited</string>
+          <string>Show binned</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pbIndShowDE">
+         <property name="geometry">
+          <rect>
+           <x>318</x>
+           <y>131</y>
+           <width>61</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Show</string>
+         </property>
+        </widget>
+        <widget class="QFrame" name="frame_5">
+         <property name="geometry">
+          <rect>
+           <x>140</x>
+           <y>100</y>
+           <width>161</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::Box</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <widget class="QLabel" name="labIndDEStatus">
+          <property name="geometry">
+           <rect>
+            <x>6</x>
+            <y>0</y>
+            <width>150</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>From type</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </widget>
+        <widget class="QFrame" name="frame_4">
+         <property name="geometry">
+          <rect>
+           <x>140</x>
+           <y>132</y>
+           <width>161</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::Box</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <widget class="QLabel" name="labIndDEwaveStatus">
+          <property name="geometry">
+           <rect>
+            <x>6</x>
+            <y>0</y>
+            <width>150</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>From type</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </widget>
+        <widget class="QLabel" name="label_107">
+         <property name="geometry">
+          <rect>
+           <x>6</x>
+           <y>167</y>
+           <width>126</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Angular response:</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_108">
+         <property name="geometry">
+          <rect>
+           <x>6</x>
+           <y>199</y>
+           <width>123</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Area response:</string>
+         </property>
+        </widget>
+        <widget class="QFrame" name="frame_7">
+         <property name="geometry">
+          <rect>
+           <x>140</x>
+           <y>197</y>
+           <width>161</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::Box</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <widget class="QLabel" name="labIndAreaStatus">
+          <property name="geometry">
+           <rect>
+            <x>6</x>
+            <y>0</y>
+            <width>150</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Not defined</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </widget>
+        <widget class="QPushButton" name="pbIndShowArea">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="geometry">
+          <rect>
+           <x>318</x>
+           <y>196</y>
+           <width>61</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Show</string>
+         </property>
+        </widget>
+        <widget class="QFrame" name="frame_6">
+         <property name="geometry">
+          <rect>
+           <x>140</x>
+           <y>165</y>
+           <width>161</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::Box</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <widget class="QLabel" name="labIndAngularStatus">
+          <property name="geometry">
+           <rect>
+            <x>6</x>
+            <y>0</y>
+            <width>150</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Not defined</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </widget>
+        <widget class="QPushButton" name="pbIndShowAngular">
+         <property name="geometry">
+          <rect>
+           <x>318</x>
+           <y>164</y>
+           <width>61</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Show</string>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="ledIndEffectiveDE">
+         <property name="geometry">
+          <rect>
+           <x>318</x>
+           <y>100</y>
+           <width>61</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>1</string>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pbIndShowEffectiveAngular">
+         <property name="geometry">
+          <rect>
+           <x>390</x>
+           <y>164</y>
+           <width>100</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Show vs cos</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pbHelpDetectionEfficiency">
+         <property name="geometry">
+          <rect>
+           <x>470</x>
+           <y>90</y>
+           <width>51</width>
+           <height>27</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>help</string>
          </property>
         </widget>
        </widget>
@@ -3285,14 +3103,95 @@ of the refracted beam:</string>
        <widget class="QPushButton" name="pbIndPmRemove">
         <property name="geometry">
          <rect>
-          <x>380</x>
-          <y>110</y>
-          <width>130</width>
+          <x>356</x>
+          <y>89</y>
+          <width>160</width>
           <height>23</height>
          </rect>
         </property>
         <property name="text">
          <string>Remove this PM</string>
+        </property>
+       </widget>
+       <widget class="Line" name="line_4">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>254</y>
+          <width>511</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_22">
+        <property name="geometry">
+         <rect>
+          <x>4</x>
+          <y>271</y>
+          <width>163</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Clear all overrides for:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pbCearOverridePDEscalar">
+        <property name="geometry">
+         <rect>
+          <x>170</x>
+          <y>268</y>
+          <width>80</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>PDE</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pbCearOverridePDEwave">
+        <property name="geometry">
+         <rect>
+          <x>260</x>
+          <y>268</y>
+          <width>80</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>PDE vs wave</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pbCearOverrideAngular">
+        <property name="geometry">
+         <rect>
+          <x>350</x>
+          <y>268</y>
+          <width>80</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Angular</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pbCearOverrideArea">
+        <property name="geometry">
+         <rect>
+          <x>440</x>
+          <y>268</y>
+          <width>80</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Area</string>
         </property>
        </widget>
       </widget>
@@ -3335,14 +3234,14 @@ of the refracted beam:</string>
            <property name="geometry">
             <rect>
              <x>10</x>
-             <y>37</y>
+             <y>30</y>
              <width>161</width>
              <height>22</height>
             </rect>
            </property>
            <item>
             <property name="text">
-             <string>Constant factor</string>
+             <string>Constant</string>
             </property>
            </item>
            <item>
@@ -3364,14 +3263,17 @@ of the refracted beam:</string>
           <widget class="QLabel" name="label_230">
            <property name="geometry">
             <rect>
-             <x>193</x>
-             <y>9</y>
-             <width>171</width>
-             <height>16</height>
+             <x>180</x>
+             <y>6</y>
+             <width>230</width>
+             <height>20</height>
             </rect>
            </property>
            <property name="text">
             <string>Average signal per photoelectron:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
           </widget>
           <widget class="QStackedWidget" name="swElSignalModel">
@@ -3391,20 +3293,23 @@ of the refracted beam:</string>
             <widget class="QLabel" name="label_231">
              <property name="geometry">
               <rect>
-               <x>149</x>
-               <y>8</y>
-               <width>46</width>
-               <height>13</height>
+               <x>130</x>
+               <y>7</y>
+               <width>105</width>
+               <height>17</height>
               </rect>
              </property>
              <property name="text">
               <string>Sigma:</string>
              </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
             </widget>
             <widget class="QLineEdit" name="ledElsigma">
              <property name="geometry">
               <rect>
-               <x>187</x>
+               <x>237</x>
                <y>5</y>
                <width>71</width>
                <height>20</height>
@@ -3420,19 +3325,22 @@ of the refracted beam:</string>
              <property name="geometry">
               <rect>
                <x>97</x>
-               <y>5</y>
-               <width>91</width>
-               <height>16</height>
+               <y>4</y>
+               <width>139</width>
+               <height>20</height>
               </rect>
              </property>
              <property name="text">
               <string>Shape parameter:</string>
              </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
             </widget>
             <widget class="QLineEdit" name="ledElShape">
              <property name="geometry">
               <rect>
-               <x>187</x>
+               <x>236</x>
                <y>5</y>
                <width>71</width>
                <height>20</height>
@@ -3484,7 +3392,7 @@ of the refracted beam:</string>
           <widget class="QLineEdit" name="ledAverageSigPhotEl">
            <property name="geometry">
             <rect>
-             <x>362</x>
+             <x>412</x>
              <y>8</y>
              <width>71</width>
              <height>20</height>
@@ -3497,9 +3405,9 @@ of the refracted beam:</string>
           <widget class="QSpinBox" name="sbElTestGeneratorEvents">
            <property name="geometry">
             <rect>
-             <x>363</x>
+             <x>362</x>
              <y>65</y>
-             <width>71</width>
+             <width>121</width>
              <height>22</height>
             </rect>
            </property>
@@ -3514,7 +3422,7 @@ of the refracted beam:</string>
            <property name="geometry">
             <rect>
              <x>16</x>
-             <y>19</y>
+             <y>12</y>
              <width>46</width>
              <height>13</height>
             </rect>
@@ -3542,14 +3450,59 @@ of the refracted beam:</string>
            </property>
            <property name="geometry">
             <rect>
-             <x>237</x>
+             <x>227</x>
              <y>64</y>
-             <width>121</width>
+             <width>131</width>
              <height>23</height>
             </rect>
            </property>
            <property name="text">
             <string>Test generator</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_104">
+           <property name="geometry">
+            <rect>
+             <x>23</x>
+             <y>63</y>
+             <width>63</width>
+             <height>17</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Factor:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="leSPEfactor">
+           <property name="geometry">
+            <rect>
+             <x>91</x>
+             <y>62</y>
+             <width>71</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>1.0</string>
+           </property>
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+          </widget>
+          <widget class="QLabel" name="labSPEfactorNotUnity">
+           <property name="geometry">
+            <rect>
+             <x>20</x>
+             <y>64</y>
+             <width>18</width>
+             <height>17</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>--</string>
            </property>
           </widget>
          </widget>
@@ -4672,15 +4625,15 @@ of the refracted beam:</string>
       </widget>
       <widget class="QWidget" name="tabGainsMain">
        <attribute name="title">
-        <string>Gains</string>
+        <string>Gain factors</string>
        </attribute>
        <widget class="QFrame" name="frame_8">
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>10</y>
+          <y>30</y>
           <width>251</width>
-          <height>210</height>
+          <height>201</height>
          </rect>
         </property>
         <property name="frameShape">
@@ -4692,10 +4645,10 @@ of the refracted beam:</string>
         <widget class="QLabel" name="labQE_PDE">
          <property name="geometry">
           <rect>
-           <x>65</x>
+           <x>5</x>
            <y>5</y>
-           <width>131</width>
-           <height>16</height>
+           <width>241</width>
+           <height>20</height>
           </rect>
          </property>
          <property name="font">
@@ -4705,60 +4658,18 @@ of the refracted beam:</string>
           </font>
          </property>
          <property name="text">
-          <string>Quantum efficiencies</string>
+          <string>Photon detection efficiency factors</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
          </property>
         </widget>
-        <widget class="QPushButton" name="pbLoadRelQEfactors">
-         <property name="geometry">
-          <rect>
-           <x>120</x>
-           <y>64</y>
-           <width>120</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Load factors</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbViewChangeRelQEfactors">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>33</y>
-           <width>230</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>View / change relative factors</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbClearRelQEfactors">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>64</y>
-           <width>100</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="toolTip">
-          <string>Use base properties of the type for all PMs</string>
-         </property>
-         <property name="text">
-          <string>Use PM type</string>
-         </property>
-        </widget>
         <widget class="Line" name="line_63">
          <property name="geometry">
           <rect>
-           <x>20</x>
-           <y>87</y>
-           <width>211</width>
+           <x>10</x>
+           <y>120</y>
+           <width>230</width>
            <height>16</height>
           </rect>
          </property>
@@ -4766,39 +4677,45 @@ of the refracted beam:</string>
           <enum>Qt::Horizontal</enum>
          </property>
         </widget>
-        <widget class="QPushButton" name="pbRelQESetELaveragesToUnity">
+        <widget class="QPushButton" name="pbSetPDEfactors">
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>179</y>
-           <width>170</width>
-           <height>23</height>
+           <y>94</y>
+           <width>167</width>
+           <height>25</height>
           </rect>
          </property>
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
          <property name="text">
-          <string>Set all gains to:</string>
+          <string>Set all to:</string>
          </property>
         </widget>
-        <widget class="QPushButton" name="pbRelQERandomScaleELaverages">
+        <widget class="QPushButton" name="pbRandomizePDEfactors">
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>100</y>
+           <y>135</y>
            <width>81</width>
-           <height>31</height>
+           <height>25</height>
           </rect>
          </property>
          <property name="text">
           <string>Randomize</string>
          </property>
         </widget>
-        <widget class="QComboBox" name="cobRelQEScaleGainsUniNorm">
+        <widget class="QComboBox" name="cobPDE">
          <property name="geometry">
           <rect>
            <x>100</x>
-           <y>103</y>
-           <width>130</width>
-           <height>22</height>
+           <y>135</y>
+           <width>140</width>
+           <height>25</height>
           </rect>
          </property>
          <item>
@@ -4808,43 +4725,43 @@ of the refracted beam:</string>
          </item>
          <item>
           <property name="text">
-           <string>Normal</string>
+           <string>Gaussian</string>
           </property>
          </item>
         </widget>
         <widget class="QStackedWidget" name="swRelQEGainUniNorm">
          <property name="geometry">
           <rect>
-           <x>103</x>
-           <y>130</y>
-           <width>130</width>
-           <height>48</height>
+           <x>12</x>
+           <y>164</y>
+           <width>231</width>
+           <height>31</height>
           </rect>
          </property>
          <property name="currentIndex">
           <number>0</number>
          </property>
          <widget class="QWidget" name="page_26">
-          <widget class="QLineEdit" name="ledRelQEELavScaleMax">
+          <widget class="QLineEdit" name="ledPDEmax">
            <property name="geometry">
             <rect>
-             <x>50</x>
-             <y>24</y>
+             <x>160</x>
+             <y>2</y>
              <width>50</width>
-             <height>20</height>
+             <height>25</height>
             </rect>
            </property>
            <property name="text">
             <string>2</string>
            </property>
           </widget>
-          <widget class="QLineEdit" name="ledRelQEELavScaleMin">
+          <widget class="QLineEdit" name="ledPDEmin">
            <property name="geometry">
             <rect>
-             <x>50</x>
+             <x>56</x>
              <y>2</y>
              <width>50</width>
-             <height>20</height>
+             <height>25</height>
             </rect>
            </property>
            <property name="text">
@@ -4854,51 +4771,57 @@ of the refracted beam:</string>
           <widget class="QLabel" name="label_50">
            <property name="geometry">
             <rect>
-             <x>10</x>
-             <y>6</y>
-             <width>35</width>
-             <height>13</height>
+             <x>13</x>
+             <y>4</y>
+             <width>41</width>
+             <height>20</height>
             </rect>
            </property>
            <property name="text">
-            <string>min:</string>
+            <string>Min:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
           </widget>
           <widget class="QLabel" name="label_136">
            <property name="geometry">
             <rect>
-             <x>10</x>
-             <y>25</y>
-             <width>35</width>
-             <height>13</height>
+             <x>116</x>
+             <y>4</y>
+             <width>43</width>
+             <height>20</height>
             </rect>
            </property>
            <property name="text">
-            <string>max:</string>
+            <string>Max:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
           </widget>
          </widget>
          <widget class="QWidget" name="page_27">
-          <widget class="QLineEdit" name="ledRelQEELavScaleMean">
+          <widget class="QLineEdit" name="ledPDEmean">
            <property name="geometry">
             <rect>
-             <x>50</x>
+             <x>56</x>
              <y>2</y>
              <width>50</width>
-             <height>20</height>
+             <height>25</height>
             </rect>
            </property>
            <property name="text">
             <string>1</string>
            </property>
           </widget>
-          <widget class="QLineEdit" name="ledRelQEELavScaleSigma">
+          <widget class="QLineEdit" name="ledPDEsigma">
            <property name="geometry">
             <rect>
-             <x>50</x>
-             <y>24</y>
+             <x>160</x>
+             <y>2</y>
              <width>50</width>
-             <height>20</height>
+             <height>25</height>
             </rect>
            </property>
            <property name="text">
@@ -4908,52 +4831,113 @@ of the refracted beam:</string>
           <widget class="QLabel" name="label_197">
            <property name="geometry">
             <rect>
-             <x>0</x>
-             <y>6</y>
+             <x>6</x>
+             <y>4</y>
              <width>48</width>
-             <height>13</height>
+             <height>20</height>
             </rect>
            </property>
            <property name="text">
-            <string>mean:</string>
+            <string>Mean:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
           </widget>
           <widget class="QLabel" name="label_205">
            <property name="geometry">
             <rect>
-             <x>0</x>
-             <y>25</y>
-             <width>48</width>
-             <height>13</height>
+             <x>105</x>
+             <y>4</y>
+             <width>54</width>
+             <height>20</height>
             </rect>
            </property>
            <property name="text">
-            <string>sigma:</string>
+            <string>Sigma:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
           </widget>
          </widget>
         </widget>
-        <widget class="QLineEdit" name="ledRelQEvalue">
+        <widget class="QLineEdit" name="ledPDEfactor">
          <property name="geometry">
           <rect>
-           <x>190</x>
-           <y>180</y>
-           <width>50</width>
-           <height>20</height>
+           <x>180</x>
+           <y>94</y>
+           <width>60</width>
+           <height>25</height>
           </rect>
          </property>
          <property name="text">
           <string>1.0</string>
          </property>
         </widget>
+        <widget class="QPushButton" name="pbShowPDEfactors">
+         <property name="geometry">
+          <rect>
+           <x>59</x>
+           <y>52</y>
+           <width>121</width>
+           <height>25</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Show factors</string>
+         </property>
+        </widget>
+        <widget class="Line" name="line_65">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>77</y>
+           <width>230</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+        <widget class="QLabel" name="labPDEfactors_notAllUnity">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>29</y>
+           <width>18</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>--</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="labPDEfactors">
+         <property name="geometry">
+          <rect>
+           <x>5</x>
+           <y>29</y>
+           <width>242</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>All set to 1</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
        </widget>
-       <widget class="QFrame" name="frame_9">
+       <widget class="QFrame" name="frSPEfactors">
         <property name="geometry">
          <rect>
           <x>276</x>
-          <y>10</y>
+          <y>30</y>
           <width>251</width>
-          <height>210</height>
+          <height>201</height>
          </rect>
         </property>
         <property name="frameShape">
@@ -4965,10 +4949,10 @@ of the refracted beam:</string>
         <widget class="QLabel" name="label_35">
          <property name="geometry">
           <rect>
-           <x>20</x>
+           <x>0</x>
            <y>4</y>
-           <width>211</width>
-           <height>16</height>
+           <width>251</width>
+           <height>20</height>
           </rect>
          </property>
          <property name="font">
@@ -4978,42 +4962,19 @@ of the refracted beam:</string>
           </font>
          </property>
          <property name="text">
-          <string>Relative gains of electronic channels</string>
+          <string>Single photoelectron signal factors</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
          </property>
         </widget>
-        <widget class="QPushButton" name="pbViewChangeRelELfactors">
-         <property name="geometry">
-          <rect>
-           <x>9</x>
-           <y>33</y>
-           <width>230</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>View / change relative factors</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbLoadRelELfactors">
-         <property name="geometry">
-          <rect>
-           <x>70</x>
-           <y>64</y>
-           <width>120</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Load factors</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbRandomScaleELaverages">
+        <widget class="QPushButton" name="pbRandomizeSPEfactors">
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>100</y>
+           <y>135</y>
            <width>81</width>
-           <height>31</height>
+           <height>25</height>
           </rect>
          </property>
          <property name="text">
@@ -5023,9 +4984,9 @@ of the refracted beam:</string>
         <widget class="Line" name="line_61">
          <property name="geometry">
           <rect>
-           <x>20</x>
-           <y>87</y>
-           <width>211</width>
+           <x>10</x>
+           <y>77</y>
+           <width>230</width>
            <height>16</height>
           </rect>
          </property>
@@ -5033,26 +4994,32 @@ of the refracted beam:</string>
           <enum>Qt::Horizontal</enum>
          </property>
         </widget>
-        <widget class="QPushButton" name="pbSetELaveragesToUnity">
+        <widget class="QPushButton" name="pbSetSPEfactors">
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>179</y>
-           <width>170</width>
-           <height>23</height>
+           <y>94</y>
+           <width>167</width>
+           <height>25</height>
           </rect>
          </property>
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
          <property name="text">
-          <string>Set all gains to:</string>
+          <string>Set all to:</string>
          </property>
         </widget>
-        <widget class="QComboBox" name="cobScaleGainsUniNorm">
+        <widget class="QComboBox" name="cobSPE">
          <property name="geometry">
           <rect>
            <x>100</x>
-           <y>103</y>
-           <width>130</width>
-           <height>22</height>
+           <y>135</y>
+           <width>140</width>
+           <height>25</height>
           </rect>
          </property>
          <item>
@@ -5062,43 +5029,43 @@ of the refracted beam:</string>
          </item>
          <item>
           <property name="text">
-           <string>Normal</string>
+           <string>Gaussian</string>
           </property>
          </item>
         </widget>
         <widget class="QStackedWidget" name="swGainUniNorm">
          <property name="geometry">
           <rect>
-           <x>103</x>
-           <y>130</y>
-           <width>130</width>
-           <height>48</height>
+           <x>12</x>
+           <y>164</y>
+           <width>231</width>
+           <height>31</height>
           </rect>
          </property>
          <property name="currentIndex">
           <number>0</number>
          </property>
          <widget class="QWidget" name="page_22">
-          <widget class="QLineEdit" name="ledELavScaleMax">
+          <widget class="QLineEdit" name="ledSPEmax">
            <property name="geometry">
             <rect>
-             <x>50</x>
-             <y>24</y>
+             <x>160</x>
+             <y>2</y>
              <width>50</width>
-             <height>20</height>
+             <height>25</height>
             </rect>
            </property>
            <property name="text">
             <string>2</string>
            </property>
           </widget>
-          <widget class="QLineEdit" name="ledELavScaleMin">
+          <widget class="QLineEdit" name="ledSPEmin">
            <property name="geometry">
             <rect>
-             <x>50</x>
+             <x>56</x>
              <y>2</y>
              <width>50</width>
-             <height>20</height>
+             <height>25</height>
             </rect>
            </property>
            <property name="text">
@@ -5108,51 +5075,57 @@ of the refracted beam:</string>
           <widget class="QLabel" name="label_49">
            <property name="geometry">
             <rect>
-             <x>10</x>
-             <y>6</y>
-             <width>35</width>
-             <height>13</height>
+             <x>13</x>
+             <y>4</y>
+             <width>41</width>
+             <height>20</height>
             </rect>
            </property>
            <property name="text">
-            <string>min:</string>
+            <string>Min:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
           </widget>
           <widget class="QLabel" name="label_116">
            <property name="geometry">
             <rect>
-             <x>10</x>
-             <y>25</y>
-             <width>35</width>
-             <height>13</height>
+             <x>116</x>
+             <y>4</y>
+             <width>43</width>
+             <height>20</height>
             </rect>
            </property>
            <property name="text">
-            <string>max:</string>
+            <string>Max:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
           </widget>
          </widget>
          <widget class="QWidget" name="page_23">
-          <widget class="QLineEdit" name="ledELavScaleMean">
+          <widget class="QLineEdit" name="ledSPEmean">
            <property name="geometry">
             <rect>
-             <x>50</x>
+             <x>56</x>
              <y>2</y>
              <width>50</width>
-             <height>20</height>
+             <height>25</height>
             </rect>
            </property>
            <property name="text">
             <string>1</string>
            </property>
           </widget>
-          <widget class="QLineEdit" name="ledELavScaleSigma">
+          <widget class="QLineEdit" name="ledSPEsigma">
            <property name="geometry">
             <rect>
-             <x>50</x>
-             <y>24</y>
+             <x>160</x>
+             <y>2</y>
              <width>50</width>
-             <height>20</height>
+             <height>25</height>
             </rect>
            </property>
            <property name="text">
@@ -5162,138 +5135,147 @@ of the refracted beam:</string>
           <widget class="QLabel" name="label_188">
            <property name="geometry">
             <rect>
-             <x>0</x>
-             <y>6</y>
+             <x>6</x>
+             <y>4</y>
              <width>48</width>
-             <height>13</height>
+             <height>20</height>
             </rect>
            </property>
            <property name="text">
-            <string>mean:</string>
+            <string>Mean:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
           </widget>
           <widget class="QLabel" name="label_196">
            <property name="geometry">
             <rect>
-             <x>0</x>
-             <y>25</y>
-             <width>48</width>
-             <height>13</height>
+             <x>105</x>
+             <y>4</y>
+             <width>54</width>
+             <height>20</height>
             </rect>
            </property>
            <property name="text">
-            <string>sigma:</string>
+            <string>Sigma:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
           </widget>
          </widget>
         </widget>
-        <widget class="QLineEdit" name="ledELEvalue">
+        <widget class="QLineEdit" name="ledSPEfactor">
          <property name="geometry">
           <rect>
-           <x>190</x>
-           <y>180</y>
-           <width>50</width>
-           <height>20</height>
+           <x>180</x>
+           <y>94</y>
+           <width>60</width>
+           <height>25</height>
           </rect>
          </property>
          <property name="text">
           <string>1.0</string>
          </property>
         </widget>
+        <widget class="QPushButton" name="pbShowSPEfactors">
+         <property name="geometry">
+          <rect>
+           <x>59</x>
+           <y>52</y>
+           <width>121</width>
+           <height>25</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Show factors</string>
+         </property>
+        </widget>
+        <widget class="Line" name="line_68">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>120</y>
+           <width>230</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+        <widget class="QLabel" name="labSPEfactors">
+         <property name="geometry">
+          <rect>
+           <x>3</x>
+           <y>29</y>
+           <width>245</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Inactive, all set to 1</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="labSPEfactors_ActiveAndNotAllUnity">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>30</y>
+           <width>18</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>--</string>
+         </property>
+        </widget>
         <zorder>label_35</zorder>
-        <zorder>pbViewChangeRelELfactors</zorder>
-        <zorder>pbLoadRelELfactors</zorder>
         <zorder>line_61</zorder>
-        <zorder>pbSetELaveragesToUnity</zorder>
-        <zorder>pbRandomScaleELaverages</zorder>
-        <zorder>cobScaleGainsUniNorm</zorder>
+        <zorder>pbSetSPEfactors</zorder>
+        <zorder>pbRandomizeSPEfactors</zorder>
+        <zorder>cobSPE</zorder>
         <zorder>swGainUniNorm</zorder>
-        <zorder>ledELEvalue</zorder>
+        <zorder>ledSPEfactor</zorder>
+        <zorder>pbShowSPEfactors</zorder>
+        <zorder>line_68</zorder>
+        <zorder>labSPEfactors</zorder>
+        <zorder>labSPEfactors_ActiveAndNotAllUnity</zorder>
        </widget>
-       <widget class="QPushButton" name="pbShowRelGains">
+       <widget class="QPushButton" name="pbGainsUpdateGUI">
         <property name="geometry">
          <rect>
-          <x>163</x>
-          <y>258</y>
-          <width>211</width>
+          <x>10</x>
+          <y>260</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>...updateGUI</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_51">
+        <property name="geometry">
+         <rect>
+          <x>40</x>
+          <y>250</y>
+          <width>470</width>
           <height>31</height>
          </rect>
         </property>
         <property name="text">
-         <string>Show relative gains</string>
+         <string>Script commands pms.SetPDE_factors() and pms.SetSPE_factors()
+can be used to manipulate the values</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
         </property>
        </widget>
-       <widget class="Line" name="line_60">
-        <property name="geometry">
-         <rect>
-          <x>132</x>
-          <y>242</y>
-          <width>270</width>
-          <height>3</height>
-         </rect>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Plain</enum>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-       <widget class="Line" name="line_79">
-        <property name="geometry">
-         <rect>
-          <x>130</x>
-          <y>220</y>
-          <width>3</width>
-          <height>24</height>
-         </rect>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Plain</enum>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-       <widget class="Line" name="line_80">
-        <property name="geometry">
-         <rect>
-          <x>400</x>
-          <y>220</y>
-          <width>3</width>
-          <height>24</height>
-         </rect>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Plain</enum>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-       <widget class="Line" name="line_81">
-        <property name="geometry">
-         <rect>
-          <x>267</x>
-          <y>243</y>
-          <width>3</width>
-          <height>24</height>
-         </rect>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Plain</enum>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-       <zorder>frame_8</zorder>
-       <zorder>frame_9</zorder>
-       <zorder>line_60</zorder>
-       <zorder>line_79</zorder>
-       <zorder>line_80</zorder>
-       <zorder>line_81</zorder>
-       <zorder>pbShowRelGains</zorder>
       </widget>
      </widget>
      <widget class="QTabWidget" name="tabWidget_2">
@@ -6907,7 +6889,7 @@ thermal neutrons:</string>
          <string>!</string>
         </property>
        </widget>
-       <widget class="QLabel" name="label_51">
+       <widget class="QLabel" name="label_511">
         <property name="geometry">
          <rect>
           <x>6</x>
@@ -6926,7 +6908,7 @@ thermal neutrons:</string>
        <zorder>label_41</zorder>
        <zorder>sbMaxNumbPhTransitions</zorder>
        <zorder>cbRndCheckBeforeTrack</zorder>
-       <zorder>label_51</zorder>
+       <zorder>label_511</zorder>
        <zorder>pbQEacceleratorWarning</zorder>
       </widget>
       <widget class="QWidget" name="tab_4">
@@ -7268,7 +7250,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <property name="documentMode">
        <bool>false</bool>
@@ -8963,8 +8945,8 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="text">
              <string>Use script unit 'sim' to define nodes, e.g.
 sim.AddNode(x,y,z)
-and then start simulation with
-sim.RunPhotonSources()</string>
+
+Multi-vertex events can be simulated using AddSubNode(x,y,z)</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -12998,8 +12980,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>221</x>
-     <y>540</y>
+     <x>203</x>
+     <y>571</y>
     </hint>
     <hint type="destinationlabel">
      <x>280</x>
@@ -13014,7 +12996,7 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>140</x>
+     <x>136</x>
      <y>400</y>
     </hint>
     <hint type="destinationlabel">
@@ -13030,7 +13012,7 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>140</x>
+     <x>136</x>
      <y>420</y>
     </hint>
     <hint type="destinationlabel">
@@ -13046,7 +13028,7 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>140</x>
+     <x>136</x>
      <y>440</y>
     </hint>
     <hint type="destinationlabel">
@@ -13062,7 +13044,7 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>312</x>
+     <x>308</x>
      <y>420</y>
     </hint>
     <hint type="destinationlabel">
@@ -13078,7 +13060,7 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>312</x>
+     <x>308</x>
      <y>439</y>
     </hint>
     <hint type="destinationlabel">
@@ -13590,8 +13572,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>295</x>
-     <y>382</y>
+     <x>301</x>
+     <y>413</y>
     </hint>
     <hint type="destinationlabel">
      <x>471</x>
@@ -13606,8 +13588,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>179</x>
-     <y>474</y>
+     <x>181</x>
+     <y>498</y>
     </hint>
     <hint type="destinationlabel">
      <x>464</x>
@@ -13622,8 +13604,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>441</x>
-     <y>443</y>
+     <x>443</x>
+     <y>474</y>
     </hint>
     <hint type="destinationlabel">
      <x>451</x>
@@ -13638,8 +13620,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>441</x>
-     <y>472</y>
+     <x>443</x>
+     <y>503</y>
     </hint>
     <hint type="destinationlabel">
      <x>504</x>
@@ -13654,8 +13636,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>441</x>
-     <y>472</y>
+     <x>443</x>
+     <y>503</y>
     </hint>
     <hint type="destinationlabel">
      <x>506</x>
@@ -13670,8 +13652,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>293</x>
-     <y>382</y>
+     <x>295</x>
+     <y>413</y>
     </hint>
     <hint type="destinationlabel">
      <x>468</x>
@@ -13686,8 +13668,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>165</x>
-     <y>382</y>
+     <x>171</x>
+     <y>413</y>
     </hint>
     <hint type="destinationlabel">
      <x>468</x>
@@ -13702,8 +13684,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>317</x>
-     <y>442</y>
+     <x>319</x>
+     <y>473</y>
     </hint>
     <hint type="destinationlabel">
      <x>514</x>
@@ -15254,12 +15236,12 @@ multiply to loaded data</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>179</x>
-     <y>474</y>
+     <x>181</x>
+     <y>498</y>
     </hint>
     <hint type="destinationlabel">
-     <x>310</x>
-     <y>453</y>
+     <x>316</x>
+     <y>506</y>
     </hint>
    </hints>
   </connection>
@@ -15286,8 +15268,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>249</x>
-     <y>472</y>
+     <x>251</x>
+     <y>503</y>
     </hint>
     <hint type="destinationlabel">
      <x>502</x>
@@ -15302,8 +15284,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>233</x>
-     <y>458</y>
+     <x>235</x>
+     <y>489</y>
     </hint>
     <hint type="destinationlabel">
      <x>489</x>
@@ -15318,8 +15300,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>233</x>
-     <y>496</y>
+     <x>235</x>
+     <y>527</y>
     </hint>
     <hint type="destinationlabel">
      <x>503</x>
@@ -15334,8 +15316,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>190</x>
-     <y>382</y>
+     <x>196</x>
+     <y>413</y>
     </hint>
     <hint type="destinationlabel">
      <x>428</x>
@@ -15350,12 +15332,12 @@ multiply to loaded data</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>239</x>
-     <y>442</y>
+     <x>241</x>
+     <y>473</y>
     </hint>
     <hint type="destinationlabel">
-     <x>427</x>
-     <y>458</y>
+     <x>433</x>
+     <y>539</y>
     </hint>
    </hints>
   </connection>
@@ -15366,8 +15348,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>390</x>
-     <y>479</y>
+     <x>392</x>
+     <y>510</y>
     </hint>
     <hint type="destinationlabel">
      <x>490</x>
@@ -15382,8 +15364,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>239</x>
-     <y>442</y>
+     <x>241</x>
+     <y>473</y>
     </hint>
     <hint type="destinationlabel">
      <x>447</x>
@@ -15472,18 +15454,18 @@ multiply to loaded data</string>
    </hints>
   </connection>
   <connection>
-   <sender>cobScaleGainsUniNorm</sender>
+   <sender>cobSPE</sender>
    <signal>currentIndexChanged(int)</signal>
    <receiver>swGainUniNorm</receiver>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>447</x>
-     <y>457</y>
+     <x>451</x>
+     <y>512</y>
     </hint>
     <hint type="destinationlabel">
-     <x>441</x>
-     <y>510</y>
+     <x>445</x>
+     <y>547</y>
     </hint>
    </hints>
   </connection>
@@ -15494,8 +15476,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>249</x>
-     <y>495</y>
+     <x>251</x>
+     <y>526</y>
     </hint>
     <hint type="destinationlabel">
      <x>416</x>
@@ -15510,8 +15492,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>146</x>
-     <y>382</y>
+     <x>152</x>
+     <y>413</y>
     </hint>
     <hint type="destinationlabel">
      <x>403</x>
@@ -15526,8 +15508,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>308</x>
-     <y>474</y>
+     <x>314</x>
+     <y>505</y>
     </hint>
     <hint type="destinationlabel">
      <x>438</x>
@@ -15676,6 +15658,22 @@ multiply to loaded data</string>
     <hint type="destinationlabel">
      <x>62</x>
      <y>582</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cobPDE</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>swRelQEGainUniNorm</receiver>
+   <slot>setCurrentIndex(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>161</x>
+     <y>512</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>170</x>
+     <y>547</y>
     </hint>
    </hints>
   </connection>

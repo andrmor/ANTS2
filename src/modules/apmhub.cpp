@@ -37,19 +37,15 @@ APmHub::~APmHub()
 
 void APmHub::writeInividualOverridesToJson(QJsonObject &json)
 {
-  QJsonObject js;
+    QJsonObject js;
 
-  //if (isPDEeffectiveOverriden())
     writePDEeffectiveToJson(js);  // scalar PDEs
-  //if (isPDEwaveOverriden())
     writePDEwaveToJson(js);       // wave-resolved PDE
-  //if (isAngularOverriden())
     writeAngularToJson(js);       // angular response
-  //if (isAreaOverriden())
     writeAreaToJson(js);          // area response
-  writeRelQE_PDE(js);             // relative factors used to adjust gains
+    writeRelQE_PDE(js);           // relative factors used to adjust gains
 
-  json["IndividualPMoverrides"] = js;
+    json["IndividualPMoverrides"] = js;
 }
 
 bool APmHub::readInividualOverridesFromJson(QJsonObject &json)
@@ -318,6 +314,45 @@ void APmHub::configure(GeneralSimSettings *SimSet)
     prepareMCcrosstalk();
 }
 
+const QString APmHub::checkBeforeSimulation() const
+{
+    QString err;
+
+    int numOverriden = 0;
+    for (int ipm = 0; ipm < numPMs; ipm++)
+        if (PMs.at(ipm).effectivePDE != -1.0) numOverriden++;
+    if (numOverriden != 0)
+        if (numOverriden != numPMs)
+            err += QString("\nPDE override is defined only for %1 PM%2\n"
+                           "Clear PDE overrides or define them for all PMs\n").arg(numOverriden).arg(numOverriden > 1 ? "s" : "");
+
+    numOverriden = 0;
+    for (int ipm = 0; ipm < numPMs; ipm++)
+        if (!PMs.at(ipm).PDE.isEmpty()) numOverriden++;
+    if (numOverriden != 0)
+        if (numOverriden != numPMs)
+            err += QString("\nWavelength-resolved PDE override is defined only for %1 PM%2\n"
+                           "Clear wavelength-resolved PDE overrides or define them for all PMs\n").arg(numOverriden).arg(numOverriden > 1 ? "s" : "");
+
+    numOverriden = 0;
+    for (int ipm = 0; ipm < numPMs; ipm++)
+        if (!PMs.at(ipm).AngularSensitivity.isEmpty()) numOverriden++;
+    if (numOverriden != 0)
+        if (numOverriden != numPMs)
+            err += QString("\nOverride for angular dependence of PDE is defined only for %1 PM%2\n"
+                           "Clear overrides or define them for all PMs\n").arg(numOverriden).arg(numOverriden > 1 ? "s" : "");
+
+    numOverriden = 0;
+    for (int ipm = 0; ipm < numPMs; ipm++)
+        if (!PMs.at(ipm).AreaSensitivity.isEmpty()) numOverriden++;
+    if (numOverriden != 0)
+        if (numOverriden != numPMs)
+            err += QString("\nOverride for area dependence of PDE is defined only for %1 PM%2\n"
+                           "Clear overrides or define them for all PMs\n").arg(numOverriden).arg(numOverriden > 1 ? "s" : "");
+
+    return err;
+}
+
 void APmHub::calculateMaxQEs()
 {
     //calculating maxQE for accelerator
@@ -506,29 +541,31 @@ void APmHub::updateADClevels()
   }
 }
 
-void APmHub::CalculateElChannelsStrength()
-{
-    for (int ipm = 0; ipm<PMs.size(); ipm++)
-        PMs[ipm].scaleSPePHS( PMs.at(ipm).relElStrength );
-}
-
 double APmHub::GenerateSignalFromOnePhotoelectron(int ipm)
 {
-    switch ( PMs.at(ipm).SPePHSmode )
+    double val = 0;
+    const APm & pm = PMs.at(ipm);
+
+    switch ( pm.SPePHSmode )
     {
-      case 0: return PMs.at(ipm).AverageSigPerPhE;
-      case 1: return RandGen->Gaus( PMs.at(ipm).AverageSigPerPhE, PMs.at(ipm).SPePHSsigma );
-      case 2: return GammaRandomGen->getGamma( PMs.at(ipm).SPePHSshape, PMs.at(ipm).AverageSigPerPhE / PMs.at(ipm).SPePHSshape );
-      case 3:
-       {
-         if (PMs.at(ipm).SPePHShist) return PMs[ipm].SPePHShist->GetRandom();
-         else return 0;
-       }
-      default:;
+    case 0:
+        val = pm.AverageSigPerPhE;
+        break;
+    case 1:
+        val = RandGen->Gaus( pm.AverageSigPerPhE, pm.SPePHSsigma );
+        break;
+    case 2:
+        val = GammaRandomGen->getGamma( pm.SPePHSshape, pm.AverageSigPerPhE / pm.SPePHSshape );
+        break;
+    case 3:
+        if ( pm.SPePHShist )
+            val = pm.SPePHShist->GetRandom();
+        break;
+    default:
+        qWarning() << "Error: unrecognized type in signal per photoelectron generation";
     }
 
-    qWarning() << "Error: unrecognized type in signal per photoelectron generation";
-    return 0;
+    return val * pm.relElStrength;
 }
 
 void APmHub::RebinPDEsForType(int itype)
@@ -666,43 +703,54 @@ void APmHub::RecalculateAngularForPM(int ipm)
 
 double APmHub::getActualPDE(int ipm, int WaveIndex) const
 {  
-    /*
-  qDebug()<<"------------";
-  qDebug()<<"Wave-resolved:"<<WavelengthResolved<<"WaveIndex:"<<WaveIndex<<" PM# "<<ipm;
-  qDebug()<<"Overrides-> Effective=" <<effectivePDE[ipm]<<" size ofWaveRes="<<PDEbinned[ipm].size();
-  if (PDEbinned[ipm].size()>0) qDebug()<<"   overridePDE at waveindex="<<PDEbinned[ipm][WaveIndex];
-  qDebug()<<"Type-> Effective="<<PMtypeProperties[PMtype[ipm]].effectivePDE<<" size of WaveRes="<<PMtypeProperties[PMtype[ipm]].PDEbinned.size();
-  if (PMtypeProperties[PMtype[ipm]].PDEbinned.size() > 0) qDebug()<<"   typePDE at this waveindex="<<PMtypeProperties[PMtype[ipm]].PDEbinned[WaveIndex];
-    */
-
+    const APm & pm = PMs.at(ipm);
     double PDE;
+
     if (!WavelengthResolved || WaveIndex == -1)
     {
         //Case: Not wavelength-resolved or no spectral data during this photon generation
 
-        if (PMs.at(ipm).effectivePDE != -1.0)
-             PDE = PMs.at(ipm).effectivePDE; //override exists
-        else PDE = PMtypes.at( PMs.at(ipm).type )->EffectivePDE;
+        if (pm.effectivePDE != -1.0)
+        {
+            // use override if exists
+            PDE = pm.effectivePDE;
+        }
+        else
+        {
+            // otherwise use type info * rel gain factor
+            PDE = PMtypes.at( pm.type )->EffectivePDE * pm.relQE_PDE;
+        }
     }
     else
     {
-        //Case: Wavelength-resolved AND there is proper waveindex
+        //Case: Wavelength-resolved AND waveindex is defined
 
-        //if wave-resolved override exists, use it:
-        if ( !PMs.at(ipm).PDEbinned.isEmpty() )
-             PDE = PMs.at(ipm).PDEbinned.at(WaveIndex);
+        if ( !pm.PDEbinned.isEmpty() )
+        {
+            // if wave-resolved override exists, use it
+            PDE = pm.PDEbinned.at(WaveIndex);
+        }
         else
         {
-            //if effective PDE is overriden, use it
-            if (PMs.at(ipm).effectivePDE != -1.0)
-                 PDE = PMs.at(ipm).effectivePDE;
+            const int iType = PMs.at(ipm).type;
+
+            if ( !PMtypes.at(iType)->PDEbinned.isEmpty() )
+            {
+                // if the type holds wave-resolved info, use it
+                PDE = PMtypes.at(iType)->PDEbinned.at(WaveIndex) * pm.relQE_PDE;
+            }
             else
             {
-                //if type hold wave-resolved info, use it
-                const int& iType = PMs.at(ipm).type;
-                if (PMtypes.at(iType)->PDEbinned.size() > 0)
-                     PDE = PMtypes.at(iType)->PDEbinned.at(WaveIndex);
-                else PDE = PMtypes.at(iType)->EffectivePDE; //last resort :)
+                if (pm.effectivePDE != -1.0)
+                {
+                    // use scalar override if exists
+                    PDE = pm.effectivePDE;
+                }
+                else
+                {
+                    // use type scalar * rel gain factor as the last resort
+                    PDE = PMtypes.at(iType)->EffectivePDE * pm.relQE_PDE;
+                }
             }
         }
     }
@@ -1010,6 +1058,52 @@ void APmHub::setPDEwave(int ipm, QVector<double> *x, QVector<double> *y)
 {
     PMs[ipm].PDE_lambda = *x;
     PMs[ipm].PDE = *y;
+}
+
+bool APmHub::isAllPDEfactorsUnity() const
+{
+    for (int ipm=0; ipm<count(); ipm++)
+        if (PMs[ipm].relQE_PDE != 1.0) return false;
+
+    return true;
+}
+
+bool APmHub::isAllPDEfactorsSame(double &value) const
+{
+    if (count() == 0)
+    {
+        value = 0;
+        return true;
+    }
+
+    value = PMs[0].relQE_PDE;
+    for (int ipm=1; ipm<count(); ipm++)
+        if (PMs[ipm].relQE_PDE != value) return false;
+
+    return true;
+}
+
+bool APmHub::isAllSPEfactorsUnity() const
+{
+    for (int ipm=0; ipm<count(); ipm++)
+        if (PMs[ipm].relElStrength != 1.0) return false;
+
+    return true;
+}
+
+bool APmHub::isAllSPEfactorsSame(double &value) const
+{
+    if (count() == 0)
+    {
+        value = 0;
+        return true;
+    }
+
+    value = PMs[0].relElStrength;
+    for (int ipm=1; ipm<count(); ipm++)
+        if (PMs[ipm].relElStrength != value) return false;
+
+    return true;
 }
 
 bool APmHub::isAngularOverriden(int ipm) const

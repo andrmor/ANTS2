@@ -31,7 +31,7 @@ ACore_SI::ACore_SI(AScriptManager* ScriptManager) :
   H["str"] = "Converts double value to string with a given precision";
   H["print"] = "Print the argument (string) on the script output text field";
   H["clearText"] = "Clear the script output text field";
-  H["abort"] = "Abort skript execution.\nOptional string argument is a message to be shown on the script output text field";
+  H["abort"] = "Abort script execution.\nOptional string argument is a message to be shown on the script output text field";
   H["save"] = "Add string (second argument) to the file with the name given by the first argument.\n"
               "Save is not performed (and false is returned) if the file does not exist\n"
               "It is a very slow method!\n"

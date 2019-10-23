@@ -1,12 +1,10 @@
-#ifdef USE_ROOT_HTML
-
 #ifndef AROOTHTTPSERVER_H
 #define AROOTHTTPSERVER_H
 
 #include <QString>
 
 class THttpServer;
-class TObject;
+class TGeoManager;
 
 class ARootHttpServer
 {
@@ -14,16 +12,12 @@ public:
     ARootHttpServer(unsigned int port, QString OptionalUrlJsRoot = "");
     ~ARootHttpServer();
 
-    void UpdateGeoWorld(TObject* NewGeoWorld);
-    void Register(QString name, TObject* obj);
-    void Unregister(TObject* obj);
+    void UpdateGeo(TGeoManager* GeoManager);
+    bool isRunning() const;
 
 private:
-    THttpServer* server;
-    TObject* GeoWorld;
-    TObject* GeoTracks;
+    THttpServer * server = nullptr;
+    TGeoManager * GeoWorld = nullptr;
 };
 
 #endif // AROOTHTTPSERVER_H
-
-#endif

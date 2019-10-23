@@ -1,5 +1,6 @@
 #include "scriptminimizer.h"
 #include "ajavascriptmanager.h"
+#include "afunctorbase.h"
 
 #ifdef GUI
 #include "mainwindow.h"
@@ -12,6 +13,35 @@
 #include "Math/Functor.h"
 #include "Minuit2/Minuit2Minimizer.h"
 
+class AFunctor_JavaScript : public AFunctorBase
+{
+public:
+    AFunctor_JavaScript(AJavaScriptManager * JSM) : ScriptManager(JSM) {}
+    double operator()(const double *p)
+    {
+        if (ScriptManager->isEvalAborted()) return 1e30;
+
+        //    QString str;
+        //    for (int i=0; i<ScriptManager->MiniNumVariables; i++)
+        //    str += QString::number(p[i])+"  ";
+        //    qDebug() << "Functor call with parameters:"<<str<<ScriptManager;
+
+        QScriptValueList input;
+        for (int i=0; i<ScriptManager->MiniNumVariables; i++) input << p[i];
+
+        QScriptValue sv = ScriptManager->getMinimalizationFunction();
+        double result = sv.call(QScriptValue(), input).toNumber();
+
+        //    qDebug() << "SM"<<ScriptManager<<"engine"<<ScriptManager->engine<<"sv reports engine:"<<sv.engine();
+        //    qDebug() << "Minimization parameter value obtained:"<<result;
+
+        return result;
+    }
+private:
+    AJavaScriptManager * ScriptManager = nullptr;
+};
+
+/*
 double JavaScriptFunctor(const double *p) //last parameter contains the pointer to MainWindow object
 {
   void *thisvalue;
@@ -20,12 +50,10 @@ double JavaScriptFunctor(const double *p) //last parameter contains the pointer 
 
   if (ScriptManager->isEvalAborted()) return 1e30;
 
-  /*
-    QString str;
-    for (int i=0; i<ScriptManager->MiniNumVariables; i++)
-        str += QString::number(p[i+1])+"  ";
-    qDebug() << "Functor call with parameters:"<<str<<ScriptManager;
-  */
+  //  QString str;
+  //  for (int i=0; i<ScriptManager->MiniNumVariables; i++)
+  //      str += QString::number(p[i+1])+"  ";
+  //  qDebug() << "Functor call with parameters:"<<str<<ScriptManager;
 
   QScriptValueList input;
   for (int i=0; i<ScriptManager->MiniNumVariables; i++) input << p[i+1];
@@ -38,6 +66,7 @@ double JavaScriptFunctor(const double *p) //last parameter contains the pointer 
 
   return result;
 }
+*/
 
 AInterfaceToMinimizerScript::AInterfaceToMinimizerScript(AScriptManager *ScriptManager) :
   ScriptManager(ScriptManager)
@@ -160,68 +189,58 @@ void AInterfaceToMinimizerScript::SetMigrad()
 
 bool AInterfaceToMinimizerScript::Run()
 {
-  if (!ScriptManager)
+    if (!ScriptManager)
     {
-      abort("ScriptManager is not set!");
-      return false;
+        abort("ScriptManager is not set!");
+        return false;
+    }
+    ScriptManager->MiniNumVariables = Variables.size();
+    if (ScriptManager->MiniNumVariables == 0)
+    {
+        abort("Variables are not defined!");
+        return false;
     }
 
-  //  qDebug() << "Minimizer Run() started";
-  ScriptManager->MiniNumVariables = Variables.size();
-  if (ScriptManager->MiniNumVariables == 0)
+    ROOT::Math::Functor * Funct = configureFunctor();
+    if (!Funct)
     {
-      abort("Variables are not defined!");
-      return false;
+        abort("Minimization function is not defined!");
+        return false;
     }
 
-  ROOT::Math::Functor *Funct = configureFunctor();
-  if (!Funct)
+    ROOT::Minuit2::Minuit2Minimizer *RootMinimizer = new ROOT::Minuit2::Minuit2Minimizer( Method==0 ? ROOT::Minuit2::kMigrad : ROOT::Minuit2::kSimplex );
+    RootMinimizer->SetMaxFunctionCalls(500);
+    RootMinimizer->SetMaxIterations(1000);
+    RootMinimizer->SetTolerance(0.001);
+    RootMinimizer->SetPrintLevel(PrintVerbosity);
+    RootMinimizer->SetStrategy( bHighPrecision ? 2 : 1 ); // 1 -> standard,  2 -> try to improve minimum (slower)
+
+    RootMinimizer->SetFunction(*Funct);
+
+    //setting up variables   -  start step min max etc
+    for (int i=0; i<ScriptManager->MiniNumVariables; i++)
+        Variables[i]->AddToMinimizer(i, RootMinimizer);
+
+    //  qDebug() << "Starting minimization";
+    bool fOK = RootMinimizer->Minimize();
+    fOK = fOK && !ScriptManager->isEvalAborted();
+    //  qDebug()<<"Minimization success? "<<fOK;
+
+    Results.clear();
+    if (fOK)
     {
-      abort("Minimization function is not defined!");
-      return false;
+        const double *VarVals = RootMinimizer->X();
+        for (int i=0; i<Variables.size(); i++)
+        {
+            //  qDebug() << i << "-->--"<<VarVals[i];
+            Results << VarVals[i];
+        }
     }
 
-  ROOT::Minuit2::Minuit2Minimizer *RootMinimizer = new ROOT::Minuit2::Minuit2Minimizer( Method==0 ? ROOT::Minuit2::kMigrad : ROOT::Minuit2::kSimplex );
-  RootMinimizer->SetMaxFunctionCalls(500);
-  RootMinimizer->SetMaxIterations(1000);
-  RootMinimizer->SetTolerance(0.001);
-  RootMinimizer->SetPrintLevel(PrintVerbosity);  
-  RootMinimizer->SetStrategy( bHighPrecision ? 2 : 1 ); // 1 -> standard,  2 -> try to improve minimum (slower)
+    delete Funct;
+    delete RootMinimizer;
 
-  RootMinimizer->SetFunction(*Funct);
-
-  //prepare to transfer pointer to ScriptManager - it will the the first variable
-  double dPoint;
-  void *thisvalue = ScriptManager;
-  memcpy(&dPoint, &thisvalue, sizeof(void *));
-  //We need to fix for the possibility that double isn't enough to store void*
-  RootMinimizer->SetFixedVariable(0, "p", dPoint);
-
-  //setting up variables   -  start step min max etc
-  for (int i=0; i<ScriptManager->MiniNumVariables; i++)
-      Variables[i]->AddToMinimizer(i+1, RootMinimizer);
-
-  //  qDebug() << "Starting minimization";
-  bool fOK = RootMinimizer->Minimize();
-  fOK = fOK && !ScriptManager->isEvalAborted();
-  //  qDebug()<<"Minimization success? "<<fOK;
-
-  //results
-  Results.clear();
-  if (fOK)
-  {
-      const double *VarVals = RootMinimizer->X();
-      for (int i=0; i<Variables.size(); i++)
-      {
-          //  qDebug() << i << "-->--"<<VarVals[i+1];
-          Results << VarVals[i+1];
-      }
-  }
-
-  delete Funct;
-  delete RootMinimizer;
-
-  return fOK;
+    return fOK;
 }
 
 AInterfaceToMinimizerScript::AVarRecordNormal::AVarRecordNormal(QString name, double start, double step)
@@ -316,20 +335,30 @@ AMini_JavaScript_SI::AMini_JavaScript_SI(AJavaScriptManager *ScriptManager) :
   AInterfaceToMinimizerScript( dynamic_cast<AScriptManager*>(ScriptManager) ) {}
 
 AMini_JavaScript_SI::AMini_JavaScript_SI(const AMini_JavaScript_SI & /*other*/) :
-  AInterfaceToMinimizerScript(0) { }
+    AInterfaceToMinimizerScript(0) { }
+
+AMini_JavaScript_SI::~AMini_JavaScript_SI()
+{
+    delete baseFunctor;
+}
 
 void AMini_JavaScript_SI::SetScriptManager(AJavaScriptManager *NewScriptManager)
 {
-  ScriptManager = dynamic_cast<AScriptManager*>(NewScriptManager);
+    ScriptManager = dynamic_cast<AScriptManager*>(NewScriptManager);
 }
 
 ROOT::Math::Functor* AMini_JavaScript_SI::configureFunctor()
 {
-  AJavaScriptManager* jsm = static_cast<AJavaScriptManager*>(ScriptManager);
-  QScriptValue sv = jsm->getMinimalizationFunction();
-  if (!sv.isFunction()) return 0;
+    delete baseFunctor; baseFunctor = nullptr;
 
-  return new ROOT::Math::Functor(&JavaScriptFunctor, ScriptManager->MiniNumVariables + 1);
+    AJavaScriptManager* jsm = static_cast<AJavaScriptManager*>(ScriptManager);
+
+    QScriptValue sv = jsm->getMinimalizationFunction();
+    if (!sv.isFunction()) return nullptr;
+
+    AFunctor_JavaScript * f = new AFunctor_JavaScript(jsm);
+    baseFunctor = f;
+    return new ROOT::Math::Functor(*f, ScriptManager->MiniNumVariables);
 }
 
 #ifdef __USE_ANTS_PYTHON__
@@ -338,6 +367,33 @@ ROOT::Math::Functor* AMini_JavaScript_SI::configureFunctor()
 //#include "PythonQt_QtAll.h"
 #include "PythonQtConversion.h"
 
+class AFunctor_PythonScript : public AFunctorBase
+{
+public:
+    AFunctor_PythonScript(APythonScriptManager * PSM) : psm(PSM) {}
+    double operator()(const double *p)
+    {
+        if (psm->isEvalAborted()) return 1e30;
+
+        const int numArguments = psm->MiniNumVariables;
+        PythonQtObjectPtr tupleArgs;
+        tupleArgs.setNewRef( PyTuple_New(numArguments) );
+        for (int i=0; i<numArguments; i++)
+            PyTuple_SetItem(tupleArgs, i, PyFloat_FromDouble(p[i]));
+        PythonQtObjectPtr pyth_val;
+        pyth_val.setNewRef( PyObject_Call(psm->MinimizationFunctor, tupleArgs, NULL) );
+
+        double result = 1e30;
+        bool bOK;
+        if (pyth_val)
+            result = PythonQtConv::PyObjGetDouble(pyth_val, false, bOK);
+        return result;
+    }
+private:
+    APythonScriptManager * psm = nullptr;
+};
+
+/*
 double PythonScriptFunctor(const double *p) //last parameter contains the pointer to MainWindow object
 {
   void *thisvalue;
@@ -348,51 +404,39 @@ double PythonScriptFunctor(const double *p) //last parameter contains the pointe
 
   const int numArguments = psm->MiniNumVariables;
 
-  /*
-    //Diagnostics
-    QString str;
-    for (int i=0; i<numArguments; i++)
-        str += QString::number(p[i+1])+"  ";
-    qDebug() << "Functor call with parameters:"<<str<<psm;
-  */
+//    //Diagnostics
+//    QString str;
+//    for (int i=0; i<numArguments; i++)
+//        str += QString::number(p[i+1])+"  ";
+//    qDebug() << "Functor call with parameters:"<<str<<psm;
 
-  /*
-    PythonQtObjectPtr mainModule = PythonQt::self()->getMainModule();
-    PyObject* dict = NULL;
-    if (PyModule_Check(mainModule)) dict = PyModule_GetDict(mainModule);
-    else if (PyDict_Check(mainModule))
-        dict = mainModule;
-
-    if (dict)
-      {
-        PyObject* expression = PyDict_GetItemString(dict, psm->MiniFunctionName.toLatin1().data());
-        qDebug() << "expression:"<<expression;
-
-            PyObject *pyth_val;
-
-            //PyObject* arg1 = PyFloat_FromDouble(p[1]);
-            //PyObject* arg2 = PyFloat_FromDouble(p[2]);
-            //qDebug() << "args:"<< arg1 << arg2;
-            //pyth_val = PyObject_CallFunctionObjArgs(expression, arg1, arg2, NULL);
-
-            PyObject* tupleArgs = PyTuple_New(numArguments);
-            for (int i=0; i<numArguments; i++)
-                PyTuple_SetItem(tupleArgs, i, PyFloat_FromDouble(p[i+1]));
-            pyth_val = PyObject_Call(expression, tupleArgs, NULL);
-
-            qDebug() << pyth_val;
-
-            double result = 1e30;
-            bool bOK;
-            if (pyth_val)
-                result = PythonQtConv::PyObjGetDouble(pyth_val, false, bOK);
-
-            qDebug() << "-->" << result;
-            return result;
-
-      }
-    else return 1e30;
-    */
+//    PythonQtObjectPtr mainModule = PythonQt::self()->getMainModule();
+//    PyObject* dict = NULL;
+//    if (PyModule_Check(mainModule)) dict = PyModule_GetDict(mainModule);
+//    else if (PyDict_Check(mainModule))
+//        dict = mainModule;
+//    if (dict)
+//      {
+//        PyObject* expression = PyDict_GetItemString(dict, psm->MiniFunctionName.toLatin1().data());
+//        qDebug() << "expression:"<<expression;
+//            PyObject *pyth_val;
+//            //PyObject* arg1 = PyFloat_FromDouble(p[1]);
+//            //PyObject* arg2 = PyFloat_FromDouble(p[2]);
+//            //qDebug() << "args:"<< arg1 << arg2;
+//            //pyth_val = PyObject_CallFunctionObjArgs(expression, arg1, arg2, NULL);
+//            PyObject* tupleArgs = PyTuple_New(numArguments);
+//            for (int i=0; i<numArguments; i++)
+//                PyTuple_SetItem(tupleArgs, i, PyFloat_FromDouble(p[i+1]));
+//            pyth_val = PyObject_Call(expression, tupleArgs, NULL);
+//            qDebug() << pyth_val;
+//            double result = 1e30;
+//            bool bOK;
+//            if (pyth_val)
+//                result = PythonQtConv::PyObjGetDouble(pyth_val, false, bOK);
+//            qDebug() << "-->" << result;
+//            return result;
+//      }
+//    else return 1e30;
 
     //PyObject* tupleArgs = PyTuple_New(numArguments);
     PythonQtObjectPtr tupleArgs;
@@ -411,13 +455,21 @@ double PythonScriptFunctor(const double *p) //last parameter contains the pointe
     //  qDebug() << "-->" << result;
     return result;
 }
+*/
 
 AMini_Python_SI::AMini_Python_SI(APythonScriptManager *ScriptManager) :
-  AInterfaceToMinimizerScript( dynamic_cast<AScriptManager*>(ScriptManager) ) {}
+    AInterfaceToMinimizerScript( dynamic_cast<AScriptManager*>(ScriptManager) ) {}
+
+AMini_Python_SI::~AMini_Python_SI()
+{
+    delete baseFunctor;
+}
 
 ROOT::Math::Functor *AMini_Python_SI::configureFunctor()
 {
-   APythonScriptManager* psm = static_cast<APythonScriptManager*>(ScriptManager);
+    delete baseFunctor; baseFunctor = nullptr;
+
+    APythonScriptManager* psm = static_cast<APythonScriptManager*>(ScriptManager);
 
    /*
    PythonQtObjectPtr mainModule = PythonQt::self()->getMainModule();   
@@ -430,20 +482,23 @@ ROOT::Math::Functor *AMini_Python_SI::configureFunctor()
        psm->MinimizationFunctor = PyDict_GetItemString(dict, ScriptManager->MiniFunctionName.toLatin1().data());
 
        if (psm->MinimizationFunctor && PyCallable_Check(psm->MinimizationFunctor))
-           return new ROOT::Math::Functor(&PythonScriptFunctor, psm->MiniNumVariables + 1);
+           return new ROOT::Math::Functor(&PythonScriptFunctor, psm->MiniNumVariables);
    }
    */
 
-   if (psm->GlobalDict.object())
-   {
-       psm->MinimizationFunctor.setNewRef( PyDict_GetItemString(psm->GlobalDict, ScriptManager->MiniFunctionName.toLatin1().data()) );
+    if (psm->GlobalDict.object())
+    {
+        psm->MinimizationFunctor.setNewRef( PyDict_GetItemString(psm->GlobalDict, ScriptManager->MiniFunctionName.toLatin1().data()) );
 
-       if (psm->MinimizationFunctor && PyCallable_Check(psm->MinimizationFunctor))
-           return new ROOT::Math::Functor(&PythonScriptFunctor, psm->MiniNumVariables + 1);
-   }
+        if (psm->MinimizationFunctor && PyCallable_Check(psm->MinimizationFunctor))
+        {
+            AFunctor_PythonScript * f = new AFunctor_PythonScript(psm);
+            baseFunctor = f;
+            return new ROOT::Math::Functor(*f, psm->MiniNumVariables);
+        }
+    }
 
-
-   psm->MinimizationFunctor = 0;
-   return 0;
+    psm->MinimizationFunctor = nullptr;
+    return nullptr;
 }
 #endif

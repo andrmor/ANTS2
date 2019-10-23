@@ -4,6 +4,7 @@
 #include <QDebug>
 
 #include "TGraph.h"
+#include "TGraphErrors.h"
 #include "TAxis.h"
 #include "TAttLine.h"
 #include "TAttMarker.h"
@@ -55,11 +56,11 @@ void ARootGraphRecord::SetTitles(const QString &titleX, const QString &titleY, c
     if (Type == "TGraph" && !graphTitle.isEmpty())
     {
         TGraph* g = dynamic_cast<TGraph*>(Object);
-        g->SetTitle(graphTitle.toLatin1().data());
+        if (g) g->SetTitle(graphTitle.toLatin1().data());
     }
 }
 
-void ARootGraphRecord::AddPoint(double x, double y)
+void ARootGraphRecord::AddPoint(double x, double y, double errorX, double errorY)
 {
     QMutexLocker locker(&Mutex);
 
@@ -67,6 +68,16 @@ void ARootGraphRecord::AddPoint(double x, double y)
     {
         TGraph* g = dynamic_cast<TGraph*>(Object);
         g->SetPoint(g->GetN(), x, y);
+    }
+    else if (Type == "TGraphErrors")
+    {
+        TGraphErrors* g = dynamic_cast<TGraphErrors*>(Object);
+        if (g)
+        {
+            const int iBin = g->GetN();
+            g->SetPoint(iBin, x, y);
+            g->SetPointError(iBin, errorX, errorY);
+        }
     }
 }
 

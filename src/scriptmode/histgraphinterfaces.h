@@ -102,12 +102,14 @@ public slots:
   void SetAbortIfAlreadyExists(bool flag) {bAbortIfExists = flag;}
 
   void NewGraph(const QString& GraphName);
+  void NewGraphErrors(const QString& GraphName);
 
   void SetMarkerProperties(QString GraphName, int MarkerColor, int MarkerStyle, double MarkerSize);
   void SetLineProperties(QString GraphName, int LineColor, int LineStyle, int LineWidth);
   void SetTitles(QString GraphName, QString X_Title, QString Y_Title, QString GraphTitle = "");
 
   void AddPoint(QString GraphName, double x, double y);
+  void AddPoint(QString GraphName, double x, double y, double errorX, double errorY);
   void AddPoints(QString GraphName, QVariant xArray, QVariant yArray);
   void AddPoints(QString GraphName, QVariant xyArray);
 

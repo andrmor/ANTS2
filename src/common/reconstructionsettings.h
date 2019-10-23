@@ -16,9 +16,6 @@ public:
   double SuggestedEnergy;
   bool   fIncludePassive;
   bool   fWeightedChi2calculation;
-  bool   fLimitSearchIfTrueIsSet;
-  double RangeForLimitSearchIfTrueSet;
-  bool   LimitSearchGauss;
 
   //Algorithm
   int    ReconstructionAlgorithm;  //0-CoG, 1-Multigrid, 2-RootMinimizer, 4-ANN, 5-GPU_CG
@@ -52,12 +49,13 @@ public:
   double LimitNodesSize1, LimitNodesSize2;
 
   //Root minimiser
-  bool   fRMuseML;
-  int    RMminuitOption;
-  double RMstepX, RMstepY, RMstepZ, RMstepEnergy;
-  int    RMmaxCalls;
-  int    RMstartOption; //0 - cog, 1 - PM with max signal
-  bool   fRMsuppressConsole;
+  int     RMtype;  //0 - LS, 1 - ML, 2 - TFormula
+  int     RMminuitOption;
+  double  RMstepX, RMstepY, RMstepZ, RMstepEnergy;
+  int     RMmaxCalls;
+  int     RMstartOption; //0 - cog, 1 - PM with max signal
+  bool    fRMsuppressConsole;
+  QString RMformula;
 
   //multiples
   int    MultipleEventOption;
@@ -78,7 +76,6 @@ public:
 
   ReconstructionSettings() : fReconstructZ(false), SuggestedZ(0), Zstrategy(0), fReconstructEnergy(false), SuggestedEnergy(1),
     fIncludePassive(false), fWeightedChi2calculation(true),
-    fLimitSearchIfTrueIsSet(false), RangeForLimitSearchIfTrueSet(1.0), LimitSearchGauss(false),
     ReconstructionAlgorithm(0),
     fUseDynamicPassivesDistance(false), fUseDynamicPassivesSignal(false), fUseDynamicPassives(false),
     SignalThresholdLow(0), SignalThresholdHigh(1e10), MaxDistance(100), MaxDistanceSquare(10000),

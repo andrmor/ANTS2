@@ -41,7 +41,7 @@ public:
 
 private:
   QStringList Shapes;  //names of possible shapes to be shown in combobox
-  ASlabXYDelegate::ShowStates ShowState;
+  ASlabXYDelegate::ShowStates ShowState = ShowNothing;
 
 public slots:
   void UpdateGui(const ASlabXYModel& ModelRecord);

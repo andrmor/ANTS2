@@ -1,5 +1,3 @@
-#ifdef USE_ROOT_HTML
-
 #include "aroothttpserver.h"
 
 #include <QDebug>
@@ -12,9 +10,6 @@ ARootHttpServer::ARootHttpServer(unsigned int port, QString OptionalUrlJsRoot)
     QString s = "http:" + QString::number(port);
     server = new THttpServer(s.toLatin1());
     if (!OptionalUrlJsRoot.isEmpty()) server->SetJSROOT(OptionalUrlJsRoot.toLatin1());
-
-    GeoWorld = 0;
-    GeoTracks = 0;
 }
 
 ARootHttpServer::~ARootHttpServer()
@@ -22,29 +17,18 @@ ARootHttpServer::~ARootHttpServer()
     delete server;
 }
 
-void ARootHttpServer::UpdateGeoWorld(TObject *NewGeoWorld)
+void ARootHttpServer::UpdateGeo(TGeoManager * GeoManager)
 {
-    //qDebug() << "In root html server: registering new TopNode and GeoTracks";
-
-    TGeoManager* GeoManager = dynamic_cast<TGeoManager*>(NewGeoWorld);
-
+    //qDebug() << "Root html server: registering new GeoManager";
     if (GeoWorld) server->Unregister(GeoWorld);
-    server->Register("GeoWorld", GeoManager->GetTopNode());
-    GeoWorld = GeoManager->GetTopNode();
+    GeoManager->SetName("world");
+    server->Register("GeoWorld", GeoManager);
+    GeoWorld = GeoManager;
 
-    if (GeoTracks) server->Unregister(GeoTracks);
-    server->Register("GeoTracks", GeoManager->GetListOfTracks());
-    GeoTracks = GeoManager->GetListOfTracks();
+    server->SetItemField("/","_drawitem","world");
 }
 
-void ARootHttpServer::Register(QString name, TObject *obj)
+bool ARootHttpServer::isRunning() const
 {
-    server->Register(name.toLatin1(), obj);
+    return server->IsAnyEngine();
 }
-
-void ARootHttpServer::Unregister(TObject *obj)
-{
-    server->Unregister(obj);
-}
-
-#endif

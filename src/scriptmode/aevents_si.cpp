@@ -64,8 +64,22 @@ QVariant AEvents_SI::GetPMsignals(int ievent)
 
   const QVector< float >& sigs = EventsDataHub->Events.at(ievent);
   QVariantList l;
-  for (float f : sigs) l << QVariant(f);
+  for (const float & f : sigs) l << QVariant(f);
   return l;
+}
+
+const QVariantList AEvents_SI::GetPMsignals() const
+{
+    QVariantList vl;
+    vl.reserve(EventsDataHub->Events.size());
+
+    for (const QVector<float> & event : EventsDataHub->Events)
+    {
+        QVariantList el;
+        for (const float & sig : event) el << sig;
+        vl.push_back(el);
+    }
+    return vl;
 }
 
 void AEvents_SI::SetPMsignal(int ievent, int ipm, double value)

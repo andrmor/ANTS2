@@ -25,7 +25,6 @@ public:
 
     // single photoelectron response
     void setElChanSPePHS(const QVector<double>& x, const QVector<double>& y);
-    void scaleSPePHS(double gain);
     void preparePHS();
     void clearSPePHSCustomDist();
     void copySPePHSdata(const APm &from);

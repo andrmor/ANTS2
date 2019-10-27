@@ -3,7 +3,8 @@
 
 #include <Eigen/Dense>
 #include <vector> // used only for string vectors
-#include <string>
+#include <string> // for fstream
+#include <fstream>
 #include "TMath.h"
 #include "TRandom.h"
 
@@ -48,7 +49,8 @@ e_list diffusion(std::string filename,
 
 // ------ input --------------------------------------------------------
 
-e_list getEventList(std::string filename);
+e_list getEventList(std::string filename,
+                    std::string diagnosticsFilename);
 
 // ------ displacement vector ------------------------------------------
 
@@ -64,7 +66,8 @@ e_pos getDisplacementVector(Params theParams,
 
 int getEventListRows(std::string filename);
 
-e_list getThisRowEventList(std::ifstream& stream);
+e_list getThisRowEventList(std::ifstream& stream,
+                           std::ofstream& diagnosticsStream);
 
 // ------ diffusion function -------------------------------------------
 
@@ -106,5 +109,10 @@ sigma_T getSigma_T(double depthFrac, // transverse diffusion coefficient
 sigma_L getSigma_L(double depthFrac, // longitudinal diffusion coeff
                    double v_d = 2.0,
                    double sigma_Lcath = 0.85);
+
+// ------ diagnostics --------------------------------------------------
+
+void gTREL_diagnostics(e_pos thisRow_pos,
+              std::ofstream& diagnosticsStream);
 
 #endif // DIFFUSION_H 

@@ -28,10 +28,13 @@ e_list diffusion(std::string filename,
                       double sigma_Tcath,  // mm
                       double sigma_Lcath){ // us
 	
-	Params theParams = constructTheParams(depthFrac, h, v_d,
+    string diagnosticsFilename = "/home/vova/Work/ANTS2/ANTS2-LXe/";
+    diagnosticsFilename       += "ANTS2/diffusionDiagnostics.txt";
+
+    Params theParams = constructTheParams(depthFrac, h, v_d,
 	                                      sigma_Tcath, sigma_Lcath);
 	
-	e_list eventList = getEventList(filename);
+    e_list eventList = getEventList(filename, diagnosticsFilename);
 	
 	e_list dispList = getDisplacementList(eventList.rows(), theParams);
 
@@ -45,7 +48,8 @@ e_list diffusion(std::string filename,
 
 // --- input -----------------------------------------------------------
 
-e_list getEventList(string filename){
+e_list getEventList(string filename,
+                    string diagnosticsFilename){
 	
 	e_list eventList;
 	
@@ -56,6 +60,10 @@ e_list getEventList(string filename){
 	int cR = 0;
 	
 	ifstream infile(filename);
+    ofstream diagnosticsFile;
+    diagnosticsFile.open(diagnosticsFilename,
+                         std::ofstream::out | std::ofstream::trunc);
+
 
 	//~ int count = 0;
 	
@@ -65,7 +73,8 @@ e_list getEventList(string filename){
 		
 		//~ cout << "GEL --> count: " << count << endl;
 		
-		e_list thisRowEventList = getThisRowEventList(infile);
+        e_list thisRowEventList = getThisRowEventList(infile,
+                                                      diagnosticsFile);
 		
 		if(thisRowEventList.cols() > 1){ // not yet the end of file
 			
@@ -90,6 +99,7 @@ e_list getEventList(string filename){
 	}
 	
 	infile.close();
+    diagnosticsFile.close();
 	
 	return eventList;
 	
@@ -144,8 +154,8 @@ int getEventListRows(std::string filename){
 		if(thisRow_sen.size() > 1){
 			//~ cout << "GELR --> stod tR_s: " << std::stod(thisRow_sen[4]);
 			//~ cout << endl;
-			std::replace(thisRow_sen[4].begin(), thisRow_sen[4].end(),
-			             '.', ',');
+            /*std::replace(thisRow_sen[4].begin(), thisRow_sen[4].end(),
+                         '.', ',');*/
 			eventListRows += std::stod(thisRow_sen[4]);
 			//~ cout << "GELR --> eventListRows: " << eventListRows << endl;
 			
@@ -159,7 +169,8 @@ int getEventListRows(std::string filename){
 	
 }
 
-e_list getThisRowEventList(std::ifstream& stream){
+e_list getThisRowEventList(std::ifstream& stream,
+                           std::ofstream& diagnosticsStream){
 	
 	e_pos thisRow_pos;
 	int thisN_electrons;
@@ -177,6 +188,7 @@ e_list getThisRowEventList(std::ifstream& stream){
 	
 	if(thisRow_sen.size() > 1){ // not end of input file yet
 	
+        /*
 		std::replace(thisRow_sen[1].begin(), thisRow_sen[1].end(),
 			         '.', ',');
 		std::replace(thisRow_sen[2].begin(), thisRow_sen[2].end(),
@@ -185,7 +197,7 @@ e_list getThisRowEventList(std::ifstream& stream){
 			         '.', ',');
 		std::replace(thisRow_sen[4].begin(), thisRow_sen[4].end(),
 			         '.', ',');
-	
+        */
 		thisRow_pos << std::stod(thisRow_sen[1]),
 		               std::stod(thisRow_sen[2]),
 		               std::stod(thisRow_sen[3]);
@@ -193,6 +205,8 @@ e_list getThisRowEventList(std::ifstream& stream){
 		
 		//~ cout << "GTREL--> thisN_electrons: " << thisN_electrons << endl;
 		
+        gTREL_diagnostics(thisRow_pos, diagnosticsStream);
+
 		thisRowEventList.resize(thisN_electrons, 3);
 		
 		for(int i = 0; i < thisN_electrons ; i++){
@@ -200,7 +214,7 @@ e_list getThisRowEventList(std::ifstream& stream){
 			thisRowEventList.row(i) = thisRow_pos;
 			
 		}
-		
+
 	} else { // reached end of input file
 		
 		cout << "reached end of file" << endl;
@@ -344,4 +358,15 @@ sigma_L getSigma_L(double depthFrac, // longitudinal diffusion coeff
 	
 	return s_L;
 
+}
+
+// ------ diagnostics --------------------------------------------------
+
+void gTREL_diagnostics(e_pos thisRow_pos,
+              std::ofstream& diagnosticsStream){
+
+    diagnosticsStream << to_string(thisRow_pos(0)) << '\t';
+    diagnosticsStream << to_string(thisRow_pos(1)) << '\t';
+    diagnosticsStream << to_string(thisRow_pos(2)) << '\t';
+    diagnosticsStream << '\n';
 }

@@ -116,7 +116,7 @@ QVariantList getPMTrawV(string filename){
 	ifstream infile(filename);
 	string thisRow_str;
 	while(std::getline(infile, thisRow_str)){
-		std::replace(thisRow_str.begin(),thisRow_str.end(),'.',',');
+        //std::replace(thisRow_str.begin(),thisRow_str.end(),'.',',');
 		PMTrawV.push_back(std::stod(thisRow_str));
 		
 	}

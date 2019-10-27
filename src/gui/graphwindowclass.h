@@ -2,6 +2,9 @@
 #define GRAPHWINDOWCLASS_H
 
 #include "aguiwindow.h"
+#include "adrawobject.h"
+#include "abasketitem.h"
+
 #include <QVariantList>
 
 #include "TMathBase.h"
@@ -17,39 +20,6 @@ class AToolboxScene;
 class QListWidgetItem;
 class TObject;
 class TTree;
-
-class DrawObjectStructure
-{
-public:
-    void setPointer(TObject* p) {Pointer = p;}
-    TObject* getPointer() {return Pointer;}
-
-    void setOptions(QString str) {Options = str;}
-    void setOptions(const char* chars) {Options = chars;}
-    QString getOptions() {return Options;}
-
-    DrawObjectStructure() {Pointer=0;}
-    DrawObjectStructure(TObject* pointer, const char* options) {Pointer = pointer; Options = options;}
-    DrawObjectStructure(TObject* pointer, QString options) {Pointer = pointer; Options = options;}
-
-private:
-    TObject* Pointer;
-    QString Options;
-};
-
-class BasketItemClass
-{
-public:
-    QString Name;
-    QString Type;
-    QVector<DrawObjectStructure> DrawObjects;
-
-    BasketItemClass(QString name, QVector<DrawObjectStructure>* drawObjects);
-    BasketItemClass(){}
-    ~BasketItemClass();
-
-    void clearObjects();
-};
 
 namespace Ui {
 class GraphWindowClass;
@@ -276,9 +246,9 @@ private:
     bool ExtractionCanceled = false;
     int LastOptStat = 1111;
 
-    QVector<DrawObjectStructure> DrawObjects;  //currently drawn
-    QVector<DrawObjectStructure> MasterDrawObjects; //last draw made from outse of the graph window
-    QVector< BasketItemClass > Basket; //container with user selected "drawings"
+    QVector<ADrawObject> DrawObjects;  //currently drawn
+    QVector<ADrawObject> MasterDrawObjects; //last draw made from outse of the graph window
+    QVector< ABasketItem > Basket; //container with user selected "drawings"
     int CurrentBasketItem = -1;
     int BasketMode = 0;
 
@@ -315,7 +285,7 @@ private:
     void Basket_DrawOnTop(int row);
 
     void AppendRootHistsOrGraphs();
-    QVector<DrawObjectStructure> *getCurrentDrawObjects();
+    QVector<ADrawObject> *getCurrentDrawObjects();
     void ShowProjection(QString type);
     double runScaleDialog();
     const QPair<double, double> runShiftDialog();

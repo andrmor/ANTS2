@@ -126,9 +126,15 @@ void MainWindow::on_pobTest_clicked()
 
 //include <QElapsedTimer>
 #include <ahistogram.h>
-#include "TH2D.h"
+#include "TH1I.h"
 void MainWindow::on_pobTest_2_clicked()
 {
+    auto * h = new TH1I("", "", 100,0,0);
+    h->Fill(5,10);
+    GraphWindow->Draw(h);
+    GraphWindow->AddCurrentToBasket("ahaaa");
+
+
 //    std::vector<mydata> v;
 //    v.push_back( mydata(1.0, 100.0) );
 

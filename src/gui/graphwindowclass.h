@@ -20,6 +20,7 @@ class AToolboxScene;
 class QListWidgetItem;
 class TObject;
 class TTree;
+class ABasketManager;
 
 namespace Ui {
 class GraphWindowClass;
@@ -146,7 +147,7 @@ public slots:
     // if the first object (no "same" option) was drawn without update, call this function after the manual update
     void UpdateControls(); //updates visualisation of the current master graph parameters
     void DoSaveGraph(QString name);
-    void AddCurrentToBasket(QString name);
+    void AddCurrentToBasket(const QString &name);
     void AddLegend(double x1, double y1, double x2, double y2, QString title);
     void SetLegendBorder(int color, int style, int size);
     void AddText(QString text, bool bShowFrame, int Alignment_0Left1Center2Right);
@@ -246,11 +247,12 @@ private:
     bool ExtractionCanceled = false;
     int LastOptStat = 1111;
 
-    QVector<ADrawObject> DrawObjects;  //currently drawn
-    QVector<ADrawObject> MasterDrawObjects; //last draw made from outse of the graph window
-    QVector< ABasketItem > Basket; //container with user selected "drawings"
-    int CurrentBasketItem = -1;
-    int BasketMode = 0;
+    QVector<ADrawObject> DrawObjects;  //always local objects -> can have a copy from the Basket
+    QVector<ADrawObject> MasterDrawObjects; //last draw made from outside of the graph window
+    //QVector< ABasketItem > Basket; //container with user selected "drawings"
+    ABasketManager * Basket = nullptr;
+    int CurrentBasketItem = -1; //-1 - Basket is off; -2 -basket is Off, using tmp drawing (e.g. overlap of two histograms)
+    //int BasketMode = 0;
 
     QList<TObject*> tmpTObjects;
     TH1D* hProjection = 0;  //for toolbox
@@ -285,7 +287,6 @@ private:
     void Basket_DrawOnTop(int row);
 
     void AppendRootHistsOrGraphs();
-    QVector<ADrawObject> *getCurrentDrawObjects();
     void ShowProjection(QString type);
     double runScaleDialog();
     const QPair<double, double> runShiftDialog();

@@ -15,6 +15,7 @@
 #include "arootlineconfigurator.h"
 #include "arootmarkerconfigurator.h"
 #include "atoolboxscene.h"
+#include "abasketmanager.h"
 
 #ifdef USE_EIGEN
 #include "curvefit.h"
@@ -80,7 +81,9 @@
 GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
   AGuiWindow(parent), MW(mw),
   ui(new Ui::GraphWindowClass)
-{ 
+{
+    Basket = new ABasketManager();
+
   //setting UI
   ui->setupUi(this);
   this->setMinimumWidth(200);
@@ -154,12 +157,10 @@ GraphWindowClass::~GraphWindowClass()
 
   clearTmpTObjects();
 
-  delete scene;
-  delete gvOver;
+  delete scene; scene =  nullptr;
+  delete gvOver; gvOver = nullptr;
 
-  //RasterWindow->setParent(0);
-  //delete RasterWindow;
-  //delete QWinContainer;
+  delete Basket; Basket = nullptr;
 }
 
 TGraph* GraphWindowClass::MakeGraph(const QVector<double> *x, const QVector<double> *y,
@@ -845,7 +846,9 @@ void GraphWindowClass::Reshape()
 //    qDebug()<<"GraphWindow  -> Reshape triggered; objects:"<<DrawObjects.size();
 
     //if (DrawObjects.isEmpty()) return;
-    if (getCurrentDrawObjects()->isEmpty()) return;
+    if (DrawObjects.isEmpty()) return;
+
+    TObject * tobj = DrawObjects.first().Pointer;
 
     //double xmin, xmax, ymin, ymax, zmin, zmax;
     xmin = ui->ledXfrom->text().toDouble();
@@ -859,7 +862,7 @@ void GraphWindowClass::Reshape()
 
     //Reshaping the main (first) object
     //QString PlotType = DrawObjects.first().Pointer->ClassName();
-    QString PlotType = getCurrentDrawObjects()->first().Pointer->ClassName();
+    QString PlotType = tobj->ClassName();
 //    QString PlotOptions = DrawObjects.first().Options;
 //    qDebug()<<"  main object name/options:"<<PlotType<<PlotOptions;
 
@@ -867,7 +870,7 @@ void GraphWindowClass::Reshape()
       {
         //its 1D hist!
         //TH1* h = (TH1*) DrawObjects.first().Pointer;
-        TH1* h = (TH1*) getCurrentDrawObjects()->first().Pointer;
+        TH1* h = (TH1*)tobj;
         h->GetXaxis()->SetRangeUser(xmin, xmax);
         h->SetMinimum(ymin);
         h->SetMaximum(ymax);
@@ -876,7 +879,7 @@ void GraphWindowClass::Reshape()
       {
         //its 1d profile
         //TProfile* h = (TProfile*) DrawObjects.first().Pointer;
-        TProfile* h = (TProfile*) getCurrentDrawObjects()->first().Pointer;
+        TProfile* h = (TProfile*)tobj;
         h->GetXaxis()->SetRangeUser(xmin, xmax);
         h->SetMinimum(ymin);
         h->SetMaximum(ymax);
@@ -885,7 +888,7 @@ void GraphWindowClass::Reshape()
       {
         //its 2D hist!
         //TH2* h = (TH2*) DrawObjects.first().Pointer;
-        TH2* h = (TH2*) getCurrentDrawObjects()->first().Pointer;
+        TH2* h = (TH2*)tobj;
         h->GetXaxis()->SetRangeUser(xmin, xmax);
         h->GetYaxis()->SetRangeUser(ymin, ymax);
 
@@ -896,7 +899,7 @@ void GraphWindowClass::Reshape()
       {
         //its 2D profile!
         //TProfile2D* h = (TProfile2D*) DrawObjects.first().Pointer;
-        TProfile2D* h = (TProfile2D*) getCurrentDrawObjects()->first().Pointer;
+        TProfile2D* h = (TProfile2D*)tobj;
         h->GetXaxis()->SetRangeUser(xmin, xmax);
         h->GetYaxis()->SetRangeUser(ymin, ymax);
       //  h->SetMinimum(zmin);
@@ -906,7 +909,7 @@ void GraphWindowClass::Reshape()
       {
         //its 1D function!
         //TF1* f = (TF1*) DrawObjects.first().Pointer;
-        TF1* f = (TF1*) getCurrentDrawObjects()->first().Pointer;
+        TF1* f = (TF1*)tobj;
         f->SetRange(xmin, xmax);
         f->SetMinimum(ymin);
         f->SetMaximum(ymax);
@@ -915,7 +918,7 @@ void GraphWindowClass::Reshape()
       {
         //its 2D function!
         //TF2* f = (TF2*) DrawObjects.first().Pointer;
-        TF2* f = (TF2*) getCurrentDrawObjects()->first().Pointer;
+        TF2* f = (TF2*)tobj;
         f->SetRange(xmin, ymin, xmax, ymax);
         //f->SetRange(xmin, ymin, zmin, xmax, ymax, zmax);
         f->SetMaximum(zmax/1.05);
@@ -924,7 +927,7 @@ void GraphWindowClass::Reshape()
     else if (PlotType == "TGraph" || PlotType == "TGraphErrors")
       {
         //its 1D graph!
-        TGraph* gr = (TGraph*) getCurrentDrawObjects()->first().Pointer;
+        TGraph* gr = (TGraph*)tobj;
         gr->GetXaxis()->SetLimits(xmin, xmax);
         gr->SetMinimum(ymin);
         gr->SetMaximum(ymax);
@@ -932,7 +935,7 @@ void GraphWindowClass::Reshape()
     else if (PlotType == "TMultiGraph")
       {
         //its a collection of (here) 1D graphs
-        TMultiGraph* gr = (TMultiGraph*) getCurrentDrawObjects()->first().Pointer;
+        TMultiGraph* gr = (TMultiGraph*)tobj;
 
         gr->GetXaxis()->SetLimits(xmin, xmax);
         gr->SetMinimum(ymin);
@@ -941,7 +944,7 @@ void GraphWindowClass::Reshape()
     else if (PlotType == "TGraph2D")
       {
         //its 2D graph!        
-        TGraph2D* gr = (TGraph2D*) getCurrentDrawObjects()->first().Pointer;
+        TGraph2D* gr = (TGraph2D*)tobj;
         //gr->GetXaxis()->SetLimits(xmin, xmax);
         gr->GetHistogram()->GetXaxis()->SetRangeUser(xmin, xmax);
         //gr->GetYaxis()->SetLimits(ymin, ymax);
@@ -960,51 +963,44 @@ void GraphWindowClass::Reshape()
 
 void GraphWindowClass::RedrawAll()
 {  
-  //qDebug()<<"---Redraw all triggered." << " Current basket item:"<<CurrentBasketItem;
-  GraphWindowClass::EnforceOverlayOff();
+    //qDebug()<<"---Redraw all triggered." << " Current basket item:"<<CurrentBasketItem;
+    EnforceOverlayOff();
 
-  //QVector<DrawObjectStructure> OldDrawObjects;
+    //if (CurrentBasketItem >= 0) //-1 - Basket is off; -2 -basket is Off, using tmp drawing (e.g. overlap of two histograms)
+    //    DrawObjects = Basket[CurrentBasketItem].DrawObjects;
 
-  if (CurrentBasketItem >= 0) //-1 - Basket is off; -2 -basket is Off, using tmp drawing (e.g. overlap of two histograms)
-      DrawObjects = Basket[CurrentBasketItem].DrawObjects;
-
-  if (DrawObjects.isEmpty())
+    if (DrawObjects.isEmpty())
     {
-      ClearRootCanvas();
-      UpdateRootCanvas();
-      return;
+        ClearRootCanvas();
+        UpdateRootCanvas();
+        return;
     }
 
-  for (int i=0; i<DrawObjects.size(); i++)
-    {      
-      QString opt = DrawObjects[i].Options;
-      QByteArray ba = opt.toLocal8Bit();
-      const char* options = ba.data();
+    for (int i=0; i<DrawObjects.size(); i++)
+    {
+        QString opt = DrawObjects[i].Options;
+        QByteArray ba = opt.toLocal8Bit();
+        const char* options = ba.data();
 
-      //qDebug()<<"   object #"<<i<<" Class name:"<<OldDrawObjects[i].Pointer->ClassName()<<" options (QStr)"<<opt<<"-> options (chars):"<<options;
-      doDraw(DrawObjects[i].Pointer, options, false);
+        //qDebug()<<"   object #"<<i<<" Class name:"<<OldDrawObjects[i].Pointer->ClassName()<<" options (QStr)"<<opt<<"-> options (chars):"<<options;
+        doDraw(DrawObjects[i].Pointer, options, false);
     }
 
-  qApp->processEvents();
-  //qDebug() << "----Mod+";
-  //RasterWindow->fCanvas->Modified();
-  //qDebug() << "----Upd+";
-  RasterWindow->fCanvas->Update();  
-  //qDebug() << "----Contr+";
-  GraphWindowClass::UpdateControls();
+    qApp->processEvents();
+    //qDebug() << "----Mod+";
+    //RasterWindow->fCanvas->Modified();
+    //qDebug() << "----Upd+";
+    RasterWindow->fCanvas->Update();
+    //qDebug() << "----Contr+";
+    UpdateControls();
 
-  //ui->leOptions->setText(getCurrentDrawObjects()->first().Options);
-  //qDebug() << "---redraw done";
+    //ui->leOptions->setText(getCurrentDrawObjects()->first().Options);
+    //qDebug() << "---redraw done";
 }
 
 void GraphWindowClass::clearTmpTObjects()
 {
-    for (int i=0; i<tmpTObjects.size(); i++)
-    {
-        //qDebug() << "Diagnostics - deleting tmpTObject:" << tmpTObjects[i];
-        //qDebug() << "...Class name:" << tmpTObjects[i]->ClassName();
-        delete tmpTObjects[i];
-    }
+    for (int i=0; i<tmpTObjects.size(); i++) delete tmpTObjects[i];
     tmpTObjects.clear();
 
     delete hProjection; hProjection = 0;
@@ -1199,17 +1195,9 @@ void GraphWindowClass::on_leOptions_editingFinished()
    old_option = newOptions;
 
    if (DrawObjects.isEmpty()) return;
-   getCurrentDrawObjects()->first().Options = newOptions;
+   DrawObjects.first().Options = newOptions;
 
    GraphWindowClass::RedrawAll();
-}
-
-QVector<ADrawObject>* GraphWindowClass::getCurrentDrawObjects()
-{
-  if (CurrentBasketItem < 0) //-1 - Basket is off; -2 -basket is Off, using tmp drawing (e.g. overlap two histograms)
-     return &DrawObjects;
-  else
-     return &Basket[CurrentBasketItem].DrawObjects;
 }
 
 void GraphWindowClass::SaveGraph(QString fileName)
@@ -1223,7 +1211,8 @@ void GraphWindowClass::SaveGraph(QString fileName)
 void GraphWindowClass::UpdateControls()
 {
   if (MW->ShutDown) return;
-  if (getCurrentDrawObjects()->isEmpty()) return;
+  if (DrawObjects.isEmpty()) return;
+
   //qDebug()<<"  GraphWindow: updating indication of ranges";
   TMPignore = true;
 
@@ -1233,14 +1222,14 @@ void GraphWindowClass::UpdateControls()
   ui->cbGridX->setChecked(c->GetGridx());
   ui->cbGridY->setChecked(c->GetGridy());
 
-  TObject* obj = getCurrentDrawObjects()->first().Pointer;
+  TObject* obj = DrawObjects.first().Pointer;
   if (!obj)
   {
       qWarning() << "Cannot update graph window rang controls - object does not exist";
       return;
   }
   QString PlotType = obj->ClassName();
-  QString opt = getCurrentDrawObjects()->first().Options;
+  QString opt = DrawObjects.first().Options;
   //qDebug() << "PlotType:"<< PlotType << "Opt:"<<opt;
 
   zmin = 0; zmax = 0;
@@ -2135,7 +2124,7 @@ void GraphWindowClass::calculateFractionTH1(int row)
 {
     if (row == -1) return;
 
-    TH1* h = dynamic_cast<TH1*>(Basket[row].DrawObjects.first().Pointer);
+    TH1* h = dynamic_cast<TH1*>(Basket->getDrawObjects(row)->first().Pointer);
     if (!h)
     {
         message("This operation requires TH1 ROOT object", this);
@@ -2494,7 +2483,7 @@ void GraphWindowClass::on_pbAddToBasket_clicked()
      //  qDebug() << i << DrawObjects[i].Pointer->ClassName();
 
    bool ok;
-   int row = Basket.size();
+   int row = Basket->getSize();
    QString name = "Item"+QString::number(row);
    QString text = QInputDialog::getText(this, "New basket item",
                                               "Enter name:", QLineEdit::Normal,
@@ -2504,12 +2493,11 @@ void GraphWindowClass::on_pbAddToBasket_clicked()
    AddCurrentToBasket(text);
 }
 
-void GraphWindowClass::AddCurrentToBasket(QString name)
+void GraphWindowClass::AddCurrentToBasket(const QString & name)
 {
   if (DrawObjects.isEmpty()) return;
 
-  name = name.simplified();
-  Basket.append(ABasketItem(name, &DrawObjects));
+  Basket->addItem(name.simplified(), DrawObjects);
 
   ui->cbShowBasket->setChecked(true);
   UpdateBasketGUI();
@@ -2527,7 +2515,7 @@ void GraphWindowClass::AddLegend(double x1, double y1, double x2, double y2, QSt
   else
   {
       //do not register for basket - they have their own system
-      Basket[CurrentBasketItem].DrawObjects.append(ADrawObject(leg, "same"));
+      Basket->getDrawObjects(CurrentBasketItem)->append(ADrawObject(leg, "same"));
   }
   RedrawAll();
 
@@ -2537,7 +2525,7 @@ void GraphWindowClass::AddLegend(double x1, double y1, double x2, double y2, QSt
 //#include "TLegendEntry.h"
 void GraphWindowClass::SetLegendBorder(int color, int style, int size)
 {
-    QVector<ADrawObject> &DrObj = (CurrentBasketItem < 0) ? DrawObjects : Basket[CurrentBasketItem].DrawObjects;
+    QVector<ADrawObject> &DrObj = (CurrentBasketItem < 0) ? DrawObjects : *Basket->getDrawObjects(CurrentBasketItem);
     for (int i=0; i<DrObj.size(); i++)
     {
         QString cn = DrObj[i].Pointer->ClassName();
@@ -2615,13 +2603,8 @@ QVector<double> GraphWindowClass::Get2DArray()
 
 void GraphWindowClass::UpdateBasketGUI()
 {
-    //qDebug() << "Update basket triggered";
-  ui->lwBasket->clear();
-  for (int i=0; i<Basket.size(); i++)
-    {
-      QString str = Basket[i].Name + " " + Basket[i].Type;
-      ui->lwBasket->addItem(str);
-    }
+    ui->lwBasket->clear();
+    ui->lwBasket->addItems(Basket->getItemNames());
 }
 
 void GraphWindowClass::on_lwBasket_itemDoubleClicked(QListWidgetItem *)
@@ -2635,7 +2618,7 @@ void GraphWindowClass::on_pbBasketBackToLast_clicked()
 {
    DrawObjects = MasterDrawObjects;
    CurrentBasketItem = -1;
-   BasketMode = 0;
+   //BasketMode = 0;
    RedrawAll();
    ui->lwBasket->clearSelection();
 }
@@ -3005,7 +2988,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
 
       DrawObjects = MasterDrawObjects;
       CurrentBasketItem = -1;
-      BasketMode = 0;
+      //BasketMode = 0;
       RedrawAll();
       ui->lwBasket->clearSelection();
   }
@@ -3269,10 +3252,6 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
 
 void GraphWindowClass::ClearBasket()
 {
-   for (int ib=0; ib<Basket.size(); ib++)
-       Basket[ib].clearObjects();
-
-  Basket.clear();  
   on_pbBasketBackToLast_clicked();
   UpdateBasketGUI();
 }

@@ -8,8 +8,6 @@
 class ABasketItem
 {
 public:
-    ABasketItem(QString name, QVector<ADrawObject> * drawObjects);
-    ABasketItem(){}
     ~ABasketItem();
 
 public:

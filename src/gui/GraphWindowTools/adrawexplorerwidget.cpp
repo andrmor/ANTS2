@@ -39,10 +39,17 @@ void ADrawExplorerWidget::updateGui()
         QString name = drObj.Name;
         if (name.isEmpty()) name = "--";
 
+        QString nameShort = name;
+        if (nameShort.size() > 15)
+        {
+            nameShort.truncate(15);
+            nameShort += "..";
+        }
+
         QString className = tObj->ClassName();
         QString opt = drObj.Options;
 
-        item->setText(0, QString("%1 %2").arg(name).arg(className));
+        item->setText(0, QString("%1 %2").arg(nameShort).arg(className));
         item->setToolTip(0, QString("Name: %1\nClassName: %2\nDraw options: %3").arg(name).arg(className).arg(opt));
         item->setText(1, QString::number(i));
 
@@ -66,9 +73,7 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
 
     QMenu Menu;
 
-    QAction * renameA =     Menu.addAction("Rename");
-    Menu.addSeparator();
-    QAction * delA =        Menu.addAction("Remove");
+    QAction * renameA =     Menu.addAction("Rename");    
     Menu.addSeparator();
     QAction * setMarkerA =  Menu.addAction("Set marker attributes");
     QAction * setLineA =    Menu.addAction("Set line attributes");
@@ -80,7 +85,10 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
     QAction* fractionA =    Menu.addAction("Calculate fraction before/after");
     QAction* interpolateA = Menu.addAction("Interpolate");
     Menu.addSeparator();
-
+    QAction* titleX =       Menu.addAction("Edit X title");
+    QAction* titleY =       Menu.addAction("Edit Y title");
+    Menu.addSeparator();
+    QAction * delA =        Menu.addAction("Delete");
 
     QAction* si = Menu.exec(mapToGlobal(pos));
     if (!si) return; //nothing was selected
@@ -94,6 +102,8 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
    else if (si == integralA)    drawIntegral(obj);
    else if (si == fractionA)    fraction(obj);
    else if (si == interpolateA) interpolate(obj);
+   else if (si == titleX)       editTitle(obj, 0);
+   else if (si == titleY)       editTitle(obj, 1);
 
     /*
     QAction* scale = 0;
@@ -102,12 +112,10 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
     QAction* gaussFit = 0;
 
     QAction* median = 0;
-    QAction* titleX = 0;
-    QAction* titleY = 0;
+
     QAction* splineFit = 0;
     QAction* projX = 0;
     QAction* projY = 0;
-
 
     if (temp)
       {
@@ -138,8 +146,7 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
                splineFit = BasketMenu.addAction("Fit with B-spline");
         }
         BasketMenu.addSeparator();
-        titleX = BasketMenu.addAction("Edit title X");
-        titleY = BasketMenu.addAction("Edit title Y");
+
       }
     else if (selectedItem == shift)
     {
@@ -325,38 +332,7 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
 
         d.exec();
     }
-    else if (selectedItem == titleX || selectedItem == titleY)
-    {
-        if (index == -1) return; //protection
-        if (DrawObjects.isEmpty()) return; //protection
-        //TObject * obj = Basket->getDrawObjects(row)->first().Pointer;
-        if (obj)
-        {
-            TAxis* a = 0;
 
-            TGraph* g = dynamic_cast<TGraph*>(obj);
-            if (g)
-               a = ( selectedItem == titleX ? g->GetXaxis() : g->GetYaxis() );
-            else
-            {
-                TH1* h = dynamic_cast<TH1*>(obj);
-                if (h)
-                   a = ( selectedItem == titleX ? h->GetXaxis() : h->GetYaxis() );
-                else
-                {
-                    message("Not supported for this object type", this);
-                    return;
-                }
-            }
-
-            QString oldTitle;
-            oldTitle = a->GetTitle();
-            bool ok;
-            QString newTitle = QInputDialog::getText(this, "", "New axis title:", QLineEdit::Normal, oldTitle, &ok);
-            if (ok) a->SetTitle(newTitle.toLatin1().data());
-            RedrawAll();
-        }
-    }
     */
 }
 
@@ -385,6 +361,7 @@ void ADrawExplorerWidget::remove(int index)
         DrawObjects[0].Options.remove("same", Qt::CaseInsensitive);
     }
 
+    updateGui();
     emit requestRedraw();
 }
 
@@ -737,5 +714,33 @@ void ADrawExplorerWidget::interpolate(ADrawObject &obj)
     }
                      );
     d.exec();
+}
+
+void ADrawExplorerWidget::editTitle(ADrawObject &obj, int X0Y1)
+{
+    TAxis * axis = nullptr;
+
+    TGraph * g = dynamic_cast<TGraph*>(obj.Pointer);
+    if (g)
+        axis = ( X0Y1 == 0 ? g->GetXaxis() : g->GetYaxis() );
+    else
+    {
+        TH1* h = dynamic_cast<TH1*>(obj.Pointer);
+        if (h)
+            axis = ( X0Y1 == 0 ? h->GetXaxis() : h->GetYaxis() );
+        else
+        {
+            message("Not supported for this object type", this);
+            return;
+        }
+    }
+
+    QString oldTitle;
+    oldTitle = axis->GetTitle();
+    bool ok;
+    QString newTitle = QInputDialog::getText(this, "Change axis title", QString("New %1 axis title:").arg(X0Y1 == 0 ? "X" : "Y"), QLineEdit::Normal, oldTitle, &ok);
+    if (ok) axis->SetTitle(newTitle.toLatin1().data());
+
+    emit requestRedraw();
 }
 

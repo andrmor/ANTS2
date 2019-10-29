@@ -2382,8 +2382,6 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
   //QAction* uniMap = 0;
   QAction* gaussFit = 0;
   QAction* median = 0;
-  QAction* titleX = 0;
-  QAction* titleY = 0;
   QAction* splineFit = 0;
   QAction* projX = 0;
   QAction* projY = 0;
@@ -2415,9 +2413,6 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
       {
              splineFit = BasketMenu.addAction("Fit with B-spline");
       }
-      BasketMenu.addSeparator();
-      titleX = BasketMenu.addAction("Edit title X");
-      titleY = BasketMenu.addAction("Edit title Y");
       BasketMenu.addSeparator();
       del = BasketMenu.addAction("Delete");
       BasketMenu.addSeparator();
@@ -2726,38 +2721,6 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
                        );
 
       d.exec();
-  }
-  else if (selectedItem == titleX || selectedItem == titleY)
-  {
-      if (row == -1) return; //protection
-      if (DrawObjects.isEmpty()) return; //protection
-      //TObject * obj = Basket->getDrawObjects(row)->first().Pointer;
-      if (obj)
-      {
-          TAxis* a = 0;
-
-          TGraph* g = dynamic_cast<TGraph*>(obj);
-          if (g)
-             a = ( selectedItem == titleX ? g->GetXaxis() : g->GetYaxis() );
-          else
-          {
-              TH1* h = dynamic_cast<TH1*>(obj);
-              if (h)
-                 a = ( selectedItem == titleX ? h->GetXaxis() : h->GetYaxis() );
-              else
-              {
-                  message("Not supported for this object type", this);
-                  return;
-              }
-          }
-
-          QString oldTitle;
-          oldTitle = a->GetTitle();
-          bool ok;
-          QString newTitle = QInputDialog::getText(this, "", "New axis title:", QLineEdit::Normal, oldTitle, &ok);
-          if (ok) a->SetTitle(newTitle.toLatin1().data());
-          RedrawAll();
-      }
   }
 }
 

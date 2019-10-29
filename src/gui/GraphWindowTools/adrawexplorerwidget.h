@@ -31,6 +31,7 @@ private:
     void drawIntegral(ADrawObject &obj);
     void fraction(ADrawObject &obj);
     void interpolate(ADrawObject &obj);
+    void editTitle(ADrawObject &obj, int X0Y1);
 
 signals:
     void requestRedraw();

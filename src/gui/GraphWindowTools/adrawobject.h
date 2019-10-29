@@ -9,6 +9,7 @@ class ADrawObject
 {
 public:
     ADrawObject() {}
+    ~ADrawObject() {} //do not own TObject!
     ADrawObject(TObject * pointer, const char* options)     {Pointer = pointer; Options = options;}
     ADrawObject(TObject * pointer, const QString & options) {Pointer = pointer; Options = options;}
 

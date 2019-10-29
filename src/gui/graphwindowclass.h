@@ -243,16 +243,13 @@ private:
     MainWindow *MW;
     Ui::GraphWindowClass *ui;
     RasterWindowGraphClass *RasterWindow = 0;
-    //QWidget *QWinContainer = 0;
     bool ExtractionCanceled = false;
     int LastOptStat = 1111;
 
     QVector<ADrawObject> DrawObjects;  //always local objects -> can have a copy from the Basket
     QVector<ADrawObject> MasterDrawObjects; //last draw made from outside of the graph window
-    //QVector< ABasketItem > Basket; //container with user selected "drawings"
     ABasketManager * Basket = nullptr;
     int CurrentBasketItem = -1; //-1 - Basket is off; -2 -basket is Off, using tmp drawing (e.g. overlap of two histograms)
-    //int BasketMode = 0;
 
     QList<TObject*> tmpTObjects;
     TH1D* hProjection = 0;  //for toolbox

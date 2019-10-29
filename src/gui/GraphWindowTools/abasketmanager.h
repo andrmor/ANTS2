@@ -13,18 +13,25 @@ public:
     ABasketManager();
     ~ABasketManager();
 
-    void addItem(const QString & name, const QVector<ADrawObject> & drawObjects); //makes deep copy!
-    const QVector<ADrawObject> getItemCopy(int index) const;
+    void add(const QString & name, const QVector<ADrawObject> & drawObjects); //makes deep copy!
+    const QVector<ADrawObject> getCopy(int index) const;
 
     void clear();
+    void remove(int index);
 
-    QVector<ADrawObject> * getDrawObjects(int index); // const?
+    QVector<ADrawObject> & getDrawObjects(int index); // return ref to NotValidItem is index is out of bounds
+    const QString getType(int index) const;
 
-    int getSize() const;
-    const QStringList & getItemNames() const;
+    int size() const;
+
+    const QString getName(int index) const;
+    void rename(int index, const QString & newName);
+    const QStringList getItemNames() const;
 
 private:
     QVector< ABasketItem > Basket;
+
+    QVector<ADrawObject> NotValidItem; // to return on wrong index
 };
 
 #endif // ABASKETMANAGER_H

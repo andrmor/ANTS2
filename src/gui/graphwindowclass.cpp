@@ -2124,7 +2124,7 @@ void GraphWindowClass::calculateFractionTH1(int row)
 {
     if (row == -1) return;
 
-    TH1* h = dynamic_cast<TH1*>(Basket->getDrawObjects(row)->first().Pointer);
+    TH1* h = dynamic_cast<TH1*>(Basket->getDrawObjects(row).first().Pointer);
     if (!h)
     {
         message("This operation requires TH1 ROOT object", this);
@@ -2483,7 +2483,7 @@ void GraphWindowClass::on_pbAddToBasket_clicked()
      //  qDebug() << i << DrawObjects[i].Pointer->ClassName();
 
    bool ok;
-   int row = Basket->getSize();
+   int row = Basket->size();
    QString name = "Item"+QString::number(row);
    QString text = QInputDialog::getText(this, "New basket item",
                                               "Enter name:", QLineEdit::Normal,
@@ -2495,12 +2495,12 @@ void GraphWindowClass::on_pbAddToBasket_clicked()
 
 void GraphWindowClass::AddCurrentToBasket(const QString & name)
 {
-  if (DrawObjects.isEmpty()) return;
+    if (DrawObjects.isEmpty()) return;
 
-  Basket->addItem(name.simplified(), DrawObjects);
+    Basket->add(name.simplified(), DrawObjects);
 
-  ui->cbShowBasket->setChecked(true);
-  UpdateBasketGUI();
+    ui->cbShowBasket->setChecked(true);
+    UpdateBasketGUI();
 }
 
 void GraphWindowClass::AddLegend(double x1, double y1, double x2, double y2, QString title)
@@ -2515,7 +2515,7 @@ void GraphWindowClass::AddLegend(double x1, double y1, double x2, double y2, QSt
   else
   {
       //do not register for basket - they have their own system
-      Basket->getDrawObjects(CurrentBasketItem)->append(ADrawObject(leg, "same"));
+      Basket->getDrawObjects(CurrentBasketItem).append(ADrawObject(leg, "same"));
   }
   RedrawAll();
 
@@ -2525,7 +2525,7 @@ void GraphWindowClass::AddLegend(double x1, double y1, double x2, double y2, QSt
 //#include "TLegendEntry.h"
 void GraphWindowClass::SetLegendBorder(int color, int style, int size)
 {
-    QVector<ADrawObject> &DrObj = (CurrentBasketItem < 0) ? DrawObjects : *Basket->getDrawObjects(CurrentBasketItem);
+    QVector<ADrawObject> & DrObj = (CurrentBasketItem < 0) ? DrawObjects : Basket->getDrawObjects(CurrentBasketItem);
     for (int i=0; i<DrObj.size(); i++)
     {
         QString cn = DrObj[i].Pointer->ClassName();
@@ -2609,9 +2609,10 @@ void GraphWindowClass::UpdateBasketGUI()
 
 void GraphWindowClass::on_lwBasket_itemDoubleClicked(QListWidgetItem *)
 {
-   //qDebug() << "Row double clicked:"<<ui->lwBasket->currentRow();
-   CurrentBasketItem = ui->lwBasket->currentRow();
-   RedrawAll();
+    //qDebug() << "Row double clicked:"<<ui->lwBasket->currentRow();
+    CurrentBasketItem = ui->lwBasket->currentRow();
+    DrawObjects = Basket->getCopy(CurrentBasketItem);
+    RedrawAll();
 }
 
 void GraphWindowClass::on_pbBasketBackToLast_clicked()
@@ -2626,6 +2627,7 @@ void GraphWindowClass::on_pbBasketBackToLast_clicked()
 void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
 {
   QMenu BasketMenu;
+  TNamed tdummy("Dummy", "Dummy");
   int row = -1;
 
   //QString shownItemType;
@@ -2656,6 +2658,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
     {
       //menu triggered at a valid item
       row = ui->lwBasket->row(temp);
+      const QString Type = Basket->getType(row);
 
       BasketMenu.addSeparator();      
       onTop = BasketMenu.addAction("Show on top of the main draw");
@@ -2670,9 +2673,10 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
       shift = BasketMenu.addAction("Shift X scale");
       if (!MasterDrawObjects.isEmpty())
           if ( QString(MasterDrawObjects.first().Pointer->ClassName()) == "TH2D")
-              if (Basket.at(row).Type == "TH2D")
+              if (Type == "TH2D")
                  uniMap = BasketMenu.addAction("Use as unif. correction map");
-      if (Basket.at(row).Type.startsWith("TH1"))
+
+      if (Type.startsWith("TH1"))
       {
              gaussFit = BasketMenu.addAction("Fit with Gauss");
              median = BasketMenu.addAction("Apply median filter");
@@ -2680,12 +2684,12 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
              interpolate = BasketMenu.addAction("Interpolate");
              fraction = BasketMenu.addAction("Calculate fraction before/after");
       }
-      if (Basket.at(row).Type.startsWith("TH2"))
+      else if (Type.startsWith("TH2"))
       {
              projX = BasketMenu.addAction("X projection");
              projY = BasketMenu.addAction("Y projection");
       }
-      if (Basket.at(row).Type == "TGraph" || Basket.at(row).Type == "TProfile")
+      else if (Type == "TGraph" || Type == "TProfile")
       {
              splineFit = BasketMenu.addAction("Fit with B-spline");
       }
@@ -2710,6 +2714,9 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
   QAction* selectedItem = BasketMenu.exec(ui->lwBasket->mapToGlobal(pos));
   if (!selectedItem) return; //nothing was selected
 
+  TObject * obj = ( row == -1 ? &tdummy : Basket->getDrawObjects(row).first().Pointer );
+  qDebug() << obj->ClassName();
+
   //gStyle->SetOptTitle(1);
   if (selectedItem == switchToThis)
     {
@@ -2718,7 +2725,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
     }
   else if (selectedItem == drawMenu)
     {
-      TObject* obj = Basket[row].DrawObjects.first().Pointer;
+      //TObject * obj = Basket->getDrawObjects(row).first().Pointer;
 
       TH1* h = dynamic_cast<TH1*>(obj);
       if (h)
@@ -2737,7 +2744,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
     }
   else if (selectedItem == setMarker)
   {
-      TObject* obj = Basket[row].DrawObjects.first().Pointer;
+      //TObject * obj = Basket->getDrawObjects(row)->first().Pointer;
       TAttMarker* la = dynamic_cast<TAttMarker*>(obj);      
       if (la)
       {
@@ -2760,7 +2767,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
   }
   else if (selectedItem == setLine)
   {
-      TObject* obj = Basket[row].DrawObjects.first().Pointer;
+      //TObject * obj = Basket->getDrawObjects(row)->first().Pointer;
       TAttLine* la = dynamic_cast<TAttLine*>(obj);
       if (la)
       {
@@ -2821,9 +2828,9 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
         {
           TGraph* gr = new TGraph(x.size(), x.data(), y.data());
           gr->SetMarkerStyle(20);
-          QVector<ADrawObject>* drawObjects = new QVector<ADrawObject>;
-          drawObjects->append(ADrawObject(gr, "APL"));
-          Basket.append(ABasketItem(name, drawObjects));
+          QVector<ADrawObject> drawObjects;
+          drawObjects << ADrawObject(gr, "APL");
+          Basket->add(name, drawObjects); //*** simplify
         }
       else message("Format error: Should be columns of X Y data", this);
       UpdateBasketGUI();
@@ -2841,9 +2848,9 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
         {
           TGraphErrors* gr = new TGraphErrors(x.size(), x.data(), y.data(), 0, err.data());
           gr->SetMarkerStyle(20);
-          QVector<ADrawObject>* drawObjects = new QVector<ADrawObject>;
-          drawObjects->append(ADrawObject(gr, "APL"));
-          Basket.append(ABasketItem(name, drawObjects));
+          QVector<ADrawObject> drawObjects;
+          drawObjects << ADrawObject(gr, "APL");
+          Basket->add(name, drawObjects);
         }
       else message("Format error: Should be columns of data X Y and optional error", this);
       UpdateBasketGUI();
@@ -2851,8 +2858,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
   else if (selectedItem == del)
     {
       if (row == -1) return; //protection
-      Basket[row].clearObjects();
-      Basket.remove(row);
+      Basket->remove(row);
       UpdateBasketGUI();
       on_pbBasketBackToLast_clicked();
     }
@@ -2862,15 +2868,15 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
       bool ok;
       QString text = QInputDialog::getText(this, "Rename basket item",
                                                  "Enter new name:", QLineEdit::Normal,
-                                                 Basket[row].Name, &ok);      
+                                                 Basket->getName(row), &ok);
       if (ok && !text.isEmpty())
         {
-          Basket[row].Name = text.simplified();
-          TObject* obj = Basket[row].DrawObjects.first().Pointer;
+          Basket->rename(row, text.simplified());
+          //TObject * obj = Basket->getDrawObjects(row)->first().Pointer;
           if (obj)
             {
               TNamed* nn = dynamic_cast<TNamed*>(obj);
-              if (nn) nn->SetTitle(Basket[row].Name.toLocal8Bit().constData());
+              if (nn) nn->SetTitle(text.simplified().toLocal8Bit().constData());
             }
         }
       UpdateBasketGUI();
@@ -2881,7 +2887,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
     {
       if (row == -1) return; //protection
       if (DrawObjects.isEmpty()) return; //protection
-      TObject* obj = Basket[row].DrawObjects.first().Pointer;
+      //TObject * obj = Basket->getDrawObjects(row)->first().Pointer;
       if (obj)
         {
           QString name = obj->ClassName();
@@ -2931,7 +2937,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
   {
       if (row == -1) return; //protection
       if (DrawObjects.isEmpty()) return; //protection
-      TObject* obj = Basket[row].DrawObjects.first().Pointer;
+      //TObject * obj = Basket->getDrawObjects(row)->first().Pointer;
       if (obj)
       {
           QString name = obj->ClassName();
@@ -2981,7 +2987,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
   }
   else if (selectedItem == uniMap)
   {
-      TH2D* map = static_cast<TH2D*>(Basket[row].DrawObjects.first().Pointer);
+      TH2D* map = static_cast<TH2D*>(obj);
       TH2D* h =   static_cast<TH2D*>(MasterDrawObjects.first().Pointer);
 
       *h = *h / *map;
@@ -2994,7 +3000,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
   }
   else if (selectedItem == projX || selectedItem == projY)
   {
-      TH2* h = static_cast<TH2*>(Basket[row].DrawObjects.first().Pointer);
+      TH2* h = static_cast<TH2*>(obj);
       TH1D* proj;
       if (selectedItem == projX)
           proj = h->ProjectionX();
@@ -3004,7 +3010,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
   }
   else if (selectedItem == gaussFit)
   {
-      TH1* h =   static_cast<TH1*>(Basket[row].DrawObjects.first().Pointer);
+      TH1* h =   static_cast<TH1*>(obj);
       TF1* f1 = new TF1("f1", "gaus");
       int status = h->Fit(f1, "+");
       if (status == 0)
@@ -3017,7 +3023,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
   else if (selectedItem == splineFit)
   {
 #ifdef USE_EIGEN
-      TGraph* g =   static_cast<TGraph*>(Basket[row].DrawObjects.first().Pointer);
+      TGraph* g =   static_cast<TGraph*>(obj);
       if (!g)
       {
           message("Suppoted only for TGraph-based ROOT objects", this);
@@ -3048,7 +3054,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
               fg->SetPoint(i, xx, cf.eval(xx));
           }
 
-          Basket[row].DrawObjects.append(ADrawObject(fg, "Csame"));
+          //Basket[row].DrawObjects.append(ADrawObject(fg, "Csame")); //***
           RedrawAll();
       }
 #else
@@ -3058,7 +3064,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
   }
   else if (selectedItem == drawIntegral)
   {
-      TH1* h = dynamic_cast<TH1*>(Basket[row].DrawObjects.first().Pointer);
+      TH1* h = dynamic_cast<TH1*>(obj);
       if (!h)
       {
           message("This operation requires TH1 ROOT object", this);
@@ -3072,7 +3078,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
 
       //    for (int i=0; i<bins+1; i++) qDebug() << i << "->" << edges[i];
 
-      QString title = "Integral of " + Basket[row].Name;
+      QString title = "Integral of " + Basket->getName(row);
       TH1D* hi = new TH1D("integral", title.toLocal8Bit().data(), bins, edges);
       delete [] edges;
 
@@ -3089,7 +3095,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
   }
   else if (selectedItem == interpolate)
   {
-      TH1* hist = dynamic_cast<TH1*>(Basket[row].DrawObjects.first().Pointer);
+      TH1* hist = dynamic_cast<TH1*>(obj);
       if (!hist)
       {
           message("This operation requires TH1 ROOT object", this);
@@ -3146,7 +3152,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
   }
   else if (selectedItem == median)
   {
-      TH1* hist = dynamic_cast<TH1*>(Basket[row].DrawObjects.first().Pointer);
+      TH1* hist = dynamic_cast<TH1*>(obj);
       if (!hist)
       {
           message("This operation requires TH1 ROOT object", this);
@@ -3220,7 +3226,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
   {
       if (row == -1) return; //protection
       if (DrawObjects.isEmpty()) return; //protection
-      TObject* obj = Basket[row].DrawObjects.first().Pointer;
+      //TObject * obj = Basket->getDrawObjects(row)->first().Pointer;
       if (obj)
       {
           TAxis* a = 0;
@@ -3336,13 +3342,14 @@ void GraphWindowClass::SaveBasket()
 
     //qDebug() << "----Items:"<<Basket.size()<<"----";
     int index = 0;
-    for (int ib=0; ib<Basket.size(); ib++)
+    for (int ib=0; ib<Basket->size(); ib++)
     {
         //qDebug() << ib<<">"<<Basket[ib].Name;
-        str += Basket[ib].Name + '\n';
-        str += QString::number( Basket[ib].DrawObjects.size() );
+        str += Basket->getName(ib) + '\n';
 
-        QVector<ADrawObject> & DrawObjects = Basket[ib].DrawObjects;
+        QVector<ADrawObject> & DrawObjects = Basket->getDrawObjects(ib);
+        str += QString::number( DrawObjects.size() );
+
         for (int i = 0; i < DrawObjects.size(); i++)
         {
             ADrawObject & Obj = DrawObjects[i];
@@ -3448,7 +3455,7 @@ void GraphWindowClass::AppendBasket()
 
             //qDebug() << "Name:"<< name << "objects:"<< numObj;
 
-            QVector<ADrawObject>* drawObjects = new QVector<ADrawObject>;
+            QVector<ADrawObject> drawObjects;
             for (int iDrawObj = 0; iDrawObj < numObj; iDrawObj++)
             {
                 TKey *key = (TKey*)f->GetListOfKeys()->At(indexFileObject++);
@@ -3486,14 +3493,11 @@ void GraphWindowClass::AppendBasket()
                 if (type=="TPaveText") p = (TPaveText*)key->ReadObj();
 
                 if (p)
-                    drawObjects->append(ADrawObject(p, fields[iDrawObj+1]));
+                    drawObjects << ADrawObject(p, fields[iDrawObj+1]);
                 else
-                {
                     qWarning() << "Unregistered object type" << type <<"for load basket from file!";
-                }
             }
-            if (!drawObjects->isEmpty()) Basket.append(ABasketItem(name, drawObjects));
-
+            if (!drawObjects.isEmpty()) Basket->add(name, drawObjects);
         }
     }
     else ok = false;
@@ -3508,20 +3512,21 @@ void GraphWindowClass::Basket_DrawOnTop(int row)
     if (row == -1) return;
     if (DrawObjects.isEmpty()) return;
 
-    qDebug() << "Basket item"<<row<<"was requested to be drawn on top of the current draw";
+    //qDebug() << "Basket item"<<row<<"was requested to be drawn on top of the current draw";
+    QVector<ADrawObject> & BasketDrawObjects = Basket->getDrawObjects(row);
 
-    for (int i=0; i<Basket[row].DrawObjects.size(); i++)
+    for (int i=0; i<BasketDrawObjects.size(); i++)
     {
-        TString CName = Basket[row].DrawObjects[i].Pointer->ClassName();
+        TString CName = BasketDrawObjects[i].Pointer->ClassName();
         if ( CName== "TLegend" || CName == "TPaveText") continue;
         //qDebug() << CName;
-        QString options = Basket[row].DrawObjects[i].Options;
+        QString options = BasketDrawObjects[i].Options;
         options.replace("same", "", Qt::CaseInsensitive);
         options.replace("a", "", Qt::CaseInsensitive);
         TString safe = "same";
         safe += options.toLatin1().data();
         //qDebug() << "New options:"<<safe;
-        DrawObjects.append(ADrawObject(Basket[row].DrawObjects[i].Pointer, safe));
+        DrawObjects.append(ADrawObject(BasketDrawObjects[i].Pointer, safe));
     }
     CurrentBasketItem = -2; //forcing to "basket off, tmp graph" mode
     RedrawAll();
@@ -3549,28 +3554,28 @@ void GraphWindowClass::AppendRootHistsOrGraphs()
 
         if (Type.startsWith("TH") || Type.startsWith("TProfile") || Type.startsWith("TGraph"))
         {
-            QVector<ADrawObject>* drawObjects = new QVector<ADrawObject>;
-            TObject *p = 0;
+            QVector<ADrawObject> drawObjects;
+            TObject * p = nullptr;
 
-            if (Type=="TH1D") p = (TH1D*)key->ReadObj();
+            if      (Type=="TH1D") p = (TH1D*)key->ReadObj();
             else if (Type=="TH1I") p = (TH1I*)key->ReadObj();
             else if (Type=="TH1F") p = (TH1F*)key->ReadObj();
             else if (Type=="TH2D") p = (TH2D*)key->ReadObj();
             else if (Type=="TH2F") p = (TH2F*)key->ReadObj();
             else if (Type=="TH2I") p = (TH2I*)key->ReadObj();
 
-            else if (Type=="TProfile") p = (TProfile*)key->ReadObj();
+            else if (Type=="TProfile")   p = (TProfile*)key->ReadObj();
             else if (Type=="TProfile2D") p = (TProfile2D*)key->ReadObj();
 
-            else if (Type=="TGraph2D") p = (TGraph2D*)key->ReadObj();
-            else if (Type=="TGraph") p = (TGraph*)key->ReadObj();
-            else if (Type=="TGraphErrors") p = (TGraphErrors*)key->ReadObj();
+            else if (Type=="TGraph2D")      p = (TGraph2D*)key->ReadObj();
+            else if (Type=="TGraph")        p = (TGraph*)key->ReadObj();
+            else if (Type=="TGraphErrors")  p = (TGraphErrors*)key->ReadObj();
 
             if (p)
             {
-                drawObjects->append(ADrawObject(p, ""));
-                Basket.append(ABasketItem(Name, drawObjects));
-                qDebug() << "  appended";
+                drawObjects << ADrawObject(p, "");
+                Basket->add(Name, drawObjects);
+                //qDebug() << "  appended";
             }
             else qWarning() << "Unregistered object type" << Type <<"for load basket from file!";
         }
@@ -3634,17 +3639,18 @@ void GraphWindowClass::on_actionFront_triggered()
 
 void GraphWindowClass::on_pbAttributes_clicked()
 {
-  TObject* obj = 0;
+  TObject * obj = nullptr;
 
   if (CurrentBasketItem < 0) //-1 - Basket is off; -2 -basket is Off, using tmp drawing (e.g. overlap of two histograms)
     {
       if (!DrawObjects.isEmpty() )
          obj = DrawObjects.first().Pointer;
     }
-  else if (CurrentBasketItem<Basket.size()) //Basket is ON
+  else if (CurrentBasketItem < Basket->size()) //Basket is ON
     {
-      if (!Basket[CurrentBasketItem].DrawObjects.isEmpty())
-         obj = Basket[CurrentBasketItem].DrawObjects.first().Pointer;
+      QVector<ADrawObject> & BasketDrawObjects = Basket->getDrawObjects(CurrentBasketItem);
+      if (!BasketDrawObjects.isEmpty())
+         obj = BasketDrawObjects.first().Pointer;
     }
 
   if (obj)
@@ -3739,14 +3745,14 @@ void GraphWindowClass::on_pbAddLegend_clicked()
   else
   {
       //do not register for basket - they have their own system
-      Basket[CurrentBasketItem].DrawObjects.append(ADrawObject(leg, "same"));
+      Basket->getDrawObjects(CurrentBasketItem).append(ADrawObject(leg, "same"));
   }
   RedrawAll();
 }
 
 void GraphWindowClass::on_pbRemoveLegend_clicked()
 {
-    QVector<ADrawObject> &DrObj = (CurrentBasketItem < 0) ? DrawObjects : Basket[CurrentBasketItem].DrawObjects;
+    QVector<ADrawObject> &DrObj = (CurrentBasketItem < 0) ? DrawObjects : Basket->getDrawObjects(CurrentBasketItem);
     for (int i=0; i<DrObj.size(); i++)
       {
           QString cn = DrObj[i].Pointer->ClassName();
@@ -3828,7 +3834,7 @@ void GraphWindowClass::SetStatPanelVisible(bool flag)
 
 void GraphWindowClass::on_pbRemoveText_clicked()
 {
-  QVector<ADrawObject> &DrObj = (CurrentBasketItem < 0) ? DrawObjects : Basket[CurrentBasketItem].DrawObjects;
+  QVector<ADrawObject> &DrObj = (CurrentBasketItem < 0) ? DrawObjects : Basket->getDrawObjects(CurrentBasketItem);
   for (int i=0; i<DrObj.size(); i++)
     {
         QString cn = DrObj[i].Pointer->ClassName();
@@ -3870,7 +3876,7 @@ Double_t GauseWithBase(Double_t *x, Double_t *par)
 
 void GraphWindowClass::on_pbFWHM_clicked()
 {
-    QVector<ADrawObject> &DrObj = (CurrentBasketItem < 0) ? DrawObjects : Basket[CurrentBasketItem].DrawObjects;
+    QVector<ADrawObject> &DrObj = (CurrentBasketItem < 0) ? DrawObjects : Basket->getDrawObjects(CurrentBasketItem);
     if (DrObj.isEmpty())
     {
         message("No data", this);

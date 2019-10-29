@@ -1,6 +1,7 @@
 #include "abasketmanager.h"
 
 #include <QStringList>
+#include <QDebug>
 
 #include "TObject.h"
 #include "TNamed.h"
@@ -13,12 +14,15 @@
 
 ABasketManager::ABasketManager()
 {
-
+    NotValidItem << ADrawObject(new TNamed("Not valid index", "Not valid index"), "");
 }
 
 ABasketManager::~ABasketManager()
 {
     clear();
+
+    delete NotValidItem.first().Pointer;
+    NotValidItem.clear();
 }
 
 TGraph * HistToGraph(TH1 * h)
@@ -33,7 +37,7 @@ TGraph * HistToGraph(TH1 * h)
     return new TGraph(x.size(), x.data(), f.data());
 }
 
-void ABasketManager::addItem(const QString & name, const QVector<ADrawObject> & drawObjects)
+void ABasketManager::add(const QString & name, const QVector<ADrawObject> & drawObjects)
 {
     ABasketItem item;
     item.Name = name;
@@ -87,9 +91,11 @@ void ABasketManager::addItem(const QString & name, const QVector<ADrawObject> & 
 
         item.DrawObjects.append( ADrawObject(tobj, options) );
     }
+
+    Basket << item;
 }
 
-const QVector<ADrawObject> ABasketManager::getItemCopy(int index) const
+const QVector<ADrawObject> ABasketManager::getCopy(int index) const
 {
     QVector<ADrawObject> res;
 
@@ -109,18 +115,47 @@ void ABasketManager::clear()
     Basket.clear();
 }
 
-QVector<ADrawObject> * ABasketManager::getDrawObjects(int index)
+void ABasketManager::remove(int index)
 {
-    if (index < 0 || index >= Basket.size()) return nullptr;
-    return &(Basket[index].DrawObjects);
+    if (index < 0 || index >= Basket.size()) return;
+    Basket[index].clearObjects();
+    Basket.remove(index);
 }
 
-int ABasketManager::getSize() const
+QVector<ADrawObject> & ABasketManager::getDrawObjects(int index)
+{
+    if (index < 0 || index >= Basket.size())
+    {
+        qWarning() << "Basket manager: index" << index << "is out of bounds!";
+        return NotValidItem;
+    }
+    return Basket[index].DrawObjects;
+}
+
+const QString ABasketManager::getType(int index) const
+{
+    if (index < 0 || index >= Basket.size()) return "";
+    return Basket[index].Type;
+}
+
+int ABasketManager::size() const
 {
     return Basket.size();
 }
 
-const QStringList &ABasketManager::getItemNames() const
+const QString ABasketManager::getName(int index) const
+{
+    if (index < 0 || index >= Basket.size()) return "";
+    return Basket.at(index).Name;
+}
+
+void ABasketManager::rename(int index, const QString & newName)
+{
+    if (index < 0 || index >= Basket.size()) return;
+    Basket[index].Name = newName;
+}
+
+const QStringList ABasketManager::getItemNames() const
 {
     QStringList res;
     for (const ABasketItem & item : Basket)

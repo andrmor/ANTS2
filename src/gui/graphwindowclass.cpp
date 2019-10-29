@@ -2473,11 +2473,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
       msgBox.setDefaultButton(QMessageBox::Cancel);
       int ret = msgBox.exec();
       if (ret == QMessageBox::Yes)
-      {
           ClearBasket();
-          //UpdateBasketGUI();
-          //on_pbBasketBackToLast_clicked();
-      }
     }
   else if (selectedItem == save)
       SaveBasket();
@@ -2791,7 +2787,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
 
 void GraphWindowClass::ClearBasket()
 {
-    //on_pbBasketBackToLast_clicked();
+    Basket->clear();
     UpdateBasketGUI();
 }
 

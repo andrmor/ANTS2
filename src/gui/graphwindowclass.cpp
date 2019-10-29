@@ -16,6 +16,7 @@
 #include "arootmarkerconfigurator.h"
 #include "atoolboxscene.h"
 #include "abasketmanager.h"
+#include "adrawexplorerwidget.h"
 
 #ifdef USE_EIGEN
 #include "curvefit.h"
@@ -84,20 +85,26 @@ GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
 {
     Basket = new ABasketManager();
 
-  //setting UI
-  ui->setupUi(this);
-  this->setMinimumWidth(200);
-  ui->swToolBox->setVisible(false);
-  ui->swToolBox->setCurrentIndex(0);
-  ui->sProjBins->setEnabled(false);
+    //setting UI
+    ui->setupUi(this);
+    this->setMinimumWidth(200);
+    ui->swToolBox->setVisible(false);
+    ui->swToolBox->setCurrentIndex(0);
+    ui->sProjBins->setEnabled(false);
 
-  //window flags
-  Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
-  windowFlags |= Qt::WindowCloseButtonHint;
-  windowFlags |= Qt::WindowMinimizeButtonHint;
-  windowFlags |= Qt::WindowMaximizeButtonHint;
-  windowFlags |= Qt::Tool;
-  this->setWindowFlags( windowFlags );
+    //window flags
+    Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
+    windowFlags |= Qt::WindowCloseButtonHint;
+    windowFlags |= Qt::WindowMinimizeButtonHint;
+    windowFlags |= Qt::WindowMaximizeButtonHint;
+    windowFlags |= Qt::Tool;
+    this->setWindowFlags( windowFlags );
+
+    //DrawListWidget init
+    Explorer = new ADrawExplorerWidget(DrawObjects);
+    ui->layExplorer->insertWidget(1, Explorer);
+    ui->splitter->setSizes({200,600});
+    connect(Explorer, &ADrawExplorerWidget::requestRedraw, this, &GraphWindowClass::RedrawAll);
 
   //input boxes format validators
   QDoubleValidator* dv = new QDoubleValidator(this);
@@ -645,11 +652,10 @@ void GraphWindowClass::RegisterTObject(TObject *obj)
 void GraphWindowClass::doDraw(TObject *obj, const char *options, bool DoUpdate)
 {
     //qDebug() << "-+-+ DoDraw";
-  GraphWindowClass::SetAsActiveRootWindow();
-
-  obj->Draw(options);
-
-  if (DoUpdate) RasterWindow->fCanvas->Update();
+    SetAsActiveRootWindow();
+    obj->Draw(options);
+    if (DoUpdate) RasterWindow->fCanvas->Update();
+    Explorer->updateGui();
 }
 
 void GraphWindowClass::updateLegendVisibility()
@@ -963,11 +969,8 @@ void GraphWindowClass::Reshape()
 
 void GraphWindowClass::RedrawAll()
 {  
-    //qDebug()<<"---Redraw all triggered." << " Current basket item:"<<CurrentBasketItem;
+    //qDebug()<<"---Redraw all triggered"
     EnforceOverlayOff();
-
-    //if (CurrentBasketItem >= 0) //-1 - Basket is off; -2 -basket is Off, using tmp drawing (e.g. overlap of two histograms)
-    //    DrawObjects = Basket[CurrentBasketItem].DrawObjects;
 
     if (DrawObjects.isEmpty())
     {
@@ -982,20 +985,12 @@ void GraphWindowClass::RedrawAll()
         QByteArray ba = opt.toLocal8Bit();
         const char* options = ba.data();
 
-        //qDebug()<<"   object #"<<i<<" Class name:"<<OldDrawObjects[i].Pointer->ClassName()<<" options (QStr)"<<opt<<"-> options (chars):"<<options;
         doDraw(DrawObjects[i].Pointer, options, false);
     }
 
     qApp->processEvents();
-    //qDebug() << "----Mod+";
-    //RasterWindow->fCanvas->Modified();
-    //qDebug() << "----Upd+";
     RasterWindow->fCanvas->Update();
-    //qDebug() << "----Contr+";
     UpdateControls();
-
-    //ui->leOptions->setText(getCurrentDrawObjects()->first().Options);
-    //qDebug() << "---redraw done";
 }
 
 void GraphWindowClass::clearTmpTObjects()
@@ -2043,48 +2038,6 @@ void GraphWindowClass::ShowProjection(QString type)
    MW->WindowNavigator->BusyOff(); // <--
 }
 
-double GraphWindowClass::runScaleDialog()
-{
-  QDialog* D = new QDialog(this);
-
-  QDoubleValidator* vali = new QDoubleValidator(D);
-  QVBoxLayout* l = new QVBoxLayout(D);
-  QHBoxLayout* l1 = new QHBoxLayout();
-    QLabel* lab1 = new QLabel("Multiply by ");
-    QLineEdit* leM = new QLineEdit("1.0");
-    leM->setValidator(vali);
-    l1->addWidget(lab1);
-    l1->addWidget(leM);
-    QLabel* lab2 = new QLabel(" and divide by ");
-    QLineEdit* leD = new QLineEdit("1.0");
-    leD->setValidator(vali);
-    l1->addWidget(lab2);
-    l1->addWidget(leD);
-  l->addLayout(l1);
-    QPushButton* pb = new QPushButton("Scale");
-    connect(pb, &QPushButton::clicked, D, &QDialog::accept);
-  l->addWidget(pb);
-
-  int ret = D->exec();
-  double res = 1.0;
-  if (ret == QDialog::Accepted)
-    {
-      double Mult = leM->text().toDouble();
-      double Div = leD->text().toDouble();
-      if (Div == 0)
-        {
-          message("Cannot divide by 0!", this);
-        }
-      else
-        {
-          res = Mult / Div;
-        }
-    }
-
-  delete D;
-  return res;
-}
-
 const QPair<double, double> GraphWindowClass::runShiftDialog()
 {
     QDialog* D = new QDialog(this);
@@ -2637,13 +2590,9 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
   QAction* onTop = 0;
   QAction* del = 0;
   QAction* rename = 0;
-  QAction* scale = 0;
   QAction* shift = 0;
   QAction* uniMap = 0;
   QAction* gaussFit = 0;
-  QAction* setLine = 0;
-  QAction* setMarker = 0;
-  QAction* drawMenu = 0;
   QAction* drawIntegral = 0;
   QAction* interpolate = 0;
   QAction* median = 0;
@@ -2664,12 +2613,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
       onTop = BasketMenu.addAction("Show on top of the main draw");
       switchToThis = BasketMenu.addAction("Switch to this");
       BasketMenu.addSeparator();
-      setLine = BasketMenu.addAction("Set line attributes");
-      setMarker = BasketMenu.addAction("Set marker attributes");
-      drawMenu = BasketMenu.addAction("Root menu");
-      BasketMenu.addSeparator();
       rename = BasketMenu.addAction("Rename");
-      scale = BasketMenu.addAction("Scale");
       shift = BasketMenu.addAction("Shift X scale");
       if (!MasterDrawObjects.isEmpty())
           if ( QString(MasterDrawObjects.first().Pointer->ClassName()) == "TH2D")
@@ -2715,79 +2659,13 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
   if (!selectedItem) return; //nothing was selected
 
   TObject * obj = ( row == -1 ? &tdummy : Basket->getDrawObjects(row).first().Pointer );
-  qDebug() << obj->ClassName();
+  //qDebug() << obj->ClassName();
 
-  //gStyle->SetOptTitle(1);
   if (selectedItem == switchToThis)
     {
       CurrentBasketItem = row;
       RedrawAll();
     }
-  else if (selectedItem == drawMenu)
-    {
-      //TObject * obj = Basket->getDrawObjects(row).first().Pointer;
-
-      TH1* h = dynamic_cast<TH1*>(obj);
-      if (h)
-        {
-          h->DrawPanel();
-          return;
-        }
-      TGraph* g = dynamic_cast<TGraph*>(obj);
-      if (g)
-        {
-          g->DrawPanel();
-          return;
-        }
-
-      message("Not supported for this object type", this);
-    }
-  else if (selectedItem == setMarker)
-  {
-      //TObject * obj = Basket->getDrawObjects(row)->first().Pointer;
-      TAttMarker* la = dynamic_cast<TAttMarker*>(obj);      
-      if (la)
-      {
-         int color = la->GetMarkerColor();
-         int siz = la->GetMarkerSize();
-         int style = la->GetMarkerStyle();
-         ARootMarkerConfigurator* rlc = new ARootMarkerConfigurator(&color, &siz, &style);
-         int res = rlc->exec();
-         if (res != 0)
-         {
-             la->SetMarkerColor(color);
-             la->SetMarkerSize(siz);
-             la->SetMarkerStyle(style);
-             la->Modify();
-             SetModifiedFlag();
-             UpdateRootCanvas();
-         }
-      }
-      else  message("Not supported for this object type", this);
-  }
-  else if (selectedItem == setLine)
-  {
-      //TObject * obj = Basket->getDrawObjects(row)->first().Pointer;
-      TAttLine* la = dynamic_cast<TAttLine*>(obj);
-      if (la)
-      {
-         int color = la->GetLineColor();
-         int wid = la->GetLineWidth();
-         int style = la->GetLineStyle();
-         ARootLineConfigurator* rlc = new ARootLineConfigurator(&color, &wid, &style);
-         int res = rlc->exec();
-         if (res != 0)
-         {
-             la->SetLineColor(color);
-             la->SetLineWidth(wid);
-             la->SetLineStyle(style);
-             la->Modify();
-             SetModifiedFlag();
-             UpdateRootCanvas();
-         }
-      }
-      else  message("Not supported for this object type", this);
-  }
   else if (selectedItem == clear)
     {
       QMessageBox msgBox;
@@ -2883,56 +2761,6 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
     }
   else if (selectedItem == onTop)
       Basket_DrawOnTop(row);
-  else if (selectedItem == scale)
-    {
-      if (row == -1) return; //protection
-      if (DrawObjects.isEmpty()) return; //protection
-      //TObject * obj = Basket->getDrawObjects(row)->first().Pointer;
-      if (obj)
-        {
-          QString name = obj->ClassName();
-          QList<QString> impl;
-          impl << "TGraph" << "TGraphErrors"  << "TH1I" << "TH1D" << "TH1F" << "TH2I"<< "TH2D"<< "TH2D";
-          if (!impl.contains(name))
-           {
-             message("Not implemented for this object", this);
-             return;
-           }
-
-          //double sf = QInputDialog::getDouble(this, "Input dialog", "Scaling factor = ", 1.0, -2147483647, 2147483647, 5, &fIn);
-          //if (!fIn) return;
-          double sf = runScaleDialog();
-          if (sf == 1.0) return;
-
-          if (name == "TGraph")
-            {
-              TGraph* gr = dynamic_cast<TGraph*>(obj);
-              TF2 f("aaa", "[0]*y",0,1);
-              f.SetParameter(0, sf);
-              gr->Apply(&f);
-            }
-          if (name == "TGraphErrors")
-            {
-              TGraphErrors* gr = dynamic_cast<TGraphErrors*>(obj);
-              TF2 f("aaa", "[0]*y",0,1);
-              f.SetParameter(0, sf);
-              gr->Apply(&f);
-            }
-          if (name.startsWith("TH1"))
-            {
-              TH1* h = dynamic_cast<TH1*>(obj);
-              //h->Sumw2();
-              h->Scale(sf);
-            }
-          if (name.startsWith("TH2"))
-            {
-              TH2* h = dynamic_cast<TH2*>(obj);
-              //h->Sumw2();
-              h->Scale(sf);
-            }
-        }
-      RedrawAll();
-    } 
   else if (selectedItem == shift)
   {
       if (row == -1) return; //protection
@@ -2994,7 +2822,6 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
 
       DrawObjects = MasterDrawObjects;
       CurrentBasketItem = -1;
-      //BasketMode = 0;
       RedrawAll();
       ui->lwBasket->clearSelection();
   }

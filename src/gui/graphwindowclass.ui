@@ -557,31 +557,12 @@
           <rect>
            <x>11</x>
            <y>353</y>
-           <width>75</width>
+           <width>131</width>
            <height>17</height>
           </rect>
          </property>
          <property name="text">
-          <string>Basket</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbAddToBasket">
-         <property name="geometry">
-          <rect>
-           <x>85</x>
-           <y>348</y>
-           <width>55</width>
-           <height>27</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Add</string>
+          <string>Show basket</string>
          </property>
         </widget>
         <widget class="QPushButton" name="pbAttributes">
@@ -790,7 +771,6 @@ Click-drag-release selects the base line and the range of the fit.</string>
         <zorder>pbRemoveLegend</zorder>
         <zorder>pbRemoveText</zorder>
         <zorder>pbBasketBackToLast</zorder>
-        <zorder>pbAddToBasket</zorder>
         <zorder>line_15</zorder>
         <zorder>pbFWHM</zorder>
         <zorder>cbShowBaseLine</zorder>
@@ -1763,14 +1743,11 @@ to the basket.</string>
        <enum>QFrame::Raised</enum>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
-       <property name="spacing">
-        <number>2</number>
-       </property>
        <property name="leftMargin">
         <number>0</number>
        </property>
        <property name="topMargin">
-        <number>2</number>
+        <number>0</number>
        </property>
        <property name="rightMargin">
         <number>0</number>
@@ -1779,20 +1756,101 @@ to the basket.</string>
         <number>0</number>
        </property>
        <item>
-        <widget class="QLabel" name="label_21">
-         <property name="text">
-          <string>Basket</string>
+        <widget class="QSplitter" name="splitter">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
          </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
+         <property name="handleWidth">
+          <number>10</number>
          </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QListWidget" name="lwBasket">
-         <property name="contextMenuPolicy">
-          <enum>Qt::CustomContextMenu</enum>
-         </property>
+         <widget class="QWidget" name="verticalLayoutWidget">
+          <layout class="QVBoxLayout" name="layExplorer">
+           <property name="spacing">
+            <number>1</number>
+           </property>
+           <property name="bottomMargin">
+            <number>3</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="label_27">
+             <property name="text">
+              <string>Explorer</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <property name="spacing">
+              <number>2</number>
+             </property>
+             <item>
+              <widget class="QPushButton" name="pbAddToBasket">
+               <property name="font">
+                <font>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>To basket</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pbUpdateInBasket">
+               <property name="text">
+                <string>Update</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="Line" name="line_8">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="">
+          <layout class="QVBoxLayout" name="layBasket">
+           <property name="spacing">
+            <number>1</number>
+           </property>
+           <property name="topMargin">
+            <number>3</number>
+           </property>
+           <item>
+            <widget class="Line" name="line_6">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_21">
+             <property name="text">
+              <string>Basket</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QListWidget" name="lwBasket">
+             <property name="contextMenuPolicy">
+              <enum>Qt::CustomContextMenu</enum>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
         </widget>
        </item>
       </layout>

@@ -21,6 +21,7 @@ class QListWidgetItem;
 class TObject;
 class TTree;
 class ABasketManager;
+class ADrawExplorerWidget;
 
 namespace Ui {
 class GraphWindowClass;
@@ -242,7 +243,8 @@ private slots:
 private:
     MainWindow *MW;
     Ui::GraphWindowClass *ui;
-    RasterWindowGraphClass *RasterWindow = 0;
+    RasterWindowGraphClass * RasterWindow = nullptr; //owns
+    ADrawExplorerWidget * Explorer = nullptr; //owns
     bool ExtractionCanceled = false;
     int LastOptStat = 1111;
 
@@ -285,7 +287,6 @@ private:
 
     void AppendRootHistsOrGraphs();
     void ShowProjection(QString type);
-    double runScaleDialog();
     const QPair<double, double> runShiftDialog();
     void calculateFractionTH1(int row);
 };

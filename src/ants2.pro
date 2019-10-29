@@ -414,7 +414,9 @@ SOURCES += main.cpp \
     Reconstruction/areconstructionworker.cpp \
     common/ahistogram.cpp \
     gui/GraphWindowTools/abasketitem.cpp \
-    gui/GraphWindowTools/abasketmanager.cpp
+    gui/GraphWindowTools/abasketmanager.cpp \
+    gui/GraphWindowTools/adrawexplorerwidget.cpp \
+    gui/GraphWindowTools/adrawobject.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -572,7 +574,8 @@ HEADERS  += common/CorrelationFilters.h \
     common/ahistogram.h \
     gui/GraphWindowTools/adrawobject.h \
     gui/GraphWindowTools/abasketitem.h \
-    gui/GraphWindowTools/abasketmanager.h
+    gui/GraphWindowTools/abasketmanager.h \
+    gui/GraphWindowTools/adrawexplorerwidget.h
 
 # --- SIM ---
 ants2_SIM {

@@ -210,7 +210,6 @@ private slots:
     void on_leOptions_editingFinished();
     void on_pbXprojection_clicked();
     void on_pbYprojection_clicked();
-    void on_cbShowBasket_toggled(bool checked);
     void on_actionSave_image_triggered();
     void on_actionExport_data_as_text_triggered();
     void on_actionExport_data_using_bin_start_positions_TH1_triggered();
@@ -245,6 +244,8 @@ private slots:
     void on_actionToggle_toolbar_triggered(bool checked);
 
     void on_pbBackToLast_clicked();
+
+    void on_actionToggle_Explorer_Basket_toggled(bool arg1);
 
 private:
     MainWindow *MW;

@@ -539,32 +539,6 @@
           <enum>Qt::Horizontal</enum>
          </property>
         </widget>
-        <widget class="Line" name="line_11">
-         <property name="geometry">
-          <rect>
-           <x>1</x>
-           <y>380</y>
-           <width>150</width>
-           <height>3</height>
-          </rect>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-        <widget class="QCheckBox" name="cbShowBasket">
-         <property name="geometry">
-          <rect>
-           <x>11</x>
-           <y>353</y>
-           <width>131</width>
-           <height>17</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Show basket</string>
-         </property>
-        </widget>
         <widget class="QPushButton" name="pbAttributes">
          <property name="geometry">
           <rect>
@@ -688,7 +662,7 @@
          <property name="geometry">
           <rect>
            <x>-2</x>
-           <y>429</y>
+           <y>392</y>
            <width>150</width>
            <height>3</height>
           </rect>
@@ -701,7 +675,7 @@
          <property name="geometry">
           <rect>
            <x>9</x>
-           <y>386</y>
+           <y>346</y>
            <width>131</width>
            <height>23</height>
           </rect>
@@ -718,7 +692,7 @@ Click-drag-release selects the base line and the range of the fit.</string>
          <property name="geometry">
           <rect>
            <x>23</x>
-           <y>410</y>
+           <y>370</y>
            <width>111</width>
            <height>17</height>
           </rect>
@@ -743,8 +717,6 @@ Click-drag-release selects the base line and the range of the fit.</string>
         <zorder>label_3</zorder>
         <zorder>line_7</zorder>
         <zorder>line_9</zorder>
-        <zorder>line_11</zorder>
-        <zorder>cbShowBasket</zorder>
         <zorder>pbAttributes</zorder>
         <zorder>cbShowFitParameters</zorder>
         <zorder>pbAddLegend</zorder>
@@ -1892,6 +1864,7 @@ to the basket.</string>
     <addaction name="actionFront"/>
     <addaction name="separator"/>
     <addaction name="actionToggle_toolbar"/>
+    <addaction name="actionToggle_Explorer_Basket"/>
     <addaction name="separator"/>
     <addaction name="actionEqualize_scale_XY"/>
    </widget>
@@ -1985,6 +1958,17 @@ to the basket.</string>
     <string>Equalize scale XY</string>
    </property>
   </action>
+  <action name="actionToggle_Explorer_Basket">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Toggle Explorer+Basket</string>
+   </property>
+  </action>
  </widget>
  <tabstops>
   <tabstop>cbToolBox</tabstop>
@@ -2004,7 +1988,6 @@ to the basket.</string>
   <tabstop>cbShowFitParameters</tabstop>
   <tabstop>leOptions</tabstop>
   <tabstop>pbAttributes</tabstop>
-  <tabstop>cbShowBasket</tabstop>
   <tabstop>pbAddToBasket</tabstop>
   <tabstop>lwBasket</tabstop>
   <tabstop>ledRulerY</tabstop>
@@ -2232,22 +2215,6 @@ to the basket.</string>
     <hint type="destinationlabel">
      <x>387</x>
      <y>435</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbShowBasket</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>fBasket</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>266</x>
-     <y>419</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>612</x>
-     <y>65</y>
     </hint>
    </hints>
   </connection>

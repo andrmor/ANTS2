@@ -156,8 +156,6 @@ GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
   connect(scene->getRuler(), &GraphicsRuler::geometryChanged, this, &GraphWindowClass::rulerGeometryChanged);
   connect(ui->cbRulerTicksLength, &QCheckBox::toggled, scene->getRuler(), &GraphicsRuler::setShowTicks);
   connect(ui->cbRulerShowBG, &QCheckBox::toggled, scene->getRuler(), &GraphicsRuler::setShowContrast);
-
-  ui->fBasket->setVisible(false);
 }
 
 GraphWindowClass::~GraphWindowClass()
@@ -712,21 +710,19 @@ void GraphWindowClass::endOverlayMode()
 
 void GraphWindowClass::OnBusyOn()
 {
-  ui->fUIbox->setEnabled(false);
-  ui->lwBasket->setEnabled(false);
-  //RasterWindow->setBlockEvents(true);
+    ui->fUIbox->setEnabled(false);
+    ui->fBasket->setEnabled(false);
 }
 
 void GraphWindowClass::OnBusyOff()
 {
-  ui->fUIbox->setEnabled(true);
-  ui->lwBasket->setEnabled(true);
-  //RasterWindow->setBlockEvents(false);
+    ui->fUIbox->setEnabled(true);
+    ui->fBasket->setEnabled(true);
 }
 
 void GraphWindowClass::switchOffBasket()
 {
-  ui->cbShowBasket->setChecked(false);
+  ui->actionToggle_Explorer_Basket->setChecked(false);
 }
 
 void GraphWindowClass::mouseMoveEvent(QMouseEvent *event)
@@ -1678,7 +1674,7 @@ void GraphWindowClass::on_cbToolBox_toggled(bool checked)
     ui->leOptions->setEnabled(!checked);
     ui->menuPalette->setEnabled(!checked);
     ui->pbAddToBasket->setEnabled(!checked);
-    ui->cbShowBasket->setEnabled(!checked);
+    ui->actionToggle_Explorer_Basket->setEnabled(!checked);
 
     int imode = ui->cobToolBox->currentIndex();
     if(checked)
@@ -2259,13 +2255,6 @@ void GraphWindowClass::on_actionSave_root_object_triggered()
     }
 }
 
-void GraphWindowClass::on_cbShowBasket_toggled(bool checked)
-{
-   int w = ui->fBasket->width();
-   if (!checked) w = -w;
-   this->resize(this->width()+w, this->height());
-}
-
 void GraphWindowClass::on_pbAddToBasket_clicked()
 {   
    if (DrawObjects.isEmpty()) return;
@@ -2291,7 +2280,7 @@ void GraphWindowClass::AddCurrentToBasket(const QString & name)
 
     Basket->add(name.simplified(), DrawObjects);
 
-    ui->cbShowBasket->setChecked(true);
+    ui->actionToggle_Explorer_Basket->setChecked(true);
     UpdateBasketGUI();
 }
 
@@ -3497,7 +3486,7 @@ bool GraphWindowClass::Extraction()
 
 bool GraphWindowClass::isBasketOn() const
 {
-    return ui->cbShowBasket->isChecked();
+    return ui->actionToggle_Explorer_Basket->isChecked();
 }
 
 Double_t GauseWithBase(Double_t *x, Double_t *par)
@@ -3622,4 +3611,13 @@ void GraphWindowClass::on_pbBackToLast_clicked()
     CurrentBasketItem = -1;
     RedrawAll();
     ui->pbBackToLast->setVisible(false);
+}
+
+void GraphWindowClass::on_actionToggle_Explorer_Basket_toggled(bool arg1)
+{
+    int w = ui->fBasket->width();
+    if (!arg1) w = -w;
+    this->resize(this->width()+w, this->height());
+
+    ui->fBasket->setVisible(arg1);
 }

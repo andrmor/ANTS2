@@ -245,6 +245,8 @@ private slots:
 
     void on_actionToggle_Explorer_Basket_toggled(bool arg1);
 
+    void on_pbUpdateInBasket_clicked();
+
 private:
     MainWindow *MW;
     Ui::GraphWindowClass *ui;
@@ -256,8 +258,9 @@ private:
     QVector<ADrawObject> DrawObjects;  //always local objects -> can have a copy from the Basket
     QVector<ADrawObject> PreviousDrawObjects; //last draw made from outside of the graph window
     ABasketManager * Basket = nullptr;
-    int CurrentBasketItem = -1; //-1 - Basket is off; -2 -basket is Off, using tmp drawing (e.g. overlap of two histograms)
+    int ActiveBasketItem = -1; //-1 - Basket is off; 0+ -> basket loaded, can be updated
     void switchToBasket(int index);
+    void setBasketItemUpdateAllowed(bool flag);
 
     QVector<TObject*> tmpTObjects;
     TH1D* hProjection = 0;  //for toolbox
@@ -280,7 +283,6 @@ private:
 
     void RedrawAll();    
     void clearTmpTObjects();   //enable qDebugs inside for diagnostics of cleanup!
-    void updateLegendVisibility();
     void startOverlayMode();
     void endOverlayMode();
     void UpdateBasketGUI();    

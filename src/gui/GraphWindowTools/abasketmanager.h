@@ -13,7 +13,8 @@ public:
     ABasketManager();
     ~ABasketManager();
 
-    void add(const QString & name, const QVector<ADrawObject> & drawObjects); //makes deep copy!
+    void add(const QString & name, const QVector<ADrawObject> & drawObjects); //makes deep copy
+    void update(int index, const QVector<ADrawObject> & drawObjects);         //makes shallow copy
     const QVector<ADrawObject> getCopy(int index) const;
 
     void clear();

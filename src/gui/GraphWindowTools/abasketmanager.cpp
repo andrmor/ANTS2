@@ -92,6 +92,16 @@ void ABasketManager::add(const QString & name, const QVector<ADrawObject> & draw
     Basket << item;
 }
 
+void ABasketManager::update(int index, const QVector<ADrawObject> & drawObjects)
+{
+    if (index < 0 || index >= Basket.size()) return;
+
+    add(Basket[index].Name, drawObjects);
+    std::swap(Basket[index], Basket.last());
+
+    Basket.remove(Basket.size()-1);
+}
+
 const QVector<ADrawObject> ABasketManager::getCopy(int index) const
 {
     QVector<ADrawObject> res;

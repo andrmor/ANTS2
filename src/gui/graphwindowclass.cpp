@@ -542,8 +542,8 @@ void GraphWindowClass::DrawWithoutFocus(TObject *obj, const char *options, bool 
   if (!RasterWindow) return;
   if (!RasterWindow->fCanvas) return;
 
-  CurrentBasketItem = -1;
   ui->lwBasket->clearSelection();
+  setBasketItemUpdateAllowed(false);
   fFirstTime = true;
 
   QString opt = options;
@@ -628,11 +628,11 @@ void GraphWindowClass::DrawWithoutFocus(TObject *obj, const char *options, bool 
         ui->actionEqualize_scale_XY->setEnabled(false);
     }
 
-  GraphWindowClass::EnforceOverlayOff(); //maybe drawing was triggered when overlay is on and root window is invisible
+  EnforceOverlayOff(); //maybe drawing was triggered when overlay is on and root window is invisible
 
   if (TransferOwnership) RegisterTObject(obj);  //should be skipped only for scripts!
 
-  GraphWindowClass::doDraw(obj, options, DoUpdate);
+  doDraw(obj, options, DoUpdate);
 
   onRequestInvalidateCopy();
   fFirstTime = false;
@@ -651,24 +651,14 @@ void GraphWindowClass::doDraw(TObject *obj, const char *options, bool DoUpdate)
 {
     //qDebug() << "-+-+ DoDraw";
     SetAsActiveRootWindow();
+
+    TH1* h = dynamic_cast<TH1*>(obj);
+    if (h) h->SetStats(ui->cbShowLegend->isChecked());
+
     obj->Draw(options);
     if (DoUpdate) RasterWindow->fCanvas->Update();
+
     Explorer->updateGui();
-}
-
-void GraphWindowClass::updateLegendVisibility()
-{  
-  if (DrawObjects.isEmpty()) return;
-
-  //qDebug() << "Updating legend";
-  TObject* obj = DrawObjects.first().Pointer;
-  QString PlotType = obj->ClassName();
-  if (PlotType.startsWith("TH1")) ((TH1*) obj)->SetStats(ui->cbShowLegend->isChecked());
-  if (PlotType.startsWith("TH2")) ((TH2*) obj)->SetStats(ui->cbShowLegend->isChecked());
-
-  //RasterWindow->fCanvas->Modified();
-  //RasterWindow->fCanvas->Update();
-  //qDebug() << "update legend done";
 }
 
 void GraphWindowClass::startOverlayMode()
@@ -994,30 +984,15 @@ void GraphWindowClass::clearTmpTObjects()
 
 void GraphWindowClass::on_cbShowLegend_toggled(bool checked)
 {
-  qApp->processEvents();
-  if (checked)
-  {
-      //qDebug() << LastOptStat << "-> OptStyle";
-      gStyle->SetOptStat(LastOptStat);
-      qApp->processEvents();
-      GraphWindowClass::updateLegendVisibility();
-      RasterWindow->fCanvas->Modified();
-      RasterWindow->fCanvas->Update();
-  }
-  else
-  {
-      LastOptStat = gStyle->GetOptStat();
-      //qDebug() << "OptStyle ->" <<LastOptStat;
-      gStyle->SetOptStat("");
-      qApp->processEvents();
-      RasterWindow->fCanvas->Modified();
-      RasterWindow->fCanvas->Update();
-  }
+    if (checked)
+        gStyle->SetOptStat(LastOptStat);
+    else
+    {
+        LastOptStat = gStyle->GetOptStat();
+        gStyle->SetOptStat("");
+    }
 
-  //qDebug() << gStyle->GetOptStat();
-  //RasterWindow->fCanvas->Modified();
-  //RasterWindow->fCanvas->Update();
-  //RedrawAll();
+    RedrawAll();
 }
 
 void GraphWindowClass::on_pbZoom_clicked()
@@ -2375,6 +2350,7 @@ void GraphWindowClass::on_lwBasket_itemDoubleClicked(QListWidgetItem *)
 void GraphWindowClass::onRequestMakeCopy()
 {
     PreviousDrawObjects = DrawObjects;
+    setBasketItemUpdateAllowed(false);
     ui->pbBackToLast->setVisible(true);
 }
 
@@ -3057,7 +3033,7 @@ void GraphWindowClass::Basket_DrawOnTop(int row)
         //qDebug() << "New options:"<<safe;
         DrawObjects.append(ADrawObject(BasketDrawObjects[i].Pointer, safe));
     }
-    CurrentBasketItem = -1;
+    setBasketItemUpdateAllowed(false);
     RedrawAll();
 }
 
@@ -3474,7 +3450,7 @@ void GraphWindowClass::on_ledAngle_customContextMenuRequested(const QPoint &pos)
 void GraphWindowClass::on_pbBackToLast_clicked()
 {
     DrawObjects = PreviousDrawObjects;
-    CurrentBasketItem = -1;
+    setBasketItemUpdateAllowed(false);
     RedrawAll();
     ui->pbBackToLast->setVisible(false);
 }
@@ -3492,7 +3468,39 @@ void GraphWindowClass::switchToBasket(int index)
 {
     if (index < 0 || index >= Basket->size()) return;
 
-    CurrentBasketItem = index;
-    DrawObjects = Basket->getCopy(CurrentBasketItem);
+    DrawObjects = Basket->getCopy(index);
     RedrawAll();
+
+    ActiveBasketItem = index;
+    setBasketItemUpdateAllowed(true);
+}
+
+void GraphWindowClass::setBasketItemUpdateAllowed(bool flag)
+{
+    if (ActiveBasketItem < 0 || ActiveBasketItem >= Basket->size()) flag = false;
+
+    if (!flag) ActiveBasketItem = -1;
+    ui->pbUpdateInBasket->setEnabled(flag);
+
+    for (int i=0; i < ui->lwBasket->count(); i++)
+    {
+        QListWidgetItem * item = ui->lwBasket->item(i);
+        if (i == ActiveBasketItem)
+        {
+            item->setForeground(QBrush(Qt::cyan));
+            item->setBackground(QBrush(Qt::lightGray));
+        }
+        else
+        {
+            item->setForeground(QBrush(Qt::black));
+            item->setBackground(QBrush(Qt::white));
+        }
+    }
+    ui->lwBasket->clearSelection();
+}
+
+void GraphWindowClass::on_pbUpdateInBasket_clicked()
+{
+    if (ActiveBasketItem < 0 || ActiveBasketItem >= Basket->size()) return;
+    Basket->update(ActiveBasketItem, DrawObjects);
 }

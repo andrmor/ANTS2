@@ -30,6 +30,7 @@ private:
     void scale(ADrawObject &obj);
     void drawIntegral(ADrawObject &obj);
     void fraction(ADrawObject &obj);
+    void interpolate(ADrawObject &obj);
 
 signals:
     void requestRedraw();

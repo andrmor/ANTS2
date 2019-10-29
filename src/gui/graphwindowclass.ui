@@ -1712,8 +1712,11 @@ to the basket.</string>
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
+         <property name="opaqueResize">
+          <bool>false</bool>
+         </property>
          <property name="handleWidth">
-          <number>10</number>
+          <number>6</number>
          </property>
          <widget class="QWidget" name="verticalLayoutWidget">
           <layout class="QVBoxLayout" name="layExplorer">
@@ -1726,7 +1729,7 @@ to the basket.</string>
            <item>
             <widget class="QLabel" name="label_27">
              <property name="text">
-              <string>Explorer</string>
+              <string>Currently drawn:</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
@@ -1754,7 +1757,8 @@ to the basket.</string>
                 </font>
                </property>
                <property name="text">
-                <string>To basket</string>
+                <string>Copy
+to basket</string>
                </property>
               </widget>
              </item>
@@ -1764,7 +1768,8 @@ to the basket.</string>
                 <bool>false</bool>
                </property>
                <property name="text">
-                <string>Update</string>
+                <string>Update
+in basket</string>
                </property>
               </widget>
              </item>

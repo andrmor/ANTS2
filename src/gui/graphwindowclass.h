@@ -128,8 +128,6 @@ public:
 
     bool Extraction();
 
-    bool isBasketOn() const;
-    void switchOffBasket();
     void ClearBasket();
     TObject *GetMainPlottedObject();
     void SaveGraph(QString fileName);    
@@ -259,6 +257,7 @@ private:
     QVector<ADrawObject> PreviousDrawObjects; //last draw made from outside of the graph window
     ABasketManager * Basket = nullptr;
     int CurrentBasketItem = -1; //-1 - Basket is off; -2 -basket is Off, using tmp drawing (e.g. overlap of two histograms)
+    void switchToBasket(int index);
 
     QVector<TObject*> tmpTObjects;
     TH1D* hProjection = 0;  //for toolbox

@@ -217,14 +217,6 @@ void MainWindow::closeEvent(QCloseEvent *)
 
    ui->pbShowColorCoding->setFocus(); //to finish editing whatever QLineEdit the user can be in - they call on_editing_finish
 
-   if (GraphWindow->isBasketOn())
-   {
-       bool bVis = GraphWindow->isVisible();
-       GraphWindow->showNormal();
-       GraphWindow->switchOffBasket();
-       GraphWindow->setVisible(bVis);
-   }
-
    //if checked, save windows' status
    if (ui->actionSave_Load_windows_status_on_Exit_Init->isChecked())
      {

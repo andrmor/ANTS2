@@ -720,11 +720,6 @@ void GraphWindowClass::OnBusyOff()
     ui->fBasket->setEnabled(true);
 }
 
-void GraphWindowClass::switchOffBasket()
-{
-  ui->actionToggle_Explorer_Basket->setChecked(false);
-}
-
 void GraphWindowClass::mouseMoveEvent(QMouseEvent *event)
 {
     if(RasterWindow->isVisible())
@@ -1675,6 +1670,7 @@ void GraphWindowClass::on_cbToolBox_toggled(bool checked)
     ui->menuPalette->setEnabled(!checked);
     ui->pbAddToBasket->setEnabled(!checked);
     ui->actionToggle_Explorer_Basket->setEnabled(!checked);
+    ui->actionToggle_toolbar->setEnabled(!checked);
 
     int imode = ui->cobToolBox->currentIndex();
     if(checked)
@@ -2286,40 +2282,26 @@ void GraphWindowClass::AddCurrentToBasket(const QString & name)
 
 void GraphWindowClass::AddLegend(double x1, double y1, double x2, double y2, QString title)
 {
-  TLegend* leg = RasterWindow->fCanvas->BuildLegend(x1, y1, x2, y2, title.toLatin1());
+    TLegend* leg = RasterWindow->fCanvas->BuildLegend(x1, y1, x2, y2, title.toLatin1());
 
-  if (CurrentBasketItem < 0) //-1 - Basket is off; -2 -basket is Off, using tmp drawing (e.g. overlap of two histograms)
-  {
-      RegisterTObject(leg);
-      DrawObjects.append(ADrawObject(leg, "same"));
-  }
-  else
-  {
-      //do not register for basket - they have their own system
-      Basket->getDrawObjects(CurrentBasketItem).append(ADrawObject(leg, "same"));
-  }
-  RedrawAll();
+    RegisterTObject(leg);
+    DrawObjects.append(ADrawObject(leg, "same"));
 
-  //UpdateRootCanvas();
+    RedrawAll();
 }
 
-//#include "TLegendEntry.h"
 void GraphWindowClass::SetLegendBorder(int color, int style, int size)
 {
-    QVector<ADrawObject> & DrObj = (CurrentBasketItem < 0) ? DrawObjects : Basket->getDrawObjects(CurrentBasketItem);
-    for (int i=0; i<DrObj.size(); i++)
+    for (int i=0; i<DrawObjects.size(); i++)
     {
-        QString cn = DrObj[i].Pointer->ClassName();
+        QString cn = DrawObjects[i].Pointer->ClassName();
         //qDebug() << cn;
         if (cn == "TLegend")
         {
-            TLegend* le = dynamic_cast<TLegend*>(DrObj[i].Pointer);
+            TLegend* le = dynamic_cast<TLegend*>(DrawObjects[i].Pointer);
             le->SetLineColor(color);
             le->SetLineStyle(style);
             le->SetLineWidth(size);
-
-            //TList* l = le->GetListOfPrimitives();
-            //qDebug() << l->GetEntries() << l->At(0)->ClassName()<<((TLegendEntry*)l->At(1))->GetLabel();
 
             RedrawAll();
             return;
@@ -2391,9 +2373,7 @@ void GraphWindowClass::UpdateBasketGUI()
 void GraphWindowClass::on_lwBasket_itemDoubleClicked(QListWidgetItem *)
 {
     //qDebug() << "Row double clicked:"<<ui->lwBasket->currentRow();
-    CurrentBasketItem = ui->lwBasket->currentRow();
-    DrawObjects = Basket->getCopy(CurrentBasketItem);
-    RedrawAll();
+    switchToBasket(ui->lwBasket->currentRow());
 }
 
 void GraphWindowClass::onRequestMakeCopy()
@@ -2429,7 +2409,6 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
   QAction* shift = 0;
   //QAction* uniMap = 0;
   QAction* gaussFit = 0;
-  QAction* interpolate = 0;
   QAction* median = 0;
   QAction* titleX = 0;
   QAction* titleY = 0;
@@ -2454,7 +2433,6 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
       {
              gaussFit = BasketMenu.addAction("Fit with Gauss");
              median = BasketMenu.addAction("Apply median filter");
-             interpolate = BasketMenu.addAction("Interpolate");
       }
       else if (Type.startsWith("TH2"))
       {
@@ -2487,13 +2465,9 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
   if (!selectedItem) return; //nothing was selected
 
   TObject * obj = ( row == -1 ? &tdummy : Basket->getDrawObjects(row).first().Pointer );
-  //qDebug() << obj->ClassName();
 
   if (selectedItem == switchToThis)
-    {
-      CurrentBasketItem = row;
-      RedrawAll();
-    }
+      switchToBasket(row);
   else if (selectedItem == clear)
     {
       QMessageBox msgBox;
@@ -2716,63 +2690,6 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
     message("CurveFitter is supported only if ANTS2 is compliled with Eigen library enabled", this);
     return;
 #endif
-  }
-  else if (selectedItem == interpolate)
-  {
-      TH1* hist = dynamic_cast<TH1*>(obj);
-      if (!hist)
-      {
-          message("This operation requires TH1 ROOT object", this);
-          return;
-      }
-
-      QDialog d;
-      QVBoxLayout * lMain = new QVBoxLayout(&d);
-
-      QHBoxLayout* l = new QHBoxLayout();
-        QVBoxLayout * v = new QVBoxLayout();
-            QLabel* lab = new QLabel("From:");
-            v->addWidget(lab);
-            lab = new QLabel("Step:");
-            v->addWidget(lab);
-            lab = new QLabel("Steps:");
-            v->addWidget(lab);
-       l->addLayout(v);
-       v = new QVBoxLayout();
-            QLineEdit * leFrom = new QLineEdit("0");
-            v->addWidget(leFrom);
-            QLineEdit * leStep = new QLineEdit("10");
-            v->addWidget(leStep);
-            QLineEdit* leSteps = new QLineEdit("100");
-            v->addWidget(leSteps);
-       l->addLayout(v);
-      lMain->addLayout(l);
-
-      QPushButton * pb = new QPushButton("Interpolate");
-      lMain->addWidget(pb);
-
-      QObject::connect(pb, &QPushButton::clicked,
-                       [&d, hist, leFrom, leStep, leSteps, this]()
-      {
-          int steps = leSteps->text().toDouble();
-          int step  = leStep->text().toDouble();
-          int from  = leFrom->text().toDouble();
-
-          TH1D* hi = new TH1D("", "", steps, from, from + step*steps);
-          for (int i=0; i<steps; i++)
-          {
-              double x = from + step * i;
-              double val = hist->Interpolate(x);
-              hi->SetBinContent(i+1, val);
-          }
-          QString Xtitle = hist->GetXaxis()->GetTitle();
-          if (!Xtitle.isEmpty()) hi->GetXaxis()->SetTitle(Xtitle.toLocal8Bit().data());
-          this->Draw(hi, "");
-          d.accept();
-      }
-                       );
-
-      d.exec();
   }
   else if (selectedItem == median)
   {
@@ -3148,7 +3065,7 @@ void GraphWindowClass::Basket_DrawOnTop(int row)
         //qDebug() << "New options:"<<safe;
         DrawObjects.append(ADrawObject(BasketDrawObjects[i].Pointer, safe));
     }
-    CurrentBasketItem = -2; //forcing to "basket off, tmp graph" mode
+    CurrentBasketItem = -1;
     RedrawAll();
 }
 
@@ -3259,37 +3176,25 @@ void GraphWindowClass::on_actionFront_triggered()
 
 void GraphWindowClass::on_pbAttributes_clicked()
 {
-  TObject * obj = nullptr;
+    TObject * obj = ( DrawObjects.isEmpty() ? nullptr : DrawObjects.first().Pointer );
 
-  if (CurrentBasketItem < 0) //-1 - Basket is off; -2 -basket is Off, using tmp drawing (e.g. overlap of two histograms)
+    if (obj)
     {
-      if (!DrawObjects.isEmpty() )
-         obj = DrawObjects.first().Pointer;
-    }
-  else if (CurrentBasketItem < Basket->size()) //Basket is ON
-    {
-      QVector<ADrawObject> & BasketDrawObjects = Basket->getDrawObjects(CurrentBasketItem);
-      if (!BasketDrawObjects.isEmpty())
-         obj = BasketDrawObjects.first().Pointer;
-    }
-
-  if (obj)
-    {
-      TH1* h = dynamic_cast<TH1*>(obj);
-      if (h)
+        TH1* h = dynamic_cast<TH1*>(obj);
+        if (h)
         {
-          h->DrawPanel();
-          return;
+            h->DrawPanel();
+            return;
         }
-      TGraph* g = dynamic_cast<TGraph*>(obj);
-      if (g)
+        TGraph* g = dynamic_cast<TGraph*>(obj);
+        if (g)
         {
-          g->DrawPanel();
-          return;
+            g->DrawPanel();
+            return;
         }
     }
 
-  RasterWindow->fCanvas->SetLineAttributes();
+    RasterWindow->fCanvas->SetLineAttributes();
 }
 
 void GraphWindowClass::on_actionToggle_toolbar_triggered(bool checked)
@@ -3349,41 +3254,31 @@ void GraphWindowClass::on_cbShowFitParameters_toggled(bool checked)
 {
     if (checked) gStyle->SetOptFit(0111);
     else gStyle->SetOptFit(0000);
-    //RasterWindow->fCanvas->Modified();
-    //RasterWindow->fCanvas->Update();
 }
 
 void GraphWindowClass::on_pbAddLegend_clicked()
 {
-  TLegend* leg = RasterWindow->fCanvas->BuildLegend();
+    TLegend* leg = RasterWindow->fCanvas->BuildLegend();
 
-  if (CurrentBasketItem < 0) //-1 - Basket is off; -2 -basket is Off, using tmp drawing (e.g. overlap of two histograms)
-  {
-      RegisterTObject(leg);
-      DrawObjects.append(ADrawObject(leg, "same"));
-  }
-  else
-  {
-      //do not register for basket - they have their own system
-      Basket->getDrawObjects(CurrentBasketItem).append(ADrawObject(leg, "same"));
-  }
-  RedrawAll();
+    RegisterTObject(leg);
+    DrawObjects.append(ADrawObject(leg, "same"));
+
+    RedrawAll();
 }
 
 void GraphWindowClass::on_pbRemoveLegend_clicked()
 {
-    QVector<ADrawObject> &DrObj = (CurrentBasketItem < 0) ? DrawObjects : Basket->getDrawObjects(CurrentBasketItem);
-    for (int i=0; i<DrObj.size(); i++)
-      {
-          QString cn = DrObj[i].Pointer->ClassName();
-            //qDebug() << cn;
-          if (cn == "TLegend")
-            {              
-              DrObj.remove(i);
-              RedrawAll();
-              return;
-            }
-      }
+    for (int i=0; i<DrawObjects.size(); i++)
+    {
+        QString cn = DrawObjects[i].Pointer->ClassName();
+        //qDebug() << cn;
+        if (cn == "TLegend")
+        {
+            DrawObjects.remove(i);
+            RedrawAll();
+            return;
+        }
+    }
     qDebug() << "Legend object was not found!";
 }
 
@@ -3432,19 +3327,6 @@ void GraphWindowClass::ShowTextPanel(const QString Text, bool bShowFrame, int Al
   for (QString s : sl) la->AddText(s.toLatin1());
 
   DrawWithoutFocus(la, "same", true, false); //it seems the Paveltext is owned by drawn object - registration causes crash if used with non-registered object (e.g. script)
-
-//  if (CurrentBasketItem < 0) //-1 - Basket is off; -2 -basket is Off, using tmp drawing (e.g. overlap of two histograms)
-//  {
-//     RegisterTObject(la);
-//     DrawObjects.append(DrawObjectStructure(la, "same"));
-//  }
-//  else
-//  {
-//     //do not register for basket - they have their own system
-//     Basket[CurrentBasketItem].DrawObjects.append(DrawObjectStructure(la, "same"));
-//  }
-
-  //  RedrawAll();
 }
 
 void GraphWindowClass::SetStatPanelVisible(bool flag)
@@ -3454,21 +3336,19 @@ void GraphWindowClass::SetStatPanelVisible(bool flag)
 
 void GraphWindowClass::on_pbRemoveText_clicked()
 {
-  QVector<ADrawObject> &DrObj = (CurrentBasketItem < 0) ? DrawObjects : Basket->getDrawObjects(CurrentBasketItem);
-  for (int i=0; i<DrObj.size(); i++)
+    for (int i=0; i<DrawObjects.size(); i++)
     {
-        QString cn = DrObj[i].Pointer->ClassName();
-          //qDebug() << cn;
+        QString cn = DrawObjects[i].Pointer->ClassName();
+        //qDebug() << cn;
         if (cn == "TPaveText")
-          {            
-            DrObj.remove(i);
+        {
+            DrawObjects.remove(i);
             RedrawAll();
             return;
-          }
+        }
     }
-  qDebug() << "Text object was not found!";
+    qDebug() << "Text object was not found!";
 }
-
 
 bool GraphWindowClass::Extraction()
 {
@@ -3484,11 +3364,6 @@ bool GraphWindowClass::Extraction()
     return !IsExtractionCanceled();  //returns false = canceled
 }
 
-bool GraphWindowClass::isBasketOn() const
-{
-    return ui->actionToggle_Explorer_Basket->isChecked();
-}
-
 Double_t GauseWithBase(Double_t *x, Double_t *par)
 {
    return par[0]*exp(par[1]*(x[0]+par[2])*(x[0]+par[2])) + par[3]*x[0] + par[4];   // [0]*exp([1]*(x+[2])^2) + [3]*x + [4]
@@ -3496,14 +3371,13 @@ Double_t GauseWithBase(Double_t *x, Double_t *par)
 
 void GraphWindowClass::on_pbFWHM_clicked()
 {
-    QVector<ADrawObject> &DrObj = (CurrentBasketItem < 0) ? DrawObjects : Basket->getDrawObjects(CurrentBasketItem);
-    if (DrObj.isEmpty())
+    if (DrawObjects.isEmpty())
     {
         message("No data", this);
         return;
     }
 
-    const QString cn = DrObj.first().Pointer->ClassName();
+    const QString cn = DrawObjects.first().Pointer->ClassName();
     if ( !cn.startsWith("TH1") && cn!="TProfile")
     {
         message("Can be used only with 1D histograms!", this);
@@ -3528,7 +3402,7 @@ void GraphWindowClass::on_pbFWHM_clicked()
         return;
     }
 
-    TH1* h =   static_cast<TH1*>(DrObj.first().Pointer);
+    TH1* h =   static_cast<TH1*>(DrawObjects.first().Pointer);
                                                                    //  S  * exp( -0.5/s2 * (x   -m )^2) +  A *x +  B
     TF1 *f = new TF1("myfunc", GauseWithBase, startX, stopX, 5);  //  [0] * exp(    [1]  * (x + [2])^2) + [3]*x + [4]
 
@@ -3620,4 +3494,13 @@ void GraphWindowClass::on_actionToggle_Explorer_Basket_toggled(bool arg1)
     this->resize(this->width()+w, this->height());
 
     ui->fBasket->setVisible(arg1);
+}
+
+void GraphWindowClass::switchToBasket(int index)
+{
+    if (index < 0 || index >= Basket->size()) return;
+
+    CurrentBasketItem = index;
+    DrawObjects = Basket->getCopy(CurrentBasketItem);
+    RedrawAll();
 }

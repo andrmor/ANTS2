@@ -78,20 +78,22 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
     Menu.addSeparator();
     QAction* integralA =    Menu.addAction("Draw integral");
     QAction* fractionA =    Menu.addAction("Calculate fraction before/after");
+    QAction* interpolateA = Menu.addAction("Interpolate");
     Menu.addSeparator();
 
 
     QAction* si = Menu.exec(mapToGlobal(pos));
     if (!si) return; //nothing was selected
 
-   if      (si == renameA)    rename(obj);
-   else if (si == delA)       remove(index);
-   else if (si == setLineA)   setLine(obj);
-   else if (si == setMarkerA) setMarker(obj);
-   else if (si == panelA)     showPanel(obj);
-   else if (si == scaleA)     scale(obj);
-   else if (si == integralA)  drawIntegral(obj);
-   else if (si == fractionA)  fraction(obj);
+   if      (si == renameA)      rename(obj);
+   else if (si == delA)         remove(index);
+   else if (si == setLineA)     setLine(obj);
+   else if (si == setMarkerA)   setMarker(obj);
+   else if (si == panelA)       showPanel(obj);
+   else if (si == scaleA)       scale(obj);
+   else if (si == integralA)    drawIntegral(obj);
+   else if (si == fractionA)    fraction(obj);
+   else if (si == interpolateA) interpolate(obj);
 
     /*
     QAction* scale = 0;
@@ -99,7 +101,6 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
     QAction* uniMap = 0;
     QAction* gaussFit = 0;
 
-    QAction* interpolate = 0;
     QAction* median = 0;
     QAction* titleX = 0;
     QAction* titleY = 0;
@@ -255,63 +256,6 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
       message("CurveFitter is supported only if ANTS2 is compliled with Eigen library enabled", this);
       return;
   #endif
-    }
-    else if (selectedItem == interpolate)
-    {
-        TH1* hist = dynamic_cast<TH1*>(obj);
-        if (!hist)
-        {
-            message("This operation requires TH1 ROOT object", this);
-            return;
-        }
-
-        QDialog d;
-        QVBoxLayout * lMain = new QVBoxLayout(&d);
-
-        QHBoxLayout* l = new QHBoxLayout();
-          QVBoxLayout * v = new QVBoxLayout();
-              QLabel* lab = new QLabel("From:");
-              v->addWidget(lab);
-              lab = new QLabel("Step:");
-              v->addWidget(lab);
-              lab = new QLabel("Steps:");
-              v->addWidget(lab);
-         l->addLayout(v);
-         v = new QVBoxLayout();
-              QLineEdit * leFrom = new QLineEdit("0");
-              v->addWidget(leFrom);
-              QLineEdit * leStep = new QLineEdit("10");
-              v->addWidget(leStep);
-              QLineEdit* leSteps = new QLineEdit("100");
-              v->addWidget(leSteps);
-         l->addLayout(v);
-        lMain->addLayout(l);
-
-        QPushButton * pb = new QPushButton("Interpolate");
-        lMain->addWidget(pb);
-
-        QObject::connect(pb, &QPushButton::clicked,
-                         [&d, hist, leFrom, leStep, leSteps, this]()
-        {
-            int steps = leSteps->text().toDouble();
-            int step  = leStep->text().toDouble();
-            int from  = leFrom->text().toDouble();
-
-            TH1D* hi = new TH1D("", "", steps, from, from + step*steps);
-            for (int i=0; i<steps; i++)
-            {
-                double x = from + step * i;
-                double val = hist->Interpolate(x);
-                hi->SetBinContent(i+1, val);
-            }
-            QString Xtitle = hist->GetXaxis()->GetTitle();
-            if (!Xtitle.isEmpty()) hi->GetXaxis()->SetTitle(Xtitle.toLocal8Bit().data());
-            this->Draw(hi, "");
-            d.accept();
-        }
-                         );
-
-        d.exec();
     }
     else if (selectedItem == median)
     {
@@ -606,7 +550,6 @@ void ADrawExplorerWidget::drawIntegral(ADrawObject &obj)
 
     QString title = "Integral of " + obj.Name;
     TH1D* hi = new TH1D("integral", title.toLocal8Bit().data(), bins, edges);
-    emit requestRegister(hi);
     delete [] edges;
 
     QString Xtitle = h->GetXaxis()->GetTitle();
@@ -620,6 +563,7 @@ void ADrawExplorerWidget::drawIntegral(ADrawObject &obj)
       }
 
     emit requestMakeCopy();
+    emit requestRegister(hi);
 
     DrawObjects.clear();
     DrawObjects << ADrawObject(hi, "hist");
@@ -728,5 +672,70 @@ void ADrawExplorerWidget::fraction(ADrawObject &obj)
     D.exec();
 
     delete cum;
+}
+
+void ADrawExplorerWidget::interpolate(ADrawObject &obj)
+{
+    TH1* hist = dynamic_cast<TH1*>(obj.Pointer);
+    if (!hist)
+    {
+        message("This operation requires TH1 ROOT object", this);
+        return;
+    }
+
+    QDialog d;
+    QVBoxLayout * lMain = new QVBoxLayout(&d);
+
+    QHBoxLayout* l = new QHBoxLayout();
+      QVBoxLayout * v = new QVBoxLayout();
+          QLabel* lab = new QLabel("From:");
+          v->addWidget(lab);
+          lab = new QLabel("Step:");
+          v->addWidget(lab);
+          lab = new QLabel("Steps:");
+          v->addWidget(lab);
+     l->addLayout(v);
+     v = new QVBoxLayout();
+          QLineEdit * leFrom = new QLineEdit("0");
+          v->addWidget(leFrom);
+          QLineEdit * leStep = new QLineEdit("10");
+          v->addWidget(leStep);
+          QLineEdit* leSteps = new QLineEdit("100");
+          v->addWidget(leSteps);
+     l->addLayout(v);
+    lMain->addLayout(l);
+
+    QPushButton * pb = new QPushButton("Interpolate");
+    lMain->addWidget(pb);
+
+    QObject::connect(pb, &QPushButton::clicked,
+                     [&d, hist, leFrom, leStep, leSteps, this]()
+    {
+        int steps = leSteps->text().toDouble();
+        int step  = leStep->text().toDouble();
+        int from  = leFrom->text().toDouble();
+
+        TH1D* hi = new TH1D("", "", steps, from, from + step*steps);
+        for (int i=0; i<steps; i++)
+        {
+            double x = from + step * i;
+            double val = hist->Interpolate(x);
+            hi->SetBinContent(i+1, val);
+        }
+        QString Xtitle = hist->GetXaxis()->GetTitle();
+        if (!Xtitle.isEmpty()) hi->GetXaxis()->SetTitle(Xtitle.toLocal8Bit().data());
+
+        emit requestMakeCopy();
+        emit requestRegister(hi);
+
+        DrawObjects.clear();
+        DrawObjects << ADrawObject(hi, "hist");
+
+        emit requestRedraw();
+
+        d.accept();
+    }
+                     );
+    d.exec();
 }
 

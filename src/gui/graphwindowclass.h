@@ -5,6 +5,7 @@
 #include "adrawobject.h"
 #include "abasketitem.h"
 
+#include <QVector>
 #include <QVariantList>
 
 #include "TMathBase.h"
@@ -168,6 +169,10 @@ private slots:
     void on_lwBasket_customContextMenuRequested(const QPoint &pos);
     void on_lwBasket_itemDoubleClicked(QListWidgetItem *item);
 
+    void onRequestMakeCopy();
+    void onRequestInvalidateCopy();
+    void onRequestRegister(TObject * tobj);
+
     void on_cbToolBox_toggled(bool checked);
     void on_cobToolBox_currentIndexChanged(int index);
     void on_pbToolboxDragMode_clicked();
@@ -206,7 +211,6 @@ private slots:
     void on_pbXprojection_clicked();
     void on_pbYprojection_clicked();
     void on_cbShowBasket_toggled(bool checked);
-    void on_pbBasketBackToLast_clicked();    
     void on_actionSave_image_triggered();
     void on_actionExport_data_as_text_triggered();
     void on_actionExport_data_using_bin_start_positions_TH1_triggered();
@@ -240,6 +244,8 @@ private slots:
 
     void on_actionToggle_toolbar_triggered(bool checked);
 
+    void on_pbBackToLast_clicked();
+
 private:
     MainWindow *MW;
     Ui::GraphWindowClass *ui;
@@ -249,11 +255,11 @@ private:
     int LastOptStat = 1111;
 
     QVector<ADrawObject> DrawObjects;  //always local objects -> can have a copy from the Basket
-    QVector<ADrawObject> MasterDrawObjects; //last draw made from outside of the graph window
+    QVector<ADrawObject> PreviousDrawObjects; //last draw made from outside of the graph window
     ABasketManager * Basket = nullptr;
     int CurrentBasketItem = -1; //-1 - Basket is off; -2 -basket is Off, using tmp drawing (e.g. overlap of two histograms)
 
-    QList<TObject*> tmpTObjects;
+    QVector<TObject*> tmpTObjects;
     TH1D* hProjection = 0;  //for toolbox
     double TG_X0 = 0;
     double TG_Y0 = 0;
@@ -288,7 +294,6 @@ private:
     void AppendRootHistsOrGraphs();
     void ShowProjection(QString type);
     const QPair<double, double> runShiftDialog();
-    void calculateFractionTH1(int row);
 };
 
 #endif // GRAPHWINDOWCLASS_H

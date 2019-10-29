@@ -684,25 +684,6 @@
           <enum>Qt::Horizontal</enum>
          </property>
         </widget>
-        <widget class="QPushButton" name="pbBasketBackToLast">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>434</y>
-           <width>131</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="toolTip">
-          <string>Show last drawn object. If toolbox was used, the object last analysed will be redrawn</string>
-         </property>
-         <property name="statusTip">
-          <string>Does not work for graph generated from script!</string>
-         </property>
-         <property name="text">
-          <string>Back to last drawn</string>
-         </property>
-        </widget>
         <widget class="Line" name="line_15">
          <property name="geometry">
           <rect>
@@ -770,7 +751,6 @@ Click-drag-release selects the base line and the range of the fit.</string>
         <zorder>pbAddText</zorder>
         <zorder>pbRemoveLegend</zorder>
         <zorder>pbRemoveText</zorder>
-        <zorder>pbBasketBackToLast</zorder>
         <zorder>line_15</zorder>
         <zorder>pbFWHM</zorder>
         <zorder>cbShowBaseLine</zorder>
@@ -1782,6 +1762,13 @@ to the basket.</string>
             </widget>
            </item>
            <item>
+            <widget class="QPushButton" name="pbBackToLast">
+             <property name="text">
+              <string>Back to last</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <layout class="QHBoxLayout" name="horizontalLayout_2">
              <property name="spacing">
               <number>2</number>
@@ -1801,6 +1788,9 @@ to the basket.</string>
              </item>
              <item>
               <widget class="QPushButton" name="pbUpdateInBasket">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
                <property name="text">
                 <string>Update</string>
                </property>
@@ -2016,7 +2006,6 @@ to the basket.</string>
   <tabstop>pbAttributes</tabstop>
   <tabstop>cbShowBasket</tabstop>
   <tabstop>pbAddToBasket</tabstop>
-  <tabstop>pbBasketBackToLast</tabstop>
   <tabstop>lwBasket</tabstop>
   <tabstop>ledRulerY</tabstop>
   <tabstop>ledRulerX2</tabstop>

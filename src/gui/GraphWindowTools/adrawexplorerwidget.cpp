@@ -76,6 +76,9 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
     Menu.addSeparator();
     QAction * scaleA   =    Menu.addAction("Scale");
     Menu.addSeparator();
+    QAction* integralA =    Menu.addAction("Draw integral");
+    QAction* fractionA =    Menu.addAction("Calculate fraction before/after");
+    Menu.addSeparator();
 
 
     QAction* si = Menu.exec(mapToGlobal(pos));
@@ -87,6 +90,8 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
    else if (si == setMarkerA) setMarker(obj);
    else if (si == panelA)     showPanel(obj);
    else if (si == scaleA)     scale(obj);
+   else if (si == integralA)  drawIntegral(obj);
+   else if (si == fractionA)  fraction(obj);
 
     /*
     QAction* scale = 0;
@@ -94,7 +99,6 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
     QAction* uniMap = 0;
     QAction* gaussFit = 0;
 
-    QAction* drawIntegral = 0;
     QAction* interpolate = 0;
     QAction* median = 0;
     QAction* titleX = 0;
@@ -102,15 +106,13 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
     QAction* splineFit = 0;
     QAction* projX = 0;
     QAction* projY = 0;
-    QAction* fraction = 0;
+
 
     if (temp)
       {
         //menu triggered at a valid item
         index = ui->lwBasket->row(temp);
         const QString Type = Basket->getType(index);
-
-        scale = BasketMenu.addAction("Scale");
         shift = BasketMenu.addAction("Shift X scale");
         if (!MasterDrawObjects.isEmpty())
             if ( QString(MasterDrawObjects.first().Pointer->ClassName()) == "TH2D")
@@ -254,37 +256,6 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
       return;
   #endif
     }
-    else if (selectedItem == drawIntegral)
-    {
-        TH1* h = dynamic_cast<TH1*>(obj);
-        if (!h)
-        {
-            message("This operation requires TH1 ROOT object", this);
-            return;
-        }
-        int bins = h->GetNbinsX();
-
-        double* edges = new double[bins+1];
-        for (int i=0; i<bins+1; i++)
-            edges[i] = h->GetBinLowEdge(i+1);
-
-        //    for (int i=0; i<bins+1; i++) qDebug() << i << "->" << edges[i];
-
-        QString title = "Integral of " + Basket->getName(index);
-        TH1D* hi = new TH1D("integral", title.toLocal8Bit().data(), bins, edges);
-        delete [] edges;
-
-        QString Xtitle = h->GetXaxis()->GetTitle();
-        if (!Xtitle.isEmpty()) hi->GetXaxis()->SetTitle(Xtitle.toLocal8Bit().data());
-
-        double prev = 0;
-        for (int i=1; i<bins+1; i++)
-          {
-            prev += h->GetBinContent(i);
-            hi->SetBinContent(i, prev);
-          }
-        Draw(hi, "");
-    }
     else if (selectedItem == interpolate)
     {
         TH1* hist = dynamic_cast<TH1*>(obj);
@@ -409,10 +380,6 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
                          );
 
         d.exec();
-    }
-    else if (selectedItem == fraction)
-    {
-        calculateFractionTH1(index);
     }
     else if (selectedItem == titleX || selectedItem == titleY)
     {
@@ -621,5 +588,145 @@ void ADrawExplorerWidget::scale(ADrawObject &obj)
         h->Scale(sf);
     }
     emit requestRedraw();
+}
+
+void ADrawExplorerWidget::drawIntegral(ADrawObject &obj)
+{
+    TH1* h = dynamic_cast<TH1*>(obj.Pointer);
+    if (!h)
+    {
+        message("Not implemented for this object type", this);
+        return;
+    }
+    int bins = h->GetNbinsX();
+
+    double* edges = new double[bins+1];
+    for (int i=0; i<bins+1; i++)
+        edges[i] = h->GetBinLowEdge(i+1);
+
+    QString title = "Integral of " + obj.Name;
+    TH1D* hi = new TH1D("integral", title.toLocal8Bit().data(), bins, edges);
+    emit requestRegister(hi);
+    delete [] edges;
+
+    QString Xtitle = h->GetXaxis()->GetTitle();
+    if (!Xtitle.isEmpty()) hi->GetXaxis()->SetTitle(Xtitle.toLocal8Bit().data());
+
+    double prev = 0;
+    for (int i=1; i<bins+1; i++)
+      {
+        prev += h->GetBinContent(i);
+        hi->SetBinContent(i, prev);
+      }
+
+    emit requestMakeCopy();
+
+    DrawObjects.clear();
+    DrawObjects << ADrawObject(hi, "hist");
+
+    emit requestRedraw();
+}
+
+void ADrawExplorerWidget::fraction(ADrawObject &obj)
+{
+    TH1* h = dynamic_cast<TH1*>(obj.Pointer);
+    if (!h)
+    {
+        message("This operation requires TH1 ROOT object", this);
+        return;
+    }
+    TH1* cum = h->GetCumulative(true);
+
+    double integral = h->Integral();
+
+    QDialog D(this);
+    D.setWindowTitle("Integral / fraction calculator");
+
+    QVBoxLayout *l = new QVBoxLayout();
+        QPushButton * pbD = new QPushButton("Dummy");
+    l->addWidget(pbD);
+        QHBoxLayout * hh = new QHBoxLayout();
+            QLabel * lab = new QLabel("Enter threshold:");
+        hh->addWidget(lab);
+            QLineEdit* tT = new QLineEdit();
+        hh->addWidget(tT);
+    l->addLayout(hh);
+        QFrame * f = new QFrame();
+            f->setFrameShape(QFrame::HLine);
+    l->addWidget(f);
+        hh = new QHBoxLayout();
+            lab = new QLabel("Interpolated sum before:");
+        hh->addWidget(lab);
+            QLineEdit* tIb = new QLineEdit();
+        hh->addWidget(tIb);
+            lab = new QLabel("Fraction:");
+        hh->addWidget(lab);
+            QLineEdit* tIbf = new QLineEdit();
+        hh->addWidget(tIbf);
+    l->addLayout(hh);
+        hh = new QHBoxLayout();
+            lab = new QLabel("Interpolated sum after:");
+        hh->addWidget(lab);
+            QLineEdit* tIa = new QLineEdit();
+        hh->addWidget(tIa);
+            lab = new QLabel("Fraction:");
+        hh->addWidget(lab);
+            QLineEdit* tIaf = new QLineEdit();
+        hh->addWidget(tIaf);
+    l->addLayout(hh);
+        hh = new QHBoxLayout();
+            lab = new QLabel("Total sum of bins:");
+        hh->addWidget(lab);
+            QLineEdit* tI = new QLineEdit(QString::number(integral));
+            tI->setReadOnly(true);
+        hh->addWidget(tI);
+    l->addLayout(hh);
+        QPushButton * pb = new QPushButton("Close");
+    l->addWidget(pb);
+    D.setLayout(l);
+
+    pbD->setVisible(false);
+
+    QObject::connect(pb, &QPushButton::clicked, &D, &QDialog::reject);
+    QObject::connect(tT, &QLineEdit::editingFinished, [h, cum, integral, tT, tIb, tIbf, tIa, tIaf]()
+    {
+        bool bOK;
+        double val = tT->text().toDouble(&bOK);
+        if (bOK)
+        {
+            int bins = cum->GetNbinsX();
+            TAxis * ax = cum->GetXaxis();
+            int bin = ax->FindBin(val);
+
+            double result = 0;
+            if (bin > bins)
+                result = cum->GetBinContent(bins);
+            else
+            {
+                double width = h->GetBinWidth(bin);
+                double delta = val - h->GetBinLowEdge(bin);
+
+                double thisBinAdds = h->GetBinContent(bin) * delta / width;
+
+                double prev = (bin == 1 ? 0 : cum->GetBinContent(bin-1));
+                result = prev + thisBinAdds;
+            }
+            tIb->setText(QString::number(result));
+            tIbf->setText(QString::number(result/integral));
+            if (integral != 0) tIa->setText(QString::number(integral - result));
+            else tIa->setText("");
+            if (integral != 0) tIaf->setText(QString::number( (integral - result)/integral ));
+            else tIa->setText("");
+        }
+        else
+        {
+            tIa->clear();
+            tIb->clear();
+        }
+    });
+
+    D.exec();
+
+    delete cum;
 }
 

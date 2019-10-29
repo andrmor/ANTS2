@@ -5,6 +5,8 @@
 
 #include <QTreeWidget>
 
+class TObject;
+
 class ADrawExplorerWidget : public QTreeWidget
 {
     Q_OBJECT
@@ -26,9 +28,14 @@ private:
     void setLine(ADrawObject &obj);
     void showPanel(ADrawObject &obj);
     void scale(ADrawObject &obj);
+    void drawIntegral(ADrawObject &obj);
+    void fraction(ADrawObject &obj);
 
 signals:
     void requestRedraw();
+    void requestMakeCopy();
+    void requestInvalidateCopy();
+    void requestRegister(TObject * tobj);
 };
 
 #endif // ADRAWEXPLORERWIDGET_H

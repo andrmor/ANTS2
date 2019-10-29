@@ -105,6 +105,10 @@ GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
     ui->layExplorer->insertWidget(1, Explorer);
     ui->splitter->setSizes({200,600});
     connect(Explorer, &ADrawExplorerWidget::requestRedraw, this, &GraphWindowClass::RedrawAll);
+    connect(Explorer, &ADrawExplorerWidget::requestMakeCopy, this, &GraphWindowClass::onRequestMakeCopy);
+    connect(Explorer, &ADrawExplorerWidget::requestInvalidateCopy, this, &GraphWindowClass::onRequestInvalidateCopy);
+    connect(Explorer, &ADrawExplorerWidget::requestRegister, this, &GraphWindowClass::onRequestRegister);
+    ui->pbBackToLast->setVisible(false);
 
   //input boxes format validators
   QDoubleValidator* dv = new QDoubleValidator(this);
@@ -632,11 +636,7 @@ void GraphWindowClass::DrawWithoutFocus(TObject *obj, const char *options, bool 
 
   GraphWindowClass::doDraw(obj, options, DoUpdate);
 
-  if (CurrentBasketItem == -1)
-    {
-      if (TransferOwnership) MasterDrawObjects = DrawObjects; //pointers are copied!
-      else MasterDrawObjects.clear();
-    }
+  onRequestInvalidateCopy();
   fFirstTime = false;
 
   //update range indication etc
@@ -759,7 +759,7 @@ void GraphWindowClass::closeEvent(QCloseEvent *)
   ExtractionCanceled = true;
   RasterWindow->setExtractionComplete(true);
   DrawObjects.clear();
-  MasterDrawObjects.clear();
+  PreviousDrawObjects.clear();
   RedrawAll();
   RasterWindow->setShowCursorPosition(false);
   LastDistributionShown = "";
@@ -2072,167 +2072,6 @@ const QPair<double, double> GraphWindowClass::runShiftDialog()
     return res;
 }
 
-//#include <QInputDialog>
-void GraphWindowClass::calculateFractionTH1(int row)
-{
-    if (row == -1) return;
-
-    TH1* h = dynamic_cast<TH1*>(Basket->getDrawObjects(row).first().Pointer);
-    if (!h)
-    {
-        message("This operation requires TH1 ROOT object", this);
-        return;
-    }
-    TH1* cum = h->GetCumulative(true);
-
-    double integral = h->Integral();
-
-    QDialog D(this);
-    D.setWindowTitle("Integral / fraction calculator");
-
-    QVBoxLayout *l = new QVBoxLayout();
-        QPushButton * pbD = new QPushButton("Dummy");
-    l->addWidget(pbD);
-        QHBoxLayout * hh = new QHBoxLayout();
-            QLabel * lab = new QLabel("Enter threshold:");
-        hh->addWidget(lab);
-            QLineEdit* tT = new QLineEdit();
-        hh->addWidget(tT);
-    l->addLayout(hh);
-        QFrame * f = new QFrame();
-            f->setFrameShape(QFrame::HLine);
-    l->addWidget(f);
-        hh = new QHBoxLayout();
-            lab = new QLabel("Interpolated sum before:");
-        hh->addWidget(lab);
-            QLineEdit* tIb = new QLineEdit();
-        hh->addWidget(tIb);
-            lab = new QLabel("Fraction:");
-        hh->addWidget(lab);
-            QLineEdit* tIbf = new QLineEdit();
-        hh->addWidget(tIbf);
-    l->addLayout(hh);
-        hh = new QHBoxLayout();
-            lab = new QLabel("Interpolated sum after:");
-        hh->addWidget(lab);
-            QLineEdit* tIa = new QLineEdit();
-        hh->addWidget(tIa);
-            lab = new QLabel("Fraction:");
-        hh->addWidget(lab);
-            QLineEdit* tIaf = new QLineEdit();
-        hh->addWidget(tIaf);
-    l->addLayout(hh);
-        hh = new QHBoxLayout();
-            lab = new QLabel("Total sum of bins:");
-        hh->addWidget(lab);
-            QLineEdit* tI = new QLineEdit(QString::number(integral));
-            tI->setReadOnly(true);
-        hh->addWidget(tI);
-    l->addLayout(hh);
-        QPushButton * pb = new QPushButton("Close");
-    l->addWidget(pb);
-    D.setLayout(l);
-
-    pbD->setVisible(false);
-
-    QObject::connect(pb, &QPushButton::clicked, &D, &QDialog::reject);
-    QObject::connect(tT, &QLineEdit::editingFinished, [h, cum, integral, tT, tIb, tIbf, tIa, tIaf]()
-    {
-        bool bOK;
-        double val = tT->text().toDouble(&bOK);
-        if (bOK)
-        {
-            int bins = cum->GetNbinsX();
-            TAxis * ax = cum->GetXaxis();
-            int bin = ax->FindBin(val);
-
-            double result = 0;
-            if (bin > bins)
-                result = cum->GetBinContent(bins);
-            else
-            {
-                double width = h->GetBinWidth(bin);
-                double delta = val - h->GetBinLowEdge(bin);
-
-                double thisBinAdds = h->GetBinContent(bin) * delta / width;
-
-                double prev = (bin == 1 ? 0 : cum->GetBinContent(bin-1));
-                result = prev + thisBinAdds;
-            }
-            tIb->setText(QString::number(result));
-            tIbf->setText(QString::number(result/integral));
-            if (integral != 0) tIa->setText(QString::number(integral - result));
-            else tIa->setText("");
-            if (integral != 0) tIaf->setText(QString::number( (integral - result)/integral ));
-            else tIa->setText("");
-        }
-        else
-        {
-            tIa->clear();
-            tIb->clear();
-        }
-    });
-
-    D.exec();
-
-    delete cum;
-
-    /*
-    const bool bFromLeft = bBefore;
-    const bool bFromRight = !bBefore;
-
-    bool ok;
-    QString text = QInputDialog::getText(this, "Input",
-                                         "Threshold value:", QLineEdit::Normal,
-                                         "", &ok);
-    if (!ok || text.isEmpty()) return;
-
-    double val = text.toDouble(&ok);
-    if (!ok) return;
-
-
-    TH1* cum = h->GetCumulative(bBefore);
-    int bins = cum->GetNbinsX();
-
-    TAxis * ax = cum->GetXaxis();
-    int bin = ax->FindBin(val);
-    Draw(cum, "hist");
-    qDebug() << bin;
-
-    double result = 0;
-    if (bin < 1)
-    {
-        if (bFromRight) result = cum->GetBinContent(1);
-    }
-    else if (bin > bins)
-    {
-        if (bFromLeft) result = cum->GetBinContent(bins);
-    }
-    else
-    {
-        double width = h->GetBinWidth(bin);
-        double delta = val - h->GetBinLowEdge(bin);
-
-        if (bFromLeft)
-        {
-            double thisBinAdds = h->GetBinContent(bin) * delta / width;
-
-            double prev = (bin == 1 ? 0 : cum->GetBinContent(bin-1));
-            result = prev + thisBinAdds;
-        }
-        else //from right
-        {
-            delta =  width - delta;
-            double thisBinAdds = h->GetBinContent(bin) * delta / width;
-
-            double prev = (bin == bins ? 0 : cum->GetBinContent(bin+1));
-            result = prev + thisBinAdds;
-        }
-    }
-    qDebug() << "Result:"<<result;
-    */
-}
-
 void GraphWindowClass::EnforceOverlayOff()
 {
    ui->cbToolBox->setChecked(false); //update is in on_toggle
@@ -2568,13 +2407,21 @@ void GraphWindowClass::on_lwBasket_itemDoubleClicked(QListWidgetItem *)
     RedrawAll();
 }
 
-void GraphWindowClass::on_pbBasketBackToLast_clicked()
+void GraphWindowClass::onRequestMakeCopy()
 {
-   DrawObjects = MasterDrawObjects;
-   CurrentBasketItem = -1;
-   //BasketMode = 0;
-   RedrawAll();
-   ui->lwBasket->clearSelection();
+    PreviousDrawObjects = DrawObjects;
+    ui->pbBackToLast->setVisible(true);
+}
+
+void GraphWindowClass::onRequestInvalidateCopy()
+{
+    PreviousDrawObjects.clear();
+    ui->pbBackToLast->setVisible(false);
+}
+
+void GraphWindowClass::onRequestRegister(TObject *tobj)
+{
+    tmpTObjects.append(tobj);
 }
 
 void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
@@ -2591,9 +2438,8 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
   QAction* del = 0;
   QAction* rename = 0;
   QAction* shift = 0;
-  QAction* uniMap = 0;
+  //QAction* uniMap = 0;
   QAction* gaussFit = 0;
-  QAction* drawIntegral = 0;
   QAction* interpolate = 0;
   QAction* median = 0;
   QAction* titleX = 0;
@@ -2601,7 +2447,6 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
   QAction* splineFit = 0;
   QAction* projX = 0;
   QAction* projY = 0;
-  QAction* fraction = 0;
 
   if (temp)
     {
@@ -2615,18 +2460,12 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
       BasketMenu.addSeparator();
       rename = BasketMenu.addAction("Rename");
       shift = BasketMenu.addAction("Shift X scale");
-      if (!MasterDrawObjects.isEmpty())
-          if ( QString(MasterDrawObjects.first().Pointer->ClassName()) == "TH2D")
-              if (Type == "TH2D")
-                 uniMap = BasketMenu.addAction("Use as unif. correction map");
 
       if (Type.startsWith("TH1"))
       {
              gaussFit = BasketMenu.addAction("Fit with Gauss");
              median = BasketMenu.addAction("Apply median filter");
-             drawIntegral = BasketMenu.addAction("Draw integral");
              interpolate = BasketMenu.addAction("Interpolate");
-             fraction = BasketMenu.addAction("Calculate fraction before/after");
       }
       else if (Type.startsWith("TH2"))
       {
@@ -2678,7 +2517,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
       {
           ClearBasket();
           //UpdateBasketGUI();
-          on_pbBasketBackToLast_clicked();
+          //on_pbBasketBackToLast_clicked();
       }
     }
   else if (selectedItem == save)
@@ -2738,7 +2577,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
       if (row == -1) return; //protection
       Basket->remove(row);
       UpdateBasketGUI();
-      on_pbBasketBackToLast_clicked();
+      //on_pbBasketBackToLast_clicked();
     }
   else if (selectedItem == rename)
     {
@@ -2813,18 +2652,18 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
           RedrawAll();
       }
   }
-  else if (selectedItem == uniMap)
-  {
-      TH2D* map = static_cast<TH2D*>(obj);
-      TH2D* h =   static_cast<TH2D*>(MasterDrawObjects.first().Pointer);
+//  else if (selectedItem == uniMap)
+//  {
+//      TH2D* map = static_cast<TH2D*>(obj);
+//      TH2D* h =   static_cast<TH2D*>(MasterDrawObjects.first().Pointer);
 
-      *h = *h / *map;
+//      *h = *h / *map;
 
-      DrawObjects = MasterDrawObjects;
-      CurrentBasketItem = -1;
-      RedrawAll();
-      ui->lwBasket->clearSelection();
-  }
+//      DrawObjects = MasterDrawObjects;
+//      CurrentBasketItem = -1;
+//      RedrawAll();
+//      ui->lwBasket->clearSelection();
+//  }
   else if (selectedItem == projX || selectedItem == projY)
   {
       TH2* h = static_cast<TH2*>(obj);
@@ -2888,37 +2727,6 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
     message("CurveFitter is supported only if ANTS2 is compliled with Eigen library enabled", this);
     return;
 #endif
-  }
-  else if (selectedItem == drawIntegral)
-  {
-      TH1* h = dynamic_cast<TH1*>(obj);
-      if (!h)
-      {
-          message("This operation requires TH1 ROOT object", this);
-          return;
-      }
-      int bins = h->GetNbinsX();
-
-      double* edges = new double[bins+1];
-      for (int i=0; i<bins+1; i++)
-          edges[i] = h->GetBinLowEdge(i+1);
-
-      //    for (int i=0; i<bins+1; i++) qDebug() << i << "->" << edges[i];
-
-      QString title = "Integral of " + Basket->getName(row);
-      TH1D* hi = new TH1D("integral", title.toLocal8Bit().data(), bins, edges);
-      delete [] edges;
-
-      QString Xtitle = h->GetXaxis()->GetTitle();
-      if (!Xtitle.isEmpty()) hi->GetXaxis()->SetTitle(Xtitle.toLocal8Bit().data());
-
-      double prev = 0;
-      for (int i=1; i<bins+1; i++)
-        {
-          prev += h->GetBinContent(i);
-          hi->SetBinContent(i, prev);
-        }
-      Draw(hi, "");
   }
   else if (selectedItem == interpolate)
   {
@@ -3045,10 +2853,6 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
 
       d.exec();
   }
-  else if (selectedItem == fraction)
-  {
-      calculateFractionTH1(row);
-  }
   else if (selectedItem == titleX || selectedItem == titleY)
   {
       if (row == -1) return; //protection
@@ -3085,8 +2889,8 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
 
 void GraphWindowClass::ClearBasket()
 {
-  on_pbBasketBackToLast_clicked();
-  UpdateBasketGUI();
+    //on_pbBasketBackToLast_clicked();
+    UpdateBasketGUI();
 }
 
 void GraphWindowClass::on_actionSave_image_triggered()
@@ -3765,8 +3569,8 @@ void GraphWindowClass::on_pbFWHM_clicked()
         double FWHM = sigma * 2.0*TMath::Sqrt(2.0*TMath::Log(2.0));
         double rel = FWHM/mid;
 
-        QVector<ADrawObject> CopyMasterDrawObjects;
-        if (CurrentBasketItem == -1) CopyMasterDrawObjects = MasterDrawObjects;
+        //QVector<ADrawObject> CopyMasterDrawObjects;
+        //if (CurrentBasketItem == -1) CopyMasterDrawObjects = MasterDrawObjects;
 
         //drawing the fit
         Draw(f, "same");
@@ -3783,7 +3587,7 @@ void GraphWindowClass::on_pbFWHM_clicked()
         //draw panel with results
         ShowTextPanel("fwhm = " + QString::number(FWHM) + "\nmean = " + QString::number(mid) + "\nfwhm/mean = "+QString::number(rel));
 
-        MasterDrawObjects = CopyMasterDrawObjects;
+        //MasterDrawObjects = CopyMasterDrawObjects;
     }
     else message("Fit failed!", this);
 }
@@ -3812,3 +3616,10 @@ void GraphWindowClass::on_ledAngle_customContextMenuRequested(const QPoint &pos)
       }
 }
 
+void GraphWindowClass::on_pbBackToLast_clicked()
+{
+    DrawObjects = PreviousDrawObjects;
+    CurrentBasketItem = -1;
+    RedrawAll();
+    ui->pbBackToLast->setVisible(false);
+}

@@ -2253,21 +2253,17 @@ void GraphWindowClass::on_actionSave_root_object_triggered()
 
 void GraphWindowClass::on_pbAddToBasket_clicked()
 {   
-   if (DrawObjects.isEmpty()) return;
+    if (DrawObjects.isEmpty()) return;
 
-     //qDebug() << "Add item to basket triggered";
-     //for (int i=0; i<DrawObjects.size(); i++)
-     //  qDebug() << i << DrawObjects[i].Pointer->ClassName();
+    bool ok;
+    int row = Basket->size();
+    QString name = "Item"+QString::number(row);
+    QString text = QInputDialog::getText(this, "New basket item",
+                                         "Enter name:", QLineEdit::Normal,
+                                         name, &ok);
+    if (!ok || text.isEmpty()) return;
 
-   bool ok;
-   int row = Basket->size();
-   QString name = "Item"+QString::number(row);
-   QString text = QInputDialog::getText(this, "New basket item",
-                                              "Enter name:", QLineEdit::Normal,
-                                              name, &ok);
-   if (!ok || text.isEmpty()) return;
-
-   AddCurrentToBasket(text);
+    AddCurrentToBasket(text);
 }
 
 void GraphWindowClass::AddCurrentToBasket(const QString & name)

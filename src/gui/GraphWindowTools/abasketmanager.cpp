@@ -86,9 +86,6 @@ void ABasketManager::add(const QString & name, const QVector<ADrawObject> & draw
             tobj = drObj.Pointer->Clone();
         }
 
-        TNamed * nn = dynamic_cast<TNamed*>(tobj);
-        if (nn) nn->SetTitle(name.toLocal8Bit().constData());
-
         item.DrawObjects.append( ADrawObject(tobj, options) );
     }
 

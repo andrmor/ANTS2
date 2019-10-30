@@ -18,10 +18,6 @@
 #include "abasketmanager.h"
 #include "adrawexplorerwidget.h"
 
-#ifdef USE_EIGEN
-#include "curvefit.h"
-#endif
-
 //Qt
 #include <QtGui>
 #include <QFileDialog>
@@ -40,7 +36,6 @@
 #include <QVariant>
 #include <QVariantList>
 #include <QSet>
-
 
 //Root
 #include "TGraph.h"
@@ -2005,40 +2000,6 @@ void GraphWindowClass::ShowProjection(QString type)
    MW->WindowNavigator->BusyOff(); // <--
 }
 
-const QPair<double, double> GraphWindowClass::runShiftDialog()
-{
-    QDialog* D = new QDialog(this);
-
-    QDoubleValidator* vali = new QDoubleValidator(D);
-    QVBoxLayout* l = new QVBoxLayout(D);
-    QHBoxLayout* l1 = new QHBoxLayout();
-      QLabel* lab1 = new QLabel("Multiply by: ");
-      QLineEdit* leM = new QLineEdit("1.0");
-      leM->setValidator(vali);
-      l1->addWidget(lab1);
-      l1->addWidget(leM);
-      QLabel* lab2 = new QLabel(" Add: ");
-      QLineEdit* leA = new QLineEdit("0");
-      leA->setValidator(vali);
-      l1->addWidget(lab2);
-      l1->addWidget(leA);
-    l->addLayout(l1);
-      QPushButton* pb = new QPushButton("Shift");
-      connect(pb, &QPushButton::clicked, D, &QDialog::accept);
-    l->addWidget(pb);
-
-    int ret = D->exec();
-    QPair<double, double> res(1.0, 0);
-    if (ret == QDialog::Accepted)
-      {
-        res.first =  leM->text().toDouble();
-        res.second = leA->text().toDouble();
-      }
-
-    delete D;
-    return res;
-}
-
 void GraphWindowClass::EnforceOverlayOff()
 {
    ui->cbToolBox->setChecked(false); //update is in on_toggle
@@ -2367,361 +2328,128 @@ void GraphWindowClass::onRequestRegister(TObject *tobj)
 
 void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
 {
-  QMenu BasketMenu;
-  TNamed tdummy("Dummy", "Dummy");
-  int row = -1;
+    QMenu BasketMenu;
+    int row = -1;
 
-  //QString shownItemType;
-  QListWidgetItem* temp = ui->lwBasket->itemAt(pos);
+    QListWidgetItem* temp = ui->lwBasket->itemAt(pos);
 
-  QAction* switchToThis = 0;
-  QAction* onTop = 0;
-  QAction* del = 0;
-  QAction* rename = 0;
-  QAction* shift = 0;
-  //QAction* uniMap = 0;
-  QAction* gaussFit = 0;
-  QAction* median = 0;
-  QAction* splineFit = 0;
-  QAction* projX = 0;
-  QAction* projY = 0;
+    QAction* switchToThis = 0;
+    QAction* onTop = 0;
+    QAction* del = 0;
+    QAction* rename = 0;
 
-  if (temp)
+    if (temp)
     {
-      //menu triggered at a valid item
-      row = ui->lwBasket->row(temp);
-      const QString Type = Basket->getType(row);
+        //menu triggered at a valid item
+        row = ui->lwBasket->row(temp);
 
-      BasketMenu.addSeparator();      
-      onTop = BasketMenu.addAction("Show on top of the main draw");
-      switchToThis = BasketMenu.addAction("Switch to this");
-      BasketMenu.addSeparator();
-      rename = BasketMenu.addAction("Rename");
-      shift = BasketMenu.addAction("Shift X scale");
-
-      if (Type.startsWith("TH1"))
-      {
-             gaussFit = BasketMenu.addAction("Fit with Gauss");
-             median = BasketMenu.addAction("Apply median filter");
-      }
-      else if (Type.startsWith("TH2"))
-      {
-             projX = BasketMenu.addAction("X projection");
-             projY = BasketMenu.addAction("Y projection");
-      }
-      else if (Type == "TGraph" || Type == "TProfile")
-      {
-             splineFit = BasketMenu.addAction("Fit with B-spline");
-      }
-      BasketMenu.addSeparator();
-      del = BasketMenu.addAction("Delete");
-      BasketMenu.addSeparator();
-    }  
-  BasketMenu.addSeparator();
-  QAction* save = BasketMenu.addAction("Save basket to file");
-  BasketMenu.addSeparator();
-  QAction* append = BasketMenu.addAction("Append basket file");
-  QAction* appendTxt = BasketMenu.addAction("Append graph from text file");
-  QAction* appendTxtEr = BasketMenu.addAction("Append graph+errorbars from text file");
-  QAction* appendRootHistsAndGraphs = BasketMenu.addAction("Append graphs and histograms from ROOT file");
-
-  BasketMenu.addSeparator();
-  QAction* clear = BasketMenu.addAction("Clear basket");
-
-  QAction* selectedItem = BasketMenu.exec(ui->lwBasket->mapToGlobal(pos));
-  if (!selectedItem) return; //nothing was selected
-
-  TObject * obj = ( row == -1 ? &tdummy : Basket->getDrawObjects(row).first().Pointer );
-
-  if (selectedItem == switchToThis)
-      switchToBasket(row);
-  else if (selectedItem == clear)
-    {
-      QMessageBox msgBox;
-      msgBox.setText("Clear basket cannot be undone!");
-      msgBox.setInformativeText("Clear basket?");
-      msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
-      msgBox.setDefaultButton(QMessageBox::Cancel);
-      int ret = msgBox.exec();
-      if (ret == QMessageBox::Yes)
-          ClearBasket();
+        BasketMenu.addSeparator();
+        onTop = BasketMenu.addAction("Show on top of the main draw");
+        switchToThis = BasketMenu.addAction("Switch to this");
+        BasketMenu.addSeparator();
+        rename = BasketMenu.addAction("Rename");
+        BasketMenu.addSeparator();
+        del = BasketMenu.addAction("Delete");
+        BasketMenu.addSeparator();
     }
-  else if (selectedItem == save)
-      SaveBasket();
-  else if (selectedItem == append)
+    BasketMenu.addSeparator();
+    QAction* append = BasketMenu.addAction("Append basket file");
+    QAction* appendTxt = BasketMenu.addAction("Append graph from text file");
+    QAction* appendTxtEr = BasketMenu.addAction("Append graph with error bars from text file");
+    QAction* appendRootHistsAndGraphs = BasketMenu.addAction("Append graphs / histograms from a ROOT file");
+    BasketMenu.addSeparator();
+    QAction* save = BasketMenu.addAction("Save basket to file");
+    BasketMenu.addSeparator();
+    QAction* clear = BasketMenu.addAction("Clear basket");
+
+    //------
+
+    QAction* selectedItem = BasketMenu.exec(ui->lwBasket->mapToGlobal(pos));
+    if (!selectedItem) return; //nothing was selected
+
+    if (selectedItem == switchToThis)
+        switchToBasket(row);
+    else if (selectedItem == clear)
     {
-      AppendBasket();
-      UpdateBasketGUI();
+        QMessageBox msgBox;
+        msgBox.setText("Clear basket cannot be undone!");
+        msgBox.setInformativeText("Clear basket?");
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::Cancel);
+        int ret = msgBox.exec();
+        if (ret == QMessageBox::Yes)
+            ClearBasket();
     }
-  else if (selectedItem == appendRootHistsAndGraphs)
-  {
-      AppendRootHistsOrGraphs();
-      UpdateBasketGUI();
-  }
-  else if (selectedItem == appendTxt)
+    else if (selectedItem == save)
+        SaveBasket();
+    else if (selectedItem == append)
     {
-      qDebug() << "Appending txt file as graph to basket";
-      QString fileName = QFileDialog::getOpenFileName(this, "Append graph from ascii file to Basket", MW->GlobSet.LastOpenDir, "Data files (*.txt *.dat); All files (*.*)");
-      if (fileName.isEmpty()) return;
-      MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-      QString name(QFileInfo(fileName).baseName());
-      QVector<double> x, y;
-      int res = LoadDoubleVectorsFromFile(fileName, &x, &y);
-      if (res == 0)
+        AppendBasket();
+        UpdateBasketGUI();
+    }
+    else if (selectedItem == appendRootHistsAndGraphs)
+    {
+        AppendRootHistsOrGraphs();
+        UpdateBasketGUI();
+    }
+    else if (selectedItem == appendTxt)
+    {
+        //qDebug() << "Appending txt file as graph to basket";
+        QString fileName = QFileDialog::getOpenFileName(this, "Append graph from ascii file to Basket", MW->GlobSet.LastOpenDir, "Data files (*.txt *.dat); All files (*.*)");
+        if (fileName.isEmpty()) return;
+        MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+        QString name(QFileInfo(fileName).baseName());
+        QVector<double> x, y;
+        int res = LoadDoubleVectorsFromFile(fileName, &x, &y);
+        if (res == 0)
         {
-          TGraph* gr = new TGraph(x.size(), x.data(), y.data());
-          gr->SetMarkerStyle(20);
-          QVector<ADrawObject> drawObjects;
-          drawObjects << ADrawObject(gr, "APL");
-          Basket->add(name, drawObjects); //*** simplify
+            TGraph* gr = new TGraph(x.size(), x.data(), y.data());
+            gr->SetMarkerStyle(20);
+            QVector<ADrawObject> drawObjects;
+            drawObjects << ADrawObject(gr, "APL");
+            Basket->add(name, drawObjects); //*** simplify
         }
-      else message("Format error: Should be columns of X Y data", this);
-      UpdateBasketGUI();
+        else message("Format error: Should be columns of X Y data", this);
+        UpdateBasketGUI();
     }
-  else if (selectedItem == appendTxtEr)
+    else if (selectedItem == appendTxtEr)
     {
-      qDebug() << "Appending txt file as graph+errors to basket";
-      QString fileName = QFileDialog::getOpenFileName(this, "Append graph from ascii file to Basket", MW->GlobSet.LastOpenDir, "Data files (*.txt *.dat); All files (*.*)");
-      if (fileName.isEmpty()) return;
-      MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-      QString name(QFileInfo(fileName).baseName());
-      QVector<double> x, y, err;
-      int res = LoadDoubleVectorsFromFile(fileName, &x, &y, &err);
-      if (res == 0)
+        //qDebug() << "Appending txt file as graph+errors to basket";
+        QString fileName = QFileDialog::getOpenFileName(this, "Append graph from ascii file to Basket", MW->GlobSet.LastOpenDir, "Data files (*.txt *.dat); All files (*.*)");
+        if (fileName.isEmpty()) return;
+        MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+        QString name(QFileInfo(fileName).baseName());
+        QVector<double> x, y, err;
+        int res = LoadDoubleVectorsFromFile(fileName, &x, &y, &err);
+        if (res == 0)
         {
-          TGraphErrors* gr = new TGraphErrors(x.size(), x.data(), y.data(), 0, err.data());
-          gr->SetMarkerStyle(20);
-          QVector<ADrawObject> drawObjects;
-          drawObjects << ADrawObject(gr, "APL");
-          Basket->add(name, drawObjects);
+            TGraphErrors* gr = new TGraphErrors(x.size(), x.data(), y.data(), 0, err.data());
+            gr->SetMarkerStyle(20);
+            QVector<ADrawObject> drawObjects;
+            drawObjects << ADrawObject(gr, "APL");
+            Basket->add(name, drawObjects);
         }
-      else message("Format error: Should be columns of data X Y and optional error", this);
-      UpdateBasketGUI();
+        else message("Format error: Should be columns of data X Y and optional error", this);
+        UpdateBasketGUI();
     }
-  else if (selectedItem == del)
+    else if (selectedItem == del)
     {
-      if (row == -1) return; //protection
-      Basket->remove(row);
-      UpdateBasketGUI();
-      //on_pbBasketBackToLast_clicked();
+        Basket->remove(row);
+        UpdateBasketGUI();
     }
-  else if (selectedItem == rename)
+    else if (selectedItem == rename)
     {
-      if (row == -1) return; //protection
-      bool ok;
-      QString text = QInputDialog::getText(this, "Rename basket item",
-                                                 "Enter new name:", QLineEdit::Normal,
-                                                 Basket->getName(row), &ok);
-      if (ok && !text.isEmpty())
-        {
-          Basket->rename(row, text.simplified());
-          //TObject * obj = Basket->getDrawObjects(row)->first().Pointer;
-          if (obj)
-            {
-              TNamed* nn = dynamic_cast<TNamed*>(obj);
-              if (nn) nn->SetTitle(text.simplified().toLocal8Bit().constData());
-            }
-        }
-      UpdateBasketGUI();
+        if (row == -1) return; //protection
+        bool ok;
+        QString text = QInputDialog::getText(this, "Rename basket item",
+                                             "Enter new name:", QLineEdit::Normal,
+                                             Basket->getName(row), &ok);
+        if (ok && !text.isEmpty())
+            Basket->rename(row, text.simplified());
+        UpdateBasketGUI();
     }
-  else if (selectedItem == onTop)
-      Basket_DrawOnTop(row);
-  else if (selectedItem == shift)
-  {
-      if (row == -1) return; //protection
-      if (DrawObjects.isEmpty()) return; //protection
-      //TObject * obj = Basket->getDrawObjects(row)->first().Pointer;
-      if (obj)
-      {
-          QString name = obj->ClassName();
-          QList<QString> impl;
-          impl << "TGraph" << "TGraphErrors"  << "TH1I" << "TH1D" << "TH1F" << "TProfile";
-          if (!impl.contains(name))
-           {
-             message("Not implemented for this object type", this);
-             return;
-           }
-
-          const QPair<double, double> val = runShiftDialog();
-          if (val.first == 1.0 && val.second == 0) return;
-
-          if (name.startsWith("TGraph"))
-          {
-              TGraph* g = dynamic_cast<TGraph*>(obj);
-              if (g)
-              {
-                  const int num = g->GetN();
-                  for (int i=0; i<num; i++)
-                  {
-                      double x, y;
-                      g->GetPoint(i, x, y);
-                      x = x * val.first + val.second;
-                      g->SetPoint(i, x, y);
-                  }
-              }
-          }
-          else
-          {
-              TH1* h = dynamic_cast<TH1*>(obj);
-              if (h)
-              {
-                  const int nbins = h->GetXaxis()->GetNbins();
-                  double* new_bins = new double[nbins+1];
-                  for (int i=0; i <= nbins; i++)
-                      new_bins[i] = ( h-> GetBinLowEdge(i+1) ) * val.first + val.second;
-
-                  h->SetBins(nbins, new_bins);
-                  delete [] new_bins;
-              }
-          }
-
-          RedrawAll();
-      }
-  }
-//  else if (selectedItem == uniMap)
-//  {
-//      TH2D* map = static_cast<TH2D*>(obj);
-//      TH2D* h =   static_cast<TH2D*>(MasterDrawObjects.first().Pointer);
-
-//      *h = *h / *map;
-
-//      DrawObjects = MasterDrawObjects;
-//      CurrentBasketItem = -1;
-//      RedrawAll();
-//      ui->lwBasket->clearSelection();
-//  }
-  else if (selectedItem == projX || selectedItem == projY)
-  {
-      TH2* h = static_cast<TH2*>(obj);
-      TH1D* proj;
-      if (selectedItem == projX)
-          proj = h->ProjectionX();
-      else
-          proj = h->ProjectionY();
-      if (proj) Draw(proj, "hist");
-  }
-  else if (selectedItem == gaussFit)
-  {
-      TH1* h =   static_cast<TH1*>(obj);
-      TF1* f1 = new TF1("f1", "gaus");
-      int status = h->Fit(f1, "+");
-      if (status == 0)
-      {
-          ui->cbShowFitParameters->setChecked(true);
-          ui->cbShowLegend->setChecked(true);
-          RedrawAll();
-      }
-  }
-  else if (selectedItem == splineFit)
-  {
-#ifdef USE_EIGEN
-      TGraph* g =   static_cast<TGraph*>(obj);
-      if (!g)
-      {
-          message("Suppoted only for TGraph-based ROOT objects", this);
-          return;
-      }
-
-      bool ok;
-      int numNodes = QInputDialog::getInt(this, "", "Enter number of nodes:", 6, 2, 1000, 1, &ok);
-      if (ok)
-      {
-          int numPoints = g->GetN();
-          if (numPoints < numNodes)
-          {
-              message("Not enough points in the graph for the selected number of nodes", this);
-              return;
-          }
-
-          QVector<double> x(numPoints), y(numPoints), f(numPoints);
-          for (int i=0; i<numPoints; i++)
-              g->GetPoint(i, x[i], y[i]);
-
-          CurveFit cf(x.first(), x.last(), numNodes, x, y);
-
-          TGraph* fg = new TGraph();
-          for (int i=0; i<numPoints; i++)
-          {
-              const double& xx = x.at(i);
-              fg->SetPoint(i, xx, cf.eval(xx));
-          }
-
-          //Basket[row].DrawObjects.append(ADrawObject(fg, "Csame")); //***
-          RedrawAll();
-      }
-#else
-    message("CurveFitter is supported only if ANTS2 is compliled with Eigen library enabled", this);
-    return;
-#endif
-  }
-  else if (selectedItem == median)
-  {
-      TH1* hist = dynamic_cast<TH1*>(obj);
-      if (!hist)
-      {
-          message("This operation requires TH1 ROOT object", this);
-          return;
-      }
-
-      QDialog d;
-      QVBoxLayout * lMain = new QVBoxLayout(&d);
-
-      QHBoxLayout* l = new QHBoxLayout();
-            QLabel* lab = new QLabel("Span in bins:");
-            l->addWidget(lab);
-            QSpinBox * sbSpan = new QSpinBox();
-            sbSpan->setMinimum(2);
-            sbSpan->setValue(6);
-            l->addWidget(sbSpan);
-      lMain->addLayout(l);
-
-      QPushButton * pb = new QPushButton("Apply median filter");
-      lMain->addWidget(pb);
-
-      QObject::connect(pb, &QPushButton::clicked,
-                       [&d, hist, sbSpan, this]()
-      {
-          int span = sbSpan->value();
-
-          int deltaLeft  = ( span % 2 == 0 ? span / 2 - 1 : span / 2 );
-          int deltaRight = span / 2;
-
-          QVector<double> Filtered;
-          int num = hist->GetNbinsX();
-          for (int iThisBin = 1; iThisBin <= num; iThisBin++)  // 0-> underflow; num+1 -> overflow
-          {
-              QVector<double> content;
-              for (int i = iThisBin - deltaLeft; i <= iThisBin + deltaRight; i++)
-              {
-                  if (i < 1 || i > num) continue;
-                  content << hist->GetBinContent(i);
-              }
-
-              std::sort(content.begin(), content.end());
-              int size = content.size();
-              double val;
-              if (size == 0) val = 0;
-              else val = ( size % 2 == 0 ? (content[size / 2 - 1] + content[size / 2]) / 2 : content[size / 2] );
-
-              Filtered.append(val);
-          }
-
-          TH1 * hc = dynamic_cast<TH1*>(hist->Clone());
-          if (!hc)
-          {
-              qWarning() << "Failed to clone the histogram!";
-              return;
-          }
-          for (int iThisBin = 1; iThisBin <= num; iThisBin++)
-              hc->SetBinContent(iThisBin, Filtered.at(iThisBin-1));
-
-          this->Draw(hc, "hist");
-          d.accept();
-      }
-                       );
-
-      d.exec();
-  }
+    else if (selectedItem == onTop)
+        Basket_DrawOnTop(row);
 }
 
 void GraphWindowClass::ClearBasket()

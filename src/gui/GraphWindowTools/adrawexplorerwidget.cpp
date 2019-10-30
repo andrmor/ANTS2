@@ -80,13 +80,19 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
     QAction * panelA   =    Menu.addAction("Root hist/graph panel");
     Menu.addSeparator();
     QAction * scaleA   =    Menu.addAction("Scale");
+    QAction * shiftA =      Menu.addAction("Shift X scale");
     Menu.addSeparator();
     QAction* integralA =    Menu.addAction("Draw integral");
     QAction* fractionA =    Menu.addAction("Calculate fraction before/after");
     QAction* interpolateA = Menu.addAction("Interpolate");
+    QAction* medianA =      Menu.addAction("Apply median filter");
+    QAction* splineFitA =   Menu.addAction("Fit with B-spline");    //*** implement for TH1 too!
     Menu.addSeparator();
     QAction* titleX =       Menu.addAction("Edit X title");
     QAction* titleY =       Menu.addAction("Edit Y title");
+    Menu.addSeparator();
+    QAction* projX =        Menu.addAction("X projection");
+    QAction* projY =        Menu.addAction("Y projection");
     Menu.addSeparator();
     QAction * delA =        Menu.addAction("Delete");
 
@@ -104,29 +110,20 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
    else if (si == interpolateA) interpolate(obj);
    else if (si == titleX)       editTitle(obj, 0);
    else if (si == titleY)       editTitle(obj, 1);
+   else if (si == shiftA)       shift(obj);
+   else if (si == medianA)      median(obj);
+   else if (si == splineFitA)   splineFit(index);
+   else if (si == projX)        projection(obj, true);
+   else if (si == projY)        projection(obj, false);
 
     /*
-    QAction* scale = 0;
-    QAction* shift = 0;
-    QAction* uniMap = 0;
     QAction* gaussFit = 0;
-
-    QAction* median = 0;
-
-    QAction* splineFit = 0;
-    QAction* projX = 0;
-    QAction* projY = 0;
 
     if (temp)
       {
         //menu triggered at a valid item
         index = ui->lwBasket->row(temp);
         const QString Type = Basket->getType(index);
-        shift = BasketMenu.addAction("Shift X scale");
-        if (!MasterDrawObjects.isEmpty())
-            if ( QString(MasterDrawObjects.first().Pointer->ClassName()) == "TH2D")
-                if (Type == "TH2D")
-                   uniMap = BasketMenu.addAction("Use as unif. correction map");
 
         if (Type.startsWith("TH1"))
         {
@@ -148,68 +145,6 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
         BasketMenu.addSeparator();
 
       }
-    else if (selectedItem == shift)
-    {
-        if (index == -1) return; //protection
-        if (DrawObjects.isEmpty()) return; //protection
-        //TObject * obj = Basket->getDrawObjects(row)->first().Pointer;
-        if (obj)
-        {
-            QString name = obj->ClassName();
-            QList<QString> impl;
-            impl << "TGraph" << "TGraphErrors"  << "TH1I" << "TH1D" << "TH1F" << "TProfile";
-            if (!impl.contains(name))
-             {
-               message("Not implemented for this object type", this);
-               return;
-             }
-
-            const QPair<double, double> val = runShiftDialog();
-            if (val.first == 1.0 && val.second == 0) return;
-
-            if (name.startsWith("TGraph"))
-            {
-                TGraph* g = dynamic_cast<TGraph*>(obj);
-                if (g)
-                {
-                    const int num = g->GetN();
-                    for (int i=0; i<num; i++)
-                    {
-                        double x, y;
-                        g->GetPoint(i, x, y);
-                        x = x * val.first + val.second;
-                        g->SetPoint(i, x, y);
-                    }
-                }
-            }
-            else
-            {
-                TH1* h = dynamic_cast<TH1*>(obj);
-                if (h)
-                {
-                    const int nbins = h->GetXaxis()->GetNbins();
-                    double* new_bins = new double[nbins+1];
-                    for (int i=0; i <= nbins; i++)
-                        new_bins[i] = ( h-> GetBinLowEdge(i+1) ) * val.first + val.second;
-
-                    h->SetBins(nbins, new_bins);
-                    delete [] new_bins;
-                }
-            }
-
-            RedrawAll();
-        }
-    }
-    else if (selectedItem == projX || selectedItem == projY)
-    {
-        TH2* h = static_cast<TH2*>(obj);
-        TH1D* proj;
-        if (selectedItem == projX)
-            proj = h->ProjectionX();
-        else
-            proj = h->ProjectionY();
-        if (proj) Draw(proj, "hist");
-    }
     else if (selectedItem == gaussFit)
     {
         TH1* h =   static_cast<TH1*>(obj);
@@ -222,117 +157,6 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
             RedrawAll();
         }
     }
-    else if (selectedItem == splineFit)
-    {
-  #ifdef USE_EIGEN
-        TGraph* g =   static_cast<TGraph*>(obj);
-        if (!g)
-        {
-            message("Suppoted only for TGraph-based ROOT objects", this);
-            return;
-        }
-
-        bool ok;
-        int numNodes = QInputDialog::getInt(this, "", "Enter number of nodes:", 6, 2, 1000, 1, &ok);
-        if (ok)
-        {
-            int numPoints = g->GetN();
-            if (numPoints < numNodes)
-            {
-                message("Not enough points in the graph for the selected number of nodes", this);
-                return;
-            }
-
-            QVector<double> x(numPoints), y(numPoints), f(numPoints);
-            for (int i=0; i<numPoints; i++)
-                g->GetPoint(i, x[i], y[i]);
-
-            CurveFit cf(x.first(), x.last(), numNodes, x, y);
-
-            TGraph* fg = new TGraph();
-            for (int i=0; i<numPoints; i++)
-            {
-                const double& xx = x.at(i);
-                fg->SetPoint(i, xx, cf.eval(xx));
-            }
-
-            //Basket[row].DrawObjects.append(ADrawObject(fg, "Csame"));
-            RedrawAll();
-        }
-  #else
-      message("CurveFitter is supported only if ANTS2 is compliled with Eigen library enabled", this);
-      return;
-  #endif
-    }
-    else if (selectedItem == median)
-    {
-        TH1* hist = dynamic_cast<TH1*>(obj);
-        if (!hist)
-        {
-            message("This operation requires TH1 ROOT object", this);
-            return;
-        }
-
-        QDialog d;
-        QVBoxLayout * lMain = new QVBoxLayout(&d);
-
-        QHBoxLayout* l = new QHBoxLayout();
-              QLabel* lab = new QLabel("Span in bins:");
-              l->addWidget(lab);
-              QSpinBox * sbSpan = new QSpinBox();
-              sbSpan->setMinimum(2);
-              sbSpan->setValue(6);
-              l->addWidget(sbSpan);
-        lMain->addLayout(l);
-
-        QPushButton * pb = new QPushButton("Apply median filter");
-        lMain->addWidget(pb);
-
-        QObject::connect(pb, &QPushButton::clicked,
-                         [&d, hist, sbSpan, this]()
-        {
-            int span = sbSpan->value();
-
-            int deltaLeft  = ( span % 2 == 0 ? span / 2 - 1 : span / 2 );
-            int deltaRight = span / 2;
-
-            QVector<double> Filtered;
-            int num = hist->GetNbinsX();
-            for (int iThisBin = 1; iThisBin <= num; iThisBin++)  // 0-> underflow; num+1 -> overflow
-            {
-                QVector<double> content;
-                for (int i = iThisBin - deltaLeft; i <= iThisBin + deltaRight; i++)
-                {
-                    if (i < 1 || i > num) continue;
-                    content << hist->GetBinContent(i);
-                }
-
-                std::sort(content.begin(), content.end());
-                int size = content.size();
-                double val;
-                if (size == 0) val = 0;
-                else val = ( size % 2 == 0 ? (content[size / 2 - 1] + content[size / 2]) / 2 : content[size / 2] );
-
-                Filtered.append(val);
-            }
-
-            TH1 * hc = dynamic_cast<TH1*>(hist->Clone());
-            if (!hc)
-            {
-                qWarning() << "Failed to clone the histogram!";
-                return;
-            }
-            for (int iThisBin = 1; iThisBin <= num; iThisBin++)
-                hc->SetBinContent(iThisBin, Filtered.at(iThisBin-1));
-
-            this->Draw(hc, "hist");
-            d.accept();
-        }
-                         );
-
-        d.exec();
-    }
-
     */
 }
 
@@ -508,6 +332,87 @@ void ADrawExplorerWidget::scale(ADrawObject &obj)
         //h->Sumw2();
         h->Scale(sf);
     }
+    emit requestRedraw();
+}
+
+const QPair<double, double> runShiftDialog(QWidget * parent)
+{
+    QDialog* D = new QDialog(parent);
+
+    QDoubleValidator* vali = new QDoubleValidator(D);
+    QVBoxLayout* l = new QVBoxLayout(D);
+    QHBoxLayout* l1 = new QHBoxLayout();
+      QLabel* lab1 = new QLabel("Multiply by: ");
+      QLineEdit* leM = new QLineEdit("1.0");
+      leM->setValidator(vali);
+      l1->addWidget(lab1);
+      l1->addWidget(leM);
+      QLabel* lab2 = new QLabel(" Add: ");
+      QLineEdit* leA = new QLineEdit("0");
+      leA->setValidator(vali);
+      l1->addWidget(lab2);
+      l1->addWidget(leA);
+    l->addLayout(l1);
+      QPushButton* pb = new QPushButton("Shift");
+      QObject::connect(pb, &QPushButton::clicked, D, &QDialog::accept);
+    l->addWidget(pb);
+
+    int ret = D->exec();
+    QPair<double, double> res(1.0, 0);
+    if (ret == QDialog::Accepted)
+      {
+        res.first =  leM->text().toDouble();
+        res.second = leA->text().toDouble();
+      }
+
+    delete D;
+    return res;
+}
+
+void ADrawExplorerWidget::shift(ADrawObject &obj)
+{
+    QString name = obj.Pointer->ClassName();
+    QList<QString> impl;
+    impl << "TGraph" << "TGraphErrors"  << "TH1I" << "TH1D" << "TH1F" << "TProfile";
+    if (!impl.contains(name))
+    {
+        message("Not implemented for this object type", this);
+        return;
+    }
+
+    const QPair<double, double> val = runShiftDialog(this);
+    if (val.first == 1.0 && val.second == 0) return;
+
+    if (name.startsWith("TGraph"))
+    {
+        TGraph* g = dynamic_cast<TGraph*>(obj.Pointer);
+        if (g)
+        {
+            const int num = g->GetN();
+            for (int i=0; i<num; i++)
+            {
+                double x, y;
+                g->GetPoint(i, x, y);
+                x = x * val.first + val.second;
+                g->SetPoint(i, x, y);
+            }
+        }
+    }
+    else
+    {
+        TH1* h = dynamic_cast<TH1*>(obj.Pointer);
+        if (h)
+        {
+            const int nbins = h->GetXaxis()->GetNbins();
+            double* new_bins = new double[nbins+1];
+            for (int i=0; i <= nbins; i++)
+                new_bins[i] = ( h-> GetBinLowEdge(i+1) ) * val.first + val.second;
+
+            h->SetBins(nbins, new_bins);
+            delete [] new_bins;
+        }
+    }
+
     emit requestRedraw();
 }
 
@@ -714,6 +619,160 @@ void ADrawExplorerWidget::interpolate(ADrawObject &obj)
     }
                      );
     d.exec();
+}
+
+#include <QSpinBox>
+void ADrawExplorerWidget::median(ADrawObject &obj)
+{
+    TH1* hist = dynamic_cast<TH1*>(obj.Pointer);
+    if (!hist)
+    {
+        message("This operation requires TH1 ROOT object", this);
+        return;
+    }
+
+    QDialog d;
+    QVBoxLayout * lMain = new QVBoxLayout(&d);
+
+    QHBoxLayout* l = new QHBoxLayout();
+          QLabel* lab = new QLabel("Span in bins:");
+          l->addWidget(lab);
+          QSpinBox * sbSpan = new QSpinBox();
+          sbSpan->setMinimum(2);
+          sbSpan->setValue(6);
+          l->addWidget(sbSpan);
+    lMain->addLayout(l);
+
+    QPushButton * pb = new QPushButton("Apply median filter");
+    lMain->addWidget(pb);
+
+    QObject::connect(pb, &QPushButton::clicked,
+                     [&d, hist, sbSpan, this]()
+    {
+        int span = sbSpan->value();
+
+        int deltaLeft  = ( span % 2 == 0 ? span / 2 - 1 : span / 2 );
+        int deltaRight = span / 2;
+
+        QVector<double> Filtered;
+        int num = hist->GetNbinsX();
+        for (int iThisBin = 1; iThisBin <= num; iThisBin++)  // 0-> underflow; num+1 -> overflow
+        {
+            QVector<double> content;
+            for (int i = iThisBin - deltaLeft; i <= iThisBin + deltaRight; i++)
+            {
+                if (i < 1 || i > num) continue;
+                content << hist->GetBinContent(i);
+            }
+
+            std::sort(content.begin(), content.end());
+            int size = content.size();
+            double val;
+            if (size == 0) val = 0;
+            else val = ( size % 2 == 0 ? (content[size / 2 - 1] + content[size / 2]) / 2 : content[size / 2] );
+
+            Filtered.append(val);
+        }
+
+        TH1 * hc = dynamic_cast<TH1*>(hist->Clone());
+        if (!hc)
+        {
+            qWarning() << "Failed to clone the histogram!";
+            return;
+        }
+        for (int iThisBin = 1; iThisBin <= num; iThisBin++)
+            hc->SetBinContent(iThisBin, Filtered.at(iThisBin-1));
+
+        emit requestMakeCopy();
+        emit requestRegister(hc);
+
+        DrawObjects.clear();
+        DrawObjects << ADrawObject(hc, "hist");
+
+        emit requestRedraw();
+
+        d.accept();
+    }
+                     );
+
+    d.exec();
+}
+
+void ADrawExplorerWidget::projection(ADrawObject &obj, bool bX)
+{
+    TH2* h = dynamic_cast<TH2*>(obj.Pointer);
+    if (!h)
+    {
+        message("This operation requires TH2 ROOT object", this);
+        return;
+    }
+
+    TH1D* proj;
+    if (bX)
+        proj = h->ProjectionX();
+    else
+        proj = h->ProjectionY();
+
+    if (proj)
+    {
+        emit requestMakeCopy();
+        emit requestRegister(proj);
+
+        DrawObjects.clear();
+        DrawObjects << ADrawObject(proj, "hist");
+
+        emit requestRedraw();
+    }
+}
+
+#ifdef USE_EIGEN
+    #include "curvefit.h"
+#endif
+void ADrawExplorerWidget::splineFit(int index)
+{
+#ifdef USE_EIGEN
+    ADrawObject & obj = DrawObjects[index];
+    TGraph* g = dynamic_cast<TGraph*>(obj.Pointer);
+    if (!g)
+    {
+        message("Suppoted only for TGraph-based ROOT objects", this);
+        return;
+    }
+
+    bool ok;
+    int numNodes = QInputDialog::getInt(this, "", "Enter number of nodes:", 6, 2, 1000, 1, &ok);
+    if (ok)
+    {
+        int numPoints = g->GetN();
+        if (numPoints < numNodes)
+        {
+            message("Not enough points in the graph for the selected number of nodes", this);
+            return;
+        }
+
+        QVector<double> x(numPoints), y(numPoints), f(numPoints);
+        for (int i=0; i<numPoints; i++)
+            g->GetPoint(i, x[i], y[i]);
+
+        CurveFit cf(x.first(), x.last(), numNodes, x, y);
+
+        TGraph* fg = new TGraph();
+        for (int i=0; i<numPoints; i++)
+        {
+            const double& xx = x.at(i);
+            fg->SetPoint(i, xx, cf.eval(xx));
+        }
+
+        emit requestMakeCopy();
+        emit requestRegister(fg);
+
+        DrawObjects.insert(index+1, ADrawObject(fg, "Csame"));
+
+        emit requestRedraw();
+    }
+#else
+    message("This option is supported only when ANTS2 is compliled with Eigen library enabled", this);
+#endif
 }
 
 void ADrawExplorerWidget::editTitle(ADrawObject &obj, int X0Y1)

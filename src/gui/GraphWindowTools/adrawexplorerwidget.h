@@ -28,9 +28,13 @@ private:
     void setLine(ADrawObject &obj);
     void showPanel(ADrawObject &obj);
     void scale(ADrawObject &obj);
+    void shift(ADrawObject &obj);
     void drawIntegral(ADrawObject &obj);
     void fraction(ADrawObject &obj);
     void interpolate(ADrawObject &obj);
+    void median(ADrawObject &obj);
+    void projection(ADrawObject &obj, bool bX);
+    void splineFit(int index);
     void editTitle(ADrawObject &obj, int X0Y1);
 
 signals:

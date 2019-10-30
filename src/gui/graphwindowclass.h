@@ -295,7 +295,6 @@ private:
 
     void AppendRootHistsOrGraphs();
     void ShowProjection(QString type);
-    const QPair<double, double> runShiftDialog();
 };
 
 #endif // GRAPHWINDOWCLASS_H

@@ -53,6 +53,8 @@ void ADrawExplorerWidget::updateGui()
         item->setToolTip(0, QString("Name: %1\nClassName: %2\nDraw options: %3").arg(name).arg(className).arg(opt));
         item->setText(1, QString::number(i));
 
+        if (!drObj.bEnabled) item->setForeground(0, QBrush(Qt::red));
+
         addTopLevelItem(item);
     }
 }
@@ -94,12 +96,16 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
     QAction* projX =        Menu.addAction("X projection");
     QAction* projY =        Menu.addAction("Y projection");
     Menu.addSeparator();
+    QAction * enableA =     Menu.addAction("Toggle enabled/disabled");
+        enableA->setChecked(obj.bEnabled);
+        enableA->setEnabled(index != 0);
     QAction * delA =        Menu.addAction("Delete");
 
     QAction* si = Menu.exec(mapToGlobal(pos));
     if (!si) return; //nothing was selected
 
    if      (si == renameA)      rename(obj);
+   else if (si == enableA)      toggleEnable(obj);
    else if (si == delA)         remove(index);
    else if (si == setLineA)     setLine(obj);
    else if (si == setMarkerA)   setMarker(obj);
@@ -173,6 +179,13 @@ void ADrawExplorerWidget::rename(ADrawObject & obj)
     if (tobj) tobj->SetTitle(text.toLatin1().data());
 
     updateGui();
+}
+
+void ADrawExplorerWidget::toggleEnable(ADrawObject & obj)
+{
+    obj.bEnabled = !obj.bEnabled;
+    //updateGui();
+    emit requestRedraw();
 }
 
 void ADrawExplorerWidget::remove(int index)

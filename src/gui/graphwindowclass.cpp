@@ -310,18 +310,10 @@ void GraphWindowClass::AddLine(double x1, double y1, double x2, double y2, int c
 
 void GraphWindowClass::ShowAndFocus()
 {
-  RasterWindow->fCanvas->cd();
-  this->show();
-  this->activateWindow();
-  this->raise();
-
-  if (ColdStart)
-    {
-      //first time this window is shown
-      ColdStart = false;
-      this->resize(width()+1, height());
-      this->resize(width()-1, height());
-    }
+    RasterWindow->fCanvas->cd();
+    this->show();
+    this->activateWindow();
+    this->raise();
 }
 
 void GraphWindowClass::SetAsActiveRootWindow()
@@ -708,6 +700,15 @@ bool GraphWindowClass::event(QEvent *event)
   if (event->type() == QEvent::WindowActivate)
       RasterWindow->UpdateRootCanvas();
 
+  if (event->type() == QEvent::Show)
+      if (ColdStart)
+      {
+          //first time this window is shown
+          ColdStart = false;
+          this->resize(width()+1, height());
+          this->resize(width()-1, height());
+      }
+
   return AGuiWindow::event(event);
 }
 
@@ -936,13 +937,13 @@ void GraphWindowClass::RedrawAll()
         return;
     }
 
-    for (int i=0; i<DrawObjects.size(); i++)
+    for (ADrawObject & obj : DrawObjects)
     {
-        QString opt = DrawObjects[i].Options;
+        QString opt = obj.Options;
         QByteArray ba = opt.toLocal8Bit();
         const char* options = ba.data();
 
-        doDraw(DrawObjects[i].Pointer, options, false);
+        if (obj.bEnabled) doDraw(obj.Pointer, options, false);
     }
 
     qApp->processEvents();
@@ -2365,53 +2366,43 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
             QString err = Basket->appendBasket(fileName);
             if (!err.isEmpty()) message(err, this);
             UpdateBasketGUI();
-            ShowAndFocus();
         }
     }
     else if (selectedItem == appendRootHistsAndGraphs)
     {
-        AppendRootHistsOrGraphs();
-        UpdateBasketGUI();
+        const QString fileName = QFileDialog::getOpenFileName(this, "Append hist and graph objects from ROOT file", MW->GlobSet.LastOpenDir, "Root files (*.root)");
+        if (!fileName.isEmpty())
+        {
+            MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+            Basket->appendRootHistGraphs(fileName);
+            UpdateBasketGUI();
+        }
     }
     else if (selectedItem == appendTxt)
     {
-        //qDebug() << "Appending txt file as graph to basket";
-        QString fileName = QFileDialog::getOpenFileName(this, "Append graph from ascii file to Basket", MW->GlobSet.LastOpenDir, "Data files (*.txt *.dat); All files (*.*)");
+        QString fileName = QFileDialog::getOpenFileName(this, "Append graph from ascii file to basket", MW->GlobSet.LastOpenDir, "Data files (*.txt *.dat); All files (*.*)");
         if (fileName.isEmpty()) return;
         MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-        QString name(QFileInfo(fileName).baseName());
-        QVector<double> x, y;
-        int res = LoadDoubleVectorsFromFile(fileName, &x, &y);
-        if (res == 0)
+        const QString res = Basket->appendTxtAsGraph(fileName);
+        if (!res.isEmpty()) message(res, this);
+        else
         {
-            TGraph* gr = new TGraph(x.size(), x.data(), y.data());
-            gr->SetMarkerStyle(20);
-            QVector<ADrawObject> drawObjects;
-            drawObjects << ADrawObject(gr, "APL");
-            Basket->add(name, drawObjects); //*** simplify
+            UpdateBasketGUI();
+            switchToBasket(Basket->size() - 1);
         }
-        else message("Format error: Should be columns of X Y data", this);
-        UpdateBasketGUI();
     }
     else if (selectedItem == appendTxtEr)
     {
-        //qDebug() << "Appending txt file as graph+errors to basket";
-        QString fileName = QFileDialog::getOpenFileName(this, "Append graph from ascii file to Basket", MW->GlobSet.LastOpenDir, "Data files (*.txt *.dat); All files (*.*)");
+        QString fileName = QFileDialog::getOpenFileName(this, "Append graph with errors from ascii file to basket", MW->GlobSet.LastOpenDir, "Data files (*.txt *.dat); All files (*.*)");
         if (fileName.isEmpty()) return;
         MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-        QString name(QFileInfo(fileName).baseName());
-        QVector<double> x, y, err;
-        int res = LoadDoubleVectorsFromFile(fileName, &x, &y, &err);
-        if (res == 0)
+        const QString res = Basket->appendTxtAsGraphErrors(fileName);
+        if (!res.isEmpty()) message(res, this);
+        else
         {
-            TGraphErrors* gr = new TGraphErrors(x.size(), x.data(), y.data(), 0, err.data());
-            gr->SetMarkerStyle(20);
-            QVector<ADrawObject> drawObjects;
-            drawObjects << ADrawObject(gr, "APL");
-            Basket->add(name, drawObjects);
+            UpdateBasketGUI();
+            switchToBasket(Basket->size() - 1);
         }
-        else message("Format error: Should be columns of data X Y and optional error", this);
-        UpdateBasketGUI();
     }
     else if (selectedItem == del)
     {
@@ -2529,60 +2520,6 @@ void GraphWindowClass::Basket_DrawOnTop(int row)
     }
     setBasketItemUpdateAllowed(false);
     RedrawAll();
-}
-
-void GraphWindowClass::AppendRootHistsOrGraphs()
-{
-    QString fileName = QFileDialog::getOpenFileName(this, "Append objects from ROOT file", MW->GlobSet.LastOpenDir, "Root files (*.root)");
-    if (fileName.isEmpty()) return;
-    MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-
-    QByteArray ba = fileName.toLocal8Bit();
-    const char *c_str = ba.data();
-    TFile* f = new TFile(c_str);
-
-    const int numKeys = f->GetListOfKeys()->GetEntries();
-    qDebug() << "File contains" << numKeys << "TKeys";
-
-    for (int i=0; i<numKeys; i++)
-    {
-        TKey *key = (TKey*)f->GetListOfKeys()->At(i);
-        QString Type = key->GetClassName();
-        QString Name = key->GetName();
-        qDebug() << i << Type << Name;
-
-        if (Type.startsWith("TH") || Type.startsWith("TProfile") || Type.startsWith("TGraph"))
-        {
-            QVector<ADrawObject> drawObjects;
-            TObject * p = nullptr;
-
-            if      (Type=="TH1D") p = (TH1D*)key->ReadObj();
-            else if (Type=="TH1I") p = (TH1I*)key->ReadObj();
-            else if (Type=="TH1F") p = (TH1F*)key->ReadObj();
-            else if (Type=="TH2D") p = (TH2D*)key->ReadObj();
-            else if (Type=="TH2F") p = (TH2F*)key->ReadObj();
-            else if (Type=="TH2I") p = (TH2I*)key->ReadObj();
-
-            else if (Type=="TProfile")   p = (TProfile*)key->ReadObj();
-            else if (Type=="TProfile2D") p = (TProfile2D*)key->ReadObj();
-
-            else if (Type=="TGraph2D")      p = (TGraph2D*)key->ReadObj();
-            else if (Type=="TGraph")        p = (TGraph*)key->ReadObj();
-            else if (Type=="TGraphErrors")  p = (TGraphErrors*)key->ReadObj();
-
-            if (p)
-            {
-                drawObjects << ADrawObject(p, "");
-                Basket->add(Name, drawObjects);
-                //qDebug() << "  appended";
-            }
-            else qWarning() << "Unregistered object type" << Type <<"for load basket from file!";
-        }
-        else qDebug() << "  ignored";
-    }
-
-    f->Close();
-    delete f;
 }
 
 void GraphWindowClass::on_pbSmooth_clicked()

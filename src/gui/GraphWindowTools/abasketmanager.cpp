@@ -315,39 +315,8 @@ const QString ABasketManager::appendBasket(const QString & fileName)
 
                 //TObject *p = 0;
                 TObject * p = key->ReadObj();
-
-                /*
-                if (type=="TH1D") p = (TH1D*)key->ReadObj();
-                if (type=="TH1I") p = (TH1I*)key->ReadObj();
-                if (type=="TH1F") p = (TH1F*)key->ReadObj();
-
-                if (type=="TH2D") p = (TH2D*)key->ReadObj();
-                if (type=="TH2I") p = (TH2I*)key->ReadObj();
-                if (type=="TH2F") p = (TH2F*)key->ReadObj();
-
-                if (type=="TProfile")   p =   (TProfile*)key->ReadObj();
-                if (type=="TProfile2D") p = (TProfile2D*)key->ReadObj();
-
-                if (type=="TEllipse")  p =  (TEllipse*)key->ReadObj();
-                if (type=="TBox")      p =      (TBox*)key->ReadObj();
-                if (type=="TPolyLine") p = (TPolyLine*)key->ReadObj();
-                if (type=="TLine")     p =     (TLine*)key->ReadObj();
-
-                if (type=="TF1") p = (TF1*)key->ReadObj();
-                if (type=="TF2") p = (TF2*)key->ReadObj();
-
-                if (type=="TGraph")       p =       (TGraph*)key->ReadObj();
-                if (type=="TGraph2D")     p =     (TGraph2D*)key->ReadObj();
-                if (type=="TGraphErrors") p = (TGraphErrors*)key->ReadObj();
-
-                if (type=="TLegend")   p =   (TLegend*)key->ReadObj();
-                if (type=="TPaveText") p = (TPaveText*)key->ReadObj();
-                */
-
-                if (p)
-                    drawObjects << ADrawObject(p, fields[iDrawObj+1]);
-                else
-                    qWarning() << "Unregistered object type" << type <<"for load basket from file!";
+                if (p) drawObjects << ADrawObject(p, fields[iDrawObj+1]);
+                else  qWarning() << "Unregistered object type" << type <<"for load basket from file!";
             }
 
             if (!drawObjects.isEmpty())
@@ -367,4 +336,79 @@ const QString ABasketManager::appendBasket(const QString & fileName)
 
     f->Close();
     return "";
+}
+
+#include "afiletools.h"
+const QString ABasketManager::appendTxtAsGraph(const QString & fileName)
+{
+    QVector<double> x, y;
+    QVector<QVector<double> *> V = {&x, &y};
+    const QString res = LoadDoubleVectorsFromFile(fileName, V);
+    if (!res.isEmpty()) return res;
+
+    TGraph* gr = new TGraph(x.size(), x.data(), y.data());
+    gr->SetMarkerStyle(20);
+    ABasketItem item;
+    item.Name = "Graph";
+    item.DrawObjects << ADrawObject(gr, "APL");
+    item.Type = gr->ClassName();
+    Basket << item;
+
+    return "";
+}
+
+const QString ABasketManager::appendTxtAsGraphErrors(const QString &fileName)
+{
+    QVector<double> x, y, err;
+    QVector<QVector<double> *> V = {&x, &y, &err};
+    const QString res = LoadDoubleVectorsFromFile(fileName, V);
+    if (!res.isEmpty()) return res;
+
+    TGraphErrors* gr = new TGraphErrors(x.size(), x.data(), y.data(), 0, err.data());
+    gr->SetMarkerStyle(20);
+    ABasketItem item;
+    item.Name = "GraphErrors";
+    item.DrawObjects << ADrawObject(gr, "APL");
+    item.Type = gr->ClassName();
+    Basket << item;
+
+    return "";
+}
+
+void ABasketManager::appendRootHistGraphs(const QString & fileName)
+{
+    QByteArray ba = fileName.toLocal8Bit();
+    const char *c_str = ba.data();
+    TFile * f = new TFile(c_str);
+
+    const int numKeys = f->GetListOfKeys()->GetEntries();
+    //qDebug() << "File contains" << numKeys << "TKeys";
+
+    for (int i = 0; i < numKeys; i++)
+    {
+        TKey * key = (TKey*)f->GetListOfKeys()->At(i);
+        QString Type = key->GetClassName();
+        QString Name = key->GetName();
+        //qDebug() << i << Type << Name;
+
+        if (Type.startsWith("TH") || Type.startsWith("TProfile") || Type.startsWith("TGraph"))
+        {
+            TObject * p = key->ReadObj();
+            if (p)
+            {
+                ABasketItem item;
+                    item.Name = Name;
+                    item.DrawObjects << ADrawObject(p, "");
+                    item.Type = p->ClassName();
+                    if (item.Name.isEmpty()) item.Name = QString("%1#%2").arg(item.Type).arg(i);
+                Basket << item;
+                //qDebug() << "  appended";
+            }
+            else qWarning() << "Failed to read object of type" << Type << "from file " << fileName;
+        }
+        //else qDebug() << "  ignored";
+    }
+
+    f->Close();
+    delete f;
 }

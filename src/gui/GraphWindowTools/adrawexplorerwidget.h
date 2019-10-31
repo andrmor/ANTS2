@@ -23,6 +23,7 @@ private:
 
 private:
     void rename(ADrawObject &obj);
+    void toggleEnable(ADrawObject &obj);
     void remove(int index);
     void setMarker(ADrawObject &obj);
     void setLine(ADrawObject &obj);

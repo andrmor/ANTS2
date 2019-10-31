@@ -11,9 +11,9 @@ public:
     ~ABasketItem();
 
 public:
-    QString Name;
-    QString Type;
     QVector<ADrawObject> DrawObjects;
+    QString Name;
+    QString Type;  // ***kill?
 
     void clearObjects();
 };

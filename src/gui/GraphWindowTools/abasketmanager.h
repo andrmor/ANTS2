@@ -33,6 +33,10 @@ public:
     void saveAll(const QString & fileName);
     const QString appendBasket(const QString & fileName);
 
+    const QString appendTxtAsGraph(const QString & fileName);
+    const QString appendTxtAsGraphErrors(const QString & fileName);
+    void appendRootHistGraphs(const QString & fileName);
+
 private:
     QVector< ABasketItem > Basket;
 

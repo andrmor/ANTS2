@@ -291,7 +291,6 @@ private:
 
     void Basket_DrawOnTop(int row);
 
-    void AppendRootHistsOrGraphs();
     void ShowProjection(QString type);
     void UpdateGuiControlsForMainObject(const QString &ClassName, const QString & options);
 };

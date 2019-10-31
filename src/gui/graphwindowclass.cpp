@@ -69,7 +69,6 @@
 #include "TLegend.h"
 #include "TVectorD.h"
 #include "TTree.h"
-
 #include "TPave.h"
 #include "TPaveLabel.h"
 #include "TPavesText.h"
@@ -525,115 +524,94 @@ QList<double> GraphWindowClass::extractedPolygon()
 
 void GraphWindowClass::Draw(TObject *obj, const char *options, bool DoUpdate, bool TransferOwnership)
 {
-  if (!RasterWindow) return;
-  if (!RasterWindow->fCanvas) return;
-  GraphWindowClass::ShowAndFocus();
-
-  DrawWithoutFocus(obj, options, DoUpdate, TransferOwnership);
+    ShowAndFocus();
+    DrawWithoutFocus(obj, options, DoUpdate, TransferOwnership);
 }
 
 void GraphWindowClass::DrawWithoutFocus(TObject *obj, const char *options, bool DoUpdate, bool TransferOwnership)
 {
-  if (!RasterWindow) return;
-  if (!RasterWindow->fCanvas) return;
+    ui->lwBasket->clearSelection();
+    setBasketItemUpdateAllowed(false);
+    const QString opt = options;
 
-  ui->lwBasket->clearSelection();
-  setBasketItemUpdateAllowed(false);
-  fFirstTime = true;
-
-  QString opt = options;
-  if (options == QString("")) opt = "";
-
-  QString ClassName = obj->ClassName();
-    //qDebug()<<"      -->class_name:"<<ClassName<<" object name:"<<obj->GetName()<<" options (char):"<<options<<" options (QStr):"<<opt;
-
-  if (opt.contains("same", Qt::CaseInsensitive))
+    if (opt.contains("same", Qt::CaseInsensitive))
+        DrawObjects.append(ADrawObject(obj, options));
+    else
     {
-      // not the new main object!
-//      qDebug()<<"same found!";
-      DrawObjects.append(ADrawObject(obj, options));
+        //this is new main object
+        clearTmpTObjects(); //delete all TObjects previously drawn
+        DrawObjects.clear();
+        DrawObjects.append(ADrawObject(obj, options));
     }
-  else
-    {
-      //This is Draw of the new main object!
-        //delete all TObjects previously drawn
-      clearTmpTObjects();
-        //clear old record
-      DrawObjects.clear();
-        //register as the main
-      DrawObjects.append(ADrawObject(obj, options));
 
-      //3D control
-      bool flag3D = false;
-      if (ClassName.startsWith("TH3") || ClassName.startsWith("TProfile2D") || ClassName.startsWith("TH2") || ClassName.startsWith("TF2") || ClassName.startsWith("TGraph2D"))
+    doDraw(obj, options, DoUpdate);
+
+    if (TransferOwnership) RegisterTObject(obj);
+    onRequestInvalidateCopy();
+    EnforceOverlayOff();
+    UpdateControls();
+}
+
+void GraphWindowClass::UpdateGuiControlsForMainObject(const QString & ClassName, const QString & options)
+{
+    //3D control
+    bool flag3D = false;
+    if (ClassName.startsWith("TH3") || ClassName.startsWith("TProfile2D") || ClassName.startsWith("TH2") || ClassName.startsWith("TF2") || ClassName.startsWith("TGraph2D"))
         flag3D = true;
-      if ((ClassName.startsWith("TH2") || ClassName.startsWith("TProfile2D")) && ( opt.contains("col",Qt::CaseInsensitive) || opt.contains("prof", Qt::CaseInsensitive) || (opt == "")) )
+    if ((ClassName.startsWith("TH2") || ClassName.startsWith("TProfile2D")) && ( options.contains("col",Qt::CaseInsensitive) || options.contains("prof", Qt::CaseInsensitive) || (options.isEmpty())) )
         flag3D = false;
-//      qDebug()<<"3D flag:"<<flag3D;
+    //      qDebug()<<"3D flag:"<<flag3D;
 
-      ui->fZrange->setEnabled(flag3D);
-      RasterWindow->setShowCursorPosition(!flag3D);
-      ui->leOptions->setText(options);
+    ui->fZrange->setEnabled(flag3D);
+    RasterWindow->setShowCursorPosition(!flag3D);
+    ui->leOptions->setText(options);
 
-      if ( ClassName.startsWith("TH1") || ClassName == "TF1" )
-        {
-          //enable toolbox; only the ruler
-          ui->fToolBox->setEnabled(true);
-          ui->fZrange->setEnabled(false);
-          ui->cbRulerTicksLength->setChecked(false);
-        }
-      else if ( ClassName.startsWith("TH2") )
-        {
-          //enable toolbox - both ruler and projection box
-          ui->fToolBox->setEnabled(true);
-          ui->fZrange->setEnabled(true);
-        }
-      else
-        {
-          //hide toolbox
-          ui->fToolBox->setEnabled(false);
-        }
-
-      //export setup
-      if (ClassName == "TGraph" || ClassName.startsWith("TF") || ClassName.startsWith("TH2") )
-        {
-          ui->actionExport_data_as_text->setText("Export data as text");
-          ui->actionExport_data_using_bin_start_positions_TH1->setText("--");
-          ui->actionExport_data_as_text->setEnabled(true);
-          ui->actionExport_data_using_bin_start_positions_TH1->setVisible(false);
-        }
-      else if (ClassName.startsWith("TH1"))
-        {
-          ui->actionExport_data_as_text->setText("Export data as text: bin center positions");
-          ui->actionExport_data_using_bin_start_positions_TH1->setText("Export data as text: bin start positions");
-          ui->actionExport_data_as_text->setEnabled(true);
-          ui->actionExport_data_using_bin_start_positions_TH1->setVisible(true);
-        }
-      else
-        {
-          ui->actionExport_data_as_text->setText("Export data as text");
-          ui->actionExport_data_using_bin_start_positions_TH1->setText("--");
-          ui->actionExport_data_as_text->setEnabled(false);
-          ui->actionExport_data_using_bin_start_positions_TH1->setVisible(false);
-        }
-      //Equalize XY
-      if (ClassName.startsWith("TH2") || ClassName.startsWith("TF2") || ClassName.startsWith("TGraph2D"))
-        ui->actionEqualize_scale_XY->setEnabled(true);
-      else
-        ui->actionEqualize_scale_XY->setEnabled(false);
+    if ( ClassName.startsWith("TH1") || ClassName == "TF1" )
+    {
+        //enable toolbox; only the ruler
+        ui->fToolBox->setEnabled(true);
+        ui->fZrange->setEnabled(false);
+        ui->cbRulerTicksLength->setChecked(false);
+    }
+    else if ( ClassName.startsWith("TH2") )
+    {
+        //enable toolbox - both ruler and projection box
+        ui->fToolBox->setEnabled(true);
+        ui->fZrange->setEnabled(true);
+    }
+    else
+    {
+        //hide toolbox
+        ui->fToolBox->setEnabled(false);
     }
 
-  EnforceOverlayOff(); //maybe drawing was triggered when overlay is on and root window is invisible
-
-  if (TransferOwnership) RegisterTObject(obj);  //should be skipped only for scripts!
-
-  doDraw(obj, options, DoUpdate);
-
-  onRequestInvalidateCopy();
-  fFirstTime = false;
-
-  //update range indication etc
-  GraphWindowClass::UpdateControls();
+    //export setup
+    if (ClassName == "TGraph" || ClassName.startsWith("TF") || ClassName.startsWith("TH2") )
+    {
+        ui->actionExport_data_as_text->setText("Export data as text");
+        ui->actionExport_data_using_bin_start_positions_TH1->setText("--");
+        ui->actionExport_data_as_text->setEnabled(true);
+        ui->actionExport_data_using_bin_start_positions_TH1->setVisible(false);
+    }
+    else if (ClassName.startsWith("TH1"))
+    {
+        ui->actionExport_data_as_text->setText("Export data as text: bin center positions");
+        ui->actionExport_data_using_bin_start_positions_TH1->setText("Export data as text: bin start positions");
+        ui->actionExport_data_as_text->setEnabled(true);
+        ui->actionExport_data_using_bin_start_positions_TH1->setVisible(true);
+    }
+    else
+    {
+        ui->actionExport_data_as_text->setText("Export data as text");
+        ui->actionExport_data_using_bin_start_positions_TH1->setText("--");
+        ui->actionExport_data_as_text->setEnabled(false);
+        ui->actionExport_data_using_bin_start_positions_TH1->setVisible(false);
+    }
+    //Equalize XY
+    if (ClassName.startsWith("TH2") || ClassName.startsWith("TF2") || ClassName.startsWith("TGraph2D"))
+        ui->actionEqualize_scale_XY->setEnabled(true);
+    else
+        ui->actionEqualize_scale_XY->setEnabled(false);
 }
 
 void GraphWindowClass::RegisterTObject(TObject *obj)
@@ -642,7 +620,7 @@ void GraphWindowClass::RegisterTObject(TObject *obj)
     tmpTObjects.append(obj);
 }
 
-void GraphWindowClass::doDraw(TObject *obj, const char *options, bool DoUpdate)
+void GraphWindowClass::doDraw(TObject *obj, const char *opt, bool DoUpdate)
 {
     //qDebug() << "-+-+ DoDraw";
     SetAsActiveRootWindow();
@@ -650,10 +628,13 @@ void GraphWindowClass::doDraw(TObject *obj, const char *options, bool DoUpdate)
     TH1* h = dynamic_cast<TH1*>(obj);
     if (h) h->SetStats(ui->cbShowLegend->isChecked());
 
-    obj->Draw(options);
+    obj->Draw(opt);
     if (DoUpdate) RasterWindow->fCanvas->Update();
 
     Explorer->updateGui();
+    QString options(opt);
+    if (!options.contains("same", Qt::CaseInsensitive))
+        UpdateGuiControlsForMainObject(obj->ClassName(), options);
 }
 
 void GraphWindowClass::startOverlayMode()
@@ -1087,59 +1068,45 @@ void GraphWindowClass::on_pbUnzoom_clicked()
   if (DrawObjects.isEmpty()) return;
 
   TObject* obj = DrawObjects.first().Pointer;
-  QString PlotType = obj->ClassName();
 
-  if (PlotType.startsWith("TH1"))
-    {
-      ((TH1*) obj)->GetXaxis()->UnZoom();
-      ((TH1*) obj)->GetYaxis()->UnZoom();
-    }
-  else if (PlotType == "TProfile")
-    {
-      ((TProfile*) obj)->GetXaxis()->UnZoom();
-      ((TProfile*) obj)->GetYaxis()->UnZoom();
-    }
-  else if (PlotType.startsWith("TH2"))
-    {
-      ((TH2*) obj)->GetXaxis()->UnZoom();
-      ((TH2*) obj)->GetYaxis()->UnZoom();
-    }
-  else if (PlotType == "TProfile2D")
-    {
-      ((TProfile2D*) obj)->GetXaxis()->UnZoom();
-      ((TProfile2D*) obj)->GetYaxis()->UnZoom();
-    }
+  TH1 * h = dynamic_cast<TH1*>(obj);
+  if (h)
+  {
+      h->GetXaxis()->UnZoom();
+      h->GetYaxis()->UnZoom();
+  }
+  else
+  {
+      TGraph * gr = dynamic_cast<TGraph*>(obj);
+      if (gr)
+      {
+          gr->GetXaxis()->UnZoom(); //does not work!
+          gr->GetYaxis()->UnZoom();
+      }
+  }
+
+  /*
   else if (PlotType == "TGraph2D")
     {
-      //((TGraph*) obj)->GetXaxis()->UnZoom();
-      //((TGraph*) obj)->GetYaxis()->UnZoom();
       if (RasterWindow->fCanvas->GetView())
         {
           RasterWindow->fCanvas->GetView()->UnZoom();
           RasterWindow->fCanvas->GetView()->Modify();
         }
     }
-  else if (PlotType == "TGraph" || PlotType == "TMultiGraph" || PlotType == "TF1" || PlotType == "TF2")
-    { //using values stored on first draw of this object
-      //qDebug() << xmin0<<xmax0<<ymin0<<ymax0<<zmin0<<zmax0;
-      ui->ledXfrom->setText( QString::number(xmin0, 'g', 4) );
-      ui->ledXto->setText( QString::number(xmax0, 'g', 4) );
-      ui->ledYfrom->setText( QString::number(ymin0, 'g', 4) );
-      ui->ledYto->setText( QString::number(ymax0, 'g', 4) );
-      ui->ledZfrom->setText( QString::number(zmin0, 'g', 4) );
-      ui->ledZto->setText( QString::number(zmax0, 'g', 4) );
-      Reshape();
-      return;
-    }  
+  else if (PlotType == "TGraph")// || PlotType == "TMultiGraph" || PlotType == "TF1" || PlotType == "TF2")
+  {
+  }
   else
     {
       qDebug() << "Unzoom is not implemented for this object type:"<<PlotType;
       return;
     }
+  */
 
   RasterWindow->fCanvas->Modified();
   RasterWindow->fCanvas->Update();
-  GraphWindowClass::UpdateControls();
+  UpdateControls();
 }
 
 void GraphWindowClass::on_leOptions_editingFinished()
@@ -1353,13 +1320,13 @@ void GraphWindowClass::UpdateControls()
   zmin = ui->ledZfrom->text().toDouble();
   zmax = ui->ledZto->text().toDouble();
 
-  if (fFirstTime)
-  {
-      xmin0 = xmin; xmax0 = xmax;
-      ymin0 = ymin; ymax0 = ymax;
-      zmin0 = zmin; zmax0 = zmax;
-      //qDebug() << "minmax0 XYZ"<<xmin0<<xmax0<<ymin0<<ymax0<<zmin0<<zmax0;
-  }
+//  if (fFirstTime)
+//  {
+//      xmin0 = xmin; xmax0 = xmax;
+//      ymin0 = ymin; ymax0 = ymax;
+//      zmin0 = zmin; zmax0 = zmax;
+//      //qDebug() << "minmax0 XYZ"<<xmin0<<xmax0<<ymin0<<ymax0<<zmin0<<zmax0;
+//  }
 
   TMPignore = false;
   //qDebug()<<"  GraphWindow: updating toolbar done";
@@ -2381,11 +2348,25 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
             ClearBasket();
     }
     else if (selectedItem == save)
-        SaveBasket();
+    {
+        const QString fileName = QFileDialog::getSaveFileName(this, "Save basket to a file", MW->GlobSet.LastOpenDir, "Root files (*.root)");
+        if (!fileName.isEmpty())
+        {
+            MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+            Basket->saveAll(fileName);
+        }
+    }
     else if (selectedItem == append)
     {
-        AppendBasket();
-        UpdateBasketGUI();
+        const QString fileName = QFileDialog::getOpenFileName(this, "Append all from a basket file", MW->GlobSet.LastOpenDir, "Root files (*.root)");
+        if (!fileName.isEmpty())
+        {
+            MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+            QString err = Basket->appendBasket(fileName);
+            if (!err.isEmpty()) message(err, this);
+            UpdateBasketGUI();
+            ShowAndFocus();
+        }
     }
     else if (selectedItem == appendRootHistsAndGraphs)
     {
@@ -2523,184 +2504,6 @@ void GraphWindowClass::on_actionInverted_dark_body_triggered()
 {
   gStyle->SetPalette(56);
   GraphWindowClass::RedrawAll();
-}
-
-void GraphWindowClass::SaveBasket()
-{
-    //qDebug() << "Saving basket";
-    QString fileName = QFileDialog::getSaveFileName(this, "Save Basket objects to file", MW->GlobSet.LastOpenDir, "Root files (*.root)");
-    if (fileName.isEmpty()) return;
-    MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-    if(QFileInfo(fileName).suffix().isEmpty()) fileName += ".root";
-
-    QString str;
-    TFile f(fileName.toLocal8Bit(),"RECREATE");
-
-    //qDebug() << "----Items:"<<Basket.size()<<"----";
-    int index = 0;
-    for (int ib=0; ib<Basket->size(); ib++)
-    {
-        //qDebug() << ib<<">"<<Basket[ib].Name;
-        str += Basket->getName(ib) + '\n';
-
-        QVector<ADrawObject> & DrawObjects = Basket->getDrawObjects(ib);
-        str += QString::number( DrawObjects.size() );
-
-        for (int i = 0; i < DrawObjects.size(); i++)
-        {
-            ADrawObject & Obj = DrawObjects[i];
-            //qDebug() << "   >>"<<i<<Obj.Pointer->GetName()<<Obj.Pointer->ClassName();
-            TString name = "";
-            name += index;
-            TNamed* nameO = dynamic_cast<TNamed*>(Obj.Pointer);
-            if (nameO) nameO->SetName(name);
-
-            TString KeyName = "#";
-            KeyName += index;
-            Obj.Pointer->Write(KeyName);
-
-            str += '|' + Obj.Options;
-
-            index++;
-        }
-
-        str += '\n';
-    }
-
-    TNamed desc;
-    desc.SetTitle(str.toLocal8Bit().data());
-    desc.Write("BasketDescription");
-
-    //qDebug()  << "Descr:" << str;
-
-    f.Close();
-}
-
-void GraphWindowClass::AppendBasket()
-{
-    //qDebug() << "\n\nAppending basket";
-    QString fileName = QFileDialog::getOpenFileName(this, "Append objects from Basket file", MW->GlobSet.LastOpenDir, "Root files (*.root)");
-    if (fileName.isEmpty()) return;
-    MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-
-    QByteArray ba = fileName.toLocal8Bit();
-    const char *c_str = ba.data();
-    TFile* f = new TFile(c_str);
-
-    /*
-    int numKeys = f->GetListOfKeys()->GetEntries();
-    qDebug() << "Number of keys:"<<numKeys;
-    for (int i=0; i<numKeys; i++)
-    {
-        TKey *key = (TKey*)f->GetListOfKeys()->At(i);
-        QString type = key->GetClassName();
-        TString objName = key->GetName();
-        qDebug() << "-->"<< i<<"   "<<objName<<"  "<<type<<key->GetTitle();
-    }
-    */
-
-    TNamed* desc = (TNamed*)f->Get("BasketDescription");
-    if (!desc)
-    {
-        message("This is not a valid ANTS2 basket file!", this);
-        return;
-    }
-
-    QString text = desc->GetTitle();
-    //qDebug() << "Basket description:"<<text;
-    //qDebug() << "Number of keys:"<<f->GetListOfKeys()->GetEntries();
-
-    QStringList sl = text.split('\n',QString::SkipEmptyParts);
-
-    int numLines = sl.size();
-    int basketSize =  numLines/2;
-    //qDebug() << "Description lists" << basketSize << "objects in the basket";
-
-    bool ok = true;
-    int indexFileObject = 0;
-    if (numLines % 2 == 0 ) // should be even number of lines
-    {
-        for (int iDrawObject = 0; iDrawObject < basketSize; iDrawObject++ )
-        {
-            //qDebug() << ">>>>Object #"<< iDrawObject;
-            QString name = sl[iDrawObject*2];
-            bool ok;
-            QStringList fields = sl[iDrawObject*2+1].split('|');
-            if (fields.size()<2)
-            {
-                qWarning()<<"Too short descr line";
-                ok=false;
-                break;
-            }
-
-            const QString sNumber = fields[0];
-
-            int numObj = sNumber.toInt(&ok);
-            if (!ok)
-            {
-                qWarning() << "Num obj convertion error!";
-                ok=false;
-                break;
-            }
-            if (numObj != fields.size()-1)
-            {
-                qWarning()<<"Number of objects vs option strings mismatch:"<<numObj<<fields.size()-1;
-                ok=false;
-                break;
-            }
-
-            //qDebug() << "Name:"<< name << "objects:"<< numObj;
-
-            QVector<ADrawObject> drawObjects;
-            for (int iDrawObj = 0; iDrawObj < numObj; iDrawObj++)
-            {
-                TKey *key = (TKey*)f->GetListOfKeys()->At(indexFileObject++);
-                //key->SetMotherDir(0);
-                QString type = key->GetClassName();
-                //TString objName = key->GetName();
-                //qDebug() << "-->"<< i<<"   "<<objName<<"  "<<type<<"   "<<fields[i+1];
-
-                TObject *p = 0;
-
-                if (type=="TH1D") p = (TH1D*)key->ReadObj();
-                if (type=="TH1I") p = (TH1I*)key->ReadObj();
-                if (type=="TH1F") p = (TH1F*)key->ReadObj();
-
-                if (type=="TH2D") p = (TH2D*)key->ReadObj();
-                if (type=="TH2I") p = (TH2I*)key->ReadObj();
-                if (type=="TH2F") p = (TH2F*)key->ReadObj();
-
-                if (type=="TProfile")   p =   (TProfile*)key->ReadObj();
-                if (type=="TProfile2D") p = (TProfile2D*)key->ReadObj();
-
-                if (type=="TEllipse")  p =  (TEllipse*)key->ReadObj();
-                if (type=="TBox")      p =      (TBox*)key->ReadObj();
-                if (type=="TPolyLine") p = (TPolyLine*)key->ReadObj();
-                if (type=="TLine")     p =     (TLine*)key->ReadObj();
-
-                if (type=="TF1") p = (TF1*)key->ReadObj();
-                if (type=="TF2") p = (TF2*)key->ReadObj();
-
-                if (type=="TGraph")       p =       (TGraph*)key->ReadObj();
-                if (type=="TGraph2D")     p =     (TGraph2D*)key->ReadObj();
-                if (type=="TGraphErrors") p = (TGraphErrors*)key->ReadObj();
-
-                if (type=="TLegend")   p =   (TLegend*)key->ReadObj();
-                if (type=="TPaveText") p = (TPaveText*)key->ReadObj();
-
-                if (p)
-                    drawObjects << ADrawObject(p, fields[iDrawObj+1]);
-                else
-                    qWarning() << "Unregistered object type" << type <<"for load basket from file!";
-            }
-            if (!drawObjects.isEmpty()) Basket->add(name, drawObjects);
-        }
-    }
-    else ok = false;
-
-    if (!ok) message("Corrupted basket file", this);
-
-    f->Close();
 }
 
 void GraphWindowClass::Basket_DrawOnTop(int row)

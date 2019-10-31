@@ -169,3 +169,202 @@ const QStringList ABasketManager::getItemNames() const
         res << item.Name;
     return res;
 }
+
+#include "TFile.h"
+void ABasketManager::saveAll(const QString & fileName)
+{
+    QString str;
+    TFile f(fileName.toLocal8Bit(), "RECREATE");
+
+    //qDebug() << "----Items:"<<Basket.size()<<"----";
+    int index = 0;
+    for (int ib=0; ib<Basket.size(); ib++)
+    {
+        //qDebug() << ib<<">"<<Basket[ib].Name;
+        str += getName(ib) + '\n';
+
+        QVector<ADrawObject> & DrawObjects = getDrawObjects(ib);
+        str += QString::number( DrawObjects.size() );
+
+        for (int i = 0; i < DrawObjects.size(); i++)
+        {
+            ADrawObject & Obj = DrawObjects[i];
+            //qDebug() << "   >>"<<i<<Obj.Pointer->GetName()<<Obj.Pointer->ClassName();
+            TString name = "";
+            name += index;
+            TNamed* nameO = dynamic_cast<TNamed*>(Obj.Pointer);
+            if (nameO) nameO->SetName(name);
+
+            TString KeyName = "#";
+            KeyName += index;
+            Obj.Pointer->Write(KeyName);
+
+            str += '|' + Obj.Options;
+
+            index++;
+        }
+
+        str += '\n';
+    }
+
+    TNamed desc;
+    desc.SetTitle(str.toLocal8Bit().data());
+    desc.Write("BasketDescription");
+
+    //qDebug()  << "Descr:" << str;
+
+    f.Close();
+}
+
+#include "TKey.h"
+#include "TGraph.h"
+#include "TMultiGraph.h"
+#include "TGraphErrors.h"
+#include "TGraph2D.h"
+#include "TH1.h"
+#include "TH2.h"
+#include "TH3.h"
+//#include "TH1D.h"
+#include "TF1.h"
+#include "TF2.h"
+#include "TProfile.h"
+#include "TProfile2D.h"
+#include "TBox.h"
+#include "TEllipse.h"
+#include "TPolyLine.h"
+#include "TLine.h"
+#include "TLegend.h"
+#include "TPavesText.h"
+#include "TNamed.h"
+
+const QString ABasketManager::appendBasket(const QString & fileName)
+{
+    QByteArray ba = fileName.toLocal8Bit();
+    const char *c_str = ba.data();
+    TFile * f = new TFile(c_str);
+
+    // /*
+    int numKeys = f->GetListOfKeys()->GetEntries();
+    qDebug() << "Number of keys:"<<numKeys;
+    for (int i=0; i<numKeys; i++)
+    {
+        TKey *key = (TKey*)f->GetListOfKeys()->At(i);
+        QString type = key->GetClassName();
+        TString objName = key->GetName();
+        qDebug() << "-->"<< i<<"   "<<objName<<"  "<<type<<key->GetTitle();
+    }
+    // */
+
+    TNamed* desc = (TNamed*)f->Get("BasketDescription");
+    if (!desc)
+        return QString("%1: this is not a valid ANTS2 basket file!").arg(fileName);
+
+    QString text = desc->GetTitle();
+    qDebug() << "Basket description:"<<text;
+    qDebug() << "Number of keys:"<<f->GetListOfKeys()->GetEntries();
+
+    QStringList sl = text.split('\n',QString::SkipEmptyParts);
+
+    int numLines = sl.size();
+    int basketSize =  numLines/2;
+    qDebug() << "Description lists" << basketSize << "objects in the basket";
+
+    bool ok = true;
+    int indexFileObject = 0;
+    if (numLines % 2 == 0 ) // should be even number of lines
+    {
+        for (int iDrawObject = 0; iDrawObject < basketSize; iDrawObject++ )
+        {
+            qDebug() << ">>>>Object #"<< iDrawObject;
+            QString name = sl[iDrawObject*2];
+            bool ok;
+            QStringList fields = sl[iDrawObject*2+1].split('|');
+            if (fields.size()<2)
+            {
+                qWarning()<<"Too short descr line";
+                ok=false;
+                break;
+            }
+
+            const QString sNumber = fields[0];
+
+            int numObj = sNumber.toInt(&ok);
+            if (!ok)
+            {
+                qWarning() << "Num obj convertion error!";
+                ok=false;
+                break;
+            }
+            if (numObj != fields.size()-1)
+            {
+                qWarning()<<"Number of objects vs option strings mismatch:"<<numObj<<fields.size()-1;
+                ok=false;
+                break;
+            }
+
+            qDebug() << "Name:"<< name << "objects:"<< numObj;
+
+            QVector<ADrawObject> drawObjects;
+            for (int iDrawObj = 0; iDrawObj < numObj; iDrawObj++)
+            {
+                TKey *key = (TKey*)f->GetListOfKeys()->At(indexFileObject++);
+                //key->SetMotherDir(0);
+                QString type = key->GetClassName();
+                TString objName = key->GetName();
+                qDebug() << "-->"<< iDrawObj <<"   "<<objName<<"  "<<type<<"   "<<fields[iDrawObj+1];
+
+                //TObject *p = 0;
+                TObject * p = key->ReadObj();
+
+                /*
+                if (type=="TH1D") p = (TH1D*)key->ReadObj();
+                if (type=="TH1I") p = (TH1I*)key->ReadObj();
+                if (type=="TH1F") p = (TH1F*)key->ReadObj();
+
+                if (type=="TH2D") p = (TH2D*)key->ReadObj();
+                if (type=="TH2I") p = (TH2I*)key->ReadObj();
+                if (type=="TH2F") p = (TH2F*)key->ReadObj();
+
+                if (type=="TProfile")   p =   (TProfile*)key->ReadObj();
+                if (type=="TProfile2D") p = (TProfile2D*)key->ReadObj();
+
+                if (type=="TEllipse")  p =  (TEllipse*)key->ReadObj();
+                if (type=="TBox")      p =      (TBox*)key->ReadObj();
+                if (type=="TPolyLine") p = (TPolyLine*)key->ReadObj();
+                if (type=="TLine")     p =     (TLine*)key->ReadObj();
+
+                if (type=="TF1") p = (TF1*)key->ReadObj();
+                if (type=="TF2") p = (TF2*)key->ReadObj();
+
+                if (type=="TGraph")       p =       (TGraph*)key->ReadObj();
+                if (type=="TGraph2D")     p =     (TGraph2D*)key->ReadObj();
+                if (type=="TGraphErrors") p = (TGraphErrors*)key->ReadObj();
+
+                if (type=="TLegend")   p =   (TLegend*)key->ReadObj();
+                if (type=="TPaveText") p = (TPaveText*)key->ReadObj();
+                */
+
+                if (p)
+                    drawObjects << ADrawObject(p, fields[iDrawObj+1]);
+                else
+                    qWarning() << "Unregistered object type" << type <<"for load basket from file!";
+            }
+
+            if (!drawObjects.isEmpty())
+            {
+                ABasketItem item;
+                item.Name = name;
+                item.DrawObjects = drawObjects;
+                item.Type = drawObjects.first().Pointer->ClassName();
+                Basket << item;
+                drawObjects.clear();
+            }
+        }
+    }
+    else ok = false;
+
+    if (!ok) return QString("%1: corrupted basket file").arg(fileName);
+
+    f->Close();
+    return "";
+}

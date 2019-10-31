@@ -3,6 +3,7 @@
 
 #include "abasketitem.h"
 
+#include <QString>
 #include <QVector>
 
 class QStringList;
@@ -28,6 +29,9 @@ public:
     const QString getName(int index) const;
     void rename(int index, const QString & newName);
     const QStringList getItemNames() const;
+
+    void saveAll(const QString & fileName);
+    const QString appendBasket(const QString & fileName);
 
 private:
     QVector< ABasketItem > Basket;

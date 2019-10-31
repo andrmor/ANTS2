@@ -270,7 +270,7 @@ private:
     QGraphicsView* gvOver = 0;
     AToolboxScene* scene = 0;
 
-    void doDraw(TObject *obj, const char *options, bool DoUpdate); //actual drawing, does not have window focussing - done to avoid refocussing issues leading to bugs
+    void doDraw(TObject *obj, const char *opt, bool DoUpdate); //actual drawing, does not have window focussing - done to avoid refocussing issues leading to bugs
 
     //flags
     bool TMPignore = false; //temporarily forbid updates - need for bulk update to avoid cross-modification
@@ -289,12 +289,11 @@ private:
     void ExportData(bool fUseBinCenters=true);
     void exportTextForTH2(TH2 *h);
 
-    void SaveBasket();
-    void AppendBasket();
     void Basket_DrawOnTop(int row);
 
     void AppendRootHistsOrGraphs();
     void ShowProjection(QString type);
+    void UpdateGuiControlsForMainObject(const QString &ClassName, const QString & options);
 };
 
 #endif // GRAPHWINDOWCLASS_H

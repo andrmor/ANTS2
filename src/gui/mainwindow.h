@@ -267,7 +267,6 @@ private slots:
     void on_pbUpdateToFixedZ_clicked();
     void on_pbIndPmRemove_clicked();
     void on_pbIndShowType_clicked();
-    void on_pbIndRestoreEffectiveDE_clicked();
     void on_pbIndShowDE_clicked();
     void on_pbIndShowDEbinned_clicked();
     void on_pbAddPM_clicked();

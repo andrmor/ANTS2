@@ -1809,13 +1809,6 @@ in basket</string>
              </property>
             </widget>
            </item>
-           <item>
-            <widget class="QListWidget" name="lwBasket">
-             <property name="contextMenuPolicy">
-              <enum>Qt::CustomContextMenu</enum>
-             </property>
-            </widget>
-           </item>
           </layout>
          </widget>
         </widget>
@@ -1994,7 +1987,6 @@ in basket</string>
   <tabstop>leOptions</tabstop>
   <tabstop>pbAttributes</tabstop>
   <tabstop>pbAddToBasket</tabstop>
-  <tabstop>lwBasket</tabstop>
   <tabstop>ledRulerY</tabstop>
   <tabstop>ledRulerX2</tabstop>
   <tabstop>ledRulerY2</tabstop>

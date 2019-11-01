@@ -1954,13 +1954,6 @@ void MainWindow::on_pbIndShowType_clicked()
   ui->sbPMtype->setValue(ui->cobPMtypeInExplorers->currentIndex());
 }
 
-void MainWindow::on_pbIndRestoreEffectiveDE_clicked()
-{
-    const int ipm = ui->sbIndPMnumber->value();
-    PMs->at(ipm).effectivePDE = -1.0;
-    ReconstructDetector(true);
-}
-
 void MainWindow::on_pbIndShowDE_clicked()
 {  
     const int ipm = ui->sbIndPMnumber->value();

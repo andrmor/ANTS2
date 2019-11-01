@@ -23,6 +23,7 @@ class TObject;
 class TTree;
 class ABasketManager;
 class ADrawExplorerWidget;
+class ABasketListWidget;
 
 namespace Ui {
 class GraphWindowClass;
@@ -142,7 +143,6 @@ protected:
     void mouseMoveEvent(QMouseEvent *event);
     bool event(QEvent *event);
     void closeEvent(QCloseEvent *event);
-    bool eventFilter(QObject *obj, QEvent *event) override; //drag and drop control of the basket
 
 public slots:
     // if the first object (no "same" option) was drawn without update, call this function after the manual update
@@ -165,8 +165,9 @@ public slots:
 
 private slots:
     void Reshape();
-    void on_lwBasket_customContextMenuRequested(const QPoint &pos);
-    void on_lwBasket_itemDoubleClicked(QListWidgetItem *item);
+    void BasketCustomContextMenuRequested(const QPoint &pos);
+    void onBasketItemDoubleClicked(QListWidgetItem *item);
+    void BasketReorderRequested(const QVector<int> & indexes, int toRow);
     void deletePressed();
 
     void onRequestMakeCopy();
@@ -260,6 +261,7 @@ private:
     QVector<ADrawObject> DrawObjects;  //always local objects -> can have a copy from the Basket
     QVector<ADrawObject> PreviousDrawObjects; //last draw made from outside of the graph window
     ABasketManager * Basket = nullptr;
+    ABasketListWidget * lwBasket = nullptr;
     int ActiveBasketItem = -1; //-1 - Basket is off; 0+ -> basket loaded, can be updated
     void switchToBasket(int index);
     void setBasketItemUpdateAllowed(bool flag);

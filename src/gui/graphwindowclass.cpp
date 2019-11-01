@@ -17,6 +17,7 @@
 #include "atoolboxscene.h"
 #include "abasketmanager.h"
 #include "adrawexplorerwidget.h"
+#include "abasketlistwidget.h"
 
 //Qt
 #include <QtGui>
@@ -96,14 +97,12 @@ GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
     connect(Explorer, &ADrawExplorerWidget::requestRegister, this, &GraphWindowClass::onRequestRegister);
     ui->pbBackToLast->setVisible(false);
 
-    //init of basket
-    ui->lwBasket->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    ui->lwBasket->setAcceptDrops(true);
-    ui->lwBasket->setDragEnabled(true);
-    ui->lwBasket->setDragDropMode(QAbstractItemView::InternalMove);
-    ui->lwBasket->setDropIndicatorShown(true);
-    ui->lwBasket->viewport()->installEventFilter(this);
-    //ui->lwBasket->installEventFilter(this);
+    //init of basket widget
+    lwBasket = new ABasketListWidget(this, Basket, ActiveBasketItem);
+    ui->layBasket->addWidget(lwBasket);
+    connect(lwBasket, &ABasketListWidget::customContextMenuRequested, this, &GraphWindowClass::BasketCustomContextMenuRequested);
+    connect(lwBasket, &ABasketListWidget::itemDoubleClicked, this, &GraphWindowClass::onBasketItemDoubleClicked);
+    connect(lwBasket, &ABasketListWidget::requestReorder, this, &GraphWindowClass::BasketReorderRequested);
 
     //input boxes format validators
     QDoubleValidator* dv = new QDoubleValidator(this);
@@ -516,7 +515,7 @@ void GraphWindowClass::Draw(TObject *obj, const char *options, bool DoUpdate, bo
 
 void GraphWindowClass::DrawWithoutFocus(TObject *obj, const char *options, bool DoUpdate, bool TransferOwnership)
 {
-    ui->lwBasket->clearSelection();
+    lwBasket->clearSelection();
     setBasketItemUpdateAllowed(false);
     const QString opt = options;
 
@@ -2260,19 +2259,19 @@ QVector<double> GraphWindowClass::Get2DArray()
 
 void GraphWindowClass::UpdateBasketGUI()
 {
-    ui->lwBasket->clear();
-    ui->lwBasket->addItems(Basket->getItemNames());
+    lwBasket->clear();
+    lwBasket->addItems(Basket->getItemNames());
 }
 
-void GraphWindowClass::on_lwBasket_itemDoubleClicked(QListWidgetItem *)
+void GraphWindowClass::onBasketItemDoubleClicked(QListWidgetItem *)
 {
     //qDebug() << "Row double clicked:"<<ui->lwBasket->currentRow();
-    switchToBasket(ui->lwBasket->currentRow());
+    switchToBasket(lwBasket->currentRow());
 }
 
 void GraphWindowClass::deletePressed()
 {
-    if ((ui->lwBasket->rect().contains(ui->lwBasket->mapFromGlobal(QCursor::pos()))))
+    if ((lwBasket->rect().contains(lwBasket->mapFromGlobal(QCursor::pos()))))
     {
         removeAllSelectedBasketItems();
     }
@@ -2296,9 +2295,9 @@ void GraphWindowClass::onRequestRegister(TObject *tobj)
     tmpTObjects.append(tobj);
 }
 
-void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
+void GraphWindowClass::BasketCustomContextMenuRequested(const QPoint &pos)
 {
-    if (ui->lwBasket->selectedItems().size() > 1)
+    if (lwBasket->selectedItems().size() > 1)
     {
         contextMenuForBasketMultipleSelection(pos);
         return;
@@ -2307,7 +2306,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
     QMenu BasketMenu;
 
     int row = -1;
-    QListWidgetItem* temp = ui->lwBasket->itemAt(pos);
+    QListWidgetItem* temp = lwBasket->itemAt(pos);
 
     QAction* switchToThis = 0;
     QAction* onTop = 0;
@@ -2317,7 +2316,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
     if (temp)
     {
         //menu triggered at a valid item
-        row = ui->lwBasket->row(temp);
+        row = lwBasket->row(temp);
 
         BasketMenu.addSeparator();
         onTop = BasketMenu.addAction("Show on top of the main draw");
@@ -2341,7 +2340,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
 
     //------
 
-    QAction* selectedItem = BasketMenu.exec(ui->lwBasket->mapToGlobal(pos));
+    QAction* selectedItem = BasketMenu.exec(lwBasket->mapToGlobal(pos));
     if (!selectedItem) return; //nothing was selected
 
     if (selectedItem == switchToThis)
@@ -2434,13 +2433,20 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
         Basket_DrawOnTop(row);
 }
 
+void GraphWindowClass::BasketReorderRequested(const QVector<int> &indexes, int toRow)
+{
+    Basket->reorder(indexes, toRow);
+    UpdateBasketGUI();
+    setBasketItemUpdateAllowed(false);
+}
+
 void GraphWindowClass::contextMenuForBasketMultipleSelection(const QPoint & pos)
 {
     QMenu Menu;
     QAction * removeAllSelected = Menu.addAction("Remove all selected");
     removeAllSelected->setShortcut(Qt::Key_Delete);
 
-    QAction* selectedItem = Menu.exec(ui->lwBasket->mapToGlobal(pos));
+    QAction* selectedItem = Menu.exec(lwBasket->mapToGlobal(pos));
     if (!selectedItem) return;
 
     if (selectedItem == removeAllSelected)
@@ -2449,7 +2455,7 @@ void GraphWindowClass::contextMenuForBasketMultipleSelection(const QPoint & pos)
 
 void GraphWindowClass::removeAllSelectedBasketItems()
 {
-    QList<QListWidgetItem*> selection = ui->lwBasket->selectedItems();
+    QList<QListWidgetItem*> selection = lwBasket->selectedItems();
     const int size = selection.size();
     if (size == 0) return;
 
@@ -2460,7 +2466,7 @@ void GraphWindowClass::removeAllSelectedBasketItems()
 
     QVector<int> indexes;
     for (QListWidgetItem * item : selection)
-        indexes << ui->lwBasket->row(item);
+        indexes << lwBasket->row(item);
     std::sort(indexes.begin(), indexes.end());
     for (int i = indexes.size() - 1; i >= 0; i--)
         Basket->remove(indexes.at(i));
@@ -2778,6 +2784,7 @@ void GraphWindowClass::SetStatPanelVisible(bool flag)
     ui->cbShowLegend->setChecked(flag);
 }
 
+/*
 bool GraphWindowClass::eventFilter(QObject * obj, QEvent * event)
 {
     if (event->type() == QEvent::DragEnter)
@@ -2811,6 +2818,7 @@ bool GraphWindowClass::eventFilter(QObject * obj, QEvent * event)
 
     return QMainWindow::eventFilter(obj, event); // pass the event on to the parent class
 }
+*/
 
 void GraphWindowClass::on_pbRemoveText_clicked()
 {
@@ -2992,9 +3000,9 @@ void GraphWindowClass::setBasketItemUpdateAllowed(bool flag)
     if (!flag) ActiveBasketItem = -1;
     ui->pbUpdateInBasket->setEnabled(flag);
 
-    for (int i=0; i < ui->lwBasket->count(); i++)
+    for (int i=0; i < lwBasket->count(); i++)
     {
-        QListWidgetItem * item = ui->lwBasket->item(i);
+        QListWidgetItem * item = lwBasket->item(i);
         if (i == ActiveBasketItem)
         {
             item->setForeground(QBrush(Qt::cyan));
@@ -3006,7 +3014,7 @@ void GraphWindowClass::setBasketItemUpdateAllowed(bool flag)
             item->setBackground(QBrush(Qt::white));
         }
     }
-    ui->lwBasket->clearSelection();
+    lwBasket->clearSelection();
 }
 
 void GraphWindowClass::on_pbUpdateInBasket_clicked()

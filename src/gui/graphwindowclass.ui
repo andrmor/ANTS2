@@ -1784,7 +1784,7 @@ in basket</string>
            </item>
           </layout>
          </widget>
-         <widget class="QWidget" name="">
+         <widget class="QWidget" name="layoutWidget">
           <layout class="QVBoxLayout" name="layBasket">
            <property name="spacing">
             <number>1</number>

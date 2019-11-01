@@ -37,6 +37,8 @@ public:
     const QString appendTxtAsGraphErrors(const QString & fileName);
     void appendRootHistGraphs(const QString & fileName);
 
+    void reorder(const QVector<int> &indexes, int to);
+
 private:
     QVector< ABasketItem > Basket;
 

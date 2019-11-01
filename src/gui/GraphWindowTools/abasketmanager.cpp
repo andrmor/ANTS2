@@ -412,3 +412,24 @@ void ABasketManager::appendRootHistGraphs(const QString & fileName)
     f->Close();
     delete f;
 }
+
+void ABasketManager::reorder(const QVector<int> &indexes, int to)
+{
+    QVector< ABasketItem > ItemsToMove;
+    for (int i = 0; i < indexes.size(); i++)
+    {
+        const int index = indexes.at(i);
+        ItemsToMove << Basket.at(index);
+        Basket[index]._flag = true;       // mark to be deleted
+    }
+
+    for (int i = 0; i < ItemsToMove.size(); i++)
+    {
+        Basket.insert(to, ItemsToMove.at(i));
+        to++;
+    }
+
+    for (int i = Basket.size()-1; i >= 0; i--)
+        if (Basket.at(i)._flag)
+            Basket.remove(i);
+}

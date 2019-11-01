@@ -100,7 +100,7 @@ public:
                       const char* options = "",
                       bool OnlyBuild = false);
 
-    //use this to only construct!
+    //use this to only construct! *** to separate file+namespace
     TGraph* ConstructTGraph(const QVector<double>& x, const QVector<double>& y) const;
     TGraph* ConstructTGraph(const std::vector<float>& x, const std::vector<float>& y) const;
     TGraph* ConstructTGraph(const QVector<double>& x, const QVector<double>& y,
@@ -142,6 +142,7 @@ protected:
     void mouseMoveEvent(QMouseEvent *event);
     bool event(QEvent *event);
     void closeEvent(QCloseEvent *event);
+    bool eventFilter(QObject *obj, QEvent *event) override; //drag and drop control of the basket
 
 public slots:
     // if the first object (no "same" option) was drawn without update, call this function after the manual update
@@ -166,6 +167,7 @@ private slots:
     void Reshape();
     void on_lwBasket_customContextMenuRequested(const QPoint &pos);
     void on_lwBasket_itemDoubleClicked(QListWidgetItem *item);
+    void deletePressed();
 
     void onRequestMakeCopy();
     void onRequestInvalidateCopy();
@@ -293,6 +295,8 @@ private:
 
     void ShowProjection(QString type);
     void UpdateGuiControlsForMainObject(const QString &ClassName, const QString & options);
+    void contextMenuForBasketMultipleSelection(const QPoint &pos);
+    void removeAllSelectedBasketItems();
 };
 
 #endif // GRAPHWINDOWCLASS_H

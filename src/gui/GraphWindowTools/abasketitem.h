@@ -16,6 +16,10 @@ public:
     QString Type;  // ***kill?
 
     void clearObjects();
+
+    //runtime properties
+public:
+    bool _flag = false; // used in rearrangment to flag items to remove
 };
 
 #endif // ABASKETITEM_H

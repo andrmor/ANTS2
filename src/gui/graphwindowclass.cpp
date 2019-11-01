@@ -35,9 +35,10 @@
 #include <QPlainTextEdit>
 #include <QVariant>
 #include <QVariantList>
-#include <QSet>
+#include <QShortcut>
 
 //Root
+#include "TMath.h"
 #include "TGraph.h"
 #include "TGraph2D.h"
 #include "TH1.h"
@@ -46,31 +47,22 @@
 #include "TH1D.h"
 #include "TSystem.h"
 #include "TStyle.h"
-#include "TList.h"
 #include "TF1.h"
 #include "TF2.h"
-#include "TMath.h"
 #include "TView.h"
-#include "TFrame.h"
 #include "TMultiGraph.h"
 #include "TGraphErrors.h"
 #include "TProfile.h"
 #include "TProfile2D.h"
 #include "TStyle.h"
 #include "TEllipse.h"
-#include "TPolyLine.h"
 #include "TLine.h"
 #include "TFile.h"
-#include "TKey.h"
 #include "TAxis.h"
-#include "TView3D.h"
-#include "TViewer3DPad.h"
 #include "TAttLine.h"
 #include "TLegend.h"
 #include "TVectorD.h"
 #include "TTree.h"
-#include "TPave.h"
-#include "TPaveLabel.h"
 #include "TPavesText.h"
 
 GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
@@ -104,52 +96,54 @@ GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
     connect(Explorer, &ADrawExplorerWidget::requestRegister, this, &GraphWindowClass::onRequestRegister);
     ui->pbBackToLast->setVisible(false);
 
-  //input boxes format validators
-  QDoubleValidator* dv = new QDoubleValidator(this);
-  dv->setNotation(QDoubleValidator::ScientificNotation);
-  QList<QLineEdit*> list = this->findChildren<QLineEdit *>();
-  foreach(QLineEdit *w, list) if (w->objectName().startsWith("led")) w->setValidator(dv);
+    //init of basket
+    ui->lwBasket->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    ui->lwBasket->setAcceptDrops(true);
+    ui->lwBasket->setDragEnabled(true);
+    ui->lwBasket->setDragDropMode(QAbstractItemView::InternalMove);
+    ui->lwBasket->setDropIndicatorShown(true);
+    ui->lwBasket->viewport()->installEventFilter(this);
+    //ui->lwBasket->installEventFilter(this);
+
+    //input boxes format validators
+    QDoubleValidator* dv = new QDoubleValidator(this);
+    dv->setNotation(QDoubleValidator::ScientificNotation);
+    QList<QLineEdit*> list = this->findChildren<QLineEdit *>();
+    foreach(QLineEdit *w, list) if (w->objectName().startsWith("led")) w->setValidator(dv);
     //
-  //QIntValidator* iv  = new QIntValidator(this);
-  //iv->setBottom(1);
-  //ui->leiBinsX->setValidator(iv);
+    //QIntValidator* iv  = new QIntValidator(this);
+    //iv->setBottom(1);
+    //ui->leiBinsX->setValidator(iv);
 
-  //starting QWindow
-  RasterWindow = new RasterWindowGraphClass(this);
-  RasterWindow->resize(400, 400);
-  RasterWindow->ForceResize();
+    //starting QWindow
+    RasterWindow = new RasterWindowGraphClass(this);
+    RasterWindow->resize(400, 400);
+    RasterWindow->ForceResize();
+    connect(RasterWindow, &RasterWindowGraphClass::LeftMouseButtonReleased, this, &GraphWindowClass::UpdateControls);
 
-  //creating QWindow container and placing the raster window in it
-//  QWinContainer = QWidget::createWindowContainer(RasterWindow, this);
+    QHBoxLayout* l = dynamic_cast<QHBoxLayout*>(centralWidget()->layout());
+    if (l) l->insertWidget(1, RasterWindow);
+    else message("Unexpected layout!", this);
 
-//  QMargins margins = RasterWindow->frameMargins();
-//  QWinContainer->setGeometry(ui->fUIbox->x() + ui->fUIbox->width() + 3 + margins.left(), 3 + margins.top(), 600, 600);
-//  QWinContainer->setVisible(true);
+    //overlay to show selection box, later scale tool too
+    gvOver = new QGraphicsView(this);
+    gvOver->setFrameStyle(0);
+    gvOver->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    gvOver->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-  QHBoxLayout* l = dynamic_cast<QHBoxLayout*>(centralWidget()->layout());
-  if (l) l->insertWidget(1, RasterWindow);
-  else message("Unexpected layout!", this);
+    scene = new AToolboxScene(this);
+    gvOver->setScene(scene);
+    gvOver->hide();
 
-  //connecting signals-slots
-  connect(RasterWindow, &RasterWindowGraphClass::LeftMouseButtonReleased, this, &GraphWindowClass::UpdateControls);
+    //toolbox graphics scene
+    connect(scene->getSelBox(), &ShapeableRectItem::geometryChanged, this, &GraphWindowClass::selBoxGeometryChanged);
+    connect(scene->getSelBox(), &ShapeableRectItem::requestResetGeometry, this, &GraphWindowClass::selBoxResetGeometry);
+    connect(ui->cbSelBoxShowBG, &QCheckBox::toggled, scene->getSelBox(), &ShapeableRectItem::setShowContrast);
+    connect(scene->getRuler(), &GraphicsRuler::geometryChanged, this, &GraphWindowClass::rulerGeometryChanged);
+    connect(ui->cbRulerTicksLength, &QCheckBox::toggled, scene->getRuler(), &GraphicsRuler::setShowTicks);
+    connect(ui->cbRulerShowBG, &QCheckBox::toggled, scene->getRuler(), &GraphicsRuler::setShowContrast);
 
-  //overlay to show selection box, later scale tool too
-  gvOver = new QGraphicsView(this);
-  gvOver->setFrameStyle(0);
-  gvOver->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-  gvOver->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
-  scene = new AToolboxScene(this);
-  gvOver->setScene(scene);
-  gvOver->hide();
-
-  //toolbox graphics scene
-  connect(scene->getSelBox(), &ShapeableRectItem::geometryChanged, this, &GraphWindowClass::selBoxGeometryChanged);
-  connect(scene->getSelBox(), &ShapeableRectItem::requestResetGeometry, this, &GraphWindowClass::selBoxResetGeometry);
-  connect(ui->cbSelBoxShowBG, &QCheckBox::toggled, scene->getSelBox(), &ShapeableRectItem::setShowContrast);
-  connect(scene->getRuler(), &GraphicsRuler::geometryChanged, this, &GraphWindowClass::rulerGeometryChanged);
-  connect(ui->cbRulerTicksLength, &QCheckBox::toggled, scene->getRuler(), &GraphicsRuler::setShowTicks);
-  connect(ui->cbRulerShowBG, &QCheckBox::toggled, scene->getRuler(), &GraphicsRuler::setShowContrast);
+    new QShortcut(QKeySequence(Qt::Key_Delete), this, SLOT(deletePressed()));
 }
 
 GraphWindowClass::~GraphWindowClass()
@@ -2276,6 +2270,14 @@ void GraphWindowClass::on_lwBasket_itemDoubleClicked(QListWidgetItem *)
     switchToBasket(ui->lwBasket->currentRow());
 }
 
+void GraphWindowClass::deletePressed()
+{
+    if ((ui->lwBasket->rect().contains(ui->lwBasket->mapFromGlobal(QCursor::pos()))))
+    {
+        removeAllSelectedBasketItems();
+    }
+}
+
 void GraphWindowClass::onRequestMakeCopy()
 {
     PreviousDrawObjects = DrawObjects;
@@ -2296,9 +2298,15 @@ void GraphWindowClass::onRequestRegister(TObject *tobj)
 
 void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
 {
-    QMenu BasketMenu;
-    int row = -1;
+    if (ui->lwBasket->selectedItems().size() > 1)
+    {
+        contextMenuForBasketMultipleSelection(pos);
+        return;
+    }
 
+    QMenu BasketMenu;
+
+    int row = -1;
     QListWidgetItem* temp = ui->lwBasket->itemAt(pos);
 
     QAction* switchToThis = 0;
@@ -2318,6 +2326,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
         rename = BasketMenu.addAction("Rename");
         BasketMenu.addSeparator();
         del = BasketMenu.addAction("Delete");
+        del->setShortcut(Qt::Key_Delete);
         BasketMenu.addSeparator();
     }
     BasketMenu.addSeparator();
@@ -2408,6 +2417,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
     {
         Basket->remove(row);
         UpdateBasketGUI();
+        setBasketItemUpdateAllowed(false);
     }
     else if (selectedItem == rename)
     {
@@ -2424,10 +2434,45 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
         Basket_DrawOnTop(row);
 }
 
+void GraphWindowClass::contextMenuForBasketMultipleSelection(const QPoint & pos)
+{
+    QMenu Menu;
+    QAction * removeAllSelected = Menu.addAction("Remove all selected");
+    removeAllSelected->setShortcut(Qt::Key_Delete);
+
+    QAction* selectedItem = Menu.exec(ui->lwBasket->mapToGlobal(pos));
+    if (!selectedItem) return;
+
+    if (selectedItem == removeAllSelected)
+        removeAllSelectedBasketItems();
+}
+
+void GraphWindowClass::removeAllSelectedBasketItems()
+{
+    QList<QListWidgetItem*> selection = ui->lwBasket->selectedItems();
+    const int size = selection.size();
+    if (size == 0) return;
+
+    bool bConfirm = true;
+    if (size > 1)
+         bConfirm = confirm(QString("Remove selected %1 item%2 from the basket?").arg(size).arg(size == 1 ? "" : "s"), this);
+    if (!bConfirm) return;
+
+    QVector<int> indexes;
+    for (QListWidgetItem * item : selection)
+        indexes << ui->lwBasket->row(item);
+    std::sort(indexes.begin(), indexes.end());
+    for (int i = indexes.size() - 1; i >= 0; i--)
+        Basket->remove(indexes.at(i));
+    UpdateBasketGUI();
+    setBasketItemUpdateAllowed(false);
+}
+
 void GraphWindowClass::ClearBasket()
 {
     Basket->clear();
     UpdateBasketGUI();
+    setBasketItemUpdateAllowed(false);
 }
 
 void GraphWindowClass::on_actionSave_image_triggered()
@@ -2731,6 +2776,40 @@ void GraphWindowClass::ShowTextPanel(const QString Text, bool bShowFrame, int Al
 void GraphWindowClass::SetStatPanelVisible(bool flag)
 {
     ui->cbShowLegend->setChecked(flag);
+}
+
+bool GraphWindowClass::eventFilter(QObject * obj, QEvent * event)
+{
+    if (event->type() == QEvent::DragEnter)
+    {
+        qDebug() << "Basket: drag started";
+    }
+    else if (event->type() == QEvent::Drop)
+    {
+        qDebug() << "Basket: Drop detected";
+
+        QList<QListWidgetItem*> sel = ui->lwBasket->selectedItems();
+        QVector<int> indexes;
+        for (QListWidgetItem* item : sel)
+            indexes << ui->lwBasket->row(item);
+        qDebug() << "   Indexes to be moved:" << indexes;
+
+        QDropEvent * dropEvent = static_cast<QDropEvent *>(event);
+        QListWidgetItem * itemTo = ui->lwBasket->itemAt(dropEvent->pos());
+        int rowTo = ui->lwBasket->count();
+        if (itemTo)
+        {
+            rowTo = ui->lwBasket->row(itemTo);
+            //if (ui->lwBasket->   dropIndicatorPosition() == QAbstractItemView::BelowItem) rowTo++;
+        }
+        qDebug() << "   Move to position:" << rowTo << itemTo;
+        Basket->reorder(indexes, rowTo);
+        UpdateBasketGUI();
+        setBasketItemUpdateAllowed(false);
+        return true;
+    }
+
+    return QMainWindow::eventFilter(obj, event); // pass the event on to the parent class
 }
 
 void GraphWindowClass::on_pbRemoveText_clicked()

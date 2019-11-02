@@ -182,7 +182,6 @@ private slots:
     void BasketReorderRequested(const QVector<int> & indexes, int toRow);
     void deletePressed();
 
-
     void on_cbToolBox_toggled(bool checked);
     void on_cobToolBox_currentIndexChanged(int index);
     void on_pbToolboxDragMode_clicked();
@@ -246,17 +245,11 @@ private slots:
     void on_pbAddText_clicked();
     void on_pbRemoveLegend_clicked();
     void on_pbRemoveText_clicked();
-
     void on_ledAngle_customContextMenuRequested(const QPoint &pos);
-
     void on_actionToggle_toolbar_triggered(bool checked);
-
     void on_pbBackToLast_clicked();
-
     void on_actionToggle_Explorer_Basket_toggled(bool arg1);
-
     void on_pbUpdateInBasket_clicked();
-
     void on_actionShow_ROOT_attribute_panel_triggered();
 
 private:
@@ -291,7 +284,7 @@ private:
     bool fFirstTime = false; //signals that "UnZoom" range values (xmin0, etc...) have to be stored
 
     double xmin, xmax, ymin, ymax, zmin, zmax;
-    double xmin0, xmax0, ymin0, ymax0, zmin0, zmax0; //start values - filled on first draw, can be used to reset view with "Unzoom"
+    //double xmin0, xmax0, ymin0, ymax0, zmin0, zmax0; //start values - filled on first draw, can be used to reset view with "Unzoom"
 
     void clearTmpTObjects();   //enable qDebugs inside for diagnostics of cleanup!
     void startOverlayMode();

@@ -472,9 +472,9 @@
         <widget class="QLineEdit" name="leOptions">
          <property name="geometry">
           <rect>
-           <x>10</x>
+           <x>16</x>
            <y>20</y>
-           <width>131</width>
+           <width>129</width>
            <height>20</height>
           </rect>
          </property>
@@ -484,7 +484,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>140</width>
+           <width>147</width>
            <height>16</height>
           </rect>
          </property>

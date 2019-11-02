@@ -2669,29 +2669,6 @@ void GraphWindowClass::on_actionFront_triggered()
   if (v) v->FrontView();
 }
 
-void GraphWindowClass::on_pbAttributes_clicked()
-{
-    TObject * obj = ( DrawObjects.isEmpty() ? nullptr : DrawObjects.first().Pointer );
-
-    if (obj)
-    {
-        TH1* h = dynamic_cast<TH1*>(obj);
-        if (h)
-        {
-            h->DrawPanel();
-            return;
-        }
-        TGraph* g = dynamic_cast<TGraph*>(obj);
-        if (g)
-        {
-            g->DrawPanel();
-            return;
-        }
-    }
-
-    RasterWindow->fCanvas->SetLineAttributes();
-}
-
 void GraphWindowClass::on_actionToggle_toolbar_triggered(bool checked)
 {
     ui->fUIbox->setVisible(checked);
@@ -2926,4 +2903,9 @@ void GraphWindowClass::on_pbUpdateInBasket_clicked()
 {
     if (ActiveBasketItem < 0 || ActiveBasketItem >= Basket->size()) return;
     Basket->update(ActiveBasketItem, DrawObjects);
+}
+
+void GraphWindowClass::on_actionShow_ROOT_attribute_panel_triggered()
+{
+    RasterWindow->fCanvas->SetLineAttributes();
 }

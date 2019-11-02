@@ -236,7 +236,6 @@ private slots:
     void on_actionTop_triggered();
     void on_actionSide_triggered();
     void on_actionFront_triggered();
-    void on_pbAttributes_clicked();
     void on_pbDensityDistribution_clicked();
     void on_actionEqualize_scale_XY_triggered();
     void on_ledRulerDX_editingFinished();
@@ -257,6 +256,8 @@ private slots:
     void on_actionToggle_Explorer_Basket_toggled(bool arg1);
 
     void on_pbUpdateInBasket_clicked();
+
+    void on_actionShow_ROOT_attribute_panel_triggered();
 
 private:
     MainWindow *MW;

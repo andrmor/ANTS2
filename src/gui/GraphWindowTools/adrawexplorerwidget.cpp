@@ -95,6 +95,10 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
     QAction* titleX =       Menu.addAction("Edit X title");
     QAction* titleY =       Menu.addAction("Edit Y title");
     Menu.addSeparator();
+    QAction* saveRootA =    Menu.addAction("Save ROOT object");
+    QAction* saveTxtA =     Menu.addAction("Save as text");
+    QAction* saveEdgeA =    Menu.addAction("Save hist as text using bin edges");
+    Menu.addSeparator();
     QAction* projX =        Menu.addAction("X projection");
     QAction* projY =        Menu.addAction("Y projection");
     Menu.addSeparator();
@@ -124,6 +128,9 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
    else if (si == splineFitA)   splineFit(index);
    else if (si == projX)        projection(obj, true);
    else if (si == projY)        projection(obj, false);
+   else if (si == saveRootA)    saveRoot(obj);
+   else if (si == saveTxtA)     saveAsTxt(obj, true);
+   else if (si == saveEdgeA)    saveAsTxt(obj, false);
 
     /*
     QAction* gaussFit = 0;
@@ -950,5 +957,118 @@ void ADrawExplorerWidget::editTitle(ADrawObject &obj, int X0Y1)
     if (ok) axis->SetTitle(newTitle.toLatin1().data());
 
     GraphWindow.RedrawAll();
+}
+
+#include <QFileDialog>
+#include <QFileInfo>
+void ADrawExplorerWidget::saveRoot(ADrawObject &obj)
+{
+    TObject * tobj = obj.Pointer;
+
+    //exceptions first
+    TF2 * tf2 = dynamic_cast<TF2*>(tobj);
+    if (tf2) tobj = tf2->GetHistogram();
+    else
+    {
+        TF1 * tf1 = dynamic_cast<TF1*>(tobj);
+        if (tf1) tobj = tf1->GetHistogram();
+    }
+
+    QString fileName = QFileDialog::getSaveFileName(this, "Save ROOT object", GraphWindow.getLastOpendDir(), "Root files(*.root)");
+    if (fileName.isEmpty()) return;
+    GraphWindow.getLastOpendDir() = QFileInfo(fileName).absolutePath();
+    if (QFileInfo(fileName).suffix().isEmpty()) fileName += ".root";
+    tobj->SaveAs(fileName.toLatin1().data());
+}
+
+#include "afiletools.h"
+void ADrawExplorerWidget::saveAsTxt(ADrawObject &obj, bool fUseBinCenters)
+{
+    TObject * tobj = obj.Pointer;
+    QString cn = tobj->ClassName();
+
+    if (cn != "TGraph" && cn != "TGraphErrors" && !cn.startsWith("TH1") && !cn.startsWith("TH2") && cn != "TF1" && cn != "TF2")
+    {
+        message("Not implemented for this object type", this);
+        return;
+    }
+
+    //exceptions first
+    TF2 * tf2 = dynamic_cast<TF2*>(tobj);
+    if (tf2) tobj = tf2->GetHistogram();
+    else
+    {
+        TF1 * tf1 = dynamic_cast<TF1*>(tobj);
+        if (tf1) tobj = tf1->GetHistogram();
+    }
+
+    QString fileName = QFileDialog::getSaveFileName(this, "Save as text", GraphWindow.getLastOpendDir(), "Text files(*.txt);;All files (*.*)");
+    if (fileName.isEmpty()) return;
+    GraphWindow.getLastOpendDir() = QFileInfo(fileName).absolutePath();
+    if (QFileInfo(fileName).suffix().isEmpty()) fileName += ".txt";
+
+    TH2 * h2 = dynamic_cast<TH2*>(tobj);
+    if (h2)
+    {
+        QVector<double> x, y, f;
+        for (int iX=1; iX<h2->GetNbinsX()+1; iX++)
+            for (int iY=1; iY<h2->GetNbinsX()+1; iY++)
+            {
+                const double X = (fUseBinCenters ? h2->GetXaxis()->GetBinCenter(iX) : h2->GetXaxis()->GetBinLowEdge(iX));
+                const double Y = (fUseBinCenters ? h2->GetYaxis()->GetBinCenter(iY) : h2->GetYaxis()->GetBinLowEdge(iY));
+                x.append(X);
+                y.append(Y);
+
+                int iBin = h2->GetBin(iX, iY);
+                double F = h2->GetBinContent(iBin);
+                f.append(F);
+            }
+        SaveDoubleVectorsToFile(fileName, &x, &y, &f);
+        return;
+    }
+
+    TH1 * h1 = dynamic_cast<TH1*>(tobj);
+    if (h1)
+    {
+        QVector<double> x,y;
+        if (fUseBinCenters)
+        {
+            for (int i=1; i<h1->GetNbinsX()+1; i++)
+            {
+                x.append(h1->GetBinCenter(i));
+                y.append(h1->GetBinContent(i));
+            }
+        }
+        else
+        { //bin starts
+            for (int i=1; i<h1->GetNbinsX()+2; i++)  // *** should it be +2?
+            {
+                x.append(h1->GetBinLowEdge(i));
+                y.append(h1->GetBinContent(i));
+            }
+        }
+        SaveDoubleVectorsToFile(fileName, &x, &y);
+        return;
+    }
+
+    TGraph* g = dynamic_cast<TGraph*>(tobj);
+    if (g)
+    {
+        QVector<double> x,y;
+        for (int i = 0; i < g->GetN(); i++)
+        {
+            double xx, yy;
+            int ok = g->GetPoint(i, xx, yy);
+            if (ok != -1)
+            {
+                x.append(xx);
+                y.append(yy);
+            }
+        }
+        SaveDoubleVectorsToFile(fileName, &x, &y);
+        return;
+    }
+
+    qWarning() << "Unsupported type:" << cn;
 }
 

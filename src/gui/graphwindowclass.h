@@ -150,6 +150,7 @@ public:
     void MakeCopyOfActiveBasketId();
     void RestoreBasketActiveId();
     void ClearCopyOfActiveBasketId();
+    QString & getLastOpendDir();
 
 protected:
     void mouseMoveEvent(QMouseEvent *event);
@@ -220,8 +221,6 @@ private slots:
     void on_pbXprojection_clicked();
     void on_pbYprojection_clicked();
     void on_actionSave_image_triggered();
-    void on_actionExport_data_as_text_triggered();
-    void on_actionExport_data_using_bin_start_positions_TH1_triggered();
     void on_actionBasic_ROOT_triggered();
     void on_actionDeep_sea_triggered();
     void on_actionGrey_scale_triggered();
@@ -230,7 +229,6 @@ private slots:
     void on_actionRainbow_triggered();
     void on_actionInverted_dark_body_triggered();
     void on_pbToolboxDragMode_2_clicked();
-    void on_actionSave_root_object_triggered();
     void on_pbSmooth_clicked();
     void on_actionTop_triggered();
     void on_actionSide_triggered();
@@ -290,8 +288,6 @@ private:
     void startOverlayMode();
     void endOverlayMode();
     void UpdateBasketGUI();    
-    void ExportData(bool fUseBinCenters=true);
-    void exportTextForTH2(TH2 *h);
 
     void Basket_DrawOnTop(int row);
 

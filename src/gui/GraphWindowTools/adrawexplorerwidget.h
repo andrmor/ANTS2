@@ -42,7 +42,8 @@ private:
     void projection(ADrawObject &obj, bool bX);
     void splineFit(int index);
     void editTitle(ADrawObject &obj, int X0Y1);
-
+    void saveRoot(ADrawObject &obj);
+    void saveAsTxt(ADrawObject &obj, bool fUseBinCenters);
 };
 
 #endif // ADRAWEXPLORERWIDGET_H

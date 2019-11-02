@@ -576,34 +576,6 @@ void GraphWindowClass::UpdateGuiControlsForMainObject(const QString & ClassName,
         //hide toolbox
         ui->fToolBox->setEnabled(false);
     }
-
-    //export setup
-    if (ClassName == "TGraph" || ClassName.startsWith("TF") || ClassName.startsWith("TH2") )
-    {
-        ui->actionExport_data_as_text->setText("Export data as text");
-        ui->actionExport_data_using_bin_start_positions_TH1->setText("--");
-        ui->actionExport_data_as_text->setEnabled(true);
-        ui->actionExport_data_using_bin_start_positions_TH1->setVisible(false);
-    }
-    else if (ClassName.startsWith("TH1"))
-    {
-        ui->actionExport_data_as_text->setText("Export data as text: bin center positions");
-        ui->actionExport_data_using_bin_start_positions_TH1->setText("Export data as text: bin start positions");
-        ui->actionExport_data_as_text->setEnabled(true);
-        ui->actionExport_data_using_bin_start_positions_TH1->setVisible(true);
-    }
-    else
-    {
-        ui->actionExport_data_as_text->setText("Export data as text");
-        ui->actionExport_data_using_bin_start_positions_TH1->setText("--");
-        ui->actionExport_data_as_text->setEnabled(false);
-        ui->actionExport_data_using_bin_start_positions_TH1->setVisible(false);
-    }
-    //Equalize XY
-    if (ClassName.startsWith("TH2") || ClassName.startsWith("TF2") || ClassName.startsWith("TGraph2D"))
-        ui->actionEqualize_scale_XY->setEnabled(true);
-    else
-        ui->actionEqualize_scale_XY->setEnabled(false);
 }
 
 void GraphWindowClass::RegisterTObject(TObject *obj)
@@ -1975,186 +1947,9 @@ void GraphWindowClass::EnforceOverlayOff()
    ui->cbToolBox->setChecked(false); //update is in on_toggle
 }
 
-void GraphWindowClass::ExportData(bool fUseBinCenters)
+QString & GraphWindowClass::getLastOpendDir()
 {
-  TObject *obj = DrawObjects.first().Pointer;
-  if (!obj)
-    {
-      message("Data are no longer available", this);
-      return;
-    }
-
-  QString cn = obj->ClassName();
-  //qDebug() << "Class name:"<<cn;
-  if (cn.startsWith("TH2"))
-    {
-      TObject *obj = DrawObjects.first().Pointer;
-      TH2* h = static_cast<TH2*>(obj);
-      exportTextForTH2(h);
-      return;
-    }
-  else if (cn.startsWith("TF2"))
-    {
-      TObject *obj = DrawObjects.first().Pointer;
-      TF2* f = static_cast<TF2*>(obj);
-      TH2* h = dynamic_cast<TH2*>(f->GetHistogram());
-      exportTextForTH2(h);
-      return;
-    }
-  else if (!cn.startsWith("TH1") && cn!="TGraph" && cn!="TF1")
-    {
-      message("Object type not supported!", this);
-      return;
-    }
-
-  QVector<double> x,y;
-  if (cn.startsWith("TH1") || cn == "TF1")
-    {
-      //1D histogram
-      TH1* h;
-      if (cn.startsWith("TH1")) h = static_cast<TH1*>(obj);
-      else
-        {
-          TF1* f = static_cast<TF1*>(obj);
-          h = f->GetHistogram();
-        }
-
-      //qDebug() << "Histogram name:"<<h->GetName()<<"Entries"<<h->GetEntries()<<"Bins"<<h->GetNbinsX();
-      if (fUseBinCenters)
-        { //bin centers
-          for (int i=1; i<h->GetNbinsX()+1; i++)
-            {
-              x.append(h->GetBinCenter(i));
-              y.append(h->GetBinContent(i));
-            }
-        }
-      else
-        { //bin starts
-          for (int i=1; i<h->GetNbinsX()+2; i++)
-            {
-              x.append(h->GetBinLowEdge(i));
-              y.append(h->GetBinContent(i));
-            }
-        }
-    }
-  else if (cn == "TGraph")
-    {
-      //Graph
-      TGraph* g = static_cast<TGraph*>(obj);
-      //qDebug() << "Graph name:"<<g->GetName()<<"Entries"<<g->GetN();
-      for (int i=0; i<g->GetN(); i++)
-        {
-          double xx, yy;
-          int ok = g->GetPoint(i, xx, yy);
-          if (ok != -1)
-            {
-              x.append(xx);
-              y.append(yy);
-            }
-        }
-    }
-  else
-    {
-      qWarning() << "Unsupported type:"<<cn;
-      return;
-    }
-
-  QFileDialog *fileDialog = new QFileDialog;
-  fileDialog->setDefaultSuffix("txt");
-  QString fileName = fileDialog->getSaveFileName(this, "Export data to ascii file", MW->GlobSet.LastOpenDir+"/"+obj->GetName(), "Text files(*.txt)");
-  if (fileName.isEmpty()) return;
-  MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-  if (QFileInfo(fileName).suffix().isEmpty()) fileName += ".txt";
-  SaveDoubleVectorsToFile(fileName, &x, &y);
-}
-
-void GraphWindowClass::exportTextForTH2(TH2* h)
-{
-  if (!h) return;
-  qDebug() << "Data size:"<< h->GetNbinsX() << "by" << h->GetNbinsY();
-
-  QVector<double> x, y, f;
-  for (int iX=1; iX<h->GetNbinsX()+1; iX++)
-    for (int iY=1; iY<h->GetNbinsX()+1; iY++)
-    {
-      double X = h->GetXaxis()->GetBinCenter(iX);
-      double Y = h->GetYaxis()->GetBinCenter(iY);
-      x.append(X);
-      y.append(Y);
-
-      int iBin = h->GetBin(iX, iY);
-      double F = h->GetBinContent(iBin);
-      f.append(F);
-      //qDebug() << iX<<iY<<iBin << "coords:" << X << Y << "val:" << F;
-    }
-
-  QFileDialog *fileDialog = new QFileDialog;
-  fileDialog->setDefaultSuffix("txt");
-  QString fileName = fileDialog->getSaveFileName(this, "Export data to ascii file", MW->GlobSet.LastOpenDir+"/"+h->GetTitle(), "Text files(*.txt)");
-  if (fileName.isEmpty()) return;
-  MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-  if (QFileInfo(fileName).suffix().isEmpty()) fileName += ".txt";
-  SaveDoubleVectorsToFile(fileName, &x, &y, &f);
-}
-
-void GraphWindowClass::on_actionSave_root_object_triggered()
-{
-  TObject *obj = DrawObjects.first().Pointer;
-  QString cn = obj->ClassName();
-  if (!obj)
-    {
-      message("Object no longer exists!", this);
-      return;
-    }
-
-  //qDebug() << "Class name:"<<cn;
-  if (cn.startsWith("TH1") || cn.startsWith("TF1"))
-    {
-      TH1* hist = 0;
-
-      if (cn.startsWith("TH1")) hist = static_cast<TH1*>(obj);
-      else
-        {
-          TF1* fun = static_cast<TF1*>(obj);
-          hist = fun->GetHistogram();
-        }
-
-      if (hist)
-        {
-          QFileDialog *fileDialog = new QFileDialog;
-          fileDialog->setDefaultSuffix("root");
-          QString fileName = fileDialog->getSaveFileName(this, "Save TH1 histogram", MW->GlobSet.LastOpenDir, "Root files(*.root)");
-          if (fileName.isEmpty()) return;
-          hist->SaveAs(fileName.toLatin1().data());
-        }
-      else message("Histogram does not exist!",this);
-    }
-  else if (cn.startsWith("TH2") || cn.startsWith("TF2"))
-    {
-      TH2* hist = 0;
-
-      if (cn.startsWith("TH2")) hist = static_cast<TH2*>(obj);
-      else
-        {
-          TF2* fun = static_cast<TF2*>(obj);
-          hist = dynamic_cast<TH2*>(fun->GetHistogram());
-        }
-
-      if (hist)
-        {
-          QFileDialog *fileDialog = new QFileDialog;
-          fileDialog->setDefaultSuffix("root");
-          QString fileName = fileDialog->getSaveFileName(this, "Save TH2 histogram", MW->GlobSet.LastOpenDir, "Root files(*.root)");
-          if (fileName.isEmpty()) return;
-          hist->SaveAs(fileName.toLatin1().data());
-        }
-      else message("Histogram does not exist!",this);
-    }
-  else
-    {
-      message("Object type not supported!", this);
-      return;
-    }
+    return MW->GlobSet.LastOpenDir;
 }
 
 void GraphWindowClass::on_pbAddToBasket_clicked()
@@ -2535,16 +2330,6 @@ void GraphWindowClass::on_actionSave_image_triggered()
   if (MW->GlobSet.fOpenImageExternalEditor) QDesktopServices::openUrl(QUrl("file:"+fileName, QUrl::TolerantMode));
 }
 
-void GraphWindowClass::on_actionExport_data_as_text_triggered()
-{
-   ExportData(true);
-}
-
-void GraphWindowClass::on_actionExport_data_using_bin_start_positions_TH1_triggered()
-{
-   ExportData(false);
-}
-
 void GraphWindowClass::on_actionBasic_ROOT_triggered()
 {
   gStyle->SetPalette(1);
@@ -2676,38 +2461,47 @@ void GraphWindowClass::on_actionToggle_toolbar_triggered(bool checked)
 
 void GraphWindowClass::on_actionEqualize_scale_XY_triggered()
 {
-   MW->WindowNavigator->BusyOn();
-   //qDebug() << "Before-> X and Y size per pixel:" << RasterWindow->getXperPixel() << RasterWindow->getYperPixel();
+    if (DrawObjects.isEmpty()) return;
+    QString ClassName = DrawObjects.first().Pointer->ClassName();
+    //Equalize XY
+    if (!ClassName.startsWith("TH2") && !ClassName.startsWith("TF2") && !ClassName.startsWith("TGraph2D"))
+    {
+        message("Supported only for 2D view");
+        return;
+    }
 
-   double XperP = fabs(RasterWindow->getXperPixel());
-   double YperP = fabs(RasterWindow->getYperPixel());
-   double CanvasWidth = RasterWindow->width();
-   double NewCanvasWidth = CanvasWidth * XperP/YperP;
-   double delta = NewCanvasWidth - CanvasWidth;
-   resize(width()+delta, height());
+    MW->WindowNavigator->BusyOn();
+    //qDebug() << "Before-> X and Y size per pixel:" << RasterWindow->getXperPixel() << RasterWindow->getYperPixel();
 
-   //qDebug() << "After guess-> X and Y size per pixel:" << RasterWindow->getXperPixel() << RasterWindow->getYperPixel();
-   XperP = fabs(RasterWindow->getXperPixel());
-   YperP = fabs(RasterWindow->getYperPixel());
-   if (XperP != YperP)
-     {
-       bool XlargerY = (XperP > YperP);
-       do
-         {
-           if (XperP<YperP) this->resize(this->width()-1, this->height());
-           else this->resize(this->width()+1, this->height());
-           UpdateRootCanvas();
-           qApp->processEvents();
+    double XperP = fabs(RasterWindow->getXperPixel());
+    double YperP = fabs(RasterWindow->getYperPixel());
+    double CanvasWidth = RasterWindow->width();
+    double NewCanvasWidth = CanvasWidth * XperP/YperP;
+    double delta = NewCanvasWidth - CanvasWidth;
+    resize(width()+delta, height());
 
-           XperP = fabs(RasterWindow->getXperPixel());
-           YperP = fabs(RasterWindow->getYperPixel());
-           if (XperP == YperP) break;
-           if ( (XperP > YperP) != XlargerY ) break;
-         }
-       while ( isVisible() && width()>200 && width()<2000);
-       //qDebug() << "After fine tune-> X and Y size per pixel:" << RasterWindow->getXperPixel() << RasterWindow->getYperPixel();
-     }
-   MW->WindowNavigator->BusyOff();   
+    //qDebug() << "After guess-> X and Y size per pixel:" << RasterWindow->getXperPixel() << RasterWindow->getYperPixel();
+    XperP = fabs(RasterWindow->getXperPixel());
+    YperP = fabs(RasterWindow->getYperPixel());
+    if (XperP != YperP)
+    {
+        bool XlargerY = (XperP > YperP);
+        do
+        {
+            if (XperP<YperP) this->resize(this->width()-1, this->height());
+            else this->resize(this->width()+1, this->height());
+            UpdateRootCanvas();
+            qApp->processEvents();
+
+            XperP = fabs(RasterWindow->getXperPixel());
+            YperP = fabs(RasterWindow->getYperPixel());
+            if (XperP == YperP) break;
+            if ( (XperP > YperP) != XlargerY ) break;
+        }
+        while ( isVisible() && width()>200 && width()<2000);
+        //qDebug() << "After fine tune-> X and Y size per pixel:" << RasterWindow->getXperPixel() << RasterWindow->getYperPixel();
+    }
+    MW->WindowNavigator->BusyOff();
 }
 
 void GraphWindowClass::on_ledRulerDX_editingFinished()

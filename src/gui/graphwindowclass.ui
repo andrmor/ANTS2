@@ -1758,11 +1758,6 @@ in basket</string>
      <string>File</string>
     </property>
     <addaction name="actionSave_image"/>
-    <addaction name="separator"/>
-    <addaction name="actionExport_data_as_text"/>
-    <addaction name="actionExport_data_using_bin_start_positions_TH1"/>
-    <addaction name="separator"/>
-    <addaction name="actionSave_root_object"/>
    </widget>
    <widget class="QMenu" name="menuPalette">
     <property name="title">
@@ -1803,16 +1798,6 @@ in basket</string>
     <string>Save image</string>
    </property>
   </action>
-  <action name="actionExport_data_as_text">
-   <property name="text">
-    <string>Export data as text</string>
-   </property>
-  </action>
-  <action name="actionExport_data_using_bin_start_positions_TH1">
-   <property name="text">
-    <string>Export data as text using bin start positions</string>
-   </property>
-  </action>
   <action name="actionBasic_ROOT">
    <property name="text">
     <string>Basic ROOT</string>
@@ -1846,11 +1831,6 @@ in basket</string>
   <action name="actionInverted_dark_body">
    <property name="text">
     <string>Inverted dark body</string>
-   </property>
-  </action>
-  <action name="actionSave_root_object">
-   <property name="text">
-    <string>Save root object</string>
    </property>
   </action>
   <action name="actionTop">

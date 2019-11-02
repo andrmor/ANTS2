@@ -415,9 +415,13 @@ void ADrawExplorerWidget::shift(ADrawObject &obj)
     const QPair<double, double> val = runShiftDialog(this);
     if (val.first == 1.0 && val.second == 0) return;
 
+    GraphWindow.MakeCopyOfDrawObjects();
+    TObject * tobj = obj.Pointer->Clone();
+    GraphWindow.RegisterTObject(tobj);
+
     if (name.startsWith("TGraph"))
     {
-        TGraph* g = dynamic_cast<TGraph*>(obj.Pointer);
+        TGraph* g = dynamic_cast<TGraph*>(tobj);
         if (g)
         {
             const int num = g->GetN();
@@ -432,18 +436,18 @@ void ADrawExplorerWidget::shift(ADrawObject &obj)
     }
     else
     {
-        TH1* h = dynamic_cast<TH1*>(obj.Pointer);
+        TH1* h = dynamic_cast<TH1*>(tobj);
         if (h)
         {
             const int nbins = h->GetXaxis()->GetNbins();
             double* new_bins = new double[nbins+1];
             for (int i=0; i <= nbins; i++)
                 new_bins[i] = ( h-> GetBinLowEdge(i+1) ) * val.first + val.second;
-
             h->SetBins(nbins, new_bins);
             delete [] new_bins;
         }
     }
+    obj.Pointer = tobj;
 
     GraphWindow.RedrawAll();
 }

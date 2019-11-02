@@ -1,7 +1,8 @@
 #include "adrawexplorerwidget.h"
 #include "arootmarkerconfigurator.h"
 #include "arootlineconfigurator.h"
-#include "amessage.h" //need?
+#include "amessage.h"
+#include "graphwindowclass.h"
 
 #include <QTreeWidgetItem>
 #include <QMenu>
@@ -18,8 +19,8 @@
 #include "TGraph.h"
 #include "TGraphErrors.h"
 
-ADrawExplorerWidget::ADrawExplorerWidget(QVector<ADrawObject> & DrawObjects) :
-    DrawObjects(DrawObjects)
+ADrawExplorerWidget::ADrawExplorerWidget(GraphWindowClass & GraphWindow, QVector<ADrawObject> & DrawObjects) :
+    GraphWindow(GraphWindow), DrawObjects(DrawObjects)
 {
     setHeaderHidden(true);
     setContextMenuPolicy(Qt::CustomContextMenu);
@@ -86,6 +87,7 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
     Menu.addSeparator();
     QAction* integralA =    Menu.addAction("Draw integral");
     QAction* fractionA =    Menu.addAction("Calculate fraction before/after");
+    QAction* fwhmA =        Menu.addAction("Estimate FWHM");
     QAction* interpolateA = Menu.addAction("Interpolate");
     QAction* medianA =      Menu.addAction("Apply median filter");
     QAction* splineFitA =   Menu.addAction("Fit with B-spline");    //*** implement for TH1 too!
@@ -113,6 +115,7 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
    else if (si == scaleA)       scale(obj);
    else if (si == integralA)    drawIntegral(obj);
    else if (si == fractionA)    fraction(obj);
+   else if (si == fwhmA)        fwhm(obj);
    else if (si == interpolateA) interpolate(obj);
    else if (si == titleX)       editTitle(obj, 0);
    else if (si == titleY)       editTitle(obj, 1);
@@ -166,6 +169,12 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
     */
 }
 
+void ADrawExplorerWidget::addToDrawObjectsAndRegister(TObject * pointer, const QString & options)
+{
+    DrawObjects << ADrawObject(pointer, options);
+    GraphWindow.RegisterTObject(pointer);
+}
+
 void ADrawExplorerWidget::rename(ADrawObject & obj)
 {
     bool ok;
@@ -184,8 +193,7 @@ void ADrawExplorerWidget::rename(ADrawObject & obj)
 void ADrawExplorerWidget::toggleEnable(ADrawObject & obj)
 {
     obj.bEnabled = !obj.bEnabled;
-    //updateGui();
-    emit requestRedraw();
+    GraphWindow.RedrawAll();
 }
 
 void ADrawExplorerWidget::remove(int index)
@@ -198,8 +206,7 @@ void ADrawExplorerWidget::remove(int index)
         DrawObjects[0].Options.remove("same", Qt::CaseInsensitive);
     }
 
-    updateGui();
-    emit requestRedraw();
+    GraphWindow.RedrawAll();
 }
 
 void ADrawExplorerWidget::setMarker(ADrawObject & obj)
@@ -218,7 +225,7 @@ void ADrawExplorerWidget::setMarker(ADrawObject & obj)
            la->SetMarkerSize(siz);
            la->SetMarkerStyle(style);
            la->Modify();
-           emit requestRedraw();
+           GraphWindow.RedrawAll();
        }
     }
 }
@@ -239,7 +246,7 @@ void ADrawExplorerWidget::setLine(ADrawObject & obj)
            la->SetLineWidth(wid);
            la->SetLineStyle(style);
            la->Modify();
-           emit requestRedraw();
+           GraphWindow.RedrawAll();
        }
     }
 }
@@ -318,34 +325,46 @@ void ADrawExplorerWidget::scale(ADrawObject &obj)
     double sf = runScaleDialog(this);
     if (sf == 1.0) return;
 
-    TObject * tobj = obj.Pointer;
+    //qDebug() << "----On start, this:"<< GraphWindow.DrawObjects.first().Pointer;
+    GraphWindow.MakeCopyOfDrawObjects();
+    //qDebug() << "----Copy:"<< GraphWindow.PreviousDrawObjects.first().Pointer;
+    TObject * tobj = obj.Pointer->Clone();
+    //qDebug() << "+++++++clone:" << tobj;
+    GraphWindow.RegisterTObject(tobj);
+
     if (name == "TGraph")
     {
-        TGraph* gr = dynamic_cast<TGraph*>(tobj);
+        TGraph* gr = static_cast<TGraph*>(tobj);
         TF2 f("aaa", "[0]*y",0,1);
         f.SetParameter(0, sf);
         gr->Apply(&f);
     }
-    if (name == "TGraphErrors")
+    else if (name == "TGraphErrors")
     {
-        TGraphErrors* gr = dynamic_cast<TGraphErrors*>(tobj);
+        TGraphErrors* gr = static_cast<TGraphErrors*>(tobj);
         TF2 f("aaa", "[0]*y",0,1);
         f.SetParameter(0, sf);
         gr->Apply(&f);
     }
-    if (name.startsWith("TH1"))
+    else if (name.startsWith("TH1"))
     {
-        TH1* h = dynamic_cast<TH1*>(tobj);
+        TH1* h = static_cast<TH1*>(tobj);
+        //h->Sumw2();
+        h->Scale(sf);
+        if (obj.Options.isEmpty()) obj.Options = "hist";
+    }
+    else if (name.startsWith("TH2"))
+    {
+        TH2* h = static_cast<TH2*>(tobj);
         //h->Sumw2();
         h->Scale(sf);
     }
-    if (name.startsWith("TH2"))
-    {
-        TH2* h = dynamic_cast<TH2*>(tobj);
-        //h->Sumw2();
-        h->Scale(sf);
-    }
-    emit requestRedraw();
+    obj.Pointer = tobj;
+
+    //qDebug() << "This:"<< GraphWindow.DrawObjects.first().Pointer;
+    //qDebug() << "Copy:"<< GraphWindow.PreviousDrawObjects.first().Pointer;
+
+    GraphWindow.RedrawAll();
 }
 
 const QPair<double, double> runShiftDialog(QWidget * parent)
@@ -426,7 +445,7 @@ void ADrawExplorerWidget::shift(ADrawObject &obj)
         }
     }
 
-    emit requestRedraw();
+    GraphWindow.RedrawAll();
 }
 
 void ADrawExplorerWidget::drawIntegral(ADrawObject &obj)
@@ -457,13 +476,12 @@ void ADrawExplorerWidget::drawIntegral(ADrawObject &obj)
         hi->SetBinContent(i, prev);
       }
 
-    emit requestMakeCopy();
-    emit requestRegister(hi);
+    GraphWindow.MakeCopyOfDrawObjects();
 
     DrawObjects.clear();
-    DrawObjects << ADrawObject(hi, "hist");
+    addToDrawObjectsAndRegister(hi, "hist");
 
-    emit requestRedraw();
+    GraphWindow.RedrawAll();
 }
 
 void ADrawExplorerWidget::fraction(ADrawObject &obj)
@@ -569,6 +587,104 @@ void ADrawExplorerWidget::fraction(ADrawObject &obj)
     delete cum;
 }
 
+Double_t GauseWithBase(Double_t *x, Double_t *par)
+{
+   return par[0] * exp( par[1] * (x[0]+par[2])*(x[0]+par[2]) ) + par[3]*x[0] + par[4];   // [0]*exp([1]*(x+[2])^2) + [3]*x + [4]
+}
+
+#include "TPaveText.h"
+void ADrawExplorerWidget::fwhm(ADrawObject &obj)
+{
+    TH1* h = dynamic_cast<TH1*>(obj.Pointer);
+    if (!h) return;
+
+    const QString cn = h->ClassName();
+    if ( !cn.startsWith("TH1") && cn!="TProfile")
+    {
+        message("Can be used only with 1D histograms!", this);
+        return;
+    }
+
+    GraphWindow.TriggerGlobalBusy(true);
+
+    GraphWindow.Extract2DLine();
+    if (!GraphWindow.Extraction()) return; //cancel
+
+    double startX = GraphWindow.extracted2DLineXstart();
+    double stopX = GraphWindow.extracted2DLineXstop();
+    if (startX > stopX) std::swap(startX, stopX);
+    //qDebug() << startX << stopX;
+
+    double a = GraphWindow.extracted2DLineA();
+    double b = GraphWindow.extracted2DLineB();
+    double c = GraphWindow.extracted2DLineC();
+    if (fabs(b) < 1.0e-10)
+    {
+        message("Bad base line, cannot fit", this);
+        return;
+    }
+                                                                   //  S  * exp( -0.5/s2 * (x   -m )^2) +  A *x +  B
+    TF1 * f = new TF1("myfunc", GauseWithBase, startX, stopX, 5);  //  [0] * exp(    [1]  * (x + [2])^2) + [3]*x + [4]
+    f->SetTitle("Gauss fit");
+    GraphWindow.RegisterTObject(f);
+
+    double initMid = startX + 0.5*(stopX - startX);
+    //qDebug() << "Initial mid:"<<initMid;
+    double initSigma = (stopX - startX)/2.3548; //sigma
+    double startPar1 = -0.5 / (initSigma * initSigma );
+    //qDebug() << "Initial par1"<<startPar1;
+    double midBinNum = h->GetXaxis()->FindBin(initMid);
+    double valOnMid = h->GetBinContent(midBinNum);
+    double baseAtMid = (c - a * initMid) / b;
+    double gaussAtMid = valOnMid - baseAtMid;
+    //qDebug() << "bin, valMid, baseMid, gaussmid"<<midBinNum<< valOnMid << baseAtMid << gaussAtMid;
+
+    f->SetParameter(0, gaussAtMid);
+    f->SetParameter(1, startPar1);
+    f->SetParameter(2, -initMid);
+    f->FixParameter(3, -a/b);  // fixed!
+    f->FixParameter(4, c/b);   // fixed!
+
+    int status = h->Fit(f, "R0");
+    if (status != 0)
+    {
+        message("Fit failed!", this);
+        return;
+    }
+
+    GraphWindow.MakeCopyOfDrawObjects();
+
+        double mid = -f->GetParameter(2);
+        double sigma = TMath::Sqrt(-0.5/f->GetParameter(1));
+        //qDebug() << "sigma:"<<sigma;
+        double FWHM = sigma * 2.0*TMath::Sqrt(2.0*TMath::Log(2.0));
+        double rel = FWHM/mid;
+
+        //draw fit line
+        DrawObjects << ADrawObject(f, "same");
+        //draw base line
+        TF1 *fl = new TF1("line", "pol2", startX, stopX);
+        fl->SetTitle("Baseline");
+        GraphWindow.RegisterTObject(fl);
+        fl->SetLineStyle(2);
+        fl->SetParameters(c/b, -a/b);
+        DrawObjects << ADrawObject(fl, "same");
+        //box with results
+        //ShowTextPanel("fwhm = " + QString::number(FWHM) + "\nmean = " + QString::number(mid) + "\nfwhm/mean = "+QString::number(rel));
+        QString text = QString("FWHM = %1\nmean = %2\nfwhm/mean = %3").arg(FWHM).arg(mid).arg(rel);
+        TPaveText* la = new TPaveText(0.15, 0.75, 0.5, 0.85, "NDC");
+        la->SetFillColor(0);
+        la->SetBorderSize(1);
+        la->SetLineColor(1);
+        la->SetTextAlign( (0 + 1) * 10 + 2);
+        QStringList sl = text.split("\n");
+        for (QString s : sl) la->AddText(s.toLatin1());
+        GraphWindow.RegisterTObject(la);
+        DrawObjects << ADrawObject(la, "same");
+
+        GraphWindow.RedrawAll();
+}
+
 void ADrawExplorerWidget::interpolate(ADrawObject &obj)
 {
     TH1* hist = dynamic_cast<TH1*>(obj.Pointer);
@@ -620,13 +736,12 @@ void ADrawExplorerWidget::interpolate(ADrawObject &obj)
         QString Xtitle = hist->GetXaxis()->GetTitle();
         if (!Xtitle.isEmpty()) hi->GetXaxis()->SetTitle(Xtitle.toLocal8Bit().data());
 
-        emit requestMakeCopy();
-        emit requestRegister(hi);
+        GraphWindow.MakeCopyOfDrawObjects();
 
         DrawObjects.clear();
-        DrawObjects << ADrawObject(hi, "hist");
+        addToDrawObjectsAndRegister(hi, "hist");
 
-        emit requestRedraw();
+        GraphWindow.RedrawAll();
 
         d.accept();
     }
@@ -696,13 +811,12 @@ void ADrawExplorerWidget::median(ADrawObject &obj)
         for (int iThisBin = 1; iThisBin <= num; iThisBin++)
             hc->SetBinContent(iThisBin, Filtered.at(iThisBin-1));
 
-        emit requestMakeCopy();
-        emit requestRegister(hc);
+        GraphWindow.MakeCopyOfDrawObjects();
 
         DrawObjects.clear();
-        DrawObjects << ADrawObject(hc, "hist");
+        addToDrawObjectsAndRegister(hc, "hist");
 
-        emit requestRedraw();
+        GraphWindow.RedrawAll();
 
         d.accept();
     }
@@ -728,13 +842,12 @@ void ADrawExplorerWidget::projection(ADrawObject &obj, bool bX)
 
     if (proj)
     {
-        emit requestMakeCopy();
-        emit requestRegister(proj);
+        GraphWindow.MakeCopyOfDrawObjects();
 
         DrawObjects.clear();
-        DrawObjects << ADrawObject(proj, "hist");
+        addToDrawObjectsAndRegister(proj, "hist");
 
-        emit requestRedraw();
+        GraphWindow.RedrawAll();
     }
 }
 
@@ -776,12 +889,12 @@ void ADrawExplorerWidget::splineFit(int index)
             fg->SetPoint(i, xx, cf.eval(xx));
         }
 
-        emit requestMakeCopy();
-        emit requestRegister(fg);
+        GraphWindow.MakeCopyOfDrawObjects();
 
         DrawObjects.insert(index+1, ADrawObject(fg, "Csame"));
+        GraphWindow.RegisterTObject(fg);
 
-        emit requestRedraw();
+        GraphWindow.RedrawAll();
     }
 #else
     message("This option is supported only when ANTS2 is compliled with Eigen library enabled", this);
@@ -813,6 +926,6 @@ void ADrawExplorerWidget::editTitle(ADrawObject &obj, int X0Y1)
     QString newTitle = QInputDialog::getText(this, "Change axis title", QString("New %1 axis title:").arg(X0Y1 == 0 ? "X" : "Y"), QLineEdit::Normal, oldTitle, &ok);
     if (ok) axis->SetTitle(newTitle.toLatin1().data());
 
-    emit requestRedraw();
+    GraphWindow.RedrawAll();
 }
 

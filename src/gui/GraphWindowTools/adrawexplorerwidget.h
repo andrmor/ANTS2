@@ -5,13 +5,14 @@
 
 #include <QTreeWidget>
 
+class GraphWindowClass;
 class TObject;
 
 class ADrawExplorerWidget : public QTreeWidget
 {
     Q_OBJECT
 public:
-    ADrawExplorerWidget(QVector<ADrawObject> & DrawObjects);
+    ADrawExplorerWidget(GraphWindowClass & GraphWindow, QVector<ADrawObject> & DrawObjects);
 
     void updateGui();
 
@@ -19,9 +20,12 @@ private slots:
     void onContextMenuRequested(const QPoint & pos);
 
 private:
+    GraphWindowClass & GraphWindow;
     QVector<ADrawObject> & DrawObjects;
 
 private:
+    void addToDrawObjectsAndRegister(TObject * pointer, const QString & options);
+
     void rename(ADrawObject &obj);
     void toggleEnable(ADrawObject &obj);
     void remove(int index);
@@ -32,17 +36,13 @@ private:
     void shift(ADrawObject &obj);
     void drawIntegral(ADrawObject &obj);
     void fraction(ADrawObject &obj);
+    void fwhm(ADrawObject &obj);
     void interpolate(ADrawObject &obj);
     void median(ADrawObject &obj);
     void projection(ADrawObject &obj, bool bX);
     void splineFit(int index);
     void editTitle(ADrawObject &obj, int X0Y1);
 
-signals:
-    void requestRedraw();
-    void requestMakeCopy();
-    void requestInvalidateCopy();
-    void requestRegister(TObject * tobj);
 };
 
 #endif // ADRAWEXPLORERWIDGET_H

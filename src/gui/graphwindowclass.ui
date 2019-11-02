@@ -658,52 +658,6 @@
           <enum>Qt::Horizontal</enum>
          </property>
         </widget>
-        <widget class="Line" name="line_15">
-         <property name="geometry">
-          <rect>
-           <x>-2</x>
-           <y>392</y>
-           <width>150</width>
-           <height>3</height>
-          </rect>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbFWHM">
-         <property name="geometry">
-          <rect>
-           <x>9</x>
-           <y>346</y>
-           <width>131</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="toolTip">
-          <string>Extract relative FWHM. 
-Click-drag-release selects the base line and the range of the fit.</string>
-         </property>
-         <property name="text">
-          <string>Extract fwhm/mean</string>
-         </property>
-        </widget>
-        <widget class="QCheckBox" name="cbShowBaseLine">
-         <property name="geometry">
-          <rect>
-           <x>23</x>
-           <y>370</y>
-           <width>111</width>
-           <height>17</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Show base line</string>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
-         </property>
-        </widget>
         <zorder>line</zorder>
         <zorder>line_2</zorder>
         <zorder>fLog</zorder>
@@ -723,9 +677,6 @@ Click-drag-release selects the base line and the range of the fit.</string>
         <zorder>pbAddText</zorder>
         <zorder>pbRemoveLegend</zorder>
         <zorder>pbRemoveText</zorder>
-        <zorder>line_15</zorder>
-        <zorder>pbFWHM</zorder>
-        <zorder>cbShowBaseLine</zorder>
        </widget>
        <widget class="QWidget" name="page_2">
         <widget class="QFrame" name="fToolBox">

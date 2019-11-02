@@ -13,6 +13,7 @@
 class MainWindow;
 class RasterWindowGraphClass;
 class TH2;
+class TH1;
 class TH1D;
 class TGraph;
 class TGraph2D;
@@ -36,12 +37,14 @@ class GraphWindowClass : public AGuiWindow
 public:
     explicit GraphWindowClass(QWidget *parent, MainWindow *mw);
     ~GraphWindowClass();
+    friend class ADrawExplorerWidget;
 
     QString LastDistributionShown;
 
     //Drawing
     void Draw(TObject* obj, const char* options = "", bool DoUpdate = true, bool TransferOwnership = true);  //registration should be skipped only for scripts!
     void DrawWithoutFocus(TObject* obj, const char* options = "", bool DoUpdate = true, bool TransferOwnership = true);  //registration should be skipped only for scripts!
+    void RedrawAll();
 
     //canvas control
     void ShowAndFocus();
@@ -138,6 +141,15 @@ public:
     void ShowTextPanel(const QString Text, bool bShowFrame=true, int AlignLeftCenterRight=0);
 
     void SetStatPanelVisible(bool flag);
+    void TriggerGlobalBusy(bool flag);
+
+    void MakeCopyOfDrawObjects();
+    void ClearCopyOfDrawObjects();
+
+    void ClearBasketActiveId();
+    void MakeCopyOfActiveBasketId();
+    void RestoreBasketActiveId();
+    void ClearCopyOfActiveBasketId();
 
 protected:
     void mouseMoveEvent(QMouseEvent *event);
@@ -170,9 +182,6 @@ private slots:
     void BasketReorderRequested(const QVector<int> & indexes, int toRow);
     void deletePressed();
 
-    void onRequestMakeCopy();
-    void onRequestInvalidateCopy();
-    void onRequestRegister(TObject * tobj);
 
     void on_cbToolBox_toggled(bool checked);
     void on_cobToolBox_currentIndexChanged(int index);
@@ -238,7 +247,6 @@ private slots:
     void on_pbAddText_clicked();
     void on_pbRemoveLegend_clicked();
     void on_pbRemoveText_clicked();
-    void on_pbFWHM_clicked();
 
     void on_ledAngle_customContextMenuRequested(const QPoint &pos);
 
@@ -263,6 +271,7 @@ private:
     ABasketManager * Basket = nullptr;
     ABasketListWidget * lwBasket = nullptr;
     int ActiveBasketItem = -1; //-1 - Basket is off; 0+ -> basket loaded, can be updated
+    int PreviousActiveBasketItem = -1; //-1 - Basket is off; 0+ -> basket loaded, can be updated
     void switchToBasket(int index);
     void setBasketItemUpdateAllowed(bool flag);
 
@@ -285,7 +294,6 @@ private:
     double xmin0, xmax0, ymin0, ymax0, zmin0, zmax0; //start values - filled on first draw, can be used to reset view with "Unzoom"
     QString old_option;
 
-    void RedrawAll();    
     void clearTmpTObjects();   //enable qDebugs inside for diagnostics of cleanup!
     void startOverlayMode();
     void endOverlayMode();

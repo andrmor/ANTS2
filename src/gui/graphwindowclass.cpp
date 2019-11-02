@@ -37,6 +37,11 @@
 #include <QVariant>
 #include <QVariantList>
 #include <QShortcut>
+#include <QPolygonF>
+#include <QButtonGroup>
+#include <QPalette>
+#include <QPalette>
+#include <QElapsedTimer>
 
 //Root
 #include "TMath.h"
@@ -88,13 +93,9 @@ GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
     this->setWindowFlags( windowFlags );
 
     //DrawListWidget init
-    Explorer = new ADrawExplorerWidget(DrawObjects);
+    Explorer = new ADrawExplorerWidget(*this, DrawObjects);
     ui->layExplorer->insertWidget(1, Explorer);
     ui->splitter->setSizes({200,600});
-    connect(Explorer, &ADrawExplorerWidget::requestRedraw, this, &GraphWindowClass::RedrawAll);
-    connect(Explorer, &ADrawExplorerWidget::requestMakeCopy, this, &GraphWindowClass::onRequestMakeCopy);
-    connect(Explorer, &ADrawExplorerWidget::requestInvalidateCopy, this, &GraphWindowClass::onRequestInvalidateCopy);
-    connect(Explorer, &ADrawExplorerWidget::requestRegister, this, &GraphWindowClass::onRequestRegister);
     ui->pbBackToLast->setVisible(false);
 
     //init of basket widget
@@ -520,11 +521,17 @@ void GraphWindowClass::DrawWithoutFocus(TObject *obj, const char *options, bool 
     const QString opt = options;
 
     if (opt.contains("same", Qt::CaseInsensitive))
+    {
+        MakeCopyOfDrawObjects();
         DrawObjects.append(ADrawObject(obj, options));
+    }
     else
     {
         //this is new main object
         clearTmpTObjects(); //delete all TObjects previously drawn
+        ClearCopyOfDrawObjects();
+        ClearCopyOfActiveBasketId();
+
         DrawObjects.clear();
         DrawObjects.append(ADrawObject(obj, options));
     }
@@ -532,7 +539,7 @@ void GraphWindowClass::DrawWithoutFocus(TObject *obj, const char *options, bool 
     doDraw(obj, options, DoUpdate);
 
     if (TransferOwnership) RegisterTObject(obj);
-    onRequestInvalidateCopy();
+
     EnforceOverlayOff();
     UpdateControls();
 }
@@ -617,6 +624,8 @@ void GraphWindowClass::doDraw(TObject *obj, const char *opt, bool DoUpdate)
     if (DoUpdate) RasterWindow->fCanvas->Update();
 
     Explorer->updateGui();
+    ui->pbBackToLast->setVisible( !PreviousDrawObjects.isEmpty() );
+
     QString options(opt);
     if (!options.contains("same", Qt::CaseInsensitive))
         UpdateGuiControlsForMainObject(obj->ClassName(), options);
@@ -976,10 +985,12 @@ void GraphWindowClass::on_pbZoom_clicked()
   //qDebug()<<"  Class name/PlotOptions/opt:"<<PlotType<<opt;
 
   if (
-      PlotType == "TGraph" || PlotType == "TMultiGraph" ||
+      PlotType == "TGraph" ||
+      PlotType == "TMultiGraph" ||
       PlotType == "TF1" ||
-      PlotType.startsWith("TH1") || PlotType == "TProfile" ||
-      (PlotType.startsWith("TH2") || PlotType == "TProfile2D") && (opt == "" || opt.contains("col", Qt::CaseInsensitive) || opt.contains("prof", Qt::CaseInsensitive))
+      PlotType.startsWith("TH1") ||
+      PlotType == "TProfile" ||
+      ( (PlotType.startsWith("TH2") || PlotType == "TProfile2D") && (opt == "" || opt.contains("col", Qt::CaseInsensitive) || opt.contains("prof", Qt::CaseInsensitive)) )
       )
     {
       MW->WindowNavigator->BusyOn();
@@ -2277,22 +2288,37 @@ void GraphWindowClass::deletePressed()
     }
 }
 
-void GraphWindowClass::onRequestMakeCopy()
+void GraphWindowClass::MakeCopyOfDrawObjects()
 {
     PreviousDrawObjects = DrawObjects;
-    setBasketItemUpdateAllowed(false);
-    ui->pbBackToLast->setVisible(true);
+    if (!PreviousDrawObjects.isEmpty())
+        qDebug() << PreviousDrawObjects.first().Pointer;
 }
 
-void GraphWindowClass::onRequestInvalidateCopy()
+void GraphWindowClass::ClearCopyOfDrawObjects()
 {
     PreviousDrawObjects.clear();
-    ui->pbBackToLast->setVisible(false);
+    //ui->pbBackToLast->setVisible(false);
 }
 
-void GraphWindowClass::onRequestRegister(TObject *tobj)
+void GraphWindowClass::ClearBasketActiveId()
 {
-    tmpTObjects.append(tobj);
+    ActiveBasketItem = -1;
+}
+
+void GraphWindowClass::MakeCopyOfActiveBasketId()
+{
+    PreviousActiveBasketItem = ActiveBasketItem;
+}
+
+void GraphWindowClass::RestoreBasketActiveId()
+{
+    ActiveBasketItem = PreviousActiveBasketItem;
+}
+
+void GraphWindowClass::ClearCopyOfActiveBasketId()
+{
+    PreviousActiveBasketItem = -1;
 }
 
 void GraphWindowClass::BasketCustomContextMenuRequested(const QPoint &pos)
@@ -2784,41 +2810,11 @@ void GraphWindowClass::SetStatPanelVisible(bool flag)
     ui->cbShowLegend->setChecked(flag);
 }
 
-/*
-bool GraphWindowClass::eventFilter(QObject * obj, QEvent * event)
+void GraphWindowClass::TriggerGlobalBusy(bool flag)
 {
-    if (event->type() == QEvent::DragEnter)
-    {
-        qDebug() << "Basket: drag started";
-    }
-    else if (event->type() == QEvent::Drop)
-    {
-        qDebug() << "Basket: Drop detected";
-
-        QList<QListWidgetItem*> sel = ui->lwBasket->selectedItems();
-        QVector<int> indexes;
-        for (QListWidgetItem* item : sel)
-            indexes << ui->lwBasket->row(item);
-        qDebug() << "   Indexes to be moved:" << indexes;
-
-        QDropEvent * dropEvent = static_cast<QDropEvent *>(event);
-        QListWidgetItem * itemTo = ui->lwBasket->itemAt(dropEvent->pos());
-        int rowTo = ui->lwBasket->count();
-        if (itemTo)
-        {
-            rowTo = ui->lwBasket->row(itemTo);
-            //if (ui->lwBasket->   dropIndicatorPosition() == QAbstractItemView::BelowItem) rowTo++;
-        }
-        qDebug() << "   Move to position:" << rowTo << itemTo;
-        Basket->reorder(indexes, rowTo);
-        UpdateBasketGUI();
-        setBasketItemUpdateAllowed(false);
-        return true;
-    }
-
-    return QMainWindow::eventFilter(obj, event); // pass the event on to the parent class
+    if (flag) MW->WindowNavigator->BusyOn();
+    else      MW->WindowNavigator->BusyOff();
 }
-*/
 
 void GraphWindowClass::on_pbRemoveText_clicked()
 {
@@ -2850,97 +2846,6 @@ bool GraphWindowClass::Extraction()
     return !IsExtractionCanceled();  //returns false = canceled
 }
 
-Double_t GauseWithBase(Double_t *x, Double_t *par)
-{
-   return par[0]*exp(par[1]*(x[0]+par[2])*(x[0]+par[2])) + par[3]*x[0] + par[4];   // [0]*exp([1]*(x+[2])^2) + [3]*x + [4]
-}
-
-void GraphWindowClass::on_pbFWHM_clicked()
-{
-    if (DrawObjects.isEmpty())
-    {
-        message("No data", this);
-        return;
-    }
-
-    const QString cn = DrawObjects.first().Pointer->ClassName();
-    if ( !cn.startsWith("TH1") && cn!="TProfile")
-    {
-        message("Can be used only with 1D histograms!", this);
-        return;
-    }
-
-    MW->WindowNavigator->BusyOn();
-    Extract2DLine();
-    if (!Extraction()) return; //cancel
-
-    double startX = extracted2DLineXstart();
-    double stopX = extracted2DLineXstop();
-    if (startX>stopX) std::swap(startX, stopX);
-    //qDebug() << startX << stopX;
-
-    double a = extracted2DLineA();
-    double b = extracted2DLineB();
-    double c = extracted2DLineC();
-    if (fabs(b)<1.0e-10)
-    {
-        message("Bad base line, cannot fit", this);
-        return;
-    }
-
-    TH1* h =   static_cast<TH1*>(DrawObjects.first().Pointer);
-                                                                   //  S  * exp( -0.5/s2 * (x   -m )^2) +  A *x +  B
-    TF1 *f = new TF1("myfunc", GauseWithBase, startX, stopX, 5);  //  [0] * exp(    [1]  * (x + [2])^2) + [3]*x + [4]
-
-    double initMid = startX + 0.5*(stopX - startX);
-    //qDebug() << "Initial mid:"<<initMid;
-    double initSigma = (stopX - startX)/2.3548; //sigma
-    double startPar1 = -0.5 / (initSigma * initSigma );
-    //qDebug() << "Initial par1"<<startPar1;
-    double midBinNum = h->GetXaxis()->FindBin(initMid);
-    double valOnMid = h->GetBinContent(midBinNum);
-    double baseAtMid = (c - a * initMid) / b;
-    double gaussAtMid = valOnMid - baseAtMid;
-    //qDebug() << "bin, valMid, baseMid, gaussmid"<<midBinNum<< valOnMid << baseAtMid << gaussAtMid;
-
-    f->SetParameter(0, gaussAtMid);
-    f->SetParameter(1, startPar1);
-    f->SetParameter(2, -initMid);
-    f->FixParameter(3, -a/b);  // fixed!
-    f->FixParameter(4, c/b);   // fixed!
-
-    int status = h->Fit(f, "R0");
-    if (status == 0)
-    {
-        double mid = -f->GetParameter(2);
-        double sigma = TMath::Sqrt(-0.5/f->GetParameter(1));
-        //qDebug() << "sigma:"<<sigma;
-        double FWHM = sigma * 2.0*TMath::Sqrt(2.0*TMath::Log(2.0));
-        double rel = FWHM/mid;
-
-        //QVector<ADrawObject> CopyMasterDrawObjects;
-        //if (CurrentBasketItem == -1) CopyMasterDrawObjects = MasterDrawObjects;
-
-        //drawing the fit
-        Draw(f, "same");
-
-        //draw base line
-        if (ui->cbShowBaseLine->isChecked())
-        {
-            TF1 *fl = new TF1("line", "pol2", startX, stopX);
-            fl->SetLineStyle(2);
-            fl->SetParameters(c/b, -a/b);
-            Draw(fl, "same");
-        }
-
-        //draw panel with results
-        ShowTextPanel("fwhm = " + QString::number(FWHM) + "\nmean = " + QString::number(mid) + "\nfwhm/mean = "+QString::number(rel));
-
-        //MasterDrawObjects = CopyMasterDrawObjects;
-    }
-    else message("Fit failed!", this);
-}
-
 void GraphWindowClass::on_ledAngle_customContextMenuRequested(const QPoint &pos)
 {
     QMenu Menu;
@@ -2968,9 +2873,9 @@ void GraphWindowClass::on_ledAngle_customContextMenuRequested(const QPoint &pos)
 void GraphWindowClass::on_pbBackToLast_clicked()
 {
     DrawObjects = PreviousDrawObjects;
+    PreviousDrawObjects.clear();
     setBasketItemUpdateAllowed(false);
     RedrawAll();
-    ui->pbBackToLast->setVisible(false);
 }
 
 void GraphWindowClass::on_actionToggle_Explorer_Basket_toggled(bool arg1)

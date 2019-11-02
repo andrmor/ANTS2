@@ -115,7 +115,7 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
    else if (si == scaleA)       scale(obj);
    else if (si == integralA)    drawIntegral(obj);
    else if (si == fractionA)    fraction(obj);
-   else if (si == fwhmA)        fwhm(obj);
+   else if (si == fwhmA)        fwhm(index);
    else if (si == interpolateA) interpolate(obj);
    else if (si == titleX)       editTitle(obj, 0);
    else if (si == titleY)       editTitle(obj, 1);
@@ -187,23 +187,29 @@ void ADrawExplorerWidget::rename(ADrawObject & obj)
     TNamed * tobj = dynamic_cast<TNamed*>(obj.Pointer);
     if (tobj) tobj->SetTitle(text.toLatin1().data());
 
+    GraphWindow.ClearCopyOfDrawObjects();
+    GraphWindow.UpdateBasketGUI();
     updateGui();
 }
 
 void ADrawExplorerWidget::toggleEnable(ADrawObject & obj)
 {
     obj.bEnabled = !obj.bEnabled;
+
+    GraphWindow.ClearCopyOfDrawObjects();
     GraphWindow.RedrawAll();
 }
 
 void ADrawExplorerWidget::remove(int index)
 {
+    GraphWindow.MakeCopyOfDrawObjects();
+
     DrawObjects.remove(index); // do not delete - GraphWindow handles garbage collection!
 
     if (index == 0 && !DrawObjects.isEmpty())
     {
         //remove "same" from the options line for the new leading object
-        DrawObjects[0].Options.remove("same", Qt::CaseInsensitive);
+        DrawObjects.first().Options.remove("same", Qt::CaseInsensitive);
     }
 
     GraphWindow.RedrawAll();
@@ -225,6 +231,7 @@ void ADrawExplorerWidget::setMarker(ADrawObject & obj)
            la->SetMarkerSize(siz);
            la->SetMarkerStyle(style);
            la->Modify();
+           GraphWindow.ClearCopyOfDrawObjects();
            GraphWindow.RedrawAll();
        }
     }
@@ -246,6 +253,7 @@ void ADrawExplorerWidget::setLine(ADrawObject & obj)
            la->SetLineWidth(wid);
            la->SetLineStyle(style);
            la->Modify();
+           GraphWindow.ClearCopyOfDrawObjects();
            GraphWindow.RedrawAll();
        }
     }
@@ -481,6 +489,8 @@ void ADrawExplorerWidget::drawIntegral(ADrawObject &obj)
       }
 
     GraphWindow.MakeCopyOfDrawObjects();
+    GraphWindow.MakeCopyOfActiveBasketId();
+    GraphWindow.ClearBasketActiveId();
 
     DrawObjects.clear();
     addToDrawObjectsAndRegister(hi, "hist");
@@ -597,8 +607,9 @@ Double_t GauseWithBase(Double_t *x, Double_t *par)
 }
 
 #include "TPaveText.h"
-void ADrawExplorerWidget::fwhm(ADrawObject &obj)
+void ADrawExplorerWidget::fwhm(int index)
 {
+    ADrawObject & obj = DrawObjects[index];
     TH1* h = dynamic_cast<TH1*>(obj.Pointer);
     if (!h) return;
 
@@ -657,36 +668,36 @@ void ADrawExplorerWidget::fwhm(ADrawObject &obj)
     }
 
     GraphWindow.MakeCopyOfDrawObjects();
+    GraphWindow.MakeCopyOfActiveBasketId();
 
-        double mid = -f->GetParameter(2);
-        double sigma = TMath::Sqrt(-0.5/f->GetParameter(1));
-        //qDebug() << "sigma:"<<sigma;
-        double FWHM = sigma * 2.0*TMath::Sqrt(2.0*TMath::Log(2.0));
-        double rel = FWHM/mid;
+    double mid = -f->GetParameter(2);
+    double sigma = TMath::Sqrt(-0.5/f->GetParameter(1));
+    //qDebug() << "sigma:"<<sigma;
+    double FWHM = sigma * 2.0*TMath::Sqrt(2.0*TMath::Log(2.0));
+    double rel = FWHM/mid;
 
-        //draw fit line
-        DrawObjects << ADrawObject(f, "same");
-        //draw base line
-        TF1 *fl = new TF1("line", "pol2", startX, stopX);
-        fl->SetTitle("Baseline");
-        GraphWindow.RegisterTObject(fl);
-        fl->SetLineStyle(2);
-        fl->SetParameters(c/b, -a/b);
-        DrawObjects << ADrawObject(fl, "same");
-        //box with results
-        //ShowTextPanel("fwhm = " + QString::number(FWHM) + "\nmean = " + QString::number(mid) + "\nfwhm/mean = "+QString::number(rel));
-        QString text = QString("FWHM = %1\nmean = %2\nfwhm/mean = %3").arg(FWHM).arg(mid).arg(rel);
-        TPaveText* la = new TPaveText(0.15, 0.75, 0.5, 0.85, "NDC");
-        la->SetFillColor(0);
-        la->SetBorderSize(1);
-        la->SetLineColor(1);
-        la->SetTextAlign( (0 + 1) * 10 + 2);
-        QStringList sl = text.split("\n");
-        for (QString s : sl) la->AddText(s.toLatin1());
-        GraphWindow.RegisterTObject(la);
-        DrawObjects << ADrawObject(la, "same");
+    //draw fit line
+    DrawObjects.insert(index+1, ADrawObject(f, "same"));
+    //draw base line
+    TF1 *fl = new TF1("line", "pol2", startX, stopX);
+    fl->SetTitle("Baseline");
+    GraphWindow.RegisterTObject(fl);
+    fl->SetLineStyle(2);
+    fl->SetParameters(c/b, -a/b);
+    DrawObjects.insert(index+2, ADrawObject(fl, "same"));
+    //box with results
+    QString text = QString("FWHM = %1\nmean = %2\nfwhm/mean = %3").arg(FWHM).arg(mid).arg(rel);
+    TPaveText* la = new TPaveText(0.15, 0.75, 0.5, 0.85, "NDC");
+    la->SetFillColor(0);
+    la->SetBorderSize(1);
+    la->SetLineColor(1);
+    la->SetTextAlign( (0 + 1) * 10 + 2);
+    QStringList sl = text.split("\n");
+    for (QString s : sl) la->AddText(s.toLatin1());
+    GraphWindow.RegisterTObject(la);
+    DrawObjects.insert(index+3, ADrawObject(la, "same"));
 
-        GraphWindow.RedrawAll();
+    GraphWindow.RedrawAll();
 }
 
 void ADrawExplorerWidget::interpolate(ADrawObject &obj)
@@ -741,6 +752,8 @@ void ADrawExplorerWidget::interpolate(ADrawObject &obj)
         if (!Xtitle.isEmpty()) hi->GetXaxis()->SetTitle(Xtitle.toLocal8Bit().data());
 
         GraphWindow.MakeCopyOfDrawObjects();
+        GraphWindow.MakeCopyOfActiveBasketId();
+        GraphWindow.ClearBasketActiveId();
 
         DrawObjects.clear();
         addToDrawObjectsAndRegister(hi, "hist");
@@ -816,6 +829,8 @@ void ADrawExplorerWidget::median(ADrawObject &obj)
             hc->SetBinContent(iThisBin, Filtered.at(iThisBin-1));
 
         GraphWindow.MakeCopyOfDrawObjects();
+        GraphWindow.MakeCopyOfActiveBasketId();
+        GraphWindow.ClearBasketActiveId();
 
         DrawObjects.clear();
         addToDrawObjectsAndRegister(hc, "hist");
@@ -847,6 +862,8 @@ void ADrawExplorerWidget::projection(ADrawObject &obj, bool bX)
     if (proj)
     {
         GraphWindow.MakeCopyOfDrawObjects();
+        GraphWindow.MakeCopyOfActiveBasketId();
+        GraphWindow.ClearBasketActiveId();
 
         DrawObjects.clear();
         addToDrawObjectsAndRegister(proj, "hist");
@@ -887,6 +904,7 @@ void ADrawExplorerWidget::splineFit(int index)
         CurveFit cf(x.first(), x.last(), numNodes, x, y);
 
         TGraph* fg = new TGraph();
+        fg->SetTitle("SplineFit");
         for (int i=0; i<numPoints; i++)
         {
             const double& xx = x.at(i);
@@ -894,6 +912,7 @@ void ADrawExplorerWidget::splineFit(int index)
         }
 
         GraphWindow.MakeCopyOfDrawObjects();
+        GraphWindow.MakeCopyOfActiveBasketId();
 
         DrawObjects.insert(index+1, ADrawObject(fg, "Csame"));
         GraphWindow.RegisterTObject(fg);

@@ -516,8 +516,6 @@ void GraphWindowClass::Draw(TObject *obj, const char *options, bool DoUpdate, bo
 
 void GraphWindowClass::DrawWithoutFocus(TObject *obj, const char *options, bool DoUpdate, bool TransferOwnership)
 {
-    lwBasket->clearSelection();
-    setBasketItemUpdateAllowed(false);
     const QString opt = options;
 
     if (opt.contains("same", Qt::CaseInsensitive))
@@ -531,6 +529,8 @@ void GraphWindowClass::DrawWithoutFocus(TObject *obj, const char *options, bool 
         clearTmpTObjects(); //delete all TObjects previously drawn
         ClearCopyOfDrawObjects();
         ClearCopyOfActiveBasketId();
+        ActiveBasketItem = -1;
+        UpdateBasketGUI();
 
         DrawObjects.clear();
         DrawObjects.append(ADrawObject(obj, options));
@@ -931,11 +931,13 @@ void GraphWindowClass::RedrawAll()
 {  
     //qDebug()<<"---Redraw all triggered"
     EnforceOverlayOff();
+    UpdateBasketGUI();
 
     if (DrawObjects.isEmpty())
     {
         ClearRootCanvas();
         UpdateRootCanvas();
+        Explorer->updateGui();
         return;
     }
 
@@ -1116,24 +1118,20 @@ void GraphWindowClass::on_pbUnzoom_clicked()
 
 void GraphWindowClass::on_leOptions_editingFinished()
 {   
-   ui->pbUnzoom->setFocus();
-   QString newOptions = ui->leOptions->text();
-   //preventing redraw just because of refocus
-   //if (old_option == newOptions) return;
-   old_option = newOptions;
+    ui->pbUnzoom->setFocus();
+    const QString newOptions = ui->leOptions->text();
 
-   if (DrawObjects.isEmpty()) return;
-   DrawObjects.first().Options = newOptions;
-
-   GraphWindowClass::RedrawAll();
+    if (DrawObjects.isEmpty()) return;
+    if (DrawObjects.first().Options != newOptions)
+    {
+        DrawObjects.first().Options = newOptions;
+        RedrawAll();
+    }
 }
 
 void GraphWindowClass::SaveGraph(QString fileName)
 {
-  //QFileInfo file(fileName);
-  //if(file.suffix().isEmpty()) fileName += ".png";
-  //qDebug() << "Saving graph:" << fileName;
-  RasterWindow->SaveAs(fileName);
+    RasterWindow->SaveAs(fileName);
 }
 
 void GraphWindowClass::UpdateControls()
@@ -2177,9 +2175,7 @@ void GraphWindowClass::on_pbAddToBasket_clicked()
 void GraphWindowClass::AddCurrentToBasket(const QString & name)
 {
     if (DrawObjects.isEmpty()) return;
-
     Basket->add(name.simplified(), DrawObjects);
-
     ui->actionToggle_Explorer_Basket->setChecked(true);
     UpdateBasketGUI();
 }
@@ -2272,6 +2268,24 @@ void GraphWindowClass::UpdateBasketGUI()
 {
     lwBasket->clear();
     lwBasket->addItems(Basket->getItemNames());
+
+    if (ActiveBasketItem >= Basket->size()) ActiveBasketItem = -1;
+
+    for (int i=0; i < lwBasket->count(); i++)
+    {
+        QListWidgetItem * item = lwBasket->item(i);
+        if (i == ActiveBasketItem)
+        {
+            item->setForeground(QBrush(Qt::cyan));
+            item->setBackground(QBrush(Qt::lightGray));
+        }
+        else
+        {
+            item->setForeground(QBrush(Qt::black));
+            item->setBackground(QBrush(Qt::white));
+        }
+    }
+    ui->pbUpdateInBasket->setEnabled(ActiveBasketItem >= 0);
 }
 
 void GraphWindowClass::onBasketItemDoubleClicked(QListWidgetItem *)
@@ -2292,7 +2306,7 @@ void GraphWindowClass::MakeCopyOfDrawObjects()
 {
     PreviousDrawObjects = DrawObjects;
     if (!PreviousDrawObjects.isEmpty())
-        qDebug() << PreviousDrawObjects.first().Pointer;
+        qDebug() << "gcc optimizer fix:" << PreviousDrawObjects.first().Pointer;
 }
 
 void GraphWindowClass::ClearCopyOfDrawObjects()
@@ -2420,10 +2434,7 @@ void GraphWindowClass::BasketCustomContextMenuRequested(const QPoint &pos)
         const QString res = Basket->appendTxtAsGraph(fileName);
         if (!res.isEmpty()) message(res, this);
         else
-        {
-            UpdateBasketGUI();
             switchToBasket(Basket->size() - 1);
-        }
     }
     else if (selectedItem == appendTxtEr)
     {
@@ -2433,16 +2444,14 @@ void GraphWindowClass::BasketCustomContextMenuRequested(const QPoint &pos)
         const QString res = Basket->appendTxtAsGraphErrors(fileName);
         if (!res.isEmpty()) message(res, this);
         else
-        {
-            UpdateBasketGUI();
             switchToBasket(Basket->size() - 1);
-        }
     }
     else if (selectedItem == del)
     {
         Basket->remove(row);
+        ActiveBasketItem = -1;
+        ClearCopyOfActiveBasketId();
         UpdateBasketGUI();
-        setBasketItemUpdateAllowed(false);
     }
     else if (selectedItem == rename)
     {
@@ -2462,8 +2471,9 @@ void GraphWindowClass::BasketCustomContextMenuRequested(const QPoint &pos)
 void GraphWindowClass::BasketReorderRequested(const QVector<int> &indexes, int toRow)
 {
     Basket->reorder(indexes, toRow);
+    ActiveBasketItem = -1;
+    ClearCopyOfActiveBasketId();
     UpdateBasketGUI();
-    setBasketItemUpdateAllowed(false);
 }
 
 void GraphWindowClass::contextMenuForBasketMultipleSelection(const QPoint & pos)
@@ -2496,15 +2506,18 @@ void GraphWindowClass::removeAllSelectedBasketItems()
     std::sort(indexes.begin(), indexes.end());
     for (int i = indexes.size() - 1; i >= 0; i--)
         Basket->remove(indexes.at(i));
+
+    ActiveBasketItem = -1;
+    ClearCopyOfActiveBasketId();
     UpdateBasketGUI();
-    setBasketItemUpdateAllowed(false);
 }
 
 void GraphWindowClass::ClearBasket()
 {
     Basket->clear();
+    ActiveBasketItem = -1;
+    ClearCopyOfActiveBasketId();
     UpdateBasketGUI();
-    setBasketItemUpdateAllowed(false);
 }
 
 void GraphWindowClass::on_actionSave_image_triggered()
@@ -2582,6 +2595,9 @@ void GraphWindowClass::Basket_DrawOnTop(int row)
     //qDebug() << "Basket item"<<row<<"was requested to be drawn on top of the current draw";
     QVector<ADrawObject> & BasketDrawObjects = Basket->getDrawObjects(row);
 
+    MakeCopyOfDrawObjects();
+    MakeCopyOfActiveBasketId();
+
     for (int i=0; i<BasketDrawObjects.size(); i++)
     {
         TString CName = BasketDrawObjects[i].Pointer->ClassName();
@@ -2595,7 +2611,10 @@ void GraphWindowClass::Basket_DrawOnTop(int row)
         //qDebug() << "New options:"<<safe;
         DrawObjects.append(ADrawObject(BasketDrawObjects[i].Pointer, safe));
     }
-    setBasketItemUpdateAllowed(false);
+
+    ActiveBasketItem = -1;
+    UpdateBasketGUI();
+
     RedrawAll();
 }
 
@@ -2874,8 +2893,11 @@ void GraphWindowClass::on_pbBackToLast_clicked()
 {
     DrawObjects = PreviousDrawObjects;
     PreviousDrawObjects.clear();
-    setBasketItemUpdateAllowed(false);
+    ActiveBasketItem = PreviousActiveBasketItem;
+    PreviousActiveBasketItem = -1;
+
     RedrawAll();
+    UpdateBasketGUI();
 }
 
 void GraphWindowClass::on_actionToggle_Explorer_Basket_toggled(bool arg1)
@@ -2895,31 +2917,9 @@ void GraphWindowClass::switchToBasket(int index)
     RedrawAll();
 
     ActiveBasketItem = index;
-    setBasketItemUpdateAllowed(true);
-}
-
-void GraphWindowClass::setBasketItemUpdateAllowed(bool flag)
-{
-    if (ActiveBasketItem < 0 || ActiveBasketItem >= Basket->size()) flag = false;
-
-    if (!flag) ActiveBasketItem = -1;
-    ui->pbUpdateInBasket->setEnabled(flag);
-
-    for (int i=0; i < lwBasket->count(); i++)
-    {
-        QListWidgetItem * item = lwBasket->item(i);
-        if (i == ActiveBasketItem)
-        {
-            item->setForeground(QBrush(Qt::cyan));
-            item->setBackground(QBrush(Qt::lightGray));
-        }
-        else
-        {
-            item->setForeground(QBrush(Qt::black));
-            item->setBackground(QBrush(Qt::white));
-        }
-    }
-    lwBasket->clearSelection();
+    ClearCopyOfActiveBasketId();
+    ClearCopyOfDrawObjects();
+    UpdateBasketGUI();
 }
 
 void GraphWindowClass::on_pbUpdateInBasket_clicked()

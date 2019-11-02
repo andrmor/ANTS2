@@ -273,7 +273,6 @@ private:
     int ActiveBasketItem = -1; //-1 - Basket is off; 0+ -> basket loaded, can be updated
     int PreviousActiveBasketItem = -1; //-1 - Basket is off; 0+ -> basket loaded, can be updated
     void switchToBasket(int index);
-    void setBasketItemUpdateAllowed(bool flag);
 
     QVector<TObject*> tmpTObjects;
     TH1D* hProjection = 0;  //for toolbox
@@ -292,7 +291,6 @@ private:
 
     double xmin, xmax, ymin, ymax, zmin, zmax;
     double xmin0, xmax0, ymin0, ymax0, zmin0, zmax0; //start values - filled on first draw, can be used to reset view with "Unzoom"
-    QString old_option;
 
     void clearTmpTObjects();   //enable qDebugs inside for diagnostics of cleanup!
     void startOverlayMode();

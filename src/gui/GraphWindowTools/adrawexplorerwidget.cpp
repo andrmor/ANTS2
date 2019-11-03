@@ -137,8 +137,9 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
     Menu.addSeparator();
 
     QMenu * fitMenu =       Menu.addMenu("Fit");
-        QAction* fwhmA      =   fitMenu->addAction("Fit with Gauss and estimate FWHM"); fwhmA->setEnabled(Type.startsWith("TH1") || Type == "TProfile");
-        QAction* splineFitA =   fitMenu->addAction("Fit with B-spline"); splineFitA->setEnabled(Type == "TGraph" || Type == "TGraphErrors");   //*** implement for TH1 too!
+        QAction* linFitA    =   fitMenu->addAction("Linear (use click-drag)"); linFitA->setEnabled(Type.startsWith("TH1") || Type == "TProfile");
+        QAction* fwhmA      =   fitMenu->addAction("Gauss (use click-frag)"); fwhmA->setEnabled(Type.startsWith("TH1") || Type == "TProfile");
+        QAction* splineFitA =   fitMenu->addAction("B-spline"); splineFitA->setEnabled(Type == "TGraph" || Type == "TGraphErrors");   //*** implement for TH1 too!
         fitMenu->addSeparator();
         QAction* showFitPanel = fitMenu->addAction("Show fit panel");
 
@@ -169,6 +170,7 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
    else if (si == scaleA)       scale(obj);
    else if (si == integralA)    drawIntegral(obj);
    else if (si == fractionA)    fraction(obj);
+   else if (si == linFitA)      linFit(index);
    else if (si == fwhmA)        fwhm(index);
    else if (si == interpolateA) interpolate(obj);
    else if (si == titleX)       editTitle(obj, 0);
@@ -623,7 +625,7 @@ void ADrawExplorerWidget::fraction(ADrawObject &obj)
     delete cum;
 }
 
-Double_t GauseWithBase(Double_t *x, Double_t *par)
+double GauseWithBase(double * x, double * par)
 {
    return par[0] * exp( par[1] * (x[0]+par[2])*(x[0]+par[2]) ) + par[3]*x[0] + par[4];   // [0]*exp([1]*(x+[2])^2) + [3]*x + [4]
 }
@@ -631,15 +633,16 @@ Double_t GauseWithBase(Double_t *x, Double_t *par)
 void ADrawExplorerWidget::fwhm(int index)
 {
     ADrawObject & obj = DrawObjects[index];
-    TH1* h = dynamic_cast<TH1*>(obj.Pointer);
-    if (!h) return;
 
-    const QString cn = h->ClassName();
+    const QString cn = obj.Pointer->ClassName();
     if ( !cn.startsWith("TH1") && cn!="TProfile")
     {
         message("Can be used only with 1D histograms!", &GraphWindow);
         return;
     }
+
+    TH1* h = dynamic_cast<TH1*>(obj.Pointer);
+    if (!h) return;
 
     GraphWindow.TriggerGlobalBusy(true);
 
@@ -700,7 +703,7 @@ void ADrawExplorerWidget::fwhm(int index)
     //draw fit line
     DrawObjects.insert(index+1, ADrawObject(f, "same"));
     //draw base line
-    TF1 *fl = new TF1("line", "pol2", startX, stopX);
+    TF1 *fl = new TF1("line", "pol1", startX, stopX);
     fl->SetTitle("Baseline");
     GraphWindow.RegisterTObject(fl);
     fl->SetLineStyle(2);
@@ -717,6 +720,74 @@ void ADrawExplorerWidget::fwhm(int index)
     for (QString s : sl) la->AddText(s.toLatin1());
     GraphWindow.RegisterTObject(la);
     DrawObjects.insert(index+3, ADrawObject(la, "same"));
+
+    GraphWindow.RedrawAll();
+}
+
+void ADrawExplorerWidget::linFit(int index)
+{
+    ADrawObject & obj = DrawObjects[index];
+
+    const QString cn = obj.Pointer->ClassName();
+    if ( !cn.startsWith("TH1") && cn!="TProfile")
+    {
+        message("Can be used only with 1D histograms!", &GraphWindow);
+        return;
+    }
+
+    TH1* h = dynamic_cast<TH1*>(obj.Pointer);
+    if (!h) return;
+
+    GraphWindow.TriggerGlobalBusy(true);
+
+    GraphWindow.Extract2DLine();
+    if (!GraphWindow.Extraction()) return; //cancel
+
+    double startX = GraphWindow.extracted2DLineXstart();
+    double stopX = GraphWindow.extracted2DLineXstop();
+    if (startX > stopX) std::swap(startX, stopX);
+
+    double a = GraphWindow.extracted2DLineA();
+    double b = GraphWindow.extracted2DLineB();
+    double c = GraphWindow.extracted2DLineC();
+    if (fabs(b) < 1.0e-10)
+    {
+        message("Bad line, cannot fit", &GraphWindow);
+        return;
+    }
+
+    TF1 * f = new TF1("line", "pol1", startX, stopX);
+    f->SetTitle("Linear fit");
+    GraphWindow.RegisterTObject(f);
+
+    f->SetParameter(0, c/b);
+    f->SetParameter(1, -a/b);
+
+    int status = h->Fit(f, "R0");
+    if (status != 0)
+    {
+        message("Fit failed!", &GraphWindow);
+        return;
+    }
+
+    GraphWindow.MakeCopyOfDrawObjects();
+    GraphWindow.MakeCopyOfActiveBasketId();
+
+    double A = f->GetParameter(0);
+    double B = f->GetParameter(1);
+
+    DrawObjects.insert(index+1, ADrawObject(f, "same"));
+
+    QString text = QString("y = Ax+B\nA = %1, B = %2\nx range: %3 -> %4").arg(A).arg(B).arg(startX).arg(stopX);
+    TPaveText* la = new TPaveText(0.15, 0.75, 0.5, 0.85, "NDC");
+    la->SetFillColor(0);
+    la->SetBorderSize(1);
+    la->SetLineColor(1);
+    la->SetTextAlign( (0 + 1) * 10 + 2);
+    QStringList sl = text.split("\n");
+    for (QString s : sl) la->AddText(s.toLatin1());
+    GraphWindow.RegisterTObject(la);
+    DrawObjects.insert(index+2, ADrawObject(la, "same"));
 
     GraphWindow.RedrawAll();
 }

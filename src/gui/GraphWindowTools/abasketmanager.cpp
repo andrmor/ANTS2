@@ -1,4 +1,6 @@
 #include "abasketmanager.h"
+#include "afiletools.h"
+#include "ajsontools.h"
 
 #include <QStringList>
 #include <QDebug>
@@ -8,9 +10,12 @@
 #include "TF1.h"
 #include "TF2.h"
 #include "TGraph.h"
+#include "TGraphErrors.h"
 #include "TAxis.h"
 #include "TH1.h"
 #include "TH2.h"
+#include "TFile.h"
+#include "TKey.h"
 
 ABasketManager::ABasketManager()
 {
@@ -170,7 +175,6 @@ const QStringList ABasketManager::getItemNames() const
     return res;
 }
 
-#include "TFile.h"
 void ABasketManager::saveAll(const QString & fileName)
 {
     QString str;
@@ -211,31 +215,8 @@ void ABasketManager::saveAll(const QString & fileName)
     desc.SetTitle(str.toLocal8Bit().data());
     desc.Write("BasketDescription");
 
-    //qDebug()  << "Descr:" << str;
-
     f.Close();
 }
-
-#include "TKey.h"
-#include "TGraph.h"
-#include "TMultiGraph.h"
-#include "TGraphErrors.h"
-#include "TGraph2D.h"
-#include "TH1.h"
-#include "TH2.h"
-#include "TH3.h"
-//#include "TH1D.h"
-#include "TF1.h"
-#include "TF2.h"
-#include "TProfile.h"
-#include "TProfile2D.h"
-#include "TBox.h"
-#include "TEllipse.h"
-#include "TPolyLine.h"
-#include "TLine.h"
-#include "TLegend.h"
-#include "TPavesText.h"
-#include "TNamed.h"
 
 const QString ABasketManager::appendBasket(const QString & fileName)
 {
@@ -338,7 +319,6 @@ const QString ABasketManager::appendBasket(const QString & fileName)
     return "";
 }
 
-#include "afiletools.h"
 const QString ABasketManager::appendTxtAsGraph(const QString & fileName)
 {
     QVector<double> x, y;

@@ -247,9 +247,7 @@ private slots:
     void on_actionToggle_Explorer_Basket_toggled(bool arg1);
     void on_pbUpdateInBasket_clicked();
     void on_actionShow_ROOT_attribute_panel_triggered();
-
     void on_pbShowRuler_clicked();
-
     void on_pbExitToolMode_clicked();
 
 private:

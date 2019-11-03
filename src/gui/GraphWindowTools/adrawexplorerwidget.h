@@ -35,6 +35,7 @@ private:
     void setMarker(ADrawObject &obj);
     void setLine(ADrawObject &obj);
     void showPanel(ADrawObject &obj);
+    void fitPanel(ADrawObject &obj);
     void scale(ADrawObject &obj);
     void shift(ADrawObject &obj);
     void drawIntegral(ADrawObject &obj);

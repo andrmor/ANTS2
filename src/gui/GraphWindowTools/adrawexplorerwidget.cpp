@@ -90,40 +90,72 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
         return;
     }
     ADrawObject & obj = DrawObjects[index];
+    const QString Type = obj.Pointer->ClassName();
 
     QMenu Menu;
 
     QAction * renameA =     Menu.addAction("Rename");    
+
     Menu.addSeparator();
+
+    QAction * enableA =     Menu.addAction("Toggle enabled/disabled"); enableA->setChecked(obj.bEnabled); enableA->setEnabled(index != 0);
+
+    Menu.addSeparator();
+
+    QAction * delA =        Menu.addAction("Delete"); delA->setEnabled(index != 0);
+
+    Menu.addSeparator();
+
     QAction * setMarkerA =  Menu.addAction("Set marker attributes");
     QAction * setLineA =    Menu.addAction("Set line attributes");
-    QAction * panelA   =    Menu.addAction("Root hist/graph panel");
+    QAction * panelA   =    Menu.addAction("Root line/marker panel");
+
     Menu.addSeparator();
-    QAction * scaleA   =    Menu.addAction("Scale");
-    QAction * shiftA =      Menu.addAction("Shift X scale");
+
+    QMenu * manipMenu =     Menu.addMenu("Manipulate histogram"); manipMenu->setEnabled(Type.startsWith("TH1"));
+        QAction * scaleA =      manipMenu->addAction("Scale");
+        QAction * shiftA =      manipMenu->addAction("Shift X scale");
+        manipMenu->addSeparator();
+        QAction* interpolateA = manipMenu->addAction("Interpolate");
+        manipMenu->addSeparator();
+        QAction* medianA =      manipMenu->addAction("Apply median filter");
+
     Menu.addSeparator();
-    QAction* integralA =    Menu.addAction("Draw integral");
-    QAction* fractionA =    Menu.addAction("Calculate fraction before/after");
-    QAction* fwhmA =        Menu.addAction("Estimate FWHM");
-    QAction* interpolateA = Menu.addAction("Interpolate");
-    QAction* medianA =      Menu.addAction("Apply median filter");
-    QAction* splineFitA =   Menu.addAction("Fit with B-spline");    //*** implement for TH1 too!
+
+    QMenu * projectMenu =   Menu.addMenu("Projection"); projectMenu->setEnabled(Type.startsWith("TH2"));
+        QAction* projX =        projectMenu->addAction("X projection");
+        QAction* projY =        projectMenu->addAction("Y projection");
+        projectMenu->addSeparator();
+        QAction* projCustom =   projectMenu->addAction("Show projection tool");
+
     Menu.addSeparator();
+
+    QMenu * calcMenu =     Menu.addMenu("Calculate"); calcMenu->setEnabled(Type.startsWith("TH1") || Type == "TProfile");
+        QAction* integralA =    calcMenu->addAction("Draw integral");
+        QAction* fractionA =    calcMenu->addAction("Calculate fraction before/after");
+
+    Menu.addSeparator();
+
+    QMenu * fitMenu =       Menu.addMenu("Fit");
+        QAction* fwhmA      =   fitMenu->addAction("Fit with Gauss and estimate FWHM"); fwhmA->setEnabled(Type.startsWith("TH1") || Type == "TProfile");
+        QAction* splineFitA =   fitMenu->addAction("Fit with B-spline"); splineFitA->setEnabled(Type == "TGraph" || Type == "TGraphErrors");   //*** implement for TH1 too!
+        fitMenu->addSeparator();
+        QAction* showFitPanel = fitMenu->addAction("Show fit panel");
+
+    Menu.addSeparator();
+
     QAction* titleX =       Menu.addAction("Edit X title");
     QAction* titleY =       Menu.addAction("Edit Y title");
+
     Menu.addSeparator();
-    QAction* saveRootA =    Menu.addAction("Save ROOT object");
-    QAction* saveTxtA =     Menu.addAction("Save as text");
-    QAction* saveEdgeA =    Menu.addAction("Save hist as text using bin edges");
-    Menu.addSeparator();
-    QAction* projX =        Menu.addAction("X projection");
-    QAction* projY =        Menu.addAction("Y projection");
-    QAction* projCustom =   Menu.addAction("Custom projection");
-    Menu.addSeparator();
-    QAction * enableA =     Menu.addAction("Toggle enabled/disabled");
-        enableA->setChecked(obj.bEnabled);
-        enableA->setEnabled(index != 0);
-    QAction * delA =        Menu.addAction("Delete");
+
+    QMenu * saveMenu =      Menu.addMenu("Save");
+        QAction* saveRootA =    saveMenu->addAction("Save ROOT object");
+        saveMenu->addSeparator();
+        QAction* saveTxtA =     saveMenu->addAction("Save as text");
+        QAction* saveEdgeA =    saveMenu->addAction("Save hist as text using bin edges");
+
+    // ------ exec ------
 
     QAction* si = Menu.exec(mapToGlobal(pos));
     if (!si) return; //nothing was selected
@@ -150,49 +182,8 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
    else if (si == saveTxtA)     saveAsTxt(obj, true);
    else if (si == saveEdgeA)    saveAsTxt(obj, false);
    else if (si == projCustom)   customProjection(obj);
+   else if (si == showFitPanel) fitPanel(obj);
 
-    /*
-    QAction* gaussFit = 0;
-
-    if (temp)
-      {
-        //menu triggered at a valid item
-        index = ui->lwBasket->row(temp);
-        const QString Type = Basket->getType(index);
-
-        if (Type.startsWith("TH1"))
-        {
-               gaussFit = BasketMenu.addAction("Fit with Gauss");
-               median = BasketMenu.addAction("Apply median filter");
-               drawIntegral = BasketMenu.addAction("Draw integral");
-               interpolate = BasketMenu.addAction("Interpolate");
-               fraction = BasketMenu.addAction("Calculate fraction before/after");
-        }
-        else if (Type.startsWith("TH2"))
-        {
-               projX = BasketMenu.addAction("X projection");
-               projY = BasketMenu.addAction("Y projection");
-        }
-        else if (Type == "TGraph" || Type == "TProfile")
-        {
-               splineFit = BasketMenu.addAction("Fit with B-spline");
-        }
-        BasketMenu.addSeparator();
-
-      }
-    else if (selectedItem == gaussFit)
-    {
-        TH1* h =   static_cast<TH1*>(obj);
-        TF1* f1 = new TF1("f1", "gaus");
-        int status = h->Fit(f1, "+");
-        if (status == 0)
-        {
-            ui->cbShowFitParameters->setChecked(true);
-            ui->cbShowLegend->setChecked(true);
-            RedrawAll();
-        }
-    }
-    */
 }
 
 void ADrawExplorerWidget::addToDrawObjectsAndRegister(TObject * pointer, const QString & options)
@@ -204,7 +195,7 @@ void ADrawExplorerWidget::addToDrawObjectsAndRegister(TObject * pointer, const Q
 void ADrawExplorerWidget::rename(ADrawObject & obj)
 {
     bool ok;
-    QString text = QInputDialog::getText(this, "Rename item",
+    QString text = QInputDialog::getText(&GraphWindow, "Rename item",
                                                "Enter new name:", QLineEdit::Normal,
                                                obj.Name, &ok);
     if (!ok || text.isEmpty()) return;
@@ -301,6 +292,17 @@ void ADrawExplorerWidget::showPanel(ADrawObject &obj)
     }
 }
 
+void ADrawExplorerWidget::fitPanel(ADrawObject &obj)
+{
+    TH1* h = dynamic_cast<TH1*>(obj.Pointer);
+    if (h) h->FitPanel();
+    else
+    {
+        TGraph* g = dynamic_cast<TGraph*>(obj.Pointer);
+        if (g) g->FitPanel();
+    }
+}
+
 double runScaleDialog(QWidget * parent)
 {
     QDialog* D = new QDialog(parent);
@@ -346,11 +348,11 @@ void ADrawExplorerWidget::scale(ADrawObject &obj)
     impl << "TGraph" << "TGraphErrors"  << "TH1I" << "TH1D" << "TH1F" << "TH2I"<< "TH2D"<< "TH2D";
     if (!impl.contains(name))
     {
-        message("Not implemented for this object", this);
+        message("Not implemented for this object", &GraphWindow);
         return;
     }
 
-    double sf = runScaleDialog(this);
+    double sf = runScaleDialog(&GraphWindow);
     if (sf == 1.0) return;
 
     //qDebug() << "----On start, this:"<< GraphWindow.DrawObjects.first().Pointer;
@@ -436,11 +438,11 @@ void ADrawExplorerWidget::shift(ADrawObject &obj)
     impl << "TGraph" << "TGraphErrors"  << "TH1I" << "TH1D" << "TH1F" << "TProfile";
     if (!impl.contains(name))
     {
-        message("Not implemented for this object type", this);
+        message("Not implemented for this object type", &GraphWindow);
         return;
     }
 
-    const QPair<double, double> val = runShiftDialog(this);
+    const QPair<double, double> val = runShiftDialog(&GraphWindow);
     if (val.first == 1.0 && val.second == 0) return;
 
     GraphWindow.MakeCopyOfDrawObjects();
@@ -485,7 +487,7 @@ void ADrawExplorerWidget::drawIntegral(ADrawObject &obj)
     TH1* h = dynamic_cast<TH1*>(obj.Pointer);
     if (!h)
     {
-        message("Not implemented for this object type", this);
+        message("Not implemented for this object type", &GraphWindow);
         return;
     }
     int bins = h->GetNbinsX();
@@ -523,14 +525,14 @@ void ADrawExplorerWidget::fraction(ADrawObject &obj)
     TH1* h = dynamic_cast<TH1*>(obj.Pointer);
     if (!h)
     {
-        message("This operation requires TH1 ROOT object", this);
+        message("This operation requires TH1 ROOT object", &GraphWindow);
         return;
     }
     TH1* cum = h->GetCumulative(true);
 
     double integral = h->Integral();
 
-    QDialog D(this);
+    QDialog D(&GraphWindow);
     D.setWindowTitle("Integral / fraction calculator");
 
     QVBoxLayout *l = new QVBoxLayout();
@@ -635,7 +637,7 @@ void ADrawExplorerWidget::fwhm(int index)
     const QString cn = h->ClassName();
     if ( !cn.startsWith("TH1") && cn!="TProfile")
     {
-        message("Can be used only with 1D histograms!", this);
+        message("Can be used only with 1D histograms!", &GraphWindow);
         return;
     }
 
@@ -654,7 +656,7 @@ void ADrawExplorerWidget::fwhm(int index)
     double c = GraphWindow.extracted2DLineC();
     if (fabs(b) < 1.0e-10)
     {
-        message("Bad base line, cannot fit", this);
+        message("Bad base line, cannot fit", &GraphWindow);
         return;
     }
                                                                    //  S  * exp( -0.5/s2 * (x   -m )^2) +  A *x +  B
@@ -682,7 +684,7 @@ void ADrawExplorerWidget::fwhm(int index)
     int status = h->Fit(f, "R0");
     if (status != 0)
     {
-        message("Fit failed!", this);
+        message("Fit failed!", &GraphWindow);
         return;
     }
 
@@ -724,7 +726,7 @@ void ADrawExplorerWidget::interpolate(ADrawObject &obj)
     TH1* hist = dynamic_cast<TH1*>(obj.Pointer);
     if (!hist)
     {
-        message("This operation requires TH1 ROOT object", this);
+        message("This operation requires TH1 ROOT object", &GraphWindow);
         return;
     }
 
@@ -790,7 +792,7 @@ void ADrawExplorerWidget::median(ADrawObject &obj)
     TH1* hist = dynamic_cast<TH1*>(obj.Pointer);
     if (!hist)
     {
-        message("This operation requires TH1 ROOT object", this);
+        message("This operation requires TH1 ROOT object", &GraphWindow);
         return;
     }
 
@@ -867,7 +869,7 @@ void ADrawExplorerWidget::projection(ADrawObject &obj, bool bX)
     TH2* h = dynamic_cast<TH2*>(obj.Pointer);
     if (!h)
     {
-        message("This operation requires TH2 ROOT object", this);
+        message("This operation requires TH2 ROOT object", &GraphWindow);
         return;
     }
 
@@ -895,7 +897,7 @@ void ADrawExplorerWidget::customProjection(ADrawObject & obj)
     TH2* hist = dynamic_cast<TH2*>(obj.Pointer);
     if (!hist)
     {
-        message("This operation requires TH2 ROOT object selected", this);
+        message("This operation requires TH2 ROOT object selected", &GraphWindow);
         return;
     }
 
@@ -910,18 +912,18 @@ void ADrawExplorerWidget::splineFit(int index)
     TGraph* g = dynamic_cast<TGraph*>(obj.Pointer);
     if (!g)
     {
-        message("Suppoted only for TGraph-based ROOT objects", this);
+        message("Suppoted only for TGraph-based ROOT objects", &GraphWindow);
         return;
     }
 
     bool ok;
-    int numNodes = QInputDialog::getInt(this, "", "Enter number of nodes:", 6, 2, 1000, 1, &ok);
+    int numNodes = QInputDialog::getInt(&GraphWindow, "", "Enter number of nodes:", 6, 2, 1000, 1, &ok);
     if (ok)
     {
         int numPoints = g->GetN();
         if (numPoints < numNodes)
         {
-            message("Not enough points in the graph for the selected number of nodes", this);
+            message("Not enough points in the graph for the selected number of nodes", &GraphWindow);
             return;
         }
 
@@ -948,7 +950,7 @@ void ADrawExplorerWidget::splineFit(int index)
         GraphWindow.RedrawAll();
     }
 #else
-    message("This option is supported only when ANTS2 is compliled with Eigen library enabled", this);
+    message("This option is supported only when ANTS2 is compliled with Eigen library enabled", &GraphWindow);
 #endif
 }
 
@@ -966,7 +968,7 @@ void ADrawExplorerWidget::editTitle(ADrawObject &obj, int X0Y1)
             axis = ( X0Y1 == 0 ? h->GetXaxis() : h->GetYaxis() );
         else
         {
-            message("Not supported for this object type", this);
+            message("Not supported for this object type", &GraphWindow);
             return;
         }
     }
@@ -974,7 +976,7 @@ void ADrawExplorerWidget::editTitle(ADrawObject &obj, int X0Y1)
     QString oldTitle;
     oldTitle = axis->GetTitle();
     bool ok;
-    QString newTitle = QInputDialog::getText(this, "Change axis title", QString("New %1 axis title:").arg(X0Y1 == 0 ? "X" : "Y"), QLineEdit::Normal, oldTitle, &ok);
+    QString newTitle = QInputDialog::getText(&GraphWindow, "Change axis title", QString("New %1 axis title:").arg(X0Y1 == 0 ? "X" : "Y"), QLineEdit::Normal, oldTitle, &ok);
     if (ok) axis->SetTitle(newTitle.toLatin1().data());
 
     GraphWindow.RedrawAll();
@@ -983,7 +985,7 @@ void ADrawExplorerWidget::editTitle(ADrawObject &obj, int X0Y1)
 #include <TFile.h>
 void ADrawExplorerWidget::saveRoot(ADrawObject &obj)
 {
-    QString fileName = QFileDialog::getSaveFileName(this, "Save ROOT object", GraphWindow.getLastOpendDir(), "Root files(*.root)");
+    QString fileName = QFileDialog::getSaveFileName(&GraphWindow, "Save ROOT object", GraphWindow.getLastOpendDir(), "Root files(*.root)");
     if (fileName.isEmpty()) return;
     GraphWindow.getLastOpendDir() = QFileInfo(fileName).absolutePath();
     if (QFileInfo(fileName).suffix().isEmpty()) fileName += ".root";
@@ -1009,7 +1011,7 @@ void ADrawExplorerWidget::saveAsTxt(ADrawObject &obj, bool fUseBinCenters)
 
     if (cn != "TGraph" && cn != "TGraphErrors" && !cn.startsWith("TH1") && !cn.startsWith("TH2") && cn != "TF1" && cn != "TF2")
     {
-        message("Not implemented for this object type", this);
+        message("Not implemented for this object type", &GraphWindow);
         return;
     }
 
@@ -1022,7 +1024,7 @@ void ADrawExplorerWidget::saveAsTxt(ADrawObject &obj, bool fUseBinCenters)
         if (tf1) tobj = tf1->GetHistogram();
     }
 
-    QString fileName = QFileDialog::getSaveFileName(this, "Save as text", GraphWindow.getLastOpendDir(), "Text files(*.txt);;All files (*.*)");
+    QString fileName = QFileDialog::getSaveFileName(&GraphWindow, "Save as text", GraphWindow.getLastOpendDir(), "Text files(*.txt);;All files (*.*)");
     if (fileName.isEmpty()) return;
     GraphWindow.getLastOpendDir() = QFileInfo(fileName).absolutePath();
     if (QFileInfo(fileName).suffix().isEmpty()) fileName += ".txt";

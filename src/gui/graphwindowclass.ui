@@ -62,7 +62,7 @@
          <x>2</x>
          <y>1</y>
          <width>151</width>
-         <height>500</height>
+         <height>561</height>
         </rect>
        </property>
        <property name="currentIndex">
@@ -674,7 +674,7 @@
            <x>0</x>
            <y>6</y>
            <width>151</width>
-           <height>490</height>
+           <height>551</height>
           </rect>
          </property>
          <property name="frameShape">
@@ -1181,9 +1181,9 @@
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>1</y>
+              <y>0</y>
               <width>145</width>
-              <height>420</height>
+              <height>521</height>
              </rect>
             </property>
             <property name="frameShape">
@@ -1195,10 +1195,10 @@
             <widget class="QLineEdit" name="ledXcenter">
              <property name="geometry">
               <rect>
-               <x>20</x>
-               <y>3</y>
-               <width>47</width>
-               <height>20</height>
+               <x>70</x>
+               <y>20</y>
+               <width>71</width>
+               <height>21</height>
               </rect>
              </property>
              <property name="text">
@@ -1209,22 +1209,25 @@
              <property name="geometry">
               <rect>
                <x>5</x>
-               <y>6</y>
-               <width>20</width>
-               <height>13</height>
+               <y>20</y>
+               <width>61</width>
+               <height>16</height>
               </rect>
              </property>
              <property name="text">
-              <string>X:</string>
+              <string>X center:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
              </property>
             </widget>
             <widget class="QLineEdit" name="ledAngle">
              <property name="geometry">
               <rect>
-               <x>91</x>
-               <y>45</y>
-               <width>47</width>
-               <height>20</height>
+               <x>70</x>
+               <y>108</y>
+               <width>71</width>
+               <height>21</height>
               </rect>
              </property>
              <property name="contextMenuPolicy">
@@ -1234,29 +1237,13 @@
               <string>0</string>
              </property>
             </widget>
-            <widget class="QLabel" name="label_14">
-             <property name="geometry">
-              <rect>
-               <x>9</x>
-               <y>44</y>
-               <width>81</width>
-               <height>20</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>Angle, deg:</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-            </widget>
             <widget class="QLineEdit" name="ledYcenter">
              <property name="geometry">
               <rect>
-               <x>20</x>
-               <y>22</y>
-               <width>47</width>
-               <height>20</height>
+               <x>70</x>
+               <y>64</y>
+               <width>71</width>
+               <height>21</height>
               </rect>
              </property>
              <property name="text">
@@ -1267,22 +1254,25 @@
              <property name="geometry">
               <rect>
                <x>5</x>
-               <y>25</y>
-               <width>20</width>
-               <height>13</height>
+               <y>64</y>
+               <width>61</width>
+               <height>16</height>
               </rect>
              </property>
              <property name="text">
-              <string>Y:</string>
+              <string>Y center:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
              </property>
             </widget>
             <widget class="QLineEdit" name="ledHeight">
              <property name="geometry">
               <rect>
-               <x>91</x>
-               <y>22</y>
-               <width>47</width>
-               <height>20</height>
+               <x>70</x>
+               <y>85</y>
+               <width>71</width>
+               <height>21</height>
               </rect>
              </property>
              <property name="text">
@@ -1292,22 +1282,25 @@
             <widget class="QLabel" name="label_18">
              <property name="geometry">
               <rect>
-               <x>73</x>
-               <y>26</y>
-               <width>35</width>
-               <height>13</height>
+               <x>5</x>
+               <y>87</y>
+               <width>61</width>
+               <height>16</height>
               </rect>
              </property>
              <property name="text">
               <string>dY:</string>
              </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
             </widget>
             <widget class="QPushButton" name="pbXprojection">
              <property name="geometry">
               <rect>
-               <x>2</x>
-               <y>147</y>
-               <width>70</width>
+               <x>30</x>
+               <y>253</y>
+               <width>90</width>
                <height>23</height>
               </rect>
              </property>
@@ -1318,9 +1311,9 @@
             <widget class="QPushButton" name="pbYprojection">
              <property name="geometry">
               <rect>
-               <x>71</x>
-               <y>147</y>
-               <width>69</width>
+               <x>30</x>
+               <y>276</y>
+               <width>90</width>
                <height>23</height>
               </rect>
              </property>
@@ -1331,10 +1324,10 @@
             <widget class="QLineEdit" name="ledWidth">
              <property name="geometry">
               <rect>
-               <x>91</x>
-               <y>3</y>
-               <width>47</width>
-               <height>20</height>
+               <x>70</x>
+               <y>41</y>
+               <width>71</width>
+               <height>21</height>
               </rect>
              </property>
              <property name="text">
@@ -1344,22 +1337,25 @@
             <widget class="QLabel" name="label_12">
              <property name="geometry">
               <rect>
-               <x>73</x>
-               <y>7</y>
-               <width>35</width>
-               <height>13</height>
+               <x>5</x>
+               <y>41</y>
+               <width>61</width>
+               <height>16</height>
               </rect>
              </property>
              <property name="text">
               <string>dX:</string>
              </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
             </widget>
             <widget class="QSpinBox" name="sProjBins">
              <property name="geometry">
               <rect>
-               <x>91</x>
-               <y>67</y>
-               <width>47</width>
+               <x>70</x>
+               <y>149</y>
+               <width>70</width>
                <height>22</height>
               </rect>
              </property>
@@ -1376,27 +1372,14 @@
             <widget class="QPushButton" name="pbSelBoxToCenter">
              <property name="geometry">
               <rect>
-               <x>76</x>
-               <y>93</y>
-               <width>60</width>
-               <height>21</height>
+               <x>30</x>
+               <y>204</y>
+               <width>90</width>
+               <height>23</height>
               </rect>
              </property>
              <property name="text">
               <string>Reset</string>
-             </property>
-            </widget>
-            <widget class="Line" name="line_12">
-             <property name="geometry">
-              <rect>
-               <x>0</x>
-               <y>266</y>
-               <width>150</width>
-               <height>3</height>
-              </rect>
-             </property>
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
              </property>
             </widget>
             <widget class="QPushButton" name="pbToolboxDragMode">
@@ -1405,10 +1388,10 @@
              </property>
              <property name="geometry">
               <rect>
-               <x>0</x>
-               <y>93</y>
-               <width>71</width>
-               <height>21</height>
+               <x>30</x>
+               <y>180</y>
+               <width>90</width>
+               <height>23</height>
               </rect>
              </property>
              <property name="toolTip">
@@ -1421,8 +1404,8 @@
             <widget class="QPushButton" name="pbSelBoxFGColor">
              <property name="geometry">
               <rect>
-               <x>5</x>
-               <y>240</y>
+               <x>10</x>
+               <y>410</y>
                <width>61</width>
                <height>21</height>
               </rect>
@@ -1434,8 +1417,8 @@
             <widget class="QPushButton" name="pbSelBoxBGColor">
              <property name="geometry">
               <rect>
-               <x>75</x>
-               <y>240</y>
+               <x>80</x>
+               <y>410</y>
                <width>61</width>
                <height>21</height>
               </rect>
@@ -1448,7 +1431,7 @@
              <property name="geometry">
               <rect>
                <x>3</x>
-               <y>222</y>
+               <y>389</y>
                <width>137</width>
                <height>17</height>
               </rect>
@@ -1460,9 +1443,9 @@
             <widget class="QPushButton" name="pbDensityDistribution">
              <property name="geometry">
               <rect>
-               <x>2</x>
-               <y>195</y>
-               <width>139</width>
+               <x>30</x>
+               <y>356</y>
+               <width>90</width>
                <height>23</height>
               </rect>
              </property>
@@ -1473,9 +1456,9 @@
             <widget class="QCheckBox" name="cbProjBoxAutobin">
              <property name="geometry">
               <rect>
-               <x>42</x>
-               <y>69</y>
-               <width>47</width>
+               <x>7</x>
+               <y>151</y>
+               <width>60</width>
                <height>17</height>
               </rect>
              </property>
@@ -1489,22 +1472,25 @@
             <widget class="QLabel" name="label_25">
              <property name="geometry">
               <rect>
-               <x>10</x>
-               <y>71</y>
-               <width>30</width>
-               <height>13</height>
+               <x>0</x>
+               <y>132</y>
+               <width>140</width>
+               <height>16</height>
               </rect>
              </property>
              <property name="text">
               <string>Bins:</string>
              </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
             </widget>
             <widget class="QPushButton" name="pbYaveraged">
              <property name="geometry">
               <rect>
-               <x>71</x>
-               <y>171</y>
-               <width>69</width>
+               <x>30</x>
+               <y>327</y>
+               <width>90</width>
                <height>23</height>
               </rect>
              </property>
@@ -1515,9 +1501,9 @@
             <widget class="QPushButton" name="pbXaveraged">
              <property name="geometry">
               <rect>
-               <x>2</x>
-               <y>171</y>
-               <width>70</width>
+               <x>30</x>
+               <y>304</y>
+               <width>90</width>
                <height>23</height>
               </rect>
              </property>
@@ -1529,7 +1515,7 @@
              <property name="geometry">
               <rect>
                <x>0</x>
-               <y>120</y>
+               <y>174</y>
                <width>150</width>
                <height>3</height>
               </rect>
@@ -1542,10 +1528,16 @@
              <property name="geometry">
               <rect>
                <x>5</x>
-               <y>128</y>
+               <y>234</y>
                <width>133</width>
                <height>16</height>
               </rect>
+             </property>
+             <property name="font">
+              <font>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
              </property>
              <property name="text">
               <string>Draw:</string>
@@ -1554,8 +1546,49 @@
               <set>Qt::AlignCenter</set>
              </property>
             </widget>
+            <widget class="QLabel" name="label_24">
+             <property name="geometry">
+              <rect>
+               <x>5</x>
+               <y>108</y>
+               <width>61</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Angle º:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+            <widget class="Line" name="line_18">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>231</y>
+               <width>150</width>
+               <height>3</height>
+              </rect>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+            <widget class="Line" name="line_19">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>383</y>
+               <width>150</width>
+               <height>3</height>
+              </rect>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
             <zorder>label_4</zorder>
-            <zorder>label_14</zorder>
             <zorder>label_17</zorder>
             <zorder>ledXcenter</zorder>
             <zorder>label_18</zorder>
@@ -1568,7 +1601,6 @@
             <zorder>ledWidth</zorder>
             <zorder>sProjBins</zorder>
             <zorder>pbSelBoxToCenter</zorder>
-            <zorder>line_12</zorder>
             <zorder>pbToolboxDragMode</zorder>
             <zorder>pbSelBoxFGColor</zorder>
             <zorder>pbSelBoxBGColor</zorder>
@@ -1580,6 +1612,22 @@
             <zorder>pbXaveraged</zorder>
             <zorder>line_14</zorder>
             <zorder>label_26</zorder>
+            <zorder>label_24</zorder>
+            <zorder>line_18</zorder>
+            <zorder>line_19</zorder>
+           </widget>
+           <widget class="Line" name="line_17">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>10</y>
+              <width>150</width>
+              <height>3</height>
+             </rect>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
            </widget>
           </widget>
          </widget>
@@ -1951,8 +1999,8 @@ in basket</string>
    <slot>selBoxControlsUpdated()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>269</x>
-     <y>85</y>
+     <x>366</x>
+     <y>106</y>
     </hint>
     <hint type="destinationlabel">
      <x>387</x>
@@ -1967,8 +2015,8 @@ in basket</string>
    <slot>selBoxControlsUpdated()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>319</x>
-     <y>85</y>
+     <x>366</x>
+     <y>127</y>
     </hint>
     <hint type="destinationlabel">
      <x>387</x>
@@ -1983,8 +2031,8 @@ in basket</string>
    <slot>selBoxControlsUpdated()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>292</x>
-     <y>104</y>
+     <x>366</x>
+     <y>150</y>
     </hint>
     <hint type="destinationlabel">
      <x>387</x>
@@ -1999,8 +2047,8 @@ in basket</string>
    <slot>selBoxControlsUpdated()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>334</x>
-     <y>104</y>
+     <x>366</x>
+     <y>171</y>
     </hint>
     <hint type="destinationlabel">
      <x>387</x>
@@ -2015,8 +2063,8 @@ in basket</string>
    <slot>selBoxControlsUpdated()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>355</x>
-     <y>127</y>
+     <x>366</x>
+     <y>194</y>
     </hint>
     <hint type="destinationlabel">
      <x>387</x>
@@ -2127,12 +2175,12 @@ in basket</string>
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>290</x>
-     <y>148</y>
+     <x>292</x>
+     <y>233</y>
     </hint>
     <hint type="destinationlabel">
-     <x>335</x>
-     <y>151</y>
+     <x>365</x>
+     <y>236</y>
     </hint>
    </hints>
   </connection>

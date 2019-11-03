@@ -1600,7 +1600,10 @@ void GraphWindowClass::on_pbExitToolMode_clicked()
 
 void GraphWindowClass::on_pbToolboxDragMode_clicked()
 {
-  scene->activateItemDrag();
+    ui->ledAngle->setText("0");
+    ShapeableRectItem *SelBox = scene->getSelBox();
+    SelBox->setTrueAngle(0);
+    scene->activateItemDrag();
 }
 
 void GraphWindowClass::on_pbToolboxDragMode_2_clicked()

@@ -410,7 +410,6 @@ void ABasketManager::appendRootHistGraphs(const QString & fileName)
     }
 
     f->Close();
-    delete f;
 }
 
 void ABasketManager::reorder(const QVector<int> &indexes, int to)

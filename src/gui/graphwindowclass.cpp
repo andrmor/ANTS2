@@ -42,6 +42,7 @@
 #include <QPalette>
 #include <QPalette>
 #include <QElapsedTimer>
+#include <QFileInfo>
 
 //Root
 #include "TMath.h"
@@ -894,8 +895,6 @@ void GraphWindowClass::clearTmpTObjects()
 {
     for (int i=0; i<tmpTObjects.size(); i++) delete tmpTObjects[i];
     tmpTObjects.clear();
-
-    delete hProjection; hProjection = 0;
 }
 
 void GraphWindowClass::on_cbShowLegend_toggled(bool checked)
@@ -1795,141 +1794,130 @@ void GraphWindowClass::on_pbYaveraged_clicked()
 
 void GraphWindowClass::ShowProjection(QString type)
 {
-  //ui->cbToolBox->setChecked(false);
-  if (DrawObjects.isEmpty()) return;
+    TH2 * h = Explorer->getObjectForCustomProjection();
+    if (!h) return;
 
-  selBoxControlsUpdated();
+    selBoxControlsUpdated();
+    TriggerGlobalBusy(true);
 
-  //  qDebug()<<"ShowProjection clicked: "<< type;
-  TObject* obj = DrawObjects.first().Pointer;
-  QString PlotType = obj->ClassName();
-  //  qDebug()<<"  Class name/PlotOptions/opt:" << PlotType << DrawObjects.first().Options;
-  if (PlotType != "TH2D" && PlotType != "TH2F") return;
+    const int nBinsX = h->GetXaxis()->GetNbins();
+    const int nBinsY = h->GetYaxis()->GetNbins();
+    double x0 = ui->ledXcenter->text().toDouble();
+    double y0 = ui->ledYcenter->text().toDouble();
+    double dx = 0.5*ui->ledWidth->text().toDouble();
+    double dy = 0.5*ui->ledHeight->text().toDouble();
 
-  MW->WindowNavigator->BusyOn(); // -->
+    const ShapeableRectItem *SelBox = scene->getSelBox();
+    double angle = SelBox->getTrueAngle();
+    angle *= 3.1415926535/180.0;
+    double cosa = cos(angle);
+    double sina = sin(angle);
 
-  TH2* h = static_cast<TH2*>(obj);
+    TH1D * hProjection = nullptr;
+    TH1D * hWeights = nullptr;
 
-  int nBinsX = h->GetXaxis()->GetNbins();
-  int nBinsY = h->GetYaxis()->GetNbins();
-  //  qDebug() << "Bins in X and Y" << nBinsX << nBinsY;
-
-  double x0 = ui->ledXcenter->text().toDouble();
-  double y0 = ui->ledYcenter->text().toDouble();  
-  double dx = 0.5*ui->ledWidth->text().toDouble();
-  double dy = 0.5*ui->ledHeight->text().toDouble();
-  //  qDebug() << "Center:"<<x0<<y0<<"dx, dy:"<<dx<<dy;
-
-  const ShapeableRectItem *SelBox = scene->getSelBox();
-  double angle = SelBox->getTrueAngle();
-  //    qDebug() << "True angle"<<angle;
-  angle *= 3.1415926535/180.0;
-  double cosa = cos(angle);
-  double sina = sin(angle);
-
-  if (hProjection) delete hProjection;
-  TH1D* hWeights = 0;
-  if (type=="x" || type=="xAv")
+    if (type=="x" || type=="xAv")
     {
-      int nn;
-      if (ui->cbProjBoxAutobin->isChecked())
-      {
-          int n = h->GetXaxis()->GetNbins();
-          double binLength = (h->GetXaxis()->GetBinCenter(n) - h->GetXaxis()->GetBinCenter(1))/(n-1);
-          nn = 2.0*dx / binLength;
-          ui->sProjBins->setValue(nn);
-      }
-      else nn = ui->sProjBins->value();
-      if (type == "x")
-        hProjection = new TH1D("X-Projection","X1 projection", nn, -dx, +dx);
-      else
+        int nn;
+        if (ui->cbProjBoxAutobin->isChecked())
         {
-          hProjection = new TH1D("X-Av","X1 averaged", nn, -dx, +dx);
-          hWeights    = new TH1D("X-W", "",            nn, -dx, +dx);
+            int n = h->GetXaxis()->GetNbins();
+            double binLength = (h->GetXaxis()->GetBinCenter(n) - h->GetXaxis()->GetBinCenter(1))/(n-1);
+            nn = 2.0*dx / binLength;
+            ui->sProjBins->setValue(nn);
         }
-    }  
-  else if (type=="y" || type=="yAv")
-    {
-      int nn;
-      if (ui->cbProjBoxAutobin->isChecked())
-      {
-          int n = h->GetYaxis()->GetNbins();
-          double binLength = (h->GetYaxis()->GetBinCenter(n) - h->GetYaxis()->GetBinCenter(1))/(n-1);
-          nn = 2.0*dy / binLength;
-          ui->sProjBins->setValue(nn);
-      }
-      else nn = ui->sProjBins->value();
-      if (type == "y")
-        hProjection = new TH1D("Y-Projection","Y1 projection", nn, -dy, +dy);
-      else
-        {
-          hProjection = new TH1D("Y-Av","Y1 averaged", nn, -dy, +dy);
-          hWeights    = new TH1D("Y-W", "",            nn, -dy, +dy);
-        }
-    }
-  else if (type == "dens")
-    {
-      //qDebug() << "Doing density distribution";
-      hProjection = new TH1D("DensDistr","Density distribution", ui->sProjBins->value(), 0, 0);
-    }
-  else
-    {
-      MW->WindowNavigator->BusyOff(); // <--
-      return;
-    }
-
-  for (int iy = 1; iy<nBinsY+1; iy++)
-    for (int ix = 1; ix<nBinsX+1; ix++)
-      {
-        double x = h->GetXaxis()->GetBinCenter(ix);
-        double y = h->GetYaxis()->GetBinCenter(iy);
-        //    qDebug() << "ix, x" << ix << x << "  iy, y " << iy << y;
-
-        //transforming to the selection box coordinates
-        x -= x0;
-        y -= y0;
-
-        // ooposite direction!
-        double nx =  x*cosa + y*sina;
-        double ny = -x*sina + y*cosa;
-        //    qDebug () << "new coords: "<< nx << ny;
-
-        //is it within the borders?
-        if (  nx < -dx || nx > dx || ny < -dy || ny > dy  )
-          {
-            //outside!
-            //h->SetBinContent(ix, iy, 0);
-          }
+        else nn = ui->sProjBins->value();
+        if (type == "x")
+            hProjection = new TH1D("X-Projection","X1 projection", nn, -dx, +dx);
         else
-          {
-            double w = h->GetBinContent(ix, iy);
-            if (type == "x") hProjection->Fill(nx, w);
-            if (type == "xAv")
-              {
-                hProjection->Fill(nx, w);
-                hWeights->Fill(nx, 1);
-              }
-            else if (type == "y") hProjection->Fill(ny, w);
-            if (type == "yAv")
-              {
-                hProjection->Fill(ny, w);
-                hWeights->Fill(ny, 1);
-              }
-            else if (type == "dens") hProjection->Fill(w, 1);
-          }
-      }
+        {
+            hProjection = new TH1D("X-Av","X1 averaged", nn, -dx, +dx);
+            hWeights    = new TH1D("X-W", "",            nn, -dx, +dx);
+        }
+    }
+    else if (type=="y" || type=="yAv")
+    {
+        int nn;
+        if (ui->cbProjBoxAutobin->isChecked())
+        {
+            int n = h->GetYaxis()->GetNbins();
+            double binLength = (h->GetYaxis()->GetBinCenter(n) - h->GetYaxis()->GetBinCenter(1))/(n-1);
+            nn = 2.0*dy / binLength;
+            ui->sProjBins->setValue(nn);
+        }
+        else nn = ui->sProjBins->value();
+        if (type == "y")
+            hProjection = new TH1D("Y-Projection","Y1 projection", nn, -dy, +dy);
+        else
+        {
+            hProjection = new TH1D("Y-Av","Y1 averaged", nn, -dy, +dy);
+            hWeights    = new TH1D("Y-W", "",            nn, -dy, +dy);
+        }
+    }
+    else if (type == "dens")
+        hProjection = new TH1D("DensDistr","Density distribution", ui->sProjBins->value(), 0, 0);
+    else
+    {
+        TriggerGlobalBusy(false);
+        return;
+    }
 
-   if (type == "x" || type == "y") hProjection->GetXaxis()->SetTitle("Distance, mm");
-   else if (type == "dens") hProjection->GetXaxis()->SetTitle("Density, counts");   
-   if (type == "xAv" || type == "yAv") *hProjection = *hProjection / *hWeights;
+    for (int iy = 1; iy<nBinsY+1; iy++)
+        for (int ix = 1; ix<nBinsX+1; ix++)
+        {
+            double x = h->GetXaxis()->GetBinCenter(ix);
+            double y = h->GetYaxis()->GetBinCenter(iy);
 
-   DrawObjects.clear();
-   DrawObjects.append(ADrawObject(hProjection, ""));
-   RedrawAll();
+            //transforming to the selection box coordinates
+            x -= x0;
+            y -= y0;
 
-   delete hWeights;
+            //oposite direction
+            double nx =  x*cosa + y*sina;
+            double ny = -x*sina + y*cosa;
 
-   MW->WindowNavigator->BusyOff(); // <--
+            //is it within the borders?
+            if (  nx < -dx || nx > dx || ny < -dy || ny > dy  )
+            {
+                //outside!
+                //h->SetBinContent(ix, iy, 0);
+            }
+            else
+            {
+                double w = h->GetBinContent(ix, iy);
+                if (type == "x") hProjection->Fill(nx, w);
+                if (type == "xAv")
+                {
+                    hProjection->Fill(nx, w);
+                    hWeights->Fill(nx, 1);
+                }
+                else if (type == "y") hProjection->Fill(ny, w);
+                if (type == "yAv")
+                {
+                    hProjection->Fill(ny, w);
+                    hWeights->Fill(ny, 1);
+                }
+                else if (type == "dens") hProjection->Fill(w, 1);
+            }
+        }
+
+    if (type == "x" || type == "y") hProjection->GetXaxis()->SetTitle("Distance, mm");
+    else if (type == "dens") hProjection->GetXaxis()->SetTitle("Density, counts");
+    if (type == "xAv" || type == "yAv") *hProjection = *hProjection / *hWeights;
+
+    MakeCopyOfDrawObjects();
+    MakeCopyOfActiveBasketId();
+
+    ClearBasketActiveId();
+
+    DrawObjects.clear();
+    RegisterTObject(hProjection);
+    DrawObjects  << ADrawObject(hProjection, "hist");
+
+    RedrawAll();
+
+    delete hWeights;
+    TriggerGlobalBusy(false);
 }
 
 void GraphWindowClass::EnforceOverlayOff()
@@ -2183,10 +2171,11 @@ void GraphWindowClass::BasketCustomContextMenuRequested(const QPoint &pos)
     }
     else if (selectedItem == save)
     {
-        const QString fileName = QFileDialog::getSaveFileName(this, "Save basket to a file", MW->GlobSet.LastOpenDir, "Root files (*.root)");
+        QString fileName = QFileDialog::getSaveFileName(this, "Save basket to a file", MW->GlobSet.LastOpenDir, "Root files (*.root)");
         if (!fileName.isEmpty())
         {
             MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+            if (QFileInfo(fileName).suffix().isEmpty()) fileName += ".root";
             Basket->saveAll(fileName);
         }
     }

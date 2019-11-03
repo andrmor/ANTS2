@@ -269,7 +269,6 @@ private:
     void switchToBasket(int index);
 
     QVector<TObject*> tmpTObjects;
-    TH1D* hProjection = 0;  //for toolbox
     double TG_X0 = 0;
     double TG_Y0 = 0;
 

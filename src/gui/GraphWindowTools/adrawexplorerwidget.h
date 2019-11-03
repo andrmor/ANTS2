@@ -7,6 +7,7 @@
 
 class GraphWindowClass;
 class TObject;
+class TH2;
 
 class ADrawExplorerWidget : public QTreeWidget
 {
@@ -15,6 +16,8 @@ public:
     ADrawExplorerWidget(GraphWindowClass & GraphWindow, QVector<ADrawObject> & DrawObjects);
 
     void updateGui();
+
+    TH2 * getObjectForCustomProjection() {return objForCustomProjection;}
 
 private slots:
     void onContextMenuRequested(const QPoint & pos);
@@ -45,6 +48,9 @@ private:
     void editTitle(ADrawObject &obj, int X0Y1);
     void saveRoot(ADrawObject &obj);
     void saveAsTxt(ADrawObject &obj, bool fUseBinCenters);
+
+private:
+    TH2 * objForCustomProjection = nullptr;
 };
 
 #endif // ADRAWEXPLORERWIDGET_H

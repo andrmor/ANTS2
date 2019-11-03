@@ -3,11 +3,25 @@
 #include "arootlineconfigurator.h"
 #include "amessage.h"
 #include "graphwindowclass.h"
+#include "afiletools.h"
 
+#ifdef USE_EIGEN
+    #include "curvefit.h"
+#endif
+
+#include <QDebug>
 #include <QTreeWidgetItem>
 #include <QMenu>
 #include <QInputDialog>
-#include <QDebug>
+#include <QDialog>
+#include <QVBoxLayout>
+#include <QLabel>
+#include <QPushButton>
+#include <QLineEdit>
+#include <QSpinBox>
+#include <QDoubleValidator>
+#include <QFileDialog>
+#include <QFileInfo>
 
 #include "TObject.h"
 #include "TNamed.h"
@@ -18,6 +32,7 @@
 #include "TF2.h"
 #include "TGraph.h"
 #include "TGraphErrors.h"
+#include "TPaveText.h"
 
 ADrawExplorerWidget::ADrawExplorerWidget(GraphWindowClass & GraphWindow, QVector<ADrawObject> & DrawObjects) :
     GraphWindow(GraphWindow), DrawObjects(DrawObjects)
@@ -58,6 +73,8 @@ void ADrawExplorerWidget::updateGui()
 
         addTopLevelItem(item);
     }
+
+    objForCustomProjection = nullptr;
 }
 
 void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
@@ -284,12 +301,6 @@ void ADrawExplorerWidget::showPanel(ADrawObject &obj)
     }
 }
 
-#include <QDialog>
-#include <QVBoxLayout>
-#include <QLabel>
-#include <QPushButton>
-#include <QLineEdit>
-#include <QDoubleValidator>
 double runScaleDialog(QWidget * parent)
 {
     QDialog* D = new QDialog(parent);
@@ -615,7 +626,6 @@ Double_t GauseWithBase(Double_t *x, Double_t *par)
    return par[0] * exp( par[1] * (x[0]+par[2])*(x[0]+par[2]) ) + par[3]*x[0] + par[4];   // [0]*exp([1]*(x+[2])^2) + [3]*x + [4]
 }
 
-#include "TPaveText.h"
 void ADrawExplorerWidget::fwhm(int index)
 {
     ADrawObject & obj = DrawObjects[index];
@@ -775,7 +785,6 @@ void ADrawExplorerWidget::interpolate(ADrawObject &obj)
     d.exec();
 }
 
-#include <QSpinBox>
 void ADrawExplorerWidget::median(ADrawObject &obj)
 {
     TH1* hist = dynamic_cast<TH1*>(obj.Pointer);
@@ -890,12 +899,10 @@ void ADrawExplorerWidget::customProjection(ADrawObject & obj)
         return;
     }
 
+    objForCustomProjection = hist;  // tried safer approach  with clone, but got random error in ROOT on clone attempt
     GraphWindow.ShowProjectionTool();
 }
 
-#ifdef USE_EIGEN
-    #include "curvefit.h"
-#endif
 void ADrawExplorerWidget::splineFit(int index)
 {
 #ifdef USE_EIGEN
@@ -973,10 +980,14 @@ void ADrawExplorerWidget::editTitle(ADrawObject &obj, int X0Y1)
     GraphWindow.RedrawAll();
 }
 
-#include <QFileDialog>
-#include <QFileInfo>
+#include <TFile.h>
 void ADrawExplorerWidget::saveRoot(ADrawObject &obj)
 {
+    QString fileName = QFileDialog::getSaveFileName(this, "Save ROOT object", GraphWindow.getLastOpendDir(), "Root files(*.root)");
+    if (fileName.isEmpty()) return;
+    GraphWindow.getLastOpendDir() = QFileInfo(fileName).absolutePath();
+    if (QFileInfo(fileName).suffix().isEmpty()) fileName += ".root";
+
     TObject * tobj = obj.Pointer;
 
     //exceptions first
@@ -988,14 +999,9 @@ void ADrawExplorerWidget::saveRoot(ADrawObject &obj)
         if (tf1) tobj = tf1->GetHistogram();
     }
 
-    QString fileName = QFileDialog::getSaveFileName(this, "Save ROOT object", GraphWindow.getLastOpendDir(), "Root files(*.root)");
-    if (fileName.isEmpty()) return;
-    GraphWindow.getLastOpendDir() = QFileInfo(fileName).absolutePath();
-    if (QFileInfo(fileName).suffix().isEmpty()) fileName += ".root";
-    tobj->SaveAs(fileName.toLatin1().data());
+    tobj->SaveAs(fileName.toLatin1().data());  // sometimes crashes on load!
 }
 
-#include "afiletools.h"
 void ADrawExplorerWidget::saveAsTxt(ADrawObject &obj, bool fUseBinCenters)
 {
     TObject * tobj = obj.Pointer;

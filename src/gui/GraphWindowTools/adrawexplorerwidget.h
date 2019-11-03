@@ -40,6 +40,7 @@ private:
     void interpolate(ADrawObject &obj);
     void median(ADrawObject &obj);
     void projection(ADrawObject &obj, bool bX);
+    void customProjection(ADrawObject &obj);
     void splineFit(int index);
     void editTitle(ADrawObject &obj, int X0Y1);
     void saveRoot(ADrawObject &obj);

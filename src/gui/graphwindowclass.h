@@ -150,7 +150,8 @@ public:
     void MakeCopyOfActiveBasketId();
     void RestoreBasketActiveId();
     void ClearCopyOfActiveBasketId();
-    QString & getLastOpendDir();
+    QString & getLastOpendDir();    
+    void ShowProjectionTool();
 
 protected:
     void mouseMoveEvent(QMouseEvent *event);
@@ -183,8 +184,6 @@ private slots:
     void BasketReorderRequested(const QVector<int> & indexes, int toRow);
     void deletePressed();
 
-    void on_cbToolBox_toggled(bool checked);
-    void on_cobToolBox_currentIndexChanged(int index);
     void on_pbToolboxDragMode_clicked();
 
     //selBox
@@ -229,7 +228,6 @@ private slots:
     void on_actionRainbow_triggered();
     void on_actionInverted_dark_body_triggered();
     void on_pbToolboxDragMode_2_clicked();
-    void on_pbSmooth_clicked();
     void on_actionTop_triggered();
     void on_actionSide_triggered();
     void on_actionFront_triggered();
@@ -249,6 +247,10 @@ private slots:
     void on_actionToggle_Explorer_Basket_toggled(bool arg1);
     void on_pbUpdateInBasket_clicked();
     void on_actionShow_ROOT_attribute_panel_triggered();
+
+    void on_pbShowRuler_clicked();
+
+    void on_pbExitToolMode_clicked();
 
 private:
     MainWindow *MW;
@@ -285,8 +287,8 @@ private:
     //double xmin0, xmax0, ymin0, ymax0, zmin0, zmax0; //start values - filled on first draw, can be used to reset view with "Unzoom"
 
     void clearTmpTObjects();   //enable qDebugs inside for diagnostics of cleanup!
-    void startOverlayMode();
-    void endOverlayMode();
+
+    void changeOverlayMode(bool bOn);
     void UpdateBasketGUI();    
 
     void Basket_DrawOnTop(int row);

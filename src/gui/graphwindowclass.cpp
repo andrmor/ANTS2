@@ -603,43 +603,6 @@ void GraphWindowClass::doDraw(TObject *obj, const char *opt, bool DoUpdate)
         UpdateGuiControlsForMainObject(obj->ClassName(), options);
 }
 
-void GraphWindowClass::startOverlayMode()
-{
-    if(gvOver->isVisible())
-        return;
-
-    QPixmap map = qApp->screens().first()->grabWindow(RasterWindow->winId());//QApplication::desktop()->winId());
-    gvOver->resize(RasterWindow->width(), RasterWindow->height());
-    //gvOver->move(RasterWindow->x(), RasterWindow->y());
-    gvOver->move(RasterWindow->x(), menuBar()->height());
-    //gvOver->setGeometry(RasterWindow->geometry());
-    scene->setSceneRect(0, 0, RasterWindow->width(), RasterWindow->height());
-    scene->setBackgroundBrush(map);
-    //RasterWindow->setVisible(false);// map.save("TestMap.png");
-
-    QPointF origin;
-    RasterWindow->PixelToXY(0, 0, origin.rx(), origin.ry());
-    GraphicsRuler *ruler = scene->getRuler();
-    ruler->setOrigin(origin);
-    ruler->setScale(RasterWindow->getXperPixel(), RasterWindow->getYperPixel());
-
-    scene->moveToolToVisible();
-    setFixedSize(this->size());
-    gvOver->show();
-}
-
-void GraphWindowClass::endOverlayMode()
-{
-    if (gvOver->isHidden())// || ui->cbShowRuler->isChecked() || ui->cbProjectionTool->isChecked())
-        return;
-
-    gvOver->hide();
-    //RasterWindow->setVisible(true);
-    setFixedSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
-
-    RasterWindow->fCanvas->Update();
-}
-
 void GraphWindowClass::OnBusyOn()
 {
     ui->fUIbox->setEnabled(false);
@@ -1565,37 +1528,76 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
     return true;
 }
 
-void GraphWindowClass::on_cbToolBox_toggled(bool checked)
+void GraphWindowClass::changeOverlayMode(bool bOn)
 {
-    //qDebug()<< "cbToolBox state togged";
-    ui->swToolBar->setCurrentIndex((int)checked);
+    ui->swToolBox->setVisible(bOn);
+    ui->swToolBar->setCurrentIndex(bOn ? 1 : 0);
+    ui->fBasket->setEnabled(!bOn);
+    ui->actionEqualize_scale_XY->setEnabled(!bOn);
+    ui->menuPalette->setEnabled(!bOn);
+    ui->actionToggle_Explorer_Basket->setEnabled(!bOn);
+    ui->actionToggle_toolbar->setEnabled(!bOn);
 
-    ui->pbToolboxDragMode->setEnabled(checked);
-    ui->cobToolBox->setEnabled(checked);
-    ui->swToolBox->setVisible(checked);
-
-    ui->fRange->setEnabled(!checked);
-    ui->fGrid->setEnabled(!checked);
-    ui->fLog->setEnabled(!checked);
-    ui->cbShowLegend->setEnabled(!checked);
-    ui->leOptions->setEnabled(!checked);
-    ui->menuPalette->setEnabled(!checked);
-    ui->pbAddToBasket->setEnabled(!checked);
-    ui->actionToggle_Explorer_Basket->setEnabled(!checked);
-    ui->actionToggle_toolbar->setEnabled(!checked);
-
-    int imode = ui->cobToolBox->currentIndex();
-    if(checked)
+    if (bOn)
     {
-      scene->setActiveTool((AToolboxScene::Tool)imode);
-      startOverlayMode();
+        if (!gvOver->isVisible())
+        {
+            QPixmap map = qApp->screens().first()->grabWindow(RasterWindow->winId());//QApplication::desktop()->winId());
+            gvOver->resize(RasterWindow->width(), RasterWindow->height());
+            gvOver->move(RasterWindow->x(), menuBar()->height());
+            scene->setSceneRect(0, 0, RasterWindow->width(), RasterWindow->height());
+            scene->setBackgroundBrush(map);
+
+            QPointF origin;
+            RasterWindow->PixelToXY(0, 0, origin.rx(), origin.ry());
+            GraphicsRuler *ruler = scene->getRuler();
+            ruler->setOrigin(origin);
+            ruler->setScale(RasterWindow->getXperPixel(), RasterWindow->getYperPixel());
+
+            scene->moveToolToVisible();
+            setFixedSize(this->size());
+            gvOver->show();
+        }
+        scene->moveToolToVisible();
+        scene->update(scene->sceneRect());
+        gvOver->update();
     }
     else
     {
-      endOverlayMode();
+        if (gvOver->isVisible())
+        {
+            gvOver->hide();
+            setFixedSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+            RasterWindow->fCanvas->Update();
+        }
     }
-    gvOver->update();
 }
+
+void GraphWindowClass::on_pbShowRuler_clicked()
+{
+    scene->setActiveTool(AToolboxScene::ToolRuler);
+    ui->swToolBox->setCurrentIndex(0);
+    changeOverlayMode(true);
+}
+
+void GraphWindowClass::ShowProjectionTool()
+{
+    scene->setActiveTool(AToolboxScene::ToolSelBox);
+    ui->swToolBox->setCurrentIndex(1);
+    changeOverlayMode(true);
+}
+
+void GraphWindowClass::on_pbExitToolMode_clicked()
+{
+    changeOverlayMode(false);
+}
+
+//ui->pbToolboxDragMode->setEnabled(checked);
+//ui->fRange->setEnabled(!checked);
+//ui->fGrid->setEnabled(!checked);
+//ui->fLog->setEnabled(!checked);
+//ui->cbShowLegend->setEnabled(!checked);
+//ui->leOptions->setEnabled(!checked);
 
 void GraphWindowClass::on_pbToolboxDragMode_clicked()
 {
@@ -1605,18 +1607,6 @@ void GraphWindowClass::on_pbToolboxDragMode_clicked()
 void GraphWindowClass::on_pbToolboxDragMode_2_clicked()
 {
   GraphWindowClass::on_pbToolboxDragMode_clicked();
-}
-
-void GraphWindowClass::on_cobToolBox_currentIndexChanged(int index)
-{
-  if (ui->cbToolBox->isChecked())
-  {
-    scene->setActiveTool((AToolboxScene::Tool)index);
-    scene->moveToolToVisible();
-
-    scene->update(scene->sceneRect());
-    gvOver->update();
-  }
 }
 
 void GraphWindowClass::selBoxGeometryChanged()
@@ -1805,7 +1795,7 @@ void GraphWindowClass::on_pbYaveraged_clicked()
 
 void GraphWindowClass::ShowProjection(QString type)
 {
-  ui->cbToolBox->setChecked(false);
+  //ui->cbToolBox->setChecked(false);
   if (DrawObjects.isEmpty()) return;
 
   selBoxControlsUpdated();
@@ -1944,7 +1934,7 @@ void GraphWindowClass::ShowProjection(QString type)
 
 void GraphWindowClass::EnforceOverlayOff()
 {
-   ui->cbToolBox->setChecked(false); //update is in on_toggle
+    changeOverlayMode(false);
 }
 
 QString & GraphWindowClass::getLastOpendDir()
@@ -2403,36 +2393,6 @@ void GraphWindowClass::Basket_DrawOnTop(int row)
     RedrawAll();
 }
 
-void GraphWindowClass::on_pbSmooth_clicked()
-{
-  if (DrawObjects.isEmpty())
-    {
-      message("Object already does not exist!", this);
-      return;
-    }
-  TObject *obj = DrawObjects.first().Pointer;
-  QString cn = obj->ClassName();
-
-  //qDebug() << "Class name:"<<cn;
-  if (cn.startsWith("TH1"))
-    {
-      TH1* hist = dynamic_cast<TH1*>(obj);
-      if (hist) hist->Smooth(ui->sbSmooth->value());
-    }
-  else if (cn.startsWith("TH2"))
-    {
-      TH2* hist = dynamic_cast<TH2*>(obj);
-      if (hist) hist->Smooth(ui->sbSmooth->value());
-    }
-  else
-    {
-      message("Implemented only for TH1 and TH2 histograms", this);
-    }
-
-  GraphWindowClass::EnforceOverlayOff();
-  RedrawAll();
-}
-
 void GraphWindowClass::on_actionTop_triggered()
 {
   SetAsActiveRootWindow();
@@ -2548,6 +2508,7 @@ void GraphWindowClass::on_pbRemoveLegend_clicked()
     qDebug() << "Legend object was not found!";
 }
 
+#include <QComboBox>
 void GraphWindowClass::on_pbAddText_clicked()
 {
   QDialog D(this);

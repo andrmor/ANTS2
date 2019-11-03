@@ -101,6 +101,7 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
     Menu.addSeparator();
     QAction* projX =        Menu.addAction("X projection");
     QAction* projY =        Menu.addAction("Y projection");
+    QAction* projCustom =   Menu.addAction("Custom projection");
     Menu.addSeparator();
     QAction * enableA =     Menu.addAction("Toggle enabled/disabled");
         enableA->setChecked(obj.bEnabled);
@@ -131,6 +132,7 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
    else if (si == saveRootA)    saveRoot(obj);
    else if (si == saveTxtA)     saveAsTxt(obj, true);
    else if (si == saveEdgeA)    saveAsTxt(obj, false);
+   else if (si == projCustom)   customProjection(obj);
 
     /*
     QAction* gaussFit = 0;
@@ -877,6 +879,18 @@ void ADrawExplorerWidget::projection(ADrawObject &obj, bool bX)
 
         GraphWindow.RedrawAll();
     }
+}
+
+void ADrawExplorerWidget::customProjection(ADrawObject & obj)
+{
+    TH2* hist = dynamic_cast<TH2*>(obj.Pointer);
+    if (!hist)
+    {
+        message("This operation requires TH2 ROOT object selected", this);
+        return;
+    }
+
+    GraphWindow.ShowProjectionTool();
 }
 
 #ifdef USE_EIGEN

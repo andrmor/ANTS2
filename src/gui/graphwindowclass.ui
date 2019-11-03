@@ -60,7 +60,7 @@
        <property name="geometry">
         <rect>
          <x>2</x>
-         <y>29</y>
+         <y>1</y>
          <width>151</width>
          <height>500</height>
         </rect>
@@ -540,9 +540,9 @@
         <widget class="QPushButton" name="pbAddLegend">
          <property name="geometry">
           <rect>
-           <x>10</x>
+           <x>15</x>
            <y>256</y>
-           <width>98</width>
+           <width>102</width>
            <height>21</height>
           </rect>
          </property>
@@ -553,20 +553,20 @@
         <widget class="QPushButton" name="pbAddText">
          <property name="geometry">
           <rect>
-           <x>10</x>
+           <x>15</x>
            <y>280</y>
-           <width>98</width>
+           <width>102</width>
            <height>21</height>
           </rect>
          </property>
          <property name="text">
-          <string>Add text</string>
+          <string>Add text box</string>
          </property>
         </widget>
         <widget class="QPushButton" name="pbRemoveLegend">
          <property name="geometry">
           <rect>
-           <x>115</x>
+           <x>125</x>
            <y>256</y>
            <width>20</width>
            <height>21</height>
@@ -579,7 +579,7 @@
         <widget class="QPushButton" name="pbRemoveText">
          <property name="geometry">
           <rect>
-           <x>115</x>
+           <x>125</x>
            <y>280</y>
            <width>20</width>
            <height>21</height>
@@ -592,7 +592,7 @@
         <widget class="Line" name="line">
          <property name="geometry">
           <rect>
-           <x>78</x>
+           <x>92</x>
            <y>265</y>
            <width>40</width>
            <height>3</height>
@@ -608,7 +608,7 @@
         <widget class="Line" name="line_2">
          <property name="geometry">
           <rect>
-           <x>80</x>
+           <x>94</x>
            <y>288</y>
            <width>40</width>
            <height>3</height>
@@ -634,6 +634,19 @@
           <enum>Qt::Horizontal</enum>
          </property>
         </widget>
+        <widget class="QPushButton" name="pbShowRuler">
+         <property name="geometry">
+          <rect>
+           <x>14</x>
+           <y>310</y>
+           <width>131</width>
+           <height>27</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Show ruler</string>
+         </property>
+        </widget>
         <zorder>line</zorder>
         <zorder>line_2</zorder>
         <zorder>fLog</zorder>
@@ -652,13 +665,14 @@
         <zorder>pbRemoveLegend</zorder>
         <zorder>pbRemoveText</zorder>
         <zorder>line_11</zorder>
+        <zorder>pbShowRuler</zorder>
        </widget>
        <widget class="QWidget" name="page_2">
         <widget class="QFrame" name="fToolBox">
          <property name="geometry">
           <rect>
            <x>0</x>
-           <y>2</y>
+           <y>6</y>
            <width>151</width>
            <height>490</height>
           </rect>
@@ -669,39 +683,11 @@
          <property name="frameShadow">
           <enum>QFrame::Raised</enum>
          </property>
-         <widget class="QComboBox" name="cobToolBox">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="geometry">
-           <rect>
-            <x>8</x>
-            <y>6</y>
-            <width>131</width>
-            <height>22</height>
-           </rect>
-          </property>
-          <item>
-           <property name="text">
-            <string>Ruler</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Projection</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Smooth (histogram)</string>
-           </property>
-          </item>
-         </widget>
          <widget class="QStackedWidget" name="swToolBox">
           <property name="geometry">
            <rect>
-            <x>2</x>
-            <y>33</y>
+            <x>0</x>
+            <y>34</y>
             <width>141</width>
             <height>440</height>
            </rect>
@@ -714,9 +700,9 @@
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>0</y>
-              <width>147</width>
-              <height>260</height>
+              <y>10</y>
+              <width>150</width>
+              <height>391</height>
              </rect>
             </property>
             <property name="frameShape">
@@ -728,10 +714,10 @@
             <widget class="QPushButton" name="pbResetRuler">
              <property name="geometry">
               <rect>
-               <x>86</x>
-               <y>139</y>
-               <width>50</width>
-               <height>21</height>
+               <x>30</x>
+               <y>285</y>
+               <width>90</width>
+               <height>23</height>
               </rect>
              </property>
              <property name="text">
@@ -741,10 +727,10 @@
             <widget class="QLineEdit" name="ledRulerX">
              <property name="geometry">
               <rect>
-               <x>22</x>
-               <y>70</y>
-               <width>45</width>
-               <height>20</height>
+               <x>70</x>
+               <y>110</y>
+               <width>71</width>
+               <height>21</height>
               </rect>
              </property>
              <property name="text">
@@ -754,10 +740,10 @@
             <widget class="QLineEdit" name="ledRulerY">
              <property name="geometry">
               <rect>
-               <x>22</x>
-               <y>88</y>
-               <width>45</width>
-               <height>20</height>
+               <x>70</x>
+               <y>130</y>
+               <width>71</width>
+               <height>21</height>
               </rect>
              </property>
              <property name="text">
@@ -767,36 +753,42 @@
             <widget class="QLabel" name="label_13">
              <property name="geometry">
               <rect>
-               <x>4</x>
-               <y>91</y>
-               <width>21</width>
-               <height>13</height>
+               <x>5</x>
+               <y>130</y>
+               <width>61</width>
+               <height>16</height>
               </rect>
              </property>
              <property name="text">
               <string>Y1:</string>
              </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
             </widget>
             <widget class="QLabel" name="label_10">
              <property name="geometry">
               <rect>
-               <x>4</x>
-               <y>73</y>
-               <width>20</width>
-               <height>13</height>
+               <x>5</x>
+               <y>112</y>
+               <width>61</width>
+               <height>16</height>
               </rect>
              </property>
              <property name="text">
               <string>X1:</string>
              </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
             </widget>
             <widget class="QLineEdit" name="ledRulerTicksLength">
              <property name="geometry">
               <rect>
-               <x>91</x>
-               <y>115</y>
-               <width>45</width>
-               <height>20</height>
+               <x>70</x>
+               <y>230</y>
+               <width>71</width>
+               <height>21</height>
               </rect>
              </property>
              <property name="text">
@@ -806,14 +798,14 @@
             <widget class="QCheckBox" name="cbRulerTicksLength">
              <property name="geometry">
               <rect>
-               <x>4</x>
-               <y>118</y>
-               <width>71</width>
-               <height>16</height>
+               <x>13</x>
+               <y>211</y>
+               <width>126</width>
+               <height>17</height>
               </rect>
              </property>
              <property name="text">
-              <string>Ticks Len:</string>
+              <string>Show ticks</string>
              </property>
              <property name="checked">
               <bool>true</bool>
@@ -822,10 +814,10 @@
             <widget class="QLineEdit" name="ledRulerY2">
              <property name="geometry">
               <rect>
-               <x>91</x>
-               <y>90</y>
-               <width>45</width>
-               <height>20</height>
+               <x>70</x>
+               <y>190</y>
+               <width>71</width>
+               <height>21</height>
               </rect>
              </property>
              <property name="text">
@@ -835,36 +827,42 @@
             <widget class="QLabel" name="label_19">
              <property name="geometry">
               <rect>
-               <x>73</x>
-               <y>93</y>
-               <width>21</width>
-               <height>13</height>
+               <x>5</x>
+               <y>190</y>
+               <width>61</width>
+               <height>16</height>
               </rect>
              </property>
              <property name="text">
               <string>Y2:</string>
              </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
             </widget>
             <widget class="QLabel" name="label_16">
              <property name="geometry">
               <rect>
-               <x>74</x>
-               <y>73</y>
-               <width>20</width>
-               <height>13</height>
+               <x>5</x>
+               <y>170</y>
+               <width>61</width>
+               <height>16</height>
               </rect>
              </property>
              <property name="text">
               <string>X2:</string>
              </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
             </widget>
             <widget class="QLineEdit" name="ledRulerX2">
              <property name="geometry">
               <rect>
-               <x>91</x>
-               <y>70</y>
-               <width>45</width>
-               <height>20</height>
+               <x>70</x>
+               <y>170</y>
+               <width>71</width>
+               <height>21</height>
               </rect>
              </property>
              <property name="text">
@@ -874,10 +872,10 @@
             <widget class="QPushButton" name="pbRulerFGColor">
              <property name="geometry">
               <rect>
-               <x>5</x>
-               <y>183</y>
+               <x>10</x>
+               <y>340</y>
                <width>61</width>
-               <height>21</height>
+               <height>23</height>
               </rect>
              </property>
              <property name="text">
@@ -887,10 +885,10 @@
             <widget class="QPushButton" name="pbRulerBGColor">
              <property name="geometry">
               <rect>
-               <x>75</x>
-               <y>183</y>
+               <x>80</x>
+               <y>340</y>
                <width>61</width>
-               <height>21</height>
+               <height>23</height>
               </rect>
              </property>
              <property name="text">
@@ -900,14 +898,14 @@
             <widget class="QCheckBox" name="cbRulerShowBG">
              <property name="geometry">
               <rect>
-               <x>40</x>
-               <y>165</y>
-               <width>71</width>
-               <height>16</height>
+               <x>6</x>
+               <y>320</y>
+               <width>140</width>
+               <height>17</height>
               </rect>
              </property>
              <property name="text">
-              <string>Show BG</string>
+              <string>Show background</string>
              </property>
             </widget>
             <widget class="QLineEdit" name="ledRulerAngle">
@@ -916,10 +914,10 @@
              </property>
              <property name="geometry">
               <rect>
-               <x>22</x>
-               <y>45</y>
-               <width>45</width>
-               <height>20</height>
+               <x>70</x>
+               <y>70</y>
+               <width>71</width>
+               <height>21</height>
               </rect>
              </property>
              <property name="text">
@@ -933,22 +931,25 @@
              <property name="geometry">
               <rect>
                <x>5</x>
-               <y>8</y>
-               <width>20</width>
-               <height>13</height>
+               <y>9</y>
+               <width>61</width>
+               <height>21</height>
               </rect>
              </property>
              <property name="text">
-              <string>L:</string>
+              <string>Length:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
              </property>
             </widget>
             <widget class="QLineEdit" name="ledRulerLen">
              <property name="geometry">
               <rect>
-               <x>22</x>
-               <y>5</y>
-               <width>45</width>
-               <height>20</height>
+               <x>70</x>
+               <y>10</y>
+               <width>71</width>
+               <height>21</height>
               </rect>
              </property>
              <property name="text">
@@ -958,14 +959,17 @@
             <widget class="QLabel" name="label_15">
              <property name="geometry">
               <rect>
-               <x>8</x>
-               <y>48</y>
-               <width>16</width>
-               <height>13</height>
+               <x>5</x>
+               <y>69</y>
+               <width>61</width>
+               <height>21</height>
               </rect>
              </property>
              <property name="text">
-              <string>º:</string>
+              <string>Angle º:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
              </property>
             </widget>
             <widget class="QLineEdit" name="ledRulerDY">
@@ -974,10 +978,10 @@
              </property>
              <property name="geometry">
               <rect>
-               <x>91</x>
-               <y>25</y>
-               <width>45</width>
-               <height>20</height>
+               <x>70</x>
+               <y>50</y>
+               <width>71</width>
+               <height>21</height>
               </rect>
              </property>
              <property name="text">
@@ -990,23 +994,26 @@
             <widget class="QLabel" name="label_22">
              <property name="geometry">
               <rect>
-               <x>73</x>
-               <y>9</y>
-               <width>20</width>
-               <height>13</height>
+               <x>5</x>
+               <y>32</y>
+               <width>61</width>
+               <height>16</height>
               </rect>
              </property>
              <property name="text">
               <string>dX:</string>
              </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
             </widget>
             <widget class="QLineEdit" name="ledRulerDX">
              <property name="geometry">
               <rect>
-               <x>91</x>
-               <y>5</y>
-               <width>45</width>
-               <height>20</height>
+               <x>70</x>
+               <y>30</y>
+               <width>71</width>
+               <height>21</height>
               </rect>
              </property>
              <property name="text">
@@ -1019,21 +1026,24 @@
             <widget class="QLabel" name="label_23">
              <property name="geometry">
               <rect>
-               <x>73</x>
-               <y>28</y>
-               <width>16</width>
-               <height>13</height>
+               <x>5</x>
+               <y>51</y>
+               <width>61</width>
+               <height>16</height>
               </rect>
              </property>
              <property name="text">
               <string>dY:</string>
              </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
             </widget>
             <widget class="Line" name="line_13">
              <property name="geometry">
               <rect>
-               <x>-10</x>
-               <y>210</y>
+               <x>-1</x>
+               <y>254</y>
                <width>150</width>
                <height>3</height>
               </rect>
@@ -1048,10 +1058,10 @@
              </property>
              <property name="geometry">
               <rect>
-               <x>7</x>
-               <y>139</y>
-               <width>71</width>
-               <height>21</height>
+               <x>30</x>
+               <y>260</y>
+               <width>90</width>
+               <height>23</height>
               </rect>
              </property>
              <property name="toolTip">
@@ -1059,6 +1069,80 @@
              </property>
              <property name="text">
               <string>Drag-draw</string>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_7">
+             <property name="geometry">
+              <rect>
+               <x>4</x>
+               <y>90</y>
+               <width>131</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Start:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_20">
+             <property name="geometry">
+              <rect>
+               <x>2</x>
+               <y>150</y>
+               <width>141</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>End:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_28">
+             <property name="geometry">
+              <rect>
+               <x>5</x>
+               <y>230</y>
+               <width>61</width>
+               <height>16</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Step:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+            <widget class="Line" name="line_15">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>150</width>
+               <height>3</height>
+              </rect>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+            <widget class="Line" name="line_16">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>313</y>
+               <width>150</width>
+               <height>3</height>
+              </rect>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
              </property>
             </widget>
             <zorder>pbResetRuler</zorder>
@@ -1085,6 +1169,11 @@
             <zorder>label_23</zorder>
             <zorder>line_13</zorder>
             <zorder>pbToolboxDragMode_2</zorder>
+            <zorder>label_7</zorder>
+            <zorder>label_20</zorder>
+            <zorder>label_28</zorder>
+            <zorder>line_15</zorder>
+            <zorder>line_16</zorder>
            </widget>
           </widget>
           <widget class="QWidget" name="page_4">
@@ -1512,85 +1601,28 @@ to the basket.</string>
             <zorder>label_26</zorder>
            </widget>
           </widget>
-          <widget class="QWidget" name="page_5">
-           <widget class="QSpinBox" name="sbSmooth">
-            <property name="geometry">
-             <rect>
-              <x>20</x>
-              <y>30</y>
-              <width>91</width>
-              <height>22</height>
-             </rect>
-            </property>
-            <property name="maximum">
-             <number>1000000</number>
-            </property>
-            <property name="value">
-             <number>1</number>
-            </property>
-           </widget>
-           <widget class="QLabel" name="label_20">
-            <property name="geometry">
-             <rect>
-              <x>20</x>
-              <y>10</y>
-              <width>71</width>
-              <height>16</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Smoothing:</string>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="pbSmooth">
-            <property name="geometry">
-             <rect>
-              <x>20</x>
-              <y>60</y>
-              <width>91</width>
-              <height>23</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Smooth</string>
-            </property>
-           </widget>
-          </widget>
+         </widget>
+         <widget class="QPushButton" name="pbExitToolMode">
+          <property name="geometry">
+           <rect>
+            <x>29</x>
+            <y>10</y>
+            <width>94</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Close</string>
+          </property>
          </widget>
         </widget>
        </widget>
-      </widget>
-      <widget class="QCheckBox" name="cbToolBox">
-       <property name="geometry">
-        <rect>
-         <x>20</x>
-         <y>4</y>
-         <width>131</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Toolbox ON/OFF</string>
-       </property>
-      </widget>
-      <widget class="Line" name="line_10">
-       <property name="geometry">
-        <rect>
-         <x>3</x>
-         <y>25</y>
-         <width>150</width>
-         <height>3</height>
-        </rect>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
       </widget>
      </widget>
     </item>
@@ -1882,7 +1914,6 @@ in basket</string>
   </action>
  </widget>
  <tabstops>
-  <tabstop>cbToolBox</tabstop>
   <tabstop>ledXfrom</tabstop>
   <tabstop>ledXto</tabstop>
   <tabstop>ledYfrom</tabstop>
@@ -1920,7 +1951,6 @@ in basket</string>
   <tabstop>ledRulerAngle</tabstop>
   <tabstop>ledRulerX</tabstop>
   <tabstop>ledRulerLen</tabstop>
-  <tabstop>cobToolBox</tabstop>
   <tabstop>ledRulerDY</tabstop>
   <tabstop>ledRulerDX</tabstop>
   <tabstop>pbToolboxDragMode_2</tabstop>
@@ -1930,8 +1960,6 @@ in basket</string>
   <tabstop>cbSelBoxShowBG</tabstop>
   <tabstop>pbDensityDistribution</tabstop>
   <tabstop>cbProjBoxAutobin</tabstop>
-  <tabstop>sbSmooth</tabstop>
-  <tabstop>pbSmooth</tabstop>
  </tabstops>
  <resources/>
  <connections>
@@ -1942,8 +1970,8 @@ in basket</string>
    <slot>selBoxControlsUpdated()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>271</x>
-     <y>108</y>
+     <x>269</x>
+     <y>85</y>
     </hint>
     <hint type="destinationlabel">
      <x>387</x>
@@ -1958,8 +1986,8 @@ in basket</string>
    <slot>selBoxControlsUpdated()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>321</x>
-     <y>108</y>
+     <x>319</x>
+     <y>85</y>
     </hint>
     <hint type="destinationlabel">
      <x>387</x>
@@ -1974,8 +2002,8 @@ in basket</string>
    <slot>selBoxControlsUpdated()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>294</x>
-     <y>127</y>
+     <x>292</x>
+     <y>104</y>
     </hint>
     <hint type="destinationlabel">
      <x>387</x>
@@ -1990,8 +2018,8 @@ in basket</string>
    <slot>selBoxControlsUpdated()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>336</x>
-     <y>127</y>
+     <x>334</x>
+     <y>104</y>
     </hint>
     <hint type="destinationlabel">
      <x>387</x>
@@ -2006,8 +2034,8 @@ in basket</string>
    <slot>selBoxControlsUpdated()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>357</x>
-     <y>150</y>
+     <x>355</x>
+     <y>127</y>
     </hint>
     <hint type="destinationlabel">
      <x>387</x>
@@ -2022,8 +2050,8 @@ in basket</string>
    <slot>rulerControlsP1Updated()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>269</x>
-     <y>174</y>
+     <x>315</x>
+     <y>201</y>
     </hint>
     <hint type="destinationlabel">
      <x>387</x>
@@ -2038,8 +2066,8 @@ in basket</string>
    <slot>rulerControlsP1Updated()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>292</x>
-     <y>192</y>
+     <x>338</x>
+     <y>221</y>
     </hint>
     <hint type="destinationlabel">
      <x>387</x>
@@ -2054,8 +2082,8 @@ in basket</string>
    <slot>rulerControlsLenAngleUpdated()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>294</x>
-     <y>109</y>
+     <x>340</x>
+     <y>101</y>
     </hint>
     <hint type="destinationlabel">
      <x>387</x>
@@ -2070,28 +2098,12 @@ in basket</string>
    <slot>rulerControlsLenAngleUpdated()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>294</x>
-     <y>149</y>
+     <x>340</x>
+     <y>161</y>
     </hint>
     <hint type="destinationlabel">
      <x>387</x>
      <y>321</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cobToolBox</sender>
-   <signal>currentIndexChanged(int)</signal>
-   <receiver>swToolBox</receiver>
-   <slot>setCurrentIndex(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>258</x>
-     <y>79</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>253</x>
-     <y>250</y>
     </hint>
    </hints>
   </connection>
@@ -2102,8 +2114,8 @@ in basket</string>
    <slot>rulerControlsP2Updated()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>319</x>
-     <y>174</y>
+     <x>296</x>
+     <y>261</y>
     </hint>
     <hint type="destinationlabel">
      <x>387</x>
@@ -2118,8 +2130,8 @@ in basket</string>
    <slot>rulerControlsP2Updated()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>341</x>
-     <y>194</y>
+     <x>318</x>
+     <y>281</y>
     </hint>
     <hint type="destinationlabel">
      <x>387</x>
@@ -2134,12 +2146,12 @@ in basket</string>
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>292</x>
-     <y>171</y>
+     <x>290</x>
+     <y>148</y>
     </hint>
     <hint type="destinationlabel">
-     <x>337</x>
-     <y>174</y>
+     <x>335</x>
+     <y>151</y>
     </hint>
    </hints>
   </connection>
@@ -2150,12 +2162,28 @@ in basket</string>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>278</x>
-     <y>240</y>
+     <x>368</x>
+     <y>237</y>
     </hint>
     <hint type="destinationlabel">
-     <x>278</x>
-     <y>260</y>
+     <x>369</x>
+     <y>257</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbRulerTicksLength</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>ledRulerTicksLength</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>345</x>
+     <y>298</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>349</x>
+     <y>311</y>
     </hint>
    </hints>
   </connection>

@@ -547,7 +547,7 @@
           </rect>
          </property>
          <property name="text">
-          <string>Add legend</string>
+          <string>Add/edit legend</string>
          </property>
         </widget>
         <widget class="QPushButton" name="pbAddText">

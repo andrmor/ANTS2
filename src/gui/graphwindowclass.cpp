@@ -2474,14 +2474,33 @@ void GraphWindowClass::on_cbShowFitParameters_toggled(bool checked)
     else gStyle->SetOptFit(0000);
 }
 
+#include "alegenddialog.h"
 void GraphWindowClass::on_pbAddLegend_clicked()
 {
-    TLegend* leg = RasterWindow->fCanvas->BuildLegend();
+    TLegend * leg = nullptr;
+    for (int i=0; i<DrawObjects.size(); i++)
+    {
+        QString cn = DrawObjects[i].Pointer->ClassName();
+        if (cn == "TLegend")
+        {
+            leg = dynamic_cast<TLegend*>(DrawObjects[i].Pointer);
+            break;
+        }
+    }
+    if (!leg )
+    {
+        leg = RasterWindow->fCanvas->BuildLegend();
+        RegisterTObject(leg);
+        DrawObjects.append(ADrawObject(leg, "same"));
+        RedrawAll();
+    }
 
-    RegisterTObject(leg);
-    DrawObjects.append(ADrawObject(leg, "same"));
+    ALegendDialog Dialog(*leg, DrawObjects, this);
+    Dialog.exec();
 
-    RedrawAll();
+
+
+
 }
 
 void GraphWindowClass::on_pbRemoveLegend_clicked()
@@ -2489,15 +2508,13 @@ void GraphWindowClass::on_pbRemoveLegend_clicked()
     for (int i=0; i<DrawObjects.size(); i++)
     {
         QString cn = DrawObjects[i].Pointer->ClassName();
-        //qDebug() << cn;
         if (cn == "TLegend")
         {
             DrawObjects.remove(i);
             RedrawAll();
-            return;
+            break;
         }
     }
-    qDebug() << "Legend object was not found!";
 }
 
 #include <QComboBox>

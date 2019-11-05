@@ -44,6 +44,7 @@ TGraph * HistToGraph(TH1 * h)
 
 #include "TLegend.h"
 #include "TLegendEntry.h"
+#include "atlegendentry.h"
 void ABasketManager::add(const QString & name, const QVector<ADrawObject> & drawObjects)
 {
     ABasketItem item;
@@ -119,7 +120,7 @@ void ABasketManager::add(const QString & name, const QVector<ADrawObject> & draw
         int num = elist->GetEntries();
         for (int ie = 0; ie < num; ie++)
         {
-            TLegendEntry * en = static_cast<TLegendEntry*>( (*elist).At(ie));
+            ATLegendEntry * en = static_cast<ATLegendEntry*>( (*elist).At(ie));
             qDebug() << "Old entry obj:"<< en->GetObject() << " found?" << OldToNew[ en->GetObject() ];
             en->SetObject( OldToNew[ en->GetObject() ] );
             qDebug() << "   set:"<< en->GetObject();
@@ -173,7 +174,7 @@ const QVector<ADrawObject> ABasketManager::getCopy(int index) const
             int num = elist->GetEntries();
             for (int ie = 0; ie < num; ie++)
             {
-                TLegendEntry * en = static_cast<TLegendEntry*>( (*elist).At(ie));
+                ATLegendEntry * en = static_cast<ATLegendEntry*>( (*elist).At(ie));
                 qDebug() << "Old entry obj:"<< en->GetObject() << " found?" << OldToNew[ en->GetObject() ];
                 en->SetObject( OldToNew[ en->GetObject() ] );
             }
@@ -404,17 +405,17 @@ const QString ABasketManager::appendBasket(const QString & fileName)
                 TObject * p = key->ReadObj();
                 if (p)
                 {
+                    ADrawObject Obj(p, Options);
+                    Obj.Name = Name;
+                    Obj.bEnabled = bEnabled;
+                    drawObjects << Obj;
+
                     TLegend * Legend = dynamic_cast<TLegend*>(p);
                     if (Legend)
                     {
                         LegendIndex = iDrawObj;
                         LegendLinks = js["LegendLinks"].toArray();
                     }
-
-                    ADrawObject Obj(p, Options);
-                    Obj.Name = Name;
-                    Obj.bEnabled = bEnabled;
-                    drawObjects << Obj;
                 }
                 else
                 {
@@ -432,7 +433,7 @@ const QString ABasketManager::appendBasket(const QString & fileName)
                 int num = elist->GetEntries();
                 for (int ie = 0; ie < num; ie++)
                 {
-                    TLegendEntry * en = static_cast<TLegendEntry*>( (*elist).At(ie) );
+                    ATLegendEntry * en = static_cast<ATLegendEntry*>( (*elist).At(ie) );
                     en->SetObject( drawObjects[ LegendLinks[ie].toInt() ].Pointer ); //*** add protection!
                 }
             }
@@ -447,7 +448,6 @@ const QString ABasketManager::appendBasket(const QString & fileName)
                 drawObjects.clear();
             }
         }
-
     }
     else
     {

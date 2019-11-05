@@ -8,18 +8,20 @@
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
 
-#include "TLegend.h"
 #include "TLegendEntry.h"
 #include "TList.h"
 
 ALegendDialog::ALegendDialog(TLegend & Legend, const QVector<ADrawObject> & DrawObjects, QWidget * parent) :
     QDialog(parent), ui(new Ui::ALegendDialog),
-    Legend(Legend), DrawObjects(DrawObjects)
+    Legend(Legend), OriginalCopy(Legend), DrawObjects(DrawObjects)
 {
     ui->setupUi(this);
+    connect(ui->lwList->itemDelegate(), &QAbstractItemDelegate::commitData, this, &ALegendDialog::onLabelTextChanged);
 
-    updateMain();
-    updateTree(nullptr);
+    updateModel(Legend);
+
+    updateList();
+    updateTree();
 }
 
 ALegendDialog::~ALegendDialog()
@@ -27,38 +29,49 @@ ALegendDialog::~ALegendDialog()
     delete ui;
 }
 
-void ALegendDialog::updateMain()
+void ALegendDialog::onLabelTextChanged()
 {
-    ui->leTitle->setText( Legend.GetHeader() );
+    int row = ui->lwList->currentRow();
+    //qDebug() << "label change:"<<row << ui->lwList->item(row)->text();
+    if (row >= 0) Model[row].Label = ui->lwList->item(row)->text();
 
-    ui->lwList->clear();
-    EntryObjects.clear();
-    TList * elist = Legend.GetListOfPrimitives();
+    updateLegend();
+}
+
+void ALegendDialog::updateModel(TLegend & legend)
+{
+    TList * elist = legend.GetListOfPrimitives();
     int num = elist->GetEntries();
     for (int ie = 0; ie < num; ie++)
     {
         TLegendEntry * en = static_cast<TLegendEntry*>( (*elist).At(ie));
-        TObject * obj = en->GetObject();
-        QString opt   = en->GetOption();
-        QString label = en->GetLabel();
-
-        QString line;
-        if (obj && isValidObject(obj))
-        {
-            line = QString("L:%2   %3").arg(opt).arg(label);
-            EntryObjects << obj;
-        }
-        else
-        {
-            line = label;
-            EntryObjects << nullptr;
-        }
-
-        ui->lwList->addItem(line);
+        Model << ALegendModelRecord(en->GetLabel(), en->GetObject());
     }
 }
 
-void ALegendDialog::updateTree(TObject * selectedObj)
+void ALegendDialog::updateList()
+{
+    ui->leTitle->setText( Legend.GetHeader() );
+
+    ui->lwList->clear();
+
+    TList * elist = Legend.GetListOfPrimitives();
+    const int num = elist->GetEntries();
+    for (int ie = 0; ie < num; ie++)
+    {
+        TLegendEntry * en = static_cast<TLegendEntry*>( (*elist).At(ie));
+
+        //TObject * obj = en->GetObject();
+        //QString opt   = en->GetOption();
+        QString label = en->GetLabel();
+
+        QListWidgetItem * item = new QListWidgetItem(label);
+        item->setFlags(item->flags() | Qt::ItemIsEditable);
+        ui->lwList->addItem(item);
+    }
+}
+
+void ALegendDialog::updateTree()
 {
     ui->twTree->clear();
 
@@ -86,7 +99,7 @@ void ALegendDialog::updateTree(TObject * selectedObj)
         item->setText(1, QString::number(i));
 
         if (!drObj.bEnabled) item->setDisabled(true);
-        if (drObj.Pointer == selectedObj)
+        if (drObj.Pointer == SelectedObject)
         {
             item->setBackground(0, QBrush(Qt::blue));
             item->setForeground(0, QBrush(Qt::white));
@@ -96,21 +109,49 @@ void ALegendDialog::updateTree(TObject * selectedObj)
     }
 }
 
-bool ALegendDialog::isValidObject(TObject *obj)
+void ALegendDialog::updateLegend()
 {
-    for (int i=0; i<DrawObjects.size(); i++)
-        if (DrawObjects.at(i).Pointer == obj) return true;
-    return false;
+    Legend.Clear();
+
+    QString title = ui->leTitle->text();
+    if (!title.isEmpty()) Legend.SetHeader(title.toLatin1(), (ui->cbCentered->isChecked() ? "C" : "") );
+
+    for (const ALegendModelRecord & rec : Model)
+    {
+        Legend.AddEntry(rec.TObj, rec.Label.toLatin1());
+    }
+
+    emit requestCanvasUpdate();
 }
 
 void ALegendDialog::on_lwList_currentRowChanged(int currentRow)
 {
-    qDebug() << currentRow;
-    TObject * selection = EntryObjects.at(currentRow);
-    updateTree(selection);
+    //qDebug() << currentRow;
+    SelectedObject = nullptr;
+    if (currentRow >= 0) SelectedObject = Model.at(currentRow).TObj;
+    updateTree();
 }
 
 void ALegendDialog::on_pbCancel_clicked()
 {
+    //Legend = OriginalCopy;
     reject();
+}
+
+void ALegendDialog::on_pbAccept_clicked()
+{
+    updateLegend();
+    accept();
+}
+
+void ALegendDialog::on_lwList_itemChanged(QListWidgetItem *item)
+{
+    return;
+    qDebug() << "Item changed triggered!";
+
+    int row = ui->lwList->currentRow();
+    qDebug() << "label change:"<<row << ui->lwList->item(row)->text();
+    if (row >= 0) Model[row].Label = ui->lwList->item(row)->text();
+
+    updateLegend();
 }

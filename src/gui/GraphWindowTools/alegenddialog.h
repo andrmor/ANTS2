@@ -4,14 +4,25 @@
 #include <QDialog>
 #include <QVector>
 
+#include "TLegend.h"
+
 namespace Ui {
 class ALegendDialog;
 }
 
 class ADrawObject;
-class TLegend;
 class TObject;
+class QListWidgetItem;
 
+class ALegendModelRecord
+{
+public:
+    ALegendModelRecord(QString Label, TObject * TObj) : Label(Label), TObj(TObj) {}
+    ALegendModelRecord() {}
+
+    QString   Label;
+    TObject * TObj = nullptr;  // nullptr -> plain text, no connected object
+};
 
 class ALegendDialog : public QDialog
 {
@@ -21,23 +32,38 @@ public:
     explicit ALegendDialog(TLegend & Legend, const QVector<ADrawObject> & DrawObjects, QWidget * parent);
     ~ALegendDialog();
 
-    void updateMain();
 
 private slots:
+    void onLabelTextChanged();
+
     void on_lwList_currentRowChanged(int currentRow);
 
     void on_pbCancel_clicked();
 
+    void on_pbAccept_clicked();
+
+
+    void on_lwList_itemChanged(QListWidgetItem *item);
+
 private:
     Ui::ALegendDialog *ui;
     TLegend & Legend;
+    TLegend OriginalCopy;
     const QVector<ADrawObject> & DrawObjects;
 
-    QVector<TObject*> EntryObjects;
+    QVector<ALegendModelRecord> Model;
+    TObject * SelectedObject = nullptr;
 
 private:
-    void updateTree(TObject *selectedObj);
-    bool isValidObject(TObject *obj);
+    void updateModel(TLegend & legend);
+
+    void updateList();
+    void updateTree();
+
+    void updateLegend();
+
+signals:
+    void requestCanvasUpdate();
 };
 
 #endif // ALEGENDDIALOG_H

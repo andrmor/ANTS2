@@ -2496,11 +2496,8 @@ void GraphWindowClass::on_pbAddLegend_clicked()
     }
 
     ALegendDialog Dialog(*leg, DrawObjects, this);
+    connect(&Dialog, &ALegendDialog::requestCanvasUpdate, RasterWindow, &RasterWindowBaseClass::UpdateRootCanvas);
     Dialog.exec();
-
-
-
-
 }
 
 void GraphWindowClass::on_pbRemoveLegend_clicked()

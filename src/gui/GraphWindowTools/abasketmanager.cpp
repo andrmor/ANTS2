@@ -42,21 +42,26 @@ TGraph * HistToGraph(TH1 * h)
     return new TGraph(x.size(), x.data(), f.data());
 }
 
+#include "TLegend.h"
+#include "TLegendEntry.h"
 void ABasketManager::add(const QString & name, const QVector<ADrawObject> & drawObjects)
 {
     ABasketItem item;
     item.Name = name;
     item.Type = drawObjects.first().Pointer->ClassName();
 
+    QMap<TObject*, TObject*> OldToNew;
+    TLegend * Legend = nullptr;
+
     for (int i = 0; i < drawObjects.size(); i++)
     {
         const ADrawObject & drObj = drawObjects.at(i);
 
-        TObject * tobj = nullptr;
         QString type = drObj.Pointer->ClassName();
         QString options = drObj.Options;
 
-        //special cases
+        TObject * tobj = nullptr;
+        //preparing to clone: process special cases
         if (type == "TF1")
         {
             //does not work normal way - recalculated LRFs will replace old ones even in the copied object
@@ -88,10 +93,37 @@ void ABasketManager::add(const QString & name, const QVector<ADrawObject> & draw
         else
         {
             //general case
-            tobj = drObj.Pointer->Clone();
+            tobj = drObj.Pointer;
         }
 
-        item.DrawObjects.append( ADrawObject(tobj, options) );
+        TObject * clone;
+        TLegend * OldLegend = dynamic_cast<TLegend*>(tobj);
+        if (OldLegend)
+        {
+            Legend = new TLegend(*OldLegend); // if cloned, Legend has invalid object pointers
+            clone = Legend;
+        }
+        else
+        {
+            clone = tobj->Clone();
+            OldToNew[drObj.Pointer] = clone;
+            qDebug() << "to Basket, old-->cloned" << drObj.Pointer << "-->" << clone;
+        }
+
+        item.DrawObjects.append( ADrawObject(clone, options) );
+    }
+
+    if (Legend)
+    {
+        TList * elist = Legend->GetListOfPrimitives();
+        int num = elist->GetEntries();
+        for (int ie = 0; ie < num; ie++)
+        {
+            TLegendEntry * en = static_cast<TLegendEntry*>( (*elist).At(ie));
+            qDebug() << "Old entry obj:"<< en->GetObject() << " found?" << OldToNew[ en->GetObject() ];
+            en->SetObject( OldToNew[ en->GetObject() ] );
+            qDebug() << "   set:"<< en->GetObject();
+        }
     }
 
     Basket << item;
@@ -111,10 +143,41 @@ const QVector<ADrawObject> ABasketManager::getCopy(int index) const
 {
     QVector<ADrawObject> res;
 
+    QMap<TObject*, TObject*> OldToNew;
+    TLegend * Legend = nullptr;
+
     if (index >= 0 && index < Basket.size())
     {
         for (const ADrawObject & obj : Basket.at(index).DrawObjects)
-            res << ADrawObject(obj.Pointer->Clone(), obj.Options);
+        {
+            TObject * clone;
+            TLegend * OldLegend = dynamic_cast<TLegend*>(obj.Pointer);
+            if (OldLegend)
+            {
+                Legend = new TLegend(*OldLegend); // if cloned, Legend has invalid object pointers
+                clone = Legend;
+            }
+            else
+            {
+                clone = obj.Pointer->Clone();
+                OldToNew[obj.Pointer] = clone;
+                qDebug() << "From basket, old-->cloned" << obj.Pointer << "-->" << clone;
+            }
+
+            res << ADrawObject(clone, obj.Options);
+        }
+
+        if (Legend)
+        {
+            TList * elist = Legend->GetListOfPrimitives();
+            int num = elist->GetEntries();
+            for (int ie = 0; ie < num; ie++)
+            {
+                TLegendEntry * en = static_cast<TLegendEntry*>( (*elist).At(ie));
+                qDebug() << "Old entry obj:"<< en->GetObject() << " found?" << OldToNew[ en->GetObject() ];
+                en->SetObject( OldToNew[ en->GetObject() ] );
+            }
+        }
     }
 
     return res;

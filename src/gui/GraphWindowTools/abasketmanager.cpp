@@ -238,8 +238,65 @@ const QStringList ABasketManager::getItemNames() const
     return res;
 }
 
+#include <QJsonDocument>
 void ABasketManager::saveAll(const QString & fileName)
 {
+    TFile f(fileName.toLocal8Bit(), "RECREATE");
+
+    int objectIndex = 0;
+    QJsonArray BasketArray;
+    for (int ib = 0; ib < Basket.size(); ib++)
+    {
+        QJsonObject ItemJson;
+        ItemJson["ItemName"] = Basket.at(ib).Name;
+
+        QJsonArray ItemArray;
+        const QVector<ADrawObject> & DrawObjects = Basket.at(ib).DrawObjects;
+        for (int io = 0; io < DrawObjects.size(); io++)
+        {
+            const ADrawObject & obj = DrawObjects.at(io);
+            TString KeyName = "#";
+            KeyName += objectIndex;
+            objectIndex++;
+            obj.Pointer->Write(KeyName);
+
+            QJsonObject js;
+            js["Name"] = obj.Name;
+            js["Options"] = obj.Options;
+            js["Enabled"] = obj.bEnabled;
+            TLegend * Legend = dynamic_cast<TLegend*>(obj.Pointer);
+            if (Legend)
+            {
+                QJsonArray links;
+                TList * elist = Legend->GetListOfPrimitives();
+                int num = elist->GetEntries();
+                for (int ie = 0; ie < num; ie++)
+                {
+                    TLegendEntry * en = static_cast<TLegendEntry*>( (*elist).At(ie));
+                    //qDebug() << "Entry obj:"<< en->GetObject();
+                    links.append(findPointerInDrawObjects(DrawObjects, en->GetObject()));
+                }
+                js["LegendLinks"] = links;
+            }
+            ItemArray.append(js);
+        }
+        ItemJson["ItemObjects"] = ItemArray;
+
+        BasketArray.append(ItemJson);
+    }
+
+    QJsonDocument doc;
+    doc.setArray(BasketArray);
+    QString descStr(doc.toJson());
+    qDebug() << descStr;
+
+    TNamed desc;
+    desc.SetTitle(descStr.toLocal8Bit().data());
+    desc.Write("BasketDescription_v2");
+
+    f.Close();
+
+    /*
     QString str;
     TFile f(fileName.toLocal8Bit(), "RECREATE");
 
@@ -256,7 +313,7 @@ void ABasketManager::saveAll(const QString & fileName)
         for (int i = 0; i < DrawObjects.size(); i++)
         {
             ADrawObject & Obj = DrawObjects[i];
-            //qDebug() << "   >>"<<i<<Obj.Pointer->GetName()<<Obj.Pointer->ClassName();
+            qDebug() << "Saving>>"<<i<<Obj.Pointer<<Obj.Pointer->GetName()<<Obj.Pointer->ClassName();
             TString name = "";
             name += index;
             TNamed* nameO = dynamic_cast<TNamed*>(Obj.Pointer);
@@ -269,6 +326,19 @@ void ABasketManager::saveAll(const QString & fileName)
             str += '|' + Obj.Options;
 
             index++;
+
+
+            TLegend * Legend = dynamic_cast<TLegend*>(Obj.Pointer);
+            if (Legend)
+            {
+                TList * elist = Legend->GetListOfPrimitives();
+                int num = elist->GetEntries();
+                for (int ie = 0; ie < num; ie++)
+                {
+                    TLegendEntry * en = static_cast<TLegendEntry*>( (*elist).At(ie));
+                    qDebug() << "Entry obj:"<< en->GetObject();
+                }
+            }
         }
 
         str += '\n';
@@ -279,106 +349,207 @@ void ABasketManager::saveAll(const QString & fileName)
     desc.Write("BasketDescription");
 
     f.Close();
+    */
 }
 
 const QString ABasketManager::appendBasket(const QString & fileName)
 {
-    QByteArray ba = fileName.toLocal8Bit();
-    const char *c_str = ba.data();
-    TFile * f = new TFile(c_str);
+    TFile f(fileName.toLocal8Bit().data());
 
-    // /*
-    int numKeys = f->GetListOfKeys()->GetEntries();
-    qDebug() << "Number of keys:"<<numKeys;
+    int numKeys = f.GetListOfKeys()->GetEntries();
+    qDebug() << "Keys:"<<numKeys;
     for (int i=0; i<numKeys; i++)
     {
-        TKey *key = (TKey*)f->GetListOfKeys()->At(i);
+        TKey * key = (TKey*)f.GetListOfKeys()->At(i);
         QString type = key->GetClassName();
-        TString objName = key->GetName();
-        qDebug() << "-->"<< i<<"   "<<objName<<"  "<<type<<key->GetTitle();
+        QString ObjName = key->GetName();
+        QString title = key->GetTitle();
+        qDebug() << title << ObjName << type;
     }
-    // */
-
-    TNamed* desc = (TNamed*)f->Get("BasketDescription");
-    if (!desc)
-        return QString("%1: this is not a valid ANTS2 basket file!").arg(fileName);
-
-    QString text = desc->GetTitle();
-    qDebug() << "Basket description:"<<text;
-    qDebug() << "Number of keys:"<<f->GetListOfKeys()->GetEntries();
-
-    QStringList sl = text.split('\n',QString::SkipEmptyParts);
-
-    int numLines = sl.size();
-    int basketSize =  numLines/2;
-    qDebug() << "Description lists" << basketSize << "objects in the basket";
 
     bool ok = true;
-    int indexFileObject = 0;
-    if (numLines % 2 == 0 ) // should be even number of lines
+    TNamed* desc = (TNamed*)f.Get("BasketDescription_v2");
+    if (desc)
     {
-        for (int iDrawObject = 0; iDrawObject < basketSize; iDrawObject++ )
+        //new system
+        QString text = desc->GetTitle();
+        QJsonDocument doc(QJsonDocument::fromJson(text.toLatin1().data()));
+        QJsonArray BasketArray = doc.array();
+        //qDebug() << BasketArray;
+
+        int basketSize = BasketArray.size();
+        int KeyIndex = 0;
+        for (int iBasketItem = 0; iBasketItem < basketSize; iBasketItem++ )
         {
-            qDebug() << ">>>>Object #"<< iDrawObject;
-            QString name = sl[iDrawObject*2];
-            bool ok;
-            QStringList fields = sl[iDrawObject*2+1].split('|');
-            if (fields.size()<2)
-            {
-                qWarning()<<"Too short descr line";
-                ok=false;
-                break;
-            }
+            QJsonObject ItemJson = BasketArray[iBasketItem].toObject();
+            qDebug() << "Item"<<iBasketItem << ItemJson;
 
-            const QString sNumber = fields[0];
-
-            int numObj = sNumber.toInt(&ok);
-            if (!ok)
-            {
-                qWarning() << "Num obj convertion error!";
-                ok=false;
-                break;
-            }
-            if (numObj != fields.size()-1)
-            {
-                qWarning()<<"Number of objects vs option strings mismatch:"<<numObj<<fields.size()-1;
-                ok=false;
-                break;
-            }
-
-            qDebug() << "Name:"<< name << "objects:"<< numObj;
+            QString    ItemName  = ItemJson["ItemName"].toString();
+            QJsonArray ItemArray = ItemJson["ItemObjects"].toArray();
+            int        ItemSize  = ItemArray.size();
 
             QVector<ADrawObject> drawObjects;
-            for (int iDrawObj = 0; iDrawObj < numObj; iDrawObj++)
+            int LegendIndex = -1;
+            QJsonArray LegendLinks;
+            for (int iDrawObj = 0; iDrawObj < ItemSize; iDrawObj++)
             {
-                TKey *key = (TKey*)f->GetListOfKeys()->At(indexFileObject++);
-                //key->SetMotherDir(0);
-                QString type = key->GetClassName();
-                TString objName = key->GetName();
-                qDebug() << "-->"<< iDrawObj <<"   "<<objName<<"  "<<type<<"   "<<fields[iDrawObj+1];
+                QJsonObject js = ItemArray[iDrawObj].toObject();
+                QString Name     = js["Name"].toString();
+                QString Options  = js["Options"].toString();
+                bool    bEnabled = js["Enabled"].toBool();
 
-                //TObject *p = 0;
+                TKey *key = (TKey*)f.GetListOfKeys()->At(KeyIndex);
+                KeyIndex++;
+
                 TObject * p = key->ReadObj();
-                if (p) drawObjects << ADrawObject(p, fields[iDrawObj+1]);
-                else  qWarning() << "Unregistered object type" << type <<"for load basket from file!";
+                if (p)
+                {
+                    TLegend * Legend = dynamic_cast<TLegend*>(p);
+                    if (Legend)
+                    {
+                        LegendIndex = iDrawObj;
+                        LegendLinks = js["LegendLinks"].toArray();
+                    }
+
+                    ADrawObject Obj(p, Options);
+                    Obj.Name = Name;
+                    Obj.bEnabled = bEnabled;
+                    drawObjects << Obj;
+                }
+                else
+                {
+                    qDebug() << "Not found!";
+                    // *** garbage collection
+                    f.Close();
+                    return QString("Corrupted basket file!").arg(fileName);
+                }
+            }
+
+            if (LegendIndex != -1)
+            {
+                TLegend * Legend = static_cast<TLegend*>(drawObjects[LegendIndex].Pointer);
+                TList * elist = Legend->GetListOfPrimitives();
+                int num = elist->GetEntries();
+                for (int ie = 0; ie < num; ie++)
+                {
+                    TLegendEntry * en = static_cast<TLegendEntry*>( (*elist).At(ie) );
+                    en->SetObject( drawObjects[ LegendLinks[ie].toInt() ].Pointer ); //*** add protection!
+                }
             }
 
             if (!drawObjects.isEmpty())
             {
                 ABasketItem item;
-                item.Name = name;
+                item.Name = ItemName;
                 item.DrawObjects = drawObjects;
                 item.Type = drawObjects.first().Pointer->ClassName();
                 Basket << item;
                 drawObjects.clear();
             }
         }
+
     }
-    else ok = false;
+    else
+    {
+        desc = (TNamed*)f.Get("BasketDescription");
+        if (desc)
+        {
+            //old system
+            QString text = desc->GetTitle();
+            //qDebug() << "Basket description:"<<text;
+            //qDebug() << "Number of keys:"<<f->GetListOfKeys()->GetEntries();
 
+            QStringList sl = text.split('\n',QString::SkipEmptyParts);
+
+            int numLines = sl.size();
+            int basketSize =  numLines/2;
+            //qDebug() << "Description lists" << basketSize << "objects in the basket";
+
+
+            int indexFileObject = 0;
+            if (numLines % 2 == 0 ) // should be even number of lines
+            {
+                for (int iDrawObject = 0; iDrawObject < basketSize; iDrawObject++ )
+                {
+                    //qDebug() << ">>>>Object #"<< iDrawObject;
+                    QString name = sl[iDrawObject*2];
+                    bool ok;
+                    QStringList fields = sl[iDrawObject*2+1].split('|');
+                    if (fields.size()<2)
+                    {
+                        qWarning()<<"Too short descr line";
+                        ok=false;
+                        break;
+                    }
+
+                    const QString sNumber = fields[0];
+
+                    int numObj = sNumber.toInt(&ok);
+                    if (!ok)
+                    {
+                        qWarning() << "Num obj convertion error!";
+                        ok=false;
+                        break;
+                    }
+                    if (numObj != fields.size()-1)
+                    {
+                        qWarning()<<"Number of objects vs option strings mismatch:"<<numObj<<fields.size()-1;
+                        ok=false;
+                        break;
+                    }
+
+                    //qDebug() << "Name:"<< name << "objects:"<< numObj;
+
+                    QVector<ADrawObject> drawObjects;
+                    for (int iDrawObj = 0; iDrawObj < numObj; iDrawObj++)
+                    {
+                        TKey *key = (TKey*)f.GetListOfKeys()->At(indexFileObject++);
+                        //key->SetMotherDir(0);
+                        //QString type = key->GetClassName();
+                        //TString objName = key->GetName();
+                        //qDebug() << "-->"<< iDrawObj <<"   "<<objName<<"  "<<type<<"   "<<fields[iDrawObj+1];
+
+                        TObject * p = key->ReadObj();
+                        if (p) drawObjects << ADrawObject(p, fields[iDrawObj+1]);
+                        //qDebug() << p;
+
+                        /*
+                    TLegend * Legend = dynamic_cast<TLegend*>(p);
+                    if (Legend)
+                    {
+                        TList * elist = Legend->GetListOfPrimitives();
+                        int num = elist->GetEntries();
+                        for (int ie = 0; ie < num; ie++)
+                        {
+                            TLegendEntry * en = static_cast<TLegendEntry*>( (*elist).At(ie));
+                            qDebug() << "Entry obj:"<< en->GetObject();
+                        }
+                    }
+                    */
+                    }
+
+                    if (!drawObjects.isEmpty())
+                    {
+                        ABasketItem item;
+                        item.Name = name;
+                        item.DrawObjects = drawObjects;
+                        item.Type = drawObjects.first().Pointer->ClassName();
+                        Basket << item;
+                        drawObjects.clear();
+                    }
+                }
+            }
+            else ok = false;
+        }
+        else
+        {
+            f.Close();
+            return QString("%1: this is not a valid ANTS2 basket file!").arg(fileName);
+        }
+    }
+
+    f.Close();
     if (!ok) return QString("%1: corrupted basket file").arg(fileName);
-
-    f->Close();
     return "";
 }
 
@@ -474,4 +645,11 @@ void ABasketManager::reorder(const QVector<int> &indexes, int to)
     for (int i = Basket.size()-1; i >= 0; i--)
         if (Basket.at(i)._flag)
             Basket.remove(i);
+}
+
+int ABasketManager::findPointerInDrawObjects(const QVector<ADrawObject> &DrawObjects, TObject *obj) const
+{
+    for (int i=0; i<DrawObjects.size(); i++)
+        if (DrawObjects.at(i).Pointer == obj) return i;
+    return -1;
 }

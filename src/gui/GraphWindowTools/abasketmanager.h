@@ -43,6 +43,9 @@ private:
     QVector< ABasketItem > Basket;
 
     QVector<ADrawObject> NotValidItem; // to return on wrong index
+
+private:
+    int findPointerInDrawObjects(const QVector<ADrawObject> & DrawObjects, TObject * obj) const;
 };
 
 #endif // ABASKETMANAGER_H

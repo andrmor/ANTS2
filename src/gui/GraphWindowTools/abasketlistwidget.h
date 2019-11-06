@@ -3,21 +3,15 @@
 
 #include <QListWidget>
 
-class ABasketManager;
-
 class ABasketListWidget : public QListWidget
 {
     Q_OBJECT
 
 public:
-    ABasketListWidget(QWidget * parent, ABasketManager* & Basket, int & ActiveBasketItem);
+    ABasketListWidget(QWidget * parent);
 
 protected:
     void dropEvent(QDropEvent * event) override;
-
-private:
-    ABasketManager* & Basket;
-    int & ActiveBasketItem;
 
 signals:
     void requestReorder(const QVector<int> &indexes, int toRow);

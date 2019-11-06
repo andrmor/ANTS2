@@ -100,7 +100,7 @@ GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
     ui->pbBackToLast->setVisible(false);
 
     //init of basket widget
-    lwBasket = new ABasketListWidget(this, Basket, ActiveBasketItem);
+    lwBasket = new ABasketListWidget(this);
     ui->layBasket->addWidget(lwBasket);
     connect(lwBasket, &ABasketListWidget::customContextMenuRequested, this, &GraphWindowClass::BasketCustomContextMenuRequested);
     connect(lwBasket, &ABasketListWidget::itemDoubleClicked, this, &GraphWindowClass::onBasketItemDoubleClicked);

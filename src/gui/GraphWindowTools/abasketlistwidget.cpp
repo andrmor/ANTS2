@@ -1,11 +1,10 @@
 #include "abasketlistwidget.h"
-#include "abasketmanager.h"
 
 #include <QDropEvent>
 #include <QDebug>
 
-ABasketListWidget::ABasketListWidget(QWidget * parent, ABasketManager* & Basket, int & ActiveBasketItem) :
-    QListWidget(parent), Basket(Basket), ActiveBasketItem(ActiveBasketItem)
+ABasketListWidget::ABasketListWidget(QWidget * parent) :
+    QListWidget(parent)
 {
     setSelectionMode(QAbstractItemView::ExtendedSelection);
     setContextMenuPolicy(Qt::CustomContextMenu);

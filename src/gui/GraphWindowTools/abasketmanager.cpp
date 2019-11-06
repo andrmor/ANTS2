@@ -434,7 +434,10 @@ const QString ABasketManager::appendBasket(const QString & fileName)
                 for (int ie = 0; ie < num; ie++)
                 {
                     ATLegendEntry * en = static_cast<ATLegendEntry*>( (*elist).At(ie) );
-                    en->SetObject( drawObjects[ LegendLinks[ie].toInt() ].Pointer ); //*** add protection!
+                    int iObj = LegendLinks[ie].toInt();
+                    TObject * p = ( iObj == -1 ? nullptr : drawObjects[iObj].Pointer );
+                    qDebug() << "Setting entry #" << ie << "to draw object #" << iObj << "with pointer" << p;
+                    en->SetObject(p); //*** add protection!
                 }
             }
 

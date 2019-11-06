@@ -10,6 +10,7 @@ namespace Ui {
 class ALegendDialog;
 }
 
+class ABasketListWidget;
 class ADrawObject;
 class TObject;
 class QListWidgetItem;
@@ -34,25 +35,24 @@ public:
 
 
 private slots:
+    void onCurrentEntryChanged(int currentRow);
     void onLabelTextChanged();
 
-    void on_lwList_currentRowChanged(int currentRow);
-
     void on_pbCancel_clicked();
-
     void on_pbAccept_clicked();
-
-
-    void on_lwList_itemChanged(QListWidgetItem *item);
 
 private:
     Ui::ALegendDialog *ui;
+    ABasketListWidget * lwList;
     TLegend & Legend;
     TLegend OriginalCopy;
     const QVector<ADrawObject> & DrawObjects;
 
     QVector<ALegendModelRecord> Model;
     TObject * SelectedObject = nullptr;
+
+private slots:
+    void onReorderEntriesRequested(const QVector<int> &indexes, int toRow);
 
 private:
     void updateModel(TLegend & legend);

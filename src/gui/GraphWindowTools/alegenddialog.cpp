@@ -1,6 +1,7 @@
 #include "alegenddialog.h"
 #include "ui_alegenddialog.h"
 #include "adrawobject.h"
+#include "abasketlistwidget.h"
 
 #include <QDebug>
 #include <QListWidget>
@@ -16,7 +17,13 @@ ALegendDialog::ALegendDialog(TLegend & Legend, const QVector<ADrawObject> & Draw
     Legend(Legend), OriginalCopy(Legend), DrawObjects(DrawObjects)
 {
     ui->setupUi(this);
-    connect(ui->lwList->itemDelegate(), &QAbstractItemDelegate::commitData, this, &ALegendDialog::onLabelTextChanged);
+
+    lwList = new ABasketListWidget(this);
+    ui->splitter->insertWidget(0, lwList);
+    connect(lwList, &ABasketListWidget::requestReorder, this, &ALegendDialog::onReorderEntriesRequested);
+    connect(lwList, &ABasketListWidget::currentRowChanged, this, &ALegendDialog::onCurrentEntryChanged);
+
+    connect(lwList->itemDelegate(), &QAbstractItemDelegate::commitData, this, &ALegendDialog::onLabelTextChanged);
 
     updateModel(Legend);
 
@@ -31,9 +38,9 @@ ALegendDialog::~ALegendDialog()
 
 void ALegendDialog::onLabelTextChanged()
 {
-    int row = ui->lwList->currentRow();
-    //qDebug() << "label change:"<<row << ui->lwList->item(row)->text();
-    if (row >= 0) Model[row].Label = ui->lwList->item(row)->text();
+    int row = lwList->currentRow();
+    //qDebug() << "label change:"<<row << lwList->item(row)->text();
+    if (row >= 0) Model[row].Label = lwList->item(row)->text();
 
     updateLegend();
 }
@@ -53,7 +60,7 @@ void ALegendDialog::updateList()
 {
     ui->leTitle->setText( Legend.GetHeader() );
 
-    ui->lwList->clear();
+    lwList->clear();
 
     TList * elist = Legend.GetListOfPrimitives();
     const int num = elist->GetEntries();
@@ -67,7 +74,7 @@ void ALegendDialog::updateList()
 
         QListWidgetItem * item = new QListWidgetItem(label);
         item->setFlags(item->flags() | Qt::ItemIsEditable);
-        ui->lwList->addItem(item);
+        lwList->addItem(item);
     }
 }
 
@@ -124,7 +131,7 @@ void ALegendDialog::updateLegend()
     emit requestCanvasUpdate();
 }
 
-void ALegendDialog::on_lwList_currentRowChanged(int currentRow)
+void ALegendDialog::onCurrentEntryChanged(int currentRow)
 {
     //qDebug() << currentRow;
     SelectedObject = nullptr;
@@ -144,14 +151,7 @@ void ALegendDialog::on_pbAccept_clicked()
     accept();
 }
 
-void ALegendDialog::on_lwList_itemChanged(QListWidgetItem *item)
+void ALegendDialog::onReorderEntriesRequested(const QVector<int> &indexes, int toRow)
 {
-    return;
-    qDebug() << "Item changed triggered!";
-
-    int row = ui->lwList->currentRow();
-    qDebug() << "label change:"<<row << ui->lwList->item(row)->text();
-    if (row >= 0) Model[row].Label = ui->lwList->item(row)->text();
-
-    updateLegend();
+    qDebug() << indexes << toRow;
 }

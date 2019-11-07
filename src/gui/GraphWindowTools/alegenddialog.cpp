@@ -2,12 +2,14 @@
 #include "ui_alegenddialog.h"
 #include "adrawobject.h"
 #include "abasketlistwidget.h"
+#include "amessage.h"
 
 #include <QDebug>
 #include <QListWidget>
 #include <QListWidgetItem>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
+#include <QMenu>
 
 #include "TLegendEntry.h"
 #include "TList.h"
@@ -19,10 +21,11 @@ ALegendDialog::ALegendDialog(TLegend & Legend, const QVector<ADrawObject> & Draw
     ui->setupUi(this);
 
     lwList = new ABasketListWidget(this);
+    lwList->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->splitter->insertWidget(0, lwList);
     connect(lwList, &ABasketListWidget::requestReorder, this, &ALegendDialog::onReorderEntriesRequested);
     connect(lwList, &ABasketListWidget::currentRowChanged, this, &ALegendDialog::onCurrentEntryChanged);
-
+    connect(lwList, &ABasketListWidget::customContextMenuRequested, this, &ALegendDialog::onListMenuRequested);
     connect(lwList->itemDelegate(), &QAbstractItemDelegate::commitData, this, &ALegendDialog::onLabelTextChanged);
 
     updateModel(Legend);
@@ -52,27 +55,20 @@ void ALegendDialog::updateModel(TLegend & legend)
     for (int ie = 0; ie < num; ie++)
     {
         TLegendEntry * en = static_cast<TLegendEntry*>( (*elist).At(ie));
-        Model << ALegendModelRecord(en->GetLabel(), en->GetObject());
+        qDebug() << ie << en->GetOption();
+        Model << ALegendModelRecord(en->GetLabel(), en->GetObject(), en->GetOption());
     }
 }
 
 void ALegendDialog::updateList()
 {
-    ui->leTitle->setText( Legend.GetHeader() );
+    //ui->leTitle->setText( Legend.GetHeader() );
 
     lwList->clear();
 
-    TList * elist = Legend.GetListOfPrimitives();
-    const int num = elist->GetEntries();
-    for (int ie = 0; ie < num; ie++)
+    for (const ALegendModelRecord & rec : Model)
     {
-        TLegendEntry * en = static_cast<TLegendEntry*>( (*elist).At(ie));
-
-        //TObject * obj = en->GetObject();
-        //QString opt   = en->GetOption();
-        QString label = en->GetLabel();
-
-        QListWidgetItem * item = new QListWidgetItem(label);
+        QListWidgetItem * item = new QListWidgetItem(rec.Label);
         item->setFlags(item->flags() | Qt::ItemIsEditable);
         lwList->addItem(item);
     }
@@ -125,10 +121,32 @@ void ALegendDialog::updateLegend()
 
     for (const ALegendModelRecord & rec : Model)
     {
-        Legend.AddEntry(rec.TObj, rec.Label.toLatin1());
+        Legend.AddEntry(rec.TObj, rec.Label.toLatin1().data(), rec.Options.toLatin1().data());
     }
 
     emit requestCanvasUpdate();
+}
+
+void ALegendDialog::removeAllSelectedEntries()
+{
+    QList<QListWidgetItem*> selection = lwList->selectedItems();
+    const int size = selection.size();
+    if (size == 0) return;
+
+    bool bConfirm = true;
+    if (size > 1)
+         bConfirm = confirm(QString("Remove %1 selected entr%2?").arg(size).arg(size == 1 ? "y" : "is"), this);
+    if (!bConfirm) return;
+
+    QVector<int> indexes;
+    for (QListWidgetItem * item : selection)
+        indexes << lwList->row(item);
+    std::sort(indexes.begin(), indexes.end());
+    for (int i = indexes.size() - 1; i >= 0; i--)
+        Model.remove(indexes.at(i));
+
+    updateList();
+    updateLegend();
 }
 
 void ALegendDialog::onCurrentEntryChanged(int currentRow)
@@ -154,4 +172,86 @@ void ALegendDialog::on_pbAccept_clicked()
 void ALegendDialog::onReorderEntriesRequested(const QVector<int> &indexes, int toRow)
 {
     qDebug() << indexes << toRow;
+}
+
+void ALegendDialog::onListMenuRequested(const QPoint &pos)
+{
+    if (lwList->selectedItems().size() > 1)
+    {
+        onListMenuMultipleSelection(pos);
+        return;
+    }
+
+    QMenu Menu;
+
+    //int row = -1; if (temp) row = lwBasket->row(temp);
+    QListWidgetItem* temp = lwList->itemAt(pos);
+
+    QAction* addTextA  = Menu.addAction("Add text line");
+    Menu.addSeparator();
+    QAction* delA      = Menu.addAction("Delete"); delA->setEnabled(temp); delA->setShortcut(Qt::Key_Delete);
+    Menu.addSeparator();
+    QAction* clearA = Menu.addAction("Clear legend");
+
+    //------
+
+    QAction* selectedItem = Menu.exec(lwList->mapToGlobal(pos));
+    if (!selectedItem) return; //nothing was selected
+
+    if      (selectedItem == addTextA)  addText();
+    else if (selectedItem == delA)      deleteSelectedEntry();
+    else if (selectedItem == clearA)    clearLegend();
+}
+
+void ALegendDialog::clearLegend()
+{
+    bool bConfirm = confirm("Clear legend entries?", this);
+    if (!bConfirm) return;
+
+    Model.clear();
+    updateList();
+    updateLegend();
+}
+
+void ALegendDialog::deleteSelectedEntry()
+{
+    int row = lwList->currentRow();
+    if (row == -1) return;
+
+    Model.remove(row);
+    updateList();
+}
+
+void ALegendDialog::addText()
+{
+    Model << ALegendModelRecord("Text", nullptr, "");
+    updateList();
+    updateLegend();
+}
+
+void ALegendDialog::onListMenuMultipleSelection(const QPoint &pos)
+{
+    QMenu Menu;
+    QAction * removeAllSelected = Menu.addAction("Remove all selected entries");
+    removeAllSelected->setShortcut(Qt::Key_Delete);
+
+    QAction* selectedItem = Menu.exec(lwList->mapToGlobal(pos));
+    if (!selectedItem) return;
+
+    if (selectedItem == removeAllSelected)
+        removeAllSelectedEntries();
+}
+
+void ALegendDialog::on_twTree_itemDoubleClicked(QTreeWidgetItem *item, int)
+{
+    int index = item->text(1).toInt();
+    if (index < 0 || index >= DrawObjects.size())
+    {
+        message("Bad index - the tree widget is corrupted", this);
+        return;
+    }
+
+    Model << ALegendModelRecord(DrawObjects[index].Name, DrawObjects[index].Pointer, "lpf");
+    updateList();
+    updateLegend();
 }

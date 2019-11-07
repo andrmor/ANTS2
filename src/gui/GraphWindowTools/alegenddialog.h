@@ -14,15 +14,17 @@ class ABasketListWidget;
 class ADrawObject;
 class TObject;
 class QListWidgetItem;
+class QTreeWidgetItem;
 
 class ALegendModelRecord
 {
 public:
-    ALegendModelRecord(QString Label, TObject * TObj) : Label(Label), TObj(TObj) {}
+    ALegendModelRecord(const QString Label, TObject * TObj, const QString Options) : Label(Label), TObj(TObj), Options(Options) {}
     ALegendModelRecord() {}
 
     QString   Label;
     TObject * TObj = nullptr;  // nullptr -> plain text, no connected object
+    QString   Options;
 };
 
 class ALegendDialog : public QDialog
@@ -53,6 +55,10 @@ private:
 
 private slots:
     void onReorderEntriesRequested(const QVector<int> &indexes, int toRow);
+    void onListMenuRequested(const QPoint &pos);
+    void onListMenuMultipleSelection(const QPoint &pos);
+
+    void on_twTree_itemDoubleClicked(QTreeWidgetItem *item, int column);
 
 private:
     void updateModel(TLegend & legend);
@@ -61,6 +67,11 @@ private:
     void updateTree();
 
     void updateLegend();
+
+    void removeAllSelectedEntries();
+    void clearLegend();
+    void deleteSelectedEntry();
+    void addText();
 
 signals:
     void requestCanvasUpdate();

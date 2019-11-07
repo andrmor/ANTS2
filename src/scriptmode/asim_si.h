@@ -39,6 +39,7 @@ public slots:
   int countMonitors() const;
   int getMonitorHits(QString monitor); //this and next: cannot be const beacuse of abort()
   int getMonitorHits(int index);
+
   QVariantList getMonitorHitsAll();
   QVariant getMonitorTime(QString monitor);
   QVariant getMonitorTime(int index);
@@ -50,6 +51,8 @@ public slots:
   QVariant getMonitorEnergy(int index);
   QVariant getMonitorXY(QString monitor);
   QVariant getMonitorXY(int index);
+
+  QVariant getMonitorEnergyStats(int index);
 
   void SetGeant4Executable(QString FileName) const;
 
@@ -66,6 +69,8 @@ private:
   enum dataType {dat_time, dat_angle, dat_wave, dat_energy};
   QVariant getMonitorData1D(const QString & monitor, dataType type) const;
   QVariant getMonitorData1D(int index, dataType type) const;
+
+  QVariant getMonitorStats1D(int index, dataType type) const;
 };
 
 #endif // ASIM_SI_H

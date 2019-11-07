@@ -235,6 +235,15 @@ const QString ATH1D::Import(double from, double to, const std::vector<double> & 
     return "";
 }
 
+void ATH1D::setStats(double *statsArray)
+{
+    fTsumw   = statsArray[0];
+    fTsumw2  = statsArray[1];
+    fTsumwx  = statsArray[2];
+    fTsumwx2 = statsArray[3];
+    SetEntries(statsArray[0]);
+}
+
 void ATH1D::SetStatistic(const std::vector<double> & stats)
 {
     fTsumw   = stats[0];

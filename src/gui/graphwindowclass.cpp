@@ -2477,6 +2477,8 @@ void GraphWindowClass::on_cbShowFitParameters_toggled(bool checked)
 #include "alegenddialog.h"
 void GraphWindowClass::on_pbAddLegend_clicked()
 {
+    if (DrawObjects.isEmpty()) return;
+
     TLegend * leg = nullptr;
     for (int i=0; i<DrawObjects.size(); i++)
     {

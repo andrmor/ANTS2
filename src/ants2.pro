@@ -1,6 +1,6 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 4
-ANTS2_MINOR = 22
+ANTS2_MINOR = 23
 
 #Optional libraries
 #CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
@@ -412,7 +412,8 @@ SOURCES += main.cpp \
     gui/MainWindowTools/alogconfigdialog.cpp \
     Simulation/alogsandstatisticsoptions.cpp \
     Reconstruction/areconstructionworker.cpp \
-    common/ahistogram.cpp
+    common/ahistogram.cpp \
+    gui/GraphWindowTools/abasketitem.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -567,7 +568,9 @@ HEADERS  += common/CorrelationFilters.h \
     Simulation/alogsandstatisticsoptions.h \
     Reconstruction/afunctorbase.h \
     Reconstruction/areconstructionworker.h \
-    common/ahistogram.h
+    common/ahistogram.h \
+    gui/GraphWindowTools/adrawobject.h \
+    gui/GraphWindowTools/abasketitem.h
 
 # --- SIM ---
 ants2_SIM {

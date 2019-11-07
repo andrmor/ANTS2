@@ -25,6 +25,9 @@ public:
     QString   Label;
     TObject * TObj = nullptr;  // nullptr -> plain text, no connected object
     QString   Options;
+
+    //runtime
+    bool _flag = false; //used for reorder
 };
 
 class ALegendDialog : public QDialog
@@ -51,6 +54,8 @@ private:
     const QVector<ADrawObject> & DrawObjects;
 
     QVector<ALegendModelRecord> Model;
+    int NumColumns = 1;
+
     TObject * SelectedObject = nullptr;
 
 private slots:
@@ -59,6 +64,10 @@ private slots:
     void onListMenuMultipleSelection(const QPoint &pos);
 
     void on_twTree_itemDoubleClicked(QTreeWidgetItem *item, int column);
+
+    void on_sbNumColumns_editingFinished();
+
+    void on_pbConfigureFrame_clicked();
 
 private:
     void updateModel(TLegend & legend);

@@ -58,12 +58,12 @@ void ALegendDialog::updateModel(TLegend & legend)
         qDebug() << ie << en->GetOption();
         Model << ALegendModelRecord(en->GetLabel(), en->GetObject(), en->GetOption());
     }
+
+    NumColumns = legend.GetNColumns();
 }
 
 void ALegendDialog::updateList()
 {
-    //ui->leTitle->setText( Legend.GetHeader() );
-
     lwList->clear();
 
     for (const ALegendModelRecord & rec : Model)
@@ -72,6 +72,8 @@ void ALegendDialog::updateList()
         item->setFlags(item->flags() | Qt::ItemIsEditable);
         lwList->addItem(item);
     }
+
+    ui->sbNumColumns->setValue(NumColumns);
 }
 
 void ALegendDialog::updateTree()
@@ -116,13 +118,12 @@ void ALegendDialog::updateLegend()
 {
     Legend.Clear();
 
-    QString title = ui->leTitle->text();
-    if (!title.isEmpty()) Legend.SetHeader(title.toLatin1(), (ui->cbCentered->isChecked() ? "C" : "") );
-
     for (const ALegendModelRecord & rec : Model)
     {
         Legend.AddEntry(rec.TObj, rec.Label.toLatin1().data(), rec.Options.toLatin1().data());
     }
+
+    Legend.SetNColumns(NumColumns);
 
     emit requestCanvasUpdate();
 }
@@ -171,7 +172,26 @@ void ALegendDialog::on_pbAccept_clicked()
 
 void ALegendDialog::onReorderEntriesRequested(const QVector<int> &indexes, int toRow)
 {
-    qDebug() << indexes << toRow;
+    QVector< ALegendModelRecord > ItemsToMove;
+    for (int i = 0; i < indexes.size(); i++)
+    {
+        const int index = indexes.at(i);
+        ItemsToMove << Model.at(index);
+        Model[index]._flag = true;       // mark to be deleted
+    }
+
+    for (int i = 0; i < ItemsToMove.size(); i++)
+    {
+        Model.insert(toRow, ItemsToMove.at(i));
+        toRow++;
+    }
+
+    for (int i = Model.size()-1; i >= 0; i--)
+        if (Model.at(i)._flag)
+            Model.remove(i);
+
+    updateList();
+    updateLegend();
 }
 
 void ALegendDialog::onListMenuRequested(const QPoint &pos)
@@ -254,4 +274,27 @@ void ALegendDialog::on_twTree_itemDoubleClicked(QTreeWidgetItem *item, int)
     Model << ALegendModelRecord(DrawObjects[index].Name, DrawObjects[index].Pointer, "lpf");
     updateList();
     updateLegend();
+}
+
+void ALegendDialog::on_sbNumColumns_editingFinished()
+{
+    NumColumns = ui->sbNumColumns->value();
+    updateLegend();
+}
+
+#include "arootlineconfigurator.h"
+void ALegendDialog::on_pbConfigureFrame_clicked()
+{
+    int color = Legend.GetLineColor();
+    int width = Legend.GetLineWidth();
+    int style = Legend.GetLineStyle();
+    ARootLineConfigurator RC(&color, &width, &style, this);
+    int res = RC.exec();
+    if (res == QDialog::Accepted)
+    {
+        Legend.SetLineColor(color);
+        Legend.SetLineWidth(width);
+        Legend.SetLineStyle(style);
+        updateLegend();
+    }
 }

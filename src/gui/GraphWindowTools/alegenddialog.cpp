@@ -32,6 +32,12 @@ ALegendDialog::ALegendDialog(TLegend & Legend, const QVector<ADrawObject> & Draw
 
     updateList();
     updateTree();
+
+
+    ALegendModelRecord rec;
+    if (!Model.isEmpty()) rec = Model.first();
+    ALegendEntryDelegate * ed = new ALegendEntryDelegate(rec, 0);
+    ui->horizontalLayout->addWidget(ed);
 }
 
 ALegendDialog::~ALegendDialog()
@@ -225,7 +231,7 @@ void ALegendDialog::onListMenuRequested(const QPoint &pos)
 
 void ALegendDialog::clearLegend()
 {
-    bool bConfirm = confirm("Clear legend entries?", this);
+    bool bConfirm = confirm("Remove all entries?", this);
     if (!bConfirm) return;
 
     Model.clear();
@@ -297,4 +303,69 @@ void ALegendDialog::on_pbConfigureFrame_clicked()
         Legend.SetLineStyle(style);
         updateLegend();
     }
+}
+
+#include <QLineEdit>
+#include <QCheckBox>
+ALegendEntryDelegate::ALegendEntryDelegate(const ALegendModelRecord & record, int index) : QFrame(), Index(index)
+{
+    setFrameShape(QFrame::StyledPanel);
+    setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
+
+    QHBoxLayout * lh = new QHBoxLayout(this);
+    lh->setContentsMargins(4, 0, 4, 0);
+
+    if (record.TObj)
+    {
+        QFrame * fr1 = new QFrame();
+        fr1->setFrameShape(QFrame::NoFrame);
+            QGridLayout * gl = new QGridLayout(fr1);
+            gl->setContentsMargins(0,0,0,0);
+            gl->setHorizontalSpacing(0);
+            gl->setVerticalSpacing(0);
+            cbLine = new QCheckBox("Line");
+            cbLine->setChecked(record.Options.contains('l', Qt::CaseInsensitive));
+            connect(cbLine, &QCheckBox::clicked, this, &ALegendEntryDelegate::onContentChanged);
+            gl->addWidget(cbLine, 1, 1);
+            cbMarker = new QCheckBox("Mark");
+            cbMarker->setChecked(record.Options.contains('p', Qt::CaseInsensitive));
+            connect(cbMarker, &QCheckBox::clicked, this, &ALegendEntryDelegate::onContentChanged);
+            gl->addWidget(cbMarker, 2, 1);
+            cbFill = new QCheckBox("Fill");
+            cbFill->setChecked(record.Options.contains('f', Qt::CaseInsensitive));
+            connect(cbFill, &QCheckBox::clicked, this, &ALegendEntryDelegate::onContentChanged);
+            gl->addWidget(cbFill, 2, 2);
+
+        lh->addWidget(fr1);
+    }
+
+
+        QFrame * fr2 = new QFrame();
+        fr2->setFrameShape(QFrame::VLine);
+        fr2->setFrameShadow(QFrame::Raised);
+    lh->addWidget(fr2);
+
+    le = new QLineEdit(record.Label);
+    connect(le, &QLineEdit::editingFinished, this, &ALegendEntryDelegate::onContentChanged);
+    lh->addWidget(le);
+}
+
+void ALegendEntryDelegate::onContentChanged()
+{
+    emit contentWasEdited(Index, le->text(), cbLine->isChecked(), cbMarker->isChecked(), cbFill->isChecked());
+}
+
+void ALegendDialog::on_pbAddEntry_clicked()
+{
+    addText();
+}
+
+void ALegendDialog::on_pbRemoveSelected_clicked()
+{
+    removeAllSelectedEntries();
+}
+
+void ALegendDialog::on_pbRemoveAll_clicked()
+{
+    clearLegend();
 }

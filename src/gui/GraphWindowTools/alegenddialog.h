@@ -69,6 +69,12 @@ private slots:
 
     void on_pbConfigureFrame_clicked();
 
+    void on_pbAddEntry_clicked();
+
+    void on_pbRemoveSelected_clicked();
+
+    void on_pbRemoveAll_clicked();
+
 private:
     void updateModel(TLegend & legend);
 
@@ -84,6 +90,32 @@ private:
 
 signals:
     void requestCanvasUpdate();
+};
+
+#include <QFrame>
+class QCheckBox;
+class QLineEdit;
+
+class ALegendEntryDelegate : public QFrame
+{
+    Q_OBJECT
+public:
+    ALegendEntryDelegate(const ALegendModelRecord & record, int index);
+
+private:
+    int Index;
+
+    QLineEdit * le = nullptr;
+    QCheckBox * cbLine   = nullptr;
+    QCheckBox * cbMarker = nullptr;
+    QCheckBox * cbFill   = nullptr;
+
+private slots:
+    void onContentChanged();
+
+signals:
+    void contentWasEdited(int index, const QString & label, bool line, bool mark, bool fill);
+
 };
 
 #endif // ALEGENDDIALOG_H

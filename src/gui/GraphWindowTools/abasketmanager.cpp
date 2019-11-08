@@ -120,10 +120,16 @@ void ABasketManager::add(const QString & name, const QVector<ADrawObject> & draw
         int num = elist->GetEntries();
         for (int ie = 0; ie < num; ie++)
         {
-            ATLegendEntry * en = static_cast<ATLegendEntry*>( (*elist).At(ie));
-            qDebug() << "Old entry obj:"<< en->GetObject() << " found?" << OldToNew[ en->GetObject() ];
-            en->SetObject( OldToNew[ en->GetObject() ] );
-            qDebug() << "   set:"<< en->GetObject();
+            //ATLegendEntry * en = static_cast<ATLegendEntry*>( (*elist).At(ie));
+            //qDebug() << "Old entry obj:"<< en->GetObject() << " found?" << OldToNew[ en->GetObject() ];
+            //en->SetObject( OldToNew[ en->GetObject() ] );
+            //qDebug() << "   set:"<< en->GetObject();
+
+            TLegendEntry * en = static_cast<TLegendEntry*>( (*elist).At(ie) );
+            const QString text = en->GetLabel();
+            //qDebug() << "Old entry obj:"<< en->GetObject() << " found?" << OldToNew[ en->GetObject() ];
+            en->SetObject( OldToNew[ en->GetObject() ] ); // will override the label
+            en->SetLabel(text.toLatin1().data());
         }
     }
 
@@ -174,9 +180,15 @@ const QVector<ADrawObject> ABasketManager::getCopy(int index) const
             int num = elist->GetEntries();
             for (int ie = 0; ie < num; ie++)
             {
-                ATLegendEntry * en = static_cast<ATLegendEntry*>( (*elist).At(ie));
-                qDebug() << "Old entry obj:"<< en->GetObject() << " found?" << OldToNew[ en->GetObject() ];
-                en->SetObject( OldToNew[ en->GetObject() ] );
+                //ATLegendEntry * en = static_cast<ATLegendEntry*>( (*elist).At(ie) );
+                //qDebug() << "Old entry obj:"<< en->GetObject() << " found?" << OldToNew[ en->GetObject() ];
+                //en->SetObject( OldToNew[ en->GetObject() ] );
+
+                TLegendEntry * en = static_cast<TLegendEntry*>( (*elist).At(ie) );
+                QString text = en->GetLabel();
+                //qDebug() << "Old entry obj:"<< en->GetObject() << " found?" << OldToNew[ en->GetObject() ];
+                en->SetObject( OldToNew[ en->GetObject() ] ); // will override the label
+                en->SetLabel(text.toLatin1().data());
             }
         }
     }
@@ -433,11 +445,20 @@ const QString ABasketManager::appendBasket(const QString & fileName)
                 int num = elist->GetEntries();
                 for (int ie = 0; ie < num; ie++)
                 {
-                    ATLegendEntry * en = static_cast<ATLegendEntry*>( (*elist).At(ie) );
+                    //ATLegendEntry * en = static_cast<ATLegendEntry*>( (*elist).At(ie) );
+                    //int iObj = LegendLinks[ie].toInt();
+                    //TObject * p = ( iObj == -1 ? nullptr : drawObjects[iObj].Pointer );
+                    //qDebug() << "Setting entry #" << ie << "to draw object #" << iObj << "with pointer" << p;
+                    //en->SetObject(p); //*** add protection!
+
+                    TLegendEntry * en = static_cast<TLegendEntry*>( (*elist).At(ie) );
+                    QString text = en->GetLabel();
+                    TObject * p = nullptr;
                     int iObj = LegendLinks[ie].toInt();
-                    TObject * p = ( iObj == -1 ? nullptr : drawObjects[iObj].Pointer );
-                    qDebug() << "Setting entry #" << ie << "to draw object #" << iObj << "with pointer" << p;
-                    en->SetObject(p); //*** add protection!
+                    if (iObj >= 0 && iObj < drawObjects.size())
+                        p = drawObjects[iObj].Pointer;
+                    en->SetObject(p); // will override the label
+                    en->SetLabel(text.toLatin1().data());
                 }
             }
 

@@ -418,8 +418,7 @@ SOURCES += main.cpp \
     gui/GraphWindowTools/adrawexplorerwidget.cpp \
     gui/GraphWindowTools/adrawobject.cpp \
     gui/GraphWindowTools/abasketlistwidget.cpp \
-    gui/GraphWindowTools/alegenddialog.cpp \
-    gui/GraphWindowTools/atlegendentry.cpp
+    gui/GraphWindowTools/alegenddialog.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -580,8 +579,7 @@ HEADERS  += common/CorrelationFilters.h \
     gui/GraphWindowTools/abasketmanager.h \
     gui/GraphWindowTools/adrawexplorerwidget.h \
     gui/GraphWindowTools/abasketlistwidget.h \
-    gui/GraphWindowTools/alegenddialog.h \
-    gui/GraphWindowTools/atlegendentry.h
+    gui/GraphWindowTools/alegenddialog.h
 
 # --- SIM ---
 ants2_SIM {

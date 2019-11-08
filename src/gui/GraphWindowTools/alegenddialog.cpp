@@ -14,44 +14,43 @@
 #include "TLegendEntry.h"
 #include "TList.h"
 
+#include <QVBoxLayout>
+
 ALegendDialog::ALegendDialog(TLegend & Legend, const QVector<ADrawObject> & DrawObjects, QWidget * parent) :
     QDialog(parent), ui(new Ui::ALegendDialog),
     Legend(Legend), OriginalCopy(Legend), DrawObjects(DrawObjects)
 {
     ui->setupUi(this);
 
+    ui->pbDummy->setDefault(true);
+    ui->pbDummy->setVisible(false);
+
     lwList = new ABasketListWidget(this);
     lwList->setContextMenuPolicy(Qt::CustomContextMenu);
+    lwList->setSpacing(4);
+    lwList->setDropIndicatorShown(true);
+    //lwList->setAutoFillBackground(false);
+    //lwList->setStyleSheet("QListWidget{ background: lightGray; }" );
     ui->splitter->insertWidget(0, lwList);
     connect(lwList, &ABasketListWidget::requestReorder, this, &ALegendDialog::onReorderEntriesRequested);
-    connect(lwList, &ABasketListWidget::currentRowChanged, this, &ALegendDialog::onCurrentEntryChanged);
+    //connect(lwList, &ABasketListWidget::currentRowChanged, this, &ALegendDialog::onCurrentEntryChanged);
+    connect(lwList, &ABasketListWidget::itemSelectionChanged, this, &ALegendDialog::onEntrySelectionChanged);
     connect(lwList, &ABasketListWidget::customContextMenuRequested, this, &ALegendDialog::onListMenuRequested);
-    connect(lwList->itemDelegate(), &QAbstractItemDelegate::commitData, this, &ALegendDialog::onLabelTextChanged);
+    //connect(lwList->itemDelegate(), &QAbstractItemDelegate::commitData, this, &ALegendDialog::onLabelTextChanged);
+
+    ui->splitter->setSizes( {500,200});
 
     updateModel(Legend);
 
     updateList();
     updateTree();
 
-
-    ALegendModelRecord rec;
-    if (!Model.isEmpty()) rec = Model.first();
-    ALegendEntryDelegate * ed = new ALegendEntryDelegate(rec, 0);
-    ui->horizontalLayout->addWidget(ed);
+    connect(qApp, &QApplication::focusChanged, this, &ALegendDialog::onFocusChanged);
 }
 
 ALegendDialog::~ALegendDialog()
 {
     delete ui;
-}
-
-void ALegendDialog::onLabelTextChanged()
-{
-    int row = lwList->currentRow();
-    //qDebug() << "label change:"<<row << lwList->item(row)->text();
-    if (row >= 0) Model[row].Label = lwList->item(row)->text();
-
-    updateLegend();
 }
 
 void ALegendDialog::updateModel(TLegend & legend)
@@ -61,7 +60,7 @@ void ALegendDialog::updateModel(TLegend & legend)
     for (int ie = 0; ie < num; ie++)
     {
         TLegendEntry * en = static_cast<TLegendEntry*>( (*elist).At(ie));
-        qDebug() << ie << en->GetOption();
+        //qDebug() << ie << en->GetOption();
         Model << ALegendModelRecord(en->GetLabel(), en->GetObject(), en->GetOption());
     }
 
@@ -72,11 +71,18 @@ void ALegendDialog::updateList()
 {
     lwList->clear();
 
-    for (const ALegendModelRecord & rec : Model)
+    for (int iModel = 0; iModel < Model.size(); iModel++)
     {
-        QListWidgetItem * item = new QListWidgetItem(rec.Label);
-        item->setFlags(item->flags() | Qt::ItemIsEditable);
+        const ALegendModelRecord & rec = Model.at(iModel);
+
+        QListWidgetItem * item = new QListWidgetItem();
+        item->setBackgroundColor(QColor(230,230,230));
         lwList->addItem(item);
+        ALegendEntryDelegate * ed = new ALegendEntryDelegate(rec, iModel);
+        connect(ed, &ALegendEntryDelegate::contentWasEdited, this, &ALegendDialog::onEntryWasEdited);
+        //connect(ed, &ALegendEntryDelegate::activated, this, &ALegendDialog::onActive);
+        lwList->setItemWidget(item, ed);
+        item->setSizeHint(ed->sizeHint());
     }
 
     ui->sbNumColumns->setValue(NumColumns);
@@ -156,12 +162,33 @@ void ALegendDialog::removeAllSelectedEntries()
     updateLegend();
 }
 
-void ALegendDialog::onCurrentEntryChanged(int currentRow)
+void ALegendDialog::onEntrySelectionChanged()
 {
     //qDebug() << currentRow;
     SelectedObject = nullptr;
-    if (currentRow >= 0) SelectedObject = Model.at(currentRow).TObj;
+
+    if (lwList->selectedItems().size() == 1)
+    {
+        SelectedObject = Model.at(lwList->currentRow()).TObj;
+    }
     updateTree();
+}
+
+void ALegendDialog::onFocusChanged(QWidget *, QWidget * newW)
+{
+    //qDebug() << old << now;
+    if (newW && newW->parent())
+    {
+        for (int i=0; i<lwList->count(); i++)
+        {
+            QWidget * w = lwList->itemWidget(lwList->item(i));
+            if (newW->parent() == w)
+            {
+                //onCurrentEntryChanged(i);
+                lwList->setCurrentRow(i);
+            }
+        }
+    }
 }
 
 void ALegendDialog::on_pbCancel_clicked()
@@ -174,6 +201,20 @@ void ALegendDialog::on_pbAccept_clicked()
 {
     updateLegend();
     accept();
+}
+
+void ALegendDialog::onEntryWasEdited(int index, const QString &label, bool line, bool mark, bool fill)
+{
+    if (index >= 0 && index < Model.size())
+    {
+        ALegendModelRecord & rec = Model[index];
+        rec.Label = label;
+        rec.Options.clear();
+        if (line) rec.Options.append('l');
+        if (mark) rec.Options.append('p');
+        if (fill) rec.Options.append('f');
+    }
+    updateLegend();
 }
 
 void ALegendDialog::onReorderEntriesRequested(const QVector<int> &indexes, int toRow)
@@ -204,29 +245,16 @@ void ALegendDialog::onListMenuRequested(const QPoint &pos)
 {
     if (lwList->selectedItems().size() > 1)
     {
-        onListMenuMultipleSelection(pos);
-        return;
+        QMenu Menu;
+        QAction * removeAllSelected = Menu.addAction("Remove all selected entries");
+        removeAllSelected->setShortcut(Qt::Key_Delete);
+
+        QAction* selectedItem = Menu.exec(lwList->mapToGlobal(pos));
+        if (!selectedItem) return;
+
+        if (selectedItem == removeAllSelected)
+            removeAllSelectedEntries();
     }
-
-    QMenu Menu;
-
-    //int row = -1; if (temp) row = lwBasket->row(temp);
-    QListWidgetItem* temp = lwList->itemAt(pos);
-
-    QAction* addTextA  = Menu.addAction("Add text line");
-    Menu.addSeparator();
-    QAction* delA      = Menu.addAction("Delete"); delA->setEnabled(temp); delA->setShortcut(Qt::Key_Delete);
-    Menu.addSeparator();
-    QAction* clearA = Menu.addAction("Clear legend");
-
-    //------
-
-    QAction* selectedItem = Menu.exec(lwList->mapToGlobal(pos));
-    if (!selectedItem) return; //nothing was selected
-
-    if      (selectedItem == addTextA)  addText();
-    else if (selectedItem == delA)      deleteSelectedEntry();
-    else if (selectedItem == clearA)    clearLegend();
 }
 
 void ALegendDialog::clearLegend()
@@ -253,19 +281,6 @@ void ALegendDialog::addText()
     Model << ALegendModelRecord("Text", nullptr, "");
     updateList();
     updateLegend();
-}
-
-void ALegendDialog::onListMenuMultipleSelection(const QPoint &pos)
-{
-    QMenu Menu;
-    QAction * removeAllSelected = Menu.addAction("Remove all selected entries");
-    removeAllSelected->setShortcut(Qt::Key_Delete);
-
-    QAction* selectedItem = Menu.exec(lwList->mapToGlobal(pos));
-    if (!selectedItem) return;
-
-    if (selectedItem == removeAllSelected)
-        removeAllSelectedEntries();
 }
 
 void ALegendDialog::on_twTree_itemDoubleClicked(QTreeWidgetItem *item, int)
@@ -313,39 +328,46 @@ ALegendEntryDelegate::ALegendEntryDelegate(const ALegendModelRecord & record, in
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
 
     QHBoxLayout * lh = new QHBoxLayout(this);
-    lh->setContentsMargins(4, 0, 4, 0);
+    lh->setContentsMargins(4, 1, 4, 1);
+
+    QFrame * fr1 = new QFrame();
+    fr1->setFrameShape(QFrame::NoFrame);
+    QGridLayout * gl = new QGridLayout(fr1);
+    gl->setContentsMargins(0,0,0,0);
+    gl->setHorizontalSpacing(0);
+    gl->setVerticalSpacing(0);
+        cbLine = new QCheckBox("Line");
+        cbLine->setChecked(record.Options.contains('l', Qt::CaseInsensitive));
+        cbLine->setEnabled(record.TObj);
+        if (record.TObj) cbLine->setChecked(record.Options.contains('l', Qt::CaseInsensitive));
+        connect(cbLine, &QCheckBox::clicked, this, &ALegendEntryDelegate::onContentChanged);
+    gl->addWidget(cbLine, 1, 1);
+        cbMarker = new QCheckBox("Mark");
+        cbMarker->setChecked(record.Options.contains('p', Qt::CaseInsensitive));
+        cbMarker->setEnabled(record.TObj);
+        if (record.TObj) cbMarker->setChecked(record.Options.contains('p', Qt::CaseInsensitive));
+        connect(cbMarker, &QCheckBox::clicked, this, &ALegendEntryDelegate::onContentChanged);
+    gl->addWidget(cbMarker, 2, 1);
+        cbFill = new QCheckBox("Fill");
+        cbFill->setChecked(record.Options.contains('f', Qt::CaseInsensitive));
+        cbFill->setEnabled(record.TObj);
+        if (record.TObj) cbFill->setChecked(record.Options.contains('f', Qt::CaseInsensitive));
+        connect(cbFill, &QCheckBox::clicked, this, &ALegendEntryDelegate::onContentChanged);
+    gl->addWidget(cbFill, 2, 2);
+    lh->addWidget(fr1);
 
     if (record.TObj)
     {
-        QFrame * fr1 = new QFrame();
-        fr1->setFrameShape(QFrame::NoFrame);
-            QGridLayout * gl = new QGridLayout(fr1);
-            gl->setContentsMargins(0,0,0,0);
-            gl->setHorizontalSpacing(0);
-            gl->setVerticalSpacing(0);
-            cbLine = new QCheckBox("Line");
-            cbLine->setChecked(record.Options.contains('l', Qt::CaseInsensitive));
-            connect(cbLine, &QCheckBox::clicked, this, &ALegendEntryDelegate::onContentChanged);
-            gl->addWidget(cbLine, 1, 1);
-            cbMarker = new QCheckBox("Mark");
-            cbMarker->setChecked(record.Options.contains('p', Qt::CaseInsensitive));
-            connect(cbMarker, &QCheckBox::clicked, this, &ALegendEntryDelegate::onContentChanged);
-            gl->addWidget(cbMarker, 2, 1);
-            cbFill = new QCheckBox("Fill");
-            cbFill->setChecked(record.Options.contains('f', Qt::CaseInsensitive));
-            connect(cbFill, &QCheckBox::clicked, this, &ALegendEntryDelegate::onContentChanged);
-            gl->addWidget(cbFill, 2, 2);
 
-        lh->addWidget(fr1);
     }
-
 
         QFrame * fr2 = new QFrame();
         fr2->setFrameShape(QFrame::VLine);
         fr2->setFrameShadow(QFrame::Raised);
     lh->addWidget(fr2);
 
-    le = new QLineEdit(record.Label);
+    le = new QLineEdit(record.Label, this);
+    le->setContextMenuPolicy(Qt::NoContextMenu);
     connect(le, &QLineEdit::editingFinished, this, &ALegendEntryDelegate::onContentChanged);
     lh->addWidget(le);
 }
@@ -353,6 +375,16 @@ ALegendEntryDelegate::ALegendEntryDelegate(const ALegendModelRecord & record, in
 void ALegendEntryDelegate::onContentChanged()
 {
     emit contentWasEdited(Index, le->text(), cbLine->isChecked(), cbMarker->isChecked(), cbFill->isChecked());
+}
+
+#include <QKeyEvent>
+void ALegendEntryDelegate::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Enter)
+    {
+        onContentChanged();
+        event->ignore();
+    }
 }
 
 void ALegendDialog::on_pbAddEntry_clicked()

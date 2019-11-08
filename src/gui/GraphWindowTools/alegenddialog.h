@@ -38,13 +38,13 @@ public:
     explicit ALegendDialog(TLegend & Legend, const QVector<ADrawObject> & DrawObjects, QWidget * parent);
     ~ALegendDialog();
 
-
 private slots:
-    void onCurrentEntryChanged(int currentRow);
-    void onLabelTextChanged();
-
-    void on_pbCancel_clicked();
-    void on_pbAccept_clicked();
+    void onListMenuRequested(const QPoint &pos);
+    void onFocusChanged(QWidget * oldW, QWidget * newW );
+    void onEntrySelectionChanged();
+    void onEntryWasEdited(int index, const QString & label, bool line, bool mark, bool fill);
+    void onReorderEntriesRequested(const QVector<int> &indexes, int toRow);
+    void on_twTree_itemDoubleClicked(QTreeWidgetItem *item, int column);
 
 private:
     Ui::ALegendDialog *ui;
@@ -59,20 +59,12 @@ private:
     TObject * SelectedObject = nullptr;
 
 private slots:
-    void onReorderEntriesRequested(const QVector<int> &indexes, int toRow);
-    void onListMenuRequested(const QPoint &pos);
-    void onListMenuMultipleSelection(const QPoint &pos);
-
-    void on_twTree_itemDoubleClicked(QTreeWidgetItem *item, int column);
-
+    void on_pbCancel_clicked();
+    void on_pbAccept_clicked();
     void on_sbNumColumns_editingFinished();
-
     void on_pbConfigureFrame_clicked();
-
     void on_pbAddEntry_clicked();
-
     void on_pbRemoveSelected_clicked();
-
     void on_pbRemoveAll_clicked();
 
 private:
@@ -112,6 +104,9 @@ private:
 
 private slots:
     void onContentChanged();
+
+protected:
+    void keyPressEvent(QKeyEvent *event);
 
 signals:
     void contentWasEdited(int index, const QString & label, bool line, bool mark, bool fill);

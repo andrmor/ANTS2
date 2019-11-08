@@ -213,6 +213,8 @@ void ALegendDialog::onEntryWasEdited(int index, const QString &label, bool line,
         if (line) rec.Options.append('l');
         if (mark) rec.Options.append('p');
         if (fill) rec.Options.append('f');
+
+        lwList->setCurrentRow(index);
     }
     updateLegend();
 }
@@ -355,11 +357,6 @@ ALegendEntryDelegate::ALegendEntryDelegate(const ALegendModelRecord & record, in
         connect(cbFill, &QCheckBox::clicked, this, &ALegendEntryDelegate::onContentChanged);
     gl->addWidget(cbFill, 2, 2);
     lh->addWidget(fr1);
-
-    if (record.TObj)
-    {
-
-    }
 
         QFrame * fr2 = new QFrame();
         fr2->setFrameShape(QFrame::VLine);

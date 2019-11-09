@@ -56,16 +56,29 @@ ALegendDialog::~ALegendDialog()
 
 void ALegendDialog::updateModel(TLegend & legend)
 {
+    NumColumns = legend.GetNColumns();
+
+    DefaultTextColor = Legend.GetTextColor();
+    DefaultTextAlign = Legend.GetTextAlign();
+    DefaultTextFont  = Legend.GetTextFont();
+    DefaultTextSize  = Legend.GetTextSize();
+
     TList * elist = legend.GetListOfPrimitives();
     int num = elist->GetEntries();
     for (int ie = 0; ie < num; ie++)
     {
         TLegendEntry * en = static_cast<TLegendEntry*>( (*elist).At(ie));
-        //qDebug() << ie << en->GetOption();
         Model << ALegendModelRecord(en->GetLabel(), en->GetObject(), en->GetOption());
+        if (en->GetTextColor()!=DefaultTextColor || en->GetTextAlign()!=DefaultTextAlign || en->GetTextFont()!=DefaultTextFont || en->GetTextSize()!=DefaultTextSize)
+        {
+            ALegendModelRecord & m = Model.last();
+            m.bAttributeOverride = true;
+            m.TextColor = en->GetTextColor();
+            m.TextAlign = en->GetTextAlign();
+            m.TextFont  = en->GetTextFont();
+            m.TextSize  = en->GetTextSize();
+        }
     }
-
-    NumColumns = legend.GetNColumns();
 }
 
 void ALegendDialog::updateList()
@@ -131,9 +144,21 @@ void ALegendDialog::updateLegend()
 {
     Legend.Clear();
 
+    Legend.SetTextColor(DefaultTextColor);
+    Legend.SetTextAlign(DefaultTextAlign);
+    Legend.SetTextFont (DefaultTextFont);
+    Legend.SetTextSize (DefaultTextSize);
+
     for (const ALegendModelRecord & rec : Model)
     {
-        Legend.AddEntry(rec.TObj, rec.Label.toLatin1().data(), rec.Options.toLatin1().data());
+        TLegendEntry *le = Legend.AddEntry(rec.TObj, rec.Label.toLatin1().data(), rec.Options.toLatin1().data());
+        if (rec.bAttributeOverride)
+        {
+            le->SetTextColor(rec.TextColor);
+            le->SetTextAlign(rec.TextAlign);
+            le->SetTextFont (rec.TextFont);
+            le->SetTextSize (rec.TextSize);
+        }
     }
 
     Legend.SetNColumns(NumColumns);
@@ -404,57 +429,54 @@ void ALegendDialog::on_pbRemoveAll_clicked()
 
 void ALegendDialog::on_pbDefaultTextProperties_clicked()
 {
-    int   color = Legend.GetTextColor();
-    int   align = Legend.GetTextAlign();
-    int   font  = Legend.GetTextFont();
-    float size  = Legend.GetTextSize();
-    qDebug() << color << align << font << size;
+    int   color = DefaultTextColor;
+    int   align = DefaultTextAlign;
+    int   font  = DefaultTextFont;
+    float size  = DefaultTextSize;
+
     ARootTextConfigurator D(color, align, font, size, this);
     int res = D.exec();
     if (res == QDialog::Accepted)
     {
+        DefaultTextColor = color;
+        DefaultTextAlign = align;
+        DefaultTextFont  = font;
+        DefaultTextSize  = size;
+        /*
         Legend.SetTextColor(color);
         Legend.SetTextAlign(align);
         Legend.SetTextFont(font);
         Legend.SetTextSize(size);
+        */
         updateLegend();
     }
 }
 
 void ALegendDialog::on_pbThisEntryTextAttributes_clicked()
 {
-    /*
     int selSize = lwList->selectedItems().size();
     if (selSize == 0) return;
 
-    for (QListWidgetItem * item : lwList->selectedItems())
+    int index = lwList->row(lwList->selectedItems().first());
+    ALegendModelRecord & rec = Model[index];
+    int   color = ( rec.bAttributeOverride ? rec.TextColor : DefaultTextColor );
+    int   align = ( rec.bAttributeOverride ? rec.TextAlign : DefaultTextAlign );
+    int   font  = ( rec.bAttributeOverride ? rec.TextFont  : DefaultTextFont );
+    float size  = ( rec.bAttributeOverride ? rec.TextSize  : DefaultTextSize );
+
+    ARootTextConfigurator D(color, align, font, size, this);
+    int res = D.exec();
+    if (res == QDialog::Accepted)
     {
-        int index = lwList->row(item);
-        Legend.
+        for (QListWidgetItem * item : lwList->selectedItems())
+        {
+            int index = lwList->row(item);
+            ALegendModelRecord & rec = Model[index];
+            rec.TextColor = color;
+            rec.TextAlign = align;
+            rec.TextFont  = font;
+            rec.TextSize  = size;
+        }
+        updateLegend();
     }
-
-    QList<QListWidgetItem*> selection = ;
-    const int size = selection.size();
-    if (size == 0) return;
-
-    bool bConfirm = true;
-    if (size > 1)
-         bConfirm = confirm(QString("Remove %1 selected entr%2?").arg(size).arg(size == 1 ? "y" : "is"), this);
-    if (!bConfirm) return;
-
-    QVector<int> indexes;
-    for (QListWidgetItem * item : selection)
-        indexes << lwList->row(item);
-    std::sort(indexes.begin(), indexes.end());
-    for (int i = indexes.size() - 1; i >= 0; i--)
-        Model.remove(indexes.at(i));
-
-    updateList();
-    updateLegend();
-
-
-
-
-    SelectedObject = Model.at(lwList->currentRow()).TObj;
-    */
 }

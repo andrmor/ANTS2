@@ -26,6 +26,11 @@ public:
     TObject * TObj = nullptr;  // nullptr -> plain text, no connected object
     QString   Options;
 
+    bool      bAttributeOverride = false;
+    int       TextColor;
+    int       TextAlign;
+    int       TextFont;
+    float     TextSize;
 
     //runtime
     bool _flag = false; //used for reorder
@@ -56,6 +61,11 @@ private:
 
     QVector<ALegendModelRecord> Model;
     int NumColumns = 1;
+
+    int       DefaultTextColor = 1;
+    int       DefaultTextAlign = 12;
+    int       DefaultTextFont  = 42;
+    float     DefaultTextSize  = 0;
 
     TObject * SelectedObject = nullptr;
 

@@ -26,6 +26,7 @@ public:
     TObject * TObj = nullptr;  // nullptr -> plain text, no connected object
     QString   Options;
 
+
     //runtime
     bool _flag = false; //used for reorder
 };
@@ -66,6 +67,10 @@ private slots:
     void on_pbAddEntry_clicked();
     void on_pbRemoveSelected_clicked();
     void on_pbRemoveAll_clicked();
+
+    void on_pbDefaultTextProperties_clicked();
+
+    void on_pbThisEntryTextAttributes_clicked();
 
 private:
     void updateModel(TLegend & legend);

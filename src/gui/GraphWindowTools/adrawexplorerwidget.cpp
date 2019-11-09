@@ -106,8 +106,8 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
 
     Menu.addSeparator();
 
-    QAction * setMarkerA =  Menu.addAction("Set marker attributes");
     QAction * setLineA =    Menu.addAction("Set line attributes");
+    QAction * setMarkerA =  Menu.addAction("Set marker attributes");
     QAction * panelA   =    Menu.addAction("Root line/marker panel");
 
     Menu.addSeparator();

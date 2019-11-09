@@ -3,6 +3,7 @@
 #include "adrawobject.h"
 #include "abasketlistwidget.h"
 #include "amessage.h"
+#include "aroottextconfigurator.h"
 
 #include <QDebug>
 #include <QListWidget>
@@ -167,10 +168,12 @@ void ALegendDialog::onEntrySelectionChanged()
     //qDebug() << currentRow;
     SelectedObject = nullptr;
 
-    if (lwList->selectedItems().size() == 1)
-    {
+    int selSize = lwList->selectedItems().size();
+    if (selSize == 1)
         SelectedObject = Model.at(lwList->currentRow()).TObj;
-    }
+
+    ui->pbThisEntryTextAttributes->setEnabled(selSize != 0);
+
     updateTree();
 }
 
@@ -397,4 +400,61 @@ void ALegendDialog::on_pbRemoveSelected_clicked()
 void ALegendDialog::on_pbRemoveAll_clicked()
 {
     clearLegend();
+}
+
+void ALegendDialog::on_pbDefaultTextProperties_clicked()
+{
+    int   color = Legend.GetTextColor();
+    int   align = Legend.GetTextAlign();
+    int   font  = Legend.GetTextFont();
+    float size  = Legend.GetTextSize();
+    qDebug() << color << align << font << size;
+    ARootTextConfigurator D(color, align, font, size, this);
+    int res = D.exec();
+    if (res == QDialog::Accepted)
+    {
+        Legend.SetTextColor(color);
+        Legend.SetTextAlign(align);
+        Legend.SetTextFont(font);
+        Legend.SetTextSize(size);
+        updateLegend();
+    }
+}
+
+void ALegendDialog::on_pbThisEntryTextAttributes_clicked()
+{
+    /*
+    int selSize = lwList->selectedItems().size();
+    if (selSize == 0) return;
+
+    for (QListWidgetItem * item : lwList->selectedItems())
+    {
+        int index = lwList->row(item);
+        Legend.
+    }
+
+    QList<QListWidgetItem*> selection = ;
+    const int size = selection.size();
+    if (size == 0) return;
+
+    bool bConfirm = true;
+    if (size > 1)
+         bConfirm = confirm(QString("Remove %1 selected entr%2?").arg(size).arg(size == 1 ? "y" : "is"), this);
+    if (!bConfirm) return;
+
+    QVector<int> indexes;
+    for (QListWidgetItem * item : selection)
+        indexes << lwList->row(item);
+    std::sort(indexes.begin(), indexes.end());
+    for (int i = indexes.size() - 1; i >= 0; i--)
+        Model.remove(indexes.at(i));
+
+    updateList();
+    updateLegend();
+
+
+
+
+    SelectedObject = Model.at(lwList->currentRow()).TObj;
+    */
 }

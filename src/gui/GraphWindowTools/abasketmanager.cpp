@@ -3,6 +3,7 @@
 #include "ajsontools.h"
 
 #include <QStringList>
+#include <QJsonDocument>
 #include <QDebug>
 
 #include "TObject.h"
@@ -16,6 +17,8 @@
 #include "TH2.h"
 #include "TFile.h"
 #include "TKey.h"
+#include "TLegend.h"
+#include "TLegendEntry.h"
 
 ABasketManager::ABasketManager()
 {
@@ -42,9 +45,6 @@ TGraph * HistToGraph(TH1 * h)
     return new TGraph(x.size(), x.data(), f.data());
 }
 
-#include "TLegend.h"
-#include "TLegendEntry.h"
-#include "atlegendentry.h"
 void ABasketManager::add(const QString & name, const QVector<ADrawObject> & drawObjects)
 {
     ABasketItem item;
@@ -251,7 +251,6 @@ const QStringList ABasketManager::getItemNames() const
     return res;
 }
 
-#include <QJsonDocument>
 void ABasketManager::saveAll(const QString & fileName)
 {
     TFile f(fileName.toLocal8Bit(), "RECREATE");

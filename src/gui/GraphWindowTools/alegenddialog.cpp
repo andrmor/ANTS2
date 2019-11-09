@@ -4,6 +4,7 @@
 #include "abasketlistwidget.h"
 #include "amessage.h"
 #include "aroottextconfigurator.h"
+#include "arootlineconfigurator.h"
 
 #include <QDebug>
 #include <QListWidget>
@@ -12,6 +13,8 @@
 #include <QTreeWidgetItem>
 #include <QMenu>
 #include <QKeyEvent>
+#include <QLineEdit>
+#include <QCheckBox>
 
 #include "TLegendEntry.h"
 #include "TList.h"
@@ -31,21 +34,21 @@ ALegendDialog::ALegendDialog(TLegend & Legend, const QVector<ADrawObject> & Draw
     lwList->setContextMenuPolicy(Qt::CustomContextMenu);
     lwList->setSpacing(4);
     lwList->setDropIndicatorShown(true);
-    //lwList->setAutoFillBackground(false);
-    //lwList->setStyleSheet("QListWidget{ background: lightGray; }" );
     ui->splitter->insertWidget(0, lwList);
     connect(lwList, &ABasketListWidget::requestReorder, this, &ALegendDialog::onReorderEntriesRequested);
-    //connect(lwList, &ABasketListWidget::currentRowChanged, this, &ALegendDialog::onCurrentEntryChanged);
     connect(lwList, &ABasketListWidget::itemSelectionChanged, this, &ALegendDialog::onEntrySelectionChanged);
     connect(lwList, &ABasketListWidget::customContextMenuRequested, this, &ALegendDialog::onListMenuRequested);
     //connect(lwList->itemDelegate(), &QAbstractItemDelegate::commitData, this, &ALegendDialog::onLabelTextChanged);
 
     ui->splitter->setSizes( {500,200});
 
+    //lwList->setStyleSheet("QListWidget::item:selected{background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #6a6ea9, stop: 1 #888dd9);};" );
+    lwList->setStyleSheet("QListWidget::item:selected{background: #888dd9;};");
+
     updateModel(Legend);
     OriginalModel = CurrentModel;
 
-    updateList();
+    updateMainGui();
     updateTree();
 
     connect(qApp, &QApplication::focusChanged, this, &ALegendDialog::onFocusChanged);
@@ -89,12 +92,9 @@ void ALegendDialog::updateModel(TLegend & legend)
             m.TextSize  = en->GetTextSize();
         }
     }
-
-    //Legend.GetX1()
-
 }
 
-void ALegendDialog::updateList()
+void ALegendDialog::updateMainGui()
 {
     lwList->clear();
 
@@ -106,10 +106,9 @@ void ALegendDialog::updateList()
         item->setBackgroundColor(QColor(230,230,230));
         lwList->addItem(item);
         ALegendEntryDelegate * ed = new ALegendEntryDelegate(rec, iModel);
-        connect(ed, &ALegendEntryDelegate::contentWasEdited, this, &ALegendDialog::onEntryWasEdited);
-        //connect(ed, &ALegendEntryDelegate::activated, this, &ALegendDialog::onActive);
-        lwList->setItemWidget(item, ed);
         item->setSizeHint(ed->sizeHint());
+        connect(ed, &ALegendEntryDelegate::contentWasEdited, this, &ALegendDialog::onEntryWasEdited);
+        lwList->setItemWidget(item, ed);
     }
 
     ui->sbNumColumns->setValue(CurrentModel.NumColumns);
@@ -206,13 +205,12 @@ void ALegendDialog::removeAllSelectedEntries()
     for (int i = indexes.size() - 1; i >= 0; i--)
         CurrentModel.Model.remove(indexes.at(i));
 
-    updateList();
+    updateMainGui();
     updateLegend();
 }
 
 void ALegendDialog::onEntrySelectionChanged()
 {
-    //qDebug() << currentRow;
     SelectedObject = nullptr;
 
     int selSize = lwList->selectedItems().size();
@@ -220,13 +218,13 @@ void ALegendDialog::onEntrySelectionChanged()
         SelectedObject = CurrentModel.Model.at(lwList->currentRow()).TObj;
 
     ui->pbThisEntryTextAttributes->setEnabled(selSize != 0);
+    ui->pbRemoveSelected->setEnabled(selSize != 0);
 
     updateTree();
 }
 
 void ALegendDialog::onFocusChanged(QWidget *, QWidget * newW)
 {
-    //qDebug() << old << now;
     if (newW && newW->parent())
     {
         for (int i=0; i<lwList->count(); i++)
@@ -243,6 +241,14 @@ void ALegendDialog::onFocusChanged(QWidget *, QWidget * newW)
 
 void ALegendDialog::on_pbCancel_clicked()
 {
+    /*
+    if (OriginalModel != CurrentModel)
+    {
+        bool bOK = confirm("Cancel all the changes made in the legend?", this);
+        if (!bOK) return;
+    }
+    */
+
     CurrentModel = OriginalModel;
     updateLegend();
 
@@ -292,7 +298,7 @@ void ALegendDialog::onReorderEntriesRequested(const QVector<int> &indexes, int t
         if (CurrentModel.Model.at(i)._flag)
             CurrentModel.Model.remove(i);
 
-    updateList();
+    updateMainGui();
     updateLegend();
 }
 
@@ -318,7 +324,7 @@ void ALegendDialog::clearLegend()
     if (!bConfirm) return;
 
     CurrentModel.Model.clear();
-    updateList();
+    updateMainGui();
     updateLegend();
 }
 
@@ -328,13 +334,13 @@ void ALegendDialog::deleteSelectedEntry()
     if (row == -1) return;
 
     CurrentModel.Model.remove(row);
-    updateList();
+    updateMainGui();
 }
 
 void ALegendDialog::addText()
 {
     CurrentModel.Model << ALegendEntryRecord("Text", nullptr, "");
-    updateList();
+    updateMainGui();
     updateLegend();
 }
 
@@ -348,7 +354,7 @@ void ALegendDialog::on_twTree_itemDoubleClicked(QTreeWidgetItem *item, int)
     }
 
     CurrentModel.Model << ALegendEntryRecord(DrawObjects[index].Name, DrawObjects[index].Pointer, "lpf");
-    updateList();
+    updateMainGui();
     updateLegend();
 }
 
@@ -358,7 +364,6 @@ void ALegendDialog::on_sbNumColumns_editingFinished()
     updateLegend();
 }
 
-#include "arootlineconfigurator.h"
 void ALegendDialog::on_pbConfigureFrame_clicked()
 {
     int color = Legend.GetLineColor();
@@ -375,8 +380,6 @@ void ALegendDialog::on_pbConfigureFrame_clicked()
     }
 }
 
-#include <QLineEdit>
-#include <QCheckBox>
 ALegendEntryDelegate::ALegendEntryDelegate(const ALegendEntryRecord & record, int index) : QFrame(), Index(index)
 {
     setFrameShape(QFrame::StyledPanel);
@@ -384,6 +387,23 @@ ALegendEntryDelegate::ALegendEntryDelegate(const ALegendEntryRecord & record, in
 
     QHBoxLayout * lh = new QHBoxLayout(this);
     lh->setContentsMargins(4, 1, 4, 1);
+
+    QFrame * frMI = new QFrame();
+    frMI->setFrameShape(QFrame::NoFrame);
+    frMI->setFixedWidth(16);
+        QGridLayout * gg = new QGridLayout(frMI);
+        gg->setContentsMargins(4,5,8,5);
+        gg->setVerticalSpacing(2);
+        for (int ix=0; ix < 2; ix++)
+            for (int iy=0; iy<8; iy++)
+            {
+                QFrame * ff = new QFrame();
+                ff->setFixedSize(4,4);
+                ff->setFrameShape(QFrame::Box);
+                ff->setStyleSheet("background-color: lightGray;  border: 1px solid lightGray;");
+                gg->addWidget(ff, iy, ix);
+            }
+    lh->addWidget(frMI);
 
     QFrame * fr1 = new QFrame();
     fr1->setFrameShape(QFrame::NoFrame);
@@ -394,18 +414,21 @@ ALegendEntryDelegate::ALegendEntryDelegate(const ALegendEntryRecord & record, in
         cbLine = new QCheckBox("Line");
         cbLine->setChecked(record.Options.contains('l', Qt::CaseInsensitive));
         cbLine->setEnabled(record.TObj);
+        cbLine->setStyleSheet("background: transparent");
         if (record.TObj) cbLine->setChecked(record.Options.contains('l', Qt::CaseInsensitive));
         connect(cbLine, &QCheckBox::clicked, this, &ALegendEntryDelegate::onContentChanged);
     gl->addWidget(cbLine, 1, 1);
         cbMarker = new QCheckBox("Mark");
         cbMarker->setChecked(record.Options.contains('p', Qt::CaseInsensitive));
         cbMarker->setEnabled(record.TObj);
+        cbMarker->setStyleSheet("background: transparent");
         if (record.TObj) cbMarker->setChecked(record.Options.contains('p', Qt::CaseInsensitive));
         connect(cbMarker, &QCheckBox::clicked, this, &ALegendEntryDelegate::onContentChanged);
     gl->addWidget(cbMarker, 2, 1);
         cbFill = new QCheckBox("Fill");
         cbFill->setChecked(record.Options.contains('f', Qt::CaseInsensitive));
         cbFill->setEnabled(record.TObj);
+        cbFill->setStyleSheet("background: transparent");
         if (record.TObj) cbFill->setChecked(record.Options.contains('f', Qt::CaseInsensitive));
         connect(cbFill, &QCheckBox::clicked, this, &ALegendEntryDelegate::onContentChanged);
     gl->addWidget(cbFill, 2, 2);

@@ -102,7 +102,7 @@ private slots:
 private:
     void updateModel(TLegend & legend);
 
-    void updateList();
+    void updateMainGui();
     void updateTree();
 
     void updateLegend();

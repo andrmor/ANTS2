@@ -294,6 +294,16 @@
      </item>
     </layout>
    </item>
+   <item>
+    <widget class="QLabel" name="label_6">
+     <property name="text">
+      <string>Double-click on a draw object to add entry; use drag-and-drop to change order of entries.</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <resources/>

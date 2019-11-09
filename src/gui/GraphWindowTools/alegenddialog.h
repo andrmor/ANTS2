@@ -16,11 +16,11 @@ class TObject;
 class QListWidgetItem;
 class QTreeWidgetItem;
 
-class ALegendModelRecord
+class ALegendEntryRecord
 {
 public:
-    ALegendModelRecord(const QString Label, TObject * TObj, const QString Options) : Label(Label), TObj(TObj), Options(Options) {}
-    ALegendModelRecord() {}
+    ALegendEntryRecord(const QString Label, TObject * TObj, const QString Options) : Label(Label), TObj(TObj), Options(Options) {}
+    ALegendEntryRecord() {}
 
     QString   Label;
     TObject * TObj = nullptr;  // nullptr -> plain text, no connected object
@@ -34,6 +34,20 @@ public:
 
     //runtime
     bool _flag = false; //used for reorder
+};
+
+class ALegendData
+{
+public:
+    QVector<ALegendEntryRecord> Model;
+    int NumColumns = 1;
+
+    double    Xfrom, Xto, Yfrom, Yto;
+
+    int       DefaultTextColor = 1;
+    int       DefaultTextAlign = 12;
+    int       DefaultTextFont  = 42;
+    float     DefaultTextSize  = 0;
 };
 
 class ALegendDialog : public QDialog
@@ -56,18 +70,10 @@ private:
     Ui::ALegendDialog *ui;
     ABasketListWidget * lwList;
     TLegend & Legend;
-    TLegend OriginalCopy;
     const QVector<ADrawObject> & DrawObjects;
 
-    QVector<ALegendModelRecord> Model;
-    int NumColumns = 1;
-
-    double    Xfrom, Xto, Yfrom, Yto;
-
-    int       DefaultTextColor = 1;
-    int       DefaultTextAlign = 12;
-    int       DefaultTextFont  = 42;
-    float     DefaultTextSize  = 0;
+    ALegendData CurrentModel;
+    ALegendData OriginalModel;
 
     TObject * SelectedObject = nullptr;
 
@@ -118,7 +124,7 @@ class ALegendEntryDelegate : public QFrame
 {
     Q_OBJECT
 public:
-    ALegendEntryDelegate(const ALegendModelRecord & record, int index);
+    ALegendEntryDelegate(const ALegendEntryRecord & record, int index);
 
 private:
     int Index;

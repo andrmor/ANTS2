@@ -11,6 +11,7 @@
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
 #include <QMenu>
+#include <QKeyEvent>
 
 #include "TLegendEntry.h"
 #include "TList.h"
@@ -19,7 +20,7 @@
 
 ALegendDialog::ALegendDialog(TLegend & Legend, const QVector<ADrawObject> & DrawObjects, QWidget * parent) :
     QDialog(parent), ui(new Ui::ALegendDialog),
-    Legend(Legend), OriginalCopy(Legend), DrawObjects(DrawObjects)
+    Legend(Legend), DrawObjects(DrawObjects)
 {
     ui->setupUi(this);
 
@@ -42,6 +43,7 @@ ALegendDialog::ALegendDialog(TLegend & Legend, const QVector<ADrawObject> & Draw
     ui->splitter->setSizes( {500,200});
 
     updateModel(Legend);
+    OriginalModel = CurrentModel;
 
     updateList();
     updateTree();
@@ -56,27 +58,30 @@ ALegendDialog::~ALegendDialog()
 
 void ALegendDialog::updateModel(TLegend & legend)
 {
-    NumColumns = legend.GetNColumns();
+    CurrentModel.NumColumns = legend.GetNColumns();
 
-    DefaultTextColor = Legend.GetTextColor();
-    DefaultTextAlign = Legend.GetTextAlign();
-    DefaultTextFont  = Legend.GetTextFont();
-    DefaultTextSize  = Legend.GetTextSize();
+    CurrentModel.DefaultTextColor = Legend.GetTextColor();
+    CurrentModel.DefaultTextAlign = Legend.GetTextAlign();
+    CurrentModel.DefaultTextFont  = Legend.GetTextFont();
+    CurrentModel.DefaultTextSize  = Legend.GetTextSize();
 
-    Xfrom = Legend.GetX1NDC();
-    Xto   = Legend.GetX2NDC();
-    Yfrom = Legend.GetY1NDC();
-    Yto   = Legend.GetY2NDC();
+    CurrentModel.Xfrom = Legend.GetX1NDC();
+    CurrentModel.Xto   = Legend.GetX2NDC();
+    CurrentModel.Yfrom = Legend.GetY1NDC();
+    CurrentModel.Yto   = Legend.GetY2NDC();
 
     TList * elist = legend.GetListOfPrimitives();
     int num = elist->GetEntries();
     for (int ie = 0; ie < num; ie++)
     {
         TLegendEntry * en = static_cast<TLegendEntry*>( (*elist).At(ie));
-        Model << ALegendModelRecord(en->GetLabel(), en->GetObject(), en->GetOption());
-        if (en->GetTextColor()!=DefaultTextColor || en->GetTextAlign()!=DefaultTextAlign || en->GetTextFont()!=DefaultTextFont || en->GetTextSize()!=DefaultTextSize)
+        CurrentModel.Model << ALegendEntryRecord(en->GetLabel(), en->GetObject(), en->GetOption());
+        if (en->GetTextColor()!=CurrentModel.DefaultTextColor ||
+                en->GetTextAlign()!=CurrentModel.DefaultTextAlign ||
+                en->GetTextFont()!=CurrentModel.DefaultTextFont ||
+                en->GetTextSize()!=CurrentModel.DefaultTextSize)
         {
-            ALegendModelRecord & m = Model.last();
+            ALegendEntryRecord & m = CurrentModel.Model.last();
             m.bAttributeOverride = true;
             m.TextColor = en->GetTextColor();
             m.TextAlign = en->GetTextAlign();
@@ -93,9 +98,9 @@ void ALegendDialog::updateList()
 {
     lwList->clear();
 
-    for (int iModel = 0; iModel < Model.size(); iModel++)
+    for (int iModel = 0; iModel < CurrentModel.Model.size(); iModel++)
     {
-        const ALegendModelRecord & rec = Model.at(iModel);
+        const ALegendEntryRecord & rec = CurrentModel.Model.at(iModel);
 
         QListWidgetItem * item = new QListWidgetItem();
         item->setBackgroundColor(QColor(230,230,230));
@@ -107,11 +112,11 @@ void ALegendDialog::updateList()
         item->setSizeHint(ed->sizeHint());
     }
 
-    ui->sbNumColumns->setValue(NumColumns);
-    ui->ledXfrom->setText( QString::number(Xfrom) );
-    ui->ledXto->setText  ( QString::number(Xto) );
-    ui->ledYfrom->setText( QString::number(Yfrom) );
-    ui->ledYto->setText  ( QString::number(Yto) );
+    ui->sbNumColumns->setValue(CurrentModel.NumColumns);
+    ui->ledXfrom->setText( QString::number(CurrentModel.Xfrom) );
+    ui->ledXto->setText  ( QString::number(CurrentModel.Xto) );
+    ui->ledYfrom->setText( QString::number(CurrentModel.Yfrom) );
+    ui->ledYto->setText  ( QString::number(CurrentModel.Yto) );
 }
 
 void ALegendDialog::updateTree()
@@ -156,17 +161,17 @@ void ALegendDialog::updateLegend()
 {
     Legend.Clear();
 
-    Legend.SetTextColor(DefaultTextColor);
-    Legend.SetTextAlign(DefaultTextAlign);
-    Legend.SetTextFont (DefaultTextFont);
-    Legend.SetTextSize (DefaultTextSize);
+    Legend.SetTextColor(CurrentModel.DefaultTextColor);
+    Legend.SetTextAlign(CurrentModel.DefaultTextAlign);
+    Legend.SetTextFont (CurrentModel.DefaultTextFont);
+    Legend.SetTextSize (CurrentModel.DefaultTextSize);
 
-    Legend.SetX1NDC(Xfrom);
-    Legend.SetX2NDC(Xto);
-    Legend.SetY1NDC(Yfrom);
-    Legend.SetY2NDC(Yto);
+    Legend.SetX1NDC(CurrentModel.Xfrom);
+    Legend.SetX2NDC(CurrentModel.Xto);
+    Legend.SetY1NDC(CurrentModel.Yfrom);
+    Legend.SetY2NDC(CurrentModel.Yto);
 
-    for (const ALegendModelRecord & rec : Model)
+    for (const ALegendEntryRecord & rec : CurrentModel.Model)
     {
         TLegendEntry *le = Legend.AddEntry(rec.TObj, rec.Label.toLatin1().data(), rec.Options.toLatin1().data());
         if (rec.bAttributeOverride)
@@ -178,7 +183,7 @@ void ALegendDialog::updateLegend()
         }
     }
 
-    Legend.SetNColumns(NumColumns);
+    Legend.SetNColumns(CurrentModel.NumColumns);
 
     emit requestCanvasUpdate();
 }
@@ -199,7 +204,7 @@ void ALegendDialog::removeAllSelectedEntries()
         indexes << lwList->row(item);
     std::sort(indexes.begin(), indexes.end());
     for (int i = indexes.size() - 1; i >= 0; i--)
-        Model.remove(indexes.at(i));
+        CurrentModel.Model.remove(indexes.at(i));
 
     updateList();
     updateLegend();
@@ -212,7 +217,7 @@ void ALegendDialog::onEntrySelectionChanged()
 
     int selSize = lwList->selectedItems().size();
     if (selSize == 1)
-        SelectedObject = Model.at(lwList->currentRow()).TObj;
+        SelectedObject = CurrentModel.Model.at(lwList->currentRow()).TObj;
 
     ui->pbThisEntryTextAttributes->setEnabled(selSize != 0);
 
@@ -238,21 +243,24 @@ void ALegendDialog::onFocusChanged(QWidget *, QWidget * newW)
 
 void ALegendDialog::on_pbCancel_clicked()
 {
-    //Legend = OriginalCopy;
+    CurrentModel = OriginalModel;
+    updateLegend();
+
     reject();
 }
 
 void ALegendDialog::on_pbAccept_clicked()
 {
     updateLegend();
+
     accept();
 }
 
 void ALegendDialog::onEntryWasEdited(int index, const QString &label, bool line, bool mark, bool fill)
 {
-    if (index >= 0 && index < Model.size())
+    if (index >= 0 && index < CurrentModel.Model.size())
     {
-        ALegendModelRecord & rec = Model[index];
+        ALegendEntryRecord & rec = CurrentModel.Model[index];
         rec.Label = label;
         rec.Options.clear();
         if (line) rec.Options.append('l');
@@ -266,23 +274,23 @@ void ALegendDialog::onEntryWasEdited(int index, const QString &label, bool line,
 
 void ALegendDialog::onReorderEntriesRequested(const QVector<int> &indexes, int toRow)
 {
-    QVector< ALegendModelRecord > ItemsToMove;
+    QVector< ALegendEntryRecord > ItemsToMove;
     for (int i = 0; i < indexes.size(); i++)
     {
         const int index = indexes.at(i);
-        ItemsToMove << Model.at(index);
-        Model[index]._flag = true;       // mark to be deleted
+        ItemsToMove << CurrentModel.Model.at(index);
+        CurrentModel.Model[index]._flag = true;       // mark to be deleted
     }
 
     for (int i = 0; i < ItemsToMove.size(); i++)
     {
-        Model.insert(toRow, ItemsToMove.at(i));
+        CurrentModel.Model.insert(toRow, ItemsToMove.at(i));
         toRow++;
     }
 
-    for (int i = Model.size()-1; i >= 0; i--)
-        if (Model.at(i)._flag)
-            Model.remove(i);
+    for (int i = CurrentModel.Model.size()-1; i >= 0; i--)
+        if (CurrentModel.Model.at(i)._flag)
+            CurrentModel.Model.remove(i);
 
     updateList();
     updateLegend();
@@ -309,7 +317,7 @@ void ALegendDialog::clearLegend()
     bool bConfirm = confirm("Remove all entries?", this);
     if (!bConfirm) return;
 
-    Model.clear();
+    CurrentModel.Model.clear();
     updateList();
     updateLegend();
 }
@@ -319,13 +327,13 @@ void ALegendDialog::deleteSelectedEntry()
     int row = lwList->currentRow();
     if (row == -1) return;
 
-    Model.remove(row);
+    CurrentModel.Model.remove(row);
     updateList();
 }
 
 void ALegendDialog::addText()
 {
-    Model << ALegendModelRecord("Text", nullptr, "");
+    CurrentModel.Model << ALegendEntryRecord("Text", nullptr, "");
     updateList();
     updateLegend();
 }
@@ -339,14 +347,14 @@ void ALegendDialog::on_twTree_itemDoubleClicked(QTreeWidgetItem *item, int)
         return;
     }
 
-    Model << ALegendModelRecord(DrawObjects[index].Name, DrawObjects[index].Pointer, "lpf");
+    CurrentModel.Model << ALegendEntryRecord(DrawObjects[index].Name, DrawObjects[index].Pointer, "lpf");
     updateList();
     updateLegend();
 }
 
 void ALegendDialog::on_sbNumColumns_editingFinished()
 {
-    NumColumns = ui->sbNumColumns->value();
+    CurrentModel.NumColumns = ui->sbNumColumns->value();
     updateLegend();
 }
 
@@ -369,7 +377,7 @@ void ALegendDialog::on_pbConfigureFrame_clicked()
 
 #include <QLineEdit>
 #include <QCheckBox>
-ALegendEntryDelegate::ALegendEntryDelegate(const ALegendModelRecord & record, int index) : QFrame(), Index(index)
+ALegendEntryDelegate::ALegendEntryDelegate(const ALegendEntryRecord & record, int index) : QFrame(), Index(index)
 {
     setFrameShape(QFrame::StyledPanel);
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
@@ -419,7 +427,6 @@ void ALegendEntryDelegate::onContentChanged()
     emit contentWasEdited(Index, le->text(), cbLine->isChecked(), cbMarker->isChecked(), cbFill->isChecked());
 }
 
-#include <QKeyEvent>
 void ALegendEntryDelegate::keyPressEvent(QKeyEvent *event)
 {
     if (event->key() == Qt::Key_Enter)
@@ -446,25 +453,19 @@ void ALegendDialog::on_pbRemoveAll_clicked()
 
 void ALegendDialog::on_pbDefaultTextProperties_clicked()
 {
-    int   color = DefaultTextColor;
-    int   align = DefaultTextAlign;
-    int   font  = DefaultTextFont;
-    float size  = DefaultTextSize;
+    int   color = CurrentModel.DefaultTextColor;
+    int   align = CurrentModel.DefaultTextAlign;
+    int   font  = CurrentModel.DefaultTextFont;
+    float size  = CurrentModel.DefaultTextSize;
 
     ARootTextConfigurator D(color, align, font, size, this);
     int res = D.exec();
     if (res == QDialog::Accepted)
     {
-        DefaultTextColor = color;
-        DefaultTextAlign = align;
-        DefaultTextFont  = font;
-        DefaultTextSize  = size;
-        /*
-        Legend.SetTextColor(color);
-        Legend.SetTextAlign(align);
-        Legend.SetTextFont(font);
-        Legend.SetTextSize(size);
-        */
+        CurrentModel.DefaultTextColor = color;
+        CurrentModel.DefaultTextAlign = align;
+        CurrentModel.DefaultTextFont  = font;
+        CurrentModel.DefaultTextSize  = size;
         updateLegend();
     }
 }
@@ -475,11 +476,11 @@ void ALegendDialog::on_pbThisEntryTextAttributes_clicked()
     if (selSize == 0) return;
 
     int index = lwList->row(lwList->selectedItems().first());
-    ALegendModelRecord & rec = Model[index];
-    int   color = ( rec.bAttributeOverride ? rec.TextColor : DefaultTextColor );
-    int   align = ( rec.bAttributeOverride ? rec.TextAlign : DefaultTextAlign );
-    int   font  = ( rec.bAttributeOverride ? rec.TextFont  : DefaultTextFont );
-    float size  = ( rec.bAttributeOverride ? rec.TextSize  : DefaultTextSize );
+    ALegendEntryRecord & rec = CurrentModel.Model[index];
+    int   color = ( rec.bAttributeOverride ? rec.TextColor : CurrentModel.DefaultTextColor );
+    int   align = ( rec.bAttributeOverride ? rec.TextAlign : CurrentModel.DefaultTextAlign );
+    int   font  = ( rec.bAttributeOverride ? rec.TextFont  : CurrentModel.DefaultTextFont );
+    float size  = ( rec.bAttributeOverride ? rec.TextSize  : CurrentModel.DefaultTextSize );
 
     ARootTextConfigurator D(color, align, font, size, this);
     int res = D.exec();
@@ -488,7 +489,7 @@ void ALegendDialog::on_pbThisEntryTextAttributes_clicked()
         for (QListWidgetItem * item : lwList->selectedItems())
         {
             int index = lwList->row(item);
-            ALegendModelRecord & rec = Model[index];
+            ALegendEntryRecord & rec = CurrentModel.Model[index];
             rec.TextColor = color;
             rec.TextAlign = align;
             rec.TextFont  = font;
@@ -500,24 +501,24 @@ void ALegendDialog::on_pbThisEntryTextAttributes_clicked()
 
 void ALegendDialog::on_ledXfrom_editingFinished()
 {
-    Xfrom = ui->ledXfrom->text().toDouble();
+    CurrentModel.Xfrom = ui->ledXfrom->text().toDouble();
     updateLegend();
 }
 
 void ALegendDialog::on_ledXto_editingFinished()
 {
-    Xto = ui->ledXto->text().toDouble();
+    CurrentModel.Xto = ui->ledXto->text().toDouble();
     updateLegend();
 }
 
 void ALegendDialog::on_ledYfrom_editingFinished()
 {
-    Yfrom = ui->ledYfrom->text().toDouble();
+    CurrentModel.Yfrom = ui->ledYfrom->text().toDouble();
     updateLegend();
 }
 
 void ALegendDialog::on_ledYto_editingFinished()
 {
-    Yto = ui->ledYto->text().toDouble();
+    CurrentModel.Yto = ui->ledYto->text().toDouble();
     updateLegend();
 }

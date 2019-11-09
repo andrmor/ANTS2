@@ -63,6 +63,11 @@ void ALegendDialog::updateModel(TLegend & legend)
     DefaultTextFont  = Legend.GetTextFont();
     DefaultTextSize  = Legend.GetTextSize();
 
+    Xfrom = Legend.GetX1NDC();
+    Xto   = Legend.GetX2NDC();
+    Yfrom = Legend.GetY1NDC();
+    Yto   = Legend.GetY2NDC();
+
     TList * elist = legend.GetListOfPrimitives();
     int num = elist->GetEntries();
     for (int ie = 0; ie < num; ie++)
@@ -79,6 +84,9 @@ void ALegendDialog::updateModel(TLegend & legend)
             m.TextSize  = en->GetTextSize();
         }
     }
+
+    //Legend.GetX1()
+
 }
 
 void ALegendDialog::updateList()
@@ -100,6 +108,10 @@ void ALegendDialog::updateList()
     }
 
     ui->sbNumColumns->setValue(NumColumns);
+    ui->ledXfrom->setText( QString::number(Xfrom) );
+    ui->ledXto->setText  ( QString::number(Xto) );
+    ui->ledYfrom->setText( QString::number(Yfrom) );
+    ui->ledYto->setText  ( QString::number(Yto) );
 }
 
 void ALegendDialog::updateTree()
@@ -148,6 +160,11 @@ void ALegendDialog::updateLegend()
     Legend.SetTextAlign(DefaultTextAlign);
     Legend.SetTextFont (DefaultTextFont);
     Legend.SetTextSize (DefaultTextSize);
+
+    Legend.SetX1NDC(Xfrom);
+    Legend.SetX2NDC(Xto);
+    Legend.SetY1NDC(Yfrom);
+    Legend.SetY2NDC(Yto);
 
     for (const ALegendModelRecord & rec : Model)
     {
@@ -479,4 +496,28 @@ void ALegendDialog::on_pbThisEntryTextAttributes_clicked()
         }
         updateLegend();
     }
+}
+
+void ALegendDialog::on_ledXfrom_editingFinished()
+{
+    Xfrom = ui->ledXfrom->text().toDouble();
+    updateLegend();
+}
+
+void ALegendDialog::on_ledXto_editingFinished()
+{
+    Xto = ui->ledXto->text().toDouble();
+    updateLegend();
+}
+
+void ALegendDialog::on_ledYfrom_editingFinished()
+{
+    Yfrom = ui->ledYfrom->text().toDouble();
+    updateLegend();
+}
+
+void ALegendDialog::on_ledYto_editingFinished()
+{
+    Yto = ui->ledYto->text().toDouble();
+    updateLegend();
 }

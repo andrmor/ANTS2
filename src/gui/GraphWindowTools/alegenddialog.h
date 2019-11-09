@@ -62,6 +62,8 @@ private:
     QVector<ALegendModelRecord> Model;
     int NumColumns = 1;
 
+    double    Xfrom, Xto, Yfrom, Yto;
+
     int       DefaultTextColor = 1;
     int       DefaultTextAlign = 12;
     int       DefaultTextFont  = 42;
@@ -81,6 +83,15 @@ private slots:
     void on_pbDefaultTextProperties_clicked();
 
     void on_pbThisEntryTextAttributes_clicked();
+
+    void on_ledXfrom_editingFinished();
+
+
+    void on_ledXto_editingFinished();
+
+    void on_ledYfrom_editingFinished();
+
+    void on_ledYto_editingFinished();
 
 private:
     void updateModel(TLegend & legend);

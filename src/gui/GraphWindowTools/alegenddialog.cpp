@@ -539,6 +539,7 @@ void ALegendDialog::on_pbThisEntryTextAttributes_clicked()
         {
             int index = lwList->row(item);
             ALegendEntryRecord & rec = CurrentModel.Model[index];
+            rec.bAttributeOverride = true;
             rec.TextColor = color;
             rec.TextAlign = align;
             rec.TextFont  = font;

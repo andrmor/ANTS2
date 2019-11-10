@@ -47,7 +47,7 @@ private:
     void projection(ADrawObject &obj, bool bX);
     void customProjection(ADrawObject &obj);
     void splineFit(int index);
-    void editTitle(ADrawObject &obj, int X0Y1);
+    void editAxis(ADrawObject &obj, int axisIndex);
     void saveRoot(ADrawObject &obj);
     void saveAsTxt(ADrawObject &obj, bool fUseBinCenters);
 

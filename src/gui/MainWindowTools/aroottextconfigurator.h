@@ -22,7 +22,7 @@ protected:
   void paintEvent(QPaintEvent *e);
   void mousePressEvent(QMouseEvent *e);
 
-private:
+protected:
     Ui::ARootTextConfigurator *ui;
     int SquareSize = 30;
     QVector<int> BaseColors;
@@ -32,6 +32,10 @@ private:
     int   & font;
     float & size;
 
+protected:
+    void setupAlignmentControls();
+    virtual void readAlignment();
+
 private slots:
     void PaintColorRow(QPainter *p, int row, int colorBase);
 
@@ -40,6 +44,34 @@ private slots:
     void previewColor();
     void on_pbAccept_clicked();
     void on_pbCancel_clicked();
+
 };
+
+class ARootAxisTitleTextConfigurator : public ARootTextConfigurator
+{
+    Q_OBJECT
+
+public:
+    explicit ARootAxisTitleTextConfigurator(int & color, int & align, int & font, float & size, QWidget *parent = 0);
+
+protected:
+    void setupAlignmentControls();
+    virtual void readAlignment() override;
+
+};
+
+class ARootAxisLabelTextConfigurator : public ARootTextConfigurator
+{
+    Q_OBJECT
+
+public:
+    explicit ARootAxisLabelTextConfigurator(int & color, int & align, int & font, float & size, QWidget *parent = 0);
+
+protected:
+    void setupAlignmentControls();
+    virtual void readAlignment() override;
+
+};
+
 
 #endif // AROOTTEXTCONFIGURATOR_H

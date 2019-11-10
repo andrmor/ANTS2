@@ -2146,6 +2146,7 @@ void GraphWindowClass::BasketCustomContextMenuRequested(const QPoint &pos)
     }
     BasketMenu.addSeparator();
     QAction* append = BasketMenu.addAction("Append basket file");
+    BasketMenu.addSeparator();
     QAction* appendTxt = BasketMenu.addAction("Append graph from text file");
     QAction* appendTxtEr = BasketMenu.addAction("Append graph with error bars from text file");
     QAction* appendRootHistsAndGraphs = BasketMenu.addAction("Append graphs / histograms from a ROOT file");

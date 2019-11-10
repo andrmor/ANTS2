@@ -145,7 +145,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QLabel" name="label_8">
+      <widget class="QLabel" name="labAlign">
        <property name="text">
         <string>Text alignment:</string>
        </property>
@@ -160,7 +160,7 @@
        </item>
        <item>
         <property name="text">
-         <string>Center</string>
+         <string>Horizontal center</string>
         </property>
        </item>
        <item>
@@ -179,7 +179,7 @@
        </item>
        <item>
         <property name="text">
-         <string>Center</string>
+         <string>Vertical center</string>
         </property>
        </item>
        <item>
@@ -218,7 +218,7 @@
     </spacer>
    </item>
    <item>
-    <widget class="Line" name="line_2">
+    <widget class="Line" name="lineAlign">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>

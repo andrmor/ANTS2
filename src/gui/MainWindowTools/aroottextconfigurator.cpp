@@ -20,7 +20,7 @@ ARootTextConfigurator::ARootTextConfigurator(int & color, int & align, int & fon
     ui->setupUi(this);
 
     setMouseTracking(true);
-    this->setWindowTitle("ROOT text properties");
+    setWindowTitle("ROOT text properties");
 
     QDoubleValidator* dv = new QDoubleValidator(this);
     dv->setNotation(QDoubleValidator::ScientificNotation);
@@ -39,11 +39,7 @@ ARootTextConfigurator::ARootTextConfigurator(int & color, int & align, int & fon
     setFixedWidth(width());
 
     ui->sbColor->setValue(color);
-    int vert = align % 10;
-    int hor  = align / 10.0;
-    qDebug() << align << hor << vert;
-    ui->cobHorizontalAlignment->setCurrentIndex(hor-1);
-    ui->cobVerticalAlignment->setCurrentIndex(vert-1);
+    setupAlignmentControls();
     int fontIndex = font / 10;
     int precision = font % 10;
     ui->sbFont->setValue(fontIndex);
@@ -85,6 +81,20 @@ void ARootTextConfigurator::mousePressEvent(QMouseEvent *e)
     //qDebug() << color << "at row/num:"<<row<<num;
     ui->sbColor->setValue(color);
     updateColorFrame();
+}
+
+void ARootTextConfigurator::setupAlignmentControls()
+{
+    int vert = align % 10;
+    int hor  = align / 10.0;
+    qDebug() << align << hor << vert;
+    ui->cobHorizontalAlignment->setCurrentIndex(hor-1);
+    ui->cobVerticalAlignment->setCurrentIndex(vert-1);
+}
+
+void ARootTextConfigurator::readAlignment()
+{
+    align = 10 * (1 + ui->cobHorizontalAlignment->currentIndex()) + (1 + ui->cobVerticalAlignment->currentIndex());
 }
 
 void ARootTextConfigurator::PaintColorRow(QPainter *p, int row, int colorBase)
@@ -134,13 +144,54 @@ void ARootTextConfigurator::previewColor()
 void ARootTextConfigurator::on_pbAccept_clicked()
 {
     color = ui->sbColor->value();
-    align = 10 * (1 + ui->cobHorizontalAlignment->currentIndex()) + (1 + ui->cobVerticalAlignment->currentIndex());
     font = ui->sbFont->value() * 10 + ui->sbPrecision->value();
     size = ui->ledSize->text().toFloat();
+    readAlignment();
     accept();
 }
 
 void ARootTextConfigurator::on_pbCancel_clicked()
 {
     reject();
+}
+
+ARootAxisTitleTextConfigurator::ARootAxisTitleTextConfigurator(int &color, int &align, int &font, float &size, QWidget *parent) :
+    ARootTextConfigurator(color, align, font, size, parent)
+{
+    setWindowTitle("Axis title text properties");
+    setupAlignmentControls();
+}
+
+void ARootAxisTitleTextConfigurator::setupAlignmentControls()
+{
+    ui->cobVerticalAlignment->setVisible(false);
+    ui->cobHorizontalAlignment->clear();
+    ui->cobHorizontalAlignment->addItems({"Right", "Center"});
+
+    ui->cobHorizontalAlignment->setCurrentIndex(align == 0);
+}
+
+void ARootAxisTitleTextConfigurator::readAlignment()
+{
+    align = ui->cobHorizontalAlignment->currentIndex();
+}
+
+ARootAxisLabelTextConfigurator::ARootAxisLabelTextConfigurator(int &color, int &align, int &font, float &size, QWidget *parent) :
+    ARootTextConfigurator(color, align, font, size, parent)
+{
+    setWindowTitle("Axis title text properties");
+    setupAlignmentControls();
+}
+
+void ARootAxisLabelTextConfigurator::setupAlignmentControls()
+{
+    ui->cobVerticalAlignment->setVisible(false);
+    ui->cobHorizontalAlignment->setVisible(false);
+    ui->labAlign->setVisible(false);
+    ui->lineAlign->setVisible(false);
+}
+
+void ARootAxisLabelTextConfigurator::readAlignment()
+{
+    // nothing to do
 }

@@ -112,6 +112,12 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
 
     Menu.addSeparator();
 
+    QAction* axesX =        Menu.addAction("X axis");
+    QAction* axesY =        Menu.addAction("Y axis");
+    QAction* axesZ =        Menu.addAction("Z axis");
+
+    Menu.addSeparator();
+
     QMenu * manipMenu =     Menu.addMenu("Manipulate histogram"); manipMenu->setEnabled(Type.startsWith("TH1"));
         QAction * scaleA =      manipMenu->addAction("Scale");
         QAction * shiftA =      manipMenu->addAction("Shift X scale");
@@ -145,11 +151,6 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
 
     Menu.addSeparator();
 
-    QAction* titleX =       Menu.addAction("Edit X title");
-    QAction* titleY =       Menu.addAction("Edit Y title");
-
-    Menu.addSeparator();
-
     QMenu * saveMenu =      Menu.addMenu("Save");
         QAction* saveRootA =    saveMenu->addAction("Save ROOT object");
         saveMenu->addSeparator();
@@ -173,8 +174,9 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
    else if (si == linFitA)      linFit(index);
    else if (si == fwhmA)        fwhm(index);
    else if (si == interpolateA) interpolate(obj);
-   else if (si == titleX)       editTitle(obj, 0);
-   else if (si == titleY)       editTitle(obj, 1);
+   else if (si == axesX)        editAxis(obj, 0);
+   else if (si == axesY)        editAxis(obj, 1);
+   else if (si == axesZ)        editAxis(obj, 2);
    else if (si == shiftA)       shift(obj);
    else if (si == medianA)      median(obj);
    else if (si == splineFitA)   splineFit(index);
@@ -1025,30 +1027,30 @@ void ADrawExplorerWidget::splineFit(int index)
 #endif
 }
 
-void ADrawExplorerWidget::editTitle(ADrawObject &obj, int X0Y1)
+#include "aaxesdialog.h"
+void ADrawExplorerWidget::editAxis(ADrawObject &obj, int axisIndex)
 {
-    TAxis * axis = nullptr;
+    QVector<TAxis*> axes;
 
-    TGraph * g = dynamic_cast<TGraph*>(obj.Pointer);
-    if (g)
-        axis = ( X0Y1 == 0 ? g->GetXaxis() : g->GetYaxis() );
-    else
+    if (dynamic_cast<TGraph*>(obj.Pointer))
+    {
+        TGraph * g = dynamic_cast<TGraph*>(obj.Pointer);
+        axes << g->GetXaxis() << g->GetYaxis() << nullptr;
+    }
+    else if (dynamic_cast<TH1*>(obj.Pointer))
     {
         TH1* h = dynamic_cast<TH1*>(obj.Pointer);
-        if (h)
-            axis = ( X0Y1 == 0 ? h->GetXaxis() : h->GetYaxis() );
-        else
-        {
-            message("Not supported for this object type", &GraphWindow);
-            return;
-        }
+        axes << h->GetXaxis() << h->GetYaxis() << h->GetZaxis();
+    }
+    else
+    {
+        message("Not supported for this object type", &GraphWindow);
+        return;
     }
 
-    QString oldTitle;
-    oldTitle = axis->GetTitle();
-    bool ok;
-    QString newTitle = QInputDialog::getText(&GraphWindow, "Change axis title", QString("New %1 axis title:").arg(X0Y1 == 0 ? "X" : "Y"), QLineEdit::Normal, oldTitle, &ok);
-    if (ok) axis->SetTitle(newTitle.toLatin1().data());
+    AAxesDialog D(axes, axisIndex, this);
+    connect(&D, &AAxesDialog::requestRedraw, &GraphWindow, &GraphWindowClass::RedrawAll);
+    D.exec();
 
     GraphWindow.RedrawAll();
 }

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>601</width>
-    <height>433</height>
+    <height>345</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -104,7 +104,7 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>40</height>
+       <height>20</height>
       </size>
      </property>
     </spacer>
@@ -124,7 +124,7 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>40</height>
+       <height>20</height>
       </size>
      </property>
     </spacer>
@@ -212,7 +212,7 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>40</height>
+       <height>20</height>
       </size>
      </property>
     </spacer>
@@ -232,7 +232,7 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>40</height>
+       <height>20</height>
       </size>
      </property>
     </spacer>
@@ -352,7 +352,7 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>40</height>
+       <height>20</height>
       </size>
      </property>
     </spacer>
@@ -364,6 +364,12 @@
      </property>
      <item>
       <widget class="QPushButton" name="pbAccept">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>30</height>
+        </size>
+       </property>
        <property name="font">
         <font>
          <weight>75</weight>

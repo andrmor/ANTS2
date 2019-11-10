@@ -65,6 +65,7 @@ private slots:
     void onEntryWasEdited(int index, const QString & label, bool line, bool mark, bool fill);
     void onReorderEntriesRequested(const QVector<int> &indexes, int toRow);
     void on_twTree_itemDoubleClicked(QTreeWidgetItem *item, int column);
+    void setNumberOfColumns();
 
 private:
     Ui::ALegendDialog *ui;
@@ -80,23 +81,15 @@ private:
 private slots:
     void on_pbCancel_clicked();
     void on_pbAccept_clicked();
-    void on_sbNumColumns_editingFinished();
     void on_pbConfigureFrame_clicked();
     void on_pbAddEntry_clicked();
     void on_pbRemoveSelected_clicked();
     void on_pbRemoveAll_clicked();
-
     void on_pbDefaultTextProperties_clicked();
-
     void on_pbThisEntryTextAttributes_clicked();
-
     void on_ledXfrom_editingFinished();
-
-
     void on_ledXto_editingFinished();
-
     void on_ledYfrom_editingFinished();
-
     void on_ledYto_editingFinished();
 
 private:
@@ -111,6 +104,7 @@ private:
     void clearLegend();
     void deleteSelectedEntry();
     void addText();
+    void configureMenu();
 
 signals:
     void requestCanvasUpdate();

@@ -15,6 +15,8 @@
 #include <QKeyEvent>
 #include <QLineEdit>
 #include <QCheckBox>
+#include <QMenuBar>
+#include <QStatusBar>
 
 #include "TLegendEntry.h"
 #include "TList.h"
@@ -26,6 +28,9 @@ ALegendDialog::ALegendDialog(TLegend & Legend, const QVector<ADrawObject> & Draw
     Legend(Legend), DrawObjects(DrawObjects)
 {
     ui->setupUi(this);
+
+    setWindowTitle("Legend editor");
+    // Drop inicator style is set in "aproxystyle.h"
 
     ui->pbDummy->setDefault(true);
     ui->pbDummy->setVisible(false);
@@ -52,6 +57,12 @@ ALegendDialog::ALegendDialog(TLegend & Legend, const QVector<ADrawObject> & Draw
     updateTree();
 
     connect(qApp, &QApplication::focusChanged, this, &ALegendDialog::onFocusChanged);
+
+    configureMenu();
+
+    QStatusBar * status = new QStatusBar(this);
+    ui->lMain->addWidget(status);
+    status->showMessage("Double-click on a draw object to add entry; use drag-and-drop to change order of entries");
 }
 
 ALegendDialog::~ALegendDialog()
@@ -111,7 +122,6 @@ void ALegendDialog::updateMainGui()
         lwList->setItemWidget(item, ed);
     }
 
-    ui->sbNumColumns->setValue(CurrentModel.NumColumns);
     ui->ledXfrom->setText( QString::number(CurrentModel.Xfrom) );
     ui->ledXto->setText  ( QString::number(CurrentModel.Xto) );
     ui->ledYfrom->setText( QString::number(CurrentModel.Yfrom) );
@@ -344,6 +354,14 @@ void ALegendDialog::addText()
     updateLegend();
 }
 
+void ALegendDialog::configureMenu()
+{
+    QMenuBar * menu = new QMenuBar(this);
+    ui->lMain->insertWidget(0, menu);
+    QMenu * colM = menu->addMenu("Columns");
+        colM->addAction("Set number of columns", this, &ALegendDialog::setNumberOfColumns);
+}
+
 void ALegendDialog::on_twTree_itemDoubleClicked(QTreeWidgetItem *item, int)
 {
     int index = item->text(1).toInt();
@@ -353,14 +371,22 @@ void ALegendDialog::on_twTree_itemDoubleClicked(QTreeWidgetItem *item, int)
         return;
     }
 
-    CurrentModel.Model << ALegendEntryRecord(DrawObjects[index].Name, DrawObjects[index].Pointer, "lpf");
+    TObject * obj = DrawObjects[index].Pointer;
+    QString Type = obj->ClassName();
+    if (!Type.startsWith("TH") && !Type.startsWith("TGraph") && !Type.startsWith("TF") && !Type.startsWith("TProfile"))
+    {
+        message("Unsupported object type", this);
+        return;
+    }
+
+    CurrentModel.Model << ALegendEntryRecord(DrawObjects[index].Name, obj, "lpf");
     updateMainGui();
     updateLegend();
 }
 
-void ALegendDialog::on_sbNumColumns_editingFinished()
+void ALegendDialog::setNumberOfColumns()
 {
-    CurrentModel.NumColumns = ui->sbNumColumns->value();
+    inputInteger("Number of columns for entries:", CurrentModel.NumColumns, 1, 10, this);
     updateLegend();
 }
 

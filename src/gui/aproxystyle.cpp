@@ -10,7 +10,7 @@ void AProxyStyle::drawPrimitive(QStyle::PrimitiveElement element, const QStyleOp
     {
         QColor c(Qt::black);
         QPen pen(c);
-        pen.setWidth(4);
+        pen.setWidth(3);
         pen.setStyle(Qt::DashLine);
         painter->setPen(pen);
 

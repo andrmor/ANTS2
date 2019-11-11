@@ -50,6 +50,7 @@ private:
     void editAxis(ADrawObject &obj, int axisIndex);
     void saveRoot(ADrawObject &obj);
     void saveAsTxt(ADrawObject &obj, bool fUseBinCenters);
+    void extract(ADrawObject &obj);
 
 private:
     TH2 * objForCustomProjection = nullptr;

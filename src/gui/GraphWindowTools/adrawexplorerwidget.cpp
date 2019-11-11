@@ -157,6 +157,10 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
         QAction* saveTxtA =     saveMenu->addAction("Save as text");
         QAction* saveEdgeA =    saveMenu->addAction("Save hist as text using bin edges");
 
+    Menu.addSeparator();
+
+    QAction * extractA =    Menu.addAction("Extract object");
+
     // ------ exec ------
 
     QAction* si = Menu.exec(mapToGlobal(pos));
@@ -187,6 +191,7 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
    else if (si == saveEdgeA)    saveAsTxt(obj, false);
    else if (si == projCustom)   customProjection(obj);
    else if (si == showFitPanel) fitPanel(obj);
+   else if (si == extractA)     extract(obj);
 
 }
 
@@ -1165,5 +1170,23 @@ void ADrawExplorerWidget::saveAsTxt(ADrawObject &obj, bool fUseBinCenters)
     }
 
     qWarning() << "Unsupported type:" << cn;
+}
+
+void ADrawExplorerWidget::extract(ADrawObject &obj)
+{
+    GraphWindow.MakeCopyOfDrawObjects();
+    GraphWindow.MakeCopyOfActiveBasketId();
+    GraphWindow.ClearBasketActiveId();
+
+    ADrawObject thisObj = obj;
+
+    thisObj.Options.remove("same", Qt::CaseInsensitive);
+    thisObj.Pointer = thisObj.Pointer->Clone();
+    GraphWindow.RegisterTObject(thisObj.Pointer);
+
+    DrawObjects.clear();
+    DrawObjects << thisObj;
+
+    GraphWindow.RedrawAll();
 }
 

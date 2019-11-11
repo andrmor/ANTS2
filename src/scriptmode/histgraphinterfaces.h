@@ -129,6 +129,8 @@ public slots:
   void Save(const QString& GraphName, const QString& FileName);
   const QVariant GetPoints(const QString& GraphName);
 
+  //void ImportFromBasket(const QString& NewGraphName, const QString& BasketName, int index = 0);
+
   bool Delete(QString GraphName);
   void DeleteAllGraph();
 

@@ -300,37 +300,21 @@
       </widget>
      </item>
      <item>
+      <widget class="QComboBox" name="cobFontType">
+       <item>
+        <property name="text">
+         <string>relative (fraction)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>absolute (pixels)</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer_8">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_5">
-       <property name="text">
-        <string>Precision</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QSpinBox" name="sbPrecision">
-       <property name="minimum">
-        <number>0</number>
-       </property>
-       <property name="maximum">
-        <number>3</number>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_9">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -397,7 +381,6 @@
   <tabstop>cobHorizontalAlignment</tabstop>
   <tabstop>cobVerticalAlignment</tabstop>
   <tabstop>sbFont</tabstop>
-  <tabstop>sbPrecision</tabstop>
  </tabstops>
  <resources/>
  <connections/>

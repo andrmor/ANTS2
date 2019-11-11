@@ -43,7 +43,7 @@ ARootTextConfigurator::ARootTextConfigurator(int & color, int & align, int & fon
     int fontIndex = font / 10;
     int precision = font % 10;
     ui->sbFont->setValue(fontIndex);
-    ui->sbPrecision->setValue(precision);
+    ui->cobFontType->setCurrentIndex( precision == 3 ? 1 : 0 );
     ui->ledSize->setText( QString::number(size) );
 
     updateColorFrame();
@@ -144,7 +144,7 @@ void ARootTextConfigurator::previewColor()
 void ARootTextConfigurator::on_pbAccept_clicked()
 {
     color = ui->sbColor->value();
-    font = ui->sbFont->value() * 10 + ui->sbPrecision->value();
+    font = ui->sbFont->value() * 10 + (ui->cobFontType->currentIndex() == 1 ? 3 : 2);
     size = ui->ledSize->text().toFloat();
     readAlignment();
     accept();

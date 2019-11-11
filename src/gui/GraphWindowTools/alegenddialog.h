@@ -27,10 +27,10 @@ public:
     QString   Options;
 
     bool      bAttributeOverride = false;
-    int       TextColor;
-    int       TextAlign;
-    int       TextFont;
-    float     TextSize;
+    int       TextColor = 1;
+    int       TextAlign = 12;
+    int       TextFont  = 42;
+    float     TextSize  = 0;
 
     //runtime
     bool _flag = false; //used for reorder

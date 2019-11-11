@@ -88,12 +88,19 @@ void ALegendDialog::updateModel(TLegend & legend)
     int num = elist->GetEntries();
     for (int ie = 0; ie < num; ie++)
     {
-        TLegendEntry * en = static_cast<TLegendEntry*>( (*elist).At(ie));
+        TLegendEntry * en = static_cast<TLegendEntry*>( (*elist).At(ie) );
+
         CurrentModel.Model << ALegendEntryRecord(en->GetLabel(), en->GetObject(), en->GetOption());
-        if (en->GetTextColor()!=CurrentModel.DefaultTextColor ||
-                en->GetTextAlign()!=CurrentModel.DefaultTextAlign ||
-                en->GetTextFont()!=CurrentModel.DefaultTextFont ||
-                en->GetTextSize()!=CurrentModel.DefaultTextSize)
+
+        if (en->GetTextAlign() == 0)
+        {
+            // auto-legend builder makes it like that
+            // use automatic values and leave bAttributeOverride=false
+        }
+        else if (en->GetTextColor() != CurrentModel.DefaultTextColor ||
+                 en->GetTextAlign() != CurrentModel.DefaultTextAlign ||
+                 en->GetTextFont()  != CurrentModel.DefaultTextFont  ||
+                 en->GetTextSize()  != CurrentModel.DefaultTextSize)
         {
             ALegendEntryRecord & m = CurrentModel.Model.last();
             m.bAttributeOverride = true;
@@ -350,6 +357,7 @@ void ALegendDialog::deleteSelectedEntry()
 void ALegendDialog::addText()
 {
     CurrentModel.Model << ALegendEntryRecord("Text", nullptr, "");
+    CurrentModel.Model.last().Options += "h";
     updateMainGui();
     updateLegend();
 }
@@ -530,6 +538,7 @@ void ALegendDialog::on_pbThisEntryTextAttributes_clicked()
     int   align = ( rec.bAttributeOverride ? rec.TextAlign : CurrentModel.DefaultTextAlign );
     int   font  = ( rec.bAttributeOverride ? rec.TextFont  : CurrentModel.DefaultTextFont );
     float size  = ( rec.bAttributeOverride ? rec.TextSize  : CurrentModel.DefaultTextSize );
+    qDebug() << rec.bAttributeOverride << color << align << font << size;
 
     ARootTextConfigurator D(color, align, font, size, this);
     int res = D.exec();

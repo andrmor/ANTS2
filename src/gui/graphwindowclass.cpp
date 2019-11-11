@@ -561,21 +561,12 @@ void GraphWindowClass::UpdateGuiControlsForMainObject(const QString & ClassName,
 
     if ( ClassName.startsWith("TH1") || ClassName == "TF1" )
     {
-        //enable toolbox; only the ruler
-        ui->fToolBox->setEnabled(true);
         ui->fZrange->setEnabled(false);
         ui->cbRulerTicksLength->setChecked(false);
     }
     else if ( ClassName.startsWith("TH2") )
     {
-        //enable toolbox - both ruler and projection box
-        ui->fToolBox->setEnabled(true);
         ui->fZrange->setEnabled(true);
-    }
-    else
-    {
-        //hide toolbox
-        ui->fToolBox->setEnabled(false);
     }
 }
 

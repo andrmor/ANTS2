@@ -85,7 +85,7 @@ private:
 
 };
 
-// ---- G R A P H S ---- (TGraph of ROOT)
+// ---- G R A P H S ---- (TGraph and TgraphError of ROOT)
 class AInterfaceToGraph : public AScriptInterface
 {
   Q_OBJECT
@@ -109,8 +109,11 @@ public slots:
   void SetTitles(QString GraphName, QString X_Title, QString Y_Title, QString GraphTitle = "");
 
   void AddPoint(QString GraphName, double x, double y);
+  void AddPoint(QString GraphName, double x, double y, double errorY);
   void AddPoint(QString GraphName, double x, double y, double errorX, double errorY);
   void AddPoints(QString GraphName, QVariant xArray, QVariant yArray);
+  void AddPoints(QString GraphName, QVariant xArray, QVariant yArray, QVariant yErrArray);
+  void AddPoints(QString GraphName, QVariant xArray, QVariant yArray, QVariant xErrArray, QVariant yErrArray);
   void AddPoints(QString GraphName, QVariant xyArray);
 
   void SetYRange(const QString& GraphName, double min, double max);

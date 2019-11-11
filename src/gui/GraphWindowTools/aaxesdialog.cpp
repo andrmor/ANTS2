@@ -15,7 +15,9 @@ AAxesDialog::AAxesDialog(QVector<TAxis *> & axes, int axisIndex, QWidget * paren
     Axes(axes), AxisIndex(axisIndex)
 {
     ui->setupUi(this);
+    setWindowTitle("Axis property editor");
 
+    ui->pbDummy->setDefault(true);
     ui->pbDummy->setVisible(false);
     ui->pbConfigureDivisions->setVisible(false);
 

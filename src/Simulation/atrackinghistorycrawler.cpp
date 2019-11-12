@@ -715,3 +715,43 @@ TFormula *AHistorySearchProcessor_Border::parse(QString & expr)
     delete f;
     return nullptr;
 }
+
+
+bool AHistorySearchProcessor_getDepositionStats::onNewTrack(const AParticleTrackingRecord &pr)
+{
+    if ( *ParticleName != pr.ParticleName)  // fast?  want to avoid research in QMap if possible
+    {
+        ParticleName = &pr.ParticleName;
+        bAlreadyFound = false;
+    }
+    else
+    {
+        // new track with the same type of particle
+        // iterator is valid
+    }
+    return false;
+}
+
+void AHistorySearchProcessor_getDepositionStats::onLocalStep(const ATrackingStepData &tr)
+{
+    if (tr.DepositedEnergy == 0) return;
+
+    const double & depo = tr.DepositedEnergy;
+
+    if (!bAlreadyFound)
+    {
+        itParticle = DepoData.find(*ParticleName);
+        if (itParticle == DepoData.end())
+        {
+            DepoData.insert(*ParticleName, AParticleDepoStat(1, depo, depo*depo));
+            return;
+        }
+    }
+
+    itParticle.value().append(depo);
+}
+
+void AHistorySearchProcessor_getDepositionStats::onTransitionOut(const ATrackingStepData &tr)
+{
+    onLocalStep(tr);
+}

@@ -1581,6 +1581,11 @@ over all events</string>
                   <string>Get deposited energies</string>
                  </property>
                 </item>
+                <item>
+                 <property name="text">
+                  <string>Get deposition statistics</string>
+                 </property>
+                </item>
                </widget>
               </item>
               <item>

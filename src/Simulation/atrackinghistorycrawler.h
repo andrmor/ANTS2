@@ -92,6 +92,33 @@ public:
     bool bSecondaryTrackingStarted = false;
 };
 
+struct AParticleDepoStat
+{
+    AParticleDepoStat(int num, double sum, double sumOfSquares) : num(num), sum(sum), sumOfSquares(sumOfSquares) {}
+    AParticleDepoStat(){}
+
+    void append(double val) {num++; sum += val; sumOfSquares += val*val;}
+
+    int num = 0;
+    double sum = 0;
+    double sumOfSquares = 0;
+};
+
+class AHistorySearchProcessor_getDepositionStats : public AHistorySearchProcessor
+{
+public:
+    virtual bool onNewTrack(const AParticleTrackingRecord & pr) override;
+    virtual void onLocalStep(const ATrackingStepData & tr) override;
+    virtual void onTransitionOut(const ATrackingStepData & tr) override; // in Geant4 energy loss can happen on transition
+
+    const QString Dummy = "___error___";
+    const QString * ParticleName = &Dummy;
+    bool bAlreadyFound = false;
+    QMap<QString, AParticleDepoStat>::iterator itParticle;
+
+    QMap<QString, AParticleDepoStat> DepoData;
+};
+
 class AHistorySearchProcessor_findTravelledDistances : public AHistorySearchProcessor
 {
 public:

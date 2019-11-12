@@ -1487,6 +1487,27 @@ void OutputWindow::on_pbPTHistRequest_clicked()
 
             break;
           }
+        case 4:
+         {
+            AHistorySearchProcessor_getDepositionStats p;
+            Crawler.find(Opt, p);
+
+            ui->ptePTHist->clear();
+            ui->ptePTHist->appendPlainText("Deposition statistics:\n");
+            QMap<QString, AParticleDepoStat>::const_iterator it = p.DepoData.constBegin();
+            while (it != p.DepoData.constEnd())
+            {
+                const AParticleDepoStat & rec = it.value();
+                const double mean = rec.sum / rec.num;
+                const double sigma = sqrt( (rec.sumOfSquares - 2.0*mean*rec.sum)/rec.num + mean*mean );
+
+                QString str = QString("%1 --> # of depositions: %2  total deposition: %3 keV  mean: %4 keV sigma: %5 keV").arg(it.key()).arg(rec.num).arg(rec.sum).arg(mean).arg(sigma);
+
+                ui->ptePTHist->appendPlainText(str);
+                ++it;
+            }
+            break;
+         }
         default:
             qWarning() << "Unknown type of volume request";
         }

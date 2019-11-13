@@ -1495,16 +1495,30 @@ void OutputWindow::on_pbPTHistRequest_clicked()
             ui->ptePTHist->clear();
             ui->ptePTHist->appendPlainText("Deposition statistics:\n");
             QMap<QString, AParticleDepoStat>::const_iterator it = p.DepoData.constBegin();
+            QVector< QPair<QString, AParticleDepoStat> > vec;
+            double sum = 0;
             while (it != p.DepoData.constEnd())
             {
-                const AParticleDepoStat & rec = it.value();
+                vec << QPair<QString, AParticleDepoStat>(it.key(), it.value());
+                sum += it.value().sum;
+                ++it;
+            }
+            double sumInv = (sum > 0 ? 100.0/sum : 1.0);
+
+            std::sort(vec.begin(), vec.end(), [](const QPair<QString, AParticleDepoStat> & a, const QPair<QString, AParticleDepoStat> & b)->bool{return a.second.sum > b.second.sum;});
+
+            for (const auto & el : vec)
+            {
+                const AParticleDepoStat & rec = el.second;
                 const double mean = rec.sum / rec.num;
                 const double sigma = sqrt( (rec.sumOfSquares - 2.0*mean*rec.sum)/rec.num + mean*mean );
 
-                QString str = QString("%1 --> # of depositions: %2  total deposition: %3 keV  mean: %4 keV sigma: %5 keV").arg(it.key()).arg(rec.num).arg(rec.sum).arg(mean).arg(sigma);
+                QString str = QString("%1\t%2 keV (%3%)\t#: %4").arg(el.first).arg(rec.sum).arg( QString::number(rec.sum*sumInv, 'g', 4) ).arg(rec.num);
+
+                if (rec.num > 1)  str += QString("\tmean: %1 keV").arg(mean);
+                if (rec.num > 10) str += QString("\tsigma: %1 keV").arg(sigma);
 
                 ui->ptePTHist->appendPlainText(str);
-                ++it;
             }
             break;
          }

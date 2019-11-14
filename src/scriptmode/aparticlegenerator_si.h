@@ -5,6 +5,8 @@
 
 #include <QObject>
 #include <QVector>
+#include <QVariantList>
+//#include <QVariant>
 
 class AParticleRecord;
 class AMaterialParticleCollection;
@@ -23,11 +25,15 @@ public slots:
     void AddParticle(int type, double energy, double x, double y, double z, double i, double k, double j, double time = 0);
     void AddParticleIsotropic(int type, double energy, double x, double y, double z, double time = 0);
 
+    void         StoreVariables(QVariantList array);
+    QVariantList RetrieveVariables();
+
 private:
     const AMaterialParticleCollection & MpCollection;
     TRandom2 * RandGen = 0;                                 //external
     QVector<AParticleRecord*> * GP = 0;                     //external
 
+    QVariantList StoredData;
 };
 
 #endif // APARTICLEGENERATORINTERFACE_H

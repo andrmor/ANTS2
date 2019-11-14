@@ -10,6 +10,9 @@ AParticleGenerator_SI::AParticleGenerator_SI(const AMaterialParticleCollection &
 {
     H["AddParticle"] = "Adds particle to track to this event";
     H["AddParticleIsotropic"] = "Adds particle to track to this event. The particle's direction is randomly generated (isotropic)";
+
+    H["StoreVariables"] = "Store array of variables: allows to have 'static' variables over the whole simulation";
+    H["StoreVariables"] = "Retrive array of variables: allows to have 'static' variables over the whole simulation\nOn simulation start retrive will produce an empty array";
 }
 
 void AParticleGenerator_SI::configure(QVector<AParticleRecord*> * GeneratedParticles)
@@ -45,4 +48,14 @@ void AParticleGenerator_SI::AddParticleIsotropic(int type, double energy, double
         p->randomDir(RandGen); //will generate unitary length
         GP->append(p);
     }
+}
+
+void AParticleGenerator_SI::StoreVariables(QVariantList array)
+{
+    StoredData = array;
+}
+
+QVariantList AParticleGenerator_SI::RetrieveVariables()
+{
+    return StoredData;
 }

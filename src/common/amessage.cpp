@@ -27,7 +27,7 @@ bool confirm(const QString & text, QWidget * parent)
     return false;
 }
 
-bool inputInteger(const QString &text, int &input, int min, int max, QWidget *parent)
+void inputInteger(const QString &text, int &input, int min, int max, QWidget *parent)
 {
     bool ok;
     int res = QInputDialog::getInt(parent, "", text, input, min, max, 1, &ok);

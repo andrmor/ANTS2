@@ -1848,11 +1848,23 @@ in basket</string>
     <addaction name="actionSide"/>
     <addaction name="actionFront"/>
     <addaction name="separator"/>
+   </widget>
+   <widget class="QMenu" name="menuSize">
+    <property name="title">
+     <string>Size</string>
+    </property>
+    <addaction name="actionSet_width"/>
+    <addaction name="actionSet_height"/>
+    <addaction name="separator"/>
+    <addaction name="actionMake_square"/>
+    <addaction name="separator"/>
     <addaction name="actionEqualize_scale_XY"/>
+    <addaction name="separator"/>
    </widget>
    <addaction name="menuExport"/>
    <addaction name="menuView"/>
    <addaction name="menuPalette"/>
+   <addaction name="menuSize"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionSave_image">
@@ -1940,6 +1952,21 @@ in basket</string>
   <action name="actionShow_ROOT_attribute_panel">
    <property name="text">
     <string>Show ROOT attribute panel</string>
+   </property>
+  </action>
+  <action name="actionSet_width">
+   <property name="text">
+    <string>Set width</string>
+   </property>
+  </action>
+  <action name="actionSet_height">
+   <property name="text">
+    <string>Set height</string>
+   </property>
+  </action>
+  <action name="actionMake_square">
+   <property name="text">
+    <string>Make square</string>
    </property>
   </action>
  </widget>

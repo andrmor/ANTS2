@@ -2408,15 +2408,13 @@ void GraphWindowClass::on_actionEqualize_scale_XY_triggered()
 {
     if (DrawObjects.isEmpty()) return;
     QString ClassName = DrawObjects.first().Pointer->ClassName();
-    //Equalize XY
     if (!ClassName.startsWith("TH2") && !ClassName.startsWith("TF2") && !ClassName.startsWith("TGraph2D"))
     {
-        message("Supported only for 2D view");
+        message("Supported only for 2D view", this);
         return;
     }
 
     MW->WindowNavigator->BusyOn();
-    //qDebug() << "Before-> X and Y size per pixel:" << RasterWindow->getXperPixel() << RasterWindow->getYperPixel();
 
     double XperP = fabs(RasterWindow->getXperPixel());
     double YperP = fabs(RasterWindow->getYperPixel());
@@ -2425,7 +2423,6 @@ void GraphWindowClass::on_actionEqualize_scale_XY_triggered()
     double delta = NewCanvasWidth - CanvasWidth;
     resize(width()+delta, height());
 
-    //qDebug() << "After guess-> X and Y size per pixel:" << RasterWindow->getXperPixel() << RasterWindow->getYperPixel();
     XperP = fabs(RasterWindow->getXperPixel());
     YperP = fabs(RasterWindow->getYperPixel());
     if (XperP != YperP)
@@ -2444,8 +2441,8 @@ void GraphWindowClass::on_actionEqualize_scale_XY_triggered()
             if ( (XperP > YperP) != XlargerY ) break;
         }
         while ( isVisible() && width()>200 && width()<2000);
-        //qDebug() << "After fine tune-> X and Y size per pixel:" << RasterWindow->getXperPixel() << RasterWindow->getYperPixel();
     }
+
     MW->WindowNavigator->BusyOff();
 }
 
@@ -2664,4 +2661,42 @@ void GraphWindowClass::on_pbUpdateInBasket_clicked()
 void GraphWindowClass::on_actionShow_ROOT_attribute_panel_triggered()
 {
     RasterWindow->fCanvas->SetLineAttributes();
+}
+
+void GraphWindowClass::on_actionSet_width_triggered()
+{
+    int w = width();
+    inputInteger("Enter new width:", w, 200, 10000, this);
+    this->resize(w, height());
+}
+
+void GraphWindowClass::on_actionSet_height_triggered()
+{
+    int h = height();
+    inputInteger("Enter new height:", h, 200, 10000, this);
+    this->resize(width(), h);
+}
+
+void GraphWindowClass::on_actionMake_square_triggered()
+{
+    double CanvasWidth = RasterWindow->width();
+    double CanvasHeight = RasterWindow->height();
+
+    resize(width() + (CanvasHeight - CanvasWidth), height());
+
+    int protectionCounter = 0;
+    while (RasterWindow->width() != RasterWindow->height())
+    {
+        CanvasWidth = RasterWindow->width();
+        CanvasHeight = RasterWindow->height();
+
+        if (CanvasWidth > CanvasHeight) this->resize(this->width()-1, this->height());
+        else this->resize(this->width()+1, this->height());
+        UpdateRootCanvas();
+        qApp->processEvents();
+
+        if (width() < 200 || width()>2000) break;
+        protectionCounter++;
+        if (protectionCounter > 100) break;
+    }
 }

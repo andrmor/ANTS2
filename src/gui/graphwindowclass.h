@@ -245,6 +245,12 @@ private slots:
     void on_pbShowRuler_clicked();
     void on_pbExitToolMode_clicked();
 
+    void on_actionSet_width_triggered();
+
+    void on_actionSet_height_triggered();
+
+    void on_actionMake_square_triggered();
+
 private:
     MainWindow *MW;
     Ui::GraphWindowClass *ui;

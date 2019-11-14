@@ -45,6 +45,7 @@
 #include "mainwindow.h"
 #include "exampleswindow.h"
 #include "amsg_si.h"
+#include "aproxystyle.h"
 #endif
 
 //Qt
@@ -102,6 +103,7 @@ int main(int argc, char *argv[])
 
 #ifdef GUI
     QApplication a(argc, argv);
+    a.setStyle(new AProxyStyle);
 #else
     QCoreApplication a(argc, argv);
 #endif

@@ -90,10 +90,46 @@ void ARootGraphRecord::AddPoints(const QVector<double>& xArr, const QVector<doub
     if (Type == "TGraph")
     {
         TGraph* g = dynamic_cast<TGraph*>(Object);
-        for (int i=0; i<xArr.size(); i++)
+        if (g)
         {
-            //  qDebug() << i << xArr.at(i)<<yArr.at(i);
-            g->SetPoint(g->GetN(), xArr.at(i), yArr.at(i));
+            for (int i=0; i<xArr.size(); i++)
+            {
+                //  qDebug() << i << xArr.at(i)<<yArr.at(i);
+                g->SetPoint(g->GetN(), xArr.at(i), yArr.at(i));
+            }
+        }
+    }
+}
+
+void ARootGraphRecord::AddPoints(const QVector<double> &xArr, const QVector<double> &yArr, const QVector<double> &xErrArr, const QVector<double> &yErrArr)
+{
+    if (xArr.size() != yArr.size() || xArr.size() != xErrArr.size() || xArr.size() != yErrArr.size()) return;
+
+    QMutexLocker locker(&Mutex);
+
+    if (Type == "TGraph")
+    {
+        TGraph* g = dynamic_cast<TGraph*>(Object);
+        if (g)
+        {
+            for (int i=0; i<xArr.size(); i++)
+            {
+                //  qDebug() << i << xArr.at(i)<<yArr.at(i);
+                g->SetPoint(g->GetN(), xArr.at(i), yArr.at(i));
+            }
+        }
+    }
+    else if (Type == "TGraphErrors")
+    {
+        TGraphErrors* g = dynamic_cast<TGraphErrors*>(Object);
+        if (g)
+        {
+            for (int i=0; i<xArr.size(); i++)
+            {
+                const int iBin = g->GetN();
+                g->SetPoint(iBin, xArr.at(i), yArr.at(i));
+                g->SetPointError(iBin, xErrArr.at(i), yErrArr.at(i));
+            }
         }
     }
 }

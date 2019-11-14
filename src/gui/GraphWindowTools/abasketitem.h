@@ -8,16 +8,18 @@
 class ABasketItem
 {
 public:
-    ABasketItem(QString name, QVector<ADrawObject> * drawObjects);
-    ABasketItem(){}
     ~ABasketItem();
 
 public:
-    QString Name;
-    QString Type;
     QVector<ADrawObject> DrawObjects;
+    QString Name;
+    QString Type;  // ***kill?
 
     void clearObjects();
+
+    //runtime properties
+public:
+    bool _flag = false; // used in rearrangment to flag items to remove
 };
 
 #endif // ABASKETITEM_H

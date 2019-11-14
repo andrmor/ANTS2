@@ -158,8 +158,6 @@ void addWindow(QString name, QMainWindow* w, QJsonObject &json)
 
 void MainWindow::on_actionSave_position_and_stratus_of_all_windows_triggered()
 {
-  GraphWindow->switchOffBasket();
-
   QJsonObject json;
 
   static_cast<AGuiWindow*>(this)->           writeToJson("Main", json);

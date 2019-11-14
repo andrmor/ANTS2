@@ -15,7 +15,7 @@
 #include "TH2.h"
 #include "TF2.h"
 #include "TGraph.h"
-#include "TGraphErrors.h".h"
+#include "TGraphErrors.h"
 #include "TF1.h"
 #include "TFile.h"
 #include "TKey.h"
@@ -842,6 +842,15 @@ void AInterfaceToGraph::AddPoint(QString GraphName, double x, double y)
         r->AddPoint(x, y);
 }
 
+void AInterfaceToGraph::AddPoint(QString GraphName, double x, double y, double errorY)
+{
+    ARootGraphRecord* r = dynamic_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
+    if (!r)
+        abort("Graph "+GraphName+" not found!");
+    else
+        r->AddPoint(x, y, 0, errorY);
+}
+
 void AInterfaceToGraph::AddPoint(QString GraphName, double x, double y, double errorX, double errorY)
 {
     ARootGraphRecord* r = dynamic_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
@@ -890,6 +899,98 @@ void AInterfaceToGraph::AddPoints(QString GraphName, QVariant xArray, QVariant y
     }
 }
 
+void AInterfaceToGraph::AddPoints(QString GraphName, QVariant xArray, QVariant yArray, QVariant yErrArray)
+{
+    const QVariantList vx  = xArray.toList();
+    const QVariantList vy  = yArray.toList();
+    const QVariantList vEy = yErrArray.toList();
+    if (vx.isEmpty() || vx.size() != vy.size() || vx.size() != vEy.size())
+    {
+        abort("Empty array or mismatch in array sizes in AddPoints for graph " + GraphName);
+        return;
+    }
+
+    ARootGraphRecord* r = dynamic_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
+    if (!r)
+        abort("Graph "+GraphName+" not found!");
+    else
+    {
+        QVector<double> xArr(vx.size());
+        QVector<double> yArr(vx.size());
+        QVector<double> xErrArr(vx.size());
+        QVector<double> yErrArr(vx.size());
+
+        bool bValidX, bValidY, bValidYerr;
+
+        for (int i=0; i<vx.size(); i++)
+        {
+            double x    = vx.at(i).toDouble(&bValidX);
+            double y    = vy.at(i).toDouble(&bValidY);
+            double yerr = vEy.at(i).toDouble(&bValidYerr);
+            if (bValidX && bValidY && bValidYerr)
+            {
+                xArr[i] = x;
+                yArr[i] = y;
+                xErrArr[i] = 0;
+                yErrArr[i] = yerr;
+            }
+            else
+            {
+                abort("Not numeric value found in AddPoints() for " + GraphName);
+                return;
+            }
+        }
+        r->AddPoints(xArr, yArr, xErrArr, yErrArr);
+    }
+}
+
+void AInterfaceToGraph::AddPoints(QString GraphName, QVariant xArray, QVariant yArray, QVariant xErrArray, QVariant yErrArray)
+{
+    const QVariantList vx  = xArray.toList();
+    const QVariantList vy  = yArray.toList();
+    const QVariantList vEx = xErrArray.toList();
+    const QVariantList vEy = yErrArray.toList();
+    if (vx.isEmpty() || vx.size() != vy.size() || vx.size() != vEx.size() || vx.size() != vEy.size())
+    {
+        abort("Empty array or mismatch in array sizes in AddPoints for graph " + GraphName);
+        return;
+    }
+
+    ARootGraphRecord* r = dynamic_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
+    if (!r)
+        abort("Graph "+GraphName+" not found!");
+    else
+    {
+        QVector<double> xArr(vx.size());
+        QVector<double> yArr(vx.size());
+        QVector<double> xErrArr(vx.size());
+        QVector<double> yErrArr(vx.size());
+
+        bool bValidX, bValidY, bValidXerr, bValidYerr;
+
+        for (int i=0; i<vx.size(); i++)
+        {
+            double x    = vx.at(i).toDouble(&bValidX);
+            double y    = vy.at(i).toDouble(&bValidY);
+            double xerr = vEx.at(i).toDouble(&bValidXerr);
+            double yerr = vEy.at(i).toDouble(&bValidYerr);
+            if (bValidX && bValidY && bValidXerr && bValidYerr)
+            {
+                xArr[i] = x;
+                yArr[i] = y;
+                xErrArr[i] = xerr;
+                yErrArr[i] = yerr;
+            }
+            else
+            {
+                abort("Not numeric value found in AddPoints() for " + GraphName);
+                return;
+            }
+        }
+        r->AddPoints(xArr, yArr, xErrArr, yErrArr);
+    }
+}
+
 void AInterfaceToGraph::AddPoints(QString GraphName, QVariant xyArray)
 {
     const QVariantList v = xyArray.toList();
@@ -900,22 +1001,42 @@ void AInterfaceToGraph::AddPoints(QString GraphName, QVariant xyArray)
     }
 
     bool bError = false;
-    bool bValidX, bValidY;
-    QVector<double> xArr(v.size()), yArr(v.size());
+    bool bValidX, bValidY, bValidErrX, bValidErrY;
+    QVector<double> xArr(v.size()), yArr(v.size()), xErrArr(v.size()), yErrArr(v.size());
+
+    const QVariantList vFirst = v.at(0).toList();
+    int Length = vFirst.size();
+    if (Length < 2 || Length > 4)
+    {
+        abort("Invalid array in AddPoints() for graph: each entry should be X,Y  [or X,Y,Xerr or X,Y,Xerr,Yerr for TGraphError]" + GraphName);
+        return;
+    }
+
     for (int i=0; i<v.size(); i++)
     {
         const QVariantList vxy = v.at(i).toList();
-        if (vxy.size() != 2)
+        if (vxy.size() < Length)
         {
             bError = true;
             break;
         }
         double x = vxy.at(0).toDouble(&bValidX);
         double y = vxy.at(1).toDouble(&bValidY);
-        if (bValidX && bValidY)
+        double xErr = 0; bValidErrX = true;
+        double yErr = 0; bValidErrY = true;
+        if (Length == 3) yErr = vxy.at(2).toDouble(&bValidErrY);
+        if (Length == 4)
+        {
+            xErr = vxy.at(2).toDouble(&bValidErrX);
+            yErr = vxy.at(3).toDouble(&bValidErrY);
+        }
+
+        if (bValidX && bValidY && bValidErrX && bValidErrY)
         {
             xArr[i] = x;
             yArr[i] = y;
+            xErrArr[i] = xErr;
+            yErrArr[i] = yErr;
         }
         else
         {
@@ -933,7 +1054,7 @@ void AInterfaceToGraph::AddPoints(QString GraphName, QVariant xyArray)
     if (!r)
         abort("Graph "+GraphName+" not found!");
     else
-        r->AddPoints(xArr, yArr);
+        r->AddPoints(xArr, yArr, xErrArr, yErrArr);
 }
 
 void AInterfaceToGraph::SetYRange(const QString &GraphName, double min, double max)

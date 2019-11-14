@@ -19,7 +19,7 @@ protected:
   void mousePressEvent(QMouseEvent *e);
 
 private:
-  int SquareSize; 
+  int SquareSize = 30;
   QList<int> BaseColors;
   int *ReturnColor, *ReturnWidth, *ReturnStyle;
 

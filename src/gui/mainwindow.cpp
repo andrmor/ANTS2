@@ -217,14 +217,6 @@ void MainWindow::closeEvent(QCloseEvent *)
 
    ui->pbShowColorCoding->setFocus(); //to finish editing whatever QLineEdit the user can be in - they call on_editing_finish
 
-   if (GraphWindow->isBasketOn())
-   {
-       bool bVis = GraphWindow->isVisible();
-       GraphWindow->showNormal();
-       GraphWindow->switchOffBasket();
-       GraphWindow->setVisible(bVis);
-   }
-
    //if checked, save windows' status
    if (ui->actionSave_Load_windows_status_on_Exit_Init->isChecked())
      {
@@ -1960,13 +1952,6 @@ void MainWindow::on_pbIndShowType_clicked()
 {
   ui->tabWidget->setCurrentIndex(1);
   ui->sbPMtype->setValue(ui->cobPMtypeInExplorers->currentIndex());
-}
-
-void MainWindow::on_pbIndRestoreEffectiveDE_clicked()
-{
-    const int ipm = ui->sbIndPMnumber->value();
-    PMs->at(ipm).effectivePDE = -1.0;
-    ReconstructDetector(true);
 }
 
 void MainWindow::on_pbIndShowDE_clicked()

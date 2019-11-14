@@ -4,8 +4,8 @@ ANTS2_MINOR = 23
 
 #Optional libraries
 #CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
-#CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library: see https://github.com/mariusmuja/flann
-#CONFIG += ants2_fann        #enables FANN (fast neural network) library: see https://github.com/libfann/fann
+CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library: see https://github.com/mariusmuja/flann
+CONFIG += ants2_fann        #enables FANN (fast neural network) library: see https://github.com/libfann/fann
 CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra - highly recommended! Installation requires only to copy files!
 CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 CONFIG += ants2_Python      #enable Python scripting
@@ -413,7 +413,15 @@ SOURCES += main.cpp \
     Simulation/alogsandstatisticsoptions.cpp \
     Reconstruction/areconstructionworker.cpp \
     common/ahistogram.cpp \
-    gui/GraphWindowTools/abasketitem.cpp
+    gui/GraphWindowTools/abasketitem.cpp \
+    gui/GraphWindowTools/abasketmanager.cpp \
+    gui/GraphWindowTools/adrawexplorerwidget.cpp \
+    gui/GraphWindowTools/adrawobject.cpp \
+    gui/GraphWindowTools/abasketlistwidget.cpp \
+    gui/GraphWindowTools/alegenddialog.cpp \
+    gui/MainWindowTools/aroottextconfigurator.cpp \
+    gui/aproxystyle.cpp \
+    gui/GraphWindowTools/aaxesdialog.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -570,7 +578,14 @@ HEADERS  += common/CorrelationFilters.h \
     Reconstruction/areconstructionworker.h \
     common/ahistogram.h \
     gui/GraphWindowTools/adrawobject.h \
-    gui/GraphWindowTools/abasketitem.h
+    gui/GraphWindowTools/abasketitem.h \
+    gui/GraphWindowTools/abasketmanager.h \
+    gui/GraphWindowTools/adrawexplorerwidget.h \
+    gui/GraphWindowTools/abasketlistwidget.h \
+    gui/GraphWindowTools/alegenddialog.h \
+    gui/MainWindowTools/aroottextconfigurator.h \
+    gui/aproxystyle.h \
+    gui/GraphWindowTools/aaxesdialog.h
 
 # --- SIM ---
 ants2_SIM {
@@ -922,5 +937,8 @@ unix {
 
 FORMS += \
     gui/ageant4configdialog.ui \
-    gui/MainWindowTools/alogconfigdialog.ui
+    gui/MainWindowTools/alogconfigdialog.ui \
+    gui/GraphWindowTools/alegenddialog.ui \
+    gui/MainWindowTools/aroottextconfigurator.ui \
+    gui/GraphWindowTools/aaxesdialog.ui
 

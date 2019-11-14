@@ -170,39 +170,39 @@ int LoadDoubleVectorsFromFile(QString FileName, QVector<double>* x, QVector<doub
 
 const QString LoadDoubleVectorsFromFile(const QString FileName, QVector<QVector<double> *>& V)
 {
-    if (FileName.isEmpty()) return("Empty file name");
+    if (FileName.isEmpty()) return("File name not provided");
 
     QFile file(FileName);
-    if(!file.open(QIODevice::ReadOnly | QFile::Text)) return QString("Could not open: ")+FileName;
+    if(!file.open(QIODevice::ReadOnly | QFile::Text)) return QString("Could not open file %1").arg(FileName);
 
     const int Vsize = V.size();
-    if (Vsize==0) return "Received no vectors to load";
+    if (Vsize == 0) return "Received no vectors to load";
     for (QVector<double>* v : V) v->clear();
 
     QTextStream in(&file);
     QRegExp rx("(\\ |\\,|\\:|\\t)"); //separators: ' ' or ',' or ':' or '\t'
     while (!in.atEnd())
-         {
-            QString line = in.readLine();
-            QStringList fields = line.split(rx, QString::SkipEmptyParts);
+    {
+        const QString line = in.readLine();
+        QStringList fields = line.split(rx, QString::SkipEmptyParts);
 
-            bool fOK = true;
-            QVector<double> tmp;
-            if (fields.size() >= Vsize )
-              {
-                for (int i=0; i<Vsize; i++)
-                {
-                    double x = fields.at(i).toDouble(&fOK);
-                    if (!fOK) break;
-                    tmp << x;
-                }
-              }
-            if (fOK && tmp.size()==Vsize)
-               for (int i=0; i<Vsize; i++) V[i]->append( tmp.at(i) );
-         }
-     file.close();
+        bool fOK = true;
+        QVector<double> tmp;
+        if (fields.size() >= Vsize )
+        {
+            for (int i = 0; i < Vsize; i++)
+            {
+                double x = fields.at(i).toDouble(&fOK);
+                if (!fOK) break;
+                tmp << x;
+            }
+        }
+        if (fOK && tmp.size() == Vsize)
+            for (int i=0; i<Vsize; i++) V[i]->append( tmp.at(i) );
+    }
+    file.close();
 
-     if (V.at(0)->isEmpty()) return QString("Wrong format - nothing was read from: ")+FileName;
+    if (V.first()->isEmpty()) return QString("File %1 has invalid format").arg(FileName);
 
     return "";
 }

@@ -1854,6 +1854,7 @@ in basket</string>
    <addaction name="menuView"/>
    <addaction name="menuPalette"/>
   </widget>
+  <widget class="QStatusBar" name="statusBar"/>
   <action name="actionSave_image">
    <property name="text">
     <string>Save image</string>

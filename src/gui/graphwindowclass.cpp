@@ -84,6 +84,7 @@ GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
     ui->swToolBox->setVisible(false);
     ui->swToolBox->setCurrentIndex(0);
     ui->sProjBins->setEnabled(false);
+    ui->statusBar->showMessage("Use context menu in \"Currently drawn\" and \"Basket\" to manipulate the objects");
 
     //window flags
     Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);

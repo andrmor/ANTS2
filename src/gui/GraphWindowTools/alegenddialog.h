@@ -26,7 +26,7 @@ public:
     TObject * TObj = nullptr;  // nullptr -> plain text, no connected object
     QString   Options;
 
-    bool      bAttributeOverride = false;
+    bool      bAttributeOverride = false;   // if set, change of default text style wuill not affect this object
     int       TextColor = 1;
     int       TextAlign = 12;
     int       TextFont  = 42;

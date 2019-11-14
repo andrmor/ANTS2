@@ -101,14 +101,14 @@ void ABasketManager::add(const QString & name, const QVector<ADrawObject> & draw
         TLegend * OldLegend = dynamic_cast<TLegend*>(tobj);
         if (OldLegend)
         {
-            Legend = new TLegend(*OldLegend); // if cloned, Legend has invalid object pointers
+            Legend = new TLegend(*OldLegend); // after cloning Legend has invalid object pointers, so have to use copy constructor
             clone = Legend;
         }
         else
         {
             clone = tobj->Clone();
             OldToNew[drObj.Pointer] = clone;
-            qDebug() << "to Basket, old-->cloned" << drObj.Pointer << "-->" << clone;
+            //qDebug() << "to Basket, old-->cloned" << drObj.Pointer << "-->" << clone;
         }
 
         item.DrawObjects.append( ADrawObject(clone, options) );
@@ -120,11 +120,6 @@ void ABasketManager::add(const QString & name, const QVector<ADrawObject> & draw
         int num = elist->GetEntries();
         for (int ie = 0; ie < num; ie++)
         {
-            //ATLegendEntry * en = static_cast<ATLegendEntry*>( (*elist).At(ie));
-            //qDebug() << "Old entry obj:"<< en->GetObject() << " found?" << OldToNew[ en->GetObject() ];
-            //en->SetObject( OldToNew[ en->GetObject() ] );
-            //qDebug() << "   set:"<< en->GetObject();
-
             TLegendEntry * en = static_cast<TLegendEntry*>( (*elist).At(ie) );
             const QString text = en->GetLabel();
             //qDebug() << "Old entry obj:"<< en->GetObject() << " found?" << OldToNew[ en->GetObject() ];
@@ -168,7 +163,7 @@ const QVector<ADrawObject> ABasketManager::getCopy(int index) const
             {
                 clone = obj.Pointer->Clone();
                 OldToNew[obj.Pointer] = clone;
-                qDebug() << "From basket, old-->cloned" << obj.Pointer << "-->" << clone;
+                //qDebug() << "From basket, old-->cloned" << obj.Pointer << "-->" << clone;
             }
 
             res << ADrawObject(clone, obj.Options);
@@ -180,10 +175,6 @@ const QVector<ADrawObject> ABasketManager::getCopy(int index) const
             int num = elist->GetEntries();
             for (int ie = 0; ie < num; ie++)
             {
-                //ATLegendEntry * en = static_cast<ATLegendEntry*>( (*elist).At(ie) );
-                //qDebug() << "Old entry obj:"<< en->GetObject() << " found?" << OldToNew[ en->GetObject() ];
-                //en->SetObject( OldToNew[ en->GetObject() ] );
-
                 TLegendEntry * en = static_cast<TLegendEntry*>( (*elist).At(ie) );
                 QString text = en->GetLabel();
                 //qDebug() << "Old entry obj:"<< en->GetObject() << " found?" << OldToNew[ en->GetObject() ];
@@ -309,6 +300,7 @@ void ABasketManager::saveAll(const QString & fileName)
     f.Close();
 
     /*
+    //Old system - files created using it still can be loaded
     QString str;
     TFile f(fileName.toLocal8Bit(), "RECREATE");
 
@@ -368,16 +360,17 @@ const QString ABasketManager::appendBasket(const QString & fileName)
 {
     TFile f(fileName.toLocal8Bit().data());
 
-    int numKeys = f.GetListOfKeys()->GetEntries();
-    qDebug() << "Keys:"<<numKeys;
-    for (int i=0; i<numKeys; i++)
-    {
-        TKey * key = (TKey*)f.GetListOfKeys()->At(i);
-        QString type = key->GetClassName();
-        QString ObjName = key->GetName();
-        QString title = key->GetTitle();
-        qDebug() << title << ObjName << type;
-    }
+    // log block
+//    int numKeys = f.GetListOfKeys()->GetEntries();
+//    qDebug() << "Keys:"<<numKeys;
+//    for (int i=0; i<numKeys; i++)
+//    {
+//        TKey * key = (TKey*)f.GetListOfKeys()->At(i);
+//        QString type = key->GetClassName();
+//        QString ObjName = key->GetName();
+//        QString title = key->GetTitle();
+//        qDebug() << title << ObjName << type;
+//    }
 
     bool ok = true;
     TNamed* desc = (TNamed*)f.Get("BasketDescription_v2");
@@ -394,7 +387,7 @@ const QString ABasketManager::appendBasket(const QString & fileName)
         for (int iBasketItem = 0; iBasketItem < basketSize; iBasketItem++ )
         {
             QJsonObject ItemJson = BasketArray[iBasketItem].toObject();
-            qDebug() << "Item"<<iBasketItem << ItemJson;
+            //qDebug() << "Item"<<iBasketItem << ItemJson;
 
             QString    ItemName  = ItemJson["ItemName"].toString();
             QJsonArray ItemArray = ItemJson["ItemObjects"].toArray();
@@ -430,10 +423,9 @@ const QString ABasketManager::appendBasket(const QString & fileName)
                 }
                 else
                 {
-                    qDebug() << "Not found!";
-                    // *** garbage collection
-                    f.Close();
-                    return QString("Corrupted basket file!").arg(fileName);
+                    TString nm(QString("Corrupted_%1").arg(Name).toLatin1().data());
+                    p = new TNamed(nm , nm);
+                    qWarning() << "Corrupted TKey in basket file" << fileName << " object:" << Name;
                 }
             }
 
@@ -444,20 +436,14 @@ const QString ABasketManager::appendBasket(const QString & fileName)
                 int num = elist->GetEntries();
                 for (int ie = 0; ie < num; ie++)
                 {
-                    //ATLegendEntry * en = static_cast<ATLegendEntry*>( (*elist).At(ie) );
-                    //int iObj = LegendLinks[ie].toInt();
-                    //TObject * p = ( iObj == -1 ? nullptr : drawObjects[iObj].Pointer );
-                    //qDebug() << "Setting entry #" << ie << "to draw object #" << iObj << "with pointer" << p;
-                    //en->SetObject(p); //*** add protection!
-
                     TLegendEntry * en = static_cast<TLegendEntry*>( (*elist).At(ie) );
                     QString text = en->GetLabel();
                     TObject * p = nullptr;
                     int iObj = LegendLinks[ie].toInt();
                     if (iObj >= 0 && iObj < drawObjects.size())
                         p = drawObjects[iObj].Pointer;
-                    en->SetObject(p); // will override the label
-                    en->SetLabel(text.toLatin1().data());
+                    en->SetObject(p);                       // will override the label
+                    en->SetLabel(text.toLatin1().data());   // so restore it
                 }
             }
 

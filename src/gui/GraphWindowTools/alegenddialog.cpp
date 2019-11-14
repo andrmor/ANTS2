@@ -94,7 +94,7 @@ void ALegendDialog::updateModel(TLegend & legend)
 
         if (en->GetTextAlign() == 0)
         {
-            // auto-legend builder makes it like that
+            // auto-legend builder makes it with "wrong" alignment value
             // use automatic values and leave bAttributeOverride=false
         }
         else if (en->GetTextColor() != CurrentModel.DefaultTextColor ||
@@ -258,7 +258,7 @@ void ALegendDialog::onFocusChanged(QWidget *, QWidget * newW)
 
 void ALegendDialog::on_pbCancel_clicked()
 {
-    /*
+    /* //to enable this, implement comparison for ALegendData or wait for Json convertion
     if (OriginalModel != CurrentModel)
     {
         bool bOK = confirm("Cancel all the changes made in the legend?", this);
@@ -538,7 +538,7 @@ void ALegendDialog::on_pbThisEntryTextAttributes_clicked()
     int   align = ( rec.bAttributeOverride ? rec.TextAlign : CurrentModel.DefaultTextAlign );
     int   font  = ( rec.bAttributeOverride ? rec.TextFont  : CurrentModel.DefaultTextFont );
     float size  = ( rec.bAttributeOverride ? rec.TextSize  : CurrentModel.DefaultTextSize );
-    qDebug() << rec.bAttributeOverride << color << align << font << size;
+    //qDebug() << rec.bAttributeOverride << color << align << font << size;
 
     ARootTextConfigurator D(color, align, font, size, this);
     int res = D.exec();

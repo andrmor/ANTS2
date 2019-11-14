@@ -87,7 +87,7 @@ void ARootTextConfigurator::setupAlignmentControls()
 {
     int vert = align % 10;
     int hor  = align / 10.0;
-    qDebug() << align << hor << vert;
+    //qDebug() << align << hor << vert;
     ui->cobHorizontalAlignment->setCurrentIndex(hor-1);
     ui->cobVerticalAlignment->setCurrentIndex(vert-1);
 }

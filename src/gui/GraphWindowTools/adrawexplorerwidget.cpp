@@ -1174,6 +1174,15 @@ void ADrawExplorerWidget::saveAsTxt(ADrawObject &obj, bool fUseBinCenters)
 
 void ADrawExplorerWidget::extract(ADrawObject &obj)
 {
+    if (!obj.Pointer) return;
+
+    QString cType = obj.Pointer->ClassName();
+    if (cType == "TLegend")
+    {
+        message("Unsupported object type", &GraphWindow);
+        return;
+    }
+
     GraphWindow.MakeCopyOfDrawObjects();
     GraphWindow.MakeCopyOfActiveBasketId();
     GraphWindow.ClearBasketActiveId();

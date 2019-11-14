@@ -1304,8 +1304,9 @@ void MainWindow::on_pbTestShowRefrIndex_clicked()
   QVector<double> x;
   x.resize(0);
   for (int i=0; i<WaveNodes; i++) x.append(WaveFrom + WaveStep*i);
-  //ShowGraphWindow();
-  GraphWindow->MakeGraph(&x, &(*MpCollection)[matId]->nWaveBinned, kRed, "Wavelength, nm", "Refractive index");
+  //GraphWindow->MakeGraph(&x, &(*MpCollection)[matId]->nWaveBinned, kRed, "Wavelength, nm", "Refractive index");
+  TGraph * g = GraphWindow->ConstructTGraph(x, (*MpCollection)[matId]->nWaveBinned, "Binned refractive index", "Wavelength, nm", "Refractive index", kRed);
+  GraphWindow->Draw(g, "APL");
 }
 
 void MainWindow::on_pbTestShowAbs_clicked()
@@ -1315,8 +1316,9 @@ void MainWindow::on_pbTestShowAbs_clicked()
   QVector<double> x;
   x.resize(0);
   for (int i=0; i<WaveNodes; i++) x.append(WaveFrom + WaveStep*i);
-  //ShowGraphWindow();
-  GraphWindow->MakeGraph(&x, &(*MpCollection)[matId]->absWaveBinned, kRed, "Wavelength, nm", "Attenuation coefficient, mm-1");
+  //GraphWindow->MakeGraph(&x, &(*MpCollection)[matId]->absWaveBinned, kRed, "Wavelength, nm", "Attenuation coefficient, mm-1");
+  TGraph * g = GraphWindow->ConstructTGraph(x, (*MpCollection)[matId]->absWaveBinned, "Binned absorption coefficient", "Wavelength, nm", "Attenuation coefficient, mm-1", kRed);
+  GraphWindow->Draw(g, "APL");
 }
 
 void MainWindow::on_sbFixedWaveIndexPointSource_valueChanged(int arg1)

@@ -13,8 +13,6 @@
 class MainWindow;
 class RasterWindowGraphClass;
 class TH2;
-class TH1;
-class TH1D;
 class TGraph;
 class TGraph2D;
 class QGraphicsView;
@@ -137,7 +135,7 @@ public:
     void SaveGraph(QString fileName);    
     void EnforceOverlayOff();    
     void ClearDrawObjects_OnShutDown(); //precvents crash on shut down
-    void RegisterTObject(TObject* obj); //ONLY use to register objects which were NOT drawn using Draw method of this window (but root Draw method instead)    
+    void RegisterTObject(TObject* obj);
     void ShowTextPanel(const QString Text, bool bShowFrame=true, int AlignLeftCenterRight=0);
 
     void SetStatPanelVisible(bool flag);
@@ -159,7 +157,6 @@ protected:
     void closeEvent(QCloseEvent *event);
 
 public slots:
-    // if the first object (no "same" option) was drawn without update, call this function after the manual update
     void UpdateControls(); //updates visualisation of the current master graph parameters
     void DoSaveGraph(QString name);
     void AddCurrentToBasket(const QString &name);
@@ -186,11 +183,9 @@ private slots:
 
     void on_pbToolboxDragMode_clicked();
 
-    //selBox
     void selBoxGeometryChanged();
     void selBoxResetGeometry(double halfW, double halfH);
     void selBoxControlsUpdated();
-
     void on_pbSelBoxToCenter_clicked();
     void on_pbSelBoxFGColor_clicked();
     void on_pbSelBoxBGColor_clicked();
@@ -264,30 +259,25 @@ private:
     ABasketListWidget * lwBasket = nullptr;
     int ActiveBasketItem = -1; //-1 - Basket is off; 0+ -> basket loaded, can be updated
     int PreviousActiveBasketItem = -1; //-1 - Basket is off; 0+ -> basket loaded, can be updated
-    void switchToBasket(int index);
 
     QVector<TObject*> tmpTObjects;
-    double TG_X0 = 0;
-    double TG_Y0 = 0;
 
     QGraphicsView* gvOver = 0;
     AToolboxScene* scene = 0;
 
     void doDraw(TObject *obj, const char *opt, bool DoUpdate); //actual drawing, does not have window focussing - done to avoid refocussing issues leading to bugs
 
-    //flags
     bool TMPignore = false; //temporarily forbid updates - need for bulk update to avoid cross-modification
     bool ColdStart = true;
-    bool fFirstTime = false; //signals that "UnZoom" range values (xmin0, etc...) have to be stored
 
     double xmin, xmax, ymin, ymax, zmin, zmax;
-    //double xmin0, xmax0, ymin0, ymax0, zmin0, zmax0; //start values - filled on first draw, can be used to reset view with "Unzoom"
 
     void clearTmpTObjects();   //enable qDebugs inside for diagnostics of cleanup!
 
     void changeOverlayMode(bool bOn);
-    void UpdateBasketGUI();    
 
+    void switchToBasket(int index);
+    void UpdateBasketGUI();    
     void Basket_DrawOnTop(int row);
 
     void ShowProjection(QString type);

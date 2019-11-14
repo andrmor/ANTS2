@@ -1053,15 +1053,16 @@ bool ALrfWindow::doLrfRadialProfile(QVector<double> &radius, QVector<double> &LR
   return true;
 }
 
+#include "TGraph.h"
 void ALrfWindow::on_pbShowRadialForXY_clicked()
 {
   QVector<double> Rad, LRF;
   if(!doLrfRadialProfile(Rad, LRF)) return;
 
-  mw->GraphWindow->ShowAndFocus();
-  TString str = "LRF of pm#";
-  str += sbPM->value();
-  mw->GraphWindow->MakeGraph(&Rad, &LRF, 4, "Radial distance, mm", "LRF", 6, 1, 0, 0, "");
+  QString str = QString("LRF of pm #%1").arg(sbPM->value());
+  //mw->GraphWindow->MakeGraph(&Rad, &LRF, 4, "Radial distance, mm", "LRF", 6, 1, 0, 0, "");
+  TGraph * g = mw->GraphWindow->ConstructTGraph(Rad, LRF, str, "Radial distance, mm", "LRF", 4, 6, 1, 0, 0, 0);
+  mw->GraphWindow->Draw(g, "AP");
 }
 
 void ALrfWindow::on_pbExportLrfVsRadial_clicked()

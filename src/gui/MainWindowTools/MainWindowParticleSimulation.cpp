@@ -811,7 +811,7 @@ void MainWindow::on_pbParticleGenerationScript_clicked()
     AScriptWindow* sw = new AScriptWindow(sm, true, this);
     sw->EnableAcceptReject();
 
-    AParticleGenerator_SI* gen = new AParticleGenerator_SI(*Detector->MpCollection, Detector->RandGen);
+    AParticleGenerator_SI* gen = new AParticleGenerator_SI(*Detector->MpCollection, Detector->RandGen, 0);
     QVector<AParticleRecord*> GP;
     gen->configure(&GP);
     gen->setObjectName("gen");

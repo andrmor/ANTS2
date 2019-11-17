@@ -45,6 +45,7 @@ public:
     QString LibPMtypes;
     QString LibParticleSources;
     QString LibScripts;
+    QString LibLogs;
 
     int FontSize = 8;
     int TextLogPrecision = 4;

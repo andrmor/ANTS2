@@ -4720,13 +4720,17 @@ void MainWindow::on_pbOpenLogOptions_clicked()
 {
     ALogConfigDialog* d = new ALogConfigDialog(SimulationManager->LogsStatOptions, this);
     d->exec();
-    delete d;
+    if (d->bRequestShowSettings)
+    {
+        GlobSetWindow->SetTab(0);
+        GlobSetWindow->show();
+    }
     on_pbUpdateSimConfig_clicked();
+
+    delete d;
 }
 
 void MainWindow::on_pbOpenLogOptions2_clicked()
 {
-    ALogConfigDialog* d = new ALogConfigDialog(SimulationManager->LogsStatOptions, this);
-    d->exec();
-    on_pbUpdateSimConfig_clicked();
+    on_pbOpenLogOptions_clicked();
 }

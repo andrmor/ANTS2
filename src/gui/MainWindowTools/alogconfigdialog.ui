@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>477</width>
-    <height>207</height>
+    <width>492</width>
+    <height>244</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,39 +15,99 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="label_2">
-     <property name="text">
-      <string>Activate collection of the following logs and statistics:</string>
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <property name="topMargin">
+      <number>0</number>
      </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="Line" name="line_2">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QCheckBox" name="cbParticleTransport">
-       <property name="text">
-        <string>Particle transport log</string>
-       </property>
-      </widget>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QCheckBox" name="cbParticleTransport">
+         <property name="text">
+          <string>Collect particle transport log</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Potentially huge memory consumtion!</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item>
-      <widget class="QLabel" name="label">
-       <property name="enabled">
-        <bool>false</bool>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <property name="topMargin">
+        <number>0</number>
        </property>
-       <property name="text">
-        <string>Potentially huge memory consumtion!</string>
-       </property>
-      </widget>
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Minimum</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="cbSaveParticleLog">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Save log</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pbDirSettings">
+         <property name="text">
+          <string>Settings</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>(Currently only for Geant4 sims)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>60</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="cbSaveDepositionLog">
+     <property name="text">
+      <string>Save deposition log (Currently only for Geant4 sims)</string>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="Line" name="line">
@@ -59,14 +119,14 @@
    <item>
     <widget class="QCheckBox" name="cbDetectionStatistics">
      <property name="text">
-      <string>Statistics on detected photons</string>
+      <string>Collect statistics on detected photons</string>
      </property>
     </widget>
    </item>
    <item>
     <widget class="QCheckBox" name="cbPhotonGeneration">
      <property name="text">
-      <string>Photon generation log</string>
+      <string>Collect photon generation log</string>
      </property>
     </widget>
    </item>
@@ -95,12 +155,28 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>107</x>
-     <y>91</y>
+     <x>117</x>
+     <y>49</y>
     </hint>
     <hint type="destinationlabel">
-     <x>274</x>
-     <y>86</y>
+     <x>481</x>
+     <y>67</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbParticleTransport</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>cbSaveParticleLog</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>73</x>
+     <y>44</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>83</x>
+     <y>105</y>
     </hint>
    </hints>
   </connection>

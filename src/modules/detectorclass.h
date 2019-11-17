@@ -98,6 +98,8 @@ public:
   const QString exportToGDML(const QString &fileName) const; //returns error string, empty if all is fine  
   const QString exportToROOT(const QString& fileName) const;
   
+  void saveCurrentConfig(const QString &fileName);
+
 public slots:
   void onRequestRegisterGeoManager();
 

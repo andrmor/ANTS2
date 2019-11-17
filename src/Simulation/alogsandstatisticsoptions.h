@@ -7,6 +7,8 @@ class ALogsAndStatisticsOptions
 {
 public:
     bool bParticleTransportLog = false;
+        bool bSaveParticleLog = false;
+    bool bSaveDepositionLog = false;
 
     bool bPhotonDetectionStat = false;
     bool bPhotonGenerationLog = false;

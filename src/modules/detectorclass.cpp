@@ -261,6 +261,11 @@ const QString DetectorClass::exportToROOT(const QString& fileName) const
     return "";
 }
 
+void DetectorClass::saveCurrentConfig(const QString & fileName)
+{
+    Config->SaveConfig(fileName);
+}
+
 void DetectorClass::writePMarraysToJson(QJsonObject &json)
 {
   QJsonArray arr;

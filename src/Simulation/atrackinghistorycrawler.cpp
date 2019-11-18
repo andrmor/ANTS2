@@ -736,7 +736,7 @@ void AHistorySearchProcessor_getDepositionStats::onLocalStep(const ATrackingStep
 {
     if (tr.DepositedEnergy == 0) return;
 
-    const double & depo = tr.DepositedEnergy;
+    const float & depo = tr.DepositedEnergy;
 
     if (!bAlreadyFound)
     {
@@ -752,6 +752,24 @@ void AHistorySearchProcessor_getDepositionStats::onLocalStep(const ATrackingStep
 }
 
 void AHistorySearchProcessor_getDepositionStats::onTransitionOut(const ATrackingStepData &tr)
+{
+    onLocalStep(tr);
+}
+
+AHistorySearchProcessor_getDepositionStatsTimeAware::AHistorySearchProcessor_getDepositionStatsTimeAware(float timeFrom, float timeTo) :
+    AHistorySearchProcessor_getDepositionStats(), timeFrom(timeFrom), timeTo(timeTo) {}
+
+void AHistorySearchProcessor_getDepositionStatsTimeAware::onLocalStep(const ATrackingStepData &tr)
+{
+    if (tr.DepositedEnergy == 0) return;
+
+    if (tr.Time < timeFrom) return;
+    if (tr.Time > timeTo)   return;
+
+    AHistorySearchProcessor_getDepositionStats::onLocalStep(tr);
+}
+
+void AHistorySearchProcessor_getDepositionStatsTimeAware::onTransitionOut(const ATrackingStepData &tr)
 {
     onLocalStep(tr);
 }

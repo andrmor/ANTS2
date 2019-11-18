@@ -119,6 +119,19 @@ public:
     QMap<QString, AParticleDepoStat> DepoData;
 };
 
+class AHistorySearchProcessor_getDepositionStatsTimeAware : public AHistorySearchProcessor_getDepositionStats
+{
+public:
+    AHistorySearchProcessor_getDepositionStatsTimeAware(float timeFrom, float timeTo);
+
+    virtual void onLocalStep(const ATrackingStepData & tr) override;
+    virtual void onTransitionOut(const ATrackingStepData & tr) override; // in Geant4 energy loss can happen on transition
+
+private:
+    float timeFrom;
+    float timeTo;
+};
+
 class AHistorySearchProcessor_findTravelledDistances : public AHistorySearchProcessor
 {
 public:

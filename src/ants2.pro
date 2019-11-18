@@ -39,7 +39,7 @@ win32 {
 }
 linux-g++ || unix {
      INCLUDEPATH += $$system(root-config --incdir)
-     LIBS += $$system(root-config --libs) -lGeom -lGeomPainter -lGeomBuilder -lMinuit2 -lSpectrum
+     LIBS += $$system(root-config --libs) -lGeom -lGeomPainter -lGeomBuilder -lMinuit2 -lSpectrum -ltbb
      ants2_RootServer {LIBS += -lRHTTP  -lXMLIO}
 }
 #-----------

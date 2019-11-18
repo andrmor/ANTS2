@@ -65,7 +65,7 @@ OutputWindow::OutputWindow(QWidget *parent, MainWindow *mw, EventsDataClass *eve
 
     QVector<QWidget*> vecInv;
     vecInv << ui->cobPTHistVolPlus << ui->pbRefreshViz << ui->frPTHistX << ui->frPTHistY
-           << ui->pbEventView_ShowTree << ui->pbEVgeo << ui->frEventFilters;
+           << ui->pbEventView_ShowTree << ui->pbEVgeo << ui->frEventFilters << ui->frTimeAware;
     for (QWidget * w : vecInv) w->setVisible(false);
 
     QDoubleValidator* dv = new QDoubleValidator(this);
@@ -1489,15 +1489,24 @@ void OutputWindow::on_pbPTHistRequest_clicked()
           }
         case 4:
          {
-            AHistorySearchProcessor_getDepositionStats p;
-            Crawler.find(Opt, p);
+            AHistorySearchProcessor_getDepositionStats * p = nullptr;
+            if (ui->cbLimitTimeWindow->isChecked())
+            {
+                p = new AHistorySearchProcessor_getDepositionStatsTimeAware(ui->ledTimeFrom->text().toFloat(), ui->ledTimeTo->text().toFloat());
+                Crawler.find(Opt, *p);
+            }
+            else
+            {
+                p = new AHistorySearchProcessor_getDepositionStats();
+                Crawler.find(Opt, *p);
+            }
 
             ui->ptePTHist->clear();
             ui->ptePTHist->appendPlainText("Deposition statistics:\n");
-            QMap<QString, AParticleDepoStat>::const_iterator it = p.DepoData.constBegin();
+            QMap<QString, AParticleDepoStat>::const_iterator it = p->DepoData.constBegin();
             QVector< QPair<QString, AParticleDepoStat> > vec;
             double sum = 0;
-            while (it != p.DepoData.constEnd())
+            while (it != p->DepoData.constEnd())
             {
                 vec << QPair<QString, AParticleDepoStat>(it.key(), it.value());
                 sum += it.value().sum;
@@ -1520,6 +1529,9 @@ void OutputWindow::on_pbPTHistRequest_clicked()
 
                 ui->ptePTHist->appendPlainText(str);
             }
+            ui->ptePTHist->appendPlainText("\n---------\n");
+            ui->ptePTHist->appendPlainText(QString("sum of all listed depositions: %1 keV").arg(sum));
+            delete p;
             break;
          }
         default:
@@ -1660,6 +1672,8 @@ void OutputWindow::on_cobPTHistVolRequestWhat_currentIndexChanged(int index)
         ui->cobPTHistVolPlus->setCurrentIndex(selectedModeForEnergyDepo);
     }
     ui->cobPTHistVolPlus->setVisible(index == 3);
+
+    ui->frTimeAware->setVisible(index == 4);
 }
 
 void OutputWindow::on_twPTHistType_currentChanged(int index)
@@ -1684,7 +1698,7 @@ void OutputWindow::updatePTHistoryBinControl()
     if (ui->twPTHistType->currentIndex() == 0)
     {
         //Volume
-        ui->frPTHistX->setVisible( ui->cobPTHistVolRequestWhat->currentIndex() > 1 );
+        ui->frPTHistX->setVisible( ui->cobPTHistVolRequestWhat->currentIndex() > 1  && ui->cobPTHistVolRequestWhat->currentIndex() != 4);
         ui->frPTHistY->setVisible(false);
     }
     else

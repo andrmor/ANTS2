@@ -476,6 +476,26 @@ QVariantList APTHistory_SI::findDepositedEnergyStats()
     return vl;
 }
 
+QVariantList APTHistory_SI::findDepositedEnergyStats(double timeFrom, double timeTo)
+{
+    AHistorySearchProcessor_getDepositionStatsTimeAware p(timeFrom, timeTo);
+    Crawler->find(*Criteria, p);
+
+    QVariantList vl;
+    QMap<QString, AParticleDepoStat>::const_iterator it = p.DepoData.constBegin();
+    while (it != p.DepoData.constEnd())
+    {
+        QVariantList el;
+        const AParticleDepoStat & rec = it.value();
+        const double mean = rec.sum / rec.num;
+        const double sigma = sqrt( (rec.sumOfSquares - 2.0*mean*rec.sum)/rec.num + mean*mean );
+        el << it.key() << rec.num << mean << sigma;
+        vl.push_back(el);
+        ++it;
+    }
+    return vl;
+}
+
 QVariantList APTHistory_SI::findTravelledDistances(int bins, double from, double to)
 {
     AHistorySearchProcessor_findTravelledDistances p(bins, from, to);

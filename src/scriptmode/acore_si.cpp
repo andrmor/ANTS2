@@ -462,6 +462,95 @@ QVariant ACore_SI::loadArray(QString fileName)
     return vl;
 }
 
+enum AArrayFormatEnum {StringFormat, IntFormat, DoubleFormat};
+
+QVariantList ACore_SI::loadArrayExtended(const QString & fileName, const QVariantList & format, bool bSkipComments, int fromLine, int toLine)
+{
+    QVariantList vl;
+
+    QVector<AArrayFormatEnum> Format;
+
+    int numEl = format.size();
+    bool bErr = (numEl==0);
+    for (int i=0; i<format.size(); i++)
+    {
+        QString f = format.at(i).toString();
+        AArrayFormatEnum   Option;
+        if      (f == "s") Option = StringFormat;
+        else if (f == "i") Option = IntFormat;
+        else if (f == "d") Option = DoubleFormat;
+        else
+        {
+            bErr = true;
+            break;
+        }
+        Format << Option;
+    }
+    if (bErr)
+    {
+        abort("'format' parameter should be an array of 's', 'i' or 'd' markers (string, int and double, respectively)");
+        return vl;
+    }
+
+    if (!QFileInfo(fileName).exists())
+    {
+        abort("File does not exist: " + fileName);
+        return vl;
+    }
+
+    QFile file(fileName);
+    if(!file.open(QIODevice::ReadOnly | QFile::Text))
+    {
+        abort("Cannot open file: "+fileName);
+        return vl;
+    }
+
+    QTextStream in(&file);
+    QRegularExpression rx("(\\ |\\,|\\:|\\t)"); //separators: ' ' or ',' or ':' or '\t'
+
+    int iLine = 0;
+    while(!in.atEnd())
+    {
+        QString line = in.readLine();
+        if (iLine < fromLine) continue;
+        if (iLine > toLine)   break;
+
+        QStringList fields = line.split(rx, QString::SkipEmptyParts);
+        if (bSkipComments)
+        {
+            if (fields.isEmpty()) continue;
+            const QString & first = fields.first();
+            if (first.startsWith('#') || first.startsWith("//")) continue;
+        }
+
+        if (fields.size() < numEl) continue;
+
+        QVariantList el;
+
+        for (int i=0; i<fields.size(); i++)
+        {
+            const QString & txt = fields.at(i);
+
+            switch (Format.at(i))
+            {
+            case StringFormat:
+                el.push_back(txt);
+                break;
+            case IntFormat:
+                el.push_back(txt.toInt());
+                break;
+            case DoubleFormat:
+                el.push_back(txt.toDouble());
+                break;
+            }
+        }
+        vl.push_back(el);
+    }
+
+    file.close();
+    return vl;
+}
+
 QString ACore_SI::loadText(QString fileName)
 {
   if (!QFileInfo(fileName).exists())

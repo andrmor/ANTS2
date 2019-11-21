@@ -219,12 +219,17 @@ void AInterfaceToHist::Smooth(const QString &HistName, int times)
 
 void AInterfaceToHist::ApplyMedianFilter(const QString &HistName, int span)
 {
+    ApplyMedianFilter(HistName, span, -1);
+}
+
+void AInterfaceToHist::ApplyMedianFilter(const QString &HistName, int spanLeft, int spanRight)
+{
     ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
     if (!r)
         abort("Histogram " + HistName + " not found!");
     else
     {
-        bool bOK = r->MedianFilter(span);
+        bool bOK = r->MedianFilter(spanLeft, spanRight);
         if (!bOK) abort("Failed - Median filter is currently implemented only for 1D histograms (TH1)");
     }
 }
@@ -1064,6 +1069,24 @@ void AInterfaceToGraph::SetYRange(const QString &GraphName, double min, double m
         abort("Graph "+GraphName+" not found!");
     else
         r->SetYRange(min, max);
+}
+
+void AInterfaceToGraph::SetMinimum(const QString &GraphName, double min)
+{
+    ARootGraphRecord* r = dynamic_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
+    if (!r)
+        abort("Graph "+GraphName+" not found!");
+    else
+        r->SetMinimum(min);
+}
+
+void AInterfaceToGraph::SetMaximum(const QString &GraphName, double max)
+{
+    ARootGraphRecord* r = dynamic_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
+    if (!r)
+        abort("Graph "+GraphName+" not found!");
+    else
+        r->SetMaximum(max);
 }
 
 void AInterfaceToGraph::SetXRange(const QString &GraphName, double min, double max)

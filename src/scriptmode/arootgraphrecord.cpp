@@ -160,6 +160,30 @@ void ARootGraphRecord::SetYRange(double min, double max)
     }
 }
 
+void ARootGraphRecord::SetMinimum(double min)
+{
+    QMutexLocker locker(&Mutex);
+
+    if (Type == "TGraph")
+    {
+        TGraph* g = dynamic_cast<TGraph*>(Object);
+        if (g)
+            g->SetMinimum(min);
+    }
+}
+
+void ARootGraphRecord::SetMaximum(double max)
+{
+    QMutexLocker locker(&Mutex);
+
+    if (Type == "TGraph")
+    {
+        TGraph* g = dynamic_cast<TGraph*>(Object);
+        if (g)
+            g->SetMaximum(max);
+    }
+}
+
 void ARootGraphRecord::SetXRange(double min, double max)
 {
     QMutexLocker locker(&Mutex);

@@ -55,6 +55,11 @@ ACore_SI::ACore_SI(AScriptManager* ScriptManager) :
   H["getFitted"] = "Used with setCurveFitter. Extracts the fitted value of y for x";
   H["getFittedArr"] = "Used with setCurveFitter. Extracts the fitted values of y for an array of x";
 
+  H["loadArrayExtended"] = "Load array of arrays from file, with inner array read according to format options:\n"
+          "'d'-double, 'i'-integer, 's'-string, ''-skip field: e.g. loadArrayExtended('fn.txt', ['d', 'd'])\n"
+          "bSkipComments parameters signals to skip lines starting with '#' or '//'"
+          "you can specify lin numbers to start from and to: by default it is set to 0 and 1e6";
+
   //DepRem["isFileExists"] = "Deprecated. Use file.isFileExists method";
   DepRem["str"] = "Deprecated. Use .toFixed(n) javaScript method. E.g.: 'var i=123.456; i.toFixed(2)'";
 }
@@ -462,33 +467,59 @@ QVariant ACore_SI::loadArray(QString fileName)
     return vl;
 }
 
-enum AArrayFormatEnum {StringFormat, IntFormat, DoubleFormat};
+enum AArrayFormatEnum {StringFormat, IntFormat, DoubleFormat, SkipFormat};
 
-QVariantList ACore_SI::loadArrayExtended(const QString & fileName, const QVariantList & format, bool bSkipComments, int fromLine, int toLine)
+bool readFormat(const QVariantList & format, QVector<AArrayFormatEnum> & FormatSelector)
 {
-    QVariantList vl;
+    const int numEl = format.size();
+    if (numEl == 0) return false;
 
-    QVector<AArrayFormatEnum> Format;
-
-    int numEl = format.size();
-    bool bErr = (numEl==0);
     for (int i=0; i<format.size(); i++)
     {
-        QString f = format.at(i).toString();
+        const QString f = format.at(i).toString();
         AArrayFormatEnum   Option;
         if      (f == "s") Option = StringFormat;
         else if (f == "i") Option = IntFormat;
         else if (f == "d") Option = DoubleFormat;
-        else
-        {
-            bErr = true;
-            break;
-        }
-        Format << Option;
+        else if (f == "")  Option = SkipFormat;
+        else return false;
+        FormatSelector << Option;
     }
-    if (bErr)
+    return true;
+}
+
+void readFormattedLine(const QStringList & fields, const QVector<AArrayFormatEnum> & FormatSelector, QVariantList & el)
+{
+    for (int i=0; i<fields.size(); i++)
     {
-        abort("'format' parameter should be an array of 's', 'i' or 'd' markers (string, int and double, respectively)");
+        const QString & txt = fields.at(i);
+
+        switch (FormatSelector.at(i))
+        {
+        case StringFormat:
+            el.push_back(txt);
+            break;
+        case IntFormat:
+            el.push_back(txt.toInt());
+            break;
+        case DoubleFormat:
+            el.push_back(txt.toDouble());
+            break;
+        case SkipFormat:
+            continue;
+        }
+    }
+}
+
+QVariantList ACore_SI::loadArrayExtended(const QString & fileName, const QVariantList & format, int fromLine, int untilLine, bool bSkipComments)
+{
+    QVariantList vl;
+
+    QVector<AArrayFormatEnum> FormatSelector;
+    bool bFormatOK = readFormat(format, FormatSelector);
+    if (!bFormatOK)
+    {
+        abort("'format' parameter should be an array of 's', 'i', 'd' or '' markers (string, int, double and skip_field, respectively)");
         return vl;
     }
 
@@ -508,17 +539,20 @@ QVariantList ACore_SI::loadArrayExtended(const QString & fileName, const QVarian
     QTextStream in(&file);
     QRegularExpression rx("(\\ |\\,|\\:|\\t)"); //separators: ' ' or ',' or ':' or '\t'
 
-    int iLine = 0;
+    const int numEl = FormatSelector.size();
+    int iLine = -1;
     while(!in.atEnd())
     {
+        iLine++;
+        if (iLine >= untilLine) break;
+
         QString line = in.readLine();
         if (iLine < fromLine) continue;
-        if (iLine > toLine)   break;
 
         QStringList fields = line.split(rx, QString::SkipEmptyParts);
+        if (fields.isEmpty()) continue;
         if (bSkipComments)
         {
-            if (fields.isEmpty()) continue;
             const QString & first = fields.first();
             if (first.startsWith('#') || first.startsWith("//")) continue;
         }
@@ -526,29 +560,97 @@ QVariantList ACore_SI::loadArrayExtended(const QString & fileName, const QVarian
         if (fields.size() < numEl) continue;
 
         QVariantList el;
-
-        for (int i=0; i<fields.size(); i++)
-        {
-            const QString & txt = fields.at(i);
-
-            switch (Format.at(i))
-            {
-            case StringFormat:
-                el.push_back(txt);
-                break;
-            case IntFormat:
-                el.push_back(txt.toInt());
-                break;
-            case DoubleFormat:
-                el.push_back(txt.toDouble());
-                break;
-            }
-        }
+        readFormattedLine(fields, FormatSelector, el);
         vl.push_back(el);
     }
 
     file.close();
     return vl;
+}
+
+QVariantList ACore_SI::loadArrayExtended3D(const QString &fileName, const QString &topSeparator, const QVariantList &format, int recordsFrom, int recordsUntil, bool bSkipComments)
+{
+    QVariantList vl1;
+
+    QVector<AArrayFormatEnum> FormatSelector;
+    bool bFormatOK = readFormat(format, FormatSelector);
+    if (!bFormatOK)
+    {
+        abort("'format' parameter should be an array of 's', 'i', 'd' or '' markers (string, int, double and skip_field, respectively)");
+        return vl1;
+    }
+
+    if (!QFileInfo(fileName).exists())
+    {
+        abort("File does not exist: " + fileName);
+        return vl1;
+    }
+
+    QFile file(fileName);
+    if(!file.open(QIODevice::ReadOnly | QFile::Text))
+    {
+        abort("Cannot open file: "+fileName);
+        return vl1;
+    }
+
+    QTextStream in(&file);
+    QRegularExpression rx("(\\ |\\,|\\:|\\t)"); //separators: ' ' or ',' or ':' or '\t'
+
+    const int numEl = FormatSelector.size();
+    int iLine = -1;
+    int iEvent = -1;
+    bool bOnStart = true;
+    bool bSkippingRecords = true;
+    QVariantList vl2;
+    while(!in.atEnd())
+    {
+        iLine++;
+        QString line = in.readLine();
+
+        QStringList fields = line.split(rx, QString::SkipEmptyParts);
+        if (fields.isEmpty()) continue;
+
+        const QString & first = fields.first();
+        if (first.startsWith(topSeparator))
+        {
+            //new events
+            iEvent++;
+            if (iEvent < recordsFrom)
+                continue;         // still skipping events
+            else
+                bSkippingRecords = false;
+
+            if (bOnStart)
+                bOnStart = false; //buffer is invalid
+            else                  //else save buffer
+            {
+                vl1.push_back(vl2);
+                vl2.clear();
+            }
+
+            if (iEvent >= recordsUntil)
+                return vl1;
+
+            continue;
+        }
+
+        if (bSkippingRecords) continue;
+
+        if (bSkipComments)
+        {
+            if (first.startsWith('#') || first.startsWith("//")) continue;
+        }
+
+        if (fields.size() < numEl) continue;
+
+        QVariantList el3;
+        readFormattedLine(fields, FormatSelector, el3);
+        vl2.push_back(el3);
+    }
+    vl1.push_back(vl2);
+
+    file.close();
+    return vl1;
 }
 
 QString ACore_SI::loadText(QString fileName)

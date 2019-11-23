@@ -421,7 +421,8 @@ SOURCES += main.cpp \
     gui/GraphWindowTools/alegenddialog.cpp \
     gui/MainWindowTools/aroottextconfigurator.cpp \
     gui/aproxystyle.cpp \
-    gui/GraphWindowTools/aaxesdialog.cpp
+    gui/GraphWindowTools/aaxesdialog.cpp \
+    gui/GraphWindowTools/atextpavedialog.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -585,7 +586,8 @@ HEADERS  += common/CorrelationFilters.h \
     gui/GraphWindowTools/alegenddialog.h \
     gui/MainWindowTools/aroottextconfigurator.h \
     gui/aproxystyle.h \
-    gui/GraphWindowTools/aaxesdialog.h
+    gui/GraphWindowTools/aaxesdialog.h \
+    gui/GraphWindowTools/atextpavedialog.h
 
 # --- SIM ---
 ants2_SIM {
@@ -940,5 +942,6 @@ FORMS += \
     gui/MainWindowTools/alogconfigdialog.ui \
     gui/GraphWindowTools/alegenddialog.ui \
     gui/MainWindowTools/aroottextconfigurator.ui \
-    gui/GraphWindowTools/aaxesdialog.ui
+    gui/GraphWindowTools/aaxesdialog.ui \
+    gui/GraphWindowTools/atextpavedialog.ui
 

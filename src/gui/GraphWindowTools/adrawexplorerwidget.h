@@ -6,6 +6,7 @@
 #include <QTreeWidget>
 
 class GraphWindowClass;
+class QTreeWidgetItem;
 class TObject;
 class TH2;
 
@@ -19,8 +20,11 @@ public:
 
     TH2 * getObjectForCustomProjection() {return objForCustomProjection;}
 
+    void activateCustomGuiForItem(int index);
+
 private slots:
     void onContextMenuRequested(const QPoint & pos);
+    void onItemDoubleClicked(QTreeWidgetItem *item, int column);
 
 private:
     GraphWindowClass & GraphWindow;
@@ -51,9 +55,13 @@ private:
     void saveRoot(ADrawObject &obj);
     void saveAsTxt(ADrawObject &obj, bool fUseBinCenters);
     void extract(ADrawObject &obj);
+    void editPave(ADrawObject &obj);
 
 private:
     TH2 * objForCustomProjection = nullptr;
+
+signals:
+    void requestShowLegendDialog();
 };
 
 #endif // ADRAWEXPLORERWIDGET_H

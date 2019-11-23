@@ -99,6 +99,7 @@ GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
     ui->layExplorer->insertWidget(1, Explorer);
     ui->splitter->setSizes({200,600});
     ui->pbBackToLast->setVisible(false);
+    connect(Explorer, &ADrawExplorerWidget::requestShowLegendDialog, this, &GraphWindowClass::on_pbAddLegend_clicked);
 
     //init of basket widget
     lwBasket = new ABasketListWidget(this);
@@ -2073,6 +2074,8 @@ void GraphWindowClass::deletePressed()
 void GraphWindowClass::MakeCopyOfDrawObjects()
 {
     PreviousDrawObjects = DrawObjects;
+
+    // without this fix cloning of legend objects is broken
     if (!PreviousDrawObjects.isEmpty())
         qDebug() << "gcc optimizer fix:" << PreviousDrawObjects.first().Pointer;
 }
@@ -2494,6 +2497,9 @@ void GraphWindowClass::on_pbAddLegend_clicked()
 
 void GraphWindowClass::on_pbRemoveLegend_clicked()
 {
+    bool bOK = confirm("Remove legend?", this);
+    if (!bOK) return;
+
     for (int i=0; i<DrawObjects.size(); i++)
     {
         QString cn = DrawObjects[i].Pointer->ClassName();
@@ -2506,38 +2512,10 @@ void GraphWindowClass::on_pbRemoveLegend_clicked()
     }
 }
 
-#include <QComboBox>
 void GraphWindowClass::on_pbAddText_clicked()
 {
-  QDialog D(this);
-  D.setModal(true);
-  QVBoxLayout* l = new QVBoxLayout(&D);
-
-  QLabel* lab = new QLabel("Enter text", &D);
-  l->addWidget(lab);
-
-  QPlainTextEdit* te = new QPlainTextEdit(&D);
-  l->addWidget(te);
-
-  QCheckBox* cbFrame = new QCheckBox("Show frame", &D);
-  l->addWidget(cbFrame);
-  cbFrame->setChecked(true);
-
-  QComboBox* cobAlign = new QComboBox(&D);
-  cobAlign->addItem("Text alignment: Left");
-  cobAlign->addItem("Text alignment: Center");
-  cobAlign->addItem("Text alignment: Right");
-  l->addWidget(cobAlign);
-
-  QPushButton* pb = new QPushButton("Confirm", &D);
-  l->addWidget(pb);
-  connect(pb, SIGNAL(clicked(bool)), &D, SLOT(accept()));
-
-  D.exec();
-  if (D.result() == QDialog::Rejected) return;
-
-  QString Text = te->toPlainText();  
-  if (!Text.isEmpty()) ShowTextPanel(Text, cbFrame->isChecked(), cobAlign->currentIndex());
+    ShowTextPanel("Text", true, 0);
+    Explorer->activateCustomGuiForItem(DrawObjects.size()-1);
 }
 
 void GraphWindowClass::ShowTextPanel(const QString Text, bool bShowFrame, int AlignLeftCenterRight)
@@ -2563,22 +2541,6 @@ void GraphWindowClass::TriggerGlobalBusy(bool flag)
 {
     if (flag) MW->WindowNavigator->BusyOn();
     else      MW->WindowNavigator->BusyOff();
-}
-
-void GraphWindowClass::on_pbRemoveText_clicked()
-{
-    for (int i=0; i<DrawObjects.size(); i++)
-    {
-        QString cn = DrawObjects[i].Pointer->ClassName();
-        //qDebug() << cn;
-        if (cn == "TPaveText")
-        {
-            DrawObjects.remove(i);
-            RedrawAll();
-            return;
-        }
-    }
-    qDebug() << "Text object was not found!";
 }
 
 bool GraphWindowClass::Extraction()

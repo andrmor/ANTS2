@@ -40,6 +40,7 @@ ADrawExplorerWidget::ADrawExplorerWidget(GraphWindowClass & GraphWindow, QVector
     setHeaderHidden(true);
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, &ADrawExplorerWidget::customContextMenuRequested, this, &ADrawExplorerWidget::onContextMenuRequested);
+    connect(this, &ADrawExplorerWidget::itemDoubleClicked, this, &ADrawExplorerWidget::onItemDoubleClicked);
 }
 
 void ADrawExplorerWidget::updateGui()
@@ -94,7 +95,10 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
 
     QMenu Menu;
 
-    QAction * renameA =     Menu.addAction("Rename");    
+    QAction * editTextPave = ( Type == "TPaveText" ? Menu.addAction("Edit") : nullptr );
+    if (editTextPave) Menu.addSeparator();
+
+    QAction * renameA =     Menu.addAction("Rename");
 
     Menu.addSeparator();
 
@@ -192,7 +196,29 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
    else if (si == projCustom)   customProjection(obj);
    else if (si == showFitPanel) fitPanel(obj);
    else if (si == extractA)     extract(obj);
+   else if (si == editTextPave) editPave(obj);
 
+}
+
+void ADrawExplorerWidget::onItemDoubleClicked(QTreeWidgetItem *item, int)
+{
+    if (!item) return;
+    activateCustomGuiForItem(item->text(1).toInt());
+}
+
+void ADrawExplorerWidget::activateCustomGuiForItem(int index)
+{
+    if (index < 0 || index >= DrawObjects.size())
+    {
+        qWarning() << "Invalid model index!";
+        return;
+    }
+
+    ADrawObject & obj = DrawObjects[index];
+    const QString Type = obj.Pointer->ClassName();
+
+    if      (Type == "TLegend")   emit requestShowLegendDialog();
+    else if (Type == "TPaveText") editPave(obj);
 }
 
 void ADrawExplorerWidget::addToDrawObjectsAndRegister(TObject * pointer, const QString & options)
@@ -1197,5 +1223,26 @@ void ADrawExplorerWidget::extract(ADrawObject &obj)
     DrawObjects << thisObj;
 
     GraphWindow.RedrawAll();
+}
+
+#include "TPaveText.h"
+#include "atextpavedialog.h"
+void ADrawExplorerWidget::editPave(ADrawObject &obj)
+{
+    TPaveText * Pave = dynamic_cast<TPaveText*>(obj.Pointer);
+    if (Pave)
+    {
+        GraphWindow.MakeCopyOfDrawObjects();
+
+        TPaveText * PaveCopy = new TPaveText(*Pave);
+        GraphWindow.RegisterTObject(PaveCopy);
+        obj.Pointer = PaveCopy;
+
+        ATextPaveDialog D(*PaveCopy);
+        connect(&D, &ATextPaveDialog::requestRedraw, &GraphWindow, &GraphWindowClass::RedrawAll);
+
+        D.exec();
+        GraphWindow.RedrawAll();
+    }
 }
 

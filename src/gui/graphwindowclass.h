@@ -235,7 +235,6 @@ private slots:
     void on_pbYaveraged_clicked();    
     void on_pbAddText_clicked();
     void on_pbRemoveLegend_clicked();
-    void on_pbRemoveText_clicked();
     void on_ledAngle_customContextMenuRequested(const QPoint &pos);
     void on_actionToggle_toolbar_triggered(bool checked);
     void on_pbBackToLast_clicked();

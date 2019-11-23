@@ -192,7 +192,7 @@
        <item>
         <widget class="QPushButton" name="pbConfigureFrame">
          <property name="text">
-          <string>Frame</string>
+          <string>Configure frame</string>
          </property>
         </widget>
        </item>
@@ -276,6 +276,12 @@
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
         <widget class="QPushButton" name="pbAccept">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>30</height>
+          </size>
+         </property>
          <property name="font">
           <font>
            <weight>75</weight>
@@ -289,6 +295,12 @@
        </item>
        <item>
         <widget class="QPushButton" name="pbCancel">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>30</height>
+          </size>
+         </property>
          <property name="text">
           <string>Cancel changes</string>
          </property>

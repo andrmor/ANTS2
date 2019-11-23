@@ -422,7 +422,9 @@ SOURCES += main.cpp \
     gui/MainWindowTools/aroottextconfigurator.cpp \
     gui/aproxystyle.cpp \
     gui/GraphWindowTools/aaxesdialog.cpp \
-    gui/GraphWindowTools/atextpavedialog.cpp
+    gui/GraphWindowTools/atextpavedialog.cpp \
+    gui/GraphWindowTools/alinemarkerfilldialog.cpp \
+    gui/GraphWindowTools/arootcolorselectordialog.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -587,7 +589,9 @@ HEADERS  += common/CorrelationFilters.h \
     gui/MainWindowTools/aroottextconfigurator.h \
     gui/aproxystyle.h \
     gui/GraphWindowTools/aaxesdialog.h \
-    gui/GraphWindowTools/atextpavedialog.h
+    gui/GraphWindowTools/atextpavedialog.h \
+    gui/GraphWindowTools/alinemarkerfilldialog.h \
+    gui/GraphWindowTools/arootcolorselectordialog.h
 
 # --- SIM ---
 ants2_SIM {
@@ -943,5 +947,7 @@ FORMS += \
     gui/GraphWindowTools/alegenddialog.ui \
     gui/MainWindowTools/aroottextconfigurator.ui \
     gui/GraphWindowTools/aaxesdialog.ui \
-    gui/GraphWindowTools/atextpavedialog.ui
+    gui/GraphWindowTools/atextpavedialog.ui \
+    gui/GraphWindowTools/alinemarkerfilldialog.ui \
+    gui/GraphWindowTools/arootcolorselectordialog.ui
 

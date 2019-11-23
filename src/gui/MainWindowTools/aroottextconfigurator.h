@@ -4,8 +4,6 @@
 #include <QDialog>
 #include <QVector>
 
-class QFrame;
-
 namespace Ui {
 class ARootTextConfigurator;
 }
@@ -39,7 +37,7 @@ protected:
 private slots:
     void PaintColorRow(QPainter *p, int row, int colorBase);
 
-  private slots:
+private slots:
     void updateColorFrame();
     void previewColor();
     void on_pbAccept_clicked();

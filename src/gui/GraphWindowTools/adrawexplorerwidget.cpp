@@ -4,6 +4,7 @@
 #include "amessage.h"
 #include "graphwindowclass.h"
 #include "afiletools.h"
+#include "alinemarkerfilldialog.h"
 
 #ifdef USE_EIGEN
     #include "curvefit.h"
@@ -110,6 +111,7 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
 
     Menu.addSeparator();
 
+    //QAction * setAttrib =   Menu.addAction("Set lattributes");
     QAction * setLineA =    Menu.addAction("Set line attributes");
     QAction * setMarkerA =  Menu.addAction("Set marker attributes");
     QAction * panelA   =    Menu.addAction("Root line/marker panel");
@@ -173,6 +175,7 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
    if      (si == renameA)      rename(obj);
    else if (si == enableA)      toggleEnable(obj);
    else if (si == delA)         remove(index);
+   //else if (si == setAttrib)    setAttributes(obj);
    else if (si == setLineA)     setLine(obj);
    else if (si == setMarkerA)   setMarker(obj);
    else if (si == panelA)       showPanel(obj);
@@ -219,6 +222,7 @@ void ADrawExplorerWidget::activateCustomGuiForItem(int index)
 
     if      (Type == "TLegend")   emit requestShowLegendDialog();
     else if (Type == "TPaveText") editPave(obj);
+    else                          setAttributes(obj);
 }
 
 void ADrawExplorerWidget::addToDrawObjectsAndRegister(TObject * pointer, const QString & options)
@@ -263,6 +267,17 @@ void ADrawExplorerWidget::remove(int index)
         //remove "same" from the options line for the new leading object
         DrawObjects.first().Options.remove("same", Qt::CaseInsensitive);
     }
+
+    GraphWindow.RedrawAll();
+}
+
+void ADrawExplorerWidget::setAttributes(ADrawObject &obj)
+{
+    QString Type = obj.Pointer->ClassName();
+    if (Type == "TLegend") return;
+
+    ALineMarkerFillDialog D(obj.Pointer, this);
+    D.exec();
 
     GraphWindow.RedrawAll();
 }

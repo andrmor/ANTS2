@@ -69,17 +69,14 @@ void ARootTextConfigurator::paintEvent(QPaintEvent *)
 
 void ARootTextConfigurator::mousePressEvent(QMouseEvent *e)
 {
-    //qDebug() << "Selected at:"<<e->x() << e->y();
-
     int row = e->y() / SquareSize;
     int num = e->x() / SquareSize;
 
-    if (row > BaseColors.size()-1) return;
+    if (row >= BaseColors.size()) return;
 
     int color = -9 + num + BaseColors.at(row);
     ui->sbColor->setValue(color);
-    //qDebug() << color << "at row/num:"<<row<<num;
-    ui->sbColor->setValue(color);
+
     updateColorFrame();
 }
 

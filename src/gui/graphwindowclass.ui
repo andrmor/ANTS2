@@ -478,6 +478,9 @@
            <height>20</height>
           </rect>
          </property>
+         <property name="toolTip">
+          <string>Root draw options for the first drawn object</string>
+         </property>
         </widget>
         <widget class="QLabel" name="label_3">
          <property name="geometry">
@@ -489,7 +492,7 @@
           </rect>
          </property>
          <property name="text">
-          <string>Root draw options:</string>
+          <string>Root options:</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>

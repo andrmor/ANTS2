@@ -1,6 +1,7 @@
 #include "alinemarkerfilldialog.h"
 #include "ui_alinemarkerfilldialog.h"
 #include "arootcolorselectordialog.h"
+#include "adrawobject.h"
 
 #include <QDebug>
 
@@ -11,10 +12,11 @@
 #include "TAttMarker.h"
 #include "TAttFill.h"
 
-ALineMarkerFillDialog::ALineMarkerFillDialog(TObject * tobj, QWidget * parent) :
+ALineMarkerFillDialog::ALineMarkerFillDialog(ADrawObject & drawObject, bool bFirstObject, QWidget * parent) :
     QDialog(parent),
     ui(new Ui::ALineMarkerFillDialog),
-    tobj(tobj)
+    DrawObject(drawObject),
+    bFirstObject(bFirstObject)
 {
     ui->setupUi(this);
 
@@ -34,13 +36,13 @@ ALineMarkerFillDialog::ALineMarkerFillDialog(TObject * tobj, QWidget * parent) :
               "26 - triangle","27 - romb","28 - big cross","29 - filled star","30 - star","32 - inverted triangle","33 - filled romb","34 - filled cross"};
     ui->cobMarkerStyle->addItems(Mstyles);
 
-    lineAtt = dynamic_cast<TAttLine*>(tobj);
+    lineAtt = dynamic_cast<TAttLine*>(DrawObject.Pointer);
     if (lineAtt) CopyLineAtt = new TAttLine(*lineAtt);
 
-    markerAtt = dynamic_cast<TAttMarker*>(tobj);
+    markerAtt = dynamic_cast<TAttMarker*>(DrawObject.Pointer);
     if (markerAtt) CopyMarkerAtt = new TAttMarker(*markerAtt);
 
-    fillAtt = dynamic_cast<TAttFill*>(tobj);
+    fillAtt = dynamic_cast<TAttFill*>(DrawObject.Pointer);
     if (fillAtt) CopyFillAtt = new TAttFill(*fillAtt);
 
     updateGui();
@@ -67,6 +69,7 @@ void ALineMarkerFillDialog::onReject()
 
 void ALineMarkerFillDialog::updateGui()
 {
+    ui->leOptions->setText(DrawObject.Options);
     updateLineGui();
     updateMarkerGui();
     updateFillGui();
@@ -192,6 +195,14 @@ void ALineMarkerFillDialog::previewColor(int & color, QFrame * frame)
 
 void ALineMarkerFillDialog::updateObject()
 {
+    QString opt = ui->leOptions->text();
+    if (!bFirstObject && !opt.contains("same", Qt::CaseInsensitive))
+    {
+        opt += "same";
+        ui->leOptions->setText(opt);
+    }
+    DrawObject.Options = opt;
+
     if (lineAtt)
     {
         lineAtt->SetLineWidth(ui->sbLineWidth->value());
@@ -260,4 +271,11 @@ void ALineMarkerFillDialog::on_pbPreview_clicked()
 {
     updateObject();
     emit requestRedraw();
+}
+
+#include <QDesktopServices>
+#include <QUrl>
+void ALineMarkerFillDialog::on_pbOptionsHelp_clicked()
+{
+    QDesktopServices::openUrl(QUrl("https://root.cern/doc/master/classTHistPainter.html"));
 }

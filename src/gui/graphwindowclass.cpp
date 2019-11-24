@@ -519,27 +519,34 @@ void GraphWindowClass::Draw(TObject *obj, const char *options, bool DoUpdate, bo
 
 void GraphWindowClass::DrawWithoutFocus(TObject *obj, const char *options, bool DoUpdate, bool TransferOwnership)
 {
-    const QString opt = options;
+    QString opt = options;
+
+    QString optNoSame = opt.remove("same", Qt::CaseInsensitive).simplified();
+    if (obj && optNoSame.isEmpty())
+    {
+        QString Type = obj->ClassName();
+        if (Type.startsWith("TH1") || Type == "TProfile") opt += "hist";
+        //else if (Type.startsWith("TH2")) opt += "colz";
+    }
 
     if (opt.contains("same", Qt::CaseInsensitive))
     {
         MakeCopyOfDrawObjects();
-        DrawObjects.append(ADrawObject(obj, options));
     }
     else
     {
         //this is new main object
-        clearTmpTObjects(); //delete all TObjects previously drawn
-        ClearCopyOfDrawObjects();
-        ClearCopyOfActiveBasketId();
+        clearTmpTObjects();             //delete all TObjects previously drawn
+        ClearCopyOfDrawObjects();       //"go back" is not possible anymore
+        ClearCopyOfActiveBasketId();    //restore basket current item is not possible anymore
         ActiveBasketItem = -1;
         UpdateBasketGUI();
 
         DrawObjects.clear();
-        DrawObjects.append(ADrawObject(obj, options));
     }
+    DrawObjects.append(ADrawObject(obj, opt));
 
-    doDraw(obj, options, DoUpdate);
+    doDraw(obj, opt.toLatin1().data(), DoUpdate);
 
     if (TransferOwnership) RegisterTObject(obj);
 

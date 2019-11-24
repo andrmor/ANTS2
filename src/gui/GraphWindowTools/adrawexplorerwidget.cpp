@@ -175,7 +175,7 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
    if      (si == renameA)      rename(obj);
    else if (si == enableA)      toggleEnable(obj);
    else if (si == delA)         remove(index);
-   else if (si == setAttrib)    setAttributes(obj);
+   else if (si == setAttrib)    setAttributes(index);
    //else if (si == setLineA)     setLine(obj);
    //else if (si == setMarkerA)   setMarker(obj);
    //else if (si == panelA)       showPanel(obj);
@@ -222,7 +222,7 @@ void ADrawExplorerWidget::activateCustomGuiForItem(int index)
 
     if      (Type == "TLegend")   emit requestShowLegendDialog();
     else if (Type == "TPaveText") editPave(obj);
-    else                          setAttributes(obj);
+    else                          setAttributes(index);
 }
 
 void ADrawExplorerWidget::addToDrawObjectsAndRegister(TObject * pointer, const QString & options)
@@ -271,12 +271,15 @@ void ADrawExplorerWidget::remove(int index)
     GraphWindow.RedrawAll();
 }
 
-void ADrawExplorerWidget::setAttributes(ADrawObject &obj)
+void ADrawExplorerWidget::setAttributes(int index)
 {
+    if (index < 0 || index >= DrawObjects.size()) return;
+
+    ADrawObject & obj = DrawObjects[index];
     QString Type = obj.Pointer->ClassName();
     if (Type == "TLegend") return;
 
-    ALineMarkerFillDialog D(obj.Pointer, this);
+    ALineMarkerFillDialog D(obj, (index == 0), this);
     connect(&D, &ALineMarkerFillDialog::requestRedraw, &GraphWindow, &GraphWindowClass::RedrawAll);
     D.exec();
 

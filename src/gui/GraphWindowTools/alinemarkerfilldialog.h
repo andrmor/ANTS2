@@ -7,7 +7,7 @@ namespace Ui {
 class ALineMarkerFillDialog;
 }
 
-class TObject;
+class ADrawObject;
 class TAttLine;
 class TAttMarker;
 class TAttFill;
@@ -18,7 +18,7 @@ class ALineMarkerFillDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit ALineMarkerFillDialog(TObject * tobj, QWidget *parent = 0);
+    explicit ALineMarkerFillDialog(ADrawObject & drawObject, bool bFirstObject, QWidget *parent = 0);
     ~ALineMarkerFillDialog();
 
 private slots:
@@ -36,9 +36,12 @@ private slots:
     void on_cbFillColorAsLine_clicked(bool checked);
     void on_pbPreview_clicked();
 
+    void on_pbOptionsHelp_clicked();
+
 private:
     Ui::ALineMarkerFillDialog *ui;
-    TObject * tobj = nullptr;
+    ADrawObject & DrawObject;
+    bool bFirstObject = true;
 
     TAttLine   * lineAtt   = nullptr;
     TAttMarker * markerAtt = nullptr;

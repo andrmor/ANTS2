@@ -6,18 +6,133 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>553</width>
-    <height>345</height>
+    <width>538</width>
+    <height>359</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>3</number>
+   </property>
+   <property name="leftMargin">
+    <number>3</number>
+   </property>
+   <property name="topMargin">
+    <number>3</number>
+   </property>
+   <property name="rightMargin">
+    <number>3</number>
+   </property>
+   <property name="bottomMargin">
+    <number>3</number>
+   </property>
    <item>
     <widget class="QPushButton" name="pbUpdateObject">
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>20</height>
+      </size>
+     </property>
      <property name="text">
       <string>UpdateObject</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="frOptions">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>50</height>
+      </size>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_6">
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>95</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_10">
+        <property name="text">
+         <string>Root draw options:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="leOptions">
+        <property name="toolTip">
+         <string>&quot;same&quot; will be automatically added to options for all except the first drawing object</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pbOptionsHelp">
+        <property name="maximumSize">
+         <size>
+          <width>50</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>https://root.cern/doc/master/classTHistPainter.html</string>
+        </property>
+        <property name="text">
+         <string>help</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>95</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <widget class="Line" name="line_4">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
      </property>
     </widget>
    </item>
@@ -148,7 +263,7 @@
          </size>
         </property>
         <property name="text">
-         <string> </string>
+         <string/>
         </property>
        </widget>
       </item>
@@ -531,12 +646,12 @@
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>327</x>
-     <y>96</y>
+     <x>281</x>
+     <y>142</y>
     </hint>
     <hint type="destinationlabel">
-     <x>104</x>
-     <y>27</y>
+     <x>107</x>
+     <y>22</y>
     </hint>
    </hints>
   </connection>
@@ -547,12 +662,12 @@
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>181</x>
-     <y>96</y>
+     <x>129</x>
+     <y>142</y>
     </hint>
     <hint type="destinationlabel">
-     <x>215</x>
-     <y>31</y>
+     <x>218</x>
+     <y>22</y>
     </hint>
    </hints>
   </connection>
@@ -563,8 +678,8 @@
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>122</x>
-     <y>160</y>
+     <x>129</x>
+     <y>220</y>
     </hint>
     <hint type="destinationlabel">
      <x>120</x>
@@ -579,8 +694,8 @@
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>280</x>
-     <y>162</y>
+     <x>281</x>
+     <y>220</y>
     </hint>
     <hint type="destinationlabel">
      <x>293</x>
@@ -595,8 +710,8 @@
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>149</x>
-     <y>271</y>
+     <x>127</x>
+     <y>302</y>
     </hint>
     <hint type="destinationlabel">
      <x>152</x>
@@ -611,12 +726,28 @@
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>274</x>
-     <y>269</y>
+     <x>210</x>
+     <y>302</y>
     </hint>
     <hint type="destinationlabel">
      <x>259</x>
      <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>leOptions</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdateObject</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>323</x>
+     <y>51</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>338</x>
+     <y>7</y>
     </hint>
    </hints>
   </connection>

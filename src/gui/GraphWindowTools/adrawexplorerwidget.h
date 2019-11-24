@@ -36,7 +36,7 @@ private:
     void rename(ADrawObject &obj);
     void toggleEnable(ADrawObject &obj);
     void remove(int index);
-    void setAttributes(ADrawObject &obj);
+    void setAttributes(int index);
     void setMarker(ADrawObject &obj);
     void setLine(ADrawObject &obj);
     void showPanel(ADrawObject &obj);

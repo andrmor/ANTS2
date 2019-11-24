@@ -104,12 +104,22 @@ void ABasketManager::add(const QString & name, const QVector<ADrawObject> & draw
             Legend = new TLegend(*OldLegend); // after cloning Legend has invalid object pointers, so have to use copy constructor
             clone = Legend;
         }
+        else if (type.startsWith("TH2"))
+        {
+            // bug in root? causes crash if options were changed. Going copy constructor way
+            if      (type == "TH2D") clone = new TH2D(*static_cast<TH2D*>(tobj));
+            else if (type == "TH2F") clone = new TH2F(*static_cast<TH2F*>(tobj));
+            else if (type == "TH2I") clone = new TH2I(*static_cast<TH2I*>(tobj));
+            else if (type == "TH2S") clone = new TH2S(*static_cast<TH2S*>(tobj));
+            else if (type == "TH2C") clone = new TH2C(*static_cast<TH2C*>(tobj));
+            else clone = tobj->Clone(); //paranoic
+        }
         else
         {
             clone = tobj->Clone();
-            OldToNew[drObj.Pointer] = clone;
             //qDebug() << "to Basket, old-->cloned" << drObj.Pointer << "-->" << clone;
         }
+        OldToNew[drObj.Pointer] = clone;
 
         item.DrawObjects.append( ADrawObject(clone, options) );
     }

@@ -111,10 +111,10 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
 
     Menu.addSeparator();
 
-    //QAction * setAttrib =   Menu.addAction("Set lattributes");
-    QAction * setLineA =    Menu.addAction("Set line attributes");
-    QAction * setMarkerA =  Menu.addAction("Set marker attributes");
-    QAction * panelA   =    Menu.addAction("Root line/marker panel");
+    QAction * setAttrib =   Menu.addAction("Draw attributes");
+    //QAction * setLineA =    Menu.addAction("Set line attributes");
+    //QAction * setMarkerA =  Menu.addAction("Set marker attributes");
+    //QAction * panelA   =    Menu.addAction("Root line/marker panel");
 
     Menu.addSeparator();
 
@@ -175,10 +175,10 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
    if      (si == renameA)      rename(obj);
    else if (si == enableA)      toggleEnable(obj);
    else if (si == delA)         remove(index);
-   //else if (si == setAttrib)    setAttributes(obj);
-   else if (si == setLineA)     setLine(obj);
-   else if (si == setMarkerA)   setMarker(obj);
-   else if (si == panelA)       showPanel(obj);
+   else if (si == setAttrib)    setAttributes(obj);
+   //else if (si == setLineA)     setLine(obj);
+   //else if (si == setMarkerA)   setMarker(obj);
+   //else if (si == panelA)       showPanel(obj);
    else if (si == scaleA)       scale(obj);
    else if (si == integralA)    drawIntegral(obj);
    else if (si == fractionA)    fraction(obj);
@@ -277,6 +277,7 @@ void ADrawExplorerWidget::setAttributes(ADrawObject &obj)
     if (Type == "TLegend") return;
 
     ALineMarkerFillDialog D(obj.Pointer, this);
+    connect(&D, &ALineMarkerFillDialog::requestRedraw, &GraphWindow, &GraphWindowClass::RedrawAll);
     D.exec();
 
     GraphWindow.RedrawAll();

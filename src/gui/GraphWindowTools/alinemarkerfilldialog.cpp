@@ -9,8 +9,7 @@
 #include "TObject.h"
 #include "TAttLine.h"
 #include "TAttMarker.h"
-
-#include "arootmarkerconfigurator.h"
+#include "TAttFill.h"
 
 ALineMarkerFillDialog::ALineMarkerFillDialog(TObject * tobj, QWidget * parent) :
     QDialog(parent),
@@ -19,40 +18,42 @@ ALineMarkerFillDialog::ALineMarkerFillDialog(TObject * tobj, QWidget * parent) :
 {
     ui->setupUi(this);
 
-    ui->pbUpdateObject->setDefault(true);
+    setWindowTitle("Draw attributes");
+    connect(this, &ALineMarkerFillDialog::rejected, this, &ALineMarkerFillDialog::onReject);
+
+    ui->pbPreview->setDefault(true);
     ui->pbUpdateObject->setVisible(false);
+
+    ui->frFillPattern->setVisible(false);
 
     QStringList Lstyles = {"Straight","Short_dash","Dot","Short_dash dot","Dash dot","Dash 3_dots","Dash","Dash 2_dots","Long_dash","Long_dash dot"};
     ui->cobLineStyle->addItems(Lstyles);
 
     QStringList Mstyles = {"1 - small dot","2 - cross","3 - asterisk","4 - circle","5 - diagonal cross","6 - rhomb dot","7 - square dot","8 - large round dot",
-              "20 - filled circle","21 - filled square","22 - filled triangle","23 - rotated filled triangle","24 - circle","25 - square",
+              "20 - filled circle","21 - filled square","22 - filled triangle","23 - inv filled triangle","24 - circle","25 - square",
               "26 - triangle","27 - romb","28 - big cross","29 - filled star","30 - star","32 - inverted triangle","33 - filled romb","34 - filled cross"};
     ui->cobMarkerStyle->addItems(Mstyles);
 
     lineAtt = dynamic_cast<TAttLine*>(tobj);
-    ui->frLine->setEnabled(lineAtt);
-    if (lineAtt)
-    {
-        updateLineGui();
-        CopyLineAtt = new TAttLine(*lineAtt);
-    }
+    if (lineAtt) CopyLineAtt = new TAttLine(*lineAtt);
 
     markerAtt = dynamic_cast<TAttMarker*>(tobj);
-    ui->frMarker->setEnabled(markerAtt);
-    if (markerAtt)
-    {
-        updateMarkerGui();
-        CopyMarkerAtt = new TAttMarker(*markerAtt);
-    }
+    if (markerAtt) CopyMarkerAtt = new TAttMarker(*markerAtt);
 
-    connect(this, &ALineMarkerFillDialog::rejected, this, &ALineMarkerFillDialog::onReject);
+    fillAtt = dynamic_cast<TAttFill*>(tobj);
+    if (fillAtt) CopyFillAtt = new TAttFill(*fillAtt);
+
+    updateGui();
+
+    if (MarkerColor == LineColor) ui->cbMarkerColorAsLine->setChecked(true);
+    if (FillColor   == LineColor) ui->cbFillColorAsLine->setChecked(true);
 }
 
 ALineMarkerFillDialog::~ALineMarkerFillDialog()
 {
     delete CopyMarkerAtt;
     delete CopyLineAtt;
+    delete CopyFillAtt;
 
     delete ui;
 }
@@ -61,6 +62,14 @@ void ALineMarkerFillDialog::onReject()
 {
     if (CopyLineAtt)   *lineAtt   = *CopyLineAtt;
     if (CopyMarkerAtt) *markerAtt = *CopyMarkerAtt;
+    if (CopyFillAtt)   *fillAtt   = *CopyFillAtt;
+}
+
+void ALineMarkerFillDialog::updateGui()
+{
+    updateLineGui();
+    updateMarkerGui();
+    updateFillGui();
 }
 
 void ALineMarkerFillDialog::on_pbLineColor_clicked()
@@ -70,8 +79,11 @@ void ALineMarkerFillDialog::on_pbLineColor_clicked()
     ARootColorSelectorDialog D(LineColor, this);
     D.exec();
 
+    if (ui->cbMarkerColorAsLine->isChecked()) MarkerColor = LineColor;
+    if (ui->cbFillColorAsLine->isChecked())   FillColor   = LineColor;
+
     on_pbUpdateObject_clicked();
-    updateLineGui();
+    updateGui();
 }
 
 void ALineMarkerFillDialog::on_pbMarkerColor_clicked()
@@ -81,8 +93,23 @@ void ALineMarkerFillDialog::on_pbMarkerColor_clicked()
     ARootColorSelectorDialog D(MarkerColor, this);
     D.exec();
 
+    if (MarkerColor != LineColor) ui->cbMarkerColorAsLine->setChecked(false);
+
     on_pbUpdateObject_clicked();
-    updateMarkerGui();
+    updateGui();
+}
+
+void ALineMarkerFillDialog::on_pbFillColor_clicked()
+{
+    if (!fillAtt) return;
+
+    ARootColorSelectorDialog D(FillColor, this);
+    D.exec();
+
+    if (FillColor != LineColor) ui->cbFillColorAsLine->setChecked(false);
+
+    on_pbUpdateObject_clicked();
+    updateGui();
 }
 
 void ALineMarkerFillDialog::on_pbClose_clicked()
@@ -93,17 +120,20 @@ void ALineMarkerFillDialog::on_pbClose_clicked()
 
 void ALineMarkerFillDialog::updateLineGui()
 {
+    ui->frLine->setEnabled(lineAtt);
     if (!lineAtt) return;
 
     ui->cobLineStyle->setCurrentIndex(lineAtt->GetLineStyle()-1);
-    ui->sbLineWidth->setValue(lineAtt->GetLineWidth());
-    LineColor = lineAtt->GetLineColor();
 
+    ui->sbLineWidth->setValue(lineAtt->GetLineWidth());
+
+    LineColor = lineAtt->GetLineColor();
     previewColor(LineColor, ui->frLineCol);
 }
 
 void ALineMarkerFillDialog::updateMarkerGui()
 {
+    ui->frMarker->setEnabled(markerAtt);
     if (!lineAtt) return;
 
     int Style = markerAtt->GetMarkerStyle();
@@ -117,10 +147,30 @@ void ALineMarkerFillDialog::updateMarkerGui()
     if (Style > 0 && Style <= map.size())
         iStyle = map[Style-1];
     ui->cobMarkerStyle->setCurrentIndex(iStyle - 1);
-    ui->ledMarkerSize->setText( QString::number(markerAtt->GetMarkerSize()) );
-    MarkerColor = markerAtt->GetMarkerColor();
 
+    ui->ledMarkerSize->setText( QString::number(markerAtt->GetMarkerSize()) );
+
+    MarkerColor = markerAtt->GetMarkerColor();
     previewColor(MarkerColor, ui->frMarkerCol);
+}
+
+void ALineMarkerFillDialog::updateFillGui()
+{
+    ui->frFill->setEnabled(fillAtt);
+    if (!fillAtt) return;
+
+    int Style = fillAtt->GetFillStyle();
+    int iCobIndex = 0;
+    if (Style == 1001) iCobIndex = 1;
+    else if (Style > 3000 && Style < 4000)
+    {
+        iCobIndex = 2;
+        ui->sbFillPattern->setValue(Style);
+    }
+    ui->cobFillStyle->setCurrentIndex(iCobIndex);
+
+    FillColor = fillAtt->GetFillColor();
+    previewColor(FillColor, ui->frFillCol);
 }
 
 void ALineMarkerFillDialog::previewColor(int & color, QFrame * frame)
@@ -163,9 +213,51 @@ void ALineMarkerFillDialog::updateObject()
         markerAtt->SetMarkerStyle(Style);
         markerAtt->SetMarkerColor(MarkerColor);
     }
+
+    if (fillAtt)
+    {
+        const int iCobIndex = ui->cobFillStyle->currentIndex();
+        int Style = 0;
+        if (iCobIndex == 1) Style = 1001;
+        else if (iCobIndex == 2) Style = ui->sbFillPattern->value();
+        fillAtt->SetFillStyle(Style);
+        fillAtt->SetFillColor(FillColor);
+    }
 }
 
 void ALineMarkerFillDialog::on_pbUpdateObject_clicked()
 {
     updateObject();
+}
+
+void ALineMarkerFillDialog::on_cobFillStyle_currentIndexChanged(int index)
+{
+    ui->frFillPattern->setVisible(index == 2);
+}
+
+
+void ALineMarkerFillDialog::on_cbMarkerColorAsLine_clicked(bool checked)
+{
+    if (checked)
+    {
+        MarkerColor = LineColor;
+        updateObject();
+        updateGui();
+    }
+}
+
+void ALineMarkerFillDialog::on_cbFillColorAsLine_clicked(bool checked)
+{
+    if (checked)
+    {
+        FillColor = LineColor;
+        updateObject();
+        updateGui();
+    }
+}
+
+void ALineMarkerFillDialog::on_pbPreview_clicked()
+{
+    updateObject();
+    emit requestRedraw();
 }

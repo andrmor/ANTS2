@@ -1045,7 +1045,7 @@ void GraphWindowClass::on_pbUnzoom_clicked()
 
 void GraphWindowClass::on_leOptions_editingFinished()
 {   
-    ui->pbUnzoom->setFocus();
+    //ui->pbUnzoom->setFocus();
     const QString newOptions = ui->leOptions->text();
 
     if (DrawObjects.isEmpty()) return;

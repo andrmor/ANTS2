@@ -521,7 +521,7 @@ void GraphWindowClass::DrawWithoutFocus(TObject *obj, const char *options, bool 
 {
     QString opt = options;
 
-    QString optNoSame = opt.remove("same", Qt::CaseInsensitive).simplified();
+    QString optNoSame = (opt.simplified()).remove("same", Qt::CaseInsensitive);
     if (obj && optNoSame.isEmpty())
     {
         QString Type = obj->ClassName();

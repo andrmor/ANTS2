@@ -467,7 +467,7 @@ QVariant ACore_SI::loadArray(QString fileName)
     return vl;
 }
 
-enum AArrayFormatEnum {StringFormat, IntFormat, DoubleFormat, SkipFormat};
+enum AArrayFormatEnum {StringFormat, IntFormat, DoubleFormat, FloatFormat, CharFormat, SkipFormat};
 
 bool readFormat(const QVariantList & format, QVector<AArrayFormatEnum> & FormatSelector)
 {
@@ -481,6 +481,8 @@ bool readFormat(const QVariantList & format, QVector<AArrayFormatEnum> & FormatS
         if      (f == "s") Option = StringFormat;
         else if (f == "i") Option = IntFormat;
         else if (f == "d") Option = DoubleFormat;
+        else if (f == "f") Option = FloatFormat;
+        else if (f == "c") Option = CharFormat;
         else if (f == "")  Option = SkipFormat;
         else return false;
         FormatSelector << Option;
@@ -490,7 +492,7 @@ bool readFormat(const QVariantList & format, QVector<AArrayFormatEnum> & FormatS
 
 void readFormattedLine(const QStringList & fields, const QVector<AArrayFormatEnum> & FormatSelector, QVariantList & el)
 {
-    for (int i=0; i<fields.size(); i++)
+    for (int i=0; i<FormatSelector.size(); i++)
     {
         const QString & txt = fields.at(i);
 
@@ -504,6 +506,12 @@ void readFormattedLine(const QStringList & fields, const QVector<AArrayFormatEnu
             break;
         case DoubleFormat:
             el.push_back(txt.toDouble());
+            break;
+        case FloatFormat:
+            el.push_back(txt.toFloat());
+            break;
+        case CharFormat:
+            el.push_back(txt.toLatin1().at(0));
             break;
         case SkipFormat:
             continue;
@@ -597,14 +605,12 @@ QVariantList ACore_SI::loadArrayExtended3D(const QString &fileName, const QStrin
     QRegularExpression rx("(\\ |\\,|\\:|\\t)"); //separators: ' ' or ',' or ':' or '\t'
 
     const int numEl = FormatSelector.size();
-    int iLine = -1;
     int iEvent = -1;
     bool bOnStart = true;
     bool bSkippingRecords = true;
     QVariantList vl2;
     while(!in.atEnd())
     {
-        iLine++;
         QString line = in.readLine();
 
         QStringList fields = line.split(rx, QString::SkipEmptyParts);
@@ -650,6 +656,149 @@ QVariantList ACore_SI::loadArrayExtended3D(const QString &fileName, const QStrin
     vl1.push_back(vl2);
 
     file.close();
+    return vl1;
+}
+
+#include <iostream>
+#include <fstream>
+void readFormattedBinaryLine(std::ifstream & inStream, const QVector<AArrayFormatEnum> & FormatSelector, QVariantList & el)
+{
+    for (int i=0; i<FormatSelector.size(); i++)
+    {
+        switch (FormatSelector.at(i))
+        {
+        case StringFormat:
+        {
+            QString str;
+            char ch;
+            while (inStream >> ch)
+            {
+                if (ch == 0x00) break;
+                str += ch;
+            }
+            //qDebug() << "str:"<<str;
+            el.push_back(str);
+            break;
+        }
+        case IntFormat:
+        {
+            int v;
+            inStream.read((char*)&v, sizeof(int));
+            //qDebug() << "int:"<<v;
+            el.push_back(v);
+            break;
+        }
+        case DoubleFormat:
+        {
+            double v;
+            inStream.read((char*)&v, sizeof(double));
+            //qDebug() << "double:"<<v;
+            el.push_back(v);
+            break;
+        }
+        case FloatFormat:
+        {
+            float v;
+            inStream.read((char*)&v, sizeof(float));
+            //qDebug() << "float:"<<v;
+            el.push_back(v);
+            break;
+        }
+        case CharFormat:
+        {
+            char v;
+            inStream >> v;
+            //qDebug() << "char:"<<v;
+            el.push_back(v);
+            break;
+        }
+        case SkipFormat:
+            continue;
+        }
+    }
+}
+
+QVariantList ACore_SI::loadArrayExtended3Dbinary(const QString &fileName, char dataId, const QVariantList &dataFormat, char separatorId, const QVariantList &separatorFormat, int recordsFrom, int recordsUntil)
+{
+    QVariantList vl1;
+
+    QVector<AArrayFormatEnum> DataFormatSelector;
+    bool bFormatOK = readFormat(dataFormat, DataFormatSelector);
+    if (!bFormatOK)
+    {
+        abort("'dataFormat' parameter should be an array of 's', 'i', 'd', 'f', 'c' or '' markers (string, int, double, float, char and skip_field, respectively)");
+        return vl1;
+    }
+    QVector<AArrayFormatEnum> SeparatorFormatSelector;
+    bFormatOK = readFormat(separatorFormat, SeparatorFormatSelector);
+    if (!bFormatOK)
+    {
+        abort("'separatorFormat' parameter should be an array of 's', 'i', 'd', 'f', 'c' or '' markers (string, int, double, float, char and skip_field, respectively)");
+        return vl1;
+    }
+
+    if (!QFileInfo(fileName).exists())
+    {
+        abort("File does not exist: " + fileName);
+        return vl1;
+    }
+
+    std::ifstream inStream(fileName.toLatin1().data(), std::ios::in | std::ios::binary);
+    if (!inStream.is_open())
+    {
+        abort("Cannot open input file: " + fileName);
+        return vl1;
+    }
+
+    int iEvent = -1;
+    bool bOnStart = true;
+    bool bSkippingRecords = true;
+    QVariantList vl2;
+    char ch;
+    while (inStream >> ch)
+    {
+        if (ch == separatorId)
+        {
+            //new top separator
+            QVariantList dummy;
+            //qDebug() << "This is separator";
+            readFormattedBinaryLine(inStream, SeparatorFormatSelector, dummy);
+
+            iEvent++;
+            if (iEvent < recordsFrom)
+                continue;         // still skipping events
+            else
+                bSkippingRecords = false;
+
+            if (bOnStart)
+                bOnStart = false; //buffer is invalid
+            else                  //else save buffer
+            {
+                vl1.push_back(vl2);
+                vl2.clear();
+            }
+
+            if (iEvent >= recordsUntil)
+                return vl1;
+        }
+        else if (ch == dataId)
+        {
+            //qDebug() << "This is data line";
+            QVariantList el3;
+            readFormattedBinaryLine(inStream, DataFormatSelector, el3);
+
+            if (!bSkippingRecords) vl2.push_back(el3);
+        }
+        else
+        {
+            qDebug() << "Format error: got leading char:" << ch;
+            abort("Format error!");
+            return vl1;
+        }
+    }
+    vl1.push_back(vl2);
+
+    inStream.close();
     return vl1;
 }
 

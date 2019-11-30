@@ -1345,12 +1345,14 @@ void MainWindow::on_sbFixedWaveIndexPointSource_valueChanged(int arg1)
 
 void MainWindow::on_pbShowPDE_clicked()
 {
-   int typ = ui->sbPMtype->value();
-   //ShowGraphWindow();
-   if (ui->cobPMdeviceType->currentIndex() == 0)
-     GraphWindow->MakeGraph(&PMs->getType(typ)->PDE_lambda, &PMs->getType(typ)->PDE, kRed, "Wavelength, nm", "Quantum Efficiency");
-   else
-     GraphWindow->MakeGraph(&PMs->getType(typ)->PDE_lambda, &PMs->getType(typ)->PDE, kRed, "Wavelength, nm", "Photon Detection Efficiency");
+    int iType = ui->sbPMtype->value();
+    if (iType < 0 || iType >= PMs->countPMtypes()) return;
+
+    const APmType * pmType = PMs->getType(iType);
+    TGraph * g = GraphWindow->ConstructTGraph(pmType->PDE_lambda, pmType->PDE, "", "Wavelength, nm",
+                                              (pmType->SiPM ? "Photon Detection Efficiency" : "Quantum Efficiency"),
+                                              kRed, 20, 1, kRed);
+    GraphWindow->Draw(g, "APL");
 }
 
 void MainWindow::on_pbLoadPDE_clicked()
@@ -1416,20 +1418,22 @@ void MainWindow::on_pbScalePDE_clicked()
 
 void MainWindow::on_pbShowPDEbinned_clicked()
 {
-  if (!ui->cbWaveResolved->isChecked())
-    {      
-      message("Activate wavelength resolved simulation option", this);
-      return;
-    }
+    int iType = ui->sbPMtype->value();
+    if (iType < 0 || iType >= PMs->countPMtypes()) return;
 
-  const int itype = ui->sbPMtype->value();
-  //PMs->RebinPDEsForType(itype);
+    if (!ui->cbWaveResolved->isChecked())
+      {
+        message("Activate wavelength resolved simulation option", this);
+        return;
+      }
 
-  QVector<double> x;
-  for (int i = 0; i < WaveNodes; i++)
-      x.append(WaveFrom + WaveStep * i);
+    const APmType * pmType = PMs->getType(iType);
 
-  GraphWindow->MakeGraph(&x, &PMs->getType(itype)->PDEbinned, kRed, "Wavelength, nm", "PDE");
+    QVector<double> x;
+    for (int i = 0; i < WaveNodes; i++)
+        x.append(WaveFrom + WaveStep * i);
+    TGraph * g = GraphWindow->ConstructTGraph(x, pmType->PDEbinned, "", "Wavelength, nm", (pmType->SiPM ? "Photon Detection Efficiency" : "Quantum Efficiency"));
+    GraphWindow->Draw(g, "APL");
 }
 
 void MainWindow::on_pbPMtypeLoadAngular_clicked()

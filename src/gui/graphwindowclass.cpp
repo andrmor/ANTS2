@@ -2474,6 +2474,14 @@ void GraphWindowClass::on_cbShowFitParameters_toggled(bool checked)
     else gStyle->SetOptFit(0000);
 }
 
+void GraphWindowClass::AddLegend()
+{
+    TLegend * leg = RasterWindow->fCanvas->BuildLegend();
+    RegisterTObject(leg);
+    DrawObjects.append(ADrawObject(leg, "same"));
+    RedrawAll();
+}
+
 #include "alegenddialog.h"
 void GraphWindowClass::on_pbAddLegend_clicked()
 {
@@ -2489,13 +2497,7 @@ void GraphWindowClass::on_pbAddLegend_clicked()
             break;
         }
     }
-    if (!leg )
-    {
-        leg = RasterWindow->fCanvas->BuildLegend();
-        RegisterTObject(leg);
-        DrawObjects.append(ADrawObject(leg, "same"));
-        RedrawAll();
-    }
+    if (!leg ) AddLegend();
 
     ALegendDialog Dialog(*leg, DrawObjects, this);
     connect(&Dialog, &ALegendDialog::requestCanvasUpdate, RasterWindow, &RasterWindowBaseClass::UpdateRootCanvas);

@@ -150,6 +150,7 @@ public:
     void ClearCopyOfActiveBasketId();
     QString & getLastOpendDir();    
     void ShowProjectionTool();
+    void AddLegend();
 
 protected:
     void mouseMoveEvent(QMouseEvent *event);

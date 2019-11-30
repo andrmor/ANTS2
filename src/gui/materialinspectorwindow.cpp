@@ -1845,7 +1845,7 @@ void MaterialInspectorWindow::on_pbShowAllForGamma_clicked()
   mg->GetYaxis()->SetTitleOffset((Float_t)1.3);
   MW->GraphWindow->UpdateRootCanvas();
 
-  MW->GraphWindow->on_pbAddLegend_clicked();
+  MW->GraphWindow->AddLegend();
 }
 
 void MaterialInspectorWindow::ShowTotalInteraction()

@@ -2671,3 +2671,25 @@ void GraphWindowClass::on_actionMake_square_triggered()
         if (protectionCounter > 100) break;
     }
 }
+
+#include "adrawtemplate.h"
+void GraphWindowClass::on_actionCreate_template_triggered()
+{
+    if (DrawObjects.isEmpty()) return;
+    qDebug() << "Under construction!";
+
+    DrawTemplate.createFrom(DrawObjects.first());
+
+    qDebug() << "Done!";
+}
+
+void GraphWindowClass::on_actionApply_template_triggered()
+{
+    if (DrawObjects.isEmpty()) return;
+    qDebug() << "Under construction!";
+
+    DrawTemplate.applyTo(DrawObjects.first());
+    RedrawAll();
+
+    qDebug() << "Done!";
+}

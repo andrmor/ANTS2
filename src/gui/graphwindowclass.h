@@ -4,6 +4,7 @@
 #include "aguiwindow.h"
 #include "adrawobject.h"
 #include "abasketitem.h"
+#include "adrawtemplate.h"
 
 #include <QVector>
 #include <QVariantList>
@@ -251,6 +252,10 @@ private slots:
 
     void on_actionMake_square_triggered();
 
+    void on_actionCreate_template_triggered();
+
+    void on_actionApply_template_triggered();
+
 private:
     MainWindow *MW;
     Ui::GraphWindowClass *ui;
@@ -270,6 +275,8 @@ private:
 
     QGraphicsView* gvOver = 0;
     AToolboxScene* scene = 0;
+
+    ADrawTemplate DrawTemplate;
 
     void doDraw(TObject *obj, const char *opt, bool DoUpdate); //actual drawing, does not have window focussing - done to avoid refocussing issues leading to bugs
 

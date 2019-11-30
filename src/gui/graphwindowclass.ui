@@ -1833,10 +1833,19 @@ in basket</string>
     <addaction name="actionEqualize_scale_XY"/>
     <addaction name="separator"/>
    </widget>
+   <widget class="QMenu" name="menuTemplate">
+    <property name="title">
+     <string>Template</string>
+    </property>
+    <addaction name="actionCreate_template"/>
+    <addaction name="separator"/>
+    <addaction name="actionApply_template"/>
+   </widget>
    <addaction name="menuExport"/>
    <addaction name="menuView"/>
    <addaction name="menuPalette"/>
    <addaction name="menuSize"/>
+   <addaction name="menuTemplate"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionSave_image">
@@ -1939,6 +1948,16 @@ in basket</string>
   <action name="actionMake_square">
    <property name="text">
     <string>Make square</string>
+   </property>
+  </action>
+  <action name="actionCreate_template">
+   <property name="text">
+    <string>Create template</string>
+   </property>
+  </action>
+  <action name="actionApply_template">
+   <property name="text">
+    <string>Apply template</string>
    </property>
   </action>
  </widget>

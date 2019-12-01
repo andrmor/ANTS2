@@ -24,6 +24,7 @@ class TTree;
 class ABasketManager;
 class ADrawExplorerWidget;
 class ABasketListWidget;
+class TLegend;
 
 namespace Ui {
 class GraphWindowClass;
@@ -151,7 +152,7 @@ public:
     void ClearCopyOfActiveBasketId();
     QString & getLastOpendDir();    
     void ShowProjectionTool();
-    void AddLegend();
+    TLegend * AddLegend();
 
 protected:
     void mouseMoveEvent(QMouseEvent *event);

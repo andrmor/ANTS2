@@ -2187,6 +2187,7 @@ void GraphWindowClass::BasketCustomContextMenuRequested(const QPoint &pos)
     }
     else if (selectedItem == append)
     {
+        bool bDrawEmpty = DrawObjects.isEmpty();
         const QString fileName = QFileDialog::getOpenFileName(this, "Append all from a basket file", MW->GlobSet.LastOpenDir, "Root files (*.root)");
         if (!fileName.isEmpty())
         {
@@ -2194,6 +2195,7 @@ void GraphWindowClass::BasketCustomContextMenuRequested(const QPoint &pos)
             QString err = Basket->appendBasket(fileName);
             if (!err.isEmpty()) message(err, this);
             UpdateBasketGUI();
+            if (bDrawEmpty) switchToBasket(0);
         }
     }
     else if (selectedItem == appendRootHistsAndGraphs)
@@ -2680,7 +2682,8 @@ void GraphWindowClass::on_actionCreate_template_triggered()
     if (DrawObjects.isEmpty()) return;
     qDebug() << "Under construction!";
 
-    DrawTemplate.createFrom(DrawObjects.first());
+    QVector<QPair<double,double>> Limits = {QPair<double,double>(xmin, xmax), QPair<double,double>(ymin, ymax), QPair<double,double>(zmin, zmax)};
+    DrawTemplate.createFrom(DrawObjects.first(), Limits); // it seems TH1 does not contain data on the shown range for Y (and Z) axes ... -> using inidcated range!
 
     qDebug() << "Done!";
 }
@@ -2690,8 +2693,20 @@ void GraphWindowClass::on_actionApply_template_triggered()
     if (DrawObjects.isEmpty()) return;
     qDebug() << "Under construction!";
 
-    DrawTemplate.applyTo(DrawObjects.first());
+    QVector<QPair<double,double>> XYZ_ranges;
+    DrawTemplate.applyTo(DrawObjects.first(), XYZ_ranges);
     RedrawAll();
+
+    ui->ledXfrom->setText( QString::number(XYZ_ranges[0].first,  'g', 4) );
+    ui->ledXto->  setText( QString::number(XYZ_ranges[0].second, 'g', 4) );
+    ui->ledYfrom->setText( QString::number(XYZ_ranges[1].first,  'g', 4) );
+    ui->ledYto->  setText( QString::number(XYZ_ranges[1].second, 'g', 4) );
+    if (ui->ledZfrom->isEnabled() && !ui->ledZfrom->text().isEmpty())
+    {
+        ui->ledZfrom->setText( QString::number(XYZ_ranges[2].first,  'g', 4) );
+        ui->ledZto->  setText( QString::number(XYZ_ranges[2].second, 'g', 4) );
+    }
+    Reshape();
 
     qDebug() << "Done!";
 }

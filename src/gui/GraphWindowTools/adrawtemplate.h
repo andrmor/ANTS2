@@ -2,6 +2,7 @@
 #define ADRAWTEMPLATE_H
 
 #include <QVector>
+#include <QPair>
 #include <QString>
 
 class ADrawObject;
@@ -58,8 +59,8 @@ public:
 class ADrawTemplate
 {
 public:
-    void createFrom(const ADrawObject & Obj);
-    void applyTo(ADrawObject & Obj) const;
+    void createFrom(const ADrawObject & Obj, const QVector<QPair<double,double>> & XYZ_ranges);
+    void applyTo(ADrawObject & Obj, QVector<QPair<double,double>> & XYZ_ranges) const;
 
 private:
     QString   ObjType = "Undefined";
@@ -67,6 +68,7 @@ private:
     QString DrawOption;
     ADrawTemplate_DrawAttributes DrawAttributes;
     ADrawTemplate_Axis  AxisProperties[3];
+    QVector<QPair<double, double>> XYZranges;
 
 
 private:

@@ -11,7 +11,7 @@
 #include "TAttMarker.h"
 #include "TAttFill.h"
 
-void ADrawTemplate::createFrom(const ADrawObject & Obj)
+void ADrawTemplate::createFrom(const ADrawObject & Obj, const QVector<QPair<double, double> > & XYZ_ranges)
 {
     TObject * tobj = Obj.Pointer;
     if (!tobj) return;
@@ -29,9 +29,12 @@ void ADrawTemplate::createFrom(const ADrawObject & Obj)
         fillAxisProperties(i, axis);
     }
 
+    //ranges
+    XYZranges = XYZ_ranges;
+
 }
 
-void ADrawTemplate::applyTo(ADrawObject & Obj) const
+void ADrawTemplate::applyTo(ADrawObject & Obj, QVector<QPair<double,double>> & XYZ_ranges) const
 {
     TObject * tobj = Obj.Pointer;
     if (!tobj) return;
@@ -46,6 +49,9 @@ void ADrawTemplate::applyTo(ADrawObject & Obj) const
         TAxis * axis = getAxis(tobj, i);
         applyAxisProperties(i, axis);
     }
+
+    //ranges
+    XYZ_ranges = XYZranges;
 }
 
 TAxis * ADrawTemplate::getAxis(TObject * tobj, int index) const

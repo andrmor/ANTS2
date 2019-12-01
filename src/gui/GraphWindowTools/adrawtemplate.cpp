@@ -81,48 +81,16 @@ TAxis * ADrawTemplate::getAxis(TObject * tobj, int index) const
 void ADrawTemplate::fillAxisProperties(int index, TAxis * axis)
 {
     if (index < 0 || index > 2) return;
-
-    ADrawTemplate_Axis & a = AxisProperties[index];
-    a.bActive = (bool)axis;
-    if (!axis) return;
-
-    a.AxisColor     = axis->GetAxisColor();
-    a.NumDiv        = axis->GetNdivisions();
-    a.TickLength    = axis->GetTickLength();
-
-    a.LabelColor    = axis->GetLabelColor();
-    a.LabelFont     = axis->GetLabelFont();
-    a.LabelSize     = axis->GetLabelSize();
-    a.LabelOffset   = axis->GetLabelOffset();
-
-    a.Title         = QString(axis->GetTitle());
-    a.TitleColor    = axis->GetTitleColor();
-    a.TitleFont     = axis->GetTitleFont();
-    a.TitleOffset   = axis->GetTitleOffset();
-    a.TitleSize     = axis->GetTitleSize();
+    ADrawTemplate_Axis & ap = AxisProperties[index];
+    ap.fillProperties(axis);
 }
 
 void ADrawTemplate::applyAxisProperties(int index, TAxis * axis) const
 {
     if (!axis) return;
     if (index < 0 || index > 2) return;
-
-    const ADrawTemplate_Axis & a = AxisProperties[index];
-
-    axis->SetAxisColor(a.AxisColor);
-    axis->SetNdivisions(a.NumDiv);
-    axis->SetTickLength(a.TickLength);
-
-    axis->SetLabelColor(a.LabelColor);
-    axis->SetLabelFont(a.LabelFont);
-    axis->SetLabelSize(a.LabelSize);
-    axis->SetLabelOffset(a.LabelOffset);
-
-    axis->SetTitle(a.Title.toLatin1().data());
-    axis->SetTitleColor(a.TitleColor);
-    axis->SetTitleFont(a.TitleFont);
-    axis->SetTitleOffset(a.TitleOffset);
-    axis->SetTitleSize(a.TitleSize);
+    const ADrawTemplate_Axis & ap = AxisProperties[index];
+    ap.applyProperties(axis);
 }
 
 void ADrawTemplate_DrawAttributes::fillProperties(const TObject * tobj)
@@ -187,4 +155,46 @@ void ADrawTemplate_DrawAttributes::applyProperties(TObject * tobj) const
             af->SetFillStyle(FillStyle);
         }
     }
+}
+
+void ADrawTemplate_Axis::fillProperties(const TAxis *axis)
+{
+    bActive = (bool)axis;
+    if (!axis) return;
+
+    AxisColor     = axis->GetAxisColor();
+    NumDiv        = axis->GetNdivisions();
+    TickLength    = axis->GetTickLength();
+
+    LabelColor    = axis->GetLabelColor();
+    LabelFont     = axis->GetLabelFont();
+    LabelSize     = axis->GetLabelSize();
+    LabelOffset   = axis->GetLabelOffset();
+
+    Title         = QString(axis->GetTitle());
+    TitleColor    = axis->GetTitleColor();
+    TitleFont     = axis->GetTitleFont();
+    TitleOffset   = axis->GetTitleOffset();
+    TitleSize     = axis->GetTitleSize();
+}
+
+void ADrawTemplate_Axis::applyProperties(TAxis * axis) const
+{
+    if (!axis) return;
+    if (!bActive) return;
+
+    axis->SetAxisColor(AxisColor);
+    axis->SetNdivisions(NumDiv);
+    axis->SetTickLength(TickLength);
+
+    axis->SetLabelColor(LabelColor);
+    axis->SetLabelFont(LabelFont);
+    axis->SetLabelSize(LabelSize);
+    axis->SetLabelOffset(LabelOffset);
+
+    axis->SetTitle(Title.toLatin1().data());
+    axis->SetTitleColor(TitleColor);
+    axis->SetTitleFont(TitleFont);
+    axis->SetTitleOffset(TitleOffset);
+    axis->SetTitleSize(TitleSize);
 }

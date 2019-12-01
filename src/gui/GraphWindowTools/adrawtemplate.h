@@ -50,6 +50,9 @@ public:
     int     TitleFont;
     float   TitleOffset;
     float   TitleSize;
+
+    void    fillProperties(const TAxis * axis);
+    void    applyProperties(TAxis * axis) const;
 };
 
 class ADrawTemplate

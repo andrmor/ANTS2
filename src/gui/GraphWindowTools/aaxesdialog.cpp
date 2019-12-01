@@ -75,7 +75,7 @@ void AAxesDialog::updateGui()
     ndiv = abs(ndiv);
     int n3 = ndiv / 10000;
     int n2 = ndiv / 100 - n3 * 100;
-    int n1 = ndiv       - n2 * 100;
+    int n1 = ndiv       - n3 * 10000 - n2 * 100;
     ui->sbNdiv->setValue(n1);
     ui->sbNdivSub->setValue(n2);
     ui->sbNdivSubSub->setValue(n3);

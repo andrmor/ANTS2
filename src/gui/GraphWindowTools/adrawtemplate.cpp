@@ -188,7 +188,7 @@ void ADrawTemplate_Axis::applyProperties(TAxis * axis) const
     axis->SetAxisColor(AxisColor);
     axis->SetNdivisions(NumDiv);
     axis->SetTickLength(TickLength);
-    axis->SetTicks(TicksPosition.toLatin1().data());
+    //axis->SetTicks(TicksPosition.toLatin1().data());
 
     axis->SetLabelColor(LabelColor);
     axis->SetLabelFont(LabelFont);

@@ -27,9 +27,7 @@ public:
 
     void    fillProperties(const TObject * tobj);
     void    applyProperties(TObject * tobj) const;
-
 };
-
 
 class ADrawTemplate_Axis
 {
@@ -39,6 +37,7 @@ public:
     int     AxisColor;
     int     NumDiv;
     float   TickLength;
+    QString TicksPosition;
 
     int     LabelColor;
     int     LabelFont;
@@ -50,6 +49,7 @@ public:
     int     TitleFont;
     float   TitleOffset;
     float   TitleSize;
+    bool    TitleCentered;
 
     void    fillProperties(const TAxis * axis);
     void    applyProperties(TAxis * axis) const;

@@ -165,6 +165,7 @@ void ADrawTemplate_Axis::fillProperties(const TAxis *axis)
     AxisColor     = axis->GetAxisColor();
     NumDiv        = axis->GetNdivisions();
     TickLength    = axis->GetTickLength();
+    TicksPosition = QString(axis->GetTicks());
 
     LabelColor    = axis->GetLabelColor();
     LabelFont     = axis->GetLabelFont();
@@ -176,6 +177,7 @@ void ADrawTemplate_Axis::fillProperties(const TAxis *axis)
     TitleFont     = axis->GetTitleFont();
     TitleOffset   = axis->GetTitleOffset();
     TitleSize     = axis->GetTitleSize();
+    TitleCentered = axis->GetCenterTitle();
 }
 
 void ADrawTemplate_Axis::applyProperties(TAxis * axis) const
@@ -186,6 +188,7 @@ void ADrawTemplate_Axis::applyProperties(TAxis * axis) const
     axis->SetAxisColor(AxisColor);
     axis->SetNdivisions(NumDiv);
     axis->SetTickLength(TickLength);
+    axis->SetTicks(TicksPosition.toLatin1().data());
 
     axis->SetLabelColor(LabelColor);
     axis->SetLabelFont(LabelFont);
@@ -197,4 +200,5 @@ void ADrawTemplate_Axis::applyProperties(TAxis * axis) const
     axis->SetTitleFont(TitleFont);
     axis->SetTitleOffset(TitleOffset);
     axis->SetTitleSize(TitleSize);
+    axis->CenterTitle(TitleCentered);
 }

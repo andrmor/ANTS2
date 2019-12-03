@@ -11,16 +11,16 @@
 #include "TAttMarker.h"
 #include "TAttFill.h"
 
-void ADrawTemplate::createFrom(const ADrawObject & Obj, const QVector<QPair<double, double> > & XYZ_ranges)
+void ADrawTemplate::createFrom(const QVector<ADrawObject> & DrawObjects, const QVector<QPair<double, double> > & XYZ_ranges)
 {
-    TObject * tobj = Obj.Pointer;
+    if (DrawObjects.isEmpty()) return;
+
+    TObject * tobj = DrawObjects.first().Pointer;
     if (!tobj) return;
 
-    ObjType = Obj.Pointer->ClassName();
-
     //draw options and attibutes
-    DrawOption = Obj.Options;
-    DrawAttributes.fillProperties(tobj);
+    DrawOption = DrawObjects.first().Options;
+    //DrawAttributes.fillProperties(tobj);
 
     //axes
     for (int i = 0; i < 3; i++)
@@ -32,16 +32,25 @@ void ADrawTemplate::createFrom(const ADrawObject & Obj, const QVector<QPair<doub
     //ranges
     XYZranges = XYZ_ranges;
 
+    //draw properties
+    ObjectAttributes.clear();
+    for (const ADrawObject & obj : DrawObjects)
+    {
+        QJsonObject json;
+        ARootJson::toJson(obj, json);
+        ObjectAttributes << json;
+    }
 }
 
-void ADrawTemplate::applyTo(ADrawObject & Obj, QVector<QPair<double,double>> & XYZ_ranges) const
+void ADrawTemplate::applyTo(QVector<ADrawObject> & DrawObjects, QVector<QPair<double,double>> & XYZ_ranges) const
 {
-    TObject * tobj = Obj.Pointer;
+    if (DrawObjects.isEmpty()) return;
+    TObject * tobj = DrawObjects.first().Pointer;
     if (!tobj) return;
 
     //draw options and attibutes
-    Obj.Options = DrawOption;
-    DrawAttributes.applyProperties(tobj);
+    DrawObjects.first().Options = DrawOption;
+    //DrawAttributes.applyProperties(tobj);
 
     //axes
     for (int i = 0; i < 3; i++)
@@ -52,6 +61,16 @@ void ADrawTemplate::applyTo(ADrawObject & Obj, QVector<QPair<double,double>> & X
 
     //ranges
     XYZ_ranges = XYZranges;
+
+    //draw properties
+    for (int i=0; i<ObjectAttributes.size(); i++)
+    {
+        if (i >= DrawObjects.size()) break;
+        const QJsonObject & json = ObjectAttributes.at(i);
+
+        bool bOK = ARootJson::fromJson(DrawObjects[i], json);
+        if (!bOK) break;
+    }
 }
 
 TAxis * ADrawTemplate::getAxis(TObject * tobj, int index) const
@@ -99,6 +118,7 @@ void ADrawTemplate::applyAxisProperties(int index, TAxis * axis) const
     ap.applyProperties(axis);
 }
 
+/*
 void ADrawTemplate_DrawAttributes::fillProperties(const TObject * tobj)
 {
     const TAttLine * al = dynamic_cast<const TAttLine*>(tobj);
@@ -162,6 +182,7 @@ void ADrawTemplate_DrawAttributes::applyProperties(TObject * tobj) const
         }
     }
 }
+*/
 
 void ADrawTemplate_Axis::fillProperties(const TAxis *axis)
 {
@@ -207,4 +228,109 @@ void ADrawTemplate_Axis::applyProperties(TAxis * axis) const
     axis->SetTitleOffset(TitleOffset);
     axis->SetTitleSize(TitleSize);
     axis->CenterTitle(TitleCentered);
+}
+
+#include "ajsontools.h"
+void ARootJson::toJson(const ADrawObject & obj, QJsonObject & json)
+{
+    const TObject * tobj = obj.Pointer;
+    json["Type"] = QString(tobj->ClassName());
+    json["Options"] = obj.Options;
+
+    const TAttLine * al = dynamic_cast<const TAttLine*>(tobj);
+    if (al)
+    {
+        QJsonObject js;
+        js["Color"] = al->GetLineColor();
+        js["Style"] = al->GetLineStyle();
+        js["Width"] = al->GetLineWidth();
+
+        json["Line"] = js;
+    }
+
+    const TAttMarker * am = dynamic_cast<const TAttMarker*>(tobj);
+    if (am)
+    {
+        QJsonObject js;
+        js["Color"] = am->GetMarkerColor();
+        js["Style"] = am->GetMarkerStyle();
+        js["Size"]  = am->GetMarkerSize();
+
+        json["Marker"] = js;
+    }
+
+    const TAttFill * af = dynamic_cast<const TAttFill*>(tobj);
+    if (af)
+    {
+        QJsonObject js;
+        js["Color"] = af->GetFillColor();
+        js["Style"] = af->GetFillStyle();
+
+        json["Fill"] = js;
+    }
+}
+
+bool ARootJson::fromJson(ADrawObject & obj, const QJsonObject & json)
+{
+    TObject * tobj = obj.Pointer;
+
+    QString SavedType;
+    parseJson(json, "Type", SavedType);
+    QString Type = QString(tobj->ClassName());
+    if (Type != SavedType) return false;
+
+    parseJson(json, "Options", obj.Options);
+
+    TAttLine * al = dynamic_cast<TAttLine*>(tobj);
+    if (al)
+    {
+        QJsonObject js;
+        if (parseJson(json, "Line", js))
+        {
+            int Color = 1;
+            parseJson(js, "Color", Color);
+            al->SetLineColor(Color);
+            int Style = 1;
+            parseJson(js, "Style", Style);
+            al->SetLineStyle(Style);
+            int Width = 1;
+            parseJson(js, "Width", Width);
+            al->SetLineWidth(Width);
+        }
+    }
+
+    TAttMarker * am = dynamic_cast<TAttMarker*>(tobj);
+    if (am)
+    {
+        QJsonObject js;
+        if (parseJson(json, "Marker", js))
+        {
+            int Color = 1;
+            parseJson(js, "Color", Color);
+            am->SetMarkerColor(Color);
+            int Style = 1;
+            parseJson(js, "Style", Style);
+            am->SetMarkerStyle(Style);
+            float Size = 1.0;
+            parseJson(js, "Size", Size);
+            am->SetMarkerSize(Size);
+        }
+    }
+
+    TAttFill * af = dynamic_cast<TAttFill*>(tobj);
+    if (af)
+    {
+        QJsonObject js;
+        if (parseJson(json, "Fill", js))
+        {
+            int Color = 1;
+            parseJson(js, "Color", Color);
+            af->SetFillColor(Color);
+            int Style = 1001; //0
+            parseJson(js, "Style", Style);
+            af->SetFillStyle(Style);
+        }
+    }
+
+    return true;
 }

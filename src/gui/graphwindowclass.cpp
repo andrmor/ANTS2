@@ -2683,7 +2683,7 @@ void GraphWindowClass::on_actionCreate_template_triggered()
     qDebug() << "Under construction!";
 
     QVector<QPair<double,double>> Limits = {QPair<double,double>(xmin, xmax), QPair<double,double>(ymin, ymax), QPair<double,double>(zmin, zmax)};
-    DrawTemplate.createFrom(DrawObjects.first(), Limits); // it seems TH1 does not contain data on the shown range for Y (and Z) axes ... -> using inidcated range!
+    DrawTemplate.createFrom(DrawObjects, Limits); // it seems TH1 does not contain data on the shown range for Y (and Z) axes ... -> using inidcated range!
 
     qDebug() << "Done!";
 }
@@ -2694,7 +2694,7 @@ void GraphWindowClass::on_actionApply_template_triggered()
     qDebug() << "Under construction!";
 
     QVector<QPair<double,double>> XYZ_ranges;
-    DrawTemplate.applyTo(DrawObjects.first(), XYZ_ranges);
+    DrawTemplate.applyTo(DrawObjects, XYZ_ranges);
     RedrawAll();
 
     ui->ledXfrom->setText( QString::number(XYZ_ranges[0].first,  'g', 4) );

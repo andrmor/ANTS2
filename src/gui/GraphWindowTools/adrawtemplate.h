@@ -4,11 +4,13 @@
 #include <QVector>
 #include <QPair>
 #include <QString>
+#include <QJsonObject>
 
 class ADrawObject;
 class TObject;
 class TAxis;
 
+/*
 class ADrawTemplate_DrawAttributes
 {
 public:
@@ -29,6 +31,7 @@ public:
     void    fillProperties(const TObject * tobj);
     void    applyProperties(TObject * tobj) const;
 };
+*/
 
 class ADrawTemplate_Axis
 {
@@ -59,16 +62,16 @@ public:
 class ADrawTemplate
 {
 public:
-    void createFrom(const ADrawObject & Obj, const QVector<QPair<double,double>> & XYZ_ranges);
-    void applyTo(ADrawObject & Obj, QVector<QPair<double,double>> & XYZ_ranges) const;
+    void createFrom(const QVector<ADrawObject> &DrawObjects, const QVector<QPair<double,double>> & XYZ_ranges);
+    void applyTo(QVector<ADrawObject> & DrawObjects, QVector<QPair<double,double>> & XYZ_ranges) const;
 
 private:
-    QString   ObjType = "Undefined";
-
     QString DrawOption;
-    ADrawTemplate_DrawAttributes DrawAttributes;
+    //ADrawTemplate_DrawAttributes DrawAttributes;
     ADrawTemplate_Axis  AxisProperties[3];
     QVector<QPair<double, double>> XYZranges;
+
+    QVector<QJsonObject> ObjectAttributes;
 
 
 private:
@@ -76,5 +79,11 @@ private:
     void    fillAxisProperties (int index, TAxis * axis);
     void    applyAxisProperties(int index, TAxis * axis) const;
 };
+
+namespace ARootJson
+{
+    void toJson(const ADrawObject & obj, QJsonObject & json);
+    bool fromJson(ADrawObject & obj, const QJsonObject & json);
+}
 
 #endif // ADRAWTEMPLATE_H

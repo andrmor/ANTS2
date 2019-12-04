@@ -37,8 +37,6 @@ private:
     void toggleEnable(ADrawObject &obj);
     void remove(int index);
     void setAttributes(int index);
-    void setMarker(ADrawObject &obj);
-    void setLine(ADrawObject &obj);
     void showPanel(ADrawObject &obj);
     void fitPanel(ADrawObject &obj);
     void scale(ADrawObject &obj);

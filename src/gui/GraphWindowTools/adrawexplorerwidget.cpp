@@ -245,6 +245,7 @@ void ADrawExplorerWidget::rename(ADrawObject & obj)
 
     GraphWindow.ClearCopyOfDrawObjects();
     GraphWindow.UpdateBasketGUI();
+    GraphWindow.HighlightUpdateBasketButton(true);
     updateGui();
 }
 
@@ -254,6 +255,7 @@ void ADrawExplorerWidget::toggleEnable(ADrawObject & obj)
 
     GraphWindow.ClearCopyOfDrawObjects();
     GraphWindow.RedrawAll();
+    GraphWindow.HighlightUpdateBasketButton(true);
 }
 
 void ADrawExplorerWidget::remove(int index)
@@ -269,6 +271,7 @@ void ADrawExplorerWidget::remove(int index)
     }
 
     GraphWindow.RedrawAll();
+    GraphWindow.HighlightUpdateBasketButton(true);
 }
 
 void ADrawExplorerWidget::setAttributes(int index)
@@ -284,50 +287,7 @@ void ADrawExplorerWidget::setAttributes(int index)
     D.exec();
 
     GraphWindow.RedrawAll();
-}
-
-void ADrawExplorerWidget::setMarker(ADrawObject & obj)
-{
-    TAttMarker* la = dynamic_cast<TAttMarker*>(obj.Pointer);
-    if (la)
-    {
-       int color = la->GetMarkerColor();
-       int siz = la->GetMarkerSize();
-       int style = la->GetMarkerStyle();
-       ARootMarkerConfigurator* rlc = new ARootMarkerConfigurator(&color, &siz, &style);
-       int res = rlc->exec();
-       if (res != 0)
-       {
-           la->SetMarkerColor(color);
-           la->SetMarkerSize(siz);
-           la->SetMarkerStyle(style);
-           la->Modify();
-           GraphWindow.ClearCopyOfDrawObjects();
-           GraphWindow.RedrawAll();
-       }
-    }
-}
-
-void ADrawExplorerWidget::setLine(ADrawObject & obj)
-{
-    TAttLine* la = dynamic_cast<TAttLine*>(obj.Pointer);
-    if (la)
-    {
-       int color = la->GetLineColor();
-       int wid = la->GetLineWidth();
-       int style = la->GetLineStyle();
-       ARootLineConfigurator* rlc = new ARootLineConfigurator(&color, &wid, &style);
-       int res = rlc->exec();
-       if (res != 0)
-       {
-           la->SetLineColor(color);
-           la->SetLineWidth(wid);
-           la->SetLineStyle(style);
-           la->Modify();
-           GraphWindow.ClearCopyOfDrawObjects();
-           GraphWindow.RedrawAll();
-       }
-    }
+    GraphWindow.HighlightUpdateBasketButton(true);
 }
 
 void ADrawExplorerWidget::showPanel(ADrawObject &obj)
@@ -449,6 +409,7 @@ void ADrawExplorerWidget::scale(ADrawObject &obj)
     //qDebug() << "Copy:"<< GraphWindow.PreviousDrawObjects.first().Pointer;
 
     GraphWindow.RedrawAll();
+    GraphWindow.HighlightUpdateBasketButton(true);
 }
 
 const QPair<double, double> runShiftDialog(QWidget * parent)
@@ -534,6 +495,7 @@ void ADrawExplorerWidget::shift(ADrawObject &obj)
     obj.Pointer = tobj;
 
     GraphWindow.RedrawAll();
+    GraphWindow.HighlightUpdateBasketButton(true);
 }
 
 void ADrawExplorerWidget::drawIntegral(ADrawObject &obj)
@@ -774,6 +736,7 @@ void ADrawExplorerWidget::fwhm(int index)
     DrawObjects.insert(index+3, ADrawObject(la, "same"));
 
     GraphWindow.RedrawAll();
+    GraphWindow.HighlightUpdateBasketButton(true);
 }
 
 void ADrawExplorerWidget::linFit(int index)
@@ -842,6 +805,7 @@ void ADrawExplorerWidget::linFit(int index)
     DrawObjects.insert(index+2, ADrawObject(la, "same"));
 
     GraphWindow.RedrawAll();
+    GraphWindow.HighlightUpdateBasketButton(true);
 }
 
 void ADrawExplorerWidget::interpolate(ADrawObject &obj)
@@ -903,6 +867,7 @@ void ADrawExplorerWidget::interpolate(ADrawObject &obj)
         addToDrawObjectsAndRegister(hi, "hist");
 
         GraphWindow.RedrawAll();
+        GraphWindow.HighlightUpdateBasketButton(true);
 
         d.accept();
     }
@@ -1103,6 +1068,7 @@ void ADrawExplorerWidget::editAxis(ADrawObject &obj, int axisIndex)
     D.exec();
 
     GraphWindow.RedrawAll();
+    GraphWindow.HighlightUpdateBasketButton(true);
 }
 
 #include <TFile.h>
@@ -1262,6 +1228,7 @@ void ADrawExplorerWidget::editPave(ADrawObject &obj)
 
         D.exec();
         GraphWindow.RedrawAll();
+        GraphWindow.HighlightUpdateBasketButton(true);
     }
 }
 

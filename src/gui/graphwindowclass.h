@@ -153,6 +153,7 @@ public:
     QString & getLastOpendDir();    
     void ShowProjectionTool();
     TLegend * AddLegend();
+    void HighlightUpdateBasketButton(bool flag);
 
 protected:
     void mouseMoveEvent(QMouseEvent *event);

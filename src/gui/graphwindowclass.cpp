@@ -2062,6 +2062,8 @@ void GraphWindowClass::UpdateBasketGUI()
         }
     }
     ui->pbUpdateInBasket->setEnabled(ActiveBasketItem >= 0);
+
+    if (ActiveBasketItem < 0) HighlightUpdateBasketButton(false);
 }
 
 void GraphWindowClass::onBasketItemDoubleClicked(QListWidgetItem *)
@@ -2629,6 +2631,8 @@ void GraphWindowClass::switchToBasket(int index)
 
 void GraphWindowClass::on_pbUpdateInBasket_clicked()
 {
+    HighlightUpdateBasketButton(false);
+
     if (ActiveBasketItem < 0 || ActiveBasketItem >= Basket->size()) return;
     Basket->update(ActiveBasketItem, DrawObjects);
 }
@@ -2709,4 +2713,15 @@ void GraphWindowClass::on_actionApply_template_triggered()
     Reshape();
 
     qDebug() << "Done!";
+
+    HighlightUpdateBasketButton(true);
+}
+
+#include "guiutils.h"
+void GraphWindowClass::HighlightUpdateBasketButton(bool flag)
+{
+    QIcon icon;
+    if (flag && ui->pbUpdateInBasket->isEnabled())
+        icon = GuiUtils::createColorCircleIcon(QSize(15,15), Qt::yellow);
+    ui->pbUpdateInBasket->setIcon(icon);
 }

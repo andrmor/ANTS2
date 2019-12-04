@@ -9,10 +9,11 @@ ADrawObject::ADrawObject(TObject *pointer, const char *options)
     extractName();
 }
 
-ADrawObject::ADrawObject(TObject *pointer, const QString &options)
+ADrawObject::ADrawObject(TObject *pointer, const QString &options, bool enabled)
 {
     Pointer = pointer;
     Options = options;
+    bEnabled = enabled;
     extractName();
 }
 

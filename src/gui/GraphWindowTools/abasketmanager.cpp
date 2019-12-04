@@ -121,7 +121,7 @@ void ABasketManager::add(const QString & name, const QVector<ADrawObject> & draw
         }
         OldToNew[drObj.Pointer] = clone;
 
-        item.DrawObjects.append( ADrawObject(clone, options) );
+        item.DrawObjects.append( ADrawObject(clone, options, drObj.bEnabled) );
     }
 
     if (Legend)
@@ -176,7 +176,7 @@ const QVector<ADrawObject> ABasketManager::getCopy(int index) const
                 //qDebug() << "From basket, old-->cloned" << obj.Pointer << "-->" << clone;
             }
 
-            res << ADrawObject(clone, obj.Options);
+            res << ADrawObject(clone, obj.Options, obj.bEnabled);
         }
 
         if (Legend)

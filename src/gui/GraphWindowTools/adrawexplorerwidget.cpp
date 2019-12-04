@@ -124,10 +124,14 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
 
     Menu.addSeparator();
 
+    QMenu * scaleMenu =     Menu.addMenu("Scale / shift"); scaleMenu->setEnabled(Type.startsWith("TH") || Type.startsWith("TGraph") || Type.startsWith("TProfile"));
+        QAction * scaleA =      scaleMenu->addAction("Scale");
+        scaleMenu->addSeparator();
+        QAction * shiftA =      scaleMenu->addAction("Shift X scale");
+
+    Menu.addSeparator();
+
     QMenu * manipMenu =     Menu.addMenu("Manipulate histogram"); manipMenu->setEnabled(Type.startsWith("TH1"));
-        QAction * scaleA =      manipMenu->addAction("Scale");
-        QAction * shiftA =      manipMenu->addAction("Shift X scale");
-        manipMenu->addSeparator();
         QAction* interpolateA = manipMenu->addAction("Interpolate");
         manipMenu->addSeparator();
         QAction* medianA =      manipMenu->addAction("Apply median filter");

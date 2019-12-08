@@ -10,29 +10,6 @@ class ADrawObject;
 class TObject;
 class TAxis;
 
-/*
-class ADrawTemplate_DrawAttributes
-{
-public:
-    bool    bLineActive = false;
-    int     LineColor;
-    int     LineStyle;
-    int     LineWidth;
-
-    bool    bMarkerActive = false;
-    int     MarkerColor;
-    float   MarkerSize;
-    int     MarkerStyle;
-
-    bool    bFillActive = false;
-    int     FillColor;
-    int     FillStyle;
-
-    void    fillProperties(const TObject * tobj);
-    void    applyProperties(TObject * tobj) const;
-};
-*/
-
 class ADrawTemplate_Axis
 {
 public:
@@ -80,10 +57,22 @@ private:
     void    applyAxisProperties(int index, TAxis * axis) const;
 };
 
+class TAttLine;
+class TAttMarker;
+class TAttFill;
 namespace ARootJson
 {
     void toJson(const ADrawObject & obj, QJsonObject & json);
     bool fromJson(ADrawObject & obj, const QJsonObject & json);
+
+    void toJson(const TAttLine * obj, QJsonObject & json);
+    void fromJson(TAttLine * obj, const QJsonObject & json);
+
+    void toJson(const TAttMarker * obj, QJsonObject & json);
+    void fromJson(TAttMarker * obj, const QJsonObject & json);
+
+    void toJson(const TAttFill * obj, QJsonObject & json);
+    void fromJson(TAttFill * obj, const QJsonObject & json);
 }
 
 #endif // ADRAWTEMPLATE_H

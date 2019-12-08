@@ -118,72 +118,6 @@ void ADrawTemplate::applyAxisProperties(int index, TAxis * axis) const
     ap.applyProperties(axis);
 }
 
-/*
-void ADrawTemplate_DrawAttributes::fillProperties(const TObject * tobj)
-{
-    const TAttLine * al = dynamic_cast<const TAttLine*>(tobj);
-    bLineActive = (bool)al;
-    if (al)
-    {
-        LineColor = al->GetLineColor();
-        LineStyle = al->GetLineStyle();
-        LineWidth = al->GetLineWidth();
-    }
-
-    const TAttMarker * am = dynamic_cast<const TAttMarker*>(tobj);
-    bMarkerActive = (bool)am;
-    if (am)
-    {
-        MarkerColor = am->GetMarkerColor();
-        MarkerStyle = am->GetMarkerStyle();
-        MarkerSize  = am->GetMarkerSize();
-    }
-
-    const TAttFill * af = dynamic_cast<const TAttFill*>(tobj);
-    bFillActive = (bool)af;
-    if (af)
-    {
-        FillColor = af->GetFillColor();
-        FillStyle = af->GetFillStyle();
-    }
-}
-
-void ADrawTemplate_DrawAttributes::applyProperties(TObject * tobj) const
-{
-    if (bLineActive)
-    {
-        TAttLine * al = dynamic_cast<TAttLine*>(tobj);
-        if (al)
-        {
-            al->SetLineColor(LineColor);
-            al->SetLineStyle(LineStyle);
-            al->SetLineWidth(LineWidth);
-        }
-    }
-
-    if (bMarkerActive)
-    {
-        TAttMarker * am = dynamic_cast<TAttMarker*>(tobj);
-        if (am)
-        {
-            am->SetMarkerColor(MarkerColor);
-            am->SetMarkerStyle(MarkerStyle);
-            am->SetMarkerSize(MarkerSize);
-        }
-    }
-
-    if (bFillActive)
-    {
-        TAttFill * af = dynamic_cast<TAttFill*>(tobj);
-        if (af)
-        {
-            af->SetFillColor(FillColor);
-            af->SetFillStyle(FillStyle);
-        }
-    }
-}
-*/
-
 void ADrawTemplate_Axis::fillProperties(const TAxis *axis)
 {
     bActive = (bool)axis;
@@ -238,36 +172,13 @@ void ARootJson::toJson(const ADrawObject & obj, QJsonObject & json)
     json["Options"] = obj.Options;
 
     const TAttLine * al = dynamic_cast<const TAttLine*>(tobj);
-    if (al)
-    {
-        QJsonObject js;
-        js["Color"] = al->GetLineColor();
-        js["Style"] = al->GetLineStyle();
-        js["Width"] = al->GetLineWidth();
-
-        json["Line"] = js;
-    }
+    if (al) ARootJson::toJson(al, json);
 
     const TAttMarker * am = dynamic_cast<const TAttMarker*>(tobj);
-    if (am)
-    {
-        QJsonObject js;
-        js["Color"] = am->GetMarkerColor();
-        js["Style"] = am->GetMarkerStyle();
-        js["Size"]  = am->GetMarkerSize();
-
-        json["Marker"] = js;
-    }
+    if (am) ARootJson::toJson(am, json);
 
     const TAttFill * af = dynamic_cast<const TAttFill*>(tobj);
-    if (af)
-    {
-        QJsonObject js;
-        js["Color"] = af->GetFillColor();
-        js["Style"] = af->GetFillStyle();
-
-        json["Fill"] = js;
-    }
+    if (af) ARootJson::toJson(af, json);
 }
 
 bool ARootJson::fromJson(ADrawObject & obj, const QJsonObject & json)
@@ -282,55 +193,90 @@ bool ARootJson::fromJson(ADrawObject & obj, const QJsonObject & json)
     parseJson(json, "Options", obj.Options);
 
     TAttLine * al = dynamic_cast<TAttLine*>(tobj);
-    if (al)
-    {
-        QJsonObject js;
-        if (parseJson(json, "Line", js))
-        {
-            int Color = 1;
-            parseJson(js, "Color", Color);
-            al->SetLineColor(Color);
-            int Style = 1;
-            parseJson(js, "Style", Style);
-            al->SetLineStyle(Style);
-            int Width = 1;
-            parseJson(js, "Width", Width);
-            al->SetLineWidth(Width);
-        }
-    }
+    if (al) ARootJson::fromJson(al, json);
 
     TAttMarker * am = dynamic_cast<TAttMarker*>(tobj);
-    if (am)
-    {
-        QJsonObject js;
-        if (parseJson(json, "Marker", js))
-        {
-            int Color = 1;
-            parseJson(js, "Color", Color);
-            am->SetMarkerColor(Color);
-            int Style = 1;
-            parseJson(js, "Style", Style);
-            am->SetMarkerStyle(Style);
-            float Size = 1.0;
-            parseJson(js, "Size", Size);
-            am->SetMarkerSize(Size);
-        }
-    }
+    if (am) ARootJson::fromJson(am, json);
 
     TAttFill * af = dynamic_cast<TAttFill*>(tobj);
-    if (af)
-    {
-        QJsonObject js;
-        if (parseJson(json, "Fill", js))
-        {
-            int Color = 1;
-            parseJson(js, "Color", Color);
-            af->SetFillColor(Color);
-            int Style = 1001; //0
-            parseJson(js, "Style", Style);
-            af->SetFillStyle(Style);
-        }
-    }
+    if (af) ARootJson::fromJson(af, json);
 
     return true;
+}
+
+void ARootJson::toJson(const TAttLine * obj, QJsonObject & json)
+{
+    QJsonObject js;
+    js["Color"] = obj->GetLineColor();
+    js["Style"] = obj->GetLineStyle();
+    js["Width"] = obj->GetLineWidth();
+
+    json["Line attributes"] = js;
+}
+
+void ARootJson::fromJson(TAttLine * obj, const QJsonObject &json)
+{
+    QJsonObject js;
+    if (parseJson(json, "Line attributes", js))
+    {
+        int Color = 1;
+        parseJson(js, "Color", Color);
+        obj->SetLineColor(Color);
+        int Style = 1;
+        parseJson(js, "Style", Style);
+        obj->SetLineStyle(Style);
+        int Width = 1;
+        parseJson(js, "Width", Width);
+        obj->SetLineWidth(Width);
+    }
+}
+
+void ARootJson::toJson(const TAttMarker *obj, QJsonObject &json)
+{
+    QJsonObject js;
+    js["Color"] = obj->GetMarkerColor();
+    js["Style"] = obj->GetMarkerStyle();
+    js["Size"]  = obj->GetMarkerSize();
+
+    json["Marker attributes"] = js;
+}
+
+void ARootJson::fromJson(TAttMarker *obj, const QJsonObject &json)
+{
+    QJsonObject js;
+    if (parseJson(json, "Marker attributes", js))
+    {
+        int Color = 1;
+        parseJson(js, "Color", Color);
+        obj->SetMarkerColor(Color);
+        int Style = 1;
+        parseJson(js, "Style", Style);
+        obj->SetMarkerStyle(Style);
+        float Size = 1.0;
+        parseJson(js, "Size", Size);
+        obj->SetMarkerSize(Size);
+    }
+}
+
+void ARootJson::toJson(const TAttFill *obj, QJsonObject &json)
+{
+    QJsonObject js;
+    js["Color"] = obj->GetFillColor();
+    js["Style"] = obj->GetFillStyle();
+
+    json["Fill attributes"] = js;
+}
+
+void ARootJson::fromJson(TAttFill *obj, const QJsonObject &json)
+{
+    QJsonObject js;
+    if (parseJson(json, "Fill attributes", js))
+    {
+        int Color = 1;
+        parseJson(js, "Color", Color);
+        obj->SetFillColor(Color);
+        int Style = 1001; //0
+        parseJson(js, "Style", Style);
+        obj->SetFillStyle(Style);
+    }
 }

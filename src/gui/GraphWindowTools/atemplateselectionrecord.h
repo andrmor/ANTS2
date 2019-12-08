@@ -23,6 +23,7 @@ public:
     virtual ~ATemplateSelectionRecord();
 
     void addChild(ATemplateSelectionRecord * rec);
+    ATemplateSelectionRecord * findChild(const QString & Label) const;
 };
 
 #endif // ATEMPLATESELECTIONRECORD_H

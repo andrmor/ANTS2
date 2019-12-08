@@ -29,7 +29,6 @@ void ATemplateSelectionDialog::addItem(ATemplateSelectionRecord * rec, ATemplate
     ui->tw->setItemWidget(rec->item, 0, cb);
     connect(cb, &QCheckBox::clicked, [rec, this](bool checked)
     {
-        qDebug() << "aaaaaaaa" << checked;
         bool bChecked = !rec->bSelected;
         setCheckedStatusRecursive(rec, bChecked);
         if (bChecked) setCheckedForParentsRecursive(rec);

@@ -16,3 +16,10 @@ void ATemplateSelectionRecord::addChild(ATemplateSelectionRecord * rec)
 {
     Children << rec;
 }
+
+ATemplateSelectionRecord *ATemplateSelectionRecord::findChild(const QString & Label) const
+{
+    for (ATemplateSelectionRecord * rec : Children)
+        if (rec->Label == Label) return rec;
+    return nullptr;
+}

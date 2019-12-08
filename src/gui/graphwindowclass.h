@@ -301,6 +301,7 @@ private:
     void UpdateGuiControlsForMainObject(const QString &ClassName, const QString & options);
     void contextMenuForBasketMultipleSelection(const QPoint &pos);
     void removeAllSelectedBasketItems();
+    void applyTemplate(bool bAll);
 };
 
 #endif // GRAPHWINDOWCLASS_H

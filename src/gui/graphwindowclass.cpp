@@ -2686,35 +2686,51 @@ void GraphWindowClass::on_actionMake_square_triggered()
 void GraphWindowClass::on_actionCreate_template_triggered()
 {
     if (DrawObjects.isEmpty()) return;
-    qDebug() << "Under construction!";
 
     QVector<QPair<double,double>> Limits = {QPair<double,double>(xmin, xmax), QPair<double,double>(ymin, ymax), QPair<double,double>(zmin, zmax)};
     DrawTemplate.createFrom(DrawObjects, Limits); // it seems TH1 does not contain data on the shown range for Y (and Z) axes ... -> using inidcated range!
-
-    qDebug() << "Done!";
 }
 
 void GraphWindowClass::on_actionApply_template_triggered()
 {
+    applyTemplate(true);
+}
+
+void GraphWindowClass::applyTemplate(bool bAll)
+{
     if (DrawObjects.isEmpty()) return;
-    qDebug() << "Under construction!";
 
     QVector<QPair<double,double>> XYZ_ranges;
-    DrawTemplate.applyTo(DrawObjects, XYZ_ranges);
+    DrawTemplate.applyTo(DrawObjects, XYZ_ranges, bAll);
     RedrawAll();
 
-    ui->ledXfrom->setText( QString::number(XYZ_ranges[0].first,  'g', 4) );
-    ui->ledXto->  setText( QString::number(XYZ_ranges[0].second, 'g', 4) );
-    ui->ledYfrom->setText( QString::number(XYZ_ranges[1].first,  'g', 4) );
-    ui->ledYto->  setText( QString::number(XYZ_ranges[1].second, 'g', 4) );
-    if (ui->ledZfrom->isEnabled() && !ui->ledZfrom->text().isEmpty())
+    //everything but ranges is already applied
+    const ATemplateSelectionRecord * range_rec = DrawTemplate.findRecord("Ranges", &DrawTemplate.Selection);
+    if (range_rec && range_rec->bSelected)
     {
-        ui->ledZfrom->setText( QString::number(XYZ_ranges[2].first,  'g', 4) );
-        ui->ledZto->  setText( QString::number(XYZ_ranges[2].second, 'g', 4) );
+        const ATemplateSelectionRecord * X_rec = DrawTemplate.findRecord("X range", range_rec);
+        if (X_rec && X_rec->bSelected)
+        {
+            ui->ledXfrom->setText( QString::number(XYZ_ranges[0].first,  'g', 4) );
+            ui->ledXto->  setText( QString::number(XYZ_ranges[0].second, 'g', 4) );
+        }
+        const ATemplateSelectionRecord * Y_rec = DrawTemplate.findRecord("Y range", range_rec);
+        if (Y_rec && Y_rec->bSelected)
+        {
+            ui->ledYfrom->setText( QString::number(XYZ_ranges[1].first,  'g', 4) );
+            ui->ledYto->  setText( QString::number(XYZ_ranges[1].second, 'g', 4) );
+        }
+        const ATemplateSelectionRecord * Z_rec = DrawTemplate.findRecord("Z range", range_rec);
+        if (Z_rec && Z_rec->bSelected)
+        {
+            if (ui->ledZfrom->isEnabled() && !ui->ledZfrom->text().isEmpty())
+            {
+                ui->ledZfrom->setText( QString::number(XYZ_ranges[2].first,  'g', 4) );
+                ui->ledZto->  setText( QString::number(XYZ_ranges[2].second, 'g', 4) );
+            }
+        }
+        Reshape();
     }
-    Reshape();
-
-    qDebug() << "Done!";
 
     HighlightUpdateBasketButton(true);
 }
@@ -2732,5 +2748,7 @@ void GraphWindowClass::HighlightUpdateBasketButton(bool flag)
 void GraphWindowClass::on_actionApply_selective_triggered()
 {
     ATemplateSelectionDialog D(DrawTemplate.Selection, this);
-    D.exec();
+    int res = D.exec();
+    if (res == QDialog::Accepted)
+        applyTemplate(false);
 }

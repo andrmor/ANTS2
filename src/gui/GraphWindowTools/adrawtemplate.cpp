@@ -14,6 +14,7 @@
 ADrawTemplate::ADrawTemplate()
 {
     InitSelection();
+    DummyRecordSelected.bSelected = true;
 }
 
 ADrawTemplate::~ADrawTemplate()
@@ -52,34 +53,69 @@ void ADrawTemplate::createFrom(const QVector<ADrawObject> & DrawObjects, const Q
     }
 }
 
-void ADrawTemplate::applyTo(QVector<ADrawObject> & DrawObjects, QVector<QPair<double,double>> & XYZ_ranges) const
+void ADrawTemplate::applyTo(QVector<ADrawObject> & DrawObjects, QVector<QPair<double,double>> & XYZ_ranges, bool bAll)
 {
     if (DrawObjects.isEmpty()) return;
     TObject * tobj = DrawObjects.first().Pointer;
     if (!tobj) return;
 
+    bIgnoreSelection = bAll;
+
     //draw options and attibutes
-    DrawObjects.first().Options = DrawOption;
+    //DrawObjects.first().Options = DrawOption;
     //DrawAttributes.applyProperties(tobj);
 
     //axes
-    for (int i = 0; i < 3; i++)
+    const ATemplateSelectionRecord * axes_rec = findRecord("Axes", &Selection);
+    if (axes_rec && axes_rec->bSelected)
     {
-        TAxis * axis = getAxis(tobj, i);
-        applyAxisProperties(i, axis);
+        const ATemplateSelectionRecord * X_rec = findRecord("X axis", axes_rec);
+        if (X_rec && X_rec->bSelected)
+        {
+            TAxis * axis = getAxis(tobj, 0);
+            applyAxisProperties(0, axis);
+        }
+        const ATemplateSelectionRecord * Y_rec = findRecord("Y axis", axes_rec);
+        if (Y_rec && Y_rec->bSelected)
+        {
+            TAxis * axis = getAxis(tobj, 1);  // will be special rules for vertical axis
+            applyAxisProperties(1, axis);
+        }
+        const ATemplateSelectionRecord * Z_rec = findRecord("Y axis", axes_rec);
+        if (Z_rec && Z_rec->bSelected)
+        {
+            TAxis * axis = getAxis(tobj, 2);  // might be special rule for Z axes
+            applyAxisProperties(2, axis);
+        }
     }
 
     //ranges
-    XYZ_ranges = XYZranges;
+    const ATemplateSelectionRecord * range_rec = findRecord("Ranges", &Selection);
+    if (range_rec && range_rec->bSelected)
+    {
+        XYZ_ranges = XYZranges;
+        /*
+        const ATemplateSelectionRecord * X_rec = findRecord("X range", range_rec);
+        if (X_rec && X_rec->bSelected) XYZ_ranges[0] = XYZranges[0];
+        const ATemplateSelectionRecord * Y_rec = findRecord("Y range", range_rec);
+        if (Y_rec && Y_rec->bSelected) XYZ_ranges[1] = XYZranges[1];
+        const ATemplateSelectionRecord * Z_rec = findRecord("Z range", range_rec);
+        if (Z_rec && Z_rec->bSelected) XYZ_ranges[2] = XYZranges[2];
+        */
+    }
 
     //draw properties
-    for (int i=0; i<ObjectAttributes.size(); i++)
+    const ATemplateSelectionRecord * att_rec = findRecord("Drawn object attributes", &Selection);
+    if (att_rec && att_rec->bSelected)
     {
-        if (i >= DrawObjects.size()) break;
-        const QJsonObject & json = ObjectAttributes.at(i);
+        for (int i=0; i<ObjectAttributes.size(); i++)
+        {
+            if (i >= DrawObjects.size()) break;
+            const QJsonObject & json = ObjectAttributes.at(i);
 
-        bool bOK = ARootJson::fromJson(DrawObjects[i], json);
-        if (!bOK) break;
+            bool bOK = ARootJson::fromJson(DrawObjects[i], json);
+            if (!bOK) break;
+        }
     }
 }
 
@@ -153,6 +189,12 @@ void ADrawTemplate::clearSelection()
     for (ATemplateSelectionRecord * rec : Selection.Children) delete rec;
     Selection.Children.clear();
     Selection.Parent = nullptr;
+}
+
+const ATemplateSelectionRecord * ADrawTemplate::findRecord(const QString & Label, const ATemplateSelectionRecord * ParentRecord) const
+{
+    if (bIgnoreSelection) return &DummyRecordSelected;
+    return ParentRecord->findChild(Label);
 }
 
 void ADrawTemplate_Axis::fillProperties(const TAxis *axis)

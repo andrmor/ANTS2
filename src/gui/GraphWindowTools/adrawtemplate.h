@@ -47,9 +47,9 @@ public:
     virtual ~ADrawTemplate();
 
     void createFrom(const QVector<ADrawObject> &DrawObjects, const QVector<QPair<double,double>> & XYZ_ranges);
-    void applyTo(QVector<ADrawObject> & DrawObjects, QVector<QPair<double,double>> & XYZ_ranges) const;
+    void applyTo(QVector<ADrawObject> & DrawObjects, QVector<QPair<double,double>> & XYZ_ranges, bool bAll);
 
-    void InitSelection();
+    const ATemplateSelectionRecord * findRecord(const QString & Label, const ATemplateSelectionRecord * ParentRecord) const;
 
 private:
     QString DrawOption;
@@ -57,7 +57,11 @@ private:
     QVector<QPair<double, double>> XYZranges;
     QVector<QJsonObject> ObjectAttributes;
 
+    bool bIgnoreSelection = true;
+    ATemplateSelectionRecord DummyRecordSelected;  //used when "apply template" is triggered in non-selective mode
+
 private:
+    void    InitSelection();
     TAxis * getAxis(TObject *tobj, int index) const;
     void    fillAxisProperties (int index, TAxis * axis);
     void    applyAxisProperties(int index, TAxis * axis) const;

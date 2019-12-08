@@ -258,6 +258,8 @@ private slots:
 
     void on_actionApply_template_triggered();
 
+    void on_actionApply_selective_triggered();
+
 private:
     MainWindow *MW;
     Ui::GraphWindowClass *ui;

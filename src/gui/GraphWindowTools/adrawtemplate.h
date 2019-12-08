@@ -1,6 +1,8 @@
 #ifndef ADRAWTEMPLATE_H
 #define ADRAWTEMPLATE_H
 
+#include "atemplateselectionrecord.h"
+
 #include <QVector>
 #include <QPair>
 #include <QString>
@@ -39,22 +41,27 @@ public:
 class ADrawTemplate
 {
 public:
+    ATemplateSelectionRecord Selection;
+
+    ADrawTemplate();
+    virtual ~ADrawTemplate();
+
     void createFrom(const QVector<ADrawObject> &DrawObjects, const QVector<QPair<double,double>> & XYZ_ranges);
     void applyTo(QVector<ADrawObject> & DrawObjects, QVector<QPair<double,double>> & XYZ_ranges) const;
 
+    void InitSelection();
+
 private:
     QString DrawOption;
-    //ADrawTemplate_DrawAttributes DrawAttributes;
     ADrawTemplate_Axis  AxisProperties[3];
     QVector<QPair<double, double>> XYZranges;
-
     QVector<QJsonObject> ObjectAttributes;
-
 
 private:
     TAxis * getAxis(TObject *tobj, int index) const;
     void    fillAxisProperties (int index, TAxis * axis);
     void    applyAxisProperties(int index, TAxis * axis) const;
+    void    clearSelection();
 };
 
 class TAttLine;

@@ -11,6 +11,16 @@
 #include "TAttMarker.h"
 #include "TAttFill.h"
 
+ADrawTemplate::ADrawTemplate()
+{
+    InitSelection();
+}
+
+ADrawTemplate::~ADrawTemplate()
+{
+    clearSelection();
+}
+
 void ADrawTemplate::createFrom(const QVector<ADrawObject> & DrawObjects, const QVector<QPair<double, double> > & XYZ_ranges)
 {
     if (DrawObjects.isEmpty()) return;
@@ -73,6 +83,26 @@ void ADrawTemplate::applyTo(QVector<ADrawObject> & DrawObjects, QVector<QPair<do
     }
 }
 
+void ADrawTemplate::InitSelection()
+{
+    clearSelection();
+
+    Selection.Label = "All properties";
+    Selection.bExpanded = true;
+
+    ATemplateSelectionRecord * axes  = new ATemplateSelectionRecord("Axes", &Selection);
+    ATemplateSelectionRecord * xAxis = new ATemplateSelectionRecord("X axis", axes);
+    ATemplateSelectionRecord * yAxis = new ATemplateSelectionRecord("Y axis", axes);
+    ATemplateSelectionRecord * zAxis = new ATemplateSelectionRecord("Z axis", axes);
+
+    ATemplateSelectionRecord * ranges = new ATemplateSelectionRecord("Ranges", &Selection);
+    ATemplateSelectionRecord * xRange = new ATemplateSelectionRecord("X range", ranges);
+    ATemplateSelectionRecord * yRange = new ATemplateSelectionRecord("Y range", ranges);
+    ATemplateSelectionRecord * zRange = new ATemplateSelectionRecord("Z range", ranges);
+
+    ATemplateSelectionRecord * drawObj = new ATemplateSelectionRecord("Drawn object attributes", &Selection);
+}
+
 TAxis * ADrawTemplate::getAxis(TObject * tobj, int index) const
 {
     TAxis * axis = nullptr;
@@ -116,6 +146,13 @@ void ADrawTemplate::applyAxisProperties(int index, TAxis * axis) const
     if (index < 0 || index > 2) return;
     const ADrawTemplate_Axis & ap = AxisProperties[index];
     ap.applyProperties(axis);
+}
+
+void ADrawTemplate::clearSelection()
+{
+    for (ATemplateSelectionRecord * rec : Selection.Children) delete rec;
+    Selection.Children.clear();
+    Selection.Parent = nullptr;
 }
 
 void ADrawTemplate_Axis::fillProperties(const TAxis *axis)

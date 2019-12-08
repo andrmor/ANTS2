@@ -147,6 +147,8 @@ GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
     connect(ui->cbRulerShowBG, &QCheckBox::toggled, scene->getRuler(), &GraphicsRuler::setShowContrast);
 
     new QShortcut(QKeySequence(Qt::Key_Delete), this, SLOT(deletePressed()));
+
+    DrawTemplate.Selection.bExpanded = true;
 }
 
 GraphWindowClass::~GraphWindowClass()
@@ -2724,4 +2726,11 @@ void GraphWindowClass::HighlightUpdateBasketButton(bool flag)
     if (flag && ui->pbUpdateInBasket->isEnabled())
         icon = GuiUtils::createColorCircleIcon(QSize(15,15), Qt::yellow);
     ui->pbUpdateInBasket->setIcon(icon);
+}
+
+#include "atemplateselectiondialog.h"
+void GraphWindowClass::on_actionApply_selective_triggered()
+{
+    ATemplateSelectionDialog D(DrawTemplate.Selection, this);
+    D.exec();
 }

@@ -425,7 +425,9 @@ SOURCES += main.cpp \
     gui/GraphWindowTools/atextpavedialog.cpp \
     gui/GraphWindowTools/alinemarkerfilldialog.cpp \
     gui/GraphWindowTools/arootcolorselectordialog.cpp \
-    gui/GraphWindowTools/adrawtemplate.cpp
+    gui/GraphWindowTools/adrawtemplate.cpp \
+    gui/GraphWindowTools/atemplateselectiondialog.cpp \
+    gui/GraphWindowTools/atemplateselectionrecord.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -593,7 +595,9 @@ HEADERS  += common/CorrelationFilters.h \
     gui/GraphWindowTools/atextpavedialog.h \
     gui/GraphWindowTools/alinemarkerfilldialog.h \
     gui/GraphWindowTools/arootcolorselectordialog.h \
-    gui/GraphWindowTools/adrawtemplate.h
+    gui/GraphWindowTools/adrawtemplate.h \
+    gui/GraphWindowTools/atemplateselectiondialog.h \
+    gui/GraphWindowTools/atemplateselectionrecord.h
 
 # --- SIM ---
 ants2_SIM {
@@ -951,5 +955,6 @@ FORMS += \
     gui/GraphWindowTools/aaxesdialog.ui \
     gui/GraphWindowTools/atextpavedialog.ui \
     gui/GraphWindowTools/alinemarkerfilldialog.ui \
-    gui/GraphWindowTools/arootcolorselectordialog.ui
+    gui/GraphWindowTools/arootcolorselectordialog.ui \
+    gui/GraphWindowTools/atemplateselectiondialog.ui
 

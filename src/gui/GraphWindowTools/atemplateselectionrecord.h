@@ -16,14 +16,16 @@ public:
     ATemplateSelectionRecord * Parent = nullptr;
     QVector<ATemplateSelectionRecord *> Children;
 
-    QTreeWidgetItem * item = nullptr;
+    QTreeWidgetItem * Item = nullptr;
 
     ATemplateSelectionRecord(const QString & Label, ATemplateSelectionRecord * Parent);
     ATemplateSelectionRecord(){}
     virtual ~ATemplateSelectionRecord();
 
     void addChild(ATemplateSelectionRecord * rec);
+
     ATemplateSelectionRecord * findChild(const QString & Label) const;
+    ATemplateSelectionRecord * findRecordByItem(const QTreeWidgetItem * item);
 };
 
 #endif // ATEMPLATESELECTIONRECORD_H

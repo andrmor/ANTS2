@@ -15,19 +15,22 @@ ATemplateSelectionDialog::ATemplateSelectionDialog(ATemplateSelectionRecord & Se
     ui->setupUi(this);
     addItem(&Selection, nullptr);
     updateCheckStateIndication(&Selection);
+
+    connect(ui->tw, &QTreeWidget::itemExpanded, this,  &ATemplateSelectionDialog::onItemExpanded);
+    connect(ui->tw, &QTreeWidget::itemCollapsed, this, &ATemplateSelectionDialog::onItemColapsed);
 }
 
 void ATemplateSelectionDialog::addItem(ATemplateSelectionRecord * rec, ATemplateSelectionRecord * parent)
 {
-    rec->item = new QTreeWidgetItem();
+    rec->Item = new QTreeWidgetItem();
 
-    if (parent) parent->item->addChild(rec->item);
-    else ui->tw->addTopLevelItem(rec->item);
+    if (parent) parent->Item->addChild(rec->Item);
+    else ui->tw->addTopLevelItem(rec->Item);
 
     QCheckBox * cb = new QCheckBox(rec->Label);
     cb->setTristate(true);
-    ui->tw->setItemWidget(rec->item, 0, cb);
-    connect(cb, &QCheckBox::clicked, [rec, this](bool checked)
+    ui->tw->setItemWidget(rec->Item, 0, cb);
+    connect(cb, &QCheckBox::clicked, [rec, this]()
     {
         bool bChecked = !rec->bSelected;
         setCheckedStatusRecursive(rec, bChecked);
@@ -35,7 +38,7 @@ void ATemplateSelectionDialog::addItem(ATemplateSelectionRecord * rec, ATemplate
         updateCheckStateIndication(&Selection);
     });
 
-    rec->item->setExpanded(rec->bExpanded);
+    rec->Item->setExpanded(rec->bExpanded);
 
     for (ATemplateSelectionRecord * r : rec->Children)
         addItem(r, rec);
@@ -102,7 +105,19 @@ void ATemplateSelectionDialog::updateCheckStateIndication(ATemplateSelectionReco
 
 QCheckBox * ATemplateSelectionDialog::getCheckBox(ATemplateSelectionRecord * rec)
 {
-    return dynamic_cast<QCheckBox*>(ui->tw->itemWidget(rec->item, 0));
+    return dynamic_cast<QCheckBox*>(ui->tw->itemWidget(rec->Item, 0));
+}
+
+void ATemplateSelectionDialog::onItemExpanded(QTreeWidgetItem * item)
+{
+    ATemplateSelectionRecord * rec = Selection.findRecordByItem(item);
+    if (rec) rec->bExpanded = true;
+}
+
+void ATemplateSelectionDialog::onItemColapsed(QTreeWidgetItem * item)
+{
+    ATemplateSelectionRecord * rec = Selection.findRecordByItem(item);
+    if (rec) rec->bExpanded = false;
 }
 
 ATemplateSelectionDialog::~ATemplateSelectionDialog()

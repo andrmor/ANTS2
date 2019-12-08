@@ -23,3 +23,15 @@ ATemplateSelectionRecord *ATemplateSelectionRecord::findChild(const QString & La
         if (rec->Label == Label) return rec;
     return nullptr;
 }
+
+ATemplateSelectionRecord * ATemplateSelectionRecord::findRecordByItem(const QTreeWidgetItem *item)
+{
+    if (Item == item) return this;
+
+    for (ATemplateSelectionRecord * rec : Children)
+    {
+        ATemplateSelectionRecord * found = rec->findRecordByItem(item);
+        if (found) return found;
+    }
+    return nullptr;
+}

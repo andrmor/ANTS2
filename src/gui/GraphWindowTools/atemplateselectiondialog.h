@@ -9,6 +9,7 @@ class ATemplateSelectionDialog;
 
 class ATemplateSelectionRecord;
 class QCheckBox;
+class QTreeWidgetItem;
 
 class ATemplateSelectionDialog : public QDialog
 {
@@ -25,6 +26,10 @@ private slots:
 private:
     ATemplateSelectionRecord & Selection;
     Ui::ATemplateSelectionDialog *ui;
+
+private slots:
+    void onItemExpanded(QTreeWidgetItem * item);
+    void onItemColapsed(QTreeWidgetItem * item);
 
 private:
     void addItem(ATemplateSelectionRecord * rec, ATemplateSelectionRecord * parent);

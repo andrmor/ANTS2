@@ -1840,6 +1840,7 @@ in basket</string>
     <addaction name="actionCreate_template"/>
     <addaction name="separator"/>
     <addaction name="actionApply_template"/>
+    <addaction name="separator"/>
     <addaction name="actionApply_selective"/>
    </widget>
    <addaction name="menuExport"/>
@@ -1963,7 +1964,7 @@ in basket</string>
   </action>
   <action name="actionApply_selective">
    <property name="text">
-    <string>Select features and apply </string>
+    <string>Apply selected features</string>
    </property>
   </action>
  </widget>

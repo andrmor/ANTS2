@@ -13,6 +13,9 @@ CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 
 CONFIG += ants2_jsroot       #enables JSROOT visualisation at GeometryWindow. Automatically enables ants2_RootServer
 
+#WATER'S ADDITION
+#CONFIG += ants2_docker
+
 # You may need to modify paths for CERN ROOT and the enabled libraries! See the corresponding sections below
 
 #Optional features enabled in Docker version   
@@ -40,7 +43,7 @@ win32 {
 linux-g++ || unix {
      CONFIG += c++17
      INCLUDEPATH += $$system(root-config --incdir)
-     LIBS += $$system(root-config --libs) -lGeom -lGeomPainter -lGeomBuilder -lMinuit2 -lSpectrum
+     LIBS += $$system(root-config --libs) -lGeom -lGeomPainter -lGeomBuilder -lMinuit2 -lSpectrum -ltbb
      ants2_RootServer {LIBS += -lRHTTP  -lXMLIO}
 }
 #-----------

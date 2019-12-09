@@ -15,8 +15,10 @@
 #include "TRandom2.h"
 #include "TH1D.h"
 
+#include "afiletools.h" // WATER'S CHANGES
+
 #ifdef GUI
-#include "afiletools.h"
+// #include "afiletools.h" // WATER'S CHANGES
 #include "graphwindowclass.h"
 #include "amessage.h"
 #include "TGraph.h"

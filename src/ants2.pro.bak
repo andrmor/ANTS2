@@ -28,7 +28,7 @@ ants2_docker {
 DEBUG_VERBOSITY = 1          # 0 - debug messages suppressed, 1 - normal, 2 - normal + file/line information
                              # after a change, qmake and rebuild (or qmake + make any change in main.cpp to trigger recompilation)
 
-#CONFIG += ants2_GUI         #if disabled, GUI is not compiled
+CONFIG += ants2_GUI         #if disabled, GUI is not compiled
 CONFIG += ants2_SIM         #if disabled, simulation-related modules are not compiled
 
 #---CERN ROOT---
@@ -40,7 +40,7 @@ win32 {
 linux-g++ || unix {
      CONFIG += c++17
      INCLUDEPATH += $$system(root-config --incdir)
-     LIBS += $$system(root-config --libs) -lGeom -lGeomPainter -lGeomBuilder -lMinuit2 -lSpectrum
+     LIBS += $$system(root-config --libs) -lGeom -lGeomPainter -lGeomBuilder -lMinuit2 -lSpectrum -ltbb
      ants2_RootServer {LIBS += -lRHTTP  -lXMLIO}
 }
 #-----------
@@ -120,8 +120,8 @@ ants2_fann {
     HEADERS += modules/neuralnetworksmodule.h
     SOURCES += modules/neuralnetworksmodule.cpp
       #gui only
-#    HEADERS += gui/neuralnetworkswindow.h
-#    SOURCES += gui/neuralnetworkswindow.cpp
+    HEADERS += gui/neuralnetworkswindow.h
+    SOURCES += gui/neuralnetworkswindow.cpp
       #interface to script module
     HEADERS += scriptmode/aann_si.h
     SOURCES += scriptmode/aann_si.cpp
@@ -220,7 +220,7 @@ ants2_Python{
     HEADERS += scriptmode/apythonscriptmanager.h
     SOURCES += scriptmode/apythonscriptmanager.cpp
 
-#    SOURCES += gui/MainWindowTools/pythonscript.cpp
+    SOURCES += gui/MainWindowTools/pythonscript.cpp
 }
 #----------
 
@@ -389,7 +389,7 @@ SOURCES += main.cpp \
     common/aisotope.cpp \
     common/achemicalelement.cpp \
     Simulation/ag4simulationsettings.cpp \
-#    gui/ageant4configdialog.cpp \
+    gui/ageant4configdialog.cpp \
     scriptmode/asim_si.cpp \
     scriptmode/amath_si.cpp \
     scriptmode/atree_si.cpp \
@@ -411,7 +411,7 @@ SOURCES += main.cpp \
     Simulation/atrackinghistorycrawler.cpp \
     Simulation/aparticletracker.cpp \
     common/aexternalprocesshandler.cpp \
-#    gui/MainWindowTools/alogconfigdialog.cpp \
+    gui/MainWindowTools/alogconfigdialog.cpp \
     Simulation/alogsandstatisticsoptions.cpp \
     scriptmode/readDiffusionVolume.cpp \
     scriptmode/diffusion.cpp \
@@ -547,7 +547,7 @@ HEADERS  += common/CorrelationFilters.h \
     common/aisotope.h \
     common/achemicalelement.h \
     Simulation/ag4simulationsettings.h \
-#    gui/ageant4configdialog.h \
+    gui/ageant4configdialog.h \
     scriptmode/asim_si.h \
     scriptmode/amath_si.h \
     scriptmode/atree_si.h \
@@ -569,7 +569,7 @@ HEADERS  += common/CorrelationFilters.h \
     Simulation/atrackinghistorycrawler.h \
     Simulation/aparticletracker.h \
     common/aexternalprocesshandler.h \
-#    gui/MainWindowTools/alogconfigdialog.h \
+    gui/MainWindowTools/alogconfigdialog.h \
     Simulation/alogsandstatisticsoptions.h \
     Reconstruction/afunctorbase.h \
     scriptmode/readDiffusionVolume.h \
@@ -926,7 +926,7 @@ unix {
 }
 #------------
 
-#FORMS += \
-#    gui/ageant4configdialog.ui \
-#   gui/MainWindowTools/alogconfigdialog.ui
+FORMS += \
+    gui/ageant4configdialog.ui \
+    gui/MainWindowTools/alogconfigdialog.ui
 

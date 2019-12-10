@@ -10,6 +10,7 @@
 #include "TAttLine.h"
 #include "TAttMarker.h"
 #include "TAttFill.h"
+#include "TLegend.h"
 
 ADrawTemplate::ADrawTemplate()
 {
@@ -45,11 +46,16 @@ void ADrawTemplate::createFrom(const QVector<ADrawObject> & DrawObjects, const Q
 
     //draw properties
     ObjectAttributes.clear();
-    for (const ADrawObject & obj : DrawObjects)
+    LegendIndex = -1;
+    for (int iObj = 0; iObj < DrawObjects.size(); iObj++)
     {
+        const ADrawObject & obj = DrawObjects.at(iObj);
         QJsonObject json;
         ARootJson::toJson(obj, json);
         ObjectAttributes << json;
+
+        const TLegend * Leg = dynamic_cast<const TLegend*>(obj.Pointer);
+        if (Leg) LegendIndex = iObj;
     }
 }
 
@@ -60,10 +66,6 @@ void ADrawTemplate::applyTo(QVector<ADrawObject> & DrawObjects, QVector<QPair<do
     if (!tobj) return;
 
     bIgnoreSelection = bAll;
-
-    //draw options and attibutes
-    //DrawObjects.first().Options = DrawOption;
-    //DrawAttributes.applyProperties(tobj);
 
     //axes
     const ATemplateSelectionRecord * axes_rec = findRecord("Axes", &Selection);
@@ -92,16 +94,41 @@ void ADrawTemplate::applyTo(QVector<ADrawObject> & DrawObjects, QVector<QPair<do
     //ranges
     const ATemplateSelectionRecord * range_rec = findRecord("Ranges", &Selection);
     if (range_rec && range_rec->bSelected)
-    {
         XYZ_ranges = XYZranges;
-        /*
-        const ATemplateSelectionRecord * X_rec = findRecord("X range", range_rec);
-        if (X_rec && X_rec->bSelected) XYZ_ranges[0] = XYZranges[0];
-        const ATemplateSelectionRecord * Y_rec = findRecord("Y range", range_rec);
-        if (Y_rec && Y_rec->bSelected) XYZ_ranges[1] = XYZranges[1];
-        const ATemplateSelectionRecord * Z_rec = findRecord("Z range", range_rec);
-        if (Z_rec && Z_rec->bSelected) XYZ_ranges[2] = XYZranges[2];
-        */
+
+    //if template has a Legend, assure that the DrawObjects hav TLegend, preferably at the same index
+    int iLegend = -1;
+    if (LegendIndex != -1)
+    {
+        const ATemplateSelectionRecord * legend_rec = findRecord("Legend", &Selection);
+        if (legend_rec && legend_rec->bSelected)
+        {
+            TLegend * Legend = nullptr;
+            for (int iObj = 0; iObj < DrawObjects.size(); iObj++)
+            {
+                Legend = dynamic_cast<TLegend*>(DrawObjects[iObj].Pointer);
+                if (Legend)
+                {
+                    iLegend = iObj;
+                    break;
+                }
+            }
+
+            if (!Legend) //paranoic -> will be created before calling this method
+            {
+                Legend = new TLegend(0.1,0.1, 0.5,0.5, "", "br");
+                DrawObjects << ADrawObject(Legend, "same");
+            }
+
+            if (iLegend != LegendIndex)
+            {
+                if (iLegend > LegendIndex)
+                {
+                    DrawObjects.move(iLegend, LegendIndex);
+                    iLegend = LegendIndex;
+                }
+            }
+        }
     }
 
     //draw properties
@@ -244,6 +271,7 @@ void ADrawTemplate_Axis::applyProperties(TAxis * axis) const
 }
 
 #include "ajsontools.h"
+#include "TAttText.h"
 void ARootJson::toJson(const ADrawObject & obj, QJsonObject & json)
 {
     const TObject * tobj = obj.Pointer;
@@ -258,6 +286,12 @@ void ARootJson::toJson(const ADrawObject & obj, QJsonObject & json)
 
     const TAttFill * af = dynamic_cast<const TAttFill*>(tobj);
     if (af) ARootJson::toJson(af, json);
+
+    const TAttText * aText = dynamic_cast<const TAttText*>(tobj);
+    if (aText) ARootJson::toJson(aText, json);
+
+    const TLegend * aLeg = dynamic_cast<const TLegend*>(tobj);
+    if (aLeg) ARootJson::toJson(aLeg, json);
 }
 
 bool ARootJson::fromJson(ADrawObject & obj, const QJsonObject & json)
@@ -279,6 +313,12 @@ bool ARootJson::fromJson(ADrawObject & obj, const QJsonObject & json)
 
     TAttFill * af = dynamic_cast<TAttFill*>(tobj);
     if (af) ARootJson::fromJson(af, json);
+
+    TAttText * aText = dynamic_cast<TAttText*>(tobj);
+    if (aText) ARootJson::fromJson(aText, json);
+
+    TLegend * aLeg = dynamic_cast<TLegend*>(tobj);
+    if (aLeg) ARootJson::fromJson(aLeg, json);
 
     return true;
 }
@@ -358,4 +398,68 @@ void ARootJson::fromJson(TAttFill *obj, const QJsonObject &json)
         parseJson(js, "Style", Style);
         obj->SetFillStyle(Style);
     }
+}
+
+void ARootJson::toJson(const TAttText * obj, QJsonObject &json)
+{
+    QJsonObject js;
+    js["Align"] = obj->GetTextAlign();
+    js["Color"] = obj->GetTextColor();
+    js["Font"] = obj->GetTextFont();
+    js["Size"] = obj->GetTextSize();
+
+    json["Text attributes"] = js;
+}
+
+void ARootJson::fromJson(TAttText *obj, const QJsonObject &json)
+{
+    QJsonObject js;
+    if (parseJson(json, "Text attributes", js))
+    {
+        int Align = 11;
+        parseJson(js, "Align", Align);
+        obj->SetTextAlign(Align);
+        int Color = 1;
+        parseJson(js, "Color", Color);
+        obj->SetTextColor(Color);
+        int Font = 2;
+        parseJson(js, "Font", Font);
+        obj->SetTextFont(Font);
+        float Size;
+        parseJson(js, "Size", Size);
+        obj->SetTextSize(Size);
+    }
+}
+
+void ARootJson::toJson(const TLegend *obj, QJsonObject &json)
+{
+    QJsonObject jsTop;
+
+    QJsonObject jsGeo;
+        jsGeo["X1"] = obj->GetX1NDC();
+        jsGeo["X2"] = obj->GetX2NDC();
+        jsGeo["Y1"] = obj->GetY1NDC();
+        jsGeo["Y2"] = obj->GetY2NDC();
+    jsTop["Geometry"] = jsGeo;
+
+    json["Legend"] = jsTop;
+}
+
+void ARootJson::fromJson(TLegend *obj, const QJsonObject &json)
+{
+    QJsonObject jsTop;
+    parseJson(json, "Legend", jsTop);
+
+    QJsonObject jsGeo;
+    parseJson(jsTop, "Geometry", jsGeo);
+    double d = 0.5;
+    parseJson(jsGeo, "X1", d);
+    obj->SetX1NDC(d);
+    parseJson(jsGeo, "X2", d);
+    obj->SetX2NDC(d);
+    parseJson(jsGeo, "Y1", d);
+    obj->SetY1NDC(d);
+    parseJson(jsGeo, "Y2", d);
+    obj->SetY2NDC(d);
+
 }

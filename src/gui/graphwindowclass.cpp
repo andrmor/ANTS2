@@ -2700,6 +2700,22 @@ void GraphWindowClass::applyTemplate(bool bAll)
 {
     if (DrawObjects.isEmpty()) return;
 
+    if (DrawTemplate.hasLegend())
+    {
+        const ATemplateSelectionRecord * legend_rec = DrawTemplate.findRecord("Legend", &DrawTemplate.Selection);
+        if (legend_rec && legend_rec->bSelected)
+        {
+            TLegend * Legend = nullptr;
+            for (ADrawObject & obj : DrawObjects)
+            {
+                Legend = dynamic_cast<TLegend*>(obj.Pointer);
+                if (Legend) break;
+            }
+            if (!Legend) //cannot build legend inside Template due to limitations in ROOT (problems with positioning if TCanvas is not involved)
+                Legend = AddLegend();
+        }
+    }
+
     QVector<QPair<double,double>> XYZ_ranges;
     DrawTemplate.applyTo(DrawObjects, XYZ_ranges, bAll);
     RedrawAll();

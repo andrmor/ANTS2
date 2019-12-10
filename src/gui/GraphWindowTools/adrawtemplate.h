@@ -11,6 +11,7 @@
 class ADrawObject;
 class TObject;
 class TAxis;
+class TAttText;
 
 class ADrawTemplate_Axis
 {
@@ -50,12 +51,15 @@ public:
     void applyTo(QVector<ADrawObject> & DrawObjects, QVector<QPair<double,double>> & XYZ_ranges, bool bAll);
 
     const ATemplateSelectionRecord * findRecord(const QString & Label, const ATemplateSelectionRecord * ParentRecord) const;
+    bool hasLegend() const {return (LegendIndex != -1);}
 
 private:
     QString DrawOption;
     ADrawTemplate_Axis  AxisProperties[3];
     QVector<QPair<double, double>> XYZranges;
     QVector<QJsonObject> ObjectAttributes;
+
+    int LegendIndex = -1;
 
     bool bIgnoreSelection = true;
     ATemplateSelectionRecord DummyRecordSelected;  //used when "apply template" is triggered in non-selective mode
@@ -71,10 +75,13 @@ private:
 class TAttLine;
 class TAttMarker;
 class TAttFill;
+class TLegend;
+
 namespace ARootJson
 {
     void toJson(const ADrawObject & obj, QJsonObject & json);
     bool fromJson(ADrawObject & obj, const QJsonObject & json);
+
 
     void toJson(const TAttLine * obj, QJsonObject & json);
     void fromJson(TAttLine * obj, const QJsonObject & json);
@@ -84,6 +91,12 @@ namespace ARootJson
 
     void toJson(const TAttFill * obj, QJsonObject & json);
     void fromJson(TAttFill * obj, const QJsonObject & json);
+
+    void toJson(const TAttText * obj, QJsonObject & json);
+    void fromJson(TAttText * obj, const QJsonObject & json);
+
+    void toJson(const TLegend * obj, QJsonObject & json);
+    void fromJson(TLegend * obj, const QJsonObject & json);
 }
 
 #endif // ADRAWTEMPLATE_H

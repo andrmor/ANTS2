@@ -98,25 +98,27 @@ void ADrawTemplate::applyTo(QVector<ADrawObject> & DrawObjects, QVector<QPair<do
 
     //if template has a Legend, assure that the DrawObjects hav TLegend, preferably at the same index
     int iLegend = -1;
+    TLegend * Legend = nullptr;
+    for (int iObj = 0; iObj < DrawObjects.size(); iObj++)
+    {
+        Legend = dynamic_cast<TLegend*>(DrawObjects[iObj].Pointer);
+        if (Legend)
+        {
+            iLegend = iObj;
+            break;
+        }
+    }
+    bool bApplyLegend = false;
     if (LegendIndex != -1)
     {
-        const ATemplateSelectionRecord * legend_rec = findRecord("Legend", &Selection);
+        const ATemplateSelectionRecord * legend_rec = findRecord("Legend attributes", &Selection);
         if (legend_rec && legend_rec->bSelected)
         {
-            TLegend * Legend = nullptr;
-            for (int iObj = 0; iObj < DrawObjects.size(); iObj++)
-            {
-                Legend = dynamic_cast<TLegend*>(DrawObjects[iObj].Pointer);
-                if (Legend)
-                {
-                    iLegend = iObj;
-                    break;
-                }
-            }
+            bApplyLegend = true;
 
-            if (!Legend) //paranoic -> will be created before calling this method
+            if (!Legend) //paranoic -> Legend is created before calling this method
             {
-                Legend = new TLegend(0.1,0.1, 0.5,0.5, "", "br");
+                Legend = new TLegend(0.1,0.1, 0.5,0.5); //not fully functional if created here! position is not set by read properties method
                 DrawObjects << ADrawObject(Legend, "same");
             }
 
@@ -140,8 +142,22 @@ void ADrawTemplate::applyTo(QVector<ADrawObject> & DrawObjects, QVector<QPair<do
             if (i >= DrawObjects.size()) break;
             const QJsonObject & json = ObjectAttributes.at(i);
 
-            bool bOK = ARootJson::fromJson(DrawObjects[i], json);
-            if (!bOK) break;
+            if (i == LegendIndex)
+            {
+                if (iLegend >= 0 && bApplyLegend)
+                {
+                    bool bOK = ARootJson::fromJson(DrawObjects[iLegend], json);
+                    if (!bOK) break;
+                    continue;
+                }
+            }
+            else
+            {
+                if (i == iLegend) continue;
+
+                bool bOK = ARootJson::fromJson(DrawObjects[i], json);
+                if (!bOK) break;
+            }
         }
     }
 }
@@ -164,6 +180,8 @@ void ADrawTemplate::InitSelection()
     ATemplateSelectionRecord * zRange = new ATemplateSelectionRecord("Z range", ranges);
 
     ATemplateSelectionRecord * drawObj = new ATemplateSelectionRecord("Drawn object attributes", &Selection);
+
+    ATemplateSelectionRecord * legend = new ATemplateSelectionRecord("Legend attributes", &Selection);
 }
 
 TAxis * ADrawTemplate::getAxis(TObject * tobj, int index) const

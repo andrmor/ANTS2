@@ -2702,7 +2702,7 @@ void GraphWindowClass::applyTemplate(bool bAll)
 
     if (DrawTemplate.hasLegend())
     {
-        const ATemplateSelectionRecord * legend_rec = DrawTemplate.findRecord("Legend", &DrawTemplate.Selection);
+        const ATemplateSelectionRecord * legend_rec = DrawTemplate.findRecord("Legend attributes", &DrawTemplate.Selection);
         if (legend_rec && legend_rec->bSelected)
         {
             TLegend * Legend = nullptr;

@@ -537,14 +537,25 @@ QVariant APhoton_SI::getListDetectedPMT_ID_time(int iPhotonStart,
 	std::cout << "gLDPMT_ID->endFor: "    << endFor << std::endl;
 	
 	for(int iPh = startFor ; iPh < endFor ; iPh++){
+
+        std::cout << "gLDPMT_ID->for loop->iPh = " << iPh << " of " << AllPhLog.size() << std::endl;
+
 		const APhotonHistoryLog &rec = AllPhLog.at(iPh).last();
 		
+        std::cout << "gLDPMT_ID->for loop-> obtained record" << std::endl;
+
 		ID_time.push_back((double)rec.number); // (int, double) can't be
+        std::cout << "gLDPMT_ID->for loop-> pushed back rec.number into ID_time" << std::endl;
+        std::cout << "gLDPMT_ID->ID_time.size() = " << ID_time.size() << std::endl;
 		ID_time.push_back(rec.time);
-		
+        std::cout << "gLDPMT_ID->for loop-> pushed back rec.time into ID_time" << std::endl;
+        std::cout << "gLDPMT_ID->ID_time.size() = " << ID_time.size() << std::endl;
+
 		out.push_back(ID_time);
-		
+        std::cout << "gLDPMT_ID->for loop-> pushed back ID_time into out" << std::endl;
+
 		ID_time.clear();
+        std::cout << "gLDPMT_ID->for loop-> completed record for this one, onto the next one" << std::endl;
 	}
 	
 	return out;
@@ -672,12 +683,16 @@ QVariant APhoton_SI::getPMsWithHits(int iPhotonStart,
 		
 		if( !out_int.contains(rec.number) ){
 			
+            std::cout << "gPMWH -> found new PMT number: " << rec.number << std::endl;
+
 			out_int.push_back(rec.number);
 			out.push_back(out_int.last().toString().toUtf8().constData());
 
+            std::cout << "gPMWH -> added to out" << std::endl;
 		}
 	}
 	
+
 	return out;
 	
 }

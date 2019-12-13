@@ -518,6 +518,8 @@ QVariant APhoton_SI::getListDetectedPMT_ID_time(int iPhotonStart,
 
 	//~ return "test getListDetectedPMT_ID_time";
 
+    std::cout << "gLDPMT_ID-> sanity check" << std::endl;
+
 	QVariantList out; // QList<QList<QVariant>>
 	QVariantList ID_time; // (PMT ID, time)
 	
@@ -536,6 +538,10 @@ QVariant APhoton_SI::getListDetectedPMT_ID_time(int iPhotonStart,
 	std::cout << "gLDPMT_ID->startFor: " << startFor << std::endl;
 	std::cout << "gLDPMT_ID->endFor: "    << endFor << std::endl;
 	
+    std::cout << "hey, so are you gonna print this, or are you segfaulting just for fun?" << std::endl;
+
+    std::cout << "gLDPMT_ID->AllPhLog.size() = " << AllPhLog.size() << std::endl;
+
 	for(int iPh = startFor ; iPh < endFor ; iPh++){
 
         std::cout << "gLDPMT_ID->for loop->iPh = " << iPh << " of " << AllPhLog.size() << std::endl;
@@ -659,6 +665,8 @@ QVariant APhoton_SI::testQVariantListQVariantList(){
 QVariant APhoton_SI::getPMsWithHits(int iPhotonStart,
 	                                              int iPhotonEnd){
 
+    std::cout << "gPMWH-> sanity check" << std::endl;
+
 	QVariantList out;     // QList<QVariant> <-- items here are strings
 	QVariantList out_int; // QList<QVariant> <-- items here are ints
 
@@ -692,6 +700,9 @@ QVariant APhoton_SI::getPMsWithHits(int iPhotonStart,
 		}
 	}
 	
+    std::cout << "gPMWH->another cout for gPMWH just as a sanity check" << std::endl;
+
+    std::cout << "gPMWH->out.size() = " << out.size() << std::endl;
 
 	return out;
 	

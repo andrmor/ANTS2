@@ -66,6 +66,7 @@ private slots:
     void onReorderEntriesRequested(const QVector<int> &indexes, int toRow);
     void on_twTree_itemDoubleClicked(QTreeWidgetItem *item, int column);
     void setNumberOfColumns();
+    void onHelpTriggered();
 
 private:
     Ui::ALegendDialog *ui;

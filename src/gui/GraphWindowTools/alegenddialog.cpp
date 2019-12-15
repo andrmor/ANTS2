@@ -60,9 +60,9 @@ ALegendDialog::ALegendDialog(TLegend & Legend, const QVector<ADrawObject> & Draw
 
     configureMenu();
 
-    QStatusBar * status = new QStatusBar(this);
-    ui->lMain->addWidget(status);
-    status->showMessage("Double-click on a draw object to add entry; use drag-and-drop to change order of entries");
+    //QStatusBar * status = new QStatusBar(this);
+    //ui->lMain->addWidget(status);
+    //status->showMessage("Double-click on a draw object to add entry; use drag-and-drop to change order of entries");
 }
 
 ALegendDialog::~ALegendDialog()
@@ -357,7 +357,7 @@ void ALegendDialog::deleteSelectedEntry()
 void ALegendDialog::addText()
 {
     CurrentModel.Model << ALegendEntryRecord("Text", nullptr, "");
-    CurrentModel.Model.last().Options += "h";
+    //CurrentModel.Model.last().Options += "h";
     updateMainGui();
     updateLegend();
 }
@@ -366,8 +366,12 @@ void ALegendDialog::configureMenu()
 {
     QMenuBar * menu = new QMenuBar(this);
     ui->lMain->insertWidget(0, menu);
+
     QMenu * colM = menu->addMenu("Columns");
         colM->addAction("Set number of columns", this, &ALegendDialog::setNumberOfColumns);
+
+    QMenu * helpM = menu->addMenu("Help");
+        helpM->addAction("Help", this, &ALegendDialog::onHelpTriggered);
 }
 
 void ALegendDialog::on_twTree_itemDoubleClicked(QTreeWidgetItem *item, int)
@@ -398,6 +402,12 @@ void ALegendDialog::setNumberOfColumns()
     updateLegend();
 }
 
+void ALegendDialog::onHelpTriggered()
+{
+    message("Double-click on a draw object to add entry\n"
+            "Use drag-and-drop to change the order of entries", this);
+}
+
 void ALegendDialog::on_pbConfigureFrame_clicked()
 {
     int color = Legend.GetLineColor();
@@ -426,10 +436,10 @@ ALegendEntryDelegate::ALegendEntryDelegate(const ALegendEntryRecord & record, in
     frMI->setFrameShape(QFrame::NoFrame);
     frMI->setFixedWidth(16);
         QGridLayout * gg = new QGridLayout(frMI);
-        gg->setContentsMargins(4,5,8,5);
+        gg->setContentsMargins(4, 2, 5, 2);
         gg->setVerticalSpacing(2);
         for (int ix=0; ix < 2; ix++)
-            for (int iy=0; iy<8; iy++)
+            for (int iy=0; iy<7; iy++)
             {
                 QFrame * ff = new QFrame();
                 ff->setFixedSize(4,4);

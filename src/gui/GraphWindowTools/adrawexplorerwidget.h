@@ -9,6 +9,8 @@ class GraphWindowClass;
 class QTreeWidgetItem;
 class TObject;
 class TH2;
+class TAxis;
+class TGaxis;
 
 class ADrawExplorerWidget : public QTreeWidget
 {
@@ -57,9 +59,13 @@ private:
     void saveAsTxt(ADrawObject &obj, bool fUseBinCenters);
     void extract(ADrawObject &obj);
     void editPave(ADrawObject &obj);
+    void editTGaxis(ADrawObject &obj);
 
     bool canScale(ADrawObject &obj);
     void doScale(ADrawObject &obj, double sf);
+    void copyAxisProperties(TGaxis & grAxis, TAxis  & axis);
+    void copyAxisProperties(TAxis  & axis,   TGaxis & grAxis);
+    const QString generateOptionForSecondaryAxis(int axisIndex, double u1, double u2);
 
 private:
     TH2 * objForCustomProjection = nullptr;

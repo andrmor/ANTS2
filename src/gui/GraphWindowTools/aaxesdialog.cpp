@@ -29,6 +29,14 @@ AAxesDialog::AAxesDialog(QVector<TAxis *> & axes, int axisIndex, QWidget * paren
     if (axisIndex >=0 && axisIndex < Axes.size())
         Axis = Axes[axisIndex];
     if (Axis) updateGui();
+
+    if (axes.size() == 1)
+    {
+        ui->cbApplyTitleTextPropToAllAxes->setChecked(false);
+        ui->cbApplyTitleTextPropToAllAxes->setEnabled(false);
+        ui->cbApplyLableTextPropToAllAxes->setChecked(false);
+        ui->cbApplyLableTextPropToAllAxes->setEnabled(false);
+    }
 }
 
 AAxesDialog::~AAxesDialog()
@@ -44,6 +52,11 @@ int AAxesDialog::exec()
         return QDialog::Rejected;
     }
     return QDialog::exec();
+}
+
+void AAxesDialog::addLayout(QLayout * lay)
+{
+    ui->verticalLayout->insertLayout( ui->verticalLayout->count()-1, lay);
 }
 
 void AAxesDialog::on_pbDummy_clicked()

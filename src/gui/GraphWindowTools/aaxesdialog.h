@@ -9,6 +9,7 @@ class AAxesDialog;
 }
 
 class TAxis;
+class QLayout;
 
 class AAxesDialog : public QDialog
 {
@@ -19,6 +20,8 @@ public:
     ~AAxesDialog();
 
     int exec() override;
+
+    void addLayout(QLayout * lay);
 
 private slots:
     void on_pbDummy_clicked();

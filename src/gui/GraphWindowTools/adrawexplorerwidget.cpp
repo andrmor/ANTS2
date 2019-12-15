@@ -34,6 +34,7 @@
 #include "TGraph.h"
 #include "TGraphErrors.h"
 #include "TPaveText.h"
+#include "TGaxis.h"
 
 ADrawExplorerWidget::ADrawExplorerWidget(GraphWindowClass & GraphWindow, QVector<ADrawObject> & DrawObjects) :
     GraphWindow(GraphWindow), DrawObjects(DrawObjects)
@@ -235,6 +236,7 @@ void ADrawExplorerWidget::activateCustomGuiForItem(int index)
 
     if      (Type == "TLegend")   emit requestShowLegendDialog();
     else if (Type == "TPaveText") editPave(obj);
+    else if (Type == "TGaxis")    editTGaxis(obj);
     else                          setAttributes(index);
 }
 
@@ -1114,16 +1116,12 @@ void ADrawExplorerWidget::editAxis(ADrawObject &obj, int axisIndex)
     GraphWindow.HighlightUpdateBasketButton(true);
 }
 
-#include "TGaxis.h"
-void ADrawExplorerWidget::addAxis(int axisIndex)
+const QString ADrawExplorerWidget::generateOptionForSecondaryAxis(int axisIndex, double u1, double u2)
 {
     double cx1 = GraphWindow.getCanvasMinX();
     double cx2 = GraphWindow.getCanvasMaxX();
     double cy1 = GraphWindow.getCanvasMinY();
     double cy2 = GraphWindow.getCanvasMaxY();
-
-    double u1 = 0;
-    double u2 = 1.0;
 
     double A, B;
     QString axisOpt;
@@ -1142,11 +1140,17 @@ void ADrawExplorerWidget::addAxis(int axisIndex)
         B = u1 - A * cx1;
         axisOpt = "-L";
     }
-    const QString opt = QString("same;%1;%2;%3").arg(axisIndex == 0 ? "X" : "Y").arg(A).arg(B);
 
-    TGaxis *axis = new TGaxis(0,0,1,1,  0,1, 510, axisOpt.toLatin1().data());
+    return QString("same;%1;%2;%3").arg(axisIndex == 0 ? "X" : "Y").arg(A).arg(B);
+}
+
+void ADrawExplorerWidget::addAxis(int axisIndex)
+{
+    TGaxis *axis = new TGaxis(0,0,1,1,  0,1, 510, (axisIndex == 1 ? "+L" : "-L") );
     axis->SetLabelFont(42);
+    axis->SetTextFont(42);
     axis->SetLabelSize(0.035);
+    const QString opt = generateOptionForSecondaryAxis(axisIndex, 0, 1.0);
     DrawObjects << ADrawObject(axis, opt);
 
     GraphWindow.RedrawAll();
@@ -1310,6 +1314,97 @@ void ADrawExplorerWidget::editPave(ADrawObject &obj)
 
         D.exec();
         GraphWindow.RedrawAll();
+        GraphWindow.HighlightUpdateBasketButton(true);
+    }
+}
+
+void ADrawExplorerWidget::copyAxisProperties(TGaxis & grAxis, TAxis & axis)
+{
+    axis.SetNdivisions(grAxis.GetNdiv());
+    axis.SetDrawOption(grAxis.GetDrawOption());
+    axis.SetTickLength(grAxis.GetTickSize());
+
+    axis.SetTitle(grAxis.GetTitle());
+    axis.SetTitleOffset(grAxis.GetTitleOffset());
+
+    axis.SetTitleFont(grAxis.GetTextFont());
+    axis.SetTitleColor(grAxis.GetTextColor());
+    axis.SetTitleSize(grAxis.GetTextSize());
+
+    axis.SetLabelColor(grAxis.GetLabelColor());
+    axis.SetLabelFont(grAxis.GetLabelFont());
+    axis.SetLabelOffset(grAxis.GetLabelOffset());
+    axis.SetLabelSize(grAxis.GetLabelSize());
+}
+
+void ADrawExplorerWidget::copyAxisProperties(TAxis & axis, TGaxis & grAxis)
+{
+    grAxis.SetNdivisions(abs(axis.GetNdivisions()));
+    grAxis.SetDrawOption(axis.GetDrawOption());
+    grAxis.SetTickLength(axis.GetTickLength());
+
+    grAxis.SetTitle(axis.GetTitle());
+    grAxis.SetTitleOffset(axis.GetTitleOffset());
+    grAxis.SetTitleFont(axis.GetTitleFont());
+    grAxis.SetTitleColor(axis.GetTitleColor());
+    grAxis.SetTitleSize(axis.GetTitleSize());
+
+    grAxis.SetLabelColor(axis.GetLabelColor());
+    grAxis.SetLabelFont(axis.GetLabelFont());
+    grAxis.SetLabelOffset(axis.GetLabelOffset());
+    grAxis.SetLabelSize(axis.GetLabelSize());
+}
+
+void ADrawExplorerWidget::editTGaxis(ADrawObject &obj)
+{
+    int axisIndex = 1;
+    if (obj.Options.contains("X")) axisIndex = 0;
+
+    TGaxis * grAxis = dynamic_cast<TGaxis*>(obj.Pointer);
+    if (grAxis)
+    {
+        TAxis axis;
+        copyAxisProperties(*grAxis, axis);
+
+        QVector<TAxis *> vec;
+        vec << &axis;
+        AAxesDialog D(vec, 0, this);
+
+        QHBoxLayout * lay = new QHBoxLayout();
+        lay->addStretch();
+            QLabel * lab = new QLabel("Min:");
+        lay->addWidget(lab);
+            QLineEdit * leMin = new QLineEdit();
+            leMin->setText( QString::number(grAxis->GetWmin()) );
+        lay->addWidget(leMin);
+            lab = new QLabel("Max:");
+        lay->addWidget(lab);
+            QLineEdit * leMax = new QLineEdit();
+            leMax->setText( QString::number(grAxis->GetWmax()) );
+        lay->addWidget(leMax);
+        lay->addStretch();
+        D.addLayout(lay);
+
+        auto UpdateTAxis = [this, leMin, leMax, grAxis, &obj, axisIndex, &axis]()
+        {
+            double u1 = leMin->text().toDouble();
+            double u2 = leMax->text().toDouble();
+            grAxis->SetWmin(u1);
+            grAxis->SetWmax(u2);
+            obj.Options = generateOptionForSecondaryAxis(axisIndex, u1, u2);
+
+            copyAxisProperties(axis, *grAxis);
+
+            GraphWindow.RedrawAll();
+        };
+        connect(leMin, &QLineEdit::editingFinished, UpdateTAxis);
+        connect(leMax, &QLineEdit::editingFinished, UpdateTAxis);
+
+        connect(&D, &AAxesDialog::requestRedraw, UpdateTAxis);
+        D.exec();
+
+        UpdateTAxis();
+
         GraphWindow.HighlightUpdateBasketButton(true);
     }
 }

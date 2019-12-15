@@ -40,6 +40,7 @@ private:
     void showPanel(ADrawObject &obj);
     void fitPanel(ADrawObject &obj);
     void scale(ADrawObject &obj);
+    void scaleCDR(ADrawObject &obj);
     void shift(ADrawObject &obj);
     void drawIntegral(ADrawObject &obj);
     void fraction(ADrawObject &obj);
@@ -55,6 +56,9 @@ private:
     void saveAsTxt(ADrawObject &obj, bool fUseBinCenters);
     void extract(ADrawObject &obj);
     void editPave(ADrawObject &obj);
+
+    bool canScale(ADrawObject &obj);
+    void doScale(ADrawObject &obj, double sf);
 
 private:
     TH2 * objForCustomProjection = nullptr;

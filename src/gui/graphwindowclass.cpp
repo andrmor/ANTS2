@@ -463,6 +463,16 @@ double GraphWindowClass::extracted2DLineXstop()
     return RasterWindow->Line2DstopX;
 }
 
+double GraphWindowClass::extracted2DLineYstart()
+{
+    return RasterWindow->Line2DstartY;
+}
+
+double GraphWindowClass::extracted2DLineYstop()
+{
+    return RasterWindow->Line2DstopY;
+}
+
 double GraphWindowClass::extracted2DEllipseX()
 {
   return RasterWindow->extracted2DEllipseX;

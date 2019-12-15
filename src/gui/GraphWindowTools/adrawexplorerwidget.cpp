@@ -126,6 +126,7 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
 
     QMenu * scaleMenu =     Menu.addMenu("Scale / shift"); scaleMenu->setEnabled(Type.startsWith("TH") || Type.startsWith("TGraph") || Type.startsWith("TProfile"));
         QAction * scaleA =      scaleMenu->addAction("Scale");
+        QAction * scaleCDRA =   scaleMenu->addAction("Scale: click-drag-release");
         scaleMenu->addSeparator();
         QAction * shiftA =      scaleMenu->addAction("Shift X scale");
 
@@ -184,6 +185,7 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
    //else if (si == setMarkerA)   setMarker(obj);
    //else if (si == panelA)       showPanel(obj);
    else if (si == scaleA)       scale(obj);
+   else if (si == scaleCDRA)    scaleCDR(obj);
    else if (si == integralA)    drawIntegral(obj);
    else if (si == fractionA)    fraction(obj);
    else if (si == linFitA)      linFit(index);
@@ -359,27 +361,26 @@ double runScaleDialog(QWidget * parent)
     return res;
 }
 
-void ADrawExplorerWidget::scale(ADrawObject &obj)
+bool ADrawExplorerWidget::canScale(ADrawObject & obj)
 {
-    QString name = obj.Pointer->ClassName();
+    const QString name = obj.Pointer->ClassName();
     QList<QString> impl;
     impl << "TGraph" << "TGraphErrors"  << "TH1I" << "TH1D" << "TH1F" << "TH2I"<< "TH2D"<< "TH2D";
     if (!impl.contains(name))
     {
         message("Not implemented for this object", &GraphWindow);
-        return;
+        return false;
     }
+    else return true;
+}
 
-    double sf = runScaleDialog(&GraphWindow);
-    if (sf == 1.0) return;
-
-    //qDebug() << "----On start, this:"<< GraphWindow.DrawObjects.first().Pointer;
+void ADrawExplorerWidget::doScale(ADrawObject &obj, double sf)
+{
     GraphWindow.MakeCopyOfDrawObjects();
-    //qDebug() << "----Copy:"<< GraphWindow.PreviousDrawObjects.first().Pointer;
     TObject * tobj = obj.Pointer->Clone();
-    //qDebug() << "+++++++clone:" << tobj;
     GraphWindow.RegisterTObject(tobj);
 
+    const QString name = obj.Pointer->ClassName();
     if (name == "TGraph")
     {
         TGraph* gr = static_cast<TGraph*>(tobj);
@@ -409,11 +410,42 @@ void ADrawExplorerWidget::scale(ADrawObject &obj)
     }
     obj.Pointer = tobj;
 
-    //qDebug() << "This:"<< GraphWindow.DrawObjects.first().Pointer;
-    //qDebug() << "Copy:"<< GraphWindow.PreviousDrawObjects.first().Pointer;
-
     GraphWindow.RedrawAll();
     GraphWindow.HighlightUpdateBasketButton(true);
+}
+
+void ADrawExplorerWidget::scale(ADrawObject &obj)
+{
+    if (!canScale(obj)) return;
+
+    double sf = runScaleDialog(&GraphWindow);
+    if (sf == 1.0) return;
+
+    doScale(obj, sf);
+}
+
+void ADrawExplorerWidget::scaleCDR(ADrawObject &obj)
+{
+    if (!canScale(obj)) return;
+
+    GraphWindow.TriggerGlobalBusy(true);
+
+    GraphWindow.Extract2DLine();
+    if (!GraphWindow.Extraction()) return; //cancel
+
+    double startY = GraphWindow.extracted2DLineYstart();
+    double stopY  = GraphWindow.extracted2DLineYstop();
+
+    if (startY == 0)  // can be very small on log canvas
+    {
+        message("Cannot scale: division by zero", this);
+        return;
+    }
+
+    double sf = stopY / startY;
+    if (sf == 1.0) return;
+
+    doScale(obj, sf);
 }
 
 const QPair<double, double> runShiftDialog(QWidget * parent)

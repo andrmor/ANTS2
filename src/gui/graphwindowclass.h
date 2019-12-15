@@ -86,6 +86,8 @@ public:
     double extracted2DLineC();
     double extracted2DLineXstart();
     double extracted2DLineXstop();
+    double extracted2DLineYstart();
+    double extracted2DLineYstop();
     double extracted2DEllipseX();
     double extracted2DEllipseY();
     double extracted2DEllipseR1();

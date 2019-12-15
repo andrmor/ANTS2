@@ -124,6 +124,11 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
 
     Menu.addSeparator();
 
+    QAction* addAxisRight = Menu.addAction("Add axis on RHS");
+    QAction* addAxisTop   = Menu.addAction("Add axis on Top");
+
+    Menu.addSeparator();
+
     QMenu * scaleMenu =     Menu.addMenu("Scale / shift"); scaleMenu->setEnabled(Type.startsWith("TH") || Type.startsWith("TGraph") || Type.startsWith("TProfile"));
         QAction * scaleA =      scaleMenu->addAction("Scale");
         QAction * scaleCDRA =   scaleMenu->addAction("Scale: click-drag-release");
@@ -194,6 +199,8 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
    else if (si == axesX)        editAxis(obj, 0);
    else if (si == axesY)        editAxis(obj, 1);
    else if (si == axesZ)        editAxis(obj, 2);
+   else if (si == addAxisTop)   addAxis(0);
+   else if (si == addAxisRight) addAxis(1);
    else if (si == shiftA)       shift(obj);
    else if (si == medianA)      median(obj);
    else if (si == splineFitA)   splineFit(index);
@@ -1102,6 +1109,45 @@ void ADrawExplorerWidget::editAxis(ADrawObject &obj, int axisIndex)
     AAxesDialog D(axes, axisIndex, this);
     connect(&D, &AAxesDialog::requestRedraw, &GraphWindow, &GraphWindowClass::RedrawAll);
     D.exec();
+
+    GraphWindow.RedrawAll();
+    GraphWindow.HighlightUpdateBasketButton(true);
+}
+
+#include "TGaxis.h"
+void ADrawExplorerWidget::addAxis(int axisIndex)
+{
+    double cx1 = GraphWindow.getCanvasMinX();
+    double cx2 = GraphWindow.getCanvasMaxX();
+    double cy1 = GraphWindow.getCanvasMinY();
+    double cy2 = GraphWindow.getCanvasMaxY();
+
+    double u1 = 0;
+    double u2 = 1.0;
+
+    double A, B;
+    QString axisOpt;
+
+    if (axisIndex == 1)
+    {
+        //Right axis
+        A = (u1 - u2) / (cy1 - cy2);
+        B = u1 - A * cy1;
+        axisOpt = "+L";
+    }
+    else
+    {
+        //Top axis
+        A = (u1 - u2) / (cx1 - cx2);
+        B = u1 - A * cx1;
+        axisOpt = "-L";
+    }
+    const QString opt = QString("same;%1;%2;%3").arg(axisIndex == 0 ? "X" : "Y").arg(A).arg(B);
+
+    TGaxis *axis = new TGaxis(0,0,1,1,  0,1, 510, axisOpt.toLatin1().data());
+    axis->SetLabelFont(42);
+    axis->SetLabelSize(0.035);
+    DrawObjects << ADrawObject(axis, opt);
 
     GraphWindow.RedrawAll();
     GraphWindow.HighlightUpdateBasketButton(true);

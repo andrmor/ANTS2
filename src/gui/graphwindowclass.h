@@ -25,6 +25,7 @@ class ABasketManager;
 class ADrawExplorerWidget;
 class ABasketListWidget;
 class TLegend;
+class TGaxis;
 
 namespace Ui {
 class GraphWindowClass;
@@ -304,6 +305,7 @@ private:
     void contextMenuForBasketMultipleSelection(const QPoint &pos);
     void removeAllSelectedBasketItems();
     void applyTemplate(bool bAll);
+    void updateSecondaryAxis(TGaxis *gaxis, const char *opt);
 };
 
 #endif // GRAPHWINDOWCLASS_H

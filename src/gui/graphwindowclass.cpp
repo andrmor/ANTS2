@@ -597,13 +597,16 @@ void GraphWindowClass::RegisterTObject(TObject *obj)
     tmpTObjects.append(obj);
 }
 
+#include "TGaxis.h"
 void GraphWindowClass::doDraw(TObject *obj, const char *opt, bool DoUpdate)
 {
-    //qDebug() << "-+-+ DoDraw";
     SetAsActiveRootWindow();
 
     TH1* h = dynamic_cast<TH1*>(obj);
     if (h) h->SetStats(ui->cbShowLegend->isChecked());
+
+    TGaxis * gaxis = dynamic_cast<TGaxis*>(obj);
+    if (gaxis) updateSecondaryAxis(gaxis, opt);
 
     obj->Draw(opt);
     if (DoUpdate) RasterWindow->fCanvas->Update();
@@ -614,6 +617,45 @@ void GraphWindowClass::doDraw(TObject *obj, const char *opt, bool DoUpdate)
     QString options(opt);
     if (!options.contains("same", Qt::CaseInsensitive))
         UpdateGuiControlsForMainObject(obj->ClassName(), options);
+}
+
+void GraphWindowClass::updateSecondaryAxis(TGaxis * gaxis, const char *opt)
+{
+    UpdateRootCanvas();   // need to update canvas to request min/max info
+
+    QString Options(opt);
+    bool bRight = Options.contains("Y");
+    bool bTop   = Options.contains("X");
+
+    if (bRight || bTop)
+    {
+        //qDebug() << "---->----" << Options;
+        double xMin = getCanvasMinX();
+        double xMax = getCanvasMaxX();
+        double yMin = getCanvasMinY();
+        double yMax = getCanvasMaxY();
+
+        gaxis->SetX1(bRight ? xMax : xMin);
+        gaxis->SetX2(xMax);
+        gaxis->SetY1(bRight ? yMin : yMax);
+        gaxis->SetY2(yMax);
+
+        QStringList sl = Options.split(';', QString::SkipEmptyParts);
+        if (sl.size() > 3)
+        {
+            QString sA = sl.at(2);
+            QString sB = sl.at(3);
+
+            bool bOKA, bOKB;
+            double A = sA.toDouble(&bOKA);
+            double B = sB.toDouble(&bOKB);
+            if (bOKA && bOKB)
+            {
+                gaxis->SetWmin( A * (bRight ? yMin : xMin) + B);
+                gaxis->SetWmax( A * (bRight ? yMax : xMax) + B);
+            }
+        }
+    }
 }
 
 void GraphWindowClass::OnBusyOn()

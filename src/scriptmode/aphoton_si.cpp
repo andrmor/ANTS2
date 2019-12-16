@@ -535,33 +535,33 @@ QVariant APhoton_SI::getListDetectedPMT_ID_time(int iPhotonStart,
 		endFor = AllPhLog.size();
 	}
 	
-	std::cout << "gLDPMT_ID->startFor: " << startFor << std::endl;
-	std::cout << "gLDPMT_ID->endFor: "    << endFor << std::endl;
+    std::cout << "gLDPMT_ID->startFor: " << startFor << std::endl;
+    std::cout << "gLDPMT_ID->endFor: "    << endFor << std::endl;
 	
-    std::cout << "hey, so are you gonna print this, or are you segfaulting just for fun?" << std::endl;
+    //std::cout << "hey, so are you gonna print this, or are you segfaulting just for fun?" << std::endl;
 
-    std::cout << "gLDPMT_ID->AllPhLog.size() = " << AllPhLog.size() << std::endl;
+    //std::cout << "gLDPMT_ID->AllPhLog.size() = " << AllPhLog.size() << std::endl;
 
 	for(int iPh = startFor ; iPh < endFor ; iPh++){
 
-        std::cout << "gLDPMT_ID->for loop->iPh = " << iPh << " of " << AllPhLog.size() << std::endl;
+        //std::cout << "gLDPMT_ID->for loop->iPh = " << iPh << " of " << AllPhLog.size() << std::endl;
 
 		const APhotonHistoryLog &rec = AllPhLog.at(iPh).last();
 		
-        std::cout << "gLDPMT_ID->for loop-> obtained record" << std::endl;
+        //std::cout << "gLDPMT_ID->for loop-> obtained record" << std::endl;
 
 		ID_time.push_back((double)rec.number); // (int, double) can't be
-        std::cout << "gLDPMT_ID->for loop-> pushed back rec.number into ID_time" << std::endl;
-        std::cout << "gLDPMT_ID->ID_time.size() = " << ID_time.size() << std::endl;
+        //std::cout << "gLDPMT_ID->for loop-> pushed back rec.number into ID_time" << std::endl;
+        //std::cout << "gLDPMT_ID->ID_time.size() = " << ID_time.size() << std::endl;
 		ID_time.push_back(rec.time);
-        std::cout << "gLDPMT_ID->for loop-> pushed back rec.time into ID_time" << std::endl;
-        std::cout << "gLDPMT_ID->ID_time.size() = " << ID_time.size() << std::endl;
+        //std::cout << "gLDPMT_ID->for loop-> pushed back rec.time into ID_time" << std::endl;
+        //std::cout << "gLDPMT_ID->ID_time.size() = " << ID_time.size() << std::endl;
 
 		out.push_back(ID_time);
-        std::cout << "gLDPMT_ID->for loop-> pushed back ID_time into out" << std::endl;
+        //std::cout << "gLDPMT_ID->for loop-> pushed back ID_time into out" << std::endl;
 
 		ID_time.clear();
-        std::cout << "gLDPMT_ID->for loop-> completed record for this one, onto the next one" << std::endl;
+        //std::cout << "gLDPMT_ID->for loop-> completed record for this one, onto the next one" << std::endl;
 	}
 	
 	return out;

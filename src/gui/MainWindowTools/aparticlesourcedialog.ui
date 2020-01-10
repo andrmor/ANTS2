@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>502</width>
-    <height>599</height>
+    <width>539</width>
+    <height>722</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -709,7 +709,7 @@ If material with this name does not exist, this limitation is not applied.</stri
        </property>
        <property name="maximumSize">
         <size>
-         <width>200</width>
+         <width>250</width>
          <height>16777215</height>
         </size>
        </property>

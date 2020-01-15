@@ -37,9 +37,6 @@ bool S2_Generator::Generate() //uses MW->EnergyVector as the input parameter
     double Electrons, Photons;
     int NumElectrons, NumPhotons;
 
-    //what is the first particle to work with?
-    //   int Id = EnergyVector->at(0)->ParticleId;
-
     int RecordNumber; //tracer for photon log index, not used if OnlySecondary
     if (DoTextLog)
     {
@@ -47,7 +44,7 @@ bool S2_Generator::Generate() //uses MW->EnergyVector as the input parameter
         //if OnlySecondary  log is filled directly (as done in S1)
         //otherwise, adding data to existing log created by S1, we have to find the first index
         if (!OnlySecondary)
-         {
+        {
            int ThisEvent = EnergyVector->at(0)->eventId;
            int max = GeneratedPhotonsHistory->last().event;
            if (ThisEvent>max)
@@ -65,7 +62,7 @@ bool S2_Generator::Generate() //uses MW->EnergyVector as the input parameter
 
            RecordNumber = i;
     //       qDebug()<<"record number:"<<RecordNumber;
-         }
+        }
      }
 
    int TextLogPhotons = 0;
@@ -77,26 +74,25 @@ bool S2_Generator::Generate() //uses MW->EnergyVector as the input parameter
 
    //--------------------main cycle--------------------------
    for (int i = 0; i < EnergyVector->size(); i++)
-     {
-       int ThisId = EnergyVector->at(i)->ParticleId;
-       int ThisIndex = EnergyVector->at(i)->index;
-       int ThisEvent = EnergyVector->at(i)->eventId;
+   {
+       AEnergyDepositionCell * cell = EnergyVector->at(i);
+       const int ThisId    = cell->ParticleId;
+       const int ThisIndex = cell->index;
+       const int ThisEvent = cell->eventId;
        //checking are we still tracking the same particle?
        if (LastEvent != ThisEvent || LastIndex != ThisIndex)
-         {
-           //Id = ThisId;
+       {
            //reset remainer
            ElRemainer = 0.0;
            Remainer = 0.0;
-         }      
-       GeoManager->SetCurrentPoint( (*EnergyVector)[i]->r);
+       }
+       GeoManager->SetCurrentPoint(cell->r);
        GeoManager->FindNode();
 //       qDebug()<<"starting from:"<<GeoManager->GetCurrentVolume()->GetName();
 //       qDebug()<<ElRemainer;
-       //int MatIndex = GeoManager->GetCurrentVolume()->GetMaterial()->GetIndex();
-       int MatId = EnergyVector->at(i)->MaterialId;
-       double W = (*MaterialCollection)[MatId]->W;
-       Electrons = EnergyVector->at(i)->dE / W + ElRemainer;
+       const int    & MatId = cell->MaterialId;
+       const double & W     = (*MaterialCollection)[MatId]->W;
+       Electrons = cell->dE / W + ElRemainer;
 //       qDebug()<<"en, W, el: "<<EnergyVector->at(i).dE<<W<<Electrons;
        NumElectrons = (int)Electrons;
        ElRemainer = Electrons - (double)NumElectrons;
@@ -107,21 +103,18 @@ bool S2_Generator::Generate() //uses MW->EnergyVector as the input parameter
        {
          //field is always in z direction, electrons drift up!
          //finding distance to drift and time it will take
-
-         double time =  EnergyVector->at(i)->time;
+         double time = cell->time;
          //       qDebug()<<"start time: "<<time;
          TString VolName;
          do
          {
             //going up untill enter secondary scintillator ("SecScint")
             int ThisMatIndex = GeoManager->GetCurrentVolume()->GetMaterial()->GetIndex();
-            GeoManager->SetCurrentDirection(0,0,1.);  //up
+            GeoManager->SetCurrentDirection(0, 0, 1.0);  //up
             GeoManager->FindNextBoundaryAndStep();
-            double Step = GeoManager->GetStep();
-            //double DriftVelocity = 0.01 * (*MaterialCollection)[ThisMatIndex]->e_driftSpeed;//given in cm/us - need in mm/ns
-            double DriftVelocity = MaterialCollection->getDriftSpeed(ThisMatIndex);
-            if (DriftVelocity != 0)
-                time += Step / DriftVelocity;
+            const double Step = GeoManager->GetStep();
+            const double DriftVelocity = MaterialCollection->getDriftSpeed(ThisMatIndex);
+            if (DriftVelocity != 0) time += Step / DriftVelocity;
             VolName = GeoManager->GetCurrentVolume()->GetName();
 //            qDebug()<<"Found new volume: "<<VolName<<" drifted: "<<Step<<"new time: "<<time;          
             if (GeoManager->IsOutside()) break;
@@ -129,21 +122,20 @@ bool S2_Generator::Generate() //uses MW->EnergyVector as the input parameter
          while ( VolName != "SecScint" );
 
          if ( VolName == "SecScint" )
-           {
+         {
              //       qDebug()<<"found secondary scint";
-             double MatIndexSecScint = GeoManager->GetCurrentVolume()->GetMaterial()->GetIndex();
-             double PhotonsPerElectron = (*MaterialCollection)[MatIndexSecScint]->SecYield;
+             const int    MatIndexSecScint = GeoManager->GetCurrentVolume()->GetMaterial()->GetIndex();
+             const double PhotonsPerElectron = (*MaterialCollection)[MatIndexSecScint]->SecYield;
       //       qDebug()<<"matIndex of sec scintillator:"<<MatIndexSecScint<<"PhPerEl"<<PhotonsPerElectron;
 
-             double Zstart = GeoManager->GetCurrentPoint()[2];
+             const double Zstart = GeoManager->GetCurrentPoint()[2];
       //       qDebug()<<"Sec scint starts: "<<Zstart;
-             //GeoManager->FindNextBoundaryAndStep();
              GeoManager->FindNextBoundary();
-             double Zspan = GeoManager->GetStep();
-             double DriftVelocity = 0.01 * (*MaterialCollection)[MatIndexSecScint]->e_driftVelocity; //given in cm/us, need in mm/ns
+             const double Zspan = GeoManager->GetStep();
+             const double DriftVelocity = MaterialCollection->getDriftSpeed(MatIndexSecScint);
 
              //generate photons            
-             Photons = NumElectrons * PhotonsPerElectron + Remainer;
+             Photons    = NumElectrons * PhotonsPerElectron + Remainer;
              NumPhotons = (int)Photons;
              Remainer   = Photons - (double)NumPhotons;
 
@@ -153,54 +145,55 @@ bool S2_Generator::Generate() //uses MW->EnergyVector as the input parameter
              {
                  //qDebug()<<"Generate photons: "<<NumPhotons ;
                  APhoton Photon;
-                 Photon.r[0] = (*EnergyVector)[i]->r[0];
-                 Photon.r[1] = (*EnergyVector)[i]->r[1];
+                 Photon.r[0] = cell->r[0];
+                 Photon.r[1] = cell->r[1];
                  Photon.scint_type = 2;
                  Photon.SimStat = PhotonGenerator->DetStat;
 
                  for (int ii=0; ii<NumPhotons; ii++)
-                   {
+                 {
                      //random z inside secondary scintillator
-                     double z = Zspan* RandGen->Rndm();
+                     double z = Zspan * RandGen->Rndm();
                      Photon.r[2] = Zstart + z;
                      Photon.time = time + z / DriftVelocity;
 
                      PhotonGenerator->GenerateDirectionSecondary(&Photon);
                      //catching photons of the wrong direction, resetting the "skip" status!
                      if (Photon.fSkipThisPhoton)
-                       {
+                     {
                          Photon.fSkipThisPhoton = false;
                          continue;
-                       }
+                     }
 
                      PhotonGenerator->GenerateWave(&Photon, MatIndexSecScint);
                      PhotonGenerator->GenerateTime(&Photon, MatIndexSecScint);
     //                 qDebug()<<time + z / DriftVelocity;
                      PhotonTracker->TracePhoton(&Photon);
-                   }
-                 //all photons generated
+                 }
+                 //all photons were generated
              }
-           }
+        }
         else
-         {
+        {
 //             qDebug()<<"Secondary scintillator was NOT found!";
              NumPhotons = 0;
-         }
+        }
        }
        else
-         {
+       {
+           // number of electrons is 0
            NumPhotons = 0;
-         }
+       }
 
        //Text log
        if (DoTextLog)
-         {
+       {
            if (LastEvent != ThisEvent || LastIndex != ThisIndex || MatId != LastMaterial)
-             {
+           {
                //changed - saving previous data
                if (OnlySecondary)
-                 {
-                   GeneratedPhotonsHistoryStructure tmp; // = {};
+               {
+                   GeneratedPhotonsHistoryStructure tmp;
                    tmp.Energy = TextLogEnergy;
                    tmp.MaterialId = LastMaterial;
                    tmp.ParticleId = LastParticle;
@@ -209,13 +202,13 @@ bool S2_Generator::Generate() //uses MW->EnergyVector as the input parameter
                    tmp.event = LastEvent;
                    tmp.index = LastIndex;
                    GeneratedPhotonsHistory->append(tmp);
-                 }
+               }
                else
-                 {
+               {
 //                   qDebug()<<"replacement in"<<RecordNumber<<" value:"<<TextLogPhotons;
                    (*GeneratedPhotonsHistory)[RecordNumber].SecondaryPhotons = TextLogPhotons;
                    RecordNumber++;
-                 }
+               }
 
                //updating current data
                LastEvent = ThisEvent;
@@ -226,24 +219,24 @@ bool S2_Generator::Generate() //uses MW->EnergyVector as the input parameter
 //               qDebug()<<"--->STARTING log photons:"<<TextLogPhotons;
 
                TextLogEnergy = EnergyVector->at(i)->dE;
-             }
+           }
            else
-             {
+           {
                //continue previous
                TextLogPhotons += NumPhotons;
 //               qDebug()<<"     text log photons:"<<TextLogPhotons;
                TextLogEnergy += EnergyVector->at(i)->dE;
-             }
-         }
-     }
+           }
+       }
+   }
    //finished all EnergyVector records
 
    //last point still needs save history
    if (DoTextLog)
-     {       
+   {
        if (OnlySecondary)
-        {
-          GeneratedPhotonsHistoryStructure tmp;// = {};
+       {
+          GeneratedPhotonsHistoryStructure tmp;
           tmp.Energy = TextLogEnergy;
           tmp.MaterialId = LastMaterial;
           tmp.ParticleId = LastParticle;
@@ -252,13 +245,13 @@ bool S2_Generator::Generate() //uses MW->EnergyVector as the input parameter
           tmp.event = LastEvent;
           tmp.index = LastIndex;
           GeneratedPhotonsHistory->append(tmp);
-        }
-      else
-         {
+       }
+       else
+       {
 //           qDebug()<<"after end replacement in"<<RecordNumber<<"  value of "<<TextLogPhotons;
            (*GeneratedPhotonsHistory)[RecordNumber].SecondaryPhotons = TextLogPhotons;
-         }
-     }
+       }
+   }
 
    return true;
 }

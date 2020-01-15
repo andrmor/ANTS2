@@ -47,17 +47,17 @@ bool S2_Generator::Generate() //uses MW->EnergyVector as the input parameter
         {
            int ThisEvent = EnergyVector->at(0)->eventId;
            int max = GeneratedPhotonsHistory->last().event;
-           if (ThisEvent>max)
-             {
+           if (ThisEvent > max)
+           {
                qWarning() << "Error in S2 generation: index is out of bounds";
                return false;
-             }
+           }
 
            int i = -1;
            do
-             {
-               i++;
-             }
+           {
+               ++i;
+           }
            while (GeneratedPhotonsHistory->at(i).event != ThisEvent);
 
            RecordNumber = i;
@@ -79,6 +79,10 @@ bool S2_Generator::Generate() //uses MW->EnergyVector as the input parameter
        const int ThisId    = cell->ParticleId;
        const int ThisIndex = cell->index;
        const int ThisEvent = cell->eventId;
+       const int MatId    = cell->MaterialId;
+
+       const double W = (*MaterialCollection)[MatId]->W;
+
        //checking are we still tracking the same particle?
        if (LastEvent != ThisEvent || LastIndex != ThisIndex)
        {
@@ -90,9 +94,8 @@ bool S2_Generator::Generate() //uses MW->EnergyVector as the input parameter
        GeoManager->FindNode();
 //       qDebug()<<"starting from:"<<GeoManager->GetCurrentVolume()->GetName();
 //       qDebug()<<ElRemainer;
-       const int    & MatId = cell->MaterialId;
-       const double & W     = (*MaterialCollection)[MatId]->W;
-       Electrons = cell->dE / W + ElRemainer;
+       Electrons = ( W != 0 ? cell->dE / W : 0 );
+       Electrons += ElRemainer;
 //       qDebug()<<"en, W, el: "<<EnergyVector->at(i).dE<<W<<Electrons;
        NumElectrons = (int)Electrons;
        ElRemainer = Electrons - (double)NumElectrons;

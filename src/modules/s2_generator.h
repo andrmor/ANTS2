@@ -26,6 +26,7 @@ public:
                           AMaterialParticleCollection* materialCollection,
                           QVector<GeneratedPhotonsHistoryStructure>* PhotonsHistory,
                           QObject *parent = 0);
+
     void UpdateGeoManager(TGeoManager* NewGeoManager) {GeoManager = NewGeoManager;} // *** obsolete?
     
     bool Generate(); //uses EnergyVector as the input parameter
@@ -38,16 +39,42 @@ signals:
 public slots:
 
 private:
-    QVector<AEnergyDepositionCell*>* EnergyVector;
-    Photon_Generator* PhotonGenerator;
-    APhotonTracer* PhotonTracker;
-    TRandom2* RandGen;
-    TGeoManager* GeoManager;
-    AMaterialParticleCollection* MaterialCollection;
-    QVector<GeneratedPhotonsHistoryStructure>* GeneratedPhotonsHistory;
+    QVector<AEnergyDepositionCell*> * EnergyVector = nullptr;
+    Photon_Generator * PhotonGenerator = nullptr;
+    APhotonTracer * PhotonTracker = nullptr;
+    TRandom2 * RandGen = nullptr;
+    TGeoManager * GeoManager = nullptr;
+    AMaterialParticleCollection * MaterialCollection = nullptr;
+    QVector<GeneratedPhotonsHistoryStructure> * GeneratedPhotonsHistory = nullptr;
 
     bool DoTextLog;
     bool OnlySecondary;
+
+    int RecordNumber = 0; //tracer for photon log index, not used if OnlySecondary is true
+
+    int ThisId;
+    int ThisIndex;
+    int ThisEvent;
+    int MatId;
+
+    double DepositedEnergy;
+
+    int NumElectrons;
+    int NumPhotons;
+
+    int    TextLogPhotons;
+    double TextLogEnergy;
+
+    int LastEvent;
+    int LastIndex;
+    int LastParticle;
+    int LastMaterial;
+
+private:
+    bool initLogger();
+    void updateLogger();
+    void storeLog();
+
 };
 
 #endif // S2_GENERATOR_H

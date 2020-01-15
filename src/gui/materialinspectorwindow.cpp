@@ -361,6 +361,11 @@ void MaterialInspectorWindow::UpdateIndicationTmpMaterial()
     str.setNum(tmpMaterial.e_driftVelocity, 'g');
     ui->ledEDriftVelocity->setText(str);
 
+    str.setNum(tmpMaterial.e_diffusion_L, 'g');
+    ui->ledEDiffL->setText(str);
+    str.setNum(tmpMaterial.e_diffusion_T, 'g');
+    ui->ledEDiffT->setText(str);
+
     int tmp = LastSelectedParticle;
     ui->cobParticle->clear();    
     int lastSelected_cobYieldForParticle = ui->cobYieldForParticle->currentIndex();
@@ -523,6 +528,9 @@ void MaterialInspectorWindow::on_pbUpdateTmpMaterial_clicked()
     tmpMaterial.SecYield = ui->ledSecYield->text().toDouble();
     tmpMaterial.SecScintDecayTime = ui->ledSecT->text().toDouble();   
     tmpMaterial.e_driftVelocity = ui->ledEDriftVelocity->text().toDouble();
+
+    tmpMaterial.e_diffusion_L = ui->ledEDiffL->text().toDouble();
+    tmpMaterial.e_diffusion_T = ui->ledEDiffT->text().toDouble();
 
     on_ledGammaDiagnosticsEnergy_editingFinished(); //gamma - update MFP
 }
@@ -3005,12 +3013,15 @@ void MaterialInspectorWindow::on_cbTrackingAllowed_clicked()
 void MaterialInspectorWindow::on_cbTransparentMaterial_clicked()
 {
     updateEnableStatus();
+}
 
-    /*
-  AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-  int particleId = ui->cobParticle->currentIndex();
-  tmpMaterial.MatParticle[particleId].MaterialIsTransparent = ui->cbTransparentMaterial->isChecked();
-  on_pbUpdateInteractionIndication_clicked();
-  on_pbWasModified_clicked();
-    */
+void MaterialInspectorWindow::on_pbSecScintHelp_clicked()
+{
+    QString s = "Diffusion is NOT active in \"Only photons\" simulation mode!\n"
+            "\n"
+            "If drift velosity is set to 0, diffusion is disabled in this material!\n"
+            "\n"
+            "Warning!\n"
+            "There are no checks for travel back in time and superluminal speed of electrons!";
+    message(s, this);
 }

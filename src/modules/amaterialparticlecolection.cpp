@@ -276,6 +276,8 @@ void AMaterialParticleCollection::ClearTmpMaterial()
   tmpMaterial.reemissionProb = 0;
   tmpMaterial.rayleighMFP = 0;
   tmpMaterial.e_driftVelocity = 0;
+  tmpMaterial.e_diffusion_L = 0;
+  tmpMaterial.e_diffusion_T = 0;
   tmpMaterial.W = 0;
   tmpMaterial.SecYield = 0;
   tmpMaterial.SecScintDecayTime = 0;

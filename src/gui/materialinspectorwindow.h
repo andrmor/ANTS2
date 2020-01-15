@@ -143,6 +143,8 @@ private slots:
 
     //new auto-generated, not cathegorized
 
+    void on_pbSecScintHelp_clicked();
+
 private:
     Ui::MaterialInspectorWindow *ui;
     MainWindow* MW;

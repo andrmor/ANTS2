@@ -261,7 +261,7 @@ void AMaterial::clear()
   n = 1.0;
   density = p1 = p2 = p3 = abs = rayleighMFP = reemissionProb = 0;
   temperature = 298.0;
-  e_driftVelocity = W = SecYield = SecScintDecayTime = 0;
+  e_driftVelocity = W = SecYield = SecScintDecayTime = e_diffusion_L = e_diffusion_T = 0;
   rayleighWave = 500.0;
   Comments = "";
 
@@ -351,6 +351,8 @@ void AMaterial::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCo
   json["SecScint_PhYield"] = SecYield;
   json["SecScint_Tau"] = SecScintDecayTime;
   json["ElDriftVelo"] = e_driftVelocity;
+  json["ElDiffusionL"] = e_diffusion_L;
+  json["ElDiffusionT"] = e_diffusion_T;
   if (p1!=0 || p2!=0 || p3!=0)
     {
       json["TGeoP1"] = p1;
@@ -559,6 +561,8 @@ bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpC
   parseJson(json, "SecScint_PhYield", SecYield);
   parseJson(json, "SecScint_Tau", SecScintDecayTime);
   parseJson(json, "ElDriftVelo", e_driftVelocity);
+  parseJson(json, "ElDiffusionL", e_diffusion_L);
+  parseJson(json, "ElDiffusionT", e_diffusion_T);
   parseJson(json, "TGeoP1", p1);
   parseJson(json, "TGeoP2", p2);
   parseJson(json, "TGeoP3", p3);

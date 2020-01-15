@@ -12,6 +12,7 @@ class TGeoManager;
 class AMaterial;
 class AMaterialParticleCollection;
 class APhotonTracer;
+class TString;
 
 class S2_Generator : public QObject
 {
@@ -62,6 +63,8 @@ private:
     int NumElectrons;
     int NumPhotons;
 
+    double PhotonRemainer;
+
     int    TextLogPhotons;
     double TextLogEnergy;
 
@@ -70,7 +73,12 @@ private:
     int LastParticle;
     int LastMaterial;
 
+    double BaseTime;
+
 private:
+    void doDrift(TString & VolName);
+    void generateLight(double * DepoPosition);
+
     bool initLogger();
     void updateLogger();
     void storeLog();

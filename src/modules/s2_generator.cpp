@@ -38,8 +38,8 @@ bool S2_Generator::Generate() //uses MW->EnergyVector as the input parameter
         if (!bOK) return false;
     }
 
-    double PhotonRemainer = 0.0;
     double ElectronRemainer = 0.0;
+    PhotonRemainer = 0.0;
     
     TextLogPhotons = 0;
     TextLogEnergy  = 0.0;
@@ -83,78 +83,16 @@ bool S2_Generator::Generate() //uses MW->EnergyVector as the input parameter
         {
             //field is always in z direction, electrons drift up!
             //finding distance to drift and time it will take
-            double time = cell->time;
+            BaseTime = cell->time;
             //       qDebug()<<"start time: "<<time;
+
             TString VolName = GeoManager->GetCurrentVolume()->GetName();
-            if (VolName != "SecScint")
-            {
-                do
-                {
-                    //going up untill enter secondary scintillator ("SecScint")
-                    int ThisMatIndex = GeoManager->GetCurrentVolume()->GetMaterial()->GetIndex();
-                    GeoManager->SetCurrentDirection(0, 0, 1.0);  //up
-                    GeoManager->FindNextBoundaryAndStep();
-                    const double Step = GeoManager->GetStep();
-                    const double DriftVelocity = MaterialCollection->getDriftSpeed(ThisMatIndex);
-                    if (DriftVelocity != 0) time += Step / DriftVelocity;
-                    VolName = GeoManager->GetCurrentVolume()->GetName();
-                    //            qDebug()<<"Found new volume: "<<VolName<<" drifted: "<<Step<<"new time: "<<time;
-                    if (GeoManager->IsOutside()) break;
-                }
-                while ( VolName != "SecScint" );
-            }
+            if (VolName != "SecScint") doDrift(VolName);
 
             if ( VolName == "SecScint" )
             {
                 //       qDebug()<<"found secondary scint";
-                const int    MatIndexSecScint = GeoManager->GetCurrentVolume()->GetMaterial()->GetIndex();
-                const double PhotonsPerElectron = (*MaterialCollection)[MatIndexSecScint]->SecYield;
-                //       qDebug()<<"matIndex of sec scintillator:"<<MatIndexSecScint<<"PhPerEl"<<PhotonsPerElectron;
-
-                const double Zstart = GeoManager->GetCurrentPoint()[2];
-                //       qDebug()<<"Sec scint starts: "<<Zstart;
-                GeoManager->FindNextBoundary();
-                const double Zspan = GeoManager->GetStep();
-                const double DriftVelocity = MaterialCollection->getDriftSpeed(MatIndexSecScint);
-
-                //generate photons
-                double Photons = NumElectrons * PhotonsPerElectron + PhotonRemainer;
-                NumPhotons = (int)Photons;
-                PhotonRemainer   = Photons - (double)NumPhotons;
-
-                if (PhotonGenerator->SimSet->fLRFsim)
-                    PhotonGenerator->GenerateSignalsForLrfMode(NumPhotons, (*EnergyVector)[i]->r, PhotonTracker->getEvent());
-                else
-                {
-                    //      qDebug()<<"Generate photons: "<<NumPhotons ;
-                    APhoton Photon;
-                    Photon.r[0] = cell->r[0];
-                    Photon.r[1] = cell->r[1];
-                    Photon.scint_type = 2;
-                    Photon.SimStat = PhotonGenerator->DetStat;
-
-                    for (int ii=0; ii<NumPhotons; ii++)
-                    {
-                        //random z inside secondary scintillator
-                        double z = Zspan * RandGen->Rndm();
-                        Photon.r[2] = Zstart + z;
-                        Photon.time = time + z / DriftVelocity;
-
-                        PhotonGenerator->GenerateDirectionSecondary(&Photon);
-                        //catching photons of the wrong direction, resetting the "skip" status!
-                        if (Photon.fSkipThisPhoton)
-                        {
-                            Photon.fSkipThisPhoton = false;
-                            continue;
-                        }
-
-                        PhotonGenerator->GenerateWave(&Photon, MatIndexSecScint);
-                        PhotonGenerator->GenerateTime(&Photon, MatIndexSecScint);
-                        //      qDebug()<<time + z / DriftVelocity;
-                        PhotonTracker->TracePhoton(&Photon);
-                    }
-                    //all photons were generated
-                }
+                generateLight(cell->r);
             }
             else
             {
@@ -173,6 +111,77 @@ bool S2_Generator::Generate() //uses MW->EnergyVector as the input parameter
 
     if (DoTextLog) storeLog();    //save history for the last event
     return true;
+}
+
+void S2_Generator::doDrift(TString & VolName)
+{
+    do
+    {
+        //drifting up until secondary scintillator ("SecScint") or outside of the defined geometry
+        int ThisMatIndex = GeoManager->GetCurrentVolume()->GetMaterial()->GetIndex();
+
+        GeoManager->SetCurrentDirection(0, 0, 1.0);  //up
+        GeoManager->FindNextBoundaryAndStep();
+        if (GeoManager->IsOutside()) break;
+
+        const double Step = GeoManager->GetStep();
+        const double DriftVelocity = MaterialCollection->getDriftSpeed(ThisMatIndex);
+        if (DriftVelocity != 0) BaseTime += Step / DriftVelocity;
+
+        VolName = GeoManager->GetCurrentVolume()->GetName();
+        //      qDebug()<<"Found new volume: "<<VolName<<" drifted: "<<Step<<"new time: "<<time;
+    }
+    while ( VolName != "SecScint" );
+}
+
+void S2_Generator::generateLight(double * DepoPosition)
+{
+    const int    MatIndexSecScint = GeoManager->GetCurrentVolume()->GetMaterial()->GetIndex();
+    const double PhotonsPerElectron = (*MaterialCollection)[MatIndexSecScint]->SecYield;
+    const double DriftVelocity = MaterialCollection->getDriftSpeed(MatIndexSecScint);
+    //       qDebug()<<"matIndex of sec scintillator:"<<MatIndexSecScint<<"PhPerEl"<<PhotonsPerElectron;
+    const double Zstart = GeoManager->GetCurrentPoint()[2];
+    //       qDebug()<<"Sec scint starts: "<<Zstart;
+
+    GeoManager->FindNextBoundary();
+    const double Zspan = GeoManager->GetStep();
+
+    //generate photons
+    double Photons = NumElectrons * PhotonsPerElectron + PhotonRemainer;
+    NumPhotons     = (int)Photons;
+    PhotonRemainer = Photons - (double)NumPhotons;
+
+    if (PhotonGenerator->SimSet->fLRFsim)
+        PhotonGenerator->GenerateSignalsForLrfMode(NumPhotons, DepoPosition, PhotonTracker->getEvent());
+    else
+    {
+        //      qDebug()<<"Generate photons: "<<NumPhotons ;
+        APhoton Photon;
+        Photon.r[0] = DepoPosition[0];
+        Photon.r[1] = DepoPosition[1];
+        Photon.scint_type = 2;
+        Photon.SimStat = PhotonGenerator->DetStat;
+
+        for (int ii=0; ii<NumPhotons; ii++)
+        {
+            //random z inside secondary scintillator
+            double z = Zspan * RandGen->Rndm();
+            Photon.r[2] = Zstart + z;
+            Photon.time = BaseTime + z / DriftVelocity;
+
+            PhotonGenerator->GenerateDirectionSecondary(&Photon);
+            //catching photons of the wrong direction, resetting the "skip" status!
+            if (Photon.fSkipThisPhoton)
+            {
+                Photon.fSkipThisPhoton = false;
+                continue;
+            }
+
+            PhotonGenerator->GenerateWave(&Photon, MatIndexSecScint);
+            PhotonGenerator->GenerateTime(&Photon, MatIndexSecScint);
+            PhotonTracker->TracePhoton(&Photon);
+        }
+    }
 }
 
 bool S2_Generator::initLogger()

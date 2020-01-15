@@ -4,6 +4,7 @@
 #include "ahistoryrecords.h"
 
 #include <QObject>
+#include <QVector>
 
 struct AEnergyDepositionCell;
 class Photon_Generator;
@@ -14,7 +15,16 @@ class AMaterialParticleCollection;
 class APhotonTracer;
 class TString;
 
-class S2_Generator : public QObject
+struct DiffSigmas
+{
+    double sigmaTime; //ns
+    double sigmaX;    //mm
+
+    DiffSigmas(double sigmaTime, double sigmaX) : sigmaTime(sigmaTime), sigmaX(sigmaX) {}
+    DiffSigmas() {}
+};
+
+class S2_Generator : public QObject  // ***!!! need QObject?
 {
     Q_OBJECT
 
@@ -74,10 +84,12 @@ private:
     int LastMaterial;
 
     double BaseTime;
+    QVector<DiffSigmas> DiffusionRecords;
 
 private:
     void doDrift(TString & VolName);
     void generateLight(double * DepoPosition);
+    void generateAndTracePhotons(double * Position, double Time, int NumPhotonsToGenerate, int MatIndexSecScint, double Zstart, double Zspan);
 
     bool initLogger();
     void updateLogger();

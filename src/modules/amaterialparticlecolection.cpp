@@ -64,6 +64,30 @@ double AMaterialParticleCollection::getDriftSpeed(int iMat) const
     return 0.01 * MaterialCollectionData.at(iMat)->e_driftVelocity; //given in cm/us - returns in mm/ns
 }
 
+double AMaterialParticleCollection::getDiffusionSigmaTime(int iMat, int length_mm) const
+{
+    //sqrt(2Dl/v^3)
+    const AMaterial * m = MaterialCollectionData.at(iMat);
+    if (m->e_driftVelocity == 0 || m->e_diffusion_L == 0) return 0;
+
+    const double v = 0.01 * m->e_driftVelocity; // in mm/ns <- from cm/us
+    const double d = m->e_diffusion_L; //now in mm^2/ns
+
+    return sqrt(2.0 * d * length_mm / v) / v; // in ns
+}
+
+double AMaterialParticleCollection::getDiffusionSigmaTransverse(int iMat, int length_mm) const
+{
+    //sqrt(2Dl/v)
+    const AMaterial * m = MaterialCollectionData.at(iMat);
+    if (m->e_driftVelocity == 0 || m->e_diffusion_L == 0) return 0;
+
+    const double v = 0.01 * m->e_driftVelocity; // in mm/ns <- from cm/us
+    const double d = m->e_diffusion_T; //now in mm^2/ns
+
+    return sqrt(2.0 * d * length_mm / v); // in mm
+}
+
 void AMaterialParticleCollection::UpdateRuntimePropertiesAndWavelengthBinning(GeneralSimSettings *SimSet, TRandom2* RandGen, int numThreads)
 {
   AMaterialParticleCollection::SetWave(SimSet->fWaveResolved, SimSet->WaveFrom, SimSet->WaveTo, SimSet->WaveStep, SimSet->WaveNodes);

@@ -94,6 +94,8 @@ public:
   void   GetWave(bool& wavelengthResolved, double& waveFrom, double& waveTo, double& waveStep, int& waveNodes) const;
   bool   IsWaveResolved() const {return WavelengthResolved;}
   double getDriftSpeed(int iMat) const; //returns in mm / ns
+  double getDiffusionSigmaTime(int iMat, int length_mm) const;
+  double getDiffusionSigmaTransverse(int iMat, int length_mm) const;
   void   CheckReadyForGeant4Sim(QString & Errors, QString & Warnings, const AGeoObject * World) const;
 
 public:

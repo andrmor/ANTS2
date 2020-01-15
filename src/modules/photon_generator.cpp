@@ -38,22 +38,6 @@ void Photon_Generator::GenerateDirectionPrimary(APhoton* Photon)
 
 void Photon_Generator::GenerateDirectionSecondary(APhoton *Photon)
 {
-  /* OBSOLETE
-  if (SimSet->SecScintGenMode == 3)
-      {
-        //custom direction     
-        double theta = SimSet->SecScintThetaHist->GetRandom();
-        double phi = RandGen->Rndm()*2.*3.1415926535;
-
-        Photon->v[2] = cos(theta);
-        double proj = sin(theta);
-        Photon->v[1] = proj*cos(phi);
-        Photon->v[0] = proj*sin(phi);
-
-        return;
-      }
-  */
-
   //Sphere function of Root:
   double a=0,b=0,r2=1;
   while (r2 > 0.25) {

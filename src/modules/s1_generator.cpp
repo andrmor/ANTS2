@@ -11,8 +11,7 @@
 
 #include "TRandom2.h"
 
-S1_Generator::S1_Generator(Photon_Generator *photonGenerator, APhotonTracer *photonTracker, AMaterialParticleCollection *materialCollection, QVector<AEnergyDepositionCell *> *energyVector, QVector<GeneratedPhotonsHistoryStructure> *PhotonsHistory, TRandom2* RandomGenerator, QObject *parent)
-    : QObject(parent)
+S1_Generator::S1_Generator(Photon_Generator *photonGenerator, APhotonTracer *photonTracker, AMaterialParticleCollection *materialCollection, QVector<AEnergyDepositionCell *> *energyVector, QVector<GeneratedPhotonsHistoryStructure> *PhotonsHistory, TRandom2* RandomGenerator)
 {
     PhotonGenerator = photonGenerator;
     PhotonTracker = photonTracker;
@@ -20,7 +19,6 @@ S1_Generator::S1_Generator(Photon_Generator *photonGenerator, APhotonTracer *pho
     MaterialCollection = materialCollection;
     GeneratedPhotonsHistory = PhotonsHistory;
     RandGen = RandomGenerator;
-    DoTextLog = false;
 }
 
 bool S1_Generator::Generate() //uses MW->EnergyVector as the input parameter

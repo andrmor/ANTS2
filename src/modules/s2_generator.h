@@ -3,7 +3,6 @@
 
 #include "ahistoryrecords.h"
 
-#include <QObject>
 #include <QVector>
 
 struct AEnergyDepositionCell;
@@ -24,10 +23,8 @@ struct DiffSigmas
     DiffSigmas() {}
 };
 
-class S2_Generator : public QObject  // ***!!! need QObject?
+class S2_Generator
 {
-    Q_OBJECT
-
 public:
     explicit S2_Generator(Photon_Generator* photonGenerator,
                           APhotonTracer* photonTracker,
@@ -35,8 +32,7 @@ public:
                           TRandom2 *RandomGenerator,
                           TGeoManager* geoManager,
                           AMaterialParticleCollection* materialCollection,
-                          QVector<GeneratedPhotonsHistoryStructure>* PhotonsHistory,
-                          QObject *parent = 0);
+                          QVector<GeneratedPhotonsHistoryStructure>* PhotonsHistory);
 
     void UpdateGeoManager(TGeoManager* NewGeoManager) {GeoManager = NewGeoManager;} // *** obsolete?
     
@@ -44,10 +40,6 @@ public:
 
     void setDoTextLog(bool flag){DoTextLog = flag;}
     void setOnlySecondary(bool flag){OnlySecondary = flag;} //determines how photon log is filled
-
-signals:
-    
-public slots:
 
 private:
     QVector<AEnergyDepositionCell*> * EnergyVector = nullptr;
@@ -58,7 +50,7 @@ private:
     AMaterialParticleCollection * MaterialCollection = nullptr;
     QVector<GeneratedPhotonsHistoryStructure> * GeneratedPhotonsHistory = nullptr;
 
-    bool DoTextLog;
+    bool DoTextLog = false;
     bool OnlySecondary;
 
     int RecordNumber = 0; //tracer for photon log index, not used if OnlySecondary is true

@@ -1,4 +1,3 @@
-//ANTS
 #include "s2_generator.h"
 #include "amaterialparticlecolection.h"
 #include "photon_generator.h"
@@ -7,15 +6,12 @@
 #include "aenergydepositioncell.h"
 #include "generalsimsettings.h"
 
-//Qt
 #include <QDebug>
 
-//Root
 #include "TGeoManager.h"
 #include "TRandom2.h"
 
-S2_Generator::S2_Generator(Photon_Generator *photonGenerator, APhotonTracer *photonTracker, QVector<AEnergyDepositionCell *> *energyVector, TRandom2 *RandomGenerator, TGeoManager *geoManager, AMaterialParticleCollection *materialCollection, QVector<GeneratedPhotonsHistoryStructure> *PhotonsHistory, QObject *parent)
-    : QObject(parent)
+S2_Generator::S2_Generator(Photon_Generator *photonGenerator, APhotonTracer *photonTracker, QVector<AEnergyDepositionCell *> *energyVector, TRandom2 *RandomGenerator, TGeoManager *geoManager, AMaterialParticleCollection *materialCollection, QVector<GeneratedPhotonsHistoryStructure> *PhotonsHistory)
 {
     PhotonGenerator = photonGenerator;
     PhotonTracker = photonTracker;
@@ -24,8 +20,6 @@ S2_Generator::S2_Generator(Photon_Generator *photonGenerator, APhotonTracer *pho
     GeoManager = geoManager;
     MaterialCollection = materialCollection;
     GeneratedPhotonsHistory = PhotonsHistory;
-
-    DoTextLog = false;
 }
 
 bool S2_Generator::Generate() //uses MW->EnergyVector as the input parameter
@@ -263,7 +257,6 @@ bool S2_Generator::initLogger()
 
        RecordNumber = i;
     }
-
     return true;
 }
 

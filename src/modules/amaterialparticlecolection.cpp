@@ -67,6 +67,7 @@ double AMaterialParticleCollection::getDriftSpeed(int iMat) const
 double AMaterialParticleCollection::getDiffusionSigmaTime(int iMat, int length_mm) const
 {
     //sqrt(2Dl/v^3)
+    //https://doi.org/10.1016/j.nima.2016.01.094
     const AMaterial * m = MaterialCollectionData.at(iMat);
     if (m->e_driftVelocity == 0 || m->e_diffusion_L == 0) return 0;
 

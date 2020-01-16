@@ -13,8 +13,8 @@
 #include "TMath.h"
 #include "TH1D.h"
 
-Photon_Generator::Photon_Generator(const DetectorClass &Detector, TRandom2* RandGen, QObject *parent) :
-    QObject(parent), Detector(Detector), RandGen(RandGen) {}
+Photon_Generator::Photon_Generator(const DetectorClass &Detector, TRandom2* RandGen) :
+    Detector(Detector), RandGen(RandGen) {}
 
 Photon_Generator::~Photon_Generator()
 {

@@ -1,7 +1,6 @@
 #ifndef PHOTON_GENERATOR_H
 #define PHOTON_GENERATOR_H
 
-#include <QObject>
 #include <QVector>
 
 class DetectorClass;
@@ -11,11 +10,10 @@ class ASimulationStatistics;
 class AOneEvent;
 class TRandom2;
 
-class Photon_Generator : public QObject
+class Photon_Generator
 {
-    Q_OBJECT
 public:
-    explicit Photon_Generator(const DetectorClass & Detector, TRandom2* RandGen, QObject *parent = 0);
+    explicit Photon_Generator(const DetectorClass & Detector, TRandom2* RandGen);
     ~Photon_Generator();
 
     void GenerateDirectionPrimary(APhoton *Photon);
@@ -27,12 +25,12 @@ public:
 
     void GenerateSignalsForLrfMode(int NumPhotons, double *r, AOneEvent* OneEvent);
 
-    ASimulationStatistics* DetStat;
-    const GeneralSimSettings* SimSet;
+    ASimulationStatistics * DetStat = nullptr;
+    const GeneralSimSettings * SimSet = nullptr;
 
 private:
     const DetectorClass & Detector;
-    TRandom2* RandGen;
+    TRandom2 * RandGen = nullptr;
 };
 
 #endif // PHOTON_GENERATOR_H

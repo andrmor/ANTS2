@@ -112,12 +112,12 @@ void S2_Generator::doDrift(TString & VolName)
 {
     DiffusionRecords.clear();
 
+    GeoManager->SetCurrentDirection(0, 0, 1.0);  //up
     do
     {
         //drifting up until secondary scintillator ("SecScint") or outside of the defined geometry
         int ThisMatIndex = GeoManager->GetCurrentVolume()->GetMaterial()->GetIndex();
 
-        GeoManager->SetCurrentDirection(0, 0, 1.0);  //up
         GeoManager->FindNextBoundaryAndStep();
         if (GeoManager->IsOutside()) break;
 
@@ -173,7 +173,7 @@ void S2_Generator::generateLight(double * DepoPosition)
             double pos[3];
             pos[0] = DepoPosition[0];
             pos[1] = DepoPosition[1];
-            pos[2] = Zstart + 0.5*Zspan; // to be inside of SecScint in Z
+            pos[2] = Zstart + 0.5*Zspan; // try to be inside the SecScint in Z
             bool bInside = true;
             for (const DiffSigmas & rec : DiffusionRecords)
             {
@@ -192,7 +192,7 @@ void S2_Generator::generateLight(double * DepoPosition)
             }
             if (!bInside)
             {
-                qDebug() << "Got outside of the SecScint during diffusion phase";
+                //qDebug() << "Left SecScint during diffusion";
                 continue;
             }
 

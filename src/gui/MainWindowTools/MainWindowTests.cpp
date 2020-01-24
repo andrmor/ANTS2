@@ -36,8 +36,50 @@
 #include "TGeoVolume.h"
 #include "TGeoNode.h"
 #include "TGeoMaterial.h"
+
+double single_exp(double t, double tau2)
+{
+    return std::exp(-1.0*t/tau2)/tau2;
+}
+
+double bi_exp(double t, double tau1,double tau2)
+{
+    return std::exp(-1.0*t/tau2)*(1-std::exp(-1.0*t/tau1))/tau2/tau2*(tau1+tau2);
+}
+
+
 void MainWindow::on_pobTest_clicked()
 {
+    TH1D* h = new TH1D("t", "", 1000, 0,200.0);
+
+    double tau1 = 20.0;     //rise
+    double tau2 = 100.0;    //decay
+
+    for (int iPh = 0; iPh < 1000000; iPh++)
+    {
+        double t;
+        while (true)  //ususally reasult is found in 1 (~80%) or 2 passes (3+ is <1%) for 10/100ns
+        {
+            // two random numbers
+            double ran1 = Detector->RandGen->Rndm();// G4UniformRand();
+            double ran2 = Detector->RandGen->Rndm();//G4UniformRand();
+            //
+            // exponential distribution as envelope function: very efficient
+            //
+            double d = (tau1 + tau2) / tau2;
+            // make sure the envelope function is
+            // always larger than the bi-exponential
+            t = -1.0 * tau2 * std::log(1.0 - ran1);
+            double gg = d * single_exp(t, tau2);
+            if (ran2 <= bi_exp(t, tau1, tau2) / gg)
+                break;
+        }
+        h->Fill(t);
+    }
+
+    GraphWindow->Draw(h, "hist");
+
+    /*
     TH1D* h = new TH1D("t", "", 11,0,10);
 
     TGeoNavigator * n = gGeoManager->GetCurrentNavigator();
@@ -54,6 +96,7 @@ void MainWindow::on_pobTest_clicked()
     }
     qDebug() << "Done!";
     GraphWindow->Draw(h, "hist");
+    */
 
     /*
     TH1D * hist = new TH1D("", "", 5, 0, 5);

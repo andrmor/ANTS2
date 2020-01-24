@@ -50,22 +50,25 @@ double bi_exp(double t, double tau1,double tau2)
 
 void MainWindow::on_pobTest_clicked()
 {
-    TH1D* h = new TH1D("t", "", 1000, 0,200.0);
+    TH1D* h = new TH1D("t", "", 1000, 0, 0);
 
-    double tau1 = 20.0;     //rise
-    double tau2 = 100.0;    //decay
+    double tau1 = 20.0; //rise
+    double tau2;        //decay
+
+    double d1 = 100.0;    //decay1
+    double d1Fraction = 0.5;
+    double d2 = 1000.0;    //decay2
 
     for (int iPh = 0; iPh < 1000000; iPh++)
     {
+        if (Detector->RandGen->Rndm() < d1Fraction) tau2 = d1;
+        else tau2 = d2;
+
         double t;
         while (true)  //ususally reasult is found in 1 (~80%) or 2 passes (3+ is <1%) for 10/100ns
         {
-            // two random numbers
             double ran1 = Detector->RandGen->Rndm();// G4UniformRand();
             double ran2 = Detector->RandGen->Rndm();//G4UniformRand();
-            //
-            // exponential distribution as envelope function: very efficient
-            //
             double d = (tau1 + tau2) / tau2;
             // make sure the envelope function is
             // always larger than the bi-exponential
@@ -78,6 +81,32 @@ void MainWindow::on_pobTest_clicked()
     }
 
     GraphWindow->Draw(h, "hist");
+    /*
+    TH1D* h = new TH1D("t", "", 1000, 0,200.0);
+
+    double tau1 = 20.0;     //rise
+    double tau2 = 100.0;    //decay
+
+    for (int iPh = 0; iPh < 1000000; iPh++)
+    {
+        double t;
+        while (true)  //ususally reasult is found in 1 (~80%) or 2 passes (3+ is <1%) for 10/100ns
+        {
+            double ran1 = Detector->RandGen->Rndm();// G4UniformRand();
+            double ran2 = Detector->RandGen->Rndm();//G4UniformRand();
+            double d = (tau1 + tau2) / tau2;
+            // make sure the envelope function is
+            // always larger than the bi-exponential
+            t = -1.0 * tau2 * std::log(1.0 - ran1);
+            double gg = d * single_exp(t, tau2);
+            if (ran2 <= bi_exp(t, tau1, tau2) / gg)
+                break;
+        }
+        h->Fill(t);
+    }
+
+    GraphWindow->Draw(h, "hist");
+    */
 
     /*
     TH1D* h = new TH1D("t", "", 11,0,10);

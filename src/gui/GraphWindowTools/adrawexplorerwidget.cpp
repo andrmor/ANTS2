@@ -160,8 +160,9 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
     Menu.addSeparator();
 
     QMenu * fitMenu =       Menu.addMenu("Fit");
-        QAction* linFitA    =   fitMenu->addAction("Linear (use click-drag)"); linFitA->setEnabled(Type.startsWith("TH1") || Type == "TProfile");
-        QAction* fwhmA      =   fitMenu->addAction("Gauss (use click-frag)"); fwhmA->setEnabled(Type.startsWith("TH1") || Type == "TProfile");
+        QAction* linFitA    =   fitMenu->addAction("Linear (use click-drag)");     linFitA->setEnabled(Type.startsWith("TH1") || Type == "TProfile");
+        QAction* fwhmA      =   fitMenu->addAction("Gauss (use click-frag)");      fwhmA->  setEnabled(Type.startsWith("TH1") || Type == "TProfile");
+        QAction* expA       =   fitMenu->addAction("Exp. decay (use click-frag)"); expA->   setEnabled(Type.startsWith("TH1") || Type == "TProfile");
         QAction* splineFitA =   fitMenu->addAction("B-spline"); splineFitA->setEnabled(Type == "TGraph" || Type == "TGraphErrors");   //*** implement for TH1 too!
         fitMenu->addSeparator();
         QAction* showFitPanel = fitMenu->addAction("Show fit panel");
@@ -196,6 +197,7 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
    else if (si == fractionA)    fraction(obj);
    else if (si == linFitA)      linFit(index);
    else if (si == fwhmA)        fwhm(index);
+   else if (si == expA)         expFit(index);
    else if (si == interpolateA) interpolate(obj);
    else if (si == axesX)        editAxis(obj, 0);
    else if (si == axesY)        editAxis(obj, 1);
@@ -839,6 +841,74 @@ void ADrawExplorerWidget::linFit(int index)
     DrawObjects.insert(index+1, ADrawObject(f, "same"));
 
     QString text = QString("y = Ax+B\nA = %1, B = %2\nx range: %3 -> %4").arg(A).arg(B).arg(startX).arg(stopX);
+    TPaveText* la = new TPaveText(0.15, 0.75, 0.5, 0.85, "NDC");
+    la->SetFillColor(0);
+    la->SetBorderSize(1);
+    la->SetLineColor(1);
+    la->SetTextAlign( (0 + 1) * 10 + 2);
+    QStringList sl = text.split("\n");
+    for (QString s : sl) la->AddText(s.toLatin1());
+    GraphWindow.RegisterTObject(la);
+    DrawObjects.insert(index+2, ADrawObject(la, "same"));
+
+    GraphWindow.RedrawAll();
+    GraphWindow.HighlightUpdateBasketButton(true);
+}
+
+void ADrawExplorerWidget::expFit(int index)
+{
+    ADrawObject & obj = DrawObjects[index];
+
+    const QString cn = obj.Pointer->ClassName();
+    if ( !cn.startsWith("TH1") && cn != "TProfile")
+    {
+        message("Can be used only with 1D histograms!", &GraphWindow);
+        return;
+    }
+
+    TH1* h = dynamic_cast<TH1*>(obj.Pointer);
+    if (!h) return;
+
+    GraphWindow.TriggerGlobalBusy(true);
+
+    GraphWindow.Extract2DLine();
+    if (!GraphWindow.Extraction()) return; //cancel
+
+    double startX = GraphWindow.extracted2DLineXstart();
+    double startY = GraphWindow.extracted2DLineYstart();
+    double stopX = GraphWindow.extracted2DLineXstop();
+    double stopY = GraphWindow.extracted2DLineYstop();
+    if (startX > stopX)
+    {
+        std::swap(startX, stopX);
+        std::swap(startY, stopY);
+    }
+
+    TF1 * f = new TF1("expDecay", "[0]*exp(-(x-[2])/[1])", startX, stopX);
+    f->SetTitle("Exp decay fit");
+    GraphWindow.RegisterTObject(f);
+
+    f->SetParameter(0, startY);
+    f->SetParameter(1, 1);
+    f->SetParameter(2, startX);
+    f->SetParLimits(2, startX, startX);
+
+    int status = h->Fit(f, "R0");
+    if (status != 0)
+    {
+        message("Fit failed!", &GraphWindow);
+        return;
+    }
+
+    GraphWindow.MakeCopyOfDrawObjects();
+    GraphWindow.MakeCopyOfActiveBasketId();
+
+    double A = f->GetParameter(0);
+    double T = f->GetParameter(1);
+
+    DrawObjects.insert(index+1, ADrawObject(f, "same"));
+
+    QString text = QString("y = A*exp{-(t-t0)/T)}\nT = %1, A = %2, t0 = %3\nx range: %3 -> %4").arg(T).arg(A).arg(startX).arg(stopX);
     TPaveText* la = new TPaveText(0.15, 0.75, 0.5, 0.85, "NDC");
     la->SetFillColor(0);
     la->SetBorderSize(1);

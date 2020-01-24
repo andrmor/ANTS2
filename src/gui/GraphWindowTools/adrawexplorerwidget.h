@@ -48,6 +48,7 @@ private:
     void fraction(ADrawObject &obj);
     void fwhm(int index);
     void linFit(int index);
+    void expFit(int index);
     void interpolate(ADrawObject &obj);
     void median(ADrawObject &obj);
     void projection(ADrawObject &obj, bool bX);

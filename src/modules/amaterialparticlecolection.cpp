@@ -284,7 +284,6 @@ void AMaterialParticleCollection::ClearTmpMaterial()
   tmpMaterial.SecScintDecayTime = 0;
   tmpMaterial.Comments = "";
 
-  tmpMaterial.PriScintModel = 0;
   tmpMaterial.PriScint_Decay.clear();
   tmpMaterial.PriScint_Decay << APair_ValueAndWeight(0, 1.0);
   tmpMaterial.PriScint_Raise.clear();

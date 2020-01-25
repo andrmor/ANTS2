@@ -349,8 +349,6 @@ void MaterialInspectorWindow::UpdateIndicationTmpMaterial()
         str.chop(3);
     }
     ui->lePriT_raise->setText(str);
-    //model for decay and rise
-    ui->cobPriT_model->setCurrentIndex(tmpMaterial.PriScintModel);
 
     str.setNum(tmpMaterial.W*1000.0, 'g'); //keV->eV
     ui->ledW->setText(str);
@@ -511,7 +509,6 @@ void MaterialInspectorWindow::on_pbUpdateTmpMaterial_clicked()
     tmpMaterial.n = ui->ledN->text().toDouble();
     tmpMaterial.abs = ui->ledAbs->text().toDouble();
     tmpMaterial.reemissionProb = ui->ledReemissionProbability->text().toDouble();
-    tmpMaterial.PriScintModel = ui->cobPriT_model->currentIndex();
 
     double prYield = ui->ledPrimaryYield->text().toDouble();
     int iP = ui->cobYieldForParticle->currentIndex();
@@ -2828,16 +2825,9 @@ void MaterialInspectorWindow::on_pbPriThelp_clicked()
             "  e.g., 25.5 : 0.25  &  250 : 0.75\n"
             "  \n"
             "Model:\n"
-            "  If \"Sum\" is selected, the photon emission time is calculated as follows:\n"
-            "  first the delay due to the raise time is generated,\n"
-            "  then decay time is generated. The emission time is sum of those values.\n"
-            "  This model can be used if, e.g., the emitting state is populated from upper states.\n"
-            "\n"
-            "  If \"Shao\" is selected, the emission time is calculated as in:\n"
             "  Yiping Shao, Phys. Med. Biol. 52 (2007) 1103–1117\n"
-            "  http://www.iss.infn.it/topem/TOF-PET/shao-model-timing.pdf\n"
-            "  The formula is generalised to have more than one decay components.\n"
-            "  Random generator was provided by Evgeny Tolotchko";
+            "  The approach is generalised to have more than one rise/decay components.\n"
+            "  Random generator is taken from G4Scintillation class of Geant4";
     message(s, this);
 }
 
@@ -2847,27 +2837,9 @@ void MaterialInspectorWindow::on_pbPriT_test_clicked()
 
     tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation, Detector->RandGen); //to update sum of stat weights
 
-    QMessageBox mb(this);
-    if (ui->cobPriT_model->currentIndex() == 1)
-    {
-        mb.setWindowFlags(mb.windowFlags() | Qt::WindowStaysOnTopHint);
-        mb.setStandardButtons(0);
-        mb.setText("calculating...");
-        mb.show();
-        MW->WindowNavigator->BusyOn();
-        QCoreApplication::processEvents();
-    }
-
     TH1D* h = new TH1D("h1", "", 1000, 0, 0);
     for (int i=0; i<1000000; i++)
         h->Fill( tmpMaterial.GeneratePrimScintTime(Detector->RandGen) );
-
-    if (ui->cobPriT_model->currentIndex() == 1)
-    {
-        mb.hide();
-        MW->WindowNavigator->BusyOff();
-    }
-
 
     h->GetXaxis()->SetTitle("Time, ns");
     TString title = "Emission for ";

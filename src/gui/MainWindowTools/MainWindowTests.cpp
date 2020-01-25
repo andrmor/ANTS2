@@ -37,6 +37,7 @@
 #include "TGeoNode.h"
 #include "TGeoMaterial.h"
 
+/*
 double single_exp(double t, double tau2)
 {
     return std::exp(-1.0*t/tau2)/tau2;
@@ -46,10 +47,11 @@ double bi_exp(double t, double tau1,double tau2)
 {
     return std::exp(-1.0*t/tau2)*(1-std::exp(-1.0*t/tau1))/tau2/tau2*(tau1+tau2);
 }
-
+*/
 
 void MainWindow::on_pobTest_clicked()
 {
+    /*
     TH1D* h = new TH1D("t", "", 1000, 0, 0);
 
     double tau1 = 20.0; //rise
@@ -81,6 +83,8 @@ void MainWindow::on_pobTest_clicked()
     }
 
     GraphWindow->Draw(h, "hist");
+    */
+
     /*
     TH1D* h = new TH1D("t", "", 1000, 0,200.0);
 

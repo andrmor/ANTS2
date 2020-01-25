@@ -43,7 +43,6 @@ public:
   double SecYield;  // ph per secondary electron
   QVector<APair_ValueAndWeight> PriScint_Decay;
   QVector<APair_ValueAndWeight> PriScint_Raise;
-  int PriScintModel = 0; //0=sum, 1=Shao
 
   double PhotonYieldDefault = 0;
   double getPhotonYield(int iParticle) const;

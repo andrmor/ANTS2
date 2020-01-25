@@ -74,18 +74,6 @@ void MainWindow::SimGeneralConfigToJson(QJsonObject &jsonMaster)
 
   //Sec scint options
   QJsonObject scjson;
-      int Type = ui->cobSecScintillationGenType->currentIndex(); //0-4Pi, 1-2PiUp, 2-2Pidown, 3-custom
-      scjson["Type"] = Type;      
-//      if (Type == 3)
-//        {
-//          //saving hist data to JsonArray
-//          if (histSecScint)
-//            {
-//              QJsonArray ar;
-//              writeTH1DtoJsonArr(histSecScint, ar);
-//              scjson["CustomDistrib"] = ar;
-//            }
-//        }
   json["SecScintConfig"] = scjson;
 
   QJsonObject tbojs;

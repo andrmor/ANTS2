@@ -85,7 +85,7 @@ void MainWindow::onRequestDetectorGuiUpdate()
   ui->cbFixedTopSize->setChecked( Detector->fWorldSizeFixed );
   //misc
   ShowPMcount();
-  CheckPresenseOfSecScintillator(); //checks if SecScint present, and update selectors of primary/secondary scintillation
+  CheckPresenseOfSecScintillator(); //checks if SecScint present, and update selectors of primary/secondary scintillation  //***!!! potentially slow on large geometries!!!
   //Sandwich - now automatic
   //PM explore
   on_pbIndPMshowInfo_clicked();
@@ -96,8 +96,8 @@ void MainWindow::onRequestDetectorGuiUpdate()
   //GDML?
   onGDMLstatusChage(!Detector->isGDMLempty());
 
-  Detector->checkSecScintPresent();
-  ui->fSecondaryLightGenType->setEnabled(Detector->fSecScintPresent);
+  //Detector->checkSecScintPresent();
+  //ui->fSecondaryLightGenType->setEnabled(Detector->fSecScintPresent);
 
   //readExtraGuiFromJson(Config->JSON); //new!
   //qDebug() << "Before:\n"<<Config->JSON["DetectorConfig"].toObject()["LoadExpDataConfig"].toObject();
@@ -260,10 +260,7 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
     }
 
   //cleanup  
-  if (histScan) delete histScan;
-  histScan = 0;
-  if (histSecScint) delete histSecScint;
-  histSecScint = 0;
+  if (histScan) delete histScan; histScan = nullptr;
   ui->pbScanDistrShow->setEnabled(false);
   ui->pbScanDistrDelete->setEnabled(false);
   populateTable = true;
@@ -316,30 +313,9 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
   JsonToSpinBox (acj, "MaxNumTransitions", ui->sbMaxNumbPhTransitions);
   JsonToCheckbox(acj, "CheckBeforeTrack", ui->cbRndCheckBeforeTrack);
   //Sec scint
-  QJsonObject scj = gjs["SecScintConfig"].toObject();
-  JsonToComboBox(scj, "Type", ui->cobSecScintillationGenType);
-  /*
-if (scj.contains("CustomDistrib"))
-  {
-    QJsonArray ja = scj["CustomDistrib"].toArray();
-    int size = ja.size();
-    if (size>0)
-      {
-        double* xx = new double[size];
-        double* yy = new double[size];
-        for (int i=0; i<size; i++)
-            {
-              xx[i] = ja[i].toArray()[0].toDouble();
-              yy[i] = ja[i].toArray()[1].toDouble();
-            }
-        histSecScint = new TH1D("SecScintTheta","SecScint: Theta", size-1, xx);
-        for (int i = 1; i<size+1; i++)  histSecScint->SetBinContent(i, yy[i-1]);
-        delete[] xx;
-        delete[] yy;
-      }
-  }
-*/
-  //JsonToCheckbox(gjs, "BuildPhotonTracks", ui->cbPointSourceBuildTracks); //general now
+  //QJsonObject scj = gjs["SecScintConfig"].toObject();
+  //JsonToComboBox(scj, "Type", ui->cobSecScintillationGenType);
+
   QJsonObject tbojs;
     parseJson(gjs, "TrackBuildingOptions", tbojs);
   SimulationManager->TrackBuildOptions.readFromJson(tbojs);

@@ -222,14 +222,7 @@ void S2_Generator::generateAndTracePhotons(double * Position, double Time, int N
         Photon.r[2] = Zstart + z;
         Photon.time = Time + z / DriftVelocity;
 
-        PhotonGenerator->GenerateDirectionSecondary(&Photon);
-        //catching photons of the wrong direction, resetting the "skip" status!
-        if (Photon.fSkipThisPhoton)
-        {
-            Photon.fSkipThisPhoton = false;
-            continue;
-        }
-
+        PhotonGenerator->GenerateDirection(&Photon);
         PhotonGenerator->GenerateWave(&Photon, MatIndexSecScint);
         PhotonGenerator->GenerateTime(&Photon, MatIndexSecScint);
         PhotonTracker->TracePhoton(&Photon);

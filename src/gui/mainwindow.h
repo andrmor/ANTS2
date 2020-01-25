@@ -168,13 +168,9 @@ public:
     double WaveFrom, WaveTo, WaveStep;
     int WaveNodes;
 
-    TH1D *histSecScint = 0;
-
     int ScriptWinX, ScriptWinY, ScriptWinW, ScriptWinH;
     void recallGeometryOfLocalScriptWindow();
     void extractGeometryOfLocalScriptWindow();
-
-    void LoadSecScintTheta(QString fileName);
 
     int PMArrayType(int ul);
     void SetPMarrayType(int ul, int itype);
@@ -305,10 +301,6 @@ private slots:
     void on_actionMaterial_inspector_window_triggered();
     void on_cbEnableElNoise_toggled(bool checked);
     void on_actionExamples_triggered();
-    void on_cobSecScintillationGenType_currentIndexChanged(int index);
-    void on_pbSecScintShowProfile_clicked();
-    void on_pbSecScintLoadProfile_clicked();
-    void on_pbSecScintDeleteProfile_clicked();
     void on_lwMaterials_currentRowChanged(int currentRow);
     void on_lwMaterials_doubleClicked(const QModelIndex &index);
     void on_lwParticles_currentRowChanged(int currentRow);

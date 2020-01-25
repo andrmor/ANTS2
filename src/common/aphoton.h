@@ -15,7 +15,6 @@ public:
     double time; //time stamp
     int waveIndex; //wavelength is always binned during simulations
     int scint_type; //1 - primary //2 - secondary // 0 - undefined
-    bool fSkipThisPhoton = false; //flag to skip this photon due to e.g. direction check
 
     ASimulationStatistics* SimStat = 0;
 

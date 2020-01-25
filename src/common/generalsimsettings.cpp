@@ -84,32 +84,7 @@ bool GeneralSimSettings::readFromJson(const QJsonObject &Json)
   G4SimSet.readFromJson(g4js);
 
   //Secondary scint options
-  QJsonObject scjson = json["SecScintConfig"].toObject();
-  SecScintGenMode = scjson["Type"].toInt();  //0-4Pi, 1-2PiUp, 2-2Pidown, // obsolete: 3-custom
-  if (SecScintGenMode == 3) SecScintGenMode = 0;
-  /*
-    if (SecScintGenMode == 3)
-      {
-        if (!scjson.contains("CustomDistrib"))
-          {
-             ErrorString = "Config file does not contain secondary scint generation histogram!";
-             return false;
-          }
-        QJsonArray ar = scjson["CustomDistrib"].toArray();
-        int size = ar.size();
-        double* xx = new double[size];
-        double* yy = new double[size];
-        for (int i=0; i<size; i++)
-            {
-              xx[i] = ar[i].toArray()[0].toDouble();
-              yy[i] = ar[i].toArray()[1].toDouble();
-            }
-        SecScintThetaHist = new TH1D("hSecThet","", size-1, xx);
-        for (int i = 1; i<size+1; i++)  SecScintThetaHist->SetBinContent(i, yy[i-1]);
-        delete[] xx;
-        delete[] yy;
-      }
-    */
+  //QJsonObject scjson = json["SecScintConfig"].toObject();
 
   return true;
 }

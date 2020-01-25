@@ -96,7 +96,6 @@
 MainWindow::~MainWindow()
 {
     qDebug()<<"<Staring destructor for MainWindow";
-    delete histSecScint;
     delete histScan;
 
     qDebug() << "<-Clearing containers with dynamic objects";
@@ -2662,62 +2661,6 @@ void MainWindow::on_pbScanDistrDelete_clicked()
   ui->pbScanDistrShow->setEnabled(false);
   ui->pbScanDistrDelete->setEnabled(false);
   MainWindow::on_pbUpdateSimConfig_clicked();
-}
-
-void MainWindow::on_cobSecScintillationGenType_currentIndexChanged(int index)
-{
-  if (index == 3) ui->fSecondaryScintLoadProfile->setVisible(true);
-  else ui->fSecondaryScintLoadProfile->setVisible(false);
-}
-
-void MainWindow::on_pbSecScintShowProfile_clicked()
-{
-  if (!histSecScint) return;
-  GraphWindow->Draw(histSecScint, "", true, false);
-}
-
-void MainWindow::on_pbSecScintLoadProfile_clicked()
-{
-  QString fileName = QFileDialog::getOpenFileName(this, "Load custom distribution", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
-  if (fileName.isEmpty()) return;
-  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-
-  MainWindow::LoadSecScintTheta(fileName);
-}
-
-void MainWindow::LoadSecScintTheta(QString fileName)
-{
-  QVector<double> x, y;
-  int error = LoadDoubleVectorsFromFile(fileName, &x, &y);
-  if (error>0)
-    {
-      qDebug()<<"Error reading custom Theta distribution file";
-      return;
-    }
-
-  //PhotonGenerator->deleteSecScintThetaDistribution();
-  if (histSecScint) delete histSecScint;
-  int size = x.size();
-  double* xx = new double [size];
-  for (int i = 0; i<size; i++) xx[i]=x[i];//*3.1415926535/180.;
-  histSecScint = new TH1D("SecScintTheta","SecScint: Theta", size-1, xx);
-
-  for (int j = 1; j<size+1; j++)  histSecScint->SetBinContent(j, y[j-1]);
-  //PhotonGenerator->setSecScintThetaDistribution(histSecScint);
-
-  ui->pbSecScintShowProfile->setEnabled(true);
-  ui->pbSecScintDeleteProfile->setEnabled(true);
-}
-
-void MainWindow::on_pbSecScintDeleteProfile_clicked()
-{
-  //PhotonGenerator->deleteSecScintThetaDistribution();
-  if (histSecScint) delete histSecScint;
-  histSecScint = 0;
-
-  ui->pbSecScintShowProfile->setEnabled(false);
-  ui->pbSecScintDeleteProfile->setEnabled(false);
-  ui->cobSecScintillationGenType->setCurrentIndex(0);
 }
 
 void MainWindow::on_lwMaterials_currentRowChanged(int currentRow)

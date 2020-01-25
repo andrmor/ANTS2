@@ -372,7 +372,6 @@ SOURCES += main.cpp \
     OpticalOverrides/aopticaloverridescriptinterface.cpp \
     OpticalOverrides/ascriptopticaloverride.cpp \
     common/atracerstateful.cpp \
-    common/aphoton.cpp \
     OpticalOverrides/fsnpopticaloverride.cpp \
     OpticalOverrides/awaveshifteroverride.cpp \
     OpticalOverrides/spectralbasicopticaloverride.cpp \
@@ -603,15 +602,16 @@ HEADERS  += common/CorrelationFilters.h \
 ants2_SIM {
     DEFINES += SIM
 
-    SOURCES += common/asimulationstatistics.cpp \
-    modules/s1_generator.cpp \
-    modules/photon_generator.cpp \
-    modules/s2_generator.cpp \
+    SOURCES += Simulation/aphoton.cpp \
+    Simulation/asimulationstatistics.cpp \
+    Simulation/s1_generator.cpp \
+    Simulation/photon_generator.cpp \
+    Simulation/s2_generator.cpp \
     OpticalOverrides/phscatclaudiomodel.cpp \
     OpticalOverrides/scatteronmetal.cpp \
-    modules/aphotontracer.cpp \
-    modules/acompton.cpp \
-    modules/ageometrytester.cpp \
+    Simulation/aphotontracer.cpp \
+    Simulation/acompton.cpp \
+    Simulation/ageometrytester.cpp \
     Simulation/atrackingdataimporter.cpp \
     Simulation/anoderecord.cpp \
     Simulation/asimulationmanager.cpp \
@@ -620,22 +620,22 @@ ants2_SIM {
     Simulation/apointsourcesimulator.cpp \
     Simulation/aparticlesourcesimulator.cpp
 
-    HEADERS  += common/agridelementrecord.h \
-    common/aphoton.h \
-    common/ageomarkerclass.h \
-    common/atrackrecords.h \
-    common/dotstgeostruct.h \
-    common/aenergydepositioncell.h \
-    common/ahistoryrecords.h \
-    common/asimulationstatistics.h \
-    modules/s1_generator.h \
-    modules/photon_generator.h \
-    modules/s2_generator.h \
+    HEADERS  += Simulation/aphoton.h \
+    Simulation/asimulationstatistics.h \
+    Simulation/agridelementrecord.h \
+    Simulation/ageomarkerclass.h \
+    Simulation/atrackrecords.h \
+    Simulation/dotstgeostruct.h \
+    Simulation/aenergydepositioncell.h \
+    Simulation/ahistoryrecords.h \
+    Simulation/s1_generator.h \
+    Simulation/photon_generator.h \
+    Simulation/s2_generator.h \
     OpticalOverrides/phscatclaudiomodel.h \
     OpticalOverrides/scatteronmetal.h \
-    modules/aphotontracer.h \
-    modules/acompton.h \
-    modules/ageometrytester.h \
+    Simulation/aphotontracer.h \
+    Simulation/acompton.h \
+    Simulation/ageometrytester.h \
     Simulation/atrackingdataimporter.h \
     Simulation/anoderecord.h \
     Simulation/asimulationmanager.h \

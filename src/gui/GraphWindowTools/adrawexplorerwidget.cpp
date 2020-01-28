@@ -160,7 +160,7 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
     Menu.addSeparator();
 
     QMenu * fitMenu =       Menu.addMenu("Fit");
-        QAction* linFitA    =   fitMenu->addAction("Linear (use click-drag)");     linFitA->setEnabled(Type.startsWith("TH1") || Type == "TProfile");
+        QAction* linFitA    =   fitMenu->addAction("Linear (use click-drag)");     linFitA->setEnabled(Type.startsWith("TH1") || Type == "TProfile" || Type.startsWith("TGraph"));
         QAction* fwhmA      =   fitMenu->addAction("Gauss (use click-frag)");      fwhmA->  setEnabled(Type.startsWith("TH1") || Type == "TProfile");
         QAction* expA       =   fitMenu->addAction("Exp. decay (use click-frag)"); expA->   setEnabled(Type.startsWith("TH1") || Type == "TProfile");
         QAction* splineFitA =   fitMenu->addAction("B-spline"); splineFitA->setEnabled(Type == "TGraph" || Type == "TGraphErrors");   //*** implement for TH1 too!
@@ -790,15 +790,25 @@ void ADrawExplorerWidget::linFit(int index)
 {
     ADrawObject & obj = DrawObjects[index];
 
+    TGraph * g = nullptr;
+    TH1    * h = nullptr;
+
     const QString cn = obj.Pointer->ClassName();
-    if ( !cn.startsWith("TH1") && cn!="TProfile")
+    if (cn.startsWith("TGraph"))
     {
-        message("Can be used only with 1D histograms!", &GraphWindow);
+        g = dynamic_cast<TGraph*>(obj.Pointer);
+        if (!g) return;
+    }
+    else if (cn.startsWith("TH1") || cn == "TProfile")
+    {
+        h = dynamic_cast<TH1*>(obj.Pointer);
+        if (!h) return;
+    }
+    else
+    {
+        message("Can be used only with Tgraphs and 1D histograms!", &GraphWindow);
         return;
     }
-
-    TH1* h = dynamic_cast<TH1*>(obj.Pointer);
-    if (!h) return;
 
     GraphWindow.TriggerGlobalBusy(true);
 
@@ -825,7 +835,7 @@ void ADrawExplorerWidget::linFit(int index)
     f->SetParameter(0, c/b);
     f->SetParameter(1, -a/b);
 
-    int status = h->Fit(f, "R0");
+    int status = (h ? h->Fit(f, "R0") : g->Fit(f, "R0"));
     if (status != 0)
     {
         message("Fit failed!", &GraphWindow);
@@ -835,12 +845,13 @@ void ADrawExplorerWidget::linFit(int index)
     GraphWindow.MakeCopyOfDrawObjects();
     GraphWindow.MakeCopyOfActiveBasketId();
 
-    double A = f->GetParameter(0);
-    double B = f->GetParameter(1);
+    double B = f->GetParameter(0);
+    double A = f->GetParameter(1);
 
     DrawObjects.insert(index+1, ADrawObject(f, "same"));
 
-    QString text = QString("y = Ax+B\nA = %1, B = %2\nx range: %3 -> %4").arg(A).arg(B).arg(startX).arg(stopX);
+    QString text = QString("y = Ax + B\nA = %1, B = %2\nx range: %3 -> %4").arg(A).arg(B).arg(startX).arg(stopX);
+    if (A != 0) text += QString("\ny=0 at %1").arg(-B/A);
     TPaveText* la = new TPaveText(0.15, 0.75, 0.5, 0.85, "NDC");
     la->SetFillColor(0);
     la->SetBorderSize(1);

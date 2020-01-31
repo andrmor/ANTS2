@@ -1124,7 +1124,7 @@ void MaterialInspectorWindow::ConvertToStandardWavelengthes(QVector<double>* sp_
 void MaterialInspectorWindow::on_pbLoadSecSpectrum_clicked()
 {
   QString fileName;
-  fileName = QFileDialog::getOpenFileName(this, "Load secondary scintillation spectrum", MW->GlobSet.LastOpenDir, "Data files (*.dat);;All files (*.*)");
+  fileName = QFileDialog::getOpenFileName(this, "Load secondary scintillation spectrum", MW->GlobSet.LastOpenDir, "Data files (*.dat *.txt);;All files (*.*)");
 
   if (fileName.isEmpty()) return;
   MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();

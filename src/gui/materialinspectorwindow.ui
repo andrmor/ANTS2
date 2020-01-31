@@ -878,6 +878,11 @@ Can be used to automatically configure gamma interaction cross-sections and neut
                   <bold>false</bold>
                  </font>
                 </property>
+                <property name="toolTip">
+                 <string>File format:
+Two columns, the first is wavelength[nm],  the second is refractive index
+Wavelengths shoul be given in increasing order</string>
+                </property>
                 <property name="text">
                  <string>Load</string>
                 </property>
@@ -1028,6 +1033,11 @@ Can be used to automatically configure gamma interaction cross-sections and neut
                   <weight>50</weight>
                   <bold>false</bold>
                  </font>
+                </property>
+                <property name="toolTip">
+                 <string>File format:
+Two columns, the first is wavelength[nm],  the second is attenuation coefficient[mm-1]
+Wavelengths shoul be given in increasing order</string>
                 </property>
                 <property name="text">
                  <string>Load</string>
@@ -1310,6 +1320,11 @@ Can be used to automatically configure gamma interaction cross-sections and neut
                   <bold>false</bold>
                  </font>
                 </property>
+                <property name="toolTip">
+                 <string>File format:
+Two columns, the first is wavelength[nm],  the second is reemission probability (0..1)
+Wavelengths shoul be given in increasing order</string>
+                </property>
                 <property name="text">
                  <string>Load</string>
                 </property>
@@ -1546,6 +1561,11 @@ Can be used to automatically configure gamma interaction cross-sections and neut
                   <weight>50</weight>
                   <bold>false</bold>
                  </font>
+                </property>
+                <property name="toolTip">
+                 <string>File format:
+Two columns, the first is wavelength[nm],  the second is relative intensity
+Wavelengths shoul be given in increasing order</string>
                 </property>
                 <property name="text">
                  <string>Load</string>
@@ -3409,6 +3429,11 @@ Can be used to automatically configure gamma interaction cross-sections and neut
               </item>
               <item>
                <widget class="QPushButton" name="pbLoadSecSpectrum">
+                <property name="toolTip">
+                 <string>File format:
+Two columns, the first is wavelength[nm],  the second is relative intensity
+Wavelengths shoul be given in increasing order</string>
+                </property>
                 <property name="text">
                  <string>Load</string>
                 </property>

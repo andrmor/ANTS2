@@ -137,7 +137,7 @@ void ALineMarkerFillDialog::updateLineGui()
 void ALineMarkerFillDialog::updateMarkerGui()
 {
     ui->frMarker->setEnabled(markerAtt);
-    if (!lineAtt) return;
+    if (!markerAtt) return;
 
     int Style = markerAtt->GetMarkerStyle();
     QVector<int> map;

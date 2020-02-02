@@ -84,7 +84,7 @@ GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
     ui->swToolBox->setVisible(false);
     ui->swToolBox->setCurrentIndex(0);
     ui->sProjBins->setEnabled(false);
-    ui->statusBar->showMessage("Use context menu in \"Currently drawn\" and \"Basket\" to manipulate the objects");
+    showHintInStatus();
 
     //window flags
     Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
@@ -658,6 +658,11 @@ void GraphWindowClass::updateSecondaryAxis(TGaxis * gaxis, const char *opt)
     }
 }
 
+void GraphWindowClass::showHintInStatus()
+{
+    ui->statusBar->showMessage("Use context menu in \"Currently drawn\" and \"Basket\" to manipulate the objects");
+}
+
 void GraphWindowClass::OnBusyOn()
 {
     ui->fUIbox->setEnabled(false);
@@ -690,7 +695,10 @@ void GraphWindowClass::mouseMoveEvent(QMouseEvent *event)
 bool GraphWindowClass::event(QEvent *event)
 {
   if (event->type() == QEvent::WindowActivate)
+  {
       RasterWindow->UpdateRootCanvas();
+      showHintInStatus(); // sometimes it is hidden by its own
+  }
 
   if (event->type() == QEvent::Show)
       if (ColdStart)
@@ -2819,4 +2827,16 @@ void GraphWindowClass::on_actionApply_selective_triggered()
     int res = D.exec();
     if (res == QDialog::Accepted)
         applyTemplate(false);
+}
+
+void GraphWindowClass::on_actionShow_first_drawn_object_context_menu_triggered()
+{
+    if (DrawObjects.isEmpty())
+    {
+        message("Nothing is drawn!", this);
+        return;
+    }
+
+    const QPoint pos = mapToGlobal(QPoint(0, menuBar()->height()));
+    Explorer->showObjectContextMenu(pos, 0);
 }

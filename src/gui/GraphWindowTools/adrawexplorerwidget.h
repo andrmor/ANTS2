@@ -22,7 +22,8 @@ public:
 
     TH2 * getObjectForCustomProjection() {return objForCustomProjection;}
 
-    void activateCustomGuiForItem(int index);
+    void activateCustomGuiForItem(int index);    
+    void showObjectContextMenu(const QPoint &pos, int index);
 
 private slots:
     void onContextMenuRequested(const QPoint & pos);

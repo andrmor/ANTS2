@@ -107,7 +107,7 @@ public:
                       const char* options = "",
                       bool OnlyBuild = false);
 
-    //use this to only construct! *** to separate file+namespace
+    //use this to only construct! ***todo: move to separate file+namespace
     TGraph* ConstructTGraph(const QVector<double>& x, const QVector<double>& y) const;
     TGraph* ConstructTGraph(const std::vector<float>& x, const std::vector<float>& y) const;
     TGraph* ConstructTGraph(const QVector<double>& x, const QVector<double>& y,
@@ -250,18 +250,14 @@ private slots:
     void on_actionShow_ROOT_attribute_panel_triggered();
     void on_pbShowRuler_clicked();
     void on_pbExitToolMode_clicked();
-
     void on_actionSet_width_triggered();
-
     void on_actionSet_height_triggered();
-
     void on_actionMake_square_triggered();
-
     void on_actionCreate_template_triggered();
-
     void on_actionApply_template_triggered();
-
     void on_actionApply_selective_triggered();
+
+    void on_actionShow_first_drawn_object_context_menu_triggered();
 
 private:
     MainWindow *MW;
@@ -306,6 +302,7 @@ private:
     void removeAllSelectedBasketItems();
     void applyTemplate(bool bAll);
     void updateSecondaryAxis(TGaxis *gaxis, const char *opt);
+    void showHintInStatus();
 };
 
 #endif // GRAPHWINDOWCLASS_H

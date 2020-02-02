@@ -1843,6 +1843,13 @@ in basket</string>
     <addaction name="separator"/>
     <addaction name="actionApply_selective"/>
    </widget>
+   <widget class="QMenu" name="menuMainObject">
+    <property name="title">
+     <string>MainObject</string>
+    </property>
+    <addaction name="actionShow_first_drawn_object_context_menu"/>
+   </widget>
+   <addaction name="menuMainObject"/>
    <addaction name="menuExport"/>
    <addaction name="menuView"/>
    <addaction name="menuPalette"/>
@@ -1965,6 +1972,11 @@ in basket</string>
   <action name="actionApply_selective">
    <property name="text">
     <string>Apply selected features</string>
+   </property>
+  </action>
+  <action name="actionShow_first_drawn_object_context_menu">
+   <property name="text">
+    <string>Show context menu of the first drawn object</string>
    </property>
   </action>
  </widget>

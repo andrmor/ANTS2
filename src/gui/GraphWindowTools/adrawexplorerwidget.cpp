@@ -86,12 +86,20 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
     if (!item) return;
 
     int index = item->text(1).toInt();
-    //qDebug() << "index selected: " << index;
     if (index < 0 || index >= DrawObjects.size())
     {
         qWarning() << "Corrupted model: invalid index extracted";
         return;
     }
+
+    showObjectContextMenu(mapToGlobal(pos), index);
+}
+
+void ADrawExplorerWidget::showObjectContextMenu(const QPoint &pos, int index)
+{
+    if (index < 0 || index >= DrawObjects.size())
+        return;
+
     ADrawObject & obj = DrawObjects[index];
     const QString Type = obj.Pointer->ClassName();
 
@@ -181,7 +189,7 @@ void ADrawExplorerWidget::onContextMenuRequested(const QPoint &pos)
 
     // ------ exec ------
 
-    QAction* si = Menu.exec(mapToGlobal(pos));
+    QAction* si = Menu.exec(pos);
     if (!si) return; //nothing was selected
 
    if      (si == renameA)      rename(obj);
@@ -261,7 +269,7 @@ void ADrawExplorerWidget::rename(ADrawObject & obj)
     if (tobj) tobj->SetTitle(text.toLatin1().data());
 
     GraphWindow.ClearCopyOfDrawObjects();
-    GraphWindow.UpdateBasketGUI();
+    GraphWindow.RedrawAll();
     GraphWindow.HighlightUpdateBasketButton(true);
     updateGui();
 }

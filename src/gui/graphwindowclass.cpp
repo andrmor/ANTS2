@@ -96,7 +96,7 @@ GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
 
     //DrawListWidget init
     Explorer = new ADrawExplorerWidget(*this, DrawObjects);
-    ui->layExplorer->insertWidget(1, Explorer);
+    ui->layExplorer->insertWidget(2, Explorer);
     ui->splitter->setSizes({200,600});
     ui->pbBackToLast->setVisible(false);
     connect(Explorer, &ADrawExplorerWidget::requestShowLegendDialog, this, &GraphWindowClass::on_pbAddLegend_clicked);
@@ -2839,4 +2839,9 @@ void GraphWindowClass::on_actionShow_first_drawn_object_context_menu_triggered()
 
     const QPoint pos = mapToGlobal(QPoint(0, menuBar()->height()));
     Explorer->showObjectContextMenu(pos, 0);
+}
+
+void GraphWindowClass::on_pbManipulate_clicked()
+{
+    Explorer->manipulateTriggered();
 }

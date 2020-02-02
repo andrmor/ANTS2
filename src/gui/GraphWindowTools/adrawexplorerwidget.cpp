@@ -121,9 +121,6 @@ void ADrawExplorerWidget::showObjectContextMenu(const QPoint &pos, int index)
     Menu.addSeparator();
 
     QAction * setAttrib =   Menu.addAction("Draw attributes");
-    //QAction * setLineA =    Menu.addAction("Set line attributes");
-    //QAction * setMarkerA =  Menu.addAction("Set marker attributes");
-    //QAction * panelA   =    Menu.addAction("Root line/marker panel");
 
     Menu.addSeparator();
 
@@ -185,7 +182,7 @@ void ADrawExplorerWidget::showObjectContextMenu(const QPoint &pos, int index)
 
     Menu.addSeparator();
 
-    QAction * extractA =    Menu.addAction("Extract object");
+    QAction * extractA =    Menu.addAction("Extract object"); extractA->setEnabled(DrawObjects.size() > 1);
 
     // ------ exec ------
 
@@ -196,9 +193,6 @@ void ADrawExplorerWidget::showObjectContextMenu(const QPoint &pos, int index)
    else if (si == enableA)      toggleEnable(obj);
    else if (si == delA)         remove(index);
    else if (si == setAttrib)    setAttributes(index);
-   //else if (si == setLineA)     setLine(obj);
-   //else if (si == setMarkerA)   setMarker(obj);
-   //else if (si == panelA)       showPanel(obj);
    else if (si == scaleA)       scale(obj);
    else if (si == scaleCDRA)    scaleCDR(obj);
    else if (si == integralA)    drawIntegral(obj);
@@ -225,6 +219,55 @@ void ADrawExplorerWidget::showObjectContextMenu(const QPoint &pos, int index)
    else if (si == extractA)     extract(obj);
    else if (si == editTextPave) editPave(obj);
 
+}
+
+void ADrawExplorerWidget::manipulateTriggered()
+{
+    const int size = DrawObjects.size();
+    const QPoint pos = mapToGlobal(QPoint(0, 0));
+
+    if      (size == 0) {}
+    else if (size == 1) showObjectContextMenu(pos, 0); //showing context menu of the first drawn object
+    else
+    {
+        ADrawObject & obj = DrawObjects[0];
+        const QString Type = obj.Pointer->ClassName();
+
+        QMenu Menu;
+
+        QAction* axesX =        Menu.addAction("X axis");
+        QAction* axesY =        Menu.addAction("Y axis");
+        QAction* axesZ =        Menu.addAction("Z axis");
+
+        Menu.addSeparator();
+
+        QAction* addAxisRight = Menu.addAction("Add axis on RHS");
+        QAction* addAxisTop   = Menu.addAction("Add axis on Top");
+
+        Menu.addSeparator();
+
+        //QMenu * scaleMenu =     Menu.addMenu("Scale / shift"); scaleMenu->setEnabled(Type.startsWith("TH") || Type.startsWith("TGraph") || Type.startsWith("TProfile"));
+        //    QAction * scaleA =      scaleMenu->addAction("Scale all graphs/histograms to the same max");
+        //    QAction * scaleCDRA =   scaleMenu->addAction("Scale: click-drag-release");
+        //    scaleMenu->addSeparator();
+        //    QAction * shiftA =      scaleMenu->addAction("Shift X scale");
+
+        QAction* scale        = Menu.addAction("Scale all graphs/histograms to the same max"); scale->setEnabled(Type.startsWith("TH") || Type.startsWith("TGraph") || Type.startsWith("TProfile"));
+
+
+        // ------ exec ------
+
+        QAction* si = Menu.exec(pos);
+        if (!si) return; //nothing was selected
+
+
+        if      (si == axesX)        editAxis(obj, 0);
+        else if (si == axesY)        editAxis(obj, 1);
+        else if (si == axesZ)        editAxis(obj, 2);
+        else if (si == addAxisTop)   addAxis(0);
+        else if (si == addAxisRight) addAxis(1);
+        else if (si == scale)        scaleAllSameMax();
+    }
 }
 
 void ADrawExplorerWidget::onItemDoubleClicked(QTreeWidgetItem *item, int)
@@ -465,6 +508,46 @@ void ADrawExplorerWidget::scaleCDR(ADrawObject &obj)
     if (sf == 1.0) return;
 
     doScale(obj, sf);
+}
+
+bool getDrawMax(ADrawObject & obj, double & max)
+{
+    TGraph * g = dynamic_cast<TGraph*>(obj.Pointer);
+    if (g)
+    {
+        max = TMath::MaxElement(g->GetN(), g->GetY());
+    }
+    else
+    {
+        TH1 * h = dynamic_cast<TH1*>(obj.Pointer);
+        if (h) max = h->GetMaximum();
+        else return false;
+    }
+    return true;
+}
+
+void ADrawExplorerWidget::scaleAllSameMax()
+{
+    const int size = DrawObjects.size();
+    if (size == 0) return;
+
+    ADrawObject & mainObj = DrawObjects[0];
+    if (!canScale(mainObj)) return;
+
+    double max = 0;
+    bool bExtractable = getDrawMax(mainObj, max);
+    if (!bExtractable) return;
+
+    for (int i=1; i<size; i++)
+    {
+        ADrawObject & obj = DrawObjects[i];
+
+        double thisMax = 0;
+        getDrawMax(obj, thisMax);
+        if (thisMax == 0) continue;
+
+        doScale(obj, max/thisMax);
+    }
 }
 
 const QPair<double, double> runShiftDialog(QWidget * parent)

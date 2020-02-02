@@ -24,6 +24,7 @@ public:
 
     void activateCustomGuiForItem(int index);    
     void showObjectContextMenu(const QPoint &pos, int index);
+    void manipulateTriggered();
 
 private slots:
     void onContextMenuRequested(const QPoint & pos);
@@ -44,6 +45,7 @@ private:
     void fitPanel(ADrawObject &obj);
     void scale(ADrawObject &obj);
     void scaleCDR(ADrawObject &obj);
+    void scaleAllSameMax();
     void shift(ADrawObject &obj);
     void drawIntegral(ADrawObject &obj);
     void fraction(ADrawObject &obj);

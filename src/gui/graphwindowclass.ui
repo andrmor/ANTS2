@@ -1686,6 +1686,13 @@
             <number>3</number>
            </property>
            <item>
+            <widget class="QPushButton" name="pbManipulate">
+             <property name="text">
+              <string>Manipulate</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QLabel" name="label_27">
              <property name="text">
               <string>Currently drawn:</string>

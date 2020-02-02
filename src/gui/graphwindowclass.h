@@ -259,6 +259,8 @@ private slots:
 
     void on_actionShow_first_drawn_object_context_menu_triggered();
 
+    void on_pbManipulate_clicked();
+
 private:
     MainWindow *MW;
     Ui::GraphWindowClass *ui;

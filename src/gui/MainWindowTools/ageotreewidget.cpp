@@ -471,7 +471,11 @@ void AGeoTreeWidget::dragMoveEvent(QDragMoveEvent *event)
 
     setDropIndicatorShown(bRearrange);
 
-    if (previousHoverItem) previousHoverItem->setBackgroundColor(0, Qt::white);
+    if (previousHoverItem)
+    {
+        previousHoverItem->setBackgroundColor(0, Qt::white);
+        previousHoverItem = nullptr;
+    }
     if (!bRearrange)
     {
         QTreeWidgetItem * itemOver = this->itemAt(event->pos());

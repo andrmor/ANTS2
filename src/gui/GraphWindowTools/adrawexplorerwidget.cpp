@@ -1458,7 +1458,11 @@ void ADrawExplorerWidget::extract(ADrawObject &obj)
 
     ADrawObject thisObj = obj;
 
+    //update options
     thisObj.Options.remove("same", Qt::CaseInsensitive);
+    if (cType.startsWith("TGraph") && !thisObj.Options.contains('a', Qt::CaseInsensitive))
+        thisObj.Options += "A";
+
     thisObj.Pointer = thisObj.Pointer->Clone();
     GraphWindow.RegisterTObject(thisObj.Pointer);
 

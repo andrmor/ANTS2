@@ -57,9 +57,9 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(MainWindow *parent, DetectorClass *de
   // tree widget
   twGeo = new AGeoTreeWidget(Detector->Sandwich);
   ui->saGeo->setWidget(twGeo);
-  twGeo->setToolTip("Use contect menu to manipulate objects!\n"
+  twGeo->setToolTip("Use context menu to manipulate objects!\n"
                     "Drag&drop can be used to move items from one parent to another\n"
-                    "Use Alt + Drag&Drop to change order of item within the same parent.");
+                    "Drop when Alt/Shift or Control is pressed changes the order of item within the same parent.");
   connect(twGeo, SIGNAL(itemExpanded(QTreeWidgetItem*)), twGeo, SLOT(onItemExpanded(QTreeWidgetItem*)));
   connect(twGeo, SIGNAL(itemCollapsed(QTreeWidgetItem*)), twGeo, SLOT(onItemCollapsed(QTreeWidgetItem*)));
   connect(twGeo, SIGNAL(RequestListOfParticles(QStringList&)), Detector->MpCollection, SLOT(OnRequestListOfParticles(QStringList&)));

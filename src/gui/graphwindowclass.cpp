@@ -2693,6 +2693,7 @@ void GraphWindowClass::switchToBasket(int index)
     ClearCopyOfActiveBasketId();
     ClearCopyOfDrawObjects();
     UpdateBasketGUI();
+    HighlightUpdateBasketButton(false);
 }
 
 void GraphWindowClass::on_pbUpdateInBasket_clicked()

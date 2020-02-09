@@ -271,16 +271,6 @@ void AGeoTreeWidget::updateExpandState(QTreeWidgetItem *item)
     }
 }
 
-/*
-QListWidgetItem * itemTo = itemAt(event->pos());
-int rowTo = count();
-if (itemTo)
-{
-    rowTo = row(itemTo);
-    if (dropIndicatorPosition() == QAbstractItemView::BelowItem) rowTo++;
-}
-*/
-
 void AGeoTreeWidget::dropEvent(QDropEvent* event)
 {  
     QList<QTreeWidgetItem*> selected = selectedItems();
@@ -452,22 +442,24 @@ void AGeoTreeWidget::dropEvent(QDropEvent* event)
 
 void AGeoTreeWidget::dragEnterEvent(QDragEnterEvent *event)
 {
-  //qDebug() << "Drag enter. Selection size:"<< selectedItems().size();
-  //attempt to drag items contaning locked objects should be canceled!
-  for (int i=0; i<selectedItems().size(); i++)
+    previousHoverItem = nullptr;
+    //qDebug() << "Drag enter. Selection size:"<< selectedItems().size();
+    //attempt to drag items contaning locked objects should be canceled!
+
+    for (int iItem = 0; iItem < selectedItems().size(); iItem++)
     {
-      QTreeWidgetItem* DraggedItem = selectedItems().at(i);
-      QString DraggedName = DraggedItem->text(0);
-      //qDebug() << "Draggin item:"<< DraggedName;
-      AGeoObject* obj = World->findObjectByName(DraggedName);
-      if (obj->fLocked || obj->isContainsLocked() || obj->ObjectType->isGridElement() || obj->ObjectType->isCompositeContainer())
+        QTreeWidgetItem * DraggedItem = selectedItems().at(iItem);
+        QString DraggedName = DraggedItem->text(0);
+        //qDebug() << "Draggin item:"<< DraggedName;
+        AGeoObject * obj = World->findObjectByName(DraggedName);
+        if (obj->fLocked || obj->isContainsLocked() || obj->ObjectType->isGridElement() || obj->ObjectType->isCompositeContainer())
         {
-           qDebug() << "Drag forbidden for one of the items!";
-           event->ignore();
-           return;
+            qDebug() << "Drag forbidden for one of the items!";
+            event->ignore();
+            return;
         }
     }
-  event->accept();
+    event->accept();
 }
 
 void AGeoTreeWidget::dragMoveEvent(QDragMoveEvent *event)
@@ -478,18 +470,14 @@ void AGeoTreeWidget::dragMoveEvent(QDragMoveEvent *event)
     bool bRearrange = (mod == Qt::ALT || mod == Qt::CTRL || mod == Qt::SHIFT);
 
     setDropIndicatorShown(bRearrange);
-    /*
+
+    if (previousHoverItem) previousHoverItem->setBackgroundColor(0, Qt::white);
     if (!bRearrange)
     {
-        QListWidgetItem * itemTo = itemAt(event->pos());
-        int rowTo = count();
-        if (itemTo)
-        {
-            rowTo = row(itemTo);
-            if (dropIndicatorPosition() == QAbstractItemView::BelowItem) rowTo++;
-        }
+        QTreeWidgetItem * itemOver = this->itemAt(event->pos());
+        itemOver->setBackgroundColor(0, Qt::cyan);
+        previousHoverItem = itemOver;
     }
-    */
 }
 
 void AGeoTreeWidget::onItemSelectionChanged()

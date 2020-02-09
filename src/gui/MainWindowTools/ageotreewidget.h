@@ -57,6 +57,8 @@ private:
   QColor BackgroundColor;
   bool fSpecialGeoViewMode;
 
+  QTreeWidgetItem * previousHoverItem = nullptr;
+
   void populateTreeWidget(QTreeWidgetItem *parent, AGeoObject *Container, bool fDisabled = false);
   void updateExpandState(QTreeWidgetItem* item); //recursive!
   void updateIcon(QTreeWidgetItem *item, AGeoObject *obj);

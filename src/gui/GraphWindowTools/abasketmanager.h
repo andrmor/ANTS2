@@ -22,7 +22,7 @@ public:
     void                clear();
     void                remove(int index);
 
-    QVector<ADrawObject> & getDrawObjects(int index); // return ref to NotValidItem is index is out of bounds
+    //QVector<ADrawObject> & getDrawObjects(int index); // return ref to NotValidItem is index is out of bounds
     const QString       getType(int index) const;
 
     int                 size() const;
@@ -43,7 +43,7 @@ public:
 
 private:
     QVector<ABasketItem> Basket;
-    QVector<ADrawObject> NotValidItem; // to return on wrong index
+    //QVector<ADrawObject> NotValidItem; // to return on wrong index
 
 private:
     int                 findPointerInDrawObjects(const QVector<ADrawObject> & DrawObjects, TObject * obj) const;

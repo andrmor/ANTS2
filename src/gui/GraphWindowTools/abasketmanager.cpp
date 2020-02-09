@@ -22,15 +22,15 @@
 
 ABasketManager::ABasketManager()
 {
-    NotValidItem << ADrawObject(new TNamed("Not valid index", "Not valid index"), "");
+    //NotValidItem << ADrawObject(new TNamed("Not valid index", "Not valid index"), "");
 }
 
 ABasketManager::~ABasketManager()
 {
     clear();
 
-    delete NotValidItem.first().Pointer;
-    NotValidItem.clear();
+    //delete NotValidItem.first().Pointer;
+    //NotValidItem.clear();
 }
 
 TGraph * HistToGraph(TH1 * h)
@@ -211,6 +211,7 @@ void ABasketManager::remove(int index)
     Basket.remove(index);
 }
 
+/*
 QVector<ADrawObject> & ABasketManager::getDrawObjects(int index)
 {
     if (index < 0 || index >= Basket.size())
@@ -220,6 +221,7 @@ QVector<ADrawObject> & ABasketManager::getDrawObjects(int index)
     }
     return Basket[index].DrawObjects;
 }
+*/
 
 const QString ABasketManager::getType(int index) const
 {

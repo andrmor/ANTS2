@@ -2428,24 +2428,28 @@ void GraphWindowClass::Basket_DrawOnTop(int row)
     if (row == -1) return;
     if (DrawObjects.isEmpty()) return;
 
-    //qDebug() << "Basket item"<<row<<"was requested to be drawn on top of the current draw";
-    QVector<ADrawObject> & BasketDrawObjects = Basket->getDrawObjects(row);
-
     MakeCopyOfDrawObjects();
     MakeCopyOfActiveBasketId();
 
-    for (int i=0; i<BasketDrawObjects.size(); i++)
+    //qDebug() << "Basket item"<<row<<"was requested to be drawn on top of the current draw";
+    const QVector<ADrawObject> DeepCopyBasketDrawObjects = Basket->getCopy(row);
+
+    for (int iObj = 0; iObj < DeepCopyBasketDrawObjects.size(); iObj++)
     {
-        TString CName = BasketDrawObjects[i].Pointer->ClassName();
-        if ( CName== "TLegend" || CName == "TPaveText") continue;
-        //qDebug() << CName;
-        QString options = BasketDrawObjects[i].Options;
+        TString CName = DeepCopyBasketDrawObjects[iObj].Pointer->ClassName();
+        if ( CName== "TLegend" || CName == "TPaveText")
+        {
+            //qDebug() << CName;
+            delete DeepCopyBasketDrawObjects[iObj].Pointer;
+            continue;
+        }
+        QString options = DeepCopyBasketDrawObjects[iObj].Options;
         options.replace("same", "", Qt::CaseInsensitive);
         options.replace("a", "", Qt::CaseInsensitive);
         TString safe = "same";
         safe += options.toLatin1().data();
         //qDebug() << "New options:"<<safe;
-        DrawObjects.append(ADrawObject(BasketDrawObjects[i].Pointer, safe));
+        DrawObjects.append(ADrawObject(DeepCopyBasketDrawObjects[iObj].Pointer, safe));
     }
 
     ActiveBasketItem = -1;

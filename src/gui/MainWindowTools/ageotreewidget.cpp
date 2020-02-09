@@ -283,64 +283,59 @@ if (itemTo)
 
 void AGeoTreeWidget::dropEvent(QDropEvent* event)
 {  
-  QList<QTreeWidgetItem*> selected = selectedItems();
+    QList<QTreeWidgetItem*> selected = selectedItems();
 
-  QTreeWidgetItem* itemTo = this->itemAt(event->pos());
-  if (!itemTo)
+    QTreeWidgetItem * itemTo = this->itemAt(event->pos());
+    if (!itemTo)
     {
-      qDebug() << "No item on drop position - rejected!";
-      event->ignore();
-      return;
+        qDebug() << "No item on drop position - rejected!";
+        event->ignore();
+        return;
     }
-  QString DraggedTo = itemTo->text(0);
-  //qDebug() << "To:"<< DraggedTo;
-  AGeoObject* objTo = World->findObjectByName(DraggedTo);
-  if (!objTo)
-  {
-      qWarning() << "Error: objTo not found!";
-      event->ignore();
-      return;
-  }
+    QString DraggedTo = itemTo->text(0);
+    AGeoObject * objTo = World->findObjectByName(DraggedTo);
+    if (!objTo)
+    {
+        qWarning() << "Error: objTo not found!";
+        event->ignore();
+        return;
+    }
 
+    QStringList selNames;
 
-  QStringList selNames;
+    //if keyboard modifier is on, rearrange objects instead of change to new container
+    const Qt::KeyboardModifiers mod = event->keyboardModifiers();
+    if (mod == Qt::ALT || mod == Qt::CTRL || mod == Qt::SHIFT)
+    {
+        //qDebug() << "Rearrange order event triggered";
+        if (selected.size() != 1)
+        {
+            //qDebug() << "Only one item should be selected to use rearrangment!";
+            event->ignore();
+            return;
+        }
+        QTreeWidgetItem * DraggedItem = this->selectedItems().first();
+        if (!DraggedItem)
+        {
+            //qDebug() << "Drag source item invalid, ignore";
+            event->ignore();
+            return;
+        }
+        const QString DraggedName = DraggedItem->text(0);
+        selNames << DraggedName;
 
-  //if modifier is on, rearrange instead of put in
-  const Qt::KeyboardModifiers mod = event->keyboardModifiers();
-  if (mod == Qt::ALT || mod == Qt::CTRL || mod == Qt::SHIFT)
-  {
-      //qDebug() << "Rearrange order event triggered";
-      if (selected.size() != 1)
-      {
-          //qDebug() << "Only one item should be selected to use rearrangment!";
-          event->ignore();
-          return;
-      }
-      QTreeWidgetItem* DraggedItem = this->selectedItems().first();
-      if (!DraggedItem)
-      {
-          //qDebug() << "Drag source item invalid, ignore";
-          event->ignore();
-          return;
-      }
-      QString DraggedName = DraggedItem->text(0);
-      selNames << DraggedName;
+        AGeoObject* obj = World->findObjectByName(DraggedName);
+        if (obj)
+        {
+            //bool fAfter = (event->pos().y() > visualItemRect(itemTo).center().y());
+            bool fAfter = (dropIndicatorPosition() == QAbstractItemView::BelowItem);
+            obj->repositionInHosted(objTo, fAfter);
+        }
 
-      AGeoObject* obj = World->findObjectByName(DraggedName);
-      if (obj)
-      {
-          bool fAfter = (dropIndicatorPosition() == QAbstractItemView::BelowItem);
-          //bool fAfter = (event->pos().y() > visualItemRect(itemTo).center().y());
-          obj->repositionInHosted(objTo, fAfter);
-      }
-
-      if (obj && obj->Container && obj->Container->ObjectType->isStack())
-        obj->updateStack();
-
-      //qDebug() << "Affected items:"<< DraggedName<<DraggedTo;
-      //Model->swapObjects(DraggedName, DraggedTo);
-  }
-  else
+        if (obj && obj->Container && obj->Container->ObjectType->isStack())
+            obj->updateStack();
+    }
+    else
     {
       // Normal drag n drop
       if (objTo->ObjectType->isGrid())
@@ -440,19 +435,19 @@ void AGeoTreeWidget::dropEvent(QDropEvent* event)
         }
     }
 
-  //qDebug() << "Drag completed, updating gui";
-  UpdateGui();
-  emit RequestRebuildDetector();
+    //qDebug() << "Drag completed, updating gui";
+    UpdateGui();
+    emit RequestRebuildDetector();
 
-  // Restore selection
-  for (int i=0; i<selNames.size(); i++)
+    // Restore selection
+    for (int i=0; i<selNames.size(); i++)
     {
-      QList<QTreeWidgetItem*> list = findItems(selNames.at(i), Qt::MatchExactly | Qt::MatchRecursive);
-      if (!list.isEmpty()) list.first()->setSelected(true);
+        QList<QTreeWidgetItem*> list = findItems(selNames.at(i), Qt::MatchExactly | Qt::MatchRecursive);
+        if (!list.isEmpty()) list.first()->setSelected(true);
     }
 
-  event->ignore();
-  return;
+    event->ignore();
+    return;
 }
 
 void AGeoTreeWidget::dragEnterEvent(QDragEnterEvent *event)

@@ -964,6 +964,8 @@ void DetectorAddOnsWindow::on_pmParseInGeometryFromGDML_clicked()
     MW->Config->LoadConfig(MW->GlobSet.ExamplesDir + "/Empty.json");
 
     QString PMtemplate = ui->lePMtemplate->text();
+    if (PMtemplate.isEmpty()) PMtemplate = "_.._#"; //clumsy, but otherwise propagate changes to readGeoObjectTree
+
     if (Detector->GeoManager) delete Detector->GeoManager;
     Detector->GeoManager = 0;
     //Detector->GeoManager = TGeoManager::Import(fileName.toLatin1());

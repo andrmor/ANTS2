@@ -2,12 +2,13 @@
 #define DETECTORCLASS_H
 
 #include "apmarraydata.h"
+#include "apmdummystructure.h"
 
-#include <QVector>
 #include <QObject>
+#include <QVector>
 #include <QJsonObject>
 
-#include "TMathBase.h"
+#include "TString.h"
 
 class AParticle;
 class TGeoManager;
@@ -23,46 +24,32 @@ class ASandwich;
 class APmGroupsManager;
 class APmType;
 
-struct PMdummyStructure
-{
-  int PMtype; //index of the PM type
-  int UpperLower; //Belongs to a PM plane: 0- upper, 1 - lower
-  double r[3]; //PMs center coordinates
-  double Angle[3]; //Phi, Theta, Psi;
-
-  void writeToJson(QJsonObject &json);
-  bool readFromJson(QJsonObject &json);
-};
-
-//-----------------------------------------------------------------------------------------
-//-----------------------------------------------------------------------------------------
-
 class DetectorClass : public QObject
 {
   Q_OBJECT
 
 public:
-  AConfiguration* Config;              // contains json config file
-  TGeoManager* GeoManager;             // detector geometry, navigator and visualizator
-  APmHub* PMs;                            // all info on PMs 
-  ALrfModuleSelector* LRFs;            // detector response
-  APmGroupsManager* PMgroups;          // all info on defined PM groups, including rec settings jsons
-  TGeoVolume* top;                     // world in GeoManager
-  TRandom2* RandGen;                   // random generator
+  AConfiguration     * Config       = nullptr;
+  TRandom2           * RandGen      = nullptr;
+  AMaterialParticleCollection* MpCollection = nullptr;
+  ASandwich          * Sandwich     = nullptr;
+  APmHub             * PMs          = nullptr;
+  ALrfModuleSelector * LRFs         = nullptr;
+  APmGroupsManager   * PMgroups     = nullptr;
+  TGeoManager        * GeoManager   = nullptr;
+  TGeoVolume         * top          = nullptr;         // world in GeoManager
 
-  QVector<APmArrayData> PMarrays;  //upper(0) and lower(1) PM array data
-  QVector<PMdummyStructure> PMdummies; // all info on PM dummies
-  QString AddObjPositioningScript;
-  ASandwich* Sandwich;
-
-  AMaterialParticleCollection* MpCollection; // collection of defined materials and particles  
+  QVector<APmArrayData>      PMarrays;                 // upper(0) and lower(1) PM array data
+  QVector<APMdummyStructure> PMdummies;
+  QString                    AddObjPositioningScript;
 
   QJsonObject PreprocessingJson;
 
-  bool fSecScintPresent;
+  bool fSecScintPresent = false;
 
-  double WorldSizeXY, WorldSizeZ; //size of World volume
-  bool fWorldSizeFixed;  //fixed and defined by GUI
+  double WorldSizeXY   = 500.0;
+  double WorldSizeZ    = 500.0;
+  bool fWorldSizeFixed = false;  //fixed and defined by GUI
 
   QString ErrorString;
 
@@ -76,13 +63,13 @@ public:
   void writeToJson(QJsonObject &json);
 
   bool makeSandwichDetector();
-  bool importGDML(QString gdml);
-  bool isGDMLempty() const {return GDML.isEmpty();}
-  void clearGDML() {GDML = "";}
-  int checkGeoOverlaps();   // checks for overlaps in the geometry (GeoManager) and returns the number of overlaps
+  bool importGDML(const QString & gdml);
+  bool isGDMLempty() const;
+  void clearGDML();
+  int  checkGeoOverlaps();   // checks for overlaps in the geometry (GeoManager) and returns the number of overlaps
   void checkSecScintPresent();
   void colorVolumes(int scheme, int id = 0);
-  int pmCount() const; // Raimundo: so it's not necessary to #include<pms.h> just to clear LRFs
+  int  pmCount() const;
   void findPM(int ipm, int &ul, int &index);
   const QString removePMtype(int itype);
 
@@ -95,8 +82,8 @@ public:
 
   void changeLineWidthOfVolumes(int delta);
 
-  const QString exportToGDML(const QString &fileName) const; //returns error string, empty if all is fine  
-  const QString exportToROOT(const QString& fileName) const;
+  const QString exportToGDML(const QString & fileName) const; //returns error string, empty if all is fine
+  const QString exportToROOT(const QString & fileName) const;
   
   void saveCurrentConfig(const QString &fileName);
 
@@ -109,12 +96,12 @@ private:
   bool readPMarraysFromJson(QJsonObject &json);
   bool readDummyPMsFromJson(QJsonObject &json);
 
-  void constructDetector();
+  void populateGeoManager();
 
   QString GDML;
   bool processGDML(); //check validity, discard if bad and return to sandwich  
 
-  Double_t UpperEdge, LowerEdge; //used to calculate Z positions of detector elements
+  double UpperEdge, LowerEdge; //used to calculate Z positions of detector elements
   TGeoVolume *generatePmVolume(TString Name, TGeoMedium *Medium, const APmType *tp);
   void populatePMs();
   void positionPMs();

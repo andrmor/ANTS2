@@ -314,7 +314,7 @@ void MainWindow::LoadDummyPMs(QString DFile)
               QStringList fields = line.split(rx, QString::SkipEmptyParts);            
               if (fields.size() == 8)
                 {
-                  PMdummyStructure dpm;
+                  APMdummyStructure dpm;
                   dpm.PMtype = fields[0].toInt();
                   dpm.UpperLower = fields[1].toInt();
                   dpm.r[0] = fields[2].toDouble();

@@ -29,7 +29,7 @@ public:
                            TRandom2* RandomGenerator,
                            AMaterialParticleCollection* materialCollection,
                            APmHub* Pms,
-                           const QList<AGridElementRecord*>* Grids);
+                           const QVector<AGridElementRecord*>* Grids);
     ~APhotonTracer();
 
     void UpdateGeoManager(TGeoManager* NewGeoManager) {GeoManager = NewGeoManager;}//will be obsolete with new simulation system soon
@@ -49,7 +49,7 @@ private:
     TGeoNavigator *navigator;    
     AMaterialParticleCollection* MaterialCollection;
     APmHub* PMs;
-    const QList<AGridElementRecord*>* grids;
+    const QVector<AGridElementRecord*>* grids;
     AOneEvent* OneEvent; //PM signals for this event are collected here
     std::vector<TrackHolderClass *> * Tracks;
     TrackHolderClass* track;

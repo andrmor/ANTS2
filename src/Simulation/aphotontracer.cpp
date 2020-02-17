@@ -22,7 +22,7 @@
 
 #define c_in_vac 2.997925e2 //speed of light in mm/ns
 
-APhotonTracer::APhotonTracer(TGeoManager *geoManager, TRandom2 *RandomGenerator, AMaterialParticleCollection* materialCollection, APmHub* Pms, const QList<AGridElementRecord *> *Grids)
+APhotonTracer::APhotonTracer(TGeoManager *geoManager, TRandom2 *RandomGenerator, AMaterialParticleCollection* materialCollection, APmHub* Pms, const QVector<AGridElementRecord *> *Grids)
 {
     RandGen = RandomGenerator;
     GeoManager = geoManager;

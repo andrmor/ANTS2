@@ -58,6 +58,8 @@ public slots:
   void EnableObject(QString Object);
   void DisableObject(QString Object);
 
+  void setEnable(QString ObjectOrWildcard, bool flag);
+
   void UpdateGeometry(bool CheckOverlaps = true);
 
   QString printOverrides();

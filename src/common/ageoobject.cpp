@@ -554,6 +554,14 @@ AGeoObject *AGeoObject::findObjectByName(const QString name)
   return 0; //not found
 }
 
+AGeoObject *AGeoObject::findObjectsByWildcard(const QString & name, QVector<AGeoObject*> & foundObjs)
+{
+    if (Name.startsWith(name, Qt::CaseSensitive)) foundObjs << this;
+
+    for (AGeoObject * obj : HostedObjects)
+        obj->findObjectsByWildcard(name, foundObjs);
+}
+
 void AGeoObject::changeLineWidthRecursive(int delta)
 {
     width += delta;

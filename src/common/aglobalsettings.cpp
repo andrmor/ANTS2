@@ -15,6 +15,7 @@
 #include <QDebug>
 #include <QtWidgets/QApplication>
 #include <QThread>
+#include "TStyle.h"
 
 AGlobalSettings& AGlobalSettings::getInstance()
 {
@@ -104,6 +105,7 @@ AGlobalSettings::AGlobalSettings()
         SM->Evaluate(RootStyleScript);
         SM->deleteLater();
     }
+    gStyle->SetOptTitle(0);  // disables drawing of the title of ROOT histograms / graphs
 #endif
 }
 

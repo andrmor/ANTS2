@@ -154,7 +154,7 @@
        <enum>Qt::Horizontal</enum>
       </property>
      </widget>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
         <x>0</x>
@@ -275,28 +275,14 @@
        </item>
       </layout>
      </widget>
+     <zorder>layoutWidget</zorder>
      <zorder>line_3</zorder>
-     <zorder>leLibMaterials</zorder>
      <zorder>leWorkingDir</zorder>
-     <zorder>pbChooseMaterialLib</zorder>
      <zorder>label_188</zorder>
      <zorder>label_146</zorder>
-     <zorder>label_267</zorder>
-     <zorder>label_260</zorder>
-     <zorder>leLibPMtypes</zorder>
-     <zorder>label_239</zorder>
-     <zorder>leLibScripts</zorder>
-     <zorder>leLibParticleSources</zorder>
-     <zorder>pbChoosePMtypeLib</zorder>
-     <zorder>pbChooseParticleSourcesLib</zorder>
-     <zorder>pbChooseScriptsLib</zorder>
      <zorder>pbChangeWorkingDir</zorder>
      <zorder>pbOpen</zorder>
      <zorder>comboBox</zorder>
-     <zorder>pbChooseLogsLib</zorder>
-     <zorder>label_268</zorder>
-     <zorder>leLibLogs</zorder>
-     <zorder>label_147</zorder>
     </widget>
     <widget class="QWidget" name="tabThreads">
      <attribute name="title">

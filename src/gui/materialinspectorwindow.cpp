@@ -1785,72 +1785,92 @@ void MaterialInspectorWindow::showProcessIntCoefficient(int particleId, int Term
   MW->GraphWindow->Draw(graphOver, "SAME L");
 }
 
+#include <limits>
 void MaterialInspectorWindow::on_pbShowAllForGamma_clicked()
 {
-  int particleId = ui->cobParticle->currentIndex();
-  AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-  if (tmpMaterial.MatParticle[particleId].Terminators.size()<2) return;
+    int particleId = ui->cobParticle->currentIndex();
+    const AMaterial & tmpMaterial = MW->MpCollection->tmpMaterial;
+    const MatParticleStructure & mp = tmpMaterial.MatParticle[particleId];
 
-  MW->GraphWindow->SetLog(true, true);
+    if (mp.Terminators.size() < 2) return;
 
-  TMultiGraph* mg = new TMultiGraph("a1", "Gamma interaction");
+    double Xmin, Xmax, Ymin, Ymax;
+    Xmin = Ymin = std::numeric_limits<double>::max();
+    Xmax = Ymax = 0;
+    TGraph * mainGr = nullptr;
 
-  for (int i=0; i<3; i++)
+    for (int i = 0; i < mp.Terminators.size(); i++)
     {
-      TString opt, title;
-      Color_t color;
-      int Lwidth = 1;
-      if (i==0)
-      {
-          color = kGreen;
-          opt = "AL";
-          title = "Photoelectric";
-          Lwidth = 2;
-      }
-      else if (i==1)
-      {
-          color = kBlue;
-          opt = "L same";
-          title = "Compton scattering";
-          Lwidth = 1;
-      }
-      else
-      {
-          if (tmpMaterial.MatParticle[particleId].Terminators.size() == 2) break;
-          color = kMagenta;
-          opt = "L same";
-          title = "Pair production";
-          Lwidth = 1;
-      }
+        TString opt, title;
+        Color_t color;
+        int Lwidth = 1;
+        switch (i)
+        {
+        case 0:
+            color = kGreen;
+            opt = "AL";
+            title = "Photoelectric";
+            Lwidth = 2;
+            break;
+        case 1:
+            color = kBlue;
+            opt = "Lsame";
+            title = "Compton";
+            break;
+        case 2:
+            color = kMagenta;
+            opt = "Lsame";
+            title = "Pair";
+            break;
+        default:
+            qWarning() << "Bad terminator size for gamma!";
+            continue;
+        }
 
-      QVector<double> &X = tmpMaterial.MatParticle[particleId].Terminators[i].PartialCrossSectionEnergy;
-      QVector<double> &Y = tmpMaterial.MatParticle[particleId].Terminators[i].PartialCrossSection;
-      //have to remove zeros!
-      QVector<double> x, y;
-      for (int i=0; i<X.size(); i++)
-      {
-          if (Y.at(i)>0)
-          {
-              x << X.at(i);
-              y << Y.at(i);
-          }
-      }
+        const QVector<double> & X = mp.Terminators[i].PartialCrossSectionEnergy;
+        const QVector<double> & Y = mp.Terminators[i].PartialCrossSection;
 
-      TGraph* gr = constructInterpolationGraph(x, y);
-      gr->SetTitle(title);
-      gr->SetLineColor(color);
-      gr->SetLineWidth(Lwidth);
-      mg->Add(gr, opt);
+        //have to remove zeros due to log scale
+        QVector<double> xVec, yVec;
+        for (int iD = 0; iD < X.size(); iD++)
+        {
+            const double & x = X.at(iD);
+            const double & y = Y.at(iD);
+            if (y > 0)
+            {
+                xVec << x;
+                yVec << y;
+
+                Xmin = std::min(Xmin, x);
+                Ymin = std::min(Ymin, y);
+                Xmax = std::max(Xmax, x);
+                Ymax = std::max(Ymax, y);
+            }
+        }
+
+        TGraph* gr = constructInterpolationGraph(xVec, yVec);
+        gr->SetTitle(title);
+        gr->SetLineColor(color);
+        gr->SetLineWidth(Lwidth);
+        gr->GetXaxis()->SetTitle("Energy, keV"); //axis titles can be drawn only after graph was shown...
+        gr->GetYaxis()->SetTitle("Mass interaction coefficient, cm2/g");
+        gr->GetXaxis()->SetTitleOffset(1.1);
+        gr->GetYaxis()->SetTitleOffset(1.3);
+        if (i == 0) mainGr = gr;
+
+        MW->GraphWindow->Draw(gr, opt);
     }
-  MW->GraphWindow->Draw(mg, "AL");
 
-  mg->GetXaxis()->SetTitle("Energy, keV"); //axis titles can be drawn only after graph was shown...
-  mg->GetYaxis()->SetTitle("Mass interaction coefficient, cm2/g");
-  mg->GetXaxis()->SetTitleOffset((Float_t)1.1);
-  mg->GetYaxis()->SetTitleOffset((Float_t)1.3);
-  MW->GraphWindow->UpdateRootCanvas();
+    if (mainGr && mainGr->GetHistogram())
+    {
+        mainGr->GetXaxis()->SetLimits(Xmin, Xmax);
+        mainGr->GetHistogram()->SetMaximum(Ymax);
+        mainGr->GetHistogram()->SetMinimum(Ymin);
+    }
 
-  MW->GraphWindow->AddLegend();
+    MW->GraphWindow->AddLegend();
+
+    MW->GraphWindow->SetLog(true, true);
 }
 
 void MaterialInspectorWindow::ShowTotalInteraction()

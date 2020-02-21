@@ -6760,13 +6760,13 @@ thermal neutrons:</string>
       </widget>
       <widget class="QWidget" name="tabAccelerators">
        <attribute name="title">
-        <string>Accelerators</string>
+        <string>Photon_tracing</string>
        </attribute>
        <widget class="QSpinBox" name="sbMaxNumbPhTransitions">
         <property name="geometry">
          <rect>
-          <x>62</x>
-          <y>8</y>
+          <x>229</x>
+          <y>7</y>
           <width>71</width>
           <height>22</height>
          </rect>
@@ -6784,14 +6784,14 @@ thermal neutrons:</string>
        <widget class="QLabel" name="label_41">
         <property name="geometry">
          <rect>
-          <x>139</x>
+          <x>309</x>
           <y>8</y>
-          <width>436</width>
-          <height>18</height>
+          <width>100</width>
+          <height>20</height>
          </rect>
         </property>
         <property name="text">
-         <string>transitions during tracking of a photon: kill the photon</string>
+         <string>transitions </string>
         </property>
         <property name="alignment">
          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -6835,14 +6835,14 @@ thermal neutrons:</string>
        <widget class="QLabel" name="label_511">
         <property name="geometry">
          <rect>
-          <x>6</x>
+          <x>10</x>
           <y>10</y>
-          <width>50</width>
+          <width>210</width>
           <height>17</height>
          </rect>
         </property>
         <property name="text">
-         <string>After</string>
+         <string>Kill optical photon after</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

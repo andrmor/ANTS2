@@ -36,7 +36,6 @@
 #include "TH1.h"
 #include "TAxis.h"
 #include "TGeoManager.h"
-#include "TMultiGraph.h"
 #include "TAttLine.h"
 #include "TAttMarker.h"
 

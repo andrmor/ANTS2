@@ -394,7 +394,6 @@ void MainWindow::on_pbAddSource_clicked()
 
     on_pbUpdateSourcesIndication_clicked();
     ui->lwDefinedParticleSources->setCurrentRow( SimulationManager->ParticleSources->countSources()-1 );
-    on_pbEditParticleSource_clicked();
 }
 
 void MainWindow::on_pbUpdateSourcesIndication_clicked()

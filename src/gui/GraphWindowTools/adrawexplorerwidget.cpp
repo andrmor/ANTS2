@@ -63,7 +63,7 @@ void ADrawExplorerWidget::updateGui()
 
         QTreeWidgetItem * item = new QTreeWidgetItem();
         QString name = drObj.Name;
-        if (name.isEmpty()) name = "--";
+        //if (name.isEmpty()) name = "--";
 
         QString nameShort = name;
         if (nameShort.size() > 15)
@@ -74,6 +74,9 @@ void ADrawExplorerWidget::updateGui()
 
         QString className = tObj->ClassName();
         QString opt = drObj.Options;
+
+        if (className == "TPaveText") className = "TextBox";
+        else if (className == "TLegend") className = "Legend";
 
         item->setText(0, QString("%1 %2").arg(nameShort).arg(className));
         item->setToolTip(0, QString("Name: %1\nClassName: %2\nDraw options: %3").arg(name).arg(className).arg(opt));
@@ -1339,6 +1342,13 @@ void ADrawExplorerWidget::constructIconForObject(QIcon & icon, const ADrawObject
 
     if (Opt.contains("colz", Qt::CaseInsensitive))
     {
+        construct2DIcon(icon);
+        return;
+    }
+
+    if (Type.startsWith("TH2") || Type.startsWith("TF2") || Type.startsWith("TGraph2D"))
+    {
+        //invent something 3D-ish
         construct2DIcon(icon);
         return;
     }

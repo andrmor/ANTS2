@@ -1852,7 +1852,7 @@ in basket</string>
    </widget>
    <widget class="QMenu" name="menuMainObject">
     <property name="title">
-     <string>MainObject</string>
+     <string>Do</string>
     </property>
     <addaction name="actionShow_first_drawn_object_context_menu"/>
    </widget>

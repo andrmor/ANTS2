@@ -96,7 +96,7 @@ void ADrawTemplate::applyTo(QVector<ADrawObject> & DrawObjects, QVector<QPair<do
     if (range_rec && range_rec->bSelected)
         XYZ_ranges = XYZranges;
 
-    //if template has a Legend, assure that the DrawObjects hav TLegend, preferably at the same index
+    //if template has a Legend, assure that the DrawObjects have TLegend, preferably at the same index
     int iLegend = -1;
     TLegend * Legend = nullptr;
     for (int iObj = 0; iObj < DrawObjects.size(); iObj++)
@@ -144,12 +144,14 @@ void ADrawTemplate::applyTo(QVector<ADrawObject> & DrawObjects, QVector<QPair<do
 
             if (i == LegendIndex)
             {
+                /* now outside, since it is a separate option in the selection widget
                 if (iLegend >= 0 && bApplyLegend)
                 {
                     bool bOK = ARootJson::fromJson(DrawObjects[iLegend], json);
                     if (!bOK) break;
                     continue;
                 }
+                */
             }
             else
             {
@@ -159,6 +161,14 @@ void ADrawTemplate::applyTo(QVector<ADrawObject> & DrawObjects, QVector<QPair<do
                 if (!bOK) break;
             }
         }
+    }
+
+    //legend properties
+    if (iLegend >= 0 && bApplyLegend)
+    {
+        const QJsonObject & json = ObjectAttributes.at(LegendIndex);
+        bool bOK = ARootJson::fromJson(DrawObjects[iLegend], json);
+        if (!bOK) qWarning() << "Error applying TLegend properties from the template";
     }
 }
 
@@ -193,7 +203,7 @@ TAxis * ADrawTemplate::getAxis(TObject * tobj, int index) const
     TH1 * h = dynamic_cast<TH1*>(tobj);
     if (h)
     {
-        qDebug() << "Cast to TH1";
+        //qDebug() << "Cast to TH1";
         if      (index == 0) axis = h->GetXaxis();
         else if (index == 1) axis = h->GetYaxis();
         else if (index == 2) axis = h->GetZaxis();
@@ -204,7 +214,7 @@ TAxis * ADrawTemplate::getAxis(TObject * tobj, int index) const
     TGraph * g = dynamic_cast<TGraph*>(tobj);
     if (g)
     {
-        qDebug() << "Cast to TGraph";
+        //qDebug() << "Cast to TGraph";
         if      (index == 0) axis = g->GetXaxis();
         else if (index == 1) axis = g->GetYaxis();
 

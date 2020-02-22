@@ -1329,11 +1329,24 @@ const QString ADrawExplorerWidget::generateOptionForSecondaryAxis(int axisIndex,
 
 void ADrawExplorerWidget::constructIconForObject(QIcon & icon, const ADrawObject & drObj)
 {
-    TObject * tObj = drObj.Pointer;
+    const TObject * tObj = drObj.Pointer;
+    const QString   Type = tObj->ClassName();
+    const QString & Opt  = drObj.Options;
 
-    TAttLine   * line = dynamic_cast<TAttLine*>(tObj);
-    TAttMarker * mark = dynamic_cast<TAttMarker*>(tObj);
-    TAttFill   * fill = dynamic_cast<TAttFill*>(tObj);
+    const TAttLine   * line = nullptr;
+    const TAttMarker * mark = nullptr;
+    const TAttFill   * fill = nullptr;
+
+    if (Type.startsWith("TH") || Type.startsWith("TGraph") || Type.startsWith("TF") || Type.startsWith("TProfile"))
+    {
+        line = dynamic_cast<const TAttLine*>(tObj);
+        mark = dynamic_cast<const TAttMarker*>(tObj);
+        fill = dynamic_cast<const TAttFill*>(tObj);
+    }
+
+    if ( (Type.startsWith("TH1") || Type.startsWith("TProfile")) && !Opt.contains('P') && !Opt.contains('*')) mark = nullptr;
+    if (Type.startsWith("TGraph") && !Opt.contains('P') && !Opt.contains('*')) mark = nullptr;
+    if (Type.startsWith("TGraph") && !Opt.contains('C') && !Opt.contains('L')) line = nullptr;
 
     construct1DIcon(icon, line, mark, fill);
 }
@@ -1353,13 +1366,17 @@ void ADrawExplorerWidget::convertRootColoToQtColor(int rootColor, QColor & qtCol
     }
 }
 
-void ADrawExplorerWidget::construct1DIcon(QIcon & icon, TAttLine * line, TAttMarker * marker, TAttFill * fill)
+void ADrawExplorerWidget::construct1DIcon(QIcon & icon, const TAttLine * line, const TAttMarker * marker, const TAttFill * fill)
 {
     const int Width  = 61;
     const int Height = 31;
 
     QPixmap pm(Width, Height);
-    QPainter b(&pm);
+    QPainter Painter(&pm);
+    Painter.setRenderHint(QPainter::Antialiasing, false);
+    Painter.setRenderHint(QPainter::TextAntialiasing, false);
+    Painter.setRenderHint(QPainter::SmoothPixmapTransform, false);
+    Painter.setRenderHint(QPainter::HighQualityAntialiasing, false);
     QColor Color;
 
     // Background of FillColor
@@ -1374,10 +1391,10 @@ void ADrawExplorerWidget::construct1DIcon(QIcon & icon, TAttLine * line, TAttMar
         int LineWidth = 2*line->GetLineWidth();
         if (LineWidth > 10) LineWidth = 10;
         convertRootColoToQtColor(RootColor, Color);
-        b.setBrush(QBrush(Color));
-        //b.setPen(QPen(Qt::NoPen));
-        b.setPen(Color);
-        b.drawRect( 0, 0.5*Height - ceil(0.5*LineWidth), Width, LineWidth );
+        Painter.setBrush(QBrush(Color));
+        //Painter.setPen(QPen(Qt::NoPen));
+        Painter.setPen(Color);
+        Painter.drawRect( 0, 0.5*Height - ceil(0.5*LineWidth), Width, LineWidth );
     }
 
     // Marker
@@ -1385,11 +1402,11 @@ void ADrawExplorerWidget::construct1DIcon(QIcon & icon, TAttLine * line, TAttMar
     {
         RootColor = marker->GetMarkerColor();
         convertRootColoToQtColor(RootColor, Color);
-        //b.setBrush(QBrush(Color));
-        b.setPen(QPen(Qt::NoPen));
-        b.setPen(Color);
+        Painter.setBrush(QBrush(Color));
+        //Painter.setPen(QPen(Qt::NoPen));
+        Painter.setPen(Color);
         int Diameter = 20;
-        b.drawEllipse( 0.5*Width - 0.5*Diameter, 0.5*Height - 0.5*Diameter, Diameter, Diameter );
+        Painter.drawEllipse( 0.5*Width - 0.5*Diameter, 0.5*Height - 0.5*Diameter, Diameter, Diameter );
     }
 
     icon = std::move(QIcon(pm));

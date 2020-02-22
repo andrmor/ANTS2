@@ -77,7 +77,7 @@ private:
     const QString generateOptionForSecondaryAxis(int axisIndex, double u1, double u2);
 
     void constructIconForObject(QIcon & icon, const ADrawObject & drObj);
-    void construct1DIcon(QIcon & icon, TAttLine * line, TAttMarker * marker, TAttFill * fill);
+    void construct1DIcon(QIcon & icon, const TAttLine *line, const TAttMarker *marker, const TAttFill *fill);
     void convertRootColoToQtColor(int rootColor, QColor & qtColor);
 
 private:

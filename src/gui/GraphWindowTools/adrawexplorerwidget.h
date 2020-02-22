@@ -78,10 +78,14 @@ private:
 
     void constructIconForObject(QIcon & icon, const ADrawObject & drObj);
     void construct1DIcon(QIcon & icon, const TAttLine *line, const TAttMarker *marker, const TAttFill *fill);
+    void construct2DIcon(QIcon & icon);
     void convertRootColoToQtColor(int rootColor, QColor & qtColor);
 
 private:
     TH2 * objForCustomProjection = nullptr;
+
+    const int IconWidth  = 61;
+    const int IconHeight = 31;
 
 signals:
     void requestShowLegendDialog();

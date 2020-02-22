@@ -1337,6 +1337,12 @@ void ADrawExplorerWidget::constructIconForObject(QIcon & icon, const ADrawObject
     const TAttMarker * mark = nullptr;
     const TAttFill   * fill = nullptr;
 
+    if (Opt.contains("colz", Qt::CaseInsensitive))
+    {
+        construct2DIcon(icon);
+        return;
+    }
+
     if (Type.startsWith("TH") || Type.startsWith("TGraph") || Type.startsWith("TF") || Type.startsWith("TProfile"))
     {
         line = dynamic_cast<const TAttLine*>(tObj);
@@ -1368,10 +1374,7 @@ void ADrawExplorerWidget::convertRootColoToQtColor(int rootColor, QColor & qtCol
 
 void ADrawExplorerWidget::construct1DIcon(QIcon & icon, const TAttLine * line, const TAttMarker * marker, const TAttFill * fill)
 {
-    const int Width  = 61;
-    const int Height = 31;
-
-    QPixmap pm(Width, Height);
+    QPixmap pm(IconWidth, IconHeight);
     QPainter Painter(&pm);
     Painter.setRenderHint(QPainter::Antialiasing, false);
     Painter.setRenderHint(QPainter::TextAntialiasing, false);
@@ -1394,7 +1397,7 @@ void ADrawExplorerWidget::construct1DIcon(QIcon & icon, const TAttLine * line, c
         Painter.setBrush(QBrush(Color));
         //Painter.setPen(QPen(Qt::NoPen));
         Painter.setPen(Color);
-        Painter.drawRect( 0, 0.5*Height - ceil(0.5*LineWidth), Width, LineWidth );
+        Painter.drawRect( 0, 0.5*IconHeight - ceil(0.5*LineWidth), IconWidth, LineWidth );
     }
 
     // Marker
@@ -1406,7 +1409,50 @@ void ADrawExplorerWidget::construct1DIcon(QIcon & icon, const TAttLine * line, c
         //Painter.setPen(QPen(Qt::NoPen));
         Painter.setPen(Color);
         int Diameter = 20;
-        Painter.drawEllipse( 0.5*Width - 0.5*Diameter, 0.5*Height - 0.5*Diameter, Diameter, Diameter );
+        Painter.drawEllipse( 0.5*IconWidth - 0.5*Diameter, 0.5*IconHeight - 0.5*Diameter, Diameter, Diameter );
+    }
+
+    icon = std::move(QIcon(pm));
+}
+
+void ADrawExplorerWidget::construct2DIcon(QIcon &icon)
+{
+    QPixmap pm(IconWidth, IconHeight);
+    QPainter Painter(&pm);
+    Painter.setRenderHint(QPainter::Antialiasing, false);
+    Painter.setRenderHint(QPainter::TextAntialiasing, false);
+    Painter.setRenderHint(QPainter::SmoothPixmapTransform, false);
+    Painter.setRenderHint(QPainter::HighQualityAntialiasing, false);
+    QColor Color;
+
+    static const TArrayI & Palette = TColor::GetPalette();
+    int Size = Palette.GetSize();
+    //qDebug() << "Palette size:" << Size;
+    if (Size == 0) return;
+
+    int RootColor = Palette.At(0);
+    convertRootColoToQtColor(RootColor, Color);
+    Painter.setBrush(QBrush(Color));
+    Painter.setPen(QPen(Qt::NoPen));
+    Painter.drawRect(0, 0, IconWidth, IconHeight);
+
+    int Divisions = 4;
+    int Delta = Size / Divisions;
+    for (int i = 1; i <= Divisions; i++)
+    {
+        int iColor = Delta * i + 1;
+        if (iColor >= Size) iColor = Size-1;
+
+        RootColor = Palette.At(iColor);
+        convertRootColoToQtColor(RootColor, Color);
+        Painter.setBrush(QBrush(Color));
+        //Painter.setPen(Color);
+
+        double fraction = (1.0 - 1.0* i / (Divisions+1));
+        int w = fraction * IconWidth;
+        int h = fraction * IconHeight;
+        //qDebug() << "Step:" << i << "iinA/Size"<< iColor << "color:" << RootColor << "w:"<<w << "h:" << h;
+        Painter.drawEllipse( 0.5*IconWidth - 0.5*w, 0.5*IconHeight - 0.5*h, w, h );
     }
 
     icon = std::move(QIcon(pm));

@@ -11,6 +11,11 @@ class TObject;
 class TH2;
 class TAxis;
 class TGaxis;
+class QColor;
+class QIcon;
+class TAttLine;
+class TAttMarker;
+class TAttFill;
 
 class ADrawExplorerWidget : public QTreeWidget
 {
@@ -70,6 +75,10 @@ private:
     void copyAxisProperties(TGaxis & grAxis, TAxis  & axis);
     void copyAxisProperties(TAxis  & axis,   TGaxis & grAxis);
     const QString generateOptionForSecondaryAxis(int axisIndex, double u1, double u2);
+
+    void constructIconForObject(QIcon & icon, const ADrawObject & drObj);
+    void construct1DIcon(QIcon & icon, TAttLine * line, TAttMarker * marker, TAttFill * fill);
+    void convertRootColoToQtColor(int rootColor, QColor & qtColor);
 
 private:
     TH2 * objForCustomProjection = nullptr;

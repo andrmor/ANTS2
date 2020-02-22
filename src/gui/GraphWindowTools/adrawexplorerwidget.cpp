@@ -23,11 +23,14 @@
 #include <QDoubleValidator>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QPainter>
+#include <QColor>
 
 #include "TObject.h"
 #include "TNamed.h"
 #include "TAttMarker.h"
 #include "TAttLine.h"
+#include "TAttFill.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TF2.h"
@@ -35,6 +38,8 @@
 #include "TGraphErrors.h"
 #include "TPaveText.h"
 #include "TGaxis.h"
+#include "TColor.h"
+#include "TROOT.h"
 
 ADrawExplorerWidget::ADrawExplorerWidget(GraphWindowClass & GraphWindow, QVector<ADrawObject> & DrawObjects) :
     GraphWindow(GraphWindow), DrawObjects(DrawObjects)
@@ -43,6 +48,8 @@ ADrawExplorerWidget::ADrawExplorerWidget(GraphWindowClass & GraphWindow, QVector
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, &ADrawExplorerWidget::customContextMenuRequested, this, &ADrawExplorerWidget::onContextMenuRequested);
     connect(this, &ADrawExplorerWidget::itemDoubleClicked, this, &ADrawExplorerWidget::onItemDoubleClicked);
+
+    setIndentation(0);
 }
 
 void ADrawExplorerWidget::updateGui()
@@ -73,6 +80,10 @@ void ADrawExplorerWidget::updateGui()
         item->setText(1, QString::number(i));
 
         if (!drObj.bEnabled) item->setForeground(0, QBrush(Qt::red));
+
+        QIcon icon;
+        constructIconForObject(icon, drObj);
+        item->setIcon(0, icon);
 
         addTopLevelItem(item);
     }
@@ -1314,6 +1325,74 @@ const QString ADrawExplorerWidget::generateOptionForSecondaryAxis(int axisIndex,
     }
 
     return QString("same;%1;%2;%3").arg(axisIndex == 0 ? "X" : "Y").arg(A).arg(B);
+}
+
+void ADrawExplorerWidget::constructIconForObject(QIcon & icon, const ADrawObject & drObj)
+{
+    TObject * tObj = drObj.Pointer;
+
+    TAttLine   * line = dynamic_cast<TAttLine*>(tObj);
+    TAttMarker * mark = dynamic_cast<TAttMarker*>(tObj);
+    TAttFill   * fill = dynamic_cast<TAttFill*>(tObj);
+
+    construct1DIcon(icon, line, mark, fill);
+}
+
+void ADrawExplorerWidget::convertRootColoToQtColor(int rootColor, QColor & qtColor)
+{
+    TColor * tc = gROOT->GetColor(rootColor);
+
+    if (!tc) qtColor = Qt::white;
+    else
+    {
+        int red   = 255 * tc->GetRed();
+        int green = 255 * tc->GetGreen();
+        int blue  = 255 * tc->GetBlue();
+
+        qtColor = QColor(red, green, blue);
+    }
+}
+
+void ADrawExplorerWidget::construct1DIcon(QIcon & icon, TAttLine * line, TAttMarker * marker, TAttFill * fill)
+{
+    const int Width  = 61;
+    const int Height = 31;
+
+    QPixmap pm(Width, Height);
+    QPainter b(&pm);
+    QColor Color;
+
+    // Background of FillColor
+    int RootColor = ( fill ? fill->GetFillColor() : -1 );
+    convertRootColoToQtColor(RootColor, Color);
+    pm.fill(Color);
+
+    // Line
+    if (line)
+    {
+        RootColor     = line->GetLineColor();
+        int LineWidth = 2*line->GetLineWidth();
+        if (LineWidth > 10) LineWidth = 10;
+        convertRootColoToQtColor(RootColor, Color);
+        b.setBrush(QBrush(Color));
+        //b.setPen(QPen(Qt::NoPen));
+        b.setPen(Color);
+        b.drawRect( 0, 0.5*Height - ceil(0.5*LineWidth), Width, LineWidth );
+    }
+
+    // Marker
+    if (marker)
+    {
+        RootColor = marker->GetMarkerColor();
+        convertRootColoToQtColor(RootColor, Color);
+        //b.setBrush(QBrush(Color));
+        b.setPen(QPen(Qt::NoPen));
+        b.setPen(Color);
+        int Diameter = 20;
+        b.drawEllipse( 0.5*Width - 0.5*Diameter, 0.5*Height - 0.5*Diameter, Diameter, Diameter );
+    }
+
+    icon = std::move(QIcon(pm));
 }
 
 void ADrawExplorerWidget::addAxis(int axisIndex)

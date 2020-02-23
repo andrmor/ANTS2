@@ -1388,7 +1388,9 @@ void ADrawExplorerWidget::constructIconForObject(QIcon & icon, const ADrawObject
         return;
     }
 
-    if (Type.startsWith("TH") || Type.startsWith("TGraph") || Type.startsWith("TF") || Type.startsWith("TProfile"))
+    if (Type.startsWith("TF"))
+        line = dynamic_cast<const TAttLine*>(tObj);
+    else if (Type.startsWith("TH") || Type.startsWith("TGraph") || Type.startsWith("TProfile"))
     {
         line = dynamic_cast<const TAttLine*>(tObj);
         mark = dynamic_cast<const TAttMarker*>(tObj);

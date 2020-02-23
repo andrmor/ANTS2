@@ -180,7 +180,7 @@ void ADrawExplorerWidget::showObjectContextMenu(const QPoint &pos, int index)
 
     QMenu * fitMenu =       Menu.addMenu("Fit");
         QAction* linFitA    =   fitMenu->addAction("Linear (use click-drag)");     linFitA->setEnabled(Type.startsWith("TH1") || Type == "TProfile" || Type.startsWith("TGraph"));
-        QAction* fwhmA      =   fitMenu->addAction("Gauss (use click-frag)");      fwhmA->  setEnabled(Type.startsWith("TH1") || Type == "TProfile");
+        QAction* fwhmA      =   fitMenu->addAction("Gauss (use click-frag)");      fwhmA->  setEnabled(Type.startsWith("TH1") || Type == "TProfile" || Type.startsWith("TGraph"));
         QAction* expA       =   fitMenu->addAction("Exp. decay (use click-frag)"); expA->   setEnabled(Type.startsWith("TH1") || Type == "TProfile");
         QAction* splineFitA =   fitMenu->addAction("B-spline"); splineFitA->setEnabled(Type == "TGraph" || Type == "TGraphErrors");   //*** implement for TH1 too!
         fitMenu->addSeparator();
@@ -800,15 +800,25 @@ void ADrawExplorerWidget::fwhm(int index)
 {
     ADrawObject & obj = DrawObjects[index];
 
+    TGraph * g = nullptr;
+    TH1    * h = nullptr;
+
     const QString cn = obj.Pointer->ClassName();
-    if ( !cn.startsWith("TH1") && cn!="TProfile")
+    if (cn.startsWith("TGraph"))
     {
-        message("Can be used only with 1D histograms!", &GraphWindow);
+        g = dynamic_cast<TGraph*>(obj.Pointer);
+        if (!g) return;
+    }
+    else if (cn.startsWith("TH1") || cn == "TProfile")
+    {
+        h = dynamic_cast<TH1*>(obj.Pointer);
+        if (!h) return;
+    }
+    else
+    {
+        message("Can be used only with TGraph and 1D histogram!", &GraphWindow);
         return;
     }
-
-    TH1* h = dynamic_cast<TH1*>(obj.Pointer);
-    if (!h) return;
 
     GraphWindow.TriggerGlobalBusy(true);
 
@@ -838,8 +848,23 @@ void ADrawExplorerWidget::fwhm(int index)
     double initSigma = (stopX - startX)/2.3548; //sigma
     double startPar1 = -0.5 / (initSigma * initSigma );
     //qDebug() << "Initial par1"<<startPar1;
-    double midBinNum = h->GetXaxis()->FindBin(initMid);
-    double valOnMid = h->GetBinContent(midBinNum);
+    double midBinNum, valOnMid;
+    if (h)
+    {
+        midBinNum = h->GetXaxis()->FindBin(initMid);
+        valOnMid = h->GetBinContent(midBinNum);
+    }
+    else
+    {
+        double x = startX;
+        double y = 0;
+        for (int i=0; i<g->GetN(); i++)
+        {
+            g->GetPoint(i, x, y);
+            if (x >= initMid) break;
+        }
+        valOnMid = y;
+    }
     double baseAtMid = (c - a * initMid) / b;
     double gaussAtMid = valOnMid - baseAtMid;
     //qDebug() << "bin, valMid, baseMid, gaussmid"<<midBinNum<< valOnMid << baseAtMid << gaussAtMid;
@@ -850,7 +875,7 @@ void ADrawExplorerWidget::fwhm(int index)
     f->FixParameter(3, -a/b);  // fixed!
     f->FixParameter(4, c/b);   // fixed!
 
-    int status = h->Fit(f, "R0");
+    int status = (h ? h->Fit(f, "R0") : g->Fit(f, "R0"));
     if (status != 0)
     {
         message("Fit failed!", &GraphWindow);
@@ -911,7 +936,7 @@ void ADrawExplorerWidget::linFit(int index)
     }
     else
     {
-        message("Can be used only with Tgraphs and 1D histograms!", &GraphWindow);
+        message("Can be used only with TGraphs and 1D histogram!", &GraphWindow);
         return;
     }
 

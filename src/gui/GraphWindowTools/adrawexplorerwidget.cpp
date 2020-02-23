@@ -181,7 +181,7 @@ void ADrawExplorerWidget::showObjectContextMenu(const QPoint &pos, int index)
     QMenu * fitMenu =       Menu.addMenu("Fit");
         QAction* linFitA    =   fitMenu->addAction("Linear (use click-drag)");     linFitA->setEnabled(Type.startsWith("TH1") || Type == "TProfile" || Type.startsWith("TGraph"));
         QAction* fwhmA      =   fitMenu->addAction("Gauss (use click-frag)");      fwhmA->  setEnabled(Type.startsWith("TH1") || Type == "TProfile" || Type.startsWith("TGraph"));
-        QAction* expA       =   fitMenu->addAction("Exp. decay (use click-frag)"); expA->   setEnabled(Type.startsWith("TH1") || Type == "TProfile");
+        QAction* expA       =   fitMenu->addAction("Exp. decay (use click-frag)"); expA->   setEnabled(Type.startsWith("TH1") || Type == "TProfile" || Type.startsWith("TGraph"));
         QAction* splineFitA =   fitMenu->addAction("B-spline"); splineFitA->setEnabled(Type == "TGraph" || Type == "TGraphErrors");   //*** implement for TH1 too!
         fitMenu->addSeparator();
         QAction* showFitPanel = fitMenu->addAction("Show fit panel");
@@ -1000,15 +1000,25 @@ void ADrawExplorerWidget::expFit(int index)
 {
     ADrawObject & obj = DrawObjects[index];
 
+    TGraph * g = nullptr;
+    TH1    * h = nullptr;
+
     const QString cn = obj.Pointer->ClassName();
-    if ( !cn.startsWith("TH1") && cn != "TProfile")
+    if (cn.startsWith("TGraph"))
     {
-        message("Can be used only with 1D histograms!", &GraphWindow);
+        g = dynamic_cast<TGraph*>(obj.Pointer);
+        if (!g) return;
+    }
+    else if (cn.startsWith("TH1") || cn == "TProfile")
+    {
+        h = dynamic_cast<TH1*>(obj.Pointer);
+        if (!h) return;
+    }
+    else
+    {
+        message("Can be used only with TGraphs and 1D histogram!", &GraphWindow);
         return;
     }
-
-    TH1* h = dynamic_cast<TH1*>(obj.Pointer);
-    if (!h) return;
 
     GraphWindow.TriggerGlobalBusy(true);
 
@@ -1034,7 +1044,7 @@ void ADrawExplorerWidget::expFit(int index)
     f->SetParameter(2, startX);
     f->SetParLimits(2, startX, startX);
 
-    int status = h->Fit(f, "R0");
+    int status = (h ? h->Fit(f, "R0") : g->Fit(f, "R0"));
     if (status != 0)
     {
         message("Fit failed!", &GraphWindow);

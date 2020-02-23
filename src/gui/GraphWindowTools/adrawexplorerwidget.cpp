@@ -1438,13 +1438,26 @@ void ADrawExplorerWidget::construct1DIcon(QIcon & icon, const TAttLine * line, c
     if (line)
     {
         RootColor     = line->GetLineColor();
-        int LineWidth = 2*line->GetLineWidth();
-        if (LineWidth > 10) LineWidth = 10;
         convertRootColoToQtColor(RootColor, Color);
-        Painter.setBrush(QBrush(Color));
-        //Painter.setPen(QPen(Qt::NoPen));
-        Painter.setPen(Color);
-        Painter.drawRect( 0, 0.5*IconHeight - ceil(0.5*LineWidth), IconWidth, LineWidth );
+
+        int LineWidth = 2 * line->GetLineWidth();
+        if (LineWidth > 10) LineWidth = 10;
+
+        Qt::PenStyle style = Qt::SolidLine;
+        switch (line->GetLineStyle())
+        {
+        case 2: case 7: case 9:
+            style = Qt::DashLine; break;
+        case 3:
+            style = Qt::DotLine; break;
+        case 4: case 5: case 10:
+            style = Qt::DashDotLine; break;
+        case 6: case 8:
+            style = Qt::DashDotDotLine; break;
+        }
+
+        Painter.setPen(QPen(Color, LineWidth, style, Qt::SquareCap, Qt::BevelJoin));
+        Painter.drawLine(0, 0.5*IconHeight, IconWidth, 0.5*IconHeight);
     }
 
     // Marker
@@ -1454,7 +1467,7 @@ void ADrawExplorerWidget::construct1DIcon(QIcon & icon, const TAttLine * line, c
         convertRootColoToQtColor(RootColor, Color);
         Painter.setBrush(QBrush(Color));
         //Painter.setPen(QPen(Qt::NoPen));
-        Painter.setPen(Color);
+        Painter.setPen(QPen(Color, 1, Qt::SolidLine, Qt::SquareCap, Qt::BevelJoin));
         int Diameter = 20;
         Painter.drawEllipse( 0.5*IconWidth - 0.5*Diameter, 0.5*IconHeight - 0.5*Diameter, Diameter, Diameter );
     }

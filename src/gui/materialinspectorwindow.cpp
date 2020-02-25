@@ -3090,7 +3090,15 @@ void MaterialInspectorWindow::on_pbImportStandardMaterial_clicked()
                 suppressParticles << newParticles.at(i);
     }
 
+    MpCollection->tmpMaterial.readFromJson(js, MpCollection, suppressParticles);
 
+    SetWasModified(true);
+    updateWaveButtons();
+    MW->ListActiveParticles();
 
+    ui->cobActiveMaterials->setCurrentIndex(-1); //to avoid confusion (and update is disabled for -1)
+    UpdateIndicationTmpMaterial();
+
+    ui->pbRename->setEnabled(false);
 }
 

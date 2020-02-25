@@ -92,7 +92,7 @@ public:
 
   void clear();
   void writeToJson (QJsonObject &json, AMaterialParticleCollection* MpCollection);  //does not save overrides!
-  bool readFromJson(QJsonObject &json, AMaterialParticleCollection* MpCollection);
+  bool readFromJson(QJsonObject &json, AMaterialParticleCollection* MpCollection, QVector<QString> SuppressParticles = QVector<QString>());
 
   const QString CheckMaterial(int iPart, const AMaterialParticleCollection *MpCollection) const;
 

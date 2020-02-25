@@ -389,7 +389,7 @@ void AMaterial::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCo
   if (!jParticleEntries.isEmpty()) json["MatParticles"] = jParticleEntries;
 }
 
-bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpCollection)
+bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpCollection, QVector<QString> SuppressParticles)
 {
   clear(); //clear all settings and set default properties
 
@@ -547,17 +547,23 @@ bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpC
   int numParticles = MpCollection->countParticles();
   MatParticle.resize(numParticles);
   for (int ip=0; ip<numParticles; ip++)
-    {
+  {
       MatParticle[ip].TrackingAllowed = true;
       MatParticle[ip].MaterialIsTransparent = true;
-    }
+  }
   // reading defined properties
   QJsonArray jParticleEntries = json["MatParticles"].toArray();
-  for (int index=0; index<jParticleEntries.size(); index++)
-    {
+  for (int index = 0; index < jParticleEntries.size(); index++)
+  {
       QJsonObject jMatParticle = jParticleEntries[index].toObject();
 
       QJsonObject jparticle = jMatParticle["*Particle"].toObject();
+      AParticle pa;
+      pa.readFromJson(jparticle);
+      if (MpCollection->findParticle(pa) == -1)
+          if (SuppressParticles.contains(pa.ParticleName))
+              continue;
+
       int ip = MpCollection->findOrAddParticle(jparticle);
 
       parseJson(jMatParticle, "TrackingAllowed", MatParticle[ip].TrackingAllowed);
@@ -613,7 +619,7 @@ bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpC
               MatParticle[ip].MaterialIsTransparent = true;
           }
       }
-    }
+  }
 
   if (!parseJson(json, "PhotonYieldDefault", PhotonYieldDefault))
   {

@@ -43,18 +43,14 @@
 #include "NCrystal/NCrystal.hh"
 #endif
 
-MaterialInspectorWindow::MaterialInspectorWindow(QWidget* parent, MainWindow *mw, DetectorClass* detector) :
+MaterialInspectorWindow::MaterialInspectorWindow(QWidget * parent, MainWindow * mw, DetectorClass * detector) :
     AGuiWindow(parent),
-    ui(new Ui::MaterialInspectorWindow)
+    ui(new Ui::MaterialInspectorWindow),
+    MW(mw), Detector(detector), MpCollection(detector->MpCollection)
 {
-    MW = mw;
-    Detector = detector;
     ui->setupUi(this);
+
     this->move(15,15);
-    //this->setFixedSize(this->size());
-    //this->setFixedWidth(this->width());
-    bClearInProgress = false;
-    NeutronInfoDialog = 0;
 
     Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
     windowFlags |= Qt::WindowCloseButtonHint;
@@ -76,15 +72,6 @@ MaterialInspectorWindow::MaterialInspectorWindow(QWidget* parent, MainWindow *mw
     QList<QLineEdit*> list = this->findChildren<QLineEdit *>();
     foreach(QLineEdit *w, list) if (w->objectName().startsWith("led")) w->setValidator(dv);
 
-    //QString styleGrey = "QLabel { background-color: #F0F0F0; }";  //setting grey background color
-    //ui->laBackground->setStyleSheet(styleGrey);
-    //ui->laBackground_2->setStyleSheet(styleGrey);
-    //ui->laBackground_3->setStyleSheet(styleGrey);
-
-    flagDisreguardChange = false;
-    fLockTable = false;
-    LastSelectedParticle = 0;
-
     //RedIcon = createColorCircleIcon(ui->labIsotopeDensityNotSet->size(), Qt::red);
     //QIcon YellowIcon = createColorCircleIcon(ui->labNeutra_TotalInteractiondataMissing->size(), Qt::yellow);
     //ui->labAutoLoadElastic->setPixmap(YellowIcon.pixmap(16,16));
@@ -97,7 +84,6 @@ MaterialInspectorWindow::MaterialInspectorWindow(QWidget* parent, MainWindow *mw
     ui->pbImportXCOM->setToolTip(str);
 
     OptionsConfigurator = new AMatParticleConfigurator(this);
-
 
     QPixmap pm(QSize(16,16));
     pm.fill(Qt::transparent);
@@ -148,7 +134,7 @@ void MaterialInspectorWindow::UpdateActiveMaterials()
     int current = ui->cobActiveMaterials->currentIndex();
 
     ui->cobActiveMaterials->clear();
-    ui->cobActiveMaterials->addItems(MW->MpCollection->getListOfMaterialNames());
+    ui->cobActiveMaterials->addItems(MpCollection->getListOfMaterialNames());
 
     if (current>-1 && current<ui->cobActiveMaterials->count())
     {
@@ -168,18 +154,18 @@ void MaterialInspectorWindow::on_pbAddToActive_clicked()
     if ( !parseDecayOrRaiseTime(true) ) return;
     if ( !parseDecayOrRaiseTime(false) ) return;
 
-    MW->MpCollection->tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation, Detector->RandGen);
+    MpCollection->tmpMaterial.updateRuntimeProperties(MpCollection->fLogLogInterpolation, Detector->RandGen);
 
     //checkig this material
-    const QString error = MW->MpCollection->CheckTmpMaterial();
+    const QString error = MpCollection->CheckTmpMaterial();
     if (!error.isEmpty())
       {
         message(error, this);
         return;
       }
 
-    QString name = MW->MpCollection->tmpMaterial.name;
-    int index = MW->MpCollection->FindMaterial(name);
+    QString name = MpCollection->tmpMaterial.name;
+    int index = MpCollection->FindMaterial(name);
     if (index > -1)
     {
 //        qDebug()<<"This name already in use! index = "<<index;
@@ -192,9 +178,9 @@ void MaterialInspectorWindow::on_pbAddToActive_clicked()
     else
     {
         //new material
-        index = MW->MpCollection->countMaterials(); //then it will be appended, so index is = current size
+        index = MpCollection->countMaterials(); //then it will be appended, so index is = current size
     }
-    MW->MpCollection->CopyTmpToMaterialCollection(); //if absent, new material is created!
+    MpCollection->CopyTmpToMaterialCollection(); //if absent, new material is created!
     MW->UpdateMaterialListEdit();
 
     ui->cobActiveMaterials->setCurrentIndex(index);
@@ -220,18 +206,18 @@ void MaterialInspectorWindow::setLogLog(bool flag)
 
 void MaterialInspectorWindow::on_cobActiveMaterials_activated(int index)
 {
-    if ( MW->MpCollection->countMaterials() == 0) return;
-    if ( (*MW->MpCollection)[index]->MatParticle.size() == 0)
+    if ( MpCollection->countMaterials() == 0) return;
+    if ( (*MpCollection)[index]->MatParticle.size() == 0)
       {
         qWarning()<<"Error: MatParticle is empty for this material!";
         return;
       }
-    MW->MpCollection->CopyMaterialToTmp(index);
+    MpCollection->CopyMaterialToTmp(index);
 
     MaterialInspectorWindow::UpdateIndicationTmpMaterial();
 
 //    //resetting particle-related section
-//    int indexToSet = (LastSelectedParticle < Detector->MpCollection->countParticles()) ? LastSelectedParticle : 0;
+//    int indexToSet = (LastSelectedParticle < MpCollection->countParticles()) ? LastSelectedParticle : 0;
 //    ui->cobParticle->setCurrentIndex(indexToSet);
 //    on_pbUpdateInteractionIndication_clicked();
 
@@ -241,7 +227,7 @@ void MaterialInspectorWindow::on_cobActiveMaterials_activated(int index)
 
 void MaterialInspectorWindow::updateWaveButtons()
 {   
-  AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+  AMaterial& tmpMaterial = MpCollection->tmpMaterial;
 
   if (tmpMaterial.PrimarySpectrum_lambda.size()>0)
     {
@@ -294,7 +280,7 @@ void MaterialInspectorWindow::updateWaveButtons()
 void MaterialInspectorWindow::UpdateIndicationTmpMaterial()
 {
     //qDebug() << "UpdateIndicationTmpMaterial triggered";
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    AMaterial& tmpMaterial = MpCollection->tmpMaterial;
 
     QString str;
     ui->leName->setText(tmpMaterial.name);  
@@ -306,7 +292,7 @@ void MaterialInspectorWindow::UpdateIndicationTmpMaterial()
 
     ui->leChemicalComposition->setText( tmpMaterial.ChemicalComposition.getCompositionString() );
     ShowTreeWithChemicalComposition();
-    tmpMaterial.updateNeutronDataOnCompositionChange(MW->MpCollection);
+    tmpMaterial.updateNeutronDataOnCompositionChange(MpCollection);
 
     str.setNum(tmpMaterial.n, 'g');
     ui->ledN->setText(str);
@@ -376,11 +362,11 @@ void MaterialInspectorWindow::UpdateIndicationTmpMaterial()
     int lastSelected_cobYieldForParticle = ui->cobYieldForParticle->currentIndex();
     ui->cobYieldForParticle->clear();
 
-    const QStringList PartList = Detector->MpCollection->getListOfParticleNames();
+    const QStringList PartList = MpCollection->getListOfParticleNames();
     ui->cobParticle->addItems(PartList);
     ui->cobYieldForParticle->addItems(QStringList() << PartList << "Undefined");
 
-    int numPart = Detector->MpCollection->countParticles();
+    int numPart = MpCollection->countParticles();
     if (lastSelected_cobYieldForParticle < 0) lastSelected_cobYieldForParticle = 0;
     if (lastSelected_cobYieldForParticle > numPart) //can be "Undefined"
         lastSelected_cobYieldForParticle = 0;
@@ -402,7 +388,7 @@ void MaterialInspectorWindow::UpdateIndicationTmpMaterial()
 
 void MaterialInspectorWindow::updateWarningIcons()
 {
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    AMaterial& tmpMaterial = MpCollection->tmpMaterial;
 
     if (tmpMaterial.ChemicalComposition.countElements() == 0)
     {
@@ -435,14 +421,14 @@ void MaterialInspectorWindow::on_pbUpdateInteractionIndication_clicked()
 {
   //qDebug() << "Update indication triggered for MI window";
 
-  AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+  AMaterial& tmpMaterial = MpCollection->tmpMaterial;
   int particleId = ui->cobParticle->currentIndex();
 
   //qDebug() << "PIndex:" << particleId;
 
   flagDisreguardChange = true; //to skip auto-update "modified!" sign
 
-  if (particleId < 0 || particleId >= MW->MpCollection->countParticles())
+  if (particleId < 0 || particleId >= MpCollection->countParticles())
   {  //on bad particle index
       ui->pbShowTotalInteraction->setEnabled(false);
       flagDisreguardChange = false;
@@ -460,7 +446,7 @@ void MaterialInspectorWindow::on_pbUpdateInteractionIndication_clicked()
   ui->ledIntEnergyRes->setText( QString::number(mp.IntrEnergyRes) );
   ui->pbShowTotalInteraction->setEnabled(true);
 
-  const AParticle::ParticleType type = Detector->MpCollection->getParticleType(particleId);
+  const AParticle::ParticleType type = MpCollection->getParticleType(particleId);
 
   if (type == AParticle::_charged_)
   {
@@ -513,7 +499,7 @@ void MaterialInspectorWindow::on_pbUpdateInteractionIndication_clicked()
 
 void MaterialInspectorWindow::on_pbUpdateTmpMaterial_clicked()
 {  
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    AMaterial& tmpMaterial = MpCollection->tmpMaterial;
 
     tmpMaterial.name = ui->leName->text();
     tmpMaterial.density = ui->ledDensity->text().toDouble();    
@@ -554,7 +540,7 @@ void MaterialInspectorWindow::on_pbLoadDeDr_clicked()
   if (fileName.isEmpty()) return;
   MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
-  AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+  AMaterial& tmpMaterial = MpCollection->tmpMaterial;
 
   QFile file(fileName);
 
@@ -606,7 +592,7 @@ void MaterialInspectorWindow::on_pbLoadDeDr_clicked()
 
 void MaterialInspectorWindow::SetParticleSelection(int index)
 {
-    const QStringList PartList = Detector->MpCollection->getListOfParticleNames();
+    const QStringList PartList = MpCollection->getListOfParticleNames();
 
     if (ui->cobParticle->count() == 0)
         ui->cobParticle->addItems(PartList);
@@ -634,7 +620,7 @@ void MaterialInspectorWindow::on_pbLoadThisScenarioCrossSection_clicked()
     if (fileName.isEmpty()) return;
     MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    AMaterial& tmpMaterial = MpCollection->tmpMaterial;
     int particleId = ui->cobParticle->currentIndex();
 
     QVector<double> en, phot, compt, pair;
@@ -672,7 +658,7 @@ void MaterialInspectorWindow::on_pbLoadThisScenarioCrossSection_clicked()
 
 void MaterialInspectorWindow::on_ledIntEnergyRes_editingFinished()
 {
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    AMaterial& tmpMaterial = MpCollection->tmpMaterial;
 
     double newVal = ui->ledIntEnergyRes->text().toDouble();
     if (newVal<0)
@@ -693,7 +679,7 @@ void MaterialInspectorWindow::on_pbImportStoppingPowerFromTrim_clicked()
     MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
     int particleId = ui->cobParticle->currentIndex();
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    AMaterial& tmpMaterial = MpCollection->tmpMaterial;
 
     tmpMaterial.MatParticle[particleId].InteractionDataX.resize(0);
     tmpMaterial.MatParticle[particleId].InteractionDataF.resize(0);
@@ -888,13 +874,13 @@ void MaterialInspectorWindow::on_pbImportXCOM_clicked()
 
 bool MaterialInspectorWindow::importXCOM(QTextStream &in, int particleId)
 {
-  if (Detector->MpCollection->getParticleType(particleId) != AParticle::_gamma_)
+  if (MpCollection->getParticleType(particleId) != AParticle::_gamma_)
     {
       message("It is not gamma particle!", this);
       return false;
     }
 
-  AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+  AMaterial& tmpMaterial = MpCollection->tmpMaterial;
 
   QVector<double> tmpEnergy, tmpCompton, tmpPhoto, tmpPair;
   bool flagError = false;
@@ -1071,7 +1057,7 @@ void MaterialInspectorWindow::on_pbLoadPrimSpectrum_clicked()
 
   if (fileName.isEmpty()) return;
   MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-  AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+  AMaterial& tmpMaterial = MpCollection->tmpMaterial;
 
   LoadDoubleVectorsFromFile(fileName, &tmpMaterial.PrimarySpectrum_lambda, &tmpMaterial.PrimarySpectrum);  //cleans previous data
 
@@ -1096,13 +1082,13 @@ void MaterialInspectorWindow::on_pbLoadPrimSpectrum_clicked()
 void MaterialInspectorWindow::on_pbShowPrimSpectrum_clicked()
 {
   //MW->ShowGraphWindow();
-  AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+  AMaterial& tmpMaterial = MpCollection->tmpMaterial;
   MW->GraphWindow->MakeGraph(&tmpMaterial.PrimarySpectrum_lambda, &tmpMaterial.PrimarySpectrum, kRed, "Wavelength, nm", "Photon flux, a.u.");
 }
 
 void MaterialInspectorWindow::on_pbDeletePrimSpectrum_clicked()
 {
-  AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+  AMaterial& tmpMaterial = MpCollection->tmpMaterial;
   tmpMaterial.PrimarySpectrum_lambda.resize(0);
   tmpMaterial.PrimarySpectrum.resize(0); 
 
@@ -1149,7 +1135,7 @@ void MaterialInspectorWindow::on_pbLoadSecSpectrum_clicked()
 
   if (fileName.isEmpty()) return;
   MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-  AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+  AMaterial& tmpMaterial = MpCollection->tmpMaterial;
 
   LoadDoubleVectorsFromFile(fileName, &tmpMaterial.SecondarySpectrum_lambda, &tmpMaterial.SecondarySpectrum);  //cleans previous data
 
@@ -1174,13 +1160,13 @@ void MaterialInspectorWindow::on_pbLoadSecSpectrum_clicked()
 void MaterialInspectorWindow::on_pbShowSecSpectrum_clicked()
 {
   //MW->ShowGraphWindow();
-  AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+  AMaterial& tmpMaterial = MpCollection->tmpMaterial;
   MW->GraphWindow->MakeGraph(&tmpMaterial.SecondarySpectrum_lambda, &tmpMaterial.SecondarySpectrum, kRed, "Wavelength, nm", "Photon flux, a.u.");
 }
 
 void MaterialInspectorWindow::on_pbDeleteSecSpectrum_clicked()
 {
-  AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+  AMaterial& tmpMaterial = MpCollection->tmpMaterial;
   tmpMaterial.SecondarySpectrum_lambda.resize(0);
   tmpMaterial.SecondarySpectrum.resize(0);  
 
@@ -1196,7 +1182,7 @@ void MaterialInspectorWindow::on_pbLoadNlambda_clicked()
 
   if (fileName.isEmpty()) return;
   MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-  AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+  AMaterial& tmpMaterial = MpCollection->tmpMaterial;
 
   LoadDoubleVectorsFromFile(fileName, &tmpMaterial.nWave_lambda, &tmpMaterial.nWave);  //cleans previous data too
 
@@ -1220,13 +1206,13 @@ void MaterialInspectorWindow::on_pbLoadNlambda_clicked()
 
 void MaterialInspectorWindow::on_pbShowNlambda_clicked()
 {
-  AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+  AMaterial& tmpMaterial = MpCollection->tmpMaterial;
   MW->GraphWindow->MakeGraph(&tmpMaterial.nWave_lambda, &tmpMaterial.nWave, kRed, "Wavelength, nm", "Refractive index");
 }
 
 void MaterialInspectorWindow::on_pbDeleteNlambda_clicked()
 {
-  AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+  AMaterial& tmpMaterial = MpCollection->tmpMaterial;
   tmpMaterial.nWave_lambda.resize(0);
   tmpMaterial.nWave.resize(0);  
 
@@ -1243,7 +1229,7 @@ void MaterialInspectorWindow::on_pbLoadABSlambda_clicked()
 
   if (fileName.isEmpty()) return;
   MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-  AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+  AMaterial& tmpMaterial = MpCollection->tmpMaterial;
 
   LoadDoubleVectorsFromFile(fileName, &tmpMaterial.absWave_lambda, &tmpMaterial.absWave);  //cleans previous data too
 
@@ -1267,13 +1253,13 @@ void MaterialInspectorWindow::on_pbLoadABSlambda_clicked()
 
 void MaterialInspectorWindow::on_pbShowABSlambda_clicked()
 {
-  AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+  AMaterial& tmpMaterial = MpCollection->tmpMaterial;
   MW->GraphWindow->MakeGraph(&tmpMaterial.absWave_lambda, &tmpMaterial.absWave, kRed, "Wavelength, nm", "Attenuation coefficient, mm-1");
 }
 
 void MaterialInspectorWindow::on_pbDeleteABSlambda_clicked()
 {
-  AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+  AMaterial& tmpMaterial = MpCollection->tmpMaterial;
   tmpMaterial.absWave_lambda.resize(0);
   tmpMaterial.absWave.resize(0); 
 
@@ -1284,7 +1270,7 @@ void MaterialInspectorWindow::on_pbDeleteABSlambda_clicked()
 
 void MaterialInspectorWindow::on_pbShowReemProbLambda_clicked()
 {
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    AMaterial& tmpMaterial = MpCollection->tmpMaterial;
     MW->GraphWindow->MakeGraph(&tmpMaterial.reemisProbWave_lambda, &tmpMaterial.reemisProbWave, kRed, "Wavelength, nm", "Reemission probability");
 }
 
@@ -1295,7 +1281,7 @@ void MaterialInspectorWindow::on_pbLoadReemisProbLambda_clicked()
 
     if (fileName.isEmpty()) return;
     MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    AMaterial& tmpMaterial = MpCollection->tmpMaterial;
 
     LoadDoubleVectorsFromFile(fileName, &tmpMaterial.reemisProbWave_lambda, &tmpMaterial.reemisProbWave);  //cleans previous data too
 
@@ -1311,7 +1297,7 @@ void MaterialInspectorWindow::on_pbLoadReemisProbLambda_clicked()
 
 void MaterialInspectorWindow::on_pbDeleteReemisProbLambda_clicked()
 {
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    AMaterial& tmpMaterial = MpCollection->tmpMaterial;
     tmpMaterial.reemisProbWave_lambda.clear();
     tmpMaterial.reemisProbWave.clear();
 
@@ -1339,7 +1325,7 @@ bool MaterialInspectorWindow::event(QEvent * e)
 void MaterialInspectorWindow::on_pbGammaDiagnosticsPhComptRation_clicked()
 {
   int particleId = ui->cobParticle->currentIndex();
-  AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+  AMaterial& tmpMaterial = MpCollection->tmpMaterial;
 
   if (tmpMaterial.MatParticle[particleId].Terminators.size() < 2) return;
 
@@ -1395,7 +1381,7 @@ void MaterialInspectorWindow::on_leName_textChanged(const QString& /*name*/)
 {
     //on text change - on chage this is a signal that it will be another material. These properties are recalculated anyway on
     //accepting changes/new material
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    AMaterial& tmpMaterial = MpCollection->tmpMaterial;
     tmpMaterial.absWaveBinned.resize(0);
     tmpMaterial.reemissionProbBinned.resize(0);
     tmpMaterial.nWaveBinned.resize(0);
@@ -1411,7 +1397,7 @@ void MaterialInspectorWindow::updateActionButtons()
 {
     //Buttons status
     QString name = ui->leName->text();
-    int iMat = Detector->MpCollection->FindMaterial(name);
+    int iMat = MpCollection->FindMaterial(name);
     if (iMat == -1)
     {
         // Material with this name does not exist
@@ -1431,12 +1417,12 @@ void MaterialInspectorWindow::updateActionButtons()
 void MaterialInspectorWindow::on_ledGammaDiagnosticsEnergy_editingFinished()
 {
   int particleId = ui->cobParticle->currentIndex();
-  if (MW->MpCollection->getParticleType(particleId) != AParticle::_gamma_) return;
+  if (MpCollection->getParticleType(particleId) != AParticle::_gamma_) return;
 
   ui->leoGammaDiagnosticsCoefficient->setText("n.a.");
   ui->leoMFPgamma->setText("n.a.");
 
-  AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+  AMaterial& tmpMaterial = MpCollection->tmpMaterial;
 
   bool ok;
   double energy = ui->ledGammaDiagnosticsEnergy->text().toDouble(&ok);
@@ -1451,7 +1437,7 @@ void MaterialInspectorWindow::on_ledGammaDiagnosticsEnergy_editingFinished()
   //str.setNum(coefficient, 'g', 4);
 
   double Density = tmpMaterial.density;
-  int LogLogInterpolation = Detector->MpCollection->fLogLogInterpolation;
+  int LogLogInterpolation = MpCollection->fLogLogInterpolation;
   double InteractionCoefficient = GetInterpolatedValue(energy, &tmpMaterial.MatParticle[particleId].InteractionDataX, &tmpMaterial.MatParticle[particleId].InteractionDataF, LogLogInterpolation);
   //qDebug()<<energy<<InteractionCoefficient;
   str.setNum(InteractionCoefficient, 'g', 4);
@@ -1473,7 +1459,7 @@ void MaterialInspectorWindow::on_ledRayleighWave_editingFinished()
         ui->ledRayleighWave->setText("500");
       }
 
-    MW->MpCollection->tmpMaterial.rayleighWave = wave;
+    MpCollection->tmpMaterial.rayleighWave = wave;
 }
 
 void MaterialInspectorWindow::on_ledRayleigh_textChanged(const QString &arg1)
@@ -1487,19 +1473,19 @@ void MaterialInspectorWindow::on_ledRayleigh_editingFinished()
   double ray;
   if (ui->ledRayleigh->text() == "") ray = 0;
   else ray = ui->ledRayleigh->text().toDouble();
-  MW->MpCollection->tmpMaterial.rayleighMFP = ray;
+  MpCollection->tmpMaterial.rayleighMFP = ray;
 }
 
 void MaterialInspectorWindow::on_pbRemoveRayleigh_clicked()
 {
   ui->ledRayleigh->setText("");
-  MW->MpCollection->tmpMaterial.rayleighMFP = 0;
+  MpCollection->tmpMaterial.rayleighMFP = 0;
   MaterialInspectorWindow::on_pbWasModified_clicked();
 }
 
 void MaterialInspectorWindow::on_pbShowUsage_clicked()
 {
-  AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+  AMaterial& tmpMaterial = MpCollection->tmpMaterial;
   QString name = tmpMaterial.name;
   int index = ui->cobActiveMaterials->currentIndex();
 
@@ -1548,16 +1534,16 @@ void MaterialInspectorWindow::on_pbRename_clicked()
   QString name = ui->leName->text();
   int aMat = ui->cobActiveMaterials->currentIndex();
   if (aMat<0) return;
-  QString aName = (*Detector->MpCollection)[aMat]->name;
+  QString aName = (*MpCollection)[aMat]->name;
   if (name == aName) return; //not changed
 
-  for (int i=0; i<Detector->MpCollection->countMaterials(); i++)
-    if (i!=aMat && name==(*Detector->MpCollection)[i]->name)
+  for (int i=0; i<MpCollection->countMaterials(); i++)
+    if (i!=aMat && name==(*MpCollection)[i]->name)
       {
         message("There is already a material with name "+name, this);
         return;
       }
-  (*Detector->MpCollection)[aMat]->name = name; 
+  (*MpCollection)[aMat]->name = name;
   ui->pbRename->setText("Rename\n"+name);
 
   MW->ReconstructDetector(true);
@@ -1567,7 +1553,7 @@ void MaterialInspectorWindow::on_pbRename_clicked()
 void MaterialInspectorWindow::on_pbComputeRangeCharged_clicked()
 {
   int particleId = ui->cobParticle->currentIndex();
-  if (MW->MpCollection->getParticleType(particleId) != AParticle::_charged_) return;
+  if (MpCollection->getParticleType(particleId) != AParticle::_charged_) return;
 
   if (ui->ledMFPenergy_2->text().isEmpty())
   {
@@ -1575,7 +1561,7 @@ void MaterialInspectorWindow::on_pbComputeRangeCharged_clicked()
       return;
   }
 
-  AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+  AMaterial& tmpMaterial = MpCollection->tmpMaterial;
   double energy = ui->ledMFPenergy_2->text().toDouble();
 
   if ( tmpMaterial.MatParticle[particleId].InteractionDataX.size() < 2)
@@ -1589,7 +1575,7 @@ void MaterialInspectorWindow::on_pbComputeRangeCharged_clicked()
       return;
   }
 
-  int LogLogInterpolation = Detector->MpCollection->fLogLogInterpolation;
+  int LogLogInterpolation = MpCollection->fLogLogInterpolation;
   //double InteractionCoefficient = InteractionValue(energy, &tmpMaterial.MatParticle[particleId].InteractionDataX, &tmpMaterial.MatParticle[particleId].InteractionDataF, LogLogInterpolation);
   //qDebug()<<InteractionCoefficient<<tmpMaterial.density;
   //double MeanFreePath = 10.0/InteractionCoefficient/tmpMaterial.density;  // 1/(cm2/g)/(g/cm3) - need in mm (so that 10.)
@@ -1621,7 +1607,7 @@ void MaterialInspectorWindow::on_pbComputeRangeCharged_clicked()
 void MaterialInspectorWindow::on_actionSave_material_triggered()
 {
   //checkig this material
-  const QString error = MW->MpCollection->CheckTmpMaterial();
+  const QString error = MpCollection->CheckTmpMaterial();
   if ( !error.isEmpty() )
     {
       message(error, this);
@@ -1631,14 +1617,14 @@ void MaterialInspectorWindow::on_actionSave_material_triggered()
   QString starter = (MW->GlobSet.LibMaterials.isEmpty()) ? MW->GlobSet.LastOpenDir : MW->GlobSet.LibMaterials;
   int imat = ui->cobActiveMaterials->currentIndex();
   if (imat == -1) starter += "/Material_";
-  else starter += "/Material_"+(*Detector->MpCollection)[imat]->name;
+  else starter += "/Material_"+(*MpCollection)[imat]->name;
   QString fileName = QFileDialog::getSaveFileName(this,"Save material", starter, "Material files (*.mat *.json);;All files (*.*)");
   if (fileName.isEmpty()) return;
   QFileInfo fileInfo(fileName);
   if (fileInfo.suffix().isEmpty()) fileName += ".mat";
 
   QJsonObject json, js;
-  Detector->MpCollection->writeMaterialToJson(imat, json);
+  MpCollection->writeMaterialToJson(imat, json);
   js["Material"] = json;
   bool bOK = SaveJsonToFile(js, fileName);
   if (!bOK) message("Failed to save json to file: "+fileName, this);
@@ -1663,7 +1649,7 @@ void MaterialInspectorWindow::on_actionLoad_material_triggered()
       return;
     }
   js = json["Material"].toObject();
-  Detector->MpCollection->tmpMaterial.readFromJson(js, Detector->MpCollection);
+  MpCollection->tmpMaterial.readFromJson(js, MpCollection);
 
   MaterialInspectorWindow::on_pbWasModified_clicked();
   MaterialInspectorWindow::updateWaveButtons();
@@ -1691,7 +1677,7 @@ void MaterialInspectorWindow::on_actionClear_Interaction_for_this_particle_trigg
   if (msgBox) delete msgBox;
 
     int iPart = ui->cobParticle->currentIndex();
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    AMaterial& tmpMaterial = MpCollection->tmpMaterial;
 
     tmpMaterial.MatParticle[iPart].Clear();
 
@@ -1714,10 +1700,10 @@ void MaterialInspectorWindow::on_actionClear_interaction_for_all_particles_trigg
     }
   if (msgBox) delete msgBox;
 
-  AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+  AMaterial& tmpMaterial = MpCollection->tmpMaterial;
 
     //for (int i=0; i<Detector->ParticleCollection.size(); i++)
-    for (int iPart=0; iPart<Detector->MpCollection->countParticles(); iPart++)
+    for (int iPart=0; iPart<MpCollection->countParticles(); iPart++)
         tmpMaterial.MatParticle[iPart].Clear();
 
     on_pbUpdateInteractionIndication_clicked();
@@ -1726,7 +1712,7 @@ void MaterialInspectorWindow::on_actionClear_interaction_for_all_particles_trigg
 
 void MaterialInspectorWindow::on_actionUse_log_log_interpolation_triggered()
 {
-  Detector->MpCollection->fLogLogInterpolation = ui->actionUse_log_log_interpolation->isChecked();
+  MpCollection->fLogLogInterpolation = ui->actionUse_log_log_interpolation->isChecked();
   MW->ReconstructDetector(true);
 }
 
@@ -1750,7 +1736,7 @@ void MaterialInspectorWindow::on_pbShowPairProduction_clicked()
 
 void MaterialInspectorWindow::showProcessIntCoefficient(int particleId, int TermScenario)
 {
-  AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+  AMaterial& tmpMaterial = MpCollection->tmpMaterial;
   if (TermScenario > tmpMaterial.MatParticle[particleId].Terminators.size()-1)
   {
       message("Not defined in the current configuration!", this);
@@ -1785,7 +1771,7 @@ void MaterialInspectorWindow::showProcessIntCoefficient(int particleId, int Term
 void MaterialInspectorWindow::on_pbShowAllForGamma_clicked()
 {
     int particleId = ui->cobParticle->currentIndex();
-    const AMaterial & tmpMaterial = MW->MpCollection->tmpMaterial;
+    const AMaterial & tmpMaterial = MpCollection->tmpMaterial;
     const MatParticleStructure & mp = tmpMaterial.MatParticle[particleId];
 
     if (mp.Terminators.size() < 2) return;
@@ -1874,15 +1860,15 @@ void MaterialInspectorWindow::ShowTotalInteraction()
   MW->GraphWindow->SetLog(true, true);
 
   int particleId = ui->cobParticle->currentIndex();
-  int entries = MW->MpCollection->tmpMaterial.MatParticle[particleId].InteractionDataX.size();
+  int entries = MpCollection->tmpMaterial.MatParticle[particleId].InteractionDataX.size();
   if (entries<1) return;
 
-  const AParticle::ParticleType type = Detector->MpCollection->getParticleType(particleId);
+  const AParticle::ParticleType type = MpCollection->getParticleType(particleId);
 
-  QVector<double> X(MW->MpCollection->tmpMaterial.MatParticle[particleId].InteractionDataX);
-  QVector<double> Y(MW->MpCollection->tmpMaterial.MatParticle[particleId].InteractionDataF);
+  QVector<double> X(MpCollection->tmpMaterial.MatParticle[particleId].InteractionDataX);
+  QVector<double> Y(MpCollection->tmpMaterial.MatParticle[particleId].InteractionDataF);
 
-  //qDebug() << MW->MpCollection->tmpMaterial.MatParticle[particleId].InteractionDataX << MW->MpCollection->tmpMaterial.MatParticle[particleId].InteractionDataF;
+  //qDebug() << MpCollection->tmpMaterial.MatParticle[particleId].InteractionDataX << MpCollection->tmpMaterial.MatParticle[particleId].InteractionDataF;
 
   TString Title="", Xtitle, Ytitle;
   if (type == AParticle::_charged_)
@@ -1927,7 +1913,7 @@ TGraph *MaterialInspectorWindow::constructInterpolationGraph(QVector<double> X, 
 
   QVector<double> xx;
   QVector<double> yy;
-  int LogLogInterpolation = Detector->MpCollection->fLogLogInterpolation;
+  int LogLogInterpolation = MpCollection->fLogLogInterpolation;
   for (int i=1; i<entries; i++)
     for (int j=1; j<50; j++)
       {
@@ -2007,7 +1993,7 @@ void MaterialInspectorWindow::on_pbXCOMauto_clicked()
 
   fOK = importXCOM(in, particleId);
 
-  if (fOK) MW->MpCollection->tmpMaterial.MatParticle[particleId].DataString = ui->leChemicalComposition->text();
+  if (fOK) MpCollection->tmpMaterial.MatParticle[particleId].DataString = ui->leChemicalComposition->text();
 
   on_pbUpdateInteractionIndication_clicked();
   on_pbWasModified_clicked();
@@ -2016,7 +2002,7 @@ void MaterialInspectorWindow::on_pbXCOMauto_clicked()
 void MaterialInspectorWindow::on_pbShowXCOMdata_clicked()
 {
   int particleId = ui->cobParticle->currentIndex();
-  const AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+  const AMaterial& tmpMaterial = MpCollection->tmpMaterial;
 
   QString s = tmpMaterial.MatParticle.at(particleId).DataSource;
 
@@ -2030,13 +2016,13 @@ void MaterialInspectorWindow::on_pbShowXCOMdata_clicked()
 
 void MaterialInspectorWindow::on_cobYieldForParticle_activated(int index)
 {
-    const AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    const AMaterial& tmpMaterial = MpCollection->tmpMaterial;
     ui->ledPrimaryYield->setText( QString::number(tmpMaterial.getPhotonYield(index)) );
 }
 
 void MaterialInspectorWindow::on_ledPrimaryYield_textChanged(const QString &arg1)
 {
-    //if (arg1.toDouble() != MW->MpCollection->tmpMaterial.getPhotonYield(ui->cobYieldForParticle->currentIndex()));
+    //if (arg1.toDouble() != MpCollection->tmpMaterial.getPhotonYield(ui->cobYieldForParticle->currentIndex()));
     //    on_pbWasModified_clicked();
 }
 
@@ -2116,10 +2102,10 @@ int MaterialInspectorWindow::autoLoadReaction(ANeutronInteractionElement& elemen
         bool bOK = LoadJsonFromFile(json, fileName);
         if (bOK)
         {
-            int numPartBefore = MW->MpCollection->countParticles();
+            int numPartBefore = MpCollection->countParticles();
             //  qDebug() << "File found! Loading reaction data...";
-            element.readScenariosFromJson(json, MW->MpCollection);
-            int numPartAfter = MW->MpCollection->countParticles();
+            element.readScenariosFromJson(json, MpCollection);
+            int numPartAfter = MpCollection->countParticles();
             delta+= numPartAfter - numPartBefore;
         }
     }
@@ -2132,9 +2118,9 @@ void MaterialInspectorWindow::onAddIsotope(AChemicalElement *element)
 {
     element->Isotopes << AIsotope(element->Symbol, 777, 0);
 
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    AMaterial& tmpMaterial = MpCollection->tmpMaterial;
     tmpMaterial.ChemicalComposition.CalculateMeanAtomMass();
-    tmpMaterial.updateNeutronDataOnCompositionChange(MW->MpCollection);
+    tmpMaterial.updateNeutronDataOnCompositionChange(MpCollection);
 
     ShowTreeWithChemicalComposition();
     FillNeutronTable();
@@ -2150,9 +2136,9 @@ void MaterialInspectorWindow::onRemoveIsotope(AChemicalElement *element, int iso
     }
     element->Isotopes.removeAt(isotopeIndexInElement);
 
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    AMaterial& tmpMaterial = MpCollection->tmpMaterial;
     tmpMaterial.ChemicalComposition.CalculateMeanAtomMass();
-    tmpMaterial.updateNeutronDataOnCompositionChange(MW->MpCollection);
+    tmpMaterial.updateNeutronDataOnCompositionChange(MpCollection);
 
     ShowTreeWithChemicalComposition();
     FillNeutronTable();
@@ -2161,9 +2147,9 @@ void MaterialInspectorWindow::onRemoveIsotope(AChemicalElement *element, int iso
 
 void MaterialInspectorWindow::IsotopePropertiesChanged(const AChemicalElement * /*element*/, int /*isotopeIndexInElement*/)
 {
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    AMaterial& tmpMaterial = MpCollection->tmpMaterial;
     tmpMaterial.ChemicalComposition.CalculateMeanAtomMass();
-    tmpMaterial.updateNeutronDataOnCompositionChange(MW->MpCollection);
+    tmpMaterial.updateNeutronDataOnCompositionChange(MpCollection);
 
     ShowTreeWithChemicalComposition();
     FillNeutronTable();
@@ -2179,10 +2165,10 @@ void MaterialInspectorWindow::onRequestDraw(const QVector<double> &x, const QVec
 
 void MaterialInspectorWindow::on_pbShowStatisticsOnElastic_clicked()
 {
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-    tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation, Detector->RandGen);
+    AMaterial& tmpMaterial = MpCollection->tmpMaterial;
+    tmpMaterial.updateRuntimeProperties(MpCollection->fLogLogInterpolation, Detector->RandGen);
 
-    NeutronInfoDialog = new ANeutronInfoDialog(&MW->MpCollection->tmpMaterial, ui->cobParticle->currentIndex(), MW->MpCollection->fLogLogInterpolation,
+    NeutronInfoDialog = new ANeutronInfoDialog(&MpCollection->tmpMaterial, ui->cobParticle->currentIndex(), MpCollection->fLogLogInterpolation,
                                                     ui->cbCapture->isChecked(), ui->cbEnableScatter->isChecked(), MW->GraphWindow, this);
 
     NeutronInfoDialog->setWindowFlags(NeutronInfoDialog->windowFlags() | Qt::WindowStaysOnTopHint);
@@ -2207,7 +2193,7 @@ void MaterialInspectorWindow::on_pbShowStatisticsOnElastic_clicked()
 
 void MaterialInspectorWindow::on_pbModifyChemicalComposition_clicked()
 {
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    AMaterial& tmpMaterial = MpCollection->tmpMaterial;
 
     QDialog* d = new QDialog(this);
     d->setWindowTitle("Enter chemical composition");
@@ -2249,7 +2235,7 @@ void MaterialInspectorWindow::on_pbModifyChemicalComposition_clicked()
         break;
     }
 
-    tmpMaterial.updateNeutronDataOnCompositionChange(MW->MpCollection);
+    tmpMaterial.updateNeutronDataOnCompositionChange(MpCollection);
 
     int numNewPart = 0;
     if (OptionsConfigurator->isAutoloadEnabled())
@@ -2273,8 +2259,8 @@ void MaterialInspectorWindow::updateTmpMatOnPartCollChange(int newPartAdded)
         s+= ":\n";
         for (int i=0; i<newPartAdded; i++)
         {
-            int ipart = MW->MpCollection->countParticles() - newPartAdded + i;
-            QString partName = MW->MpCollection->getParticleName(ipart);
+            int ipart = MpCollection->countParticles() - newPartAdded + i;
+            QString partName = MpCollection->getParticleName(ipart);
             ui->cobParticle->addItem(partName);
             s+= QString("\n  %1").arg(partName);
         }
@@ -2294,7 +2280,7 @@ void MaterialInspectorWindow::ShowTreeWithChemicalComposition()
     ui->trwChemicalComposition->clear();
     bClearInProgress = false;
 
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    AMaterial& tmpMaterial = MpCollection->tmpMaterial;
     bool bShowIsotopes = ui->cbShowIsotopes->isChecked();
 
     for (int i=0; i<tmpMaterial.ChemicalComposition.countElements(); i++)
@@ -2347,13 +2333,13 @@ void MaterialInspectorWindow::FillNeutronTable()
 {
     //      qDebug() << "Filling neutron table";
     int particleId = ui->cobParticle->currentIndex();
-    if (particleId != MW->MpCollection->getNeutronIndex()) return;
+    if (particleId != MpCollection->getNeutronIndex()) return;
 
     ui->tabwNeutron->clearContents();
     ui->tabwNeutron->setRowCount(0);
     ui->tabwNeutron->setColumnCount(0);
 
-    const AMaterial & tmpMaterial = MW->MpCollection->tmpMaterial;
+    const AMaterial & tmpMaterial = MpCollection->tmpMaterial;
     const MatParticleStructure & mp = tmpMaterial.MatParticle.at(particleId);
     const QVector<NeutralTerminatorStructure> & Terminators = mp.Terminators;
 
@@ -2483,17 +2469,17 @@ void MaterialInspectorWindow::FillNeutronTable()
     ui->tabwNeutron->resizeColumnsToContents();
     ui->tabwNeutron->resizeRowsToContents();
 
-    MW->MpCollection->tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation, Detector->RandGen); //need to be here? counter-intuitive in indication!
+    MpCollection->tmpMaterial.updateRuntimeProperties(MpCollection->fLogLogInterpolation, Detector->RandGen); //need to be here? counter-intuitive in indication!
 }
 
 int MaterialInspectorWindow::autoloadMissingCrossSectionData()
 {
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    AMaterial& tmpMaterial = MpCollection->tmpMaterial;
 
     int newParticlesDefined = 0;
 
     //for neutron
-    int neutronId = MW->MpCollection->getNeutronIndex();
+    int neutronId = MpCollection->getNeutronIndex();
     if (neutronId != -1) //otherwise not defined in this configuration
     {
         MatParticleStructure& mp = tmpMaterial.MatParticle[neutronId];
@@ -2573,7 +2559,7 @@ void MaterialInspectorWindow::onTabwNeutronsActionRequest(int iEl, int iIso, con
         on_actionNeutrons_triggered();
 
     //      qDebug() << "Element#"<<iEl << "Isotope#:"<<iIso <<Action;
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    AMaterial& tmpMaterial = MpCollection->tmpMaterial;
     int particleId = ui->cobParticle->currentIndex();
     QVector<NeutralTerminatorStructure>& Terminators = tmpMaterial.MatParticle[particleId].Terminators;
 
@@ -2661,7 +2647,7 @@ void MaterialInspectorWindow::onTabwNeutronsActionRequest(int iEl, int iIso, con
     else if (Action == "Reactions")
     {
         QStringList DefinedParticles;
-        MW->MpCollection->OnRequestListOfParticles(DefinedParticles);
+        MpCollection->OnRequestListOfParticles(DefinedParticles);
         ANeutronReactionsConfigurator* d = new ANeutronReactionsConfigurator(&Terminators[0].IsotopeRecords[iIndex], DefinedParticles, this);
         QObject::connect(d, &ANeutronReactionsConfigurator::RequestDraw, this, &MaterialInspectorWindow::onRequestDraw);
         int res = d->exec();
@@ -2676,7 +2662,7 @@ void MaterialInspectorWindow::onTabwNeutronsActionRequest(int iEl, int iIso, con
 
 void MaterialInspectorWindow::on_pbMaterialInfo_clicked()
 {
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    AMaterial& tmpMaterial = MpCollection->tmpMaterial;
 
     if (ui->leChemicalComposition->text().isEmpty())
     {
@@ -2693,7 +2679,7 @@ void MaterialInspectorWindow::on_pbMaterialInfo_clicked()
 
 void MaterialInspectorWindow::on_cbAllowAbsentCsData_clicked()
 {
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    AMaterial& tmpMaterial = MpCollection->tmpMaterial;
     int particleId = ui->cobParticle->currentIndex();
     tmpMaterial.MatParticle[particleId].bAllowAbsentCsData = ui->cbAllowAbsentCsData->isChecked();
 
@@ -2775,7 +2761,7 @@ void MaterialInspectorWindow::on_lePriT_raise_editingFinished()
 
 bool MaterialInspectorWindow::parseDecayOrRaiseTime(bool doParseDecay)
 {
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    AMaterial& tmpMaterial = MpCollection->tmpMaterial;
 
     QString s = ( doParseDecay ? ui->lePriT->text() : ui->lePriT_raise->text() );
     s = s.simplified();
@@ -2849,9 +2835,9 @@ void MaterialInspectorWindow::on_pbPriThelp_clicked()
 
 void MaterialInspectorWindow::on_pbPriT_test_clicked()
 {
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    AMaterial& tmpMaterial = MpCollection->tmpMaterial;
 
-    tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation, Detector->RandGen); //to update sum of stat weights
+    tmpMaterial.updateRuntimeProperties(MpCollection->fLogLogInterpolation, Detector->RandGen); //to update sum of stat weights
 
     TH1D* h = new TH1D("h1", "", 1000, 0, 0);
     for (int i=0; i<1000000; i++)
@@ -2872,7 +2858,7 @@ void MaterialInspectorWindow::on_actionNeutrons_triggered()
 
 void MaterialInspectorWindow::on_pbShowNcmat_clicked()
 {
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    AMaterial& tmpMaterial = MpCollection->tmpMaterial;
     int particleId = ui->cobParticle->currentIndex();
 
     MatParticleStructure& mp = tmpMaterial.MatParticle[particleId];
@@ -2906,7 +2892,7 @@ void MaterialInspectorWindow::on_pbLoadNcmat_clicked()
 #endif
 
 
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    AMaterial& tmpMaterial = MpCollection->tmpMaterial;
     int particleId = ui->cobParticle->currentIndex();
     MatParticleStructure& mp = tmpMaterial.MatParticle[particleId];
     NeutralTerminatorStructure& t = mp.Terminators.last();
@@ -2919,7 +2905,7 @@ void MaterialInspectorWindow::on_pbLoadNcmat_clicked()
 
 void MaterialInspectorWindow::on_cbUseNCrystal_clicked(bool checked)
 {
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    AMaterial& tmpMaterial = MpCollection->tmpMaterial;
     int particleId = ui->cobParticle->currentIndex();
     MatParticleStructure& mp = tmpMaterial.MatParticle[particleId];
 
@@ -2935,7 +2921,7 @@ void MaterialInspectorWindow::on_cbUseNCrystal_clicked(bool checked)
 
 void MaterialInspectorWindow::on_ledNCmatDcutoff_editingFinished()
 {
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    AMaterial& tmpMaterial = MpCollection->tmpMaterial;
     int particleId = ui->cobParticle->currentIndex();
     MatParticleStructure& mp = tmpMaterial.MatParticle[particleId];
     NeutralTerminatorStructure& t = mp.Terminators.last();
@@ -2945,7 +2931,7 @@ void MaterialInspectorWindow::on_ledNCmatDcutoff_editingFinished()
 
 void MaterialInspectorWindow::on_ledNcmatPacking_editingFinished()
 {
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    AMaterial& tmpMaterial = MpCollection->tmpMaterial;
     int particleId = ui->cobParticle->currentIndex();
     MatParticleStructure& mp = tmpMaterial.MatParticle[particleId];
     NeutralTerminatorStructure& t = mp.Terminators.last();
@@ -2970,7 +2956,7 @@ void MaterialInspectorWindow::on_pbNew_clicked()
             return;
     }
 
-    Detector->MpCollection->AddNewMaterial("Not_defined", true);
+    MpCollection->AddNewMaterial("Not_defined", true);
     MW->ReconstructDetector(true);
 
     int index = ui->cobActiveMaterials->count() - 1;
@@ -2985,7 +2971,7 @@ void MaterialInspectorWindow::on_pbCopyPrYieldToAll_clicked()
 {
     if (!confirm("Set the same primary yield value for all particles?", this)) return;
 
-    AMaterial & tmpMaterial = MW->MpCollection->tmpMaterial;
+    AMaterial & tmpMaterial = MpCollection->tmpMaterial;
     double prYield = ui->ledPrimaryYield->text().toDouble();
     for (int iP = 0; iP < tmpMaterial.MatParticle.size(); iP++)
             tmpMaterial.MatParticle[iP].PhYield = prYield;
@@ -3039,8 +3025,8 @@ void MaterialInspectorWindow::on_pbImportStandardMaterial_clicked()
         return;
     }
     js = json["Material"].toObject();
-    //Detector->MpCollection->tmpMaterial.readFromJson(js, Detector->MpCollection);
-    QVector<QString> undefMats = MW->MpCollection->getUndefinedParticles(js);
+    //MpCollection->tmpMaterial.readFromJson(js, MpCollection);
+    QVector<QString> undefMats = MpCollection->getUndefinedParticles(js);
 
     qDebug() << undefMats;
 }

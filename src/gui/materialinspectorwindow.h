@@ -14,6 +14,7 @@ class QTreeWidgetItem;
 class AChemicalElement;
 class ANeutronInteractionElement;
 class ANeutronInfoDialog;
+class AMaterialParticleCollection;
 
 namespace Ui {
 class MaterialInspectorWindow;
@@ -41,7 +42,7 @@ public:
 
     //void WriteElasticAutoToJson(QJsonObject& json);
 
-    bool bClearInProgress;
+    bool bClearInProgress = false;
 
 protected:
     bool event(QEvent * e);
@@ -125,11 +126,14 @@ private slots:
     void on_ledNCmatDcutoff_editingFinished();
     void on_ledNcmatPacking_editingFinished();
     void on_cbUseNCrystal_clicked(bool checked);
+    void on_pbSecScintHelp_clicked();
+    void on_pbImportStandardMaterial_clicked();
 
     //user or code controlled change - safe or only GUI
     void on_ledRayleigh_textChanged(const QString &arg1);
     void on_ledPrimaryYield_textChanged(const QString &arg1);
     void on_cbUseNCrystal_toggled(bool checked);
+    void on_pteComments_textChanged();
 
     //menu actions
     void on_actionSave_material_triggered();
@@ -143,24 +147,18 @@ private slots:
 
     //new auto-generated, not cathegorized
 
-    void on_pbSecScintHelp_clicked();
-
-    void on_pbImportStandardMaterial_clicked();
-
-    void on_pteComments_textChanged();
-
 private:
     Ui::MaterialInspectorWindow *ui;
-    MainWindow* MW;
-    DetectorClass* Detector;
+    MainWindow * MW = nullptr;
+    DetectorClass * Detector = nullptr;
+    AMaterialParticleCollection* MpCollection = nullptr;
 
-    AMatParticleConfigurator* OptionsConfigurator;
+    AMatParticleConfigurator* OptionsConfigurator = nullptr;
+    ANeutronInfoDialog * NeutronInfoDialog = nullptr;
 
-    ANeutronInfoDialog* NeutronInfoDialog;
-
-    bool flagDisreguardChange;
-    bool fLockTable;
-    int LastSelectedParticle;
+    bool flagDisreguardChange = false;
+    bool fLockTable = false;
+    int LastSelectedParticle = 0;
     bool bLockTmpMaterial = false;
 
     bool bMessageLock = false;

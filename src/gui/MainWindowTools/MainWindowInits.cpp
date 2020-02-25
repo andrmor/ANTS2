@@ -352,6 +352,9 @@ MainWindow::MainWindow(DetectorClass *Detector,
     qDebug() << ">Init for Reconstruction window...";
     Rwindow->InitWindow();
 
+    qDebug() << ">Init for Material Inspector window...";
+    MIwindow->InitWindow();
+
     qDebug() << ">Init for Remote sim/reconstruction window...";
     RemoteWindow->ReadConfig();
 

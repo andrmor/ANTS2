@@ -27,6 +27,7 @@ public:
     explicit MaterialInspectorWindow(QWidget* parent, MainWindow *mw, DetectorClass *detector);
     ~MaterialInspectorWindow();
 
+    void InitWindow();
     void UpdateActiveMaterials();
     void UpdateIndicationTmpMaterial();
     void SetParticleSelection(int index);

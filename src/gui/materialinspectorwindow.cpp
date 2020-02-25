@@ -126,6 +126,14 @@ MaterialInspectorWindow::~MaterialInspectorWindow()
     delete ui;
 }
 
+void MaterialInspectorWindow::InitWindow()
+{
+    UpdateActiveMaterials();
+    on_cobActiveMaterials_activated(0);
+    UpdateIndicationTmpMaterial();
+    SetWasModified(false);
+}
+
 void MaterialInspectorWindow::SetWasModified(bool flag)
 {
   QString s = " ";
@@ -190,9 +198,9 @@ void MaterialInspectorWindow::on_pbAddToActive_clicked()
     MW->UpdateMaterialListEdit();
 
     ui->cobActiveMaterials->setCurrentIndex(index);
-    SetWasModified(false);
-
     MW->ReconstructDetector(true);
+
+    SetWasModified(false);
 }
 
 void MaterialInspectorWindow::on_pbShowTotalInteraction_clicked()
@@ -591,8 +599,15 @@ void MaterialInspectorWindow::on_pbLoadDeDr_clicked()
 
 void MaterialInspectorWindow::SetParticleSelection(int index)
 {
-  ui->cobParticle->setCurrentIndex(index);
-  on_pbUpdateInteractionIndication_clicked();
+    const QStringList PartList = Detector->MpCollection->getListOfParticleNames();
+
+    if (ui->cobParticle->count() == 0)
+        ui->cobParticle->addItems(PartList);
+
+    if (index < 0 || index >= PartList.size() ) index = 0;
+    ui->cobParticle->setCurrentIndex(index);
+
+    on_pbUpdateInteractionIndication_clicked();
 }
 
 void MaterialInspectorWindow::SetMaterial(int index)

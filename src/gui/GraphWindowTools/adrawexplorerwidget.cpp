@@ -1383,7 +1383,7 @@ void ADrawExplorerWidget::constructIconForObject(QIcon & icon, const ADrawObject
 
     if (Type.startsWith("TH2") || Type.startsWith("TF2") || Type.startsWith("TGraph2D"))
     {
-        //invent something 3D-ish
+        //todo: invent something 3D-ish to show surf and lego
         construct2DIcon(icon);
         return;
     }
@@ -1397,7 +1397,20 @@ void ADrawExplorerWidget::constructIconForObject(QIcon & icon, const ADrawObject
         fill = dynamic_cast<const TAttFill*>(tObj);
     }
 
-    if ( (Type.startsWith("TH1") || Type.startsWith("TProfile")) && !Opt.contains('P') && !Opt.contains('*')) mark = nullptr;
+    if (Type.startsWith("TH1") || Type.startsWith("TProfile"))
+    {
+        // * always enables * markers
+        // C or L disables P and forces line
+        //in all other cases presence of P enables markers and removes line
+        if (!Opt.contains('*', Qt::CaseInsensitive))
+        {
+            if ( !Opt.contains('P', Qt::CaseInsensitive) || Opt.contains('C', Qt::CaseInsensitive) || Opt.contains('L', Qt::CaseInsensitive) )
+                mark = nullptr;
+        }
+
+        if ( Opt.contains('P', Qt::CaseInsensitive) && !Opt.contains('C', Qt::CaseInsensitive) && !Opt.contains('L', Qt::CaseInsensitive) )
+            line = nullptr;
+    }
     if (Type.startsWith("TGraph") && !Opt.contains('P') && !Opt.contains('*')) mark = nullptr;
     if (Type.startsWith("TGraph") && !Opt.contains('C') && !Opt.contains('L')) line = nullptr;
 

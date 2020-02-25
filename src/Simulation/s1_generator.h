@@ -3,7 +3,7 @@
 
 #include "ahistoryrecords.h"
 
-#include <QObject>
+#include <QVector>
 
 struct AEnergyDepositionCell;
 class AMaterial;
@@ -12,32 +12,28 @@ class Photon_Generator;
 class AMaterialParticleCollection;
 class TRandom2;
 
-class S1_Generator : public QObject
+class S1_Generator
 {
-    Q_OBJECT
-
 public:
     explicit S1_Generator(Photon_Generator* photonGenerator,
                           APhotonTracer* photonTracker,
                           AMaterialParticleCollection* materialCollection,
                           QVector<AEnergyDepositionCell*>* energyVector,
                           QVector<GeneratedPhotonsHistoryStructure>* PhotonsHistory,
-                          TRandom2* RandomGenerator,
-                          QObject *parent = 0);
+                          TRandom2* RandomGenerator);
 
     bool Generate();  //uses EnergyVector as the input parameter
     void setDoTextLog(bool flag){DoTextLog = flag;}
 
 private:
-    QVector<AEnergyDepositionCell*>* EnergyVector;
-    Photon_Generator* PhotonGenerator;
-    APhotonTracer* PhotonTracker;
-    TRandom2* RandGen;
+    QVector<AEnergyDepositionCell*>* EnergyVector = nullptr;
+    Photon_Generator* PhotonGenerator = nullptr;
+    APhotonTracer* PhotonTracker = nullptr;
+    TRandom2* RandGen = nullptr;
+    AMaterialParticleCollection* MaterialCollection = nullptr;
+    QVector<GeneratedPhotonsHistoryStructure>* GeneratedPhotonsHistory = nullptr;
 
-    AMaterialParticleCollection* MaterialCollection;
-    QVector<GeneratedPhotonsHistoryStructure>* GeneratedPhotonsHistory;
-
-    bool DoTextLog;    
+    bool DoTextLog = false;
 };
 
 #endif // S1_GENERATOR_H

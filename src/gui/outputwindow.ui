@@ -94,7 +94,7 @@
        </palette>
       </property>
       <property name="currentIndex">
-       <number>6</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="tabText">
        <attribute name="title">
@@ -1581,6 +1581,11 @@ over all events</string>
                   <string>Get deposited energies</string>
                  </property>
                 </item>
+                <item>
+                 <property name="text">
+                  <string>Get deposition statistics</string>
+                 </property>
+                </item>
                </widget>
               </item>
               <item>
@@ -1600,6 +1605,119 @@ over all events</string>
                </spacer>
               </item>
              </layout>
+            </item>
+            <item>
+             <widget class="QFrame" name="frTimeAware">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::NoFrame</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_27">
+               <property name="spacing">
+                <number>3</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
+               <item>
+                <spacer name="horizontalSpacer_43">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>83</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="cbLimitTimeWindow">
+                 <property name="text">
+                  <string>Limit time window</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_8">
+                 <property name="text">
+                  <string>From:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="ledTimeFrom">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>100</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>0</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_30">
+                 <property name="text">
+                  <string>ns  To:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="ledTimeTo">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>100</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>100</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_31">
+                 <property name="text">
+                  <string>ns </string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_44">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>82</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </widget>
             </item>
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_19">
@@ -2903,8 +3021,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>231</x>
-     <y>395</y>
+     <x>368</x>
+     <y>394</y>
     </hint>
     <hint type="destinationlabel">
      <x>457</x>
@@ -2919,8 +3037,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>231</x>
-     <y>424</y>
+     <x>368</x>
+     <y>422</y>
     </hint>
     <hint type="destinationlabel">
      <x>457</x>
@@ -3389,6 +3507,38 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
     <hint type="destinationlabel">
      <x>189</x>
      <y>494</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbLimitTimeWindow</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>ledTimeFrom</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>184</x>
+     <y>310</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>335</x>
+     <y>310</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbLimitTimeWindow</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>ledTimeTo</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>157</x>
+     <y>312</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>497</x>
+     <y>313</y>
     </hint>
    </hints>
   </connection>

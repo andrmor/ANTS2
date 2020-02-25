@@ -4,7 +4,6 @@
 #include "amaterialparticlecolection.h"
 #include "ajsontools.h"
 #include "agridelementrecord.h"
-//#include "amonitor.h"
 
 #include <QDebug>
 
@@ -466,7 +465,7 @@ void ASandwich::shapeGrid(AGeoObject *obj, int shape, double p0, double p1, doub
 
 void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TGeoManager* GeoManager,
                                          AMaterialParticleCollection* MaterialCollection,
-                                         QList<APMandDummy> *PMsAndDumPMs,
+                                         QVector<APMandDummy> *PMsAndDumPMs,
                                          int forcedNodeNumber)
 {
     //qDebug() << "Processing TGeo creation for object"<<obj->Name<<" which must be in"<<parent->GetName();
@@ -670,7 +669,7 @@ void ASandwich::clearMonitorRecords()
 }
 
 void ASandwich::positionArrayElement(int ix, int iy, int iz, AGeoObject* el, AGeoObject* arrayObj,
-                                     TGeoVolume* parent, TGeoManager* GeoManager, AMaterialParticleCollection* MaterialCollection, QList<APMandDummy> *PMsAndDumPMs,
+                                     TGeoVolume* parent, TGeoManager* GeoManager, AMaterialParticleCollection* MaterialCollection, QVector<APMandDummy> *PMsAndDumPMs,
                                      int arrayIndex)
 {
     ATypeArrayObject* array = static_cast<ATypeArrayObject*>(arrayObj->ObjectType);

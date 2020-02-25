@@ -484,18 +484,7 @@ void APointSourceSimulator::GenerateTraceNphotons(AScanRecord *scs, double time0
     {
         //photon direction
         if (fRandomDirection)
-        {
-            if (scs->ScintType == 2)
-            {
-                photonGenerator->GenerateDirectionSecondary(&PhotonOnStart);
-                if (PhotonOnStart.fSkipThisPhoton)
-                {
-                    PhotonOnStart.fSkipThisPhoton = false;
-                    continue;  //skip this photon - direction didn't pass the criterium set for the secondary scintillation
-                }
-            }
-            else photonGenerator->GenerateDirectionPrimary(&PhotonOnStart);
-        }
+            photonGenerator->GenerateDirection(&PhotonOnStart);
         else if (fCone)
         {
             double z = CosConeAngle + RandGen->Rndm() * (1.0 - CosConeAngle);

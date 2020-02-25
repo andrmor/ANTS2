@@ -124,6 +124,13 @@ private:
     void clearG4data();
     void copyDataFromWorkers();
     void removeOldFile(const QString &fileName, const QString &txt);
+    const QString makeLogDir() const;
+    void saveParticleLog(const QString & dir) const;
+    void saveG4ParticleLog(const QString & dir) const;
+    void saveA2ParticleLog(const QString & dir) const;
+    void saveDepositionLog(const QString & dir) const;
+    void saveG4depositionLog(const QString & dir) const;
+    void saveA2depositionLog(const QString & dir) const;
 };
 
 #endif // ASIMULATIONMANAGER_H

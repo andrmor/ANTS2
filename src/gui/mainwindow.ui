@@ -6475,69 +6475,12 @@ Constructor is disabled!</string>
        <attribute name="title">
         <string>SecScint</string>
        </attribute>
-       <widget class="QFrame" name="fSecondaryLightGenType">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="geometry">
-         <rect>
-          <x>44</x>
-          <y>10</y>
-          <width>231</width>
-          <height>54</height>
-         </rect>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::NoFrame</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
-        </property>
-        <widget class="QLabel" name="label_144">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>4</y>
-           <width>210</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Secondary scintillation is generatied:</string>
-         </property>
-        </widget>
-        <widget class="QComboBox" name="cobSecScintillationGenType">
-         <property name="geometry">
-          <rect>
-           <x>30</x>
-           <y>24</y>
-           <width>151</width>
-           <height>22</height>
-          </rect>
-         </property>
-         <item>
-          <property name="text">
-           <string>in 4Pi</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>in 2Pi, positive z (up)</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>in 2Pi, negative z (down)</string>
-          </property>
-         </item>
-        </widget>
-       </widget>
        <widget class="QLabel" name="label_240">
         <property name="geometry">
          <rect>
-          <x>274</x>
+          <x>6</x>
           <y>22</y>
-          <width>253</width>
+          <width>521</width>
           <height>31</height>
          </rect>
         </property>
@@ -6549,7 +6492,7 @@ Constructor is disabled!</string>
         </property>
         <property name="text">
          <string>Secondary scintillation is generated only
- in &quot;Secondary scintillator&quot; volume!</string>
+ in &quot;SecScint&quot; volume!</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -6817,13 +6760,13 @@ thermal neutrons:</string>
       </widget>
       <widget class="QWidget" name="tabAccelerators">
        <attribute name="title">
-        <string>Accelerators</string>
+        <string>Photon_tracing</string>
        </attribute>
        <widget class="QSpinBox" name="sbMaxNumbPhTransitions">
         <property name="geometry">
          <rect>
-          <x>62</x>
-          <y>8</y>
+          <x>229</x>
+          <y>7</y>
           <width>71</width>
           <height>22</height>
          </rect>
@@ -6841,14 +6784,14 @@ thermal neutrons:</string>
        <widget class="QLabel" name="label_41">
         <property name="geometry">
          <rect>
-          <x>139</x>
+          <x>309</x>
           <y>8</y>
-          <width>436</width>
-          <height>18</height>
+          <width>100</width>
+          <height>20</height>
          </rect>
         </property>
         <property name="text">
-         <string>transitions during tracking of a photon: kill the photon</string>
+         <string>transitions </string>
         </property>
         <property name="alignment">
          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -6892,14 +6835,14 @@ thermal neutrons:</string>
        <widget class="QLabel" name="label_511">
         <property name="geometry">
          <rect>
-          <x>6</x>
+          <x>10</x>
           <y>10</y>
-          <width>50</width>
+          <width>210</width>
           <height>17</height>
          </rect>
         </property>
         <property name="text">
-         <string>After</string>
+         <string>Kill optical photon after</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -12522,80 +12465,6 @@ multiply to loaded data</string>
      </widget>
     </widget>
    </widget>
-   <widget class="QFrame" name="fSecondaryScintLoadProfile">
-    <property name="geometry">
-     <rect>
-      <x>590</x>
-      <y>250</y>
-      <width>212</width>
-      <height>48</height>
-     </rect>
-    </property>
-    <property name="frameShape">
-     <enum>QFrame::NoFrame</enum>
-    </property>
-    <property name="frameShadow">
-     <enum>QFrame::Raised</enum>
-    </property>
-    <widget class="QPushButton" name="pbSecScintShowProfile">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>22</y>
-       <width>70</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Show</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="pbSecScintDeleteProfile">
-     <property name="geometry">
-      <rect>
-       <x>180</x>
-       <y>22</y>
-       <width>20</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>X</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="pbSecScintLoadProfile">
-     <property name="geometry">
-      <rect>
-       <x>100</x>
-       <y>22</y>
-       <width>70</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>Load</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_20">
-     <property name="geometry">
-      <rect>
-       <x>23</x>
-       <y>5</y>
-       <width>161</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>SecScint Angular distribution:</string>
-     </property>
-    </widget>
-   </widget>
    <widget class="QPushButton" name="pbReconstruction_2">
     <property name="geometry">
      <rect>
@@ -12980,8 +12849,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>203</x>
-     <y>571</y>
+     <x>201</x>
+     <y>540</y>
     </hint>
     <hint type="destinationlabel">
      <x>280</x>
@@ -13428,8 +13297,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>400</x>
-     <y>491</y>
+     <x>404</x>
+     <y>494</y>
     </hint>
     <hint type="destinationlabel">
      <x>530</x>
@@ -13572,8 +13441,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>301</x>
-     <y>413</y>
+     <x>305</x>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
      <x>471</x>
@@ -13588,8 +13457,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>181</x>
-     <y>498</y>
+     <x>179</x>
+     <y>467</y>
     </hint>
     <hint type="destinationlabel">
      <x>464</x>
@@ -13604,8 +13473,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>443</x>
-     <y>474</y>
+     <x>447</x>
+     <y>443</y>
     </hint>
     <hint type="destinationlabel">
      <x>451</x>
@@ -13620,8 +13489,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>443</x>
-     <y>503</y>
+     <x>447</x>
+     <y>472</y>
     </hint>
     <hint type="destinationlabel">
      <x>504</x>
@@ -13636,8 +13505,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>443</x>
-     <y>503</y>
+     <x>447</x>
+     <y>472</y>
     </hint>
     <hint type="destinationlabel">
      <x>506</x>
@@ -13652,8 +13521,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>295</x>
-     <y>413</y>
+     <x>293</x>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
      <x>468</x>
@@ -13668,8 +13537,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>171</x>
-     <y>413</y>
+     <x>175</x>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
      <x>468</x>
@@ -13684,8 +13553,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>319</x>
-     <y>473</y>
+     <x>317</x>
+     <y>442</y>
     </hint>
     <hint type="destinationlabel">
      <x>514</x>
@@ -14100,8 +13969,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>465</x>
-     <y>135</y>
+     <x>139</x>
+     <y>140</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14116,24 +13985,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>100</x>
-     <y>179</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cobSecScintillationGenType</sender>
-   <signal>activated(int)</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>182</x>
-     <y>166</y>
+     <x>104</x>
+     <y>164</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -15172,8 +15025,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>201</x>
-     <y>464</y>
+     <x>205</x>
+     <y>433</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -15188,8 +15041,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>512</x>
-     <y>466</y>
+     <x>510</x>
+     <y>435</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -15236,12 +15089,12 @@ multiply to loaded data</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>181</x>
-     <y>498</y>
+     <x>179</x>
+     <y>467</y>
     </hint>
     <hint type="destinationlabel">
-     <x>316</x>
-     <y>506</y>
+     <x>320</x>
+     <y>475</y>
     </hint>
    </hints>
   </connection>
@@ -15268,8 +15121,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>251</x>
-     <y>503</y>
+     <x>249</x>
+     <y>472</y>
     </hint>
     <hint type="destinationlabel">
      <x>502</x>
@@ -15284,8 +15137,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>235</x>
-     <y>489</y>
+     <x>233</x>
+     <y>458</y>
     </hint>
     <hint type="destinationlabel">
      <x>489</x>
@@ -15300,8 +15153,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>235</x>
-     <y>527</y>
+     <x>233</x>
+     <y>496</y>
     </hint>
     <hint type="destinationlabel">
      <x>503</x>
@@ -15316,8 +15169,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>196</x>
-     <y>413</y>
+     <x>200</x>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
      <x>428</x>
@@ -15332,12 +15185,12 @@ multiply to loaded data</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>241</x>
-     <y>473</y>
+     <x>239</x>
+     <y>442</y>
     </hint>
     <hint type="destinationlabel">
-     <x>433</x>
-     <y>539</y>
+     <x>437</x>
+     <y>508</y>
     </hint>
    </hints>
   </connection>
@@ -15348,8 +15201,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>392</x>
-     <y>510</y>
+     <x>390</x>
+     <y>479</y>
     </hint>
     <hint type="destinationlabel">
      <x>490</x>
@@ -15364,8 +15217,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>241</x>
-     <y>473</y>
+     <x>239</x>
+     <y>442</y>
     </hint>
     <hint type="destinationlabel">
      <x>447</x>
@@ -15444,8 +15297,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>291</x>
-     <y>465</y>
+     <x>295</x>
+     <y>434</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -15476,8 +15329,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>251</x>
-     <y>526</y>
+     <x>249</x>
+     <y>495</y>
     </hint>
     <hint type="destinationlabel">
      <x>416</x>
@@ -15492,8 +15345,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>152</x>
-     <y>413</y>
+     <x>156</x>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
      <x>403</x>
@@ -15508,8 +15361,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>314</x>
-     <y>505</y>
+     <x>318</x>
+     <y>474</y>
     </hint>
     <hint type="destinationlabel">
      <x>438</x>

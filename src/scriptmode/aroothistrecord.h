@@ -42,7 +42,7 @@ public:
 
     void   Smooth(int times);
     void   Scale(double ScaleIntegralTo, bool bDividedByBinWidth = false);
-    bool   MedianFilter(int span);
+    bool   MedianFilter(int span, int spanRight = -1);
 
     double GetIntegral(bool bMultipliedByBinWidth = false);
     int    GetEntries();

@@ -36,7 +36,6 @@
 #include "TH1.h"
 #include "TAxis.h"
 #include "TGeoManager.h"
-#include "TMultiGraph.h"
 #include "TAttLine.h"
 #include "TAttMarker.h"
 
@@ -349,8 +348,6 @@ void MaterialInspectorWindow::UpdateIndicationTmpMaterial()
         str.chop(3);
     }
     ui->lePriT_raise->setText(str);
-    //model for decay and rise
-    ui->cobPriT_model->setCurrentIndex(tmpMaterial.PriScintModel);
 
     str.setNum(tmpMaterial.W*1000.0, 'g'); //keV->eV
     ui->ledW->setText(str);
@@ -360,6 +357,11 @@ void MaterialInspectorWindow::UpdateIndicationTmpMaterial()
     ui->ledSecT->setText(str);    
     str.setNum(tmpMaterial.e_driftVelocity, 'g');
     ui->ledEDriftVelocity->setText(str);
+
+    str.setNum(tmpMaterial.e_diffusion_L, 'g');
+    ui->ledEDiffL->setText(str);
+    str.setNum(tmpMaterial.e_diffusion_T, 'g');
+    ui->ledEDiffT->setText(str);
 
     int tmp = LastSelectedParticle;
     ui->cobParticle->clear();    
@@ -506,7 +508,6 @@ void MaterialInspectorWindow::on_pbUpdateTmpMaterial_clicked()
     tmpMaterial.n = ui->ledN->text().toDouble();
     tmpMaterial.abs = ui->ledAbs->text().toDouble();
     tmpMaterial.reemissionProb = ui->ledReemissionProbability->text().toDouble();
-    tmpMaterial.PriScintModel = ui->cobPriT_model->currentIndex();
 
     double prYield = ui->ledPrimaryYield->text().toDouble();
     int iP = ui->cobYieldForParticle->currentIndex();
@@ -523,6 +524,9 @@ void MaterialInspectorWindow::on_pbUpdateTmpMaterial_clicked()
     tmpMaterial.SecYield = ui->ledSecYield->text().toDouble();
     tmpMaterial.SecScintDecayTime = ui->ledSecT->text().toDouble();   
     tmpMaterial.e_driftVelocity = ui->ledEDriftVelocity->text().toDouble();
+
+    tmpMaterial.e_diffusion_L = ui->ledEDiffL->text().toDouble();
+    tmpMaterial.e_diffusion_T = ui->ledEDiffT->text().toDouble();
 
     on_ledGammaDiagnosticsEnergy_editingFinished(); //gamma - update MFP
 }
@@ -1119,7 +1123,7 @@ void MaterialInspectorWindow::ConvertToStandardWavelengthes(QVector<double>* sp_
 void MaterialInspectorWindow::on_pbLoadSecSpectrum_clicked()
 {
   QString fileName;
-  fileName = QFileDialog::getOpenFileName(this, "Load secondary scintillation spectrum", MW->GlobSet.LastOpenDir, "Data files (*.dat);;All files (*.*)");
+  fileName = QFileDialog::getOpenFileName(this, "Load secondary scintillation spectrum", MW->GlobSet.LastOpenDir, "Data files (*.dat *.txt);;All files (*.*)");
 
   if (fileName.isEmpty()) return;
   MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
@@ -1780,72 +1784,92 @@ void MaterialInspectorWindow::showProcessIntCoefficient(int particleId, int Term
   MW->GraphWindow->Draw(graphOver, "SAME L");
 }
 
+#include <limits>
 void MaterialInspectorWindow::on_pbShowAllForGamma_clicked()
 {
-  int particleId = ui->cobParticle->currentIndex();
-  AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-  if (tmpMaterial.MatParticle[particleId].Terminators.size()<2) return;
+    int particleId = ui->cobParticle->currentIndex();
+    const AMaterial & tmpMaterial = MW->MpCollection->tmpMaterial;
+    const MatParticleStructure & mp = tmpMaterial.MatParticle[particleId];
 
-  MW->GraphWindow->SetLog(true, true);
+    if (mp.Terminators.size() < 2) return;
 
-  TMultiGraph* mg = new TMultiGraph("a1", "Gamma interaction");
+    double Xmin, Xmax, Ymin, Ymax;
+    Xmin = Ymin = std::numeric_limits<double>::max();
+    Xmax = Ymax = 0;
+    TGraph * mainGr = nullptr;
 
-  for (int i=0; i<3; i++)
+    for (int i = 0; i < mp.Terminators.size(); i++)
     {
-      TString opt, title;
-      Color_t color;
-      int Lwidth = 1;
-      if (i==0)
-      {
-          color = kGreen;
-          opt = "AL";
-          title = "Photoelectric";
-          Lwidth = 2;
-      }
-      else if (i==1)
-      {
-          color = kBlue;
-          opt = "L same";
-          title = "Compton scattering";
-          Lwidth = 1;
-      }
-      else
-      {
-          if (tmpMaterial.MatParticle[particleId].Terminators.size() == 2) break;
-          color = kMagenta;
-          opt = "L same";
-          title = "Pair production";
-          Lwidth = 1;
-      }
+        TString opt, title;
+        Color_t color;
+        int Lwidth = 1;
+        switch (i)
+        {
+        case 0:
+            color = kGreen;
+            opt = "AL";
+            title = "Photoelectric";
+            Lwidth = 2;
+            break;
+        case 1:
+            color = kBlue;
+            opt = "Lsame";
+            title = "Compton";
+            break;
+        case 2:
+            color = kMagenta;
+            opt = "Lsame";
+            title = "Pair";
+            break;
+        default:
+            qWarning() << "Bad terminator size for gamma!";
+            continue;
+        }
 
-      QVector<double> &X = tmpMaterial.MatParticle[particleId].Terminators[i].PartialCrossSectionEnergy;
-      QVector<double> &Y = tmpMaterial.MatParticle[particleId].Terminators[i].PartialCrossSection;
-      //have to remove zeros!
-      QVector<double> x, y;
-      for (int i=0; i<X.size(); i++)
-      {
-          if (Y.at(i)>0)
-          {
-              x << X.at(i);
-              y << Y.at(i);
-          }
-      }
+        const QVector<double> & X = mp.Terminators[i].PartialCrossSectionEnergy;
+        const QVector<double> & Y = mp.Terminators[i].PartialCrossSection;
 
-      TGraph* gr = constructInterpolationGraph(x, y);
-      gr->SetTitle(title);
-      gr->SetLineColor(color);
-      gr->SetLineWidth(Lwidth);
-      mg->Add(gr, opt);
+        //have to remove zeros due to log scale
+        QVector<double> xVec, yVec;
+        for (int iD = 0; iD < X.size(); iD++)
+        {
+            const double & x = X.at(iD);
+            const double & y = Y.at(iD);
+            if (y > 0)
+            {
+                xVec << x;
+                yVec << y;
+
+                Xmin = std::min(Xmin, x);
+                Ymin = std::min(Ymin, y);
+                Xmax = std::max(Xmax, x);
+                Ymax = std::max(Ymax, y);
+            }
+        }
+
+        TGraph* gr = constructInterpolationGraph(xVec, yVec);
+        gr->SetTitle(title);
+        gr->SetLineColor(color);
+        gr->SetLineWidth(Lwidth);
+        gr->GetXaxis()->SetTitle("Energy, keV"); //axis titles can be drawn only after graph was shown...
+        gr->GetYaxis()->SetTitle("Mass interaction coefficient, cm2/g");
+        gr->GetXaxis()->SetTitleOffset(1.1);
+        gr->GetYaxis()->SetTitleOffset(1.3);
+        if (i == 0) mainGr = gr;
+
+        MW->GraphWindow->Draw(gr, opt);
     }
-  MW->GraphWindow->Draw(mg, "AL");
 
-  mg->GetXaxis()->SetTitle("Energy, keV"); //axis titles can be drawn only after graph was shown...
-  mg->GetYaxis()->SetTitle("Mass interaction coefficient, cm2/g");
-  mg->GetXaxis()->SetTitleOffset((Float_t)1.1);
-  mg->GetYaxis()->SetTitleOffset((Float_t)1.3);
-  MW->GraphWindow->UpdateRootCanvas();
+    if (mainGr && mainGr->GetHistogram())
+    {
+        mainGr->GetXaxis()->SetLimits(Xmin, Xmax);
+        mainGr->GetHistogram()->SetMaximum(Ymax);
+        mainGr->GetHistogram()->SetMinimum(Ymin);
+    }
 
-  MW->GraphWindow->on_pbAddLegend_clicked();
+    MW->GraphWindow->AddLegend();
+
+    MW->GraphWindow->SetLog(true, true);
 }
 
 void MaterialInspectorWindow::ShowTotalInteraction()
@@ -2820,16 +2844,9 @@ void MaterialInspectorWindow::on_pbPriThelp_clicked()
             "  e.g., 25.5 : 0.25  &  250 : 0.75\n"
             "  \n"
             "Model:\n"
-            "  If \"Sum\" is selected, the photon emission time is calculated as follows:\n"
-            "  first the delay due to the raise time is generated,\n"
-            "  then decay time is generated. The emission time is sum of those values.\n"
-            "  This model can be used if, e.g., the emitting state is populated from upper states.\n"
-            "\n"
-            "  If \"Shao\" is selected, the emission time is calculated as in:\n"
             "  Yiping Shao, Phys. Med. Biol. 52 (2007) 1103–1117\n"
-            "  http://www.iss.infn.it/topem/TOF-PET/shao-model-timing.pdf\n"
-            "  The formula is generalised to have more than one decay components.\n"
-            "  Random generator was provided by Evgeny Tolotchko";
+            "  The approach is generalised to have more than one rise/decay components.\n"
+            "  Random generator is taken from G4Scintillation class of Geant4";
     message(s, this);
 }
 
@@ -2839,27 +2856,9 @@ void MaterialInspectorWindow::on_pbPriT_test_clicked()
 
     tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation, Detector->RandGen); //to update sum of stat weights
 
-    QMessageBox mb(this);
-    if (ui->cobPriT_model->currentIndex() == 1)
-    {
-        mb.setWindowFlags(mb.windowFlags() | Qt::WindowStaysOnTopHint);
-        mb.setStandardButtons(0);
-        mb.setText("calculating...");
-        mb.show();
-        MW->WindowNavigator->BusyOn();
-        QCoreApplication::processEvents();
-    }
-
     TH1D* h = new TH1D("h1", "", 1000, 0, 0);
     for (int i=0; i<1000000; i++)
         h->Fill( tmpMaterial.GeneratePrimScintTime(Detector->RandGen) );
-
-    if (ui->cobPriT_model->currentIndex() == 1)
-    {
-        mb.hide();
-        MW->WindowNavigator->BusyOff();
-    }
-
 
     h->GetXaxis()->SetTitle("Time, ns");
     TString title = "Emission for ";
@@ -3005,12 +3004,15 @@ void MaterialInspectorWindow::on_cbTrackingAllowed_clicked()
 void MaterialInspectorWindow::on_cbTransparentMaterial_clicked()
 {
     updateEnableStatus();
+}
 
-    /*
-  AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-  int particleId = ui->cobParticle->currentIndex();
-  tmpMaterial.MatParticle[particleId].MaterialIsTransparent = ui->cbTransparentMaterial->isChecked();
-  on_pbUpdateInteractionIndication_clicked();
-  on_pbWasModified_clicked();
-    */
+void MaterialInspectorWindow::on_pbSecScintHelp_clicked()
+{
+    QString s = "Diffusion is NOT active in \"Only photons\" simulation mode!\n"
+            "\n"
+            "If drift velosity is set to 0, diffusion is disabled in this material!\n"
+            "\n"
+            "Warning!\n"
+            "There are no checks for travel back in time and superluminal speed of electrons!";
+    message(s, this);
 }

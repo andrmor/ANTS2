@@ -1,6 +1,7 @@
 #include "amonitor.h"
 #include "ageoobject.h"
 #include "aroothistappenders.h"
+#include "ahistogram.h"
 
 #include <QDebug>
 
@@ -82,11 +83,12 @@ bool AMonitor::readFromGeoObject(const AGeoObject *MonitorRecord)
 
 void AMonitor::appendDataFromAnotherMonitor(AMonitor *from)
 {
-    appendTH1D(time, from->getTime());
+    appendTH1DwithStat(time, from->getTime());
     appendTH2D(xy, from->getXY());
-    appendTH1D(angle, from->getAngle());
-    appendTH1D(wave, from->getWave());
-    appendTH1D(energy, from->getEnergy());
+    appendTH1DwithStat(angle, from->getAngle());
+    appendTH1DwithStat(wave, from->getWave());
+    //appendTH1D(energy, from->getEnergy());
+    appendTH1DwithStat(energy, from->getEnergy());
 }
 
 #include "ahistogram.h"

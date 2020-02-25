@@ -15,6 +15,7 @@
 #include "modules/lrf_v3/corelrfstypes.h"
 #include "modules/lrf_v3/alrftypemanager.h"
 #include "modules/lrf_v3/alrftypemanagerinterface.h"
+#include "apmanddummy.h"
 
 #ifdef SIM
 #include "agridelementrecord.h"
@@ -63,16 +64,12 @@ static void autoLoadPlugins() {
   }
 }
 
-DetectorClass::DetectorClass(AConfiguration *config)
+DetectorClass::DetectorClass(AConfiguration *config) : Config(config)
 {
-  Config = config;  
   //qDebug() << "--> Detector constructor";  
   RandGen = new TRandom2(QDateTime::currentMSecsSinceEpoch());
   MpCollection = new AMaterialParticleCollection();
   //qDebug() << "    Material collection created";
-
-  GeoManager = 0;  // without it we have a crash in Linux on attempt to remove empty GeoManager: so we create GeoManager first time detector is build
-  //qDebug() << "    GeoManager created";
 
   Sandwich = new ASandwich();
   *Sandwich->DefaultXY = ASlabXYModel(0, 6, 100, 100, 0);
@@ -90,9 +87,7 @@ DetectorClass::DetectorClass(AConfiguration *config)
   //qDebug() << "    LRF selector module created";
   PMgroups = new APmGroupsManager(PMs, &Config->JSON);
 
-  GDML = "";  
   PMarrays.resize(2);
-  fSecScintPresent = false;
 }
 
 DetectorClass::~DetectorClass()
@@ -261,6 +256,11 @@ const QString DetectorClass::exportToROOT(const QString& fileName) const
     return "";
 }
 
+void DetectorClass::saveCurrentConfig(const QString & fileName)
+{
+    Config->SaveConfig(fileName);
+}
+
 void DetectorClass::writePMarraysToJson(QJsonObject &json)
 {
   QJsonArray arr;
@@ -303,45 +303,6 @@ bool DetectorClass::readPMarraysFromJson(QJsonObject &json)
   return true;
 }
 
-void PMdummyStructure::writeToJson(QJsonObject &json)
-{
-  QJsonObject js;
-  js["Type"] = PMtype;
-  js["Array"] = UpperLower;
-  QJsonArray arrR;
-  arrR.append(r[0]);
-  arrR.append(r[1]);
-  arrR.append(r[2]);
-  js["R"] = arrR;
-  QJsonArray arrA;
-  arrA.append(Angle[0]);
-  arrA.append(Angle[1]);
-  arrA.append(Angle[2]);
-  js["Angle"] = arrA;
-  json["DummyPM"] = js;
-}
-
-bool PMdummyStructure::readFromJson(QJsonObject &json)
-{
-  if (!json.contains("DummyPM"))
-    {
-      qWarning() << "Not a dummy pm json!";
-      return false;
-    }
-  QJsonObject js = json["DummyPM"].toObject();
-  parseJson(js, "Type", PMtype);
-  parseJson(js, "Array", UpperLower);
-  QJsonArray arrR = js["R"].toArray();
-  r[0] = arrR[0].toDouble();
-  r[1] = arrR[1].toDouble();
-  r[2] = arrR[2].toDouble();
-  QJsonArray arrA = js["Angle"].toArray();
-  Angle[0] = arrA[0].toDouble();
-  Angle[1] = arrA[1].toDouble();
-  Angle[2] = arrA[2].toDouble();
-  return true;
-}
-
 void DetectorClass::writeDummyPMsToJson(QJsonObject &json)
 {
   QJsonArray arr;
@@ -359,13 +320,10 @@ void DetectorClass::writeGDMLtoJson(QJsonObject &json)
   json["GDML"] = GDML;
 }
 
-void DetectorClass::constructDetector()
+void DetectorClass::populateGeoManager()
 {
-  //qDebug() << "--->Creating detector sandwich";
-
   //qDebug() << "--> Deleting old GeoManager and creating new";
-  if (GeoManager) delete GeoManager;
-  GeoManager = new TGeoManager();
+  delete GeoManager; GeoManager = new TGeoManager();
   GeoManager->SetVerboseLevel(0);
 
   //qDebug() << "--> Creating materials and media";
@@ -374,11 +332,10 @@ void DetectorClass::constructDetector()
       QString tmpStr = (*MpCollection)[i]->name;
       QByteArray ba = tmpStr.toLocal8Bit();
       char *cname = ba.data();
-      //(*MpCollection)[i]->GeoMat = new TGeoMaterial(cname, (*MpCollection)[i]->p1, (*MpCollection)[i]->p2, (*MpCollection)[i]->p3);
       (*MpCollection)[i]->generateTGeoMat();
       (*MpCollection)[i]->GeoMed = new TGeoMedium (cname, i, (*MpCollection)[i]->GeoMat);
       (*MpCollection)[i]->GeoMed->SetParam(0, (*MpCollection)[i]->n ); // refractive index
- // param[1] reserved for k
+      // param[1] reserved for k
       (*MpCollection)[i]->GeoMed->SetParam(2, (*MpCollection)[i]->abs ); // abcorption coefficient (mm^-1)
       (*MpCollection)[i]->GeoMed->SetParam(3, (*MpCollection)[i]->reemissionProb ); // re-emission probability
       (*MpCollection)[i]->GeoMed->SetParam(4, (*MpCollection)[i]->rayleighMFP ); // Rayleigh MFP (mm)
@@ -392,11 +349,7 @@ void DetectorClass::constructDetector()
   //qDebug() << "--> Populating PMs module with individual PMs";
   populatePMs();
 
-  if (fWorldSizeFixed)
-    {
-      //qDebug() << "--> Using user-defined world size";
-    }
-  else
+  if (!fWorldSizeFixed)
     {
       //qDebug() << "--> Calculating world size";
       WorldSizeXY = 0;
@@ -413,23 +366,16 @@ void DetectorClass::constructDetector()
   //qDebug() << "--> Positioning sandwich layers";
 
   //Position WorldTree objects
-  QList<APMandDummy> PMsAndDumPms;
-  for (int i=0; i<PMs->count(); i++) PMsAndDumPms << APMandDummy(PMs->X(i), PMs->Y(i), PMs->at(i).upperLower);
+  QVector<APMandDummy> PMsAndDumPms;
+  for (int i=0; i<PMs->count(); i++)     PMsAndDumPms << APMandDummy(PMs->X(i), PMs->Y(i), PMs->at(i).upperLower);
   for (int i=0; i<PMdummies.size(); i++) PMsAndDumPms << APMandDummy(PMdummies.at(i).r[0], PMdummies.at(i).r[1], PMdummies.at(i).UpperLower);
   Sandwich->clearGridRecords();
   Sandwich->clearMonitorRecords();
   Sandwich->addTGeoVolumeRecursively(Sandwich->World, top, GeoManager, MpCollection, &PMsAndDumPms);
 
-  //for (int i=0; i<Sandwich->GridRecords.size(); i++)
-  //    qDebug() << Sandwich->GridRecords[i]->shape<< Sandwich->GridRecords[i]->dx<< Sandwich->GridRecords[i]->dy;
-
-  //qDebug() << "--> Positioning PMs";
   positionPMs();
-  if (PMdummies.size()>0)
-    {
-      //qDebug() << "--> Positioning dummy PMs";
-      positionDummies();
-    }
+  if (PMdummies.size() > 0) positionDummies();
+
   top->SetName("World");
   //qDebug() << "--> Closing geometry";
   GeoManager->CloseGeometry();
@@ -480,7 +426,7 @@ bool DetectorClass::makeSandwichDetector()
   readWorldFixedFromJson(js);
 
   //making detector  
-  constructDetector();
+  populateGeoManager();
 
   //post-construction load
   PMs->readInividualOverridesFromJson(js);
@@ -502,7 +448,7 @@ void DetectorClass::readWorldFixedFromJson(QJsonObject& json)
     }
 }
 
-bool DetectorClass::importGDML(QString gdml)
+bool DetectorClass::importGDML(const QString & gdml)
 {
   GDML = gdml;
 
@@ -522,9 +468,19 @@ bool DetectorClass::importGDML(QString gdml)
   return fOK;
 }
 
+bool DetectorClass::isGDMLempty() const
+{
+    return GDML.isEmpty();
+}
+
+void DetectorClass::clearGDML()
+{
+    GDML.clear();
+}
+
 int DetectorClass::checkGeoOverlaps()
 {
-  if (!GeoManager)
+    if (!GeoManager)
     {
       qWarning() << "Attempt to access GeoManager which is NULL";
       return 0;
@@ -825,7 +781,7 @@ const QString DetectorClass::removePMtype(int itype)
     if (PMs->countPMtypes() < 2) return "Cannot remove the last type";
 
     //no need to check PMarrays -> if type is in use, PMs module will report it
-    for (const PMdummyStructure& ad : PMdummies)
+    for (const APMdummyStructure& ad : PMdummies)
         if (ad.PMtype == itype) return "Cannot remove: at least one of the dummy PMs belongs to this type";
 
     bool bOK = PMs->removePMtype(itype);
@@ -838,7 +794,7 @@ const QString DetectorClass::removePMtype(int itype)
         for (APmPosAngTypeRecord& r : ad.PositionsAnglesTypes)
             if (r.type >= itype) r.type--;
     }
-    for (PMdummyStructure& ad : PMdummies)
+    for (APMdummyStructure& ad : PMdummies)
         if (ad.PMtype >= itype) ad.PMtype--;
 
     return "";
@@ -1121,7 +1077,7 @@ void DetectorClass::positionDummies()
   //positioning dummies
   for (int idum = 0; idum<PMdummies.size(); idum++)
     {
-      const PMdummyStructure &dum = PMdummies.at(idum);
+      const APMdummyStructure &dum = PMdummies.at(idum);
       bool hex = (PMs->getType(dum.PMtype)->Shape == 2);
       TGeoRotation *dummyPmRot = new TGeoRotation("dummypmRot", dum.Angle[0], dum.Angle[1], dum.Angle[2]+(hex ? 90.0 : 0.0));
       dummyPmRot->RegisterYourself();

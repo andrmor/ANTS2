@@ -7,8 +7,8 @@
 #include <QScriptEngine>
 #include <QDebug>
 
-AScriptParticleGenerator::AScriptParticleGenerator(const AMaterialParticleCollection &MpCollection, TRandom2 * RandGen) :
-    MpCollection(MpCollection), RandGen(RandGen) {}
+AScriptParticleGenerator::AScriptParticleGenerator(const AMaterialParticleCollection &MpCollection, TRandom2 * RandGen, int ThreadID) :
+    MpCollection(MpCollection), RandGen(RandGen), ThreadId(ThreadID) {}
 
 AScriptParticleGenerator::~AScriptParticleGenerator()
 {
@@ -25,7 +25,7 @@ bool AScriptParticleGenerator::Init()
             //qDebug() << "Creating script infrastructure";
         ScriptEngine = new QScriptEngine();
         ScriptEngine->setProcessEventsInterval(processInterval);
-        ScriptInterface = new AParticleGenerator_SI(MpCollection, RandGen);
+        ScriptInterface = new AParticleGenerator_SI(MpCollection, RandGen, ThreadId);
 
         ScriptInterface->setObjectName("gen");
         QScriptValue val = ScriptEngine->newQObject(ScriptInterface, QScriptEngine::QtOwnership);

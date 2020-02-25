@@ -263,13 +263,19 @@ void ARootHistRecord::Scale(double ScaleIntegralTo, bool bDividedByBinWidth)
     }
 }
 
-bool ARootHistRecord::MedianFilter(int span)
+bool ARootHistRecord::MedianFilter(int span, int spanRight)
 {
     QMutexLocker locker(&Mutex);
 
-    int deltaLeft  = ( span % 2 == 0 ? span / 2 - 1 : span / 2 );
-    int deltaRight = span / 2;
-    qDebug() << span << deltaLeft << deltaRight;
+    int deltaLeft = span;
+    int deltaRight = spanRight;
+
+    if (deltaRight == -1)
+    {
+        deltaLeft  = ( span % 2 == 0 ? span / 2 - 1 : span / 2 );
+        deltaRight = span / 2;
+    }
+    qDebug() << "Delta left:"<< deltaLeft <<" Delta right:"<< deltaRight;
 
     TH1* h = dynamic_cast<TH1*>(Object);
     if (!h) return false;

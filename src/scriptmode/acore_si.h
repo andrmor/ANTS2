@@ -59,6 +59,9 @@ public slots:
   QVariant loadColumn(QString fileName, int column = 0); //load column of doubles from file and return it as an array
   QVariant loadArray(QString fileName, int columns);
   QVariant loadArray(QString fileName);
+  QVariantList loadArrayExtended(const QString & fileName, const QVariantList & format, int fromLine = 0, int untilLine = 1e6, bool bSkipComments = true);
+  QVariantList loadArrayExtended3D(const QString & fileName, const QString & topSeparator, const QVariantList & format, int recordsFrom = 0, int recordsUntil = 1e6, bool bSkipComments = true);
+  QVariantList loadArrayExtended3Dbinary(const QString &fileName, char dataId, const QVariantList &dataFormat, char separatorId, const QVariantList &separatorFormat, int recordsFrom = 0, int recordsUntil = 1e6);
   QString  loadText(QString fileName);
   QVariant loadObject(QString fileName);
 

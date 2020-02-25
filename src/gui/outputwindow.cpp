@@ -65,7 +65,7 @@ OutputWindow::OutputWindow(QWidget *parent, MainWindow *mw, EventsDataClass *eve
 
     QVector<QWidget*> vecInv;
     vecInv << ui->cobPTHistVolPlus << ui->pbRefreshViz << ui->frPTHistX << ui->frPTHistY
-           << ui->pbEventView_ShowTree << ui->pbEVgeo << ui->frEventFilters;
+           << ui->pbEventView_ShowTree << ui->pbEVgeo << ui->frEventFilters << ui->frTimeAware;
     for (QWidget * w : vecInv) w->setVisible(false);
 
     QDoubleValidator* dv = new QDoubleValidator(this);
@@ -1487,6 +1487,53 @@ void OutputWindow::on_pbPTHistRequest_clicked()
 
             break;
           }
+        case 4:
+         {
+            AHistorySearchProcessor_getDepositionStats * p = nullptr;
+            if (ui->cbLimitTimeWindow->isChecked())
+            {
+                p = new AHistorySearchProcessor_getDepositionStatsTimeAware(ui->ledTimeFrom->text().toFloat(), ui->ledTimeTo->text().toFloat());
+                Crawler.find(Opt, *p);
+            }
+            else
+            {
+                p = new AHistorySearchProcessor_getDepositionStats();
+                Crawler.find(Opt, *p);
+            }
+
+            ui->ptePTHist->clear();
+            ui->ptePTHist->appendPlainText("Deposition statistics:\n");
+            QMap<QString, AParticleDepoStat>::const_iterator it = p->DepoData.constBegin();
+            QVector< QPair<QString, AParticleDepoStat> > vec;
+            double sum = 0;
+            while (it != p->DepoData.constEnd())
+            {
+                vec << QPair<QString, AParticleDepoStat>(it.key(), it.value());
+                sum += it.value().sum;
+                ++it;
+            }
+            double sumInv = (sum > 0 ? 100.0/sum : 1.0);
+
+            std::sort(vec.begin(), vec.end(), [](const QPair<QString, AParticleDepoStat> & a, const QPair<QString, AParticleDepoStat> & b)->bool{return a.second.sum > b.second.sum;});
+
+            for (const auto & el : vec)
+            {
+                const AParticleDepoStat & rec = el.second;
+                const double mean = rec.sum / rec.num;
+                const double sigma = sqrt( (rec.sumOfSquares - 2.0*mean*rec.sum)/rec.num + mean*mean );
+
+                QString str = QString("%1\t%2 keV (%3%)\t#: %4").arg(el.first).arg(rec.sum).arg( QString::number(rec.sum*sumInv, 'g', 4) ).arg(rec.num);
+
+                if (rec.num > 1)  str += QString("\tmean: %1 keV").arg(mean);
+                if (rec.num > 10) str += QString("\tsigma: %1 keV").arg(sigma);
+
+                ui->ptePTHist->appendPlainText(str);
+            }
+            ui->ptePTHist->appendPlainText("\n---------\n");
+            ui->ptePTHist->appendPlainText(QString("sum of all listed depositions: %1 keV").arg(sum));
+            delete p;
+            break;
+         }
         default:
             qWarning() << "Unknown type of volume request";
         }
@@ -1625,6 +1672,8 @@ void OutputWindow::on_cobPTHistVolRequestWhat_currentIndexChanged(int index)
         ui->cobPTHistVolPlus->setCurrentIndex(selectedModeForEnergyDepo);
     }
     ui->cobPTHistVolPlus->setVisible(index == 3);
+
+    ui->frTimeAware->setVisible(index == 4);
 }
 
 void OutputWindow::on_twPTHistType_currentChanged(int index)
@@ -1649,7 +1698,7 @@ void OutputWindow::updatePTHistoryBinControl()
     if (ui->twPTHistType->currentIndex() == 0)
     {
         //Volume
-        ui->frPTHistX->setVisible( ui->cobPTHistVolRequestWhat->currentIndex() > 1 );
+        ui->frPTHistX->setVisible( ui->cobPTHistVolRequestWhat->currentIndex() > 1  && ui->cobPTHistVolRequestWhat->currentIndex() != 4);
         ui->frPTHistY->setVisible(false);
     }
     else

@@ -26,6 +26,40 @@ void appendTH1D(TH1D *toHist, TH1D *fromHist)
     }
 }
 
+#include "ahistogram.h"
+void appendTH1DwithStat(TH1D * & toHist, TH1D *fromHist)
+{
+    if (!toHist || !fromHist) return;
+
+    double numEntries = toHist->GetEntries();
+    if (numEntries < 1)
+    {
+        *toHist = *fromHist;
+    }
+    else
+    {
+        double statsFrom[4];
+        fromHist->GetStats(statsFrom);
+        double statsTo[4];
+        toHist->GetStats(statsTo);
+        for (int i=0; i<4; i++)
+            statsTo[i] += statsFrom[i];
+
+        int bins = fromHist->GetNbinsX();
+
+        for (int i = 0; i < bins+2; i++)
+            toHist->Fill(fromHist->GetBinCenter(i), fromHist->GetBinContent(i));
+
+        toHist->BufferEmpty(1); //otherwise set entries will not have effect for histograms with small number of entries (i.e. when buffer is not full)
+        //toHist->TH1::SetEntries(numEntries + fromHist->GetEntries());
+
+        ATH1D * toHistMy = new ATH1D(*toHist);
+        toHistMy->setStats(statsTo);
+
+        delete toHist; toHist = toHistMy;
+    }
+}
+
 void appendTH2D(TH2D *toHist, TH2D *fromHist)
 {
     if (!toHist || !fromHist) return;

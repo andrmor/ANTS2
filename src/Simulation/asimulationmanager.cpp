@@ -31,7 +31,7 @@ ASimulationManager::ASimulationManager(EventsDataClass & EventsDataHub, Detector
 {
     ParticleSources = new ASourceParticleGenerator(&Detector, Detector.RandGen);
     FileParticleGenerator = new AFileParticleGenerator(*Detector.MpCollection);
-    ScriptParticleGenerator = new AScriptParticleGenerator(*Detector.MpCollection, Detector.RandGen);
+    ScriptParticleGenerator = new AScriptParticleGenerator(*Detector.MpCollection, Detector.RandGen, 0);
     ScriptParticleGenerator->SetProcessInterval(200);
 
     Runner = new ASimulatorRunner(Detector, EventsDataHub, *this);
@@ -226,6 +226,17 @@ void ASimulationManager::onSimulationFinished()
         EventsDataHub.purge1e10events(); //purging events with "true" positions x==1e10 && y==1e10
     }
 
+    if (LogsStatOptions.bParticleTransportLog && LogsStatOptions.bSaveParticleLog || LogsStatOptions.bSaveDepositionLog)
+    {
+        //saving logs
+        const QString dir = makeLogDir();
+        Detector.saveCurrentConfig(QString("%1/Config.json").arg(dir));
+        if (LogsStatOptions.bParticleTransportLog && LogsStatOptions.bSaveParticleLog)
+            saveParticleLog(dir);
+        if (LogsStatOptions.bSaveDepositionLog)
+            saveDepositionLog(dir);
+    }
+
     bGuardTrackingHistory = true;
     Detector.BuildDetector(true, true);  // <- still needed on Windows
     bGuardTrackingHistory = false;
@@ -407,6 +418,149 @@ void ASimulationManager::removeOldFile(const QString & fileName, const QString &
         bool bOK = f.remove();
         if (!bOK) qWarning() << "Was unable to remove old file with" << txt << ":" << fileName;
     }
+}
+
+#include "aglobalsettings.h"
+#include <QDir>
+#include <QDateTime>
+const QString ASimulationManager::makeLogDir() const
+{
+    const QString subdir = QDateTime::currentDateTime().toString("yyyy-mm-dd_hh:mm:ss");
+    AGlobalSettings & GlobSet = AGlobalSettings::getInstance();
+    const QString dirBase = QString("%1/%2").arg(GlobSet.LibLogs).arg(subdir);
+
+    QString dir = dirBase;
+    int iCounter = 1;
+    while (QDir(dir).exists())
+    {
+        dir = QString("%1-%2").arg(dirBase).arg(iCounter);
+        iCounter++;
+    }
+    QDir(dir).mkpath(dir);
+
+    return dir;
+}
+
+void ASimulationManager::saveParticleLog(const QString & dir) const
+{
+    if (simSettings.G4SimSet.bTrackParticles)
+        saveG4ParticleLog(dir);
+    else
+        saveA2ParticleLog(dir);
+}
+
+void ASimulationManager::saveG4ParticleLog(const QString & dir) const
+{
+    QString outName = QString("%1/ParticleLog.txt").arg(dir);
+    QFile fOut(outName);
+
+    if (!fOut.open(QFile::Text | QFile::WriteOnly | QFile::Truncate))
+    {
+        qWarning() << "Cannot open" << outName << " file to save particle transport log";
+        return;
+    }
+
+    QTextStream out(&fOut);
+
+    int iThread = 0;
+    do
+    {
+        const QString fileName = simSettings.G4SimSet.getTracksFileName(iThread);
+        //qDebug() << "Looking for file:"<<fileName;
+        if (!QFile(fileName).exists())
+        {
+            //qDebug() << "No more files!";
+            break;
+        }
+
+        QFile fIn(fileName);
+        if (!fIn.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
+            qWarning() << "Cannot open" << fileName << "to import particle transport log";
+            return;
+        }
+        QTextStream stream(&fIn);
+        QString line;
+        do
+        {
+            line = stream.readLine();
+            //qDebug() << line;
+            out << line << '\n';
+        }
+        while (!stream.atEnd());
+
+        fIn.close();
+        iThread++;
+    }
+    while (true);
+
+    fOut.close();
+}
+
+void ASimulationManager::saveA2ParticleLog(const QString &) const
+{
+    qDebug() << "Not implemented yet!";
+}
+
+void ASimulationManager::saveDepositionLog(const QString & dir) const
+{
+    if (simSettings.G4SimSet.bTrackParticles)
+        saveG4depositionLog(dir);
+    else
+        saveA2depositionLog(dir);
+}
+
+void ASimulationManager::saveG4depositionLog(const QString &dir) const
+{
+    QString outName = QString("%1/DepositionLog.txt").arg(dir);
+    QFile fOut(outName);
+
+    if (!fOut.open(QFile::Text | QFile::WriteOnly | QFile::Truncate))
+    {
+        qWarning() << "Cannot open" << outName << " file to save deposition log";
+        return;
+    }
+
+    QTextStream out(&fOut);
+
+    int iThread = 0;
+    do
+    {
+        const QString fileName = simSettings.G4SimSet.getDepositionFileName(iThread);
+        //qDebug() << "Looking for file:"<<fileName;
+        if (!QFile(fileName).exists())
+        {
+            //qDebug() << "No more files!";
+            break;
+        }
+
+        QFile fIn(fileName);
+        if (!fIn.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
+            qWarning() << "Cannot open" << fileName << "to import deposition log";
+            return;
+        }
+        QTextStream stream(&fIn);
+        QString line;
+        do
+        {
+            line = stream.readLine();
+            //qDebug() << line;
+            out << line << '\n';
+        }
+        while (!stream.atEnd());
+
+        fIn.close();
+        iThread++;
+    }
+    while (true);
+
+    fOut.close();
+}
+
+void ASimulationManager::saveA2depositionLog(const QString & ) const
+{
+    qDebug() << "Not implemented yet!";
 }
 
 void ASimulationManager::generateG4antsConfigCommon(QJsonObject & json, int ThreadId)

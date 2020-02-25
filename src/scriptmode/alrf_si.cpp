@@ -6,6 +6,7 @@
 #include "sensorlrfs.h"
 
 #include <QJsonDocument>
+#include <QFile>
 
 ALrf_SI::ALrf_SI(AConfiguration *Config, EventsDataClass *EventsDataHub)
   : Config(Config), EventsDataHub(EventsDataHub) //,f2d(0)

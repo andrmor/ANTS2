@@ -25,7 +25,7 @@ ASimulator::ASimulator(ASimulationManager &simMan, int ID) :
 
     dataHub = new EventsDataClass(ID);
     OneEvent = new AOneEvent(detector.PMs, RandGen, dataHub->SimStat);
-    photonGenerator = new Photon_Generator(detector, RandGen);
+    photonGenerator = new Photon_Generator(detector, *RandGen);
     photonTracker = new APhotonTracer(detector.GeoManager, RandGen, detector.MpCollection, detector.PMs, &detector.Sandwich->GridRecords);
 }
 

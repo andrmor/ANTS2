@@ -48,14 +48,11 @@ void GlobalSettingsWindowClass::updateGUI()
   ui->leLibMaterials->setText(MW->GlobSet.LibMaterials);
   ui->leLibParticleSources->setText(MW->GlobSet.LibParticleSources);
   ui->leLibScripts->setText(MW->GlobSet.LibScripts);
+  ui->leLibLogs->setText(MW->GlobSet.LibLogs);
 
   ui->leWorkingDir->setText(MW->GlobSet.TmpDir);
 
   ui->sbFontSize->setValue(MW->GlobSet.FontSize);
-
-  //ui->rbNever->setChecked(MW->GlobSet.NeverSaveOnExit);
-  //ui->rbAlways->setChecked(MW->GlobSet.AlwaysSaveOnExit);
-  //ui->rbAskMe->setChecked(!MW->GlobSet.NeverSaveOnExit && !MW->GlobSet.AlwaysSaveOnExit);
 
   ui->cbOpenImageExternalEditor->setChecked(MW->GlobSet.fOpenImageExternalEditor);
 
@@ -240,6 +237,20 @@ void GlobalSettingsWindowClass::on_leLibScripts_editingFinished()
   MW->GlobSet.LibScripts = ui->leLibScripts->text();
 }
 
+void GlobalSettingsWindowClass::on_pbChooseLogsLib_clicked()
+{
+    QString starter = (MW->GlobSet.LibLogs.isEmpty()) ? MW->GlobSet.LastOpenDir : MW->GlobSet.LibLogs;
+    QString dir = QFileDialog::getExistingDirectory(this, "Select directory for scripts",starter,QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    if (dir.isEmpty()) return;
+    MW->GlobSet.LibLogs = dir;
+    ui->leLibLogs->setText(dir);
+}
+
+void GlobalSettingsWindowClass::on_leLibLogs_editingFinished()
+{
+    MW->GlobSet.LibLogs = ui->leLibLogs->text();
+}
+
 void GlobalSettingsWindowClass::on_pbChangeWorkingDir_clicked()
 {
   QString starter = MW->GlobSet.TmpDir;
@@ -349,6 +360,9 @@ void GlobalSettingsWindowClass::on_pbOpen_clicked()
       break;
     case 4:
       what = MW->GlobSet.ExamplesDir;
+      break;
+    case 5:
+      what = MW->GlobSet.LibLogs;
       break;
     }
   QDesktopServices::openUrl(QUrl("file:///"+what, QUrl::TolerantMode));
@@ -513,3 +527,5 @@ void GlobalSettingsWindowClass::on_leGeant4ExchangeFolder_editingFinished()
 {
     MW->GlobSet.G4ExchangeFolder = ui->leGeant4ExchangeFolder->text();
 }
+
+

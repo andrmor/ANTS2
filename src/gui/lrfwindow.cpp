@@ -796,7 +796,9 @@ void LRFwindow::on_pbShowRadialForXY_clicked()
     MW->GraphWindow->ShowAndFocus();
     TString str = "LRF of pm#";
     str += ipm;
-    MW->GraphWindow->MakeGraph(&Rad, &LRF, 4, "Radial distance, mm", "LRF", 6, 1, 0, 0, "");
+    //MW->GraphWindow->MakeGraph(&Rad, &LRF, 4, "Radial distance, mm", "LRF", 6, 1, 0, 0, "");
+    TGraph * g = MW->GraphWindow->ConstructTGraph(Rad, LRF, "", "Radial distance, mm", "LRF", 4, 6, 1, 0, 0, 0);
+    MW->GraphWindow->Draw(g, "AP");
 }
 
 void LRFwindow::on_pbAxial3DvsZ_clicked()

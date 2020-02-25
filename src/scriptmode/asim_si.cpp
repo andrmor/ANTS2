@@ -48,6 +48,8 @@ ASim_SI::ASim_SI(ASimulationManager* SimulationManager, EventsDataClass *EventsD
   H["AddSubNode"] = "Adds a sub-node to the set of nodes of the previously defined top level node.\n"
           "Main purpose is to generate events with multiple energy deposition positions.\n"
           "Format: X, Y, Z, Time(optional, default=0), NumberPhotonsOverride(optional)";
+
+  H["GetMonitorEnergyStats"] = "Return array [sumw, sumw2, sumwx, sumwx2]";
 }
 
 bool ASim_SI::InitOnRun()
@@ -248,6 +250,30 @@ QVariant ASim_SI::getMonitorData1D(const QString &monitor, dataType type) const
   return vl;
 }
 
+QVariant ASim_SI::getMonitorStats1D(int index, ASim_SI::dataType type) const
+{
+    QVariantList vl;
+    if (!EventsDataHub->SimStat) return vl;
+    if (index < 0 || index >= EventsDataHub->SimStat->Monitors.size()) return vl;
+
+    const AMonitor* mon = EventsDataHub->SimStat->Monitors.at(index);
+    TH1D* h = nullptr;
+    switch (type)
+    {
+        case dat_time:   h = mon->getTime(); break;
+        case dat_angle:  h = mon->getAngle(); break;
+        case dat_wave:   h = mon->getWave(); break;
+        case dat_energy: h = mon->getEnergy(); break;
+    }
+    if (!h) return vl;
+
+    double stat[4];
+    h->GetStats(stat); // stats[0] = sumw  stats[1] = sumw2   stats[2] = sumwx  stats[3] = sumwx2
+    for (int i=0; i<4; i++)
+        vl.push_back(stat[i]);
+    return vl;
+}
+
 QVariant ASim_SI::getMonitorData1D(int index, dataType type) const
 {
     QVariantList vl;
@@ -363,6 +389,11 @@ QVariant ASim_SI::getMonitorXY(int index)
             vl.push_back(el);
         }
     return vl;
+}
+
+QVariant ASim_SI::getMonitorEnergyStats(int index)
+{
+     return getMonitorStats1D(index, dat_energy);
 }
 
 void ASim_SI::SetGeant4Executable(QString FileName) const

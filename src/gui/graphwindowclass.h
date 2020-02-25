@@ -2,6 +2,11 @@
 #define GRAPHWINDOWCLASS_H
 
 #include "aguiwindow.h"
+#include "adrawobject.h"
+#include "abasketitem.h"
+#include "adrawtemplate.h"
+
+#include <QVector>
 #include <QVariantList>
 
 #include "TMathBase.h"
@@ -9,7 +14,6 @@
 class MainWindow;
 class RasterWindowGraphClass;
 class TH2;
-class TH1D;
 class TGraph;
 class TGraph2D;
 class QGraphicsView;
@@ -17,39 +21,11 @@ class AToolboxScene;
 class QListWidgetItem;
 class TObject;
 class TTree;
-
-class DrawObjectStructure
-{
-public:
-    void setPointer(TObject* p) {Pointer = p;}
-    TObject* getPointer() {return Pointer;}
-
-    void setOptions(QString str) {Options = str;}
-    void setOptions(const char* chars) {Options = chars;}
-    QString getOptions() {return Options;}
-
-    DrawObjectStructure() {Pointer=0;}
-    DrawObjectStructure(TObject* pointer, const char* options) {Pointer = pointer; Options = options;}
-    DrawObjectStructure(TObject* pointer, QString options) {Pointer = pointer; Options = options;}
-
-private:
-    TObject* Pointer;
-    QString Options;
-};
-
-class BasketItemClass
-{
-public:
-    QString Name;
-    QString Type;
-    QVector<DrawObjectStructure> DrawObjects;
-
-    BasketItemClass(QString name, QVector<DrawObjectStructure>* drawObjects);
-    BasketItemClass(){}
-    ~BasketItemClass();
-
-    void clearObjects();
-};
+class ABasketManager;
+class ADrawExplorerWidget;
+class ABasketListWidget;
+class TLegend;
+class TGaxis;
 
 namespace Ui {
 class GraphWindowClass;
@@ -62,12 +38,14 @@ class GraphWindowClass : public AGuiWindow
 public:
     explicit GraphWindowClass(QWidget *parent, MainWindow *mw);
     ~GraphWindowClass();
+    friend class ADrawExplorerWidget;
 
     QString LastDistributionShown;
 
     //Drawing
     void Draw(TObject* obj, const char* options = "", bool DoUpdate = true, bool TransferOwnership = true);  //registration should be skipped only for scripts!
     void DrawWithoutFocus(TObject* obj, const char* options = "", bool DoUpdate = true, bool TransferOwnership = true);  //registration should be skipped only for scripts!
+    void RedrawAll();
 
     //canvas control
     void ShowAndFocus();
@@ -109,6 +87,8 @@ public:
     double extracted2DLineC();
     double extracted2DLineXstart();
     double extracted2DLineXstop();
+    double extracted2DLineYstart();
+    double extracted2DLineYstop();
     double extracted2DEllipseX();
     double extracted2DEllipseY();
     double extracted2DEllipseR1();
@@ -127,7 +107,7 @@ public:
                       const char* options = "",
                       bool OnlyBuild = false);
 
-    //use this to only construct!
+    //use this to only construct! ***todo: move to separate file+namespace
     TGraph* ConstructTGraph(const QVector<double>& x, const QVector<double>& y) const;
     TGraph* ConstructTGraph(const std::vector<float>& x, const std::vector<float>& y) const;
     TGraph* ConstructTGraph(const QVector<double>& x, const QVector<double>& y,
@@ -155,17 +135,28 @@ public:
 
     bool Extraction();
 
-    bool isBasketOn() const;
-    void switchOffBasket();
     void ClearBasket();
     TObject *GetMainPlottedObject();
     void SaveGraph(QString fileName);    
     void EnforceOverlayOff();    
     void ClearDrawObjects_OnShutDown(); //precvents crash on shut down
-    void RegisterTObject(TObject* obj); //ONLY use to register objects which were NOT drawn using Draw method of this window (but root Draw method instead)    
+    void RegisterTObject(TObject* obj);
     void ShowTextPanel(const QString Text, bool bShowFrame=true, int AlignLeftCenterRight=0);
 
     void SetStatPanelVisible(bool flag);
+    void TriggerGlobalBusy(bool flag);
+
+    void MakeCopyOfDrawObjects();
+    void ClearCopyOfDrawObjects();
+
+    void ClearBasketActiveId();
+    void MakeCopyOfActiveBasketId();
+    void RestoreBasketActiveId();
+    void ClearCopyOfActiveBasketId();
+    QString & getLastOpendDir();    
+    void ShowProjectionTool();
+    TLegend * AddLegend();
+    void HighlightUpdateBasketButton(bool flag);
 
 protected:
     void mouseMoveEvent(QMouseEvent *event);
@@ -173,10 +164,9 @@ protected:
     void closeEvent(QCloseEvent *event);
 
 public slots:
-    // if the first object (no "same" option) was drawn without update, call this function after the manual update
     void UpdateControls(); //updates visualisation of the current master graph parameters
     void DoSaveGraph(QString name);
-    void AddCurrentToBasket(QString name);
+    void AddCurrentToBasket(const QString &name);
     void AddLegend(double x1, double y1, double x2, double y2, QString title);
     void SetLegendBorder(int color, int style, int size);
     void AddText(QString text, bool bShowFrame, int Alignment_0Left1Center2Right);
@@ -193,18 +183,16 @@ public slots:
 
 private slots:
     void Reshape();
-    void on_lwBasket_customContextMenuRequested(const QPoint &pos);
-    void on_lwBasket_itemDoubleClicked(QListWidgetItem *item);
+    void BasketCustomContextMenuRequested(const QPoint &pos);
+    void onBasketItemDoubleClicked(QListWidgetItem *item);
+    void BasketReorderRequested(const QVector<int> & indexes, int toRow);
+    void deletePressed();
 
-    void on_cbToolBox_toggled(bool checked);
-    void on_cobToolBox_currentIndexChanged(int index);
     void on_pbToolboxDragMode_clicked();
 
-    //selBox
     void selBoxGeometryChanged();
     void selBoxResetGeometry(double halfW, double halfH);
     void selBoxControlsUpdated();
-
     void on_pbSelBoxToCenter_clicked();
     void on_pbSelBoxFGColor_clicked();
     void on_pbSelBoxBGColor_clicked();
@@ -233,11 +221,7 @@ private slots:
     void on_leOptions_editingFinished();
     void on_pbXprojection_clicked();
     void on_pbYprojection_clicked();
-    void on_cbShowBasket_toggled(bool checked);
-    void on_pbBasketBackToLast_clicked();    
     void on_actionSave_image_triggered();
-    void on_actionExport_data_as_text_triggered();
-    void on_actionExport_data_using_bin_start_positions_TH1_triggered();
     void on_actionBasic_ROOT_triggered();
     void on_actionDeep_sea_triggered();
     void on_actionGrey_scale_triggered();
@@ -246,12 +230,9 @@ private slots:
     void on_actionRainbow_triggered();
     void on_actionInverted_dark_body_triggered();
     void on_pbToolboxDragMode_2_clicked();
-    void on_actionSave_root_object_triggered();
-    void on_pbSmooth_clicked();
     void on_actionTop_triggered();
     void on_actionSide_triggered();
     void on_actionFront_triggered();
-    void on_pbAttributes_clicked();
     void on_pbDensityDistribution_clicked();
     void on_actionEqualize_scale_XY_triggered();
     void on_ledRulerDX_editingFinished();
@@ -261,65 +242,69 @@ private slots:
     void on_pbYaveraged_clicked();    
     void on_pbAddText_clicked();
     void on_pbRemoveLegend_clicked();
-    void on_pbRemoveText_clicked();
-    void on_pbFWHM_clicked();
-
     void on_ledAngle_customContextMenuRequested(const QPoint &pos);
-
     void on_actionToggle_toolbar_triggered(bool checked);
+    void on_pbBackToLast_clicked();
+    void on_actionToggle_Explorer_Basket_toggled(bool arg1);
+    void on_pbUpdateInBasket_clicked();
+    void on_actionShow_ROOT_attribute_panel_triggered();
+    void on_pbShowRuler_clicked();
+    void on_pbExitToolMode_clicked();
+    void on_actionSet_width_triggered();
+    void on_actionSet_height_triggered();
+    void on_actionMake_square_triggered();
+    void on_actionCreate_template_triggered();
+    void on_actionApply_template_triggered();
+    void on_actionApply_selective_triggered();
+
+    void on_actionShow_first_drawn_object_context_menu_triggered();
+
+    void on_pbManipulate_clicked();
 
 private:
     MainWindow *MW;
     Ui::GraphWindowClass *ui;
-    RasterWindowGraphClass *RasterWindow = 0;
-    //QWidget *QWinContainer = 0;
+    RasterWindowGraphClass * RasterWindow = nullptr; //owns
+    ADrawExplorerWidget * Explorer = nullptr; //owns
     bool ExtractionCanceled = false;
     int LastOptStat = 1111;
 
-    QVector<DrawObjectStructure> DrawObjects;  //currently drawn
-    QVector<DrawObjectStructure> MasterDrawObjects; //last draw made from outse of the graph window
-    QVector< BasketItemClass > Basket; //container with user selected "drawings"
-    int CurrentBasketItem = -1;
-    int BasketMode = 0;
+    QVector<ADrawObject> DrawObjects;  //always local objects -> can have a copy from the Basket
+    QVector<ADrawObject> PreviousDrawObjects; //last draw made from outside of the graph window
+    ABasketManager * Basket = nullptr;
+    ABasketListWidget * lwBasket = nullptr;
+    int ActiveBasketItem = -1; //-1 - Basket is off; 0+ -> basket loaded, can be updated
+    int PreviousActiveBasketItem = -1; //-1 - Basket is off; 0+ -> basket loaded, can be updated
 
-    QList<TObject*> tmpTObjects;
-    TH1D* hProjection = 0;  //for toolbox
-    double TG_X0 = 0;
-    double TG_Y0 = 0;
+    QVector<TObject*> tmpTObjects;
 
     QGraphicsView* gvOver = 0;
     AToolboxScene* scene = 0;
 
-    void doDraw(TObject *obj, const char *options, bool DoUpdate); //actual drawing, does not have window focussing - done to avoid refocussing issues leading to bugs
+    ADrawTemplate DrawTemplate;
 
-    //flags
+    void doDraw(TObject *obj, const char *opt, bool DoUpdate); //actual drawing, does not have window focussing - done to avoid refocussing issues leading to bugs
+
     bool TMPignore = false; //temporarily forbid updates - need for bulk update to avoid cross-modification
     bool ColdStart = true;
-    bool fFirstTime = false; //signals that "UnZoom" range values (xmin0, etc...) have to be stored
 
     double xmin, xmax, ymin, ymax, zmin, zmax;
-    double xmin0, xmax0, ymin0, ymax0, zmin0, zmax0; //start values - filled on first draw, can be used to reset view with "Unzoom"
-    QString old_option;
 
-    void RedrawAll();    
     void clearTmpTObjects();   //enable qDebugs inside for diagnostics of cleanup!
-    void updateLegendVisibility();
-    void startOverlayMode();
-    void endOverlayMode();
-    void UpdateBasketGUI();    
-    void ExportData(bool fUseBinCenters=true);
-    void exportTextForTH2(TH2 *h);
 
-    void SaveBasket();
-    void AppendBasket();
+    void changeOverlayMode(bool bOn);
+
+    void switchToBasket(int index);
+    void UpdateBasketGUI();    
     void Basket_DrawOnTop(int row);
 
-    void AppendRootHistsOrGraphs();
-    QVector<DrawObjectStructure> *getCurrentDrawObjects();
     void ShowProjection(QString type);
-    double runScaleDialog();
-    const QPair<double, double> runShiftDialog();
-    void calculateFractionTH1(int row);
+    void UpdateGuiControlsForMainObject(const QString &ClassName, const QString & options);
+    void contextMenuForBasketMultipleSelection(const QPoint &pos);
+    void removeAllSelectedBasketItems();
+    void applyTemplate(bool bAll);
+    void updateSecondaryAxis(TGaxis *gaxis, const char *opt);
+    void showHintInStatus();
 };
 
 #endif // GRAPHWINDOWCLASS_H

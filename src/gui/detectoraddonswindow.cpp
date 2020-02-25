@@ -57,9 +57,13 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(MainWindow *parent, DetectorClass *de
   // tree widget
   twGeo = new AGeoTreeWidget(Detector->Sandwich);
   ui->saGeo->setWidget(twGeo);
-  twGeo->setToolTip("Use contect menu to manipulate objects!\n"
-                    "Drag&drop can be used to move items from one parent to another\n"
-                    "Use Alt + Drag&Drop to change order of item within the same parent.");
+  twGeo->setToolTip("Use context menu to manipulate objects\n"
+                    "\n"
+                    "Drag & drop can be used to move items from one container to another\n"
+                    "\n"
+                    "Drop when Alt_or_Shift_or_Control is pressed changes the order of item within the SAME container\n"
+                    "  In case reorder is triggered inside a stack, positions of the objects are recalculated\n"
+                    "  using the original position of the moved object as the reference.");
   connect(twGeo, SIGNAL(itemExpanded(QTreeWidgetItem*)), twGeo, SLOT(onItemExpanded(QTreeWidgetItem*)));
   connect(twGeo, SIGNAL(itemCollapsed(QTreeWidgetItem*)), twGeo, SLOT(onItemCollapsed(QTreeWidgetItem*)));
   connect(twGeo, SIGNAL(RequestListOfParticles(QStringList&)), Detector->MpCollection, SLOT(OnRequestListOfParticles(QStringList&)));
@@ -158,7 +162,7 @@ void DetectorAddOnsWindow::on_pbConvertToDummies_clicked()
     for (int iadd=ToAdd.size()-1; iadd>-1; iadd--)
     {
         //adding dummy
-        PMdummyStructure dpm;
+        APMdummyStructure dpm;
 
         int ipm = ToAdd[iadd];
         //       qDebug()<<"PM->dummy  ToAddindex="<<iadd<<"pm number="<<ipm;
@@ -248,7 +252,7 @@ void DetectorAddOnsWindow::on_pbConvertDummy_clicked()
 
 void DetectorAddOnsWindow::ConvertDummyToPM(int idpm)
 {
-  PMdummyStructure* dum = &Detector->PMdummies[idpm];
+  APMdummyStructure* dum = &Detector->PMdummies[idpm];
   int ul = dum->UpperLower;
   Detector->PMarrays[ul].PositionsAnglesTypes.append(APmPosAngTypeRecord(dum->r[0], dum->r[1], dum->r[2],
                                                                          dum->Angle[0], dum->Angle[1], dum->Angle[2],
@@ -293,7 +297,7 @@ void DetectorAddOnsWindow::on_pbUpdateDummy_clicked()
       return;
     }
 
-  PMdummyStructure dpm;
+  APMdummyStructure dpm;
   dpm.PMtype = type;
   dpm.UpperLower = ui->cobDummyUpperLower->currentIndex();
   dpm.r[0] = ui->ledDummyX->text().toDouble();
@@ -317,7 +321,7 @@ void DetectorAddOnsWindow::on_pbCreateNewDummy_clicked()
       return;
     }
 
-  PMdummyStructure dpm;
+  APMdummyStructure dpm;
   dpm.PMtype = type;
   dpm.UpperLower = ui->cobDummyUpperLower->currentIndex();
   dpm.r[0] = ui->ledDummyX->text().toDouble();
@@ -960,6 +964,8 @@ void DetectorAddOnsWindow::on_pmParseInGeometryFromGDML_clicked()
     MW->Config->LoadConfig(MW->GlobSet.ExamplesDir + "/Empty.json");
 
     QString PMtemplate = ui->lePMtemplate->text();
+    if (PMtemplate.isEmpty()) PMtemplate = "_.._#"; //clumsy, but otherwise propagate changes to readGeoObjectTree
+
     if (Detector->GeoManager) delete Detector->GeoManager;
     Detector->GeoManager = 0;
     //Detector->GeoManager = TGeoManager::Import(fileName.toLatin1());

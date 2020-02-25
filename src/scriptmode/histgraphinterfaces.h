@@ -59,6 +59,7 @@ public slots:
 
   void           Smooth(const QString& HistName, int times);
   void           ApplyMedianFilter(const QString& HistName, int span);
+  void           ApplyMedianFilter(const QString& HistName, int spanLeft, int spanRight);
   const QVariant FitGauss(const QString& HistName, const QString options = "");
   const QVariant FitGaussWithInit(const QString& HistName, const QVariant InitialParValues, const QString options = "");
   const QVariant FindPeaks(const QString& HistName, double sigma, double threshold);
@@ -85,7 +86,7 @@ private:
 
 };
 
-// ---- G R A P H S ---- (TGraph of ROOT)
+// ---- G R A P H S ---- (TGraph and TgraphError of ROOT)
 class AInterfaceToGraph : public AScriptInterface
 {
   Q_OBJECT
@@ -109,11 +110,16 @@ public slots:
   void SetTitles(QString GraphName, QString X_Title, QString Y_Title, QString GraphTitle = "");
 
   void AddPoint(QString GraphName, double x, double y);
+  void AddPoint(QString GraphName, double x, double y, double errorY);
   void AddPoint(QString GraphName, double x, double y, double errorX, double errorY);
   void AddPoints(QString GraphName, QVariant xArray, QVariant yArray);
+  void AddPoints(QString GraphName, QVariant xArray, QVariant yArray, QVariant yErrArray);
+  void AddPoints(QString GraphName, QVariant xArray, QVariant yArray, QVariant xErrArray, QVariant yErrArray);
   void AddPoints(QString GraphName, QVariant xyArray);
 
   void SetYRange(const QString& GraphName, double min, double max);
+  void SetMinimum(const QString& GraphName, double min);
+  void SetMaximum(const QString& GraphName, double max);
   void SetXRange(const QString& GraphName, double min, double max);
   void SetXDivisions(const QString& GraphName, int numDiv);
   void SetYDivisions(const QString& GraphName, int numDiv);
@@ -125,6 +131,8 @@ public slots:
   void LoadTGraph(const QString& NewGraphName, const QString& FileName);
   void Save(const QString& GraphName, const QString& FileName);
   const QVariant GetPoints(const QString& GraphName);
+
+  //void ImportFromBasket(const QString& NewGraphName, const QString& BasketName, int index = 0);
 
   bool Delete(QString GraphName);
   void DeleteAllGraph();

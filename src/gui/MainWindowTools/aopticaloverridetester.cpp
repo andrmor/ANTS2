@@ -182,7 +182,7 @@ void AOpticalOverrideTester::on_pbST_RvsAngle_clicked()
         GraphWindow->Draw(gB, "Lsame");
         GraphWindow->Draw(gF, "Lsame");
 
-        GraphWindow->on_pbAddLegend_clicked();
+        GraphWindow->AddLegend();
         break;
       }
       case 1:
@@ -204,7 +204,7 @@ void AOpticalOverrideTester::on_pbST_RvsAngle_clicked()
         GraphWindow->Draw(gL, "Lsame");
         GraphWindow->Draw(gD, "Lsame");
 
-        GraphWindow->on_pbAddLegend_clicked();
+        GraphWindow->AddLegend();
         break;
       }
       case 2:
@@ -213,7 +213,7 @@ void AOpticalOverrideTester::on_pbST_RvsAngle_clicked()
         gW->SetMaximum(1.05);
         gW->SetMinimum(0);
         GraphWindow->Draw(gW, "AL");
-        GraphWindow->on_pbAddLegend_clicked();
+        GraphWindow->AddLegend();
         break;
       }
     }

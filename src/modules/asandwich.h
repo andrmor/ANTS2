@@ -1,10 +1,11 @@
 #ifndef ASANDWICH_H
 #define ASANDWICH_H
 
-#include <QList>
 #include <QObject>
 #include <QStringList>
 #include <QVector>
+
+#include "apmanddummy.h"
 
 class ASlabModel;
 class ASlabXYModel;
@@ -15,15 +16,6 @@ class AMaterialParticleCollection;
 class AGridElementRecord;
 class TGeoNode;
 
-struct APMandDummy
-{
-    double X, Y;
-    int UpperLower;
-
-    APMandDummy(double X, double Y, int ul) : X(X), Y(Y), UpperLower(ul) {}
-    APMandDummy();
-};
-
 class ASandwich : public QObject
 {  
   Q_OBJECT
@@ -33,7 +25,7 @@ public:
   ASandwich();
   ~ASandwich();
 
-  AGeoObject* World;     //world with tree structure, slabs are on the first level!
+  AGeoObject * World = nullptr;     //world with tree structure, slabs are on the first level!
   void clearWorld();
 
   //slab handling
@@ -61,7 +53,7 @@ public:
   // populate TGeoManager
   void addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent,
                                 TGeoManager* GeoManager, AMaterialParticleCollection* MaterialCollection,
-                                QList<APMandDummy>* PMsAndDumPMs,
+                                QVector<APMandDummy> *PMsAndDumPMs,
                                 int forcedNodeNumber = 0);
 
   void clearGridRecords();
@@ -70,10 +62,9 @@ public:
   void UpdateDetector(); //trigger this to update the detector
   void ChangeState(ASandwich::SlabState State); //triggered by GUI
   bool CalculateZofSlabs();
-  QStringList GetMaterials() const {return Materials;}
+  QStringList GetMaterials() const {return Materials;}   // to const QStringList &
   bool isMaterialsEmpty() {return Materials.isEmpty();}
   bool isMaterialInUse(int imat);
-  //int FindSlabByName(QString name); //returns -1 if not found
   void DeleteMaterial(int imat);
   bool isVolumeExist(QString name);
   void changeLineWidthOfVolumes(int delta);
@@ -90,7 +81,7 @@ public:
   QStringList Materials;  // list of currently defined materials
   ASlabXYModel* DefaultXY;
   int ZOriginType; //-1 top, 0 mid, 1 bottom (of the slab with fCenter = true)
-  QList<AGridElementRecord*> GridRecords;
+  QVector<AGridElementRecord*> GridRecords;
 
   // pointers to monitors
   QVector<const AGeoObject*> MonitorsRecords;
@@ -119,7 +110,7 @@ private:
   void importOldGrid(QJsonObject &json);
   void positionArrayElement(int ix, int iy, int iz,
                             AGeoObject *el, AGeoObject *arrayObj, TGeoVolume *parent,
-                            TGeoManager *GeoManager, AMaterialParticleCollection *MaterialCollection, QList<APMandDummy> *PMsAndDumPMs,
+                            TGeoManager *GeoManager, AMaterialParticleCollection *MaterialCollection, QVector<APMandDummy> *PMsAndDumPMs,
                             int arrayIndex = 0);
 };
 

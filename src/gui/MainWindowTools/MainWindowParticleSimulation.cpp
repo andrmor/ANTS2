@@ -394,7 +394,6 @@ void MainWindow::on_pbAddSource_clicked()
 
     on_pbUpdateSourcesIndication_clicked();
     ui->lwDefinedParticleSources->setCurrentRow( SimulationManager->ParticleSources->countSources()-1 );
-    on_pbEditParticleSource_clicked();
 }
 
 void MainWindow::on_pbUpdateSourcesIndication_clicked()
@@ -811,7 +810,7 @@ void MainWindow::on_pbParticleGenerationScript_clicked()
     AScriptWindow* sw = new AScriptWindow(sm, true, this);
     sw->EnableAcceptReject();
 
-    AParticleGenerator_SI* gen = new AParticleGenerator_SI(*Detector->MpCollection, Detector->RandGen);
+    AParticleGenerator_SI* gen = new AParticleGenerator_SI(*Detector->MpCollection, Detector->RandGen, 0);
     QVector<AParticleRecord*> GP;
     gen->configure(&GP);
     gen->setObjectName("gen");

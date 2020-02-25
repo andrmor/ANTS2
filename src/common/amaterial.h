@@ -38,10 +38,11 @@ public:
   QVector<double> rayleighBinned;//regular step (WaveStep step, WaveNodes bins)
   double e_driftVelocity;
   double W; //default W
+  double e_diffusion_T = 0; //in mm2/ns
+  double e_diffusion_L = 0; //in mm2/ns
   double SecYield;  // ph per secondary electron
   QVector<APair_ValueAndWeight> PriScint_Decay;
   QVector<APair_ValueAndWeight> PriScint_Raise;
-  int PriScintModel = 0; //0=sum, 1=Shao
 
   double PhotonYieldDefault = 0;
   double getPhotonYield(int iParticle) const;

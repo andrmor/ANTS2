@@ -85,6 +85,7 @@ public:
   // the following checks are always done DOWN the chain
   // for global effect, the check has to be performed on World (Top) object
   AGeoObject* findObjectByName(const QString name);
+  AGeoObject* findObjectsByWildcard(const QString & name, QVector<AGeoObject*> & foundObjs);
   void changeLineWidthRecursive(int delta);
   bool isNameExists(const QString name);
   bool isContainsLocked();

@@ -95,6 +95,8 @@ public:
 
     const QString Import(double from, double to, const std::vector<double> & binContent, const std::vector<double> & stats); // empty srtring if no error
 
+    void setStats(double * statsArray);
+
 private:
     void SetStatistic(const std::vector<double> & stats);
 };

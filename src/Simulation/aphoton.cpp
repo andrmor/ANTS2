@@ -25,7 +25,6 @@ void APhoton::CopyFrom(const APhoton *CopyFrom)
     time = CopyFrom->time;
     waveIndex = CopyFrom->waveIndex;
     scint_type = CopyFrom->scint_type;
-    fSkipThisPhoton = CopyFrom->fSkipThisPhoton;
 
     SimStat = CopyFrom->SimStat;
 }

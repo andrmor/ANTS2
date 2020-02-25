@@ -62,126 +62,76 @@ double AMaterial::FT(double td, double tr, double t) const
     return 1.0 - ((tr + td) / td) * exp(- t / td) + (tr / td) * exp(- t * (1.0 / tr + 1.0 / td));
 }
 
-double AMaterial::GeneratePrimScintTime(TRandom2 *RandGen) const
+double single_exp(double t, double tau2)
 {
-    double t = 0;  // photon emission delay time
-
-    if (
-            PriScintModel == 0 ||
-            ( PriScint_Raise.size() == 1 && PriScint_Raise.first().value == 0 ) ||
-            ( PriScint_Decay.size() == 1 && PriScint_Decay.first().value == 0 )
-        )
-    {
-        // --- "Sum" model ---
-
-        //delay due to raise time
-        double tau = 0;
-        if (PriScint_Raise.size() == 1)
-            tau = PriScint_Raise.first().value;
-        else
-        {
-            //selecting raise time component
-            const double generatedStatWeight = _PrimScintSumStatWeight__Raise * RandGen->Rndm();
-            double cumulativeStatWeight = 0;
-            for (int i=0; i<PriScint_Raise.size(); i++)
-            {
-                cumulativeStatWeight += PriScint_Raise.at(i).statWeight;
-                if (generatedStatWeight < cumulativeStatWeight)
-                {
-                    tau = PriScint_Raise.at(i).value;
-                    break;
-                }
-            }
-        }
-
-        if (tau != 0)
-            t = RandGen->Exp(tau); //delay due to raise time    //if (tau != 0) t = -tau * log(1.0 - RandGen->Rndm());
-
-        //now delay due to decay time
-        if (PriScint_Decay.size() == 1)
-            tau = PriScint_Decay.first().value;
-        else
-        {
-            //selecting decay time component
-            const double generatedStatWeight = _PrimScintSumStatWeight_Decay * RandGen->Rndm();
-            double cumulativeStatWeight = 0;
-            for (int i=0; i<PriScint_Decay.size(); i++)
-            {
-                cumulativeStatWeight += PriScint_Decay.at(i).statWeight;
-                if (generatedStatWeight < cumulativeStatWeight)
-                {
-                    tau = PriScint_Decay.at(i).value;
-                    break;
-                }
-            }
-        }
-
-        if (tau != 0)
-            t += RandGen->Exp(tau); //adding delay due to decay
-    }
+    return std::exp(-1.0*t/tau2)/tau2;
+}
+double bi_exp(double t, double tau1,double tau2)
+{
+    return std::exp(-1.0*t/tau2)*(1-std::exp(-1.0*t/tau1))/tau2/tau2*(tau1+tau2);
+}
+double AMaterial::GeneratePrimScintTime(TRandom2 * RandGen) const
+{
+    //select decay time component
+    double DecayTime = 0;
+    if (PriScint_Decay.size() == 1)
+        DecayTime = PriScint_Decay.first().value;
     else
     {
-       //Shao model, upgraded to have several decay components
-
-       double td = 0;
-       //selecting decay component
-       if (PriScint_Decay.size() == 1)
-           td = PriScint_Decay.first().value;
-       else
-       {
-           //selecting component
-           const double generatedStatWeight = _PrimScintSumStatWeight_Decay * RandGen->Rndm();
-           double cumulativeStatWeight = 0;
-           for (int i=0; i<PriScint_Decay.size(); i++)
-           {
-               cumulativeStatWeight += PriScint_Decay.at(i).statWeight;
-               if (generatedStatWeight < cumulativeStatWeight)
-               {
-                   td = PriScint_Decay.at(i).value;
-                   break;
-               }
-           }
-       }
-
-       double tr = 0;
-       //selecting raise component
-       if (PriScint_Raise.size() == 1)
-           tr = PriScint_Raise.first().value;
-       else
-       {
-           //selecting component
-           const double generatedStatWeight = _PrimScintSumStatWeight__Raise * RandGen->Rndm();
-           double cumulativeStatWeight = 0;
-           for (int i=0; i<PriScint_Raise.size(); i++)
-           {
-               cumulativeStatWeight += PriScint_Raise.at(i).statWeight;
-               if (generatedStatWeight < cumulativeStatWeight)
-               {
-                   tr = PriScint_Raise.at(i).value;
-                   break;
-               }
-           }
-       }
-
-       double g = RandGen->Rndm(); //cannot be 0 or 1.0
-
-       //double  dt = 100.0 * (tr + td) / 2.0;
-       double  dt = 50.0 * (tr + td);
-
-       //while ( ((dt / 2.0) / (t + (dt / 2.0))) > pow(10.0, -5) )
-       while (  0.5*dt / (t + 0.5*dt) > 0.00001 )
-       {
-           if ( (FT(td, tr, t) - g) * (FT(td, tr, t + dt) - g) > 0 )
-               t += dt;
-           if ( (FT(td, tr, t) - g) * (FT(td, tr, t + dt) - g) < 0 )
-               //dt = dt / 2.0;
-               dt = 0.5 * dt;
-       }
-       //t += dt / 2.0;
-       t += 0.5 * dt;
+        //selecting decay time component
+        const double generatedStatWeight = _PrimScintSumStatWeight_Decay * RandGen->Rndm();
+        double cumulativeStatWeight = 0;
+        for (int i=0; i<PriScint_Decay.size(); i++)
+        {
+            cumulativeStatWeight += PriScint_Decay.at(i).statWeight;
+            if (generatedStatWeight < cumulativeStatWeight)
+            {
+                DecayTime = PriScint_Decay.at(i).value;
+                break;
+            }
+        }
     }
 
-    return t;
+    if (DecayTime == 0)
+        return 0; // decay time is 0 -> rise time is ignored
+
+    //select rise time component
+    double RiseTime = 0;
+    if (PriScint_Raise.size() == 1)
+        RiseTime = PriScint_Raise.first().value;
+    else
+    {
+        //selecting raise time component
+        const double generatedStatWeight = _PrimScintSumStatWeight__Raise * RandGen->Rndm();
+        double cumulativeStatWeight = 0;
+        for (int i=0; i<PriScint_Raise.size(); i++)
+        {
+            cumulativeStatWeight += PriScint_Raise.at(i).statWeight;
+            if (generatedStatWeight < cumulativeStatWeight)
+            {
+                RiseTime = PriScint_Raise.at(i).value;
+                break;
+            }
+        }
+    }
+
+    if (RiseTime == 0)
+        return RandGen->Exp(DecayTime);
+
+    double EmissionTime = 0;
+    // From G4Scintillation of Geant4
+    double d = (RiseTime + DecayTime) / DecayTime;
+    while (true)
+    {
+        double ran1 = RandGen->Rndm();
+        double ran2 = RandGen->Rndm();
+        EmissionTime = -1.0 * DecayTime * std::log(1.0 - ran1);
+        double gg = d * single_exp(EmissionTime, DecayTime);
+        if (ran2 <= bi_exp(EmissionTime, RiseTime, DecayTime) / gg)
+            break;
+    }
+
+    return EmissionTime;
 }
 
 void AMaterial::updateNeutronDataOnCompositionChange(const AMaterialParticleCollection *MPCollection)
@@ -261,11 +211,10 @@ void AMaterial::clear()
   n = 1.0;
   density = p1 = p2 = p3 = abs = rayleighMFP = reemissionProb = 0;
   temperature = 298.0;
-  e_driftVelocity = W = SecYield = SecScintDecayTime = 0;
+  e_driftVelocity = W = SecYield = SecScintDecayTime = e_diffusion_L = e_diffusion_T = 0;
   rayleighWave = 500.0;
   Comments = "";
 
-  PriScintModel = 0;
   PriScint_Decay.clear();
   PriScint_Decay << APair_ValueAndWeight(0, 1.0);
   PriScint_Raise.clear();
@@ -325,7 +274,6 @@ void AMaterial::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCo
 
   json["PhotonYieldDefault"] = PhotonYieldDefault;
 
-  json["PrimScint_Model"] = PriScintModel;
   {
     QJsonArray ar;
     for (const APair_ValueAndWeight& pair : PriScint_Decay)
@@ -351,6 +299,8 @@ void AMaterial::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCo
   json["SecScint_PhYield"] = SecYield;
   json["SecScint_Tau"] = SecScintDecayTime;
   json["ElDriftVelo"] = e_driftVelocity;
+  json["ElDiffusionL"] = e_diffusion_L;
+  json["ElDiffusionT"] = e_diffusion_T;
   if (p1!=0 || p2!=0 || p3!=0)
     {
       json["TGeoP1"] = p1;
@@ -461,7 +411,6 @@ bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpC
   parseJson(json, "ReemissionProb", reemissionProb);
   //PhotonYieldDefault for compatibility at the end
 
-  parseJson(json, "PrimScint_Model", PriScintModel);
   if (json.contains("PrimScint_Tau")) //compatibility
   {
       double tau = json["PrimScint_Tau"].toDouble();
@@ -559,6 +508,8 @@ bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpC
   parseJson(json, "SecScint_PhYield", SecYield);
   parseJson(json, "SecScint_Tau", SecScintDecayTime);
   parseJson(json, "ElDriftVelo", e_driftVelocity);
+  parseJson(json, "ElDiffusionL", e_diffusion_L);
+  parseJson(json, "ElDiffusionT", e_diffusion_T);
   parseJson(json, "TGeoP1", p1);
   parseJson(json, "TGeoP2", p2);
   parseJson(json, "TGeoP3", p3);

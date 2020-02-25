@@ -12,8 +12,6 @@
 class GeneralSimSettings
 {
 public:
-  //~GeneralSimSettings() {}      //if (SecScintThetaHist) delete SecScintThetaHist;
-
   bool   fTimeResolved = false;
   double TimeFrom = 0;
   double TimeTo = 1;
@@ -42,14 +40,9 @@ public:
 
   int    MaxNumTrans = 500;  
   bool   fQEaccelerator = false;
-  //bool   fLogsStat = false;             //generate logs and statistics
   bool   bDoPhotonHistoryLog = false; //detailed photon history, activated by "photon" script!
-  //int    NumThreads;
 
   int    DetStatNumBins;        //number of bins in detection statistics
-
-  int    SecScintGenMode = 0;
-  //TH1D *SecScintThetaHist;
 
   ATrackBuildOptions TrackBuildOptions;
   ALogsAndStatisticsOptions LogsStatOptions;

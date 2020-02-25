@@ -878,6 +878,11 @@ Can be used to automatically configure gamma interaction cross-sections and neut
                   <bold>false</bold>
                  </font>
                 </property>
+                <property name="toolTip">
+                 <string>File format:
+Two columns, the first is wavelength[nm],  the second is refractive index
+Wavelengths shoul be given in increasing order</string>
+                </property>
                 <property name="text">
                  <string>Load</string>
                 </property>
@@ -1028,6 +1033,11 @@ Can be used to automatically configure gamma interaction cross-sections and neut
                   <weight>50</weight>
                   <bold>false</bold>
                  </font>
+                </property>
+                <property name="toolTip">
+                 <string>File format:
+Two columns, the first is wavelength[nm],  the second is attenuation coefficient[mm-1]
+Wavelengths shoul be given in increasing order</string>
                 </property>
                 <property name="text">
                  <string>Load</string>
@@ -1310,6 +1320,11 @@ Can be used to automatically configure gamma interaction cross-sections and neut
                   <bold>false</bold>
                  </font>
                 </property>
+                <property name="toolTip">
+                 <string>File format:
+Two columns, the first is wavelength[nm],  the second is reemission probability (0..1)
+Wavelengths shoul be given in increasing order</string>
+                </property>
                 <property name="text">
                  <string>Load</string>
                 </property>
@@ -1547,6 +1562,11 @@ Can be used to automatically configure gamma interaction cross-sections and neut
                   <bold>false</bold>
                  </font>
                 </property>
+                <property name="toolTip">
+                 <string>File format:
+Two columns, the first is wavelength[nm],  the second is relative intensity
+Wavelengths shoul be given in increasing order</string>
+                </property>
                 <property name="text">
                  <string>Load</string>
                 </property>
@@ -1729,48 +1749,6 @@ Can be used to automatically configure gamma interaction cross-sections and neut
                 <property name="text">
                  <string>ns</string>
                 </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="labModel">
-                <property name="font">
-                 <font>
-                  <weight>50</weight>
-                  <bold>false</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>   Model:</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QComboBox" name="cobPriT_model">
-                <property name="minimumSize">
-                 <size>
-                  <width>0</width>
-                  <height>21</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <weight>50</weight>
-                  <bold>false</bold>
-                 </font>
-                </property>
-                <item>
-                 <property name="text">
-                  <string>Sum</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Shao</string>
-                 </property>
-                </item>
                </widget>
               </item>
               <item>
@@ -3377,6 +3355,20 @@ Can be used to automatically configure gamma interaction cross-sections and neut
              </widget>
             </item>
             <item>
+             <widget class="QLabel" name="label_33">
+              <property name="text">
+               <string>e- diffusion_T</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_68">
+              <property name="text">
+               <string>e- diffusion_L</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QLabel" name="label_9">
               <property name="text">
                <string>Photons per e-:</string>
@@ -3408,6 +3400,16 @@ Can be used to automatically configure gamma interaction cross-sections and neut
              <widget class="QLineEdit" name="ledEDriftVelocity"/>
             </item>
             <item>
+             <widget class="QLineEdit" name="ledEDiffT">
+              <property name="toolTip">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="ledEDiffL"/>
+            </item>
+            <item>
              <widget class="QLineEdit" name="ledSecYield"/>
             </item>
             <item>
@@ -3427,6 +3429,11 @@ Can be used to automatically configure gamma interaction cross-sections and neut
               </item>
               <item>
                <widget class="QPushButton" name="pbLoadSecSpectrum">
+                <property name="toolTip">
+                 <string>File format:
+Two columns, the first is wavelength[nm],  the second is relative intensity
+Wavelengths shoul be given in increasing order</string>
+                </property>
                 <property name="text">
                  <string>Load</string>
                 </property>
@@ -3449,6 +3456,20 @@ Can be used to automatically configure gamma interaction cross-sections and neut
              <widget class="QLabel" name="label_45">
               <property name="text">
                <string>cm/us</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_67">
+              <property name="text">
+               <string>mm2/ns</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_69">
+              <property name="text">
+               <string>mm2/ns</string>
               </property>
              </widget>
             </item>
@@ -3498,6 +3519,13 @@ Can be used to automatically configure gamma interaction cross-sections and neut
            </spacer>
           </item>
          </layout>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pbSecScintHelp">
+          <property name="text">
+           <string>Help</string>
+          </property>
+         </widget>
         </item>
         <item>
          <spacer name="verticalSpacer_2">
@@ -3696,8 +3724,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>458</x>
-     <y>437</y>
+     <x>451</x>
+     <y>389</y>
     </hint>
     <hint type="destinationlabel">
      <x>483</x>
@@ -3712,8 +3740,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>458</x>
-     <y>501</y>
+     <x>451</x>
+     <y>517</y>
     </hint>
     <hint type="destinationlabel">
      <x>483</x>
@@ -3728,8 +3756,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>458</x>
-     <y>533</y>
+     <x>451</x>
+     <y>549</y>
     </hint>
     <hint type="destinationlabel">
      <x>483</x>
@@ -3744,8 +3772,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>458</x>
-     <y>469</y>
+     <x>451</x>
+     <y>421</y>
     </hint>
     <hint type="destinationlabel">
      <x>483</x>
@@ -3776,8 +3804,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>458</x>
-     <y>437</y>
+     <x>451</x>
+     <y>389</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -3792,8 +3820,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>458</x>
-     <y>469</y>
+     <x>451</x>
+     <y>421</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -3808,8 +3836,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>458</x>
-     <y>501</y>
+     <x>451</x>
+     <y>517</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -3824,8 +3852,8 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>458</x>
-     <y>533</y>
+     <x>451</x>
+     <y>549</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -4186,38 +4214,6 @@ Can be used to automatically configure gamma interaction cross-sections and neut
    </hints>
   </connection>
   <connection>
-   <sender>cobPriT_model</sender>
-   <signal>activated(int)</signal>
-   <receiver>pbUpdateTmpMaterial</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>455</x>
-     <y>644</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>628</x>
-     <y>136</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cobPriT_model</sender>
-   <signal>activated(int)</signal>
-   <receiver>pbWasModified</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>448</x>
-     <y>644</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>93</x>
-     <y>118</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>cbEnableScatter</sender>
    <signal>toggled(bool)</signal>
    <receiver>cbUseNCrystal</receiver>
@@ -4390,6 +4386,70 @@ Can be used to automatically configure gamma interaction cross-sections and neut
     <hint type="destinationlabel">
      <x>489</x>
      <y>127</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledEDiffT</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdateTmpMaterial</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>451</x>
+     <y>453</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>565</x>
+     <y>122</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledEDiffL</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdateTmpMaterial</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>451</x>
+     <y>485</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>591</x>
+     <y>128</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledEDiffT</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>pbWasModified</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>285</x>
+     <y>447</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>88</x>
+     <y>125</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledEDiffL</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>pbWasModified</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>451</x>
+     <y>485</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>41</x>
+     <y>121</y>
     </hint>
    </hints>
   </connection>

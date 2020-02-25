@@ -119,6 +119,10 @@ private slots:
 
   void on_leGeant4ExchangeFolder_editingFinished();
 
+  void on_leLibLogs_editingFinished();
+
+  void on_pbChooseLogsLib_clicked();
+
 private:
   Ui::GlobalSettingsWindowClass *ui;
   MainWindow* MW;

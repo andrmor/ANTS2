@@ -15,10 +15,9 @@
 #include "arootlineconfigurator.h"
 #include "arootmarkerconfigurator.h"
 #include "atoolboxscene.h"
-
-#ifdef USE_EIGEN
-#include "curvefit.h"
-#endif
+#include "abasketmanager.h"
+#include "adrawexplorerwidget.h"
+#include "abasketlistwidget.h"
 
 //Qt
 #include <QtGui>
@@ -37,10 +36,16 @@
 #include <QPlainTextEdit>
 #include <QVariant>
 #include <QVariantList>
-#include <QSet>
-
+#include <QShortcut>
+#include <QPolygonF>
+#include <QButtonGroup>
+#include <QPalette>
+#include <QPalette>
+#include <QElapsedTimer>
+#include <QFileInfo>
 
 //Root
+#include "TMath.h"
 #include "TGraph.h"
 #include "TGraph2D.h"
 #include "TH1.h"
@@ -49,101 +54,101 @@
 #include "TH1D.h"
 #include "TSystem.h"
 #include "TStyle.h"
-#include "TList.h"
 #include "TF1.h"
 #include "TF2.h"
-#include "TMath.h"
 #include "TView.h"
-#include "TFrame.h"
 #include "TMultiGraph.h"
 #include "TGraphErrors.h"
 #include "TProfile.h"
 #include "TProfile2D.h"
 #include "TStyle.h"
 #include "TEllipse.h"
-#include "TPolyLine.h"
 #include "TLine.h"
 #include "TFile.h"
-#include "TKey.h"
 #include "TAxis.h"
-#include "TView3D.h"
-#include "TViewer3DPad.h"
 #include "TAttLine.h"
 #include "TLegend.h"
 #include "TVectorD.h"
 #include "TTree.h"
-
-#include "TPave.h"
-#include "TPaveLabel.h"
 #include "TPavesText.h"
 
 GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
   AGuiWindow(parent), MW(mw),
   ui(new Ui::GraphWindowClass)
-{ 
-  //setting UI
-  ui->setupUi(this);
-  this->setMinimumWidth(200);
-  ui->swToolBox->setVisible(false);
-  ui->swToolBox->setCurrentIndex(0);
-  ui->sProjBins->setEnabled(false);
+{
+    Basket = new ABasketManager();
 
-  //window flags
-  Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
-  windowFlags |= Qt::WindowCloseButtonHint;
-  windowFlags |= Qt::WindowMinimizeButtonHint;
-  windowFlags |= Qt::WindowMaximizeButtonHint;
-  windowFlags |= Qt::Tool;
-  this->setWindowFlags( windowFlags );
+    //setting UI
+    ui->setupUi(this);
+    this->setMinimumWidth(200);
+    ui->swToolBox->setVisible(false);
+    ui->swToolBox->setCurrentIndex(0);
+    ui->sProjBins->setEnabled(false);
+    showHintInStatus();
 
-  //input boxes format validators
-  QDoubleValidator* dv = new QDoubleValidator(this);
-  dv->setNotation(QDoubleValidator::ScientificNotation);
-  QList<QLineEdit*> list = this->findChildren<QLineEdit *>();
-  foreach(QLineEdit *w, list) if (w->objectName().startsWith("led")) w->setValidator(dv);
+    //window flags
+    Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
+    windowFlags |= Qt::WindowCloseButtonHint;
+    windowFlags |= Qt::WindowMinimizeButtonHint;
+    windowFlags |= Qt::WindowMaximizeButtonHint;
+    windowFlags |= Qt::Tool;
+    this->setWindowFlags( windowFlags );
+
+    //DrawListWidget init
+    Explorer = new ADrawExplorerWidget(*this, DrawObjects);
+    ui->layExplorer->insertWidget(2, Explorer);
+    ui->splitter->setSizes({200,600});
+    ui->pbBackToLast->setVisible(false);
+    connect(Explorer, &ADrawExplorerWidget::requestShowLegendDialog, this, &GraphWindowClass::on_pbAddLegend_clicked);
+
+    //init of basket widget
+    lwBasket = new ABasketListWidget(this);
+    ui->layBasket->addWidget(lwBasket);
+    connect(lwBasket, &ABasketListWidget::customContextMenuRequested, this, &GraphWindowClass::BasketCustomContextMenuRequested);
+    connect(lwBasket, &ABasketListWidget::itemDoubleClicked, this, &GraphWindowClass::onBasketItemDoubleClicked);
+    connect(lwBasket, &ABasketListWidget::requestReorder, this, &GraphWindowClass::BasketReorderRequested);
+
+    //input boxes format validators
+    QDoubleValidator* dv = new QDoubleValidator(this);
+    dv->setNotation(QDoubleValidator::ScientificNotation);
+    QList<QLineEdit*> list = this->findChildren<QLineEdit *>();
+    foreach(QLineEdit *w, list) if (w->objectName().startsWith("led")) w->setValidator(dv);
     //
-  //QIntValidator* iv  = new QIntValidator(this);
-  //iv->setBottom(1);
-  //ui->leiBinsX->setValidator(iv);
+    //QIntValidator* iv  = new QIntValidator(this);
+    //iv->setBottom(1);
+    //ui->leiBinsX->setValidator(iv);
 
-  //starting QWindow
-  RasterWindow = new RasterWindowGraphClass(this);
-  RasterWindow->resize(400, 400);
-  RasterWindow->ForceResize();
+    //starting QWindow
+    RasterWindow = new RasterWindowGraphClass(this);
+    RasterWindow->resize(400, 400);
+    RasterWindow->ForceResize();
+    connect(RasterWindow, &RasterWindowGraphClass::LeftMouseButtonReleased, this, &GraphWindowClass::UpdateControls);
 
-  //creating QWindow container and placing the raster window in it
-//  QWinContainer = QWidget::createWindowContainer(RasterWindow, this);
+    QHBoxLayout* l = dynamic_cast<QHBoxLayout*>(centralWidget()->layout());
+    if (l) l->insertWidget(1, RasterWindow);
+    else message("Unexpected layout!", this);
 
-//  QMargins margins = RasterWindow->frameMargins();
-//  QWinContainer->setGeometry(ui->fUIbox->x() + ui->fUIbox->width() + 3 + margins.left(), 3 + margins.top(), 600, 600);
-//  QWinContainer->setVisible(true);
+    //overlay to show selection box, later scale tool too
+    gvOver = new QGraphicsView(this);
+    gvOver->setFrameStyle(0);
+    gvOver->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    gvOver->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-  QHBoxLayout* l = dynamic_cast<QHBoxLayout*>(centralWidget()->layout());
-  if (l) l->insertWidget(1, RasterWindow);
-  else message("Unexpected layout!", this);
+    scene = new AToolboxScene(this);
+    gvOver->setScene(scene);
+    gvOver->hide();
 
-  //connecting signals-slots
-  connect(RasterWindow, &RasterWindowGraphClass::LeftMouseButtonReleased, this, &GraphWindowClass::UpdateControls);
+    //toolbox graphics scene
+    connect(scene->getSelBox(), &ShapeableRectItem::geometryChanged, this, &GraphWindowClass::selBoxGeometryChanged);
+    connect(scene->getSelBox(), &ShapeableRectItem::requestResetGeometry, this, &GraphWindowClass::selBoxResetGeometry);
+    connect(ui->cbSelBoxShowBG, &QCheckBox::toggled, scene->getSelBox(), &ShapeableRectItem::setShowContrast);
+    connect(scene->getRuler(), &GraphicsRuler::geometryChanged, this, &GraphWindowClass::rulerGeometryChanged);
+    connect(ui->cbRulerTicksLength, &QCheckBox::toggled, scene->getRuler(), &GraphicsRuler::setShowTicks);
+    connect(ui->cbRulerShowBG, &QCheckBox::toggled, scene->getRuler(), &GraphicsRuler::setShowContrast);
 
-  //overlay to show selection box, later scale tool too
-  gvOver = new QGraphicsView(this);
-  gvOver->setFrameStyle(0);
-  gvOver->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-  gvOver->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    new QShortcut(QKeySequence(Qt::Key_Delete), this, SLOT(deletePressed()));
 
-  scene = new AToolboxScene(this);
-  gvOver->setScene(scene);
-  gvOver->hide();
-
-  //toolbox graphics scene
-  connect(scene->getSelBox(), &ShapeableRectItem::geometryChanged, this, &GraphWindowClass::selBoxGeometryChanged);
-  connect(scene->getSelBox(), &ShapeableRectItem::requestResetGeometry, this, &GraphWindowClass::selBoxResetGeometry);
-  connect(ui->cbSelBoxShowBG, &QCheckBox::toggled, scene->getSelBox(), &ShapeableRectItem::setShowContrast);
-  connect(scene->getRuler(), &GraphicsRuler::geometryChanged, this, &GraphWindowClass::rulerGeometryChanged);
-  connect(ui->cbRulerTicksLength, &QCheckBox::toggled, scene->getRuler(), &GraphicsRuler::setShowTicks);
-  connect(ui->cbRulerShowBG, &QCheckBox::toggled, scene->getRuler(), &GraphicsRuler::setShowContrast);
-
-  ui->fBasket->setVisible(false);
+    DrawTemplate.Selection.bExpanded = true;
 }
 
 GraphWindowClass::~GraphWindowClass()
@@ -154,12 +159,10 @@ GraphWindowClass::~GraphWindowClass()
 
   clearTmpTObjects();
 
-  delete scene;
-  delete gvOver;
+  delete scene; scene =  nullptr;
+  delete gvOver; gvOver = nullptr;
 
-  //RasterWindow->setParent(0);
-  //delete RasterWindow;
-  //delete QWinContainer;
+  delete Basket; Basket = nullptr;
 }
 
 TGraph* GraphWindowClass::MakeGraph(const QVector<double> *x, const QVector<double> *y,
@@ -306,18 +309,10 @@ void GraphWindowClass::AddLine(double x1, double y1, double x2, double y2, int c
 
 void GraphWindowClass::ShowAndFocus()
 {
-  RasterWindow->fCanvas->cd();
-  this->show();
-  this->activateWindow();
-  this->raise();
-
-  if (ColdStart)
-    {
-      //first time this window is shown
-      ColdStart = false;
-      this->resize(width()+1, height());
-      this->resize(width()-1, height());
-    }
+    RasterWindow->fCanvas->cd();
+    this->show();
+    this->activateWindow();
+    this->raise();
 }
 
 void GraphWindowClass::SetAsActiveRootWindow()
@@ -468,6 +463,16 @@ double GraphWindowClass::extracted2DLineXstop()
     return RasterWindow->Line2DstopX;
 }
 
+double GraphWindowClass::extracted2DLineYstart()
+{
+    return RasterWindow->Line2DstartY;
+}
+
+double GraphWindowClass::extracted2DLineYstop()
+{
+    return RasterWindow->Line2DstopY;
+}
+
 double GraphWindowClass::extracted2DEllipseX()
 {
   return RasterWindow->extracted2DEllipseX;
@@ -520,119 +525,70 @@ QList<double> GraphWindowClass::extractedPolygon()
 
 void GraphWindowClass::Draw(TObject *obj, const char *options, bool DoUpdate, bool TransferOwnership)
 {
-  if (!RasterWindow) return;
-  if (!RasterWindow->fCanvas) return;
-  GraphWindowClass::ShowAndFocus();
-
-  DrawWithoutFocus(obj, options, DoUpdate, TransferOwnership);
+    ShowAndFocus();
+    DrawWithoutFocus(obj, options, DoUpdate, TransferOwnership);
 }
 
 void GraphWindowClass::DrawWithoutFocus(TObject *obj, const char *options, bool DoUpdate, bool TransferOwnership)
 {
-  if (!RasterWindow) return;
-  if (!RasterWindow->fCanvas) return;
+    QString opt = options;
 
-  CurrentBasketItem = -1;
-  ui->lwBasket->clearSelection();
-  fFirstTime = true;
-
-  QString opt = options;
-  if (options == QString("")) opt = "";
-
-  QString ClassName = obj->ClassName();
-    //qDebug()<<"      -->class_name:"<<ClassName<<" object name:"<<obj->GetName()<<" options (char):"<<options<<" options (QStr):"<<opt;
-
-  if (opt.contains("same", Qt::CaseInsensitive))
+    QString optNoSame = (opt.simplified()).remove("same", Qt::CaseInsensitive);
+    if (obj && optNoSame.isEmpty())
     {
-      // not the new main object!
-//      qDebug()<<"same found!";
-      DrawObjects.append(DrawObjectStructure(obj, options));
+        QString Type = obj->ClassName();
+        if (Type.startsWith("TH1") || Type == "TProfile") opt += "hist";
+        //else if (Type.startsWith("TH2")) opt += "colz";
     }
-  else
-    {
-      //This is Draw of the new main object!
-        //delete all TObjects previously drawn
-      clearTmpTObjects();
-        //clear old record
-      DrawObjects.clear();
-        //register as the main
-      DrawObjects.append(DrawObjectStructure(obj, options));
 
-      //3D control
-      bool flag3D = false;
-      if (ClassName.startsWith("TH3") || ClassName.startsWith("TProfile2D") || ClassName.startsWith("TH2") || ClassName.startsWith("TF2") || ClassName.startsWith("TGraph2D"))
+    if (opt.contains("same", Qt::CaseInsensitive))
+    {
+        MakeCopyOfDrawObjects();
+    }
+    else
+    {
+        //this is new main object
+        clearTmpTObjects();             //delete all TObjects previously drawn
+        ClearCopyOfDrawObjects();       //"go back" is not possible anymore
+        ClearCopyOfActiveBasketId();    //restore basket current item is not possible anymore
+        ActiveBasketItem = -1;
+        UpdateBasketGUI();
+
+        DrawObjects.clear();
+    }
+    DrawObjects.append(ADrawObject(obj, opt));
+
+    doDraw(obj, opt.toLatin1().data(), DoUpdate);
+
+    if (TransferOwnership) RegisterTObject(obj);
+
+    EnforceOverlayOff();
+    UpdateControls();
+}
+
+void GraphWindowClass::UpdateGuiControlsForMainObject(const QString & ClassName, const QString & options)
+{
+    //3D control
+    bool flag3D = false;
+    if (ClassName.startsWith("TH3") || ClassName.startsWith("TProfile2D") || ClassName.startsWith("TH2") || ClassName.startsWith("TF2") || ClassName.startsWith("TGraph2D"))
         flag3D = true;
-      if ((ClassName.startsWith("TH2") || ClassName.startsWith("TProfile2D")) && ( opt.contains("col",Qt::CaseInsensitive) || opt.contains("prof", Qt::CaseInsensitive) || (opt == "")) )
+    if ((ClassName.startsWith("TH2") || ClassName.startsWith("TProfile2D")) && ( options.contains("col",Qt::CaseInsensitive) || options.contains("prof", Qt::CaseInsensitive) || (options.isEmpty())) )
         flag3D = false;
-//      qDebug()<<"3D flag:"<<flag3D;
+    //      qDebug()<<"3D flag:"<<flag3D;
 
-      ui->fZrange->setEnabled(flag3D);
-      RasterWindow->setShowCursorPosition(!flag3D);
-      ui->leOptions->setText(options);
+    ui->fZrange->setEnabled(flag3D);
+    RasterWindow->setShowCursorPosition(!flag3D);
+    ui->leOptions->setText(options);
 
-      if ( ClassName.startsWith("TH1") || ClassName == "TF1" )
-        {
-          //enable toolbox; only the ruler
-          ui->fToolBox->setEnabled(true);
-          ui->fZrange->setEnabled(false);
-          ui->cbRulerTicksLength->setChecked(false);
-        }
-      else if ( ClassName.startsWith("TH2") )
-        {
-          //enable toolbox - both ruler and projection box
-          ui->fToolBox->setEnabled(true);
-          ui->fZrange->setEnabled(true);
-        }
-      else
-        {
-          //hide toolbox
-          ui->fToolBox->setEnabled(false);
-        }
-
-      //export setup
-      if (ClassName == "TGraph" || ClassName.startsWith("TF") || ClassName.startsWith("TH2") )
-        {
-          ui->actionExport_data_as_text->setText("Export data as text");
-          ui->actionExport_data_using_bin_start_positions_TH1->setText("--");
-          ui->actionExport_data_as_text->setEnabled(true);
-          ui->actionExport_data_using_bin_start_positions_TH1->setVisible(false);
-        }
-      else if (ClassName.startsWith("TH1"))
-        {
-          ui->actionExport_data_as_text->setText("Export data as text: bin center positions");
-          ui->actionExport_data_using_bin_start_positions_TH1->setText("Export data as text: bin start positions");
-          ui->actionExport_data_as_text->setEnabled(true);
-          ui->actionExport_data_using_bin_start_positions_TH1->setVisible(true);
-        }
-      else
-        {
-          ui->actionExport_data_as_text->setText("Export data as text");
-          ui->actionExport_data_using_bin_start_positions_TH1->setText("--");
-          ui->actionExport_data_as_text->setEnabled(false);
-          ui->actionExport_data_using_bin_start_positions_TH1->setVisible(false);
-        }
-      //Equalize XY
-      if (ClassName.startsWith("TH2") || ClassName.startsWith("TF2") || ClassName.startsWith("TGraph2D"))
-        ui->actionEqualize_scale_XY->setEnabled(true);
-      else
-        ui->actionEqualize_scale_XY->setEnabled(false);
-    }
-
-  GraphWindowClass::EnforceOverlayOff(); //maybe drawing was triggered when overlay is on and root window is invisible
-
-  if (TransferOwnership) RegisterTObject(obj);  //should be skipped only for scripts!
-
-  GraphWindowClass::doDraw(obj, options, DoUpdate);
-
-  if (CurrentBasketItem == -1)
+    if ( ClassName.startsWith("TH1") || ClassName == "TF1" )
     {
-      if (TransferOwnership) MasterDrawObjects = DrawObjects; //pointers are copied!
-      else MasterDrawObjects.clear();
+        ui->fZrange->setEnabled(false);
+        ui->cbRulerTicksLength->setChecked(false);
     }
-  fFirstTime = false;
-
-  //update range indication etc
-  GraphWindowClass::UpdateControls();
+    else if ( ClassName.startsWith("TH2") )
+    {
+        ui->fZrange->setEnabled(true);
+    }
 }
 
 void GraphWindowClass::RegisterTObject(TObject *obj)
@@ -641,85 +597,82 @@ void GraphWindowClass::RegisterTObject(TObject *obj)
     tmpTObjects.append(obj);
 }
 
-void GraphWindowClass::doDraw(TObject *obj, const char *options, bool DoUpdate)
+#include "TGaxis.h"
+void GraphWindowClass::doDraw(TObject *obj, const char *opt, bool DoUpdate)
 {
-    //qDebug() << "-+-+ DoDraw";
-  GraphWindowClass::SetAsActiveRootWindow();
+    SetAsActiveRootWindow();
 
-  obj->Draw(options);
+    TH1* h = dynamic_cast<TH1*>(obj);
+    if (h) h->SetStats(ui->cbShowLegend->isChecked());
 
-  if (DoUpdate) RasterWindow->fCanvas->Update();
+    TGaxis * gaxis = dynamic_cast<TGaxis*>(obj);
+    if (gaxis) updateSecondaryAxis(gaxis, opt);
+
+    obj->Draw(opt);
+    if (DoUpdate) RasterWindow->fCanvas->Update();
+
+    Explorer->updateGui();
+    ui->pbBackToLast->setVisible( !PreviousDrawObjects.isEmpty() );
+
+    QString options(opt);
+    if (!options.contains("same", Qt::CaseInsensitive))
+        UpdateGuiControlsForMainObject(obj->ClassName(), options);
 }
 
-void GraphWindowClass::updateLegendVisibility()
-{  
-  if (DrawObjects.isEmpty()) return;
+void GraphWindowClass::updateSecondaryAxis(TGaxis * gaxis, const char *opt)
+{
+    UpdateRootCanvas();   // need to update canvas to request min/max info
 
-  //qDebug() << "Updating legend";
-  TObject* obj = DrawObjects.first().getPointer();
-  QString PlotType = obj->ClassName();
-  if (PlotType.startsWith("TH1")) ((TH1*) obj)->SetStats(ui->cbShowLegend->isChecked());
-  if (PlotType.startsWith("TH2")) ((TH2*) obj)->SetStats(ui->cbShowLegend->isChecked());
+    QString Options(opt);
+    bool bRight = Options.contains("Y");
+    bool bTop   = Options.contains("X");
 
-  //RasterWindow->fCanvas->Modified();
-  //RasterWindow->fCanvas->Update();
-  //qDebug() << "update legend done";
+    if (bRight || bTop)
+    {
+        //qDebug() << "---->----" << Options;
+        double xMin = getCanvasMinX();
+        double xMax = getCanvasMaxX();
+        double yMin = getCanvasMinY();
+        double yMax = getCanvasMaxY();
+
+        gaxis->SetX1(bRight ? xMax : xMin);
+        gaxis->SetX2(xMax);
+        gaxis->SetY1(bRight ? yMin : yMax);
+        gaxis->SetY2(yMax);
+
+        QStringList sl = Options.split(';', QString::SkipEmptyParts);
+        if (sl.size() > 3)
+        {
+            QString sA = sl.at(2);
+            QString sB = sl.at(3);
+
+            bool bOKA, bOKB;
+            double A = sA.toDouble(&bOKA);
+            double B = sB.toDouble(&bOKB);
+            if (bOKA && bOKB)
+            {
+                gaxis->SetWmin( A * (bRight ? yMin : xMin) + B);
+                gaxis->SetWmax( A * (bRight ? yMax : xMax) + B);
+            }
+        }
+    }
 }
 
-void GraphWindowClass::startOverlayMode()
+void GraphWindowClass::showHintInStatus()
 {
-    if(gvOver->isVisible())
-        return;
-
-    QPixmap map = qApp->screens().first()->grabWindow(RasterWindow->winId());//QApplication::desktop()->winId());
-    gvOver->resize(RasterWindow->width(), RasterWindow->height());
-    //gvOver->move(RasterWindow->x(), RasterWindow->y());
-    gvOver->move(RasterWindow->x(), menuBar()->height());
-    //gvOver->setGeometry(RasterWindow->geometry());
-    scene->setSceneRect(0, 0, RasterWindow->width(), RasterWindow->height());
-    scene->setBackgroundBrush(map);
-    //RasterWindow->setVisible(false);// map.save("TestMap.png");
-
-    QPointF origin;
-    RasterWindow->PixelToXY(0, 0, origin.rx(), origin.ry());
-    GraphicsRuler *ruler = scene->getRuler();
-    ruler->setOrigin(origin);
-    ruler->setScale(RasterWindow->getXperPixel(), RasterWindow->getYperPixel());
-
-    scene->moveToolToVisible();
-    setFixedSize(this->size());
-    gvOver->show();
-}
-
-void GraphWindowClass::endOverlayMode()
-{
-    if (gvOver->isHidden())// || ui->cbShowRuler->isChecked() || ui->cbProjectionTool->isChecked())
-        return;
-
-    gvOver->hide();
-    //RasterWindow->setVisible(true);
-    setFixedSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
-
-    RasterWindow->fCanvas->Update();
+    ui->statusBar->showMessage("Use context menu in \"Currently drawn\" and \"Basket\" to manipulate the objects");
 }
 
 void GraphWindowClass::OnBusyOn()
 {
-  ui->fUIbox->setEnabled(false);
-  ui->lwBasket->setEnabled(false);
-  //RasterWindow->setBlockEvents(true);
+    ui->fUIbox->setEnabled(false);
+    ui->fBasket->setEnabled(false);
 }
 
 void GraphWindowClass::OnBusyOff()
 {
-  ui->fUIbox->setEnabled(true);
-  ui->lwBasket->setEnabled(true);
-  //RasterWindow->setBlockEvents(false);
-}
-
-void GraphWindowClass::switchOffBasket()
-{
-  ui->cbShowBasket->setChecked(false);
+    ui->fUIbox->setEnabled(true);
+    ui->fBasket->setEnabled(true);
 }
 
 void GraphWindowClass::mouseMoveEvent(QMouseEvent *event)
@@ -742,7 +695,19 @@ void GraphWindowClass::mouseMoveEvent(QMouseEvent *event)
 bool GraphWindowClass::event(QEvent *event)
 {
   if (event->type() == QEvent::WindowActivate)
+  {
       RasterWindow->UpdateRootCanvas();
+      showHintInStatus(); // sometimes it is hidden by its own
+  }
+
+  if (event->type() == QEvent::Show)
+      if (ColdStart)
+      {
+          //first time this window is shown
+          ColdStart = false;
+          this->resize(width()+1, height());
+          this->resize(width()-1, height());
+      }
 
   return AGuiWindow::event(event);
 }
@@ -752,7 +717,7 @@ void GraphWindowClass::closeEvent(QCloseEvent *)
   ExtractionCanceled = true;
   RasterWindow->setExtractionComplete(true);
   DrawObjects.clear();
-  MasterDrawObjects.clear();
+  PreviousDrawObjects.clear();
   RedrawAll();
   RasterWindow->setShowCursorPosition(false);
   LastDistributionShown = "";
@@ -834,7 +799,7 @@ TObject* GraphWindowClass::GetMainPlottedObject()
 {
   if (DrawObjects.isEmpty()) return 0;
 
-  return DrawObjects.first().getPointer();
+  return DrawObjects.first().Pointer;
 }
 
 void GraphWindowClass::Reshape()
@@ -845,7 +810,9 @@ void GraphWindowClass::Reshape()
 //    qDebug()<<"GraphWindow  -> Reshape triggered; objects:"<<DrawObjects.size();
 
     //if (DrawObjects.isEmpty()) return;
-    if (getCurrentDrawObjects()->isEmpty()) return;
+    if (DrawObjects.isEmpty()) return;
+
+    TObject * tobj = DrawObjects.first().Pointer;
 
     //double xmin, xmax, ymin, ymax, zmin, zmax;
     xmin = ui->ledXfrom->text().toDouble();
@@ -858,16 +825,16 @@ void GraphWindowClass::Reshape()
     zmax = ui->ledZto->text().toDouble(&OKzmax);
 
     //Reshaping the main (first) object
-    //QString PlotType = DrawObjects.first().getPointer()->ClassName();
-    QString PlotType = getCurrentDrawObjects()->first().getPointer()->ClassName();
-//    QString PlotOptions = DrawObjects.first().getOptions();
+    //QString PlotType = DrawObjects.first().Pointer->ClassName();
+    QString PlotType = tobj->ClassName();
+//    QString PlotOptions = DrawObjects.first().Options;
 //    qDebug()<<"  main object name/options:"<<PlotType<<PlotOptions;
 
     if (PlotType.startsWith("TH1"))
       {
         //its 1D hist!
-        //TH1* h = (TH1*) DrawObjects.first().getPointer();
-        TH1* h = (TH1*) getCurrentDrawObjects()->first().getPointer();
+        //TH1* h = (TH1*) DrawObjects.first().Pointer;
+        TH1* h = (TH1*)tobj;
         h->GetXaxis()->SetRangeUser(xmin, xmax);
         h->SetMinimum(ymin);
         h->SetMaximum(ymax);
@@ -875,8 +842,8 @@ void GraphWindowClass::Reshape()
     else if (PlotType == "TProfile")
       {
         //its 1d profile
-        //TProfile* h = (TProfile*) DrawObjects.first().getPointer();
-        TProfile* h = (TProfile*) getCurrentDrawObjects()->first().getPointer();
+        //TProfile* h = (TProfile*) DrawObjects.first().Pointer;
+        TProfile* h = (TProfile*)tobj;
         h->GetXaxis()->SetRangeUser(xmin, xmax);
         h->SetMinimum(ymin);
         h->SetMaximum(ymax);
@@ -884,8 +851,8 @@ void GraphWindowClass::Reshape()
     else if (PlotType.startsWith("TH2"))
       {
         //its 2D hist!
-        //TH2* h = (TH2*) DrawObjects.first().getPointer();
-        TH2* h = (TH2*) getCurrentDrawObjects()->first().getPointer();
+        //TH2* h = (TH2*) DrawObjects.first().Pointer;
+        TH2* h = (TH2*)tobj;
         h->GetXaxis()->SetRangeUser(xmin, xmax);
         h->GetYaxis()->SetRangeUser(ymin, ymax);
 
@@ -895,8 +862,8 @@ void GraphWindowClass::Reshape()
     else if (PlotType == "TProfile2D")
       {
         //its 2D profile!
-        //TProfile2D* h = (TProfile2D*) DrawObjects.first().getPointer();
-        TProfile2D* h = (TProfile2D*) getCurrentDrawObjects()->first().getPointer();
+        //TProfile2D* h = (TProfile2D*) DrawObjects.first().Pointer;
+        TProfile2D* h = (TProfile2D*)tobj;
         h->GetXaxis()->SetRangeUser(xmin, xmax);
         h->GetYaxis()->SetRangeUser(ymin, ymax);
       //  h->SetMinimum(zmin);
@@ -905,8 +872,8 @@ void GraphWindowClass::Reshape()
     else if (PlotType.startsWith("TF1"))
       {
         //its 1D function!
-        //TF1* f = (TF1*) DrawObjects.first().getPointer();
-        TF1* f = (TF1*) getCurrentDrawObjects()->first().getPointer();
+        //TF1* f = (TF1*) DrawObjects.first().Pointer;
+        TF1* f = (TF1*)tobj;
         f->SetRange(xmin, xmax);
         f->SetMinimum(ymin);
         f->SetMaximum(ymax);
@@ -914,8 +881,8 @@ void GraphWindowClass::Reshape()
     else if (PlotType.startsWith("TF2"))
       {
         //its 2D function!
-        //TF2* f = (TF2*) DrawObjects.first().getPointer();
-        TF2* f = (TF2*) getCurrentDrawObjects()->first().getPointer();
+        //TF2* f = (TF2*) DrawObjects.first().Pointer;
+        TF2* f = (TF2*)tobj;
         f->SetRange(xmin, ymin, xmax, ymax);
         //f->SetRange(xmin, ymin, zmin, xmax, ymax, zmax);
         f->SetMaximum(zmax/1.05);
@@ -924,7 +891,7 @@ void GraphWindowClass::Reshape()
     else if (PlotType == "TGraph" || PlotType == "TGraphErrors")
       {
         //its 1D graph!
-        TGraph* gr = (TGraph*) getCurrentDrawObjects()->first().getPointer();
+        TGraph* gr = (TGraph*)tobj;
         gr->GetXaxis()->SetLimits(xmin, xmax);
         gr->SetMinimum(ymin);
         gr->SetMaximum(ymax);
@@ -932,7 +899,7 @@ void GraphWindowClass::Reshape()
     else if (PlotType == "TMultiGraph")
       {
         //its a collection of (here) 1D graphs
-        TMultiGraph* gr = (TMultiGraph*) getCurrentDrawObjects()->first().getPointer();
+        TMultiGraph* gr = (TMultiGraph*)tobj;
 
         gr->GetXaxis()->SetLimits(xmin, xmax);
         gr->SetMinimum(ymin);
@@ -941,7 +908,7 @@ void GraphWindowClass::Reshape()
     else if (PlotType == "TGraph2D")
       {
         //its 2D graph!        
-        TGraph2D* gr = (TGraph2D*) getCurrentDrawObjects()->first().getPointer();
+        TGraph2D* gr = (TGraph2D*)tobj;
         //gr->GetXaxis()->SetLimits(xmin, xmax);
         gr->GetHistogram()->GetXaxis()->SetRangeUser(xmin, xmax);
         //gr->GetYaxis()->SetLimits(ymin, ymax);
@@ -960,82 +927,49 @@ void GraphWindowClass::Reshape()
 
 void GraphWindowClass::RedrawAll()
 {  
-  //qDebug()<<"---Redraw all triggered." << " Current basket item:"<<CurrentBasketItem;
-  GraphWindowClass::EnforceOverlayOff();
+    //qDebug()<<"---Redraw all triggered"
+    EnforceOverlayOff();
+    UpdateBasketGUI();
 
-  //QVector<DrawObjectStructure> OldDrawObjects;
-
-  if (CurrentBasketItem >= 0) //-1 - Basket is off; -2 -basket is Off, using tmp drawing (e.g. overlap of two histograms)
-      DrawObjects = Basket[CurrentBasketItem].DrawObjects;
-
-  if (DrawObjects.isEmpty())
+    if (DrawObjects.isEmpty())
     {
-      ClearRootCanvas();
-      UpdateRootCanvas();
-      return;
+        ClearRootCanvas();
+        UpdateRootCanvas();
+        Explorer->updateGui();
+        return;
     }
 
-  for (int i=0; i<DrawObjects.size(); i++)
-    {      
-      QString opt = DrawObjects[i].getOptions();
-      QByteArray ba = opt.toLocal8Bit();
-      const char* options = ba.data();
+    for (ADrawObject & obj : DrawObjects)
+    {
+        QString opt = obj.Options;
+        QByteArray ba = opt.toLocal8Bit();
+        const char* options = ba.data();
 
-      //qDebug()<<"   object #"<<i<<" Class name:"<<OldDrawObjects[i].getPointer()->ClassName()<<" options (QStr)"<<opt<<"-> options (chars):"<<options;
-      doDraw(DrawObjects[i].getPointer(), options, false);
+        if (obj.bEnabled) doDraw(obj.Pointer, options, false);
     }
 
-  qApp->processEvents();
-  //qDebug() << "----Mod+";
-  //RasterWindow->fCanvas->Modified();
-  //qDebug() << "----Upd+";
-  RasterWindow->fCanvas->Update();  
-  //qDebug() << "----Contr+";
-  GraphWindowClass::UpdateControls();
-
-  //ui->leOptions->setText(getCurrentDrawObjects()->first().getOptions()); 
-  //qDebug() << "---redraw done";
+    qApp->processEvents();
+    RasterWindow->fCanvas->Update();
+    UpdateControls();
 }
 
 void GraphWindowClass::clearTmpTObjects()
 {
-    for (int i=0; i<tmpTObjects.size(); i++)
-    {
-        //qDebug() << "Diagnostics - deleting tmpTObject:" << tmpTObjects[i];
-        //qDebug() << "...Class name:" << tmpTObjects[i]->ClassName();
-        delete tmpTObjects[i];
-    }
+    for (int i=0; i<tmpTObjects.size(); i++) delete tmpTObjects[i];
     tmpTObjects.clear();
-
-    delete hProjection; hProjection = 0;
 }
 
 void GraphWindowClass::on_cbShowLegend_toggled(bool checked)
 {
-  qApp->processEvents();
-  if (checked)
-  {
-      //qDebug() << LastOptStat << "-> OptStyle";
-      gStyle->SetOptStat(LastOptStat);
-      qApp->processEvents();
-      GraphWindowClass::updateLegendVisibility();
-      RasterWindow->fCanvas->Modified();
-      RasterWindow->fCanvas->Update();
-  }
-  else
-  {
-      LastOptStat = gStyle->GetOptStat();
-      //qDebug() << "OptStyle ->" <<LastOptStat;
-      gStyle->SetOptStat("");
-      qApp->processEvents();
-      RasterWindow->fCanvas->Modified();
-      RasterWindow->fCanvas->Update();
-  }
+    if (checked)
+        gStyle->SetOptStat(LastOptStat);
+    else
+    {
+        LastOptStat = gStyle->GetOptStat();
+        gStyle->SetOptStat("");
+    }
 
-  //qDebug() << gStyle->GetOptStat();
-  //RasterWindow->fCanvas->Modified();
-  //RasterWindow->fCanvas->Update();
-  //RedrawAll();
+    RedrawAll();
 }
 
 void GraphWindowClass::on_pbZoom_clicked()
@@ -1043,16 +977,18 @@ void GraphWindowClass::on_pbZoom_clicked()
   if (DrawObjects.isEmpty()) return;
 
   //qDebug()<<"Zoom clicked";
-  TObject* obj = DrawObjects.first().getPointer();
+  TObject* obj = DrawObjects.first().Pointer;
   QString PlotType = obj->ClassName();  
-  QString opt = DrawObjects.first().getOptions();
+  QString opt = DrawObjects.first().Options;
   //qDebug()<<"  Class name/PlotOptions/opt:"<<PlotType<<opt;
 
   if (
-      PlotType == "TGraph" || PlotType == "TMultiGraph" ||
+      PlotType == "TGraph" ||
+      PlotType == "TMultiGraph" ||
       PlotType == "TF1" ||
-      PlotType.startsWith("TH1") || PlotType == "TProfile" ||
-      (PlotType.startsWith("TH2") || PlotType == "TProfile2D") && (opt == "" || opt.contains("col", Qt::CaseInsensitive) || opt.contains("prof", Qt::CaseInsensitive))
+      PlotType.startsWith("TH1") ||
+      PlotType == "TProfile" ||
+      ( (PlotType.startsWith("TH2") || PlotType == "TProfile2D") && (opt == "" || opt.contains("col", Qt::CaseInsensitive) || opt.contains("prof", Qt::CaseInsensitive)) )
       )
     {
       MW->WindowNavigator->BusyOn();
@@ -1134,96 +1070,71 @@ void GraphWindowClass::on_pbUnzoom_clicked()
 {
   if (DrawObjects.isEmpty()) return;
 
-  TObject* obj = DrawObjects.first().getPointer();
-  QString PlotType = obj->ClassName();
+  TObject* obj = DrawObjects.first().Pointer;
 
-  if (PlotType.startsWith("TH1"))
-    {
-      ((TH1*) obj)->GetXaxis()->UnZoom();
-      ((TH1*) obj)->GetYaxis()->UnZoom();
-    }
-  else if (PlotType == "TProfile")
-    {
-      ((TProfile*) obj)->GetXaxis()->UnZoom();
-      ((TProfile*) obj)->GetYaxis()->UnZoom();
-    }
-  else if (PlotType.startsWith("TH2"))
-    {
-      ((TH2*) obj)->GetXaxis()->UnZoom();
-      ((TH2*) obj)->GetYaxis()->UnZoom();
-    }
-  else if (PlotType == "TProfile2D")
-    {
-      ((TProfile2D*) obj)->GetXaxis()->UnZoom();
-      ((TProfile2D*) obj)->GetYaxis()->UnZoom();
-    }
+  TH1 * h = dynamic_cast<TH1*>(obj);
+  if (h)
+  {
+      h->GetXaxis()->UnZoom();
+      h->GetYaxis()->UnZoom();
+  }
+  else
+  {
+      TGraph * gr = dynamic_cast<TGraph*>(obj);
+      if (gr)
+      {
+          gr->GetXaxis()->UnZoom(); //does not work!
+          gr->GetYaxis()->UnZoom();
+      }
+  }
+
+  /*
   else if (PlotType == "TGraph2D")
     {
-      //((TGraph*) obj)->GetXaxis()->UnZoom();
-      //((TGraph*) obj)->GetYaxis()->UnZoom();
       if (RasterWindow->fCanvas->GetView())
         {
           RasterWindow->fCanvas->GetView()->UnZoom();
           RasterWindow->fCanvas->GetView()->Modify();
         }
     }
-  else if (PlotType == "TGraph" || PlotType == "TMultiGraph" || PlotType == "TF1" || PlotType == "TF2")
-    { //using values stored on first draw of this object
-      //qDebug() << xmin0<<xmax0<<ymin0<<ymax0<<zmin0<<zmax0;
-      ui->ledXfrom->setText( QString::number(xmin0, 'g', 4) );
-      ui->ledXto->setText( QString::number(xmax0, 'g', 4) );
-      ui->ledYfrom->setText( QString::number(ymin0, 'g', 4) );
-      ui->ledYto->setText( QString::number(ymax0, 'g', 4) );
-      ui->ledZfrom->setText( QString::number(zmin0, 'g', 4) );
-      ui->ledZto->setText( QString::number(zmax0, 'g', 4) );
-      Reshape();
-      return;
-    }  
+  else if (PlotType == "TGraph")// || PlotType == "TMultiGraph" || PlotType == "TF1" || PlotType == "TF2")
+  {
+  }
   else
     {
       qDebug() << "Unzoom is not implemented for this object type:"<<PlotType;
       return;
     }
+  */
 
   RasterWindow->fCanvas->Modified();
   RasterWindow->fCanvas->Update();
-  GraphWindowClass::UpdateControls();
+  UpdateControls();
 }
 
 void GraphWindowClass::on_leOptions_editingFinished()
 {   
-   ui->pbUnzoom->setFocus();
-   QString newOptions = ui->leOptions->text();
-   //preventing redraw just because of refocus
-   //if (old_option == newOptions) return;
-   old_option = newOptions;
+    //ui->pbUnzoom->setFocus();
+    const QString newOptions = ui->leOptions->text();
 
-   if (DrawObjects.isEmpty()) return;
-   getCurrentDrawObjects()->first().setOptions(newOptions);
-
-   GraphWindowClass::RedrawAll();
-}
-
-QVector<DrawObjectStructure>* GraphWindowClass::getCurrentDrawObjects()
-{
-  if (CurrentBasketItem < 0) //-1 - Basket is off; -2 -basket is Off, using tmp drawing (e.g. overlap two histograms)
-     return &DrawObjects;
-  else
-     return &Basket[CurrentBasketItem].DrawObjects;
+    if (DrawObjects.isEmpty()) return;
+    if (DrawObjects.first().Options != newOptions)
+    {
+        DrawObjects.first().Options = newOptions;
+        RedrawAll();
+    }
 }
 
 void GraphWindowClass::SaveGraph(QString fileName)
 {
-  //QFileInfo file(fileName);
-  //if(file.suffix().isEmpty()) fileName += ".png";
-  //qDebug() << "Saving graph:" << fileName;
-  RasterWindow->SaveAs(fileName);
+    RasterWindow->SaveAs(fileName);
 }
 
 void GraphWindowClass::UpdateControls()
 {
   if (MW->ShutDown) return;
-  if (getCurrentDrawObjects()->isEmpty()) return;
+  if (DrawObjects.isEmpty()) return;
+
   //qDebug()<<"  GraphWindow: updating indication of ranges";
   TMPignore = true;
 
@@ -1233,14 +1144,14 @@ void GraphWindowClass::UpdateControls()
   ui->cbGridX->setChecked(c->GetGridx());
   ui->cbGridY->setChecked(c->GetGridy());
 
-  TObject* obj = getCurrentDrawObjects()->first().getPointer();
+  TObject* obj = DrawObjects.first().Pointer;
   if (!obj)
   {
       qWarning() << "Cannot update graph window rang controls - object does not exist";
       return;
   }
   QString PlotType = obj->ClassName();
-  QString opt = getCurrentDrawObjects()->first().getOptions();
+  QString opt = DrawObjects.first().Options;
   //qDebug() << "PlotType:"<< PlotType << "Opt:"<<opt;
 
   zmin = 0; zmax = 0;
@@ -1408,13 +1319,13 @@ void GraphWindowClass::UpdateControls()
   zmin = ui->ledZfrom->text().toDouble();
   zmax = ui->ledZto->text().toDouble();
 
-  if (fFirstTime)
-  {
-      xmin0 = xmin; xmax0 = xmax;
-      ymin0 = ymin; ymax0 = ymax;
-      zmin0 = zmin; zmax0 = zmax;
-      //qDebug() << "minmax0 XYZ"<<xmin0<<xmax0<<ymin0<<ymax0<<zmin0<<zmax0;
-  }
+//  if (fFirstTime)
+//  {
+//      xmin0 = xmin; xmax0 = xmax;
+//      ymin0 = ymin; ymax0 = ymax;
+//      zmin0 = zmin; zmax0 = zmax;
+//      //qDebug() << "minmax0 XYZ"<<xmin0<<xmax0<<ymin0<<ymax0<<zmin0<<zmax0;
+//  }
 
   TMPignore = false;
   //qDebug()<<"  GraphWindow: updating toolbar done";
@@ -1678,57 +1589,88 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
     return true;
 }
 
-void GraphWindowClass::on_cbToolBox_toggled(bool checked)
+void GraphWindowClass::changeOverlayMode(bool bOn)
 {
-    //qDebug()<< "cbToolBox state togged";
-    ui->swToolBar->setCurrentIndex((int)checked);
+    ui->swToolBox->setVisible(bOn);
+    ui->swToolBar->setCurrentIndex(bOn ? 1 : 0);
+    ui->fBasket->setEnabled(!bOn);
+    ui->actionEqualize_scale_XY->setEnabled(!bOn);
+    ui->menuPalette->setEnabled(!bOn);
+    ui->actionToggle_Explorer_Basket->setEnabled(!bOn);
+    ui->actionToggle_toolbar->setEnabled(!bOn);
 
-    ui->pbToolboxDragMode->setEnabled(checked);
-    ui->cobToolBox->setEnabled(checked);
-    ui->swToolBox->setVisible(checked);
-
-    ui->fRange->setEnabled(!checked);
-    ui->fGrid->setEnabled(!checked);
-    ui->fLog->setEnabled(!checked);
-    ui->cbShowLegend->setEnabled(!checked);
-    ui->leOptions->setEnabled(!checked);
-    ui->menuPalette->setEnabled(!checked);
-    ui->pbAddToBasket->setEnabled(!checked);
-    ui->cbShowBasket->setEnabled(!checked);
-
-    int imode = ui->cobToolBox->currentIndex();
-    if(checked)
+    if (bOn)
     {
-      scene->setActiveTool((AToolboxScene::Tool)imode);
-      startOverlayMode();
+        if (!gvOver->isVisible())
+        {
+            QPixmap map = qApp->screens().first()->grabWindow(RasterWindow->winId());//QApplication::desktop()->winId());
+            gvOver->resize(RasterWindow->width(), RasterWindow->height());
+            gvOver->move(RasterWindow->x(), menuBar()->height());
+            scene->setSceneRect(0, 0, RasterWindow->width(), RasterWindow->height());
+            scene->setBackgroundBrush(map);
+
+            QPointF origin;
+            RasterWindow->PixelToXY(0, 0, origin.rx(), origin.ry());
+            GraphicsRuler *ruler = scene->getRuler();
+            ruler->setOrigin(origin);
+            ruler->setScale(RasterWindow->getXperPixel(), RasterWindow->getYperPixel());
+
+            scene->moveToolToVisible();
+            setFixedSize(this->size());
+            gvOver->show();
+        }
+        scene->moveToolToVisible();
+        scene->update(scene->sceneRect());
+        gvOver->update();
     }
     else
     {
-      endOverlayMode();
+        if (gvOver->isVisible())
+        {
+            gvOver->hide();
+            setFixedSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+            RasterWindow->fCanvas->Update();
+        }
     }
-    gvOver->update();
 }
+
+void GraphWindowClass::on_pbShowRuler_clicked()
+{
+    scene->setActiveTool(AToolboxScene::ToolRuler);
+    ui->swToolBox->setCurrentIndex(0);
+    changeOverlayMode(true);
+}
+
+void GraphWindowClass::ShowProjectionTool()
+{
+    scene->setActiveTool(AToolboxScene::ToolSelBox);
+    ui->swToolBox->setCurrentIndex(1);
+    changeOverlayMode(true);
+}
+
+void GraphWindowClass::on_pbExitToolMode_clicked()
+{
+    changeOverlayMode(false);
+}
+
+//ui->pbToolboxDragMode->setEnabled(checked);
+//ui->fRange->setEnabled(!checked);
+//ui->fGrid->setEnabled(!checked);
+//ui->fLog->setEnabled(!checked);
+//ui->cbShowLegend->setEnabled(!checked);
+//ui->leOptions->setEnabled(!checked);
 
 void GraphWindowClass::on_pbToolboxDragMode_clicked()
 {
-  scene->activateItemDrag();
+    ui->ledAngle->setText("0");
+    ShapeableRectItem *SelBox = scene->getSelBox();
+    SelBox->setTrueAngle(0);
+    scene->activateItemDrag();
 }
 
 void GraphWindowClass::on_pbToolboxDragMode_2_clicked()
 {
   GraphWindowClass::on_pbToolboxDragMode_clicked();
-}
-
-void GraphWindowClass::on_cobToolBox_currentIndexChanged(int index)
-{
-  if (ui->cbToolBox->isChecked())
-  {
-    scene->setActiveTool((AToolboxScene::Tool)index);
-    scene->moveToolToVisible();
-
-    scene->update(scene->sceneRect());
-    gvOver->update();
-  }
 }
 
 void GraphWindowClass::selBoxGeometryChanged()
@@ -1917,640 +1859,187 @@ void GraphWindowClass::on_pbYaveraged_clicked()
 
 void GraphWindowClass::ShowProjection(QString type)
 {
-  ui->cbToolBox->setChecked(false);
-  if (DrawObjects.isEmpty()) return;
+    TH2 * h = Explorer->getObjectForCustomProjection();
+    if (!h) return;
 
-  selBoxControlsUpdated();
+    selBoxControlsUpdated();
+    TriggerGlobalBusy(true);
 
-  //  qDebug()<<"ShowProjection clicked: "<< type;
-  TObject* obj = DrawObjects.first().getPointer();
-  QString PlotType = obj->ClassName();
-  //  qDebug()<<"  Class name/PlotOptions/opt:" << PlotType << DrawObjects.first().getOptions();
-  if (PlotType != "TH2D" && PlotType != "TH2F") return;
+    const int nBinsX = h->GetXaxis()->GetNbins();
+    const int nBinsY = h->GetYaxis()->GetNbins();
+    double x0 = ui->ledXcenter->text().toDouble();
+    double y0 = ui->ledYcenter->text().toDouble();
+    double dx = 0.5*ui->ledWidth->text().toDouble();
+    double dy = 0.5*ui->ledHeight->text().toDouble();
 
-  MW->WindowNavigator->BusyOn(); // -->
+    const ShapeableRectItem *SelBox = scene->getSelBox();
+    double angle = SelBox->getTrueAngle();
+    angle *= 3.1415926535/180.0;
+    double cosa = cos(angle);
+    double sina = sin(angle);
 
-  TH2* h = static_cast<TH2*>(obj);
+    TH1D * hProjection = nullptr;
+    TH1D * hWeights = nullptr;
 
-  int nBinsX = h->GetXaxis()->GetNbins();
-  int nBinsY = h->GetYaxis()->GetNbins();
-  //  qDebug() << "Bins in X and Y" << nBinsX << nBinsY;
-
-  double x0 = ui->ledXcenter->text().toDouble();
-  double y0 = ui->ledYcenter->text().toDouble();  
-  double dx = 0.5*ui->ledWidth->text().toDouble();
-  double dy = 0.5*ui->ledHeight->text().toDouble();
-  //  qDebug() << "Center:"<<x0<<y0<<"dx, dy:"<<dx<<dy;
-
-  const ShapeableRectItem *SelBox = scene->getSelBox();
-  double angle = SelBox->getTrueAngle();
-  //    qDebug() << "True angle"<<angle;
-  angle *= 3.1415926535/180.0;
-  double cosa = cos(angle);
-  double sina = sin(angle);
-
-  if (hProjection) delete hProjection;
-  TH1D* hWeights = 0;
-  if (type=="x" || type=="xAv")
+    if (type=="x" || type=="xAv")
     {
-      int nn;
-      if (ui->cbProjBoxAutobin->isChecked())
-      {
-          int n = h->GetXaxis()->GetNbins();
-          double binLength = (h->GetXaxis()->GetBinCenter(n) - h->GetXaxis()->GetBinCenter(1))/(n-1);
-          nn = 2.0*dx / binLength;
-          ui->sProjBins->setValue(nn);
-      }
-      else nn = ui->sProjBins->value();
-      if (type == "x")
-        hProjection = new TH1D("X-Projection","X1 projection", nn, -dx, +dx);
-      else
+        int nn;
+        if (ui->cbProjBoxAutobin->isChecked())
         {
-          hProjection = new TH1D("X-Av","X1 averaged", nn, -dx, +dx);
-          hWeights    = new TH1D("X-W", "",            nn, -dx, +dx);
+            int n = h->GetXaxis()->GetNbins();
+            double binLength = (h->GetXaxis()->GetBinCenter(n) - h->GetXaxis()->GetBinCenter(1))/(n-1);
+            nn = 2.0*dx / binLength;
+            ui->sProjBins->setValue(nn);
         }
-    }  
-  else if (type=="y" || type=="yAv")
-    {
-      int nn;
-      if (ui->cbProjBoxAutobin->isChecked())
-      {
-          int n = h->GetYaxis()->GetNbins();
-          double binLength = (h->GetYaxis()->GetBinCenter(n) - h->GetYaxis()->GetBinCenter(1))/(n-1);
-          nn = 2.0*dy / binLength;
-          ui->sProjBins->setValue(nn);
-      }
-      else nn = ui->sProjBins->value();
-      if (type == "y")
-        hProjection = new TH1D("Y-Projection","Y1 projection", nn, -dy, +dy);
-      else
-        {
-          hProjection = new TH1D("Y-Av","Y1 averaged", nn, -dy, +dy);
-          hWeights    = new TH1D("Y-W", "",            nn, -dy, +dy);
-        }
-    }
-  else if (type == "dens")
-    {
-      //qDebug() << "Doing density distribution";
-      hProjection = new TH1D("DensDistr","Density distribution", ui->sProjBins->value(), 0, 0);
-    }
-  else
-    {
-      MW->WindowNavigator->BusyOff(); // <--
-      return;
-    }
-
-  for (int iy = 1; iy<nBinsY+1; iy++)
-    for (int ix = 1; ix<nBinsX+1; ix++)
-      {
-        double x = h->GetXaxis()->GetBinCenter(ix);
-        double y = h->GetYaxis()->GetBinCenter(iy);
-        //    qDebug() << "ix, x" << ix << x << "  iy, y " << iy << y;
-
-        //transforming to the selection box coordinates
-        x -= x0;
-        y -= y0;
-
-        // ooposite direction!
-        double nx =  x*cosa + y*sina;
-        double ny = -x*sina + y*cosa;
-        //    qDebug () << "new coords: "<< nx << ny;
-
-        //is it within the borders?
-        if (  nx < -dx || nx > dx || ny < -dy || ny > dy  )
-          {
-            //outside!
-            //h->SetBinContent(ix, iy, 0);
-          }
-        else
-          {
-            double w = h->GetBinContent(ix, iy);
-            if (type == "x") hProjection->Fill(nx, w);
-            if (type == "xAv")
-              {
-                hProjection->Fill(nx, w);
-                hWeights->Fill(nx, 1);
-              }
-            else if (type == "y") hProjection->Fill(ny, w);
-            if (type == "yAv")
-              {
-                hProjection->Fill(ny, w);
-                hWeights->Fill(ny, 1);
-              }
-            else if (type == "dens") hProjection->Fill(w, 1);
-          }
-      }
-
-   if (type == "x" || type == "y") hProjection->GetXaxis()->SetTitle("Distance, mm");
-   else if (type == "dens") hProjection->GetXaxis()->SetTitle("Density, counts");   
-   if (type == "xAv" || type == "yAv") *hProjection = *hProjection / *hWeights;
-
-   DrawObjects.clear();
-   DrawObjects.append(DrawObjectStructure(hProjection, ""));
-   RedrawAll();
-
-   delete hWeights;
-
-   MW->WindowNavigator->BusyOff(); // <--
-}
-
-double GraphWindowClass::runScaleDialog()
-{
-  QDialog* D = new QDialog(this);
-
-  QDoubleValidator* vali = new QDoubleValidator(D);
-  QVBoxLayout* l = new QVBoxLayout(D);
-  QHBoxLayout* l1 = new QHBoxLayout();
-    QLabel* lab1 = new QLabel("Multiply by ");
-    QLineEdit* leM = new QLineEdit("1.0");
-    leM->setValidator(vali);
-    l1->addWidget(lab1);
-    l1->addWidget(leM);
-    QLabel* lab2 = new QLabel(" and divide by ");
-    QLineEdit* leD = new QLineEdit("1.0");
-    leD->setValidator(vali);
-    l1->addWidget(lab2);
-    l1->addWidget(leD);
-  l->addLayout(l1);
-    QPushButton* pb = new QPushButton("Scale");
-    connect(pb, &QPushButton::clicked, D, &QDialog::accept);
-  l->addWidget(pb);
-
-  int ret = D->exec();
-  double res = 1.0;
-  if (ret == QDialog::Accepted)
-    {
-      double Mult = leM->text().toDouble();
-      double Div = leD->text().toDouble();
-      if (Div == 0)
-        {
-          message("Cannot divide by 0!", this);
-        }
-      else
-        {
-          res = Mult / Div;
-        }
-    }
-
-  delete D;
-  return res;
-}
-
-const QPair<double, double> GraphWindowClass::runShiftDialog()
-{
-    QDialog* D = new QDialog(this);
-
-    QDoubleValidator* vali = new QDoubleValidator(D);
-    QVBoxLayout* l = new QVBoxLayout(D);
-    QHBoxLayout* l1 = new QHBoxLayout();
-      QLabel* lab1 = new QLabel("Multiply by: ");
-      QLineEdit* leM = new QLineEdit("1.0");
-      leM->setValidator(vali);
-      l1->addWidget(lab1);
-      l1->addWidget(leM);
-      QLabel* lab2 = new QLabel(" Add: ");
-      QLineEdit* leA = new QLineEdit("0");
-      leA->setValidator(vali);
-      l1->addWidget(lab2);
-      l1->addWidget(leA);
-    l->addLayout(l1);
-      QPushButton* pb = new QPushButton("Shift");
-      connect(pb, &QPushButton::clicked, D, &QDialog::accept);
-    l->addWidget(pb);
-
-    int ret = D->exec();
-    QPair<double, double> res(1.0, 0);
-    if (ret == QDialog::Accepted)
-      {
-        res.first =  leM->text().toDouble();
-        res.second = leA->text().toDouble();
-      }
-
-    delete D;
-    return res;
-}
-
-//#include <QInputDialog>
-void GraphWindowClass::calculateFractionTH1(int row)
-{
-    if (row == -1) return;
-
-    TH1* h = dynamic_cast<TH1*>(Basket[row].DrawObjects.first().getPointer());
-    if (!h)
-    {
-        message("This operation requires TH1 ROOT object", this);
-        return;
-    }
-    TH1* cum = h->GetCumulative(true);
-
-    double integral = h->Integral();
-
-    QDialog D(this);
-    D.setWindowTitle("Integral / fraction calculator");
-
-    QVBoxLayout *l = new QVBoxLayout();
-        QPushButton * pbD = new QPushButton("Dummy");
-    l->addWidget(pbD);
-        QHBoxLayout * hh = new QHBoxLayout();
-            QLabel * lab = new QLabel("Enter threshold:");
-        hh->addWidget(lab);
-            QLineEdit* tT = new QLineEdit();
-        hh->addWidget(tT);
-    l->addLayout(hh);
-        QFrame * f = new QFrame();
-            f->setFrameShape(QFrame::HLine);
-    l->addWidget(f);
-        hh = new QHBoxLayout();
-            lab = new QLabel("Interpolated sum before:");
-        hh->addWidget(lab);
-            QLineEdit* tIb = new QLineEdit();
-        hh->addWidget(tIb);
-            lab = new QLabel("Fraction:");
-        hh->addWidget(lab);
-            QLineEdit* tIbf = new QLineEdit();
-        hh->addWidget(tIbf);
-    l->addLayout(hh);
-        hh = new QHBoxLayout();
-            lab = new QLabel("Interpolated sum after:");
-        hh->addWidget(lab);
-            QLineEdit* tIa = new QLineEdit();
-        hh->addWidget(tIa);
-            lab = new QLabel("Fraction:");
-        hh->addWidget(lab);
-            QLineEdit* tIaf = new QLineEdit();
-        hh->addWidget(tIaf);
-    l->addLayout(hh);
-        hh = new QHBoxLayout();
-            lab = new QLabel("Total sum of bins:");
-        hh->addWidget(lab);
-            QLineEdit* tI = new QLineEdit(QString::number(integral));
-            tI->setReadOnly(true);
-        hh->addWidget(tI);
-    l->addLayout(hh);
-        QPushButton * pb = new QPushButton("Close");
-    l->addWidget(pb);
-    D.setLayout(l);
-
-    pbD->setVisible(false);
-
-    QObject::connect(pb, &QPushButton::clicked, &D, &QDialog::reject);
-    QObject::connect(tT, &QLineEdit::editingFinished, [h, cum, integral, tT, tIb, tIbf, tIa, tIaf]()
-    {
-        bool bOK;
-        double val = tT->text().toDouble(&bOK);
-        if (bOK)
-        {
-            int bins = cum->GetNbinsX();
-            TAxis * ax = cum->GetXaxis();
-            int bin = ax->FindBin(val);
-
-            double result = 0;
-            if (bin > bins)
-                result = cum->GetBinContent(bins);
-            else
-            {
-                double width = h->GetBinWidth(bin);
-                double delta = val - h->GetBinLowEdge(bin);
-
-                double thisBinAdds = h->GetBinContent(bin) * delta / width;
-
-                double prev = (bin == 1 ? 0 : cum->GetBinContent(bin-1));
-                result = prev + thisBinAdds;
-            }
-            tIb->setText(QString::number(result));
-            tIbf->setText(QString::number(result/integral));
-            if (integral != 0) tIa->setText(QString::number(integral - result));
-            else tIa->setText("");
-            if (integral != 0) tIaf->setText(QString::number( (integral - result)/integral ));
-            else tIa->setText("");
-        }
+        else nn = ui->sProjBins->value();
+        if (type == "x")
+            hProjection = new TH1D("X-Projection","X1 projection", nn, -dx, +dx);
         else
         {
-            tIa->clear();
-            tIb->clear();
+            hProjection = new TH1D("X-Av","X1 averaged", nn, -dx, +dx);
+            hWeights    = new TH1D("X-W", "",            nn, -dx, +dx);
         }
-    });
-
-    D.exec();
-
-    delete cum;
-
-    /*
-    const bool bFromLeft = bBefore;
-    const bool bFromRight = !bBefore;
-
-    bool ok;
-    QString text = QInputDialog::getText(this, "Input",
-                                         "Threshold value:", QLineEdit::Normal,
-                                         "", &ok);
-    if (!ok || text.isEmpty()) return;
-
-    double val = text.toDouble(&ok);
-    if (!ok) return;
-
-
-    TH1* cum = h->GetCumulative(bBefore);
-    int bins = cum->GetNbinsX();
-
-    TAxis * ax = cum->GetXaxis();
-    int bin = ax->FindBin(val);
-    Draw(cum, "hist");
-    qDebug() << bin;
-
-    double result = 0;
-    if (bin < 1)
-    {
-        if (bFromRight) result = cum->GetBinContent(1);
     }
-    else if (bin > bins)
+    else if (type=="y" || type=="yAv")
     {
-        if (bFromLeft) result = cum->GetBinContent(bins);
+        int nn;
+        if (ui->cbProjBoxAutobin->isChecked())
+        {
+            int n = h->GetYaxis()->GetNbins();
+            double binLength = (h->GetYaxis()->GetBinCenter(n) - h->GetYaxis()->GetBinCenter(1))/(n-1);
+            nn = 2.0*dy / binLength;
+            ui->sProjBins->setValue(nn);
+        }
+        else nn = ui->sProjBins->value();
+        if (type == "y")
+            hProjection = new TH1D("Y-Projection","Y1 projection", nn, -dy, +dy);
+        else
+        {
+            hProjection = new TH1D("Y-Av","Y1 averaged", nn, -dy, +dy);
+            hWeights    = new TH1D("Y-W", "",            nn, -dy, +dy);
+        }
     }
+    else if (type == "dens")
+        hProjection = new TH1D("DensDistr","Density distribution", ui->sProjBins->value(), 0, 0);
     else
     {
-        double width = h->GetBinWidth(bin);
-        double delta = val - h->GetBinLowEdge(bin);
-
-        if (bFromLeft)
-        {
-            double thisBinAdds = h->GetBinContent(bin) * delta / width;
-
-            double prev = (bin == 1 ? 0 : cum->GetBinContent(bin-1));
-            result = prev + thisBinAdds;
-        }
-        else //from right
-        {
-            delta =  width - delta;
-            double thisBinAdds = h->GetBinContent(bin) * delta / width;
-
-            double prev = (bin == bins ? 0 : cum->GetBinContent(bin+1));
-            result = prev + thisBinAdds;
-        }
+        TriggerGlobalBusy(false);
+        return;
     }
-    qDebug() << "Result:"<<result;
-    */
+
+    for (int iy = 1; iy<nBinsY+1; iy++)
+        for (int ix = 1; ix<nBinsX+1; ix++)
+        {
+            double x = h->GetXaxis()->GetBinCenter(ix);
+            double y = h->GetYaxis()->GetBinCenter(iy);
+
+            //transforming to the selection box coordinates
+            x -= x0;
+            y -= y0;
+
+            //oposite direction
+            double nx =  x*cosa + y*sina;
+            double ny = -x*sina + y*cosa;
+
+            //is it within the borders?
+            if (  nx < -dx || nx > dx || ny < -dy || ny > dy  )
+            {
+                //outside!
+                //h->SetBinContent(ix, iy, 0);
+            }
+            else
+            {
+                double w = h->GetBinContent(ix, iy);
+                if (type == "x") hProjection->Fill(nx, w);
+                if (type == "xAv")
+                {
+                    hProjection->Fill(nx, w);
+                    hWeights->Fill(nx, 1);
+                }
+                else if (type == "y") hProjection->Fill(ny, w);
+                if (type == "yAv")
+                {
+                    hProjection->Fill(ny, w);
+                    hWeights->Fill(ny, 1);
+                }
+                else if (type == "dens") hProjection->Fill(w, 1);
+            }
+        }
+
+    if (type == "x" || type == "y") hProjection->GetXaxis()->SetTitle("Distance, mm");
+    else if (type == "dens") hProjection->GetXaxis()->SetTitle("Density, counts");
+    if (type == "xAv" || type == "yAv") *hProjection = *hProjection / *hWeights;
+
+    MakeCopyOfDrawObjects();
+    MakeCopyOfActiveBasketId();
+
+    ClearBasketActiveId();
+
+    DrawObjects.clear();
+    RegisterTObject(hProjection);
+    DrawObjects  << ADrawObject(hProjection, "hist");
+
+    RedrawAll();
+
+    delete hWeights;
+    TriggerGlobalBusy(false);
 }
 
 void GraphWindowClass::EnforceOverlayOff()
 {
-   ui->cbToolBox->setChecked(false); //update is in on_toggle
+    changeOverlayMode(false);
 }
 
-void GraphWindowClass::ExportData(bool fUseBinCenters)
+QString & GraphWindowClass::getLastOpendDir()
 {
-  TObject *obj = DrawObjects.first().getPointer();
-  if (!obj)
-    {
-      message("Data are no longer available", this);
-      return;
-    }
-
-  QString cn = obj->ClassName();
-  //qDebug() << "Class name:"<<cn;
-  if (cn.startsWith("TH2"))
-    {
-      TObject *obj = DrawObjects.first().getPointer();
-      TH2* h = static_cast<TH2*>(obj);
-      exportTextForTH2(h);
-      return;
-    }
-  else if (cn.startsWith("TF2"))
-    {
-      TObject *obj = DrawObjects.first().getPointer();
-      TF2* f = static_cast<TF2*>(obj);
-      TH2* h = dynamic_cast<TH2*>(f->GetHistogram());
-      exportTextForTH2(h);
-      return;
-    }
-  else if (!cn.startsWith("TH1") && cn!="TGraph" && cn!="TF1")
-    {
-      message("Object type not supported!", this);
-      return;
-    }
-
-  QVector<double> x,y;
-  if (cn.startsWith("TH1") || cn == "TF1")
-    {
-      //1D histogram
-      TH1* h;
-      if (cn.startsWith("TH1")) h = static_cast<TH1*>(obj);
-      else
-        {
-          TF1* f = static_cast<TF1*>(obj);
-          h = f->GetHistogram();
-        }
-
-      //qDebug() << "Histogram name:"<<h->GetName()<<"Entries"<<h->GetEntries()<<"Bins"<<h->GetNbinsX();
-      if (fUseBinCenters)
-        { //bin centers
-          for (int i=1; i<h->GetNbinsX()+1; i++)
-            {
-              x.append(h->GetBinCenter(i));
-              y.append(h->GetBinContent(i));
-            }
-        }
-      else
-        { //bin starts
-          for (int i=1; i<h->GetNbinsX()+2; i++)
-            {
-              x.append(h->GetBinLowEdge(i));
-              y.append(h->GetBinContent(i));
-            }
-        }
-    }
-  else if (cn == "TGraph")
-    {
-      //Graph
-      TGraph* g = static_cast<TGraph*>(obj);
-      //qDebug() << "Graph name:"<<g->GetName()<<"Entries"<<g->GetN();
-      for (int i=0; i<g->GetN(); i++)
-        {
-          double xx, yy;
-          int ok = g->GetPoint(i, xx, yy);
-          if (ok != -1)
-            {
-              x.append(xx);
-              y.append(yy);
-            }
-        }
-    }
-  else
-    {
-      qWarning() << "Unsupported type:"<<cn;
-      return;
-    }
-
-  QFileDialog *fileDialog = new QFileDialog;
-  fileDialog->setDefaultSuffix("txt");
-  QString fileName = fileDialog->getSaveFileName(this, "Export data to ascii file", MW->GlobSet.LastOpenDir+"/"+obj->GetName(), "Text files(*.txt)");
-  if (fileName.isEmpty()) return;
-  MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-  if (QFileInfo(fileName).suffix().isEmpty()) fileName += ".txt";
-  SaveDoubleVectorsToFile(fileName, &x, &y);
-}
-
-void GraphWindowClass::exportTextForTH2(TH2* h)
-{
-  if (!h) return;
-  qDebug() << "Data size:"<< h->GetNbinsX() << "by" << h->GetNbinsY();
-
-  QVector<double> x, y, f;
-  for (int iX=1; iX<h->GetNbinsX()+1; iX++)
-    for (int iY=1; iY<h->GetNbinsX()+1; iY++)
-    {
-      double X = h->GetXaxis()->GetBinCenter(iX);
-      double Y = h->GetYaxis()->GetBinCenter(iY);
-      x.append(X);
-      y.append(Y);
-
-      int iBin = h->GetBin(iX, iY);
-      double F = h->GetBinContent(iBin);
-      f.append(F);
-      //qDebug() << iX<<iY<<iBin << "coords:" << X << Y << "val:" << F;
-    }
-
-  QFileDialog *fileDialog = new QFileDialog;
-  fileDialog->setDefaultSuffix("txt");
-  QString fileName = fileDialog->getSaveFileName(this, "Export data to ascii file", MW->GlobSet.LastOpenDir+"/"+h->GetTitle(), "Text files(*.txt)");
-  if (fileName.isEmpty()) return;
-  MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-  if (QFileInfo(fileName).suffix().isEmpty()) fileName += ".txt";
-  SaveDoubleVectorsToFile(fileName, &x, &y, &f);
-}
-
-void GraphWindowClass::on_actionSave_root_object_triggered()
-{
-  TObject *obj = DrawObjects.first().getPointer();
-  QString cn = obj->ClassName();
-  if (!obj)
-    {
-      message("Object no longer exists!", this);
-      return;
-    }
-
-  //qDebug() << "Class name:"<<cn;
-  if (cn.startsWith("TH1") || cn.startsWith("TF1"))
-    {
-      TH1* hist = 0;
-
-      if (cn.startsWith("TH1")) hist = static_cast<TH1*>(obj);
-      else
-        {
-          TF1* fun = static_cast<TF1*>(obj);
-          hist = fun->GetHistogram();
-        }
-
-      if (hist)
-        {
-          QFileDialog *fileDialog = new QFileDialog;
-          fileDialog->setDefaultSuffix("root");
-          QString fileName = fileDialog->getSaveFileName(this, "Save TH1 histogram", MW->GlobSet.LastOpenDir, "Root files(*.root)");
-          if (fileName.isEmpty()) return;
-          hist->SaveAs(fileName.toLatin1().data());
-        }
-      else message("Histogram does not exist!",this);
-    }
-  else if (cn.startsWith("TH2") || cn.startsWith("TF2"))
-    {
-      TH2* hist = 0;
-
-      if (cn.startsWith("TH2")) hist = static_cast<TH2*>(obj);
-      else
-        {
-          TF2* fun = static_cast<TF2*>(obj);
-          hist = dynamic_cast<TH2*>(fun->GetHistogram());
-        }
-
-      if (hist)
-        {
-          QFileDialog *fileDialog = new QFileDialog;
-          fileDialog->setDefaultSuffix("root");
-          QString fileName = fileDialog->getSaveFileName(this, "Save TH2 histogram", MW->GlobSet.LastOpenDir, "Root files(*.root)");
-          if (fileName.isEmpty()) return;
-          hist->SaveAs(fileName.toLatin1().data());
-        }
-      else message("Histogram does not exist!",this);
-    }
-  else
-    {
-      message("Object type not supported!", this);
-      return;
-    }
-}
-
-void GraphWindowClass::on_cbShowBasket_toggled(bool checked)
-{
-   int w = ui->fBasket->width();
-   if (!checked) w = -w;
-   this->resize(this->width()+w, this->height());
+    return MW->GlobSet.LastOpenDir;
 }
 
 void GraphWindowClass::on_pbAddToBasket_clicked()
 {   
-   if (DrawObjects.isEmpty()) return;
+    if (DrawObjects.isEmpty()) return;
 
-     //qDebug() << "Add item to basket triggered";
-     //for (int i=0; i<DrawObjects.size(); i++)
-     //  qDebug() << i << DrawObjects[i].getPointer()->ClassName();
+    bool ok;
+    int row = Basket->size();
+    QString name = "Item"+QString::number(row);
+    QString text = QInputDialog::getText(this, "New basket item",
+                                         "Enter name:", QLineEdit::Normal,
+                                         name, &ok);
+    if (!ok || text.isEmpty()) return;
 
-   bool ok;
-   int row = Basket.size();
-   QString name = "Item"+QString::number(row);
-   QString text = QInputDialog::getText(this, "New basket item",
-                                              "Enter name:", QLineEdit::Normal,
-                                              name, &ok);
-   if (!ok || text.isEmpty()) return;
-
-   AddCurrentToBasket(text);
+    AddCurrentToBasket(text);
 }
 
-void GraphWindowClass::AddCurrentToBasket(QString name)
+void GraphWindowClass::AddCurrentToBasket(const QString & name)
 {
-  if (DrawObjects.isEmpty()) return;
-
-  name = name.simplified();
-  Basket.append(BasketItemClass(name, &DrawObjects));
-
-  ui->cbShowBasket->setChecked(true);
-  UpdateBasketGUI();
+    if (DrawObjects.isEmpty()) return;
+    Basket->add(name.simplified(), DrawObjects);
+    ui->actionToggle_Explorer_Basket->setChecked(true);
+    UpdateBasketGUI();
 }
 
 void GraphWindowClass::AddLegend(double x1, double y1, double x2, double y2, QString title)
 {
-  TLegend* leg = RasterWindow->fCanvas->BuildLegend(x1, y1, x2, y2, title.toLatin1());
+    TLegend* leg = RasterWindow->fCanvas->BuildLegend(x1, y1, x2, y2, title.toLatin1());
 
-  if (CurrentBasketItem < 0) //-1 - Basket is off; -2 -basket is Off, using tmp drawing (e.g. overlap of two histograms)
-  {
-      RegisterTObject(leg);
-      DrawObjects.append(DrawObjectStructure(leg, "same"));
-  }
-  else
-  {
-      //do not register for basket - they have their own system
-      Basket[CurrentBasketItem].DrawObjects.append(DrawObjectStructure(leg, "same"));
-  }
-  RedrawAll();
+    RegisterTObject(leg);
+    DrawObjects.append(ADrawObject(leg, "same"));
 
-  //UpdateRootCanvas();
+    RedrawAll();
 }
 
-//#include "TLegendEntry.h"
 void GraphWindowClass::SetLegendBorder(int color, int style, int size)
 {
-    QVector<DrawObjectStructure> &DrObj = (CurrentBasketItem < 0) ? DrawObjects : Basket[CurrentBasketItem].DrawObjects;
-    for (int i=0; i<DrObj.size(); i++)
+    for (int i=0; i<DrawObjects.size(); i++)
     {
-        QString cn = DrObj[i].getPointer()->ClassName();
+        QString cn = DrawObjects[i].Pointer->ClassName();
         //qDebug() << cn;
         if (cn == "TLegend")
         {
-            TLegend* le = dynamic_cast<TLegend*>(DrObj[i].getPointer());
+            TLegend* le = dynamic_cast<TLegend*>(DrawObjects[i].Pointer);
             le->SetLineColor(color);
             le->SetLineStyle(style);
             le->SetLineWidth(size);
-
-            //TList* l = le->GetListOfPrimitives();
-            //qDebug() << l->GetEntries() << l->At(0)->ClassName()<<((TLegendEntry*)l->At(1))->GetLabel();
 
             RedrawAll();
             return;
@@ -2566,7 +2055,7 @@ void GraphWindowClass::AddText(QString text, bool bShowFrame, int Alignment_0Lef
 
 void GraphWindowClass::ExportTH2AsText(QString fileName)
 {
-    TObject *obj = DrawObjects.first().getPointer();
+    TObject *obj = DrawObjects.first().Pointer;
     if (!obj) return;
 
     QString cn = obj->ClassName();
@@ -2594,7 +2083,7 @@ void GraphWindowClass::ExportTH2AsText(QString fileName)
 
 QVector<double> GraphWindowClass::Get2DArray()
 {
-    TObject *obj = DrawObjects.first().getPointer();
+    TObject *obj = DrawObjects.first().Pointer;
     if (!obj) return QVector<double>();
 
     QString cn = obj->ClassName();
@@ -2615,822 +2104,266 @@ QVector<double> GraphWindowClass::Get2DArray()
 
 void GraphWindowClass::UpdateBasketGUI()
 {
-    //qDebug() << "Update basket triggered";
-  ui->lwBasket->clear();
-  for (int i=0; i<Basket.size(); i++)
+    lwBasket->clear();
+    lwBasket->addItems(Basket->getItemNames());
+
+    if (ActiveBasketItem >= Basket->size()) ActiveBasketItem = -1;
+
+    for (int i=0; i < lwBasket->count(); i++)
     {
-      QString str = Basket[i].Name + " " + Basket[i].Type;
-      ui->lwBasket->addItem(str);
+        QListWidgetItem * item = lwBasket->item(i);
+        if (i == ActiveBasketItem)
+        {
+            item->setForeground(QBrush(Qt::cyan));
+            item->setBackground(QBrush(Qt::lightGray));
+        }
+        else
+        {
+            item->setForeground(QBrush(Qt::black));
+            item->setBackground(QBrush(Qt::white));
+        }
+    }
+    ui->pbUpdateInBasket->setEnabled(ActiveBasketItem >= 0);
+
+    if (ActiveBasketItem < 0) HighlightUpdateBasketButton(false);
+}
+
+void GraphWindowClass::onBasketItemDoubleClicked(QListWidgetItem *)
+{
+    //qDebug() << "Row double clicked:"<<ui->lwBasket->currentRow();
+    switchToBasket(lwBasket->currentRow());
+}
+
+void GraphWindowClass::deletePressed()
+{
+    if ((lwBasket->rect().contains(lwBasket->mapFromGlobal(QCursor::pos()))))
+    {
+        removeAllSelectedBasketItems();
     }
 }
 
-TGraph* HistToGraph(TH1* h)
+void GraphWindowClass::MakeCopyOfDrawObjects()
 {
-  if (!h) return 0;
-  QVector<double> x, f;
-  for (int i=1; i<h->GetXaxis()->GetNbins()-1; i++)
-    {
-      x.append(h->GetBinCenter(i));
-      f.append(h->GetBinContent(i));
-    }
-  return new TGraph(x.size(), x.data(), f.data());
+    PreviousDrawObjects = DrawObjects;
+
+    // without this fix cloning of legend objects is broken
+    if (!PreviousDrawObjects.isEmpty())
+        qDebug() << "gcc optimizer fix:" << PreviousDrawObjects.first().Pointer;
 }
 
-BasketItemClass::BasketItemClass(QString name, QVector<DrawObjectStructure> *drawObjects)
+void GraphWindowClass::ClearCopyOfDrawObjects()
 {
-    //qDebug() << "...basket item constructor triggered";
-  Name = name;
-  Type = drawObjects->first().getPointer()->ClassName();
-    //qDebug() << "...name/type:"<<Name<<Type;
-
-    //qDebug() << "...objects in the item:"<<drawObjects->size();
-  for (int i=0; i<drawObjects->size(); i++)
-    {
-        //qDebug() << "......"<<i;
-      TObject* obj = 0;
-      QString type = (*drawObjects)[i].getPointer()->ClassName();
-        //qDebug() << "......Class name:"<<type;
-      QString options = (*drawObjects)[i].getOptions();
-        //qDebug() << "......options:"<<options;
-
-      if      (type == "TH1D")
-      {
-          obj = new TH1D( *(TH1D*)(*drawObjects)[i].getPointer());
-          //TH1D* d = (TH1D*)obj;
-          //d->SetName("blabla");
-          //gROOT->RecursiveRemove(obj);
-      }
-      else if (type == "TLegend") obj = (TLegend*)(*drawObjects)[i].getPointer()->Clone("new");
-      else if (type == "TPaveLabel") obj = (TPaveLabel*)(*drawObjects)[i].getPointer()->Clone("new");
-      else if (type == "TPaveText") obj = (TPaveText*)(*drawObjects)[i].getPointer()->Clone("new");
-      else if (type == "TH1I") obj = new TH1I( *(TH1I*)(*drawObjects)[i].getPointer());
-      else if (type == "TH1F") obj = new TH1F( *(TH1F*)(*drawObjects)[i].getPointer());
-      else if (type == "TH2D") obj = new TH2D( *(TH2D*)(*drawObjects)[i].getPointer());
-      else if (type == "TH2F") obj = new TH2F( *(TH2F*)(*drawObjects)[i].getPointer());
-      else if (type == "TH2I") obj = new TH2I( *(TH2I*)(*drawObjects)[i].getPointer());
-      else if (type == "TH2C") obj = new TH2C( *(TH2C*)(*drawObjects)[i].getPointer());
-      else if (type == "TH3F") obj = (TH3F*)(*drawObjects)[i].getPointer()->Clone();
-      else if (type == "TH3D") obj = (TH3D*)(*drawObjects)[i].getPointer()->Clone();
-      else if (type == "TH3I") obj = (TH3I*)(*drawObjects)[i].getPointer()->Clone();
-      else if (type == "TProfile") obj = new TProfile( *(TProfile*)(*drawObjects)[i].getPointer());
-      else if (type == "TProfile2D") obj = new TProfile2D( *(TProfile2D*)(*drawObjects)[i].getPointer());
-
-      else if (type == "TEllipse") obj = new TEllipse( *(TEllipse*)(*drawObjects)[i].getPointer());
-      else if (type == "TBox") obj = new TBox( *(TBox*)(*drawObjects)[i].getPointer());
-      else if (type == "TPolyLine") obj = new TPolyLine( *(TPolyLine*)(*drawObjects)[i].getPointer());
-      else if (type == "TLine") obj = new TLine( *(TLine*)(*drawObjects)[i].getPointer());
-
-      //else if (type == "TF1") obj = new TF1( *(TF1*)(*drawObjects)[i].getPointer());
-      else if (type == "TF1")
-        {
-          //does not work normal way - e.g. recalculated LRFs will replace old ones even in the copied object
-          TF1* f = (TF1*)(*drawObjects)[i].getPointer();
-          TGraph* g = HistToGraph( f->GetHistogram() );
-          g->GetXaxis()->SetTitle( f->GetHistogram()->GetXaxis()->GetTitle() );
-          g->GetYaxis()->SetTitle( f->GetHistogram()->GetYaxis()->GetTitle() );
-          g->SetLineStyle( f->GetLineStyle());
-          g->SetLineColor(f->GetLineColor());
-          g->SetLineWidth(f->GetLineWidth());
-          //g->SetMarkerStyle(f->GetMarkerStyle());
-          //g->SetMarkerColor(f->GetMarkerColor());
-          //g->SetMarkerSize(f->GetMarkerSize());
-          g->SetFillColor(0);
-          g->SetFillStyle(0);
-          obj = g;
-          if (!options.contains("same", Qt::CaseInsensitive))
-              if (!options.contains("AL", Qt::CaseInsensitive))
-                  options += "AL";
-          Type = g->ClassName();
-        }
-      else if (type == "TF2")
-        {
-          //does not work normal way - e.g. recalculated LRFs will replace old ones even in the copied object
-          //obj = new TF2( *(TF2*)(*drawObjects)[i].getPointer());
-
-          //does not work this way too - conflict 1D-2D histograms
-          /*
-          TF2* f = (TF2*)(*drawObjects)[i].getPointer();
-          TGraph* g = HistToGraph( f->GetHistogram() );
-          qDebug() << g;
-          g->SetLineStyle( f->GetLineStyle());
-          g->SetLineColor(f->GetLineColor());
-          g->SetLineWidth(f->GetLineWidth());
-          obj = g;
-          //options += "AL";
-          Type = g->ClassName();
-          */
-          TF2* f = (TF2*)(*drawObjects)[i].getPointer();
-          TH1* h = f->CreateHistogram();
-          obj = h;
-          Type = h->ClassName();
-        }
-
-      else if (type == "TGraph2D")    obj = new TGraph2D( *(TGraph2D*)(*drawObjects)[i].getPointer());     
-      //else if (type == "TGraph")      obj = new TGraph( *(TGraph*)(*drawObjects)[i].getPointer());
-      else if (type == "TGraph")      obj = (TGraph*)(*drawObjects)[i].getPointer()->Clone("new");
-      else if (type == "TGraphErrors")      obj = new TGraphErrors( *(TGraphErrors*)(*drawObjects)[i].getPointer());
-      else if (type == "TMultiGraph")
-        {
-          //obj = new TMultiGraph( *(TMultiGraph*)(*drawObjects)[i].getPointer());
-          //line above does not compiles - ROOT bug in copy constructor implementation
-          TMultiGraph* newm = new TMultiGraph();
-
-          TMultiGraph* m = dynamic_cast<TMultiGraph*>((*drawObjects)[i].getPointer());
-          TList* l = m->GetListOfGraphs();
-          for (int i=0; i<l->GetEntries(); i++)
-            {
-                //qDebug() << i;
-              const TGraph* gOld = dynamic_cast<const TGraph*>(l->At(i));
-              if (gOld)
-                {
-                  TGraph* g = new TGraph(*gOld);
-                  g->SetFillColor(0);
-                  g->SetFillStyle(0);
-                  if (g) newm->Add(g);
-                }
-            }
-          obj = newm;
-        }      
-      else
-        {
-          message("Non-implemented object type: "+type);
-          exit(-777);
-        }
-
-      TNamed* nn = dynamic_cast<TNamed*>(obj);
-      if (nn) nn->SetTitle(name.toLocal8Bit().constData());
-
-        //qDebug() << "......copied object class name:"<<obj->ClassName();
-      this->DrawObjects.append(DrawObjectStructure(obj, options));
-        //qDebug() << "......";
-    }
-
-  //qDebug() << "...basked item created";
+    PreviousDrawObjects.clear();
+    //ui->pbBackToLast->setVisible(false);
 }
 
-BasketItemClass::~BasketItemClass()
+void GraphWindowClass::ClearBasketActiveId()
 {
-    //cannot delete using pointers here
+    ActiveBasketItem = -1;
 }
 
-void BasketItemClass::clearObjects()
+void GraphWindowClass::MakeCopyOfActiveBasketId()
 {
-   for (int i=0; i<DrawObjects.size(); i++)
-       delete DrawObjects[i].getPointer();
-   DrawObjects.clear();
+    PreviousActiveBasketItem = ActiveBasketItem;
 }
 
-void GraphWindowClass::on_lwBasket_itemDoubleClicked(QListWidgetItem *)
+void GraphWindowClass::RestoreBasketActiveId()
 {
-   //qDebug() << "Row double clicked:"<<ui->lwBasket->currentRow();
-   CurrentBasketItem = ui->lwBasket->currentRow();
-   RedrawAll();
+    ActiveBasketItem = PreviousActiveBasketItem;
 }
 
-void GraphWindowClass::on_pbBasketBackToLast_clicked()
+void GraphWindowClass::ClearCopyOfActiveBasketId()
 {
-   DrawObjects = MasterDrawObjects;
-   CurrentBasketItem = -1;
-   BasketMode = 0;
-   RedrawAll();
-   ui->lwBasket->clearSelection();
+    PreviousActiveBasketItem = -1;
 }
 
-void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
+void GraphWindowClass::BasketCustomContextMenuRequested(const QPoint &pos)
 {
-  QMenu BasketMenu;
-  int row = -1;
-
-  //QString shownItemType;
-  QListWidgetItem* temp = ui->lwBasket->itemAt(pos);
-
-  QAction* switchToThis = 0;
-  QAction* onTop = 0;
-  QAction* del = 0;
-  QAction* rename = 0;
-  QAction* scale = 0;
-  QAction* shift = 0;
-  QAction* uniMap = 0;
-  QAction* gaussFit = 0;
-  QAction* setLine = 0;
-  QAction* setMarker = 0;
-  QAction* drawMenu = 0;
-  QAction* drawIntegral = 0;
-  QAction* interpolate = 0;
-  QAction* median = 0;
-  QAction* titleX = 0;
-  QAction* titleY = 0;
-  QAction* splineFit = 0;
-  QAction* projX = 0;
-  QAction* projY = 0;
-  QAction* fraction = 0;
-
-  if (temp)
+    if (lwBasket->selectedItems().size() > 1)
     {
-      //menu triggered at a valid item
-      row = ui->lwBasket->row(temp);
-
-      BasketMenu.addSeparator();      
-      onTop = BasketMenu.addAction("Show on top of the main draw");
-      switchToThis = BasketMenu.addAction("Switch to this");
-      BasketMenu.addSeparator();
-      setLine = BasketMenu.addAction("Set line attributes");
-      setMarker = BasketMenu.addAction("Set marker attributes");
-      drawMenu = BasketMenu.addAction("Root menu");
-      BasketMenu.addSeparator();
-      rename = BasketMenu.addAction("Rename");
-      scale = BasketMenu.addAction("Scale");
-      shift = BasketMenu.addAction("Shift X scale");
-      if (!MasterDrawObjects.isEmpty())
-          if ( QString(MasterDrawObjects.first().getPointer()->ClassName()) == "TH2D")
-              if (Basket.at(row).Type == "TH2D")
-                 uniMap = BasketMenu.addAction("Use as unif. correction map");
-      if (Basket.at(row).Type.startsWith("TH1"))
-      {
-             gaussFit = BasketMenu.addAction("Fit with Gauss");
-             median = BasketMenu.addAction("Apply median filter");
-             drawIntegral = BasketMenu.addAction("Draw integral");
-             interpolate = BasketMenu.addAction("Interpolate");
-             fraction = BasketMenu.addAction("Calculate fraction before/after");
-      }
-      if (Basket.at(row).Type.startsWith("TH2"))
-      {
-             projX = BasketMenu.addAction("X projection");
-             projY = BasketMenu.addAction("Y projection");
-      }
-      if (Basket.at(row).Type == "TGraph" || Basket.at(row).Type == "TProfile")
-      {
-             splineFit = BasketMenu.addAction("Fit with B-spline");
-      }
-      BasketMenu.addSeparator();
-      titleX = BasketMenu.addAction("Edit title X");
-      titleY = BasketMenu.addAction("Edit title Y");
-      BasketMenu.addSeparator();
-      del = BasketMenu.addAction("Delete");
-      BasketMenu.addSeparator();
-    }  
-  BasketMenu.addSeparator();
-  QAction* save = BasketMenu.addAction("Save basket to file");
-  BasketMenu.addSeparator();
-  QAction* append = BasketMenu.addAction("Append basket file");
-  QAction* appendTxt = BasketMenu.addAction("Append graph from text file");
-  QAction* appendTxtEr = BasketMenu.addAction("Append graph+errorbars from text file");
-  QAction* appendRootHistsAndGraphs = BasketMenu.addAction("Append graphs and histograms from ROOT file");
-
-  BasketMenu.addSeparator();
-  QAction* clear = BasketMenu.addAction("Clear basket");
-
-  QAction* selectedItem = BasketMenu.exec(ui->lwBasket->mapToGlobal(pos));
-  if (!selectedItem) return; //nothing was selected
-
-  //gStyle->SetOptTitle(1);
-  if (selectedItem == switchToThis)
-    {
-      CurrentBasketItem = row;
-      RedrawAll();
+        contextMenuForBasketMultipleSelection(pos);
+        return;
     }
-  else if (selectedItem == drawMenu)
-    {
-      TObject* obj = Basket[row].DrawObjects.first().getPointer();
 
-      TH1* h = dynamic_cast<TH1*>(obj);
-      if (h)
+    QMenu BasketMenu;
+
+    int row = -1;
+    QListWidgetItem* temp = lwBasket->itemAt(pos);
+
+    QAction* switchToThis = 0;
+    QAction* onTop = 0;
+    QAction* del = 0;
+    QAction* rename = 0;
+
+    if (temp)
+    {
+        //menu triggered at a valid item
+        row = lwBasket->row(temp);
+
+        BasketMenu.addSeparator();
+        onTop = BasketMenu.addAction("Show on top of the main draw");
+        switchToThis = BasketMenu.addAction("Switch to this");
+        BasketMenu.addSeparator();
+        rename = BasketMenu.addAction("Rename");
+        BasketMenu.addSeparator();
+        del = BasketMenu.addAction("Delete");
+        del->setShortcut(Qt::Key_Delete);
+        BasketMenu.addSeparator();
+    }
+    BasketMenu.addSeparator();
+    QAction* append = BasketMenu.addAction("Append basket file");
+    BasketMenu.addSeparator();
+    QAction* appendTxt = BasketMenu.addAction("Append graph from text file");
+    QAction* appendTxtEr = BasketMenu.addAction("Append graph with error bars from text file");
+    QAction* appendRootHistsAndGraphs = BasketMenu.addAction("Append graphs / histograms from a ROOT file");
+    BasketMenu.addSeparator();
+    QAction* save = BasketMenu.addAction("Save basket to file");
+    BasketMenu.addSeparator();
+    QAction* clear = BasketMenu.addAction("Clear basket");
+
+    //------
+
+    QAction* selectedItem = BasketMenu.exec(lwBasket->mapToGlobal(pos));
+    if (!selectedItem) return; //nothing was selected
+
+    if (selectedItem == switchToThis)
+        switchToBasket(row);
+    else if (selectedItem == clear)
+    {
+        QMessageBox msgBox;
+        msgBox.setText("Clear basket cannot be undone!");
+        msgBox.setInformativeText("Clear basket?");
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::Cancel);
+        int ret = msgBox.exec();
+        if (ret == QMessageBox::Yes)
+            ClearBasket();
+    }
+    else if (selectedItem == save)
+    {
+        QString fileName = QFileDialog::getSaveFileName(this, "Save basket to a file", MW->GlobSet.LastOpenDir, "Root files (*.root)");
+        if (!fileName.isEmpty())
         {
-          h->DrawPanel();
-          return;
+            MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+            if (QFileInfo(fileName).suffix().isEmpty()) fileName += ".root";
+            Basket->saveAll(fileName);
         }
-      TGraph* g = dynamic_cast<TGraph*>(obj);
-      if (g)
+    }
+    else if (selectedItem == append)
+    {
+        bool bDrawEmpty = DrawObjects.isEmpty();
+        const QString fileName = QFileDialog::getOpenFileName(this, "Append all from a basket file", MW->GlobSet.LastOpenDir, "Root files (*.root)");
+        if (!fileName.isEmpty())
         {
-          g->DrawPanel();
-          return;
+            MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+            QString err = Basket->appendBasket(fileName);
+            if (!err.isEmpty()) message(err, this);
+            UpdateBasketGUI();
+            if (bDrawEmpty) switchToBasket(0);
         }
-
-      message("Not supported for this object type", this);
     }
-  else if (selectedItem == setMarker)
-  {
-      TObject* obj = Basket[row].DrawObjects.first().getPointer();
-      TAttMarker* la = dynamic_cast<TAttMarker*>(obj);      
-      if (la)
-      {
-         int color = la->GetMarkerColor();
-         int siz = la->GetMarkerSize();
-         int style = la->GetMarkerStyle();
-         ARootMarkerConfigurator* rlc = new ARootMarkerConfigurator(&color, &siz, &style);
-         int res = rlc->exec();
-         if (res != 0)
-         {
-             la->SetMarkerColor(color);
-             la->SetMarkerSize(siz);
-             la->SetMarkerStyle(style);
-             la->Modify();
-             SetModifiedFlag();
-             UpdateRootCanvas();
-         }
-      }
-      else  message("Not supported for this object type", this);
-  }
-  else if (selectedItem == setLine)
-  {
-      TObject* obj = Basket[row].DrawObjects.first().getPointer();
-      TAttLine* la = dynamic_cast<TAttLine*>(obj);
-      if (la)
-      {
-         int color = la->GetLineColor();
-         int wid = la->GetLineWidth();
-         int style = la->GetLineStyle();
-         ARootLineConfigurator* rlc = new ARootLineConfigurator(&color, &wid, &style);
-         int res = rlc->exec();
-         if (res != 0)
-         {
-             la->SetLineColor(color);
-             la->SetLineWidth(wid);
-             la->SetLineStyle(style);
-             la->Modify();
-             SetModifiedFlag();
-             UpdateRootCanvas();
-         }
-      }
-      else  message("Not supported for this object type", this);
-  }
-  else if (selectedItem == clear)
+    else if (selectedItem == appendRootHistsAndGraphs)
     {
-      QMessageBox msgBox;
-      msgBox.setText("Clear basket cannot be undone!");
-      msgBox.setInformativeText("Clear basket?");
-      msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
-      msgBox.setDefaultButton(QMessageBox::Cancel);
-      int ret = msgBox.exec();
-      if (ret == QMessageBox::Yes)
-      {
-          ClearBasket();
-          //UpdateBasketGUI();
-          on_pbBasketBackToLast_clicked();
-      }
-    }
-  else if (selectedItem == save)
-      SaveBasket();
-  else if (selectedItem == append)
-    {
-      AppendBasket();
-      UpdateBasketGUI();
-    }
-  else if (selectedItem == appendRootHistsAndGraphs)
-  {
-      AppendRootHistsOrGraphs();
-      UpdateBasketGUI();
-  }
-  else if (selectedItem == appendTxt)
-    {
-      qDebug() << "Appending txt file as graph to basket";
-      QString fileName = QFileDialog::getOpenFileName(this, "Append graph from ascii file to Basket", MW->GlobSet.LastOpenDir, "Data files (*.txt *.dat); All files (*.*)");
-      if (fileName.isEmpty()) return;
-      MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-      QString name(QFileInfo(fileName).baseName());
-      QVector<double> x, y;
-      int res = LoadDoubleVectorsFromFile(fileName, &x, &y);
-      if (res == 0)
+        const QString fileName = QFileDialog::getOpenFileName(this, "Append hist and graph objects from ROOT file", MW->GlobSet.LastOpenDir, "Root files (*.root)");
+        if (!fileName.isEmpty())
         {
-          TGraph* gr = new TGraph(x.size(), x.data(), y.data());
-          gr->SetMarkerStyle(20);
-          QVector<DrawObjectStructure>* drawObjects = new QVector<DrawObjectStructure>;
-          drawObjects->append(DrawObjectStructure(gr, "APL"));
-          Basket.append(BasketItemClass(name, drawObjects));
+            MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+            Basket->appendRootHistGraphs(fileName);
+            UpdateBasketGUI();
         }
-      else message("Format error: Should be columns of X Y data", this);
-      UpdateBasketGUI();
     }
-  else if (selectedItem == appendTxtEr)
+    else if (selectedItem == appendTxt)
     {
-      qDebug() << "Appending txt file as graph+errors to basket";
-      QString fileName = QFileDialog::getOpenFileName(this, "Append graph from ascii file to Basket", MW->GlobSet.LastOpenDir, "Data files (*.txt *.dat); All files (*.*)");
-      if (fileName.isEmpty()) return;
-      MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-      QString name(QFileInfo(fileName).baseName());
-      QVector<double> x, y, err;
-      int res = LoadDoubleVectorsFromFile(fileName, &x, &y, &err);
-      if (res == 0)
-        {
-          TGraphErrors* gr = new TGraphErrors(x.size(), x.data(), y.data(), 0, err.data());
-          gr->SetMarkerStyle(20);
-          QVector<DrawObjectStructure>* drawObjects = new QVector<DrawObjectStructure>;
-          drawObjects->append(DrawObjectStructure(gr, "APL"));
-          Basket.append(BasketItemClass(name, drawObjects));
-        }
-      else message("Format error: Should be columns of data X Y and optional error", this);
-      UpdateBasketGUI();
+        QString fileName = QFileDialog::getOpenFileName(this, "Append graph from ascii file to basket", MW->GlobSet.LastOpenDir, "Data files (*.txt *.dat); All files (*.*)");
+        if (fileName.isEmpty()) return;
+        MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+        const QString res = Basket->appendTxtAsGraph(fileName);
+        if (!res.isEmpty()) message(res, this);
+        else
+            switchToBasket(Basket->size() - 1);
     }
-  else if (selectedItem == del)
+    else if (selectedItem == appendTxtEr)
     {
-      if (row == -1) return; //protection
-      Basket[row].clearObjects();
-      Basket.remove(row);
-      UpdateBasketGUI();
-      on_pbBasketBackToLast_clicked();
+        QString fileName = QFileDialog::getOpenFileName(this, "Append graph with errors from ascii file to basket", MW->GlobSet.LastOpenDir, "Data files (*.txt *.dat); All files (*.*)");
+        if (fileName.isEmpty()) return;
+        MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+        const QString res = Basket->appendTxtAsGraphErrors(fileName);
+        if (!res.isEmpty()) message(res, this);
+        else
+            switchToBasket(Basket->size() - 1);
     }
-  else if (selectedItem == rename)
+    else if (selectedItem == del)
     {
-      if (row == -1) return; //protection
-      bool ok;
-      QString text = QInputDialog::getText(this, "Rename basket item",
-                                                 "Enter new name:", QLineEdit::Normal,
-                                                 Basket[row].Name, &ok);      
-      if (ok && !text.isEmpty())
-        {
-          Basket[row].Name = text.simplified();
-          TObject* obj = Basket[row].DrawObjects.first().getPointer();
-          if (obj)
-            {
-              TNamed* nn = dynamic_cast<TNamed*>(obj);
-              if (nn) nn->SetTitle(Basket[row].Name.toLocal8Bit().constData());
-            }
-        }
-      UpdateBasketGUI();
+        Basket->remove(row);
+        ActiveBasketItem = -1;
+        ClearCopyOfActiveBasketId();
+        UpdateBasketGUI();
     }
-  else if (selectedItem == onTop)
-      Basket_DrawOnTop(row);
-  else if (selectedItem == scale)
+    else if (selectedItem == rename)
     {
-      if (row == -1) return; //protection
-      if (DrawObjects.isEmpty()) return; //protection
-      TObject* obj = Basket[row].DrawObjects.first().getPointer();
-      if (obj)
-        {
-          QString name = obj->ClassName();
-          QList<QString> impl;
-          impl << "TGraph" << "TGraphErrors"  << "TH1I" << "TH1D" << "TH1F" << "TH2I"<< "TH2D"<< "TH2D";
-          if (!impl.contains(name))
-           {
-             message("Not implemented for this object", this);
-             return;
-           }
+        if (row == -1) return; //protection
+        bool ok;
+        QString text = QInputDialog::getText(this, "Rename basket item",
+                                             "Enter new name:", QLineEdit::Normal,
+                                             Basket->getName(row), &ok);
+        if (ok && !text.isEmpty())
+            Basket->rename(row, text.simplified());
+        UpdateBasketGUI();
+    }
+    else if (selectedItem == onTop)
+        Basket_DrawOnTop(row);
+}
 
-          //double sf = QInputDialog::getDouble(this, "Input dialog", "Scaling factor = ", 1.0, -2147483647, 2147483647, 5, &fIn);
-          //if (!fIn) return;
-          double sf = runScaleDialog();
-          if (sf == 1.0) return;
+void GraphWindowClass::BasketReorderRequested(const QVector<int> &indexes, int toRow)
+{
+    Basket->reorder(indexes, toRow);
+    ActiveBasketItem = -1;
+    ClearCopyOfActiveBasketId();
+    UpdateBasketGUI();
+}
 
-          if (name == "TGraph")
-            {
-              TGraph* gr = dynamic_cast<TGraph*>(obj);
-              TF2 f("aaa", "[0]*y",0,1);
-              f.SetParameter(0, sf);
-              gr->Apply(&f);
-            }
-          if (name == "TGraphErrors")
-            {
-              TGraphErrors* gr = dynamic_cast<TGraphErrors*>(obj);
-              TF2 f("aaa", "[0]*y",0,1);
-              f.SetParameter(0, sf);
-              gr->Apply(&f);
-            }
-          if (name.startsWith("TH1"))
-            {
-              TH1* h = dynamic_cast<TH1*>(obj);
-              //h->Sumw2();
-              h->Scale(sf);
-            }
-          if (name.startsWith("TH2"))
-            {
-              TH2* h = dynamic_cast<TH2*>(obj);
-              //h->Sumw2();
-              h->Scale(sf);
-            }
-        }
-      RedrawAll();
-    } 
-  else if (selectedItem == shift)
-  {
-      if (row == -1) return; //protection
-      if (DrawObjects.isEmpty()) return; //protection
-      TObject* obj = Basket[row].DrawObjects.first().getPointer();
-      if (obj)
-      {
-          QString name = obj->ClassName();
-          QList<QString> impl;
-          impl << "TGraph" << "TGraphErrors"  << "TH1I" << "TH1D" << "TH1F" << "TProfile";
-          if (!impl.contains(name))
-           {
-             message("Not implemented for this object type", this);
-             return;
-           }
+void GraphWindowClass::contextMenuForBasketMultipleSelection(const QPoint & pos)
+{
+    QMenu Menu;
+    QAction * removeAllSelected = Menu.addAction("Remove all selected");
+    removeAllSelected->setShortcut(Qt::Key_Delete);
 
-          const QPair<double, double> val = runShiftDialog();
-          if (val.first == 1.0 && val.second == 0) return;
+    QAction* selectedItem = Menu.exec(lwBasket->mapToGlobal(pos));
+    if (!selectedItem) return;
 
-          if (name.startsWith("TGraph"))
-          {
-              TGraph* g = dynamic_cast<TGraph*>(obj);
-              if (g)
-              {
-                  const int num = g->GetN();
-                  for (int i=0; i<num; i++)
-                  {
-                      double x, y;
-                      g->GetPoint(i, x, y);
-                      x = x * val.first + val.second;
-                      g->SetPoint(i, x, y);
-                  }
-              }
-          }
-          else
-          {
-              TH1* h = dynamic_cast<TH1*>(obj);
-              if (h)
-              {
-                  const int nbins = h->GetXaxis()->GetNbins();
-                  double* new_bins = new double[nbins+1];
-                  for (int i=0; i <= nbins; i++)
-                      new_bins[i] = ( h-> GetBinLowEdge(i+1) ) * val.first + val.second;
+    if (selectedItem == removeAllSelected)
+        removeAllSelectedBasketItems();
+}
 
-                  h->SetBins(nbins, new_bins);
-                  delete [] new_bins;
-              }
-          }
+void GraphWindowClass::removeAllSelectedBasketItems()
+{
+    QList<QListWidgetItem*> selection = lwBasket->selectedItems();
+    const int size = selection.size();
+    if (size == 0) return;
 
-          RedrawAll();
-      }
-  }
-  else if (selectedItem == uniMap)
-  {
-      TH2D* map = static_cast<TH2D*>(Basket[row].DrawObjects.first().getPointer());
-      TH2D* h =   static_cast<TH2D*>(MasterDrawObjects.first().getPointer());
+    bool bConfirm = true;
+    if (size > 1)
+         bConfirm = confirm(QString("Remove selected %1 item%2 from the basket?").arg(size).arg(size == 1 ? "" : "s"), this);
+    if (!bConfirm) return;
 
-      *h = *h / *map;
+    QVector<int> indexes;
+    for (QListWidgetItem * item : selection)
+        indexes << lwBasket->row(item);
+    std::sort(indexes.begin(), indexes.end());
+    for (int i = indexes.size() - 1; i >= 0; i--)
+        Basket->remove(indexes.at(i));
 
-      DrawObjects = MasterDrawObjects;
-      CurrentBasketItem = -1;
-      BasketMode = 0;
-      RedrawAll();
-      ui->lwBasket->clearSelection();
-  }
-  else if (selectedItem == projX || selectedItem == projY)
-  {
-      TH2* h = static_cast<TH2*>(Basket[row].DrawObjects.first().getPointer());
-      TH1D* proj;
-      if (selectedItem == projX)
-          proj = h->ProjectionX();
-      else
-          proj = h->ProjectionY();
-      if (proj) Draw(proj, "hist");
-  }
-  else if (selectedItem == gaussFit)
-  {
-      TH1* h =   static_cast<TH1*>(Basket[row].DrawObjects.first().getPointer());
-      TF1* f1 = new TF1("f1", "gaus");
-      int status = h->Fit(f1, "+");
-      if (status == 0)
-      {
-          ui->cbShowFitParameters->setChecked(true);
-          ui->cbShowLegend->setChecked(true);
-          RedrawAll();
-      }
-  }
-  else if (selectedItem == splineFit)
-  {
-#ifdef USE_EIGEN
-      TGraph* g =   static_cast<TGraph*>(Basket[row].DrawObjects.first().getPointer());
-      if (!g)
-      {
-          message("Suppoted only for TGraph-based ROOT objects", this);
-          return;
-      }
-
-      bool ok;
-      int numNodes = QInputDialog::getInt(this, "", "Enter number of nodes:", 6, 2, 1000, 1, &ok);
-      if (ok)
-      {
-          int numPoints = g->GetN();
-          if (numPoints < numNodes)
-          {
-              message("Not enough points in the graph for the selected number of nodes", this);
-              return;
-          }
-
-          QVector<double> x(numPoints), y(numPoints), f(numPoints);
-          for (int i=0; i<numPoints; i++)
-              g->GetPoint(i, x[i], y[i]);
-
-          CurveFit cf(x.first(), x.last(), numNodes, x, y);
-
-          TGraph* fg = new TGraph();
-          for (int i=0; i<numPoints; i++)
-          {
-              const double& xx = x.at(i);
-              fg->SetPoint(i, xx, cf.eval(xx));
-          }
-
-          Basket[row].DrawObjects.append(DrawObjectStructure(fg, "Csame"));
-          RedrawAll();
-      }
-#else
-    message("CurveFitter is supported only if ANTS2 is compliled with Eigen library enabled", this);
-    return;
-#endif
-  }
-  else if (selectedItem == drawIntegral)
-  {
-      TH1* h = dynamic_cast<TH1*>(Basket[row].DrawObjects.first().getPointer());
-      if (!h)
-      {
-          message("This operation requires TH1 ROOT object", this);
-          return;
-      }
-      int bins = h->GetNbinsX();
-
-      double* edges = new double[bins+1];
-      for (int i=0; i<bins+1; i++)
-          edges[i] = h->GetBinLowEdge(i+1);
-
-      //    for (int i=0; i<bins+1; i++) qDebug() << i << "->" << edges[i];
-
-      QString title = "Integral of " + Basket[row].Name;
-      TH1D* hi = new TH1D("integral", title.toLocal8Bit().data(), bins, edges);
-      delete [] edges;
-
-      QString Xtitle = h->GetXaxis()->GetTitle();
-      if (!Xtitle.isEmpty()) hi->GetXaxis()->SetTitle(Xtitle.toLocal8Bit().data());
-
-      double prev = 0;
-      for (int i=1; i<bins+1; i++)
-        {
-          prev += h->GetBinContent(i);
-          hi->SetBinContent(i, prev);
-        }
-      Draw(hi, "");
-  }
-  else if (selectedItem == interpolate)
-  {
-      TH1* hist = dynamic_cast<TH1*>(Basket[row].DrawObjects.first().getPointer());
-      if (!hist)
-      {
-          message("This operation requires TH1 ROOT object", this);
-          return;
-      }
-
-      QDialog d;
-      QVBoxLayout * lMain = new QVBoxLayout(&d);
-
-      QHBoxLayout* l = new QHBoxLayout();
-        QVBoxLayout * v = new QVBoxLayout();
-            QLabel* lab = new QLabel("From:");
-            v->addWidget(lab);
-            lab = new QLabel("Step:");
-            v->addWidget(lab);
-            lab = new QLabel("Steps:");
-            v->addWidget(lab);
-       l->addLayout(v);
-       v = new QVBoxLayout();
-            QLineEdit * leFrom = new QLineEdit("0");
-            v->addWidget(leFrom);
-            QLineEdit * leStep = new QLineEdit("10");
-            v->addWidget(leStep);
-            QLineEdit* leSteps = new QLineEdit("100");
-            v->addWidget(leSteps);
-       l->addLayout(v);
-      lMain->addLayout(l);
-
-      QPushButton * pb = new QPushButton("Interpolate");
-      lMain->addWidget(pb);
-
-      QObject::connect(pb, &QPushButton::clicked,
-                       [&d, hist, leFrom, leStep, leSteps, this]()
-      {
-          int steps = leSteps->text().toDouble();
-          int step  = leStep->text().toDouble();
-          int from  = leFrom->text().toDouble();
-
-          TH1D* hi = new TH1D("", "", steps, from, from + step*steps);
-          for (int i=0; i<steps; i++)
-          {
-              double x = from + step * i;
-              double val = hist->Interpolate(x);
-              hi->SetBinContent(i+1, val);
-          }
-          QString Xtitle = hist->GetXaxis()->GetTitle();
-          if (!Xtitle.isEmpty()) hi->GetXaxis()->SetTitle(Xtitle.toLocal8Bit().data());
-          this->Draw(hi, "");
-          d.accept();
-      }
-                       );
-
-      d.exec();
-  }
-  else if (selectedItem == median)
-  {
-      TH1* hist = dynamic_cast<TH1*>(Basket[row].DrawObjects.first().getPointer());
-      if (!hist)
-      {
-          message("This operation requires TH1 ROOT object", this);
-          return;
-      }
-
-      QDialog d;
-      QVBoxLayout * lMain = new QVBoxLayout(&d);
-
-      QHBoxLayout* l = new QHBoxLayout();
-            QLabel* lab = new QLabel("Span in bins:");
-            l->addWidget(lab);
-            QSpinBox * sbSpan = new QSpinBox();
-            sbSpan->setMinimum(2);
-            sbSpan->setValue(6);
-            l->addWidget(sbSpan);
-      lMain->addLayout(l);
-
-      QPushButton * pb = new QPushButton("Apply median filter");
-      lMain->addWidget(pb);
-
-      QObject::connect(pb, &QPushButton::clicked,
-                       [&d, hist, sbSpan, this]()
-      {
-          int span = sbSpan->value();
-
-          int deltaLeft  = ( span % 2 == 0 ? span / 2 - 1 : span / 2 );
-          int deltaRight = span / 2;
-
-          QVector<double> Filtered;
-          int num = hist->GetNbinsX();
-          for (int iThisBin = 1; iThisBin <= num; iThisBin++)  // 0-> underflow; num+1 -> overflow
-          {
-              QVector<double> content;
-              for (int i = iThisBin - deltaLeft; i <= iThisBin + deltaRight; i++)
-              {
-                  if (i < 1 || i > num) continue;
-                  content << hist->GetBinContent(i);
-              }
-
-              std::sort(content.begin(), content.end());
-              int size = content.size();
-              double val;
-              if (size == 0) val = 0;
-              else val = ( size % 2 == 0 ? (content[size / 2 - 1] + content[size / 2]) / 2 : content[size / 2] );
-
-              Filtered.append(val);
-          }
-
-          TH1 * hc = dynamic_cast<TH1*>(hist->Clone());
-          if (!hc)
-          {
-              qWarning() << "Failed to clone the histogram!";
-              return;
-          }
-          for (int iThisBin = 1; iThisBin <= num; iThisBin++)
-              hc->SetBinContent(iThisBin, Filtered.at(iThisBin-1));
-
-          this->Draw(hc, "hist");
-          d.accept();
-      }
-                       );
-
-      d.exec();
-  }
-  else if (selectedItem == fraction)
-  {
-      calculateFractionTH1(row);
-  }
-  else if (selectedItem == titleX || selectedItem == titleY)
-  {
-      if (row == -1) return; //protection
-      if (DrawObjects.isEmpty()) return; //protection
-      TObject* obj = Basket[row].DrawObjects.first().getPointer();
-      if (obj)
-      {
-          TAxis* a = 0;
-
-          TGraph* g = dynamic_cast<TGraph*>(obj);
-          if (g)
-             a = ( selectedItem == titleX ? g->GetXaxis() : g->GetYaxis() );
-          else
-          {
-              TH1* h = dynamic_cast<TH1*>(obj);
-              if (h)
-                 a = ( selectedItem == titleX ? h->GetXaxis() : h->GetYaxis() );
-              else
-              {
-                  message("Not supported for this object type", this);
-                  return;
-              }
-          }
-
-          QString oldTitle;
-          oldTitle = a->GetTitle();
-          bool ok;
-          QString newTitle = QInputDialog::getText(this, "", "New axis title:", QLineEdit::Normal, oldTitle, &ok);
-          if (ok) a->SetTitle(newTitle.toLatin1().data());
-          RedrawAll();
-      }
-  }
+    ActiveBasketItem = -1;
+    ClearCopyOfActiveBasketId();
+    UpdateBasketGUI();
 }
 
 void GraphWindowClass::ClearBasket()
 {
-   for (int ib=0; ib<Basket.size(); ib++)
-       Basket[ib].clearObjects();
-
-  Basket.clear();  
-  on_pbBasketBackToLast_clicked();
-  UpdateBasketGUI();
+    Basket->clear();
+    ActiveBasketItem = -1;
+    ClearCopyOfActiveBasketId();
+    UpdateBasketGUI();
 }
 
 void GraphWindowClass::on_actionSave_image_triggered()
@@ -3446,16 +2379,6 @@ void GraphWindowClass::on_actionSave_image_triggered()
 
   GraphWindowClass::SaveGraph(fileName);
   if (MW->GlobSet.fOpenImageExternalEditor) QDesktopServices::openUrl(QUrl("file:"+fileName, QUrl::TolerantMode));
-}
-
-void GraphWindowClass::on_actionExport_data_as_text_triggered()
-{
-   ExportData(true);
-}
-
-void GraphWindowClass::on_actionExport_data_using_bin_start_positions_TH1_triggered()
-{
-   ExportData(false);
 }
 
 void GraphWindowClass::on_actionBasic_ROOT_triggered()
@@ -3500,292 +2423,39 @@ void GraphWindowClass::on_actionInverted_dark_body_triggered()
   GraphWindowClass::RedrawAll();
 }
 
-void GraphWindowClass::SaveBasket()
-{
-    //qDebug() << "Saving basket";
-    QString fileName = QFileDialog::getSaveFileName(this, "Save Basket objects to file", MW->GlobSet.LastOpenDir, "Root files (*.root)");
-    if (fileName.isEmpty()) return;
-    MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-    if(QFileInfo(fileName).suffix().isEmpty()) fileName += ".root";
-
-    QString str;
-    TFile f(fileName.toLocal8Bit(),"RECREATE");
-
-    //qDebug() << "----Items:"<<Basket.size()<<"----";
-    int index = 0;
-    for (int ib=0; ib<Basket.size(); ib++)
-    {
-        //qDebug() << ib<<">"<<Basket[ib].Name;
-        str += Basket[ib].Name + '\n';
-        str += QString::number( Basket[ib].DrawObjects.size() );
-
-        QVector<DrawObjectStructure> & DrawObjects = Basket[ib].DrawObjects;
-        for (int i = 0; i < DrawObjects.size(); i++)
-        {
-            DrawObjectStructure & Obj = DrawObjects[i];
-            //qDebug() << "   >>"<<i<<Obj.getPointer()->GetName()<<Obj.getPointer()->ClassName();
-            TString name = "";
-            name += index;
-            TNamed* nameO = dynamic_cast<TNamed*>(Obj.getPointer());
-            if (nameO) nameO->SetName(name);
-
-            TString KeyName = "#";
-            KeyName += index;
-            Obj.getPointer()->Write(KeyName);
-
-            str += '|' + Obj.getOptions();
-
-            index++;
-        }
-
-        str += '\n';
-    }
-
-    TNamed desc;
-    desc.SetTitle(str.toLocal8Bit().data());
-    desc.Write("BasketDescription");
-
-    //qDebug()  << "Descr:" << str;
-
-    f.Close();
-}
-
-void GraphWindowClass::AppendBasket()
-{
-    //qDebug() << "\n\nAppending basket";
-    QString fileName = QFileDialog::getOpenFileName(this, "Append objects from Basket file", MW->GlobSet.LastOpenDir, "Root files (*.root)");
-    if (fileName.isEmpty()) return;
-    MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-
-    QByteArray ba = fileName.toLocal8Bit();
-    const char *c_str = ba.data();
-    TFile* f = new TFile(c_str);
-
-    /*
-    int numKeys = f->GetListOfKeys()->GetEntries();
-    qDebug() << "Number of keys:"<<numKeys;
-    for (int i=0; i<numKeys; i++)
-    {
-        TKey *key = (TKey*)f->GetListOfKeys()->At(i);
-        QString type = key->GetClassName();
-        TString objName = key->GetName();
-        qDebug() << "-->"<< i<<"   "<<objName<<"  "<<type<<key->GetTitle();
-    }
-    */
-
-    TNamed* desc = (TNamed*)f->Get("BasketDescription");
-    if (!desc)
-    {
-        message("This is not a valid ANTS2 basket file!", this);
-        return;
-    }
-
-    QString text = desc->GetTitle();
-    //qDebug() << "Basket description:"<<text;
-    //qDebug() << "Number of keys:"<<f->GetListOfKeys()->GetEntries();
-
-    QStringList sl = text.split('\n',QString::SkipEmptyParts);
-
-    int numLines = sl.size();
-    int basketSize =  numLines/2;
-    //qDebug() << "Description lists" << basketSize << "objects in the basket";
-
-    bool ok = true;
-    int indexFileObject = 0;
-    if (numLines % 2 == 0 ) // should be even number of lines
-    {
-        for (int iDrawObject = 0; iDrawObject < basketSize; iDrawObject++ )
-        {
-            //qDebug() << ">>>>Object #"<< iDrawObject;
-            QString name = sl[iDrawObject*2];
-            bool ok;
-            QStringList fields = sl[iDrawObject*2+1].split('|');
-            if (fields.size()<2)
-            {
-                qWarning()<<"Too short descr line";
-                ok=false;
-                break;
-            }
-
-            const QString sNumber = fields[0];
-
-            int numObj = sNumber.toInt(&ok);
-            if (!ok)
-            {
-                qWarning() << "Num obj convertion error!";
-                ok=false;
-                break;
-            }
-            if (numObj != fields.size()-1)
-            {
-                qWarning()<<"Number of objects vs option strings mismatch:"<<numObj<<fields.size()-1;
-                ok=false;
-                break;
-            }
-
-            //qDebug() << "Name:"<< name << "objects:"<< numObj;
-
-            QVector<DrawObjectStructure>* drawObjects = new QVector<DrawObjectStructure>;
-            for (int iDrawObj = 0; iDrawObj < numObj; iDrawObj++)
-            {
-                TKey *key = (TKey*)f->GetListOfKeys()->At(indexFileObject++);
-                //key->SetMotherDir(0);
-                QString type = key->GetClassName();
-                //TString objName = key->GetName();
-                //qDebug() << "-->"<< i<<"   "<<objName<<"  "<<type<<"   "<<fields[i+1];
-
-                TObject *p = 0;
-
-                if (type=="TH1D") p = (TH1D*)key->ReadObj();
-                if (type=="TH1I") p = (TH1I*)key->ReadObj();
-                if (type=="TH1F") p = (TH1F*)key->ReadObj();
-
-                if (type=="TH2D") p = (TH2D*)key->ReadObj();
-                if (type=="TH2I") p = (TH2I*)key->ReadObj();
-                if (type=="TH2F") p = (TH2F*)key->ReadObj();
-
-                if (type=="TProfile")   p =   (TProfile*)key->ReadObj();
-                if (type=="TProfile2D") p = (TProfile2D*)key->ReadObj();
-
-                if (type=="TEllipse")  p =  (TEllipse*)key->ReadObj();
-                if (type=="TBox")      p =      (TBox*)key->ReadObj();
-                if (type=="TPolyLine") p = (TPolyLine*)key->ReadObj();
-                if (type=="TLine")     p =     (TLine*)key->ReadObj();
-
-                if (type=="TF1") p = (TF1*)key->ReadObj();
-                if (type=="TF2") p = (TF2*)key->ReadObj();
-
-                if (type=="TGraph")       p =       (TGraph*)key->ReadObj();
-                if (type=="TGraph2D")     p =     (TGraph2D*)key->ReadObj();
-                if (type=="TGraphErrors") p = (TGraphErrors*)key->ReadObj();
-
-                if (type=="TLegend")   p =   (TLegend*)key->ReadObj();
-                if (type=="TPaveText") p = (TPaveText*)key->ReadObj();
-
-                if (p)
-                    drawObjects->append(DrawObjectStructure(p, fields[iDrawObj+1]));
-                else
-                {
-                    qWarning() << "Unregistered object type" << type <<"for load basket from file!";
-                }
-            }
-            if (!drawObjects->isEmpty()) Basket.append(BasketItemClass(name, drawObjects));
-
-        }
-    }
-    else ok = false;
-
-    if (!ok) message("Corrupted basket file", this);
-
-    f->Close();
-}
-
 void GraphWindowClass::Basket_DrawOnTop(int row)
 {
     if (row == -1) return;
     if (DrawObjects.isEmpty()) return;
 
-    qDebug() << "Basket item"<<row<<"was requested to be drawn on top of the current draw";
+    MakeCopyOfDrawObjects();
+    MakeCopyOfActiveBasketId();
 
-    for (int i=0; i<Basket[row].DrawObjects.size(); i++)
+    //qDebug() << "Basket item"<<row<<"was requested to be drawn on top of the current draw";
+    const QVector<ADrawObject> DeepCopyBasketDrawObjects = Basket->getCopy(row);
+
+    for (int iObj = 0; iObj < DeepCopyBasketDrawObjects.size(); iObj++)
     {
-        TString CName = Basket[row].DrawObjects[i].getPointer()->ClassName();
-        if ( CName== "TLegend" || CName == "TPaveText") continue;
-        //qDebug() << CName;
-        QString options = Basket[row].DrawObjects[i].getOptions();
+        TString CName = DeepCopyBasketDrawObjects[iObj].Pointer->ClassName();
+        if ( CName== "TLegend" || CName == "TPaveText")
+        {
+            //qDebug() << CName;
+            delete DeepCopyBasketDrawObjects[iObj].Pointer;
+            continue;
+        }
+        QString options = DeepCopyBasketDrawObjects[iObj].Options;
         options.replace("same", "", Qt::CaseInsensitive);
         options.replace("a", "", Qt::CaseInsensitive);
         TString safe = "same";
         safe += options.toLatin1().data();
         //qDebug() << "New options:"<<safe;
-        DrawObjects.append(DrawObjectStructure(Basket[row].DrawObjects[i].getPointer(), safe));
+        DrawObjects.append(ADrawObject(DeepCopyBasketDrawObjects[iObj].Pointer, safe));
     }
-    CurrentBasketItem = -2; //forcing to "basket off, tmp graph" mode
+
+    ActiveBasketItem = -1;
+    UpdateBasketGUI();
+
     RedrawAll();
-}
-
-void GraphWindowClass::AppendRootHistsOrGraphs()
-{
-    QString fileName = QFileDialog::getOpenFileName(this, "Append objects from ROOT file", MW->GlobSet.LastOpenDir, "Root files (*.root)");
-    if (fileName.isEmpty()) return;
-    MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-
-    QByteArray ba = fileName.toLocal8Bit();
-    const char *c_str = ba.data();
-    TFile* f = new TFile(c_str);
-
-    const int numKeys = f->GetListOfKeys()->GetEntries();
-    qDebug() << "File contains" << numKeys << "TKeys";
-
-    for (int i=0; i<numKeys; i++)
-    {
-        TKey *key = (TKey*)f->GetListOfKeys()->At(i);
-        QString Type = key->GetClassName();
-        QString Name = key->GetName();
-        qDebug() << i << Type << Name;
-
-        if (Type.startsWith("TH") || Type.startsWith("TProfile") || Type.startsWith("TGraph"))
-        {
-            QVector<DrawObjectStructure>* drawObjects = new QVector<DrawObjectStructure>;
-            TObject *p = 0;
-
-            if (Type=="TH1D") p = (TH1D*)key->ReadObj();
-            else if (Type=="TH1I") p = (TH1I*)key->ReadObj();
-            else if (Type=="TH1F") p = (TH1F*)key->ReadObj();
-            else if (Type=="TH2D") p = (TH2D*)key->ReadObj();
-            else if (Type=="TH2F") p = (TH2F*)key->ReadObj();
-            else if (Type=="TH2I") p = (TH2I*)key->ReadObj();
-
-            else if (Type=="TProfile") p = (TProfile*)key->ReadObj();
-            else if (Type=="TProfile2D") p = (TProfile2D*)key->ReadObj();
-
-            else if (Type=="TGraph2D") p = (TGraph2D*)key->ReadObj();
-            else if (Type=="TGraph") p = (TGraph*)key->ReadObj();
-            else if (Type=="TGraphErrors") p = (TGraphErrors*)key->ReadObj();
-
-            if (p)
-            {
-                drawObjects->append(DrawObjectStructure(p, ""));
-                Basket.append(BasketItemClass(Name, drawObjects));
-                qDebug() << "  appended";
-            }
-            else qWarning() << "Unregistered object type" << Type <<"for load basket from file!";
-        }
-        else qDebug() << "  ignored";
-    }
-
-    f->Close();
-    delete f;
-}
-
-void GraphWindowClass::on_pbSmooth_clicked()
-{
-  if (DrawObjects.isEmpty())
-    {
-      message("Object already does not exist!", this);
-      return;
-    }
-  TObject *obj = DrawObjects.first().getPointer();
-  QString cn = obj->ClassName();
-
-  //qDebug() << "Class name:"<<cn;
-  if (cn.startsWith("TH1"))
-    {
-      TH1* hist = dynamic_cast<TH1*>(obj);
-      if (hist) hist->Smooth(ui->sbSmooth->value());
-    }
-  else if (cn.startsWith("TH2"))
-    {
-      TH2* hist = dynamic_cast<TH2*>(obj);
-      if (hist) hist->Smooth(ui->sbSmooth->value());
-    }
-  else
-    {
-      message("Implemented only for TH1 and TH2 histograms", this);
-    }
-
-  GraphWindowClass::EnforceOverlayOff();
-  RedrawAll();
 }
 
 void GraphWindowClass::on_actionTop_triggered()
@@ -3809,40 +2479,6 @@ void GraphWindowClass::on_actionFront_triggered()
   if (v) v->FrontView();
 }
 
-void GraphWindowClass::on_pbAttributes_clicked()
-{
-  TObject* obj = 0;
-
-  if (CurrentBasketItem < 0) //-1 - Basket is off; -2 -basket is Off, using tmp drawing (e.g. overlap of two histograms)
-    {
-      if (!DrawObjects.isEmpty() )
-         obj = DrawObjects.first().getPointer();
-    }
-  else if (CurrentBasketItem<Basket.size()) //Basket is ON
-    {
-      if (!Basket[CurrentBasketItem].DrawObjects.isEmpty())
-         obj = Basket[CurrentBasketItem].DrawObjects.first().getPointer();
-    }
-
-  if (obj)
-    {
-      TH1* h = dynamic_cast<TH1*>(obj);
-      if (h)
-        {
-          h->DrawPanel();
-          return;
-        }
-      TGraph* g = dynamic_cast<TGraph*>(obj);
-      if (g)
-        {
-          g->DrawPanel();
-          return;
-        }
-    }
-
-  RasterWindow->fCanvas->SetLineAttributes();
-}
-
 void GraphWindowClass::on_actionToggle_toolbar_triggered(bool checked)
 {
     ui->fUIbox->setVisible(checked);
@@ -3850,38 +2486,44 @@ void GraphWindowClass::on_actionToggle_toolbar_triggered(bool checked)
 
 void GraphWindowClass::on_actionEqualize_scale_XY_triggered()
 {
-   MW->WindowNavigator->BusyOn();
-   //qDebug() << "Before-> X and Y size per pixel:" << RasterWindow->getXperPixel() << RasterWindow->getYperPixel();
+    if (DrawObjects.isEmpty()) return;
+    QString ClassName = DrawObjects.first().Pointer->ClassName();
+    if (!ClassName.startsWith("TH2") && !ClassName.startsWith("TF2") && !ClassName.startsWith("TGraph2D"))
+    {
+        message("Supported only for 2D view", this);
+        return;
+    }
 
-   double XperP = fabs(RasterWindow->getXperPixel());
-   double YperP = fabs(RasterWindow->getYperPixel());
-   double CanvasWidth = RasterWindow->width();
-   double NewCanvasWidth = CanvasWidth * XperP/YperP;
-   double delta = NewCanvasWidth - CanvasWidth;
-   resize(width()+delta, height());
+    MW->WindowNavigator->BusyOn();
 
-   //qDebug() << "After guess-> X and Y size per pixel:" << RasterWindow->getXperPixel() << RasterWindow->getYperPixel();
-   XperP = fabs(RasterWindow->getXperPixel());
-   YperP = fabs(RasterWindow->getYperPixel());
-   if (XperP != YperP)
-     {
-       bool XlargerY = (XperP > YperP);
-       do
-         {
-           if (XperP<YperP) this->resize(this->width()-1, this->height());
-           else this->resize(this->width()+1, this->height());
-           UpdateRootCanvas();
-           qApp->processEvents();
+    double XperP = fabs(RasterWindow->getXperPixel());
+    double YperP = fabs(RasterWindow->getYperPixel());
+    double CanvasWidth = RasterWindow->width();
+    double NewCanvasWidth = CanvasWidth * XperP/YperP;
+    double delta = NewCanvasWidth - CanvasWidth;
+    resize(width()+delta, height());
 
-           XperP = fabs(RasterWindow->getXperPixel());
-           YperP = fabs(RasterWindow->getYperPixel());
-           if (XperP == YperP) break;
-           if ( (XperP > YperP) != XlargerY ) break;
-         }
-       while ( isVisible() && width()>200 && width()<2000);
-       //qDebug() << "After fine tune-> X and Y size per pixel:" << RasterWindow->getXperPixel() << RasterWindow->getYperPixel();
-     }
-   MW->WindowNavigator->BusyOff();   
+    XperP = fabs(RasterWindow->getXperPixel());
+    YperP = fabs(RasterWindow->getYperPixel());
+    if (XperP != YperP)
+    {
+        bool XlargerY = (XperP > YperP);
+        do
+        {
+            if (XperP<YperP) this->resize(this->width()-1, this->height());
+            else this->resize(this->width()+1, this->height());
+            UpdateRootCanvas();
+            qApp->processEvents();
+
+            XperP = fabs(RasterWindow->getXperPixel());
+            YperP = fabs(RasterWindow->getYperPixel());
+            if (XperP == YperP) break;
+            if ( (XperP > YperP) != XlargerY ) break;
+        }
+        while ( isVisible() && width()>200 && width()<2000);
+    }
+
+    MW->WindowNavigator->BusyOff();
 }
 
 void GraphWindowClass::on_ledRulerDX_editingFinished()
@@ -3900,75 +2542,61 @@ void GraphWindowClass::on_cbShowFitParameters_toggled(bool checked)
 {
     if (checked) gStyle->SetOptFit(0111);
     else gStyle->SetOptFit(0000);
-    //RasterWindow->fCanvas->Modified();
-    //RasterWindow->fCanvas->Update();
 }
 
+TLegend * GraphWindowClass::AddLegend()
+{
+    TLegend * leg = RasterWindow->fCanvas->BuildLegend();
+    RegisterTObject(leg);
+    DrawObjects.append(ADrawObject(leg, "same"));
+    RedrawAll();
+    return leg;
+}
+
+#include "alegenddialog.h"
 void GraphWindowClass::on_pbAddLegend_clicked()
 {
-  TLegend* leg = RasterWindow->fCanvas->BuildLegend();
+    if (DrawObjects.isEmpty()) return;
 
-  if (CurrentBasketItem < 0) //-1 - Basket is off; -2 -basket is Off, using tmp drawing (e.g. overlap of two histograms)
-  {
-      RegisterTObject(leg);
-      DrawObjects.append(DrawObjectStructure(leg, "same"));
-  }
-  else
-  {
-      //do not register for basket - they have their own system
-      Basket[CurrentBasketItem].DrawObjects.append(DrawObjectStructure(leg, "same"));      
-  }
-  RedrawAll();
+    TLegend * leg = nullptr;
+    for (int i=0; i<DrawObjects.size(); i++)
+    {
+        QString cn = DrawObjects[i].Pointer->ClassName();
+        if (cn == "TLegend")
+        {
+            leg = dynamic_cast<TLegend*>(DrawObjects[i].Pointer);
+            break;
+        }
+    }
+    if (!leg )
+        leg = AddLegend();
+
+    ALegendDialog Dialog(*leg, DrawObjects, this);
+    connect(&Dialog, &ALegendDialog::requestCanvasUpdate, RasterWindow, &RasterWindowBaseClass::UpdateRootCanvas);
+    Dialog.exec();
 }
 
 void GraphWindowClass::on_pbRemoveLegend_clicked()
 {
-    QVector<DrawObjectStructure> &DrObj = (CurrentBasketItem < 0) ? DrawObjects : Basket[CurrentBasketItem].DrawObjects;
-    for (int i=0; i<DrObj.size(); i++)
-      {
-          QString cn = DrObj[i].getPointer()->ClassName();
-            //qDebug() << cn;
-          if (cn == "TLegend")
-            {              
-              DrObj.remove(i);
-              RedrawAll();
-              return;
-            }
-      }
-    qDebug() << "Legend object was not found!";
+    bool bOK = confirm("Remove legend?", this);
+    if (!bOK) return;
+
+    for (int i=0; i<DrawObjects.size(); i++)
+    {
+        QString cn = DrawObjects[i].Pointer->ClassName();
+        if (cn == "TLegend")
+        {
+            DrawObjects.remove(i);
+            RedrawAll();
+            break;
+        }
+    }
 }
 
 void GraphWindowClass::on_pbAddText_clicked()
 {
-  QDialog D(this);
-  D.setModal(true);
-  QVBoxLayout* l = new QVBoxLayout(&D);
-
-  QLabel* lab = new QLabel("Enter text", &D);
-  l->addWidget(lab);
-
-  QPlainTextEdit* te = new QPlainTextEdit(&D);
-  l->addWidget(te);
-
-  QCheckBox* cbFrame = new QCheckBox("Show frame", &D);
-  l->addWidget(cbFrame);
-  cbFrame->setChecked(true);
-
-  QComboBox* cobAlign = new QComboBox(&D);
-  cobAlign->addItem("Text alignment: Left");
-  cobAlign->addItem("Text alignment: Center");
-  cobAlign->addItem("Text alignment: Right");
-  l->addWidget(cobAlign);
-
-  QPushButton* pb = new QPushButton("Confirm", &D);
-  l->addWidget(pb);
-  connect(pb, SIGNAL(clicked(bool)), &D, SLOT(accept()));
-
-  D.exec();
-  if (D.result() == QDialog::Rejected) return;
-
-  QString Text = te->toPlainText();  
-  if (!Text.isEmpty()) ShowTextPanel(Text, cbFrame->isChecked(), cobAlign->currentIndex());
+    ShowTextPanel("Text", true, 0);
+    Explorer->activateCustomGuiForItem(DrawObjects.size()-1);
 }
 
 void GraphWindowClass::ShowTextPanel(const QString Text, bool bShowFrame, int AlignLeftCenterRight)
@@ -3983,19 +2611,6 @@ void GraphWindowClass::ShowTextPanel(const QString Text, bool bShowFrame, int Al
   for (QString s : sl) la->AddText(s.toLatin1());
 
   DrawWithoutFocus(la, "same", true, false); //it seems the Paveltext is owned by drawn object - registration causes crash if used with non-registered object (e.g. script)
-
-//  if (CurrentBasketItem < 0) //-1 - Basket is off; -2 -basket is Off, using tmp drawing (e.g. overlap of two histograms)
-//  {
-//     RegisterTObject(la);
-//     DrawObjects.append(DrawObjectStructure(la, "same"));
-//  }
-//  else
-//  {
-//     //do not register for basket - they have their own system
-//     Basket[CurrentBasketItem].DrawObjects.append(DrawObjectStructure(la, "same"));
-//  }
-
-  //  RedrawAll();
 }
 
 void GraphWindowClass::SetStatPanelVisible(bool flag)
@@ -4003,23 +2618,11 @@ void GraphWindowClass::SetStatPanelVisible(bool flag)
     ui->cbShowLegend->setChecked(flag);
 }
 
-void GraphWindowClass::on_pbRemoveText_clicked()
+void GraphWindowClass::TriggerGlobalBusy(bool flag)
 {
-  QVector<DrawObjectStructure> &DrObj = (CurrentBasketItem < 0) ? DrawObjects : Basket[CurrentBasketItem].DrawObjects;
-  for (int i=0; i<DrObj.size(); i++)
-    {
-        QString cn = DrObj[i].getPointer()->ClassName();
-          //qDebug() << cn;
-        if (cn == "TPaveText")
-          {            
-            DrObj.remove(i);
-            RedrawAll();
-            return;
-          }
-    }
-  qDebug() << "Text object was not found!";
+    if (flag) MW->WindowNavigator->BusyOn();
+    else      MW->WindowNavigator->BusyOff();
 }
-
 
 bool GraphWindowClass::Extraction()
 {
@@ -4033,103 +2636,6 @@ bool GraphWindowClass::Extraction()
     MW->WindowNavigator->BusyOff(false);
 
     return !IsExtractionCanceled();  //returns false = canceled
-}
-
-bool GraphWindowClass::isBasketOn() const
-{
-    return ui->cbShowBasket->isChecked();
-}
-
-Double_t GauseWithBase(Double_t *x, Double_t *par)
-{
-   return par[0]*exp(par[1]*(x[0]+par[2])*(x[0]+par[2])) + par[3]*x[0] + par[4];   // [0]*exp([1]*(x+[2])^2) + [3]*x + [4]
-}
-
-void GraphWindowClass::on_pbFWHM_clicked()
-{
-    QVector<DrawObjectStructure> &DrObj = (CurrentBasketItem < 0) ? DrawObjects : Basket[CurrentBasketItem].DrawObjects;
-    if (DrObj.isEmpty())
-    {
-        message("No data", this);
-        return;
-    }
-
-    const QString cn = DrObj.first().getPointer()->ClassName();
-    if ( !cn.startsWith("TH1") && cn!="TProfile")
-    {
-        message("Can be used only with 1D histograms!", this);
-        return;
-    }
-
-    MW->WindowNavigator->BusyOn();
-    Extract2DLine();
-    if (!Extraction()) return; //cancel
-
-    double startX = extracted2DLineXstart();
-    double stopX = extracted2DLineXstop();
-    if (startX>stopX) std::swap(startX, stopX);
-    //qDebug() << startX << stopX;
-
-    double a = extracted2DLineA();
-    double b = extracted2DLineB();
-    double c = extracted2DLineC();
-    if (fabs(b)<1.0e-10)
-    {
-        message("Bad base line, cannot fit", this);
-        return;
-    }
-
-    TH1* h =   static_cast<TH1*>(DrObj.first().getPointer());
-                                                                   //  S  * exp( -0.5/s2 * (x   -m )^2) +  A *x +  B
-    TF1 *f = new TF1("myfunc", GauseWithBase, startX, stopX, 5);  //  [0] * exp(    [1]  * (x + [2])^2) + [3]*x + [4]
-
-    double initMid = startX + 0.5*(stopX - startX);
-    //qDebug() << "Initial mid:"<<initMid;
-    double initSigma = (stopX - startX)/2.3548; //sigma
-    double startPar1 = -0.5 / (initSigma * initSigma );
-    //qDebug() << "Initial par1"<<startPar1;
-    double midBinNum = h->GetXaxis()->FindBin(initMid);
-    double valOnMid = h->GetBinContent(midBinNum);
-    double baseAtMid = (c - a * initMid) / b;
-    double gaussAtMid = valOnMid - baseAtMid;
-    //qDebug() << "bin, valMid, baseMid, gaussmid"<<midBinNum<< valOnMid << baseAtMid << gaussAtMid;
-
-    f->SetParameter(0, gaussAtMid);
-    f->SetParameter(1, startPar1);
-    f->SetParameter(2, -initMid);
-    f->FixParameter(3, -a/b);  // fixed!
-    f->FixParameter(4, c/b);   // fixed!
-
-    int status = h->Fit(f, "R0");
-    if (status == 0)
-    {
-        double mid = -f->GetParameter(2);
-        double sigma = TMath::Sqrt(-0.5/f->GetParameter(1));
-        //qDebug() << "sigma:"<<sigma;
-        double FWHM = sigma * 2.0*TMath::Sqrt(2.0*TMath::Log(2.0));
-        double rel = FWHM/mid;
-
-        QVector<DrawObjectStructure> CopyMasterDrawObjects;
-        if (CurrentBasketItem == -1) CopyMasterDrawObjects = MasterDrawObjects;
-
-        //drawing the fit
-        Draw(f, "same");
-
-        //draw base line
-        if (ui->cbShowBaseLine->isChecked())
-        {
-            TF1 *fl = new TF1("line", "pol2", startX, stopX);
-            fl->SetLineStyle(2);
-            fl->SetParameters(c/b, -a/b);
-            Draw(fl, "same");
-        }
-
-        //draw panel with results
-        ShowTextPanel("fwhm = " + QString::number(FWHM) + "\nmean = " + QString::number(mid) + "\nfwhm/mean = "+QString::number(rel));
-
-        MasterDrawObjects = CopyMasterDrawObjects;
-    }
-    else message("Fit failed!", this);
 }
 
 void GraphWindowClass::on_ledAngle_customContextMenuRequested(const QPoint &pos)
@@ -4156,3 +2662,191 @@ void GraphWindowClass::on_ledAngle_customContextMenuRequested(const QPoint &pos)
       }
 }
 
+void GraphWindowClass::on_pbBackToLast_clicked()
+{
+    DrawObjects = PreviousDrawObjects;
+    PreviousDrawObjects.clear();
+    ActiveBasketItem = PreviousActiveBasketItem;
+    PreviousActiveBasketItem = -1;
+
+    RedrawAll();
+    UpdateBasketGUI();
+}
+
+void GraphWindowClass::on_actionToggle_Explorer_Basket_toggled(bool arg1)
+{
+    int w = ui->fBasket->width();
+    if (!arg1) w = -w;
+    this->resize(this->width()+w, this->height());
+
+    ui->fBasket->setVisible(arg1);
+}
+
+void GraphWindowClass::switchToBasket(int index)
+{
+    if (index < 0 || index >= Basket->size()) return;
+
+    DrawObjects = Basket->getCopy(index);
+    RedrawAll();
+
+    ActiveBasketItem = index;
+    ClearCopyOfActiveBasketId();
+    ClearCopyOfDrawObjects();
+    UpdateBasketGUI();
+    HighlightUpdateBasketButton(false);
+}
+
+void GraphWindowClass::on_pbUpdateInBasket_clicked()
+{
+    HighlightUpdateBasketButton(false);
+
+    if (ActiveBasketItem < 0 || ActiveBasketItem >= Basket->size()) return;
+    Basket->update(ActiveBasketItem, DrawObjects);
+}
+
+void GraphWindowClass::on_actionShow_ROOT_attribute_panel_triggered()
+{
+    RasterWindow->fCanvas->SetLineAttributes();
+}
+
+void GraphWindowClass::on_actionSet_width_triggered()
+{
+    int w = width();
+    inputInteger("Enter new width:", w, 200, 10000, this);
+    this->resize(w, height());
+}
+
+void GraphWindowClass::on_actionSet_height_triggered()
+{
+    int h = height();
+    inputInteger("Enter new height:", h, 200, 10000, this);
+    this->resize(width(), h);
+}
+
+void GraphWindowClass::on_actionMake_square_triggered()
+{
+    double CanvasWidth = RasterWindow->width();
+    double CanvasHeight = RasterWindow->height();
+
+    resize(width() + (CanvasHeight - CanvasWidth), height());
+
+    int protectionCounter = 0;
+    while (RasterWindow->width() != RasterWindow->height())
+    {
+        CanvasWidth = RasterWindow->width();
+        CanvasHeight = RasterWindow->height();
+
+        if (CanvasWidth > CanvasHeight) this->resize(this->width()-1, this->height());
+        else this->resize(this->width()+1, this->height());
+        UpdateRootCanvas();
+        qApp->processEvents();
+
+        if (width() < 200 || width()>2000) break;
+        protectionCounter++;
+        if (protectionCounter > 100) break;
+    }
+}
+
+#include "adrawtemplate.h"
+void GraphWindowClass::on_actionCreate_template_triggered()
+{
+    if (DrawObjects.isEmpty()) return;
+
+    QVector<QPair<double,double>> Limits = {QPair<double,double>(xmin, xmax), QPair<double,double>(ymin, ymax), QPair<double,double>(zmin, zmax)};
+    DrawTemplate.createFrom(DrawObjects, Limits); // it seems TH1 does not contain data on the shown range for Y (and Z) axes ... -> using inidcated range!
+}
+
+void GraphWindowClass::on_actionApply_template_triggered()
+{
+    applyTemplate(true);
+}
+
+void GraphWindowClass::applyTemplate(bool bAll)
+{
+    if (DrawObjects.isEmpty()) return;
+
+    if (DrawTemplate.hasLegend())
+    {
+        const ATemplateSelectionRecord * legend_rec = DrawTemplate.findRecord("Legend attributes", &DrawTemplate.Selection);
+        if (legend_rec && legend_rec->bSelected)
+        {
+            TLegend * Legend = nullptr;
+            for (ADrawObject & obj : DrawObjects)
+            {
+                Legend = dynamic_cast<TLegend*>(obj.Pointer);
+                if (Legend) break;
+            }
+            if (!Legend) //cannot build legend inside Template due to limitations in ROOT (problems with positioning if TCanvas is not involved)
+                Legend = AddLegend();
+        }
+    }
+
+    QVector<QPair<double,double>> XYZ_ranges;
+    DrawTemplate.applyTo(DrawObjects, XYZ_ranges, bAll);
+    RedrawAll();
+
+    //everything but ranges is already applied
+    const ATemplateSelectionRecord * range_rec = DrawTemplate.findRecord("Ranges", &DrawTemplate.Selection);
+    if (range_rec && range_rec->bSelected)
+    {
+        const ATemplateSelectionRecord * X_rec = DrawTemplate.findRecord("X range", range_rec);
+        if (X_rec && X_rec->bSelected)
+        {
+            ui->ledXfrom->setText( QString::number(XYZ_ranges[0].first,  'g', 4) );
+            ui->ledXto->  setText( QString::number(XYZ_ranges[0].second, 'g', 4) );
+        }
+        const ATemplateSelectionRecord * Y_rec = DrawTemplate.findRecord("Y range", range_rec);
+        if (Y_rec && Y_rec->bSelected)
+        {
+            ui->ledYfrom->setText( QString::number(XYZ_ranges[1].first,  'g', 4) );
+            ui->ledYto->  setText( QString::number(XYZ_ranges[1].second, 'g', 4) );
+        }
+        const ATemplateSelectionRecord * Z_rec = DrawTemplate.findRecord("Z range", range_rec);
+        if (Z_rec && Z_rec->bSelected)
+        {
+            if (ui->ledZfrom->isEnabled() && !ui->ledZfrom->text().isEmpty())
+            {
+                ui->ledZfrom->setText( QString::number(XYZ_ranges[2].first,  'g', 4) );
+                ui->ledZto->  setText( QString::number(XYZ_ranges[2].second, 'g', 4) );
+            }
+        }
+        Reshape();
+    }
+
+    HighlightUpdateBasketButton(true);
+}
+
+#include "guiutils.h"
+void GraphWindowClass::HighlightUpdateBasketButton(bool flag)
+{
+    QIcon icon;
+    if (flag && ui->pbUpdateInBasket->isEnabled())
+        icon = GuiUtils::createColorCircleIcon(QSize(15,15), Qt::yellow);
+    ui->pbUpdateInBasket->setIcon(icon);
+}
+
+#include "atemplateselectiondialog.h"
+void GraphWindowClass::on_actionApply_selective_triggered()
+{
+    ATemplateSelectionDialog D(DrawTemplate.Selection, this);
+    int res = D.exec();
+    if (res == QDialog::Accepted)
+        applyTemplate(false);
+}
+
+void GraphWindowClass::on_actionShow_first_drawn_object_context_menu_triggered()
+{
+    if (DrawObjects.isEmpty())
+    {
+        message("Nothing is drawn!", this);
+        return;
+    }
+
+    const QPoint pos = mapToGlobal(QPoint(0, menuBar()->height()));
+    Explorer->showObjectContextMenu(pos, 0);
+}
+
+void GraphWindowClass::on_pbManipulate_clicked()
+{
+    Explorer->manipulateTriggered();
+}

@@ -52,6 +52,8 @@ AGeo_SI::AGeo_SI(DetectorClass* Detector)
                    "It will automatically calculate x,y and z positions of all elements, keeping user-configured xyz position of the Origin element.";
 
   H["RecalculateStack"] = "Recalculates xyz positions of the stack elements. Has to be called if config.Replace() was used to change thickness of the elements.";
+
+  H["setEnable"] = "Enable or disable the volume with the providfed name, or, if the name ends with '*', all volumes with the name starting with the provided string.)";
 }
 
 AGeo_SI::~AGeo_SI()
@@ -646,7 +648,34 @@ void AGeo_SI::DisableObject(QString Object)
       return;
   }
 
-  obj->fActive = false;
+  if (!obj->isWorld() && !obj->ObjectType->isSlab())
+    obj->fActive = false;
+}
+
+void AGeo_SI::setEnable(QString ObjectOrWildcard, bool flag)
+{
+    if (ObjectOrWildcard.endsWith('*'))
+    {
+        ObjectOrWildcard.chop(1);
+        //qDebug() << "Looking for all objects starting with" << ObjectOrWildcard;
+        QVector<AGeoObject*> foundObjs;
+        Detector->Sandwich->World->findObjectsByWildcard(ObjectOrWildcard, foundObjs);
+
+        for (AGeoObject * obj: foundObjs)
+            if (!obj->isWorld() && !obj->ObjectType->isSlab())
+                obj->fActive = flag;
+    }
+    else
+    {
+        AGeoObject* obj = Detector->Sandwich->World->findObjectByName(ObjectOrWildcard);
+        if (!obj)
+            abort("Cannot find object " + ObjectOrWildcard);
+        else
+        {
+            if (!obj->isWorld() && !obj->ObjectType->isSlab())
+                obj->fActive = flag;
+        }
+    }
 }
 
 void AGeo_SI::UpdateGeometry(bool CheckOverlaps)

@@ -43,7 +43,7 @@ private slots:
 protected:
   void dropEvent(QDropEvent *event);
   void dragEnterEvent(QDragEnterEvent* event);
-//  void dragMoveEvent(QDragMoveEvent* event);
+  void dragMoveEvent(QDragMoveEvent* event);
 
 private:
   AGeoObject *World;
@@ -56,6 +56,8 @@ private:
 
   QColor BackgroundColor;
   bool fSpecialGeoViewMode;
+
+  QTreeWidgetItem * previousHoverItem = nullptr;
 
   void populateTreeWidget(QTreeWidgetItem *parent, AGeoObject *Container, bool fDisabled = false);
   void updateExpandState(QTreeWidgetItem* item); //recursive!

@@ -23,8 +23,6 @@ ARootLineConfigurator::ARootLineConfigurator(int* color, int* width, int* style,
   setMouseTracking(true);
   this->setWindowTitle("Select ROOT line properties");
 
-  SquareSize = 30;
-
   //  kWhite =0, kBlack =1, kGray =920, kRed =632,
   //  kGreen =416, kBlue =600, kYellow =400, kMagenta =616,
   //  kCyan =432, kOrange =800, kSpring =820, kTeal =840,
@@ -164,7 +162,6 @@ void ARootLineConfigurator::updateColorFrame()
         message("Not valid color!", this);
         sbColor->setValue(1);
     }
-
 }
 
 void ARootLineConfigurator::previewColor()

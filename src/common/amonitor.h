@@ -7,6 +7,7 @@
 #include <vector>
 
 class TH1D;
+class ATH1D;
 class TH2D;
 class AGeoObject;
 class QJsonObject;

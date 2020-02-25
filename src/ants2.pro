@@ -1,17 +1,17 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 4
-ANTS2_MINOR = 22
+ANTS2_MINOR = 25
 
 #Optional libraries
 #CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
 #CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library: see https://github.com/mariusmuja/flann
 #CONFIG += ants2_fann        #enables FANN (fast neural network) library: see https://github.com/libfann/fann
 CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra - highly recommended! Installation requires only to copy files!
-CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
+#CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 #CONFIG += ants2_Python      #enable Python scripting
 #CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering): see https://github.com/mctools/ncrystal
 
-CONFIG += ants2_jsroot       #enables JSROOT visualisation at GeometryWindow. Automatically enables ants2_RootServer
+#CONFIG += ants2_jsroot       #enables JSROOT visualisation at GeometryWindow. Automatically enables ants2_RootServer
 
 # You may need to modify paths for CERN ROOT and the enabled libraries! See the corresponding sections below
 
@@ -39,7 +39,7 @@ win32 {
 }
 linux-g++ || unix {
      INCLUDEPATH += $$system(root-config --incdir)
-     LIBS += $$system(root-config --libs) -lGeom -lGeomPainter -lGeomBuilder -lMinuit2 -lSpectrum
+     LIBS += $$system(root-config --libs) -lGeom -lGeomPainter -lGeomBuilder -lMinuit2 -lSpectrum -ltbb
      ants2_RootServer {LIBS += -lRHTTP  -lXMLIO}
 }
 #-----------
@@ -372,7 +372,6 @@ SOURCES += main.cpp \
     OpticalOverrides/aopticaloverridescriptinterface.cpp \
     OpticalOverrides/ascriptopticaloverride.cpp \
     common/atracerstateful.cpp \
-    common/aphoton.cpp \
     OpticalOverrides/fsnpopticaloverride.cpp \
     OpticalOverrides/awaveshifteroverride.cpp \
     OpticalOverrides/spectralbasicopticaloverride.cpp \
@@ -412,7 +411,23 @@ SOURCES += main.cpp \
     gui/MainWindowTools/alogconfigdialog.cpp \
     Simulation/alogsandstatisticsoptions.cpp \
     Reconstruction/areconstructionworker.cpp \
-    common/ahistogram.cpp
+    common/ahistogram.cpp \
+    gui/GraphWindowTools/abasketitem.cpp \
+    gui/GraphWindowTools/abasketmanager.cpp \
+    gui/GraphWindowTools/adrawexplorerwidget.cpp \
+    gui/GraphWindowTools/adrawobject.cpp \
+    gui/GraphWindowTools/abasketlistwidget.cpp \
+    gui/GraphWindowTools/alegenddialog.cpp \
+    gui/MainWindowTools/aroottextconfigurator.cpp \
+    gui/aproxystyle.cpp \
+    gui/GraphWindowTools/aaxesdialog.cpp \
+    gui/GraphWindowTools/atextpavedialog.cpp \
+    gui/GraphWindowTools/alinemarkerfilldialog.cpp \
+    gui/GraphWindowTools/arootcolorselectordialog.cpp \
+    gui/GraphWindowTools/adrawtemplate.cpp \
+    gui/GraphWindowTools/atemplateselectiondialog.cpp \
+    gui/GraphWindowTools/atemplateselectionrecord.cpp \
+    modules/apmdummystructure.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -567,21 +582,39 @@ HEADERS  += common/CorrelationFilters.h \
     Simulation/alogsandstatisticsoptions.h \
     Reconstruction/afunctorbase.h \
     Reconstruction/areconstructionworker.h \
-    common/ahistogram.h
+    common/ahistogram.h \
+    gui/GraphWindowTools/adrawobject.h \
+    gui/GraphWindowTools/abasketitem.h \
+    gui/GraphWindowTools/abasketmanager.h \
+    gui/GraphWindowTools/adrawexplorerwidget.h \
+    gui/GraphWindowTools/abasketlistwidget.h \
+    gui/GraphWindowTools/alegenddialog.h \
+    gui/MainWindowTools/aroottextconfigurator.h \
+    gui/aproxystyle.h \
+    gui/GraphWindowTools/aaxesdialog.h \
+    gui/GraphWindowTools/atextpavedialog.h \
+    gui/GraphWindowTools/alinemarkerfilldialog.h \
+    gui/GraphWindowTools/arootcolorselectordialog.h \
+    gui/GraphWindowTools/adrawtemplate.h \
+    gui/GraphWindowTools/atemplateselectiondialog.h \
+    gui/GraphWindowTools/atemplateselectionrecord.h \
+    modules/apmanddummy.h \
+    modules/apmdummystructure.h
 
 # --- SIM ---
 ants2_SIM {
     DEFINES += SIM
 
-    SOURCES += common/asimulationstatistics.cpp \
-    modules/s1_generator.cpp \
-    modules/photon_generator.cpp \
-    modules/s2_generator.cpp \
+    SOURCES += Simulation/aphoton.cpp \
+    Simulation/asimulationstatistics.cpp \
+    Simulation/s1_generator.cpp \
+    Simulation/photon_generator.cpp \
+    Simulation/s2_generator.cpp \
     OpticalOverrides/phscatclaudiomodel.cpp \
     OpticalOverrides/scatteronmetal.cpp \
-    modules/aphotontracer.cpp \
-    modules/acompton.cpp \
-    modules/ageometrytester.cpp \
+    Simulation/aphotontracer.cpp \
+    Simulation/acompton.cpp \
+    Simulation/ageometrytester.cpp \
     Simulation/atrackingdataimporter.cpp \
     Simulation/anoderecord.cpp \
     Simulation/asimulationmanager.cpp \
@@ -590,22 +623,22 @@ ants2_SIM {
     Simulation/apointsourcesimulator.cpp \
     Simulation/aparticlesourcesimulator.cpp
 
-    HEADERS  += common/agridelementrecord.h \
-    common/aphoton.h \
-    common/ageomarkerclass.h \
-    common/atrackrecords.h \
-    common/dotstgeostruct.h \
-    common/aenergydepositioncell.h \
-    common/ahistoryrecords.h \
-    common/asimulationstatistics.h \
-    modules/s1_generator.h \
-    modules/photon_generator.h \
-    modules/s2_generator.h \
+    HEADERS  += Simulation/aphoton.h \
+    Simulation/asimulationstatistics.h \
+    Simulation/agridelementrecord.h \
+    Simulation/ageomarkerclass.h \
+    Simulation/atrackrecords.h \
+    Simulation/dotstgeostruct.h \
+    Simulation/aenergydepositioncell.h \
+    Simulation/ahistoryrecords.h \
+    Simulation/s1_generator.h \
+    Simulation/photon_generator.h \
+    Simulation/s2_generator.h \
     OpticalOverrides/phscatclaudiomodel.h \
     OpticalOverrides/scatteronmetal.h \
-    modules/aphotontracer.h \
-    modules/acompton.h \
-    modules/ageometrytester.h \
+    Simulation/aphotontracer.h \
+    Simulation/acompton.h \
+    Simulation/ageometrytester.h \
     Simulation/atrackingdataimporter.h \
     Simulation/anoderecord.h \
     Simulation/asimulationmanager.h \
@@ -919,5 +952,12 @@ unix {
 
 FORMS += \
     gui/ageant4configdialog.ui \
-    gui/MainWindowTools/alogconfigdialog.ui
+    gui/MainWindowTools/alogconfigdialog.ui \
+    gui/GraphWindowTools/alegenddialog.ui \
+    gui/MainWindowTools/aroottextconfigurator.ui \
+    gui/GraphWindowTools/aaxesdialog.ui \
+    gui/GraphWindowTools/atextpavedialog.ui \
+    gui/GraphWindowTools/alinemarkerfilldialog.ui \
+    gui/GraphWindowTools/arootcolorselectordialog.ui \
+    gui/GraphWindowTools/atemplateselectiondialog.ui
 

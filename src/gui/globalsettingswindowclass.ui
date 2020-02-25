@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>511</width>
-    <height>341</height>
+    <height>346</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,8 +19,8 @@
      <rect>
       <x>5</x>
       <y>4</y>
-      <width>501</width>
-      <height>331</height>
+      <width>502</width>
+      <height>338</height>
      </rect>
     </property>
     <property name="currentIndex">
@@ -30,190 +30,53 @@
      <attribute name="title">
       <string>Paths</string>
      </attribute>
-     <widget class="QLineEdit" name="leLibMaterials">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>68</y>
-        <width>402</width>
-        <height>24</height>
-       </rect>
-      </property>
-     </widget>
      <widget class="QLineEdit" name="leWorkingDir">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>204</y>
-        <width>480</width>
+        <x>1</x>
+        <y>212</y>
+        <width>494</width>
         <height>25</height>
        </rect>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pbChooseMaterialLib">
-      <property name="geometry">
-       <rect>
-        <x>420</x>
-        <y>66</y>
-        <width>71</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="contextMenuPolicy">
-       <enum>Qt::CustomContextMenu</enum>
-      </property>
-      <property name="text">
-       <string>Change</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_188">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>184</y>
-        <width>300</width>
-        <height>19</height>
+        <x>0</x>
+        <y>190</y>
+        <width>501</width>
+        <height>20</height>
        </rect>
       </property>
       <property name="text">
        <string>Temporary (working) directory:</string>
       </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
      </widget>
      <widget class="QLabel" name="label_146">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>8</y>
-        <width>371</width>
+        <x>0</x>
+        <y>4</y>
+        <width>495</width>
         <height>16</height>
        </rect>
       </property>
       <property name="text">
-       <string>PMtypes: default save/load path:</string>
+       <string>Default save/load paths:</string>
       </property>
-     </widget>
-     <widget class="QLabel" name="label_267">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>134</y>
-        <width>341</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Scripts: default save/load path:</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_260">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>90</y>
-        <width>361</width>
-        <height>18</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Particle sources: default save/load path:</string>
-      </property>
-     </widget>
-     <widget class="QLineEdit" name="leLibPMtypes">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>25</y>
-        <width>402</width>
-        <height>24</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_239">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>50</y>
-        <width>361</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Materials: default save/load path:</string>
-      </property>
-     </widget>
-     <widget class="QLineEdit" name="leLibScripts">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>151</y>
-        <width>402</width>
-        <height>24</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QLineEdit" name="leLibParticleSources">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>109</y>
-        <width>402</width>
-        <height>24</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pbChoosePMtypeLib">
-      <property name="geometry">
-       <rect>
-        <x>420</x>
-        <y>24</y>
-        <width>71</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="contextMenuPolicy">
-       <enum>Qt::CustomContextMenu</enum>
-      </property>
-      <property name="text">
-       <string>Change</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pbChooseParticleSourcesLib">
-      <property name="geometry">
-       <rect>
-        <x>420</x>
-        <y>108</y>
-        <width>71</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="contextMenuPolicy">
-       <enum>Qt::CustomContextMenu</enum>
-      </property>
-      <property name="text">
-       <string>Change</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pbChooseScriptsLib">
-      <property name="geometry">
-       <rect>
-        <x>420</x>
-        <y>150</y>
-        <width>71</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="contextMenuPolicy">
-       <enum>Qt::CustomContextMenu</enum>
-      </property>
-      <property name="text">
-       <string>Change</string>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
      <widget class="QPushButton" name="pbChangeWorkingDir">
       <property name="geometry">
        <rect>
         <x>110</x>
-        <y>231</y>
+        <y>238</y>
         <width>280</width>
         <height>25</height>
        </rect>
@@ -225,8 +88,8 @@
      <widget class="QPushButton" name="pbOpen">
       <property name="geometry">
        <rect>
-        <x>58</x>
-        <y>266</y>
+        <x>66</x>
+        <y>274</y>
         <width>96</width>
         <height>25</height>
        </rect>
@@ -238,8 +101,8 @@
      <widget class="QComboBox" name="comboBox">
       <property name="geometry">
        <rect>
-        <x>168</x>
-        <y>267</y>
+        <x>176</x>
+        <y>274</y>
         <width>246</width>
         <height>25</height>
        </rect>
@@ -269,12 +132,17 @@
         <string>Examples dir</string>
        </property>
       </item>
+      <item>
+       <property name="text">
+        <string>Logs</string>
+       </property>
+      </item>
      </widget>
      <widget class="Line" name="line_3">
       <property name="geometry">
        <rect>
-        <x>108</x>
-        <y>277</y>
+        <x>116</x>
+        <y>285</y>
         <width>123</width>
         <height>3</height>
        </rect>
@@ -286,21 +154,132 @@
        <enum>Qt::Horizontal</enum>
       </property>
      </widget>
+     <widget class="QWidget" name="layoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>23</y>
+        <width>498</width>
+        <height>161</height>
+       </rect>
+      </property>
+      <layout class="QGridLayout" name="gridLayout">
+       <property name="leftMargin">
+        <number>3</number>
+       </property>
+       <property name="rightMargin">
+        <number>3</number>
+       </property>
+       <property name="spacing">
+        <number>3</number>
+       </property>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_147">
+         <property name="text">
+          <string>PMtypes:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="leLibPMtypes"/>
+       </item>
+       <item row="0" column="2">
+        <widget class="QPushButton" name="pbChoosePMtypeLib">
+         <property name="contextMenuPolicy">
+          <enum>Qt::CustomContextMenu</enum>
+         </property>
+         <property name="text">
+          <string>Change</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_239">
+         <property name="text">
+          <string>Materials:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="leLibMaterials"/>
+       </item>
+       <item row="1" column="2">
+        <widget class="QPushButton" name="pbChooseMaterialLib">
+         <property name="contextMenuPolicy">
+          <enum>Qt::CustomContextMenu</enum>
+         </property>
+         <property name="text">
+          <string>Change</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_260">
+         <property name="text">
+          <string>Sources:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="leLibParticleSources"/>
+       </item>
+       <item row="2" column="2">
+        <widget class="QPushButton" name="pbChooseParticleSourcesLib">
+         <property name="contextMenuPolicy">
+          <enum>Qt::CustomContextMenu</enum>
+         </property>
+         <property name="text">
+          <string>Change</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_267">
+         <property name="text">
+          <string>Scripts:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLineEdit" name="leLibScripts"/>
+       </item>
+       <item row="3" column="2">
+        <widget class="QPushButton" name="pbChooseScriptsLib">
+         <property name="contextMenuPolicy">
+          <enum>Qt::CustomContextMenu</enum>
+         </property>
+         <property name="text">
+          <string>Change</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_268">
+         <property name="text">
+          <string>Logs:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QLineEdit" name="leLibLogs"/>
+       </item>
+       <item row="4" column="2">
+        <widget class="QPushButton" name="pbChooseLogsLib">
+         <property name="contextMenuPolicy">
+          <enum>Qt::CustomContextMenu</enum>
+         </property>
+         <property name="text">
+          <string>Change</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <zorder>layoutWidget</zorder>
      <zorder>line_3</zorder>
-     <zorder>leLibMaterials</zorder>
      <zorder>leWorkingDir</zorder>
-     <zorder>pbChooseMaterialLib</zorder>
      <zorder>label_188</zorder>
      <zorder>label_146</zorder>
-     <zorder>label_267</zorder>
-     <zorder>label_260</zorder>
-     <zorder>leLibPMtypes</zorder>
-     <zorder>label_239</zorder>
-     <zorder>leLibScripts</zorder>
-     <zorder>leLibParticleSources</zorder>
-     <zorder>pbChoosePMtypeLib</zorder>
-     <zorder>pbChooseParticleSourcesLib</zorder>
-     <zorder>pbChooseScriptsLib</zorder>
      <zorder>pbChangeWorkingDir</zorder>
      <zorder>pbOpen</zorder>
      <zorder>comboBox</zorder>

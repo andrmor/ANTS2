@@ -96,7 +96,6 @@
 MainWindow::~MainWindow()
 {
     qDebug()<<"<Staring destructor for MainWindow";
-    delete histSecScint;
     delete histScan;
 
     qDebug() << "<-Clearing containers with dynamic objects";
@@ -216,14 +215,6 @@ void MainWindow::closeEvent(QCloseEvent *)
    */
 
    ui->pbShowColorCoding->setFocus(); //to finish editing whatever QLineEdit the user can be in - they call on_editing_finish
-
-   if (GraphWindow->isBasketOn())
-   {
-       bool bVis = GraphWindow->isVisible();
-       GraphWindow->showNormal();
-       GraphWindow->switchOffBasket();
-       GraphWindow->setVisible(bVis);
-   }
 
    //if checked, save windows' status
    if (ui->actionSave_Load_windows_status_on_Exit_Init->isChecked())
@@ -1312,8 +1303,9 @@ void MainWindow::on_pbTestShowRefrIndex_clicked()
   QVector<double> x;
   x.resize(0);
   for (int i=0; i<WaveNodes; i++) x.append(WaveFrom + WaveStep*i);
-  //ShowGraphWindow();
-  GraphWindow->MakeGraph(&x, &(*MpCollection)[matId]->nWaveBinned, kRed, "Wavelength, nm", "Refractive index");
+  //GraphWindow->MakeGraph(&x, &(*MpCollection)[matId]->nWaveBinned, kRed, "Wavelength, nm", "Refractive index");
+  TGraph * g = GraphWindow->ConstructTGraph(x, (*MpCollection)[matId]->nWaveBinned, "Binned refractive index", "Wavelength, nm", "Refractive index", kRed);
+  GraphWindow->Draw(g, "APL");
 }
 
 void MainWindow::on_pbTestShowAbs_clicked()
@@ -1323,8 +1315,9 @@ void MainWindow::on_pbTestShowAbs_clicked()
   QVector<double> x;
   x.resize(0);
   for (int i=0; i<WaveNodes; i++) x.append(WaveFrom + WaveStep*i);
-  //ShowGraphWindow();
-  GraphWindow->MakeGraph(&x, &(*MpCollection)[matId]->absWaveBinned, kRed, "Wavelength, nm", "Attenuation coefficient, mm-1");
+  //GraphWindow->MakeGraph(&x, &(*MpCollection)[matId]->absWaveBinned, kRed, "Wavelength, nm", "Attenuation coefficient, mm-1");
+  TGraph * g = GraphWindow->ConstructTGraph(x, (*MpCollection)[matId]->absWaveBinned, "Binned absorption coefficient", "Wavelength, nm", "Attenuation coefficient, mm-1", kRed);
+  GraphWindow->Draw(g, "APL");
 }
 
 void MainWindow::on_sbFixedWaveIndexPointSource_valueChanged(int arg1)
@@ -1351,12 +1344,14 @@ void MainWindow::on_sbFixedWaveIndexPointSource_valueChanged(int arg1)
 
 void MainWindow::on_pbShowPDE_clicked()
 {
-   int typ = ui->sbPMtype->value();
-   //ShowGraphWindow();
-   if (ui->cobPMdeviceType->currentIndex() == 0)
-     GraphWindow->MakeGraph(&PMs->getType(typ)->PDE_lambda, &PMs->getType(typ)->PDE, kRed, "Wavelength, nm", "Quantum Efficiency");
-   else
-     GraphWindow->MakeGraph(&PMs->getType(typ)->PDE_lambda, &PMs->getType(typ)->PDE, kRed, "Wavelength, nm", "Photon Detection Efficiency");
+    int iType = ui->sbPMtype->value();
+    if (iType < 0 || iType >= PMs->countPMtypes()) return;
+
+    const APmType * pmType = PMs->getType(iType);
+    TGraph * g = GraphWindow->ConstructTGraph(pmType->PDE_lambda, pmType->PDE, "", "Wavelength, nm",
+                                              (pmType->SiPM ? "Photon Detection Efficiency" : "Quantum Efficiency"),
+                                              kRed, 20, 1, kRed);
+    GraphWindow->Draw(g, "APL");
 }
 
 void MainWindow::on_pbLoadPDE_clicked()
@@ -1422,20 +1417,22 @@ void MainWindow::on_pbScalePDE_clicked()
 
 void MainWindow::on_pbShowPDEbinned_clicked()
 {
-  if (!ui->cbWaveResolved->isChecked())
-    {      
-      message("Activate wavelength resolved simulation option", this);
-      return;
-    }
+    int iType = ui->sbPMtype->value();
+    if (iType < 0 || iType >= PMs->countPMtypes()) return;
 
-  const int itype = ui->sbPMtype->value();
-  //PMs->RebinPDEsForType(itype);
+    if (!ui->cbWaveResolved->isChecked())
+      {
+        message("Activate wavelength resolved simulation option", this);
+        return;
+      }
 
-  QVector<double> x;
-  for (int i = 0; i < WaveNodes; i++)
-      x.append(WaveFrom + WaveStep * i);
+    const APmType * pmType = PMs->getType(iType);
 
-  GraphWindow->MakeGraph(&x, &PMs->getType(itype)->PDEbinned, kRed, "Wavelength, nm", "PDE");
+    QVector<double> x;
+    for (int i = 0; i < WaveNodes; i++)
+        x.append(WaveFrom + WaveStep * i);
+    TGraph * g = GraphWindow->ConstructTGraph(x, pmType->PDEbinned, "", "Wavelength, nm", (pmType->SiPM ? "Photon Detection Efficiency" : "Quantum Efficiency"));
+    GraphWindow->Draw(g, "APL");
 }
 
 void MainWindow::on_pbPMtypeLoadAngular_clicked()
@@ -1960,13 +1957,6 @@ void MainWindow::on_pbIndShowType_clicked()
 {
   ui->tabWidget->setCurrentIndex(1);
   ui->sbPMtype->setValue(ui->cobPMtypeInExplorers->currentIndex());
-}
-
-void MainWindow::on_pbIndRestoreEffectiveDE_clicked()
-{
-    const int ipm = ui->sbIndPMnumber->value();
-    PMs->at(ipm).effectivePDE = -1.0;
-    ReconstructDetector(true);
 }
 
 void MainWindow::on_pbIndShowDE_clicked()
@@ -2671,62 +2661,6 @@ void MainWindow::on_pbScanDistrDelete_clicked()
   ui->pbScanDistrShow->setEnabled(false);
   ui->pbScanDistrDelete->setEnabled(false);
   MainWindow::on_pbUpdateSimConfig_clicked();
-}
-
-void MainWindow::on_cobSecScintillationGenType_currentIndexChanged(int index)
-{
-  if (index == 3) ui->fSecondaryScintLoadProfile->setVisible(true);
-  else ui->fSecondaryScintLoadProfile->setVisible(false);
-}
-
-void MainWindow::on_pbSecScintShowProfile_clicked()
-{
-  if (!histSecScint) return;
-  GraphWindow->Draw(histSecScint, "", true, false);
-}
-
-void MainWindow::on_pbSecScintLoadProfile_clicked()
-{
-  QString fileName = QFileDialog::getOpenFileName(this, "Load custom distribution", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
-  if (fileName.isEmpty()) return;
-  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-
-  MainWindow::LoadSecScintTheta(fileName);
-}
-
-void MainWindow::LoadSecScintTheta(QString fileName)
-{
-  QVector<double> x, y;
-  int error = LoadDoubleVectorsFromFile(fileName, &x, &y);
-  if (error>0)
-    {
-      qDebug()<<"Error reading custom Theta distribution file";
-      return;
-    }
-
-  //PhotonGenerator->deleteSecScintThetaDistribution();
-  if (histSecScint) delete histSecScint;
-  int size = x.size();
-  double* xx = new double [size];
-  for (int i = 0; i<size; i++) xx[i]=x[i];//*3.1415926535/180.;
-  histSecScint = new TH1D("SecScintTheta","SecScint: Theta", size-1, xx);
-
-  for (int j = 1; j<size+1; j++)  histSecScint->SetBinContent(j, y[j-1]);
-  //PhotonGenerator->setSecScintThetaDistribution(histSecScint);
-
-  ui->pbSecScintShowProfile->setEnabled(true);
-  ui->pbSecScintDeleteProfile->setEnabled(true);
-}
-
-void MainWindow::on_pbSecScintDeleteProfile_clicked()
-{
-  //PhotonGenerator->deleteSecScintThetaDistribution();
-  if (histSecScint) delete histSecScint;
-  histSecScint = 0;
-
-  ui->pbSecScintShowProfile->setEnabled(false);
-  ui->pbSecScintDeleteProfile->setEnabled(false);
-  ui->cobSecScintillationGenType->setCurrentIndex(0);
 }
 
 void MainWindow::on_lwMaterials_currentRowChanged(int currentRow)
@@ -4733,13 +4667,17 @@ void MainWindow::on_pbOpenLogOptions_clicked()
 {
     ALogConfigDialog* d = new ALogConfigDialog(SimulationManager->LogsStatOptions, this);
     d->exec();
-    delete d;
+    if (d->bRequestShowSettings)
+    {
+        GlobSetWindow->SetTab(0);
+        GlobSetWindow->show();
+    }
     on_pbUpdateSimConfig_clicked();
+
+    delete d;
 }
 
 void MainWindow::on_pbOpenLogOptions2_clicked()
 {
-    ALogConfigDialog* d = new ALogConfigDialog(SimulationManager->LogsStatOptions, this);
-    d->exec();
-    on_pbUpdateSimConfig_clicked();
+    on_pbOpenLogOptions_clicked();
 }

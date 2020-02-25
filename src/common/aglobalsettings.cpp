@@ -15,6 +15,7 @@
 #include <QDebug>
 #include <QtWidgets/QApplication>
 #include <QThread>
+#include "TStyle.h"
 
 AGlobalSettings& AGlobalSettings::getInstance()
 {
@@ -91,6 +92,9 @@ AGlobalSettings::AGlobalSettings()
     }
     else loadANTSconfiguration();
 
+    if (LibLogs.isEmpty()) LibLogs = AntsBaseDir + "/Logs";
+    if (!QDir(LibLogs).exists()) QDir().mkdir(LibLogs);
+
 #ifdef GUI
     if (!RootStyleScript.isEmpty())
     {
@@ -101,6 +105,7 @@ AGlobalSettings::AGlobalSettings()
         SM->Evaluate(RootStyleScript);
         SM->deleteLater();
     }
+    gStyle->SetOptTitle(0);  // disables drawing of the title of ROOT histograms / graphs
 #endif
 }
 
@@ -119,6 +124,8 @@ void AGlobalSettings::writeToJson(QJsonObject &json) const
     js["MaterialLib"] = LibMaterials;
     js["ParticleSourcesLib"] = LibParticleSources;
     js["ScriptsLib"] = LibScripts;
+    js["LogsLib"] = LibLogs;
+
     js["FontSize"] = FontSize;
     js["RootStyleScript"] = RootStyleScript;
     js["OpenImageExternalEditor"] = fOpenImageExternalEditor;
@@ -174,6 +181,8 @@ void AGlobalSettings::readFromJson(const QJsonObject &json)
     parseJson(js, "MaterialLib", LibMaterials);
     parseJson(js, "ParticleSourcesLib", LibParticleSources);
     parseJson(js, "ScriptsLib", LibScripts);
+    parseJson(js, "LogsLib", LibLogs);
+
     parseJson(js, "FontSize", FontSize);
     parseJson(js, "RootStyleScript", RootStyleScript);
     parseJson(js, "OpenImageExternalEditor", fOpenImageExternalEditor);

@@ -83,7 +83,6 @@ private slots:
     void on_pbWasModified_clicked();
     void on_pbGammaDiagnosticsPhComptRation_clicked();
     void on_ledGammaDiagnosticsEnergy_editingFinished();
-    void on_pbComments_clicked();
     void on_ledRayleighWave_editingFinished();
     void on_ledRayleigh_editingFinished();
     void on_pbRemoveRayleigh_clicked();
@@ -145,6 +144,10 @@ private slots:
     //new auto-generated, not cathegorized
 
     void on_pbSecScintHelp_clicked();
+
+    void on_pbImportStandardMaterial_clicked();
+
+    void on_pteComments_textChanged();
 
 private:
     Ui::MaterialInspectorWindow *ui;

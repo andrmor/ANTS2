@@ -388,6 +388,9 @@ void MaterialInspectorWindow::UpdateIndicationTmpMaterial()
     double val = tmpMaterial.getPhotonYield(lastSelected_cobYieldForParticle);
     ui->ledPrimaryYield->setText(QString::number(val));
 
+    ui->pteComments->clear();
+    ui->pteComments->appendPlainText(tmpMaterial.Comments);
+
     LastSelectedParticle = tmp;
     if (LastSelectedParticle < numPart) ui->cobParticle->setCurrentIndex(LastSelectedParticle);
     else ui->cobParticle->setCurrentIndex(0);
@@ -430,14 +433,16 @@ void MaterialInspectorWindow::updateEnableStatus()
 
 void MaterialInspectorWindow::on_pbUpdateInteractionIndication_clicked()
 {
-  //    qDebug() << "on_pbUpdateIndication_clicked";
+  //qDebug() << "Update indication triggered for MI window";
 
   AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
   int particleId = ui->cobParticle->currentIndex();
 
+  //qDebug() << "PIndex:" << particleId;
+
   flagDisreguardChange = true; //to skip auto-update "modified!" sign
 
-  if (particleId <0 || particleId > MW->MpCollection->countParticles()-1)
+  if (particleId < 0 || particleId >= MW->MpCollection->countParticles())
   {  //on bad particle index
       ui->pbShowTotalInteraction->setEnabled(false);
       flagDisreguardChange = false;
@@ -535,6 +540,8 @@ void MaterialInspectorWindow::on_pbUpdateTmpMaterial_clicked()
 
     tmpMaterial.e_diffusion_L = ui->ledEDiffL->text().toDouble();
     tmpMaterial.e_diffusion_T = ui->ledEDiffT->text().toDouble();
+
+    tmpMaterial.Comments = ui->pteComments->document()->toPlainText();
 
     on_ledGammaDiagnosticsEnergy_editingFinished(); //gamma - update MFP
 }
@@ -1454,31 +1461,6 @@ void MaterialInspectorWindow::on_ledGammaDiagnosticsEnergy_editingFinished()
 
   ui->leoGammaDiagnosticsCoefficient->setText(str);
   ui->leoMFPgamma->setText(str1);
-}
-
-void MaterialInspectorWindow::on_pbComments_clicked()
-{
-  QDialog* dialog = new QDialog(this);
-
-  QString str = ui->leName->text();
-  dialog->setWindowTitle(str);
-
-  QPushButton *okButton = new QPushButton("Close");
-  connect(okButton,SIGNAL(clicked()),dialog,SLOT(accept()));
-
-  QTextEdit *text = new QTextEdit();
-  text->append(MW->MpCollection->tmpMaterial.Comments);
-
-  QVBoxLayout *mainLayout = new QVBoxLayout;
-  mainLayout->addWidget(text);
-  mainLayout->addWidget(okButton);
-
-  dialog->setLayout(mainLayout);
-  dialog->exec();
-
-  MW->MpCollection->tmpMaterial.Comments = text->document()->toPlainText();
-  SetWasModified(true);
-  delete dialog;
 }
 
 void MaterialInspectorWindow::on_ledRayleighWave_editingFinished()
@@ -3031,3 +3013,35 @@ void MaterialInspectorWindow::on_pbSecScintHelp_clicked()
             "There are no checks for travel back in time and superluminal speed of electrons!";
     message(s, this);
 }
+
+void MaterialInspectorWindow::on_pteComments_textChanged()
+{
+    if (!flagDisreguardChange)
+        SetWasModified(true);
+}
+
+void MaterialInspectorWindow::on_pbImportStandardMaterial_clicked()
+{
+    QString starter;// = (MW->GlobSet.LibMaterials.isEmpty()) ? MW->GlobSet.LastOpenDir : MW->GlobSet.LibMaterials;
+    QString fileName = QFileDialog::getOpenFileName(this, "Load material", starter, "Material files (*mat *.json);;All files (*.*)");
+    if (fileName.isEmpty()) return;
+
+    QJsonObject json, js;
+    bool bOK = LoadJsonFromFile(json, fileName);
+    if (!bOK)
+    {
+        message("Cannot open file: "+fileName, this);
+        return;
+    }
+    if (!json.contains("Material"))
+    {
+        message("File format error: Json with material settings not found", this);
+        return;
+    }
+    js = json["Material"].toObject();
+    //Detector->MpCollection->tmpMaterial.readFromJson(js, Detector->MpCollection);
+    QVector<QString> undefMats = MW->MpCollection->getUndefinedParticles(js);
+
+    qDebug() << undefMats;
+}
+

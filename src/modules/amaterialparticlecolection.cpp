@@ -487,29 +487,25 @@ bool AMaterialParticleCollection::isNCrystalInUse() const
         if (m->isNCrystalInUse()) return true;
     return false;
 }
-/*
-bool AMaterialParticleCollection::AddParticle(QString name, AParticle::ParticleType type, int charge, double mass)
-{
-  if (getParticleId(name) != -1) return false;
 
-  AParticle* p = new AParticle(name, type, charge, mass);
-  ParticleCollection.append(p);
-  registerNewParticle();
-  emit ParticleCollectionChanged();
-  return true;
+const QVector<QString> AMaterialParticleCollection::getUndefinedParticles(QJsonObject &matJson)
+{
+    QVector<QString> vec;
+    QJsonArray arr;
+    parseJson(matJson, "MatParticles", arr);
+    for (int i = 0; i < arr.size(); i++)
+    {
+        QJsonObject jMatParticle = arr[i].toObject();
+        QJsonObject jparticle = jMatParticle["*Particle"].toObject();
+
+        AParticle pa;
+        pa.readFromJson(jparticle);
+        int pid = findParticle(pa);
+        if (pid == -1) vec << pa.ParticleName;
+    }
+    return vec;
 }
 
-bool AMaterialParticleCollection::AddParticle(QString name, AParticle::ParticleType type, double mass)
-{
-    if (getParticleId(name) != -1) return false;
-
-    AParticle* p = new AParticle(name, type, mass);
-    ParticleCollection.append(p);
-    registerNewParticle();
-    emit ParticleCollectionChanged();
-    return true;
-}
-*/
 int AMaterialParticleCollection::getNeutronIndex() const
 {
     for (int i=0; i<ParticleCollection.size(); i++)
@@ -554,13 +550,20 @@ void AMaterialParticleCollection::ConvertToStandardWavelengthes(QVector<double>*
   }
 }
 
-int AMaterialParticleCollection::findOrAddParticle(const AParticle & particle)
+int AMaterialParticleCollection::findParticle(const AParticle & particle) const
 {
     for (int Id = 0; Id < ParticleCollection.size(); Id++)
         if ( particle == *ParticleCollection.at(Id))
             return Id;
+    return -1;
+}
 
-    AParticle* p = new AParticle(particle);
+int AMaterialParticleCollection::findOrAddParticle(const AParticle & particle)
+{
+    int Id = findParticle(particle);
+    if (Id != -1) return Id;
+
+    AParticle * p = new AParticle(particle);
     int ParticleId = ParticleCollection.size();
     ParticleCollection.append(p);
     registerNewParticle(); //resize particle-indexed properties of all materials

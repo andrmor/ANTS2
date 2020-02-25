@@ -70,10 +70,9 @@ public:
   bool DeleteMaterial(int imat); //takes care of overrides of materials with index larger than imat!
   void UpdateWaveResolvedProperties(int imat); //updates wavelength-resolved material properties
   bool isNCrystalInUse() const;
+  const QVector<QString> getUndefinedParticles(QJsonObject & matJson);
 
   //Particles handling
-  //bool AddParticle(QString name, AParticle::ParticleType type, int charge, double mass);
-  //bool AddParticle(QString name, AParticle::ParticleType type, double mass);
   QVector<AParticle*>* getParticleCollection() {return &ParticleCollection;}
   int getNeutronIndex() const; //returns -1 if not in the collection
 
@@ -100,6 +99,7 @@ public:
 
 public:
   void ConvertToStandardWavelengthes(QVector<double> *sp_x, QVector<double> *sp_y, QVector<double> *y);
+  int findParticle(const AParticle & particle) const; // -1 if not found
   int findOrAddParticle(const AParticle & particle);
   int findOrAddParticle(const QJsonObject & json);
 

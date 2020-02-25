@@ -3025,9 +3025,72 @@ void MaterialInspectorWindow::on_pbImportStandardMaterial_clicked()
         return;
     }
     js = json["Material"].toObject();
-    //MpCollection->tmpMaterial.readFromJson(js, MpCollection);
-    QVector<QString> undefMats = MpCollection->getUndefinedParticles(js);
+    QVector<QString> newParticles = MpCollection->getUndefinedParticles(js);
 
-    qDebug() << undefMats;
+    QVector<QString> suppressParticles;
+    if (!newParticles.isEmpty())
+    {
+        QDialog D(this);
+        D.setWindowTitle("Add particles to current configuration");
+        QVBoxLayout * l = new QVBoxLayout(&D);
+        l->addWidget(new QLabel("This material has data for particles not defined in the current configuration"));
+        l->addWidget(new QLabel(""));
+        l->addWidget(new QLabel("Select particles to add to the configuration"));
+        QCheckBox * cbAll = nullptr;
+        QVector<QCheckBox*> cbVec;
+        if (newParticles.size() > 1)
+        {
+            cbAll = new QCheckBox("All particles below:");
+            l->addWidget(cbAll);
+            QObject::connect(cbAll, &QCheckBox::toggled, [&cbVec](bool flag)
+            {
+               for (QCheckBox * cb : cbVec) cb->setChecked(flag);
+            });
+        }
+
+        QScrollArea * SA = new QScrollArea();
+            SA->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+            SA->setMaximumHeight(500);
+            SA->setWidgetResizable(true);
+
+            QWidget * www = new QWidget();
+            QVBoxLayout * l2 = new QVBoxLayout(www);
+            for (const QString & name : newParticles)
+            {
+                QCheckBox* cb = new QCheckBox(name);
+                cbVec << cb;
+                l2->addWidget(cb);
+                QObject::connect(cb, &QCheckBox::clicked, [&cbAll]()
+                {
+                    cbAll->blockSignals(true);
+                    cbAll->setChecked(false);
+                    cbAll->blockSignals(false);
+                });
+            }
+
+            SA->setWidget(www);
+        l->addWidget(SA);
+
+        QHBoxLayout * h = new QHBoxLayout();
+            QPushButton * pbAccept = new QPushButton("Import");
+            QObject::connect(pbAccept, &QPushButton::clicked, &D, &QDialog::accept);
+            h->addWidget(pbAccept);
+            QPushButton * pbCancel = new QPushButton("Cancel");
+            QObject::connect(pbCancel, &QPushButton::clicked, &D, &QDialog::reject);
+            h->addWidget(pbCancel);
+        l->addLayout(h);
+
+        if (cbAll) cbAll->setChecked(true);
+
+        int res = D.exec();
+        if (res == QDialog::Rejected) return;
+
+        for (int i = 0; i < cbVec.size(); i++)
+            if (!cbVec.at(i)->isChecked())
+                suppressParticles << newParticles.at(i);
+    }
+
+
+
 }
 

@@ -61,7 +61,6 @@ void MainWindow::onRequestDetectorGuiUpdate()
   ListActiveParticles();
   //Materials
   on_pbRefreshMaterials_clicked();
-  //MIwindow->UpdateActiveMaterials(); //refresh indication on Material Inspector window
   MIwindow->setLogLog(Detector->MpCollection->fLogLogInterpolation);
   //Optical overrides
   on_pbRefreshOverrides_clicked();

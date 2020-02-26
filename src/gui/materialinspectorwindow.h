@@ -40,8 +40,6 @@ public:
 
     void ConvertToStandardWavelengthes(QVector<double>* sp_x, QVector<double>* sp_y, QVector<double>* y);
 
-    //void WriteElasticAutoToJson(QJsonObject& json);
-
     bool bClearInProgress = false;
 
 protected:
@@ -50,6 +48,8 @@ protected:
 private slots:
     // both user and code control - potential problems
     void on_leName_textChanged(const QString &arg1);
+    void on_cobActiveMaterials_activated(int index);
+    void on_pbUpdateInteractionIndication_clicked();  // interaction indication update
 
     //on signals from delegates
     void onAddIsotope(AChemicalElement *element);
@@ -58,11 +58,9 @@ private slots:
     void onRequestDraw(const QVector<double> & x, const QVector<double> & y, const QString & titleX, const QString & titleY);
 
     //on user input    
-    void on_pbUpdateInteractionIndication_clicked();  // interaction indication update
     void on_pbShowTotalInteraction_clicked();
     void on_leName_editingFinished();
     void on_pbAddToActive_clicked();
-    void on_cobActiveMaterials_activated(int index);
     void on_pbUpdateTmpMaterial_clicked();
     void on_pbLoadDeDr_clicked();
     void on_pbLoadThisScenarioCrossSection_clicked();
@@ -131,7 +129,6 @@ private slots:
 
     //user or code controlled change - safe or only GUI
     void on_ledRayleigh_textChanged(const QString &arg1);
-    void on_ledPrimaryYield_textChanged(const QString &arg1);
     void on_cbUseNCrystal_toggled(bool checked);
     void on_pteComments_textChanged();
 
@@ -156,6 +153,7 @@ private:
     AMatParticleConfigurator* OptionsConfigurator = nullptr;
     ANeutronInfoDialog * NeutronInfoDialog = nullptr;
 
+    bool bMaterialWasModified = false;
     bool flagDisreguardChange = false;
     bool fLockTable = false;
     int LastSelectedParticle = 0;

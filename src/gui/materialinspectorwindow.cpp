@@ -15,7 +15,6 @@
 #include "guiutils.h"
 #include "ainternetbrowser.h"
 #include "amatparticleconfigurator.h"
-//#include "amaterialcomposition.h"
 #include "achemicalelement.h"
 #include "aelementandisotopedelegates.h"
 #include "aneutronreactionsconfigurator.h"
@@ -101,10 +100,10 @@ MaterialInspectorWindow::MaterialInspectorWindow(QWidget * parent, MainWindow * 
 
 MaterialInspectorWindow::~MaterialInspectorWindow()
 {
-    if (NeutronInfoDialog)
+    if (NeutronInfoDialog)  // why like that?
     {
-        ANeutronInfoDialog* NeutronInfoDialogCopy = NeutronInfoDialog;
-        NeutronInfoDialog = 0;
+        ANeutronInfoDialog * NeutronInfoDialogCopy = NeutronInfoDialog;
+        NeutronInfoDialog = nullptr;
         delete NeutronInfoDialogCopy;
     }
 
@@ -122,9 +121,13 @@ void MaterialInspectorWindow::InitWindow()
 
 void MaterialInspectorWindow::SetWasModified(bool flag)
 {
-  QString s = " ";
-  if (flag) s = "<html><head/><body><p><span style=\" font-size:10pt; color:#ff0000;\">Material was modified: Click one of above to confirm</span></p></body></html>";
-  ui->labMatWasModified->setText(s);
+    bMaterialWasModified = flag;
+
+    QString s = ( flag ? "<html><span style=\"color:#ff0000;\">Material was modified: Click \"Update\" or \"Add\" to save changes</span></html>"
+                       : " " );
+    ui->labMatWasModified->setText(s);
+
+    updateActionButtons();
 }
 
 void MaterialInspectorWindow::UpdateActiveMaterials()
@@ -142,11 +145,13 @@ void MaterialInspectorWindow::UpdateActiveMaterials()
         on_cobActiveMaterials_activated(current);
         UpdateIndicationTmpMaterial();
     }
+
+    SetWasModified(false);
 }
 
 void MaterialInspectorWindow::on_pbAddNewMaterial_clicked()
 {
-   MaterialInspectorWindow::on_pbAddToActive_clicked(); //processes both update and add
+    on_pbAddToActive_clicked(); //processes both update and add
 }
 
 void MaterialInspectorWindow::on_pbAddToActive_clicked()
@@ -156,30 +161,26 @@ void MaterialInspectorWindow::on_pbAddToActive_clicked()
 
     MpCollection->tmpMaterial.updateRuntimeProperties(MpCollection->fLogLogInterpolation, Detector->RandGen);
 
-    //checkig this material
     const QString error = MpCollection->CheckTmpMaterial();
     if (!error.isEmpty())
-      {
+    {
         message(error, this);
         return;
-      }
+    }
 
     QString name = MpCollection->tmpMaterial.name;
     int index = MpCollection->FindMaterial(name);
-    if (index > -1)
-    {
-//        qDebug()<<"This name already in use! index = "<<index;
-        switch( QMessageBox::information( this, "", "Update properties for material "+name+"?", "Overwrite", "Cancel", 0, 1 ) )
-          {
-           case 0:  break;  //overwrite
-           default: return; //cancel
-          }        
-    }
+    if (index == -1)
+        index = MpCollection->countMaterials(); //then it will be appended, index = current size
     else
     {
-        //new material
-        index = MpCollection->countMaterials(); //then it will be appended, so index is = current size
+        switch( QMessageBox::information( this, "", "Update properties for material "+name+"?", "Overwrite", "Cancel", 0, 1 ) )
+        {
+           case 0:  break;  //overwrite
+           default: return; //cancel
+        }
     }
+
     MpCollection->CopyTmpToMaterialCollection(); //if absent, new material is created!
     MW->UpdateMaterialListEdit();
 
@@ -191,12 +192,12 @@ void MaterialInspectorWindow::on_pbAddToActive_clicked()
 
 void MaterialInspectorWindow::on_pbShowTotalInteraction_clicked()
 {
-    MaterialInspectorWindow::ShowTotalInteraction();
+    ShowTotalInteraction();
 }
 
 void MaterialInspectorWindow::on_pbShowStoppingPower_clicked()
 {
-    MaterialInspectorWindow::ShowTotalInteraction();
+    ShowTotalInteraction();
 }
 
 void MaterialInspectorWindow::setLogLog(bool flag)
@@ -207,22 +208,22 @@ void MaterialInspectorWindow::setLogLog(bool flag)
 void MaterialInspectorWindow::on_cobActiveMaterials_activated(int index)
 {
     if ( MpCollection->countMaterials() == 0) return;
-    if ( (*MpCollection)[index]->MatParticle.size() == 0)
-      {
-        qWarning()<<"Error: MatParticle is empty for this material!";
-        return;
-      }
+
+    /*
+    if (bMaterialWasModified)
+    {
+        int res = QMessageBox::question(this, "Explore another material", "All unsaved changes will be lost. Continue?", QMessageBox::Yes | QMessageBox::Cancel);
+        if (res == QMessageBox::Cancel)
+            return;
+    }
+    */
+
     MpCollection->CopyMaterialToTmp(index);
 
-    MaterialInspectorWindow::UpdateIndicationTmpMaterial();
+    UpdateIndicationTmpMaterial();
 
-//    //resetting particle-related section
-//    int indexToSet = (LastSelectedParticle < MpCollection->countParticles()) ? LastSelectedParticle : 0;
-//    ui->cobParticle->setCurrentIndex(indexToSet);
-//    on_pbUpdateInteractionIndication_clicked();
-
+    ui->pbRename->setText("Rename " + ui->cobActiveMaterials->currentText());
     SetWasModified(false);
-    ui->pbRename->setText("Rename "+ui->cobActiveMaterials->currentText());
 }
 
 void MaterialInspectorWindow::updateWaveButtons()
@@ -605,10 +606,12 @@ void MaterialInspectorWindow::SetParticleSelection(int index)
 
 void MaterialInspectorWindow::SetMaterial(int index)
 {
-  ui->cobActiveMaterials->setCurrentIndex(index);
-  on_cobActiveMaterials_activated(index);
+    ui->cobActiveMaterials->setCurrentIndex(index);
+    on_cobActiveMaterials_activated(index);
 
-  UpdateIndicationTmpMaterial();
+    UpdateIndicationTmpMaterial();
+
+    SetWasModified(false);
 }
 
 void MaterialInspectorWindow::on_pbLoadThisScenarioCrossSection_clicked()
@@ -1382,28 +1385,27 @@ void MaterialInspectorWindow::on_leName_textChanged(const QString& /*name*/)
     //on text change - on chage this is a signal that it will be another material. These properties are recalculated anyway on
     //accepting changes/new material
     AMaterial& tmpMaterial = MpCollection->tmpMaterial;
-    tmpMaterial.absWaveBinned.resize(0);
-    tmpMaterial.reemissionProbBinned.resize(0);
-    tmpMaterial.nWaveBinned.resize(0);
-    tmpMaterial.GeoMat = 0;  //do not delete! the original material has to have them
-    tmpMaterial.GeoMed = 0;
-    tmpMaterial.PrimarySpectrumHist = 0;
-    tmpMaterial.SecondarySpectrumHist = 0;
+    tmpMaterial.absWaveBinned.clear();
+    tmpMaterial.reemissionProbBinned.clear();
+    tmpMaterial.nWaveBinned.clear();
+    tmpMaterial.GeoMat = nullptr;  //do not delete! the original material has to have them
+    tmpMaterial.GeoMed = nullptr;
+    tmpMaterial.PrimarySpectrumHist = nullptr;
+    tmpMaterial.SecondarySpectrumHist = nullptr;
 
     updateActionButtons();
 }
 
 void MaterialInspectorWindow::updateActionButtons()
 {
-    //Buttons status
-    QString name = ui->leName->text();
+    const QString name = ui->leName->text();
     int iMat = MpCollection->FindMaterial(name);
     if (iMat == -1)
     {
         // Material with this name does not exist
         ui->pbAddToActive->setEnabled(false);  //update button
         ui->pbAddNewMaterial->setEnabled(true);
-        ui->pbRename->setEnabled(true);
+        ui->pbRename->setEnabled(bMaterialWasModified);
     }
     else
     {
@@ -1525,10 +1527,10 @@ void MaterialInspectorWindow::on_pbNistPage_clicked()
 
 void MaterialInspectorWindow::on_pbRename_clicked()
 {
-  if (!ui->labMatWasModified->text().simplified().isEmpty())
+    if (bMaterialWasModified)
     {
-      message("Material properties were modified!\nUpdate, add as new or cancel changes before renaming", this);
-      return;
+        message("Material properties were modified!\nUpdate, add as new or cancel changes before renaming", this);
+        return;
     }
 
   QString name = ui->leName->text();
@@ -1651,13 +1653,13 @@ void MaterialInspectorWindow::on_actionLoad_material_triggered()
   js = json["Material"].toObject();
   MpCollection->tmpMaterial.readFromJson(js, MpCollection);
 
-  MaterialInspectorWindow::on_pbWasModified_clicked();
-  MaterialInspectorWindow::updateWaveButtons();
+  on_pbWasModified_clicked();
+  updateWaveButtons();
   MW->ListActiveParticles();
 
   ui->cobActiveMaterials->setCurrentIndex(-1); //to avoid confusion (and update is disabled for -1)
-  MaterialInspectorWindow::UpdateIndicationTmpMaterial(); //refresh indication of tmpMaterial
-  MaterialInspectorWindow::updateWaveButtons(); //refresh button state for Wave-resolved properties
+  UpdateIndicationTmpMaterial(); //refresh indication of tmpMaterial
+  updateWaveButtons(); //refresh button state for Wave-resolved properties
   SetParticleSelection(0);
 }
 
@@ -2020,12 +2022,6 @@ void MaterialInspectorWindow::on_cobYieldForParticle_activated(int index)
     ui->ledPrimaryYield->setText( QString::number(tmpMaterial.getPhotonYield(index)) );
 }
 
-void MaterialInspectorWindow::on_ledPrimaryYield_textChanged(const QString &arg1)
-{
-    //if (arg1.toDouble() != MpCollection->tmpMaterial.getPhotonYield(ui->cobYieldForParticle->currentIndex()));
-    //    on_pbWasModified_clicked();
-}
-
 bool MaterialInspectorWindow::doLoadCrossSection(ANeutronInteractionElement *element, QString fileName)
 {
     QVector<double> x, y;
@@ -2034,7 +2030,7 @@ bool MaterialInspectorWindow::doLoadCrossSection(ANeutronInteractionElement *ele
     int res = LoadDoubleVectorsFromFile(fileName, &x, &y, &header, hLines);
     if (res == 0)
     {
-        double Multiplier;
+        double Multiplier = 1.0;
         switch (OptionsConfigurator->getCrossSectionLoadOption())
         {
           case (0): {Multiplier = 1.0e-6; break;} //meV
@@ -2111,8 +2107,6 @@ int MaterialInspectorWindow::autoLoadReaction(ANeutronInteractionElement& elemen
     }
     return delta;
 }
-
-//--------------------------------------------------
 
 void MaterialInspectorWindow::onAddIsotope(AChemicalElement *element)
 {
@@ -2949,7 +2943,7 @@ void MaterialInspectorWindow::on_cbUseNCrystal_toggled(bool checked)
 
 void MaterialInspectorWindow::on_pbNew_clicked()
 {
-    if ( !ui->labMatWasModified->text().simplified().isEmpty() )
+    if (bMaterialWasModified)
     {
         int res = QMessageBox::question(this, "Define new material", "All unsaved changes will be lost. Continue?", QMessageBox::Yes | QMessageBox::Cancel);
         if (res == QMessageBox::Cancel)
@@ -3006,99 +3000,31 @@ void MaterialInspectorWindow::on_pteComments_textChanged()
         SetWasModified(true);
 }
 
+#include "amateriallibrary.h"
+#include "amateriallibrarybrowser.h"
 void MaterialInspectorWindow::on_pbImportStandardMaterial_clicked()
 {
-    QString starter;// = (MW->GlobSet.LibMaterials.isEmpty()) ? MW->GlobSet.LastOpenDir : MW->GlobSet.LibMaterials;
-    QString fileName = QFileDialog::getOpenFileName(this, "Load material", starter, "Material files (*mat *.json);;All files (*.*)");
-    if (fileName.isEmpty()) return;
+    AMaterialLibraryBrowser B;
+    B.exec();
 
-    QJsonObject json, js;
-    bool bOK = LoadJsonFromFile(json, fileName);
-    if (!bOK)
+    AMaterialLibrary Lib(MpCollection, "");
+    QString err = Lib.LoadFile(this);
+    if (!err.isEmpty())
     {
-        message("Cannot open file: "+fileName, this);
+        message(err, this);
         return;
     }
-    if (!json.contains("Material"))
-    {
-        message("File format error: Json with material settings not found", this);
-        return;
-    }
-    js = json["Material"].toObject();
-    QVector<QString> newParticles = MpCollection->getUndefinedParticles(js);
 
-    QVector<QString> suppressParticles;
-    if (!newParticles.isEmpty())
-    {
-        QDialog D(this);
-        D.setWindowTitle("Add particles to current configuration");
-        QVBoxLayout * l = new QVBoxLayout(&D);
-        l->addWidget(new QLabel("This material has data for particles not defined in the current configuration"));
-        l->addWidget(new QLabel(""));
-        l->addWidget(new QLabel("Select particles to add to the configuration"));
-        QCheckBox * cbAll = nullptr;
-        QVector<QCheckBox*> cbVec;
-        if (newParticles.size() > 1)
-        {
-            cbAll = new QCheckBox("All particles below:");
-            l->addWidget(cbAll);
-            QObject::connect(cbAll, &QCheckBox::toggled, [&cbVec](bool flag)
-            {
-               for (QCheckBox * cb : cbVec) cb->setChecked(flag);
-            });
-        }
+    MpCollection->CopyTmpToMaterialCollection();
+    MW->UpdateMaterialListEdit();
 
-        QScrollArea * SA = new QScrollArea();
-            SA->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-            SA->setMaximumHeight(500);
-            SA->setWidgetResizable(true);
+    const QString & name = MpCollection->tmpMaterial.name;
+    int index = MpCollection->FindMaterial(name);
 
-            QWidget * www = new QWidget();
-            QVBoxLayout * l2 = new QVBoxLayout(www);
-            for (const QString & name : newParticles)
-            {
-                QCheckBox* cb = new QCheckBox(name);
-                cbVec << cb;
-                l2->addWidget(cb);
-                QObject::connect(cb, &QCheckBox::clicked, [&cbAll]()
-                {
-                    cbAll->blockSignals(true);
-                    cbAll->setChecked(false);
-                    cbAll->blockSignals(false);
-                });
-            }
+    MW->ReconstructDetector(true);
+    ui->cobActiveMaterials->setCurrentIndex(index);
+    on_cobActiveMaterials_activated(index);
 
-            SA->setWidget(www);
-        l->addWidget(SA);
-
-        QHBoxLayout * h = new QHBoxLayout();
-            QPushButton * pbAccept = new QPushButton("Import");
-            QObject::connect(pbAccept, &QPushButton::clicked, &D, &QDialog::accept);
-            h->addWidget(pbAccept);
-            QPushButton * pbCancel = new QPushButton("Cancel");
-            QObject::connect(pbCancel, &QPushButton::clicked, &D, &QDialog::reject);
-            h->addWidget(pbCancel);
-        l->addLayout(h);
-
-        if (cbAll) cbAll->setChecked(true);
-
-        int res = D.exec();
-        if (res == QDialog::Rejected) return;
-
-        for (int i = 0; i < cbVec.size(); i++)
-            if (!cbVec.at(i)->isChecked())
-                suppressParticles << newParticles.at(i);
-    }
-
-    MpCollection->tmpMaterial.readFromJson(js, MpCollection, suppressParticles);
-
-    SetWasModified(true);
-    updateWaveButtons();
-    MW->ListActiveParticles();
-
-    ui->cobActiveMaterials->setCurrentIndex(-1); //to avoid confusion (and update is disabled for -1)
-    UpdateIndicationTmpMaterial();
-
-    ui->pbRename->setEnabled(false);
+    SetWasModified(false);
 }
 

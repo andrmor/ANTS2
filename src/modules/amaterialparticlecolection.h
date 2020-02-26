@@ -66,7 +66,7 @@ public:
   //Material handling
   void AddNewMaterial(bool fSuppressChangedSignal = false);
   void AddNewMaterial(QString name, bool fSuppressChangedSignal = false);
-  int FindMaterial(QString name); //if not found, returns -1; if found, returns material index
+  int FindMaterial(const QString &name) const; //if not found, returns -1; if found, returns material index
   bool DeleteMaterial(int imat); //takes care of overrides of materials with index larger than imat!
   void UpdateWaveResolvedProperties(int imat); //updates wavelength-resolved material properties
   bool isNCrystalInUse() const;

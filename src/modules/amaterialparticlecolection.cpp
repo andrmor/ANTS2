@@ -379,14 +379,14 @@ void AMaterialParticleCollection::CopyTmpToMaterialCollection()
   return;
 }
 
-int AMaterialParticleCollection::FindMaterial(QString name)
+int AMaterialParticleCollection::FindMaterial(const QString & name) const
 {
-  int size = MaterialCollectionData.size();
+    const int size = MaterialCollectionData.size();
 
-  for (int index = 0; index < size; index++)
-    if (name == MaterialCollectionData[index]->name) return index;
+    for (int index = 0; index < size; index++)
+        if (name == MaterialCollectionData[index]->name) return index;
 
-  return -1;
+    return -1;
 }
 
 void AMaterialParticleCollection::UpdateWaveResolvedProperties(int imat)

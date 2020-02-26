@@ -427,7 +427,9 @@ SOURCES += main.cpp \
     gui/GraphWindowTools/adrawtemplate.cpp \
     gui/GraphWindowTools/atemplateselectiondialog.cpp \
     gui/GraphWindowTools/atemplateselectionrecord.cpp \
-    modules/apmdummystructure.cpp
+    modules/apmdummystructure.cpp \
+    Simulation/amateriallibrary.cpp \
+    gui/amateriallibrarybrowser.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -599,7 +601,9 @@ HEADERS  += common/CorrelationFilters.h \
     gui/GraphWindowTools/atemplateselectiondialog.h \
     gui/GraphWindowTools/atemplateselectionrecord.h \
     modules/apmanddummy.h \
-    modules/apmdummystructure.h
+    modules/apmdummystructure.h \
+    Simulation/amateriallibrary.h \
+    gui/amateriallibrarybrowser.h
 
 # --- SIM ---
 ants2_SIM {
@@ -959,5 +963,6 @@ FORMS += \
     gui/GraphWindowTools/atextpavedialog.ui \
     gui/GraphWindowTools/alinemarkerfilldialog.ui \
     gui/GraphWindowTools/arootcolorselectordialog.ui \
-    gui/GraphWindowTools/atemplateselectiondialog.ui
+    gui/GraphWindowTools/atemplateselectiondialog.ui \
+    gui/amateriallibrarybrowser.ui
 

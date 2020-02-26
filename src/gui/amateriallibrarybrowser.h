@@ -12,14 +12,22 @@ class AMaterialLibraryBrowser;
 
 struct AMaterialLibraryRecord
 {
-    int Index;
-    QString FileName;
-    QString MaterialName;
+    int           Index;
+    QString       FileName;
+    QString       MaterialName;
     QSet<QString> Tags;
 
     AMaterialLibraryRecord(int Index, const QString &FileName, const QString &MaterialName);
     AMaterialLibraryRecord(){}
-    void addTag(const QString & tag);
+};
+
+struct ATagRecord
+{
+    QString Tag;
+    bool    bChecked = false;
+
+    ATagRecord(const QString & Tag);
+    ATagRecord(){}
 };
 
 class AMaterialLibraryBrowser : public QDialog
@@ -37,11 +45,14 @@ private slots:
 
     void on_pbClose_clicked();
 
+    void on_pbClearTags_clicked();
+
 private:
     Ui::AMaterialLibraryBrowser *ui;
     QDir Dir;
-    QVector<AMaterialLibraryRecord> Records;
+    QVector<AMaterialLibraryRecord> MaterialRecords;
     QSet<QString> Tags;
+    QVector<ATagRecord> TagRecords;
 
 private:
     void updateGui();

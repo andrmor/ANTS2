@@ -6,6 +6,15 @@
 #include <QDebug>
 #include <QDir>
 #include <QPlainTextEdit>
+#include <QCheckBox>
+#include <QListWidget>
+#include <QListWidgetItem>
+
+AMaterialLibraryRecord::AMaterialLibraryRecord(int Index, const QString & FileName, const QString & MaterialName) :
+    Index(Index), FileName(FileName), MaterialName(MaterialName) {}
+
+ATagRecord::ATagRecord(const QString & Tag) :
+    Tag(Tag) {}
 
 AMaterialLibraryBrowser::AMaterialLibraryBrowser(QWidget *parent) :
     QDialog(parent),
@@ -56,8 +65,7 @@ void AMaterialLibraryBrowser::readFiles()
         QString absolutePath = Dir.absoluteFilePath(file);
         QJsonObject json, js;
         LoadJsonFromFile(json, absolutePath);
-        if (!parseJson(json, "Material", js))
-            return;
+        if (!parseJson(json, "Material", js)) return;
 
         QString Name;
         parseJson(js, "*MaterialName", Name);
@@ -67,39 +75,62 @@ void AMaterialLibraryBrowser::readFiles()
         for (int i=0; i<ar.size(); i++)
         {
             QString tag = ar.at(i).toString();
-            rec.addTag(tag);
+            rec.Tags << tag;
             Tags << tag;
         }
-        Records.append(rec);
+        MaterialRecords.append(rec);
     }
 
-    qDebug() << Tags;
+    QList<QString> TagsList = QList<QString>::fromSet(Tags);
+    std::sort(TagsList.begin(), TagsList.end());
+    for (const QString & s : TagsList)
+    {
+        ATagRecord rec(s);
+        TagRecords << rec;
+    }
 }
 
 void AMaterialLibraryBrowser::updateGui()
 {
     ui->lwTags->clear();
 
-    QList<QString> TagsList = QList<QString>::fromSet(Tags);
-    std::sort(TagsList.begin(), TagsList.end());
-    for (const QString & s : TagsList)
+    QSet<QString> CheckedTags;
+    for (ATagRecord & tagRec : TagRecords)
     {
-        qDebug() << s;
-        ui->lwTags->addItem(s);
+        QListWidgetItem * item = new QListWidgetItem(ui->lwTags);
+        QCheckBox * cb = new QCheckBox(tagRec.Tag);
+        cb->setChecked(tagRec.bChecked);
+        ui->lwTags->setItemWidget(item, cb);
+        QObject::connect(cb, &QCheckBox::clicked, [this, &tagRec](bool flag)
+        {
+            tagRec.bChecked = flag;
+            updateGui();
+        });
+        if (tagRec.bChecked) CheckedTags << tagRec.Tag;
     }
 
-    for (int i=0; i<Records.size(); i++)
+    ui->lwMaterials->clear();
+    qDebug() << "Checked tags:"<<CheckedTags;
+    for (const AMaterialLibraryRecord & rec : MaterialRecords)
     {
-        qDebug() << Records.at(i).MaterialName;
-        ui->lwMaterials->addItem(Records.at(i).MaterialName);
+        qDebug() << rec.MaterialName << rec.Tags;
+        bool bComply = true;
+        for (const QString & tag : CheckedTags)
+        {
+            if (!rec.Tags.contains(tag))
+            {
+                bComply = false;
+                break;
+            }
+        }
+        if (bComply) ui->lwMaterials->addItem(rec.MaterialName);
     }
 
 }
 
-AMaterialLibraryRecord::AMaterialLibraryRecord(int Index, const QString & FileName, const QString & MaterialName) :
-    Index(Index), FileName(FileName), MaterialName(MaterialName) {}
 
-void AMaterialLibraryRecord::addTag(const QString & tag)
+void AMaterialLibraryBrowser::on_pbClearTags_clicked()
 {
-    Tags << tag;
+    for (ATagRecord & tagRec : TagRecords) tagRec.bChecked = false;
+    updateGui();
 }

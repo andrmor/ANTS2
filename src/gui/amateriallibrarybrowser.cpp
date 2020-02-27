@@ -93,27 +93,17 @@ void AMaterialLibraryBrowser::readFiles()
 void AMaterialLibraryBrowser::updateGui()
 {
     ui->lwTags->clear();
+    ui->lwMaterials->clear();
 
     QSet<QString> CheckedTags;
     for (ATagRecord & tagRec : TagRecords)
-    {
-        QListWidgetItem * item = new QListWidgetItem(ui->lwTags);
-        QCheckBox * cb = new QCheckBox(tagRec.Tag);
-        cb->setChecked(tagRec.bChecked);
-        ui->lwTags->setItemWidget(item, cb);
-        QObject::connect(cb, &QCheckBox::clicked, [this, &tagRec](bool flag)
-        {
-            tagRec.bChecked = flag;
-            updateGui();
-        });
         if (tagRec.bChecked) CheckedTags << tagRec.Tag;
-    }
+    //qDebug() << "Checked tags:"<<CheckedTags;
 
-    ui->lwMaterials->clear();
-    qDebug() << "Checked tags:"<<CheckedTags;
+    QSet<QString> NarrowingTags;
     for (const AMaterialLibraryRecord & rec : MaterialRecords)
     {
-        qDebug() << rec.MaterialName << rec.Tags;
+        //qDebug() << rec.MaterialName << rec.Tags;
         bool bComply = true;
         for (const QString & tag : CheckedTags)
         {
@@ -123,11 +113,59 @@ void AMaterialLibraryBrowser::updateGui()
                 break;
             }
         }
-        if (bComply) ui->lwMaterials->addItem(rec.MaterialName);
+
+        if (bComply)
+        {
+            ui->lwMaterials->addItem(rec.MaterialName);
+            for (const QString & tag : rec.Tags)
+                NarrowingTags << tag;
+        }
     }
 
-}
+    // checked first
+    for (ATagRecord & tagRec : TagRecords)
+    {
+        if (!tagRec.bChecked) continue;
 
+        QListWidgetItem * item = new QListWidgetItem(ui->lwTags);
+        QCheckBox * cb = new QCheckBox(tagRec.Tag);
+        cb->setChecked(true);
+        ui->lwTags->setItemWidget(item, cb);
+        QObject::connect(cb, &QCheckBox::clicked, [this, &tagRec](bool flag)
+        {
+            tagRec.bChecked = flag;
+            updateGui();
+        });
+    }
+    // next narrowing ones
+    for (ATagRecord & tagRec : TagRecords)
+    {
+        if (tagRec.bChecked) continue;                      //already prtocessed
+        if (!NarrowingTags.contains(tagRec.Tag)) continue;
+
+        QListWidgetItem * item = new QListWidgetItem(ui->lwTags);
+        QCheckBox * cb = new QCheckBox(tagRec.Tag);
+        cb->setChecked(false);
+        ui->lwTags->setItemWidget(item, cb);
+        QObject::connect(cb, &QCheckBox::clicked, [this, &tagRec](bool flag)
+        {
+            tagRec.bChecked = flag;
+            updateGui();
+        });
+    }
+    // everything else as disabled
+    for (ATagRecord & tagRec : TagRecords)
+    {
+        if (tagRec.bChecked) continue;                      //already prtocessed
+        if (NarrowingTags.contains(tagRec.Tag)) continue;   //already prtocessed
+
+        QListWidgetItem * item = new QListWidgetItem(ui->lwTags);
+        QCheckBox * cb = new QCheckBox(tagRec.Tag);
+        cb->setChecked(false);
+        cb->setEnabled(false);
+        ui->lwTags->setItemWidget(item, cb);
+    }
+}
 
 void AMaterialLibraryBrowser::on_pbClearTags_clicked()
 {

@@ -33,6 +33,8 @@ AMaterialParticleCollection::AMaterialParticleCollection()
   p->ParticleName = "gamma";
   p->type = AParticle::_gamma_;
   ParticleCollection << p;
+
+  tmpMaterial.MatParticle.resize(1);
 }
 
 AMaterialParticleCollection::~AMaterialParticleCollection()

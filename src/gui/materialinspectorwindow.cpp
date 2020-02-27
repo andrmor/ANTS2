@@ -1,6 +1,5 @@
 #include "materialinspectorwindow.h"
 #include "ui_materialinspectorwindow.h"
-
 #include "mainwindow.h"
 #include "amaterialparticlecolection.h"
 #include "graphwindowclass.h"
@@ -20,6 +19,7 @@
 #include "aneutronreactionsconfigurator.h"
 #include "aneutroninfodialog.h"
 #include "geometrywindowclass.h"
+#include "amateriallibrarybrowser.h"
 
 #include <QDebug>
 #include <QLayout>
@@ -2941,26 +2941,6 @@ void MaterialInspectorWindow::on_cbUseNCrystal_toggled(bool checked)
 #endif
 }
 
-void MaterialInspectorWindow::on_pbNew_clicked()
-{
-    if (bMaterialWasModified)
-    {
-        int res = QMessageBox::question(this, "Define new material", "All unsaved changes will be lost. Continue?", QMessageBox::Yes | QMessageBox::Cancel);
-        if (res == QMessageBox::Cancel)
-            return;
-    }
-
-    MpCollection->AddNewMaterial("Not_defined", true);
-    MW->ReconstructDetector(true);
-
-    int index = ui->cobActiveMaterials->count() - 1;
-    if (index > -1)
-    {
-        ui->cobActiveMaterials->setCurrentIndex(index);
-        on_cobActiveMaterials_activated(index);
-    }
-}
-
 void MaterialInspectorWindow::on_pbCopyPrYieldToAll_clicked()
 {
     if (!confirm("Set the same primary yield value for all particles?", this)) return;
@@ -3000,10 +2980,9 @@ void MaterialInspectorWindow::on_pteComments_textChanged()
         SetWasModified(true);
 }
 
-#include "amateriallibrarybrowser.h"
-void MaterialInspectorWindow::on_pbImportStandardMaterial_clicked()
+void MaterialInspectorWindow::AddMaterialFromLibrary(QWidget * parentWidget)
 {
-    AMaterialLibraryBrowser B(*MpCollection, this);
+    AMaterialLibraryBrowser B(*MpCollection, parentWidget);
     int ret = B.exec();
     if (ret == QDialog::Rejected) return;
 
@@ -3020,3 +2999,34 @@ void MaterialInspectorWindow::on_pbImportStandardMaterial_clicked()
     SetWasModified(false);
 }
 
+void MaterialInspectorWindow::on_actionLoad_from_material_library_triggered()
+{
+    if (bMaterialWasModified)
+    {
+        int res = QMessageBox::question(this, "Add new material", "All unsaved changes will be lost. Continue?", QMessageBox::Yes | QMessageBox::Cancel);
+        if (res == QMessageBox::Cancel)
+            return;
+    }
+
+    AddMaterialFromLibrary(this);
+}
+
+void MaterialInspectorWindow::on_actionAdd_default_material_triggered()
+{
+    if (bMaterialWasModified)
+    {
+        int res = QMessageBox::question(this, "Add new material", "All unsaved changes will be lost. Continue?", QMessageBox::Yes | QMessageBox::Cancel);
+        if (res == QMessageBox::Cancel)
+            return;
+    }
+
+    MpCollection->AddNewMaterial("Not_defined", true);
+    MW->ReconstructDetector(true);
+
+    int index = ui->cobActiveMaterials->count() - 1;
+    if (index > -1)
+    {
+        ui->cobActiveMaterials->setCurrentIndex(index);
+        on_cobActiveMaterials_activated(index);
+    }
+}

@@ -593,6 +593,8 @@ private slots:
     void on_pbOpenLogOptions2_clicked();
 
 
+    void on_pbAddmaterialFromLibrary_clicked();
+
 public slots:
     void on_pbRebuildDetector_clicked();
     void onRequestDetectorGuiUpdate();     // called to update GUI related to Detector

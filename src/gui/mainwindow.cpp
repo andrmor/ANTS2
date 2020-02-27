@@ -4681,3 +4681,8 @@ void MainWindow::on_pbOpenLogOptions2_clicked()
 {
     on_pbOpenLogOptions_clicked();
 }
+
+void MainWindow::on_pbAddmaterialFromLibrary_clicked()
+{
+    MIwindow->AddMaterialFromLibrary(this);
+}

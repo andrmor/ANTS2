@@ -5686,14 +5686,14 @@ Select the ion configuration below and click 'Convert'</string>
        <widget class="QPushButton" name="pbStartMaterialInspector">
         <property name="geometry">
          <rect>
-          <x>4</x>
+          <x>43</x>
           <y>159</y>
-          <width>94</width>
+          <width>60</width>
           <height>23</height>
          </rect>
         </property>
         <property name="text">
-         <string>Add / Modify</string>
+         <string>Modify</string>
         </property>
        </widget>
        <widget class="QLabel" name="label_28">
@@ -5799,7 +5799,7 @@ materials</string>
        <widget class="QPushButton" name="pbRemoveMaterial">
         <property name="geometry">
          <rect>
-          <x>102</x>
+          <x>104</x>
           <y>159</y>
           <width>64</width>
           <height>23</height>
@@ -5913,6 +5913,19 @@ materials</string>
          <string>Map</string>
         </property>
        </widget>
+       <widget class="QPushButton" name="pbAddmaterialFromLibrary">
+        <property name="geometry">
+         <rect>
+          <x>1</x>
+          <y>159</y>
+          <width>41</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Add</string>
+        </property>
+       </widget>
        <zorder>line_6</zorder>
        <zorder>lwOverrides</zorder>
        <zorder>lwMaterials</zorder>
@@ -5929,6 +5942,7 @@ materials</string>
        <zorder>label_8</zorder>
        <zorder>label_15</zorder>
        <zorder>pbShowOverrideMap</zorder>
+       <zorder>pbAddmaterialFromLibrary</zorder>
       </widget>
      </widget>
      <widget class="QLabel" name="laBackground">

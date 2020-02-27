@@ -46,6 +46,8 @@ private slots:
     void on_pbClose_clicked();
     void on_pbClearTags_clicked();
     void on_lwMaterials_itemDoubleClicked(QListWidgetItem * item);
+    void on_lwMaterials_itemClicked(QListWidgetItem *item);
+    void on_lwMaterials_currentRowChanged(int currentRow);
 
 private:
     AMaterialParticleCollection & MpCollection;
@@ -60,6 +62,7 @@ private:
 private:
     void updateGui();
     void readFiles();
+    void out(const QString & text, bool bBold = false);
 };
 
 #endif // AMATERIALLIBRARYBROWSER_H

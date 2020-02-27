@@ -34,6 +34,7 @@ public:
     void SetParticleSelection(int index);
     void SetMaterial(int index);
     void ShowTotalInteraction();
+    void AddMaterialFromLibrary(QWidget * parentWidget);
 
     void AddMatToCobs(QString str);
     void setLogLog(bool flag);
@@ -100,7 +101,6 @@ private slots:
     void on_pbShowPairProduction_clicked();
     void on_pbShowStatisticsOnElastic_clicked();
     void on_lePriT_raise_editingFinished();
-    void on_pbNew_clicked();
     void on_pbComputeRangeCharged_clicked();
     void on_pbCopyPrYieldToAll_clicked();
     void on_cbTrackingAllowed_clicked();
@@ -125,7 +125,6 @@ private slots:
     void on_ledNcmatPacking_editingFinished();
     void on_cbUseNCrystal_clicked(bool checked);
     void on_pbSecScintHelp_clicked();
-    void on_pbImportStandardMaterial_clicked();
 
     //user or code controlled change - safe or only GUI
     void on_ledRayleigh_textChanged(const QString &arg1);
@@ -143,6 +142,10 @@ private slots:
     void on_actionNeutrons_triggered();
 
     //new auto-generated, not cathegorized
+
+    void on_actionLoad_from_material_library_triggered();
+
+    void on_actionAdd_default_material_triggered();
 
 private:
     Ui::MaterialInspectorWindow *ui;

@@ -53,7 +53,7 @@
             "ElementCompositionString": "He:4 + CF4:6",
             "MeanAtomMass": 15.884241176470589
         },
-        "Comments": "Created by: LIP team",
+        "Comments": "4 bar 3-He + 6 bar CF4\n\nCreated by: LIP team",
         "Density": 0.0229,
         "ElDiffusionL": 0,
         "ElDiffusionT": 0,

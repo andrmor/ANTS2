@@ -67,13 +67,14 @@ void AMaterialLibraryBrowser::on_pbLoad_clicked()
     AMaterialLibrary Lib(MpCollection);
 
     QString err = Lib.LoadFile(ShownMaterials.at(row).FileName, this);
+    if (err == "rejected") return;
+
     if (!err.isEmpty())
     {
-        if (err != "rejected")
         message(err, this);
         reject();
     }
-    accept();
+    else accept();
 }
 
 void AMaterialLibraryBrowser::on_pbClose_clicked()
@@ -113,6 +114,14 @@ void AMaterialLibraryBrowser::readFiles()
         ATagRecord rec(s);
         TagRecords << rec;
     }
+}
+
+void AMaterialLibraryBrowser::out(const QString &text, bool bBold)
+{
+    if (bBold)
+        ui->pte->appendHtml( QString("<html><b>%1</b</html>").arg(text) );
+    else
+        ui->pte->appendPlainText(text);
 }
 
 void AMaterialLibraryBrowser::updateGui()
@@ -203,4 +212,43 @@ void AMaterialLibraryBrowser::on_pbClearTags_clicked()
 void AMaterialLibraryBrowser::on_lwMaterials_itemDoubleClicked(QListWidgetItem * /*item*/)
 {
     on_pbLoad_clicked();
+}
+
+void AMaterialLibraryBrowser::on_lwMaterials_itemClicked(QListWidgetItem * )
+{
+    int row = ui->lwMaterials->currentRow();
+    if (row < 0 || row >= ShownMaterials.size())
+    {
+        message("Error: model corrupted", this);
+        return;
+    }
+    const AMaterialLibraryRecord & Record = ShownMaterials.at(row);
+
+    AMaterial mat;
+    AMaterialParticleCollection Dummy;
+    if (Dummy.countParticles() == 1) Dummy.RemoveParticle(0);
+    QJsonObject json;
+    LoadJsonFromFile(json, Record.FileName);
+    QJsonObject js = json["Material"].toObject();
+    mat.readFromJson(js, &Dummy);
+
+    ui->pte->clear();
+    out("Composition:");
+    out(mat.ChemicalComposition.getCompositionString(), true);
+    out("");
+    out("Tags:");
+    QString txt;
+    for (auto & s : Record.Tags) txt.append(" " + s + ",");
+    txt.chop(1);
+    out(txt, true);
+    out("");
+    out("Defined particles:");
+    out(Dummy.getListOfParticleNames().join(", "), true);
+    out("");
+    out(mat.Comments);
+}
+
+void AMaterialLibraryBrowser::on_lwMaterials_currentRowChanged(int currentRow)
+{
+    if (currentRow == -1) ui->pte->clear(); //selection cleared
 }

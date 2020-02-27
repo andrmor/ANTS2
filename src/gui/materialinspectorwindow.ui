@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>638</width>
-    <height>791</height>
+    <height>831</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -21,6 +21,18 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="leftMargin">
+     <number>3</number>
+    </property>
+    <property name="topMargin">
+     <number>6</number>
+    </property>
+    <property name="rightMargin">
+     <number>3</number>
+    </property>
+    <property name="bottomMargin">
+     <number>3</number>
+    </property>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
@@ -74,67 +86,20 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="Line" name="line_3">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="pbNew">
-        <property name="text">
-         <string>New material</string>
-        </property>
-       </widget>
-      </item>
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_46">
-      <property name="topMargin">
-       <number>0</number>
+     <spacer name="verticalSpacer_12">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
       </property>
-      <item>
-       <spacer name="horizontalSpacer_47">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QPushButton" name="pbImportStandardMaterial">
-        <property name="font">
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Import new material from library</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_48">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
     </item>
     <item>
      <widget class="Line" name="line">
@@ -142,10 +107,20 @@
        <enum>QFrame::Raised</enum>
       </property>
       <property name="lineWidth">
-       <number>1</number>
+       <number>2</number>
       </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="labMatWasModified">
+      <property name="text">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p/&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
     </item>
@@ -280,16 +255,6 @@
        </widget>
       </item>
      </layout>
-    </item>
-    <item>
-     <widget class="QLabel" name="labMatWasModified">
-      <property name="text">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p/&gt;&lt;/body&gt;&lt;/html&gt;</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
     </item>
     <item>
      <widget class="QTabWidget" name="twProperties">
@@ -3643,6 +3608,15 @@ Wavelengths shoul be given in increasing order</string>
     </property>
     <addaction name="actionNeutrons"/>
    </widget>
+   <widget class="QMenu" name="menuNew_material">
+    <property name="title">
+     <string>New material</string>
+    </property>
+    <addaction name="actionLoad_from_material_library"/>
+    <addaction name="separator"/>
+    <addaction name="actionAdd_default_material"/>
+   </widget>
+   <addaction name="menuNew_material"/>
    <addaction name="menuSettings"/>
    <addaction name="menuLibrary"/>
    <addaction name="menuClear"/>
@@ -3688,6 +3662,16 @@ Wavelengths shoul be given in increasing order</string>
   <action name="actionNeutrons">
    <property name="text">
     <string>Neutrons</string>
+   </property>
+  </action>
+  <action name="actionLoad_from_material_library">
+   <property name="text">
+    <string>Load from material library</string>
+   </property>
+  </action>
+  <action name="actionAdd_default_material">
+   <property name="text">
+    <string>Add default material</string>
    </property>
   </action>
  </widget>

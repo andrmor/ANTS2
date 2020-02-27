@@ -15,17 +15,14 @@
 #include <QCheckBox>
 #include <QPushButton>
 
-AMaterialLibrary::AMaterialLibrary(AMaterialParticleCollection * MpCollection, const QString & LibDir) :
-    MpCollection(MpCollection), LibDir(LibDir)
+AMaterialLibrary::AMaterialLibrary(AMaterialParticleCollection & MpCollection) :
+    MpCollection(MpCollection)
 {
 
 }
 
-QString AMaterialLibrary::LoadFile(QWidget * parentWidget)
+QString AMaterialLibrary::LoadFile(const QString & fileName, QWidget * parentWidget)
 {
-    QString fileName = QFileDialog::getOpenFileName(parentWidget, "Load material", LibDir, "Material files (*mat *.json);;All files (*.*)");
-    if (fileName.isEmpty()) return "";
-
     QJsonObject json, js;
     bool bOK = LoadJsonFromFile(json, fileName);
     if (!bOK)
@@ -33,7 +30,7 @@ QString AMaterialLibrary::LoadFile(QWidget * parentWidget)
     if (!json.contains("Material"))
         return "File format error: Json with material settings not found";
     js = json["Material"].toObject();
-    QVector<QString> newParticles = MpCollection->getUndefinedParticles(js);
+    QVector<QString> newParticles = MpCollection.getUndefinedParticles(js);
 
     QVector<QString> suppressParticles;
     if (!newParticles.isEmpty())
@@ -92,14 +89,14 @@ QString AMaterialLibrary::LoadFile(QWidget * parentWidget)
         l->addLayout(h);
 
         int res = D.exec();
-        if (res == QDialog::Rejected) return "";
+        if (res == QDialog::Rejected) return "rejected";
 
         for (int i = 0; i < cbVec.size(); i++)
             if (!cbVec.at(i)->isChecked())
                 suppressParticles << newParticles.at(i);
     }
 
-    MpCollection->tmpMaterial.readFromJson(js, MpCollection, suppressParticles);
+    MpCollection.tmpMaterial.readFromJson(js, &MpCollection, suppressParticles);
 
     return "";
 }

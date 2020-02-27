@@ -261,7 +261,6 @@ void AMaterial::clear()
 
 void AMaterial::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCollection) //QVector<AParticle *> *ParticleCollection)
 {
-  //general data
   json["*MaterialName"] = name;
   json["Density"] = density;
   json["Temperature"] = temperature;
@@ -284,6 +283,7 @@ void AMaterial::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCo
     }
     json["PrimScintDecay"] = ar;
   }
+
   {
     QJsonArray ar;
     for (const APair_ValueAndWeight& pair : PriScint_Raise)
@@ -301,51 +301,57 @@ void AMaterial::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCo
   json["ElDriftVelo"] = e_driftVelocity;
   json["ElDiffusionL"] = e_diffusion_L;
   json["ElDiffusionT"] = e_diffusion_T;
-  if (p1!=0 || p2!=0 || p3!=0)
-    {
+
+  {
       json["TGeoP1"] = p1;
       json["TGeoP2"] = p2;
       json["TGeoP3"] = p3;
-    }
+  }
+
   json["Comments"] = Comments;
 
-  //wavelength-resolved data
-    {
+  {
       QJsonArray ar;
       writeTwoQVectorsToJArray(nWave_lambda, nWave, ar);
       json["RefractiveIndexWave"] = ar;
-    }
-  //if (absWave_lambda.size() >0)
-    {
+  }
+
+  {
       QJsonArray ar;
       writeTwoQVectorsToJArray(absWave_lambda, absWave, ar);
       json["BulkAbsorptionWave"] = ar;
-    }
-  //if (reemisProbWave_lambda.size() >0)
-    {
+  }
+
+  {
       QJsonArray ar;
       writeTwoQVectorsToJArray(reemisProbWave_lambda, reemisProbWave, ar);
       json["ReemissionProbabilityWave"] = ar;
-    }
-  //if (PrimarySpectrum_lambda.size() >0)
-    {
+  }
+
+  {
       QJsonArray ar;
       writeTwoQVectorsToJArray(PrimarySpectrum_lambda, PrimarySpectrum, ar);
       json["PrimScintSpectrum"] = ar;
-    }
-  //if (SecondarySpectrum_lambda.size() >0)
-    {
+  }
+
+  {
       QJsonArray ar;
       writeTwoQVectorsToJArray(SecondarySpectrum_lambda, SecondarySpectrum, ar);
       json["SecScintSpectrum"] = ar;
-    }
+  }
+
+  {
+      QJsonArray ar;
+      for (const QString & s : Tags) ar.append(s);
+      json["*Tags"] = ar;
+  }
 
   //MatParticle properties
   //if a particle has default configuration (TrackingAllowed and MatIsTransparent), skip its record
   QJsonArray jParticleEntries;
   const QVector<AParticle *> *ParticleCollection = MpCollection->getParticleCollection();
   for (int ip=0; ip<ParticleCollection->size(); ip++)
-    {
+  {
       QJsonObject jMatParticle;
 
       QJsonObject jparticle;
@@ -384,7 +390,7 @@ void AMaterial::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCo
 
       //appending this particle entry to the json array
       jParticleEntries.append(jMatParticle);
-    }
+  }
   //if not empty, appending array with Matparticle properties to main json object
   if (!jParticleEntries.isEmpty()) json["MatParticles"] = jParticleEntries;
 }
@@ -517,30 +523,37 @@ bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpC
 
   //wavelength-resolved data
   if (json.contains("RefractiveIndexWave"))
-    {
+  {
       QJsonArray ar = json["RefractiveIndexWave"].toArray();
       readTwoQVectorsFromJArray(ar, nWave_lambda, nWave);
-    }
+  }
   if (json.contains("BulkAbsorptionWave"))
-    {
+  {
       QJsonArray ar = json["BulkAbsorptionWave"].toArray();
       readTwoQVectorsFromJArray(ar, absWave_lambda, absWave);
-    }
+  }
   if (json.contains("ReemissionProbabilityWave"))
-    {
+  {
       QJsonArray ar = json["ReemissionProbabilityWave"].toArray();
       readTwoQVectorsFromJArray(ar, reemisProbWave_lambda, reemisProbWave);
-    }
+  }
   if (json.contains("PrimScintSpectrum"))
-    {
+  {
       QJsonArray ar = json["PrimScintSpectrum"].toArray();
       readTwoQVectorsFromJArray(ar, PrimarySpectrum_lambda, PrimarySpectrum);
-    }
+  }
   if (json.contains("SecScintSpectrum"))
-    {
+  {
       QJsonArray ar = json["SecScintSpectrum"].toArray();
       readTwoQVectorsFromJArray(ar, SecondarySpectrum_lambda, SecondarySpectrum);
-    }
+  }
+
+  Tags.clear();
+  if (json.contains("*Tags"))
+  {
+      QJsonArray ar = json["*Tags"].toArray();
+      for (int i=0; i<ar.size(); i++) Tags << ar[i].toString();
+  }
 
   //MatParticle properties
   //filling default properties for all particles

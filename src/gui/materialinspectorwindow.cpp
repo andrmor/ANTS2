@@ -3000,20 +3000,12 @@ void MaterialInspectorWindow::on_pteComments_textChanged()
         SetWasModified(true);
 }
 
-#include "amateriallibrary.h"
 #include "amateriallibrarybrowser.h"
 void MaterialInspectorWindow::on_pbImportStandardMaterial_clicked()
 {
-    AMaterialLibraryBrowser B;
-    B.exec();
-
-    AMaterialLibrary Lib(MpCollection, "");
-    QString err = Lib.LoadFile(this);
-    if (!err.isEmpty())
-    {
-        message(err, this);
-        return;
-    }
+    AMaterialLibraryBrowser B(*MpCollection, this);
+    int ret = B.exec();
+    if (ret == QDialog::Rejected) return;
 
     MpCollection->CopyTmpToMaterialCollection();
     MW->UpdateMaterialListEdit();

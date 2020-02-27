@@ -2,6 +2,9 @@
 #include "ui_amateriallibrarybrowser.h"
 #include "aglobalsettings.h"
 #include "ajsontools.h"
+#include "amaterialparticlecolection.h"
+#include "amateriallibrary.h"
+#include "amessage.h"
 
 #include <QDebug>
 #include <QDir>
@@ -10,14 +13,15 @@
 #include <QListWidget>
 #include <QListWidgetItem>
 
-AMaterialLibraryRecord::AMaterialLibraryRecord(int Index, const QString & FileName, const QString & MaterialName) :
-    Index(Index), FileName(FileName), MaterialName(MaterialName) {}
+AMaterialLibraryRecord::AMaterialLibraryRecord(const QString & FileName, const QString & MaterialName) :
+    FileName(FileName), MaterialName(MaterialName) {}
 
 ATagRecord::ATagRecord(const QString & Tag) :
     Tag(Tag) {}
 
-AMaterialLibraryBrowser::AMaterialLibraryBrowser(QWidget *parent) :
-    QDialog(parent),
+AMaterialLibraryBrowser::AMaterialLibraryBrowser(AMaterialParticleCollection & MpCollection, QWidget * parentWidget) :
+    QDialog(parentWidget),
+    MpCollection(MpCollection),
     ui(new Ui::AMaterialLibraryBrowser)
 {
     ui->setupUi(this);
@@ -47,7 +51,29 @@ void AMaterialLibraryBrowser::on_pbDummy_clicked()
 
 void AMaterialLibraryBrowser::on_pbLoad_clicked()
 {
+    int row = ui->lwMaterials->currentRow();
+    if (row == -1)
+    {
+        message("Select material to load", this);
+        return;
+    }
 
+    if (row < 0 || row >= ShownMaterials.size())
+    {
+        message("Error: model corrupted", this);
+        return;
+    }
+
+    AMaterialLibrary Lib(MpCollection);
+
+    QString err = Lib.LoadFile(ShownMaterials.at(row).FileName, this);
+    if (!err.isEmpty())
+    {
+        if (err != "rejected")
+        message(err, this);
+        reject();
+    }
+    accept();
 }
 
 void AMaterialLibraryBrowser::on_pbClose_clicked()
@@ -59,7 +85,6 @@ void AMaterialLibraryBrowser::readFiles()
 {
     QStringList Files = Dir.entryList();
 
-    int index = 0;
     for (const QString & file : Files)
     {
         QString absolutePath = Dir.absoluteFilePath(file);
@@ -69,9 +94,9 @@ void AMaterialLibraryBrowser::readFiles()
 
         QString Name;
         parseJson(js, "*MaterialName", Name);
-        AMaterialLibraryRecord rec(index, absolutePath, Name);
+        AMaterialLibraryRecord rec(absolutePath, Name);
         QJsonArray ar;
-        parseJson(js, "Tags", ar);
+        parseJson(js, "*Tags", ar);
         for (int i=0; i<ar.size(); i++)
         {
             QString tag = ar.at(i).toString();
@@ -101,6 +126,7 @@ void AMaterialLibraryBrowser::updateGui()
     //qDebug() << "Checked tags:"<<CheckedTags;
 
     QSet<QString> NarrowingTags;
+    ShownMaterials.clear();
     for (const AMaterialLibraryRecord & rec : MaterialRecords)
     {
         //qDebug() << rec.MaterialName << rec.Tags;
@@ -117,6 +143,7 @@ void AMaterialLibraryBrowser::updateGui()
         if (bComply)
         {
             ui->lwMaterials->addItem(rec.MaterialName);
+            ShownMaterials << rec;
             for (const QString & tag : rec.Tags)
                 NarrowingTags << tag;
         }
@@ -171,4 +198,9 @@ void AMaterialLibraryBrowser::on_pbClearTags_clicked()
 {
     for (ATagRecord & tagRec : TagRecords) tagRec.bChecked = false;
     updateGui();
+}
+
+void AMaterialLibraryBrowser::on_lwMaterials_itemDoubleClicked(QListWidgetItem * /*item*/)
+{
+    on_pbLoad_clicked();
 }

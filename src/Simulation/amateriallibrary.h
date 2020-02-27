@@ -9,14 +9,12 @@ class QWidget;
 class AMaterialLibrary
 {
 public:
-    AMaterialLibrary(AMaterialParticleCollection * MpCollection, const QString & LibDir);
+    AMaterialLibrary(AMaterialParticleCollection & MpCollection);
 
-    //temporary!
-    QString LoadFile(QWidget *parentWidget);
+    QString LoadFile(const QString & fileName, QWidget * parentWidget);
 
 private:
-     AMaterialParticleCollection * MpCollection = nullptr;
-     QString LibDir;
+     AMaterialParticleCollection & MpCollection;
 };
 
 #endif // AMATERIALLIBRARY_H

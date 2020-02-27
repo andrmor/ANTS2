@@ -1,9 +1,10 @@
 {
     "Material": {
         "*MaterialName": "NaI",
-        "Tags": [
+        "*Tags": [
             "Scintillator",
-            "Crystal"
+            "Crystal",
+            "Solid"
         ],
         "BulkAbsorption": 0,
         "BulkAbsorptionWave": [

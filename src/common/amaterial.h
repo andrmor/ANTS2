@@ -51,6 +51,8 @@ public:
   double SecScintDecayTime;
   QString Comments;
 
+  QVector<QString> Tags; // used in material library
+
   AMaterialComposition ChemicalComposition;
 
   QVector<MatParticleStructure> MatParticle; //material properties related to individual particles

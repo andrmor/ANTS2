@@ -1,9 +1,11 @@
 {
     "Material": {
-        "*MaterialName": "Lead",
-        "Tags": [
+        "*MaterialName": "Pb",
+        "*Tags": [
             "Metal",
-            "Collimator"
+            "Collimator",
+            "Element",
+            "Solid"
         ],
         "BulkAbsorption": 1000,
         "BulkAbsorptionWave": [

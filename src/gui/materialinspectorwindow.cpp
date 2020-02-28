@@ -29,6 +29,9 @@
 #include <QDesktopServices>
 #include <QLabel>
 #include <QIcon>
+#include <QGroupBox>
+#include <QStringListModel>
+#include <QVariantList>
 
 //Root
 #include "TGraph.h"
@@ -56,7 +59,7 @@ MaterialInspectorWindow::MaterialInspectorWindow(QWidget * parent, MainWindow * 
     windowFlags |= Qt::Tool;
     this->setWindowFlags( windowFlags );
 
-    SetWasModified(false);
+    //SetWasModified(false);
     ui->pbWasModified->setVisible(false);
     ui->pbUpdateInteractionIndication->setVisible(false);
     ui->labContextMenuHelp->setVisible(false);
@@ -70,11 +73,6 @@ MaterialInspectorWindow::MaterialInspectorWindow(QWidget * parent, MainWindow * 
     dv->setNotation(QDoubleValidator::ScientificNotation);
     QList<QLineEdit*> list = this->findChildren<QLineEdit *>();
     foreach(QLineEdit *w, list) if (w->objectName().startsWith("led")) w->setValidator(dv);
-
-    //RedIcon = createColorCircleIcon(ui->labIsotopeDensityNotSet->size(), Qt::red);
-    //QIcon YellowIcon = createColorCircleIcon(ui->labNeutra_TotalInteractiondataMissing->size(), Qt::yellow);
-    //ui->labAutoLoadElastic->setPixmap(YellowIcon.pixmap(16,16));
-    //ui->labAutoLoadElastic->setVisible(false);
 
     QString str = "Open XCOM page by clicking the button below.\n"
                   "Select the material composition and generate the file (use cm2/g units).\n"
@@ -100,7 +98,7 @@ MaterialInspectorWindow::MaterialInspectorWindow(QWidget * parent, MainWindow * 
 
 MaterialInspectorWindow::~MaterialInspectorWindow()
 {
-    if (NeutronInfoDialog)  // why like that?
+    if (NeutronInfoDialog)
     {
         ANeutronInfoDialog * NeutronInfoDialogCopy = NeutronInfoDialog;
         NeutronInfoDialog = nullptr;
@@ -114,13 +112,13 @@ MaterialInspectorWindow::~MaterialInspectorWindow()
 void MaterialInspectorWindow::InitWindow()
 {
     UpdateActiveMaterials();
-    on_cobActiveMaterials_activated(0);
-    UpdateIndicationTmpMaterial();
-    SetWasModified(false);
+    showMaterial(0);
 }
 
 void MaterialInspectorWindow::SetWasModified(bool flag)
 {
+    if (flagDisreguardChange) return;
+
     bMaterialWasModified = flag;
 
     QString s = ( flag ? "<html><span style=\"color:#ff0000;\">Material was modified: Click \"Update\" or \"Add\" to save changes</span></html>"
@@ -139,12 +137,11 @@ void MaterialInspectorWindow::UpdateActiveMaterials()
     ui->cobActiveMaterials->clear();
     ui->cobActiveMaterials->addItems(MpCollection->getListOfMaterialNames());
 
-    if (current>-1 && current<ui->cobActiveMaterials->count())
-    {
-        ui->cobActiveMaterials->setCurrentIndex(current);
-        on_cobActiveMaterials_activated(current);
-        UpdateIndicationTmpMaterial();
-    }
+    int matCount = ui->cobActiveMaterials->count();
+    if (current < -1 || current >= matCount)
+        current = matCount - 1;
+
+    showMaterial(current);
 
     SetWasModified(false);
 }
@@ -156,8 +153,8 @@ void MaterialInspectorWindow::on_pbAddNewMaterial_clicked()
 
 void MaterialInspectorWindow::on_pbAddToActive_clicked()
 {
-    if ( !parseDecayOrRaiseTime(true) ) return;
-    if ( !parseDecayOrRaiseTime(false) ) return;
+    if ( !parseDecayOrRaiseTime(true) )  return;  //error messaging inside
+    if ( !parseDecayOrRaiseTime(false) ) return;  //error messaging inside
 
     MpCollection->tmpMaterial.updateRuntimeProperties(MpCollection->fLogLogInterpolation, Detector->RandGen);
 
@@ -182,12 +179,11 @@ void MaterialInspectorWindow::on_pbAddToActive_clicked()
     }
 
     MpCollection->CopyTmpToMaterialCollection(); //if absent, new material is created!
-    MW->UpdateMaterialListEdit();
 
-    ui->cobActiveMaterials->setCurrentIndex(index);
     MW->ReconstructDetector(true);
+    MW->UpdateMaterialListEdit(); //need?
 
-    SetWasModified(false);
+    showMaterial(index);
 }
 
 void MaterialInspectorWindow::on_pbShowTotalInteraction_clicked()
@@ -205,25 +201,39 @@ void MaterialInspectorWindow::setLogLog(bool flag)
   ui->actionUse_log_log_interpolation->setChecked(flag);
 }
 
-void MaterialInspectorWindow::on_cobActiveMaterials_activated(int index)
+void MaterialInspectorWindow::showMaterial(int index)
 {
-    if ( MpCollection->countMaterials() == 0) return;
-
-    /*
-    if (bMaterialWasModified)
+    if (index == -1)
     {
-        int res = QMessageBox::question(this, "Explore another material", "All unsaved changes will be lost. Continue?", QMessageBox::Yes | QMessageBox::Cancel);
-        if (res == QMessageBox::Cancel)
-            return;
+        ui->cobActiveMaterials->setCurrentIndex(-1);
+        LastShownMaterial = index;
+        return;
     }
-    */
+
+    if (index < 0 || index > MpCollection->countMaterials()) return;
 
     MpCollection->CopyMaterialToTmp(index);
-
+    ui->cobActiveMaterials->setCurrentIndex(index);
+    LastShownMaterial = index;
     UpdateIndicationTmpMaterial();
 
     ui->pbRename->setText("Rename " + ui->cobActiveMaterials->currentText());
     SetWasModified(false);
+}
+
+void MaterialInspectorWindow::on_cobActiveMaterials_activated(int index)
+{
+    if (bMaterialWasModified)
+    {
+        int res = QMessageBox::question(this, "Explore another material", "All unsaved changes will be lost. Continue?", QMessageBox::Yes | QMessageBox::Cancel);
+        if (res == QMessageBox::Cancel)
+        {
+            ui->cobActiveMaterials->setCurrentIndex(LastShownMaterial);
+            return;
+        }
+    }
+
+    showMaterial(index);
 }
 
 void MaterialInspectorWindow::updateWaveButtons()
@@ -488,11 +498,11 @@ void MaterialInspectorWindow::on_pbUpdateInteractionIndication_clicked()
           on_ledGammaDiagnosticsEnergy_editingFinished();
       }
       else
-        {
+      {
           message("Critical error: unknown neutral particle", this);
           flagDisreguardChange = false;
           return;
-        }
+      }
   }
 
   flagDisreguardChange = false;
@@ -588,7 +598,7 @@ void MaterialInspectorWindow::on_pbLoadDeDr_clicked()
   file.close();
   ui->pbShowStoppingPower->setEnabled(true);
   on_pbUpdateInteractionIndication_clicked();
-  on_pbWasModified_clicked();
+  SetWasModified(true);
 }
 
 void MaterialInspectorWindow::SetParticleSelection(int index)
@@ -606,12 +616,7 @@ void MaterialInspectorWindow::SetParticleSelection(int index)
 
 void MaterialInspectorWindow::SetMaterial(int index)
 {
-    ui->cobActiveMaterials->setCurrentIndex(index);
-    on_cobActiveMaterials_activated(index);
-
-    UpdateIndicationTmpMaterial();
-
-    SetWasModified(false);
+    showMaterial(index);
 }
 
 void MaterialInspectorWindow::on_pbLoadThisScenarioCrossSection_clicked()
@@ -656,7 +661,7 @@ void MaterialInspectorWindow::on_pbLoadThisScenarioCrossSection_clicked()
     tmpMaterial.MatParticle[particleId].DataString.clear();
 
     on_pbUpdateInteractionIndication_clicked();
-    on_pbWasModified_clicked();
+    SetWasModified(true);
 }
 
 void MaterialInspectorWindow::on_ledIntEnergyRes_editingFinished()
@@ -839,7 +844,7 @@ void MaterialInspectorWindow::on_pbImportStoppingPowerFromTrim_clicked()
             tmpMaterial.MatParticle[particleId].InteractionDataX.append(x);
             tmpMaterial.MatParticle[particleId].InteractionDataF.append(f);
 
-            MaterialInspectorWindow::on_pbWasModified_clicked();
+            SetWasModified(true);
         }
 
         if (flagWrongTermination)
@@ -872,7 +877,7 @@ void MaterialInspectorWindow::on_pbImportXCOM_clicked()
   int particleId = ui->cobParticle->currentIndex();
   importXCOM(in, particleId);
   on_pbUpdateInteractionIndication_clicked();
-  on_pbWasModified_clicked();
+  SetWasModified(true);
 }
 
 bool MaterialInspectorWindow::importXCOM(QTextStream &in, int particleId)
@@ -1044,7 +1049,7 @@ bool MaterialInspectorWindow::importXCOM(QTextStream &in, int particleId)
   //      qDebug()<<tmpMaterial.MatParticle[particleId].Terminators.size();
   //      qDebug()<<tmpMaterial.MatParticle[particleId].InteractionDataX.size();
 
-  MaterialInspectorWindow::on_pbWasModified_clicked();
+  SetWasModified(true);
   return true;
 }
 
@@ -1079,7 +1084,7 @@ void MaterialInspectorWindow::on_pbLoadPrimSpectrum_clicked()
       ui->pbShowPrimSpectrum->setEnabled(false);
       ui->pbDeletePrimSpectrum->setEnabled(false);
     }
-  MaterialInspectorWindow::on_pbWasModified_clicked();
+  SetWasModified(true);
 }
 
 void MaterialInspectorWindow::on_pbShowPrimSpectrum_clicked()
@@ -1097,7 +1102,7 @@ void MaterialInspectorWindow::on_pbDeletePrimSpectrum_clicked()
 
   ui->pbShowPrimSpectrum->setEnabled(false);
   ui->pbDeletePrimSpectrum->setEnabled(false);
-  MaterialInspectorWindow::on_pbWasModified_clicked();
+  SetWasModified(true);
 }
 
 void MaterialInspectorWindow::ConvertToStandardWavelengthes(QVector<double>* sp_x, QVector<double>* sp_y, QVector<double>* y)
@@ -1157,7 +1162,7 @@ void MaterialInspectorWindow::on_pbLoadSecSpectrum_clicked()
       ui->pbShowSecSpectrum->setEnabled(false);
       ui->pbDeleteSecSpectrum->setEnabled(false);
     }
-  MaterialInspectorWindow::on_pbWasModified_clicked();
+  SetWasModified(true);
 }
 
 void MaterialInspectorWindow::on_pbShowSecSpectrum_clicked()
@@ -1175,7 +1180,7 @@ void MaterialInspectorWindow::on_pbDeleteSecSpectrum_clicked()
 
   ui->pbShowSecSpectrum->setEnabled(false);
   ui->pbDeleteSecSpectrum->setEnabled(false);
-  MaterialInspectorWindow::on_pbWasModified_clicked();
+  SetWasModified(true);
 }
 
 void MaterialInspectorWindow::on_pbLoadNlambda_clicked()
@@ -1204,7 +1209,7 @@ void MaterialInspectorWindow::on_pbLoadNlambda_clicked()
       ui->pbShowNlambda->setEnabled(false);
       ui->pbDeleteNlambda->setEnabled(false);
     }
-  MaterialInspectorWindow::on_pbWasModified_clicked();
+  SetWasModified(true);
 }
 
 void MaterialInspectorWindow::on_pbShowNlambda_clicked()
@@ -1222,7 +1227,7 @@ void MaterialInspectorWindow::on_pbDeleteNlambda_clicked()
   ui->pbShowNlambda->setEnabled(false);
   ui->pbDeleteNlambda->setEnabled(false);
 
-  MaterialInspectorWindow::on_pbWasModified_clicked();
+  SetWasModified(true);
 }
 
 void MaterialInspectorWindow::on_pbLoadABSlambda_clicked()
@@ -1251,7 +1256,7 @@ void MaterialInspectorWindow::on_pbLoadABSlambda_clicked()
       ui->pbShowABSlambda->setEnabled(false);
       ui->pbDeleteABSlambda->setEnabled(false);
     }
-  MaterialInspectorWindow::on_pbWasModified_clicked();
+  SetWasModified(true);
 }
 
 void MaterialInspectorWindow::on_pbShowABSlambda_clicked()
@@ -1268,7 +1273,7 @@ void MaterialInspectorWindow::on_pbDeleteABSlambda_clicked()
 
   ui->pbShowABSlambda->setEnabled(false);
   ui->pbDeleteABSlambda->setEnabled(false);
-  MaterialInspectorWindow::on_pbWasModified_clicked();
+  SetWasModified(true);
 }
 
 void MaterialInspectorWindow::on_pbShowReemProbLambda_clicked()
@@ -1295,7 +1300,7 @@ void MaterialInspectorWindow::on_pbLoadReemisProbLambda_clicked()
 
     ui->pbShowReemProbLambda->setEnabled(numPoints>0);
     ui->pbDeleteReemisProbLambda->setEnabled(numPoints>0);
-    on_pbWasModified_clicked();
+    SetWasModified(true);
 }
 
 void MaterialInspectorWindow::on_pbDeleteReemisProbLambda_clicked()
@@ -1306,15 +1311,12 @@ void MaterialInspectorWindow::on_pbDeleteReemisProbLambda_clicked()
 
     ui->pbShowReemProbLambda->setEnabled(false);
     ui->pbDeleteReemisProbLambda->setEnabled(false);
-    on_pbWasModified_clicked();
+    SetWasModified(true);
 }
 
 void MaterialInspectorWindow::on_pbWasModified_clicked()
 {
-  if (flagDisreguardChange) return;
-  SetWasModified(true);
-
-  updateActionButtons();
+    SetWasModified(true);
 }
 
 bool MaterialInspectorWindow::event(QEvent * e)
@@ -1400,7 +1402,6 @@ void MaterialInspectorWindow::updateActionButtons()
 {
     const QString name = ui->leName->text();
     int iMat = MpCollection->FindMaterial(name);
-    qDebug() << "------"<<iMat << bMaterialWasModified;
     if (iMat == -1)
     {
         // Material with this name does not exist
@@ -1481,9 +1482,9 @@ void MaterialInspectorWindow::on_ledRayleigh_editingFinished()
 
 void MaterialInspectorWindow::on_pbRemoveRayleigh_clicked()
 {
-  ui->ledRayleigh->setText("");
-  MpCollection->tmpMaterial.rayleighMFP = 0;
-  MaterialInspectorWindow::on_pbWasModified_clicked();
+    ui->ledRayleigh->setText("");
+    MpCollection->tmpMaterial.rayleighMFP = 0;
+    SetWasModified(true);
 }
 
 void MaterialInspectorWindow::on_pbShowUsage_clicked()
@@ -1534,23 +1535,24 @@ void MaterialInspectorWindow::on_pbRename_clicked()
         return;
     }
 
-  QString name = ui->leName->text();
-  int aMat = ui->cobActiveMaterials->currentIndex();
-  if (aMat<0) return;
-  QString aName = (*MpCollection)[aMat]->name;
-  if (name == aName) return; //not changed
+    const QString newName = ui->leName->text();
+    int iMat = ui->cobActiveMaterials->currentIndex();
+    if (iMat < 0) return;
 
-  for (int i=0; i<MpCollection->countMaterials(); i++)
-    if (i!=aMat && name==(*MpCollection)[i]->name)
-      {
-        message("There is already a material with name "+name, this);
-        return;
-      }
-  (*MpCollection)[aMat]->name = name;
-  ui->pbRename->setText("Rename " + name);
+    const QString & oldName = (*MpCollection)[iMat]->name;
+    if (newName == oldName) return;
 
-  MW->ReconstructDetector(true);
-  MaterialInspectorWindow::on_leName_textChanged(ui->leName->text());
+    for (int i = 0; i < MpCollection->countMaterials(); i++)
+        if (i != iMat && newName == (*MpCollection)[i]->name)
+        {
+            message("There is already a material with name " + newName, this);
+            return;
+        }
+
+    (*MpCollection)[iMat]->name = newName;
+    ui->pbRename->setText("Rename " + newName);
+
+    MW->ReconstructDetector(true);
 }
 
 void MaterialInspectorWindow::on_pbComputeRangeCharged_clicked()
@@ -1654,11 +1656,13 @@ void MaterialInspectorWindow::on_actionLoad_material_triggered()
   js = json["Material"].toObject();
   MpCollection->tmpMaterial.readFromJson(js, MpCollection);
 
-  on_pbWasModified_clicked();
+  SetWasModified(true);
   updateWaveButtons();
   MW->ListActiveParticles();
 
   ui->cobActiveMaterials->setCurrentIndex(-1); //to avoid confusion (and update is disabled for -1)
+  LastShownMaterial = -1;
+
   UpdateIndicationTmpMaterial(); //refresh indication of tmpMaterial
   updateWaveButtons(); //refresh button state for Wave-resolved properties
   SetParticleSelection(0);
@@ -1685,7 +1689,7 @@ void MaterialInspectorWindow::on_actionClear_Interaction_for_this_particle_trigg
     tmpMaterial.MatParticle[iPart].Clear();
 
     on_pbUpdateInteractionIndication_clicked();
-    on_pbWasModified_clicked();
+    SetWasModified(true);
 }
 
 void MaterialInspectorWindow::on_actionClear_interaction_for_all_particles_triggered()
@@ -1710,7 +1714,7 @@ void MaterialInspectorWindow::on_actionClear_interaction_for_all_particles_trigg
         tmpMaterial.MatParticle[iPart].Clear();
 
     on_pbUpdateInteractionIndication_clicked();
-    on_pbWasModified_clicked();
+    SetWasModified(true);
 }
 
 void MaterialInspectorWindow::on_actionUse_log_log_interpolation_triggered()
@@ -1910,7 +1914,7 @@ void MaterialInspectorWindow::ShowTotalInteraction()
   MW->GraphWindow->Draw(graphOver, "L same");
 }
 
-TGraph *MaterialInspectorWindow::constructInterpolationGraph(QVector<double> X, QVector<double> Y)
+TGraph *MaterialInspectorWindow::constructInterpolationGraph(const QVector<double> &X, const QVector<double> &Y) const
 {
   int entries = X.size();
 
@@ -1999,7 +2003,7 @@ void MaterialInspectorWindow::on_pbXCOMauto_clicked()
   if (fOK) MpCollection->tmpMaterial.MatParticle[particleId].DataString = ui->leChemicalComposition->text();
 
   on_pbUpdateInteractionIndication_clicked();
-  on_pbWasModified_clicked();
+  SetWasModified(true);
 }
 
 void MaterialInspectorWindow::on_pbShowXCOMdata_clicked()
@@ -2063,7 +2067,7 @@ bool MaterialInspectorWindow::doLoadCrossSection(ANeutronInteractionElement *ele
         element->Energy = x;
         element->CrossSection = y;
         element->CSfileHeader = header;
-        on_pbWasModified_clicked();
+        SetWasModified(true);
         return true;
     }
     return false;
@@ -2119,7 +2123,7 @@ void MaterialInspectorWindow::onAddIsotope(AChemicalElement *element)
 
     ShowTreeWithChemicalComposition();
     FillNeutronTable();
-    on_pbWasModified_clicked();
+    SetWasModified(true);
 }
 
 void MaterialInspectorWindow::onRemoveIsotope(AChemicalElement *element, int isotopeIndexInElement)
@@ -2137,7 +2141,7 @@ void MaterialInspectorWindow::onRemoveIsotope(AChemicalElement *element, int iso
 
     ShowTreeWithChemicalComposition();
     FillNeutronTable();
-    on_pbWasModified_clicked();
+    SetWasModified(true);
 }
 
 void MaterialInspectorWindow::IsotopePropertiesChanged(const AChemicalElement * /*element*/, int /*isotopeIndexInElement*/)
@@ -2148,7 +2152,7 @@ void MaterialInspectorWindow::IsotopePropertiesChanged(const AChemicalElement * 
 
     ShowTreeWithChemicalComposition();
     FillNeutronTable();
-    on_pbWasModified_clicked();
+    SetWasModified(true);
 }
 
 void MaterialInspectorWindow::onRequestDraw(const QVector<double> &x, const QVector<double> &y, const QString &titleX, const QString &titleY)
@@ -2241,7 +2245,7 @@ void MaterialInspectorWindow::on_pbModifyChemicalComposition_clicked()
     if (numNewPart > 0)
         updateTmpMatOnPartCollChange(numNewPart);
 
-    on_pbWasModified_clicked();
+    SetWasModified(true);
     updateWarningIcons();
 }
 
@@ -2529,7 +2533,7 @@ void MaterialInspectorWindow::on_cbCapture_clicked()
     if (numNewPart > 0)
         updateTmpMatOnPartCollChange(numNewPart);
 
-    on_pbWasModified_clicked();
+    SetWasModified(true);
     updateWarningIcons();
 }
 
@@ -2544,7 +2548,7 @@ void MaterialInspectorWindow::on_cbEnableScatter_clicked()
     if (numNewPart > 0)
         updateTmpMatOnPartCollChange(numNewPart);
 
-    on_pbWasModified_clicked();
+    SetWasModified(true);
     updateWarningIcons();
 }
 
@@ -2650,7 +2654,7 @@ void MaterialInspectorWindow::onTabwNeutronsActionRequest(int iEl, int iIso, con
         if (res != 0)
         {
             FillNeutronTable();
-            on_pbWasModified_clicked();
+            SetWasModified(true);
         }
     }
 }
@@ -2679,7 +2683,7 @@ void MaterialInspectorWindow::on_cbAllowAbsentCsData_clicked()
     tmpMaterial.MatParticle[particleId].bAllowAbsentCsData = ui->cbAllowAbsentCsData->isChecked();
 
     FillNeutronTable();
-    on_pbWasModified_clicked();
+    SetWasModified(true);
 }
 
 void MaterialInspectorWindow::on_pbAutoLoadMissingNeutronCrossSections_clicked()
@@ -2687,7 +2691,7 @@ void MaterialInspectorWindow::on_pbAutoLoadMissingNeutronCrossSections_clicked()
     autoloadMissingCrossSectionData();
 
     FillNeutronTable();
-    on_pbWasModified_clicked();
+    SetWasModified(true);
 }
 
 void MaterialInspectorWindow::on_pbHelpNeutron_clicked()
@@ -2895,7 +2899,7 @@ void MaterialInspectorWindow::on_pbLoadNcmat_clicked()
     LoadTextFromFile(fileName, t.NCrystal_Ncmat);
 
     on_pbUpdateInteractionIndication_clicked();
-    on_pbWasModified_clicked();
+    SetWasModified(true);
 }
 
 void MaterialInspectorWindow::on_cbUseNCrystal_clicked(bool checked)
@@ -2951,7 +2955,7 @@ void MaterialInspectorWindow::on_pbCopyPrYieldToAll_clicked()
     for (int iP = 0; iP < tmpMaterial.MatParticle.size(); iP++)
             tmpMaterial.MatParticle[iP].PhYield = prYield;
     tmpMaterial.PhotonYieldDefault = prYield;
-    on_pbWasModified_clicked();
+    SetWasModified(true);
 }
 
 void MaterialInspectorWindow::on_cbTrackingAllowed_clicked()
@@ -2994,10 +2998,8 @@ void MaterialInspectorWindow::AddMaterialFromLibrary(QWidget * parentWidget)
     int index = MpCollection->FindMaterial(name);
 
     MW->ReconstructDetector(true);
-    ui->cobActiveMaterials->setCurrentIndex(index);
-    on_cobActiveMaterials_activated(index);
 
-    SetWasModified(false);
+    showMaterial(index);
 }
 
 void MaterialInspectorWindow::on_actionLoad_from_material_library_triggered()
@@ -3026,8 +3028,5 @@ void MaterialInspectorWindow::on_actionAdd_default_material_triggered()
 
     int index = ui->cobActiveMaterials->count() - 1;
     if (index > -1)
-    {
-        ui->cobActiveMaterials->setCurrentIndex(index);
-        on_cobActiveMaterials_activated(index);
-    }
+        showMaterial(index);
 }

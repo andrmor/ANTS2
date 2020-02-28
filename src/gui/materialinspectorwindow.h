@@ -32,7 +32,7 @@ public:
     void UpdateActiveMaterials();
     void UpdateIndicationTmpMaterial();
     void SetParticleSelection(int index);
-    void SetMaterial(int index);
+    void SetMaterial(int index);   //add watchdogs and update of mat/part list if necessary
     void ShowTotalInteraction();
     void AddMaterialFromLibrary(QWidget * parentWidget);
 
@@ -49,7 +49,6 @@ protected:
 private slots:
     // both user and code control - potential problems
     void on_leName_textChanged(const QString &arg1);
-    void on_cobActiveMaterials_activated(int index);
     void on_pbUpdateInteractionIndication_clicked();  // interaction indication update
 
     //on signals from delegates
@@ -59,6 +58,7 @@ private slots:
     void onRequestDraw(const QVector<double> & x, const QVector<double> & y, const QString & titleX, const QString & titleY);
 
     //on user input    
+    void on_cobActiveMaterials_activated(int index);
     void on_pbShowTotalInteraction_clicked();
     void on_leName_editingFinished();
     void on_pbAddToActive_clicked();
@@ -140,12 +140,11 @@ private slots:
     void on_tabwNeutron_customContextMenuRequested(const QPoint &pos);
     void onTabwNeutronsActionRequest(int iEl, int iIso, const QString Action);
     void on_actionNeutrons_triggered();
+    void on_actionLoad_from_material_library_triggered();
+    void on_actionAdd_default_material_triggered();
 
     //new auto-generated, not cathegorized
 
-    void on_actionLoad_from_material_library_triggered();
-
-    void on_actionAdd_default_material_triggered();
 
 private:
     Ui::MaterialInspectorWindow *ui;
@@ -159,7 +158,8 @@ private:
     bool bMaterialWasModified = false;
     bool flagDisreguardChange = false;
     bool fLockTable = false;
-    int LastSelectedParticle = 0;
+    int  LastSelectedParticle = 0;
+    int  LastShownMaterial = -1;
     bool bLockTmpMaterial = false;
 
     bool bMessageLock = false;
@@ -167,8 +167,10 @@ private:
     void updateWaveButtons();
     void updateActionButtons();
 
+    void showMaterial(int index);
+
     void showProcessIntCoefficient(int particleId, int TermScenario);
-    TGraph* constructInterpolationGraph(QVector<double> X, QVector<double> Y);
+    TGraph* constructInterpolationGraph(const QVector<double> & X, const QVector<double> & Y) const;
     bool importXCOM(QTextStream &in, int particleId);
 
     bool autoLoadCrossSection(ANeutronInteractionElement *element, QString target); //target = "absorption" or "elastic scattering" - replace with dynamic_cast!!!

@@ -33,7 +33,7 @@ public:
   double n;   //refractive index for monochrome
   double abs; //exp absorption per mm   for monochrome    (I = I0*exp(-abs*length[mm]))
   double reemissionProb; //for waveshifters: probability that absorbed photon is reemitted
-  double rayleighMFP; //0 - no rayleigh scattering
+  double rayleighMFP = 0; //0 - no rayleigh scattering
   double rayleighWave;
   QVector<double> rayleighBinned;//regular step (WaveStep step, WaveNodes bins)
   double e_driftVelocity;

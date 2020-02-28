@@ -701,6 +701,7 @@ bool GraphWindowClass::event(QEvent *event)
   }
 
   if (event->type() == QEvent::Show)
+  {
       if (ColdStart)
       {
           //first time this window is shown
@@ -708,19 +709,30 @@ bool GraphWindowClass::event(QEvent *event)
           this->resize(width()+1, height());
           this->resize(width()-1, height());
       }
+      else
+      {
+          qDebug() << "show!";
+          RasterWindow->UpdateRootCanvas();
+      }
+  }
 
   return AGuiWindow::event(event);
 }
 
-void GraphWindowClass::closeEvent(QCloseEvent *)
+void GraphWindowClass::closeEvent(QCloseEvent * event)
 {
+    qDebug() << "Gr win close ev";
   ExtractionCanceled = true;
   RasterWindow->setExtractionComplete(true);
-  DrawObjects.clear();
-  PreviousDrawObjects.clear();
-  RedrawAll();
-  RasterWindow->setShowCursorPosition(false);
-  LastDistributionShown = "";
+  event->ignore();
+
+  hide();
+
+  //DrawObjects.clear();
+  //PreviousDrawObjects.clear();
+  //RedrawAll();
+  //RasterWindow->setShowCursorPosition(false);
+  //LastDistributionShown = "";
 }
 
 void GraphWindowClass::on_cbGridX_toggled(bool checked)

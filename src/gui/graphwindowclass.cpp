@@ -711,8 +711,9 @@ bool GraphWindowClass::event(QEvent *event)
       }
       else
       {
-          qDebug() << "show!";
-          RasterWindow->UpdateRootCanvas();
+          //qDebug() << "Graph win show event";
+          //RasterWindow->UpdateRootCanvas();
+          QTimer::singleShot(100, [this](){RasterWindow->UpdateRootCanvas();}); // without delay canvas is not shown in Qt 5.9.5
       }
   }
 
@@ -721,18 +722,18 @@ bool GraphWindowClass::event(QEvent *event)
 
 void GraphWindowClass::closeEvent(QCloseEvent * event)
 {
-    qDebug() << "Gr win close ev";
-  ExtractionCanceled = true;
-  RasterWindow->setExtractionComplete(true);
-  event->ignore();
+    //qDebug() << "Graph win close event";
+    ExtractionCanceled = true;
+    RasterWindow->setExtractionComplete(true);
+    event->ignore();
 
-  hide();
+    hide();
 
-  //DrawObjects.clear();
-  //PreviousDrawObjects.clear();
-  //RedrawAll();
-  //RasterWindow->setShowCursorPosition(false);
-  //LastDistributionShown = "";
+    //DrawObjects.clear();
+    //PreviousDrawObjects.clear();
+    //RedrawAll();
+    //RasterWindow->setShowCursorPosition(false);
+    //LastDistributionShown = "";
 }
 
 void GraphWindowClass::on_cbGridX_toggled(bool checked)

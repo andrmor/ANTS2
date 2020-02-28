@@ -3666,7 +3666,7 @@ Wavelengths shoul be given in increasing order</string>
   </action>
   <action name="actionLoad_from_material_library">
    <property name="text">
-    <string>Load from material library</string>
+    <string>Import from ANTS2 material library</string>
    </property>
   </action>
   <action name="actionAdd_default_material">

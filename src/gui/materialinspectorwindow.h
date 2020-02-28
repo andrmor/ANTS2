@@ -48,8 +48,7 @@ protected:
 
 private slots:
     // both user and code control - potential problems
-    void on_leName_textChanged(const QString &arg1);
-    void on_pbUpdateInteractionIndication_clicked();  // interaction indication update
+    void on_pbUpdateInteractionIndication_clicked();  // interaction indication update  -> TODO: case when config has no particles
 
     //on signals from delegates
     void onAddIsotope(AChemicalElement *element);
@@ -58,6 +57,7 @@ private slots:
     void onRequestDraw(const QVector<double> & x, const QVector<double> & y, const QString & titleX, const QString & titleY);
 
     //on user input    
+    void on_leName_textChanged(const QString &arg1);
     void on_cobActiveMaterials_activated(int index);
     void on_pbShowTotalInteraction_clicked();
     void on_leName_editingFinished();

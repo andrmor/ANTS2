@@ -111,7 +111,7 @@ MaterialInspectorWindow::~MaterialInspectorWindow()
 
 void MaterialInspectorWindow::InitWindow()
 {
-    UpdateActiveMaterials();
+    //UpdateActiveMaterials();
     showMaterial(0);
 }
 
@@ -232,60 +232,31 @@ void MaterialInspectorWindow::on_cobActiveMaterials_activated(int index)
             return;
         }
     }
-
     showMaterial(index);
 }
 
 void MaterialInspectorWindow::updateWaveButtons()
 {   
-  AMaterial& tmpMaterial = MpCollection->tmpMaterial;
+    AMaterial & tmpMaterial = MpCollection->tmpMaterial;
 
-  if (tmpMaterial.PrimarySpectrum_lambda.size()>0)
-    {
-      ui->pbShowPrimSpectrum->setEnabled(true);
-      ui->pbDeletePrimSpectrum->setEnabled(true);
-    }
-  else
-    {
-      ui->pbShowPrimSpectrum->setEnabled(false);
-      ui->pbDeletePrimSpectrum->setEnabled(false);
-    }
+    bool bPrimSpec = (tmpMaterial.PrimarySpectrum_lambda.size() > 0);
+    ui->pbShowPrimSpectrum->setEnabled(bPrimSpec);
+    ui->pbDeletePrimSpectrum->setEnabled(bPrimSpec);
 
-  if (tmpMaterial.SecondarySpectrum_lambda.size()>0)
-    {
-      ui->pbShowSecSpectrum->setEnabled(true);
-      ui->pbDeleteSecSpectrum->setEnabled(true);
-    }
-  else
-    {
-      ui->pbShowSecSpectrum->setEnabled(false);
-      ui->pbDeleteSecSpectrum->setEnabled(false);
-    }
+    bool bSecSpec = (tmpMaterial.SecondarySpectrum_lambda.size() > 0);
+    ui->pbShowSecSpectrum->setEnabled(bSecSpec);
+    ui->pbDeleteSecSpectrum->setEnabled(bSecSpec);
 
-  if (tmpMaterial.nWave_lambda.size()>0)
-    {
-      ui->pbShowNlambda->setEnabled(true);
-      ui->pbDeleteNlambda->setEnabled(true);
-    }
-  else
-    {
-      ui->pbShowNlambda->setEnabled(false);
-      ui->pbDeleteNlambda->setEnabled(false);
-    }
+    bool bN = (tmpMaterial.nWave_lambda.size() > 0);
+    ui->pbShowNlambda->setEnabled(bN);
+    ui->pbDeleteNlambda->setEnabled(bN);
 
-  if (tmpMaterial.absWave_lambda.size()>0)
-    {
-      ui->pbShowABSlambda->setEnabled(true);
-      ui->pbDeleteABSlambda->setEnabled(true);
-    }
-  else
-    {
-      ui->pbShowABSlambda->setEnabled(false);
-      ui->pbDeleteABSlambda->setEnabled(false);
-    }
+    bool bA = (tmpMaterial.absWave_lambda.size() > 0);
+    ui->pbShowABSlambda->setEnabled(bA);
+    ui->pbDeleteABSlambda->setEnabled(bA);
 
-  ui->pbShowReemProbLambda->setEnabled( !tmpMaterial.reemisProbWave_lambda.isEmpty() );
-  ui->pbDeleteReemisProbLambda->setEnabled( !tmpMaterial.reemisProbWave_lambda.isEmpty() );
+    ui->pbShowReemProbLambda->setEnabled( !tmpMaterial.reemisProbWave_lambda.isEmpty() );
+    ui->pbDeleteReemisProbLambda->setEnabled( !tmpMaterial.reemisProbWave_lambda.isEmpty() );
 }
 
 void MaterialInspectorWindow::UpdateIndicationTmpMaterial()
@@ -334,8 +305,8 @@ void MaterialInspectorWindow::UpdateIndicationTmpMaterial()
         str.chop(3);
     }
     ui->lePriT->setText(str);
+
     //raise time
-        //ui->ledPriT_raise->setText( QString::number(tmpMaterial.PriScintRaiseTime) );
     if (tmpMaterial.PriScint_Raise.size() == 0)
         str = "0";
     else if (tmpMaterial.PriScint_Raise.size() == 1)
@@ -432,7 +403,7 @@ void MaterialInspectorWindow::on_pbUpdateInteractionIndication_clicked()
 {
   //qDebug() << "Update indication triggered for MI window";
 
-  AMaterial& tmpMaterial = MpCollection->tmpMaterial;
+  AMaterial & tmpMaterial = MpCollection->tmpMaterial;
   int particleId = ui->cobParticle->currentIndex();
 
   //qDebug() << "PIndex:" << particleId;
@@ -2981,8 +2952,7 @@ void MaterialInspectorWindow::on_pbSecScintHelp_clicked()
 
 void MaterialInspectorWindow::on_pteComments_textChanged()
 {
-    if (!flagDisreguardChange)
-        SetWasModified(true);
+    if (!flagDisreguardChange) SetWasModified(true);
 }
 
 void MaterialInspectorWindow::AddMaterialFromLibrary(QWidget * parentWidget)

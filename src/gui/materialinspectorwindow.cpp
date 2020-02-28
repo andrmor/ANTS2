@@ -1400,12 +1400,13 @@ void MaterialInspectorWindow::updateActionButtons()
 {
     const QString name = ui->leName->text();
     int iMat = MpCollection->FindMaterial(name);
+    qDebug() << "------"<<iMat << bMaterialWasModified;
     if (iMat == -1)
     {
         // Material with this name does not exist
         ui->pbAddToActive->setEnabled(false);  //update button
         ui->pbAddNewMaterial->setEnabled(true);
-        ui->pbRename->setEnabled(bMaterialWasModified);
+        ui->pbRename->setEnabled(!bMaterialWasModified);
     }
     else
     {
@@ -1546,7 +1547,7 @@ void MaterialInspectorWindow::on_pbRename_clicked()
         return;
       }
   (*MpCollection)[aMat]->name = name;
-  ui->pbRename->setText("Rename\n"+name);
+  ui->pbRename->setText("Rename " + name);
 
   MW->ReconstructDetector(true);
   MaterialInspectorWindow::on_leName_textChanged(ui->leName->text());

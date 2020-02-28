@@ -25,13 +25,14 @@ AMaterialLibraryBrowser::AMaterialLibraryBrowser(AMaterialParticleCollection & M
     ui(new Ui::AMaterialLibraryBrowser)
 {
     ui->setupUi(this);
+
+    ui->pbDummy->setDefault(true);
     ui->pbDummy->setVisible(false);
 
-    ui->pte->clear();
     QString dirName = AGlobalSettings::getInstance().ResourcesDir + "/MaterialLibrary";
     Dir = QDir(dirName, "*.mat");
     if (!Dir.exists())
-        ui->pte->appendPlainText("DATA/MaterialLibrary directory not found");
+        out("DATA/MaterialLibrary directory not found", true);
 
     Dir.setFilter( QDir::AllEntries | QDir::NoDotAndDotDot );
 
@@ -46,7 +47,7 @@ AMaterialLibraryBrowser::~AMaterialLibraryBrowser()
 
 void AMaterialLibraryBrowser::on_pbDummy_clicked()
 {
-    //do nothing
+    //do nothing - just intercepts "enter" pressed
 }
 
 void AMaterialLibraryBrowser::on_pbLoad_clicked()
@@ -118,10 +119,8 @@ void AMaterialLibraryBrowser::readFiles()
 
 void AMaterialLibraryBrowser::out(const QString &text, bool bBold)
 {
-    if (bBold)
-        ui->pte->appendHtml( QString("<html><b>%1</b</html>").arg(text) );
-    else
-        ui->pte->appendPlainText(text);
+    if (bBold) ui->pte->appendHtml( QString("<html><b>%1</b</html>").arg(text) );
+    else       ui->pte->appendPlainText(text);
 }
 
 void AMaterialLibraryBrowser::updateGui()
@@ -132,13 +131,11 @@ void AMaterialLibraryBrowser::updateGui()
     QSet<QString> CheckedTags;
     for (ATagRecord & tagRec : TagRecords)
         if (tagRec.bChecked) CheckedTags << tagRec.Tag;
-    //qDebug() << "Checked tags:"<<CheckedTags;
 
     QSet<QString> NarrowingTags;
     ShownMaterials.clear();
     for (const AMaterialLibraryRecord & rec : MaterialRecords)
     {
-        //qDebug() << rec.MaterialName << rec.Tags;
         bool bComply = true;
         for (const QString & tag : CheckedTags)
         {
@@ -176,7 +173,7 @@ void AMaterialLibraryBrowser::updateGui()
     // next narrowing ones
     for (ATagRecord & tagRec : TagRecords)
     {
-        if (tagRec.bChecked) continue;                      //already prtocessed
+        if (tagRec.bChecked) continue;                      //already processed
         if (!NarrowingTags.contains(tagRec.Tag)) continue;
 
         QListWidgetItem * item = new QListWidgetItem(ui->lwTags);
@@ -192,8 +189,8 @@ void AMaterialLibraryBrowser::updateGui()
     // everything else as disabled
     for (ATagRecord & tagRec : TagRecords)
     {
-        if (tagRec.bChecked) continue;                      //already prtocessed
-        if (NarrowingTags.contains(tagRec.Tag)) continue;   //already prtocessed
+        if (tagRec.bChecked) continue;                      //already processed
+        if (NarrowingTags.contains(tagRec.Tag)) continue;   //already processed
 
         QListWidgetItem * item = new QListWidgetItem(ui->lwTags);
         QCheckBox * cb = new QCheckBox(tagRec.Tag);
@@ -245,7 +242,10 @@ void AMaterialLibraryBrowser::on_lwMaterials_itemClicked(QListWidgetItem * )
     out("Defined particles:");
     out(Dummy.getListOfParticleNames().join(", "), true);
     out("");
-    out(mat.Comments);
+    out("Comments:");
+    QStringList sl = mat.Comments.split(QRegExp("[\r\n]"),QString::SkipEmptyParts);
+    txt = ">" + sl.join("\n>");
+    out(txt);
 }
 
 void AMaterialLibraryBrowser::on_lwMaterials_currentRowChanged(int currentRow)

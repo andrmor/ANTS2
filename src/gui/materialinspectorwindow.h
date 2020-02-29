@@ -30,26 +30,16 @@ public:
 
     void InitWindow();
     void UpdateActiveMaterials();
-    void UpdateIndicationTmpMaterial();
+    void UpdateGui();
     void SetParticleSelection(int index);
     void SetMaterial(int index);   //add watchdogs and update of mat/part list if necessary
-    void ShowTotalInteraction();
     void AddMaterialFromLibrary(QWidget * parentWidget);
-
-    void AddMatToCobs(QString str);
-    void setLogLog(bool flag);
-
-    void ConvertToStandardWavelengthes(QVector<double>* sp_x, QVector<double>* sp_y, QVector<double>* y);
-
-    bool bClearInProgress = false;
+    void SetLogLog(bool flag);
 
 protected:
     bool event(QEvent * e);
 
 private slots:
-    // both user and code control - potential problems
-    void on_pbUpdateInteractionIndication_clicked();  // interaction indication update  -> TODO: case when config has no particles
-
     //on signals from delegates
     void onAddIsotope(AChemicalElement *element);
     void onRemoveIsotope(AChemicalElement* element, int isotopeIndexInElement);
@@ -57,6 +47,7 @@ private slots:
     void onRequestDraw(const QVector<double> & x, const QVector<double> & y, const QString & titleX, const QString & titleY);
 
     //on user input    
+    void on_pbUpdateInteractionIndication_clicked();  // interaction indication update  -> TODO: case when config has no particles
     void on_leName_textChanged(const QString &arg1);
     void on_cobActiveMaterials_activated(int index);
     void on_pbShowTotalInteraction_clicked();
@@ -147,27 +138,32 @@ private slots:
 
 
 private:
-    Ui::MaterialInspectorWindow *ui;
-    MainWindow * MW = nullptr;
-    DetectorClass * Detector = nullptr;
-    AMaterialParticleCollection* MpCollection = nullptr;
-
-    AMatParticleConfigurator* OptionsConfigurator = nullptr;
-    ANeutronInfoDialog * NeutronInfoDialog = nullptr;
+    Ui::MaterialInspectorWindow * ui = nullptr;
+    MainWindow                  * MW = nullptr;
+    DetectorClass               * Detector = nullptr;
+    AMaterialParticleCollection * MpCollection = nullptr;
+    AMatParticleConfigurator    * OptionsConfigurator = nullptr;
+    ANeutronInfoDialog          * NeutronInfoDialog = nullptr;
 
     bool bMaterialWasModified = false;
     bool flagDisreguardChange = false;
-    bool fLockTable = false;
+    bool fLockTable           = false;
+    bool bLockTmpMaterial     = false;
+    bool bMessageLock         = false;
+    bool bClearInProgress     = false;
+
     int  LastSelectedParticle = 0;
-    int  LastShownMaterial = -1;
-    bool bLockTmpMaterial = false;
+    int  LastShownMaterial    = -1;
 
-    bool bMessageLock = false;
-
-    void updateWaveButtons();
-    void updateActionButtons();
-
+private:
     void showMaterial(int index);
+    void updateInteractionGui();
+    void setWasModified(bool flag);
+
+    void showTotalInteraction();
+
+    void updateActionButtons();
+    void updateWaveButtons();
 
     void showProcessIntCoefficient(int particleId, int TermScenario);
     TGraph* constructInterpolationGraph(const QVector<double> & X, const QVector<double> & Y) const;
@@ -177,12 +173,11 @@ private:
     bool doLoadCrossSection(ANeutronInteractionElement *element, QString fileName);
     void ShowTreeWithChemicalComposition();
     void FillNeutronTable();
-    int autoloadMissingCrossSectionData(); //returns number of particles added to the collection
+    int  autoloadMissingCrossSectionData(); //returns number of particles added to the collection
 
-    void SetWasModified(bool flag);
     bool parseDecayOrRaiseTime(bool doParseDecay);
     void updateWarningIcons();
-    int autoLoadReaction(ANeutronInteractionElement &element); //returns number of particles added to the collection
+    int  autoLoadReaction(ANeutronInteractionElement &element); //returns number of particles added to the collection
     void updateTmpMatOnPartCollChange(int newPartAdded);
     void updateEnableStatus();  // gui update for tracking allow / transparent
 };

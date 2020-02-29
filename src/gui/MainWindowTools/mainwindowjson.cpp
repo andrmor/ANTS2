@@ -61,7 +61,7 @@ void MainWindow::onRequestDetectorGuiUpdate()
   ListActiveParticles();
   //Materials
   on_pbRefreshMaterials_clicked();
-  MIwindow->setLogLog(Detector->MpCollection->fLogLogInterpolation);
+  MIwindow->SetLogLog(Detector->MpCollection->fLogLogInterpolation);
   //Optical overrides
   on_pbRefreshOverrides_clicked();
   //PM types
@@ -259,7 +259,8 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
     }
 
   //cleanup  
-  if (histScan) delete histScan; histScan = nullptr;
+  if (histScan) delete histScan;
+  histScan = nullptr;
   ui->pbScanDistrShow->setEnabled(false);
   ui->pbScanDistrDelete->setEnabled(false);
   populateTable = true;

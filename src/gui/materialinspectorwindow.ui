@@ -259,7 +259,7 @@
     <item>
      <widget class="QTabWidget" name="twProperties">
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tab_6">
        <attribute name="title">
@@ -1982,7 +1982,7 @@ Wavelengths shoul be given in increasing order</string>
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_2">
+      <widget class="QWidget" name="tabInteraction">
        <attribute name="title">
         <string>Interaction</string>
        </attribute>
@@ -2082,7 +2082,7 @@ Wavelengths shoul be given in increasing order</string>
            <item>
             <widget class="QStackedWidget" name="swMainMatParticle">
              <property name="currentIndex">
-              <number>0</number>
+              <number>1</number>
              </property>
              <widget class="QWidget" name="pageCharged">
               <layout class="QVBoxLayout" name="verticalLayout_10">
@@ -2358,7 +2358,7 @@ Wavelengths shoul be given in increasing order</string>
                   <enum>QFrame::NoFrame</enum>
                  </property>
                  <property name="currentIndex">
-                  <number>1</number>
+                  <number>0</number>
                  </property>
                  <widget class="QWidget" name="pageGamma">
                   <layout class="QVBoxLayout" name="verticalLayout_30">

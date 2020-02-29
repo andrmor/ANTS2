@@ -18,7 +18,7 @@ class DetectorAddOnsWindow : public AGuiWindow
   Q_OBJECT
   
 public:
-  explicit DetectorAddOnsWindow(MainWindow *parent, DetectorClass* detector);
+  explicit DetectorAddOnsWindow(QWidget * parent, MainWindow * MW, DetectorClass* detector);
   ~DetectorAddOnsWindow();
 
   void UpdateGUI(); //update gui controls

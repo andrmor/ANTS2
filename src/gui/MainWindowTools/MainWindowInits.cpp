@@ -98,7 +98,8 @@ MainWindow::MainWindow(DetectorClass *Detector,
     ELwindow = new ExamplesWindow(w, this);
     ELwindow->move(100,100);    
     qDebug()<<">Creating Detector Add-ons window";  //created as child window, no delete on mainwin close!
-    DAwindow = new DetectorAddOnsWindow(this, Detector);
+    w = new QWidget();
+    DAwindow = new DetectorAddOnsWindow(w, this, Detector);
     DAwindow->move(50,50);
     qDebug()<<">Creating Material Inspector Window";
     w = new QWidget();

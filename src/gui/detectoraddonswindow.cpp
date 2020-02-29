@@ -39,18 +39,17 @@
 #include "TGeoBoolNode.h"
 #include "TGeoCompositeShape.h"
 
-DetectorAddOnsWindow::DetectorAddOnsWindow(MainWindow *parent, DetectorClass *detector) :
+DetectorAddOnsWindow::DetectorAddOnsWindow(QWidget * parent, MainWindow * MW, DetectorClass * detector) :
   AGuiWindow(parent),
-  ui(new Ui::DetectorAddOnsWindow)
+  ui(new Ui::DetectorAddOnsWindow),
+  MW(MW), Detector(detector)
 {
-  MW = parent;
-  Detector = detector;
   ui->setupUi(this);
 
   Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
   windowFlags |= Qt::Tool;
   windowFlags |= Qt::WindowCloseButtonHint;
-  this->setWindowFlags( windowFlags );
+  this->setWindowFlags(windowFlags);
 
   ui->pbBackToSandwich->setEnabled(false);
 

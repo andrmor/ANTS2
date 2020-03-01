@@ -69,6 +69,7 @@ void AMaterialLoaderDialog::updateParticleGui()
         cbVec << cb;
         lay->addWidget(cb);
     }
+    lay->addStretch();
     ui->scrollArea->setWidget(w);
 }
 

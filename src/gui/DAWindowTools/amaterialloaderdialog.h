@@ -34,6 +34,10 @@ private slots:
     void on_twMain_currentChanged(int index);
     void on_cbToggleAll_toggled(bool checked);
 
+    void on_cbToggleAllProps_toggled(bool checked);
+
+    void on_cobMaterial_activated(int index);
+
 private:
     AMaterialParticleCollection & MpCollection;
     Ui::AMaterialLoaderDialog   * ui;
@@ -52,6 +56,8 @@ private:
     void updateParticleGui();
     bool isNameAlreadyExists() const;
     void updateLoadEnabled();
+    void updatePropertiesGui();
+    int  getMatchValue(const QString & s1, const QString & s2) const;
 
 };
 

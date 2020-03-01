@@ -259,7 +259,7 @@ void AMaterial::clear()
   //Do not touch overrides - handled by loaded (want to keep overrides intact when handling inspector window)
 }
 
-void AMaterial::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCollection) //QVector<AParticle *> *ParticleCollection)
+void AMaterial::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCollection) const
 {
   json["*MaterialName"] = name;
   json["Density"] = density;

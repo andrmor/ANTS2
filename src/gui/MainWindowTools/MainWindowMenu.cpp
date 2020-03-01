@@ -395,7 +395,7 @@ void MainWindow::on_actionLoad_configuration_triggered()
 
 void MainWindow::on_actionNew_detector_triggered()
 {
-  QMessageBox msgBox;
+  QMessageBox msgBox(this);
   msgBox.setText("Start new detector?");
   msgBox.setInformativeText("All unsaved changes to the configuration will be lost!");
   msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);

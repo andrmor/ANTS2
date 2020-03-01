@@ -18,7 +18,6 @@
 #include "aneutronreactionsconfigurator.h"
 #include "aneutroninfodialog.h"
 #include "geometrywindowclass.h"
-#include "amateriallibrarybrowser.h"
 
 #include <QDebug>
 #include <QLayout>
@@ -2835,19 +2834,17 @@ void MaterialInspectorWindow::on_pteComments_textChanged()
     if (!flagDisreguardChange) setWasModified(true);
 }
 
+#include "amaterialloader.h"
 void MaterialInspectorWindow::AddMaterialFromLibrary(QWidget * parentWidget)
 {
-    AMaterialLibraryBrowser B(*MpCollection, parentWidget);
-    int ret = B.exec();
-    if (ret == QDialog::Rejected) return;
+    AMaterialLoader ML(*MpCollection);
 
-    MpCollection->CopyTmpToMaterialCollection();
-    MW->UpdateMaterialListEdit();
+    bool bLoaded = ML.LoadTmpMatFromGui(parentWidget);
+    if (!bLoaded) return;
 
-    const QString & name = MpCollection->tmpMaterial.name;
+    const QString name = MpCollection->tmpMaterial.name;
+    MW->ReconstructDetector(true);   // TODO: go for detector directly  --> move to loader
     int index = MpCollection->FindMaterial(name);
-
-    MW->ReconstructDetector(true);
 
     showMaterial(index);
 }

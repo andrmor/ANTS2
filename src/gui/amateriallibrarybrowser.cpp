@@ -3,7 +3,6 @@
 #include "aglobalsettings.h"
 #include "ajsontools.h"
 #include "amaterialparticlecolection.h"
-#include "amateriallibrary.h"
 #include "amessage.h"
 
 #include <QDebug>
@@ -45,12 +44,34 @@ AMaterialLibraryBrowser::~AMaterialLibraryBrowser()
     delete ui;
 }
 
+QString AMaterialLibraryBrowser::getFileName() const
+{
+    return ReturnFileName;
+}
+
+bool AMaterialLibraryBrowser::isAdvancedLoadRequested() const
+{
+    return bAdvancedLoadRequested;
+}
+
 void AMaterialLibraryBrowser::on_pbDummy_clicked()
 {
     //do nothing - just intercepts "enter" pressed
 }
 
 void AMaterialLibraryBrowser::on_pbLoad_clicked()
+{
+    bAdvancedLoadRequested = false;
+    load();
+}
+
+void AMaterialLibraryBrowser::on_pbAdvancedLoad_clicked()
+{
+    bAdvancedLoadRequested = true;
+    load();
+}
+
+void AMaterialLibraryBrowser::load()
 {
     int row = ui->lwMaterials->currentRow();
     if (row == -1)
@@ -65,17 +86,12 @@ void AMaterialLibraryBrowser::on_pbLoad_clicked()
         return;
     }
 
-    AMaterialLibrary Lib(MpCollection);
+    ReturnFileName = ShownMaterials.at(row).FileName;
 
-    QString err = Lib.LoadFile(ShownMaterials.at(row).FileName, this);
-    if (err == "rejected") return;
+    if (MpCollection.getListOfMaterialNames().contains(ShownMaterials.at(row).MaterialName))
+        bAdvancedLoadRequested = true;
 
-    if (!err.isEmpty())
-    {
-        message(err, this);
-        reject();
-    }
-    else accept();
+    accept();
 }
 
 void AMaterialLibraryBrowser::on_pbClose_clicked()

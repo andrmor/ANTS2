@@ -428,8 +428,9 @@ SOURCES += main.cpp \
     gui/GraphWindowTools/atemplateselectiondialog.cpp \
     gui/GraphWindowTools/atemplateselectionrecord.cpp \
     modules/apmdummystructure.cpp \
-    Simulation/amateriallibrary.cpp \
-    gui/amateriallibrarybrowser.cpp
+    gui/amateriallibrarybrowser.cpp \
+    Simulation/amaterialloader.cpp \
+    gui/DAWindowTools/amaterialloaderdialog.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -602,8 +603,9 @@ HEADERS  += common/CorrelationFilters.h \
     gui/GraphWindowTools/atemplateselectionrecord.h \
     modules/apmanddummy.h \
     modules/apmdummystructure.h \
-    Simulation/amateriallibrary.h \
-    gui/amateriallibrarybrowser.h
+    gui/amateriallibrarybrowser.h \
+    Simulation/amaterialloader.h \
+    gui/DAWindowTools/amaterialloaderdialog.h
 
 # --- SIM ---
 ants2_SIM {
@@ -838,6 +840,7 @@ INCLUDEPATH += gui/RasterWindow
 INCLUDEPATH += gui/ReconstructionWindowTools
 INCLUDEPATH += modules/lrf_v3/gui
 INCLUDEPATH += gui/GraphWindowTools
+INCLUDEPATH += gui/DAWindowTools
 }
 
 INCLUDEPATH += gui/MainWindowTools
@@ -964,5 +967,6 @@ FORMS += \
     gui/GraphWindowTools/alinemarkerfilldialog.ui \
     gui/GraphWindowTools/arootcolorselectordialog.ui \
     gui/GraphWindowTools/atemplateselectiondialog.ui \
-    gui/amateriallibrarybrowser.ui
+    gui/amateriallibrarybrowser.ui \
+    gui/DAWindowTools/amaterialloaderdialog.ui
 

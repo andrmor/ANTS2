@@ -124,15 +124,28 @@
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QPushButton" name="pbLoad">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
        <property name="text">
-        <string>Load selected material</string>
+        <string>Load material</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pbAdvancedLoad">
+       <property name="text">
+        <string>Advanced load</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="pbClose">
        <property name="text">
-        <string>Close window</string>
+        <string>Cancel</string>
        </property>
       </widget>
      </item>

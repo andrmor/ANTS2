@@ -1,12 +1,14 @@
-#include "amateriallibrary.h"
-//#include "afiletools.h"
+#include "amaterialloader.h"
 #include "ajsontools.h"
-#include "amessage.h"
 #include "amaterialparticlecolection.h"
+
+#include "amessage.h"
+#include "amateriallibrarybrowser.h"
+#include "amaterialloaderdialog.h"
+
 
 #include <QFileDialog>
 #include <QVector>
-
 #include <QDialog>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -15,13 +17,46 @@
 #include <QCheckBox>
 #include <QPushButton>
 
-AMaterialLibrary::AMaterialLibrary(AMaterialParticleCollection & MpCollection) :
+AMaterialLoader::AMaterialLoader(AMaterialParticleCollection & MpCollection) :
     MpCollection(MpCollection)
 {
 
 }
 
-QString AMaterialLibrary::LoadFile(const QString & fileName, QWidget * parentWidget)
+bool AMaterialLoader::LoadTmpMatFromGui(QWidget *parentWidget)
+{
+    AMaterialLibraryBrowser B(MpCollection, parentWidget);
+    int ret = B.exec();
+    if (ret == QDialog::Rejected) return false;
+
+    QString fileName = B.getFileName();
+    if (fileName.isEmpty()) return false;
+
+    QJsonObject MaterialJson;
+    QVector<QString> SuppressParticles;
+
+    if (B.isAdvancedLoadRequested())
+    {
+        AMaterialLoaderDialog D(fileName, MpCollection, parentWidget);
+        ret = D.exec();
+        if (ret == QDialog::Rejected) return false;
+
+        MaterialJson = D.getMaterialJson();
+        SuppressParticles = D.getSuppressParticles();
+    }
+    else
+    {
+        QJsonObject json;
+        LoadJsonFromFile(json, fileName);
+        MaterialJson = json["Material"].toObject();
+    }
+
+    MpCollection.tmpMaterial.readFromJson(MaterialJson, &MpCollection, SuppressParticles);
+    MpCollection.CopyTmpToMaterialCollection();
+    return true;
+}
+
+QString AMaterialLoader::LoadFile(const QString & fileName, QWidget * parentWidget)
 {
     QJsonObject json, js;
     bool bOK = LoadJsonFromFile(json, fileName);

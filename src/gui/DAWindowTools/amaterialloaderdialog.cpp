@@ -206,10 +206,77 @@ void AMaterialLoaderDialog::updatePropertiesGui()
         ui->lwProps->setItemWidget(item, wid);
     }
 
+    addInteractionItems(MaterialTo);
+
+
     ui->cbToggleAllProps->setVisible(iDifProps > 1);
     ui->labAllMatch->setVisible(iDifProps == 0);
     ui->labSelectProp->setVisible(iDifProps != 0);
     ui->lwProps->setVisible(iDifProps != 0);
+}
+
+int AMaterialLoaderDialog::addInteractionItems(QJsonObject & MaterialTo)
+{
+    qDebug() << "\nProcessing MaterialParticle records";
+    QJsonArray ArrMpFrom = MaterialJson["MatParticles"].toArray();
+    QJsonArray ArrMpTo   = MaterialTo  ["MatParticles"].toArray();
+    for (int iFrom = 0; iFrom < ArrMpFrom.size(); iFrom++)
+    {
+        QJsonObject jsonFrom = ArrMpFrom[iFrom].toObject();
+        QJsonObject jsonParticleFrom = jsonFrom["*Particle"].toObject();
+        AParticle ParticleFrom;
+        ParticleFrom.readFromJson(jsonParticleFrom);
+        qDebug() << "\nParticle" << ParticleFrom.ParticleName;
+
+        bool bFound = false;
+        QJsonObject jsonTo;
+        QJsonObject jsonParticleTo;
+        int iTo;
+        for (iTo = 0; iTo < ArrMpTo.size(); iTo++)
+        {
+            jsonTo = ArrMpTo[iTo].toObject();
+            jsonParticleTo = jsonTo["*Particle"].toObject();
+            AParticle ParticleTo;
+            ParticleTo.readFromJson(jsonParticleTo);
+
+            if (ParticleFrom == ParticleTo)
+            {
+                bFound = true;
+                break;
+            }
+        }
+
+        if (!bFound)
+        {
+            qDebug() << "Interaction data in target material not found for this particle";
+            continue;
+        }
+
+        qDebug() << "Interaction data exists in the target material";
+
+        //TODO: check if it is a particle which is disabled in particle control GUI
+
+        if (jsonFrom == jsonTo)
+        {
+            qDebug() << "Records are identical";
+            continue;
+        }
+
+        qDebug() << "--- Records are different ---";
+
+
+        /*
+        QListWidgetItem * item = new QListWidgetItem(ui->lwProps);
+        QWidget * wid = new QWidget();
+            QHBoxLayout * lay = new QHBoxLayout(wid);
+                QCheckBox * cb = new QCheckBox(key);
+                cb->setChecked(true);
+            lay->addWidget(cb);
+        item->setSizeHint(wid->sizeHint());
+        ui->lwProps->setItemWidget(item, wid);
+        */
+    }
+
 }
 
 int AMaterialLoaderDialog::getMatchValue(const QString & s1, const QString & s2) const

@@ -58,7 +58,7 @@ private:
     void updateLoadEnabled();
     void updatePropertiesGui();
     int  getMatchValue(const QString & s1, const QString & s2) const;
-
+    int  addInteractionItems(QJsonObject & MaterialTo);
 };
 
 #endif // AMATERIALLOADERDIALOG_H

@@ -94,7 +94,7 @@ public:
 
   void clear();
   void writeToJson (QJsonObject &json, AMaterialParticleCollection* MpCollection) const;  //does not save overrides!
-  bool readFromJson(QJsonObject &json, AMaterialParticleCollection* MpCollection, QVector<QString> SuppressParticles = QVector<QString>());
+  bool readFromJson(const QJsonObject &json, AMaterialParticleCollection* MpCollection, QVector<QString> SuppressParticles = QVector<QString>());
 
   const QString CheckMaterial(int iPart, const AMaterialParticleCollection *MpCollection) const;
 
@@ -136,6 +136,8 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
 
   bool isParticleOneOfSecondaries(int iPart) const;
   void prepareForParticleRemove(int iPart);
+
+  QVector<QString> getSecondaryParticles(AMaterialParticleCollection & MpCollection) const;
 
   QString NCrystal_Ncmat;
   double NCrystal_Dcutoff = 0;

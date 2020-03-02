@@ -42,7 +42,7 @@ bool AMaterialLoader::LoadTmpMatFromGui(QWidget *parentWidget)
         if (ret == QDialog::Rejected) return false;
 
         MaterialJson = D.getMaterialJson();
-        SuppressParticles = D.getSuppressParticles();
+        SuppressParticles = D.getSuppressedParticles();
     }
     else
     {

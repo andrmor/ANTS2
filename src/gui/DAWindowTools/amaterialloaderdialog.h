@@ -14,6 +14,18 @@ namespace Ui {
 class AMaterialLoaderDialog;
 }
 
+struct AParticleRecordForMerge
+{
+    QString     ParticleName;
+    bool        bChecked         = true;
+    bool        bForcedByNeutron = false;
+
+    QCheckBox * CheckBox         = nullptr;
+
+    AParticleRecordForMerge(const QString & name) : ParticleName(name) {}
+    AParticleRecordForMerge(){}
+};
+
 class AMaterialLoaderDialog : public QDialog
 {
     Q_OBJECT
@@ -22,8 +34,8 @@ public:
     explicit AMaterialLoaderDialog(const QString & fileName, AMaterialParticleCollection & MpCollection, QWidget * parentWidget = nullptr);
     ~AMaterialLoaderDialog();
 
-    const QVector<QString> getSuppressParticles() const {return SuppressedParticles;}
-    const QJsonObject      getMaterialJson() const      {return MaterialJson;}
+    const QVector<QString> getSuppressedParticles() const;
+    const QJsonObject      getMaterialJson() const {return MaterialJson;}
 
 private slots:
     void onCheckBoxClicked();
@@ -33,33 +45,31 @@ private slots:
     void on_leName_textChanged(const QString &arg1);
     void on_twMain_currentChanged(int index);
     void on_cbToggleAll_toggled(bool checked);
-
     void on_cbToggleAllProps_toggled(bool checked);
-
     void on_cobMaterial_activated(int index);
 
 private:
     AMaterialParticleCollection & MpCollection;
     Ui::AMaterialLoaderDialog   * ui;
 
-    bool bFileOK = true;
-    QJsonObject MaterialJson;
-    QString NameInFile;
-    QVector<QString> NewParticles;
     QStringList DefinedMaterials;
+    bool        bFileOK = true;
 
-    QVector<QString> SuppressedParticles;
+    QJsonObject MaterialJson;
+    QString     NameInFile;
 
-    QVector<QCheckBox*> cbVec;
+    QVector<AParticleRecordForMerge> NewParticles;
 
 private:
+    void generateParticleGui();
     void updateParticleGui();
     bool isNameAlreadyExists() const;
     void updateLoadEnabled();
     void updatePropertiesGui();
     int  getMatchValue(const QString & s1, const QString & s2) const;
     int  addInteractionItems(QJsonObject & MaterialTo);
-    void readSuppressedParticles();
+    bool isSuppressedParticle(const QString & ParticleName) const;
+    const QVector<QString> getForcedByNeutron() const;
 };
 
 #endif // AMATERIALLOADERDIALOG_H

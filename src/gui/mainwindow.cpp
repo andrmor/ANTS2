@@ -332,7 +332,8 @@ void MainWindow::closeEvent(QCloseEvent *)
    if (DAwindow)
      {
        qDebug() << "<-Deleting detector addon window";
-       delete DAwindow->parent();
+       //delete DAwindow->parent();
+       delete DAwindow;
        DAwindow = 0;
      }
    if (CheckUpWindow)

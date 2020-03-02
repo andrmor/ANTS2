@@ -395,7 +395,7 @@ void AMaterial::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCo
   if (!jParticleEntries.isEmpty()) json["MatParticles"] = jParticleEntries;
 }
 
-bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpCollection, QVector<QString> SuppressParticles)
+bool AMaterial::readFromJson(const QJsonObject &json, AMaterialParticleCollection *MpCollection, QVector<QString> SuppressParticles)
 {
   clear(); //clear all settings and set default properties
   //general data
@@ -898,6 +898,21 @@ void NeutralTerminatorStructure::prepareForParticleRemove(int iPart)
                 int& thisParticle = IsotopeRecords[ie].DecayScenarios[ir].GeneratedParticles[ig].ParticleId;
                 if (thisParticle > iPart) thisParticle--;
             }
+}
+
+QVector<QString> NeutralTerminatorStructure::getSecondaryParticles(AMaterialParticleCollection & MpCollection) const
+{
+    QVector<QString> vec;
+
+    if (Type == Absorption)
+    {
+        for (const ANeutronInteractionElement & rec :  IsotopeRecords)
+            for (const ADecayScenario & scen : rec.DecayScenarios)
+                for (const AAbsorptionGeneratedParticle & part : scen.GeneratedParticles)
+                    vec << MpCollection.getParticleName(part.ParticleId);
+    }
+
+   return vec;
 }
 
 double NeutralTerminatorStructure::getNCrystalCrossSectionBarns(double energy_keV, int threadIndex) const

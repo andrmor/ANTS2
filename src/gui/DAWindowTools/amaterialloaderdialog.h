@@ -22,7 +22,7 @@ public:
     explicit AMaterialLoaderDialog(const QString & fileName, AMaterialParticleCollection & MpCollection, QWidget * parentWidget = nullptr);
     ~AMaterialLoaderDialog();
 
-    const QVector<QString> getSuppressParticles() const {return SuppressParticles;}
+    const QVector<QString> getSuppressParticles() const {return SuppressedParticles;}
     const QJsonObject      getMaterialJson() const      {return MaterialJson;}
 
 private slots:
@@ -48,7 +48,7 @@ private:
     QVector<QString> NewParticles;
     QStringList DefinedMaterials;
 
-    QVector<QString> SuppressParticles;
+    QVector<QString> SuppressedParticles;
 
     QVector<QCheckBox*> cbVec;
 
@@ -59,6 +59,7 @@ private:
     void updatePropertiesGui();
     int  getMatchValue(const QString & s1, const QString & s2) const;
     int  addInteractionItems(QJsonObject & MaterialTo);
+    void readSuppressedParticles();
 };
 
 #endif // AMATERIALLOADERDIALOG_H

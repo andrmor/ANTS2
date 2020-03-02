@@ -87,6 +87,7 @@ void AMaterialLoaderDialog::updateParticleGui()
     for (const QString & name : NewParticles)
     {
         QCheckBox * cb = new QCheckBox(name);
+        connect(cb, &QCheckBox::clicked, this, &AMaterialLoaderDialog::updatePropertiesGui);
         cb->setChecked(true);
         cbVec << cb;
         lay->addWidget(cb);
@@ -112,11 +113,18 @@ void AMaterialLoaderDialog::on_pbDummt_clicked()
     //dummy
 }
 
-void AMaterialLoaderDialog::on_pbLoad_clicked()
+void AMaterialLoaderDialog::readSuppressedParticles()
 {
+    //TODO: check particles enforced by neutron capture reaction
+
     for (int i = 0; i < cbVec.size(); i++)
         if (!cbVec.at(i)->isChecked())
-            SuppressParticles << NewParticles.at(i);
+            SuppressedParticles << NewParticles.at(i);
+}
+
+void AMaterialLoaderDialog::on_pbLoad_clicked()
+{
+    readSuppressedParticles();
 
     if (ui->twMain->currentIndex() == 0)
     {
@@ -154,6 +162,7 @@ void AMaterialLoaderDialog::on_twMain_currentChanged(int)
 void AMaterialLoaderDialog::on_cbToggleAll_toggled(bool checked)
 {
     for (QCheckBox * cb : cbVec) cb->setChecked(checked);
+    updatePropertiesGui();
 }
 
 void AMaterialLoaderDialog::updatePropertiesGui()
@@ -218,8 +227,12 @@ void AMaterialLoaderDialog::updatePropertiesGui()
 int AMaterialLoaderDialog::addInteractionItems(QJsonObject & MaterialTo)
 {
     qDebug() << "\nProcessing MaterialParticle records";
+
+    readSuppressedParticles();
+
     QJsonArray ArrMpFrom = MaterialJson["MatParticles"].toArray();
     QJsonArray ArrMpTo   = MaterialTo  ["MatParticles"].toArray();
+
     for (int iFrom = 0; iFrom < ArrMpFrom.size(); iFrom++)
     {
         QJsonObject jsonFrom = ArrMpFrom[iFrom].toObject();
@@ -227,6 +240,12 @@ int AMaterialLoaderDialog::addInteractionItems(QJsonObject & MaterialTo)
         AParticle ParticleFrom;
         ParticleFrom.readFromJson(jsonParticleFrom);
         qDebug() << "\nParticle" << ParticleFrom.ParticleName;
+
+        if (SuppressedParticles.contains(ParticleFrom.ParticleName))
+        {
+            qDebug() << "This particle will not be imported";
+            continue;
+        }
 
         bool bFound = false;
         QJsonObject jsonTo;
@@ -254,7 +273,6 @@ int AMaterialLoaderDialog::addInteractionItems(QJsonObject & MaterialTo)
 
         qDebug() << "Interaction data exists in the target material";
 
-        //TODO: check if it is a particle which is disabled in particle control GUI
 
         if (jsonFrom == jsonTo)
         {

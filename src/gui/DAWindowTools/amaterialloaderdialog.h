@@ -81,7 +81,7 @@ private:
     void updateLoadEnabled();
     void updateMaterialPropertiesGui();
     int  getMatchValue(const QString & s1, const QString & s2) const;
-    int  addInteractionItems(QJsonObject & MaterialTo);
+    void addInteractionItems(QJsonObject & MaterialTo, int & propCounter);
     bool isSuppressedParticle(const QString & ParticleName) const;
     const QVector<QString> getForcedByNeutron() const;
 };

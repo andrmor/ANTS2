@@ -207,16 +207,14 @@ void AMaterialLoaderDialog::updateMaterialPropertiesGui()
     QJsonObject MaterialTo;
     matTo->writeToJson(MaterialTo, &MpCollection);
 
-    qDebug() << "Merging" << NameInFile << " to " << matTo->name;
+    //qDebug() << "Merging" << NameInFile << " to " << matTo->name;
     QSet<QString> Ignore;
-    Ignore << "*MaterialName" << "*Tags" << "Comments"
-           << "TGeoP1" << "TGeoP2" << "TGeoP3"
-           << "MatParticles";
+    Ignore << "*MaterialName" << "*Tags" << "Comments" << "TGeoP1" << "TGeoP2" << "TGeoP3" << "MatParticles";
 
     int iDifProps = 0;
     foreach(const QString & key, MaterialJson.keys())
     {
-        qDebug() << "\nKey = " << key;
+        //qDebug() << "\nKey = " << key;
         if (Ignore.contains(key)) continue;
 
         QJsonValue valueFrom = MaterialJson.value(key);
@@ -235,8 +233,7 @@ void AMaterialLoaderDialog::updateMaterialPropertiesGui()
         ui->lwProps->setItemWidget(item, wid);
     }
 
-    addInteractionItems(MaterialTo);
-
+    addInteractionItems(MaterialTo, iDifProps);
 
     ui->cbToggleAllProps->setVisible(iDifProps > 1);
     ui->labAllMatch->setVisible(iDifProps == 0);
@@ -244,7 +241,7 @@ void AMaterialLoaderDialog::updateMaterialPropertiesGui()
     ui->lwProps->setVisible(iDifProps != 0);
 }
 
-int AMaterialLoaderDialog::addInteractionItems(QJsonObject & MaterialTo)
+void AMaterialLoaderDialog::addInteractionItems(QJsonObject & MaterialTo, int & propCounter)
 {
     qDebug() << "\nProcessing MaterialParticle records";
 
@@ -261,7 +258,7 @@ int AMaterialLoaderDialog::addInteractionItems(QJsonObject & MaterialTo)
 
         if (isSuppressedParticle(ParticleFrom.ParticleName))
         {
-            qDebug() << "This particle will not be imported";
+            qDebug() << "This particle will not be imported, skipping";
             continue;
         }
 
@@ -283,34 +280,27 @@ int AMaterialLoaderDialog::addInteractionItems(QJsonObject & MaterialTo)
             }
         }
 
-        if (!bFound)
+        if (bFound)
         {
-            qDebug() << "Interaction data in target material not found for this particle";
-            continue;
+            if (jsonFrom == jsonTo)
+            {
+                qDebug() << "Records are identical, skipping";
+                continue;
+            }
+
+            qDebug() << "Records are different, adding";
         }
+        else qDebug() << "Interaction data in target material not found for this particle, adding";
 
-        qDebug() << "Interaction data exists in the target material";
-
-
-        if (jsonFrom == jsonTo)
-        {
-            qDebug() << "Records are identical";
-            continue;
-        }
-
-        qDebug() << "--- Records are different ---";
-
-
-        /*
+        propCounter++;
         QListWidgetItem * item = new QListWidgetItem(ui->lwProps);
         QWidget * wid = new QWidget();
             QHBoxLayout * lay = new QHBoxLayout(wid);
-                QCheckBox * cb = new QCheckBox(key);
+                QCheckBox * cb = new QCheckBox("Interaction, " + ParticleFrom.ParticleName);
                 cb->setChecked(true);
             lay->addWidget(cb);
         item->setSizeHint(wid->sizeHint());
         ui->lwProps->setItemWidget(item, wid);
-        */
     }
 
 }

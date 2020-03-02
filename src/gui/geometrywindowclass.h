@@ -69,6 +69,7 @@ public:
 
 protected:
     bool event(QEvent *event);
+    void closeEvent(QCloseEvent * event) override;
 
 public slots:
     void on_pbShowGeometry_clicked();

@@ -378,6 +378,16 @@ bool GeometryWindowClass::event(QEvent *event)
   return AGuiWindow::event(event);
 }
 
+#include <QCloseEvent>
+void GeometryWindowClass::closeEvent(QCloseEvent * event)
+{
+    //qDebug() << "Geometry window close event";
+
+    //fix for bug with root reported for Qt 5.14: close then restore results in resize of the canvas to huge size, and nothing is shown on the widow
+    event->ignore();
+    hide();
+}
+
 #include "anetworkmodule.h"
 void GeometryWindowClass::ShowPMnumbers()
 {

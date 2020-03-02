@@ -251,7 +251,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QCheckBox" name="cbToggleAll">
+         <widget class="QCheckBox" name="cbToggleAllParticles">
           <property name="text">
            <string>Toggle all</string>
           </property>
@@ -270,18 +270,19 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>203</width>
-             <height>267</height>
+             <width>205</width>
+             <height>263</height>
             </rect>
            </property>
           </widget>
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_5">
+         <widget class="QLabel" name="labForceByNeutron">
           <property name="text">
-           <string>Neutron enforce load particles
-defined in capture reactions!</string>
+           <string>Some particles have to be
+loaded since they appear in 
+neutron capture reactions</string>
           </property>
          </widget>
         </item>

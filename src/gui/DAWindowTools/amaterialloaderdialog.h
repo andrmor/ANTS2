@@ -14,16 +14,31 @@ namespace Ui {
 class AMaterialLoaderDialog;
 }
 
-struct AParticleRecordForMerge
+class AParticleRecordForMerge
 {
-    QString     ParticleName;
-    bool        bChecked         = true;
-    bool        bForcedByNeutron = false;
-
-    QCheckBox * CheckBox         = nullptr;
-
-    AParticleRecordForMerge(const QString & name) : ParticleName(name) {}
+public:
+    AParticleRecordForMerge(const QString & name) : ParticleName(name){}
     AParticleRecordForMerge(){}
+
+    QString ParticleName;
+
+    void connectCheckBox(QCheckBox * cb);
+
+    void setChecked(bool flag);
+    void setForced(bool flag);
+
+    bool isChecked() const {return bChecked;}
+    bool isForced() const  {return bForcedByNeutron;}
+
+private:
+    bool bChecked         = true;
+    bool bForcedByNeutron = false;
+
+    QCheckBox * CheckBox  = nullptr;
+
+private:
+    void updateIndication();
+
 };
 
 class AMaterialLoaderDialog : public QDialog
@@ -38,13 +53,12 @@ public:
     const QJsonObject      getMaterialJson() const {return MaterialJson;}
 
 private slots:
-    void onCheckBoxClicked();
     void on_pbDummt_clicked();
     void on_pbLoad_clicked();
     void on_pbCancel_clicked();
     void on_leName_textChanged(const QString &arg1);
     void on_twMain_currentChanged(int index);
-    void on_cbToggleAll_toggled(bool checked);
+    void on_cbToggleAllParticles_clicked(bool checked);
     void on_cbToggleAllProps_toggled(bool checked);
     void on_cobMaterial_activated(int index);
 
@@ -65,7 +79,7 @@ private:
     void updateParticleGui();
     bool isNameAlreadyExists() const;
     void updateLoadEnabled();
-    void updatePropertiesGui();
+    void updateMaterialPropertiesGui();
     int  getMatchValue(const QString & s1, const QString & s2) const;
     int  addInteractionItems(QJsonObject & MaterialTo);
     bool isSuppressedParticle(const QString & ParticleName) const;

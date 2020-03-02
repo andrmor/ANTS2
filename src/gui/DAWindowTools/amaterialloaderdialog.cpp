@@ -14,8 +14,8 @@ AMaterialLoaderDialog::AMaterialLoaderDialog(const QString & fileName, AMaterial
     ui(new Ui::AMaterialLoaderDialog)
 {
     ui->setupUi(this);
-
     ui->pbDummt->setVisible(false);
+    ui->labForceByNeutron->setVisible(false);
 
     DefinedMaterials = MpCollection.getListOfMaterialNames();
     ui->cobMaterial->addItems(DefinedMaterials);
@@ -51,8 +51,8 @@ AMaterialLoaderDialog::AMaterialLoaderDialog(const QString & fileName, AMaterial
         AParticleRecordForMerge pr(str);
         NewParticles << pr;
     }
-
     generateParticleGui();
+    updateParticleGui();
 
     if (DefinedMaterials.size() != 0)
     {
@@ -69,7 +69,7 @@ AMaterialLoaderDialog::AMaterialLoaderDialog(const QString & fileName, AMaterial
         }
         ui->cobMaterial->setCurrentIndex(iBest);
     }
-    updatePropertiesGui();
+    updateMaterialPropertiesGui();
 }
 
 AMaterialLoaderDialog::~AMaterialLoaderDialog()
@@ -82,35 +82,30 @@ const QVector<QString> AMaterialLoaderDialog::getSuppressedParticles() const
     QVector<QString> SuppressedParticles;
 
     for (int i = 0; i < NewParticles.size(); i++)
-        if (!NewParticles.at(i).bChecked)
+        if (!NewParticles.at(i).isChecked())
             SuppressedParticles << NewParticles.at(i).ParticleName;
 
     return SuppressedParticles;
 }
 
-void AMaterialLoaderDialog::onCheckBoxClicked()
-{
-    ui->cbToggleAll->blockSignals(true);
-    ui->cbToggleAll->setChecked(false);
-    ui->cbToggleAll->blockSignals(false);
-}
-
 void AMaterialLoaderDialog::generateParticleGui()
 {
-    ui->cbToggleAll->setVisible(NewParticles.size() > 1);
+    ui->cbToggleAllParticles->setVisible(NewParticles.size() > 1);
 
     QWidget * w = new QWidget();
     QVBoxLayout * lay = new QVBoxLayout(w);
     for (AParticleRecordForMerge & rec : NewParticles)
     {
-        rec.CheckBox = new QCheckBox(rec.ParticleName);
-            rec.CheckBox->setChecked(rec.bChecked);
-            connect(rec.CheckBox, &QCheckBox::clicked, [this, &rec](bool checked)
+        QCheckBox * CheckBox = new QCheckBox(rec.ParticleName);
+        rec.connectCheckBox(CheckBox);
+            connect(CheckBox, &QCheckBox::clicked, [this, &rec](bool checked)
             {
-                rec.bChecked = checked;
-                updatePropertiesGui();
+                rec.setChecked(checked);
+                if (rec.ParticleName == "neutron") updateParticleGui();
+                updateMaterialPropertiesGui();
+                ui->cbToggleAllParticles->setChecked(false);
             });
-        lay->addWidget(rec.CheckBox);
+        lay->addWidget(CheckBox);
     }
     lay->addStretch();
     ui->scrollArea->setWidget(w);
@@ -118,16 +113,12 @@ void AMaterialLoaderDialog::generateParticleGui()
 
 void AMaterialLoaderDialog::updateParticleGui()
 {
-    QVector<QString> ParticlesForcedByNeutron = getForcedByNeutron();
+    const QVector<QString> ParticlesForcedByNeutron = getForcedByNeutron();
 
     for (AParticleRecordForMerge & pr : NewParticles)
-    {
-        pr.bForcedByNeutron = ParticlesForcedByNeutron.contains(pr.ParticleName);
-        if (pr.bForcedByNeutron) pr.bChecked = true;
+        pr.setForced( ParticlesForcedByNeutron.contains(pr.ParticleName) );
 
-        pr.CheckBox->setChecked(pr.bChecked);
-        pr.CheckBox->setEnabled(!pr.bForcedByNeutron);
-    }
+    ui->labForceByNeutron->setVisible( !ParticlesForcedByNeutron.isEmpty() );
 }
 
 bool AMaterialLoaderDialog::isNameAlreadyExists() const
@@ -182,18 +173,19 @@ void AMaterialLoaderDialog::on_twMain_currentChanged(int)
     updateLoadEnabled();
 }
 
-void AMaterialLoaderDialog::on_cbToggleAll_toggled(bool checked)
+void AMaterialLoaderDialog::on_cbToggleAllParticles_clicked(bool checked)
 {
     for (AParticleRecordForMerge & rec : NewParticles)
-        if (!rec.bForcedByNeutron)
-        {
-            rec.bChecked = checked;
-            rec.CheckBox->setChecked(checked);
-        }
-    updatePropertiesGui();
+    {
+        if (!checked) rec.setForced(false);
+        rec.setChecked(checked);
+    }
+
+    updateParticleGui();
+    updateMaterialPropertiesGui();
 }
 
-void AMaterialLoaderDialog::updatePropertiesGui()
+void AMaterialLoaderDialog::updateMaterialPropertiesGui()
 {
     ui->lwProps->clear();
 
@@ -327,7 +319,7 @@ bool AMaterialLoaderDialog::isSuppressedParticle(const QString & ParticleName) c
 {
     for (const AParticleRecordForMerge & rec : NewParticles)
         if (rec.ParticleName == ParticleName)
-            return !rec.bChecked;
+            return !rec.isChecked();
     return false;
 }
 
@@ -373,5 +365,34 @@ void AMaterialLoaderDialog::on_cbToggleAllProps_toggled(bool checked)
 
 void AMaterialLoaderDialog::on_cobMaterial_activated(int)
 {
-    updatePropertiesGui();
+    updateMaterialPropertiesGui();
+}
+
+void AParticleRecordForMerge::connectCheckBox(QCheckBox * cb)
+{
+    CheckBox = cb;
+    updateIndication();
+}
+
+void AParticleRecordForMerge::setChecked(bool flag)
+{
+    if (bForcedByNeutron) bChecked = true;
+    else                  bChecked = flag;
+    updateIndication();
+}
+
+void AParticleRecordForMerge::setForced(bool flag)
+{
+    bForcedByNeutron = flag;
+    if (flag) bChecked = true;
+    updateIndication();
+}
+
+void AParticleRecordForMerge::updateIndication()
+{
+    if (CheckBox)
+    {
+        CheckBox->setChecked(bChecked);
+        CheckBox->setEnabled(!bForcedByNeutron);
+    }
 }

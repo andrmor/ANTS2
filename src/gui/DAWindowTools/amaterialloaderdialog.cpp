@@ -155,9 +155,6 @@ void AMaterialLoaderDialog::on_pbLoad_clicked()
     }
     else
     {
-        //message("Not implemented yet!", this);
-        //return;
-
         // target mat properties as base -> replacing only those which are selected by the user
         for (APropertyRecordForMerge * rec : PropertyRecords)
         {
@@ -217,8 +214,6 @@ void AMaterialLoaderDialog::on_cbToggleAllParticles_clicked(bool checked)
         if (!checked) rec->setForced(false);
         rec->setChecked(checked);
     }
-
-    //updateParticleGui();
 }
 
 void AMaterialLoaderDialog::generateMatProperties()
@@ -288,7 +283,6 @@ void AMaterialLoaderDialog::generateInteractionItems()
         QJsonObject jsonParticleFrom = jsonFrom["*Particle"].toObject();
         AParticle ParticleFrom;
         ParticleFrom.readFromJson(jsonParticleFrom);
-        //qDebug() << "\nParticle" << ParticleFrom.ParticleName;
 
         bool bFoundInTargetMat = false;
         QJsonObject jsonTo;
@@ -362,10 +356,7 @@ const QVector<QString> AMaterialLoaderDialog::getForcedByNeutron() const
     QStringList DefParticles = FakeCollection.getListOfParticleNames();
     int iNeutron = DefParticles.indexOf("neutron");
     if (iNeutron == -1)
-    {
-        //qDebug() << "Neutron is not found";
-        return VecParticles;
-    }
+        return VecParticles; //neutron not present
 
     const MatParticleStructure & neutron = Mat.MatParticle.at(iNeutron);
 
@@ -380,7 +371,6 @@ AParticleRecordForMerge * AMaterialLoaderDialog::findParticleRecord(const QStrin
     for (AParticleRecordForMerge * rec : ParticleRecords)
         if (particleName == rec->ParticleName)
             return rec;
-
     return nullptr;
 }
 

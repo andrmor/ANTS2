@@ -6,6 +6,7 @@
 #include <QString>
 #include <QStringList>
 #include <QJsonObject>
+#include <QJsonArray>
 
 class AMaterialParticleCollection;
 class QCheckBox;
@@ -38,7 +39,32 @@ private:
 
 private:
     void updateIndication();
+};
 
+class APropertyRecordForMerge
+{
+public:
+    APropertyRecordForMerge(const QString & key, const QJsonValue & value) : key(key), value(value) {}
+    APropertyRecordForMerge(){}
+
+    QString    key;
+    QJsonValue value;
+
+    void setChecked(bool flag);
+    bool isChecked() const {return bChecked;}
+
+    void setDisabled(bool flag);
+    bool isDisabled() const {return bDisabled;}
+
+    void connectGuiResources(QCheckBox * cb);
+
+private:
+    bool bChecked        = true;
+    bool bDisabled       = false;
+    QCheckBox * CheckBox = nullptr;
+
+private:
+    void updateIndication();
 };
 
 class AMaterialLoaderDialog : public QDialog
@@ -50,7 +76,7 @@ public:
     ~AMaterialLoaderDialog();
 
     const QVector<QString> getSuppressedParticles() const;
-    const QJsonObject      getMaterialJson() const {return MaterialJson;}
+    const QJsonObject      getMaterialJson() const {return MaterialJsonFrom;}
 
 private slots:
     void on_pbDummt_clicked();
@@ -59,7 +85,7 @@ private slots:
     void on_leName_textChanged(const QString &arg1);
     void on_twMain_currentChanged(int index);
     void on_cbToggleAllParticles_clicked(bool checked);
-    void on_cbToggleAllProps_toggled(bool checked);
+    void on_cbToggleAllProps_clicked(bool checked);
     void on_cobMaterial_activated(int index);
 
 private:
@@ -69,19 +95,25 @@ private:
     QStringList DefinedMaterials;
     bool        bFileOK = true;
 
-    QJsonObject MaterialJson;
+    QJsonObject MaterialJsonFrom;
+    QJsonObject MaterialJsonTarget;
     QString     NameInFile;
 
-    QVector<AParticleRecordForMerge> NewParticles;
+    QVector<AParticleRecordForMerge> ParticleRecords;
+    QVector<APropertyRecordForMerge> PropertyRecords;
+    QVector<APropertyRecordForMerge> MatParticleRecords;
 
 private:
     void generateParticleGui();
     void updateParticleGui();
+
+    void generateMatProperties();
+    void generateInteractionItems();
+    void updateMatPropertiesGui();
+
     bool isNameAlreadyExists() const;
     void updateLoadEnabled();
-    void updateMaterialPropertiesGui();
     int  getMatchValue(const QString & s1, const QString & s2) const;
-    void addInteractionItems(QJsonObject & MaterialTo, int & propCounter);
     bool isSuppressedParticle(const QString & ParticleName) const;
     const QVector<QString> getForcedByNeutron() const;
 };

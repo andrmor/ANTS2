@@ -40,16 +40,16 @@ AMaterialLoaderDialog::AMaterialLoaderDialog(const QString & fileName, AMaterial
     }
     ui->labError->setVisible(false);
 
-    MaterialJson = json["Material"].toObject();
-    parseJson(MaterialJson, "*MaterialName", NameInFile);
+    MaterialJsonFrom = json["Material"].toObject();
+    parseJson(MaterialJsonFrom, "*MaterialName", NameInFile);
     ui->leMaterialNameInFile->setText(NameInFile);
     ui->leName->setText(NameInFile);
 
-    const QVector<QString> UndefinedParticles = MpCollection.getUndefinedParticles(MaterialJson);
+    const QVector<QString> UndefinedParticles = MpCollection.getUndefinedParticles(MaterialJsonFrom);
     for (const QString & str : UndefinedParticles)
     {
         AParticleRecordForMerge pr(str);
-        NewParticles << pr;
+        ParticleRecords << pr;
     }
     generateParticleGui();
     updateParticleGui();
@@ -69,7 +69,7 @@ AMaterialLoaderDialog::AMaterialLoaderDialog(const QString & fileName, AMaterial
         }
         ui->cobMaterial->setCurrentIndex(iBest);
     }
-    updateMaterialPropertiesGui();
+    generateMatProperties();
 }
 
 AMaterialLoaderDialog::~AMaterialLoaderDialog()
@@ -81,20 +81,20 @@ const QVector<QString> AMaterialLoaderDialog::getSuppressedParticles() const
 {
     QVector<QString> SuppressedParticles;
 
-    for (int i = 0; i < NewParticles.size(); i++)
-        if (!NewParticles.at(i).isChecked())
-            SuppressedParticles << NewParticles.at(i).ParticleName;
+    for (int i = 0; i < ParticleRecords.size(); i++)
+        if (!ParticleRecords.at(i).isChecked())
+            SuppressedParticles << ParticleRecords.at(i).ParticleName;
 
     return SuppressedParticles;
 }
 
 void AMaterialLoaderDialog::generateParticleGui()
 {
-    ui->cbToggleAllParticles->setVisible(NewParticles.size() > 1);
+    ui->cbToggleAllParticles->setVisible(ParticleRecords.size() > 1);
 
     QWidget * w = new QWidget();
     QVBoxLayout * lay = new QVBoxLayout(w);
-    for (AParticleRecordForMerge & rec : NewParticles)
+    for (AParticleRecordForMerge & rec : ParticleRecords)
     {
         QCheckBox * CheckBox = new QCheckBox(rec.ParticleName);
         rec.connectCheckBox(CheckBox);
@@ -102,7 +102,7 @@ void AMaterialLoaderDialog::generateParticleGui()
             {
                 rec.setChecked(checked);
                 if (rec.ParticleName == "neutron") updateParticleGui();
-                updateMaterialPropertiesGui();
+                updateMatPropertiesGui();
                 ui->cbToggleAllParticles->setChecked(false);
             });
         lay->addWidget(CheckBox);
@@ -115,7 +115,7 @@ void AMaterialLoaderDialog::updateParticleGui()
 {
     const QVector<QString> ParticlesForcedByNeutron = getForcedByNeutron();
 
-    for (AParticleRecordForMerge & pr : NewParticles)
+    for (AParticleRecordForMerge & pr : ParticleRecords)
         pr.setForced( ParticlesForcedByNeutron.contains(pr.ParticleName) );
 
     ui->labForceByNeutron->setVisible( !ParticlesForcedByNeutron.isEmpty() );
@@ -147,12 +147,45 @@ void AMaterialLoaderDialog::on_pbLoad_clicked()
             message("Provide a unique name!", this);
             return;
         }
-        MaterialJson["*MaterialName"] = ui->leName->text();
+        MaterialJsonFrom["*MaterialName"] = ui->leName->text();
     }
     else
     {
-        message("Not implemented yet!", this);
-        return;
+        //message("Not implemented yet!", this);
+        //return;
+
+        // target mat properties as base -> replacing only those which are selected by the user
+        for (APropertyRecordForMerge & rec : PropertyRecords)
+        {
+            if (!rec.isChecked()) continue;
+            MaterialJsonTarget[rec.key] = rec.value;
+        }
+        //same with MatPartiles, using QJsonObject to replace selected
+        QJsonObject TmpMatParticlesJson;
+        QJsonArray  arr = MaterialJsonTarget["MatParticles"].toArray();
+        for (int i = 0; i < arr.size(); i++)
+        {
+            QJsonObject json = arr[i].toObject();
+            QJsonObject jsonParticle = json["*Particle"].toObject();
+            AParticle ParticleFrom;
+            ParticleFrom.readFromJson(jsonParticle);
+            TmpMatParticlesJson[ParticleFrom.ParticleName] = json;
+        }
+        //now override selected MatParticle properties
+        for (APropertyRecordForMerge & rec : MatParticleRecords)
+        {
+            if (!rec.isChecked()) continue;
+            TmpMatParticlesJson[rec.key] = rec.value;
+        }
+        //finally back to QJsonArray
+        QJsonArray ArrMP;
+        foreach (const QString & key, TmpMatParticlesJson.keys())
+            ArrMP.append(TmpMatParticlesJson.value(key));
+
+        MaterialJsonTarget["MatParticles"] = ArrMP;
+
+        //MaterialJsonFrom will be returned to the loader
+        MaterialJsonFrom = MaterialJsonTarget;
     }
     accept();
 }
@@ -175,78 +208,79 @@ void AMaterialLoaderDialog::on_twMain_currentChanged(int)
 
 void AMaterialLoaderDialog::on_cbToggleAllParticles_clicked(bool checked)
 {
-    for (AParticleRecordForMerge & rec : NewParticles)
+    for (AParticleRecordForMerge & rec : ParticleRecords)
     {
         if (!checked) rec.setForced(false);
         rec.setChecked(checked);
     }
 
     updateParticleGui();
-    updateMaterialPropertiesGui();
+    updateMatPropertiesGui();
 }
 
-void AMaterialLoaderDialog::updateMaterialPropertiesGui()
+void AMaterialLoaderDialog::generateMatProperties()
 {
     ui->lwProps->clear();
-
-    int numMat = DefinedMaterials.size();
-    ui->tabMerge->setEnabled(numMat > 0);
-    if (numMat == 0) return;
+    PropertyRecords.clear();
+    MatParticleRecords.clear();
 
     int iMat = ui->cobMaterial->currentIndex();
+    int numMat = DefinedMaterials.size();
     if (iMat < 0 || iMat >= numMat)
     {
         ui->labError->setText("Corrupted material record");
         ui->labError->setVisible(true);
+        ui->tabMerge->setEnabled(false);
         return;
     }
-    ui->labError->setVisible(false);
 
     const AMaterial * matTo = MpCollection[iMat];
+    matTo->writeToJson(MaterialJsonTarget, &MpCollection);
 
-    QJsonObject MaterialTo;
-    matTo->writeToJson(MaterialTo, &MpCollection);
-
-    //qDebug() << "Merging" << NameInFile << " to " << matTo->name;
     QSet<QString> Ignore;
     Ignore << "*MaterialName" << "*Tags" << "Comments" << "TGeoP1" << "TGeoP2" << "TGeoP3" << "MatParticles";
-
-    int iDifProps = 0;
-    foreach(const QString & key, MaterialJson.keys())
+    foreach (const QString & key, MaterialJsonFrom.keys())
     {
-        //qDebug() << "\nKey = " << key;
         if (Ignore.contains(key)) continue;
 
-        QJsonValue valueFrom = MaterialJson.value(key);
-        QJsonValue valueTo   = MaterialTo.value(key);
+        QJsonValue valueFrom = MaterialJsonFrom.value(key);
+        QJsonValue valueTo   = MaterialJsonTarget.value(key);
         if (valueFrom == valueTo) continue;
 
-        iDifProps++;
-        QListWidgetItem * item = new QListWidgetItem(ui->lwProps);
+        APropertyRecordForMerge rec(key, valueFrom);
 
+        QListWidgetItem * item = new QListWidgetItem(ui->lwProps);
         QWidget * wid = new QWidget();
             QHBoxLayout * lay = new QHBoxLayout(wid);
                 QCheckBox * cb = new QCheckBox(key);
-                cb->setChecked(true);
+                connect(cb, &QCheckBox::clicked, [this, &rec](bool flag)
+                {
+                    rec.setChecked(flag);
+                    ui->cbToggleAllProps->setChecked(false);
+                });
+                rec.connectGuiResources(cb);
             lay->addWidget(cb);
         item->setSizeHint(wid->sizeHint());
         ui->lwProps->setItemWidget(item, wid);
+
+        PropertyRecords << rec;
     }
 
-    addInteractionItems(MaterialTo, iDifProps);
+    generateInteractionItems();
 
+    int iDifProps = PropertyRecords.size() + MatParticleRecords.size();
     ui->cbToggleAllProps->setVisible(iDifProps > 1);
     ui->labAllMatch->setVisible(iDifProps == 0);
     ui->labSelectProp->setVisible(iDifProps != 0);
     ui->lwProps->setVisible(iDifProps != 0);
+
+    updateMatPropertiesGui();
 }
 
-void AMaterialLoaderDialog::addInteractionItems(QJsonObject & MaterialTo, int & propCounter)
+void AMaterialLoaderDialog::generateInteractionItems()
 {
-    qDebug() << "\nProcessing MaterialParticle records";
-
-    QJsonArray ArrMpFrom = MaterialJson["MatParticles"].toArray();
-    QJsonArray ArrMpTo   = MaterialTo  ["MatParticles"].toArray();
+    QJsonArray ArrMpFrom = MaterialJsonFrom["MatParticles"].toArray();
+    QJsonArray ArrMpTo   = MaterialJsonTarget["MatParticles"].toArray();
 
     for (int iFrom = 0; iFrom < ArrMpFrom.size(); iFrom++)
     {
@@ -255,6 +289,7 @@ void AMaterialLoaderDialog::addInteractionItems(QJsonObject & MaterialTo, int & 
         AParticle ParticleFrom;
         ParticleFrom.readFromJson(jsonParticleFrom);
         qDebug() << "\nParticle" << ParticleFrom.ParticleName;
+
 
         if (isSuppressedParticle(ParticleFrom.ParticleName))
         {
@@ -287,27 +322,39 @@ void AMaterialLoaderDialog::addInteractionItems(QJsonObject & MaterialTo, int & 
                 qDebug() << "Records are identical, skipping";
                 continue;
             }
-
             qDebug() << "Records are different, adding";
         }
         else qDebug() << "Interaction data in target material not found for this particle, adding";
 
-        propCounter++;
+        APropertyRecordForMerge rec(ParticleFrom.ParticleName, jsonFrom);
+
         QListWidgetItem * item = new QListWidgetItem(ui->lwProps);
         QWidget * wid = new QWidget();
             QHBoxLayout * lay = new QHBoxLayout(wid);
-                QCheckBox * cb = new QCheckBox("Interaction, " + ParticleFrom.ParticleName);
-                cb->setChecked(true);
+                QCheckBox * cb = new QCheckBox("Interaction properties for " + ParticleFrom.ParticleName);
+                rec.connectGuiResources(cb);
+                connect(cb, &QCheckBox::clicked, [this, &rec](bool flag)
+                {
+                    rec.setChecked(flag);
+                    ui->cbToggleAllProps->setChecked(false);
+                });
             lay->addWidget(cb);
         item->setSizeHint(wid->sizeHint());
         ui->lwProps->setItemWidget(item, wid);
-    }
 
+        MatParticleRecords << rec;
+    }
+}
+
+void AMaterialLoaderDialog::updateMatPropertiesGui()
+{
+    for (APropertyRecordForMerge & rec : MatParticleRecords)
+        rec.setDisabled( isSuppressedParticle(rec.key) );
 }
 
 bool AMaterialLoaderDialog::isSuppressedParticle(const QString & ParticleName) const
 {
-    for (const AParticleRecordForMerge & rec : NewParticles)
+    for (const AParticleRecordForMerge & rec : ParticleRecords)
         if (rec.ParticleName == ParticleName)
             return !rec.isChecked();
     return false;
@@ -319,7 +366,7 @@ const QVector<QString> AMaterialLoaderDialog::getForcedByNeutron() const
 
     AMaterialParticleCollection FakeCollection;
     AMaterial Mat;
-    Mat.readFromJson(MaterialJson, &FakeCollection, getSuppressedParticles());
+    Mat.readFromJson(MaterialJsonFrom, &FakeCollection, getSuppressedParticles());
 
     QStringList DefParticles = FakeCollection.getListOfParticleNames();
     int iNeutron = DefParticles.indexOf("neutron");
@@ -348,14 +395,15 @@ int AMaterialLoaderDialog::getMatchValue(const QString & s1, const QString & s2)
     return imatch;
 }
 
-void AMaterialLoaderDialog::on_cbToggleAllProps_toggled(bool checked)
+void AMaterialLoaderDialog::on_cbToggleAllProps_clicked(bool checked)
 {
-
+    for (APropertyRecordForMerge & rec : PropertyRecords)
+        rec.setChecked(checked);
 }
 
 void AMaterialLoaderDialog::on_cobMaterial_activated(int)
 {
-    updateMaterialPropertiesGui();
+    generateMatProperties();
 }
 
 void AParticleRecordForMerge::connectCheckBox(QCheckBox * cb)
@@ -384,5 +432,33 @@ void AParticleRecordForMerge::updateIndication()
     {
         CheckBox->setChecked(bChecked);
         CheckBox->setEnabled(!bForcedByNeutron);
+    }
+}
+
+void APropertyRecordForMerge::setChecked(bool flag)
+{
+    bChecked = flag;
+    updateIndication();
+}
+
+void APropertyRecordForMerge::setDisabled(bool flag)
+{
+    bDisabled = flag;
+    if (flag) bChecked = false;
+    updateIndication();
+}
+
+void APropertyRecordForMerge::connectGuiResources(QCheckBox *cb)
+{
+    CheckBox = cb;
+    updateIndication();
+}
+
+void APropertyRecordForMerge::updateIndication()
+{
+    if (CheckBox)
+    {
+        CheckBox->setChecked(bChecked);
+        CheckBox->setDisabled(bDisabled);
     }
 }

@@ -221,7 +221,7 @@ void AMaterialLoaderDialog::on_cbToggleAllParticles_clicked(bool checked)
 
 void AMaterialLoaderDialog::generateMatProperties()
 {
-    //ui->lwProps->clear();
+    ui->lwProps->clear();
     PropertyRecords.clear();
     MatParticleRecords.clear();
 

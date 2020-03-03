@@ -69,6 +69,7 @@ AMaterialLoaderDialog::AMaterialLoaderDialog(const QString & fileName, AMaterial
         }
         ui->cobMaterial->setCurrentIndex(iBest);
     }
+
     generateMatProperties();
 }
 
@@ -220,7 +221,7 @@ void AMaterialLoaderDialog::on_cbToggleAllParticles_clicked(bool checked)
 
 void AMaterialLoaderDialog::generateMatProperties()
 {
-    ui->lwProps->clear();
+    //ui->lwProps->clear();
     PropertyRecords.clear();
     MatParticleRecords.clear();
 
@@ -253,12 +254,12 @@ void AMaterialLoaderDialog::generateMatProperties()
         QWidget * wid = new QWidget();
             QHBoxLayout * lay = new QHBoxLayout(wid);
                 QCheckBox * cb = new QCheckBox(key);
+                rec.connectGuiResources(cb);
                 connect(cb, &QCheckBox::clicked, [this, &rec](bool flag)
                 {
                     rec.setChecked(flag);
                     ui->cbToggleAllProps->setChecked(false);
                 });
-                rec.connectGuiResources(cb);
             lay->addWidget(cb);
         item->setSizeHint(wid->sizeHint());
         ui->lwProps->setItemWidget(item, wid);

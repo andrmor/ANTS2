@@ -345,6 +345,9 @@ void MaterialInspectorWindow::UpdateGui()
     ui->pteComments->clear();
     ui->pteComments->appendPlainText(tmpMaterial.Comments);
 
+    QStringList sl = tmpMaterial.Tags.toList();
+    ui->leTags->setText(sl.join(", "));
+
     LastSelectedParticle = tmp;
     if (LastSelectedParticle < numPart) ui->cobParticle->setCurrentIndex(LastSelectedParticle);
     else ui->cobParticle->setCurrentIndex(0);
@@ -492,6 +495,11 @@ void MaterialInspectorWindow::on_pbUpdateTmpMaterial_clicked()
     tmpMaterial.e_diffusion_T = ui->ledEDiffT->text().toDouble();
 
     tmpMaterial.Comments = ui->pteComments->document()->toPlainText();
+
+    QStringList slTags = ui->leTags->text().split(',', QString::SkipEmptyParts);
+    tmpMaterial.Tags.clear();
+    for (const QString & s : slTags)
+        tmpMaterial.Tags << s;
 
     on_ledGammaDiagnosticsEnergy_editingFinished(); //gamma - update MFP
 }

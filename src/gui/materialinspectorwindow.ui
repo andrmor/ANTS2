@@ -3567,6 +3567,16 @@ Wavelengths shoul be given in increasing order</string>
         <item>
          <widget class="QPlainTextEdit" name="pteComments"/>
         </item>
+        <item>
+         <widget class="QLabel" name="label_70">
+          <property name="text">
+           <string>Material tags</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="leTags"/>
+        </item>
        </layout>
       </widget>
      </widget>
@@ -3717,8 +3727,8 @@ Wavelengths shoul be given in increasing order</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>370</x>
-     <y>322</y>
+     <x>372</x>
+     <y>312</y>
     </hint>
     <hint type="destinationlabel">
      <x>627</x>
@@ -3797,8 +3807,8 @@ Wavelengths shoul be given in increasing order</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>370</x>
-     <y>322</y>
+     <x>372</x>
+     <y>312</y>
     </hint>
     <hint type="destinationlabel">
      <x>172</x>
@@ -3877,8 +3887,8 @@ Wavelengths shoul be given in increasing order</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>616</x>
-     <y>306</y>
+     <x>622</x>
+     <y>284</y>
     </hint>
     <hint type="destinationlabel">
      <x>172</x>
@@ -3893,8 +3903,8 @@ Wavelengths shoul be given in increasing order</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>123</x>
-     <y>325</y>
+     <x>128</x>
+     <y>314</y>
     </hint>
     <hint type="destinationlabel">
      <x>172</x>
@@ -3909,8 +3919,8 @@ Wavelengths shoul be given in increasing order</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>616</x>
-     <y>306</y>
+     <x>622</x>
+     <y>284</y>
     </hint>
     <hint type="destinationlabel">
      <x>627</x>
@@ -3925,8 +3935,8 @@ Wavelengths shoul be given in increasing order</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>415</x>
-     <y>307</y>
+     <x>417</x>
+     <y>285</y>
     </hint>
     <hint type="destinationlabel">
      <x>420</x>
@@ -3941,8 +3951,8 @@ Wavelengths shoul be given in increasing order</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>116</x>
-     <y>363</y>
+     <x>117</x>
+     <y>360</y>
     </hint>
     <hint type="destinationlabel">
      <x>172</x>
@@ -3957,8 +3967,8 @@ Wavelengths shoul be given in increasing order</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>184</x>
-     <y>392</y>
+     <x>117</x>
+     <y>360</y>
     </hint>
     <hint type="destinationlabel">
      <x>172</x>
@@ -3973,8 +3983,8 @@ Wavelengths shoul be given in increasing order</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>116</x>
-     <y>363</y>
+     <x>117</x>
+     <y>360</y>
     </hint>
     <hint type="destinationlabel">
      <x>627</x>
@@ -3989,8 +3999,8 @@ Wavelengths shoul be given in increasing order</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>184</x>
-     <y>392</y>
+     <x>117</x>
+     <y>360</y>
     </hint>
     <hint type="destinationlabel">
      <x>627</x>
@@ -4006,11 +4016,11 @@ Wavelengths shoul be given in increasing order</string>
    <hints>
     <hint type="sourcelabel">
      <x>297</x>
-     <y>767</y>
+     <y>813</y>
     </hint>
     <hint type="destinationlabel">
      <x>531</x>
-     <y>767</y>
+     <y>813</y>
     </hint>
    </hints>
   </connection>
@@ -4021,8 +4031,8 @@ Wavelengths shoul be given in increasing order</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>403</x>
-     <y>707</y>
+     <x>399</x>
+     <y>734</y>
     </hint>
     <hint type="destinationlabel">
      <x>627</x>
@@ -4037,8 +4047,8 @@ Wavelengths shoul be given in increasing order</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>312</x>
-     <y>735</y>
+     <x>309</x>
+     <y>765</y>
     </hint>
     <hint type="destinationlabel">
      <x>172</x>
@@ -4053,8 +4063,8 @@ Wavelengths shoul be given in increasing order</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>377</x>
-     <y>650</y>
+     <x>374</x>
+     <y>673</y>
     </hint>
     <hint type="destinationlabel">
      <x>172</x>
@@ -4069,7 +4079,7 @@ Wavelengths shoul be given in increasing order</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>312</x>
+     <x>309</x>
      <y>495</y>
     </hint>
     <hint type="destinationlabel">
@@ -4085,8 +4095,8 @@ Wavelengths shoul be given in increasing order</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>312</x>
-     <y>459</y>
+     <x>309</x>
+     <y>458</y>
     </hint>
     <hint type="destinationlabel">
      <x>172</x>
@@ -4101,8 +4111,8 @@ Wavelengths shoul be given in increasing order</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>448</x>
-     <y>459</y>
+     <x>450</x>
+     <y>458</y>
     </hint>
     <hint type="destinationlabel">
      <x>627</x>
@@ -4117,8 +4127,8 @@ Wavelengths shoul be given in increasing order</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>312</x>
-     <y>459</y>
+     <x>309</x>
+     <y>458</y>
     </hint>
     <hint type="destinationlabel">
      <x>627</x>
@@ -4133,8 +4143,8 @@ Wavelengths shoul be given in increasing order</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>312</x>
-     <y>395</y>
+     <x>309</x>
+     <y>390</y>
     </hint>
     <hint type="destinationlabel">
      <x>172</x>
@@ -4149,8 +4159,8 @@ Wavelengths shoul be given in increasing order</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>312</x>
-     <y>330</y>
+     <x>309</x>
+     <y>322</y>
     </hint>
     <hint type="destinationlabel">
      <x>172</x>
@@ -4165,7 +4175,7 @@ Wavelengths shoul be given in increasing order</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>312</x>
+     <x>309</x>
      <y>495</y>
     </hint>
     <hint type="destinationlabel">
@@ -4181,8 +4191,8 @@ Wavelengths shoul be given in increasing order</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>312</x>
-     <y>395</y>
+     <x>309</x>
+     <y>390</y>
     </hint>
     <hint type="destinationlabel">
      <x>627</x>
@@ -4197,8 +4207,8 @@ Wavelengths shoul be given in increasing order</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>312</x>
-     <y>330</y>
+     <x>309</x>
+     <y>322</y>
     </hint>
     <hint type="destinationlabel">
      <x>627</x>
@@ -4213,8 +4223,8 @@ Wavelengths shoul be given in increasing order</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>377</x>
-     <y>679</y>
+     <x>374</x>
+     <y>704</y>
     </hint>
     <hint type="destinationlabel">
      <x>118</x>
@@ -4229,12 +4239,12 @@ Wavelengths shoul be given in increasing order</string>
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>100</x>
-     <y>392</y>
+     <x>109</x>
+     <y>360</y>
     </hint>
     <hint type="destinationlabel">
-     <x>612</x>
-     <y>405</y>
+     <x>117</x>
+     <y>360</y>
     </hint>
    </hints>
   </connection>
@@ -4245,12 +4255,12 @@ Wavelengths shoul be given in increasing order</string>
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>612</x>
-     <y>405</y>
+     <x>117</x>
+     <y>360</y>
     </hint>
     <hint type="destinationlabel">
-     <x>145</x>
-     <y>432</y>
+     <x>117</x>
+     <y>360</y>
     </hint>
    </hints>
   </connection>
@@ -4261,8 +4271,8 @@ Wavelengths shoul be given in increasing order</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>395</x>
-     <y>356</y>
+     <x>397</x>
+     <y>347</y>
     </hint>
     <hint type="destinationlabel">
      <x>627</x>
@@ -4277,8 +4287,8 @@ Wavelengths shoul be given in increasing order</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>395</x>
-     <y>356</y>
+     <x>397</x>
+     <y>347</y>
     </hint>
     <hint type="destinationlabel">
      <x>80</x>
@@ -4293,8 +4303,8 @@ Wavelengths shoul be given in increasing order</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>194</x>
-     <y>461</y>
+     <x>67</x>
+     <y>360</y>
     </hint>
     <hint type="destinationlabel">
      <x>127</x>
@@ -4309,8 +4319,8 @@ Wavelengths shoul be given in increasing order</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>487</x>
-     <y>461</y>
+     <x>67</x>
+     <y>360</y>
     </hint>
     <hint type="destinationlabel">
      <x>70</x>
@@ -4325,8 +4335,8 @@ Wavelengths shoul be given in increasing order</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>612</x>
-     <y>405</y>
+     <x>117</x>
+     <y>360</y>
     </hint>
     <hint type="destinationlabel">
      <x>47</x>
@@ -4341,8 +4351,8 @@ Wavelengths shoul be given in increasing order</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>401</x>
-     <y>433</y>
+     <x>457</x>
+     <y>428</y>
     </hint>
     <hint type="destinationlabel">
      <x>627</x>
@@ -4357,8 +4367,8 @@ Wavelengths shoul be given in increasing order</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>510</x>
-     <y>450</y>
+     <x>516</x>
+     <y>428</y>
     </hint>
     <hint type="destinationlabel">
      <x>172</x>
@@ -4373,8 +4383,8 @@ Wavelengths shoul be given in increasing order</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>403</x>
-     <y>707</y>
+     <x>399</x>
+     <y>734</y>
     </hint>
     <hint type="destinationlabel">
      <x>138</x>
@@ -4389,8 +4399,8 @@ Wavelengths shoul be given in increasing order</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>504</x>
-     <y>325</y>
+     <x>509</x>
+     <y>314</y>
     </hint>
     <hint type="destinationlabel">
      <x>627</x>
@@ -4469,12 +4479,44 @@ Wavelengths shoul be given in increasing order</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>360</x>
-     <y>694</y>
+     <x>399</x>
+     <y>734</y>
     </hint>
     <hint type="destinationlabel">
      <x>45</x>
      <y>160</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>leTags</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>pbWasModified</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>40</x>
+     <y>803</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>65</x>
+     <y>159</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>leTags</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdateTmpMaterial</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>529</x>
+     <y>797</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>525</x>
+     <y>154</y>
     </hint>
    </hints>
   </connection>

@@ -49,13 +49,15 @@ private:
     QJsonObject MaterialJsonTarget;
     QString     NameInFile;
 
+    AParticleRecordForMerge * neutron = nullptr;
+    QVector<QString> ParticlesForcedByNeutron;
+
     QVector<AParticleRecordForMerge*> ParticleRecords;
     QVector<APropertyRecordForMerge*> PropertyRecords;
     QVector<APropertyRecordForMerge*> MatParticleRecords;
 
 private:
-    void generateParticleGui();
-    void updateParticleGui();
+    void generateParticleRecords();
 
     void generateMatProperties();
     void generateInteractionItems();
@@ -82,6 +84,8 @@ public:
     void connectCheckBox(QCheckBox * cb);
     void connectPropertyRecord(APropertyRecordForMerge * rec) {linkedPropertyRecord = rec;}
 
+    void setForcedParticles(QVector<AParticleRecordForMerge*> & vec);
+
     void setChecked(bool flag, bool bInduced = false);
     void setForced(bool flag);
 
@@ -91,6 +95,8 @@ public:
 private:
     bool bChecked         = true;
     bool bForcedByNeutron = false;
+
+    QVector<AParticleRecordForMerge*> ForcedParticles;  // can be non-empty only for neutron
 
     QCheckBox * CheckBox  = nullptr;
 

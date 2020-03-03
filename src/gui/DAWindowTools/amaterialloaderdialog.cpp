@@ -46,11 +46,7 @@ AMaterialLoaderDialog::AMaterialLoaderDialog(const QString & fileName, AMaterial
     ui->leMaterialNameInFile->setText(NameInFile);
     ui->leName->setText(NameInFile);
 
-    const QVector<QString> UndefinedParticles = MpCollection.getUndefinedParticles(MaterialJsonFrom);
-    for (const QString & str : UndefinedParticles)
-        ParticleRecords << new AParticleRecordForMerge(str);
-    generateParticleGui();
-    updateParticleGui();
+    generateParticleRecords();
 
     if (DefinedMaterials.size() != 0)
     {
@@ -69,6 +65,8 @@ AMaterialLoaderDialog::AMaterialLoaderDialog(const QString & fileName, AMaterial
     }
 
     generateMatProperties();
+
+    neutron->setChecked(true); //to update forced status
 }
 
 AMaterialLoaderDialog::~AMaterialLoaderDialog()
@@ -87,9 +85,24 @@ const QVector<QString> AMaterialLoaderDialog::getSuppressedParticles() const
     return SuppressedParticles;
 }
 
-void AMaterialLoaderDialog::generateParticleGui()
+void AMaterialLoaderDialog::generateParticleRecords()
 {
-    ui->cbToggleAllParticles->setVisible(ParticleRecords.size() > 1);
+    ParticlesForcedByNeutron = getForcedByNeutron();
+    QVector<AParticleRecordForMerge*> SlaveParticlesForNeutron;
+
+    const QVector<QString> UndefinedParticles = MpCollection.getUndefinedParticles(MaterialJsonFrom);
+    for (const QString & str : UndefinedParticles)
+    {
+        AParticleRecordForMerge * rec = new AParticleRecordForMerge(str);
+        ParticleRecords << rec;
+
+        if (str == "neutron")
+            neutron = rec;
+        else if (ParticlesForcedByNeutron.contains(str))
+            SlaveParticlesForNeutron << rec;
+    }
+
+    if (neutron) neutron->setForcedParticles(SlaveParticlesForNeutron);
 
     QWidget * w = new QWidget();
     QVBoxLayout * lay = new QVBoxLayout(w);
@@ -97,30 +110,19 @@ void AMaterialLoaderDialog::generateParticleGui()
     {
         QCheckBox * CheckBox = new QCheckBox(rec->ParticleName);
         rec->connectCheckBox(CheckBox);
-            connect(CheckBox, &QCheckBox::clicked, [this, rec](bool checked)
-            {
-                rec->setChecked(checked);
-                if (rec->ParticleName == "neutron") updateParticleGui();
-                ui->cbToggleAllParticles->setChecked(false);
-            });
+
+        connect(CheckBox, &QCheckBox::clicked, [this, rec](bool checked)
+        {
+            rec->setChecked(checked);
+            ui->cbToggleAllParticles->setChecked(false);
+        });
+
         lay->addWidget(CheckBox);
     }
     lay->addStretch();
     ui->scrollArea->setWidget(w);
-}
 
-void AMaterialLoaderDialog::updateParticleGui()
-{
-    const QVector<QString> ParticlesForcedByNeutron = getForcedByNeutron();
-
-    for (AParticleRecordForMerge * pr : ParticleRecords)
-    {
-        bool bForced = ParticlesForcedByNeutron.contains(pr->ParticleName);
-        pr->setForced(bForced);
-        if (bForced) pr->setChecked(true);
-    }
-
-    ui->labForceByNeutron->setVisible( !ParticlesForcedByNeutron.isEmpty() );
+    ui->cbToggleAllParticles->setVisible(ParticleRecords.size() > 1);
 }
 
 bool AMaterialLoaderDialog::isNameAlreadyExists() const
@@ -216,7 +218,7 @@ void AMaterialLoaderDialog::on_cbToggleAllParticles_clicked(bool checked)
         rec->setChecked(checked);
     }
 
-    updateParticleGui();
+    //updateParticleGui();
 }
 
 void AMaterialLoaderDialog::generateMatProperties()
@@ -259,7 +261,7 @@ void AMaterialLoaderDialog::generateMatProperties()
                 {
                     rec->setChecked(flag);
                     ui->cbToggleAllProps->setChecked(false);
-                    updateParticleGui();
+                    //updateParticleGui();
                 });
             lay->addWidget(cb);
         item->setSizeHint(wid->sizeHint());
@@ -355,7 +357,7 @@ const QVector<QString> AMaterialLoaderDialog::getForcedByNeutron() const
 
     AMaterialParticleCollection FakeCollection;
     AMaterial Mat;
-    Mat.readFromJson(MaterialJsonFrom, &FakeCollection, getSuppressedParticles());
+    Mat.readFromJson(MaterialJsonFrom, &FakeCollection);
 
     QStringList DefParticles = FakeCollection.getListOfParticleNames();
     int iNeutron = DefParticles.indexOf("neutron");
@@ -414,8 +416,6 @@ void AMaterialLoaderDialog::on_cbToggleAllProps_clicked(bool checked)
 {
     for (APropertyRecordForMerge * rec : PropertyRecords)
         rec->setChecked(checked);
-
-    updateParticleGui();
 }
 
 void AMaterialLoaderDialog::on_cobMaterial_activated(int)
@@ -429,6 +429,11 @@ void AParticleRecordForMerge::connectCheckBox(QCheckBox * cb)
     updateIndication();
 }
 
+void AParticleRecordForMerge::setForcedParticles(QVector<AParticleRecordForMerge *> & vec)
+{
+    ForcedParticles = vec;
+}
+
 void AParticleRecordForMerge::setChecked(bool flag, bool bInduced)
 {
     if (bForcedByNeutron) bChecked = true;
@@ -437,6 +442,12 @@ void AParticleRecordForMerge::setChecked(bool flag, bool bInduced)
 
     if (!bInduced && linkedPropertyRecord)
         linkedPropertyRecord->setChecked(bChecked, true);
+
+    for (AParticleRecordForMerge * pr : ForcedParticles)
+    {
+        if (bChecked) pr->setChecked(true);
+        pr->setForced(bChecked);
+    }
 }
 
 void AParticleRecordForMerge::setForced(bool flag)

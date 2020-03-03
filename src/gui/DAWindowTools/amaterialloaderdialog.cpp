@@ -66,7 +66,7 @@ AMaterialLoaderDialog::AMaterialLoaderDialog(const QString & fileName, AMaterial
 
     generateMatProperties();
 
-    neutron->setChecked(true); //to update forced status
+    if (neutron) neutron->setChecked(true); //to update forced status
 }
 
 AMaterialLoaderDialog::~AMaterialLoaderDialog()

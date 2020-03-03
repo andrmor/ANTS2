@@ -6,7 +6,6 @@
 #include <QString>
 #include <QStringList>
 #include <QJsonObject>
-#include <QJsonArray>
 
 class AMaterialParticleCollection;
 class QCheckBox;
@@ -60,13 +59,13 @@ private:
 
     void generateMatProperties();
     void generateInteractionItems();
-    void updateMatPropertiesGui();
 
     bool isNameAlreadyExists() const;
     void updateLoadEnabled();
     int  getMatchValue(const QString & s1, const QString & s2) const;
     bool isSuppressedParticle(const QString & ParticleName) const;
     const QVector<QString> getForcedByNeutron() const;
+    AParticleRecordForMerge * findParticleRecord(const QString & particleName);
 
     void clearParticleRecords();
     void clearPropertyRecords();
@@ -81,8 +80,9 @@ public:
     QString ParticleName;
 
     void connectCheckBox(QCheckBox * cb);
+    void connectPropertyRecord(APropertyRecordForMerge * rec) {linkedPropertyRecord = rec;}
 
-    void setChecked(bool flag);
+    void setChecked(bool flag, bool bInduced = false);
     void setForced(bool flag);
 
     bool isChecked() const {return bChecked;}
@@ -93,6 +93,8 @@ private:
     bool bForcedByNeutron = false;
 
     QCheckBox * CheckBox  = nullptr;
+
+    APropertyRecordForMerge * linkedPropertyRecord = nullptr;  //defined only if the target material does not have MatParticle property for this particle
 
 private:
     void updateIndication();
@@ -107,18 +109,23 @@ public:
     QString    key;
     QJsonValue value;
 
-    void setChecked(bool flag);
+    void setChecked(bool flag, bool bInduced = false);
     bool isChecked() const {return bChecked;}
 
     void setDisabled(bool flag);
     bool isDisabled() const {return bDisabled;}
 
     void connectGuiResources(QCheckBox * cb);
+    void connectParticleRecord(AParticleRecordForMerge * rec) {linkedParticleRecord = rec;}
 
 private:
     bool bChecked        = true;
     bool bDisabled       = false;
+
     QCheckBox * CheckBox = nullptr;
+
+    AParticleRecordForMerge * linkedParticleRecord = nullptr;  // used only by MatParticle properties.
+                                                               // nullptr indicates that this particle is defined in the target material
 
 private:
     void updateIndication();

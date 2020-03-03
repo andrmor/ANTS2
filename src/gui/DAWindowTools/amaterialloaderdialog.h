@@ -15,6 +15,63 @@ namespace Ui {
 class AMaterialLoaderDialog;
 }
 
+class AParticleRecordForMerge;
+class APropertyRecordForMerge;
+
+class AMaterialLoaderDialog : public QDialog
+{
+    Q_OBJECT
+
+public:
+    explicit AMaterialLoaderDialog(const QString & fileName, AMaterialParticleCollection & MpCollection, QWidget * parentWidget = nullptr);
+    ~AMaterialLoaderDialog();
+
+    const QVector<QString> getSuppressedParticles() const;
+    const QJsonObject      getMaterialJson() const {return MaterialJsonFrom;}
+
+private slots:
+    void on_pbDummt_clicked();
+    void on_pbLoad_clicked();
+    void on_pbCancel_clicked();
+    void on_leName_textChanged(const QString &arg1);
+    void on_twMain_currentChanged(int index);
+    void on_cbToggleAllParticles_clicked(bool checked);
+    void on_cbToggleAllProps_clicked(bool checked);
+    void on_cobMaterial_activated(int index);
+
+private:
+    AMaterialParticleCollection & MpCollection;
+    Ui::AMaterialLoaderDialog   * ui;
+
+    QStringList DefinedMaterials;
+    bool        bFileOK = true;
+
+    QJsonObject MaterialJsonFrom;
+    QJsonObject MaterialJsonTarget;
+    QString     NameInFile;
+
+    QVector<AParticleRecordForMerge*> ParticleRecords;
+    QVector<APropertyRecordForMerge*> PropertyRecords;
+    QVector<APropertyRecordForMerge*> MatParticleRecords;
+
+private:
+    void generateParticleGui();
+    void updateParticleGui();
+
+    void generateMatProperties();
+    void generateInteractionItems();
+    void updateMatPropertiesGui();
+
+    bool isNameAlreadyExists() const;
+    void updateLoadEnabled();
+    int  getMatchValue(const QString & s1, const QString & s2) const;
+    bool isSuppressedParticle(const QString & ParticleName) const;
+    const QVector<QString> getForcedByNeutron() const;
+
+    void clearParticleRecords();
+    void clearPropertyRecords();
+};
+
 class AParticleRecordForMerge
 {
 public:
@@ -65,57 +122,6 @@ private:
 
 private:
     void updateIndication();
-};
-
-class AMaterialLoaderDialog : public QDialog
-{
-    Q_OBJECT
-
-public:
-    explicit AMaterialLoaderDialog(const QString & fileName, AMaterialParticleCollection & MpCollection, QWidget * parentWidget = nullptr);
-    ~AMaterialLoaderDialog();
-
-    const QVector<QString> getSuppressedParticles() const;
-    const QJsonObject      getMaterialJson() const {return MaterialJsonFrom;}
-
-private slots:
-    void on_pbDummt_clicked();
-    void on_pbLoad_clicked();
-    void on_pbCancel_clicked();
-    void on_leName_textChanged(const QString &arg1);
-    void on_twMain_currentChanged(int index);
-    void on_cbToggleAllParticles_clicked(bool checked);
-    void on_cbToggleAllProps_clicked(bool checked);
-    void on_cobMaterial_activated(int index);
-
-private:
-    AMaterialParticleCollection & MpCollection;
-    Ui::AMaterialLoaderDialog   * ui;
-
-    QStringList DefinedMaterials;
-    bool        bFileOK = true;
-
-    QJsonObject MaterialJsonFrom;
-    QJsonObject MaterialJsonTarget;
-    QString     NameInFile;
-
-    QVector<AParticleRecordForMerge> ParticleRecords;
-    QVector<APropertyRecordForMerge> PropertyRecords;
-    QVector<APropertyRecordForMerge> MatParticleRecords;
-
-private:
-    void generateParticleGui();
-    void updateParticleGui();
-
-    void generateMatProperties();
-    void generateInteractionItems();
-    void updateMatPropertiesGui();
-
-    bool isNameAlreadyExists() const;
-    void updateLoadEnabled();
-    int  getMatchValue(const QString & s1, const QString & s2) const;
-    bool isSuppressedParticle(const QString & ParticleName) const;
-    const QVector<QString> getForcedByNeutron() const;
 };
 
 #endif // AMATERIALLOADERDIALOG_H

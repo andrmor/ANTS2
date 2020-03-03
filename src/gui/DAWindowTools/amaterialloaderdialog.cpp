@@ -259,6 +259,7 @@ void AMaterialLoaderDialog::generateMatProperties()
                 {
                     rec->setChecked(flag);
                     ui->cbToggleAllProps->setChecked(false);
+                    updateParticleGui();
                 });
             lay->addWidget(cb);
         item->setSizeHint(wid->sizeHint());
@@ -413,6 +414,8 @@ void AMaterialLoaderDialog::on_cbToggleAllProps_clicked(bool checked)
 {
     for (APropertyRecordForMerge * rec : PropertyRecords)
         rec->setChecked(checked);
+
+    updateParticleGui();
 }
 
 void AMaterialLoaderDialog::on_cobMaterial_activated(int)

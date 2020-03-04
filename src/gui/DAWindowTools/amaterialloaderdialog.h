@@ -9,6 +9,7 @@
 
 class AMaterialParticleCollection;
 class QCheckBox;
+class QWidget;
 
 namespace Ui {
 class AMaterialLoaderDialog;
@@ -58,9 +59,8 @@ private:
 
 private:
     void generateParticleRecords();
-
-    void generateMatProperties();
-    void generateInteractionItems();
+    void generateMatPropRecords();
+    void generateInteractionRecords();
 
     bool isNameAlreadyExists() const;
     void updateLoadEnabled();
@@ -68,6 +68,7 @@ private:
     bool isSuppressedParticle(const QString & ParticleName) const;
     const QVector<QString> getForcedByNeutron() const;
     AParticleRecordForMerge * findParticleRecord(const QString & particleName);
+    QWidget * createComparisonWidget(const QString & key, const QJsonValue & valueFrom, const QJsonValue & valueTo);
 
     void clearParticleRecords();
     void clearPropertyRecords();

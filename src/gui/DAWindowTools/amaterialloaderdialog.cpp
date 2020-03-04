@@ -64,7 +64,7 @@ AMaterialLoaderDialog::AMaterialLoaderDialog(const QString & fileName, AMaterial
         ui->cobMaterial->setCurrentIndex(iBest);
     }
 
-    generateMatProperties();
+    generateMatPropRecords();
 
     if (neutron) neutron->setChecked(true); //to update forced status
 }
@@ -216,7 +216,7 @@ void AMaterialLoaderDialog::on_cbToggleAllParticles_clicked(bool checked)
     }
 }
 
-void AMaterialLoaderDialog::generateMatProperties()
+void AMaterialLoaderDialog::generateMatPropRecords()
 {
     ui->lwProps->clear();
     clearPropertyRecords();
@@ -234,8 +234,10 @@ void AMaterialLoaderDialog::generateMatProperties()
     const AMaterial * matTo = MpCollection[iMat];
     matTo->writeToJson(MaterialJsonTarget, &MpCollection);
 
+    //TODO: hadling of "comments"
+
     QSet<QString> Ignore;
-    Ignore << "*MaterialName" << "*Tags" << "Comments" << "TGeoP1" << "TGeoP2" << "TGeoP3" << "MatParticles";
+    Ignore << "*MaterialName" << "Comments" << "TGeoP1" << "TGeoP2" << "TGeoP3" << "MatParticles";
     foreach (const QString & key, MaterialJsonFrom.keys())
     {
         if (Ignore.contains(key)) continue;
@@ -259,11 +261,17 @@ void AMaterialLoaderDialog::generateMatProperties()
                     //updateParticleGui();
                 });
             lay->addWidget(cb);
+                QWidget * comparisonWidget = createComparisonWidget(key, valueFrom, valueTo);
+            if (comparisonWidget)
+            {
+                lay->addStretch();
+                lay->addWidget(comparisonWidget);
+            }
         item->setSizeHint(wid->sizeHint());
         ui->lwProps->setItemWidget(item, wid);
     }
 
-    generateInteractionItems();
+    generateInteractionRecords();
 
     int iDifProps = PropertyRecords.size() + MatParticleRecords.size();
     ui->cbToggleAllProps->setVisible(iDifProps > 1);
@@ -272,7 +280,7 @@ void AMaterialLoaderDialog::generateMatProperties()
     ui->lwProps->setVisible(iDifProps != 0);
 }
 
-void AMaterialLoaderDialog::generateInteractionItems()
+void AMaterialLoaderDialog::generateInteractionRecords()
 {
     QJsonArray ArrMpFrom = MaterialJsonFrom["MatParticles"].toArray();
     QJsonArray ArrMpTo   = MaterialJsonTarget["MatParticles"].toArray();
@@ -374,6 +382,40 @@ AParticleRecordForMerge * AMaterialLoaderDialog::findParticleRecord(const QStrin
     return nullptr;
 }
 
+QWidget * makeWidget(const QString & s1, const QString & s2)
+{
+    QWidget * w = new QWidget();
+    QHBoxLayout * lay = new QHBoxLayout(w);
+        QLabel * l = new QLabel(s1);
+        lay->addWidget(l);
+        l = new QLabel(QChar(8594));
+        lay->addWidget(l);
+        l = new QLabel(s2);
+        lay->addWidget(l);
+
+    return w;
+}
+
+QWidget *AMaterialLoaderDialog::createComparisonWidget(const QString & key, const QJsonValue &valueFrom, const QJsonValue &valueTo)
+{
+    QWidget * w = nullptr;
+
+    if (key == "ChemicalComposition")
+    {
+        QJsonObject from = valueFrom.toObject();
+        QJsonObject to   = valueTo.toObject();
+        QString sfrom = from["ElementCompositionString"].toString();
+        QString sto   = to  ["ElementCompositionString"].toString();
+        w = makeWidget(sfrom, sto);
+    }
+    else if (valueFrom.isDouble() && valueTo.isDouble())
+    {
+        w = makeWidget(QString::number(valueFrom.toDouble()), QString::number(valueTo.toDouble()));
+    }
+
+    return w;
+}
+
 void AMaterialLoaderDialog::clearParticleRecords()
 {
     for (auto * r : ParticleRecords) delete r;
@@ -410,7 +452,7 @@ void AMaterialLoaderDialog::on_cbToggleAllProps_clicked(bool checked)
 
 void AMaterialLoaderDialog::on_cobMaterial_activated(int)
 {
-    generateMatProperties();
+    generateMatPropRecords();
 }
 
 void AParticleRecordForMerge::connectCheckBox(QCheckBox * cb)

@@ -67,6 +67,8 @@ AMaterialLoaderDialog::AMaterialLoaderDialog(const QString & fileName, AMaterial
     generateMatPropRecords();
 
     if (neutron) neutron->setChecked(true); //to update forced status
+
+    on_twMain_currentChanged(ui->twMain->currentIndex());
 }
 
 AMaterialLoaderDialog::~AMaterialLoaderDialog()
@@ -202,8 +204,10 @@ void AMaterialLoaderDialog::on_leName_textChanged(const QString &)
     updateLoadEnabled();
 }
 
-void AMaterialLoaderDialog::on_twMain_currentChanged(int)
+void AMaterialLoaderDialog::on_twMain_currentChanged(int index)
 {
+    ui->pbLoad->setText( index == 0 ? "Add new material"
+                                    : "Merge with existent");
     updateLoadEnabled();
 }
 
@@ -252,7 +256,7 @@ void AMaterialLoaderDialog::generateMatPropRecords()
         QListWidgetItem * item = new QListWidgetItem(ui->lwProps);
         QWidget * wid = new QWidget();
             QHBoxLayout * lay = new QHBoxLayout(wid);
-                QCheckBox * cb = new QCheckBox(key);
+                QCheckBox * cb = new QCheckBox(convertJsonNameToReadable(key));
                 rec->connectGuiResources(cb);
                 connect(cb, &QCheckBox::clicked, [this, rec](bool flag)
                 {
@@ -266,6 +270,7 @@ void AMaterialLoaderDialog::generateMatPropRecords()
             {
                 lay->addWidget(new QLabel("     "));
                 lay->addWidget(comparisonWidget);
+                wid->setToolTip(comparisonWidget->toolTip());
                 lay->addStretch();
             }
         item->setSizeHint(wid->sizeHint());
@@ -430,9 +435,52 @@ QWidget *AMaterialLoaderDialog::createComparisonWidget(const QString & key, cons
         QString sto   = QString("[%1]").arg(sizeTo);
 
         w = makeWidget(sfrom, sto);
+
+        if (key == "*Tags")
+        {
+            QString sFrom;
+            for (int i=0; i<sizeFrom; i++) sFrom += from.at(i).toString() + ", ";
+            if (sFrom.size() > 1)  sFrom.chop(2);
+            if (sFrom.isEmpty()) sFrom = "Undefined";
+            QString sTo;
+            for (int i=0; i<sizeFrom; i++) sTo   +=   to.at(i).toString() + ", ";
+            if (sTo.size()   > 1)    sTo.chop(2);
+            if (sTo.isEmpty())     sTo = "Undefined";
+            w->setToolTip(sFrom + "\n\nwill replace\n\n" + sTo);
+        }
     }
 
     return w;
+}
+
+const QString AMaterialLoaderDialog::convertJsonNameToReadable(const QString & key) const
+{
+    QJsonObject js;
+
+    js["ChemicalComposition"]       = "Composition";
+    js["RefractiveIndex"]           = "Refractive index";
+    js["BulkAbsorption"]            = "Absorption coefficient";
+    js["RayleighMFP"]               = "Rayleigh mean free path";
+    js["RayleighWave"]              = "Rayleigh wavelength";
+    js["ReemissionProb"]            = "Reemission probability";
+    js["PhotonYieldDefault"]        = "Photon yield (prim scint, default)";
+    js["PrimScintRaise"]            = "Rise time (prim scint)";
+    js["W"]                         = "Energy per e/ion pair";
+    js["SecScint_PhYield"]          = "Photon yield (sec scint)";
+    js["SecScint_Tau"]              = "Decay time (sec scint)";
+    js["ElDriftVelo"]               = "Electron drift speed";
+    js["ElDiffusionL"]              = "Electron diffusion coeff (L)";
+    js["ElDiffusionT"]              = "Electron diffusion coeff (T)";
+
+    js["RefractiveIndexWave"]       = "Refractive index (wave)";
+    js["BulkAbsorptionWave"]        = "Absorption coefficient (wave)";
+    js["ReemissionProbabilityWave"] = "Reemission probability (wave)";
+    js["PrimScintSpectrum"]         = "Emission spectrum (prim scint)";
+    js["SecScintSpectrum"]          = "Emission spectrum (sec scint)";
+    js["*Tags"]                     = "Material tags";
+
+    if (js.contains(key)) return js[key].toString();
+    return key;
 }
 
 void AMaterialLoaderDialog::clearParticleRecords()

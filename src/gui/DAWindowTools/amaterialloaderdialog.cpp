@@ -127,15 +127,18 @@ void AMaterialLoaderDialog::generateParticleRecords()
     ui->cbToggleAllParticles->setVisible(ParticleRecords.size() > 1);
 }
 
-bool AMaterialLoaderDialog::isNameAlreadyExists() const
+bool AMaterialLoaderDialog::isNameAlreadyExists(const QString & newName) const
 {
-    return DefinedMaterials.contains(ui->leName->text());
+    return DefinedMaterials.contains(newName);
 }
 
 void AMaterialLoaderDialog::updateLoadEnabled()
 {
+    const bool bNameExists = isNameAlreadyExists(ui->leName->text());
+    ui->labAlreadyExists->setVisible(bNameExists);
+
     bool bLoadActive = true;
-    if (ui->twMain->currentIndex() == 0 && isNameAlreadyExists()) bLoadActive = false;
+    if (ui->twMain->currentIndex() == 0 && bNameExists) bLoadActive = false;
     ui->pbLoad->setEnabled(bLoadActive);
 }
 
@@ -148,54 +151,67 @@ void AMaterialLoaderDialog::on_pbLoad_clicked()
 {
     if (ui->twMain->currentIndex() == 0)
     {
-        if (isNameAlreadyExists())
+        const QString err = addAsNew(ui->leName->text());
+        if (!err.isEmpty())
         {
-            message("Provide a unique name!", this);
+            message(err, this);
             return;
         }
-        MaterialJsonFrom["*MaterialName"] = ui->leName->text();
     }
     else
-    {
-        // target mat properties as base -> replacing only those which are selected by the user
-        for (APropertyRecordForMerge * rec : PropertyRecords)
-        {
-            if (!rec->isChecked()) continue;
-            MaterialJsonTarget[rec->key] = rec->value;
-        }
-        //same with MatPartiles, using QJsonObject to replace selected
-        QJsonObject TmpMatParticlesJson;
-        QJsonArray  arr = MaterialJsonTarget["MatParticles"].toArray();
-        for (int i = 0; i < arr.size(); i++)
-        {
-            QJsonObject json = arr[i].toObject();
-            QJsonObject jsonParticle = json["*Particle"].toObject();
-            AParticle ParticleFrom;
-            ParticleFrom.readFromJson(jsonParticle);
-            TmpMatParticlesJson[ParticleFrom.ParticleName] = json;
-        }
-        //now override selected MatParticle properties
-        for (APropertyRecordForMerge * rec : MatParticleRecords)
-        {
-            if (!rec->isChecked()) continue;
-            TmpMatParticlesJson[rec->key] = rec->value;
-        }
-        //finally back to QJsonArray
-        QJsonArray ArrMP;
-        foreach (const QString & key, TmpMatParticlesJson.keys())
-            ArrMP.append(TmpMatParticlesJson.value(key));
+        mergeWithExistentMaterial();
 
-        MaterialJsonTarget["MatParticles"] = ArrMP;
-
-        //comments:
-        QString MatFromComments = MaterialJsonFrom["Comments"].toString();
-        QString MatToComments   = MaterialJsonTarget["Comments"].toString();
-        MaterialJsonTarget["Comments"] = ">>>>>> Original material comments:\n" + MatToComments + "\n\n>>>>>> Comments from merging-in material:\n" + MatFromComments;
-
-        //MaterialJsonFrom will be returned to the loader
-        MaterialJsonFrom = MaterialJsonTarget;
-    }
     accept();
+}
+
+QString AMaterialLoaderDialog::addAsNew(const QString & newName)
+{
+    if (isNameAlreadyExists(newName))
+        return "Provide a unique name!";
+
+    MaterialJsonFrom["*MaterialName"] = ui->leName->text();
+    return "";
+}
+
+void AMaterialLoaderDialog::mergeWithExistentMaterial()
+{
+    // target mat properties as base -> replacing only those which are selected by the user
+    for (APropertyRecordForMerge * rec : PropertyRecords)
+    {
+        if (!rec->isChecked()) continue;
+        MaterialJsonTarget[rec->key] = rec->value;
+    }
+    //same with MatPartiles, using QJsonObject to replace selected
+    QJsonObject TmpMatParticlesJson;
+    QJsonArray  arr = MaterialJsonTarget["MatParticles"].toArray();
+    for (int i = 0; i < arr.size(); i++)
+    {
+        QJsonObject json = arr[i].toObject();
+        QJsonObject jsonParticle = json["*Particle"].toObject();
+        AParticle ParticleFrom;
+        ParticleFrom.readFromJson(jsonParticle);
+        TmpMatParticlesJson[ParticleFrom.ParticleName] = json;
+    }
+    //now override selected MatParticle properties
+    for (APropertyRecordForMerge * rec : MatParticleRecords)
+    {
+        if (!rec->isChecked()) continue;
+        TmpMatParticlesJson[rec->key] = rec->value;
+    }
+    //finally back to QJsonArray
+    QJsonArray ArrMP;
+    foreach (const QString & key, TmpMatParticlesJson.keys())
+        ArrMP.append(TmpMatParticlesJson.value(key));
+
+    MaterialJsonTarget["MatParticles"] = ArrMP;
+
+    //comments:
+    QString MatFromComments = MaterialJsonFrom["Comments"].toString();
+    QString MatToComments   = MaterialJsonTarget["Comments"].toString();
+    MaterialJsonTarget["Comments"] = ">>>>>> Original material comments:\n" + MatToComments + "\n\n>>>>>> Comments from merged-in material:\n" + MatFromComments;
+
+    //MaterialJsonFrom will be returned to the loader
+    MaterialJsonFrom = MaterialJsonTarget;
 }
 
 void AMaterialLoaderDialog::on_pbCancel_clicked()
@@ -205,7 +221,6 @@ void AMaterialLoaderDialog::on_pbCancel_clicked()
 
 void AMaterialLoaderDialog::on_leName_textChanged(const QString &)
 {
-    ui->labAlreadyExists->setVisible(isNameAlreadyExists());
     updateLoadEnabled();
 }
 

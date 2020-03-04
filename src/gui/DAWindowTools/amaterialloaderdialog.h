@@ -62,7 +62,7 @@ private:
     void generateMatPropRecords();
     void generateInteractionRecords();
 
-    bool isNameAlreadyExists() const;
+    bool isNameAlreadyExists(const QString & newName) const;
     void updateLoadEnabled();
     int  getMatchValue(const QString & s1, const QString & s2) const;
     bool isSuppressedParticle(const QString & ParticleName) const;
@@ -73,6 +73,9 @@ private:
 
     void clearParticleRecords();
     void clearPropertyRecords();
+
+    QString addAsNew(const QString &newName);
+    void mergeWithExistentMaterial();
 };
 
 class AParticleRecordForMerge

@@ -49,7 +49,7 @@ ALrfWindow::ALrfWindow(QWidget *parent, MainWindow *mw, ARepository *lrf_repo) :
 
   Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
   windowFlags |= Qt::WindowCloseButtonHint;
-  windowFlags |= Qt::Tool;
+  //windowFlags |= Qt::Tool;
   this->setWindowFlags( windowFlags );
 
   connect(repo, &ARepository::currentLrfsChangedReadyStatus, this, &ALrfWindow::onReadyStatusChanged);

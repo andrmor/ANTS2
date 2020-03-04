@@ -23,7 +23,7 @@ ARemoteWindow::ARemoteWindow(MainWindow *MW) :
     Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
     windowFlags |= Qt::WindowCloseButtonHint;
     //windowFlags |= Qt::WindowStaysOnTopHint;
-    windowFlags |= Qt::Tool;
+    //windowFlags |= Qt::Tool;
     this->setWindowFlags( windowFlags );
 
     ui->lwServers->setViewMode(QListView::ListMode);

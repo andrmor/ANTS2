@@ -29,11 +29,13 @@ RasterWindowGraphClass::~RasterWindowGraphClass()
   //qDebug()<<"    ...delegating delete to base class";
 }
 
+/*
 void RasterWindowGraphClass::setShowCursorPosition(bool flag)
 {
   ShowCursorPosition = flag;
   if (!flag) MasterWindow->setWindowTitle("Graph");
 }
+*/
 
 bool RasterWindowGraphClass::event(QEvent *event)
 {
@@ -219,13 +221,15 @@ void RasterWindowGraphClass::mouseMoveEvent(QMouseEvent *event)
   if (fCanvas->GetLogx()) x = TMath::Power(10.0, x);
   if (fCanvas->GetLogy()) y = TMath::Power(10.0, y);
 
-  //reporting cursor position for graph window
   if (ShowCursorPosition)
-    {
-      QString str = "Cursor coordinates: " + QString::number(x, 'g', 4);
-      str += " : " + QString::number(y, 'g', 4);
-      MasterWindow->setWindowTitle(str);
-    }
+  {
+      //QString str = "Cursor coordinates: " + QString::number(x, 'g', 4);
+      //str += " : " + QString::number(y, 'g', 4);
+      //MasterWindow->setWindowTitle(str);
+      emit reportCursorPosition(x, y, true);
+  }
+  else emit reportCursorPosition(0, 0, false);
+
   //first block - if does not matter buttons are pressed or not
   if (ExtractionOf2DEllipsePhase == 2)
    {

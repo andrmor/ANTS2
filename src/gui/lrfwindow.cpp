@@ -57,7 +57,7 @@ LRFwindow::LRFwindow(QWidget *parent, MainWindow *mw, EventsDataClass *eventsDat
 
   Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
   windowFlags |= Qt::WindowCloseButtonHint;
-  windowFlags |= Qt::Tool;
+  //windowFlags |= Qt::Tool;
   this->setWindowFlags( windowFlags );
 
   StopSignal = false;

@@ -37,6 +37,7 @@ WindowNavigatorClass::WindowNavigatorClass(QWidget *parent, MainWindow *mw) :
   this->setWindowFlags( windowFlags );
 
   MainOn = false;
+  DetectorOn = false;
   ReconOn = false;
   OutOn = false;
   MatOn = false;
@@ -186,6 +187,7 @@ void WindowNavigatorClass::HideWindowTriggered(QString w)
   //qDebug() << "WinNav: hide win"<<w;
 
   if (w == "main") MainOn = false;
+  if (w == "detector") DetectorOn = false;
   if (w == "recon") ReconOn = false;
   if (w == "out") OutOn = false;
   if (w == "mat") MatOn = false;
@@ -198,6 +200,7 @@ void WindowNavigatorClass::HideWindowTriggered(QString w)
   if (w == "python") PythonScriptOn = false;
 
   ui->pbMain->setChecked(MainOn);
+  ui->pbDetector->setChecked(DetectorOn);
   ui->pbRecon->setChecked(ReconOn);
   ui->pbOut->setChecked(OutOn);
   ui->pbMaterials->setChecked(MatOn);
@@ -214,6 +217,7 @@ void WindowNavigatorClass::ShowWindowTriggered(QString w)
     if (MW->ShutDown) return;
 
   if (w == "main") MainOn = true;
+  if (w == "detector") DetectorOn = true;
   if (w == "recon") ReconOn = true;
   if (w == "out") OutOn = true;
   if (w == "mat") MatOn = true;
@@ -226,6 +230,7 @@ void WindowNavigatorClass::ShowWindowTriggered(QString w)
   if (w == "python") PythonScriptOn = true;
 
   ui->pbMain->setChecked(MainOn);
+  ui->pbDetector->setChecked(DetectorOn);
   ui->pbRecon->setChecked(ReconOn);
   ui->pbOut->setChecked(OutOn);
   ui->pbMaterials->setChecked(MatOn);
@@ -360,6 +365,11 @@ void WindowNavigatorClass::on_pbMaxAll_clicked()
       MW->showNormal();
       MW->raise();
     }
+  if (DetectorOn)
+  {
+      MW->DAwindow->showNormal();
+      MW->DAwindow->raise();
+  }
   if (ReconOn)
     {
       MW->Rwindow->showNormal();
@@ -433,7 +443,7 @@ void WindowNavigatorClass::on_pbMinAll_clicked()
   QList<QMainWindow*> list;
   list.clear();
 
-  list<<MW->Owindow<<MW->Rwindow<<MW->lrfwindow<<MW->newLrfWindow<<MW->MIwindow<<MW->ELwindow<<MW->GraphWindow<<MW->GeometryWindow<<MW->ScriptWindow;
+  list << MW->DAwindow<<MW->Owindow<<MW->Rwindow<<MW->lrfwindow<<MW->newLrfWindow<<MW->MIwindow<<MW->ELwindow<<MW->GraphWindow<<MW->GeometryWindow<<MW->ScriptWindow;
   if (MW->PythonScriptWindow) list << MW->PythonScriptWindow;
   if (MW->GenScriptWindow) list <<MW->GenScriptWindow;
   if (MW->GainWindow) list << MW->GainWindow;
@@ -455,7 +465,17 @@ void WindowNavigatorClass::on_pbMain_clicked()
        MW->raise();
      }
    else MW->showMinimized();//MW->hide();
-   MainChangeExplicitlyRequested = false;  
+   MainChangeExplicitlyRequested = false;
+}
+
+void WindowNavigatorClass::on_pbDetector_clicked()
+{
+    if ( MW->DAwindow->isHidden() || MW->DAwindow->isMinimized() || (!DetectorOn) )
+    {
+        MW->DAwindow->showNormal();
+        MW->DAwindow->raise();
+    }
+    else MW->DAwindow->hide();
 }
 
 void WindowNavigatorClass::on_pbRecon_clicked()

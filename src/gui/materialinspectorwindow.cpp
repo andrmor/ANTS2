@@ -58,7 +58,7 @@ MaterialInspectorWindow::MaterialInspectorWindow(QWidget * parent, MainWindow * 
 
     Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
     windowFlags |= Qt::WindowCloseButtonHint;
-    windowFlags |= Qt::Tool;
+    //windowFlags |= Qt::Tool;
     this->setWindowFlags( windowFlags );
 
     //SetWasModified(false);

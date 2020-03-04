@@ -62,7 +62,7 @@ ReconstructionWindow::ReconstructionWindow(QWidget * parent, MainWindow * mw, Ev
 
   Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
   windowFlags |= Qt::WindowCloseButtonHint;
-  windowFlags |= Qt::Tool;
+  //windowFlags |= Qt::Tool;
   this->setWindowFlags( windowFlags );
 
   ForbidUpdate = false;  

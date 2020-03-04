@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>91</width>
-    <height>253</height>
+    <height>274</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -43,7 +43,7 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>20</y>
+      <y>40</y>
       <width>91</width>
       <height>23</height>
      </rect>
@@ -59,7 +59,7 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>40</y>
+      <y>60</y>
       <width>91</width>
       <height>23</height>
      </rect>
@@ -78,7 +78,7 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>60</y>
+      <y>80</y>
       <width>91</width>
       <height>23</height>
      </rect>
@@ -94,7 +94,7 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>100</y>
+      <y>120</y>
       <width>91</width>
       <height>23</height>
      </rect>
@@ -113,7 +113,7 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>120</y>
+      <y>140</y>
       <width>91</width>
       <height>23</height>
      </rect>
@@ -129,7 +129,7 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>140</y>
+      <y>160</y>
       <width>91</width>
       <height>23</height>
      </rect>
@@ -145,7 +145,7 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>204</y>
+      <y>224</y>
       <width>118</width>
       <height>3</height>
      </rect>
@@ -158,7 +158,7 @@
     <property name="geometry">
      <rect>
       <x>45</x>
-      <y>207</y>
+      <y>227</y>
       <width>46</width>
       <height>23</height>
      </rect>
@@ -171,7 +171,7 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>207</y>
+      <y>227</y>
       <width>46</width>
       <height>23</height>
      </rect>
@@ -184,7 +184,7 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>231</y>
+      <y>251</y>
       <width>90</width>
       <height>16</height>
      </rect>
@@ -209,7 +209,7 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>180</y>
+      <y>200</y>
       <width>91</width>
       <height>23</height>
      </rect>
@@ -225,7 +225,7 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>160</y>
+      <y>180</y>
       <width>91</width>
       <height>23</height>
      </rect>
@@ -241,13 +241,29 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>80</y>
+      <y>100</y>
       <width>91</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
      <string>New LRF</string>
+    </property>
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pbDetector">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>20</y>
+      <width>91</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Detector</string>
     </property>
     <property name="checkable">
      <bool>true</bool>

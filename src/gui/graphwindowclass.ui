@@ -621,6 +621,51 @@
           <string>Show ruler</string>
          </property>
         </widget>
+        <widget class="Line" name="line_10">
+         <property name="geometry">
+          <rect>
+           <x>3</x>
+           <y>354</y>
+           <width>150</width>
+           <height>3</height>
+          </rect>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+        <widget class="QLabel" name="labCurCoorLab">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>360</y>
+           <width>151</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Cursor coordinates:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="labCursor">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>380</y>
+           <width>151</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>--</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
         <zorder>line</zorder>
         <zorder>fLog</zorder>
         <zorder>fGrid</zorder>
@@ -638,6 +683,9 @@
         <zorder>pbRemoveLegend</zorder>
         <zorder>line_11</zorder>
         <zorder>pbShowRuler</zorder>
+        <zorder>line_10</zorder>
+        <zorder>labCurCoorLab</zorder>
+        <zorder>labCursor</zorder>
        </widget>
        <widget class="QWidget" name="page_2">
         <widget class="QFrame" name="fToolBox">

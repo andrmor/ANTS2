@@ -86,12 +86,18 @@ GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
     ui->sProjBins->setEnabled(false);
     showHintInStatus();
 
+    QString str = "Cursor coordinates ";
+    str += QChar(8596);
+    str += QChar(8597);
+    str += " :";
+    ui->labCurCoorLab->setText(str);
+
     //window flags
     Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
     windowFlags |= Qt::WindowCloseButtonHint;
     windowFlags |= Qt::WindowMinimizeButtonHint;
     windowFlags |= Qt::WindowMaximizeButtonHint;
-    windowFlags |= Qt::Tool;
+    //windowFlags |= Qt::Tool;
     this->setWindowFlags( windowFlags );
 
     //DrawListWidget init
@@ -123,6 +129,9 @@ GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
     RasterWindow->resize(400, 400);
     RasterWindow->ForceResize();
     connect(RasterWindow, &RasterWindowGraphClass::LeftMouseButtonReleased, this, &GraphWindowClass::UpdateControls);
+    connect(RasterWindow, &RasterWindowGraphClass::reportCursorPosition, this, &GraphWindowClass::onCursorPositionReceived);
+
+    setShowCursorPosition(false);
 
     QHBoxLayout* l = dynamic_cast<QHBoxLayout*>(centralWidget()->layout());
     if (l) l->insertWidget(1, RasterWindow);
@@ -577,7 +586,8 @@ void GraphWindowClass::UpdateGuiControlsForMainObject(const QString & ClassName,
     //      qDebug()<<"3D flag:"<<flag3D;
 
     ui->fZrange->setEnabled(flag3D);
-    RasterWindow->setShowCursorPosition(!flag3D);
+    setShowCursorPosition(!flag3D);
+
     ui->leOptions->setText(options);
 
     if ( ClassName.startsWith("TH1") || ClassName == "TF1" )
@@ -663,6 +673,14 @@ void GraphWindowClass::showHintInStatus()
     ui->statusBar->showMessage("Use context menu in \"Currently drawn\" and \"Basket\" to manipulate the objects");
 }
 
+void GraphWindowClass::setShowCursorPosition(bool flag)
+{
+    if (RasterWindow) RasterWindow->ShowCursorPosition = flag;
+
+    ui->labCursor->setVisible(flag);
+    ui->labCurCoorLab->setVisible(flag);
+}
+
 void GraphWindowClass::OnBusyOn()
 {
     ui->fUIbox->setEnabled(false);
@@ -683,12 +701,17 @@ void GraphWindowClass::mouseMoveEvent(QMouseEvent *event)
         return;
     }
 
+    /*
     double x, y;
     QPoint mouseInGV = event->pos() - gvOver->pos();
     RasterWindow->PixelToXY(mouseInGV.x(), mouseInGV.y(), x, y);
-    QString str = "Cursor coordinates: " + QString::number(x, 'g', 4);
+    //QString str = "Cursor coordinates: " + QString::number(x, 'g', 4);
+    QString str = QString::number(x, 'g', 4);
     str += " : " + QString::number(y, 'g', 4);
-    setWindowTitle(str);
+    //setWindowTitle(str);
+    ui->labCursor->setText(str);
+    */
+
     QMainWindow::mouseMoveEvent(event);
 }
 
@@ -2153,6 +2176,27 @@ void GraphWindowClass::deletePressed()
     {
         removeAllSelectedBasketItems();
     }
+}
+
+void GraphWindowClass::onCursorPositionReceived(double x, double y, bool bOn)
+{
+    QString str;
+
+    if (bOn)
+    {
+        /*
+        str = QChar(8596);
+        str += " " + QString::number(x, 'g', 4);
+        str += "  ";
+        str += QChar(8597);
+        str += " " + QString::number(y, 'g', 4);
+        */
+        str += QString::number(x, 'g', 4) + "  "  + QString::number(y, 'g', 4);
+    }
+    else
+        str = "--";
+
+    ui->labCursor->setText(str);
 }
 
 void GraphWindowClass::MakeCopyOfDrawObjects()

@@ -52,6 +52,7 @@ public slots:
 private slots:   
    void on_pbMinAll_clicked();
    void on_pbMain_clicked();
+   void on_pbDetector_clicked();
    void on_pbRecon_clicked();
    void on_pbOut_clicked();
    void on_pbLRF_clicked();
@@ -76,7 +77,7 @@ private:
 
   QString LastProcessedWindow;
   bool DisableBSupdate;
-  bool MainOn, ReconOn, OutOn, LRFon, newLRFon, MatOn, ExamplesOn, GeometryOn, GraphOn, ScriptOn, PythonScriptOn;
+  bool MainOn, DetectorOn, ReconOn, OutOn, LRFon, newLRFon, MatOn, ExamplesOn, GeometryOn, GraphOn, ScriptOn, PythonScriptOn;
 
   bool MainChangeExplicitlyRequested;
 };

@@ -161,7 +161,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
     ELwindow->connectToNavigator(WindowNavigator, "examples");
     Rwindow->connectToNavigator(WindowNavigator, "recon");
     Owindow->connectToNavigator(WindowNavigator, "out");
-    DAwindow->connectToNavigator(WindowNavigator, "");
+    DAwindow->connectToNavigator(WindowNavigator, "detector");
     GeometryWindow->connectToNavigator(WindowNavigator, "geometry");
     GraphWindow->connectToNavigator(WindowNavigator, "graph");
     lrfwindow->connectToNavigator(WindowNavigator, "lrf");

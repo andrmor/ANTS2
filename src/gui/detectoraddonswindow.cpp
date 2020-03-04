@@ -40,14 +40,14 @@
 #include "TGeoCompositeShape.h"
 
 DetectorAddOnsWindow::DetectorAddOnsWindow(QWidget * parent, MainWindow * MW, DetectorClass * detector) :
-  AGuiWindow(MW),
+  AGuiWindow(parent),
   ui(new Ui::DetectorAddOnsWindow),
   MW(MW), Detector(detector)
 {
   ui->setupUi(this);
 
   Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
-  windowFlags |= Qt::Tool;
+  //windowFlags |= Qt::Tool;
   windowFlags |= Qt::WindowCloseButtonHint;
   this->setWindowFlags(windowFlags);
 

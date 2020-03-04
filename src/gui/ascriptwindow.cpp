@@ -70,7 +70,7 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWid
         //not a standalone window
         Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
         windowFlags |= Qt::WindowCloseButtonHint;
-        windowFlags |= Qt::Tool;
+        //windowFlags |= Qt::Tool;
         this->setWindowFlags( windowFlags );
     }
 

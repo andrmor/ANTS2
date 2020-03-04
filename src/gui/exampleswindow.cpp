@@ -22,7 +22,6 @@ ExamplesWindow::ExamplesWindow(QWidget *parent, MainWindow *mw) :
 {  
   MW = mw;
   ui->setupUi(this);
-  //this->setFixedSize(this->size());
 
   Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
   windowFlags |= Qt::Tool;

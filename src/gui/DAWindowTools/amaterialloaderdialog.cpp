@@ -264,8 +264,9 @@ void AMaterialLoaderDialog::generateMatPropRecords()
                 QWidget * comparisonWidget = createComparisonWidget(key, valueFrom, valueTo);
             if (comparisonWidget)
             {
-                lay->addStretch();
+                lay->addWidget(new QLabel("     "));
                 lay->addWidget(comparisonWidget);
+                lay->addStretch();
             }
         item->setSizeHint(wid->sizeHint());
         ui->lwProps->setItemWidget(item, wid);
@@ -403,14 +404,32 @@ QWidget *AMaterialLoaderDialog::createComparisonWidget(const QString & key, cons
     if (key == "ChemicalComposition")
     {
         QJsonObject from = valueFrom.toObject();
-        QJsonObject to   = valueTo.toObject();
+        QJsonObject to   =   valueTo.toObject();
+
         QString sfrom = from["ElementCompositionString"].toString();
         QString sto   = to  ["ElementCompositionString"].toString();
+
+        if (sfrom.isEmpty()) sfrom = "Undefined";
+        if (sto  .isEmpty()) sto   = "Undefined";
+
         w = makeWidget(sfrom, sto);
     }
     else if (valueFrom.isDouble() && valueTo.isDouble())
     {
         w = makeWidget(QString::number(valueFrom.toDouble()), QString::number(valueTo.toDouble()));
+    }
+    else if (valueFrom.isArray() && valueTo.isArray())
+    {
+        QJsonArray from = valueFrom.toArray();
+        QJsonArray to   =   valueTo.toArray();
+
+        int sizeFrom = from.size();
+        int sizeTo   = to.size();
+
+        QString sfrom = QString("[%1]").arg(sizeFrom);
+        QString sto   = QString("[%1]").arg(sizeTo);
+
+        w = makeWidget(sfrom, sto);
     }
 
     return w;

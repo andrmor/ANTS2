@@ -187,6 +187,11 @@ void AMaterialLoaderDialog::on_pbLoad_clicked()
 
         MaterialJsonTarget["MatParticles"] = ArrMP;
 
+        //comments:
+        QString MatFromComments = MaterialJsonFrom["Comments"].toString();
+        QString MatToComments   = MaterialJsonTarget["Comments"].toString();
+        MaterialJsonTarget["Comments"] = ">>>>>> Original material comments:\n" + MatToComments + "\n\n>>>>>> Comments from merging-in material:\n" + MatFromComments;
+
         //MaterialJsonFrom will be returned to the loader
         MaterialJsonFrom = MaterialJsonTarget;
     }

@@ -69,6 +69,7 @@ private:
     const QVector<QString> getForcedByNeutron() const;
     AParticleRecordForMerge * findParticleRecord(const QString & particleName);
     QWidget * createComparisonWidget(const QString & key, const QJsonValue & valueFrom, const QJsonValue & valueTo);
+    QWidget * createComparisonWidgetMatParticle(const QJsonObject & jsonFrom, const QJsonObject & jsonTo);
     const QString convertJsonNameToReadable(const QString & key) const;
 
     void clearParticleRecords();

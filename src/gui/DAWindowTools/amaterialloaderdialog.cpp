@@ -208,7 +208,7 @@ void AMaterialLoaderDialog::mergeWithExistentMaterial()
     //comments:
     QString MatFromComments = MaterialJsonFrom["Comments"].toString();
     QString MatToComments   = MaterialJsonTarget["Comments"].toString();
-    MaterialJsonTarget["Comments"] = ">>>>>> Original material comments:\n" + MatToComments + "\n\n>>>>>> Comments from merged-in material:\n" + MatFromComments;
+    MaterialJsonTarget["Comments"] = ">>>>>> Original material comments:\n" + MatToComments + QString("\n\n>>>>>> Comments from merged-in material (%1):\n").arg(NameInFile) + MatFromComments;
 
     //MaterialJsonFrom will be returned to the loader
     MaterialJsonFrom = MaterialJsonTarget;
@@ -258,8 +258,6 @@ void AMaterialLoaderDialog::generateMatPropRecords()
     const AMaterial * matTo = MpCollection[iMat];
     matTo->writeToJson(MaterialJsonTarget, &MpCollection);
 
-    //TODO: hadling of "comments"
-
     QSet<QString> Ignore;
     Ignore << "*MaterialName" << "Comments" << "TGeoP1" << "TGeoP2" << "TGeoP3" << "MatParticles";
     foreach (const QString & key, MaterialJsonFrom.keys())
@@ -276,6 +274,7 @@ void AMaterialLoaderDialog::generateMatPropRecords()
         QListWidgetItem * item = new QListWidgetItem(ui->lwProps);
         QWidget * wid = new QWidget();
             QHBoxLayout * lay = new QHBoxLayout(wid);
+            lay->setContentsMargins(6,2,6,2);
                 QCheckBox * cb = new QCheckBox(convertJsonNameToReadable(key));
                 rec->connectGuiResources(cb);
                 connect(cb, &QCheckBox::clicked, [this, rec](bool flag)
@@ -358,7 +357,8 @@ void AMaterialLoaderDialog::generateInteractionRecords()
         QListWidgetItem * item = new QListWidgetItem(ui->lwProps);
         QWidget * wid = new QWidget();
             QHBoxLayout * lay = new QHBoxLayout(wid);
-                QCheckBox * cb = new QCheckBox("Interaction properties for " + ParticleFrom.ParticleName);
+            lay->setContentsMargins(6,2,6,2);
+                QCheckBox * cb = new QCheckBox("Interaction for " + ParticleFrom.ParticleName);
                 rec->connectGuiResources(cb);
                 connect(cb, &QCheckBox::clicked, [this, rec](bool flag)
                 {
@@ -366,6 +366,11 @@ void AMaterialLoaderDialog::generateInteractionRecords()
                     ui->cbToggleAllProps->setChecked(false);
                 });
             lay->addWidget(cb);
+            lay->addWidget(new QLabel("     "));
+                QWidget * comparisonWidget = createComparisonWidgetMatParticle(jsonFrom, jsonTo);
+            lay->addWidget(comparisonWidget);
+            lay->addStretch();
+        //wid->setToolTip(comparisonWidget->toolTip());
         item->setSizeHint(wid->sizeHint());
         ui->lwProps->setItemWidget(item, wid);
     }
@@ -412,6 +417,8 @@ QWidget * makeWidget(const QString & s1, const QString & s2)
 {
     QWidget * w = new QWidget();
     QHBoxLayout * lay = new QHBoxLayout(w);
+    //lay->setContentsMargins(6,2,6,2);
+    lay->setContentsMargins(0,0,0,0);
         QLabel * l = new QLabel(s1);
         lay->addWidget(l);
         l = new QLabel(QChar(8594));
@@ -459,18 +466,44 @@ QWidget *AMaterialLoaderDialog::createComparisonWidget(const QString & key, cons
         if (key == "*Tags")
         {
             QString sFrom;
-            for (int i=0; i<sizeFrom; i++) sFrom += from.at(i).toString() + ", ";
-            if (sFrom.size() > 1)  sFrom.chop(2);
-            if (sFrom.isEmpty()) sFrom = "Undefined";
             QString sTo;
-            for (int i=0; i<sizeFrom; i++) sTo   +=   to.at(i).toString() + ", ";
+            for (int i=0; i<sizeFrom; i++) sFrom += from.at(i).toString() + ", ";
+            for (int i=0; i<sizeTo;   i++)   sTo +=   to.at(i).toString() + ", ";
+            if (sFrom.size() > 1)  sFrom.chop(2);
             if (sTo.size()   > 1)    sTo.chop(2);
+            if (sFrom.isEmpty()) sFrom = "Undefined";
             if (sTo.isEmpty())     sTo = "Undefined";
             w->setToolTip(sFrom + "\n\nwill replace\n\n" + sTo);
         }
     }
 
     return w;
+}
+
+const QString makeStringForMatParticleComparison(const QJsonObject &json)
+{
+    if ( !json["TrackingAllowed"].toBool() ) return "No tracking";
+    if (json["MatIsTransparent"].toBool()) return "Transparent";
+
+    QString s;
+    if (json.contains("TotalInteraction"))
+    {
+        QJsonArray ar = json["TotalInteraction"].toArray();
+        s += QString("Data[%1]").arg(ar.size());
+    }
+    if (json.contains("Terminators"))
+    {
+        QJsonArray ar = json["Terminators"].toArray();
+        s += QString("Term[%1]").arg(ar.size());
+    }
+    return s;
+}
+
+QWidget *AMaterialLoaderDialog::createComparisonWidgetMatParticle(const QJsonObject &jsonFrom, const QJsonObject &jsonTo)
+{
+    const QString sfrom = makeStringForMatParticleComparison(jsonFrom);
+    const QString sto   = makeStringForMatParticleComparison(jsonTo);
+    return makeWidget(sfrom, sto);
 }
 
 const QString AMaterialLoaderDialog::convertJsonNameToReadable(const QString & key) const

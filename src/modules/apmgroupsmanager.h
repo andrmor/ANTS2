@@ -55,7 +55,7 @@ public:
     inline bool isPmBelongsToGroupFast(int ipm, int igroup) const {return Groups.at(igroup)->PMS.at(ipm).member;}
     inline bool isPmInCurrentGroupFast(int ipm) const {return Groups.at(CurrentGroup)->PMS.at(ipm).member;}
     int countPMsWithoutGroup(QVector<int>* unassigned=0) const;
-    int countStaticPassives() const;
+    int countStaticPassives();
 
     // manipulating groups
     void clearPMgroups(bool fSkipJsonUpdate=false);  //leave one default PM group

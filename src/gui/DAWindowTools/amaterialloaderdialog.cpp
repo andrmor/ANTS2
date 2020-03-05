@@ -205,7 +205,7 @@ void AMaterialLoaderDialog::mergeWithExistentMaterial()
 
     MaterialJsonTarget["MatParticles"] = ArrMP;
 
-    //comments:
+    //comments
     QString MatFromComments = MaterialJsonFrom["Comments"].toString();
     QString MatToComments   = MaterialJsonTarget["Comments"].toString();
     MaterialJsonTarget["Comments"] = ">>>>>> Original material comments:\n" + MatToComments + QString("\n\n>>>>>> Comments from merged-in material (%1):\n").arg(NameInFile) + MatFromComments;

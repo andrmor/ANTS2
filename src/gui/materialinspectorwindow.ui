@@ -2625,6 +2625,12 @@ Wavelengths shoul be given in increasing order</string>
                            <layout class="QHBoxLayout" name="horizontalLayout_40">
                             <item>
                              <widget class="QPushButton" name="pbImportXCOM">
+                              <property name="minimumSize">
+                               <size>
+                                <width>0</width>
+                                <height>21</height>
+                               </size>
+                              </property>
                               <property name="font">
                                <font>
                                 <weight>50</weight>
@@ -2641,6 +2647,12 @@ Wavelengths shoul be given in increasing order</string>
                             </item>
                             <item>
                              <widget class="QPushButton" name="pbNistPage">
+                              <property name="minimumSize">
+                               <size>
+                                <width>0</width>
+                                <height>21</height>
+                               </size>
+                              </property>
                               <property name="toolTip">
                                <string>http://physics.nist.gov/PhysRefData/Xcom/html/xcom1-t.html    Use default cm2/g units!</string>
                               </property>
@@ -2657,6 +2669,12 @@ Wavelengths shoul be given in increasing order</string>
                               <property name="enabled">
                                <bool>false</bool>
                               </property>
+                              <property name="minimumSize">
+                               <size>
+                                <width>0</width>
+                                <height>21</height>
+                               </size>
+                              </property>
                               <property name="toolTip">
                                <string>Show loaded XCOM data</string>
                               </property>
@@ -2669,6 +2687,12 @@ Wavelengths shoul be given in increasing order</string>
                           </item>
                           <item>
                            <widget class="QPushButton" name="pbXCOMauto">
+                            <property name="minimumSize">
+                             <size>
+                              <width>0</width>
+                              <height>21</height>
+                             </size>
+                            </property>
                             <property name="font">
                              <font>
                               <weight>75</weight>

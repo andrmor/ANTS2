@@ -471,6 +471,9 @@ void MaterialInspectorWindow::on_pbUpdateTmpMaterial_clicked()
 {  
     AMaterial & tmpMaterial = MpCollection->tmpMaterial;
 
+    const int ParticleId = ui->cobParticle->currentIndex();
+    if (ParticleId < 0 || ParticleId >= MpCollection->countParticles()) return; //transient update
+
     tmpMaterial.name = ui->leName->text();
     tmpMaterial.density = ui->ledDensity->text().toDouble();    
     tmpMaterial.temperature = ui->ledT->text().toDouble();
@@ -483,7 +486,6 @@ void MaterialInspectorWindow::on_pbUpdateTmpMaterial_clicked()
     if (iP > -1 && iP < tmpMaterial.MatParticle.size()) tmpMaterial.MatParticle[iP].PhYield = prYield;
     else tmpMaterial.PhotonYieldDefault = prYield;
 
-    const int ParticleId = ui->cobParticle->currentIndex();
     tmpMaterial.MatParticle[ParticleId].TrackingAllowed = ui->cbTrackingAllowed->isChecked();
     tmpMaterial.MatParticle[ParticleId].MaterialIsTransparent = ui->cbTransparentMaterial->isChecked();
     tmpMaterial.MatParticle[ParticleId].bCaptureEnabled = ui->cbCapture->isChecked();

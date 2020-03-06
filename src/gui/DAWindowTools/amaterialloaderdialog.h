@@ -33,6 +33,7 @@ private slots:
     void on_pbDummt_clicked();
     void on_pbLoad_clicked();
     void on_pbCancel_clicked();
+
     void on_leName_textChanged(const QString &arg1);
     void on_twMain_currentChanged(int index);
     void on_cbToggleAllParticles_clicked(bool checked);
@@ -141,6 +142,17 @@ private:
 
 private:
     void updateIndication();
+};
+
+#include <QListWidgetItem>
+class AListWidgetItem : public QListWidgetItem
+{
+public:
+    AListWidgetItem(QListWidget * parent) : QListWidgetItem(parent){}
+
+    QCheckBox * cb = nullptr;
+
+    bool operator<(const QListWidgetItem &other) const override;
 };
 
 #endif // AMATERIALLOADERDIALOG_H

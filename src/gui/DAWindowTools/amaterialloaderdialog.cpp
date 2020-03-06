@@ -271,19 +271,19 @@ void AMaterialLoaderDialog::generateMatPropRecords()
         APropertyRecordForMerge * rec = new APropertyRecordForMerge(key, valueFrom);
         PropertyRecords << rec;
 
-        QListWidgetItem * item = new QListWidgetItem(ui->lwProps);
+        AListWidgetItem * item = new AListWidgetItem(ui->lwProps);
         QWidget * wid = new QWidget();
             QHBoxLayout * lay = new QHBoxLayout(wid);
             lay->setContentsMargins(6,2,6,2);
-                QCheckBox * cb = new QCheckBox(convertJsonNameToReadable(key));
-                rec->connectGuiResources(cb);
-                connect(cb, &QCheckBox::clicked, [this, rec](bool flag)
+                item->cb = new QCheckBox(convertJsonNameToReadable(key));
+                rec->connectGuiResources(item->cb);
+                connect(item->cb, &QCheckBox::clicked, [this, rec](bool flag)
                 {
                     rec->setChecked(flag);
                     ui->cbToggleAllProps->setChecked(false);
                     //updateParticleGui();
                 });
-            lay->addWidget(cb);
+            lay->addWidget(item->cb);
                 QWidget * comparisonWidget = createComparisonWidget(key, valueFrom, valueTo);
             if (comparisonWidget)
             {
@@ -297,6 +297,8 @@ void AMaterialLoaderDialog::generateMatPropRecords()
     }
 
     generateInteractionRecords();
+
+    ui->lwProps->sortItems();
 
     int iDifProps = PropertyRecords.size() + MatParticleRecords.size();
     ui->cbToggleAllProps->setVisible(iDifProps > 1);
@@ -354,18 +356,18 @@ void AMaterialLoaderDialog::generateInteractionRecords()
             particleRec->connectPropertyRecord(rec);
         }
 
-        QListWidgetItem * item = new QListWidgetItem(ui->lwProps);
+        AListWidgetItem * item = new AListWidgetItem(ui->lwProps);
         QWidget * wid = new QWidget();
             QHBoxLayout * lay = new QHBoxLayout(wid);
             lay->setContentsMargins(6,2,6,2);
-                QCheckBox * cb = new QCheckBox("Interaction for " + ParticleFrom.ParticleName);
-                rec->connectGuiResources(cb);
-                connect(cb, &QCheckBox::clicked, [this, rec](bool flag)
+                item->cb = new QCheckBox("Interaction for " + ParticleFrom.ParticleName);
+                rec->connectGuiResources(item->cb);
+                connect(item->cb, &QCheckBox::clicked, [this, rec](bool flag)
                 {
                     rec->setChecked(flag);
                     ui->cbToggleAllProps->setChecked(false);
                 });
-            lay->addWidget(cb);
+            lay->addWidget(item->cb);
             lay->addWidget(new QLabel("     "));
                 QWidget * comparisonWidget = createComparisonWidgetMatParticle(jsonFrom, jsonTo);
             lay->addWidget(comparisonWidget);
@@ -650,4 +652,14 @@ void APropertyRecordForMerge::updateIndication()
         CheckBox->setChecked(bChecked);
         CheckBox->setEnabled(!bDisabled);
     }
+}
+
+bool AListWidgetItem::operator<(const QListWidgetItem & other) const
+{
+    const AListWidgetItem * pOther = dynamic_cast<const AListWidgetItem*>(&other);
+    if (!pOther) return QListWidgetItem::operator<(other);
+
+    if (!cb || !pOther->cb) return QListWidgetItem::operator<(other);
+
+    return cb->text() < pOther->cb->text();
 }

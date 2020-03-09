@@ -45,7 +45,8 @@ AGeoTreeWidget::AGeoTreeWidget(ASandwich *Sandwich) : Sandwich(Sandwich)
   World = Sandwich->World;
 
   connect(this, SIGNAL(itemSelectionChanged()), this, SLOT(onItemSelectionChanged()));
-  setHeaderLabels(QStringList() << "Tree of geometry objects: use context menu and drag-and-drop");
+  //setHeaderLabels(QStringList() << "Tree of geometry objects: use context menu and drag-and-drop");
+  setHeaderHidden(true);
 
   setAcceptDrops(true);
   setDragEnabled(true);
@@ -272,7 +273,13 @@ void AGeoTreeWidget::updateExpandState(QTreeWidgetItem *item)
 }
 
 void AGeoTreeWidget::dropEvent(QDropEvent* event)
-{  
+{
+    if (previousHoverItem)
+    {
+        previousHoverItem->setBackgroundColor(0, Qt::white);
+        previousHoverItem = nullptr;
+    }
+
     QList<QTreeWidgetItem*> selected = selectedItems();
 
     QTreeWidgetItem * itemTo = this->itemAt(event->pos());
@@ -446,7 +453,8 @@ void AGeoTreeWidget::dragEnterEvent(QDragEnterEvent *event)
     //qDebug() << "Drag enter. Selection size:"<< selectedItems().size();
     //attempt to drag items contaning locked objects should be canceled!
 
-    for (int iItem = 0; iItem < selectedItems().size(); iItem++)
+    const int numItems = selectedItems().size();
+    for (int iItem = 0; iItem < numItems; iItem++)
     {
         QTreeWidgetItem * DraggedItem = selectedItems().at(iItem);
         QString DraggedName = DraggedItem->text(0);
@@ -459,6 +467,12 @@ void AGeoTreeWidget::dragEnterEvent(QDragEnterEvent *event)
             return;
         }
     }
+
+    // Drop and mouseRelease are not fired if drop on the same item as started -> teal highlight is not removed
+    // Clumsy fix - do not show teal highlight if the item is the same
+    movingItem = ( numItems > 0 ? selectedItems().at(0)
+                                : nullptr);
+
     event->accept();
 }
 
@@ -479,7 +493,7 @@ void AGeoTreeWidget::dragMoveEvent(QDragMoveEvent *event)
     if (!bRearrange)
     {
         QTreeWidgetItem * itemOver = this->itemAt(event->pos());
-        if (itemOver)
+        if (itemOver && itemOver != movingItem)
         {
             itemOver->setBackgroundColor(0, Qt::cyan);
             previousHoverItem = itemOver;

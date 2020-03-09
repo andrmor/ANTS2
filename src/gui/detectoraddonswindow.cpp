@@ -56,6 +56,7 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(QWidget * parent, MainWindow * MW, De
   // tree widget
   twGeo = new AGeoTreeWidget(Detector->Sandwich);
   ui->saGeo->setWidget(twGeo);
+  /*
   twGeo->setToolTip("Use context menu to manipulate objects\n"
                     "\n"
                     "Drag & drop can be used to move items from one container to another\n"
@@ -63,6 +64,7 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(QWidget * parent, MainWindow * MW, De
                     "Drop when Alt_or_Shift_or_Control is pressed changes the order of item within the SAME container\n"
                     "  In case reorder is triggered inside a stack, positions of the objects are recalculated\n"
                     "  using the original position of the moved object as the reference.");
+  */
   connect(twGeo, SIGNAL(itemExpanded(QTreeWidgetItem*)), twGeo, SLOT(onItemExpanded(QTreeWidgetItem*)));
   connect(twGeo, SIGNAL(itemCollapsed(QTreeWidgetItem*)), twGeo, SLOT(onItemCollapsed(QTreeWidgetItem*)));
   connect(twGeo, SIGNAL(RequestListOfParticles(QStringList&)), Detector->MpCollection, SLOT(OnRequestListOfParticles(QStringList&)));
@@ -1270,4 +1272,20 @@ void DetectorAddOnsWindow::on_pbConvertToScript_clicked()
     MW->ScriptWindow->showNormal();
     MW->ScriptWindow->raise();
     MW->ScriptWindow->activateWindow();
+}
+
+void DetectorAddOnsWindow::on_pbWorldTreeHelp_clicked()
+{
+    QString s = "Use context menu to manipulate objects\n"
+                "\n"
+                "Drag & drop can be used to move items\n"
+                "  from one container to another\n"
+                "\n"
+                "Drop when Alt or Shift or Control is pressed\n"
+                "  changes the item order within the SAME container\n"
+                "\n"
+                "  In case reorder is triggered inside a stack, positions\n"
+                "  of the objects are recalculated using the original\n"
+                "  position of the moved object as the reference.";
+    message(s, this);
 }

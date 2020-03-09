@@ -58,6 +58,7 @@ private:
   bool fSpecialGeoViewMode;
 
   QTreeWidgetItem * previousHoverItem = nullptr;
+  const QTreeWidgetItem * movingItem = nullptr;  // used only to prevent highlight of item under the moving one if it is the same as target
 
   void populateTreeWidget(QTreeWidgetItem *parent, AGeoObject *Container, bool fDisabled = false);
   void updateExpandState(QTreeWidgetItem* item); //recursive!

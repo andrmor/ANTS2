@@ -72,6 +72,8 @@ private slots:
 
   void on_pbConvertToScript_clicked();
 
+  void on_pbWorldTreeHelp_clicked();
+
 private:
   Ui::DetectorAddOnsWindow *ui;
   MainWindow* MW;

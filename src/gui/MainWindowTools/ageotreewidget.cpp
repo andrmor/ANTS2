@@ -3467,10 +3467,10 @@ AGeoPolygonDelegate::AGeoPolygonDelegate(const QStringList &materials, QWidget *
 
     gr->addWidget(new QLabel("Number of edges:"),      0, 0);
     gr->addWidget(new QLabel("Height:"),               1, 0);
-    gr->addWidget(new QLabel("Lower inner diameter:"), 2, 0);
-    gr->addWidget(new QLabel("Lower outer diameter:"), 3, 0);
-    gr->addWidget(new QLabel("Upper inner diameter:"), 4, 0);
-    gr->addWidget(new QLabel("Upper outer diameter:"), 5, 0);
+    gr->addWidget(new QLabel("Lower outer diameter:"), 2, 0);
+    gr->addWidget(new QLabel("Lower inner diameter:"), 3, 0);
+    gr->addWidget(new QLabel("Upper outer diameter:"), 4, 0);
+    gr->addWidget(new QLabel("Upper inner diameter:"), 5, 0);
     gr->addWidget(new QLabel("Angle:"),                6, 0);
 
     sbn = new QSpinBox();  gr->addWidget(sbn, 0, 1); sbn->setMinimum(3);

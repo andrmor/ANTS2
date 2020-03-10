@@ -963,7 +963,7 @@
          <rect>
           <x>176</x>
           <y>27</y>
-          <width>369</width>
+          <width>393</width>
           <height>29</height>
          </rect>
         </property>
@@ -8348,13 +8348,13 @@ Individual sensors can belong to multiple groups!</string>
              </property>
             </item>
            </widget>
-           <widget class="QWidget" name="">
+           <widget class="QWidget" name="layoutWidget">
             <property name="geometry">
              <rect>
               <x>152</x>
               <y>30</y>
-              <width>180</width>
-              <height>24</height>
+              <width>282</width>
+              <height>29</height>
              </rect>
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -12804,7 +12804,7 @@ Beware of bugs!</string>
      </font>
     </property>
     <property name="toolTip">
-     <string>Switch off all event filters, excpet script pass filter.</string>
+     <string>Switch off all event filters, except script filter</string>
     </property>
     <property name="text">
      <string>C</string>

@@ -1068,7 +1068,7 @@ void DetectorAddOnsWindow::on_pmParseInGeometryFromGDML_clicked()
     //qDebug() << "----------------------------"<<Detector->GeoManager->GetPath();
 
     Detector->writeToJson(MW->Config->JSON);
-    //SaveJsonToFile(MW->Config->JSON, "D:/temp/CONFIGJSON.json");
+    SaveJsonToFile(MW->Config->JSON, "/home/davide/ANTS2/ANTS2_ConfigurationFiles/ANTS2_Created/temp.json");
     qDebug() << "Rebuilding detector...";
     Detector->BuildDetector(); 
 }

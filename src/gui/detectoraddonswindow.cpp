@@ -1047,6 +1047,8 @@ void DetectorAddOnsWindow::on_pmParseInGeometryFromGDML_clicked()
         counter++;
     }
     if (counter==0) Detector->PMs->appendNewPMtype(new APmType()); //maybe there are no PMs in the file or template error
+    qDebug() << "SDP: Total PMs added:"<<counter; // Just to repeat again how many PM have been found
+
 
     //==== geometry ====
     qDebug() << "Processing geometry";

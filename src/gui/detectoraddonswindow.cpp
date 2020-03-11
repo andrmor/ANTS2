@@ -797,7 +797,7 @@ void readGeoObjectTree(AGeoObject* obj, const TGeoNode* node,
                        DetectorClass* Detector, TGeoNavigator* navi, TString path)
 {
     obj->Name = node->GetName();
-    //qDebug() << "\nNode name:"<<obj->Name<<"Num nodes:"<<node->GetNdaughters();
+    // qDebug() << "\nNode name:"<<obj->Name<<"Num nodes:"<<node->GetNdaughters();
     path += node->GetName();
 
     //material
@@ -863,6 +863,8 @@ void readGeoObjectTree(AGeoObject* obj, const TGeoNode* node,
 
     //hosted nodes
     int totNodes = node->GetNdaughters();
+    QString pmtTemplate1 = "Bottom_PMT_Photocathode";
+    QString pmtTemplate2 = "Top_PMT_Photocathode";
     //qDebug() << "Number of hosted nodes:"<<totNodes;
     for (int i=0; i<totNodes; i++)
     {
@@ -871,12 +873,12 @@ void readGeoObjectTree(AGeoObject* obj, const TGeoNode* node,
         //qDebug() << i<< name;
 
 
-        if (name.startsWith(PMtemplate))
+        if (name.startsWith(pmtTemplate1) || name.startsWith(pmtTemplate2))
         {
-            //qDebug() << "  Found PM!";
-            //qDebug() << "  path:"<<path+"/"+daugtherNode->GetName();
+            qDebug() << "  Found PM!";
+            qDebug() << "  path:"<<path+"/"+daugtherNode->GetName();
             navi->cd(path+"/"+daugtherNode->GetName());
-            //qDebug() << navi->GetCurrentNode()->GetName();
+            qDebug() << navi->GetCurrentNode()->GetName();
             double PosLocal[3] = {0,0,0};
             double PosGlobal[3];
             navi->LocalToMaster(PosLocal, PosGlobal);
@@ -900,10 +902,12 @@ void readGeoObjectTree(AGeoObject* obj, const TGeoNode* node,
             double psi = eu[2]*radToGrad;
 
             TGeoVolume* vol = daugtherNode->GetVolume();
+            bool yess = true;
             for (int PmType = 0;PmType<Detector->PMs->countPMtypes(); PmType++)
-                if (vol == Detector->PMs->getType(PmType)->tmpVol)
+                // if (vol == Detector->PMs->getType(PmType)->tmpVol)
+              if (yess)
                 {
-                     //qDebug() << " Registering as type:"<<PmType;
+                     qDebug() << " Registering as type:"<<PmType;
                      Detector->PMarrays[0].PositionsAnglesTypes.append(APmPosAngTypeRecord(PosGlobal[0], PosGlobal[1], PosGlobal[2],
                                                                                            phi, theta, psi, PmType));
                      break;
@@ -1002,6 +1006,7 @@ void DetectorAddOnsWindow::on_pmParseInGeometryFromGDML_clicked()
     Detector->MpCollection->readFromJson(mats);
 
     //==== PM types ====
+    QString PMTypeName = "referencePmtPhotocathode";
     Detector->PMs->clearPMtypes();
     Detector->PMarrays[0].Regularity = 2;
     Detector->PMarrays[0].fActive = true;
@@ -1013,12 +1018,13 @@ void DetectorAddOnsWindow::on_pmParseInGeometryFromGDML_clicked()
     {
         TGeoVolume* vol = (TGeoVolume*)list->At(i);
         QString Vname = vol->GetName();
-        if (!Vname.startsWith(PMtemplate)) continue;
+        qDebug() << Vname << vol->GetPointerName();
+        if (!Vname.startsWith(PMTypeName)) continue;
 
         QString PMshape = vol->GetShape()->ClassName();
         qDebug() << "Found new PM type:"<<Vname<<"Shape:"<<PMshape;
         APmType *type = new APmType();
-        type->Name = PMtemplate + QString::number(counter);
+        type->Name = PMTypeName + QString::number(counter);
         type->MaterialIndex = tmpMats.FindMaterial(vol->GetMaterial()->GetName());
         type->tmpVol = vol;
         if (PMshape=="TGeoBBox")

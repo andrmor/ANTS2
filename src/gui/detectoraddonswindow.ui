@@ -1119,7 +1119,7 @@
                 <string>Sensor name starts with this string</string>
                </property>
                <property name="text">
-                <string>pmtPhotocathode_log</string>
+                <string>Bottom_PMT_Photocathode</string>
                </property>
               </widget>
              </item>

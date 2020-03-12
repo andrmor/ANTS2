@@ -179,7 +179,7 @@ public:
 
     void ShowGeoMarkers(); //Show dots on ALREADY PREPARED geometry window!
 
-    void CheckPresenseOfSecScintillator();
+    //void CheckPresenseOfSecScintillator();
     void DeleteLoadedEvents(bool KeepFileList = false);       
     void SavePreprocessingAddMulti(QString fileName);
     void LoadPreprocessingAddMulti(QString filename);

@@ -84,7 +84,7 @@ void MainWindow::onRequestDetectorGuiUpdate()
   ui->cbFixedTopSize->setChecked( Detector->fWorldSizeFixed );
   //misc
   ShowPMcount();
-  CheckPresenseOfSecScintillator(); //checks if SecScint present, and update selectors of primary/secondary scintillation  //***!!! potentially slow on large geometries!!!
+  //CheckPresenseOfSecScintillator(); //checks if SecScint present, and update selectors of primary/secondary scintillation  //***!!! potentially slow on large geometries!!!
   //Sandwich - now automatic
   //PM explore
   on_pbIndPMshowInfo_clicked();

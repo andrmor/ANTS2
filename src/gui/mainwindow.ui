@@ -9556,7 +9556,7 @@ Right click: toggle build photon tracks. Also switches of building particle trac
             </attribute>
             <widget class="QComboBox" name="cobScintTypePointSource">
              <property name="enabled">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
              <property name="geometry">
               <rect>
@@ -9571,6 +9571,9 @@ Right click: toggle build photon tracks. Also switches of building particle trac
                <weight>50</weight>
                <bold>false</bold>
               </font>
+             </property>
+             <property name="toolTip">
+              <string>Secondary scintillation is generated only in the volume named &quot;SecScint&quot;</string>
              </property>
              <item>
               <property name="text">
@@ -9591,6 +9594,9 @@ Right click: toggle build photon tracks. Also switches of building particle trac
                <width>141</width>
                <height>20</height>
               </rect>
+             </property>
+             <property name="toolTip">
+              <string>Secondary scintillation is generated only in the volume named &quot;SecScint&quot;</string>
              </property>
              <property name="text">
               <string>Scintillation type:</string>
@@ -10186,7 +10192,7 @@ Right click: toggle build photon tracks. Also switches of building particle trac
         <widget class="QWidget" name="page_3">
          <widget class="QCheckBox" name="cbGunDoS2">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <property name="geometry">
            <rect>
@@ -10201,6 +10207,9 @@ Right click: toggle build photon tracks. Also switches of building particle trac
             <weight>50</weight>
             <bold>false</bold>
            </font>
+          </property>
+          <property name="toolTip">
+           <string>Secondary scintillation is generated only in the volume named &quot;SecScint&quot;</string>
           </property>
           <property name="text">
            <string>Secondary scintillation</string>

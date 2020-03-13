@@ -47,7 +47,6 @@ void AGuiWindow::readFromJson(const QString & winName, const QJsonObject & json)
     else hide();
 }
 
-//#include <QApplication>
 bool AGuiWindow::event(QEvent *event)
 {
     if (event->type() == QEvent::WindowStateChange)

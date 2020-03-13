@@ -28,8 +28,7 @@ protected:
     int WinPos_Y = 40;
     int WinSize_W = 800;
     int WinSize_H = 600;
-    bool bWinVisible = true;
-    bool bWinMaximized = false;
+    bool bWinVisible = false;
 
 private:
     WindowNavigatorClass * WNav = nullptr;

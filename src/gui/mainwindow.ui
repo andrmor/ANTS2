@@ -5923,7 +5923,7 @@ materials</string>
          </rect>
         </property>
         <property name="text">
-         <string>Add</string>
+         <string>Lib</string>
         </property>
        </widget>
        <zorder>line_6</zorder>
@@ -9301,9 +9301,6 @@ Right click: toggle build photon tracks. Also switches of building particle trac
                   </spacer>
                  </item>
                 </layout>
-                <zorder>label_17</zorder>
-                <zorder>ledConeAngle</zorder>
-                <zorder>label_19</zorder>
                 <zorder>horizontalSpacer</zorder>
                 <zorder>horizontalSpacer_2</zorder>
                </widget>
@@ -9322,12 +9319,6 @@ Right click: toggle build photon tracks. Also switches of building particle trac
                </spacer>
               </item>
              </layout>
-             <zorder>label_222</zorder>
-             <zorder>label_224</zorder>
-             <zorder>label_226</zorder>
-             <zorder>ledSingleDZ</zorder>
-             <zorder>ledSingleDY</zorder>
-             <zorder>ledSingleDX</zorder>
              <zorder>cobFixedDirOrCone</zorder>
              <zorder>fConeForPhotonGen</zorder>
              <zorder>verticalSpacer</zorder>

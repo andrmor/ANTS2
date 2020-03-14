@@ -34,7 +34,7 @@
 #include "TVirtualGeoTrack.h"
 
 GeometryWindowClass::GeometryWindowClass(QWidget *parent, MainWindow *mw) :
-  AGuiWindow(parent), MW(mw),
+  AGuiWindow("geometry", parent), MW(mw),
   ui(new Ui::GeometryWindowClass)
 {    
     ui->setupUi(this);

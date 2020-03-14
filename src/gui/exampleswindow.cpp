@@ -17,7 +17,7 @@
 #include <QDateTime>
 
 ExamplesWindow::ExamplesWindow(QWidget *parent, MainWindow *mw) :
-  AGuiWindow(parent),
+  AGuiWindow("examples", parent),
   ui(new Ui::ExamplesWindow)
 {  
   MW = mw;
@@ -276,7 +276,7 @@ void ExamplesWindow::on_pbLoadExample_clicked()
 void ExamplesWindow::on_lwExample_doubleClicked(const QModelIndex &index)
 {
   ui->lwExample->setCurrentRow(index.row());
-  ExamplesWindow::on_pbLoadExample_clicked();
+  on_pbLoadExample_clicked();
 }
 
 void ExamplesWindow::on_pbSaveSessings_clicked()
@@ -302,6 +302,7 @@ void ExamplesWindow::on_pbLoadSettings_clicked()
   {
       this->close();
       if (MW->GeometryWindow->isVisible()) MW->GeometryWindow->ShowGeometry();
+      MW->show();
   }
   MW->GeometryDrawDisabled = false; //<-
 }
@@ -317,7 +318,7 @@ void ExamplesWindow::QuickLoad(int i, QWidget *parent)
   if (!QFileInfo(fileName).exists())
   {
       QString s;
-      if (i==0) s = "Save on exit configuration file not found";
+      if (i==0) s = "Autosave file not found";
       else      s = "Quick save slot # " + QString::number(i) + " is empty";
       message(s, parent);
       return;
@@ -327,8 +328,13 @@ void ExamplesWindow::QuickLoad(int i, QWidget *parent)
   bool bOK = MW->Config->LoadConfig(fileName);
   MW->GeometryDrawDisabled = false;
 
+  MW->showNormal();
+
   this->close();
   if (MW->GeometryWindow->isVisible()) MW->GeometryWindow->ShowGeometry();
+
+  MW->showNormal();
+  MW->activateWindow();
 
   if (!bOK) message(MW->Config->ErrorString, MW);
 }

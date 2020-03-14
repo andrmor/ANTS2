@@ -48,7 +48,7 @@
 #endif
 
 MaterialInspectorWindow::MaterialInspectorWindow(QWidget * parent, MainWindow * mw, DetectorClass * detector) :
-    AGuiWindow(parent),
+    AGuiWindow("mat", parent),
     ui(new Ui::MaterialInspectorWindow),
     MW(mw), Detector(detector), MpCollection(detector->MpCollection)
 {

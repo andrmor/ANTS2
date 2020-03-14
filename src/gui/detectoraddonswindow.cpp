@@ -40,7 +40,7 @@
 #include "TGeoCompositeShape.h"
 
 DetectorAddOnsWindow::DetectorAddOnsWindow(QWidget * parent, MainWindow * MW, DetectorClass * detector) :
-  AGuiWindow(parent),
+  AGuiWindow("detector", parent),
   ui(new Ui::DetectorAddOnsWindow),
   MW(MW), Detector(detector)
 {

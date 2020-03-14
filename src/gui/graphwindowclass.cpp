@@ -73,7 +73,7 @@
 #include "TPavesText.h"
 
 GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
-  AGuiWindow(parent), MW(mw),
+  AGuiWindow("graph", parent), MW(mw),
   ui(new Ui::GraphWindowClass)
 {
     Basket = new ABasketManager();

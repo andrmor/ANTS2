@@ -15,7 +15,7 @@
 #include <QDebug>
 
 ARemoteWindow::ARemoteWindow(MainWindow *MW) :
-    AGuiWindow(MW),
+    AGuiWindow("remote", MW),
     MW(MW), ui(new Ui::ARemoteWindow)
 {
     ui->setupUi(this);

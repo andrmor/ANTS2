@@ -5,11 +5,6 @@
 
 class MainWindow;
 
-#ifdef Q_OS_WIN32
-#include <QWinTaskbarButton>
-#include <QWinTaskbarProgress>
-#endif
-
 namespace Ui {
   class WindowNavigatorClass;
 }
@@ -24,8 +19,6 @@ public:
   explicit WindowNavigatorClass(QWidget *parent, MainWindow *mw);
   ~WindowNavigatorClass();
 
-  void SetupWindowsTaskbar(); //Windows only
-
   void ResetAllProgressBars();
 
   bool isMainChangeExplicitlyRequested() {return MainChangeExplicitlyRequested;}
@@ -36,15 +29,10 @@ public:
   void BusyOff(bool fShowTime = false);
 
   void DisableAllButGraphWindow(bool trueStart_falseStop);
-
-#ifdef Q_OS_WIN32
-  QWinTaskbarButton *taskButton;
-  QWinTaskbarProgress *taskProgress;
-#endif
   
 public slots:
-  void HideWindowTriggered(QString w);
-  void ShowWindowTriggered(QString w);  
+  void HideWindowTriggered(const QString & w);
+  void ShowWindowTriggered(const QString & w);
   void on_pbMaxAll_clicked();
   void ChangeGuiBusyStatus(bool flag);
   void setProgress(int percent);
@@ -70,16 +58,29 @@ signals:
    void BusyStatusChanged(bool);
 
 private:
-  Ui::WindowNavigatorClass *ui;
-  MainWindow* MW;
-
-  QTime* time;
+  MainWindow * MW = nullptr;
+  Ui::WindowNavigatorClass *ui = nullptr;
+  QTime * time = nullptr;
 
   QString LastProcessedWindow;
-  bool DisableBSupdate;
-  bool MainOn, DetectorOn, ReconOn, OutOn, LRFon, newLRFon, MatOn, ExamplesOn, GeometryOn, GraphOn, ScriptOn, PythonScriptOn;
+  bool DisableBSupdate = false;
+  bool MainChangeExplicitlyRequested = false;
 
-  bool MainChangeExplicitlyRequested;
+  bool MainOn = false;
+  bool DetectorOn = false;
+  bool ReconOn = false;
+  bool OutOn = false;
+  bool MatOn = false;
+  bool ExamplesOn = false;
+  bool LRFon = false;
+  bool NewLRFon = false;
+  bool GeometryOn = false;
+  bool GraphOn = false;
+  bool ScriptOn = false;
+  bool PythonScriptOn = false;
+
+private:
+  void updateButtons();
 };
 
 #endif // WINDOWNAVIGATORCLASS_H

@@ -37,7 +37,7 @@
 #include <QFileDialog>
 
 OutputWindow::OutputWindow(QWidget *parent, MainWindow *mw, EventsDataClass *eventsDataHub) :
-    AGuiWindow(parent),
+    AGuiWindow("out", parent),
     ui(new Ui::OutputWindow)
 {
     MW = mw;

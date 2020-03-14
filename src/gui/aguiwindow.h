@@ -10,12 +10,12 @@ class AGuiWindow : public QMainWindow
 {
     Q_OBJECT
 public:
-    AGuiWindow(QWidget * parent);
+    AGuiWindow(const QString & idStr, QWidget * parent);
 
-    void connectToNavigator(WindowNavigatorClass * wNav, const QString & idStr);
+    void connectWinNavigator(WindowNavigatorClass * wNav);
 
-    void writeToJson(const QString & winName, QJsonObject & json) const;
-    void readFromJson(const QString & winName, const QJsonObject & json);
+    void writeGeomToJson(QJsonObject & json) const;
+    void readGeomFromJson(const QJsonObject & json);
 
 protected:
     bool event(QEvent * event) override;
@@ -24,10 +24,10 @@ protected:
 
     bool bWinGeomUpdateAllowed = true;
 
-    int WinPos_X = 40;
-    int WinPos_Y = 40;
-    int WinSize_W = 800;
-    int WinSize_H = 600;
+    int  WinPos_X = 40;
+    int  WinPos_Y = 40;
+    int  WinSize_W = 800;
+    int  WinSize_H = 600;
     bool bWinVisible = false;
 
 private:

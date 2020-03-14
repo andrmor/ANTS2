@@ -405,7 +405,6 @@ bool MainWindow::event(QEvent *event)
    if (event->type() == QEvent::Show)
      {      
 //       qDebug()<<"Main window SHOW event";
-       WindowNavigator->SetupWindowsTaskbar(); // in effect only once on system start
        WindowNavigator->ShowWindowTriggered("main");
        return true;
      }

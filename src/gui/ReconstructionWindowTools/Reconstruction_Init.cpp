@@ -1,4 +1,3 @@
-//ANTS2
 #include "reconstructionwindow.h"
 #include "ui_reconstructionwindow.h"
 #include "mainwindow.h"
@@ -16,16 +15,14 @@
 #include "nnmoduleclass.h"
 #endif
 
-//Qt
 #include <QDebug>
 
-//Root
 #include "TLine.h"
 #include "TEllipse.h"
 #include "TPolyLine.h"
 
 ReconstructionWindow::ReconstructionWindow(QWidget * parent, MainWindow * mw, EventsDataClass * eventsDataHub) :
-  AGuiWindow(parent),
+  AGuiWindow("recon", parent),
   ui(new Ui::ReconstructionWindow)
 {
   MW = mw;

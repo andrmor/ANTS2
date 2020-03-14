@@ -17,255 +17,108 @@
 #include <QTime>
 #include <QDebug>
 
-#ifdef Q_OS_WIN32
-#include <QtWinExtras>
-#endif
-
-
 WindowNavigatorClass::WindowNavigatorClass(QWidget *parent, MainWindow *mw) :
-  AGuiWindow(parent),
-  ui(new Ui::WindowNavigatorClass)
+    AGuiWindow("navi", parent),
+    MW(mw),
+    ui(new Ui::WindowNavigatorClass)
 {
-  ui->setupUi(this);
-  this->setFixedSize(this->size());
-  MW = mw;
+    ui->setupUi(this);
+    this->setFixedSize(this->size());
 
-  Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
-  windowFlags |= Qt::WindowCloseButtonHint;
-  windowFlags |= Qt::WindowStaysOnTopHint;
-  windowFlags |= Qt::Tool;
-  this->setWindowFlags( windowFlags );
+    Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
+    windowFlags |= Qt::WindowCloseButtonHint;
+    windowFlags |= Qt::WindowStaysOnTopHint;
+    windowFlags |= Qt::Tool;
+    this->setWindowFlags( windowFlags );
 
-  MainOn = false;
-  DetectorOn = false;
-  ReconOn = false;
-  OutOn = false;
-  MatOn = false;
-  ExamplesOn = false;
-  LRFon = false;
-  newLRFon = false;
-  GeometryOn = false;
-  GraphOn = false;
-  ScriptOn = false;
-  PythonScriptOn = false;
-  MainChangeExplicitlyRequested = false;
-#ifdef Q_OS_WIN32
-  taskButton = 0;
-#endif
-
-  time = new QTime();
-
-  DisableBSupdate = false;
-
-//  this->setMinimumWidth(50);
-
-// QDesktopWidget *desktop = QApplication::desktop();
-//  int ix = desktop->availableGeometry(MW).width(); //use the same screen where is the main window (one can use screen index directly, -1=default)
-//  this->move(ix - 120, 50);
-
+    time = new QTime();
 }
 
 WindowNavigatorClass::~WindowNavigatorClass()
 {
-  if (time) delete time;
-  delete ui;
-}
-
-void WindowNavigatorClass::SetupWindowsTaskbar()
-{
-#ifdef Q_OS_WIN32
-    if (taskButton) return;
-
-    QWinJumpList* jumplist = new QWinJumpList(this);
-    //QString configDir = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation)+"/ants2";
-    jumplist->tasks()->addLink(QString("Base dir"), QDir::toNativeSeparators(MW->GlobSet.AntsBaseDir));
-    jumplist->tasks()->addLink(QString("Last working dir"), QDir::toNativeSeparators(MW->GlobSet.LastOpenDir));
-    if (!MW->GlobSet.LibScripts.isEmpty())
-        jumplist->tasks()->addLink(QString("Script dir"), QDir::toNativeSeparators(MW->GlobSet.LibScripts));
-    //jumplist->tasks()->addSeparator();
-    jumplist->tasks()->setVisible(true);
-
-    //qDebug() << "Handle" << MW->windowHandle();  //Handle is only created on MW show !!!
-
-    taskButton = new QWinTaskbarButton(MW);
-    taskButton->setWindow(MW->windowHandle());
-    taskProgress = taskButton->progress();
-    taskProgress->setVisible(false);
-    taskProgress->setValue(0);
-
-    QWinThumbnailToolBar *thumbbar = new QWinThumbnailToolBar(MW);
-    thumbbar->setWindow(MW->windowHandle());
-
-    QWinThumbnailToolButton *maxAll = new QWinThumbnailToolButton(thumbbar);
-    maxAll->setToolTip("Show all active");
-    maxAll->setIcon(style()->standardIcon(QStyle::SP_TitleBarMaxButton));
-    //maxAll->setDismissOnClick(true);
-    connect(maxAll, SIGNAL(clicked()), this, SLOT(on_pbMaxAll_clicked()));
-
-    QWinThumbnailToolButton *Main = new QWinThumbnailToolButton(thumbbar);
-    Main->setToolTip("Main window");
-    QPixmap pix(20, 20);
-    pix.fill(Qt::transparent);
-    QPainter painter( &pix );
-    painter.setFont( QFont("Arial", 15) );
-    painter.drawText( 2, 17, "M" );
-    Main->setIcon(QIcon(pix));
-    connect(Main, SIGNAL(clicked()), this, SLOT(on_pbMain_clicked()));
-
-    QWinThumbnailToolButton *Rec = new QWinThumbnailToolButton(thumbbar);
-    Rec->setToolTip("Reconstruction window");
-    pix.fill(Qt::transparent);
-    painter.drawText( 4, 17, "R" );
-    Rec->setIcon(QIcon(pix));
-    connect(Rec, SIGNAL(clicked()), this, SLOT(on_pbRecon_clicked()));
-
-    QWinThumbnailToolButton *Out = new QWinThumbnailToolButton(thumbbar);
-    Out->setToolTip("Output window");
-    pix.fill(Qt::transparent);
-    painter.drawText( 2, 17, "O" );
-    Out->setIcon(QIcon(pix));
-    connect(Out, SIGNAL(clicked()), this, SLOT(on_pbOut_clicked()));
-
-    QWinThumbnailToolButton *Geo = new QWinThumbnailToolButton(thumbbar);
-    Geo->setToolTip("Geometry window");
-    pix.fill(Qt::transparent);
-    painter.drawText( 2, 17, "G" );
-    Geo->setIcon(QIcon(pix));
-    connect(Geo, SIGNAL(clicked()), this, SLOT(on_pbGeometry_clicked()));
-
-    //  QWinThumbnailToolButton *lrf = new QWinThumbnailToolButton(thumbbar);
-    //  lrf->setToolTip("LRF window");
-    //  pix.fill(Qt::transparent);
-    //  painter.drawText( 4, 17, "L" );
-    //  lrf->setIcon(QIcon(pix));
-    //  connect(lrf, SIGNAL(clicked()), this, SLOT(on_pbLRF_clicked()));
-
-    QWinThumbnailToolButton *scr = new QWinThumbnailToolButton(thumbbar);
-    scr->setToolTip("Script window");
-    pix.fill(Qt::transparent);
-    painter.drawText( 4, 17, "S" );
-    scr->setIcon(QIcon(pix));
-    connect(scr, SIGNAL(clicked()), this, SLOT(on_pbScript_clicked()));
-
-    QWinThumbnailToolButton *ex = new QWinThumbnailToolButton(thumbbar);
-    ex->setToolTip("Examples/Load window");
-    pix.fill(Qt::transparent);
-    painter.drawText( 4, 17, "E" );
-    ex->setIcon(QIcon(pix));
-    connect(ex, SIGNAL(clicked()), this, SLOT(on_pbExamples_clicked()));
-
-    thumbbar->addButton(maxAll);
-    thumbbar->addButton(ex);
-    thumbbar->addButton(Main);
-    thumbbar->addButton(Rec);
-    thumbbar->addButton(Geo);
-    thumbbar->addButton(Out);
-    //  thumbbar->addButton(lrf);
-    thumbbar->addButton(scr);
-
-#endif
+    delete time; time = nullptr;
+    delete ui;
 }
 
 void WindowNavigatorClass::setProgress(int percent)
 {
-  ui->pb->setValue(percent);
-
-#ifdef Q_OS_WIN32
-  if (taskButton)
-    {
-      taskProgress->setVisible(true);
-      taskProgress->setValue(percent);
-    }
-#endif
+    ui->pb->setValue(percent);
 }
 
-void WindowNavigatorClass::HideWindowTriggered(QString w)
+void WindowNavigatorClass::HideWindowTriggered(const QString & w)
 {
-  if (MW->ShutDown) return;
-  if (DisableBSupdate) return;
+    if (MW->ShutDown) return;
+    if (DisableBSupdate) return;
 
-  //qDebug() << "WinNav: hide win"<<w;
+    //qDebug() << "WinNav: hide win"<<w;
 
-  if (w == "main") MainOn = false;
-  if (w == "detector") DetectorOn = false;
-  if (w == "recon") ReconOn = false;
-  if (w == "out") OutOn = false;
-  if (w == "mat") MatOn = false;
-  if (w == "examples") ExamplesOn = false;
-  if (w == "lrf") LRFon = false;
-  if (w == "newLrf") newLRFon = false;
-  if (w == "geometry") GeometryOn = false;
-  if (w == "graph") GraphOn = false;
-  if (w == "script") ScriptOn = false;
-  if (w == "python") PythonScriptOn = false;
+    if      (w == "main")     MainOn = false;
+    else if (w == "detector") DetectorOn = false;
+    else if (w == "recon")    ReconOn = false;
+    else if (w == "out")      OutOn = false;
+    else if (w == "mat")      MatOn = false;
+    else if (w == "examples") ExamplesOn = false;
+    else if (w == "lrf")      LRFon = false;
+    else if (w == "newLrf")   NewLRFon = false;
+    else if (w == "geometry") GeometryOn = false;
+    else if (w == "graph")    GraphOn = false;
+    else if (w == "script")   ScriptOn = false;
+    else if (w == "python")   PythonScriptOn = false;
 
-  ui->pbMain->setChecked(MainOn);
-  ui->pbDetector->setChecked(DetectorOn);
-  ui->pbRecon->setChecked(ReconOn);
-  ui->pbOut->setChecked(OutOn);
-  ui->pbMaterials->setChecked(MatOn);
-  ui->pbExamples->setChecked(ExamplesOn);
-  ui->pbLRF->setChecked(LRFon);
-  ui->pbNewLRF->setChecked(newLRFon);
-  ui->pbGeometry->setChecked(GeometryOn);
-  ui->pbGraph->setChecked(GraphOn);
-  ui->pbScript->setChecked(ScriptOn);
+    updateButtons();
 }
 
-void WindowNavigatorClass::ShowWindowTriggered(QString w)
+void WindowNavigatorClass::ShowWindowTriggered(const QString & w)
 {
     if (MW->ShutDown) return;
 
-  if (w == "main") MainOn = true;
-  if (w == "detector") DetectorOn = true;
-  if (w == "recon") ReconOn = true;
-  if (w == "out") OutOn = true;
-  if (w == "mat") MatOn = true;
-  if (w == "examples") ExamplesOn = true;
-  if (w == "lrf") LRFon = true;
-  if (w == "newLrf") newLRFon = true;
-  if (w == "geometry") GeometryOn = true;
-  if (w == "graph") GraphOn = true;
-  if (w == "script") ScriptOn = true;
-  if (w == "python") PythonScriptOn = true;
+    if      (w == "main")       MainOn = true;
+    else if (w == "detector")   DetectorOn = true;
+    else if (w == "recon")      ReconOn = true;
+    else if (w == "out")        OutOn = true;
+    else if (w == "mat")        MatOn = true;
+    else if (w == "examples")   ExamplesOn = true;
+    else if (w == "lrf")        LRFon = true;
+    else if (w == "newLrf")     NewLRFon = true;
+    else if (w == "geometry")   GeometryOn = true;
+    else if (w == "graph")      GraphOn = true;
+    else if (w == "script")     ScriptOn = true;
+    else if (w == "python")     PythonScriptOn = true;
 
-  ui->pbMain->setChecked(MainOn);
-  ui->pbDetector->setChecked(DetectorOn);
-  ui->pbRecon->setChecked(ReconOn);
-  ui->pbOut->setChecked(OutOn);
-  ui->pbMaterials->setChecked(MatOn);
-  ui->pbExamples->setChecked(ExamplesOn);
-  ui->pbLRF->setChecked(LRFon);
-  ui->pbNewLRF->setChecked(newLRFon);
-  ui->pbGeometry->setChecked(GeometryOn);
-  ui->pbGraph->setChecked(GraphOn);
-  ui->pbScript->setChecked(ScriptOn);
+    updateButtons();
+}
+
+void WindowNavigatorClass::updateButtons()
+{
+    ui->pbMain->setChecked(MainOn);
+    ui->pbDetector->setChecked(DetectorOn);
+    ui->pbRecon->setChecked(ReconOn);
+    ui->pbOut->setChecked(OutOn);
+    ui->pbMaterials->setChecked(MatOn);
+    ui->pbExamples->setChecked(ExamplesOn);
+    ui->pbLRF->setChecked(LRFon);
+    ui->pbNewLRF->setChecked(NewLRFon);
+    ui->pbGeometry->setChecked(GeometryOn);
+    ui->pbGraph->setChecked(GraphOn);
+    ui->pbScript->setChecked(ScriptOn);
 }
 
 void WindowNavigatorClass::ResetAllProgressBars()
 {
-  MW->SetProgress(0);
-  setProgress(0);
-  MW->Rwindow->SetProgress(0);
-  MW->lrfwindow->SetProgress(0);
-
-#ifdef Q_OS_WIN32
-  if (taskButton)
-    {
-      taskProgress->setVisible(false);
-      taskProgress->setValue(0);
-    }
-#endif
+    MW->SetProgress(0);
+    setProgress(0);
+    MW->Rwindow->SetProgress(0);
+    MW->lrfwindow->SetProgress(0);
 }
 
 void WindowNavigatorClass::TriggerHideButton()
 {
-  WindowNavigatorClass::on_pbMinAll_clicked();
+    on_pbMinAll_clicked();
 }
 
 void WindowNavigatorClass::TriggerShowButton()
 {
-  WindowNavigatorClass::on_pbMaxAll_clicked();
+    on_pbMaxAll_clicked();
 }
 
 void WindowNavigatorClass::BusyOn()
@@ -296,44 +149,23 @@ void WindowNavigatorClass::BusyOff(bool fShowTime)
 {
   int runtime = time->elapsed(); //gets the runtime in ms
   if (fShowTime)
-    {
+  {
       QString str;
       str.setNum(runtime);
-      MW->Owindow->OutText("-=-=-=-=-=-=-=- done: elapsed time: "+str+" ms");
-      MW->Owindow->OutText("");
-    }
+      MW->Owindow->OutText("Elapsed time: " + str + " ms\n");
+  }
 
-  //main window
   MW->onBusyOff();
-
-  //addon window
   MW->DAwindow->setEnabled(true);
-
-  //reconstruction window
-  //MW->Rwindow->setEnabled(true);
-  MW->Rwindow->onBusyOff();
-
-  //Script
+  MW->Rwindow->onBusyOff();         //setEnabled(true);
   MW->ScriptWindow->onBusyOff();
   if (MW->PythonScriptWindow) MW->PythonScriptWindow->onBusyOff();
-
-  //lrf window
   MW->lrfwindow->onBusyOff();
-
-  //material inspector
   MW->MIwindow->setEnabled(true);
-
-  //examples
   MW->ELwindow->setEnabled(true);
-
-  //gain evaluator
   if (MW->GainWindow) MW->GainWindow->setEnabled(true);
-
-  MW->GraphWindow->OnBusyOff();//setEnabled(true);
-
+  MW->GraphWindow->OnBusyOff();     //setEnabled(true);
   MW->GeometryWindow->onBusyOff();
-
-  //output window
   MW->Owindow->setEnabled(true);
 
   emit BusyStatusChanged(false);
@@ -355,7 +187,7 @@ void WindowNavigatorClass::DisableAllButGraphWindow(bool trueStart_falseStop)
 
 void WindowNavigatorClass::on_pbMaxAll_clicked()
 {
-  this->activateWindow();
+  activateWindow();
   //qDebug()<<"---MAX ALL---";
 
   MainChangeExplicitlyRequested = true;
@@ -395,7 +227,7 @@ void WindowNavigatorClass::on_pbMaxAll_clicked()
       MW->lrfwindow->showNormal();
       MW->lrfwindow->raise();
     }
-  if (newLRFon)
+  if (NewLRFon)
     {
       MW->newLrfWindow->showNormal();
       MW->newLrfWindow->raise();
@@ -440,15 +272,13 @@ void WindowNavigatorClass::on_pbMinAll_clicked()
   MainChangeExplicitlyRequested = true;
   DisableBSupdate = true;
 
-  QList<QMainWindow*> list;
-  list.clear();
+  QVector<QMainWindow*> vec;
 
-  list << MW->DAwindow<<MW->Owindow<<MW->Rwindow<<MW->lrfwindow<<MW->newLrfWindow<<MW->MIwindow<<MW->ELwindow<<MW->GraphWindow<<MW->GeometryWindow<<MW->ScriptWindow;
-  if (MW->PythonScriptWindow) list << MW->PythonScriptWindow;
-  if (MW->GenScriptWindow) list <<MW->GenScriptWindow;
-  if (MW->GainWindow) list << MW->GainWindow;
-
-  foreach (QMainWindow* win, list) win->hide();
+  vec << MW->DAwindow<<MW->Owindow<<MW->Rwindow<<MW->lrfwindow<<MW->newLrfWindow<<MW->MIwindow<<MW->ELwindow<<MW->GraphWindow<<MW->GeometryWindow<<MW->ScriptWindow;
+  if (MW->PythonScriptWindow) vec << MW->PythonScriptWindow;
+  if (MW->GenScriptWindow) vec <<MW->GenScriptWindow;
+  if (MW->GainWindow) vec << MW->GainWindow;
+  for (QMainWindow * win : vec) win->hide();
 
   MW->showMinimized();
 
@@ -510,7 +340,7 @@ void WindowNavigatorClass::on_pbLRF_clicked()
 
 void WindowNavigatorClass::on_pbNewLRF_clicked()
 {
-  if ( MW->newLrfWindow->isHidden() || MW->newLrfWindow->isMinimized() || (!newLRFon) )
+  if ( MW->newLrfWindow->isHidden() || MW->newLrfWindow->isMinimized() || (!NewLRFon) )
     {
         MW->newLrfWindow->showNormal();
         MW->newLrfWindow->raise();
@@ -528,22 +358,6 @@ void WindowNavigatorClass::on_pbGeometry_clicked()
       MW->GeometryWindow->DrawTracks();
     }
   else MW->GeometryWindow->hide();
-
-  /*
-  if (!MW->geometryRW) return;
-
- // if ( !MW->geometryRW->isVisible() || MW->geometryRW->windowState() == Qt::WindowMinimized || (!GeometryOn) )
-  if ( !MW->geometryRW->isExposed() || (!GeometryOn) )
-    {
-      MW->geometryRW->showNormal();
-      MW->geometryRW->raise();
-
-      MW->GWaddon->showNormal();
-      MW->GWaddon->raise();
-      MW->GWaddon->MoveHome();
-    }
-  else MW->geometryRW->hide();
-  */
 }
 
 void WindowNavigatorClass::on_pbGraph_clicked()
@@ -554,18 +368,6 @@ void WindowNavigatorClass::on_pbGraph_clicked()
       MW->GraphWindow->raise();
     }
   else MW->GraphWindow->hide();
-
-  /*
-  if (!MW->graphRW) return;
-
- // if ( !MW->graphRW->isVisible() || MW->graphRW->windowState() == Qt::WindowMinimized || (!GraphOn) )
-  if ( !MW->graphRW->isExposed() || (!GraphOn) )
-    {
-      MW->graphRW->showNormal();
-      MW->graphRW->raise();
-    }
-  else MW->graphRW->hide();
-  */
 }
 
 void WindowNavigatorClass::on_pbMaterials_clicked()
@@ -601,6 +403,6 @@ void WindowNavigatorClass::on_pbScript_clicked()
 
 void WindowNavigatorClass::closeEvent(QCloseEvent *)
 {
-   MW->showNormal();
+    MW->showNormal();
 }
 

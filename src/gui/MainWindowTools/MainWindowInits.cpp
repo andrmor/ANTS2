@@ -53,7 +53,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
                        AReconstructionManager *ReconstructionManager,
                        ANetworkModule* Net,
                        TmpObjHubClass *TmpHub) :
-    AGuiWindow(nullptr), Detector(Detector), EventsDataHub(EventsDataHub), RootApp(RootApp),
+    AGuiWindow("main", nullptr), Detector(Detector), EventsDataHub(EventsDataHub), RootApp(RootApp),
     SimulationManager(SimulationManager), ReconstructionManager(ReconstructionManager),
     NetModule(Net), TmpHub(TmpHub), GlobSet(AGlobalSettings::getInstance()),
     ui(new Ui::MainWindow)
@@ -156,20 +156,12 @@ MainWindow::MainWindow(DetectorClass *Detector,
     RemoteWindow = new ARemoteWindow(this);
     ServerDialog = new AWebSocketServerDialog(this);
 
-    qDebug() << ">Registering windows with window navigator";
-    //main window does not need registration
-    ELwindow->connectToNavigator(WindowNavigator, "examples");
-    Rwindow->connectToNavigator(WindowNavigator, "recon");
-    Owindow->connectToNavigator(WindowNavigator, "out");
-    DAwindow->connectToNavigator(WindowNavigator, "detector");
-    GeometryWindow->connectToNavigator(WindowNavigator, "geometry");
-    GraphWindow->connectToNavigator(WindowNavigator, "graph");
-    lrfwindow->connectToNavigator(WindowNavigator, "lrf");
-    MIwindow->connectToNavigator(WindowNavigator, "mat");
-    //ScriptWindow and PythonScriptWindow are already processed
-    WindowNavigator->connectToNavigator(WindowNavigator, ""); //paranoic
-    RemoteWindow->connectToNavigator(WindowNavigator, "");
-    newLrfWindow->connectToNavigator(WindowNavigator, "newLrf");
+    qDebug() << ">Setting winNavigator for all windows";
+    QVector<AGuiWindow*> winVec;
+    winVec << this << ELwindow << Rwindow << Owindow << DAwindow << GeometryWindow << GraphWindow << lrfwindow << MIwindow
+           << WindowNavigator << RemoteWindow << newLrfWindow;
+    for (AGuiWindow * w : winVec)
+        w->connectWinNavigator(WindowNavigator);
 
     qDebug()<<">All windows created";
 

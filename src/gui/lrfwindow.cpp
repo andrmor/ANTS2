@@ -40,7 +40,7 @@
 #include "TGraph2D.h"
 
 LRFwindow::LRFwindow(QWidget *parent, MainWindow *mw, EventsDataClass *eventsDataHub) :
-  AGuiWindow(parent),
+  AGuiWindow("lrf", parent),
   ui(new Ui::LRFwindow)
 {
   MW = mw;

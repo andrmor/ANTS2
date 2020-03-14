@@ -35,10 +35,11 @@ private slots:
     void on_pbCancel_clicked();
 
     void on_leName_textChanged(const QString &arg1);
-    void on_twMain_currentChanged(int index);
     void on_cbToggleAllParticles_clicked(bool checked);
     void on_cbToggleAllProps_clicked(bool checked);
     void on_cobMaterial_activated(int index);
+
+    void on_sw_currentChanged(int arg1);
 
 private:
     AMaterialParticleCollection & MpCollection;

@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>751</width>
-    <height>515</height>
+    <width>697</width>
+    <height>453</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Load/Merge material</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_3">
+  <layout class="QVBoxLayout" name="verticalLayout_4">
    <property name="leftMargin">
     <number>3</number>
    </property>
@@ -43,15 +43,15 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="leMaterialNameInFile">
+      <widget class="QLabel" name="labLibMaterial">
        <property name="font">
         <font>
          <weight>75</weight>
          <bold>true</bold>
         </font>
        </property>
-       <property name="readOnly">
-        <bool>true</bool>
+       <property name="text">
+        <string>Cu</string>
        </property>
       </widget>
      </item>
@@ -70,31 +70,47 @@
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+      <widget class="QComboBox" name="cobMode">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
        </property>
-      </spacer>
+       <item>
+        <property name="text">
+         <string>as a new material</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>and merge with already defined material</string>
+        </property>
+       </item>
+      </widget>
      </item>
     </layout>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_4">
      <item>
-      <widget class="QTabWidget" name="twMain">
+      <widget class="QStackedWidget" name="sw">
+       <property name="frameShape">
+        <enum>QFrame::Panel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
        <property name="currentIndex">
         <number>0</number>
        </property>
-       <widget class="QWidget" name="tab">
-        <attribute name="title">
-         <string>Add as new material</string>
-        </attribute>
+       <widget class="QWidget" name="page">
         <layout class="QVBoxLayout" name="verticalLayout">
          <item>
           <spacer name="verticalSpacer">
@@ -104,7 +120,7 @@
            <property name="sizeHint" stdset="0">
             <size>
              <width>20</width>
-             <height>135</height>
+             <height>100</height>
             </size>
            </property>
           </spacer>
@@ -160,7 +176,7 @@
            <property name="sizeHint" stdset="0">
             <size>
              <width>20</width>
-             <height>40</height>
+             <height>5</height>
             </size>
            </property>
           </spacer>
@@ -189,29 +205,32 @@
            <property name="sizeHint" stdset="0">
             <size>
              <width>20</width>
-             <height>135</height>
+             <height>100</height>
             </size>
            </property>
           </spacer>
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="tabMerge">
-        <attribute name="title">
-         <string>Merge with already defined material</string>
-        </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_4">
+       <widget class="QWidget" name="page_2">
+        <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_5">
            <item>
             <widget class="QLabel" name="label_6">
              <property name="text">
-              <string>Merge with existent material:</string>
+              <string>Merge with:</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QComboBox" name="cobMaterial">
+             <property name="minimumSize">
+              <size>
+               <width>200</width>
+               <height>0</height>
+              </size>
+             </property>
              <property name="font">
               <font>
                <weight>75</weight>
@@ -220,22 +239,25 @@
              </property>
             </widget>
            </item>
+           <item>
+            <spacer name="horizontalSpacer_4">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
           </layout>
          </item>
          <item>
           <widget class="QLabel" name="labSelectProp">
            <property name="text">
             <string>Select properties to override (matching properties not shown):</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="cbToggleAllProps">
-           <property name="text">
-            <string>Toggle all properties except particle interaction</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -251,6 +273,16 @@
          </item>
          <item>
           <widget class="QListWidget" name="lwProps"/>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="cbToggleAllProps">
+           <property name="text">
+            <string>Toggle all properties except particle interaction</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>
@@ -279,16 +311,6 @@
          </widget>
         </item>
         <item>
-         <widget class="QCheckBox" name="cbToggleAllParticles">
-          <property name="text">
-           <string>Toggle all</string>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
          <widget class="QScrollArea" name="scrollArea">
           <property name="widgetResizable">
            <bool>true</bool>
@@ -298,11 +320,21 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>203</width>
-             <height>248</height>
+             <width>205</width>
+             <height>197</height>
             </rect>
            </property>
           </widget>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="cbToggleAllParticles">
+          <property name="text">
+           <string>Toggle all</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
          </widget>
         </item>
         <item>
@@ -365,5 +397,22 @@ neutron capture reactions</string>
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>cobMode</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>sw</receiver>
+   <slot>setCurrentIndex(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>456</x>
+     <y>51</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>412</x>
+     <y>90</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

@@ -43,7 +43,7 @@ AMaterialLoaderDialog::AMaterialLoaderDialog(const QString & fileName, AMaterial
 
     MaterialJsonFrom = json["Material"].toObject();
     parseJson(MaterialJsonFrom, "*MaterialName", NameInFile);
-    ui->leMaterialNameInFile->setText(NameInFile);
+    ui->labLibMaterial->setText(NameInFile);
     ui->leName->setText(NameInFile);
 
     generateParticleRecords();
@@ -68,7 +68,7 @@ AMaterialLoaderDialog::AMaterialLoaderDialog(const QString & fileName, AMaterial
 
     if (neutron) neutron->setChecked(true); //to update forced status
 
-    on_twMain_currentChanged(ui->twMain->currentIndex());
+    ui->cobMaterial->setCurrentIndex(0);
 }
 
 AMaterialLoaderDialog::~AMaterialLoaderDialog()
@@ -138,7 +138,7 @@ void AMaterialLoaderDialog::updateLoadEnabled()
     ui->labAlreadyExists->setVisible(bNameExists);
 
     bool bLoadActive = true;
-    if (ui->twMain->currentIndex() == 0 && bNameExists) bLoadActive = false;
+    if (ui->cobMode->currentIndex()==0 && bNameExists) bLoadActive = false;
     ui->pbLoad->setEnabled(bLoadActive);
 }
 
@@ -149,7 +149,7 @@ void AMaterialLoaderDialog::on_pbDummt_clicked()
 
 void AMaterialLoaderDialog::on_pbLoad_clicked()
 {
-    if (ui->twMain->currentIndex() == 0)
+    if (ui->cobMode->currentIndex() == 0)
     {
         const QString err = addAsNew(ui->leName->text());
         if (!err.isEmpty())
@@ -224,13 +224,6 @@ void AMaterialLoaderDialog::on_leName_textChanged(const QString &)
     updateLoadEnabled();
 }
 
-void AMaterialLoaderDialog::on_twMain_currentChanged(int index)
-{
-    ui->pbLoad->setText( index == 0 ? "Add new material"
-                                    : "Merge with existent");
-    updateLoadEnabled();
-}
-
 void AMaterialLoaderDialog::on_cbToggleAllParticles_clicked(bool checked)
 {
     for (AParticleRecordForMerge * rec : ParticleRecords)
@@ -251,7 +244,7 @@ void AMaterialLoaderDialog::generateMatPropRecords()
     {
         ui->labError->setText("Corrupted material record");
         ui->labError->setVisible(true);
-        ui->tabMerge->setEnabled(false);
+        ui->sw->setEnabled(false);
         return;
     }
 
@@ -423,9 +416,9 @@ QWidget * makeWidget(const QString & s1, const QString & s2)
     lay->setContentsMargins(0,0,0,0);
         QLabel * l = new QLabel(s1);
         lay->addWidget(l);
-        l = new QLabel(QChar(8594));
+        l = new QLabel(QChar(0x21D0));//8594//8678
         lay->addWidget(l);
-        l = new QLabel(s2);
+        l = new QLabel(QString("<p style='color:#909090;'>%1</p>").arg(s2));
         lay->addWidget(l);
 
     return w;
@@ -662,4 +655,11 @@ bool AListWidgetItem::operator<(const QListWidgetItem & other) const
     if (!cb || !pOther->cb) return QListWidgetItem::operator<(other);
 
     return cb->text() < pOther->cb->text();
+}
+
+void AMaterialLoaderDialog::on_sw_currentChanged(int arg1)
+{
+    ui->pbLoad->setText( arg1 == 0 ? "Add new material"
+                                   : "Merge with existent");
+    updateLoadEnabled();
 }

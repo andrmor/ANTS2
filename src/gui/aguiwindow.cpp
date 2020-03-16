@@ -15,7 +15,7 @@ void AGuiWindow::connectWinNavigator(WindowNavigatorClass * wNav)
     WNav = wNav;
 }
 
-void AGuiWindow::writeGeomToJson(QJsonObject & json) const
+void AGuiWindow::writeGeomToJson(QJsonObject & json)
 {
     QJsonObject js;
 
@@ -24,6 +24,7 @@ void AGuiWindow::writeGeomToJson(QJsonObject & json) const
     js["w"]   = WinSize_W;
     js["h"]   = WinSize_H;
     js["vis"] = bWinVisible;
+    js["max"] = isMaximized();
 
     json[IdStr] = js;
 }
@@ -45,6 +46,10 @@ void AGuiWindow::readGeomFromJson(const QJsonObject & json)
     move(WinPos_X, WinPos_Y);
 
     GuiUtils::AssureWidgetIsWithinVisibleArea(this);
+
+    bool bMaximized = false;
+    parseJson(js, "max", bMaximized);
+    if (bMaximized) showMaximized();
 
     if (bWinVisible) show();
     else hide();
@@ -92,7 +97,7 @@ bool AGuiWindow::event(QEvent *event)
 void AGuiWindow::resizeEvent(QResizeEvent * event)
 {
     //if (event && bWinGeomUpdateAllowed)
-    if (bWinGeomUpdateAllowed)
+    if (bWinGeomUpdateAllowed && !isMaximized())
     {
         //WinSize_W = event->size().width();
         WinSize_W = width();
@@ -105,7 +110,7 @@ void AGuiWindow::resizeEvent(QResizeEvent * event)
 
 void AGuiWindow::moveEvent(QMoveEvent * event)
 {
-    if (bWinGeomUpdateAllowed)
+    if (bWinGeomUpdateAllowed && !isMaximized())
     {
         //WinPos_X = event->pos().x();
         WinPos_X = x();

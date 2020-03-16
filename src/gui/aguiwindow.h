@@ -14,7 +14,7 @@ public:
 
     void connectWinNavigator(WindowNavigatorClass * wNav);
 
-    void writeGeomToJson(QJsonObject & json) const;
+    void writeGeomToJson(QJsonObject & json);
     void readGeomFromJson(const QJsonObject & json);
 
 protected:

@@ -2,7 +2,7 @@
     "Material": {
         "*MaterialName": "Vacuum",
         "*Tags": [
-        Vacuum
+        "Vacuum"
         ],
         "BulkAbsorption": 0,
         "BulkAbsorptionWave": [

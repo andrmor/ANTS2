@@ -31,8 +31,7 @@ AMaterialLibraryBrowser::AMaterialLibraryBrowser(AMaterialParticleCollection & M
 
     QString dirName = AGlobalSettings::getInstance().ResourcesDir + "/MaterialLibrary";
     Dir = QDir(dirName, "*.mat");
-    if (!Dir.exists())
-        out("DATA/MaterialLibrary directory not found", true);
+    if (!Dir.exists()) out("DATA/MaterialLibrary directory not found", true);
 
     Dir.setFilter( QDir::AllEntries | QDir::NoDotAndDotDot );
 
@@ -109,7 +108,11 @@ void AMaterialLibraryBrowser::readFiles()
         QString absolutePath = Dir.absoluteFilePath(file);
         QJsonObject json, js;
         LoadJsonFromFile(json, absolutePath);
-        if (!parseJson(json, "Material", js)) return;
+        if (!parseJson(json, "Material", js))
+        {
+            qWarning() << "Bad json structure for:\n" << absolutePath;
+            continue;
+        }
 
         QString Name;
         parseJson(js, "*MaterialName", Name);

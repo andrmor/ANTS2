@@ -645,7 +645,9 @@ bool DetectorClass::processGDML()   //if failed, caller have to do: GeoManager =
         }
     }
   //all is fine!
-  checkSecScintPresent();
+
+  //checkSecScintPresent();
+
   return true;
 }
 
@@ -658,7 +660,7 @@ void DetectorClass::checkSecScintPresent()
     {
       TGeoVolume* vol = (TGeoVolume*)list->At(i);
       if (!vol) break;
-      QString name = vol->GetName();
+      TString name = vol->GetName();
       if (name == "SecScint")
         {
           fSecScintPresent = true;

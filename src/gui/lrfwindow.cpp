@@ -40,7 +40,7 @@
 #include "TGraph2D.h"
 
 LRFwindow::LRFwindow(QWidget *parent, MainWindow *mw, EventsDataClass *eventsDataHub) :
-  AGuiWindow(parent),
+  AGuiWindow("lrf", parent),
   ui(new Ui::LRFwindow)
 {
   MW = mw;
@@ -57,7 +57,7 @@ LRFwindow::LRFwindow(QWidget *parent, MainWindow *mw, EventsDataClass *eventsDat
 
   Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
   windowFlags |= Qt::WindowCloseButtonHint;
-  windowFlags |= Qt::Tool;
+  //windowFlags |= Qt::Tool;
   this->setWindowFlags( windowFlags );
 
   StopSignal = false;

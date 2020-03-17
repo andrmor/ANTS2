@@ -13,6 +13,8 @@ class TPolyLine;
 
 class RasterWindowGraphClass : public RasterWindowBaseClass
 {
+    Q_OBJECT
+
 public:  
   explicit RasterWindowGraphClass(QMainWindow *MasterWindow);
   ~RasterWindowGraphClass();
@@ -24,10 +26,14 @@ public:
   double extractedX1, extractedY1, extractedX2, extractedY2;
   QList<double> extractedPolygon;
 
+  bool ShowCursorPosition = true;
+  double cursorX = 0;
+  double cursorY = 0;
+
   //extraction of coordinates from graph
   bool IsExtractionComplete() {return ExtractionComplete;}
   void setExtractionComplete(bool flag) {ExtractionComplete = flag;}
-  void setShowCursorPosition(bool flag);
+  //void setShowCursorPosition(bool flag);
 
   void ExtractX();  //start extraction of X coordinate from a 1D graph/histogram using mouse
   void Extract2DLine();  //start extraction of ABC line coordinate from a 2D graph/histogram using mouse
@@ -82,13 +88,15 @@ private:
   TEllipse* Ellipse = 0;
   TPolyLine* Polygon = 0;
 
-  bool ShowCursorPosition = true;
 
   void DrawVerticalLine();
   void Draw2DLine();
   void DrawEllipse();
   void Draw2DBox();
   void Draw2DPolygon();
+
+signals:
+    void reportCursorPosition(double x, double y, bool bOn);
 };
 
 #endif // RASTERWINDOWGRAPHCLASS_H

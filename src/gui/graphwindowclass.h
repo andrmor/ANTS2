@@ -187,6 +187,7 @@ private slots:
     void onBasketItemDoubleClicked(QListWidgetItem *item);
     void BasketReorderRequested(const QVector<int> & indexes, int toRow);
     void deletePressed();
+    void onCursorPositionReceived(double x, double y, bool bOn);
 
     void on_pbToolboxDragMode_clicked();
 
@@ -305,6 +306,7 @@ private:
     void applyTemplate(bool bAll);
     void updateSecondaryAxis(TGaxis *gaxis, const char *opt);
     void showHintInStatus();
+    void setShowCursorPosition(bool flag);
 };
 
 #endif // GRAPHWINDOWCLASS_H

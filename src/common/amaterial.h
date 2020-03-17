@@ -33,7 +33,7 @@ public:
   double n;   //refractive index for monochrome
   double abs; //exp absorption per mm   for monochrome    (I = I0*exp(-abs*length[mm]))
   double reemissionProb; //for waveshifters: probability that absorbed photon is reemitted
-  double rayleighMFP; //0 - no rayleigh scattering
+  double rayleighMFP = 0; //0 - no rayleigh scattering
   double rayleighWave;
   QVector<double> rayleighBinned;//regular step (WaveStep step, WaveNodes bins)
   double e_driftVelocity;
@@ -50,6 +50,8 @@ public:
 
   double SecScintDecayTime;
   QString Comments;
+
+  QVector<QString> Tags; // used in material library
 
   AMaterialComposition ChemicalComposition;
 
@@ -91,8 +93,8 @@ public:
   void UpdateRandGen(int ID, TRandom2* RandGen);
 
   void clear();
-  void writeToJson (QJsonObject &json, AMaterialParticleCollection* MpCollection);  //does not save overrides!
-  bool readFromJson(QJsonObject &json, AMaterialParticleCollection* MpCollection);
+  void writeToJson (QJsonObject &json, AMaterialParticleCollection* MpCollection) const;  //does not save overrides!
+  bool readFromJson(const QJsonObject &json, AMaterialParticleCollection* MpCollection, QVector<QString> SuppressParticles = QVector<QString>());
 
   const QString CheckMaterial(int iPart, const AMaterialParticleCollection *MpCollection) const;
 
@@ -134,6 +136,8 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
 
   bool isParticleOneOfSecondaries(int iPart) const;
   void prepareForParticleRemove(int iPart);
+
+  QVector<QString> getSecondaryParticles(AMaterialParticleCollection & MpCollection) const;
 
   QString NCrystal_Ncmat;
   double NCrystal_Dcutoff = 0;

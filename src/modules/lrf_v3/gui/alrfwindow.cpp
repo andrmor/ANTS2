@@ -43,13 +43,13 @@ namespace Widgets = LRF::LrfWindowWidgets;
 using namespace LRF;
 
 ALrfWindow::ALrfWindow(QWidget *parent, MainWindow *mw, ARepository *lrf_repo) :
-  AGuiWindow(parent), mw(mw), repo(lrf_repo)
+  AGuiWindow("newLrf", parent), mw(mw), repo(lrf_repo)
 {
   setupUi(this);
 
   Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
   windowFlags |= Qt::WindowCloseButtonHint;
-  windowFlags |= Qt::Tool;
+  //windowFlags |= Qt::Tool;
   this->setWindowFlags( windowFlags );
 
   connect(repo, &ARepository::currentLrfsChangedReadyStatus, this, &ALrfWindow::onReadyStatusChanged);

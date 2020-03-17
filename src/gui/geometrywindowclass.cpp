@@ -34,7 +34,7 @@
 #include "TVirtualGeoTrack.h"
 
 GeometryWindowClass::GeometryWindowClass(QWidget *parent, MainWindow *mw) :
-  AGuiWindow(parent), MW(mw),
+  AGuiWindow("geometry", parent), MW(mw),
   ui(new Ui::GeometryWindowClass)
 {    
     ui->setupUi(this);
@@ -43,7 +43,7 @@ GeometryWindowClass::GeometryWindowClass(QWidget *parent, MainWindow *mw) :
     windowFlags |= Qt::WindowCloseButtonHint;
     windowFlags |= Qt::WindowMinimizeButtonHint;
     windowFlags |= Qt::WindowMaximizeButtonHint;
-    windowFlags |= Qt::Tool;
+    //windowFlags |= Qt::Tool;
     this->setWindowFlags( windowFlags );
 
     this->setMinimumWidth(200);
@@ -376,6 +376,16 @@ bool GeometryWindowClass::event(QEvent *event)
       RasterWindow->UpdateRootCanvas();
 
   return AGuiWindow::event(event);
+}
+
+#include <QCloseEvent>
+void GeometryWindowClass::closeEvent(QCloseEvent * event)
+{
+    //qDebug() << "Geometry window close event";
+
+    //fix for bug with root reported for Qt 5.14: close then restore results in resize of the canvas to huge size, and nothing is shown on the widow
+    event->ignore();
+    hide();
 }
 
 #include "anetworkmodule.h"

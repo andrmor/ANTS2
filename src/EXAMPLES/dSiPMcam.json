@@ -7736,7 +7736,7 @@
                 ]
             },
             "PDEeffective": [
-                0.31,
+                -1,
                 -1,
                 -1,
                 -1,
@@ -10589,6 +10589,8 @@
             "Materials": [
                 {
                     "*MaterialName": "Vacuum",
+                    "*Tags": [
+                    ],
                     "BulkAbsorption": 0,
                     "BulkAbsorptionWave": [
                     ],
@@ -10616,6 +10618,8 @@
                     },
                     "Comments": "",
                     "Density": 1e-25,
+                    "ElDiffusionL": 0,
+                    "ElDiffusionT": 0,
                     "ElDriftVelo": 1,
                     "MatParticles": [
                         {
@@ -11715,7 +11719,6 @@
                     ],
                     "PrimScintSpectrum": [
                     ],
-                    "PrimScint_Model": 0,
                     "RayleighMFP": 0,
                     "RayleighWave": 500,
                     "ReemissionProb": 0,
@@ -11728,11 +11731,16 @@
                     ],
                     "SecScint_PhYield": 2,
                     "SecScint_Tau": 5,
+                    "TGeoP1": 0,
+                    "TGeoP2": 0,
+                    "TGeoP3": 0,
                     "Temperature": 298,
                     "W": 100
                 },
                 {
                     "*MaterialName": "Glass",
+                    "*Tags": [
+                    ],
                     "BulkAbsorption": 0,
                     "BulkAbsorptionWave": [
                     ],
@@ -11744,6 +11752,8 @@
                     },
                     "Comments": "",
                     "Density": 2.5,
+                    "ElDiffusionL": 0,
+                    "ElDiffusionT": 0,
                     "ElDriftVelo": 0,
                     "MatParticles": [
                         {
@@ -11834,7 +11844,6 @@
                     ],
                     "PrimScintSpectrum": [
                     ],
-                    "PrimScint_Model": 0,
                     "RayleighMFP": 0,
                     "RayleighWave": 500,
                     "ReemissionProb": 0,
@@ -11847,11 +11856,16 @@
                     ],
                     "SecScint_PhYield": 0,
                     "SecScint_Tau": 0,
+                    "TGeoP1": 0,
+                    "TGeoP2": 0,
+                    "TGeoP3": 0,
                     "Temperature": 298,
                     "W": 0
                 },
                 {
                     "*MaterialName": "GS20",
+                    "*Tags": [
+                    ],
                     "BulkAbsorption": 0,
                     "BulkAbsorptionWave": [
                     ],
@@ -11979,6 +11993,8 @@
                     },
                     "Comments": "",
                     "Density": 2.5,
+                    "ElDiffusionL": 0,
+                    "ElDiffusionT": 0,
                     "ElDriftVelo": 0,
                     "MatParticles": [
                         {
@@ -12351,7 +12367,7 @@
                                     "InteractionData": [
                                         [
                                             1e-08,
-                                            9.406382718178564e-21
+                                            9.406382718178563e-21
                                         ],
                                         [
                                             1.10304e-08,
@@ -12403,7 +12419,7 @@
                                         ],
                                         [
                                             3.5782499999999996e-08,
-                                            4.9726317505044516e-21
+                                            4.972631750504452e-21
                                         ],
                                         [
                                             3.94694e-08,
@@ -12411,15 +12427,15 @@
                                         ],
                                         [
                                             4.35362e-08,
-                                            4.508135012539403e-21
+                                            4.5081350125394036e-21
                                         ],
                                         [
                                             4.8022100000000004e-08,
-                                            4.292415323391698e-21
+                                            4.2924153233916986e-21
                                         ],
                                         [
                                             5.29701e-08,
-                                            4.087017341380985e-21
+                                            4.087017341380986e-21
                                         ],
                                         [
                                             5.8428e-08,
@@ -12427,7 +12443,7 @@
                                         ],
                                         [
                                             6.444820000000001e-08,
-                                            3.7052337433125445e-21
+                                            3.705233743312544e-21
                                         ],
                                         [
                                             7.10888e-08,
@@ -12455,7 +12471,7 @@
                                         ],
                                         [
                                             1.2803900000000003e-07,
-                                            2.6287673842260332e-21
+                                            2.628767384226033e-21
                                         ],
                                         [
                                             1.41232e-07,
@@ -12491,7 +12507,7 @@
                                         ],
                                         [
                                             3.09494e-07,
-                                            1.6908151478135622e-21
+                                            1.690815147813562e-21
                                         ],
                                         [
                                             3.4138300000000003e-07,
@@ -12499,7 +12515,7 @@
                                         ],
                                         [
                                             3.76558e-07,
-                                            1.53287310687387e-21
+                                            1.5328731068738697e-21
                                         ],
                                         [
                                             4.1535800000000003e-07,
@@ -12551,19 +12567,19 @@
                                         ],
                                         [
                                             1.34742e-06,
-                                            8.103456524456031e-22
+                                            8.103456524456032e-22
                                         ],
                                         [
                                             1.48625e-06,
-                                            7.715695102670255e-22
+                                            7.715695102670256e-22
                                         ],
                                         [
                                             1.6393899999999999e-06,
-                                            7.346504779904885e-22
+                                            7.346504779904884e-22
                                         ],
                                         [
                                             1.80831e-06,
-                                            6.994968963037221e-22
+                                            6.99496896303722e-22
                                         ],
                                         [
                                             1.99463e-06,
@@ -12631,7 +12647,7 @@
                                         ],
                                         [
                                             9.57865e-06,
-                                            3.0392644695911643e-22
+                                            3.039264469591165e-22
                                         ],
                                         [
                                             1.05656e-05,
@@ -12639,7 +12655,7 @@
                                         ],
                                         [
                                             1.16543e-05,
-                                            2.7553577482008384e-22
+                                            2.755357748200838e-22
                                         ],
                                         [
                                             1.28551e-05,
@@ -12651,11 +12667,11 @@
                                         ],
                                         [
                                             1.56406e-05,
-                                            2.3784361122195784e-22
+                                            2.378436112219579e-22
                                         ],
                                         [
                                             1.72522e-05,
-                                            2.2646183735775005e-22
+                                            2.2646183735775e-22
                                         ],
                                         [
                                             1.90298e-05,
@@ -12663,7 +12679,7 @@
                                         ],
                                         [
                                             2.0990600000000002e-05,
-                                            2.0530632380301871e-22
+                                            2.0530632380301874e-22
                                         ],
                                         [
                                             2.31534e-05,
@@ -12671,7 +12687,7 @@
                                         ],
                                         [
                                             2.5241900000000003e-05,
-                                            1.87219227195631e-22
+                                            1.8721922719563102e-22
                                         ],
                                         [
                                             2.5300000000000002e-05,
@@ -12687,7 +12703,7 @@
                                         ],
                                         [
                                             3.3954e-05,
-                                            1.6142074316087534e-22
+                                            1.6142074316087532e-22
                                         ],
                                         [
                                             3.74525e-05,
@@ -12715,19 +12731,19 @@
                                         ],
                                         [
                                             6.74561e-05,
-                                            1.1451735731062688e-22
+                                            1.1451735731062686e-22
                                         ],
                                         [
                                             7.440660000000001e-05,
-                                            1.0903669036957729e-22
+                                            1.0903669036957726e-22
                                         ],
                                         [
                                             8.20732e-05,
-                                            1.0381824994652566e-22
+                                            1.0381824994652567e-22
                                         ],
                                         [
                                             9.052970000000001e-05,
-                                            9.884988135599936e-23
+                                            9.884988135599935e-23
                                         ],
                                         [
                                             9.98577e-05,
@@ -12771,11 +12787,11 @@
                                         ],
                                         [
                                             0.000266245,
-                                            5.76648639213503e-23
+                                            5.766486392135028e-23
                                         ],
                                         [
                                             0.000293678,
-                                            5.49055018990185e-23
+                                            5.490550189901849e-23
                                         ],
                                         [
                                             0.000323938,
@@ -12795,7 +12811,7 @@
                                         ],
                                         [
                                             0.00048292,
-                                            4.282408607627362e-23
+                                            4.2824086076273614e-23
                                         ],
                                         [
                                             0.000532679,
@@ -12811,7 +12827,7 @@
                                         ],
                                         [
                                             0.0007148839999999999,
-                                            3.519445147480261e-23
+                                            3.519445147480262e-23
                                         ],
                                         [
                                             0.0007885430000000001,
@@ -12819,7 +12835,7 @@
                                         ],
                                         [
                                             0.000869792,
-                                            3.1906822732456655e-23
+                                            3.190682273245666e-23
                                         ],
                                         [
                                             0.000959413,
@@ -16463,6 +16479,12 @@
                                             "DecayScenarios": [
                                                 {
                                                     "Branching": 1,
+                                                    "DirectAverage": 1000,
+                                                    "DirectConst": 1000,
+                                                    "DirectCustom": [
+                                                    ],
+                                                    "DirectModel": 0,
+                                                    "DirectSigma": 10,
                                                     "GeneratedParticles": [
                                                         {
                                                             "Energy": 2730,
@@ -16484,7 +16506,8 @@
                                                                 "Z": -1
                                                             }
                                                         }
-                                                    ]
+                                                    ],
+                                                    "InteractionModel": 1
                                                 }
                                             ],
                                             "Header": "LIBRARY    ENDF/B-VII.1\nREACTION   LI-6(N,NON),SIG",
@@ -21483,7 +21506,7 @@
                                         ],
                                         [
                                             1.48034e-08,
-                                            3.1914503116333053e-23
+                                            3.191450311633305e-23
                                         ],
                                         [
                                             1.6328600000000002e-08,
@@ -21491,11 +21514,11 @@
                                         ],
                                         [
                                             1.80947e-08,
-                                            2.8888615683059594e-23
+                                            2.88886156830596e-23
                                         ],
                                         [
                                             1.99591e-08,
-                                            2.7518584267320086e-23
+                                            2.751858426732009e-23
                                         ],
                                         [
                                             2.20157e-08,
@@ -21523,7 +21546,7 @@
                                         ],
                                         [
                                             3.96527e-08,
-                                            1.960961408140977e-23
+                                            1.9609614081409767e-23
                                         ],
                                         [
                                             4.37383e-08,
@@ -21551,7 +21574,7 @@
                                         ],
                                         [
                                             7.9889e-08,
-                                            1.393580222644841e-23
+                                            1.3935802226448407e-23
                                         ],
                                         [
                                             8.87378e-08,
@@ -21579,7 +21602,7 @@
                                         ],
                                         [
                                             1.66687e-07,
-                                            9.83031345116854e-24
+                                            9.830313451168541e-24
                                         ],
                                         [
                                             1.8515900000000002e-07,
@@ -21607,7 +21630,7 @@
                                         ],
                                         [
                                             3.47807e-07,
-                                            7.05629387781162e-24
+                                            7.056293877811619e-24
                                         ],
                                         [
                                             3.89056e-07,
@@ -21619,11 +21642,11 @@
                                         ],
                                         [
                                             4.86812e-07,
-                                            6.124500835966163e-24
+                                            6.124500835966164e-24
                                         ],
                                         [
                                             5.445470000000001e-07,
-                                            5.8529435855228004e-24
+                                            5.8529435855228e-24
                                         ],
                                         [
                                             6.091300000000001e-07,
@@ -21631,11 +21654,11 @@
                                         ],
                                         [
                                             6.86144e-07,
-                                            5.34734636894684e-24
+                                            5.347346368946839e-24
                                         ],
                                         [
                                             7.72935e-07,
-                                            5.113738839448947e-24
+                                            5.1137388394489474e-24
                                         ],
                                         [
                                             8.7066e-07,
@@ -21643,15 +21666,15 @@
                                         ],
                                         [
                                             9.80789e-07,
-                                            4.6970196702744866e-24
+                                            4.697019670274487e-24
                                         ],
                                         [
                                             1.11259e-06,
-                                            4.501361867223405e-24
+                                            4.501361867223406e-24
                                         ],
                                         [
                                             1.2621e-06,
-                                            4.322618733716746e-24
+                                            4.322618733716747e-24
                                         ],
                                         [
                                             1.44173e-06,
@@ -21663,11 +21686,11 @@
                                         ],
                                         [
                                             1.90796e-06,
-                                            3.842389402546635e-24
+                                            3.8423894025466355e-24
                                         ],
                                         [
                                             2.21037e-06,
-                                            3.7048163720770396e-24
+                                            3.70481637207704e-24
                                         ],
                                         [
                                             2.5786500000000003e-06,
@@ -21695,7 +21718,7 @@
                                         ],
                                         [
                                             8.847280000000001e-06,
-                                            2.9933460860510557e-24
+                                            2.9933460860510553e-24
                                         ],
                                         [
                                             1.19567e-05,
@@ -21703,7 +21726,7 @@
                                         ],
                                         [
                                             1.6971500000000002e-05,
-                                            2.875013215881049e-24
+                                            2.8750132158810493e-24
                                         ],
                                         [
                                             2.52117e-05,
@@ -26419,7 +26442,6 @@
                             3.28571
                         ]
                     ],
-                    "PrimScint_Model": 0,
                     "RayleighMFP": 0,
                     "RayleighWave": 500,
                     "ReemissionProb": 0,
@@ -26432,11 +26454,16 @@
                     ],
                     "SecScint_PhYield": 0,
                     "SecScint_Tau": 0,
+                    "TGeoP1": 0,
+                    "TGeoP2": 0,
+                    "TGeoP3": 0,
                     "Temperature": 298,
                     "W": 0
                 },
                 {
                     "*MaterialName": "Aluminium",
+                    "*Tags": [
+                    ],
                     "BulkAbsorption": 0,
                     "BulkAbsorptionWave": [
                     ],
@@ -26459,6 +26486,8 @@
                     },
                     "Comments": "",
                     "Density": 2.7,
+                    "ElDiffusionL": 0,
+                    "ElDiffusionT": 0,
                     "ElDriftVelo": 0,
                     "MatParticles": [
                         {
@@ -28058,7 +28087,6 @@
                     ],
                     "PrimScintSpectrum": [
                     ],
-                    "PrimScint_Model": 0,
                     "RayleighMFP": 0,
                     "RayleighWave": 500,
                     "ReemissionProb": 0,
@@ -28071,11 +28099,16 @@
                     ],
                     "SecScint_PhYield": 0,
                     "SecScint_Tau": 0,
+                    "TGeoP1": 0,
+                    "TGeoP2": 0,
+                    "TGeoP3": 0,
                     "Temperature": 298,
                     "W": 0
                 },
                 {
                     "*MaterialName": "Optical Gel",
+                    "*Tags": [
+                    ],
                     "BulkAbsorption": 0,
                     "BulkAbsorptionWave": [
                     ],
@@ -28087,6 +28120,8 @@
                     },
                     "Comments": "",
                     "Density": 1.06,
+                    "ElDiffusionL": 0,
+                    "ElDiffusionT": 0,
                     "ElDriftVelo": 0,
                     "MatParticles": [
                         {
@@ -28194,7 +28229,6 @@
                     ],
                     "PrimScintSpectrum": [
                     ],
-                    "PrimScint_Model": 0,
                     "RayleighMFP": 0,
                     "RayleighWave": 500,
                     "ReemissionProb": 0,
@@ -28207,11 +28241,16 @@
                     ],
                     "SecScint_PhYield": 0,
                     "SecScint_Tau": 0,
+                    "TGeoP1": 0,
+                    "TGeoP2": 0,
+                    "TGeoP3": 0,
                     "Temperature": 298,
                     "W": 0
                 },
                 {
                     "*MaterialName": "Optical Glue",
+                    "*Tags": [
+                    ],
                     "BulkAbsorption": 0,
                     "BulkAbsorptionWave": [
                     ],
@@ -28223,6 +28262,8 @@
                     },
                     "Comments": "",
                     "Density": 1.12,
+                    "ElDiffusionL": 0,
+                    "ElDiffusionT": 0,
                     "ElDriftVelo": 0,
                     "MatParticles": [
                         {
@@ -28330,7 +28371,6 @@
                     ],
                     "PrimScintSpectrum": [
                     ],
-                    "PrimScint_Model": 0,
                     "RayleighMFP": 0,
                     "RayleighWave": 500,
                     "ReemissionProb": 0,
@@ -28343,11 +28383,16 @@
                     ],
                     "SecScint_PhYield": 0,
                     "SecScint_Tau": 0,
+                    "TGeoP1": 0,
+                    "TGeoP2": 0,
+                    "TGeoP3": 0,
                     "Temperature": 298,
                     "W": 0
                 },
                 {
                     "*MaterialName": "Glass_neutron",
+                    "*Tags": [
+                    ],
                     "BulkAbsorption": 0,
                     "BulkAbsorptionWave": [
                     ],
@@ -28359,6 +28404,8 @@
                     },
                     "Comments": "",
                     "Density": 2.5,
+                    "ElDiffusionL": 0,
+                    "ElDiffusionT": 0,
                     "ElDriftVelo": 0,
                     "MatParticles": [
                         {
@@ -28466,7 +28513,6 @@
                     ],
                     "PrimScintSpectrum": [
                     ],
-                    "PrimScint_Model": 0,
                     "RayleighMFP": 0,
                     "RayleighWave": 500,
                     "ReemissionProb": 0,
@@ -28479,6 +28525,9 @@
                     ],
                     "SecScint_PhYield": 0,
                     "SecScint_Tau": 0,
+                    "TGeoP1": 0,
+                    "TGeoP2": 0,
+                    "TGeoP3": 0,
                     "Temperature": 298,
                     "W": 0
                 }
@@ -31132,6 +31181,8 @@
                         "angleBins": 100,
                         "angleFrom": 0,
                         "angleTo": 90,
+                        "bDirect": true,
+                        "bIndirect": true,
                         "bLower": true,
                         "bPrimary": true,
                         "bSecondary": false,
@@ -31242,6 +31293,32 @@
         },
         "MW": {
             "ConfigGuiLocked": false
+        },
+        "OutputWindow": {
+            "EventViewer": {
+                "DepoEn": true,
+                "ExclProcActive": false,
+                "ExclToProc": "",
+                "ExclToProcPrim": false,
+                "Expansion": 4,
+                "HideAllTransport": true,
+                "HidePrimTransport": false,
+                "KinEn": false,
+                "LimToProc": "",
+                "LimToProcActive": false,
+                "LimToProcPrim": false,
+                "Material": true,
+                "Position": true,
+                "Precision": 4,
+                "ShowFilters": false,
+                "ShowPMsig": false,
+                "ShowTracks": true,
+                "Step": true,
+                "SuppressSec": false,
+                "Time": true,
+                "VolIndex": true,
+                "Volume": true
+            }
         },
         "ReconstructionWindow": {
             "Blur": {
@@ -43107,6 +43184,7 @@
                         "StretchZ": 1
                     },
                     "RootMinimizerOptions": {
+                        "Formula": "-Signal * log(LRF) + LRF",
                         "LSorLikelihood": 1,
                         "LSsuppressConsole": true,
                         "MaxCalls": 500,
@@ -43129,9 +43207,6 @@
                     "IncludePassives": false,
                     "InitialEnergy": 1,
                     "InitialZ": 0,
-                    "LimitSearchGauss": false,
-                    "LimitSearchIfTrueIsSet": false,
-                    "RangeForLimitSearchIfTrueSet": 1,
                     "ReconstructEnergy": true,
                     "ReconstructZ": false,
                     "WeightedChi2": true,
@@ -44690,6 +44765,262 @@
             }
         ],
         "StaticPassives": [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
         ]
     },
     "SimulationConfig": {
@@ -44697,7 +45028,6 @@
         "GeneralSimConfig": {
             "AcceleratorConfig": {
                 "CheckBeforeTrack": true,
-                "LogsStatistics": false,
                 "MaxNumTransitions": 500
             },
             "AngleConfig": {
@@ -44719,6 +45049,7 @@
                     "/process/em/deexcitationIgnoreCut false"
                 ],
                 "PhysicsList": "QGSP_BERT_HP",
+                "Precision": 6,
                 "SensitiveVolumes": [
                     "PrScint"
                 ],
@@ -44726,13 +45057,19 @@
                 ],
                 "TrackParticles": false
             },
+            "LogStatOptions": {
+                "ParticleTransportLog": false,
+                "PhotonDetectionStat": false,
+                "PhotonGenerationLog": false,
+                "bSaveDepositionLog": false,
+                "bSaveParticleLog": false
+            },
             "LrfBasedSim": {
                 "NumPhotElLRFunity": 1,
                 "NumPhotsLRFunity": 20000,
                 "UseLRFs": false
             },
             "SecScintConfig": {
-                "Type": 0
             },
             "TimeConfig": {
                 "TimeBins": 5,

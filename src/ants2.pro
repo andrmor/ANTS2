@@ -1,6 +1,6 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 4
-ANTS2_MINOR = 26
+ANTS2_MINOR = 27
 
 #Optional libraries
 #CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
@@ -427,7 +427,10 @@ SOURCES += main.cpp \
     gui/GraphWindowTools/adrawtemplate.cpp \
     gui/GraphWindowTools/atemplateselectiondialog.cpp \
     gui/GraphWindowTools/atemplateselectionrecord.cpp \
-    modules/apmdummystructure.cpp
+    modules/apmdummystructure.cpp \
+    gui/amateriallibrarybrowser.cpp \
+    Simulation/amaterialloader.cpp \
+    gui/DAWindowTools/amaterialloaderdialog.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -599,7 +602,10 @@ HEADERS  += common/CorrelationFilters.h \
     gui/GraphWindowTools/atemplateselectiondialog.h \
     gui/GraphWindowTools/atemplateselectionrecord.h \
     modules/apmanddummy.h \
-    modules/apmdummystructure.h
+    modules/apmdummystructure.h \
+    gui/amateriallibrarybrowser.h \
+    Simulation/amaterialloader.h \
+    gui/DAWindowTools/amaterialloaderdialog.h
 
 # --- SIM ---
 ants2_SIM {
@@ -834,6 +840,7 @@ INCLUDEPATH += gui/RasterWindow
 INCLUDEPATH += gui/ReconstructionWindowTools
 INCLUDEPATH += modules/lrf_v3/gui
 INCLUDEPATH += gui/GraphWindowTools
+INCLUDEPATH += gui/DAWindowTools
 }
 
 INCLUDEPATH += gui/MainWindowTools
@@ -959,5 +966,7 @@ FORMS += \
     gui/GraphWindowTools/atextpavedialog.ui \
     gui/GraphWindowTools/alinemarkerfilldialog.ui \
     gui/GraphWindowTools/arootcolorselectordialog.ui \
-    gui/GraphWindowTools/atemplateselectiondialog.ui
+    gui/GraphWindowTools/atemplateselectiondialog.ui \
+    gui/amateriallibrarybrowser.ui \
+    gui/DAWindowTools/amaterialloaderdialog.ui
 

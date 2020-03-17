@@ -1,53 +1,60 @@
 #include "aguiwindow.h"
 #include "windownavigatorclass.h"
 #include "ajsontools.h"
+#include "guiutils.h"
 
 #include <QEvent>
 #include <QResizeEvent>
 #include <QDebug>
 
-AGuiWindow::AGuiWindow(QWidget * parent) :
-    QMainWindow(parent){}
+AGuiWindow::AGuiWindow(const QString & idStr, QWidget * parent) :
+    QMainWindow(parent), IdStr(idStr) {}
 
-void AGuiWindow::connectToNavigator(WindowNavigatorClass * wNav, const QString & idStr)
+void AGuiWindow::connectWinNavigator(WindowNavigatorClass * wNav)
 {
     WNav = wNav;
-    IdStr = idStr;
 }
 
-void AGuiWindow::writeToJson(const QString & winName, QJsonObject & json) const
+void AGuiWindow::writeGeomToJson(QJsonObject & json)
 {
     QJsonObject js;
-    js["x"] = WinPos_X;
-    js["y"] = WinPos_Y;
-    js["w"] = WinSize_W;
-    js["h"] = WinSize_H;
+
+    js["x"]   = WinPos_X;
+    js["y"]   = WinPos_Y;
+    js["w"]   = WinSize_W;
+    js["h"]   = WinSize_H;
     js["vis"] = bWinVisible;
+    js["max"] = isMaximized();
 
-    json[winName] = js;
+    json[IdStr] = js;
 }
 
-void AGuiWindow::readFromJson(const QString & winName, const QJsonObject & json)
+void AGuiWindow::readGeomFromJson(const QJsonObject & json)
 {
-    if (!json.contains(winName)) return;
+    if (!json.contains(IdStr)) return;
 
     QJsonObject js;
-    parseJson(json, winName, js);
+    parseJson(json, IdStr, js);
 
-    parseJson(js, "x", WinPos_X);
-    parseJson(js, "y", WinPos_Y);
-    parseJson(js, "w", WinSize_W);
-    parseJson(js, "h", WinSize_H);
+    parseJson(js, "x",   WinPos_X);
+    parseJson(js, "y",   WinPos_Y);
+    parseJson(js, "w",   WinSize_W);
+    parseJson(js, "h",   WinSize_H);
     parseJson(js, "vis", bWinVisible);
 
     resize(WinSize_W, WinSize_H);
     move(WinPos_X, WinPos_Y);
 
+    GuiUtils::AssureWidgetIsWithinVisibleArea(this);
+
+    bool bMaximized = false;
+    parseJson(js, "max", bMaximized);
+    if (bMaximized) showMaximized();
+
     if (bWinVisible) show();
     else hide();
 }
 
-//#include <QApplication>
 bool AGuiWindow::event(QEvent *event)
 {
     if (event->type() == QEvent::WindowStateChange)
@@ -90,7 +97,7 @@ bool AGuiWindow::event(QEvent *event)
 void AGuiWindow::resizeEvent(QResizeEvent * event)
 {
     //if (event && bWinGeomUpdateAllowed)
-    if (bWinGeomUpdateAllowed)
+    if (bWinGeomUpdateAllowed && !isMaximized())
     {
         //WinSize_W = event->size().width();
         WinSize_W = width();
@@ -103,7 +110,7 @@ void AGuiWindow::resizeEvent(QResizeEvent * event)
 
 void AGuiWindow::moveEvent(QMoveEvent * event)
 {
-    if (bWinGeomUpdateAllowed)
+    if (bWinGeomUpdateAllowed && !isMaximized())
     {
         //WinPos_X = event->pos().x();
         WinPos_X = x();

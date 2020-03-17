@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>609</width>
-    <height>520</height>
+    <width>635</width>
+    <height>523</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,6 +27,20 @@
     <number>3</number>
    </property>
    <item>
+    <widget class="QLabel" name="label_4">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>Dear user! Please contribute to the development of ANTS2: send your materials/examples/sources
+to andrei@coimbra.lip.pt to be added to the ANTS2 libraries!</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QPushButton" name="pbDummy">
      <property name="text">
       <string>...dummy</string>
@@ -35,6 +49,12 @@
    </item>
    <item>
     <widget class="QSplitter" name="splitter_2">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>

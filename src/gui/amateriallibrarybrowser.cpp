@@ -24,6 +24,7 @@ AMaterialLibraryBrowser::AMaterialLibraryBrowser(AMaterialParticleCollection & M
     ui(new Ui::AMaterialLibraryBrowser)
 {
     ui->setupUi(this);
+    setWindowTitle("Load material from library");
 
     ui->pbDummy->setDefault(true);
     ui->pbDummy->setVisible(false);

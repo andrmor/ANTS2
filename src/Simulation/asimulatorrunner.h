@@ -56,7 +56,7 @@ private:
 #else
     QVector<std::thread *> threads;
 #endif
-    ASimulator * backgroundWorker; // obsolete?
+    ASimulator * backgroundWorker = nullptr;
 
     //Time
     QTime startTime;

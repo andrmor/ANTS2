@@ -81,24 +81,11 @@ bool ASimulatorRunner::setup(int threadCount, bool bPhotonSourceSim)
         return false;
     }
 
-    bool fRunThreads = threadCount > 0;
-
-    for (int i = 0; i < threadCount; i++)
+    for (int iWorker = 0; iWorker < threadCount; iWorker++)
     {
         ASimulator *worker;
-
-        if (bPhotonSourceSim) worker = new APointSourceSimulator(simMan, i);
-        else //Particle simulator
-        {
-            AParticleSourceSimulator* pss = new AParticleSourceSimulator(simMan, i);
-            if (simMan.simSettings.TrackBuildOptions.bBuildParticleTracks && simMan.isG4Sim_OnlyGenerateFiles())
-            {
-                qDebug() << "--- only file export, external/internal sim will not be started! ---";
-                pss->setOnlySavePrimaries();
-            }
-            worker = pss;
-        }
-        simMan.setG4Sim_OnlyGenerateFiles(false); //this is single trigger flag
+        if (bPhotonSourceSim) worker = new APointSourceSimulator(simMan, iWorker);
+        else                  worker = new AParticleSourceSimulator(simMan, iWorker);
 
         bool bOK = worker->setup(simMan.jsSimSet);
         if (!bOK)
@@ -110,9 +97,9 @@ bool ASimulatorRunner::setup(int threadCount, bool bPhotonSourceSim)
         }
         worker->initSimStat();
 
-        worker->divideThreadWork(i, threadCount);
+        worker->divideThreadWork(iWorker, threadCount);
         int workerEventCount = worker->getEventCount();
-        if (workerEventCount == 0 && i != 0) // require at least 1 worker, even if no work assigned
+        if (workerEventCount == 0 && iWorker != 0) // require at least 1 worker, even if no work assigned
         {
             delete worker;
             break;
@@ -131,13 +118,11 @@ bool ASimulatorRunner::setup(int threadCount, bool bPhotonSourceSim)
         workers.append(worker);
     }
 
-    if(fRunThreads)
+    if (threadCount > 0)
     {
-        backgroundWorker = 0;
-        //Assumes that detector always adds default navigator. Otherwise we need to add it ourselves!
+        backgroundWorker = nullptr;
         detector.GeoManager->SetMaxThreads(workers.count());
 #if ROOT_VERSION_CODE < ROOT_VERSION(6,11,1)
-        //Create any missing TThreads, they are all the same, they only differ in run() call
         while(workers.count() > threads.count())
             threads.append(new TThread(&SimulationManagerRunWorker));
 #else
@@ -145,7 +130,7 @@ bool ASimulatorRunner::setup(int threadCount, bool bPhotonSourceSim)
             threads.append(new std::thread(&SimulationManagerRunWorker, workers[i]));
 #endif
     }
-    else  backgroundWorker = workers.last();
+    else backgroundWorker = workers.last();
 
     simState = SSetup;
     return true;

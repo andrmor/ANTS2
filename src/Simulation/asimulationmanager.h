@@ -34,20 +34,12 @@ public:
     ASimulationManager(EventsDataClass & EventsDataHub, DetectorClass & Detector);
     ~ASimulationManager();
 
+    void StartSimulation(QJsonObject & json, int threads, bool bDoGuiUpdate);
+    // when simulation is finished, private slot ASimulationManager::onSimulationFinished() is triggered
+
     bool isSimulationSuccess() const {return fSuccess;}
     bool isSimulationFinished() const {return fFinished;}
     bool isSimulationAborted() const;
-
-    //last event info
-    QVector<QBitArray> SiPMpixels;
-    QVector<AEnergyDepositionCell *> EnergyVector;
-
-    std::vector<TrackHolderClass *> Tracks;
-    std::vector<ANodeRecord *> Nodes;
-
-    std::vector<AEventTrackingRecord *> TrackingHistory;
-
-    void StartSimulation(QJsonObject & json, int threads, bool fStartedFromGui);
 
     const QString & getErrorString() {return ErrorString;}
     void setErrorString(const QString & err) {ErrorString = err;}
@@ -60,16 +52,27 @@ public:
     void setMaxThreads(int maxThreads) {MaxThreads = maxThreads;}
     const QString loadNodesFromFile(const QString & fileName);
 
-    void setG4Sim_OnlyGenerateFiles(bool flag) {bOnlyFileExport = flag;}
-    bool isG4Sim_OnlyGenerateFiles() const {return bOnlyFileExport;}
+    //void setG4Sim_OnlyGenerateFiles(bool flag) {bOnlyFileExport = flag;}
+    //bool isG4Sim_OnlyGenerateFiles() const {return bOnlyFileExport;}
     void generateG4antsConfigCommon(QJsonObject & json, int ThreadId);  // !!! G4ants files common
 
     const DetectorClass & getDetector() {return Detector;}
 
+public:
+    std::vector<ANodeRecord *> Nodes;
+
+    //history
+    std::vector<TrackHolderClass *> Tracks;
+    std::vector<AEventTrackingRecord *> TrackingHistory;
+
+    //last event info
+    QVector<QBitArray> SiPMpixels;
+    QVector<AEnergyDepositionCell *> EnergyVector;
+
     // Next three: Simulator workers use their own local copies constructed using configuration json
-    ASourceParticleGenerator * ParticleSources = 0;         //used to update json on config changes and in GUI to configure
-    AFileParticleGenerator   * FileParticleGenerator = 0;   //only for gui, simulation threads use their own
-    AScriptParticleGenerator * ScriptParticleGenerator = 0; //only for gui, simulation threads use their own
+    ASourceParticleGenerator * ParticleSources = nullptr;         //used to update json on config changes and in GUI to configure
+    AFileParticleGenerator   * FileParticleGenerator = nullptr;   //only for gui, simulation threads use their own
+    AScriptParticleGenerator * ScriptParticleGenerator = nullptr; //only for gui, simulation threads use their own
 
     ATrackBuildOptions TrackBuildOptions;
     ALogsAndStatisticsOptions LogsStatOptions;
@@ -87,14 +90,15 @@ private:
     EventsDataClass & EventsDataHub;
     DetectorClass   & Detector;
 
-    ASimulatorRunner * Runner;
+    ASimulatorRunner * Runner = nullptr;
+
     QThread simRunnerThread;
     QTimer simTimerGuiUpdate;
 
-    QString ErrorString; //temporary public!
+    QString ErrorString;
 
     int  MaxThreads = -1;
-    bool fStartedFromGui = false;
+    bool bDoGuiUpdate = false;
     bool fHardAborted = false;
     bool fFinished = true;
     bool fSuccess = false;
@@ -102,14 +106,14 @@ private:
     bool bGuardTrackingHistory = false;
 
     // G4ants
-    bool bOnlyFileExport = false; // single trigger flag
+    //bool bOnlyFileExport = false; // single trigger flag
 
 public slots:
-    void onSimulationFinished(); //processing of simulation results!
     void StopSimulation();
     void onNewGeoManager(); // Nodes in history will be invalid after that!
 
 private slots:
+    void onSimulationFinished(); //processing of simulation results!
     void onSimFailedToStart();    
     void updateGui();
 

@@ -57,17 +57,14 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
 {
     if ( !ASimulator::setup(json) ) return false;
 
-    //prepare this module
     timeFrom = simSettings.TimeFrom;
     timeRange = simSettings.fTimeResolved ? (simSettings.TimeTo - simSettings.TimeFrom) : 0;
 
-    //extracting generation configuration
     if (!json.contains("ParticleSourcesConfig"))
     {
         ErrorString = "Json sent to simulator does not contain particle sim config data!";
         return false;
     }
-
     QJsonObject js = json["ParticleSourcesConfig"].toObject();
         //control options
         QJsonObject cjs = js["SourceControlOptions"].toObject();
@@ -113,7 +110,7 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
         }
         else if (PartGenMode == "File")
         {
-            //  generation from file
+            //  generation from ascii file
             QJsonObject fjs;
             parseJson(js, "GenerationFromFile", fjs);
             if (fjs.isEmpty())
@@ -129,9 +126,6 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
         }
         else if (PartGenMode == "Script")
         {
-            // script based generator
-            //ErrorString = "Script particle generator is not yet implemented";
-            //return false;
             QJsonObject sjs;
             parseJson(js, "GenerationFromScript", sjs);
             if (sjs.isEmpty())
@@ -151,16 +145,14 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
             return false;
         }
 
-        // trying to initialize the gun
-        if ( !ParticleGun->Init() )
-        {
-            ErrorString = ParticleGun->GetErrorString();
-            return false;
-        }
-
-    //update config according to the selected generation mode
+    // trying to initialize the gun
+    if ( !ParticleGun->Init() )
+    {
+        ErrorString = ParticleGun->GetErrorString();
+        return false;
+    }
     if (PartGenMode == "File") totalEventCount = static_cast<AFileParticleGenerator*>(ParticleGun)->NumEventsInFile;
-    //inits
+
     ParticleTracker->configure(&simSettings, fBuildParticleTracks, &tracks, fIgnoreNoDepoEvents);
     ParticleTracker->resetCounter();
     S1generator->setDoTextLog(simSettings.LogsStatOptions.bPhotonGenerationLog);

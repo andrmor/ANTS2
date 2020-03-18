@@ -70,9 +70,9 @@ void ASimulationManager::StartSimulation(QJsonObject& json, int threads, bool fF
 {
     fFinished = false;
     fSuccess = false;
-    fStartedFromGui = fFromGui;
+    bDoGuiUpdate = fFromGui;
 
-    threads = std::max(threads, 1); // TODO check we still can run in "0" threads
+    threads = std::max(threads, 1); // TODO check if we still can run in "0" threads
 
     if (MaxThreads > 0 && threads > MaxThreads)
     {
@@ -89,7 +89,7 @@ void ASimulationManager::StartSimulation(QJsonObject& json, int threads, bool fF
     else
     {
         simRunnerThread.start();
-        if (fStartedFromGui) simTimerGuiUpdate.start();
+        if (bDoGuiUpdate) simTimerGuiUpdate.start();
     }
 }
 
@@ -226,7 +226,8 @@ void ASimulationManager::onSimulationFinished()
         EventsDataHub.purge1e10events(); //purging events with "true" positions x==1e10 && y==1e10
     }
 
-    if (LogsStatOptions.bParticleTransportLog && LogsStatOptions.bSaveParticleLog || LogsStatOptions.bSaveDepositionLog)
+    if ( (LogsStatOptions.bParticleTransportLog && LogsStatOptions.bSaveParticleLog) ||
+         LogsStatOptions.bSaveDepositionLog)
     {
         //saving logs
         const QString dir = makeLogDir();
@@ -241,9 +242,7 @@ void ASimulationManager::onSimulationFinished()
     Detector.BuildDetector(true, true);  // <- still needed on Windows
     bGuardTrackingHistory = false;
 
-    //Detector.GeoManager->CleanGarbage();
-
-    if (fStartedFromGui) emit SimulationFinished();
+    if (bDoGuiUpdate) emit SimulationFinished();
 
     SiPMpixels.clear();  // main window copied if needed
     //qDebug() << "SimManager: Sim finished";

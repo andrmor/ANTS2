@@ -92,11 +92,11 @@ ReconstructionWindow::ReconstructionWindow(QWidget * parent, MainWindow * mw, Ev
   ui->laBackground->setStyleSheet(style);
   ui->twData->setCurrentIndex(0);
   ui->twOptions->setCurrentIndex(0);
-  ui->cbRecType->setCurrentIndex(-1);
+  ui->cbRecType->setCurrentIndex(-1); //frozen development: point or track reconstruction
   ui->cbRecType->setCurrentIndex(0);
 
   QList<QWidget*> invis;
-  invis << ui->pbUpdateFilters << ui->pbSpF_UpdateTable << ui->pbUpdateGainsIndication << ui->pbCorrUpdateTMP << ui->fDynPassive
+  invis << ui->pbUpdateFilters << ui->pbSpF_UpdateTable << ui->pbUpdateGainsIndication << ui->pbCorrUpdateTMP
         << ui->fShowXYPmnumber << ui->pbKNNupdate << ui->pbUpdateReconConfig << ui->labLRFmoduleWarning << ui->pbUpdateGuiSettingsInJSON
         << ui->pbRootConfigureCustom;
   for (auto w: invis) w->setVisible(false);
@@ -104,7 +104,7 @@ ReconstructionWindow::ReconstructionWindow(QWidget * parent, MainWindow * mw, Ev
   QList<QWidget*> disab;
   disab << ui->leoTimeBins // ui->fFilterSumSignal << ui->fFilterIndividualSignal << ui->fEnergyFilter << ui->fChi2Filter << ui->fLoadedEnergyFilter
         << ui->labTimeBins << ui->fCorrCut << ui->fCorrAddRemoe << ui->fCorrSize << ui->cbCorrShowCut << ui->dLoadedEnergy
-        << ui->cbForceCoGgiveZof << ui->fCustomBins << ui->fCustomRanges << ui->fInRecFilter;
+        << ui->cbForceCoGgiveZof << ui->fCustomBins << ui->fCustomRanges << ui->fInRecFilter << ui->fDynPassive;
   for (auto w: disab) w->setEnabled(false);
   ui->fCustomSpatFilter->setEnabled(ui->cbSpFcustom->isChecked());
   ui->fSpFz->setEnabled(!ui->cbSpFallZ->isChecked());
@@ -135,11 +135,10 @@ ReconstructionWindow::ReconstructionWindow(QWidget * parent, MainWindow * mw, Ev
   iv->setBottom(0);  
   foreach(QLineEdit *w, list) if (w->objectName().startsWith("lei")) w->setValidator(iv);
 
-  ui->cbDynamicPassiveByDistance->setChecked(false); //has to be false on start
-  ui->cbDynamicPassiveBySignal->setChecked(false);  //has to be false on start
+  ui->cbDynamicPassiveByDistance->setChecked(false);
+  ui->cbDynamicPassiveBySignal->setChecked(false);
 
-  ui->twOptions->tabBar()->setTabIcon(1, RedIcon);
-  //ui->twData->tabBar()->setTabIcon(0, RedIcon);
+  ui->twOptions->tabBar()->setTabIcon(2, RedIcon); //assuming there are no LRF on start
 
   ui->tabwidCorrPolygon->resizeColumnsToContents();
   ui->tabwidCorrPolygon->resizeRowsToContents();

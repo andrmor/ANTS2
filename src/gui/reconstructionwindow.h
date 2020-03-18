@@ -269,8 +269,6 @@ private slots:
 
   void on_pbLoadGains_clicked();
 
-  void on_twOptions_currentChanged(int index);
-
   void on_pbClearGroups_clicked();
 
   void on_pbAssignPMtoGroup_clicked();
@@ -540,6 +538,10 @@ private slots:
   void on_pbRootConfigureCustom_clicked();
 
   void on_cobLSminimizeWhat_currentIndexChanged(int index);
+
+  void on_cbDynamicPassiveByDistance_toggled(bool checked);
+
+  void on_cbDynamicPassiveBySignal_toggled(bool checked);
 
 private:
   Ui::ReconstructionWindow *ui;

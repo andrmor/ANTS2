@@ -227,11 +227,13 @@ void ReconstructionWindow::InitWindow()
 
 void ReconstructionWindow::on_cobReconstructionAlgorithm_currentIndexChanged(int index)
 {
-    if (index==6) index = 2; //same tab for both
     ui->swReconstructionAlgorithm->setCurrentIndex(index);
-    ReconstructionWindow::updateRedStatusOfRecOptions(); //update warning indicator in tabWidget
-    if (index == 1 || index == 2 || index == 4 ) ui->fDynPassive->setVisible(true);
-    else ui->fDynPassive->setVisible(false);  
+
+    onUpdatePassiveIndication();
+    updateRedStatusOfRecOptions();
+
+    ui->fDynPassive->setEnabled(index == 1 || index == 2 || index == 4);
+
     ui->cobMultipleOption->setEnabled(index == 2);
 }
 
@@ -916,7 +918,7 @@ void ReconstructionWindow::on_pbShowMeasuredVsExpected_clicked()
     if (!Detector->LRFs->isAllLRFsDefined())
       {
         message("LRFs are not defined!", this);
-        ui->twOptions->setCurrentIndex(1);
+        ui->twOptions->setCurrentIndex(2);
         return;
       }
     //redo reconstruction:
@@ -1010,13 +1012,12 @@ void ReconstructionWindow::LRF_ModuleReadySlot(bool ready)
     if (ready)
        {
         ui->label_ready->setStyleSheet("QLabel { color : green; }");
-        QIcon no;
-        ui->twOptions->tabBar()->setTabIcon(1, no);
+        ui->twOptions->tabBar()->setTabIcon(2, QIcon());
        }
     else
       {
         ui->label_ready->setStyleSheet("QLabel { color : red; }");
-        ui->twOptions->tabBar()->setTabIcon(1, RedIcon);
+        ui->twOptions->tabBar()->setTabIcon(2, RedIcon);
       }
     ReconstructionWindow::updateRedStatusOfRecOptions();
 
@@ -1027,21 +1028,22 @@ void ReconstructionWindow::updateRedStatusOfRecOptions()
 {
   bool showRed = false;
 
-  int recAlg = ui->cobReconstructionAlgorithm->currentIndex();
-  if (!Detector->LRFs->isAllLRFsDefined())
-       if (recAlg !=0 && recAlg !=3) showRed = true; //CoG and network do not need LRFs!
+  int iAlg = ui->cobReconstructionAlgorithm->currentIndex();
+  if (iAlg == 1 || iAlg == 2 || iAlg == 4) //the other do not need LRFs
+    if (!Detector->LRFs->isAllLRFsDefined())
+        showRed = true;
 
   if (showRed)
-    {
+  {
       ui->label_ready->setStyleSheet("QLabel { color : red; }");
-      ui->twOptions->tabBar()->setTabIcon(1, RedIcon);
+      ui->twOptions->tabBar()->setTabIcon(2, RedIcon);
       ui->tabWidget->tabBar()->setTabIcon(1, RedIcon);
-    }
+  }
   else
-    {
-      QIcon no;
-      ui->tabWidget->tabBar()->setTabIcon(1, no);
-    }
+  {
+      ui->twOptions->tabBar()->setTabIcon(2, QIcon());
+      ui->tabWidget->tabBar()->setTabIcon(1, QIcon());
+  }
 }
 
 void ReconstructionWindow::updateFiltersGui()
@@ -2315,13 +2317,6 @@ void ReconstructionWindow::on_pbLoadGains_clicked()
   ReconstructionWindow::on_pbShowAllGainsForGroup_clicked();
   UpdateStatusAllEvents();
   //UpdateReconConfig(); //Config->JSON update
-}
-
-void ReconstructionWindow::on_twOptions_currentChanged(int)
-{
-    if (!MW->PMs) return; //on start
-    //ReconstructionWindow::on_pbUpdateGainsIndication_clicked();
-    //ReconstructionWindow::on_pbUpdatePMgroupIndication_clicked();
 }
 
 void ReconstructionWindow::on_pbAssignPMtoGroup_clicked()
@@ -4003,7 +3998,7 @@ void ReconstructionWindow::on_sbTreeViewHistory_valueChanged(int arg1)
 
 void ReconstructionWindow::on_cobCUDAoffsetOption_currentIndexChanged(int index)
 {
-   ui->fCUDAoffsets->setVisible(index == 2);
+   ui->fCUDAoffsets->setEnabled(index == 2);
 }
 
 struct ZSortStruct
@@ -6482,7 +6477,7 @@ void ReconstructionWindow::on_pbClearAllFilters_clicked()
 
 void ReconstructionWindow::on_cobCGstartOption_currentIndexChanged(int index)
 {
-    ui->fCPUoffsets->setVisible(index == 2);
+    ui->fCPUoffsets->setEnabled(index == 2);
 }
 
 #include <QPlainTextEdit>
@@ -6529,4 +6524,14 @@ void ReconstructionWindow::on_pbRootConfigureCustom_clicked()
 void ReconstructionWindow::on_cobLSminimizeWhat_currentIndexChanged(int index)
 {
     ui->pbRootConfigureCustom->setVisible(index == 2);
+}
+
+void ReconstructionWindow::on_cbDynamicPassiveByDistance_toggled(bool)
+{
+    onUpdatePassiveIndication();
+}
+
+void ReconstructionWindow::on_cbDynamicPassiveBySignal_toggled(bool)
+{
+    onUpdatePassiveIndication();
 }

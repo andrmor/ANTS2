@@ -546,29 +546,29 @@ private slots:
 private:
   Ui::ReconstructionWindow *ui;
 
-  //aliases
-  EventsDataClass* EventsDataHub;
-  AReconstructionManager* ReconstructionManager; //only pointer!
-  DetectorClass* Detector;
-  APmGroupsManager* PMgroups;
-  APmHub* PMs;
+  //external resources
+  AReconstructionManager * ReconstructionManager;
+  EventsDataClass        * EventsDataHub;
+  DetectorClass          * Detector;
+  APmGroupsManager       * PMgroups;
+  APmHub                 * PMs;
 
-  QStandardItemModel *modelSpF_TV;
-
+  QStandardItemModel * modelSpF_TV = nullptr;
   QVector<TreeViewStruct> TreeViewHistory;
+  Viewer2DarrayObject * vo = nullptr;
+  QDialog * dialog = nullptr;
+  int PMcolor = 1;
+  int PMwidth = 1;
+  int PMstyle = 1;
 
-  Viewer2DarrayObject* vo;
-  QDialog* dialog;
-  int PMcolor, PMwidth, PMstyle;
+  bool TableLocked = true;
+  bool StopRecon = false; //stop button flag
 
-  bool TableLocked;
-  bool StopRecon; //stop button flag
-
-  int ShiftZoldValue;
-  bool ForbidUpdate;
-  bool TMPignore;
-  bool bFilteringStarted;
-  QWidget* WidgetFocusedBeforeBusyOn;
+  int ShiftZoldValue = 0;
+  bool ForbidUpdate = false;
+  bool TMPignore = false;
+  bool bFilteringStarted = false;
+  QWidget * WidgetFocusedBeforeBusyOn = nullptr;
 
   double lastChi2;
 
@@ -608,9 +608,9 @@ private:
   void RefreshNumEventsIndication();
 
   void DrawCuts();
-  TLine* CorrCutLine;
-  TEllipse* CorrCutEllipse;
-  TPolyLine* CorrCutPolygon;
+  TLine     * CorrCutLine = nullptr;
+  TEllipse  * CorrCutEllipse = nullptr;
+  TPolyLine * CorrCutPolygon = nullptr;
   void FillUiFromTmpCorrFilter();
 
   QVector<TLine *> PrepareMarker(double x0, double y0, double len, Color_t color);

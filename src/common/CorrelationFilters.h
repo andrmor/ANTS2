@@ -25,14 +25,14 @@ class CorrelationUnitGenericClass
     virtual int getCOBindex() const {return 0;} //index used in ui
 
     QList<int> Channels; //additional data, e.g. channel number
-    EventsDataClass *EventsDataHub;
-    APmGroupsManager* PMgroups;
-    int ThisPMgroup;
+    EventsDataClass  * EventsDataHub = nullptr;
+    APmGroupsManager * PMgroups = nullptr;
+    int ThisPMgroup = 0;
 
     virtual double getValue(int) {return 0;} //gives value for the event number
     virtual bool isRequireReconstruction() {return true;} //does require recon data to present?
 
-    virtual CorrelationUnitGenericClass* getClone()=0;// {return new CorrelationUnitGenericClass(); } //never used not overloaded
+    virtual CorrelationUnitGenericClass* getClone()=0;//never used not overloaded
 
     virtual void saveJSON(QJsonObject &json) const;
 };
@@ -45,47 +45,45 @@ class CorrelationCutGenericClass
     virtual const QString getType() {return "undefined";}  //type
     virtual int getCOBindex() const {return 0;} //index used in ui
 
-    int CutOption; //e.g. "left_above" for line or "inside" for ellipse
+    int CutOption = 0; //e.g. "left_above" for line or "inside" for ellipse
     QList<double> Data; //e.g. A B C for line or ellipse data or X Y for polygon nodes
 
     virtual bool filter(double , double ) {return false;} //true - passes
 
-    virtual CorrelationCutGenericClass* getClone()=0;// {return new CorrelationCutGenericClass();} //never used not overloaded
+    virtual CorrelationCutGenericClass* getClone()=0;//never used not overloaded
 
     virtual void saveJSON(QJsonObject &json) const;
 };
 
 struct CorrelationFilterStructure
 {
-   //public
-     bool Active;
+     bool Active = false;
 
      //indication    
-     int BinX;
-     int BinY;
-     bool AutoSize;
-     double minX;
-     double maxX;
-     double minY;
-     double maxY;
+     int BinX = 100;
+     int BinY = 100;
+     bool AutoSize = true;
+     double minX = -20;
+     double maxX = 20;
+     double minY = -20;
+     double maxY = 20;
 
    private:
      //correlation units
-     CorrelationUnitGenericClass* X;
-     CorrelationUnitGenericClass* Y;
+     CorrelationUnitGenericClass * X = nullptr;
+     CorrelationUnitGenericClass * Y = nullptr;
 
      //cut
-     CorrelationCutGenericClass* Cut;
+     CorrelationCutGenericClass * Cut = nullptr;
 
    public:
-     //CorrelationFilterStructure() {X = new CorrelationUnitGenericClass(); Y = new CorrelationUnitGenericClass(); Cut = new CorrelationCutGenericClass(); }
      CorrelationFilterStructure(CorrelationUnitGenericClass* unit1, CorrelationUnitGenericClass* unit2, CorrelationCutGenericClass* cut)
        {X = unit1; Y = unit2; Cut = cut;}
-     CorrelationFilterStructure(CorrelationFilterStructure *from);
+     CorrelationFilterStructure(CorrelationFilterStructure * from);
      ~CorrelationFilterStructure();
 
-     void setCorrelationUnitX(CorrelationUnitGenericClass* unit);
-     void setCorrelationUnitY(CorrelationUnitGenericClass* unit);
+     void setCorrelationUnitX(CorrelationUnitGenericClass * unit);
+     void setCorrelationUnitY(CorrelationUnitGenericClass * unit);
      CorrelationUnitGenericClass* getCorrelationUnitX() {return X;}
      CorrelationUnitGenericClass* getCorrelationUnitY() {return Y;}
 

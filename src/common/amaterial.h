@@ -46,11 +46,9 @@ public:
 
   double PhotonYieldDefault = 0;
   double getPhotonYield(int iParticle) const;
-  bool   bSamePrYieldForAll = false;
 
-  //double PhotonYieldDefault = 0;
+  double IntrEnResDefault = 0;
   double getIntrinsicEnergyResolution(int iParticle) const;
-  //bool   bSamePrYieldForAll = false;
 
   double SecScintDecayTime;
   QString Comments;

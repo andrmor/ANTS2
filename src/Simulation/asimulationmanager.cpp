@@ -31,7 +31,7 @@ ASimulationManager::ASimulationManager(EventsDataClass & EventsDataHub, Detector
 {
     ParticleSources = new ASourceParticleGenerator(&Detector, Detector.RandGen);
     FileParticleGenerator = new AFileParticleGenerator(*Detector.MpCollection);
-    ScriptParticleGenerator = new AScriptParticleGenerator(*Detector.MpCollection, Detector.RandGen, 0);
+    ScriptParticleGenerator = new AScriptParticleGenerator(*Detector.MpCollection, Detector.RandGen, 0, &NumberOfWorkers);
     ScriptParticleGenerator->SetProcessInterval(200);
 
     Runner = new ASimulatorRunner(Detector, EventsDataHub, *this);

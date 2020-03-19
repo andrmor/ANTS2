@@ -137,6 +137,8 @@ private slots:
     //new auto-generated, not cathegorized
 
 
+    void on_pbCopyIntrEnResToAll_clicked();
+
 private:
     Ui::MaterialInspectorWindow * ui = nullptr;
     MainWindow                  * MW = nullptr;

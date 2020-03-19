@@ -34,10 +34,10 @@ double AMaterial::getPhotonYield(int iParticle) const
 
 double AMaterial::getIntrinsicEnergyResolution(int iParticle) const
 {
-    if (iParticle < 0 || iParticle >= MatParticle.size()) return 0;
+    if (iParticle < 0 || iParticle >= MatParticle.size()) return IntrEnResDefault;
 
     const double & er = MatParticle.at(iParticle).IntrEnergyRes;
-    if (er == -1) return 0;
+    if (er == -1) return IntrEnResDefault;
     return er;
 }
 
@@ -281,6 +281,7 @@ void AMaterial::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCo
   json["ReemissionProb"] = reemissionProb;
 
   json["PhotonYieldDefault"] = PhotonYieldDefault;
+  json["IntrEnergyResDefault"] = IntrEnResDefault;
 
   {
     QJsonArray ar;
@@ -660,6 +661,9 @@ bool AMaterial::readFromJson(const QJsonObject &json, AMaterialParticleCollectio
           if (bAllSame) PhotonYieldDefault = MatParticle.at(0).PhYield;
       }
   }
+
+  IntrEnResDefault = 0;
+  parseJson(json, "IntrEnergyResDefault", IntrEnResDefault);
 
   return true;
 }

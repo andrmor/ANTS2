@@ -341,6 +341,8 @@ void MaterialInspectorWindow::UpdateGui()
     ui->cobYieldForParticle->setCurrentIndex(lastSelected_cobYieldForParticle);
     double val = tmpMaterial.getPhotonYield(lastSelected_cobYieldForParticle);
     ui->ledPrimaryYield->setText(QString::number(val));
+    val        = tmpMaterial.getIntrinsicEnergyResolution(lastSelected_cobYieldForParticle);
+    ui->ledIntEnergyRes->setText(QString::number(val));
 
     ui->pteComments->clear();
     ui->pteComments->appendPlainText(tmpMaterial.Comments);
@@ -418,7 +420,7 @@ void MaterialInspectorWindow::updateInteractionGui()
     updateEnableStatus();
 
     LastSelectedParticle = particleId;
-    ui->ledIntEnergyRes->setText( QString::number(mp.IntrEnergyRes) );
+
     ui->pbShowTotalInteraction->setEnabled(true);
 
     if (type == AParticle::_charged_)
@@ -632,16 +634,22 @@ void MaterialInspectorWindow::on_pbLoadThisScenarioCrossSection_clicked()
 
 void MaterialInspectorWindow::on_ledIntEnergyRes_editingFinished()
 {
-    AMaterial& tmpMaterial = MpCollection->tmpMaterial;
-
+    AMaterial & tmpMaterial = MpCollection->tmpMaterial;
     double newVal = ui->ledIntEnergyRes->text().toDouble();
-    if (newVal<0)
+    if (newVal < 0)
     {
-        ui->ledIntEnergyRes->setText( QString::number(tmpMaterial.MatParticle[ui->cobParticle->currentIndex()].IntrEnergyRes, 'g', 4) );
+        ui->ledIntEnergyRes->setText("0");
         message("Intrinsic energy resolution cannot be negative", this);
+        return;
     }
+
+    int iP = ui->cobYieldForParticle->currentIndex();
+    if (iP > -1 && iP < tmpMaterial.MatParticle.size())
+        tmpMaterial.MatParticle[iP].IntrEnergyRes = newVal;
     else
-        tmpMaterial.MatParticle[ui->cobParticle->currentIndex()].IntrEnergyRes = newVal;
+        tmpMaterial.IntrEnResDefault = newVal;
+
+    setWasModified(true);
 }
 
 void MaterialInspectorWindow::on_pbImportStoppingPowerFromTrim_clicked()
@@ -1886,8 +1894,12 @@ void MaterialInspectorWindow::on_pbShowXCOMdata_clicked()
 
 void MaterialInspectorWindow::on_cobYieldForParticle_activated(int index)
 {
-    const AMaterial& tmpMaterial = MpCollection->tmpMaterial;
+    const AMaterial & tmpMaterial = MpCollection->tmpMaterial;
+
+    flagDisreguardChange = true; // -->
     ui->ledPrimaryYield->setText( QString::number(tmpMaterial.getPhotonYield(index)) );
+    ui->ledIntEnergyRes->setText( QString::number(tmpMaterial.getIntrinsicEnergyResolution(index)) );
+    flagDisreguardChange = false; // <--
 }
 
 bool MaterialInspectorWindow::doLoadCrossSection(ANeutronInteractionElement *element, QString fileName)
@@ -2818,6 +2830,18 @@ void MaterialInspectorWindow::on_pbCopyPrYieldToAll_clicked()
     for (int iP = 0; iP < tmpMaterial.MatParticle.size(); iP++)
             tmpMaterial.MatParticle[iP].PhYield = prYield;
     tmpMaterial.PhotonYieldDefault = prYield;
+    setWasModified(true);
+}
+
+void MaterialInspectorWindow::on_pbCopyIntrEnResToAll_clicked()
+{
+    if (!confirm("Set the same intrinsic energy resolution value for all particles?", this)) return;
+
+    AMaterial & tmpMaterial = MpCollection->tmpMaterial;
+    double EnRes = ui->ledIntEnergyRes->text().toDouble();
+    for (int iP = 0; iP < tmpMaterial.MatParticle.size(); iP++)
+            tmpMaterial.MatParticle[iP].IntrEnergyRes = EnRes;
+    tmpMaterial.IntrEnResDefault = EnRes;
     setWasModified(true);
 }
 

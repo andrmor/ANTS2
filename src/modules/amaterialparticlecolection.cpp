@@ -291,6 +291,9 @@ void AMaterialParticleCollection::ClearTmpMaterial()
   tmpMaterial.PriScint_Raise.clear();
   tmpMaterial.PriScint_Raise << APair_ValueAndWeight(0, 1.0);
 
+  tmpMaterial.PhotonYieldDefault = 0;
+  tmpMaterial.IntrEnResDefault = 0;
+
   int particles = ParticleCollection.size();
   tmpMaterial.MatParticle.resize(particles);
   for (int i=0; i<particles; i++)

@@ -135,7 +135,7 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
             }
             else
             {
-                ParticleGun = new AScriptParticleGenerator(*detector.MpCollection, RandGen, ID);
+                ParticleGun = new AScriptParticleGenerator(*detector.MpCollection, RandGen, ID, &simMan.NumberOfWorkers);
                 ParticleGun->readFromJson(sjs);
             }
         }

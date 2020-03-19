@@ -86,6 +86,8 @@ public:
     QJsonObject jsSimSet;   // to be removed
     bool bPhotonSourceSim;  // if false -> particle source sim
 
+    int NumberOfWorkers = 0;
+
 private:
     EventsDataClass & EventsDataHub;
     DetectorClass   & Detector;

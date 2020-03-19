@@ -32,6 +32,15 @@ double AMaterial::getPhotonYield(int iParticle) const
     return py;
 }
 
+double AMaterial::getIntrinsicEnergyResolution(int iParticle) const
+{
+    if (iParticle < 0 || iParticle >= MatParticle.size()) return 0;
+
+    const double & er = MatParticle.at(iParticle).IntrEnergyRes;
+    if (er == -1) return 0;
+    return er;
+}
+
 double AMaterial::getRefractiveIndex(int iWave) const
 {
   if (iWave == -1 || nWaveBinned.isEmpty()) return n;

@@ -1915,14 +1915,13 @@ int OutputWindow::findEventWithFilters(int currentEv, bool bUp)
 
     const QRegularExpression rx = QRegularExpression("(\\ |\\,|\\:|\\t)"); //separators: ' ' or ',' or ':' or '\t'
 
-
     bool bLimProc = ui->cbEVlimToProc->isChecked();
     bool bLimProc_prim = ui->cbEVlimitToProcPrim->isChecked();
-    QStringList LimProc = ui->leEVlimitToProc->text().split(rx, QString::SkipEmptyParts);
 
     bool bExclProc = ui->cbEVexcludeProc->isChecked();
     bool bExclProc_prim = ui->cbEVexcludeProcPrim->isChecked();
-    QStringList ExclProc = ui->leEVexcludeProc->text().split(rx, QString::SkipEmptyParts);
+
+    bool bLimVols = ui->cbLimitToVolumes->isChecked();
 
     if (currentEv > (int)TH.size()) currentEv = (int)TH.size();
 
@@ -1934,12 +1933,30 @@ int OutputWindow::findEventWithFilters(int currentEv, bool bUp)
         bool bGood = true;
         if (bLimProc)
         {
+            QStringList LimProc = ui->leEVlimitToProc->text().split(rx, QString::SkipEmptyParts);
             bGood = er->isHaveProcesses(LimProc, bLimProc_prim);
         }
         if (bGood && bExclProc)
         {
+            QStringList ExclProc = ui->leEVexcludeProc->text().split(rx, QString::SkipEmptyParts);
             bGood = !er->isHaveProcesses(ExclProc, bExclProc_prim);
         }
+        if (bGood && bLimVols)
+        {
+            QStringList LimVols = ui->leLimitToVolumes->text().split(rx, QString::SkipEmptyParts);
+            QStringList LimVolStartWith;
+            for (int i=LimVols.size()-1; i >= 0; i--)
+            {
+                const QString & s = LimVols.at(i);
+                if (s.endsWith('*'))
+                {
+                    LimVolStartWith << s.mid(0, s.size()-1);
+                    LimVols.removeAt(i);
+                }
+            }
+            bGood = er->isTouchedVolumes(LimVols, LimVolStartWith);
+        }
+
         if (bGood) return currentEv;
 
         bUp ? currentEv++ : currentEv--;
@@ -1965,7 +1982,7 @@ void OutputWindow::on_pbNextEvent_clicked()
     }
     else i++;
 
-    if (i >= 0 &&i < MW->EventsDataHub->countEvents()) ui->sbEvent->setValue(i);
+    if (i >= 0 && i < MW->EventsDataHub->countEvents()) ui->sbEvent->setValue(i);
 }
 
 void OutputWindow::on_pbPreviousEvent_clicked()

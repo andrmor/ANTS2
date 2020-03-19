@@ -134,6 +134,28 @@ bool AParticleTrackingRecord::isHaveProcesses(const QStringList & Proc, bool bOn
     return false;
 }
 
+bool AParticleTrackingRecord::isTouchedVolumes(const QStringList & Vols, const QStringList & VolsStartsWith) const
+{
+    for (ATrackingStepData * s : Steps)
+    {
+        ATransportationStepData * tr = dynamic_cast<ATransportationStepData*>(s);
+        if (tr)
+        {
+            const QString & volName = tr->VolName;
+
+            if (Vols.contains(volName)) return true;
+            for (const QString & s : VolsStartsWith)
+                if (volName.startsWith(s)) return true;
+        }
+    }
+
+    for (AParticleTrackingRecord * sec : Secondaries)
+        if (sec->isTouchedVolumes(Vols, VolsStartsWith))
+            return true;
+
+    return false;
+}
+
 void AParticleTrackingRecord::logToString(QString & str, int offset, bool bExpandSecondaries) const
 {
     str += QString(' ').repeated(offset) + '>';
@@ -242,6 +264,14 @@ bool AEventTrackingRecord::isHaveProcesses(const QStringList & Proc, bool bOnlyP
 {
     for (AParticleTrackingRecord * pr : PrimaryParticleRecords)
         if (pr->isHaveProcesses(Proc, bOnlyPrimary)) return true;
+
+    return false;
+}
+
+bool AEventTrackingRecord::isTouchedVolumes(const QStringList & Vols, const QStringList & VolsStartsWith) const
+{
+    for (AParticleTrackingRecord * pr : PrimaryParticleRecords)
+        if (pr->isTouchedVolumes(Vols, VolsStartsWith)) return true;
 
     return false;
 }

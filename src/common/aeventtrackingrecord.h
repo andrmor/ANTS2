@@ -67,6 +67,7 @@ public:
     const std::vector<AParticleTrackingRecord *> & getSecondaries() const {return Secondaries;}
 
     bool isHaveProcesses(const QStringList & Proc, bool bOnlyPrimary);
+    bool isTouchedVolumes(const QStringList & Vols, const QStringList &VolsStartsWith) const;
 
     void logToString(QString & str, int offset, bool bExpandSecondaries) const;
     void makeTrack(std::vector<TrackHolderClass *> & Tracks, const QStringList & ParticleNames, const ATrackBuildOptions & TrackBuildOptions, bool bWithSecondaries) const;
@@ -104,6 +105,7 @@ public:
     int    countPrimaries() const;
 
     bool   isHaveProcesses(const QStringList & Proc, bool bOnlyPrimary) const;
+    bool   isTouchedVolumes(const QStringList & Vols, const QStringList & VolsStartsWith) const;
 
     void   makeTracks(std::vector<TrackHolderClass *> & Tracks, const QStringList & ParticleNames, const ATrackBuildOptions & TrackBuildOptions, bool bWithSecondaries) const;
 

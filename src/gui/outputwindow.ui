@@ -94,7 +94,7 @@
        </palette>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>6</number>
       </property>
       <widget class="QWidget" name="tabText">
        <attribute name="title">
@@ -2641,7 +2641,7 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
              <item>
               <widget class="QPushButton" name="pbNextMonitor">
                <property name="text">
-                <string>Next</string>
+                <string>Next with hits</string>
                </property>
               </widget>
              </item>

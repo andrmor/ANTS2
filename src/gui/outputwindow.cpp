@@ -2181,10 +2181,22 @@ void OutputWindow::on_sbMonitorIndex_editingFinished()
 
 void OutputWindow::on_pbNextMonitor_clicked()
 {
-    int mon = ui->cobMonitor->currentIndex();
-    mon++;
-    if (mon >= ui->cobMonitor->count()) mon = 0;
-    ui->sbMonitorIndex->setValue(mon);
-    if (mon < ui->cobMonitor->count()) ui->cobMonitor->setCurrentIndex(mon); //protection: can be empty
+    int numMon = MW->Detector->Sandwich->MonitorsRecords.size();
+    if (numMon == 0) return;
+    if (numMon != EventsDataHub->SimStat->Monitors.size()) return; //catches before sim, when num records == 0
+
+    int iMon = ui->cobMonitor->currentIndex();
+    int iMonStart = iMon;
+    int hits;
+    do
+    {
+        iMon++;
+        if (iMon >= numMon) iMon = 0;
+        if (iMon == iMonStart) return;
+        hits = EventsDataHub->SimStat->Monitors.at(iMon)->getXY()->GetEntries();
+    }
+    while (hits == 0);
+
+    if (iMon < ui->cobMonitor->count()) ui->cobMonitor->setCurrentIndex(iMon);
     updateMonitors();
 }

@@ -2181,9 +2181,8 @@ void OutputWindow::on_sbMonitorIndex_editingFinished()
 
 void OutputWindow::on_pbNextMonitor_clicked()
 {
-    int numMon = MW->Detector->Sandwich->MonitorsRecords.size();
+    int numMon = EventsDataHub->SimStat->Monitors.size();
     if (numMon == 0) return;
-    if (numMon != EventsDataHub->SimStat->Monitors.size()) return; //catches before sim, when num records == 0
 
     int iMon = ui->cobMonitor->currentIndex();
     int iMonStart = iMon;
@@ -2199,4 +2198,78 @@ void OutputWindow::on_pbNextMonitor_clicked()
 
     if (iMon < ui->cobMonitor->count()) ui->cobMonitor->setCurrentIndex(iMon);
     updateMonitors();
+}
+
+void OutputWindow::on_pbShowMonitorHitDistribution_clicked()
+{
+    int numMon = EventsDataHub->SimStat->Monitors.size();
+    if (numMon == 0) return;
+
+    TH1D * h = new TH1D("", "Monitor hits", numMon, 0, numMon);
+    int sumHits = 0;
+    for (int iMon = 0; iMon < numMon; iMon++)
+    {
+        int hits = EventsDataHub->SimStat->Monitors.at(iMon)->getXY()->GetEntries();
+        sumHits += hits;
+        if (hits > 0) h->Fill(iMon, hits);
+    }
+
+    if (sumHits == 0) return;
+    h->SetEntries(sumHits);
+    h->GetXaxis()->SetTitle("Monitor index");
+    h->GetYaxis()->SetTitle("Hits");
+    MW->GraphWindow->Draw(h, "hist");
+}
+
+void OutputWindow::on_pbShowMonitorTimeOverall_clicked()
+{
+    int numMon = EventsDataHub->SimStat->Monitors.size();
+    if (numMon == 0) return;
+
+    const AMonitor * m = EventsDataHub->SimStat->Monitors.at(0);
+    TH1D * h = m->getTime();
+    if (!h) return;
+
+    const int    bins = h->GetXaxis()->GetNbins();
+    const double from = h->GetBinLowEdge(1);
+    const double to   = h->GetBinLowEdge(bins+1);
+    qDebug() << "0:" << bins << from << to;
+
+    bool bSame = true;
+    for (int iMon = 1; iMon < numMon; iMon++)
+    {
+        m = EventsDataHub->SimStat->Monitors.at(iMon);
+        h = m->getTime();
+        if (bins != h->GetXaxis()->GetNbins() || from != h->GetBinLowEdge(1) || to != h->GetBinLowEdge(bins+1))
+        {
+            bSame = false;
+            break;
+        }
+    }
+    qDebug() << "same binning?" << bSame;
+
+    TH1D * time;
+    if (bSame)
+        time = new TH1D("", "Time of hits", bins, from, to);
+    else
+        time = new TH1D("", "Time of hits", bins, 0, 0);
+
+    int sumHits = 0;
+    for (int iMon = 0; iMon < numMon; iMon++)
+    {
+        h = EventsDataHub->SimStat->Monitors.at(iMon)->getTime();
+        int hits = h->GetEntries();
+        if (hits == 0) continue;
+
+        sumHits += hits;
+        for (int iBin = 1; iBin <= h->GetNbinsX(); iBin++)  // '<=' is not a bug!
+            time->Fill(h->GetBinCenter(iBin), h->GetBinContent(iBin));
+    }
+
+    if (sumHits == 0) return;
+
+    time->SetEntries(sumHits);
+    time->GetXaxis()->SetTitle("Time, ns");
+    time->GetYaxis()->SetTitle("Hits");
+    MW->GraphWindow->Draw(time, "hist");
 }

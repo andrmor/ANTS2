@@ -2,6 +2,8 @@
 ANTS2_MAJOR = 4
 ANTS2_MINOR = 27
 
+# !!! You may need to modify path for CERN ROOT, see #---CERN ROOT--- section below
+
 #Optional libraries
 #CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
 #CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library: see https://github.com/mariusmuja/flann
@@ -11,9 +13,8 @@ CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 #CONFIG += ants2_Python      #enable Python scripting
 #CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering): see https://github.com/mctools/ncrystal
 CONFIG += ants2_jsroot       #enables JSROOT visualisation at GeometryWindow. Automatically enables ants2_RootServer
-# !!! You may need to modify paths for the enabled libraries! Fore example, for CERN ROOT, see #---CERN ROOT--- section below
 
-#Only for the Docker version! Optional features enabled in that version
+#In effect ONLY for the Docker version:
 ants2_docker {
     CONFIG += ANTS_DOCKER
     CONFIG += ants2_flann
@@ -24,15 +25,15 @@ ants2_docker {
 }
 
 #---CERN ROOT---
-win32 {
-     INCLUDEPATH += c:/root/include
-     LIBS += -Lc:/root/lib/ -llibCore -llibRIO -llibNet -llibHist -llibGraf -llibGraf3d -llibGpad -llibTree -llibRint -llibPostscript -llibMatrix -llibPhysics -llibMathCore -llibGeom -llibGeomPainter -llibGeomBuilder -llibMinuit2 -llibThread -llibSpectrum
-     ants2_RootServer {LIBS += -llibRHTTP}
-}
 linux-g++ || unix {
      INCLUDEPATH += $$system(root-config --incdir)
      LIBS += $$system(root-config --libs) -lGeom -lGeomPainter -lGeomBuilder -lMinuit2 -lSpectrum -ltbb
      ants2_RootServer {LIBS += -lRHTTP  -lXMLIO}
+}
+win32 {
+     INCLUDEPATH += c:/root/include
+     LIBS += -Lc:/root/lib/ -llibCore -llibRIO -llibNet -llibHist -llibGraf -llibGraf3d -llibGpad -llibTree -llibRint -llibPostscript -llibMatrix -llibPhysics -llibMathCore -llibGeom -llibGeomPainter -llibGeomBuilder -llibMinuit2 -llibThread -llibSpectrum
+     ants2_RootServer {LIBS += -llibRHTTP}
 }
 #-----------
 
@@ -41,8 +42,8 @@ ants2_eigen3 {
      DEFINES += USE_EIGEN
      CONFIG += ants2_matrix #if enabled - use matrix algebra for TP splines - UNDER DEVELOPMENT
 
-     win32 { INCLUDEPATH += C:/eigen3 }
      linux-g++ || unix { INCLUDEPATH += /usr/include/eigen3 }
+     win32 { INCLUDEPATH += C:/eigen3 }
 
      #advanced options:
      DEFINES += NEWFIT #if enabled, use advanced fitting class (non-negative LS, non-decreasing LS, hole-plugging, etc.)  
@@ -77,13 +78,13 @@ ants2_matrix { # use matrix algebra for TP splines
 ants2_flann {
     DEFINES += ANTS_FLANN
 
-    win32 {
-       LIBS += -LC:/FLANN/lib -lflann
-       INCLUDEPATH += C:/FLANN/include
-    }
     linux-g++ || unix {
         LIBS += -lflann
         ants2_docker{ LIBS += -llz4 }
+    }
+    win32 {
+       LIBS += -LC:/FLANN/lib -lflann
+       INCLUDEPATH += C:/FLANN/include
     }
 
     HEADERS += modules/nnmoduleclass.h
@@ -96,16 +97,16 @@ ants2_flann {
 
 #---FANN---
 ants2_fann {
-     DEFINES += ANTS_FANN
+    DEFINES += ANTS_FANN
 
-     win32 {
+    linux-g++ || unix {
+        LIBS += -L/usr/local/lib -lfann
+    }
+    win32 {
         LIBS += -Lc:/FANN-2.2.0-Source/bin/ -lfannfloat
         INCLUDEPATH += c:/FANN-2.2.0-Source/src/include
         DEFINES += NOMINMAX
-     }
-     linux-g++ || unix {
-        LIBS += -L/usr/local/lib -lfann
-     }
+    }
 
      #main module
     HEADERS += modules/neuralnetworksmodule.h
@@ -124,8 +125,8 @@ ants2_cuda {
     DEFINES += __USE_ANTS_CUDA__
 
     #Path to CUDA toolkit:
-    win32 { CUDA_DIR = "C:/cuda/toolkit" }        # AVOID SPACES IN THE PATH during toolkit installation!
     linux-g++ || unix { CUDA_DIR = $$system(which nvcc | sed 's,/bin/nvcc$,,') }
+    win32 { CUDA_DIR = "C:/cuda/toolkit" }        # AVOID SPACES IN THE PATH during toolkit installation!
 
     CUDA_SOURCES += CUDA/cudaANTS.cu
     OTHER_FILES += CUDA/cudaANTS.cu
@@ -185,13 +186,6 @@ ants2_Python{
 
     #http://pythonqt.sourceforge.net/ or https://github.com/Orochimarufan/PythonQt
     #for PythonQt installation see instructions in PythonQtInstall.txt in the root of ANTS2 on GitHub
-    win32:{
-            INCLUDEPATH += 'C:/Program Files (x86)/Microsoft Visual Studio/Shared/Python36_86/include'
-            LIBS += -L'C:/Program Files (x86)/Microsoft Visual Studio/Shared/Python36_86/libs' -lPython36
-
-            INCLUDEPATH += C:/PythonQt3.2/src
-            LIBS += -LC:/PythonQt3.2/lib -lPythonQt
-    }
     linux-g++ || unix {
             ants2_docker { 
                 LIBS += $$system(python3-config --libs)
@@ -207,6 +201,13 @@ ants2_Python{
                 LIBS += -lPythonQt-Qt5-Python3.6
             }
     }
+    win32:{
+            INCLUDEPATH += 'C:/Program Files (x86)/Microsoft Visual Studio/Shared/Python36_86/include'
+            LIBS += -L'C:/Program Files (x86)/Microsoft Visual Studio/Shared/Python36_86/libs' -lPython36
+
+            INCLUDEPATH += C:/PythonQt3.2/src
+            LIBS += -LC:/PythonQt3.2/lib -lPythonQt
+    }
 
     HEADERS += scriptmode/apythonscriptmanager.h
     SOURCES += scriptmode/apythonscriptmanager.cpp
@@ -220,10 +221,6 @@ ants2_Python{
 ants2_NCrystal{
     DEFINES += __USE_ANTS_NCRYSTAL__
 
-    win32:{
-            INCLUDEPATH += C:/NCrystal/ncrystal_core/include
-            LIBS += -LC:/NCrystal/lib -lNCrystal
-    }
     linux-g++ || unix {
             ants2_docker {
                 INCLUDEPATH += /usr/local/include/NCrystal/
@@ -235,6 +232,10 @@ ants2_NCrystal{
                 LIBS += -L/home/andr/Work/NCrystal/lib/
                 LIBS += -lNCrystal
             }
+    }
+    win32:{
+            INCLUDEPATH += C:/NCrystal/ncrystal_core/include
+            LIBS += -LC:/NCrystal/lib -lNCrystal
     }
 
     SOURCES += common/arandomgenncrystal.cpp

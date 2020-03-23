@@ -10,26 +10,18 @@ CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algeb
 CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 #CONFIG += ants2_Python      #enable Python scripting
 #CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering): see https://github.com/mctools/ncrystal
-
 CONFIG += ants2_jsroot       #enables JSROOT visualisation at GeometryWindow. Automatically enables ants2_RootServer
+# !!! You may need to modify paths for the enabled libraries! Fore example, for CERN ROOT, see #---CERN ROOT--- section below
 
-# You may need to modify paths for CERN ROOT and the enabled libraries! See the corresponding sections below
-
-#Optional features enabled in Docker version
+#Only for the Docker version! Optional features enabled in that version
 ants2_docker {
     CONFIG += ANTS_DOCKER
-    CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library: see https://github.com/mariusmuja/flann
-    CONFIG += ants2_fann        #enables FANN (fast neural network) library: see https://github.com/libfann/fann
-    CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
-    CONFIG += ants2_Python      #enable Python scripting  
-    CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering)  
+    CONFIG += ants2_flann
+    CONFIG += ants2_fann
+    CONFIG += ants2_RootServer
+    CONFIG += ants2_Python
+    CONFIG += ants2_NCrystal
 }
-
-DEBUG_VERBOSITY = 1          # 0 - debug messages suppressed, 1 - normal, 2 - normal + file/line information
-                             # after a change, qmake and rebuild (or qmake + make any change in main.cpp to trigger recompilation)
-
-CONFIG += ants2_GUI         #if disabled, GUI is not compiled
-CONFIG += ants2_SIM         #if disabled, simulation-related modules are not compiled
 
 #---CERN ROOT---
 win32 {
@@ -266,6 +258,12 @@ ants2_RootServer{
     HEADERS += Net/aroothttpserver.h
 }
 #----------
+
+DEBUG_VERBOSITY = 1          # 0 - debug messages suppressed, 1 - normal, 2 - normal + file/line information
+                             # after a change, qmake and rebuild (or qmake + make any change in main.cpp to trigger recompilation)
+
+CONFIG += ants2_GUI         #if disabled, GUI is not compiled
+CONFIG += ants2_SIM         #if disabled, simulation-related modules are not compiled
 
 #Can be used as command line option to force-disable GUI
 Headless {

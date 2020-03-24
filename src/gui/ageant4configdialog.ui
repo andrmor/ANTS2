@@ -239,6 +239,13 @@
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_6">
         <item>
+         <widget class="QCheckBox" name="cbBinaryOutput">
+          <property name="text">
+           <string>Binary output logs</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <layout class="QHBoxLayout" name="horizontalLayout_6">
           <item>
            <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -248,7 +255,7 @@
             <item>
              <widget class="QLabel" name="label_7">
               <property name="text">
-               <string>Precision in tracking log:</string>
+               <string>Precision in output logs:</string>
               </property>
              </widget>
             </item>

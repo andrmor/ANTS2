@@ -19,6 +19,8 @@ class AParticleGun;
 class QProcess;
 class AEventTrackingRecord;
 class AExternalProcessHandler;
+class QTextStream;
+class QFile;
 
 class AParticleSourceSimulator : public ASimulator
 {
@@ -61,6 +63,11 @@ private:
     bool geant4TrackAndProcess();
     bool runGeant4Handler();
 
+    bool processG4DepositionData();
+    bool readG4DepoEventFromTextFile();
+    bool readG4DepoEventFromBinFile(bool expectNewEvent = false);
+    void releaseInputResources();
+
     //local objects
     //PrimaryParticleTracker* ParticleTracker = 0;
     AParticleTracker* ParticleTracker = 0;
@@ -69,6 +76,14 @@ private:
     AParticleGun* ParticleGun = 0;
     QVector<AEnergyDepositionCell*> EnergyVector;
     QVector<AParticleRecord*> ParticleStack;
+
+    //for ascii input
+    QFile *       inTextFile = nullptr;
+    QTextStream * inTextStream = nullptr;
+    QString       G4DepoLine;
+    //for binary input
+    std::ifstream * inStream = nullptr;
+    int           G4NextEventId = -1;
 
     //local use - container which particle generator fills for each event; the particles are deleted by the tracker
     QVector<AParticleRecord*> GeneratedParticles;

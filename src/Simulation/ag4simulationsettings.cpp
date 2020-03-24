@@ -43,6 +43,7 @@ void AG4SimulationSettings::writeToJson(QJsonObject &json) const
     }
     json["StepLimits"] = arSL;
 
+    json["BinaryOutput"]  = BinaryOutput;
     json["Precision"]  = Precision;
 }
 
@@ -78,6 +79,7 @@ void AG4SimulationSettings::readFromJson(const QJsonObject &json)
         }
     }
 
+    parseJson(json, "BinaryOutput", BinaryOutput);
     parseJson(json, "Precision", Precision);
 }
 
@@ -88,7 +90,7 @@ const QString AG4SimulationSettings::getPrimariesFileName(int iThreadNum) const
 
 const QString AG4SimulationSettings::getDepositionFileName(int iThreadNum) const
 {
-    return getPath() + QString("deposition-%1.txt").arg(iThreadNum);
+    return getPath() + QString("deposition-%1.%2").arg(iThreadNum).arg(BinaryOutput ? "bin" : "txt");
 }
 
 const QString AG4SimulationSettings::getReceitFileName(int iThreadNum) const
@@ -103,7 +105,7 @@ const QString AG4SimulationSettings::getConfigFileName(int iThreadNum) const
 
 const QString AG4SimulationSettings::getTracksFileName(int iThreadNum) const
 {
-    return getPath() + QString("tracks-%1.txt").arg(iThreadNum);
+    return getPath() + QString("tracks-%1.%2").arg(iThreadNum).arg(BinaryOutput ? "bin" : "txt");
 }
 
 const QString AG4SimulationSettings::getMonitorDataFileName(int iThreadNum) const

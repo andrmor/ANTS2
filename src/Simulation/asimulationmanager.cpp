@@ -634,6 +634,7 @@ void ASimulationManager::generateG4antsConfigCommon(QJsonObject & json, int Thre
     json["File_Monitors"] = monFeedbackFN;
     removeOldFile(monFeedbackFN, "monitor data");
 
+    json["BinaryOutput"] = G4SimSet.BinaryOutput;
     json["Precision"]    = G4SimSet.Precision;
 
     QJsonArray arMon;

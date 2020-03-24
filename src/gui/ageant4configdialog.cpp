@@ -27,6 +27,7 @@ AGeant4ConfigDialog::AGeant4ConfigDialog(AG4SimulationSettings & G4SimSet, QWidg
     for (auto & key : G4SimSet.StepLimits.keys())
         ui->pteStepLimits->appendPlainText( QString("%1 %2").arg(key).arg(G4SimSet.StepLimits.value(key)) );
 
+    ui->cbBinaryOutput->setChecked(G4SimSet.BinaryOutput);
     ui->sbPrecision->setValue(G4SimSet.Precision);
 }
 
@@ -71,6 +72,7 @@ void AGeant4ConfigDialog::on_pbAccept_clicked()
         G4SimSet.StepLimits[vol] = step;
     }
 
+    G4SimSet.BinaryOutput      = ui->cbBinaryOutput->isChecked();
     G4SimSet.Precision         = ui->sbPrecision->value();
 
     accept();
@@ -90,4 +92,9 @@ void AGeant4ConfigDialog::on_cobRefPhysLists_activated(int index)
 void AGeant4ConfigDialog::on_pbCancel_clicked()
 {
     reject();
+}
+
+void AGeant4ConfigDialog::on_cbBinaryOutput_toggled(bool checked)
+{
+    ui->sbPrecision->setEnabled(!checked);
 }

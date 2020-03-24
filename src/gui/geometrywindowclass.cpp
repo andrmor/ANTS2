@@ -34,7 +34,7 @@
 #include "TVirtualGeoTrack.h"
 
 GeometryWindowClass::GeometryWindowClass(QWidget *parent, MainWindow *mw) :
-  AGuiWindow(parent), MW(mw),
+  AGuiWindow("geometry", parent), MW(mw),
   ui(new Ui::GeometryWindowClass)
 {    
     ui->setupUi(this);
@@ -43,7 +43,7 @@ GeometryWindowClass::GeometryWindowClass(QWidget *parent, MainWindow *mw) :
     windowFlags |= Qt::WindowCloseButtonHint;
     windowFlags |= Qt::WindowMinimizeButtonHint;
     windowFlags |= Qt::WindowMaximizeButtonHint;
-    windowFlags |= Qt::Tool;
+    //windowFlags |= Qt::Tool;
     this->setWindowFlags( windowFlags );
 
     this->setMinimumWidth(200);
@@ -75,6 +75,8 @@ GeometryWindowClass::GeometryWindowClass(QWidget *parent, MainWindow *mw) :
     ui->actionLarge_cross->setActionGroup(group);
 
     ui->cbWireFrame->setVisible(false);
+
+    generateSymbolMap();
 }
 
 GeometryWindowClass::~GeometryWindowClass()
@@ -378,6 +380,16 @@ bool GeometryWindowClass::event(QEvent *event)
   return AGuiWindow::event(event);
 }
 
+#include <QCloseEvent>
+void GeometryWindowClass::closeEvent(QCloseEvent * event)
+{
+    //qDebug() << "Geometry window close event";
+
+    //fix for bug with root reported for Qt 5.14: close then restore results in resize of the canvas to huge size, and nothing is shown on the widow
+    event->ignore();
+    hide();
+}
+
 #include "anetworkmodule.h"
 void GeometryWindowClass::ShowPMnumbers()
 {
@@ -444,6 +456,58 @@ void findMotherNode(const TGeoNode * node, const TGeoNode* & motherNode)
 //    else qDebug() << "--- search failed!";
 }
 
+void GeometryWindowClass::generateSymbolMap()
+{
+    //0
+    SymbolMap << "0";
+    numbersX.append({-1,1,1,-1,-1});
+    numbersY.append({1.62,1.62,-1.62,-1.62,1.62});
+    //1
+    SymbolMap << "1";
+    numbersX.append({-0.3,0.3,0.3});
+    numbersY.append({0.42,1.62,-1.62});
+    //2
+    SymbolMap << "2";
+    numbersX.append({-1,1,1,-1,-1,1});
+    numbersY.append({1.62,1.62,0,0,-1.62,-1.62});
+    //3
+    SymbolMap << "3";
+    numbersX.append({-1,1,1,-1,1,1,-1});
+    numbersY.append({1.62,1.62,0,0,0,-1.62,-1.62});
+    //4
+    SymbolMap << "4";
+    numbersX.append({-1,-1,1,1,1});
+    numbersY.append({1.62,0,0,1.62,-1.62});
+    //5
+    SymbolMap << "5";
+    numbersX.append({1,-1,-1,1,1,-1});
+    numbersY.append({1.62,1.62,0,0,-1.62,-1.62});
+    //6
+    SymbolMap << "6";
+    numbersX.append({1,-1,-1,1,1,-1});
+    numbersY.append({1.62,1.62,-1.62,-1.62,0,0});
+    //7
+    SymbolMap << "7";
+    numbersX.append({-1,1,1});
+    numbersY.append({1.62,1.62,-1.62});
+    //8
+    SymbolMap << "8";
+    numbersX.append({-1,1,1,-1,-1,1,1});
+    numbersY.append({0,0,-1.62,-1.62,1.62,1.62,0});
+    //9
+    SymbolMap << "9";
+    numbersX.append({-1   , 1   ,   1,  -1, -1,1});
+    numbersY.append({-1.62,-1.62,1.62,1.62,  0,0});
+    //.
+    SymbolMap << ".";
+    numbersX.append({-0.2, 0.2, 0.2,-0.2,-0.2});
+    numbersY.append({-1.2,-1.2,-1.6,-1.6,-1.2});
+    //-
+    SymbolMap << "-";
+    numbersX.append({-1, 1});
+    numbersY.append({ 0, 0});
+}
+
 void GeometryWindowClass::ShowText(const QVector<QString> &strData, Color_t color, bool onPMs, bool bFullCycle)
 {
     const APmHub & PMs = *MW->PMs;
@@ -488,104 +552,6 @@ void GeometryWindowClass::ShowText(const QVector<QString> &strData, Color_t colo
     if (symbols == 0) symbols++;
 //        qDebug()<<"Max number of symbols"<<symbols;
     double size = minSize/5.0/(0.5+0.5*symbols);
-
-    //graphics ofr symbols
-    QVector< QVector < double > > numbersX;
-    QVector< QVector < double > > numbersY;
-    QVector< double > tmp;
-    numbersX.resize(0);
-    numbersY.resize(0);
-
-    //0
-    tmp.resize(0);
-    tmp<<-1<<1<<1<<-1<<-1;
-    numbersX.append(tmp);
-    tmp.resize(0);
-    tmp<<1.62<<1.62<<-1.62<<-1.62<<1.62;
-    numbersY.append(tmp);
-    //1
-    tmp.resize(0);
-    //tmp<<0<<0;
-    tmp<<-0.3<<0.3<<0.3;
-    numbersX.append(tmp);
-    tmp.resize(0);
-    //tmp<<1.62<<-1.62;
-    tmp<<0.42<<1.62<<-1.62;
-    numbersY.append(tmp);
-    //2
-    tmp.resize(0);
-    tmp<<-1<<1<<1<<-1<<-1<<1;
-    numbersX.append(tmp);
-    tmp.resize(0);
-    tmp<<1.62<<1.62<<0<<0<<-1.62<<-1.62;
-    numbersY.append(tmp);
-    //3
-    tmp.resize(0);
-    tmp<<-1<<1<<1<<-1<<1<<1<<-1;
-    numbersX.append(tmp);
-    tmp.resize(0);
-    tmp<<1.62<<1.62<<0<<0<<0<<-1.62<<-1.62;
-    numbersY.append(tmp);
-    //4
-    tmp.resize(0);
-    tmp<<-1<<-1<<1<<1<<1;
-    numbersX.append(tmp);
-    tmp.resize(0);
-    tmp<<1.62<<0<<0<<1.62<<-1.62;
-    numbersY.append(tmp);
-    //5
-    tmp.resize(0);
-    tmp<<1<<-1<<-1<<1<<1<<-1;
-    numbersX.append(tmp);
-    tmp.resize(0);
-    tmp<<1.62<<1.62<<0<<0<<-1.62<<-1.62;
-    numbersY.append(tmp);
-    //6
-    tmp.resize(0);
-    tmp<<1<<-1<<-1<<1<<1<<-1;
-    numbersX.append(tmp);
-    tmp.resize(0);
-    tmp<<1.62<<1.62<<-1.62<<-1.62<<0<<0;
-    numbersY.append(tmp);
-    //7
-    tmp.resize(0);
-    tmp<<-1<<1<<1;
-    numbersX.append(tmp);
-    tmp.resize(0);
-    tmp<<1.62<<1.62<<-1.62;
-    numbersY.append(tmp);
-    //8
-    tmp.resize(0);
-    tmp<<-1<<1<<1<<-1<<-1<<1<<1;
-    numbersX.append(tmp);
-    tmp.resize(0);
-    tmp<<0<<0<<-1.62<<-1.62<<1.62<<1.62<<0;
-    numbersY.append(tmp);
-    //9
-    tmp.resize(0);
-    tmp<<-1<<1<<1<<-1<<-1<<1;
-    numbersX.append(tmp);
-    tmp.resize(0);
-    tmp<<-1.62<<-1.62<<1.62<<1.62<<0<<0;
-    numbersY.append(tmp);
-    //.
-    tmp.resize(0);
-    tmp<<-0.2<<0.2<<0.2<<-0.2<<-0.2;
-    numbersX.append(tmp);
-    tmp.resize(0);
-    tmp<<-1.2<<-1.2<<-1.6<<-1.6<<-1.2;
-    numbersY.append(tmp);
-    //-
-    tmp.resize(0);
-    tmp<<-1<<+1;
-    numbersX.append(tmp);
-    tmp.resize(0);
-    tmp<<0<<0;
-    numbersY.append(tmp);
-
-    //mapping
-    QVector<QString> SymbolMap(0);
-    SymbolMap <<"0"<<"1"<<"2"<<"3"<<"4"<<"5"<<"6"<<"7"<<"8"<<"9"<<"."<<"-";
 
     for (int iObj = 0; iObj < numObj; iObj++)
     {
@@ -676,7 +642,6 @@ void GeometryWindowClass::ShowText(const QVector<QString> &strData, Color_t colo
                 track->AddPoint(x, y, Zcenter, 0);
               }
           }
-        //break;
     }
 
     if (bFullCycle)

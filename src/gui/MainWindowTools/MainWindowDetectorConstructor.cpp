@@ -208,6 +208,7 @@ void MainWindow::OnDetectorColorSchemeChanged(int scheme, int /*matId*/)
     }  
 }
 
+/*
 void MainWindow::CheckPresenseOfSecScintillator()
 {   
   Detector->checkSecScintPresent();
@@ -220,6 +221,7 @@ void MainWindow::CheckPresenseOfSecScintillator()
   ui->cobScintTypePointSource->setEnabled(Detector->fSecScintPresent);
   ui->cbGunDoS2->setEnabled(Detector->fSecScintPresent);
 }
+*/
 
 void MainWindow::NumberOfPMsHaveChanged()
 {  

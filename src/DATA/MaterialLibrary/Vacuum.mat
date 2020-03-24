@@ -1,0 +1,90 @@
+{
+    "Material": {
+        "*MaterialName": "Vacuum",
+        "*Tags": [
+        "Vacuum"
+        ],
+        "BulkAbsorption": 0,
+        "BulkAbsorptionWave": [
+        ],
+        "ChemicalComposition": {
+            "ElementComposition": [
+                {
+                    "Isotopes": [
+                        {
+                            "Abundancy": 99.9885,
+                            "Mass": 1,
+                            "Symbol": "H"
+                        },
+                        {
+                            "Abundancy": 0.0115,
+                            "Mass": 2,
+                            "Symbol": "H"
+                        }
+                    ],
+                    "MolarFraction": 1,
+                    "Symbol": "H"
+                }
+            ],
+            "ElementCompositionString": "H",
+            "MeanAtomMass": 1.000115
+        },
+        "Comments": "",
+        "Density": 1e-25,
+        "ElDiffusionL": 0,
+        "ElDiffusionT": 0,
+        "ElDriftVelo": 0,
+        "MatParticles": [
+            {
+                "*Particle": {
+                    "A": -1,
+                    "Name": "gamma",
+                    "Type": 0,
+                    "Z": -1
+                },
+                "DataSource": "",
+                "DataString": "",
+                "IntrEnergyRes": 0,
+                "MatIsTransparent": true,
+                "PrimScintPhYield": 0,
+                "Terminators": [
+                ],
+                "TotalInteraction": [
+                ],
+                "TrackingAllowed": true
+            }
+        ],
+        "PhotonYieldDefault": 0,
+        "PrimScintDecay": [
+            [
+                0,
+                1
+            ]
+        ],
+        "PrimScintRaise": [
+            [
+                0,
+                1
+            ]
+        ],
+        "PrimScintSpectrum": [
+        ],
+        "RayleighMFP": 0,
+        "RayleighWave": 500,
+        "ReemissionProb": 0,
+        "ReemissionProbabilityWave": [
+        ],
+        "RefractiveIndex": 1,
+        "RefractiveIndexWave": [
+        ],
+        "SecScintSpectrum": [
+        ],
+        "SecScint_PhYield": 0,
+        "SecScint_Tau": 0,
+        "TGeoP1": 0,
+        "TGeoP2": 0,
+        "TGeoP3": 0,
+        "Temperature": 298,
+        "W": 1.0000000000000002e+22
+    }
+}

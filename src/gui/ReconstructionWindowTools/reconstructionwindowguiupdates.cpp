@@ -53,7 +53,17 @@ void ReconstructionWindow::OnEventsDataAdded()
 void ReconstructionWindow::onUpdatePassiveIndication()
 {
     int numPass = PMgroups->countStaticPassives();
-    ui->twOptions->setTabIcon(3, (numPass> 0 ? YellowIcon : QIcon()) );
+    bool bYellow = (numPass > 0);
+
+    if (!bYellow)
+    {
+        int iAlg = ui->cobReconstructionAlgorithm->currentIndex();
+        if (iAlg == 1 || iAlg == 2 || iAlg == 4)
+            if (ui->cbDynamicPassiveByDistance->isChecked() || ui->cbDynamicPassiveBySignal->isChecked())
+                bYellow = true;
+    }
+
+    ui->twOptions->setTabIcon(1, ( bYellow ? YellowIcon : QIcon()) );
 }
 
 void ReconstructionWindow::RefreshNumEventsIndication()

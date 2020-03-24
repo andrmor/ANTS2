@@ -272,8 +272,12 @@ int APmGroupsManager::countPMsWithoutGroup(QVector<int>* unassigned) const
     return counter;
 }
 
-int APmGroupsManager::countStaticPassives() const
+int APmGroupsManager::countStaticPassives()
 {
+    //quick patch for assert failure loading neutron Anger camera - 5.03.2020
+    if (PassiveStatus.size() != PMs->count())
+        PassiveStatus = QVector<unsigned char>(PMs->count(), 0);
+
     int counter = 0;
     for (int ipm=0; ipm<PMs->count(); ipm++)
         if (isStaticPassive(ipm)) counter++;

@@ -94,7 +94,7 @@
        </palette>
       </property>
       <property name="currentIndex">
-       <number>4</number>
+       <number>6</number>
       </property>
       <widget class="QWidget" name="tabText">
        <attribute name="title">
@@ -863,6 +863,30 @@ over all events</string>
                    </widget>
                   </item>
                  </layout>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_32">
+                <property name="text">
+                 <string>Limit events to those where particles entered these volumes (use '*' at the end to indicate 'start from'):</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_30">
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QCheckBox" name="cbLimitToVolumes">
+                  <property name="text">
+                   <string>Limit to:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="leLimitToVolumes"/>
                 </item>
                </layout>
               </item>
@@ -2576,14 +2600,14 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_16">
            <item>
-            <spacer name="verticalSpacer">
+            <spacer name="verticalSpacer_4">
              <property name="orientation">
               <enum>Qt::Vertical</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
                <width>20</width>
-               <height>32</height>
+               <height>40</height>
               </size>
              </property>
             </spacer>
@@ -2617,7 +2641,7 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
              <item>
               <widget class="QPushButton" name="pbNextMonitor">
                <property name="text">
-                <string>Next</string>
+                <string>Next with hits</string>
                </property>
               </widget>
              </item>
@@ -2814,14 +2838,68 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
             </layout>
            </item>
            <item>
-            <spacer name="verticalSpacer_2">
+            <spacer name="verticalSpacer_5">
              <property name="orientation">
               <enum>Qt::Vertical</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
                <width>20</width>
-               <height>33</height>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="Line" name="line_6">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="verticalSpacer_3">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_31">
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QPushButton" name="pbShowMonitorHitDistribution">
+               <property name="text">
+                <string>Show distribution of hits</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pbShowMonitorTimeOverall">
+               <property name="text">
+                <string>Show time overall</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <spacer name="verticalSpacer_6">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
               </size>
              </property>
             </spacer>
@@ -3005,12 +3083,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>231</x>
-     <y>366</y>
+     <x>360</x>
+     <y>360</y>
     </hint>
     <hint type="destinationlabel">
-     <x>457</x>
-     <y>367</y>
+     <x>525</x>
+     <y>362</y>
     </hint>
    </hints>
   </connection>
@@ -3021,12 +3099,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>368</x>
-     <y>394</y>
+     <x>360</x>
+     <y>388</y>
     </hint>
     <hint type="destinationlabel">
-     <x>457</x>
-     <y>397</y>
+     <x>525</x>
+     <y>392</y>
     </hint>
    </hints>
   </connection>
@@ -3037,12 +3115,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>368</x>
-     <y>422</y>
+     <x>360</x>
+     <y>416</y>
     </hint>
     <hint type="destinationlabel">
-     <x>457</x>
-     <y>427</y>
+     <x>525</x>
+     <y>422</y>
     </hint>
    </hints>
   </connection>
@@ -3053,8 +3131,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>267</x>
-     <y>113</y>
+     <x>274</x>
+     <y>109</y>
     </hint>
     <hint type="destinationlabel">
      <x>365</x>
@@ -3181,12 +3259,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>74</x>
-     <y>519</y>
+     <x>131</x>
+     <y>541</y>
     </hint>
     <hint type="destinationlabel">
-     <x>42</x>
-     <y>175</y>
+     <x>51</x>
+     <y>239</y>
     </hint>
    </hints>
   </connection>
@@ -3201,8 +3279,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>556</y>
     </hint>
     <hint type="destinationlabel">
-     <x>108</x>
-     <y>186</y>
+     <x>117</x>
+     <y>239</y>
     </hint>
    </hints>
   </connection>
@@ -3213,12 +3291,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>434</x>
-     <y>493</y>
+     <x>430</x>
+     <y>495</y>
     </hint>
     <hint type="destinationlabel">
-     <x>60</x>
-     <y>177</y>
+     <x>69</x>
+     <y>239</y>
     </hint>
    </hints>
   </connection>
@@ -3233,8 +3311,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>560</y>
     </hint>
     <hint type="destinationlabel">
-     <x>89</x>
-     <y>178</y>
+     <x>98</x>
+     <y>239</y>
     </hint>
    </hints>
   </connection>
@@ -3245,12 +3323,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>182</x>
-     <y>589</y>
+     <x>180</x>
+     <y>591</y>
     </hint>
     <hint type="destinationlabel">
-     <x>65</x>
-     <y>180</y>
+     <x>74</x>
+     <y>239</y>
     </hint>
    </hints>
   </connection>
@@ -3265,8 +3343,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>545</y>
     </hint>
     <hint type="destinationlabel">
-     <x>107</x>
-     <y>183</y>
+     <x>116</x>
+     <y>239</y>
     </hint>
    </hints>
   </connection>
@@ -3281,8 +3359,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>590</y>
     </hint>
     <hint type="destinationlabel">
-     <x>75</x>
-     <y>181</y>
+     <x>84</x>
+     <y>239</y>
     </hint>
    </hints>
   </connection>
@@ -3297,8 +3375,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>587</y>
     </hint>
     <hint type="destinationlabel">
-     <x>39</x>
-     <y>182</y>
+     <x>48</x>
+     <y>239</y>
     </hint>
    </hints>
   </connection>
@@ -3309,12 +3387,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>436</x>
-     <y>550</y>
+     <x>571</x>
+     <y>572</y>
     </hint>
     <hint type="destinationlabel">
-     <x>110</x>
-     <y>187</y>
+     <x>119</x>
+     <y>239</y>
     </hint>
    </hints>
   </connection>
@@ -3329,8 +3407,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>525</y>
     </hint>
     <hint type="destinationlabel">
-     <x>98</x>
-     <y>178</y>
+     <x>107</x>
+     <y>239</y>
     </hint>
    </hints>
   </connection>
@@ -3345,8 +3423,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>521</y>
     </hint>
     <hint type="destinationlabel">
-     <x>88</x>
-     <y>179</y>
+     <x>97</x>
+     <y>239</y>
     </hint>
    </hints>
   </connection>
@@ -3357,12 +3435,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>208</x>
-     <y>606</y>
+     <x>316</x>
+     <y>628</y>
     </hint>
     <hint type="destinationlabel">
-     <x>62</x>
-     <y>209</y>
+     <x>71</x>
+     <y>269</y>
     </hint>
    </hints>
   </connection>
@@ -3377,8 +3455,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>642</y>
     </hint>
     <hint type="destinationlabel">
-     <x>38</x>
-     <y>206</y>
+     <x>47</x>
+     <y>269</y>
     </hint>
    </hints>
   </connection>
@@ -3389,12 +3467,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>527</x>
-     <y>617</y>
+     <x>600</x>
+     <y>639</y>
     </hint>
     <hint type="destinationlabel">
-     <x>47</x>
-     <y>209</y>
+     <x>56</x>
+     <y>269</y>
     </hint>
    </hints>
   </connection>
@@ -3453,8 +3531,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>109</x>
-     <y>132</y>
+     <x>104</x>
+     <y>147</y>
     </hint>
     <hint type="destinationlabel">
      <x>137</x>
@@ -3489,8 +3567,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>525</y>
     </hint>
     <hint type="destinationlabel">
-     <x>136</x>
-     <y>170</y>
+     <x>145</x>
+     <y>239</y>
     </hint>
    </hints>
   </connection>
@@ -3539,6 +3617,22 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
     <hint type="destinationlabel">
      <x>497</x>
      <y>313</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbLimitToVolumes</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>leLimitToVolumes</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>55</x>
+     <y>185</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>151</x>
+     <y>185</y>
     </hint>
    </hints>
   </connection>

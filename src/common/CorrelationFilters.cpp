@@ -9,34 +9,31 @@
 
 CorrelationFilterStructure::CorrelationFilterStructure(CorrelationFilterStructure *from)
 {
-    X = 0;
-    Y = 0;
-    Cut = 0;
     copyFrom(from);
 }
 
 CorrelationFilterStructure::~CorrelationFilterStructure()
 {
-    if (X) delete X;
-    if (Y) delete Y;
-    if (Cut) delete Cut;
+    delete X;
+    delete Y;
+    delete Cut;
 }
 
 void CorrelationFilterStructure::setCorrelationUnitX(CorrelationUnitGenericClass *unit)
 {
-    if (X) delete X;
+    delete X;
     X = unit;
 }
 
 void CorrelationFilterStructure::setCorrelationUnitY(CorrelationUnitGenericClass *unit)
 {
-    if (Y) delete Y;
+    delete Y;
     Y = unit;
 }
 
 void CorrelationFilterStructure::setCut(CorrelationCutGenericClass *cut)
 {
-    if (Cut) delete Cut;
+    delete Cut;
     Cut = cut;
 }
 

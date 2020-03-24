@@ -69,6 +69,7 @@ public:
 
 protected:
     bool event(QEvent *event);
+    void closeEvent(QCloseEvent * event) override;
 
 public slots:
     void on_pbShowGeometry_clicked();
@@ -132,11 +133,17 @@ private:
   bool ShowTop = false;
   bool ColorByMaterial = false;
 
+  //draw on PMs related
+  QVector<QString> SymbolMap;
+  QVector< QVector < double > > numbersX;
+  QVector< QVector < double > > numbersY;
+
 private:
   void doChangeLineWidth(int deltaWidth);
   void showWebView();
   void prepareGeoManager(bool ColorUpdateAllowed = true);
   void adjustGeoAttributes(TGeoVolume *vol, int Mode, int transp, bool adjustVis, int visLevel, int currentLevel);
+  void generateSymbolMap();
 };
 
 #endif // GEOMETRYWINDOWCLASS_H

@@ -33,12 +33,12 @@ public:
     void setNetworkModule(ANetworkModule* NetworkModule) {NetModule = NetworkModule;}
     ANetworkModule* getNetworkModule() const {return NetModule;}
 
-    QString AntsBaseDir; // QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation)+"/ants2";
-    QString ConfigDir;   // AntsbaseDir + "/Config"
-    QString QuicksaveDir;// AntsbaseDir + "/Quicksave"
-    QString ExamplesDir; // AntsbaseDir + "/Examples"
-    QString ResourcesDir; // AntsbaseDir + "/Examples"
-    QString TmpDir;      // AntsbaseDir + "/Tmp"
+    QString AntsBaseDir;  // QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation)+"/ants2";
+    QString ConfigDir;    // AntsbaseDir + "/Config"
+    QString QuicksaveDir; // AntsbaseDir + "/Quicksave"
+    QString ExamplesDir;  // AntsbaseDir + "/Examples"
+    QString ResourcesDir; // AntsbaseDir + "/DATA"
+    QString TmpDir;       // AntsbaseDir + "/Tmp"
 
     QString LastOpenDir; // last open directory using save and load dialog
     QString LibMaterials;

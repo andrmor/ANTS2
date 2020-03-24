@@ -76,15 +76,14 @@ void RasterWindowBaseClass::exposeEvent(QExposeEvent *)
 
 void RasterWindowBaseClass::mouseMoveEvent(QMouseEvent *event)
 {
-    //qDebug() << "Base: Mouse move event";
+    //qDebug() << "Mouse move event";
     if (!fCanvas) return;
     fCanvas->cd();
     if (fBlockEvents) return;
 
     if (event->buttons() & Qt::LeftButton)
-      {
-        //qDebug() << "Mouse left-pressed move event";
-        //left-pressed move
+    {
+        //qDebug() << "-->Mouse left-pressed move event";
         if (!PressEventRegistered) return;
 
         if (fInvertedXYforDrag)
@@ -100,40 +99,37 @@ void RasterWindowBaseClass::mouseMoveEvent(QMouseEvent *event)
         Double_t phi = fCanvas->GetView()->GetLongitude();
         emit UserChangedWindow(centerX, centerY, viewSizeX, viewSizeY, phi, theta);
         //qDebug() << "--<";
-      }
+    }
     else if (event->buttons() & Qt::RightButton)
-      {
+    {
         //qDebug() << "Mouse right-pressed move event";  // not implemented by root!
         //right-pressed move
         //if (!PressEventRegistered) return;
         //fCanvas->HandleInput(kButton3Motion, event->x(), event->y());
-      }
+    }
     else if (event->buttons() & Qt::MidButton)
-      {
-        //middle-pressed move
+    {
+        //qDebug() << "-->Mid button move!";
+        //fCanvas->HandleInput(kButton2Motion, event->x(), event->y());
         if (!PressEventRegistered) return;
         if (!fCanvas->HasViewer3D()) return;
-        //fCanvas->HandleInput(kButton2Motion, event->x(), event->y());
         int x = event->x();
         int y = event->y();
-        int dx = x-lastX;
-        int dy = y-lastY;
-        Double_t centerX, centerY, viewSizeX, viewSizeY;
-        fCanvas->cd();
+        int dx = x - lastX;
+        int dy = y - lastY;
         if (fCanvas->GetView())
-          {
+        {
+            double centerX, centerY, viewSizeX, viewSizeY;
             fCanvas->GetView()->GetWindow(centerX, centerY, viewSizeX, viewSizeY);
-
-            Double_t theta = fCanvas->GetView()->GetLatitude();
-            Double_t phi = fCanvas->GetView()->GetLongitude();
-            double x0 = lastCenterX - 2.0*dx/(double)this->width() *viewSizeX;
-            double y0 = lastCenterY + 2.0*dy/(double)this->height() *viewSizeY;
-
+            double theta = fCanvas->GetView()->GetLatitude();
+            double phi = fCanvas->GetView()->GetLongitude();
+            double x0 = lastCenterX - 2.0*dx/(double)this->width()*viewSizeX;
+            double y0 = lastCenterY + 2.0*dy/(double)this->height()*viewSizeY;
             fCanvas->GetView()->SetWindow(x0, y0, viewSizeX, viewSizeY);
             fCanvas->GetView()->RotateView(phi,theta);
             emit UserChangedWindow(x0, y0, viewSizeX, viewSizeY, phi, theta);
-          }
-      }
+        }
+    }
     else
       {
         //move

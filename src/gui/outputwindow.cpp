@@ -37,7 +37,7 @@
 #include <QFileDialog>
 
 OutputWindow::OutputWindow(QWidget *parent, MainWindow *mw, EventsDataClass *eventsDataHub) :
-    AGuiWindow(parent),
+    AGuiWindow("out", parent),
     ui(new Ui::OutputWindow)
 {
     MW = mw;
@@ -50,7 +50,7 @@ OutputWindow::OutputWindow(QWidget *parent, MainWindow *mw, EventsDataClass *eve
 
     Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
     windowFlags |= Qt::WindowCloseButtonHint;
-    windowFlags |= Qt::Tool;
+    //windowFlags |= Qt::Tool;
     this->setWindowFlags( windowFlags );
 
     modelPMhits = 0;
@@ -1915,14 +1915,13 @@ int OutputWindow::findEventWithFilters(int currentEv, bool bUp)
 
     const QRegularExpression rx = QRegularExpression("(\\ |\\,|\\:|\\t)"); //separators: ' ' or ',' or ':' or '\t'
 
-
     bool bLimProc = ui->cbEVlimToProc->isChecked();
     bool bLimProc_prim = ui->cbEVlimitToProcPrim->isChecked();
-    QStringList LimProc = ui->leEVlimitToProc->text().split(rx, QString::SkipEmptyParts);
 
     bool bExclProc = ui->cbEVexcludeProc->isChecked();
     bool bExclProc_prim = ui->cbEVexcludeProcPrim->isChecked();
-    QStringList ExclProc = ui->leEVexcludeProc->text().split(rx, QString::SkipEmptyParts);
+
+    bool bLimVols = ui->cbLimitToVolumes->isChecked();
 
     if (currentEv > (int)TH.size()) currentEv = (int)TH.size();
 
@@ -1934,12 +1933,30 @@ int OutputWindow::findEventWithFilters(int currentEv, bool bUp)
         bool bGood = true;
         if (bLimProc)
         {
+            QStringList LimProc = ui->leEVlimitToProc->text().split(rx, QString::SkipEmptyParts);
             bGood = er->isHaveProcesses(LimProc, bLimProc_prim);
         }
         if (bGood && bExclProc)
         {
+            QStringList ExclProc = ui->leEVexcludeProc->text().split(rx, QString::SkipEmptyParts);
             bGood = !er->isHaveProcesses(ExclProc, bExclProc_prim);
         }
+        if (bGood && bLimVols)
+        {
+            QStringList LimVols = ui->leLimitToVolumes->text().split(rx, QString::SkipEmptyParts);
+            QStringList LimVolStartWith;
+            for (int i=LimVols.size()-1; i >= 0; i--)
+            {
+                const QString & s = LimVols.at(i);
+                if (s.endsWith('*'))
+                {
+                    LimVolStartWith << s.mid(0, s.size()-1);
+                    LimVols.removeAt(i);
+                }
+            }
+            bGood = er->isTouchedVolumes(LimVols, LimVolStartWith);
+        }
+
         if (bGood) return currentEv;
 
         bUp ? currentEv++ : currentEv--;
@@ -1965,7 +1982,7 @@ void OutputWindow::on_pbNextEvent_clicked()
     }
     else i++;
 
-    if (i >= 0 &&i < MW->EventsDataHub->countEvents()) ui->sbEvent->setValue(i);
+    if (i >= 0 && i < MW->EventsDataHub->countEvents()) ui->sbEvent->setValue(i);
 }
 
 void OutputWindow::on_pbPreviousEvent_clicked()
@@ -2164,10 +2181,95 @@ void OutputWindow::on_sbMonitorIndex_editingFinished()
 
 void OutputWindow::on_pbNextMonitor_clicked()
 {
-    int mon = ui->cobMonitor->currentIndex();
-    mon++;
-    if (mon >= ui->cobMonitor->count()) mon = 0;
-    ui->sbMonitorIndex->setValue(mon);
-    if (mon < ui->cobMonitor->count()) ui->cobMonitor->setCurrentIndex(mon); //protection: can be empty
+    int numMon = EventsDataHub->SimStat->Monitors.size();
+    if (numMon == 0) return;
+
+    int iMon = ui->cobMonitor->currentIndex();
+    int iMonStart = iMon;
+    int hits;
+    do
+    {
+        iMon++;
+        if (iMon >= numMon) iMon = 0;
+        if (iMon == iMonStart) return;
+        hits = EventsDataHub->SimStat->Monitors.at(iMon)->getXY()->GetEntries();
+    }
+    while (hits == 0);
+
+    if (iMon < ui->cobMonitor->count()) ui->cobMonitor->setCurrentIndex(iMon);
     updateMonitors();
+}
+
+void OutputWindow::on_pbShowMonitorHitDistribution_clicked()
+{
+    int numMon = EventsDataHub->SimStat->Monitors.size();
+    if (numMon == 0) return;
+
+    TH1D * h = new TH1D("", "Monitor hits", numMon, 0, numMon);
+    int sumHits = 0;
+    for (int iMon = 0; iMon < numMon; iMon++)
+    {
+        int hits = EventsDataHub->SimStat->Monitors.at(iMon)->getXY()->GetEntries();
+        sumHits += hits;
+        if (hits > 0) h->Fill(iMon, hits);
+    }
+
+    if (sumHits == 0) return;
+    h->SetEntries(sumHits);
+    h->GetXaxis()->SetTitle("Monitor index");
+    h->GetYaxis()->SetTitle("Hits");
+    MW->GraphWindow->Draw(h, "hist");
+}
+
+void OutputWindow::on_pbShowMonitorTimeOverall_clicked()
+{
+    int numMon = EventsDataHub->SimStat->Monitors.size();
+    if (numMon == 0) return;
+
+    const AMonitor * m = EventsDataHub->SimStat->Monitors.at(0);
+    TH1D * h = m->getTime();
+    if (!h) return;
+
+    const int    bins = h->GetXaxis()->GetNbins();
+    const double from = h->GetBinLowEdge(1);
+    const double to   = h->GetBinLowEdge(bins+1);
+    qDebug() << "0:" << bins << from << to;
+
+    bool bSame = true;
+    for (int iMon = 1; iMon < numMon; iMon++)
+    {
+        m = EventsDataHub->SimStat->Monitors.at(iMon);
+        h = m->getTime();
+        if (bins != h->GetXaxis()->GetNbins() || from != h->GetBinLowEdge(1) || to != h->GetBinLowEdge(bins+1))
+        {
+            bSame = false;
+            break;
+        }
+    }
+    qDebug() << "same binning?" << bSame;
+
+    TH1D * time;
+    if (bSame)
+        time = new TH1D("", "Time of hits", bins, from, to);
+    else
+        time = new TH1D("", "Time of hits", bins, 0, 0);
+
+    int sumHits = 0;
+    for (int iMon = 0; iMon < numMon; iMon++)
+    {
+        h = EventsDataHub->SimStat->Monitors.at(iMon)->getTime();
+        int hits = h->GetEntries();
+        if (hits == 0) continue;
+
+        sumHits += hits;
+        for (int iBin = 1; iBin <= h->GetNbinsX(); iBin++)  // '<=' is not a bug!
+            time->Fill(h->GetBinCenter(iBin), h->GetBinContent(iBin));
+    }
+
+    if (sumHits == 0) return;
+
+    time->SetEntries(sumHits);
+    time->GetXaxis()->SetTitle("Time, ns");
+    time->GetYaxis()->SetTitle("Hits");
+    MW->GraphWindow->Draw(time, "hist");
 }

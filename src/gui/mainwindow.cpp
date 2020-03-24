@@ -332,7 +332,7 @@ void MainWindow::closeEvent(QCloseEvent *)
    if (DAwindow)
      {
        qDebug() << "<-Deleting detector addon window";
-       delete DAwindow;
+       delete DAwindow->parent();
        DAwindow = 0;
      }
    if (CheckUpWindow)
@@ -405,7 +405,6 @@ bool MainWindow::event(QEvent *event)
    if (event->type() == QEvent::Show)
      {      
 //       qDebug()<<"Main window SHOW event";
-       WindowNavigator->SetupWindowsTaskbar(); // in effect only once on system start
        WindowNavigator->ShowWindowTriggered("main");
        return true;
      }
@@ -4680,4 +4679,9 @@ void MainWindow::on_pbOpenLogOptions_clicked()
 void MainWindow::on_pbOpenLogOptions2_clicked()
 {
     on_pbOpenLogOptions_clicked();
+}
+
+void MainWindow::on_pbAddmaterialFromLibrary_clicked()
+{
+    MIwindow->AddMaterialFromLibrary(this);
 }

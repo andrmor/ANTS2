@@ -14,7 +14,7 @@ class AMath_SI;
 class AScriptParticleGenerator : public AParticleGun
 {
 public:
-    AScriptParticleGenerator(const AMaterialParticleCollection& MpCollection, TRandom2 *RandGen, int ThreadID);
+    AScriptParticleGenerator(const AMaterialParticleCollection& MpCollection, TRandom2 *RandGen, int ThreadID, const int * NumRunningThreads);
     virtual ~AScriptParticleGenerator();
 
     void SetScript(const QString& script) {Script = script;}
@@ -39,6 +39,7 @@ private:
     const AMaterialParticleCollection & MpCollection;
     TRandom2 * RandGen;
     int ThreadId = 0;
+    const int * NumRunningThreads;
 
     QString Script;
     QScriptEngine * ScriptEngine = 0;  // creates only on Init - only if from script mode was selected!

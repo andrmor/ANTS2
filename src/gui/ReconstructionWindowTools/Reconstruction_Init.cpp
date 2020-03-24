@@ -1,4 +1,3 @@
-//ANTS2
 #include "reconstructionwindow.h"
 #include "ui_reconstructionwindow.h"
 #include "mainwindow.h"
@@ -16,66 +15,38 @@
 #include "nnmoduleclass.h"
 #endif
 
-//Qt
 #include <QDebug>
 
-//Root
 #include "TLine.h"
 #include "TEllipse.h"
 #include "TPolyLine.h"
 
 ReconstructionWindow::ReconstructionWindow(QWidget * parent, MainWindow * mw, EventsDataClass * eventsDataHub) :
-  AGuiWindow(parent),
-  ui(new Ui::ReconstructionWindow)
+  AGuiWindow("recon", parent),
+  MW(mw),
+  ui(new Ui::ReconstructionWindow),
+  ReconstructionManager(MW->ReconstructionManager),
+  EventsDataHub(eventsDataHub),
+  Detector(MW->Detector),
+  PMgroups(MW->Detector->PMgroups),
+  PMs(MW->PMs)
 {
-  MW = mw;
-  ReconstructionManager = MW->ReconstructionManager; //only alias
-  EventsDataHub = eventsDataHub;
-  Detector = MW->Detector;
-  PMgroups = MW->Detector->PMgroups;
-  PMs = MW->PMs;
-  TableLocked = true; //will be unlocked after table is filled
-  TMPignore = false;
-  bFilteringStarted = false;
-  WidgetFocusedBeforeBusyOn = 0;
-
-  QList<int> List;
-  List << 0;
-  CorrelationUnitGenericClass* X = new CU_SingleChannel(List, eventsDataHub, PMgroups, PMgroups->getCurrentGroup());
-  List.first() = 1;
-  CorrelationUnitGenericClass* Y = new CU_SingleChannel(List, eventsDataHub, PMgroups, PMgroups->getCurrentGroup());
+  CorrelationUnitGenericClass* X = new CU_SingleChannel({0}, eventsDataHub, PMgroups, PMgroups->getCurrentGroup());
+  CorrelationUnitGenericClass* Y = new CU_SingleChannel({0}, eventsDataHub, PMgroups, PMgroups->getCurrentGroup());
   CorrelationCutGenericClass* Cut = new Cut_Line();
-  Cut->CutOption = 0;
   Cut->Data << 0 << 1 << 300;
   tmpCorrFilter = new CorrelationFilterStructure(X, Y, Cut);
   tmpCorrFilter->Active = true;
-  tmpCorrFilter->AutoSize = true;
-  tmpCorrFilter->BinX = 100;
-  tmpCorrFilter->BinY = 100;
-  tmpCorrFilter->maxX = 20;
-  tmpCorrFilter->minX = -20;
-  tmpCorrFilter->maxY = 20;
-  tmpCorrFilter->minY = -20;
 
   ui->setupUi(this);
   this->setFixedSize(this->size());
 
   Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
   windowFlags |= Qt::WindowCloseButtonHint;
-  windowFlags |= Qt::Tool;
+  //windowFlags |= Qt::Tool;
   this->setWindowFlags( windowFlags );
 
-  ForbidUpdate = false;  
-  ShiftZoldValue = 0;  
-  modelSpF_TV = 0;
-  StopRecon = false;
-  polygon.clear();
-  CorrelationFilters.resize(0);  
-  vo = 0;
-  dialog = 0;
-  PMcolor = 1; PMwidth = 1; PMstyle = 1;
-
-  CorrCutLine = new TLine(0,0,0,0); //invisible
+  CorrCutLine    = new TLine(0,0,0,0); //invisible
   CorrCutEllipse = new TEllipse(0, 0, 0, 0, 0, 360, 0); //invisible
   CorrCutPolygon = new TPolyLine(0);
 
@@ -95,11 +66,11 @@ ReconstructionWindow::ReconstructionWindow(QWidget * parent, MainWindow * mw, Ev
   ui->laBackground->setStyleSheet(style);
   ui->twData->setCurrentIndex(0);
   ui->twOptions->setCurrentIndex(0);
-  ui->cbRecType->setCurrentIndex(-1);
+  ui->cbRecType->setCurrentIndex(-1); //frozen development: point or track reconstruction
   ui->cbRecType->setCurrentIndex(0);
 
   QList<QWidget*> invis;
-  invis << ui->pbUpdateFilters << ui->pbSpF_UpdateTable << ui->pbUpdateGainsIndication << ui->pbCorrUpdateTMP << ui->fDynPassive
+  invis << ui->pbUpdateFilters << ui->pbSpF_UpdateTable << ui->pbUpdateGainsIndication << ui->pbCorrUpdateTMP
         << ui->fShowXYPmnumber << ui->pbKNNupdate << ui->pbUpdateReconConfig << ui->labLRFmoduleWarning << ui->pbUpdateGuiSettingsInJSON
         << ui->pbRootConfigureCustom;
   for (auto w: invis) w->setVisible(false);
@@ -107,7 +78,7 @@ ReconstructionWindow::ReconstructionWindow(QWidget * parent, MainWindow * mw, Ev
   QList<QWidget*> disab;
   disab << ui->leoTimeBins // ui->fFilterSumSignal << ui->fFilterIndividualSignal << ui->fEnergyFilter << ui->fChi2Filter << ui->fLoadedEnergyFilter
         << ui->labTimeBins << ui->fCorrCut << ui->fCorrAddRemoe << ui->fCorrSize << ui->cbCorrShowCut << ui->dLoadedEnergy
-        << ui->cbForceCoGgiveZof << ui->fCustomBins << ui->fCustomRanges << ui->fInRecFilter;
+        << ui->cbForceCoGgiveZof << ui->fCustomBins << ui->fCustomRanges << ui->fInRecFilter << ui->fDynPassive;
   for (auto w: disab) w->setEnabled(false);
   ui->fCustomSpatFilter->setEnabled(ui->cbSpFcustom->isChecked());
   ui->fSpFz->setEnabled(!ui->cbSpFallZ->isChecked());
@@ -127,28 +98,22 @@ ReconstructionWindow::ReconstructionWindow(QWidget * parent, MainWindow * mw, Ev
   ui->labFLANNenabled->setVisible(true);
 #endif
 
-  //setting validator for lineEdit boxes
-    //double
   QDoubleValidator* dv = new QDoubleValidator(this);
   dv->setNotation(QDoubleValidator::ScientificNotation);
   QList<QLineEdit*> list = this->findChildren<QLineEdit *>();
   foreach(QLineEdit *w, list) if (w->objectName().startsWith("led")) w->setValidator(dv);
-    //int
+
   QIntValidator* iv  = new QIntValidator(this);
   iv->setBottom(0);  
   foreach(QLineEdit *w, list) if (w->objectName().startsWith("lei")) w->setValidator(iv);
 
-  ui->cbDynamicPassiveByDistance->setChecked(false); //has to be false on start
-  ui->cbDynamicPassiveBySignal->setChecked(false);  //has to be false on start
+  ui->cbDynamicPassiveByDistance->setChecked(false);
+  ui->cbDynamicPassiveBySignal->setChecked(false);
 
-  ui->twOptions->tabBar()->setTabIcon(1, RedIcon);
-  //ui->twData->tabBar()->setTabIcon(0, RedIcon);
+  ui->twOptions->tabBar()->setTabIcon(2, RedIcon); //assuming there are no LRF on start
 
   ui->tabwidCorrPolygon->resizeColumnsToContents();
   ui->tabwidCorrPolygon->resizeRowsToContents();
-
-  //Initialization of CorrelationFilters and tmpCorrFilter is done in ReconstructionWindow::ConfigureReconstructor() - need
-  //  Reconstructor module to be created (it is not onthe moment of ReconstructionWindow creation)
 
   ui->tabWidget->setCurrentIndex(1); //reconstruction options tab
   ui->bsAnalyzeScan->setCurrentIndex(0); //reconstruct all tab
@@ -164,23 +129,23 @@ ReconstructionWindow::ReconstructionWindow(QWidget * parent, MainWindow * mw, Ev
   //new module:
   const LRF::ARepository* NewModule = Detector->LRFs->getNewModule();
   QObject::connect(NewModule, &LRF::ARepository::currentLrfsChangedReadyStatus, this, &ReconstructionWindow::LRF_ModuleReadySlot);
-  //
+
   ui->cobLRFmodule->setCurrentIndex(0);
   on_cobLRFmodule_currentIndexChanged(0);
 
-  //handling of NN module reconstruction options.
+  //handling of NN module reconstruction options
   connect(ui->cbReconstructEnergy,SIGNAL(clicked(bool)),this,SIGNAL(cbReconstructEnergyChanged(bool)));
   connect(ui->cb3Dreconstruction,SIGNAL(clicked(bool)),this,SIGNAL(cb3DreconstructionChanged(bool)));
 
-  //ui->cobReconstructionAlgorithm->setCurrentIndex(0); //update indication
   on_cobReconstructionAlgorithm_currentIndexChanged(ui->cobReconstructionAlgorithm->currentIndex());
   on_cobCGstartOption_currentIndexChanged(ui->cobCGstartOption->currentIndex());
-   // qDebug()<<"  Reconstruction Window created";
 
   on_cbLimitNumberEvents_toggled(ui->cbLimitNumberEvents->isChecked());
   on_cobHowToAverageZ_currentIndexChanged(ui->cobHowToAverageZ->currentIndex());
 
   connect(ReconstructionManager->Calibrator_Stat,  &ACalibratorSignalPerPhEl_Stat::progressChanged, this, &ReconstructionWindow::SetProgress);
   connect(ReconstructionManager->Calibrator_Peaks, &ACalibratorSignalPerPhEl_Stat::progressChanged, this, &ReconstructionWindow::SetProgress);
+
+   // qDebug()<<"  Reconstruction Window created";
 }
 

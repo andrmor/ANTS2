@@ -50,7 +50,7 @@ void MainWindow::createPythonScriptWindow()
   PythonScriptWindow->move(25,25);
   connect(PythonScriptWindow, SIGNAL(WindowShown(QString)), WindowNavigator, SLOT(ShowWindowTriggered(QString)));
   connect(PythonScriptWindow, SIGNAL(WindowHidden(QString)), WindowNavigator, SLOT(HideWindowTriggered(QString)));
-  PythonScriptWindow->connectToNavigator(WindowNavigator, "python");
+  PythonScriptWindow->connectWinNavigator(WindowNavigator);
 
   // interface objects are owned after this by the ScriptManager!
   PythonScriptWindow->RegisterCoreInterfaces();

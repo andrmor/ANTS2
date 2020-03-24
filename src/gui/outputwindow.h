@@ -108,6 +108,10 @@ private slots:
 
     void on_pbNextMonitor_clicked();
 
+    void on_pbShowMonitorHitDistribution_clicked();
+
+    void on_pbShowMonitorTimeOverall_clicked();
+
 private:
     Ui::OutputWindow *ui;
     MainWindow* MW;

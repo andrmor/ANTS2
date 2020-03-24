@@ -51,7 +51,8 @@
 #include <QHeaderView>
 
 AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWidget *parent) :
-    AGuiWindow(parent), ScriptManager(ScriptManager), bLightMode(LightMode),
+    AGuiWindow( (dynamic_cast<AJavaScriptManager*>(ScriptManager) ? "script" : "python" ), parent),
+    ScriptManager(ScriptManager), bLightMode(LightMode),
     ui(new Ui::AScriptWindow), GlobSet(AGlobalSettings::getInstance())
 {
     if ( dynamic_cast<AJavaScriptManager*>(ScriptManager) )
@@ -70,7 +71,7 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWid
         //not a standalone window
         Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
         windowFlags |= Qt::WindowCloseButtonHint;
-        windowFlags |= Qt::Tool;
+        //windowFlags |= Qt::Tool;
         this->setWindowFlags( windowFlags );
     }
 

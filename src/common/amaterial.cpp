@@ -32,6 +32,15 @@ double AMaterial::getPhotonYield(int iParticle) const
     return py;
 }
 
+double AMaterial::getIntrinsicEnergyResolution(int iParticle) const
+{
+    if (iParticle < 0 || iParticle >= MatParticle.size()) return IntrEnResDefault;
+
+    const double & er = MatParticle.at(iParticle).IntrEnergyRes;
+    if (er == -1) return IntrEnResDefault;
+    return er;
+}
+
 double AMaterial::getRefractiveIndex(int iWave) const
 {
   if (iWave == -1 || nWaveBinned.isEmpty()) return n;
@@ -259,9 +268,8 @@ void AMaterial::clear()
   //Do not touch overrides - handled by loaded (want to keep overrides intact when handling inspector window)
 }
 
-void AMaterial::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCollection) //QVector<AParticle *> *ParticleCollection)
+void AMaterial::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCollection) const
 {
-  //general data
   json["*MaterialName"] = name;
   json["Density"] = density;
   json["Temperature"] = temperature;
@@ -273,6 +281,7 @@ void AMaterial::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCo
   json["ReemissionProb"] = reemissionProb;
 
   json["PhotonYieldDefault"] = PhotonYieldDefault;
+  json["IntrEnergyResDefault"] = IntrEnResDefault;
 
   {
     QJsonArray ar;
@@ -284,6 +293,7 @@ void AMaterial::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCo
     }
     json["PrimScintDecay"] = ar;
   }
+
   {
     QJsonArray ar;
     for (const APair_ValueAndWeight& pair : PriScint_Raise)
@@ -301,51 +311,57 @@ void AMaterial::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCo
   json["ElDriftVelo"] = e_driftVelocity;
   json["ElDiffusionL"] = e_diffusion_L;
   json["ElDiffusionT"] = e_diffusion_T;
-  if (p1!=0 || p2!=0 || p3!=0)
-    {
+
+  {
       json["TGeoP1"] = p1;
       json["TGeoP2"] = p2;
       json["TGeoP3"] = p3;
-    }
+  }
+
   json["Comments"] = Comments;
 
-  //wavelength-resolved data
-    {
+  {
       QJsonArray ar;
       writeTwoQVectorsToJArray(nWave_lambda, nWave, ar);
       json["RefractiveIndexWave"] = ar;
-    }
-  //if (absWave_lambda.size() >0)
-    {
+  }
+
+  {
       QJsonArray ar;
       writeTwoQVectorsToJArray(absWave_lambda, absWave, ar);
       json["BulkAbsorptionWave"] = ar;
-    }
-  //if (reemisProbWave_lambda.size() >0)
-    {
+  }
+
+  {
       QJsonArray ar;
       writeTwoQVectorsToJArray(reemisProbWave_lambda, reemisProbWave, ar);
       json["ReemissionProbabilityWave"] = ar;
-    }
-  //if (PrimarySpectrum_lambda.size() >0)
-    {
+  }
+
+  {
       QJsonArray ar;
       writeTwoQVectorsToJArray(PrimarySpectrum_lambda, PrimarySpectrum, ar);
       json["PrimScintSpectrum"] = ar;
-    }
-  //if (SecondarySpectrum_lambda.size() >0)
-    {
+  }
+
+  {
       QJsonArray ar;
       writeTwoQVectorsToJArray(SecondarySpectrum_lambda, SecondarySpectrum, ar);
       json["SecScintSpectrum"] = ar;
-    }
+  }
+
+  {
+      QJsonArray ar;
+      for (const QString & s : Tags) ar.append(s);
+      json["*Tags"] = ar;
+  }
 
   //MatParticle properties
   //if a particle has default configuration (TrackingAllowed and MatIsTransparent), skip its record
   QJsonArray jParticleEntries;
   const QVector<AParticle *> *ParticleCollection = MpCollection->getParticleCollection();
   for (int ip=0; ip<ParticleCollection->size(); ip++)
-    {
+  {
       QJsonObject jMatParticle;
 
       QJsonObject jparticle;
@@ -384,15 +400,14 @@ void AMaterial::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCo
 
       //appending this particle entry to the json array
       jParticleEntries.append(jMatParticle);
-    }
+  }
   //if not empty, appending array with Matparticle properties to main json object
   if (!jParticleEntries.isEmpty()) json["MatParticles"] = jParticleEntries;
 }
 
-bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpCollection)
+bool AMaterial::readFromJson(const QJsonObject &json, AMaterialParticleCollection *MpCollection, QVector<QString> SuppressParticles)
 {
   clear(); //clear all settings and set default properties
-
   //general data
   parseJson(json, "*MaterialName", name);
   parseJson(json, "Density", density);
@@ -517,103 +532,118 @@ bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpC
 
   //wavelength-resolved data
   if (json.contains("RefractiveIndexWave"))
-    {
+  {
       QJsonArray ar = json["RefractiveIndexWave"].toArray();
       readTwoQVectorsFromJArray(ar, nWave_lambda, nWave);
-    }
+  }
   if (json.contains("BulkAbsorptionWave"))
-    {
+  {
       QJsonArray ar = json["BulkAbsorptionWave"].toArray();
       readTwoQVectorsFromJArray(ar, absWave_lambda, absWave);
-    }
+  }
   if (json.contains("ReemissionProbabilityWave"))
-    {
+  {
       QJsonArray ar = json["ReemissionProbabilityWave"].toArray();
       readTwoQVectorsFromJArray(ar, reemisProbWave_lambda, reemisProbWave);
-    }
+  }
   if (json.contains("PrimScintSpectrum"))
-    {
+  {
       QJsonArray ar = json["PrimScintSpectrum"].toArray();
       readTwoQVectorsFromJArray(ar, PrimarySpectrum_lambda, PrimarySpectrum);
-    }
+  }
   if (json.contains("SecScintSpectrum"))
-    {
+  {
       QJsonArray ar = json["SecScintSpectrum"].toArray();
       readTwoQVectorsFromJArray(ar, SecondarySpectrum_lambda, SecondarySpectrum);
-    }
+  }
+
+  Tags.clear();
+  if (json.contains("*Tags"))
+  {
+      QJsonArray ar = json["*Tags"].toArray();
+      for (int i=0; i<ar.size(); i++) Tags << ar[i].toString();
+  }
 
   //MatParticle properties
   //filling default properties for all particles
   int numParticles = MpCollection->countParticles();
   MatParticle.resize(numParticles);
   for (int ip=0; ip<numParticles; ip++)
-    {
+  {
       MatParticle[ip].TrackingAllowed = true;
       MatParticle[ip].MaterialIsTransparent = true;
-    }
+  }
   // reading defined properties
   QJsonArray jParticleEntries = json["MatParticles"].toArray();
-  for (int index=0; index<jParticleEntries.size(); index++)
-    {
+  for (int index = 0; index < jParticleEntries.size(); index++)
+  {
       QJsonObject jMatParticle = jParticleEntries[index].toObject();
 
       QJsonObject jparticle = jMatParticle["*Particle"].toObject();
+      AParticle pa;
+      pa.readFromJson(jparticle);
+      bool bNewParticle = (MpCollection->findParticle(pa) == -1);
+      if (bNewParticle && SuppressParticles.contains(pa.ParticleName))
+          continue;
+
       int ip = MpCollection->findOrAddParticle(jparticle);
+      MatParticle.resize(MpCollection->countParticles());
+      MatParticleStructure & MP = MatParticle[ip];
 
-      parseJson(jMatParticle, "TrackingAllowed", MatParticle[ip].TrackingAllowed);
-      parseJson(jMatParticle, "MatIsTransparent", MatParticle[ip].MaterialIsTransparent);
-      parseJson(jMatParticle, "PrimScintPhYield", MatParticle[ip].PhYield);
+      parseJson(jMatParticle, "TrackingAllowed",  MP.TrackingAllowed);
+      parseJson(jMatParticle, "MatIsTransparent", MP.MaterialIsTransparent);
+      parseJson(jMatParticle, "PrimScintPhYield", MP.PhYield);
 
-      MatParticle[ip].IntrEnergyRes = 0;
-      parseJson(jMatParticle, "IntrEnergyRes", MatParticle[ip].IntrEnergyRes);
+      MP.IntrEnergyRes = 0;
+      parseJson(jMatParticle, "IntrEnergyRes", MP.IntrEnergyRes);
 
-      MatParticle[ip].DataSource.clear();
-      MatParticle[ip].DataString.clear();
-      parseJson(jMatParticle, "DataSource", MatParticle[ip].DataSource);
-      parseJson(jMatParticle, "DataString", MatParticle[ip].DataString);
+      MP.DataSource.clear();
+      parseJson(jMatParticle, "DataSource", MP.DataSource);
+      MP.DataString.clear();
+      parseJson(jMatParticle, "DataString", MP.DataString);
 
-      MatParticle[ip].bCaptureEnabled = true; //compatibility
-      MatParticle[ip].bElasticEnabled = false; //compatibility
-      parseJson(jMatParticle, "CaptureEnabled", MatParticle[ip].bCaptureEnabled);
-      parseJson(jMatParticle, "EllasticEnabled", MatParticle[ip].bElasticEnabled); //old configs were with this typo
-      parseJson(jMatParticle, "ElasticEnabled", MatParticle[ip].bElasticEnabled);
-      MatParticle[ip].bUseNCrystal = false; //compatibility
-      parseJson(jMatParticle, "UseNCrystal", MatParticle[ip].bUseNCrystal);
+      MP.bCaptureEnabled = true; //compatibility
+      parseJson(jMatParticle, "CaptureEnabled", MP.bCaptureEnabled);
+      MP.bElasticEnabled = false; //compatibility
+      parseJson(jMatParticle, "EllasticEnabled", MP.bElasticEnabled); //old configs were with this typo
+      parseJson(jMatParticle, "ElasticEnabled",  MP.bElasticEnabled);
+      MP.bUseNCrystal = false; //compatibility
+      parseJson(jMatParticle, "UseNCrystal", MP.bUseNCrystal);
 
-      MatParticle[ip].bAllowAbsentCsData = false;
-      parseJson(jMatParticle, "AllowAbsentCsData", MatParticle[ip].bAllowAbsentCsData);
+      MP.bAllowAbsentCsData = false;
+      parseJson(jMatParticle, "AllowAbsentCsData", MP.bAllowAbsentCsData);
 
       if (jMatParticle.contains("TotalInteraction"))
-        {
+      {
           QJsonArray iar = jMatParticle["TotalInteraction"].toArray();
-          readTwoQVectorsFromJArray(iar, MatParticle[ip].InteractionDataX, MatParticle[ip].InteractionDataF);
-        }
+          readTwoQVectorsFromJArray(iar, MP.InteractionDataX, MP.InteractionDataF);
+      }
 
       QJsonArray arTerm;
       parseJson(jMatParticle, "Terminators", arTerm);
-      parseJson(jMatParticle, "GammaTerminators", arTerm); //conpatibility
+      parseJson(jMatParticle, "GammaTerminators", arTerm); //compatibility
          // old neutron terminators are NOT compatible with new system
       if (!arTerm.isEmpty())
       {
-          MatParticle[ip].Terminators.clear();
+          MP.Terminators.clear();
           for (int iTerm=0; iTerm<arTerm.size(); iTerm++)
             {
               QJsonObject jterm = arTerm[iTerm].toObject();
               NeutralTerminatorStructure newTerm;
               newTerm.readFromJson(jterm, MpCollection);
-              MatParticle[ip].Terminators << newTerm;
+              MP.Terminators << newTerm;
             }
       }
       else
       {
           if (jMatParticle.contains("NeutronTerminators"))
           {
-              qWarning() << "This config file contains old (incompatible) standard for neutron interaction data - material is seto to transparent for neutrons!";
+              qWarning() << "This config file contains old (incompatible) standard for neutron interaction data - material is set to transparent for neutrons!";
               //making material transparent
-              MatParticle[ip].MaterialIsTransparent = true;
+              MP.MaterialIsTransparent = true;
           }
       }
-    }
+  }
 
   if (!parseJson(json, "PhotonYieldDefault", PhotonYieldDefault))
   {
@@ -631,6 +661,9 @@ bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpC
           if (bAllSame) PhotonYieldDefault = MatParticle.at(0).PhYield;
       }
   }
+
+  IntrEnResDefault = 0;
+  parseJson(json, "IntrEnergyResDefault", IntrEnResDefault);
 
   return true;
 }
@@ -878,6 +911,21 @@ void NeutralTerminatorStructure::prepareForParticleRemove(int iPart)
                 int& thisParticle = IsotopeRecords[ie].DecayScenarios[ir].GeneratedParticles[ig].ParticleId;
                 if (thisParticle > iPart) thisParticle--;
             }
+}
+
+QVector<QString> NeutralTerminatorStructure::getSecondaryParticles(AMaterialParticleCollection & MpCollection) const
+{
+    QVector<QString> vec;
+
+    if (Type == Absorption)
+    {
+        for (const ANeutronInteractionElement & rec :  IsotopeRecords)
+            for (const ADecayScenario & scen : rec.DecayScenarios)
+                for (const AAbsorptionGeneratedParticle & part : scen.GeneratedParticles)
+                    vec << MpCollection.getParticleName(part.ParticleId);
+    }
+
+   return vec;
 }
 
 double NeutralTerminatorStructure::getNCrystalCrossSectionBarns(double energy_keV, int threadIndex) const

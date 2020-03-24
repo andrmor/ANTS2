@@ -41,7 +41,7 @@ public:
     virtual void appendToDataHub(EventsDataClass * dataHub) override;
     virtual void mergeData() override;
 
-    void setOnlySavePrimaries() {bOnlySavePrimariesToFile = true;} // for G4ants mode
+    void setOnlySavePrimaries() {bOnlySavePrimariesToFile = true;} // for G4ants mode // obsolete??? ***!!!
 
     virtual void hardAbort() override;
 

@@ -15,7 +15,7 @@
 #include <QDebug>
 
 ARemoteWindow::ARemoteWindow(MainWindow *MW) :
-    AGuiWindow(MW),
+    AGuiWindow("remote", MW),
     MW(MW), ui(new Ui::ARemoteWindow)
 {
     ui->setupUi(this);
@@ -23,7 +23,7 @@ ARemoteWindow::ARemoteWindow(MainWindow *MW) :
     Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
     windowFlags |= Qt::WindowCloseButtonHint;
     //windowFlags |= Qt::WindowStaysOnTopHint;
-    windowFlags |= Qt::Tool;
+    //windowFlags |= Qt::Tool;
     this->setWindowFlags( windowFlags );
 
     ui->lwServers->setViewMode(QListView::ListMode);

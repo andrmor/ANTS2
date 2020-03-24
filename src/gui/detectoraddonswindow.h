@@ -18,7 +18,7 @@ class DetectorAddOnsWindow : public AGuiWindow
   Q_OBJECT
   
 public:
-  explicit DetectorAddOnsWindow(MainWindow *parent, DetectorClass* detector);
+  explicit DetectorAddOnsWindow(QWidget * parent, MainWindow * MW, DetectorClass* detector);
   ~DetectorAddOnsWindow();
 
   void UpdateGUI(); //update gui controls
@@ -71,6 +71,8 @@ private slots:
   void on_pmParseInGeometryFromGDML_clicked();
 
   void on_pbConvertToScript_clicked();
+
+  void on_pbWorldTreeHelp_clicked();
 
 private:
   Ui::DetectorAddOnsWindow *ui;

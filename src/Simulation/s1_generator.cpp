@@ -26,10 +26,7 @@ bool S1_Generator::Generate() //uses MW->EnergyVector as the input parameter
     if (EnergyVector->isEmpty()) return true; //no data
 
     //what is the first particle to work with?
-    //   int ThisId = EnergyVector->at(0)->ParticleId;
     int MatId = EnergyVector->at(0)->MaterialId;
-    // double time = EnergyVector->t;
-    double PhotonYield;
 
     double Remainer = 0.0;
     double Photons;
@@ -58,14 +55,18 @@ bool S1_Generator::Generate() //uses MW->EnergyVector as the input parameter
           }
 
         MatId = EnergyVector->at(iEv)->MaterialId;
-        PhotonYield = (*MaterialCollection)[MatId]->MatParticle[ThisId].PhYield;
+        //PhotonYield = (*MaterialCollection)[MatId]->MatParticle[ThisId].PhYield;
+        double PhotonYield   = (*MaterialCollection)[MatId]->getPhotonYield(ThisId);
+        double IntrEnergyRes = (*MaterialCollection)[MatId]->getIntrinsicEnergyResolution(ThisId);
 
-        if ((*MaterialCollection)[MatId]->MatParticle[ThisId].IntrEnergyRes == 0)
+        //if ((*MaterialCollection)[MatId]->MatParticle[ThisId].IntrEnergyRes == 0)
+        if (IntrEnergyRes == 0)
            Photons = EnergyVector->at(iEv)->dE * PhotonYield + Remainer;
         else
         {
            double mean =  EnergyVector->at(iEv)->dE * PhotonYield + Remainer;
-           double sigma = (*MaterialCollection)[MatId]->MatParticle[ThisId].IntrEnergyRes * mean /2.35482;
+           //double sigma = (*MaterialCollection)[MatId]->MatParticle[ThisId].IntrEnergyRes * mean /2.35482;
+           double sigma = IntrEnergyRes * mean /2.35482;
            Photons = RandGen->Gaus(mean, sigma);
         }
 

@@ -179,7 +179,7 @@ public:
 
     void ShowGeoMarkers(); //Show dots on ALREADY PREPARED geometry window!
 
-    void CheckPresenseOfSecScintillator();
+    //void CheckPresenseOfSecScintillator();
     void DeleteLoadedEvents(bool KeepFileList = false);       
     void SavePreprocessingAddMulti(QString fileName);
     void LoadPreprocessingAddMulti(QString filename);
@@ -592,6 +592,8 @@ private slots:
 
     void on_pbOpenLogOptions2_clicked();
 
+
+    void on_pbAddmaterialFromLibrary_clicked();
 
 public slots:
     void on_pbRebuildDetector_clicked();

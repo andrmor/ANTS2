@@ -33,6 +33,8 @@ AMaterialParticleCollection::AMaterialParticleCollection()
   p->ParticleName = "gamma";
   p->type = AParticle::_gamma_;
   ParticleCollection << p;
+
+  tmpMaterial.MatParticle.resize(1);
 }
 
 AMaterialParticleCollection::~AMaterialParticleCollection()
@@ -289,6 +291,9 @@ void AMaterialParticleCollection::ClearTmpMaterial()
   tmpMaterial.PriScint_Raise.clear();
   tmpMaterial.PriScint_Raise << APair_ValueAndWeight(0, 1.0);
 
+  tmpMaterial.PhotonYieldDefault = 0;
+  tmpMaterial.IntrEnResDefault = 0;
+
   int particles = ParticleCollection.size();
   tmpMaterial.MatParticle.resize(particles);
   for (int i=0; i<particles; i++)
@@ -379,14 +384,14 @@ void AMaterialParticleCollection::CopyTmpToMaterialCollection()
   return;
 }
 
-int AMaterialParticleCollection::FindMaterial(QString name)
+int AMaterialParticleCollection::FindMaterial(const QString & name) const
 {
-  int size = MaterialCollectionData.size();
+    const int size = MaterialCollectionData.size();
 
-  for (int index = 0; index < size; index++)
-    if (name == MaterialCollectionData[index]->name) return index;
+    for (int index = 0; index < size; index++)
+        if (name == MaterialCollectionData[index]->name) return index;
 
-  return -1;
+    return -1;
 }
 
 void AMaterialParticleCollection::UpdateWaveResolvedProperties(int imat)
@@ -487,29 +492,25 @@ bool AMaterialParticleCollection::isNCrystalInUse() const
         if (m->isNCrystalInUse()) return true;
     return false;
 }
-/*
-bool AMaterialParticleCollection::AddParticle(QString name, AParticle::ParticleType type, int charge, double mass)
-{
-  if (getParticleId(name) != -1) return false;
 
-  AParticle* p = new AParticle(name, type, charge, mass);
-  ParticleCollection.append(p);
-  registerNewParticle();
-  emit ParticleCollectionChanged();
-  return true;
+const QVector<QString> AMaterialParticleCollection::getUndefinedParticles(QJsonObject &matJson)
+{
+    QVector<QString> vec;
+    QJsonArray arr;
+    parseJson(matJson, "MatParticles", arr);
+    for (int i = 0; i < arr.size(); i++)
+    {
+        QJsonObject jMatParticle = arr[i].toObject();
+        QJsonObject jparticle = jMatParticle["*Particle"].toObject();
+
+        AParticle pa;
+        pa.readFromJson(jparticle);
+        int pid = findParticle(pa);
+        if (pid == -1) vec << pa.ParticleName;
+    }
+    return vec;
 }
 
-bool AMaterialParticleCollection::AddParticle(QString name, AParticle::ParticleType type, double mass)
-{
-    if (getParticleId(name) != -1) return false;
-
-    AParticle* p = new AParticle(name, type, mass);
-    ParticleCollection.append(p);
-    registerNewParticle();
-    emit ParticleCollectionChanged();
-    return true;
-}
-*/
 int AMaterialParticleCollection::getNeutronIndex() const
 {
     for (int i=0; i<ParticleCollection.size(); i++)
@@ -554,13 +555,20 @@ void AMaterialParticleCollection::ConvertToStandardWavelengthes(QVector<double>*
   }
 }
 
-int AMaterialParticleCollection::findOrAddParticle(const AParticle & particle)
+int AMaterialParticleCollection::findParticle(const AParticle & particle) const
 {
     for (int Id = 0; Id < ParticleCollection.size(); Id++)
         if ( particle == *ParticleCollection.at(Id))
             return Id;
+    return -1;
+}
 
-    AParticle* p = new AParticle(particle);
+int AMaterialParticleCollection::findOrAddParticle(const AParticle & particle)
+{
+    int Id = findParticle(particle);
+    if (Id != -1) return Id;
+
+    AParticle * p = new AParticle(particle);
     int ParticleId = ParticleCollection.size();
     ParticleCollection.append(p);
     registerNewParticle(); //resize particle-indexed properties of all materials

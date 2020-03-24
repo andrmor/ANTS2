@@ -61,8 +61,7 @@ void MainWindow::onRequestDetectorGuiUpdate()
   ListActiveParticles();
   //Materials
   on_pbRefreshMaterials_clicked();
-  //MIwindow->UpdateActiveMaterials(); //refresh indication on Material Inspector window
-  MIwindow->setLogLog(Detector->MpCollection->fLogLogInterpolation);
+  MIwindow->SetLogLog(Detector->MpCollection->fLogLogInterpolation);
   //Optical overrides
   on_pbRefreshOverrides_clicked();
   //PM types
@@ -85,7 +84,7 @@ void MainWindow::onRequestDetectorGuiUpdate()
   ui->cbFixedTopSize->setChecked( Detector->fWorldSizeFixed );
   //misc
   ShowPMcount();
-  CheckPresenseOfSecScintillator(); //checks if SecScint present, and update selectors of primary/secondary scintillation  //***!!! potentially slow on large geometries!!!
+  //CheckPresenseOfSecScintillator(); //checks if SecScint present, and update selectors of primary/secondary scintillation  //***!!! potentially slow on large geometries!!!
   //Sandwich - now automatic
   //PM explore
   on_pbIndPMshowInfo_clicked();
@@ -260,7 +259,8 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
     }
 
   //cleanup  
-  if (histScan) delete histScan; histScan = nullptr;
+  if (histScan) delete histScan;
+  histScan = nullptr;
   ui->pbScanDistrShow->setEnabled(false);
   ui->pbScanDistrDelete->setEnabled(false);
   populateTable = true;

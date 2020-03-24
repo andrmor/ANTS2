@@ -2,6 +2,7 @@ define:Gamma cameras
 define:Neutrons
 define:Dark matter
 define:Neutrinos
+define:Proton therapy
 define:ANTS2 tests
 define: Startup
 
@@ -18,6 +19,8 @@ define:Dark matter:LUX
 
 define:Neutrinos:RED
 
+define:Proton therapy:O-PGI
+
 define:ANTS2 tests:Fresnel test
 define:ANTS2 tests:Scatter model
 define:ANTS2 tests:Optical grids
@@ -28,6 +31,8 @@ define:ANTS2 tests:SecScintDiffusion
 define:Startup:Startup
 
 -------
+
+add:Proton therapy:O-PGI:opgi.json:Range monitoring using prompt gammas. Requires Geant4 interface
 
 add:ANTS2 tests:Fresnel test:FresnelTester.json:Wherever the point emission inside crysal is, the photon flux from all sides to outside (air) should be the same. Each side of the crystal is covered with a PMT (air).
 add:ANTS2 tests:Scatter model:naus.json:Detector example for fitting of scattering model parameters

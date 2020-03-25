@@ -77,6 +77,9 @@ private:
     AParticleTrackingRecord * createAndInitParticleTrackingRecord() const;
     int  getNewTrackIndex() const;
     void updatePromisedSecondary(AParticleTrackingRecord * secrec);
+    void readNewStep();
+    void addTrackStep();
+    void addHistoryStep();
 
 };
 

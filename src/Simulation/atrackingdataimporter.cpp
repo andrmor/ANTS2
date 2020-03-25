@@ -252,6 +252,118 @@ void ATrackingDataImporter::updatePromisedSecondary(AParticleTrackingRecord *sec
     }
 }
 
+void ATrackingDataImporter::readNewStep()
+{
+    if (bBinaryInput)
+        return; // ***
+    else
+    {
+        //qDebug() << "PS:"<<currentLine;
+
+        // format for "T" processes:
+        // ProcName X Y Z Time KinE DirectDepoE iMatTo VolNameTo VolIndexTo [secondaries]
+        //     0    1 2 3   4    5      6          7       8           9             ...
+        // not that if energy depo is present on T step, it is in the previous volume!
+
+        // format for all other processes:
+        // ProcName X Y Z Time KinE DirectDepoE [secondaries]
+        //     0    1 2 3   4    5      6           ...
+
+        inputSL = currentLine.split(' ', QString::SkipEmptyParts);
+        if (inputSL.size() < 7)
+        {
+            Error = "Bad format in step line";
+            return;
+        }
+    }
+}
+
+void ATrackingDataImporter::addTrackStep()
+{
+    if (bBinaryInput)
+        return; // ***
+    else
+    {
+        if (inputSL.at(0) != "T") // skip Transportation (escape out of world is marked with "O")
+        {
+            //qDebug() << "  Adding node";
+            // ProcName X Y Z Time KinE DirectDepoE [secondaries]
+            //     0    1 2 3   4    5      6           ...
+            CurrentTrack->Nodes << TrackNodeStruct(inputSL.at(1).toDouble(), inputSL.at(2).toDouble(), inputSL.at(3).toDouble());  // need time?
+        }
+    }
+}
+
+void ATrackingDataImporter::addHistoryStep()
+{
+    if (bBinaryInput)
+        return; // ***
+    else
+    {
+        const QString & Process = inputSL.at(0);
+        ATrackingStepData * step;
+        int secIndex;
+
+        if (Process == "T")
+        {
+            // format for "T" processes:
+            // ProcName X Y Z Time KinE DirectDepoE iMatTo VolNameTo VolIndexTo [secondaries]
+            //     0    1 2 3   4    5      6          7       8           9             ...
+            // not that if energy depo is present on T step, it is in the previous volume!
+
+            if (inputSL.size() < 10)
+            {
+                Error = "Bad format in tracking line (transportation step)";
+                return;
+            }
+
+            step = new ATransportationStepData(inputSL.at(1).toFloat(), // X
+                                               inputSL.at(2).toFloat(), // Y
+                                               inputSL.at(3).toFloat(), // Z
+                                               inputSL.at(4).toFloat(), // time
+                                               inputSL.at(5).toFloat(), // energy
+                                               inputSL.at(6).toFloat(), // depoE
+                                               inputSL.at(0));          // pr
+            (static_cast<ATransportationStepData*>(step))->setVolumeInfo(inputSL.at(8), inputSL.at(9).toInt(), inputSL.at(7).toInt());
+            secIndex = 10;
+        }
+        else
+        {
+            // format for all other processes:
+            // ProcName X Y Z Time KinE DirectDepoE [secondaries]
+            //     0    1 2 3   4    5      6           ...
+
+            step = new ATrackingStepData(inputSL.at(1).toFloat(), // X
+                                         inputSL.at(2).toFloat(), // Y
+                                         inputSL.at(3).toFloat(), // Z
+                                         inputSL.at(4).toFloat(), // time
+                                         inputSL.at(5).toFloat(), // energy
+                                         inputSL.at(6).toFloat(), // depoE
+                                         inputSL.at(0));          // pr
+            secIndex = 7;
+        }
+
+        CurrentParticleRecord->addStep(step);
+
+        if (inputSL.size() > secIndex)
+        {
+            for (int i = secIndex; i < inputSL.size(); i++)
+            {
+                int index = inputSL.at(i).toInt();
+                if (PromisedSecondaries.contains(index))
+                {
+                    Error = QString("Error: secondary with index %1 was already promised").arg(index);
+                    return;
+                }
+                AParticleTrackingRecord * sr = AParticleTrackingRecord::create(); //empty!
+                step->Secondaries.push_back(CurrentParticleRecord->countSecondaries());
+                CurrentParticleRecord->addSecondary(sr);
+                PromisedSecondaries.insert(index, sr);
+            }
+        }
+    }
+}
+
 void ATrackingDataImporter::processNewEvent()
 {
     if (!Error.isEmpty()) return;
@@ -364,37 +476,17 @@ void ATrackingDataImporter::processNewTrack()
 
 void ATrackingDataImporter::processNewStep()
 {
-    //qDebug() << "PS:"<<currentLine;
-
-    // format for "T" processes:
-    // ProcName X Y Z Time KinE DirectDepoE iMatTo VolNameTo VolIndexTo [secondaries]
-    //     0    1 2 3   4    5      6          7       8           9             ...
-    // not that if energy depo is present on T step, it is in the previous volume!
-
-    // format for all other processes:
-    // ProcName X Y Z Time KinE DirectDepoE [secondaries]
-    //     0    1 2 3   4    5      6           ...
-
-    QStringList f = currentLine.split(' ', QString::SkipEmptyParts);
-    if (f.size() < 7)
-    {
-        Error = "Bad format in track line";
-        return;
-    }
+    readNewStep();
+    if (!Error.isEmpty()) return;
 
     if (Tracks)
     {
         if (!CurrentTrack)
         {
-            Error = "Track not started while attempting to add step";
+            Error = "Track not started while attempting to add a node to it";
             return;
         }
-
-        if (f.at(0) != "T") // skip Transportation (escape out of world is marked with "O")
-        {
-            //qDebug() << "  Adding node";
-            CurrentTrack->Nodes << TrackNodeStruct(f.at(1).toDouble(), f.at(2).toDouble(), f.at(3).toDouble());  // need time?
-        }
+        addTrackStep();
     }
 
     if (History)
@@ -404,59 +496,7 @@ void ATrackingDataImporter::processNewStep()
             Error = "Attempt to add step when particle record does not exist";
             return;
         }
-
-        const QString & Process = f.at(0);
-        ATrackingStepData * step;
-        int secIndex;
-
-        if (Process == "T")
-        {
-            if (f.size() < 10)
-            {
-                Error = "Bad format in tracking line (transportation step)";
-                return;
-            }
-
-            step = new ATransportationStepData(f.at(1).toFloat(), // X
-                                               f.at(2).toFloat(), // Y
-                                               f.at(3).toFloat(), // Z
-                                               f.at(4).toFloat(), // time
-                                               f.at(5).toFloat(), // energy
-                                               f.at(6).toFloat(), // depoE
-                                               f.at(0));          // pr
-            (static_cast<ATransportationStepData*>(step))->setVolumeInfo(f.at(8), f.at(9).toInt(), f.at(7).toInt());
-            secIndex = 10;
-        }
-        else
-        {
-            step = new ATrackingStepData(f.at(1).toFloat(), // X
-                                         f.at(2).toFloat(), // Y
-                                         f.at(3).toFloat(), // Z
-                                         f.at(4).toFloat(), // time
-                                         f.at(5).toFloat(), // energy
-                                         f.at(6).toFloat(), // depoE
-                                         f.at(0));          // pr
-            secIndex = 7;
-        }
-
-        CurrentParticleRecord->addStep(step);
-
-        if (f.size() > secIndex)
-        {
-            for (int i = secIndex; i < f.size(); i++)
-            {
-                int index = f.at(i).toInt();
-                if (PromisedSecondaries.contains(index))
-                {
-                    Error = QString("Error: secondary with index %1 was already promised").arg(index);
-                    return;
-                }
-                AParticleTrackingRecord * sr = AParticleTrackingRecord::create(); //empty!
-                step->Secondaries.push_back(CurrentParticleRecord->countSecondaries());
-                CurrentParticleRecord->addSecondary(sr);
-                PromisedSecondaries.insert(index, sr);
-            }
-        }
+        addHistoryStep();
     }
 
     CurrentStatus = TrackOngoing;

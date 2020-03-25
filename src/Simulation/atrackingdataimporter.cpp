@@ -136,25 +136,44 @@ void ATrackingDataImporter::clearImportResources()
     delete inStream;     inStream = nullptr;
 }
 
+int ATrackingDataImporter::extractEventId()
+{
+    if (bBinaryInput)
+        return 0; // ***
+    else
+    {
+        //qDebug() << "EV-->"<<currentLine;
+        currentLine.remove(0, 1);
+        bool bOK = false;
+        int evId = currentLine.toInt(&bOK);
+        if (!bOK)
+        {
+            Error = "Error in conversion of event number to integer";
+            return -1;
+        }
+        return evId;
+    }
+}
+
 void ATrackingDataImporter::processNewEvent()
 {
-    //qDebug() << "EV-->"<<currentLine;
-    currentLine.remove(0, 1);
-    int evId = currentLine.toInt();
+    if (!Error.isEmpty()) return;
 
     if (CurrentStatus == ExpectingStep)
     {
         Error = "Unexpected start of event - single step in one record";
         return;
     }
+    if (isErrorInPromises()) return; // container of promises should be empty at the end of event
+
+    int evId = extractEventId();
+    if (!Error.isEmpty()) return;
 
     if (evId != ExpectedEvent)
     {
         Error = QString("Expected event #%1, but received #%2").arg(ExpectedEvent).arg(evId);
         return;
     }
-
-    if (isErrorInPromises()) return; // container of promises should be empty at the end of event
 
     if (Tracks && CurrentTrack)
     {
@@ -171,7 +190,6 @@ void ATrackingDataImporter::processNewEvent()
     ExpectedEvent++;
     CurrentStatus = ExpectingTrack;
 }
-
 
 void ATrackingDataImporter::processNewTrack()
 {

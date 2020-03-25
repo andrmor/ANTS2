@@ -68,6 +68,8 @@ private:
     void prepareImportResources(const QString & FileName);
     void clearImportResources();
 
+    int extractEventId();
+
 };
 
 #endif // ATRACKINGDATAIMPORTER_H

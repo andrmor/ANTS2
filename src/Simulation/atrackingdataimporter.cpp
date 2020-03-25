@@ -80,7 +80,13 @@ bool ATrackingDataImporter::isEndReached() const
 void ATrackingDataImporter::readBuffer()
 {
     if (bBinaryInput)
-        ; // ***
+    {
+        // EE - new event, F0 - new track, F8 - trasnportation step, FF - non-transport step
+        *inStream >> binHeader;
+
+        if (inStream->fail())
+            Error = "Error in header char input";
+    }
     else
         currentLine = inTextStream->readLine();
 }
@@ -90,7 +96,11 @@ bool ATrackingDataImporter::isNewEvent()
     if (!Error.isEmpty()) return false;
 
     if (bBinaryInput)
-        return false; // ***
+    {
+        // EE - new event, F0 - new track, F8 - trasnportation step, FF - non-transport step
+        qDebug() << "New event?" << (binHeader == (char)0xEE);
+        return (binHeader == char(0xEE));
+    }
     else
         return currentLine.startsWith('#');
 }
@@ -100,7 +110,11 @@ bool ATrackingDataImporter::isNewTrack()
     if (!Error.isEmpty()) return false;
 
     if (bBinaryInput)
-        return false; // ***
+    {
+        // EE - new event, F0 - new track, F8 - trasnportation step, FF - non-transport step
+        qDebug() << "New track?" << (binHeader == (char)0xF0);
+        return (binHeader == char(0xF0));
+    }
     else
         return currentLine.startsWith('>');
 }
@@ -139,18 +153,20 @@ void ATrackingDataImporter::clearImportResources()
 int ATrackingDataImporter::extractEventId()
 {
     if (bBinaryInput)
-        return 0; // ***
+    {
+        int evId;
+        inStream->read((char*)&evId, sizeof(int));
+        if (inStream->fail()) Error = "Error in header char input";
+        qDebug() << "Event id:" << evId << "  error?" << !Error.isEmpty();
+        return evId;
+    }
     else
     {
         //qDebug() << "EV-->"<<currentLine;
         currentLine.remove(0, 1);
         bool bOK = false;
         int evId = currentLine.toInt(&bOK);
-        if (!bOK)
-        {
-            Error = "Error in conversion of event number to integer";
-            return -1;
-        }
+        if (!bOK) Error = "Error in conversion of event number to integer";
         return evId;
     }
 }
@@ -158,7 +174,26 @@ int ATrackingDataImporter::extractEventId()
 void ATrackingDataImporter::readNewTrack()
 {
     if (bBinaryInput)
-        return; // ***
+    {
+        //format:
+        //trackId(int) parentTrackId(int) PartName(string0) X(double) Y(double) Z(double) time(double) kinEnergy(double) NextMat(int) NextVolNmae(string0) NextVolIndex(int)
+
+        inStream->read((char*)&BtrackId,        sizeof(int));
+        inStream->read((char*)&BparentTrackId,  sizeof(int));
+        readString(BparticleName);
+        inStream->read((char*)Bpos,           3*sizeof(double));
+        inStream->read((char*)&Btime,           sizeof(double));
+        inStream->read((char*)&BkinEnergy,      sizeof(double));
+        inStream->read((char*)&BnextMat,        sizeof(int));
+        readString(BnextVolName);
+        inStream->read((char*)&BnextVolIndex,   sizeof(int));
+
+        if (inStream->fail())
+        {
+            Error = "Unexpected format of a new track binary record";
+            return;
+        }
+    }
     else
     {
         //qDebug() << "NT:"<<currentLine;
@@ -176,7 +211,10 @@ void ATrackingDataImporter::initNewTrackRecord()
     int ParticleID;
 
     if (bBinaryInput)
-        return; // ***
+    {
+        ParticleID = ParticleNames.indexOf(BparticleName.data());
+        CurrentTrack->Nodes.append( TrackNodeStruct(Bpos[0], Bpos[1], Bpos[2]) ); //need time?
+    }
     else
     {
         ParticleID = ParticleNames.indexOf(inputSL.at(2));
@@ -189,7 +227,7 @@ void ATrackingDataImporter::initNewTrackRecord()
 bool ATrackingDataImporter::isPrimaryRecord() const
 {
     if (bBinaryInput)
-        return true; // ***
+        return (BparentTrackId == 0);
     else
     {
         int parTrIndex = inputSL.at(1).toInt();
@@ -202,7 +240,17 @@ AParticleTrackingRecord * ATrackingDataImporter::createAndInitParticleTrackingRe
     AParticleTrackingRecord * r = nullptr;
 
     if (bBinaryInput)
-        ; // ***
+    {
+        r = AParticleTrackingRecord::create(BparticleName.data());
+
+        ATransportationStepData * step = new ATransportationStepData(Bpos,          // pos
+                                                                     Btime,         // time
+                                                                     BkinEnergy,    // E
+                                                                     0,             // depoE
+                                                                     "C");          // process = 'C' which is "Creation"
+        step->setVolumeInfo(BnextVolName.data(), BnextVolIndex, BnextMat);
+        r->addStep(step);
+    }
     else
     {
         //TrackID ParentTrackID ParticleName   X Y Z Time E iMat VolName VolIndex
@@ -226,7 +274,7 @@ AParticleTrackingRecord * ATrackingDataImporter::createAndInitParticleTrackingRe
 int ATrackingDataImporter::getNewTrackIndex() const
 {
     if (bBinaryInput)
-        return 0; // ***
+        return BtrackId;
     else
         return inputSL.at(0).toInt();
 }
@@ -234,7 +282,18 @@ int ATrackingDataImporter::getNewTrackIndex() const
 void ATrackingDataImporter::updatePromisedSecondary(AParticleTrackingRecord *secrec)
 {
     if (bBinaryInput)
-        return; // ***
+    {
+        secrec->updatePromisedSecondary(BparticleName.data(),  // p_name
+                                        BkinEnergy,     // E
+                                        Bpos[0],        // X
+                                        Bpos[1],        // Y
+                                        Bpos[2],        // Z
+                                        Btime,          // time
+                                        BnextVolName.data(),   //VolName
+                                        BnextVolIndex,  //VolIndex
+                                        BnextMat        //MatIndex
+                                        );
+    }
     else
     {
         //TrackID ParentTrackID ParticleName   X Y Z Time E iMat VolName VolIndex
@@ -255,7 +314,37 @@ void ATrackingDataImporter::updatePromisedSecondary(AParticleTrackingRecord *sec
 void ATrackingDataImporter::readNewStep()
 {
     if (bBinaryInput)
-        return; // ***
+    {
+        // format for "T" processes:
+        // bin:   [FF or F8] ProcName0 X Y Z Time KinE DirectDepoE iMatTo VolNameTo0 VolIndexTo numSec [secondaries]
+        // for non-"T" process, iMatTo VolNameTo  VolIndexTo are absent
+        if (binHeader == char(0xF8) || binHeader == char(0xFF))  //transport or non-transport
+        {
+            readString(BprocessName);
+            inStream->read((char*)Bpos,           3*sizeof(double));
+            inStream->read((char*)&Btime,           sizeof(double));
+            inStream->read((char*)&BkinEnergy,      sizeof(double));
+            inStream->read((char*)&BdepoEnergy,     sizeof(double));
+            if (binHeader == char(0xF8))
+            {
+                inStream->read((char*)&BnextMat,      sizeof(int));
+                readString(BnextVolName);
+                inStream->read((char*)&BnextVolIndex, sizeof(int));
+            }
+            int numSec = 0;
+            inStream->read((char*)&numSec,            sizeof(int));
+            BsecVec.resize(numSec);
+            for (int i=0; i<numSec; i++)
+                inStream->read((char*)&BsecVec[i],    sizeof(int));
+
+            if (inStream->fail())
+            {
+                Error = "Unexpected format of a step in history/track binary file";
+                return;
+            }
+        }
+        else Error = "Unexpected header char for a step in history/track binary file";
+    }
     else
     {
         //qDebug() << "PS:"<<currentLine;
@@ -275,16 +364,26 @@ void ATrackingDataImporter::readNewStep()
             Error = "Bad format in step line";
             return;
         }
+        if (inputSL.first() == "T" && inputSL.size() < 10)
+        {
+            Error = "Bad format in tracking line (transportation step)";
+            return;
+        }
     }
 }
 
 void ATrackingDataImporter::addTrackStep()
 {
+    // skip Transportation step (escape out of world is marked with "O")
+
     if (bBinaryInput)
-        return; // ***
+    {
+        if (binHeader == char(0xFF))
+            CurrentTrack->Nodes << TrackNodeStruct(Bpos[0], Bpos[1], Bpos[2]);  // need time?
+    }
     else
     {
-        if (inputSL.at(0) != "T") // skip Transportation (escape out of world is marked with "O")
+        if (inputSL.at(0) != "T")
         {
             //qDebug() << "  Adding node";
             // ProcName X Y Z Time KinE DirectDepoE [secondaries]
@@ -296,71 +395,124 @@ void ATrackingDataImporter::addTrackStep()
 
 void ATrackingDataImporter::addHistoryStep()
 {
+    ATrackingStepData * step = ( isTransportationStep() ? createHistoryTransportationStep()
+                                                        : createHistoryStep() );
+    CurrentParticleRecord->addStep(step);
+
+    readSecondaries();
+    for (const int & index : BsecVec)
+    {
+        if (PromisedSecondaries.contains(index))
+        {
+            Error = QString("Error: secondary with index %1 was already promised").arg(index);
+            return;
+        }
+        AParticleTrackingRecord * sr = AParticleTrackingRecord::create(); //empty!
+        step->Secondaries.push_back(CurrentParticleRecord->countSecondaries());
+        CurrentParticleRecord->addSecondary(sr);
+        PromisedSecondaries.insert(index, sr);
+    }
+}
+
+ATrackingStepData *ATrackingDataImporter::createHistoryTransportationStep() const
+{
+    ATransportationStepData * step;
+
     if (bBinaryInput)
-        return; // ***
+    {
+        step = new ATransportationStepData(Bpos[0],         // X
+                                           Bpos[1],         // Y
+                                           Bpos[2],         // Z
+                                           Btime,           // time
+                                           BkinEnergy,      // energy
+                                           BdepoEnergy,     // depoE
+                                           BprocessName.data());   // pr
+
+        step->setVolumeInfo(BnextVolName.data(), BnextVolIndex, BnextMat);
+    }
     else
     {
-        const QString & Process = inputSL.at(0);
-        ATrackingStepData * step;
-        int secIndex;
+        // ProcName X Y Z Time KinE DirectDepoE iMatTo VolNameTo VolIndexTo [secondaries]
+        //     0    1 2 3   4    5      6          7       8           9         ...
 
-        if (Process == "T")
-        {
-            // format for "T" processes:
-            // ProcName X Y Z Time KinE DirectDepoE iMatTo VolNameTo VolIndexTo [secondaries]
-            //     0    1 2 3   4    5      6          7       8           9             ...
-            // not that if energy depo is present on T step, it is in the previous volume!
+        step = new ATransportationStepData(inputSL.at(1).toFloat(), // X
+                                           inputSL.at(2).toFloat(), // Y
+                                           inputSL.at(3).toFloat(), // Z
+                                           inputSL.at(4).toFloat(), // time
+                                           inputSL.at(5).toFloat(), // energy
+                                           inputSL.at(6).toFloat(), // depoE
+                                           inputSL.at(0));          // pr
 
-            if (inputSL.size() < 10)
-            {
-                Error = "Bad format in tracking line (transportation step)";
-                return;
-            }
+        step->setVolumeInfo(inputSL.at(8), inputSL.at(9).toInt(), inputSL.at(7).toInt());
+    }
 
-            step = new ATransportationStepData(inputSL.at(1).toFloat(), // X
-                                               inputSL.at(2).toFloat(), // Y
-                                               inputSL.at(3).toFloat(), // Z
-                                               inputSL.at(4).toFloat(), // time
-                                               inputSL.at(5).toFloat(), // energy
-                                               inputSL.at(6).toFloat(), // depoE
-                                               inputSL.at(0));          // pr
-            (static_cast<ATransportationStepData*>(step))->setVolumeInfo(inputSL.at(8), inputSL.at(9).toInt(), inputSL.at(7).toInt());
-            secIndex = 10;
-        }
-        else
-        {
-            // format for all other processes:
-            // ProcName X Y Z Time KinE DirectDepoE [secondaries]
-            //     0    1 2 3   4    5      6           ...
+    return step;
+}
 
-            step = new ATrackingStepData(inputSL.at(1).toFloat(), // X
-                                         inputSL.at(2).toFloat(), // Y
-                                         inputSL.at(3).toFloat(), // Z
-                                         inputSL.at(4).toFloat(), // time
-                                         inputSL.at(5).toFloat(), // energy
-                                         inputSL.at(6).toFloat(), // depoE
-                                         inputSL.at(0));          // pr
-            secIndex = 7;
-        }
+ATrackingStepData * ATrackingDataImporter::createHistoryStep() const
+{
+    ATrackingStepData * step;
 
-        CurrentParticleRecord->addStep(step);
+    if (bBinaryInput)
+    {
+        step = new ATrackingStepData(Bpos[0],         // X
+                                     Bpos[1],         // Y
+                                     Bpos[2],         // Z
+                                     Btime,           // time
+                                     BkinEnergy,      // energy
+                                     BdepoEnergy,     // depoE
+                                     BprocessName.data());   // pr
+    }
+    else
+    {
+        // ProcName X Y Z Time KinE DirectDepoE [secondaries]
+        //     0    1 2 3   4    5      6           ...
 
-        if (inputSL.size() > secIndex)
-        {
-            for (int i = secIndex; i < inputSL.size(); i++)
-            {
-                int index = inputSL.at(i).toInt();
-                if (PromisedSecondaries.contains(index))
-                {
-                    Error = QString("Error: secondary with index %1 was already promised").arg(index);
-                    return;
-                }
-                AParticleTrackingRecord * sr = AParticleTrackingRecord::create(); //empty!
-                step->Secondaries.push_back(CurrentParticleRecord->countSecondaries());
-                CurrentParticleRecord->addSecondary(sr);
-                PromisedSecondaries.insert(index, sr);
-            }
-        }
+        step = new ATrackingStepData(inputSL.at(1).toFloat(), // X
+                                     inputSL.at(2).toFloat(), // Y
+                                     inputSL.at(3).toFloat(), // Z
+                                     inputSL.at(4).toFloat(), // time
+                                     inputSL.at(5).toFloat(), // energy
+                                     inputSL.at(6).toFloat(), // depoE
+                                     inputSL.at(0));          // pr
+    }
+
+    return step;
+}
+
+void ATrackingDataImporter::readSecondaries()
+{
+    if (bBinaryInput)
+    {
+        //already done;
+    }
+    else
+    {
+        BsecVec.clear();
+        const int secIndex = (inputSL.at(0) == "T" ? 10 : 7);
+        for (int i = secIndex; i < inputSL.size(); i++)
+            BsecVec << inputSL.at(i).toInt();
+    }
+}
+
+bool ATrackingDataImporter::isTransportationStep() const
+{
+    if (bBinaryInput)
+        return (binHeader == char(0xF8));
+    else
+    {
+        return (inputSL.at(0) == "T");
+    }
+}
+
+void ATrackingDataImporter::readString(std::string & str) const
+{
+    char ch;
+    str.clear();
+    while (*inStream >> ch)
+    {
+        if (ch == char(0x00)) break;
+        str += ch;
     }
 }
 

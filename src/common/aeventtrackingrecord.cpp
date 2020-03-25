@@ -15,7 +15,7 @@ ATrackingStepData::ATrackingStepData(float *position, float time, float energy, 
     for (int i=0; i<3; i++) Position[i] = position[i];
 }
 
-ATrackingStepData::ATrackingStepData(double *position, double time, double energy, double depositedEnergy, const QString &process) :
+ATrackingStepData::ATrackingStepData(const double *position, double time, double energy, double depositedEnergy, const QString &process) :
     Time(time), Energy(energy), DepositedEnergy(depositedEnergy), Process(process)
 {
     for (int i=0; i<3; i++) Position[i] = position[i];
@@ -43,7 +43,7 @@ void ATrackingStepData::logToString(QString & str, int offset) const
 ATransportationStepData::ATransportationStepData(float x, float y, float z, float time, float energy, float depositedEnergy, const QString &process) :
     ATrackingStepData(x,y,z, time, energy, depositedEnergy, process) {}
 
-ATransportationStepData::ATransportationStepData(double *position, double time, double energy, double depositedEnergy, const QString &process) :
+ATransportationStepData::ATransportationStepData(const double *position, double time, double energy, double depositedEnergy, const QString &process) :
     ATrackingStepData(position, time, energy, depositedEnergy, process) {}
 
 void ATransportationStepData::setVolumeInfo(const QString & volName, int volIndex, int matIndex)

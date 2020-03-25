@@ -5,6 +5,7 @@
 #include <QString>
 #include <QStringList>
 #include <QMap>
+#include <QVector>
 
 class AEventTrackingRecord;
 class AParticleTrackingRecord;
@@ -12,6 +13,7 @@ class TrackHolderClass;
 class ATrackBuildOptions;
 class QFile;
 class QTextStream;
+class ATrackingStepData;
 
 class ATrackingDataImporter
 {
@@ -35,7 +37,7 @@ private:
 
     AEventTrackingRecord * CurrentEventRecord = nullptr;      // history of the current event
     AParticleTrackingRecord * CurrentParticleRecord = nullptr;  // current particle - can be primary or secondary
-    QMap<int, AParticleTrackingRecord *> PromisedSecondaries;   // <index in file, secondary AEventTrackingRecord *>
+    QMap<int, AParticleTrackingRecord *> PromisedSecondaries;   // <index in file, secondary AEventTrackingRecord *>  // *** avoid using QMap - slow!
     TrackHolderClass * CurrentTrack = nullptr;
 
     enum Status {ExpectingEvent, ExpectingTrack, ExpectingStep, TrackOngoing};
@@ -53,7 +55,21 @@ private:
 
     //resources for binary input
     std::ifstream * inStream = nullptr;
-    int           G4NextEventId = -1;
+    char          binHeader;
+    int           BtrackId;
+    int           BparentTrackId;
+    std::string   BparticleName = "______________________________________________________"; //reserve long
+    double        Bpos[3];
+    double        Btime;
+    double        BkinEnergy;
+    int           BnextMat;
+    std::string   BnextVolName  = "______________________________________________________"; //reserve long
+    int           BnextVolIndex;
+    std::string   BprocessName  = "______________________________________________________"; //reserve long
+    double        BdepoEnergy;
+    QVector<int>  BsecVec;
+
+    //to speedup, maybe add QString fields to mirrow std::strings appear?
 
 private:
     bool isEndReached() const;
@@ -80,6 +96,11 @@ private:
     void readNewStep();
     void addTrackStep();
     void addHistoryStep();
+    bool isTransportationStep() const;
+    ATrackingStepData * createHistoryTransportationStep() const;
+    ATrackingStepData * createHistoryStep() const;
+    void readSecondaries();
+    void readString(std::string & str) const;
 
 };
 

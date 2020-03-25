@@ -55,6 +55,9 @@ private:
 
 private:
     bool isEndReached() const;
+    void readBuffer();
+    bool isNewEvent();
+    bool isNewTrack();
 
     void processNewEvent();
     void processNewTrack();

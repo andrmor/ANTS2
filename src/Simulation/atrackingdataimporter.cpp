@@ -39,12 +39,12 @@ const QString ATrackingDataImporter::processFile(const QString & FileName, int S
 
     while (!isEndReached())
     {
-        currentLine = inTextStream->readLine();
-        if (currentLine.isEmpty()) continue;
+        readBuffer();
+        if (!bBinaryInput && currentLine.isEmpty()) continue;
 
-        if (currentLine.startsWith('#')) processNewEvent();
-        else if (currentLine.startsWith('>')) processNewTrack();
-        else processNewStep();
+        if      (isNewEvent()) processNewEvent();
+        else if (isNewTrack()) processNewTrack();
+        else                   processNewStep();
 
         if (!Error.isEmpty())
         {
@@ -72,16 +72,50 @@ const QString ATrackingDataImporter::processFile(const QString & FileName, int S
 bool ATrackingDataImporter::isEndReached() const
 {
     if (bBinaryInput)
-        return true;
+        return inStream->eof();
     else
         return inTextStream->atEnd();
+}
+
+void ATrackingDataImporter::readBuffer()
+{
+    if (bBinaryInput)
+        ; // ***
+    else
+        currentLine = inTextStream->readLine();
+}
+
+bool ATrackingDataImporter::isNewEvent()
+{
+    if (!Error.isEmpty()) return false;
+
+    if (bBinaryInput)
+        return false; // ***
+    else
+        return currentLine.startsWith('#');
+}
+
+bool ATrackingDataImporter::isNewTrack()
+{
+    if (!Error.isEmpty()) return false;
+
+    if (bBinaryInput)
+        return false; // ***
+    else
+        return currentLine.startsWith('>');
 }
 
 void ATrackingDataImporter::prepareImportResources(const QString & FileName)
 {
     if (bBinaryInput)
     {
+        inStream = new std::ifstream(FileName.toLatin1().data(), std::ios::in | std::ios::binary);
 
+        if (!inStream->is_open())
+        {
+            Error = "Failed to open file " + FileName;
+            return;
+        }
     }
     else
     {

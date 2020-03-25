@@ -9,6 +9,8 @@ class AEventTrackingRecord;
 class AParticleTrackingRecord;
 class TrackHolderClass;
 class ATrackBuildOptions;
+class QFile;
+class QTextStream;
 
 class ATrackingDataImporter
 {
@@ -18,17 +20,18 @@ public:
                           std::vector<AEventTrackingRecord*> * History,
                           std::vector<TrackHolderClass *> * Tracks,
                           int maxTracks);
+    ~ATrackingDataImporter();
 
-    const QString processFile(const QString & FileName, int StartEvent);
+    const QString processFile(const QString & FileName, int StartEvent, bool bBinary = false);
 
 private:
     const ATrackBuildOptions & TrackBuildOptions;
     const QStringList ParticleNames;
-    std::vector<AEventTrackingRecord *> * History = nullptr; // if 0 - do not collect history
-    std::vector<TrackHolderClass *> * Tracks = nullptr;      // if 0 - do not extract tracks
+    std::vector<AEventTrackingRecord *> * History = nullptr; // if nullptr - do not collect history
+    std::vector<TrackHolderClass *> * Tracks = nullptr;      // if nullptr - do not extract tracks
+    bool bBinaryInput = false;
     int MaxTracks = 1000;
 
-    QString currentLine;
     AEventTrackingRecord * CurrentEventRecord = nullptr;      // history of the current event
     AParticleTrackingRecord * CurrentParticleRecord = nullptr;  // current particle - can be primary or secondary
     QMap<int, AParticleTrackingRecord *> PromisedSecondaries;   // <index in file, secondary AEventTrackingRecord *>
@@ -41,11 +44,26 @@ private:
 
     QString Error;
 
+    //resources for ascii input
+    QFile *       inTextFile = nullptr;
+    QTextStream * inTextStream = nullptr;
+    QString       currentLine;
+
+    //resources for binary input
+    std::ifstream * inStream = nullptr;
+    int           G4NextEventId = -1;
+
+private:
+    bool isEndReached() const;
+
     void processNewEvent();
     void processNewTrack();
     void processNewStep();
 
     bool isErrorInPromises();
+
+    void prepareImportResources(const QString & FileName);
+    void clearImportResources();
 
 };
 

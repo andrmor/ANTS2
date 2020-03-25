@@ -69,19 +69,18 @@ private:
     void releaseInputResources();
 
     //local objects
-    //PrimaryParticleTracker* ParticleTracker = 0;
-    AParticleTracker* ParticleTracker = 0;
-    S1_Generator* S1generator = 0;
-    S2_Generator* S2generator = 0;
-    AParticleGun* ParticleGun = 0;
+    AParticleTracker* ParticleTracker = nullptr;
+    S1_Generator* S1generator = nullptr;
+    S2_Generator* S2generator = nullptr;
+    AParticleGun* ParticleGun = nullptr;
     QVector<AEnergyDepositionCell*> EnergyVector;
     QVector<AParticleRecord*> ParticleStack;
 
-    //for ascii input
+    //resources for ascii input
     QFile *       inTextFile = nullptr;
     QTextStream * inTextStream = nullptr;
     QString       G4DepoLine;
-    //for binary input
+    //resources for binary input
     std::ifstream * inStream = nullptr;
     int           G4NextEventId = -1;
 

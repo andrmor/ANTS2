@@ -7,6 +7,8 @@
 #include <QTextStream>
 #include <QDebug>
 
+#include <fstream>
+
 #include "TGeoManager.h"
 #include "TGeoNode.h"
 
@@ -15,43 +17,89 @@ ATrackingDataImporter::ATrackingDataImporter(const ATrackBuildOptions & TrackBui
                                              std::vector<AEventTrackingRecord *> * History,
                                              std::vector<TrackHolderClass *> * Tracks,
                                              int maxTracks) :
-TrackBuildOptions(TrackBuildOptions), ParticleNames(ParticleNames), History(History), Tracks(Tracks), MaxTracks(maxTracks) {}
+    TrackBuildOptions(TrackBuildOptions), ParticleNames(ParticleNames), History(History), Tracks(Tracks), MaxTracks(maxTracks) {}
 
-const QString ATrackingDataImporter::processFile(const QString &FileName, int StartEvent)
+ATrackingDataImporter::~ATrackingDataImporter()
 {
+    clearImportResources();
+}
+
+const QString ATrackingDataImporter::processFile(const QString & FileName, int StartEvent, bool bBinary)
+{
+    bBinaryInput = bBinary;
     Error.clear();
 
-    QFile file( FileName );
-    if(!file.open(QIODevice::ReadOnly | QFile::Text))
-        return "Failed to open file " + FileName;
+    prepareImportResources(FileName);
+    if (!Error.isEmpty()) return Error;
 
     ExpectedEvent = StartEvent;
     CurrentStatus = ExpectingEvent;
     CurrentEventRecord = AEventTrackingRecord::create();
     CurrentTrack = nullptr;
 
-    QTextStream in(&file);
-    while (!in.atEnd())
+    while (!isEndReached())
     {
-        currentLine = in.readLine();
+        currentLine = inTextStream->readLine();
         if (currentLine.isEmpty()) continue;
 
         if (currentLine.startsWith('#')) processNewEvent();
         else if (currentLine.startsWith('>')) processNewTrack();
         else processNewStep();
 
-        if (!Error.isEmpty()) return Error;
+        if (!Error.isEmpty())
+        {
+            clearImportResources();
+            return Error;
+        }
     }
 
     if (Tracks && CurrentTrack)
     {
         //qDebug() << "Sending last track - file at end";
-        Tracks->push_back( CurrentTrack );
+        Tracks->push_back(CurrentTrack);
         CurrentTrack = nullptr;
     }
-    if (isErrorInPromises()) return Error;
+
+    if (isErrorInPromises())
+    {
+        clearImportResources();
+        return Error;
+    }
 
     return "";
+}
+
+bool ATrackingDataImporter::isEndReached() const
+{
+    if (bBinaryInput)
+        return true;
+    else
+        return inTextStream->atEnd();
+}
+
+void ATrackingDataImporter::prepareImportResources(const QString & FileName)
+{
+    if (bBinaryInput)
+    {
+
+    }
+    else
+    {
+        inTextFile = new QFile(FileName);
+        if (!inTextFile->open(QIODevice::ReadOnly | QFile::Text))
+        {
+            Error = "Failed to open file " + FileName;
+            return;
+        }
+        inTextStream = new QTextStream(inTextFile);
+    }
+}
+
+void ATrackingDataImporter::clearImportResources()
+{
+    delete inTextStream; inTextStream = nullptr;
+    delete inTextFile;   inTextFile = nullptr;
+    delete inStream;     inStream = nullptr;
 }
 
 void ATrackingDataImporter::processNewEvent()

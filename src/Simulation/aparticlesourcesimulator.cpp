@@ -617,7 +617,7 @@ bool AParticleSourceSimulator::geant4TrackAndProcess()
     releaseInputResources();
     if (!bOK) return false;
 
-    //read tracks
+    //read history/tracks
     if (simSettings.TrackBuildOptions.bBuildParticleTracks || simSettings.LogsStatOptions.bParticleTransportLog)
     {
         ATrackingDataImporter ti(simSettings.TrackBuildOptions,
@@ -625,8 +625,8 @@ bool AParticleSourceSimulator::geant4TrackAndProcess()
                                  (simSettings.LogsStatOptions.bParticleTransportLog ? &TrackingHistory : nullptr),
                                  (simSettings.TrackBuildOptions.bBuildParticleTracks ? &tracks : nullptr),
                                  maxParticleTracks);
-        QString TrackingFileName = simSettings.G4SimSet.getTracksFileName(ID);
-        ErrorString = ti.processFile(TrackingFileName, eventBegin);
+        const QString TrackingFileName = simSettings.G4SimSet.getTracksFileName(ID);
+        ErrorString = ti.processFile(TrackingFileName, eventBegin, simSettings.G4SimSet.BinaryOutput);
         if (!ErrorString.isEmpty()) return false;
     }
 

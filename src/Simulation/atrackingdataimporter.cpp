@@ -155,6 +155,103 @@ int ATrackingDataImporter::extractEventId()
     }
 }
 
+void ATrackingDataImporter::readNewTrack()
+{
+    if (bBinaryInput)
+        return; // ***
+    else
+    {
+        //qDebug() << "NT:"<<currentLine;
+        currentLine.remove(0, 1);
+        //TrackID ParentTrackID ParticleName   X Y Z Time E iMat VolName VolIndex
+        //   0           1           2         3 4 5   6  7   8     9       10
+        inputSL = currentLine.split(' ', QString::SkipEmptyParts);
+        if (inputSL.size() != 11)
+            Error = "Bad format in new track line";
+    }
+}
+
+void ATrackingDataImporter::initNewTrackRecord()
+{
+    int ParticleID;
+
+    if (bBinaryInput)
+        return; // ***
+    else
+    {
+        ParticleID = ParticleNames.indexOf(inputSL.at(2));
+        CurrentTrack->Nodes.append( TrackNodeStruct(inputSL.at(3).toDouble(), inputSL.at(4).toDouble(), inputSL.at(5).toDouble()) ); //need time?
+    }
+
+    TrackBuildOptions.applyToParticleTrack(CurrentTrack, ParticleID);
+}
+
+bool ATrackingDataImporter::isPrimaryRecord() const
+{
+    if (bBinaryInput)
+        return true; // ***
+    else
+    {
+        int parTrIndex = inputSL.at(1).toInt();
+        return (parTrIndex == 0);
+    }
+}
+
+AParticleTrackingRecord * ATrackingDataImporter::createAndInitParticleTrackingRecord() const
+{
+    AParticleTrackingRecord * r = nullptr;
+
+    if (bBinaryInput)
+        ; // ***
+    else
+    {
+        //TrackID ParentTrackID ParticleName   X Y Z Time E iMat VolName VolIndex
+        //   0           1           2         3 4 5   6  7   8     9       10
+        r = AParticleTrackingRecord::create(inputSL.at(2));
+
+        ATransportationStepData * step = new ATransportationStepData(inputSL.at(3).toFloat(), // X
+                                                                     inputSL.at(4).toFloat(), // Y
+                                                                     inputSL.at(5).toFloat(), // Z
+                                                                     inputSL.at(6).toFloat(), // time
+                                                                     inputSL.at(7).toFloat(), // E
+                                                                     0,                       // depoE
+                                                                     "C");                    // process = 'C' which is "Creation"
+        step->setVolumeInfo(inputSL.at(9), inputSL.at(10).toInt(), inputSL.at(8).toInt());
+        r->addStep(step);
+    }
+
+    return r;
+}
+
+int ATrackingDataImporter::getNewTrackIndex() const
+{
+    if (bBinaryInput)
+        return 0; // ***
+    else
+        return inputSL.at(0).toInt();
+}
+
+void ATrackingDataImporter::updatePromisedSecondary(AParticleTrackingRecord *secrec)
+{
+    if (bBinaryInput)
+        return; // ***
+    else
+    {
+        //TrackID ParentTrackID ParticleName   X Y Z Time E iMat VolName VolIndex
+        //   0           1           2         3 4 5   6  7   8     9       10
+        secrec->updatePromisedSecondary(inputSL.at(2),            // p_name
+                                        inputSL.at(7).toFloat(),  // E
+                                        inputSL.at(3).toFloat(),  // X
+                                        inputSL.at(4).toFloat(),  // Y
+                                        inputSL.at(5).toFloat(),  // Z
+                                        inputSL.at(6).toFloat(),  // time
+                                        inputSL.at(9),            //VolName
+                                        inputSL.at(10).toInt(),   //VolIndex
+                                        inputSL.at(8).toInt()     //MatIndex
+                                        );
+    }
+}
+
 void ATrackingDataImporter::processNewEvent()
 {
     if (!Error.isEmpty()) return;
@@ -193,16 +290,7 @@ void ATrackingDataImporter::processNewEvent()
 
 void ATrackingDataImporter::processNewTrack()
 {
-    //qDebug() << "NT:"<<currentLine;
-    currentLine.remove(0, 1);
-    //TrackID ParentTrackID ParticleId X Y Z Time E iMat VolName VolIndex
-    //   0           1           2     3 4 5   6  7   8     9       10
-    QStringList f = currentLine.split(' ', QString::SkipEmptyParts);
-    if (f.size() != 11)
-    {
-        Error = "Bad format in new track line";
-        return;
-    }
+    if (!Error.isEmpty()) return;
 
     if (CurrentStatus == ExpectingEvent)
     {
@@ -215,6 +303,9 @@ void ATrackingDataImporter::processNewTrack()
         return;
     }
 
+    readNewTrack();
+    if (!Error.isEmpty()) return;
+
     if (Tracks)
     {
         if (CurrentTrack)
@@ -223,7 +314,6 @@ void ATrackingDataImporter::processNewTrack()
             Tracks->push_back( CurrentTrack );
             CurrentTrack = nullptr;
         }
-
         if ((int)Tracks->size() > MaxTracks)
         {
             //qDebug() << "Limit reached, not reading new tracks anymore";
@@ -231,12 +321,10 @@ void ATrackingDataImporter::processNewTrack()
         }
         else
         {
-            //qDebug() << "  Creating new track and its firt node";
+            //qDebug() << "  Creating new track and its first node";
             CurrentTrack = new TrackHolderClass();
             CurrentTrack->UserIndex = 22;
-            TrackBuildOptions.applyToParticleTrack( CurrentTrack, ParticleNames.indexOf(f.at(2)) );
-
-            CurrentTrack->Nodes.append( TrackNodeStruct(f.at(3).toDouble(), f.at(4).toDouble(), f.at(5).toDouble()) ); //need time?
+            initNewTrackRecord();
         }
     }
 
@@ -248,51 +336,29 @@ void ATrackingDataImporter::processNewTrack()
             return;
         }
 
-        // if parent track == 0 create new primary record in this event
-        // else pointer to empty an record should be in the list of promised secondaries -> update the record
-        int trIndex = f.at(0).toInt();
-        int parTrIndex = f.at(1).toInt();
-        if (parTrIndex == 0)
+        // if primary (parent track == 0), create a new primary record in this event
+        // else a pointer to empty record should be in the list of promised secondaries -> update the record
+        if (isPrimaryRecord())
         {
-            AParticleTrackingRecord * r = AParticleTrackingRecord::create(f.at(2)); // p_name
-
-            //float x, float y, float z, float time, float energy, float depositedEnergy, const QString & process
-            ATransportationStepData * step = new ATransportationStepData(f.at(3).toFloat(), // X
-                                                                         f.at(4).toFloat(), // Y
-                                                                         f.at(5).toFloat(), // Z
-                                                                         f.at(6).toFloat(), // time
-                                                                         f.at(7).toFloat(), // E
-                                                                         0,                 // depoE
-                                                                         "C");              // pr = 'C' which is "Creation"
-            step->setVolumeInfo(f.at(9), f.at(10).toInt(), f.at(8).toInt());
-
-            r->addStep(step);
+            AParticleTrackingRecord * r = createAndInitParticleTrackingRecord();
             CurrentEventRecord->addPrimaryRecord(r);
             CurrentParticleRecord = r;
         }
         else
         {
+            int trIndex = getNewTrackIndex();
             AParticleTrackingRecord * secrec = PromisedSecondaries[trIndex];
             if (!secrec)
             {
                 Error = "Promised secondary not found!";
                 return;
             }
-            secrec->updatePromisedSecondary(f.at(2),            // p_name
-                                            f.at(7).toFloat(),  // E
-                                            f.at(3).toFloat(),  // X
-                                            f.at(4).toFloat(),  // Y
-                                            f.at(5).toFloat(),  // Z
-                                            f.at(6).toFloat(),  // time
-                                            f.at(9),            //VolName
-                                            f.at(10).toInt(),   //VolIndex
-                                            f.at(8).toInt()     //MatIndex
-                                            );
+
+            updatePromisedSecondary(secrec);
             CurrentParticleRecord = secrec;
             PromisedSecondaries.remove(trIndex);
         }
     }
-
     CurrentStatus = ExpectingStep;
 }
 

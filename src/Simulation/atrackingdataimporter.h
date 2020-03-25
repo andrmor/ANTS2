@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <QString>
+#include <QStringList>
 #include <QMap>
 
 class AEventTrackingRecord;
@@ -48,6 +49,7 @@ private:
     QFile *       inTextFile = nullptr;
     QTextStream * inTextStream = nullptr;
     QString       currentLine;
+    QStringList   inputSL;
 
     //resources for binary input
     std::ifstream * inStream = nullptr;
@@ -68,7 +70,13 @@ private:
     void prepareImportResources(const QString & FileName);
     void clearImportResources();
 
-    int extractEventId();
+    int  extractEventId();
+    void readNewTrack();
+    void initNewTrackRecord();
+    bool isPrimaryRecord() const;
+    AParticleTrackingRecord * createAndInitParticleTrackingRecord() const;
+    int  getNewTrackIndex() const;
+    void updatePromisedSecondary(AParticleTrackingRecord * secrec);
 
 };
 

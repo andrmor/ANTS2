@@ -138,7 +138,7 @@ const QString AG4SimulationSettings::getMonitorDataFileName(int iThreadNum) cons
 
 const QString AG4SimulationSettings::getExitParticleFileName(int iThreadNum) const
 {
-    return getPath() + QString("exits-%1.json").arg(iThreadNum);
+    return getPath() + QString("exits-%1.dat").arg(iThreadNum);
 }
 
 const QString AG4SimulationSettings::getGdmlFileName() const

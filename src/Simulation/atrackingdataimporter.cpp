@@ -40,7 +40,14 @@ const QString ATrackingDataImporter::processFile(const QString & FileName, int S
     while (!isEndReached())
     {
         readBuffer();
-        if (!bBinaryInput && currentLine.isEmpty()) continue;
+        if (bBinaryInput)
+        {
+            if (inStream->eof()) break;
+        }
+        else
+        {
+            if (currentLine.isEmpty()) continue;
+        }
 
         if      (isNewEvent()) processNewEvent();
         else if (isNewTrack()) processNewTrack();
@@ -83,7 +90,7 @@ void ATrackingDataImporter::readBuffer()
     {
         // EE - new event, F0 - new track, F8 - trasnportation step, FF - non-transport step
         *inStream >> binHeader;
-
+        if (inStream->eof()) return; //this is the proper way to reach end of file
         if (inStream->fail())
             Error = "Error in header char input";
     }
@@ -98,7 +105,6 @@ bool ATrackingDataImporter::isNewEvent()
     if (bBinaryInput)
     {
         // EE - new event, F0 - new track, F8 - trasnportation step, FF - non-transport step
-        qDebug() << "New event?" << (binHeader == (char)0xEE);
         return (binHeader == char(0xEE));
     }
     else
@@ -112,7 +118,6 @@ bool ATrackingDataImporter::isNewTrack()
     if (bBinaryInput)
     {
         // EE - new event, F0 - new track, F8 - trasnportation step, FF - non-transport step
-        qDebug() << "New track?" << (binHeader == (char)0xF0);
         return (binHeader == char(0xF0));
     }
     else
@@ -157,7 +162,7 @@ int ATrackingDataImporter::extractEventId()
         int evId;
         inStream->read((char*)&evId, sizeof(int));
         if (inStream->fail()) Error = "Error in header char input";
-        qDebug() << "Event id:" << evId << "  error?" << !Error.isEmpty();
+        //qDebug() << "Event id:" << evId << "  error?" << !Error.isEmpty();
         return evId;
     }
     else
@@ -338,10 +343,11 @@ void ATrackingDataImporter::readNewStep()
                 inStream->read((char*)&BsecVec[i],    sizeof(int));
 
             if (inStream->fail())
-            {
-                Error = "Unexpected format of a step in history/track binary file";
-                return;
-            }
+                if (!inStream->eof())
+                {
+                    Error = "Unexpected format of a step in history/track binary file";
+                    return;
+                }
         }
         else Error = "Unexpected header char for a step in history/track binary file";
     }

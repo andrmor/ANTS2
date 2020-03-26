@@ -637,6 +637,17 @@ void ASimulationManager::generateG4antsConfigCommon(QJsonObject & json, int Thre
     json["BinaryOutput"] = G4SimSet.BinaryOutput;
     json["Precision"]    = G4SimSet.Precision;
 
+    QString exitParticleFN  = G4SimSet.getExitParticleFileName(ThreadId);
+    QJsonObject jsExit;
+        jsExit["Enabled" ]      = G4SimSet.SaveParticles;
+        jsExit["VolumeName"]    = G4SimSet.SP_VolumeName;
+        jsExit["FileName"]      = exitParticleFN;
+        jsExit["UseTimeWindow"] = G4SimSet.SP_UseTimeWindow;
+        jsExit["TimeFrom"]      = G4SimSet.SP_TimeFrom;
+        jsExit["TimeTo"]        = G4SimSet.SP_TimeTo;
+        jsExit["StopTrack"]     = G4SimSet.SP_StopTrack;
+    json["SaveExitParticles"] = jsExit;
+
     QJsonArray arMon;
     const QVector<const AGeoObject*> & MonitorsRecords = Detector.Sandwich->MonitorsRecords;
     for (int iMon = 0; iMon <  MonitorsRecords.size(); iMon++)

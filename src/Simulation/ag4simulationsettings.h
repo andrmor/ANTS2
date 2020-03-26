@@ -21,6 +21,14 @@ public:
     bool                  BinaryOutput = false;
     int                   Precision = 6;
 
+    bool                  SaveParticles = false;
+    QString               SP_VolumeName;
+    QString               SP_FileName;
+    bool                  SP_UseTimeWindow;
+    double                SP_TimeFrom = 0;
+    double                SP_TimeTo   = 1.0e6;
+    bool                  SP_StopTrack = true;
+
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);
 
@@ -30,6 +38,7 @@ public:
     const QString getConfigFileName(int iThreadNum) const;
     const QString getTracksFileName(int iThreadNum) const;
     const QString getMonitorDataFileName(int iThreadNum) const;
+    const QString getExitParticleFileName(int iThreadNum) const;
     const QString getGdmlFileName() const;
 
     bool  checkPathValid() const;

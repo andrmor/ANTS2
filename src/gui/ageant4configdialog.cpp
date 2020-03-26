@@ -5,6 +5,8 @@
 
 #include <QListWidget>
 #include <QDebug>
+#include <QCheckBox>
+#include <QLineEdit>
 
 AGeant4ConfigDialog::AGeant4ConfigDialog(AG4SimulationSettings & G4SimSet, QWidget *parent) :
     QDialog(parent), G4SimSet(G4SimSet),
@@ -29,6 +31,14 @@ AGeant4ConfigDialog::AGeant4ConfigDialog(AG4SimulationSettings & G4SimSet, QWidg
 
     ui->cbBinaryOutput->setChecked(G4SimSet.BinaryOutput);
     ui->sbPrecision->setValue(G4SimSet.Precision);
+
+    ui->cbSaveParticles->setChecked(G4SimSet.SaveParticles);
+    ui->leExitVolumeName->setText(G4SimSet.SP_VolumeName);
+    ui->leParticlesFileName->setText(G4SimSet.SP_FileName);
+    ui->cbUseTimeWindow->setChecked(G4SimSet.SP_UseTimeWindow);
+    ui->ledTimeFrom->setText(QString::number(G4SimSet.SP_TimeFrom));
+    ui->ledTimeTo->setText(QString::number(G4SimSet.SP_TimeTo));
+    ui->cbStopTrackExiting->setChecked(G4SimSet.SP_StopTrack);
 }
 
 AGeant4ConfigDialog::~AGeant4ConfigDialog()
@@ -72,8 +82,16 @@ void AGeant4ConfigDialog::on_pbAccept_clicked()
         G4SimSet.StepLimits[vol] = step;
     }
 
-    G4SimSet.BinaryOutput      = ui->cbBinaryOutput->isChecked();
-    G4SimSet.Precision         = ui->sbPrecision->value();
+    G4SimSet.BinaryOutput = ui->cbBinaryOutput->isChecked();
+    G4SimSet.Precision    = ui->sbPrecision->value();
+
+    G4SimSet.SaveParticles    = ui->cbSaveParticles->isChecked();
+    G4SimSet.SP_VolumeName    = ui->leExitVolumeName->text();
+    G4SimSet.SP_FileName      = ui->leParticlesFileName->text();
+    G4SimSet.SP_UseTimeWindow = ui->cbUseTimeWindow->isChecked();
+    G4SimSet.SP_TimeFrom      = ui->ledTimeFrom->text().toDouble();
+    G4SimSet.SP_TimeTo        = ui->ledTimeTo->text().toDouble();
+    G4SimSet.SP_StopTrack     = ui->cbStopTrackExiting->isChecked();
 
     accept();
 }

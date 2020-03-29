@@ -137,6 +137,7 @@ private:
     void saveDepositionLog(const QString & dir) const;
     void saveG4depositionLog(const QString & dir) const;
     void saveA2depositionLog(const QString & dir) const;
+    void saveExitLog();
 };
 
 #endif // ASIMULATIONMANAGER_H

@@ -215,8 +215,6 @@ void ASimulationManager::onSimulationFinished()
 
     copyDataFromWorkers();
 
-    Runner->clearWorkers();
-
     if (fHardAborted)
         EventsDataHub.clear(); //data are not valid!
     else
@@ -226,10 +224,9 @@ void ASimulationManager::onSimulationFinished()
         EventsDataHub.purge1e10events(); //purging events with "true" positions x==1e10 && y==1e10
     }
 
-    if ( (LogsStatOptions.bParticleTransportLog && LogsStatOptions.bSaveParticleLog) ||
-         LogsStatOptions.bSaveDepositionLog)
+    //saving logs
+    if ( (LogsStatOptions.bParticleTransportLog && LogsStatOptions.bSaveParticleLog) || LogsStatOptions.bSaveDepositionLog)
     {
-        //saving logs
         const QString dir = makeLogDir();
         Detector.saveCurrentConfig(QString("%1/Config.json").arg(dir));
         if (LogsStatOptions.bParticleTransportLog && LogsStatOptions.bSaveParticleLog)
@@ -237,6 +234,10 @@ void ASimulationManager::onSimulationFinished()
         if (LogsStatOptions.bSaveDepositionLog)
             saveDepositionLog(dir);
     }
+    if (simSettings.G4SimSet.SaveParticles) saveExitLog();
+
+    Runner->clearWorkers();
+
 
     bGuardTrackingHistory = true;
     Detector.BuildDetector(true, true);  // <- still needed on Windows
@@ -560,6 +561,79 @@ void ASimulationManager::saveG4depositionLog(const QString &dir) const
 void ASimulationManager::saveA2depositionLog(const QString & ) const
 {
     qDebug() << "Not implemented yet!";
+}
+
+#include <iostream>
+#include <fstream>
+void ASimulationManager::saveExitLog()
+{
+    int numTreads = Runner->getWorkers().size();
+
+    if (simSettings.G4SimSet.BinaryOutput)
+    {
+        std::ofstream outStream;
+        outStream.open(simSettings.G4SimSet.SP_FileName.toLatin1().data(), std::ios::out | std::ios::binary);
+        if (!outStream.is_open())
+        {
+            qWarning() << "Cannot open" << simSettings.G4SimSet.SP_FileName << "to export exit particles";
+            return;
+        }
+
+        for (int iThread = 0; iThread < numTreads; iThread++)
+        {
+            const QString fileName = simSettings.G4SimSet.getExitParticleFileName(iThread);
+            std::ifstream inStream(fileName.toLatin1().data());
+            if (!inStream.is_open())
+            {
+                qWarning() << "Cannot open" << fileName << "with exit particles for thread #" << iThread;
+                return;
+            }
+
+            char ch;
+            while (inStream.get(ch)) //cannot use >> as it swallows all new line characters (e.g. 0x20)
+                outStream << ch;
+
+            inStream.close();
+        }
+
+        outStream.close();
+    }
+    else
+    {
+        QFile fOut(simSettings.G4SimSet.SP_FileName);
+
+        if (!fOut.open(QFile::Text | QFile::WriteOnly | QFile::Truncate))
+        {
+            qWarning() << "Cannot open" << simSettings.G4SimSet.SP_FileName << " file to save exit particles";
+            return;
+        }
+
+        QTextStream out(&fOut);
+
+        for (int iThread = 0; iThread < numTreads; iThread++)
+        {
+            const QString fileName = simSettings.G4SimSet.getExitParticleFileName(iThread);
+
+            QFile fIn(fileName);
+            if (!fIn.open(QIODevice::ReadOnly | QIODevice::Text))
+            {
+                qWarning() << "Cannot open" << fileName << "to import deposition log";
+                return;
+            }
+            QTextStream stream(&fIn);
+            QString line;
+            do
+            {
+                line = stream.readLine();
+                out << line << '\n';
+            }
+            while (!stream.atEnd());
+
+            fIn.close();
+        }
+
+        fOut.close();
+    }
 }
 
 void ASimulationManager::generateG4antsConfigCommon(QJsonObject & json, int ThreadId)

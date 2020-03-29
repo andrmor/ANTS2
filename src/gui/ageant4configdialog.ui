@@ -412,6 +412,9 @@ Respects the &quot;Binary output&quot; control</string>
         </item>
         <item>
          <widget class="QLineEdit" name="leExitVolumeName">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="maximumSize">
            <size>
             <width>200</width>
@@ -428,7 +431,11 @@ Respects the &quot;Binary output&quot; control</string>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="leParticlesFileName"/>
+         <widget class="QLineEdit" name="leParticlesFileName">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>
@@ -452,6 +459,9 @@ Respects the &quot;Binary output&quot; control</string>
         </item>
         <item>
          <widget class="QCheckBox" name="cbUseTimeWindow">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>within time range from</string>
           </property>
@@ -459,6 +469,9 @@ Respects the &quot;Binary output&quot; control</string>
         </item>
         <item>
          <widget class="QLineEdit" name="ledTimeFrom">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="minimumSize">
            <size>
             <width>0</width>
@@ -485,6 +498,9 @@ Respects the &quot;Binary output&quot; control</string>
         </item>
         <item>
          <widget class="QLineEdit" name="ledTimeTo">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="minimumSize">
            <size>
             <width>0</width>
@@ -527,6 +543,9 @@ Respects the &quot;Binary output&quot; control</string>
         </item>
         <item>
          <widget class="QCheckBox" name="cbStopTrackExiting">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>Stop tracking exiting particles</string>
           </property>

@@ -22,8 +22,8 @@ private slots:
     void on_lePhysicsList_editingFinished();
     void on_cobRefPhysLists_activated(int index);
     void on_pbCancel_clicked();
-
     void on_cbBinaryOutput_toggled(bool checked);
+    void on_cbSaveParticles_toggled(bool checked);
 
 private:
     AG4SimulationSettings & G4SimSet;

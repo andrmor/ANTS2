@@ -116,3 +116,13 @@ void AGeant4ConfigDialog::on_cbBinaryOutput_toggled(bool checked)
 {
     ui->sbPrecision->setEnabled(!checked);
 }
+
+void AGeant4ConfigDialog::on_cbSaveParticles_toggled(bool checked)
+{
+    ui->leExitVolumeName->setEnabled(checked);
+    ui->leParticlesFileName->setEnabled(checked);
+    ui->cbUseTimeWindow->setEnabled(checked);
+    ui->ledTimeFrom->setEnabled(checked);
+    ui->ledTimeTo->setEnabled(checked);
+    ui->cbStopTrackExiting->setEnabled(checked);
+}

@@ -471,10 +471,10 @@ QVariant ACore_SI::loadArray(QString fileName)
 
 enum AArrayFormatEnum {StringFormat, IntFormat, DoubleFormat, FloatFormat, CharFormat, SkipFormat};
 
-bool readFormat(const QVariantList & format, QVector<AArrayFormatEnum> & FormatSelector)
+bool readFormat(const QVariantList & format, QVector<AArrayFormatEnum> & FormatSelector, bool AllowSkip = true, bool AllowEmptyFormatArray = false)
 {
     const int numEl = format.size();
-    if (numEl == 0) return false;
+    if (numEl == 0 && !AllowEmptyFormatArray) return false;
 
     for (int i=0; i<format.size(); i++)
     {
@@ -485,7 +485,11 @@ bool readFormat(const QVariantList & format, QVector<AArrayFormatEnum> & FormatS
         else if (f == "d") Option = DoubleFormat;
         else if (f == "f") Option = FloatFormat;
         else if (f == "c") Option = CharFormat;
-        else if (f == "")  Option = SkipFormat;
+        else if (f == "")
+        {
+            if (AllowSkip) Option = SkipFormat;
+            else return false;
+        }
         else return false;
         FormatSelector << Option;
     }
@@ -727,7 +731,7 @@ QVariantList ACore_SI::loadArrayBinary(const QString &fileName, const QVariantLi
     QVariantList vl1;
 
     QVector<AArrayFormatEnum> FormatSelector;
-    bool bFormatOK = readFormat(format, FormatSelector);
+    bool bFormatOK = readFormat(format, FormatSelector, false);
     if (!bFormatOK)
     {
         abort("'format' parameter should be an array of 's', 'i', 'd', 'f' or 'c' markers (string, int, double, float and char, respectively)");
@@ -767,17 +771,17 @@ QVariantList ACore_SI::loadArrayExtended3Dbinary(const QString &fileName, char d
     QVariantList vl1;
 
     QVector<AArrayFormatEnum> DataFormatSelector;
-    bool bFormatOK = readFormat(dataFormat, DataFormatSelector);
+    bool bFormatOK = readFormat(dataFormat, DataFormatSelector, false);
     if (!bFormatOK)
     {
-        abort("'dataFormat' parameter should be an array of 's', 'i', 'd', 'f', 'c' or '' markers (string, int, double, float, char and skip_field, respectively)");
+        abort("'dataFormat' parameter should be an array of 's', 'i', 'd', 'f' or 'c' markers (string, int, double, float and char, respectively)");
         return vl1;
     }
     QVector<AArrayFormatEnum> SeparatorFormatSelector;
-    bFormatOK = readFormat(separatorFormat, SeparatorFormatSelector);
+    bFormatOK = readFormat(separatorFormat, SeparatorFormatSelector, false, true);
     if (!bFormatOK)
     {
-        abort("'separatorFormat' parameter should be an array of 's', 'i', 'd', 'f', 'c' or '' markers (string, int, double, float, char and skip_field, respectively)");
+        abort("'separatorFormat' parameter should be an array of 's', 'i', 'd', 'f' or 'c' markers (string, int, double, float and char, respectively)");
         return vl1;
     }
 

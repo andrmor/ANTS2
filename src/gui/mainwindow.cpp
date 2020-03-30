@@ -4685,3 +4685,8 @@ void MainWindow::on_pbAddmaterialFromLibrary_clicked()
 {
     MIwindow->AddMaterialFromLibrary(this);
 }
+
+void MainWindow::on_cobGenerateFromFile_FileFormat_currentIndexChanged(int index)
+{
+    ui->pbLoadExampleFileFromFileGen->setVisible(index == 0);
+}

@@ -39,7 +39,7 @@
      <enum>QTabWidget::Rounded</enum>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="tabConfig">
      <attribute name="title">
@@ -7207,7 +7207,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <property name="documentMode">
        <bool>false</bool>
@@ -9664,7 +9664,7 @@ Right click: toggle build photon tracks. Also switches of building particle trac
          <rect>
           <x>8</x>
           <y>21</y>
-          <width>514</width>
+          <width>521</width>
           <height>226</height>
          </rect>
         </property>
@@ -9675,7 +9675,7 @@ Right click: toggle build photon tracks. Also switches of building particle trac
          </font>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="tab_3">
          <attribute name="title">
@@ -9967,8 +9967,8 @@ Right click: toggle build photon tracks. Also switches of building particle trac
          <widget class="QLabel" name="label_29">
           <property name="geometry">
            <rect>
-            <x>20</x>
-            <y>20</y>
+            <x>5</x>
+            <y>3</y>
             <width>281</width>
             <height>16</height>
            </rect>
@@ -9981,17 +9981,17 @@ Right click: toggle build photon tracks. Also switches of building particle trac
           <property name="geometry">
            <rect>
             <x>10</x>
-            <y>40</y>
+            <y>22</y>
             <width>421</width>
-            <height>20</height>
+            <height>22</height>
            </rect>
           </property>
          </widget>
          <widget class="QPushButton" name="pbGenerateFromFile_Change">
           <property name="geometry">
            <rect>
-            <x>431</x>
-            <y>38</y>
+            <x>440</x>
+            <y>21</y>
             <width>71</width>
             <height>23</height>
            </rect>
@@ -10000,12 +10000,45 @@ Right click: toggle build photon tracks. Also switches of building particle trac
            <string>Change</string>
           </property>
          </widget>
+         <widget class="QLabel" name="label_20">
+          <property name="geometry">
+           <rect>
+            <x>7</x>
+            <y>51</y>
+            <width>82</width>
+            <height>17</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>File format:</string>
+          </property>
+         </widget>
+         <widget class="QComboBox" name="cobGenerateFromFile_FileFormat">
+          <property name="geometry">
+           <rect>
+            <x>91</x>
+            <y>46</y>
+            <width>340</width>
+            <height>27</height>
+           </rect>
+          </property>
+          <item>
+           <property name="text">
+            <string>Ants2 ascii file</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>G4ants generated file</string>
+           </property>
+          </item>
+         </widget>
          <widget class="QPushButton" name="pbGenerateFromFile_Help">
           <property name="geometry">
            <rect>
-            <x>431</x>
-            <y>0</y>
-            <width>75</width>
+            <x>441</x>
+            <y>48</y>
+            <width>70</width>
             <height>23</height>
            </rect>
           </property>
@@ -10017,8 +10050,8 @@ Right click: toggle build photon tracks. Also switches of building particle trac
           <property name="geometry">
            <rect>
             <x>10</x>
-            <y>70</y>
-            <width>101</width>
+            <y>80</y>
+            <width>201</width>
             <height>23</height>
            </rect>
           </property>
@@ -10026,30 +10059,30 @@ Right click: toggle build photon tracks. Also switches of building particle trac
            <string>Analyse file</string>
           </property>
          </widget>
-         <widget class="QLabel" name="labGenerateFromFile_info">
-          <property name="geometry">
-           <rect>
-            <x>50</x>
-            <y>100</y>
-            <width>451</width>
-            <height>108</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
          <widget class="QPushButton" name="pbLoadExampleFileFromFileGen">
           <property name="geometry">
            <rect>
-            <x>431</x>
-            <y>61</y>
-            <width>71</width>
+            <x>440</x>
+            <y>80</y>
+            <width>70</width>
             <height>23</height>
            </rect>
           </property>
           <property name="text">
            <string>Example</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="labGenerateFromFile_info">
+          <property name="geometry">
+           <rect>
+            <x>13</x>
+            <y>110</y>
+            <width>491</width>
+            <height>80</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Not yet analyzed</string>
           </property>
          </widget>
         </widget>
@@ -13138,8 +13171,8 @@ multiply to loaded data</string>
      <y>394</y>
     </hint>
     <hint type="destinationlabel">
-     <x>475</x>
-     <y>494</y>
+     <x>438</x>
+     <y>522</y>
     </hint>
    </hints>
   </connection>
@@ -13150,12 +13183,12 @@ multiply to loaded data</string>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>168</x>
-     <y>394</y>
+     <x>172</x>
+     <y>427</y>
     </hint>
     <hint type="destinationlabel">
-     <x>486</x>
-     <y>431</y>
+     <x>453</x>
+     <y>464</y>
     </hint>
    </hints>
   </connection>
@@ -13198,8 +13231,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>168</x>
-     <y>394</y>
+     <x>172</x>
+     <y>427</y>
     </hint>
     <hint type="destinationlabel">
      <x>328</x>
@@ -13982,8 +14015,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>139</x>
-     <y>140</y>
+     <x>236</x>
+     <y>139</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14238,8 +14271,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>335</x>
-     <y>419</y>
+     <x>339</x>
+     <y>459</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14910,8 +14943,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>128</x>
-     <y>470</y>
+     <x>162</x>
+     <y>463</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14926,8 +14959,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>218</x>
-     <y>470</y>
+     <x>322</x>
+     <y>463</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14942,8 +14975,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>308</x>
-     <y>470</y>
+     <x>434</x>
+     <y>463</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14958,8 +14991,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>137</x>
-     <y>394</y>
+     <x>141</x>
+     <y>427</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14974,8 +15007,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>246</x>
-     <y>426</y>
+     <x>313</x>
+     <y>459</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -15038,8 +15071,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>205</x>
-     <y>433</y>
+     <x>211</x>
+     <y>464</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -15054,8 +15087,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>510</x>
-     <y>435</y>
+     <x>512</x>
+     <y>466</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -15310,8 +15343,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>295</x>
-     <y>434</y>
+     <x>299</x>
+     <y>465</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -15390,12 +15423,12 @@ multiply to loaded data</string>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>132</x>
-     <y>384</y>
+     <x>136</x>
+     <y>424</y>
     </hint>
     <hint type="destinationlabel">
-     <x>168</x>
-     <y>430</y>
+     <x>172</x>
+     <y>470</y>
     </hint>
    </hints>
   </connection>
@@ -15406,8 +15439,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>238</x>
-     <y>384</y>
+     <x>242</x>
+     <y>424</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -15426,8 +15459,8 @@ multiply to loaded data</string>
      <y>136</y>
     </hint>
     <hint type="destinationlabel">
-     <x>414</x>
-     <y>398</y>
+     <x>418</x>
+     <y>480</y>
     </hint>
    </hints>
   </connection>

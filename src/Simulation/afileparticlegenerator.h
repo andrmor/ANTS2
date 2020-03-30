@@ -13,6 +13,8 @@
 class AMaterialParticleCollection;
 class QTextStream;
 
+enum class AParticleFileMode {Standard = 0, G4ants = 1};
+
 class AFileParticleGenerator : public AParticleGun
 {
 public:
@@ -21,6 +23,9 @@ public:
 
     void          SetFileName(const QString &fileName);
     const QString GetFileName() const {return FileName;}
+
+    void              SetFormat(AParticleFileMode mode) {Mode = mode;}
+    AParticleFileMode GetFormat() const {return Mode;}
 
     virtual bool Init() override;               //has to be called before first use of GenerateEvent()
     virtual void ReleaseResources() override;
@@ -41,14 +46,23 @@ public:
 
     //public file inspect results
     int NumEventsInFile = 0;          //saved
+    int statNumEmptyEventsInFile = 0;
     int statNumMultipleEvents = 0;
     QVector<int> statParticleQuantity;
 
 private:
     const AMaterialParticleCollection & MpCollection;
     QString FileName;
+    AParticleFileMode Mode = AParticleFileMode::Standard;
+
+    //standard mode
     QFile File;
-    QTextStream* Stream = 0;
+    QTextStream * Stream = nullptr;
+
+    //G4ants mode
+    bool bG4binary = false;
+    std::ifstream * inStream = nullptr;
+
 
     const QRegularExpression rx = QRegularExpression("(\\ |\\,|\\:|\\t)"); //separators: ' ' or ',' or ':' or '\t'
 
@@ -59,6 +73,10 @@ private:
 private:
     void clearFileStat();
 
+    bool initStandardMode();
+    bool initG4Mode();
+    bool isRequiresInspection() const;
+    bool testG4mode();
 };
 
 #endif // AFILEPARTICLEGENERATOR_H

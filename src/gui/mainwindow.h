@@ -595,6 +595,10 @@ private slots:
 
     void on_pbAddmaterialFromLibrary_clicked();
 
+    void on_cobGenerateFromFile_FileFormat_activated(int index);
+
+    void on_cobGenerateFromFile_FileFormat_currentIndexChanged(int index);
+
 public slots:
     void on_pbRebuildDetector_clicked();
     void onRequestDetectorGuiUpdate();     // called to update GUI related to Detector

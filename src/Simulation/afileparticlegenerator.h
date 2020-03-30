@@ -44,6 +44,8 @@ public:
 
     const QString GetEventRecords(int fromEvent, int toEvent) const;
 
+    bool generateG4File(int eventBegin, int eventEnd, const QString & FileName);
+
     //public file inspect results
     int NumEventsInFile = 0;          //saved
     int statNumEmptyEventsInFile = 0;

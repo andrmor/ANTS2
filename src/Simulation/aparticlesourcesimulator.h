@@ -67,6 +67,7 @@ private:
     bool readG4DepoEventFromTextFile();
     bool readG4DepoEventFromBinFile(bool expectNewEvent = false);
     void releaseInputResources();
+    void prepareWorkerG4File();
 
     //local objects
     AParticleTracker* ParticleTracker = nullptr;

@@ -63,7 +63,7 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
 
     if (!json.contains("ParticleSourcesConfig"))
     {
-        ErrorString = "Json sent to simulator does not contain particle sim config data!";
+        ErrorString = "Simulation manager: config json does not contain particle sim data!";
         return false;
     }
     QJsonObject js = json["ParticleSourcesConfig"].toObject();
@@ -123,6 +123,12 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
             {
                 ParticleGun = new AFileParticleGenerator(*detector.MpCollection);
                 ParticleGun->readFromJson(fjs);
+
+                if (static_cast<AFileParticleGenerator*>(ParticleGun)->GetFormat() == AParticleFileMode::G4ants && !simSettings.G4SimSet.bTrackParticles )
+                {
+                    ErrorString = "Generation of particles from G4ants file cannot be run without Geant4 simulation mode";
+                    return false;
+                }
             }
         }
         else if (PartGenMode == "Script")
@@ -209,6 +215,19 @@ void AParticleSourceSimulator::simulate()
     std::unique_ptr<QTextStream> pStream;
     if (simSettings.G4SimSet.bTrackParticles)
     {
+        //mode "from G4ants file" requires special treatment
+        AFileParticleGenerator * fpg = dynamic_cast<AFileParticleGenerator*>(ParticleGun);
+        if (fpg)
+        {
+            prepareWorkerG4File();
+            fpg->ReleaseResources();
+
+            bool bOK = geant4TrackAndProcess();
+            if (!bOK) fSuccess = false;
+            else      fSuccess = !fHardAbortWasTriggered;
+            return;
+        }
+
         const QString name = simSettings.G4SimSet.getPrimariesFileName(ID);//   FilePath + QString("primaries-%1.txt").arg(ID);
         pFile.reset(new QFile(name));
         if(!pFile->open(QIODevice::WriteOnly | QFile::Text))
@@ -260,7 +279,7 @@ void AParticleSourceSimulator::simulate()
             continue; //skip tracking and go to the next event
         }
 
-        //-- only local tracking ends here --
+        //-- only local tracking remains here --
         //energy vector is ready
 
         if ( fIgnoreNoDepoEvents && EnergyVector.isEmpty() ) //if there is no deposition can ignore this event
@@ -859,5 +878,13 @@ void AParticleSourceSimulator::releaseInputResources()
 
     delete inTextStream;  inTextStream = nullptr;
     delete inTextFile;    inTextFile = nullptr;
+}
+
+void AParticleSourceSimulator::prepareWorkerG4File()
+{
+    AFileParticleGenerator * fpg = static_cast<AFileParticleGenerator*>(ParticleGun);
+
+    const QString FileName = simSettings.G4SimSet.getPrimariesFileName(ID);
+    fpg->generateG4File(eventBegin, eventEnd, FileName);
 }
 

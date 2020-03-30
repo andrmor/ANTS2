@@ -528,6 +528,18 @@ const QString AFileParticleGenerator::GetEventRecords(int fromEvent, int toEvent
     return s;
 }
 
+bool AFileParticleGenerator::generateG4File(int eventBegin, int eventEnd, const QString & FileName)
+{
+    if (bG4binary)
+    {
+
+    }
+    else
+    {
+
+    }
+}
+
 void AFileParticleGenerator::clearFileStat()
 {
     FileLastModified = QDateTime(); //will force to inspect file on next use

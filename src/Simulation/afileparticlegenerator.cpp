@@ -289,42 +289,127 @@ void AFileParticleGenerator::ReleaseResources()
 
 bool AFileParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles)
 {
-    while (!Stream->atEnd())
+    if (Mode == AParticleFileMode::Standard)
     {
-        if (bAbortRequested) return false;
-        const QString line = Stream->readLine();
-        QStringList f = line.split(rx, QString::SkipEmptyParts);
-        //format: ParticleId Energy X Y Z VX VY VZ Time *  //'*' is optional - indicates event not finished yet
+        while (!Stream->atEnd())
+        {
+            if (bAbortRequested) return false;
+            const QString line = Stream->readLine();
+            QStringList f = line.split(rx, QString::SkipEmptyParts);
+            //format: ParticleId Energy X Y Z VX VY VZ Time *  //'*' is optional - indicates event not finished yet
 
-        if (f.size() < 9) continue;
-        if (f.at(0) == '#') continue;
+            if (f.size() < 9) continue;
+            if (f.at(0) == '#') continue;
 
-        bool bOK;
-        int    pId    = f.at(0).toInt(&bOK);
-        if (!bOK) continue;
-        //TODO protection of wrong index, either test on start
+            bool bOK;
+            int    pId    = f.at(0).toInt(&bOK);
+            if (!bOK) continue;
+            //TODO protection of wrong index, either test on start
 
-        double energy = f.at(1).toDouble();
-        double x =      f.at(2).toDouble();
-        double y =      f.at(3).toDouble();
-        double z =      f.at(4).toDouble();
-        double vx =     f.at(5).toDouble();
-        double vy =     f.at(6).toDouble();
-        double vz =     f.at(7).toDouble();
-        double t  =     f.at(8).toDouble();
+            double energy = f.at(1).toDouble();
+            double x =      f.at(2).toDouble();
+            double y =      f.at(3).toDouble();
+            double z =      f.at(4).toDouble();
+            double vx =     f.at(5).toDouble();
+            double vy =     f.at(6).toDouble();
+            double vz =     f.at(7).toDouble();
+            double t  =     f.at(8).toDouble();
 
-        AParticleRecord* p = new AParticleRecord(pId,
-                                                 x, y, z,
-                                                 vx, vy, vz,
-                                                 t, energy);
-        p->ensureUnitaryLength();
-        GeneratedParticles << p;
+            AParticleRecord* p = new AParticleRecord(pId,
+                                                     x, y, z,
+                                                     vx, vy, vz,
+                                                     t, energy);
+            p->ensureUnitaryLength();
+            GeneratedParticles << p;
 
-        if (f.size() > 9 && f.at(9) == '*') continue; //this is multiple event!
-        return true; //normal termination
+            if (f.size() > 9 && f.at(9) == '*') continue; //this is multiple event!
+            return true; //normal termination
+        }
+        return false; //could not read particle record in file!
+    }
+    else if (bG4binary)
+    {
+        char h;
+        std::string pn;
+        while (inStream->get(h))
+        {
+            if (h == char(0xEE))
+            {
+                //next event starts here
+                return true;
+            }
+            else if (h == char(0xFF))
+            {
+                //data line
+                AParticleRecord * p = new AParticleRecord();
+                pn.clear();
+                while (*inStream >> h)
+                {
+                    if (h == (char)0x00) break;
+                    pn += h;
+                }
+                //qDebug() << pn.data();
+                p->Id = -1;
+                inStream->read((char*)&p->energy,    sizeof(double));
+                inStream->read((char*)&p->time,      sizeof(double));
+                inStream->read((char*)&p->r,       3*sizeof(double));
+                inStream->read((char*)&p->v,       3*sizeof(double));
+                if (inStream->fail())
+                {
+                    ErrorString = "Unexpected format of a line in the binary file with the input particles";
+                    return false;
+                }
+                GeneratedParticles << p;
+            }
+            else
+            {
+                ErrorString = "Unexpected format of a line in the binary file with the input particles";
+                return false;
+            }
+        }
+        return false;
+    }
+    else
+    {
+        // ascii G4
+        std::string str;
+        while ( getline(*inStream, str) )
+        {
+            if (str.empty())
+            {
+                if (inStream->eof()) return false;
+                ErrorString = "Found empty line!";
+                return false;
+            }
+
+            if (str[0] == '#') return true; //new event
+
+            QStringList f = QString(str.data()).split(rx, QString::SkipEmptyParts); //pname en time x y z i j k
+            if (f.size() != 9)
+            {
+                ErrorString = "Bad format of particle record!";
+                return false;
+            }
+            //qDebug() << "Ascii, "<<f.at(0);
+
+            AParticleRecord * p = new AParticleRecord();
+
+            p->Id     = -1;
+            p->energy = f.at(1).toDouble();
+            p->time   = f.at(2).toDouble();
+            p->r[0]   = f.at(3).toDouble();
+            p->r[1]   = f.at(4).toDouble();
+            p->r[2]   = f.at(5).toDouble();
+            p->v[0]   = f.at(6).toDouble();
+            p->v[1]   = f.at(7).toDouble();
+            p->v[2]   = f.at(8).toDouble();
+
+            GeneratedParticles << p;
+        }
+        return false;
     }
 
-    return false; //could not read particle record in file!
+    return false;
 }
 
 bool AFileParticleGenerator::IsParticleInUse(int particleId, QString &SourceNames) const

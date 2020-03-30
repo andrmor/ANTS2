@@ -299,6 +299,7 @@ void MainWindow::TestParticleGun(AParticleGun* Gun, int numParticles)
         message("Failed to initialize particle gun!\n" + Gun->GetErrorString(), this);
         return;
     }
+    Gun->SetStartEvent(0);
 
     double Length = std::max(Detector->WorldSizeXY, Detector->WorldSizeZ)*0.4;
     double R[3], K[3];

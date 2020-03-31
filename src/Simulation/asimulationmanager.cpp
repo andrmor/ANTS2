@@ -688,6 +688,10 @@ void ASimulationManager::generateG4antsConfigCommon(QJsonObject & json, int Thre
 
     json["Seed"] = static_cast<int>(Detector.RandGen->Rndm()*10000000);
 
+    bool bG4Primaries = false;
+    if (FileParticleGenerator) bG4Primaries = (FileParticleGenerator->GetFormat() == AParticleFileMode::G4ants);
+    json["Primaries_G4ants"] = bG4Primaries;
+
     QString primFN = G4SimSet.getPrimariesFileName(ThreadId);
     json["File_Primaries"] = primFN;
     removeOldFile(primFN, "primaries");

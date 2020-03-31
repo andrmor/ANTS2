@@ -149,8 +149,8 @@ bool AFileParticleGenerator::initG4Mode()
                     }
                     //qDebug() << pn.data();
                     inStream->read((char*)&energy,       sizeof(double));
-                    inStream->read((char*)&time,         sizeof(double));
                     inStream->read((char*)&PosDir,     6*sizeof(double));
+                    inStream->read((char*)&time,         sizeof(double));
                     if (inStream->fail())
                     {
                         ErrorString = "Unexpected format of a line in the binary file with the input particles";
@@ -204,7 +204,7 @@ bool AFileParticleGenerator::initG4Mode()
                 }
 
                 QStringList f = QString(str.data()).split(rx, QString::SkipEmptyParts);
-                //pname en time x y z i j k
+                //pname en x y z i j k time
 
                 if (f.size() != 9)
                 {
@@ -351,9 +351,9 @@ bool AFileParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & Generated
                 //qDebug() << pn.data();
                 p->Id = -1;
                 inStream->read((char*)&p->energy,    sizeof(double));
-                inStream->read((char*)&p->time,      sizeof(double));
                 inStream->read((char*)&p->r,       3*sizeof(double));
                 inStream->read((char*)&p->v,       3*sizeof(double));
+                inStream->read((char*)&p->time,      sizeof(double));
                 if (inStream->fail())
                 {
                     ErrorString = "Unexpected format of a line in the binary file with the input particles";
@@ -396,13 +396,13 @@ bool AFileParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & Generated
 
             p->Id     = -1;
             p->energy = f.at(1).toDouble();
-            p->time   = f.at(2).toDouble();
             p->r[0]   = f.at(3).toDouble();
             p->r[1]   = f.at(4).toDouble();
             p->r[2]   = f.at(5).toDouble();
             p->v[0]   = f.at(6).toDouble();
             p->v[1]   = f.at(7).toDouble();
             p->v[2]   = f.at(8).toDouble();
+            p->time   = f.at(2).toDouble();
 
             GeneratedParticles << p;
         }
@@ -594,8 +594,8 @@ bool AFileParticleGenerator::generateG4File(int eventBegin, int eventEnd, const 
                 }
                 //qDebug() << pn.data();
                 inStream->read((char*)&energy,    sizeof(double));
-                inStream->read((char*)&time,      sizeof(double));
                 inStream->read((char*)&posDir,  6*sizeof(double));
+                inStream->read((char*)&time,      sizeof(double));
                 if (inStream->fail())
                 {
                     ErrorString = "Unexpected format of a line in the G4ants binary file";
@@ -605,8 +605,8 @@ bool AFileParticleGenerator::generateG4File(int eventBegin, int eventEnd, const 
                 {
                     outStream << pn << char(0x00);
                     outStream.write((char*)&energy,  sizeof(double));
-                    outStream.write((char*)&time,    sizeof(double));
                     outStream.write((char*)posDir, 6*sizeof(double));
+                    outStream.write((char*)&time,    sizeof(double));
                 }
             }
             else

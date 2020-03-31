@@ -53,6 +53,7 @@ public:
     int statNumEmptyEventsInFile = 0;
     int statNumMultipleEvents = 0;
     QVector<int> statParticleQuantity;
+    bool bG4binary = false;
 
 private:
     const AMaterialParticleCollection & MpCollection;
@@ -64,7 +65,6 @@ private:
     QTextStream * Stream = nullptr;
 
     //G4ants mode
-    bool bG4binary = false;
     std::ifstream * inStream = nullptr;
 
 

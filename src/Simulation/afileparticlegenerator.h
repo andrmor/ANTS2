@@ -15,6 +15,8 @@ class QTextStream;
 
 enum class AParticleFileMode {Standard = 0, G4ants = 1};
 
+// TODO: make base class AFileGeneratorEngine and 3 virtual children for standard, G4bin and G4ascii
+
 class AFileParticleGenerator : public AParticleGun
 {
 public:
@@ -42,7 +44,7 @@ public:
     void InvalidateFile();    //forces the file to be inspected again during next call of Init()
     bool IsValidated() const;
 
-    const QString GetEventRecords(int fromEvent, int toEvent) const;
+    const QString GetEventRecords(int fromEvent, int toEvent) const;  // obsolete?
 
     bool generateG4File(int eventBegin, int eventEnd, const QString & FileName);
 

@@ -530,14 +530,137 @@ const QString AFileParticleGenerator::GetEventRecords(int fromEvent, int toEvent
 
 bool AFileParticleGenerator::generateG4File(int eventBegin, int eventEnd, const QString & FileName)
 {
+    qDebug() << eventBegin << eventEnd;
+
+    std::ofstream  outStream;
+    if (bG4binary) outStream.open(FileName.toLatin1().data(), std::ios::out | std::ios::binary);
+    else           outStream.open(FileName.toLatin1().data());
+
+    if (!outStream.is_open())
+    {
+        ErrorString = "Cannot open file to export G4 pareticle data";
+        return false;
+    }
+
+    int currentEvent = -1;
+    int eventsToDo = eventEnd - eventBegin;
+    bool bSkippingEvents = (eventBegin != 0);
     if (bG4binary)
     {
+        std::string pn;
+        double energy, time;
+        double posDir[6];
+        char ch;
+        while (inStream->get(ch))
+        {
+            if (inStream->eof())
+            {
+                if (eventsToDo == 0) return true;
+                else
+                {
+                    ErrorString = "Unexpected end of file";
+                    return false;
+                }
+            }
+            if (inStream->fail())
+            {
+                ErrorString = "Unexpected error during reading of a header char in the G4ants binary file";
+                return false;
+            }
 
+            if (ch == (char)0xEE)
+            {
+                if (eventsToDo == 0) return true;
+                currentEvent++;
+
+                if (bSkippingEvents && currentEvent == eventBegin) bSkippingEvents = false;
+
+                if (!bSkippingEvents)
+                {
+                    outStream << ch;
+                    eventsToDo--;
+                }
+
+                continue;
+            }
+            else if (ch == (char)0xFF)
+            {
+                //data line
+                pn.clear();
+                while (*inStream >> ch)
+                {
+                    if (ch == (char)0x00) break;
+                    pn += ch;
+                }
+                //qDebug() << pn.data();
+                inStream->read((char*)&energy,    sizeof(double));
+                inStream->read((char*)&time,      sizeof(double));
+                inStream->read((char*)&posDir,  6*sizeof(double));
+                if (inStream->fail())
+                {
+                    ErrorString = "Unexpected format of a line in the G4ants binary file";
+                    return false;
+                }
+                if (!bSkippingEvents)
+                {
+                    outStream << pn << char(0x00);
+                    outStream.write((char*)&energy,  sizeof(double));
+                    outStream.write((char*)&time,    sizeof(double));
+                    outStream.write((char*)posDir, 6*sizeof(double));
+                }
+            }
+            else
+            {
+                ErrorString = "Unexpected format of a header char in the binary file with the input particles";
+                return false;
+            }
+        }
     }
     else
     {
+        std::string str;
+        while ( getline(*inStream, str) )
+        {
+            if (inStream->eof())
+            {
+                if (eventsToDo == 0) return true;
+                else
+                {
+                    ErrorString = "Unexpected end of file";
+                    return false;
+                }
+            }
+            if (str.empty())
+            {
+                ErrorString = "Found empty line!";
+                return false;
+            }
 
+            if (str[0] == '#')
+            {
+                if (eventsToDo == 0) return true;
+                currentEvent++;
+
+                if (bSkippingEvents && currentEvent == eventBegin) bSkippingEvents = false;
+
+                if (!bSkippingEvents)
+                {
+                    outStream << '#' << std::endl;
+                    eventsToDo--;
+                }
+
+                continue;
+            }
+
+            if (!bSkippingEvents)
+            {
+                outStream << str << std::endl;
+            }
+        }
+        return false;
     }
+
+    return true;
 }
 
 void AFileParticleGenerator::clearFileStat()

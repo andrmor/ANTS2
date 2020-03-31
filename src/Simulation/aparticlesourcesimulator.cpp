@@ -219,10 +219,17 @@ void AParticleSourceSimulator::simulate()
         AFileParticleGenerator * fpg = dynamic_cast<AFileParticleGenerator*>(ParticleGun);
         if (fpg)
         {
-            prepareWorkerG4File();
+            bool bOK = prepareWorkerG4File();
             fpg->ReleaseResources();
 
-            bool bOK = geant4TrackAndProcess();
+            if (!bOK)
+            {
+                ErrorString = fpg->GetErrorString();
+                fSuccess = false;
+                return;
+            }
+
+            bOK = geant4TrackAndProcess();
             if (!bOK) fSuccess = false;
             else      fSuccess = !fHardAbortWasTriggered;
             return;
@@ -880,11 +887,11 @@ void AParticleSourceSimulator::releaseInputResources()
     delete inTextFile;    inTextFile = nullptr;
 }
 
-void AParticleSourceSimulator::prepareWorkerG4File()
+bool AParticleSourceSimulator::prepareWorkerG4File()
 {
     AFileParticleGenerator * fpg = static_cast<AFileParticleGenerator*>(ParticleGun);
 
     const QString FileName = simSettings.G4SimSet.getPrimariesFileName(ID);
-    fpg->generateG4File(eventBegin, eventEnd, FileName);
+    return fpg->generateG4File(eventBegin, eventEnd, FileName);
 }
 

@@ -44,6 +44,7 @@ public:
     virtual void mergeData() override;
 
     void setOnlySavePrimaries() {bOnlySavePrimariesToFile = true;} // for G4ants mode // obsolete??? ***!!!
+    const AParticleGun * getParticleGun() const {return ParticleGun;}
 
     virtual void hardAbort() override;
 

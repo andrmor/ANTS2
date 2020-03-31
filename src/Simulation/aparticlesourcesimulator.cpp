@@ -176,7 +176,7 @@ bool AParticleSourceSimulator::finalizeConfig()
     if (G4SimSet.bTrackParticles)
     {
         QJsonObject json;
-        simMan.generateG4antsConfigCommon(json, ID);
+        simMan.generateG4antsConfigCommon(json, this);
 
         json["NumEvents"] = getEventCount();
 
@@ -202,6 +202,8 @@ void AParticleSourceSimulator::updateGeoManager()
 
 void AParticleSourceSimulator::simulate()
 {
+    qDebug() << "Starting simulation, worker #" << ID;
+
     checkNavigatorPresent();
 
     if ( !ParticleStack.isEmpty() ) clearParticleStack();
@@ -220,6 +222,7 @@ void AParticleSourceSimulator::simulate()
         if (fpg)
         {
             bool bOK = prepareWorkerG4File();
+            qDebug() << "Prepared file for worker #" << ID << "result:"<<bOK;
             fpg->ReleaseResources();
 
             if (!bOK)
@@ -232,6 +235,7 @@ void AParticleSourceSimulator::simulate()
             bOK = geant4TrackAndProcess();
             if (!bOK) fSuccess = false;
             else      fSuccess = !fHardAbortWasTriggered;
+            qDebug() << "tread #" << ID << "reports result of geant4-based tracking:" << bOK << "fSuccess:"<< fSuccess;
             return;
         }
 

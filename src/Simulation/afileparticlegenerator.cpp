@@ -127,11 +127,12 @@ bool AFileParticleGenerator::initG4Mode()
             double energy, time;
             double PosDir[6];
             char h;
+            int eventId;
             while (inStream->get(h))
             {
-                if (h == char(0xEE))
+                if (h == char(0xEE)) //new event
                 {
-                    //new event
+                    inStream->read((char*)&eventId, sizeof(int));
                     NumEventsInFile++;
                     if (bWasMulty) statNumMultipleEvents++;
                     if (!bWasParticle) statNumEmptyEventsInFile++;
@@ -330,12 +331,14 @@ bool AFileParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & Generated
     else if (bG4binary)
     {
         char h;
+        int eventId;
         std::string pn;
         while (inStream->get(h))
         {
             if (h == char(0xEE))
             {
                 //next event starts here
+                inStream->read((char*)&eventId,    sizeof(int));
                 return true;
             }
             else if (h == char(0xFF))
@@ -396,13 +399,13 @@ bool AFileParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & Generated
 
             p->Id     = -1;
             p->energy = f.at(1).toDouble();
-            p->r[0]   = f.at(3).toDouble();
-            p->r[1]   = f.at(4).toDouble();
-            p->r[2]   = f.at(5).toDouble();
-            p->v[0]   = f.at(6).toDouble();
-            p->v[1]   = f.at(7).toDouble();
-            p->v[2]   = f.at(8).toDouble();
-            p->time   = f.at(2).toDouble();
+            p->r[0]   = f.at(2).toDouble();
+            p->r[1]   = f.at(3).toDouble();
+            p->r[2]   = f.at(4).toDouble();
+            p->v[0]   = f.at(5).toDouble();
+            p->v[1]   = f.at(6).toDouble();
+            p->v[2]   = f.at(7).toDouble();
+            p->time   = f.at(8).toDouble();
 
             GeneratedParticles << p;
         }
@@ -547,6 +550,7 @@ bool AFileParticleGenerator::generateG4File(int eventBegin, int eventEnd, const 
     bool bSkippingEvents = (eventBegin != 0);
     if (bG4binary)
     {
+        int eventId;
         std::string pn;
         double energy, time;
         double posDir[6];
@@ -570,6 +574,7 @@ bool AFileParticleGenerator::generateG4File(int eventBegin, int eventEnd, const 
 
             if (ch == (char)0xEE)
             {
+                inStream->read((char*)&eventId,    sizeof(int));
                 if (eventsToDo == 0) return true;
                 currentEvent++;
 
@@ -578,6 +583,7 @@ bool AFileParticleGenerator::generateG4File(int eventBegin, int eventEnd, const 
                 if (!bSkippingEvents)
                 {
                     outStream << ch;
+                    outStream.write((char*)&eventId, sizeof(int));
                     eventsToDo--;
                 }
 
@@ -645,7 +651,7 @@ bool AFileParticleGenerator::generateG4File(int eventBegin, int eventEnd, const 
 
                 if (!bSkippingEvents)
                 {
-                    outStream << '#' << std::endl;
+                    outStream << str << std::endl;
                     eventsToDo--;
                 }
 
@@ -657,10 +663,12 @@ bool AFileParticleGenerator::generateG4File(int eventBegin, int eventEnd, const 
                 outStream << str << std::endl;
             }
         }
-        return false;
     }
 
-    return true;
+    if (eventsToDo == 0) return true;
+
+    ErrorString = "Unexpected end of file";
+    return false;
 }
 
 void AFileParticleGenerator::clearFileStat()

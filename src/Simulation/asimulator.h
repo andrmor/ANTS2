@@ -28,6 +28,7 @@ public:
 
     const QString getErrorString() const { return ErrorString; }
     virtual int getEventsDone() const = 0;
+    int getTreadId() const {return ID;}
 
     int progress = 0; // progress in percents
 

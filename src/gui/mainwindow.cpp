@@ -3500,9 +3500,9 @@ void MainWindow::simulationFinished()
                         s += pn + ", ";
                     s.chop(2);
                     qDebug() << SimulationManager->SeenNonRegisteredParticles;
-                    message(s, this);
                 }
             }
+            if (!s.isEmpty()) message(s, this);
         }
     }
 

@@ -636,8 +636,9 @@ void ASimulationManager::saveExitLog()
     }
 }
 
-void ASimulationManager::generateG4antsConfigCommon(QJsonObject & json, int ThreadId)
+void ASimulationManager::generateG4antsConfigCommon(QJsonObject & json, ASimulator * worker)
 {
+    const int ThreadId = worker->getTreadId();
     const AG4SimulationSettings & G4SimSet = simSettings.G4SimSet;
     const AMaterialParticleCollection & MpCollection = *Detector.MpCollection;
 
@@ -690,10 +691,12 @@ void ASimulationManager::generateG4antsConfigCommon(QJsonObject & json, int Thre
 
     bool bG4Primaries = false;
     bool bBinaryPrimaries = false;
-    if (FileParticleGenerator)
+    AParticleSourceSimulator * pss = dynamic_cast<AParticleSourceSimulator*>(worker);
+    const AFileParticleGenerator * fpg = dynamic_cast<const AFileParticleGenerator*>(pss->getParticleGun());
+    if (fpg)
     {
-        bG4Primaries = (FileParticleGenerator->GetFormat() == AParticleFileMode::G4ants);
-        bBinaryPrimaries = FileParticleGenerator->bG4binary;
+        bG4Primaries = (fpg->GetFormat() == AParticleFileMode::G4ants);
+        bBinaryPrimaries = fpg->bG4binary;
     }
     json["Primaries_G4ants"] = bG4Primaries;
     json["Primaries_Binary"] = bBinaryPrimaries;

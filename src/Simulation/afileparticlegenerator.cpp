@@ -609,7 +609,8 @@ bool AFileParticleGenerator::generateG4File(int eventBegin, int eventEnd, const 
                 }
                 if (!bSkippingEvents)
                 {
-                    outStream << pn << char(0x00);
+                    outStream << (char)0xFF;
+                    outStream << pn << (char)0x00;
                     outStream.write((char*)&energy,  sizeof(double));
                     outStream.write((char*)posDir, 6*sizeof(double));
                     outStream.write((char*)&time,    sizeof(double));

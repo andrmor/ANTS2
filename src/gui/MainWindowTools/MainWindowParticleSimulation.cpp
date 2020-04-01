@@ -250,6 +250,8 @@ void MainWindow::ShowSource(const AParticleSourceRecord* p, bool clear)
 
 void MainWindow::on_pbGunTest_clicked()
 {
+    WindowNavigator->BusyOn();   // -->
+
     GeometryWindow->ShowAndFocus();
     gGeoManager->ClearTracks();
 
@@ -275,6 +277,7 @@ void MainWindow::on_pbGunTest_clicked()
     case 2: pg = SimulationManager->ScriptParticleGenerator; break;
     default:
         message("This generation mode is not implemented!", this);
+        WindowNavigator->BusyOff(); // <--
         return;
     }
 
@@ -290,7 +293,8 @@ void MainWindow::on_pbGunTest_clicked()
     ui->pbStopScan->setText("stop");
     font.setBold(false);
     ui->pbStopScan->setFont(font);
-    WindowNavigator->BusyOff();
+
+    WindowNavigator->BusyOff();  // <--
 }
 
 void MainWindow::TestParticleGun(AParticleGun* Gun, int numParticles)

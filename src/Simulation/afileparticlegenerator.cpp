@@ -27,7 +27,15 @@ void AFileParticleGenerator::SetFileName(const QString &fileName)
     if (FileName == fileName) return;
 
     FileName = fileName;
-    clearFileStat();
+    InvalidateFile();
+}
+
+void AFileParticleGenerator::SetFileFormat(AFileMode mode)
+{
+    if (Mode == mode) return;
+
+    Mode = mode;
+    InvalidateFile();
 }
 
 bool AFileParticleGenerator::Init()
@@ -41,6 +49,7 @@ bool AFileParticleGenerator::Init()
     }
 
     bool bNeedInspect = isRequireInspection();
+    qDebug() << "Init called, requires inspect?" << bNeedInspect;
     if (bNeedInspect)
     {
         RegisteredParticleCount = MpCollection.countParticles();
@@ -123,7 +132,7 @@ bool AFileParticleGenerator::isRequireInspection() const
 
 void AFileParticleGenerator::ReleaseResources()
 {
-    if (Engine) Engine->doReleaseResources();
+    delete Engine; Engine = nullptr;
 }
 
 bool AFileParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles)
@@ -169,7 +178,9 @@ bool AFileParticleGenerator::readFromJson(const QJsonObject &json)
             Mode = static_cast<AFileMode>(im);
     }
 
-    return parseJson(json, "FileName", FileName);
+    parseJson(json, "FileName", FileName);
+
+    return Init();
 }
 
 void AFileParticleGenerator::SetStartEvent(int startEvent)
@@ -179,6 +190,7 @@ void AFileParticleGenerator::SetStartEvent(int startEvent)
 
 void AFileParticleGenerator::InvalidateFile()
 {
+    FileLastModified = QDateTime(); //will force to inspect file on next use
     clearFileStat();
 }
 
@@ -193,41 +205,6 @@ bool AFileParticleGenerator::IsValidated() const
     return true;
 }
 
-/*
-const QString AFileParticleGenerator::GetEventRecords(int fromEvent, int toEvent) const
-{
-    QString s;
-    if (Stream)
-    {
-        Stream->seek(0);
-
-        int event = -1;
-        bool bContinueEvent = false;
-        while (!Stream->atEnd())
-        {
-            const QString line = Stream->readLine();
-            QStringList f = line.split(rx, QString::SkipEmptyParts);
-            if (f.size() < 9) continue;
-            if (f.at(0) == '#') continue;  //comment line
-            bool bOK;
-            f.at(0).toInt(&bOK);
-            if (!bOK) continue; //assuming this is a comment line
-
-            if (!bContinueEvent) event++;
-
-            if (event >= fromEvent && event < toEvent) s += line;
-
-            if (f.size() > 9 && f.at(9) == '*')
-                bContinueEvent = true;
-            else
-                bContinueEvent = false;
-        }
-
-    }
-    return s;
-}
-*/
-
 bool AFileParticleGenerator::generateG4File(int eventBegin, int eventEnd, const QString & FileName)
 {
     if (Engine)
@@ -238,8 +215,6 @@ bool AFileParticleGenerator::generateG4File(int eventBegin, int eventEnd, const 
 
 void AFileParticleGenerator::clearFileStat()
 {
-    FileLastModified = QDateTime(); //will force to inspect file on next use
-
     NumEventsInFile = 0;
     statNumEmptyEventsInFile = 0;
     statNumMultipleEvents = 0;
@@ -250,6 +225,12 @@ void AFileParticleGenerator::clearFileStat()
 }
 
 // ***************************************************************************
+
+AFilePGEngineStandard::~AFilePGEngineStandard()
+{
+    delete Stream; Stream = nullptr;
+    if (File.isOpen()) File.close();
+}
 
 bool AFilePGEngineStandard::doInit(bool bNeedInspect)
 {
@@ -294,12 +275,6 @@ bool AFilePGEngineStandard::doInit(bool bNeedInspect)
         }
     }
     return true;
-}
-
-void AFilePGEngineStandard::doReleaseResources()
-{
-    delete Stream; Stream = nullptr;
-    if (File.isOpen()) File.close();
 }
 
 bool AFilePGEngineStandard::doGenerateEvent(QVector<AParticleRecord *> &GeneratedParticles)
@@ -373,6 +348,12 @@ void AFilePGEngineStandard::doSetStartEvent(int startEvent)
     }
 }
 
+AFilePGEngineG4antsTxt::~AFilePGEngineG4antsTxt()
+{
+    if (inStream) inStream->close();
+    delete inStream; inStream = nullptr;
+}
+
 bool AFilePGEngineG4antsTxt::doInit(bool bNeedInspect)
 {
     inStream = new std::ifstream(FileName.toLatin1().data());
@@ -430,12 +411,6 @@ bool AFilePGEngineG4antsTxt::doInit(bool bNeedInspect)
         if (!bWasParticle) FPG->statNumEmptyEventsInFile++;
     }
     return true;
-}
-
-void AFilePGEngineG4antsTxt::doReleaseResources()
-{
-    if (inStream) inStream->close();
-    delete inStream; inStream = nullptr;
 }
 
 bool AFilePGEngineG4antsTxt::doGenerateEvent(QVector<AParticleRecord *> &GeneratedParticles)
@@ -531,6 +506,12 @@ bool AFilePGEngineG4antsTxt::doGenerateG4File(int eventBegin, int eventEnd, cons
     return false;
 }
 
+AFilePGEngineG4antsBin::~AFilePGEngineG4antsBin()
+{
+    if (inStream) inStream->close();
+    delete inStream; inStream = nullptr;
+}
+
 bool AFilePGEngineG4antsBin::doInit(bool bNeedInspect)
 {
     inStream = new std::ifstream(FileName.toLatin1().data(), std::ios::in | std::ios::binary);
@@ -602,12 +583,6 @@ bool AFilePGEngineG4antsBin::doInit(bool bNeedInspect)
         if (!bWasParticle) FPG->statNumEmptyEventsInFile++;
     }
     return true;
-}
-
-void AFilePGEngineG4antsBin::doReleaseResources()
-{
-    if (inStream) inStream->close();
-    delete inStream; inStream = nullptr;
 }
 
 bool AFilePGEngineG4antsBin::doGenerateEvent(QVector<AParticleRecord *> &GeneratedParticles)

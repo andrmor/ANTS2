@@ -38,7 +38,7 @@ public:
     void            SetFileName(const QString &fileName);
     const QString   GetFileName() const {return FileName;}
 
-    void            SetFileFormat(AFileMode mode) {Mode = mode;}
+    void            SetFileFormat(AFileMode mode);
     AFileMode       GetFileFormat() const {return Mode;}
 
     void            InvalidateFile();    //forces the file to be inspected again during next call of Init()
@@ -76,7 +76,6 @@ public:
     virtual ~AFilePGEngine(){}
 
     virtual bool doInit(bool bNeedInspect) = 0;
-    virtual void doReleaseResources() = 0;
     virtual bool doGenerateEvent(QVector<AParticleRecord*> & GeneratedParticles) = 0;
     virtual void doSetStartEvent(int startEvent) = 0;
     virtual bool doGenerateG4File(int eventBegin, int eventEnd, const QString & FileName) = 0;
@@ -92,9 +91,9 @@ class AFilePGEngineStandard : public AFilePGEngine
 {
 public:
     AFilePGEngineStandard(AFileParticleGenerator * fpg) : AFilePGEngine(fpg) {}
+    ~AFilePGEngineStandard();
 
     bool doInit(bool bNeedInspect) override;
-    void doReleaseResources() override;
     bool doGenerateEvent(QVector<AParticleRecord*> & GeneratedParticles) override;
     void doSetStartEvent(int startEvent) override;
     bool doGenerateG4File(int, int, const QString &) override {return false;}  // not needed
@@ -108,9 +107,9 @@ class AFilePGEngineG4antsTxt : public AFilePGEngine
 {
 public:
     AFilePGEngineG4antsTxt(AFileParticleGenerator * fpg) : AFilePGEngine(fpg) {}
+    ~AFilePGEngineG4antsTxt();
 
     bool doInit(bool bNeedInspect) override;
-    void doReleaseResources() override;
     bool doGenerateEvent(QVector<AParticleRecord*> & GeneratedParticles) override;  // used only in GUI test
     void doSetStartEvent(int) override {}  // not needed
     bool doGenerateG4File(int eventBegin, int eventEnd, const QString & FileName) override;
@@ -123,10 +122,10 @@ class AFilePGEngineG4antsBin : public AFilePGEngine
 {
 public:
     AFilePGEngineG4antsBin(AFileParticleGenerator * fpg) : AFilePGEngine(fpg) {}
+    ~AFilePGEngineG4antsBin();
 
 protected:
     bool doInit(bool bNeedInspect) override;
-    void doReleaseResources() override;
     bool doGenerateEvent(QVector<AParticleRecord*> & GeneratedParticles) override;  // used only in GUI test
     void doSetStartEvent(int) override {}  // not needed
     bool doGenerateG4File(int eventBegin, int eventEnd, const QString & FileName) override;

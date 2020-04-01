@@ -748,6 +748,9 @@ void MainWindow::on_leGenerateFromFile_FileName_editingFinished()
 
 void MainWindow::on_cobGenerateFromFile_FileFormat_activated(int index)
 {
+    const int oldIndex = static_cast<int>(SimulationManager->FileParticleGenerator->GetFileFormat());
+    if (oldIndex == index) return;
+
     SimulationManager->FileParticleGenerator->SetFileFormat(static_cast<AFileMode>(index));
     on_pbUpdateSimConfig_clicked();
 }

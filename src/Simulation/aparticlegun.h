@@ -27,7 +27,11 @@ public:
 
     virtual void SetStartEvent(int) {} // for 'from file' generator
 
-    const QString& GetErrorString() const {return ErrorString;}
+
+    const QString & GetErrorString() const {return ErrorString;}
+    void            SetErrorString(const QString& str) {ErrorString = str;}
+
+    bool            IsAbortRequested() const {return bAbortRequested;}
 
 public slots:
     virtual void abort() {bAbortRequested = true;}

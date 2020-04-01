@@ -40,191 +40,33 @@ bool AFileParticleGenerator::Init()
         return false;
     }
 
-    bool bOK = (Mode == AParticleFileMode::Standard ? initStandardMode()
-                                                    : initG4Mode() );
-    return bOK;
-}
-
-bool AFileParticleGenerator::initStandardMode()
-{
-    File.setFileName(FileName);
-    if(!File.open(QIODevice::ReadOnly | QFile::Text))
+    bool bNeedInspect = isRequireInspection();
+    if (bNeedInspect)
     {
-        ErrorString = QString("Failed to open file: %1").arg(FileName);
-        qWarning() << ErrorString;
-        return false;
-    }
-
-    Stream = new QTextStream(&File);
-
-    if (isRequiresInspection())
-    {
-        qDebug() << "Inspecting file:" << FileName;
         RegisteredParticleCount = MpCollection.countParticles();
         clearFileStat();  // resizes statParticleQuantity container according to RegisteredParticleCount
-
         FileLastModified = QFileInfo(FileName).lastModified();
-
-        bool bContinueEvent = false;
-        while (!Stream->atEnd())
-        {
-            const QString line = Stream->readLine();
-            QStringList f = line.split(rx, QString::SkipEmptyParts);
-
-            if (f.size() < 9) continue;
-
-            bool bOK;
-            int    pId = f.at(0).toInt(&bOK);
-            if (!bOK) continue; //assuming this is a comment line
-            if (pId < 0 || pId >= RegisteredParticleCount)
-            {
-                ErrorString = QString("Invalid particle index %1 in file %2").arg(pId).arg(FileName);
-                return false;
-            }
-            statParticleQuantity[pId]++;
-
-            if (!bContinueEvent) NumEventsInFile++;
-
-            if (f.size() > 9 && f.at(9) == '*')
-            {
-                if (!bContinueEvent) statNumMultipleEvents++;
-                bContinueEvent = true;
-            }
-            else bContinueEvent = false;
-        }
     }
-    return true;
-}
 
-bool AFileParticleGenerator::initG4Mode()
-{
+    if (Mode == AFileMode::Standard)
+    {
+        Engine = new AFilePGEngineStandard(this);
+        return Engine->doInit(bNeedInspect);
+    }
+
     bool bOK = testG4mode();
     if (!bOK) return false;
 
     if (bG4binary)
-        inStream = new std::ifstream(FileName.toLatin1().data(), std::ios::in | std::ios::binary);
+    {
+        Engine = new AFilePGEngineG4antsBin(this);
+        return Engine->doInit(bNeedInspect);
+    }
     else
-        inStream = new std::ifstream(FileName.toLatin1().data());
-
-    if (!inStream->is_open()) //paranoic
     {
-        ErrorString = QString("Cannot open file %1").arg(FileName);
-        return false;
+        Engine = new AFilePGEngineG4antsTxt(this);
+        return Engine->doInit(bNeedInspect);
     }
-
-    qDebug() << "Need inspection?" << isRequiresInspection();
-    if (isRequiresInspection())
-    {
-        qDebug() << "Inspecting G4 file:" << FileName;
-        clearFileStat();  // resizes statParticleQuantity container according to RegisteredParticleCount
-
-
-        if (bG4binary)
-        {
-            bool bWasParticle = true;
-            bool bWasMulty    = false;
-            std::string pn;
-            double energy, time;
-            double PosDir[6];
-            char h;
-            int eventId;
-            while (inStream->get(h))
-            {
-                if (h == char(0xEE)) //new event
-                {
-                    inStream->read((char*)&eventId, sizeof(int));
-                    NumEventsInFile++;
-                    if (bWasMulty) statNumMultipleEvents++;
-                    if (!bWasParticle) statNumEmptyEventsInFile++;
-                    bWasMulty = false;
-                    bWasParticle = false;
-                }
-                else if (h == char(0xFF))
-                {
-                    //data line
-                    pn.clear();
-                    while (*inStream >> h)
-                    {
-                        if (h == (char)0x00) break;
-                        pn += h;
-                    }
-                    //qDebug() << pn.data();
-                    inStream->read((char*)&energy,       sizeof(double));
-                    inStream->read((char*)&PosDir,     6*sizeof(double));
-                    inStream->read((char*)&time,         sizeof(double));
-                    if (inStream->fail())
-                    {
-                        ErrorString = "Unexpected format of a line in the binary file with the input particles";
-                        return false;
-                    }
-
-                    //statParticleQuantity[pId]++;
-
-                    if (bWasParticle) bWasMulty = true;
-                    bWasParticle = true;
-                }
-                else
-                {
-                    ErrorString = "Format error in binary file!";
-                    return false;
-                }
-            }
-            if (!inStream->eof())
-            {
-                ErrorString = "Format error in binary file!";
-                return false;
-            }
-            if (bWasMulty) statNumMultipleEvents++;
-            if (!bWasParticle) statNumEmptyEventsInFile++;
-        }
-        else
-        {
-            std::string str;
-            bool bWasParticle = true;
-            bool bWasMulty    = false;
-            while (!inStream->eof())
-            {
-                getline( *inStream, str );
-                if (str.empty())
-                {
-                    if (inStream->eof()) break;
-
-                    ErrorString = "Found empty line!";
-                    return false;
-                }
-
-                if (str[0] == '#')
-                {
-                    //new event
-                    NumEventsInFile++;
-                    if (bWasMulty) statNumMultipleEvents++;
-                    if (!bWasParticle) statNumEmptyEventsInFile++;
-                    bWasMulty = false;
-                    bWasParticle = false;
-                    continue;
-                }
-
-                QStringList f = QString(str.data()).split(rx, QString::SkipEmptyParts);
-                //pname en x y z i j k time
-
-                if (f.size() != 9)
-                {
-                    ErrorString = "Bad format of particle record!";
-                    return false;
-                }
-
-                //statParticleQuantity[pId]++;
-
-                if (bWasParticle) bWasMulty = true;
-                bWasParticle = true;
-            }
-            if (bWasMulty) statNumMultipleEvents++;
-            if (!bWasParticle) statNumEmptyEventsInFile++;
-        }
-
-        FileLastModified = QFileInfo(FileName).lastModified();
-    }
-    return true;
 }
 
 bool AFileParticleGenerator::testG4mode()
@@ -255,8 +97,8 @@ bool AFileParticleGenerator::testG4mode()
     }
 
     char ch;
-    inB >> ch;
-    if (ch == char(0xee))
+    inB.get(ch);
+    if (ch == (char)0xEE)
     {
         qDebug() << "It seems it is a valid binary G4ants file";
         bG4binary = true;
@@ -267,13 +109,13 @@ bool AFileParticleGenerator::testG4mode()
     return false;
 }
 
-bool AFileParticleGenerator::isRequiresInspection() const
+bool AFileParticleGenerator::isRequireInspection() const
 {
     QFileInfo fi(FileName);
 
     if (FileLastModified != fi.lastModified()) return true;
 
-    if (Mode == AParticleFileMode::Standard &&
+    if (Mode == AFileMode::Standard &&
         RegisteredParticleCount != MpCollection.countParticles()) return true;
 
     return false;
@@ -281,141 +123,21 @@ bool AFileParticleGenerator::isRequiresInspection() const
 
 void AFileParticleGenerator::ReleaseResources()
 {
-    delete Stream; Stream = nullptr;
-    if (File.isOpen()) File.close();
-
-    if (inStream) inStream->close();
-    delete inStream; inStream = nullptr;
+    if (Engine) Engine->doReleaseResources();
 }
 
 bool AFileParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles)
 {
-    if (Mode == AParticleFileMode::Standard)
+    if (!Engine)
     {
-        while (!Stream->atEnd())
-        {
-            if (bAbortRequested) return false;
-            const QString line = Stream->readLine();
-            QStringList f = line.split(rx, QString::SkipEmptyParts);
-            //format: ParticleId Energy X Y Z VX VY VZ Time *  //'*' is optional - indicates event not finished yet
-
-            if (f.size() < 9) continue;
-            if (f.at(0) == '#') continue;
-
-            bool bOK;
-            int    pId    = f.at(0).toInt(&bOK);
-            if (!bOK) continue;
-            //TODO protection of wrong index, either test on start
-
-            double energy = f.at(1).toDouble();
-            double x =      f.at(2).toDouble();
-            double y =      f.at(3).toDouble();
-            double z =      f.at(4).toDouble();
-            double vx =     f.at(5).toDouble();
-            double vy =     f.at(6).toDouble();
-            double vz =     f.at(7).toDouble();
-            double t  =     f.at(8).toDouble();
-
-            AParticleRecord* p = new AParticleRecord(pId,
-                                                     x, y, z,
-                                                     vx, vy, vz,
-                                                     t, energy);
-            p->ensureUnitaryLength();
-            GeneratedParticles << p;
-
-            if (f.size() > 9 && f.at(9) == '*') continue; //this is multiple event!
-            return true; //normal termination
-        }
-        return false; //could not read particle record in file!
-    }
-    else if (bG4binary)
-    {
-        char h;
-        int eventId;
-        std::string pn;
-        while (inStream->get(h))
-        {
-            if (h == char(0xEE))
-            {
-                //next event starts here
-                inStream->read((char*)&eventId,    sizeof(int));
-                return true;
-            }
-            else if (h == char(0xFF))
-            {
-                //data line
-                AParticleRecord * p = new AParticleRecord();
-                pn.clear();
-                while (*inStream >> h)
-                {
-                    if (h == (char)0x00) break;
-                    pn += h;
-                }
-                //qDebug() << pn.data();
-                p->Id = -1;
-                inStream->read((char*)&p->energy,    sizeof(double));
-                inStream->read((char*)&p->r,       3*sizeof(double));
-                inStream->read((char*)&p->v,       3*sizeof(double));
-                inStream->read((char*)&p->time,      sizeof(double));
-                if (inStream->fail())
-                {
-                    ErrorString = "Unexpected format of a line in the binary file with the input particles";
-                    return false;
-                }
-                GeneratedParticles << p;
-            }
-            else
-            {
-                ErrorString = "Unexpected format of a line in the binary file with the input particles";
-                return false;
-            }
-        }
-        return false;
-    }
-    else
-    {
-        // ascii G4
-        std::string str;
-        while ( getline(*inStream, str) )
-        {
-            if (str.empty())
-            {
-                if (inStream->eof()) return false;
-                ErrorString = "Found empty line!";
-                return false;
-            }
-
-            if (str[0] == '#') return true; //new event
-
-            QStringList f = QString(str.data()).split(rx, QString::SkipEmptyParts); //pname en time x y z i j k
-            if (f.size() != 9)
-            {
-                ErrorString = "Bad format of particle record!";
-                return false;
-            }
-            //qDebug() << "Ascii, "<<f.at(0);
-
-            AParticleRecord * p = new AParticleRecord();
-
-            p->Id     = -1;
-            p->energy = f.at(1).toDouble();
-            p->r[0]   = f.at(2).toDouble();
-            p->r[1]   = f.at(3).toDouble();
-            p->r[2]   = f.at(4).toDouble();
-            p->v[0]   = f.at(5).toDouble();
-            p->v[1]   = f.at(6).toDouble();
-            p->v[2]   = f.at(7).toDouble();
-            p->time   = f.at(8).toDouble();
-
-            GeneratedParticles << p;
-        }
+        ErrorString = "Generator is not configured!";
         return false;
     }
 
-    return false;
+    return Engine->doGenerateEvent(GeneratedParticles);
 }
 
-bool AFileParticleGenerator::IsParticleInUse(int particleId, QString &SourceNames) const
+bool AFileParticleGenerator::IsParticleInUse(int /*particleId*/, QString & /*SourceNames*/) const
 {
     return false; //TODO
 }
@@ -438,13 +160,13 @@ bool AFileParticleGenerator::readFromJson(const QJsonObject &json)
     parseJson(json, "FileLastModified", lastMod);
     FileLastModified = QDateTime::fromMSecsSinceEpoch(lastMod);
 
-    Mode = AParticleFileMode::Standard;
+    Mode = AFileMode::Standard;
     if (json.contains("Mode"))
     {
         int im;
         parseJson(json, "Mode", im);
         if (im > -1 && im < 2)
-            Mode = static_cast<AParticleFileMode>(im);
+            Mode = static_cast<AFileMode>(im);
     }
 
     return parseJson(json, "FileName", FileName);
@@ -452,34 +174,7 @@ bool AFileParticleGenerator::readFromJson(const QJsonObject &json)
 
 void AFileParticleGenerator::SetStartEvent(int startEvent)
 {
-    if (Stream)
-    {
-        Stream->seek(0);
-        if (startEvent == 0) return;
-
-        int event = -1;
-        bool bContinueEvent = false;
-        while (!Stream->atEnd())
-        {
-            const QString line = Stream->readLine();
-            QStringList f = line.split(rx, QString::SkipEmptyParts);
-            if (f.size() < 9) continue;
-            if (f.at(0) == '#') continue;
-            bool bOK;
-            f.at(0).toInt(&bOK);
-            if (!bOK) continue; //assuming this is a comment line
-
-            if (!bContinueEvent) event++;
-
-            if (f.size() > 9 && f.at(9) == '*')
-                bContinueEvent = true;
-            else
-            {
-                bContinueEvent = false;
-                if (event == startEvent-1) return;
-            }
-        }
-    }
+    if (Engine) Engine->doSetStartEvent(startEvent);
 }
 
 void AFileParticleGenerator::InvalidateFile()
@@ -493,11 +188,12 @@ bool AFileParticleGenerator::IsValidated() const
 
     if (!fi.exists()) return false;
     if (FileLastModified != fi.lastModified()) return false;
-    if (Mode == AParticleFileMode::Standard && RegisteredParticleCount != MpCollection.countParticles()) return false;
+    if (Mode == AFileMode::Standard && RegisteredParticleCount != MpCollection.countParticles()) return false;
 
     return true;
 }
 
+/*
 const QString AFileParticleGenerator::GetEventRecords(int fromEvent, int toEvent) const
 {
     QString s;
@@ -530,146 +226,14 @@ const QString AFileParticleGenerator::GetEventRecords(int fromEvent, int toEvent
     }
     return s;
 }
+*/
 
 bool AFileParticleGenerator::generateG4File(int eventBegin, int eventEnd, const QString & FileName)
 {
-    qDebug() << eventBegin << eventEnd;
-
-    std::ofstream  outStream;
-    if (bG4binary) outStream.open(FileName.toLatin1().data(), std::ios::out | std::ios::binary);
-    else           outStream.open(FileName.toLatin1().data());
-
-    if (!outStream.is_open())
-    {
-        ErrorString = "Cannot open file to export G4 pareticle data";
-        return false;
-    }
-
-    int currentEvent = -1;
-    int eventsToDo = eventEnd - eventBegin;
-    bool bSkippingEvents = (eventBegin != 0);
-    if (bG4binary)
-    {
-        int eventId;
-        std::string pn;
-        double energy, time;
-        double posDir[6];
-        char ch;
-        while (inStream->get(ch))
-        {
-            if (inStream->eof())
-            {
-                if (eventsToDo == 0) return true;
-                else
-                {
-                    ErrorString = "Unexpected end of file";
-                    return false;
-                }
-            }
-            if (inStream->fail())
-            {
-                ErrorString = "Unexpected error during reading of a header char in the G4ants binary file";
-                return false;
-            }
-
-            if (ch == (char)0xEE)
-            {
-                inStream->read((char*)&eventId,    sizeof(int));
-                if (eventsToDo == 0) return true;
-                currentEvent++;
-
-                if (bSkippingEvents && currentEvent == eventBegin) bSkippingEvents = false;
-
-                if (!bSkippingEvents)
-                {
-                    outStream << ch;
-                    outStream.write((char*)&eventId, sizeof(int));
-                    eventsToDo--;
-                }
-
-                continue;
-            }
-            else if (ch == (char)0xFF)
-            {
-                //data line
-                pn.clear();
-                while (*inStream >> ch)
-                {
-                    if (ch == (char)0x00) break;
-                    pn += ch;
-                }
-                //qDebug() << pn.data();
-                inStream->read((char*)&energy,    sizeof(double));
-                inStream->read((char*)&posDir,  6*sizeof(double));
-                inStream->read((char*)&time,      sizeof(double));
-                if (inStream->fail())
-                {
-                    ErrorString = "Unexpected format of a line in the G4ants binary file";
-                    return false;
-                }
-                if (!bSkippingEvents)
-                {
-                    outStream << (char)0xFF;
-                    outStream << pn << (char)0x00;
-                    outStream.write((char*)&energy,  sizeof(double));
-                    outStream.write((char*)posDir, 6*sizeof(double));
-                    outStream.write((char*)&time,    sizeof(double));
-                }
-            }
-            else
-            {
-                ErrorString = "Unexpected format of a header char in the binary file with the input particles";
-                return false;
-            }
-        }
-    }
+    if (Engine)
+        return Engine->doGenerateG4File(eventBegin, eventEnd, FileName);
     else
-    {
-        std::string str;
-        while ( getline(*inStream, str) )
-        {
-            if (inStream->eof())
-            {
-                if (eventsToDo == 0) return true;
-                else
-                {
-                    ErrorString = "Unexpected end of file";
-                    return false;
-                }
-            }
-            if (str.empty())
-            {
-                ErrorString = "Found empty line!";
-                return false;
-            }
-
-            if (str[0] == '#')
-            {
-                if (eventsToDo == 0) return true;
-                currentEvent++;
-
-                if (bSkippingEvents && currentEvent == eventBegin) bSkippingEvents = false;
-
-                if (!bSkippingEvents)
-                {
-                    outStream << str << std::endl;
-                    eventsToDo--;
-                }
-
-                continue;
-            }
-
-            if (!bSkippingEvents)
-            {
-                outStream << str << std::endl;
-            }
-        }
-    }
-
-    if (eventsToDo == 0) return true;
-
-    ErrorString = "Unexpected end of file";
-    return false;
+        return false;
 }
 
 void AFileParticleGenerator::clearFileStat()
@@ -683,4 +247,502 @@ void AFileParticleGenerator::clearFileStat()
     statParticleQuantity.clear();
     if (RegisteredParticleCount >= 0)
         statParticleQuantity =  QVector<int>(RegisteredParticleCount, 0);
+}
+
+// ***************************************************************************
+
+bool AFilePGEngineStandard::doInit(bool bNeedInspect)
+{
+    File.setFileName(FileName);
+    if(!File.open(QIODevice::ReadOnly | QFile::Text))
+    {
+        FPG->SetErrorString( QString("Failed to open file: %1").arg(FileName) );
+        return false;
+    }
+
+    Stream = new QTextStream(&File);
+
+    if (bNeedInspect)
+    {
+        qDebug() << "Inspecting file (standard format):" << FileName;
+
+        bool bContinueEvent = false;
+        while (!Stream->atEnd())
+        {
+            const QString line = Stream->readLine();
+            const QStringList f = line.split(rx, QString::SkipEmptyParts);
+            if (f.size() < 9) continue;
+
+            bool bOK;
+            int    pId = f.at(0).toInt(&bOK);
+            if (!bOK) continue; //assuming this is a comment line
+            if (pId < 0 || pId >= FPG->RegisteredParticleCount)
+            {
+                FPG->SetErrorString( QString("Invalid particle index %1 in file %2").arg(pId).arg(FileName) );
+                return false;
+            }
+            FPG->statParticleQuantity[pId]++;
+
+            if (!bContinueEvent) FPG->NumEventsInFile++;
+
+            if (f.size() > 9 && f.at(9) == '*')
+            {
+                if (!bContinueEvent) FPG->statNumMultipleEvents++;
+                bContinueEvent = true;
+            }
+            else bContinueEvent = false;
+        }
+    }
+    return true;
+}
+
+void AFilePGEngineStandard::doReleaseResources()
+{
+    delete Stream; Stream = nullptr;
+    if (File.isOpen()) File.close();
+}
+
+bool AFilePGEngineStandard::doGenerateEvent(QVector<AParticleRecord *> &GeneratedParticles)
+{
+    while (!Stream->atEnd())
+    {
+        if (FPG->IsAbortRequested()) return false;
+
+        const QString line = Stream->readLine();
+        QStringList f = line.split(rx, QString::SkipEmptyParts);
+        //format: ParticleId Energy X Y Z VX VY VZ Time *  //'*' is optional - indicates event not finished yet
+        if (f.size() < 9) continue;    // skip bad lines!
+        if (f.at(0) == '#') continue;  // comment line
+
+        bool bOK;
+        int  pId    = f.at(0).toInt(&bOK);
+        if (!bOK) continue;
+        //TODO protection: wrong index, either test on start
+
+        double energy = f.at(1).toDouble();
+        double x =      f.at(2).toDouble();
+        double y =      f.at(3).toDouble();
+        double z =      f.at(4).toDouble();
+        double vx =     f.at(5).toDouble();
+        double vy =     f.at(6).toDouble();
+        double vz =     f.at(7).toDouble();
+        double t  =     f.at(8).toDouble();
+
+        AParticleRecord* p = new AParticleRecord(pId,
+                                                 x, y, z,
+                                                 vx, vy, vz,
+                                                 t, energy);
+        p->ensureUnitaryLength();
+        GeneratedParticles << p;
+
+        if (f.size() > 9 && f.at(9) == '*') continue; //this is multiple event!
+        return true; //normal termination
+    }
+    return false; //could not read particle record in file!
+}
+
+void AFilePGEngineStandard::doSetStartEvent(int startEvent)
+{
+    if (Stream)
+    {
+        Stream->seek(0);
+        if (startEvent == 0) return;
+
+        int event = -1;
+        bool bContinueEvent = false;
+        while (!Stream->atEnd())
+        {
+            const QString line = Stream->readLine();
+            QStringList f = line.split(rx, QString::SkipEmptyParts);
+            if (f.size() < 9) continue;
+            if (f.at(0) == '#') continue;
+            bool bOK;
+            f.at(0).toInt(&bOK);
+            if (!bOK) continue; //assuming this is a comment line
+
+            if (!bContinueEvent) event++;
+
+            if (f.size() > 9 && f.at(9) == '*')
+                bContinueEvent = true;
+            else
+            {
+                bContinueEvent = false;
+                if (event == startEvent-1) return;
+            }
+        }
+    }
+}
+
+bool AFilePGEngineG4antsTxt::doInit(bool bNeedInspect)
+{
+    inStream = new std::ifstream(FileName.toLatin1().data());
+
+    if (!inStream->is_open())
+    {
+        FPG->SetErrorString( QString("Cannot open file %1").arg(FileName) );
+        return false;
+    }
+
+    if (bNeedInspect)
+    {
+        qDebug() << "Inspecting G4ants-generated txt file:" << FileName;
+
+        std::string str;
+        bool bWasParticle = true;
+        bool bWasMulty    = false;
+        while (!inStream->eof())
+        {
+            getline( *inStream, str );
+            if (str.empty())
+            {
+                if (inStream->eof()) break;
+
+                FPG->SetErrorString("Found empty line!");
+                return false;
+            }
+
+            if (str[0] == '#')
+            {
+                //new event
+                FPG->NumEventsInFile++;
+                if (bWasMulty)     FPG->statNumMultipleEvents++;
+                if (!bWasParticle) FPG->statNumEmptyEventsInFile++;
+                bWasMulty = false;
+                bWasParticle = false;
+                continue;
+            }
+
+            QStringList f = QString(str.data()).split(rx, QString::SkipEmptyParts);
+            //pname en x y z i j k time
+
+            if (f.size() != 9)
+            {
+                FPG->SetErrorString("Bad format of particle record!");
+                return false;
+            }
+
+            //statParticleQuantity[pId]++;
+
+            if (bWasParticle) bWasMulty = true;
+            bWasParticle = true;
+        }
+        if (bWasMulty)     FPG->statNumMultipleEvents++;
+        if (!bWasParticle) FPG->statNumEmptyEventsInFile++;
+    }
+    return true;
+}
+
+void AFilePGEngineG4antsTxt::doReleaseResources()
+{
+    if (inStream) inStream->close();
+    delete inStream; inStream = nullptr;
+}
+
+bool AFilePGEngineG4antsTxt::doGenerateEvent(QVector<AParticleRecord *> &GeneratedParticles)
+{
+    std::string str;
+    while ( getline(*inStream, str) )
+    {
+        if (str.empty())
+        {
+            if (inStream->eof()) return false;
+            FPG->SetErrorString("Found empty line!");
+            return false;
+        }
+
+        if (str[0] == '#') return true; //new event
+
+        QStringList f = QString(str.data()).split(rx, QString::SkipEmptyParts); //pname en time x y z i j k
+        if (f.size() != 9)
+        {
+            FPG->SetErrorString("Bad format of particle record!");
+            return false;
+        }
+
+        AParticleRecord * p = new AParticleRecord();
+
+        p->Id     = -1;
+        p->energy = f.at(1).toDouble();
+        p->r[0]   = f.at(2).toDouble();
+        p->r[1]   = f.at(3).toDouble();
+        p->r[2]   = f.at(4).toDouble();
+        p->v[0]   = f.at(5).toDouble();
+        p->v[1]   = f.at(6).toDouble();
+        p->v[2]   = f.at(7).toDouble();
+        p->time   = f.at(8).toDouble();
+
+        GeneratedParticles << p;
+    }
+    return false;
+}
+
+bool AFilePGEngineG4antsTxt::doGenerateG4File(int eventBegin, int eventEnd, const QString &FileName)
+{
+    std::ofstream outStream;
+    outStream.open(FileName.toLatin1().data());
+    if (!outStream.is_open())
+    {
+        FPG->SetErrorString("Cannot open file to export G4 pareticle data");
+        return false;
+    }
+
+    int currentEvent = -1;
+    int eventsToDo = eventEnd - eventBegin;
+    bool bSkippingEvents = (eventBegin != 0);
+    std::string str;
+    while ( getline(*inStream, str) )
+    {
+        if (inStream->eof())
+        {
+            if (eventsToDo == 0) return true;
+            else
+            {
+                FPG->SetErrorString("Unexpected end of file");
+                return false;
+            }
+        }
+        if (str.empty())
+        {
+            FPG->SetErrorString("Found empty line!");
+            return false;
+        }
+
+        if (str[0] == '#')
+        {
+            if (eventsToDo == 0) return true;
+            currentEvent++;
+
+            if (bSkippingEvents && currentEvent == eventBegin) bSkippingEvents = false;
+
+            if (!bSkippingEvents)
+            {
+                outStream << str << std::endl;
+                eventsToDo--;
+            }
+            continue;
+        }
+
+        if (!bSkippingEvents) outStream << str << std::endl;
+    }
+
+    if (eventsToDo == 0) return true;
+
+    FPG->SetErrorString("Unexpected end of file");
+    return false;
+}
+
+bool AFilePGEngineG4antsBin::doInit(bool bNeedInspect)
+{
+    inStream = new std::ifstream(FileName.toLatin1().data(), std::ios::in | std::ios::binary);
+
+    if (!inStream->is_open()) //paranoic
+    {
+        FPG->SetErrorString( QString("Cannot open file %1").arg(FileName) );
+        return false;
+    }
+
+    if (bNeedInspect)
+    {
+        qDebug() << "Inspecting G4ants-generated bin file:" << FileName;
+
+        bool bWasParticle = true;
+        bool bWasMulty    = false;
+        std::string pn;
+        double energy, time;
+        double PosDir[6];
+        char h;
+        int eventId;
+        while (inStream->get(h))
+        {
+            if (h == char(0xEE)) //new event
+            {
+                inStream->read((char*)&eventId, sizeof(int));
+                FPG->NumEventsInFile++;
+                if (bWasMulty)     FPG->statNumMultipleEvents++;
+                if (!bWasParticle) FPG->statNumEmptyEventsInFile++;
+                bWasMulty = false;
+                bWasParticle = false;
+            }
+            else if (h == char(0xFF))
+            {
+                //data line
+                pn.clear();
+                while (*inStream >> h)
+                {
+                    if (h == (char)0x00) break;
+                    pn += h;
+                }
+                //qDebug() << pn.data();
+                inStream->read((char*)&energy,       sizeof(double));
+                inStream->read((char*)&PosDir,     6*sizeof(double));
+                inStream->read((char*)&time,         sizeof(double));
+                if (inStream->fail())
+                {
+                    FPG->SetErrorString("Unexpected format of a line in the binary file with the input particles");
+                    return false;
+                }
+
+                //statParticleQuantity[pId]++;
+
+                if (bWasParticle) bWasMulty = true;
+                bWasParticle = true;
+            }
+            else
+            {
+                FPG->SetErrorString("Format error in binary file!");
+                return false;
+            }
+        }
+        if (!inStream->eof())
+        {
+            FPG->SetErrorString("Format error in binary file!");
+            return false;
+        }
+        if (bWasMulty)     FPG->statNumMultipleEvents++;
+        if (!bWasParticle) FPG->statNumEmptyEventsInFile++;
+    }
+    return true;
+}
+
+void AFilePGEngineG4antsBin::doReleaseResources()
+{
+    if (inStream) inStream->close();
+    delete inStream; inStream = nullptr;
+}
+
+bool AFilePGEngineG4antsBin::doGenerateEvent(QVector<AParticleRecord *> &GeneratedParticles)
+{
+    char h;
+    int eventId;
+    std::string pn;
+    while (inStream->get(h))
+    {
+        if (h == (char)0xEE)
+        {
+            //next event starts here
+            inStream->read((char*)&eventId, sizeof(int));
+            return true;
+        }
+        else if (h == (char)0xFF)
+        {
+            //data line
+            AParticleRecord * p = new AParticleRecord();
+            pn.clear();
+            while (*inStream >> h)
+            {
+                if (h == (char)0x00) break;
+                pn += h;
+            }
+            //qDebug() << pn.data();
+            p->Id = -1;
+            inStream->read((char*)&p->energy,   sizeof(double));
+            inStream->read((char*)&p->r,      3*sizeof(double));
+            inStream->read((char*)&p->v,      3*sizeof(double));
+            inStream->read((char*)&p->time,     sizeof(double));
+            if (inStream->fail())
+            {
+                FPG->SetErrorString("Unexpected format of a line in the binary file with the input particles");
+                return false;
+            }
+            GeneratedParticles << p;
+        }
+        else
+        {
+            FPG->SetErrorString("Unexpected format of a line in the binary file with the input particles");
+            return false;
+        }
+    }
+    return false;
+}
+
+bool AFilePGEngineG4antsBin::doGenerateG4File(int eventBegin, int eventEnd, const QString &FileName)
+{
+    std::ofstream  outStream;
+    outStream.open(FileName.toLatin1().data(), std::ios::out | std::ios::binary);
+    if (!outStream.is_open())
+    {
+        FPG->SetErrorString("Cannot open file to export G4 pareticle data");
+        return false;
+    }
+
+    int currentEvent = -1;
+    int eventsToDo = eventEnd - eventBegin;
+    bool bSkippingEvents = (eventBegin != 0);
+    int eventId;
+    std::string pn;
+    double energy, time;
+    double posDir[6];
+    char ch;
+    while (inStream->get(ch))
+    {
+        if (inStream->eof())
+        {
+            if (eventsToDo == 0) return true;
+            else
+            {
+                FPG->SetErrorString("Unexpected end of file");
+                return false;
+            }
+        }
+        if (inStream->fail())
+        {
+            FPG->SetErrorString("Unexpected error during reading of a header char in the G4ants binary file");
+            return false;
+        }
+
+        if (ch == (char)0xEE)
+        {
+            inStream->read((char*)&eventId, sizeof(int));
+            if (eventsToDo == 0) return true;
+            currentEvent++;
+
+            if (bSkippingEvents && currentEvent == eventBegin) bSkippingEvents = false;
+
+            if (!bSkippingEvents)
+            {
+                outStream << ch;
+                outStream.write((char*)&eventId, sizeof(int));
+                eventsToDo--;
+            }
+
+            continue;
+        }
+        else if (ch == (char)0xFF)
+        {
+            //data line
+            pn.clear();
+            while (*inStream >> ch)
+            {
+                if (ch == (char)0x00) break;
+                pn += ch;
+            }
+            //qDebug() << pn.data();
+            inStream->read((char*)&energy,   sizeof(double));
+            inStream->read((char*)&posDir, 6*sizeof(double));
+            inStream->read((char*)&time,     sizeof(double));
+            if (inStream->fail())
+            {
+                FPG->SetErrorString("Unexpected format of a line in the G4ants binary file");
+                return false;
+            }
+            if (!bSkippingEvents)
+            {
+                outStream << (char)0xFF;
+                outStream << pn << (char)0x00;
+                outStream.write((char*)&energy,  sizeof(double));
+                outStream.write((char*)posDir, 6*sizeof(double));
+                outStream.write((char*)&time,    sizeof(double));
+            }
+        }
+        else
+        {
+            FPG->SetErrorString("Unexpected format of a header char in the binary file with the input particles");
+            return false;
+        }
+    }
+
+    if (eventsToDo == 0) return true;
+
+    FPG->SetErrorString("Unexpected end of file");
+    return false;
 }

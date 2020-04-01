@@ -748,7 +748,7 @@ void MainWindow::on_leGenerateFromFile_FileName_editingFinished()
 
 void MainWindow::on_cobGenerateFromFile_FileFormat_activated(int index)
 {
-    SimulationManager->FileParticleGenerator->SetFormat(static_cast<AParticleFileMode>(index));
+    SimulationManager->FileParticleGenerator->SetFileFormat(static_cast<AFileMode>(index));
     on_pbUpdateSimConfig_clicked();
 }
 
@@ -767,7 +767,7 @@ void MainWindow::updateFileParticleGeneratorGui()
     AFileParticleGenerator* pg = SimulationManager->FileParticleGenerator;
 
     ui->leGenerateFromFile_FileName->setText(pg->GetFileName());
-    ui->cobGenerateFromFile_FileFormat->setCurrentIndex(static_cast<int>(pg->GetFormat()));
+    ui->cobGenerateFromFile_FileFormat->setCurrentIndex(static_cast<int>(pg->GetFileFormat()));
 
     QFileInfo fi(pg->GetFileName());
     if (!fi.exists())

@@ -13055,12 +13055,12 @@ multiply to loaded data</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>370</x>
-     <y>464</y>
+     <x>368</x>
+     <y>433</y>
     </hint>
     <hint type="destinationlabel">
-     <x>521</x>
-     <y>489</y>
+     <x>519</x>
+     <y>458</y>
     </hint>
    </hints>
   </connection>
@@ -13071,12 +13071,12 @@ multiply to loaded data</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>319</x>
-     <y>437</y>
+     <x>317</x>
+     <y>406</y>
     </hint>
     <hint type="destinationlabel">
-     <x>259</x>
-     <y>490</y>
+     <x>257</x>
+     <y>459</y>
     </hint>
    </hints>
   </connection>
@@ -14335,8 +14335,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>227</x>
-     <y>450</y>
+     <x>225</x>
+     <y>419</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14351,8 +14351,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>317</x>
-     <y>450</y>
+     <x>315</x>
+     <y>419</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14367,8 +14367,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>407</x>
-     <y>450</y>
+     <x>405</x>
+     <y>419</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14383,8 +14383,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>192</x>
-     <y>429</y>
+     <x>190</x>
+     <y>398</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14399,8 +14399,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>264</x>
-     <y>429</y>
+     <x>262</x>
+     <y>398</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14415,8 +14415,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>335</x>
-     <y>429</y>
+     <x>333</x>
+     <y>398</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14431,8 +14431,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>190</x>
-     <y>471</y>
+     <x>188</x>
+     <y>440</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14447,8 +14447,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>232</x>
-     <y>471</y>
+     <x>230</x>
+     <y>440</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14463,8 +14463,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>274</x>
-     <y>471</y>
+     <x>272</x>
+     <y>440</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14479,8 +14479,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>343</x>
-     <y>472</y>
+     <x>341</x>
+     <y>441</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14495,8 +14495,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>448</x>
-     <y>471</y>
+     <x>452</x>
+     <y>440</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14511,8 +14511,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>132</x>
-     <y>490</y>
+     <x>134</x>
+     <y>459</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14527,8 +14527,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>190</x>
-     <y>492</y>
+     <x>188</x>
+     <y>461</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14543,8 +14543,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>232</x>
-     <y>492</y>
+     <x>230</x>
+     <y>461</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14559,8 +14559,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>274</x>
-     <y>492</y>
+     <x>272</x>
+     <y>461</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14575,8 +14575,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>343</x>
-     <y>493</y>
+     <x>341</x>
+     <y>462</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14591,8 +14591,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>415</x>
-     <y>492</y>
+     <x>419</x>
+     <y>461</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14607,8 +14607,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>136</x>
-     <y>511</y>
+     <x>134</x>
+     <y>480</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14623,8 +14623,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>190</x>
-     <y>513</y>
+     <x>188</x>
+     <y>482</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14639,8 +14639,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>232</x>
-     <y>513</y>
+     <x>230</x>
+     <y>482</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14655,8 +14655,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>274</x>
-     <y>513</y>
+     <x>272</x>
+     <y>482</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14671,8 +14671,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>343</x>
-     <y>514</y>
+     <x>341</x>
+     <y>483</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14687,8 +14687,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>454</x>
-     <y>513</y>
+     <x>458</x>
+     <y>482</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14703,8 +14703,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>168</x>
-     <y>437</y>
+     <x>166</x>
+     <y>406</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14719,8 +14719,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>319</x>
-     <y>437</y>
+     <x>317</x>
+     <y>406</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14735,8 +14735,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>129</x>
-     <y>467</y>
+     <x>127</x>
+     <y>436</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14751,8 +14751,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>129</x>
-     <y>489</y>
+     <x>127</x>
+     <y>458</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14767,8 +14767,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>225</x>
-     <y>467</y>
+     <x>223</x>
+     <y>436</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14783,8 +14783,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>225</x>
-     <y>489</y>
+     <x>223</x>
+     <y>458</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14799,8 +14799,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>370</x>
-     <y>464</y>
+     <x>368</x>
+     <y>433</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14815,8 +14815,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>369</x>
-     <y>487</y>
+     <x>367</x>
+     <y>456</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14831,8 +14831,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>159</x>
-     <y>469</y>
+     <x>157</x>
+     <y>438</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14847,8 +14847,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>159</x>
-     <y>490</y>
+     <x>157</x>
+     <y>459</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14863,8 +14863,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>239</x>
-     <y>469</y>
+     <x>237</x>
+     <y>438</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14879,8 +14879,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>239</x>
-     <y>490</y>
+     <x>237</x>
+     <y>459</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14895,8 +14895,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>370</x>
-     <y>487</y>
+     <x>368</x>
+     <y>456</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14911,8 +14911,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>466</x>
-     <y>487</y>
+     <x>464</x>
+     <y>456</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -15551,8 +15551,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>75</x>
-     <y>464</y>
+     <x>79</x>
+     <y>433</y>
     </hint>
     <hint type="destinationlabel">
      <x>62</x>

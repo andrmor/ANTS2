@@ -49,7 +49,7 @@ bool AFileParticleGenerator::Init()
     }
 
     bool bNeedInspect = isRequireInspection();
-    qDebug() << "Init called, requires inspect?" << bNeedInspect;
+    //qDebug() << "Init called, requires inspect?" << bNeedInspect;
     if (bNeedInspect)
     {
         RegisteredParticleCount = MpCollection.countParticles();
@@ -93,7 +93,7 @@ bool AFileParticleGenerator::testG4mode()
     inT.close();
     if (str.size() > 0 && str[0] == '#')
     {
-        qDebug() << "It seems it is a valid ascii G4ants file";
+        //qDebug() << "It seems it is a valid ascii G4ants file";
         bG4binary = false;
         return true;
     }
@@ -109,7 +109,7 @@ bool AFileParticleGenerator::testG4mode()
     inB.get(ch);
     if (ch == (char)0xEE)
     {
-        qDebug() << "It seems it is a valid binary G4ants file";
+        //qDebug() << "It seems it is a valid binary G4ants file";
         bG4binary = true;
         return true;
     }
@@ -178,9 +178,7 @@ bool AFileParticleGenerator::readFromJson(const QJsonObject &json)
             Mode = static_cast<AFileMode>(im);
     }
 
-    parseJson(json, "FileName", FileName);
-
-    return Init();
+    return parseJson(json, "FileName", FileName);
 }
 
 void AFileParticleGenerator::SetStartEvent(int startEvent)
@@ -245,8 +243,7 @@ bool AFilePGEngineStandard::doInit(bool bNeedInspect)
 
     if (bNeedInspect)
     {
-        qDebug() << "Inspecting file (standard format):" << FileName;
-
+        //qDebug() << "Inspecting file (standard format):" << FileName;
         bool bContinueEvent = false;
         while (!Stream->atEnd())
         {
@@ -366,8 +363,7 @@ bool AFilePGEngineG4antsTxt::doInit(bool bNeedInspect)
 
     if (bNeedInspect)
     {
-        qDebug() << "Inspecting G4ants-generated txt file:" << FileName;
-
+        //qDebug() << "Inspecting G4ants-generated txt file:" << FileName;
         std::string str;
         bool bWasParticle = true;
         bool bWasMulty    = false;
@@ -464,6 +460,7 @@ bool AFilePGEngineG4antsTxt::doGenerateG4File(int eventBegin, int eventEnd, cons
     int currentEvent = -1;
     int eventsToDo = eventEnd - eventBegin;
     bool bSkippingEvents = (eventBegin != 0);
+    inStream->seekg(0);
     std::string str;
     while ( getline(*inStream, str) )
     {
@@ -524,8 +521,7 @@ bool AFilePGEngineG4antsBin::doInit(bool bNeedInspect)
 
     if (bNeedInspect)
     {
-        qDebug() << "Inspecting G4ants-generated bin file:" << FileName;
-
+        //qDebug() << "Inspecting G4ants-generated bin file:" << FileName;
         bool bWasParticle = true;
         bool bWasMulty    = false;
         std::string pn;
@@ -648,6 +644,7 @@ bool AFilePGEngineG4antsBin::doGenerateG4File(int eventBegin, int eventEnd, cons
     double energy, time;
     double posDir[6];
     char ch;
+    inStream->seekg(0);
     while (inStream->get(ch))
     {
         if (inStream->eof())

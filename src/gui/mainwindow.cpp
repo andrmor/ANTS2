@@ -3484,8 +3484,8 @@ void MainWindow::simulationFinished()
         {
             QString s;
             double totalEdepo = SimulationManager->DepoByRegistered + SimulationManager->DepoByNotRegistered;
-            if (totalEdepo == 0)
-                s += "Total energy deposition in sensitive volumes is zero!\n\n";
+            //if (totalEdepo == 0)
+            //    s += "Total energy deposition in sensitive volumes is zero!\n\n";
 
             if (SimulationManager->DepoByNotRegistered > 0)
             {

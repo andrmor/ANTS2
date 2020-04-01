@@ -267,7 +267,11 @@ void MainWindow::on_pbGunTest_clicked()
     switch (ui->twParticleGenerationMode->currentIndex())
     {
     case 0: pg = SimulationManager->ParticleSources; break;
-    case 1: pg = SimulationManager->FileParticleGenerator; break;
+    case 1:
+        pg = SimulationManager->FileParticleGenerator;
+        pg->Init();
+        updateFileParticleGeneratorGui();
+        break;
     case 2: pg = SimulationManager->ScriptParticleGenerator; break;
     default:
         message("This generation mode is not implemented!", this);
@@ -650,7 +654,25 @@ void containsMonsGrids(const AGeoObject * obj, bool & bGrid, bool & bMon)
 #include "asandwich.h"
 void MainWindow::on_pbParticleSourcesSimulate_clicked()
 {
-    MainWindow::writeSimSettingsToJson(Config->JSON);
+    if (ui->twParticleGenerationMode->currentIndex() == 1)  // "From file"
+    {
+        if (ui->cobGenerateFromFile_FileFormat->currentIndex() == 1)  // G4ants format
+            if (!ui->cbGeant4ParticleTracking->isChecked())
+            {
+                message("G4ants-generated files can be used only when Geant4 tracking is activated", this);
+                return;
+            }
+
+        bool bOK = SimulationManager->FileParticleGenerator->Init(); // to avoid check file in each thread
+        if (!bOK)
+        {
+            message(SimulationManager->FileParticleGenerator->GetErrorString(), this);
+            return;
+        }
+        updateFileParticleGeneratorGui();
+    }
+
+    writeSimSettingsToJson(Config->JSON);
 
     ELwindow->QuickSave(0);
     fStartedFromGUI = true;

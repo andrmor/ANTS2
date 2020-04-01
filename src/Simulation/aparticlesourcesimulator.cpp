@@ -121,14 +121,15 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
             }
             else
             {
-                ParticleGun = new AFileParticleGenerator(*detector.MpCollection);
-                ParticleGun->readFromJson(fjs);
-
-                if (static_cast<AFileParticleGenerator*>(ParticleGun)->GetFileFormat() == AFileMode::G4ants && !simSettings.G4SimSet.bTrackParticles )
+                AFileParticleGenerator * PG = new AFileParticleGenerator(*detector.MpCollection);
+                PG->readFromJson(fjs);
+                if (PG->GetFileFormat() == AFileMode::G4ants && !simSettings.G4SimSet.bTrackParticles )
                 {
                     ErrorString = "Generation of particles from G4ants file cannot be run without Geant4 simulation mode";
                     return false;
                 }
+                PG->Init();
+                ParticleGun = PG;
             }
         }
         else if (PartGenMode == "Script")
@@ -202,7 +203,7 @@ void AParticleSourceSimulator::updateGeoManager()
 
 void AParticleSourceSimulator::simulate()
 {
-    qDebug() << "Starting simulation, worker #" << ID;
+    //qDebug() << "Starting simulation, worker #" << ID;
 
     checkNavigatorPresent();
 
@@ -222,7 +223,7 @@ void AParticleSourceSimulator::simulate()
         if (fpg)
         {
             bool bOK = prepareWorkerG4File();
-            qDebug() << "Prepared file for worker #" << ID << "result:"<<bOK;
+            //qDebug() << "Prepared file for worker #" << ID << "result:"<<bOK;
             fpg->ReleaseResources();
 
             if (!bOK)
@@ -235,7 +236,7 @@ void AParticleSourceSimulator::simulate()
             bOK = geant4TrackAndProcess();
             if (!bOK) fSuccess = false;
             else      fSuccess = !fHardAbortWasTriggered;
-            qDebug() << "tread #" << ID << "reports result of geant4-based tracking:" << bOK << "fSuccess:"<< fSuccess;
+            //qDebug() << "tread #" << ID << "reports result of geant4-based tracking:" << bOK << "fSuccess:"<< fSuccess;
             return;
         }
 

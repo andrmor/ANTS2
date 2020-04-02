@@ -314,7 +314,7 @@ void MainWindow::TestParticleGun(AParticleGun* Gun, int numParticles)
     QVector<AParticleRecord*> GP;
     for (int iRun=0; iRun<numParticles; iRun++)
     {
-        bool bOK = Gun->GenerateEvent(GP);
+        bool bOK = Gun->GenerateEvent(GP, iRun);
         if (!bOK) break;
 //        if (GP.isEmpty() && iRun > 2)
 //        {

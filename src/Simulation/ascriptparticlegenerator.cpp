@@ -45,7 +45,7 @@ bool AScriptParticleGenerator::Init()
     return true;
 }
 
-bool AScriptParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles)
+bool AScriptParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles, int)
 {
     bAbortRequested = false;
     ScriptInterface->configure(&GeneratedParticles);

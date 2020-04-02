@@ -25,7 +25,7 @@ public:
 
     bool            Init() override;               //has to be called before first use of GenerateEvent()
     void            ReleaseResources() override;
-    bool            GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles) override;
+    bool            GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles, int iEvent) override;
 
     void            RemoveParticle(int) override {} //cannot be used for this class
     bool            IsParticleInUse(int particleId, QString& SourceNames) const override; // not yet implemented, but is not critical

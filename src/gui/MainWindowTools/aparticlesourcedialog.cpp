@@ -14,8 +14,6 @@
 #include <QDebug>
 #include <QDoubleValidator>
 #include <QFileDialog>
-//#include <QMenuBar>
-//#include <QMenu>
 #include <QMessageBox>
 #include <QCloseEvent>
 #include <QApplication>

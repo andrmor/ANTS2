@@ -260,7 +260,7 @@ void AParticleSourceSimulator::simulate()
 
         int numPrimaries = chooseNumberOfParticlesThisEvent();
             //qDebug() << "---- primary particles in this event: " << numPrimaries;
-        bool bGenerationSuccessful = choosePrimariesForThisEvent(numPrimaries);
+        bool bGenerationSuccessful = choosePrimariesForThisEvent(numPrimaries, eventCurrent);
         if (!bGenerationSuccessful) break; //e.g. in file gen -> end of file reached
 
         //event prepared
@@ -565,13 +565,13 @@ int AParticleSourceSimulator::chooseNumberOfParticlesThisEvent() const
     }
 }
 
-bool AParticleSourceSimulator::choosePrimariesForThisEvent(int numPrimaries)
+bool AParticleSourceSimulator::choosePrimariesForThisEvent(int numPrimaries, int iEvent)
 {
     for (int iPart = 0; iPart < numPrimaries; iPart++)
     {
         if (!ParticleGun) break; //paranoic
         //generating one event
-        bool bGenerationSuccessful = ParticleGun->GenerateEvent(GeneratedParticles);
+        bool bGenerationSuccessful = ParticleGun->GenerateEvent(GeneratedParticles, iEvent);
         //  qDebug() << "thr--->"<<ID << "ev:" << eventBegin <<"P:"<<iRun << "  =====> " << bGenerationSuccessful << GeneratedParticles.size();
         if (!bGenerationSuccessful) return false;
 

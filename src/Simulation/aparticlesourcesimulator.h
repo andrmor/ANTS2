@@ -59,7 +59,7 @@ private:
     void clearGeneratedParticles();
 
     int  chooseNumberOfParticlesThisEvent() const;
-    bool choosePrimariesForThisEvent(int numPrimaries);
+    bool choosePrimariesForThisEvent(int numPrimaries, int iEvent);
     bool generateAndTrackPhotons();
     bool geant4TrackAndProcess();
     bool runGeant4Handler();

@@ -135,7 +135,7 @@ void AFileParticleGenerator::ReleaseResources()
     delete Engine; Engine = nullptr;
 }
 
-bool AFileParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles)
+bool AFileParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles, int iEvent)
 {
     if (!Engine)
     {

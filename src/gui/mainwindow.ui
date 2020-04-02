@@ -9703,7 +9703,7 @@ Right click: toggle build photon tracks. Also switches of building particle trac
          <widget class="QPushButton" name="pbAddSource">
           <property name="geometry">
            <rect>
-            <x>430</x>
+            <x>435</x>
             <y>47</y>
             <width>70</width>
             <height>23</height>
@@ -9745,9 +9745,9 @@ Right click: toggle build photon tracks. Also switches of building particle trac
           <property name="geometry">
            <rect>
             <x>180</x>
-            <y>174</y>
+            <y>172</y>
             <width>320</width>
-            <height>21</height>
+            <height>22</height>
            </rect>
           </property>
           <property name="frameShape">
@@ -9759,9 +9759,9 @@ Right click: toggle build photon tracks. Also switches of building particle trac
           <widget class="QLabel" name="labPartPerEvent">
            <property name="geometry">
             <rect>
-             <x>130</x>
-             <y>-1</y>
-             <width>141</width>
+             <x>110</x>
+             <y>0</y>
+             <width>150</width>
              <height>20</height>
             </rect>
            </property>
@@ -9781,9 +9781,9 @@ Right click: toggle build photon tracks. Also switches of building particle trac
           <widget class="QLineEdit" name="ledGunAverageNumPartperEvent">
            <property name="geometry">
             <rect>
-             <x>276</x>
-             <y>0</y>
-             <width>41</width>
+             <x>261</x>
+             <y>1</y>
+             <width>58</width>
              <height>20</height>
             </rect>
            </property>
@@ -9803,7 +9803,7 @@ Right click: toggle build photon tracks. Also switches of building particle trac
              <x>24</x>
              <y>0</y>
              <width>80</width>
-             <height>19</height>
+             <height>22</height>
             </rect>
            </property>
            <property name="font">
@@ -9827,8 +9827,8 @@ Right click: toggle build photon tracks. Also switches of building particle trac
          <widget class="QCheckBox" name="cbGunAllowMultipleEvents">
           <property name="geometry">
            <rect>
-            <x>7</x>
-            <y>174</y>
+            <x>2</x>
+            <y>173</y>
             <width>198</width>
             <height>18</height>
            </rect>
@@ -9859,7 +9859,7 @@ Right click: toggle build photon tracks. Also switches of building particle trac
          <widget class="QPushButton" name="pbRemoveSource">
           <property name="geometry">
            <rect>
-            <x>430</x>
+            <x>435</x>
             <y>71</y>
             <width>70</width>
             <height>23</height>
@@ -9878,7 +9878,7 @@ Right click: toggle build photon tracks. Also switches of building particle trac
          <widget class="QPushButton" name="pbSaveParticleSource">
           <property name="geometry">
            <rect>
-            <x>430</x>
+            <x>435</x>
             <y>98</y>
             <width>70</width>
             <height>23</height>
@@ -9897,7 +9897,7 @@ Right click: toggle build photon tracks. Also switches of building particle trac
          <widget class="QPushButton" name="pbLoadParticleSource">
           <property name="geometry">
            <rect>
-            <x>430</x>
+            <x>435</x>
             <y>120</y>
             <width>70</width>
             <height>23</height>
@@ -9916,7 +9916,7 @@ Right click: toggle build photon tracks. Also switches of building particle trac
          <widget class="QPushButton" name="pbEditParticleSource">
           <property name="geometry">
            <rect>
-            <x>430</x>
+            <x>435</x>
             <y>23</y>
             <width>70</width>
             <height>23</height>
@@ -9929,7 +9929,7 @@ Right click: toggle build photon tracks. Also switches of building particle trac
          <widget class="QPushButton" name="pbGunShowSource">
           <property name="geometry">
            <rect>
-            <x>430</x>
+            <x>435</x>
             <y>147</y>
             <width>70</width>
             <height>23</height>

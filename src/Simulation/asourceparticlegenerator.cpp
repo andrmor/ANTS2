@@ -169,7 +169,23 @@ bool ASourceParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & Generat
     else GeneratePosition(isource, R);
 
     //time
-    double time = 10 * iEvent;
+    double time;
+    if (Source->TimeAverageMode == 0)
+        time = Source->TimeAverage;
+    else
+        time = Source->TimeAverageStart + iEvent * Source->TimeAveragePeriod;
+    switch (Source->TimeSpreadMode)
+    {
+    default:
+    case 0:
+        break;
+    case 1:
+        time = RandGen->Gaus(time, Source->TimeSpreadSigma);
+        break;
+    case 2:
+        time += (-0.5 * Source->TimeSpreadWidth + RandGen->Rndm() * Source->TimeSpreadWidth);
+        break;
+    }
 
     //selecting the particle
     double rnd = RandGen->Rndm() * TotalParticleWeight.at(isource);

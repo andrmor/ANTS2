@@ -65,6 +65,15 @@ struct AParticleSourceRecord
     //Relative activity
     double Activity = 1.0;
 
+    //time
+    int    TimeAverageMode = 0;
+    double TimeAverage = 0;
+    double TimeAverageStart = 0;
+    double TimeAveragePeriod = 10.0;
+    int    TimeSpreadMode = 0;
+    double TimeSpreadSigma = 50.0;
+    double TimeSpreadWidth = 100.0;
+
     //particles
     QVector<GunParticleStruct*> GunParticles;
 

@@ -404,14 +404,21 @@ void AParticleSourceSimulator::EnergyVectorToScan()
 
     if (EnergyVector.size() == 1) //want to have the case of 1 fast - in many modes this will be the only outcome
     {
-        for (int i=0; i<3; i++) scs->Points[0].r[i] = EnergyVector[0]->r[i];
+        for (int i=0; i<3; i++)
+            scs->Points[0].r[i] = EnergyVector[0]->r[i];
+
         scs->Points[0].energy = EnergyVector[0]->dE;
+        scs->Points[0].time   = EnergyVector[0]->time;
     }
     else
     {
         QVector<APositionEnergyRecord> Depo(EnergyVector.size()); // TODO : make property of PSS
-        for (int i=0; i<3; i++) Depo[0].r[i] = EnergyVector[0]->r[i];
+
+        for (int i=0; i<3; i++)
+            Depo[0].r[i] = EnergyVector[0]->r[i];
+
         Depo[0].energy = EnergyVector[0]->dE;
+        Depo[0].time   = EnergyVector[0]->time;
 
         //first pass is copy from EnergyVector (since cannot modify EnergyVector itself),
         //if next point is within cluster range, merge with previous point

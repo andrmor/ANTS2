@@ -447,7 +447,7 @@ void RootMinDoubleReconstructorClass::execute()
                     rec->Points[0].r[1] = xs[1];
                     rec->Points[0].r[2] = xs[2];
                     rec->Points[0].energy = xs[3];
-                    rec->Points.AddPoint(xs[4], xs[5], xs[6], xs[7]);
+                    rec->Points.AddPoint(xs[4], xs[5], xs[6], xs[7], 0);
                     rec->chi2 = chi2double;
                     rec->ReconstructionOK = true;
                 }

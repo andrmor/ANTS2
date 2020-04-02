@@ -65,7 +65,8 @@ public slots:
   double GetTrueY(int ievent, int iPoint = 0);
   double GetTrueZ(int ievent, int iPoint = 0);
   double GetTrueEnergy(int ievent, int iPoint = 0);
-  const QVariant GetTruePoints(int ievent);
+  QVariantList GetAllScan();
+  QVariantList GetTruePoints(int ievent);
   const QVariant GetTruePointsXYZE(int ievent);
   const QVariant GetTruePointsXYZEiMat(int ievent);
   bool IsTrueGoodEvent(int ievent);
@@ -96,7 +97,7 @@ public slots:
     //general
   void SetReconstructed(int igroup, int ievent, int ipoint, double x, double y, double z, double e);
   void SetReconstructedFast(int igroup, int ievent, int ipoint, double x, double y, double z, double e); // no checks!!! unsafe
-  void AddReconstructedPoint(int igroup, int ievent, double x, double y, double z, double e);
+  void AddReconstructedPoint(int igroup, int ievent, double x, double y, double z, double e, double time = 0);
   void SetReconstructedX(int igroup, int ievent, int ipoint, double x);
   void SetReconstructedY(int igroup, int ievent, int ipoint, double y);
   void SetReconstructedZ(int igroup, int ievent, int ipoint, double z);

@@ -111,6 +111,20 @@ void MainWindow::ShowSource(const AParticleSourceRecord* p, bool clear)
    }
   switch (index)
     {
+     case 0:
+     {
+      Detector->GeoManager->SetCurrentPoint(X0,Y0,Z0);
+      Detector->GeoManager->DrawCurrentPoint(9);
+      clearGeoMarkers();
+      GeoMarkerClass* marks = new GeoMarkerClass("Source", 3, 10, kBlack);
+      marks->SetNextPoint(X0, Y0, Z0);
+      GeoMarkers.append(marks);
+      GeoMarkerClass* marks1 = new GeoMarkerClass("Source", 4, 3, kBlack);
+      marks1->SetNextPoint(X0, Y0, Z0);
+      GeoMarkers.append(marks1);
+      GeometryWindow->ShowGeometry(false);
+      break;
+     }
      case (1):
       { //linear source
         Int_t track_index = Detector->GeoManager->AddTrack(1,22);
@@ -244,8 +258,6 @@ void MainWindow::ShowSource(const AParticleSourceRecord* p, bool clear)
   }
 
   GeometryWindow->DrawTracks();
-  //Detector->GeoManager->SetCurrentPoint(X0,Y0,Z0);
-  //Detector->GeoManager->DrawCurrentPoint(9);
 }
 
 void MainWindow::on_pbGunTest_clicked()
@@ -253,8 +265,7 @@ void MainWindow::on_pbGunTest_clicked()
     WindowNavigator->BusyOn();   // -->
 
     GeometryWindow->ShowAndFocus();
-    gGeoManager->ClearTracks();
-
+    Detector->GeoManager->ClearTracks();
     if (ui->twParticleGenerationMode->currentIndex() == 0)
     {
         if (ui->pbGunShowSource->isChecked())
@@ -269,11 +280,7 @@ void MainWindow::on_pbGunTest_clicked()
     switch (ui->twParticleGenerationMode->currentIndex())
     {
     case 0: pg = SimulationManager->ParticleSources; break;
-    case 1:
-        pg = SimulationManager->FileParticleGenerator;
-        pg->Init();
-        updateFileParticleGeneratorGui();
-        break;
+    case 1: pg = SimulationManager->FileParticleGenerator; break;
     case 2: pg = SimulationManager->ScriptParticleGenerator; break;
     default:
         message("This generation mode is not implemented!", this);
@@ -285,7 +292,6 @@ void MainWindow::on_pbGunTest_clicked()
     QFont font = ui->pbStopScan->font();
     font.setBold(true);
     ui->pbStopScan->setFont(font);
-    WindowNavigator->BusyOn();
 
     TestParticleGun(pg, ui->sbGunTestEvents->value()); //script generator is aborted on click of the stop button!
 
@@ -300,7 +306,6 @@ void MainWindow::on_pbGunTest_clicked()
 void MainWindow::TestParticleGun(AParticleGun* Gun, int numParticles)
 {
     clearGeoMarkers();
-
     bool bOK = Gun->Init();
     if (!bOK)
     {
@@ -308,42 +313,46 @@ void MainWindow::TestParticleGun(AParticleGun* Gun, int numParticles)
         return;
     }
     Gun->SetStartEvent(0);
+    if (ui->twParticleGenerationMode->currentIndex() == 1) updateFileParticleGeneratorGui();
 
     double Length = std::max(Detector->WorldSizeXY, Detector->WorldSizeZ)*0.4;
     double R[3], K[3];
     QVector<AParticleRecord*> GP;
+    int numTracks = 0;
     for (int iRun=0; iRun<numParticles; iRun++)
     {
         bool bOK = Gun->GenerateEvent(GP, iRun);
-        if (!bOK) break;
-//        if (GP.isEmpty() && iRun > 2)
-//        {
-//            message("Did several attempts but no particles were generated!", this);
-//            break;
-//        }
-        for (const AParticleRecord * p : GP)
+        if (bOK && numTracks < 1000)
         {
-            R[0] = p->r[0];
-            R[1] = p->r[1];
-            R[2] = p->r[2];
+            for (const AParticleRecord * p : GP)
+            {
+                R[0] = p->r[0];
+                R[1] = p->r[1];
+                R[2] = p->r[2];
 
-            K[0] = p->v[0];
-            K[1] = p->v[1];
-            K[2] = p->v[2];
+                K[0] = p->v[0];
+                K[1] = p->v[1];
+                K[2] = p->v[2];
 
-            int track_index = Detector->GeoManager->AddTrack(1, 22);
-            TVirtualGeoTrack *track = Detector->GeoManager->GetTrack(track_index);
-            track->AddPoint(R[0], R[1], R[2], 0);
-            track->AddPoint(R[0] + K[0]*Length, R[1] + K[1]*Length, R[2] + K[2]*Length, 0);
-            SimulationManager->TrackBuildOptions.applyToParticleTrack(track, p->Id);
+                int track_index = Detector->GeoManager->AddTrack(1, 22);
+                TVirtualGeoTrack *track = Detector->GeoManager->GetTrack(track_index);
+                track->AddPoint(R[0], R[1], R[2], 0);
+                track->AddPoint(R[0] + K[0]*Length, R[1] + K[1]*Length, R[2] + K[2]*Length, 0);
+                SimulationManager->TrackBuildOptions.applyToParticleTrack(track, p->Id);
 
-            GeoMarkerClass* marks = new GeoMarkerClass("t", 7, 1, SimulationManager->TrackBuildOptions.getParticleColor(p->Id));
-            marks->SetNextPoint(R[0], R[1], R[2]);
-            GeoMarkers.append(marks);
+                GeoMarkerClass* marks = new GeoMarkerClass("t", 7, 1, SimulationManager->TrackBuildOptions.getParticleColor(p->Id));
+                marks->SetNextPoint(R[0], R[1], R[2]);
+                GeoMarkers.append(marks);
 
-            delete p;
+                ++numTracks;
+                if (numTracks > 1000) break;
+            }
         }
+
+        for (const AParticleRecord * p : GP) delete p;
         GP.clear();
+
+        if (!bOK) break;
     }
 
     GeometryWindow->ShowTracksAndMarkers();
@@ -478,6 +487,7 @@ void MainWindow::on_pbGunShowSource_toggled(bool checked)
     }
     else
     {
+        clearGeoMarkers();
         Detector->GeoManager->ClearTracks();
         GeometryWindow->ShowGeometry();
     }
@@ -849,7 +859,7 @@ void MainWindow::on_pbParticleGenerationScript_clicked()
     int NumThreads = 1;
     AParticleGenerator_SI* gen = new AParticleGenerator_SI(*Detector->MpCollection, Detector->RandGen, 0, &NumThreads);
     QVector<AParticleRecord*> GP;
-    gen->configure(&GP);
+    gen->configure(&GP, 0);
     gen->setObjectName("gen");
     sw->RegisterInterface(gen, "gen"); //takes ownership
     AMath_SI* math = new AMath_SI(Detector->RandGen);

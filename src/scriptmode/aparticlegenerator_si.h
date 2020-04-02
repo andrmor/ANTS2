@@ -19,7 +19,7 @@ class AParticleGenerator_SI : public AScriptInterface
 public:
     AParticleGenerator_SI(const AMaterialParticleCollection & MpCollection, TRandom2 * RandGen, int ThreadId, const int * NumRunningThreads);
 
-    void configure(QVector<AParticleRecord*> * GeneratedParticles);
+    void configure(QVector<AParticleRecord*> * GeneratedParticles, int iEvent);
 
 public slots:
     void AddParticle(int type, double energy, double x, double y, double z, double i, double k, double j, double time = 0);
@@ -31,12 +31,15 @@ public slots:
     int GetThreadId() {return ThreadId;}
     int GetNumThreads() {return *NumRunningThreads;}
 
+    int GetCurrentEvent() {return currentEvent;}
+
 private:
     const AMaterialParticleCollection & MpCollection;
     TRandom2 * RandGen = 0;                                 //external
     int ThreadId = 0;
     const int * NumRunningThreads;
     QVector<AParticleRecord*> * GP = 0;                     //external
+    int currentEvent;
 
     QVariantList StoredData;
 };

@@ -31,6 +31,8 @@ AEvents_SI::AEvents_SI(AConfiguration *Config, EventsDataClass* EventsDataHub)
   H["GetTruePoints"] = "Return array of true (scan) points for the event. Array elements are [x, y, z, energy]";
   H["GetTrueNumberPoints"] = "Return number of true (scan) points for the given event";
 
+  H["GetTrueAll"] = "Get array (3D: [iEvent][iPoint][X Y Z Energy Time] with all true/scan data.";
+  H["GetTrueinRnage"] = "Same as GetTrueAll(), but for event indexes from iFromEvent (inclusive) and until iToEvent (not inclusive)";
 
   DepRem["GetTruePoints"] = "Use GetTruePointsXYZE() or GetTruePointsXYZEiMat instead";
 }
@@ -471,12 +473,25 @@ double AEvents_SI::GetTrueEnergy(int ievent, int iPoint)
   return EventsDataHub->Scan.at(ievent)->Points[iPoint].energy;
 }
 
-QVariantList AEvents_SI::GetAllScan()
+QVariantList AEvents_SI::GetTrueAll()
+{
+    return GetTrueInRange(0, EventsDataHub->Scan.size());
+}
+
+QVariantList AEvents_SI::GetTrueInRange(int iFromEvent, int iToEvent)
 {
     QVariantList list;
 
-    for (const AScanRecord * sr : EventsDataHub->Scan)
+    const int numEvents = EventsDataHub->Scan.size();
+    if (iFromEvent < 0 || iToEvent > numEvents)
     {
+        abort("Invalid range for GetTrueInRange()");
+        return list;
+    }
+
+    for (int iEvent = iFromEvent; iEvent < iToEvent; iEvent++)
+    {
+        const AScanRecord * sr = EventsDataHub->Scan.at(iEvent);
         QVariantList evList;
 
         const APositionEnergyBuffer & p = sr->Points;

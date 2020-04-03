@@ -65,7 +65,8 @@ public slots:
   double GetTrueY(int ievent, int iPoint = 0);
   double GetTrueZ(int ievent, int iPoint = 0);
   double GetTrueEnergy(int ievent, int iPoint = 0);
-  QVariantList GetAllScan();
+  QVariantList GetTrueAll();
+  QVariantList GetTrueInRange(int iFromEvent, int iToEvent);
   QVariantList GetTruePoints(int ievent);
   const QVariant GetTruePointsXYZE(int ievent);
   const QVariant GetTruePointsXYZEiMat(int ievent);

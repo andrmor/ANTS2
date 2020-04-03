@@ -690,6 +690,15 @@ void MainWindow::on_pbParticleSourcesSimulate_clicked()
 
     writeSimSettingsToJson(Config->JSON);
 
+    if (ui->cbGeant4ParticleTracking->isChecked() && G4SimSet.SaveParticles)
+    {
+        if (QFileInfo(G4SimSet.SP_FileName).exists())
+        {
+            bool bContinue = confirm("File configured to save exiting particles already exists!\nContinue?\n\n" + G4SimSet.SP_FileName, this);
+            if (!bContinue) return;
+        }
+    }
+
     ELwindow->QuickSave(0);
     fStartedFromGUI = true;
     fSimDataNotSaved = false; // to disable the warning

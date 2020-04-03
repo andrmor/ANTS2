@@ -14,9 +14,11 @@ struct APositionEnergyRecord
     {
         if (this != &other)
         {
-            energy = other.energy;
-            time   = other.time;
-            for (int i=0; i<3; i++) r[i] = other.r[i];
+            for (int i=0; i<3; i++)
+                r[i] = other.r[i];
+
+            energy   = other.energy;
+            time     = other.time;
         }
         return *this;
     }
@@ -26,34 +28,42 @@ struct APositionEnergyRecord
         return (lhs.energy < rhs.energy);
     }
 
-    bool isCloser(double length2, const APositionEnergyRecord & other) const // ***
+    bool isCloser(double length2, const APositionEnergyRecord & other) const
     {
         double d2 = 0;
         for (int i=0; i<3; i++)
         {
-            double delta = r[i] - other.r[i];
+            const double delta = r[i] - other.r[i];
             d2 += delta * delta;
         }
         return d2 < length2;
     }
 
-    void MergeWith(const double R[3], double E) // ***
+    void MergeWith(const double * R, double E, double Time)
     {
         if (E > 0)
         {
+            const double factor = 1.0 / (energy + E);
+
             for (int i=0; i<3; i++)
-                r[i] = (r[i]*energy + R[i]*E) / (energy + E);
-            energy += E;
+                r[i] = (r[i]*energy + R[i]*E) * factor;
+            time     = (time*energy + Time*E) * factor;
+
+            energy   += E;
         }
     }
 
-    void MergeWith(const APositionEnergyRecord & other) // ***
+    void MergeWith(const APositionEnergyRecord & other)
     {
         if (other.energy > 0)
         {
+            const double factor = 1.0 / (energy + other.energy);
+
             for (int i=0; i<3; i++)
-                r[i] = (r[i]*energy + other.r[i]*other.energy) / (energy + other.energy);
-            energy += other.energy;
+                r[i] = (r[i]*energy + other.r[i]*other.energy) * factor;
+            time     = (time*energy + other.time*other.energy) * factor;
+
+            energy   += other.energy;
         }
     }
 };

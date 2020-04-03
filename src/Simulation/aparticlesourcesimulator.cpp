@@ -83,9 +83,14 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
         parseJson(cjs, "IgnoreNoHitsEvents", fIgnoreNoHitsEvents);
         fIgnoreNoDepoEvents = true; //compatibility
         parseJson(cjs, "IgnoreNoDepoEvents", fIgnoreNoDepoEvents);
+
+        bClusterMerge = true; //compatibility
+        parseJson(cjs, "ClusterMerge", bClusterMerge);
         ClusterMergeRadius2 = 1.0;
         parseJson(cjs, "ClusterMergeRadius", ClusterMergeRadius2);
         ClusterMergeRadius2 *= ClusterMergeRadius2;
+        ClusterMergeTimeDif = 1.0;
+        parseJson(cjs, "ClusterMergeTime", ClusterMergeTimeDif);
 
         // particle generation mode
         QString PartGenMode = "Sources"; //compatibility
@@ -389,156 +394,116 @@ void AParticleSourceSimulator::updateMaxTracks(int maxPhotonTracks, int maxParti
 
 void AParticleSourceSimulator::EnergyVectorToScan()
 {
-    if (EnergyVector.isEmpty())
-    {
-        AScanRecord* scs = new AScanRecord();
-        scs->Points.Reinitialize(0);
-        scs->ScintType = 0;
-        dataHub->Scan.append(scs);
-        return;
-    }
-
-    //== new system ==
-    AScanRecord* scs = new AScanRecord();
+    AScanRecord * scs = new AScanRecord();
     scs->ScintType = 0;
 
-    if (EnergyVector.size() == 1) //want to have the case of 1 fast - in many modes this will be the only outcome
+    if (EnergyVector.isEmpty())
+        scs->Points.Reinitialize(0);
+    else if (EnergyVector.size() == 1)
     {
-        for (int i=0; i<3; i++)
-            scs->Points[0].r[i] = EnergyVector[0]->r[i];
-
-        scs->Points[0].energy = EnergyVector[0]->dE;
-        scs->Points[0].time   = EnergyVector[0]->time;
+        const AEnergyDepositionCell * Node = EnergyVector.at(0);
+        for (int i = 0; i < 3; i++)
+            scs->Points[0].r[i] = Node->r[i];
+        scs->Points[0].energy = Node->dE;
+        scs->Points[0].time   = Node->time;
     }
     else
     {
-        QVector<APositionEnergyRecord> Depo(EnergyVector.size()); // TODO : make property of PSS
+        const int numNodes = EnergyVector.size(); // here it is not equal to 1
 
-        for (int i=0; i<3; i++)
-            Depo[0].r[i] = EnergyVector[0]->r[i];
-
-        Depo[0].energy = EnergyVector[0]->dE;
-        Depo[0].time   = EnergyVector[0]->time;
-
-        //first pass is copy from EnergyVector (since cannot modify EnergyVector itself),
-        //if next point is within cluster range, merge with previous point
-        //if outside, start with a new cluster
-        int iPoint = 0;  //merging to this point
-        int numMerges = 0;
-        for (int iCell = 1; iCell < EnergyVector.size(); iCell++)
+        if (!bClusterMerge)
         {
-            const AEnergyDepositionCell * EVcell = EnergyVector.at(iCell);
-            APositionEnergyRecord & Point = Depo[iPoint];
-            if (EVcell->isCloser(ClusterMergeRadius2, Point.r))
+            scs->Points.Reinitialize(numNodes);
+            for (int iNode = 0; iNode < numNodes; iNode++)
             {
-                Point.MergeWith(EVcell->r, EVcell->dE);
-                numMerges++;
+                const AEnergyDepositionCell * Node = EnergyVector.at(iNode);
+                for (int i=0; i<3; i++)
+                    scs->Points[iNode].r[i] = Node->r[i];
+                scs->Points[iNode].energy = Node->dE;
+                scs->Points[iNode].time   = Node->time;
             }
-            else
-            {
-                //start the next cluster
-                iPoint++;
-                for (int i=0; i<3; i++) Depo[iPoint].r[i] = EVcell->r[i];
-                Depo[iPoint].energy = EVcell->dE;
-            }
-        }
-
-        //direct pass finished, if there were no merges, work is done
-            //qDebug() << "-----Merges in the first pass:"<<numMerges;
-        if (numMerges > 0)
-        {
-            Depo.resize(EnergyVector.size() - numMerges); //only shrinking
-            // pass for all clusters -> not needed for charged, but it is likely needed for Geant4 import depo data
-            int iThisCluster = 0;
-            while (iThisCluster < Depo.size()-1)
-            {
-                int iOtherCluster = iThisCluster + 1;
-                while (iOtherCluster < Depo.size())
-                {
-                    if (Depo[iThisCluster].isCloser(ClusterMergeRadius2, Depo[iOtherCluster]))
-                    {
-                        Depo[iThisCluster].MergeWith(Depo[iOtherCluster]);
-                        Depo.removeAt(iOtherCluster);
-                    }
-                    else iOtherCluster++;
-                }
-                iThisCluster++;
-            }
-
-            // in principle, after merging some clusters can become within merging range
-            // to make the procedure complete, the top while cycle have to be restarted until number of merges is 0
-            // but it will slow down without much effect - skip for now
-        }
-
-        //sort (make it optional?)
-        std::stable_sort(Depo.rbegin(), Depo.rend()); //reverse order
-
-        scs->Points.Reinitialize(Depo.size());
-        for (int iDe=0; iDe<Depo.size(); iDe++)
-            scs->Points[iDe] = Depo[iDe];
-    }
-
-    dataHub->Scan.append(scs);
-
-    /*
-    //-- old system --
-    int PreviousIndex = EnergyVector.first()->index; //particle number - not to be confused with ParticleId!!!
-    bool fTrackStarted = false;
-    double EnergyAccumulator = 0;
-
-    AScanRecord* scs = new AScanRecord();
-    for (int i=0; i<3; i++) scs->Points[0].r[i] = EnergyVector[0]->r[i];
-    scs->ScintType = 0; //unknown - could be that both primary and secondary were activated!
-    scs->Points[0].energy = EnergyVector[0]->dE;
-
-    if (EnergyVector.size() == 1)
-    {
-        dataHub->Scan.append(scs);
-        return;
-    }
-
-    for (int ip=1; ip<EnergyVector.size(); ip++) //protected against EnegyVector with size 1
-    {
-        int ThisIndex = EnergyVector[ip]->index;
-        if (ThisIndex == PreviousIndex)
-        {
-            //continuing the track
-            fTrackStarted = true; //nothing to do until the track ends
-            EnergyAccumulator += EnergyVector[ip-1]->dE; //last cell energy added to accumulator
         }
         else
         {
-            //another particle starts here
-            if (ip == 0)
+            /*
+            qDebug() << "#";
+            for (int iCell = 0; iCell < EnergyVector.size(); iCell++)
             {
-                //already filled scs data for the very first cell - does not matter it was track or single point
-                PreviousIndex = ThisIndex;
-                continue;
+                const AEnergyDepositionCell * EVcell = EnergyVector.at(iCell);
+                qDebug() << EVcell->dE << EVcell->time;
             }
-            //track teminated last cell?
-            if (fTrackStarted)
+            */
+
+            QVector<APositionEnergyRecord> Depo(numNodes);
+
+            for (int i=0; i<3; i++)
+                Depo[0].r[i] = EnergyVector[0]->r[i];
+            Depo[0].energy   = EnergyVector[0]->dE;
+            Depo[0].time     = EnergyVector[0]->time;
+
+            //first pass is copy from EnergyVector (since cannot modify EnergyVector itself),
+            //if next point is within cluster range, merge with previous point
+            //if outside, start with a new cluster
+            int iPoint = 0;  //merging to this point
+            int numMerges = 0;
+            for (int iCell = 1; iCell < EnergyVector.size(); iCell++)
             {
-                //finishing the track of the previous particle
-                EnergyAccumulator += EnergyVector[ip-1]->dE;
-                scs->Points.AddPoint( EnergyVector[ip-1]->r, EnergyAccumulator );
-                fTrackStarted = false;
+                const AEnergyDepositionCell * EVcell = EnergyVector.at(iCell);
+
+                APositionEnergyRecord & Point = Depo[iPoint];
+                if (EVcell->isCloser(ClusterMergeRadius2, Point.r) && fabs(EVcell->time - Point.time) < ClusterMergeTimeDif)
+                {
+                    Point.MergeWith(EVcell->r, EVcell->dE, EVcell->time);
+                    numMerges++;
+                }
+                else
+                {
+                    //start the next cluster
+                    iPoint++;
+                    for (int i=0; i<3; i++)
+                        Depo[iPoint].r[i] = EVcell->r[i];
+                    Depo[iPoint].energy   = EVcell->dE;
+                    Depo[iPoint].time     = EVcell->time;
+                }
             }
 
-            //adding this point - same for both the track (start point) or point deposition
-            scs->Points.AddPoint( EnergyVector[ip]->r, EnergyVector[ip]->dE); //protected against double filling of ip=0
+            //direct pass finished, if there were no merges, work is done
+                //qDebug() << "-----Merges in the first pass:"<<numMerges;
+            if (numMerges > 0)
+            {
+                Depo.resize(EnergyVector.size() - numMerges); //only shrinking
+                // pass for all clusters -> not needed for charged, but it is likely needed for Geant4 import depo data
+                int iThisCluster = 0;
+                while (iThisCluster < Depo.size()-1)
+                {
+                    int iOtherCluster = iThisCluster + 1;
+                    while (iOtherCluster < Depo.size())
+                    {
+                        if (Depo[iThisCluster].isCloser(ClusterMergeRadius2, Depo[iOtherCluster]) && fabs(Depo[iThisCluster].time - Depo[iOtherCluster].time) < ClusterMergeTimeDif)
+                        {
+                            Depo[iThisCluster].MergeWith(Depo[iOtherCluster]);
+                            Depo.removeAt(iOtherCluster);
+                        }
+                        else iOtherCluster++;
+                    }
+                    iThisCluster++;
+                }
+
+                // in principle, after merging some clusters can become within merging range
+                // to make the procedure complete, the top while cycle have to be restarted until number of merges is 0
+                // but it will slow down without much effect - skip for now
+            }
+
+            //sort (make it optional?)
+            std::stable_sort(Depo.rbegin(), Depo.rend()); //reverse order
+
+            scs->Points.Reinitialize(Depo.size());
+            for (int iDe = 0; iDe < Depo.size(); iDe++)
+                scs->Points[iDe] = Depo[iDe];
         }
-        PreviousIndex = ThisIndex;
-    }
-
-    if (fTrackStarted)
-    {
-        //if EnergyVector has finished with continuous deposition, the track is not finished yet
-        EnergyAccumulator += EnergyVector.last()->dE;
-        scs->Points.AddPoint(EnergyVector.last()->r, EnergyAccumulator);
     }
 
     dataHub->Scan.append(scs);
-    */
 }
 
 void AParticleSourceSimulator::clearParticleStack()

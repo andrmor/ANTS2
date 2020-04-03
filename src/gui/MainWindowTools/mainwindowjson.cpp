@@ -497,6 +497,8 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
             ui->cbIgnoreEventsWithNoEnergyDepo->setChecked(false);
             JsonToCheckbox(csjs, "IgnoreNoDepoEvents", ui->cbIgnoreEventsWithNoEnergyDepo);
             JsonToLineEditDouble(csjs, "ClusterMergeRadius", ui->ledClusterRadius);
+            JsonToCheckbox(csjs, "ClusterMerge", ui->cbMergeClusters);
+            JsonToLineEditDouble(csjs, "ClusterMergeTime", ui->ledClusterTimeDif);
 
         //particle sources
         SimulationManager->ParticleSources->readFromJson(psjs);

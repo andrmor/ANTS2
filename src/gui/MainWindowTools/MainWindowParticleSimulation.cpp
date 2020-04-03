@@ -61,6 +61,8 @@ void MainWindow::SimParticleSourcesConfigToJson(QJsonObject &json)
             cjs["IgnoreNoHitsEvents"] = ui->cbIgnoreEventsWithNoHits->isChecked();
             cjs["IgnoreNoDepoEvents"] = ui->cbIgnoreEventsWithNoEnergyDepo->isChecked();
             cjs["ClusterMergeRadius"] = ui->ledClusterRadius->text().toDouble();
+            cjs["ClusterMerge"] = ui->cbMergeClusters->isChecked();
+            cjs["ClusterMergeTime"] = ui->ledClusterTimeDif->text().toDouble();
         psjs["SourceControlOptions"] = cjs;
 
         //Particle generation

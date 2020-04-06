@@ -9,7 +9,6 @@
 #include "apmtype.h"
 #include "outputwindow.h"
 #include "sensorlrfs.h"
-#include "alrfmoduleselector.h"
 #include "lrfwindow.h"
 #include "CorrelationFilters.h"
 #include "windownavigatorclass.h"
@@ -129,17 +128,17 @@ void ReconstructionWindow::writeToJson(QJsonObject &json) //fVerbose - saving as
   //js1["ReconstructionConfig"] = js;
   //SaveJsonToFile(js, "ReconstructionConfig.json");
 
-  writeLrfModuleSelectionToJson(js);
-
-  //old module LRFs
-  if (Detector->LRFs->isAllLRFsDefined(true))
-    {
+  if (Detector->LRFs->isAllLRFsDefined())
+  {
       QJsonObject LRFjson;
-      Detector->LRFs->saveActiveLRFs_v2(LRFjson);
+      int iCur = Detector->LRFs->getCurrentIterIndex();
+      Detector->LRFs->saveIteration(iCur, LRFjson);
       js["ActiveLRF"] = LRFjson;
-    }
+  }
   else
+  {
     if (js.contains("ActiveLRF")) js.remove("ActiveLRF");
+  }
 
   json["ReconstructionConfig"] = js;
 }
@@ -165,8 +164,6 @@ bool ReconstructionWindow::readFromJson(QJsonObject &json)
   readReconSettingsFromJson(js);
   //event filter settings
   readFilterSettingsFromJson(js);
-  //LRF module selection
-  readLrfModuleSelectionFromJson(js);
   //scripts, PlotXY
   if (js.contains("GuiMisc")) readMiscGUIsettingsFromJson(js);  
   //LRF make settings  
@@ -4005,13 +4002,7 @@ bool lessThanSorter(const ZSortStruct* s1, const ZSortStruct* s2)
 
 void ReconstructionWindow::on_pbEvaluateZfromDistribution_clicked()
 {
-   if (ui->cobLRFmodule->currentIndex() != 0)
-     {
-       message("Not implemented yet for the new LRF module!", this);
-       return;
-     }
-
-   SensorLRFs* SensLRF = Detector->LRFs->getOldModule();
+   SensorLRFs * SensLRF = Detector->LRFs;
    if (EventsDataHub->isReconstructionDataEmpty()) return;
    TString type = (*SensLRF)[0]->type();
    int currentGr = PMgroups->getCurrentGroup();
@@ -6192,51 +6183,21 @@ void ReconstructionWindow::on_lwPMgroups_clicked(const QModelIndex &index)
         ui->cobAssignToPMgroup->setCurrentIndex(igroup);
 }
 
-void ReconstructionWindow::on_cobLRFmodule_currentIndexChanged(int index)
-{
-    bool fOld = (index==0);
-
-    Detector->LRFs->selectOld();
-    ui->labLRFmoduleWarning->setVisible( !fOld );
-
-    ReconstructionWindow::LRF_ModuleReadySlot(false); //the selector will ask the status!
-}
-
 void ReconstructionWindow::on_pbShowLRFwindow_clicked()
 {
-
   MW->lrfwindow->showNormal();
   MW->lrfwindow->raise();
   MW->lrfwindow->activateWindow();
-
 }
 
 void ReconstructionWindow::on_pbLoadLRFs_clicked()
 {
-  if (Detector->LRFs->isOldSelected())
-    {
-       //Old module
-       MW->lrfwindow->LoadLRFDialog(this);
-    }
-  else
-    {
-       //New module
-       //
-    }
+    MW->lrfwindow->LoadLRFDialog(this);
 }
 
 void ReconstructionWindow::on_pbSaveLRFs_clicked()
 {
-  if (Detector->LRFs->isOldSelected())
-    {
-       //Old module
-       MW->lrfwindow->SaveLRFDialog(this);
-    }
-  else
-    {
-       //New module
-       //
-    }
+    MW->lrfwindow->SaveLRFDialog(this);
 }
 
 void ReconstructionWindow::on_sbShowEventsEvery_valueChanged(int)

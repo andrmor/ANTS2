@@ -13,6 +13,8 @@
 #include <QJsonObject>
 
 class EventsDataClass;
+class TF1;
+class TF2;
 
 class IterationGroups
 {
@@ -124,6 +126,7 @@ public:
     void setCurrentIter(int index);
     void setCurrentIterName(QString name) {if (currentIter) currentIter->setName(name);}
     bool isAllLRFsDefined() const;
+    bool isAllSlice3D() const;
 
     //currentIter and iterations vector
     int countIterations() {return iterations.size();}
@@ -139,6 +142,13 @@ public:
     QString getLastError() {return error_string;}
 
     void requestStop() {fStopRequest = true;}
+
+    TF1 * getRootFunctionMainRadial(int ipm, double z, QJsonObject & json);
+    TF1 * getRootFunctionSecondaryRadial(int ipm, double z, QJsonObject & json);
+    bool  getNodes(int ipm, QVector<double> & GrX);
+    TF2 * getRootFunctionMainXY(int ipm, double z, QJsonObject & json);
+    TF2 * getRootFunctionSecondaryXY(int ipm, double z, QJsonObject & json);
+
 signals:
     void SensorLRFsReadySignal(bool);
     void ProgressReport(int);

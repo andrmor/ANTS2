@@ -5,7 +5,6 @@
 #include "detectorclass.h"
 #include "graphwindowclass.h"
 #include "sensorlrfs.h"
-#include "alrfmoduleselector.h"
 #include "geometrywindowclass.h"
 #include "outputwindow.h"
 #include "eventsdataclass.h"
@@ -45,7 +44,7 @@ LRFwindow::LRFwindow(QWidget *parent, MainWindow *mw, EventsDataClass *eventsDat
 {
   MW = mw;
   EventsDataHub = eventsDataHub;
-  SensLRF = MW->Detector->LRFs->getOldModule();
+  SensLRF = MW->Detector->LRFs;
   PMs = MW->Detector->PMs;
 
   tmpIgnore = false;
@@ -110,7 +109,7 @@ void LRFwindow::onBusyOff()
 
 void LRFwindow::showLRF()
 {
-    ALrfDraw lrfd(MW->Detector->LRFs, true, EventsDataHub, PMs, MW->GraphWindow);
+    ALrfDraw lrfd(MW->Detector->LRFs, EventsDataHub, PMs, MW->GraphWindow);
 
     QJsonObject json;
     json["DataSource"] =  ui->cb_data_selector->currentIndex(); //0 - sim, 1 - loaded
@@ -723,7 +722,7 @@ void LRFwindow::DoMakeGroupLRF(int igroup)
 
 void LRFwindow::drawRadial()
 {
-   ALrfDraw lrfd(MW->Detector->LRFs, true, EventsDataHub, PMs, MW->GraphWindow);
+   ALrfDraw lrfd(MW->Detector->LRFs, EventsDataHub, PMs, MW->GraphWindow);
 
    QJsonObject json;
    json["DataSource"] =  ui->cb_data_selector->currentIndex(); //0 - sim, 1 - loaded

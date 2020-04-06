@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-class ALrfModuleSelector;
+class SensorLRFs;
 class APmHub;
 class APmGroupsManager;
 class Viewer2DarrayObject;
@@ -17,7 +17,7 @@ class ALrfMouseExplorer : public QDialog
   Q_OBJECT
 
 public:
-  ALrfMouseExplorer(ALrfModuleSelector *LRFs, APmHub *PMs, APmGroupsManager *PMgroups, double SuggestedZ = 0, QWidget *parent = 0);
+  ALrfMouseExplorer(SensorLRFs *LRFs, APmHub *PMs, APmGroupsManager *PMgroups, double SuggestedZ = 0, QWidget *parent = 0);
   ~ALrfMouseExplorer();
 
   void Start();
@@ -26,7 +26,7 @@ private:
   Viewer2DarrayObject *LRFviewObj;
   myQGraphicsView* gv;
 
-  ALrfModuleSelector* LRFs;
+  SensorLRFs* LRFs;
   APmHub* PMs;
   APmGroupsManager* PMgroups;
 

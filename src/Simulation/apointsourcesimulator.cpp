@@ -14,7 +14,7 @@
 #include "photon_generator.h"
 #include "aphotontracer.h"
 #include "apmhub.h"
-#include "alrfmoduleselector.h"
+#include "sensorlrfs.h"
 
 #include <QDebug>
 #include <QJsonObject>

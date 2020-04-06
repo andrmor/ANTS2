@@ -1,7 +1,7 @@
 #include "aconfiguration.h"
 #include "detectorclass.h"
 #include "ajsontools.h"
-#include "alrfmoduleselector.h"
+#include "sensorlrfs.h"
 #include "apmgroupsmanager.h"
 #include "amaterialparticlecolection.h"
 #include "asourceparticlegenerator.h"
@@ -76,11 +76,11 @@ bool AConfiguration::LoadConfig(QJsonObject &json, bool DetConstructor, bool Sim
           JSON["ReconstructionConfig"] = ReconJson;
 
           if (ReconJson.contains("ActiveLRF"))
-            {
+          {
               QJsonObject lj = ReconJson["ActiveLRF"].toObject();
-              Detector->LRFs->loadAll_v2(lj);
-            }
-
+              Detector->LRFs->clear(Detector->PMs->count());
+              Detector->LRFs->loadAll(lj);
+          }
 
           emit requestReconstructionGuiUpdate();
           AskForLRFGuiUpdate();
@@ -193,7 +193,7 @@ bool AConfiguration::SaveConfig(QString fileName, bool DetConstructor, bool SimS
 void AConfiguration::UpdateLRFmakeJson()
 {
     QJsonObject obj = JSON["ReconstructionConfig"].toObject();
-    obj["LRFmakeJson"] = Detector->LRFs->getLRFmakeJson();
+    obj["LRFmakeJson"] = Detector->LRFs->LRFmakeJson;
     //qDebug() << Detector->SensLRF->LRFmakeJson;
     JSON["ReconstructionConfig"] = obj;
 }

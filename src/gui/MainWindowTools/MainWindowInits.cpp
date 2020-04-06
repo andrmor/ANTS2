@@ -26,8 +26,6 @@
 #include "globalsettingswindowclass.h"
 #include "aconfiguration.h"
 #include "amessage.h"
-#include "alrfmoduleselector.h"
-//#include "gui/alrfwindow.h"
 #include "anetworkmodule.h"
 #include "awebsocketserverdialog.h"
 #include "aremotewindow.h"

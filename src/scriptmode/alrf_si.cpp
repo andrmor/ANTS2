@@ -2,7 +2,6 @@
 #include "aconfiguration.h"
 #include "eventsdataclass.h"
 #include "detectorclass.h"
-#include "alrfmoduleselector.h"
 #include "sensorlrfs.h"
 
 #include <QJsonDocument>
@@ -11,7 +10,7 @@
 ALrf_SI::ALrf_SI(AConfiguration *Config, EventsDataClass *EventsDataHub)
   : Config(Config), EventsDataHub(EventsDataHub) //,f2d(0)
 {
-  SensLRF = Config->GetDetector()->LRFs->getOldModule();
+  SensLRF = Config->GetDetector()->LRFs;
 
   Description = "Access to LRFs (B-spline module)";
 

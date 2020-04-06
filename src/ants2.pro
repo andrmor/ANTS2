@@ -306,7 +306,6 @@ SOURCES += main.cpp \
 #    modules/lrf_v3/ainstruction.cpp \
 #    modules/lrf_v3/ainstructioninput.cpp \
 #    modules/lrf_v3/afitlayersensorgroup.cpp \
-    modules/alrfmoduleselector.cpp \
     common/ascriptvaluecopier.cpp \
     common/acustomrandomsampling.cpp \
     common/amaterial.cpp \
@@ -479,7 +478,6 @@ HEADERS  += common/CorrelationFilters.h \
 #    modules/lrf_v3/idclasses.h \
 #    modules/lrf_v3/alrftypemanagerinterface.h \
 #    modules/lrf_v3/astateinterface.h \
-    modules/alrfmoduleselector.h \
     common/ascriptvaluecopier.h \
     common/acustomrandomsampling.h \
     common/amaterial.h \

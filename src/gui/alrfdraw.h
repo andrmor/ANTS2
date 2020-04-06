@@ -3,7 +3,7 @@
 
 #include <QJsonObject>
 
-class ALrfModuleSelector;
+class SensorLRFs;
 class EventsDataClass;
 class GraphWindowClass;
 class APmHub;
@@ -38,20 +38,18 @@ public:
 class ALrfDraw
 {
 public:
-    ALrfDraw(ALrfModuleSelector* LRFs, bool fUseOldModule, EventsDataClass* EventsDataHub, APmHub* PMs, GraphWindowClass *GraphWindow);
+    ALrfDraw(SensorLRFs *LRFs, EventsDataClass* EventsDataHub, APmHub* PMs, GraphWindowClass *GraphWindow);
 
     bool DrawRadial(int ipm, const QJsonObject &json);
     bool DrawXY(int ipm, const QJsonObject &json);
 
 private:
-    ALrfModuleSelector *LRFs;
-    EventsDataClass    *EventsDataHub;
-    APmHub                *PMs;
-    GraphWindowClass   *GraphWindow;
+    SensorLRFs        * LRFs;
+    EventsDataClass   * EventsDataHub;
+    APmHub            * PMs;
+    GraphWindowClass  * GraphWindow;
     ALrfDrawSettings    Options;
     QString             LastError;
-
-    bool fUseOldModule;
 
     bool extractOptionsAndVerify(int PMnumber, const QJsonObject &json);
     void reportError(const QString& text);

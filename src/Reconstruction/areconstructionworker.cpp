@@ -6,6 +6,7 @@
 #include "dynamicpassiveshandler.h"
 #include "apositionenergyrecords.h"
 #include "aeventfilteringsettings.h"
+#include "sensorlrfs.h"
 
 #include <QDebug>
 
@@ -15,12 +16,12 @@
 
 AReconstructionWorker::AReconstructionWorker(APmHub* PMs,
                APmGroupsManager* PMgroups,
-               ALrfModuleSelector *LRFs,
+               SensorLRFs *LRFs,
                EventsDataClass *EventsDataHub,
                ReconstructionSettings *RecSet,
                int ThisPmGroup,
                int EventsFrom, int EventsTo) :
-    PMs(PMs), PMgroups(PMgroups), LRFs(*LRFs), EventsDataHub(EventsDataHub), RecSet(RecSet), ThisPmGroup(ThisPmGroup), EventsFrom(EventsFrom), EventsTo(EventsTo)
+    PMs(PMs), PMgroups(PMgroups), LRFs(LRFs), EventsDataHub(EventsDataHub), RecSet(RecSet), ThisPmGroup(ThisPmGroup), EventsFrom(EventsFrom), EventsTo(EventsTo)
 { 
     DynamicPassives = new DynamicPassivesHandler(PMs, PMgroups, EventsDataHub);
     DynamicPassives->init(RecSet, ThisPmGroup);
@@ -29,13 +30,6 @@ AReconstructionWorker::AReconstructionWorker(APmHub* PMs,
 AReconstructionWorker::~AReconstructionWorker()
 {
     delete DynamicPassives;
-}
-
-void AReconstructionWorker::copyLrfsAndExecute()
-{
-  LRFs = LRFs.copyToCurrentThread();  
-  emit lrfsCopied();
-  execute();
 }
 
 void CoGReconstructorClass::execute()
@@ -197,7 +191,7 @@ void CoGReconstructorClass::execute()
 
 RootMinReconstructorClass::RootMinReconstructorClass(APmHub* PMs,
                                                      APmGroupsManager* PMgroups,
-                                                     ALrfModuleSelector *LRFs,
+                                                     SensorLRFs *LRFs,
                                                      EventsDataClass *EventsDataHub,
                                                      ReconstructionSettings *RecSet,
                                                      int CurrentGroup,
@@ -334,7 +328,7 @@ void RootMinReconstructorClass::execute()
 
 RootMinDoubleReconstructorClass::RootMinDoubleReconstructorClass(APmHub* PMs,
                                                                  APmGroupsManager* PMgroups,
-                                                                 ALrfModuleSelector *LRFs,
+                                                                 SensorLRFs *LRFs,
                                                                  EventsDataClass *EventsDataHub,
                                                                  ReconstructionSettings *RecSet,
                                                                  int CurrentGroup,
@@ -480,8 +474,8 @@ double RootMinDoubleReconstructorClass::calculateChi2DoubleEvent(const double *r
   for (int ipm = 0; ipm < PMsignals->count(); ipm++)
     if (DynamicPassives->isActive(ipm))
      {
-       double LRFhere1 = LRFs.getLRF(ipm, x1, y1, z1) * energy1;
-       double LRFhere2 = LRFs.getLRF(ipm, x2, y2, z2) * energy2;
+       double LRFhere1 = LRFs->getLRF(ipm, x1, y1, z1) * energy1;
+       double LRFhere2 = LRFs->getLRF(ipm, x2, y2, z2) * energy2;
        if (LRFhere1 == 0 || LRFhere2 == 0) return 1.0e20;
 
        double LRFhere = LRFhere1 + LRFhere2;
@@ -489,8 +483,8 @@ double RootMinDoubleReconstructorClass::calculateChi2DoubleEvent(const double *r
        if (RecSet->fWeightedChi2calculation)
          {
            double sigma2;
-           double err1 = LRFs.getLRFErr(ipm, x1, y1, z1) * energy1;
-           double err2 = LRFs.getLRFErr(ipm, x2, y2, z2) * energy2;
+           double err1 = LRFs->getLRFErr(ipm, x1, y1, z1) * energy1;
+           double err2 = LRFs->getLRFErr(ipm, x2, y2, z2) * energy2;
            sigma2 = LRFhere + err1*err1 + err2*err2; // if err is not calculated, 0 is returned
            sum += delta*delta/sigma2;
          }
@@ -512,13 +506,13 @@ double AReconstructionWorker::calculateChi2NoDegFree(int iev, AReconRecord *rec)
   for (int ipm = 0; ipm < PMs->count(); ipm++)
     if (DynamicPassives->isActive(ipm))
      {
-       double LRFhere = LRFs.getLRF(ipm, rec->Points[0].r) * rec->Points[0].energy;
+       double LRFhere = LRFs->getLRF(ipm, rec->Points[0].r) * rec->Points[0].energy;
        if (LRFhere <= 0) return 1.0e20;
 
        double delta = LRFhere - EventsDataHub->Events.at(iev).at(ipm);
        if (RecSet->fWeightedChi2calculation)
          {
-           double err = LRFs.getLRFErr(ipm, rec->Points[0].r)*rec->Points[0].energy;
+           double err = LRFs->getLRFErr(ipm, rec->Points[0].r)*rec->Points[0].energy;
            double sigma2 = LRFhere + err*err; // if err is not calculated, 0 is returned
            sum += delta*delta/sigma2;
          }
@@ -535,7 +529,7 @@ double AReconstructionWorker::calculateMLfactor(int iev, AReconRecord *rec)
   for (int ipm = 0; ipm < PMs->count(); ipm++)
     if (DynamicPassives->isActive(ipm))
       {
-       double LRFhere = LRFs.getLRF(ipm, rec->Points[0].r) * rec->Points[0].energy;
+       double LRFhere = LRFs->getLRF(ipm, rec->Points[0].r) * rec->Points[0].energy;
        if (LRFhere <= 0.) return 1.0e20;
 
        sum += EventsDataHub->Events.at(iev).at(ipm) * log(LRFhere) - LRFhere; //"probability"
@@ -584,7 +578,7 @@ double AFunc_Chi2::operator()(const double *p) //0-x, 1-y, 2-z, 3-energy
     for (int ipm = 0; ipm < Reconstructor->PMs->count(); ipm++)
         if (Reconstructor->DynamicPassives->isActive(ipm))
         {
-            double LRFhere = Reconstructor->LRFs.getLRF(ipm, p)*p[3];
+            double LRFhere = Reconstructor->LRFs->getLRF(ipm, p)*p[3];
             if (LRFhere <= 0)
                 return Reconstructor->LastMiniValue *= 1.25; //if LRFs are not defined for this coordinates
 
@@ -592,7 +586,7 @@ double AFunc_Chi2::operator()(const double *p) //0-x, 1-y, 2-z, 3-energy
             if (Reconstructor->RecSet->fWeightedChi2calculation)
             {
                 double sigma2;
-                double err = Reconstructor->LRFs.getLRFErr(ipm, p)*p[3];
+                double err = Reconstructor->LRFs->getLRFErr(ipm, p)*p[3];
                 sigma2 = LRFhere + err*err; // if err is not calculated, 0 is returned
                 sum += delta*delta/sigma2;
             }
@@ -661,8 +655,8 @@ double AFunc_Chi2double::operator()(const double *p)
     for (int ipm = 0; ipm < Reconstructor->PMs->count(); ipm++)
         if (Reconstructor->DynamicPassives->isActive(ipm))
         {
-            double LRFhere1 = Reconstructor->LRFs.getLRF(ipm, X1, Y1, Z1) * energy1;
-            double LRFhere2 = Reconstructor->LRFs.getLRF(ipm, X2, Y2, Z2) * energy2;
+            double LRFhere1 = Reconstructor->LRFs->getLRF(ipm, X1, Y1, Z1) * energy1;
+            double LRFhere2 = Reconstructor->LRFs->getLRF(ipm, X2, Y2, Z2) * energy2;
             if (LRFhere1 <= 0 || LRFhere2 <= 0)
                 return Reconstructor->LastMiniValue *= 1.25;  // if LRFs are not defined for these coordinates
 
@@ -671,8 +665,8 @@ double AFunc_Chi2double::operator()(const double *p)
             if (Reconstructor->RecSet->fWeightedChi2calculation)
             {
                 double sigma2;
-                double err1 = Reconstructor->LRFs.getLRFErr(ipm, X1, Y1, Z1) * energy1;
-                double err2 = Reconstructor->LRFs.getLRFErr(ipm, X2, Y2, Z2) * energy2;
+                double err1 = Reconstructor->LRFs->getLRFErr(ipm, X1, Y1, Z1) * energy1;
+                double err2 = Reconstructor->LRFs->getLRFErr(ipm, X2, Y2, Z2) * energy2;
                 sigma2 = LRFhere + err1*err1 + err2*err2; // if err is not calculated, 0 is returned
                 sum += delta*delta/sigma2;
             }
@@ -715,7 +709,7 @@ double AFunc_ML::operator()(const double *p) //0-x, 1-y, 2-z, 3-energy
     for (int ipm = 0; ipm < Reconstructor->PMs->count(); ipm++)
         if (Reconstructor->DynamicPassives->isActive(ipm))
         {
-            double LRFhere = Reconstructor->LRFs.getLRF(ipm, p)*p[3];
+            double LRFhere = Reconstructor->LRFs->getLRF(ipm, p)*p[3];
             if (LRFhere <= 0)
                 //return Reconstructor->LastMiniValue += fabs(Reconstructor->LastMiniValue) * 0.25;
                 return Reconstructor->LastMiniValue + fabs(Reconstructor->LastMiniValue) * 0.25;
@@ -776,8 +770,8 @@ double AFunc_MLdouble::operator()(const double *p)
     for (int ipm = 0; ipm < Reconstructor->PMs->count(); ipm++)
         if (Reconstructor->DynamicPassives->isActive(ipm))
         {
-            double LRFhere1 = Reconstructor->LRFs.getLRF(ipm, X1, Y1, Z1) * energy1;
-            double LRFhere2 = Reconstructor->LRFs.getLRF(ipm, X2, Y2, Z2) * energy2;
+            double LRFhere1 = Reconstructor->LRFs->getLRF(ipm, X1, Y1, Z1) * energy1;
+            double LRFhere2 = Reconstructor->LRFs->getLRF(ipm, X2, Y2, Z2) * energy2;
             if (LRFhere1 <= 0.0 || LRFhere2 <= 0.0 )
                 return Reconstructor->LastMiniValue += fabs(Reconstructor->LastMiniValue) * 0.25;
             double LRFhere = LRFhere1 + LRFhere2;
@@ -941,7 +935,7 @@ BadEventLabel:
 void CGonCPUreconstructorClass::execute()
 {
   //qDebug() << "CConCPU starting";
-  if (LRFs.isAllSlice3Dold())
+  if (LRFs->isAllSlice3D())
   {
       //qDebug() << "Sliced3D old module - special procedure!";
       executeSliced3Dold();
@@ -1041,7 +1035,7 @@ void CGonCPUreconstructorClass::execute()
                         for (int ipm = 0; ipm < numPMs; ipm++)
                           if (DynamicPassives->isActive(ipm))
                           {
-                             double LRFhere = LRFs.getLRF(ipm, rec->Points[0].r);
+                             double LRFhere = LRFs->getLRF(ipm, rec->Points[0].r);
                              if (LRFhere <= 0.0)
                                {
                                  fBadLRFfound = true;
@@ -1104,7 +1098,7 @@ void CGonCPUreconstructorClass::executeSliced3Dold()
     float Factor = 100.0/(EventsTo-EventsFrom);
 
     eventsProcessed = 0;
-    const LRFsliced3D* lrf = dynamic_cast<const LRFsliced3D*>( (*LRFs.getOldModule())[0] );
+    const LRFsliced3D* lrf = dynamic_cast<const LRFsliced3D*>( (*LRFs)[0] );
     if (!lrf) return;
     //qDebug() << "Slices:"<<lrf->getNintZ();
 
@@ -1174,7 +1168,7 @@ void CGonCPUreconstructorClass::oneSlice(int iev, int iSlice)
     double bestResult = 1.0e20;
     double bestX, bestY, bestZ;
     double bestEnergy = -1;
-    const LRFsliced3D* lrf = dynamic_cast<const LRFsliced3D*>( (*LRFs.getOldModule())[0] );
+    const LRFsliced3D* lrf = dynamic_cast<const LRFsliced3D*>( (*LRFs)[0] );
     rec->Points[0].r[2] = lrf->getSliceMedianZ(iSlice);
 
     for (int iter = 0; iter<RecSet->CGiterations; iter++)
@@ -1212,7 +1206,7 @@ void CGonCPUreconstructorClass::oneSlice(int iev, int iSlice)
                       for (int ipm = 0; ipm < numPMs; ipm++)
                         if (DynamicPassives->isActive(ipm))
                           {
-                           double LRFhere = LRFs.getLRF(ipm, rec->Points[0].r);
+                           double LRFhere = LRFs->getLRF(ipm, rec->Points[0].r);
                            if (LRFhere <= 0.0)
                              {
                                fBadLRFfound = true;
@@ -1282,11 +1276,11 @@ double AFunc_TFormula::operator()(const double *p)
     for (int ipm = 0; ipm < Reconstructor->PMs->count(); ipm++)
         if (Reconstructor->DynamicPassives->isActive(ipm))
         {
-            par[4] = Reconstructor->LRFs.getLRF(ipm, p)*p[3];
+            par[4] = Reconstructor->LRFs->getLRF(ipm, p)*p[3];
             if (par[4] <= 0)
                 return Reconstructor->LastMiniValue + fabs(Reconstructor->LastMiniValue) * 0.25;
             par[5] = Reconstructor->PMsignals->at(ipm);
-            par[6] = Reconstructor->LRFs.getLRFErr(ipm, p);
+            par[6] = Reconstructor->LRFs->getLRFErr(ipm, p);
 
             sum += tform->EvalPar(nullptr, par);
         }

@@ -1,7 +1,7 @@
 #include "detectorclass.h"
 #include "apmhub.h"
 #include "apmtype.h"
-#include "alrfmoduleselector.h"
+#include "sensorlrfs.h"
 #include "amaterialparticlecolection.h"
 #include "ajsontools.h"
 #include "acommonfunctions.h"
@@ -51,7 +51,7 @@ DetectorClass::DetectorClass(AConfiguration *config) : Config(config)
   //autoLoadPlugins();
 
   //qDebug() << "    Photomultipliers manager created";  
-  LRFs = new ALrfModuleSelector(PMs);
+  LRFs = new SensorLRFs(PMs->count());
   //qDebug() << "    LRF selector module created";
   PMgroups = new APmGroupsManager(PMs, &Config->JSON);
 

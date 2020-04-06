@@ -1,8 +1,7 @@
 #include "areconstructionmanager.h"
 #include "eventsdataclass.h"
 #include "CorrelationFilters.h"
-#include "alrfmoduleselector.h"
-#include "sensorlrfs.h"     // TEMPORARY! see cuda
+#include "sensorlrfs.h"
 #include "ajsontools.h"
 #include "areconstructionworker.h"
 #include "ageoobject.h"
@@ -377,9 +376,12 @@ bool AReconstructionManager::fillSettingsAndVerify(QJsonObject &json, bool fChec
           ErrorString = "Unknown LRF module selection!";
           return false;
         }
+      if (sel == 1)
+      {
+          qWarning() << "Raimundo's LRF module was selected, it is not available anymore!";
+      }
     }
   //qDebug() << "LRF old?"<<fOld;
-  LRFs->selectOld();
 
   //reading reconstruction settings, for compatibility it could be QJsonObject (old system) or arrays of QObjects, one for each sensor group
   QJsonArray arRC;
@@ -526,11 +528,6 @@ bool AReconstructionManager::configureFilters(QJsonObject &json)
   return true;
 }
 
-void AReconstructionManager::onLRFsCopied()
-{
-    fDoingCopyLRFs.store(false);
-}
-
 #include "aconfiguration.h"
 void AReconstructionManager::onRequestFilterAndAskToUpdateGui()
 {
@@ -543,23 +540,14 @@ bool AReconstructionManager::run(QList<AReconstructionWorker *> reconstructorLis
   fStopRequested = false;
   QList<QThread*> threads;  
   for (int ithread = 0; ithread<reconstructorList.size(); ithread++)
-    {
-      fDoingCopyLRFs.store(true);
+  {
       threads.append(new QThread());
-      QObject::connect(threads.last(), &QThread::started, reconstructorList[ithread], &AReconstructionWorker::copyLrfsAndExecute);
-      QObject::connect(reconstructorList[ithread], SIGNAL(lrfsCopied()), this, SLOT(onLRFsCopied()), Qt::DirectConnection);
+      QObject::connect(threads.last(), &QThread::started, reconstructorList[ithread], &AReconstructionWorker::execute);
       QObject::connect(reconstructorList[ithread], SIGNAL(finished()), threads.last(), SLOT(quit()));
       QObject::connect(threads.last(), SIGNAL(finished()), threads.last(), SLOT(deleteLater()));
       reconstructorList[ithread]->moveToThread(threads.last());
       threads.last()->start();
-
-      do
-      {
-          qApp->processEvents();
-          QThread::usleep(100);
-      }
-      while (fDoingCopyLRFs.load());
-    }
+  }
 
   int StartingTreads = threads.size();
   QTime RefresherTimer;

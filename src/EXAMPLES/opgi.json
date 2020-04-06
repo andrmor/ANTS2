@@ -4538,7 +4538,7 @@
                     "*MaterialName": "GSO",
                     "*Tags": [
                     ],
-                    "BulkAbsorption": 0,
+                    "BulkAbsorption": 0.00481,
                     "BulkAbsorptionWave": [
                     ],
                     "ChemicalComposition": {
@@ -4630,7 +4630,7 @@
                         "ElementCompositionString": "Gd2SiO5",
                         "MeanAtomMass": 52.84840050000001
                     },
-                    "Comments": "",
+                    "Comments": "Bulk abosrption from: https://doi.org/10.1134/S154747711403011X",
                     "Density": 6.7,
                     "ElDiffusionL": 0,
                     "ElDiffusionT": 0,
@@ -22546,8 +22546,8 @@
             },
             "SinglePositionOptions": {
                 "SingleX": 2.5,
-                "SingleY": 1,
-                "SingleZ": -85
+                "SingleY": 0,
+                "SingleZ": -535
             },
             "WaveTimeOptions": {
                 "UseFixedWavelength": false,

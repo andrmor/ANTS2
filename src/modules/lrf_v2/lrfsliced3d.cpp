@@ -1,23 +1,22 @@
 #include "lrfsliced3d.h"
 #include "jsonparser.h"
+#include "bsfit123.h"
+#include "bspline123d.h"
 #include "spline.h"
 
 #include <QJsonObject>
 
 #include <math.h>
 
-#ifdef TPS3M
-#include "tpspline3m.h"
-#else
-#include "tpspline3.h"
-#endif
-
-
 LRFsliced3D::LRFsliced3D(double x_min, double x_max, int n_intx, double y_min,
-            double y_max, int n_inty, double z_min, double z_max, int n_intz, bool log) : LRF3d(),
-            xmin(x_min), xmax(x_max), ymin(y_min), ymax(y_max), zmin(z_min), zmax(z_max),
-            nintx(n_intx), ninty(n_inty), nintz(n_intz), logscale(log)
+            double y_max, int n_inty, double z_min, double z_max, int n_intz) : LRF2(),
+//            xmin(x_min), xmax(x_max), ymin(y_min), ymax(y_max), zmin(z_min), zmax(z_max),
+            nintx(n_intx), ninty(n_inty), nintz(n_intz)
 {
+    xmin = x_min; xmax = x_max;
+    ymin = y_min; ymax = y_max;
+    zmin = z_min; zmax = z_max;
+
     bsr.resize(nintz, 0);
     bse.resize(nintz, 0);
 
@@ -26,7 +25,7 @@ LRFsliced3D::LRFsliced3D(double x_min, double x_max, int n_intx, double y_min,
     ztop = zmax - dz/2.;        // middle of the top slice
 }
 
-LRFsliced3D::LRFsliced3D(QJsonObject &json) : LRF3d(), logscale(false)
+LRFsliced3D::LRFsliced3D(QJsonObject &json) : LRF2()
 {
     JsonParser parser(json);
     QJsonObject jsobj, splineobj;
@@ -201,19 +200,30 @@ double LRFsliced3D::fit(int npts, const double *x, const double *y, const double
         vva[iz].push_back(data[i]);
     }
 
-    for (int iz=0; iz < nintz; iz++) {
-        bsr[iz] = new TPspline3(xmin, xmax, nintx, ymin, ymax, ninty);
-
-        if (!grid)
-            fit_tpspline3(bsr[iz], vva[iz].size(), &vvx[iz][0], &vvy[iz][0], &vva[iz][0]);
-        else
-            fit_tpspline3_grid(bsr[iz], vva[iz].size(), &vvx[iz][0], &vvy[iz][0], &vva[iz][0]);
-    }
     valid = true;
-    return 0;
+    for (int iz=0; iz < nintz; iz++) {
+        bsr[iz] = new Bspline2d(xmin, xmax, nintx, ymin, ymax, ninty);
+        if (true) { // make a block where F is local
+            BSfit2D F(bsr[iz]);
+//            if (non_negative)
+//                F.SetConstraintNonNegative();
+
+//            if (top_down)
+//                F.SetConstraintTopDown(x0, y0);
+
+            if (!grid) {
+                F.Fit(vva[iz].size(), &vvx[iz][0], &vvy[iz][0], &vva[iz][0]);
+                return F.GetResidual();
+            } else {
+                F.AddData(vva[iz].size(), &vvx[iz][0], &vvy[iz][0], &vva[iz][0]);
+                F.Fit();
+                return F.GetResidual();
+            }
+        }
+    }
 }
 
-void LRFsliced3D::setSpline(TPspline3 *bs, int iz)
+void LRFsliced3D::setSpline(Bspline2d *bs, int iz)
 {
     if (iz > nintz)
         return;
@@ -269,7 +279,6 @@ QJsonObject LRFsliced3D::reportSettings() const
    json["n1"] = nintx;
   // json["n2"] = ninty;
    json["n2"] = nintz;
-   json["logscale"] = logscale;
 
    return json;
 }

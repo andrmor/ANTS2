@@ -2,9 +2,7 @@
 #define LRFFACTORY_H
 
 #include "lrfaxial.h"
-#include "lrfcaxial.h"
 #include "lrfaxial3d.h"
-#include "lrfcaxial3d.h"
 #include "lrfxy.h"
 #include "lrfxyz.h"
 #include "lrfcomposite.h"
@@ -26,9 +24,7 @@ public:
     else if (!strcmp(type, "Radial3D"))   return new LRFaxial3d(lrf_json); //compatibility
     else if (!strcmp(type, "XY"))         return new LRFxy(lrf_json);
     else if (!strcmp(type, "Freeform"))   return new LRFxy(lrf_json);      //compatibility
-#ifdef TPS3M
     else if (!strcmp(type, "XYZ"))        return new LRFxyz(lrf_json);
-#endif
     else if (!strcmp(type, "Composite"))  return new LRFcomposite(lrf_json);
     else if (!strcmp(type, "Sliced3D"))   return new LRFsliced3D(lrf_json);
     else return 0;
@@ -52,9 +48,7 @@ public:
     else if (!strcmp(type, "Radial3D"))   return new LRFaxial3d(json); //compatibility
     else if (!strcmp(type, "XY"))         return new LRFxy(json);
     else if (!strcmp(type, "Freeform"))   return new LRFxy(json);      //compatibility
-#ifdef TPS3M
     else if (!strcmp(type, "XYZ"))        return new LRFxyz(json);
-#endif
     else if (!strcmp(type, "Composite"))  return new LRFcomposite(json);
     else if (!strcmp(type, "Sliced3D"))   return new LRFsliced3D(json);
     else return 0;

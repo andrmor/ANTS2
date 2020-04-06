@@ -32,8 +32,8 @@
 #include "aconfiguration.h"
 #include "apmgroupsmanager.h"
 #include "asandwich.h"
-#include "alrfwindow.h" //For new LRF module
-#include "arepository.h"
+//#include "alrfwindow.h" //For new LRF module
+//#include "arepository.h"
 #include "amaterialparticlecolection.h"
 #include "tmpobjhubclass.h"
 #include "acalibratorsignalperphel.h"
@@ -140,15 +140,6 @@ void ReconstructionWindow::writeToJson(QJsonObject &json) //fVerbose - saving as
     }
   else
     if (js.contains("ActiveLRF")) js.remove("ActiveLRF");
-  //new module LRFs
-  if (Detector->LRFs->isAllLRFsDefined(false))
-    {
-      QJsonObject LRFjson;
-      Detector->LRFs->saveActiveLRFs_v3(LRFjson);
-      js["ActiveLRFv3"] = LRFjson;
-    }
-  else
-    if (js.contains("ActiveLRFv3")) js.remove("ActiveLRFv3");
 
   json["ReconstructionConfig"] = js;
 }
@@ -6205,8 +6196,7 @@ void ReconstructionWindow::on_cobLRFmodule_currentIndexChanged(int index)
 {
     bool fOld = (index==0);
 
-    if (fOld) Detector->LRFs->selectOld();
-    else Detector->LRFs->selectNew();
+    Detector->LRFs->selectOld();
     ui->labLRFmoduleWarning->setVisible( !fOld );
 
     ReconstructionWindow::LRF_ModuleReadySlot(false); //the selector will ask the status!
@@ -6214,20 +6204,11 @@ void ReconstructionWindow::on_cobLRFmodule_currentIndexChanged(int index)
 
 void ReconstructionWindow::on_pbShowLRFwindow_clicked()
 {
-  if (Detector->LRFs->isOldSelected())
-    {
-      //Old module
-      MW->lrfwindow->showNormal();
-      MW->lrfwindow->raise();
-      MW->lrfwindow->activateWindow();
-    }
-  else
-    {
-      //New module
-      MW->newLrfWindow->showNormal();
-      MW->newLrfWindow->raise();
-      MW->newLrfWindow->activateWindow();
-    }
+
+  MW->lrfwindow->showNormal();
+  MW->lrfwindow->raise();
+  MW->lrfwindow->activateWindow();
+
 }
 
 void ReconstructionWindow::on_pbLoadLRFs_clicked()

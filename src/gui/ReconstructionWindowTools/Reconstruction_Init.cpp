@@ -6,7 +6,7 @@
 #include "apmgroupsmanager.h"
 #include "CorrelationFilters.h"
 #include "alrfmoduleselector.h"
-#include "arepository.h"
+//#include "arepository.h"
 #include "areconstructionmanager.h"
 #include "acalibratorsignalperphel.h"
 
@@ -127,8 +127,8 @@ ReconstructionWindow::ReconstructionWindow(QWidget * parent, MainWindow * mw, Ev
   const SensorLRFs* SensLRF = Detector->LRFs->getOldModule();
   QObject::connect(SensLRF, &SensorLRFs::SensorLRFsReadySignal, this, &ReconstructionWindow::LRF_ModuleReadySlot);
   //new module:
-  const LRF::ARepository* NewModule = Detector->LRFs->getNewModule();
-  QObject::connect(NewModule, &LRF::ARepository::currentLrfsChangedReadyStatus, this, &ReconstructionWindow::LRF_ModuleReadySlot);
+  //const LRF::ARepository* NewModule = Detector->LRFs->getNewModule();
+  //QObject::connect(NewModule, &LRF::ARepository::currentLrfsChangedReadyStatus, this, &ReconstructionWindow::LRF_ModuleReadySlot);
 
   ui->cobLRFmodule->setCurrentIndex(0);
   on_cobLRFmodule_currentIndexChanged(0);

@@ -379,8 +379,7 @@ bool AReconstructionManager::fillSettingsAndVerify(QJsonObject &json, bool fChec
         }
     }
   //qDebug() << "LRF old?"<<fOld;
-  if (fOld) LRFs->selectOld();
-  else LRFs->selectNew();
+  LRFs->selectOld();
 
   //reading reconstruction settings, for compatibility it could be QJsonObject (old system) or arrays of QObjects, one for each sensor group
   QJsonArray arRC;

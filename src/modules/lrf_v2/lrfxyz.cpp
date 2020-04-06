@@ -1,35 +1,25 @@
 #include "lrfxyz.h"
 #include "jsonparser.h"
 #include "spline.h"
+#include "bspline123d.h"
+#include "bsfit123.h"
 
 #include <QJsonObject>
 
 #include <math.h>
 
-#ifdef TPS3M
-#include "tpspline3m.h"
-#else
-#include "tpspline3.h"
-#endif
-
-#ifdef NEWFIT
-#include "tps3dfit.h"
-#endif
-
-#include "tpspline3d.h"
-
 LRFxyz::LRFxyz(double x_min, double x_max, int n_intx, double y_min,
-            double y_max, int n_inty, double z_min, double z_max, int n_intz) : LRF3d(),
-            xmin(x_min), xmax(x_max), ymin(y_min), ymax(y_max), zmin(z_min), zmax(z_max),
+            double y_max, int n_inty, double z_min, double z_max, int n_intz) : LRF2(),
+//            xmin(x_min), xmax(x_max), ymin(y_min), ymax(y_max), zmin(z_min), zmax(z_max),
             nintx(n_intx), ninty(n_inty), nintz(n_intz)
 {
-    non_negative = false;
     nbasz = nintz+3;
-    bsr = new TPspline3D(xmin, xmax, nintx, ymin, ymax, ninty, zmin, zmax, nintz);
-    bse = 0;
+    xmin = x_min; xmax = x_max;
+    ymin = y_min; ymax = y_max;
+    zmin = z_min; zmax = z_max;
 }
 
-LRFxyz::LRFxyz(QJsonObject &json) : LRF3d()
+LRFxyz::LRFxyz(QJsonObject &json) : LRF2()
 {
     JsonParser parser(json);
     QJsonObject jsobj, splineobj;
@@ -47,8 +37,8 @@ LRFxyz::LRFxyz(QJsonObject &json) : LRF3d()
 
     non_negative = false;
     nbasz = nintz+3;
-    bsr = new TPspline3D(xmin, xmax, nintx, ymin, ymax, ninty, zmin, zmax, nintz);
-    bse = 0;
+    bsr = new Bspline3d(xmin, xmax, nintx, ymin, ymax, ninty, zmin, zmax, nintz);
+    bse = new Bspline3d(xmin, xmax, nintx, ymin, ymax, ninty, zmin, zmax, nintz);
 
 // read response
     if ( parser.ParseObject("response", resparr) ) {
@@ -65,7 +55,7 @@ LRFxyz::LRFxyz(QJsonObject &json) : LRF3d()
 // try to read error
     parser.SetObject(json);
     if ( parser.ParseObject("error", errarr) ) {
-        bse = new TPspline3D(xmin, xmax, nintx, ymin, ymax, ninty, zmin, zmax, nintz);
+        bse = new Bspline3d(xmin, xmax, nintx, ymin, ymax, ninty, zmin, zmax, nintz);
         QVector <QJsonObject> stack;
         if (parser.ParseArray(errarr, stack))
             if (stack.size() >= nbasz)
@@ -90,69 +80,56 @@ LRFxyz::~LRFxyz()
 
 bool LRFxyz::errorDefined() const
 {
-    return false;
-    //    return bse[0] != NULL;
+    return (bse != 0) && bse->IsReady();
 }
 
+bool LRFxyz::isReady() const
+{
+    return (bsr != 0) && bsr->IsReady();
+}
+
+bool LRFxyz::inDomain(double x, double y, double z) const
+{
+    return x>xmin && x<xmax && y>ymin && y<ymax && z>zmin && z<zmax;
+}
+
+// TODO: Check WTF is Rmax for
 double LRFxyz::getRmax() const
 {
   return std::max(std::max(fabs(xmin), fabs(ymin)), std::max(fabs(xmax), fabs(ymax)));
 }
 
-
 double LRFxyz::eval(double x, double y, double z) const
 {
-// TODO: insert check for bsr with popup on failure
-    if (!inDomain(x, y, z))
-        return 0.;
-
-    return bsr->Eval(x, y, z);
+    return isReady() ? bsr->Eval(x, y, z) : 0.;
 }
 
 double LRFxyz::evalErr(double x, double y, double z) const
 {
-    return bse ? bse->Eval(x, y, z) : 0.;
+    return errorDefined() ? bse->Eval(x, y, z) : 0.;
 }
 
 double LRFxyz::evalDrvX(double x, double y, double z) const
 {
-    // TODO: insert check for bsr with popup on failure
-    if (!inDomain(x, y, z))
-        return 0.;
-
-    return bsr->EvalDrvX(x, y, z);
+    return isReady() ? bsr->EvalDrvX(x, y, z) : 0.;
 }
 
 double LRFxyz::evalDrvY(double x, double y, double z) const
 {
-// TODO: insert check for bsr with popup on failure
-    if (!inDomain(x, y, z))
-        return 0.;
-
-    return bsr->EvalDrvY(x, y, z);
+    return isReady() ? bsr->EvalDrvY(x, y, z) : 0.;
 }
 
 double LRFxyz::evalDrvZ(double x, double y, double z) const
 {
-// TODO: insert check for bsr with popup on failure
-    if (!inDomain(x, y, z))
-        return 0.;
-
-    return bsr->EvalDrvZ(x, y, z);
+    return isReady() ? bsr->EvalDrvZ(x, y, z) : 0.;
 }
 
 double LRFxyz::eval(double x, double y, double z, double *err) const
 {
-    if (!inDomain(x, y, z)) {
-        *err = 0.;
-        return 0.;
-    }
-
-    *err = bse ? bse->Eval(x, y, z) : 0.;
-    return bsr->Eval(x, y, z);
+    *err = errorDefined() ? bse->Eval(x, y, z) : 0.;
+    return isReady() ? bsr->Eval(x, y, z) : 0.;
 }
 
-#ifdef NEWFIT
 double LRFxyz::fit(int npts, const double *x, const double *y, const double *z, const double *data, bool grid)
 {
     std::vector <double> vx;
@@ -168,9 +145,8 @@ double LRFxyz::fit(int npts, const double *x, const double *y, const double *z, 
         va.push_back(data[i]);
     }
 
-    valid = true;
-
-    TPS3Dfit F(bsr);
+    bsr = new Bspline3d(xmin, xmax, nintx, ymin, ymax, ninty, zmin, zmax, nintz);
+    BSfit3D F(bsr);
 
     if (non_negative)
         F.SetConstraintNonNegative();
@@ -184,37 +160,36 @@ double LRFxyz::fit(int npts, const double *x, const double *y, const double *z, 
         return F.GetResidual();
     }
 }
-#else
-double LRFxyz::fit(int npts, const double *x, const double *y, const double *z, const double *data, bool grid)
+
+double LRFxyz::fitError(int npts, const double *x, const double *y, const double *z, const double *data, bool grid)
 {
-    std::vector <std::vector <double> > vvx;
-    std::vector <std::vector <double> > vvy;
-    std::vector <std::vector <double> > vva;
-    vvx.resize(nintz);
-    vvy.resize(nintz);
-    vva.resize(nintz);
-
+    std::vector <double> vx;
+    std::vector <double> vy;
+    std::vector <double> vz;
+    std::vector <double> va;
     for (int i=0; i<npts; i++) {
-        if (!inDomain(x[i], y[i], z[i]) || z[i] >= zmax)
+        if (!inDomain(x[i], y[i], z[i]))
             continue;
-        int iz = (int) ((z[i]-zmin)/dz);
-        vvx[iz].push_back(x[i]);
-        vvy[iz].push_back(y[i]);
-        vva[iz].push_back(data[i]);
+        vx.push_back(x[i]);
+        vy.push_back(y[i]);
+        vy.push_back(z[i]);
+        double err = data[i] - bsr->Eval(x[i], y[i], z[i]);
+//        va.push_back(fabs(err));
+        va.push_back(err*err);
     }
 
-    for (int iz=0; iz < nintz; iz++) {
-        bsr[iz] = new TPspline3(xmin, xmax, nintx, ymin, ymax, ninty);
+    bse = new Bspline3d(xmin, xmax, nintx, ymin, ymax, ninty, zmin, zmax, nintz);
+    BSfit3D F(bse);
 
-        if (!grid)
-            fit_tpspline3(bsr[iz], vva[iz].size(), &vvx[iz][0], &vvy[iz][0], &vva[iz][0]);
-        else
-            fit_tpspline3_grid(bsr[iz], vva[iz].size(), &vvx[iz][0], &vvy[iz][0], &vva[iz][0]);
+    if (!grid) {
+        F.Fit(va.size(), &vx[0], &vy[0], &vz[0], &va[0]);
+        return F.GetResidual();
+    } else {
+        F.AddData(va.size(), &vx[0], &vy[0], &vz[0], &va[0]);
+        F.Fit();
+        return F.GetResidual();
     }
-    valid = true;
-    return 0;
 }
-#endif
 
 void LRFxyz::writeJSON(QJsonObject &json) const
 {

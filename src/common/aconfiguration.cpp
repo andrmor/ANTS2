@@ -80,11 +80,7 @@ bool AConfiguration::LoadConfig(QJsonObject &json, bool DetConstructor, bool Sim
               QJsonObject lj = ReconJson["ActiveLRF"].toObject();
               Detector->LRFs->loadAll_v2(lj);
             }
-          if (ReconJson.contains("ActiveLRFv3"))
-            {
-              QJsonObject lj = ReconJson["ActiveLRFv3"].toObject();
-              Detector->LRFs->loadAll_v3(lj);
-            }
+
 
           emit requestReconstructionGuiUpdate();
           AskForLRFGuiUpdate();
@@ -202,13 +198,6 @@ void AConfiguration::UpdateLRFmakeJson()
     JSON["ReconstructionConfig"] = obj;
 }
 
-void AConfiguration::UpdateLRFv3makeJson()
-{
-    QJsonObject obj = JSON["ReconstructionConfig"].toObject();
-    obj["LRFv3makeJson"] = Detector->LRFs->getLRFv3makeJson();
-    JSON["ReconstructionConfig"] = obj;
-}
-
 void AConfiguration::UpdateReconstructionSettings(QJsonObject &jsonRec, int iGroup)
 {
     QJsonObject jRC = JSON["ReconstructionConfig"].toObject();
@@ -274,16 +263,16 @@ void AConfiguration::AskForReconstructionGuiUpdate()
   emit requestReconstructionGuiUpdate();
 }
 
-#include "arepository.h"
+//#include "arepository.h"
 void AConfiguration::AskForLRFGuiUpdate()
 {
     //qDebug() << "Emitting signal to update lrf gui of the old module";
     emit requestLRFGuiUpdate();
 
     QJsonObject jrec = JSON["ReconstructionConfig"].toObject();
-    QJsonObject js = jrec["LRFv3makeJson"].toObject();
+//    QJsonObject js = jrec["LRFv3makeJson"].toObject();
     //qDebug() << js;
-    if (!js.isEmpty()) Detector->LRFs->getNewModule()->setNextUpdateConfig(js);
+//    if (!js.isEmpty()) Detector->LRFs->getNewModule()->setNextUpdateConfig(js);
 }
 
 void AConfiguration::AskChangeGuiBusy(bool flag)

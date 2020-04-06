@@ -27,7 +27,7 @@
 #include "aconfiguration.h"
 #include "amessage.h"
 #include "alrfmoduleselector.h"
-#include "gui/alrfwindow.h"
+//#include "gui/alrfwindow.h"
 #include "anetworkmodule.h"
 #include "awebsocketserverdialog.h"
 #include "aremotewindow.h"
@@ -119,7 +119,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
     lrfwindow->move(25,25);
     qDebug()<<">Creating New LRF Window";
     w = new QWidget();
-    newLrfWindow = new ALrfWindow(w, this, Detector->LRFs->getNewModule());    
+    // newLrfWindow = new ALrfWindow(w, this, Detector->LRFs->getNewModule());
 #ifdef ANTS_FANN
     qDebug()<<">Creating NeuralNetworks Window";
     w = new QWidget();
@@ -159,7 +159,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
     qDebug() << ">Setting winNavigator for all windows";
     QVector<AGuiWindow*> winVec;
     winVec << this << ELwindow << Rwindow << Owindow << DAwindow << GeometryWindow << GraphWindow << lrfwindow << MIwindow
-           << WindowNavigator << RemoteWindow << newLrfWindow;
+           << WindowNavigator << RemoteWindow;
     for (AGuiWindow * w : winVec)
         w->connectWinNavigator(WindowNavigator);
 
@@ -200,7 +200,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
 #endif
 
     //Busy status updates
-    QObject::connect(WindowNavigator, &WindowNavigatorClass::BusyStatusChanged, newLrfWindow, &ALrfWindow::onBusyStatusChanged);
+    //QObject::connect(WindowNavigator, &WindowNavigatorClass::BusyStatusChanged, newLrfWindow, &ALrfWindow::onBusyStatusChanged);
 
     QObject::connect(SimulationManager, &ASimulationManager::updateReady, this, &MainWindow::RefreshOnProgressReport);
     QObject::connect(SimulationManager, &ASimulationManager::SimulationFinished, this, &MainWindow::simulationFinished);

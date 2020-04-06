@@ -9,10 +9,10 @@ ANTS2_MINOR = 27
 #CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library: see https://github.com/mariusmuja/flann
 #CONFIG += ants2_fann        #enables FANN (fast neural network) library: see https://github.com/libfann/fann
 CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra - highly recommended! Installation requires only to copy files!
-CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
+#CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 #CONFIG += ants2_Python      #enable Python scripting
 #CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering): see https://github.com/mctools/ncrystal
-CONFIG += ants2_jsroot       #enables JSROOT visualisation at GeometryWindow. Automatically enables ants2_RootServer
+#CONFIG += ants2_jsroot       #enables JSROOT visualisation at GeometryWindow. Automatically enables ants2_RootServer
 
 #In effect ONLY for the Docker version:
 ants2_docker {
@@ -44,34 +44,8 @@ ants2_eigen3 {
 
      linux-g++ || unix { INCLUDEPATH += /usr/include/eigen3 }
      win32 { INCLUDEPATH += C:/eigen3 }
-
-     #advanced options:
-     DEFINES += NEWFIT #if enabled, use advanced fitting class (non-negative LS, non-decreasing LS, hole-plugging, etc.)  
-
-     SOURCES += SplineLibrary/bs3fit.cpp \
-                SplineLibrary/tps3fit.cpp \
-                SplineLibrary/curvefit.cpp
-
-     HEADERS += SplineLibrary/bs3fit.h \
-                SplineLibrary/tps3fit.h \
-                SplineLibrary/curvefit.h
 }
-ants2_matrix { # use matrix algebra for TP splines
-    DEFINES += TPS3M
-    SOURCES += SplineLibrary/tpspline3m.cpp \
-               SplineLibrary/tpspline3d.cpp \
-               SplineLibrary/tps3dfit.cpp \
-               modules/lrf_v2/lrfxyz.cpp
 
-    HEADERS += SplineLibrary/tpspline3m.h \
-               SplineLibrary/tpspline3d.h \
-               SplineLibrary/tps3dfit.h \
-               modules/lrf_v2/lrfxyz.h
-
-} else {
-    SOURCES += SplineLibrary/tpspline3.cpp
-    HEADERS += SplineLibrary/tpspline3.h
-} 
 #----------
 
 #---FLANN---
@@ -299,37 +273,39 @@ SOURCES += main.cpp \
     modules/manifesthandling.cpp \
     modules/apmgroupsmanager.cpp \
     modules/asandwich.cpp \
+    SplineLibrary/json11.cpp \
+    SplineLibrary/profileHist.cpp \
+    SplineLibrary/bspline123d.cpp \
+    SplineLibrary/bsfit123.cpp \
     SplineLibrary/spline.cpp \
-    SplineLibrary/bspline.cpp \
-    SplineLibrary/bspline3.cpp \
-    modules/lrf_v2/pmsensor.cpp \
-    modules/lrf_v2/lrf2.cpp \
-    modules/lrf_v2/lrfcaxial.cpp \
-    modules/lrf_v2/lrfaxial.cpp \
-    modules/lrf_v2/pmsensorgroup.cpp \
-    modules/lrf_v2/lrfxy.cpp \
-    modules/lrf_v2/lrfcomposite.cpp \
-    modules/lrf_v2/lrfsliced3d.cpp \
-    modules/lrf_v2/lrfaxial3d.cpp \
-    modules/lrf_v2/lrfcaxial3d.cpp \
-    modules/lrf_v2/lrf3d.cpp \
-    modules/lrf_v2/sensorlocalcache.cpp \
-    modules/lrf_v2/lrffactory.cpp \
+    SplineLibrary/curvefit.cpp \
     modules/lrf_v2/alrffitsettings.cpp \
+    modules/lrf_v2/compress.cpp \
+    modules/lrf_v2/lrf2.cpp \
+    modules/lrf_v2/lrfaxial3d.cpp \
+    modules/lrf_v2/lrfaxial.cpp \
+    modules/lrf_v2/lrfcomposite.cpp \
+    modules/lrf_v2/lrffactory.cpp \
+    modules/lrf_v2/lrfsliced3d.cpp \
+    modules/lrf_v2/lrfxy.cpp \
+    modules/lrf_v2/lrfxyz.cpp \
+    modules/lrf_v2/pmsensor.cpp \
+    modules/lrf_v2/pmsensorgroup.cpp \
+    modules/lrf_v2/sensorlocalcache.cpp \
     CUDA/cudamanagerclass.cpp \
     scriptmode/scriptminimizer.cpp \
     scriptmode/ascriptexample.cpp \
     scriptmode/ascriptexampledatabase.cpp \
     common/aslab.cpp \
-    modules/lrf_v3/arecipe.cpp \
-    modules/lrf_v3/alrftypemanager.cpp \
-    modules/lrf_v3/arepository.cpp \
-    modules/lrf_v3/corelrfs.cpp \
-    modules/lrf_v3/corelrfstypes.cpp \
-    modules/lrf_v3/asensor.cpp \
-    modules/lrf_v3/ainstruction.cpp \
-    modules/lrf_v3/ainstructioninput.cpp \
-    modules/lrf_v3/afitlayersensorgroup.cpp \
+#    modules/lrf_v3/arecipe.cpp \
+#    modules/lrf_v3/alrftypemanager.cpp \
+#    modules/lrf_v3/arepository.cpp \
+#    modules/lrf_v3/corelrfs.cpp \
+#    modules/lrf_v3/corelrfstypes.cpp \
+#    modules/lrf_v3/asensor.cpp \
+#    modules/lrf_v3/ainstruction.cpp \
+#    modules/lrf_v3/ainstructioninput.cpp \
+#    modules/lrf_v3/afitlayersensorgroup.cpp \
     modules/alrfmoduleselector.cpp \
     common/ascriptvaluecopier.cpp \
     common/acustomrandomsampling.cpp \
@@ -457,23 +433,26 @@ HEADERS  += common/CorrelationFilters.h \
     modules/dynamicpassiveshandler.h \
     modules/manifesthandling.h \
     modules/apmgroupsmanager.h \
+    SplineLibrary/json11.hpp \
+    SplineLibrary/profileHist.h \
+    SplineLibrary/bspline123d.h \
+    SplineLibrary/eiquadprog.hpp \
+    SplineLibrary/bsfit123.h \
     SplineLibrary/spline.h \
-    SplineLibrary/bspline.h \
-    SplineLibrary/bspline3.h \
-    modules/lrf_v2/pmsensor.h \
-    modules/lrf_v2/lrf2.h \
-    modules/lrf_v2/lrfaxial.h \
-    modules/lrf_v2/lrfcaxial.h \
-    modules/lrf_v2/pmsensorgroup.h \
-    modules/lrf_v2/lrfxy.h \
-    modules/lrf_v2/lrfcomposite.h \
-    modules/lrf_v2/lrfsliced3d.h \
-    modules/lrf_v2/lrfaxial3d.h \
-    modules/lrf_v2/lrfcaxial3d.h \
-    modules/lrf_v2/lrf3d.h \
-    modules/lrf_v2/sensorlocalcache.h \
-    modules/lrf_v2/lrffactory.h \
+    SplineLibrary/curvefit.h \
     modules/lrf_v2/alrffitsettings.h \
+    modules/lrf_v2/compress.h \
+    modules/lrf_v2/lrf2.h \
+    modules/lrf_v2/lrfaxial3d.h \
+    modules/lrf_v2/lrfaxial.h \
+    modules/lrf_v2/lrfcomposite.h \
+    modules/lrf_v2/lrffactory.h \
+    modules/lrf_v2/lrfsliced3d.h \
+    modules/lrf_v2/lrfxy.h \
+    modules/lrf_v2/lrfxyz.h \
+    modules/lrf_v2/pmsensorgroup.h \
+    modules/lrf_v2/pmsensor.h \
+    modules/lrf_v2/sensorlocalcache.h \
     CUDA/cudamanagerclass.h \
     scriptmode/scriptminimizer.h \
     scriptmode/ascriptexample.h \
@@ -484,22 +463,22 @@ HEADERS  += common/CorrelationFilters.h \
     common/aid.h \
     common/apoint.h \
     common/atransform.h \
-    modules/lrf_v3/arecipe.h \
-    modules/lrf_v3/alrf.h \
-    modules/lrf_v3/alrftype.h \
-    modules/lrf_v3/alrftypemanager.h \
-    modules/lrf_v3/ainstruction.h \
-    modules/lrf_v3/ainstructioninput.h \
-    modules/lrf_v3/arepository.h \
-    modules/lrf_v3/asensor.h \
-    modules/lrf_v3/aversionhistory.h \
-    modules/lrf_v3/avladimircompression.h \
-    modules/lrf_v3/corelrfs.h \
-    modules/lrf_v3/corelrfstypes.h \
-    modules/lrf_v3/afitlayersensorgroup.h \
-    modules/lrf_v3/idclasses.h \
-    modules/lrf_v3/alrftypemanagerinterface.h \
-    modules/lrf_v3/astateinterface.h \
+#    modules/lrf_v3/arecipe.h \
+#    modules/lrf_v3/alrf.h \
+#    modules/lrf_v3/alrftype.h \
+#    modules/lrf_v3/alrftypemanager.h \
+#    modules/lrf_v3/ainstruction.h \
+#    modules/lrf_v3/ainstructioninput.h \
+#    modules/lrf_v3/arepository.h \
+#    modules/lrf_v3/asensor.h \
+#    modules/lrf_v3/aversionhistory.h \
+#    modules/lrf_v3/avladimircompression.h \
+#    modules/lrf_v3/corelrfs.h \
+#    modules/lrf_v3/corelrfstypes.h \
+#    modules/lrf_v3/afitlayersensorgroup.h \
+#    modules/lrf_v3/idclasses.h \
+#    modules/lrf_v3/alrftypemanagerinterface.h \
+#    modules/lrf_v3/astateinterface.h \
     modules/alrfmoduleselector.h \
     common/ascriptvaluecopier.h \
     common/acustomrandomsampling.h \
@@ -509,7 +488,6 @@ HEADERS  += common/CorrelationFilters.h \
     common/ascriptvalueconverter.h \
     common/ainternetbrowser.h \
     Net/anetworkmodule.h \
-    SplineLibrary/eiquadprog.hpp \
     common/aphotonhistorylog.h \
     common/amonitor.h \
     common/aroothistappenders.h \
@@ -701,16 +679,16 @@ ants2_GUI {
     gui/ReconstructionWindowTools/reconstructionwindowguiupdates.cpp \
     gui/ascriptwindow.cpp \
     gui/alrfmouseexplorer.cpp \
-    modules/lrf_v3/gui/atransformwidget.cpp \
-    modules/lrf_v3/gui/abspline3widget.cpp \
-    modules/lrf_v3/gui/corelrfswidgets.cpp \
-    modules/lrf_v3/gui/alrfwindowwidgets.cpp \
-    modules/lrf_v3/gui/alrfwindow.cpp \
+#    modules/lrf_v3/gui/atransformwidget.cpp \
+#    modules/lrf_v3/gui/abspline3widget.cpp \
+#    modules/lrf_v3/gui/corelrfswidgets.cpp \
+#    modules/lrf_v3/gui/alrfwindowwidgets.cpp \
+#    modules/lrf_v3/gui/alrfwindow.cpp \
     gui/alrfdraw.cpp \
     gui/MainWindowTools/arootmarkerconfigurator.cpp \
     gui/ahighlighters.cpp \
-    modules/lrf_v3/gui/atpspline3widget.cpp \
-    modules/lrf_v3/gui/avladimircompressionwidget.cpp \
+#    modules/lrf_v3/gui/atpspline3widget.cpp \
+#    modules/lrf_v3/gui/avladimircompressionwidget.cpp \
     gui/MainWindowTools/amonitordelegateform.cpp \
     gui/aelementandisotopedelegates.cpp \
     gui/amatparticleconfigurator.cpp \
@@ -765,16 +743,16 @@ HEADERS  += gui/mainwindow.h \
     gui/ascriptexampleexplorer.h \
     gui/ascriptwindow.h \
     gui/alrfmouseexplorer.h \
-    modules/lrf_v3/gui/atransformwidget.h \
-    modules/lrf_v3/gui/abspline3widget.h \
-    modules/lrf_v3/gui/corelrfswidgets.h \
-    modules/lrf_v3/gui/alrfwindowwidgets.h \
-    modules/lrf_v3/gui/alrfwindow.h \
+#    modules/lrf_v3/gui/atransformwidget.h \
+#    modules/lrf_v3/gui/abspline3widget.h \
+#    modules/lrf_v3/gui/corelrfswidgets.h \
+#    modules/lrf_v3/gui/alrfwindowwidgets.h \
+#    modules/lrf_v3/gui/alrfwindow.h \
     gui/alrfdraw.h \
     gui/MainWindowTools/arootmarkerconfigurator.h \
     gui/ahighlighters.h \
-    modules/lrf_v3/gui/atpspline3widget.h \
-    modules/lrf_v3/gui/avladimircompressionwidget.h \
+#    modules/lrf_v3/gui/atpspline3widget.h \
+#    modules/lrf_v3/gui/avladimircompressionwidget.h \
     gui/MainWindowTools/amonitordelegateform.h \
     gui/aelementandisotopedelegates.h \
     gui/amatparticleconfigurator.h \
@@ -821,7 +799,7 @@ FORMS += gui/mainwindow.ui \
     gui/MainWindowTools/agridelementdialog.ui \
     gui/ascriptexampleexplorer.ui \
     gui/ascriptwindow.ui \
-    modules/lrf_v3/gui/alrfwindow.ui \
+#    modules/lrf_v3/gui/alrfwindow.ui \
     gui/MainWindowTools/amonitordelegateform.ui \
     gui/amatparticleconfigurator.ui \
     gui/aneutronreactionsconfigurator.ui \
@@ -837,7 +815,7 @@ FORMS += gui/mainwindow.ui \
 INCLUDEPATH += gui
 INCLUDEPATH += gui/RasterWindow
 INCLUDEPATH += gui/ReconstructionWindowTools
-INCLUDEPATH += modules/lrf_v3/gui
+#INCLUDEPATH += modules/lrf_v3/gui
 INCLUDEPATH += gui/GraphWindowTools
 INCLUDEPATH += gui/DAWindowTools
 }
@@ -848,7 +826,7 @@ INCLUDEPATH += SplineLibrary
 INCLUDEPATH += OpticalOverrides
 INCLUDEPATH += modules
 INCLUDEPATH += modules/lrf_v2
-INCLUDEPATH += modules/lrf_v3
+#INCLUDEPATH += modules/lrf_v3
 INCLUDEPATH += common
 INCLUDEPATH += scriptmode
 INCLUDEPATH += Net

@@ -21,7 +21,7 @@ using Eigen::SparseMatrix;
 BSfit::BSfit()
 {
 // no constraints by default
-    non_negative = false;
+    non_negative = false;   // Andr ! move initialization to the header
 }
 
 double BSfit::SolveSVD()
@@ -205,7 +205,7 @@ BSfit1D::BSfit1D(Bspline1d *bs_)
 BSfit1D::~BSfit1D()
 {
     if (h1)
-        delete h1;
+        delete h1;  // Andr : "if (h1)" has no effect, remove; in the header: h1 = nullptr
 }
 
 bool BSfit1D::SetBinning(int bins)
@@ -216,7 +216,7 @@ bool BSfit1D::SetBinning(int bins)
     nbins = bins;    
 // (re)create profile histogram for storing the binned data
     if (h1 != 0) 
-        delete(h1);
+        delete h1; // Andr : before was delete (h1)
     h1 = new ProfileHist1D(nbins, bs->GetXmin(), bs->GetXmax());
     return true;
 }

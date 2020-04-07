@@ -44,6 +44,10 @@ void write_bspline3_json(const Bspline1d *bs, QJsonObject &json)
     json["data"] = data;
 }
 
+#include <stdio.h>    // Andr ! moved to cpp
+//#include <iostream>
+#include <fstream>
+//#include <sstream>
 void write_bspline3_json(const Bspline1d *bs, std::ofstream *out)
 {
     *out << "{" << std::endl;

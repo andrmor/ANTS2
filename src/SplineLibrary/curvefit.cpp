@@ -26,7 +26,7 @@ CurveFit::~CurveFit()
     delete bs;
 }
 
-Bspline1d* CurveFit::GetSpline()
+Bspline1d* CurveFit::GetSpline() const
 {
     return bs;
 }

@@ -10,12 +10,12 @@ class CurveFit
 public:
     CurveFit(double x_min, double x_max, int n_intervals, QVector <double> &x0, QVector <double> &y0);
     ~CurveFit();
-    Bspline1d *GetSpline();
+    Bspline1d *GetSpline() const; //Andr + const
 
     double eval(double x);
 
 private:
-    Bspline1d *bs = 0;
+    Bspline1d *bs = nullptr; //Andr : 0 -> nullptr
 };
 
 #endif // CURVEFIT_H

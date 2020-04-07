@@ -48,6 +48,7 @@ protected:
     bool sparse;     // use sparse QR for unconstrained fit - EXPERIMENTAL    
 public:
     BSfit();
+    virtual ~BSfit() {} // Andr +
     void SetConstraintNonNegative() {non_negative=true;}
     bool Fit();
     double SolveSVD();
@@ -60,9 +61,9 @@ public:
     void SetNonDecreasing();
     void DumpQuadProg();
     void SolveQuadProg();
-    double GetResidual() {return residual;}
-    bool GetStatus() {return status;}
-    std::string GetError() {return error_msg;}
+    double GetResidual() const {return residual;}    // Andr const
+    bool GetStatus() const {return status;}          // Andr const
+    std::string GetError() const {return error_msg;} // Andr const
 //public:
 //    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };

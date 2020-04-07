@@ -26,13 +26,13 @@
 
 #include "bspline123d.h"
 
-#include <stdio.h>
-#include <iostream>
-#include <fstream>
-#include <sstream>
+//#include <stdio.h>    // Andr ! moved to cpp
+//#include <iostream>
+//#include <fstream>
+//#include <sstream>
 #include <QJsonObject>
 
-struct APoint;
+//struct APoint;  // And ! commented away
 
 void write_bspline3_json(const Bspline1d *bs, QJsonObject &json);
 namespace FromJson {

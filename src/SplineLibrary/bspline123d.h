@@ -25,18 +25,19 @@ namespace json11 {
 class BsplineBase
 {
     public:
-        BsplineBase() {
+        BsplineBase() {                 // Andr ! move to cpp, maybe some of the #include can be transferred there too
         // construct UCBS matrix
             B <<    1, -3,  3, -1,
                     4,  0, -6,  3,
                     1,  3,  3, -3,
                     0,  0,  0,  1;
             B /= 6.;
-            fValid = false;
+            fValid = false; // Andr ! make directly
             fReady = false;
         }
+        virtual ~BsplineBase(){}    // Andr +
 
-        Vector4d PowerVec(double x) const;
+        Vector4d PowerVec(double x) const;  // Andr ! maybe put Get.. in front of all getters?
         Vector4d PowerVecDrv(double x) const;
         Vector4d PowerVecDrv2(double x) const;
         bool IsReady() const {return fReady;}

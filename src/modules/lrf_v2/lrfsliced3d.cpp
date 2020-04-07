@@ -221,11 +221,12 @@ double LRFsliced3D::fit(int npts, const double *x, const double *y, const double
             }
         }
     }
+    // Andr ! there is no default return!
 }
 
 void LRFsliced3D::setSpline(Bspline2d *bs, int iz)
 {
-    if (iz > nintz)
+    if (iz > nintz) // Andr ? need a warning here?
         return;
     bsr[iz] = bs;
     double amin, amax;

@@ -385,7 +385,6 @@ SOURCES += main.cpp \
     common/aisotope.cpp \
     common/achemicalelement.cpp \
     Simulation/ag4simulationsettings.cpp \
-    gui/ageant4configdialog.cpp \
     scriptmode/asim_si.cpp \
     scriptmode/amath_si.cpp \
     scriptmode/atree_si.cpp \
@@ -407,29 +406,10 @@ SOURCES += main.cpp \
     Simulation/atrackinghistorycrawler.cpp \
     Simulation/aparticletracker.cpp \
     common/aexternalprocesshandler.cpp \
-    gui/MainWindowTools/alogconfigdialog.cpp \
     Simulation/alogsandstatisticsoptions.cpp \
     Reconstruction/areconstructionworker.cpp \
     common/ahistogram.cpp \
-    gui/GraphWindowTools/abasketitem.cpp \
-    gui/GraphWindowTools/abasketmanager.cpp \
-    gui/GraphWindowTools/adrawexplorerwidget.cpp \
-    gui/GraphWindowTools/adrawobject.cpp \
-    gui/GraphWindowTools/abasketlistwidget.cpp \
-    gui/GraphWindowTools/alegenddialog.cpp \
-    gui/MainWindowTools/aroottextconfigurator.cpp \
-    gui/aproxystyle.cpp \
-    gui/GraphWindowTools/aaxesdialog.cpp \
-    gui/GraphWindowTools/atextpavedialog.cpp \
-    gui/GraphWindowTools/alinemarkerfilldialog.cpp \
-    gui/GraphWindowTools/arootcolorselectordialog.cpp \
-    gui/GraphWindowTools/adrawtemplate.cpp \
-    gui/GraphWindowTools/atemplateselectiondialog.cpp \
-    gui/GraphWindowTools/atemplateselectionrecord.cpp \
-    modules/apmdummystructure.cpp \
-    gui/amateriallibrarybrowser.cpp \
-    Simulation/amaterialloader.cpp \
-    gui/DAWindowTools/amaterialloaderdialog.cpp
+    modules/apmdummystructure.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -558,7 +538,6 @@ HEADERS  += common/CorrelationFilters.h \
     common/aisotope.h \
     common/achemicalelement.h \
     Simulation/ag4simulationsettings.h \
-    gui/ageant4configdialog.h \
     scriptmode/asim_si.h \
     scriptmode/amath_si.h \
     scriptmode/atree_si.h \
@@ -580,31 +559,12 @@ HEADERS  += common/CorrelationFilters.h \
     Simulation/atrackinghistorycrawler.h \
     Simulation/aparticletracker.h \
     common/aexternalprocesshandler.h \
-    gui/MainWindowTools/alogconfigdialog.h \
     Simulation/alogsandstatisticsoptions.h \
     Reconstruction/afunctorbase.h \
     Reconstruction/areconstructionworker.h \
     common/ahistogram.h \
-    gui/GraphWindowTools/adrawobject.h \
-    gui/GraphWindowTools/abasketitem.h \
-    gui/GraphWindowTools/abasketmanager.h \
-    gui/GraphWindowTools/adrawexplorerwidget.h \
-    gui/GraphWindowTools/abasketlistwidget.h \
-    gui/GraphWindowTools/alegenddialog.h \
-    gui/MainWindowTools/aroottextconfigurator.h \
-    gui/aproxystyle.h \
-    gui/GraphWindowTools/aaxesdialog.h \
-    gui/GraphWindowTools/atextpavedialog.h \
-    gui/GraphWindowTools/alinemarkerfilldialog.h \
-    gui/GraphWindowTools/arootcolorselectordialog.h \
-    gui/GraphWindowTools/adrawtemplate.h \
-    gui/GraphWindowTools/atemplateselectiondialog.h \
-    gui/GraphWindowTools/atemplateselectionrecord.h \
     modules/apmanddummy.h \
-    modules/apmdummystructure.h \
-    gui/amateriallibrarybrowser.h \
-    Simulation/amaterialloader.h \
-    gui/DAWindowTools/amaterialloaderdialog.h
+    modules/apmdummystructure.h
 
 # --- SIM ---
 ants2_SIM {
@@ -626,6 +586,7 @@ ants2_SIM {
     Simulation/asimulatorrunner.cpp \
     Simulation/asimulator.cpp \
     Simulation/apointsourcesimulator.cpp \
+    Simulation/amaterialloader.cpp \
     Simulation/aparticlesourcesimulator.cpp
 
     HEADERS  += Simulation/aphoton.h \
@@ -650,6 +611,7 @@ ants2_SIM {
     Simulation/asimulatorrunner.h \
     Simulation/asimulator.h \
     Simulation/apointsourcesimulator.h \
+    Simulation/amaterialloader.h \
     Simulation/aparticlesourcesimulator.h
 }
 
@@ -735,6 +697,25 @@ ants2_GUI {
     scriptmode/agraphwin_si.cpp \
     scriptmode/aoutwin_si.cpp \
     gui/MainWindowTools/aparticlesourcedialog.cpp \
+    gui/MainWindowTools/alogconfigdialog.cpp \
+    gui/GraphWindowTools/abasketitem.cpp \
+    gui/GraphWindowTools/abasketmanager.cpp \
+    gui/GraphWindowTools/adrawexplorerwidget.cpp \
+    gui/GraphWindowTools/adrawobject.cpp \
+    gui/GraphWindowTools/abasketlistwidget.cpp \
+    gui/GraphWindowTools/alegenddialog.cpp \
+    gui/MainWindowTools/aroottextconfigurator.cpp \
+    gui/aproxystyle.cpp \
+    gui/GraphWindowTools/aaxesdialog.cpp \
+    gui/GraphWindowTools/atextpavedialog.cpp \
+    gui/GraphWindowTools/alinemarkerfilldialog.cpp \
+    gui/GraphWindowTools/arootcolorselectordialog.cpp \
+    gui/GraphWindowTools/adrawtemplate.cpp \
+    gui/GraphWindowTools/atemplateselectiondialog.cpp \
+    gui/GraphWindowTools/atemplateselectionrecord.cpp \
+    gui/amateriallibrarybrowser.cpp \
+    gui/DAWindowTools/amaterialloaderdialog.cpp \
+    gui/ageant4configdialog.cpp \
     gui/aguiwindow.cpp
 
 HEADERS  += gui/mainwindow.h \
@@ -799,6 +780,25 @@ HEADERS  += gui/mainwindow.h \
     scriptmode/agraphwin_si.h \
     scriptmode/aoutwin_si.h \
     gui/MainWindowTools/aparticlesourcedialog.h \
+    gui/MainWindowTools/alogconfigdialog.h \
+    gui/GraphWindowTools/adrawobject.h \
+    gui/GraphWindowTools/abasketitem.h \
+    gui/GraphWindowTools/abasketmanager.h \
+    gui/GraphWindowTools/adrawexplorerwidget.h \
+    gui/GraphWindowTools/abasketlistwidget.h \
+    gui/GraphWindowTools/alegenddialog.h \
+    gui/MainWindowTools/aroottextconfigurator.h \
+    gui/aproxystyle.h \
+    gui/GraphWindowTools/aaxesdialog.h \
+    gui/GraphWindowTools/atextpavedialog.h \
+    gui/GraphWindowTools/alinemarkerfilldialog.h \
+    gui/GraphWindowTools/arootcolorselectordialog.h \
+    gui/GraphWindowTools/adrawtemplate.h \
+    gui/GraphWindowTools/atemplateselectiondialog.h \
+    gui/GraphWindowTools/atemplateselectionrecord.h \
+    gui/amateriallibrarybrowser.h \
+    gui/DAWindowTools/amaterialloaderdialog.h \
+    gui/ageant4configdialog.h \
     gui/aguiwindow.h
 
 FORMS += gui/mainwindow.ui \

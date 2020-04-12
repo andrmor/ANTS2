@@ -35,6 +35,8 @@
   #include "aann_si.h"
 #endif
 
+#include <memory>
+
 // SIM
 #ifdef SIM
 #include "asimulationmanager.h"
@@ -101,11 +103,13 @@ int main(int argc, char *argv[])
     qDebug() << ">TThread initialized";
 #endif
 
+    std::unique_ptr<QCoreApplication> app;
 #ifdef GUI
-    QApplication a(argc, argv);
-    a.setStyle(new AProxyStyle);
+    QApplication * qa = new QApplication(argc, argv);
+    qa->setStyle(new AProxyStyle);
+    app.reset(qa);
 #else
-    QCoreApplication a(argc, argv);
+    app.reset(new QCoreApplication(argc, argv));
 #endif
     qDebug() << "Qt application created";
 
@@ -171,12 +175,14 @@ int main(int argc, char *argv[])
         {
             w.ELwindow->show();
             w.ELwindow->raise();//making sure examples window is on top
+            qDebug() << "Example window shown";
         }
         else w.ELwindow->hide();
-        qDebug() << "Examples window shown/hidden";
 
         qDebug() << "Starting QApplication";
-        return a.exec();
+        int res = app->exec();
+        qDebug() << "Exiting QApplication";
+        return res;
     }
     else
 #else // GUI
@@ -228,7 +234,7 @@ int main(int argc, char *argv[])
                 QCoreApplication::translate("main", "maxThreads"));
         parser.addOption(maxThreadsOption);
 
-        parser.process(a);
+        parser.process(*app);
 
         if ( parser.isSet(outputOption) )
         {
@@ -345,7 +351,7 @@ int main(int argc, char *argv[])
             Network.SetExitOnDisconnect(true);
             Network.StartWebSocketServer(ip, Port);
             qDebug() << "To connect, use "<< Network.getWebSocketServerURL();
-            a.exec();
+            app->exec();
             qDebug() << "Finished!"<<QTime::currentTime().toString();
         }
         else
@@ -357,5 +363,6 @@ int main(int argc, char *argv[])
 
     Network.StopRootHttpServer();
     Network.StopWebSocketServer();
+    return 0;
 }
 

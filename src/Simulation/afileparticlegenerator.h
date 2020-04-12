@@ -10,16 +10,31 @@
 #include <QJsonObject>
 #include <QDateTime>
 
+#include <string>
+#include <vector>
+
 class AMaterialParticleCollection;
 class QTextStream;
 class AFilePGEngine;
 
 enum class AFileMode {Standard = 0, G4ants = 1};
 
+struct AParticleInFileStatRecord
+{
+    AParticleInFileStatRecord(const std::string & NameStd, double Energy);
+    AParticleInFileStatRecord(const QString     & NameQt,  double Energy);
+    AParticleInFileStatRecord() {}
+
+    std::string NameStd;
+    QString     NameQt;
+    int         Entries = 0;
+    double      Energy  = 0;
+};
+
 class AFileParticleGenerator : public AParticleGun
 {
 public:
-    AFileParticleGenerator(const AMaterialParticleCollection& MpCollection);
+    AFileParticleGenerator(const AMaterialParticleCollection & MpCollection);
 
     virtual         ~AFileParticleGenerator();
 
@@ -51,11 +66,14 @@ public:
     int          NumEventsInFile          = 0;  // is saved in config
     int          statNumEmptyEventsInFile = 0;
     int          statNumMultipleEvents    = 0;
-    QVector<int> statParticleQuantity;
     bool         bG4binary                = false;
 
-private:
+    bool         bCollectExpandedStatistics = false;
+    std::vector<AParticleInFileStatRecord> ParticleStat;
+
     const AMaterialParticleCollection & MpCollection;
+
+private:
     AFilePGEngine * Engine = nullptr;
 
     QString FileName;
@@ -75,7 +93,7 @@ public:
     AFilePGEngine(AFileParticleGenerator * fpg) : FPG(fpg), FileName(fpg->GetFileName()) {}
     virtual ~AFilePGEngine(){}
 
-    virtual bool doInit(bool bNeedInspect) = 0;
+    virtual bool doInit(bool bNeedInspect, bool bDetailedInspection = false) = 0;
     virtual bool doGenerateEvent(QVector<AParticleRecord*> & GeneratedParticles) = 0;
     virtual void doSetStartEvent(int startEvent) = 0;
     virtual bool doGenerateG4File(int eventBegin, int eventEnd, const QString & FileName) = 0;
@@ -93,7 +111,7 @@ public:
     AFilePGEngineStandard(AFileParticleGenerator * fpg) : AFilePGEngine(fpg) {}
     ~AFilePGEngineStandard();
 
-    bool doInit(bool bNeedInspect) override;
+    bool doInit(bool bNeedInspect, bool bDetailedInspection = false) override;
     bool doGenerateEvent(QVector<AParticleRecord*> & GeneratedParticles) override;
     void doSetStartEvent(int startEvent) override;
     bool doGenerateG4File(int, int, const QString &) override {return false;}  // not needed
@@ -109,7 +127,7 @@ public:
     AFilePGEngineG4antsTxt(AFileParticleGenerator * fpg) : AFilePGEngine(fpg) {}
     ~AFilePGEngineG4antsTxt();
 
-    bool doInit(bool bNeedInspect) override;
+    bool doInit(bool bNeedInspect, bool bDetailedInspection = false) override;
     bool doGenerateEvent(QVector<AParticleRecord*> & GeneratedParticles) override;  // used only in GUI test
     void doSetStartEvent(int) override {}  // not needed
     bool doGenerateG4File(int eventBegin, int eventEnd, const QString & FileName) override;
@@ -125,7 +143,7 @@ public:
     ~AFilePGEngineG4antsBin();
 
 protected:
-    bool doInit(bool bNeedInspect) override;
+    bool doInit(bool bNeedInspect, bool bDetailedInspection = false) override;
     bool doGenerateEvent(QVector<AParticleRecord*> & GeneratedParticles) override;  // used only in GUI test
     void doSetStartEvent(int) override {}  // not needed
     bool doGenerateG4File(int eventBegin, int eventEnd, const QString & FileName) override;

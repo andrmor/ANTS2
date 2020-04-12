@@ -38,9 +38,12 @@ void AFileParticleGenerator::SetFileFormat(AFileMode mode)
     InvalidateFile();
 }
 
+#include <algorithm>
 bool AFileParticleGenerator::Init()
 {
     ReleaseResources();
+
+    bool bExpanded = bCollectExpandedStatistics; bCollectExpandedStatistics = false; // single trigger flag!
 
     if (FileName.isEmpty())
     {
@@ -48,7 +51,7 @@ bool AFileParticleGenerator::Init()
         return false;
     }
 
-    bool bNeedInspect = isRequireInspection();
+    bool bNeedInspect = isRequireInspection() || bExpanded;
     //qDebug() << "Init called, requires inspect?" << bNeedInspect;
     if (bNeedInspect)
     {
@@ -57,25 +60,39 @@ bool AFileParticleGenerator::Init()
         FileLastModified = QFileInfo(FileName).lastModified();
     }
 
+    bool bOK;
     if (Mode == AFileMode::Standard)
     {
         Engine = new AFilePGEngineStandard(this);
-        return Engine->doInit(bNeedInspect);
-    }
-
-    bool bOK = testG4mode();
-    if (!bOK) return false;
-
-    if (bG4binary)
-    {
-        Engine = new AFilePGEngineG4antsBin(this);
-        return Engine->doInit(bNeedInspect);
+        bOK = Engine->doInit(bNeedInspect, bExpanded);
     }
     else
     {
-        Engine = new AFilePGEngineG4antsTxt(this);
-        return Engine->doInit(bNeedInspect);
+        bOK = testG4mode();
+        if (bOK)
+        {
+            if (bG4binary)
+            {
+                Engine = new AFilePGEngineG4antsBin(this);
+                bOK = Engine->doInit(bNeedInspect, bExpanded);
+            }
+            else
+            {
+                Engine = new AFilePGEngineG4antsTxt(this);
+                bOK = Engine->doInit(bNeedInspect, bExpanded);
+            }
+        }
     }
+
+    if (bOK && ParticleStat.size() > 0)
+    {
+        std::sort(ParticleStat.begin(), ParticleStat.end(), [](const AParticleInFileStatRecord & l, const AParticleInFileStatRecord & r)
+        {
+            return (l.Entries > r.Entries);
+        });
+    }
+
+    return bOK;
 }
 
 bool AFileParticleGenerator::testG4mode()
@@ -216,10 +233,7 @@ void AFileParticleGenerator::clearFileStat()
     NumEventsInFile = 0;
     statNumEmptyEventsInFile = 0;
     statNumMultipleEvents = 0;
-
-    statParticleQuantity.clear();
-    if (RegisteredParticleCount >= 0)
-        statParticleQuantity =  QVector<int>(RegisteredParticleCount, 0);
+    ParticleStat.clear();
 }
 
 // ***************************************************************************
@@ -230,7 +244,7 @@ AFilePGEngineStandard::~AFilePGEngineStandard()
     if (File.isOpen()) File.close();
 }
 
-bool AFilePGEngineStandard::doInit(bool bNeedInspect)
+bool AFilePGEngineStandard::doInit(bool bNeedInspect, bool bDetailedInspection)
 {
     File.setFileName(FileName);
     if(!File.open(QIODevice::ReadOnly | QFile::Text))
@@ -259,7 +273,27 @@ bool AFilePGEngineStandard::doInit(bool bNeedInspect)
                 FPG->SetErrorString( QString("Invalid particle index %1 in file %2").arg(pId).arg(FileName) );
                 return false;
             }
-            FPG->statParticleQuantity[pId]++;
+
+            //FPG->statParticleQuantity[pId]++;
+
+            if (bDetailedInspection)
+            {
+                const QString & name = f.first(); // I know it is int, reusing G4ants-ish infrastructure
+                bool bNotFound = true;
+                for (AParticleInFileStatRecord & rec : FPG->ParticleStat)
+                {
+                    if (rec.NameQt == name)
+                    {
+                        rec.Entries++;
+                        rec.Energy += f.at(1).toDouble();
+                        bNotFound = false;
+                        break;
+                    }
+                }
+
+                if (bNotFound)
+                    FPG->ParticleStat.push_back(AParticleInFileStatRecord(name, f.at(1).toDouble()));
+            }
 
             if (!bContinueEvent) FPG->NumEventsInFile++;
 
@@ -270,7 +304,12 @@ bool AFilePGEngineStandard::doInit(bool bNeedInspect)
             }
             else bContinueEvent = false;
         }
+
+        if (bDetailedInspection)
+            for (AParticleInFileStatRecord & rec : FPG->ParticleStat)
+                rec.NameQt = FPG->MpCollection.getParticleName(rec.NameQt.toInt()); //index is valid
     }
+
     return true;
 }
 
@@ -351,7 +390,7 @@ AFilePGEngineG4antsTxt::~AFilePGEngineG4antsTxt()
     delete inStream; inStream = nullptr;
 }
 
-bool AFilePGEngineG4antsTxt::doInit(bool bNeedInspect)
+bool AFilePGEngineG4antsTxt::doInit(bool bNeedInspect, bool bDetailedInspection)
 {
     inStream = new std::ifstream(FileName.toLatin1().data());
 
@@ -398,7 +437,25 @@ bool AFilePGEngineG4antsTxt::doInit(bool bNeedInspect)
                 return false;
             }
 
-            //statParticleQuantity[pId]++;
+            if (bDetailedInspection)
+            {
+                const QString & name = f.first();
+                //TODO kill [***] of ions
+                bool bNotFound = true;
+                for (AParticleInFileStatRecord & rec : FPG->ParticleStat)
+                {
+                    if (rec.NameQt == name)
+                    {
+                        rec.Entries++;
+                        rec.Energy += f.at(1).toDouble();
+                        bNotFound = false;
+                        break;
+                    }
+                }
+
+                if (bNotFound)
+                    FPG->ParticleStat.push_back(AParticleInFileStatRecord(name, f.at(1).toDouble()));
+            }
 
             if (bWasParticle) bWasMulty = true;
             bWasParticle = true;
@@ -509,7 +566,7 @@ AFilePGEngineG4antsBin::~AFilePGEngineG4antsBin()
     delete inStream; inStream = nullptr;
 }
 
-bool AFilePGEngineG4antsBin::doInit(bool bNeedInspect)
+bool AFilePGEngineG4antsBin::doInit(bool bNeedInspect, bool bDetailedInspection)
 {
     inStream = new std::ifstream(FileName.toLatin1().data(), std::ios::in | std::ios::binary);
 
@@ -524,7 +581,7 @@ bool AFilePGEngineG4antsBin::doInit(bool bNeedInspect)
         //qDebug() << "Inspecting G4ants-generated bin file:" << FileName;
         bool bWasParticle = true;
         bool bWasMulty    = false;
-        std::string pn;
+        std::string ParticleName;
         double energy, time;
         double PosDir[6];
         char h;
@@ -543,11 +600,11 @@ bool AFilePGEngineG4antsBin::doInit(bool bNeedInspect)
             else if (h == char(0xFF))
             {
                 //data line
-                pn.clear();
+                ParticleName.clear();
                 while (*inStream >> h)
                 {
                     if (h == (char)0x00) break;
-                    pn += h;
+                    ParticleName += h;
                 }
                 //qDebug() << pn.data();
                 inStream->read((char*)&energy,       sizeof(double));
@@ -559,7 +616,24 @@ bool AFilePGEngineG4antsBin::doInit(bool bNeedInspect)
                     return false;
                 }
 
-                //statParticleQuantity[pId]++;
+                if (bDetailedInspection)
+                {
+                    //TODO kill [***] of ions
+                    bool bNotFound = true;
+                    for (AParticleInFileStatRecord & rec : FPG->ParticleStat)
+                    {
+                        if (rec.NameStd == ParticleName)
+                        {
+                            rec.Entries++;
+                            rec.Energy += energy;
+                            bNotFound = false;
+                            break;
+                        }
+                    }
+
+                    if (bNotFound)
+                        FPG->ParticleStat.push_back(AParticleInFileStatRecord(ParticleName, energy));
+                }
 
                 if (bWasParticle) bWasMulty = true;
                 bWasParticle = true;
@@ -718,3 +792,9 @@ bool AFilePGEngineG4antsBin::doGenerateG4File(int eventBegin, int eventEnd, cons
     FPG->SetErrorString("Unexpected end of file");
     return false;
 }
+
+AParticleInFileStatRecord::AParticleInFileStatRecord(const std::string & NameStd, double Energy)
+    : NameStd(NameStd), NameQt(NameStd.data()), Entries(1), Energy(Energy) {}
+
+AParticleInFileStatRecord::AParticleInFileStatRecord(const QString & NameQt, double Energy)
+    : NameStd(NameQt.toLatin1().data()), NameQt(NameQt), Entries(1), Energy(Energy) {}

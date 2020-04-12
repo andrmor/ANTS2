@@ -777,7 +777,7 @@ void MainWindow::on_pbGenerateFromFile_Help_clicked()
 
 void MainWindow::on_pbGenerateFromFile_Change_clicked()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, "Select a file with particle generation data", GlobSet.LastOpenDir, "Data files (*.dat *.txt);;All files (*)");
+    QString fileName = QFileDialog::getOpenFileName(this, "Select a file with particle generation data", GlobSet.LastOpenDir, "All files (*)");
     if (fileName.isEmpty()) return;
     GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
     ui->leGenerateFromFile_FileName->setText(fileName);
@@ -806,8 +806,14 @@ void MainWindow::on_pbGenerateFromFile_Check_clicked()
 {
     AFileParticleGenerator* pg = SimulationManager->FileParticleGenerator;
     pg->InvalidateFile();
-    if (!pg->Init())
-        message(pg->GetErrorString(), this);
+
+    pg->bCollectExpandedStatistics = ui->cbFileCollectStatistics->isChecked();
+
+    WindowNavigator->BusyOn();
+        bool bOK = pg->Init();
+    WindowNavigator->BusyOff();
+
+    if (!bOK) message(pg->GetErrorString(), this);
 
     updateFileParticleGeneratorGui();
 }
@@ -819,6 +825,10 @@ void MainWindow::updateFileParticleGeneratorGui()
     ui->leGenerateFromFile_FileName->setText(pg->GetFileName());
     ui->cobGenerateFromFile_FileFormat->setCurrentIndex(static_cast<int>(pg->GetFileFormat()));
 
+    ui->lwFileStatistics->clear();
+    ui->lwFileStatistics->setVisible(false);
+    qApp->processEvents();
+
     QFileInfo fi(pg->GetFileName());
     if (!fi.exists())
     {
@@ -829,19 +839,19 @@ void MainWindow::updateFileParticleGeneratorGui()
     QString s;
     if (pg->IsValidated())
     {
-        s += QString("%1 events in the file").arg(pg->NumEventsInFile);
+        s = QString("%1 events in the file").arg(pg->NumEventsInFile);
         if (pg->statNumEmptyEventsInFile > 0) s += QString(", %1 empty events").arg(pg->statNumEmptyEventsInFile);
         if (pg->statNumMultipleEvents > 0) s += QString(", %1 multiple events").arg(pg->statNumMultipleEvents);
 
-        s += "\n";
-
-        QString pd;
-        for (int ip = 0; ip < pg->statParticleQuantity.size(); ip++)
+        ui->lwFileStatistics->setVisible(pg->ParticleStat.size() > 0);
+        for (AParticleInFileStatRecord & rec : pg->ParticleStat)
         {
-            if (pg->statParticleQuantity.at(ip) > 0)
-                pd += QString("  %2 %1\n").arg(MpCollection->getParticleName(ip)).arg(pg->statParticleQuantity.at(ip));
+            ui->lwFileStatistics->addItem( QString("%1 \t# %2 \t <E>: %4 keV")
+                                           .arg(rec.NameQt)
+                                           .arg(rec.Entries)
+                                           //.arg( QString::number(rec.Energy, 'g', 6) )
+                                           .arg( QString::number(rec.Energy / rec.Entries, 'g', 6) ) );
         }
-        if (!pd.isEmpty()) s += "Particle distribution:\n" + pd;
     }
     else s = "Click 'Analyse file' to see statistics";
 

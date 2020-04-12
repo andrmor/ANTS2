@@ -10094,6 +10094,9 @@ Right click: toggle build photon tracks. Also switches of building particle trac
             <height>71</height>
            </rect>
           </property>
+          <property name="contextMenuPolicy">
+           <enum>Qt::CustomContextMenu</enum>
+          </property>
          </widget>
          <widget class="QCheckBox" name="cbFileCollectStatistics">
           <property name="geometry">

@@ -858,6 +858,39 @@ void MainWindow::updateFileParticleGeneratorGui()
     ui->labGenerateFromFile_info->setText(s);
 }
 
+#include <QClipboard>
+void MainWindow::on_lwFileStatistics_customContextMenuRequested(const QPoint &pos)
+{
+    QMenu myMenu;
+    myMenu.addSeparator();
+    myMenu.addAction("Copy all to clipboard");
+    myMenu.addSeparator();
+
+    QPoint globalPos = ui->lwFileStatistics->mapToGlobal(pos);
+    QAction* selectedItem = myMenu.exec(globalPos);
+
+    if (selectedItem)
+    {
+        if (selectedItem->iconText() == "Copy all to clipboard")
+         {
+            AFileParticleGenerator* pg = SimulationManager->FileParticleGenerator;
+            QString txt;
+
+            for (AParticleInFileStatRecord & rec : pg->ParticleStat)
+            {
+                txt += QString("%1 \t# %2 \t <E>: %4 keV\n")
+                                               .arg(rec.NameQt)
+                                               .arg(rec.Entries)
+                                               //.arg( QString::number(rec.Energy, 'g', 6) )
+                                               .arg( QString::number(rec.Energy / rec.Entries, 'g', 6) );
+            }
+
+            QClipboard * clipboard = QApplication::clipboard();
+            clipboard->setText(txt);
+         }
+    }
+}
+
 // --- by script
 
 #include "ajavascriptmanager.h"

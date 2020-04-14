@@ -112,10 +112,10 @@ public slots:
   void AddPoint(QString GraphName, double x, double y);
   void AddPoint(QString GraphName, double x, double y, double errorY);
   void AddPoint(QString GraphName, double x, double y, double errorX, double errorY);
-  void AddPoints(QString GraphName, QVariant xArray, QVariant yArray);
-  void AddPoints(QString GraphName, QVariant xArray, QVariant yArray, QVariant yErrArray);
-  void AddPoints(QString GraphName, QVariant xArray, QVariant yArray, QVariant xErrArray, QVariant yErrArray);
-  void AddPoints(QString GraphName, QVariant xyArray);
+  void AddPoints(QString GraphName, QVariantList xArray, QVariantList yArray);
+  void AddPoints(QString GraphName, QVariantList xArray, QVariantList yArray, QVariantList yErrArray);
+  void AddPoints(QString GraphName, QVariantList xArray, QVariantList yArray, QVariantList xErrArray, QVariantList yErrArray);
+  void AddPoints(QString GraphName, QVariantList xyArray);
 
   void SetYRange(const QString& GraphName, double min, double max);
   void SetMinimum(const QString& GraphName, double min);

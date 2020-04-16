@@ -439,8 +439,13 @@ bool AFilePGEngineG4antsTxt::doInit(bool bNeedInspect, bool bDetailedInspection)
 
             if (bDetailedInspection)
             {
-                const QString & name = f.first();
-                //TODO kill [***] of ions
+                QString name = f.first();
+
+                //kill [***] appearing in ion names
+                int iBracket = name.indexOf('[');
+                if (iBracket != -1)
+                    name = name.left(iBracket);
+
                 bool bNotFound = true;
                 for (AParticleInFileStatRecord & rec : FPG->ParticleStat)
                 {
@@ -601,12 +606,18 @@ bool AFilePGEngineG4antsBin::doInit(bool bNeedInspect, bool bDetailedInspection)
             {
                 //data line
                 ParticleName.clear();
+                bool bCopyToName = bDetailedInspection;
                 while (*inStream >> h)
                 {
                     if (h == (char)0x00) break;
-                    ParticleName += h;
+
+                    if (bDetailedInspection)
+                    {
+                        if (h == '[') bCopyToName = false;
+                        if (bCopyToName) ParticleName += h;
+                    }
                 }
-                //qDebug() << pn.data();
+                //qDebug() << ParticleName.data();
                 inStream->read((char*)&energy,       sizeof(double));
                 inStream->read((char*)&PosDir,     6*sizeof(double));
                 inStream->read((char*)&time,         sizeof(double));
@@ -618,7 +629,6 @@ bool AFilePGEngineG4antsBin::doInit(bool bNeedInspect, bool bDetailedInspection)
 
                 if (bDetailedInspection)
                 {
-                    //TODO kill [***] of ions
                     bool bNotFound = true;
                     for (AParticleInFileStatRecord & rec : FPG->ParticleStat)
                     {

@@ -124,7 +124,7 @@ signals:
     void updateReady(int Progress, double msPerEvent, int G4Progress = 0);
     void RequestStopSimulation();
     void SimulationFinished();
-    void ProgressReport(int percents);
+    void ProgressReport(int percents); // used with network manager
 
 private:
     bool setup(const QJsonObject & json, int threads);
@@ -139,6 +139,7 @@ private:
     void saveG4depositionLog(const QString & dir) const;
     void saveA2depositionLog(const QString & dir) const;
     void saveExitLog();
+    void emitProgressSignal();
 };
 
 #endif // ASIMULATIONMANAGER_H

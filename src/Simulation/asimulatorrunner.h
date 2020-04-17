@@ -37,7 +37,7 @@ public:
     bool wasHardAborted() const;
     //bool isFinished() const {return simState == SFinished;}
     void setFinished() {simState = SFinished;}    
-    QVector<ASimulator *> getWorkers() { return workers; }
+    QVector<ASimulator *> & getWorkers() {return workers;}
     State getSimState() const {return simState;}
     void clearWorkers();
 

@@ -43,8 +43,9 @@ public:
     virtual void appendToDataHub(EventsDataClass * dataHub) override;
     virtual void mergeData() override;
 
-    void setOnlySavePrimaries() {bOnlySavePrimariesToFile = true;} // for G4ants mode // obsolete??? ***!!!
+    void setOnlySavePrimaries() {bOnlySavePrimariesToFile = true;} // for G4ants mode // obsolete? *!*
     const AParticleGun * getParticleGun() const {return ParticleGun;}
+    bool isDoingPhotonTracing() const {return fDoS1 || fDoS2;}
 
     virtual void hardAbort() override;
 

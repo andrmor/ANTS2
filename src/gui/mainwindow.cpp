@@ -3518,9 +3518,9 @@ void MainWindow::RefreshOnProgressReport(int Progress, double msPerEv, int G4pro
 
     double PrVal;
         const bool bG4sim = ui->prGeant->isVisible();
-        const bool bHavePhotonSim = ui->cbGunDoS1->isChecked() || ui->cbGunDoS2->isChecked();
         if (bG4sim)
         {
+            const bool bHavePhotonSim = ui->cbGunDoS1->isChecked() || ui->cbGunDoS2->isChecked();
             if (bHavePhotonSim)
                 PrVal = 0.5 * (Progress + G4progress);
             else

@@ -189,7 +189,7 @@ public slots:
     void LRF_ModuleReadySlot(bool ready);
     void on_pbSimulate_clicked();
     void on_pbParticleSourcesSimulate_clicked();    
-    void RefreshOnProgressReport(int Progress, double msPerEv);
+    void RefreshOnProgressReport(int Progress, double msPerEv, int G4progress);
     void PMscriptSuccess();
     void onGDMLstatusChage(bool fGDMLactivated);
     void updateLoaded(int events, int progress);
@@ -592,7 +592,6 @@ private slots:
 
     void on_pbOpenLogOptions2_clicked();
 
-
     void on_pbAddmaterialFromLibrary_clicked();
 
     void on_cobGenerateFromFile_FileFormat_activated(int index);
@@ -600,6 +599,8 @@ private slots:
     void on_cobGenerateFromFile_FileFormat_currentIndexChanged(int index);
 
     void on_lwFileStatistics_customContextMenuRequested(const QPoint &pos);
+
+    void on_twSourcePhotonsParticles_currentChanged(int index);
 
 public slots:
     void on_pbRebuildDetector_clicked();
@@ -619,6 +620,7 @@ private:
     void ShowParticleSource_noFocus();
     void showPDEorSPEfactors(bool bShowPDE);
     void randomizePDEorSPEfactors(bool bDoPDE, bool bUniform, double min, double max, double mean, double sigma);
+    void updateG4ProgressBarVisibility();
 
 #ifdef __USE_ANTS_PYTHON__
     void createPythonScriptWindow();

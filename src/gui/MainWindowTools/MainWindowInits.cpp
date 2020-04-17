@@ -285,7 +285,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
      << ui->pbRefreshPMproperties << ui->pbUpdatePMproperties << ui->pbRefreshMaterials << ui->pbStopLoad
      << ui->pbIndPMshowInfo << ui->pbUpdateToFixedZ << ui->pbUpdateSimConfig
      << ui->pbUpdateToFullCustom << ui->pbElUpdateIndication << ui->pbUnlockGui << ui->fScanFloodTotProb
-     << ui->pbUpdateSourcesIndication
+     << ui->pbUpdateSourcesIndication << ui->prGeant
      << ui->sbPMtype << ui->fUpperLowerArrays << ui->sbPMtypeForGroup
      << ui->pbRebuildDetector << ui->fReloadRequired << ui->pbYellow << ui->pbGDML << ui->fGunMultipleEvents
      << ui->labPDEfactors_notAllUnity << ui->labSPEfactors_ActiveAndNotAllUnity << ui->pbGainsUpdateGUI;
@@ -358,9 +358,11 @@ MainWindow::MainWindow(DetectorClass *Detector,
     GeometryWindow->ShowGeometry(false);
     if (!fShowGeom) GeometryWindow->hide();
 
-    MainWindow::updateCOBsWithPMtypeNames();
+    updateCOBsWithPMtypeNames();
+    updateG4ProgressBarVisibility();
 
     if (!fLoadedDefaultDetector)
-      message("Startup detector NOT found, dummy default detector is loaded", this);
+        message("Startup detector NOT found, dummy default detector is loaded", this);
+
     qDebug()<<">Main window initialization complete";
 }

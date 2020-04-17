@@ -62,13 +62,14 @@ private:
     QTime startTime;
     int lastRefreshTime;
     int totalEventCount;
-    int lastProgress;
+    //int lastProgress;
     int lastEventsDone;
 
 public:
     //Stats for gui report
-    double progress;
-    double usPerEvent;
+    double progress   = 0;
+    double usPerEvent = 0;
+    double progressG4 = 0;
 
 public slots:
     void simulate();

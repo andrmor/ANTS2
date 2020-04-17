@@ -290,8 +290,7 @@ void AParticleSourceSimulator::simulate()
             }
             ParticleStack.clear();
 
-            if (bOnlySavePrimariesToFile)
-                progress = (eventCurrent - eventBegin + 1) * updateFactor;
+            if (bOnlySavePrimariesToFile) progress = (eventCurrent - eventBegin + 1) * updateFactor;  // *!* obsolete?
 
             continue; //skip tracking and go to the next event
         }
@@ -681,7 +680,7 @@ bool AParticleSourceSimulator::runGeant4Handler()
     delete G4handler;
     G4handler = new AExternalProcessHandler(exe, ar);
     //G4handler->setVerbose();
-    G4handler->setProgressVariable(&progress);
+    G4handler->setProgressVariable(&progressG4);
 
     bG4isRunning = true;
     G4handler->startAndWait();

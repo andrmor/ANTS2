@@ -31,6 +31,7 @@ public:
     int getTreadId() const {return ID;}
 
     int progress = 0; // progress in percents
+    int progressG4 = 0; // progress of G4ants sim in percents
 
     std::vector<TrackHolderClass *> tracks;  //temporary container for track data
 

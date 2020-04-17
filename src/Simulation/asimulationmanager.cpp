@@ -401,7 +401,7 @@ void ASimulationManager::updateGui()
         return;
     case ASimulatorRunner::SRunning:
         Runner->updateStats();
-        emit updateReady(Runner->progress, Runner->usPerEvent);
+        emit updateReady(Runner->progress, Runner->usPerEvent, Runner->progressG4);
         emit ProgressReport(Runner->progress);
         break;
     case ASimulatorRunner::SFinished:

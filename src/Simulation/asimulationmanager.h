@@ -121,7 +121,7 @@ private slots:
     void updateGui();
 
 signals:
-    void updateReady(int Progress, double msPerEvent);
+    void updateReady(int Progress, double msPerEvent, int G4Progress = 0);
     void RequestStopSimulation();
     void SimulationFinished();
     void ProgressReport(int percents);

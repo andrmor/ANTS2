@@ -522,45 +522,34 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
         ui->labPartLogOn->setVisible(SimulationManager->LogsStatOptions.bParticleTransportLog);
 
 
-  //Window CONTROL
+  //mode control
   if (js.contains("Mode"))
-    {
+  {
       ui->twSourcePhotonsParticles->blockSignals(true);
       QString Mode = js["Mode"].toString();
       if (Mode == "PointSim") ui->twSourcePhotonsParticles->setCurrentIndex(0);
       else if (Mode =="StackSim" || Mode =="SourceSim") ui->twSourcePhotonsParticles->setCurrentIndex(1);
       ui->twSourcePhotonsParticles->blockSignals(false);
-    }
+  }
 
   DoNotUpdateGeometry = false;
   BulkUpdate = false;
 
   //updating global parameters
-  //MainWindow::on_cbWaveResolved_toggled(ui->cbWaveResolved->isChecked()); //update on toggle
   WaveFrom = ui->ledWaveFrom->text().toDouble(); //***!!!
   WaveStep = ui->ledWaveStep->text().toDouble();
-  MainWindow::CorrectWaveTo(); //WaveTo and WaveNode are set here
-  //update materialCollection info -rebinning, hists
-  //bool bWaveRes = ui->cbWaveResolved->isChecked();
-  //MpCollection->SetWave(bWaveRes, WaveFrom, WaveTo, WaveStep, WaveNodes); //***!!! move!!!
-  //for (int i=0; i<MpCollection->countMaterials(); i++)
-  //    MpCollection->UpdateWaveResolvedProperties(i); //***!!! move
-  //PMs->SetWave(bWaveRes, WaveFrom, WaveStep, WaveNodes);
-  //PMs->RebinPDEs(); //update PMs info -rebinning, hists
+  CorrectWaveTo(); //WaveTo and WaveNode are set here
   on_pbIndPMshowInfo_clicked(); //to refresh the binned button
-  //MainWindow::on_cbAngularSensitive_toggled(ui->cbAngularSensitive->isChecked());
-  //MainWindow::on_cbTimeResolved_toggled(ui->cbTimeResolved->isChecked());
 
   //update indication
   on_pbYellow_clicked(); //yellow marker for activated advanced options in point source sim
-
+  updateG4ProgressBarVisibility();
   UpdateTestWavelengthProperties();
 
   bool bWaveRes = ui->cbWaveResolved->isChecked();
   ui->fWaveTests->setEnabled(bWaveRes);
   ui->fWaveOptions->setEnabled(bWaveRes);
   ui->cbFixWavelengthPointSource->setEnabled(bWaveRes);
-  //bool bTimeRes = ui->cbTimeResolved->isChecked();
 
   return true;
 }

@@ -3511,13 +3511,28 @@ void MainWindow::simulationFinished()
     //qDebug() << "---Procedure triggered by SimulationFinished signal has ended successfully---";
 }
 
-void MainWindow::RefreshOnProgressReport(int Progress, double msPerEv)
+void MainWindow::RefreshOnProgressReport(int Progress, double msPerEv, int G4progress)
 {
-  ui->prScan->setValue(Progress);
-  WindowNavigator->setProgress(Progress);
-  ui->leEventsPerSec->setText( (msPerEv==0) ? "n.a." : QString::number(msPerEv, 'g', 4));
+    ui->prScan->setValue(Progress);
+    ui->prGeant->setValue(G4progress);
 
-  qApp->processEvents();
+    double PrVal;
+        const bool bG4sim = ui->prGeant->isVisible();
+        const bool bHavePhotonSim = ui->cbGunDoS1->isChecked() || ui->cbGunDoS2->isChecked();
+        if (bG4sim)
+        {
+            if (bHavePhotonSim)
+                PrVal = 0.5 * (Progress + G4progress);
+            else
+                PrVal = G4progress;
+        }
+        else
+            PrVal = Progress;
+    WindowNavigator->setProgress(PrVal);
+
+    ui->leEventsPerSec->setText( (msPerEv==0) ? "n.a." : QString::number(msPerEv, 'g', 4));
+
+    qApp->processEvents();
 }
 
 void MainWindow::on_pbGDML_clicked()
@@ -4414,6 +4429,7 @@ void MainWindow::on_pbGoToConfigueG4ants_clicked()
 void MainWindow::on_cbGeant4ParticleTracking_toggled(bool checked)
 {
     ui->swNormalOrGeant4->setCurrentIndex((int)checked);
+    updateG4ProgressBarVisibility();
 }
 
 #include "ageant4configdialog.h"
@@ -4689,4 +4705,15 @@ void MainWindow::on_pbAddmaterialFromLibrary_clicked()
 void MainWindow::on_cobGenerateFromFile_FileFormat_currentIndexChanged(int index)
 {
     ui->pbLoadExampleFileFromFileGen->setVisible(index == 0);
+}
+
+void MainWindow::on_twSourcePhotonsParticles_currentChanged(int)
+{
+    updateG4ProgressBarVisibility();
+}
+
+void MainWindow::updateG4ProgressBarVisibility()
+{
+    const bool bVis = ui->twSourcePhotonsParticles->currentIndex() == 1 && ui->cbGeant4ParticleTracking->isChecked();
+    ui->prGeant->setVisible(bVis);
 }

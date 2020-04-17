@@ -54,6 +54,14 @@ AParticleSourceSimulator::~AParticleSourceSimulator()
     clearEnergyVector();
 }
 
+int AParticleSourceSimulator::getEventsDone() const
+{
+    if (simSettings.G4SimSet.bTrackParticles)
+        return 0;
+    else
+        return eventCurrent - eventBegin;
+}
+
 bool AParticleSourceSimulator::setup(QJsonObject &json)
 {
     if ( !ASimulator::setup(json) ) return false;
@@ -696,6 +704,7 @@ bool AParticleSourceSimulator::runGeant4Handler()
 
     if (fHardAbortWasTriggered) return false;
 
+    progressG4 = 100.0;
     return true;
 }
 

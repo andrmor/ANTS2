@@ -32,7 +32,7 @@ public:
     void ClearEnergyVectorButKeepObjects() {EnergyVector.resize(0);} //to avoid clear of objects stored in the vector  //obsolete
 
     virtual int getEventCount() const override { return eventEnd - eventBegin; }
-    virtual int getEventsDone() const override { return eventCurrent - eventBegin; }
+    virtual int getEventsDone() const override;
     virtual int getTotalEventCount() const override { return totalEventCount; }
     virtual bool setup(QJsonObject & json) override;
     virtual bool finalizeConfig() override;

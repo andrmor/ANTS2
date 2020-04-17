@@ -4714,6 +4714,9 @@ void MainWindow::on_twSourcePhotonsParticles_currentChanged(int)
 
 void MainWindow::updateG4ProgressBarVisibility()
 {
-    const bool bVis = ui->twSourcePhotonsParticles->currentIndex() == 1 && ui->cbGeant4ParticleTracking->isChecked();
-    ui->prGeant->setVisible(bVis);
+    const bool bG4 = ui->twSourcePhotonsParticles->currentIndex() == 1 && ui->cbGeant4ParticleTracking->isChecked();
+    const bool bNoPhot = !ui->cbGunDoS1->isChecked() && !ui->cbGunDoS2->isChecked();
+
+    ui->prGeant->setVisible(bG4);
+    ui->prScan->setHidden(bG4 && bNoPhot);
 }

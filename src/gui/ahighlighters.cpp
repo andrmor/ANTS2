@@ -10,7 +10,7 @@ AHighlighterScriptWindow::AHighlighterScriptWindow(QTextDocument *parent)
     //keywordFormat.setFontWeight(QFont::Bold);
     QStringList keywordPatterns;
     keywordPatterns << "\\bbreak\\b" << "\\bcatch\\b" << "\\bcontinue\\b" << "\\b.length\\b" << "\\barguments\\b"
-                    << "\\bdo\\b" << "\\bwhile\\b" << "\\bfor\\b"
+                    << "\\bdo\\b" << "\\bwhile\\b" << "\\bfor\\b" << "\\bwith\\b"
                     << "\\bin\\b" << "\\bfunction\\b" << "\\bif\\b"
                     << "\\belse\\b" << "\\breturn\\b" << "\\bswitch\\b"
                     << "\\bthrow\\b" << "\\btry\\b" << "\\bvar\\b"

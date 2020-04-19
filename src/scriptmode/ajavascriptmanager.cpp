@@ -224,8 +224,8 @@ QString AJavaScriptManager::expandScript(const QString & OriginalScript)
                 if (IncludedScript.isEmpty()) IncludedScript = "\n";
                 WorkScript += IncludedScript + "\n";
 
-                LineNumberMapper[iLine] = -777;
-                LineNumberMapper.insert(iLine, LineCounter-1, -777);
+                int old = LineNumberMapper[iLine];
+                LineNumberMapper.insert(iLine, LineCounter-1, old);
 
                 bWasExpanded = true;
                 bScriptExpanded = true;
@@ -282,13 +282,7 @@ int AJavaScriptManager::getUncaughtExceptionLineNumber() const
 
 const QString AJavaScriptManager::getUncaughtExceptionString() const
 {
-    QString err = engine->uncaughtException().toString();
-
-    int iLineNumber = engine->uncaughtExceptionLineNumber();
-    correctLineNumber(iLineNumber);
-    if (iLineNumber == -777) err += " (in an #include section)";
-
-    return err;
+    return engine->uncaughtException().toString();
 }
 
 void AJavaScriptManager::collectGarbage()

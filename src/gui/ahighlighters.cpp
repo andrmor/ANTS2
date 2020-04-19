@@ -25,6 +25,12 @@ AHighlighterScriptWindow::AHighlighterScriptWindow(QTextDocument *parent)
         highlightingRules.append(rule);
     }
 
+    QTextCharFormat includeFormat;
+    includeFormat.setForeground(QColor(227, 146, 48));
+    rule.pattern = QRegularExpression("#include\\b");
+    rule.format = includeFormat;
+    highlightingRules.append(rule);
+
 /*
     classFormat.setFontWeight(QFont::Bold);
     classFormat.setForeground(Qt::darkMagenta);
@@ -54,12 +60,6 @@ AHighlighterScriptWindow::AHighlighterScriptWindow(QTextDocument *parent)
 //    rule.pattern = QRegularExpression("'.*'");
 //    rule.format = charFormat;
 //    highlightingRules.append(rule);
-
-    QTextCharFormat includeFormat;
-    includeFormat.setForeground(QColor(227, 146, 48));
-    rule.pattern = QRegularExpression("#include\\b");
-    rule.format = includeFormat;
-    highlightingRules.append(rule);
 
 /*
     functionFormat.setFontItalic(true);

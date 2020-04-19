@@ -81,52 +81,11 @@ QString AJavaScriptManager::Evaluate(const QString & Script)
     bScriptExpanded = false;
     QString ModScript = expandScript(Script);
 
-    /*
-    QString ModScript;
-    bScriptExpanded = false;
-    LineNumberMapper.clear();
-    if (Script.contains("#include"))
+    if (ModScript == "Infinite loop in includes")
     {
-        const QStringList SL = Script.split('\n', QString::KeepEmptyParts);
-        for (int iL = 0; iL < SL.size(); iL++)
-        {
-            const QString Line = SL.at(iL).simplified();
-            if (!Line.startsWith("#include"))
-            {
-                ModScript += Line + '\n';
-            }
-            else
-            {
-                qDebug() << Line;
-                const QStringList tmp = Line.split('\"', QString::KeepEmptyParts);
-                if (tmp.size() < 3)
-                {
-                    qWarning() << "Error in expanding #include";
-                    ModScript += Line + '\n';
-                    continue;
-                }
-                const QString FileName = tmp.at(1);
-
-                QFile file(FileName);
-                if (!file.exists() || !file.open(QIODevice::ReadOnly | QFile::Text))
-                {
-                    qWarning() << "Error in expanding #include: failed to read the file";
-                    ModScript += Line + '\n';
-                    continue;
-                }
-                QTextStream in(&file);
-                QString incl = in.readAll();
-                file.close();
-                ModScript += incl;
-                bScriptExpanded = true;
-            }
-        }
+        LastError = ModScript;
+        return LastError;
     }
-    else
-    {
-        ModScript = Script;
-    }
-    */
 
     emit onStart();
 
@@ -175,10 +134,12 @@ QString AJavaScriptManager::expandScript(const QString & OriginalScript)
     for (int i = 0; i < OriginalSize; i++)
         LineNumberMapper[i] = i + 1; // line numbers start from 1
 
-    bool bWasExpanded = false;
+    bool bWasExpanded;
+    int iCycleCounter = 0;
     do
     {
         if ( !Script.contains("#include") ) break;
+        bWasExpanded = false;
 
         QString WorkScript;
 
@@ -232,13 +193,20 @@ QString AJavaScriptManager::expandScript(const QString & OriginalScript)
             }
         }
         Script = WorkScript;
+
+        iCycleCounter++;
+        //qDebug() << iCycleCounter;
+        if (iCycleCounter > 1000)
+            return "Infinite loop in includes";
     }
     while (bWasExpanded);
 
+    /*
     const QStringList SL = Script.split('\n', QString::KeepEmptyParts);
     for (int iLine = 0; iLine < SL.size(); iLine++)
         qDebug() << iLine + 1 << " "<< SL.at(iLine);
     qDebug() << "-----\n"<< LineNumberMapper;
+    */
 
     return Script;
 }
@@ -274,9 +242,9 @@ bool AJavaScriptManager::isUncaughtException() const
 int AJavaScriptManager::getUncaughtExceptionLineNumber() const
 {
     int iLineNumber = engine->uncaughtExceptionLineNumber();
-    qDebug() << "->-"<<iLineNumber;
+    //qDebug() << "->-"<<iLineNumber;
     correctLineNumber(iLineNumber);
-    qDebug() << "-<-"<<iLineNumber;
+    //qDebug() << "-<-"<<iLineNumber;
     return iLineNumber;
 }
 

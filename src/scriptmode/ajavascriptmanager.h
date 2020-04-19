@@ -48,12 +48,18 @@ public:
 #endif
     QScriptValue    getMinimalizationFunction();
 
+    void            correctLineNumber(int & iLineNumber) const;  // if needed, converts the error line number in the script with expanded #include(s) to the line number in the original script
+
     //for multithread-in-scripting
     AJavaScriptManager* createNewScriptManager(int threadNumber, bool bAbortIsGlobal); // *** !!!
     QScriptValue    getProperty(const QString& properyName) const;
     QScriptValue    registerNewVariant(const QVariant &Variant);
+
     QScriptValue    EvaluationResult;
-    ACore_SI* coreObj = 0;  //core interface - to forward evaluate-script-in-script
+    ACore_SI *      coreObj = nullptr;  //core interface - to forward evaluate-script-in-script
+
+    bool            bScriptExpanded = false;
+    QVector<int>    LineNumberMapper;
 
 public slots:
 #ifdef GUI
@@ -71,6 +77,7 @@ private:
 private:
     void doRegister(AScriptInterface *interface, const QString &name);
     void addQVariantToString(const QVariant &var, QString &string);
+    QString expandScript(const QString & OriginalScript);
 };
 
 #endif // AJAVASCRIPTMANAGER_H

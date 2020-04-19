@@ -10,7 +10,7 @@ AHighlighterScriptWindow::AHighlighterScriptWindow(QTextDocument *parent)
     //keywordFormat.setFontWeight(QFont::Bold);
     QStringList keywordPatterns;
     keywordPatterns << "\\bbreak\\b" << "\\bcatch\\b" << "\\bcontinue\\b" << "\\b.length\\b" << "\\barguments\\b"
-                    << "\\bdo\\b" << "\\bwhile\\b" << "\\bfor\\b" << "\\bwith\\b"
+                    << "\\bdo\\b" << "\\bwhile\\b" << "\\bfor\\b" << "\\bwith\\b" << "\\bdelete\\b"
                     << "\\bin\\b" << "\\bfunction\\b" << "\\bif\\b"
                     << "\\belse\\b" << "\\breturn\\b" << "\\bswitch\\b"
                     << "\\bthrow\\b" << "\\btry\\b" << "\\bvar\\b"
@@ -54,6 +54,12 @@ AHighlighterScriptWindow::AHighlighterScriptWindow(QTextDocument *parent)
 //    rule.pattern = QRegularExpression("'.*'");
 //    rule.format = charFormat;
 //    highlightingRules.append(rule);
+
+    QTextCharFormat includeFormat;
+    includeFormat.setForeground(QColor(227, 146, 48));
+    rule.pattern = QRegularExpression("#include\\b");
+    rule.format = includeFormat;
+    highlightingRules.append(rule);
 
 /*
     functionFormat.setFontItalic(true);

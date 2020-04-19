@@ -613,26 +613,27 @@ void AScriptWindow::on_pbRunScript_clicked()
        AScriptWindow::ReportError("Script error: "+ScriptManager->getLastError(), -1);
    }
    else if (ScriptManager->isUncaughtException())
-   {   //Script has uncaught exception
+   {
        int lineNum = ScriptManager->getUncaughtExceptionLineNumber();
-       QString message = ScriptManager->getUncaughtExceptionString();
+       const QString message = ScriptManager->getUncaughtExceptionString();
        //qDebug() << "Error message:" << message;
        //QString backtrace = engine.uncaughtExceptionBacktrace().join('\n');
        //qDebug() << "backtrace:" << backtrace;
-       AScriptWindow::ReportError("Script error: "+message, lineNum);
+       ReportError("Script error: " + message, lineNum);
    }
    else
-   {   //success
+   {
+       //success
        //qDebug() << "Script returned:" << result;
        if (!ScriptManager->isEvalAborted())
-         {
-            if (ShowEvalResult && result!="undefined" && !result.isEmpty()) ShowText("Script evaluation result:\n"+result);
-            //else ShowText("Script evaluation: success");
-         }
+       {
+            if (ShowEvalResult && result!="undefined" && !result.isEmpty())
+                ShowText("Script evaluation result:\n"+result);
+       }
        else
-         {
+       {
            //ShowText("Aborted!");
-         }
+       }
        ui->pbRunScript->setIcon(QIcon()); //clear red icon
      }
 

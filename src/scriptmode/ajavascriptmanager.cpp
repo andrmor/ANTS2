@@ -73,10 +73,60 @@ void AJavaScriptManager::addQVariantToString(const QVariant & var, QString & str
     }
 }
 
-QString AJavaScriptManager::Evaluate(const QString& Script)
+QString AJavaScriptManager::Evaluate(const QString & Script)
 {
     LastError.clear();
     fAborted = false;
+
+    bScriptExpanded = false;
+    QString ModScript = expandScript(Script);
+
+    /*
+    QString ModScript;
+    bScriptExpanded = false;
+    LineNumberMapper.clear();
+    if (Script.contains("#include"))
+    {
+        const QStringList SL = Script.split('\n', QString::KeepEmptyParts);
+        for (int iL = 0; iL < SL.size(); iL++)
+        {
+            const QString Line = SL.at(iL).simplified();
+            if (!Line.startsWith("#include"))
+            {
+                ModScript += Line + '\n';
+            }
+            else
+            {
+                qDebug() << Line;
+                const QStringList tmp = Line.split('\"', QString::KeepEmptyParts);
+                if (tmp.size() < 3)
+                {
+                    qWarning() << "Error in expanding #include";
+                    ModScript += Line + '\n';
+                    continue;
+                }
+                const QString FileName = tmp.at(1);
+
+                QFile file(FileName);
+                if (!file.exists() || !file.open(QIODevice::ReadOnly | QFile::Text))
+                {
+                    qWarning() << "Error in expanding #include: failed to read the file";
+                    ModScript += Line + '\n';
+                    continue;
+                }
+                QTextStream in(&file);
+                QString incl = in.readAll();
+                file.close();
+                ModScript += incl;
+                bScriptExpanded = true;
+            }
+        }
+    }
+    else
+    {
+        ModScript = Script;
+    }
+    */
 
     emit onStart();
 
@@ -85,24 +135,24 @@ QString AJavaScriptManager::Evaluate(const QString& Script)
       {
           AScriptInterface* bi = dynamic_cast<AScriptInterface*>(interfaces[i]);
           if (bi)
-            {
+          {
               if (!bi->InitOnRun())
-                {
+              {
                   LastError = "Init failed for unit: "+interfaces.at(i)->objectName();
                   return LastError;
-                }
-            }
+              }
+          }
       }
 
     timer = new QElapsedTimer;
     timeOfStart = timer->restart();
 
     fEngineIsRunning = true;
-    EvaluationResult = engine->evaluate(Script);
+    EvaluationResult = engine->evaluate(ModScript);
     fEngineIsRunning = false;
 
     timerEvalTookMs = timer->elapsed();
-    delete timer; timer = 0;
+    delete timer; timer = nullptr;
 
     QString result;
     if (EvaluationResult.isArray() || EvaluationResult.isObject())
@@ -114,6 +164,93 @@ QString AJavaScriptManager::Evaluate(const QString& Script)
 
     emit onFinish(result);
     return result;
+}
+
+QString AJavaScriptManager::expandScript(const QString & OriginalScript)
+{
+    QString Script = OriginalScript;
+
+    const int OriginalSize = OriginalScript.count('\n') + 1;
+    LineNumberMapper.resize(OriginalSize);
+    for (int i = 0; i < OriginalSize; i++)
+        LineNumberMapper[i] = i + 1; // line numbers start from 1
+
+    bool bWasExpanded = false;
+    do
+    {
+        if ( !Script.contains("#include") ) break;
+
+        QString WorkScript;
+
+        const QStringList SL = Script.split('\n', QString::KeepEmptyParts);
+        for (int iLine = 0; iLine < SL.size(); iLine++)
+        {
+            const QString Line = SL.at(iLine);
+            //qDebug() << Line;
+            if ( !Line.simplified().startsWith("#include") )
+            {
+                WorkScript += Line + '\n';
+            }
+            else
+            {
+                const QStringList tmp = Line.split('\"', QString::KeepEmptyParts);
+                if (tmp.size() < 3)
+                {
+                    qWarning() << "Error in expanding #include";
+                    WorkScript += Line + '\n';
+                    continue;
+                }
+                const QString FileName = tmp.at(1);
+
+                QFile file(FileName);
+                if (!file.exists() || !file.open(QIODevice::ReadOnly | QFile::Text))
+                {
+                    qWarning() << "Error in expanding #include: failed to read the file";
+                    WorkScript += Line + '\n';
+                    continue;
+                }
+
+                QTextStream in(&file);
+
+                int LineCounter = 0;
+                while(!in.atEnd())
+                {
+                    in.readLine();
+                    LineCounter++;
+                }
+                in.seek(0);
+                QString IncludedScript = in.readAll();
+                file.close();
+                if (IncludedScript.isEmpty()) IncludedScript = "\n";
+                WorkScript += IncludedScript + "\n";
+
+                LineNumberMapper[iLine] = -777;
+                LineNumberMapper.insert(iLine, LineCounter-1, -777);
+
+                bWasExpanded = true;
+                bScriptExpanded = true;
+            }
+        }
+        Script = WorkScript;
+    }
+    while (bWasExpanded);
+
+    const QStringList SL = Script.split('\n', QString::KeepEmptyParts);
+    for (int iLine = 0; iLine < SL.size(); iLine++)
+        qDebug() << iLine + 1 << " "<< SL.at(iLine);
+    qDebug() << "-----\n"<< LineNumberMapper;
+
+    return Script;
+}
+
+void AJavaScriptManager::correctLineNumber(int & iLineNumber) const
+{
+    if (!bScriptExpanded) return;
+
+    //iLineNumber for the first line is 1
+    if (iLineNumber < 1 || iLineNumber > LineNumberMapper.size()) return;
+
+    iLineNumber = LineNumberMapper[iLineNumber - 1];
 }
 
 QVariant AJavaScriptManager::EvaluateScriptInScript(const QString &script)
@@ -136,12 +273,22 @@ bool AJavaScriptManager::isUncaughtException() const
 
 int AJavaScriptManager::getUncaughtExceptionLineNumber() const
 {
-    return engine->uncaughtExceptionLineNumber();
+    int iLineNumber = engine->uncaughtExceptionLineNumber();
+    qDebug() << "->-"<<iLineNumber;
+    correctLineNumber(iLineNumber);
+    qDebug() << "-<-"<<iLineNumber;
+    return iLineNumber;
 }
 
 const QString AJavaScriptManager::getUncaughtExceptionString() const
 {
-    return engine->uncaughtException().toString();
+    QString err = engine->uncaughtException().toString();
+
+    int iLineNumber = engine->uncaughtExceptionLineNumber();
+    correctLineNumber(iLineNumber);
+    if (iLineNumber == -777) err += " (in an #include section)";
+
+    return err;
 }
 
 void AJavaScriptManager::collectGarbage()
@@ -291,18 +438,20 @@ void AJavaScriptManager::doRegister(AScriptInterface *interface, const QString &
     QObject::connect(interface, &AScriptInterface::AbortScriptEvaluation, this, &AJavaScriptManager::AbortEvaluation);
 }
 
-int AJavaScriptManager::FindSyntaxError(const QString& script)
+int AJavaScriptManager::FindSyntaxError(const QString & script)
 {
-    QScriptSyntaxCheckResult check = QScriptEngine::checkSyntax(script);
+    QString txt = script;
+    txt.replace("#include", "//#include");
+
+    QScriptSyntaxCheckResult check = QScriptEngine::checkSyntax(txt);
     if (check.state() == QScriptSyntaxCheckResult::Valid) return -1;
     else
-      {
+    {
         int lineNumber = check.errorLineNumber();
         qDebug()<<"Syntax error at line"<<lineNumber;
         return lineNumber;
-      }
+    }
 }
-
 
 // ------------ multithreading -------------
 //https://stackoverflow.com/questions/5020459/deep-copy-of-a-qscriptvalue-as-global-object

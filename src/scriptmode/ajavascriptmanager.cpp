@@ -141,11 +141,14 @@ QString AJavaScriptManager::expandScript(const QString & OriginalScript)
         LineNumberMapper[i] = i + 1; // line numbers start from 1
 
     bool bWasExpanded;
+    bool bInsideBlockComments;
     int iCycleCounter = 0;
     do
     {
         if ( !Script.contains("#include") ) break;
+
         bWasExpanded = false;
+        bInsideBlockComments = false;
 
         QString WorkScript;
 
@@ -154,9 +157,30 @@ QString AJavaScriptManager::expandScript(const QString & OriginalScript)
         {
             const QString Line = SL.at(iLine);
             //qDebug() << Line;
-            if ( !Line.simplified().startsWith("#include") )
+
+            if ( bInsideBlockComments || !Line.simplified().startsWith("#include") )
             {
                 WorkScript += Line + '\n';
+
+                const int len = Line.length();
+                if (len > 1)
+                {
+                    for (int iChar = 0; iChar < len - 1; iChar++)
+                    {
+                        if (Line.at(iChar) == '/' && Line.at(iChar+1) == '/') break; // line comment started
+
+                        if      (Line.at(iChar) == '/' && Line.at(iChar+1) == '*')
+                        {
+                            bInsideBlockComments = true;
+                            iChar++;
+                        }
+                        else if (Line.at(iChar) == '*' && Line.at(iChar+1) == '/')
+                        {
+                            bInsideBlockComments = false;
+                            iChar++;
+                        }
+                    }
+                }
             }
             else
             {

@@ -76,12 +76,18 @@ void AJavaScriptManager::addQVariantToString(const QVariant & var, QString & str
 QString AJavaScriptManager::Evaluate(const QString & Script)
 {
     LastError.clear();
+    LastErrorLineNumber = -1;
     fAborted = false;
 
     bScriptExpanded = false;
     QString ModScript = expandScript(Script);
 
-    if (ModScript == "Infinite loop in includes")
+    if (ModScript == sIncludeInfiniteLoop)
+    {
+        LastError = ModScript;
+        return LastError;
+    }
+    if (ModScript == sIncludeFileError)
     {
         LastError = ModScript;
         return LastError;
@@ -157,9 +163,9 @@ QString AJavaScriptManager::expandScript(const QString & OriginalScript)
                 const QStringList tmp = Line.split('\"', QString::KeepEmptyParts);
                 if (tmp.size() < 3)
                 {
-                    qWarning() << "Error in expanding #include";
-                    WorkScript += Line + '\n';
-                    continue;
+                    qWarning() << "Error in processing #include arguments";
+                    LastErrorLineNumber = LineNumberMapper[iLine];
+                    return sIncludeFileError;
                 }
                 const QString FileName = tmp.at(1);
 
@@ -167,8 +173,8 @@ QString AJavaScriptManager::expandScript(const QString & OriginalScript)
                 if (!file.exists() || !file.open(QIODevice::ReadOnly | QFile::Text))
                 {
                     qWarning() << "Error in expanding #include: failed to read the file";
-                    WorkScript += Line + '\n';
-                    continue;
+                    LastErrorLineNumber = LineNumberMapper[iLine];
+                    return sIncludeFileError;
                 }
 
                 QTextStream in(&file);
@@ -197,7 +203,7 @@ QString AJavaScriptManager::expandScript(const QString & OriginalScript)
         iCycleCounter++;
         //qDebug() << iCycleCounter;
         if (iCycleCounter > 1000)
-            return "Infinite loop in includes";
+            return sIncludeInfiniteLoop;
     }
     while (bWasExpanded);
 

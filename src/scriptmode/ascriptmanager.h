@@ -45,6 +45,7 @@ public:
   bool              isEvalAborted() const {return fAborted;}
 
   const QString&    getLastError() const {return LastError;}
+  int               getLastErrorLineNumber() const {return LastErrorLineNumber;}
   qint64            getElapsedTime();
   const QString     getFunctionReturnType(const QString& UnitFunction);
 
@@ -76,6 +77,7 @@ protected:
   bool              fAborted;
 
   QString           LastError;
+  int               LastErrorLineNumber = -1;   //added to be used with #include processing errors in javascript
   bool              bShowAbortMessageInOutput = true; //can be false -> in multithread if abort is local to this thread
 
   QElapsedTimer*    timer;

@@ -610,7 +610,7 @@ void AScriptWindow::on_pbRunScript_clicked()
 
    if (!ScriptManager->getLastError().isEmpty())
    {
-       AScriptWindow::ReportError("Script error: "+ScriptManager->getLastError(), -1);
+       ReportError("Script error: " + ScriptManager->getLastError(), ScriptManager->getLastErrorLineNumber());
    }
    else if (ScriptManager->isUncaughtException())
    {

@@ -78,6 +78,10 @@ private:
     void doRegister(AScriptInterface *interface, const QString &name);
     void addQVariantToString(const QVariant &var, QString &string);
     QString expandScript(const QString & OriginalScript);
+
+
+    static constexpr const char* sIncludeInfiniteLoop = "Infinite loop in #includes";
+    static constexpr const char* sIncludeFileError = "Cannot find or open file in #include";
 };
 
 #endif // AJAVASCRIPTMANAGER_H

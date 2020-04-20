@@ -105,9 +105,13 @@ int main(int argc, char *argv[])
 
     std::unique_ptr<QCoreApplication> app;
 #ifdef GUI
-    QApplication * qa = new QApplication(argc, argv);
-    qa->setStyle(new AProxyStyle);
-    app.reset(qa);
+    if (argc == 1)
+    {
+        QApplication * qa = new QApplication(argc, argv);
+        qa->setStyle(new AProxyStyle);
+        app.reset(qa);
+    }
+    else app.reset(new QCoreApplication(argc, argv));
 #else
     app.reset(new QCoreApplication(argc, argv));
 #endif

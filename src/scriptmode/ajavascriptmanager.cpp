@@ -14,6 +14,7 @@
 #include <QDebug>
 #include <QScriptValueIterator>
 #include <QElapsedTimer>
+#include <QFile>
 
 AJavaScriptManager::AJavaScriptManager(TRandom2* RandGen) :
     AScriptManager(RandGen)

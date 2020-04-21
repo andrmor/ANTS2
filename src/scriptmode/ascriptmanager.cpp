@@ -12,57 +12,49 @@
 
 #include "TRandom2.h"
 
-AScriptManager::AScriptManager(TRandom2 *RandGen) : RandGen(RandGen)
-{
-  fEngineIsRunning = false;
-  fAborted = false;
-  MiniBestResult = 1e30;
-  MiniNumVariables = 0;
-
-  timer = 0;
-  timerEvalTookMs = 0;
-}
+AScriptManager::AScriptManager(TRandom2 *RandGen)
+    : RandGen(RandGen) {}
 
 AScriptManager::~AScriptManager()
 {
-  for (int i=0; i<interfaces.size(); i++) delete interfaces[i];
-  interfaces.clear();
+    for (int i = 0; i < interfaces.size(); i++) delete interfaces[i];
+    interfaces.clear();
 
-  delete timer;
+    delete timer;
 
-  if (bOwnRandomGen) delete RandGen;
+    if (bOwnRandomGen) delete RandGen;
 }
 
 #ifdef GUI
 void AScriptManager::hideMsgDialogs()
 {
-  for (int i=0; i<interfaces.size(); i++)
-  {
-      AMsg_SI* t = dynamic_cast<AMsg_SI*>(interfaces[i]);
-      if (t)  t->HideWidget();
+    for (int i=0; i<interfaces.size(); i++)
+    {
+        AMsg_SI* t = dynamic_cast<AMsg_SI*>(interfaces[i]);
+        if (t) t->HideWidget();
     }
 }
 
 void AScriptManager::restoreMsgDialogs()
 {
-  for (int i=0; i<interfaces.size(); i++)
-  {
-      AMsg_SI* t = dynamic_cast<AMsg_SI*>(interfaces[i]);
-      if (t) t->RestorelWidget();
-  }
+    for (int i=0; i<interfaces.size(); i++)
+    {
+        AMsg_SI* t = dynamic_cast<AMsg_SI*>(interfaces[i]);
+        if (t) t->RestorelWidget();
+    }
 }
 
 void AScriptManager::deleteMsgDialogs()
 {
-  for (int i=0; i<interfaces.size(); i++)
-  {
-      AMsg_SI* t = dynamic_cast<AMsg_SI*>(interfaces[i]);
-      if (t)
-      {
-          // *** !!! t->deleteDialog(); //need by GenScriptWindow ?
-          return;
-      }
-  }
+    for (int i=0; i<interfaces.size(); i++)
+    {
+        AMsg_SI* t = dynamic_cast<AMsg_SI*>(interfaces[i]);
+        if (t)
+        {
+            // *** !!! t->deleteDialog(); //need by GenScriptWindow ?
+            return;
+        }
+    }
 }
 #endif
 
@@ -72,7 +64,7 @@ qint64 AScriptManager::getElapsedTime()
   return timerEvalTookMs;
 }
 
-const QString AScriptManager::getFunctionReturnType(const QString &UnitFunction)
+QString AScriptManager::getFunctionReturnType(const QString &UnitFunction)
 {
   QStringList f = UnitFunction.split(".");
   if (f.size() != 2) return "";

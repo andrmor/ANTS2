@@ -56,6 +56,9 @@ public:
     QScriptValue    getProperty(const QString & properyName) const;
     QScriptValue    registerNewVariant(const QVariant & Variant);
 
+protected:
+    void            updateBlockCommentStatus(const QString & Line, bool & bInsideBlockComments) const override;
+
 public:
     //for multithread-in-scripting
     QScriptValue    EvaluationResult;
@@ -66,14 +69,10 @@ private:
     QVector<AScriptMessengerDialog*> ThreadMessangerDialogs;
 #endif
     ACore_SI *      coreObj = nullptr;  //core interface - to forward evaluate-script-in-script
-    QVector<int>    LineNumberMapper;
-    bool            bScriptExpanded = false;
 
 private:
     void            doRegister(AScriptInterface * interface, const QString & name);
     void            addQVariantToString(const QVariant & var, QString & string);
-    bool            expandScript(const QString & OriginalScript, QString & ExpandedScript);  // can be splitted in functions, but wait till making it general for both JS and Python
-    void            correctLineNumber(int & iLineNumber) const; // if needed, converts the error line number in the script with expanded #include(s) to the line number in the original script
 };
 
 #endif // AJAVASCRIPTMANAGER_H

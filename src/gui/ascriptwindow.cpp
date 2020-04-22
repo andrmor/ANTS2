@@ -55,14 +55,18 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWid
     ScriptManager(ScriptManager), bLightMode(LightMode),
     ui(new Ui::AScriptWindow), GlobSet(AGlobalSettings::getInstance())
 {
+    ui->setupUi(this);
+
     if ( dynamic_cast<AJavaScriptManager*>(ScriptManager) )
     {
         ScriptLanguage = _JavaScript_;
+        setWindowTitle("JavaScript");
     }
 #ifdef __USE_ANTS_PYTHON__
     if ( dynamic_cast<APythonScriptManager*>(ScriptManager) )
     {
         ScriptLanguage = _PythonScript_;
+        setWindowTitle("Python script");
     }
 #endif
 
@@ -89,9 +93,7 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWid
     ScriptManager->ExamplesDir = &GlobSet.ExamplesDir;
 
     ShowEvalResult = true;
-    ui->setupUi(this);
     ui->pbStop->setVisible(false);
-    this->setWindowTitle("ANTS2 script");
     ui->prbProgress->setValue(0);
     ui->prbProgress->setVisible(false);
     //ui->labFileName->setTextInteractionFlags(Qt::TextSelectableByMouse);

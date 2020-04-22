@@ -123,135 +123,6 @@ QString AJavaScriptManager::Evaluate(const QString & Script)
     return result;
 }
 
-bool AJavaScriptManager::expandScript(const QString & OriginalScript, QString & ExpandedScript)
-{
-    ExpandedScript = OriginalScript;
-
-    const int OriginalSize = OriginalScript.count('\n') + 1;
-
-    LineNumberMapper.resize(OriginalSize + 1);
-    LineNumberMapper[0] = -1;    // just paranoic, line number 0 will never be requested
-    for (int i = 1; i <= OriginalSize; i++)
-        LineNumberMapper[i] = i; // line numbers start from 1
-
-    bool bWasExpanded;
-    bool bInsideBlockComments;
-    int iCycleCounter = 0;
-    do
-    {
-        if ( !ExpandedScript.contains("#include") ) break;
-
-        bWasExpanded = false;
-        bInsideBlockComments = false;
-        QVector<int> LineNumberMapperCopy = LineNumberMapper;
-        int iInsertLine = 0;
-
-        QString WorkScript;
-
-        const QStringList SL = ExpandedScript.split('\n', QString::KeepEmptyParts);
-        for (int iLine = 0; iLine < SL.size(); iLine++)
-        {
-            const QString Line = SL.at(iLine);
-            //qDebug() << Line;
-
-            if ( bInsideBlockComments || !Line.simplified().startsWith("#include") )
-            {
-                WorkScript += Line + '\n';
-                iInsertLine++;
-
-                const int len = Line.length();
-                if (len > 1)
-                {
-                    for (int iChar = 0; iChar < len - 1; iChar++)
-                    {
-                        if (Line.at(iChar) == '/' && Line.at(iChar+1) == '/') break; // line comment started
-
-                        if      (Line.at(iChar) == '/' && Line.at(iChar+1) == '*')
-                        {
-                            bInsideBlockComments = true;
-                            iChar++;
-                        }
-                        else if (Line.at(iChar) == '*' && Line.at(iChar+1) == '/')
-                        {
-                            bInsideBlockComments = false;
-                            iChar++;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                const QStringList tmp = Line.split('\"', QString::KeepEmptyParts);
-                if (tmp.size() < 3)
-                {
-                    LastError = "Format error in #include (could be in #include of included file)";
-                    LastErrorLineNumber = LineNumberMapperCopy[iLine + 1];
-                    return false;
-                }
-                const QString FileName = tmp.at(1);
-
-                QFile file(FileName);
-                if (!file.exists() || !file.open(QIODevice::ReadOnly | QFile::Text))
-                {
-                    LastError = "Cannot find or open file in #include (could be in #include of included file)";
-                    LastErrorLineNumber = LineNumberMapperCopy[iLine + 1];
-                    return false;
-                }
-
-                QTextStream in(&file);
-
-                int LineCounter = 0;
-                while(!in.atEnd())
-                {
-                    in.readLine();
-                    LineCounter++;
-                }
-                in.seek(0);
-                QString IncludedScript = in.readAll();
-                file.close();
-                //if (IncludedScript.isEmpty()) IncludedScript = "\n";
-                WorkScript += IncludedScript + "\n";
-
-                int old = LineNumberMapperCopy[iLine + 1];
-                LineNumberMapper.insert(iInsertLine+1, LineCounter-1, old);
-                //qDebug() << old << LineNumberMapperCopy << iLine << LineCounter;
-
-                iInsertLine += LineCounter;
-                bWasExpanded = true;
-                bScriptExpanded = true;
-            }
-        }
-        ExpandedScript = WorkScript;
-
-        iCycleCounter++;
-        //qDebug() << iCycleCounter;
-        if (iCycleCounter > 100)
-        {
-            LastError = "Suspect infinite loop in #includes";
-            return false;
-        }
-    }
-    while (bWasExpanded);
-
-    /*
-    const QStringList SL = ExpandedScript.split('\n', QString::KeepEmptyParts);
-    for (int iLine = 0; iLine < SL.size(); iLine++)
-        qDebug() << iLine + 1 << " "<< SL.at(iLine);
-    qDebug() << "-----\n"<< LineNumberMapper;
-    */
-
-    return true;
-}
-
-void AJavaScriptManager::correctLineNumber(int & iLineNumber) const
-{
-    if (!bScriptExpanded) return;
-
-    if (iLineNumber < 0 || iLineNumber >= LineNumberMapper.size()) return;
-
-    iLineNumber = LineNumberMapper[iLineNumber]; // line numbers start from 1 !
-}
-
 QVariant AJavaScriptManager::EvaluateScriptInScript(const QString &script)
 {
     int line = FindSyntaxError(script);
@@ -781,4 +652,27 @@ QScriptValue AJavaScriptManager::getProperty(const QString &properyName) const
 QScriptValue AJavaScriptManager::registerNewVariant(const QVariant& Variant)
 {
     return engine->toScriptValue(Variant);
+}
+
+void AJavaScriptManager::updateBlockCommentStatus(const QString & Line, bool & bInsideBlockComments) const
+{
+    const int len = Line.length();
+    if (len > 1)
+    {
+        for (int iChar = 0; iChar < len - 1; iChar++)
+        {
+            if (Line.at(iChar) == '/' && Line.at(iChar+1) == '/') break; // line comment started
+
+            if (Line.at(iChar) == '/' && Line.at(iChar+1) == '*')
+            {
+                bInsideBlockComments = true;
+                iChar++;
+            }
+            else if (Line.at(iChar) == '*' && Line.at(iChar+1) == '/')
+            {
+                bInsideBlockComments = false;
+                iChar++;
+            }
+        }
+    }
 }

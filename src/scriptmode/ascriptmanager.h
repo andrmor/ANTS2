@@ -81,6 +81,13 @@ protected:
   qint64            timeOfStart;
   qint64            timerEvalTookMs = 0;
 
+  QVector<int>      LineNumberMapper;
+  bool              bScriptExpanded = false;
+
+  bool              expandScript(const QString & OriginalScript, QString & ExpandedScript);  // can be splitted in functions, but wait till making it general for both JS and Python
+  void              correctLineNumber(int & iLineNumber) const; // if needed, converts the error line number in the script with expanded #include(s) to the line number in the original script
+  virtual void      updateBlockCommentStatus(const QString & /*Line*/, bool & /*bInsideBlockComments*/) const {return;}  // only needed for JavaScript, for Python block commenting is not possible
+
 signals:
     void            onStart();
     void            onAbort();

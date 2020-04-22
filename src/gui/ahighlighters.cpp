@@ -252,4 +252,10 @@ AHighlighterPythonScriptWindow::AHighlighterPythonScriptWindow(QTextDocument *pa
     highlightingRules.append(rule);
 */
 
+    QTextCharFormat includeFormat;
+    includeFormat.setForeground(QColor(227, 146, 48));
+    rule.pattern = QRegularExpression("^[ \t]*#include\\b");
+    rule.format = includeFormat;
+    highlightingRules.append(rule);
+
 }

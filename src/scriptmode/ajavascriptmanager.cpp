@@ -128,9 +128,11 @@ bool AJavaScriptManager::expandScript(const QString & OriginalScript, QString & 
     ExpandedScript = OriginalScript;
 
     const int OriginalSize = OriginalScript.count('\n') + 1;
-    LineNumberMapper.resize(OriginalSize);
-    for (int i = 0; i < OriginalSize; i++)
-        LineNumberMapper[i] = i + 1; // line numbers start from 1
+
+    LineNumberMapper.resize(OriginalSize + 1);
+    LineNumberMapper[0] = -1;    // just paranoic, line number 0 will never be requested
+    for (int i = 1; i <= OriginalSize; i++)
+        LineNumberMapper[i] = i; // line numbers start from 1
 
     bool bWasExpanded;
     bool bInsideBlockComments;
@@ -141,6 +143,8 @@ bool AJavaScriptManager::expandScript(const QString & OriginalScript, QString & 
 
         bWasExpanded = false;
         bInsideBlockComments = false;
+        QVector<int> LineNumberMapperCopy = LineNumberMapper;
+        int iInsertLine = 0;
 
         QString WorkScript;
 
@@ -153,6 +157,7 @@ bool AJavaScriptManager::expandScript(const QString & OriginalScript, QString & 
             if ( bInsideBlockComments || !Line.simplified().startsWith("#include") )
             {
                 WorkScript += Line + '\n';
+                iInsertLine++;
 
                 const int len = Line.length();
                 if (len > 1)
@@ -180,7 +185,7 @@ bool AJavaScriptManager::expandScript(const QString & OriginalScript, QString & 
                 if (tmp.size() < 3)
                 {
                     LastError = "Format error in #include (could be in #include of included file)";
-                    LastErrorLineNumber = LineNumberMapper[iLine];
+                    LastErrorLineNumber = LineNumberMapperCopy[iLine + 1];
                     return false;
                 }
                 const QString FileName = tmp.at(1);
@@ -189,7 +194,7 @@ bool AJavaScriptManager::expandScript(const QString & OriginalScript, QString & 
                 if (!file.exists() || !file.open(QIODevice::ReadOnly | QFile::Text))
                 {
                     LastError = "Cannot find or open file in #include (could be in #include of included file)";
-                    LastErrorLineNumber = LineNumberMapper[iLine];
+                    LastErrorLineNumber = LineNumberMapperCopy[iLine + 1];
                     return false;
                 }
 
@@ -204,12 +209,14 @@ bool AJavaScriptManager::expandScript(const QString & OriginalScript, QString & 
                 in.seek(0);
                 QString IncludedScript = in.readAll();
                 file.close();
-                if (IncludedScript.isEmpty()) IncludedScript = "\n";
+                //if (IncludedScript.isEmpty()) IncludedScript = "\n";
                 WorkScript += IncludedScript + "\n";
 
-                int old = LineNumberMapper[iLine];
-                LineNumberMapper.insert(iLine, LineCounter-1, old);
+                int old = LineNumberMapperCopy[iLine + 1];
+                LineNumberMapper.insert(iInsertLine+1, LineCounter-1, old);
+                //qDebug() << old << LineNumberMapperCopy << iLine << LineCounter;
 
+                iInsertLine += LineCounter;
                 bWasExpanded = true;
                 bScriptExpanded = true;
             }
@@ -218,16 +225,16 @@ bool AJavaScriptManager::expandScript(const QString & OriginalScript, QString & 
 
         iCycleCounter++;
         //qDebug() << iCycleCounter;
-        if (iCycleCounter > 1000)
+        if (iCycleCounter > 100)
         {
-            LastError = "Infinite loop in #includes";
+            LastError = "Suspect infinite loop in #includes";
             return false;
         }
     }
     while (bWasExpanded);
 
     /*
-    const QStringList SL = Script.split('\n', QString::KeepEmptyParts);
+    const QStringList SL = ExpandedScript.split('\n', QString::KeepEmptyParts);
     for (int iLine = 0; iLine < SL.size(); iLine++)
         qDebug() << iLine + 1 << " "<< SL.at(iLine);
     qDebug() << "-----\n"<< LineNumberMapper;
@@ -240,10 +247,9 @@ void AJavaScriptManager::correctLineNumber(int & iLineNumber) const
 {
     if (!bScriptExpanded) return;
 
-    //iLineNumber for the first line is 1
-    if (iLineNumber < 1 || iLineNumber > LineNumberMapper.size()) return;
+    if (iLineNumber < 0 || iLineNumber >= LineNumberMapper.size()) return;
 
-    iLineNumber = LineNumberMapper[iLineNumber - 1];
+    iLineNumber = LineNumberMapper[iLineNumber]; // line numbers start from 1 !
 }
 
 QVariant AJavaScriptManager::EvaluateScriptInScript(const QString &script)

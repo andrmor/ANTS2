@@ -222,6 +222,7 @@ bool AScriptManager::expandScript(const QString & OriginalScript, QString & Expa
                 QString IncludedScript = in.readAll();
                 file.close();
                 WorkScript += IncludedScript + "\n";
+                if (LineCounter == 0) LineCounter = 1;
 
                 int old = LineNumberMapperCopy[iLine + 1];
                 LineNumberMapper.insert(iInsertLine+1, LineCounter-1, old);

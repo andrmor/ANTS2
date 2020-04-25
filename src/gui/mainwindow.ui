@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>550</width>
+    <width>549</width>
     <height>652</height>
    </rect>
   </property>
@@ -39,7 +39,7 @@
      <enum>QTabWidget::Rounded</enum>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="tabConfig">
      <attribute name="title">
@@ -7090,13 +7090,13 @@ thermal neutrons:</string>
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
       </property>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <property name="geometry">
         <rect>
          <x>1</x>
          <y>10</y>
          <width>535</width>
-         <height>21</height>
+         <height>23</height>
         </rect>
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -7229,7 +7229,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <property name="documentMode">
        <bool>false</bool>
@@ -9681,512 +9681,11 @@ Right click: toggle build photon tracks. Also switches of building particle trac
        <attribute name="title">
         <string>      Particles + photons      </string>
        </attribute>
-       <widget class="QTabWidget" name="twParticleGenerationMode">
-        <property name="geometry">
-         <rect>
-          <x>8</x>
-          <y>21</y>
-          <width>521</width>
-          <height>226</height>
-         </rect>
-        </property>
-        <property name="font">
-         <font>
-          <weight>50</weight>
-          <bold>false</bold>
-         </font>
-        </property>
-        <property name="currentIndex">
-         <number>0</number>
-        </property>
-        <widget class="QWidget" name="tab_3">
-         <attribute name="title">
-          <string>Sources</string>
-         </attribute>
-         <widget class="QPushButton" name="pbUpdateSourcesIndication">
-          <property name="geometry">
-           <rect>
-            <x>360</x>
-            <y>0</y>
-            <width>142</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="font">
-           <font>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>...update source indication</string>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="pbAddSource">
-          <property name="geometry">
-           <rect>
-            <x>435</x>
-            <y>47</y>
-            <width>70</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="font">
-           <font>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>New</string>
-          </property>
-         </widget>
-         <widget class="QLabel" name="label_76">
-          <property name="geometry">
-           <rect>
-            <x>10</x>
-            <y>2</y>
-            <width>149</width>
-            <height>16</height>
-           </rect>
-          </property>
-          <property name="font">
-           <font>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Defined sources:</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-         <widget class="QFrame" name="fGunMultipleEvents">
-          <property name="geometry">
-           <rect>
-            <x>180</x>
-            <y>172</y>
-            <width>320</width>
-            <height>22</height>
-           </rect>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::NoFrame</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
-          </property>
-          <widget class="QLabel" name="labPartPerEvent">
-           <property name="geometry">
-            <rect>
-             <x>110</x>
-             <y>0</y>
-             <width>150</width>
-             <height>20</height>
-            </rect>
-           </property>
-           <property name="font">
-            <font>
-             <weight>50</weight>
-             <bold>false</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string> # of particles per event:</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
-          </widget>
-          <widget class="QLineEdit" name="ledGunAverageNumPartperEvent">
-           <property name="geometry">
-            <rect>
-             <x>261</x>
-             <y>1</y>
-             <width>58</width>
-             <height>20</height>
-            </rect>
-           </property>
-           <property name="font">
-            <font>
-             <weight>50</weight>
-             <bold>false</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string>2</string>
-           </property>
-          </widget>
-          <widget class="QComboBox" name="cobPartPerEvent">
-           <property name="geometry">
-            <rect>
-             <x>24</x>
-             <y>0</y>
-             <width>80</width>
-             <height>22</height>
-            </rect>
-           </property>
-           <property name="font">
-            <font>
-             <weight>50</weight>
-             <bold>false</bold>
-            </font>
-           </property>
-           <item>
-            <property name="text">
-             <string>Constant</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Poisson</string>
-            </property>
-           </item>
-          </widget>
-         </widget>
-         <widget class="QCheckBox" name="cbGunAllowMultipleEvents">
-          <property name="geometry">
-           <rect>
-            <x>2</x>
-            <y>173</y>
-            <width>198</width>
-            <height>18</height>
-           </rect>
-          </property>
-          <property name="font">
-           <font>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Multiple particles per event</string>
-          </property>
-         </widget>
-         <widget class="QListWidget" name="lwDefinedParticleSources">
-          <property name="geometry">
-           <rect>
-            <x>7</x>
-            <y>22</y>
-            <width>417</width>
-            <height>148</height>
-           </rect>
-          </property>
-          <property name="spacing">
-           <number>1</number>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="pbRemoveSource">
-          <property name="geometry">
-           <rect>
-            <x>435</x>
-            <y>71</y>
-            <width>70</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="font">
-           <font>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Remove</string>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="pbSaveParticleSource">
-          <property name="geometry">
-           <rect>
-            <x>435</x>
-            <y>98</y>
-            <width>70</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="font">
-           <font>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Save</string>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="pbLoadParticleSource">
-          <property name="geometry">
-           <rect>
-            <x>435</x>
-            <y>120</y>
-            <width>70</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="font">
-           <font>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Import</string>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="pbEditParticleSource">
-          <property name="geometry">
-           <rect>
-            <x>435</x>
-            <y>23</y>
-            <width>70</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Edit</string>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="pbGunShowSource">
-          <property name="geometry">
-           <rect>
-            <x>435</x>
-            <y>147</y>
-            <width>70</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="font">
-           <font>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Show</string>
-          </property>
-          <property name="checkable">
-           <bool>true</bool>
-          </property>
-         </widget>
-         <zorder>cbGunAllowMultipleEvents</zorder>
-         <zorder>pbUpdateSourcesIndication</zorder>
-         <zorder>pbAddSource</zorder>
-         <zorder>label_76</zorder>
-         <zorder>fGunMultipleEvents</zorder>
-         <zorder>lwDefinedParticleSources</zorder>
-         <zorder>pbRemoveSource</zorder>
-         <zorder>pbSaveParticleSource</zorder>
-         <zorder>pbLoadParticleSource</zorder>
-         <zorder>pbEditParticleSource</zorder>
-         <zorder>pbGunShowSource</zorder>
-        </widget>
-        <widget class="QWidget" name="tab_6">
-         <attribute name="title">
-          <string>From file</string>
-         </attribute>
-         <widget class="QLabel" name="label_29">
-          <property name="geometry">
-           <rect>
-            <x>5</x>
-            <y>3</y>
-            <width>281</width>
-            <height>16</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Generate events from file:</string>
-          </property>
-         </widget>
-         <widget class="QLineEdit" name="leGenerateFromFile_FileName">
-          <property name="geometry">
-           <rect>
-            <x>10</x>
-            <y>22</y>
-            <width>421</width>
-            <height>22</height>
-           </rect>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="pbGenerateFromFile_Change">
-          <property name="geometry">
-           <rect>
-            <x>440</x>
-            <y>21</y>
-            <width>71</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Change</string>
-          </property>
-         </widget>
-         <widget class="QLabel" name="label_20">
-          <property name="geometry">
-           <rect>
-            <x>7</x>
-            <y>51</y>
-            <width>82</width>
-            <height>17</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>File format:</string>
-          </property>
-         </widget>
-         <widget class="QComboBox" name="cobGenerateFromFile_FileFormat">
-          <property name="geometry">
-           <rect>
-            <x>91</x>
-            <y>46</y>
-            <width>340</width>
-            <height>27</height>
-           </rect>
-          </property>
-          <item>
-           <property name="text">
-            <string>Ants2 ascii file</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>G4ants generated file</string>
-           </property>
-          </item>
-         </widget>
-         <widget class="QPushButton" name="pbGenerateFromFile_Help">
-          <property name="geometry">
-           <rect>
-            <x>441</x>
-            <y>48</y>
-            <width>70</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>?</string>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="pbGenerateFromFile_Check">
-          <property name="geometry">
-           <rect>
-            <x>10</x>
-            <y>77</y>
-            <width>201</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Analyse file</string>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="pbLoadExampleFileFromFileGen">
-          <property name="geometry">
-           <rect>
-            <x>440</x>
-            <y>80</y>
-            <width>70</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Example</string>
-          </property>
-         </widget>
-         <widget class="QLabel" name="labGenerateFromFile_info">
-          <property name="geometry">
-           <rect>
-            <x>12</x>
-            <y>100</y>
-            <width>491</width>
-            <height>18</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Not yet analyzed</string>
-          </property>
-         </widget>
-         <widget class="QListWidget" name="lwFileStatistics">
-          <property name="geometry">
-           <rect>
-            <x>10</x>
-            <y>120</y>
-            <width>501</width>
-            <height>71</height>
-           </rect>
-          </property>
-          <property name="contextMenuPolicy">
-           <enum>Qt::CustomContextMenu</enum>
-          </property>
-         </widget>
-         <widget class="QCheckBox" name="cbFileCollectStatistics">
-          <property name="geometry">
-           <rect>
-            <x>217</x>
-            <y>77</y>
-            <width>220</width>
-            <height>22</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Collect statistics</string>
-          </property>
-         </widget>
-        </widget>
-        <widget class="QWidget" name="tab_5">
-         <attribute name="title">
-          <string>From script</string>
-         </attribute>
-         <widget class="QPushButton" name="pbParticleGenerationScript">
-          <property name="geometry">
-           <rect>
-            <x>178</x>
-            <y>173</y>
-            <width>160</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Edit script</string>
-          </property>
-         </widget>
-         <widget class="QPlainTextEdit" name="pteParticleGenerationScript">
-          <property name="geometry">
-           <rect>
-            <x>10</x>
-            <y>30</y>
-            <width>491</width>
-            <height>140</height>
-           </rect>
-          </property>
-          <property name="contextMenuPolicy">
-           <enum>Qt::CustomContextMenu</enum>
-          </property>
-          <property name="readOnly">
-           <bool>true</bool>
-          </property>
-         </widget>
-         <widget class="QLabel" name="label_37">
-          <property name="geometry">
-           <rect>
-            <x>20</x>
-            <y>10</y>
-            <width>471</width>
-            <height>16</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Particle generation script (called for each event):</string>
-          </property>
-         </widget>
-        </widget>
-       </widget>
        <widget class="QSpinBox" name="sbGunTestEvents">
         <property name="geometry">
          <rect>
-          <x>144</x>
-          <y>252</y>
+          <x>149</x>
+          <y>240</y>
           <width>81</width>
           <height>22</height>
          </rect>
@@ -10210,8 +9709,8 @@ Right click: toggle build photon tracks. Also switches of building particle trac
        <widget class="QPushButton" name="pbGunTest">
         <property name="geometry">
          <rect>
-          <x>7</x>
-          <y>251</y>
+          <x>12</x>
+          <y>239</y>
           <width>131</width>
           <height>24</height>
          </rect>
@@ -10229,32 +9728,13 @@ Right click: toggle build photon tracks. Also switches of building particle trac
          <string>Test generator</string>
         </property>
        </widget>
-       <widget class="QLabel" name="label_45">
-        <property name="geometry">
-         <rect>
-          <x>22</x>
-          <y>2</y>
-          <width>501</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="font">
-         <font>
-          <weight>50</weight>
-          <bold>false</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Particle generation mode:</string>
-        </property>
-       </widget>
        <widget class="QStackedWidget" name="swAdvancedSim_Particle">
         <property name="geometry">
          <rect>
           <x>-1</x>
-          <y>283</y>
+          <y>265</y>
           <width>534</width>
-          <height>87</height>
+          <height>102</height>
          </rect>
         </property>
         <property name="currentIndex">
@@ -10268,8 +9748,8 @@ Right click: toggle build photon tracks. Also switches of building particle trac
           <property name="geometry">
            <rect>
             <x>255</x>
-            <y>66</y>
-            <width>159</width>
+            <y>73</y>
+            <width>175</width>
             <height>17</height>
            </rect>
           </property>
@@ -10290,7 +9770,7 @@ Right click: toggle build photon tracks. Also switches of building particle trac
           <property name="geometry">
            <rect>
             <x>9</x>
-            <y>54</y>
+            <y>61</y>
             <width>90</width>
             <height>22</height>
            </rect>
@@ -10308,8 +9788,8 @@ Right click: toggle build photon tracks. Also switches of building particle trac
          <widget class="QPushButton" name="pbTrackOptionsGun">
           <property name="geometry">
            <rect>
-            <x>439</x>
-            <y>44</y>
+            <x>450</x>
+            <y>40</y>
             <width>80</width>
             <height>21</height>
            </rect>
@@ -10335,8 +9815,8 @@ Right click: toggle build particle tracks. Also switch off building photon track
           <property name="geometry">
            <rect>
             <x>255</x>
-            <y>46</y>
-            <width>158</width>
+            <y>53</y>
+            <width>174</width>
             <height>17</height>
            </rect>
           </property>
@@ -10356,11 +9836,17 @@ Right click: toggle build particle tracks. Also switch off building photon track
          <widget class="QLabel" name="labPhTracksOn_1">
           <property name="geometry">
            <rect>
-            <x>429</x>
-            <y>42</y>
+            <x>440</x>
+            <y>38</y>
             <width>21</width>
             <height>16</height>
            </rect>
+          </property>
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
           </property>
           <property name="text">
            <string>--</string>
@@ -10370,7 +9856,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
           <property name="geometry">
            <rect>
             <x>48</x>
-            <y>64</y>
+            <y>71</y>
             <width>118</width>
             <height>3</height>
            </rect>
@@ -10383,7 +9869,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
           <property name="geometry">
            <rect>
             <x>107</x>
-            <y>49</y>
+            <y>56</y>
             <width>141</width>
             <height>31</height>
            </rect>
@@ -10395,11 +9881,17 @@ Right click: toggle build particle tracks. Also switch off building photon track
          <widget class="QLabel" name="labPartTracksOn">
           <property name="geometry">
            <rect>
-            <x>429</x>
-            <y>51</y>
+            <x>440</x>
+            <y>47</y>
             <width>21</width>
             <height>16</height>
            </rect>
+          </property>
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
           </property>
           <property name="text">
            <string>--</string>
@@ -10409,7 +9901,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
           <property name="geometry">
            <rect>
             <x>28</x>
-            <y>36</y>
+            <y>43</y>
             <width>56</width>
             <height>15</height>
            </rect>
@@ -10428,7 +9920,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
           <property name="geometry">
            <rect>
             <x>0</x>
-            <y>2</y>
+            <y>-1</y>
             <width>525</width>
             <height>36</height>
            </rect>
@@ -10517,7 +10009,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
             <property name="geometry">
              <rect>
               <x>19</x>
-              <y>9</y>
+              <y>13</y>
               <width>501</width>
               <height>17</height>
              </rect>
@@ -10540,11 +10032,17 @@ Right click: toggle build particle tracks. Also switch off building photon track
          <widget class="QLabel" name="labPartLogOn">
           <property name="geometry">
            <rect>
-            <x>429</x>
-            <y>65</y>
+            <x>440</x>
+            <y>61</y>
             <width>19</width>
             <height>16</height>
            </rect>
+          </property>
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
           </property>
           <property name="text">
            <string>--</string>
@@ -10553,8 +10051,8 @@ Right click: toggle build particle tracks. Also switch off building photon track
          <widget class="QPushButton" name="pbOpenLogOptions2">
           <property name="geometry">
            <rect>
-            <x>439</x>
-            <y>64</y>
+            <x>450</x>
+            <y>60</y>
             <width>80</width>
             <height>21</height>
            </rect>
@@ -10576,6 +10074,48 @@ Right click: toggle build particle tracks. Also switch off building photon track
            <string>logs</string>
           </property>
          </widget>
+         <widget class="QPushButton" name="pbParticlesToFile">
+          <property name="geometry">
+           <rect>
+            <x>450</x>
+            <y>80</y>
+            <width>80</width>
+            <height>21</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string>Click: Show / edit options for saving particles to file
+Right click: toggle save on/off</string>
+          </property>
+          <property name="text">
+           <string>to file</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="labParticlesToFile">
+          <property name="geometry">
+           <rect>
+            <x>440</x>
+            <y>81</y>
+            <width>19</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>--</string>
+          </property>
+         </widget>
          <zorder>linePS</zorder>
          <zorder>cbGunDoS2</zorder>
          <zorder>sbGunEvents</zorder>
@@ -10588,6 +10128,8 @@ Right click: toggle build particle tracks. Also switch off building photon track
          <zorder>swNormalOrGeant4</zorder>
          <zorder>labPartLogOn</zorder>
          <zorder>pbOpenLogOptions2</zorder>
+         <zorder>labParticlesToFile</zorder>
+         <zorder>pbParticlesToFile</zorder>
         </widget>
         <widget class="QWidget" name="page_4">
          <widget class="QLineEdit" name="ledClusterRadius">
@@ -10813,8 +10355,8 @@ Right click: toggle build particle tracks. Also switch off building photon track
         <property name="geometry">
          <rect>
           <x>297</x>
-          <y>252</y>
-          <width>221</width>
+          <y>240</y>
+          <width>231</width>
           <height>23</height>
          </rect>
         </property>
@@ -10830,6 +10372,693 @@ Right click: toggle build particle tracks. Also switch off building photon track
         <property name="checkable">
          <bool>true</bool>
         </property>
+       </widget>
+       <widget class="QStackedWidget" name="swParticleGenerationMode">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>30</y>
+          <width>521</width>
+          <height>201</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <weight>50</weight>
+          <bold>false</bold>
+         </font>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::NoFrame</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Sunken</enum>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="twParticleGenerationModePage1">
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <property name="spacing">
+           <number>1</number>
+          </property>
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_10">
+            <item>
+             <widget class="QLabel" name="label_76">
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>  Defined sources:</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pbUpdateSourcesIndication">
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>21</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>...update source indication</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_9">
+            <item>
+             <widget class="QListWidget" name="lwDefinedParticleSources">
+              <property name="spacing">
+               <number>1</number>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_3">
+              <property name="spacing">
+               <number>1</number>
+              </property>
+              <item>
+               <widget class="QPushButton" name="pbEditParticleSource">
+                <property name="text">
+                 <string>Edit</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pbAddSource">
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>New</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pbRemoveSource">
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Remove</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_2">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Fixed</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>2</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pbSaveParticleSource">
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Save</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pbLoadParticleSource">
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Import</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_3">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Fixed</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>2</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pbGunShowSource">
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Show</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_7">
+            <property name="spacing">
+             <number>2</number>
+            </property>
+            <item>
+             <widget class="QCheckBox" name="cbGunAllowMultipleEvents">
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Multiple particles per event</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QFrame" name="fGunMultipleEvents">
+              <property name="frameShape">
+               <enum>QFrame::NoFrame</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+              <property name="lineWidth">
+               <number>5</number>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_8">
+               <property name="spacing">
+                <number>2</number>
+               </property>
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QComboBox" name="cobPartPerEvent">
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>21</height>
+                  </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
+                 <item>
+                  <property name="text">
+                   <string>Constant</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Poisson</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="labPartPerEvent">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string> # of particles per event:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="ledGunAverageNumPartperEvent">
+                 <property name="maximumSize">
+                  <size>
+                   <width>75</width>
+                   <height>21</height>
+                  </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>2</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_9">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_6">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+         </layout>
+         <zorder></zorder>
+        </widget>
+        <widget class="QWidget" name="twParticleGenerationModePage2">
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <property name="spacing">
+           <number>2</number>
+          </property>
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="label_29">
+            <property name="text">
+             <string>Generate events from file:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_11">
+            <item>
+             <widget class="QLineEdit" name="leGenerateFromFile_FileName"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pbGenerateFromFile_Change">
+              <property name="text">
+               <string>Change</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_12">
+            <item>
+             <widget class="QLabel" name="label_20">
+              <property name="text">
+               <string>File format:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="cobGenerateFromFile_FileFormat">
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>21</height>
+               </size>
+              </property>
+              <item>
+               <property name="text">
+                <string>Ants2 ascii file</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>G4ants generated file</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pbGenerateFromFile_Help">
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>21</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>?</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pbLoadExampleFileFromFileGen">
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>21</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Example</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_13">
+            <item>
+             <spacer name="horizontalSpacer_7">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pbGenerateFromFile_Check">
+              <property name="maximumSize">
+               <size>
+                <width>100</width>
+                <height>21</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Analyse file</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="cbFileCollectStatistics">
+              <property name="text">
+               <string>Collect statistics</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_8">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QLabel" name="labGenerateFromFile_info">
+            <property name="text">
+             <string>Not yet analyzed</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QListWidget" name="lwFileStatistics">
+            <property name="contextMenuPolicy">
+             <enum>Qt::CustomContextMenu</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_4">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="twParticleGenerationModePage3">
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <property name="spacing">
+           <number>2</number>
+          </property>
+          <property name="leftMargin">
+           <number>3</number>
+          </property>
+          <property name="topMargin">
+           <number>3</number>
+          </property>
+          <property name="rightMargin">
+           <number>3</number>
+          </property>
+          <property name="bottomMargin">
+           <number>3</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="label_37">
+            <property name="text">
+             <string>Particle generation script (called for each event):</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPlainTextEdit" name="pteParticleGenerationScript">
+            <property name="contextMenuPolicy">
+             <enum>Qt::CustomContextMenu</enum>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_6">
+            <item>
+             <spacer name="horizontalSpacer_4">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pbParticleGenerationScript">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>150</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>21</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Edit script</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_5">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+       <widget class="Line" name="line_5">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>233</y>
+          <width>532</width>
+          <height>3</height>
+         </rect>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+       <widget class="QWidget" name="layoutWidget">
+        <property name="geometry">
+         <rect>
+          <x>2</x>
+          <y>0</y>
+          <width>531</width>
+          <height>29</height>
+         </rect>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <item>
+          <widget class="QLabel" name="label_45">
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Particle generation mode:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="cobParticleGenerationMode">
+           <property name="minimumSize">
+            <size>
+             <width>150</width>
+             <height>0</height>
+            </size>
+           </property>
+           <item>
+            <property name="text">
+             <string>Sources</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>From file</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Script</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
        </widget>
       </widget>
      </widget>
@@ -10946,7 +11175,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
       <property name="geometry">
        <rect>
         <x>-10</x>
-        <y>400</y>
+        <y>0</y>
         <width>130</width>
         <height>50</height>
        </rect>
@@ -12691,7 +12920,7 @@ multiply to loaded data</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>550</width>
+     <width>549</width>
      <height>25</height>
     </rect>
    </property>
@@ -13037,8 +13266,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>203</x>
-     <y>571</y>
+     <x>201</x>
+     <y>540</y>
     </hint>
     <hint type="destinationlabel">
      <x>280</x>
@@ -13197,12 +13426,12 @@ multiply to loaded data</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>370</x>
-     <y>464</y>
+     <x>368</x>
+     <y>433</y>
     </hint>
     <hint type="destinationlabel">
-     <x>521</x>
-     <y>489</y>
+     <x>519</x>
+     <y>458</y>
     </hint>
    </hints>
   </connection>
@@ -13213,8 +13442,8 @@ multiply to loaded data</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>319</x>
-     <y>437</y>
+     <x>317</x>
+     <y>406</y>
     </hint>
     <hint type="destinationlabel">
      <x>257</x>
@@ -13309,8 +13538,8 @@ multiply to loaded data</string>
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>308</x>
-     <y>425</y>
+     <x>312</x>
+     <y>394</y>
     </hint>
     <hint type="destinationlabel">
      <x>438</x>
@@ -13325,12 +13554,12 @@ multiply to loaded data</string>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>178</x>
-     <y>458</y>
+     <x>182</x>
+     <y>427</y>
     </hint>
     <hint type="destinationlabel">
-     <x>455</x>
-     <y>495</y>
+     <x>453</x>
+     <y>464</y>
     </hint>
    </hints>
   </connection>
@@ -13357,8 +13586,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>308</x>
-     <y>425</y>
+     <x>312</x>
+     <y>394</y>
     </hint>
     <hint type="destinationlabel">
      <x>331</x>
@@ -13373,8 +13602,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>178</x>
-     <y>458</y>
+     <x>182</x>
+     <y>427</y>
     </hint>
     <hint type="destinationlabel">
      <x>328</x>
@@ -13629,8 +13858,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>311</x>
-     <y>413</y>
+     <x>315</x>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
      <x>471</x>
@@ -13645,8 +13874,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>181</x>
-     <y>498</y>
+     <x>179</x>
+     <y>467</y>
     </hint>
     <hint type="destinationlabel">
      <x>464</x>
@@ -13661,8 +13890,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>453</x>
-     <y>474</y>
+     <x>457</x>
+     <y>443</y>
     </hint>
     <hint type="destinationlabel">
      <x>451</x>
@@ -13677,8 +13906,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>453</x>
-     <y>503</y>
+     <x>457</x>
+     <y>472</y>
     </hint>
     <hint type="destinationlabel">
      <x>504</x>
@@ -13693,8 +13922,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>453</x>
-     <y>503</y>
+     <x>457</x>
+     <y>472</y>
     </hint>
     <hint type="destinationlabel">
      <x>506</x>
@@ -13709,8 +13938,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>295</x>
-     <y>413</y>
+     <x>293</x>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
      <x>468</x>
@@ -13725,8 +13954,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>181</x>
-     <y>413</y>
+     <x>185</x>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
      <x>468</x>
@@ -13741,8 +13970,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>319</x>
-     <y>473</y>
+     <x>317</x>
+     <y>442</y>
     </hint>
     <hint type="destinationlabel">
      <x>514</x>
@@ -14082,7 +14311,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14098,7 +14327,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14114,7 +14343,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14130,7 +14359,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14146,7 +14375,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14162,7 +14391,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14178,7 +14407,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14194,7 +14423,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14210,7 +14439,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14226,7 +14455,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14242,7 +14471,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14258,7 +14487,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14274,7 +14503,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14290,7 +14519,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14306,7 +14535,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14322,7 +14551,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14338,7 +14567,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14354,7 +14583,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14370,7 +14599,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14386,7 +14615,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14402,7 +14631,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14413,12 +14642,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>345</x>
-     <y>490</y>
+     <x>349</x>
+     <y>459</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14429,12 +14658,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>341</x>
-     <y>483</y>
+     <x>345</x>
+     <y>452</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14450,7 +14679,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14466,7 +14695,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14477,12 +14706,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>227</x>
-     <y>450</y>
+     <x>225</x>
+     <y>419</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14493,12 +14722,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>317</x>
-     <y>450</y>
+     <x>315</x>
+     <y>419</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14509,12 +14738,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>407</x>
-     <y>450</y>
+     <x>405</x>
+     <y>419</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14525,12 +14754,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>192</x>
-     <y>429</y>
+     <x>190</x>
+     <y>398</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14541,12 +14770,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>264</x>
-     <y>429</y>
+     <x>262</x>
+     <y>398</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14557,12 +14786,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>335</x>
-     <y>429</y>
+     <x>333</x>
+     <y>398</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14573,12 +14802,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>190</x>
-     <y>471</y>
+     <x>188</x>
+     <y>440</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14589,12 +14818,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>232</x>
-     <y>471</y>
+     <x>230</x>
+     <y>440</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14605,12 +14834,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>274</x>
-     <y>471</y>
+     <x>272</x>
+     <y>440</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14621,12 +14850,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>343</x>
-     <y>472</y>
+     <x>341</x>
+     <y>441</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14637,12 +14866,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>458</x>
-     <y>471</y>
+     <x>462</x>
+     <y>440</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14653,12 +14882,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>136</x>
-     <y>490</y>
+     <x>134</x>
+     <y>459</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14669,12 +14898,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>190</x>
-     <y>492</y>
+     <x>188</x>
+     <y>461</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14685,12 +14914,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>232</x>
-     <y>492</y>
+     <x>230</x>
+     <y>461</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14701,12 +14930,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>274</x>
-     <y>492</y>
+     <x>272</x>
+     <y>461</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14717,12 +14946,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>343</x>
-     <y>493</y>
+     <x>341</x>
+     <y>462</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14733,12 +14962,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>425</x>
-     <y>492</y>
+     <x>429</x>
+     <y>461</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14749,12 +14978,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>136</x>
-     <y>511</y>
+     <x>134</x>
+     <y>480</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14765,12 +14994,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>190</x>
-     <y>513</y>
+     <x>188</x>
+     <y>482</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14781,12 +15010,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>232</x>
-     <y>513</y>
+     <x>230</x>
+     <y>482</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14797,12 +15026,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>274</x>
-     <y>513</y>
+     <x>272</x>
+     <y>482</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14813,12 +15042,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>343</x>
-     <y>514</y>
+     <x>341</x>
+     <y>483</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14829,12 +15058,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>464</x>
-     <y>513</y>
+     <x>467</x>
+     <y>482</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14845,12 +15074,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>168</x>
-     <y>437</y>
+     <x>166</x>
+     <y>406</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14861,12 +15090,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>319</x>
-     <y>437</y>
+     <x>317</x>
+     <y>406</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14877,12 +15106,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>129</x>
-     <y>467</y>
+     <x>127</x>
+     <y>436</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14893,12 +15122,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>129</x>
-     <y>489</y>
+     <x>127</x>
+     <y>458</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14909,12 +15138,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>225</x>
-     <y>467</y>
+     <x>223</x>
+     <y>436</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14925,12 +15154,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>225</x>
-     <y>489</y>
+     <x>223</x>
+     <y>458</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14941,12 +15170,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>370</x>
-     <y>464</y>
+     <x>368</x>
+     <y>433</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14957,12 +15186,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>369</x>
-     <y>487</y>
+     <x>367</x>
+     <y>456</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14973,12 +15202,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>159</x>
-     <y>469</y>
+     <x>157</x>
+     <y>438</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14989,12 +15218,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>159</x>
-     <y>490</y>
+     <x>157</x>
+     <y>459</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15005,12 +15234,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>239</x>
-     <y>469</y>
+     <x>237</x>
+     <y>438</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15021,12 +15250,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>239</x>
-     <y>490</y>
+     <x>237</x>
+     <y>459</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15037,12 +15266,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>370</x>
-     <y>487</y>
+     <x>368</x>
+     <y>456</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15053,12 +15282,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>466</x>
-     <y>487</y>
+     <x>464</x>
+     <y>456</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15069,12 +15298,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>285</x>
-     <y>425</y>
+     <x>289</x>
+     <y>394</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15085,12 +15314,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>198</x>
-     <y>494</y>
+     <x>210</x>
+     <y>463</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15101,12 +15330,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>324</x>
-     <y>494</y>
+     <x>322</x>
+     <y>463</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15117,12 +15346,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>436</x>
-     <y>494</y>
+     <x>434</x>
+     <y>463</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15133,12 +15362,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>147</x>
-     <y>458</y>
+     <x>151</x>
+     <y>427</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15149,12 +15378,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>319</x>
-     <y>490</y>
+     <x>323</x>
+     <y>459</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15170,7 +15399,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15186,7 +15415,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15198,43 +15427,11 @@ multiply to loaded data</string>
    <hints>
     <hint type="sourcelabel">
      <x>152</x>
-     <y>530</y>
+     <y>509</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbGunAllowMultipleEvents</sender>
-   <signal>clicked()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>215</x>
-     <y>463</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>514</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledGunAverageNumPartperEvent</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>514</x>
-     <y>465</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15246,11 +15443,11 @@ multiply to loaded data</string>
    <hints>
     <hint type="sourcelabel">
      <x>325</x>
-     <y>566</y>
+     <y>555</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15262,11 +15459,11 @@ multiply to loaded data</string>
    <hints>
     <hint type="sourcelabel">
      <x>330</x>
-     <y>586</y>
+     <y>575</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15277,12 +15474,12 @@ multiply to loaded data</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>181</x>
-     <y>498</y>
+     <x>179</x>
+     <y>467</y>
     </hint>
     <hint type="destinationlabel">
-     <x>326</x>
-     <y>506</y>
+     <x>330</x>
+     <y>475</y>
     </hint>
    </hints>
   </connection>
@@ -15309,8 +15506,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>251</x>
-     <y>503</y>
+     <x>249</x>
+     <y>472</y>
     </hint>
     <hint type="destinationlabel">
      <x>502</x>
@@ -15325,8 +15522,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>235</x>
-     <y>489</y>
+     <x>233</x>
+     <y>458</y>
     </hint>
     <hint type="destinationlabel">
      <x>489</x>
@@ -15341,8 +15538,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>235</x>
-     <y>527</y>
+     <x>233</x>
+     <y>496</y>
     </hint>
     <hint type="destinationlabel">
      <x>503</x>
@@ -15357,8 +15554,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>206</x>
-     <y>413</y>
+     <x>210</x>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
      <x>428</x>
@@ -15373,8 +15570,8 @@ multiply to loaded data</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>241</x>
-     <y>473</y>
+     <x>239</x>
+     <y>442</y>
     </hint>
     <hint type="destinationlabel">
      <x>437</x>
@@ -15389,8 +15586,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>392</x>
-     <y>510</y>
+     <x>390</x>
+     <y>479</y>
     </hint>
     <hint type="destinationlabel">
      <x>490</x>
@@ -15405,8 +15602,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>241</x>
-     <y>473</y>
+     <x>239</x>
+     <y>442</y>
     </hint>
     <hint type="destinationlabel">
      <x>447</x>
@@ -15426,7 +15623,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15454,11 +15651,11 @@ multiply to loaded data</string>
    <hints>
     <hint type="sourcelabel">
      <x>53</x>
-     <y>579</y>
+     <y>568</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15474,23 +15671,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cobPartPerEvent</sender>
-   <signal>activated(int)</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>299</x>
-     <y>465</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15517,8 +15698,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>251</x>
-     <y>526</y>
+     <x>249</x>
+     <y>495</y>
     </hint>
     <hint type="destinationlabel">
      <x>416</x>
@@ -15533,8 +15714,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>162</x>
-     <y>413</y>
+     <x>166</x>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
      <x>403</x>
@@ -15549,8 +15730,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>320</x>
-     <y>505</y>
+     <x>318</x>
+     <y>474</y>
     </hint>
     <hint type="destinationlabel">
      <x>438</x>
@@ -15565,8 +15746,8 @@ multiply to loaded data</string>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>142</x>
-     <y>455</y>
+     <x>146</x>
+     <y>424</y>
     </hint>
     <hint type="destinationlabel">
      <x>172</x>
@@ -15581,12 +15762,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
-     <y>455</y>
+     <x>252</x>
+     <y>424</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15614,11 +15795,11 @@ multiply to loaded data</string>
    <hints>
     <hint type="sourcelabel">
      <x>119</x>
-     <y>530</y>
+     <y>509</y>
     </hint>
     <hint type="destinationlabel">
      <x>35</x>
-     <y>529</y>
+     <y>508</y>
     </hint>
    </hints>
   </connection>
@@ -15630,11 +15811,11 @@ multiply to loaded data</string>
    <hints>
     <hint type="sourcelabel">
      <x>299</x>
-     <y>530</y>
+     <y>509</y>
     </hint>
     <hint type="destinationlabel">
      <x>269</x>
-     <y>531</y>
+     <y>510</y>
     </hint>
    </hints>
   </connection>
@@ -15646,11 +15827,11 @@ multiply to loaded data</string>
    <hints>
     <hint type="sourcelabel">
      <x>367</x>
-     <y>530</y>
+     <y>509</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15662,11 +15843,11 @@ multiply to loaded data</string>
    <hints>
     <hint type="sourcelabel">
      <x>166</x>
-     <y>579</y>
+     <y>561</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15678,11 +15859,11 @@ multiply to loaded data</string>
    <hints>
     <hint type="sourcelabel">
      <x>221</x>
-     <y>530</y>
+     <y>512</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15693,12 +15874,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>85</x>
-     <y>464</y>
+     <x>89</x>
+     <y>433</y>
     </hint>
     <hint type="destinationlabel">
      <x>64</x>
-     <y>514</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15715,6 +15896,38 @@ multiply to loaded data</string>
     <hint type="destinationlabel">
      <x>170</x>
      <y>547</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cobParticleGenerationMode</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>swParticleGenerationMode</receiver>
+   <slot>setCurrentIndex(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>262</x>
+     <y>235</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>227</x>
+     <y>252</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cobParticleGenerationMode</sender>
+   <signal>activated(int)</signal>
+   <receiver>pbUpdateSimConfig</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>198</x>
+     <y>233</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>41</x>
+     <y>71</y>
     </hint>
    </hints>
   </connection>

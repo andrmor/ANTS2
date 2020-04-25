@@ -4720,3 +4720,15 @@ void MainWindow::updateG4ProgressBarVisibility()
     ui->prGeant->setVisible(bG4);
     ui->prScan->setHidden(bG4 && bNoPhot);
 }
+
+#include "asaveparticlestofiledialog.h"
+#include "asaveparticlestofilesettings.h"
+void MainWindow::on_pbParticlesToFile_clicked()
+{
+    ASaveParticlesToFileSettings set;
+
+    ASaveParticlesToFileDialog * d = new ASaveParticlesToFileDialog(set, this);
+    int res = d->exec();
+    if (res == QDialog::Accepted) on_pbUpdateSimConfig_clicked();
+    delete d;
+}

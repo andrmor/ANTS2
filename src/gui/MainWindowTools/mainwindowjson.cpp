@@ -484,7 +484,7 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
             else if (PartGenMode == "File")    PGMindex = 1;
             else if (PartGenMode == "Script")  PGMindex = 2;
             else qWarning() << "Load sim settings: Unknown particle generation mode!";
-            ui->twParticleGenerationMode->setCurrentIndex(PGMindex);
+            ui->cobParticleGenerationMode->setCurrentIndex(PGMindex);
             JsonToSpinBox (csjs, "EventsToDo", ui->sbGunEvents);
             JsonToCheckbox(csjs, "AllowMultipleParticles", ui->cbGunAllowMultipleEvents);
             JsonToLineEditDouble(csjs, "AverageParticlesPerEvent", ui->ledGunAverageNumPartperEvent);

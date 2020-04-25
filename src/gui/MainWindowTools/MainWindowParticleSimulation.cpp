@@ -44,9 +44,9 @@ void MainWindow::SimParticleSourcesConfigToJson(QJsonObject &json)
         //control options
         QJsonObject cjs;
             QString str;
-                switch (ui->twParticleGenerationMode->currentIndex())
+                switch (ui->cobParticleGenerationMode->currentIndex())
                 {
-                default: qWarning() << "Save sim config: unknown particle generation mode";
+                default: qWarning() << "During saving sim config: unknown particle generation mode";
                 case 0 : str = "Sources"; break;
                 case 1 : str = "File"; break;
                 case 2 : str = "Script"; break;
@@ -268,7 +268,7 @@ void MainWindow::on_pbGunTest_clicked()
 
     GeometryWindow->ShowAndFocus();
     Detector->GeoManager->ClearTracks();
-    if (ui->twParticleGenerationMode->currentIndex() == 0)
+    if (ui->cobParticleGenerationMode->currentIndex() == 0)
     {
         if (ui->pbGunShowSource->isChecked())
         {
@@ -279,7 +279,7 @@ void MainWindow::on_pbGunTest_clicked()
     else GeometryWindow->ShowGeometry();
 
     AParticleGun* pg;
-    switch (ui->twParticleGenerationMode->currentIndex())
+    switch (ui->cobParticleGenerationMode->currentIndex())
     {
     case 0: pg = SimulationManager->ParticleSources; break;
     case 1: pg = SimulationManager->FileParticleGenerator; break;
@@ -315,7 +315,7 @@ void MainWindow::TestParticleGun(AParticleGun* Gun, int numParticles)
         return;
     }
     Gun->SetStartEvent(0);
-    if (ui->twParticleGenerationMode->currentIndex() == 1) updateFileParticleGeneratorGui();
+    if (ui->cobParticleGenerationMode->currentIndex() == 1) updateFileParticleGeneratorGui();
 
     double Length = std::max(Detector->WorldSizeXY, Detector->WorldSizeZ)*0.4;
     double R[3], K[3];
@@ -670,7 +670,7 @@ void containsMonsGrids(const AGeoObject * obj, bool & bGrid, bool & bMon)
 #include "asandwich.h"
 void MainWindow::on_pbParticleSourcesSimulate_clicked()
 {
-    if (ui->twParticleGenerationMode->currentIndex() == 1)  // "From file"
+    if (ui->cobParticleGenerationMode->currentIndex() == 1)  // "From file"
     {
         if (ui->cobGenerateFromFile_FileFormat->currentIndex() == 1)  // G4ants format
             if (!ui->cbGeant4ParticleTracking->isChecked())
@@ -826,7 +826,7 @@ void MainWindow::updateFileParticleGeneratorGui()
     ui->cobGenerateFromFile_FileFormat->setCurrentIndex(static_cast<int>(pg->GetFileFormat()));
 
     ui->lwFileStatistics->clear();
-    ui->lwFileStatistics->setVisible(false);
+    ui->lwFileStatistics->setEnabled(false);
     qApp->processEvents();
 
     QFileInfo fi(pg->GetFileName());
@@ -843,7 +843,7 @@ void MainWindow::updateFileParticleGeneratorGui()
         if (pg->statNumEmptyEventsInFile > 0) s += QString(", %1 empty events").arg(pg->statNumEmptyEventsInFile);
         if (pg->statNumMultipleEvents > 0) s += QString(", %1 multiple events").arg(pg->statNumMultipleEvents);
 
-        ui->lwFileStatistics->setVisible(pg->ParticleStat.size() > 0);
+        ui->lwFileStatistics->setEnabled(pg->ParticleStat.size() > 0);
         for (AParticleInFileStatRecord & rec : pg->ParticleStat)
         {
             ui->lwFileStatistics->addItem( QString("%1 \t# %2 \t <E>: %4 keV")

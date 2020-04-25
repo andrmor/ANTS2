@@ -409,7 +409,9 @@ SOURCES += main.cpp \
     Simulation/alogsandstatisticsoptions.cpp \
     Reconstruction/areconstructionworker.cpp \
     common/ahistogram.cpp \
-    modules/apmdummystructure.cpp
+    modules/apmdummystructure.cpp \
+    gui/MainWindowTools/asaveparticlestofiledialog.cpp \
+    Simulation/asaveparticlestofilesettings.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -564,7 +566,9 @@ HEADERS  += common/CorrelationFilters.h \
     Reconstruction/areconstructionworker.h \
     common/ahistogram.h \
     modules/apmanddummy.h \
-    modules/apmdummystructure.h
+    modules/apmdummystructure.h \
+    gui/MainWindowTools/asaveparticlestofiledialog.h \
+    Simulation/asaveparticlestofilesettings.h
 
 # --- SIM ---
 ants2_SIM {
@@ -968,5 +972,6 @@ FORMS += \
     gui/GraphWindowTools/arootcolorselectordialog.ui \
     gui/GraphWindowTools/atemplateselectiondialog.ui \
     gui/amateriallibrarybrowser.ui \
-    gui/DAWindowTools/amaterialloaderdialog.ui
+    gui/DAWindowTools/amaterialloaderdialog.ui \
+    gui/MainWindowTools/asaveparticlestofiledialog.ui
 

@@ -4,6 +4,7 @@
 #include "atrackbuildoptions.h"
 #include "alogsandstatisticsoptions.h"
 #include "ag4simulationsettings.h"
+#include "asaveparticlestofilesettings.h"
 
 #include <QJsonObject>
 #include <QJsonArray>
@@ -47,6 +48,7 @@ public:
   ATrackBuildOptions TrackBuildOptions;
   ALogsAndStatisticsOptions LogsStatOptions;
   AG4SimulationSettings G4SimSet;
+  ASaveParticlesToFileSettings ExitParticleSettings;
 
   //utility
   QString ErrorString;

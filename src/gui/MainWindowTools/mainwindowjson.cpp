@@ -259,8 +259,7 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
     }
 
   //cleanup  
-  if (histScan) delete histScan;
-  histScan = nullptr;
+  delete histScan; histScan = nullptr;
   ui->pbScanDistrShow->setEnabled(false);
   ui->pbScanDistrDelete->setEnabled(false);
   populateTable = true;
@@ -329,6 +328,14 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
   if (parseJson(gjs, "Geant4SimulationSettings", g4js))
       G4SimSet.readFromJson(g4js);
   ui->cbGeant4ParticleTracking->setChecked(G4SimSet.bTrackParticles);
+
+  ExitParticleSettings.SaveParticles = false;
+  {
+      QJsonObject js;
+        bool bOK = parseJson(gjs, "ExitParticleSettings", js);
+      if (bOK) ExitParticleSettings.readFromJson(js);
+  }
+  ui->labParticlesToFile->setVisible(ExitParticleSettings.SaveParticles);
 
   //POINT SOURCES
   QJsonObject pojs = js["PointSourcesConfig"].toObject();

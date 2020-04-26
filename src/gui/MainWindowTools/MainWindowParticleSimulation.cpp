@@ -690,11 +690,12 @@ void MainWindow::on_pbParticleSourcesSimulate_clicked()
 
     writeSimSettingsToJson(Config->JSON);
 
-    if (ui->cbGeant4ParticleTracking->isChecked() && G4SimSet.SaveParticles)
+    if (ui->cbGeant4ParticleTracking->isChecked() && SimulationManager->simSettings.ExitParticleSettings.SaveParticles)
     {
-        if (QFileInfo(G4SimSet.SP_FileName).exists())
+        const QString fileName = ExitParticleSettings.FileName;
+        if (QFileInfo(fileName).exists())
         {
-            bool bContinue = confirm("File configured to save exiting particles already exists!\nContinue?\n\n" + G4SimSet.SP_FileName, this);
+            bool bContinue = confirm("File configured to save exiting particles already exists!\nContinue?\n\n" + fileName, this);
             if (!bContinue) return;
         }
     }

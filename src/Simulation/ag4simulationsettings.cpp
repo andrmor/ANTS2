@@ -45,14 +45,6 @@ void AG4SimulationSettings::writeToJson(QJsonObject &json) const
 
     json["BinaryOutput"]  = BinaryOutput;
     json["Precision"]     = Precision;
-
-    json["SaveParticles"]    = SaveParticles;
-    json["SP_VolumeName"]    = SP_VolumeName;
-    json["SP_FileName"]      = SP_FileName;
-    json["SP_UseTimeWindow"] = SP_UseTimeWindow;
-    json["SP_TimeFrom"]      = SP_TimeFrom;
-    json["SP_TimeTo"]        = SP_TimeTo;
-    json["SP_StopTrack"]     = SP_StopTrack;
 }
 
 void AG4SimulationSettings::readFromJson(const QJsonObject &json)
@@ -89,21 +81,6 @@ void AG4SimulationSettings::readFromJson(const QJsonObject &json)
 
     parseJson(json, "BinaryOutput", BinaryOutput);
     parseJson(json, "Precision",    Precision);
-
-    SaveParticles = false;
-    parseJson(json, "SaveParticles",    SaveParticles);
-    SP_VolumeName.clear();
-    parseJson(json, "SP_VolumeName",    SP_VolumeName);
-    SP_FileName.clear();
-    parseJson(json, "SP_FileName",      SP_FileName);
-    SP_UseTimeWindow = false;
-    parseJson(json, "SP_UseTimeWindow", SP_UseTimeWindow);
-    SP_TimeFrom = 0;
-    parseJson(json, "SP_TimeFrom",      SP_TimeFrom);
-    SP_TimeTo = 1.0e6;
-    parseJson(json, "SP_TimeTo",        SP_TimeTo);
-    SP_StopTrack = true;
-    parseJson(json, "SP_StopTrack",     SP_StopTrack);
 }
 
 const QString AG4SimulationSettings::getPrimariesFileName(int iThreadNum) const

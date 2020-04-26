@@ -31,14 +31,6 @@ AGeant4ConfigDialog::AGeant4ConfigDialog(AG4SimulationSettings & G4SimSet, QWidg
 
     ui->cbBinaryOutput->setChecked(G4SimSet.BinaryOutput);
     ui->sbPrecision->setValue(G4SimSet.Precision);
-
-    ui->cbSaveParticles->setChecked(G4SimSet.SaveParticles);
-    ui->leExitVolumeName->setText(G4SimSet.SP_VolumeName);
-    ui->leParticlesFileName->setText(G4SimSet.SP_FileName);
-    ui->cbUseTimeWindow->setChecked(G4SimSet.SP_UseTimeWindow);
-    ui->ledTimeFrom->setText(QString::number(G4SimSet.SP_TimeFrom));
-    ui->ledTimeTo->setText(QString::number(G4SimSet.SP_TimeTo));
-    ui->cbStopTrackExiting->setChecked(G4SimSet.SP_StopTrack);
 }
 
 AGeant4ConfigDialog::~AGeant4ConfigDialog()
@@ -85,14 +77,6 @@ void AGeant4ConfigDialog::on_pbAccept_clicked()
     G4SimSet.BinaryOutput = ui->cbBinaryOutput->isChecked();
     G4SimSet.Precision    = ui->sbPrecision->value();
 
-    G4SimSet.SaveParticles    = ui->cbSaveParticles->isChecked();
-    G4SimSet.SP_VolumeName    = ui->leExitVolumeName->text();
-    G4SimSet.SP_FileName      = ui->leParticlesFileName->text();
-    G4SimSet.SP_UseTimeWindow = ui->cbUseTimeWindow->isChecked();
-    G4SimSet.SP_TimeFrom      = ui->ledTimeFrom->text().toDouble();
-    G4SimSet.SP_TimeTo        = ui->ledTimeTo->text().toDouble();
-    G4SimSet.SP_StopTrack     = ui->cbStopTrackExiting->isChecked();
-
     accept();
 }
 
@@ -115,14 +99,4 @@ void AGeant4ConfigDialog::on_pbCancel_clicked()
 void AGeant4ConfigDialog::on_cbBinaryOutput_toggled(bool checked)
 {
     ui->sbPrecision->setEnabled(!checked);
-}
-
-void AGeant4ConfigDialog::on_cbSaveParticles_toggled(bool checked)
-{
-    ui->leExitVolumeName->setEnabled(checked);
-    ui->leParticlesFileName->setEnabled(checked);
-    ui->cbUseTimeWindow->setEnabled(checked);
-    ui->ledTimeFrom->setEnabled(checked);
-    ui->ledTimeTo->setEnabled(checked);
-    ui->cbStopTrackExiting->setEnabled(checked);
 }

@@ -3,6 +3,7 @@
 
 #include "aguiwindow.h"
 #include "ag4simulationsettings.h"
+#include "asaveparticlestofilesettings.h"
 
 #include <QMainWindow>
 #include <QVector>
@@ -384,7 +385,8 @@ private:
     QSize OptOvDialogSize;
     QPoint OptOvDialogPosition;
 
-    AG4SimulationSettings G4SimSet;
+    AG4SimulationSettings G4SimSet;                     // temporary, will be removed after hub with settings is implemented
+    ASaveParticlesToFileSettings ExitParticleSettings; // temporary, will be removed after hub with settings is implemented
 
     void clearPreprocessingData();
     void updateCOBsWithPMtypeNames();
@@ -603,6 +605,8 @@ private slots:
     void on_twSourcePhotonsParticles_currentChanged(int index);
 
     void on_pbParticlesToFile_clicked();
+
+    void on_pbParticlesToFile_customContextMenuRequested(const QPoint &pos);
 
 public slots:
     void on_pbRebuildDetector_clicked();

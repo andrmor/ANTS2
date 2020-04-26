@@ -234,7 +234,7 @@ void ASimulationManager::onSimulationFinished()
         if (LogsStatOptions.bSaveDepositionLog)
             saveDepositionLog(dir);
     }
-    if (simSettings.G4SimSet.SaveParticles) saveExitLog();
+    if (simSettings.ExitParticleSettings.SaveParticles) saveExitLog();
 
     Runner->clearWorkers();
 
@@ -602,10 +602,10 @@ void ASimulationManager::saveExitLog()
     if (simSettings.G4SimSet.BinaryOutput)
     {
         std::ofstream outStream;
-        outStream.open(simSettings.G4SimSet.SP_FileName.toLatin1().data(), std::ios::out | std::ios::binary);
+        outStream.open(simSettings.ExitParticleSettings.FileName.toLatin1().data(), std::ios::out | std::ios::binary);
         if (!outStream.is_open())
         {
-            qWarning() << "Cannot open" << simSettings.G4SimSet.SP_FileName << "to export exit particles";
+            qWarning() << "Cannot open" << simSettings.ExitParticleSettings.FileName << "to export exit particles";
             return;
         }
 
@@ -630,11 +630,11 @@ void ASimulationManager::saveExitLog()
     }
     else
     {
-        QFile fOut(simSettings.G4SimSet.SP_FileName);
+        QFile fOut(simSettings.ExitParticleSettings.FileName);
 
         if (!fOut.open(QFile::Text | QFile::WriteOnly | QFile::Truncate))
         {
-            qWarning() << "Cannot open" << simSettings.G4SimSet.SP_FileName << " file to save exit particles";
+            qWarning() << "Cannot open" << simSettings.ExitParticleSettings.FileName << " file to save exit particles";
             return;
         }
 
@@ -756,13 +756,14 @@ void ASimulationManager::generateG4antsConfigCommon(QJsonObject & json, ASimulat
 
     QString exitParticleFN  = G4SimSet.getExitParticleFileName(ThreadId);
     QJsonObject jsExit;
-        jsExit["Enabled" ]      = G4SimSet.SaveParticles;
-        jsExit["VolumeName"]    = G4SimSet.SP_VolumeName;
+        jsExit["Enabled" ]      = simSettings.ExitParticleSettings.SaveParticles;
+        jsExit["VolumeName"]    = simSettings.ExitParticleSettings.VolumeName;
         jsExit["FileName"]      = exitParticleFN;
-        jsExit["UseTimeWindow"] = G4SimSet.SP_UseTimeWindow;
-        jsExit["TimeFrom"]      = G4SimSet.SP_TimeFrom;
-        jsExit["TimeTo"]        = G4SimSet.SP_TimeTo;
-        jsExit["StopTrack"]     = G4SimSet.SP_StopTrack;
+        jsExit["UseBinary"]     = simSettings.ExitParticleSettings.UseBinary;
+        jsExit["UseTimeWindow"] = simSettings.ExitParticleSettings.UseTimeWindow;
+        jsExit["TimeFrom"]      = simSettings.ExitParticleSettings.TimeFrom;
+        jsExit["TimeTo"]        = simSettings.ExitParticleSettings.TimeTo;
+        jsExit["StopTrack"]     = simSettings.ExitParticleSettings.StopTrack;
     json["SaveExitParticles"] = jsExit;
 
     QJsonArray arMon;

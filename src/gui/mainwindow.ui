@@ -10089,6 +10089,9 @@ Right click: toggle build particle tracks. Also switch off building photon track
             <bold>false</bold>
            </font>
           </property>
+          <property name="contextMenuPolicy">
+           <enum>Qt::CustomContextMenu</enum>
+          </property>
           <property name="toolTip">
            <string>Click: Show / edit options for saving particles to file
 Right click: toggle save on/off</string>

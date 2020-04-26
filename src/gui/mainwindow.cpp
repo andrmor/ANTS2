@@ -3856,7 +3856,7 @@ void MainWindow::on_pbUpdateSimConfig_clicked()
 
     // reading back - like with the detector; if something is not saved, will be obvious
     readSimSettingsFromJson(Config->JSON);
-    Detector->Config->UpdateSimSettingsOfDetector();
+    Detector->Config->UpdateSimSettingsOfDetector(); // also updates GeneralSimSettings of the SimulationManager
 
     UpdateTestWavelengthProperties();
 
@@ -4725,10 +4725,14 @@ void MainWindow::updateG4ProgressBarVisibility()
 #include "asaveparticlestofilesettings.h"
 void MainWindow::on_pbParticlesToFile_clicked()
 {
-    ASaveParticlesToFileSettings set;
-
-    ASaveParticlesToFileDialog * d = new ASaveParticlesToFileDialog(set, this);
+    ASaveParticlesToFileDialog * d = new ASaveParticlesToFileDialog(ExitParticleSettings, this);
     int res = d->exec();
     if (res == QDialog::Accepted) on_pbUpdateSimConfig_clicked();
     delete d;
+}
+
+void MainWindow::on_pbParticlesToFile_customContextMenuRequested(const QPoint &)
+{
+    ExitParticleSettings.SaveParticles = !ExitParticleSettings.SaveParticles;
+    on_pbUpdateSimConfig_clicked();
 }

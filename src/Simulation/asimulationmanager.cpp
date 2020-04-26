@@ -134,6 +134,21 @@ bool ASimulationManager::setup(const QJsonObject & json, int threads)
     }
     else // particle source sim
     {
+        if (simSettings.ExitParticleSettings.SaveParticles)
+        {
+            QFile file(simSettings.ExitParticleSettings.FileName);
+            if (!file.exists())
+            {
+                bool bOK = file.open(QIODevice::WriteOnly);
+                file.close();
+                if (!bOK)
+                {
+                    ErrorString = "Cannot create file to save exiting particles:\n" + simSettings.ExitParticleSettings.FileName;
+                    return false;
+                }
+            }
+        }
+
         if (simSettings.G4SimSet.bTrackParticles)
         {
             if (!simSettings.G4SimSet.checkPathValid())

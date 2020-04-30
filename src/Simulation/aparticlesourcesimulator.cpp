@@ -174,7 +174,7 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
     }
     if (PartGenMode == "File") totalEventCount = static_cast<AFileParticleGenerator*>(ParticleGun)->NumEventsInFile;
 
-    ParticleTracker->configure(&simSettings, fBuildParticleTracks, &tracks, fIgnoreNoDepoEvents);
+    ParticleTracker->configure(&simSettings, fBuildParticleTracks, &tracks, fIgnoreNoDepoEvents, ID);
     ParticleTracker->resetCounter();
     S1generator->setDoTextLog(simSettings.LogsStatOptions.bPhotonGenerationLog);
     S2generator->setDoTextLog(simSettings.LogsStatOptions.bPhotonGenerationLog);
@@ -335,6 +335,7 @@ void AParticleSourceSimulator::simulate()
         progress = (eventCurrent - eventBegin + 1) * updateFactor;
     }
 
+    ParticleTracker->releaseResources();
     if (ParticleGun) ParticleGun->ReleaseResources();
     if (simSettings.G4SimSet.bTrackParticles)
     {

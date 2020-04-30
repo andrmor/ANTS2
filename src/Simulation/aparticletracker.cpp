@@ -12,6 +12,8 @@
 
 #include <QDebug>
 #include <QtAlgorithms>
+#include <fstream>
+#include <sstream>
 
 #include "TMath.h"
 #include "TGeoManager.h"
@@ -31,7 +33,13 @@ AParticleTracker::AParticleTracker(TRandom2 & RandomGenerator,
     ParticleStack(particleStack), EnergyVector(energyVector),
     TrackingHistory(TrackingHistory), SimStat(simStat), ThreadIndex(ThreadIndex) {}
 
-void AParticleTracker::configure(const GeneralSimSettings* simSet, bool fbuildTracks, std::vector<TrackHolderClass *> * tracks, bool fRemoveEmptyTracks)
+AParticleTracker::~AParticleTracker()
+{
+    delete outStreamExit;
+}
+
+#include "aglobalsettings.h"
+void AParticleTracker::configure(const GeneralSimSettings* simSet, bool fbuildTracks, std::vector<TrackHolderClass *> * tracks, bool fRemoveEmptyTracks, int threadID)
 {
     SimSet = simSet;
     BuildTracks = fbuildTracks;
@@ -39,6 +47,12 @@ void AParticleTracker::configure(const GeneralSimSettings* simSet, bool fbuildTr
     RemoveTracksIfNoEnergyDepo = fRemoveEmptyTracks;
     Tracks = tracks;
     ParticleTracksAdded = 0;
+
+    if (SimSet->ExitParticleSettings.SaveParticles && !SimSet->G4SimSet.bTrackParticles)
+    {
+        const QString FileName = QString("%1/out-%2.dat").arg(AGlobalSettings::getInstance().TmpDir).arg(threadID);
+        prepareOutputExitStream(FileName);
+    }
 }
 
 bool AParticleTracker::TrackParticlesOnStack(int eventId)
@@ -52,6 +66,8 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
         navigator = gGeoManager->AddNavigator();
     }
     EventId = eventId;
+
+    if (SimSet->ExitParticleSettings.SaveParticles) writeNewEventMarker();
 
     while ( !ParticleStack.empty() )
     {
@@ -120,6 +136,9 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
                     if (trackNeutral_isKilled()) break;
                 }
             }
+
+            if (navigator->GetCurrentVolume()->GetTitle()[1] == 'E')
+                saveParticle(p);
 
             //stepping to the next volume
             navigator->FindNextBoundaryAndStep();
@@ -941,4 +960,70 @@ bool AParticleTracker::processNeutronElastic_isKilled(const NeutralTerminatorStr
     }
 
     return bKilled;
+}
+
+bool AParticleTracker::prepareOutputExitStream(const QString & FileName)
+{
+    outStreamExit = new std::ofstream();
+
+    if (SimSet->ExitParticleSettings.UseBinary)
+        outStreamExit->open(FileName.toLatin1().data(), std::ios::out | std::ios::binary);
+    else
+        outStreamExit->open(FileName.toLatin1().data());
+
+    return outStreamExit->is_open();
+}
+
+void AParticleTracker::releaseResources()
+{
+    if (outStreamExit)
+    {
+        outStreamExit->close();
+        delete outStreamExit; outStreamExit = nullptr;
+    }
+}
+
+void AParticleTracker::writeNewEventMarker()
+{
+    if (outStreamExit)
+    {
+        if (SimSet->ExitParticleSettings.UseBinary)
+        {
+            *outStreamExit << (char)0xEE;
+             outStreamExit->write((char*)&EventId, sizeof(int));
+        }
+        else
+            *outStreamExit << '#' << EventId << std::endl;
+    }
+}
+
+void AParticleTracker::saveParticle(AParticleRecord * p)
+{
+    if (outStreamExit)
+    {
+        //std::string pName = MpCollection.getParticleName(p->Id).toLatin1().data();
+
+        if (SimSet->ExitParticleSettings.UseBinary)
+        {
+            *outStreamExit << (char)0xFF;
+            *outStreamExit << MpCollection.getParticleName(p->Id).toLatin1().data() << (char)0;
+            outStreamExit->write((char*)&p->energy,  sizeof(double));
+            outStreamExit->write((char*)p->r,      3*sizeof(double));
+            outStreamExit->write((char*)p->v,      3*sizeof(double));
+            outStreamExit->write((char*)&p->time,    sizeof(double));
+        }
+        else
+        {
+            std::stringstream ss;
+            //ss.precision(Precision);
+
+            ss << MpCollection.getParticleName(p->Id).toLatin1().data() << ' ';
+            ss << p->energy << ' ';
+            ss << p->r[0] << ' ' << p->r[1] << ' ' << p->r[2] << ' ';     //position
+            ss << p->v[0] << ' ' << p->v[1] << ' ' << p->v[2] << ' ';     //direction
+            ss << p->time;
+
+            *outStreamExit << ss.rdbuf() << std::endl;
+        }
+    }
 }

@@ -690,7 +690,7 @@ void MainWindow::on_pbParticleSourcesSimulate_clicked()
 
     writeSimSettingsToJson(Config->JSON);
 
-    if (ui->cbGeant4ParticleTracking->isChecked() && SimulationManager->simSettings.ExitParticleSettings.SaveParticles)
+    if (ui->cbGeant4ParticleTracking->isChecked() && ExitParticleSettings.SaveParticles)
     {
         const QString fileName = ExitParticleSettings.FileName;
         if (QFileInfo(fileName).exists())

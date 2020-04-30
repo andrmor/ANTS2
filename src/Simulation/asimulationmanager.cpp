@@ -147,6 +147,9 @@ bool ASimulationManager::setup(const QJsonObject & json, int threads)
                     return false;
                 }
             }
+
+            if (!simSettings.G4SimSet.bTrackParticles)
+                Detector.assignSaveOnExitFlag(simSettings.ExitParticleSettings.VolumeName);
         }
 
         if (simSettings.G4SimSet.bTrackParticles)
@@ -612,9 +615,10 @@ void ASimulationManager::saveA2depositionLog(const QString & ) const
 #include <fstream>
 void ASimulationManager::saveExitLog()
 {
-    int numTreads = Runner->getWorkers().size();
+    bool bFromGeant = simSettings.G4SimSet.bTrackParticles;
 
-    if (simSettings.G4SimSet.BinaryOutput)
+    const int numTreads = Runner->getWorkers().size();
+    if (simSettings.ExitParticleSettings.UseBinary)
     {
         std::ofstream outStream;
         outStream.open(simSettings.ExitParticleSettings.FileName.toLatin1().data(), std::ios::out | std::ios::binary);
@@ -626,7 +630,9 @@ void ASimulationManager::saveExitLog()
 
         for (int iThread = 0; iThread < numTreads; iThread++)
         {
-            const QString fileName = simSettings.G4SimSet.getExitParticleFileName(iThread);
+            const QString fileName = ( bFromGeant ? simSettings.G4SimSet.getExitParticleFileName(iThread)
+                                                  : QString("%1/out-%2.dat").arg(AGlobalSettings::getInstance().TmpDir).arg(iThread) );
+
             std::ifstream inStream(fileName.toLatin1().data());
             if (!inStream.is_open())
             {
@@ -635,7 +641,7 @@ void ASimulationManager::saveExitLog()
             }
 
             char ch;
-            while (inStream.get(ch)) //cannot use >> as it swallows all new line characters (e.g. 0x20)
+            while (inStream.get(ch)) //cannot use operator>> as it swallows all new line characters (e.g. 0x20)
                 outStream << ch;
 
             inStream.close();
@@ -657,7 +663,8 @@ void ASimulationManager::saveExitLog()
 
         for (int iThread = 0; iThread < numTreads; iThread++)
         {
-            const QString fileName = simSettings.G4SimSet.getExitParticleFileName(iThread);
+            const QString fileName = ( bFromGeant ? simSettings.G4SimSet.getExitParticleFileName(iThread)
+                                                  : QString("%1/out-%2.dat").arg(AGlobalSettings::getInstance().TmpDir).arg(iThread) );
 
             QFile fIn(fileName);
             if (!fIn.open(QIODevice::ReadOnly | QIODevice::Text))

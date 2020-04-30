@@ -12,7 +12,9 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <stdio.h>
+//#include <stdio.h>
+#include <istream>
+#include <iostream>
 
 AFileParticleGenerator::AFileParticleGenerator(const AMaterialParticleCollection & MpCollection) :
     MpCollection(MpCollection) {}
@@ -64,7 +66,7 @@ bool AFileParticleGenerator::Init()
     if (Mode == AFileMode::Standard)
     {
         Engine = new AFilePGEngineStandard(this);
-        bOK = Engine->doInit(bNeedInspect, bExpanded);
+        bOK = Engine->doInit(bNeedInspect, bExpanded, false);
     }
     else
     {
@@ -74,12 +76,12 @@ bool AFileParticleGenerator::Init()
             if (bG4binary)
             {
                 Engine = new AFilePGEngineG4antsBin(this);
-                bOK = Engine->doInit(bNeedInspect, bExpanded);
+                bOK = Engine->doInit(bNeedInspect, bExpanded, bParticleMustBeDefined);
             }
             else
             {
                 Engine = new AFilePGEngineG4antsTxt(this);
-                bOK = Engine->doInit(bNeedInspect, bExpanded);
+                bOK = Engine->doInit(bNeedInspect, bExpanded, bParticleMustBeDefined);
             }
         }
     }
@@ -137,6 +139,8 @@ bool AFileParticleGenerator::testG4mode()
 
 bool AFileParticleGenerator::isRequireInspection() const
 {
+    if (bParticleMustBeDefined) return true;
+
     QFileInfo fi(FileName);
 
     if (FileLastModified != fi.lastModified()) return true;
@@ -244,7 +248,7 @@ AFilePGEngineStandard::~AFilePGEngineStandard()
     if (File.isOpen()) File.close();
 }
 
-bool AFilePGEngineStandard::doInit(bool bNeedInspect, bool bDetailedInspection)
+bool AFilePGEngineStandard::doInit(bool bNeedInspect, bool bDetailedInspection, bool)
 {
     File.setFileName(FileName);
     if(!File.open(QIODevice::ReadOnly | QFile::Text))
@@ -352,12 +356,12 @@ bool AFilePGEngineStandard::doGenerateEvent(QVector<AParticleRecord *> &Generate
     return false; //could not read particle record in file!
 }
 
-void AFilePGEngineStandard::doSetStartEvent(int startEvent)
+bool AFilePGEngineStandard::doSetStartEvent(int startEvent)
 {
     if (Stream)
     {
         Stream->seek(0);
-        if (startEvent == 0) return;
+        if (startEvent == 0) return true;
 
         int event = -1;
         bool bContinueEvent = false;
@@ -378,10 +382,11 @@ void AFilePGEngineStandard::doSetStartEvent(int startEvent)
             else
             {
                 bContinueEvent = false;
-                if (event == startEvent-1) return;
+                if (event == startEvent-1) return true;
             }
         }
     }
+    return false;
 }
 
 AFilePGEngineG4antsTxt::~AFilePGEngineG4antsTxt()
@@ -390,7 +395,7 @@ AFilePGEngineG4antsTxt::~AFilePGEngineG4antsTxt()
     delete inStream; inStream = nullptr;
 }
 
-bool AFilePGEngineG4antsTxt::doInit(bool bNeedInspect, bool bDetailedInspection)
+bool AFilePGEngineG4antsTxt::doInit(bool bNeedInspect, bool bDetailedInspection, bool bParticleMustBeDefined)
 {
     inStream = new std::ifstream(FileName.toLatin1().data());
 
@@ -411,7 +416,11 @@ bool AFilePGEngineG4antsTxt::doInit(bool bNeedInspect, bool bDetailedInspection)
             getline( *inStream, str );
             if (str.empty())
             {
-                if (inStream->eof()) break;
+                if (inStream->eof())
+                {
+                    inStream->clear();  // will reuse the stream
+                    break;
+                }
 
                 FPG->SetErrorString("Found empty line!");
                 return false;
@@ -437,15 +446,23 @@ bool AFilePGEngineG4antsTxt::doInit(bool bNeedInspect, bool bDetailedInspection)
                 return false;
             }
 
+            QString name = f.first();
+            //kill [***] appearing in ion names
+            int iBracket = name.indexOf('[');
+            if (iBracket != -1) name = name.left(iBracket);
+
+            if (bParticleMustBeDefined)
+            {
+                int pId = FPG->MpCollection.getParticleId(name);
+                if (pId == -1)
+                {
+                    FPG->SetErrorString("Found particle not defined in this ANTS2 configuration: " + name);
+                    return false;
+                }
+            }
+
             if (bDetailedInspection)
             {
-                QString name = f.first();
-
-                //kill [***] appearing in ion names
-                int iBracket = name.indexOf('[');
-                if (iBracket != -1)
-                    name = name.left(iBracket);
-
                 bool bNotFound = true;
                 for (AParticleInFileStatRecord & rec : FPG->ParticleStat)
                 {
@@ -492,9 +509,13 @@ bool AFilePGEngineG4antsTxt::doGenerateEvent(QVector<AParticleRecord *> &Generat
             return false;
         }
 
-        AParticleRecord * p = new AParticleRecord();
+        QString name = f.first();
+        //kill [***] appearing in ion names
+        int iBracket = name.indexOf('[');
+        if (iBracket != -1) name = name.left(iBracket);
 
-        p->Id     = -1;
+        AParticleRecord * p = new AParticleRecord();
+        p->Id     = FPG->MpCollection.getParticleId(name);  // invalid particles will be found during init phase
         p->energy = f.at(1).toDouble();
         p->r[0]   = f.at(2).toDouble();
         p->r[1]   = f.at(3).toDouble();
@@ -505,6 +526,26 @@ bool AFilePGEngineG4antsTxt::doGenerateEvent(QVector<AParticleRecord *> &Generat
         p->time   = f.at(8).toDouble();
 
         GeneratedParticles << p;
+    }
+    return false;
+}
+
+bool AFilePGEngineG4antsTxt::doSetStartEvent(int startEvent)
+{
+    if (!inStream) return false;
+
+    inStream->seekg(0);
+
+    std::string str;
+
+    while ( getline(*inStream, str) )
+    {
+        if (str[0] == '#') //new event
+        {
+            const int iEvent = std::stoi( str.substr(1) );  // kill the leading '#' - the file was already verified at this stage!
+            if (iEvent == startEvent)
+                return true;
+        }
     }
     return false;
 }
@@ -571,7 +612,7 @@ AFilePGEngineG4antsBin::~AFilePGEngineG4antsBin()
     delete inStream; inStream = nullptr;
 }
 
-bool AFilePGEngineG4antsBin::doInit(bool bNeedInspect, bool bDetailedInspection)
+bool AFilePGEngineG4antsBin::doInit(bool bNeedInspect, bool bDetailedInspection, bool bParticleMustBeDefined)
 {
     inStream = new std::ifstream(FileName.toLatin1().data(), std::ios::in | std::ios::binary);
 
@@ -606,18 +647,28 @@ bool AFilePGEngineG4antsBin::doInit(bool bNeedInspect, bool bDetailedInspection)
             {
                 //data line
                 ParticleName.clear();
-                bool bCopyToName = bDetailedInspection;
+                bool bCopyToName = bDetailedInspection || bParticleMustBeDefined;
                 while (*inStream >> h)
                 {
                     if (h == (char)0x00) break;
 
-                    if (bDetailedInspection)
+                    if (bCopyToName)
                     {
                         if (h == '[') bCopyToName = false;
-                        if (bCopyToName) ParticleName += h;
+                        else ParticleName += h;
                     }
                 }
-                //qDebug() << ParticleName.data();
+
+                if (bParticleMustBeDefined)
+                {
+                    int pId = FPG->MpCollection.getParticleId(ParticleName.data());
+                    if (pId == -1)
+                    {
+                        FPG->SetErrorString( QString("Found particle not defined in this ANTS2 configuration: %1").arg(ParticleName.data()) );
+                        return false;
+                    }
+                }
+
                 inStream->read((char*)&energy,       sizeof(double));
                 inStream->read((char*)&PosDir,     6*sizeof(double));
                 inStream->read((char*)&time,         sizeof(double));
@@ -662,10 +713,12 @@ bool AFilePGEngineG4antsBin::doInit(bool bNeedInspect, bool bDetailedInspection)
         if (bWasMulty)     FPG->statNumMultipleEvents++;
         if (!bWasParticle) FPG->statNumEmptyEventsInFile++;
     }
+
+    inStream->clear();
     return true;
 }
 
-bool AFilePGEngineG4antsBin::doGenerateEvent(QVector<AParticleRecord *> &GeneratedParticles)
+bool AFilePGEngineG4antsBin::doGenerateEvent(QVector<AParticleRecord *> & GeneratedParticles)
 {
     char h;
     int eventId;
@@ -674,22 +727,28 @@ bool AFilePGEngineG4antsBin::doGenerateEvent(QVector<AParticleRecord *> &Generat
     {
         if (h == (char)0xEE)
         {
-            //next event starts here
+            //next event starts here!
             inStream->read((char*)&eventId, sizeof(int));
             return true;
         }
         else if (h == (char)0xFF)
         {
             //data line
-            AParticleRecord * p = new AParticleRecord();
             pn.clear();
+            bool bCopyToName = true;
             while (*inStream >> h)
             {
                 if (h == (char)0x00) break;
-                pn += h;
+
+                if (bCopyToName)
+                {
+                    if (h == '[') bCopyToName = false;
+                    else pn += h;
+                }
             }
-            //qDebug() << pn.data();
-            p->Id = -1;
+
+            AParticleRecord * p = new AParticleRecord();
+            p->Id = FPG->MpCollection.getParticleId(pn.data());
             inStream->read((char*)&p->energy,   sizeof(double));
             inStream->read((char*)&p->r,      3*sizeof(double));
             inStream->read((char*)&p->v,      3*sizeof(double));
@@ -704,6 +763,41 @@ bool AFilePGEngineG4antsBin::doGenerateEvent(QVector<AParticleRecord *> &Generat
         else
         {
             FPG->SetErrorString("Unexpected format of a line in the binary file with the input particles");
+            return false;
+        }
+    }
+    return false;
+}
+
+bool AFilePGEngineG4antsBin::doSetStartEvent(int startEvent)
+{
+    inStream->seekg(0);
+
+    char h;
+    int eventId;
+    double buf[8];
+    while (inStream->get(h))
+    {
+        if (h == (char)0xEE)
+        {
+            //next event starts here
+            inStream->read((char*)&eventId, sizeof(int));
+            //qDebug() << "Event Id in seaching for" << startEvent << " found:" << eventId;
+            if (eventId == startEvent)
+                return true;
+        }
+        else if (h == (char)0xFF)
+        {
+            //data line
+            while (*inStream >> h)
+            {
+                if (h == (char)0x00) break;
+            }
+            inStream->read((char*)buf, 8*sizeof(double));
+        }
+        else
+        {
+            qWarning() << "Unexpected format of a line in the binary file with the input particles";
             return false;
         }
     }

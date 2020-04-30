@@ -136,11 +136,14 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
             {
                 AFileParticleGenerator * PG = new AFileParticleGenerator(*detector.MpCollection);
                 PG->readFromJson(fjs);
+                PG->bParticleMustBeDefined = !simSettings.G4SimSet.bTrackParticles;
+                /*
                 if (PG->GetFileFormat() == AFileMode::G4ants && !simSettings.G4SimSet.bTrackParticles )
                 {
                     ErrorString = "Generation of particles from G4ants file cannot be run without Geant4 simulation mode";
                     return false;
                 }
+                */
                 PG->Init();
                 ParticleGun = PG;
             }

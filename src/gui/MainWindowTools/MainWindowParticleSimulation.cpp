@@ -295,6 +295,7 @@ void MainWindow::on_pbGunTest_clicked()
     font.setBold(true);
     ui->pbStopScan->setFont(font);
 
+    SimulationManager->FileParticleGenerator->bParticleMustBeDefined = false;
     TestParticleGun(pg, ui->sbGunTestEvents->value()); //script generator is aborted on click of the stop button!
 
     ui->pbStopScan->setEnabled(false);
@@ -672,13 +673,7 @@ void MainWindow::on_pbParticleSourcesSimulate_clicked()
 {
     if (ui->cobParticleGenerationMode->currentIndex() == 1)  // "From file"
     {
-        if (ui->cobGenerateFromFile_FileFormat->currentIndex() == 1)  // G4ants format
-            if (!ui->cbGeant4ParticleTracking->isChecked())
-            {
-                message("G4ants-generated files can be used only when Geant4 tracking is activated", this);
-                return;
-            }
-
+        SimulationManager->FileParticleGenerator->bParticleMustBeDefined = !ui->cbGeant4ParticleTracking->isChecked();
         bool bOK = SimulationManager->FileParticleGenerator->Init(); // to avoid check file in each thread
         if (!bOK)
         {

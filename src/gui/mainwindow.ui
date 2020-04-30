@@ -9681,53 +9681,6 @@ Right click: toggle build photon tracks. Also switches of building particle trac
        <attribute name="title">
         <string>      Particles + photons      </string>
        </attribute>
-       <widget class="QSpinBox" name="sbGunTestEvents">
-        <property name="geometry">
-         <rect>
-          <x>149</x>
-          <y>240</y>
-          <width>81</width>
-          <height>22</height>
-         </rect>
-        </property>
-        <property name="font">
-         <font>
-          <weight>50</weight>
-          <bold>false</bold>
-         </font>
-        </property>
-        <property name="minimum">
-         <number>1</number>
-        </property>
-        <property name="maximum">
-         <number>1000000</number>
-        </property>
-        <property name="value">
-         <number>100</number>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="pbGunTest">
-        <property name="geometry">
-         <rect>
-          <x>12</x>
-          <y>239</y>
-          <width>131</width>
-          <height>24</height>
-         </rect>
-        </property>
-        <property name="font">
-         <font>
-          <weight>50</weight>
-          <bold>false</bold>
-         </font>
-        </property>
-        <property name="toolTip">
-         <string>Particle are generated and their directions are shown. No interaction is simulated!</string>
-        </property>
-        <property name="text">
-         <string>Test generator</string>
-        </property>
-       </widget>
        <widget class="QStackedWidget" name="swAdvancedSim_Particle">
         <property name="geometry">
          <rect>
@@ -9935,7 +9888,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
             </property>
             <property name="geometry">
              <rect>
-              <x>260</x>
+              <x>257</x>
               <y>10</y>
               <width>271</width>
               <height>17</height>
@@ -9970,7 +9923,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
            <widget class="QCheckBox" name="cbIgnoreEventsWithNoHits">
             <property name="geometry">
              <rect>
-              <x>27</x>
+              <x>24</x>
               <y>10</y>
               <width>207</width>
               <height>17</height>
@@ -10005,13 +9958,13 @@ Right click: toggle build particle tracks. Also switch off building photon track
            <zorder>cbIgnoreEventsWithNoEnergyDepo</zorder>
           </widget>
           <widget class="QWidget" name="page_12">
-           <widget class="QLabel" name="label_60">
+           <widget class="QPushButton" name="pbG4Settings">
             <property name="geometry">
              <rect>
-              <x>19</x>
-              <y>13</y>
-              <width>501</width>
-              <height>17</height>
+              <x>50</x>
+              <y>10</y>
+              <width>131</width>
+              <height>23</height>
              </rect>
             </property>
             <property name="font">
@@ -10021,10 +9974,26 @@ Right click: toggle build particle tracks. Also switch off building photon track
              </font>
             </property>
             <property name="text">
-             <string>Particle tracking will be delegated to Geant4</string>
+             <string>Geant4 settings</string>
             </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
+           </widget>
+           <widget class="QPushButton" name="pbGoToConfigueG4ants">
+            <property name="geometry">
+             <rect>
+              <x>200</x>
+              <y>10</y>
+              <width>90</width>
+              <height>23</height>
+             </rect>
+            </property>
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Pathes</string>
             </property>
            </widget>
           </widget>
@@ -10201,66 +10170,6 @@ Right click: toggle save on/off</string>
            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
           </property>
          </widget>
-         <widget class="QCheckBox" name="cbGeant4ParticleTracking">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="geometry">
-           <rect>
-            <x>30</x>
-            <y>11</y>
-            <width>220</width>
-            <height>17</height>
-           </rect>
-          </property>
-          <property name="font">
-           <font>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Track particles in Geant4</string>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="pbGoToConfigueG4ants">
-          <property name="geometry">
-           <rect>
-            <x>370</x>
-            <y>8</y>
-            <width>101</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="font">
-           <font>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Pathes</string>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="pbG4Settings">
-          <property name="geometry">
-           <rect>
-            <x>260</x>
-            <y>8</y>
-            <width>99</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="font">
-           <font>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Options</string>
-          </property>
-         </widget>
          <widget class="QCheckBox" name="cbMergeClusters">
           <property name="enabled">
            <bool>true</bool>
@@ -10357,9 +10266,9 @@ Right click: toggle save on/off</string>
        <widget class="QPushButton" name="pnShowHideAdvanced_Particle">
         <property name="geometry">
          <rect>
-          <x>297</x>
+          <x>397</x>
           <y>240</y>
-          <width>231</width>
+          <width>131</width>
           <height>23</height>
          </rect>
         </property>
@@ -10370,7 +10279,7 @@ Right click: toggle save on/off</string>
          </font>
         </property>
         <property name="text">
-         <string>Show / hide advanced options</string>
+         <string>Advanced options</string>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -10789,6 +10698,19 @@ Right click: toggle save on/off</string>
              </widget>
             </item>
             <item>
+             <spacer name="horizontalSpacer_10">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
              <widget class="QPushButton" name="pbGenerateFromFile_Help">
               <property name="maximumSize">
                <size>
@@ -10815,6 +10737,20 @@ Right click: toggle save on/off</string>
              </widget>
             </item>
            </layout>
+          </item>
+          <item>
+           <widget class="QLabel" name="labGenerateFromFile_info">
+            <property name="text">
+             <string>Not yet analyzed</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QListWidget" name="lwFileStatistics">
+            <property name="contextMenuPolicy">
+             <enum>Qt::CustomContextMenu</enum>
+            </property>
+           </widget>
           </item>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_13">
@@ -10865,20 +10801,6 @@ Right click: toggle save on/off</string>
              </spacer>
             </item>
            </layout>
-          </item>
-          <item>
-           <widget class="QLabel" name="labGenerateFromFile_info">
-            <property name="text">
-             <string>Not yet analyzed</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QListWidget" name="lwFileStatistics">
-            <property name="contextMenuPolicy">
-             <enum>Qt::CustomContextMenu</enum>
-            </property>
-           </widget>
           </item>
           <item>
            <spacer name="verticalSpacer_4">
@@ -11005,7 +10927,7 @@ Right click: toggle save on/off</string>
          <rect>
           <x>2</x>
           <y>2</y>
-          <width>531</width>
+          <width>527</width>
           <height>29</height>
          </rect>
         </property>
@@ -11064,7 +10986,82 @@ Right click: toggle save on/off</string>
            </property>
           </spacer>
          </item>
+         <item>
+          <widget class="QPushButton" name="pbGunTest">
+           <property name="maximumSize">
+            <size>
+             <width>60</width>
+             <height>21</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="toolTip">
+            <string>Particle are generated and their directions are shown. No interaction is simulated!</string>
+           </property>
+           <property name="text">
+            <string>Test</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="sbGunTestEvents">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>21</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="minimum">
+            <number>1</number>
+           </property>
+           <property name="maximum">
+            <number>1000000</number>
+           </property>
+           <property name="value">
+            <number>100</number>
+           </property>
+          </widget>
+         </item>
         </layout>
+       </widget>
+       <widget class="QCheckBox" name="cbGeant4ParticleTracking">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>23</x>
+          <y>247</y>
+          <width>291</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Track particles using Geant4</string>
+        </property>
        </widget>
       </widget>
      </widget>

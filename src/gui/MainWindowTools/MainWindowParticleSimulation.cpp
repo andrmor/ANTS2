@@ -671,6 +671,7 @@ void containsMonsGrids(const AGeoObject * obj, bool & bGrid, bool & bMon)
 #include "asandwich.h"
 void MainWindow::on_pbParticleSourcesSimulate_clicked()
 {
+    // TODO !*! find a way to do it in SimulationManager - without the settings hub it is not straightforward at this point
     if (ui->cobParticleGenerationMode->currentIndex() == 1)  // "From file"
     {
         SimulationManager->FileParticleGenerator->bParticleMustBeDefined = !ui->cbGeant4ParticleTracking->isChecked();
@@ -685,7 +686,7 @@ void MainWindow::on_pbParticleSourcesSimulate_clicked()
 
     writeSimSettingsToJson(Config->JSON);
 
-    if (ui->cbGeant4ParticleTracking->isChecked() && ExitParticleSettings.SaveParticles)
+    if (ExitParticleSettings.SaveParticles)
     {
         const QString fileName = ExitParticleSettings.FileName;
         if (QFileInfo(fileName).exists())

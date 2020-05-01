@@ -389,6 +389,57 @@ bool AFilePGEngineStandard::doSetStartEvent(int startEvent)
     return false;
 }
 
+bool AFilePGEngineStandard::doGenerateG4File(int /*eventBegin*/, int /*eventEnd*/, const QString & /*FileName*/)
+{
+    /*
+    QFile file(FileName);
+    if(!file.open(QIODevice::WriteOnly | QFile::Text))
+    {
+        FPG->SetErrorString("Cannot open file to export primaries for G4ants sim");
+        return false;
+    }
+    QTextStream out(&file);
+
+    Stream->seek(0);
+    bool bContinueEvent = false;
+    int iEvent = -1;
+    while (!Stream->atEnd())
+    {
+        const QString line = Stream->readLine();
+        const QStringList f = line.split(rx, QString::SkipEmptyParts);
+        if (f.size() < 9 || f.at(0) == '#') continue;
+
+        bool bOK;
+        int pId = f.at(0).toInt(&bOK);
+        if (!bOK) continue; //assuming this is a comment line
+        if (pId < 0 || pId >= FPG->RegisteredParticleCount)
+        {
+            FPG->SetErrorString( QString("Invalid particle index %1 in file %2").arg(pId).arg(FileName) );
+            return false;
+        }
+
+        //assuming it is a valid particle line
+        if (!bContinueEvent)
+        {
+            iEvent++;
+            if (iEvent >= eventEnd) return true;
+            if (iEvent < eventBegin)
+            {
+                if (f.size() > 9 && f.at(9) == '*') bContinueEvent = true;
+                continue;
+            }
+        }
+
+        // todo:
+        // if new event, save event marker
+        // save particle record
+
+        if (f.size() > 9 && f.at(9) == '*') bContinueEvent = true;
+    }
+    */
+    return false;
+}
+
 AFilePGEngineG4antsTxt::~AFilePGEngineG4antsTxt()
 {
     if (inStream) inStream->close();
@@ -556,7 +607,7 @@ bool AFilePGEngineG4antsTxt::doGenerateG4File(int eventBegin, int eventEnd, cons
     outStream.open(FileName.toLatin1().data());
     if (!outStream.is_open())
     {
-        FPG->SetErrorString("Cannot open file to export G4 pareticle data");
+        FPG->SetErrorString("Cannot open file to export primaries for G4ants sim");
         return false;
     }
 
@@ -810,7 +861,7 @@ bool AFilePGEngineG4antsBin::doGenerateG4File(int eventBegin, int eventEnd, cons
     outStream.open(FileName.toLatin1().data(), std::ios::out | std::ios::binary);
     if (!outStream.is_open())
     {
-        FPG->SetErrorString("Cannot open file to export G4 pareticle data");
+        FPG->SetErrorString("CCannot open file to export primaries for G4ants sim");
         return false;
     }
 

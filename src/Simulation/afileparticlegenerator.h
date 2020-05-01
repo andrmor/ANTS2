@@ -117,7 +117,7 @@ public:
     bool doInit(bool bNeedInspect, bool bDetailedInspection, bool bParticleMustBeDefined) override;
     bool doGenerateEvent(QVector<AParticleRecord*> & GeneratedParticles) override;
     bool doSetStartEvent(int startEvent) override;
-    bool doGenerateG4File(int, int, const QString &) override {return false;}  // not needed
+    bool doGenerateG4File(int eventBegin, int eventEnd, const QString & FileName) override; // not in use! SimManager uses mainstream approach to generate events
 
 private:
     QFile File;

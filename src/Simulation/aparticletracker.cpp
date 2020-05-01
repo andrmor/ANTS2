@@ -102,14 +102,17 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
         //--------------------- loop over volumes on the path --------------------------
         do
         {
-            if (bCheckMonitors && navigator->GetCurrentVolume()->GetTitle()[0] == 'M')
+            const TGeoVolume * CurrentVolume = navigator->GetCurrentVolume();
+
+            if (bCheckMonitors && CurrentVolume->GetTitle()[0] == 'M')
             {
                 if ( checkMonitors_isKilled() ) break;
             }
 
-            thisMatId = navigator->GetCurrentVolume()->GetMaterial()->GetIndex();
+            thisMatId = CurrentVolume->GetMaterial()->GetIndex();
             thisMaterial = MpCollection[thisMatId];
             thisMatParticle = &thisMaterial->MatParticle[p->Id];
+            bool bStopOnThisVolumeExit = (CurrentVolume->GetTitle()[1] == 'E');
 
             if ( !thisMatParticle->TrackingAllowed )
             {
@@ -137,14 +140,25 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
                 }
             }
 
-            if (navigator->GetCurrentVolume()->GetTitle()[1] == 'E')
-                saveParticle(p);
-
             //stepping to the next volume
             navigator->FindNextBoundaryAndStep();
 
             const double * global = navigator->GetCurrentPoint();
             for (int j=0; j<3; j++) p->r[j] = global[j];
+
+            if (bStopOnThisVolumeExit)
+            {
+                saveParticle(p);
+                if (SimSet->ExitParticleSettings.StopTrack)
+                {
+                    if (SimSet->LogsStatOptions.bParticleTransportLog)
+                    {
+                        ATrackingStepData * step = new ATrackingStepData(p->r, p->time, p->energy, 0, "ExitStop");
+                        thisParticleRecord->addStep(step);
+                    }
+                    break;
+                }
+            }
 
             if (navigator->IsOutside())
             {
@@ -179,7 +193,7 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
         }
 
         //delete the current particle
-        delete p;
+        delete p; p = nullptr;
     }
 
     //stack is empty, no errors found
@@ -207,7 +221,7 @@ bool AParticleTracker::TrackParticlesOnStack(int eventId)
         EventRecord = nullptr;
     }
 
-    // TODO same RemoveTracksIfNoEnergyDepo control for Monitors! ***!!!
+    // TODO same RemoveTracksIfNoEnergyDepo control for Monitors! !*!
 
     return true; //success
 }

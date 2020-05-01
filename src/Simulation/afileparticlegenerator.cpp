@@ -32,12 +32,26 @@ void AFileParticleGenerator::SetFileName(const QString &fileName)
     InvalidateFile();
 }
 
-void AFileParticleGenerator::SetFileFormat(AFileMode mode)
+bool AFileParticleGenerator::IsFormatG4() const
 {
-    if (Mode == mode) return;
+    return (Mode == APFG_FileFormat::G4Ascii || Mode == APFG_FileFormat::G4Binary);
+}
 
-    Mode = mode;
-    InvalidateFile();
+bool AFileParticleGenerator::IsFormatBinary() const
+{
+    return (Mode == APFG_FileFormat::G4Binary);
+}
+
+QString AFileParticleGenerator::GetFormatName() const
+{
+    switch (Mode)
+    {
+    case APFG_FileFormat::Simplistic: return "Simplistic";
+    case APFG_FileFormat::G4Binary:   return "G4-binary";
+    case APFG_FileFormat::G4Ascii:    return "G4-txt";
+    case APFG_FileFormat::Undefined:  return "?";
+    case APFG_FileFormat::BadFormat:  return "Invalid";
+    }
 }
 
 #include <algorithm>
@@ -62,44 +76,90 @@ bool AFileParticleGenerator::Init()
         FileLastModified = QFileInfo(FileName).lastModified();
     }
 
-    bool bOK;
-    if (Mode == AFileMode::Standard)
+    bool bOK = DetermineFileFormat();
+    if (!bOK) return false;
+
+    switch (Mode)
     {
-        Engine = new AFilePGEngineStandard(this);
+    case APFG_FileFormat::Simplistic:
+        Engine = new AFilePGEngineSimplistic(this);
         bOK = Engine->doInit(bNeedInspect, bExpanded, false);
-    }
-    else
-    {
-        bOK = testG4mode();
-        if (bOK)
-        {
-            if (bG4binary)
-            {
-                Engine = new AFilePGEngineG4antsBin(this);
-                bOK = Engine->doInit(bNeedInspect, bExpanded, bParticleMustBeDefined);
-            }
-            else
-            {
-                Engine = new AFilePGEngineG4antsTxt(this);
-                bOK = Engine->doInit(bNeedInspect, bExpanded, bParticleMustBeDefined);
-            }
-        }
+        break;
+    case APFG_FileFormat::G4Binary:
+        Engine = new AFilePGEngineG4antsBin(this);
+        bOK = Engine->doInit(bNeedInspect, bExpanded, bParticleMustBeDefined);
+        break;
+    case APFG_FileFormat::G4Ascii:
+        Engine = new AFilePGEngineG4antsTxt(this);
+        bOK = Engine->doInit(bNeedInspect, bExpanded, bParticleMustBeDefined);
+        break;
+    default:
+        ErrorString = "Invalid file format";
+        return false;
     }
 
     if (bOK && ParticleStat.size() > 0)
     {
-        std::sort(ParticleStat.begin(), ParticleStat.end(), [](const AParticleInFileStatRecord & l, const AParticleInFileStatRecord & r)
-        {
-            return (l.Entries > r.Entries);
-        });
+        std::sort(ParticleStat.begin(), ParticleStat.end(),
+                  [](const AParticleInFileStatRecord & l, const AParticleInFileStatRecord & r)
+                  {
+                    return (l.Entries > r.Entries);
+                  });
     }
-
     return bOK;
 }
 
-bool AFileParticleGenerator::testG4mode()
+bool AFileParticleGenerator::DetermineFileFormat()
 {
-    //is it ascii mode?
+    if (isFileG4Binary())
+    {
+        //qDebug() << "Assuming it is G4 bin format";
+        Mode = APFG_FileFormat::G4Binary;
+        return true;
+    }
+
+    if (isFileG4Ascii())
+    {
+        //qDebug() << "Assuming it is G4 ascii format";
+        Mode = APFG_FileFormat::G4Ascii;
+        return true;
+    }
+
+    if (isFileSimpleAscii())
+    {
+        //qDebug() << "Assuming it is simplistic format";
+        Mode = APFG_FileFormat::Simplistic;
+        return true;
+    }
+
+    Mode = APFG_FileFormat::BadFormat;
+    if (!ErrorString.isEmpty()) return false;
+
+    ErrorString = QString("Unexpected format of the file %1").arg(FileName);
+    return false;
+}
+
+bool AFileParticleGenerator::isFileG4Binary()
+{
+    std::ifstream inB(FileName.toLatin1().data(), std::ios::in | std::ios::binary);
+    if (!inB.is_open())
+    {
+        ErrorString = QString("Cannot open file %1").arg(FileName);
+        return false;
+    }
+    char ch;
+    inB.get(ch);
+    if (ch == (char)0xEE)
+    {
+        int iEvent = -1;
+        inB.read((char*)&iEvent, sizeof(int));
+        if (iEvent == 0) return true;
+    }
+    return false;
+}
+
+bool AFileParticleGenerator::isFileG4Ascii()
+{
     std::ifstream inT(FileName.toLatin1().data());
     if (!inT.is_open())
     {
@@ -110,42 +170,61 @@ bool AFileParticleGenerator::testG4mode()
     std::string str;
     getline(inT, str);
     inT.close();
-    if (str.size() > 0 && str[0] == '#')
+    if (str.size() > 1 && str[0] == '#')
     {
-        //qDebug() << "It seems it is a valid ascii G4ants file";
-        bG4binary = false;
-        return true;
+        QString line = QString(str.data()).mid(1);
+        bool bOK;
+        int iEvent = line.toInt(&bOK);
+        if (bOK && iEvent == 0) return true;
     }
+    return false;
+}
 
-    std::ifstream inB(FileName.toLatin1().data(), std::ios::in | std::ios::binary);
-    if (!inB.is_open())
+bool AFileParticleGenerator::isFileSimpleAscii()
+{
+    QFile file(FileName);
+    if(!file.open(QIODevice::ReadOnly | QFile::Text))
     {
         ErrorString = QString("Cannot open file %1").arg(FileName);
         return false;
     }
 
-    char ch;
-    inB.get(ch);
-    if (ch == (char)0xEE)
+    const QRegularExpression rx = QRegularExpression("(\\ |\\,|\\:|\\t)");  // separators are: ' ' or ',' or ':' or '\t'
+    QTextStream Stream(&file);
+    while (!Stream.atEnd())
     {
-        //qDebug() << "It seems it is a valid binary G4ants file";
-        bG4binary = true;
-        return true;
+        const QString line = Stream.readLine().simplified();
+        if (line.isEmpty()) continue;
+        if (line.startsWith('#')) continue;
+        const QStringList f = line.split(rx, QString::SkipEmptyParts);
+        if ( f.size() == 9 ||
+            (f.size() == 10 && f.at(9) == '*'))
+        {
+            bool bOK;
+            int    pId = f.at(0).toInt(&bOK);
+            if (!bOK) return false;
+            if (pId < 0 || pId >= MpCollection.countParticles()) return false;
+            for (int i = 1; i < 9; i++)
+            {
+                f.at(i).toDouble(&bOK);
+                if (!bOK) return false;
+            }
+            return true;
+        }
     }
-
-    ErrorString = QString("Unexpected format of the file %1").arg(FileName);
     return false;
 }
 
 bool AFileParticleGenerator::isRequireInspection() const
 {
+    if (Mode == APFG_FileFormat::Undefined || Mode == APFG_FileFormat::BadFormat) return true;
     if (bParticleMustBeDefined) return true;
 
     QFileInfo fi(FileName);
 
     if (FileLastModified != fi.lastModified()) return true;
 
-    if (Mode == AFileMode::Standard &&
+    if (Mode == APFG_FileFormat::Simplistic &&
         RegisteredParticleCount != MpCollection.countParticles()) return true;
 
     return false;
@@ -156,7 +235,7 @@ void AFileParticleGenerator::ReleaseResources()
     delete Engine; Engine = nullptr;
 }
 
-bool AFileParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles, int iEvent)
+bool AFileParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles, int /*iEvent*/)
 {
     if (!Engine)
     {
@@ -175,7 +254,7 @@ bool AFileParticleGenerator::IsParticleInUse(int /*particleId*/, QString & /*Sou
 void AFileParticleGenerator::writeToJson(QJsonObject &json) const
 {
     json["FileName"] = FileName;
-    json["Mode"] = static_cast<int>(Mode);
+    json["FileFormat"] = static_cast<int>(Mode);
 
     json["NumEventsInFile"] = NumEventsInFile;
     json["RegisteredParticleCount"] = RegisteredParticleCount;
@@ -190,13 +269,13 @@ bool AFileParticleGenerator::readFromJson(const QJsonObject &json)
     parseJson(json, "FileLastModified", lastMod);
     FileLastModified = QDateTime::fromMSecsSinceEpoch(lastMod);
 
-    Mode = AFileMode::Standard;
-    if (json.contains("Mode"))
+    Mode = APFG_FileFormat::Undefined;
+    if (json.contains("FileFormat"))
     {
         int im;
         parseJson(json, "Mode", im);
-        if (im > -1 && im < 2)
-            Mode = static_cast<AFileMode>(im);
+        if (im >= 0 && im < 5)
+            Mode = static_cast<APFG_FileFormat>(im);
     }
 
     return parseJson(json, "FileName", FileName);
@@ -215,11 +294,12 @@ void AFileParticleGenerator::InvalidateFile()
 
 bool AFileParticleGenerator::IsValidated() const
 {
-    QFileInfo fi(FileName);
+    if (Mode == APFG_FileFormat::Undefined || Mode == APFG_FileFormat::BadFormat) return false;
+    if (Mode == APFG_FileFormat::Simplistic && RegisteredParticleCount != MpCollection.countParticles()) return false;
 
+    QFileInfo fi(FileName);
     if (!fi.exists()) return false;
     if (FileLastModified != fi.lastModified()) return false;
-    if (Mode == AFileMode::Standard && RegisteredParticleCount != MpCollection.countParticles()) return false;
 
     return true;
 }
@@ -242,13 +322,13 @@ void AFileParticleGenerator::clearFileStat()
 
 // ***************************************************************************
 
-AFilePGEngineStandard::~AFilePGEngineStandard()
+AFilePGEngineSimplistic::~AFilePGEngineSimplistic()
 {
     delete Stream; Stream = nullptr;
     if (File.isOpen()) File.close();
 }
 
-bool AFilePGEngineStandard::doInit(bool bNeedInspect, bool bDetailedInspection, bool)
+bool AFilePGEngineSimplistic::doInit(bool bNeedInspect, bool bDetailedInspection, bool)
 {
     File.setFileName(FileName);
     if(!File.open(QIODevice::ReadOnly | QFile::Text))
@@ -317,7 +397,7 @@ bool AFilePGEngineStandard::doInit(bool bNeedInspect, bool bDetailedInspection, 
     return true;
 }
 
-bool AFilePGEngineStandard::doGenerateEvent(QVector<AParticleRecord *> &GeneratedParticles)
+bool AFilePGEngineSimplistic::doGenerateEvent(QVector<AParticleRecord *> &GeneratedParticles)
 {
     while (!Stream->atEnd())
     {
@@ -356,7 +436,7 @@ bool AFilePGEngineStandard::doGenerateEvent(QVector<AParticleRecord *> &Generate
     return false; //could not read particle record in file!
 }
 
-bool AFilePGEngineStandard::doSetStartEvent(int startEvent)
+bool AFilePGEngineSimplistic::doSetStartEvent(int startEvent)
 {
     if (Stream)
     {
@@ -389,7 +469,7 @@ bool AFilePGEngineStandard::doSetStartEvent(int startEvent)
     return false;
 }
 
-bool AFilePGEngineStandard::doGenerateG4File(int /*eventBegin*/, int /*eventEnd*/, const QString & /*FileName*/)
+bool AFilePGEngineSimplistic::doGenerateG4File(int /*eventBegin*/, int /*eventEnd*/, const QString & /*FileName*/)
 {
     /*
     QFile file(FileName);

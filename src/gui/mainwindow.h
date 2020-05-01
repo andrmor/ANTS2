@@ -596,8 +596,6 @@ private slots:
 
     void on_pbAddmaterialFromLibrary_clicked();
 
-    void on_cobGenerateFromFile_FileFormat_activated(int index);
-
     void on_cobGenerateFromFile_FileFormat_currentIndexChanged(int index);
 
     void on_lwFileStatistics_customContextMenuRequested(const QPoint &pos);

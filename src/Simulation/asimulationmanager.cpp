@@ -747,8 +747,8 @@ void ASimulationManager::generateG4antsConfigCommon(QJsonObject & json, ASimulat
     const AFileParticleGenerator * fpg = dynamic_cast<const AFileParticleGenerator*>(pss->getParticleGun());
     if (fpg)
     {
-        bG4Primaries = (fpg->GetFileFormat() == AFileMode::G4ants);
-        bBinaryPrimaries = fpg->bG4binary;
+        bG4Primaries = fpg->IsFormatG4();
+        bBinaryPrimaries = fpg->IsFormatBinary();
     }
     json["Primaries_G4ants"] = bG4Primaries;
     json["Primaries_Binary"] = bBinaryPrimaries;

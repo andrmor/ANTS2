@@ -4451,7 +4451,8 @@ void MainWindow::on_pbLoadExampleFileFromFileGen_clicked()
 {
     QString epff = GlobSet.ExamplesDir + "/ExampleParticlesFromFile.dat";
     SimulationManager->FileParticleGenerator->SetFileName(epff);
-    updateFileParticleGeneratorGui();
+    on_pbGenerateFromFile_Check_clicked();
+    //updateFileParticleGeneratorGui();
 }
 
 void MainWindow::on_pbNodesFromFileHelp_clicked()

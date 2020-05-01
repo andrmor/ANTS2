@@ -1,4 +1,4 @@
-#ifndef AFILEPARTICLEGENERATOR_H
+﻿#ifndef AFILEPARTICLEGENERATOR_H
 #define AFILEPARTICLEGENERATOR_H
 
 #include "aparticlegun.h"
@@ -17,7 +17,7 @@ class AMaterialParticleCollection;
 class QTextStream;
 class AFilePGEngine;
 
-enum class AFileMode {Standard = 0, G4ants = 1};
+enum class APFG_FileFormat {Undefined = 0, BadFormat = 1, Simplistic = 2, G4Ascii = 3, G4Binary = 4};
 
 struct AParticleInFileStatRecord
 {
@@ -51,10 +51,12 @@ public:
     void            SetStartEvent(int startEvent) override;
 
     void            SetFileName(const QString &fileName);
-    const QString   GetFileName() const {return FileName;}
+    QString         GetFileName() const {return FileName;}
 
-    void            SetFileFormat(AFileMode mode);
-    AFileMode       GetFileFormat() const {return Mode;}
+    APFG_FileFormat GetFileFormat() const {return Mode;}
+    bool            IsFormatG4() const;
+    bool            IsFormatBinary() const;
+    QString         GetFormatName() const;
 
     void            InvalidateFile();    //forces the file to be inspected again during next call of Init()
     bool            IsValidated() const;
@@ -68,7 +70,6 @@ public:
     int          NumEventsInFile          = 0;  // is saved in config
     int          statNumEmptyEventsInFile = 0;
     int          statNumMultipleEvents    = 0;
-    bool         bG4binary                = false;
     bool         bParticleMustBeDefined   = false; // set to true when sim is performed in ANTS2
 
     bool         bCollectExpandedStatistics = false;
@@ -80,14 +81,17 @@ private:
     AFilePGEngine * Engine = nullptr;
 
     QString FileName;
-    AFileMode Mode = AFileMode::Standard;
+    APFG_FileFormat Mode = APFG_FileFormat::Undefined;
 
     QDateTime FileLastModified;       //saved - used in validity check
 
 private:
     void clearFileStat();
     bool isRequireInspection() const;
-    bool testG4mode();
+    bool DetermineFileFormat();
+    bool isFileG4Binary();
+    bool isFileG4Ascii();
+    bool isFileSimpleAscii();
 };
 
 class AFilePGEngine
@@ -108,11 +112,11 @@ protected:
     const QRegularExpression rx = QRegularExpression("(\\ |\\,|\\:|\\t)");  // separators are: ' ' or ',' or ':' or '\t'
 };
 
-class AFilePGEngineStandard : public AFilePGEngine
+class AFilePGEngineSimplistic : public AFilePGEngine
 {
 public:
-    AFilePGEngineStandard(AFileParticleGenerator * fpg) : AFilePGEngine(fpg) {}
-    ~AFilePGEngineStandard();
+    AFilePGEngineSimplistic(AFileParticleGenerator * fpg) : AFilePGEngine(fpg) {}
+    ~AFilePGEngineSimplistic();
 
     bool doInit(bool bNeedInspect, bool bDetailedInspection, bool bParticleMustBeDefined) override;
     bool doGenerateEvent(QVector<AParticleRecord*> & GeneratedParticles) override;

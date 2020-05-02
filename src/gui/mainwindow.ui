@@ -10691,19 +10691,6 @@ Right click: toggle save on/off</string>
              </spacer>
             </item>
             <item>
-             <widget class="QPushButton" name="pbGenerateFromFile_Help">
-              <property name="maximumSize">
-               <size>
-                <width>16777215</width>
-                <height>21</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>?</string>
-              </property>
-             </widget>
-            </item>
-            <item>
              <widget class="QPushButton" name="pbLoadExampleFileFromFileGen">
               <property name="maximumSize">
                <size>
@@ -10772,6 +10759,32 @@ Right click: toggle save on/off</string>
                </size>
               </property>
              </spacer>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pbFilePreview">
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>21</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>View</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pbGenerateFromFile_Help">
+              <property name="maximumSize">
+               <size>
+                <width>50</width>
+                <height>21</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>?</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>

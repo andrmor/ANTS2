@@ -4737,3 +4737,79 @@ void MainWindow::on_pbParticlesToFile_customContextMenuRequested(const QPoint &)
     ExitParticleSettings.SaveParticles = !ExitParticleSettings.SaveParticles;
     on_pbUpdateSimConfig_clicked();
 }
+
+#include <iostream>
+#include <fstream>
+void MainWindow::on_pbFilePreview_clicked()
+{
+    AFileParticleGenerator * fg = SimulationManager->FileParticleGenerator;
+    fg->Init();
+
+    const QString FileName = fg->GetFileName();
+    int iCounter = 100;
+    QString txt;
+    if (fg->IsFormatBinary())
+    {
+        std::ifstream inB(FileName.toLatin1().data(), std::ios::in | std::ios::binary);
+        if (!inB.is_open())
+            txt = QString("Cannot open file %1").arg(FileName);
+        else
+        {
+            char h;
+            int eventId;
+            while (inB.get(h) && iCounter > 0)
+            {
+                if (h == (char)0xEE)
+                {
+                    inB.read((char*)&eventId, sizeof(int));
+                    txt += QString("EE -> %1\n").arg(eventId);
+                }
+                else if (h == (char)0xFF)
+                {
+                    std::string pn;
+                    while (inB >> h)
+                    {
+                        if (h == (char)0x00) break;
+                        pn += h;
+                    }
+                    double buf[8];
+                    inB.read((char*)buf, 8*sizeof(double));
+                    if (inB.fail())
+                        txt += "Unexpected format of a line in the binary file with the input particles";
+                    else
+                    {
+                        QString s(pn.data());
+                        for (int i=0; i<8; i++)
+                            s += " " + QString::number(buf[i]);
+                        txt += QString("FF -> %1\n").arg(s);
+                    }
+                }
+                else
+                {
+                    txt += "Unexpected format of a line in the binary file with the input particles";
+                    break;
+                }
+                iCounter--;
+            }
+        }
+    }
+    else
+    {
+        QFile file(FileName);
+        if(!file.open(QIODevice::ReadOnly | QFile::Text))
+            txt = QString("Cannot open file %1").arg(FileName);
+        else
+        {
+            QTextStream Stream(&file);
+            while (!Stream.atEnd() && iCounter > 0)
+            {
+                const QString line = Stream.readLine().simplified();
+                txt += line + "\n";
+                iCounter--;
+            }
+        }
+    }
+
+    if (iCounter == 0) txt += "...";
+    message1(txt, FileName, this);
+}

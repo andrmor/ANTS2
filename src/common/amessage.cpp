@@ -37,3 +37,26 @@ void message(QString text)
 
 #endif
 
+#include <QDialog>
+#include <QVBoxLayout>
+#include <QPlainTextEdit>
+#include <QPushButton>
+void message1(const QString & text, const QString & title, QWidget *parent)
+{
+    QDialog d(parent);
+    QVBoxLayout * l = new QVBoxLayout(&d);
+    QPlainTextEdit * e = new QPlainTextEdit;
+        e->appendPlainText(text);
+    l->addWidget(e);
+    QPushButton * pb = new QPushButton("Close");
+        QObject::connect(pb, &QPushButton::clicked, &d, &QDialog::accept);
+    l->addWidget(pb);
+
+    QTextCursor curs = e->textCursor();
+    curs.movePosition(QTextCursor::Start, QTextCursor::MoveAnchor);
+    e->setTextCursor(curs);
+
+    d.resize(800, 400);
+    d.setWindowTitle(title);
+    d.exec();
+}

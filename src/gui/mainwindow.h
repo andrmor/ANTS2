@@ -606,6 +606,8 @@ private slots:
 
     void on_pbParticlesToFile_customContextMenuRequested(const QPoint &pos);
 
+    void on_pbFilePreview_clicked();
+
 public slots:
     void on_pbRebuildDetector_clicked();
     void onRequestDetectorGuiUpdate();     // called to update GUI related to Detector

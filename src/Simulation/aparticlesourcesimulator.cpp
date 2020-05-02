@@ -175,7 +175,11 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
         ErrorString = ParticleGun->GetErrorString();
         return false;
     }
-    if (PartGenMode == "File") totalEventCount = static_cast<AFileParticleGenerator*>(ParticleGun)->NumEventsInFile;
+
+    if (PartGenMode == "File")
+    {
+        totalEventCount = std::min(totalEventCount, static_cast<AFileParticleGenerator*>(ParticleGun)->NumEventsInFile);
+    }
 
     ParticleTracker->configure(&simSettings, fBuildParticleTracks, &tracks, fIgnoreNoDepoEvents, ID);
     ParticleTracker->resetCounter();

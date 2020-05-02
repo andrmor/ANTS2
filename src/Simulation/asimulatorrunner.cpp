@@ -104,7 +104,7 @@ bool ASimulatorRunner::setup(int threadCount, bool bPhotonSourceSim)
             delete worker;
             break;
         }
-        totalEventCount += worker->getEventCount();
+        totalEventCount += workerEventCount;
 
         bOK = worker->finalizeConfig();
         if (!bOK)

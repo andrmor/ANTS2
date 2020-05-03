@@ -624,6 +624,7 @@ bool AFilePGEngineG4antsTxt::doGenerateEvent(QVector<AParticleRecord *> &Generat
     std::string str;
     while ( getline(*inStream, str) )
     {
+        qDebug() << str.data();
         if (str.empty())
         {
             if (inStream->eof()) return false;
@@ -658,6 +659,8 @@ bool AFilePGEngineG4antsTxt::doGenerateEvent(QVector<AParticleRecord *> &Generat
 
         GeneratedParticles << p;
     }
+
+    if (inStream->eof()) return true;
     return false;
 }
 
@@ -897,6 +900,8 @@ bool AFilePGEngineG4antsBin::doGenerateEvent(QVector<AParticleRecord *> & Genera
             return false;
         }
     }
+
+    if (inStream->eof()) return true;
     return false;
 }
 

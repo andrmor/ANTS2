@@ -295,7 +295,7 @@ void MainWindow::on_pbGunTest_clicked()
     font.setBold(true);
     ui->pbStopScan->setFont(font);
 
-    SimulationManager->FileParticleGenerator->bParticleMustBeDefined = false;
+    SimulationManager->FileParticleGenerator->SetValidationMode(AFileParticleGenerator::Relaxed);
     TestParticleGun(pg, ui->sbGunTestEvents->value()); //script generator is aborted on click of the stop button!
 
     ui->pbStopScan->setEnabled(false);
@@ -672,13 +672,16 @@ void containsMonsGrids(const AGeoObject * obj, bool & bGrid, bool & bMon)
 void MainWindow::on_pbParticleSourcesSimulate_clicked()
 {
     // TODO !*! find a way to do it in SimulationManager - without the settings hub it is not straightforward at this point
+    // to avoid check file in each thread
     if (ui->cobParticleGenerationMode->currentIndex() == 1)  // "From file"
     {
-        SimulationManager->FileParticleGenerator->bParticleMustBeDefined = !ui->cbGeant4ParticleTracking->isChecked();
-        bool bOK = SimulationManager->FileParticleGenerator->Init(); // to avoid check file in each thread
+        AFileParticleGenerator * pg = SimulationManager->FileParticleGenerator;
+        pg->SetValidationMode(ui->cbGeant4ParticleTracking->isChecked() ? AFileParticleGenerator::Relaxed
+                                                                        : AFileParticleGenerator::Strict);
+        bool bOK = pg->Init();
         if (!bOK)
         {
-            message(SimulationManager->FileParticleGenerator->GetErrorString(), this);
+            message(pg->GetErrorString(), this);
             return;
         }
         updateFileParticleGeneratorGui();
@@ -811,13 +814,13 @@ void MainWindow::on_leGenerateFromFile_FileName_editingFinished()
 void MainWindow::on_pbGenerateFromFile_Check_clicked()
 {
     AFileParticleGenerator* pg = SimulationManager->FileParticleGenerator;
-    pg->InvalidateFile();
 
     pg->bCollectExpandedStatistics = ui->cbFileCollectStatistics->isChecked();
-
-    WindowNavigator->BusyOn();
-        bool bOK = pg->Init();
-    WindowNavigator->BusyOff();
+    pg->SetValidationMode(ui->cbGeant4ParticleTracking->isChecked() ? AFileParticleGenerator::Relaxed
+                                                                    : AFileParticleGenerator::Strict);
+    WindowNavigator->BusyOn();  // -->
+    bool bOK = pg->Init();
+    WindowNavigator->BusyOff(); // <--
 
     if (!bOK) message(pg->GetErrorString(), this);
 

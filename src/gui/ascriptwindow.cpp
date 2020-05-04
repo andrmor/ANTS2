@@ -1537,6 +1537,7 @@ void AScriptWindow::removeTab(int tab)
     ScriptTabs.removeAt(tab);
 
     if (ScriptTabs.isEmpty()) AddNewTab();
+    updateFileStatusIndication();
 }
 
 void AScriptWindow::clearAllTabs()

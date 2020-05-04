@@ -181,6 +181,46 @@ void ATextEdit::keyPressEvent(QKeyEvent *e)
         }
         break;
       }
+    case Qt::Key_BraceRight :
+      { // } as only one char in the line
+        tc.select(QTextCursor::LineUnderCursor);
+        QString line = tc.selectedText();
+        if (line.simplified().isEmpty())
+        {
+            QTextCursor tc1 = textCursor();
+            tc1.movePosition(QTextCursor::Up);
+            tc1.movePosition(QTextCursor::EndOfLine);
+
+            int iLevel = 0;
+            while (!tc1.atStart())
+            {
+                tc1.clearSelection();
+                tc1.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor);
+                const QString ch = tc1.selectedText();
+                if (ch == "}")
+                {
+                    iLevel++;
+                    continue;
+                }
+                if (ch != "{") continue;
+                iLevel--;
+                if (iLevel < 0)
+                {
+                    tc1.select(QTextCursor::LineUnderCursor);
+                    QString start = tc1.selectedText();
+                    if (start.simplified() == "{")
+                    {
+                        int indent = getIndent(start);
+                        tc.insertText(QString(" ").repeated(indent) + "}");
+                        setTextCursor(tc);
+                        return;
+                    }
+                    break;
+                }
+            }
+        }
+        break;
+      }
     default:
         break;
     }

@@ -216,6 +216,7 @@ private slots:
     void onForward();
     void on_pbAccept_clicked();
     void on_pbCancel_clicked();
+    void on_actionShortcuts_triggered();
 };
 
 class AScriptWindowTabItem : public QObject

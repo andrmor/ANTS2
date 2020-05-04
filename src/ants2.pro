@@ -410,7 +410,6 @@ SOURCES += main.cpp \
     Reconstruction/areconstructionworker.cpp \
     common/ahistogram.cpp \
     modules/apmdummystructure.cpp \
-    gui/MainWindowTools/asaveparticlestofiledialog.cpp \
     Simulation/asaveparticlestofilesettings.cpp
 
 HEADERS  += common/CorrelationFilters.h \
@@ -567,7 +566,6 @@ HEADERS  += common/CorrelationFilters.h \
     common/ahistogram.h \
     modules/apmanddummy.h \
     modules/apmdummystructure.h \
-    gui/MainWindowTools/asaveparticlestofiledialog.h \
     Simulation/asaveparticlestofilesettings.h
 
 # --- SIM ---
@@ -720,6 +718,7 @@ ants2_GUI {
     gui/amateriallibrarybrowser.cpp \
     gui/DAWindowTools/amaterialloaderdialog.cpp \
     gui/ageant4configdialog.cpp \
+    gui/MainWindowTools/asaveparticlestofiledialog.cpp \
     gui/aguiwindow.cpp
 
 HEADERS  += gui/mainwindow.h \
@@ -803,6 +802,7 @@ HEADERS  += gui/mainwindow.h \
     gui/amateriallibrarybrowser.h \
     gui/DAWindowTools/amaterialloaderdialog.h \
     gui/ageant4configdialog.h \
+    gui/MainWindowTools/asaveparticlestofiledialog.h \
     gui/aguiwindow.h
 
 FORMS += gui/mainwindow.ui \

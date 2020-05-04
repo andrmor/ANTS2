@@ -2159,3 +2159,17 @@ void AScriptWindow::on_pbCancel_clicked()
     bAccepted = false;
     close();
 }
+
+void AScriptWindow::on_actionShortcuts_triggered()
+{
+    QString s = "For the current line:\n"
+                "Ctrl + Alt + Del\tDelete line\n"
+                "Ctrl + Alt + Down\tDublicate line\n"
+                "Ctrl + Shift + Up\tShift line up\n"
+                "Ctrl + Shift + Down\tShift line down\n"
+                "\n"
+                "For selected text:\n"
+                "Ctrl + i\t\tAuto-align JavaScript";
+
+    message(s, this);
+}

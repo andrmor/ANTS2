@@ -171,7 +171,7 @@ void ATrackBuildOptions::applyToParticleTrack(TrackHolderClass *track, int Parti
 
 void ATrackBuildOptions::applyToParticleTrack(TVirtualGeoTrack *track, int ParticleId) const
 {
-    if ( ParticleId < CustomParticle_Attributes.size() && CustomParticle_Attributes.at(ParticleId) )
+    if ( ParticleId >= 0 && ParticleId < CustomParticle_Attributes.size() && CustomParticle_Attributes.at(ParticleId) )
     {
         //custom properties defined for this particle
         CustomParticle_Attributes.at(ParticleId)->setTrackAttributes(track);
@@ -180,16 +180,16 @@ void ATrackBuildOptions::applyToParticleTrack(TVirtualGeoTrack *track, int Parti
 
     TA_DefaultParticle.setTrackAttributes(track);
 
-    if ( ParticleId < DefaultParticle_Colors.size())
+    if ( ParticleId >=0 && ParticleId < DefaultParticle_Colors.size())
         track->SetLineColor( DefaultParticle_Colors.at(ParticleId) );
 }
 
 int ATrackBuildOptions::getParticleColor(int ParticleId) const
 {
-    if ( ParticleId < CustomParticle_Attributes.size() && CustomParticle_Attributes.at(ParticleId) )
+    if ( ParticleId >=0 && ParticleId < CustomParticle_Attributes.size() && CustomParticle_Attributes.at(ParticleId) )
         return CustomParticle_Attributes.at(ParticleId)->color; //custom properties defined for this particle
 
-    if ( ParticleId < DefaultParticle_Colors.size()) return DefaultParticle_Colors.at(ParticleId);
+    if ( ParticleId >=0 && ParticleId < DefaultParticle_Colors.size()) return DefaultParticle_Colors.at(ParticleId);
     else return TA_DefaultParticle.color;
 }
 

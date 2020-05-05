@@ -155,11 +155,11 @@ const QStringList AMaterialParticleCollection::getListOfMaterialNames() const
     return l;
 }
 
-int AMaterialParticleCollection::getParticleId(QString name) const
+int AMaterialParticleCollection::getParticleId(const QString & name) const
 {
-  for (int i=0; i<ParticleCollection.size(); i++)
-    if (ParticleCollection.at(i)->ParticleName == name) return i;
-  return -1;
+    for (int i = 0; i < ParticleCollection.size(); i++)
+        if (ParticleCollection.at(i)->ParticleName == name) return i;
+    return -1;
 }
 
 const QString AMaterialParticleCollection::getParticleName(int particleIndex) const

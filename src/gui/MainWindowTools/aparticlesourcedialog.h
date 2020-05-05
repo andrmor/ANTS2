@@ -19,7 +19,7 @@ public:
     explicit AParticleSourceDialog(MainWindow & MW, const AParticleSourceRecord * Rec);
     ~AParticleSourceDialog();
 
-    AParticleSourceRecord* getResult(); //transfers ownership
+    AParticleSourceRecord * getResult(); //transfers ownership
 
 protected:
     virtual void closeEvent(QCloseEvent * e) override;
@@ -47,12 +47,12 @@ signals:
     void delayClose();
 
 private:
-    MainWindow& MW;
+    MainWindow & MW;
 
-    AParticleSourceRecord* Rec;
-    const AParticleSourceRecord* OriginalRec;
+    AParticleSourceRecord * Rec = nullptr;
+    const AParticleSourceRecord * OriginalRec = nullptr;
 
-    Ui::AParticleSourceDialog *ui;
+    Ui::AParticleSourceDialog * ui;
 
     bool bUpdateInProgress = false;
 

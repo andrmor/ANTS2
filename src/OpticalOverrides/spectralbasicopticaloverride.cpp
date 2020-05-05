@@ -156,6 +156,7 @@ void SpectralBasicOpticalOverride::initializeWaveResolved()
     }
 }
 
+#include "afiletools.h"
 const QString SpectralBasicOpticalOverride::loadData(const QString &fileName)
 {
     QVector< QVector<double>* > vec;

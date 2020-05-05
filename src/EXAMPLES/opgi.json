@@ -4538,7 +4538,7 @@
                     "*MaterialName": "GSO",
                     "*Tags": [
                     ],
-                    "BulkAbsorption": 0,
+                    "BulkAbsorption": 0.00481,
                     "BulkAbsorptionWave": [
                     ],
                     "ChemicalComposition": {
@@ -4630,7 +4630,7 @@
                         "ElementCompositionString": "Gd2SiO5",
                         "MeanAtomMass": 52.84840050000001
                     },
-                    "Comments": "",
+                    "Comments": "Bulk abosrption from: https://doi.org/10.1134/S154747711403011X",
                     "Density": 6.7,
                     "ElDiffusionL": 0,
                     "ElDiffusionT": 0,
@@ -21307,12 +21307,6 @@
                     "Scat": 1,
                     "ScatMode": 2,
                     "Spec": 0
-                },
-                {
-                    "Albedo": 0.95,
-                    "MatFrom": 5,
-                    "MatTo": 3,
-                    "Model": "FSNP"
                 }
             ]
         },
@@ -21325,6 +21319,7 @@
                     "NumY": 2,
                     "PMtype": 0,
                     "Packing": 0,
+                    "PositioningScript": "var Pi = 3.1415926;\nvar d = 30.;\n\nvar basex = [-3., -4., -5., -6.,\n             -2., -3., -4.,\n             -1., -2.,\n             0.];\nvar basey = [3.,  2.,  1.,  0., \t\n             2.,  1.,  0.,\n             1.,  0.,\n             0.];\n\nPM(0., 0., 0, 0);        \nfor (var i=0; i<6; i++) {\n  // rotation matrix\n  var R11 = Math.cos(i*Pi/3.);\n  var R12 = -Math.sin(i*Pi/3.);\n  var R21 = Math.sin(i*Pi/3.);\n  var R22 = Math.cos(i*Pi/3.);\n\n  for (var j=0; j<10; j++) { \n    var x = basex[j] - 1.;\n    var y = Math.sqrt(3.) * (basey[j] + 1.);\n\n    var xx = R11*x + R12*y;\n    var yy = R21*x + R22*y;\n    PM(xx*d, yy*d, 0, 0);\n  }\n}",
                     "Regularity": 0,
                     "UseRings": false
                 }
@@ -21337,6 +21332,7 @@
                     "NumY": 2,
                     "PMtype": 0,
                     "Packing": 0,
+                    "PositioningScript": "var Pi = 3.1415926;\nvar d = 30.;\n\nvar basex = [-3., -4., -5., -6.,\n             -2., -3., -4.,\n             -1., -2.,\n             0.];\nvar basey = [3.,  2.,  1.,  0., \t\n             2.,  1.,  0.,\n             1.,  0.,\n             0.];\n   \nfor (var i=0; i<6; i++) {\n  // rotation matrix\n  var R11 = Math.cos(i*Pi/3.);\n  var R12 = -Math.sin(i*Pi/3.);\n  var R21 = Math.sin(i*Pi/3.);\n  var R22 = Math.cos(i*Pi/3.);\n\n  for (var j=0; j<10; j++) { \n    var x = basex[j] - 1.;\n    var y = Math.sqrt(3.) * (basey[j] + 1.);\n\n    var xx = R11*x + R12*y;\n    var yy = R21*x + R22*y;\n    PM(xx*d, yy*d, 0, 0);\n  }\n}\nPM(0., 0., 0, 0);     ",
                     "Regularity": 0,
                     "UseRings": false
                 }
@@ -21462,13 +21458,13 @@
                         "size1": 100,
                         "size2": 100,
                         "timeBins": 1000,
-                        "timeFrom": 0,
-                        "timeTo": 550,
+                        "timeFrom": -50,
+                        "timeTo": 1100,
                         "waveBins": 150,
                         "waveFrom": -1,
                         "waveTo": 148,
-                        "xbins": 1,
-                        "ybins": 1
+                        "xbins": 100,
+                        "ybins": 100
                     },
                     "Phi": 90,
                     "Psi": 0,
@@ -21482,6 +21478,32 @@
                     "X": -9.9,
                     "Y": 0,
                     "Z": 0,
+                    "color": 1,
+                    "fActive": false,
+                    "fExpanded": false,
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Material": 0,
+                    "Name": "FirstStageWindow",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoBBox",
+                    "ShapeSpecific": {
+                        "dx": 125,
+                        "dy": 150,
+                        "dz": 0.5
+                    },
+                    "Theta": 0,
+                    "X": 100,
+                    "Y": 0,
+                    "Z": -104.5,
                     "color": 1,
                     "fActive": false,
                     "fExpanded": false,
@@ -21830,17 +21852,17 @@
                 "ExclProcActive": false,
                 "ExclToProc": "",
                 "ExclToProcPrim": false,
-                "Expansion": 0,
-                "HideAllTransport": true,
+                "Expansion": 4,
+                "HideAllTransport": false,
                 "HidePrimTransport": false,
-                "KinEn": false,
-                "LimToProc": "",
-                "LimToProcActive": false,
+                "KinEn": true,
+                "LimToProc": "C",
+                "LimToProcActive": true,
                 "LimToProcPrim": false,
                 "Material": false,
                 "Position": true,
                 "Precision": 4,
-                "ShowFilters": false,
+                "ShowFilters": true,
                 "ShowPMsig": false,
                 "ShowTracks": true,
                 "Step": false,
@@ -22223,6 +22245,7 @@
             },
             "DetStatNumBins": 100,
             "Geant4SimulationSettings": {
+                "BinaryOutput": false,
                 "Commands": [
                     "/process/em/fluo true",
                     "/process/em/auger true",
@@ -22233,6 +22256,13 @@
                 ],
                 "PhysicsList": "QGSP_BIC_HP",
                 "Precision": 6,
+                "SP_FileName": "/home/andr/tmp/G4/a100.bin",
+                "SP_StopTrack": true,
+                "SP_TimeFrom": 0,
+                "SP_TimeTo": 1000000,
+                "SP_UseTimeWindow": true,
+                "SP_VolumeName": "FirstStageWindow",
+                "SaveParticles": false,
                 "SensitiveVolumes": [
                     "Scint*"
                 ],
@@ -22331,15 +22361,61 @@
         "Mode": "SourceSim",
         "ParticleSourcesConfig": {
             "GenerationFromFile": {
-                "FileLastModified": 0,
-                "FileName": "",
-                "NumEventsInFile": 0,
-                "RegisteredParticleCount": -1
+                "FileLastModified": 1585934905855,
+                "FileName": "/home/andr/tmp/G4/a100.bin",
+                "Mode": 1,
+                "NumEventsInFile": 100,
+                "RegisteredParticleCount": 5
             },
             "GenerationFromScript": {
-                "Script": "// Number of bunches = Number of requested events / number of threads\n\nvar Time = gen.RetrieveVariables( ); if (Time.length == 0) Time.push(0)\n\nvar NumPart = 310 / gen.GetNumThreads()\nfor (var i=0; i<NumPart; i++)\n        gen.AddParticle( 2,  130000,  -10,  0,  0,    1,  0,  0,   Time[0] )\n\nTime[0] += 10.0; gen.StoreVariables(Time)"
+                "Script": "var time = gen.GetCurrentEvent() * 10.0\nfor (var i=0; i<310; i++)\n        gen.AddParticle( 2,  130000,  -10,  0,  0,    1,  0,  0,  time )\n"
             },
             "ParticleSources": [
+                {
+                    "Activity": 0,
+                    "CollPhi": 90,
+                    "CollTheta": 90,
+                    "DoMaterialLimited": false,
+                    "GunParticles": [
+                        {
+                            "Energy": 130000,
+                            "Individual": true,
+                            "LinkedTo": 0,
+                            "LinkingOppositeDir": false,
+                            "LinkingProbability": 0,
+                            "Particle": {
+                                "A": -1,
+                                "Name": "proton",
+                                "Type": 1,
+                                "Z": -1
+                            },
+                            "PreferredUnits": "MeV",
+                            "StatWeight": 1,
+                            "UseFixedEnergy": true
+                        }
+                    ],
+                    "LimitedToMaterial": "",
+                    "Name": "Simgle proton",
+                    "Particles": 1,
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Size1": 2,
+                    "Size2": 2,
+                    "Size3": 10,
+                    "Spread": 0,
+                    "Theta": 0,
+                    "TimeAverage": 0,
+                    "TimeAverageMode": 0,
+                    "TimeAveragePeriod": 10,
+                    "TimeAverageStart": 0,
+                    "TimeSpreadMode": 0,
+                    "TimeSpreadSigma": 50,
+                    "TimeSpreadWidth": 100,
+                    "Type": 0,
+                    "X": -10,
+                    "Y": 0,
+                    "Z": 0
+                },
                 {
                     "Activity": 1,
                     "CollPhi": 90,
@@ -22364,7 +22440,7 @@
                         }
                     ],
                     "LimitedToMaterial": "",
-                    "Name": "P-beam",
+                    "Name": "Bunches",
                     "Particles": 1,
                     "Phi": 0,
                     "Psi": 0,
@@ -22373,6 +22449,13 @@
                     "Size3": 10,
                     "Spread": 0,
                     "Theta": 0,
+                    "TimeAverage": 0,
+                    "TimeAverageMode": 1,
+                    "TimeAveragePeriod": 10,
+                    "TimeAverageStart": 0,
+                    "TimeSpreadMode": 0,
+                    "TimeSpreadSigma": 0.43,
+                    "TimeSpreadWidth": 10,
                     "Type": 0,
                     "X": -10,
                     "Y": 0,
@@ -22380,12 +22463,14 @@
                 }
             ],
             "SourceControlOptions": {
-                "AllowMultipleParticles": false,
-                "AverageParticlesPerEvent": 0.1,
-                "ClusterMergeRadius": 0.5,
+                "AllowMultipleParticles": true,
+                "AverageParticlesPerEvent": 310,
+                "ClusterMerge": false,
+                "ClusterMergeRadius": 0.01,
+                "ClusterMergeTime": 0.1,
                 "DoS1": true,
                 "DoS2": false,
-                "EventsToDo": 310,
+                "EventsToDo": 1,
                 "IgnoreNoDepoEvents": false,
                 "IgnoreNoHitsEvents": false,
                 "ParticleGenerationMode": "Sources",
@@ -22461,8 +22546,8 @@
             },
             "SinglePositionOptions": {
                 "SingleX": 2.5,
-                "SingleY": 1,
-                "SingleZ": -85
+                "SingleY": 0,
+                "SingleZ": -535
             },
             "WaveTimeOptions": {
                 "UseFixedWavelength": false,

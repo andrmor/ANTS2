@@ -132,27 +132,28 @@ bool ASourceParticleGenerator::Init()
     return true; //TODO  check for fails
 }
 
-bool ASourceParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles)
+bool ASourceParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles, int iEvent)
 {
+    //after any operation with sources (add, remove), init should be called before the first use!
     bAbortRequested = false;
-    //after any operation with sources (add, remove), init should be called before first use!
 
-    //selecting the source
+    //select the source
     int isource = 0;
     int NumSources = ParticleSourcesData.size();
-    if (NumSources>1)
+    if (NumSources > 1)
     {
-        double rnd = RandGen->Rndm()*TotalActivity;
-        for (; isource<NumSources-1; isource++)
+        double rnd = RandGen->Rndm() * TotalActivity;
+        for (; isource<NumSources - 1; isource++)
         {
             if (ParticleSourcesData[isource]->Activity >= rnd) break; //this source selected
             rnd -= ParticleSourcesData[isource]->Activity;
         }
     }
+    AParticleSourceRecord * Source = ParticleSourcesData[isource];
 
     //position
     double R[3];
-    if (ParticleSourcesData[isource]->fLimit)
+    if (Source->fLimit)
     {
         QElapsedTimer timer; //TODO make dynamic member
         timer.start();
@@ -163,110 +164,130 @@ bool ASourceParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & Generat
             //qDebug() << "Time passed" << timer.elapsed() << "milliseconds";
             GeneratePosition(isource, R);
         }
-        while ( Detector->GeoManager->FindNode(R[0], R[1], R[2])->GetVolume()->GetMaterial()->GetIndex() != ParticleSourcesData[isource]->LimitedToMat ); //gGeoManager is Thread-aware
+        while ( Detector->GeoManager->FindNode(R[0], R[1], R[2])->GetVolume()->GetMaterial()->GetIndex() != Source->LimitedToMat ); //gGeoManager is Thread-aware
     }
     else GeneratePosition(isource, R);
+
+    //time
+    double time;
+    if (Source->TimeAverageMode == 0)
+        time = Source->TimeAverage;
+    else
+        time = Source->TimeAverageStart + iEvent * Source->TimeAveragePeriod;
+    switch (Source->TimeSpreadMode)
+    {
+    default:
+    case 0:
+        break;
+    case 1:
+        time = RandGen->Gaus(time, Source->TimeSpreadSigma);
+        break;
+    case 2:
+        time += (-0.5 * Source->TimeSpreadWidth + RandGen->Rndm() * Source->TimeSpreadWidth);
+        break;
+    }
 
     //selecting the particle
     double rnd = RandGen->Rndm() * TotalParticleWeight.at(isource);
     int iparticle;
-    for (iparticle = 0; iparticle<ParticleSourcesData[isource]->GunParticles.size()-1; iparticle++)
+    for (iparticle = 0; iparticle < Source->GunParticles.size() - 1; iparticle++)
     {
-        if (ParticleSourcesData[isource]->GunParticles[iparticle]->Individual)
+        if (Source->GunParticles[iparticle]->Individual)
         {
-            if (ParticleSourcesData[isource]->GunParticles[iparticle]->StatWeight >= rnd) break; //this one
-            rnd -= ParticleSourcesData[isource]->GunParticles[iparticle]->StatWeight;
+            if (Source->GunParticles[iparticle]->StatWeight >= rnd) break; //this one
+            rnd -= Source->GunParticles[iparticle]->StatWeight;
         }
     }
-    //iparticle is the particle number in the list
-    //qDebug()<<"----Particle"<<iparticle<<"selected";
+    //qDebug() << "----Particle" << iparticle << "selected";
 
-  //algorithm of generation depends on whether there are particles linked to this one
-  if (LinkedPartiles[isource][iparticle].size() == 1) //1 - only the particle itself
+    //algorithm of generation depends on whether there are particles linked to this one
+    if (LinkedPartiles[isource][iparticle].size() == 1) //1 - only the particle itself
     {
-      //there are no linked particles     
-      //qDebug()<<"Generating individual particle"<<iparticle;
-      ASourceParticleGenerator::AddParticleInCone(isource, iparticle, GeneratedParticles);
-      GeneratedParticles.last()->r[0] = R[0];
-      GeneratedParticles.last()->r[1] = R[1];
-      GeneratedParticles.last()->r[2] = R[2];
+        //there are no linked particles
+        //qDebug()<<"Generating individual particle"<<iparticle;
+        AddParticleInCone(isource, iparticle, GeneratedParticles);
+        AParticleRecord * p = GeneratedParticles.last();
+        p->r[0] = R[0];
+        p->r[1] = R[1];
+        p->r[2] = R[2];
+        p->time = time;
     }
-  else
+    else
     {
-      //there are linked particles
-      //qDebug()<<"Generating linked particles (no direction correlation)!";
-
-      bool NoEvent = true;
-      QVector<bool> WasGenerated(LinkedPartiles[isource][iparticle].size(), false);
-      do
+        //there are linked particles
+        //qDebug()<<"Generating linked particles (without direction correlation)!";
+        bool NoEvent = true;
+        QVector<bool> WasGenerated(LinkedPartiles[isource][iparticle].size(), false);
+        do
         {
-          for (int ip = 0; ip<LinkedPartiles[isource][iparticle].size(); ip++)  //ip - index in the list of linked particles
+            for (int ip = 0; ip < LinkedPartiles[isource][iparticle].size(); ip++)  //ip - index in the list of linked particles
             {
-              //qDebug()<<"---Testing particle:"<<ip;
-              int thisParticle = LinkedPartiles[isource][iparticle][ip].iParticle;
-              int linkedTo = LinkedPartiles[isource][iparticle][ip].LinkedTo;
-              bool fOpposite = ParticleSourcesData[isource]->GunParticles[thisParticle]->LinkingOppositeDir;
+                //qDebug()<<"---Testing particle:"<<ip;
+                int thisParticle = LinkedPartiles[isource][iparticle][ip].iParticle;
+                int linkedTo = LinkedPartiles[isource][iparticle][ip].LinkedTo;
+                bool fOpposite = Source->GunParticles[thisParticle]->LinkingOppositeDir;
 
-              if (ip != 0)
+                if (ip != 0)
                 {
-                  //paticle this one is linked to was generated?                  
-                  if (!WasGenerated[linkedTo])
+                    //paticle this one is linked to was generated?
+                    if (!WasGenerated[linkedTo])
                     {
-                      //qDebug()<<"skip: parent not generated";
-                      continue;
+                        //qDebug()<<"skip: parent not generated";
+                        continue;
                     }
-                  //probability test
-                  double LinkingProb = ParticleSourcesData[isource]->GunParticles[thisParticle]->LinkingProbability;
-                  if (RandGen->Rndm() > LinkingProb)
+                    //probability test
+                    double LinkingProb = Source->GunParticles[thisParticle]->LinkingProbability;
+                    if (RandGen->Rndm() > LinkingProb)
                     {
-                      //qDebug()<<"skip: linking prob fail";
-                      continue;
+                        //qDebug()<<"skip: linking prob fail";
+                        continue;
                     }
-                  if (!fOpposite)
-                  {
-                      //checking the cone
-                      if (RandGen->Rndm() > CollimationProbability[isource])
+                    if (!fOpposite)
+                    {
+                        //checking the cone
+                        if (RandGen->Rndm() > CollimationProbability[isource])
                         {
-                          //qDebug()<<"skip: cone test fail";
-                          continue;
+                            //qDebug()<<"skip: cone test fail";
+                            continue;
                         }
-                  } //else it will be generated in opposite direction and ignore collimation cone
+                    } //else it will be generated in opposite direction and ignore collimation cone
                 }
-              else fOpposite = false; //(paranoic) protection
+                else fOpposite = false; //(paranoic) protection
 
-              //generating particle
-              //qDebug()<<"success, adding his particle!";
-              NoEvent = false;
-              WasGenerated[ip] = true;
+                //generating particle
+                //qDebug()<<"success, adding his particle!";
+                NoEvent = false;
+                WasGenerated[ip] = true;
 
-              if (!fOpposite)
-                ASourceParticleGenerator::AddParticleInCone(isource, thisParticle, GeneratedParticles);
-              else
+                if (!fOpposite)
+                    AddParticleInCone(isource, thisParticle, GeneratedParticles);
+                else
                 {
-                  //find index in the GeneratedParticles
-                  int index = -1;
-                  for (int i=0; i<linkedTo+1; i++) if (WasGenerated.at(i)) index++;
-                  //qDebug() << "making this particle opposite to:"<<linkedTo<<"index in GeneratedParticles:"<<index;
+                    //find index in the GeneratedParticles
+                    int index = -1;
+                    for (int i = 0; i < linkedTo + 1; i++)
+                        if (WasGenerated.at(i)) index++;
+                    //qDebug() << "making this particle opposite to:"<<linkedTo<<"index in GeneratedParticles:"<<index;
 
-                  AParticleRecord* ps = new AParticleRecord();
-                  ps->Id = ParticleSourcesData[isource]->GunParticles[thisParticle]->ParticleId;
-                  ps->energy = ParticleSourcesData[isource]->GunParticles[thisParticle]->generateEnergy(RandGen);
-                  ps->v[0] = -GeneratedParticles.at(index)->v[0];
-                  ps->v[1] = -GeneratedParticles.at(index)->v[1];
-                  ps->v[2] = -GeneratedParticles.at(index)->v[2];
-                  GeneratedParticles << ps;
+                    AParticleRecord * ps = new AParticleRecord();
+                    ps->Id = Source->GunParticles[thisParticle]->ParticleId;
+                    ps->energy = Source->GunParticles[thisParticle]->generateEnergy(RandGen);
+                    ps->v[0] = -GeneratedParticles.at(index)->v[0];
+                    ps->v[1] = -GeneratedParticles.at(index)->v[1];
+                    ps->v[2] = -GeneratedParticles.at(index)->v[2];
+                    GeneratedParticles << ps;
                 }
 
-              GeneratedParticles.last()->r[0] = R[0];
-              GeneratedParticles.last()->r[1] = R[1];
-              GeneratedParticles.last()->r[2] = R[2];
+                AParticleRecord * p = GeneratedParticles.last();
+                p->r[0] = R[0];
+                p->r[1] = R[1];
+                p->r[2] = R[2];
+                p->time = time;
             }
-          //qDebug()<<"---No Event:"<<NoEvent;
         }
-      while (NoEvent);
+        while (NoEvent);
     }
-
-  return true;
+    return true;
 }
 
 void ASourceParticleGenerator::GeneratePosition(int isource, double *R) const

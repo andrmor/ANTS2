@@ -79,10 +79,15 @@ void APythonScriptManager::RegisterInterface(AScriptInterface *interface, const 
     QObject::connect(interface, &AScriptInterface::AbortScriptEvaluation, this, &APythonScriptManager::AbortEvaluation);
 }
 
-QString APythonScriptManager::Evaluate(const QString &Script)
+QString APythonScriptManager::Evaluate(const QString & Script)
 {
   LastError.clear();
   fAborted = false;
+
+  bScriptExpanded = false;
+  QString ExpandedScript;
+  bool bOK = expandScript(Script, ExpandedScript);
+  if (!bOK) return LastError;
 
   emit onStart();
 
@@ -111,7 +116,7 @@ QString APythonScriptManager::Evaluate(const QString &Script)
       GlobalDict.setNewRef(PyDict_Copy(dict)); //decref for the old one (if not NULL)
       //should do Py_XINCREF(GlobalDict.object())? seems not - no memory leak
       //do not do decref for dict -> crash
-      p.setNewRef(PyRun_String(Script.toLatin1().data(), Py_file_input, GlobalDict, GlobalDict));
+      p.setNewRef(PyRun_String(ExpandedScript.toLatin1().data(), Py_file_input, GlobalDict, GlobalDict));
     }
 
   if (!p) handleError();
@@ -267,7 +272,10 @@ void APythonScriptManager::stdErr(const QString &s)
               lineNumber = lns.toInt(&bOK);
               if (bOK)
               {
-                  qDebug() << "Error line number:"<<lineNumber;
+                  //qDebug() << "Error line number:"<<lineNumber;
+                  //qDebug() << "->-"<<lineNumber;
+                  correctLineNumber(lineNumber);
+                  //qDebug() << "-<-"<<lineNumber;
                   requestHighlightErrorLine(lineNumber);
               }
           }

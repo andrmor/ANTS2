@@ -19,6 +19,8 @@ class AParticleGun;
 class QProcess;
 class AEventTrackingRecord;
 class AExternalProcessHandler;
+class QTextStream;
+class QFile;
 
 class AParticleSourceSimulator : public ASimulator
 {
@@ -30,7 +32,7 @@ public:
     void ClearEnergyVectorButKeepObjects() {EnergyVector.resize(0);} //to avoid clear of objects stored in the vector  //obsolete
 
     virtual int getEventCount() const override { return eventEnd - eventBegin; }
-    virtual int getEventsDone() const override { return eventCurrent - eventBegin; }
+    virtual int getEventsDone() const override;
     virtual int getTotalEventCount() const override { return totalEventCount; }
     virtual bool setup(QJsonObject & json) override;
     virtual bool finalizeConfig() override;
@@ -41,7 +43,9 @@ public:
     virtual void appendToDataHub(EventsDataClass * dataHub) override;
     virtual void mergeData() override;
 
-    void setOnlySavePrimaries() {bOnlySavePrimariesToFile = true;} // for G4ants mode // obsolete??? ***!!!
+    void setOnlySavePrimaries() {bOnlySavePrimariesToFile = true;} // for G4ants mode // obsolete? *!*
+    const AParticleGun * getParticleGun() const {return ParticleGun;}
+    bool isDoingPhotonTracing() const {return fDoS1 || fDoS2;}
 
     virtual void hardAbort() override;
 
@@ -56,19 +60,32 @@ private:
     void clearGeneratedParticles();
 
     int  chooseNumberOfParticlesThisEvent() const;
-    bool choosePrimariesForThisEvent(int numPrimaries);
+    bool choosePrimariesForThisEvent(int numPrimaries, int iEvent);
     bool generateAndTrackPhotons();
     bool geant4TrackAndProcess();
     bool runGeant4Handler();
 
+    bool processG4DepositionData();
+    bool readG4DepoEventFromTextFile();
+    bool readG4DepoEventFromBinFile(bool expectNewEvent = false);
+    void releaseInputResources();
+    bool prepareWorkerG4File();
+
     //local objects
-    //PrimaryParticleTracker* ParticleTracker = 0;
-    AParticleTracker* ParticleTracker = 0;
-    S1_Generator* S1generator = 0;
-    S2_Generator* S2generator = 0;
-    AParticleGun* ParticleGun = 0;
+    AParticleTracker* ParticleTracker = nullptr;
+    S1_Generator* S1generator = nullptr;
+    S2_Generator* S2generator = nullptr;
+    AParticleGun* ParticleGun = nullptr;
     QVector<AEnergyDepositionCell*> EnergyVector;
     QVector<AParticleRecord*> ParticleStack;
+
+    //resources for ascii input
+    QFile *       inTextFile = nullptr;
+    QTextStream * inTextStream = nullptr;
+    QString       G4DepoLine;
+    //resources for binary input
+    std::ifstream * inStream = nullptr;
+    int           G4NextEventId = -1;
 
     //local use - container which particle generator fills for each event; the particles are deleted by the tracker
     QVector<AParticleRecord*> GeneratedParticles;
@@ -86,7 +103,9 @@ private:
     int TypeParticlesPerEvent;  //0 - constant, 1 - Poisson
     bool fIgnoreNoHitsEvents;
     bool fIgnoreNoDepoEvents;
+    bool bClusterMerge = true;
     double ClusterMergeRadius2 = 1.0; //scan cluster merge radius [mm] in square - used by EnergyVectorToScan()
+    double ClusterMergeTimeDif = 1.0;
 
     //Geant4 interface
     AExternalProcessHandler * G4handler = nullptr;

@@ -209,7 +209,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
 
     //have to be queued - otherwise report current index before click
     QObject::connect(ui->twSourcePhotonsParticles, &QTabWidget::tabBarClicked, this, &MainWindow::on_pbUpdateSimConfig_clicked, Qt::QueuedConnection);
-    QObject::connect(ui->twParticleGenerationMode, &QTabWidget::tabBarClicked, this, &MainWindow::on_pbUpdateSimConfig_clicked, Qt::QueuedConnection);
+    //QObject::connect(ui->cobParticleGenerationMode, &QComboBox::activated, this, &MainWindow::on_pbUpdateSimConfig_clicked, Qt::QueuedConnection);
     QObject::connect(ui->twSingleScan, &QTabWidget::tabBarClicked, this, &MainWindow::on_pbUpdateSimConfig_clicked, Qt::QueuedConnection);
 
     DoNotUpdateGeometry = false; //control
@@ -272,6 +272,8 @@ MainWindow::MainWindow(DetectorClass *Detector,
     ui->labSPEfactorNotUnity->setPixmap(Rwindow->YellowIcon.pixmap(16,16));
     ui->labPartLogOn->setPixmap(Rwindow->YellowIcon.pixmap(8,8));
     ui->labPartLogOn->setVisible(false);
+    ui->labParticlesToFile->setPixmap(Rwindow->YellowIcon.pixmap(8,8));
+    ui->labParticlesToFile->setVisible(false);
 
       //misc gui inits
     ui->swPMTvsSiPM->setCurrentIndex(ui->cobPMdeviceType->currentIndex());
@@ -285,7 +287,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
      << ui->pbRefreshPMproperties << ui->pbUpdatePMproperties << ui->pbRefreshMaterials << ui->pbStopLoad
      << ui->pbIndPMshowInfo << ui->pbUpdateToFixedZ << ui->pbUpdateSimConfig
      << ui->pbUpdateToFullCustom << ui->pbElUpdateIndication << ui->pbUnlockGui << ui->fScanFloodTotProb
-     << ui->pbUpdateSourcesIndication
+     << ui->pbUpdateSourcesIndication << ui->prGeant
      << ui->sbPMtype << ui->fUpperLowerArrays << ui->sbPMtypeForGroup
      << ui->pbRebuildDetector << ui->fReloadRequired << ui->pbYellow << ui->pbGDML << ui->fGunMultipleEvents
      << ui->labPDEfactors_notAllUnity << ui->labSPEfactors_ActiveAndNotAllUnity << ui->pbGainsUpdateGUI;
@@ -358,9 +360,11 @@ MainWindow::MainWindow(DetectorClass *Detector,
     GeometryWindow->ShowGeometry(false);
     if (!fShowGeom) GeometryWindow->hide();
 
-    MainWindow::updateCOBsWithPMtypeNames();
+    updateCOBsWithPMtypeNames();
+    updateG4ProgressBarVisibility();
 
     if (!fLoadedDefaultDetector)
-      message("Startup detector NOT found, dummy default detector is loaded", this);
+        message("Startup detector NOT found, dummy default detector is loaded", this);
+
     qDebug()<<">Main window initialization complete";
 }

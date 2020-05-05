@@ -802,6 +802,27 @@ const QString DetectorClass::removePMtype(int itype)
     return "";
 }
 
+void DetectorClass::assignSaveOnExitFlag(const QString & VolumeName)
+{
+    TString Name = VolumeName.toLatin1().data();
+    TObjArray * list = GeoManager->GetListOfVolumes();
+    const int size = list->GetEntries();
+    for (int i=0; i<size; i++)
+    {
+        TGeoVolume * vol = (TGeoVolume*)list->At(i);
+        if (!vol) break;
+        if (vol->GetName() != Name) continue;
+
+        TString Title = vol->GetTitle();
+        if (Title.Sizeof() < 4) qWarning() << "Found volume with title shorter than 4 characters!";
+        else
+        {
+            Title[1] = 'E';
+            vol->SetTitle(Title);
+        }
+    }
+}
+
 TGeoVolume *DetectorClass::generatePmVolume(TString Name, TGeoMedium *Medium, const APmType *tp)
 {
   double SizeX = 0.5 * tp->SizeX;
@@ -900,7 +921,7 @@ void DetectorClass::positionPMs()
       const APmType *tp = PMs->getType(itype);
       pmTypes[itype] = generatePmVolume(name, (*MpCollection)[tp->MaterialIndex]->GeoMed, tp);
       pmTypes[itype]->SetLineColor(kGreen);
-      pmTypes[itype]->SetTitle("P");
+      pmTypes[itype]->SetTitle("P---");
     }
 
   int index = 0;
@@ -925,9 +946,9 @@ void DetectorClass::positionPMs()
                 {
                   TGeoVolume* container = node->GetVolume();
                   TString title = container->GetTitle();
-                  if (title != "-")
+                  if (title[0] != '-')
                     {
-                      qWarning() << "PM cannot be placed inside a special volume (PM, dummy PM or optical grid)";
+                      qWarning() << "PM cannot be placed inside a special volume (PM, DummyPM, Monitor or OpticalGrid)";
                       ErrorString = "Attempt to place a PM inside a forbidden container";
                     }
                   else if (container == top)
@@ -1074,7 +1095,7 @@ void DetectorClass::positionDummies()
       const APmType *tp = PMs->getType(i);
       pmtDummy[i] = generatePmVolume(name, (*MpCollection)[tp->MaterialIndex]->GeoMed, tp);
       pmtDummy[i]->SetLineColor(30);
-      pmtDummy[i]->SetTitle("p");
+      pmtDummy[i]->SetTitle("p---");
     }
   //positioning dummies
   for (int idum = 0; idum<PMdummies.size(); idum++)
@@ -1091,9 +1112,9 @@ void DetectorClass::positionDummies()
       TGeoNode* node = navi->FindNode();
       TGeoVolume* container = node->GetVolume();
       TString title = container->GetTitle();
-      if (title != "-")
+      if (title[0] != '-')
         {
-          qWarning() << "Dummy PM cannot be placed inside a special volume (PM, dummy PM or optical grid)";
+          qWarning() << "Dummy PM cannot be placed inside a special volume (PM, DummyPM, Monitor or OpticalGrid)";
           ErrorString = "Attempt to place a dummy PM inside a forbidden container";
         }
       else if (container == top)

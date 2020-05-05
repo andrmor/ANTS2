@@ -6,10 +6,10 @@
 bool GeneralSimSettings::readFromJson(const QJsonObject &Json)
 {
   if (!Json.contains("GeneralSimConfig"))
-    {
+  {
       ErrorString = "Json sent to simulator does not contain general sim config data!";
       return false;
-    }
+  }
   ErrorString.clear();
 
   QJsonObject json = Json["GeneralSimConfig"].toObject();
@@ -64,8 +64,6 @@ bool GeneralSimSettings::readFromJson(const QJsonObject &Json)
   QJsonObject acjson = json["AcceleratorConfig"].toObject();
   MaxNumTrans = acjson["MaxNumTransitions"].toInt();
   fQEaccelerator = acjson["CheckBeforeTrack"].toBool();  
-  //fLogsStat = acjson["LogsStatistics"].toBool();
-  //NumThreads = acjson["NumberThreads"].toInt();
 
   DetStatNumBins = json["DetStatNumBins"].toInt(100);
 
@@ -82,6 +80,13 @@ bool GeneralSimSettings::readFromJson(const QJsonObject &Json)
   QJsonObject g4js;
     parseJson(json, "Geant4SimulationSettings", g4js);
   G4SimSet.readFromJson(g4js);
+
+  ExitParticleSettings.SaveParticles = false;
+  {
+      QJsonObject js;
+        bool bOK = parseJson(json, "ExitParticleSettings", js);
+      if (bOK) ExitParticleSettings.readFromJson(js);
+  }
 
   //Secondary scint options
   //QJsonObject scjson = json["SecScintConfig"].toObject();

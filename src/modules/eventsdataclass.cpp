@@ -591,22 +591,24 @@ void EventsDataClass::copyTrueToReconstructed(int igroup)
   }
 
   clearReconstruction(igroup);
-  for (int iEvent=0; iEvent<Scan.size(); iEvent++)
-    {
-      AReconRecord* rec = new AReconRecord();
-      rec->Points.Reinitialize(0);
+  for (int iEvent = 0; iEvent < Scan.size(); iEvent++)
+  {
+      AReconRecord * rec = new AReconRecord();
+      rec->Points.Reinitialize(0);  // TODO reinitialize to the proper size!
 
       for (int i=0; i<Scan.at(iEvent)->Points.size(); i++)
-         rec->Points.AddPoint(Scan.at(iEvent)->Points[i].r, Scan.at(iEvent)->Points[i].energy);
+         rec->Points.AddPoint(Scan.at(iEvent)->Points[i].r,
+                              Scan.at(iEvent)->Points[i].energy,
+                              Scan.at(iEvent)->Points[i].time);
 
-      rec->chi2 = 1;
+      rec->chi2 = 1.0;
       rec->EventId = iEvent;
       rec->GoodEvent = true;
       rec->ReconstructionOK = true;
 
       ReconstructionData[igroup].append(rec);
       //rec->report();
-    }
+  }
   fReconstructionDataReady = true;
 }
 
@@ -623,7 +625,9 @@ void EventsDataClass::copyReconstructedToTrue(int igroup)
 
         rec->Points.Reinitialize(0);
         for (int i=0; i<ReconstructionData.at(igroup).at(iEvent)->Points.size(); i++)
-           rec->Points.AddPoint(ReconstructionData.at(igroup).at(iEvent)->Points[i].r, ReconstructionData.at(igroup).at(iEvent)->Points[i].energy);
+           rec->Points.AddPoint(ReconstructionData.at(igroup).at(iEvent)->Points[i].r,
+                                ReconstructionData.at(igroup).at(iEvent)->Points[i].energy,
+                                ReconstructionData.at(igroup).at(iEvent)->Points[i].time);
 
         Scan.append(rec);
       }
@@ -782,7 +786,7 @@ bool EventsDataClass::createReconstructionTree(APmHub* PMs, bool fIncludePMsigna
           zStop = Scan[iev]->zStop;
           ScintType = Scan[iev]->ScintType;
           GoodEvent = Scan[iev]->GoodEvent;
-          EventType = Scan[iev]->EventType;
+          //EventType = Scan[iev]->EventType;
         }
 
       ReconstructionTree->Fill();
@@ -1009,7 +1013,7 @@ bool EventsDataClass::saveSimulationAsTree(QString fileName)
           zStop = Scan[iev]->zStop;
           ScintType = Scan[iev]->ScintType;
           GoodEvent = Scan[iev]->GoodEvent;
-          EventType = Scan[iev]->EventType;
+          //EventType = Scan[iev]->EventType;
         }
       tree->Fill();
     }
@@ -1692,7 +1696,7 @@ int EventsDataClass::loadSimulatedEventsFromTree(QString fileName, const APmHub 
             }
           scs->zStop = zStop;
           scs->GoodEvent = GoodEvent;
-          scs->EventType = EventType;
+          //scs->EventType = EventType;
           scs->ScintType = ScintType;
 
           Scan.append(scs);          

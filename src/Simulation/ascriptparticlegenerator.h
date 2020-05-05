@@ -22,7 +22,7 @@ public:
 
     virtual bool Init() override;               //called before first use
     //virtual void ReleaseResources() override {}   //called after end of operation
-    virtual bool GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles) override;
+    virtual bool GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles, int iEvent) override;
 
     virtual void RemoveParticle(int) override {} //should NOT be used to remove one of particles in use! use onIsPareticleInUse first
     virtual bool IsParticleInUse(int particleId, QString& SourceNames) const override;

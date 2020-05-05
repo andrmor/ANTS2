@@ -21,6 +21,7 @@
 
 #include <memory>
 #include <algorithm>
+#include <fstream>
 
 #include <QDebug>
 #include <QJsonObject>
@@ -53,6 +54,14 @@ AParticleSourceSimulator::~AParticleSourceSimulator()
     clearEnergyVector();
 }
 
+int AParticleSourceSimulator::getEventsDone() const
+{
+    if (simSettings.G4SimSet.bTrackParticles)
+        return 0;
+    else
+        return eventCurrent - eventBegin;
+}
+
 bool AParticleSourceSimulator::setup(QJsonObject &json)
 {
     if ( !ASimulator::setup(json) ) return false;
@@ -62,7 +71,7 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
 
     if (!json.contains("ParticleSourcesConfig"))
     {
-        ErrorString = "Json sent to simulator does not contain particle sim config data!";
+        ErrorString = "Simulation manager: config json does not contain particle sim data!";
         return false;
     }
     QJsonObject js = json["ParticleSourcesConfig"].toObject();
@@ -82,9 +91,14 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
         parseJson(cjs, "IgnoreNoHitsEvents", fIgnoreNoHitsEvents);
         fIgnoreNoDepoEvents = true; //compatibility
         parseJson(cjs, "IgnoreNoDepoEvents", fIgnoreNoDepoEvents);
+
+        bClusterMerge = true; //compatibility
+        parseJson(cjs, "ClusterMerge", bClusterMerge);
         ClusterMergeRadius2 = 1.0;
         parseJson(cjs, "ClusterMergeRadius", ClusterMergeRadius2);
         ClusterMergeRadius2 *= ClusterMergeRadius2;
+        ClusterMergeTimeDif = 1.0;
+        parseJson(cjs, "ClusterMergeTime", ClusterMergeTimeDif);
 
         // particle generation mode
         QString PartGenMode = "Sources"; //compatibility
@@ -120,8 +134,12 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
             }
             else
             {
-                ParticleGun = new AFileParticleGenerator(*detector.MpCollection);
-                ParticleGun->readFromJson(fjs);
+                AFileParticleGenerator * PG = new AFileParticleGenerator(*detector.MpCollection);
+                PG->readFromJson(fjs);
+                PG->SetValidationMode(simSettings.G4SimSet.bTrackParticles ? AFileParticleGenerator::Relaxed
+                                                                           : AFileParticleGenerator::Strict);
+                PG->Init();
+                ParticleGun = PG;
             }
         }
         else if (PartGenMode == "Script")
@@ -151,9 +169,13 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
         ErrorString = ParticleGun->GetErrorString();
         return false;
     }
-    if (PartGenMode == "File") totalEventCount = static_cast<AFileParticleGenerator*>(ParticleGun)->NumEventsInFile;
 
-    ParticleTracker->configure(&simSettings, fBuildParticleTracks, &tracks, fIgnoreNoDepoEvents);
+    if (PartGenMode == "File")
+    {
+        totalEventCount = std::min(totalEventCount, static_cast<AFileParticleGenerator*>(ParticleGun)->NumEventsInFile);
+    }
+
+    ParticleTracker->configure(&simSettings, fBuildParticleTracks, &tracks, fIgnoreNoDepoEvents, ID);
     ParticleTracker->resetCounter();
     S1generator->setDoTextLog(simSettings.LogsStatOptions.bPhotonGenerationLog);
     S2generator->setDoTextLog(simSettings.LogsStatOptions.bPhotonGenerationLog);
@@ -169,7 +191,7 @@ bool AParticleSourceSimulator::finalizeConfig()
     if (G4SimSet.bTrackParticles)
     {
         QJsonObject json;
-        simMan.generateG4antsConfigCommon(json, ID);
+        simMan.generateG4antsConfigCommon(json, this);
 
         json["NumEvents"] = getEventCount();
 
@@ -195,6 +217,8 @@ void AParticleSourceSimulator::updateGeoManager()
 
 void AParticleSourceSimulator::simulate()
 {
+    //qDebug() << "Starting simulation, worker #" << ID;
+
     checkNavigatorPresent();
 
     if ( !ParticleStack.isEmpty() ) clearParticleStack();
@@ -208,6 +232,28 @@ void AParticleSourceSimulator::simulate()
     std::unique_ptr<QTextStream> pStream;
     if (simSettings.G4SimSet.bTrackParticles)
     {
+        //mode "from G4ants file" requires special treatment
+        AFileParticleGenerator * fpg = dynamic_cast<AFileParticleGenerator*>(ParticleGun);
+        if (fpg && fpg->IsFormatG4())
+        {
+            bool bOK = prepareWorkerG4File();
+            //qDebug() << "Prepared file for worker #" << ID << "result:"<<bOK;
+            fpg->ReleaseResources();
+
+            if (!bOK)
+            {
+                ErrorString = fpg->GetErrorString();
+                fSuccess = false;
+                return;
+            }
+
+            bOK = geant4TrackAndProcess();
+            if (!bOK) fSuccess = false;
+            else      fSuccess = !fHardAbortWasTriggered;
+            //qDebug() << "tread #" << ID << "reports result of geant4-based tracking:" << bOK << "fSuccess:"<< fSuccess;
+            return;
+        }
+
         const QString name = simSettings.G4SimSet.getPrimariesFileName(ID);//   FilePath + QString("primaries-%1.txt").arg(ID);
         pFile.reset(new QFile(name));
         if(!pFile->open(QIODevice::WriteOnly | QFile::Text))
@@ -228,7 +274,7 @@ void AParticleSourceSimulator::simulate()
 
         int numPrimaries = chooseNumberOfParticlesThisEvent();
             //qDebug() << "---- primary particles in this event: " << numPrimaries;
-        bool bGenerationSuccessful = choosePrimariesForThisEvent(numPrimaries);
+        bool bGenerationSuccessful = choosePrimariesForThisEvent(numPrimaries, eventCurrent);
         if (!bGenerationSuccessful) break; //e.g. in file gen -> end of file reached
 
         //event prepared
@@ -253,13 +299,12 @@ void AParticleSourceSimulator::simulate()
             }
             ParticleStack.clear();
 
-            if (bOnlySavePrimariesToFile)
-                progress = (eventCurrent - eventBegin + 1) * updateFactor;
+            if (bOnlySavePrimariesToFile) progress = (eventCurrent - eventBegin + 1) * updateFactor;  // *!* obsolete?
 
             continue; //skip tracking and go to the next event
         }
 
-        //-- only local tracking ends here --
+        //-- only local tracking remains here --
         //energy vector is ready
 
         if ( fIgnoreNoDepoEvents && EnergyVector.isEmpty() ) //if there is no deposition can ignore this event
@@ -291,6 +336,7 @@ void AParticleSourceSimulator::simulate()
         progress = (eventCurrent - eventBegin + 1) * updateFactor;
     }
 
+    ParticleTracker->releaseResources();
     if (ParticleGun) ParticleGun->ReleaseResources();
     if (simSettings.G4SimSet.bTrackParticles)
     {
@@ -357,149 +403,116 @@ void AParticleSourceSimulator::updateMaxTracks(int maxPhotonTracks, int maxParti
 
 void AParticleSourceSimulator::EnergyVectorToScan()
 {
-    if (EnergyVector.isEmpty())
-    {
-        AScanRecord* scs = new AScanRecord();
-        scs->Points.Reinitialize(0);
-        scs->ScintType = 0;
-        dataHub->Scan.append(scs);
-        return;
-    }
-
-    //== new system ==
-    AScanRecord* scs = new AScanRecord();
+    AScanRecord * scs = new AScanRecord();
     scs->ScintType = 0;
 
-    if (EnergyVector.size() == 1) //want to have the case of 1 fast - in many modes this will be the only outcome
+    if (EnergyVector.isEmpty())
+        scs->Points.Reinitialize(0);
+    else if (EnergyVector.size() == 1)
     {
-        for (int i=0; i<3; i++) scs->Points[0].r[i] = EnergyVector[0]->r[i];
-        scs->Points[0].energy = EnergyVector[0]->dE;
+        const AEnergyDepositionCell * Node = EnergyVector.at(0);
+        for (int i = 0; i < 3; i++)
+            scs->Points[0].r[i] = Node->r[i];
+        scs->Points[0].energy = Node->dE;
+        scs->Points[0].time   = Node->time;
     }
     else
     {
-        QVector<APositionEnergyRecord> Depo(EnergyVector.size()); // TODO : make property of PSS
-        for (int i=0; i<3; i++) Depo[0].r[i] = EnergyVector[0]->r[i];
-        Depo[0].energy = EnergyVector[0]->dE;
+        const int numNodes = EnergyVector.size(); // here it is not equal to 1
 
-        //first pass is copy from EnergyVector (since cannot modify EnergyVector itself),
-        //if next point is within cluster range, merge with previous point
-        //if outside, start with a new cluster
-        int iPoint = 0;  //merging to this point
-        int numMerges = 0;
-        for (int iCell = 1; iCell < EnergyVector.size(); iCell++)
+        if (!bClusterMerge)
         {
-            const AEnergyDepositionCell * EVcell = EnergyVector.at(iCell);
-            APositionEnergyRecord & Point = Depo[iPoint];
-            if (EVcell->isCloser(ClusterMergeRadius2, Point.r))
+            scs->Points.Reinitialize(numNodes);
+            for (int iNode = 0; iNode < numNodes; iNode++)
             {
-                Point.MergeWith(EVcell->r, EVcell->dE);
-                numMerges++;
+                const AEnergyDepositionCell * Node = EnergyVector.at(iNode);
+                for (int i=0; i<3; i++)
+                    scs->Points[iNode].r[i] = Node->r[i];
+                scs->Points[iNode].energy = Node->dE;
+                scs->Points[iNode].time   = Node->time;
             }
-            else
-            {
-                //start the next cluster
-                iPoint++;
-                for (int i=0; i<3; i++) Depo[iPoint].r[i] = EVcell->r[i];
-                Depo[iPoint].energy = EVcell->dE;
-            }
-        }
-
-        //direct pass finished, if there were no merges, work is done
-            //qDebug() << "-----Merges in the first pass:"<<numMerges;
-        if (numMerges > 0)
-        {
-            Depo.resize(EnergyVector.size() - numMerges); //only shrinking
-            // pass for all clusters -> not needed for charged, but it is likely needed for Geant4 import depo data
-            int iThisCluster = 0;
-            while (iThisCluster < Depo.size()-1)
-            {
-                int iOtherCluster = iThisCluster + 1;
-                while (iOtherCluster < Depo.size())
-                {
-                    if (Depo[iThisCluster].isCloser(ClusterMergeRadius2, Depo[iOtherCluster]))
-                    {
-                        Depo[iThisCluster].MergeWith(Depo[iOtherCluster]);
-                        Depo.removeAt(iOtherCluster);
-                    }
-                    else iOtherCluster++;
-                }
-                iThisCluster++;
-            }
-
-            // in principle, after merging some clusters can become within merging range
-            // to make the procedure complete, the top while cycle have to be restarted until number of merges is 0
-            // but it will slow down without much effect - skip for now
-        }
-
-        //sort (make it optional?)
-        std::stable_sort(Depo.rbegin(), Depo.rend()); //reverse order
-
-        scs->Points.Reinitialize(Depo.size());
-        for (int iDe=0; iDe<Depo.size(); iDe++)
-            scs->Points[iDe] = Depo[iDe];
-    }
-
-    dataHub->Scan.append(scs);
-
-    /*
-    //-- old system --
-    int PreviousIndex = EnergyVector.first()->index; //particle number - not to be confused with ParticleId!!!
-    bool fTrackStarted = false;
-    double EnergyAccumulator = 0;
-
-    AScanRecord* scs = new AScanRecord();
-    for (int i=0; i<3; i++) scs->Points[0].r[i] = EnergyVector[0]->r[i];
-    scs->ScintType = 0; //unknown - could be that both primary and secondary were activated!
-    scs->Points[0].energy = EnergyVector[0]->dE;
-
-    if (EnergyVector.size() == 1)
-    {
-        dataHub->Scan.append(scs);
-        return;
-    }
-
-    for (int ip=1; ip<EnergyVector.size(); ip++) //protected against EnegyVector with size 1
-    {
-        int ThisIndex = EnergyVector[ip]->index;
-        if (ThisIndex == PreviousIndex)
-        {
-            //continuing the track
-            fTrackStarted = true; //nothing to do until the track ends
-            EnergyAccumulator += EnergyVector[ip-1]->dE; //last cell energy added to accumulator
         }
         else
         {
-            //another particle starts here
-            if (ip == 0)
+            /*
+            qDebug() << "#";
+            for (int iCell = 0; iCell < EnergyVector.size(); iCell++)
             {
-                //already filled scs data for the very first cell - does not matter it was track or single point
-                PreviousIndex = ThisIndex;
-                continue;
+                const AEnergyDepositionCell * EVcell = EnergyVector.at(iCell);
+                qDebug() << EVcell->dE << EVcell->time;
             }
-            //track teminated last cell?
-            if (fTrackStarted)
+            */
+
+            QVector<APositionEnergyRecord> Depo(numNodes);
+
+            for (int i=0; i<3; i++)
+                Depo[0].r[i] = EnergyVector[0]->r[i];
+            Depo[0].energy   = EnergyVector[0]->dE;
+            Depo[0].time     = EnergyVector[0]->time;
+
+            //first pass is copy from EnergyVector (since cannot modify EnergyVector itself),
+            //if next point is within cluster range, merge with previous point
+            //if outside, start with a new cluster
+            int iPoint = 0;  //merging to this point
+            int numMerges = 0;
+            for (int iCell = 1; iCell < EnergyVector.size(); iCell++)
             {
-                //finishing the track of the previous particle
-                EnergyAccumulator += EnergyVector[ip-1]->dE;
-                scs->Points.AddPoint( EnergyVector[ip-1]->r, EnergyAccumulator );
-                fTrackStarted = false;
+                const AEnergyDepositionCell * EVcell = EnergyVector.at(iCell);
+
+                APositionEnergyRecord & Point = Depo[iPoint];
+                if (EVcell->isCloser(ClusterMergeRadius2, Point.r) && fabs(EVcell->time - Point.time) < ClusterMergeTimeDif)
+                {
+                    Point.MergeWith(EVcell->r, EVcell->dE, EVcell->time);
+                    numMerges++;
+                }
+                else
+                {
+                    //start the next cluster
+                    iPoint++;
+                    for (int i=0; i<3; i++)
+                        Depo[iPoint].r[i] = EVcell->r[i];
+                    Depo[iPoint].energy   = EVcell->dE;
+                    Depo[iPoint].time     = EVcell->time;
+                }
             }
 
-            //adding this point - same for both the track (start point) or point deposition
-            scs->Points.AddPoint( EnergyVector[ip]->r, EnergyVector[ip]->dE); //protected against double filling of ip=0
+            //direct pass finished, if there were no merges, work is done
+                //qDebug() << "-----Merges in the first pass:"<<numMerges;
+            if (numMerges > 0)
+            {
+                Depo.resize(EnergyVector.size() - numMerges); //only shrinking
+                // pass for all clusters -> not needed for charged, but it is likely needed for Geant4 import depo data
+                int iThisCluster = 0;
+                while (iThisCluster < Depo.size()-1)
+                {
+                    int iOtherCluster = iThisCluster + 1;
+                    while (iOtherCluster < Depo.size())
+                    {
+                        if (Depo[iThisCluster].isCloser(ClusterMergeRadius2, Depo[iOtherCluster]) && fabs(Depo[iThisCluster].time - Depo[iOtherCluster].time) < ClusterMergeTimeDif)
+                        {
+                            Depo[iThisCluster].MergeWith(Depo[iOtherCluster]);
+                            Depo.removeAt(iOtherCluster);
+                        }
+                        else iOtherCluster++;
+                    }
+                    iThisCluster++;
+                }
+
+                // in principle, after merging some clusters can become within merging range
+                // to make the procedure complete, the top while cycle have to be restarted until number of merges is 0
+                // but it will slow down without much effect - skip for now
+            }
+
+            //sort (make it optional?)
+            std::stable_sort(Depo.rbegin(), Depo.rend()); //reverse order
+
+            scs->Points.Reinitialize(Depo.size());
+            for (int iDe = 0; iDe < Depo.size(); iDe++)
+                scs->Points[iDe] = Depo[iDe];
         }
-        PreviousIndex = ThisIndex;
-    }
-
-    if (fTrackStarted)
-    {
-        //if EnergyVector has finished with continuous deposition, the track is not finished yet
-        EnergyAccumulator += EnergyVector.last()->dE;
-        scs->Points.AddPoint(EnergyVector.last()->r, EnergyAccumulator);
     }
 
     dataHub->Scan.append(scs);
-    */
 }
 
 void AParticleSourceSimulator::clearParticleStack()
@@ -533,13 +546,13 @@ int AParticleSourceSimulator::chooseNumberOfParticlesThisEvent() const
     }
 }
 
-bool AParticleSourceSimulator::choosePrimariesForThisEvent(int numPrimaries)
+bool AParticleSourceSimulator::choosePrimariesForThisEvent(int numPrimaries, int iEvent)
 {
     for (int iPart = 0; iPart < numPrimaries; iPart++)
     {
         if (!ParticleGun) break; //paranoic
         //generating one event
-        bool bGenerationSuccessful = ParticleGun->GenerateEvent(GeneratedParticles);
+        bool bGenerationSuccessful = ParticleGun->GenerateEvent(GeneratedParticles, iEvent);
         //  qDebug() << "thr--->"<<ID << "ev:" << eventBegin <<"P:"<<iRun << "  =====> " << bGenerationSuccessful << GeneratedParticles.size();
         if (!bGenerationSuccessful) return false;
 
@@ -612,79 +625,11 @@ bool AParticleSourceSimulator::geant4TrackAndProcess()
         SeenNonRegisteredParticles.insert(arNP.at(i).toString());
 
     //read and process depo data
-    QString DepoFileName = simSettings.G4SimSet.getDepositionFileName(ID); // FilePath + QString("deposition-%1.txt").arg(ID);
-    QFile inFile(DepoFileName);
-    if(!inFile.open(QIODevice::ReadOnly | QFile::Text))
-    {
-        ErrorString = "Cannot open file with energy deposition data:\n" + DepoFileName;
-        return false;
-    }
+    bOK = processG4DepositionData();
+    releaseInputResources();
+    if (!bOK) return false;
 
-    QTextStream in(&inFile);
-
-    QString line = in.readLine();
-    for (eventCurrent = eventBegin; eventCurrent < eventEnd; eventCurrent++)
-    {
-        if (fStopRequested) break;
-        if (EnergyVector.size() > 0) clearEnergyVector();
-
-            //qDebug() << ID << " CurEv:"<<eventCurrent <<" -> " << line;
-        if (!line.startsWith('#') || line.size() < 2)
-        {
-            ErrorString = "Format error for #event field in file:\n" + DepoFileName;
-            return false;
-        }
-        line.remove(0, 1);
-        if (line.toInt() != eventCurrent)
-        {
-            ErrorString = "Missmatch of event number in file:\n" + DepoFileName;
-            return false;
-        }
-
-        do
-        {
-            line = in.readLine();
-            if (line.startsWith('#'))
-                break; //next event
-
-            //qDebug() << ID << "->"<<line;
-            //pId mId dE x y z t
-            // 0   1   2 3 4 5 6     // pId can be = -1 !
-            //populating energy vector data
-            QStringList fields = line.split(' ', QString::SkipEmptyParts);
-            if (fields.isEmpty()) break; //last event had no depo - end of file reached
-            if (fields.size() < 7)
-            {
-                ErrorString = "Format error in file:\n" + DepoFileName;
-                return false;
-            }
-            AEnergyDepositionCell* cell = new AEnergyDepositionCell(fields[3].toDouble(), fields[4].toDouble(), fields[5].toDouble(), //x y z
-                                                                    fields[6].toDouble(), fields[2].toDouble(),  //time dE
-                                                                    fields[0].toInt(), fields[1].toInt(), 0, eventCurrent); //part mat sernum event
-            EnergyVector << cell;
-        }
-        while (!in.atEnd());
-
-        //Energy vector is filled for this event
-            //qDebug() << "Energy vector contains" << EnergyVector.size() << "cells";
-
-        bool bOK = generateAndTrackPhotons();
-        if (!bOK) return false;
-
-        if (!simSettings.fLRFsim) OneEvent->HitsToSignal();
-
-        dataHub->Events.append(OneEvent->PMsignals);
-        if (timeRange != 0) dataHub->TimedEvents.append(OneEvent->TimedPMsignals);
-
-        EnergyVectorToScan();
-
-        progress = (eventCurrent - eventBegin + 1) * updateFactor;
-    }
-
-    inFile.close();
-
-
-    //read tracks
+    //read history/tracks
     if (simSettings.TrackBuildOptions.bBuildParticleTracks || simSettings.LogsStatOptions.bParticleTransportLog)
     {
         ATrackingDataImporter ti(simSettings.TrackBuildOptions,
@@ -692,8 +637,8 @@ bool AParticleSourceSimulator::geant4TrackAndProcess()
                                  (simSettings.LogsStatOptions.bParticleTransportLog ? &TrackingHistory : nullptr),
                                  (simSettings.TrackBuildOptions.bBuildParticleTracks ? &tracks : nullptr),
                                  maxParticleTracks);
-        QString TrackingFileName = simSettings.G4SimSet.getTracksFileName(ID);
-        ErrorString = ti.processFile(TrackingFileName, eventBegin);
+        const QString TrackingFileName = simSettings.G4SimSet.getTracksFileName(ID);
+        ErrorString = ti.processFile(TrackingFileName, eventBegin, simSettings.G4SimSet.BinaryOutput);
         if (!ErrorString.isEmpty()) return false;
     }
 
@@ -745,7 +690,7 @@ bool AParticleSourceSimulator::runGeant4Handler()
     delete G4handler;
     G4handler = new AExternalProcessHandler(exe, ar);
     //G4handler->setVerbose();
-    G4handler->setProgressVariable(&progress);
+    G4handler->setProgressVariable(&progressG4);
 
     bG4isRunning = true;
     G4handler->startAndWait();
@@ -761,5 +706,179 @@ bool AParticleSourceSimulator::runGeant4Handler()
 
     if (fHardAbortWasTriggered) return false;
 
+    progressG4 = 100.0;
     return true;
 }
+
+bool AParticleSourceSimulator::processG4DepositionData()
+{
+    const QString DepoFileName = simSettings.G4SimSet.getDepositionFileName(ID);
+
+    if (simSettings.G4SimSet.BinaryOutput)
+    {
+        inStream = new std::ifstream(DepoFileName.toLocal8Bit().data(), std::ios::in | std::ios::binary);
+
+        if (!inStream->is_open())
+        {
+            ErrorString = "Cannot open input file: " + DepoFileName;
+            return false;
+        }
+        eventCurrent = eventBegin - 1;
+        bool bOK = readG4DepoEventFromBinFile(true); //only reads the header of the first event
+        if (!bOK) return false;
+    }
+    else
+    {
+        inTextFile = new QFile(DepoFileName);
+        if (!inTextFile->open(QIODevice::ReadOnly | QFile::Text))
+        {
+            ErrorString = "Cannot open file with energy deposition data:\n" + DepoFileName;
+            return false;
+        }
+        inTextStream = new QTextStream(inTextFile);
+        G4DepoLine = inTextStream->readLine();
+    }
+
+    for (eventCurrent = eventBegin; eventCurrent < eventEnd; eventCurrent++)
+    {
+        if (fStopRequested) break;
+        if (EnergyVector.size() > 0) clearEnergyVector();
+
+        //Filling EnergyVector for this event
+        //  qDebug() << "iEv="<<eventCurrent << "building energy vector...";
+        bool bOK = (simSettings.G4SimSet.BinaryOutput ? readG4DepoEventFromBinFile()
+                                                      : readG4DepoEventFromTextFile() );
+        if (!bOK) return false;
+        //  qDebug() << "Energy vector contains" << EnergyVector.size() << "cells";
+
+        bOK = generateAndTrackPhotons();
+        if (!bOK) return false;
+
+        if (!simSettings.fLRFsim) OneEvent->HitsToSignal();
+
+        dataHub->Events.append(OneEvent->PMsignals);
+        if (timeRange != 0) dataHub->TimedEvents.append(OneEvent->TimedPMsignals);
+
+        EnergyVectorToScan();
+
+        progress = (eventCurrent - eventBegin + 1) * updateFactor;
+    }
+    return true;
+}
+
+bool AParticleSourceSimulator::readG4DepoEventFromTextFile()
+{
+    //  qDebug() << " CurEv:"<<eventCurrent <<" -> " << G4DepoLine;
+    if (!G4DepoLine.startsWith('#') || G4DepoLine.size() < 2)
+    {
+        ErrorString = "Format error for #event field in G4ants energy deposition file";
+        return false;
+    }
+    G4DepoLine.remove(0, 1);
+    //  qDebug() << G4DepoLine << eventCurrent;
+    if (G4DepoLine.toInt() != eventCurrent)
+    {
+        ErrorString = "Missmatch of event number in G4ants energy deposition file";
+        return false;
+    }
+
+    do
+    {
+        G4DepoLine = inTextStream->readLine();
+        if (G4DepoLine.startsWith('#'))
+            break; //next event
+
+        //  qDebug() << ID << "->"<<G4DepoLine;
+        //pId mId dE x y z t
+        // 0   1   2 3 4 5 6     // pId can be = -1 !
+        //populating energy vector data
+        QStringList fields = G4DepoLine.split(' ', QString::SkipEmptyParts);
+        if (fields.isEmpty()) break; //last event had no depo - end of file reached
+        if (fields.size() < 7)
+        {
+            ErrorString = "Format error in G4ants energy deposition file";
+            return false;
+        }
+        AEnergyDepositionCell* cell = new AEnergyDepositionCell(fields[3].toDouble(), fields[4].toDouble(), fields[5].toDouble(), //x y z
+                                                                fields[6].toDouble(), fields[2].toDouble(),  //time dE
+                                                                fields[0].toInt(), fields[1].toInt(), 0, eventCurrent); //part mat sernum event
+        EnergyVector << cell;
+    }
+    while (!inTextStream->atEnd());
+
+    return true;
+}
+
+bool AParticleSourceSimulator::readG4DepoEventFromBinFile(bool expectNewEvent)
+{
+    char header = 0;
+    while (*inStream >> header)
+    {
+        if (header == char(0xee))
+        {
+            inStream->read((char*)&G4NextEventId, sizeof(int));
+            //qDebug() << G4NextEventId << "expecting:" << eventCurrent+1;
+            if (G4NextEventId != eventCurrent + 1)
+            {
+                ErrorString = QString("Bad event number in G4ants energy depo file: expected %1 and got %2").arg(eventCurrent).arg(G4NextEventId);
+                return false;
+            }
+            return true; //ready to read this event
+        }
+        else if (expectNewEvent)
+        {
+            ErrorString = "New event tag not found in G4ants energy deposition file";
+            return false;
+        }
+        else if (header == char(0xff))
+        {
+            AEnergyDepositionCell * cell = new AEnergyDepositionCell();
+
+            // format:
+            // partId(int) matId(int) DepoE(double) X(double) Y(double) Z(double) Time(double)
+            inStream->read((char*)&cell->ParticleId, sizeof(int));
+            inStream->read((char*)&cell->MaterialId, sizeof(int));
+            inStream->read((char*)&cell->dE,         sizeof(double));
+            inStream->read((char*)&cell->r[0],       sizeof(double));
+            inStream->read((char*)&cell->r[1],       sizeof(double));
+            inStream->read((char*)&cell->r[2],       sizeof(double));
+            inStream->read((char*)&cell->time,       sizeof(double));
+
+            EnergyVector << cell;
+        }
+        else
+        {
+            ErrorString = "Unexpected format of record header for binary input in G4ants deposition file";
+            return false;
+        }
+
+        if (inStream->eof() ) return true;
+    }
+
+    if (inStream->eof() ) return true;
+    else if (inStream->fail())
+    {
+        ErrorString = "Unexpected format of binary input in G4ants deposition file";
+        return false;
+    }
+
+    qWarning() << "Error - 'should not be here' reached";
+    return true; //should not be here
+}
+
+void AParticleSourceSimulator::releaseInputResources()
+{
+    delete inStream; inStream = nullptr;
+
+    delete inTextStream;  inTextStream = nullptr;
+    delete inTextFile;    inTextFile = nullptr;
+}
+
+bool AParticleSourceSimulator::prepareWorkerG4File()
+{
+    AFileParticleGenerator * fpg = static_cast<AFileParticleGenerator*>(ParticleGun);
+
+    const QString FileName = simSettings.G4SimSet.getPrimariesFileName(ID);
+    return fpg->generateG4File(eventBegin, eventEnd, FileName);
+}
+

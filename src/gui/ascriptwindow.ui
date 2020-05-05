@@ -571,7 +571,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>21</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFont">
@@ -614,10 +614,17 @@
     <addaction name="actionShow_Find_Replace"/>
     <addaction name="actionReplace_widget_Ctr_r"/>
    </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionShortcuts"/>
+   </widget>
    <addaction name="menuTabs"/>
    <addaction name="menuFind"/>
    <addaction name="menuFont"/>
    <addaction name="menuView"/>
+   <addaction name="menuHelp"/>
   </widget>
   <action name="actionIncrease_font_size">
    <property name="text">
@@ -690,6 +697,11 @@
   <action name="actionReplace_widget_Ctr_r">
    <property name="text">
     <string>Replace (Ctrl + R)</string>
+   </property>
+  </action>
+  <action name="actionShortcuts">
+   <property name="text">
+    <string>Shortcuts</string>
    </property>
   </action>
  </widget>

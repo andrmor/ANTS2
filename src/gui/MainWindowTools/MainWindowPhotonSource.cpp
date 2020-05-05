@@ -89,6 +89,12 @@ void MainWindow::SimGeneralConfigToJson(QJsonObject &jsonMaster)
     G4SimSet.writeToJson(g4js);
   json["Geant4SimulationSettings"] = g4js;
 
+  {
+      QJsonObject js;
+        ExitParticleSettings.writeToJson(js);
+      json["ExitParticleSettings"] = js;
+  }
+
   //adding to master json
   jsonMaster["GeneralSimConfig"] = json;
 }

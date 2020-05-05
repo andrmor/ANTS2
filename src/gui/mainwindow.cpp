@@ -3484,8 +3484,8 @@ void MainWindow::simulationFinished()
         {
             QString s;
             double totalEdepo = SimulationManager->DepoByRegistered + SimulationManager->DepoByNotRegistered;
-            if (totalEdepo == 0)
-                s += "Total energy deposition in sensitive volumes is zero!\n\n";
+            //if (totalEdepo == 0)
+            //    s += "Total energy deposition in sensitive volumes is zero!\n\n";
 
             if (SimulationManager->DepoByNotRegistered > 0)
             {
@@ -3500,9 +3500,9 @@ void MainWindow::simulationFinished()
                         s += pn + ", ";
                     s.chop(2);
                     qDebug() << SimulationManager->SeenNonRegisteredParticles;
-                    message(s, this);
                 }
             }
+            if (!s.isEmpty()) message(s, this);
         }
     }
 
@@ -3511,13 +3511,28 @@ void MainWindow::simulationFinished()
     //qDebug() << "---Procedure triggered by SimulationFinished signal has ended successfully---";
 }
 
-void MainWindow::RefreshOnProgressReport(int Progress, double msPerEv)
+void MainWindow::RefreshOnProgressReport(int Progress, double msPerEv, int G4progress)
 {
-  ui->prScan->setValue(Progress);
-  WindowNavigator->setProgress(Progress);
-  ui->leEventsPerSec->setText( (msPerEv==0) ? "n.a." : QString::number(msPerEv, 'g', 4));
+    ui->prScan->setValue(Progress);
+    ui->prGeant->setValue(G4progress);
 
-  qApp->processEvents();
+    double PrVal;
+        const bool bG4sim = ui->prGeant->isVisible();
+        if (bG4sim)
+        {
+            const bool bHavePhotonSim = ui->cbGunDoS1->isChecked() || ui->cbGunDoS2->isChecked();
+            if (bHavePhotonSim)
+                PrVal = 0.5 * (Progress + G4progress);
+            else
+                PrVal = G4progress;
+        }
+        else
+            PrVal = Progress;
+    WindowNavigator->setProgress(PrVal);
+
+    ui->leEventsPerSec->setText( (msPerEv==0) ? "n.a." : QString::number(msPerEv, 'g', 4));
+
+    qApp->processEvents();
 }
 
 void MainWindow::on_pbGDML_clicked()
@@ -3841,7 +3856,7 @@ void MainWindow::on_pbUpdateSimConfig_clicked()
 
     // reading back - like with the detector; if something is not saved, will be obvious
     readSimSettingsFromJson(Config->JSON);
-    Detector->Config->UpdateSimSettingsOfDetector();
+    Detector->Config->UpdateSimSettingsOfDetector(); // also updates GeneralSimSettings of the SimulationManager
 
     UpdateTestWavelengthProperties();
 
@@ -4414,6 +4429,7 @@ void MainWindow::on_pbGoToConfigueG4ants_clicked()
 void MainWindow::on_cbGeant4ParticleTracking_toggled(bool checked)
 {
     ui->swNormalOrGeant4->setCurrentIndex((int)checked);
+    updateG4ProgressBarVisibility();
 }
 
 #include "ageant4configdialog.h"
@@ -4435,7 +4451,8 @@ void MainWindow::on_pbLoadExampleFileFromFileGen_clicked()
 {
     QString epff = GlobSet.ExamplesDir + "/ExampleParticlesFromFile.dat";
     SimulationManager->FileParticleGenerator->SetFileName(epff);
-    updateFileParticleGeneratorGui();
+    on_pbGenerateFromFile_Check_clicked();
+    //updateFileParticleGeneratorGui();
 }
 
 void MainWindow::on_pbNodesFromFileHelp_clicked()
@@ -4684,4 +4701,115 @@ void MainWindow::on_pbOpenLogOptions2_clicked()
 void MainWindow::on_pbAddmaterialFromLibrary_clicked()
 {
     MIwindow->AddMaterialFromLibrary(this);
+}
+
+void MainWindow::on_cobGenerateFromFile_FileFormat_currentIndexChanged(int index)
+{
+    ui->pbLoadExampleFileFromFileGen->setVisible(index == 0);
+}
+
+void MainWindow::on_twSourcePhotonsParticles_currentChanged(int)
+{
+    updateG4ProgressBarVisibility();
+}
+
+void MainWindow::updateG4ProgressBarVisibility()
+{
+    const bool bG4 = ui->twSourcePhotonsParticles->currentIndex() == 1 && ui->cbGeant4ParticleTracking->isChecked();
+    const bool bNoPhot = !ui->cbGunDoS1->isChecked() && !ui->cbGunDoS2->isChecked();
+
+    ui->prGeant->setVisible(bG4);
+    ui->prScan->setHidden(bG4 && bNoPhot);
+}
+
+#include "asaveparticlestofiledialog.h"
+#include "asaveparticlestofilesettings.h"
+void MainWindow::on_pbParticlesToFile_clicked()
+{
+    ASaveParticlesToFileDialog * d = new ASaveParticlesToFileDialog(ExitParticleSettings, this);
+    int res = d->exec();
+    if (res == QDialog::Accepted) on_pbUpdateSimConfig_clicked();
+    delete d;
+}
+
+void MainWindow::on_pbParticlesToFile_customContextMenuRequested(const QPoint &)
+{
+    ExitParticleSettings.SaveParticles = !ExitParticleSettings.SaveParticles;
+    on_pbUpdateSimConfig_clicked();
+}
+
+#include <iostream>
+#include <fstream>
+void MainWindow::on_pbFilePreview_clicked()
+{
+    AFileParticleGenerator * fg = SimulationManager->FileParticleGenerator;
+    fg->Init();
+
+    const QString FileName = fg->GetFileName();
+    int iCounter = 100;
+    QString txt;
+    if (fg->IsFormatBinary())
+    {
+        std::ifstream inB(FileName.toLatin1().data(), std::ios::in | std::ios::binary);
+        if (!inB.is_open())
+            txt = QString("Cannot open file %1").arg(FileName);
+        else
+        {
+            char h;
+            int eventId;
+            while (inB.get(h) && iCounter > 0)
+            {
+                if (h == (char)0xEE)
+                {
+                    inB.read((char*)&eventId, sizeof(int));
+                    txt += QString("EE -> %1\n").arg(eventId);
+                }
+                else if (h == (char)0xFF)
+                {
+                    std::string pn;
+                    while (inB >> h)
+                    {
+                        if (h == (char)0x00) break;
+                        pn += h;
+                    }
+                    double buf[8];
+                    inB.read((char*)buf, 8*sizeof(double));
+                    if (inB.fail())
+                        txt += "Unexpected format of a line in the binary file with the input particles";
+                    else
+                    {
+                        QString s(pn.data());
+                        for (int i=0; i<8; i++)
+                            s += " " + QString::number(buf[i]);
+                        txt += QString("FF -> %1\n").arg(s);
+                    }
+                }
+                else
+                {
+                    txt += "Unexpected format of a line in the binary file with the input particles";
+                    break;
+                }
+                iCounter--;
+            }
+        }
+    }
+    else
+    {
+        QFile file(FileName);
+        if(!file.open(QIODevice::ReadOnly | QFile::Text))
+            txt = QString("Cannot open file %1").arg(FileName);
+        else
+        {
+            QTextStream Stream(&file);
+            while (!Stream.atEnd() && iCounter > 0)
+            {
+                const QString line = Stream.readLine().simplified();
+                txt += line + "\n";
+                iCounter--;
+            }
+        }
+    }
+
+    if (iCounter == 0) txt += "...";
+    message1(txt, FileName, this);
 }

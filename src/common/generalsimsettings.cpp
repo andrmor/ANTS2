@@ -3,7 +3,7 @@
 
 #include <QDebug>
 
-bool GeneralSimSettings::readFromJson(const QJsonObject &Json)
+bool GeneralSimSettings::readFromJson(const QJsonObject & Json)
 {
   if (!Json.contains("GeneralSimConfig"))
   {
@@ -94,3 +94,105 @@ bool GeneralSimSettings::readFromJson(const QJsonObject &Json)
   return true;
 }
 
+bool GeneralSimSettings::writeToJson(QJsonObject & Json) const
+{
+    QJsonObject json;
+
+    //wavelength-resolved
+    {
+        QJsonObject js;
+            js["WaveResolved"] = fWaveResolved;
+            js["WaveFrom"]     = WaveFrom;
+            js["WaveTo"]       = WaveTo;
+            js["WaveStep"]     = WaveStep;
+            js["WaveNodes"]    = WaveNodes;
+        json["WaveConfig"] = js;
+    }
+
+    //time-resolved
+    {
+        QJsonObject js;
+            js["TimeResolved"] = fTimeResolved;
+            js["TimeFrom"]     = TimeFrom;
+            js["TimeTo"]       = TimeTo;
+            js["TimeBins"]     = TimeBins;
+        json["TimeConfig"] = js;
+    }
+
+    //angle-resolved
+    {
+        QJsonObject js;
+            js["AngResolved"] = fAngResolved;
+            js["NumBins"]     = CosBins;
+        json["AngleConfig"] = js;
+    }
+
+    //area-resolved
+    {
+        QJsonObject js;
+            js["AreaResolved"] = fAreaResolved;
+        json["AreaConfig"] = js;
+    }
+
+    //LRF-based simulations
+    {
+        QJsonObject js;
+            js["UseLRFs"] = fLRFsim;
+            js["NumPhotsLRFunity"]  = NumPhotsForLrfUnity;
+            js["NumPhotElLRFunity"] = NumPhotElPerLrfUnity;
+        json["LrfBasedSim"] = js;
+    }
+
+    //tracking options
+    {
+        QJsonObject js;
+            js["MinStep"]           = MinStep;
+            js["MaxStep"]           = MaxStep;
+            js["dE"]                = dE;
+            js["MinEnergy"]         = MinEnergy;
+            js["MinEnergyNeutrons"] = MinEnergyNeutrons;
+            js["Safety"]            = Safety;
+        json["TrackingConfig"] = js;
+    }
+
+    //accelerators options
+    {
+        QJsonObject js;
+            js["MaxNumTransitions"] = MaxNumTrans;
+            js["CheckBeforeTrack"]  = fQEaccelerator;
+        json["AcceleratorConfig"] = js;
+    }
+
+    //number of bins in detection statistics
+    json["DetStatNumBins"] = DetStatNumBins;  // !*! why not in Logs?
+
+    //track building options
+    {
+        QJsonObject js;
+            TrackBuildOptions.writeToJson(js);
+        json["TrackBuildingOptions"] = js;
+    }
+
+    //log settings
+    {
+        QJsonObject js;
+            LogsStatOptions.writeToJson(js);
+        json["LogStatOptions"] = js;
+    }
+
+    //geant4 simulation options
+    {
+        QJsonObject js;
+            G4SimSet.writeToJson(js);
+        json["Geant4SimulationSettings"] = js;
+    }
+
+    //exit particles to file
+    {
+        QJsonObject js;
+            ExitParticleSettings.writeToJson(js);
+        json["ExitParticleSettings"] = js;
+    }
+
+    Json["GeneralSimConfig"] = json;
+}

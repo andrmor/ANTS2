@@ -115,7 +115,7 @@ void MainWindow::SimPointSourcesConfigToJson(QJsonObject &jsonMaster)
 
   //main control options
   QJsonObject cjson;
-  int SimMode = ui->twSingleScan->currentIndex();
+  int SimMode = ui->cobNodeGenerationMode->currentIndex();
     cjson["Single_Scan_Flood"] = SimMode;    
     cjson["Primary_Secondary"] = ui->cobScintTypePointSource->currentIndex();
     cjson["MultipleRuns"] = ui->cbNumberOfRuns->isChecked();

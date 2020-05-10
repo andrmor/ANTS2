@@ -3436,7 +3436,7 @@ void MainWindow::simulationFinished()
             clearGeoMarkers();
             Rwindow->ShowPositions(1, true);
 
-            if (ui->twSingleScan->currentIndex() == 0 && SimulationManager->isSimulationSuccess())
+            if (ui->cobNodeGenerationMode->currentIndex() == 0 && SimulationManager->isSimulationSuccess())
                 if (EventsDataHub->Events.size() == 1) Owindow->SiPMpixels = SimulationManager->SiPMpixels;
         }
         else
@@ -4812,4 +4812,13 @@ void MainWindow::on_pbFilePreview_clicked()
 
     if (iCounter == 0) txt += "...";
     message1(txt, FileName, this);
+}
+
+void MainWindow::on_cobNodeGenerationMode_customContextMenuRequested(const QPoint &)
+{
+    int index = ui->cobNodeGenerationMode->currentIndex();
+    index++;
+    if (index >= ui->cobNodeGenerationMode->count()) index = 0;
+    ui->cobNodeGenerationMode->setCurrentIndex(index);
+    on_pbUpdateSimConfig_clicked();
 }

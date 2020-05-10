@@ -342,11 +342,11 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
   //control
   QJsonObject pcj = pojs["ControlOptions"].toObject();
   int SimMode = pcj["Single_Scan_Flood"].toInt();
-  if (SimMode>-1 && SimMode<ui->twSingleScan->count())
+  if (SimMode > -1 && SimMode < ui->cobNodeGenerationMode->count())
   {
-      ui->twSingleScan->blockSignals(true);
-      ui->twSingleScan->setCurrentIndex(SimMode);
-      ui->twSingleScan->blockSignals(false);
+      //ui->cobNodeGenerationMode->blockSignals(true);
+      ui->cobNodeGenerationMode->setCurrentIndex(SimMode);
+      //ui->cobNodeGenerationMode->blockSignals(false);
   }  
   JsonToComboBox(pcj, "Primary_Secondary", ui->cobScintTypePointSource);
   //JsonToCheckbox(pcj, "BuildTracks", ui->cbPointSourceBuildTracks);

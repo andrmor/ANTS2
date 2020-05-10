@@ -210,7 +210,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
     //have to be queued - otherwise report current index before click
     QObject::connect(ui->twSourcePhotonsParticles, &QTabWidget::tabBarClicked, this, &MainWindow::on_pbUpdateSimConfig_clicked, Qt::QueuedConnection);
     //QObject::connect(ui->cobParticleGenerationMode, &QComboBox::activated, this, &MainWindow::on_pbUpdateSimConfig_clicked, Qt::QueuedConnection);
-    QObject::connect(ui->twSingleScan, &QTabWidget::tabBarClicked, this, &MainWindow::on_pbUpdateSimConfig_clicked, Qt::QueuedConnection);
+    //QObject::connect(ui->twSingleScan, &QTabWidget::tabBarClicked, this, &MainWindow::on_pbUpdateSimConfig_clicked, Qt::QueuedConnection);
 
     DoNotUpdateGeometry = false; //control
 

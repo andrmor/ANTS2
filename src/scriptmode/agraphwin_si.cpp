@@ -78,7 +78,17 @@ void AGraphWin_SI::SetLegendBorder(int color, int style, int size)
 
 void AGraphWin_SI::AddText(QString text, bool Showframe, int Alignment_0Left1Center2Right)
 {
-    MW->GraphWindow->AddText(text, Showframe, Alignment_0Left1Center2Right);
+    MW->GraphWindow->ShowTextPanel(text, Showframe, Alignment_0Left1Center2Right);
+}
+
+void AGraphWin_SI::AddTextScreenXY(QString text, bool Showframe, int Alignment_0Left1Center2Right, double x1, double y1, double x2, double y2)
+{
+    MW->GraphWindow->ShowTextPanel(text, Showframe, Alignment_0Left1Center2Right, x1, y1, x2, y2, "NDC");
+}
+
+void AGraphWin_SI::AddTextTrueXY(QString text, bool Showframe, int Alignment_0Left1Center2Right, double x1, double y1, double x2, double y2)
+{
+    MW->GraphWindow->ShowTextPanel(text, Showframe, Alignment_0Left1Center2Right, x1, y1, x2, y2, "BR");
 }
 
 void AGraphWin_SI::AddLine(double x1, double y1, double x2, double y2, int color, int width, int style)

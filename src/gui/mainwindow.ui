@@ -7342,7 +7342,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
           <property name="currentIndex">
            <number>0</number>
           </property>
-          <widget class="QWidget" name="twSingleScan1Page1" native="true">
+          <widget class="QWidget" name="twSingleScan1Page1">
            <widget class="QLineEdit" name="ledSingleZ">
             <property name="geometry">
              <rect>
@@ -7519,7 +7519,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
            <zorder>ledSingleX</zorder>
            <zorder>ledSingleZ</zorder>
           </widget>
-          <widget class="QWidget" name="twSingleScan1Page2" native="true">
+          <widget class="QWidget" name="twSingleScan1Page2">
            <widget class="QLabel" name="label_74">
             <property name="geometry">
              <rect>
@@ -8065,7 +8065,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             </property>
            </widget>
           </widget>
-          <widget class="QWidget" name="twSingleScan1Page3" native="true">
+          <widget class="QWidget" name="twSingleScan1Page3">
            <widget class="QLabel" name="label_90">
             <property name="geometry">
              <rect>
@@ -8572,7 +8572,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             </widget>
            </widget>
           </widget>
-          <widget class="QWidget" name="twSingleScan1Page4" native="true">
+          <widget class="QWidget" name="twSingleScan1Page4">
            <widget class="QPushButton" name="pbNodesFromFileChange">
             <property name="geometry">
              <rect>
@@ -8639,7 +8639,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             </property>
            </widget>
           </widget>
-          <widget class="QWidget" name="twSingleScan1Page5" native="true">
+          <widget class="QWidget" name="twSingleScan1Page5">
            <widget class="QLabel" name="label_150">
             <property name="geometry">
              <rect>
@@ -9535,7 +9535,7 @@ Right click: toggle build photon tracks. Also switches of building particle trac
           <item row="0" column="0">
            <widget class="QLabel" name="label_60">
             <property name="text">
-             <string>  </string>
+             <string/>
             </property>
            </widget>
           </item>

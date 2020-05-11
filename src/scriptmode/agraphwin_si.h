@@ -34,6 +34,8 @@ public slots:
   void SetLegendBorder(int color, int style, int size);
 
   void AddText(QString text, bool Showframe, int Alignment_0Left1Center2Right);
+  void AddTextScreenXY(QString text, bool Showframe, int Alignment_0Left1Center2Right, double x1, double y1, double x2, double y2);
+  void AddTextTrueXY(QString text, bool Showframe, int Alignment_0Left1Center2Right, double x1, double y1, double x2, double y2);
 
   void AddLine(double x1, double y1, double x2, double y2, int color, int width, int style);
 

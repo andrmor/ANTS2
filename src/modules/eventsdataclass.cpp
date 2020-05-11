@@ -682,8 +682,8 @@ bool EventsDataClass::createReconstructionTree(APmHub* PMs, bool fIncludePMsigna
   //Pm signals and rho
   int numPMs = PMs->count();
   char buf[32];
-  float* signal = 0;
-  float* rho = 0;
+  float * signal = nullptr;
+  float * rho    = nullptr;
   if (fIncludePMsignals)
      {
        signal = new float[numPMs];
@@ -707,26 +707,28 @@ bool EventsDataClass::createReconstructionTree(APmHub* PMs, bool fIncludePMsigna
   std::vector <double> xScan;
   std::vector <double> yScan;
   std::vector <double> zScan;
-  std::vector <int> numPhotons;
+  std::vector <double> eScan;
+  std::vector <double> tScan;
   double zStop;
-  int ScintType, GoodEvent, EventType;
+  int ScintType, GoodEvent;
 
   if (!isScanEmpty() && fIncludeTrue)
-    {
+  {
       ReconstructionTree->Branch("xScan", &xScan);
       ReconstructionTree->Branch("yScan", &yScan);
       ReconstructionTree->Branch("zScan", &zScan);
-      ReconstructionTree->Branch("numPhotons", &numPhotons);
+      ReconstructionTree->Branch("eScan", &eScan);
+      ReconstructionTree->Branch("tScan", &tScan);
 
       ReconstructionTree->Branch("zStop",&zStop, "zStop/D");
       ReconstructionTree->Branch("ScintType",&ScintType, "ScintType/I");
       ReconstructionTree->Branch("GoodEvent",&GoodEvent, "GoodEvent/I");
-      ReconstructionTree->Branch("EventType",&EventType, "EventType/I");
-    }
+      //ReconstructionTree->Branch("EventType",&EventType, "EventType/I");
+  }
 
   //========= building tree =========
   for (int iev=0; iev<size; iev++)
-    {
+  {
       ievent = ReconstructionData[igroup][iev]->EventId;
 
       if (fRecReady)
@@ -770,31 +772,33 @@ bool EventsDataClass::createReconstructionTree(APmHub* PMs, bool fIncludePMsigna
       //frac1 = maxSig/ssum;
 
       if (!isScanEmpty() && fIncludeTrue)
-        {
+      {
           int Points = Scan[iev]->Points.size();
           xScan.resize(Points);
           yScan.resize(Points);
           zScan.resize(Points);
-          numPhotons.resize(Points);
+          eScan.resize(Points);
+          tScan.resize(Points);
           for (int iP=0; iP<Points; iP++)
             {
               xScan[iP] = Scan[iev]->Points[iP].r[0];
               yScan[iP] = Scan[iev]->Points[iP].r[1];
               zScan[iP] = Scan[iev]->Points[iP].r[2];
-              numPhotons[iP] = Scan[iev]->Points[iP].energy;
+              eScan[iP] = Scan[iev]->Points[iP].energy;
+              tScan[iP] = Scan[iev]->Points[iP].time;
             }
           zStop = Scan[iev]->zStop;
           ScintType = Scan[iev]->ScintType;
           GoodEvent = Scan[iev]->GoodEvent;
           //EventType = Scan[iev]->EventType;
-        }
+      }
 
       ReconstructionTree->Fill();
-    }
+  }
 
   ReconstructionTree->ResetBranchAddresses();
-  if (signal) delete [] signal;
-  if (rho) delete [] rho;
+  delete [] signal;
+  delete [] rho;
     qDebug()<<"   Tree created with "<<ReconstructionTree->GetEntries()<<" entries";
   return true;
 }

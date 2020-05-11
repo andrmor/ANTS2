@@ -1795,48 +1795,6 @@ void ReconstructionWindow::TableToPolygon()
   polygon<<polygon.first();
 }
 
-
-void ReconstructionWindow::on_pbGoToNextNoise_clicked()
-{
-  if (EventsDataHub->isEmpty()) return;
-  if (EventsDataHub->isScanEmpty()) return;
-
-  for (int iev = ui->sbEventNumberInspect->value()+1; iev < EventsDataHub->Events.size(); iev++)
-    {
-      if ( !EventsDataHub->Scan[iev]->GoodEvent)
-        {
-          ui->sbEventNumberInspect->setValue(iev);
-          return;
-        }
-    }
-  MW->Owindow->OutText("There are no more noise events after this index!");
-}
-
-void ReconstructionWindow::on_pbGoToNextNoiseFoundGood_clicked()
-{
-  if (EventsDataHub->isEmpty()) return;
-  if (EventsDataHub->isScanEmpty()) return;
-  int CurrentGroup = PMgroups->getCurrentGroup();
-  if (EventsDataHub->isReconstructionReady(CurrentGroup))
-    {
-      message("Run reconstruction of all events first!", this);
-      return;
-    }
-
-  for (int iev = ui->sbEventNumberInspect->value()+1; iev < EventsDataHub->Events.size(); iev++)
-    {
-      if ( !EventsDataHub->Scan[iev]->GoodEvent)
-        {
-          if (EventsDataHub->ReconstructionData[CurrentGroup][iev]->GoodEvent)
-            {
-              ui->sbEventNumberInspect->setValue(iev);
-              return;
-            }
-        }
-    }
-  MW->Owindow->OutText("There are no more noise events which pass all filters after this index!");
-}
-
 void ReconstructionWindow::on_pbStopReconstruction_toggled(bool checked)
 {
   if (checked)
@@ -3933,8 +3891,6 @@ void ReconstructionWindow::on_pbTreeViewHelpWhat_clicked()
          "x:y\t Draw x vs y in a 2D plot. \n"
          "x:y:z\t Draw x vs y vs z in a 3D plot. ";
 
-   MW->Owindow->OutText(str);
-   MW->Owindow->SetTab(0);
    message(str, this);
 }
 

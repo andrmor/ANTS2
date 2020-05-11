@@ -1091,8 +1091,8 @@
        <widget class="QComboBox" name="cobGoToSelector">
         <property name="geometry">
          <rect>
-          <x>140</x>
-          <y>36</y>
+          <x>261</x>
+          <y>38</y>
           <width>131</width>
           <height>22</height>
          </rect>
@@ -1116,8 +1116,8 @@
        <widget class="QPushButton" name="pbGoToNextEvent">
         <property name="geometry">
          <rect>
-          <x>10</x>
-          <y>36</y>
+          <x>131</x>
+          <y>38</y>
           <width>120</width>
           <height>23</height>
          </rect>
@@ -1126,46 +1126,33 @@
          <string>Go to next...</string>
         </property>
        </widget>
-       <widget class="Line" name="line_5">
-        <property name="geometry">
-         <rect>
-          <x>280</x>
-          <y>68</y>
-          <width>20</width>
-          <height>171</height>
-         </rect>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
        <widget class="QPushButton" name="pbShowMap">
         <property name="enabled">
          <bool>true</bool>
         </property>
         <property name="geometry">
          <rect>
-          <x>300</x>
-          <y>76</y>
-          <width>90</width>
-          <height>23</height>
+          <x>90</x>
+          <y>122</y>
+          <width>201</width>
+          <height>29</height>
          </rect>
         </property>
         <property name="font">
          <font>
-          <weight>75</weight>
-          <bold>true</bold>
+          <weight>50</weight>
+          <bold>false</bold>
          </font>
         </property>
         <property name="text">
-         <string>Show map</string>
+         <string>Show optimization map</string>
         </property>
        </widget>
        <widget class="QSpinBox" name="sbEventNumberInspect">
         <property name="geometry">
          <rect>
-          <x>58</x>
-          <y>8</y>
+          <x>179</x>
+          <y>10</y>
           <width>71</width>
           <height>22</height>
          </rect>
@@ -1177,14 +1164,17 @@
        <widget class="QLabel" name="label_7">
         <property name="geometry">
          <rect>
-          <x>10</x>
-          <y>10</y>
-          <width>53</width>
+          <x>110</x>
+          <y>12</y>
+          <width>67</width>
           <height>16</height>
          </rect>
         </property>
         <property name="text">
          <string>Event #:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
        <widget class="QPushButton" name="pbShowMeasuredVsExpected">
@@ -1193,16 +1183,16 @@
         </property>
         <property name="geometry">
          <rect>
-          <x>30</x>
-          <y>85</y>
+          <x>155</x>
+          <y>76</y>
           <width>231</width>
           <height>27</height>
          </rect>
         </property>
         <property name="font">
          <font>
-          <weight>75</weight>
-          <bold>true</bold>
+          <weight>50</weight>
+          <bold>false</bold>
          </font>
         </property>
         <property name="text">
@@ -1212,8 +1202,8 @@
        <widget class="Line" name="line_6">
         <property name="geometry">
          <rect>
-          <x>60</x>
-          <y>46</y>
+          <x>181</x>
+          <y>48</y>
           <width>118</width>
           <height>3</height>
          </rect>
@@ -1225,54 +1215,12 @@
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="QFrame" name="fNoiseEvents">
-        <property name="geometry">
-         <rect>
-          <x>3</x>
-          <y>142</y>
-          <width>281</width>
-          <height>61</height>
-         </rect>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::NoFrame</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
-        </property>
-        <widget class="QPushButton" name="pbGoToNextNoise">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>6</y>
-           <width>261</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Go to next noise event</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbGoToNextNoiseFoundGood">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>30</y>
-           <width>261</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Go to next noise event which got &quot;good&quot; status</string>
-         </property>
-        </widget>
-       </widget>
        <widget class="Line" name="line_23">
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>122</y>
-          <width>288</width>
+          <y>105</y>
+          <width>520</width>
           <height>16</height>
          </rect>
         </property>
@@ -1283,8 +1231,8 @@
        <widget class="QComboBox" name="cobMapType">
         <property name="geometry">
          <rect>
-          <x>400</x>
-          <y>76</y>
+          <x>301</x>
+          <y>125</y>
           <width>100</width>
           <height>22</height>
          </rect>
@@ -1303,8 +1251,8 @@
        <widget class="Line" name="line_76">
         <property name="geometry">
          <rect>
-          <x>340</x>
-          <y>86</y>
+          <x>241</x>
+          <y>135</y>
           <width>118</width>
           <height>3</height>
          </rect>
@@ -1332,21 +1280,24 @@
        <widget class="QLabel" name="label_144">
         <property name="geometry">
          <rect>
-          <x>302</x>
-          <y>110</y>
-          <width>42</width>
-          <height>13</height>
+          <x>56</x>
+          <y>156</y>
+          <width>60</width>
+          <height>17</height>
          </rect>
         </property>
         <property name="text">
          <string>Range:</string>
         </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
        </widget>
        <widget class="QLineEdit" name="ledMapRange">
         <property name="geometry">
          <rect>
-          <x>342</x>
-          <y>106</y>
+          <x>118</x>
+          <y>155</y>
           <width>71</width>
           <height>20</height>
          </rect>
@@ -1358,8 +1309,8 @@
        <widget class="QLabel" name="label_152">
         <property name="geometry">
          <rect>
-          <x>419</x>
-          <y>108</y>
+          <x>195</x>
+          <y>157</y>
           <width>46</width>
           <height>13</height>
          </rect>
@@ -1371,21 +1322,24 @@
        <widget class="QLabel" name="label_153">
         <property name="geometry">
          <rect>
-          <x>313</x>
-          <y>134</y>
-          <width>28</width>
-          <height>13</height>
+          <x>70</x>
+          <y>181</y>
+          <width>48</width>
+          <height>15</height>
          </rect>
         </property>
         <property name="text">
          <string>Bins:</string>
         </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
        </widget>
        <widget class="QSpinBox" name="sbMapBins">
         <property name="geometry">
          <rect>
-          <x>342</x>
-          <y>129</y>
+          <x>119</x>
+          <y>178</y>
           <width>70</width>
           <height>22</height>
          </rect>
@@ -1403,20 +1357,23 @@
        <widget class="QLabel" name="label_156">
         <property name="geometry">
          <rect>
-          <x>298</x>
-          <y>159</y>
-          <width>42</width>
-          <height>13</height>
+          <x>259</x>
+          <y>157</y>
+          <width>59</width>
+          <height>17</height>
          </rect>
         </property>
         <property name="text">
          <string>Center:</string>
         </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
        </widget>
        <widget class="QComboBox" name="cobMapCenter">
         <property name="geometry">
          <rect>
-          <x>342</x>
+          <x>320</x>
           <y>155</y>
           <width>140</width>
           <height>22</height>
@@ -1444,9 +1401,9 @@
         </property>
         <property name="geometry">
          <rect>
-          <x>280</x>
-          <y>176</y>
-          <width>231</width>
+          <x>239</x>
+          <y>177</y>
+          <width>250</width>
           <height>32</height>
          </rect>
         </property>
@@ -1459,21 +1416,24 @@
         <widget class="QLabel" name="label_157">
          <property name="geometry">
           <rect>
-           <x>40</x>
-           <y>6</y>
-           <width>16</width>
-           <height>16</height>
+           <x>30</x>
+           <y>3</y>
+           <width>29</width>
+           <height>17</height>
           </rect>
          </property>
          <property name="text">
           <string>Z:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
         <widget class="QComboBox" name="cobMapZ">
          <property name="geometry">
           <rect>
            <x>61</x>
-           <y>5</y>
+           <y>2</y>
            <width>92</width>
            <height>22</height>
           </rect>
@@ -1493,7 +1453,7 @@
          <property name="geometry">
           <rect>
            <x>159</x>
-           <y>6</y>
+           <y>3</y>
            <width>41</width>
            <height>20</height>
           </rect>
@@ -1506,8 +1466,8 @@
          <property name="geometry">
           <rect>
            <x>204</x>
-           <y>10</y>
-           <width>20</width>
+           <y>7</y>
+           <width>30</width>
            <height>13</height>
           </rect>
          </property>
@@ -1519,11 +1479,17 @@
        <widget class="QPushButton" name="pbShowLog">
         <property name="geometry">
          <rect>
-          <x>140</x>
-          <y>7</y>
+          <x>261</x>
+          <y>9</y>
           <width>131</width>
           <height>23</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
         </property>
         <property name="text">
          <string>Show Log</string>
@@ -1533,12 +1499,10 @@
        <zorder>line_6</zorder>
        <zorder>cobGoToSelector</zorder>
        <zorder>pbGoToNextEvent</zorder>
-       <zorder>line_5</zorder>
        <zorder>pbShowMap</zorder>
        <zorder>sbEventNumberInspect</zorder>
        <zorder>label_7</zorder>
        <zorder>pbShowMeasuredVsExpected</zorder>
-       <zorder>fNoiseEvents</zorder>
        <zorder>line_23</zorder>
        <zorder>cobMapType</zorder>
        <zorder>line_78</zorder>
@@ -1770,10 +1734,10 @@
        <widget class="QLabel" name="label_121">
         <property name="geometry">
          <rect>
-          <x>261</x>
-          <y>95</y>
-          <width>81</width>
-          <height>16</height>
+          <x>255</x>
+          <y>94</y>
+          <width>90</width>
+          <height>20</height>
          </rect>
         </property>
         <property name="text">
@@ -2108,10 +2072,10 @@
        <widget class="QPushButton" name="pbCopyFromRec">
         <property name="geometry">
          <rect>
-          <x>420</x>
-          <y>144</y>
-          <width>81</width>
-          <height>35</height>
+          <x>416</x>
+          <y>152</y>
+          <width>90</width>
+          <height>37</height>
          </rect>
         </property>
         <property name="text">
@@ -3577,7 +3541,7 @@ Individual sensors can belong to multiple groups!</string>
           <property name="geometry">
            <rect>
             <x>182</x>
-            <y>187</y>
+            <y>183</y>
             <width>141</width>
             <height>26</height>
            </rect>
@@ -3593,7 +3557,7 @@ Individual sensors can belong to multiple groups!</string>
           <property name="geometry">
            <rect>
             <x>130</x>
-            <y>173</y>
+            <y>171</y>
             <width>251</width>
             <height>16</height>
            </rect>
@@ -12868,9 +12832,9 @@ Beware of bugs!</string>
    <widget class="QLabel" name="label_81">
     <property name="geometry">
      <rect>
-      <x>270</x>
+      <x>254</x>
       <y>345</y>
-      <width>121</width>
+      <width>139</width>
       <height>20</height>
      </rect>
     </property>
@@ -13150,8 +13114,6 @@ Beware of bugs!</string>
   <tabstop>pbShowMap</tabstop>
   <tabstop>sbEventNumberInspect</tabstop>
   <tabstop>pbShowMeasuredVsExpected</tabstop>
-  <tabstop>pbGoToNextNoise</tabstop>
-  <tabstop>pbGoToNextNoiseFoundGood</tabstop>
   <tabstop>cobCorrPolygonCutOption</tabstop>
   <tabstop>tabwidCorrPolygon</tabstop>
   <tabstop>pbCorr_RemoveLine</tabstop>

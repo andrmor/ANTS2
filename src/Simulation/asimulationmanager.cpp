@@ -473,7 +473,7 @@ void ASimulationManager::removeOldFile(const QString & fileName, const QString &
 #include <QDateTime>
 const QString ASimulationManager::makeLogDir() const
 {
-    const QString subdir = QDateTime::currentDateTime().toString("yyyy-mm-dd_hh:mm:ss");
+    const QString subdir = QDateTime::currentDateTime().toString("yyyy-MM-dd_hh-mm-ss");
     AGlobalSettings & GlobSet = AGlobalSettings::getInstance();
     const QString dirBase = QString("%1/%2").arg(GlobSet.LibLogs).arg(subdir);
 

@@ -172,6 +172,16 @@ bool ASimulationManager::setup(const QJsonObject & json, int threads)
                 return false;
             }
 
+            const QStringList matNames = Detector.MpCollection->getListOfMaterialNames();
+            QString matsWithSpaces;
+            for (const QString & mn : matNames)
+                if (mn.contains(' ')) matsWithSpaces += " " + mn;
+            if (!matsWithSpaces.isEmpty())
+            {
+                ErrorString = "Material names cannot contain spaces!\n" + matsWithSpaces;
+                return false;
+            }
+
             QString err = simSettings.G4SimSet.checkSensitiveVolumes();
             if ( !err.isEmpty() )
             {

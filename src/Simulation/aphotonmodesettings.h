@@ -12,15 +12,15 @@ typedef std::pair<double, double> ADPair;
 class APhotonSim_PerNodeSettings
 {
 public:
-    enum APhPerNodeEnum {Fixed = 0, Uniform = 1, Gauss = 2, Custom = 3};
+    enum APhPerNodeEnum {Constant = 0, Uniform = 1, Gauss = 2, Custom = 3};
 
-    APhPerNodeEnum  PhPerNodeMode = Fixed;
-    int             PerNode_Fixed = 10;
-    int             PerNode_Min   = 10;
-    int             PerNode_Max   = 12;
-    double          PerNode_Mean  = 100.0;
-    double          PerNode_Sigma = 10.0;
-    QVector<ADPair> PerNode_Custom;
+    APhPerNodeEnum  Mode     = Constant;
+    int             Number   = 10;
+    int             Min      = 10;
+    int             Max      = 12;
+    double          Mean     = 100.0;
+    double          Sigma    = 10.0;
+    QVector<ADPair> CustomDist;
 
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);
@@ -59,7 +59,7 @@ public:
 // scan
 struct APhScanRecord
 {
-    bool   bEnabled  = true;
+    bool   bEnabled  = false;
     double DX        = 10.0;
     double DY        = 0;
     double DZ        = 0;

@@ -1,6 +1,8 @@
 #include "aphotonmodesettings.h"
 #include "ajsontools.h"
 
+#include <QDebug>
+
 void APhotonSimSettings::writeToJson(QJsonObject &json) const
 {
 
@@ -67,38 +69,34 @@ void APhotonSim_PerNodeSettings::writeToJson(QJsonObject & json) const
 
 void APhotonSim_PerNodeSettings::readFromJson(const QJsonObject & json)
 {
-    /*
-    JsonToComboBox(ppj, "PhotPerNodeMode", ui->cobScanNumPhotonsMode);
-    JsonToSpinBox(ppj, "PhotPerNodeConstant", ui->sbScanNumPhotons);
-    JsonToSpinBox(ppj, "PhotPerNodeUniMin", ui->sbScanNumMin);
-    JsonToSpinBox(ppj, "PhotPerNodeUniMax", ui->sbScanNumMax);
-    JsonToLineEditDouble(ppj, "PhotPerNodeGaussMean", ui->ledScanGaussMean);
-    JsonToLineEditDouble(ppj, "PhotPerNodeGaussSigma", ui->ledScanGaussSigma);
-    if (ppj.contains("PhotPerNodeCustom"))
-      {
-        QJsonArray ja = ppj["PhotPerNodeCustom"].toArray();
-        int size = ja.size();
-        if (size > 0)
-          {
-            double* xx = new double[size];
-            int* yy    = new int[size];
-            for (int i=0; i<size; i++)
-              {
-                xx[i] = ja[i].toArray()[0].toDouble();
-                yy[i] = ja[i].toArray()[1].toInt();
-              }
-            histScan = new TH1I("histPhotDistr","Photon distribution", size-1, xx);
-            histScan->SetXTitle("Number of generated photons");
-            histScan->SetYTitle("Relative probability");
-            for (int i = 1; i<size+1; i++) histScan->SetBinContent(i, yy[i-1]);
-            histScan->GetIntegral();
-            delete[] xx;
-            delete[] yy;
-            ui->pbScanDistrShow->setEnabled(true);
-            ui->pbScanDistrDelete->setEnabled(true);
-          }
-      }
-    */
+    int iMode = 0;
+    parseJson(json, "PhotPerNodeMode", iMode);
+    switch (iMode)
+    {
+    default: qWarning() << "Unknown photon per mode mode, using 'Fixed'";
+    case 0 : Mode = Constant; break;
+    case 1 : Mode = Uniform;  break;
+    case 2 : Mode = Gauss;    break;
+    case 3 : Mode = Custom;   break;
+    }
+
+    parseJson(json, "PhotPerNodeConstant",   Number);
+    parseJson(json, "PhotPerNodeUniMin",     Min);
+    parseJson(json, "PhotPerNodeUniMax",     Max);
+    parseJson(json, "PhotPerNodeGaussMean",  Mean);
+    parseJson(json, "PhotPerNodeGaussSigma", Sigma);
+
+    CustomDist.clear();
+    QJsonArray ar;
+    parseJson(json, "PhotPerNodeCustom", ar);
+    CustomDist.reserve(ar.size());
+    for (int i = 0; i < ar.size(); i++)
+    {
+        QJsonArray el = ar[i].toArray();
+        double x = el[0].toDouble();
+        double y = el[1].toDouble();
+        CustomDist << ADPair(x, y);
+    }
 }
 
 void APhotonSim_FixedPhotSettings::writeToJson(QJsonObject & json) const
@@ -108,19 +106,20 @@ void APhotonSim_FixedPhotSettings::writeToJson(QJsonObject & json) const
 
 void APhotonSim_FixedPhotSettings::readFromJson(const QJsonObject & json)
 {
-    /*
-    ui->cbFixWavelengthPointSource->setChecked(false);  //compatibility
-    JsonToCheckbox(wdj, "UseFixedWavelength", ui->cbFixWavelengthPointSource);
-    JsonToSpinBox(wdj, "WaveIndex", ui->sbFixedWaveIndexPointSource);
+    bFixWave = false;
+    parseJson(json, "UseFixedWavelength", bFixWave);
+    parseJson(json, "WaveIndex", FixWaveIndex);
 
-    JsonToLineEditDouble(pdj, "FixedX", ui->ledSingleDX);
-    JsonToLineEditDouble(pdj, "FixedY", ui->ledSingleDY);
-    JsonToLineEditDouble(pdj, "FixedZ", ui->ledSingleDZ);
-    JsonToLineEditDouble(pdj, "Cone", ui->ledConeAngle);
-    ui->cobFixedDirOrCone->setCurrentIndex(0); //compatibility
-    JsonToComboBox(pdj, "Fixed_or_Cone", ui->cobFixedDirOrCone);
-    JsonToCheckbox(pdj, "Random", ui->cbRandomDir);
-    */
+    bool bRand = true;
+    parseJson(json, "Random", bRand);
+    int iMode = 0;
+    parseJson(json, "Fixed_or_Cone", iMode);
+    if (bRand) DirectionMode = Isotropic;
+    else       DirectionMode = (iMode == 0 ? Vector : Cone);
+    parseJson(json, "FixedX", FixDX);
+    parseJson(json, "FixedY", FixDY);
+    parseJson(json, "FixedZ", FixDZ);
+    parseJson(json, "Cone", FixConeAngle);
 }
 
 void APhotonSim_SingleSettings::writeToJson(QJsonObject & json) const
@@ -142,46 +141,32 @@ void APhotonSim_ScanSettings::writeToJson(QJsonObject & json) const
 
 void APhotonSim_ScanSettings::readFromJson(const QJsonObject & json)
 {
-    /*
-    JsonToLineEditDouble(rsj, "ScanX0", ui->ledOriginX);
-    JsonToLineEditDouble(rsj, "ScanY0", ui->ledOriginY);
-    JsonToLineEditDouble(rsj, "ScanZ0", ui->ledOriginZ);
-    ui->cbSecondAxis->setChecked(false);
-    ui->cbThirdAxis->setChecked(false);
-    if (rsj.contains("AxesData"))
-      {
-        QJsonArray ar = rsj["AxesData"].toArray();
-        if (ar.size()>0)
-          {
-            QJsonObject js = ar[0].toObject();
-            JsonToLineEditDouble(js, "dX", ui->led0X);
-            JsonToLineEditDouble(js, "dY", ui->led0Y);
-            JsonToLineEditDouble(js, "dZ", ui->led0Z);
-            JsonToSpinBox (js, "Nodes", ui->sb0nodes);
-            JsonToComboBox(js, "Option", ui->cob0dir);
-          }
-        if (ar.size()>1)
-          {
-            QJsonObject js = ar[1].toObject();
-            JsonToLineEditDouble(js, "dX", ui->led1X);
-            JsonToLineEditDouble(js, "dY", ui->led1Y);
-            JsonToLineEditDouble(js, "dZ", ui->led1Z);
-            JsonToSpinBox (js, "Nodes", ui->sb1nodes);
-            JsonToComboBox(js, "Option", ui->cob1dir);
-            ui->cbSecondAxis->setChecked(true);
-          }
-        if (ar.size()>2)
-          {
-            QJsonObject js = ar[2].toObject();
-            JsonToLineEditDouble(js, "dX", ui->led2X);
-            JsonToLineEditDouble(js, "dY", ui->led2Y);
-            JsonToLineEditDouble(js, "dZ", ui->led2Z);
-            JsonToSpinBox (js, "Nodes", ui->sb2nodes);
-            JsonToComboBox(js, "Option", ui->cob2dir);
-            ui->cbThirdAxis->setChecked(true);
-          }
-      }
-      */
+    parseJson(json, "ScanX0", X0);
+    parseJson(json, "ScanY0", Y0);
+    parseJson(json, "ScanZ0", Z0);
+
+    ScanRecords.clear();
+    ScanRecords.resize(3);
+    QJsonArray ar;
+    bool bOK = parseJson(json, "AxesData", ar);
+    if (bOK)
+    {
+        for (int i = 0; i < 3 && i < ar.size(); i++)
+        {
+            QJsonObject js = ar[i].toObject();
+            APhScanRecord & r = ScanRecords[i];
+            r.bEnabled = true;
+            parseJson(js, "Enabled", r.bEnabled);
+            parseJson(js, "dX", r.DX);
+            parseJson(js, "dY", r.DY);
+            parseJson(js, "dZ", r.DZ);
+            parseJson(js, "Nodes", r.Nodes);
+            int iOpt = 0;
+            parseJson(js, "Option", iOpt);
+            r.bBiDirect = (iOpt == 1);
+        }
+    }
+    ScanRecords[0].bEnabled = true;
 }
 
 void APhotonSim_FloodSettings::writeToJson(QJsonObject &json) const

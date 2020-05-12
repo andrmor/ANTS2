@@ -410,7 +410,8 @@ SOURCES += main.cpp \
     Reconstruction/areconstructionworker.cpp \
     common/ahistogram.cpp \
     modules/apmdummystructure.cpp \
-    Simulation/asaveparticlestofilesettings.cpp
+    Simulation/asaveparticlestofilesettings.cpp \
+    Simulation/aphotonmodesettings.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -566,7 +567,8 @@ HEADERS  += common/CorrelationFilters.h \
     common/ahistogram.h \
     modules/apmanddummy.h \
     modules/apmdummystructure.h \
-    Simulation/asaveparticlestofilesettings.h
+    Simulation/asaveparticlestofilesettings.h \
+    Simulation/aphotonmodesettings.h
 
 # --- SIM ---
 ants2_SIM {

@@ -55,14 +55,18 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWid
     ScriptManager(ScriptManager), bLightMode(LightMode),
     ui(new Ui::AScriptWindow), GlobSet(AGlobalSettings::getInstance())
 {
+    ui->setupUi(this);
+
     if ( dynamic_cast<AJavaScriptManager*>(ScriptManager) )
     {
         ScriptLanguage = _JavaScript_;
+        setWindowTitle("JavaScript");
     }
 #ifdef __USE_ANTS_PYTHON__
     if ( dynamic_cast<APythonScriptManager*>(ScriptManager) )
     {
         ScriptLanguage = _PythonScript_;
+        setWindowTitle("Python script");
     }
 #endif
 
@@ -89,9 +93,7 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWid
     ScriptManager->ExamplesDir = &GlobSet.ExamplesDir;
 
     ShowEvalResult = true;
-    ui->setupUi(this);
     ui->pbStop->setVisible(false);
-    this->setWindowTitle("ANTS2 script");
     ui->prbProgress->setValue(0);
     ui->prbProgress->setVisible(false);
     //ui->labFileName->setTextInteractionFlags(Qt::TextSelectableByMouse);
@@ -610,29 +612,30 @@ void AScriptWindow::on_pbRunScript_clicked()
 
    if (!ScriptManager->getLastError().isEmpty())
    {
-       AScriptWindow::ReportError("Script error: "+ScriptManager->getLastError(), -1);
+       ReportError("Script error: " + ScriptManager->getLastError(), ScriptManager->getLastErrorLineNumber());
    }
    else if (ScriptManager->isUncaughtException())
-   {   //Script has uncaught exception
+   {
        int lineNum = ScriptManager->getUncaughtExceptionLineNumber();
-       QString message = ScriptManager->getUncaughtExceptionString();
+       const QString message = ScriptManager->getUncaughtExceptionString();
        //qDebug() << "Error message:" << message;
        //QString backtrace = engine.uncaughtExceptionBacktrace().join('\n');
        //qDebug() << "backtrace:" << backtrace;
-       AScriptWindow::ReportError("Script error: "+message, lineNum);
+       ReportError("Script error: " + message, lineNum);
    }
    else
-   {   //success
+   {
+       //success
        //qDebug() << "Script returned:" << result;
        if (!ScriptManager->isEvalAborted())
-         {
-            if (ShowEvalResult && result!="undefined" && !result.isEmpty()) ShowText("Script evaluation result:\n"+result);
-            //else ShowText("Script evaluation: success");
-         }
+       {
+            if (ShowEvalResult && result!="undefined" && !result.isEmpty())
+                ShowText("Script evaluation result:\n"+result);
+       }
        else
-         {
+       {
            //ShowText("Aborted!");
-         }
+       }
        ui->pbRunScript->setIcon(QIcon()); //clear red icon
      }
 
@@ -1534,6 +1537,7 @@ void AScriptWindow::removeTab(int tab)
     ScriptTabs.removeAt(tab);
 
     if (ScriptTabs.isEmpty()) AddNewTab();
+    updateFileStatusIndication();
 }
 
 void AScriptWindow::clearAllTabs()
@@ -2155,4 +2159,18 @@ void AScriptWindow::on_pbCancel_clicked()
 {
     bAccepted = false;
     close();
+}
+
+void AScriptWindow::on_actionShortcuts_triggered()
+{
+    QString s = "For the current line:\n"
+                "Ctrl + Alt + Del\tDelete line\n"
+                "Ctrl + Alt + Down\tDublicate line\n"
+                "Ctrl + Shift + Up\tShift line up\n"
+                "Ctrl + Shift + Down\tShift line down\n"
+                "\n"
+                "For selected text:\n"
+                "Ctrl + i\t\tAuto-align JavaScript";
+
+    message(s, this);
 }

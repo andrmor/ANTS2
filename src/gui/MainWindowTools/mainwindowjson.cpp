@@ -259,8 +259,7 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
     }
 
   //cleanup  
-  if (histScan) delete histScan;
-  histScan = nullptr;
+  delete histScan; histScan = nullptr;
   ui->pbScanDistrShow->setEnabled(false);
   ui->pbScanDistrDelete->setEnabled(false);
   populateTable = true;
@@ -330,16 +329,24 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
       G4SimSet.readFromJson(g4js);
   ui->cbGeant4ParticleTracking->setChecked(G4SimSet.bTrackParticles);
 
+  ExitParticleSettings.SaveParticles = false;
+  {
+      QJsonObject js;
+        bool bOK = parseJson(gjs, "ExitParticleSettings", js);
+      if (bOK) ExitParticleSettings.readFromJson(js);
+  }
+  ui->labParticlesToFile->setVisible(ExitParticleSettings.SaveParticles);
+
   //POINT SOURCES
   QJsonObject pojs = js["PointSourcesConfig"].toObject();
   //control
   QJsonObject pcj = pojs["ControlOptions"].toObject();
   int SimMode = pcj["Single_Scan_Flood"].toInt();
-  if (SimMode>-1 && SimMode<ui->twSingleScan->count())
+  if (SimMode > -1 && SimMode < ui->cobNodeGenerationMode->count())
   {
-      ui->twSingleScan->blockSignals(true);
-      ui->twSingleScan->setCurrentIndex(SimMode);
-      ui->twSingleScan->blockSignals(false);
+      //ui->cobNodeGenerationMode->blockSignals(true);
+      ui->cobNodeGenerationMode->setCurrentIndex(SimMode);
+      //ui->cobNodeGenerationMode->blockSignals(false);
   }  
   JsonToComboBox(pcj, "Primary_Secondary", ui->cobScintTypePointSource);
   //JsonToCheckbox(pcj, "BuildTracks", ui->cbPointSourceBuildTracks);
@@ -484,7 +491,7 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
             else if (PartGenMode == "File")    PGMindex = 1;
             else if (PartGenMode == "Script")  PGMindex = 2;
             else qWarning() << "Load sim settings: Unknown particle generation mode!";
-            ui->twParticleGenerationMode->setCurrentIndex(PGMindex);
+            ui->cobParticleGenerationMode->setCurrentIndex(PGMindex);
             JsonToSpinBox (csjs, "EventsToDo", ui->sbGunEvents);
             JsonToCheckbox(csjs, "AllowMultipleParticles", ui->cbGunAllowMultipleEvents);
             JsonToLineEditDouble(csjs, "AverageParticlesPerEvent", ui->ledGunAverageNumPartperEvent);
@@ -497,6 +504,8 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
             ui->cbIgnoreEventsWithNoEnergyDepo->setChecked(false);
             JsonToCheckbox(csjs, "IgnoreNoDepoEvents", ui->cbIgnoreEventsWithNoEnergyDepo);
             JsonToLineEditDouble(csjs, "ClusterMergeRadius", ui->ledClusterRadius);
+            JsonToCheckbox(csjs, "ClusterMerge", ui->cbMergeClusters);
+            JsonToLineEditDouble(csjs, "ClusterMergeTime", ui->ledClusterTimeDif);
 
         //particle sources
         SimulationManager->ParticleSources->readFromJson(psjs);
@@ -520,45 +529,34 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
         ui->labPartLogOn->setVisible(SimulationManager->LogsStatOptions.bParticleTransportLog);
 
 
-  //Window CONTROL
+  //mode control
   if (js.contains("Mode"))
-    {
+  {
       ui->twSourcePhotonsParticles->blockSignals(true);
       QString Mode = js["Mode"].toString();
       if (Mode == "PointSim") ui->twSourcePhotonsParticles->setCurrentIndex(0);
       else if (Mode =="StackSim" || Mode =="SourceSim") ui->twSourcePhotonsParticles->setCurrentIndex(1);
       ui->twSourcePhotonsParticles->blockSignals(false);
-    }
+  }
 
   DoNotUpdateGeometry = false;
   BulkUpdate = false;
 
   //updating global parameters
-  //MainWindow::on_cbWaveResolved_toggled(ui->cbWaveResolved->isChecked()); //update on toggle
   WaveFrom = ui->ledWaveFrom->text().toDouble(); //***!!!
   WaveStep = ui->ledWaveStep->text().toDouble();
-  MainWindow::CorrectWaveTo(); //WaveTo and WaveNode are set here
-  //update materialCollection info -rebinning, hists
-  //bool bWaveRes = ui->cbWaveResolved->isChecked();
-  //MpCollection->SetWave(bWaveRes, WaveFrom, WaveTo, WaveStep, WaveNodes); //***!!! move!!!
-  //for (int i=0; i<MpCollection->countMaterials(); i++)
-  //    MpCollection->UpdateWaveResolvedProperties(i); //***!!! move
-  //PMs->SetWave(bWaveRes, WaveFrom, WaveStep, WaveNodes);
-  //PMs->RebinPDEs(); //update PMs info -rebinning, hists
+  CorrectWaveTo(); //WaveTo and WaveNode are set here
   on_pbIndPMshowInfo_clicked(); //to refresh the binned button
-  //MainWindow::on_cbAngularSensitive_toggled(ui->cbAngularSensitive->isChecked());
-  //MainWindow::on_cbTimeResolved_toggled(ui->cbTimeResolved->isChecked());
 
   //update indication
   on_pbYellow_clicked(); //yellow marker for activated advanced options in point source sim
-
+  updateG4ProgressBarVisibility();
   UpdateTestWavelengthProperties();
 
   bool bWaveRes = ui->cbWaveResolved->isChecked();
   ui->fWaveTests->setEnabled(bWaveRes);
   ui->fWaveOptions->setEnabled(bWaveRes);
   ui->cbFixWavelengthPointSource->setEnabled(bWaveRes);
-  //bool bTimeRes = ui->cbTimeResolved->isChecked();
 
   return true;
 }

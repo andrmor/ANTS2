@@ -18,6 +18,7 @@ public:
     QStringList           SensitiveVolumes;
     QStringList           Commands;
     QMap<QString, double> StepLimits;
+    bool                  BinaryOutput = false;
     int                   Precision = 6;
 
     void writeToJson(QJsonObject & json) const;
@@ -29,6 +30,7 @@ public:
     const QString getConfigFileName(int iThreadNum) const;
     const QString getTracksFileName(int iThreadNum) const;
     const QString getMonitorDataFileName(int iThreadNum) const;
+    const QString getExitParticleFileName(int iThreadNum) const;
     const QString getGdmlFileName() const;
 
     bool  checkPathValid() const;

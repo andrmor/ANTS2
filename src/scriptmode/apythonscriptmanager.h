@@ -21,16 +21,15 @@ public:
     ~APythonScriptManager() {}
 
     //configuration
-    //virtual void      SetInterfaceObject(QObject* interfaceObject, QString name) override;
-    virtual void      RegisterInterfaceAsGlobal(AScriptInterface* interface) override;
-    virtual void      RegisterCoreInterfaces(bool bCore = true, bool bMath = true) override;
-    virtual void      RegisterInterface(AScriptInterface* interface, const QString& name) override;
+    void      RegisterInterfaceAsGlobal(AScriptInterface * interface) override;
+    void      RegisterCoreInterfaces(bool bCore = true, bool bMath = true) override;
+    void      RegisterInterface(AScriptInterface * interface, const QString & name) override;
 
     //run
-    virtual QString   Evaluate(const QString &Script) override;
-    virtual QVariant  EvaluateScriptInScript(const QString& script) override;
+    QString   Evaluate(const QString & Script) override;
+    QVariant  EvaluateScriptInScript(const QString & script) override;
 
-    virtual void      abortEvaluation() override;
+    void      abortEvaluation() override;
 
     PythonQtObjectPtr MinimizationFunctor;
     PythonQtObjectPtr GlobalDict;

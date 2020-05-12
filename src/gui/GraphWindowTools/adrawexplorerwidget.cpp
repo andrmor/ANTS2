@@ -1411,8 +1411,22 @@ void ADrawExplorerWidget::constructIconForObject(QIcon & icon, const ADrawObject
         if ( Opt.contains('P', Qt::CaseInsensitive) && !Opt.contains('C', Qt::CaseInsensitive) && !Opt.contains('L', Qt::CaseInsensitive) )
             line = nullptr;
     }
-    if (Type.startsWith("TGraph") && !Opt.contains('P') && !Opt.contains('*')) mark = nullptr;
-    if (Type.startsWith("TGraph") && !Opt.contains('C') && !Opt.contains('L')) line = nullptr;
+    if (Type.startsWith("TGraph"))
+    {
+        QString redOpt = Opt;
+        redOpt.remove("same", Qt::CaseInsensitive);
+        if (redOpt.isEmpty())
+        {
+            mark = nullptr;
+            fill = nullptr;
+        }
+        else
+        {
+            if (!Opt.contains('P', Qt::CaseInsensitive) && !Opt.contains('*', Qt::CaseInsensitive)) mark = nullptr;
+            if (!Opt.contains('C', Qt::CaseInsensitive) && !Opt.contains('L', Qt::CaseInsensitive) && !Opt.contains('B', Qt::CaseInsensitive)) line = nullptr;
+            if (!Opt.contains('F', Qt::CaseInsensitive)) fill = nullptr;
+        }
+    }
 
     construct1DIcon(icon, line, mark, fill);
 }

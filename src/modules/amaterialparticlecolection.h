@@ -55,7 +55,7 @@ public:
 
     //particle
   int countParticles() const {return ParticleCollection.size();}
-  int getParticleId(QString name) const;
+  int getParticleId(const QString & name) const;
   const QString getParticleName(int particleIndex) const;
   AParticle::ParticleType getParticleType(int particleIndex) const;
   const AParticle* getParticle(int particleIndex) const;

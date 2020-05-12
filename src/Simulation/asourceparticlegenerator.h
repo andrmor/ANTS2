@@ -30,7 +30,7 @@ public:
     ~ASourceParticleGenerator();
 
     virtual bool Init() override; // !!! has to be called before the first use of "GenerateEvent"!
-    virtual bool GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles) override; //see Init!!!
+    virtual bool GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles, int iEvent) override; //see Init!!!
 
     //triggered when remove particle from configuration is attempted
     virtual bool IsParticleInUse(int particleId, QString& SourceNames) const override;

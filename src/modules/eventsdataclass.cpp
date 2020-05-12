@@ -591,22 +591,24 @@ void EventsDataClass::copyTrueToReconstructed(int igroup)
   }
 
   clearReconstruction(igroup);
-  for (int iEvent=0; iEvent<Scan.size(); iEvent++)
-    {
-      AReconRecord* rec = new AReconRecord();
-      rec->Points.Reinitialize(0);
+  for (int iEvent = 0; iEvent < Scan.size(); iEvent++)
+  {
+      AReconRecord * rec = new AReconRecord();
+      rec->Points.Reinitialize(0);  // TODO reinitialize to the proper size!
 
       for (int i=0; i<Scan.at(iEvent)->Points.size(); i++)
-         rec->Points.AddPoint(Scan.at(iEvent)->Points[i].r, Scan.at(iEvent)->Points[i].energy);
+         rec->Points.AddPoint(Scan.at(iEvent)->Points[i].r,
+                              Scan.at(iEvent)->Points[i].energy,
+                              Scan.at(iEvent)->Points[i].time);
 
-      rec->chi2 = 1;
+      rec->chi2 = 1.0;
       rec->EventId = iEvent;
       rec->GoodEvent = true;
       rec->ReconstructionOK = true;
 
       ReconstructionData[igroup].append(rec);
       //rec->report();
-    }
+  }
   fReconstructionDataReady = true;
 }
 
@@ -623,7 +625,9 @@ void EventsDataClass::copyReconstructedToTrue(int igroup)
 
         rec->Points.Reinitialize(0);
         for (int i=0; i<ReconstructionData.at(igroup).at(iEvent)->Points.size(); i++)
-           rec->Points.AddPoint(ReconstructionData.at(igroup).at(iEvent)->Points[i].r, ReconstructionData.at(igroup).at(iEvent)->Points[i].energy);
+           rec->Points.AddPoint(ReconstructionData.at(igroup).at(iEvent)->Points[i].r,
+                                ReconstructionData.at(igroup).at(iEvent)->Points[i].energy,
+                                ReconstructionData.at(igroup).at(iEvent)->Points[i].time);
 
         Scan.append(rec);
       }
@@ -678,8 +682,8 @@ bool EventsDataClass::createReconstructionTree(APmHub* PMs, bool fIncludePMsigna
   //Pm signals and rho
   int numPMs = PMs->count();
   char buf[32];
-  float* signal = 0;
-  float* rho = 0;
+  float * signal = nullptr;
+  float * rho    = nullptr;
   if (fIncludePMsignals)
      {
        signal = new float[numPMs];
@@ -703,26 +707,28 @@ bool EventsDataClass::createReconstructionTree(APmHub* PMs, bool fIncludePMsigna
   std::vector <double> xScan;
   std::vector <double> yScan;
   std::vector <double> zScan;
-  std::vector <int> numPhotons;
+  std::vector <double> eScan;
+  std::vector <double> tScan;
   double zStop;
-  int ScintType, GoodEvent, EventType;
+  int ScintType, GoodEvent;
 
   if (!isScanEmpty() && fIncludeTrue)
-    {
+  {
       ReconstructionTree->Branch("xScan", &xScan);
       ReconstructionTree->Branch("yScan", &yScan);
       ReconstructionTree->Branch("zScan", &zScan);
-      ReconstructionTree->Branch("numPhotons", &numPhotons);
+      ReconstructionTree->Branch("eScan", &eScan);
+      ReconstructionTree->Branch("tScan", &tScan);
 
       ReconstructionTree->Branch("zStop",&zStop, "zStop/D");
       ReconstructionTree->Branch("ScintType",&ScintType, "ScintType/I");
       ReconstructionTree->Branch("GoodEvent",&GoodEvent, "GoodEvent/I");
-      ReconstructionTree->Branch("EventType",&EventType, "EventType/I");
-    }
+      //ReconstructionTree->Branch("EventType",&EventType, "EventType/I");
+  }
 
   //========= building tree =========
   for (int iev=0; iev<size; iev++)
-    {
+  {
       ievent = ReconstructionData[igroup][iev]->EventId;
 
       if (fRecReady)
@@ -766,31 +772,33 @@ bool EventsDataClass::createReconstructionTree(APmHub* PMs, bool fIncludePMsigna
       //frac1 = maxSig/ssum;
 
       if (!isScanEmpty() && fIncludeTrue)
-        {
+      {
           int Points = Scan[iev]->Points.size();
           xScan.resize(Points);
           yScan.resize(Points);
           zScan.resize(Points);
-          numPhotons.resize(Points);
+          eScan.resize(Points);
+          tScan.resize(Points);
           for (int iP=0; iP<Points; iP++)
             {
               xScan[iP] = Scan[iev]->Points[iP].r[0];
               yScan[iP] = Scan[iev]->Points[iP].r[1];
               zScan[iP] = Scan[iev]->Points[iP].r[2];
-              numPhotons[iP] = Scan[iev]->Points[iP].energy;
+              eScan[iP] = Scan[iev]->Points[iP].energy;
+              tScan[iP] = Scan[iev]->Points[iP].time;
             }
           zStop = Scan[iev]->zStop;
           ScintType = Scan[iev]->ScintType;
           GoodEvent = Scan[iev]->GoodEvent;
-          EventType = Scan[iev]->EventType;
-        }
+          //EventType = Scan[iev]->EventType;
+      }
 
       ReconstructionTree->Fill();
-    }
+  }
 
   ReconstructionTree->ResetBranchAddresses();
-  if (signal) delete [] signal;
-  if (rho) delete [] rho;
+  delete [] signal;
+  delete [] rho;
     qDebug()<<"   Tree created with "<<ReconstructionTree->GetEntries()<<" entries";
   return true;
 }
@@ -1009,7 +1017,7 @@ bool EventsDataClass::saveSimulationAsTree(QString fileName)
           zStop = Scan[iev]->zStop;
           ScintType = Scan[iev]->ScintType;
           GoodEvent = Scan[iev]->GoodEvent;
-          EventType = Scan[iev]->EventType;
+          //EventType = Scan[iev]->EventType;
         }
       tree->Fill();
     }
@@ -1692,7 +1700,7 @@ int EventsDataClass::loadSimulatedEventsFromTree(QString fileName, const APmHub 
             }
           scs->zStop = zStop;
           scs->GoodEvent = GoodEvent;
-          scs->EventType = EventType;
+          //scs->EventType = EventType;
           scs->ScintType = ScintType;
 
           Scan.append(scs);          

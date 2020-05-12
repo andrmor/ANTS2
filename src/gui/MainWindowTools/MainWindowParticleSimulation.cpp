@@ -44,9 +44,9 @@ void MainWindow::SimParticleSourcesConfigToJson(QJsonObject &json)
         //control options
         QJsonObject cjs;
             QString str;
-                switch (ui->twParticleGenerationMode->currentIndex())
+                switch (ui->cobParticleGenerationMode->currentIndex())
                 {
-                default: qWarning() << "Save sim config: unknown particle generation mode";
+                default: qWarning() << "During saving sim config: unknown particle generation mode";
                 case 0 : str = "Sources"; break;
                 case 1 : str = "File"; break;
                 case 2 : str = "Script"; break;
@@ -61,6 +61,8 @@ void MainWindow::SimParticleSourcesConfigToJson(QJsonObject &json)
             cjs["IgnoreNoHitsEvents"] = ui->cbIgnoreEventsWithNoHits->isChecked();
             cjs["IgnoreNoDepoEvents"] = ui->cbIgnoreEventsWithNoEnergyDepo->isChecked();
             cjs["ClusterMergeRadius"] = ui->ledClusterRadius->text().toDouble();
+            cjs["ClusterMerge"] = ui->cbMergeClusters->isChecked();
+            cjs["ClusterMergeTime"] = ui->ledClusterTimeDif->text().toDouble();
         psjs["SourceControlOptions"] = cjs;
 
         //Particle generation
@@ -111,6 +113,20 @@ void MainWindow::ShowSource(const AParticleSourceRecord* p, bool clear)
    }
   switch (index)
     {
+     case 0:
+     {
+      Detector->GeoManager->SetCurrentPoint(X0,Y0,Z0);
+      Detector->GeoManager->DrawCurrentPoint(9);
+      clearGeoMarkers();
+      GeoMarkerClass* marks = new GeoMarkerClass("Source", 3, 10, kBlack);
+      marks->SetNextPoint(X0, Y0, Z0);
+      GeoMarkers.append(marks);
+      GeoMarkerClass* marks1 = new GeoMarkerClass("Source", 4, 3, kBlack);
+      marks1->SetNextPoint(X0, Y0, Z0);
+      GeoMarkers.append(marks1);
+      GeometryWindow->ShowGeometry(false);
+      break;
+     }
      case (1):
       { //linear source
         Int_t track_index = Detector->GeoManager->AddTrack(1,22);
@@ -244,16 +260,15 @@ void MainWindow::ShowSource(const AParticleSourceRecord* p, bool clear)
   }
 
   GeometryWindow->DrawTracks();
-  //Detector->GeoManager->SetCurrentPoint(X0,Y0,Z0);
-  //Detector->GeoManager->DrawCurrentPoint(9);
 }
 
 void MainWindow::on_pbGunTest_clicked()
 {
-    GeometryWindow->ShowAndFocus();
-    gGeoManager->ClearTracks();
+    WindowNavigator->BusyOn();   // -->
 
-    if (ui->twParticleGenerationMode->currentIndex() == 0)
+    GeometryWindow->ShowAndFocus();
+    Detector->GeoManager->ClearTracks();
+    if (ui->cobParticleGenerationMode->currentIndex() == 0)
     {
         if (ui->pbGunShowSource->isChecked())
         {
@@ -264,13 +279,14 @@ void MainWindow::on_pbGunTest_clicked()
     else GeometryWindow->ShowGeometry();
 
     AParticleGun* pg;
-    switch (ui->twParticleGenerationMode->currentIndex())
+    switch (ui->cobParticleGenerationMode->currentIndex())
     {
     case 0: pg = SimulationManager->ParticleSources; break;
     case 1: pg = SimulationManager->FileParticleGenerator; break;
     case 2: pg = SimulationManager->ScriptParticleGenerator; break;
     default:
         message("This generation mode is not implemented!", this);
+        WindowNavigator->BusyOff(); // <--
         return;
     }
 
@@ -278,63 +294,68 @@ void MainWindow::on_pbGunTest_clicked()
     QFont font = ui->pbStopScan->font();
     font.setBold(true);
     ui->pbStopScan->setFont(font);
-    WindowNavigator->BusyOn();
 
+    SimulationManager->FileParticleGenerator->SetValidationMode(AFileParticleGenerator::Relaxed);
     TestParticleGun(pg, ui->sbGunTestEvents->value()); //script generator is aborted on click of the stop button!
 
     ui->pbStopScan->setEnabled(false);
     ui->pbStopScan->setText("stop");
     font.setBold(false);
     ui->pbStopScan->setFont(font);
-    WindowNavigator->BusyOff();
+
+    WindowNavigator->BusyOff();  // <--
 }
 
 void MainWindow::TestParticleGun(AParticleGun* Gun, int numParticles)
 {
     clearGeoMarkers();
-
     bool bOK = Gun->Init();
     if (!bOK)
     {
         message("Failed to initialize particle gun!\n" + Gun->GetErrorString(), this);
         return;
     }
+    Gun->SetStartEvent(0);
+    if (ui->cobParticleGenerationMode->currentIndex() == 1) updateFileParticleGeneratorGui();
 
     double Length = std::max(Detector->WorldSizeXY, Detector->WorldSizeZ)*0.4;
     double R[3], K[3];
     QVector<AParticleRecord*> GP;
+    int numTracks = 0;
     for (int iRun=0; iRun<numParticles; iRun++)
     {
-        bool bOK = Gun->GenerateEvent(GP);
-        if (!bOK) break;
-//        if (GP.isEmpty() && iRun > 2)
-//        {
-//            message("Did several attempts but no particles were generated!", this);
-//            break;
-//        }
-        for (const AParticleRecord * p : GP)
+        bool bOK = Gun->GenerateEvent(GP, iRun);
+        if (bOK && numTracks < 1000)
         {
-            R[0] = p->r[0];
-            R[1] = p->r[1];
-            R[2] = p->r[2];
+            for (const AParticleRecord * p : GP)
+            {
+                R[0] = p->r[0];
+                R[1] = p->r[1];
+                R[2] = p->r[2];
 
-            K[0] = p->v[0];
-            K[1] = p->v[1];
-            K[2] = p->v[2];
+                K[0] = p->v[0];
+                K[1] = p->v[1];
+                K[2] = p->v[2];
 
-            int track_index = Detector->GeoManager->AddTrack(1, 22);
-            TVirtualGeoTrack *track = Detector->GeoManager->GetTrack(track_index);
-            track->AddPoint(R[0], R[1], R[2], 0);
-            track->AddPoint(R[0] + K[0]*Length, R[1] + K[1]*Length, R[2] + K[2]*Length, 0);
-            SimulationManager->TrackBuildOptions.applyToParticleTrack(track, p->Id);
+                int track_index = Detector->GeoManager->AddTrack(1, 22);
+                TVirtualGeoTrack *track = Detector->GeoManager->GetTrack(track_index);
+                track->AddPoint(R[0], R[1], R[2], 0);
+                track->AddPoint(R[0] + K[0]*Length, R[1] + K[1]*Length, R[2] + K[2]*Length, 0);
+                SimulationManager->TrackBuildOptions.applyToParticleTrack(track, p->Id);
 
-            GeoMarkerClass* marks = new GeoMarkerClass("t", 7, 1, SimulationManager->TrackBuildOptions.getParticleColor(p->Id));
-            marks->SetNextPoint(R[0], R[1], R[2]);
-            GeoMarkers.append(marks);
+                GeoMarkerClass* marks = new GeoMarkerClass("t", 7, 1, SimulationManager->TrackBuildOptions.getParticleColor(p->Id));
+                marks->SetNextPoint(R[0], R[1], R[2]);
+                GeoMarkers.append(marks);
 
-            delete p;
+                ++numTracks;
+                if (numTracks > 1000) break;
+            }
         }
+
+        for (const AParticleRecord * p : GP) delete p;
         GP.clear();
+
+        if (!bOK) break;
     }
 
     GeometryWindow->ShowTracksAndMarkers();
@@ -469,6 +490,7 @@ void MainWindow::on_pbGunShowSource_toggled(bool checked)
     }
     else
     {
+        clearGeoMarkers();
         Detector->GeoManager->ClearTracks();
         GeometryWindow->ShowGeometry();
     }
@@ -649,7 +671,33 @@ void containsMonsGrids(const AGeoObject * obj, bool & bGrid, bool & bMon)
 #include "asandwich.h"
 void MainWindow::on_pbParticleSourcesSimulate_clicked()
 {
-    MainWindow::writeSimSettingsToJson(Config->JSON);
+    // TODO !*! find a way to do it in SimulationManager - without the settings hub it is not straightforward at this point
+    // to avoid check file in each thread
+    if (ui->cobParticleGenerationMode->currentIndex() == 1)  // "From file"
+    {
+        AFileParticleGenerator * pg = SimulationManager->FileParticleGenerator;
+        pg->SetValidationMode(ui->cbGeant4ParticleTracking->isChecked() ? AFileParticleGenerator::Relaxed
+                                                                        : AFileParticleGenerator::Strict);
+        bool bOK = pg->Init();
+        if (!bOK)
+        {
+            message(pg->GetErrorString(), this);
+            return;
+        }
+        updateFileParticleGeneratorGui();
+    }
+
+    writeSimSettingsToJson(Config->JSON);
+
+    if (ExitParticleSettings.SaveParticles)
+    {
+        const QString fileName = ExitParticleSettings.FileName;
+        if (QFileInfo(fileName).exists())
+        {
+            bool bContinue = confirm("File configured to save exiting particles already exists!\nContinue?\n\n" + fileName, this);
+            if (!bContinue) return;
+        }
+    }
 
     ELwindow->QuickSave(0);
     fStartedFromGUI = true;
@@ -713,20 +761,39 @@ void MainWindow::on_pbParticleSourcesSimulate_clicked()
 
 void MainWindow::on_pbGenerateFromFile_Help_clicked()
 {
-    QString s = "File should contain particle records, one line per particle.\n\n"
-                "Record format:\n"
-                "ParticleId  Energy  StartX  StartY  StartZ  DirX  DirY  DirZ Time *\n\n"
-                "where optional '*' indicates that the event is not finished:\n"
+    QString s = "Ants2 supports 3 formats:\n"
+                "\n"
+                "1. Simplistic (ascii file)\n"
+                "File should contain particle records, one line per particle.\n"
+                "Record format: ParticleId  Energy  X  Y  Z  DirX  DirY  DirZ Time *\n"
+                "ParticleID is the particle index in the config, not particle name!\n"
+                "The optional '*' at the end indicates that the event is not finished:\n"
                 "the next particle will be generated within the same event.\n"
-                "Energy in keV, position in mm, direction is unitary vector and time in ns.\n\n"
-                "If a line does not start with an integer, it is ignored,\n"
-                "but it is recommended to start comments with '#' symbol.";
+                "Comment lines should start with '#' symbol.\n"
+                "\n"
+                "2. G4ants-generated, ascii file\n"
+                "Each event is marked with a special line,\n"
+                "starting with '#' symbol immediately followed by the event index.\n"
+                "The first event should have index of 0: #0\n"
+                "Each record of a particle occupies one line, the format is:\n"
+                "ParticleName Energy X Y Z DirX DirY DirZ Time\n"
+                "\n"
+                "3. G4ants-generated, binary file\n"
+                "Each new entry starts either with a (char)EE or a (char)FF\n"
+                "0xEE is followed by the event number (int),\n"
+                "0xFF is followed by the particle record, which is\n"
+                "ParticleName X Y Z DirX DirY DirZ Time\n"
+                "where ParticleName is 0-terminated string and the rest are doubles\n"
+                "\n"
+                "Energy is in keV, Position is in mm,\n"
+                "Direction is unitary vector and Time is in ns.\n";
+
     message(s, this);
 }
 
 void MainWindow::on_pbGenerateFromFile_Change_clicked()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, "Select a file with particle generation data", GlobSet.LastOpenDir, "Data files (*.dat *.txt);;All files (*)");
+    QString fileName = QFileDialog::getOpenFileName(this, "Select a file with particle generation data", GlobSet.LastOpenDir, "All files (*)");
     if (fileName.isEmpty()) return;
     GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
     ui->leGenerateFromFile_FileName->setText(fileName);
@@ -735,19 +802,27 @@ void MainWindow::on_pbGenerateFromFile_Change_clicked()
 
 void MainWindow::on_leGenerateFromFile_FileName_editingFinished()
 {
-    QString newName = ui->leGenerateFromFile_FileName->text();
-    if (newName == SimulationManager->FileParticleGenerator->GetFileName()) return;
+    AFileParticleGenerator* pg = SimulationManager->FileParticleGenerator;
 
-    SimulationManager->FileParticleGenerator->SetFileName(newName);
+    QString newName = ui->leGenerateFromFile_FileName->text();
+    if (newName == pg->GetFileName()) return;
+
+    pg->SetFileName(newName);
     on_pbUpdateSimConfig_clicked();
 }
 
 void MainWindow::on_pbGenerateFromFile_Check_clicked()
 {
     AFileParticleGenerator* pg = SimulationManager->FileParticleGenerator;
-    pg->InvalidateFile();
-    if (!pg->Init())
-        message(pg->GetErrorString(), this);
+
+    pg->bCollectExpandedStatistics = ui->cbFileCollectStatistics->isChecked();
+    pg->SetValidationMode(ui->cbGeant4ParticleTracking->isChecked() ? AFileParticleGenerator::Relaxed
+                                                                    : AFileParticleGenerator::Strict);
+    WindowNavigator->BusyOn();  // -->
+    bool bOK = pg->Init();
+    WindowNavigator->BusyOff(); // <--
+
+    if (!bOK) message(pg->GetErrorString(), this);
 
     updateFileParticleGeneratorGui();
 }
@@ -757,6 +832,9 @@ void MainWindow::updateFileParticleGeneratorGui()
     AFileParticleGenerator* pg = SimulationManager->FileParticleGenerator;
 
     ui->leGenerateFromFile_FileName->setText(pg->GetFileName());
+    ui->lwFileStatistics->clear();
+    ui->lwFileStatistics->setEnabled(false);
+    qApp->processEvents();
 
     QFileInfo fi(pg->GetFileName());
     if (!fi.exists())
@@ -765,30 +843,61 @@ void MainWindow::updateFileParticleGeneratorGui()
         return;
     }
 
-    QString s;
+    QString s = "Format: ";
+    s += pg->GetFormatName();
+
     if (pg->IsValidated())
     {
-        s += QString("%1 events in the file").arg(pg->NumEventsInFile);
-        if (pg->statNumMultipleEvents > 0) s += QString(", including %1 multiple events").arg(pg->statNumMultipleEvents);
+        s += QString("  Events: %1").arg(pg->NumEventsInFile);
+        if (pg->statNumEmptyEventsInFile > 0) s += QString(", %1 empty").arg(pg->statNumEmptyEventsInFile);
+        if (pg->statNumMultipleEvents    > 0) s += QString(", %1 multiple").arg(pg->statNumMultipleEvents);
 
-        s += "\n\n";
-
-        QString pd;
-        bool bFound = false;
-        int numParticles = MpCollection->countParticles();
-        for (int ip = 0; ip < numParticles; ip++)
+        ui->lwFileStatistics->setEnabled(pg->ParticleStat.size() > 0);
+        for (AParticleInFileStatRecord & rec : pg->ParticleStat)
         {
-            if (pg->statParticleQuantity.at(ip) > 0)
-            {
-                pd += QString("  %2 %1\n").arg(MpCollection->getParticleName(ip)).arg(pg->statParticleQuantity.at(ip));
-                bFound = true;
-            }
+            ui->lwFileStatistics->addItem( QString("%1 \t# %2 \t <E>: %4 keV")
+                                           .arg(rec.NameQt)
+                                           .arg(rec.Entries)
+                                           //.arg( QString::number(rec.Energy, 'g', 6) )
+                                           .arg( QString::number(rec.Energy / rec.Entries, 'g', 6) ) );
         }
-        if (bFound) s += "Particle distribution:\n" + pd;
     }
-    else s = "Click 'Analyse file' to see statistics";
+    else s += " Click 'Analyse file' to see statistics";
 
     ui->labGenerateFromFile_info->setText(s);
+}
+
+#include <QClipboard>
+void MainWindow::on_lwFileStatistics_customContextMenuRequested(const QPoint &pos)
+{
+    QMenu myMenu;
+    myMenu.addSeparator();
+    myMenu.addAction("Copy all to clipboard");
+    myMenu.addSeparator();
+
+    QPoint globalPos = ui->lwFileStatistics->mapToGlobal(pos);
+    QAction* selectedItem = myMenu.exec(globalPos);
+
+    if (selectedItem)
+    {
+        if (selectedItem->iconText() == "Copy all to clipboard")
+         {
+            AFileParticleGenerator* pg = SimulationManager->FileParticleGenerator;
+            QString txt;
+
+            for (AParticleInFileStatRecord & rec : pg->ParticleStat)
+            {
+                txt += QString("%1 \t# %2 \t <E>: %4 keV\n")
+                                               .arg(rec.NameQt)
+                                               .arg(rec.Entries)
+                                               //.arg( QString::number(rec.Energy, 'g', 6) )
+                                               .arg( QString::number(rec.Energy / rec.Entries, 'g', 6) );
+            }
+
+            QClipboard * clipboard = QApplication::clipboard();
+            clipboard->setText(txt);
+         }
+    }
 }
 
 // --- by script
@@ -813,7 +922,7 @@ void MainWindow::on_pbParticleGenerationScript_clicked()
     int NumThreads = 1;
     AParticleGenerator_SI* gen = new AParticleGenerator_SI(*Detector->MpCollection, Detector->RandGen, 0, &NumThreads);
     QVector<AParticleRecord*> GP;
-    gen->configure(&GP);
+    gen->configure(&GP, 0);
     gen->setObjectName("gen");
     sw->RegisterInterface(gen, "gen"); //takes ownership
     AMath_SI* math = new AMath_SI(Detector->RandGen);

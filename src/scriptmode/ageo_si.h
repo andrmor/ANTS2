@@ -4,6 +4,7 @@
 #include "ascriptinterface.h"
 
 #include <QVariant>
+#include <QVariantList>
 #include <QVector>
 #include <QList>
 #include <QString>
@@ -63,6 +64,8 @@ public slots:
   void UpdateGeometry(bool CheckOverlaps = true);
 
   QString printOverrides();
+
+  QVariantList getPassedVoulumes(QVariantList startXYZ, QVariantList startVxVyVz);
 
 signals:
   void clearRequested();

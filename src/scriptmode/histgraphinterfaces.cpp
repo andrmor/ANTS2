@@ -756,7 +756,8 @@ AInterfaceToGraph::AInterfaceToGraph(TmpObjHubClass *TmpHub)
 
     H["AddPoints"] = "Can add arrays of point using two options:\n"
             "1. Provide two arrays - one for X and one for Y coordinates of the points;\n"
-            "2. Provide an array of [x,y] arrays of points.";
+            "2. Provide an array of [x,y] arrays of points;\n"
+            "3. Provide an array of Y coordinates. In this case X scale will be 0, 1, 2, etc.";
 }
 
 AInterfaceToGraph::AInterfaceToGraph(const AInterfaceToGraph &other) :
@@ -865,10 +866,8 @@ void AInterfaceToGraph::AddPoint(QString GraphName, double x, double y, double e
         r->AddPoint(x, y, errorX, errorY);
 }
 
-void AInterfaceToGraph::AddPoints(QString GraphName, QVariant xArray, QVariant yArray)
+void AInterfaceToGraph::AddPoints(QString GraphName, QVariantList vx, QVariantList vy)
 {
-    const QVariantList vx = xArray.toList();
-    const QVariantList vy = yArray.toList();
     if (vx.isEmpty() || vx.size() != vy.size())
     {
         abort("Empty array or mismatch in array sizes in AddPoints for graph " + GraphName);
@@ -904,11 +903,8 @@ void AInterfaceToGraph::AddPoints(QString GraphName, QVariant xArray, QVariant y
     }
 }
 
-void AInterfaceToGraph::AddPoints(QString GraphName, QVariant xArray, QVariant yArray, QVariant yErrArray)
+void AInterfaceToGraph::AddPoints(QString GraphName, QVariantList vx, QVariantList vy, QVariantList vEy)
 {
-    const QVariantList vx  = xArray.toList();
-    const QVariantList vy  = yArray.toList();
-    const QVariantList vEy = yErrArray.toList();
     if (vx.isEmpty() || vx.size() != vy.size() || vx.size() != vEy.size())
     {
         abort("Empty array or mismatch in array sizes in AddPoints for graph " + GraphName);
@@ -949,12 +945,8 @@ void AInterfaceToGraph::AddPoints(QString GraphName, QVariant xArray, QVariant y
     }
 }
 
-void AInterfaceToGraph::AddPoints(QString GraphName, QVariant xArray, QVariant yArray, QVariant xErrArray, QVariant yErrArray)
+void AInterfaceToGraph::AddPoints(QString GraphName, QVariantList vx, QVariantList vy, QVariantList vEx, QVariantList vEy)
 {
-    const QVariantList vx  = xArray.toList();
-    const QVariantList vy  = yArray.toList();
-    const QVariantList vEx = xErrArray.toList();
-    const QVariantList vEy = yErrArray.toList();
     if (vx.isEmpty() || vx.size() != vy.size() || vx.size() != vEx.size() || vx.size() != vEy.size())
     {
         abort("Empty array or mismatch in array sizes in AddPoints for graph " + GraphName);
@@ -996,12 +988,21 @@ void AInterfaceToGraph::AddPoints(QString GraphName, QVariant xArray, QVariant y
     }
 }
 
-void AInterfaceToGraph::AddPoints(QString GraphName, QVariant xyArray)
+void AInterfaceToGraph::AddPoints(QString GraphName, QVariantList v)
 {
-    const QVariantList v = xyArray.toList();
     if (v.isEmpty())
     {
         abort("Empty array in AddPoints for graph " + GraphName);
+        return;
+    }
+
+    bool bOK = false;
+    v.at(0).toDouble(&bOK);
+    if (bOK)
+    {
+        QVariantList vl;
+        for (int i=0; i<v.size(); i++) vl << i;
+        AddPoints(GraphName, vl, v);
         return;
     }
 

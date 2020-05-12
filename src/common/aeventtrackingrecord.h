@@ -15,7 +15,7 @@ class ATrackingStepData
 {
 public:
     ATrackingStepData(float * position, float time, float energy, float depositedEnergy, const QString & process);
-    ATrackingStepData(double * position, double time, double energy, double depositedEnergy, const QString & process);
+    ATrackingStepData(const double * position, double time, double energy, double depositedEnergy, const QString & process);
     ATrackingStepData(float x, float y, float z, float time, float energy, float depositedEnergy, const QString & process);
 
     virtual ~ATrackingStepData();
@@ -35,7 +35,7 @@ class ATransportationStepData : public ATrackingStepData
 {
 public:
     ATransportationStepData(float x, float y, float z, float time, float energy, float depositedEnergy, const QString & process);
-    ATransportationStepData(double * position, double time, double energy, double depositedEnergy, const QString & process);
+    ATransportationStepData(const double * position, double time, double energy, double depositedEnergy, const QString & process);
 
     void setVolumeInfo(const QString & volName, int volIndex, int matIndex);
 

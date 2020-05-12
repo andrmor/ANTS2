@@ -37,7 +37,7 @@ public:
     bool wasHardAborted() const;
     //bool isFinished() const {return simState == SFinished;}
     void setFinished() {simState = SFinished;}    
-    QVector<ASimulator *> getWorkers() { return workers; }
+    QVector<ASimulator *> & getWorkers() {return workers;}
     State getSimState() const {return simState;}
     void clearWorkers();
 
@@ -62,13 +62,14 @@ private:
     QTime startTime;
     int lastRefreshTime;
     int totalEventCount;
-    int lastProgress;
+    //int lastProgress;
     int lastEventsDone;
 
 public:
     //Stats for gui report
-    double progress;
-    double usPerEvent;
+    double progress   = 0;
+    double usPerEvent = 0;
+    double progressG4 = 0;
 
 public slots:
     void simulate();

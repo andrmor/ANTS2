@@ -3,6 +3,7 @@
 
 #include "aguiwindow.h"
 #include "ag4simulationsettings.h"
+#include "asaveparticlestofilesettings.h"
 
 #include <QMainWindow>
 #include <QVector>
@@ -189,7 +190,7 @@ public slots:
     void LRF_ModuleReadySlot(bool ready);
     void on_pbSimulate_clicked();
     void on_pbParticleSourcesSimulate_clicked();    
-    void RefreshOnProgressReport(int Progress, double msPerEv);
+    void RefreshOnProgressReport(int Progress, double msPerEv, int G4progress);
     void PMscriptSuccess();
     void onGDMLstatusChage(bool fGDMLactivated);
     void updateLoaded(int events, int progress);
@@ -384,7 +385,8 @@ private:
     QSize OptOvDialogSize;
     QPoint OptOvDialogPosition;
 
-    AG4SimulationSettings G4SimSet;
+    AG4SimulationSettings G4SimSet;                     // temporary, will be removed after hub with settings is implemented
+    ASaveParticlesToFileSettings ExitParticleSettings; // temporary, will be removed after hub with settings is implemented
 
     void clearPreprocessingData();
     void updateCOBsWithPMtypeNames();
@@ -592,8 +594,21 @@ private slots:
 
     void on_pbOpenLogOptions2_clicked();
 
-
     void on_pbAddmaterialFromLibrary_clicked();
+
+    void on_cobGenerateFromFile_FileFormat_currentIndexChanged(int index);
+
+    void on_lwFileStatistics_customContextMenuRequested(const QPoint &pos);
+
+    void on_twSourcePhotonsParticles_currentChanged(int index);
+
+    void on_pbParticlesToFile_clicked();
+
+    void on_pbParticlesToFile_customContextMenuRequested(const QPoint &pos);
+
+    void on_pbFilePreview_clicked();
+
+    void on_cobNodeGenerationMode_customContextMenuRequested(const QPoint &pos);
 
 public slots:
     void on_pbRebuildDetector_clicked();
@@ -613,6 +628,7 @@ private:
     void ShowParticleSource_noFocus();
     void showPDEorSPEfactors(bool bShowPDE);
     void randomizePDEorSPEfactors(bool bDoPDE, bool bUniform, double min, double max, double mean, double sigma);
+    void updateG4ProgressBarVisibility();
 
 #ifdef __USE_ANTS_PYTHON__
     void createPythonScriptWindow();

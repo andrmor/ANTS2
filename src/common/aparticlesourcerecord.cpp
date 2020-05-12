@@ -177,6 +177,14 @@ void AParticleSourceRecord::writeToJson(QJsonObject & json, const AMaterialParti
     json["DoMaterialLimited"] = DoMaterialLimited;
     json["LimitedToMaterial"] = LimtedToMatName;
 
+    json["TimeAverageMode"] = TimeAverageMode;
+    json["TimeAverage"] = TimeAverage;
+    json["TimeAverageStart"] = TimeAverageStart;
+    json["TimeAveragePeriod"] = TimeAveragePeriod;
+    json["TimeSpreadMode"] = TimeSpreadMode;
+    json["TimeSpreadSigma"] = TimeSpreadSigma;
+    json["TimeSpreadWidth"] = TimeSpreadWidth;
+
     //particles
     int GunParticleSize = GunParticles.size();
     json["Particles"] = GunParticleSize;
@@ -207,6 +215,21 @@ bool AParticleSourceRecord::readFromJson(const QJsonObject &json, AMaterialParti
     parseJson(json, "CollPhi", CollPhi);
     parseJson(json, "CollTheta", CollTheta);
     parseJson(json, "Spread", Spread);
+
+    TimeAverageMode = 0;
+    parseJson(json, "TimeAverageMode", TimeAverageMode);
+    TimeAverage = 0;
+    parseJson(json, "TimeAverage", TimeAverage);
+    TimeAverageStart = 0;
+    parseJson(json, "TimeAverageStart", TimeAverageStart);
+    TimeAveragePeriod = 10.0;
+    parseJson(json, "TimeAveragePeriod", TimeAveragePeriod);
+    TimeSpreadMode = 0;
+    parseJson(json, "TimeSpreadMode", TimeSpreadMode);
+    TimeSpreadSigma = 50.0;
+    parseJson(json, "TimeSpreadSigma", TimeSpreadSigma);
+    TimeSpreadWidth = 100.0;
+    parseJson(json, "TimeSpreadWidth", TimeSpreadWidth);
 
     DoMaterialLimited = fLimit = false;
     LimtedToMatName = "";

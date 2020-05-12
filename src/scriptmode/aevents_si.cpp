@@ -31,6 +31,8 @@ AEvents_SI::AEvents_SI(AConfiguration *Config, EventsDataClass* EventsDataHub)
   H["GetTruePoints"] = "Return array of true (scan) points for the event. Array elements are [x, y, z, energy]";
   H["GetTrueNumberPoints"] = "Return number of true (scan) points for the given event";
 
+  H["GetTrueAll"] = "Get array (3D: [iEvent][iPoint][X Y Z Energy Time] with all true/scan data.";
+  H["GetTrueinRnage"] = "Same as GetTrueAll(), but for event indexes from iFromEvent (inclusive) and until iToEvent (not inclusive)";
 
   DepRem["GetTruePoints"] = "Use GetTruePointsXYZE() or GetTruePointsXYZEiMat instead";
 }
@@ -471,11 +473,50 @@ double AEvents_SI::GetTrueEnergy(int ievent, int iPoint)
   return EventsDataHub->Scan.at(ievent)->Points[iPoint].energy;
 }
 
-const QVariant AEvents_SI::GetTruePoints(int ievent)
+QVariantList AEvents_SI::GetTrueAll()
 {
-  if (!checkTrueDataRequest(ievent, -1)) return 0; //anyway aborted
+    return GetTrueInRange(0, EventsDataHub->Scan.size());
+}
 
+QVariantList AEvents_SI::GetTrueInRange(int iFromEvent, int iToEvent)
+{
+    QVariantList list;
+
+    const int numEvents = EventsDataHub->Scan.size();
+    if (iFromEvent < 0 || iToEvent > numEvents)
+    {
+        abort("Invalid range for GetTrueInRange()");
+        return list;
+    }
+
+    for (int iEvent = iFromEvent; iEvent < iToEvent; iEvent++)
+    {
+        const AScanRecord * sr = EventsDataHub->Scan.at(iEvent);
+        QVariantList evList;
+
+        const APositionEnergyBuffer & p = sr->Points;
+        for (int i = 0; i < p.size(); i++)
+        {
+            QVariantList el;
+                el << p.at(i).r[0];
+                el << p.at(i).r[1];
+                el << p.at(i).r[2];
+                el << p.at(i).energy;
+                el << p.at(i).time;
+            evList.push_back(el);
+        }
+
+        list.push_back(evList);
+    }
+    return list;
+}
+
+QVariantList AEvents_SI::GetTruePoints(int ievent)
+{
   QVariantList list;
+
+  if (!checkTrueDataRequest(ievent, -1)) return list; //anyway aborted
+
   const APositionEnergyBuffer& p = EventsDataHub->Scan.at(ievent)->Points;
   for (int i=0; i<p.size(); i++)
   {
@@ -484,6 +525,7 @@ const QVariant AEvents_SI::GetTruePoints(int ievent)
       el << p.at(i).r[1];
       el << p.at(i).r[2];
       el << p.at(i).energy;
+      el << p.at(i).time;
       list.push_back(el);
   }
   return list;
@@ -704,10 +746,10 @@ void AEvents_SI::SetReconstructedFast(int igroup, int ievent, int ipoint, double
     EventsDataHub->ReconstructionData[igroup][ievent]->GoodEvent = true;
 }
 
-void AEvents_SI::AddReconstructedPoint(int igroup, int ievent, double x, double y, double z, double e)
+void AEvents_SI::AddReconstructedPoint(int igroup, int ievent, double x, double y, double z, double e, double time)
 {
   if (!checkEventNumber(igroup, ievent, 0)) return;
-  EventsDataHub->ReconstructionData[igroup][ievent]->Points.AddPoint(x, y, z, e);
+  EventsDataHub->ReconstructionData[igroup][ievent]->Points.AddPoint(x, y, z, e, time);
 }
 
 void AEvents_SI::SetReconstructedX(int igroup, int ievent, int ipoint, double x)

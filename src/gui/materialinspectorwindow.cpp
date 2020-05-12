@@ -2493,7 +2493,7 @@ void MaterialInspectorWindow::onTabwNeutronsActionRequest(int iEl, int iIso, con
         MW->GraphWindow->Draw(graphOver, "L same");
 
         if (!element->CSfileHeader.isEmpty())
-            MW->GraphWindow->AddText(element->CSfileHeader, true, 0);
+            MW->GraphWindow->ShowTextPanel(element->CSfileHeader, true, 0);
     }
     // -- Load --
     else if (Action.contains("Load"))

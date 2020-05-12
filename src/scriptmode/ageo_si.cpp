@@ -54,6 +54,9 @@ AGeo_SI::AGeo_SI(DetectorClass* Detector)
   H["RecalculateStack"] = "Recalculates xyz positions of the stack elements. Has to be called if config.Replace() was used to change thickness of the elements.";
 
   H["setEnable"] = "Enable or disable the volume with the providfed name, or, if the name ends with '*', all volumes with the name starting with the provided string.)";
+  H["getPassedVoulumes"] = "Go through the defined geometry in a straight line from startXYZ in the direction startVxVyVz\n"
+          "and return array of [X Y Z MaterualIndex VolumeName NodeIndex] for all volumes on the way until final exit to the World\n"
+          "the X Y Z are coordinates of the entrance points";
 }
 
 AGeo_SI::~AGeo_SI()
@@ -787,5 +790,61 @@ QString AGeo_SI::printOverrides()
         }
     }
     return s;
+}
+
+#include "TGeoManager.h"
+QVariantList AGeo_SI::getPassedVoulumes(QVariantList startXYZ, QVariantList startVxVyVz)
+{
+    QVariantList vl;
+
+    if (startXYZ.length() != 3 || startVxVyVz.length() != 3)
+    {
+        abort("input arguments should be arrays of 3 numbers");
+        return vl;
+    }
+
+    double r[3], v[3];
+    for (int i=0; i<3; i++)
+    {
+        r[i] = startXYZ[i].toDouble();
+        v[i] = startVxVyVz[i].toDouble();
+    }
+
+    TGeoNavigator * navigator = Detector->GeoManager->GetCurrentNavigator();
+    if (!navigator)
+    {
+        qDebug() << "Tracking: Current navigator does not exist, creating new";
+        navigator = Detector->GeoManager->AddNavigator();
+    }
+
+    navigator->SetCurrentPoint(r);
+    navigator->SetCurrentDirection(v);
+    navigator->FindNode();
+
+    if (navigator->IsOutside())
+    {
+        abort("The starting point is outside the defined geometry");
+        return vl;
+    }
+
+    do
+    {
+        QVariantList el;
+
+        for (int i=0; i<3; i++)
+            el << navigator->GetCurrentPoint()[i];
+        TGeoNode * node = navigator->GetCurrentNode();
+        TGeoVolume * vol = node->GetVolume();
+        el << vol->GetMaterial()->GetIndex();
+        el << vol->GetName();
+        el << node->GetNumber();
+
+        vl.push_back(el);
+
+        navigator->FindNextBoundaryAndStep();
+    }
+    while (!navigator->IsOutside());
+
+    return vl;
 }
 

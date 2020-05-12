@@ -1,8 +1,11 @@
 #include "amaterialloader.h"
 #include "ajsontools.h"
 #include "amaterialparticlecolection.h"
+
+#ifdef GUI
 #include "amateriallibrarybrowser.h"
 #include "amaterialloaderdialog.h"
+#endif
 
 #include <QString>
 #include <QVector>
@@ -10,6 +13,7 @@
 AMaterialLoader::AMaterialLoader(AMaterialParticleCollection & MpCollection) :
     MpCollection(MpCollection) {}
 
+#ifdef GUI
 bool AMaterialLoader::LoadTmpMatFromGui(QWidget *parentWidget)
 {
     AMaterialLibraryBrowser B(MpCollection, parentWidget);
@@ -42,3 +46,4 @@ bool AMaterialLoader::LoadTmpMatFromGui(QWidget *parentWidget)
     MpCollection.CopyTmpToMaterialCollection();
     return true;
 }
+#endif

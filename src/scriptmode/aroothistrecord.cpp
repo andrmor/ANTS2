@@ -275,7 +275,7 @@ bool ARootHistRecord::MedianFilter(int span, int spanRight)
         deltaLeft  = ( span % 2 == 0 ? span / 2 - 1 : span / 2 );
         deltaRight = span / 2;
     }
-    qDebug() << "Delta left:"<< deltaLeft <<" Delta right:"<< deltaRight;
+    //qDebug() << "Delta left:"<< deltaLeft <<" Delta right:"<< deltaRight;
 
     TH1* h = dynamic_cast<TH1*>(Object);
     if (!h) return false;
@@ -299,7 +299,7 @@ bool ARootHistRecord::MedianFilter(int span, int spanRight)
 
         Filtered.append(val);
     }
-    qDebug() << "Result:" << Filtered;
+    //qDebug() << "Result:" << Filtered;
 
     for (int iThisBin = 1; iThisBin <= num; iThisBin++)
         h->SetBinContent(iThisBin, Filtered.at(iThisBin-1));

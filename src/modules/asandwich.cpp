@@ -649,10 +649,13 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
             addTGeoVolumeRecursively(obj->HostedObjects[i], vol, GeoManager, MaterialCollection, PMsAndDumPMs, forcedNodeNumber);
     }
 
-    //Grids require specific title - they are recognized by it
-    if (obj->ObjectType->isGrid()) vol->SetTitle("G");
-    else if (obj->ObjectType->isMonitor()) vol->SetTitle("M");
-    else vol->SetTitle("-");
+    //  Trackers use volume title for identification of special rules
+    //  First character can be 'G' for optical grid, 'M' for monitor, 'P' for PMT, 'p' for dummy PM
+    //  PMs and DummyPMs receive title in detector class, see PositionPMs and PositionDummis methods
+    //  Second character is used by the ParticleTracker to indicate that particles leaving the volume have to be saved to file
+    if (obj->ObjectType->isGrid())         vol->SetTitle("G---");
+    else if (obj->ObjectType->isMonitor()) vol->SetTitle("M---");
+    else                                   vol->SetTitle("----");
 }
 
 void ASandwich::clearGridRecords()

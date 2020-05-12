@@ -2084,11 +2084,6 @@ void GraphWindowClass::SetLegendBorder(int color, int style, int size)
     qDebug() << "Legend object was not found!";
 }
 
-void GraphWindowClass::AddText(QString text, bool bShowFrame, int Alignment_0Left1Center2Right)
-{
-  if (!text.isEmpty()) ShowTextPanel(text, bShowFrame, Alignment_0Left1Center2Right);
-}
-
 void GraphWindowClass::ExportTH2AsText(QString fileName)
 {
     TObject *obj = DrawObjects.first().Pointer;
@@ -2656,9 +2651,10 @@ void GraphWindowClass::on_pbAddText_clicked()
     Explorer->activateCustomGuiForItem(DrawObjects.size()-1);
 }
 
-void GraphWindowClass::ShowTextPanel(const QString Text, bool bShowFrame, int AlignLeftCenterRight)
+void GraphWindowClass::ShowTextPanel(const QString Text, bool bShowFrame, int AlignLeftCenterRight,
+                                     double x1, double y1, double x2, double y2, const QString opt)
 {
-  TPaveText* la = new TPaveText(0.15, 0.75, 0.5, 0.85, "NDC");
+  TPaveText* la = new TPaveText(x1, y1, x2, y2, opt.toLatin1().data());
   la->SetFillColor(0);
   la->SetBorderSize(bShowFrame ? 1 : 0);
   la->SetLineColor(1);

@@ -9,10 +9,10 @@ ANTS2_MINOR = 28
 #CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library: see https://github.com/mariusmuja/flann
 #CONFIG += ants2_fann        #enables FANN (fast neural network) library: see https://github.com/libfann/fann
 CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra - highly recommended! Installation requires only to copy files!
-CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
+#CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 #CONFIG += ants2_Python      #enable Python scripting
 #CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering): see https://github.com/mctools/ncrystal
-CONFIG += ants2_jsroot       #enables JSROOT visualisation at GeometryWindow. Automatically enables ants2_RootServer
+#CONFIG += ants2_jsroot       #enables JSROOT visualisation at GeometryWindow. Automatically enables ants2_RootServer
 
 #In effect ONLY for the Docker version:
 ants2_docker {
@@ -409,9 +409,7 @@ SOURCES += main.cpp \
     Simulation/alogsandstatisticsoptions.cpp \
     Reconstruction/areconstructionworker.cpp \
     common/ahistogram.cpp \
-    modules/apmdummystructure.cpp \
-    Simulation/asaveparticlestofilesettings.cpp \
-    Simulation/aphotonmodesettings.cpp
+    modules/apmdummystructure.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -566,9 +564,7 @@ HEADERS  += common/CorrelationFilters.h \
     Reconstruction/areconstructionworker.h \
     common/ahistogram.h \
     modules/apmanddummy.h \
-    modules/apmdummystructure.h \
-    Simulation/asaveparticlestofilesettings.h \
-    Simulation/aphotonmodesettings.h
+    modules/apmdummystructure.h
 
 # --- SIM ---
 ants2_SIM {
@@ -591,7 +587,9 @@ ants2_SIM {
     Simulation/asimulator.cpp \
     Simulation/apointsourcesimulator.cpp \
     Simulation/amaterialloader.cpp \
-    Simulation/aparticlesourcesimulator.cpp
+    Simulation/aparticlesourcesimulator.cpp \
+    Simulation/asaveparticlestofilesettings.cpp \
+    Simulation/aphotonmodesettings.cpp
 
     HEADERS  += Simulation/aphoton.h \
     Simulation/asimulationstatistics.h \
@@ -616,7 +614,9 @@ ants2_SIM {
     Simulation/asimulator.h \
     Simulation/apointsourcesimulator.h \
     Simulation/amaterialloader.h \
-    Simulation/aparticlesourcesimulator.h
+    Simulation/aparticlesourcesimulator.h \
+    Simulation/asaveparticlestofilesettings.h \
+    Simulation/aphotonmodesettings.h
 }
 
 # --- GUI ---

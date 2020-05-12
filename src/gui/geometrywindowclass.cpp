@@ -1178,8 +1178,11 @@ void GeometryWindowClass::on_cobViewer_currentIndexChanged(int index)
     }
     ui->cbWireFrame->setVisible(index == 1);
 #else
-    ui->cobViewer->setCurrentIndex(0);
-    message("Enable ants2_jsroot in ants2.pro and rebuild", this);
+    if (index != 0)
+    {
+        ui->cobViewer->setCurrentIndex(0);
+        message("Enable ants2_jsroot in ants2.pro and rebuild ants2", this);
+    }
 #endif
 }
 

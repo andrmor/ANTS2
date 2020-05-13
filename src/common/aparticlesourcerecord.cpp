@@ -83,13 +83,6 @@ bool GunParticleStruct::readFromJson(const QJsonObject &json, AMaterialParticleC
     }
     AParticle part;
     part.readFromJson(jparticle);
-    /*
-    QString name = jparticle["name"].toString();
-    int type = jparticle["type"].toInt();
-    int charge = jparticle["charge"].toInt();
-    double mass = jparticle["mass"].toDouble();
-    AParticle::ParticleType Type = static_cast<AParticle::ParticleType>(type);
-    */
     //looking for this particle in the collection and create if necessary
     ParticleId = MpCollection.findOrAddParticle(part);
     //qDebug()<<"Added gun particle with particle Id"<<ParticleId<<ParticleCollection->at(ParticleId)->ParticleName;
@@ -125,7 +118,7 @@ bool GunParticleStruct::readFromJson(const QJsonObject &json, AMaterialParticleC
 
 GunParticleStruct::~GunParticleStruct()
 {
-  if (spectrum) delete spectrum;
+    delete spectrum; spectrum = nullptr;
 }
 
 // ---------------------- AParticleSourceRecord ----------------------

@@ -6,9 +6,8 @@
 
 class QJsonObject;
 
-typedef std::pair<double, double> ADPair;
-
 // potons per node
+typedef std::pair<double, double> ADPair;
 class APhotonSim_PerNodeSettings
 {
 public:
@@ -24,6 +23,7 @@ public:
 
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);
+    void clearSettings();
 };
 
 // fixed properties of photon
@@ -42,6 +42,7 @@ public:
 
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);
+    void clearSettings();
 };
 
 // single node
@@ -54,6 +55,7 @@ public:
 
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);
+    void clearSettings();
 };
 
 // scan
@@ -76,6 +78,7 @@ public:
 
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);
+    void clearSettings();
 };
 
 // flood
@@ -100,6 +103,7 @@ public:
     double     Zfrom    = 0;
     double     Zto      = 0;
 
+    void clearSettings();
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);
 };
@@ -112,6 +116,7 @@ public:
 
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);
+    void clearSettings();
 };
 
 // -------------- main -----------------
@@ -140,6 +145,7 @@ public:
 
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);
+    void clearSettings();
 };
 
 #endif // APHOTONMODESETTINGS_H

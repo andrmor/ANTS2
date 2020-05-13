@@ -589,7 +589,8 @@ ants2_SIM {
     Simulation/amaterialloader.cpp \
     Simulation/aparticlesourcesimulator.cpp \
     Simulation/asaveparticlestofilesettings.cpp \
-    Simulation/aphotonmodesettings.cpp
+    Simulation/aphotonmodesettings.cpp \
+    Simulation/aparticlemodesettings.cpp
 
     HEADERS  += Simulation/aphoton.h \
     Simulation/asimulationstatistics.h \
@@ -616,7 +617,8 @@ ants2_SIM {
     Simulation/amaterialloader.h \
     Simulation/aparticlesourcesimulator.h \
     Simulation/asaveparticlestofilesettings.h \
-    Simulation/aphotonmodesettings.h
+    Simulation/aphotonmodesettings.h \
+    Simulation/aparticlemodesettings.h
 }
 
 # --- GUI ---

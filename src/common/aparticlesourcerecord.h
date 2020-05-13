@@ -23,7 +23,7 @@ struct GunParticleStruct
     double  LinkingProbability = 0;  //probability to be emitted after the parent particle
     bool    LinkingOppositeDir = false; // false = random direction; otherwise particle is emitted in the opposite direction in respect to the LinkedTo particle
 
-    TH1D*   spectrum = 0; //energy spectrum
+    TH1D *  spectrum = nullptr; //energy spectrum
 
     GunParticleStruct * clone() const;
 

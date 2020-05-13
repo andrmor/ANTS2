@@ -17,7 +17,7 @@ public:
 
     AGenMode GenerationMode = Sources;
     int     EventsToDo      = 1;
-    bool    bMultiple       = false;
+    bool    bMultiple       = false;        //affects only "Sources", maybe move there?
     int     MeanPerEvent    = 1;
     AMultiMode MultiMode    = Constant;
     bool    bDoS1           = true;

@@ -76,5 +76,3 @@ void AParticleModeSettings::readFromJson(const QJsonObject & json)
     bOK = parseJson(json, "GenerationFromScript", sjs);
     if (bOK) ScriptGen->readFromJson(sjs);
 }
-
-

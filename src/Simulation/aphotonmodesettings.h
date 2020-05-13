@@ -30,17 +30,20 @@ public:
 class APhotonSim_FixedPhotSettings
 {
 public:
-    enum ADirectionEnum  {Isotropic = 0, Vector = 1, Cone = 2};
+    enum AModeEnum {Vector = 0, Cone = 1};
 
-    bool            bFixWave      = false;
-    int             FixWaveIndex  = -1;
-    ADirectionEnum  DirectionMode = Isotropic;
-    double          FixDX         = 0;
-    double          FixDY         = 0;
-    double          FixDZ         = 1.0;
-    double          FixConeAngle  = 10.0;
+    bool      bFixWave      = false;
+    int       FixWaveIndex  = -1;
 
-    void writeToJson(QJsonObject & json) const;
+    bool      bIsotropic    = true;
+    AModeEnum DirectionMode = Vector;
+    double    FixDX         = 0;
+    double    FixDY         = 0;
+    double    FixDZ         = 1.0;
+    double    FixConeAngle  = 10.0;
+
+    void writeWaveToJson(QJsonObject & json) const;
+    void writeDirToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);
     void clearSettings();
 };

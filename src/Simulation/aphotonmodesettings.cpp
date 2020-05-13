@@ -22,14 +22,61 @@ void APhotonSimSettings::clearSettings()
 
 void APhotonSimSettings::writeToJson(QJsonObject &json) const
 {
+    QJsonObject jsc;
+        jsc["Single_Scan_Flood"]  = GenMode;   // static_cast<ANodeGenEnum>(iGenMode);
+        jsc["Primary_Secondary"]  = ScintType;
+        jsc["MultipleRuns"]       = bMultiRun;
+        jsc["MultipleRunsNumber"] = NumRuns;
+        jsc["LimitNodes"]         = bLimitToVol;
+        jsc["LimitNodesTo"]       = LimitVolume;
+    json["ControlOptions"] = jsc;
 
+    {
+        QJsonObject js;
+        PerNodeSettings.writeToJson(js);
+        json["PhotPerNodeOptions"] = js;
+    }
+
+    {
+        QJsonObject js;
+        FixedPhotSettings.writeWaveToJson(js);
+        json["WaveTimeOptions"] = js;
+    }
+    {
+        QJsonObject js;
+        FixedPhotSettings.writeDirToJson(js);
+        json["PhotonDirectionOptions"] = js;
+    }
+
+    {
+        QJsonObject js;
+        SingleSettings.writeToJson(js);
+        json["SinglePositionOptions"] = js;
+    }
+
+    {
+        QJsonObject js;
+        ScanSettings.writeToJson(js);
+        json["RegularScanOptions"] = js;
+    }
+
+    {
+        QJsonObject js;
+        FloodSettings.writeToJson(js);
+        json["FloodOptions"] = js;
+    }
+
+    {
+        QJsonObject js;
+        CustomNodeSettings.writeToJson(js);
+        json["CustomNodesOptions"] = js;
+    }
 }
 
 void APhotonSimSettings::readFromJson(const QJsonObject & json)
 {
     clearSettings();
 
-    //control
     QJsonObject js;
     bool bOK = parseJson(json, "ControlOptions", js);
     if (!bOK)
@@ -49,8 +96,6 @@ void APhotonSimSettings::readFromJson(const QJsonObject & json)
     parseJson(js, "MultipleRuns", bMultiRun);
     parseJson(js, "MultipleRunsNumber", NumRuns);
 
-    bLimitToVol = false;
-    LimitVolume.clear();
     if (js.contains("GenerateOnlyInPrimary"))                                    //old system
     {
         bLimitToVol = true;
@@ -97,7 +142,21 @@ void APhotonSim_PerNodeSettings::clearSettings()
 
 void APhotonSim_PerNodeSettings::writeToJson(QJsonObject & json) const
 {
+    json["PhotPerNodeMode"]       = Mode;
+    json["PhotPerNodeConstant"]   = Number;
+    json["PhotPerNodeUniMin"]     = Min;
+    json["PhotPerNodeUniMax"]     = Max;
+    json["PhotPerNodeGaussMean"]  = Mean;
+    json["PhotPerNodeGaussSigma"] = Sigma;
 
+    QJsonArray ar;
+        for (int i = 0; i < CustomDist.size(); i++)
+        {
+            QJsonArray el;
+                el << CustomDist.at(i).first << CustomDist.at(i).second;
+            ar.push_back(el);
+        }
+    json["PhotPerNodeCustom"] = ar;
 }
 
 void APhotonSim_PerNodeSettings::readFromJson(const QJsonObject & json)
@@ -144,9 +203,20 @@ void APhotonSim_FixedPhotSettings::clearSettings()
     FixConeAngle  = 10.0;
 }
 
-void APhotonSim_FixedPhotSettings::writeToJson(QJsonObject & json) const
+void APhotonSim_FixedPhotSettings::writeWaveToJson(QJsonObject & json) const
 {
+    json["UseFixedWavelength"] = bFixWave;
+    json["WaveIndex"] = FixWaveIndex;
+}
 
+void APhotonSim_FixedPhotSettings::writeDirToJson(QJsonObject & json) const
+{
+    json["Random"]        = bIsotropic;
+    json["Fixed_or_Cone"] = DirectionMode;
+    json["FixedX"]        = FixDX;
+    json["FixedY"]        = FixDY;
+    json["FixedZ"]        = FixDZ;
+    json["Cone"]          = FixConeAngle;
 }
 
 void APhotonSim_FixedPhotSettings::readFromJson(const QJsonObject & json)
@@ -156,28 +226,26 @@ void APhotonSim_FixedPhotSettings::readFromJson(const QJsonObject & json)
     parseJson(json, "UseFixedWavelength", bFixWave);
     parseJson(json, "WaveIndex", FixWaveIndex);
 
-    bool bRand = true;
-    parseJson(json, "Random", bRand);
+    parseJson(json, "Random", bIsotropic);
     int iMode = 0;
     parseJson(json, "Fixed_or_Cone", iMode);
-    if (bRand) DirectionMode = Isotropic;
-    else       DirectionMode = (iMode == 0 ? Vector : Cone);
+    DirectionMode = (iMode == 0 ? Vector : Cone);
     parseJson(json, "FixedX", FixDX);
     parseJson(json, "FixedY", FixDY);
     parseJson(json, "FixedZ", FixDZ);
-    parseJson(json, "Cone", FixConeAngle);
+    parseJson(json, "Cone",   FixConeAngle);
 }
 
 void APhotonSim_SingleSettings::clearSettings()
 {
-    X = 0;
-    Y = 0;
-    Z = 0;
+    X = Y = Z = 0;
 }
 
 void APhotonSim_SingleSettings::writeToJson(QJsonObject & json) const
 {
-
+    json["SingleX"] = X;
+    json["SingleY"] = Y;
+    json["SingleZ"] = Z;
 }
 
 void APhotonSim_SingleSettings::readFromJson(const QJsonObject & json)
@@ -191,9 +259,7 @@ void APhotonSim_SingleSettings::readFromJson(const QJsonObject & json)
 
 void APhotonSim_ScanSettings::clearSettings()
 {
-    X0 = 0;
-    Y0 = 0;
-    Z0 = 0;
+    X0 = Y0 = Z0 = 0;
     ScanRecords.clear();
     ScanRecords.resize(3);
     ScanRecords[0].bEnabled = true;
@@ -201,7 +267,26 @@ void APhotonSim_ScanSettings::clearSettings()
 
 void APhotonSim_ScanSettings::writeToJson(QJsonObject & json) const
 {
+    json["ScanX0"] = X0;
+    json["ScanY0"] = Y0;
+    json["ScanZ0"] = Z0;
 
+    QJsonArray ar;
+        for (int i = 0; i < 3; i++)
+        {
+            APhScanRecord & r = ScanRecords[i];
+            if (!r.bEnabled) break;             // !*! remove and synchronize with gui/sim manager!
+
+            QJsonObject js;
+                js["Enabled"] = r.bEnabled;
+                js["dX"]      = r.DX;
+                js["dY"]      = r.DY;
+                js["dZ"]      = r.DZ;
+                js["Nodes"]   = r.Nodes;
+                js["Option"]  = (r.bBiDirect ? 1 : 0);
+            ar.append(js);
+        }
+    json["AxesData"] = ar;
 }
 
 void APhotonSim_ScanSettings::readFromJson(const QJsonObject & json)
@@ -254,7 +339,20 @@ void APhotonSim_FloodSettings::clearSettings()
 
 void APhotonSim_FloodSettings::writeToJson(QJsonObject &json) const
 {
-
+    json["Nodes"]       = Nodes;
+    json["Shape"]       = Shape;
+    json["Xfrom"]       = Xfrom;
+    json["Xto"]         = Xto;
+    json["Yfrom"]       = Yfrom;
+    json["Yto"]         = Yto;
+    json["CenterX"]     = X0;
+    json["CenterY"]     = Y0;
+    json["DiameterOut"] = OuterD;
+    json["DiameterIn"]  = InnerD;
+    json["Zoption"]     = ZMode;
+    json["Zfixed"]      = Zfixed;
+    json["Zfrom"]       = Zfrom;
+    json["Zto"]         = Zto;
 }
 
 void APhotonSim_FloodSettings::readFromJson(const QJsonObject &json)
@@ -294,7 +392,7 @@ void APhotonSim_CustomNodeSettings::clearSettings()
 
 void APhotonSim_CustomNodeSettings::writeToJson(QJsonObject &json) const
 {
-
+    json["FileWithNodes"] = NodesFileName;
 }
 
 void APhotonSim_CustomNodeSettings::readFromJson(const QJsonObject &json)

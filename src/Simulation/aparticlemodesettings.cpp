@@ -30,7 +30,43 @@ void AParticleModeSettings::clearSettings()
 
 void AParticleModeSettings::writeToJson(QJsonObject &json) const
 {
+    {
+        QJsonObject js;
+            QString s;
+                switch (GenerationMode)
+                {
+                case Sources: s = "Sources"; break;
+                case File:    s = "File";    break;
+                case Script:  s = "Script";  break;
+                }
+            js["ParticleGenerationMode"] = s;
+            js["EventsToDo"] = EventsToDo;
+            js["AllowMultipleParticles"] = bMultiple;
+            js["AverageParticlesPerEvent"] = MeanPerEvent;
+            js["TypeParticlesPerEvent"] = MultiMode;
+            js["DoS1"] = bDoS1;
+            js["DoS2"] = bDoS2;
+            js["IgnoreNoHitsEvents"] = bIgnoreNoHits;
+            js["IgnoreNoDepoEvents"] = bIgnoreNoDepo;
+            js["ClusterMerge"] = bClusterMerge;
+            js["ClusterMergeRadius"] = ClusterRadius;
+            js["ClusterMergeTime"] = ClusterTime;
+        json["SourceControlOptions"] = js;
+    }
 
+    SourceGen->writeToJson(json);
+
+    {
+        QJsonObject js;
+            FileGen->writeToJson(js);
+        json["GenerationFromFile"] = js;
+    }
+
+    {
+        QJsonObject js;
+            ScriptGen->writeToJson(js);
+        json["GenerationFromScript"] = js;
+    }
 }
 
 void AParticleModeSettings::readFromJson(const QJsonObject & json)

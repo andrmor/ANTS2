@@ -33,7 +33,7 @@ public:
     void clearSettings();
 
 private:
-    // !*! next round of conversion - remove dependence on generators
+    // !*! next round of conversion - remove dependence on generators by splitting each to two classes: settings + generator
     ASourceParticleGenerator * SourceGen = nullptr;
     AFileParticleGenerator   * FileGen   = nullptr;
     AScriptParticleGenerator * ScriptGen = nullptr;

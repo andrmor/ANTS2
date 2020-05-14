@@ -129,7 +129,6 @@ void AGeoTreeWidget::UpdateGui(QString selected)
       //qDebug() << currentItem()->text(0);
       selected = currentItem()->text(0);
   }
-
   clear();
 
   //World
@@ -141,8 +140,6 @@ void AGeoTreeWidget::UpdateGui(QString selected)
   w->setSizeHint(0, QSize(50, 20));
   w->setFlags(w->flags() & ~Qt::ItemIsDragEnabled);// & ~Qt::ItemIsSelectable);
   //w->setBackgroundColor(0, BackgroundColor);
-  //w->setSizeHint(0, QSize(50,50));
-
   //qDebug() << "New world WidgetItem created";
 
   populateTreeWidget(w, World);
@@ -151,7 +148,7 @@ void AGeoTreeWidget::UpdateGui(QString selected)
     updateExpandState(this->topLevelItem(0));
 
   if (!selected.isEmpty())
-    {
+  {
       //qDebug() << "Selection:"<<selected;
       QList<QTreeWidgetItem*> list = findItems(selected, Qt::MatchExactly | Qt::MatchRecursive);
       //qDebug() << list.size();
@@ -163,7 +160,6 @@ void AGeoTreeWidget::UpdateGui(QString selected)
         }
   }
 }
-
 
 void AGeoTreeWidget::onGridReshapeRequested(QString objName)
 {

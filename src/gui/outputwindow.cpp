@@ -1340,8 +1340,15 @@ void OutputWindow::on_pbShowProperties_clicked()
 {
     MW->DAwindow->showNormal();
     MW->DAwindow->ShowTab(0);
-    //MW->DAwindow->raise();
-    MW->DAwindow->UpdateGeoTree(ui->cobMonitor->currentText());
+    MW->DAwindow->raise();
+
+    int index = ui->sbMonitorIndex->value();
+    QVector<const AGeoObject*> mr = MW->Detector->Sandwich->MonitorsRecords;
+    if (index >= 0 && index < mr.size())
+    {
+        const AGeoObject* obj = mr.at(index);
+        MW->DAwindow->UpdateGeoTree(obj->Name);
+    }
 }
 
 void OutputWindow::on_cobMonitor_activated(int)

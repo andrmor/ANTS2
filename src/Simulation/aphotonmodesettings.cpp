@@ -167,11 +167,11 @@ void APhotonSim_PerNodeSettings::readFromJson(const QJsonObject & json)
     parseJson(json, "PhotPerNodeMode", iMode);
     switch (iMode)
     {
-    default: qWarning() << "Unknown photon per mode mode, using 'Fixed'";
     case 0 : Mode = Constant; break;
     case 1 : Mode = Uniform;  break;
     case 2 : Mode = Gauss;    break;
     case 3 : Mode = Custom;   break;
+    default: qWarning() << "Unknown photon per mode mode, using 'Constant'";
     }
 
     parseJson(json, "PhotPerNodeConstant",   Number);
@@ -196,7 +196,7 @@ void APhotonSim_FixedPhotSettings::clearSettings()
 {
     bFixWave      = false;
     FixWaveIndex  = -1;
-    DirectionMode = Isotropic;
+    DirectionMode = Vector;
     FixDX         = 0;
     FixDY         = 0;
     FixDZ         = 1.0;
@@ -274,7 +274,7 @@ void APhotonSim_ScanSettings::writeToJson(QJsonObject & json) const
     QJsonArray ar;
         for (int i = 0; i < 3; i++)
         {
-            APhScanRecord & r = ScanRecords[i];
+            const APhScanRecord & r = ScanRecords[i];
             if (!r.bEnabled) break;             // !*! remove and synchronize with gui/sim manager!
 
             QJsonObject js;

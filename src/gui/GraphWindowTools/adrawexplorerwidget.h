@@ -49,6 +49,7 @@ private:
     void showPanel(ADrawObject &obj);
     void fitPanel(ADrawObject &obj);
     void scale(ADrawObject &obj);
+    void scaleIntegralToUnity(ADrawObject &obj);
     void scaleCDR(ADrawObject &obj);
     void scaleAllSameMax();
     void shift(ADrawObject &obj);

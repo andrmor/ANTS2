@@ -151,6 +151,7 @@ void ADrawExplorerWidget::showObjectContextMenu(const QPoint &pos, int index)
 
     QMenu * scaleMenu =     Menu.addMenu("Scale / shift"); scaleMenu->setEnabled(Type.startsWith("TH") || Type.startsWith("TGraph") || Type.startsWith("TProfile"));
         QAction * scaleA =      scaleMenu->addAction("Scale");
+        QAction * scaleTo1 =    scaleMenu->addAction("Scale integral to unity");
         QAction * scaleCDRA =   scaleMenu->addAction("Scale: click-drag-release");
         scaleMenu->addSeparator();
         QAction * shiftA =      scaleMenu->addAction("Shift X scale");
@@ -208,6 +209,7 @@ void ADrawExplorerWidget::showObjectContextMenu(const QPoint &pos, int index)
    else if (si == delA)         remove(index);
    else if (si == setAttrib)    setAttributes(index);
    else if (si == scaleA)       scale(obj);
+   else if (si == scaleTo1)     scaleIntegralToUnity(obj);
    else if (si == scaleCDRA)    scaleCDR(obj);
    else if (si == integralA)    drawIntegral(obj);
    else if (si == fractionA)    fraction(obj);
@@ -498,6 +500,33 @@ void ADrawExplorerWidget::scale(ADrawObject &obj)
     if (sf == 1.0) return;
 
     doScale(obj, sf);
+}
+
+void ADrawExplorerWidget::scaleIntegralToUnity(ADrawObject &obj)
+{
+    if (!canScale(obj)) return;
+    double factor = 1.0;
+
+    const QString name = obj.Pointer->ClassName();
+    if (name.startsWith("TGraph"))
+    {
+        TGraph * gr = static_cast<TGraph*>(obj.Pointer);
+        factor = gr->Integral();
+    }
+    else if (name.startsWith("TH1"))
+    {
+        TH1* h = static_cast<TH1*>(obj.Pointer);
+        factor = h->Integral();
+    }
+    else if (name.startsWith("TH2"))
+    {
+        TH2* h = static_cast<TH2*>(obj.Pointer);
+        factor = h->Integral();
+    }
+
+    if (factor == 0 || factor == 1.0) return;
+    factor = 1.0 / factor;
+    doScale(obj, factor);
 }
 
 void ADrawExplorerWidget::scaleCDR(ADrawObject &obj)

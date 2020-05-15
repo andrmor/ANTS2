@@ -13,6 +13,7 @@ AMath_SI::AMath_SI(TRandom2* RandGen)
   H["poisson"] = "Returns a random value sampled from Poisson distribution with mean given by the user";
   H["maxwell"] = "Returns a random value sampled from maxwell distribution with Sqrt(kT/M) given by the user";
   H["exponential"] = "Returns a random value sampled from exponential decay with decay time given by the user";
+  H["fit1D"] = "Fits the array of [x,y] points using the provided TFormula of Cern ROOT. Retuns array of parameter values";
 }
 
 void AMath_SI::setRandomGen(TRandom2 *RandGen)
@@ -151,4 +152,51 @@ double AMath_SI::exponential(double tau)
 {
     if (!RandGen) return 0;
     return RandGen->Exp(tau);
+}
+
+#include "TFormula.h"
+#include "TF1.h"
+#include "TGraph.h"
+#include "QVariant"
+#include "QVariantList"
+#include "TFitResult.h"
+#include "TFitResultPtr.h"
+QVariantList AMath_SI::fit1D(QVariantList array, QString tformula)
+{
+    QVariantList res;
+    TFormula * f = new TFormula("", tformula.toLocal8Bit().data());
+    if (!f || !f->IsValid()) abort("Cannot create TFormula");
+
+    const int size = array.size();
+    if (size == 0)
+    {
+        abort("Array is empty!");
+        return res;
+    }
+    double xx[size];
+    double yy[size];
+    for (int i=0; i<array.size(); i++)
+    {
+        QVariantList el = array[i].toList();
+        if (el.size() != 2)
+        {
+            abort("array argument must contain arrays of [x,val]!");
+            return res;
+        }
+        xx[i] = el[0].toDouble();
+        yy[i] = el[1].toDouble();
+    }
+
+    TGraph g(size, xx, yy);
+
+    //TF1  *f1 = new TF1("f1", tformula.toLocal8Bit().data(), 0,10);
+    TF1  *f1 = new TF1("f1", tformula.toLocal8Bit().data(), 0,10);
+
+    TFitResultPtr fr = g.Fit(f1, "S", "");
+
+    int num = fr->NTotalParameters();
+    for (int i=0; i<num; i++)
+            res << fr->GetParams()[i];
+
+    return res;
 }

@@ -5,6 +5,7 @@
 
 #include <QString>
 #include <QVariant>
+#include <QVariantList>
 
 class MainWindow;
 
@@ -48,6 +49,9 @@ public slots:
   QVariant GetProjection();
 
   QVariant GetAxis();
+
+  QVariantList GetContent();
+
 private:
   MainWindow* MW;
 };

@@ -5,6 +5,7 @@
 
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QDebug>
 
 AGraphWin_SI::AGraphWin_SI(MainWindow *MW)
   : MW(MW)
@@ -147,4 +148,50 @@ QVariant AGraphWin_SI::GetAxis()
   if (!ok) result["maxZ"] = QJsonValue();
 
   return QJsonValue(result).toVariant();
+}
+
+#include "TObject.h"
+#include "TGraphErrors.h"
+#include "TH1.h"
+QVariantList AGraphWin_SI::GetContent()
+{
+    QVariantList vl;
+
+    TObject * obj = MW->GraphWindow->GetMainPlottedObject();
+    if (obj)
+    {
+        QString ClName = obj->ClassName();
+        if (ClName == "TH1D")
+        {
+            TH1 * h = dynamic_cast<TH1*>(obj);
+            if (h)
+            {
+                int bins = h->GetNbinsX();
+                for (int i=1; i<=bins; i++)
+                {
+                    QVariantList el;
+                    el << h->GetBinLowEdge(i) << h->GetBinContent(i);
+                    vl.push_back(el);
+                }
+            }
+        }
+        else if (ClName == "TGraph" || ClName == "TGraphErrors")
+        {
+            TGraph * g = dynamic_cast<TGraph*>(obj);
+            if (g)
+            {
+                int bins = g->GetN();
+                for (int i=0; i<bins; i++)
+                {
+                    QVariantList el;
+                    double x, y;
+                    g->GetPoint(i, x, y);
+                    el << x << y;
+                    vl.push_back(el);
+                }
+            }
+        }
+    }
+
+    return vl;
 }

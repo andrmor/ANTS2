@@ -812,7 +812,7 @@ void ASimulationManager::generateG4antsConfigCommon(QJsonObject & json, ASimulat
             {
                 QJsonObject mjs;
                 mc->writeToJson(mjs);
-                mjs["Name"] = obj->Name;
+                mjs["Name"] = obj->Name + "_-_" + QString::number(iMon);
                 mjs["ParticleName"] = ( particleIndex == -1 ? "" : ParticleList.at(particleIndex) );
                 mjs["MonitorIndex"] = iMon;
                 arMon.append(mjs);

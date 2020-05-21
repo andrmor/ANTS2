@@ -92,11 +92,10 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWid
     ScriptManager->LastOpenDir = &GlobSet.LastOpenDir;
     ScriptManager->ExamplesDir = &GlobSet.ExamplesDir;
 
-    ShowEvalResult = true;
+    //ShowEvalResult = true;
     ui->pbStop->setVisible(false);
     ui->prbProgress->setValue(0);
     ui->prbProgress->setVisible(false);
-    //ui->labFileName->setTextInteractionFlags(Qt::TextSelectableByMouse);
     ui->cbActivateTextReplace->setChecked(false);
 
     QPixmap rm(16, 16);
@@ -106,24 +105,9 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWid
     b.drawEllipse(0, 0, 14, 14);
     RedIcon = new QIcon(rm);
 
-    //completitionModel = new QStringListModel(QStringList());
-
-    //more GUI
     splMain = new QSplitter();  // upper + output with buttons
     splMain->setOrientation(Qt::Vertical);
     splMain->setChildrenCollapsible(false);
-
-      /*
-    twScriptTabs = new QTabWidget();
-    connect(twScriptTabs, SIGNAL(currentChanged(int)), this, SLOT(onCurrentTabChanged(int)));
-    twScriptTabs->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(twScriptTabs, SIGNAL(customContextMenuRequested(QPoint)), SLOT(onRequestTabWidgetContextMenu(QPoint)));
-    connect(twScriptTabs->tabBar(), SIGNAL(tabMoved(int,int)), SLOT(onScriptTabMoved(int,int)));
-    twScriptTabs->setMovable(true);
-    //twScriptTabs->setTabShape(QTabWidget::Triangular);
-    twScriptTabs->setMinimumHeight(25);
-    AddNewTab();
-      */
 
     if (bLightMode)
     {
@@ -133,11 +117,10 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWid
     else
     {
         twBooks = new QTabWidget();
-        //connect(twScriptTabs, SIGNAL(currentChanged(int)), this, SLOT(onCurrentTabChanged(int)));
         twBooks->setContextMenuPolicy(Qt::CustomContextMenu);
         connect(twBooks, &QTabWidget::customContextMenuRequested, this, &AScriptWindow::twBooks_customContextMenuRequested);
         connect(twBooks, &QTabWidget::currentChanged, this, &AScriptWindow::twBooks_currentChanged);
-        //connect(twScriptTabs->tabBar(), SIGNAL(tabMoved(int,int)), SLOT(onScriptTabMoved(int,int)));
+        connect(twBooks->tabBar(), &QTabBar::tabMoved, this, &AScriptWindow::onBookTabMoved);
         twBooks->setMovable(true);
         twBooks->setTabShape(QTabWidget::Triangular);
         twBooks->setMinimumHeight(25);
@@ -217,12 +200,10 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWid
           QObject::connect(trwJson, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(onContextMenuRequestedByJsonTree(QPoint)));
           QObject::connect(trwJson, SIGNAL(itemExpanded(QTreeWidgetItem*)), this, SLOT(onJsonTWExpanded(QTreeWidgetItem*)));
           QObject::connect(trwJson, SIGNAL(itemCollapsed(QTreeWidgetItem*)), this, SLOT(onJsonTWCollapsed(QTreeWidgetItem*)));
-          //splHelp->addWidget(trwJson);
 
         vbl->addWidget(trwJson);
 
           leFindJ = new QLineEdit("Find");
-          //splHelp->addWidget(leFind);
           leFindJ->setMinimumHeight(20);
           leFindJ->setMaximumHeight(20);
           QObject::connect(leFindJ, &QLineEdit::textChanged, this, &AScriptWindow::onFindTextJsonChanged);
@@ -235,7 +216,6 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWid
     sizes << 500 << 500 << 500;
     splHelp->setSizes(sizes);    
     frJsonBrowser->setVisible(false);
-    //splHelp->setVisible(false);
 
     hor->addWidget(splHelp);
     hor->setMinimumHeight(60);
@@ -1445,8 +1425,8 @@ void AScriptWindow::onRequestTabWidgetContextMenu(QPoint pos)
 
 void AScriptWindow::onScriptTabMoved(int from, int to)
 {
-   //qDebug() << "Form->to:"<<from<<to;
-   getScriptTabs().swap(from, to);
+    //qDebug() << "Form->to:"<<from<<to;
+    getScriptTabs().swap(from, to);
 }
 
 void AScriptWindow::UpdateTab(AScriptWindowTabItem* tab)
@@ -2224,4 +2204,11 @@ void AScriptWindow::twBooks_currentChanged(int index)
 
     if (ScriptBooks[index].Tabs.isEmpty())
         AddNewTab();
+}
+
+void AScriptWindow::onBookTabMoved(int from, int to)
+{
+    //qDebug() << "Book from->to:"<<from<<to;
+    if (from == to) return;
+    std::swap(ScriptBooks[from], ScriptBooks[to]);
 }

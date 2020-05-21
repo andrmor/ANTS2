@@ -173,7 +173,7 @@ private:
     QLineEdit *         leFindJ        = nullptr;
     QIcon *             RedIcon        = nullptr;
 
-    bool                ShowEvalResult;
+    bool                ShowEvalResult = true;
 
     QSet<QString> ExpandedItemsInJsonTW;
     QStringList functionList; //functions to populate tooltip helper
@@ -248,6 +248,7 @@ private slots:
     //books
     void twBooks_customContextMenuRequested(const QPoint &pos);
     void twBooks_currentChanged(int index);
+    void onBookTabMoved(int from, int to);
 };
 
 class AScriptWindowTabItem : public QObject

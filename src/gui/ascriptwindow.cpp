@@ -112,7 +112,8 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWid
     splMain = new QSplitter();  // upper + output with buttons
     splMain->setOrientation(Qt::Vertical);
     splMain->setChildrenCollapsible(false);
-      //
+
+      /*
     twScriptTabs = new QTabWidget();
     connect(twScriptTabs, SIGNAL(currentChanged(int)), this, SLOT(onCurrentTabChanged(int)));
     twScriptTabs->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -122,12 +123,22 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWid
     //twScriptTabs->setTabShape(QTabWidget::Triangular);
     twScriptTabs->setMinimumHeight(25);
     AddNewTab();
-      //
+      */
+
+    twBooks = new QTabWidget();
+    //connect(twScriptTabs, SIGNAL(currentChanged(int)), this, SLOT(onCurrentTabChanged(int)));
+    twBooks->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(twBooks, &QTabWidget::customContextMenuRequested, this, &AScriptWindow::on_twBooks_customContextMenuRequested);
+    connect(twBooks, &QTabWidget::currentChanged, this, &AScriptWindow::on_twBooks_currentChanged);
+    //connect(twScriptTabs->tabBar(), SIGNAL(tabMoved(int,int)), SLOT(onScriptTabMoved(int,int)));
+    //twScriptTabs->setMovable(true);
+    twBooks->setTabShape(QTabWidget::Triangular);
+    twBooks->setMinimumHeight(25);
+    addNewBook();
+
     QSplitter* hor = new QSplitter(); //all upper widgets are here
     hor->setContentsMargins(0,0,0,0);
-      //cteScript->setMinimumHeight(25);
-      //hor->addWidget(cteScript); //already defined
-      hor->addWidget(twScriptTabs); //already defined
+      hor->addWidget(twBooks); //already defined
 
       splHelp = new QSplitter();
       splHelp->setOrientation(Qt::Horizontal);
@@ -263,14 +274,14 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWid
     QShortcut* GoForward = new QShortcut(QKeySequence("Alt+Right"), this);
     connect(GoForward, &QShortcut::activated, this, &AScriptWindow::onForward);
     QShortcut* DoAlign = new QShortcut(QKeySequence("Ctrl+I"), this);
-    connect(DoAlign, &QShortcut::activated, [&](){ScriptTabs[CurrentTab]->TextEdit->align();});
+    connect(DoAlign, &QShortcut::activated, [&](){getTab()->TextEdit->align();});
     //QShortcut* DoPaste = new QShortcut(QKeySequence("Ctrl+V"), this);
-    //connect(DoPaste, &QShortcut::activated, [&](){ScriptTabs[CurrentTab]->TextEdit->paste();});
+    //connect(DoPaste, &QShortcut::activated, [&](){getTab()->TextEdit->paste();});
 
     if (bLightMode)
     {
         ui->pbConfig->setEnabled(false);
-        twScriptTabs->setStyleSheet("QTabWidget::tab-bar { width: 0; height: 0; margin: 0; padding: 0; border: none; }");
+        getTabWidget()->setStyleSheet("QTabWidget::tab-bar { width: 0; height: 0; margin: 0; padding: 0; border: none; }");
         ui->pbExample->setText("Example");
         ui->menuTabs->setEnabled(false);
         ui->menuView->setEnabled(false);
@@ -387,6 +398,7 @@ void AScriptWindow::doRegister(AScriptInterface *interface, const QString &name)
 
 void AScriptWindow::UpdateGui()
 {
+    QList<AScriptWindowTabItem *> ScriptTabs = getScriptTabs();
     for (int i=0; i<ScriptTabs.size(); i++)
         UpdateTab(ScriptTabs[i]);
 
@@ -408,12 +420,12 @@ void AScriptWindow::HighlightErrorLine(int line)
 
   //highlight line with error
   if (line > 1) line--;
-  QTextBlock block = ScriptTabs[CurrentTab]->TextEdit->document()->findBlockByLineNumber(line);
+  QTextBlock block = getTab()->TextEdit->document()->findBlockByLineNumber(line);
   int loc = block.position();
-  QTextCursor cur = ScriptTabs[CurrentTab]->TextEdit->textCursor();
+  QTextCursor cur = getTab()->TextEdit->textCursor();
   cur.setPosition(loc);
-  ScriptTabs[CurrentTab]->TextEdit->setTextCursor(cur);
-  ScriptTabs[CurrentTab]->TextEdit->ensureCursorVisible();
+  getTab()->TextEdit->setTextCursor(cur);
+  getTab()->TextEdit->ensureCursorVisible();
 
   int length = block.text().split("\n").at(0).length();
   cur.movePosition(cur.Right, cur.KeepAnchor, length);
@@ -426,11 +438,12 @@ void AScriptWindow::HighlightErrorLine(int line)
 
   QList<QTextEdit::ExtraSelection> esList;
   esList << es;
-  ScriptTabs[CurrentTab]->TextEdit->setExtraSelections(esList);
+  getTab()->TextEdit->setExtraSelections(esList);
 }
 
 void AScriptWindow::WriteToJson()
 {
+    /*
     if (bLightMode) return;
 
     QJsonObject* ScriptWindowJsonPtr = 0;
@@ -440,10 +453,12 @@ void AScriptWindow::WriteToJson()
 
     QJsonObject& json = *ScriptWindowJsonPtr;
     WriteToJson(json);
+    */
 }
 
 void AScriptWindow::WriteToJson(QJsonObject& json)
 {
+    /*
     json = QJsonObject(); //clear
 
     QJsonArray ar;
@@ -459,10 +474,12 @@ void AScriptWindow::WriteToJson(QJsonObject& json)
     QJsonArray sar;
     for (int& i : splMain->sizes()) sar << i;
     json["Sizes"] = sar;
+    */
 }
 
 void AScriptWindow::ReadFromJson()
 {
+    /*
     if (bLightMode) return;
 
     QJsonObject* ScriptWindowJsonPtr = 0;
@@ -472,10 +489,12 @@ void AScriptWindow::ReadFromJson()
 
     QJsonObject& json = *ScriptWindowJsonPtr;
     ReadFromJson(json);
+    */
 }
 
 void AScriptWindow::ReadFromJson(QJsonObject& json)
 {
+    /*
     if (json.isEmpty()) return;
     if (!json.contains("ScriptTabs")) return;
 
@@ -518,6 +537,7 @@ void AScriptWindow::ReadFromJson(QJsonObject& json)
             splMain->setSizes(sizes);
         }
     }
+    */
 }
 
 void AScriptWindow::SetMainSplitterSizes(QList<int> values)
@@ -543,8 +563,8 @@ void AScriptWindow::ConfigureForLightMode(QString *ScriptPtr, const QString& Win
 
     if (LightModeScript)
     {
-        ScriptTabs[CurrentTab]->TextEdit->clear();
-        ScriptTabs[CurrentTab]->TextEdit->appendPlainText(*LightModeScript);
+        getTab()->TextEdit->clear();
+        getTab()->TextEdit->appendPlainText(*LightModeScript);
     }
 }
 
@@ -585,7 +605,7 @@ void AScriptWindow::on_pbRunScript_clicked()
        GlobSet.saveANTSconfiguration();
    }
 
-   QString Script = ScriptTabs[CurrentTab]->TextEdit->document()->toPlainText();
+   QString Script = getTab()->TextEdit->document()->toPlainText();
    //in light mode save the script directly
    if (bLightMode && LightModeScript) *LightModeScript = Script;
 
@@ -693,6 +713,7 @@ void AScriptWindow::on_pbStop_clicked()
 
 void AScriptWindow::on_pbLoad_clicked()
 {
+    /*
   QString starter = (GlobSet.LibScripts.isEmpty()) ? GlobSet.LastOpenDir : GlobSet.LibScripts;
   QString fileName = QFileDialog::getOpenFileName(this, "Load script", starter, "Script files (*.txt *.js);;All files (*.*)"); //""
   if (fileName.isEmpty()) return;
@@ -710,34 +731,36 @@ void AScriptWindow::on_pbLoad_clicked()
 
   onLoadRequested(Script);
 
-  ScriptTabs[CurrentTab]->FileName = fileName;
+  getTab()->FileName = fileName;
 
-  ScriptTabs[CurrentTab]->TabName = QFileInfo(fileName).baseName();
-  twScriptTabs->setTabText(CurrentTab, ScriptTabs[CurrentTab]->TabName);
+  getTab()->TabName = QFileInfo(fileName).baseName();
+  twScriptTabs->setTabText(CurrentTab, getTab()->TabName);
   updateFileStatusIndication();
+  */
 }
 
 void AScriptWindow::onLoadRequested(QString NewScript)
 {
-    if (!ScriptTabs[CurrentTab]->TextEdit->document()->isEmpty()) AddNewTab();
+    if (!getTab()->TextEdit->document()->isEmpty()) AddNewTab();
     //twScriptTabs->setTabText(CurrentTab, "__123456789");
     //twScriptTabs->setTabText(CurrentTab, createNewTabName());
 
-    ScriptTabs[CurrentTab]->TextEdit->clear();
-    ScriptTabs[CurrentTab]->TextEdit->appendPlainText(NewScript);
+    getTab()->TextEdit->clear();
+    getTab()->TextEdit->appendPlainText(NewScript);
 
     //for examples (triggered on signal from example explorer -> do not register file name!)
-    ScriptTabs[CurrentTab]->FileName.clear();
-    ScriptTabs[CurrentTab]->TabName = createNewTabName();
-    twScriptTabs->setTabText(CurrentTab, ScriptTabs[CurrentTab]->TabName);
+    getTab()->FileName.clear();
+    getTab()->TabName = createNewTabName();
+    getTabWidget()->setTabText(getCurrentTabIndex(), getTab()->TabName);
     updateFileStatusIndication();
 }
 
 void AScriptWindow::on_pbSave_clicked()
 {
+    /*
     if (ScriptTabs.isEmpty()) return;
 
-    QString SavedName = ScriptTabs[CurrentTab]->FileName;
+    QString SavedName = getTab()->FileName;
     if (SavedName.isEmpty())
       {
        on_pbSaveAs_clicked();
@@ -752,34 +775,37 @@ void AScriptWindow::on_pbSave_clicked()
         return;
       }
 
-    QString Script = ScriptTabs[CurrentTab]->TextEdit->document()->toPlainText();
+    QString Script = getTab()->TextEdit->document()->toPlainText();
     QTextStream outStream(&outputFile);
     outStream << Script;
     outputFile.close();
 
-    if (!ScriptTabs[CurrentTab]->bExplicitlyNamed)
+    if (!getTab()->bExplicitlyNamed)
     {
-        ScriptTabs[CurrentTab]->TabName = QFileInfo(SavedName).baseName();
-        twScriptTabs->setTabText(CurrentTab, ScriptTabs[CurrentTab]->TabName);
+        getTab()->TabName = QFileInfo(SavedName).baseName();
+        twScriptTabs->setTabText(CurrentTab, getTab()->TabName);
     }
 
-    ScriptTabs[CurrentTab]->setModifiedStatus(false);
+    getTab()->setModifiedStatus(false);
     updateFileStatusIndication();
+    */
 }
 
 void AScriptWindow::on_pbSaveAs_clicked()
 {
+    /*
     if (ScriptTabs.isEmpty()) return;
     QString starter = (GlobSet.LibScripts.isEmpty()) ? GlobSet.LastOpenDir : GlobSet.LibScripts;
-    if (!ScriptTabs[CurrentTab]->FileName.isEmpty()) starter = ScriptTabs[CurrentTab]->FileName;
+    if (!getTab()->FileName.isEmpty()) starter = getTab()->FileName;
     QString fileName = QFileDialog::getSaveFileName(this,"Save script", starter, "Script files (*.txt *.js);;All files (*.*)");
     if (fileName.isEmpty()) return;
 
     QFileInfo fileInfo(fileName);
     if(fileInfo.suffix().isEmpty()) fileName += ".txt";
 
-    ScriptTabs[CurrentTab]->FileName = fileName;    
+    getTab()->FileName = fileName;
     AScriptWindow::on_pbSave_clicked();
+    */
 }
 
 void AScriptWindow::on_pbExample_clicked()
@@ -792,7 +818,7 @@ void AScriptWindow::on_pbExample_clicked()
             return;
         }
 
-        if (!ScriptTabs[CurrentTab]->TextEdit->document()->isEmpty())
+        if (!getTab()->TextEdit->document()->isEmpty())
         {
             QMessageBox b;
             b.setText("Load / append example");
@@ -812,8 +838,8 @@ void AScriptWindow::on_pbExample_clicked()
         }
         else *LightModeScript = LightModeExample;
 
-        ScriptTabs[CurrentTab]->TextEdit->clear();
-        ScriptTabs[CurrentTab]->TextEdit->appendPlainText(*LightModeScript);
+        getTab()->TextEdit->clear();
+        getTab()->TextEdit->appendPlainText(*LightModeScript);
         return;
     }
 
@@ -1148,12 +1174,12 @@ void AScriptWindow::onContextMenuRequestedByHelp(QPoint pos)
 //void AScriptWindow::onFunctionDoubleClicked(QTreeWidgetItem *item, int /*column*/)
 //{
 //  QString text = item->text(0);
-//  ScriptTabs[CurrentTab]->TextEdit->insertPlainText(text);
+//  getTab()->TextEdit->insertPlainText(text);
 //}
 
 void AScriptWindow::closeEvent(QCloseEvent* e)
 {
-    QString Script = ScriptTabs[CurrentTab]->TextEdit->document()->toPlainText();
+    QString Script = getTab()->TextEdit->document()->toPlainText();
     //in light mode save the script directly
     if (bLightMode && LightModeScript) *LightModeScript = Script;
 
@@ -1204,7 +1230,7 @@ void AScriptWindow::receivedOnSuccess(QString eval)
 void AScriptWindow::onDefaulFontSizeChanged(int size)
 {
     GlobSet.DefaultFontSize_ScriptWindow = size;
-    for (AScriptWindowTabItem* tab : ScriptTabs)
+    for (AScriptWindowTabItem* tab : getScriptTabs())
         tab->TextEdit->SetFontSize(size);
 }
 
@@ -1378,7 +1404,7 @@ void AScriptWindowTabItem::setModifiedStatus(bool flag)
 void AScriptWindow::onCurrentTabChanged(int tab)
 {
     //qDebug() << "Current changed!" << tab << ScriptTabs.size();
-    CurrentTab = tab;
+    setCurrentTabIndex(tab);
 
     updateFileStatusIndication();
     applyTextFindState();
@@ -1397,10 +1423,11 @@ QIcon makeIcon(int h)
 
 void AScriptWindow::updateFileStatusIndication()
 {
-    if (CurrentTab < 0 || CurrentTab >= ScriptTabs.size()) return;
+    int iCurrentTab = getCurrentTabIndex();
+    if (iCurrentTab < 0 || iCurrentTab >= getScriptTabs().size()) return;
 
-    QString fileName = ScriptTabs.at(CurrentTab)->FileName;
-    const bool bWasModified = ScriptTabs.at(CurrentTab)->wasModified();
+    QString fileName = getScriptTabs().at(iCurrentTab)->FileName;
+    const bool bWasModified = getScriptTabs().at(iCurrentTab)->wasModified();
 
     ui->labNotSaved->setVisible(fileName.isEmpty());
 
@@ -1422,7 +1449,7 @@ void AScriptWindow::updateFileStatusIndication()
 
 void AScriptWindow::on_pbFileName_clicked()
 {
-    QString s = ScriptTabs.at(CurrentTab)->FileName;
+    QString s = getTab()->FileName;
     QFileInfo fi(s);
     QString path = fi.path();
     pteOut->appendPlainText(path);
@@ -1436,7 +1463,7 @@ void AScriptWindow::onRequestTabWidgetContextMenu(QPoint pos)
     if (pos.isNull()) return;
 
     QMenu menu;
-    int tab = twScriptTabs->tabBar()->tabAt(pos);
+    int tab = getTabWidget()->tabBar()->tabAt(pos);
 
     QAction* add = menu.addAction("Add new tab");
     menu.addSeparator();
@@ -1444,9 +1471,9 @@ void AScriptWindow::onRequestTabWidgetContextMenu(QPoint pos)
     menu.addSeparator();
     QAction* remove = (tab == -1 ? 0 : menu.addAction("Close tab") );
     menu.addSeparator();
-    QAction* removeAll = (ScriptTabs.isEmpty()) ? 0 : menu.addAction("Close all tabs");
+    QAction* removeAll = (getScriptTabs().isEmpty()) ? 0 : menu.addAction("Close all tabs");
 
-    QAction* selectedItem = menu.exec(twScriptTabs->mapToGlobal(pos));
+    QAction* selectedItem = menu.exec(getTabWidget()->mapToGlobal(pos));
     if (!selectedItem) return; //nothing was selected
 
     if (selectedItem == add)            AddNewTab();
@@ -1458,7 +1485,7 @@ void AScriptWindow::onRequestTabWidgetContextMenu(QPoint pos)
 void AScriptWindow::onScriptTabMoved(int from, int to)
 {
    //qDebug() << "Form->to:"<<from<<to;
-   ScriptTabs.swap(from, to);
+   getScriptTabs().swap(from, to);
 }
 
 void AScriptWindow::UpdateTab(AScriptWindowTabItem* tab)
@@ -1490,11 +1517,11 @@ void AScriptWindow::AddNewTab()
     connect(tab->TextEdit, &ATextEdit::fontSizeChanged, this, &AScriptWindow::onDefaulFontSizeChanged);
     connect(tab->TextEdit, &ATextEdit::requestHelp, this, &AScriptWindow::onF1pressed);
 
-    ScriptTabs.append(tab);
-    twScriptTabs->addTab(tab->TextEdit, createNewTabName());
+    getScriptTabs().append(tab);
+    getTabWidget()->addTab(tab->TextEdit, createNewTabName());
 
-    CurrentTab = ScriptTabs.size()-1;
-    twScriptTabs->setCurrentIndex(CurrentTab);
+    setCurrentTabIndex(getScriptTabs().size() - 1);
+    getTabWidget()->setCurrentIndex(getCurrentTabIndex());
 
     connect(tab->TextEdit->document(), &QTextDocument::modificationChanged, this, &AScriptWindow::updateFileStatusIndication);
     connect(tab, &AScriptWindowTabItem::requestFindText, this, &AScriptWindow::onFindSelected);
@@ -1513,8 +1540,8 @@ QString AScriptWindow::createNewTabName()
     {
         fFound = false;
         res = QString("new_%1").arg(counter);
-        for (int i=0; i<twScriptTabs->count(); i++)
-            if ( twScriptTabs->tabText(i) == res )
+        for (int i=0; i<getTabWidget()->count(); i++)
+            if ( getTabWidget()->tabText(i) == res )
             {
                 fFound = true;
                 counter++;
@@ -1528,23 +1555,23 @@ QString AScriptWindow::createNewTabName()
 
 void AScriptWindow::removeTab(int tab)
 {
-    int numTabs = twScriptTabs->count();
+    int numTabs = getTabWidget()->count();
     if (numTabs==0) return;
     if (tab<0 || tab>numTabs-1) return;
 
-    twScriptTabs->removeTab(tab);
-    delete ScriptTabs[tab];
-    ScriptTabs.removeAt(tab);
+    getTabWidget()->removeTab(tab);
+    delete getScriptTabs()[tab];
+    getScriptTabs().removeAt(tab);
 
-    if (ScriptTabs.isEmpty()) AddNewTab();
+    if (getScriptTabs().isEmpty()) AddNewTab();
     updateFileStatusIndication();
 }
 
 void AScriptWindow::clearAllTabs()
 {
-    twScriptTabs->clear();
-    for (int i=0; i<ScriptTabs.size(); i++) delete ScriptTabs[i];
-    ScriptTabs.clear();
+    getTabWidget()->clear();
+    for (int i=0; i<getScriptTabs().size(); i++) delete getScriptTabs()[i];
+    getScriptTabs().clear();
 }
 
 void AScriptWindow::on_pbConfig_toggled(bool checked)
@@ -1588,7 +1615,7 @@ void AScriptWindow::on_actionSelect_font_triggered()
   GlobSet.DefaultFontWeight_ScriptWindow = font.weight();
   GlobSet.DefaultFontItalic_ScriptWindow = font.italic();
 
-  for (AScriptWindowTabItem* tab : ScriptTabs)
+  for (AScriptWindowTabItem* tab : getScriptTabs())
       tab->TextEdit->setFont(font);
 }
 
@@ -1621,12 +1648,12 @@ void AScriptWindow::on_actionAdd_new_tab_triggered()
 
 void AScriptWindow::askRemoveTab(int tab)
 {
-    if (tab < 0 || tab >= ScriptTabs.size()) return;
+    if (tab < 0 || tab >= getScriptTabs().size()) return;
 
     QMessageBox m(this);
     //m.setText("Confirmation.");
     m.setIcon(QMessageBox::Question);
-    m.setText("Close tab "+twScriptTabs->tabText(tab)+"?");  //setInformativeText
+    m.setText("Close tab "+getTabWidget()->tabText(tab)+"?");  //setInformativeText
     m.setStandardButtons(QMessageBox::Yes| QMessageBox::Cancel);
     m.setDefaultButton(QMessageBox::Cancel);
     int ret = m.exec();
@@ -1635,24 +1662,24 @@ void AScriptWindow::askRemoveTab(int tab)
 
 void AScriptWindow::renameTab(int tab)
 {
-    if (tab < 0 || tab >= ScriptTabs.size()) return;
+    if (tab < 0 || tab >= getScriptTabs().size()) return;
 
     bool ok;
     QString text = QInputDialog::getText(this, "Input text",
                                              "New name for the tab:", QLineEdit::Normal,
-                                             ScriptTabs.at(tab)->TabName, &ok);
+                                             getScriptTabs().at(tab)->TabName, &ok);
     if (ok && !text.isEmpty())
     {
 
-       ScriptTabs[tab]->TabName = text;
-       ScriptTabs[tab]->bExplicitlyNamed = true;
-       twScriptTabs->setTabText(tab, text);
+       getScriptTabs()[tab]->TabName = text;
+       getScriptTabs()[tab]->bExplicitlyNamed = true;
+       getTabWidget()->setTabText(tab, text);
     }
 }
 
 void AScriptWindow::on_actionRemove_current_tab_triggered()
 {
-    askRemoveTab(CurrentTab);
+    askRemoveTab(getCurrentTabIndex());
 }
 
 void AScriptWindow::on_actionRemove_all_tabs_triggered()
@@ -1673,7 +1700,7 @@ void AScriptWindow::on_actionRemove_all_tabs_triggered()
 
 void AScriptWindow::on_actionStore_all_tabs_triggered()
 {
-    if (ScriptTabs.isEmpty()) return;
+    if (getScriptTabs().isEmpty()) return;
     QString starter = GlobSet.LastOpenDir;
     QString fileName = QFileDialog::getSaveFileName(this,"Save session", starter, "Json files (*.json);;All files (*.*)");
     if (fileName.isEmpty()) return;
@@ -1689,7 +1716,7 @@ void AScriptWindow::on_actionStore_all_tabs_triggered()
 
 void AScriptWindow::on_actionRestore_session_triggered()
 {
-    if (ScriptTabs.size() == 1 && ScriptTabs.at(0)->TextEdit->document()->isEmpty())
+    if (getScriptTabs().size() == 1 && getScriptTabs().at(0)->TextEdit->document()->isEmpty())
     {
         //empty - do not ask confirmation
     }
@@ -1729,7 +1756,7 @@ void AScriptWindow::on_actionShow_Find_Replace_triggered()
             ui->cbActivateTextReplace->setChecked(false);
         else
         {
-            if (ScriptTabs[CurrentTab]->TextEdit->textCursor().selectedText() == ui->leFind->text())
+            if (getTab()->TextEdit->textCursor().selectedText() == ui->leFind->text())
             {
                 ui->frFindReplace->setVisible(false);
                 return;
@@ -1746,7 +1773,7 @@ void AScriptWindow::onFindSelected()
     ui->frFindReplace->setVisible(true);
     ui->cbActivateTextReplace->setChecked(false);
 
-    QTextCursor tc = ScriptTabs[CurrentTab]->TextEdit->textCursor();
+    QTextCursor tc = getTab()->TextEdit->textCursor();
     QString sel = tc.selectedText();
     //if (!sel.isEmpty())
     //    ui->leFind->setText(sel);
@@ -1773,7 +1800,7 @@ void AScriptWindow::on_actionReplace_widget_Ctr_r_triggered()
             ui->cbActivateTextReplace->setChecked(true);
         else
         {
-            if (ScriptTabs[CurrentTab]->TextEdit->textCursor().selectedText() == ui->leFind->text())
+            if (getTab()->TextEdit->textCursor().selectedText() == ui->leFind->text())
             {
                 ui->frFindReplace->setVisible(false);
                 return;
@@ -1790,7 +1817,7 @@ void AScriptWindow::onReplaceSelected()
     ui->frFindReplace->setVisible(true);
     ui->cbActivateTextReplace->setChecked(true);
 
-    QTextCursor tc = ScriptTabs[CurrentTab]->TextEdit->textCursor();
+    QTextCursor tc = getTab()->TextEdit->textCursor();
     QString sel = tc.selectedText();
     //if (sel.isEmpty())
     //{
@@ -1816,7 +1843,7 @@ void AScriptWindow::onReplaceSelected()
 
 void AScriptWindow::onFindFunction()
 {
-    ATextEdit* te = ScriptTabs[CurrentTab]->TextEdit;
+    ATextEdit* te = getTab()->TextEdit;
     QTextDocument* d = te->document();
     QTextCursor tc = te->textCursor();
     QString name = tc.selectedText();
@@ -1862,7 +1889,7 @@ void AScriptWindow::onFindFunction()
 
 void AScriptWindow::onFindVariable()
 {
-    ATextEdit* te = ScriptTabs[CurrentTab]->TextEdit;
+    ATextEdit* te = getTab()->TextEdit;
     QTextDocument* d = te->document();
     QTextCursor tc = te->textCursor();
     QString name = tc.selectedText();
@@ -1908,12 +1935,12 @@ void AScriptWindow::onFindVariable()
 
 void AScriptWindow::onBack()
 {
-    ScriptTabs[CurrentTab]->goBack();
+    getTab()->goBack();
 }
 
 void AScriptWindow::onForward()
 {
-    ScriptTabs[CurrentTab]->goForward();
+    getTab()->goForward();
 }
 
 void AScriptWindow::on_pbFindNext_clicked()
@@ -1928,7 +1955,7 @@ void AScriptWindow::on_pbFindPrevious_clicked()
 
 void AScriptWindow::findText(bool bForward)
 {
-    ATextEdit* te = ScriptTabs[CurrentTab]->TextEdit;
+    ATextEdit* te = getTab()->TextEdit;
     QTextDocument* d = te->document();
 
     QString textToFind = ui->leFind->text();
@@ -1990,19 +2017,20 @@ void AScriptWindow::on_leFind_textChanged(const QString & /*arg1*/)
 
 void AScriptWindow::applyTextFindState()
 {
-    if (CurrentTab < 0 || CurrentTab >= ScriptTabs.size()) return;
+    int iCurrentTab = getCurrentTabIndex();
+    if (iCurrentTab < 0 || iCurrentTab >= getScriptTabs().size()) return;
 
     bool bActive = ui->frFindReplace->isVisible();
     QString Text = (bActive ? ui->leFind->text() : "");
 
-    ATextEdit* te = ScriptTabs[CurrentTab]->TextEdit;
+    ATextEdit* te = getTab()->TextEdit;
     te->FindString = Text;
     te->RefreshExtraHighlight();
 }
 
 void AScriptWindow::on_pbReplaceOne_clicked()
 {
-    ATextEdit* te = ScriptTabs[CurrentTab]->TextEdit;
+    ATextEdit* te = getTab()->TextEdit;
     QTextDocument* d = te->document();
 
     QString textToFind = ui->leFind->text();
@@ -2027,7 +2055,7 @@ void AScriptWindow::on_pbReplaceOne_clicked()
 
 void AScriptWindow::on_pbReplaceAll_clicked()
 {
-    ATextEdit* te = ScriptTabs[CurrentTab]->TextEdit;
+    ATextEdit* te = getTab()->TextEdit;
     QTextDocument* d = te->document();
 
     QString textToFind = ui->leFind->text();
@@ -2173,4 +2201,50 @@ void AScriptWindow::on_actionShortcuts_triggered()
                 "Ctrl + i\t\tAuto-align JavaScript";
 
     message(s, this);
+}
+
+// -------------------
+
+
+
+AScriptBook::AScriptBook() : wScriptTabs(new QTabWidget()) {}
+
+void AScriptWindow::addNewBook()
+{
+    qDebug() << "Add book triggered";
+    size_t iNewBook = ScriptBooks.size();
+
+    ScriptBooks.resize(iNewBook + 1);
+    twBooks->addTab(ScriptBooks[iNewBook].wScriptTabs, QString("Book%1").arg(iNewBook+1));
+
+    QTabWidget * twScriptTabs = getTabWidget();
+    connect(twScriptTabs, &QTabWidget::currentChanged, this, &AScriptWindow::onCurrentTabChanged);
+    twScriptTabs->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(twScriptTabs, &QTabWidget::customContextMenuRequested, this, &AScriptWindow::onRequestTabWidgetContextMenu);
+    connect(twScriptTabs->tabBar(), SIGNAL(tabMoved(int,int)), SLOT(onScriptTabMoved(int,int)));
+    twScriptTabs->setMovable(true);
+    twScriptTabs->setMinimumHeight(25);
+}
+
+void AScriptWindow::on_twBooks_customContextMenuRequested(const QPoint & pos)
+{
+    QMenu menu;
+
+    QAction* add = menu.addAction("Add new book");// paste->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_V));
+    menu.addSeparator();
+
+    QAction* selectedItem = menu.exec(twBooks->mapToGlobal(pos));
+    if (!selectedItem) return;
+
+    if (selectedItem == add) addNewBook();
+}
+
+void AScriptWindow::on_twBooks_currentChanged(int index)
+{
+    iCurrentBook = index;
+
+    if (ScriptBooks[index].ScriptTabs.isEmpty())
+    {
+        AddNewTab();
+    }
 }

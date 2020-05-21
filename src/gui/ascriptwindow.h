@@ -5,6 +5,7 @@
 #include <QSet>
 #include <QHash>
 #include <QString>
+#include <QList>
 
 class AScriptInterface;
 class AHighlighterScriptWindow;
@@ -21,10 +22,24 @@ class TObject;
 class AScriptManager;
 class AScriptWindowTabItem;
 class AGlobalSettings;
+class QTabWidget;
 
 namespace Ui {
 class AScriptWindow;
 }
+
+class AScriptBook
+{
+public:
+    AScriptBook();
+
+    QList<AScriptWindowTabItem *> ScriptTabs;
+    QTabWidget *                  wScriptTabs = nullptr; // will be owned by the QTabItemWidget
+    int                           iCurrentTab = 0;
+
+    AScriptWindowTabItem *        getCurrentTab() {return ScriptTabs[iCurrentTab];}
+    QTabWidget           *        getTabWidget()  {return wScriptTabs;}
+};
 
 class AScriptWindow : public AGuiWindow
 {
@@ -58,7 +73,7 @@ public:
     void EnableAcceptReject();
     bool isAccepted() const {return bAccepted;}
 
-    AScriptManager* ScriptManager;
+    AScriptManager * ScriptManager = nullptr;
     QStringList functions;
 
 private:
@@ -130,38 +145,45 @@ public:
     enum ScriptLanguageEnum {_JavaScript_ = 0, _PythonScript_ = 1};
 
 private:
-    Ui::AScriptWindow *ui;
-    AGlobalSettings& GlobSet;
-    ScriptLanguageEnum ScriptLanguage = _JavaScript_;
+    bool                bLightMode     = false;  // true -> to imitate former genericscriptwindow. Used for local scripts
+    Ui::AScriptWindow * ui;
+    AGlobalSettings &   GlobSet;
+    ScriptLanguageEnum  ScriptLanguage = _JavaScript_;
 
-    int CurrentTab;
-    QList<AScriptWindowTabItem*> ScriptTabs;
-    QTabWidget* twScriptTabs;
+    std::vector<AScriptBook> ScriptBooks;       //vector does not require default constructor, while QVector does
+    int                 iCurrentBook   = 0;
+    QTabWidget *        twBooks        = nullptr;
 
-    bool bLightMode = false;  // true -> to imitate former genericscriptwindow. Used for local scripts
-    bool bAccepted = false;
-    QString* LightModeScript = 0;
-    QString  LightModeExample;
+    bool                bAccepted      = false;
+    QString *           LightModeScript = nullptr;
+    QString             LightModeExample;
 
-    QSplitter* splMain;
-    QSplitter* splHelp;
-    QPlainTextEdit* pteOut;
-    QTreeWidget* trwHelp;
-    QTreeWidget* trwJson;
-    QFrame* frHelper;
-    QFrame* frJsonBrowser;
-    QPlainTextEdit* pteHelp;
-    QLineEdit* leFind;
-    QLineEdit* leFindJ;
-    QIcon* RedIcon;
+    QSplitter *         splMain        = nullptr;
+    QSplitter *         splHelp        = nullptr;
+    QPlainTextEdit *    pteOut         = nullptr;
+    QTreeWidget *       trwHelp        = nullptr;
+    QTreeWidget *       trwJson        = nullptr;
+    QFrame *            frHelper       = nullptr;
+    QFrame *            frJsonBrowser  = nullptr;
+    QPlainTextEdit *    pteHelp        = nullptr;
+    QLineEdit *         leFind         = nullptr;
+    QLineEdit *         leFindJ        = nullptr;
+    QIcon *             RedIcon        = nullptr;
 
-    bool ShowEvalResult;
+    bool                ShowEvalResult;
 
     QSet<QString> ExpandedItemsInJsonTW;
     QStringList functionList; //functions to populate tooltip helper
     QHash<QString, QString> DeprecatedOrRemovedMethods;
     QStringList ListOfDeprecatedOrRemovedMethods;
     QStringList ListOfConstants;
+
+    QList<AScriptWindowTabItem *> & getScriptTabs() {return ScriptBooks[iCurrentBook].ScriptTabs;}
+    AScriptWindowTabItem *          getTab() {return ScriptBooks[iCurrentBook].getCurrentTab();}
+    QTabWidget *                    getTabWidget() {return ScriptBooks[iCurrentBook].getTabWidget();}
+    int                             getCurrentTabIndex() {return ScriptBooks[iCurrentBook].iCurrentTab;}
+
+    void                            setCurrentTabIndex(int index) {ScriptBooks[iCurrentBook].iCurrentTab = index;}
 
     void fillSubObject(QTreeWidgetItem* parent, const QJsonObject& obj);
     void fillSubArray(QTreeWidgetItem* parent, const QJsonArray& arr);
@@ -185,6 +207,7 @@ private:
     void findText(bool bForward);
 
     void UpdateTab(AScriptWindowTabItem *tab);
+    void addNewBook();
 protected:
   virtual void closeEvent(QCloseEvent *e);
   virtual bool event(QEvent * e);
@@ -217,6 +240,8 @@ private slots:
     void on_pbAccept_clicked();
     void on_pbCancel_clicked();
     void on_actionShortcuts_triggered();
+    void on_twBooks_customContextMenuRequested(const QPoint &pos);
+    void on_twBooks_currentChanged(int index);
 };
 
 class AScriptWindowTabItem : public QObject

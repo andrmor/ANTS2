@@ -1412,21 +1412,25 @@ void AScriptWindow::onRequestTabWidgetContextMenu(QPoint pos)
     menu.addSeparator();
     QAction* remove = (tab == -1 ? 0 : menu.addAction("Close tab") );
     menu.addSeparator();
-    QAction* removeAll = (getScriptTabs().isEmpty()) ? 0 : menu.addAction("Close all tabs");
+    QAction * markTabA = (tab == -1 ? 0 : menu.addAction("Mark this tab for copy/move") );
+    //QAction* removeAll = (getScriptTabs().isEmpty()) ? 0 : menu.addAction("Close all tabs");
 
     QAction* selectedItem = menu.exec(getTabWidget()->mapToGlobal(pos));
     if (!selectedItem) return; //nothing was selected
 
     if (selectedItem == add)            AddNewTab();
     else if (selectedItem == remove)    askRemoveTab(tab);
-    else if (selectedItem == removeAll) on_actionRemove_all_tabs_triggered();
+    //else if (selectedItem == removeAll) on_actionRemove_all_tabs_triggered();
     else if (selectedItem == rename)    renameTab(tab);
+    else if (selectedItem == markTabA)  markTab(tab);
 }
 
 void AScriptWindow::onScriptTabMoved(int from, int to)
 {
     //qDebug() << "Form->to:"<<from<<to;
     getScriptTabs().swap(from, to);
+
+    iMarkedTab = -1;
 }
 
 void AScriptWindow::UpdateTab(AScriptWindowTabItem* tab)
@@ -1437,17 +1441,26 @@ void AScriptWindow::UpdateTab(AScriptWindowTabItem* tab)
     tab->TextEdit->DeprecatedOrRemovedMethods = &DeprecatedOrRemovedMethods;
 }
 
-void AScriptWindow::AddNewTab()
+AScriptWindowTabItem & AScriptWindow::AddNewTab(int iBook)
 {
     AScriptWindowTabItem * tab = new AScriptWindowTabItem(functions, ScriptLanguage);
+    tab->TabName = createNewTabName();
+
     formatTab(tab);
 
-    getScriptTabs().append(tab);
-    getTabWidget()->addTab(tab->TextEdit, createNewTabName());
+    getScriptTabs(iBook).append(tab);
+    getTabWidget(iBook)->addTab(tab->TextEdit, tab->TabName);
 
-    int index = getScriptTabs().size() - 1;
-    setCurrentTabIndex(index);
-    getTabWidget()->setCurrentIndex(index);
+    int index = getScriptTabs(iBook).size() - 1;
+    setCurrentTabIndex(index, iBook);
+    getTabWidget(iBook)->setCurrentIndex(index);
+
+    return *tab;
+}
+
+AScriptWindowTabItem & AScriptWindow::AddNewTab()
+{
+    return AddNewTab(iCurrentBook);
 }
 
 void AScriptWindow::formatTab(AScriptWindowTabItem * tab)
@@ -1506,6 +1519,8 @@ void AScriptWindow::removeTab(int tab)
 
     if (getScriptTabs().isEmpty()) AddNewTab();
     updateFileStatusIndication();
+
+    iMarkedTab = -1;
 }
 
 void AScriptWindow::clearAllTabs()
@@ -1522,6 +1537,8 @@ void AScriptWindow::clearAllTabs()
             delete getScriptTabs()[i];
         getScriptTabs().clear();
     }
+
+    iMarkedTab = -1;
 }
 
 void AScriptWindow::on_pbConfig_toggled(bool checked)
@@ -1623,6 +1640,35 @@ void AScriptWindow::renameTab(int tab)
        getScriptTabs()[tab]->bExplicitlyNamed = true;
        getTabWidget()->setTabText(tab, text);
     }
+}
+
+void AScriptWindow::markTab(int tab)
+{
+    iMarkedBook = iCurrentBook;
+    iMarkedTab = tab;
+}
+
+void AScriptWindow::copyTab(int iBook)
+{
+    if (iMarkedTab == -1) return;
+    qDebug() << "Copy to book" << iBook;
+
+    QString script = ScriptBooks[iMarkedBook].getTab(iMarkedTab)->TextEdit->document()->toPlainText();
+    QString newName = "CopyOf_" + ScriptBooks[iMarkedBook].getTab(iMarkedTab)->TabName;
+
+    AScriptWindowTabItem & tab = AddNewTab(iBook);
+
+    tab.TextEdit->appendPlainText(script);
+    tab.TabName = newName;
+    getTabWidget(iBook)->setTabText(countTabs(iBook)-1, newName);
+}
+
+void AScriptWindow::moveTab(int iBook)
+{
+    qDebug() << "Move to book" << iBook;
+
+
+    iMarkedTab = -1;
 }
 
 void AScriptWindow::on_actionRemove_current_tab_triggered()
@@ -2187,14 +2233,19 @@ AScriptWindowTabItem * AScriptWindow::getTab()
 void AScriptWindow::twBooks_customContextMenuRequested(const QPoint & pos)
 {
     QMenu menu;
+    int iBook = twBooks->tabBar()->tabAt(pos);
 
-    QAction* add = menu.addAction("Add new book");// paste->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_V));
+    QAction * add = menu.addAction("Add new book");// paste->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_V));
     menu.addSeparator();
+    QAction * copy = menu.addAction("Copy tab here"); copy->setEnabled(iMarkedTab != -1 && iBook != -1);
+    QAction * move = menu.addAction("Move tab here"); move->setEnabled(iMarkedTab != -1 && iBook != -1);
 
     QAction* selectedItem = menu.exec(twBooks->mapToGlobal(pos));
     if (!selectedItem) return;
 
-    if (selectedItem == add) addNewBook();
+    if      (selectedItem == add)  addNewBook();
+    else if (selectedItem == copy) copyTab(iBook);
+    else if (selectedItem == move) moveTab(iBook);
 }
 
 void AScriptWindow::twBooks_currentChanged(int index)
@@ -2209,6 +2260,6 @@ void AScriptWindow::twBooks_currentChanged(int index)
 void AScriptWindow::onBookTabMoved(int from, int to)
 {
     //qDebug() << "Book from->to:"<<from<<to;
-    if (from == to) return;
     std::swap(ScriptBooks[from], ScriptBooks[to]);
+    iMarkedTab = -1;
 }

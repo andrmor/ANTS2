@@ -57,7 +57,8 @@ public:
 
     void SetShowEvaluationResult(bool flag) {ShowEvalResult = flag;} //if false, window only reports "success", ptherwise eval result is shown
 
-    void AddNewTab();  // new tab !
+    AScriptWindowTabItem & AddNewTab(int iBook);
+    AScriptWindowTabItem & AddNewTab();
 
     void ReportError(QString error, int line = 0);   //0 - no line is highligted
 
@@ -157,6 +158,9 @@ private:
 
     AScriptWindowTabItem * StandaloneTab = nullptr;
 
+    int                 iMarkedBook      = -1;
+    int                 iMarkedTab       = -1;
+
     bool                bAccepted      = false;
     QString *           LightModeScript = nullptr;
     QString             LightModeExample;
@@ -183,12 +187,15 @@ private:
 
     void                    addNewBook();
     QList<AScriptWindowTabItem *> & getScriptTabs() {return ScriptBooks[iCurrentBook].Tabs;}
+    QList<AScriptWindowTabItem *> & getScriptTabs(int iBook) {return ScriptBooks[iBook].Tabs;}
     AScriptWindowTabItem *  getTab();
     AScriptWindowTabItem *  getTab(int index) {return ScriptBooks[iCurrentBook].getTab(index);}
     QTabWidget *            getTabWidget() {return ScriptBooks[iCurrentBook].getTabWidget();}
     QTabWidget *            getTabWidget(int iBook) {return (iBook >= 0 && iBook < (int)ScriptBooks.size() ? ScriptBooks[iBook].getTabWidget() : nullptr);}
     int                     getCurrentTabIndex() {return ScriptBooks[iCurrentBook].iCurrentTab;}
     void                    setCurrentTabIndex(int index) {ScriptBooks[iCurrentBook].iCurrentTab = index;}
+    void                    setCurrentTabIndex(int index, int iBook) {ScriptBooks[iBook].iCurrentTab = index;}
+    int                     countTabs(int iBook) const {return (iBook >= 0 && iBook < (int)ScriptBooks.size() ? ScriptBooks[iBook].Tabs.size() : 0);}
 
     void fillSubObject(QTreeWidgetItem* parent, const QJsonObject& obj);
     void fillSubArray(QTreeWidgetItem* parent, const QJsonArray& arr);
@@ -207,6 +214,9 @@ private:
     void clearAllTabs();
     QString createNewTabName();
     void renameTab(int tab);
+    void markTab(int tab);
+    void copyTab(int iBook);
+    void moveTab(int iBook);
 
     void applyTextFindState();
     void findText(bool bForward);

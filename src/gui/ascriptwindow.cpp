@@ -705,16 +705,15 @@ void AScriptWindow::on_pbLoad_clicked()
 
 void AScriptWindow::onLoadRequested(QString NewScript)
 {
-    if (!getTab()->TextEdit->document()->isEmpty()) AddNewTab();
-    //twScriptTabs->setTabText(CurrentTab, "__123456789");
-    //twScriptTabs->setTabText(CurrentTab, createNewTabName());
+    AScriptWindowTabItem * tab = getTab();
+    if (!tab->TextEdit->document()->isEmpty()) AddNewTab();
 
-    getTab()->TextEdit->clear();
-    getTab()->TextEdit->appendPlainText(NewScript);
+    tab->TextEdit->clear();
+    tab->TextEdit->appendPlainText(NewScript);
 
     //for examples (triggered on signal from example explorer -> do not register file name!)
-    getTab()->FileName.clear();
-    getTab()->TabName = createNewTabName();
+    tab->FileName.clear();
+    tab->TabName = createNewTabName();
     getTabWidget()->setTabText(getCurrentTabIndex(), getTab()->TabName);
     updateFileStatusIndication();
 }
@@ -1385,7 +1384,6 @@ QIcon makeIcon(int h)
     return QIcon(pm);
 }
 
-
 void AScriptWindow::updateFileStatusIndication()
 {
     AScriptWindowTabItem * tab = getTab();
@@ -1623,7 +1621,6 @@ void AScriptWindow::askRemoveTab(int tab)
     if (tab < 0 || tab >= getScriptTabs().size()) return;
 
     QMessageBox m(this);
-    //m.setText("Confirmation.");
     m.setIcon(QMessageBox::Question);
     m.setText("Close tab "+getTabWidget()->tabText(tab)+"?");  //setInformativeText
     m.setStandardButtons(QMessageBox::Yes| QMessageBox::Cancel);
@@ -1642,7 +1639,6 @@ void AScriptWindow::renameTab(int tab)
                                              getScriptTabs().at(tab)->TabName, &ok);
     if (ok && !text.isEmpty())
     {
-
        getScriptTabs()[tab]->TabName = text;
        getScriptTabs()[tab]->bExplicitlyNamed = true;
        getTabWidget()->setTabText(tab, text);
@@ -1657,7 +1653,6 @@ void AScriptWindow::on_actionRemove_current_tab_triggered()
 void AScriptWindow::on_actionRemove_all_tabs_triggered()
 {
     QMessageBox m(this);
-    //m.setText("Confirmation.");
     m.setIcon(QMessageBox::Warning);
     m.setText("Close ALL tabs?");
     m.setStandardButtons(QMessageBox::Yes| QMessageBox::Cancel);
@@ -2187,13 +2182,13 @@ AScriptBook::AScriptBook()
 
 void AScriptWindow::addNewBook()
 {
-    qDebug() << "Add book triggered";
+    //qDebug() << "Add book triggered";
     size_t iNewBook = ScriptBooks.size();
 
     ScriptBooks.resize(iNewBook + 1);
     twBooks->addTab(getTabWidget(iNewBook), QString("Book%1").arg(iNewBook+1));
 
-    QTabWidget * twScriptTabs = getTabWidget();
+    QTabWidget * twScriptTabs = getTabWidget(iNewBook);
 
     connect(twScriptTabs, &QTabWidget::currentChanged, this, &AScriptWindow::onCurrentTabChanged);
     connect(twScriptTabs, &QTabWidget::customContextMenuRequested, this, &AScriptWindow::onRequestTabWidgetContextMenu);
@@ -2201,7 +2196,7 @@ void AScriptWindow::addNewBook()
     connect(twScriptTabs->tabBar(), &QTabBar::tabMoved, this, &AScriptWindow::onScriptTabMoved);
 }
 
-AScriptWindowTabItem *AScriptWindow::getTab()
+AScriptWindowTabItem * AScriptWindow::getTab()
 {
     if (bLightMode)
         return StandaloneTab;
@@ -2224,11 +2219,9 @@ void AScriptWindow::twBooks_customContextMenuRequested(const QPoint & pos)
 
 void AScriptWindow::twBooks_currentChanged(int index)
 {
-    qDebug() << "book index changed to" << index;
+    //qDebug() << "book index changed to" << index;
     iCurrentBook = index;
 
     if (ScriptBooks[index].Tabs.isEmpty())
-    {
         AddNewTab();
-    }
 }

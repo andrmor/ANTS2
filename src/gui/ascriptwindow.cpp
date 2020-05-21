@@ -125,20 +125,29 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWid
     AddNewTab();
       */
 
-    twBooks = new QTabWidget();
-    //connect(twScriptTabs, SIGNAL(currentChanged(int)), this, SLOT(onCurrentTabChanged(int)));
-    twBooks->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(twBooks, &QTabWidget::customContextMenuRequested, this, &AScriptWindow::on_twBooks_customContextMenuRequested);
-    connect(twBooks, &QTabWidget::currentChanged, this, &AScriptWindow::on_twBooks_currentChanged);
-    //connect(twScriptTabs->tabBar(), SIGNAL(tabMoved(int,int)), SLOT(onScriptTabMoved(int,int)));
-    //twScriptTabs->setMovable(true);
-    twBooks->setTabShape(QTabWidget::Triangular);
-    twBooks->setMinimumHeight(25);
-    addNewBook();
+    if (bLightMode)
+    {
+        StandaloneTab = new AScriptWindowTabItem(functions, ScriptLanguage);
+        formatTab(StandaloneTab);
+    }
+    else
+    {
+        twBooks = new QTabWidget();
+        //connect(twScriptTabs, SIGNAL(currentChanged(int)), this, SLOT(onCurrentTabChanged(int)));
+        twBooks->setContextMenuPolicy(Qt::CustomContextMenu);
+        connect(twBooks, &QTabWidget::customContextMenuRequested, this, &AScriptWindow::twBooks_customContextMenuRequested);
+        connect(twBooks, &QTabWidget::currentChanged, this, &AScriptWindow::twBooks_currentChanged);
+        //connect(twScriptTabs->tabBar(), SIGNAL(tabMoved(int,int)), SLOT(onScriptTabMoved(int,int)));
+        twBooks->setMovable(true);
+        twBooks->setTabShape(QTabWidget::Triangular);
+        twBooks->setMinimumHeight(25);
+        addNewBook();
+    }
 
     QSplitter* hor = new QSplitter(); //all upper widgets are here
     hor->setContentsMargins(0,0,0,0);
-      hor->addWidget(twBooks); //already defined
+      if (bLightMode) hor->addWidget(StandaloneTab->TextEdit);
+      else            hor->addWidget(twBooks);
 
       splHelp = new QSplitter();
       splHelp->setOrientation(Qt::Horizontal);
@@ -281,7 +290,7 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWid
     if (bLightMode)
     {
         ui->pbConfig->setEnabled(false);
-        getTabWidget()->setStyleSheet("QTabWidget::tab-bar { width: 0; height: 0; margin: 0; padding: 0; border: none; }");
+        //getTabWidget()->setStyleSheet("QTabWidget::tab-bar { width: 0; height: 0; margin: 0; padding: 0; border: none; }");
         ui->pbExample->setText("Example");
         ui->menuTabs->setEnabled(false);
         ui->menuView->setEnabled(false);
@@ -293,60 +302,11 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWid
 
 AScriptWindow::~AScriptWindow()
 {
-  clearAllTabs();
-  delete ui;
-  delete RedIcon;
-  delete ScriptManager;
+    clearAllTabs();
+    delete ui;
+    delete RedIcon;
+    delete ScriptManager;
 }
-
-/*
-void AScriptWindow::SetInterfaceObject(QObject *interfaceObject, QString name)
-{
-    ScriptManager->SetInterfaceObject(interfaceObject, name);
-
-    // populating help
-    QStringList newFunctions;
-
-    if(name.isEmpty())
-    { // empty name means the main module
-        // populating help for main, math and core units
-        if (bLightMode && interfaceObject) fillHelper(interfaceObject, "");
-
-        AInterfaceToCore core(0); //dummy to extract methods
-        fillHelper(&core, "core");
-        newFunctions << getListOfMethods(&core, "core", false);
-        appendDeprecatedOrRemovedMethods(&core, "core");
-
-        AMathScriptInterface math(0); //dummy to extract methods
-        QString mathName = (ScriptLanguage == _JavaScript_ ? "math" : "MATH");
-        fillHelper(&math, mathName);
-        newFunctions << getListOfMethods(&math, mathName, false);
-        appendDeprecatedOrRemovedMethods(&math, mathName);
-    }
-    else
-    {
-        fillHelper(interfaceObject, name);
-        newFunctions << getListOfMethods(interfaceObject, name, false);
-        appendDeprecatedOrRemovedMethods(interfaceObject, name);
-    }
-
-    //filling autocompleter
-    for (int i=0; i<newFunctions.size(); i++)
-        newFunctions[i] += "()";
-    functions << newFunctions;
-    //completitionModel->setStringList(functions);
-
-    //if standalone script, update the highlighter and tooltip
-    if (bLightMode) UpdateGui();
-
-    //special "needs" of particular interface objects
-    if ( dynamic_cast<AInterfaceToHist*>(interfaceObject) || dynamic_cast<AInterfaceToGraph*>(interfaceObject)) //"graph" or "hist"
-       QObject::connect(interfaceObject, SIGNAL(RequestDraw(TObject*,QString,bool)), this, SLOT(onRequestDraw(TObject*,QString,bool)));
-
-    if (bLightMode && interfaceObject && trwHelp->topLevelItemCount() > 0) trwHelp->expandItem(trwHelp->itemAt(0,0));
-    else trwHelp->collapseAll();
-}
-*/
 
 void AScriptWindow::RegisterInterfaceAsGlobal(AScriptInterface *interface)
 {
@@ -398,9 +358,13 @@ void AScriptWindow::doRegister(AScriptInterface *interface, const QString &name)
 
 void AScriptWindow::UpdateGui()
 {
-    QList<AScriptWindowTabItem *> ScriptTabs = getScriptTabs();
-    for (int i=0; i<ScriptTabs.size(); i++)
-        UpdateTab(ScriptTabs[i]);
+    if (bLightMode) UpdateTab(StandaloneTab);
+    else
+    {
+        QList<AScriptWindowTabItem *> ScriptTabs = getScriptTabs();
+        for (int i = 0; i < ScriptTabs.size(); i++)
+            UpdateTab(ScriptTabs[i]);
+    }
 
     if (bLightMode && trwHelp->topLevelItemCount() > 0)
         trwHelp->expandItem(trwHelp->itemAt(0,0));
@@ -1403,7 +1367,8 @@ void AScriptWindowTabItem::setModifiedStatus(bool flag)
 
 void AScriptWindow::onCurrentTabChanged(int tab)
 {
-    //qDebug() << "Current changed!" << tab << ScriptTabs.size();
+    //qDebug() << "Current changed!" << tab;
+    if (tab < 0) return; //also called by window destructor
     setCurrentTabIndex(tab);
 
     updateFileStatusIndication();
@@ -1423,11 +1388,11 @@ QIcon makeIcon(int h)
 
 void AScriptWindow::updateFileStatusIndication()
 {
-    int iCurrentTab = getCurrentTabIndex();
-    if (iCurrentTab < 0 || iCurrentTab >= getScriptTabs().size()) return;
+    AScriptWindowTabItem * tab = getTab();
+    if (!tab) return;
 
-    QString fileName = getScriptTabs().at(iCurrentTab)->FileName;
-    const bool bWasModified = getScriptTabs().at(iCurrentTab)->wasModified();
+    QString fileName  = tab->FileName;
+    bool bWasModified = tab->wasModified();
 
     ui->labNotSaved->setVisible(fileName.isEmpty());
 
@@ -1437,11 +1402,9 @@ void AScriptWindow::updateFileStatusIndication()
     else
     {
         ui->labWasModified->setVisible(bWasModified);
-
 #ifdef Q_OS_WIN32
         fileName.replace("/", "\\");
 #endif
-
         s = fileName;
     }
     ui->pbFileName->setText(s);
@@ -1498,31 +1461,31 @@ void AScriptWindow::UpdateTab(AScriptWindowTabItem* tab)
 
 void AScriptWindow::AddNewTab()
 {
-    AScriptWindowTabItem* tab = new AScriptWindowTabItem(functions, ScriptLanguage);
-
-    //tab->highlighter->setHighlighterRules(functions, ListOfDeprecatedOrRemovedMethods, QStringList());
-    //tab->TextEdit->functionList = functionList;
-    UpdateTab(tab);
-
-    if (GlobSet.DefaultFontFamily_ScriptWindow.isEmpty())
-      {
-         tab->TextEdit->SetFontSize(GlobSet.DefaultFontSize_ScriptWindow);
-      }
-    else
-      {
-        QFont font(GlobSet.DefaultFontFamily_ScriptWindow, GlobSet.DefaultFontSize_ScriptWindow, GlobSet.DefaultFontWeight_ScriptWindow, GlobSet.DefaultFontItalic_ScriptWindow);
-        tab->TextEdit->setFont(font);
-      }
-
-    connect(tab->TextEdit, &ATextEdit::fontSizeChanged, this, &AScriptWindow::onDefaulFontSizeChanged);
-    connect(tab->TextEdit, &ATextEdit::requestHelp, this, &AScriptWindow::onF1pressed);
+    AScriptWindowTabItem * tab = new AScriptWindowTabItem(functions, ScriptLanguage);
+    formatTab(tab);
 
     getScriptTabs().append(tab);
     getTabWidget()->addTab(tab->TextEdit, createNewTabName());
 
-    setCurrentTabIndex(getScriptTabs().size() - 1);
-    getTabWidget()->setCurrentIndex(getCurrentTabIndex());
+    int index = getScriptTabs().size() - 1;
+    setCurrentTabIndex(index);
+    getTabWidget()->setCurrentIndex(index);
+}
 
+void AScriptWindow::formatTab(AScriptWindowTabItem * tab)
+{
+    UpdateTab(tab);
+
+    if (GlobSet.DefaultFontFamily_ScriptWindow.isEmpty())
+         tab->TextEdit->SetFontSize(GlobSet.DefaultFontSize_ScriptWindow);
+    else
+    {
+        QFont font(GlobSet.DefaultFontFamily_ScriptWindow, GlobSet.DefaultFontSize_ScriptWindow, GlobSet.DefaultFontWeight_ScriptWindow, GlobSet.DefaultFontItalic_ScriptWindow);
+        tab->TextEdit->setFont(font);
+    }
+
+    connect(tab->TextEdit, &ATextEdit::fontSizeChanged, this, &AScriptWindow::onDefaulFontSizeChanged);
+    connect(tab->TextEdit, &ATextEdit::requestHelp, this, &AScriptWindow::onF1pressed);
     connect(tab->TextEdit->document(), &QTextDocument::modificationChanged, this, &AScriptWindow::updateFileStatusIndication);
     connect(tab, &AScriptWindowTabItem::requestFindText, this, &AScriptWindow::onFindSelected);
     connect(tab, &AScriptWindowTabItem::requestReplaceText, this, &AScriptWindow::onReplaceSelected);
@@ -1569,9 +1532,18 @@ void AScriptWindow::removeTab(int tab)
 
 void AScriptWindow::clearAllTabs()
 {
-    getTabWidget()->clear();
-    for (int i=0; i<getScriptTabs().size(); i++) delete getScriptTabs()[i];
-    getScriptTabs().clear();
+    if (bLightMode)
+    {
+        delete StandaloneTab;
+        StandaloneTab = nullptr;
+    }
+    else
+    {
+        getTabWidget()->clear();
+        for (int i=0; i<getScriptTabs().size(); i++)
+            delete getScriptTabs()[i];
+        getScriptTabs().clear();
+    }
 }
 
 void AScriptWindow::on_pbConfig_toggled(bool checked)
@@ -2017,13 +1989,10 @@ void AScriptWindow::on_leFind_textChanged(const QString & /*arg1*/)
 
 void AScriptWindow::applyTextFindState()
 {
-    int iCurrentTab = getCurrentTabIndex();
-    if (iCurrentTab < 0 || iCurrentTab >= getScriptTabs().size()) return;
-
     bool bActive = ui->frFindReplace->isVisible();
     QString Text = (bActive ? ui->leFind->text() : "");
 
-    ATextEdit* te = getTab()->TextEdit;
+    ATextEdit * te = getTab()->TextEdit;
     te->FindString = Text;
     te->RefreshExtraHighlight();
 }
@@ -2207,7 +2176,14 @@ void AScriptWindow::on_actionShortcuts_triggered()
 
 
 
-AScriptBook::AScriptBook() : wScriptTabs(new QTabWidget()) {}
+AScriptBook::AScriptBook()
+{
+    TabWidget = new QTabWidget();
+
+    TabWidget->setMovable(true);
+    TabWidget->setMinimumHeight(25);
+    TabWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+}
 
 void AScriptWindow::addNewBook()
 {
@@ -2215,18 +2191,25 @@ void AScriptWindow::addNewBook()
     size_t iNewBook = ScriptBooks.size();
 
     ScriptBooks.resize(iNewBook + 1);
-    twBooks->addTab(ScriptBooks[iNewBook].wScriptTabs, QString("Book%1").arg(iNewBook+1));
+    twBooks->addTab(getTabWidget(iNewBook), QString("Book%1").arg(iNewBook+1));
 
     QTabWidget * twScriptTabs = getTabWidget();
+
     connect(twScriptTabs, &QTabWidget::currentChanged, this, &AScriptWindow::onCurrentTabChanged);
-    twScriptTabs->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(twScriptTabs, &QTabWidget::customContextMenuRequested, this, &AScriptWindow::onRequestTabWidgetContextMenu);
-    connect(twScriptTabs->tabBar(), SIGNAL(tabMoved(int,int)), SLOT(onScriptTabMoved(int,int)));
-    twScriptTabs->setMovable(true);
-    twScriptTabs->setMinimumHeight(25);
+    //connect(twScriptTabs->tabBar(), SIGNAL(tabMoved(int,int)), SLOT(onScriptTabMoved(int,int)));
+    connect(twScriptTabs->tabBar(), &QTabBar::tabMoved, this, &AScriptWindow::onScriptTabMoved);
 }
 
-void AScriptWindow::on_twBooks_customContextMenuRequested(const QPoint & pos)
+AScriptWindowTabItem *AScriptWindow::getTab()
+{
+    if (bLightMode)
+        return StandaloneTab;
+    else
+        return ScriptBooks[iCurrentBook].getCurrentTab();
+}
+
+void AScriptWindow::twBooks_customContextMenuRequested(const QPoint & pos)
 {
     QMenu menu;
 
@@ -2239,11 +2222,12 @@ void AScriptWindow::on_twBooks_customContextMenuRequested(const QPoint & pos)
     if (selectedItem == add) addNewBook();
 }
 
-void AScriptWindow::on_twBooks_currentChanged(int index)
+void AScriptWindow::twBooks_currentChanged(int index)
 {
+    qDebug() << "book index changed to" << index;
     iCurrentBook = index;
 
-    if (ScriptBooks[index].ScriptTabs.isEmpty())
+    if (ScriptBooks[index].Tabs.isEmpty())
     {
         AddNewTab();
     }

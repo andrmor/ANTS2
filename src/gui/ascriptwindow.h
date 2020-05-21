@@ -33,12 +33,13 @@ class AScriptBook
 public:
     AScriptBook();
 
-    QList<AScriptWindowTabItem *> ScriptTabs;
-    QTabWidget *                  wScriptTabs = nullptr; // will be owned by the QTabItemWidget
+    QList<AScriptWindowTabItem *> Tabs;
+    QTabWidget *                  TabWidget = nullptr; // will be owned by the QTabItemWidget
     int                           iCurrentTab = 0;
 
-    AScriptWindowTabItem *        getCurrentTab() {return ScriptTabs[iCurrentTab];}
-    QTabWidget           *        getTabWidget()  {return wScriptTabs;}
+    AScriptWindowTabItem *        getCurrentTab()   {return Tabs[iCurrentTab];}
+    AScriptWindowTabItem *        getTab(int index) {return (index >= 0 && index < Tabs.size() ? Tabs[index] : nullptr);}
+    QTabWidget           *        getTabWidget()    {return TabWidget;}
 };
 
 class AScriptWindow : public AGuiWindow
@@ -49,7 +50,6 @@ public:
     explicit AScriptWindow(AScriptManager *ScriptManager, bool LightMode, QWidget *parent);
     ~AScriptWindow();
 
-    //void SetInterfaceObject(QObject *interfaceObject, QString name = ""); // if not lightMode, do not forget to call UpdateAllTabs() after all units were registered!
     void RegisterInterfaceAsGlobal(AScriptInterface* interface);
     void RegisterCoreInterfaces(bool bCore = true, bool bMath = true);
     void RegisterInterface(AScriptInterface* interface, const QString& name);
@@ -78,6 +78,7 @@ public:
 
 private:
     void doRegister(AScriptInterface *interface, const QString& name);
+    void formatTab(AScriptWindowTabItem *tab);
 
 public slots:
     void updateJsonTree();
@@ -154,6 +155,8 @@ private:
     int                 iCurrentBook   = 0;
     QTabWidget *        twBooks        = nullptr;
 
+    AScriptWindowTabItem * StandaloneTab = nullptr;
+
     bool                bAccepted      = false;
     QString *           LightModeScript = nullptr;
     QString             LightModeExample;
@@ -178,12 +181,14 @@ private:
     QStringList ListOfDeprecatedOrRemovedMethods;
     QStringList ListOfConstants;
 
-    QList<AScriptWindowTabItem *> & getScriptTabs() {return ScriptBooks[iCurrentBook].ScriptTabs;}
-    AScriptWindowTabItem *          getTab() {return ScriptBooks[iCurrentBook].getCurrentTab();}
-    QTabWidget *                    getTabWidget() {return ScriptBooks[iCurrentBook].getTabWidget();}
-    int                             getCurrentTabIndex() {return ScriptBooks[iCurrentBook].iCurrentTab;}
-
-    void                            setCurrentTabIndex(int index) {ScriptBooks[iCurrentBook].iCurrentTab = index;}
+    void                    addNewBook();
+    QList<AScriptWindowTabItem *> & getScriptTabs() {return ScriptBooks[iCurrentBook].Tabs;}
+    AScriptWindowTabItem *  getTab();
+    AScriptWindowTabItem *  getTab(int index) {return ScriptBooks[iCurrentBook].getTab(index);}
+    QTabWidget *            getTabWidget() {return ScriptBooks[iCurrentBook].getTabWidget();}
+    QTabWidget *            getTabWidget(int iBook) {return (iBook >= 0 && iBook < (int)ScriptBooks.size() ? ScriptBooks[iBook].getTabWidget() : nullptr);}
+    int                     getCurrentTabIndex() {return ScriptBooks[iCurrentBook].iCurrentTab;}
+    void                    setCurrentTabIndex(int index) {ScriptBooks[iCurrentBook].iCurrentTab = index;}
 
     void fillSubObject(QTreeWidgetItem* parent, const QJsonObject& obj);
     void fillSubArray(QTreeWidgetItem* parent, const QJsonArray& arr);
@@ -207,7 +212,6 @@ private:
     void findText(bool bForward);
 
     void UpdateTab(AScriptWindowTabItem *tab);
-    void addNewBook();
 protected:
   virtual void closeEvent(QCloseEvent *e);
   virtual bool event(QEvent * e);
@@ -240,8 +244,10 @@ private slots:
     void on_pbAccept_clicked();
     void on_pbCancel_clicked();
     void on_actionShortcuts_triggered();
-    void on_twBooks_customContextMenuRequested(const QPoint &pos);
-    void on_twBooks_currentChanged(int index);
+
+    //books
+    void twBooks_customContextMenuRequested(const QPoint &pos);
+    void twBooks_currentChanged(int index);
 };
 
 class AScriptWindowTabItem : public QObject

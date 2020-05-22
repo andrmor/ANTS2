@@ -40,6 +40,7 @@ public:
     AScriptWindowTabItem *        getCurrentTab()   {return Tabs[iCurrentTab];}
     AScriptWindowTabItem *        getTab(int index) {return (index >= 0 && index < Tabs.size() ? Tabs[index] : nullptr);}
     QTabWidget           *        getTabWidget()    {return TabWidget;}
+    void                          removeTab(int index);
 };
 
 class AScriptWindow : public AGuiWindow
@@ -190,6 +191,7 @@ private:
     QList<AScriptWindowTabItem *> & getScriptTabs(int iBook) {return ScriptBooks[iBook].Tabs;}
     AScriptWindowTabItem *  getTab();
     AScriptWindowTabItem *  getTab(int index) {return ScriptBooks[iCurrentBook].getTab(index);}
+    AScriptWindowTabItem *  getTab(int index, int iBook) {return ScriptBooks[iBook].getTab(index);}
     QTabWidget *            getTabWidget() {return ScriptBooks[iCurrentBook].getTabWidget();}
     QTabWidget *            getTabWidget(int iBook) {return (iBook >= 0 && iBook < (int)ScriptBooks.size() ? ScriptBooks[iBook].getTabWidget() : nullptr);}
     int                     getCurrentTabIndex() {return ScriptBooks[iCurrentBook].iCurrentTab;}

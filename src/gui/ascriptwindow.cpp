@@ -1650,8 +1650,8 @@ void AScriptWindow::markTab(int tab)
 
 void AScriptWindow::copyTab(int iBook)
 {
-    if (iMarkedTab == -1) return;
     qDebug() << "Copy to book" << iBook;
+    if (iMarkedTab == -1) return;
 
     QString script = ScriptBooks[iMarkedBook].getTab(iMarkedTab)->TextEdit->document()->toPlainText();
     QString newName = "CopyOf_" + ScriptBooks[iMarkedBook].getTab(iMarkedTab)->TabName;
@@ -1666,7 +1666,14 @@ void AScriptWindow::copyTab(int iBook)
 void AScriptWindow::moveTab(int iBook)
 {
     qDebug() << "Move to book" << iBook;
+    if (iMarkedTab == -1) return;
 
+    AScriptWindowTabItem * tab = getTab(iMarkedTab, iMarkedBook);
+    ScriptBooks[iMarkedBook].removeTab(iMarkedTab);
+    if (countTabs(iMarkedBook) == 0) AddNewTab(iMarkedBook);
+
+    ScriptBooks[iBook].Tabs.append(tab);
+    ScriptBooks[iBook].TabWidget->addTab(tab->TextEdit, tab->TabName);
 
     iMarkedTab = -1;
 }
@@ -2204,6 +2211,22 @@ AScriptBook::AScriptBook()
     TabWidget->setMovable(true);
     TabWidget->setMinimumHeight(25);
     TabWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+}
+
+void AScriptBook::removeTab(int index)
+{
+    if (index >= 0 && index < Tabs.size())
+    {
+        if (TabWidget)
+        {
+            if (index < TabWidget->count()) TabWidget->removeTab(index);
+            else qWarning() << "Bad TabWidget index";
+        }
+
+        Tabs.removeAt(index);
+
+        if (iCurrentTab >= Tabs.size()) iCurrentTab = Tabs.size() - 1;
+    }
 }
 
 void AScriptWindow::addNewBook()

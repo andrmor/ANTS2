@@ -59,13 +59,13 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWid
 
     if ( dynamic_cast<AJavaScriptManager*>(ScriptManager) )
     {
-        ScriptLanguage = _JavaScript_;
+        ScriptLanguage = JavaScript;
         setWindowTitle("JavaScript");
     }
 #ifdef __USE_ANTS_PYTHON__
     if ( dynamic_cast<APythonScriptManager*>(ScriptManager) )
     {
-        ScriptLanguage = _PythonScript_;
+        ScriptLanguage = Python;
         setWindowTitle("Python script");
     }
 #endif
@@ -111,8 +111,9 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWid
 
     if (bLightMode)
     {
-        StandaloneTab = new AScriptWindowTabItem(functions, ScriptLanguage);
+        StandaloneTab = new ATabRecord(functions, ScriptLanguage);
         formatTab(StandaloneTab);
+        bShowResult = false;
     }
     else
     {
@@ -307,7 +308,7 @@ void AScriptWindow::RegisterCoreInterfaces(bool bCore, bool bMath)
     if (bMath)
     {
         AMath_SI math(0); //dummy to extract method names
-        QString mathName = (ScriptLanguage == _JavaScript_ ? "math" : "MATH");
+        QString mathName = (ScriptLanguage == JavaScript ? "math" : "MATH");
         doRegister(&math, mathName);
     }
 }
@@ -341,7 +342,7 @@ void AScriptWindow::UpdateGui()
     if (bLightMode) UpdateTab(StandaloneTab);
     else
     {
-        QList<AScriptWindowTabItem *> ScriptTabs = getScriptTabs();
+        QList<ATabRecord *> ScriptTabs = getScriptTabs();
         for (int i = 0; i < ScriptTabs.size(); i++)
             UpdateTab(ScriptTabs[i]);
     }
@@ -484,10 +485,12 @@ void AScriptWindow::ReadFromJson(QJsonObject& json)
     */
 }
 
+/*
 void AScriptWindow::SetMainSplitterSizes(QList<int> values)
 {
     splMain->setSizes(values);
 }
+*/
 
 void AScriptWindow::onBusyOn()
 {
@@ -593,8 +596,8 @@ void AScriptWindow::on_pbRunScript_clicked()
        //qDebug() << "Script returned:" << result;
        if (!ScriptManager->isEvalAborted())
        {
-            if (ShowEvalResult && result!="undefined" && !result.isEmpty())
-                ShowText("Script evaluation result:\n"+result);
+            if (bShowResult && result != "undefined" && !result.isEmpty())
+                ShowText("Script evaluation result:\n" + result);
        }
        else
        {
@@ -685,8 +688,8 @@ void AScriptWindow::on_pbLoad_clicked()
 
 void AScriptWindow::onLoadRequested(QString NewScript)
 {
-    AScriptWindowTabItem * tab = getTab();
-    if (!tab->TextEdit->document()->isEmpty()) AddNewTab();
+    ATabRecord * tab = getTab();
+    if (!tab->TextEdit->document()->isEmpty()) addNewTab();
 
     tab->TextEdit->clear();
     tab->TextEdit->appendPlainText(NewScript);
@@ -787,7 +790,7 @@ void AScriptWindow::on_pbExample_clicked()
     }
 
     //reading example database
-    QString target = (ScriptLanguage == _JavaScript_ ? "ScriptExamples.cfg" : "PythonScriptExamples.cfg");
+    QString target = (ScriptLanguage == JavaScript ? "ScriptExamples.cfg" : "PythonScriptExamples.cfg");
     QString RecordsFilename = GlobSet.ExamplesDir + "/" + target;
     //check it is found
     QFile file(RecordsFilename);
@@ -813,7 +816,7 @@ void AScriptWindow::fillHelper(QObject* obj, QString module)
   if (io)
     {
       UnitDescription = io->getDescription();
-      if (ScriptLanguage == _PythonScript_) UnitDescription.remove("Multithread-capable");
+      if (ScriptLanguage == Python) UnitDescription.remove("Multithread-capable");
     }
 
   QStringList functions = getListOfMethods(obj, module, true);
@@ -1173,7 +1176,7 @@ void AScriptWindow::receivedOnSuccess(QString eval)
 void AScriptWindow::onDefaulFontSizeChanged(int size)
 {
     GlobSet.DefaultFontSize_ScriptWindow = size;
-    for (AScriptWindowTabItem* tab : getScriptTabs())
+    for (ATabRecord* tab : getScriptTabs())
         tab->TextEdit->SetFontSize(size);
 }
 
@@ -1250,48 +1253,47 @@ void AScriptWindow::appendDeprecatedOrRemovedMethods(const AScriptInterface *obj
     }
 }
 
-AScriptWindowTabItem::AScriptWindowTabItem(const QStringList& functions, AScriptWindow::ScriptLanguageEnum language) :
-    functions(functions)
+ATabRecord::ATabRecord(const QStringList & functions, AScriptWindow::AScriptEnum language) :
+    Functions(functions)
 {
     TextEdit = new ATextEdit();
     TextEdit->setLineWrapMode(QPlainTextEdit::NoWrap);
 
-    completer = new QCompleter(this);
-    //completer->setModel(model);
-    completitionModel = new QStringListModel(functions, this);
-    completer->setModel(completitionModel);
-    completer->setCompletionMode(QCompleter::UnfilteredPopupCompletion);
+    Completer = new QCompleter(this);
+    CompletitionModel = new QStringListModel(functions, this);
+    Completer->setModel(CompletitionModel);
+    Completer->setCompletionMode(QCompleter::UnfilteredPopupCompletion);
     //completer->setCompletionMode(QCompleter::PopupCompletion);
-    completer->setFilterMode(Qt::MatchContains);
+    Completer->setFilterMode(Qt::MatchContains);
     //completer->setFilterMode(Qt::MatchStartsWith);
-    completer->setModelSorting(QCompleter::CaseSensitivelySortedModel);
-    completer->setCaseSensitivity(Qt::CaseSensitive);
-    completer->setWrapAround(false);
-    TextEdit->setCompleter(completer);
+    Completer->setModelSorting(QCompleter::CaseSensitivelySortedModel);
+    Completer->setCaseSensitivity(Qt::CaseSensitive);
+    Completer->setWrapAround(false);
+    TextEdit->setCompleter(Completer);
 
-    if (language == AScriptWindow::_PythonScript_)
-        highlighter = new AHighlighterPythonScriptWindow(TextEdit->document());
+    if (language == AScriptWindow::Python)
+        Highlighter = new APythonHighlighter(TextEdit->document());
     else
-        highlighter = new AHighlighterScriptWindow(TextEdit->document());
+        Highlighter = new AHighlighterScriptWindow(TextEdit->document());
 
     TextEdit->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(TextEdit, &ATextEdit::customContextMenuRequested, this, &AScriptWindowTabItem::onCustomContextMenuRequested);
-    connect(TextEdit, &ATextEdit::lineNumberChanged, this, &AScriptWindowTabItem::onLineNumberChanged);
+    connect(TextEdit, &ATextEdit::customContextMenuRequested, this, &ATabRecord::onCustomContextMenuRequested);
+    connect(TextEdit, &ATextEdit::lineNumberChanged, this, &ATabRecord::onLineNumberChanged);
 
-    connect(TextEdit, &ATextEdit::textChanged, this, &AScriptWindowTabItem::onTextChanged);
+    connect(TextEdit, &ATextEdit::textChanged, this, &ATabRecord::onTextChanged);
 }
 
-AScriptWindowTabItem::~AScriptWindowTabItem()
+ATabRecord::~ATabRecord()
 {
     delete TextEdit;
 }
 
-void AScriptWindowTabItem::UpdateHighlight()
+void ATabRecord::UpdateHighlight()
 {
-    highlighter->rehighlight();
+    Highlighter->rehighlight();
 }
 
-void AScriptWindowTabItem::WriteToJson(QJsonObject &json)
+void ATabRecord::WriteToJson(QJsonObject &json)
 {
     if (!TextEdit) return;
     json["FileName"] = FileName;
@@ -1300,7 +1302,7 @@ void AScriptWindowTabItem::WriteToJson(QJsonObject &json)
     json["Script"] = TextEdit->document()->toPlainText();
 }
 
-void AScriptWindowTabItem::ReadFromJson(QJsonObject &json)
+void ATabRecord::ReadFromJson(QJsonObject &json)
 {
     if (!TextEdit) return;
     QString Script = json["Script"].toString();
@@ -1334,12 +1336,12 @@ You can also set your own document object using setDocument(). QTextDocument emi
  In addition it provides methods for undo and redo.
 */
 
-bool AScriptWindowTabItem::wasModified() const
+bool ATabRecord::wasModified() const
 {
     return TextEdit->document()->isModified();
 }
 
-void AScriptWindowTabItem::setModifiedStatus(bool flag)
+void ATabRecord::setModifiedStatus(bool flag)
 {
     TextEdit->document()->setModified(flag);
 }
@@ -1366,7 +1368,7 @@ QIcon makeIcon(int h)
 
 void AScriptWindow::updateFileStatusIndication()
 {
-    AScriptWindowTabItem * tab = getTab();
+    ATabRecord * tab = getTab();
     if (!tab) return;
 
     QString fileName  = tab->FileName;
@@ -1418,7 +1420,7 @@ void AScriptWindow::onRequestTabWidgetContextMenu(QPoint pos)
     QAction* selectedItem = menu.exec(getTabWidget()->mapToGlobal(pos));
     if (!selectedItem) return; //nothing was selected
 
-    if (selectedItem == add)            AddNewTab();
+    if (selectedItem == add)            addNewTab();
     else if (selectedItem == remove)    askRemoveTab(tab);
     //else if (selectedItem == removeAll) on_actionRemove_all_tabs_triggered();
     else if (selectedItem == rename)    renameTab(tab);
@@ -1433,17 +1435,17 @@ void AScriptWindow::onScriptTabMoved(int from, int to)
     iMarkedTab = -1;
 }
 
-void AScriptWindow::UpdateTab(AScriptWindowTabItem* tab)
+void AScriptWindow::UpdateTab(ATabRecord* tab)
 {
-    tab->highlighter->setHighlighterRules(functions, ListOfDeprecatedOrRemovedMethods, ListOfConstants);
+    tab->Highlighter->setHighlighterRules(functions, ListOfDeprecatedOrRemovedMethods, ListOfConstants);
     tab->UpdateHighlight();
     tab->TextEdit->functionList = functionList;
     tab->TextEdit->DeprecatedOrRemovedMethods = &DeprecatedOrRemovedMethods;
 }
 
-AScriptWindowTabItem & AScriptWindow::AddNewTab(int iBook)
+ATabRecord & AScriptWindow::addNewTab(int iBook)
 {
-    AScriptWindowTabItem * tab = new AScriptWindowTabItem(functions, ScriptLanguage);
+    ATabRecord * tab = new ATabRecord(functions, ScriptLanguage);
     tab->TabName = createNewTabName();
 
     formatTab(tab);
@@ -1458,12 +1460,12 @@ AScriptWindowTabItem & AScriptWindow::AddNewTab(int iBook)
     return *tab;
 }
 
-AScriptWindowTabItem & AScriptWindow::AddNewTab()
+ATabRecord & AScriptWindow::addNewTab()
 {
-    return AddNewTab(iCurrentBook);
+    return addNewTab(iCurrentBook);
 }
 
-void AScriptWindow::formatTab(AScriptWindowTabItem * tab)
+void AScriptWindow::formatTab(ATabRecord * tab)
 {
     UpdateTab(tab);
 
@@ -1478,10 +1480,10 @@ void AScriptWindow::formatTab(AScriptWindowTabItem * tab)
     connect(tab->TextEdit, &ATextEdit::fontSizeChanged, this, &AScriptWindow::onDefaulFontSizeChanged);
     connect(tab->TextEdit, &ATextEdit::requestHelp, this, &AScriptWindow::onF1pressed);
     connect(tab->TextEdit->document(), &QTextDocument::modificationChanged, this, &AScriptWindow::updateFileStatusIndication);
-    connect(tab, &AScriptWindowTabItem::requestFindText, this, &AScriptWindow::onFindSelected);
-    connect(tab, &AScriptWindowTabItem::requestReplaceText, this, &AScriptWindow::onReplaceSelected);
-    connect(tab, &AScriptWindowTabItem::requestFindFunction, this, &AScriptWindow::onFindFunction);
-    connect(tab, &AScriptWindowTabItem::requestFindVariable, this, &AScriptWindow::onFindVariable);
+    connect(tab, &ATabRecord::requestFindText, this, &AScriptWindow::onFindSelected);
+    connect(tab, &ATabRecord::requestReplaceText, this, &AScriptWindow::onReplaceSelected);
+    connect(tab, &ATabRecord::requestFindFunction, this, &AScriptWindow::onFindFunction);
+    connect(tab, &ATabRecord::requestFindVariable, this, &AScriptWindow::onFindVariable);
 }
 
 QString AScriptWindow::createNewTabName()
@@ -1517,7 +1519,7 @@ void AScriptWindow::removeTab(int tab)
     delete getScriptTabs()[tab];
     getScriptTabs().removeAt(tab);
 
-    if (getScriptTabs().isEmpty()) AddNewTab();
+    if (countTabs() == 0) addNewTab();
     updateFileStatusIndication();
 
     iMarkedTab = -1;
@@ -1578,11 +1580,11 @@ void AScriptWindow::on_actionSelect_font_triggered()
   if (!ok) return;
 
   GlobSet.DefaultFontFamily_ScriptWindow = font.family();
-  GlobSet.DefaultFontSize_ScriptWindow = font.pointSize();
+  GlobSet.DefaultFontSize_ScriptWindow   = font.pointSize();
   GlobSet.DefaultFontWeight_ScriptWindow = font.weight();
   GlobSet.DefaultFontItalic_ScriptWindow = font.italic();
 
-  for (AScriptWindowTabItem* tab : getScriptTabs())
+  for (ATabRecord* tab : getScriptTabs())
       tab->TextEdit->setFont(font);
 }
 
@@ -1610,16 +1612,16 @@ void AScriptWindow::on_actionClose_all_messenger_windows_triggered()
 
 void AScriptWindow::on_actionAdd_new_tab_triggered()
 {
-    AddNewTab();
+    addNewTab();
 }
 
 void AScriptWindow::askRemoveTab(int tab)
 {
-    if (tab < 0 || tab >= getScriptTabs().size()) return;
+    if (tab < 0 || tab >= countTabs()) return;
 
     QMessageBox m(this);
     m.setIcon(QMessageBox::Question);
-    m.setText("Close tab "+getTabWidget()->tabText(tab)+"?");  //setInformativeText
+    m.setText("Close tab " + getTabWidget()->tabText(tab) + "?");
     m.setStandardButtons(QMessageBox::Yes| QMessageBox::Cancel);
     m.setDefaultButton(QMessageBox::Cancel);
     int ret = m.exec();
@@ -1628,16 +1630,17 @@ void AScriptWindow::askRemoveTab(int tab)
 
 void AScriptWindow::renameTab(int tab)
 {
-    if (tab < 0 || tab >= getScriptTabs().size()) return;
+    ATabRecord * tr = getTab(tab);
+    if (!tr) return;
 
     bool ok;
     QString text = QInputDialog::getText(this, "Input text",
                                              "New name for the tab:", QLineEdit::Normal,
-                                             getScriptTabs().at(tab)->TabName, &ok);
+                                             tr->TabName, &ok);
     if (ok && !text.isEmpty())
     {
-       getScriptTabs()[tab]->TabName = text;
-       getScriptTabs()[tab]->bExplicitlyNamed = true;
+       tr->TabName = text;
+       tr->bExplicitlyNamed = true;
        getTabWidget()->setTabText(tab, text);
     }
 }
@@ -1656,7 +1659,7 @@ void AScriptWindow::copyTab(int iBook)
     QString script = ScriptBooks[iMarkedBook].getTab(iMarkedTab)->TextEdit->document()->toPlainText();
     QString newName = "CopyOf_" + ScriptBooks[iMarkedBook].getTab(iMarkedTab)->TabName;
 
-    AScriptWindowTabItem & tab = AddNewTab(iBook);
+    ATabRecord & tab = addNewTab(iBook);
 
     tab.TextEdit->appendPlainText(script);
     tab.TabName = newName;
@@ -1668,9 +1671,9 @@ void AScriptWindow::moveTab(int iBook)
     qDebug() << "Move to book" << iBook;
     if (iMarkedTab == -1) return;
 
-    AScriptWindowTabItem * tab = getTab(iMarkedTab, iMarkedBook);
+    ATabRecord * tab = getTab(iMarkedTab, iMarkedBook);
     ScriptBooks[iMarkedBook].removeTab(iMarkedTab);
-    if (countTabs(iMarkedBook) == 0) AddNewTab(iMarkedBook);
+    if (countTabs(iMarkedBook) == 0) addNewTab(iMarkedBook);
 
     ScriptBooks[iBook].Tabs.append(tab);
     ScriptBooks[iBook].TabWidget->addTab(tab->TextEdit, tab->TabName);
@@ -1694,7 +1697,7 @@ void AScriptWindow::on_actionRemove_all_tabs_triggered()
     if (ret == QMessageBox::Yes)
     {
         clearAllTabs();
-        AddNewTab();
+        addNewTab();
     }
 }
 
@@ -1716,7 +1719,7 @@ void AScriptWindow::on_actionStore_all_tabs_triggered()
 
 void AScriptWindow::on_actionRestore_session_triggered()
 {
-    if (getScriptTabs().size() == 1 && getScriptTabs().at(0)->TextEdit->document()->isEmpty())
+    if (countTabs() == 1 && getScriptTabs().at(0)->TextEdit->document()->isEmpty())
     {
         //empty - do not ask confirmation
     }
@@ -2075,7 +2078,7 @@ void AScriptWindow::on_pbReplaceAll_clicked()
     message("Replacements performed: " + QString::number(numReplacements), this);
 }
 
-void AScriptWindowTabItem::onCustomContextMenuRequested(const QPoint& pos)
+void ATabRecord::onCustomContextMenuRequested(const QPoint& pos)
 {
     QMenu menu;
 
@@ -2113,12 +2116,12 @@ void AScriptWindowTabItem::onCustomContextMenuRequested(const QPoint& pos)
     else if (selectedItem == paste) TextEdit->paste();
 }
 
-void AScriptWindowTabItem::goBack()
+void ATabRecord::goBack()
 {
-    if (indexInVisitedLineNumber >= 1 && indexInVisitedLineNumber < VisitedLineNumber.size())
+    if (IndexVisitedLines >= 1 && IndexVisitedLines < VisitedLines.size())
     {
-        indexInVisitedLineNumber--;
-        int goTo = VisitedLineNumber.at(indexInVisitedLineNumber);
+        IndexVisitedLines--;
+        int goTo = VisitedLines.at(IndexVisitedLines);
         QTextCursor tc = TextEdit->textCursor();
         int nowAt = tc.blockNumber();
         if (nowAt == goTo) return;
@@ -2129,12 +2132,12 @@ void AScriptWindowTabItem::goBack()
     }
 }
 
-void AScriptWindowTabItem::goForward()
+void ATabRecord::goForward()
 {
-    if (indexInVisitedLineNumber >= 0 && indexInVisitedLineNumber < VisitedLineNumber.size()-1)
+    if (IndexVisitedLines >= 0 && IndexVisitedLines < VisitedLines.size()-1)
     {
-        indexInVisitedLineNumber++;
-        int goTo = VisitedLineNumber.at(indexInVisitedLineNumber);
+        IndexVisitedLines++;
+        int goTo = VisitedLines.at(IndexVisitedLines);
         QTextCursor tc = TextEdit->textCursor();
         int nowAt = tc.blockNumber();
         if (nowAt == goTo) return;
@@ -2145,18 +2148,18 @@ void AScriptWindowTabItem::goForward()
     }
 }
 
-void AScriptWindowTabItem::onLineNumberChanged(int lineNumber)
+void ATabRecord::onLineNumberChanged(int lineNumber)
 {
-    if (!VisitedLineNumber.isEmpty())
-        if (VisitedLineNumber.last() == lineNumber) return;
+    if (!VisitedLines.isEmpty())
+        if (VisitedLines.last() == lineNumber) return;
 
-    VisitedLineNumber.append(lineNumber);
-    if (VisitedLineNumber.size() > maxLineNumbers) VisitedLineNumber.removeFirst();
+    VisitedLines.append(lineNumber);
+    if (VisitedLines.size() > MaxLineNumbers) VisitedLines.removeFirst();
 
-    indexInVisitedLineNumber = VisitedLineNumber.size() - 1;
+    IndexVisitedLines = VisitedLines.size() - 1;
 }
 
-void AScriptWindowTabItem::onTextChanged()
+void ATabRecord::onTextChanged()
 {
     //qDebug() << "Text changed!";
     QTextDocument* d = TextEdit->document();
@@ -2170,8 +2173,8 @@ void AScriptWindowTabItem::onTextChanged()
         tc = d->find(re, tc);//, flags);
     }
 
-    Variables.append(functions);
-    completitionModel->setStringList(Variables);
+    Variables.append(Functions);
+    CompletitionModel->setStringList(Variables);
 }
 
 void AScriptWindow::on_pbAccept_clicked()
@@ -2202,8 +2205,6 @@ void AScriptWindow::on_actionShortcuts_triggered()
 
 // -------------------
 
-
-
 AScriptBook::AScriptBook()
 {
     TabWidget = new QTabWidget();
@@ -2211,6 +2212,22 @@ AScriptBook::AScriptBook()
     TabWidget->setMovable(true);
     TabWidget->setMinimumHeight(25);
     TabWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+}
+
+ATabRecord *AScriptBook::getCurrentTab()
+{
+    return Tabs[iCurrentTab];
+}
+
+ATabRecord *AScriptBook::getTab(int index)
+{
+    return ( (index >= 0 && index < Tabs.size()) ? Tabs[index]
+                                                 : nullptr );
+}
+
+QTabWidget *AScriptBook::getTabWidget()
+{
+    return TabWidget;
 }
 
 void AScriptBook::removeTab(int index)
@@ -2229,36 +2246,116 @@ void AScriptBook::removeTab(int index)
     }
 }
 
+// ----------------------
+
 void AScriptWindow::addNewBook()
 {
     //qDebug() << "Add book triggered";
     size_t iNewBook = ScriptBooks.size();
 
     ScriptBooks.resize(iNewBook + 1);
-    twBooks->addTab(getTabWidget(iNewBook), QString("Book%1").arg(iNewBook+1));
+    twBooks->addTab(getTabWidget(iNewBook), "");
+
+    renameBook(iNewBook, QString("Book%1").arg(iNewBook+1));
 
     QTabWidget * twScriptTabs = getTabWidget(iNewBook);
 
     connect(twScriptTabs, &QTabWidget::currentChanged, this, &AScriptWindow::onCurrentTabChanged);
     connect(twScriptTabs, &QTabWidget::customContextMenuRequested, this, &AScriptWindow::onRequestTabWidgetContextMenu);
-    //connect(twScriptTabs->tabBar(), SIGNAL(tabMoved(int,int)), SLOT(onScriptTabMoved(int,int)));
     connect(twScriptTabs->tabBar(), &QTabBar::tabMoved, this, &AScriptWindow::onScriptTabMoved);
 }
 
-AScriptWindowTabItem * AScriptWindow::getTab()
+void AScriptWindow::renameBook(int iBook, const QString & newName)
 {
-    if (bLightMode)
-        return StandaloneTab;
-    else
-        return ScriptBooks[iCurrentBook].getCurrentTab();
+    if (iBook < 0 || iBook >= (int)ScriptBooks.size()) return;
+
+    ScriptBooks[iBook].Name = newName;
+    twBooks->setTabText(iBook, newName);
+}
+
+void AScriptWindow::renameBookRequested(int iBook)
+{
+    bool ok;
+    QString text = QInputDialog::getText(this, "Input text",
+                                             "New name for the tab:", QLineEdit::Normal,
+                                             ScriptBooks[iBook].Name, &ok);
+    if (ok && !text.isEmpty())
+        renameBook(iBook, text);
+}
+
+QList<ATabRecord *> & AScriptWindow::getScriptTabs()
+{
+    return ScriptBooks[iCurrentBook].Tabs;
+}
+
+QList<ATabRecord *> &AScriptWindow::getScriptTabs(int iBook)
+{
+    return ScriptBooks[iBook].Tabs;
+}
+
+ATabRecord * AScriptWindow::getTab()
+{
+    if (bLightMode) return StandaloneTab;
+    else            return ScriptBooks[iCurrentBook].getCurrentTab();
+}
+
+ATabRecord *AScriptWindow::getTab(int index)
+{
+    return ScriptBooks[iCurrentBook].getTab(index);
+}
+
+ATabRecord *AScriptWindow::getTab(int index, int iBook)
+{
+    if (iBook < 0 || iBook >= (int)ScriptBooks.size()) return nullptr;
+    return ScriptBooks[iBook].getTab(index);
+}
+
+QTabWidget *AScriptWindow::getTabWidget()
+{
+    return ScriptBooks[iCurrentBook].getTabWidget();
+}
+
+QTabWidget *AScriptWindow::getTabWidget(int iBook)
+{
+    if (iBook < 0 || iBook >= (int)ScriptBooks.size()) return nullptr;
+    return ScriptBooks[iBook].getTabWidget();
+}
+
+int AScriptWindow::getCurrentTabIndex()
+{
+    return ScriptBooks[iCurrentBook].iCurrentTab;
+}
+
+void AScriptWindow::setCurrentTabIndex(int index)
+{
+    ScriptBooks[iCurrentBook].iCurrentTab = index;
+}
+
+void AScriptWindow::setCurrentTabIndex(int index, int iBook)
+{
+    ScriptBooks[iBook].iCurrentTab = index;
+}
+
+int AScriptWindow::countTabs(int iBook) const
+{
+    if (iBook < 0 || iBook >= (int)ScriptBooks.size()) return 0;
+    return ScriptBooks[iBook].Tabs.size();
+}
+
+int AScriptWindow::countTabs() const
+{
+    return ScriptBooks[iCurrentBook].Tabs.size();
 }
 
 void AScriptWindow::twBooks_customContextMenuRequested(const QPoint & pos)
 {
     QMenu menu;
+
     int iBook = twBooks->tabBar()->tabAt(pos);
 
-    QAction * add = menu.addAction("Add new book");// paste->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_V));
+    QAction * rename = menu.addAction("Rename book"); rename->setEnabled(iBook != -1);
+    menu.addSeparator();
+    QAction * add = menu.addAction("Add new book");
     menu.addSeparator();
     QAction * copy = menu.addAction("Copy tab here"); copy->setEnabled(iMarkedTab != -1 && iBook != -1);
     QAction * move = menu.addAction("Move tab here"); move->setEnabled(iMarkedTab != -1 && iBook != -1);
@@ -2266,9 +2363,10 @@ void AScriptWindow::twBooks_customContextMenuRequested(const QPoint & pos)
     QAction* selectedItem = menu.exec(twBooks->mapToGlobal(pos));
     if (!selectedItem) return;
 
-    if      (selectedItem == add)  addNewBook();
-    else if (selectedItem == copy) copyTab(iBook);
-    else if (selectedItem == move) moveTab(iBook);
+    if      (selectedItem == rename) renameBookRequested(iBook);
+    else if (selectedItem == add)    addNewBook();
+    else if (selectedItem == copy)   copyTab(iBook);
+    else if (selectedItem == move)   moveTab(iBook);
 }
 
 void AScriptWindow::twBooks_currentChanged(int index)
@@ -2277,7 +2375,7 @@ void AScriptWindow::twBooks_currentChanged(int index)
     iCurrentBook = index;
 
     if (ScriptBooks[index].Tabs.isEmpty())
-        AddNewTab();
+        addNewTab();
 }
 
 void AScriptWindow::onBookTabMoved(int from, int to)

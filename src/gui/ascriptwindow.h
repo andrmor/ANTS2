@@ -20,7 +20,7 @@ class QFrame;
 class QLineEdit;
 class TObject;
 class AScriptManager;
-class AScriptWindowTabItem;
+class ATabRecord;
 class AGlobalSettings;
 class QTabWidget;
 
@@ -33,14 +33,15 @@ class AScriptBook
 public:
     AScriptBook();
 
-    QList<AScriptWindowTabItem *> Tabs;
-    QTabWidget *                  TabWidget = nullptr; // will be owned by the QTabItemWidget
-    int                           iCurrentTab = 0;
+    QString             Name;
+    QList<ATabRecord *> Tabs;
+    QTabWidget *        TabWidget   = nullptr; // will be owned by the QTabItemWidget
+    int                 iCurrentTab = 0;
 
-    AScriptWindowTabItem *        getCurrentTab()   {return Tabs[iCurrentTab];}
-    AScriptWindowTabItem *        getTab(int index) {return (index >= 0 && index < Tabs.size() ? Tabs[index] : nullptr);}
-    QTabWidget           *        getTabWidget()    {return TabWidget;}
-    void                          removeTab(int index);
+    ATabRecord *        getCurrentTab();
+    ATabRecord *        getTab(int index);
+    QTabWidget *        getTabWidget();
+    void                removeTab(int index);
 };
 
 class AScriptWindow : public AGuiWindow
@@ -51,36 +52,24 @@ public:
     explicit AScriptWindow(AScriptManager *ScriptManager, bool LightMode, QWidget *parent);
     ~AScriptWindow();
 
-    void RegisterInterfaceAsGlobal(AScriptInterface* interface);
+    enum AScriptEnum {JavaScript = 0, Python = 1};
+
+    void RegisterInterfaceAsGlobal(AScriptInterface * interface);
     void RegisterCoreInterfaces(bool bCore = true, bool bMath = true);
-    void RegisterInterface(AScriptInterface* interface, const QString& name);
+    void RegisterInterface(AScriptInterface * interface, const QString & name);
     void UpdateGui(); //highlighter, helper etc - call it to take into account all changes introduced by introduction of new interface units!
-
-    void SetShowEvaluationResult(bool flag) {ShowEvalResult = flag;} //if false, window only reports "success", ptherwise eval result is shown
-
-    AScriptWindowTabItem & AddNewTab(int iBook);
-    AScriptWindowTabItem & AddNewTab();
 
     void ReportError(QString error, int line = 0);   //0 - no line is highligted
 
     void WriteToJson();
     void ReadFromJson();
 
-    void SetMainSplitterSizes(QList<int> values);
-
     void onBusyOn();
     void onBusyOff();
 
-    void ConfigureForLightMode(QString* ScriptPtr, const QString &WindowTitle, const QString& Example);
+    void ConfigureForLightMode(QString * ScriptPtr, const QString & WindowTitle, const QString & Example);
     void EnableAcceptReject();
     bool isAccepted() const {return bAccepted;}
-
-    AScriptManager * ScriptManager = nullptr;
-    QStringList functions;
-
-private:
-    void doRegister(AScriptInterface *interface, const QString& name);
-    void formatTab(AScriptWindowTabItem *tab);
 
 public slots:
     void updateJsonTree();
@@ -89,23 +78,60 @@ public slots:
     void ShowText(QString text); //shows html-formatted text in the output box
     void ShowPlainText(QString text); //shows plain text in the output box
     void ClearText(); //clears text in the output box
-    void on_pbRunScript_clicked();
     void onF1pressed(QString text);
     void onLoadRequested(QString NewScript);
 
 private slots:
-    void onCurrentTabChanged(int tab);   //also updates status (modified, filename)
+    //context menus
+    void twBooks_customContextMenuRequested(const QPoint & pos);
     void onRequestTabWidgetContextMenu(QPoint pos);
-    void onScriptTabMoved(int from, int to);
     void onContextMenuRequestedByJsonTree(QPoint pos);
     void onContextMenuRequestedByHelp(QPoint pos);
-    //void onFunctionDoubleClicked(QTreeWidgetItem* item, int column);
 
+    //tabs
+    void onCurrentTabChanged(int tab);   //also updates status (modified, filename)
+    void onScriptTabMoved(int from, int to);
+
+    //books
+    void twBooks_currentChanged(int index);
+    void onBookTabMoved(int from, int to);
+
+    //gui buttons
+    void on_pbRunScript_clicked();
     void on_pbStop_clicked();
     void on_pbLoad_clicked();
     void on_pbSave_clicked();
     void on_pbSaveAs_clicked();
     void on_pbExample_clicked();
+    void on_pbConfig_toggled(bool checked);
+    void on_pbHelp_toggled(bool checked);
+    void on_pbFileName_clicked();
+    void on_pbCloseFindReplaceFrame_clicked();
+    void on_pbFindNext_clicked();
+    void on_pbFindPrevious_clicked();
+    void on_leFind_textChanged(const QString &arg1);
+    void on_pbReplaceOne_clicked();
+    void on_pbReplaceAll_clicked();
+    void on_pbAccept_clicked();
+    void on_pbCancel_clicked();
+
+    // main menu actions
+    void on_actionIncrease_font_size_triggered();
+    void on_actionDecrease_font_size_triggered();
+    void on_actionSelect_font_triggered();
+    void on_actionShow_all_messenger_windows_triggered();
+    void on_actionHide_all_messenger_windows_triggered();
+    void on_actionClear_unused_messenger_windows_triggered();
+    void on_actionClose_all_messenger_windows_triggered();
+    void on_actionShow_Find_Replace_triggered();
+    void on_actionReplace_widget_Ctr_r_triggered();
+    void on_actionAdd_new_tab_triggered();
+    void on_actionRemove_current_tab_triggered();
+    void on_actionRemove_all_tabs_triggered();
+    void on_actionStore_all_tabs_triggered();
+    void on_actionRestore_session_triggered();
+    void on_actionShortcuts_triggered();
+
     void onRequestDraw(TObject* obj, QString options, bool fFocus) {emit RequestDraw(obj, options, fFocus);}    
     void onFunctionClicked(QTreeWidgetItem* item, int column);  //help has to be shown
     void onKeyDoubleClicked(QTreeWidgetItem* item, int column);
@@ -116,51 +142,22 @@ private slots:
     void onJsonTWExpanded(QTreeWidgetItem* item);
     void onJsonTWCollapsed(QTreeWidgetItem* item);
 
-    void on_pbConfig_toggled(bool checked);
-    void on_pbHelp_toggled(bool checked);
-
-    void on_actionIncrease_font_size_triggered();
-    void on_actionDecrease_font_size_triggered();
-    void on_actionSelect_font_triggered();
-
-    void on_actionShow_all_messenger_windows_triggered();
-    void on_actionHide_all_messenger_windows_triggered();
-    void on_actionClear_unused_messenger_windows_triggered();
-    void on_actionClose_all_messenger_windows_triggered();
-
-    void on_pbFileName_clicked();
-    void on_actionAdd_new_tab_triggered();
-    void on_actionRemove_current_tab_triggered();
-    void on_actionRemove_all_tabs_triggered();
-    void on_actionStore_all_tabs_triggered();
-    void on_actionRestore_session_triggered();
-
-    void on_pbCloseFindReplaceFrame_clicked();
-    void on_actionShow_Find_Replace_triggered();
-    void on_pbFindNext_clicked();
-    void on_pbFindPrevious_clicked();
-    void on_leFind_textChanged(const QString &arg1);
-    void on_pbReplaceOne_clicked();
-    void on_pbReplaceAll_clicked();
-    void on_actionReplace_widget_Ctr_r_triggered();
-
-public:
-    enum ScriptLanguageEnum {_JavaScript_ = 0, _PythonScript_ = 1};
-
 private:
+    AScriptManager *    ScriptManager  = nullptr;
+    AScriptEnum         ScriptLanguage = JavaScript;
     bool                bLightMode     = false;  // true -> to imitate former genericscriptwindow. Used for local scripts
-    Ui::AScriptWindow * ui;
+    Ui::AScriptWindow * ui             = nullptr;
     AGlobalSettings &   GlobSet;
-    ScriptLanguageEnum  ScriptLanguage = _JavaScript_;
+    QStringList         functions;
 
     std::vector<AScriptBook> ScriptBooks;       //vector does not require default constructor, while QVector does
     int                 iCurrentBook   = 0;
     QTabWidget *        twBooks        = nullptr;
 
-    AScriptWindowTabItem * StandaloneTab = nullptr;
+    ATabRecord *        StandaloneTab  = nullptr;
 
-    int                 iMarkedBook      = -1;
-    int                 iMarkedTab       = -1;
+    int                 iMarkedBook    = -1;
+    int                 iMarkedTab     = -1;
 
     bool                bAccepted      = false;
     QString *           LightModeScript = nullptr;
@@ -178,26 +175,32 @@ private:
     QLineEdit *         leFindJ        = nullptr;
     QIcon *             RedIcon        = nullptr;
 
-    bool                ShowEvalResult = true;
+    bool                bShowResult    = true;   //if false, window only reports "success", otherwise eval result is shown  !*! need it?
 
-    QSet<QString> ExpandedItemsInJsonTW;
-    QStringList functionList; //functions to populate tooltip helper
+    QSet<QString>       ExpandedItemsInJsonTW;
+    QStringList         functionList; //functions to populate tooltip helper
     QHash<QString, QString> DeprecatedOrRemovedMethods;
-    QStringList ListOfDeprecatedOrRemovedMethods;
-    QStringList ListOfConstants;
+    QStringList         ListOfDeprecatedOrRemovedMethods;
+    QStringList         ListOfConstants;
 
-    void                    addNewBook();
-    QList<AScriptWindowTabItem *> & getScriptTabs() {return ScriptBooks[iCurrentBook].Tabs;}
-    QList<AScriptWindowTabItem *> & getScriptTabs(int iBook) {return ScriptBooks[iBook].Tabs;}
-    AScriptWindowTabItem *  getTab();
-    AScriptWindowTabItem *  getTab(int index) {return ScriptBooks[iCurrentBook].getTab(index);}
-    AScriptWindowTabItem *  getTab(int index, int iBook) {return ScriptBooks[iBook].getTab(index);}
-    QTabWidget *            getTabWidget() {return ScriptBooks[iCurrentBook].getTabWidget();}
-    QTabWidget *            getTabWidget(int iBook) {return (iBook >= 0 && iBook < (int)ScriptBooks.size() ? ScriptBooks[iBook].getTabWidget() : nullptr);}
-    int                     getCurrentTabIndex() {return ScriptBooks[iCurrentBook].iCurrentTab;}
-    void                    setCurrentTabIndex(int index) {ScriptBooks[iCurrentBook].iCurrentTab = index;}
-    void                    setCurrentTabIndex(int index, int iBook) {ScriptBooks[iBook].iCurrentTab = index;}
-    int                     countTabs(int iBook) const {return (iBook >= 0 && iBook < (int)ScriptBooks.size() ? ScriptBooks[iBook].Tabs.size() : 0);}
+    void                addNewBook();
+    void                renameBook(int iBook, const QString & newName);
+    void                renameBookRequested(int iBook);
+    QList<ATabRecord *> & getScriptTabs();          // !*! to pointer
+    QList<ATabRecord *> & getScriptTabs(int iBook); // !*! to pointer
+    ATabRecord *        getTab();
+    ATabRecord *        getTab(int index);
+    ATabRecord *        getTab(int index, int iBook);
+    QTabWidget *        getTabWidget();
+    QTabWidget *        getTabWidget(int iBook);
+    int                 getCurrentTabIndex();
+    void                setCurrentTabIndex(int index);
+    void                setCurrentTabIndex(int index, int iBook);
+    int                 countTabs(int iBook) const;
+    int                 countTabs() const;
+
+    ATabRecord &        addNewTab(int iBook);
+    ATabRecord &        addNewTab();
 
     void fillSubObject(QTreeWidgetItem* parent, const QJsonObject& obj);
     void fillSubArray(QTreeWidgetItem* parent, const QJsonArray& arr);
@@ -223,16 +226,18 @@ private:
     void applyTextFindState();
     void findText(bool bForward);
 
-    void UpdateTab(AScriptWindowTabItem *tab);
+    void UpdateTab(ATabRecord *tab);
+    void doRegister(AScriptInterface *interface, const QString& name);
+    void formatTab(ATabRecord *tab);
+
 protected:
-  virtual void closeEvent(QCloseEvent *e);
+  virtual void closeEvent(QCloseEvent * e);
   virtual bool event(QEvent * e);
 
 signals:
     void WindowShown(QString);
     void WindowHidden(QString);
     void RequestDraw(TObject* obj, QString options, bool fFocus);
-    //just retranslators:
     void onStart();
     void onAbort();
     void onFinish(bool bError);
@@ -249,47 +254,41 @@ public slots:
 private slots:
     void onFindSelected();
     void onReplaceSelected();
-    virtual void onFindFunction();
+    virtual void onFindFunction();              // why virtual? is it the idea to make python / JS subclasses?
     virtual void onFindVariable();
     void onBack();
     void onForward();
-    void on_pbAccept_clicked();
-    void on_pbCancel_clicked();
-    void on_actionShortcuts_triggered();
 
-    //books
-    void twBooks_customContextMenuRequested(const QPoint &pos);
-    void twBooks_currentChanged(int index);
-    void onBookTabMoved(int from, int to);
 };
 
-class AScriptWindowTabItem : public QObject
+
+class ATabRecord : public QObject
 {
     Q_OBJECT
 public:
-    AScriptWindowTabItem(const QStringList& functions, AScriptWindow::ScriptLanguageEnum language);
-    ~AScriptWindowTabItem();
+    ATabRecord(const QStringList & functions, AScriptWindow::AScriptEnum language);
+    ~ATabRecord();
 
-    ATextEdit* TextEdit;
+    ATextEdit *     TextEdit            = nullptr;
 
-    QString FileName;
-    QString TabName;
-    bool    bExplicitlyNamed = false;   //if true save will not auto-rename
+    QString         FileName;
+    QString         TabName;
+    bool            bExplicitlyNamed    = false;   //if true save will not auto-rename
 
-    const QStringList& functions;
+    const QStringList & Functions;
 
-    QCompleter* completer = 0;
-    QStringListModel* completitionModel;
-    AHighlighterScriptWindow* highlighter = 0;
+    QCompleter *    Completer           = nullptr;
+    QStringListModel * CompletitionModel;
+    AHighlighterScriptWindow * Highlighter = nullptr;
 
-    QVector<int> VisitedLineNumber;
-    int indexInVisitedLineNumber = 0;
-    int maxLineNumbers = 20;
+    QVector<int>    VisitedLines;
+    int             IndexVisitedLines   = 0;
+    int             MaxLineNumbers      = 20;
 
     void UpdateHighlight();
 
-    void WriteToJson(QJsonObject &json);
-    void ReadFromJson(QJsonObject &json);
+    void WriteToJson(QJsonObject & json);
+    void ReadFromJson(QJsonObject & json);
 
     bool wasModified() const;
     void setModifiedStatus(bool flag);
@@ -298,7 +297,7 @@ public:
     void goForward();
 
 private slots:
-    void onCustomContextMenuRequested(const QPoint& pos);
+    void onCustomContextMenuRequested(const QPoint & pos);
     void onLineNumberChanged(int lineNumber);
     void onTextChanged();
 

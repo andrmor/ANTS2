@@ -92,11 +92,12 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWid
     ScriptManager->LastOpenDir = &GlobSet.LastOpenDir;
     ScriptManager->ExamplesDir = &GlobSet.ExamplesDir;
 
-    //ShowEvalResult = true;
     ui->pbStop->setVisible(false);
     ui->prbProgress->setValue(0);
     ui->prbProgress->setVisible(false);
     ui->cbActivateTextReplace->setChecked(false);
+    ui->frFindReplace->setVisible(false);
+    ui->frAccept->setVisible(false);
 
     QPixmap rm(16, 16);
     rm.fill(Qt::transparent);
@@ -104,10 +105,6 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWid
     b.setBrush(QBrush(Qt::red));
     b.drawEllipse(0, 0, 14, 14);
     RedIcon = new QIcon(rm);
-
-    splMain = new QSplitter();  // upper + output with buttons
-    splMain->setOrientation(Qt::Vertical);
-    splMain->setChildrenCollapsible(false);
 
     if (bLightMode)
     {
@@ -127,6 +124,55 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWid
         twBooks->setMinimumHeight(25);
         addNewBook();
     }
+
+    createGuiElements();
+
+    //shortcuts
+    QShortcut* Run = new QShortcut(QKeySequence("Ctrl+Return"), this);
+    connect(Run, &QShortcut::activated, this, &AScriptWindow::on_pbRunScript_clicked);
+    QShortcut* Find = new QShortcut(QKeySequence("Ctrl+f"), this);
+    connect(Find, &QShortcut::activated, this, &AScriptWindow::on_actionShow_Find_Replace_triggered);
+    QShortcut* Replace = new QShortcut(QKeySequence("Ctrl+r"), this);
+    connect(Replace, &QShortcut::activated, this, &AScriptWindow::on_actionReplace_widget_Ctr_r_triggered);
+    QShortcut* FindFunction = new QShortcut(QKeySequence("F2"), this);
+    connect(FindFunction, &QShortcut::activated, this, &AScriptWindow::onFindFunction);
+    QShortcut* FindVariable = new QShortcut(QKeySequence("F3"), this);
+    connect(FindVariable, &QShortcut::activated, this, &AScriptWindow::onFindVariable);
+    QShortcut* GoBack = new QShortcut(QKeySequence("Alt+Left"), this);
+    connect(GoBack, &QShortcut::activated, this, &AScriptWindow::onBack);
+    QShortcut* GoForward = new QShortcut(QKeySequence("Alt+Right"), this);
+    connect(GoForward, &QShortcut::activated, this, &AScriptWindow::onForward);
+    QShortcut* DoAlign = new QShortcut(QKeySequence("Ctrl+I"), this);
+    connect(DoAlign, &QShortcut::activated, [&](){getTab()->TextEdit->align();});
+    //QShortcut* DoPaste = new QShortcut(QKeySequence("Ctrl+V"), this);
+    //connect(DoPaste, &QShortcut::activated, [&](){getTab()->TextEdit->paste();});
+
+    if (bLightMode)
+    {
+        ui->pbConfig->setEnabled(false);
+        //getTabWidget()->setStyleSheet("QTabWidget::tab-bar { width: 0; height: 0; margin: 0; padding: 0; border: none; }");
+        ui->pbExample->setText("Example");
+        ui->menuTabs->setEnabled(false);
+        ui->menuView->setEnabled(false);
+    }
+    else ReadFromJson();
+
+
+}
+
+AScriptWindow::~AScriptWindow()
+{
+    clearAllTabs();
+    delete ui;
+    delete RedIcon;
+    delete ScriptManager;
+}
+
+void AScriptWindow::createGuiElements()
+{
+    splMain = new QSplitter();  // upper + output with buttons
+    splMain->setOrientation(Qt::Vertical);
+    splMain->setChildrenCollapsible(false);
 
     QSplitter* hor = new QSplitter(); //all upper widgets are here
     hor->setContentsMargins(0,0,0,0);
@@ -153,17 +199,13 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWid
             trwHelp->setContextMenuPolicy(Qt::CustomContextMenu);
             trwHelp->setColumnCount(1);
             trwHelp->setHeaderLabel("Unit.Function");
-            //QObject::connect(trwHelp, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)), this, SLOT(onFunctionDoubleClicked(QTreeWidgetItem*,int)));
             QObject::connect(trwHelp, SIGNAL(itemClicked(QTreeWidgetItem*,int)), this, SLOT(onFunctionClicked(QTreeWidgetItem*,int)));
             QObject::connect(trwHelp, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(onContextMenuRequestedByHelp(QPoint)));
-            //splHelp->addWidget(trwHelp);
             sh->addWidget(trwHelp);
 
             pteHelp = new QPlainTextEdit();
             pteHelp->setReadOnly(true);
             pteHelp->setMinimumHeight(20);
-            //pteHelp->setMaximumHeight(50);
-            //splHelp->addWidget(pteHelp);
           sh->addWidget(pteHelp);
           QList<int> sizes;
           sizes << 800 << 175;
@@ -172,7 +214,6 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWid
           vb1->addWidget(sh);
 
             leFind = new QLineEdit("Find");
-            //splHelp->addWidget(leFind);
             leFind->setMinimumHeight(20);
             leFind->setMaximumHeight(20);
             connect(leFind, &QLineEdit::textChanged, this, &AScriptWindow::onFindTextChanged);
@@ -215,7 +256,7 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWid
 
     sizes.clear();
     sizes << 500 << 500 << 500;
-    splHelp->setSizes(sizes);    
+    splHelp->setSizes(sizes);
     frJsonBrowser->setVisible(false);
 
     hor->addWidget(splHelp);
@@ -245,48 +286,6 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWid
     sizes.clear();
     sizes << 800 << 70;
     splMain->setSizes(sizes);
-
-    ui->frFindReplace->setVisible(false);
-
-    //shortcuts
-    QShortcut* Run = new QShortcut(QKeySequence("Ctrl+Return"), this);
-    connect(Run, &QShortcut::activated, this, &AScriptWindow::on_pbRunScript_clicked);
-    QShortcut* Find = new QShortcut(QKeySequence("Ctrl+f"), this);
-    connect(Find, &QShortcut::activated, this, &AScriptWindow::on_actionShow_Find_Replace_triggered);
-    QShortcut* Replace = new QShortcut(QKeySequence("Ctrl+r"), this);
-    connect(Replace, &QShortcut::activated, this, &AScriptWindow::on_actionReplace_widget_Ctr_r_triggered);
-    QShortcut* FindFunction = new QShortcut(QKeySequence("F2"), this);
-    connect(FindFunction, &QShortcut::activated, this, &AScriptWindow::onFindFunction);
-    QShortcut* FindVariable = new QShortcut(QKeySequence("F3"), this);
-    connect(FindVariable, &QShortcut::activated, this, &AScriptWindow::onFindVariable);
-    QShortcut* GoBack = new QShortcut(QKeySequence("Alt+Left"), this);
-    connect(GoBack, &QShortcut::activated, this, &AScriptWindow::onBack);
-    QShortcut* GoForward = new QShortcut(QKeySequence("Alt+Right"), this);
-    connect(GoForward, &QShortcut::activated, this, &AScriptWindow::onForward);
-    QShortcut* DoAlign = new QShortcut(QKeySequence("Ctrl+I"), this);
-    connect(DoAlign, &QShortcut::activated, [&](){getTab()->TextEdit->align();});
-    //QShortcut* DoPaste = new QShortcut(QKeySequence("Ctrl+V"), this);
-    //connect(DoPaste, &QShortcut::activated, [&](){getTab()->TextEdit->paste();});
-
-    if (bLightMode)
-    {
-        ui->pbConfig->setEnabled(false);
-        //getTabWidget()->setStyleSheet("QTabWidget::tab-bar { width: 0; height: 0; margin: 0; padding: 0; border: none; }");
-        ui->pbExample->setText("Example");
-        ui->menuTabs->setEnabled(false);
-        ui->menuView->setEnabled(false);
-    }
-    else ReadFromJson();
-
-    ui->frAccept->setVisible(false);
-}
-
-AScriptWindow::~AScriptWindow()
-{
-    clearAllTabs();
-    delete ui;
-    delete RedIcon;
-    delete ScriptManager;
 }
 
 void AScriptWindow::RegisterInterfaceAsGlobal(AScriptInterface *interface)
@@ -515,7 +514,7 @@ void AScriptWindow::ConfigureForLightMode(QString *ScriptPtr, const QString& Win
     }
 }
 
-void AScriptWindow::EnableAcceptReject()
+void AScriptWindow::setAcceptRejectVisible()
 {
     ui->frAccept->setVisible(true);
 
@@ -539,8 +538,8 @@ void AScriptWindow::ShowPlainText(QString text)
 
 void AScriptWindow::ClearText()
 {
-  pteOut->clear();
-  qApp->processEvents();
+    pteOut->clear();
+    qApp->processEvents();
 }
 
 void AScriptWindow::on_pbRunScript_clicked()
@@ -1491,12 +1490,11 @@ QString AScriptWindow::createNewTabName()
     int counter = 1;
     QString res;
     bool fFound;
-
     do
     {
         fFound = false;
         res = QString("new_%1").arg(counter);
-        for (int i=0; i<getTabWidget()->count(); i++)
+        for (int i = 0; i < countTabs(); i++)
             if ( getTabWidget()->tabText(i) == res )
             {
                 fFound = true;
@@ -1505,19 +1503,33 @@ QString AScriptWindow::createNewTabName()
             }
     }
     while (fFound);
+    return res;
+}
 
+QString AScriptWindow::createNewBookName()
+{
+    int counter = 1;
+    QString res;
+    bool fFound;
+    do
+    {
+        fFound = false;
+        res = QString("Book%1").arg(counter);
+        for (const AScriptBook & b : ScriptBooks)
+            if (b.Name == res)
+            {
+                fFound = true;
+                counter++;
+                break;
+            }
+    }
+    while (fFound);
     return res;
 }
 
 void AScriptWindow::removeTab(int tab)
 {
-    int numTabs = getTabWidget()->count();
-    if (numTabs==0) return;
-    if (tab<0 || tab>numTabs-1) return;
-
-    getTabWidget()->removeTab(tab);
-    delete getScriptTabs()[tab];
-    getScriptTabs().removeAt(tab);
+    ScriptBooks[iCurrentBook].removeTab(tab);
 
     if (countTabs() == 0) addNewTab();
     updateFileStatusIndication();
@@ -1672,7 +1684,7 @@ void AScriptWindow::moveTab(int iBook)
     if (iMarkedTab == -1) return;
 
     ATabRecord * tab = getTab(iMarkedTab, iMarkedBook);
-    ScriptBooks[iMarkedBook].removeTab(iMarkedTab);
+    ScriptBooks[iMarkedBook].removeTabNoCleanup(iMarkedTab);
     if (countTabs(iMarkedBook) == 0) addNewTab(iMarkedBook);
 
     ScriptBooks[iBook].Tabs.append(tab);
@@ -2230,20 +2242,35 @@ QTabWidget *AScriptBook::getTabWidget()
     return TabWidget;
 }
 
+void AScriptBook::removeTabNoCleanup(int index)
+{
+    if (index < 0 || index >= Tabs.size()) return;
+
+    if (TabWidget)
+    {
+        if (index < TabWidget->count()) TabWidget->removeTab(index);
+        else qWarning() << "Bad TabWidget index";
+    }
+    Tabs.removeAt(index);
+    if (iCurrentTab >= Tabs.size()) iCurrentTab = Tabs.size() - 1;
+}
+
 void AScriptBook::removeTab(int index)
 {
-    if (index >= 0 && index < Tabs.size())
+    if (index < 0 || index >= Tabs.size()) return;
+
+    if (index < TabWidget->count())
     {
-        if (TabWidget)
-        {
-            if (index < TabWidget->count()) TabWidget->removeTab(index);
-            else qWarning() << "Bad TabWidget index";
-        }
-
+        TabWidget->removeTab(index);
+        delete Tabs[index];
         Tabs.removeAt(index);
-
-        if (iCurrentTab >= Tabs.size()) iCurrentTab = Tabs.size() - 1;
     }
+}
+
+void AScriptBook::removeAllTabs()
+{
+    for (int i = Tabs.size() - 1; i > -1; i--)
+        removeTab(i);
 }
 
 // ----------------------
@@ -2256,13 +2283,37 @@ void AScriptWindow::addNewBook()
     ScriptBooks.resize(iNewBook + 1);
     twBooks->addTab(getTabWidget(iNewBook), "");
 
-    renameBook(iNewBook, QString("Book%1").arg(iNewBook+1));
+    renameBook(iNewBook, createNewBookName());
 
     QTabWidget * twScriptTabs = getTabWidget(iNewBook);
 
     connect(twScriptTabs, &QTabWidget::currentChanged, this, &AScriptWindow::onCurrentTabChanged);
     connect(twScriptTabs, &QTabWidget::customContextMenuRequested, this, &AScriptWindow::onRequestTabWidgetContextMenu);
     connect(twScriptTabs->tabBar(), &QTabBar::tabMoved, this, &AScriptWindow::onScriptTabMoved);
+}
+
+void AScriptWindow::removeBook(int iBook)
+{
+    if (iBook < 0 || iBook >= (int)ScriptBooks.size()) return;
+    if (ScriptBooks.size() == 1)
+    {
+        message("Cannot remove the last book", this);
+        return;
+    }
+    QString t = QString("Close book %1?\nUnsaved data will be lost").arg(ScriptBooks[iBook].Name);
+    if ( !confirm(t, this) ) return;
+
+    twBooks->removeTab(iBook);
+    ScriptBooks[iBook].removeAllTabs();
+    delete ScriptBooks[iBook].TabWidget;
+    ScriptBooks.erase(ScriptBooks.begin() + iBook);
+
+    if (iCurrentBook >= (int)ScriptBooks.size()) iCurrentBook = (int)ScriptBooks.size() - 1;
+
+    if (countTabs() == 0) addNewTab();
+    updateFileStatusIndication();
+
+    iMarkedTab = -1;
 }
 
 void AScriptWindow::renameBook(int iBook, const QString & newName)
@@ -2353,12 +2404,14 @@ void AScriptWindow::twBooks_customContextMenuRequested(const QPoint & pos)
 
     int iBook = twBooks->tabBar()->tabAt(pos);
 
-    QAction * rename = menu.addAction("Rename book"); rename->setEnabled(iBook != -1);
-    menu.addSeparator();
     QAction * add = menu.addAction("Add new book");
     menu.addSeparator();
-    QAction * copy = menu.addAction("Copy tab here"); copy->setEnabled(iMarkedTab != -1 && iBook != -1);
-    QAction * move = menu.addAction("Move tab here"); move->setEnabled(iMarkedTab != -1 && iBook != -1);
+    QAction * rename = menu.addAction("Rename");             rename->setEnabled(iBook != -1);
+    menu.addSeparator();
+    QAction * remove = menu.addAction("Close");        remove->setEnabled(iBook != -1);
+    menu.addSeparator();
+    QAction * copy = menu.addAction("Copy marked tab here"); copy->setEnabled(iMarkedTab != -1 && iBook != -1);
+    QAction * move = menu.addAction("Move marked tab here"); move->setEnabled(iMarkedTab != -1 && iBook != -1);
 
     QAction* selectedItem = menu.exec(twBooks->mapToGlobal(pos));
     if (!selectedItem) return;
@@ -2367,6 +2420,7 @@ void AScriptWindow::twBooks_customContextMenuRequested(const QPoint & pos)
     else if (selectedItem == add)    addNewBook();
     else if (selectedItem == copy)   copyTab(iBook);
     else if (selectedItem == move)   moveTab(iBook);
+    else if (selectedItem == remove) removeBook(iBook);
 }
 
 void AScriptWindow::twBooks_currentChanged(int index)

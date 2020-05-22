@@ -41,7 +41,9 @@ public:
     ATabRecord *        getCurrentTab();
     ATabRecord *        getTab(int index);
     QTabWidget *        getTabWidget();
+    void                removeTabNoCleanup(int index); //used by move
     void                removeTab(int index);
+    void                removeAllTabs();
 };
 
 class AScriptWindow : public AGuiWindow
@@ -68,18 +70,17 @@ public:
     void onBusyOff();
 
     void ConfigureForLightMode(QString * ScriptPtr, const QString & WindowTitle, const QString & Example);
-    void EnableAcceptReject();
+    void setAcceptRejectVisible();
     bool isAccepted() const {return bAccepted;}
 
 public slots:
     void updateJsonTree();
-
     void HighlightErrorLine(int line);
     void ShowText(QString text); //shows html-formatted text in the output box
     void ShowPlainText(QString text); //shows plain text in the output box
     void ClearText(); //clears text in the output box
-    void onF1pressed(QString text);
     void onLoadRequested(QString NewScript);
+    void onProgressChanged(int percent);
 
 private slots:
     //context menus
@@ -138,9 +139,22 @@ private slots:
     void onKeyClicked(QTreeWidgetItem* item, int column);
     void onFindTextChanged(const QString &arg1);
     void onFindTextJsonChanged(const QString &arg1);
-
+    void onF1pressed(QString text);
     void onJsonTWExpanded(QTreeWidgetItem* item);
     void onJsonTWCollapsed(QTreeWidgetItem* item);
+
+    void onFindSelected();
+    void onReplaceSelected();
+    void onFindFunction();
+    void onFindVariable();
+    void onBack();
+    void onForward();
+
+    void receivedOnStart() {emit onStart();}
+    void receivedOnAbort();
+    void receivedOnSuccess(QString eval);
+    void onDefaulFontSizeChanged(int size);
+    void updateFileStatusIndication();
 
 private:
     AScriptManager *    ScriptManager  = nullptr;
@@ -183,7 +197,9 @@ private:
     QStringList         ListOfDeprecatedOrRemovedMethods;
     QStringList         ListOfConstants;
 
+    void                doRegister(AScriptInterface *interface, const QString& name);
     void                addNewBook();
+    void                removeBook(int iBook);
     void                renameBook(int iBook, const QString & newName);
     void                renameBookRequested(int iBook);
     QList<ATabRecord *> & getScriptTabs();          // !*! to pointer
@@ -198,9 +214,19 @@ private:
     void                setCurrentTabIndex(int index, int iBook);
     int                 countTabs(int iBook) const;
     int                 countTabs() const;
-
     ATabRecord &        addNewTab(int iBook);
     ATabRecord &        addNewTab();
+    void                askRemoveTab(int tab);
+    void                removeTab(int tab);
+    void                clearAllTabs();  // ***
+    QString             createNewTabName();
+    QString             createNewBookName();
+    void                renameTab(int tab);
+    void                markTab(int tab);
+    void                copyTab(int iBook);
+    void                moveTab(int iBook);
+    void                UpdateTab(ATabRecord *tab);
+    void                formatTab(ATabRecord *tab);
 
     void fillSubObject(QTreeWidgetItem* parent, const QJsonObject& obj);
     void fillSubArray(QTreeWidgetItem* parent, const QJsonArray& arr);
@@ -214,25 +240,13 @@ private:
     void ReadFromJson(QJsonObject &json);
     void WriteToJson(QJsonObject &json);
 
-    void askRemoveTab(int tab);
-    void removeTab(int tab);
-    void clearAllTabs();
-    QString createNewTabName();
-    void renameTab(int tab);
-    void markTab(int tab);
-    void copyTab(int iBook);
-    void moveTab(int iBook);
-
     void applyTextFindState();
     void findText(bool bForward);
-
-    void UpdateTab(ATabRecord *tab);
-    void doRegister(AScriptInterface *interface, const QString& name);
-    void formatTab(ATabRecord *tab);
+    void createGuiElements();
 
 protected:
-  virtual void closeEvent(QCloseEvent * e);
-  virtual bool event(QEvent * e);
+    void closeEvent(QCloseEvent * e) override;
+    bool event(QEvent * e) override;
 
 signals:
     void WindowShown(QString);
@@ -242,22 +256,6 @@ signals:
     void onAbort();
     void onFinish(bool bError);
     void success(QString eval);
-
-public slots:
-    void receivedOnStart() {emit onStart();}
-    void receivedOnAbort();
-    void receivedOnSuccess(QString eval);
-    void onDefaulFontSizeChanged(int size);
-    void onProgressChanged(int percent);
-    void updateFileStatusIndication();
-
-private slots:
-    void onFindSelected();
-    void onReplaceSelected();
-    virtual void onFindFunction();              // why virtual? is it the idea to make python / JS subclasses?
-    virtual void onFindVariable();
-    void onBack();
-    void onForward();
 
 };
 

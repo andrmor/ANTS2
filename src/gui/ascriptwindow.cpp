@@ -157,15 +157,29 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWid
     }
     else ReadFromJson();
 
-
 }
 
 AScriptWindow::~AScriptWindow()
 {
-    clearAllTabs();
+    bShutDown = true;
+
     delete ui;
     delete RedIcon;
     delete ScriptManager;
+
+    if (bLightMode)
+    {
+        delete StandaloneTab;
+        StandaloneTab = nullptr;
+    }
+    else
+    {
+        for (int i = (int)ScriptBooks.size() - 1; i > -1; i--)
+        {
+            for (ATabRecord * r : ScriptBooks[i].Tabs) delete r;
+            ScriptBooks[i].Tabs.clear();
+        }
+    }
 }
 
 void AScriptWindow::createGuiElements()
@@ -1345,6 +1359,8 @@ void ATabRecord::setModifiedStatus(bool flag)
 
 void AScriptWindow::onCurrentTabChanged(int tab)
 {
+    if (bShutDown) return;
+
     //qDebug() << "Current changed!" << tab;
     if (tab < 0) return; //also called by window destructor
     setCurrentTabIndex(tab);
@@ -1535,24 +1551,6 @@ void AScriptWindow::removeTab(int tab)
     iMarkedTab = -1;
 }
 
-void AScriptWindow::clearAllTabs()
-{
-    if (bLightMode)
-    {
-        delete StandaloneTab;
-        StandaloneTab = nullptr;
-    }
-    else
-    {
-        getTabWidget()->clear();
-        for (int i=0; i<getScriptTabs().size(); i++)
-            delete getScriptTabs()[i];
-        getScriptTabs().clear();
-    }
-
-    iMarkedTab = -1;
-}
-
 void AScriptWindow::on_pbConfig_toggled(bool checked)
 {
     frJsonBrowser->setVisible(checked);
@@ -1694,21 +1692,6 @@ void AScriptWindow::moveTab(int iBook)
 void AScriptWindow::on_actionRemove_current_tab_triggered()
 {
     askRemoveTab(getCurrentTabIndex());
-}
-
-void AScriptWindow::on_actionRemove_all_tabs_triggered()
-{
-    QMessageBox m(this);
-    m.setIcon(QMessageBox::Warning);
-    m.setText("Close ALL tabs?");
-    m.setStandardButtons(QMessageBox::Yes| QMessageBox::Cancel);
-    m.setDefaultButton(QMessageBox::Cancel);
-    int ret = m.exec();
-    if (ret == QMessageBox::Yes)
-    {
-        clearAllTabs();
-        addNewTab();
-    }
 }
 
 void AScriptWindow::on_actionStore_all_tabs_triggered()
@@ -2239,19 +2222,22 @@ void AScriptBook::writeToJson(QJsonObject & json) const
     json["ScriptTabs"] = ar;
 }
 
-ATabRecord *AScriptBook::getCurrentTab()
+ATabRecord * AScriptBook::getCurrentTab()
 {
+    if (iCurrentTab == -1) return nullptr;
     return Tabs[iCurrentTab];
 }
 
 ATabRecord *AScriptBook::getTab(int index)
 {
-    return ( (index >= 0 && index < Tabs.size()) ? Tabs[index] : nullptr );
+    if (index < 0 || index >= Tabs.size()) return nullptr;
+    return Tabs[index];
 }
 
 const ATabRecord *AScriptBook::getTab(int index) const
 {
-    return ( (index >= 0 && index < Tabs.size()) ? Tabs[index] : nullptr );
+    if (index < 0 || index >= Tabs.size()) return nullptr;
+    return Tabs[index];
 }
 
 QTabWidget *AScriptBook::getTabWidget()
@@ -2309,7 +2295,7 @@ void AScriptWindow::addNewBook()
     connect(twScriptTabs->tabBar(), &QTabBar::tabMoved, this, &AScriptWindow::onScriptTabMoved);
 }
 
-void AScriptWindow::removeBook(int iBook)
+void AScriptWindow::removeBook(int iBook, bool bConfirm)
 {
     if (iBook < 0 || iBook >= (int)ScriptBooks.size()) return;
     if (ScriptBooks.size() == 1)
@@ -2317,8 +2303,12 @@ void AScriptWindow::removeBook(int iBook)
         message("Cannot remove the last book", this);
         return;
     }
-    QString t = QString("Close book %1?\nUnsaved data will be lost").arg(ScriptBooks[iBook].Name);
-    if ( !confirm(t, this) ) return;
+
+    if (bConfirm)
+    {
+        QString t = QString("Close book %1?\nUnsaved data will be lost").arg(ScriptBooks[iBook].Name);
+        if ( !confirm(t, this) ) return;
+    }
 
     twBooks->removeTab(iBook);
     ScriptBooks[iBook].removeAllTabs();
@@ -2373,11 +2363,10 @@ void AScriptWindow::loadBook(int iBook, const QString & fileName)
         QJsonObject js = ar[i].toObject();
         ATabRecord & tab = addNewTab(iBook);
         tab.ReadFromJson(js);
-        if (tab.TabName.isEmpty())
-        {
-            tab.TabName = createNewTabName();
-            getTabWidget(iBook)->setTabText(countTabs(iBook) - 1, tab.TabName);
-        }
+
+        if (tab.TabName.isEmpty()) tab.TabName = createNewTabName();
+        getTabWidget(iBook)->setTabText(countTabs(iBook) - 1, tab.TabName);
+
         if (!tab.FileName.isEmpty())
         {
             QString ScriptInFile;
@@ -2396,7 +2385,7 @@ void AScriptWindow::loadBook(int iBook, const QString & fileName)
     if (iCur < 0 || iCur >= countTabs(iBook)) iCur = 0;
     ScriptBooks[iBook].iCurrentTab = iCur;
 
-    QString Name = createNewBookName();
+    QString Name = ScriptBooks[iBook].Name;
     parseJson(json, "Name", Name);
     renameBook(iBook, Name);
 
@@ -2445,7 +2434,7 @@ QList<ATabRecord *> &AScriptWindow::getScriptTabs(int iBook)
 ATabRecord * AScriptWindow::getTab()
 {
     if (bLightMode) return StandaloneTab;
-    else            return ScriptBooks[iCurrentBook].getCurrentTab();
+    else           return ScriptBooks[iCurrentBook].getCurrentTab();
 }
 
 ATabRecord *AScriptWindow::getTab(int index)
@@ -2581,4 +2570,25 @@ void AScriptWindow::on_actionClose_book_triggered()
 void AScriptWindow::on_actionSave_book_triggered()
 {
     saveBook(iCurrentBook);
+}
+
+void AScriptWindow::on_actionSave_all_triggered()
+{
+
+}
+
+void AScriptWindow::on_actionload_session_triggered()
+{
+
+}
+
+void AScriptWindow::on_actionClose_all_books_triggered()
+{
+    QString t = "Close all books?\nUnsaved data will be lost";
+    if ( !confirm(t, this) ) return;
+
+    for (int i = (int)ScriptBooks.size() - 1; i > 0; i--) removeBook(i, false);
+    ScriptBooks[0].removeAllTabs();
+
+    addNewTab();
 }

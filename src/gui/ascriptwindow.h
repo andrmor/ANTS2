@@ -38,7 +38,7 @@ public:
     QString             Name;
     QList<ATabRecord *> Tabs;
     QTabWidget *        TabWidget   = nullptr; // will be owned by the QTabItemWidget
-    int                 iCurrentTab = 0;
+    int                 iCurrentTab = -1;
 
     void                writeToJson(QJsonObject & json) const;
     //bool              readFromJson(const QJsonObject & json);  // too heavily relies on AScriptWindow, cannot be implemented here without major refactoring
@@ -91,9 +91,10 @@ private slots:
     void onRequestTabWidgetContextMenu(QPoint pos);
     void onContextMenuRequestedByJsonTree(QPoint pos);
     void onContextMenuRequestedByHelp(QPoint pos);
+    void showContextMenuForJsonTree(QTreeWidgetItem *item, QPoint pos);
 
     //tabs
-    void onCurrentTabChanged(int tab);   //also updates status (modified, filename)
+    void onCurrentTabChanged(int tab);
     void onScriptTabMoved(int from, int to);
 
     //books
@@ -120,6 +121,9 @@ private slots:
     void on_pbCancel_clicked();
 
     // main menu actions
+    void on_actionSave_all_triggered();
+    void on_actionload_session_triggered();
+    void on_actionClose_all_books_triggered();
     void on_actionAdd_new_book_triggered();
     void on_actionRename_book_triggered();
     void on_actionLoad_book_triggered();
@@ -136,7 +140,6 @@ private slots:
     void on_actionReplace_widget_Ctr_r_triggered();
     void on_actionAdd_new_tab_triggered();
     void on_actionRemove_current_tab_triggered();
-    void on_actionRemove_all_tabs_triggered();
     void on_actionStore_all_tabs_triggered();
     void on_actionRestore_session_triggered();
     void on_actionShortcuts_triggered();
@@ -200,6 +203,7 @@ private:
     QIcon *             RedIcon        = nullptr;
 
     bool                bShowResult    = true;   //if false, window only reports "success", otherwise eval result is shown  !*! need it?
+    bool                bShutDown      = false;
 
     QSet<QString>       ExpandedItemsInJsonTW;
     QStringList         functionList; //functions to populate tooltip helper
@@ -209,7 +213,7 @@ private:
 
     void                doRegister(AScriptInterface *interface, const QString& name);
     void                addNewBook();
-    void                removeBook(int iBook);
+    void                removeBook(int iBook, bool bConfirm = true);
     void                saveBook(int iBook);
     void                loadBook(int iBook, const QString & fileName);
     void                renameBook(int iBook, const QString & newName);
@@ -232,7 +236,6 @@ private:
     ATabRecord &        addNewTab();
     void                askRemoveTab(int tab);
     void                removeTab(int tab);
-    void                clearAllTabs();  // ***
     QString             createNewTabName();
     QString             createNewBookName();
     void                renameTab(int tab);
@@ -242,34 +245,33 @@ private:
     void                UpdateTab(ATabRecord *tab);
     void                formatTab(ATabRecord *tab);
 
-    void fillSubObject(QTreeWidgetItem* parent, const QJsonObject& obj);
-    void fillSubArray(QTreeWidgetItem* parent, const QJsonArray& arr);
-    QString getDesc(const QJsonValue &ref);
-    void fillHelper(QObject* obj, QString module);  //fill help TreeWidget according to the data in the obj
-    QString getKeyPath(QTreeWidgetItem *item);
-    void showContextMenuForJsonTree(QTreeWidgetItem *item, QPoint pos);
-    QStringList getListOfMethods(QObject *obj, QString ObjName, bool fWithArguments = false);
-    void appendDeprecatedOrRemovedMethods(const AScriptInterface *obj, const QString& name);
+    void                fillSubObject(QTreeWidgetItem* parent, const QJsonObject& obj);
+    void                fillSubArray(QTreeWidgetItem* parent, const QJsonArray& arr);
+    QString             getDesc(const QJsonValue &ref);
+    void                fillHelper(QObject* obj, QString module);  //fill help TreeWidget according to the data in the obj
+    QString             getKeyPath(QTreeWidgetItem *item);
+    QStringList         getListOfMethods(QObject *obj, QString ObjName, bool fWithArguments = false);
+    void                appendDeprecatedOrRemovedMethods(const AScriptInterface *obj, const QString& name);
 
     void ReadFromJson(QJsonObject &json);
     void WriteToJson(QJsonObject &json);
 
-    void applyTextFindState();
-    void findText(bool bForward);
-    void createGuiElements();
+    void                applyTextFindState();
+    void                findText(bool bForward);
+    void                createGuiElements();
 
 protected:
-    void closeEvent(QCloseEvent * e) override;
-    bool event(QEvent * e) override;
+    void                closeEvent(QCloseEvent * e) override;
+    bool                event(QEvent * e) override;
 
 signals:
-    void WindowShown(QString);
-    void WindowHidden(QString);
-    void RequestDraw(TObject* obj, QString options, bool fFocus);
-    void onStart();
-    void onAbort();
-    void onFinish(bool bError);
-    void success(QString eval);
+    void                WindowShown(QString);
+    void                WindowHidden(QString);
+    void                RequestDraw(TObject* obj, QString options, bool fFocus);
+    void                onStart();
+    void                onAbort();
+    void                onFinish(bool bError);
+    void                success(QString eval);
 
 };
 

@@ -79,10 +79,10 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWid
         this->setWindowFlags( windowFlags );
     }
 
-    QObject::connect(ScriptManager, &AScriptManager::showMessage, this, &AScriptWindow::ShowText);
-    QObject::connect(ScriptManager, &AScriptManager::showPlainTextMessage, this, &AScriptWindow::ShowPlainText);
-    QObject::connect(ScriptManager, &AScriptManager::requestHighlightErrorLine, this, &AScriptWindow::HighlightErrorLine);
-    QObject::connect(ScriptManager, &AScriptManager::clearText, this, &AScriptWindow::ClearText);
+    QObject::connect(ScriptManager, &AScriptManager::showMessage, this, &AScriptWindow::showHtmlText);
+    QObject::connect(ScriptManager, &AScriptManager::showPlainTextMessage, this, &AScriptWindow::showPlainText);
+    QObject::connect(ScriptManager, &AScriptManager::requestHighlightErrorLine, this, &AScriptWindow::highlightErrorLine);
+    QObject::connect(ScriptManager, &AScriptManager::clearText, this, &AScriptWindow::clearOutputText);
     //retranslators:
     QObject::connect(ScriptManager, &AScriptManager::onStart, this, &AScriptWindow::receivedOnStart);
     QObject::connect(ScriptManager, &AScriptManager::onAbort, this, &AScriptWindow::receivedOnAbort);
@@ -355,10 +355,10 @@ void AScriptWindow::ReportError(QString error, int line)
 {
    error = "<font color=\"red\">Error:</font><br>" + error;
    pteOut->appendHtml( error );
-   HighlightErrorLine(line);
+   highlightErrorLine(line);
 }
 
-void AScriptWindow::HighlightErrorLine(int line)
+void AScriptWindow::highlightErrorLine(int line)
 {
   if (line < 0) return;
 
@@ -524,19 +524,19 @@ void AScriptWindow::setAcceptRejectVisible()
     ui->pbRunScript->setFont(f);
 }
 
-void AScriptWindow::ShowText(QString text)
+void AScriptWindow::showHtmlText(QString text)
 {
     pteOut->appendHtml(text);
     qApp->processEvents();
 }
 
-void AScriptWindow::ShowPlainText(QString text)
+void AScriptWindow::showPlainText(QString text)
 {
     pteOut->appendPlainText(text);
     qApp->processEvents();
 }
 
-void AScriptWindow::ClearText()
+void AScriptWindow::clearOutputText()
 {
     pteOut->clear();
     qApp->processEvents();
@@ -596,7 +596,7 @@ void AScriptWindow::on_pbRunScript_clicked()
        if (!ScriptManager->isEvalAborted())
        {
             if (bShowResult && result != "undefined" && !result.isEmpty())
-                ShowText("Script evaluation result:\n" + result);
+                showPlainText("Script evaluation result:\n" + result);
        }
        else
        {
@@ -651,7 +651,7 @@ void AScriptWindow::on_pbStop_clicked()
   if (ScriptManager->isEngineRunning())
     {
       qDebug() << "Stop button pressed!";
-      ShowText("Sending stop signal...");
+      showPlainText("Sending stop signal...");
       ScriptManager->AbortEvaluation("Aborted by user!");
       qApp->processEvents();
     }
@@ -693,7 +693,7 @@ void AScriptWindow::onLoadRequested(QString NewScript)
     tab->TextEdit->clear();
     tab->TextEdit->appendPlainText(NewScript);
 
-    //for examples (triggered on signal from example explorer -> do not register file name!)
+    //for example load (triggered on signal from example explorer): do not register file name!
     tab->FileName.clear();
     tab->TabName = createNewTabName();
     getTabWidget()->setTabText(getCurrentTabIndex(), getTab()->TabName);

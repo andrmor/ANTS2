@@ -630,7 +630,7 @@ void DetectorAddOnsWindow::AddObjScriptSuccess()
 
 void DetectorAddOnsWindow::ReportScriptError(QString ErrorMessage)
 {
-    MW->GenScriptWindow->ClearText();
+    MW->GenScriptWindow->clearOutputText();
     MW->GenScriptWindow->ReportError(ErrorMessage, -1);
 }
 

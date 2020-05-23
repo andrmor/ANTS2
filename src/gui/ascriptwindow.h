@@ -74,15 +74,14 @@ public:
     void onBusyOff();
 
     void ConfigureForLightMode(QString * ScriptPtr, const QString & WindowTitle, const QString & Example);
+    void updateJsonTree();
     void setAcceptRejectVisible();
     bool isAccepted() const {return bAccepted;}
 
 public slots:
-    void updateJsonTree();
-    void HighlightErrorLine(int line);
-    void ShowText(QString text); //shows html-formatted text in the output box
-    void ShowPlainText(QString text); //shows plain text in the output box
-    void ClearText(); //clears text in the output box
+    void clearOutputText();
+    void showHtmlText(QString text);
+    void showPlainText(QString text);
     void onLoadRequested(QString NewScript);
     void onProgressChanged(int percent);
 
@@ -151,6 +150,7 @@ private slots:
     void onF1pressed(QString text);
     void onJsonTWExpanded(QTreeWidgetItem* item);
     void onJsonTWCollapsed(QTreeWidgetItem* item);
+    void onDefaulFontSizeChanged(int size);
 
     void onFindSelected();
     void onReplaceSelected();
@@ -162,9 +162,9 @@ private slots:
     void receivedOnStart() {emit onStart();}
     void receivedOnAbort();
     void receivedOnSuccess(QString eval);
-    void onDefaulFontSizeChanged(int size);
-    void updateFileStatusIndication();
 
+    void highlightErrorLine(int line);
+    void updateFileStatusIndication();
 
 private:
     AScriptManager *    ScriptManager  = nullptr;

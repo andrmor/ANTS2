@@ -276,10 +276,10 @@ void MainWindow::PMscriptSuccess()
 {
   QJsonArray &arr = PMscriptInterface->arr;
   if (arr.isEmpty())
-    {
-      GenScriptWindow->ShowText("No PMs were added!");
+  {
+      GenScriptWindow->showPlainText("No PMs were added!");
       return;
-    }
+  }
   int ul = ui->cobUpperLowerPMs->currentIndex();
   APmArrayData *PMarr = &Detector->PMarrays[ul];
   int reg = PMarr->Regularity;
@@ -326,7 +326,7 @@ void MainWindow::PMscriptSuccess()
                //GenScriptWindow->ShowText("Cannot assign phi or theta angles - change to fully custom array geometry!");
                //return;
                qDebug() << "Changing regularity to fully custom";
-               GenScriptWindow->ShowText("Changed array regularity to fully custom!");
+               GenScriptWindow->showPlainText("Changed array regularity to fully custom!");
                PMarr->Regularity = 2;
                reg = 2;
              }

@@ -28,6 +28,8 @@ namespace Ui {
 class AScriptWindow;
 }
 
+enum class AScriptLanguageEnum {JavaScript = 0, Python = 1};
+
 class AScriptBook
 {
 public:
@@ -38,8 +40,12 @@ public:
     QTabWidget *        TabWidget   = nullptr; // will be owned by the QTabItemWidget
     int                 iCurrentTab = 0;
 
+    void                writeToJson(QJsonObject & json) const;
+    //bool              readFromJson(const QJsonObject & json);  // too heavily relies on AScriptWindow, cannot be implemented here without major refactoring
+
     ATabRecord *        getCurrentTab();
     ATabRecord *        getTab(int index);
+    const ATabRecord *  getTab(int index) const;
     QTabWidget *        getTabWidget();
     void                removeTabNoCleanup(int index); //used by move
     void                removeTab(int index);
@@ -53,8 +59,6 @@ class AScriptWindow : public AGuiWindow
 public:
     explicit AScriptWindow(AScriptManager *ScriptManager, bool LightMode, QWidget *parent);
     ~AScriptWindow();
-
-    enum AScriptEnum {JavaScript = 0, Python = 1};
 
     void RegisterInterfaceAsGlobal(AScriptInterface * interface);
     void RegisterCoreInterfaces(bool bCore = true, bool bMath = true);
@@ -117,6 +121,11 @@ private slots:
     void on_pbCancel_clicked();
 
     // main menu actions
+    void on_actionAdd_new_book_triggered();
+    void on_actionRename_book_triggered();
+    void on_actionLoad_book_triggered();
+    void on_actionClose_book_triggered();
+    void on_actionSave_book_triggered();
     void on_actionIncrease_font_size_triggered();
     void on_actionDecrease_font_size_triggered();
     void on_actionSelect_font_triggered();
@@ -156,13 +165,14 @@ private slots:
     void onDefaulFontSizeChanged(int size);
     void updateFileStatusIndication();
 
+
 private:
     AScriptManager *    ScriptManager  = nullptr;
-    AScriptEnum         ScriptLanguage = JavaScript;
+    AScriptLanguageEnum ScriptLanguage = AScriptLanguageEnum::JavaScript;
     bool                bLightMode     = false;  // true -> to imitate former genericscriptwindow. Used for local scripts
     Ui::AScriptWindow * ui             = nullptr;
     AGlobalSettings &   GlobSet;
-    QStringList         functions;
+    QStringList         Functions;
 
     std::vector<AScriptBook> ScriptBooks;       //vector does not require default constructor, while QVector does
     int                 iCurrentBook   = 0;
@@ -200,13 +210,17 @@ private:
     void                doRegister(AScriptInterface *interface, const QString& name);
     void                addNewBook();
     void                removeBook(int iBook);
+    void                saveBook(int iBook);
+    void                loadBook(int iBook, const QString & fileName);
     void                renameBook(int iBook, const QString & newName);
     void                renameBookRequested(int iBook);
+    bool                isUntouchedBook(int iBook) const;
     QList<ATabRecord *> & getScriptTabs();          // !*! to pointer
     QList<ATabRecord *> & getScriptTabs(int iBook); // !*! to pointer
     ATabRecord *        getTab();
     ATabRecord *        getTab(int index);
     ATabRecord *        getTab(int index, int iBook);
+    const ATabRecord *  getTab(int index, int iBook) const;
     QTabWidget *        getTabWidget();
     QTabWidget *        getTabWidget(int iBook);
     int                 getCurrentTabIndex();
@@ -259,12 +273,11 @@ signals:
 
 };
 
-
 class ATabRecord : public QObject
 {
     Q_OBJECT
 public:
-    ATabRecord(const QStringList & functions, AScriptWindow::AScriptEnum language);
+    ATabRecord(const QStringList & functions, AScriptLanguageEnum language);
     ~ATabRecord();
 
     ATextEdit *     TextEdit            = nullptr;
@@ -285,8 +298,8 @@ public:
 
     void UpdateHighlight();
 
-    void WriteToJson(QJsonObject & json);
-    void ReadFromJson(QJsonObject & json);
+    void WriteToJson(QJsonObject & json) const;
+    void ReadFromJson(const QJsonObject &json);
 
     bool wasModified() const;
     void setModifiedStatus(bool flag);

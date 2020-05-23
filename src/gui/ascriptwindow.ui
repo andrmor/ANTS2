@@ -620,6 +620,21 @@
     </property>
     <addaction name="actionShortcuts"/>
    </widget>
+   <widget class="QMenu" name="menuBooks">
+    <property name="title">
+     <string>Books</string>
+    </property>
+    <addaction name="actionAdd_new_book"/>
+    <addaction name="actionLoad_book"/>
+    <addaction name="separator"/>
+    <addaction name="actionRename_book"/>
+    <addaction name="separator"/>
+    <addaction name="actionClose_book"/>
+    <addaction name="separator"/>
+    <addaction name="actionSave_book"/>
+    <addaction name="separator"/>
+   </widget>
+   <addaction name="menuBooks"/>
    <addaction name="menuTabs"/>
    <addaction name="menuFind"/>
    <addaction name="menuFont"/>
@@ -702,6 +717,35 @@
   <action name="actionShortcuts">
    <property name="text">
     <string>Shortcuts</string>
+   </property>
+  </action>
+  <action name="actionAdd_new_book">
+   <property name="text">
+    <string>Add new book</string>
+   </property>
+  </action>
+  <action name="actionRename_book">
+   <property name="text">
+    <string>Rename book</string>
+   </property>
+  </action>
+  <action name="actionLoad_book">
+   <property name="text">
+    <string>Load (creates new book)</string>
+   </property>
+   <property name="toolTip">
+    <string>Load a saved book
+Can also be used to load a tab session created before books were implemented</string>
+   </property>
+  </action>
+  <action name="actionClose_book">
+   <property name="text">
+    <string>Close book</string>
+   </property>
+  </action>
+  <action name="actionSave_book">
+   <property name="text">
+    <string>Save book</string>
    </property>
   </action>
  </widget>

@@ -352,11 +352,12 @@ void AScriptWindow::doRegister(AScriptInterface *interface, const QString &name)
 
 void AScriptWindow::UpdateGui()
 {
-    if (bLightMode) UpdateTab(StandaloneTab);
+    if (bLightMode) updateTab(StandaloneTab);
     else
     {
-        for (int i = 0; i < countTabs(); i++)
-            UpdateTab(getTab(i));
+        for (AScriptBook & book : ScriptBooks)
+            for (ATabRecord * tab : book.Tabs)
+                updateTab(tab);
     }
 
     if (bLightMode && trwHelp->topLevelItemCount() > 0)
@@ -1434,7 +1435,7 @@ void AScriptWindow::onScriptTabMoved(int from, int to)
     iMarkedTab = -1;
 }
 
-void AScriptWindow::UpdateTab(ATabRecord* tab)
+void AScriptWindow::updateTab(ATabRecord* tab)
 {
     tab->Highlighter->setHighlighterRules(Functions, ListOfDeprecatedOrRemovedMethods, ListOfConstants);
     tab->UpdateHighlight();
@@ -1466,7 +1467,7 @@ ATabRecord & AScriptWindow::addNewTab()
 
 void AScriptWindow::formatTab(ATabRecord * tab)
 {
-    UpdateTab(tab);
+    updateTab(tab);
 
     if (GlobSet.DefaultFontFamily_ScriptWindow.isEmpty())
          tab->TextEdit->SetFontSize(GlobSet.DefaultFontSize_ScriptWindow);
@@ -2486,11 +2487,6 @@ void AScriptWindow::on_actionAdd_new_book_triggered()
     addNewBook();
 }
 
-void AScriptWindow::on_actionRename_book_triggered()
-{
-    renameBookRequested(iCurrentBook);
-}
-
 void AScriptWindow::on_actionLoad_book_triggered()
 {
     if ( !isUntouchedBook(iCurrentBook) )
@@ -2552,8 +2548,6 @@ void AScriptWindow::on_actionload_session_triggered()
     bool bOK = LoadJsonFromFile(json, fileName);
     if (!bOK) message("Cannot open file: "+fileName, this);
     else readFromJson(json);
-
-    updateFileStatusIndication();
 }
 
 void AScriptWindow::on_actionClose_all_books_triggered()

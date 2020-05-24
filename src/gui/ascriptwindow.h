@@ -63,9 +63,8 @@ public:
     void RegisterInterfaceAsGlobal(AScriptInterface * interface);
     void RegisterCoreInterfaces(bool bCore = true, bool bMath = true);
     void RegisterInterface(AScriptInterface * interface, const QString & name);
-    void UpdateGui(); //highlighter, helper etc - call it to take into account all changes introduced by introduction of new interface units!
 
-    void ReportError(QString error, int line = 0);   //0 - no line is highligted
+    void UpdateGui(); //highlighter, helper etc - call it to take into account all changes introduced by introduction of new interface units!
 
     void WriteToJson();
     void ReadFromJson();
@@ -74,98 +73,10 @@ public:
     void onBusyOff();
 
     void ConfigureForLightMode(QString * ScriptPtr, const QString & WindowTitle, const QString & Example);
-    void updateJsonTree();
     void setAcceptRejectVisible();
+    void updateJsonTree();
+    void ReportError(QString error, int line = 0);   //0 - no line is highligted
     bool isAccepted() const {return bAccepted;}
-
-public slots:
-    void clearOutputText();
-    void showHtmlText(QString text);
-    void showPlainText(QString text);
-    void onLoadRequested(QString NewScript);
-    void onProgressChanged(int percent);
-
-private slots:
-    //context menus
-    void twBooks_customContextMenuRequested(const QPoint & pos);
-    void onRequestTabWidgetContextMenu(QPoint pos);
-    void onContextMenuRequestedByJsonTree(QPoint pos);
-    void onContextMenuRequestedByHelp(QPoint pos);
-    void showContextMenuForJsonTree(QTreeWidgetItem *item, QPoint pos);
-
-    //tabs
-    void onCurrentTabChanged(int tab);
-    void onScriptTabMoved(int from, int to);
-
-    //books
-    void twBooks_currentChanged(int index);
-    void onBookTabMoved(int from, int to);
-
-    //gui buttons
-    void on_pbRunScript_clicked();
-    void on_pbStop_clicked();
-    void on_pbLoad_clicked();
-    void on_pbSave_clicked();
-    void on_pbSaveAs_clicked();
-    void on_pbExample_clicked();
-    void on_pbConfig_toggled(bool checked);
-    void on_pbHelp_toggled(bool checked);
-    void on_pbFileName_clicked();
-    void on_pbCloseFindReplaceFrame_clicked();
-    void on_pbFindNext_clicked();
-    void on_pbFindPrevious_clicked();
-    void on_leFind_textChanged(const QString &arg1);
-    void on_pbReplaceOne_clicked();
-    void on_pbReplaceAll_clicked();
-    void on_pbAccept_clicked();
-    void on_pbCancel_clicked();
-
-    // main menu actions
-    void on_actionSave_all_triggered();
-    void on_actionload_session_triggered();
-    void on_actionClose_all_books_triggered();
-    void on_actionAdd_new_book_triggered();
-    void on_actionRename_book_triggered();
-    void on_actionLoad_book_triggered();
-    void on_actionClose_book_triggered();
-    void on_actionSave_book_triggered();
-    void on_actionIncrease_font_size_triggered();
-    void on_actionDecrease_font_size_triggered();
-    void on_actionSelect_font_triggered();
-    void on_actionShow_all_messenger_windows_triggered();
-    void on_actionHide_all_messenger_windows_triggered();
-    void on_actionClear_unused_messenger_windows_triggered();
-    void on_actionClose_all_messenger_windows_triggered();
-    void on_actionShow_Find_Replace_triggered();
-    void on_actionReplace_widget_Ctr_r_triggered();
-    void on_actionAdd_new_tab_triggered();
-    void on_actionRemove_current_tab_triggered();
-    void on_actionShortcuts_triggered();
-
-    void onRequestDraw(TObject* obj, QString options, bool fFocus) {emit RequestDraw(obj, options, fFocus);}    
-    void onFunctionClicked(QTreeWidgetItem* item, int column);  //help has to be shown
-    void onKeyDoubleClicked(QTreeWidgetItem* item, int column);
-    void onKeyClicked(QTreeWidgetItem* item, int column);
-    void onFindTextChanged(const QString &arg1);
-    void onFindTextJsonChanged(const QString &arg1);
-    void onF1pressed(QString text);
-    void onJsonTWExpanded(QTreeWidgetItem* item);
-    void onJsonTWCollapsed(QTreeWidgetItem* item);
-    void onDefaulFontSizeChanged(int size);
-
-    void onFindSelected();
-    void onReplaceSelected();
-    void onFindFunction();
-    void onFindVariable();
-    void onBack();
-    void onForward();
-
-    void receivedOnStart() {emit onStart();}
-    void receivedOnAbort();
-    void receivedOnSuccess(QString eval);
-
-    void highlightErrorLine(int line);
-    void updateFileStatusIndication();
 
 private:
     AScriptManager *    ScriptManager  = nullptr;
@@ -209,69 +120,154 @@ private:
     QStringList         ListOfDeprecatedOrRemovedMethods;
     QStringList         ListOfConstants;
 
-    void                doRegister(AScriptInterface *interface, const QString& name);
-    void                addNewBook();
-    void                removeBook(int iBook, bool bConfirm = true);
-    void                removeAllBooksExceptFirst();
-    void                saveBook(int iBook);
-    void                loadBook(int iBook, const QString & fileName);
-    void                loadBook(int iBook, const QJsonObject & json);
-    void                renameBook(int iBook, const QString & newName);
-    void                renameBookRequested(int iBook);
-    bool                isUntouchedBook(int iBook) const;
-    QList<ATabRecord *> & getScriptTabs();          // !*! to pointer
-    QList<ATabRecord *> & getScriptTabs(int iBook); // !*! to pointer
-    ATabRecord *        getTab();
-    ATabRecord *        getTab(int index);
-    ATabRecord *        getTab(int index, int iBook);
-    const ATabRecord *  getTab(int index, int iBook) const;
-    QTabWidget *        getTabWidget();
-    QTabWidget *        getTabWidget(int iBook);
-    int                 getCurrentTabIndex();
-    void                setCurrentTabIndex(int index);
-    void                setCurrentTabIndex(int index, int iBook);
-    int                 countTabs(int iBook) const;
-    int                 countTabs() const;
-    ATabRecord &        addNewTab(int iBook);
-    ATabRecord &        addNewTab();
-    void                askRemoveTab(int tab);
-    void                removeTab(int tab);
-    QString             createNewTabName();
-    QString             createNewBookName();
-    void                renameTab(int tab);
-    void                markTab(int tab);
-    void                copyTab(int iBook);
-    void                moveTab(int iBook);
-    void                UpdateTab(ATabRecord *tab);
-    void                formatTab(ATabRecord *tab);
+    void readFromJson(QJsonObject &json);
+    void writeToJson(QJsonObject & json);
 
-    void                fillSubObject(QTreeWidgetItem* parent, const QJsonObject& obj);
-    void                fillSubArray(QTreeWidgetItem* parent, const QJsonArray& arr);
-    QString             getDesc(const QJsonValue &ref);
-    void                fillHelper(QObject* obj, QString module);  //fill help TreeWidget according to the data in the obj
-    QString             getKeyPath(QTreeWidgetItem *item);
-    QStringList         getListOfMethods(QObject *obj, QString ObjName, bool fWithArguments = false);
-    void                appendDeprecatedOrRemovedMethods(const AScriptInterface *obj, const QString& name);
+    void createGuiElements();
+    void doRegister(AScriptInterface *interface, const QString& name);
+    void findText(bool bForward);
+    void applyTextFindState();
+    void fillSubObject(QTreeWidgetItem* parent, const QJsonObject& obj);
+    void fillSubArray(QTreeWidgetItem* parent, const QJsonArray& arr);
+    QString getDesc(const QJsonValue &ref);
+    void fillHelper(QObject* obj, QString module);  //fill help TreeWidget according to the data in the obj
+    QString getKeyPath(QTreeWidgetItem *item);
+    QStringList getListOfMethods(QObject *obj, QString ObjName, bool fWithArguments = false);
+    void appendDeprecatedOrRemovedMethods(const AScriptInterface *obj, const QString& name);
 
-    void                readFromJson(QJsonObject &json);
-    void                writeToJson(QJsonObject & json);
+    void addNewBook();
+    void removeBook(int iBook, bool bConfirm = true);
+    void removeAllBooksExceptFirst();
+    void saveBook(int iBook);
+    void loadBook(int iBook, const QString & fileName);
+    void loadBook(int iBook, const QJsonObject & json);
+    void renameBook(int iBook, const QString & newName);
+    void renameBookRequested(int iBook);
+    bool isUntouchedBook(int iBook) const;
+    QString createNewBookName();
 
-    void                applyTextFindState();
-    void                findText(bool bForward);
-    void                createGuiElements();
+    QList<ATabRecord *> & getScriptTabs();
+    QList<ATabRecord *> & getScriptTabs(int iBook);
+    ATabRecord * getTab();
+    ATabRecord * getTab(int index);
+    ATabRecord * getTab(int index, int iBook);
+    const ATabRecord * getTab(int index, int iBook) const;
+    QTabWidget * getTabWidget();
+    QTabWidget * getTabWidget(int iBook);
+    int  getCurrentTabIndex();
+    void setCurrentTabIndex(int index);
+    void setCurrentTabIndex(int index, int iBook);
+    int  countTabs(int iBook) const;
+    int  countTabs() const;
+    ATabRecord & addNewTab(int iBook);
+    ATabRecord & addNewTab();
+    void askRemoveTab(int tab);
+    void removeTab(int tab);
+    QString createNewTabName();
+    void renameTab(int tab);
+    void markTab(int tab);
+    void copyTab(int iBook);
+    void moveTab(int iBook);
+    void updateTab(ATabRecord *tab);
+    void formatTab(ATabRecord *tab);
+
+public slots:
+    void clearOutputText();
+    void showHtmlText(QString text);
+    void showPlainText(QString text);
+    void onLoadRequested(QString NewScript);
+    void onProgressChanged(int percent);
+
+private slots:
+    //context menus
+    void twBooks_customContextMenuRequested(const QPoint & pos);
+    void onRequestTabWidgetContextMenu(QPoint pos);
+    void onContextMenuRequestedByJsonTree(QPoint pos);
+    void onContextMenuRequestedByHelp(QPoint pos);
+    void showContextMenuForJsonTree(QTreeWidgetItem *item, QPoint pos);
+
+    void highlightErrorLine(int line);
+    void updateFileStatusIndication();
+
+    void onCurrentTabChanged(int tab);
+    void onScriptTabMoved(int from, int to);
+
+    void twBooks_currentChanged(int index);
+    void onBookTabMoved(int from, int to);
+
+    //gui buttons
+    void on_pbRunScript_clicked();
+    void on_pbStop_clicked();
+    void on_pbLoad_clicked();
+    void on_pbSave_clicked();
+    void on_pbSaveAs_clicked();
+    void on_pbExample_clicked();
+    void on_pbConfig_toggled(bool checked);
+    void on_pbHelp_toggled(bool checked);
+    void on_pbFileName_clicked();
+    void on_pbCloseFindReplaceFrame_clicked();
+    void on_pbFindNext_clicked();
+    void on_pbFindPrevious_clicked();
+    void on_leFind_textChanged(const QString &arg1);
+    void on_pbReplaceOne_clicked();
+    void on_pbReplaceAll_clicked();
+    void on_pbAccept_clicked();
+    void on_pbCancel_clicked();
+
+    // main menu actions
+    void on_actionSave_all_triggered();
+    void on_actionload_session_triggered();
+    void on_actionClose_all_books_triggered();
+    void on_actionAdd_new_book_triggered();
+    void on_actionLoad_book_triggered();
+    void on_actionClose_book_triggered();
+    void on_actionSave_book_triggered();
+    void on_actionIncrease_font_size_triggered();
+    void on_actionDecrease_font_size_triggered();
+    void on_actionSelect_font_triggered();
+    void on_actionShow_all_messenger_windows_triggered();
+    void on_actionHide_all_messenger_windows_triggered();
+    void on_actionClear_unused_messenger_windows_triggered();
+    void on_actionClose_all_messenger_windows_triggered();
+    void on_actionShow_Find_Replace_triggered();
+    void on_actionReplace_widget_Ctr_r_triggered();
+    void on_actionAdd_new_tab_triggered();
+    void on_actionRemove_current_tab_triggered();
+    void on_actionShortcuts_triggered();
+
+    void onRequestDraw(TObject* obj, QString options, bool fFocus) {emit RequestDraw(obj, options, fFocus);}    
+    void onFunctionClicked(QTreeWidgetItem* item, int column);  //help has to be shown
+    void onKeyDoubleClicked(QTreeWidgetItem* item, int column);
+    void onKeyClicked(QTreeWidgetItem* item, int column);
+    void onFindTextChanged(const QString &arg1);
+    void onFindTextJsonChanged(const QString &arg1);
+    void onF1pressed(QString text);
+    void onJsonTWExpanded(QTreeWidgetItem* item);
+    void onJsonTWCollapsed(QTreeWidgetItem* item);
+    void onDefaulFontSizeChanged(int size);
+    void onFindSelected();
+    void onReplaceSelected();
+    void onFindFunction();
+    void onFindVariable();
+    void onBack();
+    void onForward();
+
+    void receivedOnStart() {emit onStart();}
+    void receivedOnAbort();
+    void receivedOnSuccess(QString eval);
 
 protected:
-    void                closeEvent(QCloseEvent * e) override;
-    bool                event(QEvent * e) override;
+    void closeEvent(QCloseEvent * e) override;
+    bool event(QEvent * e) override;
 
 signals:
-    void                WindowShown(QString);
-    void                WindowHidden(QString);
-    void                RequestDraw(TObject* obj, QString options, bool fFocus);
-    void                onStart();
-    void                onAbort();
-    void                onFinish(bool bError);
-    void                success(QString eval);
+    void WindowShown(QString);
+    void WindowHidden(QString);
+    void RequestDraw(TObject* obj, QString options, bool fFocus);
+    void onStart();
+    void onAbort();
+    void onFinish(bool bError);
+    void success(QString eval);
 
 };
 

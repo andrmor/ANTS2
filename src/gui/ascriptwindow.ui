@@ -624,11 +624,9 @@
     <addaction name="actionAdd_new_book"/>
     <addaction name="actionLoad_book"/>
     <addaction name="separator"/>
-    <addaction name="actionRename_book"/>
+    <addaction name="actionSave_book"/>
     <addaction name="separator"/>
     <addaction name="actionClose_book"/>
-    <addaction name="separator"/>
-    <addaction name="actionSave_book"/>
     <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuAllBooks">
@@ -724,7 +722,7 @@
   </action>
   <action name="actionLoad_book">
    <property name="text">
-    <string>Load</string>
+    <string>Load book</string>
    </property>
    <property name="toolTip">
     <string>Load a saved book

@@ -602,8 +602,6 @@
     <addaction name="separator"/>
     <addaction name="actionRemove_current_tab"/>
     <addaction name="separator"/>
-    <addaction name="actionStore_all_tabs"/>
-    <addaction name="actionRestore_session"/>
     <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuFind">
@@ -684,16 +682,6 @@
   <action name="actionClose_all_messenger_windows">
    <property name="text">
     <string>Close all messenger windows</string>
-   </property>
-  </action>
-  <action name="actionStore_all_tabs">
-   <property name="text">
-    <string>Store all tabs</string>
-   </property>
-  </action>
-  <action name="actionRestore_session">
-   <property name="text">
-    <string>Restore session</string>
    </property>
   </action>
   <action name="actionAdd_new_tab">

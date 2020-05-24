@@ -355,9 +355,8 @@ void AScriptWindow::UpdateGui()
     if (bLightMode) UpdateTab(StandaloneTab);
     else
     {
-        QList<ATabRecord *> ScriptTabs = getScriptTabs();
-        for (int i = 0; i < ScriptTabs.size(); i++)
-            UpdateTab(ScriptTabs[i]);
+        for (int i = 0; i < countTabs(); i++)
+            UpdateTab(getTab(i));
     }
 
     if (bLightMode && trwHelp->topLevelItemCount() > 0)
@@ -375,15 +374,17 @@ void AScriptWindow::ReportError(QString error, int line)
 void AScriptWindow::highlightErrorLine(int line)
 {
   if (line < 0) return;
-
-  //highlight line with error
   if (line > 1) line--;
-  QTextBlock block = getTab()->TextEdit->document()->findBlockByLineNumber(line);
+
+  ATextEdit * te = getTab()->TextEdit;
+  if (!te) return;
+
+  QTextBlock block = te->document()->findBlockByLineNumber(line);
   int loc = block.position();
-  QTextCursor cur = getTab()->TextEdit->textCursor();
+  QTextCursor cur = te->textCursor();
   cur.setPosition(loc);
-  getTab()->TextEdit->setTextCursor(cur);
-  getTab()->TextEdit->ensureCursorVisible();
+  te->setTextCursor(cur);
+  te->ensureCursorVisible();
 
   int length = block.text().split("\n").at(0).length();
   cur.movePosition(cur.Right, cur.KeepAnchor, length);
@@ -396,93 +397,86 @@ void AScriptWindow::highlightErrorLine(int line)
 
   QList<QTextEdit::ExtraSelection> esList;
   esList << es;
-  getTab()->TextEdit->setExtraSelections(esList);
+  te->setExtraSelections(esList);
 }
 
 void AScriptWindow::WriteToJson()
 {
-    /*
     if (bLightMode) return;
 
-    QJsonObject* ScriptWindowJsonPtr = 0;
-    if ( ScriptLanguage == _JavaScript_) ScriptWindowJsonPtr = &GlobSet.ScriptWindowJson;
-    else if ( ScriptLanguage == _PythonScript_) ScriptWindowJsonPtr = &GlobSet.PythonScriptWindowJson;
+    QJsonObject * ScriptWindowJsonPtr = nullptr;
+    if      (ScriptLanguage == AScriptLanguageEnum::JavaScript) ScriptWindowJsonPtr = &GlobSet.ScriptWindowJson;
+    else if (ScriptLanguage == AScriptLanguageEnum::Python)     ScriptWindowJsonPtr = &GlobSet.PythonScriptWindowJson;
     if (!ScriptWindowJsonPtr) return;
 
-    QJsonObject& json = *ScriptWindowJsonPtr;
-    WriteToJson(json);
-    */
+    writeToJson(*ScriptWindowJsonPtr);
 }
 
-void AScriptWindow::WriteToJson(QJsonObject& json)
+void AScriptWindow::writeToJson(QJsonObject & json)
 {
-    /*
     json = QJsonObject(); //clear
 
     QJsonArray ar;
-    for (int i=0; i<ScriptTabs.size(); i++)
+    for (const AScriptBook & b : ScriptBooks)
     {
         QJsonObject js;
-        ScriptTabs.at(i)->WriteToJson(js);
+        b.writeToJson(js);
         ar << js;
     }
-    json["ScriptTabs"] = ar;
-    json["CurrentTab"] = CurrentTab;
+    json["ScriptBooks"] = ar;
+    json["CurrentBook"] = iCurrentBook;
 
     QJsonArray sar;
-    for (int& i : splMain->sizes()) sar << i;
+    for (int & i : splMain->sizes()) sar << i;
     json["Sizes"] = sar;
-    */
 }
 
 void AScriptWindow::ReadFromJson()
 {
-    /*
     if (bLightMode) return;
 
-    QJsonObject* ScriptWindowJsonPtr = 0;
-    if ( ScriptLanguage == _JavaScript_) ScriptWindowJsonPtr = &GlobSet.ScriptWindowJson;
-    else if ( ScriptLanguage == _PythonScript_) ScriptWindowJsonPtr = &GlobSet.PythonScriptWindowJson;
+    QJsonObject * ScriptWindowJsonPtr = nullptr;
+    if      (ScriptLanguage == AScriptLanguageEnum::JavaScript) ScriptWindowJsonPtr = &GlobSet.ScriptWindowJson;
+    else if (ScriptLanguage == AScriptLanguageEnum::Python)     ScriptWindowJsonPtr = &GlobSet.PythonScriptWindowJson;
     if (!ScriptWindowJsonPtr) return;
 
-    QJsonObject& json = *ScriptWindowJsonPtr;
-    ReadFromJson(json);
-    */
+    readFromJson(*ScriptWindowJsonPtr);
 }
 
-void AScriptWindow::ReadFromJson(QJsonObject& json)
+void AScriptWindow::removeAllBooksExceptFirst()
 {
-    /*
+    for (int i = (int)ScriptBooks.size() - 1; i > 0; i--) removeBook(i, false);
+    ScriptBooks[0].removeAllTabs();
+}
+
+void AScriptWindow::readFromJson(QJsonObject & json)
+{
     if (json.isEmpty()) return;
-    if (!json.contains("ScriptTabs")) return;
 
-    clearAllTabs();
-    QJsonArray ar = json["ScriptTabs"].toArray();
-    for (int i=0; i<ar.size(); i++)
+    removeAllBooksExceptFirst();
+
+    if (json.contains("ScriptBooks")) //new system
     {
-        QJsonObject js = ar[i].toObject();
-        AddNewTab();
-        AScriptWindowTabItem* st = ScriptTabs.last();
-        st->ReadFromJson(js);
-        if (st->TabName.isEmpty()) st->TabName = createNewTabName();
-        if (!st->FileName.isEmpty())
+        QJsonArray ar = json["ScriptBooks"].toArray();
+        for (int i = 0; i < ar.size(); i++)
         {
-           QString ScriptInFile;
-           if ( LoadTextFromFile(st->FileName, ScriptInFile) )
-           {
-               QPlainTextEdit te;
-               te.appendPlainText(ScriptInFile);
-               st->setModifiedStatus( !(te.document()->toPlainText() == st->TextEdit->document()->toPlainText()) );
-           }
+            if (i != 0) addNewBook();
+            QJsonObject js = ar[i].toObject();
+            loadBook((int)ScriptBooks.size() - 1, js);
         }
-        twScriptTabs->setTabText(twScriptTabs->count()-1, st->TabName);
 
+        int iCur = 0;
+        parseJson(json, "CurrentBook", iCur);
+        if (iCur < 0 || iCur >= (int)ScriptBooks.size()) iCur = 0;
+        iCurrentBook = iCur;
     }
-    if (ScriptTabs.isEmpty()) AddNewTab();
+    else if (json.contains("ScriptTabs")) //old system, compatibility
+    {
+        loadBook(0, json);
+        iCurrentBook = 0;
+    }
+    twBooks->setCurrentIndex(iCurrentBook);
 
-    CurrentTab = json["CurrentTab"].toInt();
-    if (CurrentTab<0 || CurrentTab>ScriptTabs.size()-1) CurrentTab = 0;
-    twScriptTabs->setCurrentIndex(CurrentTab);
     updateFileStatusIndication();
 
     if (json.contains("Sizes"))
@@ -495,15 +489,7 @@ void AScriptWindow::ReadFromJson(QJsonObject& json)
             splMain->setSizes(sizes);
         }
     }
-    */
 }
-
-/*
-void AScriptWindow::SetMainSplitterSizes(QList<int> values)
-{
-    splMain->setSizes(values);
-}
-*/
 
 void AScriptWindow::onBusyOn()
 {
@@ -1466,7 +1452,7 @@ ATabRecord & AScriptWindow::addNewTab(int iBook)
     getScriptTabs(iBook).append(tab);
     getTabWidget(iBook)->addTab(tab->TextEdit, tab->TabName);
 
-    int index = getScriptTabs(iBook).size() - 1;
+    int index = countTabs(iBook) - 1;
     setCurrentTabIndex(index, iBook);
     getTabWidget(iBook)->setCurrentIndex(index);
 
@@ -1692,50 +1678,6 @@ void AScriptWindow::moveTab(int iBook)
 void AScriptWindow::on_actionRemove_current_tab_triggered()
 {
     askRemoveTab(getCurrentTabIndex());
-}
-
-void AScriptWindow::on_actionStore_all_tabs_triggered()
-{
-    if (countTabs() == 0) return;
-    QString starter = GlobSet.LastOpenDir;
-    QString fileName = QFileDialog::getSaveFileName(this,"Save session", starter, "Json files (*.json);;All files (*.*)");
-    if (fileName.isEmpty()) return;
-
-    QFileInfo fileInfo(fileName);
-    if(fileInfo.suffix().isEmpty()) fileName += ".json";
-
-    QJsonObject json;
-    WriteToJson(json);
-    bool bOK = SaveJsonToFile(json, fileName);
-    if (!bOK) message("Failed to save json to file: "+fileName, this);
-}
-
-void AScriptWindow::on_actionRestore_session_triggered()
-{
-    if (countTabs() == 1 && getScriptTabs().at(0)->TextEdit->document()->isEmpty())
-    {
-        //empty - do not ask confirmation
-    }
-    else
-    {
-        QMessageBox m(this);
-        m.setText("Confirmation.");
-        m.setIcon(QMessageBox::Warning);
-        m.setText("This will close all tabs and unsaved data will be lost.\nContinue?");
-        m.setStandardButtons(QMessageBox::Yes| QMessageBox::Cancel);
-        m.setDefaultButton(QMessageBox::Cancel);
-        int ret = m.exec();
-        if (ret != QMessageBox::Yes) return;
-    }
-
-    QString starter = GlobSet.LastOpenDir;
-    QString fileName = QFileDialog::getOpenFileName(this, "Load script", starter, "Json files (*.json);;All files (*.*)");
-    if (fileName.isEmpty()) return;
-
-    QJsonObject json;
-    bool bOK = LoadJsonFromFile(json, fileName);
-    if (!bOK) message("Cannot open file: "+fileName, this);
-    else ReadFromJson(json);
 }
 
 void AScriptWindow::on_pbCloseFindReplaceFrame_clicked()
@@ -2356,6 +2298,11 @@ void AScriptWindow::loadBook(int iBook, const QString & fileName)
         return;
     }
 
+    loadBook(iBook, json);
+}
+
+void AScriptWindow::loadBook(int iBook, const QJsonObject & json)
+{
     QJsonArray ar = json["ScriptTabs"].toArray();
     ScriptBooks[iBook].removeAllTabs();
     for (int i=0; i<ar.size(); i++)
@@ -2388,8 +2335,6 @@ void AScriptWindow::loadBook(int iBook, const QString & fileName)
     QString Name = ScriptBooks[iBook].Name;
     parseJson(json, "Name", Name);
     renameBook(iBook, Name);
-
-    updateFileStatusIndication();
 }
 
 void AScriptWindow::renameBook(int iBook, const QString & newName)
@@ -2560,6 +2505,8 @@ void AScriptWindow::on_actionLoad_book_triggered()
     if (fileName.isEmpty()) return;
 
     loadBook(iCurrentBook, fileName);
+
+    updateFileStatusIndication();
 }
 
 void AScriptWindow::on_actionClose_book_triggered()
@@ -2574,21 +2521,45 @@ void AScriptWindow::on_actionSave_book_triggered()
 
 void AScriptWindow::on_actionSave_all_triggered()
 {
+    if (countTabs() == 0) return;
+    QString starter = GlobSet.LastOpenDir;
+    QString fileName = QFileDialog::getSaveFileName(this, "Save script books to a file", starter, "json files (*.json);;All files (*.*)");
+    if (fileName.isEmpty()) return;
 
+    QFileInfo fileInfo(fileName);
+    if(fileInfo.suffix().isEmpty()) fileName += ".json";
+
+    QJsonObject json;
+    writeToJson(json);
+    bool bOK = SaveJsonToFile(json, fileName);
+    if (!bOK) message("Failed to save json to file: "+fileName, this);
 }
 
 void AScriptWindow::on_actionload_session_triggered()
 {
+    bool bSingleUntouched = (ScriptBooks.size() == 1 && isUntouchedBook(0));
+    if (!bSingleUntouched)
+    {
+        bool ok = confirm("All books will be closed and unsaved data will be lost.\nContinue?", this);
+        if (!ok) return;
+    }
 
+    QString starter = GlobSet.LastOpenDir;
+    QString fileName = QFileDialog::getOpenFileName(this, "Load script books", starter, "json files (*.json);;All files (*.*)");
+    if (fileName.isEmpty()) return;
+
+    QJsonObject json;
+    bool bOK = LoadJsonFromFile(json, fileName);
+    if (!bOK) message("Cannot open file: "+fileName, this);
+    else readFromJson(json);
+
+    updateFileStatusIndication();
 }
 
 void AScriptWindow::on_actionClose_all_books_triggered()
 {
     QString t = "Close all books?\nUnsaved data will be lost";
     if ( !confirm(t, this) ) return;
-
-    for (int i = (int)ScriptBooks.size() - 1; i > 0; i--) removeBook(i, false);
-    ScriptBooks[0].removeAllTabs();
-
+    removeAllBooksExceptFirst();
     addNewTab();
 }

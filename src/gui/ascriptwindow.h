@@ -140,8 +140,6 @@ private slots:
     void on_actionReplace_widget_Ctr_r_triggered();
     void on_actionAdd_new_tab_triggered();
     void on_actionRemove_current_tab_triggered();
-    void on_actionStore_all_tabs_triggered();
-    void on_actionRestore_session_triggered();
     void on_actionShortcuts_triggered();
 
     void onRequestDraw(TObject* obj, QString options, bool fFocus) {emit RequestDraw(obj, options, fFocus);}    
@@ -214,8 +212,10 @@ private:
     void                doRegister(AScriptInterface *interface, const QString& name);
     void                addNewBook();
     void                removeBook(int iBook, bool bConfirm = true);
+    void                removeAllBooksExceptFirst();
     void                saveBook(int iBook);
     void                loadBook(int iBook, const QString & fileName);
+    void                loadBook(int iBook, const QJsonObject & json);
     void                renameBook(int iBook, const QString & newName);
     void                renameBookRequested(int iBook);
     bool                isUntouchedBook(int iBook) const;
@@ -253,8 +253,8 @@ private:
     QStringList         getListOfMethods(QObject *obj, QString ObjName, bool fWithArguments = false);
     void                appendDeprecatedOrRemovedMethods(const AScriptInterface *obj, const QString& name);
 
-    void ReadFromJson(QJsonObject &json);
-    void WriteToJson(QJsonObject &json);
+    void                readFromJson(QJsonObject &json);
+    void                writeToJson(QJsonObject & json);
 
     void                applyTextFindState();
     void                findText(bool bForward);

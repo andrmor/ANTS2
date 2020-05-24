@@ -163,7 +163,7 @@ private:
     ATabRecord & addNewTab();
     void askRemoveTab(int tab);
     void removeTab(int tab);
-    QString createNewTabName();
+    QString createNewTabName(int iBook);
     void renameTab(int tab);
     void markTab(int tab);
     void copyTab(int iBook);

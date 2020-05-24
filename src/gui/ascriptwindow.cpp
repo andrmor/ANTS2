@@ -24,7 +24,7 @@
 #include "afiletools.h"
 
 #include <QScriptEngine>
-#include <QTextStream>
+//#include <QTextStream>
 #include <QSplitter>
 #include <QFileDialog>
 #include <QDebug>
@@ -47,7 +47,6 @@
 #include <QMessageBox>
 #include <QDesktopServices>
 #include <QInputDialog>
-//#include <QTextDocumentFragment>
 #include <QHeaderView>
 
 AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWidget *parent) :
@@ -363,6 +362,8 @@ void AScriptWindow::UpdateGui()
     if (bLightMode && trwHelp->topLevelItemCount() > 0)
         trwHelp->expandItem(trwHelp->itemAt(0,0));
     else trwHelp->collapseAll();
+
+    //updateFileStatusIndication();
 }
 
 void AScriptWindow::ReportError(QString error, int line)
@@ -459,11 +460,11 @@ void AScriptWindow::readFromJson(QJsonObject & json)
     if (json.contains("ScriptBooks")) //new system
     {
         QJsonArray ar = json["ScriptBooks"].toArray();
-        for (int i = 0; i < ar.size(); i++)
+        for (int iBook = 0; iBook < ar.size(); iBook++)
         {
-            if (i != 0) addNewBook();
-            QJsonObject js = ar[i].toObject();
-            loadBook((int)ScriptBooks.size() - 1, js);
+            if (iBook != 0) addNewBook();
+            QJsonObject js = ar[iBook].toObject();
+            loadBook(iBook, js);
         }
 
         int iCur = 0;
@@ -609,16 +610,6 @@ void AScriptWindow::on_pbRunScript_clicked()
    ScriptManager->collectGarbage();
 }
 
-//void AScriptWindow::abortEvaluation(QString message)
-//{
-////  if (fAborted || !ScriptManager->fEngineIsRunning) return;
-////  fAborted = true;
-////  emit onAbort();
-////  ScriptManager->AbortEvaluation();
-////  message = "<font color=\"red\">"+ message +"</font><br>";
-////  ShowText(message);
-//}
-
 void AScriptWindow::onF1pressed(QString text)
 {
   //qDebug() << "F1 requested for:"<<text;
@@ -660,30 +651,25 @@ void AScriptWindow::on_pbStop_clicked()
 
 void AScriptWindow::on_pbLoad_clicked()
 {
-    /*
   QString starter = (GlobSet.LibScripts.isEmpty()) ? GlobSet.LastOpenDir : GlobSet.LibScripts;
-  QString fileName = QFileDialog::getOpenFileName(this, "Load script", starter, "Script files (*.txt *.js);;All files (*.*)"); //""
+  QString fileName = QFileDialog::getOpenFileName(this, "Load script", starter, "Text files (*.txt);;All files (*.*)");
   if (fileName.isEmpty()) return;
 
-  QFile file(fileName);
-  if(!file.open(QIODevice::ReadOnly | QFile::Text))
-    {
+  QString Script;
+  bool ok = LoadTextFromFile(fileName, Script);
+  if (!ok)
+  {
       message("Could not open: " + fileName, this);
       return;
-    }
-  QTextStream in(&file);
-  QString Script = in.readAll();
+  }
   if (bLightMode && LightModeScript) *LightModeScript = Script;
-  file.close();
 
   onLoadRequested(Script);
 
   getTab()->FileName = fileName;
-
   getTab()->TabName = QFileInfo(fileName).baseName();
-  twScriptTabs->setTabText(CurrentTab, getTab()->TabName);
+  getTabWidget()->setTabText(getCurrentTabIndex(), getTab()->TabName);
   updateFileStatusIndication();
-  */
 }
 
 void AScriptWindow::onLoadRequested(QString NewScript)
@@ -696,51 +682,39 @@ void AScriptWindow::onLoadRequested(QString NewScript)
 
     //for example load (triggered on signal from example explorer): do not register file name!
     tab->FileName.clear();
-    tab->TabName = createNewTabName();
+    tab->TabName = createNewTabName(iCurrentBook);
     getTabWidget()->setTabText(getCurrentTabIndex(), getTab()->TabName);
     updateFileStatusIndication();
 }
 
 void AScriptWindow::on_pbSave_clicked()
 {
-    /*
-    if (ScriptTabs.isEmpty()) return;
-
-    QString SavedName = getTab()->FileName;
-    if (SavedName.isEmpty())
-      {
+    QString FileName = getTab()->FileName;
+    if (FileName.isEmpty())
+    {
        on_pbSaveAs_clicked();
        return;
-      }
+    }
 
-    QFile outputFile(SavedName);
-    outputFile.open(QIODevice::WriteOnly);
-    if(!outputFile.isOpen())
-      {
-        message("Unable to open file " +SavedName+ " for writing!", this);
+    bool ok = SaveTextToFile(FileName, getTab()->TextEdit->document()->toPlainText());
+    if(!ok)
+    {
+        message("Unable to open file " + FileName + " for writing!", this);
         return;
-      }
-
-    QString Script = getTab()->TextEdit->document()->toPlainText();
-    QTextStream outStream(&outputFile);
-    outStream << Script;
-    outputFile.close();
+    }
 
     if (!getTab()->bExplicitlyNamed)
     {
-        getTab()->TabName = QFileInfo(SavedName).baseName();
-        twScriptTabs->setTabText(CurrentTab, getTab()->TabName);
+        getTab()->TabName = QFileInfo(FileName).baseName();
+        getTabWidget()->setTabText(getCurrentTabIndex(), getTab()->TabName);
     }
 
     getTab()->setModifiedStatus(false);
     updateFileStatusIndication();
-    */
 }
 
 void AScriptWindow::on_pbSaveAs_clicked()
 {
-    /*
-    if (ScriptTabs.isEmpty()) return;
     QString starter = (GlobSet.LibScripts.isEmpty()) ? GlobSet.LastOpenDir : GlobSet.LibScripts;
     if (!getTab()->FileName.isEmpty()) starter = getTab()->FileName;
     QString fileName = QFileDialog::getSaveFileName(this,"Save script", starter, "Script files (*.txt *.js);;All files (*.*)");
@@ -750,8 +724,7 @@ void AScriptWindow::on_pbSaveAs_clicked()
     if(fileInfo.suffix().isEmpty()) fileName += ".txt";
 
     getTab()->FileName = fileName;
-    AScriptWindow::on_pbSave_clicked();
-    */
+    on_pbSave_clicked();
 }
 
 void AScriptWindow::on_pbExample_clicked()
@@ -1289,7 +1262,9 @@ ATabRecord::~ATabRecord()
 
 void ATabRecord::UpdateHighlight()
 {
+    bool bWasMod = wasModified();
     Highlighter->rehighlight();
+    setModifiedStatus(bWasMod);
 }
 
 void ATabRecord::WriteToJson(QJsonObject & json) const
@@ -1347,9 +1322,9 @@ void ATabRecord::setModifiedStatus(bool flag)
 void AScriptWindow::onCurrentTabChanged(int tab)
 {
     if (bShutDown) return;
-
     //qDebug() << "Current changed!" << tab;
     if (tab < 0) return; //also called by window destructor
+
     setCurrentTabIndex(tab);
 
     updateFileStatusIndication();
@@ -1446,7 +1421,7 @@ void AScriptWindow::updateTab(ATabRecord* tab)
 ATabRecord & AScriptWindow::addNewTab(int iBook)
 {
     ATabRecord * tab = new ATabRecord(Functions, ScriptLanguage);
-    tab->TabName = createNewTabName();
+    tab->TabName = createNewTabName(iBook);
 
     formatTab(tab);
 
@@ -1486,7 +1461,7 @@ void AScriptWindow::formatTab(ATabRecord * tab)
     connect(tab, &ATabRecord::requestFindVariable, this, &AScriptWindow::onFindVariable);
 }
 
-QString AScriptWindow::createNewTabName()
+QString AScriptWindow::createNewTabName(int iBook)
 {
     int counter = 1;
     QString res;
@@ -1495,8 +1470,8 @@ QString AScriptWindow::createNewTabName()
     {
         fFound = false;
         res = QString("new_%1").arg(counter);
-        for (int i = 0; i < countTabs(); i++)
-            if ( getTabWidget()->tabText(i) == res )
+        for (int i = 0; i < countTabs(iBook); i++)
+            if ( getTabWidget(iBook)->tabText(i) == res )
             {
                 fFound = true;
                 counter++;
@@ -2304,16 +2279,22 @@ void AScriptWindow::loadBook(int iBook, const QString & fileName)
 
 void AScriptWindow::loadBook(int iBook, const QJsonObject & json)
 {
+    //qDebug() << "Loading book";
+    int iTmpCurBook = iCurrentBook;
+    iCurrentBook = iBook;  // otherwise triggers wikk change current tab for the proper CurrentBook
+
     QJsonArray ar = json["ScriptTabs"].toArray();
     ScriptBooks[iBook].removeAllTabs();
-    for (int i=0; i<ar.size(); i++)
+    for (int iTab = 0; iTab < ar.size(); iTab++)
     {
-        QJsonObject js = ar[i].toObject();
+        //qDebug() << "Tab#" << iTab;
+        QJsonObject js = ar[iTab].toObject();
         ATabRecord & tab = addNewTab(iBook);
         tab.ReadFromJson(js);
+        //qDebug() << "loaded tab"<<tab.TabName << tab.FileName;
 
-        if (tab.TabName.isEmpty()) tab.TabName = createNewTabName();
-        getTabWidget(iBook)->setTabText(countTabs(iBook) - 1, tab.TabName);
+        if (tab.TabName.isEmpty()) tab.TabName = createNewTabName(iBook);
+        getTabWidget(iBook)->setTabText(iTab, tab.TabName);
 
         if (!tab.FileName.isEmpty())
         {
@@ -2322,20 +2303,27 @@ void AScriptWindow::loadBook(int iBook, const QJsonObject & json)
             {
                 QPlainTextEdit te;
                 te.appendPlainText(ScriptInFile);
-                tab.setModifiedStatus( !(te.document()->toPlainText() == tab.TextEdit->document()->toPlainText()) );
+                bool bWasModified = ( te.document()->toPlainText() != tab.TextEdit->document()->toPlainText() );
+                //qDebug() << "read==>" << tab.TabName << bWasModified;
+                tab.setModifiedStatus(bWasModified);
             }
         }
     }
     if (countTabs(iBook) == 0) addNewTab(iBook);
 
-    int iCur = -1;
-    parseJson(json, "CurrentTab", iCur);
-    if (iCur < 0 || iCur >= countTabs(iBook)) iCur = 0;
-    ScriptBooks[iBook].iCurrentTab = iCur;
+    int iCurTab = -1;
+    parseJson(json, "CurrentTab", iCurTab);
+    //qDebug() << "-------------------->>>>> cur tab from file >>>>>>----------------"<< iCurTab;
+    if (iCurTab < 0 || iCurTab >= countTabs(iBook)) iCurTab = 0;
+    ScriptBooks[iBook].iCurrentTab = iCurTab;
+    ScriptBooks[iBook].getTabWidget()->setCurrentIndex(iCurTab);
 
     QString Name = ScriptBooks[iBook].Name;
     parseJson(json, "Name", Name);
     renameBook(iBook, Name);
+
+    iCurrentBook = iTmpCurBook;
+    //qDebug() << "before exit, current tab for book "<< iBook << " is " << ScriptBooks[iBook].iCurrentTab;
 }
 
 void AScriptWindow::renameBook(int iBook, const QString & newName)
@@ -2471,8 +2459,9 @@ void AScriptWindow::twBooks_currentChanged(int index)
     //qDebug() << "book index changed to" << index;
     iCurrentBook = index;
 
-    if (ScriptBooks[index].Tabs.isEmpty())
-        addNewTab();
+    if (ScriptBooks[index].Tabs.isEmpty()) addNewTab();
+
+    updateFileStatusIndication();
 }
 
 void AScriptWindow::onBookTabMoved(int from, int to)

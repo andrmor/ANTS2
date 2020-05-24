@@ -715,11 +715,6 @@
     <string>Add new book</string>
    </property>
   </action>
-  <action name="actionRename_book">
-   <property name="text">
-    <string>Rename book</string>
-   </property>
-  </action>
   <action name="actionLoad_book">
    <property name="text">
     <string>Load book</string>

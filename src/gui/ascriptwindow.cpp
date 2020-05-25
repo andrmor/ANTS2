@@ -2208,7 +2208,14 @@ void AScriptWindow::addNewBook()
 
     QTabWidget * twScriptTabs = getTabWidget(iNewBook);
 
-    connect(twScriptTabs, &QTabWidget::currentChanged, this, &AScriptWindow::onCurrentTabChanged);
+    twScriptTabs->isVisible();
+
+    //connect(twScriptTabs, &QTabWidget::currentChanged, this, &AScriptWindow::onCurrentTabChanged);
+    connect(twScriptTabs, &QTabWidget::currentChanged, this, [this, twScriptTabs](int index)
+    {
+        qDebug() << twScriptTabs->isVisible();
+        if (twScriptTabs->isVisible()) onCurrentTabChanged(index);
+    });
     connect(twScriptTabs, &QTabWidget::customContextMenuRequested, this, &AScriptWindow::onRequestTabWidgetContextMenu);
     connect(twScriptTabs->tabBar(), &QTabBar::tabMoved, this, &AScriptWindow::onScriptTabMoved);
 }

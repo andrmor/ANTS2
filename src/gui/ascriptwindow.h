@@ -38,15 +38,20 @@ public:
     QString             Name;
     QList<ATabRecord *> Tabs;
     QTabWidget *        TabWidget   = nullptr; // will be owned by the QTabItemWidget
-    int                 iCurrentTab = -1;
 
     void                writeToJson(QJsonObject & json) const;
     //bool              readFromJson(const QJsonObject & json);  // too heavily relies on AScriptWindow, cannot be implemented here without major refactoring
+
+    int                 getCurrentTabIndex() const;
+    void                setCurrentTabIndex(int index);
+
+    void                setTabName(const QString & name, int index);
 
     ATabRecord *        getCurrentTab();
     ATabRecord *        getTab(int index);
     const ATabRecord *  getTab(int index) const;
     QTabWidget *        getTabWidget();
+
     void                removeTabNoCleanup(int index); //used by move
     void                removeTab(int index);
     void                removeAllTabs();
@@ -87,7 +92,7 @@ private:
     QStringList         Functions;
 
     std::vector<AScriptBook> ScriptBooks;       //vector does not require default constructor, while QVector does
-    int                 iCurrentBook   = 0;
+    int                 iCurrentBook   = -1;
     QTabWidget *        twBooks        = nullptr;
 
     ATabRecord *        StandaloneTab  = nullptr;
@@ -159,6 +164,7 @@ private:
     void setCurrentTabIndex(int index, int iBook);
     int  countTabs(int iBook) const;
     int  countTabs() const;
+    void setTabName(const QString & name, int index, int iBook);
     ATabRecord & addNewTab(int iBook);
     ATabRecord & addNewTab();
     void askRemoveTab(int tab);
@@ -189,7 +195,7 @@ private slots:
     void highlightErrorLine(int line);
     void updateFileStatusIndication();
 
-    void onCurrentTabChanged(int tab);
+    void onCurrentTabChanged(int tab);   //triggered ONLY on visible book and contains only file/find gui for the current script
     void onScriptTabMoved(int from, int to);
 
     void twBooks_currentChanged(int index);

@@ -24,7 +24,6 @@
 #include "afiletools.h"
 
 #include <QScriptEngine>
-//#include <QTextStream>
 #include <QSplitter>
 #include <QFileDialog>
 #include <QDebug>
@@ -667,8 +666,7 @@ void AScriptWindow::on_pbLoad_clicked()
   onLoadRequested(Script);
 
   getTab()->FileName = fileName;
-  getTab()->TabName = QFileInfo(fileName).baseName();
-  getTabWidget()->setTabText(getCurrentTabIndex(), getTab()->TabName);
+  setTabName(QFileInfo(fileName).baseName(), getCurrentTabIndex(), iCurrentBook);
   updateFileStatusIndication();
 }
 
@@ -682,8 +680,7 @@ void AScriptWindow::onLoadRequested(QString NewScript)
 
     //for example load (triggered on signal from example explorer): do not register file name!
     tab->FileName.clear();
-    tab->TabName = createNewTabName(iCurrentBook);
-    getTabWidget()->setTabText(getCurrentTabIndex(), getTab()->TabName);
+    setTabName( createNewTabName(iCurrentBook), getCurrentTabIndex(), iCurrentBook );
     updateFileStatusIndication();
 }
 
@@ -704,10 +701,7 @@ void AScriptWindow::on_pbSave_clicked()
     }
 
     if (!getTab()->bExplicitlyNamed)
-    {
-        getTab()->TabName = QFileInfo(FileName).baseName();
-        getTabWidget()->setTabText(getCurrentTabIndex(), getTab()->TabName);
-    }
+        setTabName(QFileInfo(FileName).baseName(), getCurrentTabIndex(), iCurrentBook);
 
     getTab()->setModifiedStatus(false);
     updateFileStatusIndication();
@@ -1321,12 +1315,8 @@ void ATabRecord::setModifiedStatus(bool flag)
 
 void AScriptWindow::onCurrentTabChanged(int tab)
 {
-    if (bShutDown) return;
-    //qDebug() << "Current changed!" << tab;
-    if (tab < 0) return; //also called by window destructor
-
-    setCurrentTabIndex(tab);
-
+    if (bShutDown || tab < 0) return;
+    //qDebug() << "Current changed for visible!" << tab;
     updateFileStatusIndication();
     applyTextFindState();
 }
@@ -1430,7 +1420,6 @@ ATabRecord & AScriptWindow::addNewTab(int iBook)
 
     int index = countTabs(iBook) - 1;
     setCurrentTabIndex(index, iBook);
-    getTabWidget(iBook)->setCurrentIndex(index);
 
     return *tab;
 }
@@ -1589,13 +1578,8 @@ void AScriptWindow::askRemoveTab(int tab)
 {
     if (tab < 0 || tab >= countTabs()) return;
 
-    QMessageBox m(this);
-    m.setIcon(QMessageBox::Question);
-    m.setText("Close tab " + getTabWidget()->tabText(tab) + "?");
-    m.setStandardButtons(QMessageBox::Yes| QMessageBox::Cancel);
-    m.setDefaultButton(QMessageBox::Cancel);
-    int ret = m.exec();
-    if (ret == QMessageBox::Yes) removeTab(tab);
+    bool ok = confirm("Close tab " + getTab(tab)->TabName + "?");
+    if (ok) removeTab(tab);
 }
 
 void AScriptWindow::renameTab(int tab)
@@ -1609,9 +1593,8 @@ void AScriptWindow::renameTab(int tab)
                                              tr->TabName, &ok);
     if (ok && !text.isEmpty())
     {
-       tr->TabName = text;
+       setTabName(text, tab, iCurrentBook);
        tr->bExplicitlyNamed = true;
-       getTabWidget()->setTabText(tab, text);
     }
 }
 
@@ -1623,7 +1606,6 @@ void AScriptWindow::markTab(int tab)
 
 void AScriptWindow::copyTab(int iBook)
 {
-    qDebug() << "Copy to book" << iBook;
     if (iMarkedTab == -1) return;
 
     QString script = ScriptBooks[iMarkedBook].getTab(iMarkedTab)->TextEdit->document()->toPlainText();
@@ -1632,13 +1614,11 @@ void AScriptWindow::copyTab(int iBook)
     ATabRecord & tab = addNewTab(iBook);
 
     tab.TextEdit->appendPlainText(script);
-    tab.TabName = newName;
-    getTabWidget(iBook)->setTabText(countTabs(iBook)-1, newName);
+    setTabName(newName, countTabs(iBook)-1, iBook);
 }
 
 void AScriptWindow::moveTab(int iBook)
 {
-    qDebug() << "Move to book" << iBook;
     if (iMarkedTab == -1) return;
 
     ATabRecord * tab = getTab(iMarkedTab, iMarkedBook);
@@ -2128,7 +2108,7 @@ AScriptBook::AScriptBook()
 void AScriptBook::writeToJson(QJsonObject & json) const
 {
     json["Name"] = Name;
-    json["CurrentTab"] = iCurrentTab;
+    json["CurrentTab"] = getCurrentTabIndex();
 
     QJsonArray ar;
     for (const ATabRecord * r : Tabs)
@@ -2140,8 +2120,28 @@ void AScriptBook::writeToJson(QJsonObject & json) const
     json["ScriptTabs"] = ar;
 }
 
+void AScriptBook::setCurrentTabIndex(int index)
+{
+    if (index < 0 || index >= Tabs.size()) return;
+    if (TabWidget) TabWidget->setCurrentIndex(index);
+}
+
+void AScriptBook::setTabName(const QString & name, int index)
+{
+    if (index < 0 || index >= Tabs.size()) return;
+    Tabs[index]->TabName = name;
+    if (TabWidget) TabWidget->setTabText(index, name);
+}
+
+int AScriptBook::getCurrentTabIndex() const
+{
+    if (!TabWidget) return -1;
+    return TabWidget->currentIndex();
+}
+
 ATabRecord * AScriptBook::getCurrentTab()
 {
+    int iCurrentTab = getCurrentTabIndex();
     if (iCurrentTab == -1) return nullptr;
     return Tabs[iCurrentTab];
 }
@@ -2173,7 +2173,6 @@ void AScriptBook::removeTabNoCleanup(int index)
         else qWarning() << "Bad TabWidget index";
     }
     Tabs.removeAt(index);
-    if (iCurrentTab >= Tabs.size()) iCurrentTab = Tabs.size() - 1;
 }
 
 void AScriptBook::removeTab(int index)
@@ -2213,7 +2212,6 @@ void AScriptWindow::addNewBook()
     //connect(twScriptTabs, &QTabWidget::currentChanged, this, &AScriptWindow::onCurrentTabChanged);
     connect(twScriptTabs, &QTabWidget::currentChanged, this, [this, twScriptTabs](int index)
     {
-        qDebug() << twScriptTabs->isVisible();
         if (twScriptTabs->isVisible()) onCurrentTabChanged(index);
     });
     connect(twScriptTabs, &QTabWidget::customContextMenuRequested, this, &AScriptWindow::onRequestTabWidgetContextMenu);
@@ -2286,22 +2284,16 @@ void AScriptWindow::loadBook(int iBook, const QString & fileName)
 
 void AScriptWindow::loadBook(int iBook, const QJsonObject & json)
 {
-    //qDebug() << "Loading book";
-    int iTmpCurBook = iCurrentBook;
-    iCurrentBook = iBook;  // otherwise triggers wikk change current tab for the proper CurrentBook
-
     QJsonArray ar = json["ScriptTabs"].toArray();
     ScriptBooks[iBook].removeAllTabs();
     for (int iTab = 0; iTab < ar.size(); iTab++)
     {
-        //qDebug() << "Tab#" << iTab;
         QJsonObject js = ar[iTab].toObject();
         ATabRecord & tab = addNewTab(iBook);
         tab.ReadFromJson(js);
-        //qDebug() << "loaded tab"<<tab.TabName << tab.FileName;
 
         if (tab.TabName.isEmpty()) tab.TabName = createNewTabName(iBook);
-        getTabWidget(iBook)->setTabText(iTab, tab.TabName);
+        setTabName(tab.TabName, iTab, iBook);
 
         if (!tab.FileName.isEmpty())
         {
@@ -2311,7 +2303,6 @@ void AScriptWindow::loadBook(int iBook, const QJsonObject & json)
                 QPlainTextEdit te;
                 te.appendPlainText(ScriptInFile);
                 bool bWasModified = ( te.document()->toPlainText() != tab.TextEdit->document()->toPlainText() );
-                //qDebug() << "read==>" << tab.TabName << bWasModified;
                 tab.setModifiedStatus(bWasModified);
             }
         }
@@ -2320,17 +2311,12 @@ void AScriptWindow::loadBook(int iBook, const QJsonObject & json)
 
     int iCurTab = -1;
     parseJson(json, "CurrentTab", iCurTab);
-    //qDebug() << "-------------------->>>>> cur tab from file >>>>>>----------------"<< iCurTab;
     if (iCurTab < 0 || iCurTab >= countTabs(iBook)) iCurTab = 0;
-    ScriptBooks[iBook].iCurrentTab = iCurTab;
-    ScriptBooks[iBook].getTabWidget()->setCurrentIndex(iCurTab);
+    ScriptBooks[iBook].setCurrentTabIndex(iCurTab);
 
     QString Name = ScriptBooks[iBook].Name;
     parseJson(json, "Name", Name);
     renameBook(iBook, Name);
-
-    iCurrentBook = iTmpCurBook;
-    //qDebug() << "before exit, current tab for book "<< iBook << " is " << ScriptBooks[iBook].iCurrentTab;
 }
 
 void AScriptWindow::renameBook(int iBook, const QString & newName)
@@ -2408,17 +2394,18 @@ QTabWidget *AScriptWindow::getTabWidget(int iBook)
 
 int AScriptWindow::getCurrentTabIndex()
 {
-    return ScriptBooks[iCurrentBook].iCurrentTab;
+    if (bLightMode) return -1;
+    return ScriptBooks[iCurrentBook].getCurrentTabIndex();
 }
 
 void AScriptWindow::setCurrentTabIndex(int index)
 {
-    ScriptBooks[iCurrentBook].iCurrentTab = index;
+    ScriptBooks[iCurrentBook].setCurrentTabIndex(index);
 }
 
 void AScriptWindow::setCurrentTabIndex(int index, int iBook)
 {
-    ScriptBooks[iBook].iCurrentTab = index;
+    ScriptBooks[iBook].setCurrentTabIndex(index);
 }
 
 int AScriptWindow::countTabs(int iBook) const
@@ -2430,6 +2417,13 @@ int AScriptWindow::countTabs(int iBook) const
 int AScriptWindow::countTabs() const
 {
     return ScriptBooks[iCurrentBook].Tabs.size();
+}
+
+void AScriptWindow::setTabName(const QString & name, int index, int iBook)
+{
+    if (bLightMode) return;
+    if (iBook < 0 || iBook >= (int)ScriptBooks.size()) return;
+    ScriptBooks[iBook].setTabName(name, index);
 }
 
 void AScriptWindow::twBooks_customContextMenuRequested(const QPoint & pos)

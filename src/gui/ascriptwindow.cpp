@@ -2331,7 +2331,7 @@ void AScriptWindow::renameBook(int iBook, const QString & newName)
     if (iBook < 0 || iBook >= (int)ScriptBooks.size()) return;
 
     ScriptBooks[iBook].Name = newName;
-    twBooks->setTabText(iBook, newName);
+    twBooks->setTabText(iBook, " " + newName + " ");
 }
 
 void AScriptWindow::renameBookRequested(int iBook)

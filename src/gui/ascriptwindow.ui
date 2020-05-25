@@ -319,8 +319,11 @@
        </item>
        <item>
         <widget class="QPushButton" name="pbFileName">
+         <property name="contextMenuPolicy">
+          <enum>Qt::CustomContextMenu</enum>
+         </property>
          <property name="toolTip">
-          <string>Click to open in default file explorer</string>
+          <string>Click to open in default file explorer, right-click for menu</string>
          </property>
          <property name="text">
           <string>Not saved</string>

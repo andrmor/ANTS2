@@ -2547,3 +2547,27 @@ void AScriptWindow::on_actionClose_all_books_triggered()
     removeAllBooksExceptFirst();
     addNewTab();
 }
+
+#include <QClipboard>
+void AScriptWindow::on_pbFileName_customContextMenuRequested(const QPoint & pos)
+{
+    QString fn = getTab()->FileName;
+    if (fn.isEmpty()) return;
+
+    QMenu menu;
+    QAction * copy   = menu.addAction("Copy file name to clipboard");
+    QAction * copyIn = menu.addAction("Copy file name fro #include to clipboard");
+
+    QAction * sel = menu.exec(ui->pbFileName->mapToGlobal(pos));
+
+    if (sel == copy)
+    {
+        QClipboard * clipboard = QApplication::clipboard();
+        clipboard->setText(fn);
+    }
+    else if (sel == copyIn)
+    {
+        QClipboard * clipboard = QApplication::clipboard();
+        clipboard->setText(QString("#include \"%1\"").arg(fn));
+    }
+}

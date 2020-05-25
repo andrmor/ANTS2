@@ -187,6 +187,7 @@ public slots:
 private slots:
     //context menus
     void twBooks_customContextMenuRequested(const QPoint & pos);
+    void on_pbFileName_customContextMenuRequested(const QPoint & pos);
     void onRequestTabWidgetContextMenu(QPoint pos);
     void onContextMenuRequestedByJsonTree(QPoint pos);
     void onContextMenuRequestedByHelp(QPoint pos);

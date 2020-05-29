@@ -161,11 +161,48 @@ double AMath_SI::exponential(double tau)
 #include "QVariantList"
 #include "TFitResult.h"
 #include "TFitResultPtr.h"
-QVariantList AMath_SI::fit1D(QVariantList array, QString tformula)
+QVariantList AMath_SI::fit1D(QVariantList array, QString tformula, QVariantList range, QVariantList startParValues, bool extendedOutput)
 {
     QVariantList res;
     TFormula * f = new TFormula("", tformula.toLocal8Bit().data());
-    if (!f || !f->IsValid()) abort("Cannot create TFormula");
+    if (!f || !f->IsValid())
+    {
+        abort("Cannot create TFormula");
+        return res;
+    }
+
+    bool bParVals = false;
+    int numPars = f->GetNpar();
+    if (!startParValues.isEmpty())
+    {
+        if (startParValues.size() != numPars)
+        {
+            abort("Mismatch in the number of parameter for provided start parameter values");
+            return res;
+        }
+        bParVals = true;
+    }
+
+    bool bRange = false;
+    double from = 0;
+    double to = 1;
+    if (!range.isEmpty())
+    {
+        if (range.size() != 2)
+        {
+            abort("Range should contain start and stop values");
+            return res;
+        }
+        bool ok1, ok2;
+        bRange = true;
+        from = range[0].toDouble(&ok1);
+        to   = range[1].toDouble(&ok2);
+        if (!ok1 || !ok2)
+        {
+            abort("Format error in range");
+            return res;
+        }
+    }
 
     const int size = array.size();
     if (size == 0)
@@ -189,14 +226,33 @@ QVariantList AMath_SI::fit1D(QVariantList array, QString tformula)
 
     TGraph g(size, xx, yy);
 
-    //TF1  *f1 = new TF1("f1", tformula.toLocal8Bit().data(), 0,10);
-    TF1  *f1 = new TF1("f1", tformula.toLocal8Bit().data(), 0,10);
+    TF1  *f1 = new TF1("f1", tformula.toLocal8Bit().data(), from, to);
 
-    TFitResultPtr fr = g.Fit(f1, "S", "");
+    if (bParVals)
+    {
+        for (int i=0; i<numPars; i++)
+            f1->SetParameter(i, startParValues[i].toDouble());
+    }
 
-    int num = fr->NTotalParameters();
-    for (int i=0; i<num; i++)
-            res << fr->GetParams()[i];
+    TString opt = (bRange ? "SR" : "S");
+    TFitResultPtr fr = g.Fit(f1, opt, "");
+
+    //int numPars = fr->NTotalParameters();
+
+    if (extendedOutput)
+    {
+        for (int i=0; i<numPars; i++)
+        {
+            QVariantList el;
+            el << fr->Value(i) << fr->ParError(i);
+            res.push_back(el);
+        }
+        res.push_back(fr->Chi2());
+    }
+    else
+    {
+        for (int i=0; i<numPars; i++) res << fr->GetParams()[i];
+    }
 
     return res;
 }

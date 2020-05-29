@@ -1,5 +1,8 @@
 #include "amath_si.h"
 
+#include <QDebug>
+#include <QVector>
+
 #include "TRandom2.h"
 
 AMath_SI::AMath_SI(TRandom2* RandGen)
@@ -170,22 +173,36 @@ QVariantList AMath_SI::fit1D(QVariantList array, QString tformula, QVariantList 
         abort("Cannot create TFormula");
         return res;
     }
+    int numPars = f->GetNpar();
+    qDebug() << "TFormula accepted, #par = " << numPars;
 
     bool bParVals = false;
-    int numPars = f->GetNpar();
+    QVector<double> ParValues;
+    bool ok1, ok2;
     if (!startParValues.isEmpty())
     {
         if (startParValues.size() != numPars)
         {
-            abort("Mismatch in the number of parameter for provided start parameter values");
+            abort("Mismatch in the number of parameters for provided initial values");
             return res;
         }
+        for (int i=0; i<startParValues.size(); i++)
+        {
+            double v = startParValues[i].toDouble(&ok1);
+            if (!ok1)
+            {
+                abort("Format error in range");
+                return res;
+            }
+            ParValues << v;
+        }
         bParVals = true;
+        qDebug() << "Initial values:" << ParValues;
     }
 
     bool bRange = false;
     double from = 0;
-    double to = 1;
+    double to = 1.0;
     if (!range.isEmpty())
     {
         if (range.size() != 2)
@@ -193,8 +210,6 @@ QVariantList AMath_SI::fit1D(QVariantList array, QString tformula, QVariantList 
             abort("Range should contain start and stop values");
             return res;
         }
-        bool ok1, ok2;
-        bRange = true;
         from = range[0].toDouble(&ok1);
         to   = range[1].toDouble(&ok2);
         if (!ok1 || !ok2)
@@ -202,17 +217,22 @@ QVariantList AMath_SI::fit1D(QVariantList array, QString tformula, QVariantList 
             abort("Format error in range");
             return res;
         }
+        bRange = true;
+        qDebug() << "Fixed range:" << from << to;
     }
 
-    const int size = array.size();
-    if (size == 0)
+    const int arSize = array.size();
+    qDebug() << "Data size:"<< arSize;
+    if (arSize == 0)
     {
         abort("Array is empty!");
         return res;
     }
-    double xx[size];
-    double yy[size];
-    for (int i=0; i<array.size(); i++)
+    QVector<double> xx; xx.reserve(arSize);
+    QVector<double> yy; yy.reserve(arSize);
+    qDebug() << "Vectors are initialized";
+
+    for (int i=0; i<arSize; i++)
     {
         QVariantList el = array[i].toList();
         if (el.size() != 2)
@@ -220,24 +240,38 @@ QVariantList AMath_SI::fit1D(QVariantList array, QString tformula, QVariantList 
             abort("array argument must contain arrays of [x,val]!");
             return res;
         }
-        xx[i] = el[0].toDouble();
-        yy[i] = el[1].toDouble();
+
+        xx << el[0].toDouble(&ok1);
+        yy << el[1].toDouble(&ok2);
+        if (!ok1 || !ok2)
+        {
+            abort("Format error in data");
+            return res;
+        }
     }
 
-    TGraph g(size, xx, yy);
+    TGraph g(arSize, xx.data(), yy.data());
+    qDebug() << "Graph created";
 
-    TF1  *f1 = new TF1("f1", tformula.toLocal8Bit().data(), from, to);
+    TF1  * f1 = new TF1("f1", tformula.toLocal8Bit().data(), from, to);
+    qDebug() << "TF1 created" << f1;
 
     if (bParVals)
     {
-        for (int i=0; i<numPars; i++)
-            f1->SetParameter(i, startParValues[i].toDouble());
+        for (int i=0; i<numPars; i++) f1->SetParameter(i, ParValues[i]);
+        qDebug() << "Init par values are set!";
     }
 
     TString opt = (bRange ? "SR" : "S");
     TFitResultPtr fr = g.Fit(f1, opt, "");
 
-    //int numPars = fr->NTotalParameters();
+    qDebug() << "Fit done!";
+
+    if ((int)fr->NTotalParameters() != numPars)
+    {
+        abort("Bad number of parameters in fit result");
+        return res;
+    }
 
     if (extendedOutput)
     {
@@ -251,7 +285,7 @@ QVariantList AMath_SI::fit1D(QVariantList array, QString tformula, QVariantList 
     }
     else
     {
-        for (int i=0; i<numPars; i++) res << fr->GetParams()[i];
+        for (int i=0; i<numPars; i++) res << fr->Value(i);
     }
 
     return res;

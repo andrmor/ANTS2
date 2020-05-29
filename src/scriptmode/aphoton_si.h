@@ -22,6 +22,8 @@ public:
     APhoton_SI (AConfiguration* Config, EventsDataClass *EventsDataHub);
     ~APhoton_SI();
 
+    bool InitOnRun() override;
+
 public slots:
     void ClearData();
     void ClearTracks();

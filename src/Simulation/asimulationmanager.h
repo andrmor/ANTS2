@@ -58,6 +58,7 @@ public:
     void generateG4antsConfigCommon(QJsonObject & json, ASimulator * worker);  // !!! G4ants files common
 
     const DetectorClass & getDetector() {return Detector;}
+    bool setup(const QJsonObject & json, int threads);
 
 public:
     std::vector<ANodeRecord *> Nodes;
@@ -127,7 +128,6 @@ signals:
     void ProgressReport(int percents); // used with network manager
 
 private:
-    bool setup(const QJsonObject & json, int threads);
     void clearG4data();
     void copyDataFromWorkers();
     void removeOldFile(const QString &fileName, const QString &txt);

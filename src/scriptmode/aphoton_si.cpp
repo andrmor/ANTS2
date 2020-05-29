@@ -38,6 +38,15 @@ APhoton_SI::~APhoton_SI()
     delete Event;
 }
 
+#include "asimulationmanager.h"
+bool APhoton_SI::InitOnRun()
+{
+    DetectorClass* Detector = Config->GetDetector();
+
+    ASimulationManager simMan(*EventsDataHub, *Detector); //to configure EventsDataHub, Detector, PMs and MPcollection
+    return simMan.setup(Config->JSON, 1);
+}
+
 void APhoton_SI::ClearData()
 {
     EventsDataHub->clear();

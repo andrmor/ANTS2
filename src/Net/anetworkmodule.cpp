@@ -116,6 +116,7 @@ bool ANetworkModule::StartRootHttpServer()
         return false;
     }
 #endif
+    return false;
 }
 
 void ANetworkModule::StopRootHttpServer()

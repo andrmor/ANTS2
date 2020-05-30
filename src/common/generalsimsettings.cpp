@@ -195,4 +195,6 @@ bool GeneralSimSettings::writeToJson(QJsonObject & Json) const
     }
 
     Json["GeneralSimConfig"] = json;
+
+    return true;
 }

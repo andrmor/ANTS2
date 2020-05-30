@@ -11,7 +11,7 @@ class AParticleRecord;
 class AEventTrackingRecord;
 struct AEnergyDepositionCell;
 class AMaterialParticleCollection;
-class GeneralSimSettings;
+class AGeneralSimSettings;
 class TrackHolderClass;
 class ASimulationStatistics;
 class AEventTrackingRecord;
@@ -34,7 +34,7 @@ public:
 
     bool TrackParticlesOnStack(int eventId = 0);
 
-    void configure(const GeneralSimSettings *simSet,
+    void configure(const AGeneralSimSettings *simSet,
                    bool fbuildTrackes,
                    std::vector<TrackHolderClass *> * tracks,
                    bool fRemoveEmptyTracks,
@@ -55,7 +55,7 @@ private:
     ASimulationStatistics & SimStat;
     int ThreadIndex = 0;
 
-    const GeneralSimSettings* SimSet;
+    const AGeneralSimSettings* SimSet;
     bool BuildTracks = false;
     int MaxTracks = 10;
     int ParticleTracksAdded = 0;

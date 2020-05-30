@@ -7,10 +7,10 @@ class ASourceParticleGenerator;
 class AFileParticleGenerator;
 class AScriptParticleGenerator;
 
-class AParticleModeSettings
+class AParticleSimSettings
 {
 public:
-    AParticleModeSettings(ASourceParticleGenerator * SoG, AFileParticleGenerator * FiG, AScriptParticleGenerator * ScG);
+    AParticleSimSettings(ASourceParticleGenerator * SoG, AFileParticleGenerator * FiG, AScriptParticleGenerator * ScG);
 
     enum AGenMode   {Sources = 0, File = 1, Script = 2};
     enum AMultiMode {Constant = 0, Poisson = 1};

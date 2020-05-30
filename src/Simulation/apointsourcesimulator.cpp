@@ -8,7 +8,7 @@
 #include "anoderecord.h"
 #include "apositionenergyrecords.h"
 #include "asandwich.h"
-#include "generalsimsettings.h"
+#include "ageneralsimsettings.h"
 #include "ajsontools.h"
 #include "acommonfunctions.h"
 #include "photon_generator.h"
@@ -432,6 +432,80 @@ bool APointSourceSimulator::SimulateCustomNodes()
             if(fStopRequested) return false;
         }
         currentNode++;
+    }
+    return true;
+}
+
+bool APointSourceSimulator::SimulatePhotonsFromFile()
+{
+    eventCurrent = 0;
+    double updateFactor = 100.0 / (eventEnd - eventBegin);
+
+    QFile file("");
+    if (!file.open(QIODevice::ReadOnly | QFile::Text))
+    {
+        ErrorString = "Cannot open file ";
+        return false;
+    }
+    QTextStream in(&file);
+
+    OneEvent->clearHits();
+
+    for (int iEvent = 0; iEvent < eventEnd; iEvent++)
+    {
+        while (!in.atEnd())
+        {
+            if (fStopRequested)
+            {
+                in.flush();
+                file.close();
+                return false;
+            }
+
+            QString line = in.readLine().simplified();
+            if (line.startsWith('#')) break; //next event in the next line of the file
+
+            if (iEvent < eventBegin) continue;
+
+            QStringList sl = line.split(' ', QString::SkipEmptyParts);
+            if (sl.size() < 8)
+            {
+                ErrorString = "Format error in the file with photon records";
+                file.close();
+                return false;
+            }
+
+            APhoton p;
+            p.r[0]      = sl.at(0).toDouble();
+            p.r[1]      = sl.at(1).toDouble();
+            p.r[2]      = sl.at(2).toDouble();
+            p.v[0]      = sl.at(3).toDouble();
+            p.v[1]      = sl.at(4).toDouble();
+            p.v[2]      = sl.at(5).toDouble();
+            p.waveIndex = sl.at(6).toDouble();
+            p.time      = sl.at(7).toDouble();
+
+            p.scint_type = 0;
+            p.SimStat    = OneEvent->SimStat;
+
+            photonTracker->TracePhoton(&p);
+        }
+
+        if (iEvent < eventBegin) continue;
+
+        OneEvent->HitsToSignal();
+        dataHub->Events.append(OneEvent->PMsignals);
+        if (simSettings.fTimeResolved)
+            dataHub->TimedEvents.append(OneEvent->TimedPMsignals);
+
+        AScanRecord * sr = new AScanRecord();
+        sr->Points.Reinitialize(0);
+        sr->ScintType = 0;
+        dataHub->Scan.append(sr);
+
+        OneEvent->clearHits();
+        progress = eventCurrent * updateFactor;
+        eventCurrent++;
     }
     return true;
 }

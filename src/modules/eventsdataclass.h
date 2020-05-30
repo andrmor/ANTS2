@@ -6,7 +6,7 @@
 #include "ahistoryrecords.h"
 #endif
 
-#include "generalsimsettings.h"
+#include "ageneralsimsettings.h"
 #include "reconstructionsettings.h"
 #include "manifesthandling.h"
 
@@ -88,7 +88,7 @@ public:
     void clearManifest();
 
     // simulation setting for events / scan
-    GeneralSimSettings LastSimSet;   
+    AGeneralSimSettings LastSimSet;   
     bool fSimulatedData; // true if events data were simulated (false if loaded data)
 
     // reconstruction settings used during last reconstruction

@@ -115,7 +115,13 @@ public:
 class APhotonSim_CustomNodeSettings
 {
 public:
-    QString NodesFileName;
+    enum ModeEnum {CustomNodes = 0, PhotonsDirectly = 1};
+
+    QString   FileName;
+    ModeEnum  Mode = CustomNodes;
+
+    //runtime properties
+    int NumEventsInFile = 0;
 
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);

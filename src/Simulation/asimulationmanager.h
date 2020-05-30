@@ -1,9 +1,10 @@
 #ifndef ASIMULATIONMANAGER_H
 #define ASIMULATIONMANAGER_H
 
-#include "generalsimsettings.h"
+#include "ageneralsimsettings.h"
 #include "atrackbuildoptions.h"
 #include "alogsandstatisticsoptions.h"
+#include "asimsettings.h"
 
 #include <vector>
 
@@ -84,9 +85,10 @@ public:
     double DepoByNotRegistered;
     double DepoByRegistered;
 
-    GeneralSimSettings simSettings;
-    QJsonObject jsSimSet;   // to be removed
-    bool bPhotonSourceSim;  // if false -> particle source sim
+    ASimSettings Settings;
+    AGeneralSimSettings simSettings;        // to be removed!
+    QJsonObject jsSimSet;                   // to be removed!
+    bool bPhotonSourceSim;                  // to be removed!  if false -> particle source sim
 
     int NumberOfWorkers = 0;
 

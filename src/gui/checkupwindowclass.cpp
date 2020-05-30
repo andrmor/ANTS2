@@ -6,7 +6,7 @@
 #include "apmhub.h"
 #include "apmtype.h"
 #include "materialinspectorwindow.h"
-#include "generalsimsettings.h"
+#include "ageneralsimsettings.h"
 #include "asourceparticlegenerator.h"
 #include "aglobalsettings.h"
 #include "aparticlesourcerecord.h"
@@ -190,7 +190,7 @@ TriState CheckUpWindowClass::CheckPMs()
        // Andr:  changed flag reads -> use general sim config
     QJsonObject json;
     MW->SimGeneralConfigToJson(json);
-    GeneralSimSettings SimSet;
+    AGeneralSimSettings SimSet;
     SimSet.readFromJson(json);
 
     //if(!MW->PMs || !MW->WavelengthResolved) ui->pmtsTable->hideColumn(1);

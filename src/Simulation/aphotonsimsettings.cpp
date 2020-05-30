@@ -1,4 +1,4 @@
-#include "aphotonmodesettings.h"
+#include "aphotonsimsettings.h"
 #include "ajsontools.h"
 
 #include <QDebug>
@@ -387,17 +387,23 @@ void APhotonSim_FloodSettings::readFromJson(const QJsonObject &json)
 
 void APhotonSim_CustomNodeSettings::clearSettings()
 {
-    NodesFileName.clear();
+    FileName.clear();
+    Mode = CustomNodes;
+    NumEventsInFile = 0;
 }
 
 void APhotonSim_CustomNodeSettings::writeToJson(QJsonObject &json) const
 {
-    json["FileWithNodes"] = NodesFileName;
+    json["FileWithNodes"] = FileName;
+    json["Mode"] = Mode;
 }
 
 void APhotonSim_CustomNodeSettings::readFromJson(const QJsonObject &json)
 {
     clearSettings();
 
-    parseJson(json, "FileWithNodes", NodesFileName);
+    parseJson(json, "FileWithNodes", FileName);
+    int iMode = 0;
+    parseJson(json, "Mode", iMode);
+    if (iMode == 0 || iMode == 1) Mode = static_cast<ModeEnum>(iMode);
 }

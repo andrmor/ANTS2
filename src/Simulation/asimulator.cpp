@@ -3,7 +3,7 @@
 #include "asimulationmanager.h"
 #include "atrackrecords.h"
 #include "aoneevent.h"
-#include "generalsimsettings.h"
+#include "ageneralsimsettings.h"
 #include "eventsdataclass.h"
 #include "photon_generator.h"
 #include "aphotontracer.h"

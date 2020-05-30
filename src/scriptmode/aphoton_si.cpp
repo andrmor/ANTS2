@@ -2,7 +2,7 @@
 #include "aconfiguration.h"
 #include "aphotontracer.h"
 #include "detectorclass.h"
-#include "generalsimsettings.h"
+#include "ageneralsimsettings.h"
 #include "asandwich.h"
 #include "aoneevent.h"
 #include "asimulationstatistics.h"
@@ -48,7 +48,7 @@ bool APhoton_SI::InitOnRun()
 
     if ( !Config->JSON.contains("SimulationConfig") ) return false;
     QJsonObject jsSimSet = Config->JSON["SimulationConfig"].toObject();
-    GeneralSimSettings simSettings;
+    AGeneralSimSettings simSettings;
     if ( !simSettings.readFromJson(jsSimSet) ) return false;
 
     EventsDataHub->initializeSimStat(Detector->Sandwich->MonitorsRecords, simSettings.DetStatNumBins, (simSettings.fWaveResolved ? simSettings.WaveNodes : 0) );

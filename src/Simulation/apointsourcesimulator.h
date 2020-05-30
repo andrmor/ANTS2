@@ -34,6 +34,7 @@ private:
     bool SimulateRegularGrid();
     bool SimulateFlood();
     bool SimulateCustomNodes();
+    bool SimulatePhotonsFromFile();
 
     //utilities
     int  PhotonsToRun();

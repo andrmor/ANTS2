@@ -9,7 +9,7 @@ class DetectorClass;
 class ASimulationManager;
 class TrackHolderClass;
 class AOneEvent;
-class GeneralSimSettings;
+class AGeneralSimSettings;
 class EventsDataClass;
 class Photon_Generator;
 class APhotonTracer;
@@ -63,7 +63,7 @@ protected:
     int ID;
 
     const DetectorClass & detector;
-    const GeneralSimSettings & simSettings;
+    const AGeneralSimSettings & simSettings;
 
     // local resources
     TRandom2 *RandGen;

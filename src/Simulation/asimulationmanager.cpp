@@ -71,9 +71,7 @@ void ASimulationManager::StartSimulation(QJsonObject& json, int threads, bool fF
     fFinished = false;
     fSuccess = false;
     bDoGuiUpdate = fFromGui;
-
-    threads = std::max(threads, 1); // TODO check if we still can run in "0" threads
-
+    threads = std::max(threads, 1);
     if (MaxThreads > 0 && threads > MaxThreads)
     {
         qDebug() << "Simulation manager: Limiting max threads to " << MaxThreads;
@@ -95,6 +93,16 @@ void ASimulationManager::StartSimulation(QJsonObject& json, int threads, bool fF
 
 bool ASimulationManager::setup(const QJsonObject & json, int threads)
 {
+    // note - conversion to use "Settings" will be performed in stages, first is the photon sources!
+    bool ok = Settings.readFromJson(json);
+    if (!ok)
+    {
+        ErrorString = "Failed to read sim settings";
+        return false;
+    }
+
+    // --------
+
     if ( !json.contains("SimulationConfig") )
     {
         ErrorString = "Json does not contain simulation config!";
@@ -122,14 +130,22 @@ bool ASimulationManager::setup(const QJsonObject & json, int threads)
         if (simMode != 4) clearNodes(); // script will have the nodes already defined
         if (simMode == 3)
         {
-            QString fileName = psc["CustomNodesOptions"].toObject()["FileWithNodes"].toString();
-            const QString err = loadNodesFromFile(fileName);
-            if (!err.isEmpty())
+            //QString fileName = psc["CustomNodesOptions"].toObject()["FileWithNodes"].toString();
+            const QString & fileName = Settings.photSimSet.CustomNodeSettings.FileName;
+            if (Settings.photSimSet.CustomNodeSettings.Mode == APhotonSim_CustomNodeSettings::CustomNodes)
             {
-                ErrorString = err;
-                return false;
+                const QString err = loadNodesFromFile(fileName);
+                if (!err.isEmpty())
+                {
+                    ErrorString = err;
+                    return false;
+                }
+                //qDebug() << "Custom nodes loaded from files, top nodes:" << simMan->Nodes.size();
             }
-            //qDebug() << "Custom nodes loaded from files, top nodes:"<<simMan->Nodes.size();
+            else
+            {
+                int numEvents = 0;
+            }
         }
     }
     else // particle source sim
@@ -464,7 +480,7 @@ void ASimulationManager::emitProgressSignal()
         else
             PrVal = Runner->progress;
 
-    emit ProgressReport(PrVal);
+        emit ProgressReport(PrVal);
 }
 
 void ASimulationManager::removeOldFile(const QString & fileName, const QString & txt)

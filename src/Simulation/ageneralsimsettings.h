@@ -8,7 +8,7 @@
 
 class QJsonObject;
 
-class GeneralSimSettings
+class AGeneralSimSettings
 {
 public:
   bool   fTimeResolved  = false;

@@ -6,7 +6,7 @@
 #include "amaterialparticlecolection.h"
 #include "asourceparticlegenerator.h"
 #include "asandwich.h"
-#include "generalsimsettings.h"
+#include "ageneralsimsettings.h"
 #include "apmhub.h"
 
 #include <QDebug>
@@ -334,7 +334,7 @@ void AConfiguration::UpdateSimSettingsOfDetector()
     {
         QJsonObject SimJson = JSON["SimulationConfig"].toObject();
 
-        GeneralSimSettings simSettings;
+        AGeneralSimSettings simSettings;
         simSettings.readFromJson(SimJson);
         Detector->PMs->configure(&simSettings); //wave, angle properties + rebin, prepare crosstalk
         Detector->MpCollection->UpdateRuntimePropertiesAndWavelengthBinning(&simSettings, Detector->RandGen);

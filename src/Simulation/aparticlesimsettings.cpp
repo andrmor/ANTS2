@@ -1,4 +1,4 @@
-#include "aparticlemodesettings.h"
+#include "aparticlesimsettings.h"
 #include "ajsontools.h"
 
 #include "asourceparticlegenerator.h"
@@ -7,10 +7,10 @@
 
 #include <QDebug>
 
-AParticleModeSettings::AParticleModeSettings(ASourceParticleGenerator *SoG, AFileParticleGenerator *FiG, AScriptParticleGenerator *ScG) :
+AParticleSimSettings::AParticleSimSettings(ASourceParticleGenerator *SoG, AFileParticleGenerator *FiG, AScriptParticleGenerator *ScG) :
     SourceGen(SoG), FileGen(FiG), ScriptGen(ScG) {}
 
-void AParticleModeSettings::clearSettings()
+void AParticleSimSettings::clearSettings()
 {
     GenerationMode = Sources;
     EventsToDo      = 1;
@@ -28,7 +28,7 @@ void AParticleModeSettings::clearSettings()
     SourceGen->clear();
 }
 
-void AParticleModeSettings::writeToJson(QJsonObject &json) const
+void AParticleSimSettings::writeToJson(QJsonObject &json) const
 {
     {
         QJsonObject js;
@@ -69,7 +69,7 @@ void AParticleModeSettings::writeToJson(QJsonObject &json) const
     }
 }
 
-void AParticleModeSettings::readFromJson(const QJsonObject & json)
+void AParticleSimSettings::readFromJson(const QJsonObject & json)
 {
     clearSettings();
 

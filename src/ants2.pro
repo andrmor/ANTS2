@@ -1,6 +1,6 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 4
-ANTS2_MINOR = 29
+ANTS2_MINOR = 30
 
 # !!! You may need to modify path for CERN ROOT, see #---CERN ROOT--- section below
 
@@ -9,10 +9,10 @@ ANTS2_MINOR = 29
 #CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library: see https://github.com/mariusmuja/flann
 #CONFIG += ants2_fann        #enables FANN (fast neural network) library: see https://github.com/libfann/fann
 CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra - highly recommended! Installation requires only to copy files!
-#CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
-#CONFIG += ants2_Python      #enable Python scripting
-#CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering): see https://github.com/mctools/ncrystal
-#CONFIG += ants2_jsroot       #enables JSROOT visualisation at GeometryWindow. Automatically enables ants2_RootServer
+CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
+CONFIG += ants2_Python      #enable Python scripting
+CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering): see https://github.com/mctools/ncrystal
+CONFIG += ants2_jsroot       #enables JSROOT visualisation at GeometryWindow. Automatically enables ants2_RootServer
 
 #In effect ONLY for the Docker version:
 ants2_docker {
@@ -277,7 +277,6 @@ SOURCES += main.cpp \
     common/jsonparser.cpp \
     common/CorrelationFilters.cpp \
     common/reconstructionsettings.cpp \
-    common/generalsimsettings.cpp \
     common/tmpobjhubclass.cpp \
     common/ajsontools.cpp \
     common/afiletools.cpp \
@@ -409,12 +408,12 @@ SOURCES += main.cpp \
     Simulation/alogsandstatisticsoptions.cpp \
     Reconstruction/areconstructionworker.cpp \
     common/ahistogram.cpp \
-    modules/apmdummystructure.cpp
+    modules/apmdummystructure.cpp \
+    Simulation/aparticlesimsettings.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
     common/reconstructionsettings.h \
-    common/generalsimsettings.h \
     common/tmpobjhubclass.h \
     common/agammarandomgenerator.h \
     common/apositionenergyrecords.h \
@@ -564,7 +563,8 @@ HEADERS  += common/CorrelationFilters.h \
     Reconstruction/areconstructionworker.h \
     common/ahistogram.h \
     modules/apmanddummy.h \
-    modules/apmdummystructure.h
+    modules/apmdummystructure.h \
+    Simulation/aparticlesimsettings.h
 
 # --- SIM ---
 ants2_SIM {
@@ -589,8 +589,9 @@ ants2_SIM {
     Simulation/amaterialloader.cpp \
     Simulation/aparticlesourcesimulator.cpp \
     Simulation/asaveparticlestofilesettings.cpp \
-    Simulation/aphotonmodesettings.cpp \
-    Simulation/aparticlemodesettings.cpp
+    Simulation/aphotonsimsettings.cpp \
+    Simulation/ageneralsimsettings.cpp \
+    Simulation/asimsettings.cpp
 
     HEADERS  += Simulation/aphoton.h \
     Simulation/asimulationstatistics.h \
@@ -617,8 +618,9 @@ ants2_SIM {
     Simulation/amaterialloader.h \
     Simulation/aparticlesourcesimulator.h \
     Simulation/asaveparticlestofilesettings.h \
-    Simulation/aphotonmodesettings.h \
-    Simulation/aparticlemodesettings.h
+    Simulation/aphotonsimsettings.h \
+    Simulation/ageneralsimsettings.h \
+    Simulation/asimsettings.h
 }
 
 # --- GUI ---

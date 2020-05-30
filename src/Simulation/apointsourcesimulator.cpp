@@ -161,13 +161,11 @@ bool APointSourceSimulator::setup(QJsonObject &json)
     switch (PointSimMode)
     {
     case 0:
-        //fOK = SimulateSingle(json);
         simOptions = js["SinglePositionOptions"].toObject();
         totalEventCount = NumRuns; //the only case when we can split runs between threads
         break;
     case 1:
     {
-        //fOK = SimulateRegularGrid(json);
         simOptions = js["RegularScanOptions"].toObject();
         int RegGridNodes[3]; //number of nodes along the 3 axes
         QJsonArray rsdataArr = simOptions["AxesData"].toArray();
@@ -183,14 +181,14 @@ bool APointSourceSimulator::setup(QJsonObject &json)
         break;
     }
     case 2:
-        //fOK = SimulateFlood(json);
         simOptions = js["FloodOptions"].toObject();
         totalEventCount = simOptions["Nodes"].toInt();//progress reporting knows we do NumRuns per each node
         break;
     case 3:
-        simOptions = js["CustomNodesOptions"].toObject();
-        //totalEventCount = simOptions["Nodes"].toArray().size();//progress reporting knows we do NumRuns per each node
-        totalEventCount = simMan.Nodes.size();
+        //simOptions = js["CustomNodesOptions"].toObject();
+        if (simMan.Settings.photSimSet.CustomNodeSettings.Mode == APhotonSim_CustomNodeSettings::CustomNodes)
+             totalEventCount = simMan.Nodes.size();
+        else totalEventCount = simMan.Settings.photSimSet.CustomNodeSettings.NumEventsInFile;
         break;
     case 4:
         totalEventCount = simMan.Nodes.size();
@@ -215,7 +213,12 @@ void APointSourceSimulator::simulate()
     case 0: fSuccess = SimulateSingle(); break;
     case 1: fSuccess = SimulateRegularGrid(); break;
     case 2: fSuccess = SimulateFlood(); break;
-    case 3: fSuccess = SimulateCustomNodes(); break;
+    case 3:
+    {
+        fSuccess = (simMan.Settings.photSimSet.CustomNodeSettings.Mode == APhotonSim_CustomNodeSettings::CustomNodes ? SimulateCustomNodes()
+                                                                                                                     : SimulatePhotonsFromFile() );
+        break;
+    }
     case 4: fSuccess = SimulateCustomNodes(); break;
     default: fSuccess = false; break;
     }
@@ -441,17 +444,17 @@ bool APointSourceSimulator::SimulatePhotonsFromFile()
     eventCurrent = 0;
     double updateFactor = 100.0 / (eventEnd - eventBegin);
 
-    QFile file("");
+    QFile file(simMan.Settings.photSimSet.CustomNodeSettings.FileName);
     if (!file.open(QIODevice::ReadOnly | QFile::Text))
     {
-        ErrorString = "Cannot open file ";
+        ErrorString = "Cannot open file " + simMan.Settings.photSimSet.CustomNodeSettings.FileName;
         return false;
     }
     QTextStream in(&file);
 
     OneEvent->clearHits();
 
-    for (int iEvent = 0; iEvent < eventEnd; iEvent++)
+    for (int iEvent = -1; iEvent < eventEnd; iEvent++)
     {
         while (!in.atEnd())
         {

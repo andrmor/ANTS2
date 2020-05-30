@@ -130,21 +130,36 @@ bool ASimulationManager::setup(const QJsonObject & json, int threads)
         if (simMode != 4) clearNodes(); // script will have the nodes already defined
         if (simMode == 3)
         {
-            //QString fileName = psc["CustomNodesOptions"].toObject()["FileWithNodes"].toString();
             const QString & fileName = Settings.photSimSet.CustomNodeSettings.FileName;
-            if (Settings.photSimSet.CustomNodeSettings.Mode == APhotonSim_CustomNodeSettings::CustomNodes)
+            QFile file(fileName);
+            if (!file.open(QIODevice::ReadOnly | QFile::Text))
             {
+                ErrorString = "Cannot open file with photon records: " + fileName;
+                return false;
+            }
+            QTextStream in(&file);
+            QString line = in.readLine().simplified();
+            if (!line.startsWith('#'))
+            {
+                Settings.photSimSet.CustomNodeSettings.Mode = APhotonSim_CustomNodeSettings::CustomNodes;
                 const QString err = loadNodesFromFile(fileName);
                 if (!err.isEmpty())
                 {
+                    file.close();
                     ErrorString = err;
                     return false;
                 }
-                //qDebug() << "Custom nodes loaded from files, top nodes:" << simMan->Nodes.size();
             }
             else
             {
-                int numEvents = 0;
+                Settings.photSimSet.CustomNodeSettings.Mode = APhotonSim_CustomNodeSettings::PhotonsDirectly;
+                int numEvents = 1;
+                while (!in.atEnd())
+                {
+                    QString line = in.readLine().simplified();
+                    if (line.startsWith('#')) numEvents++;
+                }
+                Settings.photSimSet.CustomNodeSettings.NumEventsInFile = numEvents;
             }
         }
     }

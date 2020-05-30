@@ -44,7 +44,8 @@ public slots:
   double maxwell(double a);  // a is sqrt(kT/m)
   double exponential(double tau);
 
-  QVariantList fit1D(QVariantList array, QString tformula, QVariantList range = QVariantList(), QVariantList startParValues = QVariantList(), bool extendedOutput = false);
+  //QVariantList fit1D(QVariantList array, QString tformula, QVariantList range = QVariantList(), QVariantList startParValues = QVariantList(), bool extendedOutput = false);
+  QVariantList fit1D(QVariantList array, QString tformula, QVariantList startParValues = QVariantList(), bool extendedOutput = false);
 
 private:
   TRandom2* RandGen;

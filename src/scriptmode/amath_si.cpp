@@ -16,7 +16,10 @@ AMath_SI::AMath_SI(TRandom2* RandGen)
   H["poisson"] = "Returns a random value sampled from Poisson distribution with mean given by the user";
   H["maxwell"] = "Returns a random value sampled from maxwell distribution with Sqrt(kT/M) given by the user";
   H["exponential"] = "Returns a random value sampled from exponential decay with decay time given by the user";
-  H["fit1D"] = "Fits the array of [x,y] points using the provided TFormula of Cern ROOT. Retuns array of parameter values";
+  H["fit1D"] = "Fits the array of [x,y] points using the provided TFormula of Cern ROOT.\n"
+          "Optional startParValues arguments can hold array of initial parameter values.\n"
+          "Returned value depends on the extendedOutput argument (false by default),\n"
+          "false: array of parameter values; true: array of [value, error] for each parameter";
 }
 
 void AMath_SI::setRandomGen(TRandom2 *RandGen)
@@ -164,7 +167,8 @@ double AMath_SI::exponential(double tau)
 #include "QVariantList"
 #include "TFitResult.h"
 #include "TFitResultPtr.h"
-QVariantList AMath_SI::fit1D(QVariantList array, QString tformula, QVariantList range, QVariantList startParValues, bool extendedOutput)
+//QVariantList AMath_SI::fit1D(QVariantList array, QString tformula, QVariantList range, QVariantList startParValues, bool extendedOutput)
+QVariantList AMath_SI::fit1D(QVariantList array, QString tformula, QVariantList startParValues, bool extendedOutput)
 {
     QVariantList res;
     TFormula * f = new TFormula("", tformula.toLocal8Bit().data());
@@ -174,7 +178,7 @@ QVariantList AMath_SI::fit1D(QVariantList array, QString tformula, QVariantList 
         return res;
     }
     int numPars = f->GetNpar();
-    qDebug() << "TFormula accepted, #par = " << numPars;
+    //qDebug() << "TFormula accepted, #par = " << numPars;
 
     bool bParVals = false;
     QVector<double> ParValues;
@@ -197,12 +201,13 @@ QVariantList AMath_SI::fit1D(QVariantList array, QString tformula, QVariantList 
             ParValues << v;
         }
         bParVals = true;
-        qDebug() << "Initial values:" << ParValues;
+        //qDebug() << "Initial values:" << ParValues;
     }
 
-    bool bRange = false;
+    //bool bRange = false;
     double from = 0;
     double to = 1.0;
+    /*
     if (!range.isEmpty())
     {
         if (range.size() != 2)
@@ -218,11 +223,12 @@ QVariantList AMath_SI::fit1D(QVariantList array, QString tformula, QVariantList 
             return res;
         }
         bRange = true;
-        qDebug() << "Fixed range:" << from << to;
+        //qDebug() << "Fixed range:" << from << to;
     }
+    */
 
     const int arSize = array.size();
-    qDebug() << "Data size:"<< arSize;
+    //qDebug() << "Data size:"<< arSize;
     if (arSize == 0)
     {
         abort("Array is empty!");
@@ -230,7 +236,7 @@ QVariantList AMath_SI::fit1D(QVariantList array, QString tformula, QVariantList 
     }
     QVector<double> xx; xx.reserve(arSize);
     QVector<double> yy; yy.reserve(arSize);
-    qDebug() << "Vectors are initialized";
+    //qDebug() << "Vectors are initialized";
 
     for (int i=0; i<arSize; i++)
     {
@@ -251,21 +257,21 @@ QVariantList AMath_SI::fit1D(QVariantList array, QString tformula, QVariantList 
     }
 
     TGraph g(arSize, xx.data(), yy.data());
-    qDebug() << "Graph created";
+    //qDebug() << "Graph created";
 
     TF1  * f1 = new TF1("f1", tformula.toLocal8Bit().data(), from, to);
-    qDebug() << "TF1 created" << f1;
+    //qDebug() << "TF1 created" << f1;
 
     if (bParVals)
     {
         for (int i=0; i<numPars; i++) f1->SetParameter(i, ParValues[i]);
-        qDebug() << "Init par values are set!";
+        //qDebug() << "Init par values are set!";
     }
 
-    TString opt = (bRange ? "SR" : "S");
+    TString opt = "SQN"; //(bRange ? "SR" : "S"); //https://root.cern.ch/root/htmldoc/guides/users-guide/FittingHistograms.html
     TFitResultPtr fr = g.Fit(f1, opt, "");
 
-    qDebug() << "Fit done!";
+    //qDebug() << "Fit done!";
 
     if ((int)fr->NTotalParameters() != numPars)
     {
@@ -281,7 +287,7 @@ QVariantList AMath_SI::fit1D(QVariantList array, QString tformula, QVariantList 
             el << fr->Value(i) << fr->ParError(i);
             res.push_back(el);
         }
-        res.push_back(fr->Chi2());
+        //res.push_back(fr->Chi2());
     }
     else
     {

@@ -150,9 +150,6 @@ void MainWindow::createScriptWindow()
     AOutWin_SI* out = new AOutWin_SI(this);
     ScriptWindow->RegisterInterface(out, "outwin");
 
-    // window inits
-    ScriptWindow->SetShowEvaluationResult(true);
-
     QObject::connect(ScriptWindow, SIGNAL(onStart()), this, SLOT(onGlobalScriptStarted()));
     QObject::connect(ScriptWindow, SIGNAL(success(QString)), this, SLOT(onGlobalScriptFinished()));
     QObject::connect(ScriptWindow, SIGNAL(RequestDraw(TObject*,QString,bool)), GraphWindow, SLOT(DrawStrOpt(TObject*,QString,bool)));

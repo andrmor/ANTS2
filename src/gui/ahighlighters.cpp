@@ -192,7 +192,7 @@ void AHighlighterLrfScript::setFixedVariables()
   highlightingRules = hr + highlightingRules; //so e.g. comments and quatation rule have higher priority
 }
 
-AHighlighterPythonScriptWindow::AHighlighterPythonScriptWindow(QTextDocument *parent) :
+APythonHighlighter::APythonHighlighter(QTextDocument *parent) :
     AHighlighterScriptWindow(parent)
 {
     bMultilineCommentAllowed = false;

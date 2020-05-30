@@ -917,7 +917,7 @@ void MainWindow::on_pbParticleGenerationScript_clicked()
 {
     AJavaScriptManager* sm = new AJavaScriptManager(Detector->RandGen);
     AScriptWindow* sw = new AScriptWindow(sm, true, this);
-    sw->EnableAcceptReject();
+    sw->setAcceptRejectVisible();
 
     int NumThreads = 1;
     AParticleGenerator_SI* gen = new AParticleGenerator_SI(*Detector->MpCollection, Detector->RandGen, 0, &NumThreads);

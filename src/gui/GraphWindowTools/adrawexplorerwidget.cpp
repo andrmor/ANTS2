@@ -173,9 +173,9 @@ void ADrawExplorerWidget::showObjectContextMenu(const QPoint &pos, int index)
 
     Menu.addSeparator();
 
-    QMenu * calcMenu =     Menu.addMenu("Calculate"); calcMenu->setEnabled(Type.startsWith("TH1") || Type == "TProfile");
-        QAction* integralA =    calcMenu->addAction("Draw integral");
-        QAction* fractionA =    calcMenu->addAction("Calculate fraction before/after");
+    QMenu * calcMenu =     Menu.addMenu("Calculate");
+        QAction* integralA =    calcMenu->addAction("Draw integral");                   integralA->setEnabled(Type.startsWith("TH1") || Type == "TProfile" || Type == "TGraph" || Type == "TGraphError");
+        QAction* fractionA =    calcMenu->addAction("Calculate fraction before/after"); fractionA->setEnabled(Type.startsWith("TH1") || Type == "TProfile");
 
     Menu.addSeparator();
 
@@ -681,38 +681,69 @@ void ADrawExplorerWidget::shift(ADrawObject &obj)
 
 void ADrawExplorerWidget::drawIntegral(ADrawObject &obj)
 {
-    TH1* h = dynamic_cast<TH1*>(obj.Pointer);
-    if (!h)
+    TH1D   * hi = nullptr;
+    TGraph * gi = nullptr;
+
+    TH1    * h = dynamic_cast<TH1*>(obj.Pointer);
+    TGraph * g = dynamic_cast<TGraph*>(obj.Pointer);
+    if (h)
+    {
+        int bins = h->GetNbinsX();
+
+        double* edges = new double[bins+1];
+        for (int i=0; i<bins+1; i++)
+            edges[i] = h->GetBinLowEdge(i+1);
+
+        QString title = "Integral of " + obj.Name;
+        hi = new TH1D("integral", title.toLocal8Bit().data(), bins, edges);
+        delete [] edges;
+
+        QString Xtitle = h->GetXaxis()->GetTitle();
+        if (!Xtitle.isEmpty()) hi->GetXaxis()->SetTitle(Xtitle.toLocal8Bit().data());
+
+        double prev = 0;
+        for (int i=1; i<bins+1; i++)
+        {
+            prev += h->GetBinContent(i);
+            hi->SetBinContent(i, prev);
+        }
+    }
+    else if (g)
+    {
+        const int points = g->GetN();
+        double sum = 0;
+        double x, y;
+        QVector<double> X; X.reserve(points);
+        QVector<double> Y; Y.reserve(points);
+        for (int i=0; i<points; i++)
+        {
+            g->GetPoint(i, x, y);
+            X << x;
+            sum += y;
+            Y << sum;
+        }
+
+        gi = new TGraph(points, X.data(), Y.data());
+
+        TString XTitle = g->GetXaxis()->GetTitle();
+        gi->GetXaxis()->SetTitle(XTitle);
+
+        TString YTitle = g->GetYaxis()->GetTitle();
+        gi->GetYaxis()->SetTitle("Integral of " + YTitle);
+    }
+    else
     {
         message("Not implemented for this object type", &GraphWindow);
         return;
     }
-    int bins = h->GetNbinsX();
-
-    double* edges = new double[bins+1];
-    for (int i=0; i<bins+1; i++)
-        edges[i] = h->GetBinLowEdge(i+1);
-
-    QString title = "Integral of " + obj.Name;
-    TH1D* hi = new TH1D("integral", title.toLocal8Bit().data(), bins, edges);
-    delete [] edges;
-
-    QString Xtitle = h->GetXaxis()->GetTitle();
-    if (!Xtitle.isEmpty()) hi->GetXaxis()->SetTitle(Xtitle.toLocal8Bit().data());
-
-    double prev = 0;
-    for (int i=1; i<bins+1; i++)
-      {
-        prev += h->GetBinContent(i);
-        hi->SetBinContent(i, prev);
-      }
 
     GraphWindow.MakeCopyOfDrawObjects();
     GraphWindow.MakeCopyOfActiveBasketId();
     GraphWindow.ClearBasketActiveId();
 
     DrawObjects.clear();
-    addToDrawObjectsAndRegister(hi, "hist");
+    if (hi) addToDrawObjectsAndRegister(hi, "hist");
+    else    addToDrawObjectsAndRegister(gi, "APL");
 
     GraphWindow.RedrawAll();
 }

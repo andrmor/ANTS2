@@ -2,6 +2,7 @@
 #include "aconfiguration.h"
 #include "aphotontracer.h"
 #include "detectorclass.h"
+#include "generalsimsettings.h"
 #include "asandwich.h"
 #include "aoneevent.h"
 #include "asimulationstatistics.h"
@@ -9,9 +10,9 @@
 #include "atrackrecords.h"
 #include "TMath.h"
 #include "TRandom2.h"
-
 #include "eventsdataclass.h"
 #include "tmpobjhubclass.h"
+
 #include "TGeoTrack.h"
 #include "TGeoManager.h"
 #include "TH1.h"
@@ -36,6 +37,26 @@ APhoton_SI::~APhoton_SI()
 {
     delete Tracer;
     delete Event;
+}
+
+#include "eventsdataclass.h"
+#include "apmhub.h"
+#include "amaterialparticlecolection.h"
+bool APhoton_SI::InitOnRun()
+{
+    DetectorClass * Detector = Config->GetDetector();
+
+    if ( !Config->JSON.contains("SimulationConfig") ) return false;
+    QJsonObject jsSimSet = Config->JSON["SimulationConfig"].toObject();
+    GeneralSimSettings simSettings;
+    if ( !simSettings.readFromJson(jsSimSet) ) return false;
+
+    EventsDataHub->initializeSimStat(Detector->Sandwich->MonitorsRecords, simSettings.DetStatNumBins, (simSettings.fWaveResolved ? simSettings.WaveNodes : 0) );
+    //Detector->PMs->configure(&simSettings);
+
+    // threads not known! :(
+    //Detector->MpCollection->UpdateRuntimePropertiesAndWavelengthBinning(&simSettings, Detector->RandGen, threads); //update wave-resolved properties of materials and runtime properties for neutrons
+    return true;
 }
 
 void APhoton_SI::ClearData()

@@ -131,8 +131,6 @@ void MainWindow::createPythonScriptWindow()
   AOutWin_SI* out = new AOutWin_SI(this);
   PythonScriptWindow->RegisterInterface(out, "outwin");
 
-  PythonScriptWindow->SetShowEvaluationResult(true);
-
   QObject::connect(PythonScriptWindow, SIGNAL(onStart()), this, SLOT(onGlobalScriptStarted()));
   QObject::connect(PythonScriptWindow, SIGNAL(success(QString)), this, SLOT(onGlobalScriptFinished()));
   QObject::connect(PythonScriptWindow, SIGNAL(RequestDraw(TObject*,QString,bool)), GraphWindow, SLOT(DrawStrOpt(TObject*,QString,bool)));

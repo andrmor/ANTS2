@@ -838,19 +838,22 @@ void OutputWindow::ShowOneEventLog(int iev)
     {
       int iPoints = EventsDataHub->Scan[iev]->Points.size();
       for (int iP=0; iP<iPoints; iP++)
-        {
-          str2.setNum(EventsDataHub->Scan[iev]->Points[iP].r[0], 'g', precision);
-          str = "->   ";
-          str +="<font color=\"blue\">True position:</font>  X = "+str2+" mm  Y = ";
-          str2.setNum(EventsDataHub->Scan[iev]->Points[iP].r[1], 'g', precision);
-          str +=str2+" mm   Z = ";
-          str2.setNum(EventsDataHub->Scan[iev]->Points[iP].r[2], 'g', precision);
-          str +=str2+" mm";
-          str2.setNum(EventsDataHub->Scan[iev]->Points[iP].energy);
-              str += "   photons/energy = "+str2;
+      {
+          const APositionEnergyRecord & p = EventsDataHub->Scan[iev]->Points[iP];
+          str = "->   <font color=\"blue\">True XYZ position:</font> (";
+          str2.setNum(p.r[0], 'g', precision);
+          str += str2 + " ";
+          str2.setNum(p.r[1], 'g', precision);
+          str += str2 + " ";
+          str2.setNum(p.r[2], 'g', precision);
+          str += str2 + "); ";
+          str2.setNum(p.time, 'g', precision);
+          str += "  time = " + str2 +" ns;";
+          str2.setNum(p.energy);
+          str += "  photons/energy: "+str2 + " #/keV";
 
           OutText(str);
-        }
+      }
       if (iPoints==0) OutText("No energy was deposited.");
       OutText("   -----");
     }

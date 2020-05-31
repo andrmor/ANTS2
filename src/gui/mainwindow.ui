@@ -8625,9 +8625,9 @@ Second click will trigger strong abort mode, which will result in loss of all si
            <widget class="QPushButton" name="pbNodesFromFileCheckShow">
             <property name="geometry">
              <rect>
-              <x>112</x>
+              <x>182</x>
               <y>110</y>
-              <width>291</width>
+              <width>161</width>
               <height>24</height>
              </rect>
             </property>
@@ -8635,7 +8635,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
              <string>Shows on geometry window only first 10000 nodes</string>
             </property>
             <property name="text">
-             <string>Check file and show nodes</string>
+             <string>Check file</string>
             </property>
            </widget>
           </widget>
@@ -8818,7 +8818,7 @@ Right click: toggle build photon tracks. Also switches of building particle trac
            </font>
           </property>
           <property name="text">
-           <string>Node generation mode:</string>
+           <string>Generation mode:</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

@@ -4458,17 +4458,28 @@ void MainWindow::on_pbLoadExampleFileFromFileGen_clicked()
 void MainWindow::on_pbNodesFromFileHelp_clicked()
 {
     QString s;
-    s = "Each line in the file represents a single node.\n"
-        "The format is:\n\n"
-        "X Y Z [Time] [PhotNumberOverride] [*]\n\n"
-        "Arguments:\n\n"
-        "XYZ - position of the node\n\n"
-        "Optional arguments:\n\n"
-        "Time - photon generation time (0 is default)\n\n"
+    s = "There are two modes, defined by the file format:\n\n"
+        "1. Custom nodes\n"
+        "Each line in the file represents a single node.\n"
+        "The format is:  X Y Z [Time] [PhotNumberOverride] [*]\n"
+        "Arguments:\n"
+        "XYZ - position of the node\n"
+        "Optional arguments:\n"
+        "Time - photon generation time in ns (0 is default)\n"
         "PhotNumberOverride - the provided integer value\n"
-        "   overrides the standard number of photons configured for nodes.\n\n"
+        "   overrides the standard number of photons configured for nodes.\n"
         "* - if present, the next node will be added to the same event.\n"
-        "   '*' should be in the last position of the line.";
+        "   '*' should be in the last position of the line.\n\n"
+        "2. Generate photons from records in the file\n"
+        "Each new event is introduced by the line containing '#' as the only character\n"
+        "This is mandatory to have '#' in the first line even if there is only one event.\n"
+        "The photon records have this format:\n"
+        "X Y Z dX dY dZ WaveIndex Time\n"
+        "XYZ - the photon origin position,\n"
+        "dXdYdZ - the unitary direction,\n"
+        "WaveIndex - photon wave index (should be in the defined range of the simulation or -1),\n"
+        "Time - photon generation time in ns.";
+
     message(s, this);
 }
 
@@ -4485,32 +4496,37 @@ void MainWindow::on_pbNodesFromFileChange_clicked()
 void MainWindow::on_pbNodesFromFileCheckShow_clicked()
 {
     QString fileName = ui->leNodesFromFile->text();
-    QString err = SimulationManager->loadNodesFromFile(fileName);
-
-    int numTop = 0;
-    int numTotal = 0;
-    if (!err.isEmpty()) message(err, this);
+    QString err = SimulationManager->checkPnotonNodeFile(fileName);
+    if (!err. isEmpty()) message(err, this);
     else
     {
-        Detector->GeoManager->ClearTracks();
-        clearGeoMarkers();
-        GeoMarkerClass* marks = new GeoMarkerClass("Nodes", 6, 2, kBlack);
-        for (ANodeRecord * topNode : SimulationManager->Nodes)
+        QString s;
+        if (SimulationManager->Settings.photSimSet.CustomNodeSettings.Mode == APhotonSim_CustomNodeSettings::CustomNodes)
         {
-            numTop++;
-            ANodeRecord * node = topNode;
-            while (node)
+            Detector->GeoManager->ClearTracks();
+            clearGeoMarkers();
+            GeoMarkerClass* marks = new GeoMarkerClass("Nodes", 6, 2, kBlack);
+            int numTop = 0;
+            int numTotal = 0;
+            for (ANodeRecord * topNode : SimulationManager->Nodes)
             {
-                numTotal++;
-                if (numTotal < 10000) marks->SetNextPoint(node->getX(), node->getY(), node->getZ());
-                node = node->getLinkedNode();
+                numTop++;
+                ANodeRecord * node = topNode;
+                while (node)
+                {
+                    numTotal++;
+                    if (numTotal < 10000) marks->SetNextPoint(node->getX(), node->getY(), node->getZ());
+                    node = node->getLinkedNode();
+                }
             }
+            GeoMarkers.append(marks);
+            GeometryWindow->ShowGeometry();
+            s = QString("First line does not contain '#' -> this is a file with nodes\n\nFound %1 top nodes\n(%2 nodes counting subnodes)").arg(numTop).arg(numTotal);
         }
-        GeoMarkers.append(marks);
-        GeometryWindow->ShowGeometry();
+        else
+            s = QString("First line contains '#' -> this is a file with photon records\n\nFound %1 event(s)").arg(SimulationManager->Settings.photSimSet.CustomNodeSettings.NumEventsInFile);
+        message(s, this);
     }
-
-    message(QString("The file containes %1 top nodes\n(%2 nodes counting subnodes)").arg(numTop).arg(numTotal), this);
 }
 
 #include "aisotopeabundancehandler.h"

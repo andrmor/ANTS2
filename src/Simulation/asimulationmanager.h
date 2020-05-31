@@ -52,7 +52,7 @@ public:
     void clearTrackingHistory();
 
     void setMaxThreads(int maxThreads) {MaxThreads = maxThreads;}
-    const QString loadNodesFromFile(const QString & fileName);
+    QString loadNodesFromFile(const QString & fileName);
 
     //void setG4Sim_OnlyGenerateFiles(bool flag) {bOnlyFileExport = flag;}
     //bool isG4Sim_OnlyGenerateFiles() const {return bOnlyFileExport;}
@@ -60,6 +60,8 @@ public:
 
     const DetectorClass & getDetector() {return Detector;}
     bool setup(const QJsonObject & json, int threads);
+
+    QString checkPnotonNodeFile(const QString &fileName); // returns error description
 
 public:
     std::vector<ANodeRecord *> Nodes;

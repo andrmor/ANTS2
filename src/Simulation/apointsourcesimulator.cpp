@@ -485,11 +485,13 @@ bool APointSourceSimulator::SimulatePhotonsFromFile()
             p.v[0]      = sl.at(3).toDouble();
             p.v[1]      = sl.at(4).toDouble();
             p.v[2]      = sl.at(5).toDouble();
-            p.waveIndex = sl.at(6).toDouble();
+            p.waveIndex = sl.at(6).toInt();
             p.time      = sl.at(7).toDouble();
 
             p.scint_type = 0;
             p.SimStat    = OneEvent->SimStat;
+
+            if (p.waveIndex < -1 || p.waveIndex >= simMan.Settings.genSimSet.WaveNodes) p.waveIndex = -1;
 
             photonTracker->TracePhoton(&p);
         }

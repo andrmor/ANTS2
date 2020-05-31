@@ -93,6 +93,12 @@ void ASimulationManager::StartSimulation(QJsonObject& json, int threads, bool fF
 
 bool ASimulationManager::setup(const QJsonObject & json, int threads)
 {
+    if ( !json.contains("SimulationConfig") )
+    {
+        ErrorString = "Config json does not contain simulation settings!";
+        return false;
+    }
+
     // note - conversion to use "Settings" will be performed in stages, first is the photon sources!
     bool ok = Settings.readFromJson(json);
     if (!ok)
@@ -102,12 +108,6 @@ bool ASimulationManager::setup(const QJsonObject & json, int threads)
     }
 
     // --------
-
-    if ( !json.contains("SimulationConfig") )
-    {
-        ErrorString = "Json does not contain simulation config!";
-        return false;
-    }
 
     jsSimSet = json["SimulationConfig"].toObject();
     if ( !simSettings.readFromJson(jsSimSet) )
@@ -130,37 +130,8 @@ bool ASimulationManager::setup(const QJsonObject & json, int threads)
         if (simMode != 4) clearNodes(); // script will have the nodes already defined
         if (simMode == 3)
         {
-            const QString & fileName = Settings.photSimSet.CustomNodeSettings.FileName;
-            QFile file(fileName);
-            if (!file.open(QIODevice::ReadOnly | QFile::Text))
-            {
-                ErrorString = "Cannot open file with photon records: " + fileName;
-                return false;
-            }
-            QTextStream in(&file);
-            QString line = in.readLine().simplified();
-            if (!line.startsWith('#'))
-            {
-                Settings.photSimSet.CustomNodeSettings.Mode = APhotonSim_CustomNodeSettings::CustomNodes;
-                const QString err = loadNodesFromFile(fileName);
-                if (!err.isEmpty())
-                {
-                    file.close();
-                    ErrorString = err;
-                    return false;
-                }
-            }
-            else
-            {
-                Settings.photSimSet.CustomNodeSettings.Mode = APhotonSim_CustomNodeSettings::PhotonsDirectly;
-                int numEvents = 1;
-                while (!in.atEnd())
-                {
-                    QString line = in.readLine().simplified();
-                    if (line.startsWith('#')) numEvents++;
-                }
-                Settings.photSimSet.CustomNodeSettings.NumEventsInFile = numEvents;
-            }
+            ErrorString = checkPnotonNodeFile(Settings.photSimSet.CustomNodeSettings.FileName);
+            if (!ErrorString.isEmpty()) return false;
         }
     }
     else // particle source sim
@@ -245,6 +216,43 @@ bool ASimulationManager::setup(const QJsonObject & json, int threads)
     Detector.MpCollection->UpdateRuntimePropertiesAndWavelengthBinning(&simSettings, Detector.RandGen, threads); //update wave-resolved properties of materials and runtime properties for neutrons
 
     return true;
+}
+
+QString ASimulationManager::checkPnotonNodeFile(const QString & fileName)
+{
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly | QFile::Text))
+        return "Cannot open file " + fileName;
+
+    QTextStream in(&file);
+    QString line = in.readLine().simplified();
+    if (!line.startsWith('#'))
+    {
+        Settings.photSimSet.CustomNodeSettings.Mode = APhotonSim_CustomNodeSettings::CustomNodes;
+        QString err = loadNodesFromFile(fileName);
+        if (!err.isEmpty())
+        {
+            file.close();
+            return err;
+        }
+    }
+    else
+    {
+        Settings.photSimSet.CustomNodeSettings.Mode = APhotonSim_CustomNodeSettings::PhotonsDirectly;
+        int numEvents = 1;
+        while (!in.atEnd())
+        {
+            QString line = in.readLine().simplified();
+            if (line.startsWith('#')) numEvents++;
+            else
+            {
+                // !*! todo check as soon as settings will be updated on change of wave binning in gui!
+            }
+        }
+        Settings.photSimSet.CustomNodeSettings.NumEventsInFile = numEvents;
+    }
+
+    return "";
 }
 
 void ASimulationManager::onSimFailedToStart()
@@ -381,7 +389,7 @@ void ASimulationManager::clearTrackingHistory()
     TrackingHistory.clear();
 }
 
-const QString ASimulationManager::loadNodesFromFile(const QString &fileName)
+QString ASimulationManager::loadNodesFromFile(const QString &fileName)
 {
     clearNodes();
 
@@ -396,9 +404,8 @@ const QString ASimulationManager::loadNodesFromFile(const QString &fileName)
     while (!in.atEnd())
     {
         QString line = in.readLine();
-        if (line.startsWith('#')) continue; //comment
         QStringList sl = line.split(' ', QString::SkipEmptyParts);
-        if (sl.isEmpty()) continue; //alow empty lines
+        if (sl.isEmpty()) continue; //allow empty lines
         // x y z time num *
         // 0 1 2   3   4  last
         int size = sl.size();

@@ -17,7 +17,7 @@
 
 ASimulator::ASimulator(ASimulationManager &simMan, int ID) :
     simMan(simMan), ID(ID),
-    detector(simMan.getDetector()), simSettings(simMan.simSettings)
+    detector(simMan.getDetector()), simSettings(simMan.Settings.genSimSet)
 {
     RandGen = new TRandom2();
     int seed = detector.RandGen->Rndm() * 10000000;

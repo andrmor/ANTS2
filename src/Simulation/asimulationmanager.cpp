@@ -98,6 +98,7 @@ bool ASimulationManager::setup(const QJsonObject & json, int threads)
         ErrorString = "Config json does not contain simulation settings!";
         return false;
     }
+    jsSimSet = json["SimulationConfig"].toObject();
 
     // note - conversion to use "Settings" will be performed in stages, first is the photon sources!
     bool ok = Settings.readFromJson(json);
@@ -107,28 +108,18 @@ bool ASimulationManager::setup(const QJsonObject & json, int threads)
         return false;
     }
 
-    // --------
-
-    jsSimSet = json["SimulationConfig"].toObject();
-    if ( !simSettings.readFromJson(jsSimSet) )
-    {
-        ErrorString = simSettings.ErrorString;
-        return false;
-    }
-
     ErrorString = Detector.MpCollection->CheckOverrides();
     if (!ErrorString.isEmpty()) return false;
 
     QString mode = jsSimSet["Mode"].toString();
     bPhotonSourceSim = ( mode == "PointSim" );
+    const AG4SimulationSettings & G4SimSet = Settings.genSimSet.G4SimSet;
 
     // handling of custom nodes
     if (bPhotonSourceSim)
     {
-        const QJsonObject psc = jsSimSet["PointSourcesConfig"].toObject();
-        int simMode = psc["ControlOptions"].toObject()["Single_Scan_Flood"].toInt();
-        if (simMode != 4) clearNodes(); // script will have the nodes already defined
-        if (simMode == 3)
+        if (Settings.photSimSet.GenMode != APhotonSimSettings::Script) clearNodes(); // script will have the nodes already defined
+        if (Settings.photSimSet.GenMode == APhotonSimSettings::File)
         {
             ErrorString = checkPnotonNodeFile(Settings.photSimSet.CustomNodeSettings.FileName);
             if (!ErrorString.isEmpty()) return false;
@@ -136,39 +127,40 @@ bool ASimulationManager::setup(const QJsonObject & json, int threads)
     }
     else // particle source sim
     {
-        if (simSettings.ExitParticleSettings.SaveParticles)
+        const ASaveParticlesToFileSettings & ExitSimSet = Settings.genSimSet.ExitParticleSettings;
+        if (ExitSimSet.SaveParticles)
         {
-            QFile file(simSettings.ExitParticleSettings.FileName);
+            QFile file(ExitSimSet.FileName);
             if (!file.exists())
             {
                 bool bOK = file.open(QIODevice::WriteOnly);
                 file.close();
                 if (!bOK)
                 {
-                    ErrorString = "Cannot create file to save exiting particles:\n" + simSettings.ExitParticleSettings.FileName;
+                    ErrorString = "Cannot create file to save exiting particles:\n" + ExitSimSet.FileName;
                     return false;
                 }
             }
 
-            if (!simSettings.G4SimSet.bTrackParticles)
-                Detector.assignSaveOnExitFlag(simSettings.ExitParticleSettings.VolumeName);
+            if (!G4SimSet.bTrackParticles)
+                Detector.assignSaveOnExitFlag(ExitSimSet.VolumeName);
         }
 
-        if (simSettings.G4SimSet.bTrackParticles)
+        if (G4SimSet.bTrackParticles)
         {
-            if (!simSettings.G4SimSet.checkPathValid())
+            if (!G4SimSet.checkPathValid())
             {
                 ErrorString = "Exchange path does not exist.\nCheck 'Geant4' options tab in ANTS2 global settings!";
                 return false;
             }
 
-            if (!simSettings.G4SimSet.checkExecutableExists())
+            if (!G4SimSet.checkExecutableExists())
             {
                 ErrorString = "File with the name configured for G4ants executable does not exist.\nCheck 'Geant4' options tab in ANTS2 global settings!";
                 return false;
             }
 
-            if (!simSettings.G4SimSet.checkExecutablePermission())
+            if (!G4SimSet.checkExecutablePermission())
             {
                 ErrorString = "File with the name configured for G4ants executable has no execution permission.\nThe file name is specified in 'Geant4' options tab in ANTS2 global settings.";
                 return false;
@@ -184,14 +176,14 @@ bool ASimulationManager::setup(const QJsonObject & json, int threads)
                 return false;
             }
 
-            QString err = simSettings.G4SimSet.checkSensitiveVolumes();
+            QString err = G4SimSet.checkSensitiveVolumes();
             if ( !err.isEmpty() )
             {
                 ErrorString = err;
                 return false;
             }
 
-            const QString gdmlName = simSettings.G4SimSet.getGdmlFileName();
+            const QString gdmlName = G4SimSet.getGdmlFileName();
             err = Detector.exportToGDML(gdmlName);
             if ( !err.isEmpty() )
             {
@@ -210,10 +202,11 @@ bool ASimulationManager::setup(const QJsonObject & json, int threads)
     }
 
     EventsDataHub.clear();
-    EventsDataHub.initializeSimStat(Detector.Sandwich->MonitorsRecords, simSettings.DetStatNumBins, (simSettings.fWaveResolved ? simSettings.WaveNodes : 0) );
+    AGeneralSimSettings & GenSimSet = Settings.genSimSet;
+    EventsDataHub.initializeSimStat(Detector.Sandwich->MonitorsRecords, GenSimSet.DetStatNumBins, (GenSimSet.fWaveResolved ? GenSimSet.WaveNodes : 0) );
 
-    Detector.PMs->configure(&simSettings); //Setup pms module and QEaccelerator if needed
-    Detector.MpCollection->UpdateRuntimePropertiesAndWavelengthBinning(&simSettings, Detector.RandGen, threads); //update wave-resolved properties of materials and runtime properties for neutrons
+    Detector.PMs->configure(&GenSimSet); //Setup pms module and QEaccelerator if needed
+    Detector.MpCollection->UpdateRuntimePropertiesAndWavelengthBinning(&GenSimSet, Detector.RandGen, threads); //update wave-resolved properties of materials and runtime properties for neutrons
 
     return true;
 }
@@ -278,7 +271,7 @@ void ASimulationManager::onSimulationFinished()
     fHardAborted = Runner->wasHardAborted();
 
     EventsDataHub.fSimulatedData = true;
-    EventsDataHub.LastSimSet = simSettings;
+    EventsDataHub.LastSimSet = Settings.genSimSet;
 
     copyDataFromWorkers();
 
@@ -301,7 +294,7 @@ void ASimulationManager::onSimulationFinished()
         if (LogsStatOptions.bSaveDepositionLog)
             saveDepositionLog(dir);
     }
-    if (simSettings.ExitParticleSettings.SaveParticles) saveExitLog();
+    if (Settings.genSimSet.ExitParticleSettings.SaveParticles) saveExitLog();
 
     Runner->clearWorkers();
 
@@ -488,7 +481,7 @@ void ASimulationManager::emitProgressSignal()
             const AParticleSourceSimulator * pss = dynamic_cast<const AParticleSourceSimulator*>(vWorkers.first());
             if (pss)
             {
-                bG4sim = simSettings.G4SimSet.bTrackParticles;
+                bG4sim = Settings.genSimSet.G4SimSet.bTrackParticles;
                 bHavePhotonSim = pss->isDoingPhotonTracing();
             }
         }
@@ -519,7 +512,7 @@ void ASimulationManager::removeOldFile(const QString & fileName, const QString &
 #include "aglobalsettings.h"
 #include <QDir>
 #include <QDateTime>
-const QString ASimulationManager::makeLogDir() const
+QString ASimulationManager::makeLogDir() const
 {
     const QString subdir = QDateTime::currentDateTime().toString("yyyy-MM-dd_hh-mm-ss");
     AGlobalSettings & GlobSet = AGlobalSettings::getInstance();
@@ -539,7 +532,7 @@ const QString ASimulationManager::makeLogDir() const
 
 void ASimulationManager::saveParticleLog(const QString & dir) const
 {
-    if (simSettings.G4SimSet.bTrackParticles)
+    if (Settings.genSimSet.G4SimSet.bTrackParticles)
         saveG4ParticleLog(dir);
     else
         saveA2ParticleLog(dir);
@@ -561,7 +554,7 @@ void ASimulationManager::saveG4ParticleLog(const QString & dir) const
     int iThread = 0;
     do
     {
-        const QString fileName = simSettings.G4SimSet.getTracksFileName(iThread);
+        const QString fileName = Settings.genSimSet.G4SimSet.getTracksFileName(iThread);
         //qDebug() << "Looking for file:"<<fileName;
         if (!QFile(fileName).exists())
         {
@@ -600,7 +593,7 @@ void ASimulationManager::saveA2ParticleLog(const QString &) const
 
 void ASimulationManager::saveDepositionLog(const QString & dir) const
 {
-    if (simSettings.G4SimSet.bTrackParticles)
+    if (Settings.genSimSet.G4SimSet.bTrackParticles)
         saveG4depositionLog(dir);
     else
         saveA2depositionLog(dir);
@@ -622,7 +615,7 @@ void ASimulationManager::saveG4depositionLog(const QString &dir) const
     int iThread = 0;
     do
     {
-        const QString fileName = simSettings.G4SimSet.getDepositionFileName(iThread);
+        const QString fileName = Settings.genSimSet.G4SimSet.getDepositionFileName(iThread);
         //qDebug() << "Looking for file:"<<fileName;
         if (!QFile(fileName).exists())
         {
@@ -663,22 +656,25 @@ void ASimulationManager::saveA2depositionLog(const QString & ) const
 #include <fstream>
 void ASimulationManager::saveExitLog()
 {
-    bool bFromGeant = simSettings.G4SimSet.bTrackParticles;
+    const AG4SimulationSettings & G4SimSet = Settings.genSimSet.G4SimSet;
+    const ASaveParticlesToFileSettings & ExitSimSet = Settings.genSimSet.ExitParticleSettings;
+
+    bool bFromGeant = G4SimSet.bTrackParticles;
 
     const int numTreads = Runner->getWorkers().size();
-    if (simSettings.ExitParticleSettings.UseBinary)
+    if (ExitSimSet.UseBinary)
     {
         std::ofstream outStream;
-        outStream.open(simSettings.ExitParticleSettings.FileName.toLatin1().data(), std::ios::out | std::ios::binary);
+        outStream.open(ExitSimSet.FileName.toLatin1().data(), std::ios::out | std::ios::binary);
         if (!outStream.is_open())
         {
-            qWarning() << "Cannot open" << simSettings.ExitParticleSettings.FileName << "to export exit particles";
+            qWarning() << "Cannot open" << ExitSimSet.FileName << "to export exit particles";
             return;
         }
 
         for (int iThread = 0; iThread < numTreads; iThread++)
         {
-            const QString fileName = ( bFromGeant ? simSettings.G4SimSet.getExitParticleFileName(iThread)
+            const QString fileName = ( bFromGeant ? G4SimSet.getExitParticleFileName(iThread)
                                                   : QString("%1/out-%2.dat").arg(AGlobalSettings::getInstance().TmpDir).arg(iThread) );
 
             std::ifstream inStream(fileName.toLatin1().data());
@@ -699,11 +695,11 @@ void ASimulationManager::saveExitLog()
     }
     else
     {
-        QFile fOut(simSettings.ExitParticleSettings.FileName);
+        QFile fOut(ExitSimSet.FileName);
 
         if (!fOut.open(QFile::Text | QFile::WriteOnly | QFile::Truncate))
         {
-            qWarning() << "Cannot open" << simSettings.ExitParticleSettings.FileName << " file to save exit particles";
+            qWarning() << "Cannot open" << ExitSimSet.FileName << " file to save exit particles";
             return;
         }
 
@@ -711,7 +707,7 @@ void ASimulationManager::saveExitLog()
 
         for (int iThread = 0; iThread < numTreads; iThread++)
         {
-            const QString fileName = ( bFromGeant ? simSettings.G4SimSet.getExitParticleFileName(iThread)
+            const QString fileName = ( bFromGeant ? G4SimSet.getExitParticleFileName(iThread)
                                                   : QString("%1/out-%2.dat").arg(AGlobalSettings::getInstance().TmpDir).arg(iThread) );
 
             QFile fIn(fileName);
@@ -739,12 +735,12 @@ void ASimulationManager::saveExitLog()
 void ASimulationManager::generateG4antsConfigCommon(QJsonObject & json, ASimulator * worker)
 {
     const int ThreadId = worker->getTreadId();
-    const AG4SimulationSettings & G4SimSet = simSettings.G4SimSet;
+    const AG4SimulationSettings & G4SimSet = Settings.genSimSet.G4SimSet;
     const AMaterialParticleCollection & MpCollection = *Detector.MpCollection;
 
     json["PhysicsList"] = G4SimSet.PhysicsList;
 
-    json["LogHistory"] = simSettings.LogsStatOptions.bParticleTransportLog;
+    json["LogHistory"] = Settings.genSimSet.LogsStatOptions.bParticleTransportLog;
 
     QJsonArray Parr;
     const int numPart = MpCollection.countParticles();
@@ -824,16 +820,17 @@ void ASimulationManager::generateG4antsConfigCommon(QJsonObject & json, ASimulat
     json["BinaryOutput"] = G4SimSet.BinaryOutput;
     json["Precision"]    = G4SimSet.Precision;
 
+    const ASaveParticlesToFileSettings & ExitSimSet = Settings.genSimSet.ExitParticleSettings;
     QString exitParticleFN  = G4SimSet.getExitParticleFileName(ThreadId);
     QJsonObject jsExit;
-        jsExit["Enabled" ]      = simSettings.ExitParticleSettings.SaveParticles;
-        jsExit["VolumeName"]    = simSettings.ExitParticleSettings.VolumeName;
+        jsExit["Enabled" ]      = ExitSimSet.SaveParticles;
+        jsExit["VolumeName"]    = ExitSimSet.VolumeName;
         jsExit["FileName"]      = exitParticleFN;
-        jsExit["UseBinary"]     = simSettings.ExitParticleSettings.UseBinary;
-        jsExit["UseTimeWindow"] = simSettings.ExitParticleSettings.UseTimeWindow;
-        jsExit["TimeFrom"]      = simSettings.ExitParticleSettings.TimeFrom;
-        jsExit["TimeTo"]        = simSettings.ExitParticleSettings.TimeTo;
-        jsExit["StopTrack"]     = simSettings.ExitParticleSettings.StopTrack;
+        jsExit["UseBinary"]     = ExitSimSet.UseBinary;
+        jsExit["UseTimeWindow"] = ExitSimSet.UseTimeWindow;
+        jsExit["TimeFrom"]      = ExitSimSet.TimeFrom;
+        jsExit["TimeTo"]        = ExitSimSet.TimeTo;
+        jsExit["StopTrack"]     = ExitSimSet.StopTrack;
     json["SaveExitParticles"] = jsExit;
 
     QJsonArray arMon;

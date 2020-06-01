@@ -79,8 +79,8 @@ public:
     AFileParticleGenerator   * FileParticleGenerator = nullptr;   //only for gui, simulation threads use their own
     AScriptParticleGenerator * ScriptParticleGenerator = nullptr; //only for gui, simulation threads use their own
 
-    ATrackBuildOptions TrackBuildOptions;
-    ALogsAndStatisticsOptions LogsStatOptions;
+    ATrackBuildOptions TrackBuildOptions;       // to be removed!
+    ALogsAndStatisticsOptions LogsStatOptions;  // to be removed!
 
     //for G4ants sims
     QSet<QString> SeenNonRegisteredParticles;
@@ -88,9 +88,8 @@ public:
     double DepoByRegistered;
 
     ASimSettings Settings;
-    AGeneralSimSettings simSettings;        // to be removed!
     QJsonObject jsSimSet;                   // to be removed!
-    bool bPhotonSourceSim;                  // to be removed!  if false -> particle source sim
+    bool bPhotonSourceSim; // if false -> particle source sim
 
     int NumberOfWorkers = 0;
 
@@ -135,7 +134,7 @@ private:
     void clearG4data();
     void copyDataFromWorkers();
     void removeOldFile(const QString &fileName, const QString &txt);
-    const QString makeLogDir() const;
+    QString makeLogDir() const;
     void saveParticleLog(const QString & dir) const;
     void saveG4ParticleLog(const QString & dir) const;
     void saveA2ParticleLog(const QString & dir) const;

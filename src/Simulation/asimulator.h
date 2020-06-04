@@ -59,7 +59,7 @@ protected:
     int evenDivisionOfLabor(int totalEventCount);
     virtual void updateMaxTracks(int maxPhotonTracks, int maxParticleTracks);
 
-    ASimulationManager & simMan;
+    ASimulationManager & simMan;  // !*! to be removed
     int ID;
 
     const DetectorClass & detector;

@@ -44,7 +44,7 @@ private:
     bool isInsideLimitingObject(const double * r);
     virtual void ReserveSpace(int expectedNumEvents); //no need
 
-    QJsonObject simOptions;
+    QJsonObject simOptions; // !*! to be removed
     TH1I * CustomHist = nullptr; //custom photon generation distribution
 
     APhoton PhotonOnStart; //properties of the photon which are used to initiate Photon_Tracker

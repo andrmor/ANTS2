@@ -234,10 +234,8 @@ void APointSourceSimulator::appendToDataHub(EventsDataClass *dataHub)
 
 bool APointSourceSimulator::SimulateSingle()
 {
-    double x = simOptions["SingleX"].toDouble();
-    double y = simOptions["SingleY"].toDouble();
-    double z = simOptions["SingleZ"].toDouble();
-    std::unique_ptr<ANodeRecord> node(ANodeRecord::createS(x, y, z));
+    const APhotonSim_SingleSettings & SingSet = simMan.Settings.photSimSet.SingleSettings;
+    std::unique_ptr<ANodeRecord> node(ANodeRecord::createS(SingSet.X, SingSet.Y, SingSet.Z));
 
     int eventsToDo = eventEnd - eventBegin; //runs are split between the threads, since node position is fixed for all
     double updateFactor = (eventsToDo<1) ? 100.0 : 100.0/eventsToDo;

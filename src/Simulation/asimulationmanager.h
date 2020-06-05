@@ -54,8 +54,6 @@ public:
     void setMaxThreads(int maxThreads) {MaxThreads = maxThreads;}
     QString loadNodesFromFile(const QString & fileName);
 
-    //void setG4Sim_OnlyGenerateFiles(bool flag) {bOnlyFileExport = flag;}
-    //bool isG4Sim_OnlyGenerateFiles() const {return bOnlyFileExport;}
     void generateG4antsConfigCommon(QJsonObject & json, ASimulator * worker);  // !!! G4ants files common
 
     const DetectorClass & getDetector() {return Detector;}

@@ -4,14 +4,14 @@
 #include "asimulator.h"
 #include "aphoton.h"
 
-#include <QJsonObject>
-
 #include "TString.h"
 #include "TVector3.h"
 
+class APhotonSimSettings;
+class QJsonObject;
 class ANodeRecord;
 class AScanRecord;
-class TH1I; // change to TH1D?
+class TH1I; // !*! change to TH1D
 
 class APointSourceSimulator : public ASimulator
 {
@@ -36,15 +36,16 @@ private:
     bool SimulateCustomNodes();
     bool SimulatePhotonsFromFile();
 
+    void simulateOneNode(ANodeRecord & node);
+
     //utilities
     int  PhotonsToRun();
     void GenerateTraceNphotons(AScanRecord * scs, double time0 = 0, int iPoint = 0);
     bool FindSecScintBounds(double *r, double & z1, double & z2, double & timeOfDrift, double & driftSpeedInSecScint);
-    void OneNode(ANodeRecord & node);
     bool isInsideLimitingObject(const double * r);
-    virtual void ReserveSpace(int expectedNumEvents); //no need
 
-    QJsonObject simOptions; // !*! to be removed
+    const APhotonSimSettings & PhotSimSettings;
+    //QJsonObject simOptions; // !*! to be removed
     TH1I * CustomHist = nullptr; //custom photon generation distribution
 
     APhoton PhotonOnStart; //properties of the photon which are used to initiate Photon_Tracker
@@ -55,7 +56,7 @@ private:
     int ScintType;               // 1 - primary, 2 - secondary
     int NumRuns;                 // multiple runs per node
 
-    TString SecScintName = "SecScint";
+    const TString SecScintName = "SecScint";
 
     //bool fOnlyPrimScint; //do not create event outside of prim scintillator
     bool fLimitNodesToObject;

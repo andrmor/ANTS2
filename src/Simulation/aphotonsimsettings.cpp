@@ -265,6 +265,14 @@ void APhotonSim_ScanSettings::clearSettings()
     ScanRecords[0].bEnabled = true;
 }
 
+int APhotonSim_ScanSettings::countEvents() const
+{
+    int count = 1;
+    for (const APhScanRecord & rec : ScanRecords)
+        if (rec.bEnabled) count *= rec.Nodes;
+    return count;
+}
+
 void APhotonSim_ScanSettings::writeToJson(QJsonObject & json) const
 {
     json["ScanX0"] = X0;

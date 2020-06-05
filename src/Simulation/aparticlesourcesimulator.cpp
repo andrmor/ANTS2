@@ -56,7 +56,7 @@ AParticleSourceSimulator::~AParticleSourceSimulator()
 
 int AParticleSourceSimulator::getEventsDone() const
 {
-    if (simSettings.G4SimSet.bTrackParticles)
+    if (GenSimSettings.G4SimSet.bTrackParticles)
         return 0;
     else
         return eventCurrent - eventBegin;
@@ -66,8 +66,8 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
 {
     if ( !ASimulator::setup(json) ) return false;
 
-    timeFrom = simSettings.TimeFrom;
-    timeRange = simSettings.fTimeResolved ? (simSettings.TimeTo - simSettings.TimeFrom) : 0;
+    timeFrom = GenSimSettings.TimeFrom;
+    timeRange = GenSimSettings.fTimeResolved ? (GenSimSettings.TimeTo - GenSimSettings.TimeFrom) : 0;
 
     if (!json.contains("ParticleSourcesConfig"))
     {
@@ -86,7 +86,7 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
         fAllowMultiple = false; //only applies to 'Sources' mode
         fDoS1 = cjs["DoS1"].toBool();
         fDoS2 = cjs["DoS2"].toBool();
-        fBuildParticleTracks = simSettings.TrackBuildOptions.bBuildParticleTracks;
+        fBuildParticleTracks = GenSimSettings.TrackBuildOptions.bBuildParticleTracks;
         fIgnoreNoHitsEvents = false; //compatibility
         parseJson(cjs, "IgnoreNoHitsEvents", fIgnoreNoHitsEvents);
         fIgnoreNoDepoEvents = true; //compatibility
@@ -136,7 +136,7 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
             {
                 AFileParticleGenerator * PG = new AFileParticleGenerator(*detector.MpCollection);
                 PG->readFromJson(fjs);
-                PG->SetValidationMode(simSettings.G4SimSet.bTrackParticles ? AFileParticleGenerator::Relaxed
+                PG->SetValidationMode(GenSimSettings.G4SimSet.bTrackParticles ? AFileParticleGenerator::Relaxed
                                                                            : AFileParticleGenerator::Strict);
                 PG->Init();
                 ParticleGun = PG;
@@ -175,10 +175,10 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
         totalEventCount = std::min(totalEventCount, static_cast<AFileParticleGenerator*>(ParticleGun)->NumEventsInFile);
     }
 
-    ParticleTracker->configure(&simSettings, fBuildParticleTracks, &tracks, fIgnoreNoDepoEvents, ID);
+    ParticleTracker->configure(&GenSimSettings, fBuildParticleTracks, &tracks, fIgnoreNoDepoEvents, ID);
     ParticleTracker->resetCounter();
-    S1generator->setDoTextLog(simSettings.LogsStatOptions.bPhotonGenerationLog);
-    S2generator->setDoTextLog(simSettings.LogsStatOptions.bPhotonGenerationLog);
+    S1generator->setDoTextLog(GenSimSettings.LogsStatOptions.bPhotonGenerationLog);
+    S2generator->setDoTextLog(GenSimSettings.LogsStatOptions.bPhotonGenerationLog);
     S2generator->setOnlySecondary(!fDoS1);
 
     return true;
@@ -186,7 +186,7 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
 
 bool AParticleSourceSimulator::finalizeConfig()
 {
-    const AG4SimulationSettings & G4SimSet = simSettings.G4SimSet;
+    const AG4SimulationSettings & G4SimSet = GenSimSettings.G4SimSet;
 
     if (G4SimSet.bTrackParticles)
     {
@@ -195,7 +195,7 @@ bool AParticleSourceSimulator::finalizeConfig()
 
         json["NumEvents"] = getEventCount();
 
-        const bool & bBuildTracks = simSettings.TrackBuildOptions.bBuildParticleTracks;
+        const bool & bBuildTracks = GenSimSettings.TrackBuildOptions.bBuildParticleTracks;
         json["BuildTracks"] = bBuildTracks;
         if (bBuildTracks) json["MaxTracks"] = maxParticleTracks;
 
@@ -230,7 +230,7 @@ void AParticleSourceSimulator::simulate()
 
     std::unique_ptr<QFile> pFile;
     std::unique_ptr<QTextStream> pStream;
-    if (simSettings.G4SimSet.bTrackParticles)
+    if (GenSimSettings.G4SimSet.bTrackParticles)
     {
         //mode "from G4ants file" requires special treatment
         AFileParticleGenerator * fpg = dynamic_cast<AFileParticleGenerator*>(ParticleGun);
@@ -254,7 +254,7 @@ void AParticleSourceSimulator::simulate()
             return;
         }
 
-        const QString name = simSettings.G4SimSet.getPrimariesFileName(ID);//   FilePath + QString("primaries-%1.txt").arg(ID);
+        const QString name = GenSimSettings.G4SimSet.getPrimariesFileName(ID);//   FilePath + QString("primaries-%1.txt").arg(ID);
         pFile.reset(new QFile(name));
         if(!pFile->open(QIODevice::WriteOnly | QFile::Text))
         {
@@ -280,7 +280,7 @@ void AParticleSourceSimulator::simulate()
         //event prepared
             //qDebug() << "Event composition ready!  Particle stack length:" << ParticleStack.size();
 
-        if (!simSettings.G4SimSet.bTrackParticles)
+        if (!GenSimSettings.G4SimSet.bTrackParticles)
             ParticleTracker->TrackParticlesOnStack(eventCurrent);
         else
         {
@@ -326,7 +326,7 @@ void AParticleSourceSimulator::simulate()
             continue;
         }
 
-        if (!simSettings.fLRFsim) OneEvent->HitsToSignal();
+        if (!GenSimSettings.fLRFsim) OneEvent->HitsToSignal();
 
         dataHub->Events.append(OneEvent->PMsignals);
         if (timeRange != 0) dataHub->TimedEvents.append(OneEvent->TimedPMsignals);
@@ -338,13 +338,13 @@ void AParticleSourceSimulator::simulate()
 
     ParticleTracker->releaseResources();
     if (ParticleGun) ParticleGun->ReleaseResources();
-    if (simSettings.G4SimSet.bTrackParticles)
+    if (GenSimSettings.G4SimSet.bTrackParticles)
     {
         pStream->flush();
         pFile->close();
     }
 
-    if (simSettings.G4SimSet.bTrackParticles && !bOnlySavePrimariesToFile)
+    if (GenSimSettings.G4SimSet.bTrackParticles && !bOnlySavePrimariesToFile)
     {
         // track primaries in Geant4, read deposition, generate photons, trace photons, process hits
         bool bOK = geant4TrackAndProcess();
@@ -592,7 +592,7 @@ bool AParticleSourceSimulator::geant4TrackAndProcess()
     if (!bOK) return false;
 
     // read receipt file, stop if not OK
-    QString receipeFileName = simSettings.G4SimSet.getReceitFileName(ID); // FilePath + QString("receipt-%1.txt").arg(ID);
+    QString receipeFileName = GenSimSettings.G4SimSet.getReceitFileName(ID); // FilePath + QString("receipt-%1.txt").arg(ID);
     QJsonObject jrec;
     bOK = LoadJsonFromFile(jrec, receipeFileName);
     //qDebug() << jrec;
@@ -630,15 +630,15 @@ bool AParticleSourceSimulator::geant4TrackAndProcess()
     if (!bOK) return false;
 
     //read history/tracks
-    if (simSettings.TrackBuildOptions.bBuildParticleTracks || simSettings.LogsStatOptions.bParticleTransportLog)
+    if (GenSimSettings.TrackBuildOptions.bBuildParticleTracks || GenSimSettings.LogsStatOptions.bParticleTransportLog)
     {
-        ATrackingDataImporter ti(simSettings.TrackBuildOptions,
+        ATrackingDataImporter ti(GenSimSettings.TrackBuildOptions,
                                  detector.MpCollection->getListOfParticleNames(),
-                                 (simSettings.LogsStatOptions.bParticleTransportLog ? &TrackingHistory : nullptr),
-                                 (simSettings.TrackBuildOptions.bBuildParticleTracks ? &tracks : nullptr),
+                                 (GenSimSettings.LogsStatOptions.bParticleTransportLog ? &TrackingHistory : nullptr),
+                                 (GenSimSettings.TrackBuildOptions.bBuildParticleTracks ? &tracks : nullptr),
                                  maxParticleTracks);
-        const QString TrackingFileName = simSettings.G4SimSet.getTracksFileName(ID);
-        ErrorString = ti.processFile(TrackingFileName, eventBegin, simSettings.G4SimSet.BinaryOutput);
+        const QString TrackingFileName = GenSimSettings.G4SimSet.getTracksFileName(ID);
+        ErrorString = ti.processFile(TrackingFileName, eventBegin, GenSimSettings.G4SimSet.BinaryOutput);
         if (!ErrorString.isEmpty()) return false;
     }
 
@@ -646,7 +646,7 @@ bool AParticleSourceSimulator::geant4TrackAndProcess()
     int numMon = detector.Sandwich->MonitorsRecords.size();
     if (numMon != 0)
     {
-        QString monFileName = simSettings.G4SimSet.getMonitorDataFileName(ID);
+        QString monFileName = GenSimSettings.G4SimSet.getMonitorDataFileName(ID);
         QJsonArray ar;
         bOK = LoadJsonArrayFromFile(ar, monFileName);
         if (bOK)
@@ -683,7 +683,7 @@ bool AParticleSourceSimulator::geant4TrackAndProcess()
 bool AParticleSourceSimulator::runGeant4Handler()
 {
     const QString exe = AGlobalSettings::getInstance().G4antsExec;
-    const QString confFile = simSettings.G4SimSet.getConfigFileName(ID); // FilePath + QString("aga-%1.json").arg(ID);
+    const QString confFile = GenSimSettings.G4SimSet.getConfigFileName(ID); // FilePath + QString("aga-%1.json").arg(ID);
     QStringList ar;
     ar << confFile;
 
@@ -712,9 +712,9 @@ bool AParticleSourceSimulator::runGeant4Handler()
 
 bool AParticleSourceSimulator::processG4DepositionData()
 {
-    const QString DepoFileName = simSettings.G4SimSet.getDepositionFileName(ID);
+    const QString DepoFileName = GenSimSettings.G4SimSet.getDepositionFileName(ID);
 
-    if (simSettings.G4SimSet.BinaryOutput)
+    if (GenSimSettings.G4SimSet.BinaryOutput)
     {
         inStream = new std::ifstream(DepoFileName.toLocal8Bit().data(), std::ios::in | std::ios::binary);
 
@@ -746,7 +746,7 @@ bool AParticleSourceSimulator::processG4DepositionData()
 
         //Filling EnergyVector for this event
         //  qDebug() << "iEv="<<eventCurrent << "building energy vector...";
-        bool bOK = (simSettings.G4SimSet.BinaryOutput ? readG4DepoEventFromBinFile()
+        bool bOK = (GenSimSettings.G4SimSet.BinaryOutput ? readG4DepoEventFromBinFile()
                                                       : readG4DepoEventFromTextFile() );
         if (!bOK) return false;
         //  qDebug() << "Energy vector contains" << EnergyVector.size() << "cells";
@@ -754,7 +754,7 @@ bool AParticleSourceSimulator::processG4DepositionData()
         bOK = generateAndTrackPhotons();
         if (!bOK) return false;
 
-        if (!simSettings.fLRFsim) OneEvent->HitsToSignal();
+        if (!GenSimSettings.fLRFsim) OneEvent->HitsToSignal();
 
         dataHub->Events.append(OneEvent->PMsignals);
         if (timeRange != 0) dataHub->TimedEvents.append(OneEvent->TimedPMsignals);
@@ -878,7 +878,7 @@ bool AParticleSourceSimulator::prepareWorkerG4File()
 {
     AFileParticleGenerator * fpg = static_cast<AFileParticleGenerator*>(ParticleGun);
 
-    const QString FileName = simSettings.G4SimSet.getPrimariesFileName(ID);
+    const QString FileName = GenSimSettings.G4SimSet.getPrimariesFileName(ID);
     return fpg->generateG4File(eventBegin, eventEnd, FileName);
 }
 

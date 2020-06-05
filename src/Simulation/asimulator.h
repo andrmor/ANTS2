@@ -63,7 +63,7 @@ protected:
     int ID;
 
     const DetectorClass & detector;
-    const AGeneralSimSettings & simSettings;
+    const AGeneralSimSettings & GenSimSettings;
 
     // local resources
     TRandom2 *RandGen;

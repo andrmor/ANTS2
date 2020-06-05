@@ -375,29 +375,29 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
   JsonToLineEditDouble(ppj, "PhotPerNodeGaussMean", ui->ledScanGaussMean);
   JsonToLineEditDouble(ppj, "PhotPerNodeGaussSigma", ui->ledScanGaussSigma);
   if (ppj.contains("PhotPerNodeCustom"))
-    {
+  {
       QJsonArray ja = ppj["PhotPerNodeCustom"].toArray();
       int size = ja.size();
       if (size > 0)
-        {
-          double* xx = new double[size];
-          int* yy    = new int[size];
+      {
+          double * xx = new double[size];
+          double * yy = new double[size];
           for (int i=0; i<size; i++)
-            {
+          {
               xx[i] = ja[i].toArray()[0].toDouble();
-              yy[i] = ja[i].toArray()[1].toInt();
-            }
-          histScan = new TH1I("histPhotDistr","Photon distribution", size-1, xx);          
+              yy[i] = ja[i].toArray()[1].toDouble();
+          }
+          histScan = new TH1D("","CustomNumPhotDist", size-1, xx);
           histScan->SetXTitle("Number of generated photons");
-          histScan->SetYTitle("Relative probability");
-          for (int i = 1; i<size+1; i++) histScan->SetBinContent(i, yy[i-1]);
+          histScan->SetYTitle("Relative probability, a.u.");
+          for (int i = 1; i < size + 1; i++) histScan->SetBinContent(i, yy[i-1]);
           histScan->GetIntegral();
           delete[] xx;
           delete[] yy;
           ui->pbScanDistrShow->setEnabled(true);
           ui->pbScanDistrDelete->setEnabled(true);
-        }
-    }  
+      }
+  }
   //Wavelength/decay options
   QJsonObject wdj = pojs["WaveTimeOptions"].toObject();
   ui->cbFixWavelengthPointSource->setChecked(false);  //compatibility

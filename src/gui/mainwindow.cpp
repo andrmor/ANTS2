@@ -2636,30 +2636,26 @@ void MainWindow::on_cbEnableADC_toggled(bool checked)
 
 void MainWindow::on_pbScanDistrLoad_clicked()
 {
-  QString fileName = QFileDialog::getOpenFileName(this, "Load custom distribution", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
-  if (fileName.isEmpty()) return;
-  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+    QString fileName = QFileDialog::getOpenFileName(this, "Load custom distribution", GlobSet.LastOpenDir, "Text files (*.txt);;All files (*)");
+    if (fileName.isEmpty()) return;
+    GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
-  MainWindow::LoadScanPhotonDistribution(fileName);
-  MainWindow::on_pbUpdateSimConfig_clicked();
+    LoadScanPhotonDistribution(fileName);
+    on_pbUpdateSimConfig_clicked();
 }
 
 void MainWindow::on_pbScanDistrShow_clicked()
 {
-  if (!histScan) return;
-  GraphWindow->Draw(histScan, "", true, false);
+    if (!histScan) return;
+    GraphWindow->Draw(histScan, "", true, false);
 }
 
 void MainWindow::on_pbScanDistrDelete_clicked()
 {
-  if (histScan)
-    {
-      delete histScan;
-      histScan = 0;
-    }
-  ui->pbScanDistrShow->setEnabled(false);
-  ui->pbScanDistrDelete->setEnabled(false);
-  MainWindow::on_pbUpdateSimConfig_clicked();
+    delete histScan; histScan = nullptr;
+    ui->pbScanDistrShow->setEnabled(false);
+    ui->pbScanDistrDelete->setEnabled(false);
+    on_pbUpdateSimConfig_clicked();
 }
 
 void MainWindow::on_lwMaterials_currentRowChanged(int currentRow)

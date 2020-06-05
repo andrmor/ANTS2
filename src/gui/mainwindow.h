@@ -30,7 +30,6 @@ class MaterialInspectorWindow;
 class OutputWindow;
 class QComboBox;
 class TH1D;
-class TH1I;
 class WindowNavigatorClass;
 class GlobalSettingsWindowClass;
 class GainEvaluatorWindowClass;
@@ -326,7 +325,7 @@ private:
     bool TriggerForbidden = false;
     bool BulkUpdate = false;
 
-    TH1I* histScan = 0;
+    TH1D * histScan = nullptr;
 
 public:
     bool ShutDown = false; //when exiting ANTS2 by closing the main window

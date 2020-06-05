@@ -282,17 +282,18 @@ void MainWindow::LoadScanPhotonDistribution(QString fileName)
 {
   QVector<double> x, y;
   int error = LoadDoubleVectorsFromFile(fileName, &x, &y);
-  if (error>0) return;
+  if (error > 0) return;
 
-  if (histScan) delete histScan;
+  delete histScan;
   int size = x.size();
   double* xx = new double [size];
   for (int i = 0; i<size; i++) xx[i]=x[i];
-  histScan = new TH1I("histPhotDistr","", size-1, xx);
+  histScan = new TH1D("","CustomNumPhotDist", size-1, xx);
   for (int j = 1; j<size+1; j++)  histScan->SetBinContent(j, y[j-1]);
   histScan->GetIntegral(); //to make thread safe
   histScan->SetXTitle("Number of generated photons");
-  histScan->SetYTitle("Probability");
+  histScan->SetYTitle("Relative probability, a.u.");
+  delete[] xx;
 
   ui->pbScanDistrShow->setEnabled(true);
   ui->pbScanDistrDelete->setEnabled(true);

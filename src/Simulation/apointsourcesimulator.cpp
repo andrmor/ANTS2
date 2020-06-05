@@ -20,7 +20,7 @@
 #include <QDebug>
 #include <QJsonObject>
 
-#include "TH1I.h" //to change to TH1D !*!
+#include "TH1D.h"
 #include "TRandom2.h"
 #include "TGeoManager.h"
 #include "TGeoNavigator.h"
@@ -107,16 +107,14 @@ bool APointSourceSimulator::setup(QJsonObject &json)
         QJsonArray ja = ppnjson["PhotPerNodeCustom"].toArray();
         int size = ja.size();
         double* xx = new double[size];
-        int* yy    = new int[size];
+        double* yy = new double[size];
         for (int i=0; i<size; i++)
         {
             xx[i] = ja[i].toArray()[0].toDouble();
-            yy[i] = ja[i].toArray()[1].toInt();
+            yy[i] = ja[i].toArray()[1].toDouble();
         }
-        TString hName = "hPhotDistr";
-        hName += ID;
-        CustomHist = new TH1I(hName, "Photon distribution", size-1, xx);
-        for (int i = 1; i<size+1; i++)  CustomHist->SetBinContent(i, yy[i-1]);
+        CustomHist = new TH1D("", "Photon distribution", size-1, xx);
+        for (int i = 1; i < size+1; i++) CustomHist->SetBinContent(i, yy[i-1]);
         CustomHist->GetIntegral(); //will be thread safe after this
         delete[] xx;
         delete[] yy;

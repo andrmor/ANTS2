@@ -9741,6 +9741,9 @@ Right click: toggle build photon tracks. Also switches of building particle trac
               <bold>false</bold>
              </font>
             </property>
+            <property name="toolTip">
+             <string/>
+            </property>
             <property name="text">
              <string>Show</string>
             </property>
@@ -9759,6 +9762,10 @@ Right click: toggle build photon tracks. Also switches of building particle trac
               <weight>50</weight>
               <bold>false</bold>
              </font>
+            </property>
+            <property name="toolTip">
+             <string>Note that the probability value for the last point is ignored!
+The last point is only used to define the range of the semi-ultimate bin.</string>
             </property>
             <property name="text">
              <string>Load</string>

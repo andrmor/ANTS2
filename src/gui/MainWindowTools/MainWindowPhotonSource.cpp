@@ -136,7 +136,7 @@ void MainWindow::SimPointSourcesConfigToJson(QJsonObject &jsonMaster)
   if (histScan)
   {
       QJsonArray ja;
-      writeTH1ItoJsonArr(histScan, ja);
+      writeTH1DtoJsonArr(histScan, ja);
       ppnjson["PhotPerNodeCustom"] = ja;
   }
   else ppnjson["PhotPerNodeCustom"] = QJsonArray();

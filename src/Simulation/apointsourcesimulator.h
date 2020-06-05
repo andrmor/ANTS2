@@ -11,7 +11,7 @@ class APhotonSimSettings;
 class QJsonObject;
 class ANodeRecord;
 class AScanRecord;
-class TH1I; // !*! change to TH1D
+class TH1D;
 
 class APointSourceSimulator : public ASimulator
 {
@@ -46,7 +46,7 @@ private:
 
     const APhotonSimSettings & PhotSimSettings;
     //QJsonObject simOptions; // !*! to be removed
-    TH1I * CustomHist = nullptr; //custom photon generation distribution
+    TH1D * CustomHist = nullptr; //custom photon generation distribution
 
     APhoton PhotonOnStart; //properties of the photon which are used to initiate Photon_Tracker
 

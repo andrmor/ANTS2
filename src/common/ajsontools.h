@@ -38,7 +38,7 @@ bool LoadJsonFromFile(QJsonObject &json, const QString& fileName);
 bool LoadJsonArrayFromFile(QJsonArray &ar, const QString& fileName);
 bool SaveJsonToFile(const QJsonObject &json, const QString& fileName);
 
-bool writeTH1ItoJsonArr(TH1I *hist, QJsonArray &ja);
+bool writeTH1ItoJsonArr(TH1I* hist, QJsonArray &ja);
 bool writeTH1DtoJsonArr(TH1D* hist, QJsonArray &ja);
 
 bool isContainAllKeys(QJsonObject json, QStringList keys);

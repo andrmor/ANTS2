@@ -8121,9 +8121,9 @@ Second click will trigger strong abort mode, which will result in loss of all si
            <widget class="QLabel" name="label_247">
             <property name="geometry">
              <rect>
-              <x>260</x>
+              <x>257</x>
               <y>95</y>
-              <width>46</width>
+              <width>21</width>
               <height>13</height>
              </rect>
             </property>
@@ -8188,7 +8188,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
              <widget class="QLineEdit" name="ledScanFloodZto">
               <property name="geometry">
                <rect>
-                <x>135</x>
+                <x>136</x>
                 <y>3</y>
                 <width>51</width>
                 <height>20</height>
@@ -8214,27 +8214,33 @@ Second click will trigger strong abort mode, which will result in loss of all si
              <widget class="QLabel" name="label_249">
               <property name="geometry">
                <rect>
-                <x>12</x>
+                <x>0</x>
                 <y>6</y>
-                <width>30</width>
+                <width>37</width>
                 <height>13</height>
                </rect>
               </property>
               <property name="text">
                <string>from</string>
               </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
              </widget>
              <widget class="QLabel" name="label_251">
               <property name="geometry">
                <rect>
-                <x>94</x>
+                <x>92</x>
                 <y>6</y>
-                <width>46</width>
+                <width>41</width>
                 <height>13</height>
                </rect>
               </property>
               <property name="text">
-               <string>mm   to</string>
+               <string>mm  to</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </widget>

@@ -19,29 +19,29 @@ public:
     explicit APointSourceSimulator(ASimulationManager & simMan, int ID);
     ~APointSourceSimulator();
 
-    virtual int getEventCount() const;
-    virtual int getTotalEventCount() const { return totalEventCount; }
-    virtual int getEventsDone() const { return eventCurrent; }
-    virtual bool setup(QJsonObject & json);
-    virtual void simulate();
-    virtual void appendToDataHub(EventsDataClass * dataHub);
-    virtual void mergeData() override {}
+    int  getEventCount() const override;
+    int  getTotalEventCount() const override {return totalEventCount;}
+    int  getEventsDone() const override {return eventCurrent;}
+    bool setup(QJsonObject & json) override;
+    void simulate() override;
+    void appendToDataHub(EventsDataClass * dataHub) override;
+    void mergeData() override {}
 
-    int getNumRuns() const {return NumRuns;}
+    int  getNumRuns() const {return NumRuns;}   // !*! to remove
 
 private:
-    bool SimulateSingle();
-    bool SimulateRegularGrid();
-    bool SimulateFlood();
-    bool SimulateCustomNodes();
-    bool SimulatePhotonsFromFile();
+    bool simulateSingle();
+    bool simulateRegularGrid();
+    bool simulateFlood();
+    bool simulateCustomNodes();
+    bool simulatePhotonsFromFile();
 
     void simulateOneNode(ANodeRecord & node);
 
     //utilities
-    int  PhotonsToRun();
-    void GenerateTraceNphotons(AScanRecord * scs, double time0 = 0, int iPoint = 0);
-    bool FindSecScintBounds(double *r, double & z1, double & z2, double & timeOfDrift, double & driftSpeedInSecScint);
+    int  getNumPhotToRun();
+    void generateAndTracePhotons(AScanRecord * scs, double time0 = 0, int iPoint = 0);
+    bool findSecScintBounds(double *r, double & z1, double & z2, double & timeOfDrift, double & driftSpeedInSecScint);
     bool isInsideLimitingObject(const double * r);
 
     const APhotonSimSettings & PhotSimSettings;

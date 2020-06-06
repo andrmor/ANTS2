@@ -53,8 +53,8 @@ bool APointSourceSimulator::setup(QJsonObject &json)
     QJsonObject js = json["PointSourcesConfig"].toObject();
     //reading main control options
     QJsonObject cjson = js["ControlOptions"].toObject();
-    NumRuns = cjson["MultipleRunsNumber"].toInt();
-    if (!cjson["MultipleRuns"].toBool()) NumRuns = 1;
+
+    NumRuns = PhotSimSettings.getActiveRuns();
 
     fLimitNodesToObject = false;
     if (cjson.contains("GenerateOnlyInPrimary"))  //just in case it is an old config file run directly

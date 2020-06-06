@@ -21,6 +21,12 @@ void APhotonSimSettings::clearSettings()
     CustomNodeSettings.clearSettings();
 }
 
+int APhotonSimSettings::getActiveRuns() const
+{
+    if (bMultiRun) return NumRuns;
+    else           return 1;
+}
+
 void APhotonSimSettings::writeToJson(QJsonObject &json) const
 {
     QJsonObject jsc;

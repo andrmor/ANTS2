@@ -27,8 +27,6 @@ public:
     void appendToDataHub(EventsDataClass * dataHub) override;
     void mergeData() override {}
 
-    int  getNumRuns() const {return NumRuns;}   // !*! to remove
-
 private:
     bool simulateSingle();
     bool simulateRegularGrid();

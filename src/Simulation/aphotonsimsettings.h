@@ -157,6 +157,8 @@ public:
     APhotonSim_FloodSettings      FloodSettings;
     APhotonSim_CustomNodeSettings CustomNodeSettings;
 
+    int getActiveRuns() const;
+
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);
     void clearSettings();

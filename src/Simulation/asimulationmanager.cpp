@@ -344,12 +344,13 @@ void ASimulationManager::copyDataFromWorkers()
     {
         if (bPhotonSourceSim)
         {
+            EventsDataHub.ScanNumberOfRuns = Settings.photSimSet.getActiveRuns();
             APointSourceSimulator *lastPointSrcSimulator = static_cast< APointSourceSimulator *>(workers.last());
-            EventsDataHub.ScanNumberOfRuns = lastPointSrcSimulator->getNumRuns();
             SiPMpixels = lastPointSrcSimulator->getLastEvent()->SiPMpixels; //only the last event!
         }
         else
         {
+            EventsDataHub.ScanNumberOfRuns = 1;
             AParticleSourceSimulator *lastPartSrcSimulator = static_cast< AParticleSourceSimulator *>(workers.last());
             EnergyVector = lastPartSrcSimulator->getEnergyVector();
             lastPartSrcSimulator->ClearEnergyVectorButKeepObjects(); // to avoid clearing the energy vector cells

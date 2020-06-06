@@ -43,18 +43,18 @@ private:
 private:
     const APhotonSimSettings & PhotSimSettings;
 
-    TH1D * CustomHist = nullptr; //custom photon generation distribution
+    TH1D *  CustomHist     = nullptr;
+    int     NumRuns        = 1;
+    bool    bLimitToVolume = false;
+    TString LimitToVolume;
 
-    APhoton Photon; //properties of the photon which are used to initiate Photon_Tracker
+    APhoton Photon;          //properties of the photon which are used to initiate Photon_Tracker
 
     int totalEventCount = 0;
 
-    int NumRuns;                 // multiple runs per node
-
     const TString SecScintName = "SecScint";
 
-    bool fLimitNodesToObject;
-    TString LimitNodesToObject;
+
 
     //photon direction option
     bool fRandomDirection;

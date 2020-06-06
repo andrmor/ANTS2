@@ -51,33 +51,16 @@ bool APointSourceSimulator::setup(QJsonObject &json)
     if(!ASimulator::setup(json)) return false;
 
     QJsonObject js = json["PointSourcesConfig"].toObject();
-    //reading main control options
-    QJsonObject cjson = js["ControlOptions"].toObject();
 
     NumRuns = PhotSimSettings.getActiveRuns();
 
-    fLimitNodesToObject = false;
-    if (cjson.contains("GenerateOnlyInPrimary"))  //just in case it is an old config file run directly
+    bLimitToVolume = PhotSimSettings.bLimitToVol;
+    if (bLimitToVolume)
     {
-        if (detector.Sandwich->World->findObjectByName("PrScint"))
-        {
-            fLimitNodesToObject = true;
-            LimitNodesToObject = "PrScint";
-        }
-    }
-    if (cjson.contains("LimitNodesTo"))
-    {
-        if (cjson.contains("LimitNodes")) //new system
-            fLimitNodesToObject = cjson["LimitNodes"].toBool();
-        else
-            fLimitNodesToObject = true;  //semi-old
-        QString Obj = cjson["LimitNodesTo"].toString();
-
-        if (fLimitNodesToObject && !Obj.isEmpty() && detector.Sandwich->World->findObjectByName(Obj))
-        {
-            fLimitNodesToObject = true;
-            LimitNodesToObject = Obj.toLocal8Bit().data();
-        }
+        const QString & Vol = PhotSimSettings.LimitVolume;
+        if ( !Vol.isEmpty() && detector.Sandwich->World->findObjectByName(Vol) )
+            LimitToVolume = PhotSimSettings.LimitVolume.toLocal8Bit().data();
+        else bLimitToVolume = false;
     }
 
     if (PhotSimSettings.PerNodeSettings.Mode == APhotonSim_PerNodeSettings::Custom)
@@ -370,7 +353,7 @@ bool APointSourceSimulator::simulateFlood()
         else
             node->R[2] = Zfrom + (Zto - Zfrom) * RandGen->Rndm();
 
-        if (fLimitNodesToObject && !isInsideLimitingObject(node->R))
+        if (bLimitToVolume && !isInsideLimitingObject(node->R))
         {
             WatchdogThreshold--;
             if (WatchdogThreshold < 0 && inode == 0)
@@ -659,7 +642,7 @@ void APointSourceSimulator::simulateOneNode(ANodeRecord & node)
 
     for (int iPoint = 0; iPoint < numPoints; iPoint++)
     {
-        const bool bInside = !(fLimitNodesToObject && !isInsideLimitingObject(thisNode->R));
+        const bool bInside = !(bLimitToVolume && !isInsideLimitingObject(thisNode->R));
         if (bInside)
         {
             for (int i=0; i<3; i++) sr->Points[iPoint].r[i] = thisNode->R[i];
@@ -723,5 +706,5 @@ bool APointSourceSimulator::isInsideLimitingObject(const double *r)
 
     TGeoNode* node = navigator->FindNode(r[0], r[1], r[2]);
     if (!node) return false;
-    return (node->GetVolume() && node->GetVolume()->GetName()==LimitNodesToObject);
+    return (node->GetVolume() && node->GetVolume()->GetName()==LimitToVolume);
 }

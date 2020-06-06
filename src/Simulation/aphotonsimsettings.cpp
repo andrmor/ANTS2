@@ -13,7 +13,8 @@ void APhotonSimSettings::clearSettings()
     LimitVolume.clear();
 
     PerNodeSettings.clearSettings();
-    FixedPhotSettings.clearSettings();
+    FixedPhotSettings.clearWaveSettings();
+    FixedPhotSettings.clearDirSettings();
     SingleSettings.clearSettings();
     ScanSettings.clearSettings();
     FloodSettings.clearSettings();
@@ -112,9 +113,9 @@ void APhotonSimSettings::readFromJson(const QJsonObject & json)
     if (bOK) PerNodeSettings.readFromJson(js);
 
     bOK = parseJson(json, "WaveTimeOptions", js);
-    if (bOK) FixedPhotSettings.readFromJson(js);
+    if (bOK) FixedPhotSettings.readWaveFromJson(js);
     bOK = parseJson(json, "PhotonDirectionOptions", js);
-    if (bOK) FixedPhotSettings.readFromJson(js); //not a bug, using the same object with fixed settings
+    if (bOK) FixedPhotSettings.readDirFromJson(js);
 
     bOK = parseJson(json, "SinglePositionOptions", js);
     if (bOK) SingleSettings.readFromJson(js);
@@ -195,10 +196,14 @@ void APhotonSim_PerNodeSettings::readFromJson(const QJsonObject & json)
     }
 }
 
-void APhotonSim_FixedPhotSettings::clearSettings()
+void APhotonSim_FixedPhotSettings::clearWaveSettings()
 {
     bFixWave      = false;
     FixWaveIndex  = -1;
+}
+
+void APhotonSim_FixedPhotSettings::clearDirSettings()
+{
     DirectionMode = Vector;
     FixDX         = 0;
     FixDY         = 0;
@@ -222,12 +227,17 @@ void APhotonSim_FixedPhotSettings::writeDirToJson(QJsonObject & json) const
     json["Cone"]          = FixConeAngle;
 }
 
-void APhotonSim_FixedPhotSettings::readFromJson(const QJsonObject & json)
+void APhotonSim_FixedPhotSettings::readWaveFromJson(const QJsonObject & json)
 {
-    clearSettings();
+    clearWaveSettings();
 
     parseJson(json, "UseFixedWavelength", bFixWave);
     parseJson(json, "WaveIndex", FixWaveIndex);
+}
+
+void APhotonSim_FixedPhotSettings::readDirFromJson(const QJsonObject &json)
+{
+    clearDirSettings();
 
     parseJson(json, "Random", bIsotropic);
     int iMode = 0;

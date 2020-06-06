@@ -80,23 +80,6 @@ bool APointSourceSimulator::setup(QJsonObject &json)
         }
     }
 
-    //reading photons per node info
-    //QJsonObject ppnjson = js["PhotPerNodeOptions"].toObject();
-    //numPhotMode = ppnjson["PhotPerNodeMode"].toInt();
-    //if (numPhotMode < 0 || numPhotMode > 3)
-    //{
-    //    ErrorString = "Unknown photons per node mode!";
-    //    return false;
-    //}
-    //numPhotsConst = ppnjson["PhotPerNodeConstant"].toInt();
-    //parseJson(ppnjson, "PhotPerNodeConstant", numPhotsConst);
-    //numPhotUniMin = ppnjson["PhotPerNodeUniMin"].toInt();
-    //parseJson(ppnjson, "PhotPerNodeUniMin", numPhotUniMin);
-    //numPhotUniMax = ppnjson["PhotPerNodeUniMax"].toInt();
-    //parseJson(ppnjson, "PhotPerNodeUniMax", numPhotUniMax);
-    //parseJson(ppnjson, "PhotPerNodeGaussMean", numPhotGaussMean);
-    //parseJson(ppnjson, "PhotPerNodeGaussSigma", numPhotGaussSigma);
-
     if (PhotSimSettings.PerNodeSettings.Mode == APhotonSim_PerNodeSettings::Custom)
     {
         delete CustomHist; CustomHist = nullptr;
@@ -115,41 +98,20 @@ bool APointSourceSimulator::setup(QJsonObject &json)
         CustomHist = new TH1D("", "NumPhotDist", size-1, X);
         for (int i = 1; i < size + 1; i++) CustomHist->SetBinContent(i, Dist.at(i-1).second);
         CustomHist->GetIntegral(); //will be thread safe after this
-
-        /*
-        QJsonArray ja = ppnjson["PhotPerNodeCustom"].toArray();
-        int size = ja.size();
-        double* xx = new double[size];
-        double* yy = new double[size];
-        for (int i=0; i<size; i++)
-        {
-            xx[i] = ja[i].toArray()[0].toDouble();
-            yy[i] = ja[i].toArray()[1].toDouble();
-        }
-        CustomHist = new TH1D("", "Photon distribution", size-1, xx);
-        for (int i = 1; i < size+1; i++) CustomHist->SetBinContent(i, yy[i-1]);
-        CustomHist->GetIntegral(); //will be thread safe after this
-        delete[] xx;
-        delete[] yy;
-        */
     }
 
-    //reading wavelength/decay options
-    QJsonObject wdjson = js["WaveTimeOptions"].toObject();
-    fUseGivenWaveIndex = false; //compatibility
-    parseJson(wdjson, "UseFixedWavelength", fUseGivenWaveIndex);
-    PhotonOnStart.waveIndex = wdjson["WaveIndex"].toInt();
-    if (!GenSimSettings.fWaveResolved) PhotonOnStart.waveIndex = -1;
+    Photon.waveIndex = PhotSimSettings.FixedPhotSettings.FixWaveIndex;
+    if (!GenSimSettings.fWaveResolved) Photon.waveIndex = -1;
 
     //reading direction info
     QJsonObject pdjson = js["PhotonDirectionOptions"].toObject();
     fRandomDirection =  pdjson["Random"].toBool();
     if (!fRandomDirection)
     {
-        PhotonOnStart.v[0] = pdjson["FixedX"].toDouble();
-        PhotonOnStart.v[1] = pdjson["FixedY"].toDouble();
-        PhotonOnStart.v[2] = pdjson["FixedZ"].toDouble();
-        NormalizeVector(PhotonOnStart.v);
+        Photon.v[0] = pdjson["FixedX"].toDouble();
+        Photon.v[1] = pdjson["FixedY"].toDouble();
+        Photon.v[2] = pdjson["FixedZ"].toDouble();
+        NormalizeVector(Photon.v);
         //qDebug() << "  ph dir:"<<PhotonOnStart.v[0]<<PhotonOnStart.v[1]<<PhotonOnStart.v[2];
     }
     fCone = false;
@@ -560,18 +522,18 @@ void APointSourceSimulator::generateAndTracePhotons(AScanRecord *scs, double tim
         }
     }
 
-    PhotonOnStart.r[0] = scs->Points[iPoint].r[0];
-    PhotonOnStart.r[1] = scs->Points[iPoint].r[1];
-    PhotonOnStart.r[2] = scs->Points[iPoint].r[2];
-    PhotonOnStart.scint_type = scs->ScintType;
-    PhotonOnStart.time = time0;
+    Photon.r[0] = scs->Points[iPoint].r[0];
+    Photon.r[1] = scs->Points[iPoint].r[1];
+    Photon.r[2] = scs->Points[iPoint].r[2];
+    Photon.scint_type = scs->ScintType;
+    Photon.time = time0;
 
     //================================
     for (int i=0; i<scs->Points[iPoint].energy; i++)
     {
         //photon direction
         if (fRandomDirection)
-            photonGenerator->GenerateDirection(&PhotonOnStart);
+            photonGenerator->GenerateDirection(&Photon);
         else if (fCone)
         {
             double z = CosConeAngle + RandGen->Rndm() * (1.0 - CosConeAngle);
@@ -580,15 +542,15 @@ void APointSourceSimulator::generateAndTracePhotons(AScanRecord *scs, double tim
             TVector3 K1(tmp*cos(phi), tmp*sin(phi), z);
             TVector3 Coll(ConeDir);
             K1.RotateUz(Coll);
-            PhotonOnStart.v[0] = K1[0];
-            PhotonOnStart.v[1] = K1[1];
-            PhotonOnStart.v[2] = K1[2];
+            Photon.v[0] = K1[0];
+            Photon.v[1] = K1[1];
+            Photon.v[2] = K1[2];
 
         }
         //else it is already set
 
         //configure  wavelength index and emission time
-        PhotonOnStart.time = time0;   //reset time offset
+        Photon.time = time0;   //reset time offset
         TGeoNavigator * navigator = detector.GeoManager->GetCurrentNavigator();
         if (!navigator)
         {
@@ -597,7 +559,7 @@ void APointSourceSimulator::generateAndTracePhotons(AScanRecord *scs, double tim
         }
 
         int thisMatIndex;
-        TGeoNode* node = navigator->FindNode(PhotonOnStart.r[0], PhotonOnStart.r[1], PhotonOnStart.r[2]);
+        TGeoNode* node = navigator->FindNode(Photon.r[0], Photon.r[1], Photon.r[2]);
         if (!node)
         {
             //PhotonOnStart.waveIndex = -1;
@@ -607,21 +569,24 @@ void APointSourceSimulator::generateAndTracePhotons(AScanRecord *scs, double tim
         else
             thisMatIndex = node->GetVolume()->GetMaterial()->GetIndex();
 
-        if (!fUseGivenWaveIndex) photonGenerator->GenerateWave(&PhotonOnStart, thisMatIndex);//if directly given wavelength -> waveindex is already set in PhotonOnStart
-        photonGenerator->GenerateTime(&PhotonOnStart, thisMatIndex);
+        //if (!fUseGivenWaveIndex)
+        if (!PhotSimSettings.FixedPhotSettings.bFixWave)
+            photonGenerator->GenerateWave(&Photon, thisMatIndex);//if directly given wavelength -> waveindex is already set in PhotonOnStart
+
+        photonGenerator->GenerateTime(&Photon, thisMatIndex);
 
         if (scs->ScintType == 2)
         {
             const double dist = (z2 - z1) * RandGen->Rndm();
-            PhotonOnStart.r[2] = z1 + dist;
-            PhotonOnStart.time = time0 + timeOfDrift;
+            Photon.r[2] = z1 + dist;
+            Photon.time = time0 + timeOfDrift;
             if (driftSpeedSecScint != 0)
-                PhotonOnStart.time += dist / driftSpeedSecScint;
+                Photon.time += dist / driftSpeedSecScint;
         }
 
-        PhotonOnStart.SimStat = OneEvent->SimStat;
+        Photon.SimStat = OneEvent->SimStat;
 
-        photonTracker->TracePhoton(&PhotonOnStart);
+        photonTracker->TracePhoton(&Photon);
     }
     //================================
 

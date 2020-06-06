@@ -44,9 +44,10 @@ private:
 
 private:
     const APhotonSimSettings & PhotSimSettings;
+
     TH1D * CustomHist = nullptr; //custom photon generation distribution
 
-    APhoton PhotonOnStart; //properties of the photon which are used to initiate Photon_Tracker
+    APhoton Photon; //properties of the photon which are used to initiate Photon_Tracker
 
     int totalEventCount = 0;
 
@@ -56,15 +57,8 @@ private:
 
     const TString SecScintName = "SecScint";
 
-    //bool fOnlyPrimScint; //do not create event outside of prim scintillator
     bool fLimitNodesToObject;
     TString LimitNodesToObject;
-
-    //photons per node info
-    //int numPhotMode; // 0-constant, 1-uniform, 2-gauss, 3-custom
-    //int numPhotsConst;
-    //int numPhotUniMin, numPhotUniMax;
-    //double numPhotGaussMean, numPhotGaussSigma;
 
     //photon direction option
     bool fRandomDirection;
@@ -74,8 +68,8 @@ private:
     bool fCone;
 
     //wavelength and time options
-    bool fUseGivenWaveIndex;
-    double iFixedWaveIndex;
+    //bool fUseGivenWaveIndex;
+    //double iFixedWaveIndex;
 };
 
 #endif // APOINTSOURCESIMULATOR_H

@@ -45,8 +45,10 @@ public:
 
     void writeWaveToJson(QJsonObject & json) const;
     void writeDirToJson(QJsonObject & json) const;
-    void readFromJson(const QJsonObject & json);
-    void clearSettings();
+    void readWaveFromJson(const QJsonObject & json);
+    void readDirFromJson(const QJsonObject & json);
+    void clearWaveSettings();
+    void clearDirSettings();
 };
 
 // single node

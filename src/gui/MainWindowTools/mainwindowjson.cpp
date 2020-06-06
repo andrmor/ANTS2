@@ -374,6 +374,7 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
   JsonToSpinBox(ppj, "PhotPerNodeUniMax", ui->sbScanNumMax);
   JsonToLineEditDouble(ppj, "PhotPerNodeGaussMean", ui->ledScanGaussMean);
   JsonToLineEditDouble(ppj, "PhotPerNodeGaussSigma", ui->ledScanGaussSigma);
+  JsonToLineEditDouble(ppj, "PhotPerNodePoissonMean", ui->ledScanPoissonMean);
   if (ppj.contains("PhotPerNodeCustom"))
   {
       QJsonArray ja = ppj["PhotPerNodeCustom"].toArray();

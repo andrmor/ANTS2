@@ -133,6 +133,7 @@ void MainWindow::SimPointSourcesConfigToJson(QJsonObject &jsonMaster)
   ppnjson["PhotPerNodeUniMax"] = ui->sbScanNumMax->value();
   ppnjson["PhotPerNodeGaussMean"] = ui->ledScanGaussMean->text().toDouble();
   ppnjson["PhotPerNodeGaussSigma"] = ui->ledScanGaussSigma->text().toDouble();
+  ppnjson["PhotPerNodePoissonMean"] = ui->ledScanPoissonMean->text().toDouble();
   if (histScan)
   {
       QJsonArray ja;

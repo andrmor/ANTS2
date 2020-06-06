@@ -81,29 +81,42 @@ bool APointSourceSimulator::setup(QJsonObject &json)
     }
 
     //reading photons per node info
-    QJsonObject ppnjson = js["PhotPerNodeOptions"].toObject();
-    numPhotMode = ppnjson["PhotPerNodeMode"].toInt();
-    if (numPhotMode < 0 || numPhotMode > 3)
-    {
-        ErrorString = "Unknown photons per node mode!";
-        return false;
-    }
+    //QJsonObject ppnjson = js["PhotPerNodeOptions"].toObject();
+    //numPhotMode = ppnjson["PhotPerNodeMode"].toInt();
+    //if (numPhotMode < 0 || numPhotMode > 3)
+    //{
+    //    ErrorString = "Unknown photons per node mode!";
+    //    return false;
+    //}
     //numPhotsConst = ppnjson["PhotPerNodeConstant"].toInt();
-    parseJson(ppnjson, "PhotPerNodeConstant", numPhotsConst);
+    //parseJson(ppnjson, "PhotPerNodeConstant", numPhotsConst);
     //numPhotUniMin = ppnjson["PhotPerNodeUniMin"].toInt();
-    parseJson(ppnjson, "PhotPerNodeUniMin", numPhotUniMin);
+    //parseJson(ppnjson, "PhotPerNodeUniMin", numPhotUniMin);
     //numPhotUniMax = ppnjson["PhotPerNodeUniMax"].toInt();
-    parseJson(ppnjson, "PhotPerNodeUniMax", numPhotUniMax);
-    parseJson(ppnjson, "PhotPerNodeGaussMean", numPhotGaussMean);
-    parseJson(ppnjson, "PhotPerNodeGaussSigma", numPhotGaussSigma);
+    //parseJson(ppnjson, "PhotPerNodeUniMax", numPhotUniMax);
+    //parseJson(ppnjson, "PhotPerNodeGaussMean", numPhotGaussMean);
+    //parseJson(ppnjson, "PhotPerNodeGaussSigma", numPhotGaussSigma);
 
-    if (numPhotMode == 3)
+    if (PhotSimSettings.PerNodeSettings.Mode == APhotonSim_PerNodeSettings::Custom)
     {
-        if (!ppnjson.contains("PhotPerNodeCustom"))
+        delete CustomHist; CustomHist = nullptr;
+
+        const QVector<ADPair> Dist = PhotSimSettings.PerNodeSettings.CustomDist;
+        const int size = Dist.size();
+        if (size == 0)
         {
-            ErrorString = "Generation config does not contain custom photon distribution data!";
+            ErrorString = "Config does not contain per-node photon distribution";
             return false;
         }
+
+        double X[size];
+        for (int i = 0; i < size; i++) X[i] = Dist.at(i).first;
+
+        CustomHist = new TH1D("", "NumPhotDist", size-1, X);
+        for (int i = 1; i < size + 1; i++) CustomHist->SetBinContent(i, Dist.at(i-1).second);
+        CustomHist->GetIntegral(); //will be thread safe after this
+
+        /*
         QJsonArray ja = ppnjson["PhotPerNodeCustom"].toArray();
         int size = ja.size();
         double* xx = new double[size];
@@ -118,6 +131,7 @@ bool APointSourceSimulator::setup(QJsonObject &json)
         CustomHist->GetIntegral(); //will be thread safe after this
         delete[] xx;
         delete[] yy;
+        */
     }
 
     //reading wavelength/decay options
@@ -506,24 +520,29 @@ bool APointSourceSimulator::simulatePhotonsFromFile()
 
 int APointSourceSimulator::getNumPhotToRun()
 {
-    int numPhotons = 0; //protection
-    switch (numPhotMode)
+    int num = 0;
+
+    switch (PhotSimSettings.PerNodeSettings.Mode)
     {
-    case 0: //constant
-        numPhotons = numPhotsConst;
+    case APhotonSim_PerNodeSettings::Constant :
+        num = PhotSimSettings.PerNodeSettings.Number;
         break;
-    case 1:  //uniform
-        numPhotons = RandGen->Rndm()*(numPhotUniMax-numPhotUniMin+1) + numPhotUniMin;
+    case APhotonSim_PerNodeSettings::Uniform :
+        num = RandGen->Rndm() * (PhotSimSettings.PerNodeSettings.Max - PhotSimSettings.PerNodeSettings.Min + 1) + PhotSimSettings.PerNodeSettings.Min;
         break;
-    case 2: //gauss
-        numPhotons = RandGen->Gaus(numPhotGaussMean, numPhotGaussSigma);
+    case APhotonSim_PerNodeSettings::Gauss :
+        num = std::round( RandGen->Gaus(PhotSimSettings.PerNodeSettings.Mean, PhotSimSettings.PerNodeSettings.Sigma) );
         break;
-    case 3: //custom
-        numPhotons = CustomHist->GetRandom();
+    case APhotonSim_PerNodeSettings::Custom :
+        num = CustomHist->GetRandom();
+        break;
+    case APhotonSim_PerNodeSettings::Poisson :
+        num = RandGen->Poisson(PhotSimSettings.PerNodeSettings.PoisMean);
         break;
     }
 
-    return numPhotons;
+    if (num < 0) num = 0;
+    return num;
 }
 
 void APointSourceSimulator::generateAndTracePhotons(AScanRecord *scs, double time0, int iPoint)

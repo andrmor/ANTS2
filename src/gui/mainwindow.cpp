@@ -794,14 +794,16 @@ void MainWindow::CheckSetMaterial(const QString name, QComboBox* cob, QVector<QS
 
 void MainWindow::on_cbUPM_toggled(bool checked)
 {    
-  Detector->PMarrays[0].fActive = checked;
-  ToggleUpperLowerPMs();
+    ClearData();
+    Detector->PMarrays[0].fActive = checked;
+    ToggleUpperLowerPMs();
 }
 
 void MainWindow::on_cbLPM_toggled(bool checked)
 {
-  Detector->PMarrays[1].fActive = checked;
-  ToggleUpperLowerPMs();
+    ClearData();
+    Detector->PMarrays[1].fActive = checked;
+    ToggleUpperLowerPMs();
 }
 
 void MainWindow::ToggleUpperLowerPMs()

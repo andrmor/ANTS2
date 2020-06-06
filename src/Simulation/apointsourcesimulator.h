@@ -37,15 +37,13 @@ private:
     bool simulatePhotonsFromFile();
 
     void simulateOneNode(ANodeRecord & node);
-
-    //utilities
     int  getNumPhotToRun();
     void generateAndTracePhotons(AScanRecord * scs, double time0 = 0, int iPoint = 0);
     bool findSecScintBounds(double *r, double & z1, double & z2, double & timeOfDrift, double & driftSpeedInSecScint);
     bool isInsideLimitingObject(const double * r);
 
+private:
     const APhotonSimSettings & PhotSimSettings;
-    //QJsonObject simOptions; // !*! to be removed
     TH1D * CustomHist = nullptr; //custom photon generation distribution
 
     APhoton PhotonOnStart; //properties of the photon which are used to initiate Photon_Tracker
@@ -63,10 +61,10 @@ private:
     TString LimitNodesToObject;
 
     //photons per node info
-    int numPhotMode; // 0-constant, 1-uniform, 2-gauss, 3-custom
-    int numPhotsConst;
-    int numPhotUniMin, numPhotUniMax;
-    double numPhotGaussMean, numPhotGaussSigma;
+    //int numPhotMode; // 0-constant, 1-uniform, 2-gauss, 3-custom
+    //int numPhotsConst;
+    //int numPhotUniMin, numPhotUniMax;
+    //double numPhotGaussMean, numPhotGaussSigma;
 
     //photon direction option
     bool fRandomDirection;

@@ -142,12 +142,13 @@ void APhotonSim_PerNodeSettings::clearSettings()
 
 void APhotonSim_PerNodeSettings::writeToJson(QJsonObject & json) const
 {
-    json["PhotPerNodeMode"]       = Mode;
-    json["PhotPerNodeConstant"]   = Number;
-    json["PhotPerNodeUniMin"]     = Min;
-    json["PhotPerNodeUniMax"]     = Max;
-    json["PhotPerNodeGaussMean"]  = Mean;
-    json["PhotPerNodeGaussSigma"] = Sigma;
+    json["PhotPerNodeMode"]        = Mode;
+    json["PhotPerNodeConstant"]    = Number;
+    json["PhotPerNodeUniMin"]      = Min;
+    json["PhotPerNodeUniMax"]      = Max;
+    json["PhotPerNodeGaussMean"]   = Mean;
+    json["PhotPerNodeGaussSigma"]  = Sigma;
+    json["PhotPerNodePoissonMean"] = PoisMean;
 
     QJsonArray ar;
         for (int i = 0; i < CustomDist.size(); i++)
@@ -171,14 +172,16 @@ void APhotonSim_PerNodeSettings::readFromJson(const QJsonObject & json)
     case 1 : Mode = Uniform;  break;
     case 2 : Mode = Gauss;    break;
     case 3 : Mode = Custom;   break;
+    case 4 : Mode = Poisson;  break;
     default: qWarning() << "Unknown photon per mode mode, using 'Constant'";
     }
 
-    parseJson(json, "PhotPerNodeConstant",   Number);
-    parseJson(json, "PhotPerNodeUniMin",     Min);
-    parseJson(json, "PhotPerNodeUniMax",     Max);
-    parseJson(json, "PhotPerNodeGaussMean",  Mean);
-    parseJson(json, "PhotPerNodeGaussSigma", Sigma);
+    parseJson(json, "PhotPerNodeConstant",    Number);
+    parseJson(json, "PhotPerNodeUniMin",      Min);
+    parseJson(json, "PhotPerNodeUniMax",      Max);
+    parseJson(json, "PhotPerNodeGaussMean",   Mean);
+    parseJson(json, "PhotPerNodeGaussSigma",  Sigma);
+    parseJson(json, "PhotPerNodePoissonMean", PoisMean);
 
     QJsonArray ar;
     parseJson(json, "PhotPerNodeCustom", ar);

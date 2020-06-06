@@ -11,7 +11,7 @@ typedef std::pair<double, double> ADPair;
 class APhotonSim_PerNodeSettings
 {
 public:
-    enum APhPerNodeEnum {Constant = 0, Uniform = 1, Gauss = 2, Custom = 3};
+    enum APhPerNodeEnum {Constant = 0, Uniform = 1, Gauss = 2, Custom = 3, Poisson = 4};
 
     APhPerNodeEnum  Mode     = Constant;
     int             Number   = 10;
@@ -19,6 +19,7 @@ public:
     int             Max      = 12;
     double          Mean     = 100.0;
     double          Sigma    = 10.0;
+    double          PoisMean = 10.0;
     QVector<ADPair> CustomDist;
 
     void writeToJson(QJsonObject & json) const;

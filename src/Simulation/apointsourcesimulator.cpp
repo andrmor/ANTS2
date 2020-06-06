@@ -35,8 +35,10 @@ APointSourceSimulator::~APointSourceSimulator()
 
 int APointSourceSimulator::getEventCount() const
 {
-    if (PointSimMode == 0) return eventEnd - eventBegin;
-    else return (eventEnd - eventBegin)*NumRuns;
+    if (PhotSimSettings.GenMode == APhotonSimSettings::Single)
+        return eventEnd - eventBegin;
+    else
+        return (eventEnd - eventBegin) * NumRuns;
 }
 
 bool APointSourceSimulator::setup(QJsonObject &json)
@@ -51,7 +53,7 @@ bool APointSourceSimulator::setup(QJsonObject &json)
     QJsonObject js = json["PointSourcesConfig"].toObject();
     //reading main control options
     QJsonObject cjson = js["ControlOptions"].toObject();
-    PointSimMode = cjson["Single_Scan_Flood"].toInt();
+    //PointSimMode = cjson["Single_Scan_Flood"].toInt();
     ScintType = 1 + cjson["Primary_Secondary"].toInt(); //0 - primary(1), 1 - secondary(2)
     NumRuns = cjson["MultipleRunsNumber"].toInt();
     if (!cjson["MultipleRuns"].toBool()) NumRuns = 1;
@@ -133,29 +135,29 @@ bool APointSourceSimulator::setup(QJsonObject &json)
     }
 
     //calculating eventCount and storing settings specific to each simulation mode
-    switch (PointSimMode)
+    switch (PhotSimSettings.GenMode)
     {
-    case 0:
+    case APhotonSimSettings::Single :
         totalEventCount = NumRuns; //the only case when we can split runs between threads
         break;
-    case 1:
+    case APhotonSimSettings::Scan :
     {
         totalEventCount = PhotSimSettings.ScanSettings.countEvents();
         break;
     }
-    case 2:
+    case APhotonSimSettings::Flood :
         totalEventCount = PhotSimSettings.FloodSettings.Nodes;
         break;
-    case 3:
+    case APhotonSimSettings::File :
         if (PhotSimSettings.CustomNodeSettings.Mode == APhotonSim_CustomNodeSettings::CustomNodes)
              totalEventCount = simMan.Nodes.size();
         else totalEventCount = PhotSimSettings.CustomNodeSettings.NumEventsInFile;
         break;
-    case 4:
+    case APhotonSimSettings::Script :
         totalEventCount = simMan.Nodes.size();
         break;
     default:
-        ErrorString = "Unknown or not implemented simulation mode: " + QString().number(PointSimMode);
+        ErrorString = "Unknown or not implemented photon simulation mode";
         return false;
     }
     return true;
@@ -169,20 +171,34 @@ void APointSourceSimulator::simulate()
     fHardAbortWasTriggered = false;
 
     ReserveSpace(getEventCount());
-    switch (PointSimMode)
+
+    switch (PhotSimSettings.GenMode)
     {
-    case 0: fSuccess = simulateSingle(); break;
-    case 1: fSuccess = simulateRegularGrid(); break;
-    case 2: fSuccess = simulateFlood(); break;
-    case 3:
+    case APhotonSimSettings::Single :
+        fSuccess = simulateSingle();
+        break;
+    case APhotonSimSettings::Scan :
+        fSuccess = simulateRegularGrid();
+        break;
+    case APhotonSimSettings::Flood :
+        fSuccess = simulateFlood();
+        break;
+    case APhotonSimSettings::File :
     {
-        fSuccess = (PhotSimSettings.CustomNodeSettings.Mode == APhotonSim_CustomNodeSettings::CustomNodes ? simulateCustomNodes()
-                                                                                                          : simulatePhotonsFromFile() );
+        if (PhotSimSettings.CustomNodeSettings.Mode == APhotonSim_CustomNodeSettings::CustomNodes)
+             fSuccess = simulateCustomNodes();
+        else
+             fSuccess = simulatePhotonsFromFile();
         break;
     }
-    case 4: fSuccess = simulateCustomNodes(); break;
-    default: fSuccess = false; break;
+    case APhotonSimSettings::Script :
+        fSuccess = simulateCustomNodes();
+        break;
+    default:
+        fSuccess = false;
+        break;
     }
+
     if (fHardAbortWasTriggered) fSuccess = false;
 }
 

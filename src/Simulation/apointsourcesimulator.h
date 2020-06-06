@@ -51,7 +51,6 @@ private:
 
     int totalEventCount = 0;
 
-    int PointSimMode;            // 0-Single 1-Scan 2-Flood
     int ScintType;               // 1 - primary, 2 - secondary
     int NumRuns;                 // multiple runs per node
 
@@ -66,10 +65,8 @@ private:
     TVector3 ConeDir;
     double CosConeAngle;
     bool fCone;
-
-    //wavelength and time options
-    //bool fUseGivenWaveIndex;
-    //double iFixedWaveIndex;
 };
+
+// TODO !*! checkNavigatorPresent() of ASimulator - it is already in simulate(), why navigator is sometimes missing? Maybe in setup due to use of another thread?
 
 #endif // APOINTSOURCESIMULATOR_H

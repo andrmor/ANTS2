@@ -53,8 +53,6 @@ bool APointSourceSimulator::setup(QJsonObject &json)
     QJsonObject js = json["PointSourcesConfig"].toObject();
     //reading main control options
     QJsonObject cjson = js["ControlOptions"].toObject();
-    //PointSimMode = cjson["Single_Scan_Flood"].toInt();
-    ScintType = 1 + cjson["Primary_Secondary"].toInt(); //0 - primary(1), 1 - secondary(2)
     NumRuns = cjson["MultipleRunsNumber"].toInt();
     if (!cjson["MultipleRuns"].toBool()) NumRuns = 1;
 
@@ -657,7 +655,7 @@ void APointSourceSimulator::simulateOneNode(ANodeRecord & node)
     OneEvent->clearHits();
     AScanRecord* sr = new AScanRecord();
     sr->Points.Reinitialize(numPoints);
-    sr->ScintType = ScintType;
+    sr->ScintType = ( PhotSimSettings.ScintType == APhotonSimSettings::Primary ? 1 : 2 );
 
     for (int iPoint = 0; iPoint < numPoints; iPoint++)
     {

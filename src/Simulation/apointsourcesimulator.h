@@ -51,7 +51,6 @@ private:
 
     int totalEventCount = 0;
 
-    int ScintType;               // 1 - primary, 2 - secondary
     int NumRuns;                 // multiple runs per node
 
     const TString SecScintName = "SecScint";

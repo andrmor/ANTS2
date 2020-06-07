@@ -73,6 +73,8 @@ public:
   void findPM(int ipm, int &ul, int &index);
   const QString removePMtype(int itype);
   void assignSaveOnExitFlag(const QString & VolumeName);
+  void clearTracks();
+  void assureNavigatorPresent();
 
   //write to Json - can be used from outside
   void writeWorldFixedToJson(QJsonObject &json);

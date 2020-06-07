@@ -4,6 +4,8 @@
 #include "asimulator.h"
 #include "aphoton.h"
 
+#include "vector"
+
 #include "TString.h"
 #include "TVector3.h"
 
@@ -16,13 +18,13 @@ class TH1D;
 class APointSourceSimulator : public ASimulator
 {
 public:
-    explicit APointSourceSimulator(ASimulationManager & simMan, int ID);
+    explicit APointSourceSimulator(ASimulationManager & simMan, const APhotonSimSettings & PhotSimSettings, std::vector<ANodeRecord*> & Nodes, int threadID);
     ~APointSourceSimulator();
 
     int  getEventCount() const override;
     int  getTotalEventCount() const override {return TotalEvents;}
     int  getEventsDone() const override {return eventCurrent;}
-    bool setup(QJsonObject & json) override;
+    bool setup(QJsonObject & json) override;   // json already not needed, wait for fix of the particleSim then remove
     void simulate() override;
     void appendToDataHub(EventsDataClass * dataHub) override;
     void mergeData() override {}
@@ -43,6 +45,7 @@ private:
 
 private:
     const APhotonSimSettings & PhotSimSettings;
+    std::vector<ANodeRecord *> & Nodes;
 
     TH1D *   CustomHist     = nullptr;
     int      NumRuns        = 1;
@@ -58,6 +61,6 @@ private:
     const TString SecScintName = "SecScint";
 };
 
-// TODO !*! checkNavigatorPresent() of ASimulator - it is already in simulate(), why navigator is sometimes missing? Maybe in setup due to use of another thread?
+// TODO !*! assureNavigatorPresent() of ASimulator - it is already in simulate(), why navigator is sometimes missing? Maybe in setup due to use of another thread?
 
 #endif // APOINTSOURCESIMULATOR_H

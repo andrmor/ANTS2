@@ -219,7 +219,7 @@ void AParticleSourceSimulator::simulate()
 {
     //qDebug() << "Starting simulation, worker #" << ID;
 
-    checkNavigatorPresent();
+    assureNavigatorPresent();
 
     if ( !ParticleStack.isEmpty() ) clearParticleStack();
 

@@ -39,11 +39,10 @@ ASimulationManager::ASimulationManager(EventsDataClass & EventsDataHub, Detector
     QObject::connect(Runner, &ASimulatorRunner::simulationFinished, this, &ASimulationManager::onSimulationFinished);
     QObject::connect(this, &ASimulationManager::RequestStopSimulation, Runner, &ASimulatorRunner::requestStop, Qt::DirectConnection);
 
-    Runner->moveToThread(&simRunnerThread); //Move to background thread, as it always runs synchronously even in MT
-    QObject::connect(&simRunnerThread, &QThread::started, Runner, &ASimulatorRunner::simulate); //Connect thread to simulation start
+    Runner->moveToThread(&simRunnerThread);
+    QObject::connect(&simRunnerThread, &QThread::started, Runner, &ASimulatorRunner::simulate);
 
-    //GUI and websocket update
-    simTimerGuiUpdate.setInterval(1000);
+    simTimerGuiUpdate.setInterval(1000);  //GUI and websocket server update
     QObject::connect(&simTimerGuiUpdate, &QTimer::timeout, this, &ASimulationManager::updateGui, Qt::DirectConnection);
 }
 
@@ -78,12 +77,24 @@ void ASimulationManager::StartSimulation(QJsonObject& json, int threads, bool fF
         threads = MaxThreads;
     }
 
+    if (fFromGui) Detector.clearTracks();
+    Detector.assureNavigatorPresent(); // this is only for the gui thread
+
     // reading simulation settings
     bool     bOK = setup(json, threads);
     if (bOK) bOK = Runner->setup(threads, bPhotonSourceSim);
 
+    if (!fFromGui)
+    {
+        Settings.genSimSet.TrackBuildOptions.bBuildPhotonTracks   = false;
+        Settings.genSimSet.TrackBuildOptions.bBuildParticleTracks = false;
+    }
+
     if (!bOK)
-        QTimer::singleShot(100, this, &ASimulationManager::onSimFailedToStart); // timer is to allow the start cycle to finish in the main thread
+    {
+        //cannot call directly: the timer is to allow the start cycle to finish in the main thread
+        QTimer::singleShot(100, this, &ASimulationManager::onSimFailedToStart);
+    }
     else
     {
         simRunnerThread.start();

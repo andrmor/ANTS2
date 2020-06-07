@@ -823,13 +823,27 @@ void DetectorClass::assignSaveOnExitFlag(const QString & VolumeName)
     }
 }
 
+void DetectorClass::clearTracks()
+{
+    GeoManager->ClearTracks();
+}
+
+void DetectorClass::assureNavigatorPresent()
+{
+    if (!GeoManager->GetCurrentNavigator())
+    {
+        qDebug() << "There is no current navigator for this thread, adding one";
+        GeoManager->AddNavigator();
+    }
+}
+
 TGeoVolume *DetectorClass::generatePmVolume(TString Name, TGeoMedium *Medium, const APmType *tp)
 {
-  double SizeX = 0.5 * tp->SizeX;
-  double SizeY = 0.5 * tp->SizeY;
-  double SizeZ = 0.5 * tp->SizeZ;
+    double SizeX = 0.5 * tp->SizeX;
+    double SizeY = 0.5 * tp->SizeY;
+    double SizeZ = 0.5 * tp->SizeZ;
 
-  //Shape 0 -  box, 1 - cylinder, 2 - polygon, 3 - sphere
+    //Shape 0 -  box, 1 - cylinder, 2 - polygon, 3 - sphere
   switch (tp->Shape)
     {
     case 0: return GeoManager->MakeBox (Name, Medium, SizeX, SizeY, SizeZ); //box

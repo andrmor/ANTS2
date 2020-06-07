@@ -15,15 +15,15 @@
 #include "TRandom2.h"
 #include "TGeoManager.h" //to move?
 
-ASimulator::ASimulator(ASimulationManager &simMan, int ID) :
-    simMan(simMan), ID(ID),
+ASimulator::ASimulator(ASimulationManager &simMan, int threadID) :
+    simMan(simMan), ID(threadID),
     detector(simMan.getDetector()), GenSimSettings(simMan.Settings.genSimSet)
 {
     RandGen = new TRandom2();
     int seed = detector.RandGen->Rndm() * 10000000;
     RandGen->SetSeed(seed);
 
-    dataHub = new EventsDataClass(ID);
+    dataHub = new EventsDataClass(threadID);
     OneEvent = new AOneEvent(detector.PMs, RandGen, dataHub->SimStat);
     photonGenerator = new Photon_Generator(detector, *RandGen);
     photonTracker = new APhotonTracer(detector.GeoManager, RandGen, detector.MpCollection, detector.PMs, &detector.Sandwich->GridRecords);
@@ -91,17 +91,11 @@ void ASimulator::divideThreadWork(int threadId, int threadCount)
 
 bool ASimulator::setup(QJsonObject &json)
 {
-    fUpdateGUI = json["DoGuiUpdate"].toBool();
-    fBuildPhotonTracks = fUpdateGUI && GenSimSettings.TrackBuildOptions.bBuildPhotonTracks;
-
-    //inits
     dataHub->clear();
-    if (fUpdateGUI) detector.GeoManager->ClearTracks();
 
-    //configuring local modules
     OneEvent->configure(&GenSimSettings);
     photonGenerator->configure(&GenSimSettings, OneEvent->SimStat);
-    photonTracker->configure(&GenSimSettings, OneEvent, fBuildPhotonTracks, &tracks);
+    photonTracker->configure(&GenSimSettings, OneEvent, GenSimSettings.TrackBuildOptions.bBuildPhotonTracks, &tracks);
     return true;
 }
 
@@ -132,9 +126,9 @@ void ASimulator::updateMaxTracks(int maxPhotonTracks, int /*maxParticleTracks*/)
     photonTracker->setMaxTracks(maxPhotonTracks);
 }
 
-void ASimulator::checkNavigatorPresent()
+void ASimulator::assureNavigatorPresent()
 {
-    //simulator->getDetector()->GeoManager->AddNavigator();
+    // it is normal to be triggered once per tread on sim start!
     if (!detector.GeoManager->GetCurrentNavigator())
     {
         //qDebug() << "No current navigator for this thread, adding one";

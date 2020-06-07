@@ -25,8 +25,10 @@
 #include "TGeoManager.h"
 #include "TGeoNavigator.h"
 
-APointSourceSimulator::APointSourceSimulator(ASimulationManager & simMan, int ID) :
-    ASimulator(simMan, ID), PhotSimSettings(simMan.Settings.photSimSet) {}
+APointSourceSimulator::APointSourceSimulator(ASimulationManager & simMan, const APhotonSimSettings & PhotSimSettings, std::vector<ANodeRecord*> & Nodes, int threadID) :
+    ASimulator(simMan, threadID),
+    PhotSimSettings(PhotSimSettings),
+    Nodes(Nodes) {}
 
 APointSourceSimulator::~APointSourceSimulator()
 {
@@ -41,9 +43,9 @@ int APointSourceSimulator::getEventCount() const
         return (eventEnd - eventBegin) * NumRuns;
 }
 
-bool APointSourceSimulator::setup(QJsonObject &json)
+bool APointSourceSimulator::setup(QJsonObject & json)
 {
-    if (!ASimulator::setup(json)) return false;
+    ASimulator::setup(json);
 
     NumRuns = PhotSimSettings.getActiveRuns();
 
@@ -118,11 +120,11 @@ bool APointSourceSimulator::setup(QJsonObject &json)
         break;
     case APhotonSimSettings::File :
         if (PhotSimSettings.CustomNodeSettings.Mode == APhotonSim_CustomNodeSettings::CustomNodes)
-             TotalEvents = simMan.Nodes.size();
+             TotalEvents = Nodes.size();
         else TotalEvents = PhotSimSettings.CustomNodeSettings.NumEventsInFile;
         break;
     case APhotonSimSettings::Script :
-        TotalEvents = simMan.Nodes.size();
+        TotalEvents = Nodes.size();
         break;
     default:
         ErrorString = "Unknown or not implemented photon simulation mode";
@@ -133,7 +135,7 @@ bool APointSourceSimulator::setup(QJsonObject &json)
 
 void APointSourceSimulator::simulate()
 {
-    checkNavigatorPresent();
+    assureNavigatorPresent();
 
     fStopRequested = false;
     fHardAbortWasTriggered = false;
@@ -369,11 +371,11 @@ bool APointSourceSimulator::simulateCustomNodes()
     int nodeCount = (eventEnd - eventBegin);
     int currentNode = eventBegin;
     eventCurrent = 0;
-    double updateFactor = 100.0 / ( NumRuns*nodeCount );
+    double updateFactor = 100.0 / ( NumRuns * nodeCount );
 
     for (int inode = 0; inode < nodeCount; inode++)
     {
-        ANodeRecord * thisNode = simMan.Nodes.at(currentNode);
+        ANodeRecord * thisNode = Nodes.at(currentNode);
 
         for (int irun = 0; irun<NumRuns; irun++)
         {
@@ -440,7 +442,7 @@ bool APointSourceSimulator::simulatePhotonsFromFile()
             p.scint_type = 0;
             p.SimStat    = OneEvent->SimStat;
 
-            if (p.waveIndex < -1 || p.waveIndex >= simMan.Settings.genSimSet.WaveNodes) p.waveIndex = -1;
+            if (p.waveIndex < -1 || p.waveIndex >= GenSimSettings.WaveNodes) p.waveIndex = -1;
 
             photonTracker->TracePhoton(&p);
         }
@@ -495,6 +497,13 @@ void APointSourceSimulator::generateAndTracePhotons(AScanRecord *scs, double tim
 //scs contains coordinates and number of photons to run
 //iPoint - number of this scintillation center (can be not zero when e.g. double events are simulated)
 {
+    TGeoNavigator * navigator = detector.GeoManager->GetCurrentNavigator();
+    if (!navigator)
+    {
+        qWarning() << "UNEXPECTED - report this issue please: Navigator not found, adding new one";
+        detector.GeoManager->AddNavigator();
+    }
+
     //if secondary scintillation, finding the secscint boundaries
     double z1, z2, timeOfDrift, driftSpeedSecScint;
     if (scs->ScintType == 2)
@@ -535,12 +544,6 @@ void APointSourceSimulator::generateAndTracePhotons(AScanRecord *scs, double tim
 
         //configure  wavelength index and emission time
         Photon.time = time0;   //reset time offset
-        TGeoNavigator * navigator = detector.GeoManager->GetCurrentNavigator();
-        if (!navigator)
-        {
-            qWarning() << "Navigator not found, adding new one";
-            detector.GeoManager->AddNavigator();
-        }
 
         int thisMatIndex;
         TGeoNode* node = navigator->FindNode(Photon.r[0], Photon.r[1], Photon.r[2]);
@@ -585,6 +588,12 @@ void APointSourceSimulator::generateAndTracePhotons(AScanRecord *scs, double tim
 bool APointSourceSimulator::findSecScintBounds(double *r, double & z1, double & z2, double & timeOfDrift, double & driftSpeedInSecScint)
 {
     TGeoNavigator *navigator = detector.GeoManager->GetCurrentNavigator();
+    if (!navigator)
+    {
+        qWarning() << "UNEXPECTED - report this issue please! Navigator not found, adding new one";
+        detector.GeoManager->AddNavigator();
+    }
+
     navigator->SetCurrentPoint(r);
     navigator->SetCurrentDirection(0, 0, 1.0);
     TGeoNode * node = navigator->FindNode();
@@ -684,10 +693,9 @@ void APointSourceSimulator::simulateOneNode(ANodeRecord & node)
 bool APointSourceSimulator::isInsideLimitingObject(const double *r)
 {
     TGeoNavigator *navigator = detector.GeoManager->GetCurrentNavigator();
-
     if (!navigator)
     {
-        qWarning() << "Navigator not found, adding new one";
+        qWarning() << "UNEXPECTED - report this issue please!! Navigator not found, adding new one";
         detector.GeoManager->AddNavigator();
     }
 

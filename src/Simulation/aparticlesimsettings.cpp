@@ -2,13 +2,13 @@
 #include "ajsontools.h"
 
 #include "asourceparticlegenerator.h"
-#include "afileparticlegenerator.h"
-#include "ascriptparticlegenerator.h"
+
+#include "aparticlesourcerecord.h"
 
 #include <QDebug>
 
-AParticleSimSettings::AParticleSimSettings(ASourceParticleGenerator *SoG, AFileParticleGenerator *FiG, AScriptParticleGenerator *ScG) :
-    SourceGen(SoG), FileGen(FiG), ScriptGen(ScG) {}
+AParticleSimSettings::AParticleSimSettings(ASourceParticleGenerator *SoG) :
+    SourceGen(SoG) {}
 
 void AParticleSimSettings::clearSettings()
 {
@@ -58,13 +58,13 @@ void AParticleSimSettings::writeToJson(QJsonObject &json) const
 
     {
         QJsonObject js;
-            FileGen->writeToJson(js);
+        FileGenSettings.writeToJson(js);
         json["GenerationFromFile"] = js;
     }
 
     {
         QJsonObject js;
-            ScriptGen->writeToJson(js);
+        ScriptGenSettings.writeToJson(js);
         json["GenerationFromScript"] = js;
     }
 }
@@ -74,8 +74,8 @@ void AParticleSimSettings::readFromJson(const QJsonObject & json)
     clearSettings();
 
     QJsonObject js;
-    bool bOK = parseJson(json, "SourceControlOptions", js);
-    if (!bOK)
+    bool ok = parseJson(json, "SourceControlOptions", js);
+    if (!ok)
     {
         qWarning() << "Bad format of particle sim settings json";
         return;
@@ -104,11 +104,109 @@ void AParticleSimSettings::readFromJson(const QJsonObject & json)
 
     SourceGen->readFromJson(js);
 
-    QJsonObject fjs;
-    bOK = parseJson(json, "GenerationFromFile", fjs);
-    if (bOK) FileGen->readFromJson(fjs);
+    {
+        QJsonObject js;
+        ok = parseJson(json, "GenerationFromFile", js);
+        if (ok) FileGenSettings.readFromJson(js);
+    }
 
-    QJsonObject sjs;
-    bOK = parseJson(json, "GenerationFromScript", sjs);
-    if (bOK) ScriptGen->readFromJson(sjs);
+    {
+        QJsonObject js;
+        ok = parseJson(json, "GenerationFromScript", js);
+        if (ok) ScriptGenSettings.readFromJson(js);
+    }
+}
+
+// ------------------------------------
+
+void AScriptGenSettings::writeToJson(QJsonObject & json) const
+{
+    json["Script"] = Script;
+}
+
+void AScriptGenSettings::readFromJson(const QJsonObject & json)
+{
+    Script.clear();
+    parseJson(json, "Script", Script);
+}
+
+void AFileGenSettings::writeToJson(QJsonObject &json) const
+{
+    json["FileName"]         = FileName;
+    json["FileFormat"]       = FileFormat; //static_cast<int>(FileFormat);
+    json["NumEventsInFile"]  = NumEventsInFile;
+    json["LastValidation"]   = LastValidationMode; //static_cast<int>(LastValidationMode);
+    json["FileLastModified"] = FileLastModified.toMSecsSinceEpoch();
+
+    QJsonArray ar; ar.fromStringList(ValidatedWithParticles);
+    json["ValidatedWithParticles"] = ar;
+}
+
+void AFileGenSettings::readFromJson(const QJsonObject & json)
+{
+    parseJson(json, "FileName", FileName);
+
+    FileFormat = Undefined;
+    if (json.contains("FileFormat"))
+    {
+        int im;
+        parseJson(json, "FileFormat", im);
+        if (im >= 0 && im < 5)
+            FileFormat = static_cast<FileFormatEnum>(im);
+    }
+
+    parseJson(json, "NumEventsInFile", NumEventsInFile);
+
+    int iVal = static_cast<int>(None);
+    parseJson(json, "LastValidation", iVal);
+    LastValidationMode = static_cast<ValidStateEnum>(iVal);
+    ValidationMode = LastValidationMode;
+
+    qint64 lastMod;
+    parseJson(json, "FileLastModified", lastMod);
+    FileLastModified = QDateTime::fromMSecsSinceEpoch(lastMod);
+
+    QJsonArray ar;
+    parseJson(json, "ValidatedWithParticles", ar);
+    ValidatedWithParticles.clear();
+    for (int i=0; i<ar.size(); i++) ValidatedWithParticles << ar.at(i).toString();
+}
+
+void ASourceGenSettings::writeToJson(QJsonObject &json) const
+{
+    QJsonArray ja;
+    for (const AParticleSourceRecord* ps : ParticleSourcesData)
+    {
+        QJsonObject js;
+//        ps->writeToJson(js, *MpCollection);
+        ja.append(js);
+    }
+    json["ParticleSources"] = ja;
+}
+
+void ASourceGenSettings::readFromJson(const QJsonObject &  json)
+{
+    if (!json.contains("ParticleSources"))  // !*! move to outside
+    {
+        qWarning() << "--- Json does not contain config for particle sources!";
+        return;
+    }
+
+    QJsonArray ar = json["ParticleSources"].toArray();
+    if (ar.isEmpty()) return;
+
+    for (int iSource = 0; iSource < ar.size(); iSource++)
+    {
+        QJsonObject js = ar.at(iSource).toObject();
+        AParticleSourceRecord* ps = new AParticleSourceRecord();
+        /*
+        bool ok = ps->readFromJson(js, *MpCollection);
+        if (ok) ParticleSourcesData << ps;
+        else
+        {
+            qWarning() << "||| Load particle source #" << iSource << "from json failed!";
+            delete ps;
+        }
+        */
+    }
 }

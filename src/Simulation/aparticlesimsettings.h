@@ -1,16 +1,56 @@
 #ifndef APARTICLEMODESETTINGS_H
 #define APARTICLEMODESETTINGS_H
 
-class QJsonObject;
+#include <QString>
+#include <QVector>
+#include <QDateTime>
 
+class QJsonObject;
+class AParticleSourceRecord;
 class ASourceParticleGenerator;
-class AFileParticleGenerator;
-class AScriptParticleGenerator;
+
+class ASourceGenSettings
+{
+public:
+    QVector<AParticleSourceRecord*> ParticleSourcesData;
+
+    void writeToJson(QJsonObject & json) const;
+    void readFromJson(const QJsonObject & json);
+};
+
+class AFileGenSettings
+{
+public:
+    enum            ValidStateEnum {None = 0, Relaxed = 1, Strict = 2};
+    enum            FileFormatEnum {Undefined = 0, BadFormat = 1, Simplistic = 2, G4Ascii = 3, G4Binary = 4};
+
+    QString         FileName;
+    FileFormatEnum  FileFormat         = Undefined;
+    int             NumEventsInFile    = 0;
+    ValidStateEnum  ValidationMode     = None;
+    ValidStateEnum  LastValidationMode = None;
+    QDateTime       FileLastModified;
+    QStringList     ValidatedWithParticles;
+
+    void writeToJson(QJsonObject & json) const;
+    void readFromJson(const QJsonObject & json);
+};
+
+class AScriptGenSettings
+{
+public:
+    QString Script;
+
+    void writeToJson(QJsonObject & json) const;
+    void readFromJson(const QJsonObject & json);
+};
+
+// -------------- Main -------------
 
 class AParticleSimSettings
 {
 public:
-    AParticleSimSettings(ASourceParticleGenerator * SoG, AFileParticleGenerator * FiG, AScriptParticleGenerator * ScG);
+    AParticleSimSettings(ASourceParticleGenerator * SoG);
 
     enum AGenMode   {Sources = 0, File = 1, Script = 2};
     enum AMultiMode {Constant = 0, Poisson = 1};
@@ -28,6 +68,10 @@ public:
     double  ClusterRadius   = 0.1;
     double  ClusterTime     = 1.0;
 
+    ASourceGenSettings SourceGenSettings;
+    AFileGenSettings   FileGenSettings;
+    AScriptGenSettings ScriptGenSettings;
+
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);
     void clearSettings();
@@ -35,9 +79,6 @@ public:
 private:
     // !*! next round of conversion - remove dependence on generators by splitting each to two classes: settings + generator
     ASourceParticleGenerator * SourceGen = nullptr;
-    AFileParticleGenerator   * FileGen   = nullptr;
-    AScriptParticleGenerator * ScriptGen = nullptr;
-
 };
 
 #endif // APARTICLEMODESETTINGS_H

@@ -43,14 +43,7 @@ int APointSourceSimulator::getEventCount() const
 
 bool APointSourceSimulator::setup(QJsonObject &json)
 {
-    if (!json.contains("PointSourcesConfig"))
-    {
-        ErrorString = "Json sent to simulator does not contain generation config data!";
-        return false;
-    }
-    if(!ASimulator::setup(json)) return false;
-
-    QJsonObject js = json["PointSourcesConfig"].toObject();
+    if (!ASimulator::setup(json)) return false;
 
     NumRuns = PhotSimSettings.getActiveRuns();
 
@@ -83,59 +76,53 @@ bool APointSourceSimulator::setup(QJsonObject &json)
         CustomHist->GetIntegral(); //will be thread safe after this
     }
 
-    Photon.waveIndex = PhotSimSettings.FixedPhotSettings.FixWaveIndex;
+    const APhotonSim_FixedPhotSettings & FS = PhotSimSettings.FixedPhotSettings;
+    Photon.waveIndex = FS.FixWaveIndex;
     if (!GenSimSettings.fWaveResolved) Photon.waveIndex = -1;
-
-    //reading direction info
-    QJsonObject pdjson = js["PhotonDirectionOptions"].toObject();
-    fRandomDirection =  pdjson["Random"].toBool();
-    if (!fRandomDirection)
+    bIsotropic = FS.bIsotropic;
+    if (!bIsotropic)
     {
-        Photon.v[0] = pdjson["FixedX"].toDouble();
-        Photon.v[1] = pdjson["FixedY"].toDouble();
-        Photon.v[2] = pdjson["FixedZ"].toDouble();
-        NormalizeVector(Photon.v);
-        //qDebug() << "  ph dir:"<<PhotonOnStart.v[0]<<PhotonOnStart.v[1]<<PhotonOnStart.v[2];
-    }
-    fCone = false;
-    if (pdjson.contains("Fixed_or_Cone"))
-    {
-        int i = pdjson["Fixed_or_Cone"].toInt();
-        fCone = (i==1);
-        if (fCone)
+        if (FS.DirectionMode == APhotonSim_FixedPhotSettings::Vector)
         {
+            bCone = false;
+            Photon.v[0] = FS.FixDX;
+            Photon.v[1] = FS.FixDY;
+            Photon.v[2] = FS.FixDZ;
+            NormalizeVectorSilent(Photon.v);
+        }
+        else //Cone
+        {
+            bCone = true;
             double v[3];
-            v[0] = pdjson["FixedX"].toDouble();
-            v[1] = pdjson["FixedY"].toDouble();
-            v[2] = pdjson["FixedZ"].toDouble();
-            NormalizeVector(v);
+            v[0] = FS.FixDX;
+            v[1] = FS.FixDY;
+            v[2] = FS.FixDZ;
+            NormalizeVectorSilent(v);
             ConeDir = TVector3(v[0], v[1], v[2]);
-            double ConeAngle = pdjson["Cone"].toDouble()*3.1415926535/180.0;
-            CosConeAngle = cos(ConeAngle);
+            CosConeAngle = cos(FS.FixConeAngle * TMath::Pi() / 180.0);
         }
     }
 
-    //calculating eventCount and storing settings specific to each simulation mode
     switch (PhotSimSettings.GenMode)
     {
     case APhotonSimSettings::Single :
-        totalEventCount = NumRuns; //the only case when we can split runs between threads
+        TotalEvents = NumRuns; //the only case when we can split runs between threads
         break;
     case APhotonSimSettings::Scan :
     {
-        totalEventCount = PhotSimSettings.ScanSettings.countEvents();
+        TotalEvents = PhotSimSettings.ScanSettings.countEvents();
         break;
     }
     case APhotonSimSettings::Flood :
-        totalEventCount = PhotSimSettings.FloodSettings.Nodes;
+        TotalEvents = PhotSimSettings.FloodSettings.Nodes;
         break;
     case APhotonSimSettings::File :
         if (PhotSimSettings.CustomNodeSettings.Mode == APhotonSim_CustomNodeSettings::CustomNodes)
-             totalEventCount = simMan.Nodes.size();
-        else totalEventCount = PhotSimSettings.CustomNodeSettings.NumEventsInFile;
+             TotalEvents = simMan.Nodes.size();
+        else TotalEvents = PhotSimSettings.CustomNodeSettings.NumEventsInFile;
         break;
     case APhotonSimSettings::Script :
-        totalEventCount = simMan.Nodes.size();
+        TotalEvents = simMan.Nodes.size();
         break;
     default:
         ErrorString = "Unknown or not implemented photon simulation mode";
@@ -529,9 +516,9 @@ void APointSourceSimulator::generateAndTracePhotons(AScanRecord *scs, double tim
     for (int i=0; i<scs->Points[iPoint].energy; i++)
     {
         //photon direction
-        if (fRandomDirection)
+        if (bIsotropic)
             photonGenerator->GenerateDirection(&Photon);
-        else if (fCone)
+        else if (bCone)
         {
             double z = CosConeAngle + RandGen->Rndm() * (1.0 - CosConeAngle);
             double tmp = sqrt(1.0 - z*z);

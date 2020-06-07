@@ -20,7 +20,7 @@ public:
     ~APointSourceSimulator();
 
     int  getEventCount() const override;
-    int  getTotalEventCount() const override {return totalEventCount;}
+    int  getTotalEventCount() const override {return TotalEvents;}
     int  getEventsDone() const override {return eventCurrent;}
     bool setup(QJsonObject & json) override;
     void simulate() override;
@@ -35,6 +35,7 @@ private:
     bool simulatePhotonsFromFile();
 
     void simulateOneNode(ANodeRecord & node);
+
     int  getNumPhotToRun();
     void generateAndTracePhotons(AScanRecord * scs, double time0 = 0, int iPoint = 0);
     bool findSecScintBounds(double *r, double & z1, double & z2, double & timeOfDrift, double & driftSpeedInSecScint);
@@ -43,25 +44,18 @@ private:
 private:
     const APhotonSimSettings & PhotSimSettings;
 
-    TH1D *  CustomHist     = nullptr;
-    int     NumRuns        = 1;
-    bool    bLimitToVolume = false;
-    TString LimitToVolume;
-
-    APhoton Photon;          //properties of the photon which are used to initiate Photon_Tracker
-
-    int totalEventCount = 0;
+    TH1D *   CustomHist     = nullptr;
+    int      NumRuns        = 1;
+    bool     bLimitToVolume = false;
+    TString  LimitToVolume;
+    bool     bIsotropic     = true;
+    TVector3 ConeDir;
+    double   CosConeAngle   = 0;
+    bool     bCone          = false;
+    int      TotalEvents    = 0;
+    APhoton  Photon;                    //properties of the photon which are used to initiate Photon_Tracker
 
     const TString SecScintName = "SecScint";
-
-
-
-    //photon direction option
-    bool fRandomDirection;
-    //direction vector is in PhotonOnStart
-    TVector3 ConeDir;
-    double CosConeAngle;
-    bool fCone;
 };
 
 // TODO !*! checkNavigatorPresent() of ASimulator - it is already in simulate(), why navigator is sometimes missing? Maybe in setup due to use of another thread?

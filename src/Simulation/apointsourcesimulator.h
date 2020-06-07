@@ -18,7 +18,7 @@ class TH1D;
 class APointSourceSimulator : public ASimulator
 {
 public:
-    explicit APointSourceSimulator(ASimulationManager & simMan, const APhotonSimSettings & PhotSimSettings, std::vector<ANodeRecord*> & Nodes, int threadID);
+    explicit APointSourceSimulator(ASimulationManager & simMan, const APhotonSimSettings & PhotSimSettings, const std::vector<ANodeRecord*> & Nodes, int threadID);
     ~APointSourceSimulator();
 
     int  getEventCount() const override;
@@ -36,7 +36,7 @@ private:
     bool simulateCustomNodes();
     bool simulatePhotonsFromFile();
 
-    void simulateOneNode(ANodeRecord & node);
+    void simulateOneNode(const ANodeRecord & node);
 
     int  getNumPhotToRun();
     void generateAndTracePhotons(AScanRecord * scs, double time0 = 0, int iPoint = 0);
@@ -45,7 +45,7 @@ private:
 
 private:
     const APhotonSimSettings & PhotSimSettings;
-    std::vector<ANodeRecord *> & Nodes;
+    const std::vector<ANodeRecord *> & Nodes;
 
     TH1D *   CustomHist     = nullptr;
     int      NumRuns        = 1;

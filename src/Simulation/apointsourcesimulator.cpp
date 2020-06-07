@@ -25,7 +25,7 @@
 #include "TGeoManager.h"
 #include "TGeoNavigator.h"
 
-APointSourceSimulator::APointSourceSimulator(ASimulationManager & simMan, const APhotonSimSettings & PhotSimSettings, std::vector<ANodeRecord*> & Nodes, int threadID) :
+APointSourceSimulator::APointSourceSimulator(ASimulationManager & simMan, const APhotonSimSettings & PhotSimSettings, const std::vector<ANodeRecord*> & Nodes, int threadID) :
     ASimulator(simMan, threadID),
     PhotSimSettings(PhotSimSettings),
     Nodes(Nodes) {}
@@ -135,7 +135,7 @@ bool APointSourceSimulator::setup(QJsonObject & json)
 
 void APointSourceSimulator::simulate()
 {
-    assureNavigatorPresent();
+    assureNavigatorPresent();  // here navigator for this thread is created
 
     fStopRequested = false;
     fHardAbortWasTriggered = false;
@@ -494,8 +494,6 @@ int APointSourceSimulator::getNumPhotToRun()
 }
 
 void APointSourceSimulator::generateAndTracePhotons(AScanRecord *scs, double time0, int iPoint)
-//scs contains coordinates and number of photons to run
-//iPoint - number of this scintillation center (can be not zero when e.g. double events are simulated)
 {
     TGeoNavigator * navigator = detector.GeoManager->GetCurrentNavigator();
     if (!navigator)
@@ -521,12 +519,10 @@ void APointSourceSimulator::generateAndTracePhotons(AScanRecord *scs, double tim
     Photon.scint_type = scs->ScintType;
     Photon.time = time0;
 
-    //================================
     for (int i=0; i<scs->Points[iPoint].energy; i++)
     {
         //photon direction
-        if (bIsotropic)
-            photonGenerator->GenerateDirection(&Photon);
+        if (bIsotropic) photonGenerator->GenerateDirection(&Photon);
         else if (bCone)
         {
             double z = CosConeAngle + RandGen->Rndm() * (1.0 - CosConeAngle);
@@ -538,25 +534,20 @@ void APointSourceSimulator::generateAndTracePhotons(AScanRecord *scs, double tim
             Photon.v[0] = K1[0];
             Photon.v[1] = K1[1];
             Photon.v[2] = K1[2];
-
         }
         //else it is already set
 
-        //configure  wavelength index and emission time
-        Photon.time = time0;   //reset time offset
+        Photon.time = time0;
 
         int thisMatIndex;
         TGeoNode* node = navigator->FindNode(Photon.r[0], Photon.r[1], Photon.r[2]);
-        if (!node)
-        {
-            //PhotonOnStart.waveIndex = -1;
-            thisMatIndex = detector.top->GetMaterial()->GetIndex(); //get material of the world
-            //qWarning() << "Node not found when generating photons (photon sources) - assuming material of the world!"<<thisMatIndex;
-        }
+        if (node) thisMatIndex = node->GetVolume()->GetMaterial()->GetIndex();
         else
-            thisMatIndex = node->GetVolume()->GetMaterial()->GetIndex();
+        {
+            thisMatIndex = detector.top->GetMaterial()->GetIndex(); //get material of the world
+            qWarning() << "Node not found when generating photons, using material of the world";
+        }
 
-        //if (!fUseGivenWaveIndex)
         if (!PhotSimSettings.FixedPhotSettings.bFixWave)
             photonGenerator->GenerateWave(&Photon, thisMatIndex);//if directly given wavelength -> waveindex is already set in PhotonOnStart
 
@@ -575,9 +566,7 @@ void APointSourceSimulator::generateAndTracePhotons(AScanRecord *scs, double tim
 
         photonTracker->TracePhoton(&Photon);
     }
-    //================================
 
-    //filling scs for secondary
     if (scs->ScintType == 2)
     {
         scs->Points[iPoint].r[2] = z1;
@@ -625,14 +614,14 @@ bool APointSourceSimulator::findSecScintBounds(double *r, double & z1, double & 
     return true;
 }
 
-void APointSourceSimulator::simulateOneNode(ANodeRecord & node)
+void APointSourceSimulator::simulateOneNode(const ANodeRecord & node)
 {
-    ANodeRecord * thisNode = &node;
+    const ANodeRecord * thisNode = &node;
     std::unique_ptr<ANodeRecord> outNode(ANodeRecord::createS(1e10, 1e10, 1e10)); // if outside will use this instead of thisNode
 
     const int numPoints = 1 + thisNode->getNumberOfLinkedNodes();
     OneEvent->clearHits();
-    AScanRecord* sr = new AScanRecord();
+    AScanRecord * sr = new AScanRecord();
     sr->Points.Reinitialize(numPoints);
     sr->ScintType = ( PhotSimSettings.ScintType == APhotonSimSettings::Primary ? 1 : 2 );
 
@@ -690,9 +679,9 @@ void APointSourceSimulator::simulateOneNode(ANodeRecord & node)
     dataHub->Scan.append(sr);
 }
 
-bool APointSourceSimulator::isInsideLimitingObject(const double *r)
+bool APointSourceSimulator::isInsideLimitingObject(const double * r)
 {
-    TGeoNavigator *navigator = detector.GeoManager->GetCurrentNavigator();
+    TGeoNavigator * navigator = detector.GeoManager->GetCurrentNavigator();
     if (!navigator)
     {
         qWarning() << "UNEXPECTED - report this issue please!! Navigator not found, adding new one";
@@ -701,5 +690,5 @@ bool APointSourceSimulator::isInsideLimitingObject(const double *r)
 
     TGeoNode* node = navigator->FindNode(r[0], r[1], r[2]);
     if (!node) return false;
-    return (node->GetVolume() && node->GetVolume()->GetName()==LimitToVolume);
+    return (node->GetVolume() && node->GetVolume()->GetName() == LimitToVolume);
 }

@@ -123,7 +123,7 @@ void MainWindow::createScriptWindow()
     AServer_SI* server = new AServer_SI(*NetModule->WebSocketServer, EventsDataHub);
     ScriptWindow->RegisterInterface(server, "server");
 
-    APhoton_SI* photon = new APhoton_SI(Config, EventsDataHub);
+    APhoton_SI* photon = new APhoton_SI(Config, EventsDataHub, *SimulationManager);
     ScriptWindow->RegisterInterface(photon, "photon");
 
 #ifdef ANTS_FLANN

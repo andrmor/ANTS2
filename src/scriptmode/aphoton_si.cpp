@@ -12,6 +12,7 @@
 #include "TRandom2.h"
 #include "eventsdataclass.h"
 #include "tmpobjhubclass.h"
+#include "asimulationmanager.h"
 
 #include "TGeoTrack.h"
 #include "TGeoManager.h"
@@ -20,8 +21,8 @@
 #include <QDebug>
 #include <QFileInfo>
 
-APhoton_SI::APhoton_SI(AConfiguration* Config, EventsDataClass* EventsDataHub) :
-    Config(Config), EventsDataHub(EventsDataHub), Detector(Config->GetDetector())
+APhoton_SI::APhoton_SI(AConfiguration* Config, EventsDataClass* EventsDataHub, ASimulationManager & SimMan) :
+    Config(Config), EventsDataHub(EventsDataHub), SimMan(SimMan), Detector(Config->GetDetector())
 {
     Event = new AOneEvent(Detector->PMs, Detector->RandGen, EventsDataHub->SimStat);
     Tracer = new APhotonTracer(Detector->GeoManager, Detector->RandGen, Detector->MpCollection, Detector->PMs, &Detector->Sandwich->GridRecords);
@@ -42,21 +43,18 @@ APhoton_SI::~APhoton_SI()
 #include "eventsdataclass.h"
 #include "apmhub.h"
 #include "amaterialparticlecolection.h"
-bool APhoton_SI::InitOnRun()
+void APhoton_SI::Init()
 {
-    DetectorClass * Detector = Config->GetDetector();
-
-    if ( !Config->JSON.contains("SimulationConfig") ) return false;
+    if ( !Config->JSON.contains("SimulationConfig") ) return;
     QJsonObject jsSimSet = Config->JSON["SimulationConfig"].toObject();
     AGeneralSimSettings simSettings;
-    if ( !simSettings.readFromJson(jsSimSet) ) return false;
+    if ( !simSettings.readFromJson(jsSimSet) ) return;
+
+    int numThreads = SimMan.getNumThreads();
 
     EventsDataHub->initializeSimStat(Detector->Sandwich->MonitorsRecords, simSettings.DetStatNumBins, (simSettings.fWaveResolved ? simSettings.WaveNodes : 0) );
-    //Detector->PMs->configure(&simSettings);
-
-    // threads not known! :(
-    //Detector->MpCollection->UpdateRuntimePropertiesAndWavelengthBinning(&simSettings, Detector->RandGen, threads); //update wave-resolved properties of materials and runtime properties for neutrons
-    return true;
+    Detector->PMs->configure(&simSettings);
+    Detector->MpCollection->UpdateRuntimePropertiesAndWavelengthBinning(&simSettings, Detector->RandGen, numThreads); //update wave-resolved properties of materials and runtime properties for neutrons
 }
 
 void APhoton_SI::ClearData()

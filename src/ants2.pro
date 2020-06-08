@@ -228,8 +228,8 @@ ants2_NCrystal{
                 LIBS += -lNCrystal
 
             } else {
-                INCLUDEPATH += /home/andr/Work/NCrystal/include
-                LIBS += -L/home/andr/Work/NCrystal/lib/
+                INCLUDEPATH += /usr/local/include/NCrystal
+                LIBS += -L/usr/local/lib/
                 LIBS += -lNCrystal
             }
     }

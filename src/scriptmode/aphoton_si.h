@@ -6,9 +6,13 @@
 #include <QVector>
 #include <vector>
 #include <QVariant>
+#include <QStandardItemModel>
+#include <QTableView>
+#include <QJsonParseError>
 
 class AConfiguration;
 class EventsDataClass;
+class ASimulationManager;
 class DetectorClass;
 class APhotonTracer;
 class TrackHolderClass;
@@ -19,12 +23,11 @@ class APhoton_SI : public AScriptInterface
 {
   Q_OBJECT
 public:
-    APhoton_SI (AConfiguration* Config, EventsDataClass *EventsDataHub);
+    APhoton_SI (AConfiguration* Config, EventsDataClass *EventsDataHub, ASimulationManager & SimMan);
     ~APhoton_SI();
 
-    bool InitOnRun() override;
-
 public slots:
+    void Init();    // have to be called before the first call of the unit if sim.runPhotonsources or sim.runParticleSources were not used
     void ClearData();
     void ClearTracks();
     bool TracePhotons(int copies, double x, double y, double z, double vx, double vy, double vz, int iWave, double time, bool AddToPreviousEvent = false);
@@ -81,6 +84,7 @@ public slots:
 private:
     AConfiguration* Config;
     EventsDataClass *EventsDataHub;
+    ASimulationManager & SimMan;
     DetectorClass* Detector;
 
     APhotonTracer* Tracer;

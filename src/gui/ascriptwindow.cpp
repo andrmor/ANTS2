@@ -673,7 +673,7 @@ void AScriptWindow::on_pbLoad_clicked()
 void AScriptWindow::onLoadRequested(QString NewScript)
 {
     ATabRecord * tab = getTab();
-    if (!tab->TextEdit->document()->isEmpty()) addNewTab();
+    if (!tab->TextEdit->document()->isEmpty()) tab = &addNewTab();
 
     tab->TextEdit->clear();
     tab->TextEdit->appendPlainText(NewScript);

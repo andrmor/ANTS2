@@ -259,6 +259,12 @@ QString ASimulationManager::checkPnotonNodeFile(const QString & fileName)
     return "";
 }
 
+int ASimulationManager::getNumThreads()
+{
+    if (!fFinished) return NumberOfWorkers;
+    else return 1;
+}
+
 void ASimulationManager::onSimFailedToStart()
 {
     fFinished = true;

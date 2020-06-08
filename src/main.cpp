@@ -283,7 +283,7 @@ int main(int argc, char *argv[])
         SM.RegisterInterface(hist, "hist");
         ATree_SI* tree = new ATree_SI(&TmpHub);
         SM.RegisterInterface(tree, "tree");
-        APhoton_SI* photon = new APhoton_SI(&Config, &EventsDataHub);
+        APhoton_SI* photon = new APhoton_SI(&Config, &EventsDataHub, SimulationManager);
         SM.RegisterInterface(photon, "photon");
         AThreads_SI* threads = new AThreads_SI(&SM);
         SM.RegisterInterface(threads, "threads");

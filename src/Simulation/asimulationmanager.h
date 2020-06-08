@@ -60,6 +60,7 @@ public:
     bool setup(const QJsonObject & json, int threads);
 
     QString checkPnotonNodeFile(const QString &fileName); // returns error description
+    int  getNumThreads();
 
 public:
     std::vector<ANodeRecord *> Nodes;

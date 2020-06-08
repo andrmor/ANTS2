@@ -107,7 +107,7 @@ void MainWindow::createPythonScriptWindow()
   QObject::connect(web, &AWeb_SI::clearTextOnMessageWindow, txt, &AMsg_SI::Clear); // make sure this line is after AInterfaceToMessageWindow init
   PythonScriptWindow->RegisterInterface(web, "web");
 
-  APhoton_SI* photon = new APhoton_SI(Config, EventsDataHub);
+  APhoton_SI* photon = new APhoton_SI(Config, EventsDataHub, *SimulationManager);
   PythonScriptWindow->RegisterInterface(photon, "photon");
 
 #ifdef ANTS_FLANN

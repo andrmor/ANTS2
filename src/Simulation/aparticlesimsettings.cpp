@@ -1,34 +1,30 @@
 #include "aparticlesimsettings.h"
 #include "ajsontools.h"
-
-#include "asourceparticlegenerator.h"
-
 #include "aparticlesourcerecord.h"
 
 #include <QDebug>
 
-AParticleSimSettings::AParticleSimSettings(ASourceParticleGenerator *SoG) :
-    SourceGen(SoG) {}
-
 void AParticleSimSettings::clearSettings()
 {
     GenerationMode = Sources;
-    EventsToDo      = 1;
-    bMultiple       = false;
-    MeanPerEvent    = 1;
-    MultiMode    = Constant;
-    bDoS1           = true;
-    bDoS2           = false;
-    bIgnoreNoHits   = false;
-    bIgnoreNoDepo   = false;
-    bClusterMerge   = false;
-    ClusterRadius   = 0.1;
-    ClusterTime     = 1.0;
+    EventsToDo     = 1;
+    bMultiple      = false;
+    MeanPerEvent   = 1;
+    MultiMode      = Constant;
+    bDoS1          = true;
+    bDoS2          = false;
+    bIgnoreNoHits  = false;
+    bIgnoreNoDepo  = false;
+    bClusterMerge  = false;
+    ClusterRadius  = 0.1;
+    ClusterTime    = 1.0;
 
-    SourceGen->clear();
+    SourceGenSettings.clear();
+    FileGenSettings.clear();
+    ScriptGenSettings.clear();
 }
 
-void AParticleSimSettings::writeToJson(QJsonObject &json) const
+void AParticleSimSettings::writeToJson(QJsonObject & json) const
 {
     {
         QJsonObject js;
@@ -54,17 +50,17 @@ void AParticleSimSettings::writeToJson(QJsonObject &json) const
         json["SourceControlOptions"] = js;
     }
 
-    SourceGen->writeToJson(json);
+    SourceGenSettings.writeToJson(json);
 
     {
         QJsonObject js;
-        FileGenSettings.writeToJson(js);
+            FileGenSettings.writeToJson(js);
         json["GenerationFromFile"] = js;
     }
 
     {
         QJsonObject js;
-        ScriptGenSettings.writeToJson(js);
+            ScriptGenSettings.writeToJson(js);
         json["GenerationFromScript"] = js;
     }
 }
@@ -73,46 +69,48 @@ void AParticleSimSettings::readFromJson(const QJsonObject & json)
 {
     clearSettings();
 
-    QJsonObject js;
-    bool ok = parseJson(json, "SourceControlOptions", js);
-    if (!ok)
     {
-        qWarning() << "Bad format of particle sim settings json";
-        return;
+        QJsonObject js;
+        bool ok = parseJson(json, "SourceControlOptions", js);
+        if (!ok)
+        {
+            qWarning() << "Bad format of particle sim settings json";
+            return;
+        }
+
+        QString PartGenMode = "Sources";
+        parseJson(js, "ParticleGenerationMode", PartGenMode);
+        if      (PartGenMode == "Sources") GenerationMode = Sources;
+        else if (PartGenMode == "File")    GenerationMode = File;
+        else if (PartGenMode == "Script")  GenerationMode = Script;
+        else qWarning() << "Unknown particle generation mode";
+
+        parseJson(js, "EventsToDo", EventsToDo);
+        parseJson(js, "AllowMultipleParticles", bMultiple);
+        parseJson(js, "AverageParticlesPerEvent", MeanPerEvent);
+        int iMulti = 0;
+        parseJson(js, "TypeParticlesPerEvent", iMulti);
+        MultiMode = (iMulti == 1 ? Poisson : Constant);
+        parseJson(js, "DoS1", bDoS1);
+        parseJson(js, "DoS2", bDoS2);
+        parseJson(js, "IgnoreNoHitsEvents", bIgnoreNoHits);
+        parseJson(js, "IgnoreNoDepoEvents", bIgnoreNoDepo);
+        parseJson(js, "ClusterMerge", bClusterMerge);
+        parseJson(js, "ClusterMergeRadius", ClusterRadius);
+        parseJson(js, "ClusterMergeTime", ClusterTime);
     }
 
-    QString PartGenMode = "Sources";
-    parseJson(js, "ParticleGenerationMode", PartGenMode);
-    if      (PartGenMode == "Sources") GenerationMode = Sources;
-    else if (PartGenMode == "File")    GenerationMode = File;
-    else if (PartGenMode == "Script")  GenerationMode = Script;
-    else qWarning() << "Unknown particle generation mode";
-
-    parseJson(js, "EventsToDo", EventsToDo);
-    parseJson(js, "AllowMultipleParticles", bMultiple);
-    parseJson(js, "AverageParticlesPerEvent", MeanPerEvent);
-    int iMulti = 0;
-    parseJson(js, "TypeParticlesPerEvent", iMulti);
-    MultiMode = (iMulti == 1 ? Poisson : Constant);
-    parseJson(js, "DoS1", bDoS1);
-    parseJson(js, "DoS2", bDoS2);
-    parseJson(js, "IgnoreNoHitsEvents", bIgnoreNoHits);
-    parseJson(js, "IgnoreNoDepoEvents", bIgnoreNoDepo);
-    parseJson(js, "ClusterMerge", bClusterMerge);
-    parseJson(js, "ClusterMergeRadius", ClusterRadius);
-    parseJson(js, "ClusterMergeTime", ClusterTime);
-
-    SourceGen->readFromJson(js);
+    SourceGenSettings.readFromJson(json);
 
     {
         QJsonObject js;
-        ok = parseJson(json, "GenerationFromFile", js);
+            bool ok = parseJson(json, "GenerationFromFile", js);
         if (ok) FileGenSettings.readFromJson(js);
     }
 
     {
         QJsonObject js;
-        ok = parseJson(json, "GenerationFromScript", js);
+            bool ok = parseJson(json, "GenerationFromScript", js);
         if (ok) ScriptGenSettings.readFromJson(js);
     }
 }
@@ -126,8 +124,14 @@ void AScriptGenSettings::writeToJson(QJsonObject & json) const
 
 void AScriptGenSettings::readFromJson(const QJsonObject & json)
 {
-    Script.clear();
+    clear();
+
     parseJson(json, "Script", Script);
+}
+
+void AScriptGenSettings::clear()
+{
+    Script.clear();
 }
 
 void AFileGenSettings::writeToJson(QJsonObject &json) const
@@ -144,6 +148,8 @@ void AFileGenSettings::writeToJson(QJsonObject &json) const
 
 void AFileGenSettings::readFromJson(const QJsonObject & json)
 {
+    clear();
+
     parseJson(json, "FileName", FileName);
 
     FileFormat = Undefined;
@@ -172,13 +178,27 @@ void AFileGenSettings::readFromJson(const QJsonObject & json)
     for (int i=0; i<ar.size(); i++) ValidatedWithParticles << ar.at(i).toString();
 }
 
+void AFileGenSettings::clear()
+{
+    FileName.clear();
+    FileFormat         = Undefined;
+    NumEventsInFile    = 0;
+    ValidationMode     = None;
+    LastValidationMode = None;
+    FileLastModified   = QDateTime();
+    ValidatedWithParticles.clear();
+}
+
+#include "aglobalsettings.h"
 void ASourceGenSettings::writeToJson(QJsonObject &json) const
 {
+    AMaterialParticleCollection * MpCollection = AGlobalSettings::getInstance().getMpCollection();
+
     QJsonArray ja;
-    for (const AParticleSourceRecord* ps : ParticleSourcesData)
+    for (const AParticleSourceRecord * ps : ParticleSourcesData)
     {
         QJsonObject js;
-//        ps->writeToJson(js, *MpCollection);
+        ps->writeToJson(js, *MpCollection);
         ja.append(js);
     }
     json["ParticleSources"] = ja;
@@ -186,6 +206,8 @@ void ASourceGenSettings::writeToJson(QJsonObject &json) const
 
 void ASourceGenSettings::readFromJson(const QJsonObject &  json)
 {
+    clear();
+
     if (!json.contains("ParticleSources"))  // !*! move to outside
     {
         qWarning() << "--- Json does not contain config for particle sources!";
@@ -195,11 +217,12 @@ void ASourceGenSettings::readFromJson(const QJsonObject &  json)
     QJsonArray ar = json["ParticleSources"].toArray();
     if (ar.isEmpty()) return;
 
+    AMaterialParticleCollection * MpCollection = AGlobalSettings::getInstance().getMpCollection();
+
     for (int iSource = 0; iSource < ar.size(); iSource++)
     {
         QJsonObject js = ar.at(iSource).toObject();
-        AParticleSourceRecord* ps = new AParticleSourceRecord();
-        /*
+        AParticleSourceRecord * ps = new AParticleSourceRecord();
         bool ok = ps->readFromJson(js, *MpCollection);
         if (ok) ParticleSourcesData << ps;
         else
@@ -207,6 +230,11 @@ void ASourceGenSettings::readFromJson(const QJsonObject &  json)
             qWarning() << "||| Load particle source #" << iSource << "from json failed!";
             delete ps;
         }
-        */
     }
+}
+
+void ASourceGenSettings::clear()
+{
+    for (AParticleSourceRecord * r : ParticleSourcesData) delete r;
+    ParticleSourcesData.clear();
 }

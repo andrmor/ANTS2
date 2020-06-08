@@ -16,6 +16,8 @@ public:
 
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);
+
+    void clear();
 };
 
 class AFileGenSettings
@@ -34,6 +36,8 @@ public:
 
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);
+
+    void clear();
 };
 
 class AScriptGenSettings
@@ -43,6 +47,8 @@ public:
 
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);
+
+    void clear();
 };
 
 // -------------- Main -------------
@@ -50,15 +56,13 @@ public:
 class AParticleSimSettings
 {
 public:
-    AParticleSimSettings(ASourceParticleGenerator * SoG);
-
     enum AGenMode   {Sources = 0, File = 1, Script = 2};
     enum AMultiMode {Constant = 0, Poisson = 1};
 
     AGenMode GenerationMode = Sources;
     int     EventsToDo      = 1;
     bool    bMultiple       = false;        //affects only "Sources", maybe move there?
-    int     MeanPerEvent    = 1;
+    double  MeanPerEvent    = 1.0;          //affects only "Sources", maybe move there?
     AMultiMode MultiMode    = Constant;
     bool    bDoS1           = true;
     bool    bDoS2           = false;
@@ -74,11 +78,8 @@ public:
 
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);
-    void clearSettings();
 
-private:
-    // !*! next round of conversion - remove dependence on generators by splitting each to two classes: settings + generator
-    ASourceParticleGenerator * SourceGen = nullptr;
+    void clearSettings();
 };
 
 #endif // APARTICLEMODESETTINGS_H

@@ -509,7 +509,8 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
             JsonToLineEditDouble(csjs, "ClusterMergeTime", ui->ledClusterTimeDif);
 
         //particle sources
-        SimulationManager->ParticleSources->readFromJson(psjs);
+        SimulationManager->Settings.partSimSet.SourceGenSettings.readFromJson(psjs);
+        //SimulationManager->ParticleSources->readFromJson(psjs);
         on_pbUpdateSourcesIndication_clicked();
 
         //generation from file
@@ -564,7 +565,7 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
 
 void MainWindow::selectFirstActiveParticleSource()
 {
-    if (SimulationManager->ParticleSources->getTotalActivity() > 0)
+    if (SimulationManager->Settings.partSimSet.SourceGenSettings.getTotalActivity() > 0)
     {
         //show the first source with non-zero activity
         int i = 0;

@@ -5,12 +5,14 @@
 
 #include <QString>
 #include <QVector>
+
 #include "TVector3.h"
 
-class AMaterialParticleCollection;
-class QJsonObject;
-class TRandom2;
-class DetectorClass;
+class  ASourceGenSettings;
+class  AMaterialParticleCollection;
+class  QJsonObject;
+class  TRandom2;
+class  DetectorClass;
 struct AParticleSourceRecord;
 
 class ALinkedParticle
@@ -26,8 +28,7 @@ public:
 class ASourceParticleGenerator : public AParticleGun
 {
 public:
-    ASourceParticleGenerator(const DetectorClass* Detector, TRandom2* RandGen);
-    ~ASourceParticleGenerator();
+    ASourceParticleGenerator(const ASourceGenSettings & Settings, const DetectorClass * Detector, TRandom2 * RandGen);
 
     virtual bool Init() override; // !!! has to be called before the first use of "GenerateEvent"!
     virtual bool GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles, int iEvent) override; //see Init!!!
@@ -40,28 +41,23 @@ public:
     virtual bool readFromJson(const QJsonObject &json) override;
 
     //requests
-    int    countSources() const {return ParticleSourcesData.size();}
-    double getTotalActivity();
-    AParticleSourceRecord* getSource(int iSource) {return ParticleSourcesData[iSource];}
-    void   append(AParticleSourceRecord* gunParticle);
-    void   forget(AParticleSourceRecord* gunParticle);
-    bool   replace(int iSource, AParticleSourceRecord* gunParticle);
-    void   remove(int iSource);
-    void   clear();
+    int    countSources() const;  // !*!
+    AParticleSourceRecord* getSource(int iSource); // !*!
 
     bool   LoadGunEnergySpectrum(int iSource, int iParticle, QString fileName); //TODO uses load function with message
 
     TVector3 GenerateRandomDirection();
     void checkLimitedToMaterial(AParticleSourceRecord *s);
 
-private:  
-    const DetectorClass* Detector;             //external
-    AMaterialParticleCollection* MpCollection; //external
-    TRandom2 *RandGen;                         //external
+private:
+    //external resources
+    const ASourceGenSettings & Settings;
+    const DetectorClass * Detector;
+    AMaterialParticleCollection * MpCollection;
+    TRandom2 * RandGen;
 
-    QVector<AParticleSourceRecord*> ParticleSourcesData;
+    //QVector<AParticleSourceRecord*> ParticleSourcesData;
     QVector<double> TotalParticleWeight;
-    double TotalActivity = 0;
     QVector< QVector< QVector<ALinkedParticle> > > LinkedPartiles; //[isource] [iparticle] []  (includes the record of the particle iteslf!!!)
                               //full recipe of emission builder (containes particles linked to particles etc up to the top level individual particle)
 
@@ -69,7 +65,6 @@ private:
     QVector<double> CollimationProbability; //[isource] collimation probability: solid angle inside cone / 4Pi
 
     //utilities
-    void CalculateTotalActivity();
     void GeneratePosition(int isource, double *R) const;
     void AddParticleInCone(int isource, int iparticle, QVector<AParticleRecord*> & GeneratedParticles) const; //QVector - only pointer is transferred!
 };

@@ -138,16 +138,18 @@ void AParticleSourceDialog::on_pbReject_clicked()
     reject();
 }
 
+#include "aparticlesimsettings.h"
 void AParticleSourceDialog::on_pbGunTest_clicked()
 {
-    ASourceParticleGenerator ps(MW.Detector, MW.Detector->RandGen);
-    ps.append(Rec);
+    ASourceGenSettings SourceGenSettings;
+    SourceGenSettings.append(Rec);
+    ASourceParticleGenerator ps(SourceGenSettings, MW.Detector, MW.Detector->RandGen);
 
     MW.GeometryWindow->ShowAndFocus();
     MW.ShowSource(Rec, true);
     MW.TestParticleGun(&ps, ui->sbGunTestEvents->value());
 
-    ps.forget(Rec); //so Rec is not deleted
+    SourceGenSettings.forget(Rec); //so Rec is not deleted
 }
 
 void AParticleSourceDialog::on_cobGunSourceType_currentIndexChanged(int index)

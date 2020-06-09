@@ -233,10 +233,57 @@ void ASourceGenSettings::readFromJson(const QJsonObject &  json)
             delete ps;
         }
     }
+
+    calculateTotalActivity();
 }
 
 void ASourceGenSettings::clear()
 {
     for (AParticleSourceRecord * r : ParticleSourcesData) delete r;
     ParticleSourcesData.clear();
+
+    TotalActivity = 0;
+}
+
+int ASourceGenSettings::getNumSources() const
+{
+    return ParticleSourcesData.size();
+}
+
+void ASourceGenSettings::calculateTotalActivity()
+{
+    TotalActivity = 0;
+    for (const AParticleSourceRecord * r : ParticleSourcesData)
+        TotalActivity += r->Activity;
+}
+
+void ASourceGenSettings::append(AParticleSourceRecord * gunParticle)
+{
+    ParticleSourcesData.append(gunParticle);
+    calculateTotalActivity();
+}
+
+void ASourceGenSettings::forget(AParticleSourceRecord *gunParticle)
+{
+    ParticleSourcesData.removeAll(gunParticle);
+    calculateTotalActivity();
+}
+
+bool ASourceGenSettings::replace(int iSource, AParticleSourceRecord * gunParticle)
+{
+    if (iSource < 0 || iSource >= ParticleSourcesData.size()) return false;
+
+    delete ParticleSourcesData[iSource];
+    ParticleSourcesData[iSource] = gunParticle;
+    return true;
+}
+
+void ASourceGenSettings::remove(int iSource)
+{
+    if (ParticleSourcesData.isEmpty()) return;
+    if (iSource < 0 || iSource >= ParticleSourcesData.size()) return;
+
+    delete ParticleSourcesData[iSource];
+    ParticleSourcesData.remove(iSource);
+    calculateTotalActivity();
 }

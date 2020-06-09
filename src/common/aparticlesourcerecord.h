@@ -40,7 +40,7 @@ struct AParticleSourceRecord
     ~AParticleSourceRecord(); //deletes records in dynamic GunParticles
 
     QString name = "No_name";
-    int shape = 0;
+    int shape = 0;    // change to enum
     //position
     double X0 = 0;
     double Y0 = 0;

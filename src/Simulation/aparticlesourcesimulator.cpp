@@ -118,8 +118,8 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
             // particle sources
             if (js.contains("ParticleSources"))
             {
-                ParticleGun = new ASourceParticleGenerator(&detector, RandGen);
-                ParticleGun->readFromJson(js);
+                ParticleGun = new ASourceParticleGenerator(partSimSet.SourceGenSettings, &detector, RandGen);
+                //ParticleGun->readFromJson(js);
 
                 //fAllowMultiple = cjs["AllowMultipleParticles"].toBool();
                 //AverageNumParticlesPerEvent = cjs["AverageParticlesPerEvent"].toDouble();

@@ -67,7 +67,7 @@ void MainWindow::SimParticleSourcesConfigToJson(QJsonObject &json)
 
         //Particle generation
         //--particle sources
-        SimulationManager->ParticleSources->writeToJson(psjs);
+        SimulationManager->Settings.partSimSet.SourceGenSettings.writeToJson(psjs);
         //--from file
         QJsonObject fjs;
             SimulationManager->FileParticleGenerator->writeToJson(fjs);
@@ -391,7 +391,7 @@ void MainWindow::on_pbRemoveSource_clicked()
                                     QMessageBox::Cancel);
     if (ret != QMessageBox::Yes) return;
 
-    SimulationManager->ParticleSources->remove(isource);
+    SimulationManager->Settings.partSimSet.SourceGenSettings.remove(isource);
 
     on_pbUpdateSimConfig_clicked();
     on_pbUpdateSourcesIndication_clicked();
@@ -411,7 +411,7 @@ void MainWindow::on_pbAddSource_clicked()
 {
     AParticleSourceRecord* s = new AParticleSourceRecord();
     s->GunParticles << new GunParticleStruct();
-    SimulationManager->ParticleSources->append(s);
+    SimulationManager->Settings.partSimSet.SourceGenSettings.append(s);
 
     on_pbUpdateSourcesIndication_clicked();
     ui->lwDefinedParticleSources->setCurrentRow( SimulationManager->ParticleSources->countSources()-1 );
@@ -461,7 +461,7 @@ void MainWindow::on_pbUpdateSourcesIndication_clicked()
             });
         l->addWidget(e);
 
-            double totAct = SimulationManager->ParticleSources->getTotalActivity();
+            double totAct = SimulationManager->Settings.partSimSet.SourceGenSettings.getTotalActivity();
             double per = ( totAct == 0 ? 0 : 100.0 * pr->Activity / totAct );
             QString t = QString("%1%").arg(per, 3, 'g', 3);
             lab = new QLabel(t);
@@ -569,7 +569,7 @@ void MainWindow::on_pbLoadParticleSource_clicked()
 
     AParticleSourceRecord* ps = new AParticleSourceRecord();
     ps->readFromJson(js, *MpCollection);
-    SimulationManager->ParticleSources->append(ps);
+    SimulationManager->Settings.partSimSet.SourceGenSettings.append(ps);
     //SimulationManager->ParticleSources->readSourceFromJson( SimulationManager->ParticleSources->countSources()-1, js );
 
     onRequestDetectorGuiUpdate();
@@ -620,7 +620,7 @@ void MainWindow::on_pbEditParticleSource_clicked()
     int res = d.exec();
     if (res == QDialog::Rejected) return;
 
-    SimulationManager->ParticleSources->replace(isource, d.getResult());
+    SimulationManager->Settings.partSimSet.SourceGenSettings.replace(isource, d.getResult());
 
     AParticleSourceRecord* ps = SimulationManager->ParticleSources->getSource(isource);
     SimulationManager->ParticleSources->checkLimitedToMaterial(ps);

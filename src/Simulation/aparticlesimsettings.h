@@ -18,6 +18,18 @@ public:
     void readFromJson(const QJsonObject & json);
 
     void clear();
+
+    int    getNumSources() const;
+    void   calculateTotalActivity();
+    double getTotalActivity() const {return TotalActivity;}
+
+    void   append(AParticleSourceRecord * gunParticle);
+    void   forget(AParticleSourceRecord* gunParticle);
+    bool   replace(int iSource, AParticleSourceRecord* gunParticle);
+    void   remove(int iSource);
+
+private:
+    double TotalActivity = 0;
 };
 
 class AFileGenSettings

@@ -141,7 +141,7 @@ private:
     void saveG4depositionLog(const QString & dir) const;
     void saveA2depositionLog(const QString & dir) const;
     void saveExitLog();
-    void emitProgressSignal();
+    void emitProgressSignal();  // TODO !*! can be refactored now
 };
 
 #endif // ASIMULATIONMANAGER_H

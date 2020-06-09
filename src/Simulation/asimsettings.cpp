@@ -9,17 +9,15 @@ void ASimSettings::writeToJson(QJsonObject &json) const
 
     {
         QJsonObject js;
-        photSimSet.writeToJson(js);
+            photSimSet.writeToJson(js);
         json["PointSourcesConfig"] = js;
     }
 
-    /*
     {
         QJsonObject js;
-        partSimSet.writeToJson(js);
+            partSimSet.writeToJson(js);
         json["ParticleSourcesConfig"] = js;
     }
-    */
 }
 
 bool ASimSettings::readFromJson(const QJsonObject & json)
@@ -41,12 +39,10 @@ bool ASimSettings::readFromJson(const QJsonObject & json)
     if (!ok) return false;
     photSimSet.readFromJson(phjs);
 
-    /*
     QJsonObject pajs;
     ok = parseJson(js, "ParticleSourcesConfig", pajs);
     if (!ok) return false;
-    photSimSet.readFromJson(pajs);
-    */
+    partSimSet.readFromJson(pajs);
 
     return true;
 }

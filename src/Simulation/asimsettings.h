@@ -3,7 +3,7 @@
 
 #include "ageneralsimsettings.h"
 #include "aphotonsimsettings.h"
-//#include "aparticlesimsettings.h"
+#include "aparticlesimsettings.h"
 
 class QJsonObject;
 
@@ -16,7 +16,7 @@ public:
 
     AGeneralSimSettings   genSimSet;
     APhotonSimSettings    photSimSet;
-    //AParticleSimSettings  partSimSet;
+    AParticleSimSettings  partSimSet;
 
 };
 

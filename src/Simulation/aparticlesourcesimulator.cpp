@@ -32,8 +32,8 @@
 #include "TRandom2.h"
 #include "TGeoManager.h"
 
-AParticleSourceSimulator::AParticleSourceSimulator(ASimulationManager & simMan, int ID) :
-    ASimulator(simMan, ID)
+AParticleSourceSimulator::AParticleSourceSimulator(ASimulationManager & simMan, const AParticleSimSettings & partSimSet, int ID) :
+    ASimulator(simMan, ID), partSimSet(partSimSet)
 {
     detector.MpCollection->updateRandomGenForThread(ID, RandGen);
 
@@ -76,35 +76,44 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
     }
     QJsonObject js = json["ParticleSourcesConfig"].toObject();
         //control options
+    /*
         QJsonObject cjs = js["SourceControlOptions"].toObject();
         if (cjs.isEmpty())
         {
             ErrorString = "Json sent to simulator does not contain proper sim config data!";
             return false;
         }
-        totalEventCount = cjs["EventsToDo"].toInt();
-        fAllowMultiple = false; //only applies to 'Sources' mode
-        fDoS1 = cjs["DoS1"].toBool();
-        fDoS2 = cjs["DoS2"].toBool();
-        fBuildParticleTracks = GenSimSettings.TrackBuildOptions.bBuildParticleTracks;
-        fIgnoreNoHitsEvents = false; //compatibility
-        parseJson(cjs, "IgnoreNoHitsEvents", fIgnoreNoHitsEvents);
-        fIgnoreNoDepoEvents = true; //compatibility
-        parseJson(cjs, "IgnoreNoDepoEvents", fIgnoreNoDepoEvents);
+    */
+        //fAllowMultiple = false; //only applies to 'Sources' mode
+        //qDebug() << fAllowMultiple << partSimSet.bMultiple;
+        //fDoS1 = cjs["DoS1"].toBool();
+        //fDoS2 = cjs["DoS2"].toBool();
+        //qDebug() << fDoS2 << partSimSet.bDoS1 << partSimSet.bDoS2;
+        //fIgnoreNoHitsEvents = false; //compatibility
+        //parseJson(cjs, "IgnoreNoHitsEvents", fIgnoreNoHitsEvents);
+        //qDebug() << fIgnoreNoHitsEvents << partSimSet.bIgnoreNoHits;
+        //fIgnoreNoDepoEvents = true; //compatibility
+        //parseJson(cjs, "IgnoreNoDepoEvents", fIgnoreNoDepoEvents);
+        //qDebug() << fIgnoreNoDepoEvents << partSimSet.bIgnoreNoDepo;
 
-        bClusterMerge = true; //compatibility
-        parseJson(cjs, "ClusterMerge", bClusterMerge);
-        ClusterMergeRadius2 = 1.0;
-        parseJson(cjs, "ClusterMergeRadius", ClusterMergeRadius2);
-        ClusterMergeRadius2 *= ClusterMergeRadius2;
-        ClusterMergeTimeDif = 1.0;
-        parseJson(cjs, "ClusterMergeTime", ClusterMergeTimeDif);
+        //bClusterMerge = true; //compatibility
+        //parseJson(cjs, "ClusterMerge", bClusterMerge);
+        //qDebug() << bClusterMerge << partSimSet.bClusterMerge;
+
+        //ClusterMergeRadius2 = 1.0;
+        //parseJson(cjs, "ClusterMergeRadius", ClusterMergeRadius2);
+        //qDebug() << ClusterMergeRadius2 << partSimSet.ClusterRadius;
+        //ClusterMergeRadius2 *= ClusterMergeRadius2;
+        //ClusterMergeTimeDif = 1.0;
+        //parseJson(cjs, "ClusterMergeTime", ClusterMergeTimeDif);
+        //qDebug() << ClusterMergeTimeDif << partSimSet.ClusterTime;
 
         // particle generation mode
-        QString PartGenMode = "Sources"; //compatibility
-        parseJson(cjs, "ParticleGenerationMode", PartGenMode);
+        //QString PartGenMode = "Sources"; //compatibility
+        //parseJson(cjs, "ParticleGenerationMode", PartGenMode);
 
-        if (PartGenMode == "Sources")
+        //if (PartGenMode == "Sources")
+        if (partSimSet.GenerationMode == AParticleSimSettings::Sources)
         {
             // particle sources
             if (js.contains("ParticleSources"))
@@ -112,9 +121,11 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
                 ParticleGun = new ASourceParticleGenerator(&detector, RandGen);
                 ParticleGun->readFromJson(js);
 
-                fAllowMultiple = cjs["AllowMultipleParticles"].toBool();
-                AverageNumParticlesPerEvent = cjs["AverageParticlesPerEvent"].toDouble();
-                TypeParticlesPerEvent = cjs["TypeParticlesPerEvent"].toInt();
+                //fAllowMultiple = cjs["AllowMultipleParticles"].toBool();
+                //AverageNumParticlesPerEvent = cjs["AverageParticlesPerEvent"].toDouble();
+                //qDebug() << AverageNumParticlesPerEvent << partSimSet.MeanPerEvent;
+                //TypeParticlesPerEvent = cjs["TypeParticlesPerEvent"].toInt();
+                //qDebug() << TypeParticlesPerEvent << (int)partSimSet.MultiMode;
             }
             else
             {
@@ -122,7 +133,8 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
                 return false;
             }
         }
-        else if (PartGenMode == "File")
+        //else if (PartGenMode == "File")
+        else if (partSimSet.GenerationMode == AParticleSimSettings::File)
         {
             //  generation from ascii file
             QJsonObject fjs;
@@ -142,7 +154,8 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
                 ParticleGun = PG;
             }
         }
-        else if (PartGenMode == "Script")
+        //else if (PartGenMode == "Script")
+        else if (partSimSet.GenerationMode == AParticleSimSettings::Script)
         {
             QJsonObject sjs;
             parseJson(js, "GenerationFromScript", sjs);
@@ -170,16 +183,16 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
         return false;
     }
 
-    if (PartGenMode == "File")
-    {
+    totalEventCount = partSimSet.EventsToDo; //cjs["EventsToDo"].toInt();
+    //if (PartGenMode == "File")
+    if (partSimSet.GenerationMode == AParticleSimSettings::File)
         totalEventCount = std::min(totalEventCount, static_cast<AFileParticleGenerator*>(ParticleGun)->NumEventsInFile);
-    }
 
-    ParticleTracker->configure(&GenSimSettings, fBuildParticleTracks, &tracks, fIgnoreNoDepoEvents, ID);
+    ParticleTracker->configure(&GenSimSettings, GenSimSettings.TrackBuildOptions.bBuildParticleTracks, &tracks, partSimSet.bIgnoreNoDepo, ID);
     ParticleTracker->resetCounter();
     S1generator->setDoTextLog(GenSimSettings.LogsStatOptions.bPhotonGenerationLog);
     S2generator->setDoTextLog(GenSimSettings.LogsStatOptions.bPhotonGenerationLog);
-    S2generator->setOnlySecondary(!fDoS1);
+    S2generator->setOnlySecondary(!partSimSet.bDoS1);
 
     return true;
 }
@@ -307,7 +320,7 @@ void AParticleSourceSimulator::simulate()
         //-- only local tracking remains here --
         //energy vector is ready
 
-        if ( fIgnoreNoDepoEvents && EnergyVector.isEmpty() ) //if there is no deposition can ignore this event
+        if ( partSimSet.bIgnoreNoDepo && EnergyVector.isEmpty() ) //if there is no deposition -> can ignore this event
         {
             eventCurrent--;
             continue;
@@ -320,7 +333,7 @@ void AParticleSourceSimulator::simulate()
             return;
         }
 
-        if ( fIgnoreNoHitsEvents && OneEvent->isHitsEmpty() ) // if there were no PM hits can ignore this event
+        if ( partSimSet.bIgnoreNoHits && OneEvent->isHitsEmpty() ) // if there were no PM hits -> can ignore this event
         {
             eventCurrent--;
             continue;
@@ -420,7 +433,7 @@ void AParticleSourceSimulator::EnergyVectorToScan()
     {
         const int numNodes = EnergyVector.size(); // here it is not equal to 1
 
-        if (!bClusterMerge)
+        if (!partSimSet.bClusterMerge)
         {
             scs->Points.Reinitialize(numNodes);
             for (int iNode = 0; iNode < numNodes; iNode++)
@@ -442,11 +455,11 @@ void AParticleSourceSimulator::EnergyVectorToScan()
                 qDebug() << EVcell->dE << EVcell->time;
             }
             */
+            const double ClusterMergeRadius2 = partSimSet.ClusterRadius * partSimSet.ClusterRadius;
 
             QVector<APositionEnergyRecord> Depo(numNodes);
 
-            for (int i=0; i<3; i++)
-                Depo[0].r[i] = EnergyVector[0]->r[i];
+            for (int i=0; i<3; i++) Depo[0].r[i] = EnergyVector[0]->r[i];
             Depo[0].energy   = EnergyVector[0]->dE;
             Depo[0].time     = EnergyVector[0]->time;
 
@@ -460,7 +473,7 @@ void AParticleSourceSimulator::EnergyVectorToScan()
                 const AEnergyDepositionCell * EVcell = EnergyVector.at(iCell);
 
                 APositionEnergyRecord & Point = Depo[iPoint];
-                if (EVcell->isCloser(ClusterMergeRadius2, Point.r) && fabs(EVcell->time - Point.time) < ClusterMergeTimeDif)
+                if (EVcell->isCloser(ClusterMergeRadius2, Point.r) && fabs(EVcell->time - Point.time) < partSimSet.ClusterTime)
                 {
                     Point.MergeWith(EVcell->r, EVcell->dE, EVcell->time);
                     numMerges++;
@@ -488,7 +501,7 @@ void AParticleSourceSimulator::EnergyVectorToScan()
                     int iOtherCluster = iThisCluster + 1;
                     while (iOtherCluster < Depo.size())
                     {
-                        if (Depo[iThisCluster].isCloser(ClusterMergeRadius2, Depo[iOtherCluster]) && fabs(Depo[iThisCluster].time - Depo[iOtherCluster].time) < ClusterMergeTimeDif)
+                        if (Depo[iThisCluster].isCloser(ClusterMergeRadius2, Depo[iOtherCluster]) && fabs(Depo[iThisCluster].time - Depo[iOtherCluster].time) < partSimSet.ClusterTime)
                         {
                             Depo[iThisCluster].MergeWith(Depo[iOtherCluster]);
                             Depo.removeAt(iOtherCluster);
@@ -535,15 +548,17 @@ void AParticleSourceSimulator::clearGeneratedParticles()
 
 int AParticleSourceSimulator::chooseNumberOfParticlesThisEvent() const
 {
-    if (!fAllowMultiple) return 1;
+    if (!partSimSet.bMultiple) return 1;
 
-    if (TypeParticlesPerEvent == 0)
-        return std::round(AverageNumParticlesPerEvent);
+    if (partSimSet.MultiMode == AParticleSimSettings::Constant)
+        return std::round(partSimSet.MeanPerEvent);
     else
     {
-        int num = RandGen->Poisson(AverageNumParticlesPerEvent);
+        int num = RandGen->Poisson(partSimSet.MeanPerEvent);
         return std::max(1, num);
     }
+
+    return 0; //just warning suppression
 }
 
 bool AParticleSourceSimulator::choosePrimariesForThisEvent(int numPrimaries, int iEvent)
@@ -569,13 +584,13 @@ bool AParticleSourceSimulator::generateAndTrackPhotons()
 {
     OneEvent->clearHits();
 
-    if (fDoS1 && !S1generator->Generate())
+    if (partSimSet.bDoS1 && !S1generator->Generate())
     {
         ErrorString = "Error executing S1 generation!";
         return false;
     }
 
-    if (fDoS2 && !S2generator->Generate())
+    if (partSimSet.bDoS2 && !S2generator->Generate())
     {
         ErrorString = "Error executing S2 generation!";
         return false;

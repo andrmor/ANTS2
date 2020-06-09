@@ -500,7 +500,7 @@ void ASimulationManager::emitProgressSignal()
             if (pss)
             {
                 bG4sim = Settings.genSimSet.G4SimSet.bTrackParticles;
-                bHavePhotonSim = pss->isDoingPhotonTracing();
+                bHavePhotonSim = Settings.partSimSet.bDoS1 || Settings.partSimSet.bDoS2;//pss->isDoingPhotonTracing();
             }
         }
         if (bG4sim)

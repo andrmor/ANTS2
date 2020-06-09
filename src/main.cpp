@@ -158,6 +158,7 @@ int main(int argc, char *argv[])
     AGlobalSettings& GlobSet = AGlobalSettings::getInstance();
     GlobSet.setNetworkModule(&Network);
     if (GlobSet.NumThreads == -1) GlobSet.NumThreads = GlobSet.RecNumTreads;
+    GlobSet.setMpCollection(Detector.MpCollection);
     qDebug() << "Global settings object created";
 
     Config.UpdateLRFmakeJson(); //compatibility    

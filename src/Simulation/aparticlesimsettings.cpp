@@ -99,6 +99,7 @@ void AParticleSimSettings::readFromJson(const QJsonObject & json)
         parseJson(js, "ClusterMergeRadius", ClusterRadius);
         parseJson(js, "ClusterMergeTime", ClusterTime);
     }
+    if (GenerationMode != Sources) bMultiple = false;  // TODO: move bMultiple to Sources!
 
     SourceGenSettings.readFromJson(json);
 
@@ -204,6 +205,7 @@ void ASourceGenSettings::writeToJson(QJsonObject &json) const
     json["ParticleSources"] = ja;
 }
 
+#include "amaterialparticlecolection.h"
 void ASourceGenSettings::readFromJson(const QJsonObject &  json)
 {
     clear();

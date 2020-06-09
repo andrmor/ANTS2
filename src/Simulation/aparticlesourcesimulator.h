@@ -2,7 +2,7 @@
 #define APARTICLESOURCESIMULATOR_H
 
 #include "asimulator.h"
-
+#include "aparticlesimsettings.h"
 #include <vector>
 
 #include <QVector>
@@ -25,7 +25,7 @@ class QFile;
 class AParticleSourceSimulator : public ASimulator
 {
 public:
-    explicit AParticleSourceSimulator(ASimulationManager & simMan, int ID);
+    explicit AParticleSourceSimulator(ASimulationManager & simMan, const AParticleSimSettings & partSimSet, int ID);
     ~AParticleSourceSimulator();
 
     const QVector<AEnergyDepositionCell*> &getEnergyVector() const { return EnergyVector; }  //obsolete
@@ -45,7 +45,6 @@ public:
 
     void setOnlySavePrimaries() {bOnlySavePrimariesToFile = true;} // for G4ants mode // obsolete? *!*
     const AParticleGun * getParticleGun() const {return ParticleGun;}
-    bool isDoingPhotonTracing() const {return fDoS1 || fDoS2;}
 
     virtual void hardAbort() override;
 
@@ -71,6 +70,9 @@ private:
     void releaseInputResources();
     bool prepareWorkerG4File();
 
+private:
+    const AParticleSimSettings & partSimSet;
+
     //local objects
     AParticleTracker* ParticleTracker = nullptr;
     S1_Generator* S1generator = nullptr;
@@ -95,17 +97,16 @@ private:
     double updateFactor;
 
     //Control
-    bool fBuildParticleTracks;   //can be dropped and use directly TrackBuildOptions od simSettings
-    bool fDoS1;
-    bool fDoS2;
-    bool fAllowMultiple; //multiple particles per event?
-    int AverageNumParticlesPerEvent;
-    int TypeParticlesPerEvent;  //0 - constant, 1 - Poisson
-    bool fIgnoreNoHitsEvents;
-    bool fIgnoreNoDepoEvents;
-    bool bClusterMerge = true;
-    double ClusterMergeRadius2 = 1.0; //scan cluster merge radius [mm] in square - used by EnergyVectorToScan()
-    double ClusterMergeTimeDif = 1.0;
+    //bool fDoS1;
+    //bool fDoS2;
+    //bool fAllowMultiple; //multiple particles per event?
+    //int AverageNumParticlesPerEvent;
+    //int TypeParticlesPerEvent;  //0 - constant, 1 - Poisson
+    //bool fIgnoreNoHitsEvents;
+    //bool fIgnoreNoDepoEvents;
+    //bool bClusterMerge = true;
+    //double ClusterMergeRadius2 = 1.0; //scan cluster merge radius [mm] in square - used by EnergyVectorToScan()
+    //double ClusterMergeTimeDif = 1.0;
 
     //Geant4 interface
     AExternalProcessHandler * G4handler = nullptr;

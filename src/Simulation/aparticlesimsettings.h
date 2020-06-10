@@ -53,6 +53,8 @@ public:
     QDateTime       FileLastModified;
     QStringList     ValidatedWithParticles;
 
+    QString         getFormatName() const;
+
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);
 

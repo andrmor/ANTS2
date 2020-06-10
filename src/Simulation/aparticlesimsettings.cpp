@@ -146,6 +146,19 @@ void AScriptGenSettings::clear()
     Script.clear();
 }
 
+QString AFileGenSettings::getFormatName() const
+{
+    switch (FileFormat)
+    {
+    case Simplistic: return "Simplistic";
+    case G4Binary:   return "G4-binary";
+    case G4Ascii:    return "G4-txt";
+    case Undefined:  return "?";
+    case BadFormat:  return "Invalid";
+    default:         return "Error";
+    }
+}
+
 void AFileGenSettings::writeToJson(QJsonObject &json) const
 {
     json["FileName"]         = FileName;

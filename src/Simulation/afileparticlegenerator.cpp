@@ -1,4 +1,5 @@
 #include "afileparticlegenerator.h"
+#include "aparticlesimsettings.h"
 #include "amaterialparticlecolection.h"
 #include "aparticlerecord.h"
 #include "ajsontools.h"
@@ -15,8 +16,8 @@
 #include <istream>
 #include <iostream>
 
-AFileParticleGenerator::AFileParticleGenerator(const AMaterialParticleCollection & MpCollection) :
-    MpCollection(MpCollection) {}
+AFileParticleGenerator::AFileParticleGenerator(AFileGenSettings &Settings, const AMaterialParticleCollection & MpCollection) :
+    Settings(Settings), MpCollection(MpCollection) {}
 
 AFileParticleGenerator::~AFileParticleGenerator()
 {
@@ -25,38 +26,22 @@ AFileParticleGenerator::~AFileParticleGenerator()
 
 void AFileParticleGenerator::SetFileName(const QString &fileName)
 {
-    if (FileName == fileName) return;
+    if (Settings.FileName == fileName) return;
 
-    FileName = fileName;
+    Settings.FileName = fileName;
     InvalidateFile();
 }
 
+QString AFileParticleGenerator::GetFileName() const {return Settings.FileName;}
+
 bool AFileParticleGenerator::IsFormatG4() const
 {
-    return (FileFormat == G4Ascii || FileFormat == G4Binary);
+    return (Settings.FileFormat == AFileGenSettings::G4Ascii || Settings.FileFormat == AFileGenSettings::G4Binary);
 }
 
 bool AFileParticleGenerator::IsFormatBinary() const
 {
-    return (FileFormat == G4Binary);
-}
-
-QString AFileParticleGenerator::GetFormatName() const
-{
-    switch (FileFormat)
-    {
-    case Simplistic: return "Simplistic";
-    case G4Binary:   return "G4-binary";
-    case G4Ascii:    return "G4-txt";
-    case Undefined:  return "?";
-    case BadFormat:  return "Invalid";
-    default:         return "Error";
-    }
-}
-
-void AFileParticleGenerator::SetValidationMode(AFileParticleGenerator::ValidStateEnum Mode)
-{
-    ValidationMode = Mode;
+    return (Settings.FileFormat == AFileGenSettings::G4Binary);
 }
 
 #include <algorithm>
@@ -66,7 +51,7 @@ bool AFileParticleGenerator::Init()
 
     bool bExpanded = bCollectExpandedStatistics; bCollectExpandedStatistics = false; // single trigger flag!
 
-    if (FileName.isEmpty())
+    if (Settings.FileName.isEmpty())
     {
         ErrorString = "File name is not defined";
         return false;
@@ -79,15 +64,15 @@ bool AFileParticleGenerator::Init()
     bool bOK = DetermineFileFormat();
     if (!bOK) return false;
 
-    switch (FileFormat)
+    switch (Settings.FileFormat)
     {
-    case Simplistic:
+    case AFileGenSettings::Simplistic:
         Engine = new AFilePGEngineSimplistic(this);
         break;
-    case G4Binary:
+    case AFileGenSettings::G4Binary:
         Engine = new AFilePGEngineG4antsBin(this);
         break;
-    case G4Ascii:
+    case AFileGenSettings::G4Ascii:
         Engine = new AFilePGEngineG4antsTxt(this);
         break;
     default:
@@ -99,9 +84,9 @@ bool AFileParticleGenerator::Init()
 
     if (bOK && bNeedInspect)
     {
-        LastValidationMode = ValidationMode;
-        ValidatedWithParticles = MpCollection.getListOfParticleNames();
-        FileLastModified = QFileInfo(FileName).lastModified();
+        Settings.LastValidationMode = Settings.ValidationMode;
+        Settings.ValidatedWithParticles = MpCollection.getListOfParticleNames();
+        Settings.FileLastModified = QFileInfo(Settings.FileName).lastModified();
     }
 
     if (bOK && ParticleStat.size() > 0)
@@ -120,37 +105,37 @@ bool AFileParticleGenerator::DetermineFileFormat()
     if (isFileG4Binary())
     {
         //qDebug() << "Assuming it is G4 bin format";
-        FileFormat = G4Binary;
+        Settings.FileFormat = AFileGenSettings::G4Binary;
         return true;
     }
 
     if (isFileG4Ascii())
     {
         //qDebug() << "Assuming it is G4 ascii format";
-        FileFormat = G4Ascii;
+        Settings.FileFormat = AFileGenSettings::G4Ascii;
         return true;
     }
 
     if (isFileSimpleAscii())
     {
         //qDebug() << "Assuming it is simplistic format";
-        FileFormat = Simplistic;
+        Settings.FileFormat = AFileGenSettings::Simplistic;
         return true;
     }
 
-    FileFormat = BadFormat;
+    Settings.FileFormat = AFileGenSettings::BadFormat;
     if (!ErrorString.isEmpty()) return false;
 
-    ErrorString = QString("Unexpected format of the file %1").arg(FileName);
+    ErrorString = QString("Unexpected format of the file %1").arg(Settings.FileName);
     return false;
 }
 
 bool AFileParticleGenerator::isFileG4Binary()
 {
-    std::ifstream inB(FileName.toLatin1().data(), std::ios::in | std::ios::binary);
+    std::ifstream inB(Settings.FileName.toLatin1().data(), std::ios::in | std::ios::binary);
     if (!inB.is_open())
     {
-        ErrorString = QString("Cannot open file %1").arg(FileName);
+        ErrorString = QString("Cannot open file %1").arg(Settings.FileName);
         return false;
     }
     char ch;
@@ -166,10 +151,10 @@ bool AFileParticleGenerator::isFileG4Binary()
 
 bool AFileParticleGenerator::isFileG4Ascii()
 {
-    std::ifstream inT(FileName.toLatin1().data());
+    std::ifstream inT(Settings.FileName.toLatin1().data());
     if (!inT.is_open())
     {
-        ErrorString = QString("Cannot open file %1").arg(FileName);
+        ErrorString = QString("Cannot open file %1").arg(Settings.FileName);
         return false;
     }
 
@@ -188,10 +173,10 @@ bool AFileParticleGenerator::isFileG4Ascii()
 
 bool AFileParticleGenerator::isFileSimpleAscii()
 {
-    QFile file(FileName);
+    QFile file(Settings.FileName);
     if(!file.open(QIODevice::ReadOnly | QFile::Text))
     {
-        ErrorString = QString("Cannot open file %1").arg(FileName);
+        ErrorString = QString("Cannot open file %1").arg(Settings.FileName);
         return false;
     }
 
@@ -239,6 +224,7 @@ bool AFileParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & Generated
 
 void AFileParticleGenerator::writeToJson(QJsonObject &json) const
 {
+    /*
     json["FileName"] = FileName;
     json["FileFormat"] = static_cast<int>(FileFormat);
 
@@ -247,10 +233,12 @@ void AFileParticleGenerator::writeToJson(QJsonObject &json) const
     json["ValidatedWithParticles"] = ar;
     json["FileLastModified"] = FileLastModified.toMSecsSinceEpoch();
     json["LastValidation"] = static_cast<int>(LastValidationMode);
+    */
 }
 
 bool AFileParticleGenerator::readFromJson(const QJsonObject &json)
 {
+    /*
     parseJson(json, "NumEventsInFile", NumEventsInFile);
     QJsonArray ar;
     parseJson(json, "ValidatedWithParticles", ar);
@@ -275,6 +263,7 @@ bool AFileParticleGenerator::readFromJson(const QJsonObject &json)
     ValidationMode = LastValidationMode;
 
     return parseJson(json, "FileName", FileName);
+    */
 }
 
 void AFileParticleGenerator::SetStartEvent(int startEvent)
@@ -284,26 +273,26 @@ void AFileParticleGenerator::SetStartEvent(int startEvent)
 
 void AFileParticleGenerator::InvalidateFile()
 {
-    FileFormat = Undefined;
-    LastValidationMode = None;
-    ValidationMode = None;
+    Settings.FileFormat = AFileGenSettings::Undefined;
+    Settings.LastValidationMode = AFileGenSettings::None;
+    Settings.ValidationMode = AFileGenSettings::None;
     clearFileData();
 }
 
 bool AFileParticleGenerator::IsValidated() const
 {
-    if (FileFormat == Undefined || FileFormat == BadFormat) return false;
+    if (Settings.FileFormat == AFileGenSettings::Undefined || Settings.FileFormat == AFileGenSettings::BadFormat) return false;
 
-    switch (ValidationMode)
+    switch (Settings.ValidationMode)
     {
-    case None:
+    case AFileGenSettings::None:
         return false;
-    case Relaxed:
+    case AFileGenSettings::Relaxed:
         break;         // not enforcing anything
-    case Strict:
+    case AFileGenSettings::Strict:
       {
-        if (LastValidationMode != Strict) return false;
-        QSet<QString> ValidatedList = QSet<QString>::fromList(ValidatedWithParticles);
+        if (Settings.LastValidationMode != AFileGenSettings::Strict) return false;
+        QSet<QString> ValidatedList = QSet<QString>::fromList(Settings.ValidatedWithParticles);
         QSet<QString> CurrentList = QSet<QString>::fromList(MpCollection.getListOfParticleNames());
         if ( !CurrentList.contains(ValidatedList) ) return false;
         break;
@@ -311,23 +300,23 @@ bool AFileParticleGenerator::IsValidated() const
     default: qWarning() << "Unknown validation mode!";
     }
 
-    QFileInfo fi(FileName);
+    QFileInfo fi(Settings.FileName);
     if (!fi.exists()) return false;
-    if (FileLastModified != fi.lastModified()) return false;
+    if (Settings.FileLastModified != fi.lastModified()) return false;
 
     return true;
 }
 
 bool AFileParticleGenerator::IsValidParticle(int ParticleId) const
 {
-    if (ValidationMode != Strict) return true;
+    if (Settings.ValidationMode != AFileGenSettings::Strict) return true;
 
     return (ParticleId >= 0 && ParticleId < MpCollection.countParticles());
 }
 
 bool AFileParticleGenerator::IsValidParticle(const QString & ParticleName) const
 {
-    if (ValidationMode != Strict) return true;
+    if (Settings.ValidationMode != AFileGenSettings::Strict) return true;
 
     const int ParticleId = MpCollection.getParticleId(ParticleName);
     return (ParticleId != -1);
@@ -343,7 +332,7 @@ bool AFileParticleGenerator::generateG4File(int eventBegin, int eventEnd, const 
 
 void AFileParticleGenerator::clearFileData()
 {
-    NumEventsInFile          = 0;
+    Settings.NumEventsInFile          = 0;
     statNumEmptyEventsInFile = 0;
     statNumMultipleEvents    = 0;
 
@@ -407,7 +396,7 @@ bool AFilePGEngineSimplistic::doInit(bool bNeedInspect, bool bDetailedInspection
                     FPG->ParticleStat.push_back(AParticleInFileStatRecord(name, f.at(1).toDouble()));
             }
 
-            if (!bContinueEvent) FPG->NumEventsInFile++;
+            if (!bContinueEvent) FPG->Settings.NumEventsInFile++;
 
             if (f.size() > 9 && f.at(9) == '*')
             {
@@ -588,7 +577,7 @@ bool AFilePGEngineG4antsTxt::doInit(bool bNeedInspect, bool bDetailedInspection)
             if (str[0] == '#')
             {
                 //new event
-                FPG->NumEventsInFile++;
+                FPG->Settings.NumEventsInFile++;
                 if (bWasMulty)     FPG->statNumMultipleEvents++;
                 if (!bWasParticle) FPG->statNumEmptyEventsInFile++;
                 bWasMulty = false;
@@ -794,7 +783,7 @@ bool AFilePGEngineG4antsBin::doInit(bool bNeedInspect, bool bDetailedInspection)
             if (h == char(0xEE)) //new event
             {
                 inStream->read((char*)&eventId, sizeof(int));
-                FPG->NumEventsInFile++;
+                FPG->Settings.NumEventsInFile++;
                 if (bWasMulty)     FPG->statNumMultipleEvents++;
                 if (!bWasParticle) FPG->statNumEmptyEventsInFile++;
                 bWasMulty = false;

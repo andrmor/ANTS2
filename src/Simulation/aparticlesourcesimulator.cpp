@@ -32,7 +32,7 @@
 #include "TRandom2.h"
 #include "TGeoManager.h"
 
-AParticleSourceSimulator::AParticleSourceSimulator(ASimulationManager & simMan, const AParticleSimSettings & partSimSet, int ID) :
+AParticleSourceSimulator::AParticleSourceSimulator(ASimulationManager & simMan, AParticleSimSettings &partSimSet, int ID) :
     ASimulator(simMan, ID), partSimSet(partSimSet)
 {
     detector.MpCollection->updateRandomGenForThread(ID, RandGen);
@@ -146,12 +146,12 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
             }
             else
             {
-                AFileParticleGenerator * PG = new AFileParticleGenerator(*detector.MpCollection);
-                PG->readFromJson(fjs);
-                PG->SetValidationMode(GenSimSettings.G4SimSet.bTrackParticles ? AFileParticleGenerator::Relaxed
-                                                                           : AFileParticleGenerator::Strict);
-                PG->Init();
-                ParticleGun = PG;
+                ParticleGun = new AFileParticleGenerator(partSimSet.FileGenSettings, *detector.MpCollection);
+                //PG->readFromJson(fjs); //kill
+                //PG->SetValidationMode(GenSimSettings.G4SimSet.bTrackParticles ? AFileParticleGenerator::Relaxed : AFileParticleGenerator::Strict);
+                partSimSet.FileGenSettings.ValidationMode = (GenSimSettings.G4SimSet.bTrackParticles ? AFileGenSettings::Relaxed : AFileGenSettings::Strict);
+                //PG->Init();  // kill
+                //ParticleGun = PG; //kill
             }
         }
         //else if (PartGenMode == "Script")
@@ -186,7 +186,7 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
     totalEventCount = partSimSet.EventsToDo; //cjs["EventsToDo"].toInt();
     //if (PartGenMode == "File")
     if (partSimSet.GenerationMode == AParticleSimSettings::File)
-        totalEventCount = std::min(totalEventCount, static_cast<AFileParticleGenerator*>(ParticleGun)->NumEventsInFile);
+        totalEventCount = std::min(totalEventCount, partSimSet.FileGenSettings.NumEventsInFile);
 
     ParticleTracker->configure(&GenSimSettings, GenSimSettings.TrackBuildOptions.bBuildParticleTracks, &tracks, partSimSet.bIgnoreNoDepo, ID);
     ParticleTracker->resetCounter();

@@ -297,7 +297,8 @@ void MainWindow::on_pbGunTest_clicked()
     font.setBold(true);
     ui->pbStopScan->setFont(font);
 
-    SimulationManager->FileParticleGenerator->SetValidationMode(AFileParticleGenerator::Relaxed);
+    //SimulationManager->FileParticleGenerator->SetValidationMode(AFileParticleGenerator::Relaxed);
+    SimulationManager->Settings.partSimSet.FileGenSettings.ValidationMode = AFileGenSettings::Relaxed;
     TestParticleGun(pg, ui->sbGunTestEvents->value()); //script generator is aborted on click of the stop button!
 
     ui->pbStopScan->setEnabled(false);
@@ -685,8 +686,8 @@ void MainWindow::on_pbParticleSourcesSimulate_clicked()
     if (ui->cobParticleGenerationMode->currentIndex() == 1)  // "From file"
     {
         AFileParticleGenerator * pg = SimulationManager->FileParticleGenerator;
-        pg->SetValidationMode(ui->cbGeant4ParticleTracking->isChecked() ? AFileParticleGenerator::Relaxed
-                                                                        : AFileParticleGenerator::Strict);
+        //pg->SetValidationMode(ui->cbGeant4ParticleTracking->isChecked() ? AFileParticleGenerator::Relaxed : AFileParticleGenerator::Strict);
+        SimulationManager->Settings.partSimSet.FileGenSettings.ValidationMode = (ui->cbGeant4ParticleTracking->isChecked() ? AFileGenSettings::Relaxed : AFileGenSettings::Strict);
         bool bOK = pg->Init();
         if (!bOK)
         {
@@ -825,8 +826,8 @@ void MainWindow::on_pbGenerateFromFile_Check_clicked()
     AFileParticleGenerator* pg = SimulationManager->FileParticleGenerator;
 
     pg->bCollectExpandedStatistics = ui->cbFileCollectStatistics->isChecked();
-    pg->SetValidationMode(ui->cbGeant4ParticleTracking->isChecked() ? AFileParticleGenerator::Relaxed
-                                                                    : AFileParticleGenerator::Strict);
+    //pg->SetValidationMode(ui->cbGeant4ParticleTracking->isChecked() ? AFileParticleGenerator::Relaxed : AFileParticleGenerator::Strict);
+    SimulationManager->Settings.partSimSet.FileGenSettings.ValidationMode = (ui->cbGeant4ParticleTracking->isChecked() ? AFileGenSettings::Relaxed : AFileGenSettings::Strict);
     WindowNavigator->BusyOn();  // -->
     bool bOK = pg->Init();
     WindowNavigator->BusyOff(); // <--
@@ -853,11 +854,12 @@ void MainWindow::updateFileParticleGeneratorGui()
     }
 
     QString s = "Format: ";
-    s += pg->GetFormatName();
+    //s += pg->GetFormatName();
+    s += SimulationManager->Settings.partSimSet.FileGenSettings.getFormatName();
 
     if (pg->IsValidated())
     {
-        s += QString("  Events: %1").arg(pg->NumEventsInFile);
+        s += QString("  Events: %1").arg(pg->Settings.NumEventsInFile);
         if (pg->statNumEmptyEventsInFile > 0) s += QString(", %1 empty").arg(pg->statNumEmptyEventsInFile);
         if (pg->statNumMultipleEvents    > 0) s += QString(", %1 multiple").arg(pg->statNumMultipleEvents);
 

@@ -25,7 +25,7 @@ class QFile;
 class AParticleSourceSimulator : public ASimulator
 {
 public:
-    explicit AParticleSourceSimulator(ASimulationManager & simMan, const AParticleSimSettings & partSimSet, int ID);
+    explicit AParticleSourceSimulator(ASimulationManager & simMan, AParticleSimSettings & partSimSet, int ID);
     ~AParticleSourceSimulator();
 
     const QVector<AEnergyDepositionCell*> &getEnergyVector() const { return EnergyVector; }  // !*! to change
@@ -71,7 +71,7 @@ private:
     bool prepareWorkerG4File();
 
 private:
-    const AParticleSimSettings & partSimSet;
+    AParticleSimSettings & partSimSet;  // cannot be const due to FileGenSettings
 
     //local objects
     AParticleTracker * ParticleTracker = nullptr;

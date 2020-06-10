@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 
+class AFileGenSettings;
 class AMaterialParticleCollection;
 class QTextStream;
 class AFilePGEngine;
@@ -33,11 +34,11 @@ struct AParticleInFileStatRecord
 class AFileParticleGenerator : public AParticleGun
 {
 public:
-    AFileParticleGenerator(const AMaterialParticleCollection & MpCollection);
+    AFileParticleGenerator(AFileGenSettings & Settings, const AMaterialParticleCollection & MpCollection);
     virtual         ~AFileParticleGenerator();
 
-    enum            ValidStateEnum {None = 0, Relaxed, Strict};
-    enum            FileFormatEnum {Undefined = 0, BadFormat = 1, Simplistic = 2, G4Ascii = 3, G4Binary = 4};
+    //enum            ValidStateEnum {None = 0, Relaxed, Strict};
+    //enum            FileFormatEnum {Undefined = 0, BadFormat = 1, Simplistic = 2, G4Ascii = 3, G4Binary = 4};
 
     bool            Init() override;               //has to be called before first use of GenerateEvent()
     void            ReleaseResources() override;
@@ -49,14 +50,11 @@ public:
     void            SetStartEvent(int startEvent) override;
 
     void            SetFileName(const QString &fileName);
-    QString         GetFileName() const {return FileName;}
+    QString         GetFileName() const;
 
-    FileFormatEnum  GetFileFormat() const {return FileFormat;}
     bool            IsFormatG4() const;
     bool            IsFormatBinary() const;
-    QString         GetFormatName() const;
 
-    void            SetValidationMode(ValidStateEnum Mode);
     void            InvalidateFile();    //forces the file to be inspected again during next call of Init()
     bool            IsValidated() const;
     bool            IsValidParticle(int ParticleId) const;                // result depends on current ValidationType
@@ -67,7 +65,7 @@ public:
     void            setParticleMustBeDefined(bool flag);
 
 public:
-    int          NumEventsInFile          = 0;      // is saved in config
+    //int          NumEventsInFile          = 0;      // is saved in config
 
     int          statNumEmptyEventsInFile = 0;
     int          statNumMultipleEvents    = 0;
@@ -75,18 +73,19 @@ public:
     bool         bCollectExpandedStatistics = false;
     std::vector<AParticleInFileStatRecord> ParticleStat;
 
+    AFileGenSettings & Settings;
     const AMaterialParticleCollection & MpCollection;
 
 private:
     AFilePGEngine * Engine      = nullptr;
 
-    QString         FileName;
-    FileFormatEnum  FileFormat      = Undefined;
-    ValidStateEnum  ValidationMode  = None;
+    //QString         FileName;
+    //FileFormatEnum  FileFormat      = Undefined;
+    //ValidStateEnum  ValidationMode  = None;
 
-    QDateTime       FileLastModified;          // saved - used in validity check
-    QStringList     ValidatedWithParticles;    // saved - used in validaty check
-    ValidStateEnum  LastValidationMode = None; // saved - used in validaty check
+    //QDateTime       FileLastModified;          // saved - used in validity check
+    //QStringList     ValidatedWithParticles;    // saved - used in validaty check
+    //ValidStateEnum  LastValidationMode = None; // saved - used in validaty check
 
 private:
     void clearFileData();

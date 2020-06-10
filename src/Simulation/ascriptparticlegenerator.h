@@ -22,9 +22,6 @@ public:
     //virtual void ReleaseResources() override {}   //called after end of operation
     virtual bool GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles, int iEvent) override;
 
-    virtual void writeToJson(QJsonObject& json) const override;
-    virtual bool readFromJson(const QJsonObject& json) override;
-
     void SetProcessInterval(int msOrMinus1) {processInterval = msOrMinus1;}
 
 public slots:

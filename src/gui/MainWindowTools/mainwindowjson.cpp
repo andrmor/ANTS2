@@ -516,8 +516,7 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
         //generation from file
         QJsonObject fjs;
         parseJson(psjs, "GenerationFromFile", fjs);
-            if (!fjs.isEmpty())
-                SimulationManager->FileParticleGenerator->readFromJson(fjs);
+            if (!fjs.isEmpty()) SimulationManager->Settings.partSimSet.FileGenSettings.readFromJson(fjs);
         updateFileParticleGeneratorGui();
 
         QJsonObject sjs;

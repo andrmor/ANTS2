@@ -222,50 +222,6 @@ bool AFileParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & Generated
     return Engine->doGenerateEvent(GeneratedParticles);
 }
 
-void AFileParticleGenerator::writeToJson(QJsonObject &json) const
-{
-    /*
-    json["FileName"] = FileName;
-    json["FileFormat"] = static_cast<int>(FileFormat);
-
-    json["NumEventsInFile"] = NumEventsInFile;
-    QJsonArray ar; ar.fromStringList(ValidatedWithParticles);
-    json["ValidatedWithParticles"] = ar;
-    json["FileLastModified"] = FileLastModified.toMSecsSinceEpoch();
-    json["LastValidation"] = static_cast<int>(LastValidationMode);
-    */
-}
-
-bool AFileParticleGenerator::readFromJson(const QJsonObject &json)
-{
-    /*
-    parseJson(json, "NumEventsInFile", NumEventsInFile);
-    QJsonArray ar;
-    parseJson(json, "ValidatedWithParticles", ar);
-    ValidatedWithParticles.clear();
-    for (int i=0; i<ar.size(); i++) ValidatedWithParticles << ar.at(i).toString();
-    qint64 lastMod;
-    parseJson(json, "FileLastModified", lastMod);
-    FileLastModified = QDateTime::fromMSecsSinceEpoch(lastMod);
-
-    FileFormat = Undefined;
-    if (json.contains("FileFormat"))
-    {
-        int im;
-        parseJson(json, "FileFormat", im);
-        if (im >= 0 && im < 5)
-            FileFormat = static_cast<FileFormatEnum>(im);
-    }
-
-    int iVal = static_cast<int>(None);
-    parseJson(json, "LastValidation", iVal);
-    LastValidationMode = static_cast<ValidStateEnum>(iVal);
-    ValidationMode = LastValidationMode;
-
-    return parseJson(json, "FileName", FileName);
-    */
-}
-
 void AFileParticleGenerator::SetStartEvent(int startEvent)
 {
     if (Engine) Engine->doSetStartEvent(startEvent);

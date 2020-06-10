@@ -482,51 +482,6 @@ void ASourceParticleGenerator::RemoveParticle(int particleId)
 }
 */
 
-void ASourceParticleGenerator::writeToJson(QJsonObject &json) const
-{
-    /*
-    QJsonArray ja;
-    for (const AParticleSourceRecord* ps : ParticleSourcesData)
-    {
-        QJsonObject js;
-        ps->writeToJson(js, *MpCollection);
-        ja.append(js);
-    }
-    json["ParticleSources"] = ja;
-    */
-}
-
-bool ASourceParticleGenerator::readFromJson(const QJsonObject &json)
-{
-    /*
-    clear();
-
-    if (!json.contains("ParticleSources"))
-    {
-        qWarning() << "--- Json does not contain config for particle sources!";
-        return false;
-    }
-
-    QJsonArray ar = json["ParticleSources"].toArray();
-    if (ar.isEmpty()) return true;
-
-    for (int iSource = 0; iSource < ar.size(); iSource++)
-    {
-        QJsonObject json = ar.at(iSource).toObject();
-        AParticleSourceRecord* ps = new AParticleSourceRecord();
-        bool bOK = ps->readFromJson(json, *MpCollection);
-        if (!bOK)
-        {
-            qWarning() << "||| Load particle source #" << iSource << "from json failed!";
-            delete ps;
-        }
-        else ParticleSourcesData << ps;
-    }
-    */
-
-    return true;
-}
-
 /*
 int ASourceParticleGenerator::countSources() const
 {

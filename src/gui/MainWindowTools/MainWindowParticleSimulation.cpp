@@ -70,7 +70,7 @@ void MainWindow::SimParticleSourcesConfigToJson(QJsonObject &json)
         SimulationManager->Settings.partSimSet.SourceGenSettings.writeToJson(psjs);
         //--from file
         QJsonObject fjs;
-            SimulationManager->FileParticleGenerator->writeToJson(fjs);
+            SimulationManager->Settings.partSimSet.FileGenSettings.writeToJson(fjs);
         psjs["GenerationFromFile"] = fjs;
         //--from script
         QJsonObject sjs;

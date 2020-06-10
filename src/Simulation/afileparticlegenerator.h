@@ -44,9 +44,6 @@ public:
     void            ReleaseResources() override;
     bool            GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles, int iEvent) override;
 
-    void            writeToJson(QJsonObject& json) const override;
-    bool            readFromJson(const QJsonObject& json) override;
-
     void            SetStartEvent(int startEvent) override;
 
     void            SetFileName(const QString &fileName);

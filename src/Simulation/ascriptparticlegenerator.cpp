@@ -54,16 +54,6 @@ bool AScriptParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & Generat
     return !bAbortRequested;
 }
 
-void AScriptParticleGenerator::writeToJson(QJsonObject &json) const
-{
-    //json["Script"] = Script;
-}
-
-bool AScriptParticleGenerator::readFromJson(const QJsonObject &json)
-{
-    //return parseJson(json, "Script", Script);
-}
-
 void AScriptParticleGenerator::abort()
 {
     bAbortRequested = true;

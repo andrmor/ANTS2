@@ -10,7 +10,6 @@
 #include "TVector3.h"
 
 class APhotonSimSettings;
-class QJsonObject;
 class ANodeRecord;
 class AScanRecord;
 class TH1D;
@@ -24,7 +23,7 @@ public:
     int  getEventCount() const override;
     int  getTotalEventCount() const override {return TotalEvents;}
     int  getEventsDone() const override {return eventCurrent;}
-    bool setup(QJsonObject & json) override;   // json already not needed, wait for fix of the particleSim then remove
+    bool setup() override;   // json already not needed, wait for fix of the particleSim then remove
     void simulate() override;
     void appendToDataHub(EventsDataClass * dataHub) override;
     void mergeData() override {}

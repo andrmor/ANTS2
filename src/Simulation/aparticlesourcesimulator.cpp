@@ -62,129 +62,37 @@ int AParticleSourceSimulator::getEventsDone() const
         return eventCurrent - eventBegin;
 }
 
-bool AParticleSourceSimulator::setup(QJsonObject &json)
+bool AParticleSourceSimulator::setup()
 {
-    if ( !ASimulator::setup(json) ) return false;
+    if ( !ASimulator::setup() ) return false;
 
     timeFrom = GenSimSettings.TimeFrom;
     timeRange = GenSimSettings.fTimeResolved ? (GenSimSettings.TimeTo - GenSimSettings.TimeFrom) : 0;
 
-    if (!json.contains("ParticleSourcesConfig"))
+    switch (partSimSet.GenerationMode)
     {
-        ErrorString = "Simulation manager: config json does not contain particle sim data!";
+    case AParticleSimSettings::Sources :
+        ParticleGun = new ASourceParticleGenerator(partSimSet.SourceGenSettings, detector, *RandGen);
+        break;
+    case AParticleSimSettings::File :
+        ParticleGun = new AFileParticleGenerator(partSimSet.FileGenSettings, *detector.MpCollection);
+        partSimSet.FileGenSettings.ValidationMode = (GenSimSettings.G4SimSet.bTrackParticles ? AFileGenSettings::Relaxed : AFileGenSettings::Strict);
+        break;
+    case AParticleSimSettings::Script :
+        ParticleGun = new AScriptParticleGenerator(partSimSet.ScriptGenSettings, *detector.MpCollection, *RandGen, ID, &simMan.NumberOfWorkers);
+        break;
+    default:
+        ErrorString = "Unknown particle generation mode";
         return false;
     }
-    QJsonObject js = json["ParticleSourcesConfig"].toObject();
-        //control options
-    /*
-        QJsonObject cjs = js["SourceControlOptions"].toObject();
-        if (cjs.isEmpty())
-        {
-            ErrorString = "Json sent to simulator does not contain proper sim config data!";
-            return false;
-        }
-    */
-        //fAllowMultiple = false; //only applies to 'Sources' mode
-        //qDebug() << fAllowMultiple << partSimSet.bMultiple;
-        //fDoS1 = cjs["DoS1"].toBool();
-        //fDoS2 = cjs["DoS2"].toBool();
-        //qDebug() << fDoS2 << partSimSet.bDoS1 << partSimSet.bDoS2;
-        //fIgnoreNoHitsEvents = false; //compatibility
-        //parseJson(cjs, "IgnoreNoHitsEvents", fIgnoreNoHitsEvents);
-        //qDebug() << fIgnoreNoHitsEvents << partSimSet.bIgnoreNoHits;
-        //fIgnoreNoDepoEvents = true; //compatibility
-        //parseJson(cjs, "IgnoreNoDepoEvents", fIgnoreNoDepoEvents);
-        //qDebug() << fIgnoreNoDepoEvents << partSimSet.bIgnoreNoDepo;
 
-        //bClusterMerge = true; //compatibility
-        //parseJson(cjs, "ClusterMerge", bClusterMerge);
-        //qDebug() << bClusterMerge << partSimSet.bClusterMerge;
-
-        //ClusterMergeRadius2 = 1.0;
-        //parseJson(cjs, "ClusterMergeRadius", ClusterMergeRadius2);
-        //qDebug() << ClusterMergeRadius2 << partSimSet.ClusterRadius;
-        //ClusterMergeRadius2 *= ClusterMergeRadius2;
-        //ClusterMergeTimeDif = 1.0;
-        //parseJson(cjs, "ClusterMergeTime", ClusterMergeTimeDif);
-        //qDebug() << ClusterMergeTimeDif << partSimSet.ClusterTime;
-
-        // particle generation mode
-        //QString PartGenMode = "Sources"; //compatibility
-        //parseJson(cjs, "ParticleGenerationMode", PartGenMode);
-
-        //if (PartGenMode == "Sources")
-        if (partSimSet.GenerationMode == AParticleSimSettings::Sources)
-        {
-            // particle sources
-            if (js.contains("ParticleSources"))
-            {
-                ParticleGun = new ASourceParticleGenerator(partSimSet.SourceGenSettings, detector, *RandGen);
-                //ParticleGun->readFromJson(js);
-
-                //fAllowMultiple = cjs["AllowMultipleParticles"].toBool();
-                //AverageNumParticlesPerEvent = cjs["AverageParticlesPerEvent"].toDouble();
-                //qDebug() << AverageNumParticlesPerEvent << partSimSet.MeanPerEvent;
-                //TypeParticlesPerEvent = cjs["TypeParticlesPerEvent"].toInt();
-                //qDebug() << TypeParticlesPerEvent << (int)partSimSet.MultiMode;
-            }
-            else
-            {
-                ErrorString = "Simulation settings do not contain particle source configuration";
-                return false;
-            }
-        }
-        //else if (PartGenMode == "File")
-        else if (partSimSet.GenerationMode == AParticleSimSettings::File)
-        {
-            //  generation from ascii file
-            QJsonObject fjs;
-            parseJson(js, "GenerationFromFile", fjs);
-            if (fjs.isEmpty())
-            {
-                ErrorString = "Simulation settings do not contain 'from file' generator configuration";
-                return false;
-            }
-            else
-            {
-                ParticleGun = new AFileParticleGenerator(partSimSet.FileGenSettings, *detector.MpCollection);
-                //PG->readFromJson(fjs); //kill
-                //PG->SetValidationMode(GenSimSettings.G4SimSet.bTrackParticles ? AFileParticleGenerator::Relaxed : AFileParticleGenerator::Strict);
-                partSimSet.FileGenSettings.ValidationMode = (GenSimSettings.G4SimSet.bTrackParticles ? AFileGenSettings::Relaxed : AFileGenSettings::Strict);
-                //PG->Init();  // kill
-                //ParticleGun = PG; //kill
-            }
-        }
-        //else if (PartGenMode == "Script")
-        else if (partSimSet.GenerationMode == AParticleSimSettings::Script)
-        {
-            //QJsonObject sjs;
-            //parseJson(js, "GenerationFromScript", sjs);
-            //if (sjs.isEmpty())
-            //{
-            //    ErrorString = "Simulation settings do not contain 'from script' generator configuration";
-            //    return false;
-            //}
-            //else
-            //{
-                ParticleGun = new AScriptParticleGenerator(partSimSet.ScriptGenSettings, *detector.MpCollection, *RandGen, ID, &simMan.NumberOfWorkers);
-            //    ParticleGun->readFromJson(sjs);
-            //}
-        }
-        else
-        {
-            ErrorString = "Load sim settings: Unknown particle generation mode!";
-            return false;
-        }
-
-    // trying to initialize the gun
     if ( !ParticleGun->Init() )
     {
         ErrorString = ParticleGun->GetErrorString();
         return false;
     }
 
-    totalEventCount = partSimSet.EventsToDo; //cjs["EventsToDo"].toInt();
-    //if (PartGenMode == "File")
+    totalEventCount = partSimSet.EventsToDo;
     if (partSimSet.GenerationMode == AParticleSimSettings::File)
         totalEventCount = std::min(totalEventCount, partSimSet.FileGenSettings.NumEventsInFile);
 
@@ -193,7 +101,6 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
     S1generator->setDoTextLog(GenSimSettings.LogsStatOptions.bPhotonGenerationLog);
     S2generator->setDoTextLog(GenSimSettings.LogsStatOptions.bPhotonGenerationLog);
     S2generator->setOnlySecondary(!partSimSet.bDoS1);
-
     return true;
 }
 

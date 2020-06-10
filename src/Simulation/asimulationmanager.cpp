@@ -109,7 +109,7 @@ bool ASimulationManager::setup(const QJsonObject & json, int threads)
         ErrorString = "Config json does not contain simulation settings!";
         return false;
     }
-    jsSimSet = json["SimulationConfig"].toObject();
+    QJsonObject jsSimSet = json["SimulationConfig"].toObject();
 
     // note - conversion to use "Settings" will be performed in stages, first is the photon sources!
     bool ok = Settings.readFromJson(json);
@@ -488,32 +488,25 @@ void ASimulationManager::updateGui()
 
 void ASimulationManager::emitProgressSignal()
 {
+    bool bG4sim = false;
+    bool bHavePhotonSim = true;
+    if ( !bPhotonSourceSim )
+    {
+        bG4sim = Settings.genSimSet.G4SimSet.bTrackParticles;
+        bHavePhotonSim = Settings.partSimSet.bDoS1 || Settings.partSimSet.bDoS2;
+    }
+
     double PrVal;
-
-        //long procedure since currently there is no direct access to simulation options - hopefully can be refactored later
-        bool bG4sim = false;
-        bool bHavePhotonSim = true;
-        const QVector<ASimulator *> & vWorkers = Runner->getWorkers();
-        if (!vWorkers.isEmpty())
-        {
-            const AParticleSourceSimulator * pss = dynamic_cast<const AParticleSourceSimulator*>(vWorkers.first());
-            if (pss)
-            {
-                bG4sim = Settings.genSimSet.G4SimSet.bTrackParticles;
-                bHavePhotonSim = Settings.partSimSet.bDoS1 || Settings.partSimSet.bDoS2;//pss->isDoingPhotonTracing();
-            }
-        }
-        if (bG4sim)
-        {
-            if (bHavePhotonSim)
-                PrVal = 0.5 * (Runner->progress + Runner->progressG4);
-            else
-                PrVal = Runner->progressG4;
-        }
+    if (bG4sim)
+    {
+        if (bHavePhotonSim)
+            PrVal = 0.5 * (Runner->progress + Runner->progressG4);
         else
-            PrVal = Runner->progress;
+            PrVal = Runner->progressG4;
+    }
+    else    PrVal = Runner->progress;
 
-        emit ProgressReport(PrVal);
+    emit ProgressReport(PrVal);
 }
 
 void ASimulationManager::removeOldFile(const QString & fileName, const QString & txt)

@@ -87,7 +87,7 @@ bool ASimulatorRunner::setup(int threadCount, bool bPhotonSourceSim)
         if (bPhotonSourceSim) worker = new APointSourceSimulator(simMan, simMan.Settings.photSimSet, simMan.Nodes, iWorker);
         else                  worker = new AParticleSourceSimulator(simMan, simMan.Settings.partSimSet, iWorker);
 
-        bool bOK = worker->setup(simMan.jsSimSet);
+        bool bOK = worker->setup();
         if (!bOK)
         {
             simMan.setErrorString( worker->getErrorString() );

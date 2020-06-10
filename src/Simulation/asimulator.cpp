@@ -89,7 +89,7 @@ void ASimulator::divideThreadWork(int threadId, int threadCount)
     //  qDebug() << maxPhotonTracks << maxParticleTracks;
 }
 
-bool ASimulator::setup(QJsonObject &json)
+bool ASimulator::setup()
 {
     dataHub->clear();
 

@@ -25,9 +25,7 @@ class AFileParticleGenerator;
 class AScriptParticleGenerator;
 class AEventTrackingRecord;
 class ASimulator;
-
-//class QJsonObject;
-#include <QJsonObject>  // temporary
+class QJsonObject;
 
 class ASimulationManager : public QObject
 {
@@ -73,13 +71,13 @@ public:
     QVector<QBitArray> SiPMpixels;
     QVector<AEnergyDepositionCell *> EnergyVector;
 
-    // Next three: Simulator workers use their own local copies constructed using configuration json
-    ASourceParticleGenerator * ParticleSources = nullptr;         //used to update json on config changes and in GUI to configure
+    // Next three: Simulator workers use their own local copies of Generators!
+    ASourceParticleGenerator * ParticleSources = nullptr;         //only for gui, simulation threads use their own
     AFileParticleGenerator   * FileParticleGenerator = nullptr;   //only for gui, simulation threads use their own
     AScriptParticleGenerator * ScriptParticleGenerator = nullptr; //only for gui, simulation threads use their own
 
-    ATrackBuildOptions TrackBuildOptions;       // to be removed!
-    ALogsAndStatisticsOptions LogsStatOptions;  // to be removed!
+    ATrackBuildOptions TrackBuildOptions;       // to be refactored!
+    ALogsAndStatisticsOptions LogsStatOptions;  // to be refactored!
 
     //for G4ants sims
     QSet<QString> SeenNonRegisteredParticles;
@@ -87,7 +85,6 @@ public:
     double DepoByRegistered;
 
     ASimSettings Settings;
-    QJsonObject jsSimSet;                   // to be removed!
     bool bPhotonSourceSim; // if false -> particle source sim
 
     int NumberOfWorkers = 0;
@@ -110,9 +107,6 @@ private:
     bool fSuccess = false;
 
     bool bGuardTrackingHistory = false;
-
-    // G4ants
-    //bool bOnlyFileExport = false; // single trigger flag
 
 public slots:
     void StopSimulation();
@@ -141,7 +135,7 @@ private:
     void saveG4depositionLog(const QString & dir) const;
     void saveA2depositionLog(const QString & dir) const;
     void saveExitLog();
-    void emitProgressSignal();  // TODO !*! can be refactored now
+    void emitProgressSignal();
 };
 
 #endif // ASIMULATIONMANAGER_H

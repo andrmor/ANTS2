@@ -3,8 +3,6 @@
 
 #include "aparticlegun.h"
 
-#include <QString>
-
 class AScriptGenSettings;
 class AMaterialParticleCollection;
 class TRandom2;
@@ -35,7 +33,6 @@ private:
     int ThreadId = 0;
     const int * NumRunningThreads;
 
-    //QString Script;
     QScriptEngine         * ScriptEngine    = nullptr;  // creates only on Init - only if from script mode was selected!
                                                         //TODO make external (e.g. Simulator class can host it for sim)
     AParticleGenerator_SI * ScriptInterface = nullptr;  // creates only on Init - only if from script mode was selected!

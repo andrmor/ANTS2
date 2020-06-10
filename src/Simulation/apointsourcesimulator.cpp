@@ -43,9 +43,9 @@ int APointSourceSimulator::getEventCount() const
         return (eventEnd - eventBegin) * NumRuns;
 }
 
-bool APointSourceSimulator::setup(QJsonObject & json)
+bool APointSourceSimulator::setup()
 {
-    ASimulator::setup(json);
+    ASimulator::setup();
 
     NumRuns = PhotSimSettings.getActiveRuns();
 

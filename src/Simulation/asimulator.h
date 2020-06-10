@@ -13,7 +13,6 @@ class AGeneralSimSettings;
 class EventsDataClass;
 class Photon_Generator;
 class APhotonTracer;
-class QJsonObject;
 class TRandom2;
 
 // tread worker for simulation - base class
@@ -27,7 +26,7 @@ public:
     virtual int getEventCount() const = 0;
     virtual int getTotalEventCount() const = 0;
     virtual void updateGeoManager();             // obsolete - remove
-    virtual bool setup(QJsonObject & json);      // TODO  !*! to remove json
+    virtual bool setup();
     virtual bool finalizeConfig() {return true;} // called after setup and divide work
     virtual void simulate() = 0;
     virtual void appendToDataHub(EventsDataClass * dataHub);

@@ -4,12 +4,9 @@
 #include "aparticlegun.h"
 
 #include <QString>
-#include <QStringList>
 #include <QFile>
 #include <QRegularExpression>
 #include <QVector>
-#include <QJsonObject>
-#include <QDateTime>
 
 #include <string>
 #include <vector>
@@ -37,9 +34,6 @@ public:
     AFileParticleGenerator(AFileGenSettings & Settings, const AMaterialParticleCollection & MpCollection);
     virtual         ~AFileParticleGenerator();
 
-    //enum            ValidStateEnum {None = 0, Relaxed, Strict};
-    //enum            FileFormatEnum {Undefined = 0, BadFormat = 1, Simplistic = 2, G4Ascii = 3, G4Binary = 4};
-
     bool            Init() override;               //has to be called before first use of GenerateEvent()
     void            ReleaseResources() override;
     bool            GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles, int iEvent) override;
@@ -62,8 +56,6 @@ public:
     void            setParticleMustBeDefined(bool flag);
 
 public:
-    //int          NumEventsInFile          = 0;      // is saved in config
-
     int          statNumEmptyEventsInFile = 0;
     int          statNumMultipleEvents    = 0;
 
@@ -74,17 +66,8 @@ public:
     const AMaterialParticleCollection & MpCollection;
 
 private:
-    AFilePGEngine * Engine      = nullptr;
+    AFilePGEngine * Engine = nullptr;
 
-    //QString         FileName;
-    //FileFormatEnum  FileFormat      = Undefined;
-    //ValidStateEnum  ValidationMode  = None;
-
-    //QDateTime       FileLastModified;          // saved - used in validity check
-    //QStringList     ValidatedWithParticles;    // saved - used in validaty check
-    //ValidStateEnum  LastValidationMode = None; // saved - used in validaty check
-
-private:
     void clearFileData();
     bool DetermineFileFormat();
     bool isFileG4Binary();

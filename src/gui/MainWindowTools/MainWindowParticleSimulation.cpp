@@ -626,8 +626,9 @@ void MainWindow::on_pbEditParticleSource_clicked()
 
     SimulationManager->Settings.partSimSet.SourceGenSettings.replace(isource, d.getResult());
 
-    AParticleSourceRecord* ps = SimulationManager->ParticleSources->getSource(isource);
-    SimulationManager->ParticleSources->checkLimitedToMaterial(ps);
+    AParticleSourceRecord * ps = SimulationManager->ParticleSources->getSource(isource);
+    ps->updateLimitedToMat(*Detector->MpCollection);
+    //SimulationManager->Settings.partSimSet.SourceGenSettings.checkLimitedToMaterial(isource);
 
     if (Detector->isGDMLempty())
     { //check world size

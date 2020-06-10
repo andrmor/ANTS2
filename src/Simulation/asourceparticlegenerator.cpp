@@ -40,7 +40,7 @@ bool ASourceParticleGenerator::Init()
 
     for (AParticleSourceRecord * ps : Settings.ParticleSourcesData)
     {
-        QString err = ps->CheckSource(*MpCollection);
+        QString err = ps->checkSource(*MpCollection);
         if (!err.isEmpty())
         {
             ErrorString = QString("Error in source %1:\n%2").arg(ps->name).arg(err);
@@ -139,7 +139,7 @@ bool ASourceParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & Generat
 
     //position
     double R[3];
-    if (Source->fLimit)
+    if (Source->bLimitToMat)
     {
         QElapsedTimer timer; // !*! TODO make dynamic member
         timer.start();
@@ -148,12 +148,12 @@ bool ASourceParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & Generat
             if (bAbortRequested) return false;
             if (timer.elapsed() > 500) return false;
             //qDebug() << "Time passed" << timer.elapsed() << "milliseconds";
-            GeneratePosition(isource, R);
+            generatePosition(isource, R);
         }
         // !*! TODO check node not nullptr!
         while ( Detector.GeoManager->FindNode(R[0], R[1], R[2])->GetVolume()->GetMaterial()->GetIndex() != Source->LimitedToMat ); //gGeoManager is Thread-aware
     }
-    else GeneratePosition(isource, R);
+    else generatePosition(isource, R);
 
     //time
     double time;
@@ -192,7 +192,7 @@ bool ASourceParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & Generat
     {
         //there are no linked particles
         //qDebug()<<"Generating individual particle"<<iparticle;
-        AddParticleInCone(isource, iparticle, GeneratedParticles);
+        addParticleInCone(isource, iparticle, GeneratedParticles);
         AParticleRecord * p = GeneratedParticles.last();
         p->r[0] = R[0];
         p->r[1] = R[1];
@@ -247,7 +247,7 @@ bool ASourceParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & Generat
                 WasGenerated[ip] = true;
 
                 if (!fOpposite)
-                    AddParticleInCone(isource, thisParticle, GeneratedParticles);
+                    addParticleInCone(isource, thisParticle, GeneratedParticles);
                 else
                 {
                     //find index in the GeneratedParticles
@@ -277,7 +277,7 @@ bool ASourceParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & Generat
     return true;
 }
 
-void ASourceParticleGenerator::GeneratePosition(int isource, double *R) const
+void ASourceParticleGenerator::generatePosition(int isource, double *R) const
 {
     AParticleSourceRecord * rec = Settings.ParticleSourcesData[isource];
   const int& iShape = rec->shape;
@@ -401,7 +401,7 @@ void ASourceParticleGenerator::GeneratePosition(int isource, double *R) const
   return;
 }
 
-void ASourceParticleGenerator::AddParticleInCone(int isource, int iparticle, QVector<AParticleRecord*> & GeneratedParticles) const
+void ASourceParticleGenerator::addParticleInCone(int isource, int iparticle, QVector<AParticleRecord*> & GeneratedParticles) const
 {
   AParticleRecord* ps = new AParticleRecord();
 
@@ -531,25 +531,6 @@ int ASourceParticleGenerator::countSources() const
 AParticleSourceRecord *ASourceParticleGenerator::getSource(int iSource)
 {
     return Settings.ParticleSourcesData[iSource];
-}
-
-void ASourceParticleGenerator::checkLimitedToMaterial(AParticleSourceRecord* s)
-{
-    bool fFound = false;
-    int iMat;
-    for (iMat=0; iMat<MpCollection->countMaterials(); iMat++)
-        if (s->LimtedToMatName == (*MpCollection)[iMat]->name)
-        {
-            fFound = true;
-            break;
-        }
-
-    if (fFound)
-    { //only in this case limit to material will be used!
-        s->fLimit = true;
-        s->LimitedToMat = iMat;
-    }
-    else s->fLimit = false;
 }
 
 bool ASourceParticleGenerator::LoadGunEnergySpectrum(int iSource, int iParticle, QString fileName)

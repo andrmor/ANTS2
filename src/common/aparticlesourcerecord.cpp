@@ -191,7 +191,7 @@ void AParticleSourceRecord::writeToJson(QJsonObject & json, const AMaterialParti
     json["GunParticles"] = jParticleEntries;
 }
 
-bool AParticleSourceRecord::readFromJson(const QJsonObject &json, AMaterialParticleCollection &MpCollection)
+bool AParticleSourceRecord::readFromJson(const QJsonObject & json, AMaterialParticleCollection & MpCollection)
 {
     parseJson(json, "Name", name);
     parseJson(json, "Type", shape);
@@ -224,30 +224,14 @@ bool AParticleSourceRecord::readFromJson(const QJsonObject &json, AMaterialParti
     TimeSpreadWidth = 100.0;
     parseJson(json, "TimeSpreadWidth", TimeSpreadWidth);
 
-    DoMaterialLimited = fLimit = false;
+    DoMaterialLimited = bLimitToMat = false;
     LimtedToMatName = "";
     if (json.contains("DoMaterialLimited"))
     {
         parseJson(json, "DoMaterialLimited", DoMaterialLimited);
         parseJson(json, "LimitedToMaterial", LimtedToMatName);
 
-        if (DoMaterialLimited)
-        {
-            bool fFound = false;
-            int iMat;
-            for (iMat = 0; iMat < MpCollection.countMaterials(); iMat++)  //TODO make a method in MpCol
-                if (LimtedToMatName == MpCollection[iMat]->name)
-                {
-                    fFound = true;
-                    break;
-                }
-
-            if (fFound) //only in this case limit to material will be used!
-            {
-                fLimit = true;
-                LimitedToMat = iMat;
-            }
-        }
+        if (DoMaterialLimited) updateLimitedToMat(MpCollection);
     }
 
     //GunParticles
@@ -286,7 +270,7 @@ const QString AParticleSourceRecord::getShapeString() const
     return "-error-";
 }
 
-const QString AParticleSourceRecord::CheckSource(const AMaterialParticleCollection & MpCollection) const
+const QString AParticleSourceRecord::checkSource(const AMaterialParticleCollection & MpCollection) const
 {
     if (shape < 0 || shape > 5) return "unknown source shape";
 
@@ -326,4 +310,23 @@ const QString AParticleSourceRecord::CheckSource(const AMaterialParticleCollecti
     if (TotPartWeight == 0) return "total statistical weight of individual particles is zero";
 
     return "";
+}
+
+void AParticleSourceRecord::updateLimitedToMat(const AMaterialParticleCollection & MpCollection)
+{
+    bool bFound = false;
+    int iMat = 0;
+    for (; iMat < MpCollection.countMaterials(); iMat++)
+        if (LimtedToMatName == MpCollection[iMat]->name)
+        {
+            bFound = true;
+            break;
+        }
+
+    if (bFound)
+    {
+        bLimitToMat = true;
+        LimitedToMat = iMat;
+    }
+    else bLimitToMat = false;
 }

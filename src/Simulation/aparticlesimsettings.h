@@ -9,7 +9,7 @@ class QJsonObject;
 class AParticleSourceRecord;
 class ASourceParticleGenerator;
 
-class ASourceGenSettings
+class ASourceGenSettings   // ! this class uses MpCollection obtained through singleton GlobalSettings. read from json for non-existing particles triggers global update!
 {
 public:
     QVector<AParticleSourceRecord*> ParticleSourcesData;

@@ -47,14 +47,13 @@ public:
     bool   LoadGunEnergySpectrum(int iSource, int iParticle, QString fileName); //TODO uses load function with message
 
     TVector3 GenerateRandomDirection();
-    void checkLimitedToMaterial(AParticleSourceRecord *s);
 
 private:
     //external resources
     const ASourceGenSettings & Settings;
     const DetectorClass & Detector;
-    AMaterialParticleCollection * MpCollection;
-    TRandom2 * RandGen;
+    AMaterialParticleCollection * MpCollection;   // !*! to remove
+    TRandom2 * RandGen;     // !*! to reference
 
     //QVector<AParticleSourceRecord*> ParticleSourcesData;
     QVector<double> TotalParticleWeight;
@@ -65,8 +64,8 @@ private:
     QVector<double> CollimationProbability; //[isource] collimation probability: solid angle inside cone / 4Pi
 
     //utilities
-    void GeneratePosition(int isource, double *R) const;
-    void AddParticleInCone(int isource, int iparticle, QVector<AParticleRecord*> & GeneratedParticles) const; //QVector - only pointer is transferred!
+    void generatePosition(int isource, double *R) const;
+    void addParticleInCone(int isource, int iparticle, QVector<AParticleRecord*> & GeneratedParticles) const; //QVector - only pointer is transferred!
 };
 
 #endif // ASOURCEPARTICLEGENERATOR_H

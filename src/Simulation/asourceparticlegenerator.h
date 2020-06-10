@@ -28,10 +28,10 @@ public:
 class ASourceParticleGenerator : public AParticleGun
 {
 public:
-    ASourceParticleGenerator(const ASourceGenSettings & Settings, const DetectorClass * Detector, TRandom2 * RandGen);
+    ASourceParticleGenerator(const ASourceGenSettings & Settings, const DetectorClass & Detector, TRandom2 * RandGen);
 
     virtual bool Init() override; // !!! has to be called before the first use of "GenerateEvent"!
-    virtual bool GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles, int iEvent) override; //see Init!!!
+    virtual bool GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles, int iEvent) override; //see Init!!!  // !*! fix use of detector
 
     //triggered when remove particle from configuration is attempted
     virtual bool IsParticleInUse(int particleId, QString& SourceNames) const override;
@@ -41,7 +41,7 @@ public:
     virtual bool readFromJson(const QJsonObject &json) override;
 
     //requests
-    int    countSources() const;  // !*!
+    //int    countSources() const;  // !*!
     AParticleSourceRecord* getSource(int iSource); // !*!
 
     bool   LoadGunEnergySpectrum(int iSource, int iParticle, QString fileName); //TODO uses load function with message
@@ -52,7 +52,7 @@ public:
 private:
     //external resources
     const ASourceGenSettings & Settings;
-    const DetectorClass * Detector;
+    const DetectorClass & Detector;
     AMaterialParticleCollection * MpCollection;
     TRandom2 * RandGen;
 

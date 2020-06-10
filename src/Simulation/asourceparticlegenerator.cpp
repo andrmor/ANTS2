@@ -21,8 +21,8 @@
 #include "TRandom2.h"
 #include "TGeoManager.h"
 
-ASourceParticleGenerator::ASourceParticleGenerator(const ASourceGenSettings &Settings, const DetectorClass * Detector, TRandom2 * RandGen)
-    : Settings(Settings), Detector(Detector), MpCollection(Detector->MpCollection), RandGen(RandGen) {}
+ASourceParticleGenerator::ASourceParticleGenerator(const ASourceGenSettings &Settings, const DetectorClass &Detector, TRandom2 * RandGen)
+    : Settings(Settings), Detector(Detector), MpCollection(Detector.MpCollection), RandGen(RandGen) {}
 
 bool ASourceParticleGenerator::Init()
 {  
@@ -141,7 +141,7 @@ bool ASourceParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & Generat
     double R[3];
     if (Source->fLimit)
     {
-        QElapsedTimer timer; //TODO make dynamic member
+        QElapsedTimer timer; // !*! TODO make dynamic member
         timer.start();
         do
         {
@@ -150,7 +150,8 @@ bool ASourceParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & Generat
             //qDebug() << "Time passed" << timer.elapsed() << "milliseconds";
             GeneratePosition(isource, R);
         }
-        while ( Detector->GeoManager->FindNode(R[0], R[1], R[2])->GetVolume()->GetMaterial()->GetIndex() != Source->LimitedToMat ); //gGeoManager is Thread-aware
+        // !*! TODO check node not nullptr!
+        while ( Detector.GeoManager->FindNode(R[0], R[1], R[2])->GetVolume()->GetMaterial()->GetIndex() != Source->LimitedToMat ); //gGeoManager is Thread-aware
     }
     else GeneratePosition(isource, R);
 
@@ -279,7 +280,7 @@ bool ASourceParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & Generat
 void ASourceParticleGenerator::GeneratePosition(int isource, double *R) const
 {
     AParticleSourceRecord * rec = Settings.ParticleSourcesData[isource];
-  const int& index = rec->shape;
+  const int& iShape = rec->shape;
   const double& X0 = rec->X0;
   const double& Y0 = rec->Y0;
   const double& Z0 = rec->Z0;
@@ -290,7 +291,7 @@ void ASourceParticleGenerator::GeneratePosition(int isource, double *R) const
   const double& size2 = rec->size2;
   const double& size3 = rec->size3;
 
-  switch (index) //source geometry type
+  switch (iShape) //source geometry type
     {
      case (0):
       { //point source
@@ -520,10 +521,12 @@ bool ASourceParticleGenerator::readFromJson(const QJsonObject &json)
     return true;
 }
 
+/*
 int ASourceParticleGenerator::countSources() const
 {
     return Settings.ParticleSourcesData.size();
 }
+*/
 
 AParticleSourceRecord *ASourceParticleGenerator::getSource(int iSource)
 {

@@ -250,6 +250,12 @@ int ASourceGenSettings::getNumSources() const
     return ParticleSourcesData.size();
 }
 
+const AParticleSourceRecord * ASourceGenSettings::getSourceRecord(int iSource) const
+{
+    if (iSource < 0 || iSource >= ParticleSourcesData.size()) return nullptr;
+    return ParticleSourcesData.at(iSource);
+}
+
 void ASourceGenSettings::calculateTotalActivity()
 {
     TotalActivity = 0;
@@ -275,6 +281,7 @@ bool ASourceGenSettings::replace(int iSource, AParticleSourceRecord * gunParticl
 
     delete ParticleSourcesData[iSource];
     ParticleSourcesData[iSource] = gunParticle;
+    calculateTotalActivity();
     return true;
 }
 

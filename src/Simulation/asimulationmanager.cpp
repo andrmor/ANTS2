@@ -29,7 +29,7 @@ ASimulationManager::ASimulationManager(EventsDataClass & EventsDataHub, Detector
     QObject(nullptr),
     EventsDataHub(EventsDataHub), Detector(Detector)
 {
-    ParticleSources = new ASourceParticleGenerator(Settings.partSimSet.SourceGenSettings, &Detector, Detector.RandGen);
+    ParticleSources = new ASourceParticleGenerator(Settings.partSimSet.SourceGenSettings, Detector, Detector.RandGen);
     FileParticleGenerator = new AFileParticleGenerator(*Detector.MpCollection);
     ScriptParticleGenerator = new AScriptParticleGenerator(*Detector.MpCollection, Detector.RandGen, 0, &NumberOfWorkers);
     ScriptParticleGenerator->SetProcessInterval(200);

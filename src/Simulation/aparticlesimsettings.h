@@ -20,12 +20,15 @@ public:
     void clear();
 
     int    getNumSources() const;
+
+    const AParticleSourceRecord * getSourceRecord(int iSource) const;
+
     void   calculateTotalActivity();
     double getTotalActivity() const {return TotalActivity;}
 
     void   append(AParticleSourceRecord * gunParticle);
-    void   forget(AParticleSourceRecord* gunParticle);
-    bool   replace(int iSource, AParticleSourceRecord* gunParticle);
+    void   forget(AParticleSourceRecord * gunParticle);
+    bool   replace(int iSource, AParticleSourceRecord * gunParticle);
     void   remove(int iSource);
 
 private:

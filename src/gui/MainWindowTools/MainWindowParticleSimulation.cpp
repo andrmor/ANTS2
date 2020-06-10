@@ -80,8 +80,10 @@ void MainWindow::SimParticleSourcesConfigToJson(QJsonObject &json)
     json["ParticleSourcesConfig"] = psjs;
 }
 
-void MainWindow::ShowSource(const AParticleSourceRecord* p, bool clear)
+void MainWindow::ShowSource(const AParticleSourceRecord * p, bool clear)
 {
+    if (!p) return;
+
   int index = p->shape;
   double X0 = p->X0;
   double Y0 = p->Y0;
@@ -272,8 +274,8 @@ void MainWindow::on_pbGunTest_clicked()
     {
         if (ui->pbGunShowSource->isChecked())
         {
-            for (int i=0; i<SimulationManager->ParticleSources->countSources(); i++)
-                ShowSource(SimulationManager->ParticleSources->getSource(i), false);
+            for (int i = 0; i < SimulationManager->Settings.partSimSet.SourceGenSettings.getNumSources(); i++)
+                ShowSource(SimulationManager->Settings.partSimSet.SourceGenSettings.getSourceRecord(i), false);
         }
     }
     else GeometryWindow->ShowGeometry();
@@ -379,7 +381,9 @@ void MainWindow::on_pbRemoveSource_clicked()
         message("Select a source to remove", this);
         return;
     }
-    if (isource >= SimulationManager->ParticleSources->countSources())
+
+    const int numSources = SimulationManager->Settings.partSimSet.SourceGenSettings.getNumSources();
+    if (isource >= numSources)
     {
         message("Error - bad source index!", this);
         return;
@@ -397,13 +401,12 @@ void MainWindow::on_pbRemoveSource_clicked()
     on_pbUpdateSourcesIndication_clicked();
     if (ui->pbGunShowSource->isChecked())
     {
-        if (SimulationManager->ParticleSources->countSources() == 0)
+        if (numSources == 0)
         {
             Detector->GeoManager->ClearTracks();
             GeometryWindow->ShowGeometry(false);
         }
-        else
-            ShowParticleSource_noFocus();
+        else ShowParticleSource_noFocus();
     }
 }
 
@@ -414,12 +417,12 @@ void MainWindow::on_pbAddSource_clicked()
     SimulationManager->Settings.partSimSet.SourceGenSettings.append(s);
 
     on_pbUpdateSourcesIndication_clicked();
-    ui->lwDefinedParticleSources->setCurrentRow( SimulationManager->ParticleSources->countSources()-1 );
+    ui->lwDefinedParticleSources->setCurrentRow( SimulationManager->Settings.partSimSet.SourceGenSettings.getNumSources() - 1 );
 }
 
 void MainWindow::on_pbUpdateSourcesIndication_clicked()
 {
-    int numSources = SimulationManager->ParticleSources->countSources();
+    const int numSources = SimulationManager->Settings.partSimSet.SourceGenSettings.getNumSources();
 
     int curRow = ui->lwDefinedParticleSources->currentRow();
     ui->lwDefinedParticleSources->clear();
@@ -508,25 +511,25 @@ void MainWindow::on_lwDefinedParticleSources_itemClicked(QListWidgetItem *)
 
 void MainWindow::ShowParticleSource_noFocus()
 {
-  int isource = ui->lwDefinedParticleSources->currentRow();
-  if (isource < 0) return;
-  if (isource >= SimulationManager->ParticleSources->countSources())
+    const int isource = ui->lwDefinedParticleSources->currentRow();
+    if (isource < 0) return;
+    if (isource >= SimulationManager->Settings.partSimSet.SourceGenSettings.getNumSources())
     {
-      message("Source number is out of bounds!",this);
-      return;
+        message("Source number is out of bounds!", this);
+        return;
     }
-  ShowSource(SimulationManager->ParticleSources->getSource(isource), true);
+    ShowSource(SimulationManager->Settings.partSimSet.SourceGenSettings.getSourceRecord(isource), true);
 }
 
 void MainWindow::on_pbSaveParticleSource_clicked()
 {
-    int isource = ui->lwDefinedParticleSources->currentRow();
+    const int isource = ui->lwDefinedParticleSources->currentRow();
     if (isource == -1)
     {
         message("Select a source to remove", this);
         return;
     }
-    if (isource >= SimulationManager->ParticleSources->countSources())
+    if (isource >= SimulationManager->Settings.partSimSet.SourceGenSettings.getNumSources())
     {
         message("Error - bad source index!", this);
         return;
@@ -610,7 +613,8 @@ void MainWindow::on_pbEditParticleSource_clicked()
         message("Select a source to edit", this);
         return;
     }
-    if (isource >= SimulationManager->ParticleSources->countSources())
+    const int numSources = SimulationManager->Settings.partSimSet.SourceGenSettings.getNumSources();
+    if (isource >= numSources)
     {
         message("Error - bad source index!", this);
         return;
@@ -626,11 +630,11 @@ void MainWindow::on_pbEditParticleSource_clicked()
     SimulationManager->ParticleSources->checkLimitedToMaterial(ps);
 
     if (Detector->isGDMLempty())
-      { //check world size
+    { //check world size
         double XYm = 0;
         double  Zm = 0;
-        for (int isource = 0; isource < SimulationManager->ParticleSources->countSources(); isource++)
-          {
+        for (int isource = 0; isource < numSources; isource++)
+        {
             double msize =   ps->size1;
             UpdateMax(msize, ps->size2);
             UpdateMax(msize, ps->size3);
@@ -638,7 +642,7 @@ void MainWindow::on_pbEditParticleSource_clicked()
             UpdateMax(XYm, fabs(ps->X0)+msize);
             UpdateMax(XYm, fabs(ps->Y0)+msize);
             UpdateMax(Zm,  fabs(ps->Z0)+msize);
-          }
+        }
 
         double currXYm = Detector->WorldSizeXY;
         double  currZm = Detector->WorldSizeZ;
@@ -650,7 +654,7 @@ void MainWindow::on_pbEditParticleSource_clicked()
             Detector->WorldSizeZ =  std::max(Zm,currZm);
             MainWindow::ReconstructDetector();
           }
-      }
+    }
 
     on_pbUpdateSimConfig_clicked();
     if (ui->pbGunShowSource->isChecked()) ShowParticleSource_noFocus();

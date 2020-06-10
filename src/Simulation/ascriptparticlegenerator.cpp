@@ -1,4 +1,5 @@
 #include "ascriptparticlegenerator.h"
+#include "aparticlesimsettings.h"
 #include "aparticlerecord.h"
 #include "ajsontools.h"
 #include "aparticlegenerator_si.h"
@@ -7,8 +8,8 @@
 #include <QScriptEngine>
 #include <QDebug>
 
-AScriptParticleGenerator::AScriptParticleGenerator(const AMaterialParticleCollection &MpCollection, TRandom2 * RandGen, int ThreadID, const int * NumRunningThreads) :
-    MpCollection(MpCollection), RandGen(RandGen), ThreadId(ThreadID), NumRunningThreads(NumRunningThreads) {}
+AScriptParticleGenerator::AScriptParticleGenerator(const AScriptGenSettings & Settings, const AMaterialParticleCollection & MpCollection, TRandom2 & RandGen, int ThreadID, const int * NumRunningThreads) :
+    Settings(Settings), MpCollection(MpCollection), RandGen(RandGen), ThreadId(ThreadID), NumRunningThreads(NumRunningThreads) {}
 
 AScriptParticleGenerator::~AScriptParticleGenerator()
 {
@@ -25,7 +26,7 @@ bool AScriptParticleGenerator::Init()
             //qDebug() << "Creating script infrastructure";
         ScriptEngine = new QScriptEngine();
         ScriptEngine->setProcessEventsInterval(processInterval);
-        ScriptInterface = new AParticleGenerator_SI(MpCollection, RandGen, ThreadId, NumRunningThreads);
+        ScriptInterface = new AParticleGenerator_SI(MpCollection, &RandGen, ThreadId, NumRunningThreads);
 
         ScriptInterface->setObjectName("gen");
         QScriptValue val = ScriptEngine->newQObject(ScriptInterface, QScriptEngine::QtOwnership);
@@ -33,7 +34,7 @@ bool AScriptParticleGenerator::Init()
 
         //QObject::connect(ScriptInterface, &AParticleGeneratorInterface::requestAbort, ScriptEngine, &QScriptEngine::abortEvaluation, Qt::DirectConnection);
 
-        mathInterface = new AMath_SI(RandGen);
+        mathInterface = new AMath_SI(&RandGen);
         mathInterface->setObjectName("math");
         val = ScriptEngine->newQObject(mathInterface, QScriptEngine::QtOwnership);
         ScriptEngine->globalObject().setProperty(mathInterface->objectName(), val);
@@ -49,18 +50,18 @@ bool AScriptParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & Generat
 {
     bAbortRequested = false;
     ScriptInterface->configure(&GeneratedParticles, iEvent);
-    ScriptEngine->evaluate(Script).toString();
+    ScriptEngine->evaluate(Settings.Script).toString();
     return !bAbortRequested;
 }
 
 void AScriptParticleGenerator::writeToJson(QJsonObject &json) const
 {
-    json["Script"] = Script;
+    //json["Script"] = Script;
 }
 
 bool AScriptParticleGenerator::readFromJson(const QJsonObject &json)
 {
-    return parseJson(json, "Script", Script);
+    //return parseJson(json, "Script", Script);
 }
 
 void AScriptParticleGenerator::abort()

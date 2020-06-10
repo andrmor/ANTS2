@@ -27,7 +27,6 @@ public:
 
     virtual void SetStartEvent(int) {} // for 'from file' generator
 
-
     const QString & GetErrorString() const {return ErrorString;}
     void            SetErrorString(const QString& str) {ErrorString = str;}
 

@@ -522,8 +522,7 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
 
         QJsonObject sjs;
         parseJson(psjs, "GenerationFromScript", sjs);
-            if (!sjs.isEmpty())
-                SimulationManager->ScriptParticleGenerator->readFromJson(sjs);
+            if (!sjs.isEmpty()) SimulationManager->Settings.partSimSet.ScriptGenSettings.readFromJson(sjs);
         updateScriptParticleGeneratorGui();
 
         ui->labPhTracksOn_1->setVisible(SimulationManager->TrackBuildOptions.bBuildPhotonTracks);

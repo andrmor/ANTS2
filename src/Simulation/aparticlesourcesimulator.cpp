@@ -157,18 +157,18 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
         //else if (PartGenMode == "Script")
         else if (partSimSet.GenerationMode == AParticleSimSettings::Script)
         {
-            QJsonObject sjs;
-            parseJson(js, "GenerationFromScript", sjs);
-            if (sjs.isEmpty())
-            {
-                ErrorString = "Simulation settings do not contain 'from script' generator configuration";
-                return false;
-            }
-            else
-            {
-                ParticleGun = new AScriptParticleGenerator(*detector.MpCollection, RandGen, ID, &simMan.NumberOfWorkers);
-                ParticleGun->readFromJson(sjs);
-            }
+            //QJsonObject sjs;
+            //parseJson(js, "GenerationFromScript", sjs);
+            //if (sjs.isEmpty())
+            //{
+            //    ErrorString = "Simulation settings do not contain 'from script' generator configuration";
+            //    return false;
+            //}
+            //else
+            //{
+                ParticleGun = new AScriptParticleGenerator(partSimSet.ScriptGenSettings, *detector.MpCollection, *RandGen, ID, &simMan.NumberOfWorkers);
+            //    ParticleGun->readFromJson(sjs);
+            //}
         }
         else
         {

@@ -74,7 +74,7 @@ void MainWindow::SimParticleSourcesConfigToJson(QJsonObject &json)
         psjs["GenerationFromFile"] = fjs;
         //--from script
         QJsonObject sjs;
-            SimulationManager->ScriptParticleGenerator->writeToJson(sjs);
+            SimulationManager->Settings.partSimSet.ScriptGenSettings.writeToJson(sjs);
         psjs["GenerationFromScript"] = sjs;
 
     json["ParticleSourcesConfig"] = psjs;
@@ -919,7 +919,7 @@ void MainWindow::on_lwFileStatistics_customContextMenuRequested(const QPoint &po
 void MainWindow::updateScriptParticleGeneratorGui()
 {
     ui->pteParticleGenerationScript->clear();
-    ui->pteParticleGenerationScript->appendPlainText(SimulationManager->ScriptParticleGenerator->GetScript());
+    ui->pteParticleGenerationScript->appendPlainText(SimulationManager->Settings.partSimSet.ScriptGenSettings.Script);
 }
 
 void MainWindow::on_pbParticleGenerationScript_clicked()
@@ -950,7 +950,7 @@ void MainWindow::on_pbParticleGenerationScript_clicked()
     );
 
 
-    QString Script = SimulationManager->ScriptParticleGenerator->GetScript();
+    QString Script = SimulationManager->Settings.partSimSet.ScriptGenSettings.Script;
     QString Example = "gen.AddParticle(0,  100+math.random(),  10*math.random(), 10*math.random(), 0,   0, 0, 1)\n"
                       "gen.AddParticleIsotropic(0,  111,  0, 0, -5)";
     sw->ConfigureForLightMode(&Script, "Optical override: custom script", Example);
@@ -969,7 +969,7 @@ void MainWindow::on_pbParticleGenerationScript_clicked()
     GP.clear();
     delete sw; //also deletes script manager
 
-    if (bWasAccepted) SimulationManager->ScriptParticleGenerator->SetScript(Script);
+    if (bWasAccepted) SimulationManager->Settings.partSimSet.ScriptGenSettings.Script = Script;
     on_pbUpdateSimConfig_clicked();
 }
 

@@ -32,6 +32,9 @@ public:
     bool   replace(int iSource, AParticleSourceRecord * gunParticle);
     void   remove(int iSource);
 
+    QString isParticleInUse(int particleId) const;
+    bool removeParticle(int particleId);
+
 private:
     double TotalActivity = 0;
 };
@@ -96,6 +99,9 @@ public:
     void readFromJson(const QJsonObject & json);
 
     void clearSettings();
+
+    QString isParticleInUse(int particleId) const;  // returns "" if not in use, otherwise gives detail where it is used
+    bool removeParticle(int particleId); //should NOT be used to remove one of particles in use! use isPareticleInUse first
 };
 
 #endif // APARTICLEMODESETTINGS_H

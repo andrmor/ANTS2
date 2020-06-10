@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
 
 #ifdef SIM
     ASimulationManager SimulationManager(EventsDataHub, Detector);
-    Config.SetParticleSources(SimulationManager.ParticleSources);
+    Config.setSimSettings(&SimulationManager.Settings);
     QObject::connect(&EventsDataHub, &EventsDataClass::cleared, &SimulationManager, &ASimulationManager::clearTrackingHistory);
     QObject::connect(&Detector, &DetectorClass::newGeoManager, &SimulationManager, &ASimulationManager::onNewGeoManager);
     qDebug() << "Simulation manager created";

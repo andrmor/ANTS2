@@ -34,8 +34,8 @@ public:
     virtual bool GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles, int iEvent) override; //see Init!!!  // !*! fix use of detector
 
     //triggered when remove particle from configuration is attempted
-    virtual bool IsParticleInUse(int particleId, QString& SourceNames) const override;
-    virtual void RemoveParticle(int particleId) override; //should NOT be used to remove one of particles in use! use onIsPareticleInUse first
+    //virtual bool IsParticleInUse(int particleId, QString& SourceNames) const override;
+    //virtual void RemoveParticle(int particleId) override; //should NOT be used to remove one of particles in use! use onIsPareticleInUse first
 
     virtual void writeToJson(QJsonObject &json) const override;
     virtual bool readFromJson(const QJsonObject &json) override;

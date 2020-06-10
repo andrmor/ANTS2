@@ -43,9 +43,6 @@ public:
     void            ReleaseResources() override;
     bool            GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles, int iEvent) override;
 
-    void            RemoveParticle(int) override {} //cannot be used for this class
-    bool            IsParticleInUse(int , QString &) const override { return false; } // not relevant for this class, validator is on guard
-
     void            writeToJson(QJsonObject& json) const override;
     bool            readFromJson(const QJsonObject& json) override;
 

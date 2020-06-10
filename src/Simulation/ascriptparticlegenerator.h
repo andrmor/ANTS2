@@ -24,9 +24,6 @@ public:
     //virtual void ReleaseResources() override {}   //called after end of operation
     virtual bool GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles, int iEvent) override;
 
-    virtual void RemoveParticle(int) override {} //should NOT be used to remove one of particles in use! use IsPareticleInUse first
-    virtual bool IsParticleInUse(int particleId, QString& SourceNames) const override;
-
     virtual void writeToJson(QJsonObject& json) const override;
     virtual bool readFromJson(const QJsonObject& json) override;
 

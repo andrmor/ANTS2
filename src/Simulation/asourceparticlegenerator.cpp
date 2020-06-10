@@ -440,6 +440,7 @@ TVector3 ASourceParticleGenerator::GenerateRandomDirection()
 }
 */
 
+/*
 #include <QSet>
 bool ASourceParticleGenerator::IsParticleInUse(int particleId, QString &SourceNames) const
 {
@@ -466,7 +467,9 @@ bool ASourceParticleGenerator::IsParticleInUse(int particleId, QString &SourceNa
         return true;
     }
 }
+*/
 
+/*
 void ASourceParticleGenerator::RemoveParticle(int particleId)
 {
   for (int isource=0; isource < Settings.ParticleSourcesData.size(); isource++ )
@@ -477,6 +480,7 @@ void ASourceParticleGenerator::RemoveParticle(int particleId)
               ps->GunParticles[ip]->ParticleId--;
   }
 }
+*/
 
 void ASourceParticleGenerator::writeToJson(QJsonObject &json) const
 {

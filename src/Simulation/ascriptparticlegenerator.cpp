@@ -53,11 +53,6 @@ bool AScriptParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & Generat
     return !bAbortRequested;
 }
 
-bool AScriptParticleGenerator::IsParticleInUse(int particleId, QString &SourceNames) const
-{
-    return false; //TODO
-}
-
 void AScriptParticleGenerator::writeToJson(QJsonObject &json) const
 {
     json["Script"] = Script;

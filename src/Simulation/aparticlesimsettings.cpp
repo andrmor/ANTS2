@@ -24,6 +24,17 @@ void AParticleSimSettings::clearSettings()
     ScriptGenSettings.clear();
 }
 
+QString AParticleSimSettings::isParticleInUse(int particleId) const
+{
+    //for other generators options it is not implemented yet
+    return SourceGenSettings.isParticleInUse(particleId);
+}
+
+bool AParticleSimSettings::removeParticle(int particleId)
+{
+    return SourceGenSettings.removeParticle(particleId);
+}
+
 void AParticleSimSettings::writeToJson(QJsonObject & json) const
 {
     {
@@ -299,4 +310,38 @@ void ASourceGenSettings::remove(int iSource)
     delete ParticleSourcesData[iSource];
     ParticleSourcesData.remove(iSource);
     calculateTotalActivity();
+}
+
+QString ASourceGenSettings::isParticleInUse(int particleId) const
+{
+    QString res;
+
+    for (const AParticleSourceRecord * ps : ParticleSourcesData)
+    {
+        for (int ip = 0; ip < ps->GunParticles.size(); ip++)
+        {
+            if (particleId == ps->GunParticles[ip]->ParticleId)
+            {
+                if (!res.isEmpty()) res += ", ";
+                res += ps->name;
+            }
+        }
+    }
+
+    if (!res.isEmpty()) res = "This particle is in use by the following source(s):\n" + res;
+    return res;
+}
+
+bool ASourceGenSettings::removeParticle(int particleId)
+{
+    QString inUse = isParticleInUse(particleId);
+    if (!inUse.isEmpty()) return false;
+
+    for (AParticleSourceRecord * ps : ParticleSourcesData)
+    {
+        for (int ip = 0; ip < ps->GunParticles.size(); ip++)
+            if (ps->GunParticles[ip]->ParticleId > particleId)
+                ps->GunParticles[ip]->ParticleId--;
+    }
+    return true;
 }

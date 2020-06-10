@@ -42,17 +42,16 @@ public:
 
     //requests
     //int    countSources() const;  // !*!
-    AParticleSourceRecord* getSource(int iSource); // !*!
+    //AParticleSourceRecord* getSource(int iSource); // !*!
 
-    bool   LoadGunEnergySpectrum(int iSource, int iParticle, QString fileName); //TODO uses load function with message
+    //bool   LoadGunEnergySpectrum(int iSource, int iParticle, QString fileName); //TODO uses load function with message
 
-    TVector3 GenerateRandomDirection();
+    //TVector3 GenerateRandomDirection();
 
 private:
     //external resources
     const ASourceGenSettings & Settings;
     const DetectorClass & Detector;
-    AMaterialParticleCollection * MpCollection;   // !*! to remove
     TRandom2 * RandGen;     // !*! to reference
 
     //QVector<AParticleSourceRecord*> ParticleSourcesData;

@@ -22,6 +22,7 @@ public:
     int    getNumSources() const;
 
     const AParticleSourceRecord * getSourceRecord(int iSource) const;
+    AParticleSourceRecord * getSourceRecord(int iSource);
 
     void   calculateTotalActivity();
     double getTotalActivity() const {return TotalActivity;}

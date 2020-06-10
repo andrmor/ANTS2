@@ -22,7 +22,7 @@
 #include "TGeoManager.h"
 
 ASourceParticleGenerator::ASourceParticleGenerator(const ASourceGenSettings &Settings, const DetectorClass &Detector, TRandom2 * RandGen)
-    : Settings(Settings), Detector(Detector), MpCollection(Detector.MpCollection), RandGen(RandGen) {}
+    : Settings(Settings), Detector(Detector), RandGen(RandGen) {}
 
 bool ASourceParticleGenerator::Init()
 {  
@@ -40,7 +40,7 @@ bool ASourceParticleGenerator::Init()
 
     for (AParticleSourceRecord * ps : Settings.ParticleSourcesData)
     {
-        QString err = ps->checkSource(*MpCollection);
+        QString err = ps->checkSource(*Detector.MpCollection);
         if (!err.isEmpty())
         {
             ErrorString = QString("Error in source %1:\n%2").arg(ps->name).arg(err);
@@ -423,6 +423,7 @@ void ASourceParticleGenerator::addParticleInCone(int isource, int iparticle, QVe
   GeneratedParticles << ps;
 }
 
+/*
 TVector3 ASourceParticleGenerator::GenerateRandomDirection()
 {
   //Sphere function of Root:
@@ -437,6 +438,7 @@ TVector3 ASourceParticleGenerator::GenerateRandomDirection()
 
   return TVector3(a*scale, b*scale, -1.0 + 8.0 * r2 );
 }
+*/
 
 #include <QSet>
 bool ASourceParticleGenerator::IsParticleInUse(int particleId, QString &SourceNames) const
@@ -528,11 +530,14 @@ int ASourceParticleGenerator::countSources() const
 }
 */
 
+/*
 AParticleSourceRecord *ASourceParticleGenerator::getSource(int iSource)
 {
     return Settings.ParticleSourcesData[iSource];
 }
+*/
 
+/*
 bool ASourceParticleGenerator::LoadGunEnergySpectrum(int iSource, int iParticle, QString fileName)
 {
   if (iSource < 0 || iSource >= Settings.ParticleSourcesData.size())
@@ -565,7 +570,7 @@ bool ASourceParticleGenerator::LoadGunEnergySpectrum(int iSource, int iParticle,
 
   return true;
 }
-
+*/
 
 
 

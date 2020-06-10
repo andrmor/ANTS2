@@ -389,8 +389,9 @@ void MainWindow::on_pbRemoveSource_clicked()
         return;
     }
 
+    const QString SourceName = SimulationManager->Settings.partSimSet.SourceGenSettings.getSourceRecord(isource)->name;
     int ret = QMessageBox::question(this, "Remove particle source",
-                                    "Are you sure you want to remove source " + SimulationManager->ParticleSources->getSource(isource)->name,
+                                    "Remove source " + SourceName + " ?",
                                     QMessageBox::Yes | QMessageBox::Cancel,
                                     QMessageBox::Cancel);
     if (ret != QMessageBox::Yes) return;
@@ -422,15 +423,16 @@ void MainWindow::on_pbAddSource_clicked()
 
 void MainWindow::on_pbUpdateSourcesIndication_clicked()
 {
-    const int numSources = SimulationManager->Settings.partSimSet.SourceGenSettings.getNumSources();
+    ASourceGenSettings & SourceGenSettings = SimulationManager->Settings.partSimSet.SourceGenSettings;
+    const int numSources = SourceGenSettings.getNumSources();
 
     int curRow = ui->lwDefinedParticleSources->currentRow();
     ui->lwDefinedParticleSources->clear();
 
-    for (int i=0; i<numSources; i++)
+    for (int i = 0; i < numSources; i++)
     {
-        AParticleSourceRecord* pr = SimulationManager->ParticleSources->getSource(i);
-        QListWidgetItem* item = new QListWidgetItem();
+        AParticleSourceRecord * pr = SourceGenSettings.getSourceRecord(i);
+        QListWidgetItem * item = new QListWidgetItem();
         ui->lwDefinedParticleSources->addItem(item);
 
         QFrame* fr = new QFrame();
@@ -464,7 +466,7 @@ void MainWindow::on_pbUpdateSourcesIndication_clicked()
             });
         l->addWidget(e);
 
-            double totAct = SimulationManager->Settings.partSimSet.SourceGenSettings.getTotalActivity();
+            double totAct = SourceGenSettings.getTotalActivity();
             double per = ( totAct == 0 ? 0 : 100.0 * pr->Activity / totAct );
             QString t = QString("%1%").arg(per, 3, 'g', 3);
             lab = new QLabel(t);
@@ -476,7 +478,9 @@ void MainWindow::on_pbUpdateSourcesIndication_clicked()
         ui->lwDefinedParticleSources->setItemWidget(item, fr);
         item->setSizeHint(fr->sizeHint());
 
-        e->setVisible(numSources > 1);
+        bool bVis = (numSources > 1);
+        if (!bVis && pr->Activity == 0) bVis = true;
+        e->setVisible(bVis);
     }
 
     if (curRow < 0 || curRow >= ui->lwDefinedParticleSources->count())
@@ -542,7 +546,7 @@ void MainWindow::on_pbSaveParticleSource_clicked()
     if (file.suffix().isEmpty()) fileName += ".json";
 
     QJsonObject json, js;
-    SimulationManager->ParticleSources->getSource(isource)->writeToJson(json, *MpCollection);
+    SimulationManager->Settings.partSimSet.SourceGenSettings.getSourceRecord(isource)->writeToJson(json, *MpCollection);
     js["ParticleSource"] = json;
     bool bOK = SaveJsonToFile(js, fileName);
     if (!bOK) message("Failed to save json to file: "+fileName, this);
@@ -613,22 +617,22 @@ void MainWindow::on_pbEditParticleSource_clicked()
         message("Select a source to edit", this);
         return;
     }
-    const int numSources = SimulationManager->Settings.partSimSet.SourceGenSettings.getNumSources();
+    ASourceGenSettings & SourceGenSettings = SimulationManager->Settings.partSimSet.SourceGenSettings;
+    const int numSources = SourceGenSettings.getNumSources();
     if (isource >= numSources)
     {
         message("Error - bad source index!", this);
         return;
     }
 
-    AParticleSourceDialog d(*this, SimulationManager->ParticleSources->getSource(isource));
+    AParticleSourceDialog d(*this, SourceGenSettings.getSourceRecord(isource));
     int res = d.exec();
     if (res == QDialog::Rejected) return;
 
-    SimulationManager->Settings.partSimSet.SourceGenSettings.replace(isource, d.getResult());
+    SourceGenSettings.replace(isource, d.getResult());
 
-    AParticleSourceRecord * ps = SimulationManager->ParticleSources->getSource(isource);
+    AParticleSourceRecord * ps = SourceGenSettings.getSourceRecord(isource);
     ps->updateLimitedToMat(*Detector->MpCollection);
-    //SimulationManager->Settings.partSimSet.SourceGenSettings.checkLimitedToMaterial(isource);
 
     if (Detector->isGDMLempty())
     { //check world size

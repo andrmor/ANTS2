@@ -570,7 +570,7 @@ void MainWindow::selectFirstActiveParticleSource()
         //show the first source with non-zero activity
         int i = 0;
         for (; i < SimulationManager->Settings.partSimSet.SourceGenSettings.getNumSources(); i++)
-            if (SimulationManager->ParticleSources->getSource(i)->Activity > 0) break;
+            if (SimulationManager->Settings.partSimSet.SourceGenSettings.getSourceRecord(i)->Activity > 0) break;
 
         if (i < ui->lwDefinedParticleSources->count())
             ui->lwDefinedParticleSources->setCurrentRow(i);

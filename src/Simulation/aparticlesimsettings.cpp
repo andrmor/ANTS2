@@ -256,6 +256,12 @@ const AParticleSourceRecord * ASourceGenSettings::getSourceRecord(int iSource) c
     return ParticleSourcesData.at(iSource);
 }
 
+AParticleSourceRecord *ASourceGenSettings::getSourceRecord(int iSource)
+{
+    if (iSource < 0 || iSource >= ParticleSourcesData.size()) return nullptr;
+    return ParticleSourcesData.at(iSource);
+}
+
 void ASourceGenSettings::calculateTotalActivity()
 {
     TotalActivity = 0;

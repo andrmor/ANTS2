@@ -28,7 +28,7 @@ public:
 class ASourceParticleGenerator : public AParticleGun
 {
 public:
-    ASourceParticleGenerator(const ASourceGenSettings & Settings, const DetectorClass & Detector, TRandom2 * RandGen);
+    ASourceParticleGenerator(const ASourceGenSettings & Settings, const DetectorClass & Detector, TRandom2 & RandGen);
 
     virtual bool Init() override; // !!! has to be called before the first use of "GenerateEvent"!
     virtual bool GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles, int iEvent) override; //see Init!!!  // !*! fix use of detector
@@ -49,10 +49,9 @@ public:
     //TVector3 GenerateRandomDirection();
 
 private:
-    //external resources
     const ASourceGenSettings & Settings;
-    const DetectorClass & Detector;
-    TRandom2 * RandGen;     // !*! to reference
+    const DetectorClass      & Detector;
+    TRandom2                 & RandGen;
 
     //QVector<AParticleSourceRecord*> ParticleSourcesData;
     QVector<double> TotalParticleWeight;

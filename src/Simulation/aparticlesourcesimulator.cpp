@@ -118,7 +118,7 @@ bool AParticleSourceSimulator::setup(QJsonObject &json)
             // particle sources
             if (js.contains("ParticleSources"))
             {
-                ParticleGun = new ASourceParticleGenerator(partSimSet.SourceGenSettings, detector, RandGen);
+                ParticleGun = new ASourceParticleGenerator(partSimSet.SourceGenSettings, detector, *RandGen);
                 //ParticleGun->readFromJson(js);
 
                 //fAllowMultiple = cjs["AllowMultipleParticles"].toBool();

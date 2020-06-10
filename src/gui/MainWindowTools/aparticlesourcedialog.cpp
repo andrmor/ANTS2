@@ -143,7 +143,7 @@ void AParticleSourceDialog::on_pbGunTest_clicked()
 {
     ASourceGenSettings SourceGenSettings;
     SourceGenSettings.append(Rec);
-    ASourceParticleGenerator ps(SourceGenSettings, *MW.Detector, MW.Detector->RandGen);
+    ASourceParticleGenerator ps(SourceGenSettings, *MW.Detector, *MW.Detector->RandGen);
 
     MW.GeometryWindow->ShowAndFocus();
     MW.ShowSource(Rec, true);

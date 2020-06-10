@@ -21,7 +21,7 @@
 #include "TRandom2.h"
 #include "TGeoManager.h"
 
-ASourceParticleGenerator::ASourceParticleGenerator(const ASourceGenSettings &Settings, const DetectorClass &Detector, TRandom2 * RandGen)
+ASourceParticleGenerator::ASourceParticleGenerator(const ASourceGenSettings & Settings, const DetectorClass & Detector, TRandom2 & RandGen)
     : Settings(Settings), Detector(Detector), RandGen(RandGen) {}
 
 bool ASourceParticleGenerator::Init()
@@ -128,7 +128,7 @@ bool ASourceParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & Generat
     int NumSources = Settings.getNumSources();
     if (NumSources > 1)
     {
-        double rnd = RandGen->Rndm() * Settings.getTotalActivity();
+        double rnd = RandGen.Rndm() * Settings.getTotalActivity();
         for (; isource<NumSources - 1; isource++)
         {
             if (Settings.ParticleSourcesData[isource]->Activity >= rnd) break; //this source selected
@@ -167,15 +167,15 @@ bool ASourceParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & Generat
     case 0:
         break;
     case 1:
-        time = RandGen->Gaus(time, Source->TimeSpreadSigma);
+        time = RandGen.Gaus(time, Source->TimeSpreadSigma);
         break;
     case 2:
-        time += (-0.5 * Source->TimeSpreadWidth + RandGen->Rndm() * Source->TimeSpreadWidth);
+        time += (-0.5 * Source->TimeSpreadWidth + RandGen.Rndm() * Source->TimeSpreadWidth);
         break;
     }
 
     //selecting the particle
-    double rnd = RandGen->Rndm() * TotalParticleWeight.at(isource);
+    double rnd = RandGen.Rndm() * TotalParticleWeight.at(isource);
     int iparticle;
     for (iparticle = 0; iparticle < Source->GunParticles.size() - 1; iparticle++)
     {
@@ -224,7 +224,7 @@ bool ASourceParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & Generat
                     }
                     //probability test
                     double LinkingProb = Source->GunParticles[thisParticle]->LinkingProbability;
-                    if (RandGen->Rndm() > LinkingProb)
+                    if (RandGen.Rndm() > LinkingProb)
                     {
                         //qDebug()<<"skip: linking prob fail";
                         continue;
@@ -232,7 +232,7 @@ bool ASourceParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & Generat
                     if (!fOpposite)
                     {
                         //checking the cone
-                        if (RandGen->Rndm() > CollimationProbability[isource])
+                        if (RandGen.Rndm() > CollimationProbability[isource])
                         {
                             //qDebug()<<"skip: cone test fail";
                             continue;
@@ -258,7 +258,7 @@ bool ASourceParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & Generat
 
                     AParticleRecord * ps = new AParticleRecord();
                     ps->Id = Source->GunParticles[thisParticle]->ParticleId;
-                    ps->energy = Source->GunParticles[thisParticle]->generateEnergy(RandGen);
+                    ps->energy = Source->GunParticles[thisParticle]->generateEnergy(&RandGen);
                     ps->v[0] = -GeneratedParticles.at(index)->v[0];
                     ps->v[1] = -GeneratedParticles.at(index)->v[1];
                     ps->v[2] = -GeneratedParticles.at(index)->v[2];
@@ -302,7 +302,7 @@ void ASourceParticleGenerator::generatePosition(int isource, double *R) const
       {
         //line source
         TVector3 VV(sin(Theta)*sin(Phi), sin(Theta)*cos(Phi), cos(Theta));
-        double off = -1.0 + 2.0 * RandGen->Rndm();
+        double off = -1.0 + 2.0 * RandGen.Rndm();
         off *= size1;
         R[0] = X0+VV[0]*off;
         R[1] = Y0+VV[1]*off;
@@ -323,8 +323,8 @@ void ASourceParticleGenerator::generatePosition(int isource, double *R) const
           V[i].RotateZ(Psi);
          }
 
-        double off1 = -1.0 + 2.0 * RandGen->Rndm();
-        double off2 = -1.0 + 2.0 * RandGen->Rndm();
+        double off1 = -1.0 + 2.0 * RandGen.Rndm();
+        double off2 = -1.0 + 2.0 * RandGen.Rndm();
         R[0] = X0+V[0][0]*off1+V[1][0]*off2;
         R[1] = Y0+V[0][1]*off1+V[1][1]*off2;
         R[2] = Z0+V[0][2]*off1+V[1][2]*off2;
@@ -334,8 +334,8 @@ void ASourceParticleGenerator::generatePosition(int isource, double *R) const
       {
         //surface round source
         TVector3 Circ;
-        double angle = RandGen->Rndm()*3.1415926535*2.0;
-        double r = RandGen->Rndm() + RandGen->Rndm();
+        double angle = RandGen.Rndm()*3.1415926535*2.0;
+        double r = RandGen.Rndm() + RandGen.Rndm();
         if (r > 1.0) r = (2.0-r)*size1;
         else r *=  size1;
         double x = r*cos(angle);
@@ -364,9 +364,9 @@ void ASourceParticleGenerator::generatePosition(int isource, double *R) const
           V[i].RotateZ(Psi);
          }
 
-        double off1 = -1.0 + 2.0 * RandGen->Rndm();
-        double off2 = -1.0 + 2.0 * RandGen->Rndm();
-        double off3 = -1.0 + 2.0 * RandGen->Rndm();
+        double off1 = -1.0 + 2.0 * RandGen.Rndm();
+        double off2 = -1.0 + 2.0 * RandGen.Rndm();
+        double off3 = -1.0 + 2.0 * RandGen.Rndm();
         R[0] = X0+V[0][0]*off1+V[1][0]*off2+V[2][0]*off3;
         R[1] = Y0+V[0][1]*off1+V[1][1]*off2+V[2][1]*off3;
         R[2] = Z0+V[0][2]*off1+V[1][2]*off2+V[2][2]*off3;
@@ -376,9 +376,9 @@ void ASourceParticleGenerator::generatePosition(int isource, double *R) const
       {
         //cylinder source
         TVector3 Circ;
-        double off = (-1.0 + 2.0 * RandGen->Rndm())*size3;
-        double angle = RandGen->Rndm()*3.1415926535*2.0;
-        double r = RandGen->Rndm() + RandGen->Rndm();
+        double off = (-1.0 + 2.0 * RandGen.Rndm())*size3;
+        double angle = RandGen.Rndm()*3.1415926535*2.0;
+        double r = RandGen.Rndm() + RandGen.Rndm();
         if (r > 1.0) r = (2.0-r)*size1;
         else r *=  size1;
         double x = r*cos(angle);
@@ -406,13 +406,13 @@ void ASourceParticleGenerator::addParticleInCone(int isource, int iparticle, QVe
   AParticleRecord* ps = new AParticleRecord();
 
   ps->Id = Settings.ParticleSourcesData[isource]->GunParticles[iparticle]->ParticleId;
-  ps->energy = Settings.ParticleSourcesData[isource]->GunParticles[iparticle]->generateEnergy(RandGen);
+  ps->energy = Settings.ParticleSourcesData[isource]->GunParticles[iparticle]->generateEnergy(&RandGen);
     //generating random direction inside the collimation cone
     double spread = Settings.ParticleSourcesData[isource]->Spread * 3.1415926535 / 180.0; //max angle away from generation diretion
     double cosTheta = cos(spread);
-    double z = cosTheta + RandGen->Rndm() * (1.0 - cosTheta);
+    double z = cosTheta + RandGen.Rndm() * (1.0 - cosTheta);
     double tmp = TMath::Sqrt(1.0 - z*z);
-    double phi = RandGen->Rndm()*3.1415926535*2.0;
+    double phi = RandGen.Rndm()*3.1415926535*2.0;
     TVector3 K1(tmp*cos(phi), tmp*sin(phi), z);
     TVector3 Coll(CollimationDirection[isource]);
     K1.RotateUz(Coll);
@@ -430,8 +430,8 @@ TVector3 ASourceParticleGenerator::GenerateRandomDirection()
   double a=0,b=0,r2=1;
   while (r2 > 0.25)
     {
-      a  = RandGen->Rndm() - 0.5;
-      b  = RandGen->Rndm() - 0.5;
+      a  = RandGen.Rndm() - 0.5;
+      b  = RandGen.Rndm() - 0.5;
       r2 =  a*a + b*b;
     }
   double scale = 8.0 * TMath::Sqrt(0.25 - r2);

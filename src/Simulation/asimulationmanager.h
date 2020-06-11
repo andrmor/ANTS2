@@ -85,7 +85,6 @@ public:
     double DepoByRegistered;
 
     ASimSettings Settings;
-    bool bPhotonSourceSim; // if false -> particle source sim
 
     int NumberOfWorkers = 0;
 
@@ -136,6 +135,8 @@ private:
     void saveA2depositionLog(const QString & dir) const;
     void saveExitLog();
     void emitProgressSignal();
+    bool preparePhotonMode();
+    bool prepareParticleMode();
 };
 
 #endif // ASIMULATIONMANAGER_H

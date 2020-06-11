@@ -3,21 +3,27 @@
 
 #include <QDebug>
 
-void ASimSettings::writeToJson(QJsonObject &json) const
+void ASimSettings::writeToJson(QJsonObject & json) const
 {
-    genSimSet.writeToJson(json);
+    QJsonObject jsim;
+
+    jsim["Mode"] = (bOnlyPhotons ? "PointSim" : "SourceSim");
+
+    genSimSet.writeToJson(jsim);
 
     {
         QJsonObject js;
             photSimSet.writeToJson(js);
-        json["PointSourcesConfig"] = js;
+        jsim["PointSourcesConfig"] = js;
     }
 
     {
         QJsonObject js;
             partSimSet.writeToJson(js);
-        json["ParticleSourcesConfig"] = js;
+        jsim["ParticleSourcesConfig"] = js;
     }
+
+    json["SimulationConfig"] = jsim;
 }
 
 bool ASimSettings::readFromJson(const QJsonObject & json)
@@ -30,6 +36,9 @@ bool ASimSettings::readFromJson(const QJsonObject & json)
         qWarning() << "SimulationConfig is absent";
         return false;
     }
+
+    const QString mode = js["Mode"].toString();
+    bOnlyPhotons = (mode == "PointSim");
 
     ok = genSimSet.readFromJson(js);
     if (!ok) return false;

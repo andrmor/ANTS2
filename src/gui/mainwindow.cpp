@@ -3393,8 +3393,6 @@ void MainWindow::on_pbReconstruction_2_clicked()
 void MainWindow::on_pbSimulate_clicked()
 {
   ELwindow->QuickSave(0);
-  //ui->tabwidMain->setCurrentIndex(1);
-  //ui->twSourcePhotonsParticles->setCurrentIndex(0);
   fStartedFromGUI = true;
   fSimDataNotSaved = false; // to disable the warning
 
@@ -3428,7 +3426,7 @@ void MainWindow::simulationFinished()
         }
 
         bool showTracks = false;
-        if (SimulationManager->bPhotonSourceSim)
+        if (SimulationManager->Settings.bOnlyPhotons)
         {
             showTracks = SimulationManager->TrackBuildOptions.bBuildPhotonTracks;
             clearGeoMarkers();
@@ -3446,7 +3444,7 @@ void MainWindow::simulationFinished()
         if (showTracks)
         {
             int numTracks = 0;
-            for (int iTr=0; iTr<SimulationManager->Tracks.size(); iTr++)
+            for (int iTr = 0; iTr < (int)SimulationManager->Tracks.size(); iTr++)
             {
                 const TrackHolderClass* th = SimulationManager->Tracks.at(iTr);
                 TGeoTrack* track = new TGeoTrack(1, th->UserIndex);

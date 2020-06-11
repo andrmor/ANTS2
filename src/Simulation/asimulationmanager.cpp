@@ -78,40 +78,32 @@ void ASimulationManager::StartSimulation(QJsonObject& json, int threads, bool fF
     }
 
     if (fFromGui) Detector.clearTracks();
-    Detector.assureNavigatorPresent(); // this is only for the gui thread
-
-    // reading simulation settings
-    bool     bOK = setup(json, threads);
-    if (bOK) bOK = Runner->setup(threads, bPhotonSourceSim);
-
-    if (!fFromGui)
+    else
     {
         Settings.genSimSet.TrackBuildOptions.bBuildPhotonTracks   = false;
         Settings.genSimSet.TrackBuildOptions.bBuildParticleTracks = false;
     }
 
-    if (!bOK)
-    {
-        //cannot call directly: the timer is to allow the start cycle to finish in the main thread
-        QTimer::singleShot(100, this, &ASimulationManager::onSimFailedToStart);
-    }
-    else
+    Detector.assureNavigatorPresent(); // this is only for the gui thread
+
+    // reading simulation settings
+    bool    ok = setup(json, threads);
+    if (ok) ok = Runner->setup(threads, Settings.bOnlyPhotons);
+
+    if (ok)
     {
         simRunnerThread.start();
         if (bDoGuiUpdate) simTimerGuiUpdate.start();
+    }
+    else
+    {
+        //cannot call directly: the timer is to allow the start cycle to finish in the main thread
+        QTimer::singleShot(100, this, &ASimulationManager::onSimFailedToStart);
     }
 }
 
 bool ASimulationManager::setup(const QJsonObject & json, int threads)
 {
-    if ( !json.contains("SimulationConfig") )
-    {
-        ErrorString = "Config json does not contain simulation settings!";
-        return false;
-    }
-    QJsonObject jsSimSet = json["SimulationConfig"].toObject();
-
-    // note - conversion to use "Settings" will be performed in stages, first is the photon sources!
     bool ok = Settings.readFromJson(json);
     if (!ok)
     {
@@ -122,94 +114,15 @@ bool ASimulationManager::setup(const QJsonObject & json, int threads)
     ErrorString = Detector.MpCollection->CheckOverrides();
     if (!ErrorString.isEmpty()) return false;
 
-    QString mode = jsSimSet["Mode"].toString();
-    bPhotonSourceSim = ( mode == "PointSim" );
-    const AG4SimulationSettings & G4SimSet = Settings.genSimSet.G4SimSet;
-
-    // handling of custom nodes
-    if (bPhotonSourceSim)
+    if (Settings.bOnlyPhotons)
     {
-        if (Settings.photSimSet.GenMode != APhotonSimSettings::Script) clearNodes(); // script will have the nodes already defined
-        if (Settings.photSimSet.GenMode == APhotonSimSettings::File)
-        {
-            ErrorString = checkPnotonNodeFile(Settings.photSimSet.CustomNodeSettings.FileName);
-            if (!ErrorString.isEmpty()) return false;
-        }
+        bool ok = preparePhotonMode();
+        if (!ok) return false;
     }
-    else // particle source sim
+    else
     {
-        const ASaveParticlesToFileSettings & ExitSimSet = Settings.genSimSet.ExitParticleSettings;
-        if (ExitSimSet.SaveParticles)
-        {
-            QFile file(ExitSimSet.FileName);
-            if (!file.exists())
-            {
-                bool bOK = file.open(QIODevice::WriteOnly);
-                file.close();
-                if (!bOK)
-                {
-                    ErrorString = "Cannot create file to save exiting particles:\n" + ExitSimSet.FileName;
-                    return false;
-                }
-            }
-
-            if (!G4SimSet.bTrackParticles)
-                Detector.assignSaveOnExitFlag(ExitSimSet.VolumeName);
-        }
-
-        if (G4SimSet.bTrackParticles)
-        {
-            if (!G4SimSet.checkPathValid())
-            {
-                ErrorString = "Exchange path does not exist.\nCheck 'Geant4' options tab in ANTS2 global settings!";
-                return false;
-            }
-
-            if (!G4SimSet.checkExecutableExists())
-            {
-                ErrorString = "File with the name configured for G4ants executable does not exist.\nCheck 'Geant4' options tab in ANTS2 global settings!";
-                return false;
-            }
-
-            if (!G4SimSet.checkExecutablePermission())
-            {
-                ErrorString = "File with the name configured for G4ants executable has no execution permission.\nThe file name is specified in 'Geant4' options tab in ANTS2 global settings.";
-                return false;
-            }
-
-            const QStringList matNames = Detector.MpCollection->getListOfMaterialNames();
-            QString matsWithSpaces;
-            for (const QString & mn : matNames)
-                if (mn.contains(' ')) matsWithSpaces += " " + mn;
-            if (!matsWithSpaces.isEmpty())
-            {
-                ErrorString = "Material names cannot contain spaces!\n" + matsWithSpaces;
-                return false;
-            }
-
-            QString err = G4SimSet.checkSensitiveVolumes();
-            if ( !err.isEmpty() )
-            {
-                ErrorString = err;
-                return false;
-            }
-
-            const QString gdmlName = G4SimSet.getGdmlFileName();
-            err = Detector.exportToGDML(gdmlName);
-            if ( !err.isEmpty() )
-            {
-                ErrorString = err;
-                return false;
-            }
-        }
-
-#ifndef __USE_ANTS_NCRYSTAL__
-        if (Detector.MpCollection->isNCrystalInUse())
-        {
-            ErrorString = "NCrystal library is in use by material collection, but ANTS2 was compiled without this library!";
-            return false;
-        }
-#endif
+        bool ok = prepareParticleMode();
+        if (!ok) return false;
     }
 
     EventsDataHub.clear();
@@ -218,6 +131,109 @@ bool ASimulationManager::setup(const QJsonObject & json, int threads)
 
     Detector.PMs->configure(&GenSimSet); //Setup pms module and QEaccelerator if needed
     Detector.MpCollection->UpdateRuntimePropertiesAndWavelengthBinning(&GenSimSet, Detector.RandGen, threads); //update wave-resolved properties of materials and runtime properties for neutrons
+
+    return true;
+}
+
+bool ASimulationManager::preparePhotonMode()
+{
+    if (Settings.photSimSet.GenMode != APhotonSimSettings::Script) clearNodes(); // script will have the nodes already defined
+    if (Settings.photSimSet.GenMode == APhotonSimSettings::File)
+    {
+        ErrorString = checkPnotonNodeFile(Settings.photSimSet.CustomNodeSettings.FileName);
+        if (!ErrorString.isEmpty()) return false;
+    }
+    return true;
+}
+
+bool ASimulationManager::prepareParticleMode()
+{
+    const AG4SimulationSettings & G4SimSet = Settings.genSimSet.G4SimSet;
+
+    if (Settings.partSimSet.GenerationMode == AParticleSimSettings::File)
+    {
+        Settings.partSimSet.FileGenSettings.ValidationMode = (G4SimSet.bTrackParticles ? AFileGenSettings::Relaxed : AFileGenSettings::Strict);
+        bool bOK = FileParticleGenerator->Init();
+        FileParticleGenerator->ReleaseResources();
+        if (!bOK)
+        {
+            ErrorString = FileParticleGenerator->GetErrorString();
+            return false;
+        }
+    }
+
+    const ASaveParticlesToFileSettings & ExitSimSet = Settings.genSimSet.ExitParticleSettings;
+    if (ExitSimSet.SaveParticles)
+    {
+        QFile file(ExitSimSet.FileName);
+        if (!file.exists())
+        {
+            bool bOK = file.open(QIODevice::WriteOnly);
+            file.close();
+            if (!bOK)
+            {
+                ErrorString = "Cannot create file to save exiting particles:\n" + ExitSimSet.FileName;
+                return false;
+            }
+        }
+
+        if (!G4SimSet.bTrackParticles)
+            Detector.assignSaveOnExitFlag(ExitSimSet.VolumeName);
+    }
+
+    if (G4SimSet.bTrackParticles)
+    {
+        if (!G4SimSet.checkPathValid())
+        {
+            ErrorString = "Exchange path does not exist.\nCheck 'Geant4' options tab in ANTS2 global settings!";
+            return false;
+        }
+
+        if (!G4SimSet.checkExecutableExists())
+        {
+            ErrorString = "File with the name configured for G4ants executable does not exist.\nCheck 'Geant4' options tab in ANTS2 global settings!";
+            return false;
+        }
+
+        if (!G4SimSet.checkExecutablePermission())
+        {
+            ErrorString = "File with the name configured for G4ants executable has no execution permission.\nThe file name is specified in 'Geant4' options tab in ANTS2 global settings.";
+            return false;
+        }
+
+        const QStringList matNames = Detector.MpCollection->getListOfMaterialNames();
+        QString matsWithSpaces;
+        for (const QString & mn : matNames)
+            if (mn.contains(' ')) matsWithSpaces += " " + mn;
+        if (!matsWithSpaces.isEmpty())
+        {
+            ErrorString = "Material names cannot contain spaces!\n" + matsWithSpaces;
+            return false;
+        }
+
+        QString err = G4SimSet.checkSensitiveVolumes();
+        if ( !err.isEmpty() )
+        {
+            ErrorString = err;
+            return false;
+        }
+
+        const QString gdmlName = G4SimSet.getGdmlFileName();
+        err = Detector.exportToGDML(gdmlName);
+        if ( !err.isEmpty() )
+        {
+            ErrorString = err;
+            return false;
+        }
+    }
+
+#ifndef __USE_ANTS_NCRYSTAL__
+    if (Detector.MpCollection->isNCrystalInUse())
+    {
+        ErrorString = "NCrystal library is in use by material collection, but ANTS2 was compiled without this library!";
+        return false;
+    }
+#endif
 
     return true;
 }
@@ -359,7 +375,7 @@ void ASimulationManager::copyDataFromWorkers()
     clearEnergyVector();
     if (!workers.isEmpty() && !fHardAborted)
     {
-        if (bPhotonSourceSim)
+        if (Settings.bOnlyPhotons)
         {
             EventsDataHub.ScanNumberOfRuns = Settings.photSimSet.getActiveRuns();
             APointSourceSimulator *lastPointSrcSimulator = static_cast< APointSourceSimulator *>(workers.last());
@@ -490,7 +506,7 @@ void ASimulationManager::emitProgressSignal()
 {
     bool bG4sim = false;
     bool bHavePhotonSim = true;
-    if ( !bPhotonSourceSim )
+    if ( !Settings.bOnlyPhotons )
     {
         bG4sim = Settings.genSimSet.G4SimSet.bTrackParticles;
         bHavePhotonSim = Settings.partSimSet.bDoS1 || Settings.partSimSet.bDoS2;

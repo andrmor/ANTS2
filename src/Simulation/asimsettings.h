@@ -10,9 +10,10 @@ class QJsonObject;
 class ASimSettings
 {
 public:
-
     void writeToJson(QJsonObject & json) const;
     bool readFromJson(const QJsonObject & json);
+
+    bool bOnlyPhotons = true;
 
     AGeneralSimSettings   genSimSet;
     APhotonSimSettings    photSimSet;

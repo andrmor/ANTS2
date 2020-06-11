@@ -681,22 +681,6 @@ void containsMonsGrids(const AGeoObject * obj, bool & bGrid, bool & bMon)
 #include "asandwich.h"
 void MainWindow::on_pbParticleSourcesSimulate_clicked()
 {
-    // TODO !*! find a way to do it in SimulationManager - without the settings hub it is not straightforward at this point
-    // to avoid check file in each thread
-    if (ui->cobParticleGenerationMode->currentIndex() == 1)  // "From file"
-    {
-        AFileParticleGenerator * pg = SimulationManager->FileParticleGenerator;
-        //pg->SetValidationMode(ui->cbGeant4ParticleTracking->isChecked() ? AFileParticleGenerator::Relaxed : AFileParticleGenerator::Strict);
-        SimulationManager->Settings.partSimSet.FileGenSettings.ValidationMode = (ui->cbGeant4ParticleTracking->isChecked() ? AFileGenSettings::Relaxed : AFileGenSettings::Strict);
-        bool bOK = pg->Init();
-        if (!bOK)
-        {
-            message(pg->GetErrorString(), this);
-            return;
-        }
-        updateFileParticleGeneratorGui();
-    }
-
     writeSimSettingsToJson(Config->JSON);
 
     if (ExitParticleSettings.SaveParticles)
@@ -726,11 +710,6 @@ void MainWindow::on_pbParticleSourcesSimulate_clicked()
         bool bMonitors = false;
         bool bGrids = false;
         containsMonsGrids(Detector->Sandwich->World, bGrids, bMonitors);
-        /*
-        if (bMonitors)
-            Warnings+= "\nConfig contains active Monitor(s).\n"
-                       "Monitors will be treated as normal volumes\n";
-        */
         if (bGrids)
             Warnings+= "\nConfig contains optical grids.\n"
                        "The grid will NOT be expanded:\n"
@@ -762,7 +741,6 @@ void MainWindow::on_pbParticleSourcesSimulate_clicked()
             if (ret == QMessageBox::Cancel) return;
         }
     }
-    //
 
     startSimulation(Config->JSON);
 }

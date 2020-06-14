@@ -159,6 +159,16 @@ QString AFileGenSettings::getFormatName() const
     }
 }
 
+bool AFileGenSettings::isFormatG4() const
+{
+    return (FileFormat == G4Ascii || FileFormat == G4Binary);
+}
+
+bool AFileGenSettings::isFormatBinary() const
+{
+    return (FileFormat == G4Binary);
+}
+
 void AFileGenSettings::writeToJson(QJsonObject &json) const
 {
     json["FileName"]         = FileName;

@@ -36,12 +36,12 @@ QString AFileParticleGenerator::GetFileName() const {return Settings.FileName;}
 
 bool AFileParticleGenerator::IsFormatG4() const
 {
-    return (Settings.FileFormat == AFileGenSettings::G4Ascii || Settings.FileFormat == AFileGenSettings::G4Binary);
+    return Settings.isFormatG4();
 }
 
 bool AFileParticleGenerator::IsFormatBinary() const
 {
-    return (Settings.FileFormat == AFileGenSettings::G4Binary);
+    return Settings.isFormatBinary();
 }
 
 #include <algorithm>

@@ -908,8 +908,8 @@ void MainWindow::on_pbParticleGenerationScript_clicked()
     AScriptWindow* sw = new AScriptWindow(sm, true, this);
     sw->setAcceptRejectVisible();
 
-    int NumThreads = 1;
-    AParticleGenerator_SI* gen = new AParticleGenerator_SI(*Detector->MpCollection, Detector->RandGen, 0, &NumThreads);
+    //int NumThreads = 1;
+    AParticleGenerator_SI* gen = new AParticleGenerator_SI(*Detector->MpCollection, Detector->RandGen);//, 0, &NumThreads);
     QVector<AParticleRecord*> GP;
     gen->configure(&GP, 0);
     gen->setObjectName("gen");

@@ -31,7 +31,7 @@ ASimulationManager::ASimulationManager(EventsDataClass & EventsDataHub, Detector
 {
     ParticleSources = new ASourceParticleGenerator(Settings.partSimSet.SourceGenSettings, Detector, *Detector.RandGen);
     FileParticleGenerator = new AFileParticleGenerator(Settings.partSimSet.FileGenSettings, *Detector.MpCollection);
-    ScriptParticleGenerator = new AScriptParticleGenerator(Settings.partSimSet.ScriptGenSettings, *Detector.MpCollection, *Detector.RandGen, 0, &NumberOfWorkers);
+    ScriptParticleGenerator = new AScriptParticleGenerator(Settings.partSimSet.ScriptGenSettings, *Detector.MpCollection, *Detector.RandGen); //, 0, &NumberOfWorkers);
     ScriptParticleGenerator->SetProcessInterval(200);
 
     Runner = new ASimulatorRunner(Detector, EventsDataHub, *this);
@@ -525,16 +525,7 @@ void ASimulationManager::emitProgressSignal()
     emit ProgressReport(PrVal);
 }
 
-void ASimulationManager::removeOldFile(const QString & fileName, const QString & txt)
-{
-    QFile f(fileName);
-    if (f.exists())
-    {
-        //qDebug() << "Removing old file with" << txt << ":" << fileName;
-        bool bOK = f.remove();
-        if (!bOK) qWarning() << "Was unable to remove old file with" << txt << ":" << fileName;
-    }
-}
+
 
 #include "aglobalsettings.h"
 #include <QDir>
@@ -757,129 +748,4 @@ void ASimulationManager::saveExitLog()
 
         fOut.close();
     }
-}
-
-void ASimulationManager::generateG4antsConfigCommon(QJsonObject & json, ASimulator * worker)
-{
-    const int ThreadId = worker->getTreadId();
-    const AG4SimulationSettings & G4SimSet = Settings.genSimSet.G4SimSet;
-    const AMaterialParticleCollection & MpCollection = *Detector.MpCollection;
-
-    json["PhysicsList"] = G4SimSet.PhysicsList;
-
-    json["LogHistory"] = Settings.genSimSet.LogsStatOptions.bParticleTransportLog;
-
-    QJsonArray Parr;
-    const int numPart = MpCollection.countParticles();
-    for (int iP=0; iP<numPart; iP++)
-    {
-        const AParticle * part = MpCollection.getParticle(iP);
-        if (part->isIon())
-        {
-            QJsonArray ar;
-            ar << part->ParticleName << part->ionZ << part->ionA;
-            Parr << ar;
-        }
-        else Parr << part->ParticleName;
-    }
-    json["Particles"] = Parr;
-
-    const QStringList Materials = MpCollection.getListOfMaterialNames();
-    QJsonArray Marr;
-    for (auto & mname : Materials ) Marr << mname;
-    json["Materials"] = Marr;
-
-    QJsonArray SVarr;
-    for (auto & v : G4SimSet.SensitiveVolumes ) SVarr << v;
-    json["SensitiveVolumes"] = SVarr;
-
-    json["GDML"] = G4SimSet.getGdmlFileName();
-
-    QJsonArray arSL;
-    for (auto & key : G4SimSet.StepLimits.keys())
-    {
-        QJsonArray el;
-        el << key << G4SimSet.StepLimits.value(key);
-        arSL.push_back(el);
-    }
-    json["StepLimits"] = arSL;
-
-    QJsonArray Carr;
-    for (auto & c : G4SimSet.Commands ) Carr << c;
-    json["Commands"] = Carr;
-
-    json["GuiMode"] = false;
-
-    json["Seed"] = static_cast<int>(Detector.RandGen->Rndm()*10000000);
-
-    bool bG4Primaries = false;
-    bool bBinaryPrimaries = false;
-    AParticleSourceSimulator * pss = dynamic_cast<AParticleSourceSimulator*>(worker);
-    const AFileParticleGenerator * fpg = dynamic_cast<const AFileParticleGenerator*>(pss->getParticleGun());
-    if (fpg)
-    {
-        bG4Primaries = fpg->IsFormatG4();
-        bBinaryPrimaries = fpg->IsFormatBinary();
-    }
-    json["Primaries_G4ants"] = bG4Primaries;
-    json["Primaries_Binary"] = bBinaryPrimaries;
-
-    QString primFN = G4SimSet.getPrimariesFileName(ThreadId);
-    json["File_Primaries"] = primFN;
-    removeOldFile(primFN, "primaries");
-
-    QString depoFN = G4SimSet.getDepositionFileName(ThreadId);
-    json["File_Deposition"] = depoFN;
-    removeOldFile(depoFN, "deposition");
-
-    QString recFN = G4SimSet.getReceitFileName(ThreadId);
-    json["File_Receipt"] = recFN;
-    removeOldFile(recFN, "receipt");
-
-    QString tracFN = G4SimSet.getTracksFileName(ThreadId);
-    json["File_Tracks"] = tracFN;
-    removeOldFile(tracFN, "tracking");
-
-    QString monFeedbackFN = G4SimSet.getMonitorDataFileName(ThreadId);
-    json["File_Monitors"] = monFeedbackFN;
-    removeOldFile(monFeedbackFN, "monitor data");
-
-    json["BinaryOutput"] = G4SimSet.BinaryOutput;
-    json["Precision"]    = G4SimSet.Precision;
-
-    const ASaveParticlesToFileSettings & ExitSimSet = Settings.genSimSet.ExitParticleSettings;
-    QString exitParticleFN  = G4SimSet.getExitParticleFileName(ThreadId);
-    QJsonObject jsExit;
-        jsExit["Enabled" ]      = ExitSimSet.SaveParticles;
-        jsExit["VolumeName"]    = ExitSimSet.VolumeName;
-        jsExit["FileName"]      = exitParticleFN;
-        jsExit["UseBinary"]     = ExitSimSet.UseBinary;
-        jsExit["UseTimeWindow"] = ExitSimSet.UseTimeWindow;
-        jsExit["TimeFrom"]      = ExitSimSet.TimeFrom;
-        jsExit["TimeTo"]        = ExitSimSet.TimeTo;
-        jsExit["StopTrack"]     = ExitSimSet.StopTrack;
-    json["SaveExitParticles"] = jsExit;
-
-    QJsonArray arMon;
-    const QVector<const AGeoObject*> & MonitorsRecords = Detector.Sandwich->MonitorsRecords;
-    for (int iMon = 0; iMon <  MonitorsRecords.size(); iMon++)
-    {
-        const AGeoObject * obj = MonitorsRecords.at(iMon);
-        const AMonitorConfig * mc = obj->getMonitorConfig();
-        if (mc && mc->PhotonOrParticle == 1)
-        {
-            const QStringList ParticleList = Detector.MpCollection->getListOfParticleNames();
-            const int particleIndex = mc->ParticleIndex;
-            if ( particleIndex >= -1 && particleIndex < ParticleList.size() )
-            {
-                QJsonObject mjs;
-                mc->writeToJson(mjs);
-                mjs["Name"] = obj->Name + "_-_" + QString::number(iMon);
-                mjs["ParticleName"] = ( particleIndex == -1 ? "" : ParticleList.at(particleIndex) );
-                mjs["MonitorIndex"] = iMon;
-                arMon.append(mjs);
-            }
-        }
-    }
-    json["Monitors"] = arMon;
 }

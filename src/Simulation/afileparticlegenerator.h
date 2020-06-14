@@ -43,8 +43,8 @@ public:
     void            SetFileName(const QString &fileName);
     QString         GetFileName() const;
 
-    bool            IsFormatG4() const;
-    bool            IsFormatBinary() const;
+    bool            IsFormatG4() const;      // !*! to remove
+    bool            IsFormatBinary() const;  // !*! to remove
 
     void            InvalidateFile();    //forces the file to be inspected again during next call of Init()
     bool            IsValidated() const;

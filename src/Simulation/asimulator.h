@@ -19,7 +19,7 @@ class TRandom2;
 class ASimulator
 {
 public:
-    ASimulator(ASimulationManager & simMan, int threadID);
+    ASimulator(ASimulationManager & simMan, int threadID, int startSeed);
     virtual ~ASimulator();
 
     virtual int getEventsDone() const = 0;
@@ -34,7 +34,7 @@ public:
     virtual void hardAbort();
 
     const QString getErrorString() const {return ErrorString;}
-    int getTreadId() const {return ID;}
+    int getTreadId() const {return ThreadIndex;}
 
     const AOneEvent * getLastEvent() const {return OneEvent;}
 
@@ -57,7 +57,7 @@ protected:
     int evenDivisionOfLabor(int totalEventCount);
 
     ASimulationManager & simMan;  // !*! to be removed
-    int ID;
+    int ThreadIndex;
 
     const DetectorClass & detector;
     const AGeneralSimSettings & GenSimSettings;

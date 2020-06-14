@@ -52,7 +52,7 @@ public:
     void setMaxThreads(int maxThreads) {MaxThreads = maxThreads;}
     QString loadNodesFromFile(const QString & fileName);
 
-    void generateG4antsConfigCommon(QJsonObject & json, ASimulator * worker);  // !!! G4ants files common
+    //void generateG4antsConfigCommon(QJsonObject & json, ASimulator * worker);  // !!! G4ants files common
 
     const DetectorClass & getDetector() {return Detector;}
     bool setup(const QJsonObject & json, int threads);
@@ -125,7 +125,6 @@ signals:
 private:
     void clearG4data();
     void copyDataFromWorkers();
-    void removeOldFile(const QString &fileName, const QString &txt);
     QString makeLogDir() const;
     void saveParticleLog(const QString & dir) const;
     void saveG4ParticleLog(const QString & dir) const;

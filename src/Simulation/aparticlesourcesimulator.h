@@ -25,7 +25,7 @@ class QFile;
 class AParticleSourceSimulator : public ASimulator
 {
 public:
-    explicit AParticleSourceSimulator(ASimulationManager & simMan, AParticleSimSettings & partSimSet, int ID);
+    explicit AParticleSourceSimulator(ASimulationManager & simMan, AParticleSimSettings & partSimSet, int ThreadIndex, int startSeed);
     ~AParticleSourceSimulator();
 
     int  getEventCount() const override {return eventEnd - eventBegin;}
@@ -65,6 +65,8 @@ private:
     bool readG4DepoEventFromBinFile(bool expectNewEvent = false);
     void releaseInputResources();
     bool prepareWorkerG4File();
+    void generateG4antsConfigCommon(QJsonObject & json);
+    void removeOldFile(const QString &fileName, const QString &txt);
 
 private:
     AParticleSimSettings & partSimSet;  // cannot be const due to FileGenSettings
@@ -101,6 +103,7 @@ private:
     double DepoByNotRegistered = 0;
     double DepoByRegistered = 0;
     std::vector<AEventTrackingRecord *> TrackingHistory;
+    int StartSeed;
 };
 
 #endif // APARTICLESOURCESIMULATOR_H

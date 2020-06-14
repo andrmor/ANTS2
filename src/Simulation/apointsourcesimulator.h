@@ -17,7 +17,7 @@ class TH1D;
 class APointSourceSimulator : public ASimulator
 {
 public:
-    explicit APointSourceSimulator(ASimulationManager & simMan, const APhotonSimSettings & PhotSimSettings, const std::vector<ANodeRecord*> & Nodes, int threadID);
+    explicit APointSourceSimulator(ASimulationManager & simMan, const APhotonSimSettings & PhotSimSettings, const std::vector<ANodeRecord*> & Nodes, int threadID, int startSeed);
     ~APointSourceSimulator();
 
     int  getEventCount() const override;

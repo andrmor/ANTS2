@@ -15,13 +15,12 @@
 #include "TRandom2.h"
 #include "TGeoManager.h" //to move?
 
-ASimulator::ASimulator(ASimulationManager &simMan, int threadID) :
-    simMan(simMan), ID(threadID),
+ASimulator::ASimulator(ASimulationManager &simMan, int threadID, int startSeed) :
+    simMan(simMan), ThreadIndex(threadID),
     detector(simMan.getDetector()), GenSimSettings(simMan.Settings.genSimSet)
 {
-    RandGen = new TRandom2();
-    int seed = detector.RandGen->Rndm() * 10000000;
-    RandGen->SetSeed(seed);
+    RandGen = new TRandom2();    
+    RandGen->SetSeed(startSeed);
 
     dataHub = new EventsDataClass(threadID);
     OneEvent = new AOneEvent(detector.PMs, RandGen, dataHub->SimStat);

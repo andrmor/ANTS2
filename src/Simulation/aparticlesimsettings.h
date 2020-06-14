@@ -54,6 +54,8 @@ public:
     QStringList     ValidatedWithParticles;
 
     QString         getFormatName() const;
+    bool            isFormatG4() const;
+    bool            isFormatBinary() const;
 
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);

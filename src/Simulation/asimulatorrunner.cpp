@@ -84,8 +84,9 @@ bool ASimulatorRunner::setup(int threadCount, bool bPhotonSourceSim)
     for (int iWorker = 0; iWorker < threadCount; iWorker++)
     {
         ASimulator *worker;
-        if (bPhotonSourceSim) worker = new APointSourceSimulator(simMan, simMan.Settings.photSimSet, simMan.Nodes, iWorker);
-        else                  worker = new AParticleSourceSimulator(simMan, simMan.Settings.partSimSet, iWorker);
+        int seed = detector.RandGen->Rndm() * 10000000;
+        if (bPhotonSourceSim) worker = new APointSourceSimulator(simMan, simMan.Settings.photSimSet, simMan.Nodes, iWorker, seed);
+        else                  worker = new AParticleSourceSimulator(simMan, simMan.Settings.partSimSet, iWorker, seed);
 
         bool bOK = worker->setup();
         if (!bOK)

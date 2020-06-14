@@ -153,7 +153,7 @@ bool ASimulationManager::prepareParticleMode()
     if (Settings.partSimSet.GenerationMode == AParticleSimSettings::File)
     {
         Settings.partSimSet.FileGenSettings.ValidationMode = (G4SimSet.bTrackParticles ? AFileGenSettings::Relaxed : AFileGenSettings::Strict);
-        bool bOK = FileParticleGenerator->Init();
+        bool bOK = FileParticleGenerator->InitWithCheck(Settings.partSimSet.FileGenSettings, false);
         FileParticleGenerator->ReleaseResources();
         if (!bOK)
         {

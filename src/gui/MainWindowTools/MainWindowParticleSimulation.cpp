@@ -790,41 +790,40 @@ void MainWindow::on_pbGenerateFromFile_Change_clicked()
 
 void MainWindow::on_leGenerateFromFile_FileName_editingFinished()
 {
-    AFileParticleGenerator* pg = SimulationManager->FileParticleGenerator;
-
     QString newName = ui->leGenerateFromFile_FileName->text();
-    if (newName == pg->GetFileName()) return;
+    if (newName == SimulationManager->Settings.partSimSet.FileGenSettings.FileName) return;
 
-    pg->SetFileName(newName);
+    SimulationManager->Settings.partSimSet.FileGenSettings.FileName = newName;
+    SimulationManager->Settings.partSimSet.FileGenSettings.invalidateFile();
     on_pbUpdateSimConfig_clicked();
 }
 
 void MainWindow::on_pbGenerateFromFile_Check_clicked()
 {
-    AFileParticleGenerator* pg = SimulationManager->FileParticleGenerator;
+    AFileGenSettings & FileGenSettings = SimulationManager->Settings.partSimSet.FileGenSettings;
 
-    pg->bCollectExpandedStatistics = ui->cbFileCollectStatistics->isChecked();
-    //pg->SetValidationMode(ui->cbGeant4ParticleTracking->isChecked() ? AFileParticleGenerator::Relaxed : AFileParticleGenerator::Strict);
-    SimulationManager->Settings.partSimSet.FileGenSettings.ValidationMode = (ui->cbGeant4ParticleTracking->isChecked() ? AFileGenSettings::Relaxed : AFileGenSettings::Strict);
+    FileGenSettings.ValidationMode = (ui->cbGeant4ParticleTracking->isChecked() ? AFileGenSettings::Relaxed : AFileGenSettings::Strict);
+
+    AFileParticleGenerator* pg = SimulationManager->FileParticleGenerator;
     WindowNavigator->BusyOn();  // -->
-    bool bOK = pg->Init();
+    bool bOK = pg->InitWithCheck(FileGenSettings, ui->cbFileCollectStatistics->isChecked());
     WindowNavigator->BusyOff(); // <--
 
     if (!bOK) message(pg->GetErrorString(), this);
-
     updateFileParticleGeneratorGui();
 }
 
 void MainWindow::updateFileParticleGeneratorGui()
 {
-    AFileParticleGenerator* pg = SimulationManager->FileParticleGenerator;
+    const AFileGenSettings & FileGenSettings = SimulationManager->Settings.partSimSet.FileGenSettings;
+    const QString & FileName = FileGenSettings.FileName;
 
-    ui->leGenerateFromFile_FileName->setText(pg->GetFileName());
+    ui->leGenerateFromFile_FileName->setText(FileName);
     ui->lwFileStatistics->clear();
     ui->lwFileStatistics->setEnabled(false);
     qApp->processEvents();
 
-    QFileInfo fi(pg->GetFileName());
+    QFileInfo fi(FileName);
     if (!fi.exists())
     {
         ui->labGenerateFromFile_info->setText("File not found");
@@ -832,17 +831,16 @@ void MainWindow::updateFileParticleGeneratorGui()
     }
 
     QString s = "Format: ";
-    //s += pg->GetFormatName();
-    s += SimulationManager->Settings.partSimSet.FileGenSettings.getFormatName();
+    s += FileGenSettings.getFormatName();
 
-    if (pg->IsValidated())
+    if (FileGenSettings.isValidated())
     {
-        s += QString("  Events: %1").arg(pg->Settings.NumEventsInFile);
-        if (pg->statNumEmptyEventsInFile > 0) s += QString(", %1 empty").arg(pg->statNumEmptyEventsInFile);
-        if (pg->statNumMultipleEvents    > 0) s += QString(", %1 multiple").arg(pg->statNumMultipleEvents);
+        s += QString("  Events: %1").arg(FileGenSettings.NumEventsInFile);
+        if (FileGenSettings.statNumEmptyEventsInFile > 0) s += QString(", %1 empty").arg(FileGenSettings.statNumEmptyEventsInFile);
+        if (FileGenSettings.statNumMultipleEvents    > 0) s += QString(", %1 multiple").arg(FileGenSettings.statNumMultipleEvents);
 
-        ui->lwFileStatistics->setEnabled(pg->ParticleStat.size() > 0);
-        for (AParticleInFileStatRecord & rec : pg->ParticleStat)
+        ui->lwFileStatistics->setEnabled(FileGenSettings.ParticleStat.size() > 0);
+        for (const AParticleInFileStatRecord & rec : FileGenSettings.ParticleStat)
         {
             ui->lwFileStatistics->addItem( QString("%1 \t# %2 \t <E>: %4 keV")
                                            .arg(rec.NameQt)
@@ -871,10 +869,9 @@ void MainWindow::on_lwFileStatistics_customContextMenuRequested(const QPoint &po
     {
         if (selectedItem->iconText() == "Copy all to clipboard")
          {
-            AFileParticleGenerator* pg = SimulationManager->FileParticleGenerator;
             QString txt;
 
-            for (AParticleInFileStatRecord & rec : pg->ParticleStat)
+            for (AParticleInFileStatRecord & rec : SimulationManager->Settings.partSimSet.FileGenSettings.ParticleStat)
             {
                 txt += QString("%1 \t# %2 \t <E>: %4 keV\n")
                                                .arg(rec.NameQt)

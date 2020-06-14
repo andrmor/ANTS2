@@ -16,79 +16,49 @@ class AMaterialParticleCollection;
 class QTextStream;
 class AFilePGEngine;
 
-struct AParticleInFileStatRecord
-{
-    AParticleInFileStatRecord(const std::string & NameStd, double Energy);
-    AParticleInFileStatRecord(const QString     & NameQt,  double Energy);
-    AParticleInFileStatRecord() {}
-
-    std::string NameStd;
-    QString     NameQt;
-    int         Entries = 0;
-    double      Energy  = 0;
-};
-
 class AFileParticleGenerator : public AParticleGun
 {
 public:
-    AFileParticleGenerator(AFileGenSettings & Settings, const AMaterialParticleCollection & MpCollection);
+    AFileParticleGenerator(const AFileGenSettings &Settings, const AMaterialParticleCollection & MpCollection);
     virtual         ~AFileParticleGenerator();
 
-    bool            Init() override;               //has to be called before first use of GenerateEvent()
+    bool            Init() override;  // cannot modify settings, so validation is not possible with this method
+    bool            InitWithCheck(AFileGenSettings & settings, bool bExpanded);  // need to be called if validation is needed!
+
     void            ReleaseResources() override;
     bool            GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles, int iEvent) override;
 
     void            SetStartEvent(int startEvent) override;
 
-    void            SetFileName(const QString &fileName);
-    QString         GetFileName() const;
-
-    bool            IsFormatG4() const;      // !*! to remove
-    bool            IsFormatBinary() const;  // !*! to remove
-
-    void            InvalidateFile();    //forces the file to be inspected again during next call of Init()
-    bool            IsValidated() const;
-    bool            IsValidParticle(int ParticleId) const;                // result depends on current ValidationType
-    bool            IsValidParticle(const QString & ParticleName) const;  // result depends on current ValidationType
-
     bool            generateG4File(int eventBegin, int eventEnd, const QString & FileName);
 
-    void            setParticleMustBeDefined(bool flag);
-
 public:
-    int          statNumEmptyEventsInFile = 0;
-    int          statNumMultipleEvents    = 0;
-
-    bool         bCollectExpandedStatistics = false;
-    std::vector<AParticleInFileStatRecord> ParticleStat;
-
-    AFileGenSettings & Settings;
+    const AFileGenSettings & ConstSettings;
     const AMaterialParticleCollection & MpCollection;
 
 private:
     AFilePGEngine * Engine = nullptr;
 
-    void clearFileData();
-    bool DetermineFileFormat();
-    bool isFileG4Binary();
-    bool isFileG4Ascii();
-    bool isFileSimpleAscii();
+    bool determineFileFormat(AFileGenSettings & settings);
+    bool isFileG4Binary(AFileGenSettings & settings);
+    bool isFileG4Ascii(AFileGenSettings & settings);
+    bool isFileSimpleAscii(AFileGenSettings & settings);
 };
 
 class AFilePGEngine
 {
 public:
-    AFilePGEngine(AFileParticleGenerator * fpg) : FPG(fpg), FileName(fpg->GetFileName()) {}
+    AFilePGEngine(AFileParticleGenerator * fpg) : FPG(fpg) {}
     virtual ~AFilePGEngine(){}
 
-    virtual bool doInit(bool bNeedInspect, bool bDetailedInspection) = 0;
+    virtual bool doInit() = 0;
+    virtual bool doInitAndInspect(AFileGenSettings & settings, bool bDetailedInspection) = 0;
     virtual bool doGenerateEvent(QVector<AParticleRecord*> & GeneratedParticles) = 0;
     virtual bool doSetStartEvent(int startEvent) = 0;
     virtual bool doGenerateG4File(int eventBegin, int eventEnd, const QString & FileName) = 0;
 
 protected:
     AFileParticleGenerator * FPG = nullptr;
-    QString FileName;
 
     const QRegularExpression rx = QRegularExpression("(\\ |\\,|\\:|\\t)");  // separators are: ' ' or ',' or ':' or '\t'
 };
@@ -99,7 +69,8 @@ public:
     AFilePGEngineSimplistic(AFileParticleGenerator * fpg) : AFilePGEngine(fpg) {}
     ~AFilePGEngineSimplistic();
 
-    bool doInit(bool bNeedInspect, bool bDetailedInspection) override;
+    bool doInit() override;
+    bool doInitAndInspect(AFileGenSettings & settings, bool bDetailedInspection) override;
     bool doGenerateEvent(QVector<AParticleRecord*> & GeneratedParticles) override;
     bool doSetStartEvent(int startEvent) override;
     bool doGenerateG4File(int eventBegin, int eventEnd, const QString & FileName) override; // not in use! SimManager uses mainstream approach to generate events
@@ -115,7 +86,8 @@ public:
     AFilePGEngineG4antsTxt(AFileParticleGenerator * fpg) : AFilePGEngine(fpg) {}
     ~AFilePGEngineG4antsTxt();
 
-    bool doInit(bool bNeedInspect, bool bDetailedInspection) override;
+    bool doInit() override;
+    bool doInitAndInspect(AFileGenSettings & settings, bool bDetailedInspection) override;
     bool doGenerateEvent(QVector<AParticleRecord*> & GeneratedParticles) override;
     bool doSetStartEvent(int startEvent) override;
     bool doGenerateG4File(int eventBegin, int eventEnd, const QString & FileName) override;
@@ -130,7 +102,8 @@ public:
     AFilePGEngineG4antsBin(AFileParticleGenerator * fpg) : AFilePGEngine(fpg) {}
     ~AFilePGEngineG4antsBin();
 
-    bool doInit(bool bNeedInspect, bool bDetailedInspection) override;
+    bool doInit() override;
+    bool doInitAndInspect(AFileGenSettings & settings, bool bDetailedInspection) override;
     bool doGenerateEvent(QVector<AParticleRecord*> & GeneratedParticles) override;
     bool doSetStartEvent(int startEvent) override;
     bool doGenerateG4File(int eventBegin, int eventEnd, const QString & FileName) override;

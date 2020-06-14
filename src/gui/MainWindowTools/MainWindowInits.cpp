@@ -77,7 +77,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
     setWindowTitle("ANTS2_v"+mav+"."+miv);
 
     QString epff = GlobSet.ExamplesDir + "/ExampleParticlesFromFile.dat";
-    SimulationManager->FileParticleGenerator->SetFileName(epff);
+    SimulationManager->Settings.partSimSet.FileGenSettings.FileName = epff;
     updateFileParticleGeneratorGui();
 
     QString SPGtext = "gen.AddParticle(0, 120,    math.gauss(0, 25),  math.gauss(0, 25), -20,   0,0,1)\n"

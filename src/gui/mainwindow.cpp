@@ -4445,10 +4445,12 @@ void MainWindow::on_pbG4Settings_clicked()
 #include "afileparticlegenerator.h"
 void MainWindow::on_pbLoadExampleFileFromFileGen_clicked()
 {
-    QString epff = GlobSet.ExamplesDir + "/ExampleParticlesFromFile.dat";
-    SimulationManager->FileParticleGenerator->SetFileName(epff);
+    const QString fn = GlobSet.ExamplesDir + "/ExampleParticlesFromFile.dat";
+    SimulationManager->Settings.partSimSet.FileGenSettings.FileName = fn;
+    SimulationManager->Settings.partSimSet.FileGenSettings.invalidateFile();
+    updateFileParticleGeneratorGui();
+    on_pbUpdateSimConfig_clicked();
     on_pbGenerateFromFile_Check_clicked();
-    //updateFileParticleGeneratorGui();
 }
 
 void MainWindow::on_pbNodesFromFileHelp_clicked()
@@ -4749,13 +4751,17 @@ void MainWindow::on_pbParticlesToFile_customContextMenuRequested(const QPoint &)
 #include <fstream>
 void MainWindow::on_pbFilePreview_clicked()
 {
+    AFileGenSettings & FileGenSettings = SimulationManager->Settings.partSimSet.FileGenSettings;
     AFileParticleGenerator * fg = SimulationManager->FileParticleGenerator;
-    fg->Init();
 
-    const QString FileName = fg->GetFileName();
+    WindowNavigator->BusyOn();  // -->
+    fg->InitWithCheck(FileGenSettings, false);
+    WindowNavigator->BusyOff();  // <--
+
+    const QString & FileName = FileGenSettings.FileName;
     int iCounter = 100;
     QString txt;
-    if (fg->IsFormatBinary())
+    if (FileGenSettings.isFormatBinary())
     {
         std::ifstream inB(FileName.toLatin1().data(), std::ios::in | std::ios::binary);
         if (!inB.is_open())

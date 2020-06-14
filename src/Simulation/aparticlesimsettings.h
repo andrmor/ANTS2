@@ -5,6 +5,8 @@
 #include <QVector>
 #include <QDateTime>
 
+#include <vector>
+
 class QJsonObject;
 class AParticleSourceRecord;
 class ASourceParticleGenerator;
@@ -39,6 +41,18 @@ private:
     double TotalActivity = 0;
 };
 
+struct AParticleInFileStatRecord
+{
+    AParticleInFileStatRecord(const std::string & NameStd, double Energy);
+    AParticleInFileStatRecord(const QString     & NameQt,  double Energy);
+    AParticleInFileStatRecord() {}
+
+    std::string NameStd;
+    QString     NameQt;
+    int         Entries = 0;
+    double      Energy  = 0;
+};
+
 class AFileGenSettings
 {
 public:
@@ -53,14 +67,28 @@ public:
     QDateTime       FileLastModified;
     QStringList     ValidatedWithParticles;
 
+    bool            isValidated() const;
+    void            invalidateFile();    //forces the file to be inspected again during next call of Init()
+
     QString         getFormatName() const;
     bool            isFormatG4() const;
     bool            isFormatBinary() const;
 
-    void writeToJson(QJsonObject & json) const;
-    void readFromJson(const QJsonObject & json);
+    void            writeToJson(QJsonObject & json) const;
+    void            readFromJson(const QJsonObject & json);
 
-    void clear();
+    void            clear();
+    void            clearStatistics();
+
+    bool            isValidParticle(int ParticleId) const;                // result depends on current ValidationType
+    bool            isValidParticle(const QString & ParticleName) const;  // result depends on current ValidationType
+
+    //runtime
+    int             statNumEmptyEventsInFile = 0;
+    int             statNumMultipleEvents    = 0;
+    std::vector<AParticleInFileStatRecord> ParticleStat;
+
+private:
 };
 
 class AScriptGenSettings

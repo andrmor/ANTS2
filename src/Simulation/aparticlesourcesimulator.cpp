@@ -156,10 +156,11 @@ void AParticleSourceSimulator::simulate()
     {
         //mode "from G4ants file" requires special treatment
         AFileParticleGenerator * fpg = dynamic_cast<AFileParticleGenerator*>(ParticleGun);  // TODO !*! change to settings directly!
-        if (fpg && fpg->IsFormatG4())
+        //if (fpg && fpg->IsFormatG4())
+        if (fpg && partSimSet.FileGenSettings.isFormatG4())
         {
             bool bOK = prepareWorkerG4File();
-            //qDebug() << "Prepared file for worker #" << ID << "result:"<<bOK;
+            //qDebug() << "Prepared file for worker #" << ThreadIndex << "result:"<<bOK;
             fpg->ReleaseResources();
 
             if (!bOK)

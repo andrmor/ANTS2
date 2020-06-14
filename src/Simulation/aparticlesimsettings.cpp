@@ -1,8 +1,11 @@
 #include "aparticlesimsettings.h"
 #include "ajsontools.h"
 #include "aparticlesourcerecord.h"
+#include "aglobalsettings.h"
+#include "amaterialparticlecolection.h"
 
 #include <QDebug>
+#include <QFileInfo>
 
 void AParticleSimSettings::clearSettings()
 {
@@ -146,6 +149,46 @@ void AScriptGenSettings::clear()
     Script.clear();
 }
 
+bool AFileGenSettings::isValidated() const
+{
+    if (FileFormat == Undefined || FileFormat == BadFormat) return false;
+
+    switch (ValidationMode)
+    {
+    case None:
+        return false;
+    case Relaxed:
+        break;         // not enforcing anything
+    case Strict:
+    {
+        if (LastValidationMode != Strict) return false;
+        QSet<QString> ValidatedList = QSet<QString>::fromList(ValidatedWithParticles);
+        AMaterialParticleCollection * MpCollection = AGlobalSettings::getInstance().getMpCollection();
+        QSet<QString> CurrentList = QSet<QString>::fromList(MpCollection->getListOfParticleNames());
+        if ( !CurrentList.contains(ValidatedList) ) return false;
+        break;
+    }
+    default: qWarning() << "Unknown validation mode!";
+    }
+
+    QFileInfo fi(FileName);
+    if (!fi.exists()) return false;
+    if (FileLastModified != fi.lastModified()) return false;
+
+    return true;
+}
+
+void AFileGenSettings::invalidateFile()
+{
+    FileFormat         = Undefined;
+    NumEventsInFile    = 0;
+    ValidationMode     = None;
+    LastValidationMode = None;
+    FileLastModified   = QDateTime();
+    ValidatedWithParticles.clear();
+    clearStatistics();
+}
+
 QString AFileGenSettings::getFormatName() const
 {
     switch (FileFormat)
@@ -222,9 +265,36 @@ void AFileGenSettings::clear()
     LastValidationMode = None;
     FileLastModified   = QDateTime();
     ValidatedWithParticles.clear();
+
+    clearStatistics();
 }
 
-#include "aglobalsettings.h"
+bool AFileGenSettings::isValidParticle(int ParticleId) const
+{
+    if (ValidationMode != Strict) return true;
+
+    AMaterialParticleCollection * MpCollection = AGlobalSettings::getInstance().getMpCollection();
+    return (ParticleId >= 0 && ParticleId < MpCollection->countParticles());
+}
+
+bool AFileGenSettings::isValidParticle(const QString & ParticleName) const
+{
+    if (ValidationMode != Strict) return true;
+
+    AMaterialParticleCollection * MpCollection = AGlobalSettings::getInstance().getMpCollection();
+    const int ParticleId = MpCollection->getParticleId(ParticleName);
+    return (ParticleId != -1);
+}
+
+void AFileGenSettings::clearStatistics()
+{
+    NumEventsInFile          = 0;
+    statNumEmptyEventsInFile = 0;
+    statNumMultipleEvents    = 0;
+
+    ParticleStat.clear();
+}
+
 void ASourceGenSettings::writeToJson(QJsonObject &json) const
 {
     AMaterialParticleCollection * MpCollection = AGlobalSettings::getInstance().getMpCollection();
@@ -239,7 +309,6 @@ void ASourceGenSettings::writeToJson(QJsonObject &json) const
     json["ParticleSources"] = ja;
 }
 
-#include "amaterialparticlecolection.h"
 void ASourceGenSettings::readFromJson(const QJsonObject &  json)
 {
     clear();

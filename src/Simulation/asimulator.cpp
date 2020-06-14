@@ -1,4 +1,5 @@
 #include "asimulator.h"
+#include "asimsettings.h"
 #include "detectorclass.h"
 #include "asimulationmanager.h"
 #include "atrackrecords.h"
@@ -15,14 +16,15 @@
 #include "TRandom2.h"
 #include "TGeoManager.h" //to move?
 
-ASimulator::ASimulator(ASimulationManager &simMan, int threadID, int startSeed) :
-    simMan(simMan), ThreadIndex(threadID),
-    detector(simMan.getDetector()), GenSimSettings(simMan.Settings.genSimSet)
+ASimulator::ASimulator(const ASimSettings & simSet, const DetectorClass & detector, int threadIndex, int startSeed) :
+    SimSet(simSet), GenSimSettings(simSet.genSimSet),
+    detector(detector),
+    ThreadIndex(threadIndex)
 {
     RandGen = new TRandom2();    
     RandGen->SetSeed(startSeed);
 
-    dataHub = new EventsDataClass(threadID);
+    dataHub = new EventsDataClass(threadIndex);
     OneEvent = new AOneEvent(detector.PMs, RandGen, dataHub->SimStat);
     photonGenerator = new Photon_Generator(detector, *RandGen);
     photonTracker = new APhotonTracer(detector.GeoManager, RandGen, detector.MpCollection, detector.PMs, &detector.Sandwich->GridRecords);

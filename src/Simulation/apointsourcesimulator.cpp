@@ -25,9 +25,9 @@
 #include "TGeoManager.h"
 #include "TGeoNavigator.h"
 
-APointSourceSimulator::APointSourceSimulator(ASimulationManager & simMan, const APhotonSimSettings & PhotSimSettings, const std::vector<ANodeRecord*> & Nodes, int threadID, int startSeed) :
-    ASimulator(simMan, threadID, startSeed),
-    PhotSimSettings(PhotSimSettings),
+APointSourceSimulator::APointSourceSimulator(const ASimSettings & SimSet, const DetectorClass &detector, const std::vector<ANodeRecord*> & Nodes, int threadID, int startSeed) :
+    ASimulator(SimSet, detector, threadID, startSeed),
+    PhotSimSettings(SimSet.photSimSet),
     Nodes(Nodes) {}
 
 APointSourceSimulator::~APointSourceSimulator()

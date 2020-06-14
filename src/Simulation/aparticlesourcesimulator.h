@@ -2,14 +2,14 @@
 #define APARTICLESOURCESIMULATOR_H
 
 #include "asimulator.h"
-#include "aparticlesimsettings.h"
+
 #include <vector>
 
 #include <QVector>
-
 #include <QObject>
 #include <QProcess>
 
+class AParticleSimSettings;
 class AEnergyDepositionCell;
 class AParticleRecord;
 class AParticleTracker;// PrimaryParticleTracker;
@@ -25,7 +25,7 @@ class QFile;
 class AParticleSourceSimulator : public ASimulator
 {
 public:
-    explicit AParticleSourceSimulator(ASimulationManager & simMan, AParticleSimSettings & partSimSet, int ThreadIndex, int startSeed);
+    explicit AParticleSourceSimulator(const ASimSettings & SimSet, const DetectorClass & detector, int threadIndex, int startSeed, AParticleSimSettings & partSimSet);
     ~AParticleSourceSimulator();
 
     int  getEventCount() const override {return eventEnd - eventBegin;}
@@ -38,8 +38,9 @@ public:
     void simulate() override;
 
     void appendToDataHub(EventsDataClass * dataHub) override;
-    void mergeData() override;
     void hardAbort() override;
+
+    void mergeData(QSet<QString> & SeenNonReg, double & DepoNotReg, double & DepoReg, std::vector<AEventTrackingRecord *> & TrHistory);
 
     const QVector<AEnergyDepositionCell*> & getEnergyVector() const { return EnergyVector; }  // !*! to change
     void ClearEnergyVectorButKeepObjects() {EnergyVector.resize(0);} //to avoid clear of objects stored in the vector  // !*! to change
@@ -69,7 +70,7 @@ private:
     void removeOldFile(const QString &fileName, const QString &txt);
 
 private:
-    AParticleSimSettings & partSimSet;  // cannot be const due to FileGenSettings
+    AParticleSimSettings & partSimSet;  // !*! TODO refactor, now cannot be const due to FileGenSettings
 
     //local objects
     AParticleTracker * ParticleTracker = nullptr;

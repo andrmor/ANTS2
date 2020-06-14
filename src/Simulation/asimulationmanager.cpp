@@ -360,7 +360,9 @@ void ASimulationManager::copyDataFromWorkers()
     for (int i = 0; i < workers.count(); i++)
     {
         workers[i]->appendToDataHub(&EventsDataHub); //EventsDataHub should be already cleared in setup
-        workers[i]->mergeData();
+
+        AParticleSourceSimulator * pss = dynamic_cast<AParticleSourceSimulator *>(workers[i]);
+        if (pss) pss->mergeData(SeenNonRegisteredParticles, DepoByNotRegistered, DepoByRegistered, TrackingHistory);
 
         QString err = workers.at(i)->getErrorString();
         if (!err.isEmpty()) ErrorString += QString("Thread %1 reported error: %2\n").arg(i).arg(err);

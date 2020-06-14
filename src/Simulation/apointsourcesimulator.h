@@ -17,7 +17,7 @@ class TH1D;
 class APointSourceSimulator : public ASimulator
 {
 public:
-    explicit APointSourceSimulator(ASimulationManager & simMan, const APhotonSimSettings & PhotSimSettings, const std::vector<ANodeRecord*> & Nodes, int threadID, int startSeed);
+    explicit APointSourceSimulator(const ASimSettings & SimSet, const DetectorClass & detector, const std::vector<ANodeRecord*> & Nodes, int threadID, int startSeed);
     ~APointSourceSimulator();
 
     int  getEventCount() const override;
@@ -26,7 +26,6 @@ public:
     bool setup() override;   // json already not needed, wait for fix of the particleSim then remove
     void simulate() override;
     void appendToDataHub(EventsDataClass * dataHub) override;
-    void mergeData() override {}
 
 private:
     bool simulateSingle();

@@ -5,8 +5,8 @@
 #include <QSet>
 #include <vector>
 
+class ASimSettings;
 class DetectorClass;
-class ASimulationManager;
 class TrackHolderClass;
 class AOneEvent;
 class AGeneralSimSettings;
@@ -19,7 +19,7 @@ class TRandom2;
 class ASimulator
 {
 public:
-    ASimulator(ASimulationManager & simMan, int threadID, int startSeed);
+    ASimulator(const ASimSettings & simSet, const DetectorClass & detector, int threadIndex, int startSeed);
     virtual ~ASimulator();
 
     virtual int getEventsDone() const = 0;
@@ -30,7 +30,6 @@ public:
     virtual bool finalizeConfig() {return true;} // called after setup and divide work
     virtual void simulate() = 0;
     virtual void appendToDataHub(EventsDataClass * dataHub);
-    virtual void mergeData() = 0;
     virtual void hardAbort();
 
     const QString getErrorString() const {return ErrorString;}
@@ -56,11 +55,10 @@ protected:
 
     int evenDivisionOfLabor(int totalEventCount);
 
-    ASimulationManager & simMan;  // !*! to be removed
-    int ThreadIndex;
-
-    const DetectorClass & detector;
+    const ASimSettings        & SimSet;
     const AGeneralSimSettings & GenSimSettings;
+    const DetectorClass       & detector;
+    int                         ThreadIndex;
 
     // local resources
     TRandom2         * RandGen  = nullptr;

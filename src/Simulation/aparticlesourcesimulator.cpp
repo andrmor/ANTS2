@@ -32,12 +32,13 @@
 #include "TRandom2.h"
 #include "TGeoManager.h"
 
-AParticleSourceSimulator::AParticleSourceSimulator(ASimulationManager & simMan, AParticleSimSettings &partSimSet, int ID, int startSeed) :
-    ASimulator(simMan, ID, startSeed), partSimSet(partSimSet), StartSeed(startSeed)
+AParticleSourceSimulator::AParticleSourceSimulator(const ASimSettings & SimSet, const DetectorClass &detector, int threadIndex, int startSeed, AParticleSimSettings &partSimSet) :
+    ASimulator(SimSet, detector, threadIndex, startSeed),
+    partSimSet(partSimSet), StartSeed(startSeed)
 {
-    detector.MpCollection->updateRandomGenForThread(ID, RandGen);
+    detector.MpCollection->updateRandomGenForThread(threadIndex, RandGen);
 
-    ParticleTracker = new AParticleTracker(*RandGen, *detector.MpCollection, ParticleStack, EnergyVector, TrackingHistory, *dataHub->SimStat, ID);
+    ParticleTracker = new AParticleTracker(*RandGen, *detector.MpCollection, ParticleStack, EnergyVector, TrackingHistory, *dataHub->SimStat, threadIndex);
     S1generator = new S1_Generator(photonGenerator, photonTracker, detector.MpCollection, &EnergyVector, &dataHub->GeneratedPhotonsHistory, RandGen);
     S2generator = new S2_Generator(photonGenerator, photonTracker, &EnergyVector, RandGen, detector.GeoManager, detector.MpCollection, &dataHub->GeneratedPhotonsHistory);
 }
@@ -287,19 +288,19 @@ void AParticleSourceSimulator::appendToDataHub(EventsDataClass *dataHub)
     dataHub->ScanNumberOfRuns = 1;
 }
 
-void AParticleSourceSimulator::mergeData()
+void AParticleSourceSimulator::mergeData(QSet<QString> & SeenNonReg, double & DepoNotReg, double & DepoReg, std::vector<AEventTrackingRecord *> & TrHistory)
 {
-    simMan.SeenNonRegisteredParticles += SeenNonRegisteredParticles;
+    SeenNonReg += SeenNonRegisteredParticles;
     SeenNonRegisteredParticles.clear();
 
-    simMan.DepoByNotRegistered += DepoByNotRegistered;
+    DepoNotReg += DepoByNotRegistered;
     DepoByNotRegistered = 0;
 
-    simMan.DepoByRegistered += DepoByRegistered;
+    DepoReg += DepoByRegistered;
     DepoByRegistered = 0;
 
-    simMan.TrackingHistory.insert(
-          simMan.TrackingHistory.end(),
+    TrHistory.insert(
+          TrHistory.end(),
           std::make_move_iterator(TrackingHistory.begin()),
           std::make_move_iterator(TrackingHistory.end())
         );

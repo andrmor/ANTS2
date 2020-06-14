@@ -25,7 +25,7 @@ class QFile;
 class AParticleSourceSimulator : public ASimulator
 {
 public:
-    explicit AParticleSourceSimulator(const ASimSettings & SimSet, const DetectorClass & detector, int threadIndex, int startSeed, AParticleSimSettings & partSimSet);
+    explicit AParticleSourceSimulator(const ASimSettings & SimSet, const DetectorClass & detector, int threadIndex, int startSeed);
     ~AParticleSourceSimulator();
 
     int  getEventCount() const override {return eventEnd - eventBegin;}
@@ -44,7 +44,7 @@ public:
 
     const QVector<AEnergyDepositionCell*> & getEnergyVector() const { return EnergyVector; }  // !*! to change
     void ClearEnergyVectorButKeepObjects() {EnergyVector.resize(0);} //to avoid clear of objects stored in the vector  // !*! to change
-    const AParticleGun * getParticleGun() const {return ParticleGun;}  // !*! to remove
+    //const AParticleGun * getParticleGun() const {return ParticleGun;}  // !*! to remove
 
 protected:
     void updateMaxTracks(int maxPhotonTracks, int maxParticleTracks) override;
@@ -70,7 +70,6 @@ private:
     void removeOldFile(const QString &fileName, const QString &txt);
 
 private:
-    AParticleSimSettings & partSimSet;  // !*! TODO refactor, now cannot be const due to FileGenSettings
     const AParticleSimSettings & PartSimSet;
 
     //local objects

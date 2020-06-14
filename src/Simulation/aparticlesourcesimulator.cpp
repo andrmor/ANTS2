@@ -32,9 +32,9 @@
 #include "TRandom2.h"
 #include "TGeoManager.h"
 
-AParticleSourceSimulator::AParticleSourceSimulator(const ASimSettings & SimSet, const DetectorClass &detector, int threadIndex, int startSeed, AParticleSimSettings &partSimSet) :
+AParticleSourceSimulator::AParticleSourceSimulator(const ASimSettings & SimSet, const DetectorClass &detector, int threadIndex, int startSeed) :
     ASimulator(SimSet, detector, threadIndex, startSeed),
-    partSimSet(partSimSet), PartSimSet(SimSet.partSimSet),
+    PartSimSet(SimSet.partSimSet),
     StartSeed(startSeed)
 {
     detector.MpCollection->updateRandomGenForThread(threadIndex, RandGen);
@@ -77,8 +77,7 @@ bool AParticleSourceSimulator::setup()
         ParticleGun = new ASourceParticleGenerator(PartSimSet.SourceGenSettings, detector, *RandGen);
         break;
     case AParticleSimSettings::File :
-        ParticleGun = new AFileParticleGenerator(partSimSet.FileGenSettings, *detector.MpCollection);
-        partSimSet.FileGenSettings.ValidationMode = (GenSimSettings.G4SimSet.bTrackParticles ? AFileGenSettings::Relaxed : AFileGenSettings::Strict);
+        ParticleGun = new AFileParticleGenerator(PartSimSet.FileGenSettings, *detector.MpCollection);
         break;
     case AParticleSimSettings::Script :
         ParticleGun = new AScriptParticleGenerator(PartSimSet.ScriptGenSettings, *detector.MpCollection, *RandGen); //, ID, &simMan.NumberOfWorkers);
@@ -157,7 +156,7 @@ void AParticleSourceSimulator::simulate()
         //mode "from G4ants file" requires special treatment
         AFileParticleGenerator * fpg = dynamic_cast<AFileParticleGenerator*>(ParticleGun);  // TODO !*! change to settings directly!
         //if (fpg && fpg->IsFormatG4())
-        if (fpg && partSimSet.FileGenSettings.isFormatG4())
+        if (fpg && PartSimSet.FileGenSettings.isFormatG4())
         {
             bool bOK = prepareWorkerG4File();
             //qDebug() << "Prepared file for worker #" << ThreadIndex << "result:"<<bOK;

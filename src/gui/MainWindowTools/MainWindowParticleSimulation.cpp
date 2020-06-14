@@ -283,9 +283,16 @@ void MainWindow::on_pbGunTest_clicked()
     AParticleGun* pg;
     switch (ui->cobParticleGenerationMode->currentIndex())
     {
-    case 0: pg = SimulationManager->ParticleSources; break;
-    case 1: pg = SimulationManager->FileParticleGenerator; break;
-    case 2: pg = SimulationManager->ScriptParticleGenerator; break;
+    case 0:
+        pg = SimulationManager->ParticleSources;
+        break;
+    case 1:
+        pg = SimulationManager->FileParticleGenerator;
+        SimulationManager->FileParticleGenerator->InitWithCheck(SimulationManager->Settings.partSimSet.FileGenSettings, false);
+        break;
+    case 2:
+        pg = SimulationManager->ScriptParticleGenerator;
+        break;
     default:
         message("This generation mode is not implemented!", this);
         WindowNavigator->BusyOff(); // <--

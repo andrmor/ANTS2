@@ -34,7 +34,8 @@
 
 AParticleSourceSimulator::AParticleSourceSimulator(const ASimSettings & SimSet, const DetectorClass &detector, int threadIndex, int startSeed, AParticleSimSettings &partSimSet) :
     ASimulator(SimSet, detector, threadIndex, startSeed),
-    partSimSet(partSimSet), StartSeed(startSeed)
+    partSimSet(partSimSet), PartSimSet(SimSet.partSimSet),
+    StartSeed(startSeed)
 {
     detector.MpCollection->updateRandomGenForThread(threadIndex, RandGen);
 
@@ -70,17 +71,17 @@ bool AParticleSourceSimulator::setup()
     timeFrom = GenSimSettings.TimeFrom;
     timeRange = GenSimSettings.fTimeResolved ? (GenSimSettings.TimeTo - GenSimSettings.TimeFrom) : 0;
 
-    switch (partSimSet.GenerationMode)
+    switch (PartSimSet.GenerationMode)
     {
     case AParticleSimSettings::Sources :
-        ParticleGun = new ASourceParticleGenerator(partSimSet.SourceGenSettings, detector, *RandGen);
+        ParticleGun = new ASourceParticleGenerator(PartSimSet.SourceGenSettings, detector, *RandGen);
         break;
     case AParticleSimSettings::File :
         ParticleGun = new AFileParticleGenerator(partSimSet.FileGenSettings, *detector.MpCollection);
         partSimSet.FileGenSettings.ValidationMode = (GenSimSettings.G4SimSet.bTrackParticles ? AFileGenSettings::Relaxed : AFileGenSettings::Strict);
         break;
     case AParticleSimSettings::Script :
-        ParticleGun = new AScriptParticleGenerator(partSimSet.ScriptGenSettings, *detector.MpCollection, *RandGen); //, ID, &simMan.NumberOfWorkers);
+        ParticleGun = new AScriptParticleGenerator(PartSimSet.ScriptGenSettings, *detector.MpCollection, *RandGen); //, ID, &simMan.NumberOfWorkers);
         break;
     default:
         ErrorString = "Unknown particle generation mode";
@@ -93,15 +94,15 @@ bool AParticleSourceSimulator::setup()
         return false;
     }
 
-    totalEventCount = partSimSet.EventsToDo;
-    if (partSimSet.GenerationMode == AParticleSimSettings::File)
-        totalEventCount = std::min(totalEventCount, partSimSet.FileGenSettings.NumEventsInFile);
+    totalEventCount = PartSimSet.EventsToDo;
+    if (PartSimSet.GenerationMode == AParticleSimSettings::File)
+        totalEventCount = std::min(totalEventCount, PartSimSet.FileGenSettings.NumEventsInFile);
 
-    ParticleTracker->configure(&GenSimSettings, GenSimSettings.TrackBuildOptions.bBuildParticleTracks, &tracks, partSimSet.bIgnoreNoDepo, ThreadIndex);
+    ParticleTracker->configure(&GenSimSettings, GenSimSettings.TrackBuildOptions.bBuildParticleTracks, &tracks, PartSimSet.bIgnoreNoDepo, ThreadIndex);
     ParticleTracker->resetCounter();
     S1generator->setDoTextLog(GenSimSettings.LogsStatOptions.bPhotonGenerationLog);
     S2generator->setDoTextLog(GenSimSettings.LogsStatOptions.bPhotonGenerationLog);
-    S2generator->setOnlySecondary(!partSimSet.bDoS1);
+    S2generator->setOnlySecondary(!PartSimSet.bDoS1);
     return true;
 }
 
@@ -228,7 +229,7 @@ void AParticleSourceSimulator::simulate()
         //-- only local tracking remains here --
         //energy vector is ready
 
-        if ( partSimSet.bIgnoreNoDepo && EnergyVector.isEmpty() ) //if there is no deposition -> can ignore this event
+        if ( PartSimSet.bIgnoreNoDepo && EnergyVector.isEmpty() ) //if there is no deposition -> can ignore this event
         {
             eventCurrent--;
             continue;
@@ -241,7 +242,7 @@ void AParticleSourceSimulator::simulate()
             return;
         }
 
-        if ( partSimSet.bIgnoreNoHits && OneEvent->isHitsEmpty() ) // if there were no PM hits -> can ignore this event
+        if ( PartSimSet.bIgnoreNoHits && OneEvent->isHitsEmpty() ) // if there were no PM hits -> can ignore this event
         {
             eventCurrent--;
             continue;
@@ -341,7 +342,7 @@ void AParticleSourceSimulator::EnergyVectorToScan()
     {
         const int numNodes = EnergyVector.size(); // here it is not equal to 1
 
-        if (!partSimSet.bClusterMerge)
+        if (!PartSimSet.bClusterMerge)
         {
             scs->Points.Reinitialize(numNodes);
             for (int iNode = 0; iNode < numNodes; iNode++)
@@ -363,7 +364,7 @@ void AParticleSourceSimulator::EnergyVectorToScan()
                 qDebug() << EVcell->dE << EVcell->time;
             }
             */
-            const double ClusterMergeRadius2 = partSimSet.ClusterRadius * partSimSet.ClusterRadius;
+            const double ClusterMergeRadius2 = PartSimSet.ClusterRadius * PartSimSet.ClusterRadius;
 
             QVector<APositionEnergyRecord> Depo(numNodes);
 
@@ -381,7 +382,7 @@ void AParticleSourceSimulator::EnergyVectorToScan()
                 const AEnergyDepositionCell * EVcell = EnergyVector.at(iCell);
 
                 APositionEnergyRecord & Point = Depo[iPoint];
-                if (EVcell->isCloser(ClusterMergeRadius2, Point.r) && fabs(EVcell->time - Point.time) < partSimSet.ClusterTime)
+                if (EVcell->isCloser(ClusterMergeRadius2, Point.r) && fabs(EVcell->time - Point.time) < PartSimSet.ClusterTime)
                 {
                     Point.MergeWith(EVcell->r, EVcell->dE, EVcell->time);
                     numMerges++;
@@ -409,7 +410,7 @@ void AParticleSourceSimulator::EnergyVectorToScan()
                     int iOtherCluster = iThisCluster + 1;
                     while (iOtherCluster < Depo.size())
                     {
-                        if (Depo[iThisCluster].isCloser(ClusterMergeRadius2, Depo[iOtherCluster]) && fabs(Depo[iThisCluster].time - Depo[iOtherCluster].time) < partSimSet.ClusterTime)
+                        if (Depo[iThisCluster].isCloser(ClusterMergeRadius2, Depo[iOtherCluster]) && fabs(Depo[iThisCluster].time - Depo[iOtherCluster].time) < PartSimSet.ClusterTime)
                         {
                             Depo[iThisCluster].MergeWith(Depo[iOtherCluster]);
                             Depo.removeAt(iOtherCluster);
@@ -456,13 +457,13 @@ void AParticleSourceSimulator::clearGeneratedParticles()
 
 int AParticleSourceSimulator::chooseNumberOfParticlesThisEvent() const
 {
-    if (!partSimSet.bMultiple) return 1;
+    if (!PartSimSet.bMultiple) return 1;
 
-    if (partSimSet.MultiMode == AParticleSimSettings::Constant)
-        return std::round(partSimSet.MeanPerEvent);
+    if (PartSimSet.MultiMode == AParticleSimSettings::Constant)
+        return std::round(PartSimSet.MeanPerEvent);
     else
     {
-        int num = RandGen->Poisson(partSimSet.MeanPerEvent);
+        int num = RandGen->Poisson(PartSimSet.MeanPerEvent);
         return std::max(1, num);
     }
 
@@ -492,13 +493,13 @@ bool AParticleSourceSimulator::generateAndTrackPhotons()
 {
     OneEvent->clearHits();
 
-    if (partSimSet.bDoS1 && !S1generator->Generate())
+    if (PartSimSet.bDoS1 && !S1generator->Generate())
     {
         ErrorString = "Error executing S1 generation!";
         return false;
     }
 
-    if (partSimSet.bDoS2 && !S2generator->Generate())
+    if (PartSimSet.bDoS2 && !S2generator->Generate())
     {
         ErrorString = "Error executing S2 generation!";
         return false;
@@ -860,13 +861,10 @@ void AParticleSourceSimulator::generateG4antsConfigCommon(QJsonObject & json)
 
     bool bG4Primaries = false;
     bool bBinaryPrimaries = false;
-    //AParticleSourceSimulator * pss = dynamic_cast<AParticleSourceSimulator*>(this); // !*! to change to settings!
-    //const AFileParticleGenerator * fpg = dynamic_cast<const AFileParticleGenerator*>(pss->getParticleGun());
-    //if (fpg)
-    if (partSimSet.GenerationMode == AParticleSimSettings::File)
+    if (PartSimSet.GenerationMode == AParticleSimSettings::File)
     {
-        bG4Primaries     = partSimSet.FileGenSettings.isFormatG4();
-        bBinaryPrimaries = partSimSet.FileGenSettings.isFormatBinary();
+        bG4Primaries     = PartSimSet.FileGenSettings.isFormatG4();
+        bBinaryPrimaries = PartSimSet.FileGenSettings.isFormatBinary();
     }
     json["Primaries_G4ants"] = bG4Primaries;
     json["Primaries_Binary"] = bBinaryPrimaries;

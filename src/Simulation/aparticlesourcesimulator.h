@@ -71,6 +71,7 @@ private:
 
 private:
     AParticleSimSettings & partSimSet;  // !*! TODO refactor, now cannot be const due to FileGenSettings
+    const AParticleSimSettings & PartSimSet;
 
     //local objects
     AParticleTracker * ParticleTracker = nullptr;

@@ -32,10 +32,8 @@ public:
 
     bool isStoppedByUser() const { return fStopRequested; }
     void updateStats();
-    //double getProgress() const { return progress; }
     bool wasSuccessful() const;
     bool wasHardAborted() const;
-    //bool isFinished() const {return simState == SFinished;}
     void setFinished() {simState = SFinished;}    
     QVector<ASimulator *> & getWorkers() {return workers;}
     State getSimState() const {return simState;}

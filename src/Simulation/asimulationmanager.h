@@ -35,7 +35,7 @@ public:
     ~ASimulationManager();
 
     void StartSimulation(QJsonObject & json, int threads, bool bDoGuiUpdate);
-    // when simulation is finished, private slot ASimulationManager::onSimulationFinished() is triggered
+    // when simulation is finished, private slot onSimulationFinished() is triggered
 
     bool isSimulationSuccess() const {return fSuccess;}
     bool isSimulationFinished() const {return fFinished;}
@@ -52,13 +52,11 @@ public:
     void setMaxThreads(int maxThreads) {MaxThreads = maxThreads;}
     QString loadNodesFromFile(const QString & fileName);
 
-    //void generateG4antsConfigCommon(QJsonObject & json, ASimulator * worker);  // !!! G4ants files common
-
-    const DetectorClass & getDetector() {return Detector;}
+    //const DetectorClass & getDetector() {return Detector;}
     bool setup(const QJsonObject & json, int threads);
 
     QString checkPnotonNodeFile(const QString &fileName); // returns error description
-    int  getNumThreads();
+    int getNumThreads() const;
 
 public:
     std::vector<ANodeRecord *> Nodes;
@@ -85,8 +83,6 @@ public:
     double DepoByRegistered;
 
     ASimSettings Settings;
-
-    int NumberOfWorkers = 0;
 
 private:
     EventsDataClass & EventsDataHub;

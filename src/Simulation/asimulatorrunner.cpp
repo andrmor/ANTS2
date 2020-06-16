@@ -119,8 +119,6 @@ bool ASimulatorRunner::setup(int threadCount, bool bPhotonSourceSim)
         workers.append(worker);
     }
 
-    simMan.NumberOfWorkers = workers.size();  //used by particle sources - script gen
-
     if (threadCount > 1)
     {
         backgroundWorker = nullptr;

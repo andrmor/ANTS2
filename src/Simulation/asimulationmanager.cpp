@@ -275,9 +275,9 @@ QString ASimulationManager::checkPnotonNodeFile(const QString & fileName)
     return "";
 }
 
-int ASimulationManager::getNumThreads()
+int ASimulationManager::getNumThreads() const
 {
-    if (!fFinished) return NumberOfWorkers;
+    if (!fFinished) return Runner->getWorkers().size();
     else return 1;
 }
 
@@ -293,8 +293,6 @@ void ASimulationManager::onSimFailedToStart()
 void ASimulationManager::onSimulationFinished()
 {
     //  qDebug() << "Simulation manager: Simulation finished";
-
-    //qDebug() << "after finish, manager has monitors:"<< EventsDataHub->SimStat->Monitors.size();
     simTimerGuiUpdate.stop();
     QThread::usleep(5000); // to make sure update cycle is finished
     simRunnerThread.quit();
@@ -331,14 +329,13 @@ void ASimulationManager::onSimulationFinished()
 
     Runner->clearWorkers();
 
-
     bGuardTrackingHistory = true;
-    Detector.BuildDetector(true, true);  // <- still needed on Windows
+    Detector.BuildDetector(true, true);  // <- needed on Windows OS
     bGuardTrackingHistory = false;
 
     if (bDoGuiUpdate) emit SimulationFinished();
 
-    SiPMpixels.clear();  // main window copied if needed
+    SiPMpixels.clear();  // already copied to MainWindow if GUI present
     //qDebug() << "SimManager: Sim finished";
 }
 

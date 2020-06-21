@@ -97,6 +97,11 @@ void AGraphWin_SI::AddLine(double x1, double y1, double x2, double y2, int color
     MW->GraphWindow->AddLine(x1, y1, x2, y2, color, width, style);
 }
 
+void AGraphWin_SI::AddArrow(double x1, double y1, double x2, double y2, int color, int width, int style)
+{
+    MW->GraphWindow->AddArrow(x1, y1, x2, y2, color, width, style);
+}
+
 void AGraphWin_SI::AddToBasket(QString Title)
 {
   MW->GraphWindow->AddCurrentToBasket(Title);

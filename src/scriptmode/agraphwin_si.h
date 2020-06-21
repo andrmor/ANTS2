@@ -39,6 +39,7 @@ public slots:
   void AddTextTrueXY(QString text, bool Showframe, int Alignment_0Left1Center2Right, double x1, double y1, double x2, double y2);
 
   void AddLine(double x1, double y1, double x2, double y2, int color, int width, int style);
+  void AddArrow(double x1, double y1, double x2, double y2, int color, int width, int style);
 
   //basket operation
   void AddToBasket(QString Title);

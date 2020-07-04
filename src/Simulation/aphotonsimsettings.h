@@ -135,6 +135,9 @@ public:
 
 struct A3DPosProb
 {
+    A3DPosProb(double x, double y, double z, double prob);
+    A3DPosProb() {}
+
     double R[3];
     double Probability;
 };
@@ -143,15 +146,33 @@ struct A3DPosProb
 class APhotonSim_SpatDistSettings
 {
 public:
-//    enum ModeEnum {CustomNodes = 0, PhotonsDirectly = 1};
+    enum ModeEnum {DirectMode = 0, FormulaMode = 1, SplineMode = 2};
 
     bool bEnabled = false;
+    ModeEnum Mode = DirectMode;
 
-    QVector<A3DPosProb> Matrix;
+    QVector<A3DPosProb> LoadedMatrix;
+    QString Formula;
+
+    double  RangeX = 100.0;
+    double  RangeY = 100.0;
+    double  RangeZ = 100.0;
+
+    int     BinsX = 10;
+    int     BinsY = 10;
+    int     BinsZ = 1;
+
+    QString ErrorString;
 
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);
     void clearSettings();
+
+    //runtime
+    QVector<A3DPosProb> Matrix;   // !*! to move to the dedicated class?
+
+private:
+    void normalizeProbabilities();
 };
 
 // -------------- main -----------------

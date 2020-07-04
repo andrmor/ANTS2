@@ -578,7 +578,6 @@ void APointSourceSimulator::generateAndTracePhotons(AScanRecord *scs, double tim
 
 void APointSourceSimulator::applySpatialDist(double * center, APhoton & photon) const
 {
-    //qDebug() << center[0] <<center[1] <<center[2];
     const QVector<A3DPosProb> & Matrix = PhotSimSettings.SpatialDistSettings.Matrix;
     const int size = Matrix.size();
 
@@ -590,7 +589,6 @@ void APointSourceSimulator::applySpatialDist(double * center, APhoton & photon) 
         val += Matrix.at(iSelectedCell).Probability;
         if (rnd < val) break;
     }
-    qDebug() << "Found" << iSelectedCell << " of " << size;
 
     for (int i = 0; i < 3; i++)
         photon.r[i] = center[i] + Matrix.at(iSelectedCell).R[i];

@@ -40,6 +40,7 @@ private:
     void generateAndTracePhotons(AScanRecord * scs, double time0 = 0, int iPoint = 0);
     bool findSecScintBounds(double *r, double & z1, double & z2, double & timeOfDrift, double & driftSpeedInSecScint);
     bool isInsideLimitingObject(const double * r);
+    void applySpatialDist(double * center, APhoton & photon) const;
 
 private:
     const APhotonSimSettings & PhotSimSettings;

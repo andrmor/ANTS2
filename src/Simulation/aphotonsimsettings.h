@@ -133,6 +133,27 @@ public:
     void clearSettings();
 };
 
+struct A3DPosProb
+{
+    double R[3];
+    double Probability;
+};
+
+// spatial distribution in node
+class APhotonSim_SpatDistSettings
+{
+public:
+//    enum ModeEnum {CustomNodes = 0, PhotonsDirectly = 1};
+
+    bool bEnabled = false;
+
+    QVector<A3DPosProb> Matrix;
+
+    void writeToJson(QJsonObject & json) const;
+    void readFromJson(const QJsonObject & json);
+    void clearSettings();
+};
+
 // -------------- main -----------------
 
 class APhotonSimSettings
@@ -156,6 +177,7 @@ public:
     APhotonSim_ScanSettings       ScanSettings;
     APhotonSim_FloodSettings      FloodSettings;
     APhotonSim_CustomNodeSettings CustomNodeSettings;
+    APhotonSim_SpatDistSettings   SpatialDistSettings;
 
     int getActiveRuns() const;
 

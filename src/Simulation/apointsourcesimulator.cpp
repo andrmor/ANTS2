@@ -564,6 +564,8 @@ void APointSourceSimulator::generateAndTracePhotons(AScanRecord *scs, double tim
 
         Photon.SimStat = OneEvent->SimStat;
 
+        if (PhotSimSettings.SpatialDistSettings.bEnabled) applySpatialDist(scs->Points[iPoint].r, Photon);
+
         photonTracker->TracePhoton(&Photon);
     }
 
@@ -572,6 +574,26 @@ void APointSourceSimulator::generateAndTracePhotons(AScanRecord *scs, double tim
         scs->Points[iPoint].r[2] = z1;
         scs->zStop = z2;
     }
+}
+
+void APointSourceSimulator::applySpatialDist(double * center, APhoton & photon) const
+{
+    //qDebug() << center[0] <<center[1] <<center[2];
+    const QVector<A3DPosProb> & Matrix = PhotSimSettings.SpatialDistSettings.Matrix;
+    const int size = Matrix.size();
+
+    const double rnd = RandGen->Rndm();
+    double val = 0;
+    int iSelectedCell = 0;
+    for (; iSelectedCell < size; iSelectedCell++)
+    {
+        val += Matrix.at(iSelectedCell).Probability;
+        if (rnd < val) break;
+    }
+    qDebug() << "Found" << iSelectedCell << " of " << size;
+
+    for (int i = 0; i < 3; i++)
+        photon.r[i] = center[i] + Matrix.at(iSelectedCell).R[i];
 }
 
 bool APointSourceSimulator::findSecScintBounds(double *r, double & z1, double & z2, double & timeOfDrift, double & driftSpeedInSecScint)

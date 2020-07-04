@@ -19,6 +19,7 @@ void APhotonSimSettings::clearSettings()
     ScanSettings.clearSettings();
     FloodSettings.clearSettings();
     CustomNodeSettings.clearSettings();
+    SpatialDistSettings.clearSettings();
 }
 
 int APhotonSimSettings::getActiveRuns() const
@@ -78,6 +79,12 @@ void APhotonSimSettings::writeToJson(QJsonObject &json) const
         CustomNodeSettings.writeToJson(js);
         json["CustomNodesOptions"] = js;
     }
+
+    {
+        QJsonObject js;
+        SpatialDistSettings.writeToJson(js);
+        json["SpatialDistOptions"] = js;
+    }
 }
 
 void APhotonSimSettings::readFromJson(const QJsonObject & json)
@@ -134,6 +141,9 @@ void APhotonSimSettings::readFromJson(const QJsonObject & json)
 
     bOK = parseJson(json, "CustomNodesOptions", js);
     if (bOK) CustomNodeSettings.readFromJson(js);
+
+    bOK = parseJson(json, "SpatialDistOptions", js);
+    if (bOK) SpatialDistSettings.readFromJson(js);
 }
 
 void APhotonSim_PerNodeSettings::clearSettings()
@@ -433,4 +443,46 @@ void APhotonSim_CustomNodeSettings::readFromJson(const QJsonObject &json)
     int iMode = 0;
     parseJson(json, "Mode", iMode);
     if (iMode == 0 || iMode == 1) Mode = static_cast<ModeEnum>(iMode);
+}
+
+void APhotonSim_SpatDistSettings::writeToJson(QJsonObject &json) const
+{
+    json["Enabled"] = bEnabled;
+}
+
+void APhotonSim_SpatDistSettings::readFromJson(const QJsonObject &json)
+{
+    clearSettings();
+
+    parseJson(json, "Enabled", bEnabled);
+
+    QJsonArray ar;
+    bool ok = parseJson(json, "Matrix", ar);
+    if (ok)
+    {
+        const int size = ar.size();
+        Matrix.reserve(size);
+        double sum = 0;
+        for (int i = 0; i < size; i++)
+        {
+            QJsonArray el = ar[i].toArray();
+            A3DPosProb pp;
+            for (int iR = 0; iR < 3; iR++) pp.R[iR] = el[iR].toDouble();
+            pp.Probability = el[3].toDouble();
+            sum += pp.Probability;
+            Matrix << pp;
+        }
+        if (sum != 0)
+        {
+            const double inv = 1.0 / sum;
+            for (int i = 0; i < Matrix.size(); i++)
+                Matrix[i].Probability *= inv;
+        }
+    }
+}
+
+void APhotonSim_SpatDistSettings::clearSettings()
+{
+    bEnabled = false;
+    Matrix.clear();
 }

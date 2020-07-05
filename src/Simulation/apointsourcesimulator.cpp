@@ -16,6 +16,7 @@
 #include "apmhub.h"
 #include "alrfmoduleselector.h"
 #include "aphotonsimsettings.h"
+#include "aphotonnodedistributor.h"
 
 #include <QDebug>
 #include <QJsonObject>
@@ -25,10 +26,11 @@
 #include "TGeoManager.h"
 #include "TGeoNavigator.h"
 
-APointSourceSimulator::APointSourceSimulator(const ASimSettings & SimSet, const DetectorClass &detector, const std::vector<ANodeRecord*> & Nodes, int threadID, int startSeed) :
+APointSourceSimulator::APointSourceSimulator(const ASimSettings & SimSet, const DetectorClass &detector, const std::vector<ANodeRecord*> & Nodes, const APhotonNodeDistributor & InNodeDistributor, int threadID, int startSeed) :
     ASimulator(SimSet, detector, threadID, startSeed),
     PhotSimSettings(SimSet.photSimSet),
-    Nodes(Nodes) {}
+    Nodes(Nodes),
+    InNodeDistributor(InNodeDistributor) {}
 
 APointSourceSimulator::~APointSourceSimulator()
 {
@@ -564,7 +566,8 @@ void APointSourceSimulator::generateAndTracePhotons(AScanRecord *scs, double tim
 
         Photon.SimStat = OneEvent->SimStat;
 
-        if (PhotSimSettings.SpatialDistSettings.bEnabled) applySpatialDist(scs->Points[iPoint].r, Photon);
+        if (PhotSimSettings.SpatialDistSettings.bEnabled)
+            InNodeDistributor.apply(Photon, scs->Points[iPoint].r, RandGen->Rndm());
 
         photonTracker->TracePhoton(&Photon);
     }
@@ -574,24 +577,6 @@ void APointSourceSimulator::generateAndTracePhotons(AScanRecord *scs, double tim
         scs->Points[iPoint].r[2] = z1;
         scs->zStop = z2;
     }
-}
-
-void APointSourceSimulator::applySpatialDist(double * center, APhoton & photon) const
-{
-    const QVector<A3DPosProb> & Matrix = PhotSimSettings.SpatialDistSettings.Matrix;
-    const int size = Matrix.size();
-
-    const double rnd = RandGen->Rndm();
-    double val = 0;
-    int iSelectedCell = 0;
-    for (; iSelectedCell < size; iSelectedCell++)
-    {
-        val += Matrix.at(iSelectedCell).Probability;
-        if (rnd < val) break;
-    }
-
-    for (int i = 0; i < 3; i++)
-        photon.r[i] = center[i] + Matrix.at(iSelectedCell).R[i];
 }
 
 bool APointSourceSimulator::findSecScintBounds(double *r, double & z1, double & z2, double & timeOfDrift, double & driftSpeedInSecScint)

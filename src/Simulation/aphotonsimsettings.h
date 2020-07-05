@@ -133,16 +133,8 @@ public:
     void clearSettings();
 };
 
-struct A3DPosProb
-{
-    A3DPosProb(double x, double y, double z, double prob);
-    A3DPosProb() {}
-
-    double R[3];
-    double Probability;
-};
-
 // spatial distribution in node
+#include "a3dposprob.h"
 class APhotonSim_SpatDistSettings
 {
 public:
@@ -162,17 +154,9 @@ public:
     int     BinsY = 10;
     int     BinsZ = 1;
 
-    QString ErrorString;
-
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);
     void clearSettings();
-
-    //runtime
-    QVector<A3DPosProb> Matrix;   // !*! to move to the dedicated class?
-
-private:
-    void normalizeProbabilities();
 };
 
 // -------------- main -----------------

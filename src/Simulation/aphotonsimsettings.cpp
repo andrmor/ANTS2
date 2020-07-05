@@ -453,11 +453,8 @@ void APhotonSim_SpatDistSettings::writeToJson(QJsonObject &json) const
 
 }
 
-#include "TFormula.h"
 void APhotonSim_SpatDistSettings::readFromJson(const QJsonObject &json)
 {
-    ErrorString.clear();
-
     clearSettings();
 
     parseJson(json, "Enabled", bEnabled);
@@ -491,87 +488,9 @@ void APhotonSim_SpatDistSettings::readFromJson(const QJsonObject &json)
     parseJson(json, "BinsY", BinsY);
     parseJson(json, "BinsZ", BinsZ);
 
-
-    switch (Mode)
-    {
-    default:
-        ErrorString = "Unknown distributed node mode";
-        qWarning() << ErrorString;
-    case DirectMode:
-      {
-        Matrix = LoadedMatrix;
-        break;
-      }
-    case FormulaMode:
-      {
-        QString Form = Formula;
-        Form.replace(QRegExp("\\bx\\b"), "[0]");
-        Form.replace(QRegExp("\\by\\b"), "[1]");
-        Form.replace(QRegExp("\\bz\\b"), "[2]");
-        qDebug() << "Formula:" << Form;
-
-        TFormula * f = new TFormula("", Form.toLocal8Bit().data());
-        if (!f || !f->IsValid())
-        {
-            ErrorString = "Cannot create TFormula";
-            qWarning() << ErrorString;
-        }
-        else
-        {
-            const double dX = RangeX / BinsX;
-            const double dY = RangeY / BinsY;
-            const double dZ = RangeZ / BinsZ;
-
-            double R[3];
-            Matrix.reserve(BinsX * BinsY * BinsZ);
-
-            for (int ix = 0; ix < BinsX; ix++)
-                for (int iy = 0; iy < BinsY; iy++)
-                    for (int iz = 0; iz < BinsZ; iz++)
-                    {
-                        R[0] = -0.5*RangeX + (0.5 + ix)*dX;
-                        R[1] = -0.5*RangeY + (0.5 + iy)*dY;
-                        R[2] = -0.5*RangeZ + (0.5 + iz)*dZ;
-
-                        double prob = f->EvalPar(nullptr, R);
-                        //qDebug() << R[0]  << R[1] << R[2] << prob;
-
-                        Matrix << A3DPosProb(R[0], R[1], R[2], prob);
-                    }
-        }
-        break;
-      }
-    case SplineMode:
-      {
-        break;
-      }
-
-    }
-
-    normalizeProbabilities();
 }
 
-void APhotonSim_SpatDistSettings::normalizeProbabilities()
-{
-    if (Matrix.isEmpty())
-    {
-        ErrorString = "Matrix for distributed node photon generation is empty!";
-        qWarning() << ErrorString;
-        Matrix << A3DPosProb(0,0,0, 1.0);
-    }
-    const int size = Matrix.size();
 
-    double sum = 0;
-    for (int i = 0; i < size; i++) sum += Matrix.at(i).Probability;
-
-    if (sum != 0)
-    {
-        for (int i = 0; i < size; i++)
-            Matrix[i].Probability /= sum;
-    }
-    else
-        ErrorString = "Sum of probabilities iz zero!";
-}
 
 void APhotonSim_SpatDistSettings::clearSettings()
 {
@@ -580,22 +499,13 @@ void APhotonSim_SpatDistSettings::clearSettings()
     Formula.clear();
     LoadedMatrix.clear();
 
-    RangeX = 100.0;
-    RangeY = 100.0;
-    RangeZ = 100.0;
+    RangeX = 10.0;
+    RangeY = 10.0;
+    RangeZ = 10.0;
 
     BinsX = 10;
     BinsY = 10;
     BinsZ = 1;
-
-    Matrix.clear();
 }
 
-A3DPosProb::A3DPosProb(double x, double y, double z, double prob)
-{
-    R[0] = x;
-    R[1] = y;
-    R[2] = z;
 
-    Probability = prob;
-}

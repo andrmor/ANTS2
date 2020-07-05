@@ -5,6 +5,7 @@
 #include "atrackbuildoptions.h"
 #include "alogsandstatisticsoptions.h"
 #include "asimsettings.h"
+#include "aphotonnodedistributor.h"
 
 #include <vector>
 
@@ -81,6 +82,8 @@ public:
     QSet<QString> SeenNonRegisteredParticles;
     double DepoByNotRegistered;
     double DepoByRegistered;
+
+    APhotonNodeDistributor InNodeDistributor;
 
     ASimSettings Settings;
 

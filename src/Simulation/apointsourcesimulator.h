@@ -11,13 +11,14 @@
 
 class APhotonSimSettings;
 class ANodeRecord;
+class APhotonNodeDistributor;
 class AScanRecord;
 class TH1D;
 
 class APointSourceSimulator : public ASimulator
 {
 public:
-    explicit APointSourceSimulator(const ASimSettings & SimSet, const DetectorClass & detector, const std::vector<ANodeRecord*> & Nodes, int threadID, int startSeed);
+    explicit APointSourceSimulator(const ASimSettings & SimSet, const DetectorClass & detector, const std::vector<ANodeRecord*> & Nodes, const APhotonNodeDistributor & InNodeDistributor, int threadID, int startSeed);
     ~APointSourceSimulator();
 
     int  getEventCount() const override;
@@ -40,11 +41,11 @@ private:
     void generateAndTracePhotons(AScanRecord * scs, double time0 = 0, int iPoint = 0);
     bool findSecScintBounds(double *r, double & z1, double & z2, double & timeOfDrift, double & driftSpeedInSecScint);
     bool isInsideLimitingObject(const double * r);
-    void applySpatialDist(double * center, APhoton & photon) const;
 
 private:
     const APhotonSimSettings & PhotSimSettings;
     const std::vector<ANodeRecord *> & Nodes;
+    const APhotonNodeDistributor & InNodeDistributor;
 
     TH1D *   CustomHist     = nullptr;
     int      NumRuns        = 1;

@@ -143,6 +143,17 @@ bool ASimulationManager::preparePhotonMode()
         ErrorString = checkPnotonNodeFile(Settings.photSimSet.CustomNodeSettings.FileName);
         if (!ErrorString.isEmpty()) return false;
     }
+
+    if (Settings.photSimSet.SpatialDistSettings.bEnabled)
+    {
+        bool ok = InNodeDistributor.init(Settings.photSimSet.SpatialDistSettings);
+        if (!ok)
+        {
+            ErrorString = InNodeDistributor.ErrorString;
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -336,6 +347,7 @@ void ASimulationManager::onSimulationFinished()
     if (bDoGuiUpdate) emit SimulationFinished();
 
     SiPMpixels.clear();  // already copied to MainWindow if GUI present
+    InNodeDistributor.releaseResources();
     //qDebug() << "SimManager: Sim finished";
 }
 

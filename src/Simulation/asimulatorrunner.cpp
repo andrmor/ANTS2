@@ -66,7 +66,6 @@ ASimulatorRunner::~ASimulatorRunner()
 bool ASimulatorRunner::setup(int threadCount, bool bPhotonSourceSim)
 {
     totalEventCount = 0;
-    //lastProgress = 0;
     lastEventsDone = 0;
     lastRefreshTime = 0;
     usPerEvent = 0;
@@ -85,7 +84,7 @@ bool ASimulatorRunner::setup(int threadCount, bool bPhotonSourceSim)
     {
         ASimulator *worker;
         int seed = detector.RandGen->Rndm() * 10000000;
-        if (bPhotonSourceSim) worker = new APointSourceSimulator(simMan.Settings, detector, simMan.Nodes, iWorker, seed);
+        if (bPhotonSourceSim) worker = new APointSourceSimulator(simMan.Settings, detector, simMan.Nodes, simMan.InNodeDistributor, iWorker, seed);
         else                  worker = new AParticleSourceSimulator(simMan.Settings, detector, iWorker, seed);
 
         bool bOK = worker->setup();

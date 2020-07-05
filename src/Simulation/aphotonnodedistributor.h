@@ -2,6 +2,7 @@
 #define APHOTONNODEDISTRIBUTOR_H
 
 #include <QVector>
+#include <vector>
 #include <QString>
 #include "a3dposprob.h"
 
@@ -20,6 +21,8 @@ public:
 
 private:
     QVector<A3DPosProb> Matrix;
+    std::vector<double> CumulativeProb;
+    double SumProb = 1.0;
 
     bool calculateCumulativeProbabilities();
 };

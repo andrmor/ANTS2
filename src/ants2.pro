@@ -408,10 +408,7 @@ SOURCES += main.cpp \
     Simulation/alogsandstatisticsoptions.cpp \
     Reconstruction/areconstructionworker.cpp \
     common/ahistogram.cpp \
-    modules/apmdummystructure.cpp \
-    Simulation/aparticlesimsettings.cpp \
-    Simulation/aphotonnodedistributor.cpp \
-    Simulation/a3dposprob.cpp
+    modules/apmdummystructure.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -565,10 +562,7 @@ HEADERS  += common/CorrelationFilters.h \
     Reconstruction/areconstructionworker.h \
     common/ahistogram.h \
     modules/apmanddummy.h \
-    modules/apmdummystructure.h \
-    Simulation/aparticlesimsettings.h \
-    Simulation/aphotonnodedistributor.h \
-    Simulation/a3dposprob.h
+    modules/apmdummystructure.h
 
 # --- SIM ---
 ants2_SIM {
@@ -595,7 +589,10 @@ ants2_SIM {
     Simulation/asaveparticlestofilesettings.cpp \
     Simulation/aphotonsimsettings.cpp \
     Simulation/ageneralsimsettings.cpp \
-    Simulation/asimsettings.cpp
+    Simulation/asimsettings.cpp \
+    Simulation/aparticlesimsettings.cpp \
+    Simulation/aphotonnodedistributor.cpp \
+    Simulation/a3dposprob.cpp
 
     HEADERS  += Simulation/aphoton.h \
     Simulation/asimulationstatistics.h \
@@ -624,7 +621,10 @@ ants2_SIM {
     Simulation/asaveparticlestofilesettings.h \
     Simulation/aphotonsimsettings.h \
     Simulation/ageneralsimsettings.h \
-    Simulation/asimsettings.h
+    Simulation/asimsettings.h \
+    Simulation/aparticlesimsettings.h \
+    Simulation/aphotonnodedistributor.h \
+    Simulation/a3dposprob.h
 }
 
 # --- GUI ---

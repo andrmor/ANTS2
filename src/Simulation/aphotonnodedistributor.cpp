@@ -80,19 +80,15 @@ bool APhotonNodeDistributor::init(const APhotonSim_SpatDistSettings & Settings)
 void APhotonNodeDistributor::releaseResources()
 {
     Matrix.clear();
+    CumulativeProb.clear();
 }
 
 void APhotonNodeDistributor::apply(APhoton & photon, double *center, double rnd) const
 {
-    const int size = Matrix.size();
+    auto it = std::upper_bound(CumulativeProb.begin(), CumulativeProb.end(), rnd * SumProb);
+    int iSelectedCell = it - CumulativeProb.begin();
 
-    double val = 0;
-    int iSelectedCell = 0;
-    for (; iSelectedCell < size; iSelectedCell++)
-    {
-        val += Matrix.at(iSelectedCell).Probability;
-        if (rnd < val) break;
-    }
+    if (iSelectedCell == Matrix.size()) iSelectedCell = Matrix.size() - 1;
 
     for (int i = 0; i < 3; i++)
         photon.r[i] = center[i] + Matrix.at(iSelectedCell).R[i];
@@ -102,17 +98,22 @@ bool APhotonNodeDistributor::calculateCumulativeProbabilities()
 {
     const int size = Matrix.size();
 
-    double sum = 0;
-    for (int i = 0; i < size; i++) sum += Matrix.at(i).Probability;
+    SumProb = 0;
+    for (int i = 0; i < size; i++) SumProb += Matrix.at(i).Probability;
 
-    if (sum == 0)
+    if (SumProb == 0)
     {
         ErrorString = "Sum of probabilities iz zero!";
         return false;
     }
 
+    CumulativeProb.resize(size);
+    double acc = 0;
     for (int i = 0; i < size; i++)
-        Matrix[i].Probability /= sum;
+    {
+        acc += Matrix[i].Probability;
+        CumulativeProb[i] = acc;
+    }
 
     return true;
 }

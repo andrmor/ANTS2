@@ -145,6 +145,7 @@ public:
 
     QVector<A3DPosProb> LoadedMatrix;
     QString Formula;
+    QString Spline;
 
     double  RangeX = 100.0;
     double  RangeY = 100.0;

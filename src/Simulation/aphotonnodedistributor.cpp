@@ -3,6 +3,7 @@
 #include "aphoton.h"
 
 #include "TFormula.h"
+#include "Spline123/bspline123d.h"
 
 #include <QDebug>
 
@@ -23,7 +24,7 @@ bool APhotonNodeDistributor::init(const APhotonSim_SpatDistSettings & Settings)
         FormulaText.replace(QRegExp("\\bx\\b"), "[0]");
         FormulaText.replace(QRegExp("\\by\\b"), "[1]");
         FormulaText.replace(QRegExp("\\bz\\b"), "[2]");
-        qDebug() << "Formula:" << FormulaText;
+        //qDebug() << "Formula:" << FormulaText;
 
         TFormula * Formula = new TFormula("", FormulaText.toLocal8Bit().data());
         if (!Formula || !Formula->IsValid())
@@ -32,34 +33,58 @@ bool APhotonNodeDistributor::init(const APhotonSim_SpatDistSettings & Settings)
             delete Formula;
             return false;
         }
-        else
-        {
-            const double dX = Settings.RangeX / Settings.BinsX;
-            const double dY = Settings.RangeY / Settings.BinsY;
-            const double dZ = Settings.RangeZ / Settings.BinsZ;
 
-            double R[3];
-            Matrix.reserve(Settings.BinsX * Settings.BinsY * Settings.BinsZ);
+        const double dX = Settings.RangeX / Settings.BinsX;
+        const double dY = Settings.RangeY / Settings.BinsY;
+        const double dZ = Settings.RangeZ / Settings.BinsZ;
 
-            for (int ix = 0; ix < Settings.BinsX; ix++)
-                for (int iy = 0; iy < Settings.BinsY; iy++)
-                    for (int iz = 0; iz < Settings.BinsZ; iz++)
-                    {
-                        R[0] = -0.5*Settings.RangeX + (0.5 + ix)*dX;
-                        R[1] = -0.5*Settings.RangeY + (0.5 + iy)*dY;
-                        R[2] = -0.5*Settings.RangeZ + (0.5 + iz)*dZ;
+        double R[3];
+        Matrix.reserve(Settings.BinsX * Settings.BinsY * Settings.BinsZ);
 
-                        double prob = Formula->EvalPar(nullptr, R);
-                        //qDebug() << R[0]  << R[1] << R[2] << prob;
+        for (int ix = 0; ix < Settings.BinsX; ix++)
+            for (int iy = 0; iy < Settings.BinsY; iy++)
+                for (int iz = 0; iz < Settings.BinsZ; iz++)
+                {
+                    R[0] = -0.5*Settings.RangeX + (0.5 + ix)*dX;
+                    R[1] = -0.5*Settings.RangeY + (0.5 + iy)*dY;
+                    R[2] = -0.5*Settings.RangeZ + (0.5 + iz)*dZ;
 
-                        Matrix << A3DPosProb(R[0], R[1], R[2], prob);
-                    }
-        }
+                    double prob = Formula->EvalPar(nullptr, R);
+                    //qDebug() << R[0]  << R[1] << R[2] << prob;
+
+                    Matrix << A3DPosProb(R[0], R[1], R[2], prob);
+                }
         delete Formula;
+
         break;
       }
     case APhotonSim_SpatDistSettings::SplineMode:
       {
+        std::string stdSplineStr(Settings.Spline.toLatin1().data());
+
+        Bspline3d sp(stdSplineStr);
+        //qDebug() << sp.isInvalid() << sp.IsReady();
+
+        const double dX = Settings.RangeX / Settings.BinsX;
+        const double dY = Settings.RangeY / Settings.BinsY;
+        const double dZ = Settings.RangeZ / Settings.BinsZ;
+
+        Matrix.reserve(Settings.BinsX * Settings.BinsY * Settings.BinsZ);
+
+        for (int ix = 0; ix < Settings.BinsX; ix++)
+            for (int iy = 0; iy < Settings.BinsY; iy++)
+                for (int iz = 0; iz < Settings.BinsZ; iz++)
+                {
+                    double x = -0.5*Settings.RangeX + (0.5 + ix)*dX;
+                    double y = -0.5*Settings.RangeY + (0.5 + iy)*dY;
+                    double z = -0.5*Settings.RangeZ + (0.5 + iz)*dZ;
+
+                    double prob = sp.Eval(x, y, z);
+                    //qDebug() << x << y << z << prob;
+
+                    Matrix << A3DPosProb(x, y, z, prob);
+                }
+
         break;
       }
     default:

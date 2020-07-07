@@ -408,7 +408,11 @@ SOURCES += main.cpp \
     Simulation/alogsandstatisticsoptions.cpp \
     Reconstruction/areconstructionworker.cpp \
     common/ahistogram.cpp \
-    modules/apmdummystructure.cpp
+    modules/apmdummystructure.cpp \
+    SplineLibrary/Spline123/profileHist.cpp \
+    SplineLibrary/Spline123/json11.cpp \
+    SplineLibrary/Spline123/bspline123d.cpp \
+    SplineLibrary/Spline123/bsfit123.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -562,7 +566,12 @@ HEADERS  += common/CorrelationFilters.h \
     Reconstruction/areconstructionworker.h \
     common/ahistogram.h \
     modules/apmanddummy.h \
-    modules/apmdummystructure.h
+    modules/apmdummystructure.h \
+    SplineLibrary/Spline123/profileHist.h \
+    SplineLibrary/Spline123/json11.hpp \
+    SplineLibrary/Spline123/eiquadprog.hpp \
+    SplineLibrary/Spline123/bspline123d.h \
+    SplineLibrary/Spline123/bsfit123.h
 
 # --- SIM ---
 ants2_SIM {

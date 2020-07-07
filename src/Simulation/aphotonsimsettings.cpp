@@ -450,6 +450,7 @@ void APhotonSim_SpatDistSettings::writeToJson(QJsonObject &json) const
     json["Enabled"] = bEnabled;
     json["Mode"] = Mode;
     json["Formula"] = Formula;
+    json["Spline"] = Spline;
 
 }
 
@@ -460,7 +461,7 @@ void APhotonSim_SpatDistSettings::readFromJson(const QJsonObject &json)
     parseJson(json, "Enabled", bEnabled);
     int iMode = 0;
     parseJson(json, "Mode", iMode);
-    if (iMode > -1 && iMode < 2) Mode = static_cast<ModeEnum>(iMode);
+    if (iMode > -1 && iMode < 3) Mode = static_cast<ModeEnum>(iMode);
 
     QJsonArray ar;
     bool ok = parseJson(json, "Matrix", ar);
@@ -479,6 +480,7 @@ void APhotonSim_SpatDistSettings::readFromJson(const QJsonObject &json)
     }
 
     parseJson(json, "Formula", Formula);
+    parseJson(json, "Spline", Spline);
 
     parseJson(json, "RangeX", RangeX);
     parseJson(json, "RangeY", RangeY);
@@ -489,8 +491,6 @@ void APhotonSim_SpatDistSettings::readFromJson(const QJsonObject &json)
     parseJson(json, "BinsZ", BinsZ);
 
 }
-
-
 
 void APhotonSim_SpatDistSettings::clearSettings()
 {
@@ -507,5 +507,3 @@ void APhotonSim_SpatDistSettings::clearSettings()
     BinsY = 10;
     BinsZ = 1;
 }
-
-

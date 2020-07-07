@@ -555,19 +555,34 @@ void APointSourceSimulator::generateAndTracePhotons(AScanRecord *scs, double tim
 
         photonGenerator->GenerateTime(&Photon, thisMatIndex);
 
-        if (scs->ScintType == 2)
+        if (scs->ScintType == 2) //secondary scintillation
         {
-            const double dist = (z2 - z1) * RandGen->Rndm();
-            Photon.r[2] = z1 + dist;
-            Photon.time = time0 + timeOfDrift;
-            if (driftSpeedSecScint != 0)
-                Photon.time += dist / driftSpeedSecScint;
+            if (PhotSimSettings.SpatialDistSettings.bEnabled)
+            {
+                double r0[3];
+                r0[0] = scs->Points[iPoint].r[0];
+                r0[1] = scs->Points[iPoint].r[1];
+                r0[2] = 0.5 * (z2 + z1);
+                InNodeDistributor.apply(Photon, r0, RandGen->Rndm());
+                if (driftSpeedSecScint != 0)
+                    Photon.time += (Photon.r[2] - z1) / driftSpeedSecScint;
+            }
+            else
+            {
+                const double dist = (z2 - z1) * RandGen->Rndm();
+                Photon.r[2] = z1 + dist;
+                Photon.time = time0 + timeOfDrift;
+                if (driftSpeedSecScint != 0)
+                    Photon.time += dist / driftSpeedSecScint;
+            }
+        }
+        else  // primary scintillation
+        {
+            if (PhotSimSettings.SpatialDistSettings.bEnabled)
+                InNodeDistributor.apply(Photon, scs->Points[iPoint].r, RandGen->Rndm());
         }
 
         Photon.SimStat = OneEvent->SimStat;
-
-        if (PhotSimSettings.SpatialDistSettings.bEnabled)
-            InNodeDistributor.apply(Photon, scs->Points[iPoint].r, RandGen->Rndm());
 
         photonTracker->TracePhoton(&Photon);
     }

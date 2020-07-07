@@ -490,6 +490,14 @@ void APhotonSim_SpatDistSettings::readFromJson(const QJsonObject &json)
     parseJson(json, "BinsY", BinsY);
     parseJson(json, "BinsZ", BinsZ);
 
+    if (Spline.contains("zintervals"))
+        SplineDim = 3;
+    else if (Spline.contains("yintervals"))
+        SplineDim = 2;
+    else if (Spline.contains("xintervals"))
+        SplineDim = 1;
+    else
+        SplineDim = 0;
 }
 
 void APhotonSim_SpatDistSettings::clearSettings()
@@ -506,4 +514,6 @@ void APhotonSim_SpatDistSettings::clearSettings()
     BinsX = 10;
     BinsY = 10;
     BinsZ = 1;
+
+    SplineDim = 3;
 }

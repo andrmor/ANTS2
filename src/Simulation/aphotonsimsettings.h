@@ -155,9 +155,12 @@ public:
     int     BinsY = 10;
     int     BinsZ = 1;
 
-    void writeToJson(QJsonObject & json) const;
-    void readFromJson(const QJsonObject & json);
-    void clearSettings();
+    void    writeToJson(QJsonObject & json) const;
+    void    readFromJson(const QJsonObject & json);
+    void    clearSettings();
+
+    //runtime
+    int     SplineDim = 3;
 };
 
 // -------------- main -----------------

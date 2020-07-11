@@ -84,7 +84,7 @@ bool BsplineBasis1d::Locate(double x, int *idx, double *xf) const
     }
 
     double xi = (x - xl)/dx*nint;
-    int _idx = (int)xi;
+    int _idx = floor(xi);
     if (_idx < 0 || _idx >= nint)
         return false;
 

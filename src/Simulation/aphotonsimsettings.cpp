@@ -449,9 +449,24 @@ void APhotonSim_SpatDistSettings::writeToJson(QJsonObject &json) const
 {
     json["Enabled"] = bEnabled;
     json["Mode"] = Mode;
+
+    QJsonArray ar;
+    for (const A3DPosProb & r : LoadedMatrix)
+    {
+        QJsonArray el;
+        el << r.R[0] << r.R[1] << r.R[2] << r.Probability;
+        ar.push_back(el);
+    }
+    json["Matrix"] = ar;
     json["Formula"] = Formula;
     json["Spline"] = Spline;
 
+    json["RangeX"] = RangeX;
+    json["RangeY"] = RangeY;
+    json["RangeZ"] = RangeZ;
+    json["BinsX"] = BinsX;
+    json["BinsY"] = BinsY;
+    json["BinsZ"] = BinsZ;
 }
 
 void APhotonSim_SpatDistSettings::readFromJson(const QJsonObject &json)
@@ -478,7 +493,6 @@ void APhotonSim_SpatDistSettings::readFromJson(const QJsonObject &json)
             LoadedMatrix << pp;
         }
     }
-
     parseJson(json, "Formula", Formula);
     parseJson(json, "Spline", Spline);
 

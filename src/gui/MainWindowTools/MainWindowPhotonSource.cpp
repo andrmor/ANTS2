@@ -159,6 +159,13 @@ void MainWindow::SimPointSourcesConfigToJson(QJsonObject &jsonMaster)
   pdjson["Cone"] = ui->ledConeAngle->text().toDouble();
   json["PhotonDirectionOptions"] = pdjson;
 
+  //testing new system, to be updated later!
+  {
+      QJsonObject js;
+      SimulationManager->Settings.photSimSet.SpatialDistSettings.writeToJson(js);
+      json["SpatialDistOptions"] = js;
+  }
+
   QJsonObject spjson;
       spjson["SingleX"] = ui->ledSingleX->text().toDouble();
       spjson["SingleY"] = ui->ledSingleY->text().toDouble();

@@ -3344,34 +3344,42 @@ void MainWindow::on_pnShowHideAdvanced_toggled(bool checked)
 void MainWindow::on_pbYellow_clicked()
 {
    bool fYellow = false;
+   QTabBar * tb = ui->twAdvSimOpt->tabBar();
 
    if (!ui->cbRandomDir->isChecked())
-     {
+   {
        fYellow = true;
-       ui->twAdvSimOpt->tabBar()->setTabIcon(0, Rwindow->YellowIcon);
-     }
-   else ui->twAdvSimOpt->tabBar()->setTabIcon(0, QIcon());
+       tb->setTabIcon(0, Rwindow->YellowIcon);
+   }
+   else tb->setTabIcon(0, QIcon());
 
    if (ui->cbFixWavelengthPointSource->isChecked() && ui->cbWaveResolved->isChecked())
-     {
+   {
        fYellow = true;
-       ui->twAdvSimOpt->tabBar()->setTabIcon(1, Rwindow->YellowIcon);
-     }
-   else ui->twAdvSimOpt->tabBar()->setTabIcon(1, QIcon());
+       tb->setTabIcon(1, Rwindow->YellowIcon);
+   }
+   else tb->setTabIcon(1, QIcon());
 
    if (ui->cbNumberOfRuns->isChecked())
-     {
+   {
        fYellow = true;
-       ui->twAdvSimOpt->tabBar()->setTabIcon(2, Rwindow->YellowIcon);
-     }
-   else ui->twAdvSimOpt->tabBar()->setTabIcon(2, QIcon());
+       tb->setTabIcon(2, Rwindow->YellowIcon);
+   }
+   else tb->setTabIcon(2, QIcon());
 
    if (ui->cobScintTypePointSource->currentIndex() != 0 )
-     {
+   {
        fYellow = true;
-       ui->twAdvSimOpt->tabBar()->setTabIcon(3, Rwindow->YellowIcon);
-     }
-   else ui->twAdvSimOpt->tabBar()->setTabIcon(3, QIcon());
+       tb->setTabIcon(3, Rwindow->YellowIcon);
+   }
+   else tb->setTabIcon(3, QIcon());
+
+   if (ui->cbCND_Enable->isChecked())
+   {
+       fYellow = true;
+       tb->setTabIcon(4, Rwindow->YellowIcon);
+   }
+   else tb->setTabIcon(4, QIcon());
 
    ui->labAdvancedOn->setVisible(fYellow);
 }
@@ -4834,4 +4842,110 @@ void MainWindow::on_cobNodeGenerationMode_customContextMenuRequested(const QPoin
     if (index >= ui->cobNodeGenerationMode->count()) index = 0;
     ui->cobNodeGenerationMode->setCurrentIndex(index);
     on_pbUpdateSimConfig_clicked();
+}
+
+void MainWindow::on_cobCND_Mode_currentIndexChanged(int index)
+{
+    ui->swCND_Mode->setCurrentIndex(index);
+    ui->fCND_RangeAndBins->setEnabled(index != 0);
+}
+
+void MainWindow::on_pbCND_applyChanges_clicked()
+{
+    applyCNDchanges();
+}
+
+void MainWindow::applyCNDchanges()
+{
+    APhotonSim_SpatDistSettings & ds = SimulationManager->Settings.photSimSet.SpatialDistSettings;
+
+    ds.bEnabled = ui->cbCND_Enable->isChecked();
+    ds.Mode = static_cast<APhotonSim_SpatDistSettings::ModeEnum>(ui->cobCND_Mode->currentIndex());
+    ds.Formula = ui->leCND_Formula->text();
+    ds.RangeX = ui->ledCND_RangeX->text().toDouble();
+    ds.RangeY = ui->ledCND_RangeY->text().toDouble();
+    ds.RangeZ = ui->ledCND_RangeZ->text().toDouble();
+    ds.BinsX  = ui->sbCND_BinsX->value();
+    ds.BinsY  = ui->sbCND_BinsY->value();
+    ds.BinsZ  = ui->sbCND_BinsZ->value();
+}
+
+void MainWindow::on_pbCND_ShowMatrix_clicked()
+{
+    APhotonSim_SpatDistSettings & ds = SimulationManager->Settings.photSimSet.SpatialDistSettings;
+    QString str;
+    for (const A3DPosProb r : ds.LoadedMatrix)
+        str.append(QString("%1, %2, %3 \t -> %4\n").arg(r.R[0]).arg(r.R[1]).arg(r.R[2]).arg(r.Probability));
+    message1(str, "Matrix", this);
+}
+
+void MainWindow::on_pbCND_LoadMatrix_clicked()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, "Load matrix", GlobSet.LastOpenDir, "Data files (*.dat, *.txt);;All files (*)");
+    if (fileName.isEmpty()) return;
+    GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+
+    QVector<double> x, y, z, p;
+    QVector<QVector<double> *> vecs = {&x, &y, &z, &p};
+
+    QString err = LoadDoubleVectorsFromFile(fileName, vecs);
+    if (!err.isEmpty())
+    {
+        message(err, this);
+        return;
+    }
+
+    APhotonSim_SpatDistSettings & ds = SimulationManager->Settings.photSimSet.SpatialDistSettings;
+    ds.LoadedMatrix.reserve(x.size());
+    for (int i=0; i<x.size(); i++)
+        ds.LoadedMatrix << A3DPosProb(x.at(i), y.at(i), z.at(i), p.at(i));
+
+    updateCNDgui();
+}
+
+void MainWindow::on_pbCND_ShowSpline_clicked()
+{
+    APhotonSim_SpatDistSettings & ds = SimulationManager->Settings.photSimSet.SpatialDistSettings;
+    message1(ds.Spline, "Spline", this);
+}
+
+void MainWindow::on_pbCND_LoadSpline_clicked()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, "Load spline", GlobSet.LastOpenDir, "Data files (*.dat, *.txt);;All files (*)");
+    if (fileName.isEmpty()) return;
+    GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+
+    APhotonSim_SpatDistSettings & ds = SimulationManager->Settings.photSimSet.SpatialDistSettings;
+    QString str;
+    bool ok = LoadTextFromFile(fileName, str);
+    if (!ok)
+    {
+        message("Load failed!", this);
+        return;
+    }
+    ds.Spline = str;
+    updateCNDgui();
+}
+
+void MainWindow::updateCNDgui()
+{
+    APhotonSim_SpatDistSettings & ds = SimulationManager->Settings.photSimSet.SpatialDistSettings;
+
+    ui->cbCND_Enable->setChecked(ds.bEnabled);
+    ui->cobCND_Mode->setCurrentIndex(ds.Mode);
+    ui->pbCND_ShowMatrix->setEnabled(!ds.LoadedMatrix.isEmpty());
+    ui->leCND_Formula->setText(ds.Formula);
+    ui->pbCND_ShowSpline->setEnabled(!ds.Spline.isEmpty());
+
+    ui->ledCND_RangeX->setText(QString::number(ds.RangeX));
+    ui->ledCND_RangeY->setText(QString::number(ds.RangeY));
+    ui->ledCND_RangeZ->setText(QString::number(ds.RangeZ));
+    ui->sbCND_BinsX->setValue(ds.BinsX);
+    ui->sbCND_BinsY->setValue(ds.BinsY);
+    ui->sbCND_BinsZ->setValue(ds.BinsZ);
+}
+
+void MainWindow::on_pbCND_help_clicked()
+{
+
 }

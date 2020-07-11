@@ -607,6 +607,20 @@ private slots:
 
     void on_cobNodeGenerationMode_customContextMenuRequested(const QPoint &pos);
 
+    void on_cobCND_Mode_currentIndexChanged(int index);
+
+    void on_pbCND_applyChanges_clicked();
+
+    void on_pbCND_ShowMatrix_clicked();
+
+    void on_pbCND_LoadMatrix_clicked();
+
+    void on_pbCND_ShowSpline_clicked();
+
+    void on_pbCND_LoadSpline_clicked();
+
+    void on_pbCND_help_clicked();
+
 public slots:
     void on_pbRebuildDetector_clicked();
     void onRequestDetectorGuiUpdate();     // called to update GUI related to Detector
@@ -626,6 +640,8 @@ private:
     void showPDEorSPEfactors(bool bShowPDE);
     void randomizePDEorSPEfactors(bool bDoPDE, bool bUniform, double min, double max, double mean, double sigma);
     void updateG4ProgressBarVisibility();
+    void applyCNDchanges();
+    void updateCNDgui();
 
 #ifdef __USE_ANTS_PYTHON__
     void createPythonScriptWindow();

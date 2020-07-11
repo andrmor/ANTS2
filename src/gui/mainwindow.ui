@@ -39,7 +39,7 @@
      <enum>QTabWidget::Rounded</enum>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tabConfig">
      <attribute name="title">
@@ -9447,6 +9447,322 @@ Right click: toggle build photon tracks. Also switches of building particle trac
              </property>
             </widget>
            </widget>
+           <widget class="QWidget" name="tab_3">
+            <attribute name="title">
+             <string>Distributed</string>
+            </attribute>
+            <widget class="QCheckBox" name="cbCND_Enable">
+             <property name="geometry">
+              <rect>
+               <x>9</x>
+               <y>7</y>
+               <width>391</width>
+               <height>22</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Distribute photon emission positions for each node using</string>
+             </property>
+            </widget>
+            <widget class="QComboBox" name="cobCND_Mode">
+             <property name="geometry">
+              <rect>
+               <x>408</x>
+               <y>4</y>
+               <width>91</width>
+               <height>27</height>
+              </rect>
+             </property>
+             <property name="font">
+              <font>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <item>
+              <property name="text">
+               <string>Matrix</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>TFormula</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Spline</string>
+              </property>
+             </item>
+            </widget>
+            <widget class="QStackedWidget" name="swCND_Mode">
+             <property name="geometry">
+              <rect>
+               <x>3</x>
+               <y>32</y>
+               <width>500</width>
+               <height>71</height>
+              </rect>
+             </property>
+             <property name="currentIndex">
+              <number>2</number>
+             </property>
+             <widget class="QWidget" name="page_16">
+              <widget class="QPushButton" name="pbCND_ShowMatrix">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="geometry">
+                <rect>
+                 <x>140</x>
+                 <y>20</y>
+                 <width>102</width>
+                 <height>27</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Show matrix</string>
+               </property>
+              </widget>
+              <widget class="QPushButton" name="pbCND_LoadMatrix">
+               <property name="geometry">
+                <rect>
+                 <x>250</x>
+                 <y>20</y>
+                 <width>102</width>
+                 <height>27</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Load matrix</string>
+               </property>
+              </widget>
+             </widget>
+             <widget class="QWidget" name="page_17">
+              <widget class="QLineEdit" name="leCND_Formula">
+               <property name="geometry">
+                <rect>
+                 <x>0</x>
+                 <y>30</y>
+                 <width>501</width>
+                 <height>27</height>
+                </rect>
+               </property>
+              </widget>
+              <widget class="QLabel" name="label_110">
+               <property name="geometry">
+                <rect>
+                 <x>11</x>
+                 <y>10</y>
+                 <width>491</width>
+                 <height>17</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>TFormula for emission probability, use x,y and z for local coordinates</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </widget>
+             <widget class="QWidget" name="page_18">
+              <widget class="QPushButton" name="pbCND_LoadSpline">
+               <property name="geometry">
+                <rect>
+                 <x>250</x>
+                 <y>20</y>
+                 <width>102</width>
+                 <height>27</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Load spline</string>
+               </property>
+              </widget>
+              <widget class="QPushButton" name="pbCND_ShowSpline">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="geometry">
+                <rect>
+                 <x>140</x>
+                 <y>20</y>
+                 <width>102</width>
+                 <height>27</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Show spline</string>
+               </property>
+              </widget>
+             </widget>
+            </widget>
+            <widget class="QFrame" name="fCND_RangeAndBins">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="geometry">
+              <rect>
+               <x>137</x>
+               <y>104</y>
+               <width>221</width>
+               <height>100</height>
+              </rect>
+             </property>
+             <property name="frameShape">
+              <enum>QFrame::NoFrame</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Raised</enum>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_6">
+              <property name="leftMargin">
+               <number>2</number>
+              </property>
+              <property name="topMargin">
+               <number>2</number>
+              </property>
+              <property name="rightMargin">
+               <number>2</number>
+              </property>
+              <property name="bottomMargin">
+               <number>2</number>
+              </property>
+              <property name="horizontalSpacing">
+               <number>10</number>
+              </property>
+              <property name="verticalSpacing">
+               <number>2</number>
+              </property>
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_143">
+                <property name="text">
+                 <string>Y:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="2">
+               <widget class="QSpinBox" name="sbCND_BinsZ">
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>10000</number>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="2">
+               <widget class="QSpinBox" name="sbCND_BinsX">
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>10000</number>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QLineEdit" name="ledCND_RangeY">
+                <property name="text">
+                 <string>10</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="2">
+               <widget class="QSpinBox" name="sbCND_BinsY">
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>10000</number>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QLineEdit" name="ledCND_RangeX">
+                <property name="text">
+                 <string>10</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_113">
+                <property name="text">
+                 <string>X:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QLabel" name="label_144">
+                <property name="text">
+                 <string>Z:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QLineEdit" name="ledCND_RangeZ">
+                <property name="text">
+                 <string>10</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="2">
+               <widget class="QLabel" name="label_112">
+                <property name="text">
+                 <string>Bins:</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLabel" name="label_111">
+                <property name="text">
+                 <string>Range:</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QPushButton" name="pbCND_applyChanges">
+             <property name="geometry">
+              <rect>
+               <x>400</x>
+               <y>106</y>
+               <width>94</width>
+               <height>51</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>...apply
+Changes</string>
+             </property>
+            </widget>
+            <widget class="QPushButton" name="pbCND_help">
+             <property name="geometry">
+              <rect>
+               <x>25</x>
+               <y>150</y>
+               <width>61</width>
+               <height>27</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Help</string>
+             </property>
+            </widget>
+            <zorder>cbCND_Enable</zorder>
+            <zorder>swCND_Mode</zorder>
+            <zorder>fCND_RangeAndBins</zorder>
+            <zorder>cobCND_Mode</zorder>
+            <zorder>pbCND_applyChanges</zorder>
+            <zorder>pbCND_help</zorder>
+           </widget>
           </widget>
           <widget class="QPushButton" name="pbYellow">
            <property name="geometry">
@@ -13683,8 +13999,8 @@ multiply to loaded data</string>
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>316</x>
-     <y>378</y>
+     <x>322</x>
+     <y>409</y>
     </hint>
     <hint type="destinationlabel">
      <x>438</x>
@@ -13699,12 +14015,12 @@ multiply to loaded data</string>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>181</x>
-     <y>377</y>
+     <x>187</x>
+     <y>408</y>
     </hint>
     <hint type="destinationlabel">
-     <x>429</x>
-     <y>414</y>
+     <x>431</x>
+     <y>445</y>
     </hint>
    </hints>
   </connection>
@@ -13731,8 +14047,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>316</x>
-     <y>378</y>
+     <x>322</x>
+     <y>409</y>
     </hint>
     <hint type="destinationlabel">
      <x>331</x>
@@ -13747,8 +14063,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>181</x>
-     <y>377</y>
+     <x>187</x>
+     <y>408</y>
     </hint>
     <hint type="destinationlabel">
      <x>328</x>
@@ -14723,8 +15039,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>372</x>
-     <y>261</y>
+     <x>336</x>
+     <y>259</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14739,8 +15055,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>388</x>
-     <y>261</y>
+     <x>386</x>
+     <y>259</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14755,8 +15071,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>358</x>
-     <y>261</y>
+     <x>336</x>
+     <y>259</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14771,8 +15087,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>388</x>
-     <y>261</y>
+     <x>386</x>
+     <y>259</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14787,8 +15103,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>355</x>
-     <y>412</y>
+     <x>361</x>
+     <y>443</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14803,8 +15119,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>353</x>
-     <y>384</y>
+     <x>359</x>
+     <y>415</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14851,8 +15167,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>293</x>
-     <y>378</y>
+     <x>299</x>
+     <y>409</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14867,8 +15183,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>198</x>
-     <y>420</y>
+     <x>212</x>
+     <y>483</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14883,8 +15199,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>198</x>
-     <y>420</y>
+     <x>324</x>
+     <y>483</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14899,8 +15215,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>198</x>
-     <y>420</y>
+     <x>436</x>
+     <y>483</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14915,8 +15231,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>150</x>
-     <y>377</y>
+     <x>156</x>
+     <y>408</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -14931,8 +15247,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>322</x>
-     <y>409</y>
+     <x>328</x>
+     <y>440</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -15299,8 +15615,8 @@ multiply to loaded data</string>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>152</x>
-     <y>377</y>
+     <x>158</x>
+     <y>408</y>
     </hint>
     <hint type="destinationlabel">
      <x>176</x>
@@ -15315,8 +15631,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>258</x>
-     <y>377</y>
+     <x>264</x>
+     <y>408</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -15443,8 +15759,8 @@ multiply to loaded data</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>157</x>
-     <y>252</y>
+     <x>332</x>
+     <y>250</y>
     </hint>
     <hint type="destinationlabel">
      <x>227</x>
@@ -15459,8 +15775,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>157</x>
-     <y>252</y>
+     <x>332</x>
+     <y>250</y>
     </hint>
     <hint type="destinationlabel">
      <x>41</x>
@@ -15529,6 +15845,166 @@ multiply to loaded data</string>
     <hint type="destinationlabel">
      <x>432</x>
      <y>464</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cobCND_Mode</sender>
+   <signal>activated(int)</signal>
+   <receiver>pbCND_applyChanges</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>451</x>
+     <y>390</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>458</x>
+     <y>492</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledCND_RangeX</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbCND_applyChanges</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>255</x>
+     <y>506</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>435</x>
+     <y>499</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledCND_RangeY</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbCND_applyChanges</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>269</x>
+     <y>534</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>456</x>
+     <y>514</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sbCND_BinsZ</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbCND_applyChanges</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>304</x>
+     <y>562</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>473</x>
+     <y>514</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledCND_RangeZ</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbCND_applyChanges</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>229</x>
+     <y>560</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>458</x>
+     <y>511</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sbCND_BinsY</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbCND_applyChanges</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>356</x>
+     <y>537</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>443</x>
+     <y>526</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sbCND_BinsX</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbCND_applyChanges</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>346</x>
+     <y>509</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>430</x>
+     <y>508</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbCND_Enable</sender>
+   <signal>clicked()</signal>
+   <receiver>pbCND_applyChanges</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>388</x>
+     <y>396</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>425</x>
+     <y>482</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>leCND_Formula</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbCND_applyChanges</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>494</x>
+     <y>452</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>497</x>
+     <y>491</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbCND_Enable</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>pbYellow</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>329</x>
+     <y>389</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>336</x>
+     <y>347</y>
     </hint>
    </hints>
   </connection>

@@ -414,6 +414,12 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
   JsonToComboBox(pdj, "Fixed_or_Cone", ui->cobFixedDirOrCone);
   JsonToCheckbox(pdj, "Random", ui->cbRandomDir);
 
+  //testing new system, to be updated later!
+  QJsonObject sdsJson;
+  if (parseJson(pojs, "SpatialDistOptions", sdsJson))
+    SimulationManager->Settings.photSimSet.SpatialDistSettings.readFromJson(sdsJson);
+  updateCNDgui();
+
   //Single position options
   QJsonObject spj = pojs["SinglePositionOptions"].toObject();
   JsonToLineEditDouble(spj, "SingleX", ui->ledSingleX);

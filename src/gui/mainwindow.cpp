@@ -4947,5 +4947,29 @@ void MainWindow::updateCNDgui()
 
 void MainWindow::on_pbCND_help_clicked()
 {
+    QString s;
 
+    s =     "When activated, this option allows to distribute photon generation positions\n"
+            "by providing distribution of relative probabilities in local coordinates of the node.\n"
+            "There are 3 possible modes:\n"
+            "1.Matrix\n"
+            "The user provides a matrix with probability data.\n"
+            "The matrix is loaded from a file, each new line with format:\n"
+            "x, y, z, probability     (delimeter can be space, comma or tab)\n"
+            "2. TFormula\n"
+            "See https://root.cern.ch/doc/master/classTFormula.html\n"
+            "The formula should give relative probability as a function of x y and z\n"
+            "3. Spline\n"
+            "The probability is given by a spline, defined using Spline123 library:\n"
+            "https://github.com/vovasolo/spline123/\n"
+            "The user provides the string generated for the defined spline,\n"
+            "using, e.g., std::string jsontext = bs1->GetJsonString() in C++\n"
+            "or the Python tools provided in the library.\n"
+            "The spline string should be loaded from a file.\n"
+            "\n"
+            "Except the 'Matrix' mode, where the emission points are given directly,\n"
+            "the user defines the spatial ranges and number of bins for each direction.\n"
+            "Photons are generated from the defined bin centers, no 'blurring' is applied.";
+
+    message1(s, "Help on spatial in-node distribution tools", this);
 }

@@ -4881,7 +4881,7 @@ void MainWindow::on_pbCND_ShowMatrix_clicked()
 
 void MainWindow::on_pbCND_LoadMatrix_clicked()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, "Load matrix", GlobSet.LastOpenDir, "Data files (*.dat, *.txt);;All files (*)");
+    QString fileName = QFileDialog::getOpenFileName(this, "Load matrix", GlobSet.LastOpenDir, "Data files (*.txt *.dat);;All files (*)");
     if (fileName.isEmpty()) return;
     GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
@@ -4896,6 +4896,7 @@ void MainWindow::on_pbCND_LoadMatrix_clicked()
     }
 
     APhotonSim_SpatDistSettings & ds = SimulationManager->Settings.photSimSet.SpatialDistSettings;
+    ds.LoadedMatrix.clear();
     ds.LoadedMatrix.reserve(x.size());
     for (int i=0; i<x.size(); i++)
         ds.LoadedMatrix << A3DPosProb(x.at(i), y.at(i), z.at(i), p.at(i));
@@ -4911,7 +4912,7 @@ void MainWindow::on_pbCND_ShowSpline_clicked()
 
 void MainWindow::on_pbCND_LoadSpline_clicked()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, "Load spline", GlobSet.LastOpenDir, "Data files (*.dat, *.txt);;All files (*)");
+    QString fileName = QFileDialog::getOpenFileName(this, "Load spline", GlobSet.LastOpenDir, "Text files (*.txt);;All files (*)");
     if (fileName.isEmpty()) return;
     GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 

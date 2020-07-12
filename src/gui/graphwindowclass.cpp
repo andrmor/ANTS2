@@ -2337,6 +2337,7 @@ void GraphWindowClass::BasketCustomContextMenuRequested(const QPoint &pos)
         if (ok && !text.isEmpty())
             Basket->rename(row, text.simplified());
         UpdateBasketGUI();
+        Explorer->updateGui();
     }
     else if (selectedItem == onTop)
         Basket_DrawOnTop(row);

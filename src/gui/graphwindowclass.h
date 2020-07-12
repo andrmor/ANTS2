@@ -263,6 +263,8 @@ private slots:
 
     void on_pbManipulate_clicked();
 
+    void on_cbShowCross_toggled(bool checked);
+
 private:
     MainWindow *MW;
     Ui::GraphWindowClass *ui;

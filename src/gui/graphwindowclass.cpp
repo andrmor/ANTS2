@@ -86,11 +86,8 @@ GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
     ui->sProjBins->setEnabled(false);
     showHintInStatus();
 
-    QString str = "Cursor coordinates ";
-    str += QChar(8596);
-    str += QChar(8597);
-    str += " :";
-    ui->labCurCoorLab->setText(str);
+    ui->labX->setText(QChar(8596));
+    ui->labY->setText(QChar(8597));
 
     //window flags
     Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
@@ -687,9 +684,16 @@ void GraphWindowClass::showHintInStatus()
 void GraphWindowClass::setShowCursorPosition(bool flag)
 {
     if (RasterWindow) RasterWindow->ShowCursorPosition = flag;
+    ui->frCursor->setVisible(flag);
 
-    ui->labCursor->setVisible(flag);
-    ui->labCurCoorLab->setVisible(flag);
+    if (!flag && ui->cbShowCross->isChecked()) ui->cbShowCross->setChecked(false);
+}
+
+void GraphWindowClass::on_cbShowCross_toggled(bool checked)
+{
+    RasterWindow->fCanvas->SetCrosshair(checked);
+
+    if (!checked) RedrawAll();
 }
 
 void GraphWindowClass::OnBusyOn()
@@ -706,23 +710,6 @@ void GraphWindowClass::OnBusyOff()
 
 void GraphWindowClass::mouseMoveEvent(QMouseEvent *event)
 {
-    if(RasterWindow->isVisible())
-    {
-        QMainWindow::mouseMoveEvent(event);
-        return;
-    }
-
-    /*
-    double x, y;
-    QPoint mouseInGV = event->pos() - gvOver->pos();
-    RasterWindow->PixelToXY(mouseInGV.x(), mouseInGV.y(), x, y);
-    //QString str = "Cursor coordinates: " + QString::number(x, 'g', 4);
-    QString str = QString::number(x, 'g', 4);
-    str += " : " + QString::number(y, 'g', 4);
-    //setWindowTitle(str);
-    ui->labCursor->setText(str);
-    */
-
     QMainWindow::mouseMoveEvent(event);
 }
 
@@ -1700,13 +1687,6 @@ void GraphWindowClass::on_pbExitToolMode_clicked()
     changeOverlayMode(false);
 }
 
-//ui->pbToolboxDragMode->setEnabled(checked);
-//ui->fRange->setEnabled(!checked);
-//ui->fGrid->setEnabled(!checked);
-//ui->fLog->setEnabled(!checked);
-//ui->cbShowLegend->setEnabled(!checked);
-//ui->leOptions->setEnabled(!checked);
-
 void GraphWindowClass::on_pbToolboxDragMode_clicked()
 {
     ui->ledAngle->setText("0");
@@ -2186,23 +2166,8 @@ void GraphWindowClass::deletePressed()
 
 void GraphWindowClass::onCursorPositionReceived(double x, double y, bool bOn)
 {
-    QString str;
-
-    if (bOn)
-    {
-        /*
-        str = QChar(8596);
-        str += " " + QString::number(x, 'g', 4);
-        str += "  ";
-        str += QChar(8597);
-        str += " " + QString::number(y, 'g', 4);
-        */
-        str += QString::number(x, 'g', 4) + "  "  + QString::number(y, 'g', 4);
-    }
-    else
-        str = "--";
-
-    ui->labCursor->setText(str);
+    ui->labCursorX->setText(bOn ? QString::number(x, 'g', 4) : "--");
+    ui->labCursorY->setText(bOn ? QString::number(y, 'g', 4) : "--");
 }
 
 void GraphWindowClass::MakeCopyOfDrawObjects()

@@ -310,6 +310,7 @@ private:
     void updateSecondaryAxis(TGaxis *gaxis, const char *opt);
     void showHintInStatus();
     void setShowCursorPosition(bool flag);
+    void fixGraphFrame();
 };
 
 #endif // GRAPHWINDOWCLASS_H

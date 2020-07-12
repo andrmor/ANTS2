@@ -71,6 +71,8 @@
 #include "TVectorD.h"
 #include "TTree.h"
 #include "TPavesText.h"
+#include "TGaxis.h"
+#include "TFrame.h"
 
 GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
   AGuiWindow("graph", parent), MW(mw),
@@ -615,7 +617,6 @@ void GraphWindowClass::RegisterTObject(TObject *obj)
     tmpTObjects.append(obj);
 }
 
-#include "TGaxis.h"
 void GraphWindowClass::doDraw(TObject *obj, const char *opt, bool DoUpdate)
 {
     SetAsActiveRootWindow();
@@ -635,6 +636,18 @@ void GraphWindowClass::doDraw(TObject *obj, const char *opt, bool DoUpdate)
     QString options(opt);
     if (!options.contains("same", Qt::CaseInsensitive))
         UpdateGuiControlsForMainObject(obj->ClassName(), options);
+
+    fixGraphFrame();
+}
+
+void GraphWindowClass::fixGraphFrame()
+{
+    TVirtualPad * pad = RasterWindow->fCanvas->GetPad(0);
+    if (pad)
+    {
+        TFrame * frame = pad->GetFrame();
+        if (frame) frame->SetBit(TBox::kCannotMove);
+    }
 }
 
 void GraphWindowClass::updateSecondaryAxis(TGaxis * gaxis, const char *opt)
@@ -985,6 +998,8 @@ void GraphWindowClass::RedrawAll()
     qApp->processEvents();
     RasterWindow->fCanvas->Update();
     UpdateControls();
+
+    fixGraphFrame();
 }
 
 void GraphWindowClass::clearTmpTObjects()

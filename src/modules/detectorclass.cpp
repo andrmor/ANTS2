@@ -428,6 +428,13 @@ bool DetectorClass::makeSandwichDetector()
   //making detector  
   populateGeoManager();
 
+  //update world AGeoObject properties to be used in GUI (AGeoTreeWidget -> AWorldDelegate)
+  AGeoBox * box = static_cast<AGeoBox*>(Sandwich->World->Shape);
+  box->dx = WorldSizeXY;
+  box->dz = WorldSizeZ;
+  ATypeWorldObject * typeWorld = static_cast<ATypeWorldObject *>(Sandwich->World->ObjectType);
+  typeWorld->bFixedSize = fWorldSizeFixed;
+
   //post-construction load
   PMs->readInividualOverridesFromJson(js);
   PMs->readElectronicsFromJson(js);

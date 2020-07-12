@@ -919,11 +919,14 @@ void AGeoObject::clearAll()
 
 void AGeoObject::updateWorldSize(double &XYm, double &Zm)
 {    
-    double mp = std::max(fabs(Position[0]),fabs(Position[1]));
-    mp = std::max(fabs(mp), fabs(Position[2]));
-    mp += Shape->maxSize();
-    XYm = std::max(mp, XYm);
-    Zm = std::max(mp, Zm);
+    if (!isWorld())
+    {
+        double mp = std::max(fabs(Position[0]),fabs(Position[1]));
+        mp = std::max(fabs(mp), fabs(Position[2]));
+        mp += Shape->maxSize();
+        XYm = std::max(mp, XYm);
+        Zm = std::max(mp, Zm);
+    }
 
     if (ObjectType->isArray())
       {

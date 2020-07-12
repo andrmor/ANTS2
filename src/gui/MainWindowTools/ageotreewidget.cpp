@@ -1395,10 +1395,12 @@ void AGeoWidget::UpdateGui()
     pbConfirm->setEnabled(true);
     pbCancel->setEnabled(true);
 
-    AGeoObject* contObj = CurrentObject->Container;
-    if (!contObj) return; //true only for World
+    //AGeoObject* contObj = CurrentObject->Container;
+    //if (!contObj) return; //true only for World
 
-    if (CurrentObject->ObjectType->isSlab())        // SLAB or LIGHTGUIDE
+    if (CurrentObject->ObjectType->isWorld())
+        GeoDelegate = new AWorldDelegate(tw->Sandwich->Materials, this);
+    else if (CurrentObject->ObjectType->isSlab())        // SLAB or LIGHTGUIDE
         GeoDelegate = createAndAddSlabDelegate();
     else if (CurrentObject->ObjectType->isGridElement())
         GeoDelegate = createAndAddGridElementDelegate();
@@ -1499,19 +1501,19 @@ AGeoBaseDelegate *AGeoWidget::createAndAddMonitorDelegate()
 
 void AGeoWidget::onObjectSelectionChanged(const QString SelectedObject)
 {  
-  CurrentObject = 0;
-  //qDebug() << "Object selection changed! ->" << SelectedObject;
-  ClearGui();
+    CurrentObject = nullptr;
+    //qDebug() << "Object selection changed! ->" << SelectedObject;
+    ClearGui();
 
-  AGeoObject* obj = World->findObjectByName(SelectedObject);
-  if (!obj) return;
+    AGeoObject* obj = World->findObjectByName(SelectedObject);
+    if (!obj) return;
 
-  if (obj->ObjectType->isWorld()) return;
+    //if (obj->ObjectType->isWorld()) return;
 
-  CurrentObject = obj;
-  //qDebug() << "New current object:"<<CurrentObject->Name;
-  UpdateGui();
-  //qDebug() << "OnObjectSelection procedure completed";
+    CurrentObject = obj;
+    //qDebug() << "New current object:"<<CurrentObject->Name;
+    UpdateGui();
+    //qDebug() << "OnObjectSelection procedure completed";
 }
 
 void AGeoWidget::onStartEditing()
@@ -1687,6 +1689,17 @@ void AGeoWidget::onConfirmPressed()
     if (!ok) return;
 
     GeoDelegate->updateObject(CurrentObject);
+
+    AWorldDelegate * del = dynamic_cast<AWorldDelegate*>(GeoDelegate);
+    if (del)
+    {
+        AGeoBox * box = static_cast<AGeoBox*>(World->Shape);
+        double WorldSizeXY = box->dx;
+        double WorldSizeZ  = box->dz;
+        ATypeWorldObject * typeWorld = static_cast<ATypeWorldObject *>(World->ObjectType);
+        bool fWorldSizeFixed = typeWorld->bFixedSize;
+        emit tw->RequestUpdateWorldSize(WorldSizeXY, WorldSizeZ, fWorldSizeFixed);
+    }
 
     exitEditingMode();
     QString name = CurrentObject->Name;
@@ -4402,3 +4415,120 @@ QString AGeoTreeWidget::makeLinePropertiesString(AGeoObject *obj)
             QString::number(obj->style) + " )";
 }
 
+AWorldDelegate::AWorldDelegate(const QStringList & materials, QWidget * ParentWidget) :
+    AGeoBaseDelegate(ParentWidget)
+{
+    QFrame * frMainFrame = new QFrame();
+    frMainFrame->setFrameShape(QFrame::Box);
+
+    Widget = frMainFrame;
+    Widget->setContextMenuPolicy(Qt::CustomContextMenu);
+
+    QPalette palette = frMainFrame->palette();
+    palette.setColor( Widget->backgroundRole(), QColor( 255, 255, 255 ) );
+    frMainFrame->setPalette( palette );
+    frMainFrame->setAutoFillBackground( true );
+
+    QVBoxLayout * lMF = new QVBoxLayout();
+      lMF->setContentsMargins(5,5,5,2);
+
+      QLabel * labType = new QLabel("World");
+      labType->setAlignment(Qt::AlignCenter);
+      QFont font = labType->font();
+      font.setBold(true);
+      labType->setFont(font);
+      lMF->addWidget(labType);
+
+      QHBoxLayout* hl = new QHBoxLayout();
+        hl->setContentsMargins(2,0,2,0);
+
+        QLabel * lMat = new QLabel();
+        lMat->setText("Material:");
+        lMat->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+        lMat->setMaximumWidth(60);
+        hl->addWidget(lMat);
+
+        cobMat = new QComboBox();
+        cobMat->setContextMenuPolicy(Qt::NoContextMenu);
+        cobMat->addItems(materials);
+        //connect(cobMat, &QComboBox::activated, this, &AWorldDelegate::onContentChanged);
+        connect(cobMat, SIGNAL(activated(int)), this, SLOT(onContentChanged()));
+        cobMat->setMinimumWidth(120);
+        hl->addWidget(cobMat);
+      lMF->addLayout(hl);
+
+      QHBoxLayout * h = new QHBoxLayout();
+            h->addStretch();
+            cbFixedSize = new QCheckBox("Fixed size");
+            connect(cbFixedSize, &QCheckBox::clicked, this, &AWorldDelegate::onContentChanged);
+            h->addWidget(cbFixedSize);
+
+            QVBoxLayout * v1 = new QVBoxLayout();
+                v1->setContentsMargins(2,0,2,0);
+                v1->addWidget(new QLabel("Size XY:"));
+                v1->addWidget(new QLabel("Size Z:"));
+            h->addLayout(v1);
+
+            QVBoxLayout * v2 = new QVBoxLayout();
+                v2->setContentsMargins(2,0,2,0);
+                ledSizeXY = new QLineEdit();
+                connect(ledSizeXY, &QLineEdit::textChanged, this, &AWorldDelegate::onContentChanged);
+                v2->addWidget(ledSizeXY);
+                ledSizeZ  = new QLineEdit();
+                connect(ledSizeZ, &QLineEdit::textChanged, this, &AWorldDelegate::onContentChanged);
+                v2->addWidget(ledSizeZ);
+            h->addLayout(v2);
+            h->addStretch();
+    lMF->addLayout(h);
+
+    frMainFrame->setLayout(lMF);
+
+    QDoubleValidator* dv = new QDoubleValidator(this);
+    dv->setNotation(QDoubleValidator::ScientificNotation);
+    ledSizeXY->setValidator(dv);
+    ledSizeZ->setValidator(dv);
+}
+
+const QString AWorldDelegate::getName() const
+{
+    return "World";
+}
+
+bool AWorldDelegate::isValid(AGeoObject *)
+{
+    return true;
+}
+
+void AWorldDelegate::updateObject(AGeoObject * obj) const
+{
+    obj->Material = cobMat->currentIndex();
+    if (obj->Material == -1) obj->Material = 0; //protection
+
+    AGeoBox * box = static_cast<AGeoBox*>(obj->Shape);
+    box->dx = 0.5 * ledSizeXY->text().toDouble();
+    box->dz = 0.5 * ledSizeZ->text().toDouble();
+    ATypeWorldObject * typeWorld = static_cast<ATypeWorldObject *>(obj->ObjectType);
+    typeWorld->bFixedSize = cbFixedSize->isChecked();
+}
+
+void AWorldDelegate::Update(const AGeoObject *obj)
+{
+    int imat = obj->Material;
+    if (imat < 0 || imat >= cobMat->count())
+    {
+        qWarning() << "Material index out of bounds!";
+        imat = -1;
+    }
+    cobMat->setCurrentIndex(imat);
+
+    const AGeoBox * box = static_cast<const AGeoBox*>(obj->Shape);
+    ledSizeXY->setText(QString::number(box->dx*2.0));
+    ledSizeZ->setText(QString::number(box->dz*2.0));
+    ATypeWorldObject * typeWorld = static_cast<ATypeWorldObject *>(obj->ObjectType);
+    cbFixedSize->setChecked(typeWorld->bFixedSize);
+}
+
+void AWorldDelegate::onContentChanged()
+{
+    emit ContentChanged();
+}

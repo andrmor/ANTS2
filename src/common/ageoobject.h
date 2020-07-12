@@ -187,6 +187,8 @@ class ATypeWorldObject : public ATypeObject
 public:
     ATypeWorldObject() {Type = "World"; Handling = "Static";}
 
+    bool bFixedSize = false; // used by World delegate in GUI
+
     virtual void writeToJson(QJsonObject& json) { ATypeObject::writeToJson(json); }
     virtual void readFromJson(QJsonObject& ) {}
 };

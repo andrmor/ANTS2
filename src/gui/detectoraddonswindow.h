@@ -31,6 +31,7 @@ public:
 
 private slots:
   void onReconstructDetectorRequest();
+  void onRequestUpdateWorldSize(double WorldSizeXY, double WorldSizeZ, bool fWorldSizeFixed);
 
   void on_pbConvertToDummies_clicked();
 

@@ -146,7 +146,10 @@ void ABasketManager::add(const QString & name, const QVector<ADrawObject> & draw
         {
             const TString title = named->GetTitle();
             if (title == "")
+            {
                 named->SetTitle(name.toLatin1().data());
+                if (item.Name.isEmpty()) item.Name = name;
+            }
         }
     }
 

@@ -1471,7 +1471,7 @@ void ADrawExplorerWidget::constructIconForObject(QIcon & icon, const ADrawObject
         if ( Opt.contains('P', Qt::CaseInsensitive) && !Opt.contains('C', Qt::CaseInsensitive) && !Opt.contains('L', Qt::CaseInsensitive) )
             line = nullptr;
     }
-    if (Type.startsWith("TGraph"))
+    else if (Type.startsWith("TGraph"))
     {
         QString redOpt = Opt;
         redOpt.remove("same", Qt::CaseInsensitive);
@@ -1486,6 +1486,10 @@ void ADrawExplorerWidget::constructIconForObject(QIcon & icon, const ADrawObject
             if (!Opt.contains('C', Qt::CaseInsensitive) && !Opt.contains('L', Qt::CaseInsensitive) && !Opt.contains('B', Qt::CaseInsensitive)) line = nullptr;
             if (!Opt.contains('F', Qt::CaseInsensitive)) fill = nullptr;
         }
+    }
+    else if (Type == "TLine" || Type == "TArrow")
+    {
+        line = dynamic_cast<const TAttLine*>(tObj);
     }
 
     construct1DIcon(icon, line, mark, fill);

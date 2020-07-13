@@ -418,6 +418,7 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
   QJsonObject sdsJson;
   if (parseJson(pojs, "SpatialDistOptions", sdsJson))
     SimulationManager->Settings.photSimSet.SpatialDistSettings.readFromJson(sdsJson);
+  else SimulationManager->Settings.photSimSet.SpatialDistSettings.clearSettings();
   updateCNDgui();
 
   //Single position options

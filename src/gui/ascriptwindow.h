@@ -172,6 +172,7 @@ private:
     QString createNewTabName(int iBook);
     void renameTab(int tab);
     void markTab(int tab);
+    void pasteMarkedTab();
     void copyTab(int iBook);
     void moveTab(int iBook);
     void updateTab(ATabRecord *tab);

@@ -1375,21 +1375,22 @@ void AScriptWindow::onRequestTabWidgetContextMenu(QPoint pos)
 
     QAction* add = menu.addAction("Add new tab");
     menu.addSeparator();
-    QAction* rename = (tab == -1 ? 0 : menu.addAction("Rename tab") );
+    QAction* rename = (tab == -1 ? nullptr : menu.addAction("Rename tab") );
     menu.addSeparator();
-    QAction* remove = (tab == -1 ? 0 : menu.addAction("Close tab") );
+    QAction* remove = (tab == -1 ? nullptr : menu.addAction("Close tab") );
     menu.addSeparator();
-    QAction * markTabA = (tab == -1 ? 0 : menu.addAction("Mark this tab for copy/move") );
-    //QAction* removeAll = (getScriptTabs().isEmpty()) ? 0 : menu.addAction("Close all tabs");
+    QAction * markTabA = (tab == -1 ? nullptr : menu.addAction("Mark this tab for copy/move") );
+    menu.addSeparator();
+    QAction * copyTabA = menu.addAction("Copy marked tab to this book"); copyTabA->setEnabled(iMarkedTab != -1);
 
     QAction* selectedItem = menu.exec(getTabWidget()->mapToGlobal(pos));
     if (!selectedItem) return; //nothing was selected
 
     if (selectedItem == add)            addNewTab();
     else if (selectedItem == remove)    askRemoveTab(tab);
-    //else if (selectedItem == removeAll) on_actionRemove_all_tabs_triggered();
     else if (selectedItem == rename)    renameTab(tab);
     else if (selectedItem == markTabA)  markTab(tab);
+    else if (selectedItem == copyTabA)  pasteMarkedTab();
 }
 
 void AScriptWindow::onScriptTabMoved(int from, int to)
@@ -1602,6 +1603,19 @@ void AScriptWindow::markTab(int tab)
 {
     iMarkedBook = iCurrentBook;
     iMarkedTab = tab;
+}
+
+void AScriptWindow::pasteMarkedTab()
+{
+    if (iMarkedTab == -1) return;
+
+    QString script = ScriptBooks[iMarkedBook].getTab(iMarkedTab)->TextEdit->document()->toPlainText();
+    QString newName = "CopyOf_" + ScriptBooks[iMarkedBook].getTab(iMarkedTab)->TabName;
+
+    ATabRecord & tab = addNewTab(iCurrentBook);
+
+    tab.TextEdit->appendPlainText(script);
+    setTabName(newName, countTabs(iCurrentBook)-1, iCurrentBook);
 }
 
 void AScriptWindow::copyTab(int iBook)

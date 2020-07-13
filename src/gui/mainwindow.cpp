@@ -4950,16 +4950,18 @@ void MainWindow::on_pbCND_help_clicked()
 {
     QString s;
 
-    s =     "When activated, this option allows to distribute photon generation positions\n"
-            "by providing distribution of relative probabilities in local coordinates of the node.\n"
-            "There are 3 possible modes:\n"
+    s =     "When activated, photon generation positions in each node are distributed\n"
+            "using user-provided data on relative probabilities in local coordinates\n"
+            "(x=y=z=0 is the node position).\n"
+            "There are three ways to provide the distribution data:\n"
             "1.Matrix\n"
-            "The user provides a matrix with probability data.\n"
+            "The user gives a matrix with the probability data.\n"
             "The matrix is loaded from a file, each new line with format:\n"
             "x, y, z, probability     (delimeter can be space, comma or tab)\n"
+            "It is sufficient to provide only non-zero probabilities.\n"
             "2. TFormula\n"
             "See https://root.cern.ch/doc/master/classTFormula.html\n"
-            "The formula should give relative probability as a function of x y and z\n"
+            "The formula should give relative probability as a function of x y and z.\n"
             "3. Spline\n"
             "The probability is given by a spline, defined using Spline123 library:\n"
             "https://github.com/vovasolo/spline123/\n"
@@ -4968,10 +4970,10 @@ void MainWindow::on_pbCND_help_clicked()
             "or the Python tools provided in the library.\n"
             "The spline string should be loaded from a file.\n"
             "It is recommended to use 3d splines (for 1d only x coordinate is in effect,\n"
-            "and for 2d only x and y).\n"
+            "and for 2d spline only x and y).\n"
             "\n"
             "Except the 'Matrix' mode, where the emission points are given directly,\n"
-            "the user defines the spatial ranges and number of bins for each direction.\n"
+            "the user defines the spatial ranges and the number of bins for each direction.\n"
             "Photons are generated from the defined bin centers, no 'blurring' is applied.";
 
     message1(s, "Help on spatial in-node distribution tools", this);

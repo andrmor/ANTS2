@@ -946,7 +946,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
            <rect>
             <x>151</x>
             <y>34</y>
-            <width>94</width>
+            <width>100</width>
             <height>24</height>
            </rect>
           </property>
@@ -1112,9 +1112,9 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
          <widget class="QLabel" name="labSizeDiameterPM_3">
           <property name="geometry">
            <rect>
-            <x>381</x>
+            <x>379</x>
             <y>39</y>
-            <width>70</width>
+            <width>31</width>
             <height>13</height>
            </rect>
           </property>
@@ -1205,7 +1205,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
          <widget class="QPushButton" name="pbPMtypeHelp">
           <property name="geometry">
            <rect>
-            <x>410</x>
+            <x>411</x>
             <y>34</y>
             <width>29</width>
             <height>23</height>
@@ -1221,7 +1221,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <rect>
            <x>90</x>
            <y>95</y>
-           <width>141</width>
+           <width>140</width>
            <height>22</height>
           </rect>
          </property>
@@ -1239,10 +1239,10 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
         <widget class="QLabel" name="label_78">
          <property name="geometry">
           <rect>
-           <x>6</x>
-           <y>96</y>
-           <width>82</width>
-           <height>16</height>
+           <x>1</x>
+           <y>95</y>
+           <width>88</width>
+           <height>20</height>
           </rect>
          </property>
          <property name="text">
@@ -1260,7 +1260,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <rect>
            <x>90</x>
            <y>125</y>
-           <width>112</width>
+           <width>120</width>
            <height>22</height>
           </rect>
          </property>
@@ -1268,20 +1268,23 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
         <widget class="QLabel" name="label_114">
          <property name="geometry">
           <rect>
-           <x>2</x>
-           <y>127</y>
-           <width>91</width>
-           <height>16</height>
+           <x>-1</x>
+           <y>125</y>
+           <width>90</width>
+           <height>20</height>
           </rect>
          </property>
          <property name="text">
-          <string>Optical interface:</string>
+          <string>Interface:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
         <widget class="QPushButton" name="pbShowMaterialInPMtypes">
          <property name="geometry">
           <rect>
-           <x>210</x>
+           <x>214</x>
            <y>124</y>
            <width>21</width>
            <height>23</height>
@@ -1294,7 +1297,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
         <widget class="Line" name="line_73">
          <property name="geometry">
           <rect>
-           <x>200</x>
+           <x>206</x>
            <y>135</y>
            <width>14</width>
            <height>3</height>
@@ -1425,9 +1428,9 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
            <property name="geometry">
             <rect>
              <x>224</x>
-             <y>5</y>
+             <y>4</y>
              <width>61</width>
-             <height>16</height>
+             <height>20</height>
             </rect>
            </property>
            <property name="text">
@@ -1475,10 +1478,10 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QLabel" name="label_99">
            <property name="geometry">
             <rect>
-             <x>130</x>
-             <y>5</y>
-             <width>27</width>
-             <height>16</height>
+             <x>128</x>
+             <y>4</y>
+             <width>38</width>
+             <height>20</height>
             </rect>
            </property>
            <property name="text">

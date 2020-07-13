@@ -508,7 +508,7 @@ void APhotonSim_SpatDistSettings::readFromJson(const QJsonObject &json)
         SplineDim = 3;
     else if (Spline.contains("yintervals"))
         SplineDim = 2;
-    else if (Spline.contains("xintervals"))
+    else if (Spline.contains("xintervals") || Spline.contains("intervals"))
         SplineDim = 1;
     else
         SplineDim = 0;
@@ -521,12 +521,12 @@ void APhotonSim_SpatDistSettings::clearSettings()
     Formula.clear();
     LoadedMatrix.clear();
 
-    RangeX = 10.0;
-    RangeY = 10.0;
-    RangeZ = 10.0;
+    RangeX = 100.0;
+    RangeY = 100.0;
+    RangeZ = 100.0;
 
-    BinsX = 10;
-    BinsY = 10;
+    BinsX = 1;
+    BinsY = 1;
     BinsZ = 1;
 
     SplineDim = 3;

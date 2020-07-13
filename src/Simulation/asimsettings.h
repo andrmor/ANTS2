@@ -18,10 +18,6 @@ public:
     AGeneralSimSettings   genSimSet;
     APhotonSimSettings    photSimSet;
     AParticleSimSettings  partSimSet;
-
-    //runtime
-
-
 };
 
 #endif // ASIMSETTINGS_H

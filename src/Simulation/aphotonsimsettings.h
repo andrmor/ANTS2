@@ -151,8 +151,8 @@ public:
     double  RangeY = 100.0;
     double  RangeZ = 100.0;
 
-    int     BinsX = 10;
-    int     BinsY = 10;
+    int     BinsX = 1;
+    int     BinsY = 1;
     int     BinsZ = 1;
 
     void    writeToJson(QJsonObject & json) const;

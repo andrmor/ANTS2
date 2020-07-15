@@ -184,15 +184,12 @@ void ASim_SI::AddNodes(QVariantList nodes)
 
 void ASim_SI::AddNodesAndSubnodes(QVariantList nodes) //  [ [ [xyztn], [xyztn], ... ], ... ]
 {
-    qDebug() << "Top nodes:"<<nodes.size();
     for (int iTopNode = 0; iTopNode < nodes.size(); iTopNode++)
     {
         QVariantList TopNodeWithSubnodes = nodes[iTopNode].toList();
         ANodeRecord * previousNode = nullptr;
-        qDebug() << "Top #"<<iTopNode << " contains subnodes:"<<TopNodeWithSubnodes.size();
         for (int iThisNode = 0; iThisNode < TopNodeWithSubnodes.size(); iThisNode++)
         {
-            qDebug() << "  Subnode #"<<iThisNode;
             QVariantList el = TopNodeWithSubnodes[iThisNode].toList();
             const int size = el.size();
             if (size < 3)

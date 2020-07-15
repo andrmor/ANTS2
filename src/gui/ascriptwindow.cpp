@@ -2496,7 +2496,7 @@ void AScriptWindow::on_actionLoad_book_triggered()
     if ( !isUntouchedBook(iCurrentBook) )
     {
         addNewBook();
-        iCurrentBook = countTabs() - 1;
+        iCurrentBook = (int)ScriptBooks.size() - 1;
         twBooks->setCurrentIndex(iCurrentBook);
     }
 

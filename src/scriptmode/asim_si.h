@@ -31,6 +31,7 @@ public slots:
   void ClearNodes();
   int  CountNodes(bool onlyTop);
   void AddNode(double X, double Y, double Z, double Time = 0, int numPhotons = -1);
+  void AddNodes(QVariantList nodes);
   void AddSubNode(double X, double Y, double Z, double Time = 0, int numPhotons = -1);
 
   bool SaveAsTree(QString fileName);

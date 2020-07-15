@@ -137,6 +137,51 @@ void ASim_SI::AddNode(double X, double Y, double Z, double Time, int numPhotons)
     SimulationManager->Nodes.push_back(n);
 }
 
+void ASim_SI::AddNodes(QVariantList nodes)
+{
+    for (int i=0; i<nodes.size(); i++)
+    {
+        QVariantList el = nodes[i].toList();
+        const int size = el.size();
+        if (size < 3)
+        {
+            abort("Bad format of array with nodes: it should be an array of arrays [x,y,z, (optional)time, (optionsl)numPhotons]");
+            return;
+        }
+        bool ok1, ok2, ok3;
+        const double x = el[0].toDouble(&ok1);
+        const double y = el[1].toDouble(&ok2);
+        const double z = el[2].toDouble(&ok3);
+        if (!ok1 || !ok2 || !ok3)
+        {
+            abort("Invalid coordinate value in array with nodes!");
+            return;
+        }
+        double time = 0;
+        if (size > 3)
+        {
+            time = el[3].toDouble(&ok1);
+            if (!ok1)
+            {
+                abort("Invalid time value in array with nodes!");
+                return;
+            }
+        }
+        int numPhots = -1;
+        if (size > 4)
+        {
+            numPhots = el[4].toInt(&ok1);
+            if (!ok1 || numPhots<1)
+            {
+                abort("Invalid number of photons in array with nodes!");
+                return;
+            }
+        }
+        ANodeRecord * n = ANodeRecord::createS(x, y, z, time, numPhots);
+        SimulationManager->Nodes.push_back(n);
+    }
+}
+
 void ASim_SI::AddSubNode(double X, double Y, double Z, double Time, int numPhotons)
 {
     int nodes = SimulationManager->Nodes.size();

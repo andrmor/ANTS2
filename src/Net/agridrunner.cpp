@@ -140,14 +140,14 @@ const QString AGridRunner::Simulate(const QJsonObject* config)
 
     //distributing load over servers and resuming workers
     int counter = 0;
-    for (int i = 0; i < workers.size(); i++)
+    for (int iWorker = 0; iWorker < workers.size(); iWorker++)
     {
-        if (ServerRecords.at(i)->NumThreads_Allocated > 0)
+        if (ServerRecords.at(iWorker)->NumThreads_Allocated > 0)
         {
             QString modScript;
 
             double perUnitSpeed = 1.0 * numEvents / sumSpeedfactor;
-            int numEventsToDo = std::ceil(perUnitSpeed * ServerRecords.at(i)->SpeedFactor);
+            int numEventsToDo = std::ceil(perUnitSpeed * ServerRecords.at(iWorker)->SpeedFactor);
             if (counter + numEventsToDo > numEvents) numEventsToDo = numEvents - counter;
 
             if (pPointSourceSim)
@@ -157,22 +157,36 @@ const QString AGridRunner::Simulate(const QJsonObject* config)
                 {
                 case 0:
                     qDebug() << "--- single ---";
-                    qDebug() << "Server #"<<i << "will simulate"<<numEventsToDo<<"runs at single position";
+                    qDebug() << "Server #"<<iWorker << "will simulate"<<numEventsToDo<<"runs at single position";
                     modScript = QString("config.Replace(\"SimulationConfig.PointSourcesConfig.ControlOptions.MultipleRunsNumber\", %1)").arg(numEventsToDo);
+                    break;
+                case 1:
+                    {
+                        qDebug() << "--- regular nodes ---";
+                        qDebug() << "Server #"<<iWorker << "will simulate"<<numEventsToDo<<"custom nodes";
+                        qDebug() << "Changing mode to 'script'";
+                        modScript += "config.Replace(\"SimulationConfig.PointSourcesConfig.ControlOptions.Single_Scan_Flood\", 4);";
+                        QJsonArray ar;
+                        for (int iNode = counter; iNode < counter + numEventsToDo; iNode++)
+                            ar.append( nodesAr.at(iNode) );
+                        modScript += "var ar = ";
+                        modScript += jsonArrayToString(ar) + ";";
+                        modScript += "sim.AddNodes(ar);";
+                        modScript += "sim.CountNodes(true)";
+                    }
                     break;
                 case 2:
                     qDebug() << "--- flood ---";
-                    qDebug() << "Server #"<<i << "will simulate"<<numEventsToDo<<"flood events";
+                    qDebug() << "Server #"<<iWorker << "will simulate"<<numEventsToDo<<"flood events";
                     modScript = QString("config.Replace(\"SimulationConfig.PointSourcesConfig.FloodOptions.Nodes\", %1)").arg(numEventsToDo);
                     break;
-                case 1:
                 case 3:
                     {
-                        qDebug() << "--- custom (and regular->custom) nodes ---";
-                        qDebug() << "Server #"<<i << "will simulate"<<numEventsToDo<<"custom nodes";
+                        qDebug() << "--- custom nodes ---";
+                        qDebug() << "Server #"<<iWorker << "will simulate"<<numEventsToDo<<"custom nodes";
                         QJsonArray ar;
-                        for (int i = counter; i < counter + numEventsToDo; i++)
-                            ar.append( nodesAr.at(i) );
+                        for (int iNode = counter; iNode < counter + numEventsToDo; iNode++)
+                            ar.append( nodesAr.at(iNode) );
                         QJsonObject json;
                         json["Nodes"] = ar;
                         modScript  = "var obj = ";
@@ -180,27 +194,29 @@ const QString AGridRunner::Simulate(const QJsonObject* config)
                         modScript += "; config.Replace(\"SimulationConfig.PointSourcesConfig.CustomNodesOptions\", obj)";
                     }
                     break;
-                default: qWarning() << "Not implemented point source sim type "<< PointSourceSimType;
-                }
+                case 4:
+                    {
+                        //qDebug() << "nezja";
+                        //exit (-1);
+                    }
+                    //break;
+                default:
+                    return "Not implemented point source sim type: " + QString::number(PointSourceSimType);
 
-                if (PointSourceSimType == 1)
-                {
-                    qDebug() << "Fix for regular nodes: change to custom mode";
-                    modScript += "; config.Replace(\"SimulationConfig.PointSourcesConfig.ControlOptions.Single_Scan_Flood\", 3)";
                 }
             }
             else
             {
                 qDebug() << "-------- Particle sources ----------";
-                qDebug() << "Server #"<<i << "will simulate"<<numEventsToDo<<"particle source events";
+                qDebug() << "Server #"<<iWorker << "will simulate"<<numEventsToDo<<"particle source events";
                 modScript = QString("config.Replace(\"SimulationConfig.ParticleSourcesConfig.SourceControlOptions.EventsToDo\", %1)").arg(numEventsToDo);
             }
 
-            workers[i]->setExtraScript(modScript);
+            workers[iWorker]->setExtraScript(modScript);
             counter += numEventsToDo;
         }
 
-        workers[i]->setPaused(false); //resume worker
+        workers[iWorker]->setPaused(false); //resume worker
     }
 
     waitForWorkersToFinish(workers);
@@ -864,25 +880,13 @@ void AWebSocketWorker_Sim::runSimulation()
         return;
     }
 
-    if (!extraScript.isEmpty())
-    {
-        emit requestTextLog(index, "Sending script to modify configuration...");
-        bOK = ants2socket->SendText(extraScript);
-        reply = ants2socket->GetTextReply();
-        ro = strToObject(reply);
-        if (!bOK || !ro.contains("result") || !ro["result"].toBool())
-        {
-            rec->Error = "Failed to modify config on the ants2 server";
-            return;
-        }
-    }
-
     QJsonObject jsSimSet = (*config)["SimulationConfig"].toObject();
     QString modeSetup = jsSimSet["Mode"].toString();
     bool bPhotonSource = (modeSetup == "PointSim"); //Photon simulator
     const QString RemoteSimTreeFileName = QString("SimTree-") + QString::number(index) + ".root";
 
-    Script.clear();
+    Script = extraScript;
+    Script += ";";
     Script += "server.SetAcceptExternalProgressReport(true);";
     if (bPhotonSource)
         Script += "sim.RunPhotonSources(" + QString::number(rec->NumThreads_Allocated) + ");";

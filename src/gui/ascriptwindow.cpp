@@ -2521,7 +2521,7 @@ void AScriptWindow::on_actionSave_book_triggered()
 
 void AScriptWindow::on_actionSave_all_triggered()
 {
-    if (countTabs() == 0) return;
+    if (ScriptBooks.size() == 0) return;
     QString starter = GlobSet.LastOpenDir;
     QString fileName = QFileDialog::getSaveFileName(this, "Save script books to a file", starter, "json files (*.json);;All files (*.*)");
     if (fileName.isEmpty()) return;

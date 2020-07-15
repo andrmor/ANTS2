@@ -8,6 +8,7 @@
 
 class EventsDataClass;
 class APmHub;
+class ASimulationManager;
 class ARemoteServerRecord;
 class AWebSocketSession;
 class AWebSocketWorker_Base;
@@ -17,7 +18,7 @@ class AGridRunner : public QObject
 {
     Q_OBJECT
 public:
-    AGridRunner(QVector<ARemoteServerRecord*> & ServerRecords, EventsDataClass & EventsDataHub, const APmHub & PMs);
+    AGridRunner(QVector<ARemoteServerRecord*> & ServerRecords, EventsDataClass & EventsDataHub, const APmHub & PMs, ASimulationManager & simMan);
 
     const QString CheckStatus();
     const QString Simulate(const QJsonObject* config);
@@ -35,6 +36,7 @@ private:
     QVector<ARemoteServerRecord *> & ServerRecords;
     EventsDataClass & EventsDataHub;
     const APmHub & PMs;
+    ASimulationManager & SimMan;
     int TimeOut = 5000;
     //QVector<AWebSocketSession*> Sockets;
 
@@ -51,6 +53,7 @@ private:
     void waitForWorkersToPauseOrFinish(QVector<AWebSocketWorker_Base *> &workers);
 
     void regularToCustomNodes(const QJsonObject & RegularScanOptions, QJsonArray & toArray);
+    void populateNodeArrayFromSimMan(QJsonArray & toArray);
 
     void doAbort(QVector<AWebSocketWorker_Base *> &workers);
 

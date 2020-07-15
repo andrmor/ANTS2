@@ -182,6 +182,65 @@ void ASim_SI::AddNodes(QVariantList nodes)
     }
 }
 
+void ASim_SI::AddNodesAndSubnodes(QVariantList nodes) //  [ [ [xyztn], [xyztn], ... ], ... ]
+{
+    qDebug() << "Top nodes:"<<nodes.size();
+    for (int iTopNode = 0; iTopNode < nodes.size(); iTopNode++)
+    {
+        QVariantList TopNodeWithSubnodes = nodes[iTopNode].toList();
+        ANodeRecord * previousNode = nullptr;
+        qDebug() << "Top #"<<iTopNode << " contains subnodes:"<<TopNodeWithSubnodes.size();
+        for (int iThisNode = 0; iThisNode < TopNodeWithSubnodes.size(); iThisNode++)
+        {
+            qDebug() << "  Subnode #"<<iThisNode;
+            QVariantList el = TopNodeWithSubnodes[iThisNode].toList();
+            const int size = el.size();
+            if (size < 3)
+            {
+                abort("Bad format of array with nodes: it should be an array of arrays [x,y,z, (optional)time, (optionsl)numPhotons]");
+                return;
+            }
+            bool ok1, ok2, ok3;
+            const double x = el[0].toDouble(&ok1);
+            const double y = el[1].toDouble(&ok2);
+            const double z = el[2].toDouble(&ok3);
+            if (!ok1 || !ok2 || !ok3)
+            {
+                abort("Invalid coordinate value in array with nodes!");
+                return;
+            }
+            double time = 0;
+            if (size > 3)
+            {
+                time = el[3].toDouble(&ok1);
+                if (!ok1)
+                {
+                    abort("Invalid time value in array with nodes!");
+                    return;
+                }
+            }
+            int numPhots = -1;
+            if (size > 4)
+            {
+                numPhots = el[4].toInt(&ok1);
+                if (!ok1 || numPhots<1)
+                {
+                    abort("Invalid number of photons in array with nodes!");
+                    return;
+                }
+            }
+
+            ANodeRecord * n = ANodeRecord::createS(x, y, z, time, numPhots);
+            if (previousNode)
+                previousNode->addLinkedNode(n);
+            else
+                SimulationManager->Nodes.push_back(n);
+
+            previousNode = n;
+        }
+    }
+}
+
 void ASim_SI::AddSubNode(double X, double Y, double Z, double Time, int numPhotons)
 {
     int nodes = SimulationManager->Nodes.size();

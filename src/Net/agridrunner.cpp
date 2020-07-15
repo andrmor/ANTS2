@@ -3,16 +3,17 @@
 #include "aremoteserverrecord.h"
 #include "eventsdataclass.h"
 #include "apmhub.h"
-
+#include "asimulationmanager.h"
 #include "ajsontools.h"
+#include "anoderecord.h"
 
 #include <QThread>
 #include <QCoreApplication>
 #include <QTimer>
 #include <QFile>
 
-AGridRunner::AGridRunner(QVector<ARemoteServerRecord *> & ServerRecords, EventsDataClass & EventsDataHub, const APmHub & PMs) :
-    ServerRecords(ServerRecords), EventsDataHub(EventsDataHub), PMs(PMs) {}
+AGridRunner::AGridRunner(QVector<ARemoteServerRecord *> & ServerRecords, EventsDataClass & EventsDataHub, const APmHub & PMs, ASimulationManager & simMan) :
+    ServerRecords(ServerRecords), EventsDataHub(EventsDataHub), PMs(PMs), SimMan(simMan) {}
 
 const QString AGridRunner::CheckStatus()
 {
@@ -99,9 +100,17 @@ const QString AGridRunner::Simulate(const QJsonObject* config)
         }
         case 3:
         {
+            /*
             QJsonObject jCustomNodesOptions = jPointSourcesConfig["CustomNodesOptions"].toObject();
             nodesAr = jCustomNodesOptions["Nodes"].toArray();
             numEvents = nodesAr.size();
+            */
+            break;
+        }
+        case 4:
+        {
+            numEvents = SimMan.Nodes.size();
+            populateNodeArrayFromSimMan(nodesAr);
             break;
         }
         default:;
@@ -181,6 +190,7 @@ const QString AGridRunner::Simulate(const QJsonObject* config)
                     modScript = QString("config.Replace(\"SimulationConfig.PointSourcesConfig.FloodOptions.Nodes\", %1)").arg(numEventsToDo);
                     break;
                 case 3:
+                    /*
                     {
                         qDebug() << "--- custom nodes ---";
                         qDebug() << "Server #"<<iWorker << "will simulate"<<numEventsToDo<<"custom nodes";
@@ -194,15 +204,25 @@ const QString AGridRunner::Simulate(const QJsonObject* config)
                         modScript += "; config.Replace(\"SimulationConfig.PointSourcesConfig.CustomNodesOptions\", obj)";
                     }
                     break;
+                    */
+                    return "Custom nodes mode is not yet implemented in distributed simulations";
                 case 4:
                     {
-                        //qDebug() << "nezja";
-                        //exit (-1);
+                        qDebug() << "--- script ---";
+                        const int size = SimMan.Nodes.size();
+                        if (size < 1) return "There are nodes defined with a script";
+                        qDebug() << "Server #"<<iWorker << "will simulate"<<numEventsToDo<<"nodes defined in script";
+                        QJsonArray ar;
+                        for (int iNode = counter; iNode < counter + numEventsToDo; iNode++)
+                            ar.append( nodesAr.at(iNode) );
+                        modScript += "var ar = ";
+                        modScript += jsonArrayToString(ar) + ";";
+                        modScript += "sim.AddNodesAndSubnodes(ar);";
+                        modScript += "\"Num nodes: \" + sim.CountNodes(true) + \" with subnodes: \" + sim.CountNodes(false)";
                     }
-                    //break;
+                    break;
                 default:
                     return "Not implemented point source sim type: " + QString::number(PointSourceSimType);
-
                 }
             }
             else
@@ -507,6 +527,28 @@ void AGridRunner::regularToCustomNodes(const QJsonObject &RegularScanOptions, QJ
                 for (int i=0; i<3; i++) ar << r[i];
                 toArray.append(ar);
             }
+}
+
+void AGridRunner::populateNodeArrayFromSimMan(QJsonArray & toArray)
+{
+    for (ANodeRecord * topNode : SimMan.Nodes)
+    {
+        QJsonArray el;
+        ANodeRecord * node = topNode;
+        do
+        {
+            QJsonArray oneNodeAr;
+            oneNodeAr << node->R[0] << node->R[1] << node->R[2];
+            if (node->Time != 0 || node->NumPhot != -1)
+                oneNodeAr << node->Time;
+            if (node->NumPhot != -1)
+                oneNodeAr << node->NumPhot;
+            el.append(oneNodeAr);
+            node = node->getLinkedNode();
+        }
+        while (node);
+        toArray.append(el);
+    }
 }
 
 void AGridRunner::doAbort(QVector<AWebSocketWorker_Base *> &workers)

@@ -34,7 +34,7 @@ ARemoteWindow::ARemoteWindow(MainWindow *MW) :
 
     AddNewServer();
 
-    GR = new AGridRunner(Records, *MW->EventsDataHub, *MW->PMs);
+    GR = new AGridRunner(Records, *MW->EventsDataHub, *MW->PMs, *MW->SimulationManager);
     GR->SetTimeout(ui->leiTimeout->text().toInt());
     QObject::connect(GR, &AGridRunner::requestTextLog, this, &ARemoteWindow::onTextLogReceived/*, Qt::QueuedConnection*/);
     QObject::connect(GR, &AGridRunner::requestStatusLog, this, &ARemoteWindow::onStatusLogReceived/*, Qt::QueuedConnection*/);

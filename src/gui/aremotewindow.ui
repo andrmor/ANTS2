@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Distributed simulation / reconstruction</string>
+   <string>Distributed</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -327,7 +327,7 @@
      <x>0</x>
      <y>0</y>
      <width>634</width>
-     <height>21</height>
+     <height>25</height>
     </rect>
    </property>
   </widget>

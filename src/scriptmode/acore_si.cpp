@@ -147,6 +147,7 @@ void ACore_SI::print(QVariant message)
 {
     QString s;
     addQVariantToString(message, s);
+    qDebug() << s;
     emit ScriptManager->showPlainTextMessage(s);
 }
 
@@ -154,6 +155,7 @@ void ACore_SI::printHTML(QVariant message)
 {
     QString s;
     addQVariantToString(message, s);
+    qDebug() << s;
     emit ScriptManager->showMessage(s);
 }
 

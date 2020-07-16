@@ -162,6 +162,7 @@ void ARemoteWindow::on_pbSimulate_clicked()
     GR.writeConfig();
 
     onBusy(true);
+    MW->writeSimSettingsToJson(MW->Config->JSON);
     QString err = GR.Simulate(&MW->Config->JSON);
     onBusy(false);
 

@@ -21,10 +21,10 @@ public:
     AGridRunner(EventsDataClass & EventsDataHub, const APmHub & PMs, ASimulationManager & simMan);
     ~AGridRunner();
 
-    const QString CheckStatus();
-    const QString Simulate(const QJsonObject* config);
-    const QString Reconstruct(const QJsonObject* config);
-    const QString RateServers(const QJsonObject* config);
+    QString CheckStatus();
+    QString Simulate(const QJsonObject* config);
+    QString Reconstruct(const QJsonObject* config);
+    QString RateServers(const QJsonObject* config);
 
     void Abort();
 

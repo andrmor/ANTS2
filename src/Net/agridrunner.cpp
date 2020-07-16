@@ -60,7 +60,7 @@ void AGridRunner::clearRecords()
     ServerRecords.clear();
 }
 
-const QString AGridRunner::CheckStatus()
+QString AGridRunner::CheckStatus()
 {
     if (ServerRecords.isEmpty())
         return "Configure at least one dispatcher record!";
@@ -102,7 +102,7 @@ const QString AGridRunner::CheckStatus()
     return "";
 }
 
-const QString AGridRunner::Simulate(const QJsonObject* config)
+QString AGridRunner::Simulate(const QJsonObject* config)
 {
     onStart();
 
@@ -328,7 +328,7 @@ const QString AGridRunner::Simulate(const QJsonObject* config)
     return "";
 }
 
-const QString AGridRunner::Reconstruct(const QJsonObject *config)
+QString AGridRunner::Reconstruct(const QJsonObject *config)
 {
     if (EventsDataHub.isEmpty())
         return "There are no events to reconstruct!";
@@ -422,7 +422,7 @@ const QString AGridRunner::Reconstruct(const QJsonObject *config)
     return "";
 }
 
-const QString AGridRunner::RateServers(const QJsonObject *config)
+QString AGridRunner::RateServers(const QJsonObject *config)
 {
     if (ServerRecords.isEmpty())
         return "Configure at least one dispatcher record!";
@@ -982,9 +982,9 @@ void AWebSocketWorker_Sim::runSimulation()
     Script += ";";
     Script += "server.SetAcceptExternalProgressReport(true);";
     if (bPhotonSource)
-        Script += "sim.RunPhotonSources(" + QString::number(rec->NumThreads_Allocated) + ");";
+        Script += "sim.RunPhotonSources(" + QString::number(rec->NumThreads_Allocated) + ", true);";
     else
-        Script += "sim.RunParticleSources(" + QString::number(rec->NumThreads_Allocated) + ");";
+        Script += "sim.RunParticleSources(" + QString::number(rec->NumThreads_Allocated) + ", true);";
     Script += "var fileName = \"" + RemoteSimTreeFileName + "\";";
     Script += "var ok = sim.SaveAsTree(fileName);";
     Script += "if (!ok) core.abort(\"Failed to save simulation data\");";

@@ -26,6 +26,7 @@
 #include "ageowin_si.h"
 #include "agraphwin_si.h"
 #include "aoutwin_si.h"
+#include "afarm_si.h"
 
 #include "mainwindow.h"
 #include "graphwindowclass.h"
@@ -135,6 +136,9 @@ void MainWindow::createScriptWindow()
     //AAnn_SI* ann = new AAnn_SI();
     //ScriptWindow->RegisterInterface(ann, "ann");
 #endif
+
+    AFarm_si * farm = new AFarm_si(*NetModule->GridRunner);
+    ScriptWindow->RegisterInterface(farm, "farm");
 
     // Interfaces which rely on MainWindow
 

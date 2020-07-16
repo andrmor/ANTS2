@@ -3404,7 +3404,7 @@ void MainWindow::on_pbSimulate_clicked()
   fStartedFromGUI = true;
   fSimDataNotSaved = false; // to disable the warning
 
-  MainWindow::writeSimSettingsToJson(Config->JSON);  
+  MainWindow::writeSimSettingsToJson(Config->JSON);
   startSimulation(Config->JSON);  
 }
 

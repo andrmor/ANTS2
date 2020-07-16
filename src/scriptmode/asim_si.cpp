@@ -65,7 +65,8 @@ void ASim_SI::ForceStop()
 
 bool ASim_SI::RunPhotonSources(int NumThreads, bool AllowGuiUpdate)
 {
-    bool bGuiUpdate = fGuiPresent && AllowGuiUpdate;
+    //bool bGuiUpdate = fGuiPresent && AllowGuiUpdate;
+    bool bGuiUpdate = AllowGuiUpdate; // for GridRunner need even if no gui
 
     if (NumThreads == -1) NumThreads = AGlobalSettings::getInstance().RecNumTreads;
     QJsonObject sim = Config->JSON["SimulationConfig"].toObject();
@@ -88,7 +89,8 @@ bool ASim_SI::RunPhotonSources(int NumThreads, bool AllowGuiUpdate)
 
 bool ASim_SI::RunParticleSources(int NumThreads, bool AllowGuiUpdate)
 {
-    bool bGuiUpdate = fGuiPresent && AllowGuiUpdate;
+    //bool bGuiUpdate = fGuiPresent && AllowGuiUpdate;
+    bool bGuiUpdate = AllowGuiUpdate; // for GridRunner need even if no gui
 
     if (NumThreads == -1) NumThreads = AGlobalSettings::getInstance().RecNumTreads;
     QJsonObject sim = Config->JSON["SimulationConfig"].toObject();

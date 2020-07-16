@@ -26,6 +26,8 @@ public:
     QString Reconstruct(const QJsonObject* config);
     QString RateServers(const QJsonObject* config);
 
+    QString ExecuteScript(const QString & Script, const QJsonObject & config, const QVariantList & PerThreadResources, const QVariantList & PerThreadFiles);
+
     void Abort();
 
     void SetTimeout(int timeout);
@@ -49,9 +51,11 @@ private:
     bool bAbortRequested = false;
 
 private:
-    AWebSocketWorker_Base* startCheckStatusOfServer(int index, ARemoteServerRecord *serverRecord);
-    AWebSocketWorker_Base* startSim(int index, ARemoteServerRecord *serverRecord, const QJsonObject* config);
-    AWebSocketWorker_Base* startRec(int index, ARemoteServerRecord *server, const QJsonObject* config);
+    AWebSocketWorker_Base * startCheckStatusOfServer(int index, ARemoteServerRecord *serverRecord);
+    AWebSocketWorker_Base * startSim(int index, ARemoteServerRecord *serverRecord, const QJsonObject* config);
+    AWebSocketWorker_Base * startRec(int index, ARemoteServerRecord *server, const QJsonObject* config);
+
+    AWebSocketWorker_Base *startEvalWorker(int index, ARemoteServerRecord * serverrecord, const QJsonObject & config, const QString &Script);
 
     void startInNewThread(AWebSocketWorker_Base *worker);
 
@@ -64,7 +68,7 @@ private:
     void doAbort(QVector<AWebSocketWorker_Base *> &workers);
 
     void onStart();
-
+    QString commonStart();
 
 signals:
     void requestTextLog(int index, const QString message);
@@ -83,6 +87,7 @@ public:
 
     bool isRunning() const {return bRunning;}
     bool isPausedOrFinished() const {return bPaused || !bRunning;}
+    bool isPaused() const {return bPaused;}
     void setStarted() {bRunning = true;}
     void setPaused(bool flag) {bPaused = flag;}
 
@@ -113,6 +118,8 @@ protected:
     bool               allocateAntsServer();
     AWebSocketSession* connectToAntsServer();
     bool               establishSession();
+
+    bool sendAnts2Config();
 
 signals:
     void finished();
@@ -161,6 +168,29 @@ public slots:
 
 private:
     void runReconstruction();
+};
+
+class AWebSocketWorker_EvalScript : public AWebSocketWorker_Base
+{
+    Q_OBJECT
+public:
+    AWebSocketWorker_EvalScript(int index, ARemoteServerRecord* rec, int timeOut, const QJsonObject* config, const QString & Script);
+
+    QString  Script;
+
+    QVariant Resource;
+    QString  FileName;
+
+    QVariant EvalResult;
+
+    int      ResourceIndex = -1;
+    bool     bSuccess = false;
+
+public slots:
+    virtual void run() override;
+
+private:
+    void runEval();
 };
 
 #endif // AGRIDRUNNER_H

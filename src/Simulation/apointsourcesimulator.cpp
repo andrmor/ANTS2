@@ -20,6 +20,7 @@
 
 #include <QDebug>
 #include <QJsonObject>
+#include <QFile>
 
 #include "TH1D.h"
 #include "TRandom2.h"

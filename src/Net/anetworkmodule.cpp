@@ -1,8 +1,8 @@
 #include "anetworkmodule.h"
 #include "ajavascriptmanager.h"
-
-//#include "awebsocketserver.h"
+#include "agridrunner.h"
 #include "awebsocketsessionserver.h"
+
 #ifdef USE_ROOT_HTML
     #include "aroothttpserver.h"
 #endif
@@ -29,6 +29,8 @@ ANetworkModule::~ANetworkModule()
 #ifdef USE_ROOT_HTML
     delete RootHttpServer;
 #endif
+
+    delete GridRunner;
 }
 
 void ANetworkModule::SetScriptManager(AJavaScriptManager* man)
@@ -91,6 +93,12 @@ void ANetworkModule::StopWebSocketServer()
     WebSocketServer->StopListen();
     qDebug() << "ANTS2 web socket server has stopped listening";
     emit StatusChanged();
+}
+
+#include "agridrunner.h"
+void ANetworkModule::initGridRunner(EventsDataClass & EventsDataHub, const APmHub & PMs, ASimulationManager & simMan)
+{
+    GridRunner = new AGridRunner(EventsDataHub, PMs, simMan);
 }
 
 #include "aglobalsettings.h"

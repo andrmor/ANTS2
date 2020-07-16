@@ -18,7 +18,8 @@ class AGridRunner : public QObject
 {
     Q_OBJECT
 public:
-    AGridRunner(QVector<ARemoteServerRecord*> & ServerRecords, EventsDataClass & EventsDataHub, const APmHub & PMs, ASimulationManager & simMan);
+    AGridRunner(EventsDataClass & EventsDataHub, const APmHub & PMs, ASimulationManager & simMan);
+    ~AGridRunner();
 
     const QString CheckStatus();
     const QString Simulate(const QJsonObject* config);
@@ -27,13 +28,18 @@ public:
 
     void Abort();
 
-    void SetTimeout(int timeout) {TimeOut = timeout;}
+    void SetTimeout(int timeout);
+
+    void writeConfig();
+    void readConfig();
+    void clearRecords();
+
+    QVector<ARemoteServerRecord *> ServerRecords;
 
 public slots:
     void onRequestTextLog(int index, const QString message);
 
 private:
-    QVector<ARemoteServerRecord *> & ServerRecords;
     EventsDataClass & EventsDataHub;
     const APmHub & PMs;
     ASimulationManager & SimMan;
@@ -58,6 +64,7 @@ private:
     void doAbort(QVector<AWebSocketWorker_Base *> &workers);
 
     void onStart();
+
 
 signals:
     void requestTextLog(int index, const QString message);

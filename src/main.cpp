@@ -122,6 +122,9 @@ int main(int argc, char *argv[])
     //QLoggingCategory::setFilterRules("qt.network.ssl.warning=false");
     QLoggingCategory::setFilterRules(FilterRules);
 
+    AGlobalSettings & GlobSet = AGlobalSettings::getInstance();
+    qDebug() << "Global settings object created";
+
     AConfiguration Config;
     qDebug() << "Config hub created";
     EventsDataClass EventsDataHub;
@@ -149,17 +152,15 @@ int main(int argc, char *argv[])
     qDebug() << "Reconstruction manager created";
 
     ANetworkModule Network;
+    Network.initGridRunner(EventsDataHub, *Detector.PMs, SimulationManager);
     QObject::connect(&Detector, &DetectorClass::newGeoManager, &Network, &ANetworkModule::onNewGeoManagerCreated);
     QObject::connect(&Network, &ANetworkModule::RootServerStarted, &Detector, &DetectorClass::onRequestRegisterGeoManager);
     QObject::connect(&SimulationManager, &ASimulationManager::ProgressReport, &Network, &ANetworkModule::ProgressReport );
     QObject::connect(&ReconstructionManager, &AReconstructionManager::UpdateReady, &Network, &ANetworkModule::ProgressReport );
-    qDebug() << "Network module created";
-
-    AGlobalSettings& GlobSet = AGlobalSettings::getInstance();
     GlobSet.setNetworkModule(&Network);
     if (GlobSet.NumThreads == -1) GlobSet.NumThreads = GlobSet.RecNumTreads;
     GlobSet.setMpCollection(Detector.MpCollection);
-    qDebug() << "Global settings object created";
+    qDebug() << "Network module created";
 
     Config.UpdateLRFmakeJson(); //compatibility    
     TH1::AddDirectory(false);  //a histograms objects will not be automatically created in root directory (TDirectory); special case is in TreeView and ResolutionVsArea

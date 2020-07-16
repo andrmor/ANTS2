@@ -235,8 +235,8 @@ void MainWindow::closeEvent(QCloseEvent *)
        qDebug() << "<Saving Python scripts";
        PythonScriptWindow->WriteToJson();
    }
-   qDebug() << "<Saving remote servers";
-   RemoteWindow->WriteConfig();
+   //qDebug() << "<Saving remote servers";
+   //RemoteWindow->WriteConfig();
    qDebug()<<"<Saving global settings";
    GlobSet.saveANTSconfiguration();
 

@@ -6,14 +6,59 @@
 #include "asimulationmanager.h"
 #include "ajsontools.h"
 #include "anoderecord.h"
+#include "aglobalsettings.h"
 
 #include <QThread>
 #include <QCoreApplication>
 #include <QTimer>
 #include <QFile>
 
-AGridRunner::AGridRunner(QVector<ARemoteServerRecord *> & ServerRecords, EventsDataClass & EventsDataHub, const APmHub & PMs, ASimulationManager & simMan) :
-    ServerRecords(ServerRecords), EventsDataHub(EventsDataHub), PMs(PMs), SimMan(simMan) {}
+AGridRunner::AGridRunner(EventsDataClass & EventsDataHub, const APmHub & PMs, ASimulationManager & simMan) :
+    EventsDataHub(EventsDataHub), PMs(PMs), SimMan(simMan)
+{
+    readConfig();
+}
+
+AGridRunner::~AGridRunner()
+{
+    writeConfig();
+    clearRecords();
+}
+
+void AGridRunner::writeConfig()
+{
+    QJsonArray ar;
+    for (ARemoteServerRecord* r : ServerRecords)
+        ar << r->WriteToJson();
+
+    QJsonObject & json = AGlobalSettings::getInstance().RemoteServers;
+    json["Servers"] = ar;
+    json["Timeout"] = TimeOut;
+}
+
+void AGridRunner::readConfig()
+{
+    clearRecords();
+
+    QJsonObject & json = AGlobalSettings::getInstance().RemoteServers;
+    if (json.isEmpty()) return;
+
+    parseJson(json, "Timeout", TimeOut);
+    QJsonArray ar = json["Servers"].toArray();
+    for (int i=0; i<ar.size(); i++)
+    {
+        ARemoteServerRecord * record = new ARemoteServerRecord();
+        QJsonObject js = ar.at(i).toObject();
+        record->ReadFromJson(js);
+        ServerRecords << record;
+    }
+}
+
+void AGridRunner::clearRecords()
+{
+    for (ARemoteServerRecord * r : ServerRecords) delete r;
+    ServerRecords.clear();
+}
 
 const QString AGridRunner::CheckStatus()
 {
@@ -426,6 +471,12 @@ const QString AGridRunner::RateServers(const QJsonObject *config)
 void AGridRunner::Abort()
 {
     bAbortRequested = true;
+}
+
+void AGridRunner::SetTimeout(int timeout)
+{
+    TimeOut = timeout;
+    writeConfig();
 }
 
 void AGridRunner::waitForWorkersToFinish(QVector<AWebSocketWorker_Base*>& workers)

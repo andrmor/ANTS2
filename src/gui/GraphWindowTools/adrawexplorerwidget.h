@@ -56,6 +56,10 @@ private:
     void drawIntegral(ADrawObject &obj);
     void fraction(ADrawObject &obj);
     void fwhm(int index);
+    void linDraw(int index);
+    void boxDraw(int index);
+    void ellipseDraw(int index);
+
     void linFit(int index);
     void expFit(int index);
     void interpolate(ADrawObject &obj);

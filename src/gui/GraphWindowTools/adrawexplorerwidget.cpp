@@ -189,6 +189,21 @@ void ADrawExplorerWidget::showObjectContextMenu(const QPoint &pos, int index)
 
     Menu.addSeparator();
 
+    const QString options = obj.Options;
+    bool flag3D = false;
+    if (Type.startsWith("TH3") || Type.startsWith("TProfile2D") || Type.startsWith("TH2") || Type.startsWith("TF2") || Type.startsWith("TGraph2D"))
+        flag3D = true;
+    if ((Type.startsWith("TH2") || Type.startsWith("TProfile2D")) && ( options.contains("col",Qt::CaseInsensitive) || options.contains("prof", Qt::CaseInsensitive) || (options.isEmpty())) )
+        flag3D = false;
+    //qDebug() << "flag 3D" << flag3D << Type;//options.contains("col",Qt::CaseInsensitive);
+
+    QMenu * drawMenu = Menu.addMenu("Draw");        drawMenu->setEnabled(!flag3D);
+        QAction* linDrawA     = drawMenu->addAction("Line (use click-drag)");    // linDrawA->setEnabled(Type.startsWith("TH1") || Type == "TProfile" || Type.startsWith("TGraph"));
+        QAction* boxDrawA     = drawMenu->addAction("Box (use click-drag)");    // linDrawA->setEnabled(Type.startsWith("TH1") || Type == "TProfile" || Type.startsWith("TGraph"));
+        QAction* ellipseDrawA = drawMenu->addAction("Elypse (use click-drag)");    // linDrawA->setEnabled(Type.startsWith("TH1") || Type == "TProfile" || Type.startsWith("TGraph"));
+
+    Menu.addSeparator();
+
     QMenu * saveMenu =      Menu.addMenu("Save");
         QAction* saveRootA =    saveMenu->addAction("Save ROOT object");
         saveMenu->addSeparator();
@@ -234,7 +249,9 @@ void ADrawExplorerWidget::showObjectContextMenu(const QPoint &pos, int index)
    else if (si == showFitPanel) fitPanel(obj);
    else if (si == extractA)     extract(obj);
    else if (si == editTextPave) editPave(obj);
-
+   else if (si == linDrawA)     linDraw(index);
+   else if (si == boxDrawA)     boxDraw(index);
+   else if (si == ellipseDrawA) ellipseDraw(index);
 }
 
 void ADrawExplorerWidget::manipulateTriggered()
@@ -270,12 +287,26 @@ void ADrawExplorerWidget::manipulateTriggered()
 
         QAction* scale        = Menu.addAction("Scale all graphs/histograms to the same max"); scale->setEnabled(Type.startsWith("TH") || Type.startsWith("TGraph") || Type.startsWith("TProfile"));
 
+        Menu.addSeparator();
+
+        const QString options = obj.Options;
+        bool flag3D = false;
+        if (Type.startsWith("TH3") || Type.startsWith("TProfile2D") || Type.startsWith("TH2") || Type.startsWith("TF2") || Type.startsWith("TGraph2D"))
+            flag3D = true;
+        if ((Type.startsWith("TH2") || Type.startsWith("TProfile2D")) && ( options.contains("col",Qt::CaseInsensitive) || options.contains("prof", Qt::CaseInsensitive) || (options.isEmpty())) )
+            flag3D = false;
+        //qDebug() << "flag 3D" << flag3D << Type;//options.contains("col",Qt::CaseInsensitive);
+
+        QMenu * drawMenu = Menu.addMenu("Draw");        drawMenu->setEnabled(!flag3D);
+            QAction* linDrawA     = drawMenu->addAction("Line (use click-drag)");    // linDrawA->setEnabled(Type.startsWith("TH1") || Type == "TProfile" || Type.startsWith("TGraph"));
+            QAction* boxDrawA     = drawMenu->addAction("Box (use click-drag)");    // linDrawA->setEnabled(Type.startsWith("TH1") || Type == "TProfile" || Type.startsWith("TGraph"));
+            QAction* ellipseDrawA = drawMenu->addAction("Elypse (use click-drag)");    // linDrawA->setEnabled(Type.startsWith("TH1") || Type == "TProfile" || Type.startsWith("TGraph"));
+
 
         // ------ exec ------
 
         QAction* si = Menu.exec(pos);
         if (!si) return; //nothing was selected
-
 
         if      (si == axesX)        editAxis(obj, 0);
         else if (si == axesY)        editAxis(obj, 1);
@@ -283,6 +314,9 @@ void ADrawExplorerWidget::manipulateTriggered()
         else if (si == addAxisTop)   addAxis(0);
         else if (si == addAxisRight) addAxis(1);
         else if (si == scale)        scaleAllSameMax();
+        else if (si == linDrawA)     linDraw(size-1);
+        else if (si == boxDrawA)     boxDraw(size-1);
+        else if (si == ellipseDrawA) ellipseDraw(size-1);
     }
 }
 
@@ -1491,6 +1525,12 @@ void ADrawExplorerWidget::constructIconForObject(QIcon & icon, const ADrawObject
     {
         line = dynamic_cast<const TAttLine*>(tObj);
     }
+    else if (Type == "TBox" || Type == "TEllipse")
+    {
+        line = dynamic_cast<const TAttLine*>(tObj);
+        fill = dynamic_cast<const TAttFill*>(tObj);
+        if (fill->GetFillStyle() == 0) fill = nullptr;
+    }
 
     construct1DIcon(icon, line, mark, fill);
 }
@@ -1878,3 +1918,83 @@ void ADrawExplorerWidget::editTGaxis(ADrawObject &obj)
     }
 }
 
+//kira-->
+void ADrawExplorerWidget::linDraw(int index)
+{
+    GraphWindow.TriggerGlobalBusy(true);
+
+    GraphWindow.Extract2DLine();
+    if (!GraphWindow.Extraction()) return; //cancel
+
+    double startX = GraphWindow.extracted2DLineXstart();
+    double stopX = GraphWindow.extracted2DLineXstop();
+    double startY = GraphWindow.extracted2DLineYstart();
+    double stopY = GraphWindow.extracted2DLineYstop();
+
+    GraphWindow.MakeCopyOfDrawObjects();
+    GraphWindow.MakeCopyOfActiveBasketId();
+
+    //draw line
+    TLine *ln = new TLine(startX, startY, stopX, stopY);
+    GraphWindow.RegisterTObject(ln);
+    ln->SetLineStyle(2);
+    DrawObjects.insert(index+1, ADrawObject(ln, "same"));
+
+    GraphWindow.RedrawAll();
+    GraphWindow.HighlightUpdateBasketButton(true);
+}
+
+void ADrawExplorerWidget::boxDraw(int index)
+{
+    GraphWindow.TriggerGlobalBusy(true);
+
+    GraphWindow.Extract2DBox();
+    if (!GraphWindow.Extraction()) return; //cancel
+
+    double startX = GraphWindow.extractedX1();
+    double stopX  = GraphWindow.extractedX2();
+    double startY = GraphWindow.extractedY1();
+    double stopY  = GraphWindow.extractedY2();
+
+    GraphWindow.MakeCopyOfDrawObjects();
+    GraphWindow.MakeCopyOfActiveBasketId();
+
+    //draw box
+    TBox *bx = new TBox(startX, startY, stopX, stopY);
+    GraphWindow.RegisterTObject(bx);
+    bx->SetLineStyle(2);
+    bx->SetFillStyle(0);
+    DrawObjects.insert(index+1, ADrawObject(bx, "same"));
+
+    GraphWindow.RedrawAll();
+    GraphWindow.HighlightUpdateBasketButton(true);
+}
+
+#include "TEllipse.h"
+void ADrawExplorerWidget::ellipseDraw(int index)
+{
+    GraphWindow.TriggerGlobalBusy(true);
+
+    GraphWindow.Extract2DEllipse();
+    if (!GraphWindow.Extraction()) return; //cancel
+
+    double centerX = GraphWindow.extracted2DEllipseX();
+    double centerY = GraphWindow.extracted2DEllipseY();
+    double r1 = GraphWindow.extracted2DEllipseR1();
+    double r2 = GraphWindow.extracted2DEllipseR2();
+    double theta = GraphWindow.extracted2DEllipseTheta();
+
+
+    GraphWindow.MakeCopyOfDrawObjects();
+    GraphWindow.MakeCopyOfActiveBasketId();
+
+    TEllipse *el = new TEllipse(centerX, centerY, r1, r2, 0, 360, theta);
+    GraphWindow.RegisterTObject(el);
+    el->SetLineStyle(2);
+    el->SetFillStyle(0);
+    DrawObjects.insert(index+1, ADrawObject(el, "same"));
+
+    GraphWindow.RedrawAll();
+    GraphWindow.HighlightUpdateBasketButton(true);
+}
+//kira <--

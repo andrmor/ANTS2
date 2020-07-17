@@ -148,6 +148,8 @@ void ANetworkModule::onNewGeoManagerCreated()
 
 #include <QJsonObject>
 #include <QJsonDocument>
+#include "ajsontools.h"
+#include <QJsonValue>
 void ANetworkModule::OnWebSocketTextMessageReceived(QString message)
 {
     if (bSingleConnectionMode) IdleTimer.stop();
@@ -219,7 +221,16 @@ void ANetworkModule::OnWebSocketTextMessageReceived(QString message)
                 if ( !WebSocketServer->isReplied() )
                 {
                     if (res == "undefined") WebSocketServer->sendOK();
-                    else WebSocketServer->ReplyWithText("{ \"result\" : true, \"evaluation\" : " + res + " }");
+                    else
+                    {
+                        //WebSocketServer->ReplyWithText("{ \"result\" : true, \"evaluation\" : " + res + " }");
+
+                        QJsonObject js;
+                        js["result"] = true;
+                        js["evaluation"] = QJsonValue::fromVariant(ScriptManager->EvaluationResult.toVariant());
+
+                        WebSocketServer->ReplyWithText(jsonToString(js));
+                    }
                 }
             }
         }

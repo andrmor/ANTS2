@@ -74,6 +74,7 @@ void AJavaScriptManager::addQVariantToString(const QVariant & var, QString & str
     }
 }
 
+#include <QJsonDocument>
 QString AJavaScriptManager::Evaluate(const QString & Script)
 {
     LastError.clear();

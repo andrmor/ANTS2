@@ -1406,10 +1406,11 @@ void AWorker_Script::runEvalScript()
         QJsonDocument doc = QJsonDocument::fromVariant(data.Resource);
         resStr = doc.toJson(QJsonDocument::Compact);
     }
+    else if (data.Resource.type() == QVariant::String) resStr = "\"" + data.Resource.toString() + "\"";
     else resStr = data.Resource.toString();
     Script += "var Data = " + resStr + ";";
     Script += script;
-    //qDebug() << "Sending script:\n"<<Script;
+    //qDebug() << ">>>>>>>>>> Sending script:\n"<<Script;
     bool bOK = ants2socket->SendText(Script);
 
     QJsonObject ro;

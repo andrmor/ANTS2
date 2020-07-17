@@ -137,7 +137,7 @@ void MainWindow::createScriptWindow()
     //ScriptWindow->RegisterInterface(ann, "ann");
 #endif
 
-    AFarm_si * farm = new AFarm_si(*NetModule->GridRunner);
+    AFarm_si * farm = new AFarm_si(Config->JSON, *NetModule->GridRunner);
     ScriptWindow->RegisterInterface(farm, "farm");
 
     // Interfaces which rely on MainWindow

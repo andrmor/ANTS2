@@ -12,6 +12,8 @@
 #include <QCoreApplication>
 #include <QTimer>
 #include <QFile>
+#include <QVariant>
+#include <QVariantList>
 
 AGridRunner::AGridRunner(EventsDataClass & EventsDataHub, const APmHub & PMs, ASimulationManager & simMan) :
     EventsDataHub(EventsDataHub), PMs(PMs), SimMan(simMan)
@@ -460,112 +462,93 @@ QString AGridRunner::RateServers(const QJsonObject *config)
     return "";
 }
 
-struct AScriptEvalResources
+QVariant AGridRunner::EvaluateSript(const QString & Script, const QJsonObject & config, const QVariantList & PerInstanceResources, const QVariantList & PerInstanceFiles)
 {
-    QVariant Resource;
-    QString  FileName;
+    bool bHaveResources = !PerInstanceResources.isEmpty();
+    bool bHaveFiles     = !PerInstanceFiles.isEmpty();
 
-    bool bDone = false;
-    bool bAllocated = false;
-
-    QVariant EvalResult;
-};
-
-QString AGridRunner::ExecuteScript(const QString & Script, const QJsonObject & config, const QVariantList & PerThreadResources, const QVariantList & PerThreadFiles)
-{
-    bool bHaveResources = !PerThreadResources.isEmpty();
-    bool bHaveFiles     = !PerThreadFiles.isEmpty();
-
-    if (!bHaveResources && !bHaveFiles) return "Empty per-thread resources";
+    if (!bHaveResources && !bHaveFiles) return "Empty per-instance resources";
 
     if (bHaveResources && bHaveFiles)
-        if (PerThreadFiles.size() != PerThreadResources.size()) return "Mismatch in resource arrays";
+        if (PerInstanceFiles.size() != PerInstanceResources.size()) return "Mismatch in resource arrays";
 
-    int size = ( bHaveResources ? PerThreadResources.size() : PerThreadFiles.size() );
+    int size = ( bHaveResources ? PerInstanceResources.size() : PerInstanceFiles.size() );
 
 
     const QString err = commonStart();
     if (!err.isEmpty()) return err;
 
-    QVector<AScriptEvalResources> Data;
-    Data.resize(PerThreadResources.size());
+    QVector<AGridScriptResources> InstanceData;
+    InstanceData.resize(PerInstanceResources.size());
     for (int iR = 0; iR < size; iR++)
     {
-        AScriptEvalResources & de = Data[iR];
-        if (bHaveResources) de.Resource = PerThreadResources.at(iR);
-        if (bHaveFiles)     de.FileName = PerThreadFiles.at(iR).toString();
+        AGridScriptResources & de = InstanceData[iR];
+        if (bHaveResources) de.Resource = PerInstanceResources.at(iR);
+        if (bHaveFiles)     de.FileName = PerInstanceFiles.at(iR).toString();
     }
 
-    emit requestStatusLog("Executing script on the grid...");
-    QVector<AWebSocketWorker_Base*> workers;
-
-    for (int iWorker = 0; iWorker < ServerRecords.size(); iWorker++)
-        workers << startEvalWorker(iWorker, ServerRecords[iWorker], config, Script);
-    waitForWorkersToPauseOrFinish(workers);
-
-    // workers are connected to corresponding servers and ready to receive worktasks
-
+    emit requestStatusLog("Running script on the grid...");
+    QVector<AWebSocketWorker_Base*> workers(ServerRecords.size(), nullptr);
     do
     {
-        for (int iWorker = 0; iWorker < workers.size(); iWorker++)
+        int numDone = 0;
+        for (int iInput = 0; iInput < InstanceData.size(); iInput++)
         {
-            AWebSocketWorker_EvalScript * w = static_cast<AWebSocketWorker_EvalScript*>(workers[iWorker]);
-            if (w->isPaused())
-            {
-                // have result ready?
-                if (w->ResourceIndex != -1)  // else nothing was assigned yet
-                {
-                    if (w->bSuccess)
-                    {
-                        Data[w->ResourceIndex].bDone = true;
-                        Data[w->ResourceIndex].EvalResult = w->EvalResult;
-                    }
-                    else
-                    {
-                        Data[w->ResourceIndex].bAllocated = false;
-                        // !*! check connection status!
-                        // !*! check maybe connectivity changed
-                        continue; //next worker
-                    }
-                }
-
-                // can set new task
-                int numDone = 0;
-                for (int iD = 0; iD < Data.size(); iD++)
-                {
-                     AScriptEvalResources & d = Data[iD];
-                     if (d.bDone) numDone++;
-                     else if (!d.bAllocated)
+             AGridScriptResources & thisInstanceData = InstanceData[iInput];
+             if      (thisInstanceData.bDone) numDone++;
+             else if (!thisInstanceData.bAllocated)
+             {
+                 qDebug() << "=====> Processing instance # " << iInput;
+                 //find an idle server to assign work
+                 bool bFound = false;
+                 do
+                 {
+                     for (int iWorker = 0; iWorker < ServerRecords.size(); iWorker++)
                      {
-                         w->ResourceIndex = iD;
-                         w->Resource = d.Resource;
-                         w->FileName = d.FileName;
-                         d.bAllocated = true;
-                         w->setPaused(false);
+                         AWebSocketWorker_Base * thisWorker = workers[iWorker];
+                         if (!thisWorker || !thisWorker->isRunning())
+                         {
+                             //no worker or idle worker
+                             qDebug() << "-----> Found idle worker #" << iWorker;
+                             delete thisWorker; thisWorker = nullptr;
+                             workers[iWorker] = startScriptWorker(iWorker, ServerRecords[iWorker], config, Script, thisInstanceData);
+                             thisInstanceData.bAllocated = true;
+                             bFound = true;
+                             break;
+                         }
                      }
-                }
-                if (numDone == size)
-                {
-                    // ALL is done!
-                    break;
-                }
-            }
+                     qApp->processEvents();
+                     QThread::usleep(250);
+                     if (bAbortRequested) break;
+                 }
+                 while (!bFound);
+             }
+
+             if (bAbortRequested) break;
         }
-        qApp->processEvents();
-        QThread::usleep(250);
+
+        //qDebug() << "Finished instances:"<<numDone;
+        if (numDone == size)
+        {
+            // ALL is done!
+            break;
+        }
     }
     while (!bAbortRequested);
 
-    if (bAbortRequested)
-    {
-        if (bAbortRequested) doAbort(workers);
-        return "aborted"; // !*! cleanup
-    }
+    if (bAbortRequested) doAbort(workers);
 
-    emit requestStatusLog("Done!");
-    for (AWebSocketWorker_Base* w : workers) delete w;
+    for (AWebSocketWorker_Base * w : workers) delete w;
     workers.clear();
-    return "";
+
+    QVariantList res;
+    if (!bAbortRequested)
+    {
+        emit requestStatusLog("Done!");
+        for (AGridScriptResources & d : InstanceData)
+            res << d.EvalResult;
+    }
+    return res;
 }
 
 void AGridRunner::Abort()
@@ -753,9 +736,9 @@ AWebSocketWorker_Base *AGridRunner::startRec(int index, ARemoteServerRecord *ser
     return worker;
 }
 
-AWebSocketWorker_Base *AGridRunner::startEvalWorker(int index, ARemoteServerRecord * serverrecord, const QJsonObject & config, const QString & Script)
+AWebSocketWorker_Base *AGridRunner::startScriptWorker(int index, ARemoteServerRecord * serverrecord, const QJsonObject & config, const QString & script, AGridScriptResources & data)
 {
-    AWebSocketWorker_Base * worker = new AWebSocketWorker_EvalScript(index, serverrecord, TimeOut, &config, Script);
+    AWebSocketWorker_Base * worker = new AWorker_Script(index, serverrecord, TimeOut, &config, script, data);
 
     startInNewThread(worker);
     return worker;
@@ -1329,61 +1312,53 @@ void AWebSocketWorker_Rec::runReconstruction()
     emit requestTextLog(index, "Remote reconstruction finished");
 }
 
-AWebSocketWorker_EvalScript::AWebSocketWorker_EvalScript(int index, ARemoteServerRecord *rec, int timeOut, const QJsonObject *config, const QString &Script) :
-    AWebSocketWorker_Base(index, rec, timeOut, config), Script(Script) {}
+AWorker_Script::AWorker_Script(int index, ARemoteServerRecord *rec, int timeOut, const QJsonObject *config, const QString & script, AGridScriptResources & data) :
+    AWebSocketWorker_Base(index, rec, timeOut, config), script(script), data(data) {}
 
-void AWebSocketWorker_EvalScript::run()
+void AWorker_Script::run()
 {
     bRunning = true;
+    bSuccess = false;
 
     bool bOK = establishSession();
     if (!bOK)
     {
         qDebug() << "failed to get server, aborting the thread and updating status";
+        emit finished();
+
         rec->Progress = 0;
         bRunning = false;
-        emit finished();
+
+        data.bAllocated = false;
         return;
     }
 
-    bPaused = true;
-    //waiting while main thread attributes new workload
+    runEval();
 
-    while (!bExternalAbort)
+    emit finished();
+    bRunning = false;
+    ants2socket->Disconnect();
+
+    if (!rec->Error.isEmpty() || bExternalAbort)
     {
-        while (bPaused && !bExternalAbort)
-        {
-            QThread::usleep(100);
-            QCoreApplication::processEvents();
-        }
-        if (!bExternalAbort)
-        {
-            runEval();
-            if (!rec->Error.isEmpty())
-            {
-                rec->Progress = 0;
-                emit requestTextLog(index, rec->Error);
-                ants2socket->Disconnect();
-                bRunning = false;
-                emit finished();
-            }
-            else rec->Progress = 100;
-        }
-        else
-        {
-            qDebug() << index << "External abort received";
-            rec->Progress = 0;
-            ants2socket->Disconnect();
-            bRunning = false;
-            emit finished();
-        }
-        bPaused = true; //ready for the next job
+        qDebug() << (bExternalAbort ? "Error during script evaluation" : "External abort received");
+        rec->Progress = 0;
+        emit requestTextLog(index, rec->Error);
     }
+    else
+    {
+        rec->Progress = 100;
+        data.EvalResult = EvalResult;
+        emit requestTextLog(index, "Success!");
+        bSuccess = true;
+    }
+
+    data.bAllocated = false;
+    return;
 }
 
-void AWebSocketWorker_EvalScript::runEval()
+void AWorker_Script::runEval()
 {
-    emit requestTextLog(index, QString("Evaluating with thread resources from %1 to %2").arg(rec->EventsFrom).arg(rec->EventsTo));
     rec->Error.clear();
 
     if (!ants2socket || !ants2socket->ConfirmSendPossible())
@@ -1393,7 +1368,7 @@ void AWebSocketWorker_EvalScript::runEval()
     }
 
     bool ok = sendAnts2Config(); // !*! to start - it should be done just once
-    if (!ok) return;
+    if (!ok) return;  //rec->Error is set inside
 
     //sending file
     /*
@@ -1418,22 +1393,21 @@ void AWebSocketWorker_EvalScript::runEval()
     }
     */
 
-    /*
-    emit requestTextLog(index, "Starting reconstruction...");
+    emit requestTextLog(index, "Starting script eval...");
     QString Script = "server.SetAcceptExternalProgressReport(true);"; //even if not showing to the user, still want to send reports to see that the server is alive
-    Script += "rec.ReconstructEvents(" + QString::number(rec->NumThreads_Allocated) + ", false);";
-    Script += "server.SendReconstructionData()";
+    Script += script;
     bool bOK = ants2socket->SendText(Script);
     QString reply = ants2socket->GetTextReply();
+    qDebug() << "--------------Got script reply:" << reply;
     QJsonObject ro = strToObject(reply);
     if ( !bOK || ro.contains("error") )
     {
         const QString err = ro["error"].toString();
-        rec->Error = "Server reported error:<br>" + err;
+        rec->Error = "Server reported error:  \n" + err;
         return;
     }
 
-    while ( !ro.contains("binary") ) //after sending the file, the reply is "{ \"binary\" : \"qbytearray\" }"
+    while ( !ro.contains("evaluation") ) //after sending the file, the reply is "{ \"result\" : true, \"evaluation\" : .................. }"
     {
         emit requestTextLog(index, reply);
         bOK = ants2socket->ResumeWaitForAnswer();
@@ -1441,7 +1415,7 @@ void AWebSocketWorker_EvalScript::runEval()
         ro = strToObject(reply);
         if (!bOK)
         {
-            emit requestTextLog(index, "Reconstruction failed!");
+            emit requestTextLog(index, "Evaluation failed!");
             emit requestTextLog(index, ants2socket->GetError());
             return;
         }
@@ -1449,7 +1423,7 @@ void AWebSocketWorker_EvalScript::runEval()
             rec->Progress = ro["progress"].toInt();
     }
 
-    rec->ByteArrayReceived = ants2socket->GetBinaryReply();
+    data.EvalResult = ro["evaluation"].toVariant();
+    data.bDone = true;
     emit requestTextLog(index, "Remote reconstruction finished");
-    */
 }

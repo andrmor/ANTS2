@@ -14,6 +14,17 @@ class AWebSocketSession;
 class AWebSocketWorker_Base;
 class QJsonObject;
 
+struct AGridScriptResources
+{
+    QVariant Resource;
+    QString  FileName;
+
+    bool bDone = false;
+    bool bAllocated = false;
+
+    QVariant EvalResult;
+};
+
 class AGridRunner : public QObject
 {
     Q_OBJECT
@@ -26,7 +37,7 @@ public:
     QString Reconstruct(const QJsonObject* config);
     QString RateServers(const QJsonObject* config);
 
-    QString ExecuteScript(const QString & Script, const QJsonObject & config, const QVariantList & PerThreadResources, const QVariantList & PerThreadFiles);
+    QVariant EvaluateSript(const QString & Script, const QJsonObject & config, const QVariantList & PerThreadResources, const QVariantList & PerThreadFiles);
 
     void Abort();
 
@@ -46,7 +57,6 @@ private:
     const APmHub & PMs;
     ASimulationManager & SimMan;
     int TimeOut = 5000;
-    //QVector<AWebSocketSession*> Sockets;
 
     bool bAbortRequested = false;
 
@@ -55,7 +65,7 @@ private:
     AWebSocketWorker_Base * startSim(int index, ARemoteServerRecord *serverRecord, const QJsonObject* config);
     AWebSocketWorker_Base * startRec(int index, ARemoteServerRecord *server, const QJsonObject* config);
 
-    AWebSocketWorker_Base *startEvalWorker(int index, ARemoteServerRecord * serverrecord, const QJsonObject & config, const QString &Script);
+    AWebSocketWorker_Base * startScriptWorker(int index, ARemoteServerRecord * serverrecord, const QJsonObject & config, const QString & script, AGridScriptResources & data);
 
     void startInNewThread(AWebSocketWorker_Base *worker);
 
@@ -76,7 +86,6 @@ signals:
     void requestDelegateGuiUpdate();
 
 };
-
 
 class AWebSocketWorker_Base : public QObject
 {
@@ -170,13 +179,14 @@ private:
     void runReconstruction();
 };
 
-class AWebSocketWorker_EvalScript : public AWebSocketWorker_Base
+class AWorker_Script : public AWebSocketWorker_Base
 {
     Q_OBJECT
 public:
-    AWebSocketWorker_EvalScript(int index, ARemoteServerRecord* rec, int timeOut, const QJsonObject* config, const QString & Script);
+    AWorker_Script(int index, ARemoteServerRecord* rec, int timeOut, const QJsonObject* config, const QString & script, AGridScriptResources & data);
 
-    QString  Script;
+    const QString        & script;
+    AGridScriptResources & data;
 
     QVariant Resource;
     QString  FileName;
@@ -185,9 +195,10 @@ public:
 
     int      ResourceIndex = -1;
     bool     bSuccess = false;
+    bool     bFailed   = false;
 
 public slots:
-    virtual void run() override;
+    void run() override;
 
 private:
     void runEval();

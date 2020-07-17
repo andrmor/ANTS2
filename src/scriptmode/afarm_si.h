@@ -23,6 +23,8 @@ public slots:
 
     QVariantList evaluateScript(QString Script, QVariantList Resources, QVariantList FileNames);
 
+    void test(QString str);
+
 private:
     const QJsonObject & Config;
     AGridRunner & GridRunner;

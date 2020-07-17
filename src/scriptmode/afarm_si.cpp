@@ -37,3 +37,18 @@ QVariantList AFarm_si::evaluateScript(QString Script, QVariantList Resources, QV
     else
         return res.toList();
 }
+
+#include "ajsontools.h"
+void AFarm_si::test(QString str)
+{
+    QJsonObject js = strToObject(str);
+    /*
+    {
+        QJsonDocument doc = QJsonDocument::fromJson(s.toUtf8());
+        qDebug() << doc.toJson(QJsonDocument::Compact);
+        return doc.object();
+    }
+    */
+
+    qDebug() << jsonToString(js);
+}

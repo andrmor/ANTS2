@@ -21,6 +21,7 @@ struct AGridScriptResources
 
     bool bDone = false;
     bool bAllocated = false;
+    bool bAbort = false;
 
     QVariant EvalResult;
 };
@@ -188,12 +189,6 @@ public:
     const QString        & script;
     AGridScriptResources & data;
 
-    QVariant Resource;
-    QString  FileName;
-
-    QVariant EvalResult;
-
-    int      ResourceIndex = -1;
     bool     bSuccess = false;
     bool     bFailed   = false;
 
@@ -201,7 +196,7 @@ public slots:
     void run() override;
 
 private:
-    void runEval();
+    void runEvalScript();
 };
 
 #endif // AGRIDRUNNER_H

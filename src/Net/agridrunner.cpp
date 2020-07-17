@@ -495,7 +495,12 @@ QVariant AGridRunner::EvaluateSript(const QString & Script, const QJsonObject & 
         for (int iInput = 0; iInput < InstanceData.size(); iInput++)
         {
              AGridScriptResources & thisInstanceData = InstanceData[iInput];
-             if      (thisInstanceData.bDone) numDone++;
+             if      (thisInstanceData.bAbort)
+             {
+                 bAbortRequested = true;
+                 break;
+             }
+             else if (thisInstanceData.bDone) numDone++;
              else if (!thisInstanceData.bAllocated)
              {
                  qDebug() << "=====> Processing instance # " << iInput;
@@ -530,7 +535,7 @@ QVariant AGridRunner::EvaluateSript(const QString & Script, const QJsonObject & 
         //qDebug() << "Finished instances:"<<numDone;
         if (numDone == size)
         {
-            // ALL is done!
+            // all instances are done!
             break;
         }
     }
@@ -1324,19 +1329,16 @@ void AWorker_Script::run()
     if (!bOK)
     {
         qDebug() << "failed to get server, aborting the thread and updating status";
-        emit finished();
 
         rec->Progress = 0;
-        bRunning = false;
-
         data.bAllocated = false;
+        bRunning = false;
+        emit finished();
         return;
     }
 
-    runEval();
+    runEvalScript();
 
-    emit finished();
-    bRunning = false;
     ants2socket->Disconnect();
 
     if (!rec->Error.isEmpty() || bExternalAbort)
@@ -1344,20 +1346,23 @@ void AWorker_Script::run()
         qDebug() << (bExternalAbort ? "Error during script evaluation" : "External abort received");
         rec->Progress = 0;
         emit requestTextLog(index, rec->Error);
+        data.bAllocated = false;
     }
     else
     {
         rec->Progress = 100;
-        data.EvalResult = EvalResult;
         emit requestTextLog(index, "Success!");
         bSuccess = true;
+        data.bDone = true;
     }
 
-    data.bAllocated = false;
+    bRunning = false;
+    emit finished();
     return;
 }
 
-void AWorker_Script::runEval()
+#include <QJsonDocument>
+void AWorker_Script::runEvalScript()
 {
     rec->Error.clear();
 
@@ -1395,35 +1400,38 @@ void AWorker_Script::runEval()
 
     emit requestTextLog(index, "Starting script eval...");
     QString Script = "server.SetAcceptExternalProgressReport(true);"; //even if not showing to the user, still want to send reports to see that the server is alive
-    Script += script;
-    bool bOK = ants2socket->SendText(Script);
-    QString reply = ants2socket->GetTextReply();
-    qDebug() << "--------------Got script reply:" << reply;
-    QJsonObject ro = strToObject(reply);
-    if ( !bOK || ro.contains("error") )
+    QString resStr;
+    if (data.Resource.type() == QVariant::Map || data.Resource.type() == QVariant::List)
     {
-        const QString err = ro["error"].toString();
-        rec->Error = "Server reported error:  \n" + err;
-        return;
+        QJsonDocument doc = QJsonDocument::fromVariant(data.Resource);
+        resStr = doc.toJson(QJsonDocument::Compact);
     }
+    else resStr = data.Resource.toString();
+    Script += "var Data = " + resStr + ";";
+    Script += script;
+    //qDebug() << "Sending script:\n"<<Script;
+    bool bOK = ants2socket->SendText(Script);
 
-    while ( !ro.contains("evaluation") ) //after sending the file, the reply is "{ \"result\" : true, \"evaluation\" : .................. }"
+    QJsonObject ro;
+    do
     {
-        emit requestTextLog(index, reply);
-        bOK = ants2socket->ResumeWaitForAnswer();
-        reply = ants2socket->GetTextReply();
+        QString reply = ants2socket->GetTextReply();
         ro = strToObject(reply);
-        if (!bOK)
+        //qDebug() << bOK << "--------------Got script eval reply:" << reply;
+        if ( !bOK || ro.contains("error") )
         {
-            emit requestTextLog(index, "Evaluation failed!");
-            emit requestTextLog(index, ants2socket->GetError());
+            const QString err = ro["error"].toString();
+            rec->Error = ( bOK ? QString("Server reported error: %1").arg(err) : QString("Send script failed: %1").arg(ants2socket->GetError()) );
+            emit requestTextLog(index, rec->Error);
+            if (err.contains("Syntax check failed")) data.bAbort = true;
             return;
         }
-        if (ro.contains("progress"))
-            rec->Progress = ro["progress"].toInt();
+
+        if (ro.contains("progress")) rec->Progress = ro["progress"].toInt();
     }
+    while ( !ro.contains("evaluation") ); //after sending the file, the reply is "{ \"result\" : true, \"evaluation\" : .................. }"
 
     data.EvalResult = ro["evaluation"].toVariant();
-    data.bDone = true;
-    emit requestTextLog(index, "Remote reconstruction finished");
+    //qDebug() << "!!!!!!!!!!!!!!!" << data.EvalResult;
+    emit requestTextLog(index, "Remote script eval finished");
 }

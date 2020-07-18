@@ -3,8 +3,9 @@
 
 #include <QObject>
 #include <QVector>
-#include <QJsonObject>
 #include <QHostAddress>
+#include <QVariant>
+#include <QString>
 
 class EventsDataClass;
 class APmHub;
@@ -13,18 +14,7 @@ class ARemoteServerRecord;
 class AWebSocketSession;
 class AWebSocketWorker_Base;
 class QJsonObject;
-
-struct AGridScriptResources
-{
-    QVariant Resource;
-    QString  FileName;
-
-    bool bDone = false;
-    bool bAllocated = false;
-    bool bAbort = false;
-
-    QVariant EvalResult;
-};
+struct AGridScriptResources;
 
 class AGridRunner : public QObject
 {
@@ -92,8 +82,7 @@ class AWebSocketWorker_Base : public QObject
 {
     Q_OBJECT
 public:
-    AWebSocketWorker_Base(int index, ARemoteServerRecord* rec, int timeOut,  const QJsonObject* config = 0);
-    virtual ~AWebSocketWorker_Base() {}
+    AWebSocketWorker_Base(int index, ARemoteServerRecord* rec, int timeOut,  const QJsonObject* config = nullptr);
 
     bool isRunning() const {return bRunning;}
     bool isPausedOrFinished() const {return bPaused || !bRunning;}
@@ -115,12 +104,12 @@ protected:
     ARemoteServerRecord* rec;
     int TimeOut = 5000;
 
-    bool bRunning = false;
-    bool bPaused = false;
+    bool bRunning       = false;
+    bool bPaused        = false;
     bool bExternalAbort = false;
 
     const QJsonObject* config;
-    AWebSocketSession* ants2socket = 0;
+    AWebSocketSession* ants2socket = nullptr;
 
     QString extraScript; //e.g. script to modify config according to distribution of sim events
 
@@ -129,7 +118,7 @@ protected:
     AWebSocketSession* connectToAntsServer();
     bool               establishSession();
 
-    bool sendAnts2Config();
+    bool               sendAnts2Config();
 
 signals:
     void finished();
@@ -184,19 +173,33 @@ class AWorker_Script : public AWebSocketWorker_Base
 {
     Q_OBJECT
 public:
+    enum AErrorType {Communication, ScriptSyntax, ScriptEval};
+
     AWorker_Script(int index, ARemoteServerRecord* rec, int timeOut, const QJsonObject* config, const QString & script, AGridScriptResources & data);
 
     const QString        & script;
     AGridScriptResources & data;
 
-    bool     bSuccess = false;
-    bool     bFailed   = false;
+    bool       bSuccess = false;
+    bool       bFailed  = false;
+    AErrorType ErrorType;
 
 public slots:
     void run() override;
 
 private:
     void runEvalScript();
+};
+
+struct AGridScriptResources
+{
+    QVariant Resource;
+    QString  FileName;
+
+    bool bDone = false;
+    bool bAllocated = false;
+
+    QVariant EvalResult;
 };
 
 #endif // AGRIDRUNNER_H

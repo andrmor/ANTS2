@@ -472,15 +472,15 @@ QVariant AGridRunner::EvaluateSript(const QString & Script, const QJsonObject & 
     if (bHaveResources && bHaveFiles)
         if (PerInstanceFiles.size() != PerInstanceResources.size()) return "Mismatch in resource arrays";
 
-    int size = ( bHaveResources ? PerInstanceResources.size() : PerInstanceFiles.size() );
-
+    const int sizeResources = ( bHaveResources ? PerInstanceResources.size() : PerInstanceFiles.size() );
 
     const QString err = commonStart();
     if (!err.isEmpty()) return err;
 
+    QString ErrorString;
     QVector<AGridScriptResources> InstanceData;
-    InstanceData.resize(PerInstanceResources.size());
-    for (int iR = 0; iR < size; iR++)
+    InstanceData.resize(sizeResources);
+    for (int iR = 0; iR < sizeResources; iR++)
     {
         AGridScriptResources & de = InstanceData[iR];
         if (bHaveResources) de.Resource = PerInstanceResources.at(iR);
@@ -495,12 +495,7 @@ QVariant AGridRunner::EvaluateSript(const QString & Script, const QJsonObject & 
         for (int iInput = 0; iInput < InstanceData.size(); iInput++)
         {
              AGridScriptResources & thisInstanceData = InstanceData[iInput];
-             if      (thisInstanceData.bAbort)
-             {
-                 bAbortRequested = true;
-                 break;
-             }
-             else if (thisInstanceData.bDone) numDone++;
+             if      (thisInstanceData.bDone) numDone++;
              else if (!thisInstanceData.bAllocated)
              {
                  qDebug() << "=====> Processing instance # " << iInput;
@@ -508,10 +503,17 @@ QVariant AGridRunner::EvaluateSript(const QString & Script, const QJsonObject & 
                  bool bFound = false;
                  do
                  {
-                     for (int iWorker = 0; iWorker < ServerRecords.size(); iWorker++)
+                     for (int iWorker = 0; iWorker < workers.size(); iWorker++)
                      {
-                         AWebSocketWorker_Base * thisWorker = workers[iWorker];
-                         if (!thisWorker || !thisWorker->isRunning())
+                         AWorker_Script * thisWorker = dynamic_cast<AWorker_Script*>(workers[iWorker]);
+                         if (thisWorker && thisWorker->bFailed && thisWorker->ErrorType != AWorker_Script::Communication)
+                         {
+                             bAbortRequested = true;
+                             if (thisWorker->ErrorType == AWorker_Script::ScriptSyntax) ErrorString = "Syntax error in the script";
+                             if (thisWorker->ErrorType == AWorker_Script::ScriptEval)   ErrorString = "Script evaluation error";
+                             break;
+                         }
+                         else if (!thisWorker || !thisWorker->isRunning())
                          {
                              //no worker or idle worker
                              qDebug() << "-----> Found idle worker #" << iWorker;
@@ -533,7 +535,7 @@ QVariant AGridRunner::EvaluateSript(const QString & Script, const QJsonObject & 
         }
 
         //qDebug() << "Finished instances:"<<numDone;
-        if (numDone == size)
+        if (numDone == sizeResources)
         {
             // all instances are done!
             break;
@@ -541,13 +543,21 @@ QVariant AGridRunner::EvaluateSript(const QString & Script, const QJsonObject & 
     }
     while (!bAbortRequested);
 
-    if (bAbortRequested) doAbort(workers);
+    if (bAbortRequested)
+    {
+        doAbort(workers);
+        waitForWorkersToFinish(workers);
+    }
 
     for (AWebSocketWorker_Base * w : workers) delete w;
     workers.clear();
 
     QVariantList res;
-    if (!bAbortRequested)
+    if (bAbortRequested)
+    {
+        return ErrorString;
+    }
+    else
     {
         emit requestStatusLog("Done!");
         for (AGridScriptResources & d : InstanceData)
@@ -576,7 +586,7 @@ void AGridRunner::waitForWorkersToFinish(QVector<AWebSocketWorker_Base*>& worker
     {
         bStillWorking = false;
         for (AWebSocketWorker_Base* w : workers)
-            if (w->isRunning()) bStillWorking = true;
+            if (w && w->isRunning()) bStillWorking = true;
         emit requestDelegateGuiUpdate();
         QCoreApplication::processEvents();
         QThread::usleep(250);
@@ -597,7 +607,7 @@ void AGridRunner::waitForWorkersToPauseOrFinish(QVector<AWebSocketWorker_Base *>
     {
         bStillWorking = false;
         for (AWebSocketWorker_Base* w : workers)
-            if (!w->isPausedOrFinished()) bStillWorking = true;
+            if (w && !w->isPausedOrFinished()) bStillWorking = true;
         emit requestDelegateGuiUpdate();
         QCoreApplication::processEvents();
         QThread::usleep(250);
@@ -692,11 +702,12 @@ void AGridRunner::populateNodeArrayFromSimMan(QJsonArray & toArray)
 
 void AGridRunner::doAbort(QVector<AWebSocketWorker_Base *> &workers)
 {
-    for (AWebSocketWorker_Base* w : workers)
-    {
-        w->RequestAbort();
-        emit w->finished();
-    }
+    for (AWebSocketWorker_Base * w : workers)
+        if (w)
+        {
+            w->RequestAbort();
+            emit w->finished();
+        }
 }
 
 void AGridRunner::onStart()
@@ -935,7 +946,7 @@ bool AWebSocketWorker_Base::sendAnts2Config()
     emit requestTextLog(index, "Sending script to setup configuration...");
     QString Script = "var c = server.GetBufferAsObject();"
                      "var ok = config.SetConfig(c);"
-                     "if (!ok) core.abort(\"Failed to set config\");";
+                     "if (!ok) core.abort(\"Failed to set config\");true";
     bOK = ants2socket->SendText(Script);
     reply = ants2socket->GetTextReply();
     ro = strToObject(reply);
@@ -1332,6 +1343,10 @@ void AWorker_Script::run()
 
         rec->Progress = 0;
         data.bAllocated = false;
+
+        bFailed = true;
+        ErrorType = Communication;
+
         bRunning = false;
         emit finished();
         return;
@@ -1343,9 +1358,10 @@ void AWorker_Script::run()
 
     if (!rec->Error.isEmpty() || bExternalAbort)
     {
-        qDebug() << (bExternalAbort ? "Error during script evaluation" : "External abort received");
+        qDebug() << "Abort / Error during script evaluation";
         rec->Progress = 0;
         emit requestTextLog(index, rec->Error);
+        bFailed = true;
         data.bAllocated = false;
     }
     else
@@ -1364,11 +1380,12 @@ void AWorker_Script::run()
 #include <QJsonDocument>
 void AWorker_Script::runEvalScript()
 {
-    rec->Error.clear();
+    rec->Error.clear(); //?
 
     if (!ants2socket || !ants2socket->ConfirmSendPossible())
     {
         rec->Error = "There is no connection to ANTS2 server";
+        ErrorType = Communication;
         return;
     }
 
@@ -1411,7 +1428,13 @@ void AWorker_Script::runEvalScript()
     Script += "var Data = " + resStr + ";";
     Script += script;
     //qDebug() << ">>>>>>>>>> Sending script:\n"<<Script;
-    bool bOK = ants2socket->SendText(Script);
+    ok = ants2socket->SendText(Script);
+    if (!ok)
+    {
+        rec->Error = "Send script failed";
+        ErrorType = Communication;
+        return;
+    }
 
     QJsonObject ro;
     do
@@ -1419,12 +1442,12 @@ void AWorker_Script::runEvalScript()
         QString reply = ants2socket->GetTextReply();
         ro = strToObject(reply);
         //qDebug() << bOK << "--------------Got script eval reply:" << reply;
-        if ( !bOK || ro.contains("error") )
+        if (ro.contains("error"))
         {
             const QString err = ro["error"].toString();
-            rec->Error = ( bOK ? QString("Server reported error: %1").arg(err) : QString("Send script failed: %1").arg(ants2socket->GetError()) );
+            rec->Error = QString("Server reported error: %1").arg(err);
             emit requestTextLog(index, rec->Error);
-            if (err.contains("Syntax check failed")) data.bAbort = true;
+            ErrorType = ( err.contains("Syntax check failed") ? ScriptSyntax : ScriptEval) ;
             return;
         }
 

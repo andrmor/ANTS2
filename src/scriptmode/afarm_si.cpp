@@ -31,6 +31,7 @@ QVariantList AFarm_si::evaluateScript(QString Script, QVariantList Resources, QV
 
     if (res.type() == QVariant::String)
     {
+        //error is coded as a string
         abort(res.toString());
         return QVariantList();
     }
@@ -38,17 +39,3 @@ QVariantList AFarm_si::evaluateScript(QString Script, QVariantList Resources, QV
         return res.toList();
 }
 
-#include "ajsontools.h"
-void AFarm_si::test(QString str)
-{
-    QJsonObject js = strToObject(str);
-    /*
-    {
-        QJsonDocument doc = QJsonDocument::fromJson(s.toUtf8());
-        qDebug() << doc.toJson(QJsonDocument::Compact);
-        return doc.object();
-    }
-    */
-
-    qDebug() << jsonToString(js);
-}

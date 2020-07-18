@@ -121,6 +121,7 @@ protected:
 
     bool               sendAnts2Config();
     bool               uploadFile(const QString & LocalFileName, const QString & RemoteFileName);
+    bool               evaluateScript(const QString & Script, QVariant * Result = nullptr);
 
 signals:
     void finished();

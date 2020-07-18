@@ -1006,6 +1006,51 @@ bool AWebSocketWorker_Base::uploadFile(const QString &LocalFileName, const QStri
     return true;
 }
 
+bool AWebSocketWorker_Base::evaluateScript(const QString & Script, QVariant * Result)
+{
+    emit requestTextLog(index, "Starting script eval...");
+    QString scriptToSend = "server.SetAcceptExternalProgressReport(true);"; //even if not showing to the user, still want to send reports to upkeep the connection to the server
+    scriptToSend += Script;
+    //qDebug() << ">>>>>>>>>> Sending script:\n"<<Script;
+    bool ok = ants2socket->SendText(scriptToSend);
+    if (!ok)
+    {
+        rec->Error = "Send script failed";
+        rec->ErrorType = ARemoteServerRecord::Communication;
+        return false;
+    }
+
+    QJsonObject ro;
+    do
+    {
+        QString reply = ants2socket->GetTextReply();
+        ro = strToObject(reply);
+        //qDebug() << bOK << "--------------Got script eval reply:" << reply;
+        if (ro.contains("error"))
+        {
+            const QString err = ro["error"].toString();
+            if (err.contains("Syntax check failed"))
+            {
+                rec->ErrorType = ARemoteServerRecord::ScriptSyntax;
+                rec->Error = "Script syntax error";
+            }
+            else
+            {
+                rec->ErrorType = ARemoteServerRecord::ScriptEval;
+                rec->Error = QString("Script evaluation error: %1").arg(err);
+            }
+            emit requestTextLog(index, rec->Error);
+            return false;
+        }
+
+        if (ro.contains("progress")) rec->Progress = ro["progress"].toInt();
+    }
+    while ( !ro.contains("evaluation") ); //after sending the file, the reply is "{ \"result\" : true, \"evaluation\" : .................. }"
+
+    if (Result) *Result = ro["evaluation"].toVariant();
+    return true;
+}
+
 AWebSocketWorker_Check::AWebSocketWorker_Check(int index, ARemoteServerRecord *rec, int timeOut) :
     AWebSocketWorker_Base(index, rec, timeOut) {}
 
@@ -1440,7 +1485,6 @@ void AWorker_Script::runEvalScript()
     bool ok = sendAnts2Config();
     if (!ok) return;  //rec->Error is set inside
 
-    //sending file
     if (!data.FileName.isEmpty())
     {
         ok = uploadFile(data.FileName, "File.dat");
@@ -1448,55 +1492,21 @@ void AWorker_Script::runEvalScript()
     }
 
     emit requestTextLog(index, "Starting script eval...");
-    QString Script = "server.SetAcceptExternalProgressReport(true);"; //even if not showing to the user, still want to send reports to see that the server is alive
-    QString resStr;
+    QString str;
     if (data.Resource.type() == QVariant::Map || data.Resource.type() == QVariant::List)
     {
         QJsonDocument doc = QJsonDocument::fromVariant(data.Resource);
-        resStr = doc.toJson(QJsonDocument::Compact);
+        str = doc.toJson(QJsonDocument::Compact);
     }
-    else if (data.Resource.type() == QVariant::String) resStr = "\"" + data.Resource.toString() + "\"";
-    else resStr = data.Resource.toString();
-    Script += "var Data = " + resStr + ";";
+    else if (data.Resource.type() == QVariant::String)
+        str = "\"" + data.Resource.toString() + "\"";
+    else
+        str = data.Resource.toString();
+    QString Script = "var Data = " + str + ";";
     Script += script;
     //qDebug() << ">>>>>>>>>> Sending script:\n"<<Script;
-    ok = ants2socket->SendText(Script);
-    if (!ok)
-    {
-        rec->Error = "Send script failed";
-        rec->ErrorType = ARemoteServerRecord::Communication;
-        return;
-    }
 
-    QJsonObject ro;
-    do
-    {
-        QString reply = ants2socket->GetTextReply();
-        ro = strToObject(reply);
-        //qDebug() << bOK << "--------------Got script eval reply:" << reply;
-        if (ro.contains("error"))
-        {
-            const QString err = ro["error"].toString();
-            rec->Error = QString("Server reported error: %1").arg(err);
-            emit requestTextLog(index, rec->Error);
-            if (err.contains("Syntax check failed"))
-            {
-                rec->ErrorType = ARemoteServerRecord::ScriptSyntax;
-                rec->Error = "Script syntax error";
-            }
-            else
-            {
-                rec->ErrorType = ARemoteServerRecord::ScriptEval;
-                rec->Error = "Script evaluation error";
-            }
-            return;
-        }
-
-        if (ro.contains("progress")) rec->Progress = ro["progress"].toInt();
-    }
-    while ( !ro.contains("evaluation") ); //after sending the file, the reply is "{ \"result\" : true, \"evaluation\" : .................. }"
-
-    data.EvalResult = ro["evaluation"].toVariant();
-    //qDebug() << "!!!!!!!!!!!!!!!" << data.EvalResult;
-    emit requestTextLog(index, "Remote script eval finished");
+    ok = evaluateScript(Script, &data.EvalResult);
+    //qDebug() << "-------Eval result:" << data.EvalResult;
+    if (ok) emit requestTextLog(index, "Remote script eval finished");
 }

@@ -19,7 +19,7 @@ public:
 public slots:
     void setTimeout(double Timeout_ms);
 
-    int checkAvailableThreads();
+    QVariantList getServers();
 
     QVariantList evaluateScript(QString Script, QVariantList Resources, QVariantList FileNames);
 

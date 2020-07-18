@@ -205,6 +205,7 @@ int main(int argc, char *argv[])
         parser.addPositionalArgument("port", QCoreApplication::translate("main", "Web socket server port"));
         parser.addPositionalArgument("ticket", QCoreApplication::translate("main", "Id for accessing ANTS2 server"));
         parser.addPositionalArgument("maxThreads", QCoreApplication::translate("main", "Maximum number of threads in sim and rec"));
+        parser.addPositionalArgument("directory", QCoreApplication::translate("main", "Working directory"));
 
         QCommandLineOption serverOption(QStringList() << "s" << "server",
                 QCoreApplication::translate("main", "Run ANTS2 in server mode."));
@@ -240,7 +241,24 @@ int main(int argc, char *argv[])
                 QCoreApplication::translate("main", "maxThreads"));
         parser.addOption(maxThreadsOption);
 
+        QCommandLineOption workDirOption(QStringList() << "w" << "workdir",
+                QCoreApplication::translate("main", "Sets max sim and rec threads."),
+                QCoreApplication::translate("main", "directory"));
+        parser.addOption(workDirOption);
+
         parser.process(*app);
+
+        if ( parser.isSet(workDirOption) )
+        {
+            QString WorkDir = parser.value(workDirOption);
+            if (QDir(WorkDir).exists())
+            {
+                qDebug() << "Setting the working directory to:" << WorkDir;
+                QDir::setCurrent(WorkDir);
+                GlobSet.TmpDir = WorkDir;
+            }
+            else qDebug() << "Ignoring the provided working directory (" << WorkDir << ") - it does not exist!";
+        }
 
         if ( parser.isSet(outputOption) )
         {

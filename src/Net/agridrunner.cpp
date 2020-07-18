@@ -1393,27 +1393,41 @@ void AWorker_Script::runEvalScript()
     if (!ok) return;  //rec->Error is set inside
 
     //sending file
-    /*
-    emit requestTextLog(index, "Sending events to the server...");
-    bOK = ants2socket->SendQByteArray(rec->ByteArrayToSend);
-    QString reply = ants2socket->GetTextReply();
-    QJsonObject ro = strToObject(reply);
-    if (!bOK || !ro.contains("result") || !ro["result"].toBool())
+    if (!data.FileName.isEmpty())
     {
-        rec->Error = "Failed to send events to remote server";
-        return;
+        emit requestTextLog(index, "Sending file to the server...");
+        ok = ants2socket->SendFile(data.FileName);
+        if (!ok)
+        {
+            rec->Error = "Send script failed";
+            ErrorType = Communication;
+            return;
+        }
+        QString reply = ants2socket->GetTextReply();
+        QJsonObject ro = strToObject(reply);
+        if (!ro.contains("result") || !ro["result"].toBool())
+        {
+            rec->Error = "Failed to send file to remote server";
+            ErrorType = Communication;
+            return;
+        }
+        emit requestTextLog(index, "Saving file on server...");
+        QString Script = "server.SaveBufferToFile(\"File.dat\")";
+        ok = ants2socket->SendText(Script);
+        if (!ok)
+        {
+            rec->Error = "Send script failed";
+            ErrorType = Communication;
+            return;
+        }
+        reply = ants2socket->GetTextReply();
+        ro = strToObject(reply);
+        if ( !ro.contains("result") || !ro["result"].toBool() )
+        {
+            rec->Error = "Failed to set events on server.";
+            return;
+        }
     }
-    emit requestTextLog(index, "Setting event signals at the remote server...");
-    Script = "server.GetBufferAsEvents()";
-    bOK = ants2socket->SendText(Script);
-    reply = ants2socket->GetTextReply();
-    ro = strToObject(reply);
-    if ( !bOK || !ro.contains("result") || !ro["result"].toBool() )
-    {
-        rec->Error = "Failed to set events on server.";
-        return;
-    }
-    */
 
     emit requestTextLog(index, "Starting script eval...");
     QString Script = "server.SetAcceptExternalProgressReport(true);"; //even if not showing to the user, still want to send reports to see that the server is alive

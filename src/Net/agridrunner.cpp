@@ -506,11 +506,10 @@ QVariant AGridRunner::EvaluateSript(const QString & Script, const QJsonObject & 
                      for (int iWorker = 0; iWorker < workers.size(); iWorker++)
                      {
                          AWorker_Script * thisWorker = dynamic_cast<AWorker_Script*>(workers[iWorker]);
-                         if (thisWorker && thisWorker->bFailed && thisWorker->ErrorType != AWorker_Script::Communication)
+                         if (thisWorker && thisWorker->bFailed && thisWorker->rec->ErrorType != ARemoteServerRecord::Communication)
                          {
                              bAbortRequested = true;
-                             if (thisWorker->ErrorType == AWorker_Script::ScriptSyntax) ErrorString = "Syntax error in the script";
-                             if (thisWorker->ErrorType == AWorker_Script::ScriptEval)   ErrorString = "Script evaluation error";
+                             ErrorString = thisWorker->rec->Error;
                              break;
                          }
                          else if (!thisWorker || !thisWorker->isRunning())
@@ -554,9 +553,7 @@ QVariant AGridRunner::EvaluateSript(const QString & Script, const QJsonObject & 
 
     QVariantList res;
     if (bAbortRequested)
-    {
         return ErrorString;
-    }
     else
     {
         emit requestStatusLog("Done!");
@@ -754,6 +751,7 @@ AWebSocketWorker_Base *AGridRunner::startRec(int index, ARemoteServerRecord *ser
 
 AWebSocketWorker_Base *AGridRunner::startScriptWorker(int index, ARemoteServerRecord * serverrecord, const QJsonObject & config, const QString & script, AGridScriptResources & data)
 {
+    serverrecord->Error.clear();
     AWebSocketWorker_Base * worker = new AWorker_Script(index, serverrecord, TimeOut, &config, script, data);
 
     startInNewThread(worker);
@@ -955,6 +953,56 @@ bool AWebSocketWorker_Base::sendAnts2Config()
         rec->Error = "failed to setup config on the ants2 server";
         return false;
     }
+    return true;
+}
+
+bool AWebSocketWorker_Base::uploadFile(const QString &LocalFileName, const QString &RemoteFileName)
+{
+    //send file to remote server buffer
+    emit requestTextLog(index, "Sending file to the server...");
+    bool ok = ants2socket->SendFile(LocalFileName);
+    if (!ok)
+    {
+        if (ants2socket->GetError().startsWith("Cannot open"))
+        {
+            rec->Error = ants2socket->GetError();
+            rec->ErrorType = ARemoteServerRecord::LocalFile;
+        }
+        else
+        {
+            rec->Error = "Send script failed";
+            rec->ErrorType = ARemoteServerRecord::Communication;
+        }
+        return false;
+    }
+    QString reply = ants2socket->GetTextReply();
+    QJsonObject ro = strToObject(reply);
+    if (!ro.contains("result") || !ro["result"].toBool())
+    {
+        rec->Error = "Failed to send file to remote server";
+        rec->ErrorType = ARemoteServerRecord::Communication;
+        return false;
+    }
+
+    //send script to remote server to save buffer as file
+    emit requestTextLog(index, "Saving file on server...");
+    QString Script = "server.SaveBufferToFile(\"" + RemoteFileName + "\")";
+    ok = ants2socket->SendText(Script);
+    if (!ok)
+    {
+        rec->Error = "Failed to send script to remote server to save file";
+        rec->ErrorType = ARemoteServerRecord::Communication;
+        return false;
+    }
+    reply = ants2socket->GetTextReply();
+    ro = strToObject(reply);
+    if ( !ro.contains("result") || !ro["result"].toBool() )
+    {
+        rec->Error = "Failed to save file on remote server";
+        rec->ErrorType = ARemoteServerRecord::RemoteFile;
+        return false;
+    }
+
     return true;
 }
 
@@ -1345,7 +1393,7 @@ void AWorker_Script::run()
         data.bAllocated = false;
 
         bFailed = true;
-        ErrorType = Communication;
+        rec->ErrorType = ARemoteServerRecord::Communication;
 
         bRunning = false;
         emit finished();
@@ -1385,48 +1433,18 @@ void AWorker_Script::runEvalScript()
     if (!ants2socket || !ants2socket->ConfirmSendPossible())
     {
         rec->Error = "There is no connection to ANTS2 server";
-        ErrorType = Communication;
+        rec->ErrorType = ARemoteServerRecord::Communication;
         return;
     }
 
-    bool ok = sendAnts2Config(); // !*! to start - it should be done just once
+    bool ok = sendAnts2Config();
     if (!ok) return;  //rec->Error is set inside
 
     //sending file
     if (!data.FileName.isEmpty())
     {
-        emit requestTextLog(index, "Sending file to the server...");
-        ok = ants2socket->SendFile(data.FileName);
-        if (!ok)
-        {
-            rec->Error = "Send script failed";
-            ErrorType = Communication;
-            return;
-        }
-        QString reply = ants2socket->GetTextReply();
-        QJsonObject ro = strToObject(reply);
-        if (!ro.contains("result") || !ro["result"].toBool())
-        {
-            rec->Error = "Failed to send file to remote server";
-            ErrorType = Communication;
-            return;
-        }
-        emit requestTextLog(index, "Saving file on server...");
-        QString Script = "server.SaveBufferToFile(\"File.dat\")";
-        ok = ants2socket->SendText(Script);
-        if (!ok)
-        {
-            rec->Error = "Send script failed";
-            ErrorType = Communication;
-            return;
-        }
-        reply = ants2socket->GetTextReply();
-        ro = strToObject(reply);
-        if ( !ro.contains("result") || !ro["result"].toBool() )
-        {
-            rec->Error = "Failed to set events on server.";
-            return;
-        }
+        ok = uploadFile(data.FileName, "File.dat");
+        if (!ok) return;
     }
 
     emit requestTextLog(index, "Starting script eval...");
@@ -1446,7 +1464,7 @@ void AWorker_Script::runEvalScript()
     if (!ok)
     {
         rec->Error = "Send script failed";
-        ErrorType = Communication;
+        rec->ErrorType = ARemoteServerRecord::Communication;
         return;
     }
 
@@ -1461,7 +1479,16 @@ void AWorker_Script::runEvalScript()
             const QString err = ro["error"].toString();
             rec->Error = QString("Server reported error: %1").arg(err);
             emit requestTextLog(index, rec->Error);
-            ErrorType = ( err.contains("Syntax check failed") ? ScriptSyntax : ScriptEval) ;
+            if (err.contains("Syntax check failed"))
+            {
+                rec->ErrorType = ARemoteServerRecord::ScriptSyntax;
+                rec->Error = "Script syntax error";
+            }
+            else
+            {
+                rec->ErrorType = ARemoteServerRecord::ScriptEval;
+                rec->Error = "Script evaluation error";
+            }
             return;
         }
 

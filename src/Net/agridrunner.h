@@ -94,19 +94,20 @@ public:
 
     void RequestAbort();
 
-    ARemoteServerRecord* getRecord() {return rec;}
+    //ARemoteServerRecord* getRecord() {return rec;}
+    ARemoteServerRecord * rec = nullptr;
 
 public slots:
     virtual void run() = 0;
 
 protected:
     int index;
-    ARemoteServerRecord* rec;
     int TimeOut = 5000;
 
     bool bRunning       = false;
     bool bPaused        = false;
     bool bExternalAbort = false;
+
 
     const QJsonObject* config;
     AWebSocketSession* ants2socket = nullptr;
@@ -119,6 +120,7 @@ protected:
     bool               establishSession();
 
     bool               sendAnts2Config();
+    bool               uploadFile(const QString & LocalFileName, const QString & RemoteFileName);
 
 signals:
     void finished();
@@ -173,8 +175,6 @@ class AWorker_Script : public AWebSocketWorker_Base
 {
     Q_OBJECT
 public:
-    enum AErrorType {Communication, ScriptSyntax, ScriptEval};
-
     AWorker_Script(int index, ARemoteServerRecord* rec, int timeOut, const QJsonObject* config, const QString & script, AGridScriptResources & data);
 
     const QString        & script;
@@ -182,7 +182,6 @@ public:
 
     bool       bSuccess = false;
     bool       bFailed  = false;
-    AErrorType ErrorType;
 
 public slots:
     void run() override;

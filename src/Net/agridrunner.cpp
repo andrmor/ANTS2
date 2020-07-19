@@ -1023,9 +1023,16 @@ bool AWebSocketWorker_Base::evaluateScript(const QString & Script, QVariant * Re
     QJsonObject ro;
     do
     {
+        ok = ants2socket->ResumeWaitForAnswer();
+        if (!ok)
+        {
+            rec->Error = "Connection lost";
+            rec->ErrorType = ARemoteServerRecord::Communication;
+            return false;
+        }
         QString reply = ants2socket->GetTextReply();
         ro = strToObject(reply);
-        //qDebug() << bOK << "--------------Got script eval reply:" << reply;
+        //qDebug() << "-|-|-|-|-|-|-|-  reply:" << reply;
         if (ro.contains("error"))
         {
             const QString err = ro["error"].toString();

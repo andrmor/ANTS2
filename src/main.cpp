@@ -274,6 +274,7 @@ int main(int argc, char *argv[])
 
         AJavaScriptManager SM(Detector.RandGen);
         Network.SetScriptManager(&SM);
+        QObject::connect(&SM, &AScriptManager::reportProgress, &Network, &ANetworkModule::ProgressReport);
         SM.RegisterCoreInterfaces();
         AConfig_SI* conf = new AConfig_SI(&Config);
         SM.RegisterInterface(conf, "config");

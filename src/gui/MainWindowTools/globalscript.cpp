@@ -58,6 +58,8 @@ void MainWindow::createScriptWindow()
     connect(ScriptWindow, &AScriptWindow::WindowHidden, WindowNavigator, &WindowNavigatorClass::HideWindowTriggered);
     //connect(SM, &AScriptManager::reportProgress, WindowNavigator, &WindowNavigatorClass::setProgress);
     connect(SM, &AScriptManager::reportProgress, ScriptWindow, &AScriptWindow::onProgressChanged);
+    connect(SM, &AScriptManager::reportProgress, NetModule, &ANetworkModule::ProgressReport);
+
     NetModule->SetScriptManager(SM);
     ScriptWindow->connectWinNavigator(WindowNavigator);
 

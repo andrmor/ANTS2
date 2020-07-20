@@ -29,6 +29,7 @@ public:
     QString RateServers(const QJsonObject* config);
 
     QVariant EvaluateSript(const QString & Script, const QJsonObject & config, const QVariantList & PerThreadResources, const QVariantList & PerThreadFiles);
+    QString  UploadFile(int iServer, const QString & FileName);
 
     void Abort();
 
@@ -57,6 +58,7 @@ private:
     AWebSocketWorker_Base * startRec(int index, ARemoteServerRecord *server, const QJsonObject* config);
 
     AWebSocketWorker_Base * startScriptWorker(int index, ARemoteServerRecord * serverrecord, const QJsonObject & config, const QString & script, AGridScriptResources & data);
+    AWebSocketWorker_Base * startUploadWorker(int index, ARemoteServerRecord * serverrecord, const QString & fileName);
 
     void startInNewThread(AWebSocketWorker_Base *worker);
 
@@ -200,6 +202,20 @@ struct AGridScriptResources
     bool bAllocated = false;
 
     QVariant EvalResult;
+};
+
+class AWorker_Upload : public AWebSocketWorker_Base
+{
+    Q_OBJECT
+public:
+    AWorker_Upload(int index, ARemoteServerRecord* rec, int timeOut, const QString & fileName);
+
+    const QString & FileName;
+    bool bSuccess = false;
+
+public slots:
+    void run() override;
+
 };
 
 #endif // AGRIDRUNNER_H

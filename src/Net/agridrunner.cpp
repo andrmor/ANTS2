@@ -563,6 +563,23 @@ QVariant AGridRunner::EvaluateSript(const QString & Script, const QJsonObject & 
     return res;
 }
 
+QString AGridRunner::UploadFile(int iServer, const QString &FileName)
+{
+    if (iServer < 0 || iServer >= ServerRecords.size())
+        return "Invalid server index!";
+    if (ServerRecords.at(iServer)->NumThreads_Allocated == 0)
+        return QString("Server #%1 is down or disabled").arg(iServer);
+    if (!QFile(FileName).exists())
+        return QString("File %1 does not exist").arg(FileName);
+
+    AWebSocketWorker_Base * worker = startUploadWorker(iServer, ServerRecords[iServer], FileName);
+    QVector<AWebSocketWorker_Base*> workers;
+    workers << worker;
+    waitForWorkersToFinish(workers);
+
+    return ServerRecords[iServer]->Error;
+}
+
 void AGridRunner::Abort()
 {
     bAbortRequested = true;
@@ -753,6 +770,15 @@ AWebSocketWorker_Base *AGridRunner::startScriptWorker(int index, ARemoteServerRe
 {
     serverrecord->Error.clear();
     AWebSocketWorker_Base * worker = new AWorker_Script(index, serverrecord, TimeOut, &config, script, data);
+
+    startInNewThread(worker);
+    return worker;
+}
+
+AWebSocketWorker_Base *AGridRunner::startUploadWorker(int index, ARemoteServerRecord *serverrecord, const QString &fileName)
+{
+    serverrecord->Error.clear();
+    AWebSocketWorker_Base * worker = new AWorker_Upload(index, serverrecord, TimeOut, fileName);
 
     startInNewThread(worker);
     return worker;
@@ -1516,4 +1542,55 @@ void AWorker_Script::runEvalScript()
     ok = evaluateScript(Script, &data.EvalResult);
     //qDebug() << "-------Eval result:" << data.EvalResult;
     if (ok) emit requestTextLog(index, "Remote script eval finished");
+}
+
+AWorker_Upload::AWorker_Upload(int index, ARemoteServerRecord *rec, int timeOut, const QString &fileName) :
+    AWebSocketWorker_Base(index, rec, timeOut), FileName(fileName) {}
+
+#include <QFileInfo>
+void AWorker_Upload::run()
+{
+    bRunning = true;
+    bSuccess = false;
+
+    bool bOK = establishSession();
+    if (!bOK)
+    {
+        qDebug() << "failed to get server, aborting the thread and updating status";
+
+        rec->Progress = 0;
+        rec->ErrorType = ARemoteServerRecord::Communication;
+        bRunning = false;
+        emit finished();
+        return;
+    }
+
+    if (!ants2socket || !ants2socket->ConfirmSendPossible())
+    {
+        rec->Error = "There is no connection to ANTS2 server";
+        rec->ErrorType = ARemoteServerRecord::Communication;
+        return;
+    }
+
+    emit requestTextLog(index, "Uploading file...");
+    bool ok = uploadFile(FileName, QFileInfo(FileName).fileName());
+    ants2socket->Disconnect();
+    if (!ok) return;
+
+    if (!rec->Error.isEmpty() || bExternalAbort)
+    {
+        qDebug() << "Abort / Error during script evaluation";
+        rec->Progress = 0;
+        emit requestTextLog(index, rec->Error);
+    }
+    else
+    {
+        rec->Progress = 100;
+        emit requestTextLog(index, "Success!");
+        bSuccess = true;
+    }
+
+    bRunning = false;
+    emit finished();
+    return;
 }

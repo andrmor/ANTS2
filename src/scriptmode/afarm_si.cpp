@@ -3,6 +3,7 @@
 #include "aremoteserverrecord.h"
 
 #include <QJsonObject>
+#include <QFile>
 
 AFarm_si::AFarm_si(const QJsonObject & Config, AGridRunner & GridRunner) :
     AScriptInterface(), Config(Config), GridRunner(GridRunner)
@@ -47,5 +48,11 @@ QVariantList AFarm_si::evaluateScript(QString Script, QVariantList Resources, QV
     }
     else
         return res.toList();
+}
+
+void AFarm_si::uploadFile(int ServerIndex, QString FileName)
+{
+    QString err = GridRunner.UploadFile(ServerIndex, FileName);
+    if (!err.isEmpty()) abort(err);
 }
 

@@ -4,6 +4,7 @@
 #include "ascriptinterface.h"
 
 #include <QVariant>
+#include <QString>
 #include <QVariantList>
 
 class QJsonObject;
@@ -23,6 +24,7 @@ public slots:
 
     QVariantList evaluateScript(QString Script, QVariantList Resources, QVariantList FileNames);
 
+    void uploadFile(int ServerIndex, QString FileName);
 
 private:
     const QJsonObject & Config;

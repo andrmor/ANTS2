@@ -241,7 +241,11 @@ void ANetworkModule::OnWebSocketTextMessageReceived(QString message)
 
 void ANetworkModule::OnClientDisconnected()
 {
-    if (bSingleConnectionMode) exit(0);
+    if (bSingleConnectionMode)
+    {
+        qDebug() << "ANTS2 server: exiting application on client diconnect";
+        exit(0);
+    }
 }
 
 void ANetworkModule::onIdleTimerTriggered()

@@ -53,6 +53,7 @@ public slots:
   void onNewGeoManagerCreated();
   void OnWebSocketTextMessageReceived(QString message);
   void OnClientDisconnected();
+  void RestartIdleTimer();
 
 signals:
   void StatusChanged();

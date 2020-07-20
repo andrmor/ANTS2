@@ -18,6 +18,7 @@ ANetworkModule::ANetworkModule()
     QObject::connect(WebSocketServer, &AWebSocketSessionServer::textMessageReceived, this, &ANetworkModule::OnWebSocketTextMessageReceived);
     QObject::connect(WebSocketServer, &AWebSocketSessionServer::reportToGUI, this, &ANetworkModule::ReportTextToGUI);
     QObject::connect(WebSocketServer, &AWebSocketSessionServer::clientDisconnected, this, &ANetworkModule::OnClientDisconnected);
+    QObject::connect(WebSocketServer, &AWebSocketSessionServer::restartIdleTimer, this, &ANetworkModule::RestartIdleTimer);
 
     QObject::connect(this, &ANetworkModule::ProgressReport, WebSocketServer, &AWebSocketSessionServer::onProgressChanged);
 }
@@ -81,7 +82,7 @@ void ANetworkModule::StartWebSocketServer(QHostAddress ip, quint16 port)
 
     if (bSingleConnectionMode)
     {
-        IdleTimer.setInterval(SelfDestructOnIdle);
+        IdleTimer.setInterval(SelfDestructOnIdle);        
         IdleTimer.setSingleShot(true);
         QObject::connect(&IdleTimer, &QTimer::timeout, this, &ANetworkModule::onIdleTimerTriggered);
         IdleTimer.start();
@@ -246,6 +247,11 @@ void ANetworkModule::OnClientDisconnected()
         qDebug() << "ANTS2 server: exiting application on client diconnect";
         exit(0);
     }
+}
+
+void ANetworkModule::RestartIdleTimer()
+{
+    if (bSingleConnectionMode) IdleTimer.start();
 }
 
 void ANetworkModule::onIdleTimerTriggered()

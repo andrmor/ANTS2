@@ -1001,14 +1001,38 @@ bool AWebSocketWorker_Base::uploadFile(const QString &LocalFileName, const QStri
         }
         return false;
     }
-    QString reply = ants2socket->GetTextReply();
-    QJsonObject ro = strToObject(reply);
-    if (!ro.contains("result") || !ro["result"].toBool())
+
+    do
     {
-        rec->Error = "Failed to send file to remote server";
-        rec->ErrorType = ARemoteServerRecord::Communication;
-        return false;
+        QString reply = ants2socket->GetTextReply();
+        QJsonObject ro = strToObject(reply);
+        if      (ro.contains("progress")) rec->Progress = ro["progress"].toInt();
+        else if (ro.contains("result"))
+        {
+            if (ro["result"].toBool()) break; //done!
+            else
+            {
+                rec->Error = "Failed to send file to remote server";
+                rec->ErrorType = ARemoteServerRecord::Communication;
+                return false;
+            }
+        }
+        else if (ro.contains("error"))
+        {
+            rec->Error = "Failed to send file to remote server";
+            rec->ErrorType = ARemoteServerRecord::Communication;
+            return false;
+        }
+
+        ok = ants2socket->ResumeWaitForAnswer();
+        if (!ok)
+        {
+            rec->Error = "Connection lost";
+            rec->ErrorType = ARemoteServerRecord::Communication;
+            return false;
+        }
     }
+    while (true);
 
     //send script to remote server to save buffer as file
     emit requestTextLog(index, "Saving file on server...");
@@ -1020,8 +1044,8 @@ bool AWebSocketWorker_Base::uploadFile(const QString &LocalFileName, const QStri
         rec->ErrorType = ARemoteServerRecord::Communication;
         return false;
     }
-    reply = ants2socket->GetTextReply();
-    ro = strToObject(reply);
+    QString reply = ants2socket->GetTextReply();
+    QJsonObject ro = strToObject(reply);
     if ( !ro.contains("result") || !ro["result"].toBool() )
     {
         rec->Error = "Failed to save file on remote server";

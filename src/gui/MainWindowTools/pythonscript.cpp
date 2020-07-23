@@ -98,6 +98,7 @@ void MainWindow::createPythonScriptWindow()
 
   ATree_SI* tree = new ATree_SI(TmpHub);
   PythonScriptWindow->RegisterInterface(tree, "tree");
+  connect(tree, &ATree_SI::RequestTreeDraw, GraphWindow, &GraphWindowClass::DrawTree);
 
   AMsg_SI* txt = new AMsg_SI(PSM, PythonScriptWindow);
   PythonScriptWindow->RegisterInterface(txt, "msg");

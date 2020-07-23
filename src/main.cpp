@@ -357,6 +357,7 @@ int main(int argc, char *argv[])
                 int max = parser.value(maxThreadsOption).toInt();
                 SimulationManager.setMaxThreads(max);
                 ReconstructionManager.setMaxThread(max);
+                SM.MaxThreads = max;
             }
             QHostAddress ip = QHostAddress::Null;
             if (parser.isSet(ipOption))

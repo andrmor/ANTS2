@@ -48,6 +48,8 @@ public slots:
 
     void          setAbortInThreadIsGlobal(bool flag) {bAbortIsGlobal = flag;}
 
+    int           getMaxNumThreads();
+
 private:
     AJavaScriptManager *MasterScriptManager;
     QVector<AScriptThreadBase*> workers;

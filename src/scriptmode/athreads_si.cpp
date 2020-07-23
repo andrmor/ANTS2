@@ -182,6 +182,13 @@ bool AThreads_SI::deleteOne(int IndexOfWorker)
    return true;
 }
 
+#include "aglobalsettings.h"
+int AThreads_SI::getMaxNumThreads()
+{
+    if (MasterScriptManager->MaxThreads != -1) return MasterScriptManager->MaxThreads;
+    return AGlobalSettings::getInstance().RecNumTreads;
+}
+
 AScriptThreadBase::AScriptThreadBase(AJavaScriptManager *ScriptManager) : ScriptManager(ScriptManager) {}
 
 AScriptThreadBase::~AScriptThreadBase()

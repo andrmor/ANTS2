@@ -6,6 +6,7 @@ var Servers = farm.getServers() //all servers, including unavailable ones
 var AvailableServers = 0 
 for (var i = 0; i<Servers.length; i++) 
        if (Servers[i][0] != 0) AvailableServers++
+if (AvailableServers == 0) core.abort("No remote servers found")
        
 var DataArray = []
 var PointsDone = 0
@@ -16,16 +17,12 @@ for (var i=0; i<AvailableServers; i++)
        var offset = NumPointsPerServer * i
        
        if (i == (AvailableServers - 1)) 
-              NumPointsPerServer = NumPoints - PointsDone   //last server gets the remainder of points
+              NumPointsPerServer = NumPoints - PointsDone   //the last server gets all the remaining points
        PointsDone += NumPointsPerServer
        
        for (var j = 0; j < NumPointsPerServer; j++) ar.push(j + offset)
        DataArray.push(ar)
 }
-
-msg.Clear()
-msg.Show()
-msg.Resize(700, 600)
 
 function sf() // script to be used on servers
 {
@@ -37,18 +34,18 @@ function sf() // script to be used on servers
                      var testVal = Math.sin(Freq          * Data[i]*3.1415926/50 + Phase)
                      d2 += (trueVal - testVal) * (trueVal - testVal)
               }
-       d2
+       return d2
 }
+var StaticScript = sf.toString() + ";sf()"
 
-var strArr = sf.toString().split("\n")
-strArr.pop(); strArr.shift() //kill function name and last bracket
-for (var i=0; i<strArr.length; i++) strArr[i] = strArr[i].trim()
-var StaticScript = strArr.join(";")
 var bestDelta = 1e30
+msg.Clear()
+msg.Show()
+msg.Resize(700, 600)
 
 mini.Clear()
 mini.SetFunctorName("Functor")
-mini.AddVariable("Freq", 2.0,  0.5, 0, 4)
+mini.AddVariable("Freq", 2.0,  0.5, 0, 4)         //name, start, step, min, max
 mini.AddVariable("Phas", 0.5,  0.5, 0, 3.1415926)
 mini.Run()
 
@@ -58,12 +55,10 @@ function Functor()
   var phase = arguments[1]
   
   var Script = "var Freq = " + freq + ";" + "var Phase = " + phase + ";" + StaticScript
-  
   var Result = farm.evaluateScript(Script, DataArray, [])
 
   var delta = 0
-  for (var i = 0; i < Result.length; i++)
-       delta += Result[i];
+  for (var i = 0; i < Result.length; i++) delta += Result[i];
   
   var s = ""
   if (delta < bestDelta)

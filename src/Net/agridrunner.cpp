@@ -112,6 +112,8 @@ QString AGridRunner::CheckStatus()
 
 QString AGridRunner::Simulate(const QJsonObject* config)
 {
+    EventsDataHub.clearReconstruction();
+
     const QString err = commonStart();
     if (!err.isEmpty()) return err;
 
@@ -333,6 +335,8 @@ QString AGridRunner::Simulate(const QJsonObject* config)
         emit requestStatusLog("Done!");
     }
     requestDelegateGuiUpdate();
+
+    emit notifySimulationFinished();
 
     return "";
 }

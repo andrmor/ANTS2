@@ -54,9 +54,9 @@ void MainWindow::createScriptWindow()
     AJavaScriptManager* SM = new AJavaScriptManager(Detector->RandGen);
     ScriptWindow = new AScriptWindow(SM, false, w); //transfer ownership of SM
     ScriptWindow->move(25,25);
+    connect(ScriptWindow, &AScriptWindow::requestUpdateConfig, this, &MainWindow::updateConfig);
     connect(ScriptWindow, &AScriptWindow::WindowShown, WindowNavigator, &WindowNavigatorClass::ShowWindowTriggered);
     connect(ScriptWindow, &AScriptWindow::WindowHidden, WindowNavigator, &WindowNavigatorClass::HideWindowTriggered);
-    //connect(SM, &AScriptManager::reportProgress, WindowNavigator, &WindowNavigatorClass::setProgress);
     connect(SM, &AScriptManager::reportProgress, ScriptWindow, &AScriptWindow::onProgressChanged);
     connect(SM, &AScriptManager::reportProgress, NetModule, &ANetworkModule::ProgressReport);
 

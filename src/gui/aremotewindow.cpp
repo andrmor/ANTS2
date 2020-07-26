@@ -39,6 +39,8 @@ ARemoteWindow::ARemoteWindow(MainWindow *MW) :
     QObject::connect(&GR, &AGridRunner::requestStatusLog, this, &ARemoteWindow::onStatusLogReceived/*, Qt::QueuedConnection*/);
     QObject::connect(&GR, &AGridRunner::requestDelegateGuiUpdate, this, &ARemoteWindow::onGuiUpdate/*, Qt::QueuedConnection*/);
 
+    connect(&GR, &AGridRunner::notifySimulationFinished, MW, &MainWindow::onGridSimulationFinished);
+
     QIntValidator* intVal = new QIntValidator(this);
     intVal->setRange(1, 100000000);
     ui->leiTimeout->setValidator(intVal);
@@ -169,9 +171,11 @@ void ARemoteWindow::on_pbSimulate_clicked()
     if (!err.isEmpty())
         message(err, this);
 
+    /*
     MW->Owindow->RefreshData();
     MW->Rwindow->OnEventsDataAdded();
     MW->Rwindow->ShowPositions(1, true);
+    */
 }
 
 void ARemoteWindow::on_pbReconstruct_clicked()

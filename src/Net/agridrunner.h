@@ -78,6 +78,9 @@ signals:
     void requestStatusLog(const QString message);
     void requestDelegateGuiUpdate();
 
+    void notifySimulationFinished();
+    void notifyReconstructionFinished();
+
 };
 
 class AWebSocketWorker_Base : public QObject

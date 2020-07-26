@@ -48,6 +48,7 @@ void MainWindow::createPythonScriptWindow()
   APythonScriptManager* PSM = new APythonScriptManager(Detector->RandGen);
   PythonScriptWindow = new AScriptWindow(PSM, false, w);
   PythonScriptWindow->move(25,25);
+  connect(PythonScriptWindow, &AScriptWindow::requestUpdateConfig, this, &MainWindow::updateConfig);
   connect(PythonScriptWindow, SIGNAL(WindowShown(QString)), WindowNavigator, SLOT(ShowWindowTriggered(QString)));
   connect(PythonScriptWindow, SIGNAL(WindowHidden(QString)), WindowNavigator, SLOT(HideWindowTriggered(QString)));
   PythonScriptWindow->connectWinNavigator(WindowNavigator);

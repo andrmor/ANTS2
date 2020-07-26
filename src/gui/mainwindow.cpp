@@ -4077,6 +4077,18 @@ void MainWindow::ShowGeometrySlot()
     GeometryWindow->ShowGeometry(false, false);
 }
 
+void MainWindow::onGridSimulationFinished()
+{
+    Owindow->RefreshData();
+    Rwindow->OnEventsDataAdded();
+    Rwindow->ShowPositions(1, true);
+}
+
+void MainWindow::updateConfig()
+{
+     ELwindow->UpdateConfig();
+}
+
 void MainWindow::on_cobPartPerEvent_currentIndexChanged(int index)
 {
     QString s;

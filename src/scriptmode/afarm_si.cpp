@@ -8,7 +8,12 @@
 AFarm_si::AFarm_si(const QJsonObject & Config, AGridRunner & GridRunner) :
     AScriptInterface(), Config(Config), GridRunner(GridRunner)
 {
-    H["getServers"] = "Returns the list of configured (and not disabled) servers\nFormat: [ [NumThreads1, SpeedFactor1], [NumThreads2, SpeedFactor2], ... ])";
+    H["getServers"] = "Returns the list of all configured servers\nFormat: [ [NumThreads1, SpeedFactor1], [NumThreads2, SpeedFactor2], ... ])";
+}
+
+void AFarm_si::ForceStop()
+{
+    GridRunner.Abort();
 }
 
 void AFarm_si::setTimeout(double Timeout_ms)
@@ -34,6 +39,16 @@ QVariantList AFarm_si::getServers()
         res.push_back(el);
     }
     return res;
+}
+
+void AFarm_si::reconstruct()
+{
+    GridRunner.Reconstruct(&Config);
+}
+
+void AFarm_si::simulate()
+{
+    GridRunner.Simulate(&Config);
 }
 
 QVariantList AFarm_si::evaluateScript(QString Script, QVariantList Resources, QVariantList FileNames)

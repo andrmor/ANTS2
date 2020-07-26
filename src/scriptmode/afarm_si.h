@@ -17,14 +17,16 @@ class AFarm_si : public AScriptInterface
 public:
     AFarm_si(const QJsonObject & Config, AGridRunner & GridRunner);
 
+    void ForceStop() override;
+
 public slots:
-    void setTimeout(double Timeout_ms);
-
     QVariantList getServers();
-
     QVariantList evaluateScript(QString Script, QVariantList Resources, QVariantList FileNames);
+    void         uploadFile(int ServerIndex, QString FileName);
+    void         reconstruct();
+    void         simulate();
 
-    void uploadFile(int ServerIndex, QString FileName);
+    void         setTimeout(double Timeout_ms);
 
 private:
     const QJsonObject & Config;

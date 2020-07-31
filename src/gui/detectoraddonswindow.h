@@ -26,12 +26,14 @@ public:
   void UpdateDummyPMindication();
   void HighlightVolume(const QString & VolName);
 
-  AGeo_SI* AddObjScriptInterface = 0;  // if created -> owned by the script manager
-  AGeoTreeWidget* twGeo;  // WorldTree widget
+  AGeo_SI* AddObjScriptInterface = nullptr;  // if created -> owned by the script manager
+  AGeoTreeWidget* twGeo = nullptr;  // WorldTree widget
 
 private slots:
   void onReconstructDetectorRequest();
   void onRequestUpdateWorldSize(double WorldSizeXY, double WorldSizeZ, bool fWorldSizeFixed);
+
+  void on_tabwConstants_customContextMenuRequested(const QPoint &pos);
 
   void on_pbConvertToDummies_clicked();
 
@@ -75,6 +77,9 @@ private slots:
 
   void on_pbWorldTreeHelp_clicked();
 
+
+  void on_tabwConstants_cellChanged(int row, int column);
+
 private:
   Ui::DetectorAddOnsWindow *ui;
   MainWindow* MW;
@@ -84,6 +89,9 @@ private:
   void ConvertDummyToPM(int idpm);  
   bool GDMLtoTGeo(const QString &fileName);
   const QString loadGDML(const QString &fileName, QString &gdml);  //returns error string - empty if OK
+
+protected:
+  void resizeEvent(QResizeEvent *event);
 
 public slots:
   void UpdateGeoTree(QString name = "");

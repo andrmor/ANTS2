@@ -919,6 +919,7 @@ void ASandwich::changeLineWidthOfVolumes(int delta)
     World->changeLineWidthRecursive(delta);
 }
 
+#include "ageoconsts.h"
 void ASandwich::writeToJson(QJsonObject &json)
 {
   QJsonObject js;
@@ -964,6 +965,10 @@ void ASandwich::writeToJson(QJsonObject &json)
   World->writeAllToJarr(arrTree);
   js["WorldTree"] = arrTree;
 
+  QJsonObject jsGC;
+  AGeoConsts::getConstInstance().writeToJson(jsGC);
+  js["GeoConsts"] = jsGC;
+
   json["Sandwich"] = js;
 }
 
@@ -994,6 +999,11 @@ void ASandwich::readFromJson(QJsonObject &json)
       SandwichState = ASandwich::CommonShapeSize;
 
       QJsonObject js = json["Sandwich"].toObject();
+
+      QJsonObject jsGC;
+      if (parseJson(js, "GeoConsts", jsGC))
+        AGeoConsts::getInstance().readFromJson(jsGC);
+
       if (js.contains("State"))
         {
           QString state = js["State"].toString();

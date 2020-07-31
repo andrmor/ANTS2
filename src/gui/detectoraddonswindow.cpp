@@ -270,9 +270,26 @@ void DetectorAddOnsWindow::ConvertDummyToPM(int idpm)
   Detector->PMdummies.remove(idpm);
 }
 
+#include "ageoconsts.h"
+#include <QTabWidget>
 void DetectorAddOnsWindow::UpdateGeoTree(QString name)
 {
     twGeo->UpdateGui(name);
+
+    //update constants
+    ui->tabwConstants->clear();
+    const QMapIterator<QString, double> & Map = AGeoConsts::getConstInstance().geoConsts;
+    QMapIterator<QString, double> iter(Map);
+    int iCounter = 0;
+    while (iter.hasNext())
+    {
+        iter.next();
+        QTableWidgetItem * newItem = new QTableWidgetItem(iter.key());
+        ui->tabwConstants->setItem(iCounter, 0, newItem);
+        newItem = new QTableWidgetItem(QString::number(iter.value()));
+        ui->tabwConstants->setItem(iCounter, 1, newItem);
+        iCounter++;
+    }
 }
 
 void DetectorAddOnsWindow::ShowTab(int tab)
@@ -1100,6 +1117,16 @@ const QString DetectorAddOnsWindow::loadGDML(const QString& fileName, QString& g
     return "";
 }
 
+void DetectorAddOnsWindow::resizeEvent(QResizeEvent *event)
+{
+    if (!isVisible()) return;
+
+    int ww = ui->tabwConstants->width();
+    ui->tabwConstants->setColumnWidth(0, 0.5*ww - 2);
+    ui->tabwConstants->setColumnWidth(1, 0.5*ww - 2);
+    QMainWindow::resizeEvent(event);
+}
+
 void DetectorAddOnsWindow::on_pbLoadTGeo_clicked()
 {
     QString gdml;
@@ -1296,4 +1323,14 @@ void DetectorAddOnsWindow::on_pbWorldTreeHelp_clicked()
                 "  of the objects are recalculated using the original\n"
                 "  position of the moved object as the reference.";
     message(s, this);
+}
+
+void DetectorAddOnsWindow::on_tabwConstants_customContextMenuRequested(const QPoint &pos)
+{
+
+}
+
+void DetectorAddOnsWindow::on_tabwConstants_cellChanged(int row, int column)
+{
+
 }

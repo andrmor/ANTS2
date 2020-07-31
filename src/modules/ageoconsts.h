@@ -7,9 +7,15 @@
 class AGeoConsts final
 {
 public:
-    static AGeoConsts& getInstance();
-    const static AGeoConsts& getConstInstance();
-    QMap < QString, double> geoConsts;
+    static       AGeoConsts& getInstance();
+    static const AGeoConsts& getConstInstance();
+
+    QMap<QString, double> geoConsts;  // Andr: -> GeoConsts
+
+    void clearConstants();
+
+    void writeToJson(QJsonObject & json) const;
+    void readFromJson(const QJsonObject & json);
 
 private:
     AGeoConsts();

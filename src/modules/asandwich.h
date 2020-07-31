@@ -4,7 +4,6 @@
 #include <QObject>
 #include <QStringList>
 #include <QVector>
-
 #include "apmanddummy.h"
 
 class ASlabModel;

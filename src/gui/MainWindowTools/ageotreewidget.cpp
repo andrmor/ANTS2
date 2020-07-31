@@ -9,6 +9,7 @@
 #include "agridelementdialog.h"
 #include "amonitordelegateform.h"
 #include "amessage.h"
+#include "ageoconsts.h"
 
 #include <QDropEvent>
 #include <QDebug>
@@ -2687,7 +2688,35 @@ void AGeoBoxDelegate::Update(const AGeoObject *obj)
 
 void AGeoBoxDelegate::onLocalShapeParameterChange()
 {
-    updatePteShape(QString("TGeoBBox( %1, %2, %3 )").arg(0.5*ex->text().toDouble()).arg(0.5*ey->text().toDouble()).arg(0.5*ez->text().toDouble()));
+
+    double tmpx= 0;
+    double tmpy= 0;
+    double tmpz= 0;
+    QMap <QString, double> gConsts = AGeoConsts::getConstInstance().geoConsts;
+
+    bool bOkx = ex->text().toDouble();
+    if (bOkx) {tmpx = ex->text().toDouble(); qDebug() <<"just an int";}
+    else
+    {
+        bool bOkx = gConsts.value(ex->text());
+        if (bOkx) {tmpx = gConsts.value(ex->text()); qDebug() <<"just a const";}
+        else {
+            qDebug() <<"kError" << " not valid x";
+        }
+
+        /*for (int iConst=0; iConst< gConsts.size(); iConst++)
+        {
+            bool bOkx = gConsts.value(iConst);
+            if (bOkx) {tmpx = gConsts.value(iConst);}
+            else {
+                qDebug() <<"kError" << " not valid x";
+            }
+            //if (ASandwich..contains(ex)) {tmpx = ASandwich.globalGeoVar.value(ex);}
+        }*/
+    }
+    updatePteShape(QString("TGeoBBox( %1, %2, %3 )").arg(tmpx).arg(0.5*ey->text().toDouble()).arg(0.5*ez->text().toDouble()));
+    //updatePteShape(QString("TGeoBBox( %1, %2, %3 )").arg(0.5*ex->text().toDouble()).arg(0.5*ey->text().toDouble()).arg(0.5*ez->text().toDouble()));
+    qDebug() << tmpx;
 }
 
 AGeoTubeDelegate::AGeoTubeDelegate(const QStringList & materials, QWidget *parent)

@@ -20,6 +20,7 @@ ASandwich::ASandwich()
   World->Material = 0;
   World->makeItWorld();
   //qDebug() << "--World object in GeoTree created";
+
 }
 
 ASandwich::~ASandwich()

@@ -1,5 +1,6 @@
 #include "ageoconsts.h"
 #include "ajsontools.h"
+#include "TFormula.h"
 
 AGeoConsts &AGeoConsts::getInstance()
 {
@@ -50,6 +51,51 @@ void AGeoConsts::readFromJson(const QJsonObject & json)
             geoConsts[key] = val;      // warnings if not unique?
         }
     }
+}
+#include <QVector>
+bool AGeoConsts::evaluateFormula(QString &str, double &returnValue) const
+{
+    for (int iQRE=0; iQRE < vQRegularExpression.size(); iQRE++)
+    {
+        QString num = QString("[%1]").arg(iQRE);
+        str.replace(QRegExp(vQRegularExpression[iQRE]),num);
+    }
+
+    qDebug() << str;
+    TFormula * f = new TFormula("", str.toLocal8Bit().data());
+    if (!f || !f->IsValid())
+    {
+        delete f;
+        return false;
+    }
+
+    returnValue = f->EvalPar(nullptr, vConstValues.data());
+    delete f;
+    qDebug() << "return value: "<< returnValue;
+    return true;
+
+}
+
+void AGeoConsts::updateConsts()
+{
+    vQRegularExpression.clear();
+    vConstValues.clear();
+
+    QMapIterator<QString, double> iter(geoConsts);
+    while (iter.hasNext())
+    {
+        iter.next();
+
+        QString newQRE ="\\b" + iter.key() + "\\b";
+        double newConstVal = iter.value();
+        //qDebug() << "new QRE" <<newQRE << "   newConstVal" << newConstVal;
+        vQRegularExpression.append(newQRE);
+        vConstValues.append(newConstVal);
+    }
+    //qDebug() <<"vQRegularExpression"<< vQRegularExpression;
+    //qDebug() <<"vConstValues"<< vConstValues;
+
+
 }
 
 AGeoConsts::AGeoConsts()

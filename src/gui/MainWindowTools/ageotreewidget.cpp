@@ -1992,12 +1992,21 @@ void AGeoObjectDelegate::updateObject(AGeoObject * obj) const
         old << obj->Position[0]    << obj->Position[1]    << obj->Position[2]
                 << obj->Orientation[0] << obj->Orientation[1] << obj->Orientation[2];
 
+        /*
+        const AGeoConsts& gConsts = AGeoConsts::getConstInstance();
+        qDebug() << obj->Position[0];
+
+        gConsts.evaluateFormula(ledX->text(), obj->Position[0]);
+        qDebug() << obj->Position[0];
+        */
+
         obj->Position[0] = ledX->text().toDouble();
         obj->Position[1] = ledY->text().toDouble();
         obj->Position[2] = ledZ->text().toDouble();
         obj->Orientation[0] = ledPhi->text().toDouble();
         obj->Orientation[1] = ledTheta->text().toDouble();
         obj->Orientation[2] = ledPsi->text().toDouble();
+
 
         // checking was there a rotation of the main object
         bool fWasRotated = false;
@@ -2337,6 +2346,7 @@ void AGeoObjectDelegate::onContentChanged()
 {
     pbShapeInfo->setToolTip(pteShape->document()->toPlainText());
     emit ContentChanged();
+    //qDebug() <<pteShape->document()->toPlainText();
 }
 
 AShapeHighlighter::AShapeHighlighter(QTextDocument *parent) : QSyntaxHighlighter(parent)
@@ -2689,34 +2699,7 @@ void AGeoBoxDelegate::Update(const AGeoObject *obj)
 void AGeoBoxDelegate::onLocalShapeParameterChange()
 {
 
-    double tmpx= 0;
-    double tmpy= 0;
-    double tmpz= 0;
-    QMap <QString, double> gConsts = AGeoConsts::getConstInstance().geoConsts;
-
-    bool bOkx = ex->text().toDouble();
-    if (bOkx) {tmpx = ex->text().toDouble(); qDebug() <<"just an int";}
-    else
-    {
-        bool bOkx = gConsts.value(ex->text());
-        if (bOkx) {tmpx = gConsts.value(ex->text()); qDebug() <<"just a const";}
-        else {
-            qDebug() <<"kError" << " not valid x";
-        }
-
-        /*for (int iConst=0; iConst< gConsts.size(); iConst++)
-        {
-            bool bOkx = gConsts.value(iConst);
-            if (bOkx) {tmpx = gConsts.value(iConst);}
-            else {
-                qDebug() <<"kError" << " not valid x";
-            }
-            //if (ASandwich..contains(ex)) {tmpx = ASandwich.globalGeoVar.value(ex);}
-        }*/
-    }
-    updatePteShape(QString("TGeoBBox( %1, %2, %3 )").arg(tmpx).arg(0.5*ey->text().toDouble()).arg(0.5*ez->text().toDouble()));
-    //updatePteShape(QString("TGeoBBox( %1, %2, %3 )").arg(0.5*ex->text().toDouble()).arg(0.5*ey->text().toDouble()).arg(0.5*ez->text().toDouble()));
-    qDebug() << tmpx;
+    updatePteShape(QString("TGeoBBox( %1, %2, %3 )").arg(0.5*ex->text().toDouble()).arg(0.5*ey->text().toDouble()).arg(0.5*ez->text().toDouble()));
 }
 
 AGeoTubeDelegate::AGeoTubeDelegate(const QStringList & materials, QWidget *parent)

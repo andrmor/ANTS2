@@ -1863,7 +1863,7 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
     PosOrient->setContentsMargins(0,0,0,0);
     PosOrient->setMaximumHeight(80);
     QGridLayout *gr = new QGridLayout();
-    gr->setContentsMargins(50, 0, 50, 3);
+    gr->setContentsMargins(10, 0, 10, 3);
     gr->setVerticalSpacing(1);
       ledX = new QLineEdit();
       ledX->setContextMenuPolicy(Qt::NoContextMenu);
@@ -2329,13 +2329,13 @@ void AGeoObjectDelegate::Update(const AGeoObject *obj)
 
     pteShape->setPlainText(obj->Shape->getGenerationString());
 
-    ledX->setText(QString::number(obj->Position[0]));
-    ledY->setText(QString::number(obj->Position[1]));
-    ledZ->setText(QString::number(obj->Position[2]));
+    ledX->setText(obj->PositionStr[0].isEmpty() ? QString::number(obj->Position[0]) : obj->PositionStr[0]);
+    ledY->setText(obj->PositionStr[1].isEmpty() ? QString::number(obj->Position[1]) : obj->PositionStr[1]);
+    ledZ->setText(obj->PositionStr[2].isEmpty() ? QString::number(obj->Position[2]) : obj->PositionStr[2]);
 
-    ledPhi->setText(QString::number(obj->Orientation[0]));
-    ledTheta->setText(QString::number(obj->Orientation[1]));
-    ledPsi->setText(QString::number(obj->Orientation[2]));
+    ledPhi->  setText(obj->OrientationStr[0].isEmpty() ? QString::number(obj->Orientation[0]) : obj->OrientationStr[0]);
+    ledTheta->setText(obj->OrientationStr[1].isEmpty() ? QString::number(obj->Orientation[1]) : obj->OrientationStr[1]);
+    ledPsi->  setText(obj->OrientationStr[2].isEmpty() ? QString::number(obj->Orientation[2]) : obj->OrientationStr[2]);
 
     updateTypeLabel();
     updateControlUI();

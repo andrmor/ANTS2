@@ -190,7 +190,7 @@ public:
 
     virtual const QString getName() const = 0;
     virtual bool isValid(AGeoObject * obj) = 0;
-    virtual void updateObject(AGeoObject * obj) const = 0;
+    virtual bool updateObject(AGeoObject * obj) const = 0;
 
 public:
     QWidget * Widget = nullptr;
@@ -228,7 +228,7 @@ public:
     const QString getName() const override;
 
     bool isValid(AGeoObject * obj) override;
-    void updateObject(AGeoObject * obj) const override;
+    bool updateObject(AGeoObject * obj) const override;
 
 private:
     QVBoxLayout * lMF = nullptr;      //main layout
@@ -316,7 +316,7 @@ public:
 
     const QString getName() const override;
     bool isValid(AGeoObject * obj) override;
-    void updateObject(AGeoObject * obj) const override;
+    bool updateObject(AGeoObject * obj) const override;
 
 public slots:
     void Update(const AGeoObject * obj) override;
@@ -702,7 +702,7 @@ public:
 
    const QString getName() const override;
    bool isValid(AGeoObject * obj) override;
-   void updateObject(AGeoObject * obj) const override;
+   bool updateObject(AGeoObject * obj) const override;
 
 private:
    QLineEdit *ledDX, *ledDY, *ledDZ;
@@ -737,7 +737,7 @@ public:
 
     const QString getName() const override;
     bool isValid(AGeoObject * obj) override;
-    void updateObject(AGeoObject * obj) const override;
+    bool updateObject(AGeoObject * obj) const override;
 
 private:
     ASlabDelegate * SlabDel = nullptr;
@@ -761,7 +761,7 @@ public:
 
    const QString getName() const override;
    bool isValid(AGeoObject * obj) override;
-   void updateObject(AGeoObject * obj) const override;
+   bool updateObject(AGeoObject * obj) const override;
 
 private:
    AMonitorDelegateForm * del;

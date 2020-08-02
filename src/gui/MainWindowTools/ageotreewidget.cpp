@@ -1689,7 +1689,8 @@ void AGeoWidget::onConfirmPressed()
     bool ok = checkDelegateValidity();
     if (!ok) return;
 
-    GeoDelegate->updateObject(CurrentObject);
+    bool bok= GeoDelegate->updateObject(CurrentObject);
+    if (!bok) return;
 
     AWorldDelegate * del = dynamic_cast<AWorldDelegate*>(GeoDelegate);
     if (del)
@@ -1921,6 +1922,7 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
   frMainFrame->setLayout(lMF);
 
   //installing double validators for edit boxes
+  /*
   QDoubleValidator* dv = new QDoubleValidator(this);
   dv->setNotation(QDoubleValidator::ScientificNotation);
   ledX->setValidator(dv);
@@ -1928,7 +1930,7 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
   ledZ->setValidator(dv);
   ledPhi->setValidator(dv);
   ledTheta->setValidator(dv);
-  ledPsi->setValidator(dv);
+  ledPsi->setValidator(dv);*/
 }
 
 const QString AGeoObjectDelegate::getName() const
@@ -1961,7 +1963,20 @@ bool AGeoObjectDelegate::isValid(AGeoObject * obj)
     return true;
 }
 
-void AGeoObjectDelegate::updateObject(AGeoObject * obj) const  // Andr: void -> bool and react to false in void AGeoWidget::onConfirmPressed()
+bool processEditBox(QLineEdit* lineEdit, double &returnValue, QWidget * parent)
+{
+    const AGeoConsts& gConsts = AGeoConsts::getConstInstance();
+    bool ok = gConsts.evaluateFormula(lineEdit->text(), returnValue);
+    if (!ok)
+    {
+        qWarning () << lineEdit->text() <<  "is an invalid pos or orientation" ;
+        QMessageBox::warning(parent,"", QString("%1 is invalid position/ orientation").arg(lineEdit->text()));
+        return false;
+    }
+    return true;
+}
+
+bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false in void AGeoWidget::onConfirmPressed()
 {
     const QString oldName = obj->Name;
     const QString newName = leName->text();
@@ -1992,21 +2007,15 @@ void AGeoObjectDelegate::updateObject(AGeoObject * obj) const  // Andr: void -> 
         old << obj->Position[0]    << obj->Position[1]    << obj->Position[2]
                 << obj->Orientation[0] << obj->Orientation[1] << obj->Orientation[2];
 
-        /*
-        const AGeoConsts& gConsts = AGeoConsts::getConstInstance();
-        qDebug() << obj->Position[0];
+        bool globalOk =true;
+        globalOk = globalOk && processEditBox(ledX, obj->Position[0], ParentWidget);
+        globalOk = globalOk && processEditBox(ledY, obj->Position[1], ParentWidget);
+        globalOk = globalOk && processEditBox(ledZ, obj->Position[2], ParentWidget);
+        globalOk = globalOk && processEditBox(ledPhi, obj->Orientation[0], ParentWidget);
+        globalOk = globalOk && processEditBox(ledTheta, obj->Orientation[1], ParentWidget);
+        globalOk = globalOk && processEditBox(ledPsi, obj->Orientation[2], ParentWidget);
 
-        gConsts.evaluateFormula(ledX->text(), obj->Position[0]);
-        qDebug() << obj->Position[0];
-        */
-
-        obj->Position[0] = ledX->text().toDouble();
-        obj->Position[1] = ledY->text().toDouble();
-        obj->Position[2] = ledZ->text().toDouble();
-        obj->Orientation[0] = ledPhi->text().toDouble();
-        obj->Orientation[1] = ledTheta->text().toDouble();
-        obj->Orientation[2] = ledPsi->text().toDouble();
-
+        if (!globalOk) {return false;}
 
         // checking was there a rotation of the main object
         bool fWasRotated = false;
@@ -2105,6 +2114,7 @@ void AGeoObjectDelegate::updateObject(AGeoObject * obj) const  // Andr: void -> 
             }
         }
     }
+    return true;
 }
 
 void AGeoObjectDelegate::onChangeShapePressed()
@@ -2481,10 +2491,10 @@ bool AGridElementDelegate::isValid(AGeoObject * /*obj*/)
     return true;
 }
 
-void AGridElementDelegate::updateObject(AGeoObject * obj) const
+bool AGridElementDelegate::updateObject(AGeoObject * obj) const
 {
-    if (!obj) return;
-    if (!obj->ObjectType->isGridElement()) return;
+    if (!obj) return false;
+    if (!obj->ObjectType->isGridElement()) return false;
 
     ATypeGridElementObject* GE = static_cast<ATypeGridElementObject*>(obj->ObjectType);
     int shape = cobShape->currentIndex();
@@ -2501,6 +2511,8 @@ void AGridElementDelegate::updateObject(AGeoObject * obj) const
     GE->size2 = ledDY->text().toDouble();
 
     obj->updateGridElementShape();
+
+    return true;
 }
 
 void AGridElementDelegate::updateVisibility()
@@ -2626,9 +2638,10 @@ bool AMonitorDelegate::isValid(AGeoObject * /*obj*/)
     return true;
 }
 
-void AMonitorDelegate::updateObject(AGeoObject *obj) const
+bool AMonitorDelegate::updateObject(AGeoObject *obj) const
 {
     del->updateObject(obj);
+    return true;
 }
 
 void AMonitorDelegate::Update(const AGeoObject *obj)
@@ -4165,7 +4178,7 @@ bool AGeoSlabDelegate::isValid(AGeoObject * /*obj*/)
     return true;
 }
 
-void AGeoSlabDelegate::updateObject(AGeoObject * obj) const
+bool AGeoSlabDelegate::updateObject(AGeoObject * obj) const
 {
     ASlabModel * model = obj->getSlabModel();
 
@@ -4173,6 +4186,7 @@ void AGeoSlabDelegate::updateObject(AGeoObject * obj) const
     bool fCenter = model->fCenter;
     SlabDel->UpdateModel(model);
     model->fCenter = fCenter; //delegate does not remember center status
+    return true;
 }
 
 void AGeoSlabDelegate::Update(const AGeoObject *obj)
@@ -4511,7 +4525,7 @@ bool AWorldDelegate::isValid(AGeoObject *)
     return true;
 }
 
-void AWorldDelegate::updateObject(AGeoObject * obj) const
+bool AWorldDelegate::updateObject(AGeoObject * obj) const
 {
     obj->Material = cobMat->currentIndex();
     if (obj->Material == -1) obj->Material = 0; //protection
@@ -4521,6 +4535,8 @@ void AWorldDelegate::updateObject(AGeoObject * obj) const
     box->dz = 0.5 * ledSizeZ->text().toDouble();
     ATypeWorldObject * typeWorld = static_cast<ATypeWorldObject *>(obj->ObjectType);
     typeWorld->bFixedSize = cbFixedSize->isChecked();
+
+    return true;
 }
 
 void AWorldDelegate::Update(const AGeoObject *obj)

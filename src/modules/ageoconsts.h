@@ -13,13 +13,13 @@ public:
     static       AGeoConsts& getInstance();
     static const AGeoConsts& getConstInstance();
 
-    QMap<QString, double> geoConsts;  // Andr: -> GeoConsts
+    QMap<QString, double> GeoConsts;
 
     void clearConstants();
 
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);
-    bool evaluateFormula(QString &str, double &returnValue) const;  // Andr: recommend -> const QString & str
+    bool evaluateFormula(QString str, double &returnValue) const;  // Kira: no I want a copy
     void updateConsts();
 
 private:

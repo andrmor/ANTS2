@@ -278,7 +278,7 @@ void DetectorAddOnsWindow::UpdateGeoTree(QString name)
 
     //update constants
     ui->tabwConstants->clear();
-    const QMapIterator<QString, double> & Map = AGeoConsts::getConstInstance().geoConsts;
+    const QMapIterator<QString, double> & Map = AGeoConsts::getConstInstance().GeoConsts;
     QMapIterator<QString, double> iter(Map);
     int iCounter = 0;
     while (iter.hasNext())

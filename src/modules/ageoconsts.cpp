@@ -17,7 +17,7 @@ const AGeoConsts &AGeoConsts::getConstInstance()
 
 void AGeoConsts::clearConstants()
 {
-    geoConsts.clear();
+    GeoConsts.clear();
     updateConsts();
 }
 
@@ -25,7 +25,7 @@ void AGeoConsts::writeToJson(QJsonObject & json) const
 {
     QJsonArray ar;
 
-    QMapIterator<QString, double> iter(geoConsts);
+    QMapIterator<QString, double> iter(GeoConsts);
     while (iter.hasNext())
     {
         iter.next();
@@ -51,12 +51,13 @@ void AGeoConsts::readFromJson(const QJsonObject & json)
         {
             const QString key = el[0].toString();
             const double  val = el[1].toDouble();
-            geoConsts[key] = val;      // warnings if not unique?
+            GeoConsts[key] = val;      // warnings if not unique?
         }
     }
+    updateConsts();
 }
 
-bool AGeoConsts::evaluateFormula(QString &str, double &returnValue) const
+bool AGeoConsts::evaluateFormula(QString str, double &returnValue) const
 {
     for (int iQRE=0; iQRE < vQRegularExpression.size(); iQRE++)
     {
@@ -84,7 +85,7 @@ void AGeoConsts::updateConsts()
     vQRegularExpression.clear();
     vConstValues.clear();
 
-    QMapIterator<QString, double> iter(geoConsts);
+    QMapIterator<QString, double> iter(GeoConsts);
     while (iter.hasNext())
     {
         iter.next();

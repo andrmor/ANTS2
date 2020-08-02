@@ -1689,8 +1689,8 @@ void AGeoWidget::onConfirmPressed()
     bool ok = checkDelegateValidity();
     if (!ok) return;
 
-    bool bok= GeoDelegate->updateObject(CurrentObject);
-    if (!bok) return;
+    ok = GeoDelegate->updateObject(CurrentObject);
+    if (!ok) return;
 
     AWorldDelegate * del = dynamic_cast<AWorldDelegate*>(GeoDelegate);
     if (del)
@@ -1963,17 +1963,16 @@ bool AGeoObjectDelegate::isValid(AGeoObject * obj)
     return true;
 }
 
-bool processEditBox(QLineEdit* lineEdit, double &returnValue, QWidget * parent)
+bool processEditBox(QLineEdit* lineEdit, double & val, QString & str, QWidget * parent)
 {
-    const AGeoConsts& gConsts = AGeoConsts::getConstInstance();
-    bool ok = gConsts.evaluateFormula(lineEdit->text(), returnValue);
-    if (!ok)
-    {
-        qWarning () << lineEdit->text() <<  "is an invalid pos or orientation" ;
-        QMessageBox::warning(parent,"", QString("%1 is invalid position/ orientation").arg(lineEdit->text()));
-        return false;
-    }
-    return true;
+    str = lineEdit->text();
+    const AGeoConsts & gConsts = AGeoConsts::getConstInstance();
+    bool ok = gConsts.evaluateFormula(str, val);
+    if (ok) return true;
+
+    qWarning () << "Bad format:" << str;
+    QMessageBox::warning(parent, "", QString("Bad format: %1").arg(str));
+    return false;
 }
 
 bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false in void AGeoWidget::onConfirmPressed()
@@ -2005,17 +2004,16 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
         //if it is a set member, need old values of position and angle
         QVector<double> old;
         old << obj->Position[0]    << obj->Position[1]    << obj->Position[2]
-                << obj->Orientation[0] << obj->Orientation[1] << obj->Orientation[2];
+            << obj->Orientation[0] << obj->Orientation[1] << obj->Orientation[2];
 
-        bool globalOk =true;
-        globalOk = globalOk && processEditBox(ledX, obj->Position[0], ParentWidget);
-        globalOk = globalOk && processEditBox(ledY, obj->Position[1], ParentWidget);
-        globalOk = globalOk && processEditBox(ledZ, obj->Position[2], ParentWidget);
-        globalOk = globalOk && processEditBox(ledPhi, obj->Orientation[0], ParentWidget);
-        globalOk = globalOk && processEditBox(ledTheta, obj->Orientation[1], ParentWidget);
-        globalOk = globalOk && processEditBox(ledPsi, obj->Orientation[2], ParentWidget);
-
-        if (!globalOk) {return false;}
+        bool ok = true;
+        ok = ok && processEditBox(ledX, obj->Position[0], obj->PositionStr[0], ParentWidget);
+        ok = ok && processEditBox(ledY, obj->Position[1], obj->PositionStr[1], ParentWidget);
+        ok = ok && processEditBox(ledZ, obj->Position[2], obj->PositionStr[2], ParentWidget);
+        ok = ok && processEditBox(ledPhi,   obj->Orientation[0], obj->OrientationStr[0], ParentWidget);
+        ok = ok && processEditBox(ledTheta, obj->Orientation[1], obj->OrientationStr[1], ParentWidget);
+        ok = ok && processEditBox(ledPsi,   obj->Orientation[2], obj->OrientationStr[2], ParentWidget);
+        if (!ok) return false;
 
         // checking was there a rotation of the main object
         bool fWasRotated = false;

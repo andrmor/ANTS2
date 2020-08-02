@@ -224,9 +224,17 @@ void AGeoObject::writeToJson(QJsonObject &json)
       json["X"] = Position[0];
       json["Y"] = Position[1];
       json["Z"] = Position[2];
-      json["Phi"] = Orientation[0];
+      json["Phi"]   = Orientation[0];
       json["Theta"] = Orientation[1];
-      json["Psi"] = Orientation[2];
+      json["Psi"]   = Orientation[2];
+
+      if (!PositionStr[0].isEmpty()) json["XStr"] = PositionStr[0];
+      if (!PositionStr[1].isEmpty()) json["YStr"] = PositionStr[1];
+      if (!PositionStr[2].isEmpty()) json["ZStr"] = PositionStr[2];
+
+      if (!OrientationStr[0].isEmpty()) json["PhiStr"]   = OrientationStr[0];
+      if (!OrientationStr[1].isEmpty()) json["ThetaStr"] = OrientationStr[1];
+      if (!OrientationStr[2].isEmpty()) json["PsiStr"]   = OrientationStr[2];
   }
 
   if (!LastScript.isEmpty())
@@ -255,6 +263,18 @@ void AGeoObject::readFromJson(QJsonObject &json)
     parseJson(json, "Phi", Orientation[0]);
     parseJson(json, "Theta", Orientation[1]);
     parseJson(json, "Psi", Orientation[2]);
+
+    for (int i = 0; i < 3; i++)
+    {
+        PositionStr[i].clear();
+        OrientationStr[i].clear();
+    }
+    parseJson(json, "XStr", PositionStr[0]);
+    parseJson(json, "YStr", PositionStr[1]);
+    parseJson(json, "ZStr", PositionStr[2]);
+    parseJson(json, "PhiStr",   OrientationStr[0]);
+    parseJson(json, "ThetaStr", OrientationStr[1]);
+    parseJson(json, "PsiStr",   OrientationStr[2]);
 
     //ObjectType
     QJsonObject jj = json["ObjectType"].toObject();

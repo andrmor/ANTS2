@@ -50,6 +50,9 @@ public:
   bool fLocked;
   bool fActive;
 
+  QString PositionStr[3];
+  QString OrientationStr[3];
+
   AGeoObject* Container;
   QList<AGeoObject*> HostedObjects;
 

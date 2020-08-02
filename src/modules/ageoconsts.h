@@ -19,7 +19,7 @@ public:
 
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);
-    bool evaluateFormula(QString str, double &returnValue) const;  // Kira: no I want a copy
+    bool evaluateFormula(QString str, double &returnValue) const;
     void updateConsts();
 
 private:

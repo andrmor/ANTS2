@@ -1961,7 +1961,7 @@ bool AGeoObjectDelegate::isValid(AGeoObject * obj)
     return true;
 }
 
-void AGeoObjectDelegate::updateObject(AGeoObject * obj) const
+void AGeoObjectDelegate::updateObject(AGeoObject * obj) const  // Andr: void -> bool and react to false in void AGeoWidget::onConfirmPressed()
 {
     const QString oldName = obj->Name;
     const QString newName = leName->text();

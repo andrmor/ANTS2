@@ -2,6 +2,8 @@
 #include "ajsontools.h"
 #include "TFormula.h"
 
+#include <QDebug>
+
 AGeoConsts &AGeoConsts::getInstance()
 {
     static AGeoConsts instance;
@@ -16,6 +18,7 @@ const AGeoConsts &AGeoConsts::getConstInstance()
 void AGeoConsts::clearConstants()
 {
     geoConsts.clear();
+    updateConsts();
 }
 
 void AGeoConsts::writeToJson(QJsonObject & json) const
@@ -52,7 +55,7 @@ void AGeoConsts::readFromJson(const QJsonObject & json)
         }
     }
 }
-#include <QVector>
+
 bool AGeoConsts::evaluateFormula(QString &str, double &returnValue) const
 {
     for (int iQRE=0; iQRE < vQRegularExpression.size(); iQRE++)

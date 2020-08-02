@@ -2,7 +2,10 @@
 #define AGEOCONSTS_H
 
 #include <QMap>
-#include <QDebug>
+#include <QVector>
+#include <QString>
+
+class QJsonObject;
 
 class AGeoConsts final
 {
@@ -16,7 +19,7 @@ public:
 
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);
-    bool evaluateFormula (QString &str, double &returnValue) const;
+    bool evaluateFormula(QString &str, double &returnValue) const;  // Andr: recommend -> const QString & str
     void updateConsts();
 
 private:
@@ -28,8 +31,8 @@ private:
     AGeoConsts& operator=(const AGeoConsts&) = delete;// Copy assign
     AGeoConsts& operator=(AGeoConsts&) = delete;     // Move assign
 
-    QVector <QString> vQRegularExpression;
-    QVector <double> vConstValues;
+    QVector<QString> vQRegularExpression;
+    QVector<double>  vConstValues;
 
 };
 

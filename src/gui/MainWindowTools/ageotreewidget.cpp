@@ -3835,8 +3835,8 @@ AGeoCompositeDelegate::AGeoCompositeDelegate(const QStringList &materials, QWidg
     v->addWidget(te);
     connect(te, &QPlainTextEdit::textChanged, this, &AGeoCompositeDelegate::onLocalShapeParameterChange);
 
-    cbScale->setChecked(false);
-    cbScale->setVisible(false);
+    //cbScale->setChecked(false);
+    //cbScale->setVisible(false);
 
     addLocalLayout(v);
 }

@@ -3270,6 +3270,7 @@ TGeoShape* AGeoScaledShape::generateBaseTGeoShape(const QString & BaseShapeGener
 
 TGeoShape *AGeoScaledShape::createGeoShape(const QString shapeName)
 {
+    /*
    TGeoShape* Tshape = generateBaseTGeoShape(BaseShapeGenerationString);
    if (!Tshape)
      {
@@ -3282,6 +3283,22 @@ TGeoShape *AGeoScaledShape::createGeoShape(const QString shapeName)
    scale->RegisterYourself();
 
    return (shapeName.isEmpty()) ? new TGeoScaledShape(Tshape, scale) : new TGeoScaledShape(shapeName.toLatin1().data(), Tshape, scale);
+   */
+
+    TGeoShape * Tshape = BaseShape->createGeoShape();
+    if (!Tshape)
+    {
+        qWarning() << "->failed to generate shape\nreplacing by default TGeoBBox";
+        Tshape = new TGeoBBox(5,5,5);
+    }
+
+    QString name = shapeName + "_base";
+    Tshape->SetName(name.toLatin1().data());
+
+    TGeoScale* scale = new TGeoScale(scaleX, scaleY, scaleZ);
+    scale->RegisterYourself();
+
+    return (shapeName.isEmpty()) ? new TGeoScaledShape(Tshape, scale) : new TGeoScaledShape(shapeName.toLatin1().data(), Tshape, scale);
 }
 
 const QString AGeoScaledShape::getGenerationString() const
@@ -3296,28 +3313,68 @@ const QString AGeoScaledShape::getGenerationString() const
 
 const QString AGeoScaledShape::getBaseShapeType() const
 {
+    /*
     QStringList sl = BaseShapeGenerationString.split('(', QString::SkipEmptyParts);
 
     if (sl.size() < 1) return "";
     return sl.first().simplified();
+    */
+
+    if (BaseShape) return BaseShape->getShapeType();
+    else exit (-7777);
 }
 
 void AGeoScaledShape::writeToJson(QJsonObject &json)
 {
-   json["scaleX"] = scaleX;
-   json["scaleY"] = scaleY;
-   json["scaleZ"] = scaleZ;
+    json["scaleX"] = scaleX;
+    json["scaleY"] = scaleY;
+    json["scaleZ"] = scaleZ;
 
-   json["BaseShapeGenerationString"] = BaseShapeGenerationString;
+    //json["BaseShapeGenerationString"] = BaseShapeGenerationString;
+    if (BaseShape)
+    {
+        BaseShape->writeToJson(json);
+        json["shape"] = BaseShape->getShapeType();
+    }
 }
 
 void AGeoScaledShape::readFromJson(QJsonObject &json)
 {
-   parseJson(json, "scaleX", scaleX);
-   parseJson(json, "scaleY", scaleY);
-   parseJson(json, "scaleZ", scaleZ);
+    parseJson(json, "scaleX", scaleX);
+    parseJson(json, "scaleY", scaleY);
+    parseJson(json, "scaleZ", scaleZ);
 
-   parseJson(json, "BaseShapeGenerationString", BaseShapeGenerationString);
+    bool bOldSystem = parseJson(json, "BaseShapeGenerationString", BaseShapeGenerationString);
+    if (bOldSystem)
+    {
+        //compatibility
+        delete BaseShape;
+
+        qDebug() << "SCALED->: Generating base shape from "<< BaseShapeGenerationString;
+        QString shapeType = BaseShapeGenerationString.left(BaseShapeGenerationString.indexOf('('));
+        qDebug() << "SCALED->: base type:"<<shapeType;
+        BaseShape = AGeoObject::GeoShapeFactory(shapeType);
+        if (BaseShape)
+        {
+            qDebug() << "SCALED->" << "Created AGeoShape of type" << BaseShape->getShapeType();
+            bool fOK = BaseShape->readFromString(BaseShapeGenerationString);
+            qDebug() << "reading base shape properties ->" << fOK;
+        }
+    }
+    else
+    {
+        //new system
+        QString type = "TGeoBBox";
+        parseJson(json, "shape", type);
+        BaseShape = AGeoObject::GeoShapeFactory(type);
+        if (BaseShape) BaseShape->readFromJson(json);
+    }
+
+    if (!BaseShape)
+    {
+        qWarning() << "Shape generation failed, replacing with box";
+        BaseShape = new AGeoBox();
+    }
 }
 
 bool AGeoScaledShape::readFromTShape(TGeoShape *Tshape)

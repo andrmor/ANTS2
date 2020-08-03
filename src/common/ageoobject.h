@@ -329,13 +329,6 @@ public:
   AGeoShape() {}
   virtual ~AGeoShape() {}
 
-  /*
-  bool bScale = false;
-  double ScaleX = 1.0;
-  double ScaleY = 1.0;
-  double ScaleZ = 1.0;
-  */
-
   virtual bool readFromString(QString /*GenerationString*/) {return false;}
 
   //general: the same for all objects of the given shape
@@ -364,6 +357,70 @@ protected:
 };
 
 // -------------- Particular shapes ---------------
+
+
+class AGeoBox : public AGeoShape
+{
+public:
+  AGeoBox(double dx, double dy, double dz) :
+    dx(dx), dy(dy), dz(dz) {}
+  AGeoBox() :
+    dx(10), dy(10), dz(10) {}
+  virtual ~AGeoBox() {}
+
+  virtual const QString getShapeType() {return "TGeoBBox";}
+  virtual const QString getShapeTemplate() {return "TGeoBBox( dx, dy, dz )";}
+  virtual bool readFromString(QString GenerationString);
+  virtual const QString getHelp();
+
+  virtual TGeoShape* createGeoShape(const QString shapeName = "");
+
+  virtual double getHeight() {return dz;}
+  virtual void setHeight(double dz) {this->dz = dz;}
+  virtual const QString getGenerationString() const;
+  virtual double maxSize();
+  virtual double minSize() override;
+
+  virtual void writeToJson(QJsonObject& json) override;
+  virtual void readFromJson(QJsonObject& json) override;
+
+  virtual bool readFromTShape(TGeoShape* Tshape);
+
+  double dx, dy, dz;
+};
+
+class AGeoScaledShape  : public AGeoShape
+{
+public:
+  AGeoScaledShape(QString BaseShapeGenerationString, double scaleX, double scaleY, double scaleZ);
+  AGeoScaledShape() {}
+  virtual ~AGeoScaledShape() {}
+
+  virtual const QString getShapeType() {return "TGeoScaledShape";}
+  virtual const QString getShapeTemplate() {return "TGeoScaledShape( TGeoShape(parameters), scaleX, scaleY, scaleZ )";}
+  virtual const QString getHelp();
+
+  virtual bool readFromString(QString GenerationString);
+  virtual TGeoShape* createGeoShape(const QString shapeName = "");
+
+  //virtual double getHeight() {return 0;}
+  //virtual void setHeight(double /*dz*/) {}
+  virtual const QString getGenerationString() const;
+  virtual double maxSize() {return 0;}  //***!!!
+
+  const QString getBaseShapeType() const;
+  TGeoShape * generateBaseTGeoShape(const QString & BaseShapeGenerationString) const;
+
+  virtual void writeToJson(QJsonObject& json);
+  virtual void readFromJson(QJsonObject& json);
+
+  virtual bool readFromTShape(TGeoShape* Tshape);
+
+  QString BaseShapeGenerationString;  //compatibility
+
+  double scaleX, scaleY, scaleZ;
+  AGeoShape * BaseShape = nullptr;
+};
 
 class AGeoParaboloid : public AGeoShape
 {
@@ -614,7 +671,6 @@ public:
   double dx1, dx2, dy1, dy2, dz;
 };
 
-
 class AGeoTube : public AGeoShape
 {
 public:
@@ -773,36 +829,6 @@ public:
   double rmin, rmax, theta1, theta2, phi1, phi2;
 };
 
-class AGeoBox : public AGeoShape
-{
-public:
-  AGeoBox(double dx, double dy, double dz) :
-    dx(dx), dy(dy), dz(dz) {}
-  AGeoBox() :
-    dx(10), dy(10), dz(10) {}
-  virtual ~AGeoBox() {}
-
-  virtual const QString getShapeType() {return "TGeoBBox";}
-  virtual const QString getShapeTemplate() {return "TGeoBBox( dx, dy, dz )";}
-  virtual bool readFromString(QString GenerationString);
-  virtual const QString getHelp();
-
-  virtual TGeoShape* createGeoShape(const QString shapeName = "");
-
-  virtual double getHeight() {return dz;}
-  virtual void setHeight(double dz) {this->dz = dz;}
-  virtual const QString getGenerationString() const;
-  virtual double maxSize();
-  virtual double minSize() override;
-
-  virtual void writeToJson(QJsonObject& json) override;
-  virtual void readFromJson(QJsonObject& json) override;
-
-  virtual bool readFromTShape(TGeoShape* Tshape);
-
-  double dx, dy, dz;
-};
-
 class AGeoPara : public AGeoShape
 {
 public:
@@ -891,38 +917,6 @@ public:
 
   QStringList members;
   QString GenerationString;
-};
-
-class AGeoScaledShape  : public AGeoShape
-{
-public:
-  AGeoScaledShape(QString BaseShapeGenerationString, double scaleX, double scaleY, double scaleZ);
-  AGeoScaledShape() {}
-  virtual ~AGeoScaledShape() {}
-
-  virtual const QString getShapeType() {return "TGeoScaledShape";}
-  virtual const QString getShapeTemplate() {return "TGeoScaledShape( TGeoShape(parameters), scaleX, scaleY, scaleZ )";}
-  virtual const QString getHelp();
-
-  virtual bool readFromString(QString GenerationString);
-  virtual TGeoShape* createGeoShape(const QString shapeName = "");
-
-  //virtual double getHeight() {return 0;}
-  //virtual void setHeight(double /*dz*/) {}
-  virtual const QString getGenerationString() const;
-  virtual double maxSize() {return 0;}  //***!!!
-
-  const QString getBaseShapeType() const;
-  TGeoShape * generateBaseTGeoShape(const QString & BaseShapeGenerationString) const;
-
-  virtual void writeToJson(QJsonObject& json);
-  virtual void readFromJson(QJsonObject& json);
-
-  virtual bool readFromTShape(TGeoShape* Tshape);
-
-  QString BaseShapeGenerationString;
-  double scaleX, scaleY, scaleZ;
-
 };
 
 class AGeoTorus  : public AGeoShape

@@ -631,12 +631,12 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
   addUpperLGA->setEnabled(!World->containsUpperLightGuide());
   addLoweLGA->setEnabled(!World->containsLowerLightGuide());
 
-  if (selected.size() == 0)
-    { //menu triggered without selected items            
-    }
+  QString objName;
+  if      (selected.size() == 0) objName = "World"; // no object selected
   else if (selected.size() == 1)
-    { //menu triggered with only one selected item
-      AGeoObject* obj = World->findObjectByName(selected.first()->text(0));
+  { //menu triggered with only one selected item
+      objName = selected.first()->text(0);
+      AGeoObject* obj = World->findObjectByName(objName);
       if (!obj) return;
       const ATypeObject& ObjectType = *obj->ObjectType;
 
@@ -666,61 +666,61 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
       showA->setEnabled(true);
       showAonly->setEnabled(true);
       showAdown->setEnabled(true);
-    }
+  }
   else if (!selected.first()->font(0).bold())
-    { //menu triggered with several items selected, and they are not slabs
+  { //menu triggered with several items selected, and they are not slabs
       removeA->setEnabled(true); //world cannot be in selection with anything else anyway
       lockA->setEnabled(true);
       unlockA->setEnabled(true);
       groupA->setEnabled(true);
       stackA->setEnabled(true);
-    }
+  }
 
   QAction* SelectedAction = menu.exec(mapToGlobal(pos));
   if (!SelectedAction) return; //nothing was selected
 
   // -- EXECUTE SELECTED ACTION --
   if (SelectedAction == showA)  // SHOW OBJECT
-     ShowObject(selected.first()->text(0));
+     ShowObject(objName);
   else if (SelectedAction == showAonly)
-      ShowObjectOnly(selected.first()->text(0));
+     ShowObjectOnly(objName);
   else if (SelectedAction == showAdown)
-      ShowObjectRecursive(selected.first()->text(0));
+     ShowObjectRecursive(objName);
   else if (SelectedAction == lineA) // SET LINE ATTRIBUTES
-     SetLineAttributes(selected.first()->text(0));
+     SetLineAttributes(objName);
   else if (SelectedAction == enableDisableA)
-     menuActionEnableDisable(selected.first()->text(0));
+     menuActionEnableDisable(objName);
   // ADD NEW OBJECT
-  else if (SelectedAction == newBox)         menuActionAddNewObject(selected.first()->text(0), new AGeoBox());
-  else if (SelectedAction == newTube)        menuActionAddNewObject(selected.first()->text(0), new AGeoTube());
-  else if (SelectedAction == newTubeSegment) menuActionAddNewObject(selected.first()->text(0), new AGeoTubeSeg());
-  else if (SelectedAction == newTubeSegCut)  menuActionAddNewObject(selected.first()->text(0), new AGeoCtub());
-  else if (SelectedAction == newTubeElli)    menuActionAddNewObject(selected.first()->text(0), new AGeoEltu());
-  else if (SelectedAction == newTrapSim)     menuActionAddNewObject(selected.first()->text(0), new AGeoTrd1());
-  else if (SelectedAction == newTrap)        menuActionAddNewObject(selected.first()->text(0), new AGeoTrd2());
-  else if (SelectedAction == newPcon)        menuActionAddNewObject(selected.first()->text(0), new AGeoPcon());
-  else if (SelectedAction == newPgonSim)     menuActionAddNewObject(selected.first()->text(0), new AGeoPolygon());
-  else if (SelectedAction == newPgon)        menuActionAddNewObject(selected.first()->text(0), new AGeoPgon());
-  else if (SelectedAction == newPara)        menuActionAddNewObject(selected.first()->text(0), new AGeoPara());
-  else if (SelectedAction == newSphere)      menuActionAddNewObject(selected.first()->text(0), new AGeoSphere());
-  else if (SelectedAction == newCone)        menuActionAddNewObject(selected.first()->text(0), new AGeoCone());
-  else if (SelectedAction == newConeSeg)     menuActionAddNewObject(selected.first()->text(0), new AGeoConeSeg());
-  else if (SelectedAction == newTor)         menuActionAddNewObject(selected.first()->text(0), new AGeoTorus());
-  else if (SelectedAction == newParabol)     menuActionAddNewObject(selected.first()->text(0), new AGeoParaboloid());
-  else if (SelectedAction == newArb8)        menuActionAddNewObject(selected.first()->text(0), new AGeoArb8());
+  else if (SelectedAction == newBox)         menuActionAddNewObject(objName, new AGeoBox());
+  else if (SelectedAction == newTube)        menuActionAddNewObject(objName, new AGeoTube());
+  else if (SelectedAction == newTubeSegment) menuActionAddNewObject(objName, new AGeoTubeSeg());
+  else if (SelectedAction == newTubeSegCut)  menuActionAddNewObject(objName, new AGeoCtub());
+  else if (SelectedAction == newTubeElli)    menuActionAddNewObject(objName, new AGeoEltu());
+  else if (SelectedAction == newTrapSim)     menuActionAddNewObject(objName, new AGeoTrd1());
+  else if (SelectedAction == newTrap)        menuActionAddNewObject(objName, new AGeoTrd2());
+  else if (SelectedAction == newPcon)        menuActionAddNewObject(objName, new AGeoPcon());
+  else if (SelectedAction == newPgonSim)     menuActionAddNewObject(objName, new AGeoPolygon());
+  else if (SelectedAction == newPgon)        menuActionAddNewObject(objName, new AGeoPgon());
+  else if (SelectedAction == newPara)        menuActionAddNewObject(objName, new AGeoPara());
+  else if (SelectedAction == newSphere)      menuActionAddNewObject(objName, new AGeoSphere());
+  else if (SelectedAction == newCone)        menuActionAddNewObject(objName, new AGeoCone());
+  else if (SelectedAction == newConeSeg)     menuActionAddNewObject(objName, new AGeoConeSeg());
+  else if (SelectedAction == newTor)         menuActionAddNewObject(objName, new AGeoTorus());
+  else if (SelectedAction == newParabol)     menuActionAddNewObject(objName, new AGeoParaboloid());
+  else if (SelectedAction == newArb8)        menuActionAddNewObject(objName, new AGeoArb8());
   //ADD NEW COMPOSITE
   else if (SelectedAction == newCompositeA)
-     menuActionAddNewComposite(selected.first()->text(0));
+     menuActionAddNewComposite(objName);
   else if (SelectedAction == newArrayA) //ADD NEW COMPOSITE
-     menuActionAddNewArray(selected.first()->text(0));
+     menuActionAddNewArray(objName);
   else if (SelectedAction == newGridA) //ADD NEW GRID
-     menuActionAddNewGrid(selected.first()->text(0));
+     menuActionAddNewGrid(objName);
   else if (SelectedAction == newMonitorA) //ADD NEW MONITOR
-     menuActionAddNewMonitor(selected.first()->text(0));
+     menuActionAddNewMonitor(objName);
   else if (SelectedAction == addUpperLGA || SelectedAction == addLoweLGA) // ADD LIGHTGUIDE
      addLightguide(SelectedAction == addUpperLGA);
   else if (SelectedAction == copyA) // COPY OBJECT
-     menuActionCopyObject(selected.first()->text(0));
+     menuActionCopyObject(objName);
   else if (SelectedAction == groupA || SelectedAction == stackA) //GROUP & STACK
     {
       int option = (SelectedAction == groupA) ? 0 : 1;
@@ -731,15 +731,15 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
   else if (SelectedAction == unlockA) // UNLOCK
      menuActionUnlock();
   else if (SelectedAction == lockallA) // LOCK OBJECTS INSIDE
-     menuActionLockAllInside(selected.first()->text(0));
+     menuActionLockAllInside(objName);
   else if (SelectedAction == unlockallA)
-     menuActionUnlockAllInside(selected.first()->text(0));
+     menuActionUnlockAllInside(objName);
   else if (SelectedAction == removeA) // REMOVE
      menuActionRemove();
   else if (SelectedAction == removeThisAndHostedA) // REMOVE RECURSIVLY
-     menuActionRemoveRecursively(selected.first()->text(0));
+     menuActionRemoveRecursively(objName);
   else if (SelectedAction == removeHostedA) // REMOVE HOSTED
-      menuActionRemoveHostedObjects(selected.first()->text(0));
+      menuActionRemoveHostedObjects(objName);
 }
 
 void AGeoTreeWidget::onItemClicked()

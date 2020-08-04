@@ -77,6 +77,8 @@ public slots:
   QVariant SetNewFileFinder(const QString dir, const QString fileNamePattern);
   QVariant GetNewFiles();
 
+  QVariantList GetDirectories(const QString dir, const QString dirNamePattern);
+
   //misc
   void processEvents();
   void reportProgress(int percents);

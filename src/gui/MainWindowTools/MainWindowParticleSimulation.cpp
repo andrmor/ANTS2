@@ -674,6 +674,7 @@ void MainWindow::on_pbEditParticleSource_clicked()
 }
 
 #include "ageoobject.h"
+#include "atypegeoobject.h"
 void containsMonsGrids(const AGeoObject * obj, bool & bGrid, bool & bMon)
 {
     if (obj->isDisabled()) return;

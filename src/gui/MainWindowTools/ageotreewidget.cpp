@@ -1,5 +1,7 @@
 #include "ageotreewidget.h"
 #include "ageoobject.h"
+#include "ageoshape.h"
+#include "atypegeoobject.h"
 #include "ashapehelpdialog.h"
 #include "arootlineconfigurator.h"
 #include "aslablistwidget.h"
@@ -638,7 +640,7 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
       objName = selected.first()->text(0);
       AGeoObject* obj = World->findObjectByName(objName);
       if (!obj) return;
-      const ATypeObject& ObjectType = *obj->ObjectType;
+      const ATypeGeoObject& ObjectType = *obj->ObjectType;
 
       bool fNotGridNotMonitor = !ObjectType.isGrid() && !ObjectType.isMonitor();
 
@@ -2184,7 +2186,7 @@ const AGeoShape * AGeoObjectDelegate::getBaseShapeOfObject(const AGeoObject * ob
     AGeoScaledShape * scaledShape = dynamic_cast<AGeoScaledShape*>(obj->Shape);
     if (!scaledShape) return nullptr;
 
-    AGeoShape * baseShape = AGeoObject::GeoShapeFactory(scaledShape->getBaseShapeType());
+    AGeoShape * baseShape = AGeoShape::GeoShapeFactory(scaledShape->getBaseShapeType());
     bool bOK = baseShape->readFromString( scaledShape->BaseShapeGenerationString );
     if (!bOK) qDebug() << "Failed to read shape properties:" << scaledShape->BaseShapeGenerationString;
     return baseShape;
@@ -2363,7 +2365,7 @@ AShapeHighlighter::AShapeHighlighter(QTextDocument *parent) : QSyntaxHighlighter
   ShapeFormat.setForeground(Qt::blue);
   ShapeFormat.setFontWeight(QFont::Bold);
 
-  QList<AGeoShape*> AvailableShapes = AGeoObject::GetAvailableShapes();
+  QList<AGeoShape*> AvailableShapes = AGeoShape::GetAvailableShapes();
   QStringList ShapePatterns;
   while (!AvailableShapes.isEmpty())
   {

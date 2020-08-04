@@ -13,6 +13,7 @@
 #include "asandwich.h"
 #include "anetworkmodule.h"
 #include "ageomarkerclass.h"
+#include "ageoshape.h"
 
 #include <QStringList>
 #include <QDebug>

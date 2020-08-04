@@ -413,7 +413,9 @@ SOURCES += main.cpp \
     SplineLibrary/Spline123/json11.cpp \
     SplineLibrary/Spline123/bspline123d.cpp \
     SplineLibrary/Spline123/bsfit123.cpp \
-    modules/ageoconsts.cpp
+    modules/ageoconsts.cpp \
+    modules/atypegeoobject.cpp \
+    modules/ageoshape.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -573,7 +575,9 @@ HEADERS  += common/CorrelationFilters.h \
     SplineLibrary/Spline123/eiquadprog.hpp \
     SplineLibrary/Spline123/bspline123d.h \
     SplineLibrary/Spline123/bsfit123.h \
-    modules/ageoconsts.h
+    modules/ageoconsts.h \
+    modules/atypegeoobject.h \
+    modules/ageoshape.h
 
 # --- SIM ---
 ants2_SIM {

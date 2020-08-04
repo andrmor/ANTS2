@@ -18,6 +18,7 @@
 #include "amonitor.h"
 #include "asandwich.h"
 #include "ageoobject.h"
+#include "atypegeoobject.h"
 #include "detectoraddonswindow.h"
 #include "ajsontools.h"
 

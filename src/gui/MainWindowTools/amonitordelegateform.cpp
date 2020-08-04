@@ -1,6 +1,7 @@
 #include "amonitordelegateform.h"
 #include "ui_amonitordelegateform.h"
 #include "ageoobject.h"
+#include "atypegeoobject.h"
 
 #include <QDebug>
 

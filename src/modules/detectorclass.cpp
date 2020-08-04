@@ -11,6 +11,8 @@
 #include "asandwich.h"
 #include "aslab.h"
 #include "ageoobject.h"
+#include "ageoshape.h"
+#include "atypegeoobject.h"
 #include "afiletools.h"
 #include "modules/lrf_v3/corelrfstypes.h"
 #include "modules/lrf_v3/alrftypemanager.h"

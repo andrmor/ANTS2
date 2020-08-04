@@ -1,6 +1,8 @@
 #include "asandwich.h"
 #include "aslab.h"
 #include "ageoobject.h"
+#include "ageoshape.h"
+#include "atypegeoobject.h"
 #include "amaterialparticlecolection.h"
 #include "ajsontools.h"
 #include "agridelementrecord.h"

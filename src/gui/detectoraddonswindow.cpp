@@ -15,6 +15,8 @@
 #include "slabdelegate.h"
 #include "ageotreewidget.h"
 #include "ageoobject.h"
+#include "ageoshape.h"
+#include "atypegeoobject.h"
 #include "amessage.h"
 #include "acommonfunctions.h"
 #include "ageometrytester.h"
@@ -730,7 +732,7 @@ void processNonComposite(QString Name, TGeoShape* Tshape, const TGeoMatrix* Matr
     for (int i=0; i<3; i++) GeoObj->Position[i] = trans.GetTranslation()[i];
     GeoObj->Orientation[0] = phi; GeoObj->Orientation[1] = theta; GeoObj->Orientation[2] = psi;
     delete GeoObj->Shape;
-    GeoObj->Shape = AGeoObject::GeoShapeFactory(Tshape->ClassName());
+    GeoObj->Shape = AGeoShape::GeoShapeFactory(Tshape->ClassName());
     if (!GeoObj->Shape)
     {
         qWarning() << "Unknown TGeoShape:"<<Tshape->ClassName();
@@ -837,7 +839,7 @@ void readGeoObjectTree(AGeoObject* obj, const TGeoNode* node,
     TGeoShape* Tshape = node->GetVolume()->GetShape();
     QString Sshape = Tshape->ClassName();
     //qDebug() << "TGeoShape:"<<Sshape;
-    AGeoShape* Ashape = AGeoObject::GeoShapeFactory(Sshape);
+    AGeoShape* Ashape = AGeoShape::GeoShapeFactory(Sshape);
     bool fOK = false;
     if (!Ashape) qWarning() << "TGeoShape was not recognized - using box";
     else

@@ -1,6 +1,8 @@
 #include "ageo_si.h"
 #include "amaterialparticlecolection.h"
 #include "ageoobject.h"
+#include "ageoshape.h"
+#include "atypegeoobject.h"
 #include "aslab.h"
 #include "asandwich.h"
 #include "detectorclass.h"
@@ -141,7 +143,7 @@ void AGeo_SI::Arb8(QString name, QVariant NodesX, QVariant NodesY, double h, int
       V.append( QPair<double,double>(x,y) );
     }
 
-  if (!AGeoObject::CheckPointsForArb8(V))
+  if (!AGeoShape::CheckPointsForArb8(V))
     {
       clearGeoObjects();
       abort("Arb8 nodes should be define clockwise for both planes");

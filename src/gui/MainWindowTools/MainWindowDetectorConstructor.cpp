@@ -16,6 +16,7 @@
 #include "slabdelegate.h"
 #include "aslablistwidget.h"
 #include "ageoobject.h"
+#include "atypegeoobject.h"
 #include "ageotreewidget.h"
 #include "localscriptinterfaces.h"
 #include "aconfiguration.h"

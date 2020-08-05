@@ -1837,15 +1837,18 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
         hbsw->setContentsMargins(2,0,2,0);
         hbsw->addWidget(new QLabel("in X:"));
         ledScaleX = new QLineEdit("1.0"); hbsw->addWidget(ledScaleX);
-        connect(ledScaleX, &QLineEdit::textChanged, this, &AGeoObjectDelegate::onLocalShapeParameterChange);
+        connect(ledScaleX, &QLineEdit::textChanged, this, &AGeoObjectDelegate::onLocalShapeParameterChange); // !*! obsolete?
+        connect(ledScaleX, &QLineEdit::editingFinished, this, &AGeoObjectDelegate::updateScalingFactors); // new
         connect(ledScaleX, &QLineEdit::textChanged, this, &AGeoObjectDelegate::onContentChanged);
         hbsw->addWidget(new QLabel("in Y:"));
         ledScaleY = new QLineEdit("1.0"); hbsw->addWidget(ledScaleY);
         connect(ledScaleY, &QLineEdit::textChanged, this, &AGeoObjectDelegate::onLocalShapeParameterChange);
+        connect(ledScaleY, &QLineEdit::editingFinished, this, &AGeoObjectDelegate::updateScalingFactors); // new
         connect(ledScaleY, &QLineEdit::textChanged, this, &AGeoObjectDelegate::onContentChanged);
         hbsw->addWidget(new QLabel("in Z:"));
         ledScaleZ = new QLineEdit("1.0"); hbsw->addWidget(ledScaleZ);
         connect(ledScaleZ, &QLineEdit::textChanged, this, &AGeoObjectDelegate::onLocalShapeParameterChange);
+        connect(ledScaleZ, &QLineEdit::editingFinished, this, &AGeoObjectDelegate::updateScalingFactors); // new
         connect(ledScaleZ, &QLineEdit::textChanged, this, &AGeoObjectDelegate::onContentChanged);
     hbs->addWidget(scaleWidget);
     hbs->addStretch();
@@ -1956,6 +1959,15 @@ bool AGeoObjectDelegate::isValid(AGeoObject * obj)
     }
     else
     {
+        // !*! temporary!!! to avoid old system of pteEdit control!
+        AGeoBox * box = dynamic_cast<AGeoBox*>(ShapeCopy);
+        if (!box)
+        {
+            AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+            box = dynamic_cast<AGeoBox*>(scaled->BaseShape);
+        }
+        if (box) return true;
+
         // this is normal or composite object then
         //if composite, first check all members
         QString newShape = pteShape->document()->toPlainText();
@@ -2234,6 +2246,18 @@ void AGeoObjectDelegate::updatePteShape(const QString & text)
 
     pteShape->appendPlainText(str);
     pbShapeInfo->setToolTip(pteShape->document()->toPlainText());
+}
+
+void AGeoObjectDelegate::updateScalingFactors()
+{
+    AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+    if (scaled)
+    {
+        // !*! TFormula?   common method with combine with toggle on check box scale?
+        scaled->scaleX = ledScaleX->text().toDouble();
+        scaled->scaleY = ledScaleY->text().toDouble();
+        scaled->scaleZ = ledScaleZ->text().toDouble();
+    }
 }
 
 const AGeoShape * AGeoObjectDelegate::getBaseShapeOfObject(const AGeoObject * obj)

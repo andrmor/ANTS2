@@ -285,7 +285,7 @@ void ADrawExplorerWidget::manipulateTriggered()
         //    scaleMenu->addSeparator();
         //    QAction * shiftA =      scaleMenu->addAction("Shift X scale");
 
-        QAction* scale        = Menu.addAction("Scale all graphs/histograms to the same max"); scale->setEnabled(Type.startsWith("TH") || Type.startsWith("TGraph") || Type.startsWith("TProfile"));
+        QAction* scale        = Menu.addAction("Scale all graphs/histograms to have max of unity"); scale->setEnabled(Type.startsWith("TH") || Type.startsWith("TGraph") || Type.startsWith("TProfile"));
 
         Menu.addSeparator();
 
@@ -589,16 +589,26 @@ void ADrawExplorerWidget::scaleCDR(ADrawObject &obj)
 
 bool getDrawMax(ADrawObject & obj, double & max)
 {
+    max = 0;
+
     TGraph * g = dynamic_cast<TGraph*>(obj.Pointer);
     if (g)
     {
         max = TMath::MaxElement(g->GetN(), g->GetY());
+        return true;
     }
-    else
+
+    TH1 * h = dynamic_cast<TH1*>(obj.Pointer);
+    if (!h) return false;
+
+    //if (h) max = h->GetMaximum();  //problem with underflow/overflow bins?
+    int numBins = h->GetNbinsX();
+    if (numBins == 0) return false;
+    max = h->GetBinContent(1); //underflow/overflow bins are #0 and #(numBins+1)
+    for (int i = 2; i < numBins+1; i++)
     {
-        TH1 * h = dynamic_cast<TH1*>(obj.Pointer);
-        if (h) max = h->GetMaximum();
-        else return false;
+        double val = h->GetBinContent(i);
+        if (val > max) max = val;
     }
     return true;
 }
@@ -611,19 +621,22 @@ void ADrawExplorerWidget::scaleAllSameMax()
     ADrawObject & mainObj = DrawObjects[0];
     if (!canScale(mainObj)) return;
 
-    double max = 0;
-    bool bExtractable = getDrawMax(mainObj, max);
-    if (!bExtractable) return;
+    //double max = 0;
+    //bool bExtractable = getDrawMax(mainObj, max);
+    //if (!bExtractable) return;
 
-    for (int i=1; i<size; i++)
+    //for (int i=1; i<size; i++)
+    for (int i=0; i<size; i++)
     {
         ADrawObject & obj = DrawObjects[i];
 
         double thisMax = 0;
         getDrawMax(obj, thisMax);
+        qDebug() << i << thisMax;
         if (thisMax == 0) continue;
 
-        doScale(obj, max/thisMax);
+        //doScale(obj, max/thisMax);
+        doScale(obj, 1.0/thisMax);
     }
 }
 

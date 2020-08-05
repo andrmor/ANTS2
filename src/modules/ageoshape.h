@@ -17,7 +17,7 @@ public:
   virtual bool readFromString(QString /*GenerationString*/) {return false;}
 
   //general: the same for all objects of the given shape
-  virtual const QString getShapeType() {return "";}
+  virtual const QString getShapeType() const = 0;
   virtual const QString getShapeTemplate() {return "";}  //string used in auto generated help: Name(paramType param1, paramType param2, etc)
   virtual const QString getHelp() {return "";}
 
@@ -30,11 +30,13 @@ public:
   virtual double minSize() {return 0;} //for monitors only!
 
   //json
-  virtual void writeToJson(QJsonObject &/*json*/){}
+  virtual void writeToJson(QJsonObject &/*json*/) const = 0;
   virtual void readFromJson(QJsonObject &/*json*/){}
 
   //from Tshape if geometry was loaded from GDML
   virtual bool readFromTShape(TGeoShape* /*Tshape*/) {return false;}
+
+  virtual AGeoShape * clone() const; // without override it uses Factory and save/load to/from json  !!! do it for COMPOSITE !!!
 
 protected:
   bool extractParametersFromString(QString GenerationString, QStringList& parameters, int numParameters);
@@ -50,7 +52,6 @@ public:
 
 // -------------- Particular shapes ---------------
 
-
 class AGeoBox : public AGeoShape
 {
 public:
@@ -60,7 +61,7 @@ public:
     dx(10), dy(10), dz(10) {}
   virtual ~AGeoBox() {}
 
-  virtual const QString getShapeType() {return "TGeoBBox";}
+  const QString getShapeType() const override {return "TGeoBBox";}
   virtual const QString getShapeTemplate() {return "TGeoBBox( dx, dy, dz )";}
   virtual bool readFromString(QString GenerationString);
   virtual const QString getHelp();
@@ -73,12 +74,15 @@ public:
   virtual double maxSize();
   virtual double minSize() override;
 
-  virtual void writeToJson(QJsonObject& json) override;
+  void writeToJson(QJsonObject& json) const override;
   virtual void readFromJson(QJsonObject& json) override;
 
   virtual bool readFromTShape(TGeoShape* Tshape);
 
-  double dx, dy, dz;
+  //AGeoShape * clone() const override;
+
+  double      dx,     dy,     dz;
+  QString str2dx, str2dy, str2dz;
 };
 
 class AGeoScaledShape  : public AGeoShape
@@ -88,7 +92,7 @@ public:
   AGeoScaledShape() {}
   virtual ~AGeoScaledShape() {}
 
-  virtual const QString getShapeType() {return "TGeoScaledShape";}
+  const QString getShapeType() const override {return "TGeoScaledShape";}
   virtual const QString getShapeTemplate() {return "TGeoScaledShape( TGeoShape(parameters), scaleX, scaleY, scaleZ )";}
   virtual const QString getHelp();
 
@@ -103,7 +107,7 @@ public:
   const QString getBaseShapeType() const;
   TGeoShape * generateBaseTGeoShape(const QString & BaseShapeGenerationString) const;
 
-  virtual void writeToJson(QJsonObject& json);
+  void writeToJson(QJsonObject& json) const override;
   virtual void readFromJson(QJsonObject& json);
 
   virtual bool readFromTShape(TGeoShape* Tshape);
@@ -123,7 +127,7 @@ public:
     rlo(0), rhi(40), dz(10)  {}
   virtual ~AGeoParaboloid() {}
 
-  virtual const QString getShapeType() {return "TGeoParaboloid";}
+  const QString getShapeType() const override {return "TGeoParaboloid";}
   virtual const QString getShapeTemplate() {return "TGeoParaboloid( rlo, rhi, dz )";}
   virtual const QString getHelp();
 
@@ -135,7 +139,7 @@ public:
   virtual const QString getGenerationString() const;
   virtual double maxSize();
 
-  virtual void writeToJson(QJsonObject &json);
+  void writeToJson(QJsonObject &json) const override;
   virtual void readFromJson( QJsonObject &json);
 
   virtual bool readFromTShape(TGeoShape* Tshape);
@@ -153,7 +157,7 @@ public:
     dz(10), rminL(0), rmaxL(20), rminU(0), rmaxU(5), phi1(0), phi2(180) {}
   virtual ~AGeoConeSeg() {}
 
-  virtual const QString getShapeType() {return "TGeoConeSeg";}
+  const QString getShapeType() const override {return "TGeoConeSeg";}
   virtual const QString getShapeTemplate() {return "TGeoConeSeg( dz, rminL, rmaxL, rminU, rmaxU, phi1, phi2 )";}
   virtual const QString getHelp();
 
@@ -165,7 +169,7 @@ public:
   virtual const QString getGenerationString() const;
   virtual double maxSize();
 
-  virtual void writeToJson(QJsonObject& json);
+  void writeToJson(QJsonObject& json) const override;
   virtual void readFromJson(QJsonObject& json);
 
   virtual bool readFromTShape(TGeoShape *Tshape);
@@ -186,7 +190,7 @@ public:
     dz(10), rminL(0), rmaxL(20), rminU(0), rmaxU(0) {}
   virtual ~AGeoCone() {}
 
-  virtual const QString getShapeType() {return "TGeoCone";}
+  const QString getShapeType() const override {return "TGeoCone";}
   virtual const QString getShapeTemplate() {return "TGeoCone( dz, rminL, rmaxL, rminU, rmaxU )";}
   virtual const QString getHelp();
 
@@ -198,7 +202,7 @@ public:
   virtual const QString getGenerationString() const;
   virtual double maxSize();
 
-  virtual void writeToJson(QJsonObject& json);
+  void writeToJson(QJsonObject& json) const override;
   virtual void readFromJson(QJsonObject &json);
 
   virtual bool readFromTShape(TGeoShape* Tshape);
@@ -218,7 +222,7 @@ public:
     nedges(6), dphi(360), dz(10), rminL(0), rmaxL(20), rminU(0), rmaxU(20) {}
   virtual ~AGeoPolygon() {}
 
-  virtual const QString getShapeType() {return "TGeoPolygon";}
+  const QString getShapeType() const override {return "TGeoPolygon";}
   virtual const QString getShapeTemplate() {return "TGeoPolygon( nedges, dphi, dz, rminL, rmaxL, rminU, rmaxU )";}
   virtual const QString getHelp();
 
@@ -230,7 +234,7 @@ public:
   virtual const QString getGenerationString() const;
   virtual double maxSize();
 
-  virtual void writeToJson(QJsonObject& json);
+  void writeToJson(QJsonObject& json) const override;
   virtual void readFromJson(QJsonObject& json);
 
   virtual bool readFromTShape(TGeoShape* /*Tshape*/) { return false; } //it is not a base root class, so not valid for import from GDML
@@ -260,7 +264,7 @@ public:
   AGeoPcon();
   virtual ~AGeoPcon() {}
 
-  virtual const QString getShapeType() {return "TGeoPcon";}
+  const QString getShapeType() const override {return "TGeoPcon";}
   virtual const QString getShapeTemplate() {return "TGeoPcon( phi, dphi, { z0 : rmin0 : rmaz0 }, { z1 : rmin1 : rmax1 } )";}
   virtual const QString getHelp();
 
@@ -270,7 +274,7 @@ public:
   virtual const QString getGenerationString() const;
   virtual double maxSize();
 
-  virtual void writeToJson(QJsonObject& json);
+  void writeToJson(QJsonObject& json) const override;
   virtual void readFromJson(QJsonObject& json);
 
   virtual bool readFromTShape(TGeoShape* Tshape);
@@ -287,7 +291,7 @@ public:
     AGeoPcon(), nedges(6) {}
   virtual ~AGeoPgon() {}
 
-  virtual const QString getShapeType() {return "TGeoPgon";}
+  const QString getShapeType() const override {return "TGeoPgon";}
   virtual const QString getShapeTemplate() {return "TGeoPgon( phi, dphi, nedges, { z0 : rmin0 : rmaz0 }, { zN : rminN : rmaxN } )";}
   virtual const QString getHelp();
 
@@ -297,7 +301,7 @@ public:
   virtual const QString getGenerationString() const;
   virtual double maxSize();
 
-  virtual void writeToJson(QJsonObject& json);
+  void writeToJson(QJsonObject& json) const override;
   virtual void readFromJson(QJsonObject& json);
 
   virtual bool readFromTShape(TGeoShape* Tshape);
@@ -314,7 +318,7 @@ public:
     dx1(15), dx2(5), dy(10), dz(10) {}
   virtual ~AGeoTrd1() {}
 
-  virtual const QString getShapeType() {return "TGeoTrd1";}
+  const QString getShapeType() const override {return "TGeoTrd1";}
   virtual const QString getShapeTemplate() {return "TGeoTrd1( dx1, dx2, dy, dz )";}
   virtual const QString getHelp();
 
@@ -326,7 +330,7 @@ public:
   virtual const QString getGenerationString() const;
   virtual double maxSize();
 
-  virtual void writeToJson(QJsonObject& json);
+  void writeToJson(QJsonObject& json) const override;
   virtual void readFromJson(QJsonObject& json);
 
   virtual bool readFromTShape(TGeoShape* Tshape);
@@ -343,7 +347,7 @@ public:
     dx1(15), dx2(5), dy1(10), dy2(20), dz(10) {}
   virtual ~AGeoTrd2() {}
 
-  virtual const QString getShapeType() {return "TGeoTrd2";}
+  const QString getShapeType() const override {return "TGeoTrd2";}
   virtual const QString getShapeTemplate() {return "TGeoTrd2( dx1, dx2, dy1, dy2, dz )";}
   virtual const QString getHelp();
 
@@ -355,7 +359,7 @@ public:
   virtual const QString getGenerationString() const;
   virtual double maxSize();
 
-  virtual void writeToJson(QJsonObject& json);
+  void writeToJson(QJsonObject& json) const override;
   virtual void readFromJson(QJsonObject& json);
 
   virtual bool readFromTShape(TGeoShape* Tshape);
@@ -374,7 +378,7 @@ public:
     rmin(0), rmax(10), dz(5) {}
   virtual ~AGeoTube() {}
 
-  virtual const QString getShapeType() {return "TGeoTube";}
+  const QString getShapeType() const override {return "TGeoTube";}
   virtual const QString getShapeTemplate() {return "TGeoTube( rmin, rmax, dz )";}
   virtual const QString getHelp();
 
@@ -387,7 +391,7 @@ public:
   virtual double maxSize();
   virtual double minSize() override;
 
-  virtual void writeToJson(QJsonObject& json);
+  void writeToJson(QJsonObject& json) const override;
   virtual void readFromJson(QJsonObject& json);
 
   virtual bool readFromTShape(TGeoShape* Tshape);
@@ -404,7 +408,7 @@ public:
     rmin(0), rmax(10), dz(5), phi1(0), phi2(180) {}
   virtual ~AGeoTubeSeg() {}
 
-  virtual const QString getShapeType() {return "TGeoTubeSeg";}
+  const QString getShapeType() const override {return "TGeoTubeSeg";}
   virtual const QString getShapeTemplate() {return "TGeoTubeSeg( rmin, rmax, dz, phi1, phi2 )";}
   virtual const QString getHelp();
 
@@ -416,7 +420,7 @@ public:
   virtual const QString getGenerationString() const;
   virtual double maxSize();
 
-  virtual void writeToJson(QJsonObject& json);
+  void writeToJson(QJsonObject& json) const override;
   virtual void readFromJson(QJsonObject& json);
 
   virtual bool readFromTShape(TGeoShape* Tshape);
@@ -439,7 +443,7 @@ public:
     nxhi(0), nyhi(0.09), nzhi(0.87) {}
   virtual ~AGeoCtub() {}
 
-  virtual const QString getShapeType() {return "TGeoCtub";}
+  const QString getShapeType() const override {return "TGeoCtub";}
   virtual const QString getShapeTemplate() {return "TGeoCtub( rmin, rmax, dz, phi1, phi2, nxlow, nylow, nzlow, nxhi, nyhi, nzhi )";}
   virtual const QString getHelp();
 
@@ -451,7 +455,7 @@ public:
   virtual const QString getGenerationString() const;
   virtual double maxSize();
 
-  virtual void writeToJson(QJsonObject& json);
+  void writeToJson(QJsonObject& json) const override;
   virtual void readFromJson(QJsonObject& json);
 
   virtual bool readFromTShape(TGeoShape* Tshape);
@@ -470,7 +474,7 @@ public:
     a(10), b(20), dz(5) {}
   virtual ~AGeoEltu() {}
 
-  virtual const QString getShapeType() {return "TGeoEltu";}
+  const QString getShapeType() const override {return "TGeoEltu";}
   virtual const QString getShapeTemplate() {return "TGeoEltu( a, b, dz )";}
   virtual const QString getHelp();
 
@@ -482,7 +486,7 @@ public:
   virtual const QString getGenerationString() const;
   virtual double maxSize();
 
-  virtual void writeToJson(QJsonObject& json);
+  void writeToJson(QJsonObject& json) const override;
   virtual void readFromJson(QJsonObject& json);
 
   virtual bool readFromTShape(TGeoShape* Tshape);
@@ -501,7 +505,7 @@ public:
     rmin(0), rmax(10), theta1(0), theta2(180), phi1(0), phi2(360) {}
   virtual ~AGeoSphere() {}
 
-  virtual const QString getShapeType() {return "TGeoSphere";}
+  const QString getShapeType() const override {return "TGeoSphere";}
   virtual const QString getShapeTemplate() {return "TGeoSphere( rmin,  rmax, theta1, theta2, phi1, phi2 )";}
   virtual const QString getHelp();
 
@@ -513,7 +517,7 @@ public:
   virtual const QString getGenerationString() const;
   virtual double maxSize() { return rmax;}
 
-  virtual void writeToJson(QJsonObject& json);
+  void writeToJson(QJsonObject& json) const override;
   virtual void readFromJson(QJsonObject& json);
 
   virtual bool readFromTShape(TGeoShape* Tshape);
@@ -530,7 +534,7 @@ public:
     dx(10), dy(10), dz(10), alpha(10), theta(25), phi(45) {}
   virtual ~AGeoPara() {}
 
-  virtual const QString getShapeType() {return "TGeoPara";}
+  const QString getShapeType() const override {return "TGeoPara";}
   virtual const QString getShapeTemplate() {return "TGeoPara( dX, dY, dZ, alpha, theta, phi )";}
   virtual const QString getHelp();
 
@@ -542,7 +546,7 @@ public:
   virtual const QString getGenerationString() const;
   virtual double maxSize();
 
-  virtual void writeToJson(QJsonObject& json);
+  void writeToJson(QJsonObject& json) const override;
   virtual void readFromJson(QJsonObject& json);
 
   virtual bool readFromTShape(TGeoShape* Tshape);
@@ -558,7 +562,7 @@ public:
   AGeoArb8();
   virtual ~AGeoArb8() {}
 
-  virtual const QString getShapeType() {return "TGeoArb8";}
+  const QString getShapeType() const override {return "TGeoArb8";}
   virtual const QString getShapeTemplate() {return "TGeoArb8( dz,  xL1,yL1, xL2,yL2, xL3,yL3, xL4,yL4, xU1,yU1, xU2,yU2, xU3,yU3, xU4,yU4  )";}
   virtual const QString getHelp();
 
@@ -570,7 +574,7 @@ public:
   virtual const QString getGenerationString() const;
   virtual double maxSize();
 
-  virtual void writeToJson(QJsonObject& json);
+  void writeToJson(QJsonObject& json) const override;
   virtual void readFromJson(QJsonObject& json);
 
   virtual bool readFromTShape(TGeoShape* Tshape);
@@ -590,7 +594,7 @@ public:
   AGeoComposite() {}
   virtual ~AGeoComposite() {}
 
-  virtual const QString getShapeType() {return "TGeoCompositeShape";}
+  const QString getShapeType() const override {return "TGeoCompositeShape";}
   virtual const QString getShapeTemplate() {return "TGeoCompositeShape( (A + B) * (C - D) )";}
   virtual const QString getHelp();
 
@@ -602,7 +606,7 @@ public:
   virtual const QString getGenerationString() const {return GenerationString;}
   virtual double maxSize() {return 0;}  //***!!!
 
-  virtual void writeToJson(QJsonObject& json);
+  void writeToJson(QJsonObject& json) const override;
   virtual void readFromJson(QJsonObject& json);
 
   virtual bool readFromTShape(TGeoShape* /*Tshape*/) {return false;} //cannot be retrieved this way! need cooperation with AGeoObject itself
@@ -619,7 +623,7 @@ public:
   AGeoTorus() {}
   virtual ~AGeoTorus () {}
 
-  virtual const QString getShapeType() {return "TGeoTorus";}
+  const QString getShapeType() const override {return "TGeoTorus";}
   virtual const QString getShapeTemplate() {return "TGeoTorus( R, Rmin, Rmax, Phi1, Dphi )";}
   virtual const QString getHelp();
 
@@ -631,7 +635,7 @@ public:
   virtual const QString getGenerationString() const;
   virtual double maxSize();
 
-  virtual void writeToJson(QJsonObject& json);
+  void writeToJson(QJsonObject& json) const override;
   virtual void readFromJson(QJsonObject& json);
 
   virtual bool readFromTShape(TGeoShape* Tshape);

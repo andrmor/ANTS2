@@ -1735,6 +1735,8 @@ void AGeoWidget::onCancelPressed()
 AGeoBaseDelegate::AGeoBaseDelegate(QWidget * ParentWidget) :
     ParentWidget(ParentWidget) {}
 
+
+
 QHBoxLayout * AGeoBaseDelegate::createBottomButtons()
 {
     QHBoxLayout * abl = new QHBoxLayout();
@@ -1826,7 +1828,8 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
         hbs->addStretch();
         cbScale = new QCheckBox("Apply scaling factors");
         cbScale->setToolTip("Use scaling only if it is the only choice, e.g. to make ellipsoid from a sphere");
-        connect(cbScale, &QCheckBox::clicked, this, &AGeoObjectDelegate::onLocalShapeParameterChange);
+        connect(cbScale, &QCheckBox::clicked, this, &AGeoObjectDelegate::onLocalShapeParameterChange);  // !*! OLD SYSTEM
+        connect(cbScale, &QCheckBox::clicked, this, &AGeoObjectDelegate::onScaleToggled); // new system
         connect(cbScale, &QCheckBox::clicked, this, &AGeoObjectDelegate::onContentChanged);
         hbs->addWidget(cbScale);
     scaleWidget = new QWidget();
@@ -1935,6 +1938,11 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
   ledPsi->setValidator(dv);*/
 }
 
+AGeoObjectDelegate::~AGeoObjectDelegate()
+{
+    delete ShapeCopy;
+}
+
 const QString AGeoObjectDelegate::getName() const
 {
     return leName->text();
@@ -1999,9 +2007,33 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
                 obj->Material = obj->Container->Container->Material;
         }
 
-        QString newShape = pteShape->document()->toPlainText();
-        //qDebug() << "Geting shape values from the delegate"<<newShape;
-        obj->readShapeFromString(newShape);
+        AGeoShape * baseShape = ShapeCopy;
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+        if (scaled) baseShape = scaled->BaseShape;
+        //temporary:
+        AGeoBox * box = dynamic_cast<AGeoBox*>(baseShape);
+        if (box)
+        {
+            //new system
+            //implement TFormula processing here -> should be a virtual function of AGeoShape
+            if (!box->str2dx.isEmpty())
+            {
+                bool ok;
+                box->dx = 0.5*box->str2dx.toDouble(&ok);
+                if (!ok) ;//todo and 2 below too
+                box->dy = 0.5*box->str2dy.toDouble(&ok);
+                box->dz = 0.5*box->str2dz.toDouble(&ok);
+            }
+            delete obj->Shape;
+            obj->Shape = ShapeCopy->clone();
+        }
+        else
+        {
+            // old system
+            QString newShape = pteShape->document()->toPlainText();
+            obj->readShapeFromString(newShape);
+        }
+
 
         //if it is a set member, need old values of position and angle
         QVector<double> old;
@@ -2163,6 +2195,30 @@ void AGeoObjectDelegate::onChangeShapePressed()
     delete d;
 }
 
+void AGeoObjectDelegate::onScaleToggled()
+{
+    AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+    if (scaled)
+    {
+        qDebug() << "Convering scaled to base shape!";
+        AGeoShape * tmp = ShapeCopy;
+        ShapeCopy = scaled->BaseShape;
+        delete tmp;
+    }
+    else
+    {
+        qDebug() << "Converting shape to scaled!";
+        scaled = new AGeoScaledShape();
+        scaled->BaseShape = ShapeCopy;
+        ShapeCopy = scaled;
+
+        // !*!  TFormula too?
+        scaled->scaleX = ledScaleX->text().toDouble();
+        scaled->scaleY = ledScaleY->text().toDouble();
+        scaled->scaleZ = ledScaleZ->text().toDouble();
+    }
+}
+
 void AGeoObjectDelegate::addLocalLayout(QLayout * lay)
 {
     lMF->insertLayout(3, lay);
@@ -2320,6 +2376,10 @@ void AGeoObjectDelegate::Update(const AGeoObject *obj)
 {
     CurrentObject = obj;
     leName->setText(obj->Name);
+
+    delete ShapeCopy;
+    ShapeCopy = obj->Shape->clone();
+    qDebug() << "--genstring:original/copy->"<<obj->Shape->getGenerationString() << ShapeCopy->getGenerationString();
 
     int imat = obj->Material;
     if (imat < 0 || imat >= cobMat->count())
@@ -2696,8 +2756,9 @@ void AGeoBoxDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
 
+    //old system
+    /*
     const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
-
     const AGeoBox * box = dynamic_cast<const AGeoBox *>(tmpShape ? tmpShape : obj->Shape);
     if (box)
     {
@@ -2705,14 +2766,46 @@ void AGeoBoxDelegate::Update(const AGeoObject *obj)
         ey->setText(QString::number(box->dy*2.0));
         ez->setText(QString::number(box->dz*2.0));
     }
-
     delete tmpShape;
+    */
+
+    //new system
+    AGeoBox * box = dynamic_cast<AGeoBox*>(ShapeCopy);
+    if (!box)
+    {
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+        box = dynamic_cast<AGeoBox*>(scaled->BaseShape);
+    }
+    if (box)
+    {
+        ex->setText(box->str2dx.isEmpty() ? QString::number(box->dx*2.0) : box->str2dx);
+        ey->setText(box->str2dy.isEmpty() ? QString::number(box->dy*2.0) : box->str2dy);
+        ez->setText(box->str2dz.isEmpty() ? QString::number(box->dz*2.0) : box->str2dz);
+    }
+    else qWarning() << "Update delegate: Box shape not found!";
 }
 
 void AGeoBoxDelegate::onLocalShapeParameterChange()
 {
+    //old
+    //updatePteShape(QString("TGeoBBox( %1, %2, %3 )").arg(0.5*ex->text().toDouble()).arg(0.5*ey->text().toDouble()).arg(0.5*ez->text().toDouble()));
 
-    updatePteShape(QString("TGeoBBox( %1, %2, %3 )").arg(0.5*ex->text().toDouble()).arg(0.5*ey->text().toDouble()).arg(0.5*ez->text().toDouble()));
+    //new
+    AGeoBox * box = dynamic_cast<AGeoBox*>(ShapeCopy);
+    if (!box)
+    {
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+        box = dynamic_cast<AGeoBox*>(scaled->BaseShape);
+    }
+
+    if (box)
+    {
+        box->str2dx = ex->text();
+        box->str2dy = ey->text();
+        box->str2dz = ez->text();
+        emit ContentChanged();
+    }
+    else qWarning() << "Read delegate: Box shape not found!";
 }
 
 AGeoTubeDelegate::AGeoTubeDelegate(const QStringList & materials, QWidget *parent)

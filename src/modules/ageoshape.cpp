@@ -20,6 +20,20 @@
 #include "TGeoMatrix.h"
 #include "TGeoTorus.h"
 
+AGeoShape * AGeoShape::clone() const
+{
+    AGeoShape * sh = AGeoShape::GeoShapeFactory(getShapeType());
+    if (!sh)
+    {
+        qWarning() << "Failed to clone AGeoShape";
+        return nullptr;
+    }
+    QJsonObject json;
+    writeToJson(json);
+    sh->readFromJson(json);
+    return sh;
+}
+
 bool AGeoShape::extractParametersFromString(QString GenerationString, QStringList &parameters, int numParameters)
 {
     GenerationString = GenerationString.simplified();
@@ -112,11 +126,15 @@ TGeoShape *AGeoBox::createGeoShape(const QString shapeName)
     return (shapeName.isEmpty()) ? new TGeoBBox(dx, dy, dz) : new TGeoBBox(shapeName.toLatin1().data(), dx, dy, dz);
 }
 
-void AGeoBox::writeToJson(QJsonObject &json)
+void AGeoBox::writeToJson(QJsonObject &json) const
 {
     json["dx"] = dx;
     json["dy"] = dy;
     json["dz"] = dz;
+
+    if (!str2dx.isEmpty()) json["str2dx"] = str2dx;
+    if (!str2dy.isEmpty()) json["str2dy"] = str2dy;
+    if (!str2dz.isEmpty()) json["str2dz"] = str2dz;
 }
 
 void AGeoBox::readFromJson(QJsonObject &json)
@@ -124,6 +142,10 @@ void AGeoBox::readFromJson(QJsonObject &json)
     dx = json["dx"].toDouble();
     dy = json["dy"].toDouble();
     dz = json["dz"].toDouble();
+
+    if (!parseJson(json, "str2dx", str2dx)) str2dx.clear();
+    if (!parseJson(json, "str2dy", str2dy)) str2dy.clear();
+    if (!parseJson(json, "str2dz", str2dz)) str2dz.clear();
 }
 
 bool AGeoBox::readFromTShape(TGeoShape *Tshape)
@@ -137,6 +159,13 @@ bool AGeoBox::readFromTShape(TGeoShape *Tshape)
 
     return true;
 }
+
+/*
+AGeoShape * AGeoBox::clone() const
+{
+    return new AGeoBox(dx, dy, dz);
+}
+*/
 
 // ====== PARA ======
 const QString AGeoPara::getHelp()
@@ -201,7 +230,7 @@ double AGeoPara::maxSize()
     return sqrt(3.0)*m;
 }
 
-void AGeoPara::writeToJson(QJsonObject &json)
+void AGeoPara::writeToJson(QJsonObject &json) const
 {
     json["dx"] = dx;
     json["dy"] = dy;
@@ -294,7 +323,7 @@ TGeoShape *AGeoComposite::createGeoShape(const QString shapeName)
     return (shapeName.isEmpty()) ? new TGeoCompositeShape(s.toLatin1().data()) : new TGeoCompositeShape(shapeName.toLatin1().data(), s.toLatin1().data());
 }
 
-void AGeoComposite::writeToJson(QJsonObject &json)
+void AGeoComposite::writeToJson(QJsonObject &json) const
 {
     json["GenerationString"] = GenerationString;
 }
@@ -360,7 +389,7 @@ const QString AGeoSphere::getGenerationString() const
 
 
 
-void AGeoSphere::writeToJson(QJsonObject &json)
+void AGeoSphere::writeToJson(QJsonObject &json) const
 {
     json["rmin"] = rmin;
     json["rmax"] = rmax;
@@ -453,7 +482,7 @@ double AGeoTubeSeg::maxSize()
     return sqrt(3.0)*m;
 }
 
-void AGeoTubeSeg::writeToJson(QJsonObject &json)
+void AGeoTubeSeg::writeToJson(QJsonObject &json) const
 {
     json["rmin"] = rmin;
     json["rmax"] = rmax;
@@ -556,7 +585,7 @@ double AGeoCtub::maxSize()
     return sqrt(3.0)*m;
 }
 
-void AGeoCtub::writeToJson(QJsonObject &json)
+void AGeoCtub::writeToJson(QJsonObject &json) const
 {
     json["rmin"] = rmin;
     json["rmax"] = rmax;
@@ -663,7 +692,7 @@ double AGeoTube::minSize()
     return rmax;
 }
 
-void AGeoTube::writeToJson(QJsonObject &json)
+void AGeoTube::writeToJson(QJsonObject &json) const
 {
     json["rmin"] = rmin;
     json["rmax"] = rmax;
@@ -749,7 +778,7 @@ double AGeoTrd1::maxSize()
     return sqrt(3.0)*m;
 }
 
-void AGeoTrd1::writeToJson(QJsonObject &json)
+void AGeoTrd1::writeToJson(QJsonObject &json) const
 {
     json["dx1"] = dx1;
     json["dx2"] = dx2;
@@ -840,7 +869,7 @@ double AGeoTrd2::maxSize()
     return sqrt(3.0)*m;
 }
 
-void AGeoTrd2::writeToJson(QJsonObject &json)
+void AGeoTrd2::writeToJson(QJsonObject &json) const
 {
     json["dx1"] = dx1;
     json["dx2"] = dx2;
@@ -978,7 +1007,7 @@ double AGeoPgon::maxSize()
     return AGeoPcon::maxSize();
 }
 
-void AGeoPgon::writeToJson(QJsonObject &json)
+void AGeoPgon::writeToJson(QJsonObject &json) const
 {
     json["nedges"] = nedges;
     AGeoPcon::writeToJson(json);
@@ -1076,7 +1105,7 @@ double AGeoConeSeg::maxSize()
     return sqrt(3.0)*m;
 }
 
-void AGeoConeSeg::writeToJson(QJsonObject &json)
+void AGeoConeSeg::writeToJson(QJsonObject &json) const
 {
     json["dz"] = dz;
     json["rminL"] = rminL;
@@ -1170,7 +1199,7 @@ double AGeoParaboloid::maxSize()
     return sqrt(3.0)*m;
 }
 
-void AGeoParaboloid::writeToJson(QJsonObject &json)
+void AGeoParaboloid::writeToJson(QJsonObject &json) const
 {
     json["rlo"] = rlo;
     json["rhi"] = rhi;
@@ -1257,7 +1286,7 @@ double AGeoCone::maxSize()
     return sqrt(3.0)*m;
 }
 
-void AGeoCone::writeToJson(QJsonObject &json)
+void AGeoCone::writeToJson(QJsonObject &json) const
 {
     json["dz"] = dz;
     json["rminL"] = rminL;
@@ -1339,7 +1368,7 @@ double AGeoEltu::maxSize()
     return sqrt(3.0)*m;
 }
 
-void AGeoEltu::writeToJson(QJsonObject &json)
+void AGeoEltu::writeToJson(QJsonObject &json) const
 {
     json["a"] = a;
     json["b"] = b;
@@ -1467,7 +1496,7 @@ double AGeoArb8::maxSize()
     return dz;
 }
 
-void AGeoArb8::writeToJson(QJsonObject &json)
+void AGeoArb8::writeToJson(QJsonObject &json) const
 {
     json["dz"] = dz;
     QJsonArray ar;
@@ -1604,7 +1633,7 @@ double AGeoPcon::maxSize()
     return sqrt(3.0)*m;
 }
 
-void AGeoPcon::writeToJson(QJsonObject &json)
+void AGeoPcon::writeToJson(QJsonObject &json) const
 {
     json["phi"] = phi;
     json["dphi"] = dphi;
@@ -1788,7 +1817,7 @@ double AGeoPolygon::maxSize()
     return sqrt(3.0)*m;
 }
 
-void AGeoPolygon::writeToJson(QJsonObject &json)
+void AGeoPolygon::writeToJson(QJsonObject &json) const
 {
     json["nedges"] = nedges;
     json["dphi"] = dphi;
@@ -1972,7 +2001,7 @@ const QString AGeoScaledShape::getBaseShapeType() const
     else exit (-7777);
 }
 
-void AGeoScaledShape::writeToJson(QJsonObject &json)
+void AGeoScaledShape::writeToJson(QJsonObject &json) const
 {
     json["scaleX"] = scaleX;
     json["scaleY"] = scaleY;
@@ -2114,7 +2143,7 @@ double AGeoTorus::maxSize()
     return sqrt(3.0)*m;
 }
 
-void AGeoTorus::writeToJson(QJsonObject &json)
+void AGeoTorus::writeToJson(QJsonObject &json) const
 {
     json["R"] = R;
     json["Rmin"] = Rmin;

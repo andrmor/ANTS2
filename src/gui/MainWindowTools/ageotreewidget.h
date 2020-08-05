@@ -164,7 +164,7 @@ public slots:
   void onRequestSetVisAttributes();
 
 private slots:
-  void onConfirmPressed();
+  void onConfirmPressed();          // CONFIRM -> COPY FROM DELEGATE TO OBJECT
   void onCancelPressed();
 
 private:
@@ -223,14 +223,16 @@ class AGeoObjectDelegate : public AGeoBaseDelegate
 
 public:
     AGeoObjectDelegate(const QStringList & materials, QWidget * ParentWidget = nullptr);
-    virtual ~AGeoObjectDelegate(){}
+    virtual ~AGeoObjectDelegate();
 
     const QString getName() const override;
 
     bool isValid(AGeoObject * obj) override;
     bool updateObject(AGeoObject * obj) const override;
 
+    AGeoShape * ShapeCopy = nullptr;
 private:
+
     QVBoxLayout * lMF = nullptr;      //main layout
 
     QWidget   * scaleWidget = nullptr;
@@ -265,6 +267,7 @@ private slots:
     void onContentChanged();          // only to enter the editing mode! Object update is performed only on confirm button click!
     void onHelpRequested();           // dialog with AGeoShape list can be accessed here
     void onChangeShapePressed();
+    void onScaleToggled();
 
 protected slots:
     virtual void onLocalShapeParameterChange() {}

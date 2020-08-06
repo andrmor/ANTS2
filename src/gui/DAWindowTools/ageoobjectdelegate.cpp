@@ -685,7 +685,7 @@ void AGeoObjectDelegate::Update(const AGeoObject *obj)
 
     delete ShapeCopy;
     ShapeCopy = obj->Shape->clone();
-    qDebug() << "--genstring:original/copy->"<<obj->Shape->getGenerationString() << ShapeCopy->getGenerationString();
+    //qDebug() << "--genstring:original/copy->"<<obj->Shape->getGenerationString() << ShapeCopy->getGenerationString();
 
     int imat = obj->Material;
     if (imat < 0 || imat >= cobMat->count())
@@ -797,7 +797,10 @@ AGeoBoxDelegate::AGeoBoxDelegate(const QStringList &materials, QWidget *parent)
 
     QVector<QLineEdit*> l = {ex, ey, ez};
     for (QLineEdit * le : l)
-        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoBoxDelegate::onLocalShapeParameterChange);
+    {
+        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoBoxDelegate::ContentChanged);
+        QObject::connect(le, &QLineEdit::editingFinished, this, &AGeoBoxDelegate::onLocalShapeParameterChange);
+    }
 }
 
 void AGeoBoxDelegate::Update(const AGeoObject *obj)
@@ -895,7 +898,6 @@ AGeoTubeDelegate::AGeoTubeDelegate(const QStringList & materials, QWidget *paren
 
 void AGeoTubeDelegate::Update(const AGeoObject *obj)
 {
-
     AGeoObjectDelegate::Update(obj);
     /*
     const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
@@ -938,7 +940,6 @@ void AGeoTubeDelegate::onLocalShapeParameterChange()
         tube->str2rmax = eo->text();
         tube->str2dz   = ez->text();
         emit ContentChanged();
-
     }
     else qWarning() << "Read delegate: Tube shape not found!";
 }

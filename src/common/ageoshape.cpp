@@ -664,7 +664,7 @@ QString AGeoTube::updateShape()
     errorStr = updateParameter(str2rmax, rmax);
     if (!errorStr.isEmpty()) return errorStr;
 
-    if (rmin >= rmax) return "Inside diameter is larger than the outside one!";
+    if (rmin >= rmax) return "Inside diameter should be smaller than the outside one!";
 
     errorStr = updateParameter(str2dz, dz);
     return errorStr;
@@ -2283,13 +2283,14 @@ bool AGeoShape::CheckPointsForArb8(QList<QPair<double, double> > V)
     return checkPointsArb8(V);
 }
 
-QString AGeoShape::updateParameter(const QString & str, double & returnValue, bool bForbidZero, bool bForbidNegative, bool bMakeHalf)
+QString AGeoShape::updateParameter(QString & str, double & returnValue, bool bForbidZero, bool bForbidNegative, bool bMakeHalf)
 {
     if (str.isEmpty()) return "";
 
     bool ok;
     returnValue = str.simplified().toDouble(&ok);
-    if (!ok)
+    if (ok) str.clear();
+    else
     {
         ok = AGeoConsts::getInstance().evaluateFormula(str, returnValue);
         if (!ok) return QString("Syntax error:\n%1").arg(str);

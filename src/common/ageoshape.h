@@ -41,7 +41,7 @@ public:
 
 protected:
   bool    extractParametersFromString(QString GenerationString, QStringList& parameters, int numParameters);
-  QString updateParameter(const QString & str, double & returnValue, bool bForbidZero = true, bool bForbidNegative = true, bool bMakeHalf = true);
+  QString updateParameter(QString & str, double & returnValue, bool bForbidZero = true, bool bForbidNegative = true, bool bMakeHalf = true);
 
 public:
   static AGeoShape * GeoShapeFactory(const QString ShapeType);  // SHAPE FACTORY !!!
@@ -75,7 +75,7 @@ public:
   virtual double minSize() override;
 
   void writeToJson(QJsonObject& json) const override;
-  virtual void readFromJson(QJsonObject& json) override;
+  void readFromJson(QJsonObject& json) override;
 
   virtual bool readFromTShape(TGeoShape* Tshape);
 
@@ -107,11 +107,11 @@ public:
   virtual double minSize() override;
 
   void writeToJson(QJsonObject& json) const override;
-  virtual void readFromJson(QJsonObject& json);
+  void readFromJson(QJsonObject& json);
 
   virtual bool readFromTShape(TGeoShape* Tshape);
 
-  double rmin, rmax, dz;
+  double      rmin,     rmax,     dz;
   QString str2rmin, str2rmax, str2dz;
 };
 

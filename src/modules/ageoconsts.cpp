@@ -65,7 +65,7 @@ bool AGeoConsts::evaluateFormula(QString str, double &returnValue) const
         str.replace(QRegExp(vQRegularExpression[iQRE]),num);
     }
 
-    qDebug() << str;
+    //qDebug() << str;
     TFormula * f = new TFormula("", str.toLocal8Bit().data());
     if (!f || !f->IsValid())
     {
@@ -75,7 +75,7 @@ bool AGeoConsts::evaluateFormula(QString str, double &returnValue) const
 
     returnValue = f->EvalPar(nullptr, vConstValues.data());
     delete f;
-    qDebug() << "return value: "<< returnValue;
+    //qDebug() << "return value: "<< returnValue;
     return true;
 
 }

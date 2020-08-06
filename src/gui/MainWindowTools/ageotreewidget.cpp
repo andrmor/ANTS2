@@ -1960,13 +1960,41 @@ bool AGeoObjectDelegate::isValid(AGeoObject * obj)
     else
     {
         // !*! temporary!!! to avoid old system of pteEdit control!
-        AGeoBox * box = dynamic_cast<AGeoBox*>(ShapeCopy);
+        /*AGeoBox * box = dynamic_cast<AGeoBox*>(ShapeCopy);
         if (!box)
         {
             AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
             box = dynamic_cast<AGeoBox*>(scaled->BaseShape);
         }
         if (box) return true;
+
+        AGeoTube * tube = dynamic_cast<AGeoTube*> (ShapeCopy);
+        if (!tube)
+        {
+            AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*> (ShapeCopy);
+            tube = dynamic_cast<AGeoTube*> (scaled->BaseShape);
+        }
+        if (tube) return true;
+        */
+        AGeoBox * box =dynamic_cast<AGeoBox*> (ShapeCopy);
+        AGeoTube * tube =dynamic_cast<AGeoTube*> (ShapeCopy);
+        if (!box && !tube)
+        {
+            qDebug()<< "then its scaled";
+            AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*> (ShapeCopy);
+            tube =dynamic_cast<AGeoTube*> (scaled->BaseShape);
+            qDebug()<< "its a scled tube!";
+
+            if (!tube)
+            {
+                box =dynamic_cast<AGeoBox*> (scaled->BaseShape);
+                qDebug()<< "nope its a scaled box!";
+
+            }
+        }
+        if (box) return true;
+        if (tube) return true;
+
 
         // this is normal or composite object then
         //if composite, first check all members
@@ -2024,6 +2052,7 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
         if (scaled) baseShape = scaled->BaseShape;
         //temporary:
         AGeoBox * box = dynamic_cast<AGeoBox*>(baseShape);
+        AGeoTube * tube = dynamic_cast<AGeoTube*>(baseShape);
         if (box)
         {
             //new system
@@ -2035,10 +2064,27 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
                 if (!ok) ;//todo and 2 below too
                 box->dy = 0.5*box->str2dy.toDouble(&ok);
                 box->dz = 0.5*box->str2dz.toDouble(&ok);
+                qDebug() <<box->dx <<box->dy<< box->dz;
             }
             delete obj->Shape;
             obj->Shape = ShapeCopy->clone();
         }
+        else if (tube)
+        {
+            //new system
+            //implement TFormula processing here -> should be a virtual function of AGeoShape
+            if (!tube->str2rmin.isEmpty())
+            {
+                bool ok;
+                tube->rmin = 0.5*tube->str2rmin.toDouble(&ok);
+                if (!ok) ;//todo and 2 below too
+                tube->rmax = 0.5*tube->str2rmax.toDouble(&ok);
+                tube->dz = 0.5*tube->str2dz.toDouble(&ok);
+            }
+            delete obj->Shape;
+            obj->Shape = ShapeCopy->clone();
+        }
+
         else
         {
             // old system
@@ -2213,9 +2259,14 @@ void AGeoObjectDelegate::onScaleToggled()
     if (scaled)
     {
         qDebug() << "Convering scaled to base shape!";
+        /*
         AGeoShape * tmp = ShapeCopy;
         ShapeCopy = scaled->BaseShape;
         delete tmp;
+        */
+        ShapeCopy = scaled->BaseShape;
+        scaled->BaseShape = nullptr;
+        delete scaled;
     }
     else
     {
@@ -2805,6 +2856,7 @@ void AGeoBoxDelegate::Update(const AGeoObject *obj)
         ex->setText(box->str2dx.isEmpty() ? QString::number(box->dx*2.0) : box->str2dx);
         ey->setText(box->str2dy.isEmpty() ? QString::number(box->dy*2.0) : box->str2dy);
         ez->setText(box->str2dz.isEmpty() ? QString::number(box->dz*2.0) : box->str2dz);
+        //qDebug() <<"str2ss"<<box->str2dx <<box->str2dy <<box->str2dz;
     }
     else qWarning() << "Update delegate: Box shape not found!";
 }
@@ -2870,8 +2922,9 @@ AGeoTubeDelegate::AGeoTubeDelegate(const QStringList & materials, QWidget *paren
 
 void AGeoTubeDelegate::Update(const AGeoObject *obj)
 {
-    AGeoObjectDelegate::Update(obj);
 
+    AGeoObjectDelegate::Update(obj);
+    /*
     const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
     const AGeoTube * tube = dynamic_cast<const AGeoTube*>(tmpShape ? tmpShape : obj->Shape);
     if (tube)
@@ -2881,11 +2934,40 @@ void AGeoTubeDelegate::Update(const AGeoObject *obj)
         ez->setText(QString::number(tube->dz*2.0));
     }
     delete tmpShape;
+    */
+    AGeoTube * tube = dynamic_cast<AGeoTube*>(ShapeCopy);
+    if (!tube)
+    {
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+        tube = dynamic_cast<AGeoTube*>(scaled->BaseShape);
+    }
+    if (tube)
+    {
+        ei->setText(tube->str2rmin.isEmpty() ? QString::number(tube->rmin*2.0) : tube->str2rmin);
+        eo->setText(tube->str2rmax.isEmpty() ? QString::number(tube->rmax*2.0) : tube->str2rmax);
+        ez->setText(tube->str2dz.isEmpty()   ? QString::number(tube->dz*2.0)   : tube->str2dz);
+    }
+    else qWarning() << "Update delegate: Tube shape not found!";
 }
 
 void AGeoTubeDelegate::onLocalShapeParameterChange()
 {
-    updatePteShape(QString("TGeoTube( %1, %2, %3 )").arg(0.5*ei->text().toDouble()).arg(0.5*eo->text().toDouble()).arg(0.5*ez->text().toDouble()));
+    /*updatePteShape(QString("TGeoTube( %1, %2, %3 )").arg(0.5*ei->text().toDouble()).arg(0.5*eo->text().toDouble()).arg(0.5*ez->text().toDouble()));*/
+    AGeoTube * tube = dynamic_cast<AGeoTube*>(ShapeCopy);
+    if (!tube)
+    {
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*> (ShapeCopy);
+        tube = dynamic_cast<AGeoTube*> (scaled->BaseShape);
+    }
+    if (tube)
+    {
+        tube->str2rmin = ei->text();
+        tube->str2rmax = eo->text();
+        tube->str2dz   = ez->text();
+        emit ContentChanged();
+
+    }
+    else qWarning() << "Read delegate: Tube shape not found!";
 }
 
 AGeoTubeSegDelegate::AGeoTubeSegDelegate(const QStringList & materials, QWidget * parent) :

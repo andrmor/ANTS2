@@ -696,14 +696,22 @@ void AGeoTube::writeToJson(QJsonObject &json) const
 {
     json["rmin"] = rmin;
     json["rmax"] = rmax;
-    json["dz"] = dz;
+    json["dz"]   = dz;
+
+    if (!str2rmin.isEmpty()) json["str2rmin"] = str2rmin;
+    if (!str2rmax.isEmpty()) json["str2rmax"] = str2rmax;
+    if (!str2dz.isEmpty())   json["str2dz"]   = str2dz;
 }
 
 void AGeoTube::readFromJson(QJsonObject &json)
 {
     rmin = json["rmin"].toDouble();
     rmax = json["rmax"].toDouble();
-    dz = json["dz"].toDouble();
+    dz   = json["dz"].toDouble();
+
+    if (!parseJson(json, "str2rmin", str2rmin)) str2rmin.clear();
+    if (!parseJson(json, "str2rmax", str2rmax)) str2rmax.clear();
+    if (!parseJson(json, "str2rdz", str2dz))    str2dz.clear();
 }
 
 bool AGeoTube::readFromTShape(TGeoShape *Tshape)

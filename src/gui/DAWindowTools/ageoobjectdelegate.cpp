@@ -318,13 +318,12 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
                 obj->Material = obj->Container->Container->Material;
         }
 
-        AGeoShape * baseShape = ShapeCopy;
+        AGeoShape * shape = ShapeCopy;
         AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
-        if (scaled) baseShape = scaled->BaseShape;
-
-        if (baseShape)
+        if (scaled) shape = scaled->BaseShape;
+        if (shape)
         {
-            QString errorStr = baseShape->updateShape();
+            QString errorStr = shape->updateShape();
             if (!errorStr.isEmpty())
             {
                 QMessageBox::warning(this->ParentWidget,"", errorStr);
@@ -333,6 +332,12 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
             delete obj->Shape;
             obj->Shape = ShapeCopy->clone();
         }
+        else
+        {
+            qWarning() << "Something went very wrong, ShapeCopy not found";
+            return false;
+        }
+
         /*
         else
         {

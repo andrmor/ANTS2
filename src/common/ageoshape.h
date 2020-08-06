@@ -40,7 +40,8 @@ public:
   virtual AGeoShape * clone() const; // without override it uses Factory and save/load to/from json  !!! do it for COMPOSITE !!!
 
 protected:
-  bool extractParametersFromString(QString GenerationString, QStringList& parameters, int numParameters);
+  bool    extractParametersFromString(QString GenerationString, QStringList& parameters, int numParameters);
+  QString updateParameter(const QString & str, double & returnValue, bool bForbidZero = true, bool bForbidNegative = true, bool bMakeHalf = true);
 
 public:
   static AGeoShape * GeoShapeFactory(const QString ShapeType);  // SHAPE FACTORY !!!
@@ -48,7 +49,6 @@ public:
   static QList<AGeoShape*> GetAvailableShapes();               // list of available shapes for generation of help and highlighter: do not forget to add new here!
 
   static bool CheckPointsForArb8(QList<QPair<double, double> > V );
-  QString updateParameter(QString str, double &returnValue);
 
 };
 

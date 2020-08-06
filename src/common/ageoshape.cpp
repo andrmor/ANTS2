@@ -103,15 +103,13 @@ const QString AGeoBox::getHelp()
 
 QString AGeoBox::updateShape()
 {
-    //qDebug()<<"str2dz" << str2dx <<dz;
-
-    QString errorStr =updateParameter(str2dx, dx);
+    QString errorStr = updateParameter(str2dx, dx);
     if (!errorStr.isEmpty()) return errorStr;
 
-    errorStr =updateParameter(str2dy, dy);
+    errorStr = updateParameter(str2dy, dy);
     if (!errorStr.isEmpty()) return errorStr;
 
-    errorStr =updateParameter(str2dz, dz);
+    errorStr = updateParameter(str2dz, dz);
     return errorStr;
 }
 
@@ -660,11 +658,13 @@ const QString AGeoTube::getHelp()
 
 QString AGeoTube::updateShape()
 {
-    QString errorStr = updateParameter(str2rmin, rmin);
+    QString errorStr = updateParameter(str2rmin, rmin, false);
     if (!errorStr.isEmpty()) return errorStr;
 
     errorStr = updateParameter(str2rmax, rmax);
     if (!errorStr.isEmpty()) return errorStr;
+
+    if (rmin >= rmax) return "Inside diameter is larger than the outside one!";
 
     errorStr = updateParameter(str2dz, dz);
     return errorStr;
@@ -2283,17 +2283,22 @@ bool AGeoShape::CheckPointsForArb8(QList<QPair<double, double> > V)
     return checkPointsArb8(V);
 }
 
-QString AGeoShape::updateParameter(QString str, double & returnValue)
+QString AGeoShape::updateParameter(const QString & str, double & returnValue, bool bForbidZero, bool bForbidNegative, bool bMakeHalf)
 {
-    bool ok                  = true;
-    const AGeoConsts &consts = AGeoConsts::getInstance();
+    if (str.isEmpty()) return "";
 
-    if (!str.isEmpty())
+    bool ok;
+    returnValue = str.simplified().toDouble(&ok);
+    if (!ok)
     {
-        ok = consts.evaluateFormula(str, returnValue);
-        returnValue *= 0.5;
+        ok = AGeoConsts::getInstance().evaluateFormula(str, returnValue);
+        if (!ok) return QString("Syntax error:\n%1").arg(str);
     }
-    if (!ok) return QString("syntax error in:\n %1").arg(str);
+
+    if (bForbidZero && returnValue == 0) return "Unacceptable value: zero";
+    if (bForbidNegative && returnValue < 0) return "Unacceptable value: negative";
+
+    if (bMakeHalf) returnValue *= 0.5;
     return "";
 }
 

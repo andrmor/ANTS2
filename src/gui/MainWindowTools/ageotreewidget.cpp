@@ -2050,47 +2050,25 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
         AGeoShape * baseShape = ShapeCopy;
         AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
         if (scaled) baseShape = scaled->BaseShape;
-        //temporary:
-        AGeoBox * box = dynamic_cast<AGeoBox*>(baseShape);
-        AGeoTube * tube = dynamic_cast<AGeoTube*>(baseShape);
-        if (box)
-        {
-            //new system
-            //implement TFormula processing here -> should be a virtual function of AGeoShape
-            if (!box->str2dx.isEmpty())
-            {
-                bool ok;
-                box->dx = 0.5*box->str2dx.toDouble(&ok);
-                if (!ok) ;//todo and 2 below too
-                box->dy = 0.5*box->str2dy.toDouble(&ok);
-                box->dz = 0.5*box->str2dz.toDouble(&ok);
-                qDebug() <<box->dx <<box->dy<< box->dz;
-            }
-            delete obj->Shape;
-            obj->Shape = ShapeCopy->clone();
-        }
-        else if (tube)
-        {
-            //new system
-            //implement TFormula processing here -> should be a virtual function of AGeoShape
-            if (!tube->str2rmin.isEmpty())
-            {
-                bool ok;
-                tube->rmin = 0.5*tube->str2rmin.toDouble(&ok);
-                if (!ok) ;//todo and 2 below too
-                tube->rmax = 0.5*tube->str2rmax.toDouble(&ok);
-                tube->dz = 0.5*tube->str2dz.toDouble(&ok);
-            }
-            delete obj->Shape;
-            obj->Shape = ShapeCopy->clone();
-        }
 
+        if (baseShape)
+        {
+            QString errorStr = baseShape->updateShape();
+            if (!errorStr.isEmpty())
+            {
+                QMessageBox::warning(this->ParentWidget,"", errorStr);
+                return false;
+            }
+            delete obj->Shape;
+            obj->Shape = ShapeCopy->clone();
+        }
+        /*
         else
         {
             // old system
             QString newShape = pteShape->document()->toPlainText();
             obj->readShapeFromString(newShape);
-        }
+        }*/
 
 
         //if it is a set member, need old values of position and angle

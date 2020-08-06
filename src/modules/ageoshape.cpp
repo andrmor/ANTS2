@@ -19,6 +19,7 @@
 #include "TGeoScaledShape.h"
 #include "TGeoMatrix.h"
 #include "TGeoTorus.h"
+#include "ageoconsts.h"
 
 AGeoShape * AGeoShape::clone() const
 {
@@ -98,6 +99,20 @@ const QString AGeoBox::getHelp()
 {
     return "A box has 3 parameters: dx, dy, dz representing the half-lengths on X, Y and Z axes.\n"
            "The box will range from: -dx to dx on X-axis, from -dy to dy on Y and from -dz to dz on Z.";
+}
+
+QString AGeoBox::updateShape()
+{
+    //qDebug()<<"str2dz" << str2dx <<dz;
+
+    QString errorStr =updateParameter(str2dx, dx);
+    if (!errorStr.isEmpty()) return errorStr;
+
+    errorStr =updateParameter(str2dy, dy);
+    if (!errorStr.isEmpty()) return errorStr;
+
+    errorStr =updateParameter(str2dz, dz);
+    return errorStr;
 }
 
 const QString AGeoBox::getGenerationString() const
@@ -641,6 +656,18 @@ const QString AGeoTube::getHelp()
 {
     return "Tubes have Z as their symmetry axis. They have a range in Z, a minimum (rmin) and a maximum (rmax) radius.\n"
            "The full Z range is from -dz to +dz.";
+}
+
+QString AGeoTube::updateShape()
+{
+    QString errorStr = updateParameter(str2rmin, rmin);
+    if (!errorStr.isEmpty()) return errorStr;
+
+    errorStr = updateParameter(str2rmax, rmax);
+    if (!errorStr.isEmpty()) return errorStr;
+
+    errorStr = updateParameter(str2dz, dz);
+    return errorStr;
 }
 
 bool AGeoTube::readFromString(QString GenerationString)
@@ -2254,6 +2281,20 @@ bool AGeoShape::CheckPointsForArb8(QList<QPair<double, double> > V)
     V.removeFirst();
     V.removeFirst();
     return checkPointsArb8(V);
+}
+
+QString AGeoShape::updateParameter(QString str, double & returnValue)
+{
+    bool ok                  = true;
+    const AGeoConsts &consts = AGeoConsts::getInstance();
+
+    if (!str.isEmpty())
+    {
+        ok = consts.evaluateFormula(str, returnValue);
+        returnValue *= 0.5;
+    }
+    if (!ok) return QString("syntax error in:\n %1").arg(str);
+    return "";
 }
 
 AGeoShape * AGeoShape::GeoShapeFactory(const QString ShapeType)

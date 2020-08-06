@@ -28,6 +28,7 @@ public:
   virtual void setHeight(double /*dz*/) {}
   virtual double maxSize() {return 0;} //for world size evaluation
   virtual double minSize() {return 0;} //for monitors only!
+  virtual QString updateShape() {return "";}
 
   //json
   virtual void writeToJson(QJsonObject &/*json*/) const = 0;
@@ -47,6 +48,7 @@ public:
   static QList<AGeoShape*> GetAvailableShapes();               // list of available shapes for generation of help and highlighter: do not forget to add new here!
 
   static bool CheckPointsForArb8(QList<QPair<double, double> > V );
+  QString updateParameter(QString str, double &returnValue);
 
 };
 
@@ -65,6 +67,7 @@ public:
   virtual const QString getShapeTemplate() {return "TGeoBBox( dx, dy, dz )";}
   virtual bool readFromString(QString GenerationString);
   virtual const QString getHelp();
+  QString updateShape() override;
 
   virtual TGeoShape* createGeoShape(const QString shapeName = "");
 
@@ -99,6 +102,7 @@ public:
   const QString getShapeType() const override {return "TGeoTube";}
   virtual const QString getShapeTemplate() {return "TGeoTube( rmin, rmax, dz )";}
   virtual const QString getHelp();
+  QString updateShape() override;
 
   virtual bool readFromString(QString GenerationString);
   virtual TGeoShape* createGeoShape(const QString shapeName = "");

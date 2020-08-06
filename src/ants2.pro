@@ -692,9 +692,9 @@ ants2_GUI {
     gui/MainWindowTools/globalscript.cpp \
     gui/MainWindowTools/aslablistwidget.cpp \
     gui/MainWindowTools/arootlineconfigurator.cpp \
-    gui/MainWindowTools/ageotreewidget.cpp \
+    gui/DAWindowTools/ageotreewidget.cpp \
     gui/MainWindowTools/ashapehelpdialog.cpp \
-    gui/MainWindowTools/agridelementdialog.cpp \
+    gui/DAWindowTools/agridelementdialog.cpp \
     gui/ascriptexampleexplorer.cpp \
     gui/MainWindowTools/mainwindowjson.cpp \
     gui/ReconstructionWindowTools/reconstructionwindowguiupdates.cpp \
@@ -710,7 +710,7 @@ ants2_GUI {
     gui/ahighlighters.cpp \
     modules/lrf_v3/gui/atpspline3widget.cpp \
     modules/lrf_v3/gui/avladimircompressionwidget.cpp \
-    gui/MainWindowTools/amonitordelegateform.cpp \
+    gui/DAWindowTools/amonitordelegateform.cpp \
     gui/aelementandisotopedelegates.cpp \
     gui/amatparticleconfigurator.cpp \
     gui/aneutronreactionsconfigurator.cpp \
@@ -778,9 +778,9 @@ HEADERS  += gui/mainwindow.h \
     gui/globalsettingswindowclass.h \
     gui/MainWindowTools/aslablistwidget.h \
     gui/MainWindowTools/arootlineconfigurator.h \
-    gui/MainWindowTools/ageotreewidget.h \
+    gui/DAWindowTools/ageotreewidget.h \
     gui/MainWindowTools/ashapehelpdialog.h \
-    gui/MainWindowTools/agridelementdialog.h \
+    gui/DAWindowTools/agridelementdialog.h \
     gui/ascriptexampleexplorer.h \
     gui/ascriptwindow.h \
     gui/alrfmouseexplorer.h \
@@ -794,7 +794,7 @@ HEADERS  += gui/mainwindow.h \
     gui/ahighlighters.h \
     modules/lrf_v3/gui/atpspline3widget.h \
     modules/lrf_v3/gui/avladimircompressionwidget.h \
-    gui/MainWindowTools/amonitordelegateform.h \
+    gui/DAWindowTools/amonitordelegateform.h \
     gui/aelementandisotopedelegates.h \
     gui/amatparticleconfigurator.h \
     gui/aneutronreactionsconfigurator.h \
@@ -857,11 +857,11 @@ FORMS += gui/mainwindow.ui \
     gui/credits.ui \
     gui/globalsettingswindowclass.ui \
     gui/MainWindowTools/ashapehelpdialog.ui \
-    gui/MainWindowTools/agridelementdialog.ui \
+    gui/DAWindowTools/agridelementdialog.ui \
     gui/ascriptexampleexplorer.ui \
     gui/ascriptwindow.ui \
     modules/lrf_v3/gui/alrfwindow.ui \
-    gui/MainWindowTools/amonitordelegateform.ui \
+    gui/DAWindowTools/amonitordelegateform.ui \
     gui/amatparticleconfigurator.ui \
     gui/aneutronreactionsconfigurator.ui \
     gui/aneutronreactionwidget.ui \

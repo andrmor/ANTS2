@@ -57,11 +57,8 @@ public:
 class AGeoBox : public AGeoShape
 {
 public:
-  AGeoBox(double dx, double dy, double dz) :
-    dx(dx), dy(dy), dz(dz) {}
-  AGeoBox() :
-    dx(10), dy(10), dz(10) {}
-  virtual ~AGeoBox() {}
+  AGeoBox(double dx, double dy, double dz) : dx(dx), dy(dy), dz(dz) {}
+  AGeoBox() : dx(10), dy(10), dz(10) {}
 
   const QString getShapeType() const override {return "TGeoBBox";}
   virtual const QString getShapeTemplate() {return "TGeoBBox( dx, dy, dz )";}
@@ -91,13 +88,9 @@ public:
 class AGeoTube : public AGeoShape
 {
 public:
-  AGeoTube(double rmin, double rmax, double dz) :
-    rmin(rmin), rmax(rmax), dz(dz) {}
-  AGeoTube(double r, double dz) :
-    rmin(0), rmax(r), dz(dz) {}
-  AGeoTube() :
-    rmin(0), rmax(10), dz(5) {}
-  virtual ~AGeoTube() {}
+  AGeoTube(double rmin, double rmax, double dz) : rmin(rmin), rmax(rmax), dz(dz) {}
+  AGeoTube(double r, double dz) : rmin(0), rmax(r), dz(dz) {}
+  AGeoTube() : rmin(0), rmax(10), dz(5) {}
 
   const QString getShapeType() const override {return "TGeoTube";}
   virtual const QString getShapeTemplate() {return "TGeoTube( rmin, rmax, dz )";}

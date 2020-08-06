@@ -414,8 +414,13 @@ SOURCES += main.cpp \
     SplineLibrary/Spline123/bspline123d.cpp \
     SplineLibrary/Spline123/bsfit123.cpp \
     modules/ageoconsts.cpp \
-    modules/atypegeoobject.cpp \
-    modules/ageoshape.cpp
+    common/atypegeoobject.cpp \
+    common/ageoshape.cpp \
+    gui/DAWindowTools/amonitordelegate.cpp \
+    gui/DAWindowTools/ageobasedelegate.cpp \
+    gui/DAWindowTools/ageoslabdelegate.cpp \
+    gui/DAWindowTools/agridelementdelegate.cpp \
+    gui/DAWindowTools/ageoobjectdelegate.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -576,8 +581,13 @@ HEADERS  += common/CorrelationFilters.h \
     SplineLibrary/Spline123/bspline123d.h \
     SplineLibrary/Spline123/bsfit123.h \
     modules/ageoconsts.h \
-    modules/atypegeoobject.h \
-    modules/ageoshape.h
+    common/atypegeoobject.h \
+    common/ageoshape.h \
+    gui/DAWindowTools/amonitordelegate.h \
+    gui/DAWindowTools/ageobasedelegate.h \
+    gui/DAWindowTools/ageoslabdelegate.h \
+    gui/DAWindowTools/agridelementdelegate.h \
+    gui/DAWindowTools/ageoobjectdelegate.h
 
 # --- SIM ---
 ants2_SIM {

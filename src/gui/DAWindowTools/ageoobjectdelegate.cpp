@@ -696,7 +696,7 @@ void AGeoObjectDelegate::Update(const AGeoObject *obj)
     }
     cobMat->setCurrentIndex(imat);
 
-    //pteShape->setPlainText(obj->Shape->getGenerationString());
+    pteShape->setPlainText(obj->Shape->getGenerationString());
 
     ledX->setText(obj->PositionStr[0].isEmpty() ? QString::number(obj->Position[0]) : obj->PositionStr[0]);
     ledY->setText(obj->PositionStr[1].isEmpty() ? QString::number(obj->Position[1]) : obj->PositionStr[1]);

@@ -1908,7 +1908,7 @@ void AGeoWidget::onConfirmPressed()
     //    qDebug() << "Validating update data for object" << CurrentObject->Name;
     bool ok = checkDelegateValidity();
     if (!ok) return;
-
+    GeoDelegate->finalizeLocalParameters();
     ok = GeoDelegate->updateObject(CurrentObject);
     if (!ok) return;
 

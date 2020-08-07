@@ -658,10 +658,10 @@ const QString AGeoTube::getHelp()
 
 QString AGeoTube::updateShape()
 {
-    QString errorStr = updateParameter(str2rmin, rmin, false);
+    QString errorStr = updateParameter(str2rmax, rmax);
     if (!errorStr.isEmpty()) return errorStr;
 
-    errorStr = updateParameter(str2rmax, rmax);
+    errorStr = updateParameter(str2rmin, rmin, false);
     if (!errorStr.isEmpty()) return errorStr;
 
     if (rmin >= rmax) return "Inside diameter should be smaller than the outside one!";
@@ -738,7 +738,7 @@ void AGeoTube::readFromJson(QJsonObject &json)
 
     if (!parseJson(json, "str2rmin", str2rmin)) str2rmin.clear();
     if (!parseJson(json, "str2rmax", str2rmax)) str2rmax.clear();
-    if (!parseJson(json, "str2rdz",  str2dz))   str2dz.clear();
+    if (!parseJson(json, "str2dz",  str2dz))   str2dz.clear();
 }
 
 bool AGeoTube::readFromTShape(TGeoShape *Tshape)

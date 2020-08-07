@@ -109,12 +109,14 @@ class AGeoBoxDelegate : public AGeoObjectDelegate
 public:
     AGeoBoxDelegate(const QStringList & materials, QWidget * parent);
 
+    void finalizeLocalParameters();
+
     QLineEdit * ex = nullptr;
     QLineEdit * ey = nullptr;
     QLineEdit * ez = nullptr;
 
 public slots:
-    virtual void Update(const AGeoObject * obj) override;
+    void Update(const AGeoObject * obj) override;
 
 private slots:
     void onLocalShapeParameterChange() override;
@@ -150,6 +152,8 @@ class AGeoTubeDelegate : public AGeoObjectDelegate
 
 public:
     AGeoTubeDelegate(const QStringList & materials, QWidget * parent);
+
+    void finalizeLocalParameters();
 
     QLineEdit * ei = nullptr;
     QLineEdit * eo = nullptr;

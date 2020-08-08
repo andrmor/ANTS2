@@ -152,8 +152,9 @@ public slots:
   void onRequestScriptRecursiveToClipboard();
   void onRequestSetVisAttributes();
 
-private slots:
-  void onConfirmPressed();          // CONFIRM -> COPY FROM DELEGATE TO OBJECT
+  AGeoObject * getCurrentObject() {return CurrentObject;}
+
+  void onConfirmPressed();          // CONFIRM BUTTON PRESSED -> COPY FROM DELEGATE TO OBJECT
   void onCancelPressed();
 
 private:

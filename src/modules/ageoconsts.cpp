@@ -79,6 +79,35 @@ bool AGeoConsts::evaluateFormula(QString str, double &returnValue) const
     return true;
 }
 
+QString AGeoConsts::getName(int index) const
+{
+    if (index < 0 || index >= Names.size()) return "";
+    return Names.at(index);
+}
+
+bool AGeoConsts::rename(int index, const QString & newName)
+{
+    if (index < 0 || index >= Names.size()) return false;
+
+    for (int i = 0; i < Names.size(); i++)
+    {
+        if (i == index) continue;
+        if (newName == Names.at(i)) return false;
+    }
+
+    Names[index] = newName;
+    update();
+    return true;
+}
+
+bool AGeoConsts::setNewValue(int index, double newValue)
+{
+    if (index < 0 || index >= Names.size()) return false;
+
+    Values[index] = newValue;
+    return true;
+}
+
 void AGeoConsts::update()
 {
     const int size = Names.size();

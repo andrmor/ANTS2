@@ -86,9 +86,12 @@ private:
   DetectorClass* Detector;
   QString ObjectScriptTarget;
 
+  bool bGeoConstsWidgetUpdateInProgress = false;
+
   void ConvertDummyToPM(int idpm);  
   bool GDMLtoTGeo(const QString &fileName);
   const QString loadGDML(const QString &fileName, QString &gdml);  //returns error string - empty if OK
+  void updateGeoConstsIndication();
 
 protected:
   void resizeEvent(QResizeEvent *event);
@@ -101,6 +104,7 @@ public slots:
   void ShowObject(QString name = "");
   void ShowObjectRecursive(QString name);
   void OnrequestShowMonitor(const AGeoObject* mon);
+
 };
 
 #endif // DETECTORADDONSWINDOW_H

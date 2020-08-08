@@ -280,18 +280,20 @@ void DetectorAddOnsWindow::UpdateGeoTree(QString name)
 
     //update constants
     ui->tabwConstants->clearContents();
-    const QMap<QString, double> & Map = AGeoConsts::getConstInstance().GeoConsts;
-    ui->tabwConstants->setRowCount(Map.size() + 1);
-    QMapIterator<QString, double> iter(Map);
-    int iCounter = 0;
-    while (iter.hasNext())
+
+    const AGeoConsts & GC = AGeoConsts::getConstInstance();
+
+    const int numConsts = GC.countConstants();
+    const QVector<QString> & Names  = GC.getNames();
+    const QVector<double>  & Values = GC.getValues();
+
+    ui->tabwConstants->setRowCount(numConsts + 1);
+    for (int i = 0; i < numConsts; i++)
     {
-        iter.next();
-        QTableWidgetItem * newItem = new QTableWidgetItem(iter.key());
-        ui->tabwConstants->setItem(iCounter, 0, newItem);
-        newItem = new QTableWidgetItem(QString::number(iter.value()));
-        ui->tabwConstants->setItem(iCounter, 1, newItem);
-        iCounter++;
+        QTableWidgetItem * newItem = new QTableWidgetItem(Names.at(i));
+        ui->tabwConstants->setItem(i, 0, newItem);
+        newItem = new QTableWidgetItem(QString::number(Values.at(i)));
+        ui->tabwConstants->setItem(i, 1, newItem);
     }
 }
 
@@ -1335,5 +1337,8 @@ void DetectorAddOnsWindow::on_tabwConstants_customContextMenuRequested(const QPo
 
 void DetectorAddOnsWindow::on_tabwConstants_cellChanged(int row, int column)
 {
+    AGeoConsts & GC = AGeoConsts::getInstance();
+    //GC.
 
+    //if (row == )
 }

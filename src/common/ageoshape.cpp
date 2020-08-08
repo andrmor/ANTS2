@@ -156,9 +156,9 @@ void AGeoBox::readFromJson(QJsonObject &json)
     dy = json["dy"].toDouble();
     dz = json["dz"].toDouble();
 
-    if (!parseJson(json, "str2dx", str2dx)) str2dx.clear();
-    if (!parseJson(json, "str2dy", str2dy)) str2dy.clear();
-    if (!parseJson(json, "str2dz", str2dz)) str2dz.clear();
+    if (!parseJson(json, "str2dx", str2dx)) str2dx.clear(); else updateParameter(str2dx, dx);
+    if (!parseJson(json, "str2dy", str2dy)) str2dy.clear(); else updateParameter(str2dy, dy);
+    if (!parseJson(json, "str2dz", str2dz)) str2dz.clear(); else updateParameter(str2dz, dz);
 }
 
 bool AGeoBox::readFromTShape(TGeoShape *Tshape)
@@ -732,13 +732,13 @@ void AGeoTube::writeToJson(QJsonObject &json) const
 
 void AGeoTube::readFromJson(QJsonObject &json)
 {
-    rmin = json["rmin"].toDouble();
     rmax = json["rmax"].toDouble();
+    rmin = json["rmin"].toDouble();
     dz   = json["dz"].toDouble();
 
-    if (!parseJson(json, "str2rmin", str2rmin)) str2rmin.clear();
-    if (!parseJson(json, "str2rmax", str2rmax)) str2rmax.clear();
-    if (!parseJson(json, "str2dz",  str2dz))   str2dz.clear();
+    if (!parseJson(json, "str2rmax", str2rmax)) str2rmax.clear(); else updateParameter(str2rmax, rmax);
+    if (!parseJson(json, "str2rmin", str2rmin)) str2rmin.clear(); else updateParameter(str2rmin, rmin);
+    if (!parseJson(json, "str2dz",   str2dz))   str2dz.clear();   else updateParameter(str2dz,   dz);
 }
 
 bool AGeoTube::readFromTShape(TGeoShape *Tshape)

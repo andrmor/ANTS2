@@ -458,6 +458,7 @@ class AGeoCompositeDelegate : public AGeoObjectDelegate
 
 public:
     AGeoCompositeDelegate(const QStringList & materials, QWidget * parent);
+    void finalizeLocalParameters();
 
     QPlainTextEdit * te = nullptr;
 

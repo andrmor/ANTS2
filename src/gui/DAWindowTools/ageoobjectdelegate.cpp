@@ -247,22 +247,25 @@ bool AGeoObjectDelegate::isValid(AGeoObject * obj)
         }
         if (tube) return true;
         */
+        AGeoComposite * comp = dynamic_cast<AGeoComposite*>(ShapeCopy);
+
         AGeoBox * box =dynamic_cast<AGeoBox*> (ShapeCopy);
         AGeoTube * tube =dynamic_cast<AGeoTube*> (ShapeCopy);
-        if (!box && !tube)
+        if (!box && !tube && !comp)
         {
-            qDebug()<< "then its scaled";
+            //qDebug()<< "then its scaled";
             AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*> (ShapeCopy);
             tube =dynamic_cast<AGeoTube*> (scaled->BaseShape);
-            qDebug()<< "its a scled tube!";
+            //qDebug()<< "its a scled tube!";
 
             if (!tube)
             {
                 box =dynamic_cast<AGeoBox*> (scaled->BaseShape);
-                qDebug()<< "nope its a scaled box!";
-
+                //qDebug()<< "nope its a scaled box!";
+                if (!box) comp =dynamic_cast<AGeoComposite*> (scaled->BaseShape);
             }
         }
+        if (comp) return true;
         if (box) return true;
         if (tube) return true;
 
@@ -329,8 +332,14 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
                 QMessageBox::warning(this->ParentWidget,"", errorStr);
                 return false;
             }
+            AGeoComposite * comp =dynamic_cast<AGeoComposite*> (obj->Shape); // !*! Temporary tester to show it works
+            if (comp) qDebug() <<"before: "<<comp->getGenerationString();
+
             delete obj->Shape;
             obj->Shape = ShapeCopy->clone();
+
+            AGeoComposite * comp2 =dynamic_cast<AGeoComposite*> (obj->Shape);
+            if (comp) qDebug() <<"after: "<<comp2->getGenerationString();
         }
         else
         {
@@ -2057,6 +2066,24 @@ AGeoCompositeDelegate::AGeoCompositeDelegate(const QStringList &materials, QWidg
     //cbScale->setVisible(false);
 
     addLocalLayout(v);
+}
+
+void AGeoCompositeDelegate::finalizeLocalParameters()
+{
+    AGeoComposite * comp = dynamic_cast<AGeoComposite*>(ShapeCopy);
+    if (!comp)
+    {
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+        comp = dynamic_cast<AGeoComposite*>(scaled->BaseShape);
+    }
+
+    if (comp)
+    {
+        QString Str= te->document()->toPlainText();
+        comp->GenerationString = "TGeoCompositeShape( " + Str + " )";
+        //emit ContentChanged();
+    }
+    else qWarning() << "Read delegate: Composite shape not found!";
 }
 
 void AGeoCompositeDelegate::Update(const AGeoObject *obj)

@@ -1335,9 +1335,32 @@ void DetectorAddOnsWindow::on_pbWorldTreeHelp_clicked()
     message(s, this);
 }
 
+#include <QMenu>
 void DetectorAddOnsWindow::on_tabwConstants_customContextMenuRequested(const QPoint &pos)
 {
+    int index = ui->tabwConstants->currentRow();
 
+    QMenu menu;
+    QAction * removeA = menu.addAction("Remove this constant"); removeA->setEnabled(index != -1);
+
+    AGeoConsts & GC = AGeoConsts::getInstance();
+    QAction * selected = menu.exec(ui->tabwConstants->mapToGlobal(pos));
+    if (selected == removeA)
+    {
+        QString name = GC.getName(index);
+        if (name.isEmpty()) return;
+
+        const AGeoObject * obj = twGeo->Sandwich->World->isGeoConstInUseRecursive(QRegExp("\\b"+name+"\\b"));
+        if (obj)
+        {
+            message(QString("\"%1\" cannot be removed.\nThe first object using it:\n\n%2").arg(name).arg(obj->Name), this);
+            return;
+        }
+
+        GC.remove(index);
+        MW->writeDetectorToJson(MW->Config->JSON);
+        updateGeoConstsIndication();
+    }
 }
 
 void DetectorAddOnsWindow::on_tabwConstants_cellChanged(int row, int column)
@@ -1345,22 +1368,45 @@ void DetectorAddOnsWindow::on_tabwConstants_cellChanged(int row, int column)
     if (bGeoConstsWidgetUpdateInProgress) return;
 
     AGeoConsts & GC = AGeoConsts::getInstance();
+    const int numConsts = GC.countConstants();
 
-    if (column == 0)
+    if (numConsts == row)
+    {
+        //new constant?
+        if (column == 1) return; //nothing yet to do
+
+        QString Name = ui->tabwConstants->item(row, 0)->text().simplified();
+        bool ok = false;
+        double Value;
+        QTableWidgetItem * item = ui->tabwConstants->item(row, 1);
+        if (item) Value = item->text().simplified().toDouble(&ok);
+        if (!ok)
+        {
+            Value = 0;
+            if (item) ui->tabwConstants->item(row, 1)->setText("0");
+            else
+            {
+                item = new QTableWidgetItem("0");
+                ui->tabwConstants->setItem(row, 1, item);
+            }
+        }
+
+        ok = GC.addNewConstant(Name, Value);
+        if (!ok)
+        {
+            message("This name is already in use", this);
+            updateGeoConstsIndication();
+            return;
+        }
+        MW->writeDetectorToJson(MW->Config->JSON);
+        updateGeoConstsIndication();
+    }
+    else if (column == 0)
     {
         //rename
         QString oldName = GC.getName(row);
         QString newName = ui->tabwConstants->item(row, 0)->text().simplified();
         if (oldName == newName) return;
-
-        /*
-        const AGeoObject * obj = twGeo->Sandwich->World->isGeoConstInUseRecursive(NewNameRegExp);
-        if (obj)
-        {
-            message("This constant name is already in use!\nFirst found object: " + obj->Name, this);
-            return;
-        }
-        */
 
         bool ok = GC.rename(row, newName);
         if (!ok)

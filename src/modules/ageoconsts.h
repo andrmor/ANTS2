@@ -26,6 +26,9 @@ public:
     QString getName(int index) const;
     bool rename(int index, const QString & newName);
     bool setNewValue(int index, double newValue);
+    bool addNewConstant(const QString & name, double value);
+
+    void remove(int index);
 
 private:
     AGeoConsts(){}

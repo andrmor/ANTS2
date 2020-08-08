@@ -108,6 +108,26 @@ bool AGeoConsts::setNewValue(int index, double newValue)
     return true;
 }
 
+bool AGeoConsts::addNewConstant(const QString & name, double value)
+{
+    for (int i = 0; i < Names.size(); i++)
+        if (name == Names.at(i)) return false; //already in use
+
+    Names. append(name);
+    Values.append(value);
+    update();
+    return true;
+}
+
+void AGeoConsts::remove(int index)
+{
+    if (index < 0 || index >= Names.size()) return;
+
+    Names .remove(index);
+    Values.remove(index);
+    update();
+}
+
 void AGeoConsts::update()
 {
     const int size = Names.size();

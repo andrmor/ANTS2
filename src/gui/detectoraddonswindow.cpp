@@ -1350,15 +1350,32 @@ void DetectorAddOnsWindow::on_tabwConstants_cellChanged(int row, int column)
     {
         //rename
         QString oldName = GC.getName(row);
-        QString newName = ui->tabwConstants->item(row, 0)->text();
-        bool ok = GC.rename(row, newName);
-        if (ok)
-        {
-            // TODO
-            // rename in all GeoObjects
-            // oldName -> newName
+        QString newName = ui->tabwConstants->item(row, 0)->text().simplified();
+        if (oldName == newName) return;
 
-            twGeo->GetEditWidget()->onCancelPressed();
+        /*
+        const AGeoObject * obj = twGeo->Sandwich->World->isGeoConstInUseRecursive(NewNameRegExp);
+        if (obj)
+        {
+            message("This constant name is already in use!\nFirst found object: " + obj->Name, this);
+            return;
+        }
+        */
+
+        bool ok = GC.rename(row, newName);
+        if (!ok)
+        {
+            message("This constant name is already in use!", this);
+            updateGeoConstsIndication();
+            return;
+        }
+        else
+        {
+            const QRegExp OldNameRegExp("\\b" + oldName + "\\b");
+            twGeo->Sandwich->World->replaceGeoConstNameRecursive(OldNameRegExp, newName);
+            //twGeo->GetEditWidget()->onCancelPressed();
+            QString name = twGeo->GetEditWidget()->getCurrentObject()->Name;
+            twGeo->UpdateGui(name);
         }
     }
     else
@@ -1379,5 +1396,6 @@ void DetectorAddOnsWindow::on_tabwConstants_cellChanged(int row, int column)
         emit twGeo->RequestRebuildDetector();
         twGeo->UpdateGui(name);
     }
+
     updateGeoConstsIndication();
 }

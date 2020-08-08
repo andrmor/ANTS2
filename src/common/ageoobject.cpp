@@ -170,21 +170,18 @@ int AGeoObject::getMaterial() const
     return Material;
 }
 
-AGeoObject *AGeoObject::isGeoConstInUse(const QRegExp &nameRegExp)
+const AGeoObject * AGeoObject::isGeoConstInUse(const QRegExp & nameRegExp) const
 {
     for (int i = 0; i < 3; i++)
     {
         if (PositionStr[i]   .contains(nameRegExp)) return this;
         if (OrientationStr[i].contains(nameRegExp)) return this;
     }
-    if (Shape)
-    {
-        if (Shape->isGeoConstInUse(nameRegExp)) return this;
-    }
+    if (Shape && Shape->isGeoConstInUse(nameRegExp)) return this;
     return nullptr;
 }
 
-void AGeoObject::replaceGeoConstName(const QRegExp &nameRegExp, QString &newName)
+void AGeoObject::replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName)
 {
     for (int i = 0; i < 3; i++)
     {
@@ -192,6 +189,26 @@ void AGeoObject::replaceGeoConstName(const QRegExp &nameRegExp, QString &newName
         OrientationStr[i].replace(nameRegExp, newName);
     }
     if (Shape) Shape->replaceGeoConstName(nameRegExp, newName);
+}
+
+const AGeoObject *AGeoObject::isGeoConstInUseRecursive(const QRegExp & nameRegExp) const
+{
+    if (isGeoConstInUse(nameRegExp)) return this;
+
+    for (AGeoObject * hosted : HostedObjects)
+    {
+        const AGeoObject * obj = hosted->isGeoConstInUseRecursive(nameRegExp);
+        if (obj) return obj;
+    }
+    return nullptr;
+}
+
+void AGeoObject::replaceGeoConstNameRecursive(const QRegExp & nameRegExp, const QString & newName)
+{
+    replaceGeoConstName(nameRegExp, newName);
+
+    for (AGeoObject * hosted : HostedObjects)
+        hosted->replaceGeoConstNameRecursive(nameRegExp, newName);
 }
 
 void AGeoObject::writeToJson(QJsonObject &json)

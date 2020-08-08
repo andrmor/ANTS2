@@ -4,6 +4,7 @@
 #include "aslab.h"
 #include "ajsontools.h"
 #include "agridelementrecord.h"
+#include "ageoconsts.h"
 
 #include <cmath>
 
@@ -167,6 +168,30 @@ int AGeoObject::getMaterial() const
     if (ObjectType->isHandlingArray() || ObjectType->isHandlingSet())
         return Container->getMaterial();
     return Material;
+}
+
+AGeoObject *AGeoObject::isGeoConstInUse(const QRegExp &nameRegExp)
+{
+    for (int i = 0; i < 3; i++)
+    {
+        if (PositionStr[i]   .contains(nameRegExp)) return this;
+        if (OrientationStr[i].contains(nameRegExp)) return this;
+    }
+    if (Shape)
+    {
+        if (Shape->isGeoConstInUse(nameRegExp)) return this;
+    }
+    return nullptr;
+}
+
+void AGeoObject::replaceGeoConstName(const QRegExp &nameRegExp, QString &newName)
+{
+    for (int i = 0; i < 3; i++)
+    {
+        PositionStr[i]   .replace(nameRegExp, newName);
+        OrientationStr[i].replace(nameRegExp, newName);
+    }
+    if (Shape) Shape->replaceGeoConstName(nameRegExp, newName);
 }
 
 void AGeoObject::writeToJson(QJsonObject &json)

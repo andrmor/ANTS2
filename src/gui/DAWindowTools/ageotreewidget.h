@@ -154,7 +154,7 @@ public slots:
 
   AGeoObject * getCurrentObject() {return CurrentObject;}
 
-  void onConfirmPressed();          // CONFIRM BUTTON PRESSED -> COPY FROM DELEGATE TO OBJECT
+  void onConfirmPressed();                                        // CONFIRM BUTTON PRESSED -> COPY FROM DELEGATE TO OBJECT
   void onCancelPressed();
 
 private:

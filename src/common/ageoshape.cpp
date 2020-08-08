@@ -113,6 +113,22 @@ QString AGeoBox::updateShape()
     return errorStr;
 }
 
+bool AGeoBox::isGeoConstInUse(const QRegExp &nameRegExp)
+{
+    if (str2dx.contains(nameRegExp)) return true;
+    if (str2dy.contains(nameRegExp)) return true;
+    if (str2dz.contains(nameRegExp)) return true;
+
+    return false;
+}
+
+void AGeoBox::replaceGeoConstName(const QRegExp &nameRegExp, QString &newName)
+{
+    str2dx.replace(nameRegExp, newName);
+    str2dy.replace(nameRegExp, newName);
+    str2dz.replace(nameRegExp, newName);
+}
+
 const QString AGeoBox::getGenerationString() const
 {
     QString str = "TGeoBBox( " +
@@ -668,6 +684,22 @@ QString AGeoTube::updateShape()
 
     errorStr = updateParameter(str2dz, dz);
     return errorStr;
+}
+
+bool AGeoTube::isGeoConstInUse(const QRegExp &nameRegExp)
+{
+    if (str2rmax.contains(nameRegExp)) return true;
+    if (str2rmin.contains(nameRegExp)) return true;
+    if (str2dz.contains(nameRegExp))   return true;
+
+    return false;
+}
+
+void AGeoTube::replaceGeoConstName(const QRegExp &nameRegExp, QString &newName)
+{
+    str2rmax.replace(nameRegExp, newName);
+    str2rmin.replace(nameRegExp, newName);
+    str2dz  .replace(nameRegExp, newName);
 }
 
 bool AGeoTube::readFromString(QString GenerationString)

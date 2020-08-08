@@ -361,6 +361,9 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
         ok = ok && processEditBox(ledPsi,   obj->Orientation[2], obj->OrientationStr[2], ParentWidget);
         if (!ok) return false;
 
+        QRegExp regExp("\\bkira\\b"); // !*! TEMPORARY TESTER
+        obj->isGeoConstInUse(regExp);
+
         // checking was there a rotation of the main object
         bool fWasRotated = false;
         for (int i=0; i<3; i++)

@@ -28,7 +28,10 @@ public:
   virtual void setHeight(double /*dz*/) {}
   virtual double maxSize() {return 0;} //for world size evaluation
   virtual double minSize() {return 0;} //for monitors only!
+
   virtual QString updateShape() {return "";}
+  virtual bool isGeoConstInUse    (const QRegExp &nameRegExp){return "";}
+  virtual void replaceGeoConstName(const QRegExp &nameRegExp, QString &newName) {}
 
   //json
   virtual void writeToJson(QJsonObject &/*json*/) const = 0;
@@ -65,6 +68,8 @@ public:
   virtual bool readFromString(QString GenerationString);
   virtual const QString getHelp();
   QString updateShape() override;
+  bool isGeoConstInUse(const QRegExp &nameRegExp) override;
+  void replaceGeoConstName(const QRegExp &nameRegExp, QString &newName) override;
 
   virtual TGeoShape* createGeoShape(const QString shapeName = "");
 
@@ -96,6 +101,8 @@ public:
   virtual const QString getShapeTemplate() {return "TGeoTube( rmin, rmax, dz )";}
   virtual const QString getHelp();
   QString updateShape() override;
+  bool isGeoConstInUse(const QRegExp &nameRegExp) override;
+  void replaceGeoConstName(const QRegExp &nameRegExp, QString &newName) override;
 
   virtual bool readFromString(QString GenerationString);
   virtual TGeoShape* createGeoShape(const QString shapeName = "");

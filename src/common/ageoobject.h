@@ -30,6 +30,8 @@ public:
   void makeItWorld();
   bool isWorld() const;
   int  getMaterial() const;
+  AGeoObject *isGeoConstInUse(const QRegExp &nameRegExp);
+  void replaceGeoConstName(const QRegExp &nameRegExp, QString&newName);
 
   //json for a single object
   void writeToJson(QJsonObject & json);

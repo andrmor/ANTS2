@@ -33,6 +33,7 @@ private slots:
   void onReconstructDetectorRequest();
   void onRequestUpdateWorldSize(double WorldSizeXY, double WorldSizeZ, bool fWorldSizeFixed);
   void onGeoConstEditingFinished(int index, QString newValue);
+  void onGeoConstEscapePressed(int index);
 
   void on_tabwConstants_customContextMenuRequested(const QPoint &pos);
 
@@ -106,6 +107,20 @@ public slots:
   void ShowObjectRecursive(QString name);
   void OnrequestShowMonitor(const AGeoObject* mon);
 
+};
+
+#include <QLineEdit>
+class ALineEditWithEscape : public QLineEdit
+{
+    Q_OBJECT
+public:
+    ALineEditWithEscape(const QString & text, QWidget * parent) : QLineEdit(text, parent){}
+
+protected:
+    void keyPressEvent(QKeyEvent * event);
+
+signals:
+    void escapePressed();
 };
 
 #endif // DETECTORADDONSWINDOW_H

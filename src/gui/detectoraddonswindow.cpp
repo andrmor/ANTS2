@@ -1333,10 +1333,11 @@ void DetectorAddOnsWindow::updateGeoConstsIndication()
             QTableWidgetItem * newItem = new QTableWidgetItem(Name);
             ui->tabwConstants->setItem(i, 0, newItem);
 
-            QLineEdit * edit = new QLineEdit(Value, ui->tabwConstants);
+            ALineEditWithEscape * edit = new ALineEditWithEscape(Value, ui->tabwConstants);
             edit->setValidator(new QDoubleValidator(edit));
             edit->setFrame(false);
-            connect(edit, &QLineEdit::editingFinished, [this, i, edit](){this->onGeoConstEditingFinished(i, edit->text()); });
+            connect(edit, &ALineEditWithEscape::editingFinished, [this, i, edit](){this->onGeoConstEditingFinished(i, edit->text()); });
+            connect(edit, &ALineEditWithEscape::escapePressed,   [this, i](){this->onGeoConstEscapePressed(i); });
             ui->tabwConstants->setCellWidget(i, 1, edit);
         }
     bGeoConstsWidgetUpdateInProgress = false; // <--
@@ -1362,6 +1363,11 @@ void DetectorAddOnsWindow::onGeoConstEditingFinished(int index, QString strNewVa
     QString CurrentObjName = ( twGeo->GetEditWidget()->getCurrentObject() ? twGeo->GetEditWidget()->getCurrentObject()->Name : "" );
     emit twGeo->RequestRebuildDetector();
     twGeo->UpdateGui(CurrentObjName);
+}
+
+void DetectorAddOnsWindow::onGeoConstEscapePressed(int /*index*/)
+{
+    updateGeoConstsIndication();
 }
 
 void DetectorAddOnsWindow::on_tabwConstants_cellChanged(int row, int column)
@@ -1451,4 +1457,15 @@ void DetectorAddOnsWindow::on_tabwConstants_customContextMenuRequested(const QPo
         MW->writeDetectorToJson(MW->Config->JSON);
         updateGeoConstsIndication();
     }
+}
+
+#include <QEvent>
+void ALineEditWithEscape::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Escape)
+    {
+        event->accept();
+        emit escapePressed();
+    }
+    else QLineEdit::keyPressEvent(event);
 }

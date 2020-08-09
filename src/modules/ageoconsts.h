@@ -46,6 +46,9 @@ private:
 
     void update();
     void clearConstants();
+
+public:
+    static QVector<QString> getTFormulaReservedWords();
 };
 
 #endif // AGEOCONSTS_H

@@ -140,3 +140,11 @@ void AGeoConsts::update()
         Indexes[i] = QString("[%1]").arg(i);
     }
 }
+
+QVector<QString> AGeoConsts::getTFormulaReservedWords()
+{
+    QVector<QString> v;
+    v << "sqrt2" << "e" << "pi" << "ln10" << "infinity";
+    v << "pow" << "sin" << "cos" << "sqrt" << "exp";
+    return v;
+}

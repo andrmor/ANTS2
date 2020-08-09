@@ -777,6 +777,7 @@ void AShapeHighlighter::highlightBlock(const QString &text)
 
 //---------------
 #include "aonelinetextedit.h"
+#include <QTextDocument>
 
 AGeoBoxDelegate::AGeoBoxDelegate(const QStringList &materials, QWidget *parent)
     : AGeoObjectDelegate(materials, parent)
@@ -803,8 +804,9 @@ AGeoBoxDelegate::AGeoBoxDelegate(const QStringList &materials, QWidget *parent)
     ey = new QLineEdit(); gr->addWidget(ey, 1, 1);
     ez = new QLineEdit(); gr->addWidget(ez, 2, 1);
 
-    //AOneLineTextEdit * le = new AOneLineTextEdit();
-    //gr->addWidget(le, 0, 3);
+    AOneLineTextEdit * le = new AOneLineTextEdit();
+    configureHighligherAndCompleter(le);
+    gr->addWidget(le, 0, 3);
 
     gr->addWidget(new QLabel("mm"), 0, 2);
     gr->addWidget(new QLabel("mm"), 1, 2);

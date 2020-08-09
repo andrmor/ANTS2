@@ -7,6 +7,7 @@
 class AGeoObject;
 class QPushButton;
 class QHBoxLayout;
+class AOneLineTextEdit;
 
 class AGeoBaseDelegate : public QObject
 {
@@ -33,6 +34,7 @@ protected:
     QPushButton * pbScriptLine = nullptr;
 
     QHBoxLayout * createBottomButtons();
+    void          configureHighligherAndCompleter(AOneLineTextEdit * edit);
 
 protected:
     QWidget * ParentWidget = nullptr;

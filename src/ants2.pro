@@ -420,7 +420,8 @@ SOURCES += main.cpp \
     gui/DAWindowTools/ageobasedelegate.cpp \
     gui/DAWindowTools/ageoslabdelegate.cpp \
     gui/DAWindowTools/agridelementdelegate.cpp \
-    gui/DAWindowTools/ageoobjectdelegate.cpp
+    gui/DAWindowTools/ageoobjectdelegate.cpp \
+    gui/DAWindowTools/aonelinetextedit.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -587,7 +588,8 @@ HEADERS  += common/CorrelationFilters.h \
     gui/DAWindowTools/ageobasedelegate.h \
     gui/DAWindowTools/ageoslabdelegate.h \
     gui/DAWindowTools/agridelementdelegate.h \
-    gui/DAWindowTools/ageoobjectdelegate.h
+    gui/DAWindowTools/ageoobjectdelegate.h \
+    gui/DAWindowTools/aonelinetextedit.h
 
 # --- SIM ---
 ants2_SIM {

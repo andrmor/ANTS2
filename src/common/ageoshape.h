@@ -169,6 +169,10 @@ public:
   const QString getShapeType() const override {return "TGeoParaboloid";}
   virtual const QString getShapeTemplate() {return "TGeoParaboloid( rlo, rhi, dz )";}
   virtual const QString getHelp();
+  QString updateShape() override;
+
+  bool isGeoConstInUse (const QRegExp & nameRegExp) const override;
+  void replaceGeoConstName (const QRegExp & nameRegExp, const QString & newName) override;
 
   virtual bool readFromString(QString GenerationString);
   virtual TGeoShape* createGeoShape(const QString shapeName = "");
@@ -185,6 +189,7 @@ public:
 
   //paraboloid specific
   double rlo, rhi, dz;
+  QString str2rlo, str2rhi, str2dz;
 };
 
 class AGeoConeSeg : public AGeoShape

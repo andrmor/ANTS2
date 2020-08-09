@@ -1220,6 +1220,37 @@ const QString AGeoParaboloid::getHelp()
             " • +dz = a·rhi·rhi + b";
 }
 
+QString AGeoParaboloid::updateShape()
+{
+    QString errorStr = updateParameter(str2rlo, rlo, false);
+    if (!errorStr.isEmpty()) return errorStr;
+
+    errorStr = updateParameter(str2rhi, rhi, false);
+    if (!errorStr.isEmpty()) return errorStr;
+
+    if (rlo == rhi) return "lower diameter and upper diameter should be distinct";
+
+    errorStr = updateParameter(str2dz, dz);
+    qDebug() <<"updateShape()";
+    return errorStr;
+}
+
+bool AGeoParaboloid::isGeoConstInUse(const QRegExp &nameRegExp) const
+{
+    if (str2rlo.contains(nameRegExp)) return true;
+    if (str2rhi.contains(nameRegExp)) return true;
+    if (str2dz.contains(nameRegExp))  return true;
+
+    return false;
+}
+
+void AGeoParaboloid::replaceGeoConstName(const QRegExp &nameRegExp, const QString &newName)
+{
+    str2rlo.replace(nameRegExp, newName);
+    str2rhi.replace(nameRegExp, newName);
+    str2dz .replace(nameRegExp, newName);
+}
+
 bool AGeoParaboloid::readFromString(QString GenerationString)
 {
     QStringList params;
@@ -1270,14 +1301,22 @@ void AGeoParaboloid::writeToJson(QJsonObject &json) const
 {
     json["rlo"] = rlo;
     json["rhi"] = rhi;
-    json["dz"] = dz;
+    json["dz"]  = dz;
+
+    if (!str2rlo.isEmpty()) json["str2rlo"] = str2rlo;
+    if (!str2rhi.isEmpty()) json["str2rhi"] = str2rhi;
+    if (!str2dz.isEmpty())  json["str2dz"]  = str2dz;
 }
 
 void AGeoParaboloid::readFromJson(QJsonObject &json)
 {
     rlo = json["rlo"].toDouble();
     rhi = json["rhi"].toDouble();
-    dz = json["dz"].toDouble();
+    dz  = json["dz"].toDouble();
+
+    if (!parseJson(json, "str2rlo", str2rlo)) str2rlo.clear(); else updateParameter(str2rlo, rlo, false);
+    if (!parseJson(json, "str2rhi", str2rhi)) str2rhi.clear(); else updateParameter(str2rhi, rhi, false);
+    if (!parseJson(json, "str2dz", str2dz))   str2dz.clear() ; else updateParameter(str2dz,  dz);
 }
 
 bool AGeoParaboloid::readFromTShape(TGeoShape *Tshape)

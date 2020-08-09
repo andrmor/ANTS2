@@ -1628,13 +1628,32 @@ AGeoParaboloidDelegate::AGeoParaboloidDelegate(const QStringList &materials, QWi
 
     QVector<QLineEdit*> l = {el, eu, ez};
     for (QLineEdit * le : l)
-        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoParaboloidDelegate::onLocalShapeParameterChange);
+        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoParaboloidDelegate::ContentChanged);
+        //QObject::connect(le, &QLineEdit::textChanged, this, &AGeoParaboloidDelegate::onLocalShapeParameterChange);
+}
+
+void AGeoParaboloidDelegate::finalizeLocalParameters()
+{
+    AGeoParaboloid * paraboloid = dynamic_cast<AGeoParaboloid*>(ShapeCopy);
+    if (!paraboloid)
+    {
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+        paraboloid = dynamic_cast<AGeoParaboloid*>(scaled->BaseShape);
+    }
+    if (paraboloid)
+    {
+        paraboloid->str2rlo = el->text();
+        paraboloid->str2rhi = eu->text();
+        paraboloid->str2dz  = ez->text();
+    }
+    else qWarning() << "Update delegate: Paraboloid shape not found!";
 }
 
 void AGeoParaboloidDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
 
+    /* old system
     const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
     const AGeoParaboloid * para = dynamic_cast<const AGeoParaboloid*>(tmpShape ? tmpShape : obj->Shape);
     if (para)
@@ -1643,7 +1662,22 @@ void AGeoParaboloidDelegate::Update(const AGeoObject *obj)
         eu->setText(QString::number(para->rhi * 2.0));
         ez->setText(QString::number(para->dz  * 2.0));
     }
-    delete tmpShape;
+    delete tmpShape;*/
+
+    AGeoParaboloid * paraboloid = dynamic_cast<AGeoParaboloid*>(ShapeCopy);
+    if (!paraboloid)
+    {
+        //qDebug() <<"aaaaaaaaaaaaaaaa";
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+        paraboloid = dynamic_cast<AGeoParaboloid*>(scaled->BaseShape);
+    }
+    if (paraboloid)
+    {
+        el->setText(paraboloid->str2rlo.isEmpty() ? QString::number(paraboloid->rlo*2.0) : paraboloid->str2rhi);
+        eu->setText(paraboloid->str2rhi.isEmpty() ? QString::number(paraboloid->rhi*2.0) : paraboloid->str2rlo);
+        ez->setText(paraboloid->str2dz.isEmpty()  ? QString::number(paraboloid->dz*2.0)  : paraboloid->str2dz);
+    }
+    else qWarning() << "Update delegate: Paraboloid shape not found!";
 }
 
 void AGeoParaboloidDelegate::onLocalShapeParameterChange()

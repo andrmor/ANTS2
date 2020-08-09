@@ -1938,8 +1938,8 @@ bool AGeoWidget::checkDelegateValidity()
         QMessageBox::warning(this, "", QString("%1 name already exists").arg(newName));
         return false;
     }
-
-    return GeoDelegate->isValid(CurrentObject);
+    return true;
+    //return GeoDelegate->isValid(CurrentObject);
 }
 
 void AGeoWidget::onCancelPressed()

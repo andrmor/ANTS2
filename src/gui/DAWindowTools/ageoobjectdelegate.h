@@ -356,6 +356,8 @@ class AGeoParaboloidDelegate : public AGeoObjectDelegate
 public:
     AGeoParaboloidDelegate(const QStringList & materials, QWidget * parent);
 
+    void finalizeLocalParameters() override;
+
     QLineEdit * el = nullptr;
     QLineEdit * eu = nullptr;
     QLineEdit * ez = nullptr;

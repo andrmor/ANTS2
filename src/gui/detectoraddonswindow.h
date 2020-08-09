@@ -32,6 +32,7 @@ public:
 private slots:
   void onReconstructDetectorRequest();
   void onRequestUpdateWorldSize(double WorldSizeXY, double WorldSizeZ, bool fWorldSizeFixed);
+  void onGeoConstEditingFinished(int index, QString newValue);
 
   void on_tabwConstants_customContextMenuRequested(const QPoint &pos);
 

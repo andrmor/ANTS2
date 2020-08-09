@@ -272,30 +272,6 @@ void DetectorAddOnsWindow::ConvertDummyToPM(int idpm)
   Detector->PMdummies.remove(idpm);
 }
 
-#include "ageoconsts.h"
-#include <QTabWidget>
-void DetectorAddOnsWindow::updateGeoConstsIndication()
-{
-    ui->tabwConstants->clearContents();
-
-    const AGeoConsts & GC = AGeoConsts::getConstInstance();
-
-    const int numConsts = GC.countConstants();
-    const QVector<QString> & Names  = GC.getNames();
-    const QVector<double>  & Values = GC.getValues();
-
-    bGeoConstsWidgetUpdateInProgress = true; // -->
-        ui->tabwConstants->setRowCount(numConsts + 1);
-        for (int i = 0; i < numConsts; i++)
-        {
-            QTableWidgetItem * newItem = new QTableWidgetItem(Names.at(i));
-            ui->tabwConstants->setItem(i, 0, newItem);
-            newItem = new QTableWidgetItem(QString::number(Values.at(i)));
-            ui->tabwConstants->setItem(i, 1, newItem);
-        }
-    bGeoConstsWidgetUpdateInProgress = false; // <--
-}
-
 void DetectorAddOnsWindow::UpdateGeoTree(QString name)
 {
     twGeo->UpdateGui(name);
@@ -1335,15 +1311,129 @@ void DetectorAddOnsWindow::on_pbWorldTreeHelp_clicked()
     message(s, this);
 }
 
+#include "ageoconsts.h"
+#include <QTabWidget>
+void DetectorAddOnsWindow::updateGeoConstsIndication()
+{
+    ui->tabwConstants->clearContents();
+
+    const AGeoConsts & GC = AGeoConsts::getConstInstance();
+
+    const int numConsts = GC.countConstants();
+    const QVector<QString> & Names  = GC.getNames();
+    const QVector<double>  & Values = GC.getValues();
+
+    bGeoConstsWidgetUpdateInProgress = true; // -->
+        ui->tabwConstants->setRowCount(numConsts + 1);
+        for (int i = 0; i <= numConsts; i++)
+        {
+            const QString Name  = ( i == numConsts ? ""  : Names.at(i) );
+            const QString Value = ( i == numConsts ? "0" : QString::number(Values.at(i)) );
+
+            QTableWidgetItem * newItem = new QTableWidgetItem(Name);
+            ui->tabwConstants->setItem(i, 0, newItem);
+
+            QLineEdit * edit = new QLineEdit(Value, ui->tabwConstants);
+            edit->setValidator(new QDoubleValidator(edit));
+            edit->setFrame(false);
+            connect(edit, &QLineEdit::editingFinished, [this, i, edit](){this->onGeoConstEditingFinished(i, edit->text()); });
+            ui->tabwConstants->setCellWidget(i, 1, edit);
+        }
+    bGeoConstsWidgetUpdateInProgress = false; // <--
+}
+
+void DetectorAddOnsWindow::onGeoConstEditingFinished(int index, QString strNewValue)
+{
+    //qDebug() << "GeoConst value changed! index/text are:" << index << strNewValue;
+    AGeoConsts & GC = AGeoConsts::getInstance();
+
+    if (index == GC.countConstants()) return; // nothing to do yet - this constant is not yet defined
+
+    bool ok;
+    double val = strNewValue.toDouble(&ok);
+    if (!ok)
+    {
+        message("Bad format of the edited value of geometry constant!", this);
+        updateGeoConstsIndication();
+        return;
+    }
+    GC.setNewValue(index, val);
+
+    QString CurrentObjName = ( twGeo->GetEditWidget()->getCurrentObject() ? twGeo->GetEditWidget()->getCurrentObject()->Name : "" );
+    emit twGeo->RequestRebuildDetector();
+    twGeo->UpdateGui(CurrentObjName);
+}
+
+void DetectorAddOnsWindow::on_tabwConstants_cellChanged(int row, int column)
+{
+    if (column == 1) return; // only name change or new
+    if (bGeoConstsWidgetUpdateInProgress) return;
+
+    AGeoConsts & GC = AGeoConsts::getInstance();
+    const int numConsts = GC.countConstants();
+
+    if (numConsts == row)
+    {
+        //qDebug() << "Attempting to add new geometry constant";
+        QString Name = ui->tabwConstants->item(row, 0)->text().simplified();
+
+        QLineEdit * le = dynamic_cast<QLineEdit*>(ui->tabwConstants->cellWidget(row, 1));
+        if (!le)
+        {
+            message("Something went wrong!", this);
+            return;
+        }
+        bool ok;
+        double Value = le->text().toDouble(&ok);
+        if (!ok) Value = 0;
+
+        ok = GC.addNewConstant(Name, Value);
+        if (!ok)
+        {
+            message("This name is already in use", this);
+            updateGeoConstsIndication();
+            return;
+        }
+        MW->writeDetectorToJson(MW->Config->JSON);
+        updateGeoConstsIndication();
+    }
+    else
+    {
+        //qDebug() << "Attempting to change name of a geometry constant";
+        QString oldName = GC.getName(row);
+        QString newName = ui->tabwConstants->item(row, 0)->text().simplified();
+        if (oldName == newName) return;
+
+        bool ok = GC.rename(row, newName);
+        if (!ok)
+        {
+            message("This constant name is already in use!", this);
+            updateGeoConstsIndication();
+            return;
+        }
+        else
+        {
+            const QRegExp OldNameRegExp("\\b" + oldName + "\\b");
+            twGeo->Sandwich->World->replaceGeoConstNameRecursive(OldNameRegExp, newName);
+
+            QString CurrentObjName = ( twGeo->GetEditWidget()->getCurrentObject() ? twGeo->GetEditWidget()->getCurrentObject()->Name : "" );
+            emit twGeo->RequestRebuildDetector();
+            twGeo->UpdateGui(CurrentObjName);
+        }
+    }
+
+    updateGeoConstsIndication();
+}
+
 #include <QMenu>
 void DetectorAddOnsWindow::on_tabwConstants_customContextMenuRequested(const QPoint &pos)
 {
+    AGeoConsts & GC = AGeoConsts::getInstance();
     int index = ui->tabwConstants->currentRow();
 
     QMenu menu;
-    QAction * removeA = menu.addAction("Remove this constant"); removeA->setEnabled(index != -1);
+    QAction * removeA = menu.addAction("Remove selected constant"); removeA->setEnabled(index != -1 && index != GC.countConstants());
 
-    AGeoConsts & GC = AGeoConsts::getInstance();
     QAction * selected = menu.exec(ui->tabwConstants->mapToGlobal(pos));
     if (selected == removeA)
     {
@@ -1361,87 +1451,4 @@ void DetectorAddOnsWindow::on_tabwConstants_customContextMenuRequested(const QPo
         MW->writeDetectorToJson(MW->Config->JSON);
         updateGeoConstsIndication();
     }
-}
-
-void DetectorAddOnsWindow::on_tabwConstants_cellChanged(int row, int column)
-{
-    if (bGeoConstsWidgetUpdateInProgress) return;
-
-    AGeoConsts & GC = AGeoConsts::getInstance();
-    const int numConsts = GC.countConstants();
-
-    if (numConsts == row)
-    {
-        //new constant?
-        if (column == 1) return; //nothing yet to do
-
-        QString Name = ui->tabwConstants->item(row, 0)->text().simplified();
-        bool ok = false;
-        double Value;
-        QTableWidgetItem * item = ui->tabwConstants->item(row, 1);
-        if (item) Value = item->text().simplified().toDouble(&ok);
-        if (!ok)
-        {
-            Value = 0;
-            if (item) ui->tabwConstants->item(row, 1)->setText("0");
-            else
-            {
-                item = new QTableWidgetItem("0");
-                ui->tabwConstants->setItem(row, 1, item);
-            }
-        }
-
-        ok = GC.addNewConstant(Name, Value);
-        if (!ok)
-        {
-            message("This name is already in use", this);
-            updateGeoConstsIndication();
-            return;
-        }
-        MW->writeDetectorToJson(MW->Config->JSON);
-        updateGeoConstsIndication();
-    }
-    else if (column == 0)
-    {
-        //rename
-        QString oldName = GC.getName(row);
-        QString newName = ui->tabwConstants->item(row, 0)->text().simplified();
-        if (oldName == newName) return;
-
-        bool ok = GC.rename(row, newName);
-        if (!ok)
-        {
-            message("This constant name is already in use!", this);
-            updateGeoConstsIndication();
-            return;
-        }
-        else
-        {
-            const QRegExp OldNameRegExp("\\b" + oldName + "\\b");
-            twGeo->Sandwich->World->replaceGeoConstNameRecursive(OldNameRegExp, newName);
-            //twGeo->GetEditWidget()->onCancelPressed();
-            QString name = twGeo->GetEditWidget()->getCurrentObject()->Name;
-            twGeo->UpdateGui(name);
-        }
-    }
-    else
-    {
-        //new value
-        bool ok;
-        double newValue = ui->tabwConstants->item(row, 1)->text().toDouble(&ok);  // TODO add double validators!
-        if (!ok)
-        {
-            message("Format error: constant values have to be doubles", this);
-            updateGeoConstsIndication();
-            return;
-        }
-        GC.setNewValue(row, newValue);
-
-        //twGeo->GetEditWidget()->exitEditingMode();
-        QString name = twGeo->GetEditWidget()->getCurrentObject()->Name;
-        emit twGeo->RequestRebuildDetector();
-        twGeo->UpdateGui(name);
-    }
-
-    updateGeoConstsIndication();
 }

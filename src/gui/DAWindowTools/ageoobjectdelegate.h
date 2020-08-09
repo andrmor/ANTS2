@@ -349,7 +349,7 @@ private slots:
     void onLocalShapeParameterChange() override;
 };
 
-class AGeoParaboloidDelegate : public AGeoObjectDelegate
+class AGeoParaboloidDelegate : public AGeoObjectDelegate                      //paraboloiid
 {
     Q_OBJECT
 

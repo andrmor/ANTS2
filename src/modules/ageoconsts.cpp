@@ -26,15 +26,13 @@ void AGeoConsts::clearConstants()
 void AGeoConsts::writeToJson(QJsonObject & json) const
 {
     QJsonArray ar;
-
     for (int i = 0; i < Names.size(); i++)
     {
         QJsonArray el;
             el << Names.at(i) << Values.at(i);
         ar.push_back(el);
     }
-
-    json["Map"] = ar;
+    json["GeoConsts"] = ar;
 }
 
 void AGeoConsts::readFromJson(const QJsonObject & json)
@@ -42,7 +40,7 @@ void AGeoConsts::readFromJson(const QJsonObject & json)
     clearConstants();
 
     QJsonArray ar;
-    parseJson(json, "Map", ar);
+    parseJson(json, "GeoConsts", ar);
 
     const int size = ar.size();
     Names .resize(size);

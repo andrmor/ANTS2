@@ -967,9 +967,7 @@ void ASandwich::writeToJson(QJsonObject &json)
   World->writeAllToJarr(arrTree);
   js["WorldTree"] = arrTree;
 
-  QJsonObject jsGC;
-  AGeoConsts::getConstInstance().writeToJson(jsGC);
-  js["GeoConsts"] = jsGC;
+  AGeoConsts::getConstInstance().writeToJson(js);
 
   json["Sandwich"] = js;
 }
@@ -1002,9 +1000,8 @@ void ASandwich::readFromJson(QJsonObject &json)
 
       QJsonObject js = json["Sandwich"].toObject();
 
-      QJsonObject jsGC;
-      if (parseJson(js, "GeoConsts", jsGC))
-        AGeoConsts::getInstance().readFromJson(jsGC);
+      if (js.contains("GeoConsts"))
+        AGeoConsts::getInstance().readFromJson(js);
 
       if (js.contains("State"))
         {

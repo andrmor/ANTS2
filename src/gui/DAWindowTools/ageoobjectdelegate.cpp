@@ -108,17 +108,17 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
         hbsw->setContentsMargins(2,0,2,0);
         hbsw->addWidget(new QLabel("in X:"));
         ledScaleX = new QLineEdit("1.0"); hbsw->addWidget(ledScaleX);
-        connect(ledScaleX, &QLineEdit::textChanged, this, &AGeoObjectDelegate::onLocalShapeParameterChange); // !*! obsolete?
+        //connect(ledScaleX, &QLineEdit::textChanged, this, &AGeoObjectDelegate::onLocalShapeParameterChange); // !*! obsolete?
         connect(ledScaleX, &QLineEdit::editingFinished, this, &AGeoObjectDelegate::updateScalingFactors); // new
         connect(ledScaleX, &QLineEdit::textChanged, this, &AGeoObjectDelegate::onContentChanged);
         hbsw->addWidget(new QLabel("in Y:"));
         ledScaleY = new QLineEdit("1.0"); hbsw->addWidget(ledScaleY);
-        connect(ledScaleY, &QLineEdit::textChanged, this, &AGeoObjectDelegate::onLocalShapeParameterChange);
+        //connect(ledScaleY, &QLineEdit::textChanged, this, &AGeoObjectDelegate::onLocalShapeParameterChange);
         connect(ledScaleY, &QLineEdit::editingFinished, this, &AGeoObjectDelegate::updateScalingFactors); // new
         connect(ledScaleY, &QLineEdit::textChanged, this, &AGeoObjectDelegate::onContentChanged);
         hbsw->addWidget(new QLabel("in Z:"));
         ledScaleZ = new QLineEdit("1.0"); hbsw->addWidget(ledScaleZ);
-        connect(ledScaleZ, &QLineEdit::textChanged, this, &AGeoObjectDelegate::onLocalShapeParameterChange);
+        //connect(ledScaleZ, &QLineEdit::textChanged, this, &AGeoObjectDelegate::onLocalShapeParameterChange);
         connect(ledScaleZ, &QLineEdit::editingFinished, this, &AGeoObjectDelegate::updateScalingFactors); // new
         connect(ledScaleZ, &QLineEdit::textChanged, this, &AGeoObjectDelegate::onContentChanged);
     hbs->addWidget(scaleWidget);
@@ -339,7 +339,7 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
             obj->Shape = ShapeCopy->clone();
 
             AGeoComposite * comp2 =dynamic_cast<AGeoComposite*> (obj->Shape);
-            if (comp) qDebug() <<"after: "<<comp2->getGenerationString();
+            if (comp2) qDebug() <<"after: "<<comp2->getGenerationString();
         }
         else
         {

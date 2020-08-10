@@ -4,6 +4,7 @@
 #include "ageoshape.h"
 #include "ageoconsts.h"
 #include "amessage.h"
+#include "aonelinetextedit.h"
 
 #include <QDebug>
 #include <QWidget>
@@ -97,7 +98,7 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
     QHBoxLayout * hbs = new QHBoxLayout();
     hbs->setContentsMargins(2,0,2,0);
         hbs->addStretch();
-        cbScale = new QCheckBox("Apply scaling factors");
+        cbScale = new QCheckBox("Apply scaling");
         cbScale->setToolTip("Use scaling only if it is the only choice, e.g. to make ellipsoid from a sphere");
         connect(cbScale, &QCheckBox::clicked, this, &AGeoObjectDelegate::onLocalShapeParameterChange);  // !*! OLD SYSTEM
         connect(cbScale, &QCheckBox::clicked, this, &AGeoObjectDelegate::onScaleToggled); // new system
@@ -144,52 +145,34 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
     QGridLayout *gr = new QGridLayout();
     gr->setContentsMargins(10, 0, 10, 3);
     gr->setVerticalSpacing(1);
-      ledX = new QLineEdit();
-      ledX->setContextMenuPolicy(Qt::NoContextMenu);
-      connect(ledX, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
-      gr->addWidget(ledX, 0, 1);
-      ledY = new QLineEdit();
-      ledY->setContextMenuPolicy(Qt::NoContextMenu);
-      connect(ledY, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
-      gr->addWidget(ledY, 1, 1);
-      ledZ = new QLineEdit();
-      ledZ->setContextMenuPolicy(Qt::NoContextMenu);
-      connect(ledZ, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
-      gr->addWidget(ledZ, 2, 1);
 
-      ledPhi = new QLineEdit();
-      ledPhi->setContextMenuPolicy(Qt::NoContextMenu);
-      connect(ledPhi, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
-      gr->addWidget(ledPhi, 0, 3);
-      ledTheta = new QLineEdit();
-      ledTheta->setContextMenuPolicy(Qt::NoContextMenu);
-      connect(ledTheta, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
-      gr->addWidget(ledTheta, 1, 3);
-      ledPsi = new QLineEdit();
-      ledPsi->setContextMenuPolicy(Qt::NoContextMenu);
-      connect(ledPsi, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
-      gr->addWidget(ledPsi, 2, 3);
+      ledX     = new AOneLineTextEdit(); gr->addWidget(ledX,     0, 1);
+      ledY     = new AOneLineTextEdit(); gr->addWidget(ledY,     1, 1);
+      ledZ     = new AOneLineTextEdit(); gr->addWidget(ledZ,     2, 1);
+      ledPhi   = new AOneLineTextEdit(); gr->addWidget(ledPhi,   0, 3);
+      ledTheta = new AOneLineTextEdit(); gr->addWidget(ledTheta, 1, 3);
+      ledPsi   = new AOneLineTextEdit(); gr->addWidget(ledPsi,   2, 3);
 
-      QLabel *l = new QLabel("X:");
-      gr->addWidget(l, 0, 0);
-      l = new QLabel("Y:");
-      gr->addWidget(l, 1, 0);
-      l = new QLabel("Z:");
-      gr->addWidget(l, 2, 0);
+      QVector<AOneLineTextEdit*> ole = {ledX, ledY, ledZ, ledPhi, ledTheta, ledPsi};
+      for (AOneLineTextEdit * le : ole)
+      {
+          configureHighligherAndCompleter(le);
+          le->setContextMenuPolicy(Qt::NoContextMenu);
+          connect(le, &AOneLineTextEdit::textChanged, this, &AGeoObjectDelegate::onContentChanged);
+      }
 
-      l = new QLabel("mm    Phi:");
-      gr->addWidget(l, 0, 2);
-      l = new QLabel("mm  Theta:");
-      gr->addWidget(l, 1, 2);
-      l = new QLabel("mm    Psi:");
-      gr->addWidget(l, 2, 2);
+      QLabel * l;
+      l = new QLabel("X:");         gr->addWidget(l, 0, 0);
+      l = new QLabel("Y:");         gr->addWidget(l, 1, 0);
+      l = new QLabel("Z:");         gr->addWidget(l, 2, 0);
 
-      l = new QLabel("°");
-      gr->addWidget(l, 0, 4);
-      l = new QLabel("°");
-      gr->addWidget(l, 1, 4);
-      l = new QLabel("°");
-      gr->addWidget(l, 2, 4);
+      l = new QLabel("mm    Phi:"); gr->addWidget(l, 0, 2);
+      l = new QLabel("mm  Theta:"); gr->addWidget(l, 1, 2);
+      l = new QLabel("mm    Psi:"); gr->addWidget(l, 2, 2);
+
+      l = new QLabel("°");          gr->addWidget(l, 0, 4);
+      l = new QLabel("°");          gr->addWidget(l, 1, 4);
+      l = new QLabel("°");          gr->addWidget(l, 2, 4);
 
     PosOrient->setLayout(gr);
     lMF->addWidget(PosOrient);
@@ -199,22 +182,11 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
     lMF->addLayout(abl);
 
   frMainFrame->setLayout(lMF);
-
-  //installing double validators for edit boxes
-  /*
-  QDoubleValidator* dv = new QDoubleValidator(this);
-  dv->setNotation(QDoubleValidator::ScientificNotation);
-  ledX->setValidator(dv);
-  ledY->setValidator(dv);
-  ledZ->setValidator(dv);
-  ledPhi->setValidator(dv);
-  ledTheta->setValidator(dv);
-  ledPsi->setValidator(dv);*/
 }
 
 AGeoObjectDelegate::~AGeoObjectDelegate()
 {
-    delete ShapeCopy;
+    delete ShapeCopy; ShapeCopy = nullptr;
 }
 
 const QString AGeoObjectDelegate::getName() const
@@ -287,7 +259,7 @@ bool AGeoObjectDelegate::isValid(AGeoObject * obj)
     return true;
 }
 
-bool processEditBox(QLineEdit* lineEdit, double & val, QString & str, QWidget * parent)
+bool processEditBox(AOneLineTextEdit * lineEdit, double & val, QString & str, QWidget * parent)
 {
     str = lineEdit->text();
     const AGeoConsts & gConsts = AGeoConsts::getConstInstance();
@@ -362,9 +334,9 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
             << obj->Orientation[0] << obj->Orientation[1] << obj->Orientation[2];
 
         bool ok = true;
-        ok = ok && processEditBox(ledX, obj->Position[0], obj->PositionStr[0], ParentWidget);
-        ok = ok && processEditBox(ledY, obj->Position[1], obj->PositionStr[1], ParentWidget);
-        ok = ok && processEditBox(ledZ, obj->Position[2], obj->PositionStr[2], ParentWidget);
+        ok = ok && processEditBox(ledX,     obj->Position[0],    obj->PositionStr[0],    ParentWidget);
+        ok = ok && processEditBox(ledY,     obj->Position[1],    obj->PositionStr[1],    ParentWidget);
+        ok = ok && processEditBox(ledZ,     obj->Position[2],    obj->PositionStr[2],    ParentWidget);
         ok = ok && processEditBox(ledPhi,   obj->Orientation[0], obj->OrientationStr[0], ParentWidget);
         ok = ok && processEditBox(ledTheta, obj->Orientation[1], obj->OrientationStr[1], ParentWidget);
         ok = ok && processEditBox(ledPsi,   obj->Orientation[2], obj->OrientationStr[2], ParentWidget);
@@ -776,9 +748,6 @@ void AShapeHighlighter::highlightBlock(const QString &text)
 }
 
 //---------------
-#include "aonelinetextedit.h"
-#include <QTextDocument>
-
 AGeoBoxDelegate::AGeoBoxDelegate(const QStringList &materials, QWidget *parent)
     : AGeoObjectDelegate(materials, parent)
 {
@@ -800,13 +769,9 @@ AGeoBoxDelegate::AGeoBoxDelegate(const QStringList &materials, QWidget *parent)
     gr->addWidget(new QLabel("Y full size:"), 1, 0);
     gr->addWidget(new QLabel("Z full size:"), 2, 0);
 
-    ex = new QLineEdit(); gr->addWidget(ex, 0, 1);
-    ey = new QLineEdit(); gr->addWidget(ey, 1, 1);
-    ez = new QLineEdit(); gr->addWidget(ez, 2, 1);
-
-    AOneLineTextEdit * le = new AOneLineTextEdit();
-    configureHighligherAndCompleter(le);
-    gr->addWidget(le, 0, 3);
+    ex = new AOneLineTextEdit(); gr->addWidget(ex, 0, 1);
+    ey = new AOneLineTextEdit(); gr->addWidget(ey, 1, 1);
+    ez = new AOneLineTextEdit(); gr->addWidget(ez, 2, 1);
 
     gr->addWidget(new QLabel("mm"), 0, 2);
     gr->addWidget(new QLabel("mm"), 1, 2);
@@ -814,11 +779,11 @@ AGeoBoxDelegate::AGeoBoxDelegate(const QStringList &materials, QWidget *parent)
 
     addLocalLayout(gr);
 
-    QVector<QLineEdit*> l = {ex, ey, ez};
-    for (QLineEdit * le : l)
+    QVector<AOneLineTextEdit*> l = {ex, ey, ez};
+    for (AOneLineTextEdit * le : l)
     {
-        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoBoxDelegate::ContentChanged);
-        //QObject::connect(le, &QLineEdit::editingFinished, this, &AGeoBoxDelegate::onLocalShapeParameterChange);
+        configureHighligherAndCompleter(le);
+        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoBoxDelegate::ContentChanged);
     }
 }
 
@@ -918,9 +883,9 @@ AGeoTubeDelegate::AGeoTubeDelegate(const QStringList & materials, QWidget *paren
     gr->addWidget(new QLabel("Inner diameter:"), 1, 0);
     gr->addWidget(new QLabel("Height:"), 2,0);
 
-    eo = new QLineEdit(); gr->addWidget(eo, 0, 1);
-    ei = new QLineEdit(); gr->addWidget(ei, 1, 1);
-    ez = new QLineEdit(); gr->addWidget(ez, 2, 1);
+    eo = new AOneLineTextEdit(); gr->addWidget(eo, 0, 1);
+    ei = new AOneLineTextEdit(); gr->addWidget(ei, 1, 1);
+    ez = new AOneLineTextEdit(); gr->addWidget(ez, 2, 1);
 
     gr->addWidget(new QLabel("mm"), 0, 2);
     gr->addWidget(new QLabel("mm"), 1, 2);
@@ -928,13 +893,12 @@ AGeoTubeDelegate::AGeoTubeDelegate(const QStringList & materials, QWidget *paren
 
     addLocalLayout(gr);
 
-    QVector<QLineEdit*> l = {eo, ei, ez};
-    for (QLineEdit * le : l)
+    QVector<AOneLineTextEdit*> l = {eo, ei, ez};
+    for (AOneLineTextEdit * le : l)
     {
-        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoTubeDelegate::ContentChanged);
-        //QObject::connect(le, &QLineEdit::editingFinished, this, &AGeoTubeDelegate::onLocalShapeParameterChange);
+        configureHighligherAndCompleter(le);
+        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoTubeDelegate::ContentChanged);
     }
-
 }
 
 void AGeoTubeDelegate::finalizeLocalParameters()

@@ -28,6 +28,7 @@ class QLayout;
 class QDialog;
 class QListWidget;
 class QTableWidget;
+class AOneLineTextEdit;
 
 class AGeoObjectDelegate : public AGeoBaseDelegate
 {
@@ -71,8 +72,8 @@ protected:
     QLabel* lMat;
     QSpinBox *sbNumX, *sbNumY, *sbNumZ;
     QLineEdit *ledStepX, *ledStepY, *ledStepZ;
-    QLineEdit *ledX, *ledY, *ledZ;
-    QLineEdit *ledPhi, *ledTheta, *ledPsi;
+    AOneLineTextEdit *ledX,   *ledY,     *ledZ;
+    AOneLineTextEdit *ledPhi, *ledTheta, *ledPsi;
 
 public slots:
     void Update(const AGeoObject * obj) override;
@@ -111,9 +112,9 @@ public:
 
     void finalizeLocalParameters();
 
-    QLineEdit * ex = nullptr;
-    QLineEdit * ey = nullptr;
-    QLineEdit * ez = nullptr;
+    AOneLineTextEdit * ex = nullptr;
+    AOneLineTextEdit * ey = nullptr;
+    AOneLineTextEdit * ez = nullptr;
 
 public slots:
     void Update(const AGeoObject * obj) override;
@@ -155,9 +156,9 @@ public:
 
     void finalizeLocalParameters();
 
-    QLineEdit * ei = nullptr;
-    QLineEdit * eo = nullptr;
-    QLineEdit * ez = nullptr;
+    AOneLineTextEdit * ei = nullptr;
+    AOneLineTextEdit * eo = nullptr;
+    AOneLineTextEdit * ez = nullptr;
 
 protected:
     QGridLayout * gr = nullptr;

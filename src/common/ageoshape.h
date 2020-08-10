@@ -489,6 +489,10 @@ public:
   const QString getShapeType() const override {return "TGeoEltu";}
   virtual const QString getShapeTemplate() {return "TGeoEltu( a, b, dz )";}
   virtual const QString getHelp();
+  QString updateShape() override;
+
+  bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
+  void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
 
   virtual bool readFromString(QString GenerationString);
   virtual TGeoShape* createGeoShape(const QString shapeName = "");
@@ -504,6 +508,7 @@ public:
   virtual bool readFromTShape(TGeoShape* Tshape);
 
   double a, b, dz;
+  QString str2a, str2b, str2dz;
 };
 
 class AGeoSphere : public AGeoShape

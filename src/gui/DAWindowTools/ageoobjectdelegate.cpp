@@ -1440,13 +1440,34 @@ AGeoElTubeDelegate::AGeoElTubeDelegate(const QStringList &materials, QWidget *pa
 
     QVector<QLineEdit*> l = {ex, ey, ez};
     for (QLineEdit * le : l)
-        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoElTubeDelegate::onLocalShapeParameterChange);
+        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoElTubeDelegate::ContentChanged);
+        //QObject::connect(le, &QLineEdit::textChanged, this, &AGeoElTubeDelegate::onLocalShapeParameterChange);
+}
+
+void AGeoElTubeDelegate::finalizeLocalParameters()
+{
+    AGeoEltu* elTube = dynamic_cast<AGeoEltu*>(ShapeCopy);
+    if (!elTube)
+    {
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*> (ShapeCopy);
+        elTube = dynamic_cast<AGeoEltu*> (scaled->BaseShape);
+    }
+    if (elTube)
+    {
+        elTube->str2a  = ex->text();
+        elTube->str2b  = ey->text();
+        elTube->str2dz = ez->text();
+
+        //emit ContentChanged();
+    }
+    else qWarning() << "Read delegate: EllipticalTube shape not found!";
 }
 
 void AGeoElTubeDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
 
+    /* old system
     const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
     const AGeoEltu * tube = dynamic_cast<const AGeoEltu*>(tmpShape ? tmpShape : obj->Shape);
     if (tube)
@@ -1455,7 +1476,21 @@ void AGeoElTubeDelegate::Update(const AGeoObject *obj)
         ey->setText(QString::number(tube->b*2.0));
         ez->setText(QString::number(tube->dz*2.0));
     }
-    delete tmpShape;
+    delete tmpShape;*/
+
+    AGeoEltu * elTube = dynamic_cast<AGeoEltu*> (ShapeCopy);
+    if (!elTube)
+    {
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*> (ShapeCopy);
+        elTube = dynamic_cast<AGeoEltu*> (scaled->BaseShape);
+    }
+    if (elTube)
+    {
+        ex->setText(elTube->str2a .isEmpty() ? QString::number(elTube-> a*2.0) : elTube->str2a);
+        ey->setText(elTube->str2b .isEmpty() ? QString::number(elTube-> b*2.0) : elTube->str2b);
+        ez->setText(elTube->str2dz.isEmpty() ? QString::number(elTube->dz*2.0) : elTube->str2dz);
+    }
+    else qWarning() << "Update delegate: Elliptical Tube shape not found!";
 }
 
 void AGeoElTubeDelegate::onLocalShapeParameterChange()

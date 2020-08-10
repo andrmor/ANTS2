@@ -214,6 +214,8 @@ class AGeoElTubeDelegate : public AGeoObjectDelegate
 public:
     AGeoElTubeDelegate(const QStringList & materials, QWidget * parent);
 
+    void finalizeLocalParameters();
+
     QLineEdit * ex = nullptr;
     QLineEdit * ey = nullptr;
     QLineEdit * ez = nullptr;

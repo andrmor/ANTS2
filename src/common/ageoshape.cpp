@@ -1429,6 +1429,34 @@ const QString AGeoEltu::getHelp()
     return "An elliptical tube is defined by the two semi-axes a and b. It ranges from –dz to +dz in Z direction.";
 }
 
+QString AGeoEltu::updateShape()
+{
+    QString errorStr = updateParameter(str2a,  a);
+    if (!errorStr.isEmpty()) return errorStr;
+
+    errorStr = updateParameter        (str2b,  b);
+    if (!errorStr.isEmpty()) return errorStr;
+
+    errorStr = updateParameter        (str2dz, dz);
+    return errorStr;
+}
+
+bool AGeoEltu::isGeoConstInUse(const QRegExp &nameRegExp) const
+{
+    if (str2a .contains(nameRegExp)) return true;
+    if (str2b .contains(nameRegExp)) return true;
+    if (str2dz.contains(nameRegExp)) return true;
+
+    return false;
+}
+
+void AGeoEltu::replaceGeoConstName(const QRegExp &nameRegExp, const QString &newName)
+{
+    str2a .replace(nameRegExp, newName);
+    str2b .replace(nameRegExp, newName);
+    str2dz.replace(nameRegExp, newName);
+}
+
 bool AGeoEltu::readFromString(QString GenerationString)
 {
     QStringList params;
@@ -1476,16 +1504,24 @@ double AGeoEltu::maxSize()
 
 void AGeoEltu::writeToJson(QJsonObject &json) const
 {
-    json["a"] = a;
-    json["b"] = b;
+    json["a"]  = a;
+    json["b"]  = b;
     json["dz"] = dz;
+
+    if (!str2a .isEmpty()) json["str2a"]  = str2a;
+    if (!str2b .isEmpty()) json["str2b"]  = str2b;
+    if (!str2dz.isEmpty()) json["str2dz"] = str2dz;
 }
 
 void AGeoEltu::readFromJson(QJsonObject &json)
 {
-    a  = json["a"].toDouble();
-    b  = json["b"].toDouble();
+    a  = json["a"] .toDouble();
+    b  = json["b"] .toDouble();
     dz = json["dz"].toDouble();
+
+    if (!parseJson(json, "str2a", str2a))   str2a.clear();  else updateParameter(str2a,  a);
+    if (!parseJson(json, "str2b", str2b))   str2b.clear();  else updateParameter(str2b,  b);
+    if (!parseJson(json, "str2dz", str2dz)) str2dz.clear(); else updateParameter(str2dz, dz);
 }
 
 bool AGeoEltu::readFromTShape(TGeoShape *Tshape)

@@ -32,11 +32,13 @@ public:
   void SelectObjects(QStringList ObjectNames);
   void SetLineAttributes(QString ObjectName);
 
+
 public slots:
   void UpdateGui(QString selected = "");
   void onGridReshapeRequested(QString objName);
   void objectMembersToScript(AGeoObject *Master, QString &script, int ident, bool bExpandMaterial, bool bRecursive);
   void objectToScript(AGeoObject *obj, QString &script, int ident, bool bExpandMaterial, bool bRecursive);
+  void rebuildDetetctorAndRestoreCurrentDelegate();
 
 private slots:
   void onItemSelectionChanged();

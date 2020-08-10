@@ -87,6 +87,8 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(QWidget * parent, MainWindow * MW, De
   ui->frObjectEditor->setPalette( palette );
   ui->frObjectEditor->setAutoFillBackground( true );
 
+  connect(this, &DetectorAddOnsWindow::requestDelayedRebuildAndRestoreDelegate, twGeo, &AGeoTreeWidget::rebuildDetetctorAndRestoreCurrentDelegate, Qt::QueuedConnection);
+
   QPalette p = ui->pteTP->palette();
   p.setColor(QPalette::Active, QPalette::Base, QColor(220,220,220));
   p.setColor(QPalette::Inactive, QPalette::Base, QColor(220,220,220));
@@ -1360,9 +1362,8 @@ void DetectorAddOnsWindow::onGeoConstEditingFinished(int index, QString strNewVa
     }
     GC.setNewValue(index, val);
 
-    QString CurrentObjName = ( twGeo->GetEditWidget()->getCurrentObject() ? twGeo->GetEditWidget()->getCurrentObject()->Name : "" );
-    emit twGeo->RequestRebuildDetector();
-    twGeo->UpdateGui(CurrentObjName);
+    //QTimer::singleShot(50, twGeo, &AGeoTreeWidget::rebuildDetetctorAndRestoreCurrentDelegate); // to avoid focus on to_be_destroyed delegate
+    emit requestDelayedRebuildAndRestoreDelegate();
 }
 
 void DetectorAddOnsWindow::onGeoConstEscapePressed(int /*index*/)
@@ -1401,7 +1402,6 @@ void DetectorAddOnsWindow::on_tabwConstants_cellChanged(int row, int column)
             return;
         }
         MW->writeDetectorToJson(MW->Config->JSON);
-        updateGeoConstsIndication();
     }
     else
     {
@@ -1422,9 +1422,8 @@ void DetectorAddOnsWindow::on_tabwConstants_cellChanged(int row, int column)
             const QRegExp OldNameRegExp("\\b" + oldName + "\\b");
             twGeo->Sandwich->World->replaceGeoConstNameRecursive(OldNameRegExp, newName);
 
-            QString CurrentObjName = ( twGeo->GetEditWidget()->getCurrentObject() ? twGeo->GetEditWidget()->getCurrentObject()->Name : "" );
-            emit twGeo->RequestRebuildDetector();
-            twGeo->UpdateGui(CurrentObjName);
+            //QTimer::singleShot(50, twGeo, &AGeoTreeWidget::rebuildDetetctorAndRestoreCurrentDelegate); // to avoid focus on to_be_destroyed delegate
+            emit requestDelayedRebuildAndRestoreDelegate();
         }
     }
 
@@ -1469,3 +1468,12 @@ void ALineEditWithEscape::keyPressEvent(QKeyEvent *event)
     }
     else QLineEdit::keyPressEvent(event);
 }
+
+/*
+void ALineEditWithEscape::focusInEvent(QFocusEvent * event)
+{
+    emit gotFocus();
+    QLineEdit::focusInEvent(event);
+}
+*/
+

@@ -79,7 +79,6 @@ private slots:
 
   void on_pbWorldTreeHelp_clicked();
 
-
   void on_tabwConstants_cellChanged(int row, int column);
 
 private:
@@ -107,6 +106,9 @@ public slots:
   void ShowObjectRecursive(QString name);
   void OnrequestShowMonitor(const AGeoObject* mon);
 
+signals:
+  void requestDelayedRebuildAndRestoreDelegate();
+
 };
 
 #include <QLineEdit>
@@ -118,9 +120,11 @@ public:
 
 protected:
     void keyPressEvent(QKeyEvent * event);
+    //void focusInEvent(QFocusEvent * event);
 
 signals:
     void escapePressed();
+    //void gotFocus();
 };
 
 #endif // DETECTORADDONSWINDOW_H

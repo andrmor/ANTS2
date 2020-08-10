@@ -1381,6 +1381,13 @@ void AGeoTreeWidget::objectToScript(AGeoObject *obj, QString &script, int ident,
     }
 }
 
+void AGeoTreeWidget::rebuildDetetctorAndRestoreCurrentDelegate()
+{
+    const QString CurrentObjName = ( EditWidget->getCurrentObject() ? EditWidget->getCurrentObject()->Name : "" );
+    emit RequestRebuildDetector();
+    UpdateGui(CurrentObjName);
+}
+
 const QString AGeoTreeWidget::makeScriptString_basicObject(AGeoObject* obj, bool bExpandMaterials) const
 {
     return  QString("geo.TGeo( ") +

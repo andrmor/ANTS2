@@ -54,6 +54,7 @@ void AOneLineTextEdit::insertCompletion(const QString &completion)
 
 void AOneLineTextEdit::keyPressEvent(QKeyEvent * e)
 {
+    //qDebug() << "Key pressed:" << e->text();
     if ( !Completer || (Completer && !Completer->popup()->isVisible()) )
     {
         if (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter)
@@ -75,9 +76,9 @@ void AOneLineTextEdit::keyPressEvent(QKeyEvent * e)
         // The following keys are forwarded by the completer to the widget
         switch (e->key())
         {
-        case Qt::Key_Tab:
+        case Qt::Key_Right:
         {
-            //qDebug() << "Tab pressed when completer is active";
+            //qDebug() << "Tab pressed when completer is active";  // Tab is not intercepted, using right arrow instead
             //QString startsWith = c->completionPrefix();
             int i = 0;
             QAbstractItemModel * m = Completer->completionModel();
@@ -165,33 +166,6 @@ void AOneLineTextEdit::focusOutEvent(QFocusEvent *event)
 
 QSize AOneLineTextEdit::sizeHint() const
 {
-    /*
-    QFontMetrics fm(font());
-    int h = qMax(fm.height(), 14) + 4;
-    int w = fm.width(QLatin1Char('x')) * 17 + 4;
-    QStyleOptionFrameV2 opt;
-    opt.initFrom(this);
-    return (style()->sizeFromContents(QStyle::CT_LineEdit, &opt, QSize(w, h).
-                                      expandedTo(QApplication::globalStrut()), this));
-                                      */
-    /*
-    QFontMetrics fm(font());
-    QStyleOptionFrame opt;
-    QString text = document()->toPlainText();
-
-    int h = qMax(fm.height(), 14) + 4;
-    int w = fm.width(text) + 4;
-
-    opt.initFrom(this);
-
-    return style()->sizeFromContents(
-                QStyle::CT_LineEdit,
-                &opt,
-                QSize(w, h).expandedTo(QApplication::globalStrut()),
-                this
-                );
-                */
-
     ensurePolished();
     QFontMetrics fm(font());
     const int iconSize = style()->pixelMetric(QStyle::PM_SmallIconSize, 0, this);

@@ -177,6 +177,8 @@ class AGeoTubeSegDelegate : public AGeoTubeDelegate
 public:
     AGeoTubeSegDelegate(const QStringList & materials, QWidget * parent);
 
+    void finalizeLocalParameters();
+
     QLineEdit * ep1 = nullptr;
     QLineEdit * ep2 = nullptr;
 

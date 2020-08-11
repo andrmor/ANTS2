@@ -994,13 +994,37 @@ AGeoTubeSegDelegate::AGeoTubeSegDelegate(const QStringList & materials, QWidget 
 
     QVector<QLineEdit*> l = {ep1, ep2};
     for (QLineEdit * le : l)
-        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoTubeSegDelegate::onLocalShapeParameterChange);
+        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoTubeSegDelegate::ContentChanged);
+        //QObject::connect(le, &QLineEdit::textChanged, this, &AGeoTubeSegDelegate::onLocalShapeParameterChange);
+}
+
+void AGeoTubeSegDelegate::finalizeLocalParameters()
+{
+    AGeoTubeSeg * tubeSeg = dynamic_cast<AGeoTubeSeg*>(ShapeCopy);
+        if (!tubeSeg)
+        {
+            AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+            tubeSeg = dynamic_cast<AGeoTubeSeg*>(scaled->BaseShape);
+        }
+
+        if (tubeSeg)
+        {
+            tubeSeg->str2rmin = ei ->text();
+            tubeSeg->str2rmax = eo ->text();
+            tubeSeg->str2dz   = ez ->text();
+            tubeSeg->str2phi1 = ep1->text();
+            tubeSeg->str2phi2 = ep2->text();
+            //emit ContentChanged();
+        }
+        else qWarning() << "Read delegate: Tube Segment shape not found!";
+
 }
 
 void AGeoTubeSegDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
 
+    /* old system
     const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
     const AGeoTubeSeg * seg = dynamic_cast<const AGeoTubeSeg*>(tmpShape ? tmpShape : obj->Shape);
     if (seg)
@@ -1011,13 +1035,31 @@ void AGeoTubeSegDelegate::Update(const AGeoObject *obj)
         ep1->setText(QString::number(seg->phi1));
         ep2->setText(QString::number(seg->phi2));
     }
-    delete tmpShape;
+    delete tmpShape;*/
+
+    AGeoTubeSeg * tubeSeg = dynamic_cast<AGeoTubeSeg*>(ShapeCopy);
+        if (!tubeSeg)
+        {
+            AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+            tubeSeg = dynamic_cast<AGeoTubeSeg*>(scaled->BaseShape);
+        }
+
+        if (tubeSeg)
+        {
+            ei ->setText(tubeSeg->str2rmin.isEmpty() ? QString::number(tubeSeg->rmin*2.0) : tubeSeg->str2rmin);
+            eo ->setText(tubeSeg->str2rmax.isEmpty() ? QString::number(tubeSeg->rmax*2.0) : tubeSeg->str2rmax);
+            ez ->setText(tubeSeg->str2dz  .isEmpty() ? QString::number(tubeSeg->dz  *2.0) : tubeSeg->str2dz);
+            ep1->setText(tubeSeg->str2phi1.isEmpty() ? QString::number(tubeSeg->phi1)     : tubeSeg->str2phi1);
+            ep2->setText(tubeSeg->str2phi2.isEmpty() ? QString::number(tubeSeg->phi2)     : tubeSeg->str2phi2);
+            //emit ContentChanged();
+        }
+        else qWarning() << "Read delegate: Tube Segment shape not found!";
 }
 
 void AGeoTubeSegDelegate::onLocalShapeParameterChange()
 {
-    updatePteShape(QString("TGeoTubeSeg( %1, %2, %3, %4, %5 )").arg(0.5*ei->text().toDouble()).arg(0.5*eo->text().toDouble()).arg(0.5*ez->text().toDouble())
-                                                               .arg(ep1->text()).arg(ep2->text()) );
+    /*updatePteShape(QString("TGeoTubeSeg( %1, %2, %3, %4, %5 )").arg(0.5*ei->text().toDouble()).arg(0.5*eo->text().toDouble()).arg(0.5*ez->text().toDouble())
+                                                               .arg(ep1->text()).arg(ep2->text()) );*/
 }
 
 AGeoTubeSegCutDelegate::AGeoTubeSegCutDelegate(const QStringList &materials, QWidget *parent) :

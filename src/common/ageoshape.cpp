@@ -443,12 +443,12 @@ bool AGeoSphere::readFromTShape(TGeoShape *Tshape)
     TGeoSphere* s = dynamic_cast<TGeoSphere*>(Tshape);
     if (!s) return false;
 
-    rmin = s->GetRmin();
-    rmax = s->GetRmax();
+    rmin   = s->GetRmin();
+    rmax   = s->GetRmax();
     theta1 = s->GetTheta1();
     theta2 = s->GetTheta2();
-    phi1 = s->GetPhi1();
-    phi2 = s->GetPhi2();
+    phi1   = s->GetPhi1();
+    phi2   = s->GetPhi2();
 
     return true;
 }
@@ -461,6 +461,48 @@ const QString AGeoTubeSeg::getHelp()
            "negative or positive values. They are stored such that phi1 is converted to [0,360] and phi2 > phi1.\n"
            "Tube segments have Z as their symmetry axis. They have a range in Z, a minimum (rmin) and a maximum (rmax) radius.\n"
            "The full Z range is from -dz to +dz.";
+}
+
+QString AGeoTubeSeg::updateShape()
+{
+    QString errorStr;
+
+    errorStr = updateParameter (str2rmin, rmin, false);
+    if (!errorStr.isEmpty()) return errorStr;
+
+    errorStr = updateParameter (str2rmax, rmax);
+    if (!errorStr.isEmpty()) return errorStr;
+
+    if (rmin >= rmax) return "Inside diameter should be smaller than the outside one!";
+
+    errorStr = updateParameter (str2dz,   dz);
+    if (!errorStr.isEmpty()) return errorStr;
+
+    errorStr = updateParameter (str2phi1, phi1, false, false, false);
+    if (!errorStr.isEmpty()) return errorStr;
+
+    errorStr = updateParameter (str2phi2, phi2, false, false, false);
+    return errorStr;
+}
+
+bool AGeoTubeSeg::isGeoConstInUse(const QRegExp &nameRegExp) const
+{
+    if (str2rmin.contains(nameRegExp)) return true;
+    if (str2rmax.contains(nameRegExp)) return true;
+    if (str2dz  .contains(nameRegExp)) return true;
+    if (str2phi1.contains(nameRegExp)) return true;
+    if (str2phi2.contains(nameRegExp)) return true;
+
+    return false;
+}
+
+void AGeoTubeSeg::replaceGeoConstName(const QRegExp &nameRegExp, const QString &newName)
+{
+    str2rmin.replace(nameRegExp, newName);
+    str2rmax.replace(nameRegExp, newName);
+    str2dz  .replace(nameRegExp, newName);
+    str2phi1.replace(nameRegExp, newName);
+    str2phi2.replace(nameRegExp, newName);
 }
 
 bool AGeoTubeSeg::readFromString(QString GenerationString)
@@ -515,18 +557,31 @@ void AGeoTubeSeg::writeToJson(QJsonObject &json) const
 {
     json["rmin"] = rmin;
     json["rmax"] = rmax;
-    json["dz"] = dz;
+    json["dz"]   = dz;
     json["phi1"] = phi1;
     json["phi2"] = phi2;
+
+    if (!str2rmin.isEmpty()) json["str2rmin"] = str2rmin;
+    if (!str2rmax.isEmpty()) json["str2rmax"] = str2rmax;
+    if (!str2dz  .isEmpty()) json["str2dz"]   = str2dz;
+    if (!str2phi1.isEmpty()) json["str2phi1"] = str2phi1;
+    if (!str2phi2.isEmpty()) json["str2phi2"] = str2phi2;
+
 }
 
 void AGeoTubeSeg::readFromJson(QJsonObject &json)
 {
     rmin = json["rmin"].toDouble();
     rmax = json["rmax"].toDouble();
-    dz = json["dz"].toDouble();
+    dz   = json["dz"]  .toDouble();
     phi1 = json["phi1"].toDouble();
     phi2 = json["phi2"].toDouble();
+
+    if (!parseJson(json, "str2rmin", str2rmin)) str2rmin.clear();
+    if (!parseJson(json, "str2rmax", str2rmax)) str2rmax.clear();
+    if (!parseJson(json, "str2dz"  , str2dz))   str2dz.clear();
+    if (!parseJson(json, "str2phi1", str2phi1)) str2phi1.clear();
+    if (!parseJson(json, "str2phi2", str2phi2)) str2phi2.clear();
 }
 
 bool AGeoTubeSeg::readFromTShape(TGeoShape *Tshape)

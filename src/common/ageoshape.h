@@ -423,6 +423,11 @@ public:
   const QString getShapeType() const override {return "TGeoTubeSeg";}
   virtual const QString getShapeTemplate() {return "TGeoTubeSeg( rmin, rmax, dz, phi1, phi2 )";}
   virtual const QString getHelp();
+  QString updateShape() override;
+
+  bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
+  void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
+
 
   virtual bool readFromString(QString GenerationString);
   virtual TGeoShape* createGeoShape(const QString shapeName = "");
@@ -438,6 +443,7 @@ public:
   virtual bool readFromTShape(TGeoShape* Tshape);
 
   double rmin, rmax, dz, phi1, phi2;
+  QString str2rmin, str2rmax, str2dz, str2phi1, str2phi2;
 };
 
 class AGeoCtub : public AGeoShape

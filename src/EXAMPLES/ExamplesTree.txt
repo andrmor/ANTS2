@@ -27,6 +27,7 @@ define:ANTS2 tests:Optical grids
 define:ANTS2 tests:WavelengthShifters
 define:ANTS2 tests:NCrystal
 define:ANTS2 tests:SecScintDiffusion
+define:ANTS2 tests:Shapes
 
 define:Startup:Startup
 
@@ -42,6 +43,7 @@ add:ANTS2 tests:WavelengthShifters:SurfaceWavelengthShifter.json:Detector with a
 add:ANTS2 tests:WavelengthShifters:WavelengthShiftingFibers.json:A detector concept based on Wavelength Shifting Fibers. Simplest possible way to configure - just two wavelengths.
 add:ANTS2 tests:NCrystal:NCrystal_AlPlate.json:Al plate and two monitors. ANTS2 has to be compiled with NCrystal support!
 add:ANTS2 tests:SecScintDiffusion:SecScintDiffusion.json:Secondary scintillation with activated electron diffusion
+add:ANTS2 tests:Shapes:ShapeShowcase.json:ROOT shapes and geo constants
 
 add:Gamma cameras:SiPM-based:NewGenSiPM64.json:30x30x2 mm3 LYSO crystal with 8 x 8 SiPMs; NaturalLYSO, Co-57 and Na-22 sources
 add:Gamma cameras:SiPM-based:SiPM_64cross.json:30x30x5 mm3 LYSO crystal with 4 x 16-elements SensL SiPMs, ceramic holders; NaturalLYSO, Co-57 and Na-22 sources

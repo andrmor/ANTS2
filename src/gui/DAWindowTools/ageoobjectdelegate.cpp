@@ -262,8 +262,17 @@ bool AGeoObjectDelegate::isValid(AGeoObject * obj)
 bool processEditBox(AOneLineTextEdit * lineEdit, double & val, QString & str, QWidget * parent)
 {
     str = lineEdit->text();
+
+    bool ok;
+    val = str.toDouble(&ok);
+    if (ok)
+    {
+        str.clear();
+        return true;
+    }
+
     const AGeoConsts & gConsts = AGeoConsts::getConstInstance();
-    bool ok = gConsts.evaluateFormula(str, val);
+    ok = gConsts.evaluateFormula(str, val);
     if (ok) return true;
 
     qWarning () << "Bad format:" << str;
@@ -987,18 +996,20 @@ AGeoTubeSegDelegate::AGeoTubeSegDelegate(const QStringList & materials, QWidget 
             "Implemented using TGeoTubeSeg(0.5*Inner_diameter, 0.5*Outer_diameter, 0.5*Height, phi_from, phi_to)";
 
     gr->addWidget(new QLabel("Phi from:"), 3, 0);
-    gr->addWidget(new QLabel("Phi to:"), 4, 0);
+    gr->addWidget(new QLabel("Phi to:"),   4, 0);
 
-    ep1 = new QLineEdit(); gr->addWidget(ep1, 3, 1);
-    ep2 = new QLineEdit(); gr->addWidget(ep2, 4, 1);
+    ep1 = new AOneLineTextEdit(); gr->addWidget(ep1, 3, 1);
+    ep2 = new AOneLineTextEdit(); gr->addWidget(ep2, 4, 1);
 
     gr->addWidget(new QLabel("°"), 3, 2);
     gr->addWidget(new QLabel("°"), 4, 2);
 
-    QVector<QLineEdit*> l = {ep1, ep2};
-    for (QLineEdit * le : l)
-        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoTubeSegDelegate::ContentChanged);
-        //QObject::connect(le, &QLineEdit::textChanged, this, &AGeoTubeSegDelegate::onLocalShapeParameterChange);
+    QVector<AOneLineTextEdit*> l = {ep1, ep2};
+    for (AOneLineTextEdit * le : l)
+    {
+        configureHighligherAndCompleter(le);
+        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoTubeSegDelegate::ContentChanged);
+    }
 }
 
 void AGeoTubeSegDelegate::finalizeLocalParameters()
@@ -1015,12 +1026,11 @@ void AGeoTubeSegDelegate::finalizeLocalParameters()
             tubeSeg->str2rmin = ei ->text();
             tubeSeg->str2rmax = eo ->text();
             tubeSeg->str2dz   = ez ->text();
-            tubeSeg->str2phi1 = ep1->text();
-            tubeSeg->str2phi2 = ep2->text();
+            tubeSeg->strPhi1 = ep1->text();
+            tubeSeg->strPhi2 = ep2->text();
             //emit ContentChanged();
         }
         else qWarning() << "Read delegate: Tube Segment shape not found!";
-
 }
 
 void AGeoTubeSegDelegate::Update(const AGeoObject *obj)
@@ -1052,8 +1062,8 @@ void AGeoTubeSegDelegate::Update(const AGeoObject *obj)
             ei ->setText(tubeSeg->str2rmin.isEmpty() ? QString::number(tubeSeg->rmin*2.0) : tubeSeg->str2rmin);
             eo ->setText(tubeSeg->str2rmax.isEmpty() ? QString::number(tubeSeg->rmax*2.0) : tubeSeg->str2rmax);
             ez ->setText(tubeSeg->str2dz  .isEmpty() ? QString::number(tubeSeg->dz  *2.0) : tubeSeg->str2dz);
-            ep1->setText(tubeSeg->str2phi1.isEmpty() ? QString::number(tubeSeg->phi1)     : tubeSeg->str2phi1);
-            ep2->setText(tubeSeg->str2phi2.isEmpty() ? QString::number(tubeSeg->phi2)     : tubeSeg->str2phi2);
+            ep1->setText(tubeSeg->strPhi1.isEmpty() ? QString::number(tubeSeg->phi1)     : tubeSeg->strPhi1);
+            ep2->setText(tubeSeg->strPhi2.isEmpty() ? QString::number(tubeSeg->phi2)     : tubeSeg->strPhi2);
             //emit ContentChanged();
         }
         else qWarning() << "Read delegate: Tube Segment shape not found!";
@@ -1662,9 +1672,9 @@ AGeoParaboloidDelegate::AGeoParaboloidDelegate(const QStringList &materials, QWi
     gr->addWidget(new QLabel("Upper diameter:"), 1, 0);
     gr->addWidget(new QLabel("Height:"),         2, 0);
 
-    el = new QLineEdit(); gr->addWidget(el, 0, 1);
-    eu = new QLineEdit(); gr->addWidget(eu, 1, 1);
-    ez = new QLineEdit(); gr->addWidget(ez, 2, 1);
+    el = new AOneLineTextEdit(); gr->addWidget(el, 0, 1);
+    eu = new AOneLineTextEdit(); gr->addWidget(eu, 1, 1);
+    ez = new AOneLineTextEdit(); gr->addWidget(ez, 2, 1);
 
     gr->addWidget(new QLabel("mm"), 0, 2);
     gr->addWidget(new QLabel("mm"), 1, 2);
@@ -1672,10 +1682,12 @@ AGeoParaboloidDelegate::AGeoParaboloidDelegate(const QStringList &materials, QWi
 
     addLocalLayout(gr);
 
-    QVector<QLineEdit*> l = {el, eu, ez};
-    for (QLineEdit * le : l)
-        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoParaboloidDelegate::ContentChanged);
-        //QObject::connect(le, &QLineEdit::textChanged, this, &AGeoParaboloidDelegate::onLocalShapeParameterChange);
+    QVector<AOneLineTextEdit*> l = {el, eu, ez};
+    for (AOneLineTextEdit * le : l)
+    {
+        configureHighligherAndCompleter(le);
+        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoParaboloidDelegate::ContentChanged);
+    }
 }
 
 void AGeoParaboloidDelegate::finalizeLocalParameters()

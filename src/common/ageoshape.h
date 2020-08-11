@@ -443,7 +443,7 @@ public:
   virtual bool readFromTShape(TGeoShape* Tshape);
 
   double rmin, rmax, dz, phi1, phi2;
-  QString str2rmin, str2rmax, str2dz, str2phi1, str2phi2;
+  QString str2rmin, str2rmax, str2dz, strPhi1, strPhi2;
 };
 
 class AGeoCtub : public AGeoShape

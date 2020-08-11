@@ -13,9 +13,6 @@ AOneLineTextEdit::AOneLineTextEdit(QWidget * parent) : QPlainTextEdit(parent)
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     setFixedHeight(sizeHint().height());
-
-    //setFrameShape(QFrame::Box);
-    //setFrameShadow(QFrame::Raised);
 }
 
 void AOneLineTextEdit::setText(const QString & text)
@@ -31,24 +28,8 @@ QString AOneLineTextEdit::text() const
 void AOneLineTextEdit::insertCompletion(const QString &completion)
 {
     QTextCursor tc = textCursor();
-    /*
-    while (tc.position() != 0)
-    {
-        tc.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor);
-        QString selected = tc.selectedText();
-        //qDebug() << "<-" <<selected << selected.left(1).contains(QRegExp("[A-Za-z0-9.]"));
-        if ( !selected.left(1).contains(QRegExp("[A-Za-z0-9._]")) )
-        {
-            tc.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor);
-            break;
-        }
-    }
-    //qDebug() << "reached left, selection:"<<tc.selectedText();
-    */
-
     tc.select(QTextCursor::WordUnderCursor);
     tc.removeSelectedText();
-
     tc.insertText(completion);
 }
 

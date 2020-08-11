@@ -245,13 +245,13 @@ void AGeoObject::writeToJson(QJsonObject &json)
       json["Theta"] = Orientation[1];
       json["Psi"]   = Orientation[2];
 
-      if (!PositionStr[0].isEmpty()) json["XStr"] = PositionStr[0];
-      if (!PositionStr[1].isEmpty()) json["YStr"] = PositionStr[1];
-      if (!PositionStr[2].isEmpty()) json["ZStr"] = PositionStr[2];
+      if (!PositionStr[0].isEmpty()) json["strX"] = PositionStr[0];
+      if (!PositionStr[1].isEmpty()) json["strY"] = PositionStr[1];
+      if (!PositionStr[2].isEmpty()) json["strZ"] = PositionStr[2];
 
-      if (!OrientationStr[0].isEmpty()) json["PhiStr"]   = OrientationStr[0];
-      if (!OrientationStr[1].isEmpty()) json["ThetaStr"] = OrientationStr[1];
-      if (!OrientationStr[2].isEmpty()) json["PsiStr"]   = OrientationStr[2];
+      if (!OrientationStr[0].isEmpty()) json["strPhi"]   = OrientationStr[0];
+      if (!OrientationStr[1].isEmpty()) json["strTheta"] = OrientationStr[1];
+      if (!OrientationStr[2].isEmpty()) json["strPsi"]   = OrientationStr[2];
   }
 
   if (!LastScript.isEmpty())
@@ -274,24 +274,29 @@ void AGeoObject::readFromJson(const QJsonObject & json)
     //Hosted are not loaded, they are populated later
 
     parseJson(json, "Material", Material);
-    parseJson(json, "X", Position[0]);
-    parseJson(json, "Y", Position[1]);
-    parseJson(json, "Z", Position[2]);
-    parseJson(json, "Phi", Orientation[0]);
+    parseJson(json, "X",     Position[0]);
+    parseJson(json, "Y",     Position[1]);
+    parseJson(json, "Z",     Position[2]);
+    parseJson(json, "Phi",   Orientation[0]);
     parseJson(json, "Theta", Orientation[1]);
-    parseJson(json, "Psi", Orientation[2]);
+    parseJson(json, "Psi",   Orientation[2]);
 
     for (int i = 0; i < 3; i++)
     {
         PositionStr[i].clear();
         OrientationStr[i].clear();
     }
-    parseJson(json, "XStr", PositionStr[0]);
-    parseJson(json, "YStr", PositionStr[1]);
-    parseJson(json, "ZStr", PositionStr[2]);
-    parseJson(json, "PhiStr",   OrientationStr[0]);
-    parseJson(json, "ThetaStr", OrientationStr[1]);
-    parseJson(json, "PsiStr",   OrientationStr[2]);
+
+    const AGeoConsts & GC = AGeoConsts::getConstInstance();
+
+    // TODO: control of error on formula call
+
+    if (parseJson(json, "strX",     PositionStr[0]))    GC.evaluateFormula(PositionStr[0], Position[0]);
+    if (parseJson(json, "strY",     PositionStr[1]))    GC.evaluateFormula(PositionStr[1], Position[1]);
+    if (parseJson(json, "strZ",     PositionStr[2]))    GC.evaluateFormula(PositionStr[2], Position[2]);
+    if (parseJson(json, "strPhi",   OrientationStr[0])) GC.evaluateFormula(OrientationStr[0], Orientation[0]);
+    if (parseJson(json, "strTheta", OrientationStr[1])) GC.evaluateFormula(OrientationStr[1], Orientation[1]);
+    if (parseJson(json, "strPsi",   OrientationStr[2])) GC.evaluateFormula(OrientationStr[2], Orientation[2]);
 
     //ObjectType
     QJsonObject jj = json["ObjectType"].toObject();

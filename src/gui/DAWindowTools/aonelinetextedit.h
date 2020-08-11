@@ -53,7 +53,6 @@ public:
 
 protected:
     void highlightBlock(const QString & text) override;
-
 };
 
 #endif // AONELINETEXTEDIT_H

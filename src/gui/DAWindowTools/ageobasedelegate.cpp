@@ -60,26 +60,17 @@ void AGeoBaseDelegate::configureHighligherAndCompleter(AOneLineTextEdit * edit)
     QStringList sl;
     for (const QString & name : AGeoConsts::getConstInstance().getNames()) sl << name;
 
-    /*
-    QCompleter* completer = new QCompleter(sl, edit);
-    completer->setCaseSensitivity(Qt::CaseInsensitive); //Qt::CaseSensitive
-    completer->setCompletionMode(QCompleter::PopupCompletion);
-    //completer->setCompletionMode(QCompleter::UnfilteredPopupCompletion);
-    completer->setFilterMode(Qt::MatchContains);
-    completer->setModelSorting(QCompleter::CaseInsensitivelySortedModel);
-    completer->setWrapAround(false);
-    */
     edit->Completer = new QCompleter(sl, edit);
+    edit->Completer->setCaseSensitivity(Qt::CaseInsensitive); //Qt::CaseSensitive
     //CompletitionModel = new QStringListModel(functions, this);
-    //Completer->setModel(CompletitionModel);
-    //edit->Completer->setCompletionMode(QCompleter::UnfilteredPopupCompletion);
+    //edit->Completer->setModel(CompletitionModel);
+    //edit->Completer->Completer->setCompletionMode(QCompleter::UnfilteredPopupCompletion);
     edit->Completer->setCompletionMode(QCompleter::PopupCompletion);
     edit->Completer->setFilterMode(Qt::MatchContains);
-    //completer->setFilterMode(Qt::MatchStartsWith);
-    edit->Completer->setModelSorting(QCompleter::CaseSensitivelySortedModel);
-    edit->Completer->setCaseSensitivity(Qt::CaseSensitive);
+    //edit->Completer->setFilterMode(Qt::MatchStartsWith);
+    //edit->Completer->setModelSorting(QCompleter::CaseSensitivelySortedModel);
+    edit->Completer->setModelSorting(QCompleter::CaseInsensitivelySortedModel);
     edit->Completer->setWrapAround(false);
-
 
     edit->Completer->setWidget(edit);
     QObject::connect(edit->Completer, SIGNAL(activated(QString)), edit, SLOT(insertCompletion(QString)));

@@ -478,10 +478,10 @@ QString AGeoTubeSeg::updateShape()
     errorStr = updateParameter (str2dz,   dz);
     if (!errorStr.isEmpty()) return errorStr;
 
-    errorStr = updateParameter (str2phi1, phi1, false, false, false);
+    errorStr = updateParameter (strPhi1, phi1, false, false, false);
     if (!errorStr.isEmpty()) return errorStr;
 
-    errorStr = updateParameter (str2phi2, phi2, false, false, false);
+    errorStr = updateParameter (strPhi2, phi2, false, false, false);
     return errorStr;
 }
 
@@ -490,8 +490,8 @@ bool AGeoTubeSeg::isGeoConstInUse(const QRegExp &nameRegExp) const
     if (str2rmin.contains(nameRegExp)) return true;
     if (str2rmax.contains(nameRegExp)) return true;
     if (str2dz  .contains(nameRegExp)) return true;
-    if (str2phi1.contains(nameRegExp)) return true;
-    if (str2phi2.contains(nameRegExp)) return true;
+    if (strPhi1.contains(nameRegExp)) return true;
+    if (strPhi2.contains(nameRegExp)) return true;
 
     return false;
 }
@@ -501,8 +501,8 @@ void AGeoTubeSeg::replaceGeoConstName(const QRegExp &nameRegExp, const QString &
     str2rmin.replace(nameRegExp, newName);
     str2rmax.replace(nameRegExp, newName);
     str2dz  .replace(nameRegExp, newName);
-    str2phi1.replace(nameRegExp, newName);
-    str2phi2.replace(nameRegExp, newName);
+    strPhi1.replace(nameRegExp, newName);
+    strPhi2.replace(nameRegExp, newName);
 }
 
 bool AGeoTubeSeg::readFromString(QString GenerationString)
@@ -564,8 +564,8 @@ void AGeoTubeSeg::writeToJson(QJsonObject &json) const
     if (!str2rmin.isEmpty()) json["str2rmin"] = str2rmin;
     if (!str2rmax.isEmpty()) json["str2rmax"] = str2rmax;
     if (!str2dz  .isEmpty()) json["str2dz"]   = str2dz;
-    if (!str2phi1.isEmpty()) json["str2phi1"] = str2phi1;
-    if (!str2phi2.isEmpty()) json["str2phi2"] = str2phi2;
+    if (!strPhi1.isEmpty())  json["strPhi1"]  = strPhi1;
+    if (!strPhi2.isEmpty())  json["strPhi2"]  = strPhi2;
 
 }
 
@@ -580,8 +580,8 @@ void AGeoTubeSeg::readFromJson(QJsonObject &json)
     if (!parseJson(json, "str2rmin", str2rmin)) str2rmin.clear();
     if (!parseJson(json, "str2rmax", str2rmax)) str2rmax.clear();
     if (!parseJson(json, "str2dz"  , str2dz))   str2dz.clear();
-    if (!parseJson(json, "str2phi1", str2phi1)) str2phi1.clear();
-    if (!parseJson(json, "str2phi2", str2phi2)) str2phi2.clear();
+    if (!parseJson(json, "strPhi1",  strPhi1)) strPhi1.clear();
+    if (!parseJson(json, "strPhi2",  strPhi2)) strPhi2.clear();
 }
 
 bool AGeoTubeSeg::readFromTShape(TGeoShape *Tshape)

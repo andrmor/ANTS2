@@ -179,8 +179,8 @@ public:
 
     void finalizeLocalParameters();
 
-    QLineEdit * ep1 = nullptr;
-    QLineEdit * ep2 = nullptr;
+    AOneLineTextEdit * ep1 = nullptr;
+    AOneLineTextEdit * ep2 = nullptr;
 
 public slots:
     virtual void Update(const AGeoObject * obj) override;
@@ -363,9 +363,9 @@ public:
 
     void finalizeLocalParameters() override;
 
-    QLineEdit * el = nullptr;
-    QLineEdit * eu = nullptr;
-    QLineEdit * ez = nullptr;
+    AOneLineTextEdit * el = nullptr;
+    AOneLineTextEdit * eu = nullptr;
+    AOneLineTextEdit * ez = nullptr;
 
 public slots:
     virtual void Update(const AGeoObject * obj) override;

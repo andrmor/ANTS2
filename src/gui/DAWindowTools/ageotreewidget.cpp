@@ -1638,6 +1638,7 @@ void AGeoWidget::UpdateGui()
         GeoDelegate = createAndAddGeoObjectDelegate();
 
     GeoDelegate->Update(CurrentObject);
+
     GeoDelegate->Widget->setEnabled(!CurrentObject->fLocked);
     connect(GeoDelegate, &AGeoBaseDelegate::ContentChanged,             this, &AGeoWidget::onStartEditing);
     connect(GeoDelegate, &AGeoBaseDelegate::RequestChangeVisAttributes, this, &AGeoWidget::onRequestSetVisAttributes);

@@ -304,14 +304,17 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
                 QMessageBox::warning(this->ParentWidget,"", errorStr);
                 return false;
             }
+            /*AGeoComposite * comp3 =dynamic_cast<AGeoComposite*> (shape); // !*! Temporary tester to show it works
+            if (comp3) qDebug() <<"hmmm: "<<comp3->getGenerationString();
+
             AGeoComposite * comp =dynamic_cast<AGeoComposite*> (obj->Shape); // !*! Temporary tester to show it works
-            if (comp) qDebug() <<"before: "<<comp->getGenerationString();
+            if (comp) qDebug() <<"before: "<<comp->getGenerationString();*/
 
             delete obj->Shape;
             obj->Shape = ShapeCopy->clone();
 
-            AGeoComposite * comp2 =dynamic_cast<AGeoComposite*> (obj->Shape);
-            if (comp2) qDebug() <<"after: "<<comp2->getGenerationString();
+            /*AGeoComposite * comp2 =dynamic_cast<AGeoComposite*> (obj->Shape);
+            if (comp2) qDebug() <<"after: "<<comp2->getGenerationString();*/
         }
         else
         {
@@ -2142,7 +2145,8 @@ AGeoCompositeDelegate::AGeoCompositeDelegate(const QStringList &materials, QWidg
         font.setPointSize(te->font().pointSize() + 2);
         te->setFont(font);
     v->addWidget(te);
-    connect(te, &QPlainTextEdit::textChanged, this, &AGeoCompositeDelegate::onLocalShapeParameterChange);
+    connect(te, &QPlainTextEdit::textChanged, this, &AGeoCompositeDelegate::ContentChanged);
+    //connect(te, &QPlainTextEdit::textChanged, this, &AGeoCompositeDelegate::onLocalShapeParameterChange);
 
     //cbScale->setChecked(false);
     //cbScale->setVisible(false);
@@ -2157,12 +2161,16 @@ void AGeoCompositeDelegate::finalizeLocalParameters()
     {
         AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
         comp = dynamic_cast<AGeoComposite*>(scaled->BaseShape);
+        qDebug() <<"aaaa?";
     }
 
     if (comp)
     {
         QString Str= te->document()->toPlainText();
         comp->GenerationString = "TGeoCompositeShape( " + Str + " )";
+
+        //AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+        //if (scaled) scaled->BaseShapeGenerationString = comp->GenerationString;
         //emit ContentChanged();
     }
     else qWarning() << "Read delegate: Composite shape not found!";
@@ -2172,6 +2180,7 @@ void AGeoCompositeDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
 
+    /* old system
     const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
     const AGeoComposite * combo = dynamic_cast<const AGeoComposite *>(tmpShape ? tmpShape : obj->Shape);
     if (combo)
@@ -2183,12 +2192,31 @@ void AGeoCompositeDelegate::Update(const AGeoObject *obj)
         te->clear();
         te->appendPlainText(s.simplified());
     }
-    delete tmpShape;
+    delete tmpShape;*/
+
+AGeoComposite * comp = dynamic_cast<AGeoComposite*>(ShapeCopy);
+    if (!comp)
+    {
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+        comp = dynamic_cast<AGeoComposite*>(scaled->BaseShape);
+    }
+
+    if (comp)
+    {
+        qDebug() <<"updte delegate"<<comp->GenerationString.simplified();
+        QString s = comp->GenerationString.simplified();
+        s.remove("TGeoCompositeShape(");
+        s.chop(1);
+
+        te->clear();
+        te->appendPlainText(s.simplified());
+    }
+    else qWarning() << "Read delegate: Composite shape not found!";
 }
 
 void AGeoCompositeDelegate::onLocalShapeParameterChange()
 {
-    updatePteShape(QString("TGeoCompositeShape( %1 )").arg(te->document()->toPlainText()));
+    //updatePteShape(QString("TGeoCompositeShape( %1 )").arg(te->document()->toPlainText()));
 }
 
 AGeoArb8Delegate::AGeoArb8Delegate(const QStringList &materials, QWidget *parent)

@@ -2204,7 +2204,7 @@ void AGeoScaledShape::writeToJson(QJsonObject &json) const
     json["scaleY"] = scaleY;
     json["scaleZ"] = scaleZ;
 
-    //json["BaseShapeGenerationString"] = BaseShapeGenerationString;
+    //json["CompositeGenerationstring"] = BaseShapeGenerationString;
     if (BaseShape)
     {
         BaseShape->writeToJson(json);
@@ -2277,7 +2277,6 @@ bool AGeoScaledShape::readFromTShape(TGeoShape *Tshape)
         return false;
     }
     BaseShapeGenerationString = AShape->getGenerationString();
-
     delete AShape;
     return true;
 }

@@ -514,8 +514,12 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
             AGeoComposite* cs = dynamic_cast<AGeoComposite*>(obj->Shape);
             if (!cs)
             {
-                qWarning()<< "Composite: Shape object is not composite!!";
-                return;
+                AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(obj->Shape);
+                if (!scaled)
+                {
+                    qWarning()<< "Composite: Shape object is not composite nor scaled composite!!";
+                    return;
+                }
             }
             obj->refreshShapeCompositeMembers();
 

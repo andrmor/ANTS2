@@ -261,12 +261,14 @@ class AGeoSphereDelegate : public AGeoObjectDelegate
 public:
     AGeoSphereDelegate(const QStringList & materials, QWidget * parent);
 
-    QLineEdit * eod = nullptr;
-    QLineEdit * eid = nullptr;
-    QLineEdit * et1 = nullptr;
-    QLineEdit * et2 = nullptr;
-    QLineEdit * ep1 = nullptr;
-    QLineEdit * ep2 = nullptr;
+    void finalizeLocalParameters();
+
+    AOneLineTextEdit * eod = nullptr;
+    AOneLineTextEdit * eid = nullptr;
+    AOneLineTextEdit * et1 = nullptr;
+    AOneLineTextEdit * et2 = nullptr;
+    AOneLineTextEdit * ep1 = nullptr;
+    AOneLineTextEdit * ep2 = nullptr;
 
 public slots:
     virtual void Update(const AGeoObject * obj) override;

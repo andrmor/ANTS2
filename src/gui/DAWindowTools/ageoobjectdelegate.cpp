@@ -918,16 +918,14 @@ void AGeoTubeDelegate::finalizeLocalParameters()
     AGeoTube * tube = dynamic_cast<AGeoTube*>(ShapeCopy);
     if (!tube)
     {
-        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*> (ShapeCopy);
-        tube = dynamic_cast<AGeoTube*> (scaled->BaseShape);
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+        tube = dynamic_cast<AGeoTube*>(scaled->BaseShape);
     }
     if (tube)
     {
         tube->str2rmax = eo->text();
         tube->str2rmin = ei->text();
         tube->str2dz   = ez->text();
-
-        //emit ContentChanged();
     }
     else qWarning() << "Read delegate: Tube shape not found!";
 }
@@ -1248,12 +1246,12 @@ AGeoSphereDelegate::AGeoSphereDelegate(const QStringList & materials, QWidget *p
     gr->addWidget(new QLabel("Phi from:"),     4, 0);
     gr->addWidget(new QLabel("Phi to:"),       5, 0);
 
-    eod = new QLineEdit(); gr->addWidget(eod, 0, 1);
-    eid = new QLineEdit(); gr->addWidget(eid, 1, 1);
-    et1 = new QLineEdit(); gr->addWidget(et1, 2, 1);
-    et2 = new QLineEdit(); gr->addWidget(et2, 3, 1);
-    ep1 = new QLineEdit(); gr->addWidget(ep1, 4, 1);
-    ep2 = new QLineEdit(); gr->addWidget(ep2, 5, 1);
+    eod = new AOneLineTextEdit(); gr->addWidget(eod, 0, 1);
+    eid = new AOneLineTextEdit(); gr->addWidget(eid, 1, 1);
+    et1 = new AOneLineTextEdit(); gr->addWidget(et1, 2, 1);
+    et2 = new AOneLineTextEdit(); gr->addWidget(et2, 3, 1);
+    ep1 = new AOneLineTextEdit(); gr->addWidget(ep1, 4, 1);
+    ep2 = new AOneLineTextEdit(); gr->addWidget(ep2, 5, 1);
 
     gr->addWidget(new QLabel("mm"), 0, 2);
     gr->addWidget(new QLabel("mm"), 1, 2);
@@ -1264,15 +1262,39 @@ AGeoSphereDelegate::AGeoSphereDelegate(const QStringList & materials, QWidget *p
 
     addLocalLayout(gr);
 
-    QVector<QLineEdit*> l = {eod, eid, et1, et2, ep1, ep2};
-    for (QLineEdit * le : l)
-        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoSphereDelegate::onLocalShapeParameterChange);
+    QVector<AOneLineTextEdit*> l = {eod, eid, et1, et2, ep1, ep2};
+    for (AOneLineTextEdit * le : l)
+    {
+        configureHighligherAndCompleter(le);
+        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoObjectDelegate::ContentChanged);
+    }
+}
+
+void AGeoSphereDelegate::finalizeLocalParameters()
+{
+    AGeoSphere * sphere = dynamic_cast<AGeoSphere*>(ShapeCopy);
+    if (!sphere)
+    {
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+        sphere = dynamic_cast<AGeoSphere*>(scaled->BaseShape);
+    }
+    if (sphere)
+    {
+        sphere->str2rmax  = eod->text();
+        sphere->str2rmin  = eid->text();
+        sphere->strTheta1 = et1->text();
+        sphere->strTheta2 = et2->text();
+        sphere->strPhi1   = ep1->text();
+        sphere->strPhi2   = ep2->text();
+    }
+    else qWarning() << "Read delegate: Sphere shape not found!";
 }
 
 void AGeoSphereDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
 
+    /*
     const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
     const AGeoSphere * sph = dynamic_cast<const AGeoSphere*>(tmpShape ? tmpShape : obj->Shape);
     if (sph)
@@ -1285,13 +1307,50 @@ void AGeoSphereDelegate::Update(const AGeoObject *obj)
         ep2->setText(QString::number(sph->phi2));
     }
     delete tmpShape;
+    */
+
+    AGeoSphere * sphere = dynamic_cast<AGeoSphere*>(ShapeCopy);
+    if (!sphere)
+    {
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+        sphere = dynamic_cast<AGeoSphere*>(scaled->BaseShape);
+    }
+    if (sphere)
+    {
+        eid->setText(sphere->str2rmin.isEmpty() ? QString::number(sphere->rmin*2.0) : sphere->str2rmin);
+        eod->setText(sphere->str2rmax.isEmpty() ? QString::number(sphere->rmax*2.0) : sphere->str2rmax);
+        et1->setText(sphere->strTheta1.isEmpty() ? QString::number(sphere->theta1) : sphere->strTheta1);
+        et2->setText(sphere->strTheta2.isEmpty() ? QString::number(sphere->theta2) : sphere->strTheta2);
+        ep1->setText(sphere->strPhi1.isEmpty() ? QString::number(sphere->phi1) : sphere->strPhi1);
+        ep2->setText(sphere->strPhi2.isEmpty() ? QString::number(sphere->phi2) : sphere->strPhi2);
+    }
+    else qWarning() << "Update delegate: Sphere shape not found!";
 }
 
-void AGeoSphereDelegate::onLocalShapeParameterChange()
+void AGeoSphereDelegate::onLocalShapeParameterChange() //now performed by "finalizelocalparameters"
 {
-    updatePteShape(QString("TGeoSphere( %1, %2, %3, %4, %5, %6 )").arg(0.5*eid->text().toDouble()).arg(0.5*eod->text().toDouble())
-                                                                  .arg(et1->text()).arg(et2->text())
-                                                                  .arg(ep1->text()).arg(ep2->text())  );
+    //updatePteShape(QString("TGeoSphere( %1, %2, %3, %4, %5, %6 )").arg(0.5*eid->text().toDouble()).arg(0.5*eod->text().toDouble())
+    //                                                              .arg(et1->text()).arg(et2->text())
+    //                                                              .arg(ep1->text()).arg(ep2->text())  );
+
+    //new
+    AGeoSphere * sphere = dynamic_cast<AGeoSphere*>(ShapeCopy);
+    if (!sphere)
+    {
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+        sphere = dynamic_cast<AGeoSphere*>(scaled->BaseShape);
+    }
+
+    if (sphere)
+    {
+        sphere->str2rmin  = eid->text();
+        sphere->str2rmax  = eod->text();
+        sphere->strTheta1 = et1->text();
+        sphere->strTheta2 = et2->text();
+        sphere->strPhi1   = ep1->text();
+        sphere->strPhi2   = ep2->text();
+    }
+    else qWarning() << "Read delegate: Sphere shape not found!";
 }
 
 AGeoConeDelegate::AGeoConeDelegate(const QStringList &materials, QWidget *parent)

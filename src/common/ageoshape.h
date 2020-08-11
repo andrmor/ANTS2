@@ -428,7 +428,6 @@ public:
   bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
   void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
 
-
   virtual bool readFromString(QString GenerationString);
   virtual TGeoShape* createGeoShape(const QString shapeName = "");
 
@@ -442,7 +441,7 @@ public:
 
   virtual bool readFromTShape(TGeoShape* Tshape);
 
-  double rmin, rmax, dz, phi1, phi2;
+  double      rmin,     rmax,     dz,    phi1,    phi2;
   QString str2rmin, str2rmax, str2dz, strPhi1, strPhi2;
 };
 
@@ -531,6 +530,10 @@ public:
   const QString getShapeType() const override {return "TGeoSphere";}
   virtual const QString getShapeTemplate() {return "TGeoSphere( rmin,  rmax, theta1, theta2, phi1, phi2 )";}
   virtual const QString getHelp();
+  QString updateShape() override;
+
+  bool isGeoConstInUse (const QRegExp & nameRegExp) const override;
+  void replaceGeoConstName (const QRegExp & nameRegExp, const QString & newName) override;
 
   virtual bool readFromString(QString GenerationString);
   virtual TGeoShape* createGeoShape(const QString shapeName = "");
@@ -545,7 +548,8 @@ public:
 
   virtual bool readFromTShape(TGeoShape* Tshape);
 
-  double rmin, rmax, theta1, theta2, phi1, phi2;
+  double      rmin,     rmax,    theta1,    theta2,    phi1,    phi2;
+  QString str2rmin, str2rmax, strTheta1, strTheta2, strPhi1, strPhi2;
 };
 
 class AGeoPara : public AGeoShape

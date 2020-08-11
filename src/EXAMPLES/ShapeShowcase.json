@@ -39,8 +39,8 @@
         },
         "FixedWorldSizes": {
             "WorldSizeFixed": false,
-            "XY": 114.74613391789285,
-            "Z": 114.74613391789285
+            "XY": 86.05960043841964,
+            "Z": 86.05960043841964
         },
         "IndividualPMoverrides": {
             "Angular": {
@@ -331,7 +331,7 @@
                 ],
                 [
                     "Offset",
-                    40
+                    30
                 ],
                 [
                     "Angle",
@@ -372,9 +372,9 @@
                         "str2dy": "sqrt(SizeY*10)"
                     },
                     "Theta": 0,
-                    "X": 40,
-                    "Y": 40,
-                    "Z": 40,
+                    "X": 30,
+                    "Y": 30,
+                    "Z": 30,
                     "color": 4,
                     "fActive": true,
                     "fExpanded": true,
@@ -402,9 +402,9 @@
                         "str2rmax": "Diameter*0.5"
                     },
                     "Theta": 45,
-                    "X": -40,
-                    "Y": 40,
-                    "Z": 40,
+                    "X": -30,
+                    "Y": 30,
+                    "Z": 30,
                     "color": 2,
                     "fActive": true,
                     "fExpanded": true,
@@ -436,9 +436,9 @@
                         "strPhi2": "2*Angle"
                     },
                     "Theta": 0,
-                    "X": -40,
-                    "Y": -40,
-                    "Z": 40,
+                    "X": -30,
+                    "Y": -30,
+                    "Z": 30,
                     "color": 9,
                     "fActive": true,
                     "fExpanded": true,
@@ -461,20 +461,53 @@
                     "Shape": "TGeoParaboloid",
                     "ShapeSpecific": {
                         "dz": 10,
-                        "rhi": 40,
-                        "rlo": 20,
-                        "str2rhi": "Diameter + 30",
-                        "str2rlo": "SizeX"
+                        "rhi": 25,
+                        "rlo": 2.5,
+                        "str2rlo": "0.1*Diameter"
                     },
                     "Theta": 0,
-                    "X": -40,
-                    "Y": -40,
-                    "Z": -40,
+                    "X": -30,
+                    "Y": -30,
+                    "Z": -30,
                     "color": 3,
                     "fActive": true,
                     "fExpanded": true,
                     "strX": "-Offset",
                     "strY": "-Offset",
+                    "strZ": "-Offset",
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Material": 1,
+                    "Name": "Sphere",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoSphere",
+                    "ShapeSpecific": {
+                        "phi1": 0,
+                        "phi2": 270,
+                        "rmax": 25,
+                        "rmin": 12.5,
+                        "str2rmax": "Diameter",
+                        "str2rmin": "0.5*Diameter",
+                        "theta1": 0,
+                        "theta2": 180
+                    },
+                    "Theta": 0,
+                    "X": -30,
+                    "Y": 30,
+                    "Z": -30,
+                    "color": 1,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "strX": "-Offset",
+                    "strY": "Offset",
                     "strZ": "-Offset",
                     "style": 1,
                     "width": 1
@@ -494,9 +527,9 @@
                         "GenerationString": "TGeoCompositeShape( bb - aa )"
                     },
                     "Theta": 0,
-                    "X": 40,
-                    "Y": -40,
-                    "Z": -40,
+                    "X": 30,
+                    "Y": -30,
+                    "Z": -30,
                     "color": 1,
                     "fActive": true,
                     "fExpanded": true,

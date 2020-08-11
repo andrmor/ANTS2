@@ -373,6 +373,51 @@ const QString AGeoSphere::getHelp()
            " • phi2: ending phi value (0, 360] in degrees (phi1<phi2)";
 }
 
+QString AGeoSphere::updateShape()
+{
+    QString err;
+
+    err = updateParameter(str2rmax,  rmax);                        if (!err.isEmpty()) return err;
+    err = updateParameter(str2rmin,  rmin,   false);               if (!err.isEmpty()) return err;
+    err = updateParameter(strTheta1, theta1, false, false, false); if (!err.isEmpty()) return err;
+    err = updateParameter(strTheta2, theta2, false, false, false); if (!err.isEmpty()) return err;
+    err = updateParameter(strPhi1,   phi1,   false, false, false); if (!err.isEmpty()) return err;
+    err = updateParameter(strPhi2,   phi2,   false, false, false); if (!err.isEmpty()) return err;
+
+    if (rmin   >= rmax)               return "Inside diameter should be smaller than the outside one!";
+    if (theta1 >= theta2)             return "Theta2 should be larger than Theta1";
+    if (phi1   >= phi2)               return   "Phi2 should be larger than Phi1";
+
+    if (theta1 <  0 || theta1 >= 180) return "Theta1 should be in the range of [0, 180)";
+    if (theta2 <= 0 || theta2 >  180) return "Theta2 should be in the range of (0, 180]";
+    if (phi1   <  0 || phi1   >= 360) return   "Phi1 should be in the range of [0, 360)";
+    if (phi2   <= 0 || phi2   >  360) return   "Phi2 should be in the range of (0, 360]";
+
+    return "";
+}
+
+bool AGeoSphere::isGeoConstInUse(const QRegExp &nameRegExp) const
+{
+    if (str2rmin .contains(nameRegExp)) return true;
+    if (str2rmax .contains(nameRegExp)) return true;
+    if (strTheta1.contains(nameRegExp)) return true;
+    if (strTheta2.contains(nameRegExp)) return true;
+    if (strPhi1  .contains(nameRegExp)) return true;
+    if (strPhi2  .contains(nameRegExp)) return true;
+
+    return false;
+}
+
+void AGeoSphere::replaceGeoConstName(const QRegExp &nameRegExp, const QString &newName)
+{
+    str2rmin .replace(nameRegExp, newName);
+    str2rmax .replace(nameRegExp, newName);
+    strTheta1.replace(nameRegExp, newName);
+    strTheta2.replace(nameRegExp, newName);
+    strPhi1  .replace(nameRegExp, newName);
+    strPhi2  .replace(nameRegExp, newName);
+}
+
 bool AGeoSphere::readFromString(QString GenerationString)
 {
     QStringList params;
@@ -416,26 +461,38 @@ const QString AGeoSphere::getGenerationString() const
     return str;
 }
 
-
-
 void AGeoSphere::writeToJson(QJsonObject &json) const
 {
-    json["rmin"] = rmin;
-    json["rmax"] = rmax;
+    json["rmin"]   = rmin;
+    json["rmax"]   = rmax;
     json["theta1"] = theta1;
     json["theta2"] = theta2;
-    json["phi1"] = phi1;
-    json["phi2"] = phi2;
+    json["phi1"]   = phi1;
+    json["phi2"]   = phi2;
+
+    if (!str2rmin. isEmpty()) json["str2rmin"]  = str2rmin;
+    if (!str2rmax. isEmpty()) json["str2rmax"]  = str2rmax;
+    if (!strTheta1.isEmpty()) json["strTheta1"] = strTheta1;
+    if (!strTheta2.isEmpty()) json["strTheta2"] = strTheta2;
+    if (!strPhi1.  isEmpty()) json["strPhi1"]   = strPhi1;
+    if (!strPhi2.  isEmpty()) json["strPhi2"]   = strPhi2;
 }
 
 void AGeoSphere::readFromJson(QJsonObject &json)
 {
-    rmin = json["rmin"].toDouble();
-    rmax = json["rmax"].toDouble();
+    rmin   = json["rmin"].  toDouble();
+    rmax   = json["rmax"].  toDouble();
     theta1 = json["theta1"].toDouble();
     theta2 = json["theta2"].toDouble();
-    phi1 = json["phi1"].toDouble();
-    phi2 = json["phi2"].toDouble();
+    phi1   = json["phi1"].  toDouble();
+    phi2   = json["phi2"].  toDouble();
+
+    if (!parseJson(json, "str2rmin",  str2rmin))  str2rmin.clear();
+    if (!parseJson(json, "str2rmax",  str2rmax))  str2rmax.clear();
+    if (!parseJson(json, "strTheta1", strTheta1)) strTheta1.clear();
+    if (!parseJson(json, "strTheta2", strTheta2)) strTheta2.clear();
+    if (!parseJson(json, "strPhi1",   strPhi1))   strPhi1.clear();
+    if (!parseJson(json, "strPhi2",   strPhi2))   strPhi2.clear();
 }
 
 bool AGeoSphere::readFromTShape(TGeoShape *Tshape)

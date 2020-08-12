@@ -851,28 +851,6 @@ void AGeoBoxDelegate::Update(const AGeoObject *obj)
     else qWarning() << "Update delegate: Box shape not found!";
 }
 
-void AGeoBoxDelegate::onLocalShapeParameterChange() //now performed by "finalizelocalparameters"
-{
-    //old
-    //updatePteShape(QString("TGeoBBox( %1, %2, %3 )").arg(0.5*ex->text().toDouble()).arg(0.5*ey->text().toDouble()).arg(0.5*ez->text().toDouble()));
-
-    //new
-    AGeoBox * box = dynamic_cast<AGeoBox*>(ShapeCopy);
-    if (!box)
-    {
-        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
-        box = dynamic_cast<AGeoBox*>(scaled->BaseShape);
-    }
-
-    if (box)
-    {
-        box->str2dx = ex->text();
-        box->str2dy = ey->text();
-        box->str2dz = ez->text();
-        //emit ContentChanged();
-    }
-    else qWarning() << "Read delegate: Box shape not found!";
-}
 
 AGeoTubeDelegate::AGeoTubeDelegate(const QStringList & materials, QWidget *parent)
     : AGeoObjectDelegate(materials, parent)
@@ -958,25 +936,6 @@ void AGeoTubeDelegate::Update(const AGeoObject *obj)
         ez->setText(tube->str2dz.isEmpty()   ? QString::number(tube->dz*2.0)   : tube->str2dz);
     }
     else qWarning() << "Update delegate: Tube shape not found!";
-}
-
-void AGeoTubeDelegate::onLocalShapeParameterChange() //now performed by "finalizelocalparameters"
-{
-    /*updatePteShape(QString("TGeoTube( %1, %2, %3 )").arg(0.5*ei->text().toDouble()).arg(0.5*eo->text().toDouble()).arg(0.5*ez->text().toDouble()));*/
-    AGeoTube * tube = dynamic_cast<AGeoTube*>(ShapeCopy);
-    if (!tube)
-    {
-        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*> (ShapeCopy);
-        tube = dynamic_cast<AGeoTube*> (scaled->BaseShape);
-    }
-    if (tube)
-    {
-        tube->str2rmax = eo->text();
-        tube->str2rmin = ei->text();
-        tube->str2dz   = ez->text();
-        emit ContentChanged();
-    }
-    else qWarning() << "Read delegate: Tube shape not found!";
 }
 
 AGeoTubeSegDelegate::AGeoTubeSegDelegate(const QStringList & materials, QWidget * parent) :
@@ -1065,12 +1024,6 @@ void AGeoTubeSegDelegate::Update(const AGeoObject *obj)
             //emit ContentChanged();
         }
         else qWarning() << "Read delegate: Tube Segment shape not found!";
-}
-
-void AGeoTubeSegDelegate::onLocalShapeParameterChange()
-{
-    /*updatePteShape(QString("TGeoTubeSeg( %1, %2, %3, %4, %5 )").arg(0.5*ei->text().toDouble()).arg(0.5*eo->text().toDouble()).arg(0.5*ez->text().toDouble())
-                                                               .arg(ep1->text()).arg(ep2->text()) );*/
 }
 
 AGeoTubeSegCutDelegate::AGeoTubeSegCutDelegate(const QStringList &materials, QWidget *parent) :
@@ -1327,32 +1280,6 @@ void AGeoSphereDelegate::Update(const AGeoObject *obj)
     else qWarning() << "Update delegate: Sphere shape not found!";
 }
 
-void AGeoSphereDelegate::onLocalShapeParameterChange() //now performed by "finalizelocalparameters"
-{
-    //updatePteShape(QString("TGeoSphere( %1, %2, %3, %4, %5, %6 )").arg(0.5*eid->text().toDouble()).arg(0.5*eod->text().toDouble())
-    //                                                              .arg(et1->text()).arg(et2->text())
-    //                                                              .arg(ep1->text()).arg(ep2->text())  );
-
-    //new
-    AGeoSphere * sphere = dynamic_cast<AGeoSphere*>(ShapeCopy);
-    if (!sphere)
-    {
-        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
-        sphere = dynamic_cast<AGeoSphere*>(scaled->BaseShape);
-    }
-
-    if (sphere)
-    {
-        sphere->str2rmin  = eid->text();
-        sphere->str2rmax  = eod->text();
-        sphere->strTheta1 = et1->text();
-        sphere->strTheta2 = et2->text();
-        sphere->strPhi1   = ep1->text();
-        sphere->strPhi2   = ep2->text();
-    }
-    else qWarning() << "Read delegate: Sphere shape not found!";
-}
-
 AGeoConeDelegate::AGeoConeDelegate(const QStringList &materials, QWidget *parent)
     : AGeoObjectDelegate(materials, parent)
 {
@@ -1569,11 +1496,6 @@ void AGeoElTubeDelegate::Update(const AGeoObject *obj)
         ez->setText(elTube->str2dz.isEmpty() ? QString::number(elTube->dz*2.0) : elTube->str2dz);
     }
     else qWarning() << "Update delegate: Elliptical Tube shape not found!";
-}
-
-void AGeoElTubeDelegate::onLocalShapeParameterChange()
-{
-    updatePteShape(QString("TGeoEltu( %1, %2, %3 )").arg(0.5*ex->text().toDouble()).arg(0.5*ey->text().toDouble()).arg(0.5*ez->text().toDouble()) );
 }
 
 AGeoTrapXDelegate::AGeoTrapXDelegate(const QStringList &materials, QWidget *parent)
@@ -1796,15 +1718,6 @@ void AGeoParaboloidDelegate::Update(const AGeoObject *obj)
     else qWarning() << "Update delegate: Paraboloid shape not found!";
 }
 
-void AGeoParaboloidDelegate::onLocalShapeParameterChange()
-{
-    /*
-    updatePteShape(QString("TGeoParaboloid( %1, %2, %3)")
-                   .arg(0.5*el->text().toDouble())
-                   .arg(0.5*eu->text().toDouble())
-                   .arg(0.5*ez->text().toDouble()) );
-                   */
-}
 
 AGeoTorusDelegate::AGeoTorusDelegate(const QStringList &materials, QWidget *parent)
     : AGeoObjectDelegate(materials, parent)
@@ -2283,11 +2196,6 @@ AGeoComposite * comp = dynamic_cast<AGeoComposite*>(ShapeCopy);
         te->appendPlainText(s.simplified());
     }
     else qWarning() << "Read delegate: Composite shape not found!";
-}
-
-void AGeoCompositeDelegate::onLocalShapeParameterChange()
-{
-    //updatePteShape(QString("TGeoCompositeShape( %1 )").arg(te->document()->toPlainText()));
 }
 
 AGeoArb8Delegate::AGeoArb8Delegate(const QStringList &materials, QWidget *parent)

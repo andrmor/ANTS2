@@ -120,7 +120,6 @@ public slots:
     void Update(const AGeoObject * obj) override;
 
 private slots:
-    void onLocalShapeParameterChange() override;
 };
 
 class AWorldDelegate : public AGeoBaseDelegate
@@ -167,7 +166,6 @@ public slots:
     virtual void Update(const AGeoObject * obj) override;
 
 private slots:
-    void onLocalShapeParameterChange() override;
 };
 
 class AGeoTubeSegDelegate : public AGeoTubeDelegate
@@ -186,7 +184,6 @@ public slots:
     virtual void Update(const AGeoObject * obj) override;
 
 private slots:
-    void onLocalShapeParameterChange() override;
 };
 
 class AGeoTubeSegCutDelegate : public AGeoTubeSegDelegate
@@ -230,7 +227,6 @@ public slots:
     virtual void Update(const AGeoObject * obj) override;
 
 private slots:
-    void onLocalShapeParameterChange() override;
 };
 
 class AGeoParaDelegate : public AGeoObjectDelegate
@@ -274,7 +270,6 @@ public slots:
     virtual void Update(const AGeoObject * obj) override;
 
 private slots:
-    void onLocalShapeParameterChange() override;
 };
 
 class AGeoConeDelegate : public AGeoObjectDelegate
@@ -373,7 +368,6 @@ public slots:
     virtual void Update(const AGeoObject * obj) override;
 
 private slots:
-    void onLocalShapeParameterChange() override;
 };
 
 class AGeoTorusDelegate : public AGeoObjectDelegate
@@ -475,7 +469,6 @@ public slots:
     virtual void Update(const AGeoObject * obj) override;
 
 private slots:
-    void onLocalShapeParameterChange() override;
 };
 
 struct AEditEdit

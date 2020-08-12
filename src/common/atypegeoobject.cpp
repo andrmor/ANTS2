@@ -41,6 +41,11 @@ void ATypeLightguideObject::readFromJson(QJsonObject &json)
     UpperLower = (UppLow == "Lower") ? Lower : Upper;
 }
 
+void ATypeArrayObject::updateType()
+{
+
+}
+
 void ATypeArrayObject::writeToJson(QJsonObject &json)
 {
     ATypeGeoObject::writeToJson(json);

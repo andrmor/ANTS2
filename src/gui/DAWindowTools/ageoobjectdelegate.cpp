@@ -339,6 +339,8 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
             obj->readShapeFromString(newShape);
         }*/
 
+        qDebug() <<"completely updated shape";
+
 
         //if it is a set member, need old values of position and angle
         QVector<double> old;
@@ -349,10 +351,12 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
         ok = ok && processEditBox(ledX,     obj->Position[0],    obj->PositionStr[0],    ParentWidget);
         ok = ok && processEditBox(ledY,     obj->Position[1],    obj->PositionStr[1],    ParentWidget);
         ok = ok && processEditBox(ledZ,     obj->Position[2],    obj->PositionStr[2],    ParentWidget);
-        ok = ok && processEditBox(ledPhi,   obj->Orientation[0], obj->OrientationStr[0], ParentWidget);
-        ok = ok && processEditBox(ledTheta, obj->Orientation[1], obj->OrientationStr[1], ParentWidget);
-        ok = ok && processEditBox(ledPsi,   obj->Orientation[2], obj->OrientationStr[2], ParentWidget);
+        if (ledPhi->isEnabled()) ok = ok && processEditBox(ledPhi,   obj->Orientation[0], obj->OrientationStr[0], ParentWidget);
+        if (ledTheta->isEnabled()) ok = ok && processEditBox(ledTheta, obj->Orientation[1], obj->OrientationStr[1], ParentWidget);
+        if (ledPsi->isEnabled()) ok = ok && processEditBox(ledPsi,   obj->Orientation[2], obj->OrientationStr[2], ParentWidget);
         if (!ok) return false;
+
+
 
         QRegExp regExp("\\bkira\\b"); // !*! TEMPORARY TESTER
         obj->isGeoConstInUse(regExp);
@@ -407,17 +411,29 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
             obj->updateStack();
     }
 
+    qDebug() <<"starting array post processing";
+
     //additional post-processing
     if ( obj->ObjectType->isArray() )
     {
         //additional properties for array
         ATypeArrayObject* array = static_cast<ATypeArrayObject*>(obj->ObjectType);
-        array->numX = sbNumX->value();
-        array->numY = sbNumY->value();
-        array->numZ = sbNumZ->value();
-        array->stepX = ledStepX->text().toDouble();
-        array->stepY = ledStepY->text().toDouble();
-        array->stepZ = ledStepZ->text().toDouble();
+        //array->numX = ledNumX->value();
+        //array->numY = ledNumY->value();
+        //array->numZ = ledNumZ->value();dNumX
+        //array->stepX = ledStepX->text().toDouble();
+        //array->stepY = ledStepY->text().toDouble();
+        //array->stepZ = ledStepZ->text().toDouble();
+        double dNumx, dNumY, dNumZ;
+        bool ok = true;
+        ok = ok && processEditBox(ledNumX,   dNumx, array->strNumX, ParentWidget); array->numX = dNumx;
+        ok = ok && processEditBox(ledNumY,   dNumY, array->strNumY, ParentWidget); array->numY = dNumY;
+        ok = ok && processEditBox(ledNumZ,   dNumZ, array->strNumZ, ParentWidget); array->numZ = dNumZ;
+        ok = ok && processEditBox(ledStepX,   array->stepX, array->strStepX, ParentWidget);
+        ok = ok && processEditBox(ledStepY,   array->stepY, array->strStepY, ParentWidget);
+        ok = ok && processEditBox(ledStepZ,   array->stepZ, array->strStepZ, ParentWidget);
+        if (!ok) return false;
+
     }
     else if (obj->ObjectType->isComposite())
     {
@@ -2347,38 +2363,41 @@ AGeoArrayDelegate::AGeoArrayDelegate(const QStringList &materials, QWidget *pare
     la = new QLabel("mm");
     grAW->addWidget(la, 2, 4);
 
-    sbNumX = new QSpinBox(Widget);
-    sbNumX->setMaximum(100);
-    sbNumX->setMinimum(0);
-    sbNumX->setContextMenuPolicy(Qt::NoContextMenu);
-    grAW->addWidget(sbNumX, 0, 1);
-    connect(sbNumX, SIGNAL(valueChanged(int)), this, SLOT(onContentChanged()));
-    sbNumY = new QSpinBox(Widget);
-    sbNumY->setMaximum(100);
-    sbNumY->setMinimum(0);
-    sbNumY->setContextMenuPolicy(Qt::NoContextMenu);
-    grAW->addWidget(sbNumY, 1, 1);
-    connect(sbNumY, SIGNAL(valueChanged(int)), this, SLOT(onContentChanged()));
-    sbNumZ = new QSpinBox(Widget);
-    sbNumZ->setMaximum(100);
-    sbNumZ->setMinimum(0);
-    sbNumZ->setContextMenuPolicy(Qt::NoContextMenu);
-    grAW->addWidget(sbNumZ, 2, 1);
-    connect(sbNumZ, SIGNAL(valueChanged(int)), this, SLOT(onContentChanged()));
-    ledStepX = new QLineEdit(Widget);
+    ledNumX = new AOneLineTextEdit(Widget);
+    /*ledNumX->setMaximum(100);
+    ledNumX->setMinimum(0);*/
+    ledNumX->setMaximumWidth(75);
+    ledNumX->setContextMenuPolicy(Qt::NoContextMenu);
+    grAW->addWidget(ledNumX, 0, 1);
+    connect(ledNumX, SIGNAL(textChanged()), this, SLOT(onContentChanged()));
+    ledNumY = new AOneLineTextEdit(Widget);
+    /*ledNumY->setMaximum(100);
+    ledNumY->setMinimum(0);*/
+    ledNumY->setMaximumWidth(75);
+    ledNumY->setContextMenuPolicy(Qt::NoContextMenu);
+    grAW->addWidget(ledNumY, 1, 1);
+    connect(ledNumY, SIGNAL(textChanged()), this, SLOT(onContentChanged()));
+    ledNumZ = new AOneLineTextEdit(Widget);
+    /*ledNumZ->setMaximum(100);
+    ledNumZ->setMinimum(0);*/
+    ledNumZ->setMaximumWidth(75);
+    ledNumZ->setContextMenuPolicy(Qt::NoContextMenu);
+    grAW->addWidget(ledNumZ, 2, 1);
+    connect(ledNumZ, SIGNAL(textChanged()), this, SLOT(onContentChanged()));
+    ledStepX = new AOneLineTextEdit(Widget);
     ledStepX->setContextMenuPolicy(Qt::NoContextMenu);
     ledStepX->setMaximumWidth(75);
-    connect(ledStepX, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
+    connect(ledStepX, SIGNAL(textChanged()), this, SLOT(onContentChanged()));
     grAW->addWidget(ledStepX, 0, 3);
-    ledStepY = new QLineEdit(Widget);
+    ledStepY = new AOneLineTextEdit(Widget);
     ledStepY->setMaximumWidth(75);
     ledStepY->setContextMenuPolicy(Qt::NoContextMenu);
-    connect(ledStepY, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
+    connect(ledStepY, SIGNAL(textChanged()), this, SLOT(onContentChanged()));
     grAW->addWidget(ledStepY, 1, 3);
-    ledStepZ = new QLineEdit(Widget);
+    ledStepZ = new AOneLineTextEdit(Widget);
     ledStepZ->setMaximumWidth(75);
     ledStepZ->setContextMenuPolicy(Qt::NoContextMenu);
-    connect(ledStepZ, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
+    connect(ledStepZ, SIGNAL(textChanged()), this, SLOT(onContentChanged()));
     grAW->addWidget(ledStepZ, 2, 3);
 
     addLocalLayout(grAW);
@@ -2397,6 +2416,28 @@ AGeoArrayDelegate::AGeoArrayDelegate(const QStringList &materials, QWidget *pare
     pbShapeInfo->setVisible(false);
 }
 
+void AGeoArrayDelegate::finalizeLocalParameters()
+{
+    /*ATypeArrayObject* array = dynamic_cast<ATypeArrayObject*>(CurrentObject->ObjectType);
+    processEditBox(ledNumX,   array->dNumx, array->strNumX, ParentWidget); array->numX = floor(array->dNumx);
+    processEditBox(ledNumY,   array->dNumY, array->strNumY, ParentWidget); array->numY = floor(array->dNumY);
+    processEditBox(ledNumZ,   array->dNumZ, array->strNumZ, ParentWidget); array->numZ = floor(array->dNumZ);
+    processEditBox(ledStepX,   array->stepX, array->strStepX, ParentWidget);
+    processEditBox(ledStepY,   array->stepY, array->strStepY, ParentWidget);
+    processEditBox(ledStepZ,   array->stepZ, array->strStepZ, ParentWidget);*/
+
+    if (CurrentObject->ObjectType->isArray())
+    {
+        ATypeArrayObject* array = static_cast<ATypeArrayObject*>(CurrentObject->ObjectType);
+        array->strNumX = ledNumX->text();
+        array->strNumY = ledNumY->text();
+        array->strNumZ = ledNumZ->text();
+        array->strStepX = ledStepX->text();
+        array->strStepY = ledStepY->text();
+        array->strStepZ = ledStepZ->text();
+    }
+}
+
 void AGeoArrayDelegate::Update(const AGeoObject * obj)
 {
     AGeoObjectDelegate::Update(obj);
@@ -2404,12 +2445,19 @@ void AGeoArrayDelegate::Update(const AGeoObject * obj)
     if (obj->ObjectType->isArray())
     {
         ATypeArrayObject* array = static_cast<ATypeArrayObject*>(obj->ObjectType);
-        sbNumX->setValue(array->numX);
-        sbNumY->setValue(array->numY);
-        sbNumZ->setValue(array->numZ);
+        ledNumX->setText(array->strNumX.isEmpty() ? QString::number(array->numX) : array->strNumX);
+        ledNumY->setText(array->strNumY.isEmpty() ? QString::number(array->numY) : array->strNumY);
+        ledNumZ->setText(array->strNumZ.isEmpty() ? QString::number(array->numZ) : array->strNumZ);
+        ledStepX->setText(array->strStepX.isEmpty() ? QString::number(array->stepX) : array->strStepX);
+        ledStepY->setText(array->strStepY.isEmpty() ? QString::number(array->stepY) : array->strStepY);
+        ledStepZ->setText(array->strStepZ.isEmpty() ? QString::number(array->stepZ) : array->strStepZ);
+
+        /*ledNumX->setValue(array->numX);
+        ledNumY->setValue(array->numY);
+        ledNumZ->setValue(array->numZ);
         ledStepX->setText(QString::number(array->stepX));
         ledStepY->setText(QString::number(array->stepY));
-        ledStepZ->setText(QString::number(array->stepZ));
+        ledStepZ->setText(QString::number(array->stepZ));*/
     }
 }
 

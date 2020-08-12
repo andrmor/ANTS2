@@ -70,8 +70,8 @@ protected:
     QPlainTextEdit* pteShape;
     QWidget* PosOrient;
     QLabel* lMat;
-    QSpinBox *sbNumX, *sbNumY, *sbNumZ;
-    QLineEdit *ledStepX, *ledStepY, *ledStepZ;
+    AOneLineTextEdit *ledNumX, *ledNumY, *ledNumZ;
+    AOneLineTextEdit *ledStepX, *ledStepY, *ledStepZ;
     AOneLineTextEdit *ledX,   *ledY,     *ledZ;
     AOneLineTextEdit *ledPhi, *ledTheta, *ledPsi;
 
@@ -500,6 +500,8 @@ class AGeoArrayDelegate : public AGeoObjectDelegate
 
 public:
     AGeoArrayDelegate(const QStringList & materials, QWidget * parent);
+
+    void finalizeLocalParameters();
 
 public slots:
     virtual void Update(const AGeoObject * obj) override;

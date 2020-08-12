@@ -77,6 +77,37 @@ bool AGeoConsts::evaluateFormula(QString str, double &returnValue) const
     return true;
 }
 
+bool AGeoConsts::updateParameter(QString &errorStr, QString &str, double &returnValue, bool bForbidZero, bool bForbidNegative, bool bMakeHalf)
+{
+    if (str.isEmpty()) return true;    //should it return true?
+
+        bool ok;
+        returnValue = str.simplified().toDouble(&ok);
+        if (ok) str.clear();
+        else
+        {
+            ok = evaluateFormula(str, returnValue);
+            if (!ok)
+            {
+                errorStr = QString("Syntax error:\n%1").arg(str);
+                return false;
+            }
+        }
+
+        if (bForbidZero && returnValue == 0)
+        {
+            errorStr = "Unacceptable value: zero";
+            return false;
+        }
+        if (bForbidNegative && returnValue < 0)
+        {
+            errorStr = "Unacceptable value: negative";
+            return false;
+        }
+        if (bMakeHalf) returnValue *= 0.5;
+        return true;
+}
+
 QString AGeoConsts::getName(int index) const
 {
     if (index < 0 || index >= Names.size()) return "";

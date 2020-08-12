@@ -22,6 +22,7 @@ public:
     void readFromJson(const QJsonObject & json);
 
     bool evaluateFormula(QString str, double & returnValue) const;
+    bool updateParameter(QString &errorStr, QString & str, double & returnValue, bool bForbidZero = true, bool bForbidNegative = true, bool bMakeHalf = true);
 
     QString getName(int index) const;
     bool rename(int index, const QString & newName);

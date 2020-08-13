@@ -266,12 +266,21 @@ double AGeoPara::maxSize()
 
 void AGeoPara::writeToJson(QJsonObject &json) const
 {
-    json["dx"] = dx;
-    json["dy"] = dy;
-    json["dz"] = dz;
+    json["dx"]    = dx;
+    json["dy"]    = dy;
+    json["dz"]    = dz;
     json["alpha"] = alpha;
     json["theta"] = theta;
-    json["phi"] = phi;
+    json["phi"]   = phi;
+
+    if (!str2dx  .isEmpty()) json["str2dx"]   = str2dx;
+    if (!str2dy  .isEmpty()) json["str2dy"]   = str2dy;
+    if (!str2dz  .isEmpty()) json["str2dz"]   = str2dz;
+    if (!strAlpha.isEmpty()) json["strAlpha"] = strAlpha;
+    if (!strTheta.isEmpty()) json["strTheta"] = strTheta;
+    if (!strPhi  .isEmpty()) json["strPhi"]   = strPhi;
+
+
 }
 
 void AGeoPara::readFromJson(QJsonObject &json)

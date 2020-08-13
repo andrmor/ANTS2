@@ -580,6 +580,7 @@ public:
 
   double dx, dy, dz;
   double alpha, theta, phi;
+  QString str2dx, str2dy, str2dz, strAlpha, strTheta, strPhi;
 };
 
 class AGeoArb8 : public AGeoShape

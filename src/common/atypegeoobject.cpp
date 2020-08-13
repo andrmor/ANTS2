@@ -42,6 +42,12 @@ void ATypeLightguideObject::readFromJson(QJsonObject &json)
     UpperLower = (UppLow == "Lower") ? Lower : Upper;
 }
 
+void ATypeArrayObject::Reconfigure(int NumX, int NumY, int NumZ, double StepX, double StepY, double StepZ)
+{
+    numX = NumX; numY = NumY; numZ = NumZ;
+    stepX = StepX; stepY = StepY; stepZ = StepZ;
+}
+
 QString ATypeArrayObject::updateType()
 {
     qDebug() <<"updating type";
@@ -70,9 +76,9 @@ QString ATypeArrayObject::updateType()
 
 bool ATypeArrayObject::isGeoConstInUse(const QRegExp &nameRegExp) const
 {
-    if (strNumX.contains(nameRegExp)) return true;
-    if (strNumY.contains(nameRegExp)) return true;
-    if (strNumZ.contains(nameRegExp)) return true;
+    if (strNumX .contains(nameRegExp)) return true;
+    if (strNumY .contains(nameRegExp)) return true;
+    if (strNumZ .contains(nameRegExp)) return true;
     if (strStepX.contains(nameRegExp)) return true;
     if (strStepY.contains(nameRegExp)) return true;
     if (strStepZ.contains(nameRegExp)) return true;
@@ -81,9 +87,9 @@ bool ATypeArrayObject::isGeoConstInUse(const QRegExp &nameRegExp) const
 
 void ATypeArrayObject::replaceGeoConstName(const QRegExp &nameRegExp, const QString &newName)
 {
-    strNumX.replace(nameRegExp, newName);
-    strNumY.replace(nameRegExp, newName);
-    strNumZ.replace(nameRegExp, newName);
+    strNumX .replace(nameRegExp, newName);
+    strNumY .replace(nameRegExp, newName);
+    strNumZ .replace(nameRegExp, newName);
     strStepX.replace(nameRegExp, newName);
     strStepY.replace(nameRegExp, newName);
     strStepZ.replace(nameRegExp, newName);

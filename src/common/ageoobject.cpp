@@ -188,12 +188,15 @@ void AGeoObject::replaceGeoConstName(const QRegExp & nameRegExp, const QString &
         PositionStr[i]   .replace(nameRegExp, newName);
         OrientationStr[i].replace(nameRegExp, newName);
     }
-    if (Shape) Shape->replaceGeoConstName(nameRegExp, newName);
+    if (Shape)      Shape->replaceGeoConstName(nameRegExp, newName);
+    if (ObjectType) ObjectType->replaceGeoConstName(nameRegExp, newName);
 }
 
 const AGeoObject *AGeoObject::isGeoConstInUseRecursive(const QRegExp & nameRegExp) const
 {
+    qDebug() <<"name of current "<<this->Name;
     if (isGeoConstInUse(nameRegExp)) return this;
+    if (ObjectType && ObjectType->isGeoConstInUse(nameRegExp)) return this;
 
     for (AGeoObject * hosted : HostedObjects)
     {

@@ -34,7 +34,9 @@ public:
     bool isGridElement() const      {return Type == "GridElement";}
     bool isMonitor() const          {return Type == "Monitor";}
 
-    //virtual QString updateType() {}
+    virtual QString updateType()  {return "";}
+    virtual bool isGeoConstInUse(const QRegExp & /*nameRegExp*/) const {return false;}
+    virtual void replaceGeoConstName(const QRegExp & /*nameRegExp*/, const QString & /*newName*/) {}
 
     virtual void writeToJson(QJsonObject& json); // virtual: CALL THIS, then save additional properties the concrete type has
     virtual void readFromJson(QJsonObject& json) = 0;  // virtual: read additional properties the concrete type has
@@ -133,15 +135,11 @@ public:
     ATypeArrayObject(int numX, int numY, int numZ, double stepX, double stepY, double stepZ)
         : numX(numX), numY(numY), numZ(numZ), stepX(stepX), stepY(stepY), stepZ(stepZ) {Type = "Array"; Handling = "Array";}
 
-    void Reconfigure(int NumX, int NumY, int NumZ, double StepX, double StepY, double StepZ)
-    {
-        numX = NumX; numY = NumY; numZ = NumZ;
-        stepX = StepX; stepY = StepY; stepZ = StepZ;
-    }
+    void Reconfigure(int NumX, int NumY, int NumZ, double StepX, double StepY, double StepZ);
 
-    QString updateType();
-    bool isGeoConstInUse(const QRegExp & nameRegExp) const;
-    void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName);
+    QString updateType() override;
+    bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
+    void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
 
     virtual void writeToJson(QJsonObject& json);
     virtual void readFromJson(QJsonObject& json);

@@ -103,13 +103,18 @@ const QString AGeoBox::getHelp()
 
 QString AGeoBox::updateShape()
 {
-    QString errorStr = updateParameter(str2dx, dx);
-    if (!errorStr.isEmpty()) return errorStr;
+    QString errorStr;
+    bool ok = AGeoConsts::getConstInstance().updateParameter(errorStr, str2dx, dx);
+    if (!ok)
+    {
+        qDebug() <<errorStr;
+        return errorStr;
+    }
 
-    errorStr = updateParameter(str2dy, dy);
-    if (!errorStr.isEmpty()) return errorStr;
+    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, str2dy, dy);
+    if (!ok) return errorStr;
 
-    errorStr = updateParameter(str2dz, dz);
+    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, str2dz, dz);
     return errorStr;
 }
 

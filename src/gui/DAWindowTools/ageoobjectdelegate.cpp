@@ -416,23 +416,23 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
     //additional post-processing
     if ( obj->ObjectType->isArray() )
     {
+        //old system
+        /*array->numX = ledNumX->value();
+        array->numY = ledNumY->value();
+        array->numZ = ledNumZ->value();
+        array->stepX = ledStepX->text().toDouble();
+        array->stepY = ledStepY->text().toDouble();
+        array->stepZ = ledStepZ->text().toDouble();*/
+
         //additional properties for array
         ATypeArrayObject* array = static_cast<ATypeArrayObject*>(obj->ObjectType);
-        //array->numX = ledNumX->value();
-        //array->numY = ledNumY->value();
-        //array->numZ = ledNumZ->value();dNumX
-        //array->stepX = ledStepX->text().toDouble();
-        //array->stepY = ledStepY->text().toDouble();
-        //array->stepZ = ledStepZ->text().toDouble();
-        double dNumx, dNumY, dNumZ;
-        bool ok = true;
-        ok = ok && processEditBox(ledNumX,   dNumx, array->strNumX, ParentWidget); array->numX = dNumx;
-        ok = ok && processEditBox(ledNumY,   dNumY, array->strNumY, ParentWidget); array->numY = dNumY;
-        ok = ok && processEditBox(ledNumZ,   dNumZ, array->strNumZ, ParentWidget); array->numZ = dNumZ;
-        ok = ok && processEditBox(ledStepX,   array->stepX, array->strStepX, ParentWidget);
-        ok = ok && processEditBox(ledStepY,   array->stepY, array->strStepY, ParentWidget);
-        ok = ok && processEditBox(ledStepZ,   array->stepZ, array->strStepZ, ParentWidget);
-        if (!ok) return false;
+        qDebug() <<"updateobject" << "strnux " << array->strNumX;
+        QString errorStr = array->updateType();
+        if (!errorStr.isEmpty())
+        {
+            QMessageBox::warning(this->ParentWidget,"", errorStr);
+            return false;
+        }
 
     }
     else if (obj->ObjectType->isComposite())
@@ -2426,6 +2426,8 @@ void AGeoArrayDelegate::finalizeLocalParameters()
     processEditBox(ledStepY,   array->stepY, array->strStepY, ParentWidget);
     processEditBox(ledStepZ,   array->stepZ, array->strStepZ, ParentWidget);*/
 
+    qDebug() <<"finalizing local parameters";
+
     if (CurrentObject->ObjectType->isArray())
     {
         ATypeArrayObject* array = static_cast<ATypeArrayObject*>(CurrentObject->ObjectType);
@@ -2444,13 +2446,12 @@ void AGeoArrayDelegate::Update(const AGeoObject * obj)
 
     if (obj->ObjectType->isArray())
     {
-        ATypeArrayObject* array = static_cast<ATypeArrayObject*>(obj->ObjectType);
-        ledNumX->setText(array->strNumX.isEmpty() ? QString::number(array->numX) : array->strNumX);
+        /*ledNumX->setText(array->strNumX.isEmpty() ? QString::number(array->numX) : array->strNumX);
         ledNumY->setText(array->strNumY.isEmpty() ? QString::number(array->numY) : array->strNumY);
         ledNumZ->setText(array->strNumZ.isEmpty() ? QString::number(array->numZ) : array->strNumZ);
         ledStepX->setText(array->strStepX.isEmpty() ? QString::number(array->stepX) : array->strStepX);
         ledStepY->setText(array->strStepY.isEmpty() ? QString::number(array->stepY) : array->strStepY);
-        ledStepZ->setText(array->strStepZ.isEmpty() ? QString::number(array->stepZ) : array->strStepZ);
+        ledStepZ->setText(array->strStepZ.isEmpty() ? QString::number(array->stepZ) : array->strStepZ);*/
 
         /*ledNumX->setValue(array->numX);
         ledNumY->setValue(array->numY);
@@ -2458,6 +2459,15 @@ void AGeoArrayDelegate::Update(const AGeoObject * obj)
         ledStepX->setText(QString::number(array->stepX));
         ledStepY->setText(QString::number(array->stepY));
         ledStepZ->setText(QString::number(array->stepZ));*/
+        ATypeArrayObject* array = static_cast<ATypeArrayObject*>(obj->ObjectType);
+
+        ledNumX->setText(array->strNumX.isEmpty() ? QString::number(array->numX) : array->strNumX);
+        ledNumY->setText(array->strNumY.isEmpty() ? QString::number(array->numY) : array->strNumY);
+        ledNumZ->setText(array->strNumZ.isEmpty() ? QString::number(array->numZ) : array->strNumZ);
+        ledStepX->setText(array->strStepX.isEmpty() ? QString::number(array->stepX) : array->strStepX);
+        ledStepY->setText(array->strStepY.isEmpty() ? QString::number(array->stepY) : array->strStepY);
+        ledStepZ->setText(array->strStepZ.isEmpty() ? QString::number(array->stepZ) : array->strStepZ);
+
     }
 }
 

@@ -1,6 +1,7 @@
 #include "atypegeoobject.h"
 #include "aslab.h"
 #include "ajsontools.h"
+#include "ageoconsts.h"
 
 #include <QDebug>
 
@@ -41,30 +42,92 @@ void ATypeLightguideObject::readFromJson(QJsonObject &json)
     UpperLower = (UppLow == "Lower") ? Lower : Upper;
 }
 
-void ATypeArrayObject::updateType()
+QString ATypeArrayObject::updateType()
 {
+    qDebug() <<"updating type";
+    QString errorStr;
+    bool ok;
+    double dNumX = numX;
+    double dNumY = numY;
+    double dNumZ = numZ;
 
+
+    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, strNumX, dNumX, true, true, false) ; if (!ok) return errorStr;
+    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, strNumY, dNumY, true, true, false) ; if (!ok) return errorStr;
+    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, strNumZ, dNumZ, true, true, false) ; if (!ok) return errorStr;
+
+    numX = dNumX;
+    numY = dNumY;
+    numZ = dNumZ;
+
+    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, strStepX, stepX, true, true, false) ; if (!ok) return errorStr;
+    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, strStepY, stepY, true, true, false) ; if (!ok) return errorStr;
+    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, strStepZ, stepZ, true, true, false) ; if (!ok) return errorStr;
+    qDebug() <<"update type "<<"strnumx" << strNumX;
+
+    return "";
+}
+
+bool ATypeArrayObject::isGeoConstInUse(const QRegExp &nameRegExp) const
+{
+    if (strNumX.contains(nameRegExp)) return true;
+    if (strNumY.contains(nameRegExp)) return true;
+    if (strNumZ.contains(nameRegExp)) return true;
+    if (strStepX.contains(nameRegExp)) return true;
+    if (strStepY.contains(nameRegExp)) return true;
+    if (strStepZ.contains(nameRegExp)) return true;
+    return false;
+}
+
+void ATypeArrayObject::replaceGeoConstName(const QRegExp &nameRegExp, const QString &newName)
+{
+    strNumX.replace(nameRegExp, newName);
+    strNumY.replace(nameRegExp, newName);
+    strNumZ.replace(nameRegExp, newName);
+    strStepX.replace(nameRegExp, newName);
+    strStepY.replace(nameRegExp, newName);
+    strStepZ.replace(nameRegExp, newName);
 }
 
 void ATypeArrayObject::writeToJson(QJsonObject &json)
 {
+    qDebug() <<"writing to jason";
+    qDebug() <<"write to Json " <<" strumx " <<strNumX;
     ATypeGeoObject::writeToJson(json);
-    json["numX"] = numX;
-    json["numY"] = numY;
-    json["numZ"] = numZ;
+    json["numX"]  = numX;
+    json["numY"]  = numY;
+    json["numZ"]  = numZ;
     json["stepX"] = stepX;
     json["stepY"] = stepY;
     json["stepZ"] = stepZ;
+
+    if (!strNumX .isEmpty()) json["strNumX"]  = strNumX;
+    if (!strNumY .isEmpty()) json["strNumY"]  = strNumY;
+    if (!strNumZ .isEmpty()) json["strNumZ"]  = strNumZ;
+    if (!strStepX.isEmpty()) json["strStepX"] = strStepX;
+    if (!strStepY.isEmpty()) json["strStepY"] = strStepY;
+    if (!strStepZ.isEmpty()) json["strStepZ"] = strStepZ;
 }
 
 void ATypeArrayObject::readFromJson(QJsonObject &json)
 {
-    parseJson(json, "numX", numX);
-    parseJson(json, "numY", numY);
-    parseJson(json, "numZ", numZ);
+    qDebug() <<"reading from json";
+    parseJson(json, "numX",  numX);
+    parseJson(json, "numY",  numY);
+    parseJson(json, "numZ",  numZ);
     parseJson(json, "stepX", stepX);
     parseJson(json, "stepY", stepY);
     parseJson(json, "stepZ", stepZ);
+
+    if (!parseJson(json, "strNumX",  strNumX))  strNumX .clear();
+    if (!parseJson(json, "strNumY",  strNumY))  strNumY .clear();
+    if (!parseJson(json, "strNumZ",  strNumZ))  strNumZ .clear();
+    if (!parseJson(json, "strStepX", strStepX)) strStepX.clear();
+    if (!parseJson(json, "strStepY", strStepY)) strStepY.clear();
+    if (!parseJson(json, "strStepZ", strStepZ)) strStepZ.clear();
+
+    updateType();
+
 }
 
 void ATypeGridElementObject::writeToJson(QJsonObject &json)

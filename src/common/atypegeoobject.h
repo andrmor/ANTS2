@@ -34,7 +34,7 @@ public:
     bool isGridElement() const      {return Type == "GridElement";}
     bool isMonitor() const          {return Type == "Monitor";}
 
-    virtual void updateType() {}
+    //virtual QString updateType() {}
 
     virtual void writeToJson(QJsonObject& json); // virtual: CALL THIS, then save additional properties the concrete type has
     virtual void readFromJson(QJsonObject& json) = 0;  // virtual: read additional properties the concrete type has
@@ -139,7 +139,9 @@ public:
         stepX = StepX; stepY = StepY; stepZ = StepZ;
     }
 
-    void updateType();
+    QString updateType();
+    bool isGeoConstInUse(const QRegExp & nameRegExp) const;
+    void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName);
 
     virtual void writeToJson(QJsonObject& json);
     virtual void readFromJson(QJsonObject& json);

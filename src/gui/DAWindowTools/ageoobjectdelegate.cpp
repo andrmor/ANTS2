@@ -2356,49 +2356,25 @@ AGeoArrayDelegate::AGeoArrayDelegate(const QStringList &materials, QWidget *pare
     la = new QLabel("Step in Z:");
     la->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     grAW->addWidget(la, 2, 2);
-    la = new QLabel("mm");
-    grAW->addWidget(la, 0, 4);
-    la = new QLabel("mm");
-    grAW->addWidget(la, 1, 4);
-    la = new QLabel("mm");
-    grAW->addWidget(la, 2, 4);
+    la = new QLabel("mm"); grAW->addWidget(la, 0, 4);
+    la = new QLabel("mm"); grAW->addWidget(la, 1, 4);
+    la = new QLabel("mm"); grAW->addWidget(la, 2, 4);
 
-    ledNumX = new AOneLineTextEdit(Widget);
-    /*ledNumX->setMaximum(100);
-    ledNumX->setMinimum(0);*/
-    ledNumX->setMaximumWidth(75);
-    ledNumX->setContextMenuPolicy(Qt::NoContextMenu);
-    grAW->addWidget(ledNumX, 0, 1);
-    connect(ledNumX, SIGNAL(textChanged()), this, SLOT(onContentChanged()));
-    ledNumY = new AOneLineTextEdit(Widget);
-    /*ledNumY->setMaximum(100);
-    ledNumY->setMinimum(0);*/
-    ledNumY->setMaximumWidth(75);
-    ledNumY->setContextMenuPolicy(Qt::NoContextMenu);
-    grAW->addWidget(ledNumY, 1, 1);
-    connect(ledNumY, SIGNAL(textChanged()), this, SLOT(onContentChanged()));
-    ledNumZ = new AOneLineTextEdit(Widget);
-    /*ledNumZ->setMaximum(100);
-    ledNumZ->setMinimum(0);*/
-    ledNumZ->setMaximumWidth(75);
-    ledNumZ->setContextMenuPolicy(Qt::NoContextMenu);
-    grAW->addWidget(ledNumZ, 2, 1);
-    connect(ledNumZ, SIGNAL(textChanged()), this, SLOT(onContentChanged()));
-    ledStepX = new AOneLineTextEdit(Widget);
-    ledStepX->setContextMenuPolicy(Qt::NoContextMenu);
-    ledStepX->setMaximumWidth(75);
-    connect(ledStepX, SIGNAL(textChanged()), this, SLOT(onContentChanged()));
-    grAW->addWidget(ledStepX, 0, 3);
-    ledStepY = new AOneLineTextEdit(Widget);
-    ledStepY->setMaximumWidth(75);
-    ledStepY->setContextMenuPolicy(Qt::NoContextMenu);
-    connect(ledStepY, SIGNAL(textChanged()), this, SLOT(onContentChanged()));
-    grAW->addWidget(ledStepY, 1, 3);
-    ledStepZ = new AOneLineTextEdit(Widget);
-    ledStepZ->setMaximumWidth(75);
-    ledStepZ->setContextMenuPolicy(Qt::NoContextMenu);
-    connect(ledStepZ, SIGNAL(textChanged()), this, SLOT(onContentChanged()));
-    grAW->addWidget(ledStepZ, 2, 3);
+    ledNumX  = new AOneLineTextEdit(Widget); grAW->addWidget(ledNumX,  0, 1);
+    ledNumY  = new AOneLineTextEdit(Widget); grAW->addWidget(ledNumY,  1, 1);
+    ledNumZ  = new AOneLineTextEdit(Widget); grAW->addWidget(ledNumZ,  2, 1);
+    ledStepX = new AOneLineTextEdit(Widget); grAW->addWidget(ledStepX, 0, 3);
+    ledStepY = new AOneLineTextEdit(Widget); grAW->addWidget(ledStepY, 1, 3);
+    ledStepZ = new AOneLineTextEdit(Widget); grAW->addWidget(ledStepZ, 2, 3);
+
+    QVector<AOneLineTextEdit*> l = {ledNumX, ledNumY, ledNumZ, ledStepX, ledStepY, ledStepZ};
+    for (AOneLineTextEdit * le : l)
+    {
+        le->setMaximumWidth(75);
+        le->setContextMenuPolicy(Qt::NoContextMenu);
+        configureHighligherAndCompleter(le);
+        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoObjectDelegate::ContentChanged);
+    }
 
     addLocalLayout(grAW);
 

@@ -356,6 +356,71 @@
                 {
                     "Container": "World",
                     "Locked": false,
+                    "Material": 0,
+                    "Name": "Para",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoPara",
+                    "ShapeSpecific": {
+                        "alpha": 10,
+                        "dx": 10,
+                        "dy": 6,
+                        "dz": 10,
+                        "phi": 45,
+                        "str2dx": "SizeX*0.5",
+                        "str2dy": "SizeY*0.2",
+                        "theta": 25
+                    },
+                    "Theta": 0,
+                    "X": 30,
+                    "Y": 30,
+                    "Z": -30,
+                    "color": 797,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "strX": "Offset",
+                    "strY": "Offset",
+                    "strZ": "-Offset",
+                    "style": 2,
+                    "width": 2
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Material": 0,
+                    "Name": "ElTube",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoEltu",
+                    "ShapeSpecific": {
+                        "a": 10,
+                        "b": 15,
+                        "dz": 5,
+                        "str2a": "SizeX*0.5",
+                        "str2b": "SizeY*0.5"
+                    },
+                    "Theta": 0,
+                    "X": 30,
+                    "Y": -30,
+                    "Z": 30,
+                    "color": 892,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "strX": "Offset",
+                    "strY": "-Offset",
+                    "strZ": "Offset",
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
                     "Material": 1,
                     "Name": "Box",
                     "ObjectType": {

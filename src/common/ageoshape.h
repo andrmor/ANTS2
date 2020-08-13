@@ -564,6 +564,10 @@ public:
   const QString getShapeType() const override {return "TGeoPara";}
   virtual const QString getShapeTemplate() {return "TGeoPara( dX, dY, dZ, alpha, theta, phi )";}
   virtual const QString getHelp();
+  QString updateShape() override;
+
+  bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
+  void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
 
   virtual bool readFromString(QString GenerationString);
   virtual TGeoShape* createGeoShape(const QString shapeName = "");

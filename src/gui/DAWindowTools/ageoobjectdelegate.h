@@ -216,9 +216,9 @@ public:
 
     void finalizeLocalParameters();
 
-    QLineEdit * ex = nullptr;
-    QLineEdit * ey = nullptr;
-    QLineEdit * ez = nullptr;
+    AOneLineTextEdit * ex = nullptr;
+    AOneLineTextEdit * ey = nullptr;
+    AOneLineTextEdit * ez = nullptr;
 
 protected:
     QGridLayout * gr = nullptr;
@@ -236,18 +236,19 @@ class AGeoParaDelegate : public AGeoObjectDelegate
 public:
     AGeoParaDelegate(const QStringList & materials, QWidget * parent);
 
-    QLineEdit * ex = nullptr;
-    QLineEdit * ey = nullptr;
-    QLineEdit * ez = nullptr;
-    QLineEdit * ea = nullptr;
-    QLineEdit * et = nullptr;
-    QLineEdit * ep = nullptr;
+    void finalizeLocalParameters() override;
+
+    AOneLineTextEdit * ex = nullptr;
+    AOneLineTextEdit * ey = nullptr;
+    AOneLineTextEdit * ez = nullptr;
+    AOneLineTextEdit * ea = nullptr;
+    AOneLineTextEdit * et = nullptr;
+    AOneLineTextEdit * ep = nullptr;
 
 public slots:
     virtual void Update(const AGeoObject * obj) override;
 
 private slots:
-    void onLocalShapeParameterChange() override;
 };
 
 class AGeoSphereDelegate : public AGeoObjectDelegate

@@ -1142,12 +1142,12 @@ AGeoParaDelegate::AGeoParaDelegate(const QStringList & materials, QWidget *paren
     gr->addWidget(new QLabel("Theta:"),     4, 0);
     gr->addWidget(new QLabel("Phi:"),       5, 0);
 
-    ex = new QLineEdit(); gr->addWidget(ex, 0, 1);
-    ey = new QLineEdit(); gr->addWidget(ey, 1, 1);
-    ez = new QLineEdit(); gr->addWidget(ez, 2, 1);
-    ea = new QLineEdit(); gr->addWidget(ea, 3, 1);
-    et = new QLineEdit(); gr->addWidget(et, 4, 1);
-    ep = new QLineEdit(); gr->addWidget(ep, 5, 1);
+    ex = new AOneLineTextEdit(); gr->addWidget(ex, 0, 1);
+    ey = new AOneLineTextEdit(); gr->addWidget(ey, 1, 1);
+    ez = new AOneLineTextEdit(); gr->addWidget(ez, 2, 1);
+    ea = new AOneLineTextEdit(); gr->addWidget(ea, 3, 1);
+    et = new AOneLineTextEdit(); gr->addWidget(et, 4, 1);
+    ep = new AOneLineTextEdit(); gr->addWidget(ep, 5, 1);
 
     gr->addWidget(new QLabel("mm"), 0, 2);
     gr->addWidget(new QLabel("mm"), 1, 2);
@@ -1158,15 +1158,41 @@ AGeoParaDelegate::AGeoParaDelegate(const QStringList & materials, QWidget *paren
 
     addLocalLayout(gr);
 
-    QVector<QLineEdit*> l = {ex, ey, ez, ea, et, ep};
-    for (QLineEdit * le : l)
-        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoParaDelegate::onLocalShapeParameterChange);
+    QVector<AOneLineTextEdit*> l = {ex, ey, ez, ea, et, ep};
+    for (AOneLineTextEdit * le : l)
+    {
+        configureHighligherAndCompleter(le);
+        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoParaDelegate::ContentChanged);
+    }
+}
+
+void AGeoParaDelegate::finalizeLocalParameters()
+{
+    AGeoPara * para = dynamic_cast<AGeoPara*>(ShapeCopy);
+    if (!para)
+    {
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+        para = dynamic_cast<AGeoPara*>(scaled->BaseShape);
+    }
+
+    if (para)
+    {
+        para->str2dx   = ex->text();
+        para->str2dy   = ey->text();
+        para->str2dz   = ez->text();
+        para->strAlpha = ea->text();
+        para->strTheta = et->text();
+        para->strPhi   = ep->text();
+        //emit ContentChanged();
+    }
+    else qWarning() << "Read delegate: Parallelepiped shape not found!";
+
 }
 
 void AGeoParaDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
-
+    /* old system
     const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
     const AGeoPara * para = dynamic_cast<const AGeoPara*>(tmpShape ? tmpShape : obj->Shape);
     if (para)
@@ -1178,13 +1204,25 @@ void AGeoParaDelegate::Update(const AGeoObject *obj)
         et->setText(QString::number(para->theta));
         ep->setText(QString::number(para->phi));
     }
-    delete tmpShape;
-}
+    delete tmpShape;*/
+    AGeoPara * para = dynamic_cast<AGeoPara*>(ShapeCopy);
+    if (!para)
+    {
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+        para = dynamic_cast<AGeoPara*>(scaled->BaseShape);
+    }
 
-void AGeoParaDelegate::onLocalShapeParameterChange()
-{
-    updatePteShape(QString("TGeoPara( %1, %2, %3, %4, %5, %6 )").arg(0.5*ex->text().toDouble()).arg(0.5*ey->text().toDouble()).arg(0.5*ez->text().toDouble())
-                                                                .arg(ea->text()).arg(et->text()).arg(ep->text())  );
+    if (para)
+    {
+        ex->setText(para->str2dx  .isEmpty() ? QString::number(para->dx*2.0) : para->str2dx);
+        ey->setText(para->str2dy  .isEmpty() ? QString::number(para->dy*2.0) : para->str2dy);
+        ez->setText(para->str2dz  .isEmpty() ? QString::number(para->dz*2.0) : para->str2dz);
+        ea->setText(para->strAlpha.isEmpty() ? QString::number(para->alpha)  : para->strAlpha);
+        et->setText(para->strTheta.isEmpty() ? QString::number(para->theta)  : para->strTheta);
+        ep->setText(para->strPhi  .isEmpty() ? QString::number(para->phi)    : para->strPhi);
+        //emit ContentChanged();
+    }
+    else qWarning() << "Read delegate: Box shape not found!";
 }
 
 AGeoSphereDelegate::AGeoSphereDelegate(const QStringList & materials, QWidget *parent)
@@ -1449,9 +1487,9 @@ AGeoElTubeDelegate::AGeoElTubeDelegate(const QStringList &materials, QWidget *pa
     gr->addWidget(new QLabel("Y full size:"), 1, 0);
     gr->addWidget(new QLabel("Height:"),    2, 0);
 
-    ex = new QLineEdit(); gr->addWidget(ex, 0, 1);
-    ey = new QLineEdit(); gr->addWidget(ey, 1, 1);
-    ez = new QLineEdit(); gr->addWidget(ez, 2, 1);
+    ex = new AOneLineTextEdit(); gr->addWidget(ex, 0, 1);
+    ey = new AOneLineTextEdit(); gr->addWidget(ey, 1, 1);
+    ez = new AOneLineTextEdit(); gr->addWidget(ez, 2, 1);
 
     gr->addWidget(new QLabel("mm"), 0, 2);
     gr->addWidget(new QLabel("mm"), 1, 2);
@@ -1459,10 +1497,12 @@ AGeoElTubeDelegate::AGeoElTubeDelegate(const QStringList &materials, QWidget *pa
 
     addLocalLayout(gr);
 
-    QVector<QLineEdit*> l = {ex, ey, ez};
-    for (QLineEdit * le : l)
-        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoElTubeDelegate::ContentChanged);
-        //QObject::connect(le, &QLineEdit::textChanged, this, &AGeoElTubeDelegate::onLocalShapeParameterChange);
+    QVector<AOneLineTextEdit*> l = {ex, ey, ez};
+    for (AOneLineTextEdit * le : l)
+    {
+        configureHighligherAndCompleter(le);
+        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoElTubeDelegate::ContentChanged);
+    }
 }
 
 void AGeoElTubeDelegate::finalizeLocalParameters()
@@ -2341,21 +2381,23 @@ AGeoArrayDelegate::AGeoArrayDelegate(const QStringList &materials, QWidget *pare
     grAW->setContentsMargins(5, 3, 5, 3);
     grAW->setVerticalSpacing(0);
 
-    QLabel *la = new QLabel("Number in X:");
-    grAW->addWidget(la, 0, 0);
-    la = new QLabel("Number in Y:");
-    grAW->addWidget(la, 1, 0);
-    la = new QLabel("Number in Z:");
-    grAW->addWidget(la, 2, 0);
+    QLabel *la = new QLabel;
+    la = new QLabel("Number in X:"); grAW->addWidget(la, 0, 0);
+    la = new QLabel("Number in Y:"); grAW->addWidget(la, 1, 0);
+    la = new QLabel("Number in Z:"); grAW->addWidget(la, 2, 0);
+
     la = new QLabel("Step in X:");
     la->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     grAW->addWidget(la, 0, 2);
+
     la = new QLabel("Step in Y:");
     la->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     grAW->addWidget(la, 1, 2);
+
     la = new QLabel("Step in Z:");
     la->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     grAW->addWidget(la, 2, 2);
+
     la = new QLabel("mm"); grAW->addWidget(la, 0, 4);
     la = new QLabel("mm"); grAW->addWidget(la, 1, 4);
     la = new QLabel("mm"); grAW->addWidget(la, 2, 4);

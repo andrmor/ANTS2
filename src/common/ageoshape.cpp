@@ -214,6 +214,41 @@ const QString AGeoPara::getHelp()
            " • phi: phi angle of the same segment";
 }
 
+QString AGeoPara::updateShape()
+{
+    QString errorStr = "";
+    bool ok;
+
+    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, str2dx,   dx);                         if (!ok) return errorStr;
+    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, str2dy,   dy);                         if (!ok) return errorStr;
+    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, str2dz,   dz);                         if (!ok) return errorStr;
+    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, strAlpha, alpha, false, false, false); if (!ok) return errorStr;
+    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, strTheta, theta, false, false, false); if (!ok) return errorStr;
+    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, strPhi,   phi, false, false, false);   if (!ok) return errorStr;
+    return "";
+}
+
+bool AGeoPara::isGeoConstInUse(const QRegExp &nameRegExp) const
+{
+    if (str2dx.contains(nameRegExp))   return true;
+    if (str2dy.contains(nameRegExp))   return true;
+    if (str2dz.contains(nameRegExp))   return true;
+    if (strAlpha.contains(nameRegExp)) return true;
+    if (strTheta.contains(nameRegExp)) return true;
+    if (strPhi.contains(nameRegExp))   return true;
+    return false;
+}
+
+void AGeoPara::replaceGeoConstName(const QRegExp &nameRegExp, const QString &newName)
+{
+    str2dx  .replace(nameRegExp, newName);
+    str2dy  .replace(nameRegExp, newName);
+    str2dz  .replace(nameRegExp, newName);
+    strAlpha.replace(nameRegExp, newName);
+    strTheta.replace(nameRegExp, newName);
+    strPhi  .replace(nameRegExp, newName);
+}
+
 bool AGeoPara::readFromString(QString GenerationString)
 {
     QStringList params;
@@ -285,12 +320,19 @@ void AGeoPara::writeToJson(QJsonObject &json) const
 
 void AGeoPara::readFromJson(QJsonObject &json)
 {
-    dx = json["dx"].toDouble();
-    dy = json["dy"].toDouble();
-    dz = json["dz"].toDouble();
+    dx    = json["dx"]   .toDouble();
+    dy    = json["dy"]   .toDouble();
+    dz    = json["dz"]   .toDouble();
     alpha = json["alpha"].toDouble();
     theta = json["theta"].toDouble();
-    phi = json["phi"].toDouble();
+    phi   = json["phi"]  .toDouble();
+
+    if (!parseJson(json, "str2dx",   str2dx))   str2dx  .clear();
+    if (!parseJson(json, "str2dy",   str2dy))   str2dy  .clear();
+    if (!parseJson(json, "str2dz",   str2dz))   str2dz  .clear();
+    if (!parseJson(json, "strAlpha", strAlpha)) strAlpha.clear();
+    if (!parseJson(json, "strTheta", strTheta)) strTheta.clear();
+    if (!parseJson(json, "strPhi",   strPhi))   strPhi  .clear();
 }
 
 bool AGeoPara::readFromTShape(TGeoShape *Tshape)

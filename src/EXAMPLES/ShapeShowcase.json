@@ -39,8 +39,8 @@
         },
         "FixedWorldSizes": {
             "WorldSizeFixed": false,
-            "XY": 86.05960043841964,
-            "Z": 86.05960043841964
+            "XY": 163.84920673956736,
+            "Z": 110.25
         },
         "IndividualPMoverrides": {
             "Angular": {
@@ -352,6 +352,59 @@
                     },
                     "fActive": true,
                     "fExpanded": true
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Name": "Array",
+                    "ObjectType": {
+                        "Type": "Array",
+                        "numX": 2,
+                        "numY": 2,
+                        "numZ": 2,
+                        "stepX": 20,
+                        "stepY": 25,
+                        "stepZ": 25,
+                        "strStepX": "SizeX*0.5"
+                    },
+                    "Phi": 0,
+                    "Psi": 22.5,
+                    "Theta": 0,
+                    "X": 60,
+                    "Y": 60,
+                    "Z": 30,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "strPsi": "Angle*0.5",
+                    "strX": "2*Offset",
+                    "strY": "2*Offset",
+                    "strZ": "Offset"
+                },
+                {
+                    "Container": "Array",
+                    "Locked": false,
+                    "Material": 0,
+                    "Name": "Bb",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoBBox",
+                    "ShapeSpecific": {
+                        "dx": 5,
+                        "dy": 5,
+                        "dz": 5
+                    },
+                    "Theta": 0,
+                    "X": 0,
+                    "Y": 0,
+                    "Z": 0,
+                    "color": 8,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "style": 1,
+                    "width": 1
                 },
                 {
                     "Container": "World",

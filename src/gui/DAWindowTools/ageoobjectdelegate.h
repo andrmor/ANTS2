@@ -320,10 +320,12 @@ class AGeoTrapXDelegate : public AGeoObjectDelegate
 public:
     AGeoTrapXDelegate(const QStringList & materials, QWidget * parent);
 
-    QLineEdit * exl = nullptr;
-    QLineEdit * exu = nullptr;
-    QLineEdit * ey = nullptr;
-    QLineEdit * ez = nullptr;
+    void finalizeLocalParameters() override;
+
+    AOneLineTextEdit * exl = nullptr;
+    AOneLineTextEdit * exu = nullptr;
+    AOneLineTextEdit * ey = nullptr;
+    AOneLineTextEdit * ez = nullptr;
 
 public slots:
     virtual void Update(const AGeoObject * obj) override;

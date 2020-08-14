@@ -1576,10 +1576,10 @@ AGeoTrapXDelegate::AGeoTrapXDelegate(const QStringList &materials, QWidget *pare
     gr->addWidget(new QLabel("Y size:"),       2, 0);
     gr->addWidget(new QLabel("Height:"),       3, 0);
 
-    exl = new QLineEdit(); gr->addWidget(exl, 0, 1);
-    exu = new QLineEdit(); gr->addWidget(exu, 1, 1);
-    ey  = new QLineEdit(); gr->addWidget(ey,  2, 1);
-    ez  = new QLineEdit(); gr->addWidget(ez,  3, 1);
+    exl = new AOneLineTextEdit(); gr->addWidget(exl, 0, 1);
+    exu = new AOneLineTextEdit(); gr->addWidget(exu, 1, 1);
+    ey  = new AOneLineTextEdit(); gr->addWidget(ey,  2, 1);
+    ez  = new AOneLineTextEdit(); gr->addWidget(ez,  3, 1);
 
     gr->addWidget(new QLabel("mm"), 0, 2);
     gr->addWidget(new QLabel("mm"), 1, 2);
@@ -1588,15 +1588,39 @@ AGeoTrapXDelegate::AGeoTrapXDelegate(const QStringList &materials, QWidget *pare
 
     addLocalLayout(gr);
 
-    QVector<QLineEdit*> l = {exl, exu, ey, ez};
-    for (QLineEdit * le : l)
-        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoTrapXDelegate::onLocalShapeParameterChange);
+    QVector<AOneLineTextEdit*> l = {exl, exu, ey, ez};
+    for (AOneLineTextEdit * le : l)
+    {
+        configureHighligherAndCompleter(le);
+        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoTrapXDelegate::ContentChanged);
+    }
+}
+
+void AGeoTrapXDelegate::finalizeLocalParameters()
+{
+    AGeoTrd1 * trap = dynamic_cast<AGeoTrd1*>(ShapeCopy);
+        if (!trap)
+        {
+            AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+            trap = dynamic_cast<AGeoTrd1*>(scaled->BaseShape);
+        }
+
+        if (trap)
+        {
+            trap->str2dx1 = exl->text();
+            trap->str2dx2 = exu->text();
+            trap->str2dy  = ey->text();
+            trap->str2dz  = ez->text();
+            //emit ContentChanged();
+        }
+        else qWarning() << "Read delegate: Trapezoid Simplified shape not found!";
+
 }
 
 void AGeoTrapXDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
-
+    /*old system
     const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
     const AGeoTrd1 * trap = dynamic_cast<const AGeoTrd1*>(tmpShape ? tmpShape : obj->Shape);
     if (trap)
@@ -1606,7 +1630,25 @@ void AGeoTrapXDelegate::Update(const AGeoObject *obj)
         ey-> setText(QString::number(trap->dy  * 2.0));
         ez-> setText(QString::number(trap->dz  * 2.0));
     }
-    delete tmpShape;
+    delete tmpShape;*/
+
+    AGeoTrd1 * trap = dynamic_cast<AGeoTrd1*>(ShapeCopy);
+        if (!trap)
+        {
+            AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+            trap = dynamic_cast<AGeoTrd1*>(scaled->BaseShape);
+        }
+
+        if (trap)
+        {
+            exl->setText(trap->str2dx1.isEmpty() ? QString::number(trap->dx1 * 2.0) : trap->str2dx1);
+            exu->setText(trap->str2dx2.isEmpty() ? QString::number(trap->dx2 * 2.0) : trap->str2dx2);
+            ey-> setText(trap->str2dy .isEmpty() ? QString::number(trap->dy  * 2.0) : trap->str2dy);
+            ez-> setText(trap->str2dz .isEmpty() ? QString::number(trap->dz  * 2.0) : trap->str2dz);
+            //emit ContentChanged();
+        }
+        else qWarning() << "Read delegate: Trapezoid Simplified shape not found!";
+
 }
 
 void AGeoTrapXDelegate::onLocalShapeParameterChange()

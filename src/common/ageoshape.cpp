@@ -965,6 +965,36 @@ const QString AGeoTrd1::getHelp()
            " • dz: half length in Z\n";
 }
 
+QString AGeoTrd1::updateShape()
+{
+    QString errorStr = "";
+    bool ok;
+
+    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, str2dx1, dx1); if (!ok) return errorStr;
+    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, str2dx2, dx2); if (!ok) return errorStr;
+    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, str2dy,  dy);  if (!ok) return errorStr;
+    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, str2dz,  dz);  if (!ok) return errorStr;
+
+    return "";
+}
+
+bool AGeoTrd1::isGeoConstInUse(const QRegExp &nameRegExp) const
+{
+    if (str2dx1.contains(nameRegExp)) return true;
+    if (str2dx2.contains(nameRegExp)) return true;
+    if (str2dy .contains(nameRegExp)) return true;
+    if (str2dz .contains(nameRegExp)) return true;
+    return false;
+}
+
+void AGeoTrd1::replaceGeoConstName(const QRegExp &nameRegExp, const QString &newName)
+{
+    str2dx1.replace(nameRegExp, newName);
+    str2dx2.replace(nameRegExp, newName);
+    str2dy .replace(nameRegExp, newName);
+    str2dz .replace(nameRegExp, newName);
+}
+
 bool AGeoTrd1::readFromString(QString GenerationString)
 {
     QStringList params;
@@ -1017,16 +1047,28 @@ void AGeoTrd1::writeToJson(QJsonObject &json) const
 {
     json["dx1"] = dx1;
     json["dx2"] = dx2;
-    json["dy"] = dy;
-    json["dz"] = dz;
+    json["dy"]  = dy;
+    json["dz"]  = dz;
+
+    if (!str2dx1.isEmpty()) json["str2dx1"] = str2dx1;
+    if (!str2dx2.isEmpty()) json["str2dx2"] = str2dx2;
+    if (!str2dy.isEmpty())  json["str2dy"]  = str2dy;
+    if (!str2dz.isEmpty())  json["str2dz"]  = str2dz;
 }
 
 void AGeoTrd1::readFromJson(QJsonObject &json)
 {
     dx1 = json["dx1"].toDouble();
     dx2 = json["dx2"].toDouble();
-    dy = json["dy"].toDouble();
-    dz = json["dz"].toDouble();
+    dy  = json["dy"].toDouble();
+    dz  = json["dz"].toDouble();
+
+    if (!parseJson(json, "str2dx1", str2dx1)) str2dx1.clear();
+    if (!parseJson(json, "str2dx2", str2dx2)) str2dx2.clear();
+    if (!parseJson(json, "str2dy",  str2dy))  str2dy .clear();
+    if (!parseJson(json, "str2dz",  str2dz))  str2dz .clear();
+
+    updateShape();
 }
 
 bool AGeoTrd1::readFromTShape(TGeoShape *Tshape)

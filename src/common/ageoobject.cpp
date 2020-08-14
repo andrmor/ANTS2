@@ -178,6 +178,7 @@ const AGeoObject * AGeoObject::isGeoConstInUse(const QRegExp & nameRegExp) const
         if (OrientationStr[i].contains(nameRegExp)) return this;
     }
     if (Shape && Shape->isGeoConstInUse(nameRegExp)) return this;
+    if (ObjectType && ObjectType->isGeoConstInUse(nameRegExp)) return this;  //good?
     return nullptr;
 }
 
@@ -196,7 +197,6 @@ const AGeoObject *AGeoObject::isGeoConstInUseRecursive(const QRegExp & nameRegEx
 {
     qDebug() <<"name of current "<<this->Name;
     if (isGeoConstInUse(nameRegExp)) return this;
-    if (ObjectType && ObjectType->isGeoConstInUse(nameRegExp)) return this;
 
     for (AGeoObject * hosted : HostedObjects)
     {

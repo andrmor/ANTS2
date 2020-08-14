@@ -1180,9 +1180,9 @@ void DetectorAddOnsWindow::on_pbRunTestParticle_clicked()
    Start[0] = ui->ledTPx->text().toDouble();
    Start[1] = ui->ledTPy->text().toDouble();
    Start[2] = ui->ledTPz->text().toDouble();
-   Dir[0] = ui->ledTPi->text().toDouble();
-   Dir[1] = ui->ledTPj->text().toDouble();
-   Dir[2] = ui->ledTPk->text().toDouble();
+   Dir[0]   = ui->ledTPi->text().toDouble();
+   Dir[1]   = ui->ledTPj->text().toDouble();
+   Dir[2]   = ui->ledTPk->text().toDouble();
 
    NormalizeVector(Dir);
    //qDebug() << Dir[0]<<Dir[1]<<Dir[2];

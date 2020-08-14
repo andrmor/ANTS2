@@ -422,21 +422,22 @@ class AGeoPconDelegate : public AGeoObjectDelegate
 public:
     AGeoPconDelegate(const QStringList & materials, QWidget * parent);
 
-    void finalizeLocalParameters();
+    void finalizeLocalParameters() override;
 
-    QLineEdit * ep0 = nullptr;
-    QLineEdit * epe = nullptr;
+    AOneLineTextEdit * ep0 = nullptr;
+    AOneLineTextEdit * epe = nullptr;
 
     QTableWidget * tab = nullptr;
 
 protected:
     QVBoxLayout * lay = nullptr;
+    void addOneLineTextEdits(int row);
 
 public slots:
     virtual void Update(const AGeoObject * obj) override;
 
 private slots:
-    void onLocalShapeParameterChange() override;
+    //void onLocalShapeParameterChange() override;
 
 protected:
     const int rowHeight = 23;

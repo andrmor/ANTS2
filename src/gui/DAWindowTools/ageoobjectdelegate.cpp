@@ -1990,7 +1990,7 @@ AGeoPconDelegate::AGeoPconDelegate(const QStringList &materials, QWidget *parent
 
         tab = new QTableWidget();
         tab->setColumnCount(3);
-        tab->setHorizontalHeaderLabels(QStringList({"Z position", "Outer diameter", "Inner diameter"}));
+        tab->setHorizontalHeaderLabels(QStringList({"Z position", "Inner diameter", "Outer diameter"}));
         tab->setMaximumHeight(150);
         tab->verticalHeader()->setSectionsMovable(true);
         QObject::connect(tab->verticalHeader(), &QHeaderView::sectionMoved, this, [this](int /*logicalIndex*/, int oldVisualIndex, int newVisualIndex)
@@ -2009,7 +2009,7 @@ AGeoPconDelegate::AGeoPconDelegate(const QStringList &materials, QWidget *parent
                 tab->setItem(newVisualIndex, i, from);
             }
         }, Qt::QueuedConnection);
-        connect(tab, &QTableWidget::cellChanged, this, &AGeoPconDelegate::onLocalShapeParameterChange);
+        connect(tab, &QTableWidget::cellChanged, this, &AGeoPconDelegate::ContentChanged);
 
     lay->addWidget(tab);
 
@@ -2022,7 +2022,8 @@ AGeoPconDelegate::AGeoPconDelegate(const QStringList &materials, QWidget *parent
             if (row == -1) row = 0;
             tab->insertRow(row);
             tab->setRowHeight(row, rowHeight);
-            onLocalShapeParameterChange();
+            addOneLineTextEdits(row);
+            ContentChanged();       //right?
         });
         hl->addWidget(pbAddAbove);
         QPushButton * pbAddBelow = new QPushButton("Add below");
@@ -2034,7 +2035,8 @@ AGeoPconDelegate::AGeoPconDelegate(const QStringList &materials, QWidget *parent
             row++;
             tab->insertRow(row);
             tab->setRowHeight(row, rowHeight);
-            onLocalShapeParameterChange();
+            addOneLineTextEdits(row);
+            ContentChanged();      //right?
         });
         hl->addWidget(pbAddBelow);
         QPushButton * pbRemoveRow = new QPushButton("Remove plane");
@@ -2042,7 +2044,7 @@ AGeoPconDelegate::AGeoPconDelegate(const QStringList &materials, QWidget *parent
         {
             int row = tab->currentRow();
             if (row != -1) tab->removeRow(row);
-            onLocalShapeParameterChange();
+            ContentChanged();        //right?
         });
         hl->addWidget(pbRemoveRow);
 
@@ -2055,8 +2057,8 @@ AGeoPconDelegate::AGeoPconDelegate(const QStringList &materials, QWidget *parent
         gr->addWidget(new QLabel("Phi from:"), 0, 0);
         gr->addWidget(new QLabel("Phi to:"),   1, 0);
 
-        ep0 = new QLineEdit(); gr->addWidget(ep0, 0, 1);
-        epe = new QLineEdit(); gr->addWidget(epe, 1, 1);
+        ep0 = new AOneLineTextEdit(); gr->addWidget(ep0, 0, 1);
+        epe = new AOneLineTextEdit(); gr->addWidget(epe, 1, 1);
 
         gr->addWidget(new QLabel("°"),  0, 2);
         gr->addWidget(new QLabel("°"),  1, 2);
@@ -2065,20 +2067,69 @@ AGeoPconDelegate::AGeoPconDelegate(const QStringList &materials, QWidget *parent
 
     addLocalLayout(lay);
 
-    QVector<QLineEdit*> l = {ep0, epe};
-    for (QLineEdit * le : l)
-        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoPconDelegate::onLocalShapeParameterChange);
+    QVector<AOneLineTextEdit*> l = {ep0, epe};
+    for (AOneLineTextEdit * le : l)
+    {
+        configureHighligherAndCompleter(le);
+        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoPconDelegate::ContentChanged);
+    }
 }
 
 void AGeoPconDelegate::finalizeLocalParameters()
 {
+    qDebug() <<"hmmm finalizing";
+    AGeoPcon * pcon = dynamic_cast<AGeoPcon*>(ShapeCopy);
+        if (!pcon)
+        {
+            AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+            pcon = dynamic_cast<AGeoPcon*>(scaled->BaseShape);
+        }
 
+        if (pcon)
+        {
+            pcon->strPhi  = ep0->text();
+            pcon->strdPhi = epe->text();
+
+            if (!tab) return;
+            const int rows = tab->rowCount();
+            pcon->Sections.clear();
+            qDebug() <<"roooowws " <<rows;
+            for (int ir = 0; ir < rows; ir++)
+            {
+                qDebug() << "very hmmmmmmmmmmmmmmmmmmmmm";
+                if (!tab->cellWidget(ir, 0) || !tab->cellWidget(ir, 1) || !tab->cellWidget(ir, 2)) continue;
+
+                APolyCGsection * Section = new APolyCGsection;
+                AOneLineTextEdit * edit = new AOneLineTextEdit;
+
+                edit = dynamic_cast <AOneLineTextEdit *>(tab->cellWidget(ir, 0)); Section->strZ    = edit->text();
+                edit = dynamic_cast <AOneLineTextEdit *>(tab->cellWidget(ir, 1)); Section->str2rmin = edit->text();
+                edit = dynamic_cast <AOneLineTextEdit *>(tab->cellWidget(ir, 2)); Section->str2rmax = edit->text();
+
+                qDebug() <<"finalizing" <<Section->strZ <<Section->str2rmin <<Section->str2rmax;
+                qDebug() << "very hmmmmmmmmmmmmmmmmmhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhmmmm";
+
+                pcon->Sections.append(*Section);
+            }
+        }
+        else qWarning() << "Read delegate: PolyCone shape not found!";
+}
+
+void AGeoPconDelegate::addOneLineTextEdits(int row)
+{
+    AOneLineTextEdit * ez   = new AOneLineTextEdit(tab);
+    AOneLineTextEdit * emin = new AOneLineTextEdit(tab);
+    AOneLineTextEdit * emax = new AOneLineTextEdit(tab);
+
+    tab->setCellWidget(row, 0, ez);
+    tab->setCellWidget(row, 1, emin);
+    tab->setCellWidget(row, 2, emax);
 }
 
 void AGeoPconDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
-
+    /*old system
     const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
     const AGeoPcon * pcon = dynamic_cast<const AGeoPcon*>(tmpShape ? tmpShape : obj->Shape);
     if (pcon)
@@ -2101,10 +2152,54 @@ void AGeoPconDelegate::Update(const AGeoObject *obj)
             tab->setRowHeight(iP, rowHeight);
         }
     }
-    delete tmpShape;
+    delete tmpShape;*/
+
+    AGeoPcon * pcon = dynamic_cast<AGeoPcon*>(ShapeCopy);
+        if (!pcon)
+        {
+            AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+            pcon = dynamic_cast<AGeoPcon*>(scaled->BaseShape);
+        }
+
+        if (pcon)
+        {
+            ep0->setText(pcon->strPhi .isEmpty() ? QString::number(pcon->phi) : pcon->strPhi);
+            epe->setText(pcon->strdPhi.isEmpty() ? QString::number(pcon->dphi): pcon->strdPhi);
+
+            tab->clearContents();
+            const int numPlanes = pcon->Sections.size();
+            tab->setRowCount(numPlanes);
+            for (int iP = 0; iP < numPlanes; iP++)
+            {
+                const APolyCGsection & Section = pcon->Sections.at(iP);
+                qDebug() <<"update delegate" <<Section.strZ <<Section.str2rmin <<Section.str2rmax;
+                AOneLineTextEdit * ez   = new AOneLineTextEdit(tab);
+                AOneLineTextEdit * emin = new AOneLineTextEdit(tab);
+                AOneLineTextEdit * emax = new AOneLineTextEdit(tab);
+
+                QVector<AOneLineTextEdit*> l = {ez, emin, emax};
+                for (AOneLineTextEdit * le : l)
+                {
+                    configureHighligherAndCompleter(le);
+                    QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoBaseDelegate::ContentChanged);
+                }
+
+                ez  ->setText(Section.strZ    .isEmpty() ? QString::number(Section.z)          : Section.strZ);
+                emin->setText(Section.str2rmin.isEmpty() ? QString::number(Section.rmin * 2.0) : Section.str2rmin);
+                emax->setText(Section.str2rmax.isEmpty() ? QString::number(Section.rmax * 2.0) : Section.str2rmax);
+
+
+                tab->setCellWidget(iP, 0, ez);
+                tab->setCellWidget(iP, 1, emin);
+                tab->setCellWidget(iP, 2, emax);
+
+                tab->setRowHeight (iP, rowHeight);
+            }
+        }
+        else qWarning() << "Read delegate: PolyCone shape not found!";
 }
 
-void AGeoPconDelegate::onLocalShapeParameterChange()
+/*void AGeoPconDelegate::onLocalShapeParameterChange()
 {
     QString s = QString("TGeoPcon( %1, %2")
             .arg(ep0->text())
@@ -2123,7 +2218,7 @@ void AGeoPconDelegate::onLocalShapeParameterChange()
     s += " )";
 
     updatePteShape(s);
-}
+}*/
 
 AGeoPgonDelegate::AGeoPgonDelegate(const QStringList &materials, QWidget *parent)
     : AGeoPconDelegate(materials, parent)

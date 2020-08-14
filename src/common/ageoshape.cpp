@@ -2111,8 +2111,8 @@ bool APolyCGsection::updateShape(QString &errorStr)
     bool ok;
 
     ok = AGeoConsts::getConstInstance().updateParameter(errorStr, strZ,     z,    false, false, false); if (!ok) return false;
-    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, str2rmin, rmin, false, false, false); if (!ok) return false;
-    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, str2rmax, rmax, false, false, false); if (!ok) return false;
+    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, str2rmin, rmin, false, false);        if (!ok) return false;
+    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, str2rmax, rmax, false, false);        if (!ok) return false;
 
     if (rmin   >= rmax)
     {

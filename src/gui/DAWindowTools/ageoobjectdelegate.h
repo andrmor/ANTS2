@@ -331,7 +331,6 @@ public slots:
     virtual void Update(const AGeoObject * obj) override;
 
 private slots:
-    void onLocalShapeParameterChange() override;
 };
 
 class AGeoTrapXYDelegate : public AGeoObjectDelegate
@@ -422,6 +421,8 @@ class AGeoPconDelegate : public AGeoObjectDelegate
 
 public:
     AGeoPconDelegate(const QStringList & materials, QWidget * parent);
+
+    void finalizeLocalParameters();
 
     QLineEdit * ep0 = nullptr;
     QLineEdit * epe = nullptr;

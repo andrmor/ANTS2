@@ -292,9 +292,14 @@ struct APolyCGsection
 {
   double z;
   double rmin, rmax;
+  QString strZ, str2rmin, str2rmax;
 
   APolyCGsection() : z(0), rmin(0), rmax(100) {}
   APolyCGsection(double z, double rmin, double rmax) : z(z), rmin(rmin), rmax(rmax) {}
+
+  bool updateShape(QString & errorStr);
+  bool isGeoConstInUse(const QRegExp & nameRegExp) const;
+  void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName);
 
   bool fromString(QString string);
   const QString toString() const;
@@ -311,6 +316,10 @@ public:
   const QString getShapeType() const override {return "TGeoPcon";}
   virtual const QString getShapeTemplate() {return "TGeoPcon( phi, dphi, { z0 : rmin0 : rmaz0 }, { z1 : rmin1 : rmax1 } )";}
   virtual const QString getHelp();
+  QString updateShape() override;
+
+  bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
+  void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
 
   virtual bool readFromString(QString GenerationString);
   virtual TGeoShape* createGeoShape(const QString shapeName = "");
@@ -324,6 +333,7 @@ public:
   virtual bool readFromTShape(TGeoShape* Tshape);
 
   double phi, dphi;
+  QString strPhi, strdPhi;
   QVector<APolyCGsection> Sections;
 
 };

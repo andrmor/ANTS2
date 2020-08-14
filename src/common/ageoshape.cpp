@@ -333,6 +333,8 @@ void AGeoPara::readFromJson(QJsonObject &json)
     if (!parseJson(json, "strAlpha", strAlpha)) strAlpha.clear();
     if (!parseJson(json, "strTheta", strTheta)) strTheta.clear();
     if (!parseJson(json, "strPhi",   strPhi))   strPhi  .clear();
+
+    updateShape();
 }
 
 bool AGeoPara::readFromTShape(TGeoShape *Tshape)
@@ -549,6 +551,8 @@ void AGeoSphere::readFromJson(QJsonObject &json)
     if (!parseJson(json, "strTheta2", strTheta2)) strTheta2.clear();
     if (!parseJson(json, "strPhi1",   strPhi1))   strPhi1.clear();
     if (!parseJson(json, "strPhi2",   strPhi2))   strPhi2.clear();
+
+    updateShape();
 }
 
 bool AGeoSphere::readFromTShape(TGeoShape *Tshape)
@@ -693,8 +697,10 @@ void AGeoTubeSeg::readFromJson(QJsonObject &json)
     if (!parseJson(json, "str2rmin", str2rmin)) str2rmin.clear();
     if (!parseJson(json, "str2rmax", str2rmax)) str2rmax.clear();
     if (!parseJson(json, "str2dz"  , str2dz))   str2dz.clear();
-    if (!parseJson(json, "strPhi1",  strPhi1)) strPhi1.clear();
-    if (!parseJson(json, "strPhi2",  strPhi2)) strPhi2.clear();
+    if (!parseJson(json, "strPhi1",  strPhi1))  strPhi1.clear();
+    if (!parseJson(json, "strPhi2",  strPhi2))  strPhi2.clear();
+
+    updateShape();
 }
 
 bool AGeoTubeSeg::readFromTShape(TGeoShape *Tshape)
@@ -1732,6 +1738,8 @@ void AGeoEltu::readFromJson(QJsonObject &json)
     if (!parseJson(json, "str2a", str2a))   str2a.clear();  else updateParameter(str2a,  a);
     if (!parseJson(json, "str2b", str2b))   str2b.clear();  else updateParameter(str2b,  b);
     if (!parseJson(json, "str2dz", str2dz)) str2dz.clear(); else updateParameter(str2dz, dz);
+
+    updateShape();
 }
 
 bool AGeoEltu::readFromTShape(TGeoShape *Tshape)
@@ -1911,6 +1919,49 @@ const QString AGeoPcon::getHelp()
            "{z : rmin : rmax} - arbitrary number of sections defined with z position, minimum and maximum radii";
 }
 
+QString AGeoPcon::updateShape()
+{
+    QString errorStr = "";
+    bool ok;
+
+    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, strPhi, phi,   false, false, false); if (!ok) return errorStr;
+    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, strdPhi, dphi, false, false, false); if (!ok) return errorStr;
+
+    if ( phi   <  0 || phi    >= 360) return   "Phi should be in the range of [0, 360)";
+    if (dphi   <= 0 || dphi   >  360) return   "Dphi should be in the range of (0, 360]";
+
+    for (APolyCGsection s : Sections)
+    {
+        ok = s.updateShape(errorStr);
+        if (!ok) return errorStr;
+    }
+    return "";
+}
+
+bool AGeoPcon::isGeoConstInUse(const QRegExp &nameRegExp) const
+{
+    if (strPhi .contains(nameRegExp)) return true;
+    if (strdPhi.contains(nameRegExp)) return true;
+
+    for (APolyCGsection s : Sections)
+    {
+        if (s.isGeoConstInUse(nameRegExp)) return true;
+    }
+
+    return false;
+}
+
+void AGeoPcon::replaceGeoConstName(const QRegExp &nameRegExp, const QString &newName)
+{
+    strPhi .replace(nameRegExp, newName);
+    strdPhi.replace(nameRegExp, newName);
+
+    for (APolyCGsection s : Sections)
+    {
+        s.replaceGeoConstName(nameRegExp, newName);
+    }
+}
+
 bool AGeoPcon::readFromString(QString GenerationString)
 {
     Sections.clear();
@@ -1987,8 +2038,12 @@ double AGeoPcon::maxSize()
 
 void AGeoPcon::writeToJson(QJsonObject &json) const
 {
-    json["phi"] = phi;
+    json["phi"]  = phi;
     json["dphi"] = dphi;
+
+    if (!strPhi .isEmpty()) json["strPhi"]  = strPhi;
+    if (!strdPhi.isEmpty()) json["strdPhi"] = strdPhi;
+
     QJsonArray ar;
     for (APolyCGsection s : Sections)
     {
@@ -2005,6 +2060,9 @@ void AGeoPcon::readFromJson(QJsonObject &json)
 
     parseJson(json, "phi", phi);
     parseJson(json, "dphi", dphi);
+
+    if (!parseJson(json, "strPhi",  strPhi))  strPhi .clear();
+    if (!parseJson(json, "strdPhi", strdPhi)) strdPhi.clear();
 
     QJsonArray ar;
     parseJson(json, "Sections", ar);
@@ -2048,6 +2106,38 @@ bool AGeoPcon::readFromTShape(TGeoShape *Tshape)
 }
 
 
+bool APolyCGsection::updateShape(QString &errorStr)
+{
+    bool ok;
+
+    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, strZ,     z,    false, false, false); if (!ok) return false;
+    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, str2rmin, rmin, false, false, false); if (!ok) return false;
+    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, str2rmax, rmax, false, false, false); if (!ok) return false;
+
+    if (rmin   >= rmax)
+    {
+        errorStr = "Inside diameter should be smaller than the outside one!";
+        return false;
+    }
+    return true;
+}
+
+bool APolyCGsection::isGeoConstInUse(const QRegExp &nameRegExp) const
+{
+    if (strZ    .contains(nameRegExp)) return true;
+    if (str2rmin.contains(nameRegExp)) return true;
+    if (str2rmax.contains(nameRegExp)) return true;
+
+    return false;
+}
+
+void APolyCGsection::replaceGeoConstName(const QRegExp &nameRegExp, const QString &newName)
+{
+    strZ    .replace(nameRegExp, newName);
+    str2rmin.replace(nameRegExp, newName);
+    str2rmax.replace(nameRegExp, newName);
+}
+
 bool APolyCGsection::fromString(QString s)
 {
     s = s.simplified();
@@ -2081,9 +2171,13 @@ const QString APolyCGsection::toString() const
 
 void APolyCGsection::writeToJson(QJsonObject &json) const
 {
-    json["z"] = z;
+    json["z"]    = z;
     json["rmin"] = rmin;
     json["rmax"] = rmax;
+
+    if (!strZ    .isEmpty()) json["strZ"]     = strZ;
+    if (!str2rmin.isEmpty()) json["str2rmin"] = str2rmin;
+    if (!str2rmax.isEmpty()) json["str2rmax"] = str2rmax;
 }
 
 void APolyCGsection::readFromJson(QJsonObject &json)
@@ -2091,6 +2185,13 @@ void APolyCGsection::readFromJson(QJsonObject &json)
     parseJson(json, "z", z);
     parseJson(json, "rmin", rmin);
     parseJson(json, "rmax", rmax);
+
+    if (!parseJson(json, "strZ",     strZ))     strZ.clear();
+    if (!parseJson(json, "str2rmin", str2rmin)) str2rmin.clear();
+    if (!parseJson(json, "str2rmax", str2rmax)) str2rmax.clear();
+
+    QString errorStr = "";
+    updateShape(errorStr);
 }
 
 // --- GeoPolygon ---

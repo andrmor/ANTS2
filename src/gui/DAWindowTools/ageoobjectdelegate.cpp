@@ -1651,12 +1651,6 @@ void AGeoTrapXDelegate::Update(const AGeoObject *obj)
 
 }
 
-void AGeoTrapXDelegate::onLocalShapeParameterChange()
-{
-    updatePteShape(QString("TGeoTrd1( %1, %2, %3, %4 )")
-                   .arg(0.5*exl->text().toDouble()).arg(0.5*exu->text().toDouble())
-                   .arg(0.5* ey->text().toDouble()).arg(0.5* ez->text().toDouble()) );
-}
 
 AGeoTrapXYDelegate::AGeoTrapXYDelegate(const QStringList &materials, QWidget *parent)
     : AGeoObjectDelegate(materials, parent)
@@ -2074,6 +2068,11 @@ AGeoPconDelegate::AGeoPconDelegate(const QStringList &materials, QWidget *parent
     QVector<QLineEdit*> l = {ep0, epe};
     for (QLineEdit * le : l)
         QObject::connect(le, &QLineEdit::textChanged, this, &AGeoPconDelegate::onLocalShapeParameterChange);
+}
+
+void AGeoPconDelegate::finalizeLocalParameters()
+{
+
 }
 
 void AGeoPconDelegate::Update(const AGeoObject *obj)

@@ -163,7 +163,7 @@ protected:
     QGridLayout * gr = nullptr;
 
 public slots:
-    virtual void Update(const AGeoObject * obj) override;
+    void Update(const AGeoObject * obj) override;
 
 private slots:
 };
@@ -181,7 +181,7 @@ public:
     AOneLineTextEdit * ep2 = nullptr;
 
 public slots:
-    virtual void Update(const AGeoObject * obj) override;
+    void Update(const AGeoObject * obj) override;
 
 private slots:
 };
@@ -201,7 +201,7 @@ public:
     QLineEdit * eunz = nullptr;
 
 public slots:
-    virtual void Update(const AGeoObject * obj) override;
+    void Update(const AGeoObject * obj) override;
 
 private slots:
     void onLocalShapeParameterChange() override;
@@ -224,7 +224,7 @@ protected:
     QGridLayout * gr = nullptr;
 
 public slots:
-    virtual void Update(const AGeoObject * obj) override;
+    void Update(const AGeoObject * obj) override;
 
 private slots:
 };
@@ -246,7 +246,7 @@ public:
     AOneLineTextEdit * ep = nullptr;
 
 public slots:
-    virtual void Update(const AGeoObject * obj) override;
+    void Update(const AGeoObject * obj) override;
 
 private slots:
 };
@@ -268,7 +268,7 @@ public:
     AOneLineTextEdit * ep2 = nullptr;
 
 public slots:
-    virtual void Update(const AGeoObject * obj) override;
+    void Update(const AGeoObject * obj) override;
 
 private slots:
 };
@@ -290,7 +290,7 @@ protected:
     QGridLayout * gr = nullptr;
 
 public slots:
-    virtual void Update(const AGeoObject * obj) override;
+    void Update(const AGeoObject * obj) override;
 
 protected slots:
     void onLocalShapeParameterChange() override;
@@ -307,7 +307,7 @@ public:
     QLineEdit * ep2 = nullptr;
 
 public slots:
-    virtual void Update(const AGeoObject * obj) override;
+    void Update(const AGeoObject * obj) override;
 
 protected slots:
     void onLocalShapeParameterChange() override;
@@ -328,7 +328,7 @@ public:
     AOneLineTextEdit * ez = nullptr;
 
 public slots:
-    virtual void Update(const AGeoObject * obj) override;
+    void Update(const AGeoObject * obj) override;
 
 private slots:
 };
@@ -347,7 +347,7 @@ public:
     QLineEdit * ez  = nullptr;
 
 public slots:
-    virtual void Update(const AGeoObject * obj) override;
+    void Update(const AGeoObject * obj) override;
 
 private slots:
     void onLocalShapeParameterChange() override;
@@ -367,7 +367,7 @@ public:
     AOneLineTextEdit * ez = nullptr;
 
 public slots:
-    virtual void Update(const AGeoObject * obj) override;
+    void Update(const AGeoObject * obj) override;
 
 private slots:
 };
@@ -379,17 +379,17 @@ class AGeoTorusDelegate : public AGeoObjectDelegate
 public:
     AGeoTorusDelegate(const QStringList & materials, QWidget * parent);
 
-    QLineEdit * ead = nullptr;
-    QLineEdit * edi = nullptr;
-    QLineEdit * edo = nullptr;
-    QLineEdit * ep0 = nullptr;
-    QLineEdit * epe = nullptr;
+    void finalizeLocalParameters() override;
+
+    AOneLineTextEdit * ead = nullptr;
+    AOneLineTextEdit * edi = nullptr;
+    AOneLineTextEdit * edo = nullptr;
+    AOneLineTextEdit * ep0 = nullptr;
+    AOneLineTextEdit * epe = nullptr;
 
 public slots:
-    virtual void Update(const AGeoObject * obj) override;
+    void Update(const AGeoObject * obj) override;
 
-private slots:
-    void onLocalShapeParameterChange() override;
 };
 
 class AGeoPolygonDelegate : public AGeoObjectDelegate
@@ -434,7 +434,7 @@ protected:
     void addOneLineTextEdits(int row);
 
 public slots:
-    virtual void Update(const AGeoObject * obj) override;
+    void Update(const AGeoObject * obj) override;
 
 private slots:
     //void onLocalShapeParameterChange() override;
@@ -453,7 +453,7 @@ public:
     QSpinBox  * sbn = nullptr;
 
 public slots:
-    virtual void Update(const AGeoObject * obj) override;
+    void Update(const AGeoObject * obj) override;
 
 private slots:
     void onLocalShapeParameterChange() override;
@@ -471,7 +471,7 @@ public:
     QPlainTextEdit * te = nullptr;
 
 public slots:
-    virtual void Update(const AGeoObject * obj) override;
+    void Update(const AGeoObject * obj) override;
 
 private slots:
 };
@@ -493,7 +493,7 @@ public:
     QVector< QVector<AEditEdit> > ve; //[0..1][0..3] - upper/lower, 4 points
 
 public slots:
-    virtual void Update(const AGeoObject * obj) override;
+    void Update(const AGeoObject * obj) override;
 
 private slots:
     void onLocalShapeParameterChange() override;
@@ -509,7 +509,7 @@ public:
     void finalizeLocalParameters();
 
 public slots:
-    virtual void Update(const AGeoObject * obj) override;
+    void Update(const AGeoObject * obj) override;
 };
 
 class AGeoSetDelegate : public AGeoObjectDelegate
@@ -520,7 +520,7 @@ public:
     AGeoSetDelegate(const QStringList & materials, QWidget * parent);
 
 public slots:
-    virtual void Update(const AGeoObject * obj) override;
+    void Update(const AGeoObject * obj) override;
 };
 
 // ---------------------------------------------------

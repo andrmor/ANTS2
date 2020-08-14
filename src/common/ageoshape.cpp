@@ -2552,6 +2552,41 @@ const QString AGeoTorus::getHelp()
                       "• Dphi - phi extent";
 }
 
+QString AGeoTorus::updateShape()
+{
+    QString err;
+
+    err = updateParameter(str2R, R);                            if (!err.isEmpty()) return err;
+    err = updateParameter(str2Rmax, Rmax);                      if (!err.isEmpty()) return err;
+    err = updateParameter(str2Rmin, Rmin, false);               if (!err.isEmpty()) return err;
+    err = updateParameter(strPhi1,  Phi1, false, false, false); if (!err.isEmpty()) return err;
+    err = updateParameter(strDphi,  Dphi, true,  true,  false); if (!err.isEmpty()) return err;
+
+    if (Rmin >= Rmax) return "Inside diameter should be smaller than the outside one!";
+
+    return "";
+}
+
+bool AGeoTorus::isGeoConstInUse(const QRegExp & nameRegExp) const
+{
+    if (str2R   .contains(nameRegExp)) return true;
+    if (str2Rmin.contains(nameRegExp)) return true;
+    if (str2Rmax.contains(nameRegExp)) return true;
+    if (strPhi1 .contains(nameRegExp)) return true;
+    if (strDphi .contains(nameRegExp)) return true;
+
+    return false;
+}
+
+void AGeoTorus::replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName)
+{
+    str2R   .replace(nameRegExp, newName);
+    str2Rmin.replace(nameRegExp, newName);
+    str2Rmax.replace(nameRegExp, newName);
+    strPhi1 .replace(nameRegExp, newName);
+    strDphi .replace(nameRegExp, newName);
+}
+
 bool AGeoTorus::readFromString(QString GenerationString)
 {
     QStringList params;
@@ -2606,6 +2641,12 @@ void AGeoTorus::writeToJson(QJsonObject &json) const
     json["Rmax"] = Rmax;
     json["Phi1"] = Phi1;
     json["Dphi"] = Dphi;
+
+    if (!str2R.   isEmpty()) json["str2R"]    = str2R;
+    if (!str2Rmin.isEmpty()) json["str2Rmin"] = str2Rmin;
+    if (!str2Rmax.isEmpty()) json["str2Rmax"] = str2Rmax;
+    if (!strPhi1. isEmpty()) json["strPhi1"]  = strPhi1;
+    if (!strDphi. isEmpty()) json["strDphi"]  = strDphi;
 }
 
 void AGeoTorus::readFromJson(QJsonObject &json)
@@ -2615,6 +2656,14 @@ void AGeoTorus::readFromJson(QJsonObject &json)
     parseJson(json, "Rmax", Rmax);
     parseJson(json, "Phi1", Phi1);
     parseJson(json, "Dphi", Dphi);
+
+    if (!parseJson(json, "str2R",    str2R))    str2R.clear();
+    if (!parseJson(json, "str2Rmin", str2Rmin)) str2Rmin.clear();
+    if (!parseJson(json, "str2Rmax", str2Rmax)) str2Rmax.clear();
+    if (!parseJson(json, "strPhi1",  strPhi1))  strPhi1.clear();
+    if (!parseJson(json, "strDphi",  strDphi))  strDphi.clear();
+
+    updateShape();
 }
 
 bool AGeoTorus::readFromTShape(TGeoShape *Tshape)

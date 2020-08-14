@@ -673,6 +673,10 @@ public:
   const QString getShapeType() const override {return "TGeoTorus";}
   virtual const QString getShapeTemplate() {return "TGeoTorus( R, Rmin, Rmax, Phi1, Dphi )";}
   virtual const QString getHelp();
+  QString updateShape() override;
+
+  bool isGeoConstInUse (const QRegExp & nameRegExp) const override;
+  void replaceGeoConstName (const QRegExp & nameRegExp, const QString & newName) override;
 
   virtual bool readFromString(QString GenerationString);
   virtual TGeoShape* createGeoShape(const QString shapeName = "");
@@ -690,6 +694,8 @@ public:
   double R = 100.0;
   double Rmin = 0, Rmax = 20.0;
   double Phi1 = 0, Dphi = 360.0;
+
+  QString str2R, str2Rmin, str2Rmax, strPhi1, strDphi;
 };
 
 

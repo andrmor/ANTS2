@@ -88,7 +88,7 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
 
       pteShape = new QPlainTextEdit();
       pteShape->setContextMenuPolicy(Qt::NoContextMenu);
-      connect(pteShape, SIGNAL(textChanged()), this, SLOT(onContentChanged()));
+      connect(pteShape, &QPlainTextEdit::textChanged, this, &AGeoObjectDelegate::onContentChanged);
       pteShape->setMaximumHeight(50);
       new AShapeHighlighter(pteShape->document());
       h2->addWidget(pteShape);
@@ -107,21 +107,14 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
     scaleWidget = new QWidget();
         QHBoxLayout * hbsw = new QHBoxLayout(scaleWidget);
         hbsw->setContentsMargins(2,0,2,0);
-        hbsw->addWidget(new QLabel("in X:"));
-        ledScaleX = new QLineEdit("1.0"); hbsw->addWidget(ledScaleX);
-        //connect(ledScaleX, &QLineEdit::textChanged, this, &AGeoObjectDelegate::onLocalShapeParameterChange); // !*! obsolete?
-        connect(ledScaleX, &QLineEdit::editingFinished, this, &AGeoObjectDelegate::updateScalingFactors); // new
-        connect(ledScaleX, &QLineEdit::textChanged, this, &AGeoObjectDelegate::onContentChanged);
-        hbsw->addWidget(new QLabel("in Y:"));
-        ledScaleY = new QLineEdit("1.0"); hbsw->addWidget(ledScaleY);
-        //connect(ledScaleY, &QLineEdit::textChanged, this, &AGeoObjectDelegate::onLocalShapeParameterChange);
-        connect(ledScaleY, &QLineEdit::editingFinished, this, &AGeoObjectDelegate::updateScalingFactors); // new
-        connect(ledScaleY, &QLineEdit::textChanged, this, &AGeoObjectDelegate::onContentChanged);
-        hbsw->addWidget(new QLabel("in Z:"));
-        ledScaleZ = new QLineEdit("1.0"); hbsw->addWidget(ledScaleZ);
-        //connect(ledScaleZ, &QLineEdit::textChanged, this, &AGeoObjectDelegate::onLocalShapeParameterChange);
-        connect(ledScaleZ, &QLineEdit::editingFinished, this, &AGeoObjectDelegate::updateScalingFactors); // new
-        connect(ledScaleZ, &QLineEdit::textChanged, this, &AGeoObjectDelegate::onContentChanged);
+        hbsw->addWidget(new QLabel("in X:")); ledScaleX = new QLineEdit("1.0"); hbsw->addWidget(ledScaleX);
+        hbsw->addWidget(new QLabel("in Y:")); ledScaleY = new QLineEdit("1.0"); hbsw->addWidget(ledScaleY);
+        hbsw->addWidget(new QLabel("in Z:")); ledScaleZ = new QLineEdit("1.0"); hbsw->addWidget(ledScaleZ);
+        for (QLineEdit * led : {ledScaleX, ledScaleY, ledScaleZ})
+        {
+            connect(led, &QLineEdit::editingFinished, this, &AGeoObjectDelegate::updateScalingFactors);
+            connect(led, &QLineEdit::textChanged,     this, &AGeoObjectDelegate::onContentChanged);
+        }
     hbs->addWidget(scaleWidget);
     hbs->addStretch();
     lMF->addLayout(hbs);
@@ -1835,11 +1828,11 @@ AGeoTorusDelegate::AGeoTorusDelegate(const QStringList &materials, QWidget *pare
     gr->addWidget(new QLabel("Phi from:"),       3, 0);
     gr->addWidget(new QLabel("Phi to:"),         4, 0);
 
-    ead = new QLineEdit(); gr->addWidget(ead, 0, 1);
-    edo = new QLineEdit(); gr->addWidget(edo, 1, 1);
-    edi = new QLineEdit(); gr->addWidget(edi, 2, 1);
-    ep0 = new QLineEdit(); gr->addWidget(ep0, 3, 1);
-    epe= new QLineEdit();  gr->addWidget(epe, 4, 1);
+    ead = new AOneLineTextEdit(); gr->addWidget(ead, 0, 1);
+    edo = new AOneLineTextEdit(); gr->addWidget(edo, 1, 1);
+    edi = new AOneLineTextEdit(); gr->addWidget(edi, 2, 1);
+    ep0 = new AOneLineTextEdit(); gr->addWidget(ep0, 3, 1);
+    epe = new AOneLineTextEdit(); gr->addWidget(epe, 4, 1);
 
     gr->addWidget(new QLabel("mm"), 0, 2);
     gr->addWidget(new QLabel("mm"), 1, 2);
@@ -1849,15 +1842,37 @@ AGeoTorusDelegate::AGeoTorusDelegate(const QStringList &materials, QWidget *pare
 
     addLocalLayout(gr);
 
-    QVector<QLineEdit*> l = {ead, edi, edo, ep0, epe};
-    for (QLineEdit * le : l)
-        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoTorusDelegate::onLocalShapeParameterChange);
+    for (AOneLineTextEdit * le : {ead, edi, edo, ep0, epe})
+    {
+        configureHighligherAndCompleter(le);
+        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoBaseDelegate::ContentChanged);
+    }
+}
+
+void AGeoTorusDelegate::finalizeLocalParameters()
+{
+    AGeoTorus * torus = dynamic_cast<AGeoTorus*>(ShapeCopy);
+    if (!torus)
+    {
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+        torus = dynamic_cast<AGeoTorus*>(scaled->BaseShape);
+    }
+    if (torus)
+    {
+        torus->str2R    = ead->text();
+        torus->str2Rmin = edi->text();
+        torus->str2Rmax = edo->text();
+        torus->strPhi1  = ep0->text();
+        torus->strDphi  = epe->text();
+    }
+    else qWarning() << "Update delegate: Torus shape not found!";
 }
 
 void AGeoTorusDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
 
+    /*
     const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
     const AGeoTorus * tor = dynamic_cast<const AGeoTorus*>(tmpShape ? tmpShape : obj->Shape);
     if (tor)
@@ -1869,16 +1884,23 @@ void AGeoTorusDelegate::Update(const AGeoObject *obj)
         epe->setText(QString::number(tor->Dphi));
     }
     delete tmpShape;
-}
+    */
 
-void AGeoTorusDelegate::onLocalShapeParameterChange()
-{
-    updatePteShape(QString("TGeoTorus( %1, %2, %3, %4, %5)")
-                   .arg(0.5*ead->text().toDouble())
-                   .arg(0.5*edi->text().toDouble())
-                   .arg(0.5*edo->text().toDouble())
-                   .arg(ep0->text())
-                   .arg(epe->text()) );
+    AGeoTorus * torus = dynamic_cast<AGeoTorus*>(ShapeCopy);
+    if (!torus)
+    {
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+        torus = dynamic_cast<AGeoTorus*>(scaled->BaseShape);
+    }
+    if (torus)
+    {
+        ead->setText(torus->str2R.isEmpty()    ? QString::number(torus->R*2.0)    : torus->str2R);
+        edi->setText(torus->str2Rmin.isEmpty() ? QString::number(torus->Rmin*2.0) : torus->str2Rmin);
+        edo->setText(torus->str2Rmax.isEmpty() ? QString::number(torus->Rmax*2.0) : torus->str2Rmax);
+        ep0->setText(torus->strPhi1.isEmpty()  ? QString::number(torus->Phi1)     : torus->strPhi1);
+        epe->setText(torus->strDphi.isEmpty()  ? QString::number(torus->Dphi)     : torus->strDphi);
+    }
+    else qWarning() << "Update delegate: Torus shape not found!";
 }
 
 AGeoPolygonDelegate::AGeoPolygonDelegate(const QStringList &materials, QWidget *parent)

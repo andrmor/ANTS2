@@ -523,29 +523,4 @@ public slots:
     void Update(const AGeoObject * obj) override;
 };
 
-// ---------------------------------------------------
-
-#include <QSyntaxHighlighter>
-#include <QTextCharFormat>
-#include <QRegExp>
-
-class QTextDocument;
-
-class AShapeHighlighter : public QSyntaxHighlighter
-{
-    Q_OBJECT
-public:
-    AShapeHighlighter(QTextDocument * parent = nullptr);
-protected:
-    void highlightBlock(const QString & text);
-private:
-    struct HighlightingRule
-      {
-        QRegExp pattern;
-        QTextCharFormat format;
-      };
-    QVector<HighlightingRule> highlightingRules;
-    QTextCharFormat ShapeFormat;
-};
-
 #endif // AGEOOBJECTDELEGATE_H

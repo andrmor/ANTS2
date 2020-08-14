@@ -90,7 +90,6 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
       pteShape->setContextMenuPolicy(Qt::NoContextMenu);
       connect(pteShape, &QPlainTextEdit::textChanged, this, &AGeoObjectDelegate::onContentChanged);
       pteShape->setMaximumHeight(50);
-      new AShapeHighlighter(pteShape->document());
       h2->addWidget(pteShape);
     lMF->addLayout(h2);
 
@@ -731,44 +730,8 @@ void AGeoObjectDelegate::onContentChanged()
     //qDebug() <<pteShape->document()->toPlainText();
 }
 
-AShapeHighlighter::AShapeHighlighter(QTextDocument *parent) : QSyntaxHighlighter(parent)
-{
-  HighlightingRule rule;
-  ShapeFormat.setForeground(Qt::blue);
-  ShapeFormat.setFontWeight(QFont::Bold);
-
-  QList<AGeoShape*> AvailableShapes = AGeoShape::GetAvailableShapes();
-  QStringList ShapePatterns;
-  while (!AvailableShapes.isEmpty())
-  {
-      ShapePatterns << AvailableShapes.first()->getShapeType();
-      delete AvailableShapes.first();
-      AvailableShapes.removeFirst();
-  }
-
-  foreach (const QString &pattern, ShapePatterns)
-  {
-      rule.pattern = QRegExp(pattern);
-      rule.format = ShapeFormat;
-      highlightingRules.append(rule);
-  }
-}
-
-void AShapeHighlighter::highlightBlock(const QString &text)
-{
-  foreach (const HighlightingRule &rule, highlightingRules)
-    {
-      QRegExp expression(rule.pattern);
-      int index = expression.indexIn(text);
-      while (index >= 0) {
-          int length = expression.matchedLength();
-          setFormat(index, length, rule.format);
-          index = expression.indexIn(text, index + length);
-        }
-    }
-}
-
 //---------------
+
 AGeoBoxDelegate::AGeoBoxDelegate(const QStringList &materials, QWidget *parent)
     : AGeoObjectDelegate(materials, parent)
 {

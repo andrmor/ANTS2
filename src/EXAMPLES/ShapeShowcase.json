@@ -40,7 +40,7 @@
         "FixedWorldSizes": {
             "WorldSizeFixed": false,
             "XY": 163.84920673956736,
-            "Z": 110.25
+            "Z": 121.77980021920982
         },
         "IndividualPMoverrides": {
             "Angular": {
@@ -352,6 +352,40 @@
                     },
                     "fActive": true,
                     "fExpanded": true
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Material": 0,
+                    "Name": "Trapezoid Simplified",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 45,
+                    "Psi": 90,
+                    "Shape": "TGeoTrd1",
+                    "ShapeSpecific": {
+                        "dx1": 10,
+                        "dx2": 15,
+                        "dy": 10,
+                        "dz": 10,
+                        "str2dx1": "SizeX*0.5",
+                        "str2dx2": "SizeY*0.5"
+                    },
+                    "Theta": 0,
+                    "X": 90,
+                    "Y": 30,
+                    "Z": 30,
+                    "color": 1,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "strPhi": "Angle",
+                    "strPsi": "Angle*2",
+                    "strX": "3* Offset",
+                    "strY": "Offset",
+                    "strZ": "Offset",
+                    "style": 9,
+                    "width": 1
                 },
                 {
                     "Container": "World",

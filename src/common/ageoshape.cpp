@@ -171,7 +171,7 @@ void AGeoBox::writeToJson(QJsonObject &json) const
     if (!str2dz.isEmpty()) json["str2dz"] = str2dz;
 }
 
-void AGeoBox::readFromJson(QJsonObject &json)
+void AGeoBox::readFromJson(const QJsonObject &json)
 {
     dx = json["dx"].toDouble();
     dy = json["dy"].toDouble();
@@ -318,7 +318,7 @@ void AGeoPara::writeToJson(QJsonObject &json) const
 
 }
 
-void AGeoPara::readFromJson(QJsonObject &json)
+void AGeoPara::readFromJson(const QJsonObject &json)
 {
     dx    = json["dx"]   .toDouble();
     dy    = json["dy"]   .toDouble();
@@ -415,7 +415,7 @@ void AGeoComposite::writeToJson(QJsonObject &json) const
     json["GenerationString"] = GenerationString;
 }
 
-void AGeoComposite::readFromJson(QJsonObject &json)
+void AGeoComposite::readFromJson(const QJsonObject &json)
 {
     GenerationString = json["GenerationString"].toString();
 }
@@ -536,7 +536,7 @@ void AGeoSphere::writeToJson(QJsonObject &json) const
     if (!strPhi2.  isEmpty()) json["strPhi2"]   = strPhi2;
 }
 
-void AGeoSphere::readFromJson(QJsonObject &json)
+void AGeoSphere::readFromJson(const QJsonObject &json)
 {
     rmin   = json["rmin"].  toDouble();
     rmax   = json["rmax"].  toDouble();
@@ -681,12 +681,11 @@ void AGeoTubeSeg::writeToJson(QJsonObject &json) const
     if (!str2rmin.isEmpty()) json["str2rmin"] = str2rmin;
     if (!str2rmax.isEmpty()) json["str2rmax"] = str2rmax;
     if (!str2dz  .isEmpty()) json["str2dz"]   = str2dz;
-    if (!strPhi1.isEmpty())  json["strPhi1"]  = strPhi1;
-    if (!strPhi2.isEmpty())  json["strPhi2"]  = strPhi2;
-
+    if (!strPhi1 .isEmpty())  json["strPhi1"] = strPhi1;
+    if (!strPhi2 .isEmpty())  json["strPhi2"] = strPhi2;
 }
 
-void AGeoTubeSeg::readFromJson(QJsonObject &json)
+void AGeoTubeSeg::readFromJson(const QJsonObject &json)
 {
     rmin = json["rmin"].toDouble();
     rmax = json["rmax"].toDouble();
@@ -804,7 +803,7 @@ void AGeoCtub::writeToJson(QJsonObject &json) const
     json["nzhi"] = nzhi;
 }
 
-void AGeoCtub::readFromJson(QJsonObject &json)
+void AGeoCtub::readFromJson(const QJsonObject &json)
 {
     rmin = json["rmin"].toDouble();
     rmax = json["rmax"].toDouble();
@@ -936,7 +935,7 @@ void AGeoTube::writeToJson(QJsonObject &json) const
     if (!str2dz.isEmpty())   json["str2dz"]   = str2dz;
 }
 
-void AGeoTube::readFromJson(QJsonObject &json)
+void AGeoTube::readFromJson(const QJsonObject &json)
 {
     rmax = json["rmax"].toDouble();
     rmin = json["rmin"].toDouble();
@@ -1062,7 +1061,7 @@ void AGeoTrd1::writeToJson(QJsonObject &json) const
     if (!str2dz.isEmpty())  json["str2dz"]  = str2dz;
 }
 
-void AGeoTrd1::readFromJson(QJsonObject &json)
+void AGeoTrd1::readFromJson(const QJsonObject &json)
 {
     dx1 = json["dx1"].toDouble();
     dx2 = json["dx2"].toDouble();
@@ -1161,7 +1160,7 @@ void AGeoTrd2::writeToJson(QJsonObject &json) const
     json["dz"] = dz;
 }
 
-void AGeoTrd2::readFromJson(QJsonObject &json)
+void AGeoTrd2::readFromJson(const QJsonObject &json)
 {
     dx1 = json["dx1"].toDouble();
     dx2 = json["dx2"].toDouble();
@@ -1296,7 +1295,7 @@ void AGeoPgon::writeToJson(QJsonObject &json) const
     AGeoPcon::writeToJson(json);
 }
 
-void AGeoPgon::readFromJson(QJsonObject &json)
+void AGeoPgon::readFromJson(const QJsonObject &json)
 {
     nedges = json["nedges"].toInt();
     AGeoPcon::readFromJson(json);
@@ -1399,7 +1398,7 @@ void AGeoConeSeg::writeToJson(QJsonObject &json) const
     json["phi2"] = phi2;
 }
 
-void AGeoConeSeg::readFromJson(QJsonObject &json)
+void AGeoConeSeg::readFromJson(const QJsonObject &json)
 {
     dz = json["dz"].toDouble();
     rminL = json["rminL"].toDouble();
@@ -1524,7 +1523,7 @@ void AGeoParaboloid::writeToJson(QJsonObject &json) const
     if (!str2dz.isEmpty())  json["str2dz"]  = str2dz;
 }
 
-void AGeoParaboloid::readFromJson(QJsonObject &json)
+void AGeoParaboloid::readFromJson(const QJsonObject &json)
 {
     rlo = json["rlo"].toDouble();
     rhi = json["rhi"].toDouble();
@@ -1617,7 +1616,7 @@ void AGeoCone::writeToJson(QJsonObject &json) const
     json["rmaxU"] = rmaxU;
 }
 
-void AGeoCone::readFromJson(QJsonObject &json)
+void AGeoCone::readFromJson(const QJsonObject &json)
 {
     dz = json["dz"].toDouble();
     rminL = json["rminL"].toDouble();
@@ -1729,7 +1728,7 @@ void AGeoEltu::writeToJson(QJsonObject &json) const
     if (!str2dz.isEmpty()) json["str2dz"] = str2dz;
 }
 
-void AGeoEltu::readFromJson(QJsonObject &json)
+void AGeoEltu::readFromJson(const QJsonObject &json)
 {
     a  = json["a"] .toDouble();
     b  = json["b"] .toDouble();
@@ -1870,7 +1869,7 @@ void AGeoArb8::writeToJson(QJsonObject &json) const
     json["Vertices"] = ar;
 }
 
-void AGeoArb8::readFromJson(QJsonObject &json)
+void AGeoArb8::readFromJson(const QJsonObject &json)
 {
     dz = json["dz"].toDouble();
     QJsonArray ar = json["Vertices"].toArray();
@@ -2058,7 +2057,7 @@ void AGeoPcon::writeToJson(QJsonObject &json) const
     json["Sections"] = ar;
 }
 
-void AGeoPcon::readFromJson(QJsonObject &json)
+void AGeoPcon::readFromJson(const QJsonObject &json)
 {
     Sections.clear();
 
@@ -2184,7 +2183,7 @@ void APolyCGsection::writeToJson(QJsonObject &json) const
     if (!str2rmax.isEmpty()) json["str2rmax"] = str2rmax;
 }
 
-void APolyCGsection::readFromJson(QJsonObject &json)
+void APolyCGsection::readFromJson(const QJsonObject &json)
 {
     parseJson(json, "z", z);
     parseJson(json, "rmin", rmin);
@@ -2285,7 +2284,7 @@ void AGeoPolygon::writeToJson(QJsonObject &json) const
     json["rmaxU"] = rmaxU;
 }
 
-void AGeoPolygon::readFromJson(QJsonObject &json)
+void AGeoPolygon::readFromJson(const QJsonObject &json)
 {
     nedges = json["nedges"].toInt();
     dphi = json["dphi"].toDouble();
@@ -2472,7 +2471,7 @@ void AGeoScaledShape::writeToJson(QJsonObject &json) const
     }
 }
 
-void AGeoScaledShape::readFromJson(QJsonObject &json)
+void AGeoScaledShape::readFromJson(const QJsonObject &json)
 {
     parseJson(json, "scaleX", scaleX);
     parseJson(json, "scaleY", scaleY);
@@ -2649,7 +2648,7 @@ void AGeoTorus::writeToJson(QJsonObject &json) const
     if (!strDphi. isEmpty()) json["strDphi"]  = strDphi;
 }
 
-void AGeoTorus::readFromJson(QJsonObject &json)
+void AGeoTorus::readFromJson(const QJsonObject &json)
 {
     parseJson(json, "R", R);
     parseJson(json, "Rmin", Rmin);

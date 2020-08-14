@@ -35,7 +35,7 @@ public:
 
   //json
   virtual void writeToJson(QJsonObject &/*json*/) const = 0;
-  virtual void readFromJson(QJsonObject &/*json*/){}
+  virtual void readFromJson(const QJsonObject &/*json*/) = 0;
 
   //from Tshape if geometry was loaded from GDML
   virtual bool readFromTShape(TGeoShape* /*Tshape*/) {return false;}
@@ -81,7 +81,7 @@ public:
   virtual double minSize() override;
 
   void writeToJson(QJsonObject& json) const override;
-  void readFromJson(QJsonObject& json) override;
+  void readFromJson(const QJsonObject& json) override;
 
   virtual bool readFromTShape(TGeoShape* Tshape);
 
@@ -116,7 +116,7 @@ public:
   virtual double minSize() override;
 
   void writeToJson(QJsonObject& json) const override;
-  void readFromJson(QJsonObject& json);
+  void readFromJson(const QJsonObject& json) override;
 
   virtual bool readFromTShape(TGeoShape* Tshape);
 
@@ -147,7 +147,7 @@ public:
   TGeoShape * generateBaseTGeoShape(const QString & BaseShapeGenerationString) const;
 
   void writeToJson(QJsonObject& json) const override;
-  virtual void readFromJson(QJsonObject& json);
+  void readFromJson(const QJsonObject& json) override;
 
   virtual bool readFromTShape(TGeoShape* Tshape);
 
@@ -183,7 +183,7 @@ public:
   virtual double maxSize();
 
   void writeToJson(QJsonObject &json) const override;
-  virtual void readFromJson( QJsonObject &json);
+  void readFromJson(const QJsonObject& json) override;
 
   virtual bool readFromTShape(TGeoShape* Tshape);
 
@@ -214,7 +214,7 @@ public:
   virtual double maxSize();
 
   void writeToJson(QJsonObject& json) const override;
-  virtual void readFromJson(QJsonObject& json);
+  void readFromJson(const QJsonObject& json) override;
 
   virtual bool readFromTShape(TGeoShape *Tshape);
 
@@ -247,7 +247,7 @@ public:
   virtual double maxSize();
 
   void writeToJson(QJsonObject& json) const override;
-  virtual void readFromJson(QJsonObject &json);
+  void readFromJson(const QJsonObject& json) override;
 
   virtual bool readFromTShape(TGeoShape* Tshape);
 
@@ -279,7 +279,7 @@ public:
   virtual double maxSize();
 
   void writeToJson(QJsonObject& json) const override;
-  virtual void readFromJson(QJsonObject& json);
+  void readFromJson(const QJsonObject& json) override;
 
   virtual bool readFromTShape(TGeoShape* /*Tshape*/) { return false; } //it is not a base root class, so not valid for import from GDML
 
@@ -304,7 +304,7 @@ struct APolyCGsection
   bool fromString(QString string);
   const QString toString() const;
   void writeToJson(QJsonObject& json) const;
-  void readFromJson(QJsonObject& json);
+  void readFromJson(const QJsonObject& json);
 };
 
 class AGeoPcon : public AGeoShape
@@ -328,7 +328,7 @@ public:
   virtual double maxSize();
 
   void writeToJson(QJsonObject& json) const override;
-  virtual void readFromJson(QJsonObject& json);
+  void readFromJson(const QJsonObject& json) override;
 
   virtual bool readFromTShape(TGeoShape* Tshape);
 
@@ -356,7 +356,7 @@ public:
   virtual double maxSize();
 
   void writeToJson(QJsonObject& json) const override;
-  virtual void readFromJson(QJsonObject& json);
+  void readFromJson(const QJsonObject& json) override;
 
   virtual bool readFromTShape(TGeoShape* Tshape);
 
@@ -389,7 +389,7 @@ public:
   virtual double maxSize();
 
   void writeToJson(QJsonObject& json) const override;
-  virtual void readFromJson(QJsonObject& json);
+  void readFromJson(const QJsonObject& json) override;
 
   virtual bool readFromTShape(TGeoShape* Tshape);
 
@@ -419,7 +419,7 @@ public:
   virtual double maxSize();
 
   void writeToJson(QJsonObject& json) const override;
-  virtual void readFromJson(QJsonObject& json);
+  void readFromJson(const QJsonObject& json) override;
 
   virtual bool readFromTShape(TGeoShape* Tshape);
 
@@ -452,7 +452,7 @@ public:
   virtual double maxSize();
 
   void writeToJson(QJsonObject& json) const override;
-  virtual void readFromJson(QJsonObject& json);
+  void readFromJson(const QJsonObject& json) override;
 
   virtual bool readFromTShape(TGeoShape* Tshape);
 
@@ -488,7 +488,7 @@ public:
   virtual double maxSize();
 
   void writeToJson(QJsonObject& json) const override;
-  virtual void readFromJson(QJsonObject& json);
+  void readFromJson(const QJsonObject& json) override;
 
   virtual bool readFromTShape(TGeoShape* Tshape);
 
@@ -523,7 +523,7 @@ public:
   virtual double maxSize();
 
   void writeToJson(QJsonObject& json) const override;
-  virtual void readFromJson(QJsonObject& json);
+  void readFromJson(const QJsonObject& json) override;
 
   virtual bool readFromTShape(TGeoShape* Tshape);
 
@@ -559,7 +559,7 @@ public:
   virtual double maxSize() { return rmax;}
 
   void writeToJson(QJsonObject& json) const override;
-  virtual void readFromJson(QJsonObject& json);
+  void readFromJson(const QJsonObject& json) override;
 
   virtual bool readFromTShape(TGeoShape* Tshape);
 
@@ -593,7 +593,7 @@ public:
   virtual double maxSize();
 
   void writeToJson(QJsonObject& json) const override;
-  virtual void readFromJson(QJsonObject& json);
+  void readFromJson(const QJsonObject& json) override;
 
   virtual bool readFromTShape(TGeoShape* Tshape);
 
@@ -622,7 +622,7 @@ public:
   virtual double maxSize();
 
   void writeToJson(QJsonObject& json) const override;
-  virtual void readFromJson(QJsonObject& json);
+  void readFromJson(const QJsonObject& json) override;
 
   virtual bool readFromTShape(TGeoShape* Tshape);
 
@@ -654,7 +654,7 @@ public:
   virtual double maxSize() {return 0;}  //***!!!
 
   void writeToJson(QJsonObject& json) const override;
-  virtual void readFromJson(QJsonObject& json);
+  void readFromJson(const QJsonObject& json) override;
 
   virtual bool readFromTShape(TGeoShape* /*Tshape*/) {return false;} //cannot be retrieved this way! need cooperation with AGeoObject itself
 
@@ -687,7 +687,7 @@ public:
   virtual double maxSize();
 
   void writeToJson(QJsonObject& json) const override;
-  virtual void readFromJson(QJsonObject& json);
+  void readFromJson(const QJsonObject& json) override;
 
   virtual bool readFromTShape(TGeoShape* Tshape);
 
@@ -697,6 +697,5 @@ public:
 
   QString str2R, str2Rmin, str2Rmax, strPhi1, strDphi;
 };
-
 
 #endif // AGEOSHAPE_H

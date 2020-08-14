@@ -2096,18 +2096,21 @@ void AGeoPconDelegate::finalizeLocalParameters()
             qDebug() <<"roooowws " <<rows;
             for (int ir = 0; ir < rows; ir++)
             {
-                qDebug() << "very hmmmmmmmmmmmmmmmmmmmmm";
-                if (!tab->cellWidget(ir, 0) || !tab->cellWidget(ir, 1) || !tab->cellWidget(ir, 2)) continue;
-
+                QVector<QString> edits;
+                for (int ic = 0; ic < 3; ic++)
+                {
+                    AOneLineTextEdit * edit    = new AOneLineTextEdit;
+                    edit    = static_cast <AOneLineTextEdit *>(tab->cellWidget(ir, ic));
+                    edits.append(edit->text());
+                }
+                if (edits[0].isEmpty() || edits[1].isEmpty()|| edits[2].isEmpty() ) continue;
                 APolyCGsection * Section = new APolyCGsection;
-                AOneLineTextEdit * edit = new AOneLineTextEdit;
 
-                edit = dynamic_cast <AOneLineTextEdit *>(tab->cellWidget(ir, 0)); Section->strZ    = edit->text();
-                edit = dynamic_cast <AOneLineTextEdit *>(tab->cellWidget(ir, 1)); Section->str2rmin = edit->text();
-                edit = dynamic_cast <AOneLineTextEdit *>(tab->cellWidget(ir, 2)); Section->str2rmax = edit->text();
+                Section->strZ     = edits[0];
+                Section->str2rmin = edits[1];
+                Section->str2rmax = edits[2];
 
                 qDebug() <<"finalizing" <<Section->strZ <<Section->str2rmin <<Section->str2rmax;
-                qDebug() << "very hmmmmmmmmmmmmmmmmmhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhmmmm";
 
                 pcon->Sections.append(*Section);
             }
@@ -2117,13 +2120,19 @@ void AGeoPconDelegate::finalizeLocalParameters()
 
 void AGeoPconDelegate::addOneLineTextEdits(int row)
 {
-    AOneLineTextEdit * ez   = new AOneLineTextEdit(tab);
+    /*AOneLineTextEdit * ez   = new AOneLineTextEdit(tab);
     AOneLineTextEdit * emin = new AOneLineTextEdit(tab);
     AOneLineTextEdit * emax = new AOneLineTextEdit(tab);
 
     tab->setCellWidget(row, 0, ez);
     tab->setCellWidget(row, 1, emin);
-    tab->setCellWidget(row, 2, emax);
+    tab->setCellWidget(row, 2, emax);*/
+
+    for (int ic = 0; ic < 3; ic++)
+    {
+        AOneLineTextEdit * e   = new AOneLineTextEdit(tab);
+        tab->setCellWidget(row, ic, e);
+    }
 }
 
 void AGeoPconDelegate::Update(const AGeoObject *obj)
@@ -2177,7 +2186,7 @@ void AGeoPconDelegate::Update(const AGeoObject *obj)
                 AOneLineTextEdit * emin = new AOneLineTextEdit(tab);
                 AOneLineTextEdit * emax = new AOneLineTextEdit(tab);
 
-                QVector<AOneLineTextEdit*> l = {ez, emin, emax};
+                QVector<AOneLineTextEdit*> l = {ez, emin, emax};   // !*! here is the order in question
                 for (AOneLineTextEdit * le : l)
                 {
                     configureHighligherAndCompleter(le);
@@ -2187,7 +2196,6 @@ void AGeoPconDelegate::Update(const AGeoObject *obj)
                 ez  ->setText(Section.strZ    .isEmpty() ? QString::number(Section.z)          : Section.strZ);
                 emin->setText(Section.str2rmin.isEmpty() ? QString::number(Section.rmin * 2.0) : Section.str2rmin);
                 emax->setText(Section.str2rmax.isEmpty() ? QString::number(Section.rmax * 2.0) : Section.str2rmax);
-
 
                 tab->setCellWidget(iP, 0, ez);
                 tab->setCellWidget(iP, 1, emin);

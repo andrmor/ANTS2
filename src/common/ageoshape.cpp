@@ -1924,15 +1924,19 @@ QString AGeoPcon::updateShape()
     QString errorStr = "";
     bool ok;
 
+    if (Sections.size() <2) return "there should be at least 2 sections";
+
     ok = AGeoConsts::getConstInstance().updateParameter(errorStr, strPhi, phi,   false, false, false); if (!ok) return errorStr;
     ok = AGeoConsts::getConstInstance().updateParameter(errorStr, strdPhi, dphi, false, false, false); if (!ok) return errorStr;
 
     if ( phi   <  0 || phi    >= 360) return   "Phi should be in the range of [0, 360)";
     if (dphi   <= 0 || dphi   >  360) return   "Dphi should be in the range of (0, 360]";
-
+    double minimumZ = -10^30;
     for (APolyCGsection s : Sections)
     {
         ok = s.updateShape(errorStr);
+        if (minimumZ > s.z) return "sections' z coordinates are not in ascending order";
+        minimumZ = s.z;
         if (!ok) return errorStr;
     }
     return "";

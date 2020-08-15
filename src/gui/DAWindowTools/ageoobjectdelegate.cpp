@@ -1978,23 +1978,33 @@ AGeoPconDelegate::AGeoPconDelegate(const QStringList &materials, QWidget *parent
         tab->setHorizontalHeaderLabels(QStringList({"Z position", "Inner diameter", "Outer diameter"}));
         tab->setMaximumHeight(150);
         tab->verticalHeader()->setSectionsMovable(true);
+        QObject::connect(this, &AGeoPconDelegate::reorderSections, this,  &AGeoPconDelegate::onReorderSections, Qt::QueuedConnection);
         QObject::connect(tab->verticalHeader(), &QHeaderView::sectionMoved, this, [this](int /*logicalIndex*/, int oldVisualIndex, int newVisualIndex)
         {
+            onReorderSections(oldVisualIndex, newVisualIndex);
+            emit ContentChanged();
+            /*tab->verticalHeader()->blockSignals(true);
             //qDebug() << logicalIndex << oldVisualIndex << newVisualIndex;
-            tab->verticalHeader()->blockSignals(true);
             //tab->verticalHeader()->swapSections(oldVisualIndex, newVisualIndex);
             tab->verticalHeader()->moveSection(newVisualIndex, oldVisualIndex);
-            tab->verticalHeader()->blockSignals(false);
+            tab->verticalHeader()->blockSignals(false);*/
             //swap table rows oldVisualIndex and newVisualIndex
-            for (int i=0; i<3; i++)
+
+            /*for (int i=0; i<3; i++)
             {
-                QTableWidgetItem * from = tab->takeItem(oldVisualIndex, i);
-                QTableWidgetItem * to = tab->takeItem(newVisualIndex, i);
-                tab->setItem(oldVisualIndex, i, to);
-                tab->setItem(newVisualIndex, i, from);
-            }
+                AOneLineTextEdit * kira1 = static_cast<AOneLineTextEdit *> (tab->cellWidget(0, i));
+                qDebug() <<"kiraaaaaaaaaaaaaaaa1" <<kira1->text();
+                AOneLineTextEdit * from = static_cast<AOneLineTextEdit *> (tab->cellWidget(oldVisualIndex, i));
+                AOneLineTextEdit * to   = static_cast<AOneLineTextEdit *> (tab->cellWidget(newVisualIndex, i));
+                qDebug() <<"ssssssssssssssssssssssssssssssssssssssss" <<from->text() <<"old" <<oldVisualIndex <<"new" <<newVisualIndex;
+                tab->setCellWidget(oldVisualIndex, i, to);
+                tab->setCellWidget(newVisualIndex, i, from);
+                AOneLineTextEdit * kira = static_cast<AOneLineTextEdit *> (tab->cellWidget(0, i));
+                qDebug() <<"kiraaaaaaaaaaaaaaaa2" <<kira->text();
+            }*/
         }, Qt::QueuedConnection);
         connect(tab, &QTableWidget::cellChanged, this, &AGeoPconDelegate::ContentChanged);
+
 
     lay->addWidget(tab);
 
@@ -2159,37 +2169,102 @@ void AGeoPconDelegate::Update(const AGeoObject *obj)
         {
             ep0->setText(pcon->strPhi .isEmpty() ? QString::number(pcon->phi) : pcon->strPhi);
             epe->setText(pcon->strdPhi.isEmpty() ? QString::number(pcon->dphi): pcon->strdPhi);
-
-            tab->clearContents();
-            const int numPlanes = pcon->Sections.size();
-            tab->setRowCount(numPlanes);
-            for (int iP = 0; iP < numPlanes; iP++)
-            {
-                const APolyCGsection & Section = pcon->Sections.at(iP);
-                qDebug() <<"update delegate" <<Section.strZ <<Section.str2rmin <<Section.str2rmax;
-                AOneLineTextEdit * ez   = new AOneLineTextEdit(tab);
-                AOneLineTextEdit * emin = new AOneLineTextEdit(tab);
-                AOneLineTextEdit * emax = new AOneLineTextEdit(tab);
-
-                QVector<AOneLineTextEdit*> l = {ez, emin, emax};   // !*! here is the order in question
-                for (AOneLineTextEdit * le : l)
-                {
-                    configureHighligherAndCompleter(le);
-                    QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoBaseDelegate::ContentChanged);
-                }
-
-                ez  ->setText(Section.strZ    .isEmpty() ? QString::number(Section.z)          : Section.strZ);
-                emin->setText(Section.str2rmin.isEmpty() ? QString::number(Section.rmin * 2.0) : Section.str2rmin);
-                emax->setText(Section.str2rmax.isEmpty() ? QString::number(Section.rmax * 2.0) : Section.str2rmax);
-
-                tab->setCellWidget(iP, 0, ez);
-                tab->setCellWidget(iP, 1, emin);
-                tab->setCellWidget(iP, 2, emax);
-
-                tab->setRowHeight (iP, rowHeight);
-            }
+            updateTableW(pcon);
         }
         else qWarning() << "Read delegate: PolyCone shape not found!";
+}
+
+void AGeoPconDelegate::updateTableW(AGeoShape *shape)
+{
+    AGeoPcon * pcon = dynamic_cast<AGeoPcon*>(shape);
+    tab->clear();
+    tab = new QTableWidget();
+    tab->setColumnCount(3);
+    tab->setHorizontalHeaderLabels(QStringList({"Z position", "Inner diameter", "Outer diameter"}));
+    tab->setMaximumHeight(150);
+    tab->verticalHeader()->setSectionsMovable(true);
+    QObject::connect(this, &AGeoPconDelegate::reorderSections, this,  &AGeoPconDelegate::onReorderSections, Qt::QueuedConnection);
+    QObject::connect(tab->verticalHeader(), &QHeaderView::sectionMoved, this, [this](int /*logicalIndex*/, int oldVisualIndex, int newVisualIndex)
+    {
+        onReorderSections(oldVisualIndex, newVisualIndex);
+        emit ContentChanged();
+        //tab->verticalHeader()->blockSignals(true);
+        //qDebug() << logicalIndex << oldVisualIndex << newVisualIndex;
+        //tab->verticalHeader()->swapSections(oldVisualIndex, newVisualIndex);
+        //tab->verticalHeader()->moveSection(newVisualIndex, oldVisualIndex);
+        //tab->verticalHeader()->blockSignals(false);
+        //swap table rows oldVisualIndex and newVisualIndex
+
+        /*for (int i=0; i<3; i++)
+        {
+            AOneLineTextEdit * kira1 = static_cast<AOneLineTextEdit *> (tab->cellWidget(0, i));
+            qDebug() <<"kiraaaaaaaaaaaaaaaa1" <<kira1->text();
+            AOneLineTextEdit * from = static_cast<AOneLineTextEdit *> (tab->cellWidget(oldVisualIndex, i));
+            AOneLineTextEdit * to   = static_cast<AOneLineTextEdit *> (tab->cellWidget(newVisualIndex, i));
+            qDebug() <<"ssssssssssssssssssssssssssssssssssssssss" <<from->text() <<"old" <<oldVisualIndex <<"new" <<newVisualIndex;
+            tab->setCellWidget(oldVisualIndex, i, to);
+            tab->setCellWidget(newVisualIndex, i, from);
+            AOneLineTextEdit * kira = static_cast<AOneLineTextEdit *> (tab->cellWidget(0, i));
+            qDebug() <<"kiraaaaaaaaaaaaaaaa2" <<kira->text();
+        }*/
+    }, Qt::QueuedConnection);
+    connect(tab, &QTableWidget::cellChanged, this, &AGeoPconDelegate::ContentChanged);
+    const int numPlanes = pcon->Sections.size();
+    tab->setRowCount(numPlanes);
+    for (int iP = 0; iP < numPlanes; iP++)
+    {
+        const APolyCGsection & Section = pcon->Sections.at(iP);
+        qDebug() <<"update delegate" <<Section.strZ <<Section.str2rmin <<Section.str2rmax;
+        AOneLineTextEdit * ez   = new AOneLineTextEdit(tab);
+        AOneLineTextEdit * emin = new AOneLineTextEdit(tab);
+        AOneLineTextEdit * emax = new AOneLineTextEdit(tab);
+
+        QVector<AOneLineTextEdit*> l = {ez, emin, emax};   // !*! here is the order in question
+        for (AOneLineTextEdit * le : l)
+        {
+            configureHighligherAndCompleter(le);
+            QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoBaseDelegate::ContentChanged);
+        }
+
+        ez  ->setText(Section.strZ    .isEmpty() ? QString::number(Section.z)          : Section.strZ);
+        emin->setText(Section.str2rmin.isEmpty() ? QString::number(Section.rmin * 2.0) : Section.str2rmin);
+        emax->setText(Section.str2rmax.isEmpty() ? QString::number(Section.rmax * 2.0) : Section.str2rmax);
+
+        tab->setCellWidget(iP, 0, ez);
+        tab->setCellWidget(iP, 1, emin);
+        tab->setCellWidget(iP, 2, emax);
+
+        tab->setRowHeight (iP, rowHeight);
+    }
+}
+
+void AGeoPconDelegate::onReorderSections(int oldVisualIndex, int newVisualIndex)
+{
+    AGeoPcon * pcon = dynamic_cast<AGeoPcon*>(ShapeCopy);
+        if (!pcon)
+        {
+            AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+            pcon = dynamic_cast<AGeoPcon*>(scaled->BaseShape);
+        }
+
+        if (pcon)
+        {
+            /*APolyCGsection & oldSection = pcon->Sections[oldVisualIndex];
+            qDebug() <<"old" <<pcon->Sections[0].z;
+            APolyCGsection & newSection = pcon->Sections[newVisualIndex];
+            qDebug() <<"new" <<pcon->Sections[1].z;
+
+            pcon->Sections[oldVisualIndex] = newSection;
+            qDebug() <<pcon->Sections[oldVisualIndex];
+            pcon->Sections[newVisualIndex] = oldSection;*/
+
+            qDebug() <<"sections1" <<pcon->Sections[0].z<<pcon->Sections[1].z; //<<oldVisualIndex <<newVisualIndex;
+            APolyCGsection tempSection = pcon->Sections[oldVisualIndex];
+            pcon->Sections[oldVisualIndex] = pcon->Sections[newVisualIndex];
+            pcon->Sections[newVisualIndex] = tempSection;
+            qDebug() <<"sections2" <<pcon->Sections[0].z<<pcon->Sections[1].z;
+            updateTableW(pcon);
+        }
 }
 
 /*void AGeoPconDelegate::onLocalShapeParameterChange()

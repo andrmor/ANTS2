@@ -432,9 +432,13 @@ public:
 protected:
     QVBoxLayout * lay = nullptr;
     void addOneLineTextEdits(int row);
+signals:
+    void reorderSections(int oldVisualIndex, int newVisualIndex);
 
 public slots:
     void Update(const AGeoObject * obj) override;
+    void updateTableW(AGeoShape *shape);
+    void onReorderSections(int oldVisualIndex, int newVisualIndex);
 
 private slots:
     //void onLocalShapeParameterChange() override;

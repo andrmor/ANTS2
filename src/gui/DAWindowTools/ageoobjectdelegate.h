@@ -415,6 +415,7 @@ private slots:
 };
 
 class QTableWidget;
+class AGeoPcon;
 class AGeoPconDelegate : public AGeoObjectDelegate
 {
     Q_OBJECT
@@ -437,11 +438,10 @@ signals:
 
 public slots:
     void Update(const AGeoObject * obj) override;
-    void updateTableW(AGeoShape *shape);
-    void onReorderSections(int oldVisualIndex, int newVisualIndex);
+    void updateTableW(AGeoPcon * pcon);
 
 private slots:
-    //void onLocalShapeParameterChange() override;
+    void onReorderSections(int /*logicalIndex*/, int oldVisualIndex, int newVisualIndex);
 
 protected:
     const int rowHeight = 23;

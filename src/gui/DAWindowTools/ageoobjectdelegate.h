@@ -438,6 +438,8 @@ public slots:
     void Update(const AGeoObject * obj) override;
     void updateTableW(AGeoPcon * pcon);
     void onCellEdited();
+    void onAddAbove();
+    void onAddBellow();
 
 private slots:
     void onReorderSections(int /*logicalIndex*/, int oldVisualIndex, int newVisualIndex);

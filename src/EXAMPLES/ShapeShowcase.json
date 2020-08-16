@@ -39,8 +39,8 @@
         },
         "FixedWorldSizes": {
             "WorldSizeFixed": false,
-            "XY": 163.84920673956736,
-            "Z": 121.77980021920982
+            "XY": 153.34920673956736,
+            "Z": 131.25
         },
         "IndividualPMoverrides": {
             "Angular": {
@@ -331,7 +331,7 @@
                 ],
                 [
                     "Offset",
-                    30
+                    50
                 ],
                 [
                     "Angle",
@@ -357,6 +357,142 @@
                     "Container": "World",
                     "Locked": false,
                     "Material": 0,
+                    "Name": "Torus",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoTorus",
+                    "ShapeSpecific": {
+                        "Dphi": 315,
+                        "Phi1": -90,
+                        "R": 12.5,
+                        "Rmax": 5,
+                        "Rmin": 0,
+                        "str2R": "Diameter*.5",
+                        "str2Rmax": "Diameter*0.2",
+                        "strDphi": "Angle*7"
+                    },
+                    "Theta": 0,
+                    "X": 0,
+                    "Y": 50,
+                    "Z": -50,
+                    "color": 804,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "strY": "Offset",
+                    "strZ": "-Offset",
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Material": 0,
+                    "Name": "Polygon",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoPgon",
+                    "ShapeSpecific": {
+                        "Sections": [
+                            {
+                                "rmax": 9,
+                                "rmin": 6,
+                                "str2rmax": "SizeY*0.3",
+                                "z": -5
+                            },
+                            {
+                                "rmax": 2.5,
+                                "rmin": 0,
+                                "str2rmax": "Diameter*0.1",
+                                "z": 5
+                            },
+                            {
+                                "rmax": 5,
+                                "rmin": 0,
+                                "str2rmax": "Diameter*0.2",
+                                "z": 15
+                            },
+                            {
+                                "rmax": 0.5,
+                                "rmin": 0,
+                                "z": 25
+                            }
+                        ],
+                        "dphi": 360,
+                        "nedges": 3,
+                        "phi": 0
+                    },
+                    "Theta": 0,
+                    "X": -50,
+                    "Y": 0,
+                    "Z": 50,
+                    "color": 6,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "strX": "-Offset",
+                    "strZ": "Offset",
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Material": 0,
+                    "Name": "Polycone",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoPcon",
+                    "ShapeSpecific": {
+                        "Sections": [
+                            {
+                                "rmax": 12.5,
+                                "rmin": 10,
+                                "str2rmax": "Diameter*0.5",
+                                "strZ": "-Offset*0.5",
+                                "z": -25
+                            },
+                            {
+                                "rmax": 7.5,
+                                "rmin": 5,
+                                "str2rmax": "Diameter*0.3",
+                                "strZ": "-Offset+SizeX",
+                                "z": -10
+                            },
+                            {
+                                "rmax": 25,
+                                "rmin": 20,
+                                "str2rmax": "Diameter",
+                                "strZ": "-Offset+SizeY",
+                                "z": 10
+                            }
+                        ],
+                        "dphi": 360,
+                        "phi": 0
+                    },
+                    "Theta": 0,
+                    "X": 50,
+                    "Y": 0,
+                    "Z": -50,
+                    "color": 867,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "strX": "Offset",
+                    "strZ": "-Offset",
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Material": 0,
                     "Name": "Trapezoid Simplified",
                     "ObjectType": {
                         "Type": "Single"
@@ -373,15 +509,14 @@
                         "str2dx2": "SizeY*0.5"
                     },
                     "Theta": 0,
-                    "X": 90,
-                    "Y": 30,
-                    "Z": 30,
+                    "X": 0,
+                    "Y": 50,
+                    "Z": 50,
                     "color": 1,
                     "fActive": true,
                     "fExpanded": true,
                     "strPhi": "Angle",
                     "strPsi": "Angle*2",
-                    "strX": "3* Offset",
                     "strY": "Offset",
                     "strZ": "Offset",
                     "style": 9,
@@ -404,15 +539,14 @@
                     "Phi": 0,
                     "Psi": 22.5,
                     "Theta": 0,
-                    "X": 60,
-                    "Y": 60,
-                    "Z": 30,
+                    "X": -50,
+                    "Y": 0,
+                    "Z": -50,
                     "fActive": true,
                     "fExpanded": true,
                     "strPsi": "Angle*0.5",
-                    "strX": "2*Offset",
-                    "strY": "2*Offset",
-                    "strZ": "Offset"
+                    "strX": "-Offset",
+                    "strZ": "-Offset"
                 },
                 {
                     "Container": "Array",
@@ -434,7 +568,7 @@
                     "X": 0,
                     "Y": 0,
                     "Z": 0,
-                    "color": 8,
+                    "color": 797,
                     "fActive": true,
                     "fExpanded": true,
                     "style": 1,
@@ -462,9 +596,9 @@
                         "theta": 25
                     },
                     "Theta": 0,
-                    "X": 30,
-                    "Y": 30,
-                    "Z": -30,
+                    "X": 50,
+                    "Y": 50,
+                    "Z": -50,
                     "color": 797,
                     "fActive": true,
                     "fExpanded": true,
@@ -493,9 +627,9 @@
                         "str2b": "SizeY*0.5"
                     },
                     "Theta": 0,
-                    "X": 30,
-                    "Y": -30,
-                    "Z": 30,
+                    "X": 50,
+                    "Y": -50,
+                    "Z": 50,
                     "color": 892,
                     "fActive": true,
                     "fExpanded": true,
@@ -524,9 +658,9 @@
                         "str2dy": "sqrt(SizeY*10)"
                     },
                     "Theta": 0,
-                    "X": 30,
-                    "Y": 30,
-                    "Z": 30,
+                    "X": 50,
+                    "Y": 50,
+                    "Z": 50,
                     "color": 4,
                     "fActive": true,
                     "fExpanded": true,
@@ -554,9 +688,9 @@
                         "str2rmax": "Diameter*0.5"
                     },
                     "Theta": 45,
-                    "X": -30,
-                    "Y": 30,
-                    "Z": 30,
+                    "X": -50,
+                    "Y": 50,
+                    "Z": 50,
                     "color": 2,
                     "fActive": true,
                     "fExpanded": true,
@@ -588,9 +722,9 @@
                         "strPhi2": "2*Angle"
                     },
                     "Theta": 0,
-                    "X": -30,
-                    "Y": -30,
-                    "Z": 30,
+                    "X": -50,
+                    "Y": -50,
+                    "Z": 50,
                     "color": 9,
                     "fActive": true,
                     "fExpanded": true,
@@ -618,9 +752,9 @@
                         "str2rlo": "0.1*Diameter"
                     },
                     "Theta": 0,
-                    "X": -30,
-                    "Y": -30,
-                    "Z": -30,
+                    "X": -50,
+                    "Y": -50,
+                    "Z": -50,
                     "color": 3,
                     "fActive": true,
                     "fExpanded": true,
@@ -652,9 +786,9 @@
                         "theta2": 180
                     },
                     "Theta": 0,
-                    "X": -30,
-                    "Y": 30,
-                    "Z": -30,
+                    "X": -50,
+                    "Y": 50,
+                    "Z": -50,
                     "color": 1,
                     "fActive": true,
                     "fExpanded": true,
@@ -679,9 +813,9 @@
                         "GenerationString": "TGeoCompositeShape( bb - aa )"
                     },
                     "Theta": 0,
-                    "X": 30,
-                    "Y": -30,
-                    "Z": -30,
+                    "X": 50,
+                    "Y": -50,
+                    "Z": -50,
                     "color": 1,
                     "fActive": true,
                     "fExpanded": true,

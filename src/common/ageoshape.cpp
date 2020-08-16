@@ -1182,6 +1182,31 @@ const QString AGeoPgon::getHelp()
            "{z : rmin : rmax} - arbitrary number of sections defined with z position, minimum and maximum radii";
 }
 
+QString AGeoPgon::updateShape()
+{
+    const AGeoConsts & GC = AGeoConsts::getConstInstance();
+    QString errorStr;
+    bool ok;
+    double dnedges = nedges;
+    ok = GC.updateParameter(errorStr, strNedges, dnedges, true, true, false); if (!ok) return errorStr;
+    nedges = dnedges;
+
+    return AGeoPcon::updateShape();
+
+}
+
+bool AGeoPgon::isGeoConstInUse(const QRegExp &nameRegExp) const
+{
+    if (strNedges.contains(nameRegExp)) return true;
+    return AGeoPcon::isGeoConstInUse(nameRegExp);
+}
+
+void AGeoPgon::replaceGeoConstName(const QRegExp &nameRegExp, const QString &newName)
+{
+    strNedges.replace(nameRegExp, newName);
+    AGeoPcon::replaceGeoConstName(nameRegExp, newName);
+}
+
 bool AGeoPgon::readFromString(QString GenerationString)
 {
     Sections.clear();
@@ -1281,13 +1306,18 @@ double AGeoPgon::maxSize()
 void AGeoPgon::writeToJson(QJsonObject &json) const
 {
     json["nedges"] = nedges;
+    if (!strNedges.isEmpty()) json["strNedges"] = strNedges;
+
     AGeoPcon::writeToJson(json);
 }
 
 void AGeoPgon::readFromJson(const QJsonObject &json)
 {
     nedges = json["nedges"].toInt();
+    if (!parseJson(json, "strNedges", strNedges)) strNedges.clear();
     AGeoPcon::readFromJson(json);
+
+    updateShape();
 }
 
 bool AGeoPgon::readFromTShape(TGeoShape *Tshape)

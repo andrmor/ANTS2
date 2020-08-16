@@ -2183,50 +2183,58 @@ AGeoPgonDelegate::AGeoPgonDelegate(const QStringList &materials, QWidget *parent
     h->setSpacing(1);
     QLabel * lab = new QLabel("Edges:");
     h->addWidget(lab);
-        sbn = new QSpinBox();
-        sbn->setMinimum(3);
-        sbn->setMaximum(100000);
-    h->addWidget(sbn);
+    eed = new AOneLineTextEdit;
+    h->addWidget(eed);
     h->addStretch();
 
     lay->insertLayout(0, h);
-
     tab->setHorizontalHeaderLabels(QStringList({"Z position", "Outer size", "Inner size"}));
 
-    QObject::connect(sbn, SIGNAL(valueChanged(int)), this, SLOT(onLocalShapeParameterChange()));
+    configureHighligherAndCompleter(eed);
+    QObject::connect(eed, &AOneLineTextEdit::textChanged, this, &AGeoPconDelegate::ContentChanged);
+}
+
+void AGeoPgonDelegate::finalizeLocalParameters()
+{
+    AGeoPgon * pgon = dynamic_cast<AGeoPgon*>(ShapeCopy);
+    if (!pgon)
+    {
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+        pgon = dynamic_cast<AGeoPgon*>(scaled->BaseShape);
+    }
+
+    if (pgon)
+    {
+        pgon->strNedges = eed->text();
+    }
+    else qWarning() << "Read delegate: Polygon shape not found!";
+
+    AGeoPconDelegate::finalizeLocalParameters();
+
 }
 
 void AGeoPgonDelegate::Update(const AGeoObject *obj)
 {
     AGeoPconDelegate::Update(obj);
 
+    AGeoPgon * pgon = dynamic_cast<AGeoPgon*>(ShapeCopy);
+    if (!pgon)
+    {
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+        pgon = dynamic_cast<AGeoPgon*>(scaled->BaseShape);
+    }
+
+    if (pgon)
+    {
+        eed->setText(pgon->strNedges.isEmpty() ? QString::number(pgon->nedges) : pgon->strNedges);
+    }
+    else qWarning() << "Read delegate: Polygon shape not found!";
+    /*
     const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
     const AGeoPgon * pgon = dynamic_cast<const AGeoPgon*>(tmpShape ? tmpShape : obj->Shape);
     if (pgon)
         sbn->setValue(pgon->nedges);
-    delete tmpShape;
-}
-
-void AGeoPgonDelegate::onLocalShapeParameterChange()
-{
-    QString s = QString("TGeoPgon( %1, %2, %3")
-            .arg(ep0->text())
-            .arg(epe->text())
-            .arg(sbn->value());
-
-    if (!tab) return;
-    const int rows = tab->rowCount();
-    for (int ir = 0; ir < rows; ir++)
-    {
-        if (!tab->item(ir, 0) || !tab->item(ir, 1) || !tab->item(ir, 2)) continue;
-        s += QString(", { %1 : %2 : %3 }")
-                .arg(tab->item(ir, 0)->text())
-                .arg(0.5*tab->item(ir, 2)->text().toDouble())
-                .arg(0.5*tab->item(ir, 1)->text().toDouble());
-    }
-    s += " )";
-
-    updatePteShape(s);
+    delete tmpShape;*/
 }
 
 AGeoCompositeDelegate::AGeoCompositeDelegate(const QStringList &materials, QWidget *parent)

@@ -453,13 +453,14 @@ class AGeoPgonDelegate : public AGeoPconDelegate
 public:
     AGeoPgonDelegate(const QStringList & materials, QWidget * parent);
 
-    QSpinBox  * sbn = nullptr;
+    void finalizeLocalParameters() override;
+
+    AOneLineTextEdit  * eed = nullptr;
 
 public slots:
     void Update(const AGeoObject * obj) override;
 
 private slots:
-    void onLocalShapeParameterChange() override;
 
 };
 

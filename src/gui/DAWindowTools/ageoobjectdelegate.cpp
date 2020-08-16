@@ -2068,7 +2068,6 @@ void AGeoPconDelegate::onCellEdited()
 void AGeoPconDelegate::onAddAbove()
 {
     int row = tab->currentRow();
-    qDebug() <<row;
     if (row == -1) row = 0;
     AGeoPcon * pcon = dynamic_cast<AGeoPcon*>(ShapeCopy);
     if (!pcon)

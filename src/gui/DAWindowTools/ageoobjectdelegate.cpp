@@ -1985,11 +1985,29 @@ AGeoPconDelegate::AGeoPconDelegate(const QStringList &materials, QWidget *parent
         connect(pbAddAbove, &QPushButton::clicked, [this]()
         {
             int row = tab->currentRow();
+            qDebug() <<row;
             if (row == -1) row = 0;
-            tab->insertRow(row);
-            tab->setRowHeight(row, rowHeight);
-            addOneLineTextEdits(row);
-            ContentChanged();
+            AGeoPcon * pcon = dynamic_cast<AGeoPcon*>(ShapeCopy);
+            if (!pcon)
+            {
+                AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+                pcon = dynamic_cast<AGeoPcon*>(scaled->BaseShape);
+            }
+
+            if (pcon)
+            {
+                APolyCGsection newSection = pcon->Sections[row];
+                if (row == 0)
+                {
+                    newSection.z -=1;
+                    if (!newSection.strZ.isEmpty()) newSection.strZ += "-1";
+                }
+                else newSection.strZ = QString("%1").arg((pcon->Sections[row].z + pcon->Sections[row-1].z)/2);
+                //qDebug() <<"new section" <<newSection.strZ <<newSection.z;
+                pcon->Sections.insert(row, newSection);
+
+            }
+            updateTableW(pcon);
         });
         hl->addWidget(pbAddAbove);
         QPushButton * pbAddBelow = new QPushButton("Add below");
@@ -1998,11 +2016,26 @@ AGeoPconDelegate::AGeoPconDelegate(const QStringList &materials, QWidget *parent
             const int num = tab->rowCount();
             int row = tab->currentRow();
             if (row == -1) row = num-1;
-            row++;
-            tab->insertRow(row);
-            tab->setRowHeight(row, rowHeight);
-            addOneLineTextEdits(row);
-            ContentChanged();
+            AGeoPcon * pcon = dynamic_cast<AGeoPcon*>(ShapeCopy);
+            if (!pcon)
+            {
+                AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+                pcon = dynamic_cast<AGeoPcon*>(scaled->BaseShape);
+            }
+
+            if (pcon)
+            {
+                APolyCGsection newSection = pcon->Sections[row];
+                if (row == num-1)
+                {
+                    newSection.z +=1;
+                    if (!newSection.strZ.isEmpty()) newSection.strZ += "+1";
+                }
+                else newSection.strZ = QString("%1").arg((pcon->Sections[row].z + pcon->Sections[row+1].z)/2);
+                //qDebug() <<"new section" <<newSection.z;
+                pcon->Sections.insert(row+1, newSection);
+            }
+            updateTableW(pcon);
         });
         hl->addWidget(pbAddBelow);
         QPushButton * pbRemoveRow = new QPushButton("Remove plane");
@@ -2149,6 +2182,7 @@ void AGeoPconDelegate::updateTableW(AGeoPcon * pcon)
             le[i] = new AOneLineTextEdit(tab);
             configureHighligherAndCompleter(le[i]);
             QObject::connect(le[i], &AOneLineTextEdit::textChanged, this, &AGeoBaseDelegate::ContentChanged);
+            QObject::connect(le[i], &AOneLineTextEdit::editingFinished, this, &AGeoPconDelegate::onCellEdited);
             tab->setCellWidget(iP, i, le[i]);
         }
 
@@ -2158,6 +2192,23 @@ void AGeoPconDelegate::updateTableW(AGeoPcon * pcon)
 
         tab->setRowHeight (iP, rowHeight);
     }
+}
+
+void AGeoPconDelegate::onCellEdited()
+{
+    finalizeLocalParameters();
+    AGeoPcon * pcon = dynamic_cast<AGeoPcon*>(ShapeCopy);
+        if (!pcon)
+        {
+            AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+            pcon = dynamic_cast<AGeoPcon*>(scaled->BaseShape);
+        }
+
+        if (pcon)
+        {
+            pcon->updateShape();
+            //emit ContentChanged();
+        }
 }
 
 void AGeoPconDelegate::onReorderSections(int, int oldVisualIndex, int newVisualIndex)

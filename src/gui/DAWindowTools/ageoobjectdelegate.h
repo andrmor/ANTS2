@@ -439,6 +439,7 @@ signals:
 public slots:
     void Update(const AGeoObject * obj) override;
     void updateTableW(AGeoPcon * pcon);
+    void onCellEdited();
 
 private slots:
     void onReorderSections(int /*logicalIndex*/, int oldVisualIndex, int newVisualIndex);

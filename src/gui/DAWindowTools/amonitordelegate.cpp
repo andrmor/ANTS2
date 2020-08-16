@@ -48,14 +48,9 @@ AMonitorDelegate::AMonitorDelegate(const QStringList &definedParticles, QWidget 
     frMainFrame->setLayout(vl);
 }
 
-const QString AMonitorDelegate::getName() const
+QString AMonitorDelegate::getName() const
 {
     return del->getName();
-}
-
-bool AMonitorDelegate::isValid(AGeoObject *)
-{
-    return true;
 }
 
 bool AMonitorDelegate::updateObject(AGeoObject *obj) const

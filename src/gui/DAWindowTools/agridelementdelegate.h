@@ -18,8 +18,7 @@ class AGridElementDelegate : public AGeoBaseDelegate
 public:
     AGridElementDelegate(QWidget * ParentWidget);
 
-    const QString getName() const override;
-    bool isValid(AGeoObject * obj) override;
+    QString getName() const override;
     bool updateObject(AGeoObject * obj) const override;
 
 private:

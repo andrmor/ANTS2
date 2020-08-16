@@ -38,9 +38,8 @@ public:
     AGeoObjectDelegate(const QStringList & materials, QWidget * ParentWidget = nullptr);
     virtual ~AGeoObjectDelegate();
 
-    const QString getName() const override;
+    QString getName() const override;
 
-    bool isValid(AGeoObject * obj) override;
     bool updateObject(AGeoObject * obj) const override;
 
     AGeoShape * ShapeCopy = nullptr;
@@ -134,8 +133,7 @@ public:
     QLineEdit * ledSizeXY = nullptr;
     QLineEdit * ledSizeZ  = nullptr;
 
-    const QString getName() const override;
-    bool isValid(AGeoObject * obj) override;
+    QString getName() const override;
     bool updateObject(AGeoObject * obj) const override;
 
 public slots:

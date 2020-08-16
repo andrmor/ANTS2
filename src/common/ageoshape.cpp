@@ -103,19 +103,13 @@ const QString AGeoBox::getHelp()
 
 QString AGeoBox::updateShape()
 {
+    const AGeoConsts & GC = AGeoConsts::getConstInstance();
     QString errorStr;
-    bool ok = AGeoConsts::getConstInstance().updateParameter(errorStr, str2dx, dx);
-    if (!ok)
-    {
-        qDebug() <<errorStr;
-        return errorStr;
-    }
-
-    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, str2dy, dy);
-    if (!ok) return errorStr;
-
-    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, str2dz, dz);
-    return errorStr;
+    bool ok;
+    ok = GC.updateParameter(errorStr, str2dx, dx); if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, str2dy, dy); if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, str2dz, dz); if (!ok) return errorStr;
+    return "";
 }
 
 bool AGeoBox::isGeoConstInUse(const QRegExp & nameRegExp) const
@@ -123,7 +117,6 @@ bool AGeoBox::isGeoConstInUse(const QRegExp & nameRegExp) const
     if (str2dx.contains(nameRegExp)) return true;
     if (str2dy.contains(nameRegExp)) return true;
     if (str2dz.contains(nameRegExp)) return true;
-
     return false;
 }
 
@@ -847,16 +840,14 @@ const QString AGeoTube::getHelp()
 
 QString AGeoTube::updateShape()
 {
-    QString errorStr = updateParameter(str2rmax, rmax);
-    if (!errorStr.isEmpty()) return errorStr;
-
-    errorStr = updateParameter(str2rmin, rmin, false);
-    if (!errorStr.isEmpty()) return errorStr;
-
+    const AGeoConsts & GC = AGeoConsts::getConstInstance();
+    QString errorStr;
+    bool ok;
+    ok = GC.updateParameter(errorStr, str2rmax, rmax);        if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, str2rmin, rmin, false); if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, str2dz, dz);            if (!ok) return errorStr;
     if (rmin >= rmax) return "Inside diameter should be smaller than the outside one!";
-
-    errorStr = updateParameter(str2dz, dz);
-    return errorStr;
+    return "";
 }
 
 bool AGeoTube::isGeoConstInUse(const QRegExp & nameRegExp) const
@@ -864,7 +855,6 @@ bool AGeoTube::isGeoConstInUse(const QRegExp & nameRegExp) const
     if (str2rmax.contains(nameRegExp)) return true;
     if (str2rmin.contains(nameRegExp)) return true;
     if (str2dz.  contains(nameRegExp)) return true;
-
     return false;
 }
 
@@ -972,14 +962,13 @@ const QString AGeoTrd1::getHelp()
 
 QString AGeoTrd1::updateShape()
 {
-    QString errorStr = "";
+    const AGeoConsts & GC = AGeoConsts::getConstInstance();
+    QString errorStr;
     bool ok;
-
-    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, str2dx1, dx1); if (!ok) return errorStr;
-    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, str2dx2, dx2); if (!ok) return errorStr;
-    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, str2dy,  dy);  if (!ok) return errorStr;
-    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, str2dz,  dz);  if (!ok) return errorStr;
-
+    ok = GC.updateParameter(errorStr, str2dx1, dx1); if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, str2dx2, dx2); if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, str2dy,  dy);  if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, str2dz,  dz);  if (!ok) return errorStr;
     return "";
 }
 
@@ -1437,17 +1426,14 @@ const QString AGeoParaboloid::getHelp()
 
 QString AGeoParaboloid::updateShape()
 {
-    QString errorStr = updateParameter(str2rlo, rlo, false);
-    if (!errorStr.isEmpty()) return errorStr;
-
-    errorStr = updateParameter(str2rhi, rhi, false);
-    if (!errorStr.isEmpty()) return errorStr;
-
+    const AGeoConsts & GC = AGeoConsts::getConstInstance();
+    QString errorStr;
+    bool ok;
+    ok = GC.updateParameter(errorStr, str2rlo, rlo, false); if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, str2rhi, rhi, false); if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, str2dz, dz);          if (!ok) return errorStr;
     if (rlo == rhi) return "lower diameter and upper diameter should be distinct";
-
-    errorStr = updateParameter(str2dz, dz);
-    qDebug() <<"updateShape()";
-    return errorStr;
+    return "";
 }
 
 bool AGeoParaboloid::isGeoConstInUse(const QRegExp &nameRegExp) const

@@ -98,15 +98,10 @@ AGridElementDelegate::AGridElementDelegate(QWidget * ParentWidget)
     ledDZ->setValidator(dv);
 }
 
-const QString AGridElementDelegate::getName() const
+QString AGridElementDelegate::getName() const
 {
     if (!CurrentObject) return "Undefined";
     return CurrentObject->Name;
-}
-
-bool AGridElementDelegate::isValid(AGeoObject * /*obj*/)
-{
-    return true;
 }
 
 bool AGridElementDelegate::updateObject(AGeoObject * obj) const

@@ -14,8 +14,7 @@ class AGeoSlabDelegate : public AGeoBaseDelegate
 public:
     AGeoSlabDelegate(const QStringList & definedMaterials, int State, QWidget * ParentWidget);
 
-    const QString getName() const override;
-    bool isValid(AGeoObject * obj) override;
+    QString getName() const override;
     bool updateObject(AGeoObject * obj) const override;
 
 private:

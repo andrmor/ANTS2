@@ -181,74 +181,9 @@ AGeoObjectDelegate::~AGeoObjectDelegate()
     delete ShapeCopy; ShapeCopy = nullptr;
 }
 
-const QString AGeoObjectDelegate::getName() const
+QString AGeoObjectDelegate::getName() const
 {
     return leName->text();
-}
-
-bool AGeoObjectDelegate::isValid(AGeoObject * obj)
-{
-    if ( obj->ObjectType->isHandlingSet())
-    {
-        //for Set object there is no shape to check
-    }
-    else
-    {
-        // !*! temporary!!! to avoid old system of pteEdit control!
-        /*AGeoBox * box = dynamic_cast<AGeoBox*>(ShapeCopy);
-        if (!box)
-        {
-            AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
-            box = dynamic_cast<AGeoBox*>(scaled->BaseShape);
-        }
-        if (box) return true;
-
-        AGeoTube * tube = dynamic_cast<AGeoTube*> (ShapeCopy);
-        if (!tube)
-        {
-            AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*> (ShapeCopy);
-            tube = dynamic_cast<AGeoTube*> (scaled->BaseShape);
-        }
-        if (tube) return true;
-        */
-        AGeoComposite * comp = dynamic_cast<AGeoComposite*>(ShapeCopy);
-
-        AGeoBox * box =dynamic_cast<AGeoBox*> (ShapeCopy);
-        AGeoTube * tube =dynamic_cast<AGeoTube*> (ShapeCopy);
-        if (!box && !tube && !comp)
-        {
-            //qDebug()<< "then its scaled";
-            AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*> (ShapeCopy);
-            tube =dynamic_cast<AGeoTube*> (scaled->BaseShape);
-            //qDebug()<< "its a scled tube!";
-
-            if (!tube)
-            {
-                box =dynamic_cast<AGeoBox*> (scaled->BaseShape);
-                //qDebug()<< "nope its a scaled box!";
-                if (!box) comp =dynamic_cast<AGeoComposite*> (scaled->BaseShape);
-            }
-        }
-        if (comp) return true;
-        if (box) return true;
-        if (tube) return true;
-
-
-        // this is normal or composite object then
-        //if composite, first check all members
-        QString newShape = pteShape->document()->toPlainText();
-        //qDebug() << "--> attempt to set shape using string:"<< newShape;
-
-        bool fValid = obj->readShapeFromString(newShape, true); //only checks, no change!
-        if (!fValid)
-        {
-            message(newShape.simplified().startsWith("TGeoArb8") ?
-                        "Error parsing shape!\nIt could be non-clockwise order of defined nodes!" :
-                        "Error parsing shape!", ParentWidget);
-            return false;
-        }
-    }
-    return true;
 }
 
 bool processEditBox(AOneLineTextEdit * lineEdit, double & val, QString & str, QWidget * parent)
@@ -302,7 +237,8 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
             QString errorStr = shape->updateShape();
             if (!errorStr.isEmpty())
             {
-                QMessageBox::warning(this->ParentWidget,"", errorStr);
+                qDebug() << errorStr;
+                QMessageBox::warning(this->ParentWidget, "", errorStr);
                 return false;
             }
             /*AGeoComposite * comp3 =dynamic_cast<AGeoComposite*> (shape); // !*! Temporary tester to show it works
@@ -343,22 +279,17 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
         ok = ok && processEditBox(ledX,     obj->Position[0],    obj->PositionStr[0],    ParentWidget);
         ok = ok && processEditBox(ledY,     obj->Position[1],    obj->PositionStr[1],    ParentWidget);
         ok = ok && processEditBox(ledZ,     obj->Position[2],    obj->PositionStr[2],    ParentWidget);
-        if (ledPhi->isEnabled()) ok = ok && processEditBox(ledPhi,   obj->Orientation[0], obj->OrientationStr[0], ParentWidget);
+        if (ledPhi->isEnabled())   ok = ok && processEditBox(ledPhi,   obj->Orientation[0], obj->OrientationStr[0], ParentWidget);
         if (ledTheta->isEnabled()) ok = ok && processEditBox(ledTheta, obj->Orientation[1], obj->OrientationStr[1], ParentWidget);
-        if (ledPsi->isEnabled()) ok = ok && processEditBox(ledPsi,   obj->Orientation[2], obj->OrientationStr[2], ParentWidget);
+        if (ledPsi->isEnabled())   ok = ok && processEditBox(ledPsi,   obj->Orientation[2], obj->OrientationStr[2], ParentWidget);
         if (!ok) return false;
-
-
-
-        QRegExp regExp("\\bkira\\b"); // !*! TEMPORARY TESTER
-        obj->isGeoConstInUse(regExp);
 
         // checking was there a rotation of the main object
         bool fWasRotated = false;
         for (int i=0; i<3; i++)
             if (obj->Orientation[i] != old[3+i])
             {
-                fWasRotated =true;
+                fWasRotated = true;
                 break;
             }
         //qDebug() << "--Was rotated?"<< fWasRotated;
@@ -425,7 +356,6 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
             QMessageBox::warning(this->ParentWidget,"", errorStr);
             return false;
         }
-
     }
     else if (obj->ObjectType->isComposite())
     {
@@ -785,7 +715,6 @@ void AGeoBoxDelegate::finalizeLocalParameters()
         box->str2dx = ex->text();
         box->str2dy = ey->text();
         box->str2dz = ez->text();
-        //emit ContentChanged();
     }
     else qWarning() << "Read delegate: Box shape not found!";
 }
@@ -794,20 +723,6 @@ void AGeoBoxDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
 
-    //old system
-    /*
-    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
-    const AGeoBox * box = dynamic_cast<const AGeoBox *>(tmpShape ? tmpShape : obj->Shape);
-    if (box)
-    {
-        ex->setText(QString::number(box->dx*2.0));
-        ey->setText(QString::number(box->dy*2.0));
-        ez->setText(QString::number(box->dz*2.0));
-    }
-    delete tmpShape;
-    */
-
-    //new system
     AGeoBox * box = dynamic_cast<AGeoBox*>(ShapeCopy);
     if (!box)
     {
@@ -822,7 +737,6 @@ void AGeoBoxDelegate::Update(const AGeoObject *obj)
     }
     else qWarning() << "Update delegate: Box shape not found!";
 }
-
 
 AGeoTubeDelegate::AGeoTubeDelegate(const QStringList & materials, QWidget *parent)
     : AGeoObjectDelegate(materials, parent)
@@ -883,17 +797,6 @@ void AGeoTubeDelegate::finalizeLocalParameters()
 void AGeoTubeDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
-    /*
-    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
-    const AGeoTube * tube = dynamic_cast<const AGeoTube*>(tmpShape ? tmpShape : obj->Shape);
-    if (tube)
-    {
-        eo->setText(QString::number(tube->rmax*2.0));
-        ei->setText(QString::number(tube->rmin*2.0));
-        ez->setText(QString::number(tube->dz*2.0));
-    }
-    delete tmpShape;
-    */
 
     AGeoTube * tube = dynamic_cast<AGeoTube*>(ShapeCopy);
     if (!tube)
@@ -1993,14 +1896,13 @@ AGeoPconDelegate::AGeoPconDelegate(const QStringList &materials, QWidget *parent
                 AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
                 pcon = dynamic_cast<AGeoPcon*>(scaled->BaseShape);
             }
-
             if (pcon)
             {
                 APolyCGsection newSection = pcon->Sections[row];
                 if (row == 0)
                 {
-                    newSection.z -=1;
-                    if (!newSection.strZ.isEmpty()) newSection.strZ += "-1";
+                    newSection.z -= 10.0;
+                    if (!newSection.strZ.isEmpty()) newSection.strZ += "-10";
                 }
                 else newSection.strZ = QString("%1").arg((pcon->Sections[row].z + pcon->Sections[row-1].z)/2);
                 //qDebug() <<"new section" <<newSection.strZ <<newSection.z;
@@ -2028,8 +1930,8 @@ AGeoPconDelegate::AGeoPconDelegate(const QStringList &materials, QWidget *parent
                 APolyCGsection newSection = pcon->Sections[row];
                 if (row == num-1)
                 {
-                    newSection.z +=1;
-                    if (!newSection.strZ.isEmpty()) newSection.strZ += "+1";
+                    newSection.z += 10.0;
+                    if (!newSection.strZ.isEmpty()) newSection.strZ += "+10";
                 }
                 else newSection.strZ = QString("%1").arg((pcon->Sections[row].z + pcon->Sections[row+1].z)/2);
                 //qDebug() <<"new section" <<newSection.z;
@@ -2190,7 +2092,7 @@ void AGeoPconDelegate::updateTableW(AGeoPcon * pcon)
         le[1]->setText(Section.str2rmin.isEmpty() ? QString::number(Section.rmin * 2.0) : Section.str2rmin);
         le[2]->setText(Section.str2rmax.isEmpty() ? QString::number(Section.rmax * 2.0) : Section.str2rmax);
 
-        tab->setRowHeight (iP, rowHeight);
+        tab->setRowHeight(iP, rowHeight);
     }
 }
 
@@ -2762,14 +2664,9 @@ AWorldDelegate::AWorldDelegate(const QStringList & materials, QWidget * ParentWi
     ledSizeZ->setValidator(dv);
 }
 
-const QString AWorldDelegate::getName() const
+QString AWorldDelegate::getName() const
 {
     return "World";
-}
-
-bool AWorldDelegate::isValid(AGeoObject *)
-{
-    return true;
 }
 
 bool AWorldDelegate::updateObject(AGeoObject * obj) const

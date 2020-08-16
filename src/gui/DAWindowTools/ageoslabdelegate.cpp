@@ -76,14 +76,9 @@ AGeoSlabDelegate::AGeoSlabDelegate(const QStringList & definedMaterials, int Sta
      Widget->setLayout(lMF);
 }
 
-const QString AGeoSlabDelegate::getName() const
+QString AGeoSlabDelegate::getName() const
 {
     return SlabDel->leName->text();
-}
-
-bool AGeoSlabDelegate::isValid(AGeoObject * /*obj*/)
-{
-    return true;
 }
 
 bool AGeoSlabDelegate::updateObject(AGeoObject * obj) const

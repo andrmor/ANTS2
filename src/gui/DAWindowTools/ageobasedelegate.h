@@ -17,8 +17,7 @@ public:
     AGeoBaseDelegate(QWidget * ParentWidget);
     virtual ~AGeoBaseDelegate(){}
 
-    virtual const QString getName() const = 0;
-    virtual bool isValid(AGeoObject * obj) = 0;
+    virtual QString getName() const = 0;
     virtual void finalizeLocalParameters() {}             //activated in the beggining of "update object"
     virtual bool updateObject(AGeoObject * obj) const = 0;
 

@@ -17,6 +17,7 @@ AOneLineTextEdit::AOneLineTextEdit(QWidget * parent) : QPlainTextEdit(parent)
 
 void AOneLineTextEdit::setText(const QString & text)
 {
+    clear();
     appendPlainText(text);
 }
 

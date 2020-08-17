@@ -357,6 +357,40 @@
                     "Container": "World",
                     "Locked": false,
                     "Material": 0,
+                    "Name": "Cone",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoCone",
+                    "ShapeSpecific": {
+                        "dz": 10,
+                        "rmaxL": 20,
+                        "rmaxU": 12.5,
+                        "rminL": 0,
+                        "rminU": 7.5,
+                        "str2dz": "SizeX*0.5",
+                        "str2rmaxL": "Diameter*0.8",
+                        "str2rmaxU": "Diameter*0.5",
+                        "str2rminU": "Diameter*0.3"
+                    },
+                    "Theta": 0,
+                    "X": 0,
+                    "Y": -50,
+                    "Z": -50,
+                    "color": 900,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "strY": "-Offset",
+                    "strZ": "-Offset",
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Material": 0,
                     "Name": "Torus",
                     "ObjectType": {
                         "Type": "Single"

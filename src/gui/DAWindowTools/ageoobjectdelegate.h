@@ -278,11 +278,13 @@ class AGeoConeDelegate : public AGeoObjectDelegate
 public:
     AGeoConeDelegate(const QStringList & materials, QWidget * parent);
 
-    QLineEdit * ez  = nullptr;
-    QLineEdit * eli = nullptr;
-    QLineEdit * elo = nullptr;
-    QLineEdit * eui = nullptr;
-    QLineEdit * euo = nullptr;
+    void finalizeLocalParameters();
+
+    AOneLineTextEdit * ez  = nullptr;
+    AOneLineTextEdit * eli = nullptr;
+    AOneLineTextEdit * elo = nullptr;
+    AOneLineTextEdit * eui = nullptr;
+    AOneLineTextEdit * euo = nullptr;
 
 protected:
     QGridLayout * gr = nullptr;
@@ -291,7 +293,6 @@ public slots:
     void Update(const AGeoObject * obj) override;
 
 protected slots:
-    void onLocalShapeParameterChange() override;
 };
 
 class AGeoConeSegDelegate : public AGeoConeDelegate

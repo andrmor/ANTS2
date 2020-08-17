@@ -1572,6 +1572,45 @@ const QString AGeoCone::getHelp()
            "rmaxU - external radius at Z+dz";
 }
 
+QString AGeoCone::updateShape()
+{
+    const AGeoConsts & GC = AGeoConsts::getConstInstance();
+    QString errorStr;
+    bool ok;
+    ok = GC.updateParameter(errorStr, str2dz,    dz);           if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, str2rminL, rminL, false); if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, str2rmaxL, rmaxL, false); if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, str2rminU, rminU, false); if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, str2rmaxU, rmaxU, false); if (!ok) return errorStr;
+
+    if (rminL >  rmaxL)                   return "Inside lower diameter should be equal or smaller than the outside one!";
+    if (rminU >  rmaxU)                   return "Inside upper diameter should be equal or smaller than the outside one!";
+    if (rmaxL == 0     && rmaxU == 0)     return "Upper and lower outside diameters can't be 0 at the same time!";
+    if (rminL == rmaxL && rminU == rmaxU) return "Upper and lower outside diameters can't be equal to the inside ones at the same time!";
+
+    return "";
+}
+
+bool AGeoCone::isGeoConstInUse(const QRegExp &nameRegExp) const
+{
+    if (str2dz   .contains(nameRegExp)) return false;
+    if (str2rminL.contains(nameRegExp)) return false;
+    if (str2rmaxL.contains(nameRegExp)) return false;
+    if (str2rminU.contains(nameRegExp)) return false;
+    if (str2rmaxU.contains(nameRegExp)) return false;
+
+    return false;
+}
+
+void AGeoCone::replaceGeoConstName(const QRegExp &nameRegExp, const QString &newName)
+{
+    str2dz   .replace(nameRegExp, newName);
+    str2rminL.replace(nameRegExp, newName);
+    str2rmaxL.replace(nameRegExp, newName);
+    str2rminU.replace(nameRegExp, newName);
+    str2rmaxU.replace(nameRegExp, newName);
+}
+
 bool AGeoCone::readFromString(QString GenerationString)
 {
     QStringList params;
@@ -1625,20 +1664,33 @@ double AGeoCone::maxSize()
 
 void AGeoCone::writeToJson(QJsonObject &json) const
 {
-    json["dz"] = dz;
+    json["dz"]    = dz;
     json["rminL"] = rminL;
     json["rmaxL"] = rmaxL;
     json["rminU"] = rminU;
     json["rmaxU"] = rmaxU;
+
+    if (!str2dz   .isEmpty()) json ["str2dz"]    = str2dz;
+    if (!str2rminL.isEmpty()) json ["str2rminL"] = str2rminL;
+    if (!str2rmaxL.isEmpty()) json ["str2rmaxL"] = str2rmaxL;
+    if (!str2rminU.isEmpty()) json ["str2rminU"] = str2rminU;
+    if (!str2rmaxU.isEmpty()) json ["str2rmaxU"] = str2rmaxU;
 }
 
 void AGeoCone::readFromJson(const QJsonObject &json)
 {
-    dz = json["dz"].toDouble();
+    dz    = json["dz"]   .toDouble();
     rminL = json["rminL"].toDouble();
     rmaxL = json["rmaxL"].toDouble();
     rminU = json["rminU"].toDouble();
     rmaxU = json["rmaxU"].toDouble();
+
+    if (!parseJson(json, "str2dz",    str2dz))    str2dz   .clear();
+    if (!parseJson(json, "str2rminL", str2rminL)) str2rminL.clear();
+    if (!parseJson(json, "str2rmaxL", str2rmaxL)) str2rmaxL.clear();
+    if (!parseJson(json, "str2rminU", str2rminU)) str2rminU.clear();
+    if (!parseJson(json, "str2rmaxU", str2rmaxU)) str2rmaxU.clear();
+    updateShape();
 }
 
 bool AGeoCone::readFromTShape(TGeoShape *Tshape)

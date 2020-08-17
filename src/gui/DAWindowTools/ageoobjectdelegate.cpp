@@ -1219,11 +1219,11 @@ AGeoConeDelegate::AGeoConeDelegate(const QStringList &materials, QWidget *parent
     gr->addWidget(new QLabel("Upper outer diameter:"), 3, 0);
     gr->addWidget(new QLabel("Upper inner diameter:"), 4, 0);
 
-    ez  = new QLineEdit(); gr->addWidget(ez, 0, 1);
-    elo = new QLineEdit(); gr->addWidget(elo, 1, 1);
-    eli = new QLineEdit(); gr->addWidget(eli, 2, 1);
-    euo = new QLineEdit(); gr->addWidget(euo, 3, 1);
-    eui = new QLineEdit(); gr->addWidget(eui, 4, 1);
+    ez  = new AOneLineTextEdit(); gr->addWidget(ez, 0, 1);
+    elo = new AOneLineTextEdit(); gr->addWidget(elo, 1, 1);
+    eli = new AOneLineTextEdit(); gr->addWidget(eli, 2, 1);
+    euo = new AOneLineTextEdit(); gr->addWidget(euo, 3, 1);
+    eui = new AOneLineTextEdit(); gr->addWidget(eui, 4, 1);
 
     gr->addWidget(new QLabel("mm"), 0, 2);
     gr->addWidget(new QLabel("mm"), 1, 2);
@@ -1233,15 +1233,38 @@ AGeoConeDelegate::AGeoConeDelegate(const QStringList &materials, QWidget *parent
 
     addLocalLayout(gr);
 
-    QVector<QLineEdit*> l = {ez, eli, elo, eui, euo};
-    for (QLineEdit * le : l)
-        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoConeDelegate::onLocalShapeParameterChange);
+    for (AOneLineTextEdit * le : {ez, eli, elo, eui, euo})
+    {
+        configureHighligherAndCompleter(le);
+        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoConeDelegate::ContentChanged);
+    }
+}
+
+void AGeoConeDelegate::finalizeLocalParameters()
+{
+    AGeoCone * cone = dynamic_cast<AGeoCone*>(ShapeCopy);
+    if (!cone)
+    {
+    AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+    cone = dynamic_cast<AGeoCone*>(scaled->BaseShape);
+    }
+
+    if (cone)
+    {
+        cone->str2dz    = ez ->text();
+        cone->str2rminL = eli->text();
+        cone->str2rmaxL = elo->text();
+        cone->str2rminU = eui->text();
+        cone->str2rmaxU = euo->text();
+    }
+    else qWarning() << "Read delegate: Cone shape not found!";
 }
 
 void AGeoConeDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
 
+    /*
     const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
     const AGeoCone * cone = dynamic_cast<const AGeoCone*>(tmpShape ? tmpShape : obj->Shape);
     if (cone)
@@ -1252,15 +1275,23 @@ void AGeoConeDelegate::Update(const AGeoObject *obj)
         eui->setText(QString::number(cone->rminU*2.0));
         euo->setText(QString::number(cone->rmaxU*2.0));
     }
-    delete tmpShape;
-}
+    delete tmpShape;*/
+    AGeoCone * cone = dynamic_cast<AGeoCone*>(ShapeCopy);
+    if (!cone)
+    {
+    AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+    cone = dynamic_cast<AGeoCone*>(scaled->BaseShape);
+    }
 
-void AGeoConeDelegate::onLocalShapeParameterChange()
-{
-    updatePteShape(QString("TGeoCone( %1, %2, %3, %4, %5 )")
-                   .arg(0.5*ez->text().toDouble())
-                   .arg(0.5*eli->text().toDouble()).arg(0.5*elo->text().toDouble())
-                   .arg(0.5*eui->text().toDouble()).arg(0.5*euo->text().toDouble()) );
+    if (cone)
+    {
+        ez ->setText(cone->str2dz.isEmpty()    ? QString::number(cone->dz   *2.0) : cone->str2dz);
+        eli->setText(cone->str2rminL.isEmpty() ? QString::number(cone->rminL*2.0) : cone->str2rminL);
+        elo->setText(cone->str2rmaxL.isEmpty() ? QString::number(cone->rmaxL*2.0) : cone->str2rmaxL);
+        eui->setText(cone->str2rminU.isEmpty() ? QString::number(cone->rminU*2.0) : cone->str2rminU);
+        euo->setText(cone->str2rmaxU.isEmpty() ? QString::number(cone->rmaxU*2.0) : cone->str2rmaxU);
+    }
+    else qWarning() << "Read delegate: Cone shape not found!";
 }
 
 AGeoConeSegDelegate::AGeoConeSegDelegate(const QStringList &materials, QWidget *parent)

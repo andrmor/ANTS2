@@ -237,6 +237,11 @@ public:
   const QString getShapeType() const override {return "TGeoCone";}
   virtual const QString getShapeTemplate() {return "TGeoCone( dz, rminL, rmaxL, rminU, rmaxU )";}
   virtual const QString getHelp();
+  QString updateShape() override;
+
+  bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
+  void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
+
 
   virtual bool readFromString(QString GenerationString);
   virtual TGeoShape* createGeoShape(const QString shapeName = "");
@@ -253,6 +258,7 @@ public:
 
   double dz;
   double rminL, rmaxL, rminU, rmaxU;
+  QString str2dz, str2rminL, str2rmaxL, str2rminU, str2rmaxU;
 };
 
 class AGeoPolygon : public AGeoShape

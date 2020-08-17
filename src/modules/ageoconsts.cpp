@@ -15,6 +15,50 @@ const AGeoConsts &AGeoConsts::getConstInstance()
     return getInstance();
 }
 
+bool AGeoConsts::isGeoConstInUse(const QRegExp &nameRegExp, AGeoObject *obj) const
+{
+    for (QString StrValue : StrValues)
+    {
+        if (StrValue.contains(nameRegExp)) return true;
+    }
+    if (obj->isGeoConstInUseRecursive(nameRegExp)) return true;
+
+    return false;
+}
+
+QString AGeoConsts::exportToJavaSript(AGeoObject *obj) const
+{
+    if (Names.isEmpty()) return "\n";
+    QRegExp nameRegExp;
+    QString GCScript;
+    QString GCName;
+    double GCValue;
+
+    for (int i =0; i < Names.size(); i++)
+    {
+        GCName = Names.at(i);
+        GCValue = Values.at(i);
+        nameRegExp = QRegExp("\\b"+GCName+"\\b");
+        if (isGeoConstInUse(nameRegExp, obj))
+        {
+            GCScript += (QString("var %1 = %2;\n").arg(GCName).arg(GCValue));
+        }
+    }
+    GCScript += "\n";
+    qDebug() <<GCScript;
+    return GCScript;
+}
+
+
+/*QVector<QString> &AGeoConsts::getGeoConstsInUse(const AGeoObject & obj) const
+{
+    //AGeoObject * obje = dynamic_cast<AGeoObject*> (obj);
+    for (QString constName : Names)
+    {
+
+    }
+}*/
+
 void AGeoConsts::clearConstants()
 {
     Names.clear();

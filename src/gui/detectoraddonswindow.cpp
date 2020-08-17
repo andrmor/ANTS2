@@ -1268,9 +1268,15 @@ void DetectorAddOnsWindow::on_cbAutoCheck_stateChanged(int)
 
 #include <QClipboard>
 #include "ascriptwindow.h"
+#include "ageoconsts.h"
+
 void DetectorAddOnsWindow::on_pbConvertToScript_clicked()
 {
     QString script = "// Auto-generated script\n\n";
+
+    AGeoObject* World = Detector->Sandwich->World;
+    script += "// GeoConsts\n";
+    script += AGeoConsts::getConstInstance().exportToJavaSript(World);
 
     script += "  //Set all PM arrays to fully custom regularity, so PM Z-positions will not be affected by slabs\n";
     script += "  pms.SetAllArraysFullyCustom()\n";
@@ -1282,7 +1288,6 @@ void DetectorAddOnsWindow::on_pbConvertToScript_clicked()
     for (int i=0; i<Detector->MpCollection->countMaterials(); i++)
         script += "  var " + Detector->MpCollection->getMaterialName(i) + "_mat = " + QString::number(i) + "\n";
 
-    AGeoObject* World = Detector->Sandwich->World;
 
     twGeo->objectMembersToScript(World, script, 2, true, true);
 

@@ -4,6 +4,7 @@
 #include <QVector>
 #include <QString>
 #include <QRegExp>
+#include <ageoobject.h>
 
 class QJsonObject;
 
@@ -17,6 +18,10 @@ public:
     const QVector<double>  & getValues() const {return Values;}
 
     int  countConstants() const {return Names.size();}
+    //QVector<QString> getGeoConstsInUse(const AGeoObject &obj) const;
+    bool isGeoConstInUse(const QRegExp & nameRegExp, AGeoObject *obj) const;
+
+    QString exportToJavaSript(AGeoObject *obj) const;
 
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);
@@ -41,6 +46,7 @@ private:
 
     QVector<QString> Names;
     QVector<double>  Values;
+    QVector<QString> StrValues;
     //runtime
     QVector<QRegExp> RegExps;
     QVector<QString> Indexes;

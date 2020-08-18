@@ -49,6 +49,13 @@ QString AGeoConsts::exportToJavaSript(AGeoObject *obj) const
     return GCScript;
 }
 
+QString AGeoConsts::formulaToJavaScript(QString &input) const
+{
+    input.replace("sqrt(", "Math.sqrt(");
+    qDebug() <<"input" <<input;
+    return input;
+}
+
 
 /*QVector<QString> &AGeoConsts::getGeoConstsInUse(const AGeoObject & obj) const
 {

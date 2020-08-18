@@ -22,6 +22,8 @@ public:
     bool isGeoConstInUse(const QRegExp & nameRegExp, AGeoObject *obj) const;
 
     QString exportToJavaSript(AGeoObject *obj) const;
+    QString formulaToJavaScript(QString &input) const;
+
 
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);

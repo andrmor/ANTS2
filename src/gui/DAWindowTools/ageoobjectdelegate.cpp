@@ -609,7 +609,7 @@ void AGeoObjectDelegate::onShapeDialogActivated(QDialog * d, QListWidget * w)
 
 void AGeoObjectDelegate::onHelpRequested()
 {
-    message(ShapeHelp, Widget);
+    message(ShapeHelp, ParentWidget);
 }
 
 void AGeoObjectDelegate::Update(const AGeoObject *obj)

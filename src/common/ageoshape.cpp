@@ -136,19 +136,18 @@ const QString AGeoBox::getGenerationString(bool useStrings) const
                 QString::number(dx)+", "+
                 QString::number(dy)+", "+
                 QString::number(dz)+" )";
-        QString sdx = str2dx.isEmpty()? QString::number(dx) : "' + 0.5*( " + str2dx + " )+ '";
-        QString sdy = str2dy.isEmpty()? QString::number(dy) : "' + 0.5*(" + str2dy + ")+ '";
-        QString sdz = str2dz.isEmpty()? QString::number(dz) : "' + 0.5*(" + str2dz + ")+ '";
-        sdx = AGeoConsts::getConstInstance().formulaToJavaScript(sdx);
-        str = "TGeoBBox( " +
-                        sdx +", "+
-                        sdy +", "+
-                        sdz +" )";
+
 
     }
     else
     {
-
+        QString sdx = str2dx.isEmpty()? QString::number(dx) : "' + 0.5*( " + str2dx + " )+ '";
+        QString sdy = str2dy.isEmpty()? QString::number(dy) : "' + 0.5*(" + str2dy + ")+ '";
+        QString sdz = str2dz.isEmpty()? QString::number(dz) : "' + 0.5*(" + str2dz + ")+ '";
+        str = "TGeoBBox( " +
+                        sdx +", "+
+                        sdy +", "+
+                        sdz +" )";
     }
     return str;
 }

@@ -1390,18 +1390,33 @@ void AGeoTreeWidget::rebuildDetetctorAndRestoreCurrentDelegate()
 
 const QString AGeoTreeWidget::makeScriptString_basicObject(AGeoObject* obj, bool bExpandMaterials) const
 {
-    return  QString("geo.TGeo( ") +
+    QVector<QString> posStrs;
+    QVector<QString> oriStrs;
+    for (int i=0; i<3; i++)
+    {
+        QString sPos = obj->PositionStr[i].isEmpty()? QString::number(obj->Position[i]) : "(" + obj->PositionStr[i] + ")";
+        posStrs.append(sPos);
+        QString sOri = obj->OrientationStr[i].isEmpty()? QString::number(obj->Orientation[i]) : "(" + obj->OrientationStr[i] + ")";
+        oriStrs.append(sOri);
+    }
+
+
+    QString str = QString("geo.TGeo( ") +              // !*! am I creating 2 strings?
             "'" + obj->Name + "', " +
-            "'" + obj->Shape->getGenerationString() + "', " +
+            "'" + obj->Shape->getGenerationString(true) + "', " +
             (bExpandMaterials && obj->Material < Sandwich->GetMaterials().size() ?
                  Sandwich->GetMaterials().at(obj->Material) + "_mat" : QString::number(obj->Material)) + ", "
             "'"+obj->Container->Name + "',   "+
-            QString::number(obj->Position[0]) + ", " +
-            QString::number(obj->Position[1]) + ", " +
-            QString::number(obj->Position[2]) + ",   " +
-            QString::number(obj->Orientation[0]) + ", " +
-            QString::number(obj->Orientation[1]) + ", " +
-            QString::number(obj->Orientation[2]) + " )";
+            posStrs[0] + ", " +
+            posStrs[1] + ", " +
+            posStrs[2] + ",   " +
+            oriStrs[0] + ", " +
+            oriStrs[1] + ", " +
+            oriStrs[2] + " )";
+
+    str = AGeoConsts::getConstInstance().formulaToJavaScript(str);
+    return str;
+
 }
 
 QString AGeoTreeWidget::makeScriptString_arrayObject(AGeoObject *obj)

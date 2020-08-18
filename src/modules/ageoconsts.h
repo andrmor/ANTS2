@@ -19,11 +19,10 @@ public:
 
     int  countConstants() const {return Names.size();}
     //QVector<QString> getGeoConstsInUse(const AGeoObject &obj) const;
-    bool isGeoConstInUse(const QRegExp & nameRegExp, AGeoObject *obj) const;
+    bool isGeoConstInUse(const QRegExp & nameRegExp, const AGeoObject * obj) const;
 
-    QString exportToJavaSript(AGeoObject *obj) const;
-    QString formulaToJavaScript(QString &input) const;
-
+    QString exportToJavaSript(const AGeoObject * obj) const;
+    void formulaToJavaScript(QString & str) const;
 
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);
@@ -39,7 +38,7 @@ public:
     void remove(int index);
 
 private:
-    AGeoConsts(){}
+    AGeoConsts();
 
     AGeoConsts(const AGeoConsts&) = delete;            // Copy ctor
     AGeoConsts(AGeoConsts&&) = delete;                 // Move ctor
@@ -52,6 +51,9 @@ private:
     //runtime
     QVector<QRegExp> RegExps;
     QVector<QString> Indexes;
+
+    //misc
+    QVector<QString> FunctionsToJS;
 
     void update();
     void clearConstants();

@@ -76,7 +76,7 @@ public:
 
   virtual double getHeight() {return dz;}
   virtual void setHeight(double dz) {this->dz = dz;}
-  virtual const QString getGenerationString(bool useStrings) const;
+  const QString getGenerationString(bool useStrings) const override;
   virtual double maxSize();
   virtual double minSize() override;
 

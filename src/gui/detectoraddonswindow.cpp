@@ -1288,13 +1288,12 @@ void DetectorAddOnsWindow::on_pbConvertToScript_clicked()
     for (int i=0; i<Detector->MpCollection->countMaterials(); i++)
         script += "  var " + Detector->MpCollection->getMaterialName(i) + "_mat = " + QString::number(i) + "\n";
 
-
     twGeo->objectMembersToScript(World, script, 2, true, true);
 
     script += "\n\n  geo.UpdateGeometry(true)";
 
-    QClipboard *clipboard = QApplication::clipboard();
-    clipboard->setText(script);
+//    QClipboard *clipboard = QApplication::clipboard();
+//    clipboard->setText(script);
 
     MW->ScriptWindow->onLoadRequested(script);
     MW->ScriptWindow->showNormal();
@@ -1460,6 +1459,7 @@ void DetectorAddOnsWindow::on_tabwConstants_customContextMenuRequested(const QPo
         GC.remove(index);
         MW->writeDetectorToJson(MW->Config->JSON);
         updateGeoConstsIndication();
+        emit requestDelayedRebuildAndRestoreDelegate();
     }
 }
 
@@ -1473,12 +1473,3 @@ void ALineEditWithEscape::keyPressEvent(QKeyEvent *event)
     }
     else QLineEdit::keyPressEvent(event);
 }
-
-/*
-void ALineEditWithEscape::focusInEvent(QFocusEvent * event)
-{
-    emit gotFocus();
-    QLineEdit::focusInEvent(event);
-}
-*/
-

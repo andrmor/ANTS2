@@ -120,11 +120,9 @@ public:
 
 protected:
     void keyPressEvent(QKeyEvent * event);
-    //void focusInEvent(QFocusEvent * event);
 
 signals:
     void escapePressed();
-    //void gotFocus();
 };
 
 #endif // DETECTORADDONSWINDOW_H

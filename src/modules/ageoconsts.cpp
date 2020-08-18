@@ -4,6 +4,11 @@
 
 #include <QDebug>
 
+AGeoConsts::AGeoConsts()
+{
+    FunctionsToJS << "abs" << "acos" << "asin" << "atan" << "ceil" << "cos" << "exp" << "log" << "pow" << "sin" << "sqrt" << "tan";
+}
+
 AGeoConsts &AGeoConsts::getInstance()
 {
     static AGeoConsts instance;
@@ -15,18 +20,19 @@ const AGeoConsts &AGeoConsts::getConstInstance()
     return getInstance();
 }
 
-bool AGeoConsts::isGeoConstInUse(const QRegExp &nameRegExp, AGeoObject *obj) const
+bool AGeoConsts::isGeoConstInUse(const QRegExp &nameRegExp, const AGeoObject * obj) const
 {
-    for (QString StrValue : StrValues)
+    for (const QString & StrValue : StrValues)
     {
         if (StrValue.contains(nameRegExp)) return true;
     }
+
     if (obj->isGeoConstInUseRecursive(nameRegExp)) return true;
 
     return false;
 }
 
-QString AGeoConsts::exportToJavaSript(AGeoObject *obj) const
+QString AGeoConsts::exportToJavaSript(const AGeoObject * obj) const
 {
     if (Names.isEmpty()) return "\n";
     QRegExp nameRegExp;
@@ -45,17 +51,18 @@ QString AGeoConsts::exportToJavaSript(AGeoObject *obj) const
         }
     }
     GCScript += "\n";
-    qDebug() <<GCScript;
+    qDebug() << GCScript;
     return GCScript;
 }
 
-QString AGeoConsts::formulaToJavaScript(QString &input) const
+void AGeoConsts::formulaToJavaScript(QString & str) const
 {
-    input.replace("sqrt(", "Math.sqrt(");
-    qDebug() <<"input" <<input;
-    return input;
+    for (const QString & s : FunctionsToJS)
+    {
+        QString pat(s + '(');
+        str.replace(pat, "Math." + pat);
+    }
 }
-
 
 /*QVector<QString> &AGeoConsts::getGeoConstsInUse(const AGeoObject & obj) const
 {

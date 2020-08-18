@@ -248,7 +248,7 @@ public:
 
   virtual double getHeight() {return dz;}
   virtual void setHeight(double dz) {this->dz = dz;}
-  virtual const QString getGenerationString(bool useStrings) const;
+  const QString getGenerationString(bool useStrings) const override;
   virtual double maxSize();
 
   void writeToJson(QJsonObject& json) const override;
@@ -275,13 +275,17 @@ public:
   const QString getShapeType() const override {return "TGeoPolygon";}
   virtual const QString getShapeTemplate() {return "TGeoPolygon( nedges, dphi, dz, rminL, rmaxL, rminU, rmaxU )";}
   virtual const QString getHelp();
+  QString updateShape() override;
+
+  bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
+  void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
 
   virtual bool readFromString(QString GenerationString);
   virtual TGeoShape* createGeoShape(const QString shapeName = "");
 
   virtual double getHeight() {return dz;}
   virtual void setHeight(double dz) {this->dz = dz;}
-  virtual const QString getGenerationString(bool useStrings) const;
+  const QString getGenerationString(bool useStrings) const override;
   virtual double maxSize();
 
   void writeToJson(QJsonObject& json) const override;
@@ -292,6 +296,7 @@ public:
   int nedges;
   double dphi, dz;
   double rminL, rmaxL, rminU, rmaxU;
+  QString strNedges, strdPhi, str2dz, str2rminL, str2rmaxL, str2rminU, str2rmaxU;
 };
 
 struct APolyCGsection

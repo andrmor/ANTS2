@@ -398,13 +398,15 @@ class AGeoPolygonDelegate : public AGeoObjectDelegate
 public:
     AGeoPolygonDelegate(const QStringList & materials, QWidget * parent);
 
-    QSpinBox  * sbn = nullptr;
-    QLineEdit * edp = nullptr;
-    QLineEdit * ez  = nullptr;
-    QLineEdit * elo = nullptr;
-    QLineEdit * eli = nullptr;
-    QLineEdit * euo = nullptr;
-    QLineEdit * eui = nullptr;
+    void finalizeLocalParameters() override;
+
+    AOneLineTextEdit  * en = nullptr;
+    AOneLineTextEdit * edp = nullptr;
+    AOneLineTextEdit * ez  = nullptr;
+    AOneLineTextEdit * elo = nullptr;
+    AOneLineTextEdit * eli = nullptr;
+    AOneLineTextEdit * euo = nullptr;
+    AOneLineTextEdit * eui = nullptr;
 
 public slots:
     virtual void Update(const AGeoObject * obj) override;

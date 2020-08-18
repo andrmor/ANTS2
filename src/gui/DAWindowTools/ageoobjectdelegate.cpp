@@ -1829,13 +1829,13 @@ AGeoPolygonDelegate::AGeoPolygonDelegate(const QStringList &materials, QWidget *
     gr->addWidget(new QLabel("Upper inner diameter:"), 5, 0);
     gr->addWidget(new QLabel("Angle:"),                6, 0);
 
-    sbn = new QSpinBox();  gr->addWidget(sbn, 0, 1); sbn->setMinimum(3);
-    ez  = new QLineEdit(); gr->addWidget(ez,  1, 1);
-    elo = new QLineEdit(); gr->addWidget(elo, 2, 1);
-    eli = new QLineEdit(); gr->addWidget(eli, 3, 1);
-    euo = new QLineEdit(); gr->addWidget(euo, 4, 1);
-    eui = new QLineEdit(); gr->addWidget(eui, 5, 1);
-    edp = new QLineEdit(); gr->addWidget(edp, 6, 1);
+    en = new AOneLineTextEdit();  gr->addWidget(en, 0, 1); //sbn->setMinimum(3);
+    ez  = new AOneLineTextEdit(); gr->addWidget(ez,  1, 1);
+    elo = new AOneLineTextEdit(); gr->addWidget(elo, 2, 1);
+    eli = new AOneLineTextEdit(); gr->addWidget(eli, 3, 1);
+    euo = new AOneLineTextEdit(); gr->addWidget(euo, 4, 1);
+    eui = new AOneLineTextEdit(); gr->addWidget(eui, 5, 1);
+    edp = new AOneLineTextEdit(); gr->addWidget(edp, 6, 1);
 
     gr->addWidget(new QLabel("mm"), 1, 2);
     gr->addWidget(new QLabel("mm"), 2, 2);
@@ -1846,21 +1846,45 @@ AGeoPolygonDelegate::AGeoPolygonDelegate(const QStringList &materials, QWidget *
 
     addLocalLayout(gr);
 
-    QObject::connect(sbn, SIGNAL(valueChanged(int)), this, SLOT(onLocalShapeParameterChange()));
-    QVector<QLineEdit*> l = {edp, ez, eli, elo, eui, euo};
-    for (QLineEdit * le : l)
-        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoPolygonDelegate::onLocalShapeParameterChange);
+    for (AOneLineTextEdit * le : {en, edp, ez, eli, elo, eui, euo})
+    {
+        configureHighligherAndCompleter(le);
+        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoPolygonDelegate::finalizeLocalParameters);
+    }
+}
+
+void AGeoPolygonDelegate::finalizeLocalParameters()
+{
+    AGeoPolygon * polygon = dynamic_cast<AGeoPolygon*>(ShapeCopy);
+    if (!polygon)
+    {
+    AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+    polygon = dynamic_cast<AGeoPolygon*>(scaled->BaseShape);
+    }
+
+    if (polygon)
+    {
+        polygon->strNedges = en ->text();
+        polygon->strdPhi   = edp->text();
+        polygon->str2dz    = ez ->text();
+        polygon->str2rminL = eli->text();
+        polygon->str2rmaxL = elo->text();
+        polygon->str2rminU = eui->text();
+        polygon->str2rmaxU = euo->text();
+    }
+    else qWarning() << "Read delegate: Polygon shape not found!";
+
 }
 
 void AGeoPolygonDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
-
+    /*
     const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
     const AGeoPolygon * pgon = dynamic_cast<const AGeoPolygon*>(tmpShape ? tmpShape : obj->Shape);
     if (pgon)
     {
-        sbn->setValue(pgon->nedges);
+        en->setValue(pgon->nedges);
         edp->setText(QString::number(pgon->dphi));
         ez-> setText(QString::number(pgon->dz    * 2.0));
         eli->setText(QString::number(pgon->rminL * 2.0));
@@ -1868,13 +1892,32 @@ void AGeoPolygonDelegate::Update(const AGeoObject *obj)
         eui->setText(QString::number(pgon->rminU * 2.0));
         euo->setText(QString::number(pgon->rmaxU * 2.0));
     }
-    delete tmpShape;
+    delete tmpShape;*/
+
+    AGeoPolygon * polygon = dynamic_cast<AGeoPolygon*>(ShapeCopy);
+    if (!polygon)
+    {
+    AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+    polygon = dynamic_cast<AGeoPolygon*>(scaled->BaseShape);
+    }
+
+    if (polygon)
+    {
+        en ->setText(polygon->strNedges .isEmpty() ? QString::number(polygon->nedges)     : polygon->strNedges);
+        edp->setText(polygon->strdPhi  .isEmpty() ? QString::number(polygon->dphi)        : polygon->strdPhi);
+        ez ->setText(polygon->str2dz   .isEmpty() ? QString::number(polygon->dz    * 2.0) : polygon->str2dz);
+        eli->setText(polygon->str2rminL.isEmpty() ? QString::number(polygon->rminL * 2.0) : polygon->str2rminL);
+        elo->setText(polygon->str2rmaxL.isEmpty() ? QString::number(polygon->rmaxL * 2.0) : polygon->str2rmaxL);
+        eui->setText(polygon->str2rminU.isEmpty() ? QString::number(polygon->rminU * 2.0) : polygon->str2rminU);
+        euo->setText(polygon->str2rmaxU.isEmpty() ? QString::number(polygon->rmaxU * 2.0) : polygon->str2rmaxU);
+    }
+    else qWarning() << "Read delegate: Polygon shape not found!";
 }
 
 void AGeoPolygonDelegate::onLocalShapeParameterChange()
 {
     updatePteShape(QString("TGeoPolygon( %1, %2, %3, %4, %5, %6, %7 )")
-                   .arg(sbn->value())
+                   .arg(en->text())
                    .arg(edp->text())
                    .arg(0.5*ez->text().toDouble())
                    .arg(0.5*eli->text().toDouble())

@@ -2300,6 +2300,51 @@ const QString AGeoPolygon::getHelp()
            "rmaxU - outer size on upper side\n";
 }
 
+QString AGeoPolygon::updateShape()
+{
+    const AGeoConsts & GC = AGeoConsts::getConstInstance();
+    QString errorStr;
+    bool ok;
+    double dnedges = nedges;
+    ok = GC.updateParameter(errorStr, strNedges, dnedges, true, true, false); if (!ok) return errorStr;
+    nedges = dnedges;
+    ok = GC.updateParameter(errorStr, strdPhi,   dphi, false, false, false);   if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, str2dz,    dz);     if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, str2rminL, rminL, false);  if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, str2rmaxL, rmaxL, false);  if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, str2rminU, rminU, false);  if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, str2rminU, rmaxU, false);  if (!ok) return errorStr;
+
+    if (rminL   >= rmaxL)               return "Inside lower diameter should be smaller than the outside one!";
+    if (rminU   >= rmaxU)               return "Inside upper diameter should be smaller than the outside one!";
+    if (dphi   <= 0 || dphi   >  360)   return   "Phi2 should be in the range of (0, 360]";
+    return "";
+}
+
+bool AGeoPolygon::isGeoConstInUse(const QRegExp &nameRegExp) const
+{
+    if (strNedges.contains(nameRegExp)) return true;
+    if (strdPhi  .contains(nameRegExp)) return true;
+    if (str2dz   .contains(nameRegExp)) return true;
+    if (str2rminL.contains(nameRegExp)) return true;
+    if (str2rmaxL.contains(nameRegExp)) return true;
+    if (str2rminU.contains(nameRegExp)) return true;
+    if (str2rmaxU.contains(nameRegExp)) return true;
+    return false;
+
+}
+
+void AGeoPolygon::replaceGeoConstName(const QRegExp &nameRegExp, const QString &newName)
+{
+    strNedges.replace(nameRegExp, newName);
+    strdPhi  .replace(nameRegExp, newName);
+    str2dz   .replace(nameRegExp, newName);
+    str2rminL.replace(nameRegExp, newName);
+    str2rmaxL.replace(nameRegExp, newName);
+    str2rminU.replace(nameRegExp, newName);
+    str2rmaxU.replace(nameRegExp, newName);
+}
+
 bool AGeoPolygon::readFromString(QString GenerationString)
 {
     QStringList params;
@@ -2366,23 +2411,39 @@ double AGeoPolygon::maxSize()
 void AGeoPolygon::writeToJson(QJsonObject &json) const
 {
     json["nedges"] = nedges;
-    json["dphi"] = dphi;
-    json["dz"] = dz;
-    json["rminL"] = rminL;
-    json["rmaxL"] = rmaxL;
-    json["rminU"] = rminU;
-    json["rmaxU"] = rmaxU;
+    json["dphi"]   = dphi;
+    json["dz"]     = dz;
+    json["rminL"]  = rminL;
+    json["rmaxL"]  = rmaxL;
+    json["rminU"]  = rminU;
+    json["rmaxU"]  = rmaxU;
+
+    if (!strNedges.isEmpty()) json ["strNedges"] = strNedges;
+    if (!strdPhi  .isEmpty()) json ["strdPhi"]   = strdPhi;
+    if (!str2dz   .isEmpty()) json ["str2dz"]    = str2dz;
+    if (!str2rminL.isEmpty()) json ["str2rminL"] = str2rminL;
+    if (!str2rmaxL.isEmpty()) json ["str2rmaxL"] = str2rmaxL;
+    if (!str2rminU.isEmpty()) json ["str2rminU"] = str2rminU;
+    if (!str2rmaxU.isEmpty()) json ["str2rmaxU"] = str2rmaxU;
 }
 
 void AGeoPolygon::readFromJson(const QJsonObject &json)
 {
     nedges = json["nedges"].toInt();
-    dphi = json["dphi"].toDouble();
-    dz = json["dz"].toDouble();
-    rminL = json["rminL"].toDouble();
-    rmaxL = json["rmaxL"].toDouble();
-    rminU = json["rminU"].toDouble();
-    rmaxU = json["rmaxU"].toDouble();
+    dphi   = json["dphi"]  .toDouble();
+    dz     = json["dz"]    .toDouble();
+    rminL  = json["rminL"] .toDouble();
+    rmaxL  = json["rmaxL"] .toDouble();
+    rminU  = json["rminU"] .toDouble();
+    rmaxU  = json["rmaxU"] .toDouble();
+
+    if (!parseJson(json, "strNedges", strNedges)) strNedges.clear();
+    if (!parseJson(json, "strdPhi",   strdPhi))   strdPhi  .clear();
+    if (!parseJson(json, "str2dz",    str2dz))    str2dz   .clear();
+    if (!parseJson(json, "str2rminL", str2rminL)) str2rminL.clear();
+    if (!parseJson(json, "str2rmaxL", str2rmaxL)) str2rmaxL.clear();
+    if (!parseJson(json, "str2rminU", str2rminU)) str2rminU.clear();
+    if (!parseJson(json, "str2rmaxU", str2rmaxU)) str2rmaxU.clear();
 }
 
 AGeoScaledShape::AGeoScaledShape(QString ShapeGenerationString, double scaleX, double scaleY, double scaleZ) :

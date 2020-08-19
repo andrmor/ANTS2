@@ -4980,12 +4980,20 @@ void MainWindow::on_cbFixedTopSize_clicked(bool checked)
 
 void MainWindow::on_ledTopSizeXY_editingFinished()
 {
-    Detector->Sandwich->setWorldSizeXY(0.5 * ui->ledTopSizeXY->text().toDouble());
-    ReconstructDetector();
+    double val = 0.5 * ui->ledTopSizeXY->text().toDouble();
+    if (val != Detector->Sandwich->getWorldSizeXY())
+    {
+        Detector->Sandwich->setWorldSizeXY(val);
+        ReconstructDetector();
+    }
 }
 
 void MainWindow::on_ledTopSizeZ_editingFinished()
 {
-    Detector->Sandwich->setWorldSizeZ(0.5 * ui->ledTopSizeZ->text().toDouble());
-    ReconstructDetector();
+    double val = 0.5 * ui->ledTopSizeZ->text().toDouble();
+    if (val != Detector->Sandwich->getWorldSizeZ())
+    {
+        Detector->Sandwich->setWorldSizeZ(val);
+        ReconstructDetector();
+    }
 }

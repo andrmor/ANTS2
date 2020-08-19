@@ -264,7 +264,7 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
 
         if (!ok) return false;
 
-        for (int i = 0; i<3; i++)
+        for (int i = 0; i < 3; i++)
         {
             obj->PositionStr[i] = tempStrs[i];
             obj->OrientationStr[i] = tempStrs[i+3];
@@ -275,7 +275,7 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
 
         // checking was there a rotation of the main object
         bool fWasRotated = false;
-        for (int i=0; i<3; i++)
+        for (int i = 0; i < 3; i++)
             if (obj->Orientation[i] != old[3+i])
             {
                 fWasRotated = true;
@@ -1028,10 +1028,8 @@ void AGeoParaDelegate::finalizeLocalParameters()
         para->strAlpha = ea->text();
         para->strTheta = et->text();
         para->strPhi   = ep->text();
-        //emit ContentChanged();
     }
     else qWarning() << "Read delegate: Parallelepiped shape not found!";
-
 }
 
 void AGeoParaDelegate::Update(const AGeoObject *obj)
@@ -1394,8 +1392,6 @@ void AGeoElTubeDelegate::finalizeLocalParameters()
         elTube->str2a  = ex->text();
         elTube->str2b  = ey->text();
         elTube->str2dz = ez->text();
-
-        //emit ContentChanged();
     }
     else qWarning() << "Read delegate: EllipticalTube shape not found!";
 }
@@ -1490,7 +1486,6 @@ void AGeoTrapXDelegate::finalizeLocalParameters()
             //emit ContentChanged();
         }
         else qWarning() << "Read delegate: Trapezoid Simplified shape not found!";
-
 }
 
 void AGeoTrapXDelegate::Update(const AGeoObject *obj)
@@ -1521,12 +1516,9 @@ void AGeoTrapXDelegate::Update(const AGeoObject *obj)
             exu->setText(trap->str2dx2.isEmpty() ? QString::number(trap->dx2 * 2.0) : trap->str2dx2);
             ey-> setText(trap->str2dy .isEmpty() ? QString::number(trap->dy  * 2.0) : trap->str2dy);
             ez-> setText(trap->str2dz .isEmpty() ? QString::number(trap->dz  * 2.0) : trap->str2dz);
-            //emit ContentChanged();
         }
         else qWarning() << "Read delegate: Trapezoid Simplified shape not found!";
-
 }
-
 
 AGeoTrapXYDelegate::AGeoTrapXYDelegate(const QStringList &materials, QWidget *parent)
     : AGeoObjectDelegate(materials, parent)
@@ -1725,7 +1717,6 @@ void AGeoParaboloidDelegate::Update(const AGeoObject *obj)
     else qWarning() << "Update delegate: Paraboloid shape not found!";
 }
 
-
 AGeoTorusDelegate::AGeoTorusDelegate(const QStringList &materials, QWidget *parent)
     : AGeoObjectDelegate(materials, parent)
 {
@@ -1898,7 +1889,6 @@ void AGeoPolygonDelegate::finalizeLocalParameters()
         polygon->str2rmaxU = euo->text();
     }
     else qWarning() << "Read delegate: Polygon shape not found!";
-
 }
 
 void AGeoPolygonDelegate::Update(const AGeoObject *obj)
@@ -1929,10 +1919,8 @@ void AGeoPolygonDelegate::Update(const AGeoObject *obj)
     if (polygon)
     {
         en ->setText(polygon->strNedges .isEmpty() ? QString::number(polygon->nedges)      : polygon->strNedges);
-        //qDebug() <<"aaaaaaaaaa"<<polygon->strNedges;
         edp->setText(polygon->strdPhi  .isEmpty()  ? QString::number(polygon->dphi)        : polygon->strdPhi);
         ez ->setText(polygon->str2dz   .isEmpty()  ? QString::number(polygon->dz    * 2.0) : polygon->str2dz);
-        //qDebug() <<"bbbbbbbbbbbbb"<<polygon->str2dz;
         eli->setText(polygon->str2rminL.isEmpty()  ? QString::number(polygon->rminL * 2.0) : polygon->str2rminL);
         elo->setText(polygon->str2rmaxL.isEmpty()  ? QString::number(polygon->rmaxL * 2.0) : polygon->str2rmaxL);
         eui->setText(polygon->str2rminU.isEmpty()  ? QString::number(polygon->rminU * 2.0) : polygon->str2rminU);
@@ -2308,14 +2296,10 @@ void AGeoPgonDelegate::finalizeLocalParameters()
         pgon = dynamic_cast<AGeoPgon*>(scaled->BaseShape);
     }
 
-    if (pgon)
-    {
-        pgon->strNedges = eed->text();
-    }
+    if (pgon) pgon->strNedges = eed->text();
     else qWarning() << "Read delegate: Polygon shape not found!";
 
     AGeoPconDelegate::finalizeLocalParameters();
-
 }
 
 void AGeoPgonDelegate::Update(const AGeoObject *obj)
@@ -2672,7 +2656,6 @@ void AGeoArrayDelegate::Update(const AGeoObject * obj)
         ledStepX->setText(array->strStepX.isEmpty() ? QString::number(array->stepX) : array->strStepX);
         ledStepY->setText(array->strStepY.isEmpty() ? QString::number(array->stepY) : array->strStepY);
         ledStepZ->setText(array->strStepZ.isEmpty() ? QString::number(array->stepZ) : array->strStepZ);
-
     }
 }
 

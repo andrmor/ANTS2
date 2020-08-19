@@ -226,7 +226,7 @@ void AGeoObject::writeToJson(QJsonObject &json)
   json["fActive"] = fActive;
   json["fExpanded"] = fExpanded;
 
-  if ( ObjectType->isHandlingStandard())
+  if ( ObjectType->isHandlingStandard() || ObjectType->isWorld())
     {
       json["Material"] = Material;
       json["color"] = color;
@@ -335,6 +335,8 @@ void AGeoObject::readFromJson(const QJsonObject & json)
             Shape->readFromJson(js);
 
             //composite: cannot update memebers at this phase - HostedObjects are not set yet!
+
+            if (Name == "World") qDebug() << "----world-----" << Shape->getGenerationString(true);
         }
 
     parseJson(json, "LastScript", LastScript);

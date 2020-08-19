@@ -77,7 +77,7 @@ public:
   void assureNavigatorPresent();
 
   //write to Json - can be used from outside
-  void writeWorldFixedToJson(QJsonObject &json);
+  //void writeWorldFixedToJson(QJsonObject &json);
   void writePMarraysToJson(QJsonObject &json);
   void writeDummyPMsToJson(QJsonObject &json);  
   void writeGDMLtoJson(QJsonObject &json);
@@ -95,7 +95,7 @@ public slots:
 
 private:
   //reads
-  void readWorldFixedFromJson(QJsonObject &json);
+  bool readWorldFixedFromJson(const QJsonObject & json);
   bool readPMarraysFromJson(QJsonObject &json);
   bool readDummyPMsFromJson(QJsonObject &json);
 

@@ -176,8 +176,8 @@ void MainWindow::UpdateSandwichGui()
 
 void MainWindow::on_cobTOP_activated(int index)
 {
-  Detector->Sandwich->World->Material = index;
-  ReconstructDetector(true);
+    Detector->Sandwich->World->Material = index;
+    ReconstructDetector(true);
 }
 
 void MainWindow::OnWarningMessage(QString text)

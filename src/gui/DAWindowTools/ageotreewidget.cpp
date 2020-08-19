@@ -1931,6 +1931,7 @@ void AGeoWidget::onConfirmPressed()
     ok = GeoDelegate->updateObject(CurrentObject);
     if (!ok) return;
 
+    /*
     AWorldDelegate * del = dynamic_cast<AWorldDelegate*>(GeoDelegate);
     if (del)
     {
@@ -1941,6 +1942,7 @@ void AGeoWidget::onConfirmPressed()
         bool fWorldSizeFixed = typeWorld->bFixedSize;
         emit tw->RequestUpdateWorldSize(WorldSizeXY, WorldSizeZ, fWorldSizeFixed);
     }
+    */
 
     exitEditingMode();
     QString name = CurrentObject->Name;

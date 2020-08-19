@@ -137,7 +137,7 @@ bool AGeoConsts::evaluateFormula(QString str, double &returnValue) const
 
 bool AGeoConsts::updateParameter(QString &errorStr, QString &str, double &returnValue, bool bForbidZero, bool bForbidNegative, bool bMakeHalf) const
 {
-    if (str.isEmpty()) return true;    //should it return true?
+    if (str.isEmpty()) return true;
 
     bool ok;
     returnValue = str.simplified().toDouble(&ok);

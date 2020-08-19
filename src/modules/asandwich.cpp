@@ -965,7 +965,7 @@ void ASandwich::writeToJson(QJsonObject &json)
     }
   js["Slabs"] = arr;
 
-  js["WorldMaterial"] = World->Material;
+  //js["WorldMaterial"] = World->Material;
 
   QJsonArray arrTree;
   World->writeAllToJarr(arrTree);

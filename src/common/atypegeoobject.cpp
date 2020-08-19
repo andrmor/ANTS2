@@ -218,3 +218,16 @@ ATypeGeoObject *ATypeGeoObject::TypeObjectFactory(const QString Type)
         return 0;
     }
 }
+
+void ATypeWorldObject::writeToJson(QJsonObject & json)
+{
+    ATypeGeoObject::writeToJson(json);
+
+    json["FixedSize"] = bFixedSize;
+}
+
+void ATypeWorldObject::readFromJson(QJsonObject & json)
+{
+    bFixedSize = false;
+    parseJson(json, "FixedSize", bFixedSize);
+}

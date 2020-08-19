@@ -2669,8 +2669,7 @@ AWorldDelegate::AWorldDelegate(const QStringList & materials, QWidget * ParentWi
         cobMat = new QComboBox();
         cobMat->setContextMenuPolicy(Qt::NoContextMenu);
         cobMat->addItems(materials);
-        //connect(cobMat, &QComboBox::activated, this, &AWorldDelegate::onContentChanged);
-        connect(cobMat, SIGNAL(activated(int)), this, SLOT(onContentChanged()));
+        connect(cobMat, SIGNAL(activated(int)), this, SIGNAL(ContentChanged()));
         cobMat->setMinimumWidth(120);
         hl->addWidget(cobMat);
       lMF->addLayout(hl);
@@ -2678,7 +2677,7 @@ AWorldDelegate::AWorldDelegate(const QStringList & materials, QWidget * ParentWi
       QHBoxLayout * h = new QHBoxLayout();
             h->addStretch();
             cbFixedSize = new QCheckBox("Fixed size");
-            connect(cbFixedSize, &QCheckBox::clicked, this, &AWorldDelegate::onContentChanged);
+            connect(cbFixedSize, &QCheckBox::clicked, this, &AWorldDelegate::ContentChanged);
             h->addWidget(cbFixedSize);
 
             QVBoxLayout * v1 = new QVBoxLayout();
@@ -2689,22 +2688,18 @@ AWorldDelegate::AWorldDelegate(const QStringList & materials, QWidget * ParentWi
 
             QVBoxLayout * v2 = new QVBoxLayout();
                 v2->setContentsMargins(2,0,2,0);
-                ledSizeXY = new QLineEdit();
-                connect(ledSizeXY, &QLineEdit::textChanged, this, &AWorldDelegate::onContentChanged);
-                v2->addWidget(ledSizeXY);
-                ledSizeZ  = new QLineEdit();
-                connect(ledSizeZ, &QLineEdit::textChanged, this, &AWorldDelegate::onContentChanged);
-                v2->addWidget(ledSizeZ);
+                ledSizeXY = new AOneLineTextEdit(); v2->addWidget(ledSizeXY);
+                ledSizeZ  = new AOneLineTextEdit(); v2->addWidget(ledSizeZ);
+                for (AOneLineTextEdit * le : {ledSizeXY, ledSizeZ})
+                {
+                    configureHighligherAndCompleter(le);
+                    connect(le, &AOneLineTextEdit::textChanged, this, &AWorldDelegate::ContentChanged);
+                }
             h->addLayout(v2);
             h->addStretch();
     lMF->addLayout(h);
 
     frMainFrame->setLayout(lMF);
-
-    QDoubleValidator* dv = new QDoubleValidator(this);
-    dv->setNotation(QDoubleValidator::ScientificNotation);
-    ledSizeXY->setValidator(dv);
-    ledSizeZ->setValidator(dv);
 }
 
 QString AWorldDelegate::getName() const
@@ -2717,11 +2712,40 @@ bool AWorldDelegate::updateObject(AGeoObject * obj) const
     obj->Material = cobMat->currentIndex();
     if (obj->Material == -1) obj->Material = 0; //protection
 
-    AGeoBox * box = static_cast<AGeoBox*>(obj->Shape);
-    box->dx = 0.5 * ledSizeXY->text().toDouble();
-    box->dz = 0.5 * ledSizeZ->text().toDouble();
-    ATypeWorldObject * typeWorld = static_cast<ATypeWorldObject *>(obj->ObjectType);
+    ATypeWorldObject * typeWorld = static_cast<ATypeWorldObject*>(obj->ObjectType);
     typeWorld->bFixedSize = cbFixedSize->isChecked();
+
+    //protection
+    AGeoBox * box = static_cast<AGeoBox*>(obj->Shape);
+    box->dx = 500.0;
+    box->dy = 500.0;
+    box->dz = 500.0;
+
+    const AGeoConsts & GC = AGeoConsts::getConstInstance();
+    QString errorStr;
+    bool ok;
+    double dx, dz;
+    QString strSizeXY = ledSizeXY->text();
+    QString strSizeZ  = ledSizeZ ->text();
+    ok = GC.updateParameter(errorStr, strSizeXY, dx);
+    if (!ok)
+    {
+        QMessageBox::warning(this->ParentWidget, "", errorStr);
+        return false;
+    }
+    ok = GC.updateParameter(errorStr, strSizeZ,  dz);
+    if (!ok)
+    {
+        QMessageBox::warning(this->ParentWidget, "", errorStr);
+        return false;
+    }
+
+    box->dx = dx;
+    box->dy = dx;
+    box->dz = dz;
+    box->str2dx = strSizeXY;
+    box->str2dy = strSizeXY;
+    box->str2dz = strSizeZ;
 
     return true;
 }
@@ -2736,14 +2760,10 @@ void AWorldDelegate::Update(const AGeoObject *obj)
     }
     cobMat->setCurrentIndex(imat);
 
-    const AGeoBox * box = static_cast<const AGeoBox*>(obj->Shape);
-    ledSizeXY->setText(QString::number(box->dx*2.0));
-    ledSizeZ->setText(QString::number(box->dz*2.0));
-    ATypeWorldObject * typeWorld = static_cast<ATypeWorldObject *>(obj->ObjectType);
+    ATypeWorldObject * typeWorld = static_cast<ATypeWorldObject*>(obj->ObjectType);
     cbFixedSize->setChecked(typeWorld->bFixedSize);
-}
 
-void AWorldDelegate::onContentChanged()
-{
-    emit ContentChanged();
+    const AGeoBox * box = static_cast<const AGeoBox*>(obj->Shape);
+    ledSizeXY->setText(box->str2dx.isEmpty() ? QString::number(box->dx*2.0) : box->str2dx);
+    ledSizeZ ->setText(box->str2dz.isEmpty() ? QString::number(box->dz*2.0) : box->str2dz);
 }

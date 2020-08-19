@@ -130,17 +130,15 @@ public:
 
     QComboBox * cobMat = nullptr;
     QCheckBox * cbFixedSize = nullptr;
-    QLineEdit * ledSizeXY = nullptr;
-    QLineEdit * ledSizeZ  = nullptr;
+
+    AOneLineTextEdit * ledSizeXY = nullptr;
+    AOneLineTextEdit * ledSizeZ  = nullptr;
 
     QString getName() const override;
     bool updateObject(AGeoObject * obj) const override;
 
 public slots:
     void Update(const AGeoObject * obj) override;
-
-private slots:
-    void onContentChanged();
 
 };
 

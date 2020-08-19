@@ -31,7 +31,7 @@ public:
 
 private slots:
   void onReconstructDetectorRequest();
-  void onRequestUpdateWorldSize(double WorldSizeXY, double WorldSizeZ, bool fWorldSizeFixed);
+  void onRequestUpdateWorldSize(double WorldSizeXY, double WorldSizeZ, bool fWorldSizeFixed);  // !*! obsolete?
   void onGeoConstEditingFinished(int index, QString newValue);
   void onGeoConstEscapePressed(int index);
 

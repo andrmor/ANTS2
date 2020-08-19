@@ -54,10 +54,10 @@ class ATypeWorldObject : public ATypeGeoObject
 public:
     ATypeWorldObject() {Type = "World"; Handling = "Static";}
 
-    bool bFixedSize = false; // used by World delegate in GUI
+    bool bFixedSize = false;
 
-    virtual void writeToJson(QJsonObject& json) { ATypeGeoObject::writeToJson(json); }
-    virtual void readFromJson(QJsonObject& ) {}
+    void writeToJson(QJsonObject & json) override;
+    void readFromJson(QJsonObject & json) override;
 };
 class ATypeSlabObject : public ATypeGeoObject
 {

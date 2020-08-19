@@ -337,11 +337,13 @@ class AGeoTrapXYDelegate : public AGeoObjectDelegate
 public:
     AGeoTrapXYDelegate(const QStringList & materials, QWidget * parent);
 
-    QLineEdit * exl = nullptr;
-    QLineEdit * exu = nullptr;
-    QLineEdit * eyl = nullptr;
-    QLineEdit * eyu = nullptr;
-    QLineEdit * ez  = nullptr;
+    void finalizeLocalParameters() override;
+
+    AOneLineTextEdit * exl = nullptr;
+    AOneLineTextEdit * exu = nullptr;
+    AOneLineTextEdit * eyl = nullptr;
+    AOneLineTextEdit * eyu = nullptr;
+    AOneLineTextEdit * ez  = nullptr;
 
 public slots:
     void Update(const AGeoObject * obj) override;

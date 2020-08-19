@@ -1551,11 +1551,11 @@ AGeoTrapXYDelegate::AGeoTrapXYDelegate(const QStringList &materials, QWidget *pa
     gr->addWidget(new QLabel("Y upper size:"), 3, 0);
     gr->addWidget(new QLabel("Height:"),       4, 0);
 
-    exl = new QLineEdit(); gr->addWidget(exl, 0, 1);
-    exu = new QLineEdit(); gr->addWidget(exu, 1, 1);
-    eyl = new QLineEdit(); gr->addWidget(eyl, 2, 1);
-    eyu = new QLineEdit(); gr->addWidget(eyu, 3, 1);
-    ez  = new QLineEdit(); gr->addWidget(ez,  4, 1);
+    exl = new AOneLineTextEdit(); gr->addWidget(exl, 0, 1);
+    exu = new AOneLineTextEdit(); gr->addWidget(exu, 1, 1);
+    eyl = new AOneLineTextEdit(); gr->addWidget(eyl, 2, 1);
+    eyu = new AOneLineTextEdit(); gr->addWidget(eyu, 3, 1);
+    ez  = new AOneLineTextEdit(); gr->addWidget(ez,  4, 1);
 
     gr->addWidget(new QLabel("mm"), 0, 2);
     gr->addWidget(new QLabel("mm"), 1, 2);
@@ -1565,15 +1565,37 @@ AGeoTrapXYDelegate::AGeoTrapXYDelegate(const QStringList &materials, QWidget *pa
 
     addLocalLayout(gr);
 
-    QVector<QLineEdit*> l = {exl, exu, eyl, eyu, ez};
-    for (QLineEdit * le : l)
-        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoTrapXYDelegate::onLocalShapeParameterChange);
+    for (AOneLineTextEdit * le : {exl, exu, eyl, eyu, ez})
+    {
+        configureHighligherAndCompleter(le);
+        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoTrapXYDelegate::ContentChanged);
+    }
+}
+
+void AGeoTrapXYDelegate::finalizeLocalParameters()
+{
+    AGeoTrd2 * trapxy = dynamic_cast<AGeoTrd2*>(ShapeCopy);
+    if (!trapxy)
+    {
+    AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+    trapxy = dynamic_cast<AGeoTrd2*>(scaled->BaseShape);
+    }
+
+    if (trapxy)
+    {
+        trapxy->str2dx1 = exl->text();
+        trapxy->str2dx2 = exu->text();
+        trapxy->str2dy1 = eyl->text();
+        trapxy->str2dy2 = eyu->text();
+        trapxy->str2dz  = ez ->text();
+    }
+    else qWarning() << "Read delegate: Trapezoid XY shape not found!";
 }
 
 void AGeoTrapXYDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
-
+    /*
     const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
     const AGeoTrd2 * trap = dynamic_cast<const AGeoTrd2*>(tmpShape ? tmpShape : obj->Shape);
     if (trap)
@@ -1584,7 +1606,24 @@ void AGeoTrapXYDelegate::Update(const AGeoObject *obj)
         eyu->setText(QString::number(trap->dy2 * 2.0));
         ez-> setText(QString::number(trap->dz  * 2.0));
     }
-    delete tmpShape;
+    delete tmpShape;*/
+
+    AGeoTrd2 * trapxy = dynamic_cast<AGeoTrd2*>(ShapeCopy);
+    if (!trapxy)
+    {
+    AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+    trapxy = dynamic_cast<AGeoTrd2*>(scaled->BaseShape);
+    }
+
+    if (trapxy)
+    {
+        exl->setText(trapxy->str2dx1.isEmpty() ? QString::number(trapxy->dx1 * 2.0) : trapxy->str2dx1);
+        exu->setText(trapxy->str2dx2.isEmpty() ? QString::number(trapxy->dx2 * 2.0) : trapxy->str2dx2);
+        eyl->setText(trapxy->str2dy1.isEmpty() ? QString::number(trapxy->dy1 * 2.0) : trapxy->str2dy1);
+        eyu->setText(trapxy->str2dy2.isEmpty() ? QString::number(trapxy->dy2 * 2.0) : trapxy->str2dy2);
+        ez-> setText(trapxy->str2dz .isEmpty() ? QString::number(trapxy->dz  * 2.0) : trapxy->str2dz);
+    }
+    else qWarning() << "Read delegate: Trapezoid XY shape not found!";
 }
 
 void AGeoTrapXYDelegate::onLocalShapeParameterChange()

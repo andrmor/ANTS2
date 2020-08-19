@@ -1301,21 +1301,42 @@ AGeoConeSegDelegate::AGeoConeSegDelegate(const QStringList &materials, QWidget *
     gr->addWidget(new QLabel("Phi from:"), 5, 0);
     gr->addWidget(new QLabel("Phi to:"),   6, 0);
 
-    ep1 = new QLineEdit(); gr->addWidget(ep1, 5, 1);
-    ep2 = new QLineEdit(); gr->addWidget(ep2, 6, 1);
+    ep1 = new AOneLineTextEdit(); gr->addWidget(ep1, 5, 1);
+    ep2 = new AOneLineTextEdit(); gr->addWidget(ep2, 6, 1);
 
     gr->addWidget(new QLabel("°"), 5, 2);
     gr->addWidget(new QLabel("°"), 6, 2);
 
-    QVector<QLineEdit*> l = {ep1, ep2};
-    for (QLineEdit * le : l)
-        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoConeSegDelegate::onLocalShapeParameterChange);
+    QVector<AOneLineTextEdit*> l = {ep1, ep2};
+    for (AOneLineTextEdit * le : l)
+    {
+        configureHighligherAndCompleter(le);
+        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoConeSegDelegate::ContentChanged);
+    }
+}
+
+void AGeoConeSegDelegate::finalizeLocalParameters()
+{
+    AGeoConeDelegate::finalizeLocalParameters();
+
+    AGeoConeSeg * coneSeg = dynamic_cast<AGeoConeSeg*>(ShapeCopy);
+    if (!coneSeg)
+    {
+    AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+    coneSeg = dynamic_cast<AGeoConeSeg*>(scaled->BaseShape);
+    }
+
+    if (coneSeg)
+    {
+        coneSeg->strPhi1 = ep1->text();
+        coneSeg->strPhi2 = ep2->text();
+    }
+    else qWarning() << "Read delegate: Cone Segment shape not found!";
 }
 
 void AGeoConeSegDelegate::Update(const AGeoObject *obj)
 {
-    AGeoObjectDelegate::Update(obj);
-
+    /*
     const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
     const AGeoConeSeg * cone = dynamic_cast<const AGeoConeSeg*>(tmpShape ? tmpShape : obj->Shape);
     if (cone)
@@ -1328,7 +1349,22 @@ void AGeoConeSegDelegate::Update(const AGeoObject *obj)
         ep1->setText(QString::number(cone->phi1));
         ep2->setText(QString::number(cone->phi2));
     }
-    delete tmpShape;
+    delete tmpShape;*/
+    AGeoConeDelegate::Update(obj);
+
+    AGeoConeSeg * coneSeg = dynamic_cast<AGeoConeSeg*>(ShapeCopy);
+    if (!coneSeg)
+    {
+    AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+    coneSeg = dynamic_cast<AGeoConeSeg*>(scaled->BaseShape);
+    }
+
+    if (coneSeg)
+    {
+        ep1->setText(coneSeg->strPhi1.isEmpty() ? QString::number(coneSeg->phi1) : coneSeg->strPhi1);
+        ep2->setText(coneSeg->strPhi2.isEmpty() ? QString::number(coneSeg->phi2) : coneSeg->strPhi2);
+    }
+    else qWarning() << "Read delegate: Cone Segment shape not found!";
 }
 
 void AGeoConeSegDelegate::onLocalShapeParameterChange()

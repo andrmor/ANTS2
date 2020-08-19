@@ -771,7 +771,7 @@ TGeoShape *AGeoCtub::createGeoShape(const QString shapeName)
                                    new TGeoCtub( shapeName.toLatin1().data(), rmin, rmax, dz, phi1, phi2, nxlow, nylow, nzlow, nxhi, nyhi, nzhi );
 }
 
-const QString AGeoCtub::getGenerationString() const
+const QString AGeoCtub::getGenerationString(bool) const
 {
     QString str = "TGeoCtub( " +
             QString::number(rmin)+", "+
@@ -1413,6 +1413,36 @@ const QString AGeoConeSeg::getHelp()
            "phi2 - angle (0, 360]";
 }
 
+QString AGeoConeSeg::updateShape()
+{
+    const AGeoConsts & GC = AGeoConsts::getConstInstance();
+    QString errorStr;
+    bool ok;
+    ok = GC.updateParameter(errorStr, strPhi1,    phi1, false, true, false); if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, strPhi2,    phi2, false, true, false); if (!ok) return errorStr;
+
+    if (phi1   <  0 || phi1   >= 360) return   "Phi1 should be in the range of [0, 360)";
+    if (phi2   <= 0 || phi2   >  360) return   "Phi2 should be in the range of (0, 360]";
+
+    return AGeoCone::updateShape();
+}
+
+bool AGeoConeSeg::isGeoConstInUse(const QRegExp &nameRegExp) const
+{
+    if (strPhi1.contains(nameRegExp)) return true;
+    if (strPhi2.contains(nameRegExp)) return true;
+
+    return AGeoCone::isGeoConstInUse(nameRegExp);
+}
+
+void AGeoConeSeg::replaceGeoConstName(const QRegExp &nameRegExp, const QString &newName)
+{
+    AGeoCone::replaceGeoConstName(nameRegExp, newName);
+
+    strPhi1.replace(nameRegExp, newName);
+    strPhi2.replace(nameRegExp, newName);
+}
+
 bool AGeoConeSeg::readFromString(QString GenerationString)
 {
     QStringList params;
@@ -1470,24 +1500,25 @@ double AGeoConeSeg::maxSize()
 
 void AGeoConeSeg::writeToJson(QJsonObject &json) const
 {
-    json["dz"] = dz;
-    json["rminL"] = rminL;
-    json["rmaxL"] = rmaxL;
-    json["rminU"] = rminU;
-    json["rmaxU"] = rmaxU;
+    AGeoCone::writeToJson(json);
+
     json["phi1"] = phi1;
     json["phi2"] = phi2;
+
+    if (!strPhi1.isEmpty()) json["strPhi1"] = strPhi1;
+    if (!strPhi2.isEmpty()) json["strPhi2"] = strPhi2;
+
 }
 
 void AGeoConeSeg::readFromJson(const QJsonObject &json)
 {
-    dz = json["dz"].toDouble();
-    rminL = json["rminL"].toDouble();
-    rmaxL = json["rmaxL"].toDouble();
-    rminU = json["rminU"].toDouble();
-    rmaxU = json["rmaxU"].toDouble();
+    AGeoCone::readFromJson(json);
+
     phi1 = json["phi1"].toDouble();
     phi2 = json["phi2"].toDouble();
+
+    if (!parseJson(json, "strPhi1", strPhi1)) strPhi1.clear();
+    if (!parseJson(json, "strPhi2", strPhi2)) strPhi2.clear();
 }
 
 bool AGeoConeSeg::readFromTShape(TGeoShape *Tshape)
@@ -1961,7 +1992,7 @@ TGeoShape *AGeoArb8::createGeoShape(const QString shapeName)
     return (shapeName.isEmpty()) ? new TGeoArb8(dz, (double*)ar) : new TGeoArb8(shapeName.toLatin1().data(), dz, (double*)ar);
 }
 
-const QString AGeoArb8::getGenerationString() const
+const QString AGeoArb8::getGenerationString(bool) const
 {
     QString str = "TGeoArb8( " + QString::number(dz)+",  ";
 

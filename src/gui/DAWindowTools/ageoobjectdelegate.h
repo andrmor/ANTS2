@@ -300,8 +300,10 @@ class AGeoConeSegDelegate : public AGeoConeDelegate
 public:
     AGeoConeSegDelegate(const QStringList & materials, QWidget * parent);
 
-    QLineEdit * ep1 = nullptr;
-    QLineEdit * ep2 = nullptr;
+    void finalizeLocalParameters() override;
+
+    AOneLineTextEdit * ep1 = nullptr;
+    AOneLineTextEdit * ep2 = nullptr;
 
 public slots:
     void Update(const AGeoObject * obj) override;

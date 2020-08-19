@@ -106,7 +106,6 @@ private:
 
 signals:
   void ObjectSelectionChanged(const QString); // should be fired with empty string if selection does not contain a single item  
-  void RequestUpdateWorldSize(double WorldSizeXY, double WorldSizeZ, bool fWorldSizeFixed);
   void RequestRebuildDetector();
   void RequestHighlightObject(QString name);
   void RequestShowObjectRecursive(QString name);

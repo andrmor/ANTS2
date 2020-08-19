@@ -76,6 +76,14 @@ public:
   void IsParticleInUse(int particleId, bool &bInUse, QString& MonitorNames);
   void RemoveParticle(int particleId); //should NOT be used to remove one of particles in use! use onIsPareticleInUse first
 
+  //World size-related
+  bool   isWorldSizeFixed() const;
+  void   setWorldSizeFixed(bool bFlag);
+  double getWorldSizeXY() const;
+  void   setWorldSizeXY(double size);
+  double getWorldSizeZ() const;
+  void   setWorldSizeZ(double size);
+
   ASandwich::SlabState SandwichState;
   QStringList Materials;  // list of currently defined materials
   ASlabXYModel* DefaultXY;

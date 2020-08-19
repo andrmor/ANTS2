@@ -3,6 +3,7 @@
 #include "aglobalsettings.h"
 #include "ui_mainwindow.h"
 #include "detectorclass.h"
+#include "asandwich.h"
 #include "materialinspectorwindow.h"
 #include "amaterialparticlecolection.h"
 #include "detectoraddonswindow.h"
@@ -79,9 +80,11 @@ void MainWindow::onRequestDetectorGuiUpdate()
   Owindow->RefreshData();
 //  Owindow->ResetViewport();  // *** !!! extend to other windows too!
   //world
-  ui->ledTopSizeXY->setText( QString::number(2.0*Detector->WorldSizeXY, 'g', 4) );
-  ui->ledTopSizeZ->setText( QString::number(2.0*Detector->WorldSizeZ, 'g', 4) );
-  ui->cbFixedTopSize->setChecked( Detector->fWorldSizeFixed );
+  const double WorldSizeXY = Detector->Sandwich->getWorldSizeXY();
+  const double WorldSizeZ  = Detector->Sandwich->getWorldSizeZ();
+  ui->ledTopSizeXY->setText( QString::number(2.0 * WorldSizeXY, 'g', 4) );
+  ui->ledTopSizeZ-> setText( QString::number(2.0 * WorldSizeZ,  'g', 4) );
+  ui->cbFixedTopSize->setChecked( Detector->Sandwich->isWorldSizeFixed() );
   //misc
   ShowPMcount();
   //CheckPresenseOfSecScintillator(); //checks if SecScint present, and update selectors of primary/secondary scintillation  //***!!! potentially slow on large geometries!!!

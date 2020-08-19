@@ -344,15 +344,19 @@ void DetectorClass::populateGeoManager()
   //qDebug() << "--> Populating PMs module with individual PMs";
   populatePMs();
 
-  if (!fWorldSizeFixed)
-    {
+  double WorldSizeXY = Sandwich->getWorldSizeXY();
+  double WorldSizeZ  = Sandwich->getWorldSizeZ();
+  if (!Sandwich->isWorldSizeFixed())
+  {
       //qDebug() << "--> Calculating world size";
       WorldSizeXY = 0;
-      WorldSizeZ = 0;
+      WorldSizeZ  = 0;
       updateWorldSize(WorldSizeXY, WorldSizeZ);
       WorldSizeXY *= 1.05; WorldSizeZ *= 1.05; //adding margings
-    }
-  //qDebug() << "    World size XYmax:"<<WorldSizeXY<<"Zmax:"<<WorldSizeZ;
+      Sandwich->setWorldSizeXY(WorldSizeXY);
+      Sandwich->setWorldSizeZ(WorldSizeZ);
+  }
+  //qDebug() << "-<-<->->- World size XY:" << WorldSizeXY << " Z:" << WorldSizeZ;
 
   //qDebug() << "--> Creating top volume";
   top = GeoManager->MakeBox("WorldBox", (*MpCollection)[Sandwich->World->Material]->GeoMed, WorldSizeXY, WorldSizeXY, WorldSizeZ);
@@ -427,26 +431,18 @@ bool DetectorClass::makeSandwichDetector()
       // new system
       qDebug() << "-==- Using NEW system for world size";
 
-      ATypeWorldObject * typeWorld = dynamic_cast<ATypeWorldObject *>(Sandwich->World->ObjectType);
-      if (typeWorld) fWorldSizeFixed = typeWorld->bFixedSize;
-
-      AGeoBox * box = static_cast<AGeoBox*>(Sandwich->World->Shape);
-      const AGeoConsts & GC = AGeoConsts::getConstInstance();
-
-      WorldSizeXY = 500.0;
-      WorldSizeZ  = 500.0;
-      QString errorStr;
-      bool ok =  GC.updateParameter(errorStr, box->str2dx, box->dx);
-      ok = ok && GC.updateParameter(errorStr, box->str2dz, box->dz);
-      if (ok)
+      if (!Sandwich->isWorldSizeFixed())
       {
-          WorldSizeXY = box->dx;
-          WorldSizeZ  = box->dz;
-      }
-      else fWorldSizeFixed = false;
+          AGeoBox * box = static_cast<AGeoBox*>(Sandwich->World->Shape);
+          const AGeoConsts & GC = AGeoConsts::getConstInstance();
 
-      qDebug() << "---World mat:" << Sandwich->World->Material;
-      qDebug() << "---World size:" << box->dx << box->dz;
+          QString errorStr;
+          bool ok =  GC.updateParameter(errorStr, box->str2dx, box->dx);
+          box->dy = box->dx; box->str2dy.clear();
+          ok = ok && GC.updateParameter(errorStr, box->str2dz, box->dz);
+          if (!ok)
+              Sandwich->setWorldSizeFixed(false);
+      }
   }
 
   //making detector  
@@ -462,27 +458,31 @@ bool DetectorClass::makeSandwichDetector()
 
 bool DetectorClass::readWorldFixedFromJson(const QJsonObject &json)
 {
-    fWorldSizeFixed = false;    //paranoic
     if (!json.contains("FixedWorldSizes")) return false; //already new system is in effect
 
     //old system
     qDebug() << "-==- Using OLD system for world size";
 
+    bool   bWorldSizeFixed = false;
+    double WorldSizeXY;
+    double WorldSizeZ;
+
     QJsonObject jws = json["FixedWorldSizes"].toObject();
-    parseJson(jws, "WorldSizeFixed", fWorldSizeFixed);
-    if (fWorldSizeFixed)
+    bool ok = parseJson(jws, "WorldSizeFixed", bWorldSizeFixed);
+    if (!ok)
+    {
+        Sandwich->setWorldSizeFixed(false);
+        return true;
+    }
+    Sandwich->setWorldSizeFixed(bWorldSizeFixed);
+
+    if (bWorldSizeFixed)
     {
         parseJson(jws, "XY", WorldSizeXY);
         parseJson(jws, "Z",  WorldSizeZ);
+        Sandwich->setWorldSizeXY(WorldSizeXY);
+        Sandwich->setWorldSizeZ (WorldSizeZ);
     }
-    //converting to the new system
-    AGeoBox * box = static_cast<AGeoBox*>(Sandwich->World->Shape);
-    box->dx = WorldSizeXY;
-    box->dy = WorldSizeXY;
-    box->dz = WorldSizeZ;
-    ATypeWorldObject * typeWorld = static_cast<ATypeWorldObject *>(Sandwich->World->ObjectType);
-    typeWorld->bFixedSize = fWorldSizeFixed;
-
     return true;
 }
 

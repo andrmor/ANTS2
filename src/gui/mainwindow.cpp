@@ -448,20 +448,13 @@ void MainWindow::ShowGeoMarkers()
 
 void MainWindow::ShowGraphWindow()
 {
-  GraphWindow->ShowAndFocus();  
+    GraphWindow->ShowAndFocus();
 }
 
 void MainWindow::on_pbRebuildDetector_clicked()
 {   
-  if (DoNotUpdateGeometry) return; //if bulk update in progress
-  //world size
-  Detector->fWorldSizeFixed = ui->cbFixedTopSize->isChecked();
-  if (Detector->fWorldSizeFixed)
-  {
-    Detector->WorldSizeXY = 0.5*ui->ledTopSizeXY->text().toDouble();
-    Detector->WorldSizeZ = 0.5*ui->ledTopSizeZ->text().toDouble();
-  }
-  MainWindow::ReconstructDetector();
+    if (DoNotUpdateGeometry) return; //if bulk update in progress
+    ReconstructDetector();
 }
 
 // -------materials: visualization--------------
@@ -4977,4 +4970,22 @@ void MainWindow::on_pbCND_help_clicked()
             "Photons are generated from the defined bin centers, no 'blurring' is applied.";
 
     message1(s, "Help on spatial in-node distribution tools", this);
+}
+
+void MainWindow::on_cbFixedTopSize_clicked(bool checked)
+{
+    Detector->Sandwich->setWorldSizeFixed(checked);
+    ReconstructDetector();
+}
+
+void MainWindow::on_ledTopSizeXY_editingFinished()
+{
+    Detector->Sandwich->setWorldSizeXY(0.5 * ui->ledTopSizeXY->text().toDouble());
+    ReconstructDetector();
+}
+
+void MainWindow::on_ledTopSizeZ_editingFinished()
+{
+    Detector->Sandwich->setWorldSizeZ(0.5 * ui->ledTopSizeZ->text().toDouble());
+    ReconstructDetector();
 }

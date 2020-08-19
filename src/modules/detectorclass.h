@@ -47,10 +47,6 @@ public:
 
   bool fSecScintPresent = false;
 
-  double WorldSizeXY   = 500.0;
-  double WorldSizeZ    = 500.0;
-  bool fWorldSizeFixed = false;  //fixed and defined by GUI
-
   QString ErrorString;
 
   DetectorClass(AConfiguration* config);

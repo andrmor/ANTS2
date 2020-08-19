@@ -1534,5 +1534,51 @@ void ASandwich::RemoveParticle(int particleId)
       ATypeMonitorObject* mon = static_cast<ATypeMonitorObject*>(monObj->ObjectType);
 
       if ( mon->config.ParticleIndex > particleId ) mon->config.ParticleIndex--;
+  }
+}
+
+bool ASandwich::isWorldSizeFixed() const
+{
+    ATypeWorldObject * wt = static_cast<ATypeWorldObject*>(World->ObjectType);
+    return wt->bFixedSize;
+}
+
+void ASandwich::setWorldSizeFixed(bool bFlag)
+{
+    ATypeWorldObject * wt = static_cast<ATypeWorldObject*>(World->ObjectType);
+    wt->bFixedSize = bFlag;
+}
+
+double ASandwich::getWorldSizeXY() const
+{
+    AGeoBox * box = dynamic_cast<AGeoBox*>(World->Shape);
+    return ( box ? box->dx : 0 );
+}
+
+void ASandwich::setWorldSizeXY(double size)
+{
+    AGeoBox * box = dynamic_cast<AGeoBox*>(World->Shape);
+    if (box)
+    {
+        box->dx = size;
+        box->dy = size;
+        box->str2dx.clear();
+        box->str2dy.clear();
+    }
+}
+
+double ASandwich::getWorldSizeZ() const
+{
+    AGeoBox * box = dynamic_cast<AGeoBox*>(World->Shape);
+    return ( box ? box->dz : 0 );
+}
+
+void ASandwich::setWorldSizeZ(double size)
+{
+    AGeoBox * box = dynamic_cast<AGeoBox*>(World->Shape);
+    if (box)
+    {
+        box->dz = size;
+        box->str2dz.clear();
     }
 }

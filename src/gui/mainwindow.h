@@ -621,6 +621,12 @@ private slots:
 
     void on_pbCND_help_clicked();
 
+    void on_cbFixedTopSize_clicked(bool checked);
+
+    void on_ledTopSizeXY_editingFinished();
+
+    void on_ledTopSizeZ_editingFinished();
+
 public slots:
     void on_pbRebuildDetector_clicked();
     void onRequestDetectorGuiUpdate();     // called to update GUI related to Detector

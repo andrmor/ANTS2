@@ -151,15 +151,17 @@ void AGeoObject::DeleteMaterialIndex(int imat)
 }
 
 void AGeoObject::makeItWorld()
-{    
+{
+    if (isWorld()) return;
+
     Name = "World";
-    delete ObjectType;
-    ObjectType = new ATypeWorldObject();
-    Container = 0;
+    delete ObjectType; ObjectType = new ATypeWorldObject();
+    Container = nullptr;
 }
 
 bool AGeoObject::isWorld() const
 {
+    if (!ObjectType) return false;
     return ObjectType->isWorld();
 }
 
@@ -323,7 +325,7 @@ void AGeoObject::readFromJson(const QJsonObject & json)
 
     //Shape
     if (json.contains("Shape"))
-        {
+    {
             QString ShapeType = json["Shape"].toString();
             QJsonObject js = json["ShapeSpecific"].toObject();
 
@@ -335,10 +337,7 @@ void AGeoObject::readFromJson(const QJsonObject & json)
             Shape->readFromJson(js);
 
             //composite: cannot update memebers at this phase - HostedObjects are not set yet!
-
-            if (Name == "World") qDebug() << "----world-----" << Shape->getGenerationString(true);
-        }
-
+    }
     parseJson(json, "LastScript", LastScript);
 }
 
@@ -357,22 +356,19 @@ void AGeoObject::readAllFromJarr(AGeoObject * World, const QJsonArray & jarr)
    int size = jarr.size();
    //qDebug() << "Read all from World tree array, size:" << size;
 
-   if (size<1)
-     {
+   if (size < 1)
+   {
        qWarning() << "Read World tree: size cannot be < 1";
        return;
-     }
+   }
 
-   //the first object in the tree must be World -> only extracting the script!
    QJsonObject worldJS = jarr[0].toObject();
-   AGeoObject wgo;
-   wgo.readFromJson(worldJS);
-   World->LastScript = wgo.LastScript;
+   World->readFromJson(worldJS);
 
-   AGeoObject* prevObj = World;
+   AGeoObject * prevObj = World;
    for (int iob=1; iob<size; iob++)
      {
-       AGeoObject* newObj = new AGeoObject();
+       AGeoObject * newObj = new AGeoObject();
        //qDebug() << "--record in array:"<<json;
        QJsonObject json = jarr[iob].toObject();
        newObj->readFromJson(json);

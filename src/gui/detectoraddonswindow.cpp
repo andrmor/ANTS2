@@ -77,7 +77,6 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(QWidget * parent, MainWindow * MW, De
   ui->frObjectEditor->setLayout(l);
   l->addWidget(twGeo->GetEditWidget());
   connect(twGeo, &AGeoTreeWidget::RequestRebuildDetector, this, &DetectorAddOnsWindow::onReconstructDetectorRequest);
-  connect(twGeo, &AGeoTreeWidget::RequestUpdateWorldSize, this, &DetectorAddOnsWindow::onRequestUpdateWorldSize);
   connect(twGeo, &AGeoTreeWidget::RequestHighlightObject, this, &DetectorAddOnsWindow::ShowObject);
   connect(twGeo, &AGeoTreeWidget::RequestShowObjectRecursive, this, &DetectorAddOnsWindow::ShowObjectRecursive);
   connect(twGeo, SIGNAL(RequestNormalDetectorDraw()), MW, SLOT(ShowGeometrySlot()));
@@ -124,13 +123,6 @@ void DetectorAddOnsWindow::onReconstructDetectorRequest()
       //else
       //    MW->CheckUpWindow->hide();
   }
-}
-
-void DetectorAddOnsWindow::onRequestUpdateWorldSize(double WorldSizeXY, double WorldSizeZ, bool fWorldSizeFixed)
-{
-    Detector->WorldSizeXY     = WorldSizeXY;
-    Detector->WorldSizeZ      = WorldSizeZ;
-    Detector->fWorldSizeFixed = fWorldSizeFixed;
 }
 
 void DetectorAddOnsWindow::UpdateGUI()
@@ -1067,14 +1059,13 @@ void DetectorAddOnsWindow::on_pmParseInGeometryFromGDML_clicked()
     Detector->Sandwich->clearWorld();
     readGeoObjectTree(Detector->Sandwich->World, top, &tmpMats, PMtemplate, Detector, Detector->GeoManager->GetCurrentNavigator(), "/");
     Detector->Sandwich->World->makeItWorld(); //just to reset the name
-    AGeoBox* wb = dynamic_cast<AGeoBox*>(Detector->Sandwich->World->Shape);
+    AGeoBox * wb = dynamic_cast<AGeoBox*>(Detector->Sandwich->World->Shape);
     if (wb)
     {
-        Detector->WorldSizeXY = std::max(wb->dx, wb->dy);
-        Detector->WorldSizeZ = wb->dz;
-        Detector->fWorldSizeFixed = true;
+        Detector->Sandwich->setWorldSizeXY( std::max(wb->dx, wb->dy) );
+        Detector->Sandwich->setWorldSizeZ(wb->dz);
     }
-    else Detector->fWorldSizeFixed = false;
+    Detector->Sandwich->setWorldSizeFixed(wb);
 
     Detector->GeoManager->FindNode(0,0,0);
     //qDebug() << "----------------------------"<<Detector->GeoManager->GetPath();

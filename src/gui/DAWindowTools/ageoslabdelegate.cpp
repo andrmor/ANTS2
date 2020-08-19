@@ -116,3 +116,51 @@ void AGeoSlabDelegate::onContentChanged()
 {
     emit ContentChanged();
 }
+
+// ------------------------------------------- BOX ------------------------------------
+
+#include "aonelinetextedit.h"
+#include "ageoshape.h"
+
+#include <QPushButton>
+
+AGeoSlabDelegate_Box::AGeoSlabDelegate_Box(const QStringList & definedMaterials, int SlabModelState, QWidget * ParentWidget) :
+    AGeoBoxDelegate(definedMaterials, ParentWidget), SlabModelState(SlabModelState)
+{
+    switch (SlabModelState) // supposed to fall through!
+    {
+    case 0 :
+        ex->setEnabled(false);
+        ey->setEnabled(false);
+    case 1 :
+        ledPsi->setEnabled(false);
+    case 2 :;
+    default:;
+    }
+
+    ledX->setEnabled(false);
+    ledY->setEnabled(false);
+    ledZ->setEnabled(false);
+
+    ledPhi->setEnabled(false);
+    ledTheta->setEnabled(false);
+
+    cbScale->setVisible(false);
+
+    if (SlabModelState == 2) ListOfShapesForTransform = QStringList({"Box", "Tube", "Polygon"});
+    else pbTransform->setEnabled(false);
+}
+
+bool AGeoSlabDelegate_Box::updateObject(AGeoObject * obj) const
+{
+    bool ok = AGeoBoxDelegate::updateObject(obj);
+    // TODO
+    return ok;
+}
+
+void AGeoSlabDelegate_Box::Update(const AGeoObject * obj)
+{
+    AGeoBoxDelegate::Update(obj);
+
+    labType->setText( CurrentObject->ObjectType->isLightguide() ? "Lightguide, rectangular slab" : "Rectangular slab" );
+}

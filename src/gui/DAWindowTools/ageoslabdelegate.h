@@ -28,4 +28,27 @@ private slots:
     void onContentChanged();
 };
 
+
+
+#include "ageoobjectdelegate.h"
+
+class ASlabModel;
+
+class AGeoSlabDelegate_Box : public AGeoBoxDelegate
+{
+    Q_OBJECT
+
+public:
+    AGeoSlabDelegate_Box(const QStringList & definedMaterials, int SlabModelState, QWidget * ParentWidget);
+
+    bool updateObject(AGeoObject * obj) const override;
+
+private:
+    ASlabModel * SlabModel = nullptr;
+    int SlabModelState = 0;
+
+public slots:
+    void Update(const AGeoObject * obj) override;
+};
+
 #endif // AGEOSLABDELEGATE_H

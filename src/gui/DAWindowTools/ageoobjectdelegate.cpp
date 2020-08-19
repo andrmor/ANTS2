@@ -174,6 +174,18 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
     lMF->addLayout(abl);
 
   frMainFrame->setLayout(lMF);
+
+  ListOfShapesForTransform << "Box"
+       << "Tube" << "Tube segment" << "Tube segment cut" << "Tube elliptical"
+       << "Trapezoid simplified" << "Trapezoid"
+       << "Polycone"
+       << "Polygon simplified" << "Polygon"
+       << "Parallelepiped"
+       << "Sphere"
+       << "Cone" << "Cone segment"
+       << "Torus"
+       << "Paraboloid"
+       << "Arb8";
 }
 
 AGeoObjectDelegate::~AGeoObjectDelegate()
@@ -386,22 +398,9 @@ void AGeoObjectDelegate::onChangeShapePressed()
     QDialog * d = new QDialog(ParentWidget);
     d->setWindowTitle("Select new shape");
 
-    QStringList list;
-    list << "Box"
-         << "Tube" << "Tube segment" << "Tube segment cut" << "Tube elliptical"
-         << "Trapezoid simplified" << "Trapezoid"
-         << "Polycone"
-         << "Polygon simplified" << "Polygon"
-         << "Parallelepiped"
-         << "Sphere"
-         << "Cone" << "Cone segment"
-         << "Torus"
-         << "Paraboloid"
-         << "Arb8";
-
     QVBoxLayout * l = new QVBoxLayout(d);
         QListWidget * w = new QListWidget();
-        w->addItems(list);
+        w->addItems(ListOfShapesForTransform);
     l->addWidget(w);
     d->resize(d->width(), 400);
 

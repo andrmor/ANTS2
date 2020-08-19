@@ -6,6 +6,7 @@
 #include <QObject>
 #include <QString>
 #include <QVector>
+#include <QStringList>
 
 class AGeoObject;
 class AGeoShape;
@@ -43,8 +44,8 @@ public:
     bool updateObject(AGeoObject * obj) const override;
 
     AGeoShape * ShapeCopy = nullptr;
-private:
 
+private:
     QVBoxLayout * lMF = nullptr;      //main layout
 
     QWidget   * scaleWidget = nullptr;
@@ -73,6 +74,8 @@ protected:
     AOneLineTextEdit *ledStepX, *ledStepY, *ledStepZ;
     AOneLineTextEdit *ledX,   *ledY,     *ledZ;
     AOneLineTextEdit *ledPhi, *ledTheta, *ledPsi;
+
+    QStringList ListOfShapesForTransform;
 
 public slots:
     void Update(const AGeoObject * obj) override;

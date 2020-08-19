@@ -1719,7 +1719,20 @@ AGeoBaseDelegate * AGeoWidget::createAndAddGeoObjectDelegate()
 
 AGeoBaseDelegate * AGeoWidget::createAndAddSlabDelegate()
 {
-    AGeoSlabDelegate * Del = new AGeoSlabDelegate(tw->Sandwich->Materials, static_cast<int>(tw->Sandwich->SandwichState), this);
+    AGeoBaseDelegate * Del;
+
+    /*
+    ASlabModel * SlabModel = (static_cast<ATypeSlabObject*>(CurrentObject->ObjectType))->SlabModel;
+    switch (SlabModel->XYrecord.shape)
+    {
+    default: qWarning() << "Unknown slab shape, assuming rectangular";
+    case 0: Del = new AGeoSlabDelegate_Box(tw->Sandwich->Materials, static_cast<int>(tw->Sandwich->SandwichState), this); break;
+    case 1: Del = new AGeoSlabDelegate(tw->Sandwich->Materials, static_cast<int>(tw->Sandwich->SandwichState), this); break;
+    case 2: Del = new AGeoSlabDelegate(tw->Sandwich->Materials, static_cast<int>(tw->Sandwich->SandwichState), this); break;
+    }
+    */
+    Del = new AGeoSlabDelegate(tw->Sandwich->Materials, static_cast<int>(tw->Sandwich->SandwichState), this);
+
     return Del;
 }
 

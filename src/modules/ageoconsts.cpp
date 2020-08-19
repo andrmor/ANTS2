@@ -134,7 +134,6 @@ bool AGeoConsts::evaluateFormula(QString str, double &returnValue) const
     //qDebug() << "return value: "<< returnValue;
     return true;
 }
-
 bool AGeoConsts::updateParameter(QString &errorStr, QString &str, double &returnValue, bool bForbidZero, bool bForbidNegative, bool bMakeHalf) const
 {
     if (str.isEmpty()) return true;
@@ -151,7 +150,6 @@ bool AGeoConsts::updateParameter(QString &errorStr, QString &str, double &return
             return false;
         }
     }
-
     if (bForbidZero && returnValue == 0)
     {
         errorStr = "Unacceptable value zero";

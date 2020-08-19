@@ -252,14 +252,26 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
         old << obj->Position[0]    << obj->Position[1]    << obj->Position[2]
             << obj->Orientation[0] << obj->Orientation[1] << obj->Orientation[2];
 
+        QVector<QString> tempStrs(6);
+        QVector<double> tempDoubles(6);
         bool ok = true;
-        ok = ok && processEditBox(ledX,     obj->Position[0],    obj->PositionStr[0],    ParentWidget);
-        ok = ok && processEditBox(ledY,     obj->Position[1],    obj->PositionStr[1],    ParentWidget);
-        ok = ok && processEditBox(ledZ,     obj->Position[2],    obj->PositionStr[2],    ParentWidget);
-        if (ledPhi->isEnabled())   ok = ok && processEditBox(ledPhi,   obj->Orientation[0], obj->OrientationStr[0], ParentWidget);
-        if (ledTheta->isEnabled()) ok = ok && processEditBox(ledTheta, obj->Orientation[1], obj->OrientationStr[1], ParentWidget);
-        if (ledPsi->isEnabled())   ok = ok && processEditBox(ledPsi,   obj->Orientation[2], obj->OrientationStr[2], ParentWidget);
+        ok = ok && processEditBox(ledX,     tempDoubles[0],    tempStrs[0],    ParentWidget);
+        ok = ok && processEditBox(ledY,     tempDoubles[1],    tempStrs[1],    ParentWidget);
+        ok = ok && processEditBox(ledZ,     tempDoubles[2],    tempStrs[2],    ParentWidget);
+        if (ledPhi->isEnabled())   ok = ok && processEditBox(ledPhi,   tempDoubles[3], tempStrs[3], ParentWidget);
+        if (ledTheta->isEnabled()) ok = ok && processEditBox(ledTheta, tempDoubles[4], tempStrs[4], ParentWidget);
+        if (ledPsi->isEnabled())   ok = ok && processEditBox(ledPsi,   tempDoubles[5], tempStrs[5], ParentWidget);
+
         if (!ok) return false;
+
+        for (int i = 0; i<3; i++)
+        {
+            obj->PositionStr[i] = tempStrs[i];
+            obj->OrientationStr[i] = tempStrs[i+3];
+
+            obj->Position[i] = tempDoubles[i];
+            obj->Orientation[i] = tempDoubles[i+3];
+        }
 
         // checking was there a rotation of the main object
         bool fWasRotated = false;

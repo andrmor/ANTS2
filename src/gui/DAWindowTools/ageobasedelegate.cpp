@@ -82,19 +82,11 @@ bool AGeoBaseDelegate::processEditBox(AOneLineTextEdit *lineEdit, double &val, Q
 {
     str = lineEdit->text();
 
+    const AGeoConsts & GC = AGeoConsts::getConstInstance();
+    QString errorStr;
     bool ok;
-    val = str.toDouble(&ok);
-    if (ok)
-    {
-        str.clear();
-        return true;
-    }
-
-    const AGeoConsts & gConsts = AGeoConsts::getConstInstance();
-    ok = gConsts.evaluateFormula(str, val);
+    ok = GC.updateParameter(errorStr, str, val, false, false, false);
     if (ok) return true;
-
-    qWarning () << "Bad format:" << str;
-    QMessageBox::warning(parent, "", QString("Bad format: %1").arg(str));
+    QMessageBox::warning(parent, "", errorStr);
     return false;
 }

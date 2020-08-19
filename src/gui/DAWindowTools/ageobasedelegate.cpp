@@ -84,8 +84,7 @@ bool AGeoBaseDelegate::processEditBox(AOneLineTextEdit *lineEdit, double &val, Q
 
     const AGeoConsts & GC = AGeoConsts::getConstInstance();
     QString errorStr;
-    bool ok;
-    ok = GC.updateParameter(errorStr, str, val, false, false, false);
+    bool ok = GC.updateParameter(errorStr, str, val, false, false, false);
     if (ok) return true;
     QMessageBox::warning(parent, "", errorStr);
     return false;

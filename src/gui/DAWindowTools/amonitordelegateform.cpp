@@ -162,14 +162,24 @@ bool AMonitorDelegateForm::updateObject(AGeoObject * obj)
 
     obj->updateMonitorShape();
 
+    QVector<QString> tempStrs(6);
+    QVector<double>  tempDoubles(6);
     ok = true;
-    ok = ok && AGeoBaseDelegate::processEditBox(leX,     obj->Position[0],    obj->PositionStr[0],    this->parentWidget());
-    ok = ok && AGeoBaseDelegate::processEditBox(leY,     obj->Position[1],    obj->PositionStr[1],    this->parentWidget());
-    ok = ok && AGeoBaseDelegate::processEditBox(leZ,     obj->Position[2],    obj->PositionStr[2],    this->parentWidget());
-    ok = ok && AGeoBaseDelegate::processEditBox(lePhi,   obj->Orientation[0], obj->OrientationStr[0], this->parentWidget());
-    ok = ok && AGeoBaseDelegate::processEditBox(leTheta, obj->Orientation[1], obj->OrientationStr[1], this->parentWidget());
-    ok = ok && AGeoBaseDelegate::processEditBox(lePsi,   obj->Orientation[2], obj->OrientationStr[2], this->parentWidget());
+    ok = ok && AGeoBaseDelegate::processEditBox(leX,     tempDoubles[0], tempStrs[0], this->parentWidget());
+    ok = ok && AGeoBaseDelegate::processEditBox(leY,     tempDoubles[1], tempStrs[1], this->parentWidget());
+    ok = ok && AGeoBaseDelegate::processEditBox(leZ,     tempDoubles[2], tempStrs[2], this->parentWidget());
+    ok = ok && AGeoBaseDelegate::processEditBox(lePhi,   tempDoubles[3], tempStrs[3], this->parentWidget());
+    ok = ok && AGeoBaseDelegate::processEditBox(leTheta, tempDoubles[4], tempStrs[4], this->parentWidget());
+    ok = ok && AGeoBaseDelegate::processEditBox(lePsi,   tempDoubles[5], tempStrs[5], this->parentWidget());
     if (!ok) return false;
+    for (int i = 0; i < 3; i++)
+    {
+        obj->PositionStr[i]    = tempStrs[i];
+        obj->OrientationStr[i] = tempStrs[i+3];
+
+        obj->Position[i]       = tempDoubles[i];
+        obj->Orientation[i]    = tempDoubles[i+3];
+    }
 
     int sens = ui->cobSensitiveDirection->currentIndex();
     switch (sens)

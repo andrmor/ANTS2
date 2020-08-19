@@ -135,6 +135,9 @@ public:
   virtual const QString getShapeTemplate() {return "TGeoScaledShape( TGeoShape(parameters), scaleX, scaleY, scaleZ )";}
   virtual const QString getHelp();
 
+  virtual bool isGeoConstInUse    (const QRegExp & nameRegExp) const;
+  virtual void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName);
+
   virtual bool readFromString(QString GenerationString);
   virtual TGeoShape* createGeoShape(const QString shapeName = "");
 
@@ -671,7 +674,7 @@ public:
 
   //virtual double getHeight() {return 0;}
   //virtual void setHeight(double /*dz*/) {}
-  virtual const QString getGenerationString(bool useStrings) const {return GenerationString;}
+  virtual const QString getGenerationString(bool /*useStrings*/) const {return GenerationString;}
   virtual double maxSize() {return 0;}  //***!!!
 
   void writeToJson(QJsonObject& json) const override;

@@ -2499,6 +2499,17 @@ const QString AGeoScaledShape::getHelp()
     return "TGeoShape scaled with TGeoScale transformation";
 }
 
+bool AGeoScaledShape::isGeoConstInUse(const QRegExp & nameRegExp) const
+{
+    if (BaseShape) return BaseShape->isGeoConstInUse(nameRegExp);
+    return false;
+}
+
+void AGeoScaledShape::replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName)
+{
+    if (BaseShape) BaseShape->replaceGeoConstName(nameRegExp, newName);
+}
+
 bool AGeoScaledShape::readFromString(QString GenerationString)
 {
     GenerationString = GenerationString.simplified();

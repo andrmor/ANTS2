@@ -98,11 +98,7 @@ void AMonitorConfig::updateFromGeoConstants()
     const AGeoConsts & GC = AGeoConsts::getConstInstance();
     QString errorStr;
 
-    qDebug() << GC.getValues();
-
     bool ok;
     ok = GC.updateParameter(errorStr, str2size1, size1); if (!ok) {qWarning() << errorStr;}
     ok = GC.updateParameter(errorStr, str2size2, size2); if (!ok) {qWarning() << errorStr;}
-
-    qDebug() << str2size1 << size1 << str2size2 << size2;
 }

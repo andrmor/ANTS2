@@ -75,3 +75,26 @@ void AGeoBaseDelegate::configureHighligherAndCompleter(AOneLineTextEdit * edit)
     edit->Completer->setWidget(edit);
     QObject::connect(edit->Completer, SIGNAL(activated(QString)), edit, SLOT(insertCompletion(QString)));
 }
+
+#include <QMessageBox>
+#include <QDebug>
+bool AGeoBaseDelegate::processEditBox(AOneLineTextEdit *lineEdit, double &val, QString &str, QWidget *parent)
+{
+    str = lineEdit->text();
+
+    bool ok;
+    val = str.toDouble(&ok);
+    if (ok)
+    {
+        str.clear();
+        return true;
+    }
+
+    const AGeoConsts & gConsts = AGeoConsts::getConstInstance();
+    ok = gConsts.evaluateFormula(str, val);
+    if (ok) return true;
+
+    qWarning () << "Bad format:" << str;
+    QMessageBox::warning(parent, "", QString("Bad format: %1").arg(str));
+    return false;
+}

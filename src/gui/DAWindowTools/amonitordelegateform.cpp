@@ -22,12 +22,18 @@ AMonitorDelegateForm::AMonitorDelegateForm(QStringList particles, QWidget *paren
 
     //ui->leName->setMaximumWidth(50);
 
-    leSize1 = new AOneLineTextEdit();
-    leSize2 = new AOneLineTextEdit();
-    ui->laySize->insertWidget(1, leSize1);
-    ui->laySize->insertWidget(4, leSize2);
+    leSize1 = new AOneLineTextEdit(); ui->laySize->insertWidget(1, leSize1);
+    leSize2 = new AOneLineTextEdit(); ui->laySize->insertWidget(4, leSize2);
 
-    for (AOneLineTextEdit * le : {leSize1, leSize2})
+    leX     = new AOneLineTextEdit(); ui->layX->insertWidget(1, leX);
+    leY     = new AOneLineTextEdit(); ui->layY->insertWidget(1, leY);
+    leZ     = new AOneLineTextEdit(); ui->layZ->insertWidget(1, leZ);
+
+    lePhi   = new AOneLineTextEdit(); ui->layOrientation->addWidget(lePhi);
+    leTheta = new AOneLineTextEdit(); ui->layOrientation->addWidget(leTheta);
+    lePsi   = new AOneLineTextEdit(); ui->layOrientation->addWidget(lePsi);
+
+    for (AOneLineTextEdit * le : {leSize1, leSize2, leX, leY, leZ, lePhi, leTheta, lePsi})
     {
         connect(le, &AOneLineTextEdit::textChanged, this, &AMonitorDelegateForm::contentChanged);
         AGeoBaseDelegate::configureHighligherAndCompleter(le);
@@ -60,15 +66,17 @@ bool AMonitorDelegateForm::updateGUI(const AGeoObject *obj)
     ui->leName->setText(obj->Name);
     if (config.shape == 0) ui->cobShape->setCurrentIndex(0);
     else ui->cobShape->setCurrentIndex(1);
+
     leSize1->setText( config.str2size1.isEmpty() ? QString::number(2.0*config.size1) : config.str2size1);
     leSize2->setText( config.str2size2.isEmpty() ? QString::number(2.0*config.size2) : config.str2size2);
 
-    ui->ledX->setText(QString::number(obj->Position[0]));
-    ui->ledY->setText(QString::number(obj->Position[1]));
-    ui->ledZ->setText(QString::number(obj->Position[2]));
-    ui->ledPhi->setText(QString::number(obj->Orientation[0]));
-    ui->ledTheta->setText(QString::number(obj->Orientation[1]));
-    ui->ledPsi->setText(QString::number(obj->Orientation[2]));
+    leX->    setText( obj->PositionStr[0].isEmpty() ? QString::number(obj->Position[0]) : obj->PositionStr[0]);
+    leY->    setText( obj->PositionStr[1].isEmpty() ? QString::number(obj->Position[1]) : obj->PositionStr[1]);
+    leZ->    setText( obj->PositionStr[2].isEmpty() ? QString::number(obj->Position[2]) : obj->PositionStr[2]);
+
+    lePhi->  setText( obj->OrientationStr[0].isEmpty() ? QString::number(obj->Orientation[0]) : obj->OrientationStr[0]);
+    leTheta->setText( obj->OrientationStr[1].isEmpty() ? QString::number(obj->Orientation[1]) : obj->OrientationStr[1]);
+    lePsi->  setText( obj->OrientationStr[2].isEmpty() ? QString::number(obj->Orientation[2]) : obj->OrientationStr[2]);
 
     int sens = 0;
     if (config.bLower && !config.bUpper) sens = 1;
@@ -154,12 +162,14 @@ bool AMonitorDelegateForm::updateObject(AGeoObject * obj)
 
     obj->updateMonitorShape();
 
-    obj->Position[0] = ui->ledX->text().toDouble();
-    obj->Position[1] = ui->ledY->text().toDouble();
-    obj->Position[2] = ui->ledZ->text().toDouble();
-    obj->Orientation[0] = ui->ledPhi->text().toDouble();
-    obj->Orientation[1] = ui->ledTheta->text().toDouble();
-    obj->Orientation[2] = ui->ledPsi->text().toDouble();
+    ok = true;
+    ok = ok && AGeoBaseDelegate::processEditBox(leX,     obj->Position[0],    obj->PositionStr[0],    this->parentWidget());
+    ok = ok && AGeoBaseDelegate::processEditBox(leY,     obj->Position[1],    obj->PositionStr[1],    this->parentWidget());
+    ok = ok && AGeoBaseDelegate::processEditBox(leZ,     obj->Position[2],    obj->PositionStr[2],    this->parentWidget());
+    ok = ok && AGeoBaseDelegate::processEditBox(lePhi,   obj->Orientation[0], obj->OrientationStr[0], this->parentWidget());
+    ok = ok && AGeoBaseDelegate::processEditBox(leTheta, obj->Orientation[1], obj->OrientationStr[1], this->parentWidget());
+    ok = ok && AGeoBaseDelegate::processEditBox(lePsi,   obj->Orientation[2], obj->OrientationStr[2], this->parentWidget());
+    if (!ok) return false;
 
     int sens = ui->cobSensitiveDirection->currentIndex();
     switch (sens)

@@ -45,7 +45,8 @@ signals:
     void RequestScriptRecursiveToClipboard();
 
 public:
-    static void   configureHighligherAndCompleter(AOneLineTextEdit * edit);
+    static void configureHighligherAndCompleter(AOneLineTextEdit * edit);
+    static bool processEditBox(AOneLineTextEdit * lineEdit, double & val, QString & str, QWidget * parent);
 };
 
 #endif // AGEOBASEDELEGATE_H

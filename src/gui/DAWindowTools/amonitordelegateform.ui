@@ -175,7 +175,7 @@
         <number>50</number>
        </property>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <layout class="QHBoxLayout" name="layX">
          <property name="spacing">
           <number>5</number>
          </property>
@@ -186,13 +186,6 @@
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="ledX">
-           <property name="text">
-            <string>0</string>
            </property>
           </widget>
          </item>
@@ -209,7 +202,7 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <layout class="QHBoxLayout" name="layY">
          <property name="spacing">
           <number>5</number>
          </property>
@@ -220,13 +213,6 @@
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="ledY">
-           <property name="text">
-            <string>0</string>
            </property>
           </widget>
          </item>
@@ -243,7 +229,7 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_7">
+        <layout class="QHBoxLayout" name="layZ">
          <property name="spacing">
           <number>5</number>
          </property>
@@ -254,13 +240,6 @@
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="ledZ">
-           <property name="text">
-            <string>0</string>
            </property>
           </widget>
          </item>
@@ -336,31 +315,10 @@ changed</string>
         </layout>
        </item>
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout_5">
+        <layout class="QVBoxLayout" name="layOrientation">
          <property name="spacing">
           <number>1</number>
          </property>
-         <item>
-          <widget class="QLineEdit" name="ledPhi">
-           <property name="text">
-            <string>0</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="ledTheta">
-           <property name="text">
-            <string>0</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="ledPsi">
-           <property name="text">
-            <string>0</string>
-           </property>
-          </widget>
-         </item>
         </layout>
        </item>
        <item>
@@ -1261,102 +1219,6 @@ changed</string>
     <hint type="sourcelabel">
      <x>526</x>
      <y>29</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>303</x>
-     <y>149</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledPhi</sender>
-   <signal>textChanged(QString)</signal>
-   <receiver>pbContentChanged</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>472</x>
-     <y>104</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>303</x>
-     <y>149</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledTheta</sender>
-   <signal>textChanged(QString)</signal>
-   <receiver>pbContentChanged</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>472</x>
-     <y>133</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>303</x>
-     <y>149</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledPsi</sender>
-   <signal>textChanged(QString)</signal>
-   <receiver>pbContentChanged</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>472</x>
-     <y>162</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>303</x>
-     <y>149</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledX</sender>
-   <signal>textChanged(QString)</signal>
-   <receiver>pbContentChanged</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>171</x>
-     <y>103</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>303</x>
-     <y>149</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledY</sender>
-   <signal>textChanged(QString)</signal>
-   <receiver>pbContentChanged</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>171</x>
-     <y>133</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>303</x>
-     <y>149</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledZ</sender>
-   <signal>textChanged(QString)</signal>
-   <receiver>pbContentChanged</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>171</x>
-     <y>163</y>
     </hint>
     <hint type="destinationlabel">
      <x>303</x>

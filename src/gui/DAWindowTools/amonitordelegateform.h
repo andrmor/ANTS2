@@ -28,6 +28,14 @@ private:
     AOneLineTextEdit * leSize1 = nullptr;
     AOneLineTextEdit * leSize2 = nullptr;
 
+    AOneLineTextEdit * leX = nullptr;
+    AOneLineTextEdit * leY = nullptr;
+    AOneLineTextEdit * leZ = nullptr;
+
+    AOneLineTextEdit * lePhi   = nullptr;
+    AOneLineTextEdit * leTheta = nullptr;
+    AOneLineTextEdit * lePsi   = nullptr;
+
 public slots:
     void UpdateVisibility();
 

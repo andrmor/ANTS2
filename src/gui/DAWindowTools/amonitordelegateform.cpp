@@ -2,6 +2,9 @@
 #include "ui_amonitordelegateform.h"
 #include "ageoobject.h"
 #include "atypegeoobject.h"
+#include "aonelinetextedit.h"
+#include "ageobasedelegate.h"
+#include "ageoconsts.h"
 
 #include <QDebug>
 
@@ -16,6 +19,19 @@ AMonitorDelegateForm::AMonitorDelegateForm(QStringList particles, QWidget *paren
     ui->pbContentChanged->setVisible(false);
 
     ui->cobEnergyUnits->setCurrentIndex(2);
+
+    //ui->leName->setMaximumWidth(50);
+
+    leSize1 = new AOneLineTextEdit();
+    leSize2 = new AOneLineTextEdit();
+    ui->laySize->insertWidget(1, leSize1);
+    ui->laySize->insertWidget(4, leSize2);
+
+    for (AOneLineTextEdit * le : {leSize1, leSize2})
+    {
+        connect(le, &AOneLineTextEdit::textChanged, this, &AMonitorDelegateForm::contentChanged);
+        AGeoBaseDelegate::configureHighligherAndCompleter(le);
+    }
 
     //installing double validators for edit boxes
     QDoubleValidator* dv = new QDoubleValidator(this);
@@ -44,8 +60,8 @@ bool AMonitorDelegateForm::updateGUI(const AGeoObject *obj)
     ui->leName->setText(obj->Name);
     if (config.shape == 0) ui->cobShape->setCurrentIndex(0);
     else ui->cobShape->setCurrentIndex(1);
-    ui->ledSize1->setText( QString::number(2.0*config.size1));
-    ui->ledSize2->setText( QString::number(2.0*config.size2));
+    leSize1->setText( config.str2size1.isEmpty() ? QString::number(2.0*config.size1) : config.str2size1);
+    leSize2->setText( config.str2size2.isEmpty() ? QString::number(2.0*config.size2) : config.str2size2);
 
     ui->ledX->setText(QString::number(obj->Position[0]));
     ui->ledY->setText(QString::number(obj->Position[1]));
@@ -103,15 +119,39 @@ const QString AMonitorDelegateForm::getName() const
     return ui->leName->text();
 }
 
-void AMonitorDelegateForm::updateObject(AGeoObject *obj) const
+#include "amessage.h"
+bool AMonitorDelegateForm::updateObject(AGeoObject * obj)
 {
     obj->Name = ui->leName->text();
 
     ATypeMonitorObject* mon = dynamic_cast<ATypeMonitorObject*>(obj->ObjectType);
-    AMonitorConfig& config = mon->config;
+    AMonitorConfig & config = mon->config;
+
     config.shape = ui->cobShape->currentIndex();
-    config.size1 = 0.5*ui->ledSize1->text().toDouble();
-    config.size2 = 0.5*ui->ledSize2->text().toDouble();
+
+    const AGeoConsts & GC = AGeoConsts::getConstInstance();
+    QString ErrorStr;
+
+    QString strSize1 = leSize1->text();
+    double Size1;
+    bool ok = GC.updateParameter(ErrorStr, strSize1, Size1);
+    if (!ok)
+    {
+        message(ErrorStr, this);
+        return false;
+    }
+    config.size1 = Size1; config.str2size1 = strSize1;
+
+    QString strSize2 = leSize2->text();
+    double Size2;
+    ok = GC.updateParameter(ErrorStr, strSize2, Size2);
+    if (!ok)
+    {
+        message(ErrorStr, this);
+        return false;
+    }
+    config.size2 = Size2; config.str2size2 = strSize2;
+
     obj->updateMonitorShape();
 
     obj->Position[0] = ui->ledX->text().toDouble();
@@ -174,6 +214,8 @@ void AMonitorDelegateForm::updateObject(AGeoObject *obj) const
     config.waveTo = ui->ledWaveTo->text().toDouble();
     config.energyTo = ui->ledEnergyTo->text().toDouble();
     config.energyUnitsInHist = ui->cobEnergyUnits->currentIndex();
+
+    return true;
 }
 
 void AMonitorDelegateForm::UpdateVisibility()
@@ -188,7 +230,7 @@ void AMonitorDelegateForm::on_cobShape_currentIndexChanged(int index)
 
     ui->labSize2->setVisible(bRectangular);
     ui->labSize2mm->setVisible(bRectangular);
-    ui->ledSize2->setVisible(bRectangular);
+    leSize2->setVisible(bRectangular);
     ui->labSizeX->setText( (bRectangular ? "Size X:" : "Diameter:") );
 }
 

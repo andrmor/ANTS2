@@ -55,8 +55,7 @@ QString AMonitorDelegate::getName() const
 
 bool AMonitorDelegate::updateObject(AGeoObject *obj) const
 {
-    del->updateObject(obj);
-    return true;
+    return del->updateObject(obj);
 }
 
 void AMonitorDelegate::Update(const AGeoObject *obj)

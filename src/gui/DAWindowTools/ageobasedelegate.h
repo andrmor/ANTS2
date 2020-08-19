@@ -33,7 +33,6 @@ protected:
     QPushButton * pbScriptLine = nullptr;
 
     QHBoxLayout * createBottomButtons();
-    void          configureHighligherAndCompleter(AOneLineTextEdit * edit);
 
 protected:
     QWidget * ParentWidget = nullptr;
@@ -44,6 +43,9 @@ signals:
     void RequestChangeVisAttributes();
     void RequestScriptToClipboard();
     void RequestScriptRecursiveToClipboard();
+
+public:
+    static void   configureHighligherAndCompleter(AOneLineTextEdit * edit);
 };
 
 #endif // AGEOBASEDELEGATE_H

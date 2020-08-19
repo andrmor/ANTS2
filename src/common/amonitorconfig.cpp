@@ -1,7 +1,9 @@
 #include "amonitorconfig.h"
 #include "ajsontools.h"
+#include "ageoconsts.h"
 
 #include <QJsonObject>
+#include <QDebug>
 
 void AMonitorConfig::writeToJson(QJsonObject &json) const
 {
@@ -9,6 +11,9 @@ void AMonitorConfig::writeToJson(QJsonObject &json) const
    json["size1"] = size1;
    json["size2"] = size2;
    json["dz"] = dz;
+
+   if (!str2size1.isEmpty()) json["str2size1"] = str2size1;
+   if (!str2size2.isEmpty()) json["str2size2"] = str2size2;
 
    json["PhotonOrParticle"] = PhotonOrParticle;
    json["bUpper"] = bUpper;
@@ -49,6 +54,11 @@ void AMonitorConfig::readFromJson(const QJsonObject & json)
     parseJson(json, "size2", size2);
     parseJson(json, "dz", dz);
 
+    str2size1.clear();
+    parseJson(json, "str2size1", str2size1);
+    str2size2.clear();
+    parseJson(json, "str2size2", str2size2);
+
     parseJson(json, "PhotonOrParticle", PhotonOrParticle);
     parseJson(json, "bUpper", bUpper);
     parseJson(json, "bLower", bLower);
@@ -79,4 +89,20 @@ void AMonitorConfig::readFromJson(const QJsonObject & json)
     parseJson(json, "energyFrom", energyFrom);
     parseJson(json, "energyTo", energyTo);
     parseJson(json, "energyUnitsInHist", energyUnitsInHist);
+
+    updateFromGeoConstants();
+}
+
+void AMonitorConfig::updateFromGeoConstants()
+{
+    const AGeoConsts & GC = AGeoConsts::getConstInstance();
+    QString errorStr;
+
+    qDebug() << GC.getValues();
+
+    bool ok;
+    ok = GC.updateParameter(errorStr, str2size1, size1); if (!ok) {qWarning() << errorStr;}
+    ok = GC.updateParameter(errorStr, str2size2, size2); if (!ok) {qWarning() << errorStr;}
+
+    qDebug() << str2size1 << size1 << str2size2 << size2;
 }

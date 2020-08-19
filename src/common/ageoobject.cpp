@@ -229,17 +229,20 @@ void AGeoObject::writeToJson(QJsonObject &json)
   json["fExpanded"] = fExpanded;
 
   if ( ObjectType->isHandlingStandard() || ObjectType->isWorld())
-    {
+  {
       json["Material"] = Material;
       json["color"] = color;
       json["style"] = style;
       json["width"] = width;
 
-      json["Shape"] = Shape->getShapeType();
-      QJsonObject js;
-      Shape->writeToJson(js);
-      json["ShapeSpecific"] = js;      
-    }
+      if (!ObjectType->isMonitor()) // monitor shape is in ObjectType
+      {
+          json["Shape"] = Shape->getShapeType();
+          QJsonObject js;
+          Shape->writeToJson(js);
+          json["ShapeSpecific"] = js;
+      }
+  }
 
   if ( ObjectType->isHandlingStandard() || ObjectType->isArray() )
   {
@@ -303,26 +306,6 @@ void AGeoObject::readFromJson(const QJsonObject & json)
     if (parseJson(json, "strTheta", OrientationStr[1])) GC.evaluateFormula(OrientationStr[1], Orientation[1]);
     if (parseJson(json, "strPsi",   OrientationStr[2])) GC.evaluateFormula(OrientationStr[2], Orientation[2]);
 
-    //ObjectType
-    QJsonObject jj = json["ObjectType"].toObject();
-    if (!jj.isEmpty())
-    {
-        QString tmpType;
-        parseJson(jj, "Type", tmpType);
-        ATypeGeoObject* newType = ATypeGeoObject::TypeObjectFactory(tmpType);
-        if (newType)
-        {
-            delete ObjectType;
-            ObjectType = newType;
-            ObjectType->readFromJson(jj);
-            if (ObjectType->isMonitor()) updateMonitorShape();
-        }
-        else
-            qDebug() << "ObjectType read failed for object:" << Name << ", keeping default type";
-    }
-    else qDebug() << "ObjectType is empty for object:" << Name << ", keeping default type";
-
-
     //Shape
     if (json.contains("Shape"))
     {
@@ -338,6 +321,25 @@ void AGeoObject::readFromJson(const QJsonObject & json)
 
             //composite: cannot update memebers at this phase - HostedObjects are not set yet!
     }
+
+    //ObjectType
+    QJsonObject jj = json["ObjectType"].toObject();
+    if (!jj.isEmpty())
+    {
+        QString tmpType;
+        parseJson(jj, "Type", tmpType);
+        ATypeGeoObject * newType = ATypeGeoObject::TypeObjectFactory(tmpType);
+        if (newType)
+        {
+            delete ObjectType;
+            ObjectType = newType;
+            ObjectType->readFromJson(jj);
+            if (ObjectType->isMonitor()) updateMonitorShape();
+        }
+        else qDebug() << "ObjectType read failed for object:" << Name << ", keeping default type";
+    }
+    else qDebug() << "ObjectType is empty for object:" << Name << ", keeping default type";
+
     parseJson(json, "LastScript", LastScript);
 }
 
@@ -569,6 +571,9 @@ void AGeoObject::updateMonitorShape()
 
     ATypeMonitorObject* mon = static_cast<ATypeMonitorObject*>(ObjectType);
     delete Shape;
+
+    qDebug() << "TAJNA-----"<<mon->config.size1 << mon->config.size2;
+
     if (mon->config.shape == 0) //rectangular
         Shape = new AGeoBox(mon->config.size1, mon->config.size2, mon->config.dz);
     else //round

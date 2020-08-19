@@ -2309,15 +2309,15 @@ QString AGeoPolygon::updateShape()
     ok = GC.updateParameter(errorStr, strNedges, dnedges, true, true, false); if (!ok) return errorStr;
     nedges = dnedges;
     ok = GC.updateParameter(errorStr, strdPhi,   dphi, false, false, false);   if (!ok) return errorStr;
-    ok = GC.updateParameter(errorStr, str2dz,    dz);     if (!ok) return errorStr;
-    ok = GC.updateParameter(errorStr, str2rminL, rminL, false);  if (!ok) return errorStr;
-    ok = GC.updateParameter(errorStr, str2rmaxL, rmaxL, false);  if (!ok) return errorStr;
-    ok = GC.updateParameter(errorStr, str2rminU, rminU, false);  if (!ok) return errorStr;
-    ok = GC.updateParameter(errorStr, str2rminU, rmaxU, false);  if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, str2dz,    dz);                          if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, str2rminL, rminL, false);                if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, str2rmaxL, rmaxL, false);                if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, str2rminU, rminU, false);                if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, str2rmaxU, rmaxU, false);                if (!ok) return errorStr;
 
     if (rminL   >= rmaxL)               return "Inside lower diameter should be smaller than the outside one!";
     if (rminU   >= rmaxU)               return "Inside upper diameter should be smaller than the outside one!";
-    if (dphi   <= 0 || dphi   >  360)   return   "Phi2 should be in the range of (0, 360]";
+    if (dphi   <= 0 || dphi   >  360)   return "Phi2 should be in the range of (0, 360]";
     return "";
 }
 

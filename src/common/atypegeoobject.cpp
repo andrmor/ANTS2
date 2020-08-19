@@ -50,7 +50,6 @@ void ATypeArrayObject::Reconfigure(int NumX, int NumY, int NumZ, double StepX, d
 
 QString ATypeArrayObject::updateType()
 {
-    qDebug() <<"updating type";
     QString errorStr;
     bool ok;
     double dNumX = numX;
@@ -69,7 +68,6 @@ QString ATypeArrayObject::updateType()
     ok = AGeoConsts::getConstInstance().updateParameter(errorStr, strStepX, stepX, true, true, false) ; if (!ok) return errorStr;
     ok = AGeoConsts::getConstInstance().updateParameter(errorStr, strStepY, stepY, true, true, false) ; if (!ok) return errorStr;
     ok = AGeoConsts::getConstInstance().updateParameter(errorStr, strStepZ, stepZ, true, true, false) ; if (!ok) return errorStr;
-    qDebug() <<"update type "<<"strnumx" << strNumX;
 
     return "";
 }
@@ -97,8 +95,6 @@ void ATypeArrayObject::replaceGeoConstName(const QRegExp &nameRegExp, const QStr
 
 void ATypeArrayObject::writeToJson(QJsonObject &json)
 {
-    qDebug() <<"writing to jason";
-    qDebug() <<"write to Json " <<" strumx " <<strNumX;
     ATypeGeoObject::writeToJson(json);
     json["numX"]  = numX;
     json["numY"]  = numY;
@@ -117,7 +113,6 @@ void ATypeArrayObject::writeToJson(QJsonObject &json)
 
 void ATypeArrayObject::readFromJson(QJsonObject &json)
 {
-    qDebug() <<"reading from json";
     parseJson(json, "numX",  numX);
     parseJson(json, "numY",  numY);
     parseJson(json, "numZ",  numZ);

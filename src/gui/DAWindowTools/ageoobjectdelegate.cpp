@@ -267,8 +267,6 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
             obj->readShapeFromString(newShape);
         }*/
 
-        qDebug() <<"completely updated shape";
-
 
         //if it is a set member, need old values of position and angle
         QVector<double> old;
@@ -334,8 +332,6 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
             obj->updateStack();
     }
 
-    qDebug() <<"starting array post processing";
-
     //additional post-processing
     if ( obj->ObjectType->isArray() )
     {
@@ -349,7 +345,6 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
 
         //additional properties for array
         ATypeArrayObject* array = static_cast<ATypeArrayObject*>(obj->ObjectType);
-        qDebug() <<"updateobject" << "strnux " << array->strNumX;
         QString errorStr = array->updateType();
         if (!errorStr.isEmpty())
         {
@@ -1849,7 +1844,7 @@ AGeoPolygonDelegate::AGeoPolygonDelegate(const QStringList &materials, QWidget *
     for (AOneLineTextEdit * le : {en, edp, ez, eli, elo, eui, euo})
     {
         configureHighligherAndCompleter(le);
-        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoPolygonDelegate::finalizeLocalParameters);
+        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoPolygonDelegate::ContentChanged);
     }
 }
 
@@ -1903,13 +1898,15 @@ void AGeoPolygonDelegate::Update(const AGeoObject *obj)
 
     if (polygon)
     {
-        en ->setText(polygon->strNedges .isEmpty() ? QString::number(polygon->nedges)     : polygon->strNedges);
-        edp->setText(polygon->strdPhi  .isEmpty() ? QString::number(polygon->dphi)        : polygon->strdPhi);
-        ez ->setText(polygon->str2dz   .isEmpty() ? QString::number(polygon->dz    * 2.0) : polygon->str2dz);
-        eli->setText(polygon->str2rminL.isEmpty() ? QString::number(polygon->rminL * 2.0) : polygon->str2rminL);
-        elo->setText(polygon->str2rmaxL.isEmpty() ? QString::number(polygon->rmaxL * 2.0) : polygon->str2rmaxL);
-        eui->setText(polygon->str2rminU.isEmpty() ? QString::number(polygon->rminU * 2.0) : polygon->str2rminU);
-        euo->setText(polygon->str2rmaxU.isEmpty() ? QString::number(polygon->rmaxU * 2.0) : polygon->str2rmaxU);
+        en ->setText(polygon->strNedges .isEmpty() ? QString::number(polygon->nedges)      : polygon->strNedges);
+        //qDebug() <<"aaaaaaaaaa"<<polygon->strNedges;
+        edp->setText(polygon->strdPhi  .isEmpty()  ? QString::number(polygon->dphi)        : polygon->strdPhi);
+        ez ->setText(polygon->str2dz   .isEmpty()  ? QString::number(polygon->dz    * 2.0) : polygon->str2dz);
+        //qDebug() <<"bbbbbbbbbbbbb"<<polygon->str2dz;
+        eli->setText(polygon->str2rminL.isEmpty()  ? QString::number(polygon->rminL * 2.0) : polygon->str2rminL);
+        elo->setText(polygon->str2rmaxL.isEmpty()  ? QString::number(polygon->rmaxL * 2.0) : polygon->str2rmaxL);
+        eui->setText(polygon->str2rminU.isEmpty()  ? QString::number(polygon->rminU * 2.0) : polygon->str2rminU);
+        euo->setText(polygon->str2rmaxU.isEmpty()  ? QString::number(polygon->rmaxU * 2.0) : polygon->str2rmaxU);
     }
     else qWarning() << "Read delegate: Polygon shape not found!";
 }
@@ -2405,7 +2402,7 @@ AGeoComposite * comp = dynamic_cast<AGeoComposite*>(ShapeCopy);
 
     if (comp)
     {
-        qDebug() <<"updte delegate"<<comp->GenerationString.simplified();
+        //qDebug() <<"updte delegate"<<comp->GenerationString.simplified();
         QString s = comp->GenerationString.simplified();
         s.remove("TGeoCompositeShape(");
         s.chop(1);
@@ -2605,8 +2602,6 @@ void AGeoArrayDelegate::finalizeLocalParameters()
     processEditBox(ledStepX,   array->stepX, array->strStepX, ParentWidget);
     processEditBox(ledStepY,   array->stepY, array->strStepY, ParentWidget);
     processEditBox(ledStepZ,   array->stepZ, array->strStepZ, ParentWidget);*/
-
-    qDebug() <<"finalizing local parameters";
 
     if (CurrentObject->ObjectType->isArray())
     {

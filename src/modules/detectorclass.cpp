@@ -113,6 +113,7 @@ DetectorClass::~DetectorClass()
   delete RandGen;
 }
 
+/*
 void DetectorClass::writeWorldFixedToJson(QJsonObject &json)
 {
   QJsonObject js;
@@ -121,6 +122,7 @@ void DetectorClass::writeWorldFixedToJson(QJsonObject &json)
   js["Z"] = WorldSizeZ;
   json["FixedWorldSizes"] = js;
 }
+*/
 
 bool DetectorClass::MakeDetectorFromJson(QJsonObject &json)
 {
@@ -184,7 +186,7 @@ void DetectorClass::writeToJson(QJsonObject &json)
     QJsonObject js;
 
     MpCollection->writeToJson(js);          //Particles+Material (including overrides)
-    writeWorldFixedToJson(js);              //Fixed world size - if activated
+    //writeWorldFixedToJson(js);              //Fixed world size - if activated
     Sandwich->writeToJson(js);
     PMs->writePMtypesToJson(js);            //PM array types
     writePMarraysToJson(js);                //PM arrays    
@@ -196,15 +198,6 @@ void DetectorClass::writeToJson(QJsonObject &json)
     writePreprocessingToJson(js);           //Preprocessing for load ascii data
 
     json["DetectorConfig"] = js;
-
-      //just for control
-    //QJsonObject js1;
-    //js1["DetectorConfig"] = js;
-    //SaveJsonToFile(js1, "DetectorConfig.json");
-
-      //should not be here:
-    //Config->AskForDetectorGuiUpdate();
-    //Config->AskForSimulationGuiUpdate();
 }
 
 void DetectorClass::writePreprocessingToJson(QJsonObject &json)
@@ -391,6 +384,7 @@ void DetectorClass::onRequestRegisterGeoManager()
       emit newGeoManager();
 }
 
+#include "ageoconsts.h"
 bool DetectorClass::readDummyPMsFromJson(QJsonObject &json)
 {
   if (!json.contains("DummyPMs"))
@@ -425,17 +419,38 @@ bool DetectorClass::makeSandwichDetector()
   PMdummies.clear();
   readDummyPMsFromJson(js);  
   Sandwich->readFromJson(js);
-  readWorldFixedFromJson(js);
+
+  //World size
+  //old system
+  if (!readWorldFixedFromJson(js))  //if can read, json is made using the old system
+  {
+      // new system
+      qDebug() << "-==- Using NEW system for world size";
+
+      ATypeWorldObject * typeWorld = dynamic_cast<ATypeWorldObject *>(Sandwich->World->ObjectType);
+      if (typeWorld) fWorldSizeFixed = typeWorld->bFixedSize;
+
+      AGeoBox * box = static_cast<AGeoBox*>(Sandwich->World->Shape);
+      const AGeoConsts & GC = AGeoConsts::getConstInstance();
+
+      WorldSizeXY = 500.0;
+      WorldSizeZ  = 500.0;
+      QString errorStr;
+      bool ok =  GC.updateParameter(errorStr, box->str2dx, box->dx);
+      ok = ok && GC.updateParameter(errorStr, box->str2dz, box->dz);
+      if (ok)
+      {
+          WorldSizeXY = box->dx;
+          WorldSizeZ  = box->dz;
+      }
+      else fWorldSizeFixed = false;
+
+      qDebug() << "---World mat:" << Sandwich->World->Material;
+      qDebug() << "---World size:" << box->dx << box->dz;
+  }
 
   //making detector  
   populateGeoManager();
-
-  //update world AGeoObject properties to be used in GUI (AGeoTreeWidget -> AWorldDelegate)
-  AGeoBox * box = static_cast<AGeoBox*>(Sandwich->World->Shape);
-  box->dx = WorldSizeXY;
-  box->dz = WorldSizeZ;
-  ATypeWorldObject * typeWorld = static_cast<ATypeWorldObject *>(Sandwich->World->ObjectType);
-  typeWorld->bFixedSize = fWorldSizeFixed;
 
   //post-construction load
   PMs->readInividualOverridesFromJson(js);
@@ -445,16 +460,30 @@ bool DetectorClass::makeSandwichDetector()
   return true;
 }
 
-void DetectorClass::readWorldFixedFromJson(QJsonObject& json)
+bool DetectorClass::readWorldFixedFromJson(const QJsonObject &json)
 {
-  QJsonObject jws = json["FixedWorldSizes"].toObject();
-  fWorldSizeFixed = false;
-  parseJson(jws, "WorldSizeFixed", fWorldSizeFixed);
-  if (fWorldSizeFixed)
+    fWorldSizeFixed = false;    //paranoic
+    if (!json.contains("FixedWorldSizes")) return false; //already new system is in effect
+
+    //old system
+    qDebug() << "-==- Using OLD system for world size";
+
+    QJsonObject jws = json["FixedWorldSizes"].toObject();
+    parseJson(jws, "WorldSizeFixed", fWorldSizeFixed);
+    if (fWorldSizeFixed)
     {
-      parseJson(jws, "XY", WorldSizeXY);
-      parseJson(jws, "Z", WorldSizeZ);
+        parseJson(jws, "XY", WorldSizeXY);
+        parseJson(jws, "Z",  WorldSizeZ);
     }
+    //converting to the new system
+    AGeoBox * box = static_cast<AGeoBox*>(Sandwich->World->Shape);
+    box->dx = WorldSizeXY;
+    box->dy = WorldSizeXY;
+    box->dz = WorldSizeZ;
+    ATypeWorldObject * typeWorld = static_cast<ATypeWorldObject *>(Sandwich->World->ObjectType);
+    typeWorld->bFixedSize = fWorldSizeFixed;
+
+    return true;
 }
 
 bool DetectorClass::importGDML(const QString & gdml)

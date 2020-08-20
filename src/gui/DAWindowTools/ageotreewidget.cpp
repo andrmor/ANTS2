@@ -1719,38 +1719,21 @@ AGeoBaseDelegate * AGeoWidget::createAndAddGeoObjectDelegate()
 
 AGeoBaseDelegate * AGeoWidget::createAndAddSlabDelegate()
 {
-    AGeoBaseDelegate * Del;
-
+    AGeoObjectDelegate * Del;
     ASlabModel * SlabModel = (static_cast<ATypeSlabObject*>(CurrentObject->ObjectType))->SlabModel;
     switch (SlabModel->XYrecord.shape)
     {
     default: qWarning() << "Unknown slab shape, assuming rectangular";
     case 0:
-    {
-        AGeoObjectDelegate * del = new AGeoSlabDelegate_Box(tw->Sandwich->Materials, static_cast<int>(tw->Sandwich->SandwichState), this);
-        connect(del, &AGeoObjectDelegate::RequestChangeSlabShape, this, &AGeoWidget::onRequestChangeSlabShape);
-        Del = del; // temporary!
-        break;
-    }
+        Del = new AGeoSlabDelegate_Box(tw->Sandwich->Materials, static_cast<int>(tw->Sandwich->SandwichState), this); break;
     case 1:
-    {
-        AGeoObjectDelegate * del = new AGeoSlabDelegate_Tube(tw->Sandwich->Materials, static_cast<int>(tw->Sandwich->SandwichState), this);
-        connect(del, &AGeoObjectDelegate::RequestChangeSlabShape, this, &AGeoWidget::onRequestChangeSlabShape);
-        Del = del; // temporary!
-        break;
-    }
+        Del = new AGeoSlabDelegate_Tube(tw->Sandwich->Materials, static_cast<int>(tw->Sandwich->SandwichState), this); break;
     case 2:
-    {
-        AGeoObjectDelegate * del = new AGeoSlabDelegate_Poly(tw->Sandwich->Materials, static_cast<int>(tw->Sandwich->SandwichState), this);
-        connect(del, &AGeoObjectDelegate::RequestChangeSlabShape, this, &AGeoWidget::onRequestChangeSlabShape);
-        Del = del; // temporary!
-        break;
+        Del = new AGeoSlabDelegate_Poly(tw->Sandwich->Materials, static_cast<int>(tw->Sandwich->SandwichState), this); break;
     }
-    }
+    connect(Del, &AGeoObjectDelegate::RequestChangeSlabShape, this, &AGeoWidget::onRequestChangeSlabShape);
 
     //Del = new AGeoSlabDelegate(tw->Sandwich->Materials, static_cast<int>(tw->Sandwich->SandwichState), this);
-
-
     return Del;
 }
 

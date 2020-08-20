@@ -1732,9 +1732,22 @@ AGeoBaseDelegate * AGeoWidget::createAndAddSlabDelegate()
         Del = del; // temporary!
         break;
     }
-    case 1: Del = new AGeoSlabDelegate(tw->Sandwich->Materials, static_cast<int>(tw->Sandwich->SandwichState), this); break;
-    case 2: Del = new AGeoSlabDelegate(tw->Sandwich->Materials, static_cast<int>(tw->Sandwich->SandwichState), this); break;
+    case 1:
+    {
+        AGeoObjectDelegate * del = new AGeoSlabDelegate_Tube(tw->Sandwich->Materials, static_cast<int>(tw->Sandwich->SandwichState), this);
+        connect(del, &AGeoObjectDelegate::RequestChangeSlabShape, this, &AGeoWidget::onRequestChangeSlabShape);
+        Del = del; // temporary!
+        break;
     }
+    case 2:
+    {
+        AGeoObjectDelegate * del = new AGeoSlabDelegate_Poly(tw->Sandwich->Materials, static_cast<int>(tw->Sandwich->SandwichState), this);
+        connect(del, &AGeoObjectDelegate::RequestChangeSlabShape, this, &AGeoWidget::onRequestChangeSlabShape);
+        Del = del; // temporary!
+        break;
+    }
+    }
+
     //Del = new AGeoSlabDelegate(tw->Sandwich->Materials, static_cast<int>(tw->Sandwich->SandwichState), this);
 
 
@@ -1806,7 +1819,6 @@ void AGeoWidget::onRequestChangeShape(AGeoShape * NewShape)
 
 void AGeoWidget::onRequestChangeSlabShape(int NewShape)
 {
-    qDebug() << "ahaaaaaaaaaaaaaaa" << NewShape;
     if (!GeoDelegate) return;
     if (!CurrentObject) return;
     if (NewShape < 0 || NewShape > 2) return;

@@ -96,6 +96,7 @@ protected:
     const AGeoShape * getBaseShapeOfObject(const AGeoObject *obj);
     void updateTypeLabel();
     void updateControlUI();
+    void initSlabDelegate(int SlabModelState);
 
 private:
     void rotate(TVector3 & v, double dPhi, double dTheta, double dPsi) const;

@@ -122,37 +122,21 @@ void AGeoSlabDelegate::onContentChanged()
 
 #include "aonelinetextedit.h"
 #include "ageoshape.h"
+#include "ageoconsts.h"
 
 #include <QPushButton>
 
 AGeoSlabDelegate_Box::AGeoSlabDelegate_Box(const QStringList & definedMaterials, int SlabModelState, QWidget * ParentWidget) :
     AGeoBoxDelegate(definedMaterials, ParentWidget), SlabModelState(SlabModelState)
 {
-    switch (SlabModelState) // supposed to fall through!
+    initSlabDelegate(SlabModelState);
+    if (SlabModelState == 0)
     {
-    case 0 :
         ex->setEnabled(false);
         ey->setEnabled(false);
-    case 1 :
-        ledPsi->setEnabled(false);
-    case 2 :;
-    default:;
     }
-
-    ledX->setEnabled(false);
-    ledY->setEnabled(false);
-    ledZ->setEnabled(false);
-
-    ledPhi->setEnabled(false);
-    ledTheta->setEnabled(false);
-
-    cbScale->setVisible(false);
-
-    if (SlabModelState == 2) ListOfShapesForTransform = QStringList({"Rectangular slab", "Round slab", "Polygon slab"});
-    else pbTransform->setEnabled(false);
 }
 
-#include "ageoconsts.h"
 bool AGeoSlabDelegate_Box::updateObject(AGeoObject * obj) const
 {
     ATypeSlabObject * slab = dynamic_cast<ATypeSlabObject*>(obj->ObjectType);
@@ -201,6 +185,134 @@ bool AGeoSlabDelegate_Box::updateObject(AGeoObject * obj) const
 void AGeoSlabDelegate_Box::Update(const AGeoObject * obj)
 {
     AGeoBoxDelegate::Update(obj);
-
     labType->setText( CurrentObject->ObjectType->isLightguide() ? "Lightguide, rectangular slab" : "Rectangular slab" );
+}
+
+AGeoSlabDelegate_Tube::AGeoSlabDelegate_Tube(const QStringList &definedMaterials, int SlabModelState, QWidget *ParentWidget) :
+    AGeoTubeDelegate(definedMaterials, ParentWidget), SlabModelState(SlabModelState)
+{
+    initSlabDelegate(SlabModelState);
+    ei->setEnabled(false);
+    if (SlabModelState == 0) eo->setEnabled(false);
+}
+
+bool AGeoSlabDelegate_Tube::updateObject(AGeoObject *obj) const
+{
+    ATypeSlabObject * slab = dynamic_cast<ATypeSlabObject*>(obj->ObjectType);
+    if (!slab)
+    {
+        qWarning() << "This is not a slab!";
+        return false;
+    }
+
+    bool ok = AGeoTubeDelegate::updateObject(obj);
+    if (!ok) return false;
+
+    ASlabModel SlabModel = *slab->SlabModel;
+
+    SlabModel.material = obj->Material;
+    SlabModel.name     = obj->Name;
+
+    const AGeoConsts & GC = AGeoConsts::getConstInstance();
+    QString ErrorStr;
+    switch (SlabModelState)  // supposed to fall through!
+    {
+    default: qWarning() << "Unknown slab shape, assuming rectangular";
+    case 2: //update psi
+        SlabModel.XYrecord.strAngle = ledPsi->text();
+        ok =       GC.updateParameter(ErrorStr, SlabModel.XYrecord.strAngle, SlabModel.XYrecord.angle, false, false, false);
+    case 1: //update dx dy
+        SlabModel.XYrecord.strSize1 = eo->text();
+        ok = ok && GC.updateParameter(ErrorStr, SlabModel.XYrecord.strSize1, SlabModel.XYrecord.size1, true, true, false);
+    case 0: //update dz
+        SlabModel.strHeight = ez->text();
+        ok = ok && GC.updateParameter(ErrorStr, SlabModel.strHeight, SlabModel.height, true, true, false);
+    }
+
+    if (!ok)
+    {
+        message(ErrorStr, this->ParentWidget);
+        return false;
+    }
+
+    *(slab->SlabModel) = SlabModel;
+    return true;
+}
+
+void AGeoSlabDelegate_Tube::Update(const AGeoObject *obj)
+{
+    AGeoTubeDelegate::Update(obj);
+    labType->setText( CurrentObject->ObjectType->isLightguide() ? "Lightguide, round slab" : "Round slab" );
+}
+
+AGeoSlabDelegate_Poly::AGeoSlabDelegate_Poly(const QStringList &definedMaterials, int SlabModelState, QWidget *ParentWidget) :
+    AGeoPolygonDelegate(definedMaterials, ParentWidget), SlabModelState(SlabModelState)
+{
+    initSlabDelegate(SlabModelState);
+    if (SlabModelState == 0)
+        euo->setEnabled(false);
+
+    if (SlabModelState != 2) en->setEnabled(false);
+    elo->setEnabled(false);
+    edp->setEnabled(false);
+    eli->setEnabled(false);
+    eui->setEnabled(false);
+}
+
+bool AGeoSlabDelegate_Poly::updateObject(AGeoObject *obj) const
+{
+    ATypeSlabObject * slab = dynamic_cast<ATypeSlabObject*>(obj->ObjectType);
+    if (!slab)
+    {
+        qWarning() << "This is not a slab!";
+        return false;
+    }
+
+    bool ok = AGeoPolygonDelegate::updateObject(obj);
+    if (!ok) return false;
+
+    ASlabModel SlabModel = *slab->SlabModel;
+
+    SlabModel.material = obj->Material;
+    SlabModel.name     = obj->Name;
+
+    const AGeoConsts & GC = AGeoConsts::getConstInstance();
+    QString ErrorStr;
+    switch (SlabModelState)  // supposed to fall through!
+    {
+    default: qWarning() << "Unknown slab shape, assuming rectangular";
+    case 2: //update psi
+        SlabModel.XYrecord.strAngle = ledPsi->text();
+        ok =       GC.updateParameter(ErrorStr, SlabModel.XYrecord.strAngle, SlabModel.XYrecord.angle, false, false, false);
+        SlabModel.XYrecord.strSides = en->text();
+        double sides;
+        ok = ok && GC.updateParameter(ErrorStr, SlabModel.XYrecord.strSides, sides, true, true, false);
+        if (sides < 3)
+        {
+            ErrorStr = "Number of sides should be at least 3";
+            ok = false;
+        }
+        else SlabModel.XYrecord.sides = sides;
+    case 1: //update dx dy
+        SlabModel.XYrecord.strSize1 = euo->text();
+        ok = ok && GC.updateParameter(ErrorStr, SlabModel.XYrecord.strSize1, SlabModel.XYrecord.size1, true, true, false);
+    case 0: //update dz
+        SlabModel.strHeight = ez->text();
+        ok = ok && GC.updateParameter(ErrorStr, SlabModel.strHeight, SlabModel.height, true, true, false);
+    }
+
+    if (!ok)
+    {
+        message(ErrorStr, this->ParentWidget);
+        return false;
+    }
+
+    *(slab->SlabModel) = SlabModel;
+    return true;
+}
+
+void AGeoSlabDelegate_Poly::Update(const AGeoObject *obj)
+{
+    AGeoPolygonDelegate::Update(obj);
+    labType->setText( CurrentObject->ObjectType->isLightguide() ? "Lightguide, polygon slab" : "Polygon slab" );
 }

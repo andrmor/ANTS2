@@ -551,6 +551,23 @@ void AGeoObjectDelegate::updateControlUI()
     }
 }
 
+void AGeoObjectDelegate::initSlabDelegate(int SlabModelState)
+{
+    if (SlabModelState != 2) ledPsi->setEnabled(false);
+
+    ledX->setEnabled(false);
+    ledY->setEnabled(false);
+    ledZ->setEnabled(false);
+
+    ledPhi->setEnabled(false);
+    ledTheta->setEnabled(false);
+
+    cbScale->setVisible(false);
+
+    if (SlabModelState == 2) ListOfShapesForTransform = QStringList({"Rectangular slab", "Round slab", "Polygon slab"});
+    else pbTransform->setEnabled(false);
+}
+
 void AGeoObjectDelegate::rotate(TVector3 & v, double dPhi, double dTheta, double dPsi) const
 {
     v.RotateZ( TMath::Pi()/180.0* dPhi );
@@ -567,7 +584,6 @@ void AGeoObjectDelegate::rotate(TVector3 & v, double dPhi, double dTheta, double
 void AGeoObjectDelegate::onShapeDialogActivated(QDialog * d, QListWidget * w)
 {
     const QString sel = w->currentItem()->text();
-    qDebug() << "uuuuuuuuuuuu" << sel;
     if      (sel == "Box")                  emit RequestChangeShape(new AGeoBox());
     else if (sel == "Parallelepiped")       emit RequestChangeShape(new AGeoPara());
     else if (sel == "Tube")                 emit RequestChangeShape(new AGeoTube());

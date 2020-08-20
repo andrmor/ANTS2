@@ -446,11 +446,12 @@ void AGeoObject::UpdateFromSlabModel(ASlabModel* SlabModel)
         break;        
       }
     }
+    AGeoConsts::getConstInstance().evaluateFormula(OrientationStr[2], Orientation[2]);
 }
 
-ASlabModel *AGeoObject::getSlabModel()
+ASlabModel * AGeoObject::getSlabModel()
 {
-    if (!ObjectType->isSlab()) return 0;
+    if (!ObjectType->isSlab()) return nullptr;
     ATypeSlabObject* SO = static_cast<ATypeSlabObject*>(ObjectType);
     return SO->SlabModel;
 }

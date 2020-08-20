@@ -106,6 +106,7 @@ void ASlabModel::writeToJson(QJsonObject &json) const
     json["XY"] = XYjson;
 }
 
+#include "ageoconsts.h"
 void ASlabModel::readFromJson(const QJsonObject & json)
 {
     *this = ASlabModel(); //to load default values
@@ -127,6 +128,18 @@ void ASlabModel::readFromJson(const QJsonObject & json)
     parseJson(json, "color",  color);
     parseJson(json, "style",  style);
     parseJson(json, "width",  width);
+
+    const AGeoConsts & GC = AGeoConsts::getConstInstance();
+    double sides;
+    if (!XYrecord.strSides.isEmpty())
+    {
+        bool ok = GC.evaluateFormula(XYrecord.strSides, sides);
+        if (ok && sides > 2) XYrecord.sides = sides;
+    }
+    if (!XYrecord.strSize1.isEmpty()) GC.evaluateFormula(XYrecord.strSize1, XYrecord.size1);
+    if (!XYrecord.strSize2.isEmpty()) GC.evaluateFormula(XYrecord.strSize2, XYrecord.size2);
+    if (!XYrecord.strAngle.isEmpty()) GC.evaluateFormula(XYrecord.strAngle, XYrecord.angle);
+    if (!strHeight.isEmpty())         GC.evaluateFormula(strHeight,         height);
 }
 
 void ASlabModel::importFromOldJson(QJsonObject &json)

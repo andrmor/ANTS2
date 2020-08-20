@@ -1807,8 +1807,9 @@ void AGeoWidget::onRequestChangeSlabShape(int NewShape)
     if (NewShape < 0 || NewShape > 2) return;
     if (!CurrentObject->ObjectType->isSlab()) return;
 
-    ASlabModel * SlabModel = (static_cast<ATypeSlabObject*>(CurrentObject->ObjectType))->SlabModel;
+    ASlabModel * SlabModel = CurrentObject->getSlabModel();
     SlabModel->XYrecord.shape = NewShape;
+    CurrentObject->UpdateFromSlabModel(SlabModel);
 
     exitEditingMode();
     QString name = CurrentObject->Name;

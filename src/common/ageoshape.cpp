@@ -1922,11 +1922,22 @@ AGeoArb8::AGeoArb8(double dz, QList<QPair<double, double> > VertList) : dz(dz)
         init();
     }
     else  Vertices = VertList;
+
+    strVertices.resize(8);
+    for (int i =0; i<8; i++)
+    {
+        strVertices[i].resize(2);
+    }
 }
 
 AGeoArb8::AGeoArb8() : dz(10)
 {
     init();
+    strVertices.resize(8);
+    for (int i =0; i<8; i++)
+    {
+        strVertices[i].resize(2);
+    }
 }
 
 const QString AGeoArb8::getHelp()
@@ -1944,6 +1955,47 @@ const QString AGeoArb8::getHelp()
                 "a triangle) or point-point (making a line). Any choice is valid as long as at one of the end-caps is at least a "
                 "triangle.";
     return s;
+}
+
+QString AGeoArb8::updateShape()
+{
+    const AGeoConsts & GC = AGeoConsts::getConstInstance();
+    QString errorStr;
+    bool ok;
+    ok = GC.updateParameter(errorStr, str2dz, dz); if (!ok) return errorStr;
+    for (int i =0; i<8; i++)
+    {
+        ok = GC.updateParameter(errorStr, strVertices[i][0], Vertices[i].first, false, false, false);  if (!ok) return errorStr;
+        ok = GC.updateParameter(errorStr, strVertices[i][1], Vertices[i].second, false, false, false); if (!ok) return errorStr;
+    }
+
+    if (!AGeoShape::CheckPointsForArb8(Vertices))
+    {
+        return "Nodes of AGeoArb8 should be defined clockwise on both planes";
+    }
+    return "";
+}
+
+bool AGeoArb8::isGeoConstInUse(const QRegExp &nameRegExp) const
+{
+    if (str2dz.contains(nameRegExp)) return true;
+
+    for (int i =0; i<8; i++)
+    {
+        if (strVertices[i][0].contains(nameRegExp)) return true;
+        if (strVertices[i][1].contains(nameRegExp)) return true;
+    }
+}
+
+void AGeoArb8::replaceGeoConstName(const QRegExp &nameRegExp, const QString &newName)
+{
+    str2dz.replace(nameRegExp, newName);
+
+    for (int i =0; i<8; i++)
+    {
+        strVertices[i][0].replace(nameRegExp, newName);
+        strVertices[i][1].replace(nameRegExp, newName);
+    }
 }
 
 bool AGeoArb8::readFromString(QString GenerationString)
@@ -2019,6 +2071,8 @@ double AGeoArb8::maxSize()
 void AGeoArb8::writeToJson(QJsonObject &json) const
 {
     json["dz"] = dz;
+    if (!str2dz.isEmpty()) json["str2dz"] = str2dz;
+
     QJsonArray ar;
     for (int i=0; i<8; i++)
     {
@@ -2028,17 +2082,43 @@ void AGeoArb8::writeToJson(QJsonObject &json) const
         ar.append(el);
     }
     json["Vertices"] = ar;
+
+    QJsonArray strAr;
+
+    for (int i=0; i<8; i++)
+    {
+        QJsonArray el;
+        el << (strVertices.at(i).at(0).isEmpty() ? "" : strVertices.at(i).at(0));
+        el << (strVertices.at(i).at(1).isEmpty() ? "" : strVertices.at(i).at(1));
+        strAr.append(el);
+    }
+
+    json["StrVertices"] = strAr;
+
 }
 
 void AGeoArb8::readFromJson(const QJsonObject &json)
 {
-    dz = json["dz"].toDouble();
+    qDebug() <<"reading from json";
+
+    dz     = json["dz"].toDouble();
+    str2dz = json["str2dz"].toString();
+
+
     QJsonArray ar = json["Vertices"].toArray();
     for (int i=0; i<8; i++)
     {
         QJsonArray el = ar[i].toArray();
         Vertices[i].first = el[0].toDouble();
         Vertices[i].second = el[1].toDouble();
+    }
+
+    QJsonArray strAr = json["StrVertices"].toArray();
+    for (int i=0; i<8; i++)
+    {
+        QJsonArray el = strAr[i].toArray();
+        strVertices[i][0] = el[0].toString();
+        strVertices[i][1] = el[1].toString();
     }
 }
 

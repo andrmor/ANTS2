@@ -494,8 +494,8 @@ private slots:
 
 struct AEditEdit
 {
-    QLineEdit * X = nullptr;
-    QLineEdit * Y = nullptr;
+    AOneLineTextEdit * X = nullptr;
+    AOneLineTextEdit * Y = nullptr;
 };
 
 class AGeoArb8Delegate : public AGeoObjectDelegate
@@ -505,7 +505,9 @@ class AGeoArb8Delegate : public AGeoObjectDelegate
 public:
     AGeoArb8Delegate(const QStringList & materials, QWidget * parent);
 
-    QLineEdit * ez = nullptr;
+    void finalizeLocalParameters() override;
+
+    AOneLineTextEdit * ez = nullptr;
     QVector< QVector<AEditEdit> > ve; //[0..1][0..3] - upper/lower, 4 points
 
 public slots:

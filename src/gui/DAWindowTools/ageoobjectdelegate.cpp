@@ -2525,8 +2525,9 @@ AGeoArb8Delegate::AGeoArb8Delegate(const QStringList &materials, QWidget *parent
     QGridLayout * gr = new QGridLayout();
         gr->setContentsMargins(0, 0, 0, 0);
         gr->addWidget(new QLabel("Height:"), 0, 0);
-        ez = new QLineEdit(); gr->addWidget(ez,  0, 1);
-        connect(ez, &QLineEdit::textChanged, this, &AGeoArb8Delegate::onLocalShapeParameterChange);
+        ez = new AOneLineTextEdit(); gr->addWidget(ez,  0, 1);
+        configureHighligherAndCompleter(ez);
+        connect(ez, &AOneLineTextEdit::textChanged, this, &AGeoArb8Delegate::ContentChanged);
         gr->addWidget(new QLabel("mm"), 0, 2);
     v->addLayout(gr);
 
@@ -2544,12 +2545,14 @@ AGeoArb8Delegate::AGeoArb8Delegate(const QStringList &materials, QWidget *parent
         for (int i=0; i < 4; i++)
         {
             gri->addWidget(new QLabel("  x:"),    i, 0);
-            tmpV[i].X = new QLineEdit("");
-            connect(tmpV[i].X, &QLineEdit::textChanged, this, &AGeoArb8Delegate::onLocalShapeParameterChange);
+            tmpV[i].X = new AOneLineTextEdit;
+            configureHighligherAndCompleter(tmpV[i].X);
+            connect(tmpV[i].X, &AOneLineTextEdit::textChanged, this, &AGeoArb8Delegate::ContentChanged);
             gri->addWidget(tmpV[i].X,             i, 1);
             gri->addWidget(new QLabel("mm   y:"), i, 2);
-            tmpV[i].Y = new QLineEdit("");
-            connect(tmpV[i].Y, &QLineEdit::textChanged, this, &AGeoArb8Delegate::onLocalShapeParameterChange);
+            tmpV[i].Y = new AOneLineTextEdit;
+            configureHighligherAndCompleter(tmpV[i].Y);
+            connect(tmpV[i].Y, &AOneLineTextEdit::textChanged, this, &AGeoArb8Delegate::ContentChanged);
             gri->addWidget(tmpV[i].Y,             i, 3);
             gri->addWidget(new QLabel("mm"),      i, 4);
         }
@@ -2559,11 +2562,37 @@ AGeoArb8Delegate::AGeoArb8Delegate(const QStringList &materials, QWidget *parent
     addLocalLayout(v);
 }
 
+void AGeoArb8Delegate::finalizeLocalParameters()
+{
+    AGeoArb8 * arb8 = dynamic_cast<AGeoArb8*>(ShapeCopy);
+    if (!arb8)
+    {
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+        arb8 = dynamic_cast<AGeoArb8*>(scaled->BaseShape);
+    }
+
+    if (arb8)
+    {
+        arb8->str2dz = ez->text();
+
+        for (int iul =0; iul < 2; iul++)
+        {
+            for (int i=0; i < 4; i++)
+            {
+                const int iInVert = iul * 4 + i;
+                arb8->strVertices[iInVert][0] = ve[iul][i].X->text();
+                arb8->strVertices[iInVert][1] = ve[iul][i].Y->text();
+            }
+        }
+    }
+    else qWarning() << "Read delegate: Arb8 shape not found!";
+}
+
 void AGeoArb8Delegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
 
-    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
+    /*const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
     const AGeoArb8 * arb = dynamic_cast<const AGeoArb8 *>(tmpShape ? tmpShape : obj->Shape);
     if (arb)
     {
@@ -2581,7 +2610,32 @@ void AGeoArb8Delegate::Update(const AGeoObject *obj)
             }
         }
     }
-    delete tmpShape;
+    delete tmpShape;*/
+
+    AGeoArb8 * arb8 = dynamic_cast<AGeoArb8*>(ShapeCopy);
+    if (!arb8)
+    {
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+        arb8 = dynamic_cast<AGeoArb8*>(scaled->BaseShape);
+    }
+
+    if (arb8)
+    {
+        ez->setText(arb8->str2dz.isEmpty() ? QString::number(2.0 * arb8->dz) : arb8->str2dz);
+
+        for (int iul = 0; iul < 2; iul++)
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                const int iInVert = iul * 4 + i;
+                const QPair<double, double> & V = arb8->Vertices.at(iInVert);
+                AEditEdit & CEE = ve[iul][i];
+                CEE.X->setText(arb8->strVertices.at(iInVert).at(0).isEmpty() ? QString::number(V.first)  : arb8->strVertices.at(iInVert).at(0));
+                CEE.Y->setText(arb8->strVertices.at(iInVert).at(1).isEmpty() ? QString::number(V.second) : arb8->strVertices.at(iInVert).at(1));
+            }
+        }
+    }
+    else qWarning() << "Read delegate: Arb8 shape not found!";
 }
 
 void AGeoArb8Delegate::onLocalShapeParameterChange()

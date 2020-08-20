@@ -641,6 +641,10 @@ public:
   const QString getShapeType() const override {return "TGeoArb8";}
   virtual const QString getShapeTemplate() {return "TGeoArb8( dz,  xL1,yL1, xL2,yL2, xL3,yL3, xL4,yL4, xU1,yU1, xU2,yU2, xU3,yU3, xU4,yU4  )";}
   virtual const QString getHelp();
+  QString updateShape() override;
+
+  bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
+  void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
 
   virtual bool readFromString(QString GenerationString);
   virtual TGeoShape* createGeoShape(const QString shapeName = "");
@@ -656,7 +660,9 @@ public:
   virtual bool readFromTShape(TGeoShape* Tshape);
 
   double dz;
+  QString str2dz;
   QList<QPair<double, double> > Vertices;
+  QVector<QVector<QString> > strVertices;
 
 private:
   void init();

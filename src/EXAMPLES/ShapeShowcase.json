@@ -37,11 +37,6 @@
                 ]
             }
         },
-        "FixedWorldSizes": {
-            "WorldSizeFixed": false,
-            "XY": 153.34920673956736,
-            "Z": 131.25
-        },
         "IndividualPMoverrides": {
             "Angular": {
                 "AngularResponse": [
@@ -341,17 +336,134 @@
             "Slabs": [
             ],
             "State": "CommonShape",
-            "WorldMaterial": 0,
             "WorldTree": [
                 {
                     "Container": "",
                     "Locked": false,
+                    "Material": 0,
                     "Name": "World",
                     "ObjectType": {
+                        "FixedSize": false,
                         "Type": "World"
                     },
+                    "Shape": "TGeoBBox",
+                    "ShapeSpecific": {
+                        "dx": 153.34920673956736,
+                        "dy": 153.34920673956736,
+                        "dz": 131.25
+                    },
+                    "color": -1,
                     "fActive": true,
-                    "fExpanded": true
+                    "fExpanded": true,
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Material": 0,
+                    "Name": "Cone Segment",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoConeSeg",
+                    "ShapeSpecific": {
+                        "dz": 10,
+                        "phi1": 0,
+                        "phi2": 270,
+                        "rmaxL": 5,
+                        "rmaxU": 17.5,
+                        "rminL": 0,
+                        "rminU": 7.5,
+                        "str2rmaxL": "Diameter*0.2",
+                        "str2rmaxU": "Diameter*0.7",
+                        "str2rminU": "Diameter*0.3",
+                        "strPhi2": "Angle*6"
+                    },
+                    "Theta": 0,
+                    "X": 0,
+                    "Y": 0,
+                    "Z": 50,
+                    "color": 8,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "strZ": "Offset",
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Material": 0,
+                    "Name": "Polygon Simplified",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": -90,
+                    "Psi": 0,
+                    "Shape": "TGeoPolygon",
+                    "ShapeSpecific": {
+                        "dphi": 225,
+                        "dz": 10,
+                        "nedges": 5,
+                        "rmaxL": 15,
+                        "rmaxU": 7.5,
+                        "rminL": 2.5,
+                        "rminU": 5,
+                        "str2rmaxL": "Diameter*0.6",
+                        "str2rmaxU": "Diameter*0.3",
+                        "str2rminL": "Diameter*0.1",
+                        "str2rminU": "Diameter*0.2",
+                        "strdPhi": "Angle*5"
+                    },
+                    "Theta": 0,
+                    "X": 0,
+                    "Y": -50,
+                    "Z": 50,
+                    "color": 797,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "strPhi": "-Angle*2",
+                    "strY": "-Offset",
+                    "strZ": "Offset",
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Material": 0,
+                    "Name": "Trapezoid",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoTrd2",
+                    "ShapeSpecific": {
+                        "dx1": 10,
+                        "dx2": 21,
+                        "dy1": 21,
+                        "dy2": 10,
+                        "dz": 10,
+                        "str2dx1": "SizeX*0.5",
+                        "str2dx2": "SizeY*0.7",
+                        "str2dy1": "SizeY*0.7",
+                        "str2dy2": "SizeX*0.5"
+                    },
+                    "Theta": 0,
+                    "X": 50,
+                    "Y": 0,
+                    "Z": 50,
+                    "color": 1,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "strX": "Offset",
+                    "strZ": "Offset",
+                    "style": 1,
+                    "width": 1
                 },
                 {
                     "Container": "World",

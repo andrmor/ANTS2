@@ -194,12 +194,14 @@ class AGeoTubeSegCutDelegate : public AGeoTubeSegDelegate
 public:
     AGeoTubeSegCutDelegate(const QStringList & materials, QWidget * parent);
 
-    QLineEdit * elnx = nullptr;
-    QLineEdit * elny = nullptr;
-    QLineEdit * elnz = nullptr;
-    QLineEdit * eunx = nullptr;
-    QLineEdit * euny = nullptr;
-    QLineEdit * eunz = nullptr;
+    void finalizeLocalParameters() override;
+
+    AOneLineTextEdit * elnx = nullptr;
+    AOneLineTextEdit * elny = nullptr;
+    AOneLineTextEdit * elnz = nullptr;
+    AOneLineTextEdit * eunx = nullptr;
+    AOneLineTextEdit * euny = nullptr;
+    AOneLineTextEdit * eunz = nullptr;
 
 public slots:
     void Update(const AGeoObject * obj) override;

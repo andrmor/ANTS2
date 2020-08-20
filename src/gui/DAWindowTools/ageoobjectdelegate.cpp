@@ -932,23 +932,49 @@ AGeoTubeSegCutDelegate::AGeoTubeSegCutDelegate(const QStringList &materials, QWi
     gr->addWidget(new QLabel("Up  Ny:"), 9, 0);
     gr->addWidget(new QLabel("Up  Nz:"), 10, 0);
 
-    elnx = new QLineEdit(); gr->addWidget(elnx, 5, 1);
-    elny = new QLineEdit(); gr->addWidget(elny, 6, 1);
-    elnz = new QLineEdit(); gr->addWidget(elnz, 7, 1);
-    eunx = new QLineEdit(); gr->addWidget(eunx, 8, 1);
-    euny = new QLineEdit(); gr->addWidget(euny, 9, 1);
-    eunz = new QLineEdit(); gr->addWidget(eunz, 10, 1);
+    elnx = new AOneLineTextEdit(); gr->addWidget(elnx, 5, 1);
+    elny = new AOneLineTextEdit(); gr->addWidget(elny, 6, 1);
+    elnz = new AOneLineTextEdit(); gr->addWidget(elnz, 7, 1);
+    eunx = new AOneLineTextEdit(); gr->addWidget(eunx, 8, 1);
+    euny = new AOneLineTextEdit(); gr->addWidget(euny, 9, 1);
+    eunz = new AOneLineTextEdit(); gr->addWidget(eunz, 10, 1);
 
-    QVector<QLineEdit*> l = {elnx, elny, elnz, eunx, euny, eunz};
-    for (QLineEdit * le : l)
-        QObject::connect(le, &QLineEdit::textChanged, this, &AGeoTubeSegCutDelegate::onLocalShapeParameterChange);
+    for (AOneLineTextEdit * le : {elnx, elny, elnz, eunx, euny, eunz})
+    {
+        configureHighligherAndCompleter(le);
+        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoTubeSegCutDelegate::onLocalShapeParameterChange);
+    }
+}
+
+void AGeoTubeSegCutDelegate::finalizeLocalParameters()
+{
+    AGeoTubeSegDelegate::finalizeLocalParameters();
+
+    AGeoCtub * ctube = dynamic_cast<AGeoCtub*>(ShapeCopy);
+    if (!ctube)
+    {
+    AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+    ctube = dynamic_cast<AGeoCtub*>(scaled->BaseShape);
+    }
+
+    if (ctube)
+    {
+        ctube->strnxlow = elnx->text();
+        ctube->strnylow = elny->text();
+        ctube->strnzlow = elnz->text();
+        ctube->strnxhi  = eunx->text();
+        ctube->strnyhi  = euny->text();
+        ctube->strnzhi  = eunz->text();
+
+    }
+    else qWarning() << "Read delegate: Tube segment cut shape not found!";
 }
 
 void AGeoTubeSegCutDelegate::Update(const AGeoObject *obj)
 {
-    AGeoObjectDelegate::Update(obj);
+    AGeoTubeSegDelegate::Update(obj);
 
-    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
+    /*const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
     const AGeoCtub * seg = dynamic_cast<const AGeoCtub*>(tmpShape ? tmpShape : obj->Shape);
     if (seg)
     {
@@ -964,7 +990,26 @@ void AGeoTubeSegCutDelegate::Update(const AGeoObject *obj)
         euny->setText(QString::number(seg->nyhi));
         eunz->setText(QString::number(seg->nzhi));
     }
-    delete tmpShape;
+    delete tmpShape;*/
+
+    AGeoCtub * ctube = dynamic_cast<AGeoCtub*>(ShapeCopy);
+    if (!ctube)
+    {
+    AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+    ctube = dynamic_cast<AGeoCtub*>(scaled->BaseShape);
+    }
+
+    if (ctube)
+    {
+        elnx->setText(ctube->strnxlow.isEmpty() ? QString::number(ctube->nxlow) : ctube->strnxlow);
+        elny->setText(ctube->strnylow.isEmpty() ? QString::number(ctube->nylow) : ctube->strnylow);
+        elnz->setText(ctube->strnzlow.isEmpty() ? QString::number(ctube->nzlow) : ctube->strnzlow);
+        eunx->setText(ctube->strnxhi .isEmpty() ? QString::number(ctube->nxhi)  : ctube->strnxhi);
+        euny->setText(ctube->strnyhi .isEmpty() ? QString::number(ctube->nyhi)  : ctube->strnyhi);
+        eunz->setText(ctube->strnzhi .isEmpty() ? QString::number(ctube->nzhi)  : ctube->strnzhi);
+
+    }
+    else qWarning() << "Read delegate: Tube segment cut shape not found!";
 }
 
 void AGeoTubeSegCutDelegate::onLocalShapeParameterChange()

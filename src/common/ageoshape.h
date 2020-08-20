@@ -489,17 +489,17 @@ public:
   QString str2rmin, str2rmax, str2dz, strPhi1, strPhi2;
 };
 
-class AGeoCtub : public AGeoShape
+class AGeoCtub : public AGeoTubeSeg
 {
 public:
   AGeoCtub(double rmin, double rmax, double dz, double phi1, double phi2,
            double nxlow, double nylow, double nzlow,
            double nxhi, double nyhi, double nzhi) :
-    rmin(rmin), rmax(rmax), dz(dz), phi1(phi1), phi2(phi2),
+    AGeoTubeSeg(rmin,  rmax,  dz,  phi1,  phi2),
     nxlow(nxlow), nylow(nylow), nzlow(nzlow),
     nxhi(nxhi), nyhi(nyhi), nzhi(nzhi) {}
   AGeoCtub() :
-    rmin(0), rmax(10), dz(5), phi1(0), phi2(180),
+    AGeoTubeSeg(0,  10,  5,  0,  180),
     nxlow(0), nylow(0.64), nzlow(-0.77),
     nxhi(0), nyhi(0.09), nzhi(0.87) {}
   virtual ~AGeoCtub() {}
@@ -507,6 +507,10 @@ public:
   const QString getShapeType() const override {return "TGeoCtub";}
   virtual const QString getShapeTemplate() {return "TGeoCtub( rmin, rmax, dz, phi1, phi2, nxlow, nylow, nzlow, nxhi, nyhi, nzhi )";}
   virtual const QString getHelp();
+  QString updateShape() override;
+
+  bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
+  void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
 
   virtual bool readFromString(QString GenerationString);
   virtual TGeoShape* createGeoShape(const QString shapeName = "");
@@ -521,9 +525,9 @@ public:
 
   virtual bool readFromTShape(TGeoShape* Tshape);
 
-  double rmin, rmax, dz, phi1, phi2;
   double nxlow, nylow, nzlow;
   double nxhi, nyhi, nzhi;
+  QString strnxlow, strnylow, strnzlow, strnxhi, strnyhi, strnzhi;
 };
 
 class AGeoEltu : public AGeoShape

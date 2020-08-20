@@ -734,6 +734,48 @@ const QString AGeoCtub::getHelp()
            "The shape has a minimum (rmin) and a maximum (rmax) radius.\n";
 }
 
+QString AGeoCtub::updateShape()
+{
+    AGeoTubeSeg::updateShape();
+
+    const AGeoConsts & GC = AGeoConsts::getConstInstance();
+    QString errorStr;
+    bool ok;
+    ok = GC.updateParameter(errorStr, strnxlow, nxlow, false, false, false); if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, strnylow, nylow, false, false, false); if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, strnzlow, nzlow, false, false, false); if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, strnxhi, nxhi,   false, false, false); if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, strnyhi, nyhi,   false, false, false); if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, strnzhi, nzhi,   false, false, false); if (!ok) return errorStr;
+
+    if (nzlow >= 0) return "Lower Nz should be negative";
+    if (nzhi  <= 0) return "Upper Nz should be positive";
+    return "";
+}
+
+bool AGeoCtub::isGeoConstInUse(const QRegExp &nameRegExp) const
+{
+    if (strnxlow.contains(nameRegExp)) return true;
+    if (strnylow.contains(nameRegExp)) return true;
+    if (strnzlow.contains(nameRegExp)) return true;
+    if (strnxhi .contains(nameRegExp)) return true;
+    if (strnyhi .contains(nameRegExp)) return true;
+    if (strnzhi .contains(nameRegExp)) return true;
+    return AGeoTubeSeg::isGeoConstInUse(nameRegExp);
+}
+
+void AGeoCtub::replaceGeoConstName(const QRegExp &nameRegExp, const QString &newName)
+{
+    AGeoTubeSeg::replaceGeoConstName(nameRegExp, newName);
+
+    strnxlow.replace(nameRegExp, newName);
+    strnylow.replace(nameRegExp, newName);
+    strnzlow.replace(nameRegExp, newName);
+    strnxhi .replace(nameRegExp, newName);
+    strnyhi .replace(nameRegExp, newName);
+    strnzhi .replace(nameRegExp, newName);
+}
+
 bool AGeoCtub::readFromString(QString GenerationString)
 {
     QStringList params;
@@ -796,34 +838,42 @@ double AGeoCtub::maxSize()
 
 void AGeoCtub::writeToJson(QJsonObject &json) const
 {
-    json["rmin"] = rmin;
-    json["rmax"] = rmax;
-    json["dz"] = dz;
-    json["phi1"] = phi1;
-    json["phi2"] = phi2;
+    AGeoTubeSeg::writeToJson(json);
 
     json["nxlow"] = nxlow;
     json["nylow"] = nylow;
     json["nzlow"] = nzlow;
-    json["nxhi"] = nxhi;
-    json["nyhi"] = nyhi;
-    json["nzhi"] = nzhi;
+    json["nxhi"]  = nxhi;
+    json["nyhi"]  = nyhi;
+    json["nzhi"]  = nzhi;
+
+    if (!strnxlow.isEmpty()) json["strnxlow"] = strnxlow;
+    if (!strnylow.isEmpty()) json["strnylow"] = strnylow;
+    if (!strnzlow.isEmpty()) json["strnzlow"] = strnzlow;
+    if (!strnxhi.isEmpty())  json["strnxhi"]  = strnxhi;
+    if (!strnyhi.isEmpty())  json["strnyhi"]  = strnyhi;
+    if (!strnzhi.isEmpty())  json["strnzhi"]  = strnzhi;
+
 }
 
 void AGeoCtub::readFromJson(const QJsonObject &json)
 {
-    rmin = json["rmin"].toDouble();
-    rmax = json["rmax"].toDouble();
-    dz = json["dz"].toDouble();
-    phi1 = json["phi1"].toDouble();
-    phi2 = json["phi2"].toDouble();
+    AGeoTubeSeg::readFromJson(json);
 
     nxlow = json["nxlow"].toDouble();
     nylow = json["nylow"].toDouble();
     nzlow = json["nzlow"].toDouble();
-    nxhi = json["nxhi"].toDouble();
-    nyhi = json["nyhi"].toDouble();
-    nzhi = json["nzhi"].toDouble();
+    nxhi  = json["nxhi"] .toDouble();
+    nyhi  = json["nyhi"] .toDouble();
+    nzhi  = json["nzhi"] .toDouble();
+
+    if (!parseJson(json, "strnxlow", strnxlow)) strnxlow.clear();
+    if (!parseJson(json, "strnylow", strnylow)) strnylow.clear();
+    if (!parseJson(json, "strnzlow", strnzlow)) strnzlow.clear();
+    if (!parseJson(json, "strnxhi",  strnxhi))  strnxhi .clear();
+    if (!parseJson(json, "strnyhi",  strnyhi))  strnyhi .clear();
+    if (!parseJson(json, "strnzhi",  strnzhi))  strnzhi .clear();
+    updateShape();
 }
 
 bool AGeoCtub::readFromTShape(TGeoShape *Tshape)
@@ -1985,6 +2035,7 @@ bool AGeoArb8::isGeoConstInUse(const QRegExp &nameRegExp) const
         if (strVertices[i][0].contains(nameRegExp)) return true;
         if (strVertices[i][1].contains(nameRegExp)) return true;
     }
+    return false;
 }
 
 void AGeoArb8::replaceGeoConstName(const QRegExp &nameRegExp, const QString &newName)
@@ -2099,8 +2150,6 @@ void AGeoArb8::writeToJson(QJsonObject &json) const
 
 void AGeoArb8::readFromJson(const QJsonObject &json)
 {
-    qDebug() <<"reading from json";
-
     dz     = json["dz"].toDouble();
     str2dz = json["str2dz"].toString();
 
@@ -2120,6 +2169,8 @@ void AGeoArb8::readFromJson(const QJsonObject &json)
         strVertices[i][0] = el[0].toString();
         strVertices[i][1] = el[1].toString();
     }
+
+    updateShape();
 }
 
 bool AGeoArb8::readFromTShape(TGeoShape *Tshape)

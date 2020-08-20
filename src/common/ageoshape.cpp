@@ -287,7 +287,7 @@ TGeoShape *AGeoPara::createGeoShape(const QString shapeName)
     return (shapeName.isEmpty()) ? new TGeoPara(dx, dy, dz, alpha, theta, phi) : new TGeoPara(shapeName.toLatin1().data(), dx, dy, dz, alpha, theta, phi);
 }
 
-const QString AGeoPara::getGenerationString(bool useStrings) const
+const QString AGeoPara::getGenerationString(bool) const
 {
     QString str = "TGeoPara( " +
             QString::number(dx)+", "+
@@ -514,7 +514,7 @@ TGeoShape *AGeoSphere::createGeoShape(const QString shapeName)
     return (shapeName.isEmpty()) ? new TGeoSphere(rmin, rmax, theta1, theta2, phi1,  phi2) : new TGeoSphere(shapeName.toLatin1().data(), rmin, rmax, theta1, theta2, phi1,  phi2);
 }
 
-const QString AGeoSphere::getGenerationString(bool useStrings) const
+const QString AGeoSphere::getGenerationString(bool) const
 {
     QString str = "TGeoSphere( " +
             QString::number(rmin)+", "+
@@ -660,7 +660,7 @@ TGeoShape *AGeoTubeSeg::createGeoShape(const QString shapeName)
                                    new TGeoTubeSeg(shapeName.toLatin1().data(), rmin, rmax, dz, phi1, phi2);
 }
 
-const QString AGeoTubeSeg::getGenerationString(bool useStrings) const
+const QString AGeoTubeSeg::getGenerationString(bool) const
 {
     QString str = "TGeoTubeSeg( " +
             QString::number(rmin)+", "+
@@ -908,10 +908,10 @@ TGeoShape *AGeoTube::createGeoShape(const QString shapeName)
                                    new TGeoTube(shapeName.toLatin1().data(), rmin, rmax, dz);
 }
 
-const QString AGeoTube::getGenerationString(bool useStrings) const
+const QString AGeoTube::getGenerationString(bool) const
 {
     QString str;
-    if (!useStrings)
+    //if (!useStrings)
     {
         str = "TGeoTube( " +
                 QString::number(rmin)+", "+
@@ -1037,7 +1037,7 @@ TGeoShape *AGeoTrd1::createGeoShape(const QString shapeName)
                                    new TGeoTrd1(shapeName.toLatin1().data(), dx1, dx2, dy, dz);
 }
 
-const QString AGeoTrd1::getGenerationString(bool useStrings) const
+const QString AGeoTrd1::getGenerationString(bool) const
 {
     QString str = "TGeoTrd1( " +
             QString::number(dx1)+", "+
@@ -1170,7 +1170,7 @@ TGeoShape *AGeoTrd2::createGeoShape(const QString shapeName)
                                    new TGeoTrd2(shapeName.toLatin1().data(), dx1, dx2, dy1, dy2, dz);
 }
 
-const QString AGeoTrd2::getGenerationString(bool useStrings) const
+const QString AGeoTrd2::getGenerationString(bool) const
 {
     QString str = "TGeoTrd2( " +
             QString::number(dx1)+", "+
@@ -1347,7 +1347,7 @@ TGeoShape *AGeoPgon::createGeoShape(const QString shapeName)
     return pg;
 }
 
-const QString AGeoPgon::getGenerationString(bool useStrings) const
+const QString AGeoPgon::getGenerationString(bool) const
 {
     QString str = "TGeoPgon( " +
             QString::number(phi)+", "+
@@ -1478,7 +1478,7 @@ TGeoShape *AGeoConeSeg::createGeoShape(const QString shapeName)
     return s;
 }
 
-const QString AGeoConeSeg::getGenerationString(bool useStrings) const
+const QString AGeoConeSeg::getGenerationString(bool) const
 {
     QString str = "TGeoConeSeg( " +
             QString::number(dz)+", "+
@@ -1605,7 +1605,7 @@ TGeoShape *AGeoParaboloid::createGeoShape(const QString shapeName)
     return s;
 }
 
-const QString AGeoParaboloid::getGenerationString(bool useStrings) const
+const QString AGeoParaboloid::getGenerationString(bool) const
 {
     QString str = "TGeoParaboloid( " +
             QString::number(rlo)+", "+
@@ -1737,7 +1737,7 @@ TGeoShape *AGeoCone::createGeoShape(const QString shapeName)
     return s;
 }
 
-const QString AGeoCone::getGenerationString(bool useStrings) const
+const QString AGeoCone::getGenerationString(bool) const
 {
     QString str = "TGeoCone( " +
             QString::number(dz)+", "+
@@ -1862,7 +1862,7 @@ TGeoShape *AGeoEltu::createGeoShape(const QString shapeName)
                                    new TGeoEltu(shapeName.toLatin1().data(), a, b, dz);
 }
 
-const QString AGeoEltu::getGenerationString(bool useStrings) const
+const QString AGeoEltu::getGenerationString(bool) const
 {
     QString str = "TGeoEltu( " +
             QString::number(a)+", "+
@@ -2184,7 +2184,7 @@ TGeoShape *AGeoPcon::createGeoShape(const QString shapeName)
     return pc;
 }
 
-const QString AGeoPcon::getGenerationString(bool useStrings) const
+const QString AGeoPcon::getGenerationString(bool) const
 {
     QString str = "TGeoPcon( " +
             QString::number(phi)+", "+
@@ -2463,7 +2463,7 @@ TGeoShape *AGeoPolygon::createGeoShape(const QString shapeName)
     return s;
 }
 
-const QString AGeoPolygon::getGenerationString(bool useStrings) const
+const QString AGeoPolygon::getGenerationString(bool) const
 {
     QString str = "TGeoPolygon( " +
             QString::number(nedges)+", "+
@@ -2671,7 +2671,7 @@ TGeoShape *AGeoScaledShape::createGeoShape(const QString shapeName)
     return (shapeName.isEmpty()) ? new TGeoScaledShape(Tshape, scale) : new TGeoScaledShape(shapeName.toLatin1().data(), Tshape, scale);
 }
 
-const QString AGeoScaledShape::getGenerationString(bool useStrings) const
+const QString AGeoScaledShape::getGenerationString(bool) const
 {
     return QString() + "TGeoScaledShape( " +
             BaseShapeGenerationString + ", " +
@@ -2853,7 +2853,7 @@ TGeoShape *AGeoTorus::createGeoShape(const QString shapeName)
     return (shapeName.isEmpty()) ? new TGeoTorus(R, Rmin, Rmax, Phi1, Dphi) : new TGeoTorus(shapeName.toLatin1().data(), R, Rmin, Rmax, Phi1, Dphi);
 }
 
-const QString AGeoTorus::getGenerationString(bool useStrings) const
+const QString AGeoTorus::getGenerationString(bool) const
 {
     QString str = "TGeoTorus( " +
             QString::number(R)+", "+

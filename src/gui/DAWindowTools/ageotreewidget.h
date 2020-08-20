@@ -145,6 +145,7 @@ public slots:
   void onObjectSelectionChanged(const QString SelectedObject); //starts GUI update  //why const? :)
   void onStartEditing();
   void onRequestChangeShape(AGeoShape * NewShape);
+  void onRequestChangeSlabShape(int NewShape);
   //void OnCustomContextMenuTriggered_forMainObject(QPoint pos);
   void onMonitorRequestsShowSensitiveDirection();
 

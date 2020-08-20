@@ -425,13 +425,24 @@ void AGeoObject::UpdateFromSlabModel(ASlabModel* SlabModel)
       }
       case 1:
       {
-        Shape = new AGeoTube(0.5*SlabModel->XYrecord.size1, 0.5*SlabModel->height);
+        AGeoTube * tube = new AGeoTube(0.5*SlabModel->XYrecord.size1, 0.5*SlabModel->height);
+        if (!SlabModel->XYrecord.strSize1.isEmpty()) tube->str2rmax = SlabModel->XYrecord.strSize1;
+        if (!SlabModel->strHeight.isEmpty())         tube->str2dz   = SlabModel->strHeight;
+        tube->updateShape();
+        Shape = tube;
         break;
       }
       case 2:
       {
-        Shape = new AGeoPolygon(SlabModel->XYrecord.sides, 0.5*SlabModel->height, 0.5*SlabModel->XYrecord.size1, 0.5*SlabModel->XYrecord.size1);
+        AGeoPolygon * poly = new AGeoPolygon(SlabModel->XYrecord.sides, 0.5*SlabModel->height, 0.5*SlabModel->XYrecord.size1, 0.5*SlabModel->XYrecord.size1);
+        if (!SlabModel->XYrecord.strSides.isEmpty()) poly->strNedges = SlabModel->XYrecord.strSides;
+        if (!SlabModel->XYrecord.strSize1.isEmpty()) poly->str2rmaxL = poly->str2rmaxU = SlabModel->XYrecord.strSize1;
+        if (!SlabModel->strHeight.isEmpty())         poly->str2dz    = SlabModel->strHeight;
+        poly->updateShape();
+        Shape = poly;
+
         Orientation[2] = SlabModel->XYrecord.angle;
+        if (!SlabModel->XYrecord.strAngle.isEmpty()) OrientationStr[2] = SlabModel->XYrecord.strAngle;
         break;        
       }
     }

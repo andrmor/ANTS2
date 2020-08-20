@@ -148,7 +148,7 @@ AGeoSlabDelegate_Box::AGeoSlabDelegate_Box(const QStringList & definedMaterials,
 
     cbScale->setVisible(false);
 
-    if (SlabModelState == 2) ListOfShapesForTransform = QStringList({"Box", "Tube", "Polygon"});
+    if (SlabModelState == 2) ListOfShapesForTransform = QStringList({"Rectangular slab", "Round slab", "Polygon slab"});
     else pbTransform->setEnabled(false);
 }
 

@@ -567,6 +567,7 @@ void AGeoObjectDelegate::rotate(TVector3 & v, double dPhi, double dTheta, double
 void AGeoObjectDelegate::onShapeDialogActivated(QDialog * d, QListWidget * w)
 {
     const QString sel = w->currentItem()->text();
+    qDebug() << "uuuuuuuuuuuu" << sel;
     if      (sel == "Box")                  emit RequestChangeShape(new AGeoBox());
     else if (sel == "Parallelepiped")       emit RequestChangeShape(new AGeoPara());
     else if (sel == "Tube")                 emit RequestChangeShape(new AGeoTube());
@@ -584,6 +585,11 @@ void AGeoObjectDelegate::onShapeDialogActivated(QDialog * d, QListWidget * w)
     else if (sel == "Polygon simplified")   emit RequestChangeShape(new AGeoPolygon());
     else if (sel == "Polygon")              emit RequestChangeShape(new AGeoPgon());
     else if (sel == "Arb8")                 emit RequestChangeShape(new AGeoArb8());
+
+    else if (sel == "Rectangular slab")     emit RequestChangeSlabShape(0);
+    else if (sel == "Round slab")           emit RequestChangeSlabShape(1);
+    else if (sel == "Polygon slab")         emit RequestChangeSlabShape(2);
+
     else
     {
         //nothing selected or unknown shape

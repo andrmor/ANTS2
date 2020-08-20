@@ -1712,7 +1712,7 @@ AGeoBaseDelegate * AGeoWidget::createAndAddGeoObjectDelegate()
     else
         Del = new AGeoObjectDelegate(tw->Sandwich->Materials, this);
 
-    connect(Del, &AGeoObjectDelegate::RequestChangeShape, this, &AGeoWidget::onRequestChangeShape);
+    connect(Del, &AGeoObjectDelegate::RequestChangeShape,     this, &AGeoWidget::onRequestChangeShape);
 
     return Del;
 }
@@ -1725,11 +1725,18 @@ AGeoBaseDelegate * AGeoWidget::createAndAddSlabDelegate()
     switch (SlabModel->XYrecord.shape)
     {
     default: qWarning() << "Unknown slab shape, assuming rectangular";
-    case 0: Del = new AGeoSlabDelegate_Box(tw->Sandwich->Materials, static_cast<int>(tw->Sandwich->SandwichState), this); break;
+    case 0:
+    {
+        AGeoObjectDelegate * del = new AGeoSlabDelegate_Box(tw->Sandwich->Materials, static_cast<int>(tw->Sandwich->SandwichState), this);
+        connect(del, &AGeoObjectDelegate::RequestChangeSlabShape, this, &AGeoWidget::onRequestChangeSlabShape);
+        Del = del; // temporary!
+        break;
+    }
     case 1: Del = new AGeoSlabDelegate(tw->Sandwich->Materials, static_cast<int>(tw->Sandwich->SandwichState), this); break;
     case 2: Del = new AGeoSlabDelegate(tw->Sandwich->Materials, static_cast<int>(tw->Sandwich->SandwichState), this); break;
     }
     //Del = new AGeoSlabDelegate(tw->Sandwich->Materials, static_cast<int>(tw->Sandwich->SandwichState), this);
+
 
     return Del;
 }
@@ -1797,73 +1804,22 @@ void AGeoWidget::onRequestChangeShape(AGeoShape * NewShape)
     onConfirmPressed();
 }
 
-/*
-void AGeoWidget::OnCustomContextMenuTriggered_forMainObject(QPoint pos)
+void AGeoWidget::onRequestChangeSlabShape(int NewShape)
 {
-  if (!CurrentObject) return;
+    qDebug() << "ahaaaaaaaaaaaaaaa" << NewShape;
+    if (!GeoDelegate) return;
+    if (!CurrentObject) return;
+    if (NewShape < 0 || NewShape > 2) return;
+    if (!CurrentObject->ObjectType->isSlab()) return;
 
-  QMenu Menu;
+    ASlabModel * SlabModel = (static_cast<ATypeSlabObject*>(CurrentObject->ObjectType))->SlabModel;
+    SlabModel->XYrecord.shape = NewShape;
 
-  QAction* convertToCompositeA = 0;
-  QAction* convertToUpperLGA = 0;
-  QAction* convertToLowerLGA = 0;
-
-  Menu.addSeparator();
-  QAction* showA = Menu.addAction("Show object");
-  QAction* setLineA = Menu.addAction("Change line color/width/style");
-  Menu.addSeparator();
-  QAction* clipA = Menu.addAction("Object generation command -> clipboard");
-  Menu.addSeparator();
-  if (CurrentObject->ObjectType->isSingle())
-    {
-      //menu triggered on individual object
-      convertToCompositeA = Menu.addAction("Convert to composite object");
-      convertToCompositeA->setEnabled(!CurrentObject->fLocked && CurrentObject->ObjectType->isSingle() );
-    }
-  if (CurrentObject->ObjectType->isSlab() && !CurrentObject->ObjectType->isLightguide())
-    {
-      convertToUpperLGA = Menu.addAction("Convert to upper lightguide");
-      convertToUpperLGA->setEnabled(CurrentObject->isFirstSlab() && !CurrentObject->fLocked);
-    }
-  if (CurrentObject->ObjectType->isSlab() && !CurrentObject->ObjectType->isLightguide() )
-    {
-      convertToLowerLGA = Menu.addAction("Convert to lower lightguide");
-      convertToLowerLGA->setEnabled(CurrentObject->isLastSlab() && !CurrentObject->fLocked );
-    }
-  Menu.addSeparator();
-
-
-  QAction* SelectedAction = Menu.exec(mapToGlobal(pos));
-  if (!SelectedAction) return; //nothing was selected
-
-  // Convert to composite
-  if (SelectedAction == convertToCompositeA)
-    {
-      tw->Sandwich->convertObjToComposite(CurrentObject);
-      QString name = CurrentObject->Name;
-      UpdateGui();
-      emit tw->RequestRebuildDetector();
-      tw->UpdateGui(name);
-    }
-  else if (SelectedAction == convertToUpperLGA)
-  {
-      tw->Sandwich->convertObjToLightguide(CurrentObject, true);
-      QString name = CurrentObject->Name;
-      emit tw->RequestRebuildDetector();
-      tw->UpdateGui(name);
-  }
-  else if (SelectedAction == convertToLowerLGA)
-  {
-      tw->Sandwich->convertObjToLightguide(CurrentObject, false);
-      QString name = CurrentObject->Name;
-      emit tw->RequestRebuildDetector();
-      tw->UpdateGui(name);
-  }
-  else if (SelectedAction == showA) onRequestShowCurrentObject();
-  else if (SelectedAction == clipA) onRequestScriptLineToClipboard();
-  else if (SelectedAction == setLineA) onRequestSetVisAttributes();
+    exitEditingMode();
+    QString name = CurrentObject->Name;
+    emit tw->RequestRebuildDetector();
+    tw->UpdateGui(name);
 }
-*/
 
 void AGeoWidget::onRequestShowCurrentObject()
 {

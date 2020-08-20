@@ -103,6 +103,7 @@ private:
 
 signals:
     void RequestChangeShape(AGeoShape * newShape);
+    void RequestChangeSlabShape(int Shape);
 };
 
 class AGeoBoxDelegate : public AGeoObjectDelegate

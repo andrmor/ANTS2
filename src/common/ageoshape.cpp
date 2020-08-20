@@ -736,7 +736,7 @@ const QString AGeoCtub::getHelp()
 
 QString AGeoCtub::updateShape()
 {
-    AGeoTubeSeg::updateShape();
+
 
     const AGeoConsts & GC = AGeoConsts::getConstInstance();
     QString errorStr;
@@ -750,7 +750,7 @@ QString AGeoCtub::updateShape()
 
     if (nzlow >= 0) return "Lower Nz should be negative";
     if (nzhi  <= 0) return "Upper Nz should be positive";
-    return "";
+    return AGeoTubeSeg::updateShape();
 }
 
 bool AGeoCtub::isGeoConstInUse(const QRegExp &nameRegExp) const

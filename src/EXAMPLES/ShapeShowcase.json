@@ -362,6 +362,137 @@
                     "Container": "World",
                     "Locked": false,
                     "Material": 0,
+                    "Name": "Arb8",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoArb8",
+                    "ShapeSpecific": {
+                        "StrVertices": [
+                            [
+                                "",
+                                ""
+                            ],
+                            [
+                                "",
+                                ""
+                            ],
+                            [
+                                "",
+                                ""
+                            ],
+                            [
+                                "",
+                                ""
+                            ],
+                            [
+                                "-SizeX*0.5",
+                                ""
+                            ],
+                            [
+                                "",
+                                "SizeX*0.5"
+                            ],
+                            [
+                                "SizeX*0.5",
+                                ""
+                            ],
+                            [
+                                "",
+                                "-SizeX*0.5"
+                            ]
+                        ],
+                        "Vertices": [
+                            [
+                                -20,
+                                20
+                            ],
+                            [
+                                20,
+                                20
+                            ],
+                            [
+                                20,
+                                -20
+                            ],
+                            [
+                                -20,
+                                -20
+                            ],
+                            [
+                                -20,
+                                1
+                            ],
+                            [
+                                1,
+                                20
+                            ],
+                            [
+                                20,
+                                -1
+                            ],
+                            [
+                                1,
+                                -20
+                            ]
+                        ],
+                        "dz": 10
+                    },
+                    "Theta": 0,
+                    "X": -50,
+                    "Y": -50,
+                    "Z": 0,
+                    "color": 883,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "strX": "-Offset",
+                    "strY": "-Offset",
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Material": 0,
+                    "Name": "Tube Segment Cut",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoCtub",
+                    "ShapeSpecific": {
+                        "dz": 5,
+                        "nxhi": 0,
+                        "nxlow": 2,
+                        "nyhi": 0.09,
+                        "nylow": 0.64,
+                        "nzhi": 0.87,
+                        "nzlow": -0.77,
+                        "phi1": 0,
+                        "phi2": 180,
+                        "rmax": 12.5,
+                        "rmin": 7.5,
+                        "str2rmax": "Diameter*0.5",
+                        "str2rmin": "Diameter*0.3"
+                    },
+                    "Theta": 0,
+                    "X": 0,
+                    "Y": 0,
+                    "Z": -50,
+                    "color": 904,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "strZ": "-Offset",
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Material": 0,
                     "Name": "Cone Segment",
                     "ObjectType": {
                         "Type": "Single"

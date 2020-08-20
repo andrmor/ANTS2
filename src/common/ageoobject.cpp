@@ -400,20 +400,27 @@ void AGeoObject::readAllFromJarr(AGeoObject * World, const QJsonArray & jarr)
 
 void AGeoObject::UpdateFromSlabModel(ASlabModel* SlabModel)
 {
-    fActive = SlabModel->fActive;
-    Name = SlabModel->name;
+    fActive  = SlabModel->fActive;
+    Name     = SlabModel->name;
     Material = SlabModel->material;
-    color = SlabModel->color;
-    width = SlabModel->width;
-    style = SlabModel->style;
+    color    = SlabModel->color;
+    width    = SlabModel->width;
+    style    = SlabModel->style;
 
     if (Shape) delete Shape;
     switch (SlabModel->XYrecord.shape)
     {
       case 0:
       {
-        Shape = new AGeoBox(0.5*SlabModel->XYrecord.size1, 0.5*SlabModel->XYrecord.size2, 0.5*SlabModel->height);
+        AGeoBox * box = new AGeoBox(0.5*SlabModel->XYrecord.size1, 0.5*SlabModel->XYrecord.size2, 0.5*SlabModel->height);
+        if (!SlabModel->XYrecord.strSize1.isEmpty()) box->str2dx = SlabModel->XYrecord.strSize1;
+        if (!SlabModel->XYrecord.strSize2.isEmpty()) box->str2dy = SlabModel->XYrecord.strSize2;
+        if (!SlabModel->strHeight.isEmpty())         box->str2dz = SlabModel->strHeight;
+        box->updateShape();
+        Shape = box;
+
         Orientation[2] = SlabModel->XYrecord.angle;
+        if (!SlabModel->XYrecord.strAngle.isEmpty()) OrientationStr[2] = SlabModel->XYrecord.strAngle;
         break;
       }
       case 1:

@@ -1,62 +1,132 @@
 #include "aslab.h"
+#include "ajsontools.h"
 
 #include <QDebug>
+#include <QJsonObject>
+#include <QJsonArray>
 
-//ROOT
 #include "TROOT.h"
 #include "TColor.h"
 
-void ASlabXYModel::writeToJson(QJsonObject &json)
+ASlabXYModel::ASlabXYModel(int shape, int sides, double size1, double size2, double angle)
+    : shape(shape), sides(sides), size1(size1), size2(size2), angle(angle) {}
+
+bool ASlabXYModel::operator==(const ASlabXYModel &other) const
 {
-  json["shape"] = shape;
-  json["sides"] = sides;
-  json["size1"] = size1;
-  json["size2"] = size2;
-  json["angle"] = angle;
+    if (other.shape != shape) return false;
+    if (other.sides != sides) return false;
+    if (other.size1 != size1) return false;
+    if (other.size2 != size2) return false;
+    if (other.angle != angle) return false;
+    return true;
 }
 
-void ASlabXYModel::readFromJson(QJsonObject &json)
+bool ASlabXYModel::operator!=(const ASlabXYModel &other) const
 {
-  *this = ASlabXYModel(); //to load default values
-  if (json.contains("shape")) shape = json["shape"].toInt();
-  if (json.contains("sides")) sides = json["sides"].toInt();
-  if (json.contains("size1")) size1 = json["size1"].toDouble();
-  if (json.contains("size2")) size2 = json["size2"].toDouble();
-  if (json.contains("angle")) angle = json["angle"].toDouble();
+    return !(*this == other);
 }
 
-void ASlabModel::writeToJson(QJsonObject &json)
+bool ASlabXYModel::isSameShape(const ASlabXYModel &other) const
 {
-  json["fActive"] = fActive;
-  json["name"] = name;
-  json["height"] = height;
-  json["material"] = material;
-  json["fCenter"] = fCenter;
-  json["color"] = color;
-  json["style"] = style;
-  json["width"] = width;
-
-  QJsonObject XYjson;
-  XYrecord.writeToJson(XYjson);
-  json["XY"] = XYjson;
+    if (other.shape != shape) return false;
+    if (other.sides != sides) return false;
+    if (other.angle != angle) return false;
+    return true;
 }
 
-void ASlabModel::readFromJson(QJsonObject &json)
+void ASlabXYModel::writeToJson(QJsonObject &json) const
 {
-  *this = ASlabModel(); //to load default values
-  if (json.contains("fActive")) fActive = json["fActive"].toBool();
-  if (json.contains("name")) name = json["name"].toString();
-  if (json.contains("height")) height = json["height"].toDouble();
-  if (json.contains("material")) material = json["material"].toInt();
-  if (json.contains("fCenter")) fCenter = json["fCenter"].toBool();
-  if (json.contains("XY"))
+    json["shape"] = shape;
+    json["sides"] = sides;
+    json["size1"] = size1;
+    json["size2"] = size2;
+    json["angle"] = angle;
+
+    if (!strSides.isEmpty()) json["strSides"] = strSides;
+    if (!strSize1.isEmpty()) json["strSize1"] = strSize1;
+    if (!strSize2.isEmpty()) json["strSize2"] = strSize2;
+    if (!strAngle.isEmpty()) json["strAngle"] = strAngle;
+}
+
+void ASlabXYModel::readFromJson(const QJsonObject & json)
+{
+    *this = ASlabXYModel(); //to load default values
+
+    parseJson(json, "shape", shape);
+    parseJson(json, "sides", sides);
+    parseJson(json, "size1", size1);
+    parseJson(json, "size2", size2);
+    parseJson(json, "angle", angle);
+
+    parseJson(json, "strSides", strSides);
+    parseJson(json, "strSize1", strSize1);
+    parseJson(json, "strSize2", strSize2);
+    parseJson(json, "strAngle", strAngle);
+}
+
+ASlabModel::ASlabModel(bool fActive, QString name, double height, int material, bool fCenter, int shape, int sides, double size1, double size2, double angle)
+    : fActive(fActive), name(name), height(height), material(material), fCenter(fCenter)
+{XYrecord.shape=shape; XYrecord.sides=sides; XYrecord.size1=size1; XYrecord.size2=size2; XYrecord.angle=angle;
+    color = -1; style = 1; width = 1;}
+
+ASlabModel::ASlabModel() : fActive(true), name(randomSlabName()), height(10), material(-1), fCenter(false)
+{color = -1; style = 1; width = 1;}
+
+bool ASlabModel::operator==(const ASlabModel &other) const  //Z and line properties are not checked!
+{
+    if (other.fActive!=fActive) return false;
+    if (other.name!=name) return false;
+    if (other.height!=height) return false;
+    if (other.material!=material) return false;
+    if (other.fCenter!=fCenter) return false;
+    if ( !(other.XYrecord==XYrecord) ) return false;
+    return true;
+}
+
+bool ASlabModel::operator!=(const ASlabModel &other) const
+{
+    return !(*this == other);
+}
+
+void ASlabModel::writeToJson(QJsonObject &json) const
+{
+    json["fActive"] = fActive;
+    json["name"] = name;
+    json["height"] = height;
+    json["material"] = material;
+    json["fCenter"] = fCenter;
+    json["color"] = color;
+    json["style"] = style;
+    json["width"] = width;
+
+    if (!strHeight.isEmpty()) json["strHeight"] = strHeight;
+
+    QJsonObject XYjson;
+    XYrecord.writeToJson(XYjson);
+    json["XY"] = XYjson;
+}
+
+void ASlabModel::readFromJson(const QJsonObject & json)
+{
+    *this = ASlabModel(); //to load default values
+
+    parseJson(json, "fActive",  fActive);
+    parseJson(json, "name",     name);
+    parseJson(json, "height",   height);
+    parseJson(json, "material", material);
+    parseJson(json, "fCenter",  fCenter);
+
+    if (json.contains("XY"))
     {
-      QJsonObject XYjson = json["XY"].toObject();
-      XYrecord.readFromJson(XYjson);
+        QJsonObject XYjson = json["XY"].toObject();
+        XYrecord.readFromJson(XYjson);
     }
-  if (json.contains("color")) color = json["color"].toInt();
-  if (json.contains("style")) style = json["style"].toInt();
-  if (json.contains("width")) width = json["width"].toInt();
+
+    parseJson(json, "strHeight",  strHeight);
+
+    parseJson(json, "color",  color);
+    parseJson(json, "style",  style);
+    parseJson(json, "width",  width);
 }
 
 void ASlabModel::importFromOldJson(QJsonObject &json)
@@ -74,4 +144,36 @@ void ASlabModel::importFromOldJson(QJsonObject &json)
   if (json.contains("Angle")) XYrecord.angle = json["Angle"].toDouble();
 
   //name and center status has to be given on detector level - they depend on index
+}
+
+QString ASlabModel::randomSlabName()
+{
+    const QString possibleLett("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
+    const QString possibleNum("0123456789");
+    const int lettLength = 1;
+    const int numLength = 1;
+
+    QString randomString;
+    for(int i=0; i<lettLength; i++)
+    {
+        int index = qrand() % possibleLett.length();
+        QChar nextChar = possibleLett.at(index);
+        randomString.append(nextChar);
+    }
+    for(int i=0; i<numLength; i++)
+    {
+        int index = qrand() % possibleNum.length();
+        QChar nextChar = possibleNum.at(index);
+        randomString.append(nextChar);
+    }
+    randomString = "New_"+randomString;
+    return randomString;
+}
+
+void ASlabModel::updateWorldSize(double & XYm) const
+{
+    if (XYrecord.size1 > XYm)
+        XYm = XYrecord.size1;
+    if (XYrecord.shape == 0 && XYrecord.size2 > XYm)
+        XYm = XYrecord.size2;
 }

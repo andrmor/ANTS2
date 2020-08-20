@@ -1721,7 +1721,6 @@ AGeoBaseDelegate * AGeoWidget::createAndAddSlabDelegate()
 {
     AGeoBaseDelegate * Del;
 
-    /*
     ASlabModel * SlabModel = (static_cast<ATypeSlabObject*>(CurrentObject->ObjectType))->SlabModel;
     switch (SlabModel->XYrecord.shape)
     {
@@ -1730,8 +1729,7 @@ AGeoBaseDelegate * AGeoWidget::createAndAddSlabDelegate()
     case 1: Del = new AGeoSlabDelegate(tw->Sandwich->Materials, static_cast<int>(tw->Sandwich->SandwichState), this); break;
     case 2: Del = new AGeoSlabDelegate(tw->Sandwich->Materials, static_cast<int>(tw->Sandwich->SandwichState), this); break;
     }
-    */
-    Del = new AGeoSlabDelegate(tw->Sandwich->Materials, static_cast<int>(tw->Sandwich->SandwichState), this);
+    //Del = new AGeoSlabDelegate(tw->Sandwich->Materials, static_cast<int>(tw->Sandwich->SandwichState), this);
 
     return Del;
 }

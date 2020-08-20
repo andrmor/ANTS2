@@ -3,6 +3,7 @@
 #include "ageoobject.h"
 #include "atypegeoobject.h"
 #include "aslab.h"
+#include "amessage.h"
 
 #include <QDebug>
 #include <QWidget>
@@ -151,11 +152,50 @@ AGeoSlabDelegate_Box::AGeoSlabDelegate_Box(const QStringList & definedMaterials,
     else pbTransform->setEnabled(false);
 }
 
+#include "ageoconsts.h"
 bool AGeoSlabDelegate_Box::updateObject(AGeoObject * obj) const
 {
+    ATypeSlabObject * slab = dynamic_cast<ATypeSlabObject*>(obj->ObjectType);
+    if (!slab)
+    {
+        qWarning() << "This is not a slab!";
+        return false;
+    }
+
     bool ok = AGeoBoxDelegate::updateObject(obj);
-    // TODO
-    return ok;
+    if (!ok) return false;
+
+    ASlabModel SlabModel = *slab->SlabModel;
+
+    SlabModel.material = obj->Material;
+    SlabModel.name     = obj->Name;
+
+    const AGeoConsts & GC = AGeoConsts::getConstInstance();
+    QString ErrorStr;
+    switch (SlabModelState)  // supposed to fall through!
+    {
+    default: qWarning() << "Unknown slab shape, assuming rectangular";
+    case 2: //update psi
+        SlabModel.XYrecord.strAngle = ledPsi->text();
+        ok =       GC.updateParameter(ErrorStr, SlabModel.XYrecord.strAngle, SlabModel.XYrecord.angle, false, false, false);
+    case 1: //update dx dy
+        SlabModel.XYrecord.strSize1 = ex->text();
+        ok = ok && GC.updateParameter(ErrorStr, SlabModel.XYrecord.strSize1, SlabModel.XYrecord.size1, true, true, false);
+        SlabModel.XYrecord.strSize2 = ey->text();
+        ok = ok && GC.updateParameter(ErrorStr, SlabModel.XYrecord.strSize2, SlabModel.XYrecord.size2, true, true, false);
+    case 0: //update dz
+        SlabModel.strHeight = ez->text();
+        ok = ok && GC.updateParameter(ErrorStr, SlabModel.strHeight, SlabModel.height, true, true, false);
+    }
+
+    if (!ok)
+    {
+        message(ErrorStr, this->ParentWidget);
+        return false;
+    }
+
+    *(slab->SlabModel) = SlabModel;
+    return true;
 }
 
 void AGeoSlabDelegate_Box::Update(const AGeoObject * obj)

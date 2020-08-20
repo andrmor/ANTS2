@@ -29,10 +29,7 @@ private slots:
 };
 
 
-
 #include "ageoobjectdelegate.h"
-
-class ASlabModel;
 
 class AGeoSlabDelegate_Box : public AGeoBoxDelegate
 {
@@ -44,7 +41,6 @@ public:
     bool updateObject(AGeoObject * obj) const override;
 
 private:
-    ASlabModel * SlabModel = nullptr;
     int SlabModelState = 0;
 
 public slots:

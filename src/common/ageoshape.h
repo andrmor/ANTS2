@@ -144,7 +144,7 @@ public:
   //virtual double getHeight() {return 0;}
   //virtual void setHeight(double /*dz*/) {}
   const QString getGenerationString(bool useStrings) const override;
-  virtual double maxSize() {return 0;}  //***!!!
+  double maxSize() override;
 
   const QString getBaseShapeType() const;
   TGeoShape * generateBaseTGeoShape(const QString & BaseShapeGenerationString) const;

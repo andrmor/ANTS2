@@ -2866,6 +2866,17 @@ const QString AGeoScaledShape::getGenerationString(bool useStrings) const
     }
 }
 
+double AGeoScaledShape::maxSize()
+{
+    if (!BaseShape) return 0;
+
+    double size = BaseShape->maxSize();
+    double factor = std::max(scaleX, scaleY);
+    factor = std::max(factor, scaleZ);
+    size *= factor;
+    return size;
+}
+
 const QString AGeoScaledShape::getBaseShapeType() const
 {
     /*

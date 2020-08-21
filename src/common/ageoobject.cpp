@@ -99,6 +99,7 @@ bool AGeoObject::readShapeFromString(const QString & GenerationString, bool Only
       return false;
     }
   QString type = sl.first().simplified();
+  qDebug() <<"sl" <<sl <<"   type"<< type;
 
   AGeoShape* newShape = AGeoShape::GeoShapeFactory(type);
   if (!newShape)

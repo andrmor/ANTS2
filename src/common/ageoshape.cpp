@@ -74,9 +74,11 @@ bool AGeoShape::extractParametersFromString(QString GenerationString, QStringLis
 // ====== BOX ======
 bool AGeoBox::readFromString(QString GenerationString)
 {
+    qDebug() <<"bbox readfrom string: generation str" <<GenerationString;
     QStringList params;
     bool ok = extractParametersFromString(GenerationString, params, 3);
     if (!ok) return false;
+    qDebug() <<"bbox readfrom string: params" <<params;
 
     double tmp[3];
     for (int i=0; i<3; i++)
@@ -92,6 +94,7 @@ bool AGeoBox::readFromString(QString GenerationString)
     dx = tmp[0];
     dy = tmp[1];
     dz = tmp[2];
+    qDebug() <<"bbox readfrom string: ds" <<dx <<dy <<dz;
     return true;
 }
 
@@ -164,6 +167,7 @@ double AGeoBox::minSize()
 
 TGeoShape *AGeoBox::createGeoShape(const QString shapeName)
 {
+    qDebug() <<"createGeoShape" <<dx <<dy <<dz;
     return (shapeName.isEmpty()) ? new TGeoBBox(dx, dy, dz) : new TGeoBBox(shapeName.toLatin1().data(), dx, dy, dz);
 }
 
@@ -2713,15 +2717,33 @@ bool AGeoScaledShape::readFromString(QString GenerationString)
         qWarning() << "Format error in AGeoScaledShape read from string";
         return false;
     }
+    qDebug() <<"ageoscaled: read from string" <<l1;
 
     QString generator = l1.first() + ")";
     TGeoShape* sh = AGeoScaledShape::generateBaseTGeoShape(generator);
+    qDebug() <<"is valid" <<sh->IsValidBox();
     if (!sh)
     {
         qWarning() << "Not valid generation string:"<<GenerationString;
         return false;
     }
+
+    QString shapeType = generator.left(generator.indexOf('('));
+    AGeoShape* Ashape = AGeoShape::GeoShapeFactory(shapeType);
+    if (Ashape)
+    {
+        qDebug() <<"1" <<"generation str" <<Ashape->getGenerationString(true);
+        bool fOK = Ashape->readFromString(generator);
+        qDebug() <<"2" <<"ashape" <<"type" <<Ashape->getShapeType() <<"generation str" <<Ashape->getGenerationString(true);
+        if (!fOK)
+        {
+            qWarning() << "failed to create base shape from string:"<<GenerationString;
+        }
+    }
+
+    BaseShape = Ashape;
     BaseShapeGenerationString = generator;
+    qDebug()<<BaseShapeGenerationString;
 
     QString params = l1.last(); // should be ",scaleX,scaleY,ScaleZ"
     params.remove(0, 1);
@@ -2750,7 +2772,7 @@ bool AGeoScaledShape::readFromString(QString GenerationString)
         qWarning() << "Scaling parameter error in AGeoScaledShape.";
         return false;
     }
-
+    qDebug() <<"readFrom string" <<scaleX << scaleY <<scaleZ;
     delete sh;
     return true;
 }
@@ -2761,11 +2783,14 @@ TGeoShape* AGeoScaledShape::generateBaseTGeoShape(const QString & BaseShapeGener
     QString shapeType = BaseShapeGenerationString.left(BaseShapeGenerationString.indexOf('('));
     //qDebug() << "SCALED->: base type:"<<shapeType;
     TGeoShape* Tshape = 0;
+    qDebug() <<"base generation string shape type" <<shapeType;
     AGeoShape* Ashape = AGeoShape::GeoShapeFactory(shapeType);
     if (Ashape)
     {
         //qDebug() << "SCALED->" << "Created AGeoShape of type" << Ashape->getShapeType();
+        qDebug() <<"generation str" <<Ashape->getGenerationString(true);
         bool fOK = Ashape->readFromString(BaseShapeGenerationString);
+        qDebug() << "ashape" <<"type" <<Ashape->getShapeType() <<"generation str" <<Ashape->getGenerationString(true);
         if (fOK)
         {
             Tshape = Ashape->createGeoShape();
@@ -2796,7 +2821,9 @@ TGeoShape *AGeoScaledShape::createGeoShape(const QString shapeName)
    return (shapeName.isEmpty()) ? new TGeoScaledShape(Tshape, scale) : new TGeoScaledShape(shapeName.toLatin1().data(), Tshape, scale);
    */
 
+    qDebug() <<"here?";
     TGeoShape * Tshape = BaseShape->createGeoShape();
+    qDebug() <<"here?";
     if (!Tshape)
     {
         qWarning() << "->failed to generate shape\nreplacing by default TGeoBBox";
@@ -2814,9 +2841,10 @@ TGeoShape *AGeoScaledShape::createGeoShape(const QString shapeName)
 
 const QString AGeoScaledShape::getGenerationString(bool useStrings) const
 {
-    qDebug() <<"base" <<BaseShape->getGenerationString();
+    qDebug() <<"base" <<BaseShape->getGenerationString() <<useStrings;
     if (!useStrings)
     {
+        qDebug() <<"hmnjkfsk";
         return QString() + "TGeoScaledShape( " +
                 BaseShapeGenerationString + ", " +
                 QString::number(scaleX) + ", " +
@@ -2827,11 +2855,10 @@ const QString AGeoScaledShape::getGenerationString(bool useStrings) const
 
     else
     {
-        QString temps = BaseShape->getGenerationString();
-        temps.replace("\"\'", "\"\'\"");
+        QString temps = BaseShape->getGenerationString(true);
         qDebug()<< "temps" <<temps;
         return QString() + "TGeoScaledShape( " +
-                BaseShape->getGenerationString() + ", " +
+                temps + ", " +
                 QString::number(scaleX) + ", " +
                 QString::number(scaleY) + ", " +
                 QString::number(scaleZ) +

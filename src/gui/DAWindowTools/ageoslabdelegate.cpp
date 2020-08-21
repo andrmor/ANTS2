@@ -79,6 +79,10 @@ AGeoSlabDelegate_Tube::AGeoSlabDelegate_Tube(const QStringList &definedMaterials
     initSlabDelegate(SlabModelState);
     ei->setEnabled(false);
     if (SlabModelState == 0) eo->setEnabled(false);
+
+    ei->   setVisible(false);
+    labIm->setVisible(false);
+    labIu->setVisible(false);
 }
 
 bool AGeoSlabDelegate_Tube::updateObject(AGeoObject *obj) const
@@ -138,10 +142,11 @@ AGeoSlabDelegate_Poly::AGeoSlabDelegate_Poly(const QStringList &definedMaterials
         elo->setEnabled(false);
 
     if (SlabModelState != 2) en->setEnabled(false);
-    euo->setEnabled(false);
-    edp->setEnabled(false);
-    eli->setEnabled(false);
-    eui->setEnabled(false);
+
+    for (QLabel * lab : {labLI, labUO, labUI, labA, labLIu, labUOu, labUIu, labAu}) lab->setVisible(false);
+    for (AOneLineTextEdit * lab : {euo, edp, eli, eui}) lab->setVisible(false);
+
+    labLO->setText("Outer diameter");
 }
 
 bool AGeoSlabDelegate_Poly::updateObject(AGeoObject *obj) const

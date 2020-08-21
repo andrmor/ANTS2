@@ -762,15 +762,17 @@ AGeoTubeDelegate::AGeoTubeDelegate(const QStringList & materials, QWidget *paren
     gr->setContentsMargins(50, 0, 50, 3);
     gr->setVerticalSpacing(1);
 
-    gr->addWidget(new QLabel("Inner diameter:"), 0, 0);
+    labIm = new QLabel("Inner diameter:");
+    gr->addWidget(labIm,                         0, 0);
     gr->addWidget(new QLabel("Outer diameter:"), 1, 0);
-    gr->addWidget(new QLabel("Height:"), 2,0);
+    gr->addWidget(new QLabel("Height:"),         2, 0);
 
     ei = new AOneLineTextEdit(); gr->addWidget(ei, 0, 1);
     eo = new AOneLineTextEdit(); gr->addWidget(eo, 1, 1);
     ez = new AOneLineTextEdit(); gr->addWidget(ez, 2, 1);
 
-    gr->addWidget(new QLabel("mm"), 0, 2);
+    labIu = new QLabel("mm");
+    gr->addWidget(labIu,            0, 2);
     gr->addWidget(new QLabel("mm"), 1, 2);
     gr->addWidget(new QLabel("mm"), 2, 2);
 
@@ -1939,15 +1941,16 @@ AGeoPolygonDelegate::AGeoPolygonDelegate(const QStringList &materials, QWidget *
     gr->setContentsMargins(50, 0, 50, 3);
     gr->setVerticalSpacing(1);
 
-    gr->addWidget(new QLabel("Number of edges:"),      0, 0);
-    gr->addWidget(new QLabel("Height:"),               1, 0);
-    gr->addWidget(new QLabel("Lower outer diameter:"), 2, 0);
-    gr->addWidget(new QLabel("Lower inner diameter:"), 3, 0);
-    gr->addWidget(new QLabel("Upper outer diameter:"), 4, 0);
-    gr->addWidget(new QLabel("Upper inner diameter:"), 5, 0);
-    gr->addWidget(new QLabel("Angle:"),                6, 0);
+    QLabel * lab;
+    lab   = new QLabel("Number of edges:");      gr->addWidget(lab,   0, 0);
+    lab   = new QLabel("Height:");               gr->addWidget(lab,   1, 0);
+    labLO = new QLabel("Lower outer diameter:"); gr->addWidget(labLO, 2, 0);
+    labLI = new QLabel("Lower inner diameter:"); gr->addWidget(labLI, 3, 0);
+    labUO = new QLabel("Upper outer diameter:"); gr->addWidget(labUO, 4, 0);
+    labUI = new QLabel("Upper inner diameter:"); gr->addWidget(labUI, 5, 0);
+    labA  = new QLabel("Angle:");                gr->addWidget(labA,  6, 0);
 
-    en = new AOneLineTextEdit();  gr->addWidget(en, 0, 1); //sbn->setMinimum(3);
+    en  = new AOneLineTextEdit(); gr->addWidget(en,  0, 1);
     ez  = new AOneLineTextEdit(); gr->addWidget(ez,  1, 1);
     elo = new AOneLineTextEdit(); gr->addWidget(elo, 2, 1);
     eli = new AOneLineTextEdit(); gr->addWidget(eli, 3, 1);
@@ -1955,12 +1958,12 @@ AGeoPolygonDelegate::AGeoPolygonDelegate(const QStringList &materials, QWidget *
     eui = new AOneLineTextEdit(); gr->addWidget(eui, 5, 1);
     edp = new AOneLineTextEdit(); gr->addWidget(edp, 6, 1);
 
-    gr->addWidget(new QLabel("mm"), 1, 2);
-    gr->addWidget(new QLabel("mm"), 2, 2);
-    gr->addWidget(new QLabel("mm"), 3, 2);
-    gr->addWidget(new QLabel("mm"), 4, 2);
-    gr->addWidget(new QLabel("mm"), 5, 2);
-    gr->addWidget(new QLabel("°"),  6, 2);
+    lab    = new QLabel("mm"); gr->addWidget(lab,    1, 2);
+    lab    = new QLabel("mm"); gr->addWidget(lab,    2, 2);
+    labLIu = new QLabel("mm"); gr->addWidget(labLIu, 3, 2);
+    labUOu = new QLabel("mm"); gr->addWidget(labUOu, 4, 2);
+    labUIu = new QLabel("mm"); gr->addWidget(labUIu, 5, 2);
+    labAu  = new QLabel("°");  gr->addWidget(labAu,  6, 2);
 
     addLocalLayout(gr);
 

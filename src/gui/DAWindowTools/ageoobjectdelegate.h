@@ -123,7 +123,6 @@ public:
 public slots:
     void Update(const AGeoObject * obj) override;
 
-private slots:
 };
 
 class AWorldDelegate : public AGeoBaseDelegate
@@ -160,13 +159,12 @@ public:
     AOneLineTextEdit * eo = nullptr;
     AOneLineTextEdit * ez = nullptr;
 
-protected:
-    QGridLayout * gr = nullptr;
+    QGridLayout * gr    = nullptr;
+    QLabel      * labIm = nullptr;
+    QLabel      * labIu = nullptr;
 
 public slots:
     void Update(const AGeoObject * obj) override;
-
-private slots:
 };
 
 class AGeoTubeSegDelegate : public AGeoTubeDelegate
@@ -416,6 +414,17 @@ public:
     AOneLineTextEdit * eli = nullptr;
     AOneLineTextEdit * euo = nullptr;
     AOneLineTextEdit * eui = nullptr;
+
+    QLabel * labLO  = nullptr;
+    QLabel * labLI  = nullptr;
+    QLabel * labUO  = nullptr;
+    QLabel * labUI  = nullptr;
+    QLabel * labA   = nullptr;
+
+    QLabel * labLIu = nullptr;
+    QLabel * labUOu = nullptr;
+    QLabel * labUIu = nullptr;
+    QLabel * labAu  = nullptr;
 
 public slots:
     virtual void Update(const AGeoObject * obj) override;

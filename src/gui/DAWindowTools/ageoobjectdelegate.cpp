@@ -762,12 +762,12 @@ AGeoTubeDelegate::AGeoTubeDelegate(const QStringList & materials, QWidget *paren
     gr->setContentsMargins(50, 0, 50, 3);
     gr->setVerticalSpacing(1);
 
-    gr->addWidget(new QLabel("Outer diameter:"), 0, 0);
-    gr->addWidget(new QLabel("Inner diameter:"), 1, 0);
+    gr->addWidget(new QLabel("Inner diameter:"), 0, 0);
+    gr->addWidget(new QLabel("Outer diameter:"), 1, 0);
     gr->addWidget(new QLabel("Height:"), 2,0);
 
-    eo = new AOneLineTextEdit(); gr->addWidget(eo, 0, 1);
-    ei = new AOneLineTextEdit(); gr->addWidget(ei, 1, 1);
+    ei = new AOneLineTextEdit(); gr->addWidget(ei, 0, 1);
+    eo = new AOneLineTextEdit(); gr->addWidget(eo, 1, 1);
     ez = new AOneLineTextEdit(); gr->addWidget(ez, 2, 1);
 
     gr->addWidget(new QLabel("mm"), 0, 2);
@@ -776,7 +776,7 @@ AGeoTubeDelegate::AGeoTubeDelegate(const QStringList & materials, QWidget *paren
 
     addLocalLayout(gr);
 
-    QVector<AOneLineTextEdit*> l = {eo, ei, ez};
+    QVector<AOneLineTextEdit*> l = {ei, eo, ez};
     for (AOneLineTextEdit * le : l)
     {
         configureHighligherAndCompleter(le);
@@ -794,8 +794,8 @@ void AGeoTubeDelegate::finalizeLocalParameters()
     }
     if (tube)
     {
-        tube->str2rmax = eo->text();
         tube->str2rmin = ei->text();
+        tube->str2rmax = eo->text();
         tube->str2dz   = ez->text();
     }
     else qWarning() << "Read delegate: Tube shape not found!";
@@ -813,8 +813,8 @@ void AGeoTubeDelegate::Update(const AGeoObject *obj)
     }
     if (tube)
     {
-        eo->setText(tube->str2rmax.isEmpty() ? QString::number(tube->rmax*2.0) : tube->str2rmax);
         ei->setText(tube->str2rmin.isEmpty() ? QString::number(tube->rmin*2.0) : tube->str2rmin);
+        eo->setText(tube->str2rmax.isEmpty() ? QString::number(tube->rmax*2.0) : tube->str2rmax);
         ez->setText(tube->str2dz.isEmpty()   ? QString::number(tube->dz*2.0)   : tube->str2dz);
     }
     else qWarning() << "Update delegate: Tube shape not found!";

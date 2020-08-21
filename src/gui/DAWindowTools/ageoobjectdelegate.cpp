@@ -1960,7 +1960,7 @@ AGeoPolygonDelegate::AGeoPolygonDelegate(const QStringList &materials, QWidget *
     gr->addWidget(new QLabel("mm"), 3, 2);
     gr->addWidget(new QLabel("mm"), 4, 2);
     gr->addWidget(new QLabel("mm"), 5, 2);
-    gr->addWidget(new QLabel("°"),  5, 2);
+    gr->addWidget(new QLabel("°"),  6, 2);
 
     addLocalLayout(gr);
 

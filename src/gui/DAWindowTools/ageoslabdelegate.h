@@ -1,35 +1,9 @@
 #ifndef AGEOSLABDELEGATE_H
 #define AGEOSLABDELEGATE_H
 
-#include "ageobasedelegate.h"
 #include "ageoobjectdelegate.h"
 
 class QWidget;
-class ASlabDelegate;
-class QLabel;
-
-class AGeoSlabDelegate : public AGeoBaseDelegate
-{
-  Q_OBJECT
-
-public:
-    AGeoSlabDelegate(const QStringList & definedMaterials, int State, QWidget * ParentWidget);
-
-    QString getName() const override;
-    bool updateObject(AGeoObject * obj) const override;
-
-private:
-    ASlabDelegate * SlabDel = nullptr;
-    QLabel * labType = nullptr;
-
-public slots:
-    void Update(const AGeoObject* obj) override;
-
-private slots:
-    void onContentChanged();
-};
-
-
 
 class AGeoSlabDelegate_Box : public AGeoBoxDelegate
 {

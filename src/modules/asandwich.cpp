@@ -795,25 +795,26 @@ void ASandwich::ChangeState(ASandwich::SlabState State)
 
 void ASandwich::enforceCommonProperties()
 {
-  // for common states, ensure XY shape or sizes are proper
-  if (SandwichState != ASandwich::Individual)
-    for (int i=0; i<World->HostedObjects.size(); i++)
-      {
-        AGeoObject* obj = World->HostedObjects[i];
-        if (!obj->ObjectType->isSlab()) continue;
+    // for common states, ensure XY shape or sizes are proper
+    if (SandwichState != ASandwich::Individual)
+        for (AGeoObject * obj : World->HostedObjects)
+        {
+            if (!obj->ObjectType->isSlab()) continue;
 
-        obj->getSlabModel()->XYrecord.shape = DefaultXY->shape;
-        obj->getSlabModel()->XYrecord.sides = DefaultXY->sides;
-        obj->getSlabModel()->XYrecord.angle = DefaultXY->angle;
+            ASlabXYModel & m = obj->getSlabModel()->XYrecord;
 
-        if (SandwichState == ASandwich::CommonShapeSize)
-          {
-            obj->getSlabModel()->XYrecord.size1 = DefaultXY->size1;
-            obj->getSlabModel()->XYrecord.size2 = DefaultXY->size2;
-          }
+            m.shape = DefaultXY->shape;
+            m.sides = DefaultXY->sides; m.strSides.clear();
+            m.angle = DefaultXY->angle; m.strAngle.clear();
 
-        obj->UpdateFromSlabModel(obj->getSlabModel());
-      }
+            if (SandwichState == ASandwich::CommonShapeSize)
+            {
+                m.size1 = DefaultXY->size1; m.strSize1.clear();
+                m.size2 = DefaultXY->size2; m.strSize2.clear();
+            }
+
+            obj->UpdateFromSlabModel(obj->getSlabModel());
+        }
 }
 
 bool ASandwich::CalculateZofSlabs()

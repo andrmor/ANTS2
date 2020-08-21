@@ -958,15 +958,25 @@ TGeoShape *AGeoTube::createGeoShape(const QString shapeName)
                                    new TGeoTube(shapeName.toLatin1().data(), rmin, rmax, dz);
 }
 
-const QString AGeoTube::getGenerationString(bool) const
+const QString AGeoTube::getGenerationString(bool useStrings) const
 {
     QString str;
-    //if (!useStrings)
+    if (!useStrings)
     {
         str = "TGeoTube( " +
                 QString::number(rmin)+", "+
                 QString::number(rmax)+", "+
                 QString::number(dz)+" )";
+    }
+    else
+    {
+        QString srmin = (str2rmin.isEmpty() ? QString::number(rmin) : "' + 0.5*(" + str2rmin + ") + '");
+        QString srmax = (str2rmax.isEmpty() ? QString::number(rmax) : "' + 0.5*(" + str2rmax + ") + '");
+        QString sdz   = (str2dz  .isEmpty() ? QString::number(dz)   : "' + 0.5*(" + str2dz   + ") + '");
+        str = "TGeoTube( " +
+                srmin +", "+
+                srmax +", "+
+                sdz   +" )";
     }
     return str;
 }
@@ -2802,14 +2812,31 @@ TGeoShape *AGeoScaledShape::createGeoShape(const QString shapeName)
     return (shapeName.isEmpty()) ? new TGeoScaledShape(Tshape, scale) : new TGeoScaledShape(shapeName.toLatin1().data(), Tshape, scale);
 }
 
-const QString AGeoScaledShape::getGenerationString(bool) const
+const QString AGeoScaledShape::getGenerationString(bool useStrings) const
 {
-    return QString() + "TGeoScaledShape( " +
-            BaseShapeGenerationString + ", " +
-            QString::number(scaleX) + ", " +
-            QString::number(scaleY) + ", " +
-            QString::number(scaleZ) +
-            " )";
+    qDebug() <<"base" <<BaseShape->getGenerationString();
+    if (!useStrings)
+    {
+        return QString() + "TGeoScaledShape( " +
+                BaseShapeGenerationString + ", " +
+                QString::number(scaleX) + ", " +
+                QString::number(scaleY) + ", " +
+                QString::number(scaleZ) +
+                " )";
+    }
+
+    else
+    {
+        QString temps = BaseShape->getGenerationString();
+        temps.replace("\"\'", "\"\'\"");
+        qDebug()<< "temps" <<temps;
+        return QString() + "TGeoScaledShape( " +
+                BaseShape->getGenerationString() + ", " +
+                QString::number(scaleX) + ", " +
+                QString::number(scaleY) + ", " +
+                QString::number(scaleZ) +
+                " )";
+    }
 }
 
 const QString AGeoScaledShape::getBaseShapeType() const

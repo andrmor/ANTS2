@@ -24,6 +24,32 @@ ATypeSlabObject::~ATypeSlabObject()
     //qDebug() << "Done!!";
 }
 
+bool ATypeSlabObject::isGeoConstInUse(const QRegExp & nameRegExp) const
+{
+    if (!SlabModel) return false;
+
+    if (SlabModel->strHeight.contains(nameRegExp)) return true;
+    ASlabXYModel & XY = SlabModel->XYrecord;
+    if (XY.strSides.contains(nameRegExp)) return true;
+    if (XY.strSize1.contains(nameRegExp)) return true;
+    if (XY.strSize2.contains(nameRegExp)) return true;
+    if (XY.strAngle.contains(nameRegExp)) return true;
+
+    return false;
+}
+
+void ATypeSlabObject::replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName)
+{
+    if (!SlabModel) return;
+
+    SlabModel->strHeight.replace(nameRegExp, newName);
+    ASlabXYModel & XY = SlabModel->XYrecord;
+    XY.strSides.replace(nameRegExp, newName);
+    XY.strSize1.replace(nameRegExp, newName);
+    XY.strSize2.replace(nameRegExp, newName);
+    XY.strAngle.replace(nameRegExp, newName);
+}
+
 ATypeLightguideObject::ATypeLightguideObject()
 {
     Type = "Lightguide";

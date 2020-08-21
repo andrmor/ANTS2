@@ -65,8 +65,11 @@ public:
     ATypeSlabObject(); //Slab Static
     ~ATypeSlabObject();
 
-    virtual void writeToJson(QJsonObject& json) { ATypeGeoObject::writeToJson(json); } //no need to save slab, it will be assigned from outside
-    virtual void readFromJson(QJsonObject& ) {}
+    bool isGeoConstInUse(const QRegExp & nameRegExp) const;
+    void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName);
+
+    void writeToJson(QJsonObject& json) { ATypeGeoObject::writeToJson(json); } //no need to save slab, it will be assigned from outside
+    void readFromJson(QJsonObject& ) {}
 
     ASlabModel* SlabModel;
 };

@@ -153,14 +153,14 @@ const QString AGeoBox::getGenerationString(bool useStrings) const
     return str;
 }
 
-double AGeoBox::maxSize()
+double AGeoBox::maxSize() const
 {
     double m = std::max(dx, dy);
     m = std::max(m, dz);
     return sqrt(3.0)*m;
 }
 
-double AGeoBox::minSize()
+double AGeoBox::minSize() const
 {
     return std::min(dx, dy);
 }
@@ -303,7 +303,7 @@ const QString AGeoPara::getGenerationString(bool) const
     return str;
 }
 
-double AGeoPara::maxSize()
+double AGeoPara::maxSize() const
 {
     double m = std::max(dx, dy);
     m = std::max(m, dz);
@@ -420,6 +420,8 @@ TGeoShape *AGeoComposite::createGeoShape(const QString shapeName)
 
     return (shapeName.isEmpty()) ? new TGeoCompositeShape(s.toLatin1().data()) : new TGeoCompositeShape(shapeName.toLatin1().data(), s.toLatin1().data());
 }
+
+
 
 void AGeoComposite::writeToJson(QJsonObject &json) const
 {
@@ -675,7 +677,7 @@ const QString AGeoTubeSeg::getGenerationString(bool) const
     return str;
 }
 
-double AGeoTubeSeg::maxSize()
+double AGeoTubeSeg::maxSize() const
 {
     double m = std::max(rmax, dz);
     return sqrt(3.0)*m;
@@ -834,7 +836,7 @@ const QString AGeoCtub::getGenerationString(bool) const
     return str;
 }
 
-double AGeoCtub::maxSize()
+double AGeoCtub::maxSize() const
 {
     double m = std::max(rmax, dz);
     return sqrt(3.0)*m;
@@ -985,13 +987,13 @@ const QString AGeoTube::getGenerationString(bool useStrings) const
     return str;
 }
 
-double AGeoTube::maxSize()
+double AGeoTube::maxSize() const
 {
     double m = std::max(rmax, dz);
     return sqrt(3.0)*m;
 }
 
-double AGeoTube::minSize()
+double AGeoTube::minSize() const
 {
     return rmax;
 }
@@ -1111,7 +1113,7 @@ const QString AGeoTrd1::getGenerationString(bool) const
     return str;
 }
 
-double AGeoTrd1::maxSize()
+double AGeoTrd1::maxSize() const
 {
     double m = std::max(dx1, dx2);
     m = std::max(m, dy);
@@ -1245,7 +1247,7 @@ const QString AGeoTrd2::getGenerationString(bool) const
     return str;
 }
 
-double AGeoTrd2::maxSize()
+double AGeoTrd2::maxSize() const
 {
     double m = std::max(dx1, dx2);
     m = std::max(m, dy1);
@@ -1424,7 +1426,7 @@ const QString AGeoPgon::getGenerationString(bool) const
     return str;
 }
 
-double AGeoPgon::maxSize()
+double AGeoPgon::maxSize() const
 {
     return AGeoPcon::maxSize();
 }
@@ -1555,7 +1557,7 @@ const QString AGeoConeSeg::getGenerationString(bool) const
     return str;
 }
 
-double AGeoConeSeg::maxSize()
+double AGeoConeSeg::maxSize() const
 {
     double m = std::max(rmaxL, rmaxU);
     m = std::max(m, dz);
@@ -1678,7 +1680,7 @@ const QString AGeoParaboloid::getGenerationString(bool) const
     return str;
 }
 
-double AGeoParaboloid::maxSize()
+double AGeoParaboloid::maxSize() const
 {
     double m = std::max(rlo, rhi);
     m = std::max(m, dz);
@@ -1812,7 +1814,7 @@ const QString AGeoCone::getGenerationString(bool) const
     return str;
 }
 
-double AGeoCone::maxSize()
+double AGeoCone::maxSize() const
 {
     double m = std::max(rmaxL, rmaxU);
     m = std::max(m, dz);
@@ -1935,7 +1937,7 @@ const QString AGeoEltu::getGenerationString(bool) const
     return str;
 }
 
-double AGeoEltu::maxSize()
+double AGeoEltu::maxSize() const
 {
     double m = std::max(a, b);
     m = std::max(m, dz);
@@ -2128,7 +2130,7 @@ const QString AGeoArb8::getGenerationString(bool) const
     return str;
 }
 
-double AGeoArb8::maxSize()
+double AGeoArb8::maxSize() const
 {
     return dz;
 }
@@ -2341,7 +2343,7 @@ const QString AGeoPcon::getGenerationString(bool) const
     return str;
 }
 
-double AGeoPcon::maxSize()
+double AGeoPcon::maxSize() const
 {
     double m = 0.5*fabs(Sections.at(0).z - Sections.last().z);
     for (int i=0; i<Sections.size(); i++)
@@ -2621,7 +2623,7 @@ const QString AGeoPolygon::getGenerationString(bool) const
     return str;
 }
 
-double AGeoPolygon::maxSize()
+double AGeoPolygon::maxSize() const
 {
     double m = std::max(rmaxL, rmaxU);
     m = std::max(m, dz);
@@ -2866,7 +2868,7 @@ const QString AGeoScaledShape::getGenerationString(bool useStrings) const
     }
 }
 
-double AGeoScaledShape::maxSize()
+double AGeoScaledShape::maxSize() const
 {
     if (!BaseShape) return 0;
 
@@ -3060,7 +3062,7 @@ const QString AGeoTorus::getGenerationString(bool) const
     return str;
 }
 
-double AGeoTorus::maxSize()
+double AGeoTorus::maxSize() const
 {
     double m = std::max(R, Rmax);
     return sqrt(3.0)*m;

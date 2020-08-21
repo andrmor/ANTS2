@@ -2906,6 +2906,11 @@ AWorldDelegate::AWorldDelegate(const QStringList & materials, QWidget * ParentWi
             h->addStretch();
     lMF->addLayout(h);
 
+    QHBoxLayout * abl = createBottomButtons();
+    pbShow->setEnabled(false);
+    pbScriptLine->setEnabled(false);
+    lMF->addLayout(abl);
+
     frMainFrame->setLayout(lMF);
 }
 

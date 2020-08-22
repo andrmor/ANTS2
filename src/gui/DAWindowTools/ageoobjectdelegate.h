@@ -446,9 +446,6 @@ private slots:
     void onCellEdited();
     void onAddAbove();
     void onAddBellow();
-
-signals:
-    void reorderSections(int oldVisualIndex, int newVisualIndex);
 };
 
 class AGeoPgonDelegate : public AGeoPconDelegate

@@ -182,7 +182,7 @@ public:
 
   virtual double getHeight() {return dz;}
   virtual void setHeight(double /*dz*/) {}
-  const QString getGenerationString(bool /*useStrings*/) const override;
+  const QString getGenerationString(bool useStrings) const override;
   double maxSize() const override;
 
   void writeToJson(QJsonObject &json) const override;
@@ -219,7 +219,7 @@ public:
 
   virtual double getHeight() {return dz;}
   virtual void setHeight(double dz) {this->dz = dz;}
-  const QString getGenerationString(bool /*useStrings*/) const override;
+  const QString getGenerationString(bool useStrings) const override;
   double maxSize() const override;
 
   void writeToJson(QJsonObject& json) const override;
@@ -254,7 +254,7 @@ public:
 
   virtual double getHeight() {return dz;}
   virtual void setHeight(double dz) {this->dz = dz;}
-  const QString getGenerationString(bool /*useStrings*/) const override;
+  const QString getGenerationString(bool useStrings) const override;
   double maxSize() const override;
 
   void writeToJson(QJsonObject& json) const override;
@@ -290,7 +290,7 @@ public:
 
   virtual double getHeight() {return dz;}
   virtual void setHeight(double dz) {this->dz = dz;}
-  const QString getGenerationString(bool /*useStrings*/) const override;
+  const QString getGenerationString(bool useStrings) const override;
   double maxSize() const override;
 
   void writeToJson(QJsonObject& json) const override;
@@ -318,7 +318,7 @@ struct APolyCGsection
   void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName);
 
   bool fromString(QString string);
-  const QString toString() const;
+  const QString toString(bool useStrings) const;
   void writeToJson(QJsonObject& json) const;
   void readFromJson(const QJsonObject& json);
 };
@@ -340,7 +340,7 @@ public:
   virtual bool readFromString(QString GenerationString);
   virtual TGeoShape* createGeoShape(const QString shapeName = "");
 
-  const QString getGenerationString(bool /*useStrings*/) const override;
+  const QString getGenerationString(bool useStrings) const override;
   double maxSize() const override;
 
   void writeToJson(QJsonObject& json) const override;
@@ -372,7 +372,7 @@ public:
   virtual bool readFromString(QString GenerationString);
   virtual TGeoShape* createGeoShape(const QString shapeName = "");
 
-  const QString getGenerationString(bool /*useStrings*/) const override;
+  const QString getGenerationString(bool useStrings) const override;
   double maxSize() const override;
 
   void writeToJson(QJsonObject& json) const override;
@@ -406,7 +406,7 @@ public:
 
   virtual double getHeight() {return dz;}
   virtual void setHeight(double dz) {this->dz = dz;}
-  const QString getGenerationString(bool /*useStrings*/) const override;
+  const QString getGenerationString(bool useStrings) const override;
   double maxSize() const override;
 
   void writeToJson(QJsonObject& json) const override;

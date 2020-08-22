@@ -1103,13 +1103,31 @@ TGeoShape *AGeoTrd1::createGeoShape(const QString shapeName)
                                    new TGeoTrd1(shapeName.toLatin1().data(), dx1, dx2, dy, dz);
 }
 
-const QString AGeoTrd1::getGenerationString(bool) const
+const QString AGeoTrd1::getGenerationString(bool useStrings) const
 {
-    QString str = "TGeoTrd1( " +
-            QString::number(dx1)+", "+
-            QString::number(dx2)+", "+
-            QString::number(dy)+", "+
-            QString::number(dz)+" )";
+    QString str;
+    if (!useStrings)
+    {
+        str = "TGeoTrd1( " +
+                QString::number(dx1)+", "+
+                QString::number(dx2)+", "+
+                QString::number(dy)+", "+
+                QString::number(dz)+" )";
+    }
+    else
+    {
+        QString sdx1  = (str2dx1.isEmpty() ? QString::number(dx1) : "' + 0.5*(" + str2dx1    + ") + '");
+        QString sdx2  = (str2dx2.isEmpty() ? QString::number(dx2) : "' + 0.5*(" + str2dx2    + ") + '");
+        QString sdy   = (str2dy .isEmpty() ? QString::number(dy)  : "' + 0.5*(" + str2dy     + ") + '");
+        QString sdz   = (str2dz .isEmpty() ? QString::number(dz)  : "' + 0.5*(" + str2dz     + ") + '");
+
+        str = "TGeoTrd1( " +
+                sdx1 +", "+
+                sdx2 +", "+
+                sdy  +", "+
+                sdz  +" )";
+
+    }
     return str;
 }
 
@@ -1413,16 +1431,35 @@ TGeoShape *AGeoPgon::createGeoShape(const QString shapeName)
     return pg;
 }
 
-const QString AGeoPgon::getGenerationString(bool) const
+const QString AGeoPgon::getGenerationString(bool useStrings) const
 {
-    QString str = "TGeoPgon( " +
-            QString::number(phi)+", "+
-            QString::number(dphi) + ", "+
-            QString::number(nedges);
+    QString str;
+    if (!useStrings)
+    {
+        str = "TGeoPgon( " +
+                QString::number(phi)+", "+
+                QString::number(dphi) + ", "+
+                QString::number(nedges);
 
-    for (const APolyCGsection& s : Sections)  str += ", " + s.toString();
+        for (const APolyCGsection& s : Sections)  str += ", " + s.toString(false);
 
-    str +=" )";
+        str +=" )";
+    }
+    else
+    {
+        QString sphi    = (strPhi    .isEmpty() ? QString::number(phi)   : "' + " + strPhi    + " + '");
+        QString sdphi   = (strdPhi   .isEmpty() ? QString::number(dphi)  : "' + " + strdPhi   + " + '");
+        QString snedges = (strNedges .isEmpty() ? QString::number(nedges): "' + " + strNedges + " + '");
+
+        str = "TGeoPgon( " +
+                sphi  + ", "+
+                sdphi + ", "+
+                snedges;
+
+        for (const APolyCGsection& s : Sections)  str += ", " + s.toString(true);
+
+        str +=" )";
+    }
     return str;
 }
 
@@ -1544,16 +1581,40 @@ TGeoShape *AGeoConeSeg::createGeoShape(const QString shapeName)
     return s;
 }
 
-const QString AGeoConeSeg::getGenerationString(bool) const
+const QString AGeoConeSeg::getGenerationString(bool useStrings) const
 {
-    QString str = "TGeoConeSeg( " +
-            QString::number(dz)+", "+
-            QString::number(rminL)+", "+
-            QString::number(rmaxL)+", "+
-            QString::number(rminU)+", "+
-            QString::number(rmaxU)+", "+
-            QString::number(phi1)+", "+
-            QString::number(phi2)+" )";
+    QString str;
+    if (!useStrings)
+    {
+        str = "TGeoConeSeg( " +
+                QString::number(dz)+", "+
+                QString::number(rminL)+", "+
+                QString::number(rmaxL)+", "+
+                QString::number(rminU)+", "+
+                QString::number(rmaxU)+", "+
+                QString::number(phi1)+", "+
+                QString::number(phi2)+" )";
+    }
+    else
+    {
+        QString sdz    = (str2dz   .isEmpty() ? QString::number(dz)    : "' + 0.5*(" + str2dz    + ") + '");
+        QString srminL = (str2rminL.isEmpty() ? QString::number(rminL) : "' + 0.5*(" + str2rminL + ") + '");
+        QString srmaxL = (str2rmaxL.isEmpty() ? QString::number(rmaxL) : "' + 0.5*(" + str2rmaxL + ") + '");
+        QString srminU = (str2rminU.isEmpty() ? QString::number(rminU) : "' + 0.5*(" + str2rminU + ") + '");
+        QString srmaxU = (str2rmaxU.isEmpty() ? QString::number(rmaxU) : "' + 0.5*(" + str2rmaxU + ") + '");
+        QString sphi1  = (strPhi1  .isEmpty() ? QString::number(phi1)  : "' + "      + strPhi1   + " + '");
+        QString sphi2  = (strPhi2  .isEmpty() ? QString::number(phi2)  : "' + "      + strPhi2   + " + '");
+
+        str = "TGeoConeSeg( " +
+                sdz    + ", "+
+                srminL + ", "+
+                srmaxL + ", "+
+                srminU + ", "+
+                srmaxU + ", "+
+                sphi1  + ", "+
+                sphi2  + " )";
+
+    }
     return str;
 }
 
@@ -1671,12 +1732,28 @@ TGeoShape *AGeoParaboloid::createGeoShape(const QString shapeName)
     return s;
 }
 
-const QString AGeoParaboloid::getGenerationString(bool) const
+const QString AGeoParaboloid::getGenerationString(bool useStrings) const
 {
-    QString str = "TGeoParaboloid( " +
-            QString::number(rlo)+", "+
-            QString::number(rhi)+", "+
-            QString::number(dz)+" )";
+    QString str;
+    if (!useStrings)
+    {
+        str = "TGeoParaboloid( " +
+                QString::number(rlo)+", "+
+                QString::number(rhi)+", "+
+                QString::number(dz)+" )";
+    }
+    else
+    {
+        QString srlo   = (str2rlo  .isEmpty() ? QString::number(rlo)   : "' + 0.5*(" + str2rlo   + ") + '");
+        QString srhi   = (str2rhi  .isEmpty() ? QString::number(rhi)   : "' + 0.5*(" + str2rhi   + ") + '");
+        QString sdz    = (str2dz   .isEmpty() ? QString::number(dz)    : "' + 0.5*(" + str2dz    + ") + '");
+
+        str = "TGeoParaboloid( " +
+                srlo + ", "+
+                srhi + ", "+
+                sdz  + " )";
+
+    }
     return str;
 }
 
@@ -1752,11 +1829,11 @@ QString AGeoCone::updateShape()
 
 bool AGeoCone::isGeoConstInUse(const QRegExp &nameRegExp) const
 {
-    if (str2dz   .contains(nameRegExp)) return false;
-    if (str2rminL.contains(nameRegExp)) return false;
-    if (str2rmaxL.contains(nameRegExp)) return false;
-    if (str2rminU.contains(nameRegExp)) return false;
-    if (str2rmaxU.contains(nameRegExp)) return false;
+    if (str2dz   .contains(nameRegExp)) return true;
+    if (str2rminL.contains(nameRegExp)) return true;
+    if (str2rmaxL.contains(nameRegExp)) return true;
+    if (str2rminU.contains(nameRegExp)) return true;
+    if (str2rmaxU.contains(nameRegExp)) return true;
 
     return false;
 }
@@ -1803,14 +1880,35 @@ TGeoShape *AGeoCone::createGeoShape(const QString shapeName)
     return s;
 }
 
-const QString AGeoCone::getGenerationString(bool) const
+const QString AGeoCone::getGenerationString(bool useStrings) const
 {
-    QString str = "TGeoCone( " +
-            QString::number(dz)+", "+
-            QString::number(rminL)+", "+
-            QString::number(rmaxL)+", "+
-            QString::number(rminU)+", "+
-            QString::number(rmaxU)+" )";
+    QString str;
+    if (!useStrings)
+    {
+        str = "TGeoCone( " +
+                QString::number(dz)+", "+
+                QString::number(rminL)+", "+
+                QString::number(rmaxL)+", "+
+                QString::number(rminU)+", "+
+                QString::number(rmaxU)+" )";
+    }
+    else
+    {
+        QString sdz      = (str2dz   .isEmpty() ? QString::number(dz)      : "' + 0.5*(" + str2dz    + ") + '");
+        QString srminL   = (str2rminL.isEmpty() ? QString::number(rminL)   : "' + 0.5*(" + str2rminL + ") + '");
+        QString srmaxL   = (str2rmaxL.isEmpty() ? QString::number(rmaxL)   : "' + 0.5*(" + str2rmaxL + ") + '");
+        QString srminU   = (str2rminU.isEmpty() ? QString::number(rminU)   : "' + 0.5*(" + str2rminU + ") + '");
+        QString srmaxU   = (str2rmaxU.isEmpty() ? QString::number(rmaxU)   : "' + 0.5*(" + str2rmaxU + ") + '");
+
+        str = "TGeoCone( " +
+                sdz    + ", "+
+                srminL + ", "+
+                srmaxL + ", "+
+                srminU + ", "+
+                srmaxU + " )";
+
+
+    }
     return str;
 }
 
@@ -2331,15 +2429,32 @@ TGeoShape *AGeoPcon::createGeoShape(const QString shapeName)
     return pc;
 }
 
-const QString AGeoPcon::getGenerationString(bool) const
+const QString AGeoPcon::getGenerationString(bool useStrings) const
 {
-    QString str = "TGeoPcon( " +
-            QString::number(phi)+", "+
-            QString::number(dphi);
+    QString str;
+    if (!useStrings)
+    {
+        str = "TGeoPcon( " +
+                QString::number(phi)+", "+
+                QString::number(dphi);
 
-    for (const APolyCGsection& s : Sections) str += ", " + s.toString();
+        for (const APolyCGsection& s : Sections) str += ", " + s.toString(false);
 
-    str +=" )";
+        str +=" )";
+    }
+    else
+    {
+        QString sphi    = (strPhi    .isEmpty() ? QString::number(phi)   : "' + " + strPhi  + " + '");
+        QString sdphi   = (strdPhi   .isEmpty() ? QString::number(dphi)  : "' + " + strdPhi + " + '");
+
+        str = "TGeoPcon( " +
+                sphi + ", "+
+                sdphi ;
+
+        for (const APolyCGsection& s : Sections) str += ", " + s.toString(true);
+
+        str +=" )";
+    }
     return str;
 }
 
@@ -2475,13 +2590,30 @@ bool APolyCGsection::fromString(QString s)
     return true;
 }
 
-const QString APolyCGsection::toString() const
+const QString APolyCGsection::toString(bool useStrings) const
 {
-    return QString("{ ") +
-            QString::number(z) + " : " +
-            QString::number(rmin) + " : " +
-            QString::number(rmax) +
-            " }";
+    QString str;
+    if (!useStrings)
+    {
+        str = QString("{ ") +
+                QString::number(z)    + " : " +
+                QString::number(rmin) + " : " +
+                QString::number(rmax) +
+                " }";
+    }
+    else
+    {
+        QString sz    = (strZ    .isEmpty() ? QString::number(z)    : "' + " +      strZ     + " + '");
+        QString srmin = (str2rmin.isEmpty() ? QString::number(rmin) : "' + 0.5*(" + str2rmin + ") + '");
+        QString srmax = (str2rmax.isEmpty() ? QString::number(rmax) : "' + 0.5*(" + str2rmax + ") + '");
+
+        str = QString("{ ") +
+                sz     + " : " +
+                srmin  + " : " +
+                srmax  + " }";
+
+    }
+    return str;
 }
 
 void APolyCGsection::writeToJson(QJsonObject &json) const
@@ -2610,16 +2742,39 @@ TGeoShape *AGeoPolygon::createGeoShape(const QString shapeName)
     return s;
 }
 
-const QString AGeoPolygon::getGenerationString(bool) const
+const QString AGeoPolygon::getGenerationString(bool useStrings) const
 {
-    QString str = "TGeoPolygon( " +
-            QString::number(nedges)+", "+
-            QString::number(dphi)+", "+
-            QString::number(dz)+", "+
-            QString::number(rminL)+", "+
-            QString::number(rmaxL)+", "+
-            QString::number(rminU)+", "+
-            QString::number(rmaxU)+" )";
+    QString str;
+    if (!useStrings)
+    {
+        str = "TGeoPolygon( " +
+                QString::number(nedges)+", "+
+                QString::number(dphi)+", "+
+                QString::number(dz)+", "+
+                QString::number(rminL)+", "+
+                QString::number(rmaxL)+", "+
+                QString::number(rminU)+", "+
+                QString::number(rmaxU)+" )";
+    }
+    else
+    {
+        QString snedges = (strNedges .isEmpty() ? QString::number(nedges): "' + "      + strNedges + " + '");
+        QString sdphi   = (strdPhi   .isEmpty() ? QString::number(dphi)  : "' + "      + strdPhi   + " + '");
+        QString sdz     = (str2dz    .isEmpty() ? QString::number(dz)    : "' + 0.5*(" + str2dz    + ") + '");
+        QString srminL  = (str2rminL .isEmpty() ? QString::number(rminL) : "' + 0.5*(" + str2rminL + ") + '");
+        QString srmaxL  = (str2rmaxL .isEmpty() ? QString::number(rmaxL) : "' + 0.5*(" + str2rmaxL + ") + '");
+        QString srminU  = (str2rminU .isEmpty() ? QString::number(rminU) : "' + 0.5*(" + str2rminU + ") + '");
+        QString srmaxU  = (str2rmaxU .isEmpty() ? QString::number(rmaxU) : "' + 0.5*(" + str2rmaxU + ") + '");
+
+        str = "TGeoPolygon( " +
+                snedges + ", "+
+                sdphi   + ", "+
+                sdz     + ", "+
+                srminL  + ", "+
+                srmaxL  + ", "+
+                srminU  + ", "+
+                srmaxU  + " )";
+    }
     return str;
 }
 
@@ -2858,7 +3013,6 @@ const QString AGeoScaledShape::getGenerationString(bool useStrings) const
     else
     {
         QString temps = BaseShape->getGenerationString(true);
-        qDebug()<< "temps" <<temps;
         return QString() + "TGeoScaledShape( " +
                 temps + ", " +
                 QString::number(scaleX) + ", " +

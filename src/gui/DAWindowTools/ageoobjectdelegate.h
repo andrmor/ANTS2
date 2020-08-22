@@ -16,7 +16,6 @@ class TVector3;
 class QWidget;
 class QStringList;
 class QVBoxLayout;
-class QHBoxLayout;
 class QGridLayout;
 class QLineEdit;
 class QLabel;
@@ -43,7 +42,8 @@ public:
 
     bool updateObject(AGeoObject * obj) const override;
 
-    AGeoShape * ShapeCopy = nullptr;
+public slots:
+    void Update(const AGeoObject * obj) override;
 
 private:
     QVBoxLayout * lMF = nullptr;      //main layout
@@ -55,6 +55,8 @@ private:
 
 protected:
     const AGeoObject * CurrentObject = nullptr;
+
+    AGeoShape * ShapeCopy = nullptr;
 
     QLabel    * labType = nullptr;
     QCheckBox * cbScale = nullptr;
@@ -77,21 +79,15 @@ protected:
 
     QStringList ListOfShapesForTransform;
 
-public slots:
-    void Update(const AGeoObject * obj) override;
-
 private slots:
     void onContentChanged();          // only to enter the editing mode! Object update is performed only on confirm button click!
     void onHelpRequested();           // dialog with AGeoShape list can be accessed here
     void onChangeShapePressed();
     void onScaleToggled();
 
-protected slots:
-    virtual void onLocalShapeParameterChange() {}
-
 protected:
     void addLocalLayout(QLayout * lay);
-    void updatePteShape(const QString & text);
+    void updatePteShape(const QString & text);  // !*! obsolete?
     void updateScalingFactors();
     const AGeoShape * getBaseShapeOfObject(const AGeoObject *obj);
     void updateTypeLabel();
@@ -107,6 +103,7 @@ signals:
     void RequestChangeSlabShape(int Shape);
 };
 
+
 class AGeoBoxDelegate : public AGeoObjectDelegate
 {
     Q_OBJECT
@@ -114,15 +111,15 @@ class AGeoBoxDelegate : public AGeoObjectDelegate
 public:
     AGeoBoxDelegate(const QStringList & materials, QWidget * parent);
 
-    void finalizeLocalParameters();
-
-    AOneLineTextEdit * ex = nullptr;
-    AOneLineTextEdit * ey = nullptr;
-    AOneLineTextEdit * ez = nullptr;
+    bool updateObject(AGeoObject * obj) const override;
 
 public slots:
     void Update(const AGeoObject * obj) override;
 
+protected:
+    AOneLineTextEdit * ex = nullptr;
+    AOneLineTextEdit * ey = nullptr;
+    AOneLineTextEdit * ez = nullptr;
 };
 
 class AWorldDelegate : public AGeoBaseDelegate
@@ -132,18 +129,18 @@ class AWorldDelegate : public AGeoBaseDelegate
 public:
     AWorldDelegate(const QStringList & materials, QWidget * ParentWidget);
 
-    QComboBox * cobMat = nullptr;
-    QCheckBox * cbFixedSize = nullptr;
-
-    AOneLineTextEdit * ledSizeXY = nullptr;
-    AOneLineTextEdit * ledSizeZ  = nullptr;
+    bool updateObject(AGeoObject * obj) const override;
 
     QString getName() const override;
-    bool updateObject(AGeoObject * obj) const override;
 
 public slots:
     void Update(const AGeoObject * obj) override;
 
+protected:
+    QComboBox        * cobMat      = nullptr;
+    QCheckBox        * cbFixedSize = nullptr;
+    AOneLineTextEdit * ledSizeXY   = nullptr;
+    AOneLineTextEdit * ledSizeZ    = nullptr;
 };
 
 class AGeoTubeDelegate : public AGeoObjectDelegate
@@ -153,8 +150,12 @@ class AGeoTubeDelegate : public AGeoObjectDelegate
 public:
     AGeoTubeDelegate(const QStringList & materials, QWidget * parent);
 
-    void finalizeLocalParameters();
+    bool updateObject(AGeoObject * obj) const override;
 
+public slots:
+    void Update(const AGeoObject * obj) override;
+
+protected:
     AOneLineTextEdit * ei = nullptr;
     AOneLineTextEdit * eo = nullptr;
     AOneLineTextEdit * ez = nullptr;
@@ -162,9 +163,6 @@ public:
     QGridLayout * gr    = nullptr;
     QLabel      * labIm = nullptr;
     QLabel      * labIu = nullptr;
-
-public slots:
-    void Update(const AGeoObject * obj) override;
 };
 
 class AGeoTubeSegDelegate : public AGeoTubeDelegate
@@ -174,15 +172,14 @@ class AGeoTubeSegDelegate : public AGeoTubeDelegate
 public:
     AGeoTubeSegDelegate(const QStringList & materials, QWidget * parent);
 
-    void finalizeLocalParameters();
-
-    AOneLineTextEdit * ep1 = nullptr;
-    AOneLineTextEdit * ep2 = nullptr;
+    bool updateObject(AGeoObject * obj) const override;
 
 public slots:
     void Update(const AGeoObject * obj) override;
 
-private slots:
+protected:
+    AOneLineTextEdit * ep1 = nullptr;
+    AOneLineTextEdit * ep2 = nullptr;
 };
 
 class AGeoTubeSegCutDelegate : public AGeoTubeSegDelegate
@@ -192,20 +189,18 @@ class AGeoTubeSegCutDelegate : public AGeoTubeSegDelegate
 public:
     AGeoTubeSegCutDelegate(const QStringList & materials, QWidget * parent);
 
-    void finalizeLocalParameters() override;
+    bool updateObject(AGeoObject * obj) const override;
 
+public slots:
+    void Update(const AGeoObject * obj) override;
+
+protected:
     AOneLineTextEdit * elnx = nullptr;
     AOneLineTextEdit * elny = nullptr;
     AOneLineTextEdit * elnz = nullptr;
     AOneLineTextEdit * eunx = nullptr;
     AOneLineTextEdit * euny = nullptr;
     AOneLineTextEdit * eunz = nullptr;
-
-public slots:
-    void Update(const AGeoObject * obj) override;
-
-private slots:
-    void onLocalShapeParameterChange() override;
 };
 
 class AGeoElTubeDelegate : public AGeoObjectDelegate
@@ -215,19 +210,17 @@ class AGeoElTubeDelegate : public AGeoObjectDelegate
 public:
     AGeoElTubeDelegate(const QStringList & materials, QWidget * parent);
 
-    void finalizeLocalParameters();
-
-    AOneLineTextEdit * ex = nullptr;
-    AOneLineTextEdit * ey = nullptr;
-    AOneLineTextEdit * ez = nullptr;
-
-protected:
-    QGridLayout * gr = nullptr;
+    bool updateObject(AGeoObject * obj) const override;
 
 public slots:
     void Update(const AGeoObject * obj) override;
 
-private slots:
+protected:
+    AOneLineTextEdit * ex = nullptr;
+    AOneLineTextEdit * ey = nullptr;
+    AOneLineTextEdit * ez = nullptr;
+
+    QGridLayout * gr = nullptr;
 };
 
 class AGeoParaDelegate : public AGeoObjectDelegate
@@ -237,19 +230,18 @@ class AGeoParaDelegate : public AGeoObjectDelegate
 public:
     AGeoParaDelegate(const QStringList & materials, QWidget * parent);
 
-    void finalizeLocalParameters() override;
+    bool updateObject(AGeoObject * obj) const override;
 
+public slots:
+    void Update(const AGeoObject * obj) override;
+
+protected:
     AOneLineTextEdit * ex = nullptr;
     AOneLineTextEdit * ey = nullptr;
     AOneLineTextEdit * ez = nullptr;
     AOneLineTextEdit * ea = nullptr;
     AOneLineTextEdit * et = nullptr;
     AOneLineTextEdit * ep = nullptr;
-
-public slots:
-    void Update(const AGeoObject * obj) override;
-
-private slots:
 };
 
 class AGeoSphereDelegate : public AGeoObjectDelegate
@@ -259,19 +251,18 @@ class AGeoSphereDelegate : public AGeoObjectDelegate
 public:
     AGeoSphereDelegate(const QStringList & materials, QWidget * parent);
 
-    void finalizeLocalParameters();
+    bool updateObject(AGeoObject * obj) const override;
 
+public slots:
+    void Update(const AGeoObject * obj) override;
+
+protected:
     AOneLineTextEdit * eod = nullptr;
     AOneLineTextEdit * eid = nullptr;
     AOneLineTextEdit * et1 = nullptr;
     AOneLineTextEdit * et2 = nullptr;
     AOneLineTextEdit * ep1 = nullptr;
     AOneLineTextEdit * ep2 = nullptr;
-
-public slots:
-    void Update(const AGeoObject * obj) override;
-
-private slots:
 };
 
 class AGeoConeDelegate : public AGeoObjectDelegate
@@ -281,21 +272,19 @@ class AGeoConeDelegate : public AGeoObjectDelegate
 public:
     AGeoConeDelegate(const QStringList & materials, QWidget * parent);
 
-    void finalizeLocalParameters();
+    bool updateObject(AGeoObject * obj) const override;
 
+public slots:
+    void Update(const AGeoObject * obj) override;
+
+protected:
     AOneLineTextEdit * ez  = nullptr;
     AOneLineTextEdit * eli = nullptr;
     AOneLineTextEdit * elo = nullptr;
     AOneLineTextEdit * eui = nullptr;
     AOneLineTextEdit * euo = nullptr;
 
-protected:
     QGridLayout * gr = nullptr;
-
-public slots:
-    void Update(const AGeoObject * obj) override;
-
-protected slots:
 };
 
 class AGeoConeSegDelegate : public AGeoConeDelegate
@@ -305,16 +294,14 @@ class AGeoConeSegDelegate : public AGeoConeDelegate
 public:
     AGeoConeSegDelegate(const QStringList & materials, QWidget * parent);
 
-    void finalizeLocalParameters() override;
-
-    AOneLineTextEdit * ep1 = nullptr;
-    AOneLineTextEdit * ep2 = nullptr;
+    bool updateObject(AGeoObject * obj) const override;
 
 public slots:
     void Update(const AGeoObject * obj) override;
 
-protected slots:
-    void onLocalShapeParameterChange() override;
+protected:
+    AOneLineTextEdit * ep1 = nullptr;
+    AOneLineTextEdit * ep2 = nullptr;
 };
 
 class AGeoTrapXDelegate : public AGeoObjectDelegate
@@ -324,17 +311,16 @@ class AGeoTrapXDelegate : public AGeoObjectDelegate
 public:
     AGeoTrapXDelegate(const QStringList & materials, QWidget * parent);
 
-    void finalizeLocalParameters() override;
-
-    AOneLineTextEdit * exl = nullptr;
-    AOneLineTextEdit * exu = nullptr;
-    AOneLineTextEdit * ey = nullptr;
-    AOneLineTextEdit * ez = nullptr;
+    bool updateObject(AGeoObject * obj) const override;
 
 public slots:
     void Update(const AGeoObject * obj) override;
 
-private slots:
+protected:
+    AOneLineTextEdit * exl = nullptr;
+    AOneLineTextEdit * exu = nullptr;
+    AOneLineTextEdit * ey = nullptr;
+    AOneLineTextEdit * ez = nullptr;
 };
 
 class AGeoTrapXYDelegate : public AGeoObjectDelegate
@@ -344,19 +330,17 @@ class AGeoTrapXYDelegate : public AGeoObjectDelegate
 public:
     AGeoTrapXYDelegate(const QStringList & materials, QWidget * parent);
 
-    void finalizeLocalParameters() override;
+    bool updateObject(AGeoObject * obj) const override;
 
+public slots:
+    void Update(const AGeoObject * obj) override;
+
+protected:
     AOneLineTextEdit * exl = nullptr;
     AOneLineTextEdit * exu = nullptr;
     AOneLineTextEdit * eyl = nullptr;
     AOneLineTextEdit * eyu = nullptr;
     AOneLineTextEdit * ez  = nullptr;
-
-public slots:
-    void Update(const AGeoObject * obj) override;
-
-private slots:
-    void onLocalShapeParameterChange() override;
 };
 
 class AGeoParaboloidDelegate : public AGeoObjectDelegate                      //paraboloiid
@@ -366,16 +350,15 @@ class AGeoParaboloidDelegate : public AGeoObjectDelegate                      //
 public:
     AGeoParaboloidDelegate(const QStringList & materials, QWidget * parent);
 
-    void finalizeLocalParameters() override;
-
-    AOneLineTextEdit * el = nullptr;
-    AOneLineTextEdit * eu = nullptr;
-    AOneLineTextEdit * ez = nullptr;
+    bool updateObject(AGeoObject * obj) const override;
 
 public slots:
     void Update(const AGeoObject * obj) override;
 
-private slots:
+protected:
+    AOneLineTextEdit * el = nullptr;
+    AOneLineTextEdit * eu = nullptr;
+    AOneLineTextEdit * ez = nullptr;
 };
 
 class AGeoTorusDelegate : public AGeoObjectDelegate
@@ -385,17 +368,17 @@ class AGeoTorusDelegate : public AGeoObjectDelegate
 public:
     AGeoTorusDelegate(const QStringList & materials, QWidget * parent);
 
-    void finalizeLocalParameters() override;
+    bool updateObject(AGeoObject * obj) const override;
 
+public slots:
+    void Update(const AGeoObject * obj) override;
+
+protected:
     AOneLineTextEdit * ead = nullptr;
     AOneLineTextEdit * edi = nullptr;
     AOneLineTextEdit * edo = nullptr;
     AOneLineTextEdit * ep0 = nullptr;
     AOneLineTextEdit * epe = nullptr;
-
-public slots:
-    void Update(const AGeoObject * obj) override;
-
 };
 
 class AGeoPolygonDelegate : public AGeoObjectDelegate
@@ -405,8 +388,12 @@ class AGeoPolygonDelegate : public AGeoObjectDelegate
 public:
     AGeoPolygonDelegate(const QStringList & materials, QWidget * parent);
 
-    void finalizeLocalParameters() override;
+    bool updateObject(AGeoObject * obj) const override;
 
+public slots:
+    virtual void Update(const AGeoObject * obj) override;
+
+protected:
     AOneLineTextEdit  * en = nullptr;
     AOneLineTextEdit * edp = nullptr;
     AOneLineTextEdit * ez  = nullptr;
@@ -425,12 +412,6 @@ public:
     QLabel * labUOu = nullptr;
     QLabel * labUIu = nullptr;
     QLabel * labAu  = nullptr;
-
-public slots:
-    virtual void Update(const AGeoObject * obj) override;
-
-private slots:
-    void onLocalShapeParameterChange() override;
 };
 
 class QTableWidget;
@@ -442,31 +423,32 @@ class AGeoPconDelegate : public AGeoObjectDelegate
 public:
     AGeoPconDelegate(const QStringList & materials, QWidget * parent);
 
-    void finalizeLocalParameters() override;
+    bool updateObject(AGeoObject * obj) const override;
 
+public slots:
+    void Update(const AGeoObject * obj) override;
+
+protected:
     AOneLineTextEdit * ep0 = nullptr;
     AOneLineTextEdit * epe = nullptr;
 
     QTableWidget * tab = nullptr;
+    QVBoxLayout  * lay = nullptr;
 
-protected:
-    QVBoxLayout * lay = nullptr;
+    const int rowHeight = 23;
+
     void addOneLineTextEdits(int row);
-signals:
-    void reorderSections(int oldVisualIndex, int newVisualIndex);
-
-public slots:
-    void Update(const AGeoObject * obj) override;
+    void readGui() const;
     void updateTableW(AGeoPcon * pcon);
+
+private slots:
+    void onReorderSections(int /*logicalIndex*/, int oldVisualIndex, int newVisualIndex);
     void onCellEdited();
     void onAddAbove();
     void onAddBellow();
 
-private slots:
-    void onReorderSections(int /*logicalIndex*/, int oldVisualIndex, int newVisualIndex);
-
-protected:
-    const int rowHeight = 23;
+signals:
+    void reorderSections(int oldVisualIndex, int newVisualIndex);
 };
 
 class AGeoPgonDelegate : public AGeoPconDelegate
@@ -476,15 +458,13 @@ class AGeoPgonDelegate : public AGeoPconDelegate
 public:
     AGeoPgonDelegate(const QStringList & materials, QWidget * parent);
 
-    void finalizeLocalParameters() override;
-
-    AOneLineTextEdit  * eed = nullptr;
+    bool updateObject(AGeoObject * obj) const override;
 
 public slots:
     void Update(const AGeoObject * obj) override;
 
-private slots:
-
+protected:
+    AOneLineTextEdit  * eed = nullptr;
 };
 
 class AGeoCompositeDelegate : public AGeoObjectDelegate
@@ -493,14 +473,14 @@ class AGeoCompositeDelegate : public AGeoObjectDelegate
 
 public:
     AGeoCompositeDelegate(const QStringList & materials, QWidget * parent);
-    void finalizeLocalParameters();
 
-    QPlainTextEdit * te = nullptr;
+    bool updateObject(AGeoObject * obj) const override;
 
 public slots:
     void Update(const AGeoObject * obj) override;
 
-private slots:
+protected:
+    QPlainTextEdit * te = nullptr;
 };
 
 struct AEditEdit
@@ -516,16 +496,15 @@ class AGeoArb8Delegate : public AGeoObjectDelegate
 public:
     AGeoArb8Delegate(const QStringList & materials, QWidget * parent);
 
-    void finalizeLocalParameters() override;
-
-    AOneLineTextEdit * ez = nullptr;
-    QVector< QVector<AEditEdit> > ve; //[0..1][0..3] - upper/lower, 4 points
+    bool updateObject(AGeoObject * obj) const override;
 
 public slots:
     void Update(const AGeoObject * obj) override;
 
-private slots:
-    void onLocalShapeParameterChange() override;
+protected:
+    AOneLineTextEdit * ez = nullptr;
+
+    QVector<QVector<AEditEdit>> ve; //[0..1][0..3] - upper/lower, 4 points
 };
 
 class AGeoArrayDelegate : public AGeoObjectDelegate
@@ -535,7 +514,7 @@ class AGeoArrayDelegate : public AGeoObjectDelegate
 public:
     AGeoArrayDelegate(const QStringList & materials, QWidget * parent);
 
-    void finalizeLocalParameters();
+    bool updateObject(AGeoObject * obj) const override;
 
 public slots:
     void Update(const AGeoObject * obj) override;

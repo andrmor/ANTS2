@@ -110,6 +110,7 @@ bool AGeoSlabDelegate_Tube::updateObject(AGeoObject *obj) const
     case 2: //update psi
         SlabModel.XYrecord.strAngle = ledPsi->text();
         ok =       GC.updateParameter(ErrorStr, SlabModel.XYrecord.strAngle, SlabModel.XYrecord.angle, false, false, false);
+        //[[fallthrough]];
     case 1: //update dx dy
         SlabModel.XYrecord.strSize1 = eo->text();
         ok = ok && GC.updateParameter(ErrorStr, SlabModel.XYrecord.strSize1, SlabModel.XYrecord.size1, true, true, false);

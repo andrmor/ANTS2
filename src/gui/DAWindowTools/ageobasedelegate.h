@@ -18,7 +18,6 @@ public:
     virtual ~AGeoBaseDelegate(){}
 
     virtual QString getName() const = 0;
-    virtual void finalizeLocalParameters() {}             //activated in the beggining of "update object"
     virtual bool updateObject(AGeoObject * obj) const = 0;
 
 public:

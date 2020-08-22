@@ -99,8 +99,7 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
         hbs->addStretch();
         cbScale = new QCheckBox("Apply scaling");
         cbScale->setToolTip("Use scaling only if it is the only choice, e.g. to make ellipsoid from a sphere");
-        connect(cbScale, &QCheckBox::clicked, this, &AGeoObjectDelegate::onLocalShapeParameterChange);  // !*! OLD SYSTEM
-        connect(cbScale, &QCheckBox::clicked, this, &AGeoObjectDelegate::onScaleToggled); // new system
+        connect(cbScale, &QCheckBox::clicked, this, &AGeoObjectDelegate::onScaleToggled);
         connect(cbScale, &QCheckBox::clicked, this, &AGeoObjectDelegate::onContentChanged);
         hbs->addWidget(cbScale);
     scaleWidget = new QWidget();
@@ -232,32 +231,15 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
                 QMessageBox::warning(this->ParentWidget, "", errorStr);
                 return false;
             }
-            /*AGeoComposite * comp3 =dynamic_cast<AGeoComposite*> (shape); // !*! Temporary tester to show it works
-            if (comp3) qDebug() <<"hmmm: "<<comp3->getGenerationString();
-
-            AGeoComposite * comp =dynamic_cast<AGeoComposite*> (obj->Shape); // !*! Temporary tester to show it works
-            if (comp) qDebug() <<"before: "<<comp->getGenerationString();*/
 
             delete obj->Shape;
             obj->Shape = ShapeCopy->clone();
-
-            /*AGeoComposite * comp2 =dynamic_cast<AGeoComposite*> (obj->Shape);
-            if (comp2) qDebug() <<"after: "<<comp2->getGenerationString();*/
         }
         else
         {
             qWarning() << "Something went very wrong, ShapeCopy not found";
             return false;
         }
-
-        /*
-        else
-        {
-            // old system
-            QString newShape = pteShape->document()->toPlainText();
-            obj->readShapeFromString(newShape);
-        }*/
-
 
         //if it is a set member, need old values of position and angle
         QVector<double> old;
@@ -338,14 +320,6 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
     //additional post-processing
     if ( obj->ObjectType->isArray() )
     {
-        //old system
-        /*array->numX = ledNumX->value();
-        array->numY = ledNumY->value();
-        array->numZ = ledNumZ->value();
-        array->stepX = ledStepX->text().toDouble();
-        array->stepY = ledStepY->text().toDouble();
-        array->stepZ = ledStepZ->text().toDouble();*/
-
         //additional properties for array
         ATypeArrayObject* array = static_cast<ATypeArrayObject*>(obj->ObjectType);
         QString errorStr = array->updateType();
@@ -432,11 +406,6 @@ void AGeoObjectDelegate::onScaleToggled()
     if (scaled)
     {
         qDebug() << "Convering scaled to base shape!";
-        /*
-        AGeoShape * tmp = ShapeCopy;
-        ShapeCopy = scaled->BaseShape;
-        delete tmp;
-        */
         ShapeCopy = scaled->BaseShape;
         scaled->BaseShape = nullptr;
         delete scaled;
@@ -708,7 +677,7 @@ AGeoBoxDelegate::AGeoBoxDelegate(const QStringList &materials, QWidget *parent)
     }
 }
 
-void AGeoBoxDelegate::finalizeLocalParameters()
+bool AGeoBoxDelegate::updateObject(AGeoObject *obj) const
 {
     AGeoBox * box = dynamic_cast<AGeoBox*>(ShapeCopy);
     if (!box)
@@ -724,6 +693,8 @@ void AGeoBoxDelegate::finalizeLocalParameters()
         box->str2dz = ez->text();
     }
     else qWarning() << "Read delegate: Box shape not found!";
+
+    return AGeoObjectDelegate::updateObject(obj);
 }
 
 void AGeoBoxDelegate::Update(const AGeoObject *obj)
@@ -786,7 +757,7 @@ AGeoTubeDelegate::AGeoTubeDelegate(const QStringList & materials, QWidget *paren
     }
 }
 
-void AGeoTubeDelegate::finalizeLocalParameters()
+bool AGeoTubeDelegate::updateObject(AGeoObject *obj) const
 {
     AGeoTube * tube = dynamic_cast<AGeoTube*>(ShapeCopy);
     if (!tube)
@@ -801,6 +772,8 @@ void AGeoTubeDelegate::finalizeLocalParameters()
         tube->str2dz   = ez->text();
     }
     else qWarning() << "Read delegate: Tube shape not found!";
+
+    return AGeoObjectDelegate::updateObject(obj);
 }
 
 void AGeoTubeDelegate::Update(const AGeoObject *obj)
@@ -853,61 +826,50 @@ AGeoTubeSegDelegate::AGeoTubeSegDelegate(const QStringList & materials, QWidget 
     }
 }
 
-void AGeoTubeSegDelegate::finalizeLocalParameters()
+bool AGeoTubeSegDelegate::updateObject(AGeoObject *obj) const
 {
     AGeoTubeSeg * tubeSeg = dynamic_cast<AGeoTubeSeg*>(ShapeCopy);
-        if (!tubeSeg)
-        {
-            AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
-            tubeSeg = dynamic_cast<AGeoTubeSeg*>(scaled->BaseShape);
-        }
+    if (!tubeSeg)
+    {
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+        tubeSeg = dynamic_cast<AGeoTubeSeg*>(scaled->BaseShape);
+    }
 
-        if (tubeSeg)
-        {
-            tubeSeg->str2rmin = ei ->text();
-            tubeSeg->str2rmax = eo ->text();
-            tubeSeg->str2dz   = ez ->text();
-            tubeSeg->strPhi1 = ep1->text();
-            tubeSeg->strPhi2 = ep2->text();
-            //emit ContentChanged();
-        }
-        else qWarning() << "Read delegate: Tube Segment shape not found!";
+    if (tubeSeg)
+    {
+        tubeSeg->str2rmin = ei ->text();
+        tubeSeg->str2rmax = eo ->text();
+        tubeSeg->str2dz   = ez ->text();
+        tubeSeg->strPhi1 = ep1->text();
+        tubeSeg->strPhi2 = ep2->text();
+        //emit ContentChanged();
+    }
+    else qWarning() << "Read delegate: Tube Segment shape not found!";
+
+    return AGeoObjectDelegate::updateObject(obj);
 }
 
 void AGeoTubeSegDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
 
-    /* old system
-    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
-    const AGeoTubeSeg * seg = dynamic_cast<const AGeoTubeSeg*>(tmpShape ? tmpShape : obj->Shape);
-    if (seg)
-    {
-        eo->setText (QString::number(seg->rmax*2.0));
-        ei->setText (QString::number(seg->rmin*2.0));
-        ez->setText (QString::number(seg->dz*2.0));
-        ep1->setText(QString::number(seg->phi1));
-        ep2->setText(QString::number(seg->phi2));
-    }
-    delete tmpShape;*/
-
     AGeoTubeSeg * tubeSeg = dynamic_cast<AGeoTubeSeg*>(ShapeCopy);
-        if (!tubeSeg)
-        {
-            AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
-            tubeSeg = dynamic_cast<AGeoTubeSeg*>(scaled->BaseShape);
-        }
+    if (!tubeSeg)
+    {
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+        tubeSeg = dynamic_cast<AGeoTubeSeg*>(scaled->BaseShape);
+    }
 
-        if (tubeSeg)
-        {
-            ei ->setText(tubeSeg->str2rmin.isEmpty() ? QString::number(tubeSeg->rmin*2.0) : tubeSeg->str2rmin);
-            eo ->setText(tubeSeg->str2rmax.isEmpty() ? QString::number(tubeSeg->rmax*2.0) : tubeSeg->str2rmax);
-            ez ->setText(tubeSeg->str2dz  .isEmpty() ? QString::number(tubeSeg->dz  *2.0) : tubeSeg->str2dz);
-            ep1->setText(tubeSeg->strPhi1.isEmpty() ? QString::number(tubeSeg->phi1)     : tubeSeg->strPhi1);
-            ep2->setText(tubeSeg->strPhi2.isEmpty() ? QString::number(tubeSeg->phi2)     : tubeSeg->strPhi2);
-            //emit ContentChanged();
-        }
-        else qWarning() << "Read delegate: Tube Segment shape not found!";
+    if (tubeSeg)
+    {
+        ei ->setText(tubeSeg->str2rmin.isEmpty() ? QString::number(tubeSeg->rmin*2.0) : tubeSeg->str2rmin);
+        eo ->setText(tubeSeg->str2rmax.isEmpty() ? QString::number(tubeSeg->rmax*2.0) : tubeSeg->str2rmax);
+        ez ->setText(tubeSeg->str2dz  .isEmpty() ? QString::number(tubeSeg->dz  *2.0) : tubeSeg->str2dz);
+        ep1->setText(tubeSeg->strPhi1.isEmpty() ? QString::number(tubeSeg->phi1)     : tubeSeg->strPhi1);
+        ep2->setText(tubeSeg->strPhi2.isEmpty() ? QString::number(tubeSeg->phi2)     : tubeSeg->strPhi2);
+        //emit ContentChanged();
+    }
+    else qWarning() << "Read delegate: Tube Segment shape not found!";
 }
 
 AGeoTubeSegCutDelegate::AGeoTubeSegCutDelegate(const QStringList &materials, QWidget *parent) :
@@ -944,19 +906,17 @@ AGeoTubeSegCutDelegate::AGeoTubeSegCutDelegate(const QStringList &materials, QWi
     for (AOneLineTextEdit * le : {elnx, elny, elnz, eunx, euny, eunz})
     {
         configureHighligherAndCompleter(le);
-        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoTubeSegCutDelegate::onLocalShapeParameterChange);
+        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoBaseDelegate::ContentChanged);
     }
 }
 
-void AGeoTubeSegCutDelegate::finalizeLocalParameters()
+bool AGeoTubeSegCutDelegate::updateObject(AGeoObject *obj) const
 {
-    AGeoTubeSegDelegate::finalizeLocalParameters();
-
     AGeoCtub * ctube = dynamic_cast<AGeoCtub*>(ShapeCopy);
     if (!ctube)
     {
-    AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
-    ctube = dynamic_cast<AGeoCtub*>(scaled->BaseShape);
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+        ctube = dynamic_cast<AGeoCtub*>(scaled->BaseShape);
     }
 
     if (ctube)
@@ -970,29 +930,13 @@ void AGeoTubeSegCutDelegate::finalizeLocalParameters()
 
     }
     else qWarning() << "Read delegate: Tube segment cut shape not found!";
+
+    return AGeoTubeSegDelegate::updateObject(obj); // AGeoTubeSeg for the rest of the properties
 }
 
 void AGeoTubeSegCutDelegate::Update(const AGeoObject *obj)
 {
     AGeoTubeSegDelegate::Update(obj);
-
-    /*const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
-    const AGeoCtub * seg = dynamic_cast<const AGeoCtub*>(tmpShape ? tmpShape : obj->Shape);
-    if (seg)
-    {
-        eo->setText (QString::number(seg->rmax*2.0));
-        ei->setText (QString::number(seg->rmin*2.0));
-        ez->setText (QString::number(seg->dz*2.0));
-        ep1->setText(QString::number(seg->phi1));
-        ep2->setText(QString::number(seg->phi2));
-        elnx->setText(QString::number(seg->nxlow));
-        elny->setText(QString::number(seg->nylow));
-        elnz->setText(QString::number(seg->nzlow));
-        eunx->setText(QString::number(seg->nxhi));
-        euny->setText(QString::number(seg->nyhi));
-        eunz->setText(QString::number(seg->nzhi));
-    }
-    delete tmpShape;*/
 
     AGeoCtub * ctube = dynamic_cast<AGeoCtub*>(ShapeCopy);
     if (!ctube)
@@ -1012,15 +956,6 @@ void AGeoTubeSegCutDelegate::Update(const AGeoObject *obj)
 
     }
     else qWarning() << "Read delegate: Tube segment cut shape not found!";
-}
-
-void AGeoTubeSegCutDelegate::onLocalShapeParameterChange()
-{
-    updatePteShape(QString("TGeoCtub( %1, %2, %3, %4, %5, %6, %7, %8, %9, %10, %11 )")
-                              .arg(0.5*ei->text().toDouble()).arg(0.5*eo->text().toDouble()).arg(0.5*ez->text().toDouble())
-                              .arg(ep1->text()).arg(ep2->text())
-                              .arg(elnx->text()).arg(elny->text()).arg(elnz->text())
-                              .arg(eunx->text()).arg(euny->text()).arg(eunz->text()) );
 }
 
 AGeoParaDelegate::AGeoParaDelegate(const QStringList & materials, QWidget *parent)
@@ -1079,7 +1014,7 @@ AGeoParaDelegate::AGeoParaDelegate(const QStringList & materials, QWidget *paren
     }
 }
 
-void AGeoParaDelegate::finalizeLocalParameters()
+bool AGeoParaDelegate::updateObject(AGeoObject *obj) const
 {
     AGeoPara * para = dynamic_cast<AGeoPara*>(ShapeCopy);
     if (!para)
@@ -1098,24 +1033,14 @@ void AGeoParaDelegate::finalizeLocalParameters()
         para->strPhi   = ep->text();
     }
     else qWarning() << "Read delegate: Parallelepiped shape not found!";
+
+    return AGeoObjectDelegate::updateObject(obj);
 }
 
 void AGeoParaDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
-    /* old system
-    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
-    const AGeoPara * para = dynamic_cast<const AGeoPara*>(tmpShape ? tmpShape : obj->Shape);
-    if (para)
-    {
-        ex->setText(QString::number(para->dx*2.0));
-        ey->setText(QString::number(para->dy*2.0));
-        ez->setText(QString::number(para->dz*2.0));
-        ea->setText(QString::number(para->alpha));
-        et->setText(QString::number(para->theta));
-        ep->setText(QString::number(para->phi));
-    }
-    delete tmpShape;*/
+
     AGeoPara * para = dynamic_cast<AGeoPara*>(ShapeCopy);
     if (!para)
     {
@@ -1188,7 +1113,7 @@ AGeoSphereDelegate::AGeoSphereDelegate(const QStringList & materials, QWidget *p
     }
 }
 
-void AGeoSphereDelegate::finalizeLocalParameters()
+bool AGeoSphereDelegate::updateObject(AGeoObject *obj) const
 {
     AGeoSphere * sphere = dynamic_cast<AGeoSphere*>(ShapeCopy);
     if (!sphere)
@@ -1206,26 +1131,13 @@ void AGeoSphereDelegate::finalizeLocalParameters()
         sphere->strPhi2   = ep2->text();
     }
     else qWarning() << "Read delegate: Sphere shape not found!";
+
+    return AGeoObjectDelegate::updateObject(obj);
 }
 
 void AGeoSphereDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
-
-    /*
-    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
-    const AGeoSphere * sph = dynamic_cast<const AGeoSphere*>(tmpShape ? tmpShape : obj->Shape);
-    if (sph)
-    {
-        eid->setText(QString::number(sph->rmin*2.0));
-        eod->setText(QString::number(sph->rmax*2.0));
-        et1->setText(QString::number(sph->theta1));
-        et2->setText(QString::number(sph->theta2));
-        ep1->setText(QString::number(sph->phi1));
-        ep2->setText(QString::number(sph->phi2));
-    }
-    delete tmpShape;
-    */
 
     AGeoSphere * sphere = dynamic_cast<AGeoSphere*>(ShapeCopy);
     if (!sphere)
@@ -1292,13 +1204,13 @@ AGeoConeDelegate::AGeoConeDelegate(const QStringList &materials, QWidget *parent
     }
 }
 
-void AGeoConeDelegate::finalizeLocalParameters()
+bool AGeoConeDelegate::updateObject(AGeoObject *obj) const
 {
     AGeoCone * cone = dynamic_cast<AGeoCone*>(ShapeCopy);
     if (!cone)
     {
-    AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
-    cone = dynamic_cast<AGeoCone*>(scaled->BaseShape);
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+        cone = dynamic_cast<AGeoCone*>(scaled->BaseShape);
     }
 
     if (cone)
@@ -1310,24 +1222,14 @@ void AGeoConeDelegate::finalizeLocalParameters()
         cone->str2rmaxU = euo->text();
     }
     else qWarning() << "Read delegate: Cone shape not found!";
+
+    return AGeoObjectDelegate::updateObject(obj);
 }
 
 void AGeoConeDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
 
-    /*
-    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
-    const AGeoCone * cone = dynamic_cast<const AGeoCone*>(tmpShape ? tmpShape : obj->Shape);
-    if (cone)
-    {
-        ez ->setText(QString::number(cone->dz*2.0));
-        eli->setText(QString::number(cone->rminL*2.0));
-        elo->setText(QString::number(cone->rmaxL*2.0));
-        eui->setText(QString::number(cone->rminU*2.0));
-        euo->setText(QString::number(cone->rmaxU*2.0));
-    }
-    delete tmpShape;*/
     AGeoCone * cone = dynamic_cast<AGeoCone*>(ShapeCopy);
     if (!cone)
     {
@@ -1383,15 +1285,13 @@ AGeoConeSegDelegate::AGeoConeSegDelegate(const QStringList &materials, QWidget *
     }
 }
 
-void AGeoConeSegDelegate::finalizeLocalParameters()
+bool AGeoConeSegDelegate::updateObject(AGeoObject *obj) const
 {
-    AGeoConeDelegate::finalizeLocalParameters();
-
     AGeoConeSeg * coneSeg = dynamic_cast<AGeoConeSeg*>(ShapeCopy);
     if (!coneSeg)
     {
-    AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
-    coneSeg = dynamic_cast<AGeoConeSeg*>(scaled->BaseShape);
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+        coneSeg = dynamic_cast<AGeoConeSeg*>(scaled->BaseShape);
     }
 
     if (coneSeg)
@@ -1400,24 +1300,12 @@ void AGeoConeSegDelegate::finalizeLocalParameters()
         coneSeg->strPhi2 = ep2->text();
     }
     else qWarning() << "Read delegate: Cone Segment shape not found!";
+
+    return AGeoConeDelegate::updateObject(obj); // cone delegate to update the rest of the propertires!
 }
 
 void AGeoConeSegDelegate::Update(const AGeoObject *obj)
 {
-    /*
-    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
-    const AGeoConeSeg * cone = dynamic_cast<const AGeoConeSeg*>(tmpShape ? tmpShape : obj->Shape);
-    if (cone)
-    {
-        ez ->setText(QString::number(cone->dz*2.0));
-        eli->setText(QString::number(cone->rminL*2.0));
-        elo->setText(QString::number(cone->rmaxL*2.0));
-        eui->setText(QString::number(cone->rminU*2.0));
-        euo->setText(QString::number(cone->rmaxU*2.0));
-        ep1->setText(QString::number(cone->phi1));
-        ep2->setText(QString::number(cone->phi2));
-    }
-    delete tmpShape;*/
     AGeoConeDelegate::Update(obj);
 
     AGeoConeSeg * coneSeg = dynamic_cast<AGeoConeSeg*>(ShapeCopy);
@@ -1433,15 +1321,6 @@ void AGeoConeSegDelegate::Update(const AGeoObject *obj)
         ep2->setText(coneSeg->strPhi2.isEmpty() ? QString::number(coneSeg->phi2) : coneSeg->strPhi2);
     }
     else qWarning() << "Read delegate: Cone Segment shape not found!";
-}
-
-void AGeoConeSegDelegate::onLocalShapeParameterChange()
-{
-    updatePteShape(QString("TGeoConeSeg( %1, %2, %3, %4, %5, %6, %7 )")
-                   .arg(0.5*ez->text().toDouble())
-                   .arg(0.5*eli->text().toDouble()).arg(0.5*elo->text().toDouble())
-                   .arg(0.5*eui->text().toDouble()).arg(0.5*euo->text().toDouble())
-                   .arg(ep1->text()).arg(ep2->text()) );
 }
 
 AGeoElTubeDelegate::AGeoElTubeDelegate(const QStringList &materials, QWidget *parent)
@@ -1483,7 +1362,7 @@ AGeoElTubeDelegate::AGeoElTubeDelegate(const QStringList &materials, QWidget *pa
     }
 }
 
-void AGeoElTubeDelegate::finalizeLocalParameters()
+bool AGeoElTubeDelegate::updateObject(AGeoObject *obj) const
 {
     AGeoEltu* elTube = dynamic_cast<AGeoEltu*>(ShapeCopy);
     if (!elTube)
@@ -1498,22 +1377,13 @@ void AGeoElTubeDelegate::finalizeLocalParameters()
         elTube->str2dz = ez->text();
     }
     else qWarning() << "Read delegate: EllipticalTube shape not found!";
+
+    return AGeoObjectDelegate::updateObject(obj);
 }
 
 void AGeoElTubeDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
-
-    /* old system
-    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
-    const AGeoEltu * tube = dynamic_cast<const AGeoEltu*>(tmpShape ? tmpShape : obj->Shape);
-    if (tube)
-    {
-        ex->setText(QString::number(tube->a*2.0));
-        ey->setText(QString::number(tube->b*2.0));
-        ez->setText(QString::number(tube->dz*2.0));
-    }
-    delete tmpShape;*/
 
     AGeoEltu * elTube = dynamic_cast<AGeoEltu*> (ShapeCopy);
     if (!elTube)
@@ -1572,40 +1442,31 @@ AGeoTrapXDelegate::AGeoTrapXDelegate(const QStringList &materials, QWidget *pare
     }
 }
 
-void AGeoTrapXDelegate::finalizeLocalParameters()
+bool AGeoTrapXDelegate::updateObject(AGeoObject *obj) const
 {
     AGeoTrd1 * trap = dynamic_cast<AGeoTrd1*>(ShapeCopy);
-        if (!trap)
-        {
-            AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
-            trap = dynamic_cast<AGeoTrd1*>(scaled->BaseShape);
-        }
+    if (!trap)
+    {
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+        trap = dynamic_cast<AGeoTrd1*>(scaled->BaseShape);
+    }
 
-        if (trap)
-        {
-            trap->str2dx1 = exl->text();
-            trap->str2dx2 = exu->text();
-            trap->str2dy  = ey->text();
-            trap->str2dz  = ez->text();
-            //emit ContentChanged();
-        }
-        else qWarning() << "Read delegate: Trapezoid Simplified shape not found!";
+    if (trap)
+    {
+        trap->str2dx1 = exl->text();
+        trap->str2dx2 = exu->text();
+        trap->str2dy  = ey->text();
+        trap->str2dz  = ez->text();
+        //emit ContentChanged();
+    }
+    else qWarning() << "Read delegate: Trapezoid Simplified shape not found!";
+
+    return AGeoObjectDelegate::updateObject(obj);
 }
 
 void AGeoTrapXDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
-    /*old system
-    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
-    const AGeoTrd1 * trap = dynamic_cast<const AGeoTrd1*>(tmpShape ? tmpShape : obj->Shape);
-    if (trap)
-    {
-        exl->setText(QString::number(trap->dx1 * 2.0));
-        exu->setText(QString::number(trap->dx2 * 2.0));
-        ey-> setText(QString::number(trap->dy  * 2.0));
-        ez-> setText(QString::number(trap->dz  * 2.0));
-    }
-    delete tmpShape;*/
 
     AGeoTrd1 * trap = dynamic_cast<AGeoTrd1*>(ShapeCopy);
         if (!trap)
@@ -1668,13 +1529,13 @@ AGeoTrapXYDelegate::AGeoTrapXYDelegate(const QStringList &materials, QWidget *pa
     }
 }
 
-void AGeoTrapXYDelegate::finalizeLocalParameters()
+bool AGeoTrapXYDelegate::updateObject(AGeoObject *obj) const
 {
     AGeoTrd2 * trapxy = dynamic_cast<AGeoTrd2*>(ShapeCopy);
     if (!trapxy)
     {
-    AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
-    trapxy = dynamic_cast<AGeoTrd2*>(scaled->BaseShape);
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+        trapxy = dynamic_cast<AGeoTrd2*>(scaled->BaseShape);
     }
 
     if (trapxy)
@@ -1686,23 +1547,13 @@ void AGeoTrapXYDelegate::finalizeLocalParameters()
         trapxy->str2dz  = ez ->text();
     }
     else qWarning() << "Read delegate: Trapezoid XY shape not found!";
+
+    return AGeoObjectDelegate::updateObject(obj);
 }
 
 void AGeoTrapXYDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
-    /*
-    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
-    const AGeoTrd2 * trap = dynamic_cast<const AGeoTrd2*>(tmpShape ? tmpShape : obj->Shape);
-    if (trap)
-    {
-        exl->setText(QString::number(trap->dx1 * 2.0));
-        exu->setText(QString::number(trap->dx2 * 2.0));
-        eyl->setText(QString::number(trap->dy1 * 2.0));
-        eyu->setText(QString::number(trap->dy2 * 2.0));
-        ez-> setText(QString::number(trap->dz  * 2.0));
-    }
-    delete tmpShape;*/
 
     AGeoTrd2 * trapxy = dynamic_cast<AGeoTrd2*>(ShapeCopy);
     if (!trapxy)
@@ -1720,13 +1571,6 @@ void AGeoTrapXYDelegate::Update(const AGeoObject *obj)
         ez-> setText(trapxy->str2dz .isEmpty() ? QString::number(trapxy->dz  * 2.0) : trapxy->str2dz);
     }
     else qWarning() << "Read delegate: Trapezoid XY shape not found!";
-}
-
-void AGeoTrapXYDelegate::onLocalShapeParameterChange()
-{
-    updatePteShape(QString("TGeoTrd2( %1, %2, %3, %4, %5)")
-                   .arg(0.5*exl->text().toDouble()).arg(0.5*exu->text().toDouble())
-                   .arg(0.5*eyl->text().toDouble()).arg(0.5*eyu->text().toDouble()).arg(0.5*ez->text().toDouble()) );
 }
 
 AGeoParaboloidDelegate::AGeoParaboloidDelegate(const QStringList &materials, QWidget *parent)
@@ -1774,7 +1618,7 @@ AGeoParaboloidDelegate::AGeoParaboloidDelegate(const QStringList &materials, QWi
     }
 }
 
-void AGeoParaboloidDelegate::finalizeLocalParameters()
+bool AGeoParaboloidDelegate::updateObject(AGeoObject *obj) const
 {
     AGeoParaboloid * paraboloid = dynamic_cast<AGeoParaboloid*>(ShapeCopy);
     if (!paraboloid)
@@ -1789,22 +1633,13 @@ void AGeoParaboloidDelegate::finalizeLocalParameters()
         paraboloid->str2dz  = ez->text();
     }
     else qWarning() << "Update delegate: Paraboloid shape not found!";
+
+    return AGeoObjectDelegate::updateObject(obj);
 }
 
 void AGeoParaboloidDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
-
-    /* old system
-    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
-    const AGeoParaboloid * para = dynamic_cast<const AGeoParaboloid*>(tmpShape ? tmpShape : obj->Shape);
-    if (para)
-    {
-        el->setText(QString::number(para->rlo * 2.0));
-        eu->setText(QString::number(para->rhi * 2.0));
-        ez->setText(QString::number(para->dz  * 2.0));
-    }
-    delete tmpShape;*/
 
     AGeoParaboloid * paraboloid = dynamic_cast<AGeoParaboloid*>(ShapeCopy);
     if (!paraboloid)
@@ -1866,7 +1701,7 @@ AGeoTorusDelegate::AGeoTorusDelegate(const QStringList &materials, QWidget *pare
     }
 }
 
-void AGeoTorusDelegate::finalizeLocalParameters()
+bool AGeoTorusDelegate::updateObject(AGeoObject *obj) const
 {
     AGeoTorus * torus = dynamic_cast<AGeoTorus*>(ShapeCopy);
     if (!torus)
@@ -1883,25 +1718,13 @@ void AGeoTorusDelegate::finalizeLocalParameters()
         torus->strDphi  = epe->text();
     }
     else qWarning() << "Update delegate: Torus shape not found!";
+
+    return AGeoObjectDelegate::updateObject(obj);
 }
 
 void AGeoTorusDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
-
-    /*
-    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
-    const AGeoTorus * tor = dynamic_cast<const AGeoTorus*>(tmpShape ? tmpShape : obj->Shape);
-    if (tor)
-    {
-        ead->setText(QString::number(tor->R    * 2.0));
-        edi->setText(QString::number(tor->Rmin * 2.0));
-        edo->setText(QString::number(tor->Rmax * 2.0));
-        ep0->setText(QString::number(tor->Phi1));
-        epe->setText(QString::number(tor->Dphi));
-    }
-    delete tmpShape;
-    */
 
     AGeoTorus * torus = dynamic_cast<AGeoTorus*>(ShapeCopy);
     if (!torus)
@@ -1974,13 +1797,13 @@ AGeoPolygonDelegate::AGeoPolygonDelegate(const QStringList &materials, QWidget *
     }
 }
 
-void AGeoPolygonDelegate::finalizeLocalParameters()
+bool AGeoPolygonDelegate::updateObject(AGeoObject *obj) const
 {
     AGeoPolygon * polygon = dynamic_cast<AGeoPolygon*>(ShapeCopy);
     if (!polygon)
     {
-    AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
-    polygon = dynamic_cast<AGeoPolygon*>(scaled->BaseShape);
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+        polygon = dynamic_cast<AGeoPolygon*>(scaled->BaseShape);
     }
 
     if (polygon)
@@ -1994,25 +1817,13 @@ void AGeoPolygonDelegate::finalizeLocalParameters()
         polygon->str2rmaxU = euo->text();
     }
     else qWarning() << "Read delegate: Polygon shape not found!";
+
+    return AGeoObjectDelegate::updateObject(obj);
 }
 
 void AGeoPolygonDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
-    /*
-    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
-    const AGeoPolygon * pgon = dynamic_cast<const AGeoPolygon*>(tmpShape ? tmpShape : obj->Shape);
-    if (pgon)
-    {
-        en->setValue(pgon->nedges);
-        edp->setText(QString::number(pgon->dphi));
-        ez-> setText(QString::number(pgon->dz    * 2.0));
-        eli->setText(QString::number(pgon->rminL * 2.0));
-        elo->setText(QString::number(pgon->rmaxL * 2.0));
-        eui->setText(QString::number(pgon->rminU * 2.0));
-        euo->setText(QString::number(pgon->rmaxU * 2.0));
-    }
-    delete tmpShape;*/
 
     AGeoPolygon * polygon = dynamic_cast<AGeoPolygon*>(ShapeCopy);
     if (!polygon)
@@ -2032,18 +1843,6 @@ void AGeoPolygonDelegate::Update(const AGeoObject *obj)
         euo->setText(polygon->str2rmaxU.isEmpty()  ? QString::number(polygon->rmaxU * 2.0) : polygon->str2rmaxU);
     }
     else qWarning() << "Read delegate: Polygon shape not found!";
-}
-
-void AGeoPolygonDelegate::onLocalShapeParameterChange()
-{
-    updatePteShape(QString("TGeoPolygon( %1, %2, %3, %4, %5, %6, %7 )")
-                   .arg(en->text())
-                   .arg(edp->text())
-                   .arg(0.5*ez->text().toDouble())
-                   .arg(0.5*eli->text().toDouble())
-                   .arg(0.5*elo->text().toDouble())
-                   .arg(0.5*eui->text().toDouble())
-                   .arg(0.5*euo->text().toDouble()) );
 }
 
 AGeoPconDelegate::AGeoPconDelegate(const QStringList &materials, QWidget *parent)
@@ -2119,7 +1918,29 @@ AGeoPconDelegate::AGeoPconDelegate(const QStringList &materials, QWidget *parent
     addLocalLayout(lay);
 }
 
-void AGeoPconDelegate::finalizeLocalParameters()
+bool AGeoPconDelegate::updateObject(AGeoObject *obj) const
+{
+    if (!tab)
+    {
+        qWarning() << "Tab widget not found!";
+        return false;
+    }
+    readGui();
+
+    return AGeoObjectDelegate::updateObject(obj);
+}
+
+void AGeoPconDelegate::addOneLineTextEdits(int row)
+{
+    for (int ic = 0; ic < 3; ic++)
+    {
+        AOneLineTextEdit * e = new AOneLineTextEdit(tab);
+        configureHighligherAndCompleter(e);
+        tab->setCellWidget(row, ic, e);
+    }
+}
+
+void AGeoPconDelegate::readGui() const
 {
     AGeoPcon * pcon = dynamic_cast<AGeoPcon*>(ShapeCopy);
     if (!pcon)
@@ -2133,7 +1954,6 @@ void AGeoPconDelegate::finalizeLocalParameters()
         pcon->strPhi  = ep0->text();
         pcon->strdPhi = epe->text();
 
-        if (!tab) return;
         const int rows = tab->rowCount();
         pcon->Sections.clear();
         for (int ir = 0; ir < rows; ir++)
@@ -2158,43 +1978,9 @@ void AGeoPconDelegate::finalizeLocalParameters()
     else qWarning() << "Read delegate: PolyCone shape not found!";
 }
 
-void AGeoPconDelegate::addOneLineTextEdits(int row)
-{
-    for (int ic = 0; ic < 3; ic++)
-    {
-        AOneLineTextEdit * e = new AOneLineTextEdit(tab);
-        configureHighligherAndCompleter(e);
-        tab->setCellWidget(row, ic, e);
-    }
-}
-
 void AGeoPconDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
-    /*old system
-    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
-    const AGeoPcon * pcon = dynamic_cast<const AGeoPcon*>(tmpShape ? tmpShape : obj->Shape);
-    if (pcon)
-    {
-        ep0->setText(QString::number(pcon->phi));
-        epe->setText(QString::number(pcon->dphi));
-
-        tab->clearContents();
-        const int numPlanes = pcon->Sections.size();
-        tab->setRowCount(numPlanes);
-        for (int iP = 0; iP < numPlanes; iP++)
-        {
-            const APolyCGsection & Section = pcon->Sections.at(iP);
-            QTableWidgetItem * item = new QTableWidgetItem(QString::number(Section.z)); item->setTextAlignment(Qt::AlignCenter);
-            tab->setItem(iP, 0, item);
-            item = new QTableWidgetItem(QString::number(Section.rmax * 2.0)); item->setTextAlignment(Qt::AlignCenter);
-            tab->setItem(iP, 1, item);
-            item = new QTableWidgetItem(QString::number(Section.rmin * 2.0)); item->setTextAlignment(Qt::AlignCenter);
-            tab->setItem(iP, 2, item);
-            tab->setRowHeight(iP, rowHeight);
-        }
-    }
-    delete tmpShape;*/
 
     AGeoPcon * pcon = dynamic_cast<AGeoPcon*>(ShapeCopy);
     if (!pcon)
@@ -2244,19 +2030,16 @@ void AGeoPconDelegate::updateTableW(AGeoPcon * pcon)
 
 void AGeoPconDelegate::onCellEdited()
 {
-    finalizeLocalParameters();
-    AGeoPcon * pcon = dynamic_cast<AGeoPcon*>(ShapeCopy);
-        if (!pcon)
-        {
-            AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
-            pcon = dynamic_cast<AGeoPcon*>(scaled->BaseShape);
-        }
+    readGui();
 
-        if (pcon)
-        {
-            pcon->updateShape();
-            //emit ContentChanged();
-        }
+    AGeoPcon * pcon = dynamic_cast<AGeoPcon*>(ShapeCopy);
+    if (!pcon)
+    {
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+        pcon = dynamic_cast<AGeoPcon*>(scaled->BaseShape);
+    }
+
+    if (pcon) pcon->updateShape();
 }
 
 void AGeoPconDelegate::onAddAbove()
@@ -2337,27 +2120,6 @@ void AGeoPconDelegate::onReorderSections(int, int oldVisualIndex, int newVisualI
     else qWarning() << "PolyCone not found in move row";
 }
 
-/*void AGeoPconDelegate::onLocalShapeParameterChange()
-{
-    QString s = QString("TGeoPcon( %1, %2")
-            .arg(ep0->text())
-            .arg(epe->text());
-
-    if (!tab) return;
-    const int rows = tab->rowCount();
-    for (int ir = 0; ir < rows; ir++)
-    {
-        if (!tab->item(ir, 0) || !tab->item(ir, 1) || !tab->item(ir, 2)) continue;
-        s += QString(", { %1 : %2 : %3 }")
-                .arg(tab->item(ir, 0)->text())
-                .arg(0.5*tab->item(ir, 2)->text().toDouble())
-                .arg(0.5*tab->item(ir, 1)->text().toDouble());
-    }
-    s += " )";
-
-    updatePteShape(s);
-}*/
-
 AGeoPgonDelegate::AGeoPgonDelegate(const QStringList &materials, QWidget *parent)
     : AGeoPconDelegate(materials, parent)
 {
@@ -2392,7 +2154,7 @@ AGeoPgonDelegate::AGeoPgonDelegate(const QStringList &materials, QWidget *parent
     QObject::connect(eed, &AOneLineTextEdit::textChanged, this, &AGeoPconDelegate::ContentChanged);
 }
 
-void AGeoPgonDelegate::finalizeLocalParameters()
+bool AGeoPgonDelegate::updateObject(AGeoObject *obj) const
 {
     AGeoPgon * pgon = dynamic_cast<AGeoPgon*>(ShapeCopy);
     if (!pgon)
@@ -2404,7 +2166,7 @@ void AGeoPgonDelegate::finalizeLocalParameters()
     if (pgon) pgon->strNedges = eed->text();
     else qWarning() << "Read delegate: Polygon shape not found!";
 
-    AGeoPconDelegate::finalizeLocalParameters();
+    return AGeoPconDelegate::updateObject(obj); // AGeoPcon for the rest of parameters!
 }
 
 void AGeoPgonDelegate::Update(const AGeoObject *obj)
@@ -2423,12 +2185,6 @@ void AGeoPgonDelegate::Update(const AGeoObject *obj)
         eed->setText(pgon->strNedges.isEmpty() ? QString::number(pgon->nedges) : pgon->strNedges);
     }
     else qWarning() << "Read delegate: Polygon shape not found!";
-    /*
-    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
-    const AGeoPgon * pgon = dynamic_cast<const AGeoPgon*>(tmpShape ? tmpShape : obj->Shape);
-    if (pgon)
-        sbn->setValue(pgon->nedges);
-    delete tmpShape;*/
 }
 
 AGeoCompositeDelegate::AGeoCompositeDelegate(const QStringList &materials, QWidget *parent)
@@ -2464,55 +2220,34 @@ AGeoCompositeDelegate::AGeoCompositeDelegate(const QStringList &materials, QWidg
         te->setFont(font);
     v->addWidget(te);
     connect(te, &QPlainTextEdit::textChanged, this, &AGeoCompositeDelegate::ContentChanged);
-    //connect(te, &QPlainTextEdit::textChanged, this, &AGeoCompositeDelegate::onLocalShapeParameterChange);
-
-    //cbScale->setChecked(false);
-    //cbScale->setVisible(false);
 
     addLocalLayout(v);
 }
 
-void AGeoCompositeDelegate::finalizeLocalParameters()
+bool AGeoCompositeDelegate::updateObject(AGeoObject *obj) const
 {
     AGeoComposite * comp = dynamic_cast<AGeoComposite*>(ShapeCopy);
     if (!comp)
     {
         AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
         comp = dynamic_cast<AGeoComposite*>(scaled->BaseShape);
-        qDebug() <<"aaaa?";
     }
 
     if (comp)
     {
-        QString Str= te->document()->toPlainText();
+        QString Str = te->document()->toPlainText();
         comp->GenerationString = "TGeoCompositeShape( " + Str + " )";
-
-        //AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
-        //if (scaled) scaled->BaseShapeGenerationString = comp->GenerationString;
-        //emit ContentChanged();
     }
-    else qWarning() << "Read delegate: Composite shape not found!";
+    else qWarning() << "Composite shape not found!";
+
+    return AGeoObjectDelegate::updateObject(obj);
 }
 
 void AGeoCompositeDelegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
 
-    /* old system
-    const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
-    const AGeoComposite * combo = dynamic_cast<const AGeoComposite *>(tmpShape ? tmpShape : obj->Shape);
-    if (combo)
-    {
-        QString s = combo->getGenerationString().simplified();
-        s.remove("TGeoCompositeShape(");
-        s.chop(1);
-
-        te->clear();
-        te->appendPlainText(s.simplified());
-    }
-    delete tmpShape;*/
-
-AGeoComposite * comp = dynamic_cast<AGeoComposite*>(ShapeCopy);
+    AGeoComposite * comp = dynamic_cast<AGeoComposite*>(ShapeCopy);
     if (!comp)
     {
         AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
@@ -2610,7 +2345,7 @@ AGeoArb8Delegate::AGeoArb8Delegate(const QStringList &materials, QWidget *parent
     addLocalLayout(v);
 }
 
-void AGeoArb8Delegate::finalizeLocalParameters()
+bool AGeoArb8Delegate::updateObject(AGeoObject *obj) const
 {
     AGeoArb8 * arb8 = dynamic_cast<AGeoArb8*>(ShapeCopy);
     if (!arb8)
@@ -2634,31 +2369,13 @@ void AGeoArb8Delegate::finalizeLocalParameters()
         }
     }
     else qWarning() << "Read delegate: Arb8 shape not found!";
+
+    return AGeoObjectDelegate::updateObject(obj);
 }
 
 void AGeoArb8Delegate::Update(const AGeoObject *obj)
 {
     AGeoObjectDelegate::Update(obj);
-
-    /*const AGeoShape * tmpShape = getBaseShapeOfObject(obj); //non-zero only if scaled shape!
-    const AGeoArb8 * arb = dynamic_cast<const AGeoArb8 *>(tmpShape ? tmpShape : obj->Shape);
-    if (arb)
-    {
-        ez->setText(QString::number(2.0 * arb->dz));
-
-        for (int iul = 0; iul < 2; iul++)
-        {
-            for (int i = 0; i < 4; i++)
-            {
-                const int iInVert = iul * 4 + i;
-                const QPair<double, double> & V = arb->Vertices.at(iInVert);
-                AEditEdit & CEE = ve[iul][i];
-                CEE.X->setText(QString::number(V.first));
-                CEE.Y->setText(QString::number(V.second));
-            }
-        }
-    }
-    delete tmpShape;*/
 
     AGeoArb8 * arb8 = dynamic_cast<AGeoArb8*>(ShapeCopy);
     if (!arb8)
@@ -2684,21 +2401,6 @@ void AGeoArb8Delegate::Update(const AGeoObject *obj)
         }
     }
     else qWarning() << "Read delegate: Arb8 shape not found!";
-}
-
-void AGeoArb8Delegate::onLocalShapeParameterChange()
-{
-    QString s = QString("TGeoArb8( %1").arg(0.5 * ez->text().toDouble());
-    for (int iul = 0; iul < 2; iul++)
-    {
-        for (int i = 0; i < 4; i++)
-        {
-            AEditEdit & CEE = ve[iul][i];
-            s += QString(", %1,%2").arg(CEE.X->text()).arg(CEE.Y->text());
-        }
-    }
-    s += ")";
-    updatePteShape(s);
 }
 
 AGeoArrayDelegate::AGeoArrayDelegate(const QStringList &materials, QWidget *parent)
@@ -2766,26 +2468,20 @@ AGeoArrayDelegate::AGeoArrayDelegate(const QStringList &materials, QWidget *pare
     pbShapeInfo->setVisible(false);
 }
 
-void AGeoArrayDelegate::finalizeLocalParameters()
+bool AGeoArrayDelegate::updateObject(AGeoObject *obj) const
 {
-    /*ATypeArrayObject* array = dynamic_cast<ATypeArrayObject*>(CurrentObject->ObjectType);
-    processEditBox(ledNumX,   array->dNumx, array->strNumX, ParentWidget); array->numX = floor(array->dNumx);
-    processEditBox(ledNumY,   array->dNumY, array->strNumY, ParentWidget); array->numY = floor(array->dNumY);
-    processEditBox(ledNumZ,   array->dNumZ, array->strNumZ, ParentWidget); array->numZ = floor(array->dNumZ);
-    processEditBox(ledStepX,   array->stepX, array->strStepX, ParentWidget);
-    processEditBox(ledStepY,   array->stepY, array->strStepY, ParentWidget);
-    processEditBox(ledStepZ,   array->stepZ, array->strStepZ, ParentWidget);*/
-
     if (CurrentObject->ObjectType->isArray())
     {
-        ATypeArrayObject* array = static_cast<ATypeArrayObject*>(CurrentObject->ObjectType);
-        array->strNumX = ledNumX->text();
-        array->strNumY = ledNumY->text();
-        array->strNumZ = ledNumZ->text();
+        ATypeArrayObject * array = static_cast<ATypeArrayObject*>(CurrentObject->ObjectType);
+        array->strNumX  = ledNumX->text();
+        array->strNumY  = ledNumY->text();
+        array->strNumZ  = ledNumZ->text();
         array->strStepX = ledStepX->text();
         array->strStepY = ledStepY->text();
         array->strStepZ = ledStepZ->text();
     }
+
+    return AGeoObjectDelegate::updateObject(obj);
 }
 
 void AGeoArrayDelegate::Update(const AGeoObject * obj)
@@ -2794,19 +2490,6 @@ void AGeoArrayDelegate::Update(const AGeoObject * obj)
 
     if (obj->ObjectType->isArray())
     {
-        /*ledNumX->setText(array->strNumX.isEmpty() ? QString::number(array->numX) : array->strNumX);
-        ledNumY->setText(array->strNumY.isEmpty() ? QString::number(array->numY) : array->strNumY);
-        ledNumZ->setText(array->strNumZ.isEmpty() ? QString::number(array->numZ) : array->strNumZ);
-        ledStepX->setText(array->strStepX.isEmpty() ? QString::number(array->stepX) : array->strStepX);
-        ledStepY->setText(array->strStepY.isEmpty() ? QString::number(array->stepY) : array->strStepY);
-        ledStepZ->setText(array->strStepZ.isEmpty() ? QString::number(array->stepZ) : array->strStepZ);*/
-
-        /*ledNumX->setValue(array->numX);
-        ledNumY->setValue(array->numY);
-        ledNumZ->setValue(array->numZ);
-        ledStepX->setText(QString::number(array->stepX));
-        ledStepY->setText(QString::number(array->stepY));
-        ledStepZ->setText(QString::number(array->stepZ));*/
         ATypeArrayObject* array = static_cast<ATypeArrayObject*>(obj->ObjectType);
 
         ledNumX->setText(array->strNumX.isEmpty() ? QString::number(array->numX) : array->strNumX);

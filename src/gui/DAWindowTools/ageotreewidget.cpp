@@ -1890,22 +1890,9 @@ void AGeoWidget::onConfirmPressed()
     //    qDebug() << "Validating update data for object" << CurrentObject->Name;
     bool ok = checkDelegateValidity();
     if (!ok) return;
-    GeoDelegate->finalizeLocalParameters();
+
     ok = GeoDelegate->updateObject(CurrentObject);
     if (!ok) return;
-
-    /*
-    AWorldDelegate * del = dynamic_cast<AWorldDelegate*>(GeoDelegate);
-    if (del)
-    {
-        AGeoBox * box = static_cast<AGeoBox*>(World->Shape);
-        double WorldSizeXY = box->dx;
-        double WorldSizeZ  = box->dz;
-        ATypeWorldObject * typeWorld = static_cast<ATypeWorldObject *>(World->ObjectType);
-        bool fWorldSizeFixed = typeWorld->bFixedSize;
-        emit tw->RequestUpdateWorldSize(WorldSizeXY, WorldSizeZ, fWorldSizeFixed);
-    }
-    */
 
     exitEditingMode();
     QString name = CurrentObject->Name;

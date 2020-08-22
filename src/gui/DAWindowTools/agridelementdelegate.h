@@ -20,6 +20,7 @@ public:
 
     QString getName() const override;
     bool updateObject(AGeoObject * obj) const override;
+    void Update(const AGeoObject * obj) override;
 
 private:
     QLineEdit * ledDX    = nullptr;
@@ -30,9 +31,6 @@ private:
     QLabel    * lSize2   = nullptr;
 
     const AGeoObject * CurrentObject = nullptr;
-
-public slots:
-    void Update(const AGeoObject * obj) override;
 
 private slots:
     void onContentChanged();  //only to enter editing mode! Object update only on confirm button!

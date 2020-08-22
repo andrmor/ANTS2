@@ -19,12 +19,10 @@ public:
 
     virtual QString getName() const = 0;
     virtual bool updateObject(AGeoObject * obj) const = 0;
+    virtual void Update(const AGeoObject * obj) = 0;
 
 public:
     QWidget * Widget = nullptr;
-
-public slots:
-    virtual void Update(const AGeoObject * obj) = 0;
 
 protected:
     QPushButton * pbShow = nullptr;

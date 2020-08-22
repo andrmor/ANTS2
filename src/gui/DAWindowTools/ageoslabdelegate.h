@@ -11,10 +11,9 @@ class AGeoSlabDelegate_Box : public AGeoBoxDelegate
 public:
     AGeoSlabDelegate_Box(const QStringList & definedMaterials, int SlabModelState, QWidget * ParentWidget);
     bool updateObject(AGeoObject * obj) const override;
+    void Update(const AGeoObject * obj) override;
 private:
     int SlabModelState = 0;
-public slots:
-    void Update(const AGeoObject * obj) override;
 };
 
 class AGeoSlabDelegate_Tube : public AGeoTubeDelegate
@@ -23,10 +22,9 @@ class AGeoSlabDelegate_Tube : public AGeoTubeDelegate
 public:
     AGeoSlabDelegate_Tube(const QStringList & definedMaterials, int SlabModelState, QWidget * ParentWidget);
     bool updateObject(AGeoObject * obj) const override;
+    void Update(const AGeoObject * obj) override;
 private:
     int SlabModelState = 0;
-public slots:
-    void Update(const AGeoObject * obj) override;
 };
 
 class AGeoSlabDelegate_Poly : public AGeoPolygonDelegate
@@ -35,10 +33,9 @@ class AGeoSlabDelegate_Poly : public AGeoPolygonDelegate
 public:
     AGeoSlabDelegate_Poly(const QStringList & definedMaterials, int SlabModelState, QWidget * ParentWidget);
     bool updateObject(AGeoObject * obj) const override;
+    void Update(const AGeoObject * obj) override;
 private:
     int SlabModelState = 0;
-public slots:
-    void Update(const AGeoObject * obj) override;
 };
 
 #endif // AGEOSLABDELEGATE_H

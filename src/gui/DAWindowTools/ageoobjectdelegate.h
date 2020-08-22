@@ -42,7 +42,6 @@ public:
 
     bool updateObject(AGeoObject * obj) const override;
 
-public slots:
     void Update(const AGeoObject * obj) override;
 
 private:
@@ -113,7 +112,6 @@ public:
 
     bool updateObject(AGeoObject * obj) const override;
 
-public slots:
     void Update(const AGeoObject * obj) override;
 
 protected:
@@ -133,7 +131,6 @@ public:
 
     QString getName() const override;
 
-public slots:
     void Update(const AGeoObject * obj) override;
 
 protected:
@@ -152,7 +149,6 @@ public:
 
     bool updateObject(AGeoObject * obj) const override;
 
-public slots:
     void Update(const AGeoObject * obj) override;
 
 protected:
@@ -174,7 +170,6 @@ public:
 
     bool updateObject(AGeoObject * obj) const override;
 
-public slots:
     void Update(const AGeoObject * obj) override;
 
 protected:
@@ -191,7 +186,6 @@ public:
 
     bool updateObject(AGeoObject * obj) const override;
 
-public slots:
     void Update(const AGeoObject * obj) override;
 
 protected:
@@ -212,7 +206,6 @@ public:
 
     bool updateObject(AGeoObject * obj) const override;
 
-public slots:
     void Update(const AGeoObject * obj) override;
 
 protected:
@@ -232,7 +225,6 @@ public:
 
     bool updateObject(AGeoObject * obj) const override;
 
-public slots:
     void Update(const AGeoObject * obj) override;
 
 protected:
@@ -253,7 +245,6 @@ public:
 
     bool updateObject(AGeoObject * obj) const override;
 
-public slots:
     void Update(const AGeoObject * obj) override;
 
 protected:
@@ -274,7 +265,6 @@ public:
 
     bool updateObject(AGeoObject * obj) const override;
 
-public slots:
     void Update(const AGeoObject * obj) override;
 
 protected:
@@ -296,7 +286,6 @@ public:
 
     bool updateObject(AGeoObject * obj) const override;
 
-public slots:
     void Update(const AGeoObject * obj) override;
 
 protected:
@@ -313,7 +302,6 @@ public:
 
     bool updateObject(AGeoObject * obj) const override;
 
-public slots:
     void Update(const AGeoObject * obj) override;
 
 protected:
@@ -332,7 +320,6 @@ public:
 
     bool updateObject(AGeoObject * obj) const override;
 
-public slots:
     void Update(const AGeoObject * obj) override;
 
 protected:
@@ -352,7 +339,6 @@ public:
 
     bool updateObject(AGeoObject * obj) const override;
 
-public slots:
     void Update(const AGeoObject * obj) override;
 
 protected:
@@ -370,7 +356,6 @@ public:
 
     bool updateObject(AGeoObject * obj) const override;
 
-public slots:
     void Update(const AGeoObject * obj) override;
 
 protected:
@@ -390,7 +375,6 @@ public:
 
     bool updateObject(AGeoObject * obj) const override;
 
-public slots:
     virtual void Update(const AGeoObject * obj) override;
 
 protected:
@@ -425,7 +409,6 @@ public:
 
     bool updateObject(AGeoObject * obj) const override;
 
-public slots:
     void Update(const AGeoObject * obj) override;
 
 protected:
@@ -457,7 +440,6 @@ public:
 
     bool updateObject(AGeoObject * obj) const override;
 
-public slots:
     void Update(const AGeoObject * obj) override;
 
 protected:
@@ -473,7 +455,6 @@ public:
 
     bool updateObject(AGeoObject * obj) const override;
 
-public slots:
     void Update(const AGeoObject * obj) override;
 
 protected:
@@ -495,7 +476,6 @@ public:
 
     bool updateObject(AGeoObject * obj) const override;
 
-public slots:
     void Update(const AGeoObject * obj) override;
 
 protected:
@@ -513,7 +493,6 @@ public:
 
     bool updateObject(AGeoObject * obj) const override;
 
-public slots:
     void Update(const AGeoObject * obj) override;
 };
 
@@ -524,7 +503,6 @@ class AGeoSetDelegate : public AGeoObjectDelegate
 public:
     AGeoSetDelegate(const QStringList & materials, QWidget * parent);
 
-public slots:
     void Update(const AGeoObject * obj) override;
 };
 

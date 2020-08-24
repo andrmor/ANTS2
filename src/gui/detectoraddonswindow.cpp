@@ -1326,9 +1326,9 @@ void DetectorAddOnsWindow::updateGeoConstsIndication()
         ui->tabwConstants->setRowCount(numConsts + 1);
         for (int i = 0; i <= numConsts; i++)
         {
-            const QString Name  = ( i == numConsts ? ""  : Names.at(i) );
-            const QString Value = ( i == numConsts ? "0" : QString::number(Values.at(i)) );
-            const QString Expression = ( i == numConsts ? "" : Expressions.at(i) );
+            const QString Name  =      ( i == numConsts ? ""  : Names.at(i) );
+            const QString Value =      ( i == numConsts ? "0" : QString::number(Values.at(i)) );
+            const QString Expression = ( i == numConsts ? ""  : Expressions.at(i) );
 
             QTableWidgetItem * newItem = new QTableWidgetItem(Name);
             ui->tabwConstants->setItem(i, 0, newItem);

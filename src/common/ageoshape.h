@@ -11,38 +11,37 @@ class QStringList;
 class AGeoShape
 {
 public:
-  AGeoShape() {}
   virtual ~AGeoShape() {}
 
   virtual bool readFromString(QString /*GenerationString*/) {return false;}
 
   //general: the same for all objects of the given shape
-  virtual const QString getShapeType() const = 0;
-  virtual const QString getShapeTemplate() {return "";}  //string used in auto generated help: Name(paramType param1, paramType param2, etc)
-  virtual const QString getHelp() {return "";}
+  virtual QString getShapeType() const = 0;
+  virtual QString getShapeTemplate() const = 0;  //string used in auto generated help: Name(paramType param1, paramType param2, etc)
+  virtual QString getHelp() const = 0;
 
   //specific for this particular object
-  virtual TGeoShape* createGeoShape(const QString /*shapeName*/ = "") {return 0;} //create ROOT TGeoShape
-  virtual const QString getGenerationString(bool /*useStrings*/ = false) const {return "";} //return string which can be used to generate this object: e.g. Name(param1, param2, etc)
+  virtual TGeoShape * createGeoShape(const QString /*shapeName*/ = "") = 0; //create ROOT's TGeoShape
+  virtual QString getGenerationString(bool /*useStrings*/ = false) const = 0;
 
-  virtual double getHeight() {return 0;}  //if 0, cannot be used for stack  ***!!!
-  virtual void   setHeight(double /*dz*/) {}
-  virtual double maxSize() const = 0;        //for world size evaluation
-  virtual double minSize() const {return 0;} //for monitors only!
+  virtual double getHeight() {return 0;}      //if 0, cannot be used for stack  ***!!!
+  virtual void   setHeight(double /*dz*/) {}  //for stacks
+  virtual double maxSize() const = 0;         //used for world size evaluation
+  virtual double minSize() const {return 0;}  //needed only for shapes used by monitors (box tube polygon)
 
   virtual QString updateShape() {return "";}
 
-  virtual bool isGeoConstInUse    (const QRegExp & /*nameRegExp*/) const {return false;}
+  virtual bool isGeoConstInUse(const QRegExp & /*nameRegExp*/) const = 0;
   virtual void replaceGeoConstName(const QRegExp & /*nameRegExp*/, const QString & /*newName*/) {}
 
   //json
   virtual void writeToJson(QJsonObject &/*json*/) const = 0;
   virtual void readFromJson(const QJsonObject &/*json*/) = 0;
 
-  //from Tshape if geometry was loaded from GDML
+  //from TShape if geometry was loaded from GDML
   virtual bool readFromTShape(TGeoShape* /*Tshape*/) {return false;}
 
-  virtual AGeoShape * clone() const; // without override it uses Factory and save/load to/from json  !!! do it for COMPOSITE !!!
+  virtual AGeoShape * clone() const; // without override it uses Factory and save/load to/from json
 
 protected:
   bool    extractParametersFromString(QString GenerationString, QStringList& parameters, int numParameters);
@@ -52,7 +51,6 @@ public:
   static AGeoShape * GeoShapeFactory(const QString ShapeType);  // -=<  SHAPE FACTORY >=-
   static QList<AGeoShape*> GetAvailableShapes();                // list of available shapes for generation of help and highlighter: do not forget to add new here!
   static bool CheckPointsForArb8(QList<QPair<double, double> > V );
-
 };
 
 // -------------- Particular shapes ---------------
@@ -63,10 +61,11 @@ public:
   AGeoBox(double dx, double dy, double dz) : dx(dx), dy(dy), dz(dz) {}
   AGeoBox() : dx(10), dy(10), dz(10) {}
 
-  const QString getShapeType() const override {return "TGeoBBox";}
-  const QString getShapeTemplate() override {return "TGeoBBox( dx, dy, dz )";}
+  QString getShapeType() const override {return "TGeoBBox";}
+  QString getShapeTemplate() const override {return "TGeoBBox( dx, dy, dz )";}
+  QString getHelp() const override;
+
   bool readFromString(QString GenerationString) override;
-  const QString getHelp() override;
   QString updateShape() override;
 
   bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
@@ -76,7 +75,7 @@ public:
 
   double getHeight() override {return dz;}
   void setHeight(double dz) override {this->dz = dz;}
-  const QString getGenerationString(bool useStrings) const override;
+  QString getGenerationString(bool useStrings) const override;
   double maxSize() const override;
   double minSize() const override;
 
@@ -98,9 +97,10 @@ public:
   AGeoTube(double r, double dz) : rmin(0), rmax(r), dz(dz) {}
   AGeoTube() : rmin(0), rmax(10), dz(5) {}
 
-  const QString getShapeType() const override {return "TGeoTube";}
-  const QString getShapeTemplate() override {return "TGeoTube( rmin, rmax, dz )";}
-  const QString getHelp() override;
+  QString getShapeType() const override {return "TGeoTube";}
+  QString getShapeTemplate() const override {return "TGeoTube( rmin, rmax, dz )";}
+  QString getHelp() const override;
+
   QString updateShape() override;
 
   bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
@@ -111,7 +111,7 @@ public:
 
   double getHeight() override {return dz;}
   void setHeight(double dz) override {this->dz = dz;}
-  const QString getGenerationString(bool useStrings) const override;
+  QString getGenerationString(bool useStrings) const override;
   double maxSize() const override;
   double minSize() const override;
 
@@ -129,21 +129,21 @@ class AGeoScaledShape  : public AGeoShape
 public:
   AGeoScaledShape(QString BaseShapeGenerationString, double scaleX, double scaleY, double scaleZ);
   AGeoScaledShape() {}
-  virtual ~AGeoScaledShape() {delete BaseShape;}
+  ~AGeoScaledShape() {delete BaseShape;}
 
-  const QString getShapeType() const override {return "TGeoScaledShape";}
-  virtual const QString getShapeTemplate() {return "TGeoScaledShape( TGeoShape(parameters), scaleX, scaleY, scaleZ )";}
-  virtual const QString getHelp();
+  QString getShapeType() const override {return "TGeoScaledShape";}
+  QString getShapeTemplate() const override {return "TGeoScaledShape( TGeoShape(parameters), scaleX, scaleY, scaleZ )";}
+  QString getHelp() const override;
 
-  virtual bool isGeoConstInUse    (const QRegExp & nameRegExp) const;
-  virtual void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName);
+  bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
+  void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
 
-  virtual bool readFromString(QString GenerationString);
-  virtual TGeoShape* createGeoShape(const QString shapeName = "");
+  bool readFromString(QString GenerationString) override;
+  TGeoShape* createGeoShape(const QString shapeName = "") override;
 
   //double getHeight() override {return 0;}
   //void setHeight(double /*dz*/) override {}
-  const QString getGenerationString(bool useStrings) const override;
+  QString getGenerationString(bool useStrings) const override;
   double maxSize() const override;
 
   const QString getBaseShapeType() const;
@@ -152,45 +152,44 @@ public:
   void writeToJson(QJsonObject& json) const override;
   void readFromJson(const QJsonObject& json) override;
 
-  virtual bool readFromTShape(TGeoShape* Tshape);
+  bool readFromTShape(TGeoShape* Tshape) override;
 
   QString BaseShapeGenerationString;  //compatibility
 
-  double scaleX, scaleY, scaleZ;
+  double scaleX = 1.0;
+  double scaleY = 1.0;
+  double scaleZ = 1.0;
   AGeoShape * BaseShape = nullptr;
 };
 
 class AGeoParaboloid : public AGeoShape
 {
 public:
-  AGeoParaboloid(double rlo, double rhi, double dz) :
-    rlo(rlo), rhi(rhi), dz(dz) {}
-  AGeoParaboloid() :
-    rlo(0), rhi(40), dz(10)  {}
-  virtual ~AGeoParaboloid() {}
+  AGeoParaboloid(double rlo, double rhi, double dz) : rlo(rlo), rhi(rhi), dz(dz) {}
+  AGeoParaboloid() : rlo(0), rhi(40), dz(10) {}
 
-  const QString getShapeType() const override {return "TGeoParaboloid";}
-  virtual const QString getShapeTemplate() {return "TGeoParaboloid( rlo, rhi, dz )";}
-  virtual const QString getHelp();
+  QString getShapeType() const override {return "TGeoParaboloid";}
+  QString getShapeTemplate() const override {return "TGeoParaboloid( rlo, rhi, dz )";}
+  QString getHelp() const override;
+
   QString updateShape() override;
 
   bool isGeoConstInUse (const QRegExp & nameRegExp) const override;
   void replaceGeoConstName (const QRegExp & nameRegExp, const QString & newName) override;
 
-  virtual bool readFromString(QString GenerationString);
-  virtual TGeoShape* createGeoShape(const QString shapeName = "");
+  bool readFromString(QString GenerationString) override;
+  TGeoShape* createGeoShape(const QString shapeName = "") override;
 
-  virtual double getHeight() {return dz;}
-  virtual void setHeight(double /*dz*/) {}
-  const QString getGenerationString(bool useStrings) const override;
+  double getHeight() override {return dz;}
+  void setHeight(double /*dz*/) override {}
+  QString getGenerationString(bool useStrings) const override;
   double maxSize() const override;
 
   void writeToJson(QJsonObject &json) const override;
   void readFromJson(const QJsonObject& json) override;
 
-  virtual bool readFromTShape(TGeoShape* Tshape);
+  bool readFromTShape(TGeoShape* Tshape) override;
 
-  //paraboloid specific
   double rlo, rhi, dz;
   QString str2rlo, str2rhi, str2dz;
 };
@@ -204,28 +203,28 @@ public:
     dz(dz), rminL(0), rmaxL(rmaxL), rminU(0), rmaxU(rmaxU) {}
   AGeoCone() :
     dz(10), rminL(0), rmaxL(20), rminU(0), rmaxU(0) {}
-  virtual ~AGeoCone() {}
 
-  const QString getShapeType() const override {return "TGeoCone";}
-  virtual const QString getShapeTemplate() {return "TGeoCone( dz, rminL, rmaxL, rminU, rmaxU )";}
-  virtual const QString getHelp();
+  QString getShapeType() const override {return "TGeoCone";}
+  QString getShapeTemplate() const override {return "TGeoCone( dz, rminL, rmaxL, rminU, rmaxU )";}
+  QString getHelp() const override;
+
   QString updateShape() override;
 
   bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
   void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
 
-  virtual bool readFromString(QString GenerationString);
-  virtual TGeoShape* createGeoShape(const QString shapeName = "");
+  bool readFromString(QString GenerationString) override;
+  TGeoShape* createGeoShape(const QString shapeName = "") override;
 
-  virtual double getHeight() {return dz;}
-  virtual void setHeight(double dz) {this->dz = dz;}
-  const QString getGenerationString(bool useStrings) const override;
+  double getHeight() override {return dz;}
+  void setHeight(double dz) override {this->dz = dz;}
+  QString getGenerationString(bool useStrings) const override;
   double maxSize() const override;
 
   void writeToJson(QJsonObject& json) const override;
   void readFromJson(const QJsonObject& json) override;
 
-  virtual bool readFromTShape(TGeoShape* Tshape);
+  bool readFromTShape(TGeoShape* Tshape) override;
 
   double dz;
   double rminL, rmaxL, rminU, rmaxU;
@@ -237,30 +236,29 @@ class AGeoConeSeg : public AGeoCone
 public:
   AGeoConeSeg(double dz, double rminL, double rmaxL, double rminU, double rmaxU, double phi1, double phi2) :
     AGeoCone(dz, rminL, rmaxL, rminU, rmaxU), phi1(phi1), phi2(phi2) {}
-  AGeoConeSeg() :
-    AGeoCone(), phi1(0), phi2(180) {}
-  virtual ~AGeoConeSeg() {}
+  AGeoConeSeg() : AGeoCone(), phi1(0), phi2(180) {}
 
-  const QString getShapeType() const override {return "TGeoConeSeg";}
-  virtual const QString getShapeTemplate() {return "TGeoConeSeg( dz, rminL, rmaxL, rminU, rmaxU, phi1, phi2 )";}
-  virtual const QString getHelp();
+  QString getShapeType() const override {return "TGeoConeSeg";}
+  QString getShapeTemplate() const override {return "TGeoConeSeg( dz, rminL, rmaxL, rminU, rmaxU, phi1, phi2 )";}
+  QString getHelp() const override;
+
   QString updateShape() override;
 
   bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
   void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
 
-  virtual bool readFromString(QString GenerationString);
-  virtual TGeoShape* createGeoShape(const QString shapeName = "");
+  bool readFromString(QString GenerationString) override;
+  TGeoShape* createGeoShape(const QString shapeName = "") override;
 
-  virtual double getHeight() {return dz;}
-  virtual void setHeight(double dz) {this->dz = dz;}
-  const QString getGenerationString(bool useStrings) const override;
+  double getHeight() override {return dz;}
+  void setHeight(double dz) override {this->dz = dz;}
+  QString getGenerationString(bool useStrings) const override;
   double maxSize() const override;
 
   void writeToJson(QJsonObject& json) const override;
   void readFromJson(const QJsonObject& json) override;
 
-  virtual bool readFromTShape(TGeoShape *Tshape);
+  bool readFromTShape(TGeoShape *Tshape) override;
 
   double phi1, phi2;
   QString strPhi1, strPhi2;
@@ -275,28 +273,28 @@ public:
     nedges(nedges), dphi(360), dz(dz), rminL(0), rmaxL(rmaxL), rminU(0), rmaxU(rmaxU) {}
   AGeoPolygon() :
     nedges(6), dphi(360), dz(10), rminL(0), rmaxL(20), rminU(0), rmaxU(20) {}
-  virtual ~AGeoPolygon() {}
 
-  const QString getShapeType() const override {return "TGeoPolygon";}
-  virtual const QString getShapeTemplate() {return "TGeoPolygon( nedges, dphi, dz, rminL, rmaxL, rminU, rmaxU )";}
-  virtual const QString getHelp();
+  QString getShapeType() const override {return "TGeoPolygon";}
+  QString getShapeTemplate() const override {return "TGeoPolygon( nedges, dphi, dz, rminL, rmaxL, rminU, rmaxU )";}
+  QString getHelp() const override;
+
   QString updateShape() override;
 
   bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
   void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
 
-  virtual bool readFromString(QString GenerationString);
-  virtual TGeoShape* createGeoShape(const QString shapeName = "");
+  bool readFromString(QString GenerationString) override;
+  TGeoShape* createGeoShape(const QString shapeName = "") override;
 
-  virtual double getHeight() {return dz;}
-  virtual void setHeight(double dz) {this->dz = dz;}
-  const QString getGenerationString(bool useStrings) const override;
+  double getHeight() override {return dz;}
+  void setHeight(double dz) override {this->dz = dz;}
+  QString getGenerationString(bool useStrings) const override;
   double maxSize() const override;
 
   void writeToJson(QJsonObject& json) const override;
   void readFromJson(const QJsonObject& json) override;
 
-  virtual bool readFromTShape(TGeoShape* /*Tshape*/) { return false; } //it is not a base root class, so not valid for import from GDML
+  bool readFromTShape(TGeoShape* /*Tshape*/) override { return false; } //it is not a base root class, so not valid for import from GDML
 
   int nedges;
   double dphi, dz;
@@ -318,7 +316,7 @@ struct APolyCGsection
   void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName);
 
   bool fromString(QString string);
-  const QString toString(bool useStrings) const;
+  QString toString(bool useStrings) const;
   void writeToJson(QJsonObject& json) const;
   void readFromJson(const QJsonObject& json);
 };
@@ -327,58 +325,56 @@ class AGeoPcon : public AGeoShape
 {
 public:
   AGeoPcon();
-  virtual ~AGeoPcon() {}
 
-  const QString getShapeType() const override {return "TGeoPcon";}
-  virtual const QString getShapeTemplate() {return "TGeoPcon( phi, dphi, { z0 : rmin0 : rmaz0 }, { z1 : rmin1 : rmax1 } )";}
-  virtual const QString getHelp();
+  QString getShapeType() const override {return "TGeoPcon";}
+  QString getShapeTemplate() const override {return "TGeoPcon( phi, dphi, { z0 : rmin0 : rmaz0 }, { z1 : rmin1 : rmax1 } )";}
+  QString getHelp() const override;
+
   QString updateShape() override;
 
   bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
   void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
 
-  virtual bool readFromString(QString GenerationString);
-  virtual TGeoShape* createGeoShape(const QString shapeName = "");
+  bool readFromString(QString GenerationString) override;
+  TGeoShape* createGeoShape(const QString shapeName = "") override;
 
-  const QString getGenerationString(bool useStrings) const override;
+  QString getGenerationString(bool useStrings) const override;
   double maxSize() const override;
 
   void writeToJson(QJsonObject& json) const override;
   void readFromJson(const QJsonObject& json) override;
 
-  virtual bool readFromTShape(TGeoShape* Tshape);
+  bool readFromTShape(TGeoShape* Tshape) override;
 
   double phi, dphi;
   QString strPhi, strdPhi;
   QVector<APolyCGsection> Sections;
-
 };
 
 class AGeoPgon : public AGeoPcon
 {
 public:
-  AGeoPgon() :
-    AGeoPcon(), nedges(6) {}
-  virtual ~AGeoPgon() {}
+  AGeoPgon() : AGeoPcon(), nedges(6) {}
 
-  const QString getShapeType() const override {return "TGeoPgon";}
-  virtual const QString getShapeTemplate() {return "TGeoPgon( phi, dphi, nedges, { z0 : rmin0 : rmaz0 }, { zN : rminN : rmaxN } )";}
-  virtual const QString getHelp();
+  QString getShapeType() const override {return "TGeoPgon";}
+  QString getShapeTemplate() const override {return "TGeoPgon( phi, dphi, nedges, { z0 : rmin0 : rmaz0 }, { zN : rminN : rmaxN } )";}
+  QString getHelp() const override;
+
   QString updateShape() override;
 
   bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
   void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
 
-  virtual bool readFromString(QString GenerationString);
-  virtual TGeoShape* createGeoShape(const QString shapeName = "");
+  bool readFromString(QString GenerationString) override;
+  TGeoShape* createGeoShape(const QString shapeName = "") override;
 
-  const QString getGenerationString(bool useStrings) const override;
+  QString getGenerationString(bool useStrings) const override;
   double maxSize() const override;
 
   void writeToJson(QJsonObject& json) const override;
   void readFromJson(const QJsonObject& json) override;
 
-  virtual bool readFromTShape(TGeoShape* Tshape);
+  bool readFromTShape(TGeoShape* Tshape) override;
 
   int nedges;
   QString strNedges;
@@ -389,30 +385,29 @@ class AGeoTrd1 : public AGeoShape
 public:
   AGeoTrd1(double dx1, double dx2, double dy, double dz) :
     dx1(dx1), dx2(dx2), dy(dy), dz(dz) {}
-  AGeoTrd1() :
-    dx1(15), dx2(5), dy(10), dz(10) {}
-  virtual ~AGeoTrd1() {}
+  AGeoTrd1() : dx1(15), dx2(5), dy(10), dz(10) {}
 
-  const QString getShapeType() const override {return "TGeoTrd1";}
-  virtual const QString getShapeTemplate() {return "TGeoTrd1( dx1, dx2, dy, dz )";}
-  virtual const QString getHelp();
+  QString getShapeType() const override {return "TGeoTrd1";}
+  QString getShapeTemplate() const override {return "TGeoTrd1( dx1, dx2, dy, dz )";}
+  QString getHelp() const override;
+
   QString updateShape() override;
 
   bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
   void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
 
-  virtual bool readFromString(QString GenerationString);
-  virtual TGeoShape* createGeoShape(const QString shapeName = "");
+  bool readFromString(QString GenerationString) override;
+  TGeoShape* createGeoShape(const QString shapeName = "") override;
 
-  virtual double getHeight() {return dz;}
-  virtual void setHeight(double dz) {this->dz = dz;}
-  const QString getGenerationString(bool useStrings) const override;
+  double getHeight() override {return dz;}
+  void setHeight(double dz) override {this->dz = dz;}
+  QString getGenerationString(bool useStrings) const override;
   double maxSize() const override;
 
   void writeToJson(QJsonObject& json) const override;
   void readFromJson(const QJsonObject& json) override;
 
-  virtual bool readFromTShape(TGeoShape* Tshape);
+  bool readFromTShape(TGeoShape* Tshape) override;
 
   double dx1, dx2, dy, dz;
   QString str2dx1, str2dx2, str2dy, str2dz;
@@ -425,28 +420,28 @@ public:
     dx1(dx1), dx2(dx2), dy1(dy1), dy2(dy2), dz(dz) {}
   AGeoTrd2() :
     dx1(15), dx2(5), dy1(10), dy2(20), dz(10) {}
-  virtual ~AGeoTrd2() {}
 
-  const QString getShapeType() const override {return "TGeoTrd2";}
-  virtual const QString getShapeTemplate() {return "TGeoTrd2( dx1, dx2, dy1, dy2, dz )";}
-  virtual const QString getHelp();
+  QString getShapeType() const override {return "TGeoTrd2";}
+  QString getShapeTemplate() const override {return "TGeoTrd2( dx1, dx2, dy1, dy2, dz )";}
+  QString getHelp() const override;
+
   QString updateShape() override;
 
   bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
   void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
 
-  virtual bool readFromString(QString GenerationString);
-  virtual TGeoShape* createGeoShape(const QString shapeName = "");
+  bool readFromString(QString GenerationString) override;
+  TGeoShape* createGeoShape(const QString shapeName = "") override;
 
-  virtual double getHeight() {return dz;}
-  virtual void setHeight(double dz) {this->dz = dz;}
-  const QString getGenerationString(bool /*useStrings*/) const override;
+  double getHeight() override {return dz;}
+  void setHeight(double dz) override {this->dz = dz;}
+  QString getGenerationString(bool /*useStrings*/) const override;
   double maxSize() const override;
 
   void writeToJson(QJsonObject& json) const override;
   void readFromJson(const QJsonObject& json) override;
 
-  virtual bool readFromTShape(TGeoShape* Tshape);
+  bool readFromTShape(TGeoShape* Tshape) override;
 
   double dx1, dx2, dy1, dy2, dz;
   QString str2dx1, str2dx2, str2dy1, str2dy2, str2dz;
@@ -457,30 +452,29 @@ class AGeoTubeSeg : public AGeoShape
 public:
   AGeoTubeSeg(double rmin, double rmax, double dz, double phi1, double phi2) :
     rmin(rmin), rmax(rmax), dz(dz), phi1(phi1), phi2(phi2) {}
-  AGeoTubeSeg() :
-    rmin(0), rmax(10), dz(5), phi1(0), phi2(180) {}
-  virtual ~AGeoTubeSeg() {}
+  AGeoTubeSeg() : rmin(0), rmax(10), dz(5), phi1(0), phi2(180) {}
 
-  const QString getShapeType() const override {return "TGeoTubeSeg";}
-  virtual const QString getShapeTemplate() {return "TGeoTubeSeg( rmin, rmax, dz, phi1, phi2 )";}
-  virtual const QString getHelp();
+  QString getShapeType() const override {return "TGeoTubeSeg";}
+  QString getShapeTemplate() const override {return "TGeoTubeSeg( rmin, rmax, dz, phi1, phi2 )";}
+  QString getHelp() const override;
+
   QString updateShape() override;
 
   bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
   void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
 
-  virtual bool readFromString(QString GenerationString);
-  virtual TGeoShape* createGeoShape(const QString shapeName = "");
+  bool readFromString(QString GenerationString) override;
+  TGeoShape* createGeoShape(const QString shapeName = "") override;
 
-  virtual double getHeight() {return dz;}
-  virtual void setHeight(double dz) {this->dz = dz;}
-  const QString getGenerationString(bool /*useStrings*/) const override;
+  double getHeight() override {return dz;}
+  void setHeight(double dz) override {this->dz = dz;}
+  QString getGenerationString(bool /*useStrings*/) const override;
   double maxSize() const override;
 
   void writeToJson(QJsonObject& json) const override;
   void readFromJson(const QJsonObject& json) override;
 
-  virtual bool readFromTShape(TGeoShape* Tshape);
+  bool readFromTShape(TGeoShape* Tshape) override;
 
   double      rmin,     rmax,     dz,    phi1,    phi2;
   QString str2rmin, str2rmax, str2dz, strPhi1, strPhi2;
@@ -499,28 +493,28 @@ public:
     AGeoTubeSeg(0,  10,  5,  0,  180),
     nxlow(0), nylow(0.64), nzlow(-0.77),
     nxhi(0), nyhi(0.09), nzhi(0.87) {}
-  virtual ~AGeoCtub() {}
 
-  const QString getShapeType() const override {return "TGeoCtub";}
-  virtual const QString getShapeTemplate() {return "TGeoCtub( rmin, rmax, dz, phi1, phi2, nxlow, nylow, nzlow, nxhi, nyhi, nzhi )";}
-  virtual const QString getHelp();
+  QString getShapeType() const override {return "TGeoCtub";}
+  QString getShapeTemplate() const override {return "TGeoCtub( rmin, rmax, dz, phi1, phi2, nxlow, nylow, nzlow, nxhi, nyhi, nzhi )";}
+  QString getHelp() const override;
+
   QString updateShape() override;
 
   bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
   void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
 
-  virtual bool readFromString(QString GenerationString);
-  virtual TGeoShape* createGeoShape(const QString shapeName = "");
+  bool readFromString(QString GenerationString) override;
+  TGeoShape* createGeoShape(const QString shapeName = "") override;
 
-  virtual double getHeight() {return dz;}
-  virtual void setHeight(double dz) {this->dz = dz;}
-  const QString getGenerationString(bool /*useStrings*/) const override;
+  double getHeight() override {return dz;}
+  void setHeight(double dz) override {this->dz = dz;}
+  QString getGenerationString(bool /*useStrings*/) const override;
   double maxSize() const override;
 
   void writeToJson(QJsonObject& json) const override;
   void readFromJson(const QJsonObject& json) override;
 
-  virtual bool readFromTShape(TGeoShape* Tshape);
+  bool readFromTShape(TGeoShape* Tshape) override;
 
   double nxlow, nylow, nzlow;
   double nxhi, nyhi, nzhi;
@@ -530,32 +524,30 @@ public:
 class AGeoEltu : public AGeoShape
 {
 public:
-  AGeoEltu(double a, double b, double dz) :
-    a(a), b(b), dz(dz) {}
-  AGeoEltu() :
-    a(10), b(20), dz(5) {}
-  virtual ~AGeoEltu() {}
+  AGeoEltu(double a, double b, double dz) : a(a), b(b), dz(dz) {}
+  AGeoEltu() : a(10), b(20), dz(5) {}
 
-  const QString getShapeType() const override {return "TGeoEltu";}
-  virtual const QString getShapeTemplate() {return "TGeoEltu( a, b, dz )";}
-  virtual const QString getHelp();
+  QString getShapeType() const override {return "TGeoEltu";}
+  QString getShapeTemplate() const override {return "TGeoEltu( a, b, dz )";}
+  QString getHelp() const override;
+
   QString updateShape() override;
 
   bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
   void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
 
-  virtual bool readFromString(QString GenerationString);
-  virtual TGeoShape* createGeoShape(const QString shapeName = "");
+  bool readFromString(QString GenerationString) override;
+  TGeoShape* createGeoShape(const QString shapeName = "") override;
 
-  virtual double getHeight() { return dz; }
-  virtual void setHeight(double dz) {this->dz = dz;}
-  const QString getGenerationString(bool /*useStrings*/) const override;
+  double getHeight() override { return dz; }
+  void setHeight(double dz) override {this->dz = dz;}
+  QString getGenerationString(bool /*useStrings*/) const override;
   double maxSize() const override;
 
   void writeToJson(QJsonObject& json) const override;
   void readFromJson(const QJsonObject& json) override;
 
-  virtual bool readFromTShape(TGeoShape* Tshape);
+  bool readFromTShape(TGeoShape* Tshape) override;
 
   double a, b, dz;
   QString str2a, str2b, str2dz;
@@ -568,13 +560,12 @@ public:
     rmin(rmin), rmax(rmax), theta1(theta1), theta2(theta2), phi1(phi1), phi2(phi2) {}
   AGeoSphere(double r) :
     rmin(0), rmax(r), theta1(0), theta2(180), phi1(0), phi2(360) {}
-  AGeoSphere() :
-    rmin(0), rmax(10), theta1(0), theta2(180), phi1(0), phi2(360) {}
-  virtual ~AGeoSphere() {}
+  AGeoSphere() : rmin(0), rmax(10), theta1(0), theta2(180), phi1(0), phi2(360) {}
 
-  const QString getShapeType() const override {return "TGeoSphere";}
-  virtual const QString getShapeTemplate() {return "TGeoSphere( rmin,  rmax, theta1, theta2, phi1, phi2 )";}
-  virtual const QString getHelp();
+  QString getShapeType() const override {return "TGeoSphere";}
+  QString getShapeTemplate() const override {return "TGeoSphere( rmin,  rmax, theta1, theta2, phi1, phi2 )";}
+  QString getHelp() const override;
+
   QString updateShape() override;
 
   bool isGeoConstInUse (const QRegExp & nameRegExp) const override;
@@ -583,15 +574,15 @@ public:
   virtual bool readFromString(QString GenerationString);
   virtual TGeoShape* createGeoShape(const QString shapeName = "");
 
-  virtual double getHeight() {return rmax;}
-  virtual void setHeight(double dz) {rmax = dz;}
-  const QString getGenerationString(bool /*useStrings*/) const override;
+  double getHeight() override {return rmax;}
+  void setHeight(double dz) override {rmax = dz;}
+  QString getGenerationString(bool /*useStrings*/) const override;
   double maxSize() const override { return rmax;}
 
   void writeToJson(QJsonObject& json) const override;
   void readFromJson(const QJsonObject& json) override;
 
-  virtual bool readFromTShape(TGeoShape* Tshape);
+  bool readFromTShape(TGeoShape* Tshape) override;
 
   double      rmin,     rmax,    theta1,    theta2,    phi1,    phi2;
   QString str2rmin, str2rmax, strTheta1, strTheta2, strPhi1, strPhi2;
@@ -602,30 +593,29 @@ class AGeoPara : public AGeoShape
 public:
   AGeoPara(double dx, double dy, double dz, double alpha, double theta, double phi) :
     dx(dx), dy(dy), dz(dz), alpha(alpha), theta(theta), phi(phi) {}
-  AGeoPara() :
-    dx(10), dy(10), dz(10), alpha(10), theta(25), phi(45) {}
-  virtual ~AGeoPara() {}
+  AGeoPara() : dx(10), dy(10), dz(10), alpha(10), theta(25), phi(45) {}
 
-  const QString getShapeType() const override {return "TGeoPara";}
-  virtual const QString getShapeTemplate() {return "TGeoPara( dX, dY, dZ, alpha, theta, phi )";}
-  virtual const QString getHelp();
+  QString getShapeType() const override {return "TGeoPara";}
+  QString getShapeTemplate() const override {return "TGeoPara( dX, dY, dZ, alpha, theta, phi )";}
+  QString getHelp() const override;
+
   QString updateShape() override;
 
   bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
   void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
 
-  virtual bool readFromString(QString GenerationString);
-  virtual TGeoShape* createGeoShape(const QString shapeName = "");
+  bool readFromString(QString GenerationString) override;
+  TGeoShape* createGeoShape(const QString shapeName = "") override;
 
-  virtual double getHeight() {return dz;}
-  virtual void setHeight(double dz) {this->dz = dz;}
-  const QString getGenerationString(bool /*useStrings*/) const override;
+  double getHeight() override {return dz;}
+  void setHeight(double dz) override {this->dz = dz;}
+  QString getGenerationString(bool /*useStrings*/) const override;
   double maxSize() const override;
 
   void writeToJson(QJsonObject& json) const override;
   void readFromJson(const QJsonObject& json) override;
 
-  virtual bool readFromTShape(TGeoShape* Tshape);
+  bool readFromTShape(TGeoShape* Tshape) override;
 
   double dx, dy, dz;
   double alpha, theta, phi;
@@ -637,28 +627,28 @@ class AGeoArb8 : public AGeoShape
 public:
   AGeoArb8(double dz, QList<QPair<double, double> > VertList);
   AGeoArb8();
-  virtual ~AGeoArb8() {}
 
-  const QString getShapeType() const override {return "TGeoArb8";}
-  virtual const QString getShapeTemplate() {return "TGeoArb8( dz,  xL1,yL1, xL2,yL2, xL3,yL3, xL4,yL4, xU1,yU1, xU2,yU2, xU3,yU3, xU4,yU4  )";}
-  virtual const QString getHelp();
+  QString getShapeType() const override {return "TGeoArb8";}
+  QString getShapeTemplate() const override {return "TGeoArb8( dz,  xL1,yL1, xL2,yL2, xL3,yL3, xL4,yL4, xU1,yU1, xU2,yU2, xU3,yU3, xU4,yU4  )";}
+  QString getHelp() const override;
+
   QString updateShape() override;
 
   bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
   void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
 
-  virtual bool readFromString(QString GenerationString);
-  virtual TGeoShape* createGeoShape(const QString shapeName = "");
+  bool readFromString(QString GenerationString) override;
+  TGeoShape* createGeoShape(const QString shapeName = "") override;
 
-  virtual double getHeight() {return dz;}
-  virtual void setHeight(double dz) {this->dz = dz;}
-  const QString getGenerationString(bool /*useStrings*/) const;
+  double getHeight() override {return dz;}
+  void setHeight(double dz) override {this->dz = dz;}
+  QString getGenerationString(bool /*useStrings*/) const override;
   double maxSize() const override;
 
   void writeToJson(QJsonObject& json) const override;
   void readFromJson(const QJsonObject& json) override;
 
-  virtual bool readFromTShape(TGeoShape* Tshape);
+  bool readFromTShape(TGeoShape* Tshape) override;
 
   double dz;
   QString str2dz;
@@ -674,24 +664,25 @@ class AGeoComposite : public AGeoShape
 public:
   AGeoComposite(const QStringList members, const QString GenerationString);
   AGeoComposite() {}
-  virtual ~AGeoComposite() {}
 
-  const QString getShapeType() const override {return "TGeoCompositeShape";}
-  virtual const QString getShapeTemplate() {return "TGeoCompositeShape( (A + B) * (C - D) )";}
-  virtual const QString getHelp();
+  QString getShapeType() const override {return "TGeoCompositeShape";}
+  QString getShapeTemplate() const override {return "TGeoCompositeShape( (A + B) * (C - D) )";}
+  QString getHelp() const override;
 
   virtual bool readFromString(QString GenerationString);
   virtual TGeoShape* createGeoShape(const QString shapeName = "");
 
-  //virtual double getHeight() {return 0;}
-  //virtual void setHeight(double /*dz*/) {}
-  const QString getGenerationString(bool /*useStrings*/) const override {return GenerationString;}
+  bool isGeoConstInUse(const QRegExp & /*nameRegExp*/) const override {return false;}
+
+  //double getHeight() {return 0;}
+  //void setHeight(double /*dz*/) {}
+  QString getGenerationString(bool /*useStrings*/) const override {return GenerationString;}
   double maxSize() const {return 0;} // have to ask AGeoObject
 
   void writeToJson(QJsonObject& json) const override;
   void readFromJson(const QJsonObject& json) override;
 
-  virtual bool readFromTShape(TGeoShape* /*Tshape*/) {return false;} //cannot be retrieved this way! need cooperation with AGeoObject itself
+  bool readFromTShape(TGeoShape* /*Tshape*/) override {return false;} //cannot be retrieved this way! need cooperation with AGeoObject itself
 
   QStringList members;
   QString GenerationString;
@@ -703,28 +694,28 @@ public:
   AGeoTorus(double R, double Rmin, double Rmax, double Phi1, double Dphi) :
     R(R), Rmin(Rmin), Rmax(Rmax), Phi1(Phi1), Dphi(Dphi) {}
   AGeoTorus() {}
-  virtual ~AGeoTorus () {}
 
-  const QString getShapeType() const override {return "TGeoTorus";}
-  virtual const QString getShapeTemplate() {return "TGeoTorus( R, Rmin, Rmax, Phi1, Dphi )";}
-  virtual const QString getHelp();
+  QString getShapeType() const override {return "TGeoTorus";}
+  QString getShapeTemplate() const override {return "TGeoTorus( R, Rmin, Rmax, Phi1, Dphi )";}
+  QString getHelp() const override;
+
   QString updateShape() override;
 
   bool isGeoConstInUse (const QRegExp & nameRegExp) const override;
   void replaceGeoConstName (const QRegExp & nameRegExp, const QString & newName) override;
 
-  virtual bool readFromString(QString GenerationString);
-  virtual TGeoShape* createGeoShape(const QString shapeName = "");
+  bool readFromString(QString GenerationString) override;
+  TGeoShape* createGeoShape(const QString shapeName = "") override;
 
-  virtual double getHeight() {return Rmax;}
-  virtual void setHeight(double dz) {this->Rmax = dz;}
-  const QString getGenerationString(bool /*useStrings*/) const override;
+  double getHeight() override {return Rmax;}
+  void setHeight(double dz) override {this->Rmax = dz;}
+  QString getGenerationString(bool /*useStrings*/) const override;
   double maxSize() const override;
 
   void writeToJson(QJsonObject& json) const override;
   void readFromJson(const QJsonObject& json) override;
 
-  virtual bool readFromTShape(TGeoShape* Tshape);
+  bool readFromTShape(TGeoShape* Tshape) override;
 
   double R = 100.0;
   double Rmin = 0, Rmax = 20.0;

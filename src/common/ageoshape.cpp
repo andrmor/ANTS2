@@ -98,7 +98,7 @@ bool AGeoBox::readFromString(QString GenerationString)
     return true;
 }
 
-const QString AGeoBox::getHelp()
+QString AGeoBox::getHelp() const
 {
     return "A box has 3 parameters: dx, dy, dz representing the half-lengths on X, Y and Z axes.\n"
            "The box will range from: -dx to dx on X-axis, from -dy to dy on Y and from -dz to dz on Z.";
@@ -130,7 +130,7 @@ void AGeoBox::replaceGeoConstName(const QRegExp & nameRegExp, const QString & ne
     str2dz.replace(nameRegExp, newName);
 }
 
-const QString AGeoBox::getGenerationString(bool useStrings) const
+QString AGeoBox::getGenerationString(bool useStrings) const
 {
     QString str;
     if (!useStrings)
@@ -213,7 +213,7 @@ AGeoShape * AGeoBox::clone() const
 */
 
 // ====== PARA ======
-const QString AGeoPara::getHelp()
+QString AGeoPara::getHelp() const
 {
     return "A parallelepiped is a shape having 3 pairs of parallel faces out of which one is parallel with the XY plane (Z"
            " faces). All faces are parallelograms in the general case. The Z faces have 2 edges parallel with the X-axis.\n"
@@ -291,7 +291,7 @@ TGeoShape *AGeoPara::createGeoShape(const QString shapeName)
     return (shapeName.isEmpty()) ? new TGeoPara(dx, dy, dz, alpha, theta, phi) : new TGeoPara(shapeName.toLatin1().data(), dx, dy, dz, alpha, theta, phi);
 }
 
-const QString AGeoPara::getGenerationString(bool) const
+QString AGeoPara::getGenerationString(bool) const
 {
     QString str = "TGeoPara( " +
             QString::number(dx)+", "+
@@ -371,7 +371,7 @@ AGeoComposite::AGeoComposite(const QStringList members, const QString Generation
     //qDebug() << GenerationString;
 }
 
-const QString AGeoComposite::getHelp()
+QString AGeoComposite::getHelp() const
 {
     return "Composite shapes are Boolean combinations of two or more shape components. The supported Boolean "
            "operations are union (+), intersection (*) and subtraction(-).";
@@ -433,7 +433,7 @@ void AGeoComposite::readFromJson(const QJsonObject &json)
     GenerationString = json["GenerationString"].toString();
 }
 
-const QString AGeoSphere::getHelp()
+QString AGeoSphere::getHelp() const
 {
     return "TSphere is a spherical sector with the following parameters:\n"
            " • rmin: internal radius\n"
@@ -520,7 +520,7 @@ TGeoShape *AGeoSphere::createGeoShape(const QString shapeName)
     return (shapeName.isEmpty()) ? new TGeoSphere(rmin, rmax, theta1, theta2, phi1,  phi2) : new TGeoSphere(shapeName.toLatin1().data(), rmin, rmax, theta1, theta2, phi1,  phi2);
 }
 
-const QString AGeoSphere::getGenerationString(bool) const
+QString AGeoSphere::getGenerationString(bool) const
 {
     QString str = "TGeoSphere( " +
             QString::number(rmin)+", "+
@@ -584,7 +584,7 @@ bool AGeoSphere::readFromTShape(TGeoShape *Tshape)
 }
 
 
-const QString AGeoTubeSeg::getHelp()
+QString AGeoTubeSeg::getHelp() const
 {
     return "A tube segment is a tube having a range in phi. The general phi convention is "
            "that the shape ranges from phi1 to phi2 going counterclockwise. The angles can be defined with either "
@@ -666,7 +666,7 @@ TGeoShape *AGeoTubeSeg::createGeoShape(const QString shapeName)
                                    new TGeoTubeSeg(shapeName.toLatin1().data(), rmin, rmax, dz, phi1, phi2);
 }
 
-const QString AGeoTubeSeg::getGenerationString(bool) const
+QString AGeoTubeSeg::getGenerationString(bool) const
 {
     QString str = "TGeoTubeSeg( " +
             QString::number(rmin)+", "+
@@ -730,7 +730,7 @@ bool AGeoTubeSeg::readFromTShape(TGeoShape *Tshape)
 }
 
 
-const QString AGeoCtub::getHelp()
+QString AGeoCtub::getHelp() const
 {
     return "A cut tube is a tube segment cut with two planes. The centers of the 2 sections are positioned at ±dZ. Each cut "
            "plane is therefore defined by a point (0,0,±dZ) and its normal unit vector pointing outside the shape: "
@@ -742,8 +742,6 @@ const QString AGeoCtub::getHelp()
 
 QString AGeoCtub::updateShape()
 {
-
-
     const AGeoConsts & GC = AGeoConsts::getConstInstance();
     QString errorStr;
     bool ok;
@@ -819,7 +817,7 @@ TGeoShape *AGeoCtub::createGeoShape(const QString shapeName)
                                    new TGeoCtub( shapeName.toLatin1().data(), rmin, rmax, dz, phi1, phi2, nxlow, nylow, nzlow, nxhi, nyhi, nzhi );
 }
 
-const QString AGeoCtub::getGenerationString(bool) const
+QString AGeoCtub::getGenerationString(bool) const
 {
     QString str = "TGeoCtub( " +
             QString::number(rmin)+", "+
@@ -902,7 +900,7 @@ bool AGeoCtub::readFromTShape(TGeoShape *Tshape)
     return true;
 }
 
-const QString AGeoTube::getHelp()
+QString AGeoTube::getHelp() const
 {
     return "Tubes have Z as their symmetry axis. They have a range in Z, a minimum (rmin) and a maximum (rmax) radius.\n"
            "The full Z range is from -dz to +dz.";
@@ -964,7 +962,7 @@ TGeoShape *AGeoTube::createGeoShape(const QString shapeName)
                                    new TGeoTube(shapeName.toLatin1().data(), rmin, rmax, dz);
 }
 
-const QString AGeoTube::getGenerationString(bool useStrings) const
+QString AGeoTube::getGenerationString(bool useStrings) const
 {
     QString str;
     if (!useStrings)
@@ -1033,7 +1031,7 @@ bool AGeoTube::readFromTShape(TGeoShape *Tshape)
 }
 
 // ---  Trd1  ---
-const QString AGeoTrd1::getHelp()
+QString AGeoTrd1::getHelp() const
 {
     return "Trapezoid with two of the opposite faces parallel to XY plane and positioned at ± dZ\n"
            "Trd1 is a trapezoid with only X varying with Z. It is defined by the half-length in Z, the half-length in X at the "
@@ -1103,7 +1101,7 @@ TGeoShape *AGeoTrd1::createGeoShape(const QString shapeName)
                                    new TGeoTrd1(shapeName.toLatin1().data(), dx1, dx2, dy, dz);
 }
 
-const QString AGeoTrd1::getGenerationString(bool useStrings) const
+QString AGeoTrd1::getGenerationString(bool useStrings) const
 {
     QString str;
     if (!useStrings)
@@ -1181,7 +1179,7 @@ bool AGeoTrd1::readFromTShape(TGeoShape *Tshape)
 }
 
 // ---  Trd2  ---
-const QString AGeoTrd2::getHelp()
+QString AGeoTrd2::getHelp() const
 {
     return "Trd2 is a trapezoid with both X and Y varying with Z. It is defined by the half-length in Z, the half-length in X at "
            "the lowest and highest Z planes and the half-length in Y at these planes: "
@@ -1254,7 +1252,7 @@ TGeoShape *AGeoTrd2::createGeoShape(const QString shapeName)
                                    new TGeoTrd2(shapeName.toLatin1().data(), dx1, dx2, dy1, dy2, dz);
 }
 
-const QString AGeoTrd2::getGenerationString(bool) const
+QString AGeoTrd2::getGenerationString(bool) const
 {
     QString str = "TGeoTrd2( " +
             QString::number(dx1)+", "+
@@ -1319,7 +1317,7 @@ bool AGeoTrd2::readFromTShape(TGeoShape *Tshape)
 }
 
 // --- GeoPgon ---
-const QString AGeoPgon::getHelp()
+QString AGeoPgon::getHelp() const
 {
     return "TGeoPgon:\n"
            "nedges - number of edges\n"
@@ -1431,7 +1429,7 @@ TGeoShape *AGeoPgon::createGeoShape(const QString shapeName)
     return pg;
 }
 
-const QString AGeoPgon::getGenerationString(bool useStrings) const
+QString AGeoPgon::getGenerationString(bool useStrings) const
 {
     QString str;
     if (!useStrings)
@@ -1504,7 +1502,7 @@ bool AGeoPgon::readFromTShape(TGeoShape *Tshape)
     return true;
 }
 
-const QString AGeoConeSeg::getHelp()
+QString AGeoConeSeg::getHelp() const
 {
     return "Cone segment with the following parameters:\n"
            "dz - half size in Z\n"
@@ -1581,7 +1579,7 @@ TGeoShape *AGeoConeSeg::createGeoShape(const QString shapeName)
     return s;
 }
 
-const QString AGeoConeSeg::getGenerationString(bool useStrings) const
+QString AGeoConeSeg::getGenerationString(bool useStrings) const
 {
     QString str;
     if (!useStrings)
@@ -1664,7 +1662,7 @@ bool AGeoConeSeg::readFromTShape(TGeoShape *Tshape)
     return true;
 }
 
-const QString AGeoParaboloid::getHelp()
+QString AGeoParaboloid::getHelp() const
 {
     return  "A paraboloid is defined by the revolution surface generated by a parabola and is bounded by two planes "
             "perpendicular to Z axis. The parabola equation is taken in the form: z = a·r2 + b, where: r2 = x2 + y2. "
@@ -1732,7 +1730,7 @@ TGeoShape *AGeoParaboloid::createGeoShape(const QString shapeName)
     return s;
 }
 
-const QString AGeoParaboloid::getGenerationString(bool useStrings) const
+QString AGeoParaboloid::getGenerationString(bool useStrings) const
 {
     QString str;
     if (!useStrings)
@@ -1798,7 +1796,7 @@ bool AGeoParaboloid::readFromTShape(TGeoShape *Tshape)
     return true;
 }
 
-const QString AGeoCone::getHelp()
+QString AGeoCone::getHelp() const
 {
     return "Cone with the following parameters:\n"
            "dz - half size in Z\n"
@@ -1880,7 +1878,7 @@ TGeoShape *AGeoCone::createGeoShape(const QString shapeName)
     return s;
 }
 
-const QString AGeoCone::getGenerationString(bool useStrings) const
+QString AGeoCone::getGenerationString(bool useStrings) const
 {
     QString str;
     if (!useStrings)
@@ -1964,7 +1962,7 @@ bool AGeoCone::readFromTShape(TGeoShape *Tshape)
     return true;
 }
 
-const QString AGeoEltu::getHelp()
+QString AGeoEltu::getHelp() const
 {
     return "An elliptical tube is defined by the two semi-axes a and b. It ranges from –dz to +dz in Z direction.";
 }
@@ -2026,7 +2024,7 @@ TGeoShape *AGeoEltu::createGeoShape(const QString shapeName)
                                    new TGeoEltu(shapeName.toLatin1().data(), a, b, dz);
 }
 
-const QString AGeoEltu::getGenerationString(bool) const
+QString AGeoEltu::getGenerationString(bool) const
 {
     QString str = "TGeoEltu( " +
             QString::number(a)+", "+
@@ -2104,7 +2102,7 @@ AGeoArb8::AGeoArb8() : dz(10)
     }
 }
 
-const QString AGeoArb8::getHelp()
+QString AGeoArb8::getHelp() const
 {
     QString s = "An Arb8 is defined by two quadrilaterals sitting on parallel planes, at ±dZ. These are defined each by 4 vertices "
                 "having the coordinates (Xi,Yi,+/-dZ), i=0, 3. The lateral surface of the Arb8 is defined by the 4 pairs of "
@@ -2209,7 +2207,7 @@ TGeoShape *AGeoArb8::createGeoShape(const QString shapeName)
     return (shapeName.isEmpty()) ? new TGeoArb8(dz, (double*)ar) : new TGeoArb8(shapeName.toLatin1().data(), dz, (double*)ar);
 }
 
-const QString AGeoArb8::getGenerationString(bool) const
+QString AGeoArb8::getGenerationString(bool) const
 {
     QString str = "TGeoArb8( " + QString::number(dz)+",  ";
 
@@ -2316,7 +2314,7 @@ AGeoPcon::AGeoPcon()
     Sections << APolyCGsection(-5, 10, 20) <<  APolyCGsection(5, 20, 40);
 }
 
-const QString AGeoPcon::getHelp()
+QString AGeoPcon::getHelp() const
 {
     return "TGeoPcon:\n"
            "phi - start angle [0, 360)\n"
@@ -2429,7 +2427,7 @@ TGeoShape *AGeoPcon::createGeoShape(const QString shapeName)
     return pc;
 }
 
-const QString AGeoPcon::getGenerationString(bool useStrings) const
+QString AGeoPcon::getGenerationString(bool useStrings) const
 {
     QString str;
     if (!useStrings)
@@ -2590,7 +2588,7 @@ bool APolyCGsection::fromString(QString s)
     return true;
 }
 
-const QString APolyCGsection::toString(bool useStrings) const
+QString APolyCGsection::toString(bool useStrings) const
 {
     QString str;
     if (!useStrings)
@@ -2642,7 +2640,7 @@ void APolyCGsection::readFromJson(const QJsonObject &json)
 }
 
 // --- GeoPolygon ---
-const QString AGeoPolygon::getHelp()
+QString AGeoPolygon::getHelp() const
 {
     return "Simplified TGeoPgon:\n"
            "nedges - number of edges\n"
@@ -2742,7 +2740,7 @@ TGeoShape *AGeoPolygon::createGeoShape(const QString shapeName)
     return s;
 }
 
-const QString AGeoPolygon::getGenerationString(bool useStrings) const
+QString AGeoPolygon::getGenerationString(bool useStrings) const
 {
     QString str;
     if (!useStrings)
@@ -2827,7 +2825,7 @@ AGeoScaledShape::AGeoScaledShape(QString ShapeGenerationString, double scaleX, d
     BaseShapeGenerationString(ShapeGenerationString),
     scaleX(scaleX), scaleY(scaleY), scaleZ(scaleZ) {}
 
-const QString AGeoScaledShape::getHelp()
+QString AGeoScaledShape::getHelp() const
 {
     return "TGeoShape scaled with TGeoScale transformation";
 }
@@ -2996,7 +2994,7 @@ TGeoShape *AGeoScaledShape::createGeoShape(const QString shapeName)
     return (shapeName.isEmpty()) ? new TGeoScaledShape(Tshape, scale) : new TGeoScaledShape(shapeName.toLatin1().data(), Tshape, scale);
 }
 
-const QString AGeoScaledShape::getGenerationString(bool useStrings) const
+QString AGeoScaledShape::getGenerationString(bool useStrings) const
 {
     qDebug() <<"base" <<BaseShape->getGenerationString() <<useStrings;
     if (!useStrings)
@@ -3129,8 +3127,7 @@ bool AGeoScaledShape::readFromTShape(TGeoShape *Tshape)
     return true;
 }
 
-
-const QString AGeoTorus::getHelp()
+QString AGeoTorus::getHelp() const
 {
     return QString()+ "Torus segment:\n"
                       "• R - axial radius\n"
@@ -3205,7 +3202,7 @@ TGeoShape *AGeoTorus::createGeoShape(const QString shapeName)
     return (shapeName.isEmpty()) ? new TGeoTorus(R, Rmin, Rmax, Phi1, Dphi) : new TGeoTorus(shapeName.toLatin1().data(), R, Rmin, Rmax, Phi1, Dphi);
 }
 
-const QString AGeoTorus::getGenerationString(bool) const
+QString AGeoTorus::getGenerationString(bool) const
 {
     QString str = "TGeoTorus( " +
             QString::number(R)+", "+

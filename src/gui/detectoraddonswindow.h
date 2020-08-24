@@ -32,52 +32,31 @@ public:
 private slots:
   void onReconstructDetectorRequest();
   void onGeoConstEditingFinished(int index, QString newValue);
+  void onGeoConstExpressionEditingFinished(int index, QString newValue);
   void onGeoConstEscapePressed(int index);
 
   void on_tabwConstants_customContextMenuRequested(const QPoint &pos);
-
   void on_pbConvertToDummies_clicked();
-
   void on_sbDummyPMindex_valueChanged(int arg1);
-
   void on_pbDeleteDummy_clicked();
-
   void on_pbConvertDummy_clicked();
-
   void on_pbUpdateDummy_clicked();
-
   void on_pbCreateNewDummy_clicked();
-
   void on_sbDummyType_valueChanged(int arg1);
-
   void on_pbLoadDummyPMs_clicked();
-
   void on_pbConvertAllToPMs_clicked();
-
   void on_pbUseScriptToAddObj_clicked();
-
   void on_pbSaveTGeo_clicked();
-
   void on_pbLoadTGeo_clicked();
-
   void on_pbBackToSandwich_clicked();
-
   void on_pbRootWeb_clicked();
-
   void on_pbCheckGeometry_clicked();
-
   void on_cbAutoCheck_clicked(bool checked);
-
   void on_pbRunTestParticle_clicked();
-
   void on_cbAutoCheck_stateChanged(int arg1);
-
   void on_pmParseInGeometryFromGDML_clicked();
-
   void on_pbConvertToScript_clicked();
-
   void on_pbWorldTreeHelp_clicked();
-
   void on_tabwConstants_cellChanged(int row, int column);
 
 private:
@@ -90,7 +69,7 @@ private:
 
   void ConvertDummyToPM(int idpm);  
   bool GDMLtoTGeo(const QString &fileName);
-  const QString loadGDML(const QString &fileName, QString &gdml);  //returns error string - empty if OK
+  QString loadGDML(const QString &fileName, QString &gdml);  //returns error string - empty if OK
   void updateGeoConstsIndication();
 
 protected:

@@ -22,7 +22,7 @@ const AGeoConsts &AGeoConsts::getConstInstance()
 
 bool AGeoConsts::isGeoConstInUse(const QRegExp &nameRegExp, const AGeoObject * obj) const
 {
-    for (const QString & StrValue : StrValues)
+    for (const QString & StrValue : Expressions)
     {
         if (StrValue.contains(nameRegExp)) return true;
     }
@@ -77,6 +77,7 @@ void AGeoConsts::clearConstants()
 {
     Names.clear();
     Values.clear();
+    Expressions.clear();
 
     update();
 }
@@ -87,7 +88,7 @@ void AGeoConsts::writeToJson(QJsonObject & json) const
     for (int i = 0; i < Names.size(); i++)
     {
         QJsonArray el;
-            el << Names.at(i) << Values.at(i);
+            el << Names.at(i) << Values.at(i) << Expressions.at(i);
         ar.push_back(el);
     }
     json["GeoConsts"] = ar;
@@ -101,8 +102,9 @@ void AGeoConsts::readFromJson(const QJsonObject & json)
     parseJson(json, "GeoConsts", ar);
 
     const int size = ar.size();
-    Names .resize(size);
+    Names.resize(size);
     Values.resize(size);
+    Expressions.resize(size);
 
     for (int i = 0; i < size; i++)
     {
@@ -112,6 +114,8 @@ void AGeoConsts::readFromJson(const QJsonObject & json)
             Names[i]  = el[0].toString();
             Values[i] = el[1].toDouble();
         }
+        if (el.size() >= 3) Expressions[i] = el[2].toString();
+        else Expressions[i] = QString();
     }
     update();
 }
@@ -195,23 +199,33 @@ bool AGeoConsts::setNewValue(int index, double newValue)
     return true;
 }
 
+bool AGeoConsts::setNewExpression(int index, const QString & newExpression, AGeoObject * worldObj)
+{
+    if (index < 0 || index >= Names.size()) return false;
+
+    Expressions[index] = newExpression;
+    return true;
+}
+
 bool AGeoConsts::addNewConstant(const QString & name, double value)
 {
     for (int i = 0; i < Names.size(); i++)
         if (name == Names.at(i)) return false; //already in use
 
-    Names. append(name);
+    Names.append(name);
     Values.append(value);
+    Expressions.append("");
     update();
     return true;
 }
 
-void AGeoConsts::remove(int index)
+void AGeoConsts::removeConstant(int index)
 {
     if (index < 0 || index >= Names.size()) return;
 
-    Names .remove(index);
+    Names.remove(index);
     Values.remove(index);
+    Expressions.remove(index);
     update();
 }
 

@@ -2374,7 +2374,7 @@ double AGeoArb8::maxSize() const
 {
     double max = dz;
 
-    for ( const QPair<double, double> & pair : Vertices)
+    for (const QPair<double, double> & pair : Vertices)
         max = std::max(max, std::max( fabs(pair.first), fabs(pair.second)) );
 
     return max;

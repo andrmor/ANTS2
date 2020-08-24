@@ -1076,7 +1076,7 @@ void DetectorAddOnsWindow::on_pmParseInGeometryFromGDML_clicked()
     Detector->BuildDetector(); 
 }
 
-const QString DetectorAddOnsWindow::loadGDML(const QString& fileName, QString& gdml)
+QString DetectorAddOnsWindow::loadGDML(const QString& fileName, QString& gdml)
 {
     QFileInfo fi(fileName);
     if (fi.suffix() != "gdml")
@@ -1101,8 +1101,9 @@ void DetectorAddOnsWindow::resizeEvent(QResizeEvent *event)
     if (!isVisible()) return;
 
     int ww = ui->tabwConstants->width();
-    ui->tabwConstants->setColumnWidth(0, 0.5*ww - 2);
-    ui->tabwConstants->setColumnWidth(1, 0.5*ww - 2);
+    ui->tabwConstants->setColumnWidth(0, 0.4*ww - 1);
+    ui->tabwConstants->setColumnWidth(1, 0.1*ww - 1);
+    ui->tabwConstants->setColumnWidth(2, 0.5*ww - 1);
     QMainWindow::resizeEvent(event);
 }
 
@@ -1319,6 +1320,7 @@ void DetectorAddOnsWindow::updateGeoConstsIndication()
     const int numConsts = GC.countConstants();
     const QVector<QString> & Names  = GC.getNames();
     const QVector<double>  & Values = GC.getValues();
+    const QVector<QString> & Expressions = GC.getExpressions();
 
     bGeoConstsWidgetUpdateInProgress = true; // -->
         ui->tabwConstants->setRowCount(numConsts + 1);
@@ -1326,6 +1328,7 @@ void DetectorAddOnsWindow::updateGeoConstsIndication()
         {
             const QString Name  = ( i == numConsts ? ""  : Names.at(i) );
             const QString Value = ( i == numConsts ? "0" : QString::number(Values.at(i)) );
+            const QString Expression = ( i == numConsts ? "" : Expressions.at(i) );
 
             QTableWidgetItem * newItem = new QTableWidgetItem(Name);
             ui->tabwConstants->setItem(i, 0, newItem);
@@ -1336,6 +1339,12 @@ void DetectorAddOnsWindow::updateGeoConstsIndication()
             connect(edit, &ALineEditWithEscape::editingFinished, [this, i, edit](){this->onGeoConstEditingFinished(i, edit->text()); });
             connect(edit, &ALineEditWithEscape::escapePressed,   [this, i](){this->onGeoConstEscapePressed(i); });
             ui->tabwConstants->setCellWidget(i, 1, edit);
+
+            edit = new ALineEditWithEscape(Expression, ui->tabwConstants);
+            edit->setFrame(false);
+            connect(edit, &ALineEditWithEscape::editingFinished, [this, i, edit](){this->onGeoConstExpressionEditingFinished(i, edit->text()); });
+            connect(edit, &ALineEditWithEscape::escapePressed,   [this, i](){this->onGeoConstEscapePressed(i); });
+            ui->tabwConstants->setCellWidget(i, 2, edit);
         }
     bGeoConstsWidgetUpdateInProgress = false; // <--
 }
@@ -1357,7 +1366,24 @@ void DetectorAddOnsWindow::onGeoConstEditingFinished(int index, QString strNewVa
     }
     GC.setNewValue(index, val);
 
-    //QTimer::singleShot(50, twGeo, &AGeoTreeWidget::rebuildDetetctorAndRestoreCurrentDelegate); // to avoid focus on to_be_destroyed delegate
+    emit requestDelayedRebuildAndRestoreDelegate();
+}
+
+void DetectorAddOnsWindow::onGeoConstExpressionEditingFinished(int index, QString newValue)
+{
+    qDebug() << "Expression changed! index/text are:" << index << newValue;
+    AGeoConsts & GC = AGeoConsts::getInstance();
+
+    if (index == GC.countConstants()) return; // nothing to do yet - this constant is not yet defined
+
+    bool ok = GC.setNewExpression(index, newValue, twGeo->Sandwich->World);
+    if (!ok)
+    {
+        message("Expression not valid!\nIt is possible to use only geometry constants defined above!", this);
+        updateGeoConstsIndication();
+        return;
+    }
+
     emit requestDelayedRebuildAndRestoreDelegate();
 }
 
@@ -1368,7 +1394,7 @@ void DetectorAddOnsWindow::onGeoConstEscapePressed(int /*index*/)
 
 void DetectorAddOnsWindow::on_tabwConstants_cellChanged(int row, int column)
 {
-    if (column == 1) return; // only name change or new
+    if (column != 0) return; // only name change or new
     if (bGeoConstsWidgetUpdateInProgress) return;
 
     AGeoConsts & GC = AGeoConsts::getInstance();
@@ -1447,7 +1473,7 @@ void DetectorAddOnsWindow::on_tabwConstants_customContextMenuRequested(const QPo
             return;
         }
 
-        GC.remove(index);
+        GC.removeConstant(index);
         MW->writeDetectorToJson(MW->Config->JSON);
         updateGeoConstsIndication();
         emit requestDelayedRebuildAndRestoreDelegate();

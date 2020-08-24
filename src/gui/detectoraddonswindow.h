@@ -26,8 +26,8 @@ public:
   void UpdateDummyPMindication();
   void HighlightVolume(const QString & VolName);
 
-  AGeo_SI* AddObjScriptInterface = nullptr;  // if created -> owned by the script manager
-  AGeoTreeWidget* twGeo = nullptr;  // WorldTree widget
+  AGeo_SI        * AddObjScriptInterface = nullptr;  // if created -> owned by the script manager
+  AGeoTreeWidget * twGeo = nullptr;                  // WorldTree widget
 
 private slots:
   void onReconstructDetectorRequest();
@@ -63,6 +63,7 @@ private:
   Ui::DetectorAddOnsWindow *ui;
   MainWindow* MW;
   DetectorClass* Detector;
+
   QString ObjectScriptTarget;
 
   bool bGeoConstsWidgetUpdateInProgress = false;

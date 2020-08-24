@@ -49,7 +49,6 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(QWidget * parent, MainWindow * MW, De
   ui->setupUi(this);
 
   Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
-  //windowFlags |= Qt::Tool;
   windowFlags |= Qt::WindowCloseButtonHint;
   this->setWindowFlags(windowFlags);
 
@@ -58,19 +57,11 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(QWidget * parent, MainWindow * MW, De
   // tree widget
   twGeo = new AGeoTreeWidget(Detector->Sandwich);
   ui->saGeo->setWidget(twGeo);
-  /*
-  twGeo->setToolTip("Use context menu to manipulate objects\n"
-                    "\n"
-                    "Drag & drop can be used to move items from one container to another\n"
-                    "\n"
-                    "Drop when Alt_or_Shift_or_Control is pressed changes the order of item within the SAME container\n"
-                    "  In case reorder is triggered inside a stack, positions of the objects are recalculated\n"
-                    "  using the original position of the moved object as the reference.");
-  */
   connect(twGeo, SIGNAL(itemExpanded(QTreeWidgetItem*)), twGeo, SLOT(onItemExpanded(QTreeWidgetItem*)));
   connect(twGeo, SIGNAL(itemCollapsed(QTreeWidgetItem*)), twGeo, SLOT(onItemCollapsed(QTreeWidgetItem*)));
   connect(twGeo, SIGNAL(RequestListOfParticles(QStringList&)), Detector->MpCollection, SLOT(OnRequestListOfParticles(QStringList&)));
   connect(twGeo, &AGeoTreeWidget::RequestShowMonitor, this, &DetectorAddOnsWindow::OnrequestShowMonitor);
+
   // Object editor
   QVBoxLayout* l = new QVBoxLayout();
   l->setContentsMargins(0,0,0,0);
@@ -94,7 +85,7 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(QWidget * parent, MainWindow * MW, De
   ui->pteTP->setPalette(p);
   ui->pteTP->setReadOnly(true);
 
-  DetectorAddOnsWindow::UpdateGUI();
+  UpdateGUI();
 
   QDoubleValidator* dv = new QDoubleValidator(this);
   dv->setNotation(QDoubleValidator::ScientificNotation);
@@ -1104,7 +1095,8 @@ void DetectorAddOnsWindow::resizeEvent(QResizeEvent *event)
     ui->tabwConstants->setColumnWidth(0, 0.4*ww - 1);
     ui->tabwConstants->setColumnWidth(1, 0.1*ww - 1);
     ui->tabwConstants->setColumnWidth(2, 0.5*ww - 1);
-    QMainWindow::resizeEvent(event);
+
+    AGuiWindow::resizeEvent(event);
 }
 
 void DetectorAddOnsWindow::on_pbLoadTGeo_clicked()

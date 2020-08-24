@@ -1091,10 +1091,16 @@ void DetectorAddOnsWindow::resizeEvent(QResizeEvent *event)
 {
     if (!isVisible()) return;
 
-    int ww = ui->tabwConstants->width();
-    ui->tabwConstants->setColumnWidth(0, 0.4*ww - 1);
-    ui->tabwConstants->setColumnWidth(1, 0.1*ww - 1);
-    ui->tabwConstants->setColumnWidth(2, 0.5*ww - 1);
+    int AllW = ui->tabwConstants->width() - 3;
+
+    int SecW = AllW * 0.33333;
+    if (SecW > 50) SecW = 50;
+
+    int FirstPlusThird = AllW - SecW;
+
+    ui->tabwConstants->setColumnWidth(0, 0.4*FirstPlusThird);
+    ui->tabwConstants->setColumnWidth(1, SecW);
+    ui->tabwConstants->setColumnWidth(2, 0.6*FirstPlusThird);
 
     AGuiWindow::resizeEvent(event);
 }
@@ -1318,6 +1324,7 @@ void DetectorAddOnsWindow::updateGeoConstsIndication()
 
     bGeoConstsWidgetUpdateInProgress = true; // -->
         ui->tabwConstants->setRowCount(numConsts + 1);
+        ui->tabwConstants->setColumnWidth(1, 50);
         for (int i = 0; i <= numConsts; i++)
         {
             const QString Name  =      ( i == numConsts ? ""  : Names.at(i) );

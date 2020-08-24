@@ -222,13 +222,10 @@ QString AGeoConsts::setNewExpression(int &index, const QString & newExpression, 
 {
     if (index < 0 || index >= Names.size()) return "wrong index";
 
-    Expressions[index] = newExpression;
-    QString errorStr = updateExpression(newExpression, index);
+    QString err = updateExpression(newExpression, index);
+    if (err.isEmpty()) Expressions[index] = newExpression;
 
-
-    qDebug() <<"expressions " <<Expressions;
-    qDebug() <<"values " <<Values;
-    return errorStr;
+    return err;
 }
 
 bool AGeoConsts::addNewConstant(const QString & name, double value)
@@ -270,16 +267,19 @@ void AGeoConsts::update()
 
 QString AGeoConsts::updateExpression(const QString &Expression, int &index)
 {
-    QString errorStr = "";
+    QString errorStr;
     if (Expression.isEmpty()) return errorStr;
 
     bool ok;
-    Values[index] = Expression.simplified().toDouble(&ok);
-    if (!ok)
+    double val;
+    val = Expression.simplified().toDouble(&ok);
+    if (ok) Values[index] = val;
+    else
     {
         ok = evaluateConstExpression(index, Values[index], Expression);
-        if (!ok) errorStr = QString("Expression not valid!\nSyntax error or Using geometry constants which are defined bellow!:\n%1").arg(Expression);
+        if (!ok) errorStr = QString("Expression not valid:\n\n%1\n\nSyntax error or expression uses a geometry constant defined bellow").arg(Expression);
     }
+
     return errorStr;
 }
 

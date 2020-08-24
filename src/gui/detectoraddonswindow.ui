@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1032</width>
+    <width>1048</width>
     <height>532</height>
    </rect>
   </property>
@@ -270,6 +270,12 @@
         </item>
         <item>
          <widget class="QTableWidget" name="tabwConstants">
+          <property name="minimumSize">
+           <size>
+            <width>120</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="contextMenuPolicy">
            <enum>Qt::CustomContextMenu</enum>
           </property>

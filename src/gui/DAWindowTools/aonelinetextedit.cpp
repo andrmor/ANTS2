@@ -26,6 +26,11 @@ QString AOneLineTextEdit::text() const
     return document()->toPlainText();
 }
 
+void AOneLineTextEdit::setFrame(bool flag)
+{
+    setFrameShape( flag ? QFrame::Panel : QFrame::NoFrame );
+}
+
 void AOneLineTextEdit::insertCompletion(const QString &completion)
 {
     QTextCursor tc = textCursor();
@@ -43,6 +48,12 @@ void AOneLineTextEdit::keyPressEvent(QKeyEvent * e)
         {
             e->accept();
             emit editingFinished();
+            return;
+        }
+        if (e->key() == Qt::Key_Escape)
+        {
+            e->accept();
+            emit escapePressed();
             return;
         }
     }

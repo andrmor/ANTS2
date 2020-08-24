@@ -1302,6 +1302,8 @@ void DetectorAddOnsWindow::on_pbWorldTreeHelp_clicked()
 }
 
 #include "ageoconsts.h"
+#include "aonelinetextedit.h"
+#include "ageobasedelegate.h"
 #include <QTabWidget>
 void DetectorAddOnsWindow::updateGeoConstsIndication()
 {
@@ -1332,11 +1334,15 @@ void DetectorAddOnsWindow::updateGeoConstsIndication()
             connect(edit, &ALineEditWithEscape::escapePressed,   [this, i](){this->onGeoConstEscapePressed(i); });
             ui->tabwConstants->setCellWidget(i, 1, edit);
 
-            edit = new ALineEditWithEscape(Expression, ui->tabwConstants);
-            edit->setFrame(false);
-            connect(edit, &ALineEditWithEscape::editingFinished, [this, i, edit](){this->onGeoConstExpressionEditingFinished(i, edit->text()); });
-            connect(edit, &ALineEditWithEscape::escapePressed,   [this, i](){this->onGeoConstEscapePressed(i); });
-            ui->tabwConstants->setCellWidget(i, 2, edit);
+            AOneLineTextEdit * ed = new AOneLineTextEdit(ui->tabwConstants);
+            AGeoBaseDelegate::configureHighligherAndCompleter(ed, i);
+            ed->setText(Expression);
+            ed->setFrame(false);
+            connect(ed, &AOneLineTextEdit::editingFinished, [this, i, ed](){this->onGeoConstExpressionEditingFinished(i, ed->text()); });
+            connect(ed, &AOneLineTextEdit::escapePressed,   [this, i](){this->onGeoConstEscapePressed(i); });
+            ui->tabwConstants->setCellWidget(i, 2, ed);
+
+            if (!Expression.isEmpty()) edit->setEnabled(false);
         }
     bGeoConstsWidgetUpdateInProgress = false; // <--
 }
@@ -1367,6 +1373,14 @@ void DetectorAddOnsWindow::onGeoConstExpressionEditingFinished(int index, QStrin
     AGeoConsts & GC = AGeoConsts::getInstance();
 
     if (index == GC.countConstants()) return; // nothing to do yet - this constant is not yet defined
+
+    bool ok;
+    newValue.toDouble(&ok);
+    if (ok)
+    {
+        onGeoConstEditingFinished(index, newValue);
+        return;
+    }
 
     QString errorStr = GC.setNewExpression(index, newValue, twGeo->Sandwich->World);
     if (!errorStr.isEmpty())

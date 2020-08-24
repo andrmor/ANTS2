@@ -42,7 +42,7 @@ signals:
     void RequestScriptRecursiveToClipboard();
 
 public:
-    static void configureHighligherAndCompleter(AOneLineTextEdit * edit);
+    static void configureHighligherAndCompleter(AOneLineTextEdit * edit, int iUntilIndex = -1); // -1 == all
     static bool processEditBox(AOneLineTextEdit * lineEdit, double & val, QString & str, QWidget * parent);
 };
 

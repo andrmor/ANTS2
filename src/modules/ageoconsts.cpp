@@ -214,6 +214,7 @@ bool AGeoConsts::setNewValue(int index, double newValue)
     if (index < 0 || index >= Names.size()) return false;
 
     Values[index] = newValue;
+    Expressions[index].clear();
     return true;
 }
 

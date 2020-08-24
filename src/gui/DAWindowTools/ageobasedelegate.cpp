@@ -29,20 +29,28 @@ QHBoxLayout *AGeoBaseDelegate::createBottomButtons()
 #include "aonelinetextedit.h"
 #include "ageoconsts.h"
 #include <QCompleter>
-void AGeoBaseDelegate::configureHighligherAndCompleter(AOneLineTextEdit * edit)
+void AGeoBaseDelegate::configureHighligherAndCompleter(AOneLineTextEdit * edit, int iUntilIndex)
 {
+    const AGeoConsts & GC = AGeoConsts::getConstInstance();
+
+    int numConsts = GC.countConstants();
+    if (iUntilIndex == -1 || iUntilIndex > numConsts) iUntilIndex = numConsts;
+
     ABasicHighlighter * highlighter = new ABasicHighlighter(edit->document());
 
     QTextCharFormat GeoConstantFormat;
     GeoConstantFormat.setForeground(Qt::darkMagenta);
     //GeoConstantFormat.setFontWeight(QFont::Bold);
 
+    QStringList sl;
     AHighlightingRule rule;
-    for (const QString & name : AGeoConsts::getConstInstance().getNames())
+    for (int i = 0; i < iUntilIndex; i++)
     {
+        const QString & name = GC.getName(i);
         rule.pattern = QRegExp("\\b" + name + "\\b");
         rule.format = GeoConstantFormat;
         highlighter->HighlightingRules.append(rule);
+        sl << name;
     }
 
     QTextCharFormat FormulaFormat;
@@ -56,9 +64,6 @@ void AGeoBaseDelegate::configureHighligherAndCompleter(AOneLineTextEdit * edit)
         rule.format = FormulaFormat;
         highlighter->HighlightingRules.append(rule);
     }
-
-    QStringList sl;
-    for (const QString & name : AGeoConsts::getConstInstance().getNames()) sl << name;
 
     edit->Completer = new QCompleter(sl, edit);
     edit->Completer->setCaseSensitivity(Qt::CaseInsensitive); //Qt::CaseSensitive

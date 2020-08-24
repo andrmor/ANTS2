@@ -16,6 +16,8 @@ public:
     void setText(const QString & text);
     QString text() const;
 
+    void setFrame(bool flag);
+
 public slots:
     void insertCompletion(const QString & completion);
 
@@ -27,6 +29,7 @@ protected:
 
 signals:
     void editingFinished();
+    void escapePressed();
 
 public:
     QCompleter * Completer = nullptr;

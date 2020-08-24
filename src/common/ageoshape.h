@@ -435,7 +435,7 @@ public:
 
   double getHeight() const override {return dz;}
   void setHeight(double dz) override {this->dz = dz;}
-  QString getGenerationString(bool /*useStrings*/) const override;
+  QString getGenerationString(bool useStrings) const override;
   double maxSize() const override;
 
   void writeToJson(QJsonObject& json) const override;
@@ -468,7 +468,7 @@ public:
 
   double getHeight() const override {return dz;}
   void setHeight(double dz) override {this->dz = dz;}
-  QString getGenerationString(bool /*useStrings*/) const override;
+  QString getGenerationString(bool useStrings) const override;
   double maxSize() const override;
 
   void writeToJson(QJsonObject& json) const override;
@@ -508,7 +508,7 @@ public:
 
   double getHeight() const override {return dz;}
   void setHeight(double dz) override {this->dz = dz;}
-  QString getGenerationString(bool /*useStrings*/) const override;
+  QString getGenerationString(bool useStrings) const override;
   double maxSize() const override;
 
   void writeToJson(QJsonObject& json) const override;
@@ -541,7 +541,7 @@ public:
 
   double getHeight() const override {return dz;}
   void setHeight(double dz) override {this->dz = dz;}
-  QString getGenerationString(bool /*useStrings*/) const override;
+  QString getGenerationString(bool useStrings) const override;
   double maxSize() const override;
 
   void writeToJson(QJsonObject& json) const override;
@@ -576,7 +576,7 @@ public:
 
   double getHeight() const override {return rmax;}
   void setHeight(double dz) override {rmax = dz;}
-  QString getGenerationString(bool /*useStrings*/) const override;
+  QString getGenerationString(bool useStrings) const override;
   double maxSize() const override { return rmax;}
 
   void writeToJson(QJsonObject& json) const override;
@@ -609,7 +609,7 @@ public:
 
   double getHeight() const override {return dz;}
   void setHeight(double dz) override {this->dz = dz;}
-  QString getGenerationString(bool /*useStrings*/) const override;
+  QString getGenerationString(bool useStrings) const override;
   double maxSize() const override;
 
   void writeToJson(QJsonObject& json) const override;
@@ -642,7 +642,7 @@ public:
 
   double getHeight() const override {return dz;}
   void setHeight(double dz) override {this->dz = dz;}
-  QString getGenerationString(bool /*useStrings*/) const override;
+  QString getGenerationString(bool useStrings) const override;
   double maxSize() const override;
 
   void writeToJson(QJsonObject& json) const override;
@@ -707,7 +707,7 @@ public:
 
   double getHeight() const override {return Rmax;}
   void setHeight(double dz) override {this->Rmax = dz;}
-  QString getGenerationString(bool /*useStrings*/) const override;
+  QString getGenerationString(bool useStrings) const override;
   double maxSize() const override;
 
   void writeToJson(QJsonObject& json) const override;

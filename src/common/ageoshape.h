@@ -21,13 +21,13 @@ public:
   virtual QString getHelp() const = 0;
 
   //specific for this particular object
-  virtual TGeoShape * createGeoShape(const QString /*shapeName*/ = "") = 0; //create ROOT's TGeoShape
+  virtual TGeoShape * createGeoShape(const QString /*shapeName*/ = "") = 0;    //creates ROOT's TGeoShape
   virtual QString getGenerationString(bool /*useStrings*/ = false) const = 0;
 
-  virtual double getHeight() {return 0;}      //if 0, cannot be used for stack  ***!!!
-  virtual void   setHeight(double /*dz*/) {}  //for stacks
-  virtual double maxSize() const = 0;         //used for world size evaluation
-  virtual double minSize() const {return 0;}  //needed only for shapes used by monitors (box tube polygon)
+  virtual double getHeight() const {return 0;}   //for stacks; if 0, cannot be used in a stack
+  virtual void   setHeight(double /*dz*/) {}     //for stacks
+  virtual double maxSize() const = 0;            //used for world size evaluation
+  virtual double minSize() const {return 0;}     //needed only for shapes used by monitors (box tube polygon)
 
   virtual QString updateShape() {return "";}
 
@@ -73,7 +73,7 @@ public:
 
   TGeoShape* createGeoShape(const QString shapeName = "") override;
 
-  double getHeight() override {return dz;}
+  double getHeight() const override {return dz;}
   void setHeight(double dz) override {this->dz = dz;}
   QString getGenerationString(bool useStrings) const override;
   double maxSize() const override;
@@ -109,7 +109,7 @@ public:
   bool readFromString(QString GenerationString) override;
   TGeoShape* createGeoShape(const QString shapeName = "") override;
 
-  double getHeight() override {return dz;}
+  double getHeight() const override {return dz;}
   void setHeight(double dz) override {this->dz = dz;}
   QString getGenerationString(bool useStrings) const override;
   double maxSize() const override;
@@ -141,8 +141,8 @@ public:
   bool readFromString(QString GenerationString) override;
   TGeoShape* createGeoShape(const QString shapeName = "") override;
 
-  //double getHeight() override {return 0;}
-  //void setHeight(double /*dz*/) override {}
+  double getHeight() const override;
+  void setHeight(double dz) override;
   QString getGenerationString(bool useStrings) const override;
   double maxSize() const override;
 
@@ -180,7 +180,7 @@ public:
   bool readFromString(QString GenerationString) override;
   TGeoShape* createGeoShape(const QString shapeName = "") override;
 
-  double getHeight() override {return dz;}
+  double getHeight() const override {return dz;}
   void setHeight(double /*dz*/) override {}
   QString getGenerationString(bool useStrings) const override;
   double maxSize() const override;
@@ -216,7 +216,7 @@ public:
   bool readFromString(QString GenerationString) override;
   TGeoShape* createGeoShape(const QString shapeName = "") override;
 
-  double getHeight() override {return dz;}
+  double getHeight() const override {return dz;}
   void setHeight(double dz) override {this->dz = dz;}
   QString getGenerationString(bool useStrings) const override;
   double maxSize() const override;
@@ -250,7 +250,7 @@ public:
   bool readFromString(QString GenerationString) override;
   TGeoShape* createGeoShape(const QString shapeName = "") override;
 
-  double getHeight() override {return dz;}
+  double getHeight() const override {return dz;}
   void setHeight(double dz) override {this->dz = dz;}
   QString getGenerationString(bool useStrings) const override;
   double maxSize() const override;
@@ -286,7 +286,7 @@ public:
   bool readFromString(QString GenerationString) override;
   TGeoShape* createGeoShape(const QString shapeName = "") override;
 
-  double getHeight() override {return dz;}
+  double getHeight() const override {return dz;}
   void setHeight(double dz) override {this->dz = dz;}
   QString getGenerationString(bool useStrings) const override;
   double maxSize() const override;
@@ -399,7 +399,7 @@ public:
   bool readFromString(QString GenerationString) override;
   TGeoShape* createGeoShape(const QString shapeName = "") override;
 
-  double getHeight() override {return dz;}
+  double getHeight() const override {return dz;}
   void setHeight(double dz) override {this->dz = dz;}
   QString getGenerationString(bool useStrings) const override;
   double maxSize() const override;
@@ -433,7 +433,7 @@ public:
   bool readFromString(QString GenerationString) override;
   TGeoShape* createGeoShape(const QString shapeName = "") override;
 
-  double getHeight() override {return dz;}
+  double getHeight() const override {return dz;}
   void setHeight(double dz) override {this->dz = dz;}
   QString getGenerationString(bool /*useStrings*/) const override;
   double maxSize() const override;
@@ -466,7 +466,7 @@ public:
   bool readFromString(QString GenerationString) override;
   TGeoShape* createGeoShape(const QString shapeName = "") override;
 
-  double getHeight() override {return dz;}
+  double getHeight() const override {return dz;}
   void setHeight(double dz) override {this->dz = dz;}
   QString getGenerationString(bool /*useStrings*/) const override;
   double maxSize() const override;
@@ -506,7 +506,7 @@ public:
   bool readFromString(QString GenerationString) override;
   TGeoShape* createGeoShape(const QString shapeName = "") override;
 
-  double getHeight() override {return dz;}
+  double getHeight() const override {return dz;}
   void setHeight(double dz) override {this->dz = dz;}
   QString getGenerationString(bool /*useStrings*/) const override;
   double maxSize() const override;
@@ -539,7 +539,7 @@ public:
   bool readFromString(QString GenerationString) override;
   TGeoShape* createGeoShape(const QString shapeName = "") override;
 
-  double getHeight() override { return dz; }
+  double getHeight() const override {return dz;}
   void setHeight(double dz) override {this->dz = dz;}
   QString getGenerationString(bool /*useStrings*/) const override;
   double maxSize() const override;
@@ -574,7 +574,7 @@ public:
   virtual bool readFromString(QString GenerationString);
   virtual TGeoShape* createGeoShape(const QString shapeName = "");
 
-  double getHeight() override {return rmax;}
+  double getHeight() const override {return rmax;}
   void setHeight(double dz) override {rmax = dz;}
   QString getGenerationString(bool /*useStrings*/) const override;
   double maxSize() const override { return rmax;}
@@ -607,7 +607,7 @@ public:
   bool readFromString(QString GenerationString) override;
   TGeoShape* createGeoShape(const QString shapeName = "") override;
 
-  double getHeight() override {return dz;}
+  double getHeight() const override {return dz;}
   void setHeight(double dz) override {this->dz = dz;}
   QString getGenerationString(bool /*useStrings*/) const override;
   double maxSize() const override;
@@ -640,7 +640,7 @@ public:
   bool readFromString(QString GenerationString) override;
   TGeoShape* createGeoShape(const QString shapeName = "") override;
 
-  double getHeight() override {return dz;}
+  double getHeight() const override {return dz;}
   void setHeight(double dz) override {this->dz = dz;}
   QString getGenerationString(bool /*useStrings*/) const override;
   double maxSize() const override;
@@ -674,8 +674,6 @@ public:
 
   bool isGeoConstInUse(const QRegExp & /*nameRegExp*/) const override {return false;}
 
-  //double getHeight() {return 0;}
-  //void setHeight(double /*dz*/) {}
   QString getGenerationString(bool /*useStrings*/) const override {return GenerationString;}
   double maxSize() const {return 0;} // have to ask AGeoObject
 
@@ -707,7 +705,7 @@ public:
   bool readFromString(QString GenerationString) override;
   TGeoShape* createGeoShape(const QString shapeName = "") override;
 
-  double getHeight() override {return Rmax;}
+  double getHeight() const override {return Rmax;}
   void setHeight(double dz) override {this->Rmax = dz;}
   QString getGenerationString(bool /*useStrings*/) const override;
   double maxSize() const override;

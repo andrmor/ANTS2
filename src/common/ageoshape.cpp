@@ -2994,6 +2994,18 @@ TGeoShape *AGeoScaledShape::createGeoShape(const QString shapeName)
     return (shapeName.isEmpty()) ? new TGeoScaledShape(Tshape, scale) : new TGeoScaledShape(shapeName.toLatin1().data(), Tshape, scale);
 }
 
+double AGeoScaledShape::getHeight() const
+{
+    if (!BaseShape) return 0;
+    return BaseShape->getHeight() * scaleZ;
+}
+
+void AGeoScaledShape::setHeight(double dz)
+{
+    if (!BaseShape) return;
+    BaseShape->setHeight(dz / scaleZ);
+}
+
 QString AGeoScaledShape::getGenerationString(bool useStrings) const
 {
     qDebug() <<"base" <<BaseShape->getGenerationString() <<useStrings;

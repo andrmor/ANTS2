@@ -2372,7 +2372,12 @@ QString AGeoArb8::getGenerationString(bool useStrings) const
 
 double AGeoArb8::maxSize() const
 {
-    return dz;
+    double max = dz;
+
+    for ( const QPair<double, double> & pair : Vertices)
+        max = std::max(max, std::max( fabs(pair.first), fabs(pair.second)) );
+
+    return max;
 }
 
 void AGeoArb8::writeToJson(QJsonObject &json) const

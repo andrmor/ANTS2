@@ -1376,10 +1376,10 @@ void DetectorAddOnsWindow::onGeoConstExpressionEditingFinished(int index, QStrin
 
     if (index == GC.countConstants()) return; // nothing to do yet - this constant is not yet defined
 
-    bool ok = GC.setNewExpression(index, newValue, twGeo->Sandwich->World);
-    if (!ok)
+    QString errorStr = GC.setNewExpression(index, newValue, twGeo->Sandwich->World);
+    if (!errorStr.isEmpty())
     {
-        message("Expression not valid!\nIt is possible to use only geometry constants defined above!", this);
+        message(errorStr, this);
         updateGeoConstsIndication();
         return;
     }

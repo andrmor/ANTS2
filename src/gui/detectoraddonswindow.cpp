@@ -1390,7 +1390,7 @@ void DetectorAddOnsWindow::onGeoConstExpressionEditingFinished(int index, QStrin
         return;
     }
     qDebug() <<"c" <<GC.countConstants();
-    QString errorStr = GC.setNewExpression(index, newValue, twGeo->Sandwich->World);
+    QString errorStr = GC.setNewExpression(index, newValue);
     if (!errorStr.isEmpty())
     {
         message(errorStr, this);

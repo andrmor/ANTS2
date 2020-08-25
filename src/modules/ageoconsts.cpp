@@ -176,7 +176,7 @@ QString AGeoConsts::getName(int index) const
     return Names.at(index);
 }
 
-bool AGeoConsts::evaluateConstExpression(const int to, double & returnValue, const QString &str) const
+bool AGeoConsts::evaluateConstExpression(int to, double & returnValue, const QString &str) const
 {
     QString strCopy = str;
     for (int i = 0; i < to; i++)
@@ -218,7 +218,7 @@ bool AGeoConsts::setNewValue(int index, double newValue)
     return true;
 }
 
-QString AGeoConsts::setNewExpression(int &index, const QString & newExpression, AGeoObject * worldObj)
+QString AGeoConsts::setNewExpression(int index, const QString & newExpression)
 {
     if (index < 0 || index >= Names.size()) return "wrong index";
 
@@ -228,19 +228,16 @@ QString AGeoConsts::setNewExpression(int &index, const QString & newExpression, 
     return err;
 }
 
-bool AGeoConsts::areGeoConstsBellowInUse(const QString &newExpression)
+QString AGeoConsts::isGeoConstsBellowInUse(const QString &Expression, int current)
 {
-    QString strCopy = newExpression;
-    for (int i = 0; i < Names.size(); i++)
-        strCopy.replace(RegExps.at(i), Indexes.at(i));
-
-    TFormula * f = new TFormula("", strCopy.toLocal8Bit().data());
-    if (!f || !f->IsValid())
-    {
-        delete f;
-        return false;
-    }
-    return true;
+    current += 1;
+    for (int i = current; i < Names.size(); i++)
+        if (Expression.contains(RegExps.at(i)))
+        {
+            //qDebug() <<i <<"is contained in expression";
+            return Names.at(i);
+        }
+    return "";
 }
 
 QString AGeoConsts::isGeoConstInUse(const QRegExp &nameRegExp, int index) const
@@ -299,7 +296,7 @@ void AGeoConsts::update()
     }
 }
 
-QString AGeoConsts::updateExpression(const QString &Expression, int &index)
+QString AGeoConsts::updateExpression(const QString &Expression, int index)
 {
     QString errorStr;
     if (Expression.isEmpty()) return errorStr;
@@ -310,13 +307,12 @@ QString AGeoConsts::updateExpression(const QString &Expression, int &index)
     if (ok) Values[index] = val;
     else
     {
-        ok = evaluateConstExpression(index, Values[index], Expression);
-        if (!ok)
+        QString constInUseBellow = isGeoConstsBellowInUse(Expression, index);
+        if (!constInUseBellow.isEmpty()) errorStr = QString("Expression not valid:\n%1\n\nExpression uses a geometry constant defined bellow:\n%2").arg(Expression).arg(constInUseBellow);
+        else
         {
-            ok = areGeoConstsBellowInUse(Expression);
-            if (ok) errorStr = QString("Expression not valid:\n\n%1\n\nExpression uses a geometry constant defined bellow").arg(Expression);
-            else errorStr = QString("Expression not valid:\n\n%1\n\nSyntax error").arg(Expression);
-
+            ok = evaluateConstExpression(index, Values[index], Expression);
+            if (!ok) errorStr = QString("Expression not valid:\n\n%1\n\nSyntax error").arg(Expression);
         }
     }
 

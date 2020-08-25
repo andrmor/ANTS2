@@ -19,8 +19,9 @@ public:
 
     bool rename(int index, const QString & newName);
     bool setNewValue(int index, double newValue);
-    QString setNewExpression(int &index, const QString & newExpression, AGeoObject *worldObj);
-    bool areGeoConstsBellowInUse(const QString & newExpression);
+    QString setNewExpression(int index, const QString & newExpression);
+
+    QString isGeoConstsBellowInUse(const QString & Expression, int current);
 
     QString isGeoConstInUse(const QRegExp & nameRegExp, int index) const ;
     void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName, int index);
@@ -31,7 +32,7 @@ public:
     const QVector<QString> & getExpressions() const {return Expressions;}
 
     int  countConstants() const {return Names.size();}
-    bool evaluateConstExpression(const int to, double &returnValue, const QString &str) const;
+    bool evaluateConstExpression(int to, double &returnValue, const QString &str) const;
     bool isGeoConstInUseGlobal(const QRegExp & nameRegExp, const AGeoObject * obj) const;
 
     QString exportToJavaSript(const AGeoObject * obj) const;
@@ -62,7 +63,7 @@ private:
     QVector<QString> FunctionsToJS;
 
     void update();
-    QString updateExpression(const QString &Expression, int &index);
+    QString updateExpression(const QString &Expression, int index);
     void clearConstants();
 
 public:

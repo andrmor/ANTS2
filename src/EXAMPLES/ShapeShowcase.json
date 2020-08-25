@@ -314,28 +314,87 @@
             "GeoConsts": [
                 [
                     "Diameter",
-                    50
+                    50,
+                    ""
                 ],
                 [
                     "SizeX",
-                    40
+                    40,
+                    ""
                 ],
                 [
                     "SizeY",
-                    60
+                    60,
+                    ""
                 ],
                 [
                     "Offset",
-                    50
+                    50,
+                    ""
                 ],
                 [
                     "Angle",
-                    45
+                    45,
+                    ""
                 ]
             ],
             "Slabs": [
+                {
+                    "XY": {
+                        "angle": 0,
+                        "shape": 1,
+                        "sides": 6,
+                        "size1": 50,
+                        "size2": 100,
+                        "strSize1": "Diameter"
+                    },
+                    "color": 3,
+                    "fActive": true,
+                    "fCenter": false,
+                    "height": 10,
+                    "material": 0,
+                    "name": "Round slab",
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "XY": {
+                        "angle": 0,
+                        "shape": 2,
+                        "sides": 6,
+                        "size1": 50,
+                        "size2": 100,
+                        "strSize1": "Diameter"
+                    },
+                    "color": 859,
+                    "fActive": true,
+                    "fCenter": false,
+                    "height": 15,
+                    "material": 0,
+                    "name": "Polygon slab",
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "XY": {
+                        "angle": 0,
+                        "shape": 0,
+                        "sides": 6,
+                        "size1": 50,
+                        "size2": 50,
+                        "strSize1": "Diameter"
+                    },
+                    "color": 2,
+                    "fActive": true,
+                    "fCenter": true,
+                    "height": 10,
+                    "material": 0,
+                    "name": "Rectangular slab",
+                    "style": 1,
+                    "width": 1
+                }
             ],
-            "State": "CommonShape",
+            "State": "Individual",
             "WorldTree": [
                 {
                     "Container": "",
@@ -464,10 +523,10 @@
                     "Psi": 0,
                     "Shape": "TGeoCtub",
                     "ShapeSpecific": {
-                        "dz": 5,
-                        "nxhi": 0,
-                        "nxlow": 2,
-                        "nyhi": 0.09,
+                        "dz": 15,
+                        "nxhi": 0.2,
+                        "nxlow": 0.2,
+                        "nyhi": 0.2,
                         "nylow": 0.64,
                         "nzhi": 0.87,
                         "nzlow": -0.77,
@@ -1167,6 +1226,36 @@
                     "fExpanded": true,
                     "style": 1,
                     "width": 1
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Name": "Round slab",
+                    "ObjectType": {
+                        "Type": "Slab"
+                    },
+                    "fActive": true,
+                    "fExpanded": true
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Name": "Polygon slab",
+                    "ObjectType": {
+                        "Type": "Slab"
+                    },
+                    "fActive": true,
+                    "fExpanded": true
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Name": "Rectangular slab",
+                    "ObjectType": {
+                        "Type": "Slab"
+                    },
+                    "fActive": true,
+                    "fExpanded": true
                 }
             ],
             "ZeroZ": "Center"

@@ -1378,9 +1378,10 @@ void DetectorAddOnsWindow::onGeoConstExpressionEditingFinished(int index, QStrin
 {
     qDebug() << "Expression changed! index/text are:" << index << newValue;
     AGeoConsts & GC = AGeoConsts::getInstance();
+    qDebug() <<"how mmany" <<GC.countConstants();
 
     if (index == GC.countConstants()) return; // nothing to do yet - this constant is not yet defined
-
+    qDebug() <<"b" <<GC.countConstants();
     bool ok;
     newValue.toDouble(&ok);
     if (ok)
@@ -1388,7 +1389,7 @@ void DetectorAddOnsWindow::onGeoConstExpressionEditingFinished(int index, QStrin
         onGeoConstEditingFinished(index, newValue);
         return;
     }
-
+    qDebug() <<"c" <<GC.countConstants();
     QString errorStr = GC.setNewExpression(index, newValue, twGeo->Sandwich->World);
     if (!errorStr.isEmpty())
     {
@@ -1396,6 +1397,7 @@ void DetectorAddOnsWindow::onGeoConstExpressionEditingFinished(int index, QStrin
         updateGeoConstsIndication();
         return;
     }
+    qDebug() <<"d" <<GC.countConstants();
 
     emit requestDelayedRebuildAndRestoreDelegate();
 }
@@ -1472,6 +1474,7 @@ void DetectorAddOnsWindow::on_tabwConstants_customContextMenuRequested(const QPo
 
     QMenu menu;
     QAction * removeA = menu.addAction("Remove selected constant"); removeA->setEnabled(index != -1 && index != GC.countConstants());
+    QAction * addAboveA = menu.addAction("Add new constant above"); addAboveA->setEnabled(index != -1 && index != GC.countConstants());
 
     QAction * selected = menu.exec(ui->tabwConstants->mapToGlobal(pos));
     if (selected == removeA)
@@ -1490,6 +1493,32 @@ void DetectorAddOnsWindow::on_tabwConstants_customContextMenuRequested(const QPo
         MW->writeDetectorToJson(MW->Config->JSON);
         updateGeoConstsIndication();
         emit requestDelayedRebuildAndRestoreDelegate();
+    }
+    if (selected == addAboveA)
+    {
+        QString Name = "";
+
+        /*QLineEdit * le = dynamic_cast<QLineEdit*>(ui->tabwConstants->cellWidget(row, 1));
+        if (!le)
+        {
+            message("Something went wrong!", this);
+            return;
+        }*/
+        double Value = 0;
+        //if (!ok) Value = 0;
+
+        bool ok;
+        ok = GC.addNewConstant(Name, Value, index);
+        if (!ok)
+        {
+            message("This name is already in use", this);
+            updateGeoConstsIndication();
+            return;
+        }
+        MW->writeDetectorToJson(MW->Config->JSON);
+        qDebug() <<"here?";
+        updateGeoConstsIndication();
+        qDebug() <<"or here";
     }
 }
 

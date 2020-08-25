@@ -35,8 +35,8 @@ AMonitorDelegateForm::AMonitorDelegateForm(QStringList particles, QWidget *paren
 
     for (AOneLineTextEdit * le : {leSize1, leSize2, leX, leY, leZ, lePhi, leTheta, lePsi})
     {
-        connect(le, &AOneLineTextEdit::textChanged, this, &AMonitorDelegateForm::contentChanged);
         AGeoBaseDelegate::configureHighligherAndCompleter(le);
+        connect(le, &AOneLineTextEdit::textChanged, this, &AMonitorDelegateForm::contentChanged);
     }
 
     //installing double validators for edit boxes

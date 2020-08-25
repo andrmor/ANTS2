@@ -228,14 +228,20 @@ QString AGeoConsts::setNewExpression(int &index, const QString & newExpression, 
     return err;
 }
 
-bool AGeoConsts::addNewConstant(const QString & name, double value)
+bool AGeoConsts::addNewConstant(const QString & name, double value, int index)
 {
-    for (int i = 0; i < Names.size(); i++)
-        if (name == Names.at(i)) return false; //already in use
+    if (name != "")
+    {
+        for (int i = 0; i < Names.size(); i++)
+            if (name == Names.at(i)) return false; //already in use
+    }
+    if (index == -1) index = Names.size();
 
-    Names.append(name);
-    Values.append(value);
-    Expressions.append("");
+    Names.insert(index, name);
+    Values.insert(index, value);
+    Expressions.insert(index, "");
+
+    qDebug() <<"sizes" <<Names.size() <<Values.size()  <<Expressions.size();
     update();
     return true;
 }

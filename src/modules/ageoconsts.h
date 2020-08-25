@@ -14,7 +14,7 @@ public:
     static       AGeoConsts & getInstance();
     static const AGeoConsts & getConstInstance();
 
-    bool addNewConstant(const QString & name, double value);
+    bool addNewConstant(const QString & name, double value, int index = -1);
     void removeConstant(int index);
 
     bool rename(int index, const QString & newName);

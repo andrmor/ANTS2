@@ -21,6 +21,7 @@ public:
     bool setNewValue(int index, double newValue);
     QString setNewExpression(int index, const QString & newExpression);
 
+    QString checkifValidAndGetDoublefromExpression(const QString & Expression, int current);
     QString isGeoConstsBellowInUse(const QString & Expression, int current);
 
     QString isGeoConstInUse(const QRegExp & nameRegExp, int index) const ;
@@ -32,7 +33,7 @@ public:
     const QVector<QString> & getExpressions() const {return Expressions;}
 
     int  countConstants() const {return Names.size();}
-    bool evaluateConstExpression(int to, double &returnValue, const QString &str) const;
+    bool evaluateConstExpression(int to, const QString &str);
     bool isGeoConstInUseGlobal(const QRegExp & nameRegExp, const AGeoObject * obj) const;
 
     QString exportToJavaSript(const AGeoObject * obj) const;
@@ -41,7 +42,7 @@ public:
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);
 
-    bool evaluateFormula(QString str, double & returnValue) const;
+    bool evaluateFormula(QString str, double &returnValue, int to = -1) const;
     bool updateParameter(QString &errorStr, QString & str, double & returnValue, bool bForbidZero = true, bool bForbidNegative = true, bool bMakeHalf = true) const;
 
 private:
@@ -62,8 +63,7 @@ private:
     //misc
     QVector<QString> FunctionsToJS;
 
-    void update();
-    QString updateExpression(const QString &Expression, int index);
+    void updateRegExpsAndIndexes();
     void clearConstants();
 
 public:

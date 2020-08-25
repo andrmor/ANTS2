@@ -228,6 +228,21 @@ QString AGeoConsts::setNewExpression(int &index, const QString & newExpression, 
     return err;
 }
 
+bool AGeoConsts::areGeoConstsBellowInUse(const QString &newExpression)
+{
+    QString strCopy = newExpression;
+    for (int i = 0; i < Names.size(); i++)
+        strCopy.replace(RegExps.at(i), Indexes.at(i));
+
+    TFormula * f = new TFormula("", strCopy.toLocal8Bit().data());
+    if (!f || !f->IsValid())
+    {
+        delete f;
+        return false;
+    }
+    return true;
+}
+
 QString AGeoConsts::isGeoConstInUse(const QRegExp &nameRegExp, int index) const
 {
     for (int i = index; i < Names.size(); i++)
@@ -296,7 +311,13 @@ QString AGeoConsts::updateExpression(const QString &Expression, int &index)
     else
     {
         ok = evaluateConstExpression(index, Values[index], Expression);
-        if (!ok) errorStr = QString("Expression not valid:\n\n%1\n\nSyntax error or expression uses a geometry constant defined bellow").arg(Expression);
+        if (!ok)
+        {
+            ok = areGeoConstsBellowInUse(Expression);
+            if (ok) errorStr = QString("Expression not valid:\n\n%1\n\nExpression uses a geometry constant defined bellow").arg(Expression);
+            else errorStr = QString("Expression not valid:\n\n%1\n\nSyntax error").arg(Expression);
+
+        }
     }
 
     return errorStr;

@@ -20,6 +20,7 @@ public:
     bool rename(int index, const QString & newName);
     bool setNewValue(int index, double newValue);
     QString setNewExpression(int &index, const QString & newExpression, AGeoObject *worldObj);
+    bool areGeoConstsBellowInUse(const QString & newExpression);
 
     QString isGeoConstInUse(const QRegExp & nameRegExp, int index) const ;
     void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName, int index);

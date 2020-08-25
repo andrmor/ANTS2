@@ -21,6 +21,9 @@ public:
     bool setNewValue(int index, double newValue);
     QString setNewExpression(int &index, const QString & newExpression, AGeoObject *worldObj);
 
+    QString isGeoConstInUse(const QRegExp & nameRegExp, int index) const ;
+    void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName, int index);
+
     QString getName(int index) const;
     const QVector<QString> & getNames()  const {return Names;}
     const QVector<double>  & getValues() const {return Values;}

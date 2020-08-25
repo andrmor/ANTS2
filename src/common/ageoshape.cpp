@@ -167,7 +167,6 @@ double AGeoBox::minSize() const
 
 TGeoShape *AGeoBox::createGeoShape(const QString shapeName)
 {
-    qDebug() <<"createGeoShape" <<dx <<dy <<dz;
     return (shapeName.isEmpty()) ? new TGeoBBox(dx, dy, dz) : new TGeoBBox(shapeName.toLatin1().data(), dx, dy, dz);
 }
 
@@ -3125,9 +3124,7 @@ TGeoShape *AGeoScaledShape::createGeoShape(const QString shapeName)
    return (shapeName.isEmpty()) ? new TGeoScaledShape(Tshape, scale) : new TGeoScaledShape(shapeName.toLatin1().data(), Tshape, scale);
    */
 
-    qDebug() <<"here?";
     TGeoShape * Tshape = BaseShape->createGeoShape();
-    qDebug() <<"here?";
     if (!Tshape)
     {
         qWarning() << "->failed to generate shape\nreplacing by default TGeoBBox";

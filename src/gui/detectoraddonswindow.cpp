@@ -1456,6 +1456,7 @@ void DetectorAddOnsWindow::on_tabwConstants_cellChanged(int row, int column)
         else
         {
             const QRegExp OldNameRegExp("\\b" + oldName + "\\b");
+            GC.replaceGeoConstName(OldNameRegExp, newName, row);
             twGeo->Sandwich->World->replaceGeoConstNameRecursive(OldNameRegExp, newName);
 
             //QTimer::singleShot(50, twGeo, &AGeoTreeWidget::rebuildDetetctorAndRestoreCurrentDelegate); // to avoid focus on to_be_destroyed delegate
@@ -1482,6 +1483,12 @@ void DetectorAddOnsWindow::on_tabwConstants_customContextMenuRequested(const QPo
         QString name = GC.getName(index);
         if (name.isEmpty()) return;
 
+        QString constUsingIt = GC.isGeoConstInUse(QRegExp("\\b"+name+"\\b"), index);
+        if (!constUsingIt.isEmpty())
+        {
+            message(QString("\"%1\" cannot be removed.\nThe first geometric constant using it:\n\n%2").arg(name).arg(constUsingIt), this);
+            return;
+        }
         const AGeoObject * obj = twGeo->Sandwich->World->isGeoConstInUseRecursive(QRegExp("\\b"+name+"\\b"));
         if (obj)
         {

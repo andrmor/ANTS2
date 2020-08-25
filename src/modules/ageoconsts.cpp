@@ -228,6 +228,19 @@ QString AGeoConsts::setNewExpression(int &index, const QString & newExpression, 
     return err;
 }
 
+QString AGeoConsts::isGeoConstInUse(const QRegExp &nameRegExp, int index) const
+{
+    for (int i = index; i < Names.size(); i++)
+        if (Expressions[i].contains(nameRegExp)) return Names.at(i);
+    return "";
+}
+
+void AGeoConsts::replaceGeoConstName(const QRegExp &nameRegExp, const QString &newName, int index)
+{
+    for (int i = index; i < Names.size(); i++)
+        Expressions[i].replace(nameRegExp, newName);
+}
+
 bool AGeoConsts::addNewConstant(const QString & name, double value, int index)
 {
     if (name != "")

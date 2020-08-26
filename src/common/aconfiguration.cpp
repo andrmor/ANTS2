@@ -9,6 +9,7 @@
 #include "asandwich.h"
 #include "ageneralsimsettings.h"
 #include "apmhub.h"
+#include "ageoconsts.h"
 
 #include <QDebug>
 #include <QFile>
@@ -21,6 +22,7 @@ AConfiguration::AConfiguration(QObject *parent) :
 //to do: //add messenger for warnings
 bool AConfiguration::LoadConfig(QJsonObject &json, bool DetConstructor, bool SimSettings, bool ReconstrSettings)
 {
+  AGeoConsts::getInstance().clearConstants();
   ErrorString.clear();
   if (json.isEmpty())
     {

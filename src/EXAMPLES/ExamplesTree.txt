@@ -34,6 +34,7 @@ define:Startup:Startup
 -------
 
 add:Proton therapy:O-PGI:opgi.json:Range monitoring using prompt gammas. Requires Geant4 interface
+add:Proton therapy:O-PGI:opgi-yap.json:Range monitoring using prompt gammas. Requires Geant4 interface. Example on using Geo Constants.
 
 add:ANTS2 tests:Fresnel test:FresnelTester.json:Wherever the point emission inside crysal is, the photon flux from all sides to outside (air) should be the same. Each side of the crystal is covered with a PMT (air).
 add:ANTS2 tests:Scatter model:naus.json:Detector example for fitting of scattering model parameters

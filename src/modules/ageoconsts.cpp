@@ -47,7 +47,7 @@ QString AGeoConsts::exportToJavaSript(const AGeoObject * obj) const
         GCValue = Values.at(i);
         nameRegExp = QRegExp("\\b"+GCName+"\\b");
         if (isGeoConstInUseGlobal(nameRegExp, obj))
-            GCScript += (QString("var %1 = %2;\n").arg(GCName).arg(GCValue));
+            GCScript += (QString("var %1 = %2\n").arg(GCName).arg(GCValue));
     }
     GCScript += "\n";
     qDebug() << GCScript;
@@ -178,19 +178,19 @@ bool AGeoConsts::evaluateConstExpression(int current)
     if (Expressions.at(current).isEmpty()) return true;
     QString strCopy = Expressions.at(current);
 
-
     bool ok;
     double val;
     val = strCopy.simplified().toDouble(&ok);
-    if (ok) Values[current] = val;
-
+    if (ok)
+    {
+        Values[current] = val;
+        Expressions[current].clear();
+    }
     else
     {
         ok = evaluateFormula(strCopy, val, current);
         if (!ok)
-        {
             return false;
-        }
         Values[current] = val;
     }
     return true;
@@ -266,21 +266,19 @@ QString AGeoConsts::checkifValidAndGetDoublefromExpression(int current)
                                "%1\n\n"
                                "Expression uses a geometry constant defined bellow:\n%2")
                                .arg(Expressions.at(current)).arg(constInUseBellow);
-
         else
         {
             bool ok;
             ok = evaluateConstExpression(current);
             if (!ok) errorStr = QString("Expression not valid:\n\n%1\n\nSyntax error").arg(Expressions.at(current));
         }
-
     }
     return errorStr;
 }
 
 QString AGeoConsts::isGeoConstsBellowInUse(int current)
 {
-    current += 1;
+    current += 1;  // Andr: bug?
     for (int i = current; i < Names.size(); i++)
         if (Expressions.at(current).contains(RegExps.at(i))) return Names.at(i);
     return "";
@@ -313,7 +311,7 @@ QString AGeoConsts::addNewConstant(const QString & name, double value, int index
     Values.insert(index, value);
     Expressions.insert(index, "");
 
-    qDebug() <<"sizes" <<Names.size() <<Values.size()  <<Expressions.size();
+    //qDebug() <<"sizes" <<Names.size() <<Values.size()  <<Expressions.size();
     updateRegExpsAndIndexes();
 
     return "";

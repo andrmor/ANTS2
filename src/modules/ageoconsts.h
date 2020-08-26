@@ -14,13 +14,15 @@ public:
     static       AGeoConsts & getInstance();
     static const AGeoConsts & getConstInstance();
 
-    QString addNewConstant(const QString & name, double value, int index = -1);
-    void addNoNameConstant(int index);
-    void removeConstant(int index);
+    void    clearConstants();
 
-    bool rename(int index, const QString & newName, AGeoObject *world, QString &errorStr);
+    QString addNewConstant(const QString & name, double value, int index = -1);
+    void    addNoNameConstant(int index);
+    void    removeConstant(int index);
+
+    bool    rename(int index, const QString & newName, AGeoObject *world, QString &errorStr);
     QString isNameValid(int index, const QString &newName);
-    bool setNewValue(int index, double newValue);
+    bool    setNewValue(int index, double newValue);
     QString setNewExpression(int index, const QString & newExpression);
 
     QString checkifValidAndGetDoublefromExpression(int current);
@@ -34,24 +36,23 @@ public:
     const QVector<double>  & getValues() const {return Values;}
     const QVector<QString> & getExpressions() const {return Expressions;}
 
-    int  countConstants() const {return Names.size();}
-    bool evaluateConstExpression(int to);
-    bool isGeoConstInUseGlobal(const QRegExp & nameRegExp, const AGeoObject * obj) const;
+    int     countConstants() const {return Names.size();}
+    bool    evaluateConstExpression(int to);
+    bool    isGeoConstInUseGlobal(const QRegExp & nameRegExp, const AGeoObject * obj) const;
 
     QString exportToJavaSript(const AGeoObject * obj) const;
-    void formulaToJavaScript(QString & str) const;
+    void    formulaToJavaScript(QString & str) const;
 
-    void writeToJson(QJsonObject & json) const;
-    void readFromJson(const QJsonObject & json);
+    void    writeToJson(QJsonObject & json) const;
+    void    readFromJson(const QJsonObject & json);
 
-    bool evaluateFormula(QString str, double &returnValue, int to = -1) const;
-    bool updateParameter(QString &errorStr, QString & str, double & returnValue, bool bForbidZero = true, bool bForbidNegative = true, bool bMakeHalf = true) const;
+    bool    evaluateFormula(QString str, double &returnValue, int to = -1) const;
+    bool    updateParameter(QString &errorStr, QString & str, double & returnValue, bool bForbidZero = true, bool bForbidNegative = true, bool bMakeHalf = true) const;
 
     const QVector<QString> & getTFormulaReservedWords() const {return FormulaReservedWords;}
 
 public:
     QString placeholderStr = "______";
-
 
 private:
     AGeoConsts();
@@ -73,7 +74,6 @@ private:
     QVector<QString> FormulaReservedWords;
 
     void updateRegExpsAndIndexes();
-    void clearConstants();
 };
 
 #endif // AGEOCONSTS_H

@@ -1354,7 +1354,6 @@ void DetectorAddOnsWindow::updateGeoConstsIndication()
             connect(ed, &AOneLineTextEdit::escapePressed,   [this, i](){this->onGeoConstEscapePressed(i); });
             ui->tabwConstants->setCellWidget(i, 2, ed);
 
-
             if (!Expression.isEmpty()) edit->setEnabled(false);
         }
     bGeoConstsWidgetUpdateInProgress = false; // <--

@@ -48,6 +48,8 @@ void AGeoBaseDelegate::configureHighligherAndCompleter(AOneLineTextEdit * edit, 
     for (int i = 0; i < iUntilIndex; i++)
     {
         const QString & name = GC.getName(i);
+        if (name.isEmpty()) continue;
+
         rule.pattern = QRegExp("\\b" + name + "\\b");
         rule.format = GeoConstantFormat;
         highlighter->HighlightingRules.append(rule);

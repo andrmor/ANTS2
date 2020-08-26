@@ -57,7 +57,7 @@ void AGeoBaseDelegate::configureHighligherAndCompleter(AOneLineTextEdit * edit, 
     FormulaFormat.setForeground(Qt::blue);
     //GeoConstantFormat.setFontWeight(QFont::Bold);
 
-    QVector<QString> words = AGeoConsts::getTFormulaReservedWords();
+    const QVector<QString> & words = AGeoConsts::getConstInstance().getTFormulaReservedWords();
     for (const QString & word : words)
     {
         rule.pattern = QRegExp("\\b" + word + "\\b");
@@ -67,14 +67,9 @@ void AGeoBaseDelegate::configureHighligherAndCompleter(AOneLineTextEdit * edit, 
 
     edit->Completer = new QCompleter(sl, edit);
     edit->Completer->setCaseSensitivity(Qt::CaseInsensitive); //Qt::CaseSensitive
-    //CompletitionModel = new QStringListModel(functions, this);
-    //edit->Completer->setModel(CompletitionModel);
-    //edit->Completer->Completer->setCompletionMode(QCompleter::UnfilteredPopupCompletion);
-    edit->Completer->setCompletionMode(QCompleter::PopupCompletion);
-    edit->Completer->setFilterMode(Qt::MatchContains);
-    //edit->Completer->setFilterMode(Qt::MatchStartsWith);
-    //edit->Completer->setModelSorting(QCompleter::CaseSensitivelySortedModel);
-    edit->Completer->setModelSorting(QCompleter::CaseInsensitivelySortedModel);
+    edit->Completer->setCompletionMode(QCompleter::PopupCompletion); //QCompleter::UnfilteredPopupCompletion
+    edit->Completer->setFilterMode(Qt::MatchContains); //Qt::MatchStartsWith
+    edit->Completer->setModelSorting(QCompleter::CaseInsensitivelySortedModel); //QCompleter::CaseSensitivelySortedModel
     edit->Completer->setWrapAround(false);
 
     edit->Completer->setWidget(edit);

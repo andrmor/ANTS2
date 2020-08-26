@@ -1098,9 +1098,12 @@ void DetectorAddOnsWindow::resizeEvent(QResizeEvent *event)
 
     int FirstPlusThird = AllW - SecW;
 
-    ui->tabwConstants->setColumnWidth(0, 0.4*FirstPlusThird);
+    int FirstW = 0.4 * FirstPlusThird;
+    if (FirstW > 150) FirstW = 150;
+
+    ui->tabwConstants->setColumnWidth(0, FirstW);
     ui->tabwConstants->setColumnWidth(1, SecW);
-    ui->tabwConstants->setColumnWidth(2, 0.6*FirstPlusThird);
+    ui->tabwConstants->setColumnWidth(2, FirstPlusThird - FirstW);
 
     AGuiWindow::resizeEvent(event);
 }

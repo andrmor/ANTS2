@@ -25,7 +25,7 @@ public:
     QString isGeoConstsBellowInUse(const QString & Expression, int current);
 
     QString isGeoConstInUse(const QRegExp & nameRegExp, int index) const ;
-    void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName, int index);
+    void    replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName, int index);
 
     QString getName(int index) const;
     const QVector<QString> & getNames()  const {return Names;}
@@ -45,6 +45,8 @@ public:
     bool evaluateFormula(QString str, double &returnValue, int to = -1) const;
     bool updateParameter(QString &errorStr, QString & str, double & returnValue, bool bForbidZero = true, bool bForbidNegative = true, bool bMakeHalf = true) const;
 
+    const QVector<QString> & getTFormulaReservedWords() const {return FormulaReservedWords;}
+
 private:
     AGeoConsts();
 
@@ -62,12 +64,10 @@ private:
 
     //misc
     QVector<QString> FunctionsToJS;
+    QVector<QString> FormulaReservedWords;
 
     void updateRegExpsAndIndexes();
     void clearConstants();
-
-public:
-    static QVector<QString> getTFormulaReservedWords();
 };
 
 #endif // AGEOCONSTS_H

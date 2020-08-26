@@ -6,7 +6,10 @@
 
 AGeoConsts::AGeoConsts()
 {
-    FunctionsToJS << "abs" << "acos" << "asin" << "atan" << "ceil" << "cos" << "exp" << "log" << "pow" << "sin" << "sqrt" << "tan";
+    FunctionsToJS << "abs" << "acos" << "asin" << "atan" << "ceil" << "floor" << "cos" << "exp" << "log" << "pow" << "sin" << "sqrt" << "tan";
+
+    FormulaReservedWords << "sqrt2" << "e" << "pi" << "ln10" << "infinity"
+    << "pow" << "sin" << "cos" << "sqrt" << "exp" << "ceil" << "floor";
 }
 
 AGeoConsts &AGeoConsts::getInstance()
@@ -325,7 +328,6 @@ void AGeoConsts::removeConstant(int index)
 void AGeoConsts::updateRegExpsAndIndexes()
 {
     const int size = Names.size();
-    qDebug() <<"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
     RegExps.resize(size);
     Indexes.resize(size);
@@ -334,12 +336,4 @@ void AGeoConsts::updateRegExpsAndIndexes()
         RegExps[i] = QRegExp("\\b" + Names.at(i) + "\\b");
         Indexes[i] = QString("[%1]").arg(i);
     }
-}
-
-QVector<QString> AGeoConsts::getTFormulaReservedWords()
-{
-    QVector<QString> v;
-    v << "sqrt2" << "e" << "pi" << "ln10" << "infinity";
-    v << "pow" << "sin" << "cos" << "sqrt" << "exp";
-    return v;
 }

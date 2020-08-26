@@ -1321,7 +1321,6 @@ void DetectorAddOnsWindow::updateGeoConstsIndication()
     const AGeoConsts & GC = AGeoConsts::getConstInstance();
 
     const int numConsts = GC.countConstants();
-    const QVector<QString> & Names  = GC.getNames();
     const QVector<double>  & Values = GC.getValues();
     const QVector<QString> & Expressions = GC.getExpressions();
 
@@ -1331,10 +1330,9 @@ void DetectorAddOnsWindow::updateGeoConstsIndication()
         ui->tabwConstants->setColumnWidth(1, 50);
         for (int i = 0; i <= numConsts; i++)
         {
-            const QString Name  =      ( i == numConsts ? ""  : Names.at(i) );
+            const QString Name  =      ( i == numConsts ? ""  : GC.getName(i));
             const QString Value =      ( i == numConsts ? "0" : QString::number(Values.at(i)) );
             const QString Expression = ( i == numConsts ? ""  : Expressions.at(i) );
-            qDebug() <<"2break" <<Name <<Value <<Expression <<i;
 
             QTableWidgetItem * newItem = new QTableWidgetItem(Name);
             ui->tabwConstants->setItem(i, 0, newItem);
@@ -1345,11 +1343,9 @@ void DetectorAddOnsWindow::updateGeoConstsIndication()
             connect(edit, &ALineEditWithEscape::editingFinished, [this, i, edit](){this->onGeoConstEditingFinished(i, edit->text()); });
             connect(edit, &ALineEditWithEscape::escapePressed,   [this, i](){this->onGeoConstEscapePressed(i); });
             ui->tabwConstants->setCellWidget(i, 1, edit);
-            qDebug() <<"3break";
 
             AOneLineTextEdit * ed = new AOneLineTextEdit(ui->tabwConstants);
-            qDebug() <<"pointer ed  "<<ed;
-            //AGeoBaseDelegate::configureHighligherAndCompleter(ed, i);
+            AGeoBaseDelegate::configureHighligherAndCompleter(ed, i);
             qDebug() <<"3.5break" <<Expression <<i;
             ed->setText(Expression);
             qDebug() <<"4break";
@@ -1388,10 +1384,8 @@ void DetectorAddOnsWindow::onGeoConstExpressionEditingFinished(int index, QStrin
 {
     qDebug() << "Expression changed! index/text are:" << index << newValue;
     AGeoConsts & GC = AGeoConsts::getInstance();
-    qDebug() <<"how mmany" <<GC.countConstants();
 
     if (index == GC.countConstants()) return; // nothing to do yet - this constant is not yet defined
-    qDebug() <<"b" <<GC.countConstants();
     bool ok;
     newValue.toDouble(&ok);
     if (ok)
@@ -1399,7 +1393,6 @@ void DetectorAddOnsWindow::onGeoConstExpressionEditingFinished(int index, QStrin
         onGeoConstEditingFinished(index, newValue);
         return;
     }
-    qDebug() <<"c" <<GC.countConstants();
     QString errorStr = GC.setNewExpression(index, newValue);
     if (!errorStr.isEmpty())
     {
@@ -1407,7 +1400,6 @@ void DetectorAddOnsWindow::onGeoConstExpressionEditingFinished(int index, QStrin
         updateGeoConstsIndication();
         return;
     }
-    qDebug() <<"d" <<GC.countConstants();
 
     emit requestDelayedRebuildAndRestoreDelegate();
 }
@@ -1451,12 +1443,10 @@ void DetectorAddOnsWindow::on_tabwConstants_cellChanged(int row, int column)
     }
     else
     {
-        //qDebug() << "Attempting to change name of a geometry constant";
-        QString oldName = GC.getName(row);
-        QString newName = ui->tabwConstants->item(row, 0)->text().simplified();
-        if (oldName == newName) return;
+        qDebug() << "Attempting to change name of a geometry constant";
 
-        bool ok = GC.rename(row, newName);
+        QString newName = ui->tabwConstants->item(row, 0)->text().simplified();
+        bool ok = GC.rename(row, newName, twGeo->Sandwich->World);
         if (!ok)
         {
             message("This constant name is already in use!", this);
@@ -1465,10 +1455,6 @@ void DetectorAddOnsWindow::on_tabwConstants_cellChanged(int row, int column)
         }
         else
         {
-            const QRegExp OldNameRegExp("\\b" + oldName + "\\b");
-            GC.replaceGeoConstName(OldNameRegExp, newName, row);
-            twGeo->Sandwich->World->replaceGeoConstNameRecursive(OldNameRegExp, newName);
-
             //QTimer::singleShot(50, twGeo, &AGeoTreeWidget::rebuildDetetctorAndRestoreCurrentDelegate); // to avoid focus on to_be_destroyed delegate
             emit requestDelayedRebuildAndRestoreDelegate();
         }
@@ -1513,25 +1499,7 @@ void DetectorAddOnsWindow::on_tabwConstants_customContextMenuRequested(const QPo
     }
     if (selected == addAboveA)
     {
-        QString Name = "";
-
-        /*QLineEdit * le = dynamic_cast<QLineEdit*>(ui->tabwConstants->cellWidget(row, 1));
-        if (!le)
-        {
-            message("Something went wrong!", this);
-            return;
-        }*/
-        double Value = 0;
-        //if (!ok) Value = 0;
-
-        bool ok;
-        ok = GC.addNewConstant(Name, Value, index);
-        if (!ok)
-        {
-            message("This name is already in use", this);
-            updateGeoConstsIndication();
-            return;
-        }
+        GC.addNoNameConstant(index);
         MW->writeDetectorToJson(MW->Config->JSON);
         qDebug() <<"break";
         updateGeoConstsIndication();

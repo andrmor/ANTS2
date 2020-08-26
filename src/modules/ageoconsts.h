@@ -15,14 +15,15 @@ public:
     static const AGeoConsts & getConstInstance();
 
     bool addNewConstant(const QString & name, double value, int index = -1);
+    void addNoNameConstant(int index);
     void removeConstant(int index);
 
-    bool rename(int index, const QString & newName);
+    bool rename(int index, const QString & newName, AGeoObject *world);
     bool setNewValue(int index, double newValue);
     QString setNewExpression(int index, const QString & newExpression);
 
-    QString checkifValidAndGetDoublefromExpression(const QString & Expression, int current);
-    QString isGeoConstsBellowInUse(const QString & Expression, int current);
+    QString checkifValidAndGetDoublefromExpression(int current);
+    QString isGeoConstsBellowInUse(int current);
 
     QString isGeoConstInUse(const QRegExp & nameRegExp, int index) const ;
     void    replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName, int index);
@@ -33,7 +34,7 @@ public:
     const QVector<QString> & getExpressions() const {return Expressions;}
 
     int  countConstants() const {return Names.size();}
-    bool evaluateConstExpression(int to, const QString &str);
+    bool evaluateConstExpression(int to);
     bool isGeoConstInUseGlobal(const QRegExp & nameRegExp, const AGeoObject * obj) const;
 
     QString exportToJavaSript(const AGeoObject * obj) const;
@@ -46,6 +47,10 @@ public:
     bool updateParameter(QString &errorStr, QString & str, double & returnValue, bool bForbidZero = true, bool bForbidNegative = true, bool bMakeHalf = true) const;
 
     const QVector<QString> & getTFormulaReservedWords() const {return FormulaReservedWords;}
+
+public:
+    QString placeholderStr = "______";
+
 
 private:
     AGeoConsts();

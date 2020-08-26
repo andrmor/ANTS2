@@ -14,6 +14,7 @@
 #include "anetworkmodule.h"
 #include "ageomarkerclass.h"
 #include "ageoshape.h"
+#include "acameracontroldialog.h"
 
 #include <QStringList>
 #include <QDebug>
@@ -78,6 +79,9 @@ GeometryWindowClass::GeometryWindowClass(QWidget *parent, MainWindow *mw) :
     ui->cbWireFrame->setVisible(false);
 
     generateSymbolMap();
+
+    CameraControl = new ACameraControlDialog(RasterWindow->fCanvas, this);
+    CameraControl->setModal(false);
 }
 
 GeometryWindowClass::~GeometryWindowClass()
@@ -1385,9 +1389,7 @@ void GeometryWindowClass::onDownloadPngRequested(QWebEngineDownloadItem *item)
 #endif
 }
 
-#include "acameracontroldialog.h"
 void GeometryWindowClass::on_pbCameraDialog_clicked()
 {
-    ACameraControlDialog D(RasterWindow->fCanvas, this);
-    D.exec();
+    CameraControl->showAndUpdate();
 }

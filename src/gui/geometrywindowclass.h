@@ -10,6 +10,7 @@ class QWebEngineView;
 class QVariant;
 class QWebEngineDownloadItem;
 class TGeoVolume;
+class ACameraControlDialog;
 
 namespace Ui {
   class GeometryWindowClass;
@@ -120,9 +121,11 @@ private slots:
     void on_pbCameraDialog_clicked();
 
 private:
-  MainWindow* MW;
-  Ui::GeometryWindowClass *ui;
-  RasterWindowBaseClass *RasterWindow = 0;
+  MainWindow * MW = nullptr;
+  Ui::GeometryWindowClass * ui;
+  RasterWindowBaseClass * RasterWindow = nullptr;
+
+  ACameraControlDialog * CameraControl = nullptr;
 
 #ifdef __USE_ANTS_JSROOT__
     QWebEngineView * WebView = nullptr;

@@ -13,6 +13,9 @@ ACameraControlDialog::ACameraControlDialog(TCanvas *Canvas, QWidget * parent) :
 {
     ui->setupUi(this);
 
+    ui->pbDummy->setDefault(true);
+    ui->pbDummy->setVisible(false);
+
     updateGui();
 
     QDoubleValidator * dv = new QDoubleValidator(this);
@@ -27,9 +30,16 @@ ACameraControlDialog::~ACameraControlDialog()
     delete ui;
 }
 
+void ACameraControlDialog::showAndUpdate()
+{
+    show();
+    if (xPos != 0 && yPos != 0) move(xPos, yPos);
+    updateGui();
+}
+
 void ACameraControlDialog::on_pbClose_clicked()
 {
-    accept();
+    close();
 }
 
 void ACameraControlDialog::updateGui()
@@ -51,6 +61,16 @@ void ACameraControlDialog::updateGui()
     ui->ledCenterX->setText(QString::number( 0.5*(UR[0] + LL[0])) );
     ui->ledCenterY->setText(QString::number( 0.5*(UR[1] + LL[1])) );
     ui->ledCenterZ->setText(QString::number( 0.5*(UR[2] + LL[2])) );
+
+
+    double x0, y0, dx, dy;
+    Canvas->GetView()->GetWindow(x0, y0, dx, dy);
+
+    ui->ledWx->setText(QString::number(x0));
+    ui->ledWy->setText(QString::number(y0));
+
+    ui->ledWw->setText(QString::number(dx));
+    ui->ledWh->setText(QString::number(dy));
 }
 
 void ACameraControlDialog::on_pbUpdateRange_clicked()
@@ -93,6 +113,12 @@ void ACameraControlDialog::on_ledCenterZ_editingFinished()
     setCenter(2, ui->ledCenterZ);
 }
 
+void ACameraControlDialog::closeEvent(QCloseEvent *)
+{
+    xPos = x();
+    yPos = y();
+}
+
 void ACameraControlDialog::setCenter(int index, QLineEdit *led)
 {
     if (!Canvas->HasViewer3D()) return;
@@ -107,5 +133,21 @@ void ACameraControlDialog::setCenter(int index, QLineEdit *led)
     UR[index] = c + halfRange;
 
     Canvas->GetView()->SetRange(LL, UR);
+    Canvas->Modified();
+    Canvas->Update();
+    updateGui();
+}
+
+void ACameraControlDialog::on_pbUpdateWindow_clicked()
+{
+    double x0 = ui->ledWx->text().toDouble();
+    double y0 = ui->ledWy->text().toDouble();
+    double dx = ui->ledWw->text().toDouble();
+    double dy = ui->ledWh->text().toDouble();
+
+    Canvas->GetView()->SetWindow(x0, y0, dx, dy);
+    Canvas->GetView()->SetViewChanged();
+    Canvas->Modified();
+    Canvas->Update();
     updateGui();
 }

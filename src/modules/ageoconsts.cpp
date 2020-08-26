@@ -26,9 +26,7 @@ const AGeoConsts &AGeoConsts::getConstInstance()
 bool AGeoConsts::isGeoConstInUseGlobal(const QRegExp &nameRegExp, const AGeoObject * obj) const
 {
     for (const QString & StrValue : Expressions)
-    {
         if (StrValue.contains(nameRegExp)) return true;
-    }
 
     if (obj->isGeoConstInUseRecursive(nameRegExp)) return true;
 
@@ -49,9 +47,7 @@ QString AGeoConsts::exportToJavaSript(const AGeoObject * obj) const
         GCValue = Values.at(i);
         nameRegExp = QRegExp("\\b"+GCName+"\\b");
         if (isGeoConstInUseGlobal(nameRegExp, obj))
-        {
             GCScript += (QString("var %1 = %2;\n").arg(GCName).arg(GCValue));
-        }
     }
     GCScript += "\n";
     qDebug() << GCScript;
@@ -67,15 +63,6 @@ void AGeoConsts::formulaToJavaScript(QString & str) const
     }
 }
 
-/*QVector<QString> &AGeoConsts::getGeoConstsInUse(const AGeoObject & obj) const
-{
-    //AGeoObject * obje = dynamic_cast<AGeoObject*> (obj);
-    for (QString constName : Names)
-    {
-
-    }
-}*/
-
 void AGeoConsts::clearConstants()
 {
     Names.clear();
@@ -83,8 +70,6 @@ void AGeoConsts::clearConstants()
     Expressions.clear();
 
     updateRegExpsAndIndexes();
-    qDebug() <<"oooooop 0";
-
 }
 
 void AGeoConsts::writeToJson(QJsonObject & json) const
@@ -123,14 +108,11 @@ void AGeoConsts::readFromJson(const QJsonObject & json)
         else Expressions[i] = QString();
     }
     updateRegExpsAndIndexes();
-    qDebug() <<"1oooooop 1" <<Expressions;
     for (int i = 0; i < size; i++)
-        {
-            bool ok = evaluateConstExpression(i);
-            if (!ok) qWarning() <<"something went really wrong";
-        }
-    qDebug() <<"2oooooop 1" <<Expressions;
-
+    {
+        bool ok = evaluateConstExpression(i);
+        if (!ok) qWarning() <<"something went really wrong";
+    }
 }
 
 bool AGeoConsts::evaluateFormula(QString str, double &returnValue, int to) const
@@ -232,9 +214,6 @@ bool AGeoConsts::rename(int index, const QString & newName, AGeoObject *world)
     replaceGeoConstName(RegExps.at(index), newName, index);
     world->replaceGeoConstNameRecursive(RegExps.at(index), newName);
     updateRegExpsAndIndexes();
-
-    //const QRegExp OldNameRegExp("\\b" + oldName + "\\b");
-
     return true;
 }
 
@@ -298,12 +277,8 @@ QString AGeoConsts::isGeoConstInUse(const QRegExp &nameRegExp, int index) const
 
 void AGeoConsts::replaceGeoConstName(const QRegExp &nameRegExp, const QString &newName, int index)
 {
-    qDebug() <<"aaaaaaaaaaaaaaaaaaaaaaaaaa";
     for (int i = index; i < Names.size(); i++)
-    {
         Expressions[i].replace(nameRegExp, newName);
-    }
-    qDebug() <<"Expression" <<Expressions;
 }
 
 bool AGeoConsts::addNewConstant(const QString & name, double value, int index)
@@ -321,7 +296,6 @@ bool AGeoConsts::addNewConstant(const QString & name, double value, int index)
 
     qDebug() <<"sizes" <<Names.size() <<Values.size()  <<Expressions.size();
     updateRegExpsAndIndexes();
-    qDebug() <<"oooooop 3";
 
     return true;
 }
@@ -338,7 +312,6 @@ void AGeoConsts::removeConstant(int index)
     Names.remove(index);
     Values.remove(index);
     Expressions.remove(index);
-    qDebug() <<"oooooop 4";
 
     updateRegExpsAndIndexes();
 }
@@ -352,7 +325,7 @@ void AGeoConsts::updateRegExpsAndIndexes()
     for (int i = 0; i < size; i++)
     {
         RegExps[i] = QRegExp("\\b" + Names.at(i) + "\\b");
-        qDebug() <<"reg exp" <<RegExps;
         Indexes[i] = QString("[%1]").arg(i);
     }
+    //qDebug() <<"reg exp" <<RegExps;
 }

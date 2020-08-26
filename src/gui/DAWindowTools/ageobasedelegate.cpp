@@ -1,8 +1,12 @@
 #include "ageobasedelegate.h"
+#include "aonelinetextedit.h"
+#include "ageoconsts.h"
 
+#include <QDebug>
+#include <QCompleter>
 #include <QHBoxLayout>
 #include <QPushButton>
-#include <qdebug.h>
+#include <QMessageBox>
 
 AGeoBaseDelegate::AGeoBaseDelegate(QWidget *ParentWidget) :
     ParentWidget(ParentWidget) {}
@@ -27,9 +31,6 @@ QHBoxLayout *AGeoBaseDelegate::createBottomButtons()
     return abl;
 }
 
-#include "aonelinetextedit.h"
-#include "ageoconsts.h"
-#include <QCompleter>
 void AGeoBaseDelegate::configureHighligherAndCompleter(AOneLineTextEdit * edit, int iUntilIndex)
 {
     const AGeoConsts & GC = AGeoConsts::getConstInstance();
@@ -79,8 +80,6 @@ void AGeoBaseDelegate::configureHighligherAndCompleter(AOneLineTextEdit * edit, 
     QObject::connect(edit->Completer, SIGNAL(activated(QString)), edit, SLOT(insertCompletion(QString)));
 }
 
-#include <QMessageBox>
-#include <QDebug>
 bool AGeoBaseDelegate::processEditBox(AOneLineTextEdit *lineEdit, double &val, QString &str, QWidget *parent)
 {
     str = lineEdit->text();

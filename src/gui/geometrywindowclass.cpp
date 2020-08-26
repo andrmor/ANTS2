@@ -1384,3 +1384,10 @@ void GeometryWindowClass::onDownloadPngRequested(QWebEngineDownloadItem *item)
     item->accept();
 #endif
 }
+
+#include "acameracontroldialog.h"
+void GeometryWindowClass::on_pbCameraDialog_clicked()
+{
+    ACameraControlDialog D(RasterWindow->fCanvas, this);
+    D.exec();
+}

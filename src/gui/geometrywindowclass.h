@@ -117,6 +117,8 @@ private slots:
     void on_cbLimitVisibility_clicked();
     void on_sbLimitVisibility_editingFinished();
 
+    void on_pbCameraDialog_clicked();
+
 private:
   MainWindow* MW;
   Ui::GeometryWindowClass *ui;

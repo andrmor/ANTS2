@@ -421,7 +421,8 @@ SOURCES += main.cpp \
     gui/DAWindowTools/ageoslabdelegate.cpp \
     gui/DAWindowTools/agridelementdelegate.cpp \
     gui/DAWindowTools/ageoobjectdelegate.cpp \
-    gui/DAWindowTools/aonelinetextedit.cpp
+    gui/DAWindowTools/aonelinetextedit.cpp \
+    gui/RasterWindow/acameracontroldialog.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -589,7 +590,8 @@ HEADERS  += common/CorrelationFilters.h \
     gui/DAWindowTools/ageoslabdelegate.h \
     gui/DAWindowTools/agridelementdelegate.h \
     gui/DAWindowTools/ageoobjectdelegate.h \
-    gui/DAWindowTools/aonelinetextedit.h
+    gui/DAWindowTools/aonelinetextedit.h \
+    gui/RasterWindow/acameracontroldialog.h
 
 # --- SIM ---
 ants2_SIM {
@@ -1010,5 +1012,6 @@ FORMS += \
     gui/GraphWindowTools/atemplateselectiondialog.ui \
     gui/amateriallibrarybrowser.ui \
     gui/DAWindowTools/amaterialloaderdialog.ui \
-    gui/MainWindowTools/asaveparticlestofiledialog.ui
+    gui/MainWindowTools/asaveparticlestofiledialog.ui \
+    gui/RasterWindow/acameracontroldialog.ui
 

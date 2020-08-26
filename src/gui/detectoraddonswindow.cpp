@@ -1431,10 +1431,10 @@ void DetectorAddOnsWindow::on_tabwConstants_cellChanged(int row, int column)
         double Value = le->text().toDouble(&ok);
         if (!ok) Value = 0;
 
-        ok = GC.addNewConstant(Name, Value);
-        if (!ok)
+        QString errorStr = GC.addNewConstant(Name, Value, -1);
+        if (!errorStr.isEmpty())
         {
-            message("This name is already in use", this);
+            message(errorStr, this);
             updateGeoConstsIndication();
             return;
         }
@@ -1445,10 +1445,11 @@ void DetectorAddOnsWindow::on_tabwConstants_cellChanged(int row, int column)
         qDebug() << "Attempting to change name of a geometry constant";
 
         QString newName = ui->tabwConstants->item(row, 0)->text().simplified();
-        bool ok = GC.rename(row, newName, twGeo->Sandwich->World);
+        QString errorStr;
+        bool ok = GC.rename(row, newName, twGeo->Sandwich->World, errorStr);
         if (!ok)
         {
-            message("This constant name is already in use!", this);
+            if (!errorStr.isEmpty()) message(errorStr, this);
             updateGeoConstsIndication();
             return;
         }

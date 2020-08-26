@@ -196,18 +196,15 @@ bool AGeoConsts::evaluateConstExpression(int current)
     return true;
 }
 
-bool AGeoConsts::rename(int index, const QString & newName, AGeoObject *world)
+bool AGeoConsts::rename(int index, const QString & newName, AGeoObject *world, QString &errorStr)
 {
     QString oldName = Names.at(index);
     if (oldName == newName) return true;
 
     if (index < 0 || index >= Names.size()) return false;
 
-    for (int i = 0; i < Names.size(); i++)
-    {
-        if (i == index) continue;
-        if (newName == Names.at(i)) return false;
-    }
+    errorStr = isNameValid(index, newName);
+    if (!errorStr.isEmpty()) return false;
 
     Names[index] = newName;
 
@@ -215,6 +212,27 @@ bool AGeoConsts::rename(int index, const QString & newName, AGeoObject *world)
     world->replaceGeoConstNameRecursive(RegExps.at(index), newName);
     updateRegExpsAndIndexes();
     return true;
+}
+
+QString AGeoConsts::isNameValid(int index, const QString &newName)
+{
+    if (newName.isEmpty()) return "Names can't be empty";
+
+    if (newName.contains(QRegExp("\\s"))) return "Names can't contain whitespace charachters eg:\" \" or \"\\n\" ";
+
+    for (int i = 0; i < Names.size(); i++)
+    {
+        if (i == index) continue;
+        if (newName == Names.at(i)) return "This name is already in use";
+    }
+
+    QRegExp reservedQRegExp;
+    for (const QString & word : FormulaReservedWords)
+    {
+        reservedQRegExp = QRegExp("\\b" + word + "\\b");
+        if (newName.contains(reservedQRegExp)) return QString("Names contains a TFormula reserved word:%1").arg(word);
+    }
+    return "";
 }
 
 bool AGeoConsts::setNewValue(int index, double newValue)
@@ -281,12 +299,13 @@ void AGeoConsts::replaceGeoConstName(const QRegExp &nameRegExp, const QString &n
         Expressions[i].replace(nameRegExp, newName);
 }
 
-bool AGeoConsts::addNewConstant(const QString & name, double value, int index)
+QString AGeoConsts::addNewConstant(const QString & name, double value, int index)
 {
+    QString errorStr;
     if (name != placeholderStr)
     {
-        for (int i = 0; i < Names.size(); i++)
-            if (name == Names.at(i)) return false; //already in use
+        errorStr = isNameValid(index, name);
+        if (!errorStr.isEmpty()) return errorStr;
     }
     if (index == -1) index = Names.size();
 
@@ -297,7 +316,7 @@ bool AGeoConsts::addNewConstant(const QString & name, double value, int index)
     qDebug() <<"sizes" <<Names.size() <<Values.size()  <<Expressions.size();
     updateRegExpsAndIndexes();
 
-    return true;
+    return "";
 }
 
 void AGeoConsts::addNoNameConstant(int index)

@@ -14,11 +14,12 @@ public:
     static       AGeoConsts & getInstance();
     static const AGeoConsts & getConstInstance();
 
-    bool addNewConstant(const QString & name, double value, int index = -1);
+    QString addNewConstant(const QString & name, double value, int index = -1);
     void addNoNameConstant(int index);
     void removeConstant(int index);
 
-    bool rename(int index, const QString & newName, AGeoObject *world);
+    bool rename(int index, const QString & newName, AGeoObject *world, QString &errorStr);
+    QString isNameValid(int index, const QString &newName);
     bool setNewValue(int index, double newValue);
     QString setNewExpression(int index, const QString & newExpression);
 

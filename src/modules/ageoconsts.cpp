@@ -228,11 +228,12 @@ bool AGeoConsts::rename(int index, const QString & newName, AGeoObject *world)
     }
 
     Names[index] = newName;
+
+    replaceGeoConstName(RegExps.at(index), newName, index);
+    world->replaceGeoConstNameRecursive(RegExps.at(index), newName);
     updateRegExpsAndIndexes();
 
     //const QRegExp OldNameRegExp("\\b" + oldName + "\\b");
-    replaceGeoConstName(RegExps.at(index), newName, index);
-    world->replaceGeoConstNameRecursive(RegExps.at(index), newName);
 
     return true;
 }

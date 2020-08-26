@@ -241,9 +241,11 @@ bool AGeoConsts::setNewValue(int index, double newValue)
 QString AGeoConsts::setNewExpression(int index, const QString & newExpression)
 {
     if (index < 0 || index >= Names.size()) return "wrong index";
+    qDebug() <<"1expressions" <<Expressions;
 
     QString err = checkifValidAndGetDoublefromExpression(newExpression, index);
     qDebug() <<"errorStr" <<err;
+    qDebug() <<"2expressions" <<Expressions;
     if (err.isEmpty()) Expressions[index] = newExpression;
 
     return err;

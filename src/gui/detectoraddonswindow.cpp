@@ -1327,12 +1327,14 @@ void DetectorAddOnsWindow::updateGeoConstsIndication()
 
     bGeoConstsWidgetUpdateInProgress = true; // -->
         ui->tabwConstants->setRowCount(numConsts + 1);
+        qDebug() <<numConsts+1;
         ui->tabwConstants->setColumnWidth(1, 50);
         for (int i = 0; i <= numConsts; i++)
         {
             const QString Name  =      ( i == numConsts ? ""  : Names.at(i) );
             const QString Value =      ( i == numConsts ? "0" : QString::number(Values.at(i)) );
             const QString Expression = ( i == numConsts ? ""  : Expressions.at(i) );
+            qDebug() <<"2break" <<Name <<Value <<Expression <<i;
 
             QTableWidgetItem * newItem = new QTableWidgetItem(Name);
             ui->tabwConstants->setItem(i, 0, newItem);
@@ -1343,14 +1345,19 @@ void DetectorAddOnsWindow::updateGeoConstsIndication()
             connect(edit, &ALineEditWithEscape::editingFinished, [this, i, edit](){this->onGeoConstEditingFinished(i, edit->text()); });
             connect(edit, &ALineEditWithEscape::escapePressed,   [this, i](){this->onGeoConstEscapePressed(i); });
             ui->tabwConstants->setCellWidget(i, 1, edit);
+            qDebug() <<"3break";
 
             AOneLineTextEdit * ed = new AOneLineTextEdit(ui->tabwConstants);
-            AGeoBaseDelegate::configureHighligherAndCompleter(ed, i);
+            qDebug() <<"pointer ed  "<<ed;
+            //AGeoBaseDelegate::configureHighligherAndCompleter(ed, i);
+            qDebug() <<"3.5break" <<Expression <<i;
             ed->setText(Expression);
+            qDebug() <<"4break";
             ed->setFrame(false);
             connect(ed, &AOneLineTextEdit::editingFinished, [this, i, ed](){this->onGeoConstExpressionEditingFinished(i, ed->text()); });
             connect(ed, &AOneLineTextEdit::escapePressed,   [this, i](){this->onGeoConstEscapePressed(i); });
             ui->tabwConstants->setCellWidget(i, 2, ed);
+
 
             if (!Expression.isEmpty()) edit->setEnabled(false);
         }
@@ -1526,7 +1533,7 @@ void DetectorAddOnsWindow::on_tabwConstants_customContextMenuRequested(const QPo
             return;
         }
         MW->writeDetectorToJson(MW->Config->JSON);
-        qDebug() <<"here?";
+        qDebug() <<"break";
         updateGeoConstsIndication();
         qDebug() <<"or here";
     }

@@ -2,6 +2,7 @@
 
 #include <QHBoxLayout>
 #include <QPushButton>
+#include <qdebug.h>
 
 AGeoBaseDelegate::AGeoBaseDelegate(QWidget *ParentWidget) :
     ParentWidget(ParentWidget) {}

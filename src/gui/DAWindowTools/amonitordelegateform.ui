@@ -172,7 +172,7 @@
         <number>1</number>
        </property>
        <property name="leftMargin">
-        <number>50</number>
+        <number>20</number>
        </property>
        <item>
         <layout class="QHBoxLayout" name="layX">
@@ -272,7 +272,7 @@ changed</string>
         <number>2</number>
        </property>
        <property name="rightMargin">
-        <number>50</number>
+        <number>20</number>
        </property>
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_3">

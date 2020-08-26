@@ -69,9 +69,10 @@ void AOneLineTextEdit::keyPressEvent(QKeyEvent * e)
         // The following keys are forwarded by the completer to the widget
         switch (e->key())
         {
-        case Qt::Key_Right:
+        /*
+        case Qt::Key_Tab: // Tab is not intercepted !
         {
-            //qDebug() << "Tab pressed when completer is active";  // Tab is not intercepted, using right arrow instead
+            //qDebug() << "Tab pressed when completer is active";
             //QString startsWith = c->completionPrefix();
             int i = 0;
             QAbstractItemModel * m = Completer->completionModel();
@@ -109,6 +110,7 @@ void AOneLineTextEdit::keyPressEvent(QKeyEvent * e)
             }
             return;
         }
+        */
         case Qt::Key_Enter:
         case Qt::Key_Return:
         case Qt::Key_Escape:

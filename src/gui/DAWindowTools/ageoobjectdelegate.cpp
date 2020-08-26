@@ -2446,7 +2446,7 @@ AGeoArrayDelegate::AGeoArrayDelegate(const QStringList &materials, QWidget *pare
     QVector<AOneLineTextEdit*> l = {ledNumX, ledNumY, ledNumZ, ledStepX, ledStepY, ledStepZ};
     for (AOneLineTextEdit * le : l)
     {
-        le->setMaximumWidth(75);
+        //le->setMaximumWidth(75);
         le->setContextMenuPolicy(Qt::NoContextMenu);
         configureHighligherAndCompleter(le);
         QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoObjectDelegate::ContentChanged);

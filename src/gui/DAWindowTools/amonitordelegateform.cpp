@@ -20,8 +20,6 @@ AMonitorDelegateForm::AMonitorDelegateForm(QStringList particles, QWidget *paren
 
     ui->cobEnergyUnits->setCurrentIndex(2);
 
-    //ui->leName->setMaximumWidth(50);
-
     leSize1 = new AOneLineTextEdit(); ui->laySize->insertWidget(1, leSize1);
     leSize2 = new AOneLineTextEdit(); ui->laySize->insertWidget(4, leSize2);
 
@@ -42,10 +40,9 @@ AMonitorDelegateForm::AMonitorDelegateForm(QStringList particles, QWidget *paren
     //installing double validators for edit boxes
     QDoubleValidator* dv = new QDoubleValidator(this);
     dv->setNotation(QDoubleValidator::ScientificNotation);
-    QList<QLineEdit*> list = this->findChildren<QLineEdit *>();
-    foreach(QLineEdit *w, list)
-        if (w->objectName().startsWith("led"))
-            w->setValidator(dv);
+    QList<QLineEdit*> list = findChildren<QLineEdit*>();
+    for (QLineEdit * w : list)
+        if (w->objectName().startsWith("led")) w->setValidator(dv);
 }
 
 AMonitorDelegateForm::~AMonitorDelegateForm()

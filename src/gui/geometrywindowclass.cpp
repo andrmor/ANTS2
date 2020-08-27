@@ -222,6 +222,8 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
         page->runJavaScript(js);
 #endif
     }
+
+    CameraControl->updateGui();
 }
 
 /*
@@ -926,6 +928,8 @@ void GeometryWindowClass::onRasterWindowChange(double centerX, double centerY, d
   HHeight = hHeight;
   Phi = phi;
   Theta = theta;
+
+  CameraControl->updateGui();
 }
 
 void GeometryWindowClass::readRasterWindowProperties()

@@ -20,6 +20,9 @@ public:
 
     void showAndUpdate();
 
+public slots:
+    void updateGui();
+
 private slots:
     void on_pbClose_clicked();
     void on_ledCenterX_editingFinished();
@@ -40,7 +43,6 @@ private:
     double xPos = 0;
     double yPos = 0;
 
-    void updateGui();
     void setCenter(int index, QLineEdit * led);
 
 };

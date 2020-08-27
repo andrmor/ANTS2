@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Camera control</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
@@ -693,8 +693,8 @@ center</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>88</x>
-     <y>88</y>
+     <x>87</x>
+     <y>68</y>
     </hint>
     <hint type="destinationlabel">
      <x>225</x>
@@ -709,8 +709,8 @@ center</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>88</x>
-     <y>120</y>
+     <x>87</x>
+     <y>100</y>
     </hint>
     <hint type="destinationlabel">
      <x>225</x>
@@ -726,7 +726,7 @@ center</string>
    <hints>
     <hint type="sourcelabel">
      <x>62</x>
-     <y>152</y>
+     <y>132</y>
     </hint>
     <hint type="destinationlabel">
      <x>225</x>
@@ -741,8 +741,8 @@ center</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>215</x>
-     <y>88</y>
+     <x>214</x>
+     <y>68</y>
     </hint>
     <hint type="destinationlabel">
      <x>225</x>
@@ -757,8 +757,8 @@ center</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>215</x>
-     <y>120</y>
+     <x>214</x>
+     <y>100</y>
     </hint>
     <hint type="destinationlabel">
      <x>225</x>
@@ -773,8 +773,8 @@ center</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>215</x>
-     <y>152</y>
+     <x>214</x>
+     <y>132</y>
     </hint>
     <hint type="destinationlabel">
      <x>225</x>
@@ -789,12 +789,12 @@ center</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>120</x>
-     <y>261</y>
+     <x>117</x>
+     <y>232</y>
     </hint>
     <hint type="destinationlabel">
-     <x>273</x>
-     <y>378</y>
+     <x>274</x>
+     <y>352</y>
     </hint>
    </hints>
   </connection>
@@ -805,12 +805,12 @@ center</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>74</x>
-     <y>226</y>
+     <x>71</x>
+     <y>197</y>
     </hint>
     <hint type="destinationlabel">
-     <x>283</x>
-     <y>384</y>
+     <x>284</x>
+     <y>358</y>
     </hint>
    </hints>
   </connection>
@@ -821,12 +821,12 @@ center</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>300</x>
-     <y>223</y>
+     <x>291</x>
+     <y>194</y>
     </hint>
     <hint type="destinationlabel">
-     <x>301</x>
-     <y>379</y>
+     <x>302</x>
+     <y>353</y>
     </hint>
    </hints>
   </connection>
@@ -837,12 +837,12 @@ center</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>304</x>
-     <y>255</y>
+     <x>293</x>
+     <y>226</y>
     </hint>
     <hint type="destinationlabel">
-     <x>301</x>
-     <y>380</y>
+     <x>302</x>
+     <y>354</y>
     </hint>
    </hints>
   </connection>
@@ -853,12 +853,12 @@ center</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>105</x>
-     <y>337</y>
+     <x>90</x>
+     <y>300</y>
     </hint>
     <hint type="destinationlabel">
-     <x>338</x>
-     <y>372</y>
+     <x>343</x>
+     <y>346</y>
     </hint>
    </hints>
   </connection>
@@ -869,12 +869,12 @@ center</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>188</x>
-     <y>328</y>
+     <x>173</x>
+     <y>291</y>
     </hint>
     <hint type="destinationlabel">
-     <x>359</x>
-     <y>382</y>
+     <x>361</x>
+     <y>356</y>
     </hint>
    </hints>
   </connection>
@@ -885,12 +885,12 @@ center</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>286</x>
-     <y>341</y>
+     <x>271</x>
+     <y>304</y>
     </hint>
     <hint type="destinationlabel">
-     <x>367</x>
-     <y>376</y>
+     <x>361</x>
+     <y>350</y>
     </hint>
    </hints>
   </connection>

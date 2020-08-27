@@ -318,7 +318,7 @@
        <item>
         <widget class="QPushButton" name="pbCameraDialog">
          <property name="text">
-          <string>Camera dialog</string>
+          <string>Camera control</string>
          </property>
         </widget>
        </item>

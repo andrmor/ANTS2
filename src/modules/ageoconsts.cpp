@@ -225,11 +225,13 @@ QString AGeoConsts::isNameValid(int index, const QString &newName)
         if (i == index) continue;
         if (newName == Names.at(i)) return "This name is already in use";
     }
-
+    /*
     QRegExp allowedSymbols("\\w");
     QString strCopy = newName;
     strCopy.replace(allowedSymbols, "");
-    if (!strCopy.isEmpty()) return "Names can only contain word characters: [0-9], [A-Z], [a-z], _";
+    if (!strCopy.isEmpty()) return "Names can only contain word characters: [0-9], [A-Z], [a-z], _";*/
+
+    if (newName.contains(QRegExp("\\W"))) return "Names can only contain word characters: [0-9], [A-Z], [a-z], _";
 
     QRegExp reservedQRegExp;
     for (const QString & word : FormulaReservedWords)

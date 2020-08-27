@@ -226,11 +226,16 @@ QString AGeoConsts::isNameValid(int index, const QString &newName)
         if (newName == Names.at(i)) return "This name is already in use";
     }
 
+    QRegExp allowedSymbols("\\w");
+    QString strCopy = newName;
+    strCopy.replace(allowedSymbols, "");
+    if (!strCopy.isEmpty()) return "Names can only contain word characters: [0-9], [A-Z], [a-z], _";
+
     QRegExp reservedQRegExp;
     for (const QString & word : FormulaReservedWords)
     {
         reservedQRegExp = QRegExp("\\b" + word + "\\b");
-        if (newName.contains(reservedQRegExp)) return QString("Names contains a TFormula reserved word:%1").arg(word);
+        if (newName.contains(reservedQRegExp)) return QString("Name contains a TFormula reserved word:%1").arg(word);
     }
     return "";
 }
@@ -278,8 +283,7 @@ QString AGeoConsts::checkifValidAndGetDoublefromExpression(int current)
 
 QString AGeoConsts::isGeoConstsBellowInUse(int current)
 {
-    current += 1;  // Andr: bug?
-    for (int i = current; i < Names.size(); i++)
+    for (int i = current+1; i < Names.size(); i++)
         if (Expressions.at(current).contains(RegExps.at(i))) return Names.at(i);
     return "";
 }

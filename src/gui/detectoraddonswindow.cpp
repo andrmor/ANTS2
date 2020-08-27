@@ -1326,7 +1326,6 @@ void DetectorAddOnsWindow::updateGeoConstsIndication()
 
     bGeoConstsWidgetUpdateInProgress = true; // -->
         ui->tabwConstants->setRowCount(numConsts + 1);
-        qDebug() <<numConsts+1;
         ui->tabwConstants->setColumnWidth(1, 50);
         for (int i = 0; i <= numConsts; i++)
         {
@@ -1346,9 +1345,7 @@ void DetectorAddOnsWindow::updateGeoConstsIndication()
 
             AOneLineTextEdit * ed = new AOneLineTextEdit(ui->tabwConstants);
             AGeoBaseDelegate::configureHighligherAndCompleter(ed, i);
-            qDebug() <<"3.5break" <<Expression <<i;
             ed->setText(Expression);
-            qDebug() <<"4break";
             ed->setFrame(false);
             connect(ed, &AOneLineTextEdit::editingFinished, [this, i, ed](){this->onGeoConstExpressionEditingFinished(i, ed->text()); });
             connect(ed, &AOneLineTextEdit::escapePressed,   [this, i](){this->onGeoConstEscapePressed(i); });
@@ -1501,9 +1498,7 @@ void DetectorAddOnsWindow::on_tabwConstants_customContextMenuRequested(const QPo
     {
         GC.addNoNameConstant(index);
         MW->writeDetectorToJson(MW->Config->JSON);
-        qDebug() <<"break";
         updateGeoConstsIndication();
-        qDebug() <<"or here";
     }
 }
 

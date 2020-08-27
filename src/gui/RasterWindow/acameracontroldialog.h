@@ -22,12 +22,13 @@ public:
 
 private slots:
     void on_pbClose_clicked();
-    void on_pbUpdateRange_clicked();
     void on_ledCenterX_editingFinished();
     void on_ledCenterY_editingFinished();
     void on_ledCenterZ_editingFinished();
 
+    void on_pbUpdateRange_clicked();
     void on_pbUpdateWindow_clicked();
+    void on_pbUpdateAngles_clicked();
 
 protected:
     void closeEvent(QCloseEvent *);

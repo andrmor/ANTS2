@@ -12,9 +12,8 @@ ACameraControlDialog::ACameraControlDialog(TCanvas *Canvas, QWidget * parent) :
     ui(new Ui::ACameraControlDialog)
 {
     ui->setupUi(this);
-
     ui->pbDummy->setDefault(true);
-    ui->pbDummy->setVisible(false);
+    for (QPushButton * pb : {ui->pbDummy, ui->pbUpdateRange, ui->pbUpdateWindow, ui->pbUpdateAngles}) pb->setVisible(false);
 
     updateGui();
 
@@ -71,6 +70,10 @@ void ACameraControlDialog::updateGui()
 
     ui->ledWw->setText(QString::number(dx));
     ui->ledWh->setText(QString::number(dy));
+
+    ui->ledLat-> setText( QString::number(Canvas->GetView()->GetLatitude()) );
+    ui->ledLong->setText( QString::number(Canvas->GetView()->GetLongitude()) );
+    ui->ledPsi-> setText( QString::number(Canvas->GetView()->GetPsi()) );
 }
 
 void ACameraControlDialog::on_pbUpdateRange_clicked()
@@ -95,6 +98,8 @@ void ACameraControlDialog::on_pbUpdateRange_clicked()
     }
 
     Canvas->GetView()->SetRange(LL, UR);
+    Canvas->Modified();
+    Canvas->Update();
     updateGui();
 }
 
@@ -146,7 +151,20 @@ void ACameraControlDialog::on_pbUpdateWindow_clicked()
     double dy = ui->ledWh->text().toDouble();
 
     Canvas->GetView()->SetWindow(x0, y0, dx, dy);
+
+    /*
     Canvas->GetView()->SetViewChanged();
+    Canvas->Modified();
+    Canvas->Update();
+    updateGui();
+    */
+    on_pbUpdateAngles_clicked();
+}
+
+void ACameraControlDialog::on_pbUpdateAngles_clicked()
+{
+    int err;
+    Canvas->GetView()->SetView(ui->ledLong->text().toDouble(), ui->ledLat->text().toDouble(), ui->ledPsi->text().toDouble(), err);
     Canvas->Modified();
     Canvas->Update();
     updateGui();

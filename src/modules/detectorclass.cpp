@@ -425,11 +425,9 @@ bool DetectorClass::makeSandwichDetector()
   Sandwich->readFromJson(js);
 
   //World size
-  //old system
   if (!readWorldFixedFromJson(js))  //if can read, json is made using the old system
   {
-      // new system
-      qDebug() << "-==- Using NEW system for world size";
+      //qDebug() << "-==- Using NEW system for world size";
 
       if (!Sandwich->isWorldSizeFixed())
       {
@@ -460,8 +458,7 @@ bool DetectorClass::readWorldFixedFromJson(const QJsonObject &json)
 {
     if (!json.contains("FixedWorldSizes")) return false; //already new system is in effect
 
-    //old system
-    qDebug() << "-==- Using OLD system for world size";
+    //qDebug() << "-==- Using OLD system for world size";
 
     bool   bWorldSizeFixed = false;
     double WorldSizeXY;

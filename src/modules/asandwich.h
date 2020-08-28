@@ -32,6 +32,7 @@ public:
   void insertSlab(int index, ASlabModel* slab);
   int countSlabs();
   AGeoObject* findSlabByIndex(int index);
+  void enforceCommonProperties();
 
   //lightguide handling
   AGeoObject* getUpperLightguide();  // 0 if not defined
@@ -110,7 +111,6 @@ public slots:
 
 private:
   void clearModel();
-  void enforceCommonProperties();
   void importFromOldStandardJson(QJsonObject& json, bool fPrScintCont);
   void importOldLightguide(QJsonObject& json, bool upper);
   void importOldMask(QJsonObject &json);

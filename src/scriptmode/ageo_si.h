@@ -45,6 +45,8 @@ public slots:
   void SlabRound(QString name, int imat, double height, double diameter);
   void SlabPolygon(QString name, int imat, double height, double outsideDiamater, double angle, int sides);
   void SetCenterSlab(QString name, int iType);
+  void SetCommonSlabMode(int iMode);
+  void SetCommonSlabProperties(int shape, double size1, double size2, double angle, int sides);
 
   void RecalculateStack(QString name);
 
@@ -80,6 +82,10 @@ signals:
 private:
   DetectorClass* Detector;
   void clearGeoObjects();
+
+  QString ZeroSlabName;
+  int     ZeroSlabType = 0;
+  int     SlabMode = -1;
 };
 
 #endif // AINTERFACETOADDOBJSCRIPT_H

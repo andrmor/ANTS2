@@ -582,43 +582,40 @@ void AGeo_SI::SetCenterSlab(QString name, int iType)
         return;
     }
 
-    AGeoObject * obj = nullptr;
+    ZeroSlabName = name;
+    ZeroSlabType = iType;
+}
 
-    for (int i = 0; i < GeoObjects.size(); i++)
-    {
-        const QString & GOname = GeoObjects.at(i)->Name;
-        if (GOname == name)
-        {
-            obj = GeoObjects[i];
-            break;
-        }
-    }
+void AGeo_SI::SetCommonSlabMode(int iMode)
+{
+    if (iMode < 0 || iMode > 2) abort("Common slab mode can be 0 (common shape and size), 1 (common shape) and 2 (individual)");
+    else SlabMode = iMode;
+}
 
-    if (!obj)
+void AGeo_SI::SetCommonSlabProperties(int shape, double size1, double size2, double angle, int sides)
+{
+    if (shape < 0 || shape > 2)
     {
-        //looking through already defined objects in the geometry
-        obj = Detector->Sandwich->World->findObjectByName(name);
+        abort("Shape should be 0..2");
+        return;
     }
-    if (!obj)
+    if (size1 <= 0 || size2 <= 0)
     {
-        abort("Cannot find object " + name);
+        abort("Sizes should be positive");
+        return;
+    }
+    if (sides < 3)
+    {
+        abort("Number of sides should be at least 3");
         return;
     }
 
-    ASlabModel * slab = obj->getSlabModel();
-    if (!slab)
-    {
-        abort("This is not a slab: " + name);
-        return;
-    }
-
-    for (AGeoObject * obj : Detector->Sandwich->World->HostedObjects)
-    {
-        ASlabModel * m = obj->getSlabModel();
-        if (m) m->fCenter = false;
-    }
-    slab->fCenter = true;
-    Detector->Sandwich->ZOriginType = iType;
+    ASlabXYModel * xy = Detector->Sandwich->DefaultXY;
+    xy->shape = shape;
+    xy->size1 = size1;
+    xy->size2 = size2;
+    xy->angle = angle;
+    xy->sides = sides;
 }
 
 void AGeo_SI::MakeStack(QString name, QString container)
@@ -867,11 +864,10 @@ void AGeo_SI::UpdateGeometry(bool CheckOverlaps)
   for (int i = 0; i < GeoObjects.size(); i++)
   {
       const QString & name = GeoObjects.at(i)->Name;
-      //qDebug() << "Checking"<<name;
       if (Detector->Sandwich->World->isNameExists(name))
       {
+          abort(QString("Name already exists in the detector geometry: %1").arg(name));
           clearGeoObjects();
-          abort("Add geo object: Name already exists in the detector geometry: " + name);
           return;
       }
       for (int j = 0; j < GeoObjects.size(); j++)
@@ -879,8 +875,8 @@ void AGeo_SI::UpdateGeometry(bool CheckOverlaps)
           if (i == j) continue;
           if (name == GeoObjects.at(j)->Name)
           {
+              abort(QString("At least two objects have the same name: %1").arg(name));
               clearGeoObjects();
-              abort("Add geo object: At least two objects have the same name: " + name);
               return;
           }
       }
@@ -888,8 +884,8 @@ void AGeo_SI::UpdateGeometry(bool CheckOverlaps)
       int imat = GeoObjects.at(i)->Material;
       if (imat < 0 || imat > Detector->MpCollection->countMaterials()-1)
       {
+          abort(QString("Wrong material index for object %1").arg(name));
           clearGeoObjects();
-          abort("Add geo object: Wrong material index for object " + name);
           return;
       }
 
@@ -908,8 +904,8 @@ void AGeo_SI::UpdateGeometry(bool CheckOverlaps)
           }
           if (!fFound)
           {
+              abort(QString("Container does not exist: %1").arg(cont));
               clearGeoObjects();
-              abort("Add geo object: Container does not exist: " + cont);
               return;
           }
       }
@@ -924,13 +920,42 @@ void AGeo_SI::UpdateGeometry(bool CheckOverlaps)
      AGeoObject* contObj = Detector->Sandwich->World->findObjectByName(contName);
      if (!contObj)
      {
+         abort(QString("Failed to add object %1 to container %2").arg(name).arg(contName));
          clearGeoObjects();
-         abort("Add geo object: Failed to add object "+name+" to container "+contName);
          return;
      }
      contObj->addObjectLast(obj);
      GeoObjects[i] = nullptr;
   }
+
+  if (!ZeroSlabName.isEmpty())
+  {
+      AGeoObject * obj = Detector->Sandwich->World->findObjectByName(ZeroSlabName);
+      if (obj)
+      {
+          ASlabModel * slab = obj->getSlabModel();
+          if (slab)
+          {
+              for (AGeoObject * obj : Detector->Sandwich->World->HostedObjects)
+              {
+                  ASlabModel * m = obj->getSlabModel();
+                  if (m) m->fCenter = false;
+              }
+              slab->fCenter = true;
+              Detector->Sandwich->ZOriginType = ZeroSlabType;
+          }
+          else qWarning() << "This is not a slab:" << ZeroSlabName;
+      }
+      else qWarning() << "Cannot find slab" + ZeroSlabName;
+      ZeroSlabName.clear();
+  }
+  if (SlabMode != -1)
+  {
+      Detector->Sandwich->SandwichState = static_cast<ASandwich::SlabState>(SlabMode);
+      SlabMode = -1;
+  }
+
+  Detector->Sandwich->enforceCommonProperties();
 
   Detector->BuildDetector_CallFromScript();
 
@@ -940,7 +965,7 @@ void AGeo_SI::UpdateGeometry(bool CheckOverlaps)
       if (overlaps > 0)
       {
           emit requestShowCheckUpWindow();
-          abort("Add geo object: Overlap(s) detected!");
+          abort("Overlap(s) detected in the geometry!");
       }
   }
 }

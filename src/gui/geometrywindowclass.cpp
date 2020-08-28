@@ -1050,7 +1050,7 @@ void GeometryWindowClass::Zoom(bool update)
   if (update)
     {
       RasterWindow->ForceResize();
-      fRecallWindow = false;
+      //fRecallWindow = false;
       UpdateRootCanvas();
     }
 }

@@ -86,19 +86,11 @@ void RasterWindowBaseClass::mouseMoveEvent(QMouseEvent *event)
         //qDebug() << "-->Mouse left-pressed move event";
         if (!PressEventRegistered) return;
 
-        if (fInvertedXYforDrag)
-            fCanvas->HandleInput(kButton1Motion, event->y(), event->x());
-        else
-            fCanvas->HandleInput(kButton1Motion, event->x(), event->y());
+        if (fInvertedXYforDrag) fCanvas->HandleInput(kButton1Motion, event->y(), event->x());
+        else                    fCanvas->HandleInput(kButton1Motion, event->x(), event->y());
 
-        if (!fCanvas->HasViewer3D() || !fCanvas->GetView()) return;
-        //qDebug() << "-->"<<fCanvas->GetView();
-        Double_t centerX, centerY, viewSizeX, viewSizeY;
-        fCanvas->GetView()->GetWindow(centerX, centerY, viewSizeX, viewSizeY);
-        Double_t theta = fCanvas->GetView()->GetLatitude();
-        Double_t phi = fCanvas->GetView()->GetLongitude();
-        emit UserChangedWindow(centerX, centerY, viewSizeX, viewSizeY, phi, theta);
-        //qDebug() << "--<";
+        //if (!fCanvas->HasViewer3D() || !fCanvas->GetView()) return;
+        onViewChanged();
     }
     else if (event->buttons() & Qt::RightButton)
     {
@@ -119,15 +111,12 @@ void RasterWindowBaseClass::mouseMoveEvent(QMouseEvent *event)
         int dy = y - lastY;
         if (fCanvas->GetView())
         {
-            double centerX, centerY, viewSizeX, viewSizeY;
-            fCanvas->GetView()->GetWindow(centerX, centerY, viewSizeX, viewSizeY);
-            double theta = fCanvas->GetView()->GetLatitude();
-            double phi = fCanvas->GetView()->GetLongitude();
-            double x0 = lastCenterX - 2.0*dx/(double)this->width()*viewSizeX;
-            double y0 = lastCenterY + 2.0*dy/(double)this->height()*viewSizeY;
-            fCanvas->GetView()->SetWindow(x0, y0, viewSizeX, viewSizeY);
-            fCanvas->GetView()->RotateView(phi,theta);
-            emit UserChangedWindow(x0, y0, viewSizeX, viewSizeY, phi, theta);
+            ViewParameters.read(fCanvas);
+            ViewParameters.WinX = lastCenterX - 2.0 * dx / (double)this->width()  * ViewParameters.WinW;
+            ViewParameters.WinY = lastCenterY + 2.0 * dy / (double)this->height() * ViewParameters.WinH;
+            ViewParameters.apply(fCanvas);
+
+            onViewChanged();
         }
     }
     else
@@ -181,26 +170,15 @@ void RasterWindowBaseClass::wheelEvent(QWheelEvent *event)
   if (!fCanvas) return;
   fCanvas->cd();
   if (fBlockEvents) return;
-  //qDebug() << "Mouse wheel event";
-
-  //if (event->delta()>0) fCanvas->GetView()->Execute("ZoomIn", "");
-  //else fCanvas->GetView()->Execute("ZoomOut", "");
 
   if (!fCanvas->HasViewer3D() || !fCanvas->GetView()) return;
   fCanvas->cd();
-  //int x = event->x();
-  //int y = event->y();
-  double factor = (event->delta()<0) ? 1.25 : 0.8;
+
+  double factor = ( event->delta() < 0 ? 1.25 : 0.8 );
 
   fCanvas->GetView()->ZoomView(0, 1.0/factor);
 
-  Double_t centerX, centerY, viewSizeX, viewSizeY;
-  fCanvas->cd();
-  fCanvas->GetView()->GetWindow(centerX, centerY, viewSizeX, viewSizeY);
-  Double_t theta = fCanvas->GetView()->GetLatitude();
-  Double_t phi = fCanvas->GetView()->GetLongitude();
-
-  emit UserChangedWindow(centerX, centerY, viewSizeX, viewSizeY, phi, theta);
+  onViewChanged();
 }
 
 void RasterWindowBaseClass::paintEvent(QPaintEvent * /*event*/)
@@ -243,22 +221,48 @@ void RasterWindowBaseClass::SaveAs(const QString filename)
 
 void RasterWindowBaseClass::SetWindowTitle(const QString &title)
 {
-  MasterWindow->setWindowTitle(title);
+    MasterWindow->setWindowTitle(title);
 }
 
-void RasterWindowBaseClass::getWindowProperties(double &centerX, double &centerY, double &hWidth, double &hHeight, double &phi, double &theta)
+void RasterWindowBaseClass::setWindowProperties()
 {
-  if (!fCanvas->HasViewer3D() || !fCanvas->GetView()) return;
-  fCanvas->cd();
-  fCanvas->GetView()->GetWindow(centerX, centerY, hWidth, hHeight);
-  theta = fCanvas->GetView()->GetLatitude();
-  phi = fCanvas->GetView()->GetLongitude();
+    ViewParameters.apply(fCanvas);
 }
 
-void RasterWindowBaseClass::setWindowProperties(double centerX, double centerY, double hWidth, double hHeight, double phi, double theta)
+void RasterWindowBaseClass::onViewChanged()
 {
-  if (!fCanvas->HasViewer3D() || !fCanvas->GetView()) return;
-  fCanvas->cd();
-  fCanvas->GetView()->SetWindow(centerX, centerY, hWidth, hHeight);
-  fCanvas->GetView()->RotateView(phi,theta);
+    fCanvas->cd();
+    ViewParameters.read(fCanvas);
+    emit userChangedWindow();
+}
+
+void AGeoViewParameters::read(TCanvas * Canvas)
+{
+    TView3D * v = dynamic_cast<TView3D*>(Canvas->GetView());
+    if (!v) return;
+
+    v->GetRange(RangeLL, RangeUR);
+
+    for (int i = 0; i < 3; i++)
+        RotCenter[i] = 0.5 * (RangeUR[i] + RangeLL[i]);
+
+    v->GetWindow(WinX, WinY, WinW, WinH);
+
+    Lat  = v->GetLatitude();
+    Long = v->GetLongitude();
+    Psi  = v->GetPsi();
+}
+
+void AGeoViewParameters::apply(TCanvas *Canvas) const
+{
+    TView3D * v = dynamic_cast<TView3D*>(Canvas->GetView());
+    if (!v) return;
+
+    v->SetRange(RangeLL, RangeUR);
+    v->SetWindow(WinX, WinY, WinW, WinH);
+    int err;
+    v->SetView(Long, Lat, Psi, err);
+
+    Canvas->Modified();
+    Canvas->Update();
 }

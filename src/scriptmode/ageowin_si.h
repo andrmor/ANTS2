@@ -24,11 +24,13 @@ public slots:
   void BlockUpdates(bool on); //forbids updates
 
   //orientation of TView3D
+  /*
   double GetPhi();
   double GetTheta();
   void SetPhi(double phi);
   void SetTheta(double theta);
   void Rotate(double Theta, double Phi, int Steps, int msPause = 50);
+  */
 
   //view manipulation
   void SetZoom(int level);

@@ -52,7 +52,7 @@ GeometryWindowClass::GeometryWindowClass(QWidget *parent, MainWindow *mw) :
 
     RasterWindow = new RasterWindowBaseClass(this);
     //centralWidget()->layout()->addWidget(RasterWindow);
-    connect(RasterWindow, &RasterWindowBaseClass::UserChangedWindow, this, &GeometryWindowClass::onRasterWindowChange);
+    connect(RasterWindow, &RasterWindowBaseClass::userChangedWindow, this, &GeometryWindowClass::onRasterWindowChange);
 
     QVBoxLayout * layV = new QVBoxLayout();
     layV->setContentsMargins(0,0,0,0);
@@ -80,7 +80,7 @@ GeometryWindowClass::GeometryWindowClass(QWidget *parent, MainWindow *mw) :
 
     generateSymbolMap();
 
-    CameraControl = new ACameraControlDialog(RasterWindow->fCanvas, this);
+    CameraControl = new ACameraControlDialog(RasterWindow, this);
     CameraControl->setModal(false);
 }
 
@@ -309,26 +309,19 @@ void GeometryWindowClass::PostDraw()
   fNeedZoom = false;
 
   if (ModePerspective)
-    {
+  {
      if (!v->IsPerspective()) v->SetPerspective();
-    }
+  }
   else
-    {
+  {
       if (v->IsPerspective()) v->SetParallel();
-    }
+  }
 
   if (fRecallWindow)
-    {
+  {
       //recalling window properties
-      //qDebug() << "Restoring window";
-      RasterWindow->setWindowProperties(CenterX, CenterY, HWidth, HHeight, Phi, Theta);
-    }
-//  else
-//    {
-//      //saving window properties to use next draw
-//      fRecallWindow = true;
-//      RasterWindow->getWindowProperties(CenterX, CenterY, HWidth, HHeight, Phi, Theta);
-//    }
+      RasterWindow->setWindowProperties();
+  }
 
   if (ui->cbShowAxes->isChecked()) v->ShowAxis();
   setHideUpdate(false);
@@ -348,6 +341,7 @@ void GeometryWindowClass::onBusyOff()
   RasterWindow->setBlockEvents(false);
 }
 
+/*
 void GeometryWindowClass::writeWindowPropsToJson(QJsonObject &json)
 {
   if (fRecallWindow)
@@ -373,6 +367,7 @@ void GeometryWindowClass::readWindowPropsFromJson(QJsonObject &json)
   parseJson(js, "Phi", Phi);
   parseJson(js, "Theta", Theta);
 }
+*/
 
 bool GeometryWindowClass::IsWorldVisible()
 {
@@ -919,23 +914,16 @@ void GeometryWindowClass::on_pbFront_clicked()
     }
 }
 
-void GeometryWindowClass::onRasterWindowChange(double centerX, double centerY, double hWidth, double hHeight, double phi, double theta)
+void GeometryWindowClass::onRasterWindowChange()
 {
-  fRecallWindow = true;
-  CenterX = centerX;
-  CenterY = centerY;
-  HWidth = hWidth;
-  HHeight = hHeight;
-  Phi = phi;
-  Theta = theta;
-
-  CameraControl->updateGui();
+    fRecallWindow = true;
+    CameraControl->updateGui();
 }
 
 void GeometryWindowClass::readRasterWindowProperties()
 {
-  fRecallWindow = true;
-  RasterWindow->getWindowProperties(CenterX, CenterY, HWidth, HHeight, Phi, Theta);
+    fRecallWindow = true;
+    RasterWindow->ViewParameters.read(RasterWindow->fCanvas);   // !*! method
 }
 
 void GeometryWindowClass::on_pbSide_clicked()

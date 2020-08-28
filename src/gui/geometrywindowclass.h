@@ -50,10 +50,11 @@ public:
   bool isColorByMaterial() {return ColorByMaterial;}
 
   bool fRecallWindow = false;
-  Double_t CenterX, CenterY, HWidth, HHeight, Phi, Theta;
 
-  void writeWindowPropsToJson(QJsonObject &json);
+  /*
+  void writeWindowPropsToJson(QJsonObject &json);   !*!
   void readWindowPropsFromJson(QJsonObject &json);
+  */
 
   int GeoMarkerSize = 2;
   int GeoMarkerStyle = 6;
@@ -81,8 +82,8 @@ public slots:
     void ShowText(const QVector<QString> & strData, Color_t color, bool onPMs = true, bool bFullCycle = true); //onPMs=false -> srawing on monitors
     void on_pbTop_clicked();
     void on_pbFront_clicked();
-    void onRasterWindowChange(double centerX, double centerY, double hWidth, double hHeight, double phi, double theta);
-    void readRasterWindowProperties();
+    void onRasterWindowChange();
+    void readRasterWindowProperties();   // !*!
 
     void on_pbShowPMnumbers_clicked();
     void on_pbShowTracks_clicked();

@@ -6,6 +6,22 @@
 
 class TCanvas;
 class QMainWindow;
+class TView;
+
+struct AGeoViewParameters
+{
+    double RangeLL[3];
+    double RangeUR[3];
+
+    double RotCenter[3];
+
+    double WinX, WinY, WinW, WinH;
+
+    double Long, Lat, Psi;
+
+    void read(TCanvas * Canvas);
+    void apply(TCanvas * Canvas) const;
+};
 
 class RasterWindowBaseClass : public QWidget
 {
@@ -14,7 +30,8 @@ public:
     explicit RasterWindowBaseClass(QMainWindow *MasterWindow);
     virtual ~RasterWindowBaseClass();
 
-    TCanvas* fCanvas = 0;
+    TCanvas * fCanvas = nullptr;
+    AGeoViewParameters ViewParameters;
 
     void setBlockEvents(bool flag) {fBlockEvents = flag;}
     void setInvertedXYforDrag(bool flag) {fInvertedXYforDrag = flag;} //fix ROOT inversion in x-y for parallel view of geometry
@@ -28,12 +45,14 @@ public:
     void SaveAs(const QString filename);
     void SetWindowTitle(const QString &title);
 
-    void getWindowProperties(double &centerX, double &centerY, double &hWidth, double &hHeight, double &phi, double &theta);
-    void setWindowProperties(double  centerX, double  centerY, double  hWidth, double  hHeight, double  phi, double  theta);
+    void setWindowProperties();
+
+    void onViewChanged();
 
 signals:
     void LeftMouseButtonReleased();
-    void UserChangedWindow(double centerX, double centerY, double hWidth, double hHeight, double phi, double theta);
+    //void UserChangedWindow(double centerX, double centerY, double hWidth, double hHeight, double phi, double theta);
+    void userChangedWindow();
 
 protected:
     //void exposeEvent(QExposeEvent *event);

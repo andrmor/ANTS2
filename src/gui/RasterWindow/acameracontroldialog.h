@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-class TCanvas;
+class RasterWindowBaseClass;
 class QLineEdit;
 
 namespace Ui {
@@ -15,7 +15,7 @@ class ACameraControlDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit ACameraControlDialog(TCanvas * Canvas, QWidget * parent = nullptr);
+    explicit ACameraControlDialog(RasterWindowBaseClass * RasterWin, QWidget * parent = nullptr);
     ~ACameraControlDialog();
 
     void showAndUpdate();
@@ -37,7 +37,7 @@ protected:
     void closeEvent(QCloseEvent *);
 
 private:
-    TCanvas * Canvas = nullptr;
+    RasterWindowBaseClass * RW = nullptr;
     Ui::ACameraControlDialog * ui;
 
     double xPos = 0;

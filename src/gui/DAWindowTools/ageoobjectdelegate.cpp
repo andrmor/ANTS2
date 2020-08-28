@@ -105,13 +105,17 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
     scaleWidget = new QWidget();
         QHBoxLayout * hbsw = new QHBoxLayout(scaleWidget);
         hbsw->setContentsMargins(2,0,2,0);
-        hbsw->addWidget(new QLabel("in X:")); ledScaleX = new QLineEdit("1.0"); hbsw->addWidget(ledScaleX);
-        hbsw->addWidget(new QLabel("in Y:")); ledScaleY = new QLineEdit("1.0"); hbsw->addWidget(ledScaleY);
-        hbsw->addWidget(new QLabel("in Z:")); ledScaleZ = new QLineEdit("1.0"); hbsw->addWidget(ledScaleZ);
-        for (QLineEdit * led : {ledScaleX, ledScaleY, ledScaleZ})
+        hbsw->addWidget(new QLabel("in X:")); ledScaleX = new AOneLineTextEdit();
+        hbsw->addWidget(ledScaleX);
+        hbsw->addWidget(new QLabel("in Y:")); ledScaleY = new AOneLineTextEdit();
+        hbsw->addWidget(ledScaleY);
+        hbsw->addWidget(new QLabel("in Z:")); ledScaleZ = new AOneLineTextEdit();
+        hbsw->addWidget(ledScaleZ);
+        for (AOneLineTextEdit * led : {ledScaleX, ledScaleY, ledScaleZ})
         {
-            connect(led, &QLineEdit::editingFinished, this, &AGeoObjectDelegate::updateScalingFactors);
-            connect(led, &QLineEdit::textChanged,     this, &AGeoObjectDelegate::onContentChanged);
+            led->setText("1.0");
+            connect(led, &AOneLineTextEdit::editingFinished, this, &AGeoObjectDelegate::updateScalingFactors);
+            connect(led, &AOneLineTextEdit::textChanged,     this, &AGeoObjectDelegate::onContentChanged);
         }
     hbs->addWidget(scaleWidget);
     hbs->addStretch();
@@ -416,11 +420,6 @@ void AGeoObjectDelegate::onScaleToggled()
         scaled = new AGeoScaledShape();
         scaled->BaseShape = ShapeCopy;
         ShapeCopy = scaled;
-
-        // !*!  TFormula too?
-        scaled->scaleX = ledScaleX->text().toDouble();
-        scaled->scaleY = ledScaleY->text().toDouble();
-        scaled->scaleZ = ledScaleZ->text().toDouble();
     }
 }
 
@@ -447,9 +446,19 @@ void AGeoObjectDelegate::updateScalingFactors()
     if (scaled)
     {
         // !*! TFormula?   common method with combine with toggle on check box scale?
+        /*
+        const AGeoConsts & GC = AGeoConsts::getConstInstance();
+        QString errorStr;
+        bool ok;
+        ok = GC.updateParameter(errorStr, ledScaleX->text(), scaled->scaleX, true, true, false); if (!ok) return errorStr;
+        ok = GC.updateParameter(errorStr, ledScaleY->text(), scaled->scaleY, true, true, false); if (!ok) return errorStr;
+        ok = GC.updateParameter(errorStr, ledScaleZ->text(), scaled->scaleZ, true, true, false); if (!ok) return errorStr;
+        return "";*/
+
         scaled->scaleX = ledScaleX->text().toDouble();
         scaled->scaleY = ledScaleY->text().toDouble();
         scaled->scaleZ = ledScaleZ->text().toDouble();
+
     }
 }
 

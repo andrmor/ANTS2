@@ -153,13 +153,14 @@ bool AGeoConsts::updateParameter(QString &errorStr, QString &str, double &return
     if (bForbidZero && returnValue == 0)
     {
         errorStr = "Unacceptable value zero";
-        if (str !=0) errorStr += " in : " + str;
+        if (!str.isEmpty()) errorStr += " in: " + str;
         return false;
     }
     if (bForbidNegative && returnValue < 0)
     {
         errorStr = "Unacceptable value negative in";
-        errorStr += ": " + str;
+        if (!str.isEmpty()) errorStr += ": " + str;
+        else errorStr += ": " + QString::number(returnValue);
         return false;
     }
     if (bMakeHalf) returnValue *= 0.5;

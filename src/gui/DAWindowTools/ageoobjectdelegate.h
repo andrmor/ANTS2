@@ -48,9 +48,9 @@ private:
     QVBoxLayout * lMF = nullptr;      //main layout
 
     QWidget   * scaleWidget = nullptr;
-    QLineEdit * ledScaleX   = nullptr;
-    QLineEdit * ledScaleY   = nullptr;
-    QLineEdit * ledScaleZ   = nullptr;
+    AOneLineTextEdit * ledScaleX   = nullptr;
+    AOneLineTextEdit * ledScaleY   = nullptr;
+    AOneLineTextEdit * ledScaleZ   = nullptr;
 
 protected:
     const AGeoObject * CurrentObject = nullptr;

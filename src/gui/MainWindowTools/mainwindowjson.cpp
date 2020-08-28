@@ -37,21 +37,6 @@ void MainWindow::writeDetectorToJson(QJsonObject &json)
   Detector->writeToJson(json);
 }
 
-// will be obsolete after conversion!
-bool MainWindow::readDetectorFromJson(QJsonObject &json)
-{
-  GeometryWindow->fRecallWindow = false;
-  bool fOK = Detector->MakeDetectorFromJson(json);
-  if (!fOK)
-    {
-      qCritical() << "Error while loading detector config";
-      return false;
-    }
-
-  //gui update is automatically triggered
-  return true;
-}
-
 void MainWindow::onRequestDetectorGuiUpdate()
 {
     //qDebug() << "DetJson->DetGUI";

@@ -143,7 +143,6 @@ public:
     void UpdateTestWavelengthProperties(); //if material properties were updated, need to update indication in the Test tab
 
     void writeDetectorToJson(QJsonObject &json); //GDML is NOT here
-    bool readDetectorFromJson(QJsonObject &json);
     void writeSimSettingsToJson(QJsonObject &json);
     bool readSimSettingsFromJson(QJsonObject &json);
 

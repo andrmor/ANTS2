@@ -399,7 +399,7 @@ void AGeoObject::readAllFromJarr(AGeoObject * World, const QJsonArray & jarr)
      }
 }
 
-void AGeoObject::UpdateFromSlabModel(ASlabModel* SlabModel)
+bool AGeoObject::UpdateFromSlabModel(ASlabModel * SlabModel)
 {
     fActive  = SlabModel->fActive;
     Name     = SlabModel->name;
@@ -408,46 +408,60 @@ void AGeoObject::UpdateFromSlabModel(ASlabModel* SlabModel)
     width    = SlabModel->width;
     style    = SlabModel->style;
 
-    if (Shape) delete Shape;
+    QString err;
+    delete Shape; Shape = nullptr;
     switch (SlabModel->XYrecord.shape)
     {
       case 0:
       {
         AGeoBox * box = new AGeoBox(0.5*SlabModel->XYrecord.size1, 0.5*SlabModel->XYrecord.size2, 0.5*SlabModel->height);
+        Shape = box;
         if (!SlabModel->XYrecord.strSize1.isEmpty()) box->str2dx = SlabModel->XYrecord.strSize1;
         if (!SlabModel->XYrecord.strSize2.isEmpty()) box->str2dy = SlabModel->XYrecord.strSize2;
         if (!SlabModel->strHeight.isEmpty())         box->str2dz = SlabModel->strHeight;
-        box->updateShape();
-        Shape = box;
-
-        Orientation[2] = SlabModel->XYrecord.angle;
-        if (!SlabModel->XYrecord.strAngle.isEmpty()) OrientationStr[2] = SlabModel->XYrecord.strAngle;
+        err = box->updateShape();
+        if (!err.isEmpty()) return false;
         break;
       }
       case 1:
       {
         AGeoTube * tube = new AGeoTube(0.5*SlabModel->XYrecord.size1, 0.5*SlabModel->height);
+        Shape = tube;
         if (!SlabModel->XYrecord.strSize1.isEmpty()) tube->str2rmax = SlabModel->XYrecord.strSize1;
         if (!SlabModel->strHeight.isEmpty())         tube->str2dz   = SlabModel->strHeight;
-        tube->updateShape();
-        Shape = tube;
+        err = tube->updateShape();
+        if (!err.isEmpty()) return false;
         break;
       }
       case 2:
       {
         AGeoPolygon * poly = new AGeoPolygon(SlabModel->XYrecord.sides, 0.5*SlabModel->height, 0.5*SlabModel->XYrecord.size1, 0.5*SlabModel->XYrecord.size1);
+        Shape = poly;
         if (!SlabModel->XYrecord.strSides.isEmpty()) poly->strNedges = SlabModel->XYrecord.strSides;
         if (!SlabModel->XYrecord.strSize1.isEmpty()) poly->str2rmaxL = poly->str2rmaxU = SlabModel->XYrecord.strSize1;
         if (!SlabModel->strHeight.isEmpty())         poly->str2dz    = SlabModel->strHeight;
-        poly->updateShape();
-        Shape = poly;
-
-        Orientation[2] = SlabModel->XYrecord.angle;
-        if (!SlabModel->XYrecord.strAngle.isEmpty()) OrientationStr[2] = SlabModel->XYrecord.strAngle;
+        err = poly->updateShape();
+        if (!err.isEmpty()) return false;
         break;        
       }
     }
-    AGeoConsts::getConstInstance().evaluateFormula(OrientationStr[2], Orientation[2]);
+
+    bool ok = true;
+    if (SlabModel->XYrecord.shape == 1)
+    {
+        Orientation[2] = 0;
+        OrientationStr[2].clear();
+    }
+    else
+    {
+        Orientation[2] = SlabModel->XYrecord.angle;
+        if (!SlabModel->XYrecord.strAngle.isEmpty())
+        {
+            OrientationStr[2] = SlabModel->XYrecord.strAngle;
+            ok = AGeoConsts::getConstInstance().evaluateFormula(OrientationStr[2], Orientation[2]);
+        }
+    }
+    return ok;
 }
 
 ASlabModel * AGeoObject::getSlabModel()
@@ -771,11 +785,11 @@ void AGeoObject::addObjectFirst(AGeoObject *Object)
   Object->Container = this;
 }
 
-void AGeoObject::addObjectLast(AGeoObject *Object)
+void AGeoObject::addObjectLast(AGeoObject * Object)
 {
   Object->Container = this;
 
-  if (this->ObjectType->isWorld())
+  if (this->ObjectType->isWorld() && !Object->ObjectType->isSlab())
   {
       //put before slabs
       int i=0;

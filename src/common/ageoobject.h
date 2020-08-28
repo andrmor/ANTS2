@@ -68,7 +68,7 @@ public:
   QString LastScript;
 
   //for slabs
-  void UpdateFromSlabModel(ASlabModel* SlabModel);
+  bool UpdateFromSlabModel(ASlabModel * SlabModel);
   ASlabModel* getSlabModel();       // danger! it returns 0 if the object is not slab!
   void setSlabModel(ASlabModel* slab);  // force-converts to slab type!
 

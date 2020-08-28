@@ -66,11 +66,9 @@ void ASlabXYModel::readFromJson(const QJsonObject & json)
 
 ASlabModel::ASlabModel(bool fActive, QString name, double height, int material, bool fCenter, int shape, int sides, double size1, double size2, double angle)
     : fActive(fActive), name(name), height(height), material(material), fCenter(fCenter)
-{XYrecord.shape=shape; XYrecord.sides=sides; XYrecord.size1=size1; XYrecord.size2=size2; XYrecord.angle=angle;
-    color = -1; style = 1; width = 1;}
+{XYrecord.shape=shape; XYrecord.sides=sides; XYrecord.size1=size1; XYrecord.size2=size2; XYrecord.angle=angle;}
 
-ASlabModel::ASlabModel() : fActive(true), name(randomSlabName()), height(10), material(-1), fCenter(false)
-{color = -1; style = 1; width = 1;}
+ASlabModel::ASlabModel() : name(randomSlabName()) {}
 
 bool ASlabModel::operator==(const ASlabModel &other) const  //Z and line properties are not checked!
 {

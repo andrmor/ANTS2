@@ -35,20 +35,20 @@ public:
                            int shape, int sides, double size1, double size2, double angle);
   ASlabModel();
 
-  bool    fActive;
+  bool    fActive = true;
   QString name;
-  double  height;
-  int     material;
-  bool    fCenter;
+  double  height = 10.0;
+  int     material = -1;
+  bool    fCenter = false;
 
   QString strHeight;
 
   ASlabXYModel XYrecord;
 
   //visualization properties
-  int color; // initialized as -1, updated when first time shown by SlabListWidget
-  int style;
-  int width;
+  int color = -1; // initialized as -1, updated when first time shown by SlabListWidget
+  int style = 1;
+  int width = 1;
 
   bool operator==(const ASlabModel& other) const;
   bool operator!=(const ASlabModel& other) const;

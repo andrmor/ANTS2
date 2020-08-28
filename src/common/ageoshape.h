@@ -134,6 +134,7 @@ public:
   QString getShapeType() const override {return "TGeoScaledShape";}
   QString getShapeTemplate() const override {return "TGeoScaledShape( TGeoShape(parameters), scaleX, scaleY, scaleZ )";}
   QString getHelp() const override;
+  QString updateScalingFactors();
 
   bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
   void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
@@ -159,6 +160,7 @@ public:
   double scaleX = 1.0;
   double scaleY = 1.0;
   double scaleZ = 1.0;
+  QString strScaleX, strScaleY, strScaleZ;
   AGeoShape * BaseShape = nullptr;
 };
 

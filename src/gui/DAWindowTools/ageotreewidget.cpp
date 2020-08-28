@@ -1767,6 +1767,7 @@ void AGeoWidget::onObjectSelectionChanged(const QString SelectedObject)
     CurrentObject = obj;
     //qDebug() << "New current object:"<<CurrentObject->Name;
     UpdateGui();
+    fEditingMode = false;
     //qDebug() << "OnObjectSelection procedure completed";
 }
 

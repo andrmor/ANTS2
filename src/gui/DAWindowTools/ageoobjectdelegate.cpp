@@ -113,9 +113,9 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
         hbsw->addWidget(ledScaleZ);
         for (AOneLineTextEdit * led : {ledScaleX, ledScaleY, ledScaleZ})
         {
-            led->setText("1.0");
-            connect(led, &AOneLineTextEdit::editingFinished, this, &AGeoObjectDelegate::updateScalingFactors);
+            configureHighligherAndCompleter(led);
             connect(led, &AOneLineTextEdit::textChanged,     this, &AGeoObjectDelegate::onContentChanged);
+            led->setText("1.0");
         }
     hbs->addWidget(scaleWidget);
     hbs->addStretch();
@@ -222,13 +222,28 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
             if (obj->Container && obj->Container->Container)
                 obj->Material = obj->Container->Container->Material;
         }
-
+        QString errorStr;
         AGeoShape * shape = ShapeCopy;
         AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
-        if (scaled) shape = scaled->BaseShape;
+        if (scaled)
+        {
+            scaled->strScaleX = ledScaleX->text();
+            scaled->strScaleY = ledScaleY->text();
+            scaled->strScaleZ = ledScaleZ->text();
+
+            errorStr =  scaled->updateScalingFactors();
+            if (!errorStr.isEmpty())
+            {
+                qDebug() << errorStr;
+                QMessageBox::warning(this->ParentWidget, "", errorStr);
+                return false;
+            }
+            shape = scaled->BaseShape;
+        }
         if (shape)
         {
-            QString errorStr = shape->updateShape();
+            errorStr.clear();
+            errorStr = shape->updateShape();
             if (!errorStr.isEmpty())
             {
                 qDebug() << errorStr;
@@ -440,26 +455,30 @@ void AGeoObjectDelegate::updatePteShape(const QString & text)
     pbShapeInfo->setToolTip(pteShape->document()->toPlainText());
 }
 
-void AGeoObjectDelegate::updateScalingFactors()
+QString AGeoObjectDelegate::updateScalingFactors() const //not needed anymore need to kill as well as pteshape
 {
     AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
     if (scaled)
     {
         // !*! TFormula?   common method with combine with toggle on check box scale?
-        /*
+        scaled->strScaleX = ledScaleX->text();
+        scaled->strScaleY = ledScaleY->text();
+        scaled->strScaleZ = ledScaleZ->text();
+
         const AGeoConsts & GC = AGeoConsts::getConstInstance();
         QString errorStr;
         bool ok;
-        ok = GC.updateParameter(errorStr, ledScaleX->text(), scaled->scaleX, true, true, false); if (!ok) return errorStr;
-        ok = GC.updateParameter(errorStr, ledScaleY->text(), scaled->scaleY, true, true, false); if (!ok) return errorStr;
-        ok = GC.updateParameter(errorStr, ledScaleZ->text(), scaled->scaleZ, true, true, false); if (!ok) return errorStr;
-        return "";*/
-
+        ok = GC.updateParameter(errorStr, scaled->strScaleX, scaled->scaleX, true, true, false); if (!ok) return errorStr;
+        ok = GC.updateParameter(errorStr, scaled->strScaleY, scaled->scaleY, true, true, false); if (!ok) return errorStr;
+        ok = GC.updateParameter(errorStr, scaled->strScaleZ, scaled->scaleZ, true, true, false); if (!ok) return errorStr;
+        /*
         scaled->scaleX = ledScaleX->text().toDouble();
         scaled->scaleY = ledScaleY->text().toDouble();
-        scaled->scaleZ = ledScaleZ->text().toDouble();
-
+        scaled->scaleZ = ledScaleZ->text().toDouble();*/
+        qDebug() <<scaled->scaleX <<scaled->scaleY <<scaled->scaleZ;
     }
+    else qWarning() << "Read delegate: Scaled shape not found!";
+    return "";
 }
 
 const AGeoShape * AGeoObjectDelegate::getBaseShapeOfObject(const AGeoObject * obj)
@@ -625,6 +644,7 @@ void AGeoObjectDelegate::Update(const AGeoObject *obj)
     ledTheta->setText(obj->OrientationStr[1].isEmpty() ? QString::number(obj->Orientation[1]) : obj->OrientationStr[1]);
     ledPsi->  setText(obj->OrientationStr[2].isEmpty() ? QString::number(obj->Orientation[2]) : obj->OrientationStr[2]);
 
+
     updateTypeLabel();
     updateControlUI();
 
@@ -632,15 +652,15 @@ void AGeoObjectDelegate::Update(const AGeoObject *obj)
     cbScale->setChecked(scaledShape);
     if (scaledShape)
     {
-        ledScaleX->setText(QString::number(scaledShape->scaleX));
-        ledScaleY->setText(QString::number(scaledShape->scaleY));
-        ledScaleZ->setText(QString::number(scaledShape->scaleZ));
+        ledScaleX->setText(scaledShape->strScaleX.isEmpty() ? QString::number(scaledShape->scaleX) : scaledShape->strScaleX);
+        ledScaleY->setText(scaledShape->strScaleY.isEmpty() ? QString::number(scaledShape->scaleY) : scaledShape->strScaleY);
+        ledScaleZ->setText(scaledShape->strScaleZ.isEmpty() ? QString::number(scaledShape->scaleZ) : scaledShape->strScaleZ);
     }
 }
 
 void AGeoObjectDelegate::onContentChanged()
 {
-    pbShapeInfo->setToolTip(pteShape->document()->toPlainText());
+    //pbShapeInfo->setToolTip(pteShape->document()->toPlainText());
     emit ContentChanged();
     //qDebug() <<pteShape->document()->toPlainText();
 }

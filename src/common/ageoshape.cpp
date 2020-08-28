@@ -187,9 +187,11 @@ void AGeoBox::readFromJson(const QJsonObject &json)
     dy = json["dy"].toDouble();
     dz = json["dz"].toDouble();
 
-    if (!parseJson(json, "str2dx", str2dx)) str2dx.clear(); else updateParameter(str2dx, dx);
-    if (!parseJson(json, "str2dy", str2dy)) str2dy.clear(); else updateParameter(str2dy, dy);
-    if (!parseJson(json, "str2dz", str2dz)) str2dz.clear(); else updateParameter(str2dz, dz);
+    if (!parseJson(json, "str2dx", str2dx)) str2dx.clear();
+    if (!parseJson(json, "str2dy", str2dy)) str2dy.clear();
+    if (!parseJson(json, "str2dz", str2dz)) str2dz.clear();
+
+    updateShape();
 }
 
 bool AGeoBox::readFromTShape(TGeoShape *Tshape)
@@ -2978,14 +2980,33 @@ QString AGeoScaledShape::getHelp() const
     return "TGeoShape scaled with TGeoScale transformation";
 }
 
+QString AGeoScaledShape::updateScalingFactors()
+{
+    const AGeoConsts & GC = AGeoConsts::getConstInstance();
+    QString errorStr;
+    bool ok;
+    ok = GC.updateParameter(errorStr, strScaleX, scaleX, true, true, false); if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, strScaleY, scaleY, true, true, false); if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, strScaleZ, scaleZ, true, true, false); if (!ok) return errorStr;
+    return "";
+}
+
 bool AGeoScaledShape::isGeoConstInUse(const QRegExp & nameRegExp) const
 {
+    if (strScaleX.contains(nameRegExp)) return true;
+    if (strScaleY.contains(nameRegExp)) return true;
+    if (strScaleZ.contains(nameRegExp)) return true;
+
     if (BaseShape) return BaseShape->isGeoConstInUse(nameRegExp);
     return false;
 }
 
 void AGeoScaledShape::replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName)
 {
+    strScaleX.replace(nameRegExp, newName);
+    strScaleY.replace(nameRegExp, newName);
+    strScaleZ.replace(nameRegExp, newName);
+
     if (BaseShape) BaseShape->replaceGeoConstName(nameRegExp, newName);
 }
 
@@ -3208,6 +3229,10 @@ void AGeoScaledShape::writeToJson(QJsonObject &json) const
     json["scaleY"] = scaleY;
     json["scaleZ"] = scaleZ;
 
+    if (!strScaleX.isEmpty()) json["strScaleX"] = strScaleX;
+    if (!strScaleY.isEmpty()) json["strScaleY"] = strScaleY;
+    if (!strScaleZ.isEmpty()) json["strScaleZ"] = strScaleZ;
+
     //json["CompositeGenerationstring"] = BaseShapeGenerationString;
     if (BaseShape)
     {
@@ -3221,6 +3246,10 @@ void AGeoScaledShape::readFromJson(const QJsonObject &json)
     parseJson(json, "scaleX", scaleX);
     parseJson(json, "scaleY", scaleY);
     parseJson(json, "scaleZ", scaleZ);
+
+    if (!parseJson(json, "strScaleX", strScaleX)) strScaleX.clear();
+    if (!parseJson(json, "strScaleY", strScaleY)) strScaleY.clear();
+    if (!parseJson(json, "strScaleZ", strScaleZ)) strScaleZ.clear();
 
     bool bOldSystem = parseJson(json, "BaseShapeGenerationString", BaseShapeGenerationString);
     if (bOldSystem)
@@ -3253,6 +3282,8 @@ void AGeoScaledShape::readFromJson(const QJsonObject &json)
         qWarning() << "Shape generation failed, replacing with box";
         BaseShape = new AGeoBox();
     }
+    updateScalingFactors();
+
 }
 
 bool AGeoScaledShape::readFromTShape(TGeoShape *Tshape)

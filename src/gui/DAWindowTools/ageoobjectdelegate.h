@@ -87,7 +87,7 @@ private slots:
 protected:
     void addLocalLayout(QLayout * lay);
     void updatePteShape(const QString & text);  // !*! obsolete?
-    void updateScalingFactors();
+    QString updateScalingFactors() const;
     const AGeoShape * getBaseShapeOfObject(const AGeoObject *obj);
     void updateTypeLabel();
     void updateControlUI();

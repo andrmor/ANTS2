@@ -426,7 +426,7 @@ void AGeoObjectDelegate::onScaleToggled()
 
 void AGeoObjectDelegate::addLocalLayout(QLayout * lay)
 {
-    lMF->insertLayout(3, lay);
+    lMF->insertLayout(2, lay);
 }
 
 QString AGeoObjectDelegate::updateScalingFactors() const //not needed anymore need to kill as well as pteshape

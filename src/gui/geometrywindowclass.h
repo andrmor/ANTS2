@@ -26,7 +26,6 @@ public:
 
   bool ModePerspective = true;
   int  ZoomLevel = 0; //0 is fastest, +2 is typically the most "natural"
-  bool fNeedZoom = true; //set to true by "ShowGeometry", which force-resets the view
 
   void ShowAndFocus();
   void SetAsActiveRootWindow(); //focus root on this Raster Window

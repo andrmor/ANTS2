@@ -158,7 +158,6 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
         else SetAsActiveRootWindow(); //no activation in this mode
 
         //DRAW
-        fNeedZoom = true;
         setHideUpdate(true);
         ClearRootCanvas();
         if (SAME) MW->Detector->top->Draw("SAME");
@@ -270,14 +269,12 @@ void GeometryWindowClass::ClearRootCanvas()
 
 void GeometryWindowClass::UpdateRootCanvas()
 {
-  //RasterWindow->fCanvas->Modified();
-  //RasterWindow->fCanvas->Update();
     RasterWindow->UpdateRootCanvas();
 }
 
 void GeometryWindowClass::SaveAs(const QString filename)
 {
-  RasterWindow->SaveAs(filename);
+    RasterWindow->SaveAs(filename);
 }
 
 void GeometryWindowClass::ResetView()
@@ -305,8 +302,7 @@ void GeometryWindowClass::PostDraw()
   TView3D *v = dynamic_cast<TView3D*>(RasterWindow->fCanvas->GetView());
   if (!v) return;
 
-  if (fNeedZoom) Zoom();
-  fNeedZoom = false;
+  if (!fRecallWindow) Zoom();
 
   if (ModePerspective)
   {
@@ -317,11 +313,7 @@ void GeometryWindowClass::PostDraw()
       if (v->IsPerspective()) v->SetParallel();
   }
 
-  if (fRecallWindow)
-  {
-      //recalling window properties
-      RasterWindow->setWindowProperties();
-  }
+  if (fRecallWindow) RasterWindow->setWindowProperties();
 
   if (ui->cbShowAxes->isChecked()) v->ShowAxis();
   setHideUpdate(false);
@@ -452,7 +444,7 @@ void findMotherNode(const TGeoNode * node, const TGeoNode* & motherNode)
     motherNode = worldNode;
     if (node == worldNode) return; //already there
 
-    bool bOK = findMotherNodeFor(node, worldNode, motherNode);
+    findMotherNodeFor(node, worldNode, motherNode); //bool OK = ...
 //    if (bOK)
 //        qDebug() << "--- found mother node:"<<motherNode->GetName();
 //    else qDebug() << "--- search failed!";
@@ -684,7 +676,7 @@ void GeometryWindowClass::ShowEvent_Particles(size_t iEvent, bool withSecondarie
         const AEventTrackingRecord * er = MW->SimulationManager->TrackingHistory.at(iEvent);
         er->makeTracks(MW->SimulationManager->Tracks, MW->MpCollection->getListOfParticleNames(), MW->SimulationManager->TrackBuildOptions, withSecondaries);
 
-        for (int iTr=0; iTr<MW->SimulationManager->Tracks.size(); iTr++)
+        for (int iTr=0; iTr < (int)MW->SimulationManager->Tracks.size(); iTr++)
         {
             const TrackHolderClass* th = MW->SimulationManager->Tracks.at(iTr);
             TGeoTrack* track = new TGeoTrack(1, th->UserIndex);

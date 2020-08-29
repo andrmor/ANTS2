@@ -14,7 +14,7 @@ ACameraControlDialog::ACameraControlDialog(RasterWindowBaseClass *RasterWin, QWi
 {
     ui->setupUi(this);
     ui->pbDummy->setDefault(true);
-    for (QPushButton * pb : {ui->pbDummy, ui->pbUpdateRange, ui->pbUpdateWindow, ui->pbUpdateAngles}) pb->setVisible(false);
+    for (QPushButton * pb : {ui->pbDummy, ui->pbSetView}) pb->setVisible(false);
 
     updateGui();
 
@@ -34,6 +34,53 @@ void ACameraControlDialog::showAndUpdate()
 {
     show();
     if (xPos != 0 && yPos != 0) move(xPos, yPos);
+    updateGui();
+}
+
+void ACameraControlDialog::setView()
+{
+    if (!RW->fCanvas->HasViewer3D()) return;
+
+    AGeoViewParameters & p = RW->ViewParameters;
+
+    // Range
+    p.RangeLL[0] = ui->ledRangeLX->text().toDouble();
+    p.RangeLL[1] = ui->ledRangeLY->text().toDouble();
+    p.RangeLL[2] = ui->ledRangeLZ->text().toDouble();
+
+    p.RangeUR[0] = ui->ledRangeUX->text().toDouble();
+    p.RangeUR[1] = ui->ledRangeUY->text().toDouble();
+    p.RangeUR[2] = ui->ledRangeUZ->text().toDouble();
+
+    for (int i = 0; i < 3; i++)
+    {
+        if (p.RangeLL[i] > p.RangeUR[i]) std::swap(p.RangeLL[i], p.RangeUR[i]);
+        else if (p.RangeLL[i] == p.RangeUR[i]) p.RangeUR[i] += 1.0;
+    }
+
+    RW->fCanvas->GetView()->SetRange(p.RangeLL, p.RangeUR);
+
+    // Window
+    p.WinX = ui->ledWx->text().toDouble();
+    p.WinY = ui->ledWy->text().toDouble();
+    p.WinW = ui->ledWw->text().toDouble();
+    p.WinH = ui->ledWh->text().toDouble();
+
+    RW->fCanvas->GetView()->SetWindow(p.WinX, p.WinY, p.WinW, p.WinH);
+
+    // Rotation
+    p.Long = ui->ledLong->text().toDouble();
+    p.Lat  = ui->ledLat->text().toDouble();
+    p.Psi  = ui->ledPsi->text().toDouble();
+
+    int err;
+    RW->fCanvas->GetView()->SetView(p.Long, p.Lat, p.Psi, err);
+
+    // Update canvas
+    RW->fCanvas->Modified();
+    RW->fCanvas->Update();
+
+    // Read back
     updateGui();
 }
 
@@ -67,32 +114,6 @@ void ACameraControlDialog::updateGui()
     ui->ledLat-> setText( QString::number(p.Lat) );
     ui->ledLong->setText( QString::number(p.Long) );
     ui->ledPsi-> setText( QString::number(p.Psi) );
-}
-
-void ACameraControlDialog::on_pbUpdateRange_clicked()
-{
-    if (!RW->fCanvas->HasViewer3D()) return;
-
-    AGeoViewParameters & p = RW->ViewParameters;
-
-    p.RangeLL[0] = ui->ledRangeLX->text().toDouble();
-    p.RangeLL[1] = ui->ledRangeLY->text().toDouble();
-    p.RangeLL[2] = ui->ledRangeLZ->text().toDouble();
-
-    p.RangeUR[0] = ui->ledRangeUX->text().toDouble();
-    p.RangeUR[1] = ui->ledRangeUY->text().toDouble();
-    p.RangeUR[2] = ui->ledRangeUZ->text().toDouble();
-
-    for (int i=0; i<3; i++)
-    {
-        if (p.RangeLL[i] > p.RangeUR[i]) std::swap(p.RangeLL[i], p.RangeUR[i]);
-        else if (p.RangeLL[i] == p.RangeUR[i]) p.RangeUR[i] += 1.0;
-    }
-
-    RW->fCanvas->GetView()->SetRange(p.RangeLL, p.RangeUR);
-    RW->fCanvas->Modified();
-    RW->fCanvas->Update();
-    updateGui();
 }
 
 void ACameraControlDialog::on_ledCenterX_editingFinished()
@@ -129,36 +150,10 @@ void ACameraControlDialog::setCenter(int index, QLineEdit *led)
     p.RangeLL[index] = c - halfRange;
     p.RangeUR[index] = c + halfRange;
 
-    RW->fCanvas->GetView()->SetRange(p.RangeLL, p.RangeUR);
-    RW->fCanvas->Modified();
-    RW->fCanvas->Update();
-    updateGui();
+    setView();
 }
 
-void ACameraControlDialog::on_pbUpdateWindow_clicked()
+void ACameraControlDialog::on_pbSetView_clicked()
 {
-    AGeoViewParameters & p = RW->ViewParameters;
-
-    p.WinX = ui->ledWx->text().toDouble();
-    p.WinY = ui->ledWy->text().toDouble();
-    p.WinW = ui->ledWw->text().toDouble();
-    p.WinH = ui->ledWh->text().toDouble();
-
-    RW->fCanvas->GetView()->SetWindow(p.WinX, p.WinY, p.WinW, p.WinH);
-    on_pbUpdateAngles_clicked();
-}
-
-void ACameraControlDialog::on_pbUpdateAngles_clicked()
-{
-    AGeoViewParameters & p = RW->ViewParameters;
-
-    p.Long = ui->ledLong->text().toDouble();
-    p.Lat  = ui->ledLat->text().toDouble();
-    p.Psi  = ui->ledPsi->text().toDouble();
-
-    int err;
-    RW->fCanvas->GetView()->SetView(p.Long, p.Lat, p.Psi, err);
-    RW->fCanvas->Modified();
-    RW->fCanvas->Update();
-    updateGui();
+    setView();
 }

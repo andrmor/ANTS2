@@ -89,7 +89,6 @@ void RasterWindowBaseClass::mouseMoveEvent(QMouseEvent *event)
         if (fInvertedXYforDrag) fCanvas->HandleInput(kButton1Motion, event->y(), event->x());
         else                    fCanvas->HandleInput(kButton1Motion, event->x(), event->y());
 
-        //if (!fCanvas->HasViewer3D() || !fCanvas->GetView()) return;
         onViewChanged();
     }
     else if (event->buttons() & Qt::RightButton)

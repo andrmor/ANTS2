@@ -642,41 +642,9 @@ center</string>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pbUpdateRange">
-       <property name="maximumSize">
-        <size>
-         <width>50</width>
-         <height>16777215</height>
-        </size>
-       </property>
+      <widget class="QPushButton" name="pbSetView">
        <property name="text">
-        <string>...Range</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="pbUpdateWindow">
-       <property name="maximumSize">
-        <size>
-         <width>75</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>...Window</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="pbUpdateAngles">
-       <property name="maximumSize">
-        <size>
-         <width>50</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>...Angl</string>
+        <string>...SetView</string>
        </property>
       </widget>
      </item>
@@ -689,208 +657,208 @@ center</string>
   <connection>
    <sender>ledRangeLX</sender>
    <signal>editingFinished()</signal>
-   <receiver>pbUpdateRange</receiver>
+   <receiver>pbSetView</receiver>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>87</x>
-     <y>68</y>
+     <x>70</x>
+     <y>58</y>
     </hint>
     <hint type="destinationlabel">
-     <x>225</x>
-     <y>368</y>
+     <x>222</x>
+     <y>360</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>ledRangeLY</sender>
    <signal>editingFinished()</signal>
-   <receiver>pbUpdateRange</receiver>
+   <receiver>pbSetView</receiver>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>87</x>
-     <y>100</y>
+     <x>33</x>
+     <y>94</y>
     </hint>
     <hint type="destinationlabel">
-     <x>225</x>
-     <y>368</y>
+     <x>231</x>
+     <y>355</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>ledRangeLZ</sender>
    <signal>editingFinished()</signal>
-   <receiver>pbUpdateRange</receiver>
+   <receiver>pbSetView</receiver>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>62</x>
-     <y>132</y>
+     <x>48</x>
+     <y>124</y>
     </hint>
     <hint type="destinationlabel">
-     <x>225</x>
-     <y>368</y>
+     <x>259</x>
+     <y>358</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>ledRangeUX</sender>
    <signal>editingFinished()</signal>
-   <receiver>pbUpdateRange</receiver>
+   <receiver>pbSetView</receiver>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>214</x>
-     <y>68</y>
+     <x>205</x>
+     <y>59</y>
     </hint>
     <hint type="destinationlabel">
-     <x>225</x>
-     <y>368</y>
+     <x>340</x>
+     <y>356</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>ledRangeUY</sender>
    <signal>editingFinished()</signal>
-   <receiver>pbUpdateRange</receiver>
+   <receiver>pbSetView</receiver>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>214</x>
-     <y>100</y>
+     <x>178</x>
+     <y>95</y>
     </hint>
     <hint type="destinationlabel">
-     <x>225</x>
-     <y>368</y>
+     <x>328</x>
+     <y>344</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>ledRangeUZ</sender>
    <signal>editingFinished()</signal>
-   <receiver>pbUpdateRange</receiver>
+   <receiver>pbSetView</receiver>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>214</x>
-     <y>132</y>
+     <x>189</x>
+     <y>128</y>
     </hint>
     <hint type="destinationlabel">
-     <x>225</x>
-     <y>368</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledWy</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateWindow</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>117</x>
-     <y>232</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>274</x>
-     <y>352</y>
+     <x>317</x>
+     <y>353</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>ledWx</sender>
    <signal>editingFinished()</signal>
-   <receiver>pbUpdateWindow</receiver>
+   <receiver>pbSetView</receiver>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>71</x>
-     <y>197</y>
+     <x>98</x>
+     <y>196</y>
     </hint>
     <hint type="destinationlabel">
-     <x>284</x>
-     <y>358</y>
+     <x>218</x>
+     <y>345</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledWy</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbSetView</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>105</x>
+     <y>232</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>212</x>
+     <y>343</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>ledWw</sender>
    <signal>editingFinished()</signal>
-   <receiver>pbUpdateWindow</receiver>
+   <receiver>pbSetView</receiver>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>291</x>
-     <y>194</y>
+     <x>285</x>
+     <y>193</y>
     </hint>
     <hint type="destinationlabel">
-     <x>302</x>
-     <y>353</y>
+     <x>299</x>
+     <y>354</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>ledWh</sender>
    <signal>editingFinished()</signal>
-   <receiver>pbUpdateWindow</receiver>
+   <receiver>pbSetView</receiver>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>293</x>
+     <x>278</x>
      <y>226</y>
     </hint>
     <hint type="destinationlabel">
-     <x>302</x>
-     <y>354</y>
+     <x>286</x>
+     <y>365</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>ledLat</sender>
    <signal>editingFinished()</signal>
-   <receiver>pbUpdateAngles</receiver>
+   <receiver>pbSetView</receiver>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>90</x>
-     <y>300</y>
+     <x>92</x>
+     <y>301</y>
     </hint>
     <hint type="destinationlabel">
-     <x>343</x>
-     <y>346</y>
+     <x>250</x>
+     <y>354</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>ledLong</sender>
    <signal>editingFinished()</signal>
-   <receiver>pbUpdateAngles</receiver>
+   <receiver>pbSetView</receiver>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>173</x>
-     <y>291</y>
+     <x>178</x>
+     <y>298</y>
     </hint>
     <hint type="destinationlabel">
-     <x>361</x>
-     <y>356</y>
+     <x>232</x>
+     <y>354</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>ledPsi</sender>
    <signal>editingFinished()</signal>
-   <receiver>pbUpdateAngles</receiver>
+   <receiver>pbSetView</receiver>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>271</x>
-     <y>304</y>
+     <y>305</y>
     </hint>
     <hint type="destinationlabel">
-     <x>361</x>
-     <y>350</y>
+     <x>274</x>
+     <y>365</y>
     </hint>
    </hints>
   </connection>

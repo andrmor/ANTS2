@@ -1101,9 +1101,11 @@ void AGeoTube::readFromJson(const QJsonObject &json)
     rmin = json["rmin"].toDouble();
     dz   = json["dz"].toDouble();
 
-    if (!parseJson(json, "str2rmax", str2rmax)) str2rmax.clear(); else updateParameter(str2rmax, rmax);
-    if (!parseJson(json, "str2rmin", str2rmin)) str2rmin.clear(); else updateParameter(str2rmin, rmin);
-    if (!parseJson(json, "str2dz",   str2dz))   str2dz.clear();   else updateParameter(str2dz,   dz);
+    if (!parseJson(json, "str2rmax", str2rmax)) str2rmax.clear();
+    if (!parseJson(json, "str2rmin", str2rmin)) str2rmin.clear();
+    if (!parseJson(json, "str2dz",   str2dz))   str2dz.clear();
+
+    updateShape();
 }
 
 bool AGeoTube::readFromTShape(TGeoShape *Tshape)
@@ -1408,6 +1410,8 @@ void AGeoTrd2::readFromJson(const QJsonObject &json)
     if (!parseJson(json, "str2dy1", str2dy1)) str2dy1.clear();
     if (!parseJson(json, "str2dy2", str2dy2)) str2dy2.clear();
     if (!parseJson(json, "str2dz",  str2dz))  str2dz .clear();
+
+    updateShape();
 }
 
 bool AGeoTrd2::readFromTShape(TGeoShape *Tshape)
@@ -1752,6 +1756,7 @@ void AGeoConeSeg::readFromJson(const QJsonObject &json)
 
     if (!parseJson(json, "strPhi1", strPhi1)) strPhi1.clear();
     if (!parseJson(json, "strPhi2", strPhi2)) strPhi2.clear();
+    updateShape();
 }
 
 bool AGeoConeSeg::readFromTShape(TGeoShape *Tshape)
@@ -1887,9 +1892,11 @@ void AGeoParaboloid::readFromJson(const QJsonObject &json)
     rhi = json["rhi"].toDouble();
     dz  = json["dz"].toDouble();
 
-    if (!parseJson(json, "str2rlo", str2rlo)) str2rlo.clear(); else updateParameter(str2rlo, rlo, false);
-    if (!parseJson(json, "str2rhi", str2rhi)) str2rhi.clear(); else updateParameter(str2rhi, rhi, false);
-    if (!parseJson(json, "str2dz", str2dz))   str2dz.clear() ; else updateParameter(str2dz,  dz);
+    if (!parseJson(json, "str2rlo", str2rlo)) str2rlo.clear();
+    if (!parseJson(json, "str2rhi", str2rhi)) str2rhi.clear();
+    if (!parseJson(json, "str2dz", str2dz))   str2dz.clear() ;
+
+    updateShape();
 }
 
 bool AGeoParaboloid::readFromTShape(TGeoShape *Tshape)
@@ -2182,9 +2189,9 @@ void AGeoEltu::readFromJson(const QJsonObject &json)
     b  = json["b"] .toDouble();
     dz = json["dz"].toDouble();
 
-    if (!parseJson(json, "str2a", str2a))   str2a.clear();  else updateParameter(str2a,  a);
-    if (!parseJson(json, "str2b", str2b))   str2b.clear();  else updateParameter(str2b,  b);
-    if (!parseJson(json, "str2dz", str2dz)) str2dz.clear(); else updateParameter(str2dz, dz);
+    if (!parseJson(json, "str2a", str2a))   str2a.clear();
+    if (!parseJson(json, "str2b", str2b))   str2b.clear();
+    if (!parseJson(json, "str2dz", str2dz)) str2dz.clear();
 
     updateShape();
 }
@@ -2663,6 +2670,7 @@ void AGeoPcon::readFromJson(const QJsonObject &json)
         qWarning() << "Error in reading AGeoPcone from json";
         Sections.resize(2);
     }
+    updateShape();
 }
 
 bool AGeoPcon::readFromTShape(TGeoShape *Tshape)
@@ -2969,6 +2977,8 @@ void AGeoPolygon::readFromJson(const QJsonObject &json)
     if (!parseJson(json, "str2rmaxL", str2rmaxL)) str2rmaxL.clear();
     if (!parseJson(json, "str2rminU", str2rminU)) str2rminU.clear();
     if (!parseJson(json, "str2rmaxU", str2rmaxU)) str2rmaxU.clear();
+
+    updateShape();
 }
 
 AGeoScaledShape::AGeoScaledShape(QString ShapeGenerationString, double scaleX, double scaleY, double scaleZ) :

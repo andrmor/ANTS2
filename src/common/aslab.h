@@ -64,9 +64,8 @@ public:
   QString makeRectangularSlabScriptString();
   QString makeRoundSlabScriptString();
   QString makePolygonSlabScriptString();
-  QString makeSlabScriptString();
+  QString makeSlabScriptString(QString matStr);
 
-  QString materialPlaceholderStr = "________";
 };
 
 #endif // ASLAB_H

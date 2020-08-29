@@ -1321,16 +1321,23 @@ void AGeoTreeWidget::objectToScript(AGeoObject *obj, QString &script, int ident,
     {
          //nothing to do
     }
-    else if (obj->ObjectType->isSlab() || obj->ObjectType->isSingle() )
+    else if (obj->ObjectType->isSlab())
     {
-        script += "\n" + QString(" ").repeated(ident)+ makeScriptString_basicObject(obj, bExpandMaterial);
+        script += "\n" + QString(" ").repeated(ident)+ makeScriptString_slab(obj, bExpandMaterial, ident);
         script += "\n" + QString(" ").repeated(ident)+ makeLinePropertiesString(obj);
+
         if (obj->ObjectType->isLightguide())
         {
             script += "\n";
             script += "\n" + QString(" ").repeated(ident)+ "//=== Lightguide object is not supported! ===";
             script += "\n";
         }
+        if (bRecursive) objectMembersToScript(obj, script, ident + 2, bExpandMaterial, bRecursive);
+    }
+    else if (obj->ObjectType->isSingle() )
+    {
+        script += "\n" + QString(" ").repeated(ident)+ makeScriptString_basicObject(obj, bExpandMaterial);
+        script += "\n" + QString(" ").repeated(ident)+ makeLinePropertiesString(obj);
         if (bRecursive) objectMembersToScript(obj, script, ident + 2, bExpandMaterial, bRecursive);
     }
     else if (obj->ObjectType->isComposite())
@@ -1429,21 +1436,36 @@ const QString AGeoTreeWidget::makeScriptString_basicObject(AGeoObject* obj, bool
     return str;
 }
 
-const QString AGeoTreeWidget::makeScriptString_slab(AGeoObject *obj, bool bExpandMaterials) const
+const QString AGeoTreeWidget::makeScriptString_slab(AGeoObject *obj, bool bExpandMaterials, int ident) const
+{
+    ATypeSlabObject *slab = static_cast<ATypeSlabObject*>(obj->ObjectType);
+    ASlabModel *m = static_cast<ASlabModel*>(slab->SlabModel);
+    QString str;
+    if (m->fCenter)
+    {
+        str += makeScriptString_setCenterSlab(obj) + "\n" + QString(" ").repeated(ident);
+    }
+
+    QString matStr = (bExpandMaterials && obj->Material < Sandwich->GetMaterials().size() ?
+         Sandwich->GetMaterials().at(obj->Material) + "_mat" : QString::number(obj->Material));
+    str += m->makeSlabScriptString(matStr);
+
+    return str;
+
+}
+
+const QString AGeoTreeWidget::makeScriptString_setCenterSlab(AGeoObject *obj) const
 {
     ATypeSlabObject *slab = static_cast<ATypeSlabObject*>(obj->ObjectType);
     ASlabModel *m = static_cast<ASlabModel*>(slab->SlabModel);
 
-    QString str;
     if (m->fCenter)
     {
-        str += QString("geo.SetCenterSlab(") +
+        return QString("geo.SetCenterSlab(") +
                 "'" + m->name + "', " +
-                QString::number(Sandwich->ZOriginType) + ")\n\n" ;
+                QString::number(Sandwich->ZOriginType) + ")     //setting center slab" ;
     }
-    str += m->makeSlabScriptString() + "\n\n";
-    return str;
-
+    return "";
 }
 
 QString AGeoTreeWidget::makeScriptString_arrayObject(AGeoObject *obj)

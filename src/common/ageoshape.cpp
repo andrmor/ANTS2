@@ -2504,7 +2504,7 @@ bool AGeoPcon::isGeoConstInUse(const QRegExp &nameRegExp) const
     if (strPhi .contains(nameRegExp)) return true;
     if (strdPhi.contains(nameRegExp)) return true;
 
-    for (APolyCGsection s : Sections)
+    for (const APolyCGsection &s : Sections)
     {
         if (s.isGeoConstInUse(nameRegExp)) return true;
     }
@@ -2517,7 +2517,7 @@ void AGeoPcon::replaceGeoConstName(const QRegExp &nameRegExp, const QString &new
     strPhi .replace(nameRegExp, newName);
     strdPhi.replace(nameRegExp, newName);
 
-    for (APolyCGsection s : Sections)
+    for (APolyCGsection &s : Sections)
     {
         s.replaceGeoConstName(nameRegExp, newName);
     }

@@ -181,6 +181,56 @@ QString ASlabModel::randomSlabName()
     return randomString;
 }
 
+QString ASlabModel::makeRectangularSlabScriptString()
+{
+    ASlabXYModel &xy = XYrecord;
+    return QString(QString::number(height)) + ", "+
+                   QString::number(xy.size1) + ", "+
+                   QString::number(xy.size2) + ", "+
+                   QString::number(xy.angle) + ")";
+}
+
+
+QString ASlabModel::makeRoundSlabScriptString()
+{
+    ASlabXYModel &xy = XYrecord;
+    return QString(QString::number(height)) + "', "+
+                   QString::number(xy.size1) + ")";
+}
+
+QString ASlabModel::makePolygonSlabScriptString()
+{
+    ASlabXYModel &xy = XYrecord;
+    return QString(QString::number(height)) + ", "+
+                   QString::number(xy.size1) + ", "+
+                   QString::number(xy.angle) + ", "+
+                   QString::number(xy.sides) + ")";
+}
+
+QString ASlabModel::makeSlabScriptString()
+{
+    ASlabXYModel &xy = XYrecord;
+    switch(xy.shape)
+    {
+        case 0:
+            return QString("geo.SlabRectangular( ") +
+                    "'" + name + "', " +
+                    materialPlaceholderStr + ", " +
+                    makeRectangularSlabScriptString();
+        case 1:
+            return QString("geo.SlabRound( ") +
+                    "'" + name + "', " +
+                    materialPlaceholderStr + ", " +
+                    makeRoundSlabScriptString();
+        case 2:
+            return QString("geo.SlabPolygon( ") +
+                    "'" + name + "', " +
+                    materialPlaceholderStr + ", " +
+                    makePolygonSlabScriptString();
+    }
+    return "slab shape not found";
+}
+
 void ASlabModel::updateWorldSize(double & XYm) const
 {
     if (XYrecord.size1 > XYm)

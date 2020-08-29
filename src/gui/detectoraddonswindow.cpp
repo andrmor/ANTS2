@@ -1280,6 +1280,8 @@ void DetectorAddOnsWindow::on_pbConvertToScript_clicked()
     script += "  //Defined materials:\n";
     for (int i=0; i<Detector->MpCollection->countMaterials(); i++)
         script += "  var " + Detector->MpCollection->getMaterialName(i) + "_mat = " + QString::number(i) + "\n";
+    script += "  \n";
+    twGeo->commonSlabToScript(script);
 
     twGeo->objectMembersToScript(World, script, 2, true, true);
 

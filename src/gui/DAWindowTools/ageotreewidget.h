@@ -38,6 +38,7 @@ public slots:
   void onGridReshapeRequested(QString objName);
   void objectMembersToScript(AGeoObject *Master, QString &script, int ident, bool bExpandMaterial, bool bRecursive);
   void objectToScript(AGeoObject *obj, QString &script, int ident, bool bExpandMaterial, bool bRecursive);
+  void commonSlabToScript(QString &script);
   void rebuildDetetctorAndRestoreCurrentDelegate();
 
 private slots:
@@ -96,6 +97,7 @@ private:
   void menuActionAddNewMonitor(QString ContainerName);
 
   const QString makeScriptString_basicObject(AGeoObject *obj, bool bExpandMaterials) const;
+  const QString makeScriptString_slab(AGeoObject *obj, bool bExpandMaterials) const;
   QString makeScriptString_arrayObject(AGeoObject *obj);
   const QString makeScriptString_monitorBaseObject(const AGeoObject *obj) const;
   const QString makeScriptString_monitorConfig(const AGeoObject *obj) const;

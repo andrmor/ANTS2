@@ -1381,6 +1381,20 @@ void AGeoTreeWidget::objectToScript(AGeoObject *obj, QString &script, int ident,
     }
 }
 
+void AGeoTreeWidget::commonSlabToScript(QString &script)
+{
+    script += QString ("  geo.SetCommonSlabMode(") +
+                      QString::number(Sandwich->SandwichState) + ")\n";
+
+    ASlabXYModel* xy =static_cast<ASlabXYModel*>(Sandwich->DefaultXY);
+    script += QString("  geo.SetCommonSlabProperties(") +
+            QString::number(xy->shape) + ", " +
+            QString::number(xy->size1) + ", " +
+            QString::number(xy->size2) + ", " +
+            QString::number(xy->angle) + ", " +
+            QString::number(xy->sides) + ")\n";
+}
+
 void AGeoTreeWidget::rebuildDetetctorAndRestoreCurrentDelegate()
 {
     const QString CurrentObjName = ( EditWidget->getCurrentObject() ? EditWidget->getCurrentObject()->Name : "" );
@@ -1413,6 +1427,23 @@ const QString AGeoTreeWidget::makeScriptString_basicObject(AGeoObject* obj, bool
 
     AGeoConsts::getConstInstance().formulaToJavaScript(str);
     return str;
+}
+
+const QString AGeoTreeWidget::makeScriptString_slab(AGeoObject *obj, bool bExpandMaterials) const
+{
+    ATypeSlabObject *slab = static_cast<ATypeSlabObject*>(obj->ObjectType);
+    ASlabModel *m = static_cast<ASlabModel*>(slab->SlabModel);
+
+    QString str;
+    if (m->fCenter)
+    {
+        str += QString("geo.SetCenterSlab(") +
+                "'" + m->name + "', " +
+                QString::number(Sandwich->ZOriginType) + ")\n\n" ;
+    }
+    str += m->makeSlabScriptString() + "\n\n";
+    return str;
+
 }
 
 QString AGeoTreeWidget::makeScriptString_arrayObject(AGeoObject *obj)

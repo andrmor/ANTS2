@@ -60,6 +60,13 @@ public:
   void updateWorldSize(double &XYm) const;
 
   static QString randomSlabName();
+
+  QString makeRectangularSlabScriptString();
+  QString makeRoundSlabScriptString();
+  QString makePolygonSlabScriptString();
+  QString makeSlabScriptString();
+
+  QString materialPlaceholderStr = "________";
 };
 
 #endif // ASLAB_H

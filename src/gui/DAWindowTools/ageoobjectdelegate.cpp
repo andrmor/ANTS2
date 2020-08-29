@@ -50,9 +50,7 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
     //object type
     labType = new QLabel("");
     labType->setAlignment(Qt::AlignCenter);
-    QFont font = labType->font();
-    font.setBold(true);
-    labType->setFont(font);
+    QFont font = labType->font(); font.setBold(true); labType->setFont(font);
     lMF->addWidget(labType);
 
     //name and material line
@@ -77,7 +75,6 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
       cobMat->setContextMenuPolicy(Qt::NoContextMenu);
       cobMat->addItems(materials);
       connect(cobMat, SIGNAL(activated(int)), this, SLOT(onContentChanged()));
-      //cobMat->setMaximumWidth(150);
       cobMat->setMinimumWidth(120);
       hl->addWidget(cobMat);
     lMF->addLayout(hl);
@@ -86,14 +83,14 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
     QHBoxLayout * hbs = new QHBoxLayout();
     hbs->setContentsMargins(2,0,2,0);
         hbs->addStretch();
-        cbScale = new QCheckBox("Apply scaling");
-        cbScale->setToolTip("Use scaling only if it is the only choice, e.g. to make ellipsoid from a sphere");
+        cbScale = new QCheckBox("Scale");
+        cbScale->setToolTip("Use scaling only if it really necessary, e.g. to make ellipsoid from a sphere");
         connect(cbScale, &QCheckBox::clicked, this, &AGeoObjectDelegate::onScaleToggled);
         connect(cbScale, &QCheckBox::clicked, this, &AGeoObjectDelegate::onContentChanged);
         hbs->addWidget(cbScale);
     scaleWidget = new QWidget();
         QHBoxLayout * hbsw = new QHBoxLayout(scaleWidget);
-        hbsw->setContentsMargins(2,0,2,0);
+        hbsw->setContentsMargins(0,0,0,0);
         hbsw->addWidget(new QLabel("in X:")); ledScaleX = new AOneLineTextEdit();
         hbsw->addWidget(ledScaleX);
         hbsw->addWidget(new QLabel("in Y:")); ledScaleY = new AOneLineTextEdit();
@@ -103,8 +100,8 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
         for (AOneLineTextEdit * led : {ledScaleX, ledScaleY, ledScaleZ})
         {
             configureHighligherAndCompleter(led);
-            connect(led, &AOneLineTextEdit::textChanged,     this, &AGeoObjectDelegate::onContentChanged);
-            led->setText("1.0");
+            connect(led, &AOneLineTextEdit::textChanged, this, &AGeoObjectDelegate::onContentChanged);
+            led->setText("1");
         }
     hbs->addWidget(scaleWidget);
     hbs->addStretch();
@@ -434,28 +431,27 @@ void AGeoObjectDelegate::addLocalLayout(QLayout * lay)
 
 QString AGeoObjectDelegate::updateScalingFactors() const //not needed anymore need to kill as well as pteshape
 {
+    QString errorStr;
     AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
     if (scaled)
     {
-        // !*! TFormula?   common method with combine with toggle on check box scale?
         scaled->strScaleX = ledScaleX->text();
         scaled->strScaleY = ledScaleY->text();
         scaled->strScaleZ = ledScaleZ->text();
 
         const AGeoConsts & GC = AGeoConsts::getConstInstance();
-        QString errorStr;
         bool ok;
         ok = GC.updateParameter(errorStr, scaled->strScaleX, scaled->scaleX, true, true, false); if (!ok) return errorStr;
         ok = GC.updateParameter(errorStr, scaled->strScaleY, scaled->scaleY, true, true, false); if (!ok) return errorStr;
         ok = GC.updateParameter(errorStr, scaled->strScaleZ, scaled->scaleZ, true, true, false); if (!ok) return errorStr;
-        /*
-        scaled->scaleX = ledScaleX->text().toDouble();
-        scaled->scaleY = ledScaleY->text().toDouble();
-        scaled->scaleZ = ledScaleZ->text().toDouble();*/
-        qDebug() <<scaled->scaleX <<scaled->scaleY <<scaled->scaleZ;
+        //qDebug() <<scaled->scaleX <<scaled->scaleY <<scaled->scaleZ;
     }
-    else qWarning() << "Read delegate: Scaled shape not found!";
-    return "";
+    else
+    {
+        errorStr = "UpdateScalingFactors: Scaled shape not found!";
+        qWarning() << errorStr;
+    }
+    return errorStr;
 }
 
 const AGeoShape * AGeoObjectDelegate::getBaseShapeOfObject(const AGeoObject * obj)
@@ -629,11 +625,9 @@ void AGeoObjectDelegate::Update(const AGeoObject *obj)
     }
 }
 
-void AGeoObjectDelegate::onContentChanged()  // !*! to remove, connect directly to the signal!
+void AGeoObjectDelegate::onContentChanged()
 {
-    //pbShapeInfo->setToolTip(pteShape->document()->toPlainText());
     emit ContentChanged();
-    //qDebug() <<pteShape->document()->toPlainText();
 }
 
 //---------------
@@ -673,7 +667,7 @@ AGeoBoxDelegate::AGeoBoxDelegate(const QStringList &materials, QWidget *parent)
     for (AOneLineTextEdit * le : l)
     {
         configureHighligherAndCompleter(le);
-        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoBoxDelegate::ContentChanged);
+        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoBaseDelegate::ContentChanged);
     }
 }
 
@@ -753,7 +747,7 @@ AGeoTubeDelegate::AGeoTubeDelegate(const QStringList & materials, QWidget *paren
     for (AOneLineTextEdit * le : l)
     {
         configureHighligherAndCompleter(le);
-        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoTubeDelegate::ContentChanged);
+        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoBaseDelegate::ContentChanged);
     }
 }
 
@@ -822,7 +816,7 @@ AGeoTubeSegDelegate::AGeoTubeSegDelegate(const QStringList & materials, QWidget 
     for (AOneLineTextEdit * le : l)
     {
         configureHighligherAndCompleter(le);
-        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoTubeSegDelegate::ContentChanged);
+        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoBaseDelegate::ContentChanged);
     }
 }
 
@@ -842,7 +836,6 @@ bool AGeoTubeSegDelegate::updateObject(AGeoObject *obj) const
         tubeSeg->str2dz   = ez ->text();
         tubeSeg->strPhi1 = ep1->text();
         tubeSeg->strPhi2 = ep2->text();
-        //emit ContentChanged();
     }
     else qWarning() << "Read delegate: Tube Segment shape not found!";
 
@@ -865,9 +858,8 @@ void AGeoTubeSegDelegate::Update(const AGeoObject *obj)
         ei ->setText(tubeSeg->str2rmin.isEmpty() ? QString::number(tubeSeg->rmin*2.0) : tubeSeg->str2rmin);
         eo ->setText(tubeSeg->str2rmax.isEmpty() ? QString::number(tubeSeg->rmax*2.0) : tubeSeg->str2rmax);
         ez ->setText(tubeSeg->str2dz  .isEmpty() ? QString::number(tubeSeg->dz  *2.0) : tubeSeg->str2dz);
-        ep1->setText(tubeSeg->strPhi1.isEmpty() ? QString::number(tubeSeg->phi1)     : tubeSeg->strPhi1);
-        ep2->setText(tubeSeg->strPhi2.isEmpty() ? QString::number(tubeSeg->phi2)     : tubeSeg->strPhi2);
-        //emit ContentChanged();
+        ep1->setText(tubeSeg->strPhi1.isEmpty()  ? QString::number(tubeSeg->phi1)     : tubeSeg->strPhi1);
+        ep2->setText(tubeSeg->strPhi2.isEmpty()  ? QString::number(tubeSeg->phi2)     : tubeSeg->strPhi2);
     }
     else qWarning() << "Read delegate: Tube Segment shape not found!";
 }
@@ -927,7 +919,6 @@ bool AGeoTubeSegCutDelegate::updateObject(AGeoObject *obj) const
         ctube->strnxhi  = eunx->text();
         ctube->strnyhi  = euny->text();
         ctube->strnzhi  = eunz->text();
-
     }
     else qWarning() << "Read delegate: Tube segment cut shape not found!";
 
@@ -941,8 +932,8 @@ void AGeoTubeSegCutDelegate::Update(const AGeoObject *obj)
     AGeoCtub * ctube = dynamic_cast<AGeoCtub*>(ShapeCopy);
     if (!ctube)
     {
-    AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
-    ctube = dynamic_cast<AGeoCtub*>(scaled->BaseShape);
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+        ctube = dynamic_cast<AGeoCtub*>(scaled->BaseShape);
     }
 
     if (ctube)
@@ -953,7 +944,6 @@ void AGeoTubeSegCutDelegate::Update(const AGeoObject *obj)
         eunx->setText(ctube->strnxhi .isEmpty() ? QString::number(ctube->nxhi)  : ctube->strnxhi);
         euny->setText(ctube->strnyhi .isEmpty() ? QString::number(ctube->nyhi)  : ctube->strnyhi);
         eunz->setText(ctube->strnzhi .isEmpty() ? QString::number(ctube->nzhi)  : ctube->strnzhi);
-
     }
     else qWarning() << "Read delegate: Tube segment cut shape not found!";
 }
@@ -1010,7 +1000,7 @@ AGeoParaDelegate::AGeoParaDelegate(const QStringList & materials, QWidget *paren
     for (AOneLineTextEdit * le : l)
     {
         configureHighligherAndCompleter(le);
-        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoParaDelegate::ContentChanged);
+        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoBaseDelegate::ContentChanged);
     }
 }
 
@@ -1056,7 +1046,6 @@ void AGeoParaDelegate::Update(const AGeoObject *obj)
         ea->setText(para->strAlpha.isEmpty() ? QString::number(para->alpha)  : para->strAlpha);
         et->setText(para->strTheta.isEmpty() ? QString::number(para->theta)  : para->strTheta);
         ep->setText(para->strPhi  .isEmpty() ? QString::number(para->phi)    : para->strPhi);
-        //emit ContentChanged();
     }
     else qWarning() << "Read delegate: Box shape not found!";
 }
@@ -1109,7 +1098,7 @@ AGeoSphereDelegate::AGeoSphereDelegate(const QStringList & materials, QWidget *p
     for (AOneLineTextEdit * le : l)
     {
         configureHighligherAndCompleter(le);
-        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoObjectDelegate::ContentChanged);
+        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoBaseDelegate::ContentChanged);
     }
 }
 
@@ -1147,12 +1136,12 @@ void AGeoSphereDelegate::Update(const AGeoObject *obj)
     }
     if (sphere)
     {
-        eid->setText(sphere->str2rmin.isEmpty() ? QString::number(sphere->rmin*2.0) : sphere->str2rmin);
-        eod->setText(sphere->str2rmax.isEmpty() ? QString::number(sphere->rmax*2.0) : sphere->str2rmax);
-        et1->setText(sphere->strTheta1.isEmpty() ? QString::number(sphere->theta1) : sphere->strTheta1);
-        et2->setText(sphere->strTheta2.isEmpty() ? QString::number(sphere->theta2) : sphere->strTheta2);
-        ep1->setText(sphere->strPhi1.isEmpty() ? QString::number(sphere->phi1) : sphere->strPhi1);
-        ep2->setText(sphere->strPhi2.isEmpty() ? QString::number(sphere->phi2) : sphere->strPhi2);
+        eid->setText(sphere->str2rmin.isEmpty()  ? QString::number(sphere->rmin*2.0) : sphere->str2rmin);
+        eod->setText(sphere->str2rmax.isEmpty()  ? QString::number(sphere->rmax*2.0) : sphere->str2rmax);
+        et1->setText(sphere->strTheta1.isEmpty() ? QString::number(sphere->theta1)   : sphere->strTheta1);
+        et2->setText(sphere->strTheta2.isEmpty() ? QString::number(sphere->theta2)   : sphere->strTheta2);
+        ep1->setText(sphere->strPhi1.isEmpty()   ? QString::number(sphere->phi1)     : sphere->strPhi1);
+        ep2->setText(sphere->strPhi2.isEmpty()   ? QString::number(sphere->phi2)     : sphere->strPhi2);
     }
     else qWarning() << "Update delegate: Sphere shape not found!";
 }
@@ -1200,7 +1189,7 @@ AGeoConeDelegate::AGeoConeDelegate(const QStringList &materials, QWidget *parent
     for (AOneLineTextEdit * le : {ez, eli, elo, eui, euo})
     {
         configureHighligherAndCompleter(le);
-        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoConeDelegate::ContentChanged);
+        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoBaseDelegate::ContentChanged);
     }
 }
 
@@ -1233,8 +1222,8 @@ void AGeoConeDelegate::Update(const AGeoObject *obj)
     AGeoCone * cone = dynamic_cast<AGeoCone*>(ShapeCopy);
     if (!cone)
     {
-    AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
-    cone = dynamic_cast<AGeoCone*>(scaled->BaseShape);
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+        cone = dynamic_cast<AGeoCone*>(scaled->BaseShape);
     }
 
     if (cone)
@@ -1281,7 +1270,7 @@ AGeoConeSegDelegate::AGeoConeSegDelegate(const QStringList &materials, QWidget *
     for (AOneLineTextEdit * le : l)
     {
         configureHighligherAndCompleter(le);
-        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoConeSegDelegate::ContentChanged);
+        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoBaseDelegate::ContentChanged);
     }
 }
 
@@ -1311,8 +1300,8 @@ void AGeoConeSegDelegate::Update(const AGeoObject *obj)
     AGeoConeSeg * coneSeg = dynamic_cast<AGeoConeSeg*>(ShapeCopy);
     if (!coneSeg)
     {
-    AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
-    coneSeg = dynamic_cast<AGeoConeSeg*>(scaled->BaseShape);
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+        coneSeg = dynamic_cast<AGeoConeSeg*>(scaled->BaseShape);
     }
 
     if (coneSeg)
@@ -1342,7 +1331,7 @@ AGeoElTubeDelegate::AGeoElTubeDelegate(const QStringList &materials, QWidget *pa
 
     gr->addWidget(new QLabel("X full size:"), 0, 0);
     gr->addWidget(new QLabel("Y full size:"), 1, 0);
-    gr->addWidget(new QLabel("Height:"),    2, 0);
+    gr->addWidget(new QLabel("Height:"),      2, 0);
 
     ex = new AOneLineTextEdit(); gr->addWidget(ex, 0, 1);
     ey = new AOneLineTextEdit(); gr->addWidget(ey, 1, 1);
@@ -1358,7 +1347,7 @@ AGeoElTubeDelegate::AGeoElTubeDelegate(const QStringList &materials, QWidget *pa
     for (AOneLineTextEdit * le : l)
     {
         configureHighligherAndCompleter(le);
-        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoElTubeDelegate::ContentChanged);
+        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoBaseDelegate::ContentChanged);
     }
 }
 
@@ -1438,7 +1427,7 @@ AGeoTrapXDelegate::AGeoTrapXDelegate(const QStringList &materials, QWidget *pare
     for (AOneLineTextEdit * le : l)
     {
         configureHighligherAndCompleter(le);
-        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoTrapXDelegate::ContentChanged);
+        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoBaseDelegate::ContentChanged);
     }
 }
 
@@ -1457,7 +1446,6 @@ bool AGeoTrapXDelegate::updateObject(AGeoObject *obj) const
         trap->str2dx2 = exu->text();
         trap->str2dy  = ey->text();
         trap->str2dz  = ez->text();
-        //emit ContentChanged();
     }
     else qWarning() << "Read delegate: Trapezoid Simplified shape not found!";
 
@@ -1525,7 +1513,7 @@ AGeoTrapXYDelegate::AGeoTrapXYDelegate(const QStringList &materials, QWidget *pa
     for (AOneLineTextEdit * le : {exl, exu, eyl, eyu, ez})
     {
         configureHighligherAndCompleter(le);
-        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoTrapXYDelegate::ContentChanged);
+        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoBaseDelegate::ContentChanged);
     }
 }
 
@@ -1558,8 +1546,8 @@ void AGeoTrapXYDelegate::Update(const AGeoObject *obj)
     AGeoTrd2 * trapxy = dynamic_cast<AGeoTrd2*>(ShapeCopy);
     if (!trapxy)
     {
-    AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
-    trapxy = dynamic_cast<AGeoTrd2*>(scaled->BaseShape);
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
+        trapxy = dynamic_cast<AGeoTrd2*>(scaled->BaseShape);
     }
 
     if (trapxy)
@@ -1614,7 +1602,7 @@ AGeoParaboloidDelegate::AGeoParaboloidDelegate(const QStringList &materials, QWi
     for (AOneLineTextEdit * le : l)
     {
         configureHighligherAndCompleter(le);
-        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoParaboloidDelegate::ContentChanged);
+        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoBaseDelegate::ContentChanged);
     }
 }
 
@@ -1793,7 +1781,7 @@ AGeoPolygonDelegate::AGeoPolygonDelegate(const QStringList &materials, QWidget *
     for (AOneLineTextEdit * le : {en, edp, ez, eli, elo, eui, euo})
     {
         configureHighligherAndCompleter(le);
-        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoPolygonDelegate::ContentChanged);
+        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoBaseDelegate::ContentChanged);
     }
 }
 
@@ -2151,7 +2139,7 @@ AGeoPgonDelegate::AGeoPgonDelegate(const QStringList &materials, QWidget *parent
     tab->setHorizontalHeaderLabels(QStringList({"Z position", "Outer size", "Inner size"}));
 
     configureHighligherAndCompleter(eed);
-    QObject::connect(eed, &AOneLineTextEdit::textChanged, this, &AGeoPconDelegate::ContentChanged);
+    QObject::connect(eed, &AOneLineTextEdit::textChanged, this, &AGeoBaseDelegate::ContentChanged);
 }
 
 bool AGeoPgonDelegate::updateObject(AGeoObject *obj) const
@@ -2310,7 +2298,7 @@ AGeoArb8Delegate::AGeoArb8Delegate(const QStringList &materials, QWidget *parent
         gr->addWidget(new QLabel("Height:"), 0, 0);
         ez = new AOneLineTextEdit(); gr->addWidget(ez,  0, 1);
         configureHighligherAndCompleter(ez);
-        connect(ez, &AOneLineTextEdit::textChanged, this, &AGeoArb8Delegate::ContentChanged);
+        connect(ez, &AOneLineTextEdit::textChanged, this, &AGeoBaseDelegate::ContentChanged);
         gr->addWidget(new QLabel("mm"), 0, 2);
     v->addLayout(gr);
 
@@ -2330,12 +2318,12 @@ AGeoArb8Delegate::AGeoArb8Delegate(const QStringList &materials, QWidget *parent
             gri->addWidget(new QLabel("  x:"),    i, 0);
             tmpV[i].X = new AOneLineTextEdit;
             configureHighligherAndCompleter(tmpV[i].X);
-            connect(tmpV[i].X, &AOneLineTextEdit::textChanged, this, &AGeoArb8Delegate::ContentChanged);
+            connect(tmpV[i].X, &AOneLineTextEdit::textChanged, this, &AGeoBaseDelegate::ContentChanged);
             gri->addWidget(tmpV[i].X,             i, 1);
             gri->addWidget(new QLabel("mm   y:"), i, 2);
             tmpV[i].Y = new AOneLineTextEdit;
             configureHighligherAndCompleter(tmpV[i].Y);
-            connect(tmpV[i].Y, &AOneLineTextEdit::textChanged, this, &AGeoArb8Delegate::ContentChanged);
+            connect(tmpV[i].Y, &AOneLineTextEdit::textChanged, this, &AGeoBaseDelegate::ContentChanged);
             gri->addWidget(tmpV[i].Y,             i, 3);
             gri->addWidget(new QLabel("mm"),      i, 4);
         }
@@ -2449,7 +2437,7 @@ AGeoArrayDelegate::AGeoArrayDelegate(const QStringList &materials, QWidget *pare
         //le->setMaximumWidth(75);
         le->setContextMenuPolicy(Qt::NoContextMenu);
         configureHighligherAndCompleter(le);
-        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoObjectDelegate::ContentChanged);
+        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoBaseDelegate::ContentChanged);
     }
 
     addLocalLayout(grAW);
@@ -2570,7 +2558,7 @@ AWorldDelegate::AWorldDelegate(const QStringList & materials, QWidget * ParentWi
       QHBoxLayout * h = new QHBoxLayout();
             h->addStretch();
             cbFixedSize = new QCheckBox("Fixed size");
-            connect(cbFixedSize, &QCheckBox::clicked, this, &AWorldDelegate::ContentChanged);
+            connect(cbFixedSize, &QCheckBox::clicked, this, &AGeoBaseDelegate::ContentChanged);
             h->addWidget(cbFixedSize);
 
             QVBoxLayout * v1 = new QVBoxLayout();
@@ -2586,7 +2574,7 @@ AWorldDelegate::AWorldDelegate(const QStringList & materials, QWidget * ParentWi
                 for (AOneLineTextEdit * le : {ledSizeXY, ledSizeZ})
                 {
                     configureHighligherAndCompleter(le);
-                    connect(le, &AOneLineTextEdit::textChanged, this, &AWorldDelegate::ContentChanged);
+                    connect(le, &AOneLineTextEdit::textChanged, this, &AGeoBaseDelegate::ContentChanged);
                 }
             h->addLayout(v2);
             h->addStretch();

@@ -47,7 +47,7 @@ public:
 private:
     QVBoxLayout * lMF = nullptr;      //main layout
 
-    QWidget   * scaleWidget = nullptr;
+    QWidget * scaleWidget = nullptr;
     AOneLineTextEdit * ledScaleX   = nullptr;
     AOneLineTextEdit * ledScaleY   = nullptr;
     AOneLineTextEdit * ledScaleZ   = nullptr;

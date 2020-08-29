@@ -68,7 +68,6 @@ protected:
 
     QLineEdit* leName;
     QComboBox* cobMat;
-    QPlainTextEdit* pteShape;
     QWidget* PosOrient;
     QLabel* lMat;
     AOneLineTextEdit *ledNumX, *ledNumY, *ledNumZ;
@@ -86,7 +85,6 @@ private slots:
 
 protected:
     void addLocalLayout(QLayout * lay);
-    void updatePteShape(const QString & text);  // !*! obsolete?
     QString updateScalingFactors() const;
     const AGeoShape * getBaseShapeOfObject(const AGeoObject *obj);
     void updateTypeLabel();

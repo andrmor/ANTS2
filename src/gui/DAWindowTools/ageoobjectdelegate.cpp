@@ -82,17 +82,6 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
       hl->addWidget(cobMat);
     lMF->addLayout(hl);
 
-    //Shape box
-    QHBoxLayout* h2 = new QHBoxLayout();
-      h2->setContentsMargins(2,0,2,0);
-
-      pteShape = new QPlainTextEdit();
-      pteShape->setContextMenuPolicy(Qt::NoContextMenu);
-      connect(pteShape, &QPlainTextEdit::textChanged, this, &AGeoObjectDelegate::onContentChanged);
-      pteShape->setMaximumHeight(50);
-      h2->addWidget(pteShape);
-    lMF->addLayout(h2);
-
     //scale widget
     QHBoxLayout * hbs = new QHBoxLayout();
     hbs->setContentsMargins(2,0,2,0);
@@ -443,18 +432,6 @@ void AGeoObjectDelegate::addLocalLayout(QLayout * lay)
     lMF->insertLayout(3, lay);
 }
 
-void AGeoObjectDelegate::updatePteShape(const QString & text)
-{
-    pteShape->clear();
-
-    QString str = text;
-    if (cbScale->isChecked())
-        str = QString("TGeoScaledShape( %1, %2, %3, %4 )").arg(text).arg(ledScaleX->text()).arg(ledScaleY->text()).arg(ledScaleZ->text());
-
-    pteShape->appendPlainText(str);
-    pbShapeInfo->setToolTip(pteShape->document()->toPlainText());
-}
-
 QString AGeoObjectDelegate::updateScalingFactors() const //not needed anymore need to kill as well as pteshape
 {
     AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
@@ -516,11 +493,8 @@ void AGeoObjectDelegate::updateTypeLabel()
 
 void AGeoObjectDelegate::updateControlUI()
 {
-    pteShape->setVisible(false);
-
     if (CurrentObject->ObjectType->isHandlingSet())
     {
-        pteShape->setVisible(false);
         lMat->setVisible(false);
         cobMat->setVisible(false);
         PosOrient->setVisible(false);
@@ -634,8 +608,6 @@ void AGeoObjectDelegate::Update(const AGeoObject *obj)
     }
     cobMat->setCurrentIndex(imat);
 
-    pteShape->setPlainText(obj->Shape->getGenerationString());
-
     ledX->setText(obj->PositionStr[0].isEmpty() ? QString::number(obj->Position[0]) : obj->PositionStr[0]);
     ledY->setText(obj->PositionStr[1].isEmpty() ? QString::number(obj->Position[1]) : obj->PositionStr[1]);
     ledZ->setText(obj->PositionStr[2].isEmpty() ? QString::number(obj->Position[2]) : obj->PositionStr[2]);
@@ -643,7 +615,6 @@ void AGeoObjectDelegate::Update(const AGeoObject *obj)
     ledPhi->  setText(obj->OrientationStr[0].isEmpty() ? QString::number(obj->Orientation[0]) : obj->OrientationStr[0]);
     ledTheta->setText(obj->OrientationStr[1].isEmpty() ? QString::number(obj->Orientation[1]) : obj->OrientationStr[1]);
     ledPsi->  setText(obj->OrientationStr[2].isEmpty() ? QString::number(obj->Orientation[2]) : obj->OrientationStr[2]);
-
 
     updateTypeLabel();
     updateControlUI();
@@ -658,7 +629,7 @@ void AGeoObjectDelegate::Update(const AGeoObject *obj)
     }
 }
 
-void AGeoObjectDelegate::onContentChanged()
+void AGeoObjectDelegate::onContentChanged()  // !*! to remove, connect directly to the signal!
 {
     //pbShapeInfo->setToolTip(pteShape->document()->toPlainText());
     emit ContentChanged();

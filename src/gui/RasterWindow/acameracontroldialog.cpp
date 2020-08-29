@@ -157,3 +157,46 @@ void ACameraControlDialog::on_pbSetView_clicked()
 {
     setView();
 }
+
+void ACameraControlDialog::on_pbStepXM_clicked()
+{
+    makeStep(0, -1.0 * ui->ledStepX->text().toDouble());
+}
+
+void ACameraControlDialog::on_pbStepXP_clicked()
+{
+    makeStep(0, ui->ledStepX->text().toDouble());
+}
+
+void ACameraControlDialog::on_pbStepYM_clicked()
+{
+    makeStep(1, -1.0 * ui->ledStepY->text().toDouble());
+}
+
+void ACameraControlDialog::on_pbStepYP_clicked()
+{
+    makeStep(1, ui->ledStepY->text().toDouble());
+}
+
+void ACameraControlDialog::on_pbStepZM_clicked()
+{
+    makeStep(2, -1.0 * ui->ledStepZ->text().toDouble());
+}
+
+void ACameraControlDialog::on_pbStepZP_clicked()
+{
+    makeStep(2, ui->ledStepZ->text().toDouble());
+}
+
+void ACameraControlDialog::makeStep(int index, double step)
+{
+    if (!RW->fCanvas->HasViewer3D()) return;
+
+    AGeoViewParameters & p = RW->ViewParameters;
+    p.read(RW->fCanvas);
+    p.RangeLL[index] += step;
+    p.RangeUR[index] += step;
+    p.apply(RW->fCanvas);
+
+    updateGui();
+}

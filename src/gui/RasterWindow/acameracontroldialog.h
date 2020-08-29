@@ -34,6 +34,18 @@ private slots:
 
     void on_pbSetView_clicked();
 
+    void on_pbStepXM_clicked();
+
+    void on_pbStepXP_clicked();
+
+    void on_pbStepYM_clicked();
+
+    void on_pbStepYP_clicked();
+
+    void on_pbStepZM_clicked();
+
+    void on_pbStepZP_clicked();
+
 protected:
     void closeEvent(QCloseEvent *);
 
@@ -45,6 +57,7 @@ private:
     double yPos = 0;
 
     void setCenter(int index, QLineEdit * led);
+    void makeStep(int index, double step);
 
 };
 

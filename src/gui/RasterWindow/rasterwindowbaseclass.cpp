@@ -145,36 +145,41 @@ void RasterWindowBaseClass::mousePressEvent(QMouseEvent *event)
       lastY = event->y();
       Double_t viewSizeX, viewSizeY;
       fCanvas->cd();
-      fCanvas->GetView()->GetWindow(lastCenterX, lastCenterY, viewSizeX, viewSizeY);      
+      fCanvas->GetView()->GetWindow(lastCenterX, lastCenterY, viewSizeX, viewSizeY);
+      bBlockZoom = true;
     }
  // qDebug() << "done";
+
+  // future: maybe it is possible to hide menu on left click using signal-slot mechanism?
+  //TQObject::Connect("TGPopupMenu", "PoppedDown()", "TCanvas", fCanvas, "Update()");
 }
 
+#include <QTimer>
 void RasterWindowBaseClass::mouseReleaseEvent(QMouseEvent *event)
 {
   if (!fCanvas) return;
   fCanvas->cd();
   if (fBlockEvents) return;
-  //qDebug() << "Mouse release event";
   if (!PressEventRegistered) return;
   PressEventRegistered = false;
-  if (event->button() == Qt::LeftButton) fCanvas->HandleInput(kButton1Up, event->x(), event->y());
-  if (event->button() == Qt::RightButton) fCanvas->HandleInput(kButton3Up, event->x(), event->y());
-
-  if (event->button() == Qt::LeftButton) emit LeftMouseButtonReleased();
+  if (event->button() == Qt::LeftButton)
+  {
+      fCanvas->HandleInput(kButton1Up, event->x(), event->y());
+      emit LeftMouseButtonReleased();
+  }
+  else if (event->button() == Qt::RightButton) fCanvas->HandleInput(kButton3Up, event->x(), event->y());
+  else if (event->button() == Qt::MiddleButton) QTimer::singleShot(300, this, &RasterWindowBaseClass::releaseZoomBlock);
 }
 
 void RasterWindowBaseClass::wheelEvent(QWheelEvent *event)
 {
   if (!fCanvas) return;
-  fCanvas->cd();
-  if (fBlockEvents) return;
+  if (fBlockEvents || bBlockZoom) return;
 
   if (!fCanvas->HasViewer3D() || !fCanvas->GetView()) return;
   fCanvas->cd();
 
   double factor = ( event->delta() < 0 ? 1.25 : 0.8 );
-
   fCanvas->GetView()->ZoomView(0, 1.0/factor);
 
   onViewChanged();

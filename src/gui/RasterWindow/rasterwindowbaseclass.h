@@ -51,21 +51,20 @@ public:
 
 signals:
     void LeftMouseButtonReleased();
-    //void UserChangedWindow(double centerX, double centerY, double hWidth, double hHeight, double phi, double theta);
     void userChangedWindow();
 
 protected:
-    //void exposeEvent(QExposeEvent *event);
-    void mouseMoveEvent(QMouseEvent *event);
-    void mousePressEvent(QMouseEvent *event);
-    void mouseReleaseEvent(QMouseEvent *event);
-    void wheelEvent(QWheelEvent *event);
+    //void exposeEvent(QExposeEvent * event);
+    void mouseMoveEvent(QMouseEvent * event);
+    void mousePressEvent(QMouseEvent * event);
+    void mouseReleaseEvent(QMouseEvent * event);
+    void wheelEvent(QWheelEvent * event);
 
-    virtual void    paintEvent( QPaintEvent *event ) override;
-    virtual void    resizeEvent(QResizeEvent *event ) override;
+    virtual void paintEvent(QPaintEvent * event ) override;
+    virtual void resizeEvent(QResizeEvent * event ) override;
 
 protected:
-    QMainWindow *MasterWindow = 0;
+    QMainWindow * MasterWindow = nullptr;
     int wid;
     bool PressEventRegistered = false; //to avoid Qt bug - "leaking" of events to another window
     int lastX, lastY;
@@ -73,7 +72,9 @@ protected:
     bool fBlockEvents = false;
 
     bool fInvertedXYforDrag = false;
+    bool bBlockZoom = false;
 
+    void releaseZoomBlock() {bBlockZoom = false;}
 };
 
 #endif // RASTERWINDOWBASECLASS_H

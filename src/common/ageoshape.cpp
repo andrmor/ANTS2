@@ -3199,13 +3199,17 @@ QString AGeoScaledShape::getGenerationString(bool useStrings) const
 
     else
     {
-        QString temps = BaseShape->getGenerationString(true);
+        QString sscaleX = (strScaleX.isEmpty() ? QString::number(scaleX) : "' + (" + strScaleX + ") + '");
+        QString sscaleY = (strScaleY.isEmpty() ? QString::number(scaleY) : "' + (" + strScaleY + ") + '");
+        QString sscaleZ = (strScaleZ.isEmpty() ? QString::number(scaleZ) : "' + (" + strScaleZ + ") + '");
+
+        QString bases = BaseShape->getGenerationString(true);
+
         return QString() + "TGeoScaledShape( " +
-                temps + ", " +
-                QString::number(scaleX) + ", " +
-                QString::number(scaleY) + ", " +
-                QString::number(scaleZ) +
-                " )";
+                bases + ", " +
+                sscaleX + ", " +
+                sscaleY + ", " +
+                sscaleZ + " )";
     }
 }
 

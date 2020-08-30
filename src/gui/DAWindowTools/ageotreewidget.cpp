@@ -1386,6 +1386,10 @@ void AGeoTreeWidget::objectToScript(AGeoObject *obj, QString &script, int ident,
         script += "\n" + QString(" ").repeated(ident)+ "//=== Optical grid object is not supported! Make a request to the developers ===";
         script += "\n";
     }
+    if (obj->isDisabled())
+    {
+        script += "\n" + QString(" ").repeated(ident)+ makeScriptString_DisabledObject(obj);
+    }
 }
 
 void AGeoTreeWidget::commonSlabToScript(QString &script)
@@ -1599,6 +1603,11 @@ QString AGeoTreeWidget::makeLinePropertiesString(AGeoObject *obj)
             QString::number(obj->color) + ",  " +
             QString::number(obj->width) + ",  " +
             QString::number(obj->style) + " )";
+}
+
+const QString AGeoTreeWidget::makeScriptString_DisabledObject(AGeoObject *obj)
+{
+    return QString("geo.DisableObject( '%1')").arg(obj->Name);
 }
 
 // ================== EDIT WIDGET ===================

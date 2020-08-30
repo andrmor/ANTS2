@@ -106,6 +106,7 @@ private:
   QString makeScriptString_groupObjectStart(AGeoObject *obj);
   QString makeScriptString_stackObjectEnd(AGeoObject *obj);
   QString makeLinePropertiesString(AGeoObject *obj);
+  const QString makeScriptString_DisabledObject(AGeoObject *obj);
 
 signals:
   void ObjectSelectionChanged(const QString); // should be fired with empty string if selection does not contain a single item  

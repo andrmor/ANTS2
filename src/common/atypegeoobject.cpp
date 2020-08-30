@@ -5,7 +5,7 @@
 
 #include <QDebug>
 
-void ATypeGeoObject::writeToJson(QJsonObject &json)
+void ATypeGeoObject::writeToJson(QJsonObject & json) const
 {
     json["Type"] = Type;
 }
@@ -20,7 +20,7 @@ ATypeSlabObject::ATypeSlabObject()
 ATypeSlabObject::~ATypeSlabObject()
 {
     //qDebug() << "Destructor called for slab object inside:"<< ( SlabModel ? SlabModel->name : "-Model is NULL-");
-    if (SlabModel) delete SlabModel;
+    delete SlabModel;
     //qDebug() << "Done!!";
 }
 
@@ -56,16 +56,17 @@ ATypeLightguideObject::ATypeLightguideObject()
     Handling = "Static";
 }
 
-void ATypeLightguideObject::writeToJson(QJsonObject &json)
+void ATypeLightguideObject::writeToJson(QJsonObject &json) const
 {
     ATypeGeoObject::writeToJson(json);
-    json["UpperLower"] = (UpperLower == Lower) ? "Lower" : "Upper";
+
+    json["UpperLower"] = ( UpperLower == Lower ? "Lower" : "Upper" );
 }
 
-void ATypeLightguideObject::readFromJson(QJsonObject &json)
+void ATypeLightguideObject::readFromJson(const QJsonObject &json)
 {
     QString UppLow = json["UpperLower"].toString();
-    UpperLower = (UppLow == "Lower") ? Lower : Upper;
+    UpperLower = (UppLow == "Lower" ? Lower : Upper);
 }
 
 void ATypeArrayObject::Reconfigure(int NumX, int NumY, int NumZ, double StepX, double StepY, double StepZ)
@@ -81,7 +82,6 @@ QString ATypeArrayObject::updateType()
     double dNumX = numX;
     double dNumY = numY;
     double dNumZ = numZ;
-
 
     ok = AGeoConsts::getConstInstance().updateParameter(errorStr, strNumX, dNumX, true, true, false) ; if (!ok) return errorStr;
     ok = AGeoConsts::getConstInstance().updateParameter(errorStr, strNumY, dNumY, true, true, false) ; if (!ok) return errorStr;
@@ -119,9 +119,10 @@ void ATypeArrayObject::replaceGeoConstName(const QRegExp &nameRegExp, const QStr
     strStepZ.replace(nameRegExp, newName);
 }
 
-void ATypeArrayObject::writeToJson(QJsonObject &json)
+void ATypeArrayObject::writeToJson(QJsonObject &json) const
 {
     ATypeGeoObject::writeToJson(json);
+
     json["numX"]  = numX;
     json["numY"]  = numY;
     json["numZ"]  = numZ;
@@ -137,7 +138,7 @@ void ATypeArrayObject::writeToJson(QJsonObject &json)
     if (!strStepZ.isEmpty()) json["strStepZ"] = strStepZ;
 }
 
-void ATypeArrayObject::readFromJson(QJsonObject &json)
+void ATypeArrayObject::readFromJson(const QJsonObject &json)
 {
     parseJson(json, "numX",  numX);
     parseJson(json, "numY",  numY);
@@ -154,33 +155,34 @@ void ATypeArrayObject::readFromJson(QJsonObject &json)
     if (!parseJson(json, "strStepZ", strStepZ)) strStepZ.clear();
 
     updateType();
-
 }
 
-void ATypeGridElementObject::writeToJson(QJsonObject &json)
+void ATypeGridElementObject::writeToJson(QJsonObject &json) const
 {
     ATypeGeoObject::writeToJson(json);
+
     json["size1"] = size1;
     json["size2"] = size2;
     json["shape"] = shape;
-    json["dz"] = dz;
+    json["dz"]    = dz;
 }
 
-void ATypeGridElementObject::readFromJson(QJsonObject &json)
+void ATypeGridElementObject::readFromJson(const QJsonObject &json)
 {
     parseJson(json, "size1", size1);
     parseJson(json, "size2", size2);
     parseJson(json, "shape", shape);
-    parseJson(json, "dz", dz);
+    parseJson(json, "dz",    dz);
 }
 
-void ATypeMonitorObject::writeToJson(QJsonObject &json)
+void ATypeMonitorObject::writeToJson(QJsonObject &json) const
 {
     ATypeGeoObject::writeToJson(json);
+
     config.writeToJson(json);
 }
 
-void ATypeMonitorObject::readFromJson(QJsonObject &json)
+void ATypeMonitorObject::readFromJson(const QJsonObject &json)
 {
     config.readFromJson(json);
 }
@@ -220,7 +222,7 @@ bool ATypeGeoObject::isLowerLightguide() const
     return obj->UpperLower == ATypeLightguideObject::Lower;
 }
 
-ATypeGeoObject *ATypeGeoObject::TypeObjectFactory(const QString Type)
+ATypeGeoObject *ATypeGeoObject::TypeObjectFactory(const QString &Type)
 {
     if (Type == "World")
         return new ATypeWorldObject(); //is not used to create World, only to check file with WorldTree starts with World and reads positioning script
@@ -253,14 +255,14 @@ ATypeGeoObject *ATypeGeoObject::TypeObjectFactory(const QString Type)
     }
 }
 
-void ATypeWorldObject::writeToJson(QJsonObject & json)
+void ATypeWorldObject::writeToJson(QJsonObject & json) const
 {
     ATypeGeoObject::writeToJson(json);
 
     json["FixedSize"] = bFixedSize;
 }
 
-void ATypeWorldObject::readFromJson(QJsonObject & json)
+void ATypeWorldObject::readFromJson(const QJsonObject &json)
 {
     bFixedSize = false;
     parseJson(json, "FixedSize", bFixedSize);

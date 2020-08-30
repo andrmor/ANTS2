@@ -185,6 +185,19 @@ void ATypeMonitorObject::readFromJson(QJsonObject &json)
     config.readFromJson(json);
 }
 
+bool ATypeMonitorObject::isGeoConstInUse(const QRegExp & nameRegExp) const
+{
+    if (config.str2size1.contains(nameRegExp)) return true;
+    if (config.str2size2.contains(nameRegExp)) return true;
+    return false;
+}
+
+void ATypeMonitorObject::replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName)
+{
+    config.str2size1.replace(nameRegExp, newName);
+    config.str2size2.replace(nameRegExp, newName);
+}
+
 bool ATypeMonitorObject::isParticleInUse(int partId) const
 {
     if (config.PhotonOrParticle == 0) return false;

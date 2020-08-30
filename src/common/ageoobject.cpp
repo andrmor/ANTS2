@@ -606,8 +606,6 @@ void AGeoObject::updateMonitorShape()
     ATypeMonitorObject* mon = static_cast<ATypeMonitorObject*>(ObjectType);
     delete Shape;
 
-    qDebug() << "TAJNA-----"<<mon->config.size1 << mon->config.size2;
-
     if (mon->config.shape == 0) //rectangular
         Shape = new AGeoBox(mon->config.size1, mon->config.size2, mon->config.dz);
     else //round

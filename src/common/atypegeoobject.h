@@ -35,6 +35,7 @@ public:
     bool isMonitor() const          {return Type == "Monitor";}
 
     virtual QString updateType()  {return "";}
+
     virtual bool isGeoConstInUse(const QRegExp & /*nameRegExp*/) const {return false;}
     virtual void replaceGeoConstName(const QRegExp & /*nameRegExp*/, const QString & /*newName*/) {}
 
@@ -141,6 +142,7 @@ public:
     void Reconfigure(int NumX, int NumY, int NumZ, double StepX, double StepY, double StepZ);
 
     QString updateType() override;
+
     bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
     void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
 
@@ -179,6 +181,9 @@ public:
 
     virtual void writeToJson(QJsonObject& json);
     virtual void readFromJson(QJsonObject& json);
+
+    bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
+    void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
 
     AMonitorConfig config;
 

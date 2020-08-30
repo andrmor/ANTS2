@@ -179,8 +179,19 @@ void RasterWindowBaseClass::wheelEvent(QWheelEvent *event)
   if (!fCanvas->HasViewer3D() || !fCanvas->GetView()) return;
   fCanvas->cd();
 
+  ViewParameters.read(fCanvas);
+  double oldX0 = ViewParameters.WinX;
+  double oldY0 = ViewParameters.WinY;
+  //double RotCenterX = ViewParameters.RotCenter[0];
+  //double RotCenterY = ViewParameters.RotCenter[1];
+
   double factor = ( event->delta() < 0 ? 1.25 : 0.8 );
-  fCanvas->GetView()->ZoomView(0, 1.0/factor);
+  setVisible(false); fCanvas->GetView()->ZoomView(0, 1.0/factor); setVisible(true);
+
+  ViewParameters.read(fCanvas); //after zoom X0,Y0 will become 0, RotCenter remains unchanged
+  ViewParameters.WinX = oldX0;
+  ViewParameters.WinY = oldY0;
+  ViewParameters.apply(fCanvas);
 
   onViewChanged();
 }

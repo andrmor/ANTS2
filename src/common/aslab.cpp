@@ -184,27 +184,33 @@ QString ASlabModel::randomSlabName()
 QString ASlabModel::makeRectangularSlabScriptString()
 {
     ASlabXYModel &xy = XYrecord;
-    return QString(QString::number(height)) + ", "+
-                   QString::number(xy.size1) + ", "+
-                   QString::number(xy.size2) + ", "+
-                   QString::number(xy.angle) + ")";
+    QString sheight = (   strHeight.isEmpty() ? QString::number(height)   :    strHeight );
+    QString ssize1  = (xy.strSize1 .isEmpty() ? QString::number(xy.size1) : xy.strSize1  );
+    QString ssize2  = (xy.strSize2 .isEmpty() ? QString::number(xy.size2) : xy.strSize2  );
+    QString sangle  = (xy.strAngle .isEmpty() ? QString::number(xy.angle) : xy.strAngle  );
+
+    return QString("%1, %2, %3, %4)").arg(sheight).arg(ssize1).arg(ssize2).arg(sangle);
 }
 
 
 QString ASlabModel::makeRoundSlabScriptString()
 {
     ASlabXYModel &xy = XYrecord;
-    return QString(QString::number(height)) + "', "+
-                   QString::number(xy.size1) + ")";
+    QString sheight = (   strHeight.isEmpty() ? QString::number(height)   :    strHeight );
+    QString ssize1  = (xy.strSize1 .isEmpty() ? QString::number(xy.size1) : xy.strSize1  );
+
+    return QString("%1, %2)").arg(sheight).arg(ssize1);
 }
 
 QString ASlabModel::makePolygonSlabScriptString()
 {
     ASlabXYModel &xy = XYrecord;
-    return QString(QString::number(height)) + ", "+
-                   QString::number(xy.size1) + ", "+
-                   QString::number(xy.angle) + ", "+
-                   QString::number(xy.sides) + ")";
+    QString sheight = (   strHeight.isEmpty() ? QString::number(height)   :    strHeight );
+    QString ssize1  = (xy.strSize1 .isEmpty() ? QString::number(xy.size1) : xy.strSize1  );
+    QString sangle  = (xy.strAngle .isEmpty() ? QString::number(xy.angle) : xy.strAngle  );
+    QString ssides  = (xy.strSides .isEmpty() ? QString::number(xy.sides) : xy.strSides  );
+
+    return QString("%1, %2, %3, %4)").arg(sheight).arg(ssize1).arg(sangle).arg(ssides);
 }
 
 QString ASlabModel::makeSlabScriptString(QString matStr)
@@ -213,20 +219,11 @@ QString ASlabModel::makeSlabScriptString(QString matStr)
     switch(xy.shape)
     {
         case 0:
-            return QString("geo.SlabRectangular( ") +
-                    "'" + name + "', " +
-                    matStr     + ", " +
-                    makeRectangularSlabScriptString();
+            return QString("geo.SlabRectangular( '%1', %2, %3").arg(name).arg(matStr).arg(makeRectangularSlabScriptString());
         case 1:
-            return QString("geo.SlabRound( ") +
-                    "'" + name + "', " +
-                    matStr     + ", " +
-                    makeRoundSlabScriptString();
+            return QString("geo.SlabRound( '%1', %2, %3")      .arg(name).arg(matStr).arg(makeRoundSlabScriptString());
         case 2:
-            return QString("geo.SlabPolygon( ") +
-                    "'" + name + "', " +
-                    matStr     + ", " +
-                    makePolygonSlabScriptString();
+            return QString("geo.SlabPolygon( '%1', %2, %3")    .arg(name).arg(matStr).arg(makePolygonSlabScriptString());
     }
     return "slab shape not found";
 }

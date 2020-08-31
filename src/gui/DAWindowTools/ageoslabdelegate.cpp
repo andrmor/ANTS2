@@ -148,7 +148,7 @@ AGeoSlabDelegate_Poly::AGeoSlabDelegate_Poly(const QStringList &definedMaterials
     for (QLabel * lab : {labLI, labUO, labUI, labA, labLIu, labUOu, labUIu, labAu}) lab->setVisible(false);
     for (AOneLineTextEdit * lab : {euo, edp, eli, eui}) lab->setVisible(false);
 
-    labLO->setText("Outer diameter");
+    labLO->setText("Size");
 }
 
 bool AGeoSlabDelegate_Poly::updateObject(AGeoObject *obj) const

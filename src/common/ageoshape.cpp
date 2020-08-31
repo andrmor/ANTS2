@@ -1788,7 +1788,6 @@ QString AGeoParaboloid::updateShape()
     ok = GC.updateParameter(errorStr, str2rhi, rhi, false); if (!ok) return errorStr;
     ok = GC.updateParameter(errorStr, str2dz, dz);          if (!ok) return errorStr;
     if (rlo >= rhi)                 return "lower diameter should be smaller than the upper diameter!";
-    if (rlo == rhi)                 return "lower diameter and upper diameter should be distinct";
     return "";
 }
 

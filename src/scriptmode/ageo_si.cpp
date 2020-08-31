@@ -821,35 +821,24 @@ void AGeo_SI::EnableObject(QString Object)
 
 void AGeo_SI::DisableObject(QString Object)
 {
-  AGeoObject* obj;
+  AGeoObject * obj = nullptr;
   for (AGeoObject * geoObj : GeoObjects)
-  {
       if (geoObj->Name == Object) obj = geoObj;
-  }
+
   if (!obj)
   {
       obj = Detector->Sandwich->World->findObjectByName(Object);
       if (!obj)
       {
-          abort("Cannot find object "+Object);
+          abort("Cannot find object " + Object);
           return;
       }
   }
-  bool yup = obj->ObjectType->isSlab();
-  if (yup)
-  {
-      bool ayup = obj->getSlabModel()->fCenter;
-      if (ayup)
-      {
-          return;
-      }
-  }
+
+  if (obj->ObjectType->isSlab() && obj->getSlabModel()->fCenter) return;
 
   if (!obj->isWorld())
     obj->fActive = false;
-
-  bool aaa = obj->fActive;
-
 }
 
 void AGeo_SI::setEnable(QString ObjectOrWildcard, bool flag)

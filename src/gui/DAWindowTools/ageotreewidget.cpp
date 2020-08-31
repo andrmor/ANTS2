@@ -544,10 +544,11 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
 {  
   QMenu menu;
 
-  QAction* showA = Action(menu, "Show - highlight in geometry");
+  QAction* showAplus = Action(menu, "Show - focus geometry view");
+  QAction* showA     = Action(menu, "Show - highlight in geometry");
   QAction* showAdown = Action(menu, "Show - this object with content");
   QAction* showAonly = Action(menu, "Show - only this object");
-  QAction* lineA = Action(menu, "Change line color/width/style");
+  QAction* lineA     = Action(menu, "Change line color/width/style");
 
   menu.addSeparator();
 
@@ -657,6 +658,7 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
       lockallA->setEnabled(true);
       unlockallA->setEnabled(true);
       lineA->setEnabled(true);
+      showAplus->setEnabled(true);
       showA->setEnabled(true);
       showAonly->setEnabled(true);
       showAdown->setEnabled(true);
@@ -674,7 +676,12 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
   if (!SelectedAction) return; //nothing was selected
 
   // -- EXECUTE SELECTED ACTION --
-  if (SelectedAction == showA)  // SHOW OBJECT
+  if (SelectedAction == showAplus)  // FOCUS OBJECT
+  {
+      emit RequestFocusObject(objName);
+      UpdateGui(objName);
+  }
+  if (SelectedAction == showA)      // SHOW OBJECT
      ShowObject(objName);
   else if (SelectedAction == showAonly)
      ShowObjectOnly(objName);

@@ -1032,7 +1032,12 @@ void GeometryWindowClass::Zoom(bool update)
       RasterWindow->ForceResize();
       //fRecallWindow = false;
       UpdateRootCanvas();
-    }
+  }
+}
+
+void GeometryWindowClass::FocusVolume(const QString & name)
+{
+    CameraControl->setFocus(name);
 }
 
 void GeometryWindowClass::on_actionDefault_zoom_1_triggered()

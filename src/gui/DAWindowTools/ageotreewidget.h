@@ -112,6 +112,7 @@ signals:
   void ObjectSelectionChanged(const QString); // should be fired with empty string if selection does not contain a single item  
   void RequestRebuildDetector();
   void RequestHighlightObject(QString name);
+  void RequestFocusObject(QString name);
   void RequestShowObjectRecursive(QString name);
   void RequestNormalDetectorDraw();
   void RequestListOfParticles(QStringList &definedParticles);

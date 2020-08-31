@@ -28,6 +28,7 @@ public:
   int  ZoomLevel = 0; //0 is fastest, +2 is typically the most "natural"
 
   void ShowAndFocus();
+  void FocusVolume(const QString & name);
   void SetAsActiveRootWindow(); //focus root on this Raster Window
   void ClearRootCanvas(); //clear root canvas
   void UpdateRootCanvas();

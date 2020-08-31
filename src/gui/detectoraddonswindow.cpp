@@ -68,6 +68,7 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(QWidget * parent, MainWindow * MW, De
   ui->frObjectEditor->setLayout(l);
   l->addWidget(twGeo->GetEditWidget());
   connect(twGeo, &AGeoTreeWidget::RequestRebuildDetector, this, &DetectorAddOnsWindow::onReconstructDetectorRequest);
+  connect(twGeo, &AGeoTreeWidget::RequestFocusObject,     this, &DetectorAddOnsWindow::FocusVolume);
   connect(twGeo, &AGeoTreeWidget::RequestHighlightObject, this, &DetectorAddOnsWindow::ShowObject);
   connect(twGeo, &AGeoTreeWidget::RequestShowObjectRecursive, this, &DetectorAddOnsWindow::ShowObjectRecursive);
   connect(twGeo, SIGNAL(RequestNormalDetectorDraw()), MW, SLOT(ShowGeometrySlot()));
@@ -391,6 +392,11 @@ void DetectorAddOnsWindow::ShowObject(QString name)
     MW->GeometryWindow->SetAsActiveRootWindow();
     Detector->GeoManager->ClearTracks();
     MW->GeometryWindow->ShowGeometry(true, false, false);
+}
+
+void DetectorAddOnsWindow::FocusVolume(QString name)
+{
+    MW->GeometryWindow->FocusVolume(name);
 }
 
 bool drawIfFound(TGeoNode* node, TString name)

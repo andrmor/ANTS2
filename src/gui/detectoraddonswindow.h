@@ -82,6 +82,7 @@ public slots:
   void AddObjScriptSuccess();
   void ReportScriptError(QString ErrorMessage);
   void ShowObject(QString name = "");
+  void FocusVolume(QString name);
   void ShowObjectRecursive(QString name);
   void OnrequestShowMonitor(const AGeoObject* mon);
 

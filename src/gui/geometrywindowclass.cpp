@@ -80,7 +80,7 @@ GeometryWindowClass::GeometryWindowClass(QWidget *parent, MainWindow *mw) :
 
     generateSymbolMap();
 
-    CameraControl = new ACameraControlDialog(RasterWindow, this);
+    CameraControl = new ACameraControlDialog(RasterWindow, MW->Detector->Sandwich->World, this);
     CameraControl->setModal(false);
 }
 

@@ -123,6 +123,8 @@ public:
   bool isMaterialInActiveUse(int imat) const;  //excluding disabled objects
   void collectContainingObjects(QVector<AGeoObject*> & vec) const;
 
+  bool getPositionInWorld(double * worldPos) const;
+
   //service propertie
   QString tmpContName;   //used only during load
   bool fExpanded = true; //gui only - is this object expanded in tree view

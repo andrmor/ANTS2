@@ -4,6 +4,7 @@
 #include <QDialog>
 
 class RasterWindowBaseClass;
+class AGeoObject;
 class QLineEdit;
 
 namespace Ui {
@@ -15,12 +16,14 @@ class ACameraControlDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit ACameraControlDialog(RasterWindowBaseClass * RasterWin, QWidget * parent = nullptr);
+    explicit ACameraControlDialog(RasterWindowBaseClass * RasterWin, AGeoObject * World, QWidget * parent = nullptr);
     ~ACameraControlDialog();
 
     void showAndUpdate();
 
     void setView(bool bSkipReadRange = false);
+
+    QString setFocus(const QString & name);
 
 public slots:
     void updateGui();
@@ -46,11 +49,14 @@ private slots:
 
     void on_pbStepZP_clicked();
 
+    void on_pbSetFocus_clicked();
+
 protected:
     void closeEvent(QCloseEvent *);
 
 private:
     RasterWindowBaseClass * RW = nullptr;
+    AGeoObject * World = nullptr;
     Ui::ACameraControlDialog * ui;
 
     double xPos = 0;

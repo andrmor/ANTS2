@@ -1069,6 +1069,26 @@ void AGeoObject::collectContainingObjects(QVector<AGeoObject *> & vec) const
     }
 }
 
+#include "TGeoMatrix.h"
+bool AGeoObject::getPositionInWorld(double * worldPos) const
+{
+    for (int i=0; i<3; i++) worldPos[i] = 0;
+
+    const AGeoObject * obj = this;
+    do
+    {
+        for (int i=0; i<3; i++) worldPos[i] += obj->Position[i];
+        if (obj->isWorld()) return true;
+        obj = obj->Container;
+    }
+    while (obj);
+
+    return false;
+}
+
+//TGeoTranslation Trans = TGeoTranslation("Rot", obj->Position[0], obj->Position[1], obj->Position[2]);
+//Trans.LocalToMaster(obj->Position, worldPos);
+
 QString randomString(int lettLength, int numLength)
 {
   //const QString possibleLett("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");

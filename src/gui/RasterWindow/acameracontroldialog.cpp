@@ -1,15 +1,16 @@
 #include "acameracontroldialog.h"
 #include "ui_acameracontroldialog.h"
+#include "rasterwindowbaseclass.h"
+#include "ageoobject.h"
 
 #include <QDebug>
 #include <QDoubleValidator>
 
-#include "rasterwindowbaseclass.h"
 #include "TCanvas.h"
 #include "TView3D.h"
 
-ACameraControlDialog::ACameraControlDialog(RasterWindowBaseClass *RasterWin, QWidget * parent) :
-    QDialog(parent), RW(RasterWin),
+ACameraControlDialog::ACameraControlDialog(RasterWindowBaseClass *RasterWin, AGeoObject *World, QWidget * parent) :
+    QDialog(parent), RW(RasterWin), World(World),
     ui(new Ui::ACameraControlDialog)
 {
     ui->setupUi(this);
@@ -202,4 +203,58 @@ void ACameraControlDialog::makeStep(int index, double step)
     p.apply(RW->fCanvas);
 
     updateGui();
+}
+
+#include "amessage.h"
+#include "ageoshape.h"
+void ACameraControlDialog::on_pbSetFocus_clicked()
+{
+    QString name = ui->leFocusVolume->text();
+    if (name.isEmpty())
+    {
+        message("Provide the name for the volume to focus", this);
+        return;
+    }
+
+    QString err = setFocus(name);
+    if (!err.isEmpty()) message(err, this);
+}
+
+QString ACameraControlDialog::setFocus(const QString & name)
+{
+    if (!RW->fCanvas->HasViewer3D()) return "There is no 3D view!";
+
+    if (name.isEmpty()) return "Provide the name for the volume to focus";
+
+    AGeoObject * obj = World->findObjectByName(name);
+    if (!obj) return "Volume " + name + " not found!";
+
+    double worldPos[3];
+    bool ok = obj->getPositionInWorld(worldPos);
+    if (!ok) return "Failed to compute global position of this volume!";
+    //qDebug() << ok << worldPos[0] << worldPos[1] << worldPos[2];
+
+    AGeoShape * shape = obj->Shape;
+    if (!shape) return "Object has no shape!";
+    double size = shape->maxSize();
+
+    AGeoViewParameters & p = RW->ViewParameters;
+    p.read(RW->fCanvas);
+
+    for (int i=0; i<3; i++)
+    {
+        p.RangeLL[i] = worldPos[i] - size;
+        p.RangeUR[i] = worldPos[i] + size;
+    }
+    p.WinX = 0;
+    p.WinY = 0;
+
+    RW->setVisible(false);
+        p.apply(RW->fCanvas);
+    RW->setVisible(true);
+    TView3D * v = static_cast<TView3D*>(RW->fCanvas->GetView());
+    v->Zoom();
+
+    updateGui();
+    return "";
 }

@@ -37,20 +37,23 @@ void ACameraControlDialog::showAndUpdate()
     updateGui();
 }
 
-void ACameraControlDialog::setView()
+void ACameraControlDialog::setView(bool bSkipReadRange)
 {
     if (!RW->fCanvas->HasViewer3D()) return;
 
     AGeoViewParameters & p = RW->ViewParameters;
 
     // Range
-    p.RangeLL[0] = ui->ledRangeLX->text().toDouble();
-    p.RangeLL[1] = ui->ledRangeLY->text().toDouble();
-    p.RangeLL[2] = ui->ledRangeLZ->text().toDouble();
+    if (!bSkipReadRange)
+    {
+        p.RangeLL[0] = ui->ledRangeLX->text().toDouble();
+        p.RangeLL[1] = ui->ledRangeLY->text().toDouble();
+        p.RangeLL[2] = ui->ledRangeLZ->text().toDouble();
 
-    p.RangeUR[0] = ui->ledRangeUX->text().toDouble();
-    p.RangeUR[1] = ui->ledRangeUY->text().toDouble();
-    p.RangeUR[2] = ui->ledRangeUZ->text().toDouble();
+        p.RangeUR[0] = ui->ledRangeUX->text().toDouble();
+        p.RangeUR[1] = ui->ledRangeUY->text().toDouble();
+        p.RangeUR[2] = ui->ledRangeUZ->text().toDouble();
+    }
 
     for (int i = 0; i < 3; i++)
     {
@@ -150,7 +153,7 @@ void ACameraControlDialog::setCenter(int index, QLineEdit *led)
     p.RangeLL[index] = c - halfRange;
     p.RangeUR[index] = c + halfRange;
 
-    setView();
+    setView(true);
 }
 
 void ACameraControlDialog::on_pbSetView_clicked()

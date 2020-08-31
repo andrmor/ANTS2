@@ -20,7 +20,7 @@ public:
 
     void showAndUpdate();
 
-    void setView();
+    void setView(bool bSkipReadRange = false);
 
 public slots:
     void updateGui();

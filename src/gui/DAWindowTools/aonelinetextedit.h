@@ -27,6 +27,9 @@ protected:
     void keyPressEvent(QKeyEvent * e) override;
     void focusOutEvent(QFocusEvent * event) override;
 
+private slots:
+    void clearTooltip();
+
 signals:
     void editingFinished();
     void escapePressed();

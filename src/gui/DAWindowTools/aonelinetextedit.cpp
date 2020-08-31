@@ -13,12 +13,24 @@ AOneLineTextEdit::AOneLineTextEdit(QWidget * parent) : QPlainTextEdit(parent)
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     setFixedHeight(sizeHint().height());
+
+    connect(this, &AOneLineTextEdit::textChanged, this, &AOneLineTextEdit::clearTooltip);
 }
 
+#include "ageoconsts.h"
 void AOneLineTextEdit::setText(const QString & text)
 {
     clear();
     appendPlainText(text);
+
+    bool ok;
+    double val = text.toDouble(&ok);
+    if (!ok)
+    {
+        AGeoConsts::getConstInstance().evaluateFormula(text, val);
+        setToolTip(QString::number(val));
+        setToolTipDuration(1000);
+    }
 }
 
 QString AOneLineTextEdit::text() const
@@ -151,6 +163,11 @@ void AOneLineTextEdit::focusOutEvent(QFocusEvent *event)
 {
     QPlainTextEdit::focusOutEvent(event);
     emit editingFinished();
+}
+
+void AOneLineTextEdit::clearTooltip()
+{
+    setToolTip("");
 }
 
 #include <QFont>

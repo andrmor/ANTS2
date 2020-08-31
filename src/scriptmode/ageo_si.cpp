@@ -835,7 +835,11 @@ void AGeo_SI::DisableObject(QString Object)
       }
   }
 
-  if (obj->ObjectType->isSlab() && obj->getSlabModel()->fCenter) return;
+  if (obj->ObjectType->isSlab())
+  {
+      if (obj->getSlabModel()->fCenter) return;
+      obj->getSlabModel()->fActive = false;
+  }
 
   if (!obj->isWorld())
     obj->fActive = false;

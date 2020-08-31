@@ -1,7 +1,10 @@
 #include "acameracontroldialog.h"
 #include "ui_acameracontroldialog.h"
 #include "rasterwindowbaseclass.h"
+#include "detectorclass.h"
+#include "asandwich.h"
 #include "ageoobject.h"
+#include "apmhub.h"
 
 #include <QDebug>
 #include <QDoubleValidator>
@@ -9,8 +12,8 @@
 #include "TCanvas.h"
 #include "TView3D.h"
 
-ACameraControlDialog::ACameraControlDialog(RasterWindowBaseClass *RasterWin, AGeoObject *World, QWidget * parent) :
-    QDialog(parent), RW(RasterWin), World(World),
+ACameraControlDialog::ACameraControlDialog(RasterWindowBaseClass * RasterWin, const DetectorClass & Detector, QWidget * parent) :
+    QDialog(parent), RW(RasterWin), Detector(Detector),
     ui(new Ui::ACameraControlDialog)
 {
     ui->setupUi(this);
@@ -33,8 +36,8 @@ ACameraControlDialog::~ACameraControlDialog()
 
 void ACameraControlDialog::showAndUpdate()
 {
+    if (xPos != 0 || yPos != 0) move(xPos, yPos);
     show();
-    if (xPos != 0 && yPos != 0) move(xPos, yPos);
     updateGui();
 }
 
@@ -223,20 +226,60 @@ void ACameraControlDialog::on_pbSetFocus_clicked()
 QString ACameraControlDialog::setFocus(const QString & name)
 {
     if (!RW->fCanvas->HasViewer3D()) return "There is no 3D view!";
-
     if (name.isEmpty()) return "Provide the name for the volume to focus";
 
-    AGeoObject * obj = World->findObjectByName(name);
-    if (!obj) return "Volume " + name + " not found!";
-
     double worldPos[3];
-    bool ok = obj->getPositionInWorld(worldPos);
-    if (!ok) return "Failed to compute global position of this volume!";
-    //qDebug() << ok << worldPos[0] << worldPos[1] << worldPos[2];
+    double size = 100;
+    bool ok = true;
 
-    AGeoShape * shape = obj->Shape;
-    if (!shape) return "Object has no shape!";
-    double size = shape->maxSize();
+    AGeoObject * obj = Detector.Sandwich->World->findObjectByName(name);
+    if (!obj)
+    {
+        QString numStr = name;
+        if (numStr.startsWith("PM")) // it could be a PM
+        {
+            numStr.remove("PM");
+            int iPM = numStr.toInt(&ok);
+            if (ok && iPM > -1 && iPM < Detector.PMs->count())
+            {
+                worldPos[0] = Detector.PMs->at(iPM).x;
+                worldPos[1] = Detector.PMs->at(iPM).y;
+                worldPos[2] = Detector.PMs->at(iPM).z;
+                size = std::max(Detector.PMs->getTypeForPM(iPM)->SizeX, Detector.PMs->getTypeForPM(iPM)->SizeY);
+            }
+            else return "Volume/PM " + name + " not found!";
+        }
+        else if (numStr.startsWith("dPM")) // or dummy PM
+        {
+            numStr.remove("dPM");
+            int iDpm = numStr.toInt(&ok);
+            if (ok && iDpm > -1 && iDpm < Detector.PMdummies.size())
+            {
+                for (int i = 0; i < 3; i++)
+                    worldPos[i] = Detector.PMdummies.at(iDpm).r[i];
+                int iType = Detector.PMdummies.at(iDpm).PMtype;
+                if (iType > -1 && iType < Detector.PMs->countPMtypes())
+                {
+                    const APmType * PMtype = Detector.PMs->getType(iType);
+                    size = std::max(PMtype->SizeX, PMtype->SizeY);
+                }
+            }
+            else return "Volume/dummyPM " + name + " not found!";
+        }
+        else return "Volume " + name + " not found!";
+    }
+
+
+    if (obj) // else already have the position
+    {
+        ok = obj->getPositionInWorld(worldPos);
+        if (!ok) return "Failed to compute global position of this volume!";
+
+        AGeoShape * shape = obj->Shape;
+        if (!shape) return "Object has no shape!";
+        size = shape->maxSize();
+    }
+    //qDebug() << ok << worldPos[0] << worldPos[1] << worldPos[2];
 
     AGeoViewParameters & p = RW->ViewParameters;
     p.read(RW->fCanvas);
@@ -258,3 +301,18 @@ QString ACameraControlDialog::setFocus(const QString & name)
     updateGui();
     return "";
 }
+
+/*
+void ACameraControlDialog::writeToJson(QJsonObject &json) const
+{
+    json["PosX"] = xPos;
+    json["PosY"] = yPos;
+}
+
+#include "ajsontools.h"
+void ACameraControlDialog::readFromJson(const QJsonObject &json)
+{
+    parseJson(json, "PosX", xPos);
+    parseJson(json, "PosY", yPos);
+}
+*/

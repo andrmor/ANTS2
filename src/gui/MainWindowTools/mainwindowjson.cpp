@@ -129,7 +129,7 @@ void MainWindow::writeExtraGuiToJson(QJsonObject &json)
         jmain["MW"] = jsMW;
 
         QJsonObject jeom;
-        jeom["ZoomLevel"] = GeometryWindow->ZoomLevel;
+            GeometryWindow->writeToJson(jeom);
         jmain["GeometryWindow"] = jeom;
 
         Rwindow->writeMiscGUIsettingsToJson(jmain);  //Misc setting (PlotXY, blur)
@@ -154,12 +154,9 @@ void MainWindow::readExtraGuiFromJson(QJsonObject &json)
     }
     onGuiEnableStatus(fConfigGuiLocked);
 
-    QJsonObject js = jmain["GeometryWindow"].toObject();
-    if (js.contains("ZoomLevel"))
-    {
-        GeometryWindow->ZoomLevel = js["ZoomLevel"].toInt();
-        GeometryWindow->Zoom(true);
-    }
+    QJsonObject js;
+    if ( parseJson(jmain, "GeometryWindow", js) ) GeometryWindow->readFromJson(js);
+
     if (jmain.contains("ReconstructionWindow"))
         Rwindow->readMiscGUIsettingsFromJson(jmain);
 

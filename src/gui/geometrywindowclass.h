@@ -51,10 +51,8 @@ public:
 
   bool fRecallWindow = false;
 
-  /*
-  void writeWindowPropsToJson(QJsonObject &json);   !*!
-  void readWindowPropsFromJson(QJsonObject &json);
-  */
+  void writeToJson(QJsonObject & json) const;
+  void readFromJson(const QJsonObject & json);
 
   int GeoMarkerSize = 2;
   int GeoMarkerStyle = 6;

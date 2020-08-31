@@ -80,13 +80,13 @@ GeometryWindowClass::GeometryWindowClass(QWidget *parent, MainWindow *mw) :
 
     generateSymbolMap();
 
-    CameraControl = new ACameraControlDialog(RasterWindow, MW->Detector->Sandwich->World, this);
+    CameraControl = new ACameraControlDialog(RasterWindow, *MW->Detector, this);
     CameraControl->setModal(false);
 }
 
 GeometryWindowClass::~GeometryWindowClass()
 {
-  delete ui;
+    delete ui;
 }
 
 void GeometryWindowClass::adjustGeoAttributes(TGeoVolume * vol, int Mode, int transp, bool adjustVis, int visLevel, int currentLevel)
@@ -333,33 +333,16 @@ void GeometryWindowClass::onBusyOff()
   RasterWindow->setBlockEvents(false);
 }
 
-/*
-void GeometryWindowClass::writeWindowPropsToJson(QJsonObject &json)
+void GeometryWindowClass::writeToJson(QJsonObject & json) const
 {
-  if (fRecallWindow)
-    {
-      QJsonObject js;
-      js["CenterX"] = CenterX;
-      js["CenterY"] = CenterY;
-      js["HWidth"] = HWidth;
-      js["HHeight"] = HHeight;
-      js["Phi"] = Phi;
-      js["Theta"] = Theta;
-      json["GeometryWindow"] = js;
-    }
+    json["ZoomLevel"] = ZoomLevel;
 }
 
-void GeometryWindowClass::readWindowPropsFromJson(QJsonObject &json)
+void GeometryWindowClass::readFromJson(const QJsonObject &json)
 {
-  QJsonObject js = json["GeometryWindow"].toObject();
-  parseJson(js, "CenterX", CenterX);
-  parseJson(js, "CenterY", CenterY);
-  parseJson(js, "HWidth", HWidth);
-  parseJson(js, "HHeight", HHeight);
-  parseJson(js, "Phi", Phi);
-  parseJson(js, "Theta", Theta);
+    bool ok = parseJson(json, "ZoomLevel", ZoomLevel);
+    if (ok) Zoom(true);
 }
-*/
 
 bool GeometryWindowClass::IsWorldVisible()
 {
@@ -1378,7 +1361,22 @@ void GeometryWindowClass::onDownloadPngRequested(QWebEngineDownloadItem *item)
 #endif
 }
 
+#include "guiutils.h"
 void GeometryWindowClass::on_pbCameraDialog_clicked()
 {
+    if (CameraControl->xPos == 0 && CameraControl->yPos == 0)
+    {
+        CameraControl->xPos = x() + width() + 3;
+        CameraControl->yPos = y() + 0.5*height() - 0.5*CameraControl->height();
+
+        CameraControl->move(CameraControl->xPos, CameraControl->yPos);
+        bool bVis = GuiUtils::AssureWidgetIsWithinVisibleArea(CameraControl);
+        if (!bVis)
+        {
+            CameraControl->xPos = x() + 0.5*width()  - 0.5*CameraControl->width();
+            CameraControl->yPos = y() + 0.5*height() - 0.5*CameraControl->height();
+        }
+    }
+
     CameraControl->showAndUpdate();
 }

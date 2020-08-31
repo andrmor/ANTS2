@@ -468,14 +468,15 @@ QString AGeoSphere::getHelp() const
 
 QString AGeoSphere::updateShape()
 {
-    QString err;
-
-    err = updateParameter(str2rmax,  rmax);                        if (!err.isEmpty()) return err;
-    err = updateParameter(str2rmin,  rmin,   false);               if (!err.isEmpty()) return err;
-    err = updateParameter(strTheta1, theta1, false, false, false); if (!err.isEmpty()) return err;
-    err = updateParameter(strTheta2, theta2, false, false, false); if (!err.isEmpty()) return err;
-    err = updateParameter(strPhi1,   phi1,   false, false, false); if (!err.isEmpty()) return err;
-    err = updateParameter(strPhi2,   phi2,   false, false, false); if (!err.isEmpty()) return err;
+    const AGeoConsts & GC = AGeoConsts::getConstInstance();
+    QString errorStr;
+    bool ok;
+    ok = GC.updateParameter(errorStr, str2rmax,  rmax);                           if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, str2rmin,  rmin,   false);                  if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, strTheta1, theta1, false, false,  false);   if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, strTheta2, theta2, false, false,  false);   if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, strPhi1,   phi1,   false, false, false);    if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, strPhi2,   phi2,   false, false, false);    if (!ok) return errorStr;
 
     if (rmin   >= rmax)               return "Inside diameter should be smaller than the outside one!";
     if (theta1 >= theta2)             return "Theta2 should be larger than Theta1";
@@ -638,24 +639,17 @@ QString AGeoTubeSeg::getHelp() const
 
 QString AGeoTubeSeg::updateShape()
 {
+    const AGeoConsts & GC = AGeoConsts::getConstInstance();
     QString errorStr;
-
-    errorStr = updateParameter (str2rmin, rmin, false);
-    if (!errorStr.isEmpty()) return errorStr;
-
-    errorStr = updateParameter (str2rmax, rmax);
-    if (!errorStr.isEmpty()) return errorStr;
+    bool ok;
+    ok = GC.updateParameter(errorStr, str2rmax, rmax);                      if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, str2rmin, rmin, false);               if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, str2dz, dz);                          if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, strPhi1, phi1, false, false, false);  if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, strPhi2, phi2, false, false, false);  if (!ok) return errorStr;
 
     if (rmin >= rmax) return "Inside diameter should be smaller than the outside one!";
-
-    errorStr = updateParameter (str2dz,   dz);
-    if (!errorStr.isEmpty()) return errorStr;
-
-    errorStr = updateParameter (strPhi1, phi1, false, false, false);
-    if (!errorStr.isEmpty()) return errorStr;
-
-    errorStr = updateParameter (strPhi2, phi2, false, false, false);
-    return errorStr;
+    return "";
 }
 
 bool AGeoTubeSeg::isGeoConstInUse(const QRegExp &nameRegExp) const
@@ -1793,7 +1787,8 @@ QString AGeoParaboloid::updateShape()
     ok = GC.updateParameter(errorStr, str2rlo, rlo, false); if (!ok) return errorStr;
     ok = GC.updateParameter(errorStr, str2rhi, rhi, false); if (!ok) return errorStr;
     ok = GC.updateParameter(errorStr, str2dz, dz);          if (!ok) return errorStr;
-    if (rlo == rhi) return "lower diameter and upper diameter should be distinct";
+    if (rlo >= rhi)                 return "lower diameter should be smaller than the upper diameter!";
+    if (rlo == rhi)                 return "lower diameter and upper diameter should be distinct";
     return "";
 }
 
@@ -2084,14 +2079,15 @@ QString AGeoEltu::getHelp() const
 
 QString AGeoEltu::updateShape()
 {
-    QString errorStr = updateParameter(str2a,  a);
-    if (!errorStr.isEmpty()) return errorStr;
 
-    errorStr = updateParameter        (str2b,  b);
-    if (!errorStr.isEmpty()) return errorStr;
+    const AGeoConsts & GC = AGeoConsts::getConstInstance();
+    QString errorStr;
+    bool ok;
+    ok = GC.updateParameter(errorStr, str2a,  a);     if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, str2b,  b);     if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, str2dz, dz);    if (!ok) return errorStr;
 
-    errorStr = updateParameter        (str2dz, dz);
-    return errorStr;
+    return "";
 }
 
 bool AGeoEltu::isGeoConstInUse(const QRegExp &nameRegExp) const
@@ -3342,13 +3338,14 @@ QString AGeoTorus::getHelp() const
 
 QString AGeoTorus::updateShape()
 {
-    QString err;
-
-    err = updateParameter(str2R, R);                            if (!err.isEmpty()) return err;
-    err = updateParameter(str2Rmax, Rmax);                      if (!err.isEmpty()) return err;
-    err = updateParameter(str2Rmin, Rmin, false);               if (!err.isEmpty()) return err;
-    err = updateParameter(strPhi1,  Phi1, false, false, false); if (!err.isEmpty()) return err;
-    err = updateParameter(strDphi,  Dphi, true,  true,  false); if (!err.isEmpty()) return err;
+    const AGeoConsts & GC = AGeoConsts::getConstInstance();
+    QString errorStr;
+    bool ok;
+    ok = GC.updateParameter(errorStr, str2R,    R);                            if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, str2Rmax, Rmax);                         if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, str2Rmin, Rmin, false);                  if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, strPhi1,  Phi1, false, false, false);    if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, strDphi,  Dphi, true,  true,  false);    if (!ok) return errorStr;
 
     if (Rmin >= Rmax) return "Inside diameter should be smaller than the outside one!";
 

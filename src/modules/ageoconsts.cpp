@@ -263,6 +263,12 @@ QString AGeoConsts::setNewExpression(int index, const QString & newExpression)
     return err;
 }
 
+bool AGeoConsts::isIndexValid(int index)
+{
+    if (index < 0 || index >= Names.size()) return false;
+    return true;
+}
+
 QString AGeoConsts::checkifValidAndGetDoublefromExpression(int current)
 {
     QString errorStr;

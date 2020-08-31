@@ -1481,20 +1481,23 @@ void DetectorAddOnsWindow::on_tabwConstants_customContextMenuRequested(const QPo
     QAction * selected = menu.exec(ui->tabwConstants->mapToGlobal(pos));
     if (selected == removeA)
     {
-        QString name = GC.getName(index);
-        if (name.isEmpty()) return;
+        if (!GC.isIndexValid(index)) return;
 
-        QString constUsingIt = GC.isGeoConstInUse(QRegExp("\\b"+name+"\\b"), index);
-        if (!constUsingIt.isEmpty())
+        QString name = GC.getName(index);
+        if (!name.isEmpty())
         {
-            message(QString("\"%1\" cannot be removed.\nThe first geometric constant using it:\n\n%2").arg(name).arg(constUsingIt), this);
-            return;
-        }
-        const AGeoObject * obj = twGeo->Sandwich->World->isGeoConstInUseRecursive(QRegExp("\\b"+name+"\\b"));
-        if (obj)
-        {
-            message(QString("\"%1\" cannot be removed.\nThe first object using it:\n\n%2").arg(name).arg(obj->Name), this);
-            return;
+            QString constUsingIt = GC.isGeoConstInUse(QRegExp("\\b"+name+"\\b"), index);
+            if (!constUsingIt.isEmpty())
+            {
+                message(QString("\"%1\" cannot be removed.\nThe first geometric constant using it:\n\n%2").arg(name).arg(constUsingIt), this);
+                return;
+            }
+            const AGeoObject * obj = twGeo->Sandwich->World->isGeoConstInUseRecursive(QRegExp("\\b"+name+"\\b"));
+            if (obj)
+            {
+                message(QString("\"%1\" cannot be removed.\nThe first object using it:\n\n%2").arg(name).arg(obj->Name), this);
+                return;
+            }
         }
 
         GC.removeConstant(index);

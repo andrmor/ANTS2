@@ -24,6 +24,7 @@ public:
     QString isNameValid(int index, const QString &newName);
     bool    setNewValue(int index, double newValue);
     QString setNewExpression(int index, const QString & newExpression);
+    bool    isIndexValid(int index);
 
     QString checkifValidAndGetDoublefromExpression(int current);
     QString isGeoConstsBellowInUse(int current);

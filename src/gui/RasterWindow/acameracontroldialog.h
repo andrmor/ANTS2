@@ -26,9 +26,6 @@ public:
 
     QString setFocus(const QString & name);
 
-    //void writeToJson(QJsonObject & json) const;
-    //void readFromJson(const QJsonObject & json);
-
     int xPos = 0;
     int yPos = 0;
 

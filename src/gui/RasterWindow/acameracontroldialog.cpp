@@ -275,11 +275,8 @@ QString ACameraControlDialog::setFocus(const QString & name)
         ok = obj->getPositionInWorld(worldPos);
         if (!ok) return "Failed to compute global position of this volume!";
 
-        AGeoShape * shape = obj->Shape;
-        if (!shape) return "Object has no shape!";
-        size = shape->maxSize();
+        size = obj->getMaxSize();
     }
-    //qDebug() << ok << worldPos[0] << worldPos[1] << worldPos[2];
 
     AGeoViewParameters & p = RW->ViewParameters;
     p.read(RW->fCanvas);
@@ -301,18 +298,3 @@ QString ACameraControlDialog::setFocus(const QString & name)
     updateGui();
     return "";
 }
-
-/*
-void ACameraControlDialog::writeToJson(QJsonObject &json) const
-{
-    json["PosX"] = xPos;
-    json["PosY"] = yPos;
-}
-
-#include "ajsontools.h"
-void ACameraControlDialog::readFromJson(const QJsonObject &json)
-{
-    parseJson(json, "PosX", xPos);
-    parseJson(json, "PosY", yPos);
-}
-*/

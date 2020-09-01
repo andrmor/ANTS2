@@ -483,9 +483,9 @@ void AGeoObject::setSlabModel(ASlabModel *slab)
     slabObject->SlabModel = slab;
 }
 
-AGeoObject *AGeoObject::getContainerWithLogical()
+AGeoObject * AGeoObject::getContainerWithLogical()
 {
-    if ( !ObjectType->isComposite()) return 0;
+    if ( !ObjectType->isComposite()) return nullptr;
 
     for (int i=0; i<HostedObjects.size(); i++)
     {
@@ -493,7 +493,20 @@ AGeoObject *AGeoObject::getContainerWithLogical()
         if (obj->ObjectType->isCompositeContainer())
             return obj;
     }
-    return 0;
+    return nullptr;
+}
+
+const AGeoObject *AGeoObject::getContainerWithLogical() const
+{
+    if ( !ObjectType->isComposite()) return nullptr;
+
+    for (int i=0; i<HostedObjects.size(); i++)
+    {
+        AGeoObject* obj = HostedObjects[i];
+        if (obj->ObjectType->isCompositeContainer())
+            return obj;
+    }
+    return nullptr;
 }
 
 bool AGeoObject::isCompositeMemeber() const
@@ -1067,6 +1080,41 @@ void AGeoObject::collectContainingObjects(QVector<AGeoObject *> & vec) const
         vec << obj;
         obj->collectContainingObjects(vec);
     }
+}
+
+double AGeoObject::getMaxSize() const
+{
+    if (!ObjectType) return 100.0;
+
+    if (ObjectType->isArray())
+    {
+        const ATypeArrayObject * a = static_cast<const ATypeArrayObject*>(ObjectType);
+        double X = a->stepX * (2.0 + a->numX);
+        double Y = a->stepY * (2.0 + a->numY);
+        double Z = a->stepZ * (2.0 + a->numZ);
+        return std::cbrt(X*X + Y*Y + Z*Z);
+    }
+
+    if (ObjectType->isComposite())
+    {
+        const AGeoObject * cont = getContainerWithLogical();
+        if (!cont) return 100.0;
+
+        double msize = 0;
+        for (AGeoObject * lo : cont->HostedObjects)
+        {
+            double thisMax = 0;
+            for (int i=0; i<3; i++)
+                thisMax  = std::max(thisMax, fabs(lo->Position[i]));
+            thisMax += lo->getMaxSize();
+
+            msize = std::max(msize, thisMax);
+        }
+        return msize;
+    }
+
+    if (!Shape) return 100.0;
+    return Shape->maxSize();
 }
 
 #include "TGeoMatrix.h"

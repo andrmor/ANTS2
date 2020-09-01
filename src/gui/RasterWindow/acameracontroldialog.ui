@@ -1225,21 +1225,5 @@ by a step in mm</string>
     </hint>
    </hints>
   </connection>
-  <connection>
-   <sender>leFocusVolume</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbSetFocus</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>138</x>
-     <y>253</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>55</x>
-     <y>254</y>
-    </hint>
-   </hints>
-  </connection>
  </connections>
 </ui>

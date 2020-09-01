@@ -74,6 +74,7 @@ public:
 
   //for composite
   AGeoObject* getContainerWithLogical();
+  const AGeoObject* getContainerWithLogical() const;
   bool isCompositeMemeber() const;
   void refreshShapeCompositeMembers(AGeoShape * ExternalShape = nullptr); //safe to use on any AGeoObject; if ExternalShape is provided , it is updated; otherwise, Objects's shape is updated
   bool isInUseByComposite(); //safe to use on any AGeoObject
@@ -122,6 +123,7 @@ public:
   bool isMaterialInUse(int imat) const;  //including disabled objects
   bool isMaterialInActiveUse(int imat) const;  //excluding disabled objects
   void collectContainingObjects(QVector<AGeoObject*> & vec) const;
+  double getMaxSize() const;
 
   bool getPositionInWorld(double * worldPos) const;
 

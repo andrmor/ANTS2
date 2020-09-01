@@ -323,23 +323,7 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
     }
 
     //additional post-processing
-    if ( obj->ObjectType->isArray() )
-    {
-        //additional properties for array
-        ATypeArrayObject* array = static_cast<ATypeArrayObject*>(obj->ObjectType);
-        //ATypeArrayObject tempArray(*array);
-        //qDebug() << "stepp" <<tempArray.stepX <<tempArray.strStepX;
-        QString errorStr = array->updateType();
-        if (!errorStr.isEmpty())
-        {
-            //qDebug() << "steppp" <<tempArray.stepX <<tempArray.strStepX;
-            QMessageBox::warning(this->ParentWidget,"", errorStr);
-            return false;
-        }
-        qDebug() << "stepppp" <<array->stepX <<array->strStepX;
-        //*array = tempArray;
-    }
-    else if (obj->ObjectType->isComposite())
+    if (obj->ObjectType->isComposite())
     {
         AGeoObject* logicals = obj->getContainerWithLogical();
         if (logicals)
@@ -2461,18 +2445,28 @@ AGeoArrayDelegate::AGeoArrayDelegate(const QStringList &materials, QWidget *pare
     pbShapeInfo->setVisible(false);
 }
 
-bool AGeoArrayDelegate::updateObject(AGeoObject *obj) const
+bool AGeoArrayDelegate::updateObject(AGeoObject * obj) const
 {
-    if (CurrentObject->ObjectType->isArray())
+    if (!CurrentObject->ObjectType->isArray()) return false;
+
+    ATypeArrayObject a;
+    a.strNumX  = ledNumX->text();
+    a.strNumY  = ledNumY->text();
+    a.strNumZ  = ledNumZ->text();
+    a.strStepX = ledStepX->text();
+    a.strStepY = ledStepY->text();
+    a.strStepZ = ledStepZ->text();
+
+    QString errorStr = ATypeArrayObject::evalueateGeoConsts(a);
+    if (!errorStr.isEmpty())
     {
-        ATypeArrayObject * array = static_cast<ATypeArrayObject*>(CurrentObject->ObjectType);
-        array->strNumX  = ledNumX->text();
-        array->strNumY  = ledNumY->text();
-        array->strNumZ  = ledNumZ->text();
-        array->strStepX = ledStepX->text();
-        array->strStepY = ledStepY->text();
-        array->strStepZ = ledStepZ->text();
+        qDebug() << errorStr;
+        QMessageBox::warning(this->ParentWidget, "", errorStr);
+        return false;
     }
+
+    ATypeArrayObject * array = static_cast<ATypeArrayObject*>(obj->ObjectType);
+    *array = a;
 
     return AGeoObjectDelegate::updateObject(obj);
 }

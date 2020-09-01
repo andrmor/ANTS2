@@ -75,28 +75,20 @@ void ATypeArrayObject::Reconfigure(int NumX, int NumY, int NumZ, double StepX, d
     stepX = StepX; stepY = StepY; stepZ = StepZ;
 }
 
-QString ATypeArrayObject::updateType()
+QString ATypeArrayObject::evalueateGeoConsts(ATypeArrayObject & A)
 {
+    const AGeoConsts & GC = AGeoConsts::getConstInstance();
+
     QString errorStr;
     bool ok;
-    double  dNumX =         numX,     dNumY  =    numY,     dNumZ  =    numZ;
-    double  dstepX  =      stepX,    dstepY =    stepY,    dstepZ =    stepZ;
-    QString sstrNumX =   strNumX,  sstrNumY =  strNumY,  sstrNumZ  = strNumZ;
-    QString sstrStepX = strStepX, sstrStepY = strStepY, sstrStepZ = strStepZ;
 
-    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, sstrNumX, dNumX, true, true, false) ; if (!ok) return errorStr;
-    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, sstrNumY, dNumY, true, true, false) ; if (!ok) return errorStr;
-    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, sstrNumZ, dNumZ, true, true, false) ; if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, A.strNumX, A.numX, true, true) ; if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, A.strNumY, A.numY, true, true) ; if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, A.strNumZ, A.numZ, true, true) ; if (!ok) return errorStr;
 
-
-    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, sstrStepX, dstepX, true, true, false) ; if (!ok) return errorStr;
-    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, sstrStepY, dstepY, true, true, false) ; if (!ok) return errorStr;
-    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, sstrStepZ, dstepZ, true, true, false) ; if (!ok) return errorStr;
-
-        numX =     dNumX,     numY = dNumY, numZ = dNumZ;
-       stepX =    dstepX,    stepY = dstepY, stepZ = dstepZ;
-     strNumX =  sstrNumX,  strNumY = sstrNumY, strNumZ= sstrNumZ;
-    strStepX = sstrStepX, strStepY = sstrStepY, strStepZ= sstrStepZ;
+    ok = GC.updateParameter(errorStr, A.strStepX, A.stepX, true, false, false) ; if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, A.strStepY, A.stepY, true, false, false) ; if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, A.strStepZ, A.stepZ, true, false, false) ; if (!ok) return errorStr;
 
     return "";
 }
@@ -157,7 +149,7 @@ void ATypeArrayObject::readFromJson(const QJsonObject &json)
     if (!parseJson(json, "strStepY", strStepY)) strStepY.clear();
     if (!parseJson(json, "strStepZ", strStepZ)) strStepZ.clear();
 
-    updateType();
+    ATypeArrayObject::evalueateGeoConsts(*this);
 }
 
 void ATypeGridElementObject::writeToJson(QJsonObject &json) const

@@ -34,8 +34,6 @@ public:
     bool isGridElement() const      {return Type == "GridElement";}
     bool isMonitor() const          {return Type == "Monitor";}
 
-    virtual QString updateType() {return "";}
-
     virtual bool isGeoConstInUse(const QRegExp & /*nameRegExp*/) const {return false;}
     virtual void replaceGeoConstName(const QRegExp & /*nameRegExp*/, const QString & /*newName*/) {}
 
@@ -136,8 +134,6 @@ public:
 
     void Reconfigure(int NumX, int NumY, int NumZ, double StepX, double StepY, double StepZ);
 
-    QString updateType() override;
-
     bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
     void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
 
@@ -151,6 +147,8 @@ public:
     double stepY = 25.0;
     double stepZ = 25.0;
     QString strNumX, strNumY, strNumZ, strStepX, strStepY, strStepZ;
+
+    static QString evalueateGeoConsts(ATypeArrayObject & ArrayType);
 };
 
 class ATypeGridObject : public ATypeGeoObject

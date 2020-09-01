@@ -134,6 +134,7 @@ bool AGeoConsts::evaluateFormula(QString str, double &returnValue, int to) const
     //qDebug() << "return value: "<< returnValue;
     return true;
 }
+
 bool AGeoConsts::updateParameter(QString &errorStr, QString &str, double &returnValue, bool bForbidZero, bool bForbidNegative, bool bMakeHalf) const
 {
     if (str.isEmpty()) return true;
@@ -150,20 +151,56 @@ bool AGeoConsts::updateParameter(QString &errorStr, QString &str, double &return
             return false;
         }
     }
+
     if (bForbidZero && returnValue == 0)
     {
-        errorStr = "Unacceptable value zero";
+        errorStr = "Unacceptable zero value";
         if (!str.isEmpty()) errorStr += " in: " + str;
         return false;
     }
     if (bForbidNegative && returnValue < 0)
     {
-        errorStr = "Unacceptable value negative in";
+        errorStr = "Unacceptable negative value in";
         if (!str.isEmpty()) errorStr += ": " + str;
         else errorStr += ": " + QString::number(returnValue);
         return false;
     }
     if (bMakeHalf) returnValue *= 0.5;
+    return true;
+}
+
+bool AGeoConsts::updateParameter(QString & errorStr, QString & str, int & returnValue, bool bForbidZero, bool bForbidNegative) const
+{
+    if (str.isEmpty()) return true;
+
+    bool ok;
+    returnValue = str.simplified().toInt(&ok);
+    if (ok) str.clear();
+    else
+    {
+        double dRetVal;
+        ok = evaluateFormula(str, dRetVal);
+        if (!ok)
+        {
+            errorStr = QString("Syntax error:\n%1").arg(str);
+            return false;
+        }
+        returnValue = dRetVal;
+    }
+
+    if (bForbidZero && returnValue == 0)
+    {
+        errorStr = "Unacceptable zero value";
+        if (!str.isEmpty()) errorStr += " in: " + str;
+        return false;
+    }
+    if (bForbidNegative && returnValue < 0)
+    {
+        errorStr = "Unacceptable negative value in";
+        if (!str.isEmpty()) errorStr += ": " + str;
+        else errorStr += ": " + QString::number(returnValue);
+        return false;
+    }
     return true;
 }
 

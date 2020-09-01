@@ -48,7 +48,8 @@ public:
     void    readFromJson(const QJsonObject & json);
 
     bool    evaluateFormula(QString str, double &returnValue, int to = -1) const;
-    bool    updateParameter(QString &errorStr, QString & str, double & returnValue, bool bForbidZero = true, bool bForbidNegative = true, bool bMakeHalf = true) const;
+    bool    updateParameter(QString & errorStr, QString & str, double & returnValue, bool bForbidZero = true, bool bForbidNegative = true, bool bMakeHalf = true) const;
+    bool    updateParameter(QString & errorStr, QString & str, int    & returnValue, bool bForbidZero = true, bool bForbidNegative = true) const;
 
     const QVector<QString> & getTFormulaReservedWords() const {return FormulaReservedWords;}
 

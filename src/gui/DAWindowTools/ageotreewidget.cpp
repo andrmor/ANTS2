@@ -639,7 +639,7 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
 
       //newA->setEnabled(fNotGridNotMonitor);
       addObjMenu->setEnabled(fNotGridNotMonitor);
-      enableDisableA->setEnabled(true);      
+      enableDisableA->setEnabled( !obj->isWorld() );
       enableDisableA->setText( (obj->isDisabled() ? "Enable object" : "Disable object" ) );
       if (obj->getSlabModel())
           if (obj->getSlabModel()->fCenter) enableDisableA->setEnabled(false);

@@ -217,6 +217,12 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
             scaled->strScaleY = ledScaleY->text();
             scaled->strScaleZ = ledScaleZ->text();
 
+            if (scaled->strScaleX.isEmpty() || scaled->strScaleY.isEmpty() || scaled->strScaleZ.isEmpty())
+            {
+                QMessageBox::warning(this->ParentWidget, "", "Empty line!");
+                return false;
+            }
+
             errorStr =  scaled->updateScalingFactors();
             if (!errorStr.isEmpty())
             {

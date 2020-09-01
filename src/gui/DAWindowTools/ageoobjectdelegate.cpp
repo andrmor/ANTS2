@@ -2457,7 +2457,7 @@ bool AGeoArrayDelegate::updateObject(AGeoObject * obj) const
     a.strStepY = ledStepY->text();
     a.strStepZ = ledStepZ->text();
 
-    QString errorStr = ATypeArrayObject::evalueateGeoConsts(a);
+    QString errorStr = ATypeArrayObject::evaluateStringValues(a);
     if (!errorStr.isEmpty())
     {
         qDebug() << errorStr;

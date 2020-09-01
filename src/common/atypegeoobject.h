@@ -148,7 +148,7 @@ public:
     double stepZ = 25.0;
     QString strNumX, strNumY, strNumZ, strStepX, strStepY, strStepZ;
 
-    static QString evalueateGeoConsts(ATypeArrayObject & ArrayType);
+    static QString evaluateStringValues(ATypeArrayObject & ArrayType);
 };
 
 class ATypeGridObject : public ATypeGeoObject

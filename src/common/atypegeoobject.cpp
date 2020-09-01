@@ -75,7 +75,7 @@ void ATypeArrayObject::Reconfigure(int NumX, int NumY, int NumZ, double StepX, d
     stepX = StepX; stepY = StepY; stepZ = StepZ;
 }
 
-QString ATypeArrayObject::evalueateGeoConsts(ATypeArrayObject & A)
+QString ATypeArrayObject::evaluateStringValues(ATypeArrayObject & A)
 {
     const AGeoConsts & GC = AGeoConsts::getConstInstance();
 
@@ -149,7 +149,7 @@ void ATypeArrayObject::readFromJson(const QJsonObject &json)
     if (!parseJson(json, "strStepY", strStepY)) strStepY.clear();
     if (!parseJson(json, "strStepZ", strStepZ)) strStepZ.clear();
 
-    ATypeArrayObject::evalueateGeoConsts(*this);
+    ATypeArrayObject::evaluateStringValues(*this);
 }
 
 void ATypeGridElementObject::writeToJson(QJsonObject &json) const

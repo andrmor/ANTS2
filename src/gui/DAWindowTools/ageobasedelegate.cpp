@@ -83,6 +83,11 @@ void AGeoBaseDelegate::configureHighligherAndCompleter(AOneLineTextEdit * edit, 
 bool AGeoBaseDelegate::processEditBox(AOneLineTextEdit *lineEdit, double &val, QString &str, QWidget *parent)
 {
     str = lineEdit->text();
+    if (str.isEmpty())
+    {
+        QMessageBox::warning(parent, "", "Empty line!");
+        return false;
+    }
 
     const AGeoConsts & GC = AGeoConsts::getConstInstance();
     QString errorStr;

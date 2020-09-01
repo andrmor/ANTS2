@@ -190,6 +190,21 @@ QSize AOneLineTextEdit::sizeHint() const
                                       expandedTo(QApplication::globalStrut()), this));
 }
 
+void AOneLineTextEdit::dragEnterEvent(QDragEnterEvent *e)
+{
+    e->ignore();
+}
+
+void AOneLineTextEdit::dragLeaveEvent(QDragLeaveEvent *e)
+{
+    e->ignore();
+}
+
+void AOneLineTextEdit::dragMoveEvent(QDragMoveEvent *e)
+{
+    e->ignore();
+}
+
 // ------------------
 
 void ABasicHighlighter::highlightBlock(const QString & text)

@@ -24,6 +24,10 @@ public slots:
 protected:
     QSize sizeHint() const override;
 
+    void dragEnterEvent(QDragEnterEvent * e);
+    void dragLeaveEvent(QDragLeaveEvent *e);
+    void dragMoveEvent(QDragMoveEvent *e);
+
     void keyPressEvent(QKeyEvent * e) override;
     void focusOutEvent(QFocusEvent * event) override;
 

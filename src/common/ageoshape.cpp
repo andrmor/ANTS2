@@ -2494,8 +2494,10 @@ QString AGeoPcon::updateShape()
             return errorStr;
         if (i > 0 && Sections[i-1].z > Sections[i].z)
             return "sections' z coordinates are not in ascending order";
+        if ( i > 0  && (Sections[i-1] == Sections[i]))
+            return "sections can't have duplicates";
     }
-    int lastSection = Sections.size() -1;
+    const int lastSection = Sections.size() -1;
     if (Sections[0].z == Sections[1].z || Sections[lastSection].z == Sections[lastSection-1].z)
         return "Not allowed first two or last two sections at same Z";
     return "";
@@ -2790,6 +2792,13 @@ void APolyCGsection::readFromJson(const QJsonObject &json)
 
     QString errorStr = "";
     updateShape(errorStr);
+}
+
+bool APolyCGsection::operator ==(const APolyCGsection &section) const
+{
+    if ((z == section.z) && (rmin == section.rmin) && (rmax == section.rmax))
+        return true;
+    return false;
 }
 
 // --- GeoPolygon ---

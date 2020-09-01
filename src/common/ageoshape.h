@@ -321,6 +321,7 @@ struct APolyCGsection
   QString toString(bool useStrings) const;
   void writeToJson(QJsonObject& json) const;
   void readFromJson(const QJsonObject& json);
+  bool operator ==( const APolyCGsection &section1) const;
 };
 
 class AGeoPcon : public AGeoShape

@@ -14,6 +14,8 @@ AOneLineTextEdit::AOneLineTextEdit(QWidget * parent) : QPlainTextEdit(parent)
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     setFixedHeight(sizeHint().height());
 
+    setAcceptDrops(false);
+
     connect(this, &AOneLineTextEdit::textChanged, this, &AOneLineTextEdit::clearTooltip);
 }
 
@@ -188,21 +190,6 @@ QSize AOneLineTextEdit::sizeHint() const
     initStyleOption(&opt);
     return (style()->sizeFromContents(QStyle::CT_LineEdit, &opt, QSize(w, h).
                                       expandedTo(QApplication::globalStrut()), this));
-}
-
-void AOneLineTextEdit::dragEnterEvent(QDragEnterEvent *e)
-{
-    e->ignore();
-}
-
-void AOneLineTextEdit::dragLeaveEvent(QDragLeaveEvent *e)
-{
-    e->ignore();
-}
-
-void AOneLineTextEdit::dragMoveEvent(QDragMoveEvent *e)
-{
-    e->ignore();
 }
 
 // ------------------

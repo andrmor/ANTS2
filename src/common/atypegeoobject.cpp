@@ -79,21 +79,24 @@ QString ATypeArrayObject::updateType()
 {
     QString errorStr;
     bool ok;
-    double dNumX = numX;
-    double dNumY = numY;
-    double dNumZ = numZ;
+    double  dNumX =         numX,     dNumY  =    numY,     dNumZ  =    numZ;
+    double  dstepX  =      stepX,    dstepY =    stepY,    dstepZ =    stepZ;
+    QString sstrNumX =   strNumX,  sstrNumY =  strNumY,  sstrNumZ  = strNumZ;
+    QString sstrStepX = strStepX, sstrStepY = strStepY, sstrStepZ = strStepZ;
 
-    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, strNumX, dNumX, true, true, false) ; if (!ok) return errorStr;
-    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, strNumY, dNumY, true, true, false) ; if (!ok) return errorStr;
-    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, strNumZ, dNumZ, true, true, false) ; if (!ok) return errorStr;
+    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, sstrNumX, dNumX, true, true, false) ; if (!ok) return errorStr;
+    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, sstrNumY, dNumY, true, true, false) ; if (!ok) return errorStr;
+    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, sstrNumZ, dNumZ, true, true, false) ; if (!ok) return errorStr;
 
-    numX = dNumX;
-    numY = dNumY;
-    numZ = dNumZ;
 
-    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, strStepX, stepX, true, true, false) ; if (!ok) return errorStr;
-    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, strStepY, stepY, true, true, false) ; if (!ok) return errorStr;
-    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, strStepZ, stepZ, true, true, false) ; if (!ok) return errorStr;
+    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, sstrStepX, dstepX, true, true, false) ; if (!ok) return errorStr;
+    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, sstrStepY, dstepY, true, true, false) ; if (!ok) return errorStr;
+    ok = AGeoConsts::getConstInstance().updateParameter(errorStr, sstrStepZ, dstepZ, true, true, false) ; if (!ok) return errorStr;
+
+        numX =     dNumX,     numY = dNumY, numZ = dNumZ;
+       stepX =    dstepX,    stepY = dstepY, stepZ = dstepZ;
+     strNumX =  sstrNumX,  strNumY = sstrNumY, strNumZ= sstrNumZ;
+    strStepX = sstrStepX, strStepY = sstrStepY, strStepZ= sstrStepZ;
 
     return "";
 }

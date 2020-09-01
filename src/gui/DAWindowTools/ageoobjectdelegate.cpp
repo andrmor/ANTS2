@@ -327,17 +327,17 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
     {
         //additional properties for array
         ATypeArrayObject* array = static_cast<ATypeArrayObject*>(obj->ObjectType);
-        ATypeArrayObject tempArray(*array);
-        qDebug() << "stepp" <<tempArray.stepX <<tempArray.strStepX;
-        QString errorStr = tempArray.updateType();
+        //ATypeArrayObject tempArray(*array);
+        //qDebug() << "stepp" <<tempArray.stepX <<tempArray.strStepX;
+        QString errorStr = array->updateType();
         if (!errorStr.isEmpty())
         {
-            qDebug() << "steppp" <<tempArray.stepX <<tempArray.strStepX;
+            //qDebug() << "steppp" <<tempArray.stepX <<tempArray.strStepX;
             QMessageBox::warning(this->ParentWidget,"", errorStr);
             return false;
         }
         qDebug() << "stepppp" <<array->stepX <<array->strStepX;
-        *array = tempArray;
+        //*array = tempArray;
     }
     else if (obj->ObjectType->isComposite())
     {

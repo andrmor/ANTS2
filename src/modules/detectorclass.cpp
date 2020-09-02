@@ -709,65 +709,49 @@ void DetectorClass::checkSecScintPresent()
 
 void DetectorClass::colorVolumes(int scheme, int id)
 {
-  //scheme = 0 - default, according to the name
+  //scheme = 0 - default
   //scheme = 1 - by material
   //scheme = 2 - medium with id will be red, the rest - black
-  TObjArray* list = GeoManager->GetListOfVolumes();
-  int size = list->GetEntries();
-  for (int i=0; i<size; i++)
-    {
-      TGeoVolume* vol = (TGeoVolume*)list->At(i);
-      if (!vol) break;
-      QString name = vol->GetName();
-      //      qDebug()<<"name: "<<name<<" medium name: "<<vol->GetMedium()->GetName()<<" med index: "<<vol->GetMedium()->GetId();
-      switch (scheme)
-        { //default color volumes using name
-        case 0:
-          {
-            vol->SetLineColor(kGray);
-            if (name.startsWith("World")) vol->SetLineColor(kGreen);
-            if (name.startsWith("PM")) vol->SetLineColor(kGreen);
-            if (name.startsWith("dPM")) vol->SetLineColor(30);
-            //          if (name.startsWith("Sp")) vol->SetLineColor(28);
-            //          if (name.startsWith("PrScint")) vol->SetLineColor(kRed);
-            //          if (name.startsWith("SecScint")) vol->SetLineColor(kMagenta);
-            //          if (name.startsWith("UpWin")) vol->SetLineColor(kBlue);
-            //          if (name.startsWith("LowWin")) vol->SetLineColor(kBlue);
-            if (name.startsWith("Mask")) vol->SetLineColor(40);
-            if (name.startsWith("MaskHole")) vol->SetLineColor(40);
-            if (name.startsWith("LGu")) vol->SetLineColor(38);
-            if (name.startsWith("LGl")) vol->SetLineColor(38);
-            if (name.startsWith("UOp")) vol->SetLineColor(38);
-            if (name.startsWith("LOp")) vol->SetLineColor(38);
 
-//            int slabIndex = Sandwich->FindSlabByName(name);
-//            if (slabIndex != -1)
-//              {
-//                //qDebug() << Sandwich->Slabs.at(slabIndex)->name << Sandwich->Slabs.at(slabIndex)->color;
-//                vol->SetLineColor(Sandwich->Slabs.at(slabIndex)->color);
-//                vol->SetLineWidth(Sandwich->Slabs.at(slabIndex)->width);
-//                vol->SetLineStyle(Sandwich->Slabs.at(slabIndex)->style);
-//              }
-            const AGeoObject* obj = Sandwich->World->findObjectByName(name);
-            if (obj)
+  TObjArray * list = GeoManager->GetListOfVolumes();
+  int size = list->GetEntries();
+  for (int iVol = 0; iVol < size; iVol++)
+  {
+      TGeoVolume* vol = (TGeoVolume*)list->At(iVol);
+      if (!vol) break;
+
+      QString name = vol->GetName();
+      switch (scheme)
+      {
+        case 0:  //default color volumes for PMs and dPMs otherwise color from AGeoObject
+            if      (name.startsWith("PM"))  vol->SetLineColor(kGreen);
+            else if (name.startsWith("dPM")) vol->SetLineColor(30);
+            else
             {
-                //qDebug() << obj->Name << obj->color;
-                vol->SetLineColor(obj->color);
-                vol->SetLineWidth(obj->width);
-                vol->SetLineStyle(obj->style);
+                const AGeoObject * obj = Sandwich->World->findObjectByName(name); // !*! can be very slow for large detectors!
+                if (!obj && !name.isEmpty())
+                {
+                    //special for monitors
+                    QString mName = name.split("_-_").at(0);
+                    obj = Sandwich->World->findObjectByName(mName);
+                }
+                if (obj)
+                {
+                    vol->SetLineColor(obj->color);
+                    vol->SetLineWidth(obj->width);
+                    vol->SetLineStyle(obj->style);
+                }
+                else vol->SetLineColor(kGray);
+                //qDebug() << name << obj << vol->GetTitle();
             }
-          }
-          break;
-        case 1:
-          { //color by material
-            int MatId = vol->GetMaterial()->GetIndex();
-            vol->SetLineColor(MatId+1);
             break;
-          }
+        case 1:  //color by material
+            vol->SetLineColor(vol->GetMaterial()->GetIndex() + 1);
+            break;
         case 2:  //highlight a given material
-          if (vol->GetMaterial()->GetIndex() == id) vol->SetLineColor(kRed);
-          else vol->SetLineColor(kBlack);
-        }
+            vol->SetLineColor( vol->GetMaterial()->GetIndex() == id ? kRed : kBlack );
+            break;
+      }
   }
   emit ColorSchemeChanged(scheme, id);
 }

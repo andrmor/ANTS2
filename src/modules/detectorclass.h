@@ -64,7 +64,7 @@ public:
   void clearGDML();
   int  checkGeoOverlaps();   // checks for overlaps in the geometry (GeoManager) and returns the number of overlaps
   void checkSecScintPresent();
-  void colorVolumes(int scheme, int id = 0);
+  void colorVolumes(int scheme, int id = 0);  // !*! can be very slow for large detectors!
   int  pmCount() const;
   void findPM(int ipm, int &ul, int &index);
   const QString removePMtype(int itype);

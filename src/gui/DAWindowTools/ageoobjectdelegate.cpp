@@ -1896,7 +1896,7 @@ AGeoPconDelegate::AGeoPconDelegate(const QStringList &materials, QWidget *parent
         gr->setContentsMargins(0, 0, 0, 3);
         gr->setVerticalSpacing(1);
         gr->addWidget(new QLabel("Phi from:"), 0, 0);
-        gr->addWidget(new QLabel("Phi to:"),   1, 0);
+        gr->addWidget(new QLabel("Phi range:"),   1, 0);
         ep0 = new AOneLineTextEdit(); gr->addWidget(ep0, 0, 1);
         epe = new AOneLineTextEdit(); gr->addWidget(epe, 1, 1);
         gr->addWidget(new QLabel("°"),  0, 2);

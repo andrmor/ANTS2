@@ -11,7 +11,7 @@ AGeoConsts::AGeoConsts()
     FormulaReservedWords << "sqrt2" << "e" << "pi" << "ln10" << "infinity"
     << "pow" << "sin" << "cos" << "sqrt" << "exp" << "ceil" << "floor";
 
-    ForbiddenLettersRExp <<QRegExp("\\bg\\b") <<QRegExp("\\bh\\b") <<QRegExp("\\bt\\b") <<QRegExp("\\bk\\b")<<QRegExp("\\bx\\b")
+    ForbiddenVarsRExp <<QRegExp("\\bg\\b") <<QRegExp("\\bh\\b") <<QRegExp("\\bt\\b") <<QRegExp("\\bk\\b")<<QRegExp("\\bx\\b")
                         <<QRegExp("\\by\\b")<<QRegExp("\\bz\\b") <<QRegExp("\\bc\\b") <<QRegExp("\\br\\b") <<QRegExp("\\be\\b");
 }
 
@@ -125,9 +125,9 @@ bool AGeoConsts::evaluateFormula(QString str, double &returnValue, int to) const
         str.replace(RegExps.at(i), Indexes.at(i));
     //qDebug() << str;
 
-    for (int ir = 0; ir < ForbiddenLettersRExp.size(); ir++)
+    for (int ir = 0; ir < ForbiddenVarsRExp.size(); ir++)
     {
-        if (str.contains(ForbiddenLettersRExp.at(ir)) )
+        if (str.contains(ForbiddenVarsRExp.at(ir)) )
             return false;
     }
 

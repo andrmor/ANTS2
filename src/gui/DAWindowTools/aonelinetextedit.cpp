@@ -15,6 +15,7 @@ AOneLineTextEdit::AOneLineTextEdit(QWidget * parent) : QPlainTextEdit(parent)
     setFixedHeight(sizeHint().height());
 
     setAcceptDrops(false);
+    setCenterOnScroll(true);
 
     connect(this, &AOneLineTextEdit::textChanged, this, &AOneLineTextEdit::clearTooltip);
 }

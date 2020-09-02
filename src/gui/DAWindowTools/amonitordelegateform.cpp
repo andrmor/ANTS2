@@ -127,7 +127,17 @@ const QString AMonitorDelegateForm::getName() const
 #include "amessage.h"
 bool AMonitorDelegateForm::updateObject(AGeoObject * obj)
 {
-    obj->Name = ui->leName->text();
+    QString newName = ui->leName->text();
+    QString errorStr;
+    if (newName.isEmpty()) errorStr = "Name cannot be empty";
+    else if (newName.contains(QRegExp("\\s"))) errorStr = "Name cannot contain spaces";
+    //else if (newName.contains(QRegExp("\\W"))) errorStr = "Name can only contain word characters: [A-Z], [a-z], [0-9], _";
+    if (!errorStr.isEmpty())
+    {
+        message(errorStr, this);
+        return false;
+    }
+    obj->Name = newName;
 
     ATypeMonitorObject* mon = dynamic_cast<ATypeMonitorObject*>(obj->ObjectType);
     AMonitorConfig & config = mon->config;

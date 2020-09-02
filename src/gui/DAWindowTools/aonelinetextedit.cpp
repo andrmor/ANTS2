@@ -16,6 +16,7 @@ AOneLineTextEdit::AOneLineTextEdit(QWidget * parent) : QPlainTextEdit(parent)
 
     setAcceptDrops(false);
     setCenterOnScroll(true);
+    setTabChangesFocus(false);
 
     connect(this, &AOneLineTextEdit::textChanged, this, &AOneLineTextEdit::clearTooltip);
 }
@@ -56,8 +57,15 @@ void AOneLineTextEdit::insertCompletion(const QString &completion)
 
 void AOneLineTextEdit::keyPressEvent(QKeyEvent * e)
 {
+    const bool bComplVisible = Completer && Completer->popup()->isVisible();
+    if (!bComplVisible && e->key() == Qt::Key_Tab)
+    {
+        e->ignore();  //equivavlent of setTabChangesFocus(true);
+        return;
+    }
+
     //qDebug() << "Key pressed:" << e->text();
-    if ( !Completer || (Completer && !Completer->popup()->isVisible()) )
+    if ( !Completer || !bComplVisible )
     {
         if (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter)
         {
@@ -79,15 +87,14 @@ void AOneLineTextEdit::keyPressEvent(QKeyEvent * e)
         return;
     }
 
-    if (Completer->popup()->isVisible())
+    if (bComplVisible)
     {
         // The following keys are forwarded by the completer to the widget
         switch (e->key())
         {
-        /*
         case Qt::Key_Tab: // Tab is not intercepted !
         {
-            //qDebug() << "Tab pressed when completer is active";
+            qDebug() << "Tab pressed when completer is active, filling in common part of the completer";
             //QString startsWith = c->completionPrefix();
             int i = 0;
             QAbstractItemModel * m = Completer->completionModel();
@@ -125,7 +132,6 @@ void AOneLineTextEdit::keyPressEvent(QKeyEvent * e)
             }
             return;
         }
-        */
         case Qt::Key_Enter:
         case Qt::Key_Return:
         case Qt::Key_Escape:
@@ -159,7 +165,6 @@ void AOneLineTextEdit::keyPressEvent(QKeyEvent * e)
     cr.setWidth(Completer->popup()->sizeHintForColumn(0)
                 + Completer->popup()->verticalScrollBar()->sizeHint().width());
     Completer->complete(cr); // popup it up!
-
 }
 
 void AOneLineTextEdit::focusOutEvent(QFocusEvent *event)

@@ -45,7 +45,6 @@ public:
 
 protected:
   bool    extractParametersFromString(QString GenerationString, QStringList& parameters, int numParameters);
-  QString updateParameter(QString & str, double & returnValue, bool bForbidZero = true, bool bForbidNegative = true, bool bMakeHalf = true);
 
 public:
   static AGeoShape * GeoShapeFactory(const QString ShapeType);  // -=<  SHAPE FACTORY >=-

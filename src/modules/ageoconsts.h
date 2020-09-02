@@ -75,7 +75,6 @@ private:
     QVector<QString> FunctionsToJS;
     QVector<QString> FormulaReservedWords;
     QVector<QRegExp> ForbiddenLettersRExp;
-    QVector<QString> ForbiddenLetters;
 
     void updateRegExpsAndIndexes();
 };

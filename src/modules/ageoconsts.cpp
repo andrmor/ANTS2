@@ -11,7 +11,6 @@ AGeoConsts::AGeoConsts()
     FormulaReservedWords << "sqrt2" << "e" << "pi" << "ln10" << "infinity"
     << "pow" << "sin" << "cos" << "sqrt" << "exp" << "ceil" << "floor";
 
-    ForbiddenLetters << "g" << "h" << "t" << "k" << "x" << "y" << "z"<< "c"<< "r" <<"e";
     ForbiddenLettersRExp <<QRegExp("\\bg\\b") <<QRegExp("\\bh\\b") <<QRegExp("\\bt\\b") <<QRegExp("\\bk\\b")<<QRegExp("\\bx\\b")
                         <<QRegExp("\\by\\b")<<QRegExp("\\bz\\b") <<QRegExp("\\bc\\b") <<QRegExp("\\br\\b") <<QRegExp("\\be\\b");
 }
@@ -126,6 +125,12 @@ bool AGeoConsts::evaluateFormula(QString str, double &returnValue, int to) const
         str.replace(RegExps.at(i), Indexes.at(i));
     //qDebug() << str;
 
+    for (int ir = 0; ir < ForbiddenLettersRExp.size(); ir++)
+    {
+        if (str.contains(ForbiddenLettersRExp.at(ir)) )
+            return false;
+    }
+
     TFormula * f = new TFormula("", str.toLocal8Bit().data());
     if (!f || !f->IsValid())
     {
@@ -148,15 +153,7 @@ bool AGeoConsts::updateParameter(QString &errorStr, QString &str, double &return
     if (ok) str.clear();
     else
     {
-        for (int ir = 0; ir < ForbiddenLettersRExp.size(); ir++)
-        {
-            if (str.contains(ForbiddenLettersRExp.at(ir)) )
-            {
-                errorStr = QString("\"%1\"\nContains unsuported tformula variable: %2")
-                                  .arg(str).arg(ForbiddenLetters.at(ir));
-                return false;
-            }
-        }
+
         ok = evaluateFormula(str, returnValue);
         if (!ok)
         {

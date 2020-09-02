@@ -3565,26 +3565,6 @@ bool AGeoShape::CheckPointsForArb8(QList<QPair<double, double> > V)
     return checkPointsArb8(V);
 }
 
-QString AGeoShape::updateParameter(QString & str, double & returnValue, bool bForbidZero, bool bForbidNegative, bool bMakeHalf)
-{
-    if (str.isEmpty()) return "";
-
-    bool ok;
-    returnValue = str.simplified().toDouble(&ok);
-    if (ok) str.clear();
-    else
-    {
-        ok = AGeoConsts::getInstance().evaluateFormula(str, returnValue);
-        if (!ok) return QString("Syntax error:\n%1").arg(str);
-    }
-
-    if (bForbidZero && returnValue == 0) return "Unacceptable value: zero";
-    if (bForbidNegative && returnValue < 0) return "Unacceptable value: negative";
-
-    if (bMakeHalf) returnValue *= 0.5;
-    return "";
-}
-
 AGeoShape * AGeoShape::GeoShapeFactory(const QString ShapeType)
 {
     if (ShapeType == "TGeoBBox")

@@ -1118,24 +1118,31 @@ double AGeoObject::getMaxSize() const
 }
 
 #include "TGeoMatrix.h"
-bool AGeoObject::getPositionInWorld(double * worldPos) const
+bool AGeoObject::getPositionInWorld(double * Pos) const
 {
-    for (int i=0; i<3; i++) worldPos[i] = 0;
+    for (int i=0; i<3; i++) Pos[i] = 0;
+    if (isWorld()) return true;
 
     const AGeoObject * obj = this;
-    do
+
+    double PosInContainer[3];
+    const AGeoObject * cont = obj->Container;
+    while (cont)
     {
-        for (int i=0; i<3; i++) worldPos[i] += obj->Position[i];
-        if (obj->isWorld()) return true;
-        obj = obj->Container;
+        for (int i=0; i<3; i++) Pos[i] += obj->Position[i];
+
+        TGeoRotation Trans("Rot", cont->Orientation[0], cont->Orientation[1], cont->Orientation[2]);
+        Trans.LocalToMaster(Pos, PosInContainer);
+
+        for (int i=0; i<3; i++) Pos[i] = PosInContainer[i];
+        if (cont->isWorld()) return true;
+
+        obj = cont;
+        cont = obj->Container;
     }
-    while (obj);
 
     return false;
 }
-
-//TGeoTranslation Trans = TGeoTranslation("Rot", obj->Position[0], obj->Position[1], obj->Position[2]);
-//Trans.LocalToMaster(obj->Position, worldPos);
 
 QString randomString(int lettLength, int numLength)
 {

@@ -443,7 +443,7 @@ void DetectorAddOnsWindow::ShowObjectRecursive(QString name)
     //gGeoManager->SetTopVisible(MW->GeometryWindow->IsWorldVisible());
 }
 
-void DetectorAddOnsWindow::OnrequestShowMonitor(const AGeoObject *mon)
+void DetectorAddOnsWindow::OnrequestShowMonitor(const AGeoObject * mon)
 {
     if (!mon->ObjectType->isMonitor())
     {
@@ -451,28 +451,39 @@ void DetectorAddOnsWindow::OnrequestShowMonitor(const AGeoObject *mon)
         return;
     }
 
-    const ATypeMonitorObject* tmo = static_cast<const ATypeMonitorObject*>(mon->ObjectType);
-    const AMonitorConfig& c = tmo->config;
+    const ATypeMonitorObject * tmo = static_cast<const ATypeMonitorObject*>(mon->ObjectType);
+    const AMonitorConfig & c = tmo->config;
 
     double length1 = c.size1;
     double length2 = c.size2;
-    if (c.shape==1) length2 = length1;
+    if (c.shape == 1) length2 = length1;
 
     Detector->GeoManager->ClearTracks();
     Int_t track_index = Detector->GeoManager->AddTrack(1,22);
-    TVirtualGeoTrack *track = Detector->GeoManager->GetTrack(track_index);
+    TVirtualGeoTrack * track = Detector->GeoManager->GetTrack(track_index);
+
+    double worldPos[3];
+    mon->getPositionInWorld(worldPos);
+    const double & x = worldPos[0];
+    const double & y = worldPos[1];
+    const double & z = worldPos[2];
+    //qDebug() << "World pos:"<< x << y << z;
 
     double hl[3] = {-length1, 0, 0}; //local coordinates
     double vl[3] = {0, -length2, 0}; //local coordinates
     double mhl[3]; //master coordinates (world)
     double mvl[3]; //master coordinates (world)
-    TGeoRotation Rot = TGeoRotation("Rot", mon->Orientation[0], mon->Orientation[1], mon->Orientation[2]);
-    Rot.LocalToMaster(hl, mhl);
-    Rot.LocalToMaster(vl, mvl);
 
-    const double& x = mon->Position[0];
-    const double& y = mon->Position[1];
-    const double& z = mon->Position[2];
+    TGeoNavigator * navigator = gGeoManager->GetCurrentNavigator();
+    if (!navigator)
+    {
+        qDebug() << "Show monitor: Current navigator does not exist, creating new";
+        navigator = gGeoManager->AddNavigator();
+    }
+    navigator->FindNode(x, y, z);
+    //qDebug() << navigator->GetCurrentVolume()->GetName();
+    navigator->LocalToMasterVect(hl, mhl); //qDebug() << mhl[0]<< mhl[1]<< mhl[2];
+    navigator->LocalToMasterVect(vl, mvl);
 
     track->AddPoint(x+mhl[0], y+mhl[1], z+mhl[2], 0);
     track->AddPoint(x-mhl[0], y-mhl[1], z-mhl[2], 0);
@@ -485,7 +496,7 @@ void DetectorAddOnsWindow::OnrequestShowMonitor(const AGeoObject *mon)
     //show orientation
     double l[3] = {0,0, std::max(length1,length2)}; //local coordinates
     double m[3]; //master coordinates (world)
-    Rot.LocalToMaster(l, m);
+    navigator->LocalToMasterVect(l, m);
     if (c.bUpper)
     {
         track_index = Detector->GeoManager->AddTrack(1,22);

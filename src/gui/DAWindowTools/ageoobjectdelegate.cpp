@@ -191,6 +191,17 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
 {
     const QString oldName = obj->Name;
     const QString newName = leName->text();
+
+    QString errorStr;
+    if (newName.isEmpty()) errorStr = "Name cannot be empty";
+    else if (newName.contains(QRegExp("\\s"))) errorStr = "Name cannot contain spaces";
+    //else if (newName.contains(QRegExp("\\W"))) errorStr = "Name can only contain word characters: [A-Z], [a-z], [0-9], _";
+    if (!errorStr.isEmpty())
+    {
+        qDebug() << errorStr;
+        QMessageBox::warning(this->ParentWidget, "", errorStr);
+        return false;
+    }
     obj->Name = newName;
 
     if ( obj->ObjectType->isHandlingSet() )
@@ -207,8 +218,7 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
         {
             if (obj->Container && obj->Container->Container)
                 obj->Material = obj->Container->Container->Material;
-        }
-        QString errorStr;
+        }        
         AGeoShape * shape = ShapeCopy;
         AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
         if (scaled)

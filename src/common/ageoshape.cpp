@@ -237,6 +237,9 @@ QString AGeoPara::updateShape()
     ok = AGeoConsts::getConstInstance().updateParameter(errorStr, strAlpha, alpha, false, false, false); if (!ok) return errorStr;
     ok = AGeoConsts::getConstInstance().updateParameter(errorStr, strTheta, theta, false, false, false); if (!ok) return errorStr;
     ok = AGeoConsts::getConstInstance().updateParameter(errorStr, strPhi,   phi, false, false, false);   if (!ok) return errorStr;
+
+    if (-90 >= alpha || alpha >= 90)                              return "alpha must be between -90 and 90";
+    if (-90 >= theta || theta >= 90)                              return "theta must be between -90 and 90";
     return "";
 }
 
@@ -3355,6 +3358,7 @@ QString AGeoTorus::updateShape()
     ok = GC.updateParameter(errorStr, strPhi1,  Phi1, false, false, false);    if (!ok) return errorStr;
     ok = GC.updateParameter(errorStr, strDphi,  Dphi, true,  true,  false);    if (!ok) return errorStr;
 
+    if (R <     Rmax) return "Axial diameter should be bigger or equal than outside one";
     if (Rmin >= Rmax) return "Inside diameter should be smaller than the outside one!";
 
     return "";
@@ -3442,7 +3446,9 @@ QString AGeoTorus::getGenerationString(bool useStrings) const
 
 double AGeoTorus::maxSize() const
 {
-    double m = std::max(R, Rmax);
+    //double m = std::max(R, Rmax);
+    double m = R+Rmax;
+    qDebug() << R << Rmax << "rrrrrrs";
     return sqrt(3.0)*m;
 }
 

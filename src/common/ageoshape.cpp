@@ -3448,7 +3448,6 @@ double AGeoTorus::maxSize() const
 {
     //double m = std::max(R, Rmax);
     double m = R+Rmax;
-    qDebug() << R << Rmax << "rrrrrrs";
     return sqrt(3.0)*m;
 }
 

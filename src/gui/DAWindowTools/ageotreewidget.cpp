@@ -1488,19 +1488,32 @@ QString AGeoTreeWidget::makeScriptString_arrayObject(AGeoObject *obj)
         return "Error accessing object as array!";
     }
 
-    return  QString("geo.Array( ") +
+    QString snumX  = (a  ->strNumX          .isEmpty() ? QString::number(a  ->numX)              : a->strNumX);
+    QString snumY  = (a  ->strNumY          .isEmpty() ? QString::number(a  ->numY)              : a->strNumY);
+    QString snumZ  = (a  ->strNumZ          .isEmpty() ? QString::number(a  ->numZ)              : a->strNumZ);
+    QString sstepX = (a  ->strStepX         .isEmpty() ? QString::number(a  ->stepX)             : a->strStepX);
+    QString sstepY = (a  ->strStepY         .isEmpty() ? QString::number(a  ->stepY)             : a->strStepY);
+    QString sstepZ = (a  ->strStepZ         .isEmpty() ? QString::number(a  ->stepZ)             : a->strStepZ);
+    QString sPos0  = (obj->PositionStr[0]   .isEmpty() ? QString::number(obj->Position[0])       : obj->PositionStr[0]);
+    QString sPos1  = (obj->PositionStr[1]   .isEmpty() ? QString::number(obj->Position[1])       : obj->PositionStr[1]);
+    QString sPos2  = (obj->PositionStr[2]   .isEmpty() ? QString::number(obj->Position[2])       : obj->PositionStr[2]);
+    QString sOri2  = (obj->OrientationStr[2].isEmpty() ? QString::number(obj->Orientation[2])    : obj->OrientationStr[2]);
+
+    QString str =  QString("geo.Array( ") +
             "'" + obj->Name + "', " +
-            QString::number(a->numX) + ", " +
-            QString::number(a->numY) + ", " +
-            QString::number(a->numZ) + ",   " +
-            QString::number(a->stepX) + ", " +
-            QString::number(a->stepY) + ", " +
-            QString::number(a->stepZ) + ", " +
+            snumX + ", " +
+            snumY + ", " +
+            snumZ + ",   " +
+            sstepX + ", " +
+            sstepY + ", " +
+            sstepZ + ", " +
             "'" + obj->Container->Name + "',   " +
-            QString::number(obj->Position[0]) + ", " +
-            QString::number(obj->Position[1]) + ", " +
-            QString::number(obj->Position[2]) + ",   " +
-            QString::number(obj->Orientation[2]) + " )";
+            sPos0 + ", " +
+            sPos1 + ", " +
+            sPos2 + ",   " +
+            sOri2 + " )";
+    qDebug() <<"strrr" << str;
+    return str;
 }
 
 const QString AGeoTreeWidget::makeScriptString_monitorBaseObject(const AGeoObject * obj) const
@@ -1736,6 +1749,7 @@ AGeoBaseDelegate * AGeoWidget::createAndAddGeoObjectDelegate()
     AGeoObjectDelegate * Del;
 
     AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(CurrentObject->Shape);
+    qDebug() <<"typeeeeeeeeeeeeee" <<CurrentObject->Shape->getShapeType();
     const QString shape = (scaled ? scaled->getBaseShapeType() : CurrentObject->Shape->getShapeType());
 
     if (CurrentObject->ObjectType->isArray())

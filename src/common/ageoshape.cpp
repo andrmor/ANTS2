@@ -1437,9 +1437,8 @@ QString AGeoPgon::updateShape()
     const AGeoConsts & GC = AGeoConsts::getConstInstance();
     QString errorStr;
     bool ok;
-    double dnedges = nedges;
-    ok = GC.updateParameter(errorStr, strNedges, dnedges, true, true, false); if (!ok) return errorStr;
-    nedges = dnedges;
+    ok = GC.updateParameter(errorStr, strNedges, nedges, true, true); if (!ok) return errorStr;
+    if (nedges < 3)  return "There should be at least 3 edges";
 
     return AGeoPcon::updateShape();
 
@@ -1482,12 +1481,13 @@ bool AGeoPgon::readFromString(QString GenerationString)
         qWarning() << "Syntax error found during extracting parameters of TGeoPgon";
         return false;
     }
-    nedges = params[2].toInt(&ok);
+    double dnedges = params[2].toDouble(&ok);
     if (!ok)
     {
         qWarning() << "Syntax error found during extracting parameters of TGeoPgon";
         return false;
     }
+    nedges = dnedges;
 
     for (int i=3; i<params.size(); i++)
     {
@@ -2819,9 +2819,7 @@ QString AGeoPolygon::updateShape()
     const AGeoConsts & GC = AGeoConsts::getConstInstance();
     QString errorStr;
     bool ok;
-    double dnedges = nedges;
-    ok = GC.updateParameter(errorStr, strNedges, dnedges, true, true, false); if (!ok) return errorStr;
-    nedges = dnedges;
+    ok = GC.updateParameter(errorStr, strNedges, nedges, true, true);          if (!ok) return errorStr;
     ok = GC.updateParameter(errorStr, strdPhi,   dphi, false, false, false);   if (!ok) return errorStr;
     ok = GC.updateParameter(errorStr, str2dz,    dz);                          if (!ok) return errorStr;
     ok = GC.updateParameter(errorStr, str2rminL, rminL, false);                if (!ok) return errorStr;
@@ -2829,6 +2827,7 @@ QString AGeoPolygon::updateShape()
     ok = GC.updateParameter(errorStr, str2rminU, rminU, false);                if (!ok) return errorStr;
     ok = GC.updateParameter(errorStr, str2rmaxU, rmaxU, false);                if (!ok) return errorStr;
 
+    if (nedges < 3)                     return "There should be at least 3 edges";
     if (rminL   >= rmaxL)               return "Inside lower diameter should be smaller than the outside one!";
     if (rminU   >= rmaxU)               return "Inside upper diameter should be smaller than the outside one!";
     if (dphi   <= 0 || dphi   >  360)   return "Phi2 should be in the range of (0, 360]";
@@ -2865,9 +2864,10 @@ bool AGeoPolygon::readFromString(QString GenerationString)
     bool ok = extractParametersFromString(GenerationString, params, 7);
     if (!ok) return false;
 
-    int n = params[0].toInt(&ok);
+    double dn = params[0].toDouble(&ok);
     if (!ok)
     {
+        qDebug() <<"right here bug";
         qWarning() << "Syntax error found during extracting parameters of TGeoPolygon";
         return false;
     }
@@ -2883,7 +2883,7 @@ bool AGeoPolygon::readFromString(QString GenerationString)
         }
     }
 
-    nedges = n;
+    nedges = dn;
     dphi = tmp[1];
     dz = tmp[2];
     rminL = tmp[3];

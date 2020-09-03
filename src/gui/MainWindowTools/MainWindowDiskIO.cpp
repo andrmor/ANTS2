@@ -363,11 +363,8 @@ void MainWindow::on_pbLoadPMcenters_clicked()
       for (int i=0; i<x.size(); i++)
         PMar->PositionsAnglesTypes.append(APmPosAngTypeRecord(x[i], y[i], z[i], 0,0,0, 0));
     }
-  MainWindow::ReconstructDetector();
+  ReconstructDetector();
   GeometryWindow->ShowGeometry(false, false);
-  //MainWindow::ShowPMcount();
-  //MainWindow::ClearData();
-  //Owindow->RefreshData();
 }
 
 void MainWindow::on_pbSavePMcenters_clicked()

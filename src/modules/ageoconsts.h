@@ -33,6 +33,8 @@ public:
     void    replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName, int index);
 
     QString getName(int index) const;
+    double  getValue(int index) const;
+    QString getExpression(int index) const;
     const QVector<QString> & getNames()  const {return Names;}
     const QVector<double>  & getValues() const {return Values;}
     const QVector<QString> & getExpressions() const {return Expressions;}

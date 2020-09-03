@@ -354,49 +354,53 @@ void AGeoObject::writeAllToJarr(QJsonArray &jarr)
     HostedObjects[i]->writeAllToJarr(jarr);
 }
 
-void AGeoObject::readAllFromJarr(AGeoObject * World, const QJsonArray & jarr)
+QString AGeoObject::readAllFromJarr(AGeoObject * World, const QJsonArray & jarr)
 {
-   int size = jarr.size();
-   //qDebug() << "Read all from World tree array, size:" << size;
+    QString ErrorString;
+    const int size = jarr.size();
+    if (size < 1)
+    {
+        ErrorString = "Read World tree: size cannot be < 1";
+        qWarning() << ErrorString;
+        return ErrorString;
+    }
 
-   if (size < 1)
-   {
-       qWarning() << "Read World tree: size cannot be < 1";
-       return;
-   }
+    QJsonObject worldJS = jarr[0].toObject();
+    World->readFromJson(worldJS);
 
-   QJsonObject worldJS = jarr[0].toObject();
-   World->readFromJson(worldJS);
+    AGeoObject * prevObj = World;
+    for (int iObj = 1; iObj < size; iObj++)
+    {
+        AGeoObject * newObj = new AGeoObject();
+        //qDebug() << "--record in array:"<<json;
+        QJsonObject json = jarr[iObj].toObject();
+        newObj->readFromJson(json);
+        //qDebug() << "--read success, object name:"<<newObj->Name<< "Container:"<<newObj->tmpContName;
 
-   AGeoObject * prevObj = World;
-   for (int iob=1; iob<size; iob++)
-     {
-       AGeoObject * newObj = new AGeoObject();
-       //qDebug() << "--record in array:"<<json;
-       QJsonObject json = jarr[iob].toObject();
-       newObj->readFromJson(json);
-       //qDebug() << "--read success, object name:"<<newObj->Name<< "Container:"<<newObj->tmpContName;
+        AGeoObject * cont = prevObj->findContainerUp(newObj->tmpContName);
+        if (cont)
+        {
+            newObj->Container = cont;
+            cont->HostedObjects.append(newObj);
+            //qDebug() << "Success! Registered"<<newObj->Name<<"in"<<newObj->tmpContName;
+            if (newObj->isCompositeMemeber())
+            {
+                //qDebug() << "---It is composite member!";
+                if (cont->Container)
+                    cont->Container->refreshShapeCompositeMembers(); //register in the Shape
+            }
+            prevObj = newObj;
+        }
+        else
+        {
+            ErrorString = "ERROR reading geo objects! Not found container: " + newObj->tmpContName;
+            qWarning() << ErrorString;
+            delete newObj;
+            return ErrorString;
+        }
+    }
 
-       AGeoObject* cont = prevObj->findContainerUp(newObj->tmpContName);
-       if (cont)
-         {
-           newObj->Container = cont;
-           cont->HostedObjects.append(newObj);
-           //qDebug() << "Success! Registered"<<newObj->Name<<"in"<<newObj->tmpContName;
-           if (newObj->isCompositeMemeber())
-             {
-               //qDebug() << "---It is composite member!";
-               if (cont->Container)
-                 cont->Container->refreshShapeCompositeMembers(); //register in the Shape
-             }
-           prevObj = newObj;
-         }
-       else
-         {
-           qWarning() << "ERROR reading geo objects! Not found container:"<<newObj->tmpContName;
-           delete newObj;
-         }
-     }
+    return "";
 }
 
 bool AGeoObject::UpdateFromSlabModel(ASlabModel * SlabModel)

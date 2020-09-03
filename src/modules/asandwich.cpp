@@ -977,100 +977,101 @@ void ASandwich::writeToJson(QJsonObject &json)
   json["Sandwich"] = js;
 }
 
-void ASandwich::readFromJson(QJsonObject &json)
+QString ASandwich::readFromJson(QJsonObject & json)
 {
-  if (!json.contains("Sandwich"))
+    QString ErrorString;
+    QJsonObject js;
+    bool ok = parseJson(json, "Sandwich", js);
+    if (ok)
     {
-      if (json.contains("SandwichSettings"))
-        {
-          //it is old standard
-          QJsonObject js = json["SandwichSettings"].toObject();
-          bool PrScintCont = json.contains("PrScintCont") && json["PrScintCont"].toBool();
-          importFromOldStandardJson(js, PrScintCont);
-        }
-      else
-        {
-          //critical error - missing Sandwich settings (new or old standard) in the config file!
-          qCritical() << "Critical error: Sandwich (or SandwichSettings) object is missing in the config file!";
-          exit(666);
-        }
-    }
-  else
-  {
-      clearModel();
-      DefaultXY = new ASlabXYModel();
-      ZOriginType = 0;
-      World->Material = 0;
-      SandwichState = ASandwich::CommonShapeSize;
+        clearModel();
+        DefaultXY = new ASlabXYModel();
+        ZOriginType = 0;
+        World->Material = 0;
+        SandwichState = ASandwich::CommonShapeSize;
 
-      QJsonObject js = json["Sandwich"].toObject();
+        QJsonObject js = json["Sandwich"].toObject();
 
-      if (js.contains("GeoConsts"))
-        AGeoConsts::getInstance().readFromJson(js);
+        if (js.contains("GeoConsts"))
+          AGeoConsts::getInstance().readFromJson(js);
 
-      if (js.contains("State"))
+        if (js.contains("State"))
         {
-          QString state = js["State"].toString();
-          if (state == "CommonShapeSize") SandwichState = ASandwich::CommonShapeSize;
-          else if (state == "CommonShape") SandwichState = ASandwich::CommonShape;
-          else if (state == "Individual") SandwichState = ASandwich::Individual;
-          else qWarning() << "Unknown Sandwich state in json object!";
+            QString state = js["State"].toString();
+            if (state == "CommonShapeSize")  SandwichState = ASandwich::CommonShapeSize;
+            else if (state == "CommonShape") SandwichState = ASandwich::CommonShape;
+            else if (state == "Individual")  SandwichState = ASandwich::Individual;
+            else qWarning() << "Unknown Sandwich state in json object!";
         }
-      if (js.contains("ZeroZ"))
+        if (js.contains("ZeroZ"))
         {
-          QString ZeroZ = js["ZeroZ"].toString();
-          if (ZeroZ == "Top") ZOriginType = -1;
-          else if (ZeroZ == "Center") ZOriginType = 0;
-          else if (ZeroZ == "Bottom") ZOriginType = 1;
-          else qWarning() << "Unknown Zero plane type in json object!";
+            QString ZeroZ = js["ZeroZ"].toString();
+            if      (ZeroZ == "Top")    ZOriginType = -1;
+            else if (ZeroZ == "Center") ZOriginType = 0;
+            else if (ZeroZ == "Bottom") ZOriginType = 1;
+            else qWarning() << "Unknown Zero plane type in json object!";
         }
-      if (js.contains("DefaultXY"))
+        if (js.contains("DefaultXY"))
         {
-          QJsonObject XYjson = js["DefaultXY"].toObject();
-          DefaultXY->readFromJson(XYjson);
+            QJsonObject XYjson = js["DefaultXY"].toObject();
+            DefaultXY->readFromJson(XYjson);
         }
-      if (js.contains("WorldTree"))
-        {
-          //qDebug() << "...Loading WorldTree";
-          QJsonArray arrTree = js["WorldTree"].toArray();
-          World->readAllFromJarr(World, arrTree);
-          //qDebug() << "...done!";
-        }
-      else
-          qDebug() << "...Json does not contain WordTree";
 
-
-      //slabs properties are written in a separate container:
-      //qDebug() << "Loading slab properties";
-      if (js.contains("Slabs"))
+        if (js.contains("WorldTree"))
         {
-          QJsonArray arr = js["Slabs"].toArray();
-          //qDebug() << "Slabs found:"<<arr.size();
-          for (int i=0; i<arr.size(); i++)
+            //qDebug() << "...Loading WorldTree";
+            QJsonArray arrTree = js["WorldTree"].toArray();
+            ErrorString = World->readAllFromJarr(World, arrTree);
+            //qDebug() << "...done!";
+        }
+        else qWarning() << "...Json does not contain WordTree!"; // !*! is itr a critical error?
+
+        //slabs properties are written in a separate container:
+        //qDebug() << "Loading slab properties";
+        if (js.contains("Slabs"))
+        {
+            QJsonArray arr = js["Slabs"].toArray();
+            //qDebug() << "Slabs found:"<<arr.size();
+            for (int i=0; i<arr.size(); i++)
             {
-              QJsonObject j = arr[i].toObject();
-              ASlabModel* r = new ASlabModel();
-              r->readFromJson(j);
+                QJsonObject j = arr[i].toObject();
+                ASlabModel* r = new ASlabModel();
+                r->readFromJson(j);
 
-              AGeoObject* obj = World->findObjectByName(r->name);
-              if (!obj)
-              {
-                  qWarning() << "Slab"<<r->name<<"object not found! Creating new slab!";
-                  appendSlab(r);
-              }
-              else
-              {
-                  //qDebug() << "Updating slab:"<<obj->Name;
-                  delete obj->getSlabModel();
-                  obj->setSlabModel(r);
-                  obj->UpdateFromSlabModel(r);
-              }
+                AGeoObject* obj = World->findObjectByName(r->name);
+                if (!obj)
+                {
+                    qWarning() << "Slab"<<r->name<<"object not found! Creating new slab!";
+                    appendSlab(r);
+                }
+                else
+                {
+                    //qDebug() << "Updating slab:"<<obj->Name;
+                    delete obj->getSlabModel();
+                    obj->setSlabModel(r);
+                    obj->UpdateFromSlabModel(r);
+                }
             }
         }
+        if (js.contains("WorldMaterial")) World->Material = js["WorldMaterial"].toInt();
 
-      if (js.contains("WorldMaterial")) World->Material = js["WorldMaterial"].toInt();
-  }
+    }
+    else if (json.contains("SandwichSettings"))
+    {
+        //old system
+        qDebug() << "==Config uses deprecated system of saving detector settings!==";
+        QJsonObject js = json["SandwichSettings"].toObject();
+        bool PrScintCont = json.contains("PrScintCont") && json["PrScintCont"].toBool();
+        importFromOldStandardJson(js, PrScintCont);
+    }
+    else
+    {
+        //critical error - missing Sandwich settings (new or old standard) in the config file!
+        qCritical() << "Critical error: Sandwich (or SandwichSettings) object is missing in the config file!";
+        exit(666);
+    }
 
+  // Compatibility with some old standards
   if (json.contains("AddGeoObjects"))
   {
       qDebug() << "==Found old system of GeoObjects (replaced now by GeoTree)";
@@ -1196,8 +1197,8 @@ void ASandwich::readFromJson(QJsonObject &json)
   }
 
   //qDebug() << "Finished, requesting GUI update";
-  emit RequestGuiUpdate(); // DOES NOT updates the detector!
-  //UpdateDetector();
+  emit RequestGuiUpdate(); // DOES NOT update the detector!
+  return ErrorString;
 }
 
 void ASandwich::importOldMask(QJsonObject &json)

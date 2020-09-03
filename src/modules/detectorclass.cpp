@@ -113,65 +113,48 @@ DetectorClass::~DetectorClass()
   delete RandGen;
 }
 
-/*
-void DetectorClass::writeWorldFixedToJson(QJsonObject &json)
-{
-  QJsonObject js;
-  js["WorldSizeFixed"] = fWorldSizeFixed;
-  js["XY"] = WorldSizeXY;
-  js["Z"] = WorldSizeZ;
-  json["FixedWorldSizes"] = js;
-}
-*/
-
-bool DetectorClass::MakeDetectorFromJson(QJsonObject &json)
-{
-  Config->JSON = json;
-  return BuildDetector();
-}
-
 bool DetectorClass::BuildDetector(bool SkipSimGuiUpdate, bool bSkipAllUpdates)
 {
-  if (bSkipAllUpdates) SkipSimGuiUpdate = true;
+    // qDebug() << "Remake detector triggered";
+    ErrorString.clear();
+    if (bSkipAllUpdates) SkipSimGuiUpdate = true;
 
-  // qDebug() << "Remake detector triggered"  ;
-  if (Config->JSON.isEmpty())
-  {
-      qCritical() << "!!!Cannot construct detector: Config is empty";
-      return false;
-  }
+    if (Config->JSON.isEmpty())
+    {
+        ErrorString = "Cannot construct detector: Config is empty";
+        qCritical() << ErrorString;
+        return false;
+    }
 
-  int numPMs = pmCount(); //number of PMs before new detector is constructed
+    const int oldNumPMs = pmCount(); //number of PMs before new detector is constructed
 
-  //qDebug() << "-->Constructing detector using Config json object";
-  bool fOK = makeSandwichDetector();
-  if (!fOK) return false;
+    //qDebug() << "-->Constructing detector using Config->JSON";
+    bool fOK = makeSandwichDetector();
+    if (!fOK) return false;
 
-  //handling GDML if present
-  QJsonObject js = Config->JSON["DetectorConfig"].toObject();
-  if (js.contains("GDML"))
-  {
-      QString gdml = js["GDML"].toString();
-      fOK = importGDML(gdml);  //if failed, it is reported and sandwich is rebuilt
-  }
+    //handling GDML if present
+    QJsonObject js = Config->JSON["DetectorConfig"].toObject();
+    if (js.contains("GDML"))
+    {
+        QString gdml = js["GDML"].toString();
+        fOK = importGDML(gdml);  //if failed, it is reported and sandwich is rebuilt
+    }
 
-  Config->UpdateSimSettingsOfDetector(); //otherwise some sim data will be lost due to remake of PMs and MPcollection
+    Config->UpdateSimSettingsOfDetector(); //otherwise some sim data will be lost due to remake of PMs and MPcollection
 
-  if (numPMs != pmCount())
-  {
-      LRFs->clear(PMs->count()); // clear LRFs if number of PMs changed
-      updatePreprocessingAddMultySize();
-      PMgroups->onNumberOfPMsChanged();
-      if (!bSkipAllUpdates) emit requestGroupsGuiUpdate();
-      //emit requestClearPreprocessingSettings();
-  }
+    if (oldNumPMs != pmCount())
+    {
+        LRFs->clear(PMs->count());
+        updatePreprocessingAddMultySize();
+        PMgroups->onNumberOfPMsChanged();
+        if (!bSkipAllUpdates) emit requestGroupsGuiUpdate();
+    }
 
-  //request GUI update
-  if (!bSkipAllUpdates)  Config->AskForDetectorGuiUpdate(); //save in batch mode too, just emits a signal
-  if (!SkipSimGuiUpdate) Config->AskForSimulationGuiUpdate();
-  //emit requestClearEventsData();
+    //request GUI updates
+    if (!bSkipAllUpdates)  Config->AskForDetectorGuiUpdate(); //save in no_Gui mode too, just emits a signal
+    if (!SkipSimGuiUpdate) Config->AskForSimulationGuiUpdate();
 
-  return fOK;
+    return fOK;
 }
 
 bool DetectorClass::BuildDetector_CallFromScript()
@@ -409,49 +392,57 @@ bool DetectorClass::readDummyPMsFromJson(QJsonObject &json)
 
 bool DetectorClass::makeSandwichDetector()
 {
-  //qDebug() << "--->MakeSandwichDetector triggered";
-  if (!Config->JSON.contains("DetectorConfig"))
+    //qDebug() << "--->MakeSandwichDetector triggered";
+    QJsonObject js;
+    bool ok = parseJson(Config->JSON, "DetectorConfig", js);
+    if (!ok)
     {
-      qCritical() << "Config does NOT contain detector properties!";
-      return false;
+        ErrorString = "Config->JSON does not contain detector properties!";
+        qCritical() << ErrorString;
+        return false;
     }
-  QJsonObject js = Config->JSON["DetectorConfig"].toObject();
 
-  MpCollection->readFromJson(js);
-  PMs->readPMtypesFromJson(js);
-  readPMarraysFromJson(js);  
-  PMdummies.clear();
-  readDummyPMsFromJson(js);  
-  Sandwich->readFromJson(js);
+    MpCollection->readFromJson(js); // !*! add error to string and return only if critical
 
-  //World size
-  if (!readWorldFixedFromJson(js))  //if can read, json is made using the old system
-  {
-      //qDebug() << "-==- Using NEW system for world size";
+    PMs->readPMtypesFromJson(js);   // !*! add error to string and return only if critical
 
-      if (!Sandwich->isWorldSizeFixed())
-      {
-          AGeoBox * box = static_cast<AGeoBox*>(Sandwich->World->Shape);
-          const AGeoConsts & GC = AGeoConsts::getConstInstance();
+    readPMarraysFromJson(js);       // !*! add error to string and return only if critical
 
-          QString errorStr;
-          bool ok =  GC.updateParameter(errorStr, box->str2dx, box->dx);
-          box->dy = box->dx; box->str2dy.clear();
-          ok = ok && GC.updateParameter(errorStr, box->str2dz, box->dz);
-          if (!ok)
-              Sandwich->setWorldSizeFixed(false);
-      }
-  }
+    PMdummies.clear();
+    readDummyPMsFromJson(js);       // !*! add error to string and return only if critical
 
-  //making detector  
-  populateGeoManager();
+    const QString err = Sandwich->readFromJson(js);
+    if (!err.isEmpty()) ErrorString += "\n" + err;
 
-  //post-construction load
-  PMs->readInividualOverridesFromJson(js);
-  PMs->readElectronicsFromJson(js);
+    //World size
+    if (!readWorldFixedFromJson(js))  //if can read, json is made using the old system
+    {
+        //qDebug() << "-==- Using NEW system for world size";
+        if (!Sandwich->isWorldSizeFixed())
+        {
+            AGeoBox * box = static_cast<AGeoBox*>(Sandwich->World->Shape);
+            const AGeoConsts & GC = AGeoConsts::getConstInstance();
 
-  top->SetVisContainers(true); //making contaners visible
-  return true;
+            bool ok =  GC.updateParameter(ErrorString, box->str2dx, box->dx);
+            box->dy = box->dx; box->str2dy.clear();
+            ok = ok && GC.updateParameter(ErrorString, box->str2dz, box->dz);
+            if (!ok)
+            {
+                qWarning() << "Failed to evaluate str expressions in world size, switching to not_fixed world size";
+                ErrorString += "\nFailed to evaluate str expressions in world size";
+                Sandwich->setWorldSizeFixed(false); //retrun false
+            }
+        }
+    }
+
+    populateGeoManager();  // !*! add error to string and return only if critical
+
+    //post-construction load
+    PMs->readInividualOverridesFromJson(js);
+    PMs->readElectronicsFromJson(js);
+
+    top->SetVisContainers(true); //making contaners visible
+    return true;
 }
 
 bool DetectorClass::readWorldFixedFromJson(const QJsonObject &json)
@@ -485,6 +476,7 @@ bool DetectorClass::readWorldFixedFromJson(const QJsonObject &json)
 
 bool DetectorClass::importGDML(const QString & gdml)
 {
+  ErrorString.clear();
   GDML = gdml;
 
   bool fOK = processGDML();
@@ -545,20 +537,16 @@ int DetectorClass::checkGeoOverlaps()
 bool DetectorClass::processGDML()   //if failed, caller have to do: GeoManager = new TGeoManager();GDML = ""; then reconstruct Sandwich Detector
 {
   ErrorString = "";
-  //have to delete old GeoManager
-  if (GeoManager)
-    {
-      delete GeoManager;
-      GeoManager = 0;
-    }
+  delete GeoManager; GeoManager = nullptr;
+
   //making tmp file to be used by root
   QFile file("tmpGDML.gdml");
   file.open(QIODevice::WriteOnly);
-  if(!file.isOpen())
-    {
+  if (!file.isOpen())
+  {
       ErrorString = "Cannot open file for writing";
       return false;
-    }
+  }
   QTextStream out(&file);
   out << GDML;
   file.close();
@@ -566,10 +554,10 @@ bool DetectorClass::processGDML()   //if failed, caller have to do: GeoManager =
   GeoManager = TGeoManager::Import("tmpGDML.gdml");
   //checking for the result
   if (!GeoManager)
-    {
+  {
       ErrorString = "Failed to import GDML file!";
       return false;
-    }
+  }
   qDebug() << "--> GeoManager loaded from GDML file";
   //GeoManager->AddNavigator(); /// *** !!!
 
@@ -679,9 +667,6 @@ bool DetectorClass::processGDML()   //if failed, caller have to do: GeoManager =
           return false;
         }
     }
-  //all is fine!
-
-  //checkSecScintPresent();
 
   return true;
 }
@@ -797,7 +782,7 @@ void DetectorClass::findPM(int ipm, int &ul, int &index)
     return;
 }
 
-const QString DetectorClass::removePMtype(int itype)
+QString DetectorClass::removePMtype(int itype)
 {
     if (PMs->countPMtypes() < 2) return "Cannot remove the last type";
 

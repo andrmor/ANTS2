@@ -1413,7 +1413,7 @@ void AGeoTreeWidget::commonSlabToScript(QString &script)
             QString::number(xy->sides) + ")\n";
 }
 
-void AGeoTreeWidget::rebuildDetetctorAndRestoreCurrentDelegate()
+void AGeoTreeWidget::rebuildDetectorAndRestoreCurrentDelegate()
 {
     const QString CurrentObjName = ( EditWidget->getCurrentObject() ? EditWidget->getCurrentObject()->Name : "" );
     emit RequestRebuildDetector();
@@ -1966,7 +1966,6 @@ void AGeoWidget::onConfirmPressed()
 
     exitEditingMode();
     QString name = CurrentObject->Name;
-    //tw->UpdateGui(name);
     emit tw->RequestRebuildDetector();
     tw->UpdateGui(name);
 }

@@ -221,6 +221,18 @@ QString AGeoConsts::getName(int index) const
     return Names.at(index);
 }
 
+double AGeoConsts::getValue(int index) const
+{
+    if (index < 0 || index >= Names.size()) return 0;
+    return Values.at(index);
+}
+
+QString AGeoConsts::getExpression(int index) const
+{
+    if (index < 0 || index >= Names.size()) return "";
+    return Expressions.at(index);
+}
+
 bool AGeoConsts::evaluateConstExpression(int current)
 {
     if (Expressions.at(current).isEmpty()) return true;

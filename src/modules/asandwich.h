@@ -71,7 +71,7 @@ public:
 
   // JSON
   void writeToJson(QJsonObject& json);
-  void readFromJson(QJsonObject& json);
+  QString readFromJson(QJsonObject& json);  // returnd "" if no errors, else error description
 
   // for particle remove - handled by AConfiguration!
   void IsParticleInUse(int particleId, bool &bInUse, QString& MonitorNames);

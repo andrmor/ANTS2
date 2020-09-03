@@ -39,7 +39,7 @@ public slots:
   void objectMembersToScript(AGeoObject *Master, QString &script, int ident, bool bExpandMaterial, bool bRecursive);
   void objectToScript(AGeoObject *obj, QString &script, int ident, bool bExpandMaterial, bool bRecursive);
   void commonSlabToScript(QString &script);
-  void rebuildDetetctorAndRestoreCurrentDelegate();
+  void rebuildDetectorAndRestoreCurrentDelegate();
 
 private slots:
   void onItemSelectionChanged();
@@ -161,7 +161,7 @@ public slots:
 
   AGeoObject * getCurrentObject() {return CurrentObject;}
 
-  void onConfirmPressed();                                        // CONFIRM BUTTON PRESSED -> COPY FROM DELEGATE TO OBJECT
+  void onConfirmPressed();                                        // CONFIRM BUTTON PRESSED: performing copy from delegate to object
   void onCancelPressed();
 
 private:

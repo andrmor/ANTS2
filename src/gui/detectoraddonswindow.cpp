@@ -78,7 +78,7 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(QWidget * parent, MainWindow * MW, De
   ui->frObjectEditor->setPalette( palette );
   ui->frObjectEditor->setAutoFillBackground( true );
 
-  connect(this, &DetectorAddOnsWindow::requestDelayedRebuildAndRestoreDelegate, twGeo, &AGeoTreeWidget::rebuildDetetctorAndRestoreCurrentDelegate, Qt::QueuedConnection);
+  connect(this, &DetectorAddOnsWindow::requestDelayedRebuildAndRestoreDelegate, twGeo, &AGeoTreeWidget::rebuildDetectorAndRestoreCurrentDelegate, Qt::QueuedConnection);
 
   QPalette p = ui->pteTP->palette();
   p.setColor(QPalette::Active, QPalette::Base, QColor(220,220,220));
@@ -99,21 +99,24 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(QWidget * parent, MainWindow * MW, De
 
 DetectorAddOnsWindow::~DetectorAddOnsWindow()
 {
-    delete ui;  ui = 0;
+    delete ui; ui = nullptr;
 }
 
 void DetectorAddOnsWindow::onReconstructDetectorRequest()
-{ 
+{
+  qDebug() << "onReconstructDetectorRequest triggered";
   if (MW->DoNotUpdateGeometry) return; //if bulk update in progress
+
   MW->ReconstructDetector();
+  if (!Detector->ErrorString.isEmpty())
+  {
+      message("Errors were detected during detector construction:\n\n" + Detector->ErrorString, this);
+  }
 
   if (ui->cbAutoCheck->isChecked())
   {
       int nooverlaps = MW->CheckUpWindow->CheckGeoOverlaps();
-      if (nooverlaps != 0)
-          MW->CheckUpWindow->show();
-      //else
-      //    MW->CheckUpWindow->hide();
+      if (nooverlaps != 0) MW->CheckUpWindow->show();
   }
 }
 
@@ -212,7 +215,7 @@ void DetectorAddOnsWindow::on_sbDummyPMindex_valueChanged(int arg1)
       ui->sbDummyPMindex->setValue(0);
       if (Detector->PMdummies.count() == 0) return;
     }
-  DetectorAddOnsWindow::UpdateDummyPMindication();
+  UpdateDummyPMindication();
 }
 
 void DetectorAddOnsWindow::on_pbDeleteDummy_clicked()
@@ -226,7 +229,7 @@ void DetectorAddOnsWindow::on_pbDeleteDummy_clicked()
     }
   if (idpm > Detector->PMdummies.size()-1)
     if (idpm != 0) ui->sbDummyPMindex->setValue(Detector->PMdummies.size()-1);
-  DetectorAddOnsWindow::UpdateDummyPMindication();
+  UpdateDummyPMindication();
   MW->ReconstructDetector();
 }
 
@@ -239,11 +242,11 @@ void DetectorAddOnsWindow::on_pbConvertDummy_clicked()
       return;
     }
 
-  DetectorAddOnsWindow::ConvertDummyToPM(idpm);
+  ConvertDummyToPM(idpm);
 
   if (idpm > Detector->PMdummies.size()-1)
     if (idpm != 0) ui->sbDummyPMindex->setValue(Detector->PMdummies.size()-1);
-  DetectorAddOnsWindow::UpdateDummyPMindication();
+  UpdateDummyPMindication();
   MW->ReconstructDetector();
 }
 
@@ -280,7 +283,7 @@ void DetectorAddOnsWindow::on_pbConvertAllToPMs_clicked()
 
 void DetectorAddOnsWindow::on_pbUpdateDummy_clicked()
 {
-    qDebug() << "Dummy PMs size:"<<  Detector->PMdummies.size();
+  //  qDebug() << "Dummy PMs size:"<<  Detector->PMdummies.size();
   int idpm = ui->sbDummyPMindex->value();
   if (idpm >= Detector->PMdummies.size())
     {
@@ -306,7 +309,7 @@ void DetectorAddOnsWindow::on_pbUpdateDummy_clicked()
   dpm.Angle[2] = ui->ledDummyPsi->text().toDouble();
   Detector->PMdummies[idpm] = dpm;
 
-  DetectorAddOnsWindow::UpdateDummyPMindication();
+  UpdateDummyPMindication();
   MW->ReconstructDetector();
 }
 
@@ -1377,7 +1380,7 @@ void DetectorAddOnsWindow::updateGeoConstsIndication()
 
 void DetectorAddOnsWindow::onGeoConstEditingFinished(int index, QString strNewValue)
 {
-    //qDebug() << "GeoConst value changed! index/text are:" << index << strNewValue;
+    qDebug() << "GeoConst value changed! index/text are:" << index << strNewValue;
     AGeoConsts & GC = AGeoConsts::getInstance();
 
     if (index == GC.countConstants()) return; // nothing to do yet - this constant is not yet defined
@@ -1390,14 +1393,16 @@ void DetectorAddOnsWindow::onGeoConstEditingFinished(int index, QString strNewVa
         updateGeoConstsIndication();
         return;
     }
-    GC.setNewValue(index, val);
 
+    if (val == GC.getValue(index)) return;
+
+    GC.setNewValue(index, val);
     emit requestDelayedRebuildAndRestoreDelegate();
 }
 
 void DetectorAddOnsWindow::onGeoConstExpressionEditingFinished(int index, QString newValue)
 {
-    qDebug() << "Expression changed! index/text are:" << index << newValue;
+    qDebug() << "Geo const expression changed! index/text are:" << index << newValue;
     AGeoConsts & GC = AGeoConsts::getInstance();
 
     if (index == GC.countConstants()) return; // nothing to do yet - this constant is not yet defined
@@ -1408,6 +1413,9 @@ void DetectorAddOnsWindow::onGeoConstExpressionEditingFinished(int index, QStrin
         onGeoConstEditingFinished(index, newValue);
         return;
     }
+
+    if (newValue == GC.getExpression(index)) return;
+
     QString errorStr = GC.setNewExpression(index, newValue);
     if (!errorStr.isEmpty())
     {
@@ -1428,6 +1436,7 @@ void DetectorAddOnsWindow::on_tabwConstants_cellChanged(int row, int column)
 {
     if (column != 0) return; // only name change or new
     if (bGeoConstsWidgetUpdateInProgress) return;
+    qDebug() << "Geo const name changed";
 
     AGeoConsts & GC = AGeoConsts::getInstance();
     const int numConsts = GC.countConstants();
@@ -1471,7 +1480,6 @@ void DetectorAddOnsWindow::on_tabwConstants_cellChanged(int row, int column)
         }
         else
         {
-            //QTimer::singleShot(50, twGeo, &AGeoTreeWidget::rebuildDetetctorAndRestoreCurrentDelegate); // to avoid focus on to_be_destroyed delegate
             emit requestDelayedRebuildAndRestoreDelegate();
         }
     }

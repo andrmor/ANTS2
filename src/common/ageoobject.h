@@ -42,7 +42,7 @@ public:
 
   //recursive json, using single object json
   void writeAllToJarr(QJsonArray & jarr);
-  void readAllFromJarr(AGeoObject * World, const QJsonArray &jarr);
+  QString readAllFromJarr(AGeoObject * World, const QJsonArray & jarr);  // returns "" if no errors
 
   ATypeGeoObject * ObjectType = nullptr;
   AGeoShape * Shape = nullptr;

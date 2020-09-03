@@ -52,7 +52,6 @@ public:
   DetectorClass(AConfiguration* config);
   ~DetectorClass();
 
-  bool MakeDetectorFromJson(QJsonObject &json);
   bool BuildDetector(bool SkipSimGuiUpdate = false, bool bSkipAllUpdates = false);   // build detector from JSON //on load config, set SkipSimGuiUpdate = true since json is still old!
   bool BuildDetector_CallFromScript(); // save current detector to JSON, then call BuildDetector()
 
@@ -67,7 +66,7 @@ public:
   void colorVolumes(int scheme, int id = 0);  // !*! can be very slow for large detectors!
   int  pmCount() const;
   void findPM(int ipm, int &ul, int &index);
-  const QString removePMtype(int itype);
+  QString removePMtype(int itype);
   void assignSaveOnExitFlag(const QString & VolumeName);
   void clearTracks();
   void assureNavigatorPresent();

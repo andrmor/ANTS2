@@ -34,19 +34,18 @@
 
 void MainWindow::ReconstructDetector(bool fKeepData)
 {
-  //qDebug() << ">>>> ReconstructDetector (GUI method) triggered <<<<";
-  int numPMs = Detector->pmCount();
+    //qDebug() << ">>>> ReconstructDetector (GUI method) triggered <<<<";
+    int oldNumPMs = Detector->pmCount();
 
-  writeDetectorToJson(Config->JSON);
-  Detector->BuildDetector();
+    writeDetectorToJson(Config->JSON);
+    Detector->BuildDetector(); //gui update will be triggered automatically
 
-  //gui update will be triggered automatically
+    if (!fKeepData) ClearData();
 
-  if (!fKeepData) MainWindow::ClearData();
-  if (numPMs != Detector->pmCount())
+    if (oldNumPMs != Detector->pmCount())  // !*! obsolete?
     {
-      //qDebug() << "Number of PMs changed!";
-      MainWindow::NumberOfPMsHaveChanged();
+        //qDebug() << "Number of PMs changed!";
+        NumberOfPMsHaveChanged();
     }
 }
 

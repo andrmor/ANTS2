@@ -278,6 +278,8 @@ QString AGeoConsts::isNameValid(int index, const QString &newName)
 {
     if (newName.isEmpty()) return "Names can't be empty";
 
+    if (newName.at(0).isDigit()) return "name can't start with a digit";
+
     if (newName.contains(QRegExp("\\s"))) return "Names can't contain whitespace charachters eg:\" \" or \"\\n\" ";
 
     for (int i = 0; i < Names.size(); i++)
@@ -285,11 +287,6 @@ QString AGeoConsts::isNameValid(int index, const QString &newName)
         if (i == index) continue;
         if (newName == Names.at(i)) return "This name is already in use";
     }
-    /*
-    QRegExp allowedSymbols("\\w");
-    QString strCopy = newName;
-    strCopy.replace(allowedSymbols, "");
-    if (!strCopy.isEmpty()) return "Names can only contain word characters: [0-9], [A-Z], [a-z], _";*/
 
     if (newName.contains(QRegExp("\\W"))) return "Names can only contain word characters: [0-9], [A-Z], [a-z], _";
 

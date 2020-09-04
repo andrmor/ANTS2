@@ -1749,7 +1749,6 @@ AGeoBaseDelegate * AGeoWidget::createAndAddGeoObjectDelegate()
     AGeoObjectDelegate * Del;
 
     AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(CurrentObject->Shape);
-    qDebug() <<"typeeeeeeeeeeeeee" <<CurrentObject->Shape->getShapeType();
     const QString shape = (scaled ? scaled->getBaseShapeType() : CurrentObject->Shape->getShapeType());
 
     if (CurrentObject->ObjectType->isArray())

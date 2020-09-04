@@ -8,7 +8,7 @@ AGeoConsts::AGeoConsts()
 {
     FunctionsToJS << "abs" << "acos" << "asin" << "atan" << "ceil" << "floor" << "cos" << "exp" << "log" << "pow" << "sin" << "sqrt" << "tan";
 
-    FormulaReservedWords << "sqrt2" << "e" << "pi" << "ln10" << "infinity"
+    FormulaReservedWords << "sqrt2" << "pi" << "ln10" << "infinity"
     << "pow" << "sin" << "cos" << "sqrt" << "exp" << "ceil" << "floor";
 
     ForbiddenVarsRExp <<QRegExp("\\bg\\b") <<QRegExp("\\bh\\b") <<QRegExp("\\bt\\b") <<QRegExp("\\bk\\b")<<QRegExp("\\bx\\b")

@@ -704,6 +704,7 @@ void AGeo_SI::RecalculateStack(QString name)
 void AGeo_SI::Array(QString name, int numX, int numY, int numZ, double stepX, double stepY, double stepZ, QString container, double x, double y, double z, double psi)
 {
     AGeoObject* o = new AGeoObject(name, container, 0, 0, x,y,z, 0,0,psi);
+    delete o->Shape; o->Shape = new AGeoBox;
     delete o->ObjectType;
     o->ObjectType = new ATypeArrayObject(numX, numY, numZ, stepX, stepY, stepZ);
     GeoObjects.append(o);

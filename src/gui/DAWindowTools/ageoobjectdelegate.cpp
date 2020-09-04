@@ -1857,13 +1857,13 @@ AGeoPolygonDelegate::AGeoPolygonDelegate(const QStringList &materials, QWidget *
     gr->setVerticalSpacing(1);
 
     QLabel * lab;
-    lab   = new QLabel("Number of edges:");      gr->addWidget(lab,   0, 0);
-    lab   = new QLabel("Height:");               gr->addWidget(lab,   1, 0);
-    labLO = new QLabel("Lower outer diameter:"); gr->addWidget(labLO, 2, 0);
-    labLI = new QLabel("Lower inner diameter:"); gr->addWidget(labLI, 3, 0);
-    labUO = new QLabel("Upper outer diameter:"); gr->addWidget(labUO, 4, 0);
-    labUI = new QLabel("Upper inner diameter:"); gr->addWidget(labUI, 5, 0);
-    labA  = new QLabel("Angle:");                gr->addWidget(labA,  6, 0);
+    lab   = new QLabel("Number of edges:");                  gr->addWidget(lab,   0, 0);
+    lab   = new QLabel("Height:");                           gr->addWidget(lab,   1, 0);
+    labLO = new QLabel("Lower outer diameter of incircle:"); gr->addWidget(labLO, 2, 0);
+    labLI = new QLabel("Lower inner diameter of incircle:"); gr->addWidget(labLI, 3, 0);
+    labUO = new QLabel("Upper outer diameter of incircle:"); gr->addWidget(labUO, 4, 0);
+    labUI = new QLabel("Upper inner diameter of incircle:"); gr->addWidget(labUI, 5, 0);
+    labA  = new QLabel("Angle:");                            gr->addWidget(labA,  6, 0);
 
     en  = new AOneLineTextEdit(); gr->addWidget(en,  0, 1);
     ez  = new AOneLineTextEdit(); gr->addWidget(ez,  1, 1);

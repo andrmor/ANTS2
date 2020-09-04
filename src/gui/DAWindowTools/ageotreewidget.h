@@ -75,7 +75,7 @@ private:
   void populateTreeWidget(QTreeWidgetItem *parent, AGeoObject *Container, bool fDisabled = false);
   void updateExpandState(QTreeWidgetItem* item); //recursive!
   void updateIcon(QTreeWidgetItem *item, AGeoObject *obj);
-  void formSet(QList<QTreeWidgetItem *> selected, int option);
+  void formStack(QList<QTreeWidgetItem *> selected);
   void addLightguide(bool upper);
 
   void menuActionAddNewObject(QString ContainerName, AGeoShape * shape);

@@ -611,7 +611,6 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
 
   menu.addSeparator();
 
-  QAction* groupA = Action(menu, "Group");
   QAction* stackA = Action(menu, "Form a stack");
 
   menu.addSeparator();
@@ -668,7 +667,6 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
       removeA->setEnabled(true); //world cannot be in selection with anything else anyway
       lockA->setEnabled(true);
       unlockA->setEnabled(true);
-      groupA->setEnabled(true);
       stackA->setEnabled(true);
   }
 
@@ -722,11 +720,8 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
      addLightguide(SelectedAction == addUpperLGA);
   else if (SelectedAction == copyA) // COPY OBJECT
      menuActionCopyObject(objName);
-  else if (SelectedAction == groupA || SelectedAction == stackA) //GROUP & STACK
-    {
-      int option = (SelectedAction == groupA) ? 0 : 1;
-      formSet(selected, option);
-    }
+  else if (SelectedAction == stackA) // Form STACK
+      formStack(selected);
   else if (SelectedAction == lockA) // LOCK
      menuActionLock();
   else if (SelectedAction == unlockA) // UNLOCK
@@ -1194,19 +1189,15 @@ void AGeoTreeWidget::menuActionEnableDisable(QString ObjectName)
     }
 }
 
-void AGeoTreeWidget::formSet(QList<QTreeWidgetItem*> selected, int option) //option 0->group, option 1->stack
+void AGeoTreeWidget::formStack(QList<QTreeWidgetItem*> selected) //option 0->group, option 1->stack
 {
   //creating a set
   AGeoObject* grObj = new AGeoObject();
 
   delete grObj->ObjectType;
-  if (option == 0)
-      grObj->ObjectType = new ATypeGroupContainerObject();
-  else
-      grObj->ObjectType = new ATypeStackContainerObject();
+  grObj->ObjectType = new ATypeStackContainerObject();
 
-  do
-    grObj->Name = (option==0) ? AGeoObject::GenerateRandomGroupName() : AGeoObject::GenerateRandomStackName();
+  do grObj->Name = AGeoObject::GenerateRandomStackName();
   while (World->isNameExists(grObj->Name));
   //qDebug() << "--Created new set object:"<<grObj->Name;
 
@@ -1218,22 +1209,19 @@ void AGeoTreeWidget::formSet(QList<QTreeWidgetItem*> selected, int option) //opt
   //qDebug() << "--Group will be hosted by:"<<grObj->Container->Name;
 
   for (int i=0; i<selected.size(); i++)
-    {
+  {
       QString name = selected.at(i)->text(0);
       AGeoObject* obj = World->findObjectByName(name);
       if (!obj) continue;
       contObj->HostedObjects.removeOne(obj);
       obj->Container = grObj;
       grObj->HostedObjects.append(obj);
-    }
+  }
   contObj->HostedObjects.insert(0, grObj);
 
   QString name = grObj->Name;
-  if (option == 1)
-  {
-    firstObj->updateStack();
-    emit RequestRebuildDetector();
-  }
+  firstObj->updateStack();
+  emit RequestRebuildDetector();
   //qDebug() << "--Done! updating gui";
   UpdateGui(name);
 }
@@ -1278,6 +1266,7 @@ void AGeoTreeWidget::updateIcon(QTreeWidgetItem* item, AGeoObject *obj)
   AGeoObject* cont = obj->Container;
   if (cont && !cont->HostedObjects.isEmpty())
   {
+      /*
       if (cont->ObjectType->isGroup())
       {
           if (obj == cont->HostedObjects.first())
@@ -1287,7 +1276,9 @@ void AGeoTreeWidget::updateIcon(QTreeWidgetItem* item, AGeoObject *obj)
           else
               image = GroupMid;
       }
-      else if (cont->ObjectType->isStack())
+      else
+      */
+      if (cont->ObjectType->isStack())
       {
           if (obj == cont->HostedObjects.first())
               image = StackStart;

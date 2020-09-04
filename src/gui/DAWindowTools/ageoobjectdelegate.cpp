@@ -245,7 +245,6 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
             return false;
         }
 
-        //if it is a set member, need old values of position and angle
         QVector<double> old;
         old << obj->Position[0]    << obj->Position[1]    << obj->Position[2]
             << obj->Orientation[0] << obj->Orientation[1] << obj->Orientation[2];
@@ -288,6 +287,7 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
             obj->Orientation[i] = tempDoubles[i+3];
         }
 
+        /*
         // checking was there a rotation of the main object
         bool fWasRotated = false;
         for (int i = 0; i < 3; i++)
@@ -297,7 +297,9 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
                 break;
             }
         //qDebug() << "--Was rotated?"<< fWasRotated;
+        */
 
+        /*
         //for grouped object, taking into accound the shift
         if (obj->Container && obj->Container->ObjectType->isGroup())
         {
@@ -333,6 +335,8 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
                 }
             }
         }
+        */
+
         //for stack:
         if (obj->Container && obj->Container->ObjectType->isStack())
             obj->updateStack();
@@ -341,30 +345,29 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
     //additional post-processing
     if (obj->ObjectType->isComposite())
     {
-        AGeoObject* logicals = obj->getContainerWithLogical();
-        if (logicals)
-            logicals->Name = "CompositeSet_"+obj->Name;
+        AGeoObject * logicals = obj->getContainerWithLogical();
+        if (logicals) logicals->Name = "CompositeSet_"+obj->Name;
     }
     else if (obj->ObjectType->isGrid())
     {
-        AGeoObject* GE = obj->getGridElement();
+        AGeoObject * GE = obj->getGridElement();
         if (GE)
         {
-            GE->Name = "GridElement_"+obj->Name;
+            GE->Name = "GridElement_" + obj->Name;
             GE->Material = obj->Material;
         }
     }
     else if (obj->isCompositeMemeber())
     {
-        AGeoObject* cont = obj->Container;
+        AGeoObject * cont = obj->Container;
         if (cont)
         {
             if (cont->ObjectType->isCompositeContainer())
             {
-                AGeoObject* Composite = cont->Container;
+                AGeoObject * Composite = cont->Container;
                 if (Composite)
-                { //updating Shape
-                    AGeoComposite* cs = dynamic_cast<AGeoComposite*>(Composite->Shape);
+                {   //updating Shape
+                    AGeoComposite * cs = dynamic_cast<AGeoComposite*>(Composite->Shape);
                     if (cs)
                     {
                         cs->members.replaceInStrings(oldName, newName);
@@ -2662,7 +2665,24 @@ void AGeoSetDelegate::Update(const AGeoObject *obj)
         pbScriptLine->setVisible(false);
     }
     else
+    {
         DelegateTypeName = ( obj->ObjectType->isStack() ? "Stack" : "Group" );
+
+        if (obj->ObjectType->isGroup())
+        {
+            QVBoxLayout * lay = new QVBoxLayout();
+            lay->setAlignment(Qt::AlignHCenter);
+            lay->addWidget(new QLabel(" "));
+            lay->addWidget(new QLabel("Deprecated"));
+            lay->addWidget(new QLabel("Group does nothing!"));
+            lay->addWidget(new QLabel(" "));
+            addLocalLayout(lay);
+
+            pbShow->setVisible(false);
+            pbChangeAtt->setVisible(false);
+            pbScriptLine->setVisible(false);
+        }
+    }
 
     AGeoObjectDelegate::Update(obj);
 }

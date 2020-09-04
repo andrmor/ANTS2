@@ -40,6 +40,8 @@ public:
 
     QString getName() const override;
 
+    bool isLeEmpty(const QVector<AOneLineTextEdit*> v) const;
+
     bool updateObject(AGeoObject * obj) const override;
 
     void Update(const AGeoObject * obj) override;
@@ -126,6 +128,8 @@ public:
     AWorldDelegate(const QStringList & materials, QWidget * ParentWidget);
 
     bool updateObject(AGeoObject * obj) const override;
+
+    bool isLeEmpty(const QVector<AOneLineTextEdit *> v) const;
 
     QString getName() const override;
 

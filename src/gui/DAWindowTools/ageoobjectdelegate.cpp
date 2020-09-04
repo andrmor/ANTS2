@@ -197,36 +197,13 @@ bool AGeoObjectDelegate::isLeEmpty(const QVector<AOneLineTextEdit *> v) const
 
 bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false in void AGeoWidget::onConfirmPressed()
 {
+    QString errorStr;
     const QString oldName = obj->Name;
     const QString newName = leName->text();
 
-    QString errorStr;
-    if (newName.isEmpty()) errorStr = "Name cannot be empty";
-    else if (newName.contains(QRegExp("\\s"))) errorStr = "Name cannot contain spaces";
-    //else if (newName.contains(QRegExp("\\W"))) errorStr = "Name can only contain word characters: [A-Z], [a-z], [0-9], _";
-    if (!errorStr.isEmpty())
+    if ( !obj->ObjectType->isHandlingSet() ) //set container object does not have updateable properties except name
     {
-        qDebug() << errorStr;
-        QMessageBox::warning(this->ParentWidget, "", errorStr);
-        return false;
-    }
-    obj->Name = newName;
-
-    if ( obj->ObjectType->isHandlingSet() )
-    {
-        //set container object does not have material and shape
-    }
-    else
-    {
-        obj->Material = cobMat->currentIndex();
-        if (obj->Material == -1) obj->Material = 0; //protection
-
-        //inherit materials for composite members
-        if (obj->isCompositeMemeber())
-        {
-            if (obj->Container && obj->Container->Container)
-                obj->Material = obj->Container->Container->Material;
-        }        
+        // doing tests, if failed, return before assigning anything to the object!
         AGeoShape * shape = ShapeCopy;
         AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(ShapeCopy);
         if (scaled)
@@ -241,7 +218,7 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
                 return false;
             }
 
-            errorStr =  scaled->updateScalingFactors();
+            errorStr = scaled->updateScalingFactors();
             if (!errorStr.isEmpty())
             {
                 qDebug() << errorStr;
@@ -250,6 +227,7 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
             }
             shape = scaled->BaseShape;
         }
+
         if (shape)
         {
             errorStr.clear();
@@ -260,9 +238,6 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
                 QMessageBox::warning(this->ParentWidget, "", errorStr);
                 return false;
             }
-
-            delete obj->Shape;
-            obj->Shape = ShapeCopy->clone();
         }
         else
         {
@@ -286,6 +261,23 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
         if (ledPsi->isEnabled())   ok = ok && processEditBox(ledPsi,   tempDoubles[5], tempStrs[5], ParentWidget);
 
         if (!ok) return false;
+
+
+        // ---- all checks are ok, can assign new values to the object ----
+
+        obj->Name = newName;
+
+        obj->Material = cobMat->currentIndex();
+        if (obj->Material == -1) obj->Material = 0; //protection
+
+        //inherit materials for composite members
+        if (obj->isCompositeMemeber())
+        {
+            if (obj->Container && obj->Container->Container)
+                obj->Material = obj->Container->Container->Material;
+        }
+
+        delete obj->Shape; obj->Shape = ShapeCopy->clone();
 
         for (int i = 0; i < 3; i++)
         {

@@ -1970,29 +1970,24 @@ void AGeoWidget::onConfirmPressed()
         return;
     }
 
-    //    qDebug() << "Validating update data for object" << CurrentObject->Name;
-    bool ok = checkDelegateValidity();
-    if (!ok) return;
+    const QString newName = GeoDelegate->getName();
+    QString errorStr;
+    if (newName != CurrentObject->Name && World->isNameExists(newName)) errorStr = QString("%1 name already exists").arg(newName);
+    else if (newName.isEmpty()) errorStr = "Name cannot be empty";
+    else if (newName.contains(QRegExp("\\s"))) errorStr = "Name cannot contain spaces";
+    if (!errorStr.isEmpty())
+    {
+        QMessageBox::warning(this, "", errorStr);
+        return;
+    }
 
-    ok = GeoDelegate->updateObject(CurrentObject);
+    bool ok = GeoDelegate->updateObject(CurrentObject);
     if (!ok) return;
 
     exitEditingMode();
     QString name = CurrentObject->Name;
     emit tw->RequestRebuildDetector();
     tw->UpdateGui(name);
-}
-
-bool AGeoWidget::checkDelegateValidity()
-{
-    const QString newName = GeoDelegate->getName();
-    if (newName != CurrentObject->Name && World->isNameExists(newName))
-    {
-        QMessageBox::warning(this, "", QString("%1 name already exists").arg(newName));
-        return false;
-    }
-    return true;
-    //return GeoDelegate->isValid(CurrentObject);
 }
 
 void AGeoWidget::onCancelPressed()

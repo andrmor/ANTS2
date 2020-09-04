@@ -21,7 +21,7 @@ public:
     Ui::AMonitorDelegateForm *ui;
 
     bool updateGUI(const AGeoObject *obj);
-    const QString getName() const;
+    QString getName() const;
     bool updateObject(AGeoObject* obj);
 
 private:

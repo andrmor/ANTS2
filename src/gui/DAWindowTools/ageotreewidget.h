@@ -170,7 +170,6 @@ private:
   AGeoBaseDelegate * createAndAddGeoObjectDelegate();
   AGeoBaseDelegate * createAndAddGridElementDelegate();
   AGeoBaseDelegate * createAndAddMonitorDelegate();
-  bool checkDelegateValidity();
 
 signals:
   void showMonitor(const AGeoObject* mon);

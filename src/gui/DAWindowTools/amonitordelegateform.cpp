@@ -5,6 +5,7 @@
 #include "aonelinetextedit.h"
 #include "ageobasedelegate.h"
 #include "ageoconsts.h"
+#include "amessage.h"
 
 #include <QDebug>
 
@@ -119,30 +120,15 @@ bool AMonitorDelegateForm::updateGUI(const AGeoObject *obj)
     return true;
 }
 
-const QString AMonitorDelegateForm::getName() const
+QString AMonitorDelegateForm::getName() const
 {
     return ui->leName->text();
 }
 
-#include "amessage.h"
 bool AMonitorDelegateForm::updateObject(AGeoObject * obj)
 {
-    QString newName = ui->leName->text();
-    QString errorStr;
-    if (newName.isEmpty()) errorStr = "Name cannot be empty";
-    else if (newName.contains(QRegExp("\\s"))) errorStr = "Name cannot contain spaces";
-    //else if (newName.contains(QRegExp("\\W"))) errorStr = "Name can only contain word characters: [A-Z], [a-z], [0-9], _";
-    if (!errorStr.isEmpty())
-    {
-        message(errorStr, this);
-        return false;
-    }
-    obj->Name = newName;
-
     ATypeMonitorObject* mon = dynamic_cast<ATypeMonitorObject*>(obj->ObjectType);
     AMonitorConfig & config = mon->config;
-
-    config.shape = ui->cobShape->currentIndex();
 
     const AGeoConsts & GC = AGeoConsts::getConstInstance();
     QString ErrorStr;
@@ -155,7 +141,6 @@ bool AMonitorDelegateForm::updateObject(AGeoObject * obj)
         message(ErrorStr, this);
         return false;
     }
-    config.size1 = Size1; config.str2size1 = strSize1;
 
     QString strSize2 = leSize2->text();
     double Size2;
@@ -165,9 +150,6 @@ bool AMonitorDelegateForm::updateObject(AGeoObject * obj)
         message(ErrorStr, this);
         return false;
     }
-    config.size2 = Size2; config.str2size2 = strSize2;
-
-    obj->updateMonitorShape();
 
     QVector<QString> tempStrs(6);
     QVector<double>  tempDoubles(6);
@@ -179,6 +161,17 @@ bool AMonitorDelegateForm::updateObject(AGeoObject * obj)
     ok = ok && AGeoBaseDelegate::processEditBox(leTheta, tempDoubles[4], tempStrs[4], this->parentWidget());
     ok = ok && AGeoBaseDelegate::processEditBox(lePsi,   tempDoubles[5], tempStrs[5], this->parentWidget());
     if (!ok) return false;
+
+
+    // ---- all checks are passed, can assign values now ----
+
+    obj->Name = getName();
+
+    config.shape = ui->cobShape->currentIndex();
+    config.size1 = Size1; config.str2size1 = strSize1;
+    config.size2 = Size2; config.str2size2 = strSize2;
+    obj->updateMonitorShape();
+
     for (int i = 0; i < 3; i++)
     {
         obj->PositionStr[i]    = tempStrs[i];
@@ -191,9 +184,9 @@ bool AMonitorDelegateForm::updateObject(AGeoObject * obj)
     int sens = ui->cobSensitiveDirection->currentIndex();
     switch (sens)
     {
-      case 0: config.bUpper = true; config.bLower = false; break;
-      case 1: config.bUpper = false; config.bLower = true; break;
-      case 2: config.bUpper = true; config.bLower = true; break;
+      case 0: config.bUpper = true;  config.bLower = false; break;
+      case 1: config.bUpper = false; config.bLower = true;  break;
+      case 2: config.bUpper = true;  config.bLower = true;  break;
       default: qWarning() << "Bad sensitive directions!";
     }
 
@@ -208,9 +201,9 @@ bool AMonitorDelegateForm::updateObject(AGeoObject * obj)
         int prsec =  ui->cobPrimarySecondary->currentIndex();
         switch (prsec)
         {
-        case 0: config.bPrimary = true; config.bSecondary = false; break;
-        case 1: config.bPrimary = false; config.bSecondary = true; break;
-        case 2: config.bPrimary = true; config.bSecondary = true; break;
+        case 0: config.bPrimary = true;  config.bSecondary = false; break;
+        case 1: config.bPrimary = false; config.bSecondary = true;  break;
+        case 2: config.bPrimary = true;  config.bSecondary = true;  break;
         default: qWarning() << "Bad primary/secondary selector";
         }
 

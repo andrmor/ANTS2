@@ -90,6 +90,13 @@ public:
   void updateMonitorShape();
   const AMonitorConfig * getMonitorConfig() const; //returns nullptr if obj is not a monitor
 
+  //for stacks
+  bool isStackMember() const;
+  bool isStackReference() const;
+  AGeoObject * getOrMakeStackReferenceVolume();  // for stack container or members
+  void updateStack();  //called on one object of the set - it is used to calculate positions of other members!
+  void updateAllStacks();
+
   // the following checks are always done DOWN the chain
   // for global effect, the check has to be performed on World (Top) object
   AGeoObject * findObjectByName(const QString & name);
@@ -117,7 +124,6 @@ public:
   void lockBuddies();
   void lockRecursively();
   void unlockAllInside();
-  void updateStack();  //called on one object of the set - it is used to calculate positions of other members!
   void clearAll();
   void updateWorldSize(double& XYm, double& Zm);
   bool isMaterialInUse(int imat) const;  //including disabled objects

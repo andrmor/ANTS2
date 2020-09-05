@@ -253,7 +253,6 @@ ATypeGeoObject *ATypeGeoObject::TypeObjectFactory(const QString &Type)
 void ATypeWorldObject::writeToJson(QJsonObject & json) const
 {
     ATypeGeoObject::writeToJson(json);
-
     json["FixedSize"] = bFixedSize;
 }
 
@@ -261,4 +260,16 @@ void ATypeWorldObject::readFromJson(const QJsonObject &json)
 {
     bFixedSize = false;
     parseJson(json, "FixedSize", bFixedSize);
+}
+
+void ATypeStackContainerObject::writeToJson(QJsonObject & json) const
+{
+    ATypeGeoObject::writeToJson(json);
+    json["ReferenceVolume"] = ReferenceVolume;
+}
+
+void ATypeStackContainerObject::readFromJson(const QJsonObject & json)
+{
+    ReferenceVolume.clear();
+    parseJson(json, "ReferenceVolume", ReferenceVolume);
 }

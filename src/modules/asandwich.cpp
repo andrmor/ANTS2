@@ -1196,6 +1196,8 @@ QString ASandwich::readFromJson(QJsonObject & json)
         }
   }
 
+  World->updateAllStacks();
+
   //qDebug() << "Finished, requesting GUI update";
   emit RequestGuiUpdate(); // DOES NOT update the detector!
   return ErrorString;

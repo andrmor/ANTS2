@@ -102,6 +102,11 @@ class ATypeStackContainerObject : public ATypeGeoObject
 {
 public:
     ATypeStackContainerObject() {Type = "Stack"; Handling = "Set";}
+
+    QString ReferenceVolume;
+
+    void writeToJson(QJsonObject & json) const override;
+    void readFromJson(const QJsonObject & json) override;
 };
 
 class ATypeCompositeContainerObject : public ATypeGeoObject

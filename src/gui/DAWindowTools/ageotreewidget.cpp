@@ -227,21 +227,22 @@ void AGeoTreeWidget::populateTreeWidget(QTreeWidgetItem* parent, AGeoObject *Con
       if (obj->ObjectType->isHandlingStatic())
         { //this is one of the slabs or World
           item->setFlags(item->flags() & ~Qt::ItemIsDragEnabled);// & ~Qt::ItemIsSelectable);
-          QFont f = item->font(0);
-          f.setBold(true);
-          item->setFont(0, f);
+          QFont f = item->font(0); f.setBold(true); item->setFont(0, f);
         }
       else if (obj->ObjectType->isHandlingSet() || obj->ObjectType->isArray() || obj->ObjectType->isGridElement())
         { //group or stack or array or gridElement
-          QFont f = item->font(0);
-          f.setItalic(true);
-          item->setFont(0, f);
+          QFont f = item->font(0); f.setItalic(true); item->setFont(0, f);
           updateIcon(item, obj);
           item->setBackgroundColor(0, BackgroundColor);
         }      
       else
         {
           updateIcon(item, obj);
+          if (obj->isStackReference())
+          {
+              item->setFlags(item->flags() & ~Qt::ItemIsDragEnabled);
+              QFont f = item->font(0); f.setBold(true); item->setFont(0, f);
+          }
           item->setBackgroundColor(0, BackgroundColor);
         }      
 
@@ -557,9 +558,6 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
   menu.addSeparator();
 
   QMenu * addObjMenu = menu.addMenu("Add object");
-  //QFont f = addObjMenu->font();
-  //f.setBold(true);
-  //addObjMenu->setFont(f);
     QAction* newBox  = addObjMenu->addAction("Box");
     QMenu * addTubeMenu = addObjMenu->addMenu("Tube");
         QAction* newTube =        addTubeMenu->addAction("Tube");
@@ -612,6 +610,7 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
   menu.addSeparator();
 
   QAction* stackA = Action(menu, "Form a stack");
+  QAction* stackRefA = Action(menu, "Mark as the stack reference volume"); stackRefA->setEnabled(false);
 
   menu.addSeparator();
 
@@ -626,17 +625,17 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
   addLoweLGA->setEnabled(!World->containsLowerLightGuide());
 
   QString objName;
+  AGeoObject * obj = nullptr;
   if      (selected.size() == 0) objName = "World"; // no object selected
   else if (selected.size() == 1)
   { //menu triggered with only one selected item
       objName = selected.first()->text(0);
-      AGeoObject* obj = World->findObjectByName(objName);
+      obj = World->findObjectByName(objName);
       if (!obj) return;
-      const ATypeGeoObject& ObjectType = *obj->ObjectType;
+      const ATypeGeoObject & ObjectType = *obj->ObjectType;
 
       bool fNotGridNotMonitor = !ObjectType.isGrid() && !ObjectType.isMonitor();
 
-      //newA->setEnabled(fNotGridNotMonitor);
       addObjMenu->setEnabled(fNotGridNotMonitor);
       enableDisableA->setEnabled( !obj->isWorld() );
       enableDisableA->setText( (obj->isDisabled() ? "Enable object" : "Disable object" ) );
@@ -649,7 +648,6 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
       newGridA->setEnabled(fNotGridNotMonitor);
       copyA->setEnabled( ObjectType.isSingle() || ObjectType.isSlab() || ObjectType.isMonitor());  //supported so far only Single, Slab and Monitor
       removeHostedA->setEnabled(fNotGridNotMonitor);
-      //removeThisAndHostedA->setEnabled(fNotGridNotMonitor);
       removeThisAndHostedA->setEnabled(!ObjectType.isWorld());
       removeA->setEnabled(!ObjectType.isWorld());
       lockA->setEnabled(!ObjectType.isHandlingStatic() || ObjectType.isLightguide());
@@ -661,13 +659,14 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
       showA->setEnabled(true);
       showAonly->setEnabled(true);
       showAdown->setEnabled(true);
+      stackRefA->setEnabled(obj->isStackMember());
   }
   else if (!selected.first()->font(0).bold())
   { //menu triggered with several items selected, and they are not slabs
       removeA->setEnabled(true); //world cannot be in selection with anything else anyway
       lockA->setEnabled(true);
       unlockA->setEnabled(true);
-      stackA->setEnabled(true);
+      stackA->setEnabled(true);      
   }
 
   QAction* SelectedAction = menu.exec(mapToGlobal(pos));
@@ -722,6 +721,8 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
      menuActionCopyObject(objName);
   else if (SelectedAction == stackA) // Form STACK
       formStack(selected);
+  else if (SelectedAction == stackRefA) // Make STACK ref volume
+      markAsStackRefVolume(obj);
   else if (SelectedAction == lockA) // LOCK
      menuActionLock();
   else if (SelectedAction == unlockA) // UNLOCK
@@ -1191,39 +1192,51 @@ void AGeoTreeWidget::menuActionEnableDisable(QString ObjectName)
 
 void AGeoTreeWidget::formStack(QList<QTreeWidgetItem*> selected) //option 0->group, option 1->stack
 {
-  //creating a set
-  AGeoObject* grObj = new AGeoObject();
+    //creating a set - note that selected objects always have the same container!
+    const QString firstName = selected.first()->text(0);
+    AGeoObject *  firstObj  = World->findObjectByName(firstName);
+    if (!firstObj) return;
 
-  delete grObj->ObjectType;
-  grObj->ObjectType = new ATypeStackContainerObject();
+    AGeoObject * stackObj = new AGeoObject();
 
-  do grObj->Name = AGeoObject::GenerateRandomStackName();
-  while (World->isNameExists(grObj->Name));
-  //qDebug() << "--Created new set object:"<<grObj->Name;
+    delete stackObj->ObjectType;
+    stackObj->ObjectType = new ATypeStackContainerObject();
+    static_cast<ATypeStackContainerObject*>(stackObj->ObjectType)->ReferenceVolume = firstName;
 
-  QString FirstName = selected.first()->text(0); //selected objects always have the same container
-  AGeoObject* firstObj = World->findObjectByName(FirstName);
-  if (!firstObj) return;
-  AGeoObject* contObj = firstObj->Container;
-  grObj->Container = contObj;
-  //qDebug() << "--Group will be hosted by:"<<grObj->Container->Name;
+    do stackObj->Name = AGeoObject::GenerateRandomStackName();
+    while (World->isNameExists(stackObj->Name));
 
-  for (int i=0; i<selected.size(); i++)
-  {
-      QString name = selected.at(i)->text(0);
-      AGeoObject* obj = World->findObjectByName(name);
-      if (!obj) continue;
-      contObj->HostedObjects.removeOne(obj);
-      obj->Container = grObj;
-      grObj->HostedObjects.append(obj);
-  }
-  contObj->HostedObjects.insert(0, grObj);
+    AGeoObject * contObj = firstObj->Container;
+    stackObj->Container = contObj;
 
-  QString name = grObj->Name;
-  firstObj->updateStack();
-  emit RequestRebuildDetector();
-  //qDebug() << "--Done! updating gui";
-  UpdateGui(name);
+    for (int i = 0; i < selected.size(); i++)
+    {
+        const QString name = selected.at(i)->text(0);
+        AGeoObject * obj = World->findObjectByName(name);
+        if (!obj) continue;
+        contObj->HostedObjects.removeOne(obj);
+        obj->Container = stackObj;
+        stackObj->HostedObjects.append(obj);
+    }
+    contObj->HostedObjects.insert(0, stackObj);
+
+    const QString name = stackObj->Name;
+    firstObj->updateStack();
+    emit RequestRebuildDetector();
+    UpdateGui(name);
+}
+
+void AGeoTreeWidget::markAsStackRefVolume(AGeoObject * obj)
+{
+    if (!obj->Container) return;
+    if (!obj->Container->ObjectType) return;
+    ATypeStackContainerObject * sc = dynamic_cast<ATypeStackContainerObject*>(obj->Container->ObjectType);
+    if (!sc) return;
+    const QString name = obj->Name;
+    sc->ReferenceVolume = name;
+
+    emit RequestRebuildDetector();
+    UpdateGui(name);
 }
 
 void AGeoTreeWidget::addLightguide(bool upper)

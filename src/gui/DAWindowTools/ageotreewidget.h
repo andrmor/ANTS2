@@ -76,6 +76,7 @@ private:
   void updateExpandState(QTreeWidgetItem* item); //recursive!
   void updateIcon(QTreeWidgetItem *item, AGeoObject *obj);
   void formStack(QList<QTreeWidgetItem *> selected);
+  void markAsStackRefVolume(AGeoObject * obj);
   void addLightguide(bool upper);
 
   void menuActionAddNewObject(QString ContainerName, AGeoShape * shape);

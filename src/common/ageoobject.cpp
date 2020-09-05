@@ -638,6 +638,65 @@ const AMonitorConfig * AGeoObject::getMonitorConfig() const
     return &mon->config;
 }
 
+bool AGeoObject::isStackMember() const
+{
+    if (!Container || !Container->ObjectType) return false;
+    return Container->ObjectType->isStack();
+}
+
+bool AGeoObject::isStackReference() const
+{
+    if (!Container || !Container->ObjectType) return false;
+
+    ATypeStackContainerObject * sc = dynamic_cast<ATypeStackContainerObject*>(Container->ObjectType);
+    if (sc && sc->ReferenceVolume == Name) return true;
+    return false;
+}
+
+AGeoObject * AGeoObject::getOrMakeStackReferenceVolume()
+{
+    if (!ObjectType) return nullptr;
+
+    AGeoObject * Stack;
+    ATypeStackContainerObject * StackTO = dynamic_cast<ATypeStackContainerObject*>(ObjectType);
+    if (StackTO) Stack = this;
+    else
+    {
+        if (Container)
+        {
+            StackTO = dynamic_cast<ATypeStackContainerObject*>(Container->ObjectType);
+            if (StackTO) Stack = Container;
+        }
+    }
+    if (!StackTO) return nullptr;
+    if (Stack->HostedObjects.isEmpty()) return nullptr;
+
+    AGeoObject * RefVolume;
+    if (StackTO->ReferenceVolume.isEmpty())
+    {
+        RefVolume = Stack->HostedObjects.first();
+        StackTO->ReferenceVolume = RefVolume->Name;
+    }
+    else
+    {
+        for (AGeoObject * obj : Stack->HostedObjects)
+        {
+            if (obj->Name == StackTO->ReferenceVolume)
+            {
+                RefVolume = obj;
+                break;
+            }
+        }
+        if (!RefVolume)
+        {
+            qWarning() << "Declared reference volume of the stack not found, setting first volume as the reference!";
+            RefVolume = Stack->HostedObjects.first();
+            StackTO->ReferenceVolume = RefVolume->Name;
+        }
+    }
+    return RefVolume;
+}
+
 AGeoObject * AGeoObject::findObjectByName(const QString & name)
 {
     if (Name == name) return this;
@@ -969,31 +1028,47 @@ void AGeoObject::unlockAllInside()
 
 void AGeoObject::updateStack()
 {
-  qDebug() << "Stack update triggered for:"<<Name;
-  double Z = Position[2];
-  double Edge = 0;
-  for (int i=0; i<Container->HostedObjects.size(); i++)
+    qDebug() << "Stack update triggered for:" << Name;
+
+    AGeoObject * RefObj = getOrMakeStackReferenceVolume();
+    if (!RefObj) return;
+
+    double Edge = 0;
+    double RefPos = 0;
+    for (AGeoObject * obj : Container->HostedObjects)
     {
-      AGeoObject* o = Container->HostedObjects[i];
-      //qDebug() << " --"<<o->Name;
+        obj->Orientation[0] = 0; obj->OrientationStr[0].clear();
+        obj->Orientation[1] = 0; obj->OrientationStr[1].clear();
 
-      o->Orientation[0] = o->Orientation[1] = 0;
-      o->Orientation[2] = Orientation[2];
+        const double halfHeight = obj->Shape->getHeight();
+        if (obj == RefObj) RefPos = Edge - halfHeight;
+        else
+        {
+            obj->Orientation[2] = RefObj->Orientation[2]; obj->OrientationStr[2] = RefObj->OrientationStr[2];
 
-      o->Position[0] = Position[0];
-      o->Position[1] = Position[1];
-
-      o->Position[2] = Edge - o->Shape->getHeight();
-      Edge -= 2.0*o->Shape->getHeight();
+            obj->Position[0] = RefObj->Position[0];  obj->PositionStr[0] = RefObj->PositionStr[0];
+            obj->Position[1] = RefObj->Position[1];  obj->PositionStr[1] = RefObj->PositionStr[1];
+            obj->Position[2] = Edge - halfHeight;    obj->PositionStr[2].clear();
+        }
+        Edge -= 2.0 * halfHeight;
     }
 
-  //shift in Z
-  double dZ = Z - Position[2];
-  for (int i=0; i<Container->HostedObjects.size(); i++)
+    const double dZ = RefPos - RefObj->Position[2];
+    for (AGeoObject * obj : Container->HostedObjects)
     {
-      AGeoObject* o = Container->HostedObjects[i];
-      o->Position[2] += dZ;
-  }
+        if (obj != RefObj) obj->Position[2] -= dZ;
+    }
+}
+
+void AGeoObject::updateAllStacks()
+{
+    if (ObjectType)
+    {
+        ATypeStackContainerObject * so = dynamic_cast<ATypeStackContainerObject*>(ObjectType);
+        if (so) updateStack();
+    }
+
+    for (AGeoObject * obj : HostedObjects) obj->updateAllStacks();
 }
 
 AGeoObject * AGeoObject::findContainerUp(const QString & name)

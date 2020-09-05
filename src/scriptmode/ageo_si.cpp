@@ -628,8 +628,8 @@ void AGeo_SI::MakeStack(QString name, QString container)
 
 void AGeo_SI::InitializeStack(QString StackName, QString Origin_MemberName)
 {
-    AGeoObject* StackObj = 0;
-    for (AGeoObject* obj : GeoObjects)
+    AGeoObject * StackObj = nullptr;
+    for (AGeoObject * obj : GeoObjects)
         if (obj->Name == StackName && obj->ObjectType->isStack())
         {
             StackObj = obj;

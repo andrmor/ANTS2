@@ -1035,12 +1035,13 @@ void AGeoObject::updateStack()
 
     double Edge = 0;
     double RefPos = 0;
-    for (AGeoObject * obj : Container->HostedObjects)
+    for (AGeoObject * obj : RefObj->Container->HostedObjects)
     {
         obj->Orientation[0] = 0; obj->OrientationStr[0].clear();
         obj->Orientation[1] = 0; obj->OrientationStr[1].clear();
 
         const double halfHeight = obj->Shape->getHeight();
+        qDebug() << "HalfHeight" << halfHeight;
         if (obj == RefObj) RefPos = Edge - halfHeight;
         else
         {
@@ -1054,7 +1055,7 @@ void AGeoObject::updateStack()
     }
 
     const double dZ = RefPos - RefObj->Position[2];
-    for (AGeoObject * obj : Container->HostedObjects)
+    for (AGeoObject * obj : RefObj->Container->HostedObjects)
     {
         if (obj != RefObj) obj->Position[2] -= dZ;
     }

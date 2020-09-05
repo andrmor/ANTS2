@@ -104,7 +104,7 @@ DetectorAddOnsWindow::~DetectorAddOnsWindow()
 
 void DetectorAddOnsWindow::onReconstructDetectorRequest()
 {
-  qDebug() << "onReconstructDetectorRequest triggered";
+  //qDebug() << "onReconstructDetectorRequest triggered";
   if (MW->DoNotUpdateGeometry) return; //if bulk update in progress
 
   MW->ReconstructDetector();

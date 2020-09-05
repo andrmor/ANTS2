@@ -1028,8 +1028,6 @@ void AGeoObject::unlockAllInside()
 
 void AGeoObject::updateStack()
 {
-    qDebug() << "Stack update triggered for:" << Name;
-
     AGeoObject * RefObj = getOrMakeStackReferenceVolume();
     if (!RefObj) return;
 
@@ -1041,7 +1039,6 @@ void AGeoObject::updateStack()
         obj->Orientation[1] = 0; obj->OrientationStr[1].clear();
 
         const double halfHeight = obj->Shape->getHeight();
-        qDebug() << "HalfHeight" << halfHeight;
         if (obj == RefObj) RefPos = Edge - halfHeight;
         else
         {

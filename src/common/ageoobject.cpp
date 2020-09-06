@@ -153,11 +153,11 @@ void AGeoObject::DeleteMaterialIndex(int imat)
 
 void AGeoObject::makeItWorld()
 {
-    if (isWorld()) return;
-
     Name = "World";
-    delete ObjectType; ObjectType = new ATypeWorldObject();
     Container = nullptr;
+
+    if (isWorld()) return;
+    delete ObjectType; ObjectType = new ATypeWorldObject();
 }
 
 bool AGeoObject::isWorld() const

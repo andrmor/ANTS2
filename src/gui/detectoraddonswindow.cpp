@@ -983,8 +983,7 @@ void DetectorAddOnsWindow::on_pmParseInGeometryFromGDML_clicked()
     QString PMtemplate = ui->lePMtemplate->text();
     if (PMtemplate.isEmpty()) PMtemplate = "_.._#"; //clumsy, but otherwise propagate changes to readGeoObjectTree
 
-    if (Detector->GeoManager) delete Detector->GeoManager;
-    Detector->GeoManager = 0;
+    delete Detector->GeoManager; Detector->GeoManager = nullptr;
     //Detector->GeoManager = TGeoManager::Import(fileName.toLatin1());
     GDMLtoTGeo(fileName.toLatin1());
     if (!Detector->GeoManager || !Detector->GeoManager->IsClosed())
@@ -1463,7 +1462,8 @@ void DetectorAddOnsWindow::on_tabwConstants_cellChanged(int row, int column)
             updateGeoConstsIndication();
             return;
         }
-        MW->writeDetectorToJson(MW->Config->JSON);
+        //MW->writeDetectorToJson(MW->Config->JSON);
+        emit requestDelayedRebuildAndRestoreDelegate();
     }
     else
     {

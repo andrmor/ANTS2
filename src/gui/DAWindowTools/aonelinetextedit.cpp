@@ -18,6 +18,10 @@ AOneLineTextEdit::AOneLineTextEdit(QWidget * parent) : QPlainTextEdit(parent)
     setCenterOnScroll(true);
     setTabChangesFocus(false);
 
+    QPalette p = palette();
+    p.setColor(QPalette::Disabled, QPalette::Base, QColor(235,235,235));
+    setPalette(p);
+
     connect(this, &AOneLineTextEdit::textChanged, this, &AOneLineTextEdit::clearTooltip);
 }
 

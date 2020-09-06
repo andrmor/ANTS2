@@ -1039,7 +1039,9 @@ void AGeoObject::updateStack()
         obj->Orientation[1] = 0; obj->OrientationStr[1].clear();
 
         const double halfHeight = obj->Shape->getHeight();
-        if (obj == RefObj) RefPos = Edge - halfHeight;
+        double relPosrefobj = RefObj->Shape->getRelativePosZofCenter();
+
+        if (obj == RefObj) RefPos = Edge - halfHeight - relPosrefobj;
         else
         {
             obj->Orientation[2] = RefObj->Orientation[2]; obj->OrientationStr[2] = RefObj->OrientationStr[2];
@@ -1047,6 +1049,9 @@ void AGeoObject::updateStack()
             obj->Position[0] = RefObj->Position[0];  obj->PositionStr[0] = RefObj->PositionStr[0];
             obj->Position[1] = RefObj->Position[1];  obj->PositionStr[1] = RefObj->PositionStr[1];
             obj->Position[2] = Edge - halfHeight;    obj->PositionStr[2].clear();
+
+            double relPos = obj->Shape->getRelativePosZofCenter();
+            obj->Position[2] -= relPos;
         }
         Edge -= 2.0 * halfHeight;
     }

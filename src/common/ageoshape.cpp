@@ -2584,6 +2584,20 @@ TGeoShape *AGeoPcon::createGeoShape(const QString shapeName)
     return pc;
 }
 
+double AGeoPcon::getHeight() const
+{
+    double res = Sections.at(Sections.size()-1).z - Sections.at(0).z;
+    res *=0.5;
+    return res;
+}
+
+double AGeoPcon::getRelativePosZofCenter() const
+{
+    double res = Sections.at(0).z + getHeight();
+
+    return res;
+}
+
 QString AGeoPcon::getGenerationString(bool useStrings) const
 {
     QString str;

@@ -25,6 +25,7 @@ public:
   virtual QString getGenerationString(bool /*useStrings*/ = false) const = 0;
 
   virtual double getHeight() const {return 0;}   //for stacks; if 0, cannot be used in a stack
+  virtual double getRelativePosZofCenter() const {return 0;} //for polycones and polygons in stacks
   virtual void   setHeight(double /*dz*/) {}     //for stacks
   virtual double maxSize() const = 0;            //used for world size evaluation
   virtual double minSize() const {return 0;}     //needed only for shapes used by monitors (box tube polygon)
@@ -340,6 +341,8 @@ public:
   bool readFromString(QString GenerationString) override;
   TGeoShape* createGeoShape(const QString shapeName = "") override;
 
+  double getHeight() const override;
+  double getRelativePosZofCenter() const override;
   QString getGenerationString(bool useStrings) const override;
   double maxSize() const override;
 

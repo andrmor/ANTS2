@@ -3198,6 +3198,12 @@ double AGeoScaledShape::getHeight() const
     return BaseShape->getHeight() * scaleZ;
 }
 
+double AGeoScaledShape::getRelativePosZofCenter() const
+{
+    if (!BaseShape) return 0;
+    return BaseShape->getRelativePosZofCenter() * scaleZ;
+}
+
 void AGeoScaledShape::setHeight(double dz)
 {
     if (!BaseShape) return;

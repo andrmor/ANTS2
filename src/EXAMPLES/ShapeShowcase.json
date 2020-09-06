@@ -353,7 +353,7 @@
                     "fCenter": false,
                     "height": 10,
                     "material": 0,
-                    "name": "Round slab",
+                    "name": "Round_slab",
                     "style": 1,
                     "width": 1
                 },
@@ -371,7 +371,7 @@
                     "fCenter": false,
                     "height": 15,
                     "material": 0,
-                    "name": "Polygon slab",
+                    "name": "Polygon_slab",
                     "style": 1,
                     "width": 1
                 },
@@ -389,7 +389,7 @@
                     "fCenter": true,
                     "height": 10,
                     "material": 0,
-                    "name": "Rectangular slab",
+                    "name": "Rectangular_slab",
                     "style": 1,
                     "width": 1
                 }
@@ -515,7 +515,7 @@
                     "Container": "World",
                     "Locked": false,
                     "Material": 0,
-                    "Name": "Tube Segment Cut",
+                    "Name": "Tube_Segment_Cut",
                     "ObjectType": {
                         "Type": "Single"
                     },
@@ -552,7 +552,7 @@
                     "Container": "World",
                     "Locked": false,
                     "Material": 0,
-                    "Name": "Cone Segment",
+                    "Name": "Cone_Segment",
                     "ObjectType": {
                         "Type": "Single"
                     },
@@ -587,7 +587,7 @@
                     "Container": "World",
                     "Locked": false,
                     "Material": 0,
-                    "Name": "Polygon Simplified",
+                    "Name": "Polygon_Simplified",
                     "ObjectType": {
                         "Type": "Single"
                     },
@@ -829,7 +829,7 @@
                     "Container": "World",
                     "Locked": false,
                     "Material": 0,
-                    "Name": "Trapezoid Simplified",
+                    "Name": "Trapezoid_Simplified",
                     "ObjectType": {
                         "Type": "Single"
                     },
@@ -1230,7 +1230,7 @@
                 {
                     "Container": "World",
                     "Locked": false,
-                    "Name": "Round slab",
+                    "Name": "Round_slab",
                     "ObjectType": {
                         "Type": "Slab"
                     },
@@ -1240,7 +1240,7 @@
                 {
                     "Container": "World",
                     "Locked": false,
-                    "Name": "Polygon slab",
+                    "Name": "Polygon_slab",
                     "ObjectType": {
                         "Type": "Slab"
                     },
@@ -1250,7 +1250,7 @@
                 {
                     "Container": "World",
                     "Locked": false,
-                    "Name": "Rectangular slab",
+                    "Name": "Rectangular_slab",
                     "ObjectType": {
                         "Type": "Slab"
                     },

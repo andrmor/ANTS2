@@ -187,14 +187,6 @@ QString AGeoObjectDelegate::getName() const
     return leName->text();
 }
 
-bool AGeoObjectDelegate::isLeEmpty(const QVector<AOneLineTextEdit *> v) const
-{
-    for (AOneLineTextEdit* a : v)
-        if (a->text().isEmpty()) return true;
-
-    return false;
-}
-
 bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false in void AGeoWidget::onConfirmPressed()
 {
     QString errorStr;
@@ -688,7 +680,7 @@ AGeoBoxDelegate::AGeoBoxDelegate(const QStringList &materials, QWidget *parent)
 bool AGeoBoxDelegate::updateObject(AGeoObject *obj) const
 {
     QVector<AOneLineTextEdit*> v = {ex, ey, ez};
-    if (AGeoObjectDelegate::isLeEmpty(v))
+    if (isLeEmpty(v))
     {
         QMessageBox::warning(this->ParentWidget, "", "Empty line!");
         return false;
@@ -775,7 +767,7 @@ AGeoTubeDelegate::AGeoTubeDelegate(const QStringList & materials, QWidget *paren
 bool AGeoTubeDelegate::updateObject(AGeoObject *obj) const
 {
     QVector<AOneLineTextEdit*> v = {ei, eo, ez};
-    if (AGeoObjectDelegate::isLeEmpty(v))
+    if (isLeEmpty(v))
     {
         QMessageBox::warning(this->ParentWidget, "", "Empty line!");
         return false;
@@ -851,7 +843,7 @@ AGeoTubeSegDelegate::AGeoTubeSegDelegate(const QStringList & materials, QWidget 
 bool AGeoTubeSegDelegate::updateObject(AGeoObject *obj) const
 {
     QVector<AOneLineTextEdit*> v = {ei, eo, ez, ep1, ep2};
-    if (AGeoObjectDelegate::isLeEmpty(v))
+    if (isLeEmpty(v))
     {
         QMessageBox::warning(this->ParentWidget, "", "Empty line!");
         return false;
@@ -940,7 +932,7 @@ AGeoTubeSegCutDelegate::AGeoTubeSegCutDelegate(const QStringList &materials, QWi
 bool AGeoTubeSegCutDelegate::updateObject(AGeoObject *obj) const
 {
     QVector<AOneLineTextEdit*> v = {elnx, elny, elnz, eunx, euny, eunz};
-    if (AGeoObjectDelegate::isLeEmpty(v))
+    if (isLeEmpty(v))
     {
         QMessageBox::warning(this->ParentWidget, "", "Empty line!");
         return false;
@@ -1049,7 +1041,7 @@ AGeoParaDelegate::AGeoParaDelegate(const QStringList & materials, QWidget *paren
 bool AGeoParaDelegate::updateObject(AGeoObject *obj) const
 {
     QVector<AOneLineTextEdit*> v = {ex, ey, ez, ea, et, ep};
-    if (AGeoObjectDelegate::isLeEmpty(v))
+    if (isLeEmpty(v))
     {
         QMessageBox::warning(this->ParentWidget, "", "Empty line!");
         return false;
@@ -1154,7 +1146,7 @@ AGeoSphereDelegate::AGeoSphereDelegate(const QStringList & materials, QWidget *p
 bool AGeoSphereDelegate::updateObject(AGeoObject *obj) const
 {
     QVector<AOneLineTextEdit*> v = {eod, eid, et1, et2, ep1, ep2};
-    if (AGeoObjectDelegate::isLeEmpty(v))
+    if (isLeEmpty(v))
     {
         QMessageBox::warning(this->ParentWidget, "", "Empty line!");
         return false;
@@ -1252,7 +1244,7 @@ AGeoConeDelegate::AGeoConeDelegate(const QStringList &materials, QWidget *parent
 bool AGeoConeDelegate::updateObject(AGeoObject *obj) const
 {
     QVector<AOneLineTextEdit*> v = {ez, eli, elo, eui, euo};
-    if (AGeoObjectDelegate::isLeEmpty(v))
+    if (isLeEmpty(v))
     {
         QMessageBox::warning(this->ParentWidget, "", "Empty line!");
         return false;
@@ -1340,7 +1332,7 @@ AGeoConeSegDelegate::AGeoConeSegDelegate(const QStringList &materials, QWidget *
 bool AGeoConeSegDelegate::updateObject(AGeoObject *obj) const
 {
     QVector<AOneLineTextEdit*> v = {ep1, ep2};
-    if (AGeoObjectDelegate::isLeEmpty(v))
+    if (isLeEmpty(v))
     {
         QMessageBox::warning(this->ParentWidget, "", "Empty line!");
         return false;
@@ -1424,7 +1416,7 @@ AGeoElTubeDelegate::AGeoElTubeDelegate(const QStringList &materials, QWidget *pa
 bool AGeoElTubeDelegate::updateObject(AGeoObject *obj) const
 {
     QVector<AOneLineTextEdit*> v = {ex, ey, ez};
-    if (AGeoObjectDelegate::isLeEmpty(v))
+    if (isLeEmpty(v))
     {
         QMessageBox::warning(this->ParentWidget, "", "Empty line!");
         return false;
@@ -1511,7 +1503,7 @@ AGeoTrapXDelegate::AGeoTrapXDelegate(const QStringList &materials, QWidget *pare
 bool AGeoTrapXDelegate::updateObject(AGeoObject *obj) const
 {
     QVector<AOneLineTextEdit*> v = {exl, exu, ey, ez};
-    if (AGeoObjectDelegate::isLeEmpty(v))
+    if (isLeEmpty(v))
     {
         QMessageBox::warning(this->ParentWidget, "", "Empty line!");
         return false;
@@ -1604,7 +1596,7 @@ AGeoTrapXYDelegate::AGeoTrapXYDelegate(const QStringList &materials, QWidget *pa
 bool AGeoTrapXYDelegate::updateObject(AGeoObject *obj) const
 {
     QVector<AOneLineTextEdit*> v = {exl, exu, eyl, eyu, ez};
-    if (AGeoObjectDelegate::isLeEmpty(v))
+    if (isLeEmpty(v))
     {
         QMessageBox::warning(this->ParentWidget, "", "Empty line!");
         return false;
@@ -1700,7 +1692,7 @@ AGeoParaboloidDelegate::AGeoParaboloidDelegate(const QStringList &materials, QWi
 bool AGeoParaboloidDelegate::updateObject(AGeoObject *obj) const
 {
     QVector<AOneLineTextEdit*> v = {el, eu, ez};
-    if (AGeoObjectDelegate::isLeEmpty(v))
+    if (isLeEmpty(v))
     {
         QMessageBox::warning(this->ParentWidget, "", "Empty line!");
         return false;
@@ -1790,7 +1782,7 @@ AGeoTorusDelegate::AGeoTorusDelegate(const QStringList &materials, QWidget *pare
 bool AGeoTorusDelegate::updateObject(AGeoObject *obj) const
 {
     QVector<AOneLineTextEdit*> v = {ead, edi, edo, ep0, epe};
-    if (AGeoObjectDelegate::isLeEmpty(v))
+    if (isLeEmpty(v))
     {
         QMessageBox::warning(this->ParentWidget, "", "Empty line!");
         return false;
@@ -1893,7 +1885,7 @@ AGeoPolygonDelegate::AGeoPolygonDelegate(const QStringList &materials, QWidget *
 bool AGeoPolygonDelegate::updateObject(AGeoObject *obj) const
 {
     QVector<AOneLineTextEdit*> v = {en, edp, ez, eli, elo, eui, euo};
-    if (AGeoObjectDelegate::isLeEmpty(v))
+    if (isLeEmpty(v))
     {
         QMessageBox::warning(this->ParentWidget, "", "Empty line!");
         return false;
@@ -2043,7 +2035,7 @@ void AGeoPconDelegate::addOneLineTextEdits(int row)
 void AGeoPconDelegate::readGui() const
 {
     QVector<AOneLineTextEdit*> v = {ep0, epe};
-    if (AGeoObjectDelegate::isLeEmpty(v))
+    if (isLeEmpty(v))
     {
         QMessageBox::warning(this->ParentWidget, "", "Empty line!");
         return;
@@ -2269,7 +2261,7 @@ AGeoPgonDelegate::AGeoPgonDelegate(const QStringList &materials, QWidget *parent
 bool AGeoPgonDelegate::updateObject(AGeoObject *obj) const
 {
     QVector<AOneLineTextEdit*> v = {eed};
-    if (AGeoObjectDelegate::isLeEmpty(v))
+    if (isLeEmpty(v))
     {
         QMessageBox::warning(this->ParentWidget, "", "Empty line!");
         return false;
@@ -2467,7 +2459,7 @@ AGeoArb8Delegate::AGeoArb8Delegate(const QStringList &materials, QWidget *parent
 bool AGeoArb8Delegate::updateObject(AGeoObject *obj) const
 {
     QVector<AOneLineTextEdit*> v = {ez};
-    if (AGeoObjectDelegate::isLeEmpty(v))
+    if (isLeEmpty(v))
     {
         QMessageBox::warning(this->ParentWidget, "", "Empty line!");
         return false;
@@ -2489,7 +2481,7 @@ bool AGeoArb8Delegate::updateObject(AGeoObject *obj) const
             for (int i=0; i < 4; i++)
             {
                 QVector<AOneLineTextEdit*> v = {ve[iul][i].X, ve[iul][i].Y};
-                if (AGeoObjectDelegate::isLeEmpty(v))
+                if (isLeEmpty(v))
                 {
                     QMessageBox::warning(this->ParentWidget, "", "Empty line!");
                     return false;
@@ -2604,7 +2596,7 @@ AGeoArrayDelegate::AGeoArrayDelegate(const QStringList &materials, QWidget *pare
 bool AGeoArrayDelegate::updateObject(AGeoObject * obj) const
 {
     QVector<AOneLineTextEdit*> v = {ledNumX, ledNumY, ledNumZ, ledStepX, ledStepY, ledStepZ};
-    if (AGeoObjectDelegate::isLeEmpty(v))
+    if (isLeEmpty(v))
     {
         QMessageBox::warning(this->ParentWidget, "", "Empty line!");
         return false;
@@ -2820,14 +2812,6 @@ bool AWorldDelegate::updateObject(AGeoObject * obj) const
     box->str2dz = strSizeZ;
 
     return true;
-}
-
-bool AWorldDelegate::isLeEmpty(const QVector<AOneLineTextEdit *> v) const
-{
-    for (AOneLineTextEdit* a : v)
-        if (a->text().isEmpty()) return true;
-
-    return false;
 }
 
 void AWorldDelegate::Update(const AGeoObject *obj)

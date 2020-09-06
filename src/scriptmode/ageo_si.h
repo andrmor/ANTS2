@@ -51,7 +51,7 @@ public slots:
   void RecalculateStack(QString name);
 
   void MakeStack(QString name, QString container);
-  void InitializeStack(QString StackName, QString Origin_MemberName);
+  void InitializeStack(QString StackName, QString MemberName_StackReference);
 
   void MakeGroup(QString name, QString container);
 

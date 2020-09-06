@@ -1616,7 +1616,7 @@ QString AGeoTreeWidget::makeScriptString_stackObjectEnd(AGeoObject *obj)
 {
     return QString("geo.InitializeStack( ") +
            "'" + obj->Name + "',  " +
-           "'" + obj->HostedObjects.first()->Name + "' )";
+           "'" + obj->getOrMakeStackReferenceVolume()->Name + "' )";  //obj->HostedObjects.first()->Name
 }
 
 QString AGeoTreeWidget::makeLinePropertiesString(AGeoObject *obj)

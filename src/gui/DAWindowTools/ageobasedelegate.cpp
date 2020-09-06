@@ -11,6 +11,14 @@
 AGeoBaseDelegate::AGeoBaseDelegate(QWidget *ParentWidget) :
     ParentWidget(ParentWidget) {}
 
+bool AGeoBaseDelegate::isLeEmpty(const QVector<AOneLineTextEdit *> & v) const
+{
+    for (AOneLineTextEdit * a : v)
+        if (a->text().isEmpty()) return true;
+
+    return false;
+}
+
 QHBoxLayout *AGeoBaseDelegate::createBottomButtons()
 {
     QHBoxLayout * abl = new QHBoxLayout();

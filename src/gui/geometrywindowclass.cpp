@@ -279,7 +279,8 @@ void GeometryWindowClass::SaveAs(const QString filename)
 
 void GeometryWindowClass::ResetView()
 {
-  TView3D *v = (TView3D*)RasterWindow->fCanvas->GetView();
+  TView3D *v = dynamic_cast<TView3D*>(RasterWindow->fCanvas->GetView());
+  if (!v) return;
 
   v->SetPsi(0);
   v->SetLatitude(60.0);
@@ -340,6 +341,7 @@ void GeometryWindowClass::writeToJson(QJsonObject & json) const
 
 void GeometryWindowClass::readFromJson(const QJsonObject &json)
 {
+    fRecallWindow = false;
     bool ok = parseJson(json, "ZoomLevel", ZoomLevel);
     if (ok) Zoom(true);
 }

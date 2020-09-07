@@ -662,7 +662,7 @@ by a step in mm</string>
        <item row="1" column="2">
         <widget class="QLabel" name="label_29">
          <property name="text">
-          <string>mm</string>
+          <string>a.u.</string>
          </property>
         </widget>
        </item>
@@ -692,7 +692,7 @@ by a step in mm</string>
        <item row="2" column="2">
         <widget class="QLabel" name="label_30">
          <property name="text">
-          <string>mm</string>
+          <string>a.u.</string>
          </property>
         </widget>
        </item>
@@ -749,7 +749,7 @@ by a step in mm</string>
        <item row="1" column="2">
         <widget class="QLabel" name="label_32">
          <property name="text">
-          <string>mm</string>
+          <string>a.u.</string>
          </property>
         </widget>
        </item>
@@ -779,7 +779,7 @@ by a step in mm</string>
        <item row="2" column="2">
         <widget class="QLabel" name="label_31">
          <property name="text">
-          <string>mm</string>
+          <string>a.u.</string>
          </property>
         </widget>
        </item>

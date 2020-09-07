@@ -143,6 +143,7 @@ public:
   TGeoShape* createGeoShape(const QString shapeName = "") override;
 
   double getHeight() const override;
+  double getRelativePosZofCenter() const override;
   void setHeight(double dz) override;
   QString getGenerationString(bool useStrings) const override;
   double maxSize() const override;

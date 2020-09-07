@@ -54,6 +54,7 @@ QString AGeoConsts::exportToJavaSript(const AGeoObject * obj) const
         if (isGeoConstInUseGlobal(nameRegExp, obj))
             GCScript += (QString("var %1 = %2\n").arg(GCName).arg(GCExpression.isEmpty()? QString::number(GCValue) : GCExpression));
     }
+    formulaToJavaScript(GCScript);
     GCScript += "\n";
     qDebug() << GCScript;
     return GCScript;

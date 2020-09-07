@@ -268,7 +268,7 @@ void ASandwich::shapeGrid(AGeoObject *obj, int shape, double p0, double p1, doub
     }
     GEobj->HostedObjects.clear();
 
-    obj->Shape->setHeight(0.5*p2 + 0.001);
+    obj->Shape->  setHeight(0.5*p2 + 0.001);
     GE->shape = shape;
     GE->dz = 0.5*p2 + 0.001;
     GE->size1 = 0.5*p0;

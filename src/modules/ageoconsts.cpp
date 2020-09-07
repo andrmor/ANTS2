@@ -42,15 +42,17 @@ QString AGeoConsts::exportToJavaSript(const AGeoObject * obj) const
     QRegExp nameRegExp;
     QString GCScript;
     QString GCName;
+    QString GCExpression;
     double GCValue;
 
     for (int i =0; i < Names.size(); i++)
     {
         GCName = Names.at(i);
         GCValue = Values.at(i);
+        GCExpression =Expressions.at(i);
         nameRegExp = QRegExp("\\b"+GCName+"\\b");
         if (isGeoConstInUseGlobal(nameRegExp, obj))
-            GCScript += (QString("var %1 = %2\n").arg(GCName).arg(GCValue));
+            GCScript += (QString("var %1 = %2\n").arg(GCName).arg(GCExpression.isEmpty()? QString::number(GCValue) : GCExpression));
     }
     GCScript += "\n";
     qDebug() << GCScript;

@@ -61,7 +61,7 @@
           <widget class="QLineEdit" name="leName">
            <property name="minimumSize">
             <size>
-             <width>110</width>
+             <width>100</width>
              <height>0</height>
             </size>
            </property>

@@ -71,6 +71,7 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(QWidget * parent, MainWindow * MW, De
   connect(twGeo, &AGeoTreeWidget::RequestFocusObject,     this, &DetectorAddOnsWindow::FocusVolume);
   connect(twGeo, &AGeoTreeWidget::RequestHighlightObject, this, &DetectorAddOnsWindow::ShowObject);
   connect(twGeo, &AGeoTreeWidget::RequestShowObjectRecursive, this, &DetectorAddOnsWindow::ShowObjectRecursive);
+  connect(twGeo->GetEditWidget(), &AGeoWidget::requestEnableGeoConstWidget, this, &DetectorAddOnsWindow::onRequestEnableGeoConstWidget);
   connect(twGeo, SIGNAL(RequestNormalDetectorDraw()), MW, SLOT(ShowGeometrySlot()));
   connect(Detector->Sandwich, SIGNAL(RequestGuiUpdate()), twGeo, SLOT(UpdateGui()));
   QPalette palette = ui->frObjectEditor->palette();
@@ -519,6 +520,11 @@ void DetectorAddOnsWindow::OnrequestShowMonitor(const AGeoObject * mon)
         track->SetLineColor(kRed);
     }
     MW->GeometryWindow->DrawTracks();
+}
+
+void DetectorAddOnsWindow::onRequestEnableGeoConstWidget(bool flag)
+{
+    ui->tabwConstants->setEnabled(flag);
 }
 
 void DetectorAddOnsWindow::HighlightVolume(const QString & VolName)

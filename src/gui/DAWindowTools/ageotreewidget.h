@@ -175,6 +175,7 @@ private:
 signals:
   void showMonitor(const AGeoObject* mon);
   void requestBuildScript(AGeoObject *obj, QString &script, int ident, bool bExpandMaterial, bool bRecursive);
+  void requestEnableGeoConstWidget(bool);
 };
 
 #endif // AGEOTREEWIDGET_H

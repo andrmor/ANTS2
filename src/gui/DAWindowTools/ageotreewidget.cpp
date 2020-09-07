@@ -1871,6 +1871,7 @@ void AGeoWidget::onStartEditing()
       f.setBold(true);
       pbConfirm->setFont(f);
       pbConfirm->setStyleSheet("QPushButton {color: red;}");
+      emit requestEnableGeoConstWidget(false);
   }
 }
 
@@ -1962,6 +1963,7 @@ void AGeoWidget::exitEditingMode()
     pbConfirm->setStyleSheet("QPushButton {color: black;}");
     pbConfirm->setEnabled(false);
     pbCancel->setEnabled(false);
+    emit requestEnableGeoConstWidget(true);
 }
 
 void AGeoWidget::onConfirmPressed()

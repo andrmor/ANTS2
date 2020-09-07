@@ -64,7 +64,7 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>346</width>
+               <width>366</width>
                <height>421</height>
               </rect>
              </property>
@@ -151,13 +151,13 @@
            <widget class="QFrame" name="frObjectEditor">
             <property name="minimumSize">
              <size>
-              <width>450</width>
+              <width>475</width>
               <height>344</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>450</width>
+              <width>475</width>
               <height>17700</height>
              </size>
             </property>

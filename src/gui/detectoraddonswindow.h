@@ -34,6 +34,7 @@ private slots:
   void onGeoConstEditingFinished(int index, QString newValue);
   void onGeoConstExpressionEditingFinished(int index, QString newValue);
   void onGeoConstEscapePressed(int index);
+  void updateMenuIndication();
 
   void on_tabwConstants_customContextMenuRequested(const QPoint &pos);
   void on_pbConvertToDummies_clicked();
@@ -58,6 +59,10 @@ private slots:
   void on_pbConvertToScript_clicked();
   void on_pbWorldTreeHelp_clicked();
   void on_tabwConstants_cellChanged(int row, int column);
+
+  void on_actionUndo_triggered();
+
+  void on_actionRedo_triggered();
 
 private:
   Ui::DetectorAddOnsWindow *ui;

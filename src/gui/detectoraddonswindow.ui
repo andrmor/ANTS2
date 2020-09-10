@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1048</width>
-    <height>532</height>
+    <height>543</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -64,8 +64,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>366</width>
-               <height>421</height>
+               <width>346</width>
+               <height>407</height>
               </rect>
              </property>
             </widget>
@@ -1351,6 +1351,42 @@
     </item>
    </layout>
   </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1048</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuUndo_redo">
+    <property name="title">
+     <string>Undo</string>
+    </property>
+    <addaction name="actionUndo"/>
+    <addaction name="separator"/>
+    <addaction name="actionRedo"/>
+    <addaction name="separator"/>
+    <addaction name="actionExperimental_feature"/>
+   </widget>
+   <addaction name="menuUndo_redo"/>
+  </widget>
+  <action name="actionUndo">
+   <property name="text">
+    <string>Undo</string>
+   </property>
+  </action>
+  <action name="actionRedo">
+   <property name="text">
+    <string>Redo (back from Undo)</string>
+   </property>
+  </action>
+  <action name="actionExperimental_feature">
+   <property name="text">
+    <string>Undo/redo is an experimental feature!</string>
+   </property>
+  </action>
  </widget>
  <tabstops>
   <tabstop>lePMlist</tabstop>

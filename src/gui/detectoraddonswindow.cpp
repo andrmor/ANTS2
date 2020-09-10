@@ -96,6 +96,8 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(QWidget * parent, MainWindow * MW, De
 
   ui->cbAutoCheck->setChecked( MW->GlobSet.PerformAutomaticGeometryCheck );
   on_cbAutoCheck_stateChanged(111);
+
+  connect(ui->menuUndo_redo, &QMenu::aboutToShow, this, &DetectorAddOnsWindow::updateMenuIndication);
 }
 
 DetectorAddOnsWindow::~DetectorAddOnsWindow()
@@ -1437,6 +1439,12 @@ void DetectorAddOnsWindow::onGeoConstEscapePressed(int /*index*/)
     updateGeoConstsIndication();
 }
 
+void DetectorAddOnsWindow::updateMenuIndication()
+{
+    ui->actionUndo->setEnabled(MW->Config->isUndoAvailable());
+    ui->actionRedo->setEnabled(MW->Config->isRedoAvailable());
+}
+
 void DetectorAddOnsWindow::on_tabwConstants_cellChanged(int row, int column)
 {
     if (column != 0) return; // only name change or new
@@ -1547,4 +1555,28 @@ void ALineEditWithEscape::keyPressEvent(QKeyEvent *event)
         emit escapePressed();
     }
     else QLineEdit::keyPressEvent(event);
+}
+
+void DetectorAddOnsWindow::on_actionUndo_triggered()
+{
+    bool ok = MW->Config->isUndoAvailable();
+    if (!ok)
+        message("Undo is not available!", this);
+    else
+    {
+        QString err = MW->Config->doUndo();
+        if (!err.isEmpty()) message(err, this);
+    }
+}
+
+void DetectorAddOnsWindow::on_actionRedo_triggered()
+{
+    bool ok = MW->Config->isRedoAvailable();
+    if (!ok)
+        message("Redo is not available!", this);
+    else
+    {
+        QString err = MW->Config->doRedo();
+        if (!err.isEmpty()) message(err, this);
+    }
 }

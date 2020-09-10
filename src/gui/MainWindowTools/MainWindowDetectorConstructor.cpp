@@ -34,7 +34,10 @@
 
 void MainWindow::ReconstructDetector(bool fKeepData)
 {
-    //qDebug() << ">>>> ReconstructDetector (GUI method) triggered <<<<";
+    qDebug() << ">>>> ReconstructDetector (GUI method) triggered <<<<";
+
+    Config->createUndo();
+
     int oldNumPMs = Detector->pmCount();
 
     writeDetectorToJson(Config->JSON);

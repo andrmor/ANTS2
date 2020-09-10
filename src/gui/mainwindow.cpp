@@ -4045,7 +4045,7 @@ void MainWindow::on_tabMCcrosstalk_cellChanged(int row, int column)
 void MainWindow::on_leLimitNodesObject_textChanged(const QString &/*arg1*/)
 {
     bool fFound = (ui->cbLimitNodesOutsideObject->isChecked()) ?
-         Detector->Sandwich->isVolumeExist(ui->leLimitNodesObject->text()) : true;
+         Detector->Sandwich->isVolumeExistAndActive(ui->leLimitNodesObject->text()) : true;
 
     QPalette palette = ui->leLimitNodesObject->palette();
     palette.setColor(QPalette::Text, (fFound ? Qt::black : Qt::red) );

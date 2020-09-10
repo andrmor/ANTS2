@@ -14,15 +14,11 @@
 
 ASandwich::ASandwich()
 {  
-  SandwichState = CommonShapeSize;
-  ZOriginType = 0;
-  DefaultXY = new ASlabXYModel();
+    DefaultXY = new ASlabXYModel();
 
-  World = new AGeoObject("World");
-  World->Material = 0;
-  World->makeItWorld();
-  //qDebug() << "--World object in GeoTree created";
-
+    World = new AGeoObject("World");
+    World->Material = 0;
+    World->makeItWorld();
 }
 
 ASandwich::~ASandwich()
@@ -542,8 +538,7 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
                         lRot);
                 lTrans->RegisterYourself();
                 //qDebug() << "  member name:"<<name<<"  trans name:"<<TransName;
-            }           
-
+            }
 
             vol = new TGeoVolume(obj->Name.toLatin1().data(), obj->Shape->createGeoShape(), med);
         }
@@ -679,7 +674,7 @@ void ASandwich::clearGridRecords()
 
 void ASandwich::clearMonitorRecords()
 {
-    MonitorsRecords.clear(); //dont delete - it is just pointers to world tree objects
+    MonitorsRecords.clear(); //do not delete - it contains pointers to world tree objects
     MonitorIdNames.clear();
     MonitorNodes.clear();
 }
@@ -694,7 +689,6 @@ void ASandwich::positionArrayElement(int ix, int iy, int iz, AGeoObject* el, AGe
     double tmpX = el->Position[0];
     double tmpY = el->Position[1];
     double tmpZ = el->Position[2];
-    //double tmpA = el->Orientation[2];
 
     TVector3 v(arrayObj->Position[0] + el->Position[0] + ix*array->stepX,
                arrayObj->Position[1] + el->Position[1] + iy*array->stepY,
@@ -707,11 +701,10 @@ void ASandwich::positionArrayElement(int ix, int iy, int iz, AGeoObject* el, AGe
 
     addTGeoVolumeRecursively(el, parent, GeoManager, MaterialCollection, PMsAndDumPMs, arrayIndex);
 
-    //recovering original position/orientation
+    //recovering original positions
     el->Position[0] = tmpX;
     el->Position[1] = tmpY;
     el->Position[2] = tmpZ;
-    //el->Orientation[2] = tmpA;
 }
 
 void ASandwich::clearModel()
@@ -916,9 +909,12 @@ void ASandwich::DeleteMaterial(int imat)
     World->DeleteMaterialIndex(imat);
 }
 
-bool ASandwich::isVolumeExist(QString name)
+bool ASandwich::isVolumeExistAndActive(const QString & name) const
 {
-    return (World->findObjectByName(name) != 0);
+    AGeoObject * obj = World->findObjectByName(name);
+    if (!obj) return false;
+
+    return obj->fActive;
 }
 
 void ASandwich::changeLineWidthOfVolumes(int delta)
@@ -1196,6 +1192,7 @@ QString ASandwich::readFromJson(QJsonObject & json)
         }
   }
 
+  // stacks can be updated only now, when values using geoConsts have been evaluated
   World->updateAllStacks();
 
   //qDebug() << "Finished, requesting GUI update";

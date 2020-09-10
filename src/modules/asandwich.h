@@ -62,11 +62,11 @@ public:
   void UpdateDetector(); //trigger this to update the detector
   void ChangeState(ASandwich::SlabState State); //triggered by GUI
   bool CalculateZofSlabs();
-  QStringList GetMaterials() const {return Materials;}   // to const QStringList &
+  QStringList GetMaterials() const {return Materials;}
   bool isMaterialsEmpty() {return Materials.isEmpty();}
   bool isMaterialInUse(int imat);
   void DeleteMaterial(int imat);
-  bool isVolumeExist(QString name);
+  bool isVolumeExistAndActive(const QString & name) const;
   void changeLineWidthOfVolumes(int delta);
 
   // JSON
@@ -85,10 +85,10 @@ public:
   double getWorldSizeZ() const;
   void   setWorldSizeZ(double size);
 
-  ASandwich::SlabState SandwichState;
+  ASandwich::SlabState SandwichState = CommonShapeSize;
   QStringList Materials;  // list of currently defined materials
-  ASlabXYModel* DefaultXY;
-  int ZOriginType; //-1 top, 0 mid, 1 bottom (of the slab with fCenter = true)
+  ASlabXYModel * DefaultXY = nullptr;
+  int ZOriginType = 0; //-1 top, 0 mid, 1 bottom (of the slab with fCenter = true)
   QVector<AGridElementRecord*> GridRecords;
 
   // pointers to monitors

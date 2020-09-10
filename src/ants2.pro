@@ -1,6 +1,6 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 4
-ANTS2_MINOR = 31
+ANTS2_MINOR = 32
 
 # !!! You may need to modify path for CERN ROOT, see #---CERN ROOT--- section below
 

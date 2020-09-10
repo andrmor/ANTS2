@@ -6248,7 +6248,7 @@ void ReconstructionWindow::showSensorGroup(int igroup)
 void ReconstructionWindow::on_leSpF_LimitToObject_textChanged(const QString &/*arg1*/)
 {
     bool fFound = (ui->cbSpF_LimitToObject->isChecked()) ?
-         Detector->Sandwich->isVolumeExist(ui->leSpF_LimitToObject->text()) : true;
+         Detector->Sandwich->isVolumeExistAndActive(ui->leSpF_LimitToObject->text()) : true;
 
     QPalette palette = ui->leSpF_LimitToObject->palette();
     palette.setColor(QPalette::Text, (fFound ? Qt::black : Qt::red) );

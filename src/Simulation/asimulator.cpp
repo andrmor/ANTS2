@@ -1,9 +1,10 @@
 #include "asimulator.h"
+#include "asimsettings.h"
 #include "detectorclass.h"
 #include "asimulationmanager.h"
 #include "atrackrecords.h"
 #include "aoneevent.h"
-#include "generalsimsettings.h"
+#include "ageneralsimsettings.h"
 #include "eventsdataclass.h"
 #include "photon_generator.h"
 #include "aphotontracer.h"
@@ -15,15 +16,15 @@
 #include "TRandom2.h"
 #include "TGeoManager.h" //to move?
 
-ASimulator::ASimulator(ASimulationManager &simMan, int ID) :
-    simMan(simMan), ID(ID),
-    detector(simMan.getDetector()), simSettings(simMan.simSettings)
+ASimulator::ASimulator(const ASimSettings & simSet, const DetectorClass & detector, int threadIndex, int startSeed) :
+    SimSet(simSet), GenSimSettings(simSet.genSimSet),
+    detector(detector),
+    ThreadIndex(threadIndex)
 {
-    RandGen = new TRandom2();
-    int seed = detector.RandGen->Rndm() * 10000000;
-    RandGen->SetSeed(seed);
+    RandGen = new TRandom2();    
+    RandGen->SetSeed(startSeed);
 
-    dataHub = new EventsDataClass(ID);
+    dataHub = new EventsDataClass(threadIndex);
     OneEvent = new AOneEvent(detector.PMs, RandGen, dataHub->SimStat);
     photonGenerator = new Photon_Generator(detector, *RandGen);
     photonTracker = new APhotonTracer(detector.GeoManager, RandGen, detector.MpCollection, detector.PMs, &detector.Sandwich->GridRecords);
@@ -49,7 +50,7 @@ void ASimulator::updateGeoManager()
 
 void ASimulator::initSimStat()
 {
-    dataHub->initializeSimStat(detector.Sandwich->MonitorsRecords, simSettings.DetStatNumBins, (simSettings.fWaveResolved ? simSettings.WaveNodes : 0));
+    dataHub->initializeSimStat(detector.Sandwich->MonitorsRecords, GenSimSettings.DetStatNumBins, (GenSimSettings.fWaveResolved ? GenSimSettings.WaveNodes : 0));
 }
 
 void ASimulator::requestStop()
@@ -79,29 +80,23 @@ void ASimulator::divideThreadWork(int threadId, int threadCount)
     //  qDebug()<<"Thread"<<threadId<<"/"<<threadCount<<": eventBegin"<<eventBegin<<": eventEnd"<<eventEnd<<": eventCount"<<getEventCount()<<"/"<<getTotalEventCount();
 
     //dividing track building
-    if (simSettings.TrackBuildOptions.bBuildPhotonTracks)
-        maxPhotonTracks = ceil( 1.0 * getEventCount() / getTotalEventCount() * simSettings.TrackBuildOptions.MaxPhotonTracks );
+    if (GenSimSettings.TrackBuildOptions.bBuildPhotonTracks)
+        maxPhotonTracks = ceil( 1.0 * getEventCount() / getTotalEventCount() * GenSimSettings.TrackBuildOptions.MaxPhotonTracks );
     else maxPhotonTracks = 0;
-    if (simSettings.TrackBuildOptions.bBuildParticleTracks)
-        maxParticleTracks = ceil( 1.0 * getEventCount() / getTotalEventCount() * simSettings.TrackBuildOptions.MaxParticleTracks );
+    if (GenSimSettings.TrackBuildOptions.bBuildParticleTracks)
+        maxParticleTracks = ceil( 1.0 * getEventCount() / getTotalEventCount() * GenSimSettings.TrackBuildOptions.MaxParticleTracks );
     else maxParticleTracks = 0;
     updateMaxTracks(maxPhotonTracks, maxParticleTracks);
     //  qDebug() << maxPhotonTracks << maxParticleTracks;
 }
 
-bool ASimulator::setup(QJsonObject &json)
+bool ASimulator::setup()
 {
-    fUpdateGUI = json["DoGuiUpdate"].toBool();
-    fBuildPhotonTracks = fUpdateGUI && simSettings.TrackBuildOptions.bBuildPhotonTracks;
-
-    //inits
     dataHub->clear();
-    if (fUpdateGUI) detector.GeoManager->ClearTracks();
 
-    //configuring local modules
-    OneEvent->configure(&simSettings);
-    photonGenerator->configure(&simSettings, OneEvent->SimStat);
-    photonTracker->configure(&simSettings, OneEvent, fBuildPhotonTracks, &tracks);
+    OneEvent->configure(&GenSimSettings);
+    photonGenerator->configure(&GenSimSettings, OneEvent->SimStat);
+    photonTracker->configure(&GenSimSettings, OneEvent, GenSimSettings.TrackBuildOptions.bBuildPhotonTracks, &tracks);
     return true;
 }
 
@@ -123,7 +118,7 @@ void ASimulator::hardAbort()
 void ASimulator::ReserveSpace(int expectedNumEvents)
 {
     dataHub->Events.reserve(expectedNumEvents);
-    if (simSettings.fTimeResolved) dataHub->TimedEvents.reserve(expectedNumEvents);
+    if (GenSimSettings.fTimeResolved) dataHub->TimedEvents.reserve(expectedNumEvents);
     dataHub->Scan.reserve(expectedNumEvents);
 }
 
@@ -132,9 +127,9 @@ void ASimulator::updateMaxTracks(int maxPhotonTracks, int /*maxParticleTracks*/)
     photonTracker->setMaxTracks(maxPhotonTracks);
 }
 
-void ASimulator::checkNavigatorPresent()
+void ASimulator::assureNavigatorPresent()
 {
-    //simulator->getDetector()->GeoManager->AddNavigator();
+    // it is normal to be triggered once per tread on sim start!
     if (!detector.GeoManager->GetCurrentNavigator())
     {
         //qDebug() << "No current navigator for this thread, adding one";

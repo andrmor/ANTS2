@@ -23,7 +23,7 @@ struct GunParticleStruct
     double  LinkingProbability = 0;  //probability to be emitted after the parent particle
     bool    LinkingOppositeDir = false; // false = random direction; otherwise particle is emitted in the opposite direction in respect to the LinkedTo particle
 
-    TH1D*   spectrum = 0; //energy spectrum
+    TH1D *  spectrum = nullptr; //energy spectrum
 
     GunParticleStruct * clone() const;
 
@@ -40,7 +40,7 @@ struct AParticleSourceRecord
     ~AParticleSourceRecord(); //deletes records in dynamic GunParticles
 
     QString name = "No_name";
-    int shape = 0;
+    int shape = 0;    // change to enum
     //position
     double X0 = 0;
     double Y0 = 0;
@@ -84,11 +84,13 @@ struct AParticleSourceRecord
 
     const QString getShapeString() const;
 
-    const QString CheckSource(const AMaterialParticleCollection & MpCollection) const; //return error description if error found
+    const QString checkSource(const AMaterialParticleCollection & MpCollection) const; //return error description if error found
 
-    //local variables, used in tracking, calculated autonatically, not to be loaded/saved!
-    int LimitedToMat; //automatically calculated if LimtedToMatName matches a material
-    bool fLimit = false;
+    void updateLimitedToMat(const AMaterialParticleCollection & MpCollection);
+
+    //runtime properties
+    int  LimitedToMat; //automatically calculated if LimtedToMatName matches a material
+    bool bLimitToMat = false;
 
 private:
     void clearGunParticles();

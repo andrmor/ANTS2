@@ -9,7 +9,7 @@
 #include <QObject>
 #include <QStringList>
 
-class GeneralSimSettings;
+class AGeneralSimSettings;
 class ATracerStateful;
 class AGeoObject;
 
@@ -36,7 +36,7 @@ public:
   void SetWave(bool wavelengthResolved, double waveFrom, double waveTo, double waveStep, int waveNodes);
 
   //hopefully we will get rid of the RandGen after update in NCrystal
-  void UpdateRuntimePropertiesAndWavelengthBinning(GeneralSimSettings *SimSet, TRandom2 *RandGen, int numThreads = 1);
+  void UpdateRuntimePropertiesAndWavelengthBinning(AGeneralSimSettings *SimSet, TRandom2 *RandGen, int numThreads = 1);
   const QString CheckOverrides();
   void updateRandomGenForThread(int ID, TRandom2 *RandGen);
 

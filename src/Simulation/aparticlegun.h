@@ -19,14 +19,10 @@ public:
     virtual void ReleaseResources() {}   //called after end of operation
     virtual bool GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles, int iEvent) = 0;
 
-    virtual void RemoveParticle(int particleId) = 0; //should NOT be used to remove one of particles in use! use onIsPareticleInUse first
-    virtual bool IsParticleInUse(int particleId, QString& SourceNames) const = 0;
-
-    virtual void writeToJson(QJsonObject &json) const = 0;
-    virtual bool readFromJson(const QJsonObject &json) = 0;
+    //virtual void RemoveParticle(int particleId) = 0; //should NOT be used to remove one of particles in use! use onIsPareticleInUse first
+    //virtual bool IsParticleInUse(int particleId, QString& SourceNames) const = 0;
 
     virtual void SetStartEvent(int) {} // for 'from file' generator
-
 
     const QString & GetErrorString() const {return ErrorString;}
     void            SetErrorString(const QString& str) {ErrorString = str;}

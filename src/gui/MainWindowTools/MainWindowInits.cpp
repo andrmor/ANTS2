@@ -77,13 +77,13 @@ MainWindow::MainWindow(DetectorClass *Detector,
     setWindowTitle("ANTS2_v"+mav+"."+miv);
 
     QString epff = GlobSet.ExamplesDir + "/ExampleParticlesFromFile.dat";
-    SimulationManager->FileParticleGenerator->SetFileName(epff);
+    SimulationManager->Settings.partSimSet.FileGenSettings.FileName = epff;
     updateFileParticleGeneratorGui();
 
     QString SPGtext = "gen.AddParticle(0, 120,    math.gauss(0, 25),  math.gauss(0, 25), -20,   0,0,1)\n"
                       "if (math.random() < 0.1)\n"
                       "      gen.AddParticle(0, 120,    math.gauss(0, 25),  math.gauss(0, 25), -20,   0,0,1)";
-    SimulationManager->ScriptParticleGenerator->SetScript(SPGtext);
+    SimulationManager->Settings.partSimSet.ScriptGenSettings.Script = SPGtext;
     QObject::connect(ui->pbStopScan, &QPushButton::clicked, SimulationManager->ScriptParticleGenerator, &AScriptParticleGenerator::abort);//[pg](){pg->abort();});
     updateScriptParticleGeneratorGui();
 
@@ -287,7 +287,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
      << ui->pbRefreshPMproperties << ui->pbUpdatePMproperties << ui->pbRefreshMaterials << ui->pbStopLoad
      << ui->pbIndPMshowInfo << ui->pbUpdateToFixedZ << ui->pbUpdateSimConfig
      << ui->pbUpdateToFullCustom << ui->pbElUpdateIndication << ui->pbUnlockGui << ui->fScanFloodTotProb
-     << ui->pbUpdateSourcesIndication << ui->prGeant
+     << ui->pbUpdateSourcesIndication << ui->prGeant << ui->pbCND_applyChanges
      << ui->sbPMtype << ui->fUpperLowerArrays << ui->sbPMtypeForGroup
      << ui->pbRebuildDetector << ui->fReloadRequired << ui->pbYellow << ui->pbGDML << ui->fGunMultipleEvents
      << ui->labPDEfactors_notAllUnity << ui->labSPEfactors_ActiveAndNotAllUnity << ui->pbGainsUpdateGUI;
@@ -350,8 +350,8 @@ MainWindow::MainWindow(DetectorClass *Detector,
     qDebug() << ">Init for Material Inspector window...";
     MIwindow->InitWindow();
 
-    qDebug() << ">Init for Remote sim/reconstruction window...";
-    RemoteWindow->ReadConfig();
+    //qDebug() << ">Init for Remote sim/reconstruction window...";
+    //RemoteWindow->ReadConfig();
 
     qDebug()<<">Showing geometry";
     GeometryWindow->show();

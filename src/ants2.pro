@@ -1,6 +1,6 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 4
-ANTS2_MINOR = 28
+ANTS2_MINOR = 31
 
 # !!! You may need to modify path for CERN ROOT, see #---CERN ROOT--- section below
 
@@ -228,8 +228,8 @@ ants2_NCrystal{
                 LIBS += -lNCrystal
 
             } else {
-                INCLUDEPATH += /home/andr/Work/NCrystal/include
-                LIBS += -L/home/andr/Work/NCrystal/lib/
+                INCLUDEPATH += /usr/local/include/NCrystal
+                LIBS += -L/usr/local/lib/
                 LIBS += -lNCrystal
             }
     }
@@ -277,7 +277,6 @@ SOURCES += main.cpp \
     common/jsonparser.cpp \
     common/CorrelationFilters.cpp \
     common/reconstructionsettings.cpp \
-    common/generalsimsettings.cpp \
     common/tmpobjhubclass.cpp \
     common/ajsontools.cpp \
     common/afiletools.cpp \
@@ -409,12 +408,16 @@ SOURCES += main.cpp \
     Simulation/alogsandstatisticsoptions.cpp \
     Reconstruction/areconstructionworker.cpp \
     common/ahistogram.cpp \
-    modules/apmdummystructure.cpp
+    modules/apmdummystructure.cpp \
+    SplineLibrary/Spline123/profileHist.cpp \
+    SplineLibrary/Spline123/json11.cpp \
+    SplineLibrary/Spline123/bspline123d.cpp \
+    SplineLibrary/Spline123/bsfit123.cpp \
+    scriptmode/afarm_si.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
     common/reconstructionsettings.h \
-    common/generalsimsettings.h \
     common/tmpobjhubclass.h \
     common/agammarandomgenerator.h \
     common/apositionenergyrecords.h \
@@ -564,7 +567,13 @@ HEADERS  += common/CorrelationFilters.h \
     Reconstruction/areconstructionworker.h \
     common/ahistogram.h \
     modules/apmanddummy.h \
-    modules/apmdummystructure.h
+    modules/apmdummystructure.h \
+    SplineLibrary/Spline123/profileHist.h \
+    SplineLibrary/Spline123/json11.hpp \
+    SplineLibrary/Spline123/eiquadprog.hpp \
+    SplineLibrary/Spline123/bspline123d.h \
+    SplineLibrary/Spline123/bsfit123.h \
+    scriptmode/afarm_si.h
 
 # --- SIM ---
 ants2_SIM {
@@ -589,7 +598,12 @@ ants2_SIM {
     Simulation/amaterialloader.cpp \
     Simulation/aparticlesourcesimulator.cpp \
     Simulation/asaveparticlestofilesettings.cpp \
-    Simulation/aphotonmodesettings.cpp
+    Simulation/aphotonsimsettings.cpp \
+    Simulation/ageneralsimsettings.cpp \
+    Simulation/asimsettings.cpp \
+    Simulation/aparticlesimsettings.cpp \
+    Simulation/aphotonnodedistributor.cpp \
+    Simulation/a3dposprob.cpp
 
     HEADERS  += Simulation/aphoton.h \
     Simulation/asimulationstatistics.h \
@@ -616,7 +630,12 @@ ants2_SIM {
     Simulation/amaterialloader.h \
     Simulation/aparticlesourcesimulator.h \
     Simulation/asaveparticlestofilesettings.h \
-    Simulation/aphotonmodesettings.h
+    Simulation/aphotonsimsettings.h \
+    Simulation/ageneralsimsettings.h \
+    Simulation/asimsettings.h \
+    Simulation/aparticlesimsettings.h \
+    Simulation/aphotonnodedistributor.h \
+    Simulation/a3dposprob.h
 }
 
 # --- GUI ---

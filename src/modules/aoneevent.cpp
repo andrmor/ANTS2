@@ -2,7 +2,7 @@
 #include "apmhub.h"
 #include "apmtype.h"
 #include "asimulationstatistics.h"
-#include "generalsimsettings.h"
+#include "ageneralsimsettings.h"
 #include "agammarandomgenerator.h"
 #include "acustomrandomsampling.h"
 
@@ -23,7 +23,7 @@ AOneEvent::~AOneEvent()
     delete GammaRandomGen;
 }
 
-void AOneEvent::configure(const GeneralSimSettings *simSet)
+void AOneEvent::configure(const AGeneralSimSettings *simSet)
 {
     SimSet = simSet;
     numPMs = PMs->count();

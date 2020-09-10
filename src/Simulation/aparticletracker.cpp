@@ -1,7 +1,7 @@
 #include "aparticletracker.h"
 #include "aeventtrackingrecord.h"
 #include "amaterialparticlecolection.h"
-#include "generalsimsettings.h"
+#include "ageneralsimsettings.h"
 #include "acompton.h"
 #include "atrackrecords.h"
 #include "aenergydepositioncell.h"
@@ -39,7 +39,7 @@ AParticleTracker::~AParticleTracker()
 }
 
 #include "aglobalsettings.h"
-void AParticleTracker::configure(const GeneralSimSettings* simSet, bool fbuildTracks, std::vector<TrackHolderClass *> * tracks, bool fRemoveEmptyTracks, int threadID)
+void AParticleTracker::configure(const AGeneralSimSettings* simSet, bool fbuildTracks, std::vector<TrackHolderClass *> * tracks, bool fRemoveEmptyTracks, int threadID)
 {
     SimSet = simSet;
     BuildTracks = fbuildTracks;

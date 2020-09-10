@@ -94,6 +94,7 @@ private:
   QString makeLinePropertiesString(AGeoObject *obj);
 signals:
   void ObjectSelectionChanged(const QString); // should be fired with empty string if selection does not contain a single item  
+  void RequestUpdateWorldSize(double WorldSizeXY, double WorldSizeZ, bool fWorldSizeFixed);
   void RequestRebuildDetector();
   void RequestHighlightObject(QString name);
   void RequestShowObjectRecursive(QString name);
@@ -151,7 +152,7 @@ private:
   void UpdateGui();
 
 public slots:
-  void onObjectSelectionChanged(const QString SelectedObject); //starts GUI update
+  void onObjectSelectionChanged(const QString SelectedObject); //starts GUI update  //why const? :)
   void onStartEditing();
   void onRequestChangeShape(AGeoShape * NewShape);
   //void OnCustomContextMenuTriggered_forMainObject(QPoint pos);
@@ -299,6 +300,30 @@ public slots:
 
 private slots:
     void onLocalShapeParameterChange() override;
+};
+
+class AWorldDelegate : public AGeoBaseDelegate
+{
+    Q_OBJECT
+
+public:
+    AWorldDelegate(const QStringList & materials, QWidget * ParentWidget);
+
+    QComboBox * cobMat = nullptr;
+    QCheckBox * cbFixedSize = nullptr;
+    QLineEdit * ledSizeXY = nullptr;
+    QLineEdit * ledSizeZ  = nullptr;
+
+    const QString getName() const override;
+    bool isValid(AGeoObject * obj) override;
+    void updateObject(AGeoObject * obj) const override;
+
+public slots:
+    void Update(const AGeoObject * obj) override;
+
+private slots:
+    void onContentChanged();
+
 };
 
 class AGeoTubeDelegate : public AGeoObjectDelegate

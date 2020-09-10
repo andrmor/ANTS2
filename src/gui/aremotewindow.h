@@ -23,9 +23,6 @@ public:
     explicit ARemoteWindow(MainWindow *MW);
     ~ARemoteWindow();
 
-    //save/load config
-    void WriteConfig();
-    void ReadConfig();
 
 public slots:
     void onBusy(bool flag);
@@ -33,9 +30,10 @@ public slots:
 private:
     MainWindow *MW;
     Ui::ARemoteWindow *ui;
-    AGridRunner* GR;
 
-    QVector<ARemoteServerRecord*> Records;
+    AGridRunner & GR;
+    QVector<ARemoteServerRecord*> & Records;
+
     QVector<AServerDelegate*> Delegates;
 
 private slots:
@@ -57,7 +55,7 @@ private slots:
 
 private:
     void Clear();
-    void AddNewServer(ARemoteServerRecord* record = 0);
+    void AddNewServerDelegate(ARemoteServerRecord* record);
 
 };
 

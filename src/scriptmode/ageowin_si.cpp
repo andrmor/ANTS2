@@ -189,7 +189,7 @@ void AGeoWin_SI::ShowTracks(int num, int OnlyColor)
   Detector->GeoManager->ClearTracks();
   if (SimManager->Tracks.empty()) return;
 
-  for (int iTr=0; iTr<SimManager->Tracks.size() && iTr<num; iTr++)
+  for (int iTr = 0; iTr < (int)SimManager->Tracks.size() && iTr < num; iTr++)
   {
       TrackHolderClass* th = SimManager->Tracks.at(iTr);
       TGeoTrack* track = new TGeoTrack(1, th->UserIndex);

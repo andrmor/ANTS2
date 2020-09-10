@@ -5,6 +5,8 @@
 #include <QByteArray>
 #include <QJsonObject>
 
+#include <QAbstractSocket>
+
 class QWebSocketServer;
 class QWebSocket;
 class QHostAddress;
@@ -50,10 +52,14 @@ private slots:
     void onNewConnection();
     void onTextMessageReceived(const QString &message);
     void onBinaryMessageReceived(const QByteArray &message);
+    void onBinaryFrameReceived(const QByteArray &frame, bool isLastFrame);
+    //void onError(QAbstractSocket::SocketError error);
+    //void onStateChanged(QAbstractSocket::SocketState state);
     void onSocketDisconnected();
 
 signals:
     void textMessageReceived(const QString &message);
+    void restartIdleTimer();
     void clientDisconnected();
     void closed();
     void reportToGUI(const QString& text);
@@ -71,6 +77,9 @@ private:
 
     bool bReplied = false;
     bool bRetranslateProgress = false;
+
+    int  Progress = 0;
+    int  NumFrames = 0;
 
 private:
     bool assureCanReply();

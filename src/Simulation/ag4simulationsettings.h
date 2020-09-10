@@ -37,7 +37,7 @@ public:
     bool  checkExecutableExists() const;
     bool  checkExecutablePermission() const;
 
-    const QString checkSensitiveVolumes() const;
+    const QString checkSensitiveVolumes() const;  // move to sim manager
 
 private:
     const QString getPath() const;

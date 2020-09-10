@@ -40,8 +40,8 @@ public:
   void writeAllToJarr(QJsonArray& jarr);
   void readAllFromJarr(AGeoObject *World, QJsonArray& jarr);
 
-  ATypeObject* ObjectType;
-  AGeoShape* Shape;
+  ATypeObject * ObjectType = nullptr;
+  AGeoShape   * Shape = nullptr;
 
   QString Name;
   int Material;
@@ -50,7 +50,7 @@ public:
   bool fLocked;
   bool fActive;
 
-  AGeoObject* Container;
+  AGeoObject * Container = nullptr;
   QList<AGeoObject*> HostedObjects;
 
   //visualization properties
@@ -186,6 +186,8 @@ class ATypeWorldObject : public ATypeObject
 {
 public:
     ATypeWorldObject() {Type = "World"; Handling = "Static";}
+
+    bool bFixedSize = false; // used by World delegate in GUI
 
     virtual void writeToJson(QJsonObject& json) { ATypeObject::writeToJson(json); }
     virtual void readFromJson(QJsonObject& ) {}

@@ -164,11 +164,14 @@ void ARootGraphRecord::SetMinimum(double min)
 {
     QMutexLocker locker(&Mutex);
 
-    if (Type == "TGraph")
+    TGraph * g = dynamic_cast<TGraph*>(Object);
+    //if (Type == "TGraph" || Type == "TGraphErrors")
+    if (g)
     {
-        TGraph* g = dynamic_cast<TGraph*>(Object);
-        if (g)
+        //TGraph* g = dynamic_cast<TGraph*>(Object);
+        //if (g)
             g->SetMinimum(min);
+        //    g->GetYaxis()->SetRangeUser(min, g->GetMaximum());
     }
 }
 

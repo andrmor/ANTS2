@@ -7,7 +7,7 @@
 #include "aconfiguration.h"
 #include "aglobalsettings.h"
 #include "amessage.h"
-
+#include "anetworkmodule.h"
 #include "ajsontools.h"
 
 #include <QPlainTextEdit>
@@ -16,29 +16,30 @@
 
 ARemoteWindow::ARemoteWindow(MainWindow *MW) :
     AGuiWindow("remote", MW),
-    MW(MW), ui(new Ui::ARemoteWindow)
+    MW(MW), ui(new Ui::ARemoteWindow),
+    GR(*MW->NetModule->GridRunner),
+    Records(GR.ServerRecords)
 {
     ui->setupUi(this);
 
     Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
     windowFlags |= Qt::WindowCloseButtonHint;
-    //windowFlags |= Qt::WindowStaysOnTopHint;
-    //windowFlags |= Qt::Tool;
     this->setWindowFlags( windowFlags );
 
     ui->lwServers->setViewMode(QListView::ListMode);
-    //ui->lwServers->setDragDropMode(QAbstractItemView::InternalMove);
-    //ui->lwServers->setDragEnabled(true);
     ui->lwServers->setSpacing(1);
     ui->twLog->clear();
 
-    AddNewServer();
+    if (Records.isEmpty()) Records << new ARemoteServerRecord();
+    for (ARemoteServerRecord * record : Records)
+        AddNewServerDelegate(record);
 
-    GR = new AGridRunner(Records, *MW->EventsDataHub, *MW->PMs);
-    GR->SetTimeout(ui->leiTimeout->text().toInt());
-    QObject::connect(GR, &AGridRunner::requestTextLog, this, &ARemoteWindow::onTextLogReceived/*, Qt::QueuedConnection*/);
-    QObject::connect(GR, &AGridRunner::requestStatusLog, this, &ARemoteWindow::onStatusLogReceived/*, Qt::QueuedConnection*/);
-    QObject::connect(GR, &AGridRunner::requestDelegateGuiUpdate, this, &ARemoteWindow::onGuiUpdate/*, Qt::QueuedConnection*/);
+    GR.SetTimeout(ui->leiTimeout->text().toInt());
+    QObject::connect(&GR, &AGridRunner::requestTextLog, this, &ARemoteWindow::onTextLogReceived/*, Qt::QueuedConnection*/);
+    QObject::connect(&GR, &AGridRunner::requestStatusLog, this, &ARemoteWindow::onStatusLogReceived/*, Qt::QueuedConnection*/);
+    QObject::connect(&GR, &AGridRunner::requestDelegateGuiUpdate, this, &ARemoteWindow::onGuiUpdate/*, Qt::QueuedConnection*/);
+
+    connect(&GR, &AGridRunner::notifySimulationFinished, MW, &MainWindow::onGridSimulationFinished);
 
     QIntValidator* intVal = new QIntValidator(this);
     intVal->setRange(1, 100000000);
@@ -50,42 +51,7 @@ ARemoteWindow::ARemoteWindow(MainWindow *MW) :
 ARemoteWindow::~ARemoteWindow()
 {
     Clear();
-
-    delete GR;
     delete ui;
-}
-
-void ARemoteWindow::WriteConfig()
-{
-    QJsonObject json;
-
-    json["Timeout"] = ui->leiTimeout->text().toInt();
-    QJsonArray ar;
-        for (ARemoteServerRecord* r : Records) ar << r->WriteToJson();
-    json["Servers"] = ar;
-
-    MW->GlobSet.RemoteServers = json;
-}
-
-void ARemoteWindow::ReadConfig()
-{
-    QJsonObject& json = MW->GlobSet.RemoteServers;
-    if (json.isEmpty()) return;
-
-    Clear();
-    JsonToLineEditInt(json, "Timeout", ui->leiTimeout);
-    GR->SetTimeout(ui->leiTimeout->text().toInt());
-
-    QJsonArray ar = json["Servers"].toArray();
-    for (int i=0; i<ar.size(); i++)
-    {
-        ARemoteServerRecord* record = new ARemoteServerRecord();
-
-        QJsonObject js = ar.at(i).toObject();
-        record->ReadFromJson(js);
-
-        AddNewServer(record);
-    }
 }
 
 void ARemoteWindow::onBusy(bool flag)
@@ -93,17 +59,14 @@ void ARemoteWindow::onBusy(bool flag)
     flag = !flag;
     ui->pbAdd->setEnabled(flag);
     ui->pbRemove->setEnabled(flag);
-    //ui->lwServers->setEnabled(flag);
     ui->pbStatus->setEnabled(flag);
     ui->pbSimulate->setEnabled(flag);
     ui->pbReconstruct->setEnabled(flag);
     ui->pbRateServers->setEnabled(flag);
 }
 
-void ARemoteWindow::AddNewServer(ARemoteServerRecord* record)
+void ARemoteWindow::AddNewServerDelegate(ARemoteServerRecord * record)
 {
-    if (!record) record = new ARemoteServerRecord();
-    Records << record;
     AServerDelegate* delegate = new AServerDelegate(record);
     Delegates << delegate;
 
@@ -121,7 +84,9 @@ void ARemoteWindow::AddNewServer(ARemoteServerRecord* record)
 
 void ARemoteWindow::on_pbAdd_clicked()
 {
-    AddNewServer();
+    ARemoteServerRecord * rec = new ARemoteServerRecord();
+    Records << rec;
+    AddNewServerDelegate(rec);
 }
 
 void ARemoteWindow::onUpdateSizeHint(AServerDelegate* d)
@@ -143,9 +108,6 @@ void ARemoteWindow::Clear()
 {
     for (AServerDelegate* d : Delegates) delete d;
     Delegates.clear();
-
-    for (ARemoteServerRecord* r : Records) delete r;
-    Records.clear();
 
     ui->lwServers->clear();
     ui->twLog->clear();
@@ -180,10 +142,10 @@ void ARemoteWindow::onNameWasChanged()
 
 void ARemoteWindow::on_pbStatus_clicked()
 {
-    WriteConfig();
+    GR.writeConfig();
 
     onBusy(true);
-    QString err = GR->CheckStatus();
+    QString err = GR.CheckStatus();
     onBusy(false);
 
     if (!err.isEmpty()) message(err, this);
@@ -199,32 +161,35 @@ void ARemoteWindow::on_pbStatus_clicked()
 #include "outputwindow.h"
 void ARemoteWindow::on_pbSimulate_clicked()
 {
-    WriteConfig();
+    GR.writeConfig();
 
     onBusy(true);
-    QString err = GR->Simulate(&MW->Config->JSON);
+    MW->writeSimSettingsToJson(MW->Config->JSON);
+    QString err = GR.Simulate(&MW->Config->JSON);
     onBusy(false);
 
     if (!err.isEmpty())
         message(err, this);
 
+    /*
     MW->Owindow->RefreshData();
     MW->Rwindow->OnEventsDataAdded();
     MW->Rwindow->ShowPositions(1, true);
+    */
 }
 
 void ARemoteWindow::on_pbReconstruct_clicked()
 {
-    WriteConfig();
+    GR.writeConfig();
 
     onBusy(true);
-    GR->Reconstruct(&MW->Config->JSON);
+    GR.Reconstruct(&MW->Config->JSON);
     onBusy(false);
 }
 
 void ARemoteWindow::on_pbRateServers_clicked()
 {
-    WriteConfig();
+    GR.writeConfig();
 
     const QString DefDet = MW->GlobSet.ExamplesDir + "/StartupDetector.json";
     QJsonObject js;
@@ -245,7 +210,7 @@ void ARemoteWindow::on_pbRateServers_clicked()
     js["SimulationConfig"] = sc;
 
     onBusy(true);
-    QString err = GR->RateServers(&js);
+    QString err = GR.RateServers(&js);
     onBusy(false);
 
     if (!err.isEmpty())
@@ -257,7 +222,7 @@ void ARemoteWindow::on_pbRateServers_clicked()
 
 void ARemoteWindow::on_leiTimeout_editingFinished()
 {
-    GR->SetTimeout(ui->leiTimeout->text().toInt());
+    GR.SetTimeout(ui->leiTimeout->text().toInt());
 }
 
 void ARemoteWindow::on_pbRemove_clicked()
@@ -283,6 +248,6 @@ void ARemoteWindow::on_pbRemove_clicked()
 
 void ARemoteWindow::on_pbAbort_clicked()
 {
-    GR->Abort();
+    GR.Abort();
     onStatusLogReceived("Aborted!");
 }

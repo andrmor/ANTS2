@@ -30,7 +30,6 @@ class MaterialInspectorWindow;
 class OutputWindow;
 class QComboBox;
 class TH1D;
-class TH1I;
 class WindowNavigatorClass;
 class GlobalSettingsWindowClass;
 class GainEvaluatorWindowClass;
@@ -196,10 +195,12 @@ public slots:
     void updateLoaded(int events, int progress);
     void on_pbSingleSourceShow_clicked();
     void ShowGeometrySlot();
+    void onGridSimulationFinished();
 
 private slots:
     void updateFileParticleGeneratorGui();
     void updateScriptParticleGeneratorGui();
+    void updateConfig();
 
     void on_pbRefreshMaterials_clicked();
     void on_cbXbyYarray_stateChanged(int arg1);
@@ -326,7 +327,7 @@ private:
     bool TriggerForbidden = false;
     bool BulkUpdate = false;
 
-    TH1I* histScan = 0;
+    TH1D * histScan = nullptr;
 
 public:
     bool ShutDown = false; //when exiting ANTS2 by closing the main window
@@ -596,8 +597,6 @@ private slots:
 
     void on_pbAddmaterialFromLibrary_clicked();
 
-    void on_cobGenerateFromFile_FileFormat_currentIndexChanged(int index);
-
     void on_lwFileStatistics_customContextMenuRequested(const QPoint &pos);
 
     void on_twSourcePhotonsParticles_currentChanged(int index);
@@ -609,6 +608,20 @@ private slots:
     void on_pbFilePreview_clicked();
 
     void on_cobNodeGenerationMode_customContextMenuRequested(const QPoint &pos);
+
+    void on_cobCND_Mode_currentIndexChanged(int index);
+
+    void on_pbCND_applyChanges_clicked();
+
+    void on_pbCND_ShowMatrix_clicked();
+
+    void on_pbCND_LoadMatrix_clicked();
+
+    void on_pbCND_ShowSpline_clicked();
+
+    void on_pbCND_LoadSpline_clicked();
+
+    void on_pbCND_help_clicked();
 
 public slots:
     void on_pbRebuildDetector_clicked();
@@ -629,6 +642,8 @@ private:
     void showPDEorSPEfactors(bool bShowPDE);
     void randomizePDEorSPEfactors(bool bDoPDE, bool bUniform, double min, double max, double mean, double sigma);
     void updateG4ProgressBarVisibility();
+    void applyCNDchanges();
+    void updateCNDgui();
 
 #ifdef __USE_ANTS_PYTHON__
     void createPythonScriptWindow();

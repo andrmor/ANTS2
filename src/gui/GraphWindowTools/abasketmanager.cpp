@@ -138,6 +138,21 @@ void ABasketManager::add(const QString & name, const QVector<ADrawObject> & draw
         }
     }
 
+    // it is convinient if title-less objects will be named the same as their basket entry - less problems with a TLegend
+    if (item.DrawObjects.size() > 0)
+    {
+        TNamed * named = dynamic_cast<TNamed*>(item.DrawObjects.first().Pointer);
+        if (named)
+        {
+            const TString title = named->GetTitle();
+            if (title == "")
+            {
+                named->SetTitle(name.toLatin1().data());
+                if (item.Name.isEmpty()) item.Name = name;
+            }
+        }
+    }
+
     Basket << item;
 }
 
@@ -243,6 +258,19 @@ const QString ABasketManager::getName(int index) const
 void ABasketManager::rename(int index, const QString & newName)
 {
     if (index < 0 || index >= Basket.size()) return;
+
+    // it is convinient if title-less objects are named the same as their basket entry - less problems with a TLegend
+    if (Basket[index].DrawObjects.size() > 0)
+    {
+        TNamed * named = dynamic_cast<TNamed*>(Basket[index].DrawObjects.first().Pointer);
+        if (named)
+        {
+            const TString title = named->GetTitle();
+            if (title == Basket[index].Name)
+                named->SetTitle(newName.toLatin1().data());
+        }
+    }
+
     Basket[index].Name = newName;
 }
 

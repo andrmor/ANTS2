@@ -1,9 +1,9 @@
-#include "generalsimsettings.h"
+#include "ageneralsimsettings.h"
 #include "ajsontools.h"
 
 #include <QDebug>
 
-bool GeneralSimSettings::readFromJson(const QJsonObject & Json)
+bool AGeneralSimSettings::readFromJson(const QJsonObject & Json)
 {
   if (!Json.contains("GeneralSimConfig"))
   {
@@ -94,7 +94,7 @@ bool GeneralSimSettings::readFromJson(const QJsonObject & Json)
   return true;
 }
 
-bool GeneralSimSettings::writeToJson(QJsonObject & Json) const
+bool AGeneralSimSettings::writeToJson(QJsonObject & Json) const
 {
     QJsonObject json;
 
@@ -195,4 +195,6 @@ bool GeneralSimSettings::writeToJson(QJsonObject & Json) const
     }
 
     Json["GeneralSimConfig"] = json;
+
+    return true;
 }

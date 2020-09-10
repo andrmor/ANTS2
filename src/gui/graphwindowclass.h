@@ -129,6 +129,7 @@ public:
                               Color_t LineColor=2,   int LineStyle=1,    int LineWidth=2);
 
     void AddLine(double x1, double y1, double x2, double y2, int color, int width, int style);
+    void AddArrow(double x1, double y1, double x2, double y2, int color, int width, int style);
 
     void OnBusyOn();
     void OnBusyOff();
@@ -262,6 +263,8 @@ private slots:
 
     void on_pbManipulate_clicked();
 
+    void on_cbShowCross_toggled(bool checked);
+
 private:
     MainWindow *MW;
     Ui::GraphWindowClass *ui;
@@ -307,6 +310,7 @@ private:
     void updateSecondaryAxis(TGaxis *gaxis, const char *opt);
     void showHintInStatus();
     void setShowCursorPosition(bool flag);
+    void fixGraphFrame();
 };
 
 #endif // GRAPHWINDOWCLASS_H

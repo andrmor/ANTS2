@@ -3,8 +3,7 @@
 
 #include "aparticlegun.h"
 
-#include <QString>
-
+class AScriptGenSettings;
 class AMaterialParticleCollection;
 class TRandom2;
 class QScriptEngine;
@@ -14,21 +13,12 @@ class AMath_SI;
 class AScriptParticleGenerator : public AParticleGun
 {
 public:
-    AScriptParticleGenerator(const AMaterialParticleCollection& MpCollection, TRandom2 *RandGen, int ThreadID, const int * NumRunningThreads);
+    AScriptParticleGenerator(const AScriptGenSettings & Settings, const AMaterialParticleCollection & MpCollection, TRandom2 & RandGen); //, int ThreadID, const int * NumRunningThreads);
     virtual ~AScriptParticleGenerator();
 
-    void SetScript(const QString& script) {Script = script;}
-    const QString& GetScript() const {return Script;}
-
-    virtual bool Init() override;               //called before first use
+    virtual bool Init() override;                   //called before first use
     //virtual void ReleaseResources() override {}   //called after end of operation
     virtual bool GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles, int iEvent) override;
-
-    virtual void RemoveParticle(int) override {} //should NOT be used to remove one of particles in use! use onIsPareticleInUse first
-    virtual bool IsParticleInUse(int particleId, QString& SourceNames) const override;
-
-    virtual void writeToJson(QJsonObject& json) const override;
-    virtual bool readFromJson(const QJsonObject& json) override;
 
     void SetProcessInterval(int msOrMinus1) {processInterval = msOrMinus1;}
 
@@ -36,16 +26,17 @@ public slots:
     virtual void abort() override;
 
 private:
+    const AScriptGenSettings          & Settings;
     const AMaterialParticleCollection & MpCollection;
-    TRandom2 * RandGen;
-    int ThreadId = 0;
-    const int * NumRunningThreads;
+    TRandom2                          & RandGen;
 
-    QString Script;
-    QScriptEngine * ScriptEngine = 0;  // creates only on Init - only if from script mode was selected!
-                                       //TODO make external (e.g. Simulator class can host it for sim)
-    AParticleGenerator_SI * ScriptInterface = 0; // creates only on Init - only if from script mode was selected!
-    AMath_SI * mathInterface = 0; // creates only on Init - only if from script mode was selected!
+    //int ThreadId = 0;
+    //const int * NumRunningThreads;
+
+    QScriptEngine         * ScriptEngine    = nullptr;  // creates only on Init - only if from script mode was selected!
+                                                        //TODO make external (e.g. Simulator class can host it for sim)
+    AParticleGenerator_SI * ScriptInterface = nullptr;  // creates only on Init - only if from script mode was selected!
+    AMath_SI              * mathInterface   = nullptr;  // creates only on Init - only if from script mode was selected!
 
     int processInterval = -1; //ms; if -1 processing of events during evaluation is disabled
 };

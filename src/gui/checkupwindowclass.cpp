@@ -6,7 +6,7 @@
 #include "apmhub.h"
 #include "apmtype.h"
 #include "materialinspectorwindow.h"
-#include "generalsimsettings.h"
+#include "ageneralsimsettings.h"
 #include "asourceparticlegenerator.h"
 #include "aglobalsettings.h"
 #include "aparticlesourcerecord.h"
@@ -190,7 +190,7 @@ TriState CheckUpWindowClass::CheckPMs()
        // Andr:  changed flag reads -> use general sim config
     QJsonObject json;
     MW->SimGeneralConfigToJson(json);
-    GeneralSimSettings SimSet;
+    AGeneralSimSettings SimSet;
     SimSet.readFromJson(json);
 
     //if(!MW->PMs || !MW->WavelengthResolved) ui->pmtsTable->hideColumn(1);
@@ -221,6 +221,7 @@ TriState CheckUpWindowClass::CheckPMs()
     return setTabState(2, checkTable(ui->pmtsTable, true));
 }
 
+#include "aparticlesimsettings.h"
 TriState CheckUpWindowClass::CheckInteractions()
 {
     ui->listInteraction->clear();
@@ -242,15 +243,17 @@ TriState CheckUpWindowClass::CheckInteractions()
     int listIndex = ui->listInteraction->count();
 
     //Check all particle sources: if links are valid, if interaction data for a given energy is available
-    for(int i = 0; i < MW->SimulationManager->ParticleSources->countSources(); i++)
+    //for (int i = 0; i < MW->SimulationManager->ParticleSources->countSources(); i++)
+    for (int i = 0; i < MW->SimulationManager->Settings.partSimSet.SourceGenSettings.getNumSources(); i++)
     {
-        AParticleSourceRecord* source = MW->SimulationManager->ParticleSources->getSource(i);
+        //AParticleSourceRecord* source = MW->SimulationManager->ParticleSources->getSource(i);
+        const AParticleSourceRecord * source = MW->SimulationManager->Settings.partSimSet.SourceGenSettings.getSourceRecord(i);
         int sourceParticleCount = source->GunParticles.size();
 
         //Loop over all GunParticles
         for(int j = 0; j < sourceParticleCount; j++)
         {
-            GunParticleStruct *part = source->GunParticles[j];
+            const GunParticleStruct * part = source->GunParticles[j];
             const QString partname = Detector->MpCollection->getParticleName(part->ParticleId);
 
             //Check energy range

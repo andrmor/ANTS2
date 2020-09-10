@@ -129,7 +129,6 @@ void AGeoTreeWidget::UpdateGui(QString selected)
       //qDebug() << currentItem()->text(0);
       selected = currentItem()->text(0);
   }
-
   clear();
 
   //World
@@ -141,8 +140,6 @@ void AGeoTreeWidget::UpdateGui(QString selected)
   w->setSizeHint(0, QSize(50, 20));
   w->setFlags(w->flags() & ~Qt::ItemIsDragEnabled);// & ~Qt::ItemIsSelectable);
   //w->setBackgroundColor(0, BackgroundColor);
-  //w->setSizeHint(0, QSize(50,50));
-
   //qDebug() << "New world WidgetItem created";
 
   populateTreeWidget(w, World);
@@ -151,7 +148,7 @@ void AGeoTreeWidget::UpdateGui(QString selected)
     updateExpandState(this->topLevelItem(0));
 
   if (!selected.isEmpty())
-    {
+  {
       //qDebug() << "Selection:"<<selected;
       QList<QTreeWidgetItem*> list = findItems(selected, Qt::MatchExactly | Qt::MatchRecursive);
       //qDebug() << list.size();
@@ -163,7 +160,6 @@ void AGeoTreeWidget::UpdateGui(QString selected)
         }
   }
 }
-
 
 void AGeoTreeWidget::onGridReshapeRequested(QString objName)
 {
@@ -634,12 +630,12 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
   addUpperLGA->setEnabled(!World->containsUpperLightGuide());
   addLoweLGA->setEnabled(!World->containsLowerLightGuide());
 
-  if (selected.size() == 0)
-    { //menu triggered without selected items            
-    }
+  QString objName;
+  if      (selected.size() == 0) objName = "World"; // no object selected
   else if (selected.size() == 1)
-    { //menu triggered with only one selected item
-      AGeoObject* obj = World->findObjectByName(selected.first()->text(0));
+  { //menu triggered with only one selected item
+      objName = selected.first()->text(0);
+      AGeoObject* obj = World->findObjectByName(objName);
       if (!obj) return;
       const ATypeObject& ObjectType = *obj->ObjectType;
 
@@ -669,61 +665,61 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
       showA->setEnabled(true);
       showAonly->setEnabled(true);
       showAdown->setEnabled(true);
-    }
+  }
   else if (!selected.first()->font(0).bold())
-    { //menu triggered with several items selected, and they are not slabs
+  { //menu triggered with several items selected, and they are not slabs
       removeA->setEnabled(true); //world cannot be in selection with anything else anyway
       lockA->setEnabled(true);
       unlockA->setEnabled(true);
       groupA->setEnabled(true);
       stackA->setEnabled(true);
-    }
+  }
 
   QAction* SelectedAction = menu.exec(mapToGlobal(pos));
   if (!SelectedAction) return; //nothing was selected
 
   // -- EXECUTE SELECTED ACTION --
   if (SelectedAction == showA)  // SHOW OBJECT
-     ShowObject(selected.first()->text(0));
+     ShowObject(objName);
   else if (SelectedAction == showAonly)
-      ShowObjectOnly(selected.first()->text(0));
+     ShowObjectOnly(objName);
   else if (SelectedAction == showAdown)
-      ShowObjectRecursive(selected.first()->text(0));
+     ShowObjectRecursive(objName);
   else if (SelectedAction == lineA) // SET LINE ATTRIBUTES
-     SetLineAttributes(selected.first()->text(0));
+     SetLineAttributes(objName);
   else if (SelectedAction == enableDisableA)
-     menuActionEnableDisable(selected.first()->text(0));
+     menuActionEnableDisable(objName);
   // ADD NEW OBJECT
-  else if (SelectedAction == newBox)         menuActionAddNewObject(selected.first()->text(0), new AGeoBox());
-  else if (SelectedAction == newTube)        menuActionAddNewObject(selected.first()->text(0), new AGeoTube());
-  else if (SelectedAction == newTubeSegment) menuActionAddNewObject(selected.first()->text(0), new AGeoTubeSeg());
-  else if (SelectedAction == newTubeSegCut)  menuActionAddNewObject(selected.first()->text(0), new AGeoCtub());
-  else if (SelectedAction == newTubeElli)    menuActionAddNewObject(selected.first()->text(0), new AGeoEltu());
-  else if (SelectedAction == newTrapSim)     menuActionAddNewObject(selected.first()->text(0), new AGeoTrd1());
-  else if (SelectedAction == newTrap)        menuActionAddNewObject(selected.first()->text(0), new AGeoTrd2());
-  else if (SelectedAction == newPcon)        menuActionAddNewObject(selected.first()->text(0), new AGeoPcon());
-  else if (SelectedAction == newPgonSim)     menuActionAddNewObject(selected.first()->text(0), new AGeoPolygon());
-  else if (SelectedAction == newPgon)        menuActionAddNewObject(selected.first()->text(0), new AGeoPgon());
-  else if (SelectedAction == newPara)        menuActionAddNewObject(selected.first()->text(0), new AGeoPara());
-  else if (SelectedAction == newSphere)      menuActionAddNewObject(selected.first()->text(0), new AGeoSphere());
-  else if (SelectedAction == newCone)        menuActionAddNewObject(selected.first()->text(0), new AGeoCone());
-  else if (SelectedAction == newConeSeg)     menuActionAddNewObject(selected.first()->text(0), new AGeoConeSeg());
-  else if (SelectedAction == newTor)         menuActionAddNewObject(selected.first()->text(0), new AGeoTorus());
-  else if (SelectedAction == newParabol)     menuActionAddNewObject(selected.first()->text(0), new AGeoParaboloid());
-  else if (SelectedAction == newArb8)        menuActionAddNewObject(selected.first()->text(0), new AGeoArb8());
+  else if (SelectedAction == newBox)         menuActionAddNewObject(objName, new AGeoBox());
+  else if (SelectedAction == newTube)        menuActionAddNewObject(objName, new AGeoTube());
+  else if (SelectedAction == newTubeSegment) menuActionAddNewObject(objName, new AGeoTubeSeg());
+  else if (SelectedAction == newTubeSegCut)  menuActionAddNewObject(objName, new AGeoCtub());
+  else if (SelectedAction == newTubeElli)    menuActionAddNewObject(objName, new AGeoEltu());
+  else if (SelectedAction == newTrapSim)     menuActionAddNewObject(objName, new AGeoTrd1());
+  else if (SelectedAction == newTrap)        menuActionAddNewObject(objName, new AGeoTrd2());
+  else if (SelectedAction == newPcon)        menuActionAddNewObject(objName, new AGeoPcon());
+  else if (SelectedAction == newPgonSim)     menuActionAddNewObject(objName, new AGeoPolygon());
+  else if (SelectedAction == newPgon)        menuActionAddNewObject(objName, new AGeoPgon());
+  else if (SelectedAction == newPara)        menuActionAddNewObject(objName, new AGeoPara());
+  else if (SelectedAction == newSphere)      menuActionAddNewObject(objName, new AGeoSphere());
+  else if (SelectedAction == newCone)        menuActionAddNewObject(objName, new AGeoCone());
+  else if (SelectedAction == newConeSeg)     menuActionAddNewObject(objName, new AGeoConeSeg());
+  else if (SelectedAction == newTor)         menuActionAddNewObject(objName, new AGeoTorus());
+  else if (SelectedAction == newParabol)     menuActionAddNewObject(objName, new AGeoParaboloid());
+  else if (SelectedAction == newArb8)        menuActionAddNewObject(objName, new AGeoArb8());
   //ADD NEW COMPOSITE
   else if (SelectedAction == newCompositeA)
-     menuActionAddNewComposite(selected.first()->text(0));
+     menuActionAddNewComposite(objName);
   else if (SelectedAction == newArrayA) //ADD NEW COMPOSITE
-     menuActionAddNewArray(selected.first()->text(0));
+     menuActionAddNewArray(objName);
   else if (SelectedAction == newGridA) //ADD NEW GRID
-     menuActionAddNewGrid(selected.first()->text(0));
+     menuActionAddNewGrid(objName);
   else if (SelectedAction == newMonitorA) //ADD NEW MONITOR
-     menuActionAddNewMonitor(selected.first()->text(0));
+     menuActionAddNewMonitor(objName);
   else if (SelectedAction == addUpperLGA || SelectedAction == addLoweLGA) // ADD LIGHTGUIDE
      addLightguide(SelectedAction == addUpperLGA);
   else if (SelectedAction == copyA) // COPY OBJECT
-     menuActionCopyObject(selected.first()->text(0));
+     menuActionCopyObject(objName);
   else if (SelectedAction == groupA || SelectedAction == stackA) //GROUP & STACK
     {
       int option = (SelectedAction == groupA) ? 0 : 1;
@@ -734,15 +730,15 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
   else if (SelectedAction == unlockA) // UNLOCK
      menuActionUnlock();
   else if (SelectedAction == lockallA) // LOCK OBJECTS INSIDE
-     menuActionLockAllInside(selected.first()->text(0));
+     menuActionLockAllInside(objName);
   else if (SelectedAction == unlockallA)
-     menuActionUnlockAllInside(selected.first()->text(0));
+     menuActionUnlockAllInside(objName);
   else if (SelectedAction == removeA) // REMOVE
      menuActionRemove();
   else if (SelectedAction == removeThisAndHostedA) // REMOVE RECURSIVLY
-     menuActionRemoveRecursively(selected.first()->text(0));
+     menuActionRemoveRecursively(objName);
   else if (SelectedAction == removeHostedA) // REMOVE HOSTED
-      menuActionRemoveHostedObjects(selected.first()->text(0));
+      menuActionRemoveHostedObjects(objName);
 }
 
 void AGeoTreeWidget::onItemClicked()
@@ -1399,10 +1395,12 @@ void AGeoWidget::UpdateGui()
     pbConfirm->setEnabled(true);
     pbCancel->setEnabled(true);
 
-    AGeoObject* contObj = CurrentObject->Container;
-    if (!contObj) return; //true only for World
+    //AGeoObject* contObj = CurrentObject->Container;
+    //if (!contObj) return; //true only for World
 
-    if (CurrentObject->ObjectType->isSlab())        // SLAB or LIGHTGUIDE
+    if (CurrentObject->ObjectType->isWorld())
+        GeoDelegate = new AWorldDelegate(tw->Sandwich->Materials, this);
+    else if (CurrentObject->ObjectType->isSlab())        // SLAB or LIGHTGUIDE
         GeoDelegate = createAndAddSlabDelegate();
     else if (CurrentObject->ObjectType->isGridElement())
         GeoDelegate = createAndAddGridElementDelegate();
@@ -1503,19 +1501,19 @@ AGeoBaseDelegate *AGeoWidget::createAndAddMonitorDelegate()
 
 void AGeoWidget::onObjectSelectionChanged(const QString SelectedObject)
 {  
-  CurrentObject = 0;
-  //qDebug() << "Object selection changed! ->" << SelectedObject;
-  ClearGui();
+    CurrentObject = nullptr;
+    //qDebug() << "Object selection changed! ->" << SelectedObject;
+    ClearGui();
 
-  AGeoObject* obj = World->findObjectByName(SelectedObject);
-  if (!obj) return;
+    AGeoObject* obj = World->findObjectByName(SelectedObject);
+    if (!obj) return;
 
-  if (obj->ObjectType->isWorld()) return;
+    //if (obj->ObjectType->isWorld()) return;
 
-  CurrentObject = obj;
-  //qDebug() << "New current object:"<<CurrentObject->Name;
-  UpdateGui();
-  //qDebug() << "OnObjectSelection procedure completed";
+    CurrentObject = obj;
+    //qDebug() << "New current object:"<<CurrentObject->Name;
+    UpdateGui();
+    //qDebug() << "OnObjectSelection procedure completed";
 }
 
 void AGeoWidget::onStartEditing()
@@ -1691,6 +1689,17 @@ void AGeoWidget::onConfirmPressed()
     if (!ok) return;
 
     GeoDelegate->updateObject(CurrentObject);
+
+    AWorldDelegate * del = dynamic_cast<AWorldDelegate*>(GeoDelegate);
+    if (del)
+    {
+        AGeoBox * box = static_cast<AGeoBox*>(World->Shape);
+        double WorldSizeXY = box->dx;
+        double WorldSizeZ  = box->dz;
+        ATypeWorldObject * typeWorld = static_cast<ATypeWorldObject *>(World->ObjectType);
+        bool fWorldSizeFixed = typeWorld->bFixedSize;
+        emit tw->RequestUpdateWorldSize(WorldSizeXY, WorldSizeZ, fWorldSizeFixed);
+    }
 
     exitEditingMode();
     QString name = CurrentObject->Name;
@@ -4406,3 +4415,120 @@ QString AGeoTreeWidget::makeLinePropertiesString(AGeoObject *obj)
             QString::number(obj->style) + " )";
 }
 
+AWorldDelegate::AWorldDelegate(const QStringList & materials, QWidget * ParentWidget) :
+    AGeoBaseDelegate(ParentWidget)
+{
+    QFrame * frMainFrame = new QFrame();
+    frMainFrame->setFrameShape(QFrame::Box);
+
+    Widget = frMainFrame;
+    Widget->setContextMenuPolicy(Qt::CustomContextMenu);
+
+    QPalette palette = frMainFrame->palette();
+    palette.setColor( Widget->backgroundRole(), QColor( 255, 255, 255 ) );
+    frMainFrame->setPalette( palette );
+    frMainFrame->setAutoFillBackground( true );
+
+    QVBoxLayout * lMF = new QVBoxLayout();
+      lMF->setContentsMargins(5,5,5,2);
+
+      QLabel * labType = new QLabel("World");
+      labType->setAlignment(Qt::AlignCenter);
+      QFont font = labType->font();
+      font.setBold(true);
+      labType->setFont(font);
+      lMF->addWidget(labType);
+
+      QHBoxLayout* hl = new QHBoxLayout();
+        hl->setContentsMargins(2,0,2,0);
+
+        QLabel * lMat = new QLabel();
+        lMat->setText("Material:");
+        lMat->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+        lMat->setMaximumWidth(60);
+        hl->addWidget(lMat);
+
+        cobMat = new QComboBox();
+        cobMat->setContextMenuPolicy(Qt::NoContextMenu);
+        cobMat->addItems(materials);
+        //connect(cobMat, &QComboBox::activated, this, &AWorldDelegate::onContentChanged);
+        connect(cobMat, SIGNAL(activated(int)), this, SLOT(onContentChanged()));
+        cobMat->setMinimumWidth(120);
+        hl->addWidget(cobMat);
+      lMF->addLayout(hl);
+
+      QHBoxLayout * h = new QHBoxLayout();
+            h->addStretch();
+            cbFixedSize = new QCheckBox("Fixed size");
+            connect(cbFixedSize, &QCheckBox::clicked, this, &AWorldDelegate::onContentChanged);
+            h->addWidget(cbFixedSize);
+
+            QVBoxLayout * v1 = new QVBoxLayout();
+                v1->setContentsMargins(2,0,2,0);
+                v1->addWidget(new QLabel("Size XY:"));
+                v1->addWidget(new QLabel("Size Z:"));
+            h->addLayout(v1);
+
+            QVBoxLayout * v2 = new QVBoxLayout();
+                v2->setContentsMargins(2,0,2,0);
+                ledSizeXY = new QLineEdit();
+                connect(ledSizeXY, &QLineEdit::textChanged, this, &AWorldDelegate::onContentChanged);
+                v2->addWidget(ledSizeXY);
+                ledSizeZ  = new QLineEdit();
+                connect(ledSizeZ, &QLineEdit::textChanged, this, &AWorldDelegate::onContentChanged);
+                v2->addWidget(ledSizeZ);
+            h->addLayout(v2);
+            h->addStretch();
+    lMF->addLayout(h);
+
+    frMainFrame->setLayout(lMF);
+
+    QDoubleValidator* dv = new QDoubleValidator(this);
+    dv->setNotation(QDoubleValidator::ScientificNotation);
+    ledSizeXY->setValidator(dv);
+    ledSizeZ->setValidator(dv);
+}
+
+const QString AWorldDelegate::getName() const
+{
+    return "World";
+}
+
+bool AWorldDelegate::isValid(AGeoObject *)
+{
+    return true;
+}
+
+void AWorldDelegate::updateObject(AGeoObject * obj) const
+{
+    obj->Material = cobMat->currentIndex();
+    if (obj->Material == -1) obj->Material = 0; //protection
+
+    AGeoBox * box = static_cast<AGeoBox*>(obj->Shape);
+    box->dx = 0.5 * ledSizeXY->text().toDouble();
+    box->dz = 0.5 * ledSizeZ->text().toDouble();
+    ATypeWorldObject * typeWorld = static_cast<ATypeWorldObject *>(obj->ObjectType);
+    typeWorld->bFixedSize = cbFixedSize->isChecked();
+}
+
+void AWorldDelegate::Update(const AGeoObject *obj)
+{
+    int imat = obj->Material;
+    if (imat < 0 || imat >= cobMat->count())
+    {
+        qWarning() << "Material index out of bounds!";
+        imat = -1;
+    }
+    cobMat->setCurrentIndex(imat);
+
+    const AGeoBox * box = static_cast<const AGeoBox*>(obj->Shape);
+    ledSizeXY->setText(QString::number(box->dx*2.0));
+    ledSizeZ->setText(QString::number(box->dz*2.0));
+    ATypeWorldObject * typeWorld = static_cast<ATypeWorldObject *>(obj->ObjectType);
+    cbFixedSize->setChecked(typeWorld->bFixedSize);
+}
+
+void AWorldDelegate::onContentChanged()
+{
+    emit ContentChanged();
+}

@@ -965,22 +965,26 @@ bool EventsDataClass::saveSimulationAsTree(QString fileName)
   std::vector <double> y;
   std::vector <double> z;
   double zStop;
-  std::vector <int> numPhotons; //int numPhots;
-  int ScintType, GoodEvent, EventType;
+  //std::vector <int> numPhotons; //int numPhots;
+  std::vector <double> energy;
+  std::vector <double> time;
+  int ScintType, GoodEvent;//, EventType;
   int iev;
 
   tree->Branch("i",&iev, "i/I");
   if (!Scan.isEmpty())
-    {
+  {
       tree->Branch("x", &x);
       tree->Branch("y", &y);
       tree->Branch("z", &z);
       tree->Branch("zStop",&zStop, "zStop/D");
-      tree->Branch("numPhotons", &numPhotons);
+      //tree->Branch("numPhotons", &numPhotons);
+      tree->Branch("energy", &energy);
+      tree->Branch("time", &time);
       tree->Branch("ScintType",&ScintType, "ScintType/I");
       tree->Branch("GoodEvent",&GoodEvent, "GoodEvent/I");
-      tree->Branch("EventType",&EventType, "EventType/I");
-    }
+      //tree->Branch("EventType",&EventType, "EventType/I");
+  }
   float* signal;
   signal = new float[numPMs];
   char buf[32];
@@ -1006,14 +1010,19 @@ bool EventsDataClass::saveSimulationAsTree(QString fileName)
           x.resize(Points);
           y.resize(Points);
           z.resize(Points);
-          numPhotons.resize(Points);
+          //numPhotons.resize(Points);
+          energy.resize(Points);
+          time.resize(Points);
           for (int iP=0; iP<Points; iP++)
-            {
-              x[iP] = Scan[iev]->Points[iP].r[0];
-              y[iP] = Scan[iev]->Points[iP].r[1];
-              z[iP] = Scan[iev]->Points[iP].r[2];
-              numPhotons[iP] = Scan[iev]->Points[iP].energy;
-            }
+          {
+              const APositionEnergyRecord & p = Scan[iev]->Points[iP];
+              x[iP] = p.r[0];
+              y[iP] = p.r[1];
+              z[iP] = p.r[2];
+              //numPhotons[iP] = Scan[iev]->Points[iP].energy;
+              energy[iP] = p.energy;
+              time[iP]   = p.time;
+          }
           zStop = Scan[iev]->zStop;
           ScintType = Scan[iev]->ScintType;
           GoodEvent = Scan[iev]->GoodEvent;
@@ -1617,7 +1626,9 @@ int EventsDataClass::loadSimulatedEventsFromTree(QString fileName, const APmHub 
   //num of PMs in the Tree data?
   TBranch* signalBranch = T->FindBranch("signal");
   TString title = signalBranch->GetTitle();  //  "signal[%d]/D"    or "signal[%d]/F"
-  bool fDoubleSignals = (title.Contains("D")) ? true : false;  //(title.Contains("F"))
+  //bool fDoubleSignals = (title.Contains("D")) ? true : false;  //(title.Contains("F"))
+  bool fDoubleSignals = title.Contains("D");
+  bool bOldEnergy = (bool)T->FindBranch("numPhotons");  // new system: numPhotons was replaced with "energy" and "time" was added
 
   title.ReplaceAll("signal[","");
   title.ReplaceAll("]/D","");
@@ -1646,21 +1657,30 @@ int EventsDataClass::loadSimulatedEventsFromTree(QString fileName, const APmHub 
   double zStop;
   std::vector <double> *x = 0, *y = 0, *z = 0;
   std::vector <int> *numPhotons = 0;
-  int ScintType, GoodEvent, EventType;
+  std::vector <double> * energy = 0;
+  std::vector <double> * time = 0;
+  int ScintType, GoodEvent; //, EventType;
   TBranch *bx = 0;
 
   if (ScanDataPresent)
-    {
+  {
       T->SetBranchAddress("x", &x, &bx);
       T->SetBranchAddress("y", &y);
       T->SetBranchAddress("z", &z);
-      T->SetBranchAddress("numPhotons", &numPhotons);
+
+      if (bOldEnergy)
+          T->SetBranchAddress("numPhotons", &numPhotons);
+      else
+      {
+          T->SetBranchAddress("energy", &energy);
+          T->SetBranchAddress("time",   &time);
+      }
 
       T->SetBranchAddress("zStop", &zStop);
       T->SetBranchAddress("ScintType", &ScintType);
       T->SetBranchAddress("GoodEvent", &GoodEvent);
-      T->SetBranchAddress("EventType", &EventType);
-    }
+      //T->SetBranchAddress("EventType", &EventType);
+  }
 
   float *signalF = new float[numPMs];
   std::vector< std::vector <float> > *signalTimedF = 0;  //  [timebin][ipm]
@@ -1679,32 +1699,41 @@ int EventsDataClass::loadSimulatedEventsFromTree(QString fileName, const APmHub 
     }
 
   for (int iev=0; iev<numEv; iev++)
-    {
+  {
       if (limitNumEvents && iev==maxEvents) break;
 
       Long64_t tentry = T->LoadTree(iev);
       T->GetEntry(tentry);
 
       if (ScanDataPresent)
-        {
+      {
           AScanRecord* scs = new AScanRecord();
           int Points = x->size();
           //                        qDebug()<<"Points this event:"<<Points;
           if (Points != 1) scs->Points.Reinitialize(Points);
           for (int iP = 0; iP<Points; iP++)
-            {
+          {
               scs->Points[iP].r[0] = x->at(iP);
               scs->Points[iP].r[1] = y->at(iP);
               scs->Points[iP].r[2] = z->at(iP);
-              scs->Points[iP].energy = numPhotons->at(iP);
-            }
+              if (bOldEnergy)
+              {
+                  scs->Points[iP].energy = numPhotons->at(iP);
+                  scs->Points[iP].time   = 0;
+              }
+              else
+              {
+                  scs->Points[iP].energy = energy->at(iP);
+                  scs->Points[iP].time   = time->at(iP);
+              }
+          }
           scs->zStop = zStop;
           scs->GoodEvent = GoodEvent;
           //scs->EventType = EventType;
           scs->ScintType = ScintType;
 
           Scan.append(scs);          
-        }
+      }
 
       QVector<float> PMsignals(numPMs);
       if (fDoubleSignals)

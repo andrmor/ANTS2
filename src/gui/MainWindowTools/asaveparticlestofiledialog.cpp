@@ -2,7 +2,7 @@
 #include "ui_asaveparticlestofiledialog.h"
 #include "asaveparticlestofilesettings.h"
 #include "aglobalsettings.h"
-#include "generalsimsettings.h"
+#include "ageneralsimsettings.h"
 
 #include <QFileDialog>
 #include <QDoubleValidator>

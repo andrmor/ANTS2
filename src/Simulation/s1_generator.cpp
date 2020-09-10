@@ -4,7 +4,7 @@
 #include "aphotontracer.h"
 #include "aphoton.h"
 #include "aenergydepositioncell.h"
-#include "generalsimsettings.h"
+#include "ageneralsimsettings.h"
 #include "aoneevent.h"
 
 #include <QDebug>

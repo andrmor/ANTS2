@@ -66,6 +66,24 @@ bool NormalizeVector(double *arr)
     return true;
 }
 
+void NormalizeVectorSilent(double * arr)
+{
+    double Norm = 0;
+    for (int i = 0; i < 3; i++) Norm += arr[i] * arr[i];
+    Norm = TMath::Sqrt(Norm);
+    if (Norm > 1.0e-20)
+    {
+        double inv = 1.0 / Norm;
+        for (int i=0; i<3; i++) arr[i] = arr[i] * inv;
+    }
+    else
+    {
+        arr[0] = 0;
+        arr[1] = 0;
+        arr[2] = 1.0;
+    }
+}
+
 double GetInterpolatedValue(double val, const QVector<double>* X, const QVector<double>* F, bool LogLog)
 {
     //      qDebug()<<"data point in arrays X and F:"<<X->size()<<F->size()<<"Min X:"<<X->first()<<"Max X:"<<X->last();

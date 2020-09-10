@@ -235,8 +235,8 @@ void MainWindow::closeEvent(QCloseEvent *)
        qDebug() << "<Saving Python scripts";
        PythonScriptWindow->WriteToJson();
    }
-   qDebug() << "<Saving remote servers";
-   RemoteWindow->WriteConfig();
+   //qDebug() << "<Saving remote servers";
+   //RemoteWindow->WriteConfig();
    qDebug()<<"<Saving global settings";
    GlobSet.saveANTSconfiguration();
 
@@ -794,14 +794,16 @@ void MainWindow::CheckSetMaterial(const QString name, QComboBox* cob, QVector<QS
 
 void MainWindow::on_cbUPM_toggled(bool checked)
 {    
-  Detector->PMarrays[0].fActive = checked;
-  ToggleUpperLowerPMs();
+    ClearData();
+    Detector->PMarrays[0].fActive = checked;
+    ToggleUpperLowerPMs();
 }
 
 void MainWindow::on_cbLPM_toggled(bool checked)
 {
-  Detector->PMarrays[1].fActive = checked;
-  ToggleUpperLowerPMs();
+    ClearData();
+    Detector->PMarrays[1].fActive = checked;
+    ToggleUpperLowerPMs();
 }
 
 void MainWindow::ToggleUpperLowerPMs()
@@ -2636,30 +2638,26 @@ void MainWindow::on_cbEnableADC_toggled(bool checked)
 
 void MainWindow::on_pbScanDistrLoad_clicked()
 {
-  QString fileName = QFileDialog::getOpenFileName(this, "Load custom distribution", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
-  if (fileName.isEmpty()) return;
-  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+    QString fileName = QFileDialog::getOpenFileName(this, "Load custom distribution", GlobSet.LastOpenDir, "Text files (*.txt);;All files (*)");
+    if (fileName.isEmpty()) return;
+    GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
-  MainWindow::LoadScanPhotonDistribution(fileName);
-  MainWindow::on_pbUpdateSimConfig_clicked();
+    LoadScanPhotonDistribution(fileName);
+    on_pbUpdateSimConfig_clicked();
 }
 
 void MainWindow::on_pbScanDistrShow_clicked()
 {
-  if (!histScan) return;
-  GraphWindow->Draw(histScan, "", true, false);
+    if (!histScan) return;
+    GraphWindow->Draw(histScan, "", true, false);
 }
 
 void MainWindow::on_pbScanDistrDelete_clicked()
 {
-  if (histScan)
-    {
-      delete histScan;
-      histScan = 0;
-    }
-  ui->pbScanDistrShow->setEnabled(false);
-  ui->pbScanDistrDelete->setEnabled(false);
-  MainWindow::on_pbUpdateSimConfig_clicked();
+    delete histScan; histScan = nullptr;
+    ui->pbScanDistrShow->setEnabled(false);
+    ui->pbScanDistrDelete->setEnabled(false);
+    on_pbUpdateSimConfig_clicked();
 }
 
 void MainWindow::on_lwMaterials_currentRowChanged(int currentRow)
@@ -3346,34 +3344,42 @@ void MainWindow::on_pnShowHideAdvanced_toggled(bool checked)
 void MainWindow::on_pbYellow_clicked()
 {
    bool fYellow = false;
+   QTabBar * tb = ui->twAdvSimOpt->tabBar();
 
    if (!ui->cbRandomDir->isChecked())
-     {
+   {
        fYellow = true;
-       ui->twAdvSimOpt->tabBar()->setTabIcon(0, Rwindow->YellowIcon);
-     }
-   else ui->twAdvSimOpt->tabBar()->setTabIcon(0, QIcon());
+       tb->setTabIcon(0, Rwindow->YellowIcon);
+   }
+   else tb->setTabIcon(0, QIcon());
 
    if (ui->cbFixWavelengthPointSource->isChecked() && ui->cbWaveResolved->isChecked())
-     {
+   {
        fYellow = true;
-       ui->twAdvSimOpt->tabBar()->setTabIcon(1, Rwindow->YellowIcon);
-     }
-   else ui->twAdvSimOpt->tabBar()->setTabIcon(1, QIcon());
+       tb->setTabIcon(1, Rwindow->YellowIcon);
+   }
+   else tb->setTabIcon(1, QIcon());
 
    if (ui->cbNumberOfRuns->isChecked())
-     {
+   {
        fYellow = true;
-       ui->twAdvSimOpt->tabBar()->setTabIcon(2, Rwindow->YellowIcon);
-     }
-   else ui->twAdvSimOpt->tabBar()->setTabIcon(2, QIcon());
+       tb->setTabIcon(2, Rwindow->YellowIcon);
+   }
+   else tb->setTabIcon(2, QIcon());
 
    if (ui->cobScintTypePointSource->currentIndex() != 0 )
-     {
+   {
        fYellow = true;
-       ui->twAdvSimOpt->tabBar()->setTabIcon(3, Rwindow->YellowIcon);
-     }
-   else ui->twAdvSimOpt->tabBar()->setTabIcon(3, QIcon());
+       tb->setTabIcon(3, Rwindow->YellowIcon);
+   }
+   else tb->setTabIcon(3, QIcon());
+
+   if (ui->cbCND_Enable->isChecked())
+   {
+       fYellow = true;
+       tb->setTabIcon(4, Rwindow->YellowIcon);
+   }
+   else tb->setTabIcon(4, QIcon());
 
    ui->labAdvancedOn->setVisible(fYellow);
 }
@@ -3395,12 +3401,10 @@ void MainWindow::on_pbReconstruction_2_clicked()
 void MainWindow::on_pbSimulate_clicked()
 {
   ELwindow->QuickSave(0);
-  //ui->tabwidMain->setCurrentIndex(1);
-  //ui->twSourcePhotonsParticles->setCurrentIndex(0);
   fStartedFromGUI = true;
   fSimDataNotSaved = false; // to disable the warning
 
-  MainWindow::writeSimSettingsToJson(Config->JSON);  
+  MainWindow::writeSimSettingsToJson(Config->JSON);
   startSimulation(Config->JSON);  
 }
 
@@ -3430,7 +3434,7 @@ void MainWindow::simulationFinished()
         }
 
         bool showTracks = false;
-        if (SimulationManager->bPhotonSourceSim)
+        if (SimulationManager->Settings.bOnlyPhotons)
         {
             showTracks = SimulationManager->TrackBuildOptions.bBuildPhotonTracks;
             clearGeoMarkers();
@@ -3448,7 +3452,7 @@ void MainWindow::simulationFinished()
         if (showTracks)
         {
             int numTracks = 0;
-            for (int iTr=0; iTr<SimulationManager->Tracks.size(); iTr++)
+            for (int iTr = 0; iTr < (int)SimulationManager->Tracks.size(); iTr++)
             {
                 const TrackHolderClass* th = SimulationManager->Tracks.at(iTr);
                 TGeoTrack* track = new TGeoTrack(1, th->UserIndex);
@@ -4073,6 +4077,18 @@ void MainWindow::ShowGeometrySlot()
     GeometryWindow->ShowGeometry(false, false);
 }
 
+void MainWindow::onGridSimulationFinished()
+{
+    Owindow->RefreshData();
+    Rwindow->OnEventsDataAdded();
+    Rwindow->ShowPositions(1, true);
+}
+
+void MainWindow::updateConfig()
+{
+     ELwindow->UpdateConfig();
+}
+
 void MainWindow::on_cobPartPerEvent_currentIndexChanged(int index)
 {
     QString s;
@@ -4449,26 +4465,39 @@ void MainWindow::on_pbG4Settings_clicked()
 #include "afileparticlegenerator.h"
 void MainWindow::on_pbLoadExampleFileFromFileGen_clicked()
 {
-    QString epff = GlobSet.ExamplesDir + "/ExampleParticlesFromFile.dat";
-    SimulationManager->FileParticleGenerator->SetFileName(epff);
+    const QString fn = GlobSet.ExamplesDir + "/ExampleParticlesFromFile.dat";
+    SimulationManager->Settings.partSimSet.FileGenSettings.FileName = fn;
+    SimulationManager->Settings.partSimSet.FileGenSettings.invalidateFile();
+    updateFileParticleGeneratorGui();
+    on_pbUpdateSimConfig_clicked();
     on_pbGenerateFromFile_Check_clicked();
-    //updateFileParticleGeneratorGui();
 }
 
 void MainWindow::on_pbNodesFromFileHelp_clicked()
 {
     QString s;
-    s = "Each line in the file represents a single node.\n"
-        "The format is:\n\n"
-        "X Y Z [Time] [PhotNumberOverride] [*]\n\n"
-        "Arguments:\n\n"
-        "XYZ - position of the node\n\n"
-        "Optional arguments:\n\n"
-        "Time - photon generation time (0 is default)\n\n"
+    s = "There are two modes, defined by the file format:\n\n"
+        "1. Custom nodes\n"
+        "Each line in the file represents a single node.\n"
+        "The format is:  X Y Z [Time] [PhotNumberOverride] [*]\n"
+        "Arguments:\n"
+        "XYZ - position of the node\n"
+        "Optional arguments:\n"
+        "Time - photon generation time in ns (0 is default)\n"
         "PhotNumberOverride - the provided integer value\n"
-        "   overrides the standard number of photons configured for nodes.\n\n"
+        "   overrides the standard number of photons configured for nodes.\n"
         "* - if present, the next node will be added to the same event.\n"
-        "   '*' should be in the last position of the line.";
+        "   '*' should be in the last position of the line.\n\n"
+        "2. Generate photons from records in the file\n"
+        "Each new event is introduced by the line containing '#' as the only character\n"
+        "This is mandatory to have '#' in the first line even if there is only one event.\n"
+        "The photon records have this format:\n"
+        "X Y Z dX dY dZ WaveIndex Time\n"
+        "XYZ - the photon origin position,\n"
+        "dXdYdZ - the unitary direction,\n"
+        "WaveIndex - photon wave index (should be in the defined range of the simulation or -1),\n"
+        "Time - photon generation time in ns.";
+
     message(s, this);
 }
 
@@ -4485,32 +4514,37 @@ void MainWindow::on_pbNodesFromFileChange_clicked()
 void MainWindow::on_pbNodesFromFileCheckShow_clicked()
 {
     QString fileName = ui->leNodesFromFile->text();
-    QString err = SimulationManager->loadNodesFromFile(fileName);
-
-    int numTop = 0;
-    int numTotal = 0;
-    if (!err.isEmpty()) message(err, this);
+    QString err = SimulationManager->checkPnotonNodeFile(fileName);
+    if (!err. isEmpty()) message(err, this);
     else
     {
-        Detector->GeoManager->ClearTracks();
-        clearGeoMarkers();
-        GeoMarkerClass* marks = new GeoMarkerClass("Nodes", 6, 2, kBlack);
-        for (ANodeRecord * topNode : SimulationManager->Nodes)
+        QString s;
+        if (SimulationManager->Settings.photSimSet.CustomNodeSettings.Mode == APhotonSim_CustomNodeSettings::CustomNodes)
         {
-            numTop++;
-            ANodeRecord * node = topNode;
-            while (node)
+            Detector->GeoManager->ClearTracks();
+            clearGeoMarkers();
+            GeoMarkerClass* marks = new GeoMarkerClass("Nodes", 6, 2, kBlack);
+            int numTop = 0;
+            int numTotal = 0;
+            for (ANodeRecord * topNode : SimulationManager->Nodes)
             {
-                numTotal++;
-                if (numTotal < 10000) marks->SetNextPoint(node->getX(), node->getY(), node->getZ());
-                node = node->getLinkedNode();
+                numTop++;
+                ANodeRecord * node = topNode;
+                while (node)
+                {
+                    numTotal++;
+                    if (numTotal < 10000) marks->SetNextPoint(node->getX(), node->getY(), node->getZ());
+                    node = node->getLinkedNode();
+                }
             }
+            GeoMarkers.append(marks);
+            GeometryWindow->ShowGeometry();
+            s = QString("First line does not contain '#' -> this is a file with nodes\n\nFound %1 top nodes\n(%2 nodes counting subnodes)").arg(numTop).arg(numTotal);
         }
-        GeoMarkers.append(marks);
-        GeometryWindow->ShowGeometry();
+        else
+            s = QString("First line contains '#' -> this is a file with photon records\n\nFound %1 event(s)").arg(SimulationManager->Settings.photSimSet.CustomNodeSettings.NumEventsInFile);
+        message(s, this);
     }
-
-    message(QString("The file containes %1 top nodes\n(%2 nodes counting subnodes)").arg(numTop).arg(numTotal), this);
 }
 
 #include "aisotopeabundancehandler.h"
@@ -4703,11 +4737,6 @@ void MainWindow::on_pbAddmaterialFromLibrary_clicked()
     MIwindow->AddMaterialFromLibrary(this);
 }
 
-void MainWindow::on_cobGenerateFromFile_FileFormat_currentIndexChanged(int index)
-{
-    ui->pbLoadExampleFileFromFileGen->setVisible(index == 0);
-}
-
 void MainWindow::on_twSourcePhotonsParticles_currentChanged(int)
 {
     updateG4ProgressBarVisibility();
@@ -4742,13 +4771,17 @@ void MainWindow::on_pbParticlesToFile_customContextMenuRequested(const QPoint &)
 #include <fstream>
 void MainWindow::on_pbFilePreview_clicked()
 {
+    AFileGenSettings & FileGenSettings = SimulationManager->Settings.partSimSet.FileGenSettings;
     AFileParticleGenerator * fg = SimulationManager->FileParticleGenerator;
-    fg->Init();
 
-    const QString FileName = fg->GetFileName();
+    WindowNavigator->BusyOn();  // -->
+    fg->InitWithCheck(FileGenSettings, false);
+    WindowNavigator->BusyOff();  // <--
+
+    const QString & FileName = FileGenSettings.FileName;
     int iCounter = 100;
     QString txt;
-    if (fg->IsFormatBinary())
+    if (FileGenSettings.isFormatBinary())
     {
         std::ifstream inB(FileName.toLatin1().data(), std::ios::in | std::ios::binary);
         if (!inB.is_open())
@@ -4821,4 +4854,139 @@ void MainWindow::on_cobNodeGenerationMode_customContextMenuRequested(const QPoin
     if (index >= ui->cobNodeGenerationMode->count()) index = 0;
     ui->cobNodeGenerationMode->setCurrentIndex(index);
     on_pbUpdateSimConfig_clicked();
+}
+
+void MainWindow::on_cobCND_Mode_currentIndexChanged(int index)
+{
+    ui->swCND_Mode->setCurrentIndex(index);
+    ui->fCND_RangeAndBins->setEnabled(index != 0);
+}
+
+void MainWindow::on_pbCND_applyChanges_clicked()
+{
+    applyCNDchanges();
+}
+
+void MainWindow::applyCNDchanges()
+{
+    APhotonSim_SpatDistSettings & ds = SimulationManager->Settings.photSimSet.SpatialDistSettings;
+
+    ds.bEnabled = ui->cbCND_Enable->isChecked();
+    ds.Mode = static_cast<APhotonSim_SpatDistSettings::ModeEnum>(ui->cobCND_Mode->currentIndex());
+    ds.Formula = ui->leCND_Formula->text();
+    ds.RangeX = ui->ledCND_RangeX->text().toDouble();
+    ds.RangeY = ui->ledCND_RangeY->text().toDouble();
+    ds.RangeZ = ui->ledCND_RangeZ->text().toDouble();
+    ds.BinsX  = ui->sbCND_BinsX->value();
+    ds.BinsY  = ui->sbCND_BinsY->value();
+    ds.BinsZ  = ui->sbCND_BinsZ->value();
+}
+
+void MainWindow::on_pbCND_ShowMatrix_clicked()
+{
+    APhotonSim_SpatDistSettings & ds = SimulationManager->Settings.photSimSet.SpatialDistSettings;
+    QString str;
+    for (const A3DPosProb r : ds.LoadedMatrix)
+        str.append(QString("%1, %2, %3 \t -> %4\n").arg(r.R[0]).arg(r.R[1]).arg(r.R[2]).arg(r.Probability));
+    message1(str, "Matrix", this);
+}
+
+void MainWindow::on_pbCND_LoadMatrix_clicked()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, "Load matrix", GlobSet.LastOpenDir, "Data files (*.txt *.dat);;All files (*)");
+    if (fileName.isEmpty()) return;
+    GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+
+    QVector<double> x, y, z, p;
+    QVector<QVector<double> *> vecs = {&x, &y, &z, &p};
+
+    QString err = LoadDoubleVectorsFromFile(fileName, vecs);
+    if (!err.isEmpty())
+    {
+        message(err, this);
+        return;
+    }
+
+    APhotonSim_SpatDistSettings & ds = SimulationManager->Settings.photSimSet.SpatialDistSettings;
+    ds.LoadedMatrix.clear();
+    ds.LoadedMatrix.reserve(x.size());
+    for (int i=0; i<x.size(); i++)
+        ds.LoadedMatrix << A3DPosProb(x.at(i), y.at(i), z.at(i), p.at(i));
+
+    updateCNDgui();
+}
+
+void MainWindow::on_pbCND_ShowSpline_clicked()
+{
+    APhotonSim_SpatDistSettings & ds = SimulationManager->Settings.photSimSet.SpatialDistSettings;
+    message1(ds.Spline, "Spline", this);
+}
+
+void MainWindow::on_pbCND_LoadSpline_clicked()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, "Load spline", GlobSet.LastOpenDir, "Text files (*.txt);;All files (*)");
+    if (fileName.isEmpty()) return;
+    GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+
+    APhotonSim_SpatDistSettings & ds = SimulationManager->Settings.photSimSet.SpatialDistSettings;
+    QString str;
+    bool ok = LoadTextFromFile(fileName, str);
+    if (!ok)
+    {
+        message("Load failed!", this);
+        return;
+    }
+    ds.Spline = str;
+    updateCNDgui();
+}
+
+void MainWindow::updateCNDgui()
+{
+    APhotonSim_SpatDistSettings & ds = SimulationManager->Settings.photSimSet.SpatialDistSettings;
+
+    ui->cbCND_Enable->setChecked(ds.bEnabled);
+    ui->cobCND_Mode->setCurrentIndex(ds.Mode);
+    ui->pbCND_ShowMatrix->setEnabled(!ds.LoadedMatrix.isEmpty());
+    ui->leCND_Formula->setText(ds.Formula);
+    ui->pbCND_ShowSpline->setEnabled(!ds.Spline.isEmpty());
+
+    ui->ledCND_RangeX->setText(QString::number(ds.RangeX));
+    ui->ledCND_RangeY->setText(QString::number(ds.RangeY));
+    ui->ledCND_RangeZ->setText(QString::number(ds.RangeZ));
+    ui->sbCND_BinsX->setValue(ds.BinsX);
+    ui->sbCND_BinsY->setValue(ds.BinsY);
+    ui->sbCND_BinsZ->setValue(ds.BinsZ);
+}
+
+void MainWindow::on_pbCND_help_clicked()
+{
+    QString s;
+
+    s =     "When activated, photon generation positions in each node are distributed\n"
+            "using user-provided data on relative probabilities in local coordinates\n"
+            "(x=y=z=0 is the node position).\n"
+            "There are three ways to provide the distribution data:\n"
+            "1.Matrix\n"
+            "The user gives a matrix with the probability data.\n"
+            "The matrix is loaded from a file, each new line with format:\n"
+            "x, y, z, probability     (delimeter can be space, comma or tab)\n"
+            "It is sufficient to provide only non-zero probabilities.\n"
+            "2. TFormula\n"
+            "See https://root.cern.ch/doc/master/classTFormula.html\n"
+            "The formula should give relative probability as a function of x y and z.\n"
+            "3. Spline\n"
+            "The probability is given by a spline, defined using Spline123 library:\n"
+            "https://github.com/vovasolo/spline123/\n"
+            "The user provides the string generated for the defined spline,\n"
+            "using, e.g., std::string jsontext = bs3->GetJsonString() in C++\n"
+            "or the Python tools provided in the library.\n"
+            "The spline string should be loaded from a file.\n"
+            "It is recommended to use 3d splines (for 1d only x coordinate is in effect,\n"
+            "and for 2d spline only x and y).\n"
+            "\n"
+            "Except the 'Matrix' mode, where the emission points are given directly,\n"
+            "the user defines the spatial ranges and the number of bins for each direction.\n"
+            "Photons are generated from the defined bin centers, no 'blurring' is applied.";
+
+    message1(s, "Help on spatial in-node distribution tools", this);
 }

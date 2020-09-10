@@ -13,6 +13,7 @@ double GetRandomFromHist(TH1* hist, TRandom2* RandGen);    //integral must be al
 int    GetRandomBinFromHist(TH1* hist, TRandom2* RandGen); //integral must be already calculated to be thread-safe
 
 bool NormalizeVector(double *arr);
+void NormalizeVectorSilent(double *arr); //if failed, returns (0,0,1) vector
 
 void UpdateMax(double &max, double value); //assume positive max and value!
 

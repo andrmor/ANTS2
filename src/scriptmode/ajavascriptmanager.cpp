@@ -74,6 +74,7 @@ void AJavaScriptManager::addQVariantToString(const QVariant & var, QString & str
     }
 }
 
+#include <QJsonDocument>
 QString AJavaScriptManager::Evaluate(const QString & Script)
 {
     LastError.clear();
@@ -112,12 +113,22 @@ QString AJavaScriptManager::Evaluate(const QString & Script)
     delete timer; timer = nullptr;
 
     QString result;
+    /*
     if (EvaluationResult.isArray() || EvaluationResult.isObject())
     {
         QVariant resVar = EvaluationResult.toVariant();
         addQVariantToString(resVar, result);
     }
     else result = EvaluationResult.toString();
+    */
+    QVariant var = EvaluationResult.toVariant();
+    if (var.type() == QVariant::Map || var.type() == QVariant::List)
+    {
+        QJsonDocument doc = QJsonDocument::fromVariant(var);
+        result = doc.toJson(QJsonDocument::Compact);
+    }
+    else if (var.type() == QVariant::String) result = "\"" + var.toString() + "\"";
+    else result = var.toString();
 
     emit onFinish(result);
     return result;

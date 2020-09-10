@@ -26,6 +26,7 @@
 #include "ageowin_si.h"
 #include "agraphwin_si.h"
 #include "aoutwin_si.h"
+#include "afarm_si.h"
 
 #include "mainwindow.h"
 #include "graphwindowclass.h"
@@ -53,10 +54,12 @@ void MainWindow::createScriptWindow()
     AJavaScriptManager* SM = new AJavaScriptManager(Detector->RandGen);
     ScriptWindow = new AScriptWindow(SM, false, w); //transfer ownership of SM
     ScriptWindow->move(25,25);
+    connect(ScriptWindow, &AScriptWindow::requestUpdateConfig, this, &MainWindow::updateConfig);
     connect(ScriptWindow, &AScriptWindow::WindowShown, WindowNavigator, &WindowNavigatorClass::ShowWindowTriggered);
     connect(ScriptWindow, &AScriptWindow::WindowHidden, WindowNavigator, &WindowNavigatorClass::HideWindowTriggered);
-    //connect(SM, &AScriptManager::reportProgress, WindowNavigator, &WindowNavigatorClass::setProgress);
     connect(SM, &AScriptManager::reportProgress, ScriptWindow, &AScriptWindow::onProgressChanged);
+    connect(SM, &AScriptManager::reportProgress, NetModule, &ANetworkModule::ProgressReport);
+
     NetModule->SetScriptManager(SM);
     ScriptWindow->connectWinNavigator(WindowNavigator);
 
@@ -123,7 +126,7 @@ void MainWindow::createScriptWindow()
     AServer_SI* server = new AServer_SI(*NetModule->WebSocketServer, EventsDataHub);
     ScriptWindow->RegisterInterface(server, "server");
 
-    APhoton_SI* photon = new APhoton_SI(Config, EventsDataHub);
+    APhoton_SI* photon = new APhoton_SI(Config, EventsDataHub, *SimulationManager);
     ScriptWindow->RegisterInterface(photon, "photon");
 
 #ifdef ANTS_FLANN
@@ -135,6 +138,9 @@ void MainWindow::createScriptWindow()
     //AAnn_SI* ann = new AAnn_SI();
     //ScriptWindow->RegisterInterface(ann, "ann");
 #endif
+
+    AFarm_si * farm = new AFarm_si(Config->JSON, *NetModule->GridRunner);
+    ScriptWindow->RegisterInterface(farm, "farm");
 
     // Interfaces which rely on MainWindow
 
@@ -149,9 +155,6 @@ void MainWindow::createScriptWindow()
 
     AOutWin_SI* out = new AOutWin_SI(this);
     ScriptWindow->RegisterInterface(out, "outwin");
-
-    // window inits
-    ScriptWindow->SetShowEvaluationResult(true);
 
     QObject::connect(ScriptWindow, SIGNAL(onStart()), this, SLOT(onGlobalScriptStarted()));
     QObject::connect(ScriptWindow, SIGNAL(success(QString)), this, SLOT(onGlobalScriptFinished()));

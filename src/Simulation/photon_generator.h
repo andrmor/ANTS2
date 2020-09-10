@@ -3,7 +3,7 @@
 
 class DetectorClass;
 class APhoton;
-class GeneralSimSettings;
+class AGeneralSimSettings;
 class ASimulationStatistics;
 class AOneEvent;
 class TRandom2;
@@ -17,12 +17,12 @@ public:
     void GenerateWave(APhoton *Photon, int materialId) const;
     void GenerateTime(APhoton *Photon, int materialId) const;
 
-    void configure(const GeneralSimSettings *simSet, ASimulationStatistics* detStat) {SimSet = simSet; DetStat = detStat;}
+    void configure(const AGeneralSimSettings *simSet, ASimulationStatistics* detStat) {SimSet = simSet; DetStat = detStat;}
 
     void GenerateSignalsForLrfMode(int NumPhotons, double *r, AOneEvent* OneEvent);
 
     ASimulationStatistics * DetStat = nullptr;
-    const GeneralSimSettings * SimSet = nullptr;
+    const AGeneralSimSettings * SimSet = nullptr;
 
 private:
     const DetectorClass & Detector;

@@ -49,11 +49,11 @@ private:
     void setFixedVariables();
 };
 
-class AHighlighterPythonScriptWindow : public AHighlighterScriptWindow
+class APythonHighlighter : public AHighlighterScriptWindow
 {
     Q_OBJECT
 public:
-    AHighlighterPythonScriptWindow(QTextDocument *parent = 0);
+    APythonHighlighter(QTextDocument *parent = 0);
 };
 
 #endif // AHIGHLIGHTERS_H

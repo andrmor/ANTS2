@@ -67,21 +67,23 @@ void MainWindow::SimParticleSourcesConfigToJson(QJsonObject &json)
 
         //Particle generation
         //--particle sources
-        SimulationManager->ParticleSources->writeToJson(psjs);
+        SimulationManager->Settings.partSimSet.SourceGenSettings.writeToJson(psjs);
         //--from file
         QJsonObject fjs;
-            SimulationManager->FileParticleGenerator->writeToJson(fjs);
+            SimulationManager->Settings.partSimSet.FileGenSettings.writeToJson(fjs);
         psjs["GenerationFromFile"] = fjs;
         //--from script
         QJsonObject sjs;
-            SimulationManager->ScriptParticleGenerator->writeToJson(sjs);
+            SimulationManager->Settings.partSimSet.ScriptGenSettings.writeToJson(sjs);
         psjs["GenerationFromScript"] = sjs;
 
     json["ParticleSourcesConfig"] = psjs;
 }
 
-void MainWindow::ShowSource(const AParticleSourceRecord* p, bool clear)
+void MainWindow::ShowSource(const AParticleSourceRecord * p, bool clear)
 {
+    if (!p) return;
+
   int index = p->shape;
   double X0 = p->X0;
   double Y0 = p->Y0;
@@ -272,8 +274,8 @@ void MainWindow::on_pbGunTest_clicked()
     {
         if (ui->pbGunShowSource->isChecked())
         {
-            for (int i=0; i<SimulationManager->ParticleSources->countSources(); i++)
-                ShowSource(SimulationManager->ParticleSources->getSource(i), false);
+            for (int i = 0; i < SimulationManager->Settings.partSimSet.SourceGenSettings.getNumSources(); i++)
+                ShowSource(SimulationManager->Settings.partSimSet.SourceGenSettings.getSourceRecord(i), false);
         }
     }
     else GeometryWindow->ShowGeometry();
@@ -281,9 +283,16 @@ void MainWindow::on_pbGunTest_clicked()
     AParticleGun* pg;
     switch (ui->cobParticleGenerationMode->currentIndex())
     {
-    case 0: pg = SimulationManager->ParticleSources; break;
-    case 1: pg = SimulationManager->FileParticleGenerator; break;
-    case 2: pg = SimulationManager->ScriptParticleGenerator; break;
+    case 0:
+        pg = SimulationManager->ParticleSources;
+        break;
+    case 1:
+        pg = SimulationManager->FileParticleGenerator;
+        SimulationManager->FileParticleGenerator->InitWithCheck(SimulationManager->Settings.partSimSet.FileGenSettings, false);
+        break;
+    case 2:
+        pg = SimulationManager->ScriptParticleGenerator;
+        break;
     default:
         message("This generation mode is not implemented!", this);
         WindowNavigator->BusyOff(); // <--
@@ -295,7 +304,8 @@ void MainWindow::on_pbGunTest_clicked()
     font.setBold(true);
     ui->pbStopScan->setFont(font);
 
-    SimulationManager->FileParticleGenerator->SetValidationMode(AFileParticleGenerator::Relaxed);
+    //SimulationManager->FileParticleGenerator->SetValidationMode(AFileParticleGenerator::Relaxed);
+    SimulationManager->Settings.partSimSet.FileGenSettings.ValidationMode = AFileGenSettings::Relaxed;
     TestParticleGun(pg, ui->sbGunTestEvents->value()); //script generator is aborted on click of the stop button!
 
     ui->pbStopScan->setEnabled(false);
@@ -379,31 +389,33 @@ void MainWindow::on_pbRemoveSource_clicked()
         message("Select a source to remove", this);
         return;
     }
-    if (isource >= SimulationManager->ParticleSources->countSources())
+
+    const int numSources = SimulationManager->Settings.partSimSet.SourceGenSettings.getNumSources();
+    if (isource >= numSources)
     {
         message("Error - bad source index!", this);
         return;
     }
 
+    const QString SourceName = SimulationManager->Settings.partSimSet.SourceGenSettings.getSourceRecord(isource)->name;
     int ret = QMessageBox::question(this, "Remove particle source",
-                                    "Are you sure you want to remove source " + SimulationManager->ParticleSources->getSource(isource)->name,
+                                    "Remove source " + SourceName + " ?",
                                     QMessageBox::Yes | QMessageBox::Cancel,
                                     QMessageBox::Cancel);
     if (ret != QMessageBox::Yes) return;
 
-    SimulationManager->ParticleSources->remove(isource);
+    SimulationManager->Settings.partSimSet.SourceGenSettings.remove(isource);
 
     on_pbUpdateSimConfig_clicked();
     on_pbUpdateSourcesIndication_clicked();
     if (ui->pbGunShowSource->isChecked())
     {
-        if (SimulationManager->ParticleSources->countSources() == 0)
+        if (numSources == 0)
         {
             Detector->GeoManager->ClearTracks();
             GeometryWindow->ShowGeometry(false);
         }
-        else
-            ShowParticleSource_noFocus();
+        else ShowParticleSource_noFocus();
     }
 }
 
@@ -411,23 +423,24 @@ void MainWindow::on_pbAddSource_clicked()
 {
     AParticleSourceRecord* s = new AParticleSourceRecord();
     s->GunParticles << new GunParticleStruct();
-    SimulationManager->ParticleSources->append(s);
+    SimulationManager->Settings.partSimSet.SourceGenSettings.append(s);
 
     on_pbUpdateSourcesIndication_clicked();
-    ui->lwDefinedParticleSources->setCurrentRow( SimulationManager->ParticleSources->countSources()-1 );
+    ui->lwDefinedParticleSources->setCurrentRow( SimulationManager->Settings.partSimSet.SourceGenSettings.getNumSources() - 1 );
 }
 
 void MainWindow::on_pbUpdateSourcesIndication_clicked()
 {
-    int numSources = SimulationManager->ParticleSources->countSources();
+    ASourceGenSettings & SourceGenSettings = SimulationManager->Settings.partSimSet.SourceGenSettings;
+    const int numSources = SourceGenSettings.getNumSources();
 
     int curRow = ui->lwDefinedParticleSources->currentRow();
     ui->lwDefinedParticleSources->clear();
 
-    for (int i=0; i<numSources; i++)
+    for (int i = 0; i < numSources; i++)
     {
-        AParticleSourceRecord* pr = SimulationManager->ParticleSources->getSource(i);
-        QListWidgetItem* item = new QListWidgetItem();
+        AParticleSourceRecord * pr = SourceGenSettings.getSourceRecord(i);
+        QListWidgetItem * item = new QListWidgetItem();
         ui->lwDefinedParticleSources->addItem(item);
 
         QFrame* fr = new QFrame();
@@ -461,7 +474,7 @@ void MainWindow::on_pbUpdateSourcesIndication_clicked()
             });
         l->addWidget(e);
 
-            double totAct = SimulationManager->ParticleSources->getTotalActivity();
+            double totAct = SourceGenSettings.getTotalActivity();
             double per = ( totAct == 0 ? 0 : 100.0 * pr->Activity / totAct );
             QString t = QString("%1%").arg(per, 3, 'g', 3);
             lab = new QLabel(t);
@@ -473,7 +486,9 @@ void MainWindow::on_pbUpdateSourcesIndication_clicked()
         ui->lwDefinedParticleSources->setItemWidget(item, fr);
         item->setSizeHint(fr->sizeHint());
 
-        e->setVisible(numSources > 1);
+        bool bVis = (numSources > 1);
+        if (!bVis && pr->Activity == 0) bVis = true;
+        e->setVisible(bVis);
     }
 
     if (curRow < 0 || curRow >= ui->lwDefinedParticleSources->count())
@@ -508,25 +523,25 @@ void MainWindow::on_lwDefinedParticleSources_itemClicked(QListWidgetItem *)
 
 void MainWindow::ShowParticleSource_noFocus()
 {
-  int isource = ui->lwDefinedParticleSources->currentRow();
-  if (isource < 0) return;
-  if (isource >= SimulationManager->ParticleSources->countSources())
+    const int isource = ui->lwDefinedParticleSources->currentRow();
+    if (isource < 0) return;
+    if (isource >= SimulationManager->Settings.partSimSet.SourceGenSettings.getNumSources())
     {
-      message("Source number is out of bounds!",this);
-      return;
+        message("Source number is out of bounds!", this);
+        return;
     }
-  ShowSource(SimulationManager->ParticleSources->getSource(isource), true);
+    ShowSource(SimulationManager->Settings.partSimSet.SourceGenSettings.getSourceRecord(isource), true);
 }
 
 void MainWindow::on_pbSaveParticleSource_clicked()
 {
-    int isource = ui->lwDefinedParticleSources->currentRow();
+    const int isource = ui->lwDefinedParticleSources->currentRow();
     if (isource == -1)
     {
         message("Select a source to remove", this);
         return;
     }
-    if (isource >= SimulationManager->ParticleSources->countSources())
+    if (isource >= SimulationManager->Settings.partSimSet.SourceGenSettings.getNumSources())
     {
         message("Error - bad source index!", this);
         return;
@@ -539,7 +554,7 @@ void MainWindow::on_pbSaveParticleSource_clicked()
     if (file.suffix().isEmpty()) fileName += ".json";
 
     QJsonObject json, js;
-    SimulationManager->ParticleSources->getSource(isource)->writeToJson(json, *MpCollection);
+    SimulationManager->Settings.partSimSet.SourceGenSettings.getSourceRecord(isource)->writeToJson(json, *MpCollection);
     js["ParticleSource"] = json;
     bool bOK = SaveJsonToFile(js, fileName);
     if (!bOK) message("Failed to save json to file: "+fileName, this);
@@ -569,7 +584,7 @@ void MainWindow::on_pbLoadParticleSource_clicked()
 
     AParticleSourceRecord* ps = new AParticleSourceRecord();
     ps->readFromJson(js, *MpCollection);
-    SimulationManager->ParticleSources->append(ps);
+    SimulationManager->Settings.partSimSet.SourceGenSettings.append(ps);
     //SimulationManager->ParticleSources->readSourceFromJson( SimulationManager->ParticleSources->countSources()-1, js );
 
     onRequestDetectorGuiUpdate();
@@ -610,27 +625,29 @@ void MainWindow::on_pbEditParticleSource_clicked()
         message("Select a source to edit", this);
         return;
     }
-    if (isource >= SimulationManager->ParticleSources->countSources())
+    ASourceGenSettings & SourceGenSettings = SimulationManager->Settings.partSimSet.SourceGenSettings;
+    const int numSources = SourceGenSettings.getNumSources();
+    if (isource >= numSources)
     {
         message("Error - bad source index!", this);
         return;
     }
 
-    AParticleSourceDialog d(*this, SimulationManager->ParticleSources->getSource(isource));
+    AParticleSourceDialog d(*this, SourceGenSettings.getSourceRecord(isource));
     int res = d.exec();
     if (res == QDialog::Rejected) return;
 
-    SimulationManager->ParticleSources->replace(isource, d.getResult());
+    SourceGenSettings.replace(isource, d.getResult());
 
-    AParticleSourceRecord* ps = SimulationManager->ParticleSources->getSource(isource);
-    SimulationManager->ParticleSources->checkLimitedToMaterial(ps);
+    AParticleSourceRecord * ps = SourceGenSettings.getSourceRecord(isource);
+    ps->updateLimitedToMat(*Detector->MpCollection);
 
     if (Detector->isGDMLempty())
-      { //check world size
+    { //check world size
         double XYm = 0;
         double  Zm = 0;
-        for (int isource = 0; isource < SimulationManager->ParticleSources->countSources(); isource++)
-          {
+        for (int isource = 0; isource < numSources; isource++)
+        {
             double msize =   ps->size1;
             UpdateMax(msize, ps->size2);
             UpdateMax(msize, ps->size3);
@@ -638,7 +655,7 @@ void MainWindow::on_pbEditParticleSource_clicked()
             UpdateMax(XYm, fabs(ps->X0)+msize);
             UpdateMax(XYm, fabs(ps->Y0)+msize);
             UpdateMax(Zm,  fabs(ps->Z0)+msize);
-          }
+        }
 
         double currXYm = Detector->WorldSizeXY;
         double  currZm = Detector->WorldSizeZ;
@@ -650,7 +667,7 @@ void MainWindow::on_pbEditParticleSource_clicked()
             Detector->WorldSizeZ =  std::max(Zm,currZm);
             MainWindow::ReconstructDetector();
           }
-      }
+    }
 
     on_pbUpdateSimConfig_clicked();
     if (ui->pbGunShowSource->isChecked()) ShowParticleSource_noFocus();
@@ -671,22 +688,6 @@ void containsMonsGrids(const AGeoObject * obj, bool & bGrid, bool & bMon)
 #include "asandwich.h"
 void MainWindow::on_pbParticleSourcesSimulate_clicked()
 {
-    // TODO !*! find a way to do it in SimulationManager - without the settings hub it is not straightforward at this point
-    // to avoid check file in each thread
-    if (ui->cobParticleGenerationMode->currentIndex() == 1)  // "From file"
-    {
-        AFileParticleGenerator * pg = SimulationManager->FileParticleGenerator;
-        pg->SetValidationMode(ui->cbGeant4ParticleTracking->isChecked() ? AFileParticleGenerator::Relaxed
-                                                                        : AFileParticleGenerator::Strict);
-        bool bOK = pg->Init();
-        if (!bOK)
-        {
-            message(pg->GetErrorString(), this);
-            return;
-        }
-        updateFileParticleGeneratorGui();
-    }
-
     writeSimSettingsToJson(Config->JSON);
 
     if (ExitParticleSettings.SaveParticles)
@@ -716,11 +717,6 @@ void MainWindow::on_pbParticleSourcesSimulate_clicked()
         bool bMonitors = false;
         bool bGrids = false;
         containsMonsGrids(Detector->Sandwich->World, bGrids, bMonitors);
-        /*
-        if (bMonitors)
-            Warnings+= "\nConfig contains active Monitor(s).\n"
-                       "Monitors will be treated as normal volumes\n";
-        */
         if (bGrids)
             Warnings+= "\nConfig contains optical grids.\n"
                        "The grid will NOT be expanded:\n"
@@ -752,7 +748,6 @@ void MainWindow::on_pbParticleSourcesSimulate_clicked()
             if (ret == QMessageBox::Cancel) return;
         }
     }
-    //
 
     startSimulation(Config->JSON);
 }
@@ -782,7 +777,7 @@ void MainWindow::on_pbGenerateFromFile_Help_clicked()
                 "Each new entry starts either with a (char)EE or a (char)FF\n"
                 "0xEE is followed by the event number (int),\n"
                 "0xFF is followed by the particle record, which is\n"
-                "ParticleName X Y Z DirX DirY DirZ Time\n"
+                "ParticleName Energy X Y Z DirX DirY DirZ Time\n"
                 "where ParticleName is 0-terminated string and the rest are doubles\n"
                 "\n"
                 "Energy is in keV, Position is in mm,\n"
@@ -802,41 +797,40 @@ void MainWindow::on_pbGenerateFromFile_Change_clicked()
 
 void MainWindow::on_leGenerateFromFile_FileName_editingFinished()
 {
-    AFileParticleGenerator* pg = SimulationManager->FileParticleGenerator;
-
     QString newName = ui->leGenerateFromFile_FileName->text();
-    if (newName == pg->GetFileName()) return;
+    if (newName == SimulationManager->Settings.partSimSet.FileGenSettings.FileName) return;
 
-    pg->SetFileName(newName);
+    SimulationManager->Settings.partSimSet.FileGenSettings.FileName = newName;
+    SimulationManager->Settings.partSimSet.FileGenSettings.invalidateFile();
     on_pbUpdateSimConfig_clicked();
 }
 
 void MainWindow::on_pbGenerateFromFile_Check_clicked()
 {
-    AFileParticleGenerator* pg = SimulationManager->FileParticleGenerator;
+    AFileGenSettings & FileGenSettings = SimulationManager->Settings.partSimSet.FileGenSettings;
 
-    pg->bCollectExpandedStatistics = ui->cbFileCollectStatistics->isChecked();
-    pg->SetValidationMode(ui->cbGeant4ParticleTracking->isChecked() ? AFileParticleGenerator::Relaxed
-                                                                    : AFileParticleGenerator::Strict);
+    FileGenSettings.ValidationMode = (ui->cbGeant4ParticleTracking->isChecked() ? AFileGenSettings::Relaxed : AFileGenSettings::Strict);
+
+    AFileParticleGenerator* pg = SimulationManager->FileParticleGenerator;
     WindowNavigator->BusyOn();  // -->
-    bool bOK = pg->Init();
+    bool bOK = pg->InitWithCheck(FileGenSettings, ui->cbFileCollectStatistics->isChecked());
     WindowNavigator->BusyOff(); // <--
 
     if (!bOK) message(pg->GetErrorString(), this);
-
     updateFileParticleGeneratorGui();
 }
 
 void MainWindow::updateFileParticleGeneratorGui()
 {
-    AFileParticleGenerator* pg = SimulationManager->FileParticleGenerator;
+    const AFileGenSettings & FileGenSettings = SimulationManager->Settings.partSimSet.FileGenSettings;
+    const QString & FileName = FileGenSettings.FileName;
 
-    ui->leGenerateFromFile_FileName->setText(pg->GetFileName());
+    ui->leGenerateFromFile_FileName->setText(FileName);
     ui->lwFileStatistics->clear();
     ui->lwFileStatistics->setEnabled(false);
     qApp->processEvents();
 
-    QFileInfo fi(pg->GetFileName());
+    QFileInfo fi(FileName);
     if (!fi.exists())
     {
         ui->labGenerateFromFile_info->setText("File not found");
@@ -844,16 +838,16 @@ void MainWindow::updateFileParticleGeneratorGui()
     }
 
     QString s = "Format: ";
-    s += pg->GetFormatName();
+    s += FileGenSettings.getFormatName();
 
-    if (pg->IsValidated())
+    if (FileGenSettings.isValidated())
     {
-        s += QString("  Events: %1").arg(pg->NumEventsInFile);
-        if (pg->statNumEmptyEventsInFile > 0) s += QString(", %1 empty").arg(pg->statNumEmptyEventsInFile);
-        if (pg->statNumMultipleEvents    > 0) s += QString(", %1 multiple").arg(pg->statNumMultipleEvents);
+        s += QString("  Events: %1").arg(FileGenSettings.NumEventsInFile);
+        if (FileGenSettings.statNumEmptyEventsInFile > 0) s += QString(", %1 empty").arg(FileGenSettings.statNumEmptyEventsInFile);
+        if (FileGenSettings.statNumMultipleEvents    > 0) s += QString(", %1 multiple").arg(FileGenSettings.statNumMultipleEvents);
 
-        ui->lwFileStatistics->setEnabled(pg->ParticleStat.size() > 0);
-        for (AParticleInFileStatRecord & rec : pg->ParticleStat)
+        ui->lwFileStatistics->setEnabled(FileGenSettings.ParticleStat.size() > 0);
+        for (const AParticleInFileStatRecord & rec : FileGenSettings.ParticleStat)
         {
             ui->lwFileStatistics->addItem( QString("%1 \t# %2 \t <E>: %4 keV")
                                            .arg(rec.NameQt)
@@ -882,10 +876,9 @@ void MainWindow::on_lwFileStatistics_customContextMenuRequested(const QPoint &po
     {
         if (selectedItem->iconText() == "Copy all to clipboard")
          {
-            AFileParticleGenerator* pg = SimulationManager->FileParticleGenerator;
             QString txt;
 
-            for (AParticleInFileStatRecord & rec : pg->ParticleStat)
+            for (AParticleInFileStatRecord & rec : SimulationManager->Settings.partSimSet.FileGenSettings.ParticleStat)
             {
                 txt += QString("%1 \t# %2 \t <E>: %4 keV\n")
                                                .arg(rec.NameQt)
@@ -910,17 +903,17 @@ void MainWindow::on_lwFileStatistics_customContextMenuRequested(const QPoint &po
 void MainWindow::updateScriptParticleGeneratorGui()
 {
     ui->pteParticleGenerationScript->clear();
-    ui->pteParticleGenerationScript->appendPlainText(SimulationManager->ScriptParticleGenerator->GetScript());
+    ui->pteParticleGenerationScript->appendPlainText(SimulationManager->Settings.partSimSet.ScriptGenSettings.Script);
 }
 
 void MainWindow::on_pbParticleGenerationScript_clicked()
 {
     AJavaScriptManager* sm = new AJavaScriptManager(Detector->RandGen);
     AScriptWindow* sw = new AScriptWindow(sm, true, this);
-    sw->EnableAcceptReject();
+    sw->setAcceptRejectVisible();
 
-    int NumThreads = 1;
-    AParticleGenerator_SI* gen = new AParticleGenerator_SI(*Detector->MpCollection, Detector->RandGen, 0, &NumThreads);
+    //int NumThreads = 1;
+    AParticleGenerator_SI* gen = new AParticleGenerator_SI(*Detector->MpCollection, Detector->RandGen);//, 0, &NumThreads);
     QVector<AParticleRecord*> GP;
     gen->configure(&GP, 0);
     gen->setObjectName("gen");
@@ -941,7 +934,7 @@ void MainWindow::on_pbParticleGenerationScript_clicked()
     );
 
 
-    QString Script = SimulationManager->ScriptParticleGenerator->GetScript();
+    QString Script = SimulationManager->Settings.partSimSet.ScriptGenSettings.Script;
     QString Example = "gen.AddParticle(0,  100+math.random(),  10*math.random(), 10*math.random(), 0,   0, 0, 1)\n"
                       "gen.AddParticleIsotropic(0,  111,  0, 0, -5)";
     sw->ConfigureForLightMode(&Script, "Optical override: custom script", Example);
@@ -960,7 +953,7 @@ void MainWindow::on_pbParticleGenerationScript_clicked()
     GP.clear();
     delete sw; //also deletes script manager
 
-    if (bWasAccepted) SimulationManager->ScriptParticleGenerator->SetScript(Script);
+    if (bWasAccepted) SimulationManager->Settings.partSimSet.ScriptGenSettings.Script = Script;
     on_pbUpdateSimConfig_clicked();
 }
 

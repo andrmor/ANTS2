@@ -1,9 +1,11 @@
 #ifndef ASIMULATIONMANAGER_H
 #define ASIMULATIONMANAGER_H
 
-#include "generalsimsettings.h"
+#include "ageneralsimsettings.h"
 #include "atrackbuildoptions.h"
 #include "alogsandstatisticsoptions.h"
+#include "asimsettings.h"
+#include "aphotonnodedistributor.h"
 
 #include <vector>
 
@@ -24,9 +26,7 @@ class AFileParticleGenerator;
 class AScriptParticleGenerator;
 class AEventTrackingRecord;
 class ASimulator;
-
-//class QJsonObject;
-#include <QJsonObject>  // temporary
+class QJsonObject;
 
 class ASimulationManager : public QObject
 {
@@ -36,7 +36,7 @@ public:
     ~ASimulationManager();
 
     void StartSimulation(QJsonObject & json, int threads, bool bDoGuiUpdate);
-    // when simulation is finished, private slot ASimulationManager::onSimulationFinished() is triggered
+    // when simulation is finished, private slot onSimulationFinished() is triggered
 
     bool isSimulationSuccess() const {return fSuccess;}
     bool isSimulationFinished() const {return fFinished;}
@@ -51,13 +51,13 @@ public:
     void clearTrackingHistory();
 
     void setMaxThreads(int maxThreads) {MaxThreads = maxThreads;}
-    const QString loadNodesFromFile(const QString & fileName);
+    QString loadNodesFromFile(const QString & fileName);
 
-    //void setG4Sim_OnlyGenerateFiles(bool flag) {bOnlyFileExport = flag;}
-    //bool isG4Sim_OnlyGenerateFiles() const {return bOnlyFileExport;}
-    void generateG4antsConfigCommon(QJsonObject & json, ASimulator * worker);  // !!! G4ants files common
+    //const DetectorClass & getDetector() {return Detector;}
+    bool setup(const QJsonObject & json, int threads);
 
-    const DetectorClass & getDetector() {return Detector;}
+    QString checkPnotonNodeFile(const QString &fileName); // returns error description
+    int getNumThreads() const;
 
 public:
     std::vector<ANodeRecord *> Nodes;
@@ -70,24 +70,22 @@ public:
     QVector<QBitArray> SiPMpixels;
     QVector<AEnergyDepositionCell *> EnergyVector;
 
-    // Next three: Simulator workers use their own local copies constructed using configuration json
-    ASourceParticleGenerator * ParticleSources = nullptr;         //used to update json on config changes and in GUI to configure
+    // Next three: Simulator workers use their own local copies of Generators!
+    ASourceParticleGenerator * ParticleSources = nullptr;         //only for gui, simulation threads use their own
     AFileParticleGenerator   * FileParticleGenerator = nullptr;   //only for gui, simulation threads use their own
     AScriptParticleGenerator * ScriptParticleGenerator = nullptr; //only for gui, simulation threads use their own
 
-    ATrackBuildOptions TrackBuildOptions;
-    ALogsAndStatisticsOptions LogsStatOptions;
+    ATrackBuildOptions TrackBuildOptions;       // to be refactored!
+    ALogsAndStatisticsOptions LogsStatOptions;  // to be refactored!
 
     //for G4ants sims
     QSet<QString> SeenNonRegisteredParticles;
     double DepoByNotRegistered;
     double DepoByRegistered;
 
-    GeneralSimSettings simSettings;
-    QJsonObject jsSimSet;   // to be removed
-    bool bPhotonSourceSim;  // if false -> particle source sim
+    APhotonNodeDistributor InNodeDistributor;
 
-    int NumberOfWorkers = 0;
+    ASimSettings Settings;
 
 private:
     EventsDataClass & EventsDataHub;
@@ -108,9 +106,6 @@ private:
 
     bool bGuardTrackingHistory = false;
 
-    // G4ants
-    //bool bOnlyFileExport = false; // single trigger flag
-
 public slots:
     void StopSimulation();
     void onNewGeoManager(); // Nodes in history will be invalid after that!
@@ -127,11 +122,9 @@ signals:
     void ProgressReport(int percents); // used with network manager
 
 private:
-    bool setup(const QJsonObject & json, int threads);
     void clearG4data();
     void copyDataFromWorkers();
-    void removeOldFile(const QString &fileName, const QString &txt);
-    const QString makeLogDir() const;
+    QString makeLogDir() const;
     void saveParticleLog(const QString & dir) const;
     void saveG4ParticleLog(const QString & dir) const;
     void saveA2ParticleLog(const QString & dir) const;
@@ -140,6 +133,8 @@ private:
     void saveA2depositionLog(const QString & dir) const;
     void saveExitLog();
     void emitProgressSignal();
+    bool preparePhotonMode();
+    bool prepareParticleMode();
 };
 
 #endif // ASIMULATIONMANAGER_H

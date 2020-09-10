@@ -1,12 +1,13 @@
 #include "aconfiguration.h"
 #include "detectorclass.h"
+#include "asimsettings.h"
+#include "aparticlesimsettings.h"
 #include "ajsontools.h"
 #include "alrfmoduleselector.h"
 #include "apmgroupsmanager.h"
 #include "amaterialparticlecolection.h"
-#include "asourceparticlegenerator.h"
 #include "asandwich.h"
-#include "generalsimsettings.h"
+#include "ageneralsimsettings.h"
 #include "apmhub.h"
 
 #include <QDebug>
@@ -15,7 +16,7 @@
 #include <QtWidgets/QApplication>
 
 AConfiguration::AConfiguration(QObject *parent) :
-  QObject(parent), Detector(0), ParticleSources(0) {}
+  QObject(parent) {}
 
 //to do: //add messenger for warnings
 bool AConfiguration::LoadConfig(QJsonObject &json, bool DetConstructor, bool SimSettings, bool ReconstrSettings)
@@ -300,15 +301,15 @@ const QString AConfiguration::RemoveParticle(int particleId)
   Detector->MpCollection->IsParticleInUse(particleId, bInUse, s);
   if (bInUse) return "This particle is a secondary particle defined in neutron capture.\nIt appears in the following material(s):\n"+s;
 
-  if ( ParticleSources->IsParticleInUse(particleId, s) )
-      return "This particle is in use by the particle source(s):\n" + s;
+  s = SimSettings->partSimSet.isParticleInUse(particleId);
+  if (!s.isEmpty()) return s;
 
   Detector->Sandwich->IsParticleInUse(particleId, bInUse, s);
   if (bInUse) return "This particle is currently in use by the monitor(s):\n" + s;
 
   //this particle is not in use, so can be removed
   Detector->MpCollection->RemoveParticle(particleId);
-  ParticleSources->RemoveParticle(particleId);
+  SimSettings->partSimSet.removeParticle(particleId);
   Detector->Sandwich->RemoveParticle(particleId);
 
   //updating JSON config
@@ -317,7 +318,7 @@ const QString AConfiguration::RemoveParticle(int particleId)
     //particle sources
   QJsonObject sj = JSON["SimulationConfig"].toObject();
     QJsonObject pj = sj["ParticleSourcesConfig"].toObject();
-       ParticleSources->writeToJson(pj);
+       SimSettings->partSimSet.writeToJson(pj);   // !*! to be changed when SimSettings will be the main line
     sj["ParticleSourcesConfig"] = pj;
   JSON["SimulationConfig"] = sj;
 
@@ -334,7 +335,7 @@ void AConfiguration::UpdateSimSettingsOfDetector()
     {
         QJsonObject SimJson = JSON["SimulationConfig"].toObject();
 
-        GeneralSimSettings simSettings;
+        AGeneralSimSettings simSettings;
         simSettings.readFromJson(SimJson);
         Detector->PMs->configure(&simSettings); //wave, angle properties + rebin, prepare crosstalk
         Detector->MpCollection->UpdateRuntimePropertiesAndWavelengthBinning(&simSettings, Detector->RandGen);

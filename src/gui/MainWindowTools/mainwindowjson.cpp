@@ -374,30 +374,31 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
   JsonToSpinBox(ppj, "PhotPerNodeUniMax", ui->sbScanNumMax);
   JsonToLineEditDouble(ppj, "PhotPerNodeGaussMean", ui->ledScanGaussMean);
   JsonToLineEditDouble(ppj, "PhotPerNodeGaussSigma", ui->ledScanGaussSigma);
+  JsonToLineEditDouble(ppj, "PhotPerNodePoissonMean", ui->ledScanPoissonMean);
   if (ppj.contains("PhotPerNodeCustom"))
-    {
+  {
       QJsonArray ja = ppj["PhotPerNodeCustom"].toArray();
       int size = ja.size();
       if (size > 0)
-        {
-          double* xx = new double[size];
-          int* yy    = new int[size];
+      {
+          double * xx = new double[size];
+          double * yy = new double[size];
           for (int i=0; i<size; i++)
-            {
+          {
               xx[i] = ja[i].toArray()[0].toDouble();
-              yy[i] = ja[i].toArray()[1].toInt();
-            }
-          histScan = new TH1I("histPhotDistr","Photon distribution", size-1, xx);          
+              yy[i] = ja[i].toArray()[1].toDouble();
+          }
+          histScan = new TH1D("","CustomNumPhotDist", size-1, xx);
           histScan->SetXTitle("Number of generated photons");
-          histScan->SetYTitle("Relative probability");
-          for (int i = 1; i<size+1; i++) histScan->SetBinContent(i, yy[i-1]);
+          histScan->SetYTitle("Relative probability, a.u.");
+          for (int i = 1; i < size + 1; i++) histScan->SetBinContent(i, yy[i-1]);
           histScan->GetIntegral();
           delete[] xx;
           delete[] yy;
           ui->pbScanDistrShow->setEnabled(true);
           ui->pbScanDistrDelete->setEnabled(true);
-        }
-    }  
+      }
+  }
   //Wavelength/decay options
   QJsonObject wdj = pojs["WaveTimeOptions"].toObject();
   ui->cbFixWavelengthPointSource->setChecked(false);  //compatibility
@@ -412,6 +413,13 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
   ui->cobFixedDirOrCone->setCurrentIndex(0); //compatibility
   JsonToComboBox(pdj, "Fixed_or_Cone", ui->cobFixedDirOrCone);
   JsonToCheckbox(pdj, "Random", ui->cbRandomDir);
+
+  //testing new system, to be updated later!
+  QJsonObject sdsJson;
+  if (parseJson(pojs, "SpatialDistOptions", sdsJson))
+    SimulationManager->Settings.photSimSet.SpatialDistSettings.readFromJson(sdsJson);
+  else SimulationManager->Settings.photSimSet.SpatialDistSettings.clearSettings();
+  updateCNDgui();
 
   //Single position options
   QJsonObject spj = pojs["SinglePositionOptions"].toObject();
@@ -508,20 +516,19 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
             JsonToLineEditDouble(csjs, "ClusterMergeTime", ui->ledClusterTimeDif);
 
         //particle sources
-        SimulationManager->ParticleSources->readFromJson(psjs);
+        SimulationManager->Settings.partSimSet.SourceGenSettings.readFromJson(psjs);
+        //SimulationManager->ParticleSources->readFromJson(psjs);
         on_pbUpdateSourcesIndication_clicked();
 
         //generation from file
         QJsonObject fjs;
         parseJson(psjs, "GenerationFromFile", fjs);
-            if (!fjs.isEmpty())
-                SimulationManager->FileParticleGenerator->readFromJson(fjs);
+            if (!fjs.isEmpty()) SimulationManager->Settings.partSimSet.FileGenSettings.readFromJson(fjs);
         updateFileParticleGeneratorGui();
 
         QJsonObject sjs;
         parseJson(psjs, "GenerationFromScript", sjs);
-            if (!sjs.isEmpty())
-                SimulationManager->ScriptParticleGenerator->readFromJson(sjs);
+            if (!sjs.isEmpty()) SimulationManager->Settings.partSimSet.ScriptGenSettings.readFromJson(sjs);
         updateScriptParticleGeneratorGui();
 
         ui->labPhTracksOn_1->setVisible(SimulationManager->TrackBuildOptions.bBuildPhotonTracks);
@@ -563,12 +570,12 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
 
 void MainWindow::selectFirstActiveParticleSource()
 {
-    if (SimulationManager->ParticleSources->getTotalActivity() > 0)
+    if (SimulationManager->Settings.partSimSet.SourceGenSettings.getTotalActivity() > 0)
     {
         //show the first source with non-zero activity
         int i = 0;
-        for (; i<SimulationManager->ParticleSources->countSources(); i++)
-          if (SimulationManager->ParticleSources->getSource(i)->Activity > 0) break;
+        for (; i < SimulationManager->Settings.partSimSet.SourceGenSettings.getNumSources(); i++)
+            if (SimulationManager->Settings.partSimSet.SourceGenSettings.getSourceRecord(i)->Activity > 0) break;
 
         if (i < ui->lwDefinedParticleSources->count())
             ui->lwDefinedParticleSources->setCurrentRow(i);

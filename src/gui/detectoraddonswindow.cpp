@@ -75,6 +75,7 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(QWidget * parent, MainWindow * MW, De
   ui->frObjectEditor->setLayout(l);
   l->addWidget(twGeo->GetEditWidget());
   connect(twGeo, &AGeoTreeWidget::RequestRebuildDetector, this, &DetectorAddOnsWindow::onReconstructDetectorRequest);
+  connect(twGeo, &AGeoTreeWidget::RequestUpdateWorldSize, this, &DetectorAddOnsWindow::onRequestUpdateWorldSize);
   connect(twGeo, &AGeoTreeWidget::RequestHighlightObject, this, &DetectorAddOnsWindow::ShowObject);
   connect(twGeo, &AGeoTreeWidget::RequestShowObjectRecursive, this, &DetectorAddOnsWindow::ShowObjectRecursive);
   connect(twGeo, SIGNAL(RequestNormalDetectorDraw()), MW, SLOT(ShowGeometrySlot()));
@@ -119,6 +120,13 @@ void DetectorAddOnsWindow::onReconstructDetectorRequest()
       //else
       //    MW->CheckUpWindow->hide();
   }
+}
+
+void DetectorAddOnsWindow::onRequestUpdateWorldSize(double WorldSizeXY, double WorldSizeZ, bool fWorldSizeFixed)
+{
+    Detector->WorldSizeXY     = WorldSizeXY;
+    Detector->WorldSizeZ      = WorldSizeZ;
+    Detector->fWorldSizeFixed = fWorldSizeFixed;
 }
 
 void DetectorAddOnsWindow::UpdateGUI()
@@ -630,7 +638,7 @@ void DetectorAddOnsWindow::AddObjScriptSuccess()
 
 void DetectorAddOnsWindow::ReportScriptError(QString ErrorMessage)
 {
-    MW->GenScriptWindow->ClearText();
+    MW->GenScriptWindow->clearOutputText();
     MW->GenScriptWindow->ReportError(ErrorMessage, -1);
 }
 

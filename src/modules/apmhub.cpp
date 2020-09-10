@@ -1,7 +1,7 @@
 //ANTS
 #include "apmhub.h"
 #include "amaterialparticlecolection.h"
-#include "generalsimsettings.h"
+#include "ageneralsimsettings.h"
 #include "apmposangtyperecord.h"
 #include "agammarandomgenerator.h"
 #include "ajsontools.h"
@@ -292,7 +292,7 @@ void APmHub::resetOverrides()
     for (APm& pm : PMs) pm.resetOverrides();
 }
 
-void APmHub::configure(GeneralSimSettings *SimSet)
+void APmHub::configure(AGeneralSimSettings *SimSet)
 {
     WavelengthResolved = SimSet->fWaveResolved;
     AngularResolved = SimSet->fAngResolved;

@@ -11,7 +11,7 @@ public:
 
     void addLinkedNode(ANodeRecord * node); // ownership is transferred to the chain of linked node of this node
 
-    int    getNumberOfLinkedNodes();
+    int    getNumberOfLinkedNodes() const;
     double getX() const {return R[0];}
     double getY() const {return R[1];}
     double getZ() const {return R[2];}

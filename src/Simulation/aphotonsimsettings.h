@@ -6,42 +6,49 @@
 
 class QJsonObject;
 
-typedef std::pair<double, double> ADPair;
-
 // potons per node
+typedef std::pair<double, double> ADPair;
 class APhotonSim_PerNodeSettings
 {
 public:
-    enum APhPerNodeEnum {Fixed = 0, Uniform = 1, Gauss = 2, Custom = 3};
+    enum APhPerNodeEnum {Constant = 0, Uniform = 1, Gauss = 2, Custom = 3, Poisson = 4};
 
-    APhPerNodeEnum  PhPerNodeMode = Fixed;
-    int             PerNode_Fixed = 10;
-    int             PerNode_Min   = 10;
-    int             PerNode_Max   = 12;
-    double          PerNode_Mean  = 100.0;
-    double          PerNode_Sigma = 10.0;
-    QVector<ADPair> PerNode_Custom;
+    APhPerNodeEnum  Mode     = Constant;
+    int             Number   = 10;
+    int             Min      = 10;
+    int             Max      = 12;
+    double          Mean     = 100.0;
+    double          Sigma    = 10.0;
+    double          PoisMean = 10.0;
+    QVector<ADPair> CustomDist;
 
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);
+    void clearSettings();
 };
 
 // fixed properties of photon
 class APhotonSim_FixedPhotSettings
 {
 public:
-    enum ADirectionEnum  {Isotropic = 0, Vector = 1, Cone = 2};
+    enum AModeEnum {Vector = 0, Cone = 1};
 
-    bool            bFixWave      = false;
-    int             FixWaveIndex  = -1;
-    ADirectionEnum  DirectionMode = Isotropic;
-    double          FixDX         = 0;
-    double          FixDY         = 0;
-    double          FixDZ         = 1.0;
-    double          FixConeAngle  = 10.0;
+    bool      bFixWave      = false;
+    int       FixWaveIndex  = -1;
 
-    void writeToJson(QJsonObject & json) const;
-    void readFromJson(const QJsonObject & json);
+    bool      bIsotropic    = true;
+    AModeEnum DirectionMode = Vector;
+    double    FixDX         = 0;
+    double    FixDY         = 0;
+    double    FixDZ         = 1.0;
+    double    FixConeAngle  = 10.0;
+
+    void writeWaveToJson(QJsonObject & json) const;
+    void writeDirToJson(QJsonObject & json) const;
+    void readWaveFromJson(const QJsonObject & json);
+    void readDirFromJson(const QJsonObject & json);
+    void clearWaveSettings();
+    void clearDirSettings();
 };
 
 // single node
@@ -54,12 +61,13 @@ public:
 
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);
+    void clearSettings();
 };
 
 // scan
 struct APhScanRecord
 {
-    bool   bEnabled  = true;
+    bool   bEnabled  = false;
     double DX        = 10.0;
     double DY        = 0;
     double DZ        = 0;
@@ -76,6 +84,9 @@ public:
 
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);
+    void clearSettings();
+
+    int  countEvents() const;
 };
 
 // flood
@@ -100,6 +111,7 @@ public:
     double     Zfrom    = 0;
     double     Zto      = 0;
 
+    void clearSettings();
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);
 };
@@ -108,10 +120,47 @@ public:
 class APhotonSim_CustomNodeSettings
 {
 public:
-    QString NodesFileName;
+    enum ModeEnum {CustomNodes = 0, PhotonsDirectly = 1};
+
+    QString   FileName;
+    ModeEnum  Mode = CustomNodes;
+
+    //runtime properties
+    int NumEventsInFile = 0;
 
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);
+    void clearSettings();
+};
+
+// spatial distribution in node
+#include "a3dposprob.h"
+class APhotonSim_SpatDistSettings
+{
+public:
+    enum ModeEnum {DirectMode = 0, FormulaMode = 1, SplineMode = 2};
+
+    bool bEnabled = false;
+    ModeEnum Mode = DirectMode;
+
+    QVector<A3DPosProb> LoadedMatrix;
+    QString Formula;
+    QString Spline;
+
+    double  RangeX = 100.0;
+    double  RangeY = 100.0;
+    double  RangeZ = 100.0;
+
+    int     BinsX = 1;
+    int     BinsY = 1;
+    int     BinsZ = 1;
+
+    void    writeToJson(QJsonObject & json) const;
+    void    readFromJson(const QJsonObject & json);
+    void    clearSettings();
+
+    //runtime
+    int     SplineDim = 3;
 };
 
 // -------------- main -----------------
@@ -137,9 +186,13 @@ public:
     APhotonSim_ScanSettings       ScanSettings;
     APhotonSim_FloodSettings      FloodSettings;
     APhotonSim_CustomNodeSettings CustomNodeSettings;
+    APhotonSim_SpatDistSettings   SpatialDistSettings;
+
+    int getActiveRuns() const;
 
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);
+    void clearSettings();
 };
 
 #endif // APHOTONMODESETTINGS_H

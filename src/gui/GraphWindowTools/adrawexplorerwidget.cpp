@@ -151,6 +151,7 @@ void ADrawExplorerWidget::showObjectContextMenu(const QPoint &pos, int index)
 
     QMenu * scaleMenu =     Menu.addMenu("Scale / shift"); scaleMenu->setEnabled(Type.startsWith("TH") || Type.startsWith("TGraph") || Type.startsWith("TProfile"));
         QAction * scaleA =      scaleMenu->addAction("Scale");
+        QAction * scaleTo1 =    scaleMenu->addAction("Scale integral to unity");
         QAction * scaleCDRA =   scaleMenu->addAction("Scale: click-drag-release");
         scaleMenu->addSeparator();
         QAction * shiftA =      scaleMenu->addAction("Shift X scale");
@@ -172,9 +173,9 @@ void ADrawExplorerWidget::showObjectContextMenu(const QPoint &pos, int index)
 
     Menu.addSeparator();
 
-    QMenu * calcMenu =     Menu.addMenu("Calculate"); calcMenu->setEnabled(Type.startsWith("TH1") || Type == "TProfile");
-        QAction* integralA =    calcMenu->addAction("Draw integral");
-        QAction* fractionA =    calcMenu->addAction("Calculate fraction before/after");
+    QMenu * calcMenu =     Menu.addMenu("Calculate");
+        QAction* integralA =    calcMenu->addAction("Draw integral");                   integralA->setEnabled(Type.startsWith("TH1") || Type == "TProfile" || Type == "TGraph" || Type == "TGraphError");
+        QAction* fractionA =    calcMenu->addAction("Calculate fraction before/after"); fractionA->setEnabled(Type.startsWith("TH1") || Type == "TProfile");
 
     Menu.addSeparator();
 
@@ -185,6 +186,21 @@ void ADrawExplorerWidget::showObjectContextMenu(const QPoint &pos, int index)
         QAction* splineFitA =   fitMenu->addAction("B-spline"); splineFitA->setEnabled(Type == "TGraph" || Type == "TGraphErrors");   //*** implement for TH1 too!
         fitMenu->addSeparator();
         QAction* showFitPanel = fitMenu->addAction("Show fit panel");
+
+    Menu.addSeparator();
+
+    const QString options = obj.Options;
+    bool flag3D = false;
+    if (Type.startsWith("TH3") || Type.startsWith("TProfile2D") || Type.startsWith("TH2") || Type.startsWith("TF2") || Type.startsWith("TGraph2D"))
+        flag3D = true;
+    if ((Type.startsWith("TH2") || Type.startsWith("TProfile2D")) && ( options.contains("col",Qt::CaseInsensitive) || options.contains("prof", Qt::CaseInsensitive) || (options.isEmpty())) )
+        flag3D = false;
+    //qDebug() << "flag 3D" << flag3D << Type;//options.contains("col",Qt::CaseInsensitive);
+
+    QMenu * drawMenu = Menu.addMenu("Draw");        drawMenu->setEnabled(!flag3D);
+        QAction* linDrawA     = drawMenu->addAction("Line (use click-drag)");    // linDrawA->setEnabled(Type.startsWith("TH1") || Type == "TProfile" || Type.startsWith("TGraph"));
+        QAction* boxDrawA     = drawMenu->addAction("Box (use click-drag)");    // linDrawA->setEnabled(Type.startsWith("TH1") || Type == "TProfile" || Type.startsWith("TGraph"));
+        QAction* ellipseDrawA = drawMenu->addAction("Elypse (use click-drag)");    // linDrawA->setEnabled(Type.startsWith("TH1") || Type == "TProfile" || Type.startsWith("TGraph"));
 
     Menu.addSeparator();
 
@@ -208,6 +224,7 @@ void ADrawExplorerWidget::showObjectContextMenu(const QPoint &pos, int index)
    else if (si == delA)         remove(index);
    else if (si == setAttrib)    setAttributes(index);
    else if (si == scaleA)       scale(obj);
+   else if (si == scaleTo1)     scaleIntegralToUnity(obj);
    else if (si == scaleCDRA)    scaleCDR(obj);
    else if (si == integralA)    drawIntegral(obj);
    else if (si == fractionA)    fraction(obj);
@@ -232,7 +249,9 @@ void ADrawExplorerWidget::showObjectContextMenu(const QPoint &pos, int index)
    else if (si == showFitPanel) fitPanel(obj);
    else if (si == extractA)     extract(obj);
    else if (si == editTextPave) editPave(obj);
-
+   else if (si == linDrawA)     linDraw(index);
+   else if (si == boxDrawA)     boxDraw(index);
+   else if (si == ellipseDrawA) ellipseDraw(index);
 }
 
 void ADrawExplorerWidget::manipulateTriggered()
@@ -266,7 +285,22 @@ void ADrawExplorerWidget::manipulateTriggered()
         //    scaleMenu->addSeparator();
         //    QAction * shiftA =      scaleMenu->addAction("Shift X scale");
 
-        QAction* scale        = Menu.addAction("Scale all graphs/histograms to the same max"); scale->setEnabled(Type.startsWith("TH") || Type.startsWith("TGraph") || Type.startsWith("TProfile"));
+        QAction* scale        = Menu.addAction("Scale all graphs/histograms to have max of unity"); scale->setEnabled(Type.startsWith("TH") || Type.startsWith("TGraph") || Type.startsWith("TProfile"));
+
+        Menu.addSeparator();
+
+        const QString options = obj.Options;
+        bool flag3D = false;
+        if (Type.startsWith("TH3") || Type.startsWith("TProfile2D") || Type.startsWith("TH2") || Type.startsWith("TF2") || Type.startsWith("TGraph2D"))
+            flag3D = true;
+        if ((Type.startsWith("TH2") || Type.startsWith("TProfile2D")) && ( options.contains("col",Qt::CaseInsensitive) || options.contains("prof", Qt::CaseInsensitive) || (options.isEmpty())) )
+            flag3D = false;
+        //qDebug() << "flag 3D" << flag3D << Type;//options.contains("col",Qt::CaseInsensitive);
+
+        QMenu * drawMenu = Menu.addMenu("Draw");        drawMenu->setEnabled(!flag3D);
+            QAction* linDrawA     = drawMenu->addAction("Line (use click-drag)");    // linDrawA->setEnabled(Type.startsWith("TH1") || Type == "TProfile" || Type.startsWith("TGraph"));
+            QAction* boxDrawA     = drawMenu->addAction("Box (use click-drag)");    // linDrawA->setEnabled(Type.startsWith("TH1") || Type == "TProfile" || Type.startsWith("TGraph"));
+            QAction* ellipseDrawA = drawMenu->addAction("Elypse (use click-drag)");    // linDrawA->setEnabled(Type.startsWith("TH1") || Type == "TProfile" || Type.startsWith("TGraph"));
 
 
         // ------ exec ------
@@ -274,13 +308,15 @@ void ADrawExplorerWidget::manipulateTriggered()
         QAction* si = Menu.exec(pos);
         if (!si) return; //nothing was selected
 
-
         if      (si == axesX)        editAxis(obj, 0);
         else if (si == axesY)        editAxis(obj, 1);
         else if (si == axesZ)        editAxis(obj, 2);
         else if (si == addAxisTop)   addAxis(0);
         else if (si == addAxisRight) addAxis(1);
         else if (si == scale)        scaleAllSameMax();
+        else if (si == linDrawA)     linDraw(size-1);
+        else if (si == boxDrawA)     boxDraw(size-1);
+        else if (si == ellipseDrawA) ellipseDraw(size-1);
     }
 }
 
@@ -500,6 +536,33 @@ void ADrawExplorerWidget::scale(ADrawObject &obj)
     doScale(obj, sf);
 }
 
+void ADrawExplorerWidget::scaleIntegralToUnity(ADrawObject &obj)
+{
+    if (!canScale(obj)) return;
+    double factor = 1.0;
+
+    const QString name = obj.Pointer->ClassName();
+    if (name.startsWith("TGraph"))
+    {
+        TGraph * gr = static_cast<TGraph*>(obj.Pointer);
+        factor = gr->Integral();
+    }
+    else if (name.startsWith("TH1"))
+    {
+        TH1* h = static_cast<TH1*>(obj.Pointer);
+        factor = h->Integral();
+    }
+    else if (name.startsWith("TH2"))
+    {
+        TH2* h = static_cast<TH2*>(obj.Pointer);
+        factor = h->Integral();
+    }
+
+    if (factor == 0 || factor == 1.0) return;
+    factor = 1.0 / factor;
+    doScale(obj, factor);
+}
+
 void ADrawExplorerWidget::scaleCDR(ADrawObject &obj)
 {
     if (!canScale(obj)) return;
@@ -526,16 +589,26 @@ void ADrawExplorerWidget::scaleCDR(ADrawObject &obj)
 
 bool getDrawMax(ADrawObject & obj, double & max)
 {
+    max = 0;
+
     TGraph * g = dynamic_cast<TGraph*>(obj.Pointer);
     if (g)
     {
         max = TMath::MaxElement(g->GetN(), g->GetY());
+        return true;
     }
-    else
+
+    TH1 * h = dynamic_cast<TH1*>(obj.Pointer);
+    if (!h) return false;
+
+    //if (h) max = h->GetMaximum();  //problem with underflow/overflow bins?
+    int numBins = h->GetNbinsX();
+    if (numBins == 0) return false;
+    max = h->GetBinContent(1); //underflow/overflow bins are #0 and #(numBins+1)
+    for (int i = 2; i < numBins+1; i++)
     {
-        TH1 * h = dynamic_cast<TH1*>(obj.Pointer);
-        if (h) max = h->GetMaximum();
-        else return false;
+        double val = h->GetBinContent(i);
+        if (val > max) max = val;
     }
     return true;
 }
@@ -548,19 +621,22 @@ void ADrawExplorerWidget::scaleAllSameMax()
     ADrawObject & mainObj = DrawObjects[0];
     if (!canScale(mainObj)) return;
 
-    double max = 0;
-    bool bExtractable = getDrawMax(mainObj, max);
-    if (!bExtractable) return;
+    //double max = 0;
+    //bool bExtractable = getDrawMax(mainObj, max);
+    //if (!bExtractable) return;
 
-    for (int i=1; i<size; i++)
+    //for (int i=1; i<size; i++)
+    for (int i=0; i<size; i++)
     {
         ADrawObject & obj = DrawObjects[i];
 
         double thisMax = 0;
         getDrawMax(obj, thisMax);
+        qDebug() << i << thisMax;
         if (thisMax == 0) continue;
 
-        doScale(obj, max/thisMax);
+        //doScale(obj, max/thisMax);
+        doScale(obj, 1.0/thisMax);
     }
 }
 
@@ -652,38 +728,69 @@ void ADrawExplorerWidget::shift(ADrawObject &obj)
 
 void ADrawExplorerWidget::drawIntegral(ADrawObject &obj)
 {
-    TH1* h = dynamic_cast<TH1*>(obj.Pointer);
-    if (!h)
+    TH1D   * hi = nullptr;
+    TGraph * gi = nullptr;
+
+    TH1    * h = dynamic_cast<TH1*>(obj.Pointer);
+    TGraph * g = dynamic_cast<TGraph*>(obj.Pointer);
+    if (h)
+    {
+        int bins = h->GetNbinsX();
+
+        double* edges = new double[bins+1];
+        for (int i=0; i<bins+1; i++)
+            edges[i] = h->GetBinLowEdge(i+1);
+
+        QString title = "Integral of " + obj.Name;
+        hi = new TH1D("integral", title.toLocal8Bit().data(), bins, edges);
+        delete [] edges;
+
+        QString Xtitle = h->GetXaxis()->GetTitle();
+        if (!Xtitle.isEmpty()) hi->GetXaxis()->SetTitle(Xtitle.toLocal8Bit().data());
+
+        double prev = 0;
+        for (int i=1; i<bins+1; i++)
+        {
+            prev += h->GetBinContent(i);
+            hi->SetBinContent(i, prev);
+        }
+    }
+    else if (g)
+    {
+        const int points = g->GetN();
+        double sum = 0;
+        double x, y;
+        QVector<double> X; X.reserve(points);
+        QVector<double> Y; Y.reserve(points);
+        for (int i=0; i<points; i++)
+        {
+            g->GetPoint(i, x, y);
+            X << x;
+            sum += y;
+            Y << sum;
+        }
+
+        gi = new TGraph(points, X.data(), Y.data());
+
+        TString XTitle = g->GetXaxis()->GetTitle();
+        gi->GetXaxis()->SetTitle(XTitle);
+
+        TString YTitle = g->GetYaxis()->GetTitle();
+        gi->GetYaxis()->SetTitle("Integral of " + YTitle);
+    }
+    else
     {
         message("Not implemented for this object type", &GraphWindow);
         return;
     }
-    int bins = h->GetNbinsX();
-
-    double* edges = new double[bins+1];
-    for (int i=0; i<bins+1; i++)
-        edges[i] = h->GetBinLowEdge(i+1);
-
-    QString title = "Integral of " + obj.Name;
-    TH1D* hi = new TH1D("integral", title.toLocal8Bit().data(), bins, edges);
-    delete [] edges;
-
-    QString Xtitle = h->GetXaxis()->GetTitle();
-    if (!Xtitle.isEmpty()) hi->GetXaxis()->SetTitle(Xtitle.toLocal8Bit().data());
-
-    double prev = 0;
-    for (int i=1; i<bins+1; i++)
-      {
-        prev += h->GetBinContent(i);
-        hi->SetBinContent(i, prev);
-      }
 
     GraphWindow.MakeCopyOfDrawObjects();
     GraphWindow.MakeCopyOfActiveBasketId();
     GraphWindow.ClearBasketActiveId();
 
     DrawObjects.clear();
-    addToDrawObjectsAndRegister(hi, "hist");
+    if (hi) addToDrawObjectsAndRegister(hi, "hist");
+    else    addToDrawObjectsAndRegister(gi, "APL");
 
     GraphWindow.RedrawAll();
 }
@@ -1411,7 +1518,7 @@ void ADrawExplorerWidget::constructIconForObject(QIcon & icon, const ADrawObject
         if ( Opt.contains('P', Qt::CaseInsensitive) && !Opt.contains('C', Qt::CaseInsensitive) && !Opt.contains('L', Qt::CaseInsensitive) )
             line = nullptr;
     }
-    if (Type.startsWith("TGraph"))
+    else if (Type.startsWith("TGraph"))
     {
         QString redOpt = Opt;
         redOpt.remove("same", Qt::CaseInsensitive);
@@ -1426,6 +1533,16 @@ void ADrawExplorerWidget::constructIconForObject(QIcon & icon, const ADrawObject
             if (!Opt.contains('C', Qt::CaseInsensitive) && !Opt.contains('L', Qt::CaseInsensitive) && !Opt.contains('B', Qt::CaseInsensitive)) line = nullptr;
             if (!Opt.contains('F', Qt::CaseInsensitive)) fill = nullptr;
         }
+    }
+    else if (Type == "TLine" || Type == "TArrow")
+    {
+        line = dynamic_cast<const TAttLine*>(tObj);
+    }
+    else if (Type == "TBox" || Type == "TEllipse")
+    {
+        line = dynamic_cast<const TAttLine*>(tObj);
+        fill = dynamic_cast<const TAttFill*>(tObj);
+        if (fill->GetFillStyle() == 0) fill = nullptr;
     }
 
     construct1DIcon(icon, line, mark, fill);
@@ -1814,3 +1931,83 @@ void ADrawExplorerWidget::editTGaxis(ADrawObject &obj)
     }
 }
 
+//kira-->
+void ADrawExplorerWidget::linDraw(int index)
+{
+    GraphWindow.TriggerGlobalBusy(true);
+
+    GraphWindow.Extract2DLine();
+    if (!GraphWindow.Extraction()) return; //cancel
+
+    double startX = GraphWindow.extracted2DLineXstart();
+    double stopX = GraphWindow.extracted2DLineXstop();
+    double startY = GraphWindow.extracted2DLineYstart();
+    double stopY = GraphWindow.extracted2DLineYstop();
+
+    GraphWindow.MakeCopyOfDrawObjects();
+    GraphWindow.MakeCopyOfActiveBasketId();
+
+    //draw line
+    TLine *ln = new TLine(startX, startY, stopX, stopY);
+    GraphWindow.RegisterTObject(ln);
+    ln->SetLineStyle(2);
+    DrawObjects.insert(index+1, ADrawObject(ln, "same"));
+
+    GraphWindow.RedrawAll();
+    GraphWindow.HighlightUpdateBasketButton(true);
+}
+
+void ADrawExplorerWidget::boxDraw(int index)
+{
+    GraphWindow.TriggerGlobalBusy(true);
+
+    GraphWindow.Extract2DBox();
+    if (!GraphWindow.Extraction()) return; //cancel
+
+    double startX = GraphWindow.extractedX1();
+    double stopX  = GraphWindow.extractedX2();
+    double startY = GraphWindow.extractedY1();
+    double stopY  = GraphWindow.extractedY2();
+
+    GraphWindow.MakeCopyOfDrawObjects();
+    GraphWindow.MakeCopyOfActiveBasketId();
+
+    //draw box
+    TBox *bx = new TBox(startX, startY, stopX, stopY);
+    GraphWindow.RegisterTObject(bx);
+    bx->SetLineStyle(2);
+    bx->SetFillStyle(0);
+    DrawObjects.insert(index+1, ADrawObject(bx, "same"));
+
+    GraphWindow.RedrawAll();
+    GraphWindow.HighlightUpdateBasketButton(true);
+}
+
+#include "TEllipse.h"
+void ADrawExplorerWidget::ellipseDraw(int index)
+{
+    GraphWindow.TriggerGlobalBusy(true);
+
+    GraphWindow.Extract2DEllipse();
+    if (!GraphWindow.Extraction()) return; //cancel
+
+    double centerX = GraphWindow.extracted2DEllipseX();
+    double centerY = GraphWindow.extracted2DEllipseY();
+    double r1 = GraphWindow.extracted2DEllipseR1();
+    double r2 = GraphWindow.extracted2DEllipseR2();
+    double theta = GraphWindow.extracted2DEllipseTheta();
+
+
+    GraphWindow.MakeCopyOfDrawObjects();
+    GraphWindow.MakeCopyOfActiveBasketId();
+
+    TEllipse *el = new TEllipse(centerX, centerY, r1, r2, 0, 360, theta);
+    GraphWindow.RegisterTObject(el);
+    el->SetLineStyle(2);
+    el->SetFillStyle(0);
+    DrawObjects.insert(index+1, ADrawObject(el, "same"));
+
+    GraphWindow.RedrawAll();
+    GraphWindow.HighlightUpdateBasketButton(true);
+}
+//kira <--

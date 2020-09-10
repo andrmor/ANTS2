@@ -6,7 +6,7 @@
 #include <QJsonArray>
 
 class DetectorClass;
-class ASourceParticleGenerator;
+class ASimSettings;
 
 class AConfiguration : public QObject
 {
@@ -19,7 +19,8 @@ public:
   QString ErrorString;      // Last detected error (load config)
 
   void SetDetector(DetectorClass* detector) {Detector = detector;}
-  void SetParticleSources(ASourceParticleGenerator* particleSources) {ParticleSources = particleSources;}
+  void setSimSettings(ASimSettings * simSettings) {SimSettings = simSettings;}
+
   DetectorClass* GetDetector() {return Detector;}
 
   // save/load to json
@@ -70,9 +71,8 @@ signals:
 public slots:
 
 private:
-  DetectorClass* Detector;                  // Link to the Detector object
-  ASourceParticleGenerator* ParticleSources;    // Link to the ParticleSources object of SimulationManager
-
+  DetectorClass * Detector    = nullptr;           // Link to the Detector object
+  ASimSettings  * SimSettings = nullptr;
 };
 
 #endif // ACONFIGURATION_H

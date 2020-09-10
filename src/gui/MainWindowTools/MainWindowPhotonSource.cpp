@@ -133,10 +133,11 @@ void MainWindow::SimPointSourcesConfigToJson(QJsonObject &jsonMaster)
   ppnjson["PhotPerNodeUniMax"] = ui->sbScanNumMax->value();
   ppnjson["PhotPerNodeGaussMean"] = ui->ledScanGaussMean->text().toDouble();
   ppnjson["PhotPerNodeGaussSigma"] = ui->ledScanGaussSigma->text().toDouble();
+  ppnjson["PhotPerNodePoissonMean"] = ui->ledScanPoissonMean->text().toDouble();
   if (histScan)
   {
       QJsonArray ja;
-      writeTH1ItoJsonArr(histScan, ja);
+      writeTH1DtoJsonArr(histScan, ja);
       ppnjson["PhotPerNodeCustom"] = ja;
   }
   else ppnjson["PhotPerNodeCustom"] = QJsonArray();
@@ -157,6 +158,13 @@ void MainWindow::SimPointSourcesConfigToJson(QJsonObject &jsonMaster)
   pdjson["Fixed_or_Cone"] = ui->cobFixedDirOrCone->currentIndex();
   pdjson["Cone"] = ui->ledConeAngle->text().toDouble();
   json["PhotonDirectionOptions"] = pdjson;
+
+  //testing new system, to be updated later!
+  {
+      QJsonObject js;
+      SimulationManager->Settings.photSimSet.SpatialDistSettings.writeToJson(js);
+      json["SpatialDistOptions"] = js;
+  }
 
   QJsonObject spjson;
       spjson["SingleX"] = ui->ledSingleX->text().toDouble();

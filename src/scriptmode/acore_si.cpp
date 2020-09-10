@@ -147,6 +147,7 @@ void ACore_SI::print(QVariant message)
 {
     QString s;
     addQVariantToString(message, s);
+    qDebug() << s;
     emit ScriptManager->showPlainTextMessage(s);
 }
 
@@ -154,6 +155,7 @@ void ACore_SI::printHTML(QVariant message)
 {
     QString s;
     addQVariantToString(message, s);
+    qDebug() << s;
     emit ScriptManager->showMessage(s);
 }
 
@@ -977,6 +979,16 @@ QVariant ACore_SI::GetNewFiles()
         Finder_FileNames << n;
     }
     return newFiles;
+}
+
+QVariantList ACore_SI::GetDirectories(const QString dir, const QString dirNamePattern)
+{
+    QDir d(dir);
+    QStringList dl = d.entryList( QStringList(dirNamePattern), QDir::Dirs);
+
+    QVariantList Dirs;
+    for (const QString & s : dl) Dirs << s;
+    return Dirs;
 }
 
 void ACore_SI::processEvents()

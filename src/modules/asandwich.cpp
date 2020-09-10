@@ -561,6 +561,12 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
         else if (obj->ObjectType->isMonitor())
         {
             int MonitorCounter = MonitorsRecords.size();
+
+            TString fixedName = vol->GetName();
+            fixedName += "_-_";
+            fixedName += MonitorCounter;
+            vol->SetName(fixedName);
+
             MonitorsRecords.append(obj);
             (static_cast<ATypeMonitorObject*>(obj->ObjectType))->index = MonitorCounter;
             parent->AddNode(vol, MonitorCounter, lTrans);

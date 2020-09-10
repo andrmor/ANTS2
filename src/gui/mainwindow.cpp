@@ -235,8 +235,8 @@ void MainWindow::closeEvent(QCloseEvent *)
        qDebug() << "<Saving Python scripts";
        PythonScriptWindow->WriteToJson();
    }
-   qDebug() << "<Saving remote servers";
-   RemoteWindow->WriteConfig();
+   //qDebug() << "<Saving remote servers";
+   //RemoteWindow->WriteConfig();
    qDebug()<<"<Saving global settings";
    GlobSet.saveANTSconfiguration();
 
@@ -3404,7 +3404,7 @@ void MainWindow::on_pbSimulate_clicked()
   fStartedFromGUI = true;
   fSimDataNotSaved = false; // to disable the warning
 
-  MainWindow::writeSimSettingsToJson(Config->JSON);  
+  MainWindow::writeSimSettingsToJson(Config->JSON);
   startSimulation(Config->JSON);  
 }
 
@@ -4075,6 +4075,18 @@ void MainWindow::on_bpResults_clicked()
 void MainWindow::ShowGeometrySlot()
 {
     GeometryWindow->ShowGeometry(false, false);
+}
+
+void MainWindow::onGridSimulationFinished()
+{
+    Owindow->RefreshData();
+    Rwindow->OnEventsDataAdded();
+    Rwindow->ShowPositions(1, true);
+}
+
+void MainWindow::updateConfig()
+{
+     ELwindow->UpdateConfig();
 }
 
 void MainWindow::on_cobPartPerEvent_currentIndexChanged(int index)

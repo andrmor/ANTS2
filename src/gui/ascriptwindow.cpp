@@ -550,6 +550,7 @@ void AScriptWindow::on_pbRunScript_clicked()
    {
        WriteToJson();
        GlobSet.saveANTSconfiguration();
+       emit requestUpdateConfig();
    }
 
    QString Script = getTab()->TextEdit->document()->toPlainText();

@@ -1,8 +1,8 @@
 #include "anetworkmodule.h"
 #include "ajavascriptmanager.h"
-
-//#include "awebsocketserver.h"
+#include "agridrunner.h"
 #include "awebsocketsessionserver.h"
+
 #ifdef USE_ROOT_HTML
     #include "aroothttpserver.h"
 #endif
@@ -18,6 +18,7 @@ ANetworkModule::ANetworkModule()
     QObject::connect(WebSocketServer, &AWebSocketSessionServer::textMessageReceived, this, &ANetworkModule::OnWebSocketTextMessageReceived);
     QObject::connect(WebSocketServer, &AWebSocketSessionServer::reportToGUI, this, &ANetworkModule::ReportTextToGUI);
     QObject::connect(WebSocketServer, &AWebSocketSessionServer::clientDisconnected, this, &ANetworkModule::OnClientDisconnected);
+    QObject::connect(WebSocketServer, &AWebSocketSessionServer::restartIdleTimer, this, &ANetworkModule::RestartIdleTimer);
 
     QObject::connect(this, &ANetworkModule::ProgressReport, WebSocketServer, &AWebSocketSessionServer::onProgressChanged);
 }
@@ -29,6 +30,8 @@ ANetworkModule::~ANetworkModule()
 #ifdef USE_ROOT_HTML
     delete RootHttpServer;
 #endif
+
+    delete GridRunner;
 }
 
 void ANetworkModule::SetScriptManager(AJavaScriptManager* man)
@@ -79,7 +82,7 @@ void ANetworkModule::StartWebSocketServer(QHostAddress ip, quint16 port)
 
     if (bSingleConnectionMode)
     {
-        IdleTimer.setInterval(SelfDestructOnIdle);
+        IdleTimer.setInterval(SelfDestructOnIdle);        
         IdleTimer.setSingleShot(true);
         QObject::connect(&IdleTimer, &QTimer::timeout, this, &ANetworkModule::onIdleTimerTriggered);
         IdleTimer.start();
@@ -91,6 +94,12 @@ void ANetworkModule::StopWebSocketServer()
     WebSocketServer->StopListen();
     qDebug() << "ANTS2 web socket server has stopped listening";
     emit StatusChanged();
+}
+
+#include "agridrunner.h"
+void ANetworkModule::initGridRunner(EventsDataClass & EventsDataHub, const APmHub & PMs, ASimulationManager & simMan)
+{
+    GridRunner = new AGridRunner(EventsDataHub, PMs, simMan);
 }
 
 #include "aglobalsettings.h"
@@ -140,6 +149,8 @@ void ANetworkModule::onNewGeoManagerCreated()
 
 #include <QJsonObject>
 #include <QJsonDocument>
+#include "ajsontools.h"
+#include <QJsonValue>
 void ANetworkModule::OnWebSocketTextMessageReceived(QString message)
 {
     if (bSingleConnectionMode) IdleTimer.stop();
@@ -211,7 +222,16 @@ void ANetworkModule::OnWebSocketTextMessageReceived(QString message)
                 if ( !WebSocketServer->isReplied() )
                 {
                     if (res == "undefined") WebSocketServer->sendOK();
-                    else WebSocketServer->ReplyWithText("{ \"result\" : true, \"evaluation\" : \"" + res + "\" }");
+                    else
+                    {
+                        //WebSocketServer->ReplyWithText("{ \"result\" : true, \"evaluation\" : " + res + " }");
+
+                        QJsonObject js;
+                        js["result"] = true;
+                        js["evaluation"] = QJsonValue::fromVariant(ScriptManager->EvaluationResult.toVariant());
+
+                        WebSocketServer->ReplyWithText(jsonToString(js));
+                    }
                 }
             }
         }
@@ -222,7 +242,16 @@ void ANetworkModule::OnWebSocketTextMessageReceived(QString message)
 
 void ANetworkModule::OnClientDisconnected()
 {
-    if (bSingleConnectionMode) exit(0);
+    if (bSingleConnectionMode)
+    {
+        qDebug() << "ANTS2 server: exiting application on client diconnect";
+        exit(0);
+    }
+}
+
+void ANetworkModule::RestartIdleTimer()
+{
+    if (bSingleConnectionMode) IdleTimer.start();
 }
 
 void ANetworkModule::onIdleTimerTriggered()

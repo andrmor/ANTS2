@@ -412,7 +412,8 @@ SOURCES += main.cpp \
     SplineLibrary/Spline123/profileHist.cpp \
     SplineLibrary/Spline123/json11.cpp \
     SplineLibrary/Spline123/bspline123d.cpp \
-    SplineLibrary/Spline123/bsfit123.cpp
+    SplineLibrary/Spline123/bsfit123.cpp \
+    scriptmode/afarm_si.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -571,7 +572,8 @@ HEADERS  += common/CorrelationFilters.h \
     SplineLibrary/Spline123/json11.hpp \
     SplineLibrary/Spline123/eiquadprog.hpp \
     SplineLibrary/Spline123/bspline123d.h \
-    SplineLibrary/Spline123/bsfit123.h
+    SplineLibrary/Spline123/bsfit123.h \
+    scriptmode/afarm_si.h
 
 # --- SIM ---
 ants2_SIM {

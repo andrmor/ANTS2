@@ -276,6 +276,7 @@ signals:
     void onAbort();
     void onFinish(bool bError);
     void success(QString eval);
+    void requestUpdateConfig();
 
 };
 

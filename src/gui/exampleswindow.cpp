@@ -62,15 +62,19 @@ ExamplesWindow::~ExamplesWindow()
     delete ui;
 }
 
-void ExamplesWindow::SaveConfig(QString fileName, bool DetConstructor, bool SimSettings, bool ReconstrSettings)
+void ExamplesWindow::UpdateConfig()
 {
     MW->writeDetectorToJson(MW->Config->JSON);
-      MW->writeExtraGuiToJson(MW->Config->JSON);
+    MW->writeExtraGuiToJson(MW->Config->JSON);
     MW->writeSimSettingsToJson(MW->Config->JSON);
     MW->Rwindow->writeToJson(MW->Config->JSON);
     MW->Config->UpdateLRFmakeJson();
     MW->Config->UpdateLRFv3makeJson();
+}
 
+void ExamplesWindow::SaveConfig(QString fileName, bool DetConstructor, bool SimSettings, bool ReconstrSettings)
+{
+    UpdateConfig();
     MW->Config->SaveConfig(fileName, DetConstructor, SimSettings, ReconstrSettings);
 }
 

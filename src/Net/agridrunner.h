@@ -3,8 +3,9 @@
 
 #include <QObject>
 #include <QVector>
-#include <QJsonObject>
 #include <QHostAddress>
+#include <QVariant>
+#include <QString>
 
 class EventsDataClass;
 class APmHub;
@@ -13,39 +14,51 @@ class ARemoteServerRecord;
 class AWebSocketSession;
 class AWebSocketWorker_Base;
 class QJsonObject;
+struct AGridScriptResources;
 
 class AGridRunner : public QObject
 {
     Q_OBJECT
 public:
-    AGridRunner(QVector<ARemoteServerRecord*> & ServerRecords, EventsDataClass & EventsDataHub, const APmHub & PMs, ASimulationManager & simMan);
+    AGridRunner(EventsDataClass & EventsDataHub, const APmHub & PMs, ASimulationManager & simMan);
+    ~AGridRunner();
 
-    const QString CheckStatus();
-    const QString Simulate(const QJsonObject* config);
-    const QString Reconstruct(const QJsonObject* config);
-    const QString RateServers(const QJsonObject* config);
+    QString CheckStatus();
+    QString Simulate(const QJsonObject* config);
+    QString Reconstruct(const QJsonObject* config);
+    QString RateServers(const QJsonObject* config);
+
+    QVariant EvaluateSript(const QString & Script, const QJsonObject & config, const QVariantList & PerThreadResources, const QVariantList & PerThreadFiles);
+    QString  UploadFile(int iServer, const QString & FileName);
 
     void Abort();
 
-    void SetTimeout(int timeout) {TimeOut = timeout;}
+    void SetTimeout(int timeout);
+
+    void writeConfig();
+    void readConfig();
+    void clearRecords();
+
+    QVector<ARemoteServerRecord *> ServerRecords;
 
 public slots:
     void onRequestTextLog(int index, const QString message);
 
 private:
-    QVector<ARemoteServerRecord *> & ServerRecords;
     EventsDataClass & EventsDataHub;
     const APmHub & PMs;
     ASimulationManager & SimMan;
     int TimeOut = 5000;
-    //QVector<AWebSocketSession*> Sockets;
 
     bool bAbortRequested = false;
 
 private:
-    AWebSocketWorker_Base* startCheckStatusOfServer(int index, ARemoteServerRecord *serverRecord);
-    AWebSocketWorker_Base* startSim(int index, ARemoteServerRecord *serverRecord, const QJsonObject* config);
-    AWebSocketWorker_Base* startRec(int index, ARemoteServerRecord *server, const QJsonObject* config);
+    AWebSocketWorker_Base * startCheckStatusOfServer(int index, ARemoteServerRecord *serverRecord);
+    AWebSocketWorker_Base * startSim(int index, ARemoteServerRecord *serverRecord, const QJsonObject* config);
+    AWebSocketWorker_Base * startRec(int index, ARemoteServerRecord *server, const QJsonObject* config);
+
+    AWebSocketWorker_Base * startScriptWorker(int index, ARemoteServerRecord * serverrecord, const QJsonObject & config, const QString & script, AGridScriptResources & data);
+    AWebSocketWorker_Base * startUploadWorker(int index, ARemoteServerRecord * serverrecord, const QString & fileName);
 
     void startInNewThread(AWebSocketWorker_Base *worker);
 
@@ -58,24 +71,27 @@ private:
     void doAbort(QVector<AWebSocketWorker_Base *> &workers);
 
     void onStart();
+    QString commonStart();
 
 signals:
     void requestTextLog(int index, const QString message);
     void requestStatusLog(const QString message);
     void requestDelegateGuiUpdate();
 
-};
+    void notifySimulationFinished();
+    void notifyReconstructionFinished();
 
+};
 
 class AWebSocketWorker_Base : public QObject
 {
     Q_OBJECT
 public:
-    AWebSocketWorker_Base(int index, ARemoteServerRecord* rec, int timeOut,  const QJsonObject* config = 0);
-    virtual ~AWebSocketWorker_Base() {}
+    AWebSocketWorker_Base(int index, ARemoteServerRecord* rec, int timeOut,  const QJsonObject* config = nullptr);
 
     bool isRunning() const {return bRunning;}
     bool isPausedOrFinished() const {return bPaused || !bRunning;}
+    bool isPaused() const {return bPaused;}
     void setStarted() {bRunning = true;}
     void setPaused(bool flag) {bPaused = flag;}
 
@@ -83,22 +99,23 @@ public:
 
     void RequestAbort();
 
-    ARemoteServerRecord* getRecord() {return rec;}
+    //ARemoteServerRecord* getRecord() {return rec;}
+    ARemoteServerRecord * rec = nullptr;
 
 public slots:
     virtual void run() = 0;
 
 protected:
     int index;
-    ARemoteServerRecord* rec;
     int TimeOut = 5000;
 
-    bool bRunning = false;
-    bool bPaused = false;
+    bool bRunning       = false;
+    bool bPaused        = false;
     bool bExternalAbort = false;
 
+
     const QJsonObject* config;
-    AWebSocketSession* ants2socket = 0;
+    AWebSocketSession* ants2socket = nullptr;
 
     QString extraScript; //e.g. script to modify config according to distribution of sim events
 
@@ -106,6 +123,10 @@ protected:
     bool               allocateAntsServer();
     AWebSocketSession* connectToAntsServer();
     bool               establishSession();
+
+    bool               sendAnts2Config();
+    bool               uploadFile(const QString & LocalFileName, const QString & RemoteFileName);
+    bool               evaluateScript(const QString & Script, QVariant * Result = nullptr);
 
 signals:
     void finished();
@@ -154,6 +175,50 @@ public slots:
 
 private:
     void runReconstruction();
+};
+
+class AWorker_Script : public AWebSocketWorker_Base
+{
+    Q_OBJECT
+public:
+    AWorker_Script(int index, ARemoteServerRecord* rec, int timeOut, const QJsonObject* config, const QString & script, AGridScriptResources & data);
+
+    const QString        & script;
+    AGridScriptResources & data;
+
+    bool       bSuccess = false;
+    bool       bFailed  = false;
+
+public slots:
+    void run() override;
+
+private:
+    void runEvalScript();
+};
+
+struct AGridScriptResources
+{
+    QVariant Resource;
+    QString  FileName;
+
+    bool bDone = false;
+    bool bAllocated = false;
+
+    QVariant EvalResult;
+};
+
+class AWorker_Upload : public AWebSocketWorker_Base
+{
+    Q_OBJECT
+public:
+    AWorker_Upload(int index, ARemoteServerRecord* rec, int timeOut, const QString & fileName);
+
+    const QString & FileName;
+    bool bSuccess = false;
+
+public slots:
+    void run() override;
+
 };
 
 #endif // AGRIDRUNNER_H

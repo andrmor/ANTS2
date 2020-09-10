@@ -37,6 +37,9 @@ public:
     QByteArray ByteArrayReceived;
     qint64  TimeElapsed; //for rating
 
+    //error-related
+    enum AErrorType {Communication, ScriptSyntax, ScriptEval, LocalFile, RemoteFile};
+    AErrorType ErrorType;
     QString Error;
 
 public:

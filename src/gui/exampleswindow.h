@@ -28,6 +28,7 @@ public:
   explicit ExamplesWindow(QWidget* parent, MainWindow *mw);
   ~ExamplesWindow();
 
+  void UpdateConfig();
   void SaveConfig(QString fileName, bool DetConstructor = true, bool SimSettings = true, bool ReconstrSettings = true);
 
   void QuickSave(int i);

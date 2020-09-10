@@ -48,6 +48,7 @@ void MainWindow::createPythonScriptWindow()
   APythonScriptManager* PSM = new APythonScriptManager(Detector->RandGen);
   PythonScriptWindow = new AScriptWindow(PSM, false, w);
   PythonScriptWindow->move(25,25);
+  connect(PythonScriptWindow, &AScriptWindow::requestUpdateConfig, this, &MainWindow::updateConfig);
   connect(PythonScriptWindow, SIGNAL(WindowShown(QString)), WindowNavigator, SLOT(ShowWindowTriggered(QString)));
   connect(PythonScriptWindow, SIGNAL(WindowHidden(QString)), WindowNavigator, SLOT(HideWindowTriggered(QString)));
   PythonScriptWindow->connectWinNavigator(WindowNavigator);
@@ -98,6 +99,7 @@ void MainWindow::createPythonScriptWindow()
 
   ATree_SI* tree = new ATree_SI(TmpHub);
   PythonScriptWindow->RegisterInterface(tree, "tree");
+  connect(tree, &ATree_SI::RequestTreeDraw, GraphWindow, &GraphWindowClass::DrawTree);
 
   AMsg_SI* txt = new AMsg_SI(PSM, PythonScriptWindow);
   PythonScriptWindow->RegisterInterface(txt, "msg");

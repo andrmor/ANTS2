@@ -195,10 +195,12 @@ public slots:
     void updateLoaded(int events, int progress);
     void on_pbSingleSourceShow_clicked();
     void ShowGeometrySlot();
+    void onGridSimulationFinished();
 
 private slots:
     void updateFileParticleGeneratorGui();
     void updateScriptParticleGeneratorGui();
+    void updateConfig();
 
     void on_pbRefreshMaterials_clicked();
     void on_cbXbyYarray_stateChanged(int arg1);

@@ -236,12 +236,12 @@ void MainWindow::onRequestSimulationGuiUpdate()
 
 bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
 {
-  //        qDebug() << "Read sim from json and update sim gui";
+  qDebug() << "Read sim from json and update sim gui";
   if (!json.contains("SimulationConfig"))
-    {
+  {
       //qWarning() << "Json does not contain sim settings!";
       return false;
-    }
+  }
 
   //cleanup  
   delete histScan; histScan = nullptr;
@@ -471,6 +471,7 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
   QJsonObject njson = pojs["CustomNodesOptions"].toObject();
   JsonToLineEditText(njson, "FileWithNodes", ui->leNodesFromFile);
 
+  qDebug() << SimulationManager->TrackBuildOptions.bBuildPhotonTracks << SimulationManager->TrackBuildOptions.bBuildPhotonTracks;
   ui->labPhTracksOn->setVisible(SimulationManager->TrackBuildOptions.bBuildPhotonTracks);
 
     //PARTICLE SOURCES

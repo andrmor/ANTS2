@@ -75,7 +75,7 @@ void AGeoWin_SI::SetZoom(int level)
 {
   MW->GeometryWindow->ZoomLevel = level;
   MW->GeometryWindow->Zoom(true);
-  MW->GeometryWindow->on_pbShowGeometry_clicked();
+  MW->GeometryWindow->ShowGeometry(true, false);
   MW->GeometryWindow->readRasterWindowProperties();
 }
 

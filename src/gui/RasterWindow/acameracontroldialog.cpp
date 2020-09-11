@@ -91,6 +91,16 @@ void ACameraControlDialog::setView(bool bSkipReadRange)
     updateGui();
 }
 
+void ACameraControlDialog::resetView()
+{
+    int err;
+    RW->fCanvas->GetView()->SetView(60.0, -120.0, 0, err);
+    RW->fCanvas->Modified();
+    RW->fCanvas->Update();
+
+    updateGui();
+}
+
 void ACameraControlDialog::on_pbClose_clicked()
 {
     close();

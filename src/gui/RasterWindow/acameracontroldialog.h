@@ -23,6 +23,7 @@ public:
     void showAndUpdate();
 
     void setView(bool bSkipReadRange = false);
+    void resetView();
 
     QString setFocus(const QString & name);
 

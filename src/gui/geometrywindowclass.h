@@ -7,7 +7,6 @@
 class MainWindow;
 class RasterWindowBaseClass;
 class QWebEngineView;
-class QVariant;
 class QWebEngineDownloadItem;
 class TGeoVolume;
 class ACameraControlDialog;
@@ -25,7 +24,8 @@ public:
   ~GeometryWindowClass();
 
   bool ModePerspective = true;
-  int  ZoomLevel = 0; //0 is fastest, +2 is typically the most "natural"
+  int  ZoomLevel       = 0; //0 is fastest, +2 is typically the most "natural"
+  bool fRecallWindow   = false;
 
   void ShowAndFocus();
   void FocusVolume(const QString & name);
@@ -49,13 +49,8 @@ public:
 
   bool isColorByMaterial() {return ColorByMaterial;}
 
-  bool fRecallWindow = false;
-
   void writeToJson(QJsonObject & json) const;
   void readFromJson(const QJsonObject & json);
-
-  int GeoMarkerSize = 2;
-  int GeoMarkerStyle = 6;
 
   bool IsWorldVisible();
 
@@ -72,7 +67,6 @@ protected:
     void closeEvent(QCloseEvent * event) override;
 
 public slots:
-    void on_pbShowGeometry_clicked();
     void DrawTracks();
     void ShowPoint(double * r, bool keepTracks = false);
     void ShowPMnumbers();
@@ -92,6 +86,7 @@ private slots:
     void onDownloadPngRequested(QWebEngineDownloadItem *item);
 
 private slots:
+    void on_pbShowGeometry_clicked();
     void on_cbShowTop_toggled(bool checked);
     void on_cbColor_toggled(bool checked);
     void on_pbSaveAs_clicked();
@@ -116,7 +111,6 @@ private slots:
     void on_cbWireFrame_toggled(bool checked);
     void on_cbLimitVisibility_clicked();
     void on_sbLimitVisibility_editingFinished();
-
     void on_pbCameraDialog_clicked();
 
 private:
@@ -129,6 +123,10 @@ private:
 #ifdef __USE_ANTS_JSROOT__
     QWebEngineView * WebView = nullptr;
 #endif
+
+  // markers / lines
+  int GeoMarkerSize  = 2;
+  int GeoMarkerStyle = 6;
 
   bool TMPignore = false;
 

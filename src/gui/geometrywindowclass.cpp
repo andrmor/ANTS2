@@ -279,18 +279,18 @@ void GeometryWindowClass::SaveAs(const QString filename)
 
 void GeometryWindowClass::ResetView()
 {
-  TView3D *v = dynamic_cast<TView3D*>(RasterWindow->fCanvas->GetView());
-  if (!v) return;
+    if (ui->cobViewer->currentIndex() == 0)
+    {
+        TView3D *v = dynamic_cast<TView3D*>(RasterWindow->fCanvas->GetView());
+        if (!v) return;
 
-  v->SetPsi(0);
-  v->SetLatitude(60.0);
-  v->SetLongitude(-120.0);
+        //TMPignore = true;
+        ui->cobViewType->setCurrentIndex(0);
+        //TMPignore = false;
 
-  TMPignore = true;
-  ui->cobViewType->setCurrentIndex(0);
-  TMPignore = false;
-
-  RasterWindow->UpdateRootCanvas();
+        CameraControl->resetView();
+        //RasterWindow->UpdateRootCanvas();
+    }
 }
 
 void GeometryWindowClass::setHideUpdate(bool flag)
@@ -754,6 +754,7 @@ void GeometryWindowClass::on_pbShowGeometry_clicked()
     if (Mode == 0)
     {
         RasterWindow->ForceResize();
+        ResetView();
         fRecallWindow = false;
     }
 
@@ -762,9 +763,9 @@ void GeometryWindowClass::on_pbShowGeometry_clicked()
 
 void GeometryWindowClass::on_cbColor_toggled(bool checked)
 {
-  ColorByMaterial = checked;
-  MW->UpdateMaterialListEdit();
-  on_pbShowGeometry_clicked();
+    ColorByMaterial = checked;
+    MW->UpdateMaterialListEdit();
+    ShowGeometry(true, false);
 }
 
 void GeometryWindowClass::on_pbShowPMnumbers_clicked()
@@ -829,11 +830,12 @@ void GeometryWindowClass::on_pbTop_clicked()
     if (ui->cobViewer->currentIndex() == 0)
     {
         SetAsActiveRootWindow();
-        TView *v = RasterWindow->fCanvas->GetView();
+        TView * v = RasterWindow->fCanvas->GetView();
         v->Top();
         RasterWindow->fCanvas->Modified();
         RasterWindow->fCanvas->Update();
         readRasterWindowProperties();
+        CameraControl->updateGui();
     }
     else
     {
@@ -878,6 +880,7 @@ void GeometryWindowClass::on_pbFront_clicked()
         RasterWindow->fCanvas->Modified();
         RasterWindow->fCanvas->Update();
         readRasterWindowProperties();
+        CameraControl->updateGui();
     }
     else
     {
@@ -913,6 +916,7 @@ void GeometryWindowClass::on_pbSide_clicked()
         RasterWindow->fCanvas->Modified();
         RasterWindow->fCanvas->Update();
         readRasterWindowProperties();
+        CameraControl->updateGui();
     }
     else
     {
@@ -1055,22 +1059,17 @@ void GeometryWindowClass::on_actionDecrease_line_width_triggered()
 
 void GeometryWindowClass::doChangeLineWidth(int deltaWidth)
 {
-    // for all WorldTree objects the following will be overriden. Still affects, e.g., PMs
-    TObjArray* list = MW->Detector->GeoManager->GetListOfVolumes();
-    int numVolumes = list->GetEntries();
-    for (int i=0; i<numVolumes; i++)
-      {
-        TGeoVolume* tv = (TGeoVolume*)list->At(i);
+    TObjArray * list = MW->Detector->GeoManager->GetListOfVolumes();
+    const int numVolumes = list->GetEntries();
+    for (int i = 0; i < numVolumes; i++)
+    {
+        TGeoVolume * tv = (TGeoVolume*)list->At(i);
         int LWidth = tv->GetLineWidth() + deltaWidth;
-        if (LWidth <1) LWidth = 1;
-        qDebug() << i << tv->GetName() << LWidth;
+        if (LWidth < 1) LWidth = 1;
         tv->SetLineWidth(LWidth);
-      }
-
-    // for all WorldTree objects
+    }
     MW->Detector->changeLineWidthOfVolumes(deltaWidth);
-
-    on_pbShowGeometry_clicked();
+    ShowGeometry(true, false);
 }
 
 //#include <QElapsedTimer>
@@ -1160,9 +1159,13 @@ void GeometryWindowClass::on_cobViewer_currentIndexChanged(int index)
     if (index != 0)
     {
         ui->cobViewer->setCurrentIndex(0);
+        index = 0;
         message("Enable ants2_jsroot in ants2.pro and rebuild ants2", this);
     }
 #endif
+
+    ui->pbCameraDialog->setVisible(index == 0);
+    if (index != 0) CameraControl->hide();
 }
 
 void GeometryWindowClass::on_actionOpen_GL_viewer_triggered()

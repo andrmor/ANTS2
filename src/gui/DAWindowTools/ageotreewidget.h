@@ -32,17 +32,16 @@ public:
   void SelectObjects(QStringList ObjectNames);
   void SetLineAttributes(QString ObjectName);
 
-
 public slots:
   void UpdateGui(QString selected = "");
   void onGridReshapeRequested(QString objName);
   void objectMembersToScript(AGeoObject *Master, QString &script, int ident, bool bExpandMaterial, bool bRecursive);
   void objectToScript(AGeoObject *obj, QString &script, int ident, bool bExpandMaterial, bool bRecursive);
   void commonSlabToScript(QString &script);
-  void rebuildDetectorAndRestoreCurrentDelegate();
+  void rebuildDetectorAndRestoreCurrentDelegate();  // used by geoConst widget
 
 private slots:
-  void onItemSelectionChanged();
+  void onItemSelectionChanged();   // !*! bold is also used now for stack reference volume
   void customMenuRequested(const QPoint &pos);  // CONTEXT MENU
   void onItemClicked(); //only to return to normal geo view mode!
 
@@ -58,8 +57,8 @@ protected:
   void dragMoveEvent(QDragMoveEvent* event);
 
 private:
-  AGeoObject *World;
-  AGeoWidget *EditWidget;
+  AGeoObject * World      = nullptr;
+  AGeoWidget * EditWidget = nullptr;
 
   //base images for icons
   QImage Lock;
@@ -67,10 +66,10 @@ private:
   QImage StackStart, StackMid, StackEnd;
 
   QColor BackgroundColor;
-  bool fSpecialGeoViewMode;
+  bool   fSpecialGeoViewMode;
 
   QTreeWidgetItem * previousHoverItem = nullptr;
-  const QTreeWidgetItem * movingItem = nullptr;  // used only to prevent highlight of item under the moving one if it is the same as target
+  const QTreeWidgetItem * movingItem  = nullptr;  // used only to prevent highlight of item under the moving one if it is the same as target
 
   void populateTreeWidget(QTreeWidgetItem *parent, AGeoObject *Container, bool fDisabled = false);
   void updateExpandState(QTreeWidgetItem* item); //recursive!
@@ -81,7 +80,7 @@ private:
 
   void menuActionAddNewObject(QString ContainerName, AGeoShape * shape);
   void menuActionCopyObject(QString ObjToCopyName);
-  void ShowObject(QString ObjectName);
+  void ShowObject(QString ObjectName);   // !*!  str to obj
   void ShowObjectRecursive(QString ObjectName);
   void ShowObjectOnly(QString ObjectName);
   void menuActionEnableDisable(QString ObjectName);
@@ -110,7 +109,7 @@ private:
   const QString makeScriptString_DisabledObject(AGeoObject *obj);
 
 signals:
-  void ObjectSelectionChanged(const QString); // should be fired with empty string if selection does not contain a single item  
+  void ObjectSelectionChanged(QString); // should be fired with empty string if selection does not contain a single item
   void RequestRebuildDetector();
   void RequestHighlightObject(QString name);
   void RequestFocusObject(QString name);
@@ -148,11 +147,10 @@ private:
   void UpdateGui();
 
 public slots:
-  void onObjectSelectionChanged(const QString SelectedObject); //starts GUI update  //why const? :)
+  void onObjectSelectionChanged(QString SelectedObject); //starts GUI update
   void onStartEditing();
   void onRequestChangeShape(AGeoShape * NewShape);
   void onRequestChangeSlabShape(int NewShape);
-  //void OnCustomContextMenuTriggered_forMainObject(QPoint pos);
   void onMonitorRequestsShowSensitiveDirection();
 
   void onRequestShowCurrentObject();

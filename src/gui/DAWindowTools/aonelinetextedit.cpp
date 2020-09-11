@@ -31,6 +31,8 @@ void AOneLineTextEdit::setText(const QString & text)
     clear();
     appendPlainText(text);
 
+    if (text.isEmpty()) return;
+
     bool ok;
     double val = text.toDouble(&ok);
     if (!ok)

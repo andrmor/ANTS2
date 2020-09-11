@@ -39,7 +39,6 @@ AGeoTreeWidget::AGeoTreeWidget(ASandwich *Sandwich) : Sandwich(Sandwich)
 {
   World = Sandwich->World;
 
-  connect(this, SIGNAL(itemSelectionChanged()), this, SLOT(onItemSelectionChanged()));
   //setHeaderLabels(QStringList() << "Tree of geometry objects: use context menu and drag-and-drop");
   setHeaderHidden(true);
 
@@ -63,13 +62,14 @@ AGeoTreeWidget::AGeoTreeWidget(ASandwich *Sandwich) : Sandwich(Sandwich)
   StackEnd.load(dir+"BotSt.png");
 
   setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(customMenuRequested(const QPoint &)));
+  connect(this, &AGeoTreeWidget::customContextMenuRequested, this, &AGeoTreeWidget::customMenuRequested);
 
   BackgroundColor = QColor(240,240,240);
   fSpecialGeoViewMode = false;
 
   EditWidget = new AGeoWidget(Sandwich->World, this);
-  connect(this, SIGNAL(ObjectSelectionChanged(QString)), EditWidget, SLOT(onObjectSelectionChanged(QString)));
+  connect(this, &AGeoTreeWidget::itemSelectionChanged, this, &AGeoTreeWidget::onItemSelectionChanged);
+  connect(this, &AGeoTreeWidget::ObjectSelectionChanged, EditWidget, &AGeoWidget::onObjectSelectionChanged);
   connect(this, SIGNAL(itemClicked(QTreeWidgetItem*,int)), this, SLOT(onItemClicked()));
   connect(EditWidget, &AGeoWidget::showMonitor, this, &AGeoTreeWidget::RequestShowMonitor);
   connect(EditWidget, &AGeoWidget::requestBuildScript, this, &AGeoTreeWidget::objectToScript);
@@ -116,44 +116,41 @@ void AGeoTreeWidget::SelectObjects(QStringList ObjectNames)
 
 void AGeoTreeWidget::UpdateGui(QString selected)
 {
-  if (!World) return;
+    if (!World) return;
 
-  //qDebug() << "Update, selected = "<<selected;
-  if (selected.isEmpty() && currentItem())
-  {
-      //qDebug() << currentItem()->text(0);
-      selected = currentItem()->text(0);
-  }
-  clear();
+    qDebug() << "==> Update tree triggered, selected = "<<selected;
 
-  //World
-  QTreeWidgetItem *w = new QTreeWidgetItem(this);
-  w->setText(0, "World");
-  QFont f = w->font(0);
-  f.setBold(true);
-  w->setFont(0, f);
-  w->setSizeHint(0, QSize(50, 20));
-  w->setFlags(w->flags() & ~Qt::ItemIsDragEnabled);// & ~Qt::ItemIsSelectable);
-  //w->setBackgroundColor(0, BackgroundColor);
-  //qDebug() << "New world WidgetItem created";
+    clear(); // also emits "itemSelectionChanged" with no selection -> clears delegate
 
-  populateTreeWidget(w, World);
-  //expandAll(); // less blunt later - e.g. on exapand remember the status in AGeoObject
-  if (topLevelItemCount()>0)
-    updateExpandState(this->topLevelItem(0));
+    //World
+    QTreeWidgetItem * w = new QTreeWidgetItem(this);
+    w->setText(0, "World");
+    QFont f = w->font(0);
+    f.setBold(true);
+    w->setFont(0, f);
+    w->setSizeHint(0, QSize(50, 20));
+    w->setFlags(w->flags() & ~Qt::ItemIsDragEnabled);// & ~Qt::ItemIsSelectable);
+    //w->setBackgroundColor(0, BackgroundColor);
 
-  if (!selected.isEmpty())
-  {
-      //qDebug() << "Selection:"<<selected;
-      QList<QTreeWidgetItem*> list = findItems(selected, Qt::MatchExactly | Qt::MatchRecursive);
-      //qDebug() << list.size();
+    populateTreeWidget(w, World);
+    if (topLevelItemCount() > 0)
+        updateExpandState(this->topLevelItem(0));
+
+    if (selected.isEmpty())
+    {
+        if (topLevelItemCount() > 0)
+            setCurrentItem(topLevelItem(0));
+    }
+    else
+    {
+        QList<QTreeWidgetItem*> list = findItems(selected, Qt::MatchExactly | Qt::MatchRecursive);
         if (!list.isEmpty())
         {
-           //qDebug() << "Attempting to focus:"<<list.first()->text(0);
-           list.first()->setSelected(true);
-           setCurrentItem(list.first());
+            list.first()->setSelected(true);
+            setCurrentItem(list.first());
         }
-  }
+    }
+    qDebug() << "<==";
 }
 
 void AGeoTreeWidget::onGridReshapeRequested(QString objName)
@@ -495,40 +492,41 @@ void AGeoTreeWidget::dragMoveEvent(QDragMoveEvent *event)
 
 void AGeoTreeWidget::onItemSelectionChanged()
 {
+    qDebug() << "---Widget selection cghanged";
   QList<QTreeWidgetItem*> sel = selectedItems();
 
   if (sel.size() == 0)
-    {
+  {
       emit ObjectSelectionChanged("");
       return;
-    }
+  }
   if (sel.size() == 1)
-    {
+  {
       QString name = sel.first()->text(0);
       emit ObjectSelectionChanged(name);
       return;
-    }
+  }
 
   //multiple selected
 
   //allow only selection of objects of the same container!
   //static objects cannot be mixed with others
-  QTreeWidgetItem* FirstParent = sel.first()->parent();
-  for (int i=1; i<sel.size(); i++)
-    {
+  QTreeWidgetItem * FirstParent = sel.first()->parent();
+  for (int i = 1; i < sel.size(); i++)
+  {
       if (sel.at(i)->parent() != FirstParent)
-        {
+      {
           //qDebug() << "Cannot select together items from different containers!";
           sel.at(i)->setSelected(false);
           return; // will retrigger anyway
-        }
+      }
       if (sel.at(i)->font(0).bold())
-        {
+      {
           //qDebug() << "Cannot select together different slabs or    world and slab(s)";
           sel.at(i)->setSelected(false);
           return; // will retrigger anyway
-        }
-    }
+      }
+  }
 
   //with multiple selected do not show EditWidget
   emit ObjectSelectionChanged("");
@@ -1691,7 +1689,7 @@ AGeoWidget::AGeoWidget(AGeoObject *World, AGeoTreeWidget *tw) :
 
 void AGeoWidget::ClearGui()
 {
-    //qDebug() << "Object widget clear triggered!";
+    qDebug() << "AGeoWidget clear triggered!";
     fIgnoreSignals = true;
 
     while(ObjectLayout->count() > 0)
@@ -1712,16 +1710,13 @@ void AGeoWidget::ClearGui()
 
 void AGeoWidget::UpdateGui()
 {  
-    //qDebug() << "UpdateGui triggered";
+    qDebug() << "UpdateGui triggered for AGeoWidget--->->->->";
     ClearGui(); //deletes Delegate!
 
     if (!CurrentObject) return;
 
     pbConfirm->setEnabled(true);
     pbCancel->setEnabled(true);
-
-    //AGeoObject* contObj = CurrentObject->Container;
-    //if (!contObj) return; //true only for World
 
     if (CurrentObject->ObjectType->isWorld())
         GeoDelegate = new AWorldDelegate(tw->Sandwich->Materials, this);
@@ -1839,22 +1834,22 @@ AGeoBaseDelegate *AGeoWidget::createAndAddMonitorDelegate()
     return Del;
 }
 
-void AGeoWidget::onObjectSelectionChanged(const QString SelectedObject)
+void AGeoWidget::onObjectSelectionChanged(QString SelectedObject)
 {  
+    if (fIgnoreSignals) return;
+
     CurrentObject = nullptr;
-    //qDebug() << "Object selection changed! ->" << SelectedObject;
+    qDebug() << "Object selection changed! ->" << SelectedObject;
     ClearGui();
 
     AGeoObject* obj = World->findObjectByName(SelectedObject);
     if (!obj) return;
 
-    //if (obj->ObjectType->isWorld()) return;
-
     CurrentObject = obj;
-    //qDebug() << "New current object:"<<CurrentObject->Name;
+    qDebug() << "New current object:"<<CurrentObject->Name;
     UpdateGui();
     fEditingMode = false;
-    //qDebug() << "OnObjectSelection procedure completed";
+    qDebug() << "OnObjectSelection procedure completed";
 }
 
 void AGeoWidget::onStartEditing()
@@ -1957,9 +1952,7 @@ void AGeoWidget::exitEditingMode()
 {
     fEditingMode = false;
     tw->setEnabled(true);
-    QFont f = pbConfirm->font();
-    f.setBold(false);
-    pbConfirm->setFont(f);
+    QFont f = pbConfirm->font(); f.setBold(false); pbConfirm->setFont(f);
     pbConfirm->setStyleSheet("QPushButton {color: black;}");
     pbConfirm->setEnabled(false);
     pbCancel->setEnabled(false);

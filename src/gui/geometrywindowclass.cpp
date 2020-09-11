@@ -1,7 +1,6 @@
 #include "TCanvas.h"
 #include "geometrywindowclass.h"
 #include "ui_geometrywindowclass.h"
-#include "mainwindow.h"
 #include "apmhub.h"
 #include "apmtype.h"
 #include "windownavigatorclass.h"
@@ -35,8 +34,8 @@
 #include "TGeoManager.h"
 #include "TVirtualGeoTrack.h"
 
-GeometryWindowClass::GeometryWindowClass(QWidget *parent, MainWindow *mw, DetectorClass &Detector, ASimulationManager & SimulationManager) :
-  AGuiWindow("geometry", parent), MW(mw), Detector(Detector), SimulationManager(SimulationManager),
+GeometryWindowClass::GeometryWindowClass(QWidget *parent, DetectorClass &Detector, ASimulationManager & SimulationManager) :
+  AGuiWindow("geometry", parent), Detector(Detector), SimulationManager(SimulationManager),
   ui(new Ui::GeometryWindowClass)
 {    
     ui->setupUi(this);
@@ -87,6 +86,7 @@ GeometryWindowClass::GeometryWindowClass(QWidget *parent, MainWindow *mw, Detect
 GeometryWindowClass::~GeometryWindowClass()
 {
     delete ui;
+    ClearGeoMarkers(0);
 }
 
 void GeometryWindowClass::adjustGeoAttributes(TGeoVolume * vol, int Mode, int transp, bool adjustVis, int visLevel, int currentLevel)
@@ -159,7 +159,7 @@ void GeometryWindowClass::on_pbShowGeometry_clicked()
 void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool ColorUpdateAllowed)
 {
     //qDebug()<<"  ----Showing geometry----" << MW->GeometryDrawDisabled;
-    if (MW->GeometryDrawDisabled) return;
+    if (bDisableDraw) return;
 
     prepareGeoManager(ColorUpdateAllowed);
 
@@ -188,10 +188,10 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
     else
     {
 #ifdef __USE_ANTS_JSROOT__
-        //qDebug() << "Before:" << gGeoManager->GetListOfTracks()->GetEntriesFast() << "markers: "<< MW->GeoMarkers.size();
+        //qDebug() << "Before:" << Detector.GeoManager->GetListOfTracks()->GetEntriesFast() << "markers: "<< MW->GeoMarkers.size();
 
         //deleting old markers
-        TObjArray * Arr = gGeoManager->GetListOfTracks();
+        TObjArray * Arr = Detector.GeoManager->GetListOfTracks();
         const int numObj = Arr->GetEntriesFast();
         int iObj = 0;
         for (; iObj<numObj; iObj++)
@@ -206,13 +206,13 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
             }
             Arr->Compress();
         }
-        //qDebug() << "After filtering markers:"<<gGeoManager->GetListOfTracks()->GetEntriesFast();
+        //qDebug() << "After filtering markers:"<<Detector.GeoManager->GetListOfTracks()->GetEntriesFast();
 
-        if (!MW->GeoMarkers.isEmpty())
+        if (!GeoMarkers.isEmpty())
         {
-            for (int i=0; i<MW->GeoMarkers.size(); i++)
+            for (int i = 0; i < GeoMarkers.size(); i++)
             {
-                GeoMarkerClass* gm = MW->GeoMarkers[i];
+                GeoMarkerClass * gm = GeoMarkers[i];
                 //overrides
                 if (gm->Type == "Recon" || gm->Type == "Scan" || gm->Type == "Nodes")
                 {
@@ -221,18 +221,19 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
                 }
 
                 TPolyMarker3D * mark = new TPolyMarker3D(*gm);
-                gGeoManager->GetListOfTracks()->Add(mark);
+                Detector.GeoManager->GetListOfTracks()->Add(mark);
             }
         }
-        //qDebug() << "After:" << gGeoManager->GetListOfTracks()->GetEntriesFast();
+        //qDebug() << "After:" << Detector.GeoManager->GetListOfTracks()->GetEntriesFast();
 
-        MW->NetModule->onNewGeoManagerCreated();
+        //MW->NetModule->onNewGeoManagerCreated();
+        emit requestUpdateRegisteredGeoManager();
 
         QWebEnginePage * page = WebView->page();
         QString js = "var painter = JSROOT.GetMainPainter(\"onlineGUI_drawing\");";
         js += QString("painter.setAxesDraw(%1);").arg(ui->cbShowAxes->isChecked());
         js += QString("painter.setWireFrame(%1);").arg(ui->cbWireFrame->isChecked());
-        js += QString("JSROOT.GEO.GradPerSegm = %1;").arg(ui->cbWireFrame->isChecked() ? 360 / MW->GlobSet.NumSegments : 6);
+        js += QString("JSROOT.GEO.GradPerSegm = %1;").arg(ui->cbWireFrame->isChecked() ? 360 / AGlobalSettings::getInstance().NumSegments : 6);
         js += QString("painter.setShowTop(%1);").arg(ui->cbShowTop->isChecked() ? "true" : "false");
         js += "if (JSROOT.hpainter) JSROOT.hpainter.updateAll();";
         page->runJavaScript(js);
@@ -311,7 +312,7 @@ void GeometryWindowClass::UpdateRootCanvas()
     RasterWindow->UpdateRootCanvas();
 }
 
-void GeometryWindowClass::SaveAs(const QString filename)
+void GeometryWindowClass::SaveAs(const QString & filename)
 {
     RasterWindow->SaveAs(filename);
 }
@@ -392,7 +393,7 @@ void GeometryWindowClass::ShowPMnumbers()
        tmp.append( QString::number(i) );
    ShowText(tmp, kBlack, true);
 
-   MW->NetModule->onNewGeoManagerCreated();
+   emit requestUpdateRegisteredGeoManager();
 }
 
 void GeometryWindowClass::ShowMonitorIndexes()
@@ -704,15 +705,15 @@ void GeometryWindowClass::ShowPMsignals(const QVector<float> & Event, bool bFull
 
 void GeometryWindowClass::ShowGeoMarkers()
 {
-    if (!MW->GeoMarkers.isEmpty())
+    if (!GeoMarkers.isEmpty())
     {
         int Mode = ui->cobViewer->currentIndex(); // 0 - standard, 1 - jsroot
         if (Mode == 0)
         {
             SetAsActiveRootWindow();
-            for (int i=0; i<MW->GeoMarkers.size(); i++)
+            for (int i = 0; i < GeoMarkers.size(); i++)
             {
-                GeoMarkerClass* gm = MW->GeoMarkers[i];
+                GeoMarkerClass* gm = GeoMarkers[i];
                 //overrides
                 if (gm->Type == "Recon" || gm->Type == "Scan" || gm->Type == "Nodes")
                 {
@@ -742,6 +743,33 @@ void GeometryWindowClass::ShowTracksAndMarkers()
     }
 }
 
+#include "anoderecord.h"
+void GeometryWindowClass::ShowCustomNodes(int firstN)
+{
+    ClearGeoMarkers();
+    Detector.GeoManager->ClearTracks();
+
+    GeoMarkerClass * marks = new GeoMarkerClass("Nodes", 6, 2, kBlack);
+
+    int iCounter = 0;
+    for (ANodeRecord * node : SimulationManager.Nodes)
+    {
+        ANodeRecord * thisNode = node;
+        while (thisNode)
+        {
+            marks->SetNextPoint(thisNode->R[0], thisNode->R[1], thisNode->R[2]);
+            if (firstN != -1)
+            {
+                iCounter++;
+                if (iCounter > firstN) break;
+            }
+            thisNode = thisNode->getLinkedNode();
+        }
+    }
+    GeoMarkers.append(marks);
+    ShowGeometry(true, false);
+}
+
 void GeometryWindowClass::ClearTracks(bool bRefreshWindow)
 {
     Detector.GeoManager->ClearTracks();
@@ -757,10 +785,39 @@ void GeometryWindowClass::ClearTracks(bool bRefreshWindow)
     }
 }
 
+void GeometryWindowClass::ClearGeoMarkers(int All_Rec_True)
+{
+    for (int i = GeoMarkers.size()-1; i>-1; i--)
+    {
+        switch (All_Rec_True)
+        {
+        case 1:
+            if (GeoMarkers.at(i)->Type == "Recon")
+            {
+                delete GeoMarkers[i];
+                GeoMarkers.remove(i);
+            }
+            break;
+        case 2:
+            if (GeoMarkers.at(i)->Type == "Scan")
+            {
+                delete GeoMarkers[i];
+                GeoMarkers.remove(i);
+            }
+            break;
+        case 0:
+        default:
+            delete GeoMarkers[i];
+        }
+    }
+
+    if (All_Rec_True == 0) GeoMarkers.clear();
+}
+
 void GeometryWindowClass::on_cbColor_toggled(bool checked)
 {
     ColorByMaterial = checked;
-    MW->UpdateMaterialListEdit();
+    emit requestUpdateMaterialListWidget();
     ShowGeometry(true, false);
 }
 
@@ -781,7 +838,7 @@ void GeometryWindowClass::on_pbShowTracks_clicked()
 
 void GeometryWindowClass::DrawTracks()
 {
-    if (MW->GeometryDrawDisabled) return;
+    if (bDisableDraw) return;
 
     int Mode = ui->cobViewer->currentIndex(); // 0 - standard, 1 - jsroot
     if (Mode == 0)
@@ -793,17 +850,16 @@ void GeometryWindowClass::DrawTracks()
     else ShowGeometry(false);
 }
 
-#include "ageomarkerclass.h"
 void GeometryWindowClass::ShowPoint(double * r, bool keepTracks)
 {
-    MW->clearGeoMarkers();
+    ClearGeoMarkers();
 
     GeoMarkerClass* marks = new GeoMarkerClass("Source", 3, 10, kBlack);
     marks->SetNextPoint(r[0], r[1], r[2]);
-    MW->GeoMarkers.append(marks);
+    GeoMarkers.append(marks);
     GeoMarkerClass* marks1 = new GeoMarkerClass("Source", 4, 3, kRed);
     marks1->SetNextPoint(r[0], r[1], r[2]);
-    MW->GeoMarkers.append(marks1);
+    GeoMarkers.append(marks1);
 
     ShowGeometry(false);
     if (keepTracks) DrawTracks();
@@ -811,14 +867,14 @@ void GeometryWindowClass::ShowPoint(double * r, bool keepTracks)
 
 void GeometryWindowClass::on_pbClearTracks_clicked()
 {
-  Detector.GeoManager->ClearTracks();
-  ShowGeometry(true, false);
+    Detector.GeoManager->ClearTracks();
+    ShowGeometry(true, false);
 }
 
 void GeometryWindowClass::on_pbClearDots_clicked()
 { 
-  MW->clearGeoMarkers();
-  ShowGeometry(true, false);
+    ClearGeoMarkers();
+    ShowGeometry(true, false);
 }
 
 void GeometryWindowClass::on_pbTop_clicked()
@@ -1135,14 +1191,15 @@ void GeometryWindowClass::on_cobViewer_currentIndexChanged(int index)
     }
     else
     {
-        if (!MW->NetModule->isRootServerRunning())
+        ANetworkModule * NetModule = AGlobalSettings::getInstance().getNetworkModule();
+        if (!NetModule->isRootServerRunning())
         {
-            bool bOK = MW->NetModule->StartRootHttpServer();
+            bool bOK = NetModule->StartRootHttpServer();
             if (!bOK)
             {
                 ui->cobViewer->setCurrentIndex(0);
-                message("Failed to start root http server. Check if another server is running at the same port", this);
-                MW->GlobSetWindow->ShowNetSettings();
+                message("Failed to start root http server. Check if another server is running at the same port", this);                
+                emit requestShowNetSettings();
                 return;
             }
         }
@@ -1186,7 +1243,8 @@ void GeometryWindowClass::OpenGLview()
 void GeometryWindowClass::on_actionJSROOT_in_browser_triggered()
 {
 #ifdef USE_ROOT_HTML
-    if (MW->NetModule->isRootServerRunning())
+    ANetworkModule * NetModule = AGlobalSettings::getInstance().getNetworkModule();
+    if (NetModule->isRootServerRunning())
     {
         //QString t = "http://localhost:8080/?nobrowser&item=[Objects/GeoWorld/WorldBox_1,Objects/GeoTracks/TObjArray]&opt=dray;all;tracks";
         QString t = "http://localhost:8080/?nobrowser&item=Objects/GeoWorld/world&opt=dray;all;tracks";
@@ -1250,8 +1308,9 @@ void GeometryWindowClass::on_cbLimitVisibility_clicked()
 #ifdef __USE_ANTS_JSROOT__
         int level = ui->sbLimitVisibility->value();
         if (!ui->cbLimitVisibility->isChecked()) level = -1;
-        MW->Detector->GeoManager->SetVisLevel(level);
-        MW->NetModule->onNewGeoManagerCreated();
+        Detector.GeoManager->SetVisLevel(level);
+        //MW->NetModule->onNewGeoManagerCreated();
+        emit requestUpdateRegisteredGeoManager();
 
         prepareGeoManager();
         showWebView();

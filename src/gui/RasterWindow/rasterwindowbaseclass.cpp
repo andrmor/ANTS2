@@ -225,13 +225,9 @@ void RasterWindowBaseClass::ForceResize()
     }
 }
 
-void RasterWindowBaseClass::SaveAs(const QString filename)
+void RasterWindowBaseClass::SaveAs(const QString & filename)
 {
-  //converting QString to char
-  QByteArray ba = filename.toLocal8Bit();
-  char *name = ba.data();
-
-  fCanvas->SaveAs(name);
+    fCanvas->SaveAs(filename.toLocal8Bit().data());
 }
 
 void RasterWindowBaseClass::SetWindowTitle(const QString &title)

@@ -42,8 +42,8 @@ public:
 
     void ForceResize();
 
-    void SaveAs(const QString filename);
-    void SetWindowTitle(const QString &title);
+    void SaveAs(const QString & filename);
+    void SetWindowTitle(const QString & title);
 
     void setWindowProperties();
 

@@ -11,10 +11,8 @@
 #include <QTimer>
 #include <QJsonObject>
 
-// forward declarations
 class AConfiguration;
 class AGlobalSettings;
-class GeoMarkerClass;
 class AMaterialParticleCollection;
 class EventsDataClass;
 class GeometryWindowClass;
@@ -54,7 +52,6 @@ class AParticleGun;
 #ifdef ANTS_FANN
 class NeuralNetworksWindow;
 #endif
-
 
 namespace Ui {
 class MainWindow;
@@ -114,9 +111,6 @@ public:
     // custom gui elements
     ASlabListWidget* lw = 0;
 
-    //local data, just for GUI
-    QVector<GeoMarkerClass*> GeoMarkers;
-
     InterfaceToPMscript* PMscriptInterface = 0;       // if created -> managed by the script manager
 
     //critical - updates
@@ -138,7 +132,6 @@ public:
     void ListActiveParticles();
 
     void ShowGraphWindow();
-    void UpdateMaterialListEdit();
 
     void UpdateTestWavelengthProperties(); //if material properties were updated, need to update indication in the Test tab
 
@@ -160,7 +153,6 @@ public:
 
     //public flags
     bool DoNotUpdateGeometry;  //if GUI is in bulk-update, we do not detector geometry be updated on each line
-    bool GeometryDrawDisabled = false; //no drawing of the geometry or tracks
     bool fStartedFromGUI = false;          //flag indicating that an action was run from GUI, e.g. simulation
 
     bool isWavelengthResolved() const;
@@ -194,6 +186,7 @@ public slots:
     void updateLoaded(int events, int progress);
     void on_pbSingleSourceShow_clicked();
     void ShowGeometrySlot();
+    void UpdateMaterialListEdit();
 
 private slots:
     void updateFileParticleGeneratorGui();
@@ -341,7 +334,6 @@ public:
     void updatePMArrayDataIndication();
     void writeLoadExpDataConfigToJson(QJsonObject &json);
     bool readLoadExpDataConfigFromJson(QJsonObject &json);
-    void clearGeoMarkers(int All_Rec_True = 0);
     void setFontSizeAllWindows(int size);
     void writeExtraGuiToJson(QJsonObject &json);
     void readExtraGuiFromJson(QJsonObject &json);

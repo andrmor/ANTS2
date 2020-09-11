@@ -1174,7 +1174,7 @@ void GraphWindowClass::on_leOptions_editingFinished()
     }
 }
 
-void GraphWindowClass::SaveGraph(QString fileName)
+void GraphWindowClass::SaveGraph(const QString & fileName)
 {
     RasterWindow->SaveAs(fileName);
 }

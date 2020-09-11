@@ -53,6 +53,7 @@ bool AGeoSlabDelegate_Box::updateObject(AGeoObject * obj) const
         ok = ok && GC.updateParameter(ErrorStr, SlabModel.XYrecord.strSize1, SlabModel.XYrecord.size1, true, true, false);
         SlabModel.XYrecord.strSize2 = ey->text();
         ok = ok && GC.updateParameter(ErrorStr, SlabModel.XYrecord.strSize2, SlabModel.XYrecord.size2, true, true, false);
+        //[[fallthrough]];
     case 0: //update dz
         SlabModel.strHeight = ez->text();
         ok = ok && GC.updateParameter(ErrorStr, SlabModel.strHeight, SlabModel.height, true, true, false);
@@ -115,6 +116,7 @@ bool AGeoSlabDelegate_Tube::updateObject(AGeoObject *obj) const
     case 1: //update dx dy
         SlabModel.XYrecord.strSize1 = eo->text();
         ok = ok && GC.updateParameter(ErrorStr, SlabModel.XYrecord.strSize1, SlabModel.XYrecord.size1, true, true, false);
+        //[[fallthrough]];
     case 0: //update dz
         SlabModel.strHeight = ez->text();
         ok = ok && GC.updateParameter(ErrorStr, SlabModel.strHeight, SlabModel.height, true, true, false);
@@ -185,9 +187,11 @@ bool AGeoSlabDelegate_Poly::updateObject(AGeoObject *obj) const
             ok = false;
         }
         else SlabModel.XYrecord.sides = sides;
+        //[[fallthrough]];
     case 1: //update dx dy
         SlabModel.XYrecord.strSize1 = elo->text();
         ok = ok && GC.updateParameter(ErrorStr, SlabModel.XYrecord.strSize1, SlabModel.XYrecord.size1, true, true, false);
+        //[[fallthrough]];
     case 0: //update dz
         SlabModel.strHeight = ez->text();
         ok = ok && GC.updateParameter(ErrorStr, SlabModel.strHeight, SlabModel.height, true, true, false);

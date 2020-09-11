@@ -96,10 +96,7 @@
 MainWindow::~MainWindow()
 {
     qDebug()<<"<Staring destructor for MainWindow";
-    delete histScan;
-
-    qDebug() << "<-Clearing containers with dynamic objects";
-    clearGeoMarkers();
+    delete histScan; histScan = nullptr;
 
     qDebug() << "<-Deleting ui";
     delete ui;
@@ -177,7 +174,7 @@ void MainWindow::ClearData(bool bKeepEnergyVector)
 void MainWindow::onRequestUpdateGuiForClearData()
 {
     //  qDebug() << ">>> Main window: OnClear signal received";
-    clearGeoMarkers();
+    GeometryWindow->ClearGeoMarkers();
     //SimulationManager->clearEnergyVector();
     ui->leoLoadedEvents->setText("");
     ui->leoTotalLoadedEvents->setText("");
@@ -410,35 +407,6 @@ bool MainWindow::event(QEvent *event)
      }
 
    return QMainWindow::event(event);
-}
-
-void MainWindow::clearGeoMarkers(int All_Rec_True)
-{    
-  for (int i=GeoMarkers.size()-1; i>-1; i--)
-  {
-      switch (All_Rec_True)
-      {
-        case 1:
-          if (GeoMarkers.at(i)->Type == "Recon")
-          {
-              delete GeoMarkers[i];
-              GeoMarkers.remove(i);
-          }
-          break;
-        case 2:
-          if (GeoMarkers.at(i)->Type == "Scan")
-          {
-              delete GeoMarkers[i];
-              GeoMarkers.remove(i);
-          }
-          break;
-        case 0:
-        default:
-          delete GeoMarkers[i];
-      }
-  }
-
-  if (All_Rec_True == 0) GeoMarkers.clear();
 }
 
 void MainWindow::ShowGeoMarkers()
@@ -2331,7 +2299,7 @@ void MainWindow::DeleteLoadedEvents(bool KeepFileList)
       }
 
     if (Detector->GeoManager) Detector->GeoManager->ClearTracks();    
-    clearGeoMarkers();    
+    GeometryWindow->ClearGeoMarkers();
     Owindow->RefreshData();    
 }
 
@@ -3430,7 +3398,7 @@ void MainWindow::simulationFinished()
         if (SimulationManager->Settings.bOnlyPhotons)
         {
             showTracks = SimulationManager->TrackBuildOptions.bBuildPhotonTracks;
-            clearGeoMarkers();
+            GeometryWindow->ClearGeoMarkers();
             Rwindow->ShowPositions(1, true);
 
             if (ui->cobNodeGenerationMode->currentIndex() == 0 && SimulationManager->isSimulationSuccess())
@@ -4503,7 +4471,7 @@ void MainWindow::on_pbNodesFromFileCheckShow_clicked()
         if (SimulationManager->Settings.photSimSet.CustomNodeSettings.Mode == APhotonSim_CustomNodeSettings::CustomNodes)
         {
             Detector->GeoManager->ClearTracks();
-            clearGeoMarkers();
+            GeometryWindow->ClearGeoMarkers();
             GeoMarkerClass* marks = new GeoMarkerClass("Nodes", 6, 2, kBlack);
             int numTop = 0;
             int numTotal = 0;
@@ -4518,7 +4486,7 @@ void MainWindow::on_pbNodesFromFileCheckShow_clicked()
                     node = node->getLinkedNode();
                 }
             }
-            GeoMarkers.append(marks);
+            GeometryWindow->GeoMarkers.append(marks);
             GeometryWindow->ShowGeometry();
             s = QString("First line does not contain '#' -> this is a file with nodes\n\nFound %1 top nodes\n(%2 nodes counting subnodes)").arg(numTop).arg(numTotal);
         }

@@ -120,13 +120,13 @@ void MainWindow::ShowSource(const AParticleSourceRecord * p, bool clear)
      {
       Detector->GeoManager->SetCurrentPoint(X0,Y0,Z0);
       Detector->GeoManager->DrawCurrentPoint(9);
-      clearGeoMarkers();
+      GeometryWindow->ClearGeoMarkers();
       GeoMarkerClass* marks = new GeoMarkerClass("Source", 3, 10, kBlack);
       marks->SetNextPoint(X0, Y0, Z0);
-      GeoMarkers.append(marks);
+      GeometryWindow->GeoMarkers.append(marks);
       GeoMarkerClass* marks1 = new GeoMarkerClass("Source", 4, 3, kBlack);
       marks1->SetNextPoint(X0, Y0, Z0);
-      GeoMarkers.append(marks1);
+      GeometryWindow->GeoMarkers.append(marks1);
       GeometryWindow->ShowGeometry(false);
       break;
      }
@@ -321,7 +321,7 @@ void MainWindow::on_pbGunTest_clicked()
 
 void MainWindow::TestParticleGun(AParticleGun* Gun, int numParticles)
 {
-    clearGeoMarkers();
+    GeometryWindow->ClearGeoMarkers();
     bool bOK = Gun->Init();
     if (!bOK)
     {
@@ -360,7 +360,7 @@ void MainWindow::TestParticleGun(AParticleGun* Gun, int numParticles)
 
                 GeoMarkerClass* marks = new GeoMarkerClass("t", 7, 1, SimulationManager->TrackBuildOptions.getParticleColor(p->Id));
                 marks->SetNextPoint(R[0], R[1], R[2]);
-                GeoMarkers.append(marks);
+                GeometryWindow->GeoMarkers.append(marks);
 
                 ++numTracks;
                 if (numTracks > 1000) break;
@@ -510,7 +510,7 @@ void MainWindow::on_pbGunShowSource_toggled(bool checked)
     }
     else
     {
-        clearGeoMarkers();
+        GeometryWindow->ClearGeoMarkers();
         Detector->GeoManager->ClearTracks();
         GeometryWindow->ShowGeometry();
     }

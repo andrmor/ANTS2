@@ -144,7 +144,10 @@ MainWindow::MainWindow(DetectorClass *Detector,
     GraphWindow->move(25,25);
     qDebug()<<">Creating geometry window";
     w = new QWidget();
-    GeometryWindow = new GeometryWindowClass(w, this, *Detector, *SimulationManager);
+    GeometryWindow = new GeometryWindowClass(w, *Detector, *SimulationManager);
+    connect(GeometryWindow, &GeometryWindowClass::requestUpdateRegisteredGeoManager, NetModule,     &ANetworkModule::onNewGeoManagerCreated);
+    connect(GeometryWindow, &GeometryWindowClass::requestUpdateMaterialListWidget,   this,          &MainWindow::UpdateMaterialListEdit);
+    connect(GeometryWindow, &GeometryWindowClass::requestShowNetSettings,            GlobSetWindow, &GlobalSettingsWindowClass::ShowNetSettings);
     GeometryWindow->move(25,25);
     qDebug()<<">Creating JavaScript window";
     createScriptWindow();

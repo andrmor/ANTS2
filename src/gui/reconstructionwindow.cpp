@@ -263,7 +263,7 @@ void ReconstructionWindow::on_sbEventNumberInspect_valueChanged(int arg1)
 
   if (MW->GeometryWindow->isVisible())
     {
-      MW->clearGeoMarkers();
+      MW->GeometryWindow->ClearGeoMarkers();
       MW->Detector->GeoManager->ClearTracks();
 
       if (!EventsDataHub->isScanEmpty()) ReconstructionWindow::UpdateSimVizData(arg1);
@@ -272,7 +272,7 @@ void ReconstructionWindow::on_sbEventNumberInspect_valueChanged(int arg1)
           GeoMarkerClass* marks = new GeoMarkerClass("Recon", 6, 2, kRed);
           for (int i=0; i<result->Points.size(); i++)
             marks->SetNextPoint(result->Points[i].r[0], result->Points[i].r[1], result->Points[i].r[2]);         
-          MW->GeoMarkers.append(marks);
+          MW->GeometryWindow->GeoMarkers.append(marks);
         }
       MW->GeometryWindow->ShowGeometry(false);  //to clear view
       MW->GeometryWindow->DrawTracks(); //has to use ShowTracks since if there is continuos energy deposition - tracks are used for inidication
@@ -289,14 +289,14 @@ void ReconstructionWindow::VisualizeScan(int iev)
 {
   GeoMarkerClass* marks;
   bool fAppend;
-  if (MW->GeoMarkers.isEmpty() || MW->GeoMarkers.last()->Type != "Scan")
+  if (MW->GeometryWindow->GeoMarkers.isEmpty() || MW->GeometryWindow->GeoMarkers.last()->Type != "Scan")
     { //previous marker was not scan, so making new one
       marks = new GeoMarkerClass("Scan", 6, 2, kBlue);
       fAppend = true;
     }
   else
     { //reusing old scan marker, just add the new point. This way its is MUCH faster to remove markers if one has ~100k o them.
-      marks = MW->GeoMarkers.last();
+      marks = MW->GeometryWindow->GeoMarkers.last();
       fAppend = false;
     }
 
@@ -320,12 +320,12 @@ void ReconstructionWindow::VisualizeScan(int iev)
         marks->SetNextPoint(EventsDataHub->Scan[iev]->Points[j].r[0], EventsDataHub->Scan[iev]->Points[j].r[1], EventsDataHub->Scan[iev]->Points[j].r[2]);
     }  
 
-  if (fAppend) MW->GeoMarkers.append(marks);
+  if (fAppend) MW->GeometryWindow->GeoMarkers.append(marks);
 }
 
 void ReconstructionWindow::on_pbClearPositions_clicked()
 {
-    MW->clearGeoMarkers();
+    MW->GeometryWindow->ClearGeoMarkers();
     MW->GeometryWindow->ShowGeometry(false);
 }
 
@@ -372,7 +372,7 @@ const QString ReconstructionWindow::ShowPositions(int Rec_True, bool fOnlyIfWind
     }
 
     MW->Detector->GeoManager->ClearTracks(); //tracks could be used for indication (if continuous deposition)
-    MW->clearGeoMarkers(Rec_True+1);
+    MW->GeometryWindow->ClearGeoMarkers(Rec_True + 1);
 
     int goodCounter = 0;
     int everyPeriod = ui->sbShowEventsEvery->value();
@@ -426,7 +426,7 @@ const QString ReconstructionWindow::ShowPositions(int Rec_True, bool fOnlyIfWind
                 if (goodCounter > UpperLimit) break;
             }
       }
-    MW->GeoMarkers.append(marks);
+    MW->GeometryWindow->GeoMarkers.append(marks);
 
     MW->GeometryWindow->show();
     MW->GeometryWindow->raise();
@@ -569,7 +569,7 @@ void ReconstructionWindow::VisualizeEnergyVector(int eventId)
 //     qDebug()<<EV.last()->r[0]<< EV.last()->r[1]<< EV.last()->r[2];
     }
 
-  MW->GeoMarkers.append(marks);
+  MW->GeometryWindow->GeoMarkers.append(marks);
 }
 
 void ReconstructionWindow::VisualizeScan()

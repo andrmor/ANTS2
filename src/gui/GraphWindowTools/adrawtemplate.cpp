@@ -180,18 +180,18 @@ void ADrawTemplate::InitSelection()
     Selection.bExpanded = true;
 
     ATemplateSelectionRecord * axes  = new ATemplateSelectionRecord("Axes", &Selection);
-    ATemplateSelectionRecord * xAxis = new ATemplateSelectionRecord("X axis", axes);
-    ATemplateSelectionRecord * yAxis = new ATemplateSelectionRecord("Y axis", axes);
-    ATemplateSelectionRecord * zAxis = new ATemplateSelectionRecord("Z axis", axes);
+    /*ATemplateSelectionRecord * xAxis = */ new ATemplateSelectionRecord("X axis", axes);
+    /*ATemplateSelectionRecord * yAxis = */ new ATemplateSelectionRecord("Y axis", axes);
+    /*ATemplateSelectionRecord * zAxis = */ new ATemplateSelectionRecord("Z axis", axes);
 
     ATemplateSelectionRecord * ranges = new ATemplateSelectionRecord("Ranges", &Selection);
-    ATemplateSelectionRecord * xRange = new ATemplateSelectionRecord("X range", ranges);
-    ATemplateSelectionRecord * yRange = new ATemplateSelectionRecord("Y range", ranges);
-    ATemplateSelectionRecord * zRange = new ATemplateSelectionRecord("Z range", ranges);
+    /*ATemplateSelectionRecord * xRange = */ new ATemplateSelectionRecord("X range", ranges);
+    /*ATemplateSelectionRecord * yRange = */ new ATemplateSelectionRecord("Y range", ranges);
+    /*ATemplateSelectionRecord * zRange = */ new ATemplateSelectionRecord("Z range", ranges);
 
-    ATemplateSelectionRecord * drawObj = new ATemplateSelectionRecord("Drawn object attributes", &Selection);
+    /*ATemplateSelectionRecord * drawObj = */ new ATemplateSelectionRecord("Drawn object attributes", &Selection);
 
-    ATemplateSelectionRecord * legend = new ATemplateSelectionRecord("Legend attributes", &Selection);
+    /*ATemplateSelectionRecord * legend = */  new ATemplateSelectionRecord("Legend attributes", &Selection);
 }
 
 TAxis * ADrawTemplate::getAxis(TObject * tobj, int index) const

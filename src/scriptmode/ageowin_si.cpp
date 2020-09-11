@@ -105,7 +105,7 @@ void AGeoWin_SI::Hide()
 void AGeoWin_SI::BlockUpdates(bool on)
 {
   MW->DoNotUpdateGeometry = on;
-  MW->GeometryDrawDisabled = on;
+  MW->GeometryWindow->bDisableDraw = on;
 }
 
 int AGeoWin_SI::GetX()
@@ -232,28 +232,7 @@ void AGeoWin_SI::DeleteAllTracks()
 
 void AGeoWin_SI::ShowCustomNodes(int firstN)
 {
-    MW->clearGeoMarkers();
-    MW->Detector->GeoManager->ClearTracks();
-
-    GeoMarkerClass* marks = new GeoMarkerClass("Nodes", 6, 2, kBlack);
-
-    int iCounter = 0;
-    for (ANodeRecord * node : MW->SimulationManager->Nodes)
-    {
-        ANodeRecord * thisNode = node;
-        while (thisNode)
-        {
-            marks->SetNextPoint(thisNode->R[0], thisNode->R[1], thisNode->R[2]);
-            if (firstN != -1)
-            {
-                iCounter++;
-                if (iCounter > firstN) break;
-            }
-            thisNode = thisNode->getLinkedNode();
-        }
-    }
-    MW->GeoMarkers.append(marks);
-    MW->GeometryWindow->ShowGeometry(true, false);
+    MW->GeometryWindow->ShowCustomNodes(firstN);
 }
 
 void AGeoWin_SI::ShowSPS_position()

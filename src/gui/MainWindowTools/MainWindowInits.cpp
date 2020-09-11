@@ -144,7 +144,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
     GraphWindow->move(25,25);
     qDebug()<<">Creating geometry window";
     w = new QWidget();
-    GeometryWindow = new GeometryWindowClass(w, this);
+    GeometryWindow = new GeometryWindowClass(w, this, *Detector);
     GeometryWindow->move(25,25);
     qDebug()<<">Creating JavaScript window";
     createScriptWindow();

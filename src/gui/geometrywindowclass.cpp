@@ -35,8 +35,8 @@
 #include "TGeoManager.h"
 #include "TVirtualGeoTrack.h"
 
-GeometryWindowClass::GeometryWindowClass(QWidget *parent, MainWindow *mw) :
-  AGuiWindow("geometry", parent), MW(mw),
+GeometryWindowClass::GeometryWindowClass(QWidget *parent, MainWindow *mw, DetectorClass &Detector) :
+  AGuiWindow("geometry", parent), MW(mw), Detector(Detector),
   ui(new Ui::GeometryWindowClass)
 {    
     ui->setupUi(this);
@@ -80,7 +80,7 @@ GeometryWindowClass::GeometryWindowClass(QWidget *parent, MainWindow *mw) :
 
     generateSymbolMap();
 
-    CameraControl = new ACameraControlDialog(RasterWindow, *MW->Detector, this);
+    CameraControl = new ACameraControlDialog(RasterWindow, Detector, this);
     CameraControl->setModal(false);
 }
 
@@ -111,36 +111,33 @@ void GeometryWindowClass::adjustGeoAttributes(TGeoVolume * vol, int Mode, int tr
 
 void GeometryWindowClass::prepareGeoManager(bool ColorUpdateAllowed)
 {
-    if (!MW->Detector->top) return;
+    if (!Detector.top) return;
 
     int Mode = ui->cobViewer->currentIndex(); // 0 - standard, 1 - jsroot
 
     //root segments for roundish objects
-    MW->Detector->GeoManager->SetNsegments(MW->GlobSet.NumSegments);
+    Detector.GeoManager->SetNsegments(AGlobalSettings::getInstance().NumSegments);
 
     //control of visibility of inner volumes
     int level = ui->sbLimitVisibility->value();
     if (!ui->cbLimitVisibility->isChecked()) level = -1;
-    MW->Detector->GeoManager->SetVisLevel(level);
+    Detector.GeoManager->SetVisLevel(level);
 
     if (ColorUpdateAllowed)
     {
-        if (ColorByMaterial) MW->Detector->colorVolumes(1);
-        else MW->Detector->colorVolumes(0);
+        if (ColorByMaterial) Detector.colorVolumes(1);
+        else Detector.colorVolumes(0);
     }
 
-    MW->Detector->GeoManager->SetTopVisible(ui->cbShowTop->isChecked());
-    //in this way jsroot have no problem to update visibility of top:
-    //MW->Detector->GeoManager->SetTopVisible(true);
-    //MW->Detector->top->SetVisibility(ui->cbShowTop->isChecked());
-    MW->Detector->top->SetAttBit(TGeoAtt::kVisOnScreen, ui->cbShowTop->isChecked());
+    Detector.GeoManager->SetTopVisible(ui->cbShowTop->isChecked());
+    Detector.top->SetAttBit(TGeoAtt::kVisOnScreen, ui->cbShowTop->isChecked());
 
     int transp = ui->sbTransparency->value();
-    MW->Detector->top->SetTransparency(Mode == 0 ? 0 : transp);
-    adjustGeoAttributes(MW->Detector->top, Mode, transp, ui->cbLimitVisibility->isChecked(), level, 0);
+    Detector.top->SetTransparency(Mode == 0 ? 0 : transp);
+    adjustGeoAttributes(Detector.top, Mode, transp, ui->cbLimitVisibility->isChecked(), level, 0);
 
     //making contaners visible
-    MW->Detector->top->SetVisContainers(true);
+    Detector.top->SetVisContainers(true);
 }
 
 void GeometryWindowClass::on_pbShowGeometry_clicked()
@@ -151,8 +148,8 @@ void GeometryWindowClass::on_pbShowGeometry_clicked()
     int Mode = ui->cobViewer->currentIndex(); // 0 - standard, 1 - jsroot
     if (Mode == 0)
     {
-        RasterWindow->ForceResize();
-        ResetView();
+        //RasterWindow->ForceResize();
+        //ResetView();
         fRecallWindow = false;
     }
 
@@ -176,8 +173,8 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
         //DRAW
         setHideUpdate(true);
         ClearRootCanvas();
-        if (SAME) MW->Detector->top->Draw("SAME");
-        else      MW->Detector->top->Draw("");
+        if (SAME) Detector.top->Draw("SAME");  // is it needed at all?
+        else      Detector.top->Draw("");
         PostDraw();
 
         //drawing dots
@@ -391,18 +388,18 @@ void GeometryWindowClass::closeEvent(QCloseEvent * event)
 void GeometryWindowClass::ShowPMnumbers()
 {
    QVector<QString> tmp;
-   for (int i=0; i<MW->PMs->count(); i++)
+   for (int i = 0; i < Detector.PMs->count(); i++)
        tmp.append( QString::number(i) );
    ShowText(tmp, kBlack, true);
 
-   MW->NetModule->onNewGeoManagerCreated();
+   MW->NetModule->onNewGeoManagerCreated();  // !*! why???
 }
 
 void GeometryWindowClass::ShowMonitorIndexes()
 {
     QVector<QString> tmp;
-    const QVector<const AGeoObject*> & MonitorsRecords = MW->Detector->Sandwich->MonitorsRecords;
-    for (int i=0; i<MonitorsRecords.size(); i++)
+    const QVector<const AGeoObject*> & MonitorsRecords = Detector.Sandwich->MonitorsRecords;
+    for (int i = 0; i < MonitorsRecords.size(); i++)
         tmp.append( QString::number(i) );
     ShowText(tmp, kBlue, false);
 }
@@ -507,8 +504,8 @@ void GeometryWindowClass::generateSymbolMap()
 
 void GeometryWindowClass::ShowText(const QVector<QString> &strData, Color_t color, bool onPMs, bool bFullCycle)
 {
-    const APmHub & PMs = *MW->PMs;
-    const QVector<const AGeoObject*> & Mons = MW->Detector->Sandwich->MonitorsRecords;
+    const APmHub & PMs = *Detector.PMs;
+    const QVector<const AGeoObject*> & Mons = Detector.Sandwich->MonitorsRecords;
 
     int numObj = ( onPMs ? PMs.count() : Mons.size() );
     if (strData.size() != numObj)
@@ -518,7 +515,7 @@ void GeometryWindowClass::ShowText(const QVector<QString> &strData, Color_t colo
     }
     //qDebug() << "Objects:"<<numObj;
 
-    if (bFullCycle) MW->Detector->GeoManager->ClearTracks();
+    if (bFullCycle) Detector.GeoManager->ClearTracks();
     if (!isVisible()) showNormal();
 
     //font size
@@ -528,12 +525,12 @@ void GeometryWindowClass::ShowText(const QVector<QString> &strData, Color_t colo
     {
         if (onPMs)
         {
-            int typ = MW->PMs->at(i).type;
-            APmType tp = *MW->PMs->getType(typ);
-            if (tp.SizeX<minSize) minSize = tp.SizeX;
-            int shape = tp.Shape; //0 box, 1 round, 2 hexa
+            int typ = PMs.at(i).type;
+            const APmType * tp = Detector.PMs->getType(typ);
+            if (tp->SizeX < minSize) minSize = tp->SizeX;
+            int shape = tp->Shape; //0 box, 1 round, 2 hexa
             if (shape == 0)
-              if (tp.SizeY<minSize) minSize = tp.SizeY;
+              if (tp->SizeY < minSize) minSize = tp->SizeY;
         }
         else
         {
@@ -563,7 +560,7 @@ void GeometryWindowClass::ShowText(const QVector<QString> &strData, Color_t colo
         }
         else
         {
-            const TGeoNode * n = MW->Detector->Sandwich->MonitorNodes.at(iObj);
+            const TGeoNode * n = Detector.Sandwich->MonitorNodes.at(iObj);
             //qDebug() << "\nProcessing monitor"<<n->GetName();
 
             double pos[3], master[3];
@@ -623,8 +620,8 @@ void GeometryWindowClass::ShowText(const QVector<QString> &strData, Color_t colo
 
 //            qDebug()<<"position="<<idig<<  "  To show: str="<<str1<<"index of mapping="<<isymbol;
 
-            Int_t track_index = MW->Detector->GeoManager->AddTrack(2,22); //  Here track_index is the index of the newly created track in the array of primaries. One can get the pointer of this track and make it known as current track by the manager class:
-            TVirtualGeoTrack *track = MW->Detector->GeoManager->GetTrack(track_index);
+            Int_t track_index = Detector.GeoManager->AddTrack(2,22); //  Here track_index is the index of the newly created track in the array of primaries. One can get the pointer of this track and make it known as current track by the manager class:
+            TVirtualGeoTrack *track = Detector.GeoManager->GetTrack(track_index);
             if (str.right(1) == "F")
                 track->SetLineColor(kRed);
             else
@@ -644,15 +641,15 @@ void GeometryWindowClass::ShowText(const QVector<QString> &strData, Color_t colo
     if (bFullCycle)
     {
         ShowGeometry(false);
-        MW->Detector->GeoManager->DrawTracks();
+        Detector.GeoManager->DrawTracks();
         UpdateRootCanvas();
     }
 }
 
 void GeometryWindowClass::AddLineToGeometry(QPointF& start, QPointF& end, Color_t color, int width)
 {
-  Int_t track_index = MW->Detector->GeoManager->AddTrack(2,22); //  Here track_index is the index of the newly created track in the array of primaries. One can get the pointer of this track and make it known as current track by the manager class:
-  TVirtualGeoTrack *track = MW->Detector->GeoManager->GetTrack(track_index);
+  Int_t track_index = Detector.GeoManager->AddTrack(2,22); //  Here track_index is the index of the newly created track in the array of primaries. One can get the pointer of this track and make it known as current track by the manager class:
+  TVirtualGeoTrack *track = Detector.GeoManager->GetTrack(track_index);
   track->SetLineColor(color);
   track->SetLineWidth(width);
 
@@ -689,7 +686,7 @@ void GeometryWindowClass::ShowEvent_Particles(size_t iEvent, bool withSecondarie
             for (int iNode=0; iNode<th->Nodes.size(); iNode++)
                 track->AddPoint(th->Nodes[iNode].R[0], th->Nodes[iNode].R[1], th->Nodes[iNode].R[2], th->Nodes[iNode].Time);
             if (track->GetNpoints()>1)
-                MW->Detector->GeoManager->AddTrack(track);
+                Detector.GeoManager->AddTrack(track);
             else delete track;
         }
     }
@@ -703,7 +700,7 @@ void GeometryWindowClass::ShowPMsignals(int iEvent, bool bFullCycle)
     if (iEvent < 0 || iEvent >= MW->EventsDataHub->countEvents()) return;
 
     QVector<QString> tmp;
-    for (int i=0; i<MW->PMs->count(); i++)
+    for (int i = 0; i < Detector.PMs->count(); i++)
         tmp.append( QString::number(MW->EventsDataHub->Events.at(iEvent).at(i)) );
     ShowText(tmp, kBlack, true, bFullCycle);
 }
@@ -750,7 +747,7 @@ void GeometryWindowClass::ShowTracksAndMarkers()
 
 void GeometryWindowClass::ClearTracks(bool bRefreshWindow)
 {
-    MW->Detector->GeoManager->ClearTracks();
+    Detector.GeoManager->ClearTracks();
     if (bRefreshWindow)
     {
         int Mode = ui->cobViewer->currentIndex(); // 0 - standard, 1 - jsroot
@@ -793,7 +790,7 @@ void GeometryWindowClass::DrawTracks()
     if (Mode == 0)
     {
         SetAsActiveRootWindow();
-        MW->Detector->GeoManager->DrawTracks();
+        Detector.GeoManager->DrawTracks();
         UpdateRootCanvas();
     }
     else ShowGeometry(false);
@@ -817,7 +814,7 @@ void GeometryWindowClass::ShowPoint(double * r, bool keepTracks)
 
 void GeometryWindowClass::on_pbClearTracks_clicked()
 {
-  MW->Detector->GeoManager->ClearTracks();
+  Detector.GeoManager->ClearTracks();
   ShowGeometry(true, false);
 }
 
@@ -1061,7 +1058,7 @@ void GeometryWindowClass::on_actionDecrease_line_width_triggered()
 
 void GeometryWindowClass::doChangeLineWidth(int deltaWidth)
 {
-    TObjArray * list = MW->Detector->GeoManager->GetListOfVolumes();
+    TObjArray * list = Detector.GeoManager->GetListOfVolumes();
     const int numVolumes = list->GetEntries();
     for (int i = 0; i < numVolumes; i++)
     {
@@ -1070,7 +1067,7 @@ void GeometryWindowClass::doChangeLineWidth(int deltaWidth)
         if (LWidth < 1) LWidth = 1;
         tv->SetLineWidth(LWidth);
     }
-    MW->Detector->changeLineWidthOfVolumes(deltaWidth);
+    Detector.changeLineWidthOfVolumes(deltaWidth);
     ShowGeometry(true, false);
 }
 
@@ -1173,7 +1170,7 @@ void GeometryWindowClass::on_cobViewer_currentIndexChanged(int index)
 void GeometryWindowClass::on_actionOpen_GL_viewer_triggered()
 {
     int tran = ui->sbTransparency->value();
-    TObjArray * list = MW->Detector->GeoManager->GetListOfVolumes();
+    TObjArray * list = Detector.GeoManager->GetListOfVolumes();
     int numVolumes = list->GetEntries();
 
     for (int i = 0; i < numVolumes; i++)
@@ -1334,14 +1331,14 @@ void GeometryWindowClass::on_pbSaveAs_clicked()
     {
         QFileDialog *fileDialog = new QFileDialog;
         fileDialog->setDefaultSuffix("png");
-        QString fileName = fileDialog->getSaveFileName(this, "Save image as file", MW->GlobSet.LastOpenDir, "png (*.png);;gif (*.gif);;Jpg (*.jpg)");
+        QString fileName = fileDialog->getSaveFileName(this, "Save image as file", AGlobalSettings::getInstance().LastOpenDir, "png (*.png);;gif (*.gif);;Jpg (*.jpg)");
         if (fileName.isEmpty()) return;
-        MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+        AGlobalSettings::getInstance().LastOpenDir = QFileInfo(fileName).absolutePath();
 
         QFileInfo file(fileName);
         if(file.suffix().isEmpty()) fileName += ".png";
         GeometryWindowClass::SaveAs(fileName);
-        if (MW->GlobSet.fOpenImageExternalEditor) QDesktopServices::openUrl(QUrl("file:"+fileName, QUrl::TolerantMode));
+        if (AGlobalSettings::getInstance().fOpenImageExternalEditor) QDesktopServices::openUrl(QUrl("file:"+fileName, QUrl::TolerantMode));
     }
     else
     {

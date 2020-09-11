@@ -5,6 +5,7 @@
 #include "TMathBase.h"
 
 class MainWindow;
+class DetectorClass;
 class RasterWindowBaseClass;
 class QWebEngineView;
 class QWebEngineDownloadItem;
@@ -20,7 +21,7 @@ class GeometryWindowClass : public AGuiWindow
   Q_OBJECT
 
 public:
-  explicit GeometryWindowClass(QWidget *parent, MainWindow *mw);
+  explicit GeometryWindowClass(QWidget *parent, MainWindow *mw, DetectorClass & Detector);
   ~GeometryWindowClass();
 
   bool ModePerspective = true;
@@ -115,6 +116,8 @@ private slots:
 
 private:
   MainWindow * MW = nullptr;
+  DetectorClass & Detector;
+
   Ui::GeometryWindowClass * ui;
   RasterWindowBaseClass * RasterWindow = nullptr;
 

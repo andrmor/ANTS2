@@ -143,6 +143,22 @@ void GeometryWindowClass::prepareGeoManager(bool ColorUpdateAllowed)
     MW->Detector->top->SetVisContainers(true);
 }
 
+void GeometryWindowClass::on_pbShowGeometry_clicked()
+{
+    //qDebug() << "Redraw triggered!";
+    ShowAndFocus();
+
+    int Mode = ui->cobViewer->currentIndex(); // 0 - standard, 1 - jsroot
+    if (Mode == 0)
+    {
+        RasterWindow->ForceResize();
+        ResetView();
+        fRecallWindow = false;
+    }
+
+    ShowGeometry(true, false); //not doing "same" option!
+}
+
 void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool ColorUpdateAllowed)
 {
     //qDebug()<<"  ----Showing geometry----" << MW->GeometryDrawDisabled;
@@ -166,7 +182,11 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
 
         //drawing dots
         MW->ShowGeoMarkers();
+
+        //ResetView();  // angles are resetted, by rotation (with mouse) starts with a wrong angles
         UpdateRootCanvas();
+
+        CameraControl->updateGui();
     }
     else
     {
@@ -221,8 +241,30 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
         page->runJavaScript(js);
 #endif
     }
+}
 
-    CameraControl->updateGui();
+void GeometryWindowClass::PostDraw()
+{
+  TView3D *v = dynamic_cast<TView3D*>(RasterWindow->fCanvas->GetView());
+  if (!v) return;
+
+  if (!fRecallWindow) Zoom();
+
+  if (ModePerspective)
+  {
+     if (!v->IsPerspective()) v->SetPerspective();
+  }
+  else
+  {
+      if (v->IsPerspective()) v->SetParallel();
+  }
+
+  if (fRecallWindow) RasterWindow->setWindowProperties();
+
+  if (ui->cbShowAxes->isChecked()) v->ShowAxis();
+  setHideUpdate(false);
+
+  //canvas is updated in the caller
 }
 
 /*
@@ -284,11 +326,11 @@ void GeometryWindowClass::ResetView()
         TView3D *v = dynamic_cast<TView3D*>(RasterWindow->fCanvas->GetView());
         if (!v) return;
 
-        //TMPignore = true;
+        TMPignore = true;
         ui->cobViewType->setCurrentIndex(0);
-        //TMPignore = false;
+        TMPignore = false;
 
-        CameraControl->resetView();
+        //CameraControl->resetView();  //does not work: Draw() method resets canvas orientation to the last draw
         //RasterWindow->UpdateRootCanvas();
     }
 }
@@ -296,30 +338,6 @@ void GeometryWindowClass::ResetView()
 void GeometryWindowClass::setHideUpdate(bool flag)
 {
   RasterWindow->setVisible(!flag);
-}
-
-void GeometryWindowClass::PostDraw()
-{  
-  TView3D *v = dynamic_cast<TView3D*>(RasterWindow->fCanvas->GetView());
-  if (!v) return;
-
-  if (!fRecallWindow) Zoom();
-
-  if (ModePerspective)
-  {
-     if (!v->IsPerspective()) v->SetPerspective();
-  }
-  else
-  {
-      if (v->IsPerspective()) v->SetParallel();
-  }
-
-  if (fRecallWindow) RasterWindow->setWindowProperties();
-
-  if (ui->cbShowAxes->isChecked()) v->ShowAxis();
-  setHideUpdate(false);
-
-  //canvas is updated in the caller
 }
 
 void GeometryWindowClass::onBusyOn()
@@ -743,22 +761,6 @@ void GeometryWindowClass::ClearTracks(bool bRefreshWindow)
         }
         else ShowGeometry(false);
     }
-}
-
-void GeometryWindowClass::on_pbShowGeometry_clicked()
-{
-    //qDebug() << "Redraw triggered!";
-    ShowAndFocus();
-
-    int Mode = ui->cobViewer->currentIndex(); // 0 - standard, 1 - jsroot
-    if (Mode == 0)
-    {
-        RasterWindow->ForceResize();
-        ResetView();
-        fRecallWindow = false;
-    }
-
-    ShowGeometry(true, false); //not doing "same" option!
 }
 
 void GeometryWindowClass::on_cbColor_toggled(bool checked)

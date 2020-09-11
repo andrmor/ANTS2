@@ -94,10 +94,16 @@ void ACameraControlDialog::setView(bool bSkipReadRange)
 void ACameraControlDialog::resetView()
 {
     int err;
-    RW->fCanvas->GetView()->SetView(60.0, -120.0, 0, err);
+    RW->fCanvas->GetView()->SetView(-120.0, 60.0, 0, err);
+
+    //RW->fCanvas->GetView()->SetLongitude(-120.0);
+    //RW->fCanvas->GetView()->SetLatitude(60.0);
+
     RW->fCanvas->Modified();
     RW->fCanvas->Update();
 
+    //RW->ViewParameters.read(RW->fCanvas);
+    //RW->ViewParameters.apply(RW->fCanvas);
     updateGui();
 }
 

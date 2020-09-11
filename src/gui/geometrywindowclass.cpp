@@ -35,8 +35,8 @@
 #include "TGeoManager.h"
 #include "TVirtualGeoTrack.h"
 
-GeometryWindowClass::GeometryWindowClass(QWidget *parent, MainWindow *mw, DetectorClass &Detector) :
-  AGuiWindow("geometry", parent), MW(mw), Detector(Detector),
+GeometryWindowClass::GeometryWindowClass(QWidget *parent, MainWindow *mw, DetectorClass &Detector, ASimulationManager & SimulationManager) :
+  AGuiWindow("geometry", parent), MW(mw), Detector(Detector), SimulationManager(SimulationManager),
   ui(new Ui::GeometryWindowClass)
 {    
     ui->setupUi(this);
@@ -178,7 +178,7 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
         PostDraw();
 
         //drawing dots
-        MW->ShowGeoMarkers();
+        ShowGeoMarkers();
 
         //ResetView();  // angles are resetted, by rotation (with mouse) starts with a wrong angles
         UpdateRootCanvas();
@@ -392,7 +392,7 @@ void GeometryWindowClass::ShowPMnumbers()
        tmp.append( QString::number(i) );
    ShowText(tmp, kBlack, true);
 
-   MW->NetModule->onNewGeoManagerCreated();  // !*! why???
+   MW->NetModule->onNewGeoManagerCreated();
 }
 
 void GeometryWindowClass::ShowMonitorIndexes()
@@ -671,14 +671,14 @@ void GeometryWindowClass::AddPolygonfToGeometry(QPolygonF& poly, Color_t color, 
 #include "atrackrecords.h"
 void GeometryWindowClass::ShowEvent_Particles(size_t iEvent, bool withSecondaries)
 {
-    if (iEvent < MW->SimulationManager->TrackingHistory.size())
+    if (iEvent < SimulationManager.TrackingHistory.size())
     {
-        const AEventTrackingRecord * er = MW->SimulationManager->TrackingHistory.at(iEvent);
-        er->makeTracks(MW->SimulationManager->Tracks, MW->MpCollection->getListOfParticleNames(), MW->SimulationManager->TrackBuildOptions, withSecondaries);
+        const AEventTrackingRecord * er = SimulationManager.TrackingHistory.at(iEvent);
+        er->makeTracks(SimulationManager.Tracks, Detector.MpCollection->getListOfParticleNames(), SimulationManager.TrackBuildOptions, withSecondaries);
 
-        for (int iTr=0; iTr < (int)MW->SimulationManager->Tracks.size(); iTr++)
+        for (int iTr=0; iTr < (int)SimulationManager.Tracks.size(); iTr++)
         {
-            const TrackHolderClass* th = MW->SimulationManager->Tracks.at(iTr);
+            const TrackHolderClass* th = SimulationManager.Tracks.at(iTr);
             TGeoTrack* track = new TGeoTrack(1, th->UserIndex);
             track->SetLineColor(th->Color);
             track->SetLineWidth(th->Width);
@@ -694,14 +694,11 @@ void GeometryWindowClass::ShowEvent_Particles(size_t iEvent, bool withSecondarie
     DrawTracks();
 }
 
-#include "eventsdataclass.h"
-void GeometryWindowClass::ShowPMsignals(int iEvent, bool bFullCycle)
+void GeometryWindowClass::ShowPMsignals(const QVector<float> & Event, bool bFullCycle)
 {
-    if (iEvent < 0 || iEvent >= MW->EventsDataHub->countEvents()) return;
-
     QVector<QString> tmp;
-    for (int i = 0; i < Detector.PMs->count(); i++)
-        tmp.append( QString::number(MW->EventsDataHub->Events.at(iEvent).at(i)) );
+    for (const float & f : Event)
+        tmp.append( QString::number(f) );
     ShowText(tmp, kBlack, true, bFullCycle);
 }
 

@@ -6,6 +6,7 @@
 
 class MainWindow;
 class DetectorClass;
+class ASimulationManager;
 class RasterWindowBaseClass;
 class QWebEngineView;
 class QWebEngineDownloadItem;
@@ -21,7 +22,7 @@ class GeometryWindowClass : public AGuiWindow
   Q_OBJECT
 
 public:
-  explicit GeometryWindowClass(QWidget *parent, MainWindow *mw, DetectorClass & Detector);
+  explicit GeometryWindowClass(QWidget *parent, MainWindow *mw, DetectorClass & Detector, ASimulationManager & SimulationManager);
   ~GeometryWindowClass();
 
   bool ModePerspective = true;
@@ -57,7 +58,7 @@ public:
 
   void ShowGeometry(bool ActivateWindow = true, bool SAME = true, bool ColorUpdateAllowed = true);
   void ShowEvent_Particles(size_t iEvent, bool withSecondaries);
-  void ShowPMsignals(int iEvent, bool bFullCycle = true);
+  void ShowPMsignals(const QVector<float> &Event, bool bFullCycle = true);
   void ShowGeoMarkers();
   void ShowTracksAndMarkers();
 
@@ -116,7 +117,8 @@ private slots:
 
 private:
   MainWindow * MW = nullptr;
-  DetectorClass & Detector;
+  DetectorClass      & Detector;
+  ASimulationManager & SimulationManager;
 
   Ui::GeometryWindowClass * ui;
   RasterWindowBaseClass * RasterWindow = nullptr;

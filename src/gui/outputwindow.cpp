@@ -1922,10 +1922,11 @@ void OutputWindow::EV_showGeo()
     MW->SimulationManager->clearTracks();
     MW->GeometryWindow->ClearTracks(false);
 
-    int iEv = ui->sbEvent->value();
-    if (ui->cbEVtracks->isChecked()) MW->GeometryWindow->ShowEvent_Particles(iEv, !ui->cbEVsupressSec->isChecked());
+    const int iEv = ui->sbEvent->value();
+    if (iEv < 0 || iEv >= MW->EventsDataHub->countEvents()) return;
 
-    if (ui->cbEVpmSig->isChecked()) MW->GeometryWindow->ShowPMsignals(iEv, false);
+    if (ui->cbEVtracks->isChecked()) MW->GeometryWindow->ShowEvent_Particles(iEv, !ui->cbEVsupressSec->isChecked());
+    if (ui->cbEVpmSig->isChecked())  MW->GeometryWindow->ShowPMsignals(MW->EventsDataHub->Events.at(iEv), false);
 
     MW->GeometryWindow->DrawTracks();
 }

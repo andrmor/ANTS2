@@ -47,7 +47,9 @@ QString AGeoConsts::exportToJavaSript(const AGeoObject * obj) const
             const AGeoConstRecord & r = Records.at(i);
             QRegExp nameRegExp("\\b" + r.Name + "\\b");
             if (isGeoConstInUseGlobal(nameRegExp, obj))
-                GCScript += (QString("var %1 = %2\n").arg(r.Name).arg(r.Expression.isEmpty()? QString::number(GeoConstValues[i]) : r.Expression));
+                GCScript += (QString("var %1 = %2%3\n").arg(r.Name)
+                             .arg(r.Expression.isEmpty()? QString::number(GeoConstValues[i]) : r.Expression))
+                             .arg(r.Comment.isEmpty()? r.Comment : QString("                   //%1").arg(r.Comment));
         }
         formulaToJavaScript(GCScript);
     }

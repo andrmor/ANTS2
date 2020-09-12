@@ -230,6 +230,12 @@ QString AGeoConsts::getExpression(int index) const
     return Records.at(index).Expression;
 }
 
+QString AGeoConsts::getComment(int index) const
+{
+    if (index < 0 || index >= Records.size()) return "";
+    return Records.at(index).Comment;
+}
+
 bool AGeoConsts::evaluateConstExpression(int index)
 {
     AGeoConstRecord & rec = Records[index];
@@ -307,6 +313,12 @@ QString AGeoConsts::setNewExpression(int index, const QString & newExpression)
     QString err = checkifValidAndGetDoublefromExpression(index);
     if (!err.isEmpty()) rec.Expression.clear();
     return err;
+}
+
+void AGeoConsts::setNewComment(int index, const QString & txt)
+{
+    if (index < 0 || index >= Records.size()) return;
+    Records[index].Comment = txt;
 }
 
 bool AGeoConsts::isIndexValid(int index)

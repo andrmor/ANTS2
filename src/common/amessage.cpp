@@ -60,3 +60,8 @@ void message1(const QString & text, const QString & title, QWidget *parent)
     d.setWindowTitle(title);
     d.exec();
 }
+
+QString inputString(const QString & label, QWidget *parent)
+{
+    return QInputDialog::getText(parent, "", label);
+}

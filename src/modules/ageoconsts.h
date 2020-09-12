@@ -14,7 +14,6 @@ struct AGeoConstRecord
     AGeoConstRecord(const QString & Name) : Name(Name) {}
 
     QString Name;
-    //double  Value = 0;  // values have to sit in a separate vector -> need to use its .data() for TFormula evaluation
     QString Expression;
     QString Comment;
 
@@ -39,6 +38,7 @@ public:
     QString isNameValid(int index, const QString & newName);
     bool    setNewValue(int index, double newValue);
     QString setNewExpression(int index, const QString & newExpression);
+    void    setNewComment(int index, const QString & txt);
     bool    isIndexValid(int index);
 
     QString checkifValidAndGetDoublefromExpression(int index);
@@ -50,6 +50,7 @@ public:
     QString getName(int index) const;
     double  getValue(int index) const;
     QString getExpression(int index) const;
+    QString getComment(int index) const;
 
     int     countConstants() const {return Records.size();}
     bool    evaluateConstExpression(int index);

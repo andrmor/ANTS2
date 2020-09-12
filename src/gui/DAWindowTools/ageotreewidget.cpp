@@ -118,7 +118,7 @@ void AGeoTreeWidget::UpdateGui(QString selected)
 {
     if (!World) return;
 
-    qDebug() << "==> Update tree triggered, selected = "<<selected;
+    //qDebug() << "==> Update tree triggered, selected = "<<selected;
 
     clear(); // also emits "itemSelectionChanged" with no selection -> clears delegate
 
@@ -149,7 +149,7 @@ void AGeoTreeWidget::UpdateGui(QString selected)
             setCurrentItem(list.first());
         }
     }
-    qDebug() << "<==";
+    //qDebug() << "<==";
 }
 
 void AGeoTreeWidget::onGridReshapeRequested(QString objName)
@@ -491,7 +491,7 @@ void AGeoTreeWidget::dragMoveEvent(QDragMoveEvent *event)
 
 void AGeoTreeWidget::onItemSelectionChanged()
 {
-    qDebug() << "---Widget selection cghanged";
+  //  qDebug() << "---Widget selection cghanged";
   QList<QTreeWidgetItem*> sel = selectedItems();
 
   if (sel.size() == 0)
@@ -1688,7 +1688,7 @@ AGeoWidget::AGeoWidget(AGeoObject *World, AGeoTreeWidget *tw) :
 
 void AGeoWidget::ClearGui()
 {
-    qDebug() << "AGeoWidget clear triggered!";
+    //qDebug() << "AGeoWidget clear triggered!";
     fIgnoreSignals = true;
 
     while(ObjectLayout->count() > 0)
@@ -1709,7 +1709,7 @@ void AGeoWidget::ClearGui()
 
 void AGeoWidget::UpdateGui()
 {  
-    qDebug() << "UpdateGui triggered for AGeoWidget--->->->->";
+    //qDebug() << "UpdateGui triggered for AGeoWidget--->->->->";
     ClearGui(); //deletes Delegate!
 
     if (!CurrentObject) return;
@@ -1838,17 +1838,17 @@ void AGeoWidget::onObjectSelectionChanged(QString SelectedObject)
     if (fIgnoreSignals) return;
 
     CurrentObject = nullptr;
-    qDebug() << "Object selection changed! ->" << SelectedObject;
+    //qDebug() << "Object selection changed! ->" << SelectedObject;
     ClearGui();
 
     AGeoObject* obj = World->findObjectByName(SelectedObject);
     if (!obj) return;
 
     CurrentObject = obj;
-    qDebug() << "New current object:"<<CurrentObject->Name;
+    //qDebug() << "New current object:"<<CurrentObject->Name;
     UpdateGui();
     fEditingMode = false;
-    qDebug() << "OnObjectSelection procedure completed";
+    //qDebug() << "OnObjectSelection procedure completed";
 }
 
 void AGeoWidget::onStartEditing()

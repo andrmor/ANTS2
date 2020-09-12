@@ -98,7 +98,6 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(QWidget * parent, MainWindow * MW, De
   on_cbAutoCheck_stateChanged(111);
 
   connect(ui->menuUndo_redo, &QMenu::aboutToShow, this, &DetectorAddOnsWindow::updateMenuIndication);
-  qDebug() << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
 }
 
 DetectorAddOnsWindow::~DetectorAddOnsWindow()
@@ -126,8 +125,6 @@ void DetectorAddOnsWindow::onReconstructDetectorRequest()
 
 void DetectorAddOnsWindow::UpdateGUI()
 {
-  qDebug() << "=========>!!!->GeoTree widget update triggered";
-
   UpdateGeoTree();
   UpdateDummyPMindication();
   ui->pbBackToSandwich->setEnabled(!Detector->isGDMLempty());
@@ -266,7 +263,6 @@ void DetectorAddOnsWindow::ConvertDummyToPM(int idpm)
 
 void DetectorAddOnsWindow::UpdateGeoTree(QString name)
 {
-    qDebug() << "------UpdateGeoTree";
     twGeo->UpdateGui(name);
     updateGeoConstsIndication();
 }
@@ -1357,6 +1353,8 @@ void DetectorAddOnsWindow::updateGeoConstsIndication()
             const QString Expression = ( i == numConsts ? ""  : GC.getExpression(i) );
 
             QTableWidgetItem * newItem = new QTableWidgetItem(Name);
+            QString Comment = GC.getComment(i);
+            newItem->setToolTip(Comment);
             ui->tabwConstants->setItem(i, 0, newItem);
 
             ALineEditWithEscape * edit = new ALineEditWithEscape(Value, ui->tabwConstants);
@@ -1505,6 +1503,11 @@ void DetectorAddOnsWindow::on_tabwConstants_customContextMenuRequested(const QPo
     QAction * removeA = menu.addAction("Remove selected constant"); removeA->setEnabled(index != -1 && index != GC.countConstants());
     QAction * addAboveA = menu.addAction("Add new constant above"); addAboveA->setEnabled(index != -1 && index != GC.countConstants());
 
+    menu.addSeparator();
+
+    QAction * setCommentA = menu.addAction("Add comment"); setCommentA->setEnabled(index != -1 && index != GC.countConstants());
+
+
     QAction * selected = menu.exec(ui->tabwConstants->mapToGlobal(pos));
     if (selected == removeA)
     {
@@ -1532,9 +1535,16 @@ void DetectorAddOnsWindow::on_tabwConstants_customContextMenuRequested(const QPo
         updateGeoConstsIndication();
         emit requestDelayedRebuildAndRestoreDelegate();
     }
-    if (selected == addAboveA)
+    else if (selected == addAboveA)
     {
         GC.addNoNameConstant(index);
+        MW->writeDetectorToJson(MW->Config->JSON);
+        updateGeoConstsIndication();
+    }
+    else if (selected == setCommentA)
+    {
+        QString txt = inputString("New comment (empty to remove)", this);
+        GC.setNewComment(index, txt);
         MW->writeDetectorToJson(MW->Config->JSON);
         updateGeoConstsIndication();
     }

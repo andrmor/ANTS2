@@ -8,6 +8,21 @@
 
 class QJsonObject;
 
+struct AGeoConstRecord
+{
+    AGeoConstRecord(){}
+    AGeoConstRecord(const QString & Name) : Name(Name) {}
+
+    QString Name;
+    //double  Value = 0;  // values have to sit in a separate vector -> need to use its .data() for TFormula evaluation
+    QString Expression;
+    QString Comment;
+
+    //runtime
+    QRegExp RegExp;
+    QString Index;
+};
+
 class AGeoConsts final
 {
 public:
@@ -20,27 +35,24 @@ public:
     void    addNoNameConstant(int index);
     void    removeConstant(int index);
 
-    bool    rename(int index, const QString & newName, AGeoObject *world, QString &errorStr);
-    QString isNameValid(int index, const QString &newName);
+    bool    rename(int index, const QString & newName, AGeoObject * world, QString & errorStr);
+    QString isNameValid(int index, const QString & newName);
     bool    setNewValue(int index, double newValue);
     QString setNewExpression(int index, const QString & newExpression);
     bool    isIndexValid(int index);
 
-    QString checkifValidAndGetDoublefromExpression(int current);
-    QString isGeoConstsBellowInUse(int current);
+    QString checkifValidAndGetDoublefromExpression(int index);
+    QString isGeoConstsBellowInUse(int index) const;
 
-    QString isGeoConstInUse(const QRegExp & nameRegExp, int index) const ;
+    QString isGeoConstInUse(const QRegExp & nameRegExp, int index) const;
     void    replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName, int index);
 
     QString getName(int index) const;
     double  getValue(int index) const;
     QString getExpression(int index) const;
-    const QVector<QString> & getNames()  const {return Names;}
-    const QVector<double>  & getValues() const {return Values;}
-    const QVector<QString> & getExpressions() const {return Expressions;}
 
-    int     countConstants() const {return Names.size();}
-    bool    evaluateConstExpression(int to);
+    int     countConstants() const {return Records.size();}
+    bool    evaluateConstExpression(int index);
     bool    isGeoConstInUseGlobal(const QRegExp & nameRegExp, const AGeoObject * obj) const;
 
     QString exportToJavaSript(const AGeoObject * obj) const;
@@ -49,14 +61,14 @@ public:
     void    writeToJson(QJsonObject & json) const;
     void    readFromJson(const QJsonObject & json);
 
-    bool    evaluateFormula(QString str, double &returnValue, int to = -1) const;
+    bool    evaluateFormula(QString str, double & returnValue, int to = -1) const;
     bool    updateParameter(QString & errorStr, QString & str, double & returnValue, bool bForbidZero = true, bool bForbidNegative = true, bool bMakeHalf = true) const;
     bool    updateParameter(QString & errorStr, QString & str, int    & returnValue, bool bForbidZero = true, bool bForbidNegative = true) const;
 
     const QVector<QString> & getTFormulaReservedWords() const {return FormulaReservedWords;}
 
 public:
-    QString placeholderStr = "______";
+    const QString placeholderStr = "______";
 
 private:
     AGeoConsts();
@@ -66,20 +78,15 @@ private:
     AGeoConsts& operator=(const AGeoConsts&) = delete; // Copy assign
     AGeoConsts& operator=(AGeoConsts&) = delete;       // Move assign
 
-    QVector<QString> Names;
-    QVector<double>  Values;
-    QVector<QString> Expressions;
-    //runtime
-    QVector<QRegExp> RegExps;
-    QVector<QString> Indexes;
+    QVector<AGeoConstRecord> Records;
+    QVector<double> GeoConstValues;                    // has to be always synchronized with Records !  GeoConstValues.data() is used by TFormula
 
     //misc
     QVector<QString> FunctionsToJS;
     QVector<QString> FormulaReservedWords;
     QVector<QRegExp> ForbiddenVarsRExp;
 
-    void updateRegExpsAndIndexes();
+    void updateRunTimeProperties();
 };
 
 #endif // AGEOCONSTS_H
-

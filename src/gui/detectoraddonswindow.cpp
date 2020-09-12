@@ -1345,10 +1345,7 @@ void DetectorAddOnsWindow::updateGeoConstsIndication()
     ui->tabwConstants->clearContents();
 
     const AGeoConsts & GC = AGeoConsts::getConstInstance();
-
     const int numConsts = GC.countConstants();
-    const QVector<double>  & Values = GC.getValues();
-    const QVector<QString> & Expressions = GC.getExpressions();
 
     bGeoConstsWidgetUpdateInProgress = true; // -->
         ui->tabwConstants->setRowCount(numConsts + 1);
@@ -1356,8 +1353,8 @@ void DetectorAddOnsWindow::updateGeoConstsIndication()
         for (int i = 0; i <= numConsts; i++)
         {
             const QString Name  =      ( i == numConsts ? ""  : GC.getName(i));
-            const QString Value =      ( i == numConsts ? "0" : QString::number(Values.at(i)) );
-            const QString Expression = ( i == numConsts ? ""  : Expressions.at(i) );
+            const QString Value =      ( i == numConsts ? "0" : QString::number(GC.getValue(i)) );
+            const QString Expression = ( i == numConsts ? ""  : GC.getExpression(i) );
 
             QTableWidgetItem * newItem = new QTableWidgetItem(Name);
             ui->tabwConstants->setItem(i, 0, newItem);

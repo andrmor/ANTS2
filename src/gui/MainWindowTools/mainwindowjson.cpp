@@ -59,8 +59,7 @@ void MainWindow::onRequestDetectorGuiUpdate()
   ui->cbLPM->setChecked(Detector->PMarrays[1].fActive);
   on_pbShowPMsArrayRegularData_clicked(); //update regular array fields
   //Detector addon window updates
-  DAwindow->UpdateGUI();
-  if (Detector->PMdummies.size()>0) DAwindow->UpdateDummyPMindication();
+  DAwindow->UpdateGUI();  
   //Output window
   Owindow->RefreshData();
 //  Owindow->ResetViewport();  // *** !!! extend to other windows too!
@@ -83,13 +82,7 @@ void MainWindow::onRequestDetectorGuiUpdate()
   //GDML?
   onGDMLstatusChage(!Detector->isGDMLempty());
 
-  //Detector->checkSecScintPresent();
-  //ui->fSecondaryLightGenType->setEnabled(Detector->fSecScintPresent);
-
-  //readExtraGuiFromJson(Config->JSON); //new!
-  //qDebug() << "Before:\n"<<Config->JSON["DetectorConfig"].toObject()["LoadExpDataConfig"].toObject();
   UpdatePreprocessingSettingsIndication();
-  //qDebug() << "AFTER:\n"<<Config->JSON["DetectorConfig"].toObject()["LoadExpDataConfig"].toObject();
 
   DoNotUpdateGeometry = false;
 

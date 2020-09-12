@@ -138,8 +138,7 @@ void AGeoTreeWidget::UpdateGui(QString selected)
 
     if (selected.isEmpty())
     {
-        if (topLevelItemCount() > 0)
-            setCurrentItem(topLevelItem(0));
+        if (topLevelItemCount() > 0) setCurrentItem(topLevelItem(0));
     }
     else
     {
@@ -1102,7 +1101,7 @@ void AGeoTreeWidget::menuActionAddNewComposite(QString ContainerName)
   Sandwich->convertObjToComposite(newObj);
 
   QString name = newObj->Name;
-  UpdateGui(name);
+  //UpdateGui(name);
   emit RequestRebuildDetector();
   UpdateGui(name);
 }

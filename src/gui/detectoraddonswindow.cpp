@@ -72,8 +72,8 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(QWidget * parent, MainWindow * MW, De
   connect(twGeo, &AGeoTreeWidget::RequestHighlightObject, this, &DetectorAddOnsWindow::ShowObject);
   connect(twGeo, &AGeoTreeWidget::RequestShowObjectRecursive, this, &DetectorAddOnsWindow::ShowObjectRecursive);
   connect(twGeo->GetEditWidget(), &AGeoWidget::requestEnableGeoConstWidget, this, &DetectorAddOnsWindow::onRequestEnableGeoConstWidget);
-  connect(twGeo, SIGNAL(RequestNormalDetectorDraw()), MW, SLOT(ShowGeometrySlot()));
-  connect(Detector->Sandwich, SIGNAL(RequestGuiUpdate()), twGeo, SLOT(UpdateGui()));
+  connect(twGeo, &AGeoTreeWidget::RequestNormalDetectorDraw, MW, &MainWindow::ShowGeometrySlot);
+  //connect(Detector->Sandwich, &ASandwich::RequestGuiUpdate, twGeo, &AGeoTreeWidget::UpdateGui);
   QPalette palette = ui->frObjectEditor->palette();
   palette.setColor( backgroundRole(), QColor( 240, 240, 240 ) );
   ui->frObjectEditor->setPalette( palette );
@@ -87,7 +87,7 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(QWidget * parent, MainWindow * MW, De
   ui->pteTP->setPalette(p);
   ui->pteTP->setReadOnly(true);
 
-  UpdateGUI();
+  //UpdateGUI();  // on load will trigger, even if default startup detector not found,. will trigger rebuild detector -> update gui
 
   QDoubleValidator* dv = new QDoubleValidator(this);
   dv->setNotation(QDoubleValidator::ScientificNotation);
@@ -98,6 +98,7 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(QWidget * parent, MainWindow * MW, De
   on_cbAutoCheck_stateChanged(111);
 
   connect(ui->menuUndo_redo, &QMenu::aboutToShow, this, &DetectorAddOnsWindow::updateMenuIndication);
+  qDebug() << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
 }
 
 DetectorAddOnsWindow::~DetectorAddOnsWindow()
@@ -125,11 +126,10 @@ void DetectorAddOnsWindow::onReconstructDetectorRequest()
 
 void DetectorAddOnsWindow::UpdateGUI()
 {
-  //qDebug() << "GeoTree widget update triggered";
-  //Geo tree
-  UpdateGeoTree();
+  qDebug() << "=========>!!!->GeoTree widget update triggered";
 
-  //GDML
+  UpdateGeoTree();
+  UpdateDummyPMindication();
   ui->pbBackToSandwich->setEnabled(!Detector->isGDMLempty());
 }
 
@@ -266,6 +266,7 @@ void DetectorAddOnsWindow::ConvertDummyToPM(int idpm)
 
 void DetectorAddOnsWindow::UpdateGeoTree(QString name)
 {
+    qDebug() << "------UpdateGeoTree";
     twGeo->UpdateGui(name);
     updateGeoConstsIndication();
 }
@@ -343,17 +344,15 @@ void DetectorAddOnsWindow::on_pbCreateNewDummy_clicked()
 
 void DetectorAddOnsWindow::UpdateDummyPMindication()
 {
-  bool on;
-  if (Detector->PMdummies.size() == 0) on = false;
-  else on = true;
+  bool bThereAre = !Detector->PMdummies.isEmpty();
 
-  ui->pbDeleteDummy->setEnabled(on);
-  ui->pbUpdateDummy->setEnabled(on);
-  ui->pbConvertDummy->setEnabled(on);
-  ui->frDummyEdit->setEnabled(on);
+  ui->pbDeleteDummy->setEnabled(bThereAre);
+  ui->pbUpdateDummy->setEnabled(bThereAre);
+  ui->pbConvertDummy->setEnabled(bThereAre);
+  ui->frDummyEdit->setEnabled(bThereAre);
 
   int idpm = ui->sbDummyPMindex->value();
-  if (idpm > Detector->PMdummies.count() ) return;
+  if (idpm < 0 || idpm >= Detector->PMdummies.count() ) return;
 
   ui->sbDummyType->setValue(Detector->PMdummies[idpm].PMtype);
   ui->leoDummyType->setText(MW->PMs->getType(Detector->PMdummies[idpm].PMtype)->Name);
@@ -377,15 +376,13 @@ void DetectorAddOnsWindow::on_sbDummyType_valueChanged(int arg1)
 
 void DetectorAddOnsWindow::on_pbLoadDummyPMs_clicked()
 {
-    QString fileName;
-    fileName = QFileDialog::getOpenFileName(this, "Load file with dummy PMs", MW->GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);; All files (*.*)");
-    //qDebug()<<fileName;
+    QString fileName = QFileDialog::getOpenFileName(this, "Load file with dummy PMs", MW->GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);; All files (*.*)");
     if (fileName.isEmpty()) return;
     MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
     Detector->PMdummies.resize(0);
     MW->LoadDummyPMs(fileName);
     ui->sbDummyPMindex->setValue(0);
-    DetectorAddOnsWindow::UpdateDummyPMindication();
+    UpdateDummyPMindication();
     MW->ReconstructDetector();
 }
 

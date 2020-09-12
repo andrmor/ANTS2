@@ -1382,7 +1382,7 @@ void GraphWindowClass::UpdateControls()
 
 void GraphWindowClass::DoSaveGraph(QString name)
 {  
-  GraphWindowClass::SaveGraph(MW->GlobSet.LastOpenDir + "/" + name);
+  GraphWindowClass::SaveGraph(AGlobalSettings::getInstance().LastOpenDir + "/" + name);
 }
 
 void GraphWindowClass::DrawStrOpt(TObject *obj, QString options, bool DoUpdate)
@@ -1533,7 +1533,7 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
     // --------------DRAW--------------
     qDebug() << "TreeDraw -> what:" << What << "cuts:" << Cond << "opt:"<<HowAdj;
 
-    GraphWindowClass* tmpWin = 0;
+    GraphWindowClass * tmpWin = nullptr;
     if (bHistToGraph)
     {
         tmpWin = new GraphWindowClass(this, MW);
@@ -2034,7 +2034,7 @@ void GraphWindowClass::EnforceOverlayOff()
 
 QString & GraphWindowClass::getLastOpendDir()
 {
-    return MW->GlobSet.LastOpenDir;
+    return AGlobalSettings::getInstance().LastOpenDir;
 }
 
 void GraphWindowClass::on_pbAddToBasket_clicked()
@@ -2284,10 +2284,10 @@ void GraphWindowClass::BasketCustomContextMenuRequested(const QPoint &pos)
     }
     else if (selectedItem == save)
     {
-        QString fileName = QFileDialog::getSaveFileName(this, "Save basket to a file", MW->GlobSet.LastOpenDir, "Root files (*.root)");
+        QString fileName = QFileDialog::getSaveFileName(this, "Save basket to a file", AGlobalSettings::getInstance().LastOpenDir, "Root files (*.root)");
         if (!fileName.isEmpty())
         {
-            MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+            AGlobalSettings::getInstance().LastOpenDir = QFileInfo(fileName).absolutePath();
             if (QFileInfo(fileName).suffix().isEmpty()) fileName += ".root";
             Basket->saveAll(fileName);
         }
@@ -2295,10 +2295,10 @@ void GraphWindowClass::BasketCustomContextMenuRequested(const QPoint &pos)
     else if (selectedItem == append)
     {
         bool bDrawEmpty = DrawObjects.isEmpty();
-        const QString fileName = QFileDialog::getOpenFileName(this, "Append all from a basket file", MW->GlobSet.LastOpenDir, "Root files (*.root)");
+        const QString fileName = QFileDialog::getOpenFileName(this, "Append all from a basket file", AGlobalSettings::getInstance().LastOpenDir, "Root files (*.root)");
         if (!fileName.isEmpty())
         {
-            MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+            AGlobalSettings::getInstance().LastOpenDir = QFileInfo(fileName).absolutePath();
             QString err = Basket->appendBasket(fileName);
             if (!err.isEmpty()) message(err, this);
             UpdateBasketGUI();
@@ -2307,19 +2307,19 @@ void GraphWindowClass::BasketCustomContextMenuRequested(const QPoint &pos)
     }
     else if (selectedItem == appendRootHistsAndGraphs)
     {
-        const QString fileName = QFileDialog::getOpenFileName(this, "Append hist and graph objects from ROOT file", MW->GlobSet.LastOpenDir, "Root files (*.root)");
+        const QString fileName = QFileDialog::getOpenFileName(this, "Append hist and graph objects from ROOT file", AGlobalSettings::getInstance().LastOpenDir, "Root files (*.root)");
         if (!fileName.isEmpty())
         {
-            MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+            AGlobalSettings::getInstance().LastOpenDir = QFileInfo(fileName).absolutePath();
             Basket->appendRootHistGraphs(fileName);
             UpdateBasketGUI();
         }
     }
     else if (selectedItem == appendTxt)
     {
-        QString fileName = QFileDialog::getOpenFileName(this, "Append graph from ascii file to basket", MW->GlobSet.LastOpenDir, "Data files (*.txt *.dat); All files (*.*)");
+        QString fileName = QFileDialog::getOpenFileName(this, "Append graph from ascii file to basket", AGlobalSettings::getInstance().LastOpenDir, "Data files (*.txt *.dat); All files (*.*)");
         if (fileName.isEmpty()) return;
-        MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+        AGlobalSettings::getInstance().LastOpenDir = QFileInfo(fileName).absolutePath();
         const QString res = Basket->appendTxtAsGraph(fileName);
         if (!res.isEmpty()) message(res, this);
         else
@@ -2327,9 +2327,9 @@ void GraphWindowClass::BasketCustomContextMenuRequested(const QPoint &pos)
     }
     else if (selectedItem == appendTxtEr)
     {
-        QString fileName = QFileDialog::getOpenFileName(this, "Append graph with errors from ascii file to basket", MW->GlobSet.LastOpenDir, "Data files (*.txt *.dat); All files (*.*)");
+        QString fileName = QFileDialog::getOpenFileName(this, "Append graph with errors from ascii file to basket", AGlobalSettings::getInstance().LastOpenDir, "Data files (*.txt *.dat); All files (*.*)");
         if (fileName.isEmpty()) return;
-        MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+        AGlobalSettings::getInstance().LastOpenDir = QFileInfo(fileName).absolutePath();
         const QString res = Basket->appendTxtAsGraphErrors(fileName);
         if (!res.isEmpty()) message(res, this);
         else
@@ -2413,15 +2413,15 @@ void GraphWindowClass::on_actionSave_image_triggered()
 {
   QFileDialog *fileDialog = new QFileDialog;
   fileDialog->setDefaultSuffix("png");
-  QString fileName = fileDialog->getSaveFileName(this, "Save image as file", MW->GlobSet.LastOpenDir, "png (*.png);;gif (*.gif);;Jpg (*.jpg)");
+  QString fileName = fileDialog->getSaveFileName(this, "Save image as file", AGlobalSettings::getInstance().LastOpenDir, "png (*.png);;gif (*.gif);;Jpg (*.jpg)");
   if (fileName.isEmpty()) return;
-  MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+  AGlobalSettings::getInstance().LastOpenDir = QFileInfo(fileName).absolutePath();
 
   QFileInfo file(fileName);
   if (file.suffix().isEmpty()) fileName += ".png";
 
   GraphWindowClass::SaveGraph(fileName);
-  if (MW->GlobSet.fOpenImageExternalEditor) QDesktopServices::openUrl(QUrl("file:"+fileName, QUrl::TolerantMode));
+  if (AGlobalSettings::getInstance().fOpenImageExternalEditor) QDesktopServices::openUrl(QUrl("file:"+fileName, QUrl::TolerantMode));
 }
 
 void GraphWindowClass::on_actionBasic_ROOT_triggered()

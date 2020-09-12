@@ -1311,19 +1311,32 @@ void AGeoTreeWidget::updateIcon(QTreeWidgetItem* item, AGeoObject *obj)
   item->setIcon(0, icon); 
 }
 
-void AGeoTreeWidget::objectMembersToScript(AGeoObject* Master, QString &script, int ident, bool bExpandMaterial, bool bRecursive)
+void AGeoTreeWidget::objectMembersToScript(AGeoObject* Master, QString &script, int ident, bool bExpandMaterial, bool bRecursive, bool usePython)
 {
     for (AGeoObject* obj : Master->HostedObjects)
-        objectToScript(obj, script, ident, bExpandMaterial, bRecursive);
+        objectToScript(obj, script, ident, bExpandMaterial, bRecursive, usePython);
 }
 
-void AGeoTreeWidget::objectToScript(AGeoObject *obj, QString &script, int ident, bool bExpandMaterial, bool bRecursive)
+void AGeoTreeWidget::objectToScript(AGeoObject *obj, QString &script, int ident, bool bExpandMaterial, bool bRecursive, bool usePython)
 {
+    int bigIdent = ident + 4;
+    int medIdent = ident + 2;
+    QString CommentStr;
+    if (!usePython)
+    {
+        CommentStr = "//";
+    }
+    else
+    {
+        bigIdent = medIdent = 0;
+        CommentStr = "#";
+    }
+
     const QString Starter = "\n" + QString(" ").repeated(ident);
 
     if (obj->ObjectType->isLogical())
     {
-        script += "\n" + QString(" ").repeated(ident)+ makeScriptString_basicObject(obj, bExpandMaterial);
+        script += "\n" + QString(" ").repeated(ident)+ makeScriptString_basicObject(obj, bExpandMaterial, usePython);
     }
     else if (obj->ObjectType->isCompositeContainer())
     {
@@ -1337,61 +1350,62 @@ void AGeoTreeWidget::objectToScript(AGeoObject *obj, QString &script, int ident,
         if (obj->ObjectType->isLightguide())
         {
             script += "\n";
-            script += "\n" + QString(" ").repeated(ident)+ "//=== Lightguide object is not supported! ===";
+            script += "\n" + QString(" ").repeated(ident)+ CommentStr + "=== Lightguide object is not supported! ===";
             script += "\n";
         }
-        if (bRecursive) objectMembersToScript(obj, script, ident + 2, bExpandMaterial, bRecursive);
+        if (bRecursive) objectMembersToScript(obj, script, medIdent, bExpandMaterial, bRecursive, usePython);
     }
     else if (obj->ObjectType->isSingle() )
     {
-        script += "\n" + QString(" ").repeated(ident)+ makeScriptString_basicObject(obj, bExpandMaterial);
+        script += "\n" + QString(" ").repeated(ident)+ makeScriptString_basicObject(obj, bExpandMaterial, usePython);
         script += "\n" + QString(" ").repeated(ident)+ makeLinePropertiesString(obj);
-        if (bRecursive) objectMembersToScript(obj, script, ident + 2, bExpandMaterial, bRecursive);
+        if (bRecursive) objectMembersToScript(obj, script, medIdent, bExpandMaterial, bRecursive, usePython);
     }
     else if (obj->ObjectType->isComposite())
     {
-        script += "\n" + QString(" ").repeated(ident) + "//-->-- logical volumes for " + obj->Name;
-        objectMembersToScript(obj->getContainerWithLogical(), script, ident + 4, bExpandMaterial, bRecursive);
-        script += "\n" + QString(" ").repeated(ident) + "//--<-- logical volumes end for " + obj->Name;
+        script += "\n" + QString(" ").repeated(ident) + CommentStr + "-->-- logical volumes for " + obj->Name;
+        objectMembersToScript(obj->getContainerWithLogical(), script, bigIdent, bExpandMaterial, bRecursive, usePython);
+        script += "\n" + QString(" ").repeated(ident) + CommentStr + "--<-- logical volumes end for " + obj->Name;
 
-        script += "\n" + QString(" ").repeated(ident)+ makeScriptString_basicObject(obj, bExpandMaterial);
+        script += "\n" + QString(" ").repeated(ident)+ makeScriptString_basicObject(obj, bExpandMaterial, usePython);
         script += "\n" + QString(" ").repeated(ident)+ makeLinePropertiesString(obj);
-        if (bRecursive) objectMembersToScript(obj, script, ident + 2, bExpandMaterial, bRecursive);
+        if (bRecursive) objectMembersToScript(obj, script, medIdent, bExpandMaterial, bRecursive, usePython);
     }
     else if (obj->ObjectType->isArray())
     {
         script += "\n" + QString(" ").repeated(ident)+ makeScriptString_arrayObject(obj);
-        script += "\n" + QString(" ").repeated(ident)+ "//-->-- array elements for " + obj->Name;
-        objectMembersToScript(obj, script, ident + 2, bExpandMaterial, bRecursive);
-        script += "\n" + QString(" ").repeated(ident)+ "//--<-- array elements end for " + obj->Name;
+        script += "\n" + QString(" ").repeated(ident)+ CommentStr + "-->-- array elements for " + obj->Name;
+        objectMembersToScript(obj, script, medIdent, bExpandMaterial, bRecursive, usePython);
+        script += "\n" + QString(" ").repeated(ident)+ CommentStr + "--<-- array elements end for " + obj->Name;
     }
     else if (obj->ObjectType->isMonitor())
     {
         script += Starter + makeScriptString_monitorBaseObject(obj);
         script += Starter + makeScriptString_monitorConfig(obj);
+        script += "\n" + QString(" ").repeated(ident)+ makeLinePropertiesString(obj);
     }
     else if (obj->ObjectType->isStack())
     {
         script += "\n" + QString(" ").repeated(ident)+ makeScriptString_stackObjectStart(obj);
-        script += "\n" + QString(" ").repeated(ident)+ "//-->-- stack elements for " + obj->Name;
-        script += "\n" + QString(" ").repeated(ident)+ "// Values of x, y, z only matter for the stack element, refered to at InitializeStack below";
-        script += "\n" + QString(" ").repeated(ident)+ "// For the rest of elements they are calculated automatically";
-        objectMembersToScript(obj, script, ident + 2, bExpandMaterial, bRecursive);
-        script += "\n" + QString(" ").repeated(ident)+ "//--<-- stack elements end for " + obj->Name;
+        script += "\n" + QString(" ").repeated(ident)+ CommentStr + "-->-- stack elements for " + obj->Name;
+        script += "\n" + QString(" ").repeated(ident)+ CommentStr + " Values of x, y, z only matter for the stack element, refered to at InitializeStack below";
+        script += "\n" + QString(" ").repeated(ident)+ CommentStr + " For the rest of elements they are calculated automatically";
+        objectMembersToScript(obj, script, medIdent, bExpandMaterial, bRecursive, usePython);
+        script += "\n" + QString(" ").repeated(ident)+ CommentStr + "--<-- stack elements end for " + obj->Name;
         if (!obj->HostedObjects.isEmpty())
             script += "\n" + QString(" ").repeated(ident)+ makeScriptString_stackObjectEnd(obj);
     }
     else if (obj->ObjectType->isGroup())
     {
         script += "\n" + QString(" ").repeated(ident)+ makeScriptString_groupObjectStart(obj);
-        script += "\n" + QString(" ").repeated(ident)+ "//-->-- group elements for " + obj->Name;
-        objectMembersToScript(obj, script, ident + 2, bExpandMaterial, bRecursive);
-        script += "\n" + QString(" ").repeated(ident)+ "//--<-- group elements end for " + obj->Name;
+        script += "\n" + QString(" ").repeated(ident)+ CommentStr + "-->-- group elements for " + obj->Name;
+        objectMembersToScript(obj, script, medIdent, bExpandMaterial, bRecursive, usePython);
+        script += "\n" + QString(" ").repeated(ident)+ CommentStr + "--<-- group elements end for " + obj->Name;
     }
     else if (obj->ObjectType->isGrid())
     {
         script += "\n";
-        script += "\n" + QString(" ").repeated(ident)+ "//=== Optical grid object is not supported! Make a request to the developers ===";
+        script += "\n" + QString(" ").repeated(ident)+ CommentStr + "=== Optical grid object is not supported! Make a request to the developers ===";
         script += "\n";
     }
     if (obj->isDisabled())
@@ -1400,13 +1414,13 @@ void AGeoTreeWidget::objectToScript(AGeoObject *obj, QString &script, int ident,
     }
 }
 
-void AGeoTreeWidget::commonSlabToScript(QString &script)
+void AGeoTreeWidget::commonSlabToScript(QString &script, QString &identStr)
 {
-    script += QString ("  geo.SetCommonSlabMode(") +
+    script += identStr + QString ("geo.SetCommonSlabMode(") +
                       QString::number(Sandwich->SandwichState) + ")\n";
 
     ASlabXYModel* xy =static_cast<ASlabXYModel*>(Sandwich->DefaultXY);
-    script += QString("  geo.SetCommonSlabProperties(") +
+    script += identStr + QString("geo.SetCommonSlabProperties(") +
             QString::number(xy->shape) + ", " +
             QString::number(xy->size1) + ", " +
             QString::number(xy->size2) + ", " +
@@ -1421,7 +1435,7 @@ void AGeoTreeWidget::rebuildDetectorAndRestoreCurrentDelegate()
     UpdateGui(CurrentObjName);
 }
 
-const QString AGeoTreeWidget::makeScriptString_basicObject(AGeoObject* obj, bool bExpandMaterials) const
+const QString AGeoTreeWidget::makeScriptString_basicObject(AGeoObject* obj, bool bExpandMaterials, bool usePython) const
 {
     QVector<QString> posStrs; posStrs.reserve(3);
     QVector<QString> oriStrs; oriStrs.reserve(3);
@@ -1444,7 +1458,7 @@ const QString AGeoTreeWidget::makeScriptString_basicObject(AGeoObject* obj, bool
             oriStrs[1] + ", " +
             oriStrs[2] + " )";
 
-    AGeoConsts::getConstInstance().formulaToJavaScript(str);
+    AGeoConsts::getConstInstance().formulaToScript(str, usePython);
     return str;
 }
 
@@ -1914,7 +1928,7 @@ void AGeoWidget::onRequestScriptLineToClipboard()
 
     QString script;
     bool bNotRecursive = (CurrentObject->ObjectType->isSlab() || CurrentObject->ObjectType->isSingle() || CurrentObject->ObjectType->isComposite());
-    emit requestBuildScript(CurrentObject, script, 0, false, !bNotRecursive);
+    emit requestBuildScript(CurrentObject, script, 0, false, !bNotRecursive, false);     // !*! the false may be temporary
 
     qDebug() << script;
 
@@ -1927,7 +1941,8 @@ void AGeoWidget::onRequestScriptRecursiveToClipboard()
     if (!CurrentObject) return;
 
     QString script;
-    emit requestBuildScript(CurrentObject, script, 0, false, true);
+    emit requestBuildScript(CurrentObject, script, 0, false, true, false);            // !*! the false may be temporary
+
 
     qDebug() << script;
 

@@ -35,9 +35,9 @@ public:
 public slots:
   void UpdateGui(QString selected = "");
   void onGridReshapeRequested(QString objName);
-  void objectMembersToScript(AGeoObject *Master, QString &script, int ident, bool bExpandMaterial, bool bRecursive);
-  void objectToScript(AGeoObject *obj, QString &script, int ident, bool bExpandMaterial, bool bRecursive);
-  void commonSlabToScript(QString &script);
+  void objectMembersToScript(AGeoObject *Master, QString &script, int ident, bool bExpandMaterial, bool bRecursive, bool usePython);
+  void objectToScript(AGeoObject *obj, QString &script, int ident, bool bExpandMaterial, bool bRecursive, bool usePython);
+  void commonSlabToScript(QString &script, QString &identStr);
   void rebuildDetectorAndRestoreCurrentDelegate();  // used by geoConst widget
 
 private slots:
@@ -96,7 +96,7 @@ private:
   void menuActionAddNewGrid(QString ContainerName);
   void menuActionAddNewMonitor(QString ContainerName);
 
-  const QString makeScriptString_basicObject(AGeoObject *obj, bool bExpandMaterials) const;
+  const QString makeScriptString_basicObject(AGeoObject *obj, bool bExpandMaterials, bool usePython) const;
   const QString makeScriptString_slab(AGeoObject *obj, bool bExpandMaterials, int ident) const;
   const QString makeScriptString_setCenterSlab(AGeoObject *obj) const;
   QString makeScriptString_arrayObject(AGeoObject *obj);
@@ -172,7 +172,7 @@ private:
 
 signals:
   void showMonitor(const AGeoObject* mon);
-  void requestBuildScript(AGeoObject *obj, QString &script, int ident, bool bExpandMaterial, bool bRecursive);
+  void requestBuildScript(AGeoObject *obj, QString &script, int ident, bool bExpandMaterial, bool bRecursive, bool usePython);
   void requestEnableGeoConstWidget(bool);
 };
 

@@ -1285,35 +1285,26 @@ void DetectorAddOnsWindow::on_cbAutoCheck_stateChanged(int)
 
 void DetectorAddOnsWindow::on_pbConvertToScript_clicked()
 {
-    QString script = "// Auto-generated script\n\n";
-
-    AGeoObject* World = Detector->Sandwich->World;
-    script += "// GeoConsts\n";
-    script += AGeoConsts::getConstInstance().exportToJavaSript(World);
-
-    script += "  //Set all PM arrays to fully custom regularity, so PM Z-positions will not be affected by slabs\n";
-    script += "  pms.SetAllArraysFullyCustom()\n";
-    script += "  //Remove all slabs and objects\n";
-    script += "  geo.RemoveAllExceptWorld()\n";
-
-    script += "\n";
-    script += "  //Defined materials:\n";
-    for (int i=0; i<Detector->MpCollection->countMaterials(); i++)
-        script += "  var " + Detector->MpCollection->getMaterialName(i) + "_mat = " + QString::number(i) + "\n";
-    script += "  \n";
-    twGeo->commonSlabToScript(script);
-
-    twGeo->objectMembersToScript(World, script, 2, true, true);
-
-    script += "\n\n  geo.UpdateGeometry(true)";
-
-//    QClipboard *clipboard = QApplication::clipboard();
-//    clipboard->setText(script);
+    QString script;
+    createScript(script, false);//MW->ScriptWindow->isLanguagePython());
+    //    QClipboard *clipboard = QApplication::clipboard();
+    //    clipboard->setText(script);
 
     MW->ScriptWindow->onLoadRequested(script);
     MW->ScriptWindow->showNormal();
     MW->ScriptWindow->raise();
     MW->ScriptWindow->activateWindow();
+
+
+    if (MW->PythonScriptWindow)
+    {
+        script.clear();
+        createScript(script, true);
+        MW->PythonScriptWindow->onLoadRequested(script);
+        MW->PythonScriptWindow->showNormal();
+        MW->PythonScriptWindow->raise();
+        MW->PythonScriptWindow->activateWindow();
+    }
 }
 
 void DetectorAddOnsWindow::on_pbWorldTreeHelp_clicked()
@@ -1375,6 +1366,52 @@ void DetectorAddOnsWindow::updateGeoConstsIndication()
             if (!Expression.isEmpty()) edit->setEnabled(false);
         }
     bGeoConstsWidgetUpdateInProgress = false; // <--
+}
+
+QString DetectorAddOnsWindow::createScript(QString &script, bool usePython)
+{
+    QString CommentStr = "//";
+    int indent = 2;
+    QString VarStr;
+    QString indentStr;
+
+    script += "Auto-generated script\n\n";
+
+    if (!usePython)
+    {
+        VarStr = "var ";
+        indentStr = "  ";
+    }
+    else
+    {
+        CommentStr = "#";
+        indent = 0;
+        script += "import numpy as np\n";
+        script += "true = True\n\n";     // for now                   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    }
+    script.insert(0, CommentStr);
+
+    AGeoObject* World = Detector->Sandwich->World;
+    script += CommentStr + " GeoConsts\n";
+    script += AGeoConsts::getConstInstance().exportToScript(World, CommentStr, VarStr);
+
+    script += indentStr + CommentStr + "Set all PM arrays to fully custom regularity, so PM Z-positions will not be affected by slabs\n";
+    script += indentStr + "pms.SetAllArraysFullyCustom()\n";
+    script += indentStr + CommentStr + "Remove all slabs and objects\n";
+    script += indentStr + "geo.RemoveAllExceptWorld()\n";
+
+    script += "\n";
+    script += indentStr + CommentStr + "Defined materials:\n";
+    for (int i=0; i<Detector->MpCollection->countMaterials(); i++)
+        script += indentStr + VarStr + Detector->MpCollection->getMaterialName(i) + "_mat = " + QString::number(i) + "\n";
+    script += "  \n";
+    twGeo->commonSlabToScript(script, indentStr);
+
+    twGeo->objectMembersToScript(World, script, indent, true, true, usePython);
+
+    script += "\n\n" + indentStr + "geo.UpdateGeometry(true)";
+
+    return script;
 }
 
 void DetectorAddOnsWindow::onGeoConstEditingFinished(int index, QString strNewValue)

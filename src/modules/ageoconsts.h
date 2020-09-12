@@ -56,8 +56,8 @@ public:
     bool    evaluateConstExpression(int index);
     bool    isGeoConstInUseGlobal(const QRegExp & nameRegExp, const AGeoObject * obj) const;
 
-    QString exportToJavaSript(const AGeoObject * obj) const;
-    void    formulaToJavaScript(QString & str) const;
+    QString exportToScript(const AGeoObject * obj, const QString &CommentStr, const QString &VarStr) const;
+    void    formulaToScript(QString & str, bool usePython) const;
 
     void    writeToJson(QJsonObject & json) const;
     void    readFromJson(const QJsonObject & json);

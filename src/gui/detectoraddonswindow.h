@@ -77,6 +77,7 @@ private:
   bool GDMLtoTGeo(const QString &fileName);
   QString loadGDML(const QString &fileName, QString &gdml);  //returns error string - empty if OK
   void updateGeoConstsIndication();
+  QString createScript(QString &script, bool usePython);
 
 protected:
   void resizeEvent(QResizeEvent *event);

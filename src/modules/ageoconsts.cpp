@@ -36,7 +36,7 @@ bool AGeoConsts::isGeoConstInUseGlobal(const QRegExp & nameRegExp, const AGeoObj
     return false;
 }
 
-QString AGeoConsts::exportToJavaSript(const AGeoObject * obj) const
+QString AGeoConsts::exportToScript(const AGeoObject * obj, const QString &CommentStr, const QString &VarStr) const
 {
     QString GCScript;
 
@@ -47,23 +47,31 @@ QString AGeoConsts::exportToJavaSript(const AGeoObject * obj) const
             const AGeoConstRecord & r = Records.at(i);
             QRegExp nameRegExp("\\b" + r.Name + "\\b");
             if (isGeoConstInUseGlobal(nameRegExp, obj))
-                GCScript += (QString("var %1 = %2%3\n").arg(r.Name)
+                GCScript += (QString("%1%2 = %3%4\n")
+                             .arg(VarStr)
+                             .arg(r.Name)
                              .arg(r.Expression.isEmpty()? QString::number(GeoConstValues[i]) : r.Expression))
-                             .arg(r.Comment.isEmpty()? r.Comment : QString("                   //%1").arg(r.Comment));
+                             .arg(r.Comment.isEmpty()? r.Comment : QString("                   " + CommentStr + r.Comment));
         }
-        formulaToJavaScript(GCScript);
+        formulaToScript(GCScript, VarStr.isEmpty());    //VarStr is only empty when python
     }
 
     GCScript += "\n";
     return GCScript;
 }
 
-void AGeoConsts::formulaToJavaScript(QString & str) const
+void AGeoConsts::formulaToScript(QString & str, bool usePython) const
 {
+    QString mathStr;
+    if (!usePython)
+        mathStr = "Math.";
+    else
+        mathStr = "np.";
+
     for (const QString & s : FunctionsToJS)
     {
         QString pat(s + '(');
-        str.replace(pat, "Math." + pat);
+        str.replace(pat, mathStr + pat);
     }
 }
 

@@ -102,12 +102,12 @@ public:
   QString LastError;  
 
 signals:
-  void RequestGuiUpdate();       //does NOT trigger remake detector in GUI mode
-  void RequestRebuildDetector(); //triggers remake detector in GUI mode
+  void RequestGuiUpdate();       //   !*! obsolete?
+  void RequestRebuildDetector();
   void WarningMessage(QString);
 
 public slots:
-  void onMaterialsChanged(const QStringList MaterialList);
+  void onMaterialsChanged(const QStringList MaterialList);  // !*! obsolete?
 
 private:
   void clearModel();

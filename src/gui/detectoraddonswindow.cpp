@@ -1286,7 +1286,7 @@ void DetectorAddOnsWindow::on_cbAutoCheck_stateChanged(int)
 void DetectorAddOnsWindow::on_pbConvertToScript_clicked()
 {
     QString script;
-    if (MW->ScriptWindow->isVisible() || (!MW->ScriptWindow->isVisible()  && !MW->PythonScriptWindow->isVisible()))
+    if (MW->ScriptWindow->isVisible() || !MW->PythonScriptWindow->isVisible())
     {
         createScript(script, false);
         //    QClipboard *clipboard = QApplication::clipboard();
@@ -1298,7 +1298,6 @@ void DetectorAddOnsWindow::on_pbConvertToScript_clicked()
         MW->ScriptWindow->activateWindow();
     }
 
-
     if (MW->PythonScriptWindow && MW->PythonScriptWindow->isVisible())
     {
         script.clear();
@@ -1308,7 +1307,6 @@ void DetectorAddOnsWindow::on_pbConvertToScript_clicked()
         MW->PythonScriptWindow->raise();
         MW->PythonScriptWindow->activateWindow();
     }
-
 }
 
 void DetectorAddOnsWindow::on_pbWorldTreeHelp_clicked()

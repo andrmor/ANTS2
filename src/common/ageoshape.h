@@ -51,6 +51,7 @@ public:
   static AGeoShape * GeoShapeFactory(const QString ShapeType);  // -=<  SHAPE FACTORY >=-
   static QList<AGeoShape*> GetAvailableShapes();                // list of available shapes for generation of help and highlighter: do not forget to add new here!
   static bool CheckPointsForArb8(QList<QPair<double, double> > V );
+  const QString getPythonGenerationString(const QString &javaGenString) const;
 };
 
 // -------------- Particular shapes ---------------

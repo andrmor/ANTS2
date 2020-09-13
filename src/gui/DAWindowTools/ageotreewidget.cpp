@@ -1439,6 +1439,10 @@ const QString AGeoTreeWidget::makeScriptString_basicObject(AGeoObject* obj, bool
 {
     QVector<QString> posStrs; posStrs.reserve(3);
     QVector<QString> oriStrs; oriStrs.reserve(3);
+
+    QString GenerationString = obj->Shape->getGenerationString(true);
+    if (usePython) GenerationString = obj->Shape->getPythonGenerationString(GenerationString);
+
     for (int i = 0; i < 3; i++)
     {
         posStrs << ( obj->PositionStr[i].isEmpty() ? QString::number(obj->Position[i]) : obj->PositionStr[i] );
@@ -1447,7 +1451,7 @@ const QString AGeoTreeWidget::makeScriptString_basicObject(AGeoObject* obj, bool
 
     QString str = QString("geo.TGeo( ") +
             "'" + obj->Name + "', " +
-            "'" + obj->Shape->getGenerationString(true) + "', " +
+            "'" + GenerationString + "', " +
             (bExpandMaterials && obj->Material < Sandwich->GetMaterials().size() ?
                  Sandwich->GetMaterials().at(obj->Material) + "_mat" : QString::number(obj->Material)) + ", "
             "'" + obj->Container->Name + "',   "+

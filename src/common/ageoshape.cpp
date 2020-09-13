@@ -3590,6 +3590,38 @@ bool AGeoShape::CheckPointsForArb8(QList<QPair<double, double> > V)
     return checkPointsArb8(V);
 }
 
+const QString AGeoShape::getPythonGenerationString(const QString &javaGenString) const
+{
+    int numberofQ = javaGenString.count("'");
+    if (numberofQ == 0) return javaGenString;
+
+    QString PythonGenString = javaGenString;
+    const QString firstStr = " )";
+    const QString secondStr = " str(";
+    int   plusAccomidation = QString(" + ").size();
+
+    bool first = true;
+    for (int i = 0; i < PythonGenString.size(); i++)
+    {
+        if (PythonGenString.at(i) == "'")
+        {
+            if (!first)
+            {
+                PythonGenString.insert(i - plusAccomidation , firstStr);
+                i += firstStr.size();
+            }
+            else
+            {
+                PythonGenString.insert(i + plusAccomidation , secondStr);
+                i += secondStr.size();
+            }
+            first = !first;
+
+        }
+    }
+    return PythonGenString;
+}
+
 AGeoShape * AGeoShape::GeoShapeFactory(const QString ShapeType)
 {
     if (ShapeType == "TGeoBBox")

@@ -1286,17 +1286,20 @@ void DetectorAddOnsWindow::on_cbAutoCheck_stateChanged(int)
 void DetectorAddOnsWindow::on_pbConvertToScript_clicked()
 {
     QString script;
-    createScript(script, false);
-    //    QClipboard *clipboard = QApplication::clipboard();
-    //    clipboard->setText(script);
+    if (MW->ScriptWindow->isVisible() || (!MW->ScriptWindow->isVisible()  && !MW->PythonScriptWindow->isVisible()))
+    {
+        createScript(script, false);
+        //    QClipboard *clipboard = QApplication::clipboard();
+        //    clipboard->setText(script);
 
-    MW->ScriptWindow->onLoadRequested(script);
-    MW->ScriptWindow->showNormal();
-    MW->ScriptWindow->raise();
-    MW->ScriptWindow->activateWindow();
+        MW->ScriptWindow->onLoadRequested(script);
+        MW->ScriptWindow->showNormal();
+        MW->ScriptWindow->raise();
+        MW->ScriptWindow->activateWindow();
+    }
 
 
-    if (MW->PythonScriptWindow)
+    if (MW->PythonScriptWindow->isVisible())
     {
         script.clear();
         createScript(script, true);
@@ -1305,6 +1308,7 @@ void DetectorAddOnsWindow::on_pbConvertToScript_clicked()
         MW->PythonScriptWindow->raise();
         MW->PythonScriptWindow->activateWindow();
     }
+
 }
 
 void DetectorAddOnsWindow::on_pbWorldTreeHelp_clicked()

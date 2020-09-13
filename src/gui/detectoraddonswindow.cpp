@@ -1299,7 +1299,7 @@ void DetectorAddOnsWindow::on_pbConvertToScript_clicked()
     }
 
 
-    if (MW->PythonScriptWindow->isVisible())
+    if (MW->PythonScriptWindow && MW->PythonScriptWindow->isVisible())
     {
         script.clear();
         createScript(script, true);

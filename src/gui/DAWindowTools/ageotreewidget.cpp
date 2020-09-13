@@ -1414,7 +1414,7 @@ void AGeoTreeWidget::objectToScript(AGeoObject *obj, QString &script, int ident,
     }
 }
 
-void AGeoTreeWidget::commonSlabToScript(QString &script, QString &identStr)
+void AGeoTreeWidget::commonSlabToScript(QString &script, const QString &identStr)
 {
     script += identStr + QString ("geo.SetCommonSlabMode(") +
                       QString::number(Sandwich->SandwichState) + ")\n";

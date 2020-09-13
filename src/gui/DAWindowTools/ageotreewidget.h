@@ -37,7 +37,7 @@ public slots:
   void onGridReshapeRequested(QString objName);
   void objectMembersToScript(AGeoObject *Master, QString &script, int ident, bool bExpandMaterial, bool bRecursive, bool usePython);
   void objectToScript(AGeoObject *obj, QString &script, int ident, bool bExpandMaterial, bool bRecursive, bool usePython);
-  void commonSlabToScript(QString &script, QString &identStr);
+  void commonSlabToScript(QString &script, const QString &identStr);
   void rebuildDetectorAndRestoreCurrentDelegate();  // used by geoConst widget
 
 private slots:

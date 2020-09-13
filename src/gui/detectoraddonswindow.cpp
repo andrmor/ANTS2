@@ -1286,7 +1286,7 @@ void DetectorAddOnsWindow::on_cbAutoCheck_stateChanged(int)
 void DetectorAddOnsWindow::on_pbConvertToScript_clicked()
 {
     QString script;
-    createScript(script, false);//MW->ScriptWindow->isLanguagePython());
+    createScript(script, false);
     //    QClipboard *clipboard = QApplication::clipboard();
     //    clipboard->setText(script);
 

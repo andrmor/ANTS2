@@ -1388,7 +1388,6 @@ QString DetectorAddOnsWindow::createScript(QString &script, bool usePython)
     {
         CommentStr = "#";
         indent = 0;
-        script += "import numpy as np\n";
         script += "true = True\n\n";     // for now                   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     }
     script.insert(0, CommentStr);

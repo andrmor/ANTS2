@@ -68,7 +68,7 @@ void AGeoConsts::formulaToScript(QString & str, bool usePython) const
     if (!usePython)
         mathStr = "Math.";
     else
-        mathStr = "np.";
+        mathStr = "MATH.";
 
     for (const QString & s : FunctionsToJS)
     {

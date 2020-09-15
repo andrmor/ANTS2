@@ -116,7 +116,7 @@ public:
   int getIndexOfLastSlab();
   void addObjectFirst(AGeoObject* Object);
   void addObjectLast(AGeoObject* Object);  //before slabs!
-  bool migrateTo(AGeoObject* objTo);
+  bool migrateTo(AGeoObject* objTo, bool fAfter = false, AGeoObject *reorderObj = nullptr);
   bool repositionInHosted(AGeoObject* objTo, bool fAfter);
   bool suicide(bool SlabsToo = false); // not possible for locked and static objects
   void recursiveSuicide(); // does not remove locked and static objects, but removes all unlocked objects down the chain

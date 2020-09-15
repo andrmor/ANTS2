@@ -874,7 +874,7 @@ void AGeoObject::addObjectLast(AGeoObject * Object)
   else HostedObjects.append(Object);
 }
 
-bool AGeoObject::migrateTo(AGeoObject *objTo)
+bool AGeoObject::migrateTo(AGeoObject *objTo, bool fAfter, AGeoObject *reorderObj)
 {   
   if (objTo == this->Container) return true;
 
@@ -896,7 +896,11 @@ bool AGeoObject::migrateTo(AGeoObject *objTo)
   //Container = objTo;
   //objTo->HostedObjects.insert(0, this);
   objTo->addObjectFirst(this);
+
+  if (reorderObj) this->repositionInHosted(reorderObj, fAfter);
   return true;
+
+
 }
 
 bool AGeoObject::repositionInHosted(AGeoObject *objTo, bool fAfter)

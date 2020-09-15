@@ -1388,7 +1388,7 @@ QString DetectorAddOnsWindow::createScript(QString &script, bool usePython)
     {
         CommentStr = "#";
         indent = 0;
-        script += "true = True\n\n";     // for now                   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        script += "true = True\n\nfalse = False\n\n";     // for now                   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     }
     script.insert(0, CommentStr);
 

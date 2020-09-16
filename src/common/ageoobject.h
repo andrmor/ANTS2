@@ -133,6 +133,8 @@ public:
 
   bool getPositionInWorld(double * worldPos) const;
 
+  bool isContainerValid(QString &errorStr) const;
+
   //service propertie
   QString tmpContName;   //used only during load
   bool fExpanded = true; //gui only - is this object expanded in tree view

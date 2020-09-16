@@ -1230,6 +1230,27 @@ bool AGeoObject::getPositionInWorld(double * Pos) const
     return false;
 }
 
+bool AGeoObject::isContainerValid(QString & errorStr) const
+{
+    if (ObjectType->isGrid())
+    {
+        errorStr = "Grid cannot contain anything but the grid element!";
+        return false;
+    }
+    if (isCompositeMemeber())
+    {
+        errorStr = "Cannot move objects to composite logical objects!";
+        return false;
+    }
+    if (ObjectType->isMonitor())
+    {
+        errorStr = "Monitors cannot host objects!";
+        return false;
+    }
+    return true;
+}
+
+
 QString randomString(int lettLength, int numLength)
 {
   //const QString possibleLett("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");

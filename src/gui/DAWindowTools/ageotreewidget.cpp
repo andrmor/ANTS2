@@ -288,138 +288,119 @@ void AGeoTreeWidget::dropEvent(QDropEvent* event)
 
     QStringList selNames;
 
-    //if keyboard modifier is on, rearrange objects instead of change to new container
-    const Qt::KeyboardModifiers mod = event->keyboardModifiers();
-    if (mod == Qt::ALT || mod == Qt::CTRL || mod == Qt::SHIFT)
-    {
-        //qDebug() << "Rearrange order event triggered";
-        if (selected.size() != 1)
-        {
-            //qDebug() << "Only one item should be selected to use rearrangment!";
-            event->ignore();
-            return;
-        }
-        QTreeWidgetItem * DraggedItem = this->selectedItems().first();
-        if (!DraggedItem)
-        {
-            //qDebug() << "Drag source item invalid, ignore";
-            event->ignore();
-            return;
-        }
-        const QString DraggedName = DraggedItem->text(0);
-        selNames << DraggedName;
-
-        AGeoObject* obj = World->findObjectByName(DraggedName);
-        if (obj)
-        {
-            //bool fAfter = (event->pos().y() > visualItemRect(itemTo).center().y());
-            bool fAfter = (dropIndicatorPosition() == QAbstractItemView::BelowItem);
-            obj->repositionInHosted(objTo, fAfter);
-        }
-
-        if (obj && obj->Container && obj->Container->ObjectType->isStack())
-            obj->updateStack();
-    }
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    AGeoObject * ContainerTo = nullptr;
+    qDebug() <<"start of drop";
+    if (!showDropIndicator()) {ContainerTo = objTo; qDebug() <<"ON ITEM";}
     else
     {
-      // Normal drag n drop
-      if (objTo->ObjectType->isGrid())
-      {
-          event->ignore();
-          QMessageBox::information(this, "", "Grid cannot contain anything but the grid element!");
-          return;
-      }
-      if (objTo->isCompositeMemeber())
-      {
-          event->ignore();
-          QMessageBox::information(this, "", "Cannot move objects to composite logical objects!");
-          return;
-      }
-      if (objTo->ObjectType->isMonitor())
-      {
-          event->ignore();
-          QMessageBox::information(this, "", "Monitors cannot host objects!");
-          return;
-      }
+        if (objTo->Container)
+            ContainerTo = objTo->Container;
+        else ContainerTo = objTo;
+        qDebug() <<"NOT ON ITEM";
+    }
+    QString containerErrorStr;
+    bool containerOk = true;
+    if (!ContainerTo->isWorld()) containerOk = ContainerTo->isContainerValid(containerErrorStr);
 
-      //check if any of the items are composite members and are in use
-      // possible optimisation: make search only once, -> container with AGeoObjects?
-      for (int i=0; i<selected.size(); i++)
-      {
-          QTreeWidgetItem* DraggedItem = this->selectedItems().at(i);
-          if (!DraggedItem)
-            {
-              qDebug() << "Drag source item invalid, ignore";
-              event->ignore();
-              return;
-            }
+    for (int i=0; i<selected.size(); i++) //error catching
+    {
+        QTreeWidgetItem* DraggedItem = this->selectedItems().at(i);
+        if (!DraggedItem)
+          {
+            qDebug() << "Drag source item invalid, ignore";
+            event->ignore();
+            return;
+          }
 
-          QString DraggedName = DraggedItem->text(0);
-          AGeoObject* obj = World->findObjectByName(DraggedName);
-          if (!obj)
-          {
-              qWarning() << "Error: obj not found!";
-              event->ignore();
-              return;
-          }
-          if (objTo->ObjectType->isArray() && obj->ObjectType->isArray())
-          {
-              event->ignore();
-              QMessageBox::information(this, "", "Cannot move array directly inside another array!");
-              return;
-          }
-          if (obj->isInUseByComposite())
-          {
-              event->ignore();
-              QMessageBox::information(this, "", "Cannot move objects: Contains object(s) used in a composite object generation");
-              return;
-          }
-          if (objTo->ObjectType->isCompositeContainer() && !obj->ObjectType->isSingle())
-          {
-              event->ignore();
-              QMessageBox::information(this, "", "Can insert only elementary objects to the list of composite members!");
-              return;
-          }
-          if (objTo->ObjectType->isHandlingSet() && !obj->ObjectType->isSingle())
-          {
-              event->ignore();
-              QMessageBox::information(this, "", "Can insert only elementary objects to sets!");
-              return;
-          }
-      }
-
-      for (int i=selected.size()-1; i>-1; i--)
+        QString DraggedName = DraggedItem->text(0);
+        AGeoObject* obj = World->findObjectByName(DraggedName);
+        if (!obj)
         {
-          QTreeWidgetItem* DraggedItem = this->selectedItems().at(i);
-          QString DraggedName = DraggedItem->text(0);
-          selNames << DraggedName;
-          //qDebug() << "Draggin item:"<< DraggedName;
+            qWarning() << "Error: obj not found!";
+            event->ignore();
+            return;
+        }
 
-          AGeoObject* obj = World->findObjectByName(DraggedName);
-          AGeoObject* objFormerContainer = obj->Container;
-          //qDebug() << "Dragging"<<obj->Name<<"to"<<objTo->Name<<"from"<<objFormerContainer->Name;
-          bool ok = obj->migrateTo(objTo);
-          if (!ok)
-          {
-              qWarning() << "Object migration failed: cannot migrate down the chain (or to itself)!";
-              event->ignore();
-              return;
-          }
-
-          if (objTo->ObjectType->isStack())
+        if (ContainerTo != obj->Container)
+        {
+            if (!containerOk)
             {
-              //qDebug() << "updating stack of this object";
-              obj->updateStack();
+                event->ignore();
+                QMessageBox::information(this, "", containerErrorStr);
+                return;
             }
-          if (objFormerContainer && objFormerContainer->ObjectType->isStack())
+
+            if (ContainerTo->ObjectType->isArray() && obj->ObjectType->isArray())
             {
-              //qDebug() << "updating stack of the former container";
-              if (objFormerContainer->HostedObjects.size()>0)
-                objFormerContainer->HostedObjects.first()->updateStack();
+                event->ignore();
+                QMessageBox::information(this, "", "Cannot move array directly inside another array!");
+                return;
+            }
+            if (obj->isInUseByComposite())
+            {
+                event->ignore();
+                QMessageBox::information(this, "", "Cannot move objects: Contains object(s) used in a composite object generation");
+                return;
+            }
+            if (ContainerTo->ObjectType->isCompositeContainer() && !obj->ObjectType->isSingle())
+            {
+                event->ignore();
+                QMessageBox::information(this, "", "Can insert only elementary objects to the list of composite members!");
+                return;
+            }
+            if (ContainerTo->ObjectType->isHandlingSet() && !obj->ObjectType->isSingle())
+            {
+                event->ignore();
+                QMessageBox::information(this, "", "Can insert only elementary objects to sets!");
+                return;
             }
         }
     }
 
+    for (int i=selected.size()-1; i>-1; i--) //actual move and reorder
+    {
+        QTreeWidgetItem* DraggedItem = this->selectedItems().at(i);
+
+        QString DraggedName = DraggedItem->text(0);
+        AGeoObject* obj = World->findObjectByName(DraggedName);
+
+        if (ContainerTo != obj->Container)
+        {
+            AGeoObject* objFormerContainer = obj->Container;
+
+            bool ok = obj->migrateTo(ContainerTo);
+            if (!ok)
+            {
+                qWarning() << "Object migration failed: cannot migrate down the chain (or to itself)!";
+                event->ignore();
+                return;
+            }
+
+            if (ContainerTo->ObjectType->isStack())
+            {
+                //qDebug() << "updating stack of this object";
+                obj->updateStack();
+            }
+            if (objFormerContainer && objFormerContainer->ObjectType->isStack())
+            {
+                //qDebug() << "updating stack of the former container";
+                if (objFormerContainer->HostedObjects.size()>0)
+                    objFormerContainer->HostedObjects.first()->updateStack();
+            }
+        }
+
+        if (ContainerTo != objTo)
+        {
+            bool fAfter = (dropIndicatorPosition() == QAbstractItemView::BelowItem);
+            obj->repositionInHosted(objTo, fAfter);
+
+            if (obj && obj->Container && obj->Container->ObjectType->isStack())
+                obj->updateStack();
+
+        }
+
+    }
     //qDebug() << "Drag completed, updating gui";
     UpdateGui();
     emit RequestRebuildDetector();
@@ -510,15 +491,15 @@ void AGeoTreeWidget::onItemSelectionChanged()
 
   //allow only selection of objects of the same container!
   //static objects cannot be mixed with others
-  QTreeWidgetItem * FirstParent = sel.first()->parent();
+  //QTreeWidgetItem * FirstParent = sel.first()->parent();
   for (int i = 1; i < sel.size(); i++)
   {
-      if (sel.at(i)->parent() != FirstParent)
+      /*if (sel.at(i)->parent() != FirstParent)
       {
           //qDebug() << "Cannot select together items from different containers!";
           sel.at(i)->setSelected(false);
           return; // will retrigger anyway
-      }
+      }*/
       if (sel.at(i)->font(0).bold())
       {
           //qDebug() << "Cannot select together different slabs or    world and slab(s)";

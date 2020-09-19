@@ -195,22 +195,6 @@ void MainWindow::closeEvent(QCloseEvent *)
    qDebug() << "\n<MainWindow shutdown initiated";
    ShutDown = true;
 
-   /*
-   if (ReconstructionManager->isBusy() || !SimulationManager->fFinished)
-       if (timesTriedToExit < 6)
-       {
-           //qDebug() << "<-Reconstruction manager is busy, terminating and trying again in 100us";
-           ReconstructionManager->requestStop();
-           SimulationManager->StopSimulation();
-           qApp->processEvents();
-           QThread::usleep(100);
-           QTimer::singleShot(100, this, SLOT(close()));
-           timesTriedToExit++;
-           event->ignore();
-           return;
-       }
-   */
-
    ui->pbShowColorCoding->setFocus(); //to finish editing whatever QLineEdit the user can be in - they call on_editing_finish
 
    //if checked, save windows' status
@@ -409,16 +393,6 @@ bool MainWindow::event(QEvent *event)
    return QMainWindow::event(event);
 }
 
-void MainWindow::ShowGeoMarkers()
-{
-    GeometryWindow->ShowGeoMarkers();
-}
-
-void MainWindow::ShowGraphWindow()
-{
-    GraphWindow->ShowAndFocus();
-}
-
 void MainWindow::on_pbRebuildDetector_clicked()
 {   
     if (DoNotUpdateGeometry) return; //if bulk update in progress
@@ -510,145 +484,15 @@ void MainWindow::ShowPMcount()
   ui->labTotPMs->setText(str);
 }
 
-void MainWindow::PopulatePMarray(int ul, double z, int istart) // ul= 0 upper, 1 = lower; z - z coordinate; istart - first PM fill be added at this index
-{  
-  bool hexagonal;
-  if (Detector->PMarrays[ul].Packing == 0) hexagonal = false; else hexagonal = true;
-  int iX = Detector->PMarrays[ul].NumX;
-  int iY = Detector->PMarrays[ul].NumY;
-  double CtC = Detector->PMarrays[ul].CenterToCenter;
-  double CtCbis = CtC*cos(30.*3.14159/180.);
-  int rings = Detector->PMarrays[ul].NumRings;
-  bool XbyYarray = !Detector->PMarrays[ul].fUseRings;
-  double Psi = 0;
-
-  double x, y;
-  double typ = Detector->PMarrays[ul].PMtype;
-
-  int ipos = istart; //where (ipm) insert the next PM
-
-  //populating PM array
-  if (XbyYarray)
-  { //X by Y type of array  
-    if (hexagonal)
-     {
-      for (int j=iY-1; j>-1; j--)
-          for (int i=0; i<iX; i++)
-            {
-              x = CtC*( -0.5*(iX-1) +i  + 0.5*(j%2));
-              y = CtCbis*(-0.5*(iY-1) +j);
-              PMs->insert(ipos, ul,x,y,z,Psi,typ);
-              ipos++;
-            }
-     }
-    else
-     {
-       for (int j=iY-1; j>-1; j--)
-           for (int i=0; i<iX; i++)
-             {
-               x = CtC*(-0.5*(iX-1) +i);
-               y = CtC*(-0.5*(iY-1) +j);
-               PMs->insert(ipos, ul,x,y,z,Psi,typ);
-               ipos++;
-             }
-      }
-  }
-  else
-    { //rings array
-      if (hexagonal) {
-     //   int nPMs = 1; //0 rings = 1 PM
-     //   for (int i=1; i<rings+1; i++) nPMs += 6*i; //every new ring adds 6i PMs
-
-        //qDebug()<<nPMs<<"for rings:"<<rings;
-        PMs->insert(ipos, ul,0,0,z, Psi, typ);
-        ipos++;
-
-        ///int index=PMs->count();
-        //int index = ipos;
-        for (int i=1; i<rings+1; i++)
-          {
-            x = i*CtC;
-            y = 0;
-            PMs->insert(ipos, ul,x,y,z,Psi,typ);
-            ipos++;
-            //qDebug()<<"-*"<<PMx[index]<<PMy[index];
-            //index++;
-
-            for (int j=1; j<i+1; j++) {  //   /
-                x = PMs->X(ipos-1) - 0.5*CtC; //was index
-                y = PMs->Y(ipos-1) - CtCbis;
-                PMs->insert(ipos, ul,x,y,z,Psi,typ);
-                ipos++;
-                // qDebug()<<"/"<<PMx[index]<<PMy[index];
-                //index++;
-            }
-            for (int j=1; j<i+1; j++) {   // -
-                x = PMs->X(ipos-1) - CtC;
-                y = PMs->Y(ipos-1);
-                PMs->insert(ipos, ul,x,y,z,Psi,typ);
-                ipos++;
-                // qDebug()<<"-"<<PMx[index]<<PMy[index];
-                //index++;
-            }
-            for (int j=1; j<i+1; j++) {  // right-down
-                x = PMs->X(ipos-1) - 0.5*CtC;
-                y = PMs->Y(ipos-1) + CtCbis;
-                PMs->insert(ipos, ul,x,y,z,Psi,typ);
-                ipos++;
-                // qDebug()<<"\\"<<PMx[index]<<PMy[index];
-                //index++;
-            }
-            for (int j=1; j<i+1; j++) {  // /
-                x = PMs->X(ipos-1) + 0.5*CtC;
-                y = PMs->Y(ipos-1) + CtCbis;
-                PMs->insert(ipos, ul,x,y,z,Psi,typ);
-                ipos++;
-                //qDebug()<<"/"<<PMx[index]<<PMy[index];
-                //index++;
-            }
-            for (int j=1; j<i+1; j++) {   // -
-                x = PMs->X(ipos-1) + CtC;
-                y = PMs->Y(ipos-1);
-                PMs->insert(ipos, ul,x,y,z,Psi,typ);
-                ipos++;
-                //qDebug()<<"-"<<PMx[index]<<PMy[index];
-                //index++;
-            }
-            for (int j=1; j<i; j++) {  // left-up       //dont do the last step - already positioned PM
-                x = PMs->X(ipos-1) + 0.5*CtC;
-                y = PMs->Y(ipos-1) - CtCbis;
-                PMs->insert(ipos, ul,x,y,z,Psi,typ);
-                ipos++;
-                //qDebug()<<"\\"<<PMx[index]<<PMy[index];
-                //index++;
-            }
-        }
-      }
-      else {
-         //using the same algorithm as X * Y
-         iX = rings*2 + 1;
-         iY = rings*2 + 1;
-
-         for (int j=0; j<iY; j++)
-             for (int i=0; i<iX; i++) {
-                 x = CtC*(-0.5*(iX-1) +i);
-                 y = CtC*(-0.5*(iY-1) +j);
-                 PMs->insert(ipos, ul,x,y,z,Psi,typ);
-                 ipos++;
-             }
-      }
-    }
-}
-
 void MainWindow::on_cbXbyYarray_stateChanged(int arg1)
 {
-        ui->sbNumX->setEnabled(arg1);
-        ui->sbNumY->setEnabled(arg1);
+    ui->sbNumX->setEnabled(arg1);
+    ui->sbNumY->setEnabled(arg1);
 }
 
 void MainWindow::on_cbRingsArray_stateChanged(int arg1)
 {
-     ui->sbPMrings->setEnabled(arg1);
+    ui->sbPMrings->setEnabled(arg1);
 }
 
 void MainWindow::on_pbEditOverride_clicked()
@@ -737,20 +581,6 @@ void MainWindow::on_cobPMdeviceType_currentIndexChanged(int index)
 void MainWindow::on_cobPMdeviceType_activated(const QString &/*arg1*/)
 {  //see also method on_cobPMdeviceType_currentIndexChanged(int index)
     on_pbUpdatePMproperties_clicked();
-}
-
-void MainWindow::CheckSetMaterial(const QString name, QComboBox* cob, QVector<QString>* vec)
-{
-    for (int i=0; i<MpCollection->countMaterials(); i++)
-    {
-        if (!(*MpCollection)[i]->name.compare(name,Qt::CaseSensitive))
-        {
-            cob->setCurrentIndex(i);
-            return;
-        }
-    }
-    //not found
-   vec->append(name);
 }
 
 void MainWindow::on_cbUPM_toggled(bool checked)

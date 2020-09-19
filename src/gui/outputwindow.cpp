@@ -36,6 +36,7 @@
 #include <QBitArray>
 #include <QStandardItemModel>
 #include <QFileDialog>
+#include <QTimer>
 
 OutputWindow::OutputWindow(QWidget *parent, MainWindow *mw, EventsDataClass *eventsDataHub) :
     AGuiWindow("out", parent),

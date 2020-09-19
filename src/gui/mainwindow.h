@@ -7,8 +7,6 @@
 
 #include <QMainWindow>
 #include <QVector>
-#include <QThread>
-#include <QTimer>
 #include <QJsonObject>
 
 class AConfiguration;
@@ -32,14 +30,12 @@ class WindowNavigatorClass;
 class GlobalSettingsWindowClass;
 class GainEvaluatorWindowClass;
 class TApplication;
-class Viewer2DarrayObject;
 class DetectorClass;
 class TmpObjHubClass;
 class ASlabListWidget;
 class InterfaceToPMscript;
 class QMessageBox;
 class QListWidgetItem;
-class QFile;
 class ASimulationManager;
 class AScriptWindow;
 class ALrfWindow;
@@ -48,6 +44,7 @@ struct AParticleSourceRecord;
 class ARemoteWindow;
 class AWebSocketServerDialog;
 class AParticleGun;
+class QTimer;
 
 #ifdef ANTS_FANN
 class NeuralNetworksWindow;
@@ -109,9 +106,9 @@ public:
 #endif
 
     // custom gui elements
-    ASlabListWidget* lw = 0;
+    ASlabListWidget * lw = nullptr;
 
-    InterfaceToPMscript* PMscriptInterface = 0;       // if created -> managed by the script manager
+    InterfaceToPMscript * PMscriptInterface = nullptr;       // if created -> managed by the script manager
 
     //critical - updates
     void NumberOfPMsHaveChanged();
@@ -130,8 +127,6 @@ public:
     void ReconstructDetector(bool fKeepData = false);
 
     void ListActiveParticles();
-
-    void ShowGraphWindow();
 
     void UpdateTestWavelengthProperties(); //if material properties were updated, need to update indication in the Test tab
 
@@ -163,9 +158,6 @@ public:
     void recallGeometryOfLocalScriptWindow();
     void extractGeometryOfLocalScriptWindow();
 
-    void ShowGeoMarkers(); //Show dots on ALREADY PREPARED geometry window!
-
-    //void CheckPresenseOfSecScintillator();
     void DeleteLoadedEvents(bool KeepFileList = false);       
     void SavePreprocessingAddMulti(QString fileName);
     void LoadPreprocessingAddMulti(QString filename);
@@ -304,9 +296,9 @@ protected:
     bool event(QEvent *event);
 
 private:
-    Ui::MainWindow *ui;
-    QTimer *RootUpdateTimer = 0; //root update timer
-    QMessageBox *msBox = 0; //box to be used to confirm discard or save sim data on data clear; 0 if not activated
+    Ui::MainWindow * ui = nullptr;
+    QTimer * RootUpdateTimer = nullptr; //root update timer
+    QMessageBox * msBox = nullptr;      //box to be used to confirm discard or save sim data on data clear; 0 if not activated
 
     //flags
     bool TriggerForbidden = false;
@@ -340,9 +332,7 @@ public:
 
 private:
     bool startupDetector();  //on ANTS start load/create detector
-    void CheckSetMaterial(const QString name, QComboBox* cob, QVector<QString>* vec);
     void ToggleUpperLowerPMs();
-    void PopulatePMarray(int ul, double z, int istart);
     void AddDefaultPMtype();
     void CorrectWaveTo();
     void RefreshAngularButtons();
@@ -355,12 +345,9 @@ private:
     int LoadSPePHSfile(QString fileName, QVector<double>* SPePHS_x, QVector<double>* SPePHS);                   ///see MainWindowDiskIO.cpp    
     QStringList LoadedEventFiles, LoadedTreeFiles;
 
-//    QString CheckerScript; //obsolete?
     QString PreprocessingFileName;
 
-    int PreviousNumberPMs = 0;
     bool fConfigGuiLocked = false;
-    int timesTriedToExit = 0;
 
     bool populateTable; //for SimLoadConfig - compatability check
 

@@ -34,6 +34,7 @@
 #include <QVBoxLayout>
 #include <QPlainTextEdit>
 #include <QPushButton>
+#include <QThread>
 
 //Root
 #include "TGraph.h"

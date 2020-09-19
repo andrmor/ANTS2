@@ -179,7 +179,7 @@ AGeoObjectDelegate::AGeoObjectDelegate(const QStringList & materials, QWidget * 
 
 AGeoObjectDelegate::~AGeoObjectDelegate()
 {
-    qDebug() << "deleted---------------";
+    //qDebug() << "deleted---------------";
     blockSignals(true);
     delete ShapeCopy; ShapeCopy = nullptr;
 }
@@ -596,7 +596,7 @@ void AGeoObjectDelegate::onHelpRequested()
 
 void AGeoObjectDelegate::Update(const AGeoObject *obj)
 {
-    qDebug() << "update----------------" << obj->Name;
+    //qDebug() << "update----------------" << obj->Name;
     CurrentObject = obj;
     leName->setText(obj->Name);
 

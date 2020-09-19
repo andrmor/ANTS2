@@ -34,7 +34,7 @@
 
 void MainWindow::ReconstructDetector(bool fKeepData)
 {
-    qDebug() << ">>>> ReconstructDetector (GUI method) triggered <<<<";
+    //qDebug() << ">>>> ReconstructDetector (GUI method) triggered <<<<";
 
     Config->createUndo();
 
@@ -51,8 +51,6 @@ void MainWindow::ReconstructDetector(bool fKeepData)
         NumberOfPMsHaveChanged();
     }
 }
-
-// GUI update in mainwindowjson.cpp
 
 bool MainWindow::startupDetector()
 {
@@ -74,8 +72,6 @@ bool MainWindow::startupDetector()
       //Generate MaterialCollection
       MpCollection->AddNewMaterial();
       AddDefaultPMtype();
-      //MainWindow::on_pbRefreshMaterials_clicked();
-      //MainWindow::on_pbRefreshOverrides_clicked();
       //create detector geometry and visualize
       qDebug()<<"-> Pre-building make-shift detector";
       Detector->PMarrays[0].fActive = ui->cbUPM->isChecked();
@@ -89,7 +85,7 @@ bool MainWindow::startupDetector()
       MIwindow->SetMaterial(0);
       MIwindow->SetParticleSelection(0);
 
-      MainWindow::on_pbShowPMsArrayRegularData_clicked();
+      on_pbShowPMsArrayRegularData_clicked();
       return false;
     }
 }

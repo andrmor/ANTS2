@@ -24,12 +24,15 @@
 #include "aconfiguration.h"
 #include "ajsontools.h"
 #include "afiletools.h"
+#include "ascriptwindow.h"
+#include "ageoconsts.h"
 
 #include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QVBoxLayout>
 #include <QDesktopServices>
+#include <QEvent>
 
 #include "TGeoManager.h"
 #include "TGeoTrack.h"
@@ -1021,7 +1024,6 @@ void DetectorAddOnsWindow::on_pmParseInGeometryFromGDML_clicked()
     if (PMtemplate.isEmpty()) PMtemplate = "_.._#"; //clumsy, but otherwise propagate changes to readGeoObjectTree
 
     delete Detector->GeoManager; Detector->GeoManager = nullptr;
-    //Detector->GeoManager = TGeoManager::Import(fileName.toLatin1());
     GDMLtoTGeo(fileName.toLatin1());
     if (!Detector->GeoManager || !Detector->GeoManager->IsClosed())
     {
@@ -1315,19 +1317,12 @@ void DetectorAddOnsWindow::on_cbAutoCheck_stateChanged(int)
   ui->cbAutoCheck->setPalette(p);
 }
 
-#include <QClipboard>
-#include "ascriptwindow.h"
-#include "ageoconsts.h"
-
 void DetectorAddOnsWindow::on_pbConvertToScript_clicked()
 {
     QString script;
     if (MW->ScriptWindow->isVisible() || !MW->PythonScriptWindow->isVisible())
     {
         createScript(script, false);
-        //    QClipboard *clipboard = QApplication::clipboard();
-        //    clipboard->setText(script);
-
         MW->ScriptWindow->onLoadRequested(script);
         MW->ScriptWindow->showNormal();
         MW->ScriptWindow->raise();
@@ -1336,7 +1331,6 @@ void DetectorAddOnsWindow::on_pbConvertToScript_clicked()
 
     if (MW->PythonScriptWindow && MW->PythonScriptWindow->isVisible())
     {
-        script.clear();
         createScript(script, true);
         MW->PythonScriptWindow->onLoadRequested(script);
         MW->PythonScriptWindow->showNormal();
@@ -1353,15 +1347,10 @@ void DetectorAddOnsWindow::on_pbWorldTreeHelp_clicked()
                 "  from one container to another\n"
                 "\n"
                 "Drop when Alt or Shift or Control is pressed\n"
-                "  changes the item order within the SAME container\n"
-                "\n"
-                "  In case reorder is triggered inside a stack, positions\n"
-                "  of the objects are recalculated using the original\n"
-                "  position of the moved object as the reference.";
+                "  changes the item order (can be used to move too)";
     message(s, this);
 }
 
-#include "ageoconsts.h"
 #include "aonelinetextedit.h"
 #include "ageobasedelegate.h"
 #include <QTabWidget>
@@ -1453,7 +1442,7 @@ QString DetectorAddOnsWindow::createScript(QString &script, bool usePython)
 
 void DetectorAddOnsWindow::onGeoConstEditingFinished(int index, QString strNewValue)
 {
-    qDebug() << "GeoConst value changed! index/text are:" << index << strNewValue;
+    //qDebug() << "GeoConst value changed! index/text are:" << index << strNewValue;
     AGeoConsts & GC = AGeoConsts::getInstance();
 
     if (index == GC.countConstants()) return; // nothing to do yet - this constant is not yet defined
@@ -1475,7 +1464,7 @@ void DetectorAddOnsWindow::onGeoConstEditingFinished(int index, QString strNewVa
 
 void DetectorAddOnsWindow::onGeoConstExpressionEditingFinished(int index, QString newValue)
 {
-    qDebug() << "Geo const expression changed! index/text are:" << index << newValue;
+    //qDebug() << "Geo const expression changed! index/text are:" << index << newValue;
     AGeoConsts & GC = AGeoConsts::getInstance();
 
     if (index == GC.countConstants()) return; // nothing to do yet - this constant is not yet defined
@@ -1515,7 +1504,7 @@ void DetectorAddOnsWindow::on_tabwConstants_cellChanged(int row, int column)
 {
     if (column != 0) return; // only name change or new
     if (bGeoConstsWidgetUpdateInProgress) return;
-    qDebug() << "Geo const name changed";
+    //qDebug() << "Geo const name changed";
 
     AGeoConsts & GC = AGeoConsts::getInstance();
     const int numConsts = GC.countConstants();
@@ -1547,8 +1536,7 @@ void DetectorAddOnsWindow::on_tabwConstants_cellChanged(int row, int column)
     }
     else
     {
-        qDebug() << "Attempting to change name of a geometry constant";
-
+        //qDebug() << "Attempting to change name of a geometry constant";
         QString newName = ui->tabwConstants->item(row, 0)->text().simplified();
         QString errorStr;
         bool ok = GC.rename(row, newName, twGeo->Sandwich->World, errorStr);
@@ -1624,7 +1612,6 @@ void DetectorAddOnsWindow::on_tabwConstants_customContextMenuRequested(const QPo
     }
 }
 
-#include <QEvent>
 void ALineEditWithEscape::keyPressEvent(QKeyEvent *event)
 {
     if (event->key() == Qt::Key_Escape)

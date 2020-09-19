@@ -137,6 +137,11 @@ void ACameraControlDialog::updateGui()
     ui->ledLat-> setText( QString::number(p.Lat) );
     ui->ledLong->setText( QString::number(p.Long) );
     ui->ledPsi-> setText( QString::number(p.Psi) );
+
+    TView * v = RW->fCanvas->GetView();
+    bool bPerspective = v->IsPerspective();
+    for (QLineEdit * le : {ui->ledWx, ui->ledWy, ui->ledWw, ui->ledWh, })
+        le->setEnabled(bPerspective);
 }
 
 void ACameraControlDialog::on_ledCenterX_editingFinished()

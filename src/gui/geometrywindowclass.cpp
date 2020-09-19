@@ -1367,6 +1367,7 @@ void GeometryWindowClass::on_cobViewType_currentIndexChanged(int index)
         RasterWindow->fCanvas->Modified();
         RasterWindow->fCanvas->Update();
         readRasterWindowProperties();
+        CameraControl->updateGui();
 
 #if ROOT_VERSION_CODE < ROOT_VERSION(6,11,1)
         RasterWindow->setInvertedXYforDrag( index==1 );

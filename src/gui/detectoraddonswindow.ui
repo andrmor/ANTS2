@@ -369,6 +369,11 @@
             </item>
             <item>
              <widget class="QPushButton" name="pbLoadDummyPMs">
+              <property name="toolTip">
+               <string>Format:
+One line per dummy PM,
+Type Upper_0/lower_1 x y z phi theta psi</string>
+              </property>
               <property name="text">
                <string>Load dummy PMs from file</string>
               </property>

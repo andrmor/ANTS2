@@ -59,24 +59,23 @@ private slots:
   void on_pbConvertToScript_clicked();
   void on_pbWorldTreeHelp_clicked();
   void on_tabwConstants_cellChanged(int row, int column);
-
   void on_actionUndo_triggered();
-
   void on_actionRedo_triggered();
 
 private:
   Ui::DetectorAddOnsWindow *ui;
-  MainWindow* MW;
-  DetectorClass* Detector;
+  MainWindow * MW;
+  DetectorClass * Detector;
 
   QString ObjectScriptTarget;
 
   bool bGeoConstsWidgetUpdateInProgress = false;
 
-  void ConvertDummyToPM(int idpm);  
-  bool GDMLtoTGeo(const QString &fileName);
+  void    ConvertDummyToPM(int idpm);
+  bool    GDMLtoTGeo(const QString &fileName);
   QString loadGDML(const QString &fileName, QString &gdml);  //returns error string - empty if OK
-  void updateGeoConstsIndication();
+  void    loadDummyPMs(const QString &DFile);
+  void    updateGeoConstsIndication();
   QString createScript(QString &script, bool usePython);
 
 protected:

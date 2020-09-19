@@ -736,7 +736,7 @@ void MainWindow::on_cobPMdeviceType_currentIndexChanged(int index)
 
 void MainWindow::on_cobPMdeviceType_activated(const QString &/*arg1*/)
 {  //see also method on_cobPMdeviceType_currentIndexChanged(int index)
-    MainWindow::on_pbUpdatePMproperties_clicked();
+    on_pbUpdatePMproperties_clicked();
 }
 
 void MainWindow::CheckSetMaterial(const QString name, QComboBox* cob, QVector<QString>* vec)
@@ -778,10 +778,10 @@ void MainWindow::ToggleUpperLowerPMs()
   else if (!ui->cbUPM->isChecked() && ui->cbLPM->isChecked()) ui->cobUpperLowerPMs->setCurrentIndex(1);
 
   //force-trigger visualization  ***!!!
-  MainWindow::on_cobUpperLowerPMs_currentIndexChanged(ui->cobUpperLowerPMs->currentIndex());
+  on_cobUpperLowerPMs_currentIndexChanged(ui->cobUpperLowerPMs->currentIndex());
 
   if (DoNotUpdateGeometry) return; //if it is triggered during load/init hase
-  MainWindow::on_pbRebuildDetector_clicked();  //rebuild detector
+  on_pbRebuildDetector_clicked();  //rebuild detector
 }
 
 void MainWindow::on_pbRefreshPMArrayData_clicked()
@@ -803,7 +803,6 @@ void MainWindow::on_pbRefreshPMArrayData_clicked()
     }  
   Detector->PMarrays[ul].Regularity = ui->cobPMarrayRegularity->currentIndex();
 
-  //if (ui->cobPMarrayRegularity->currentIndex() < 2) MainWindow::RebuildPmArray();
   if (ui->cobPMarrayRegularity->currentIndex() == 1)
     {
       //there will be no automatic update of the base type in the array, have to do it:
@@ -811,10 +810,8 @@ void MainWindow::on_pbRefreshPMArrayData_clicked()
         if (PMs->at(i).upperLower == ul) PMs->at(i).type = ui->sbPMtypeForGroup->value();
     }
 
-  //if (geometryRW) MainWindow::on_pbCreateCustomConfiguration_clicked();
-  MainWindow::on_pbRebuildDetector_clicked();
+  on_pbRebuildDetector_clicked();
 
-  //MainWindow::ClearData();
   Owindow->RefreshData();
 }
 
@@ -833,7 +830,7 @@ void MainWindow::updatePMArrayDataIndication()
   ui->sbPMtypeForGroup->setValue(Detector->PMarrays[i].PMtype);
   ui->cobPMtypeInArrays->setCurrentIndex(Detector->PMarrays[i].PMtype);
   ui->cobPMarrayRegularity->setCurrentIndex(Detector->PMarrays[i].Regularity);
-  if (!BulkUpdate) MainWindow::on_cobPMarrayRegularity_currentIndexChanged(Detector->PMarrays[i].Regularity); //force update
+  if (!BulkUpdate) on_cobPMarrayRegularity_currentIndexChanged(Detector->PMarrays[i].Regularity); //force update
   ui->cobPacking->setCurrentIndex(Detector->PMarrays[i].Packing);
   QString str;
   str.setNum(Detector->PMarrays[i].CenterToCenter, 'g', 4);
@@ -845,7 +842,7 @@ void MainWindow::updatePMArrayDataIndication()
   ui->cbXbyYarray->setChecked(!Detector->PMarrays[i].fUseRings);
 
   DoNotUpdateGeometry = tmpBool;
-  MainWindow::ShowPMcount();
+  ShowPMcount();
 }
 
 void MainWindow::on_pbRefreshPMproperties_clicked()
@@ -887,8 +884,8 @@ void MainWindow::on_pbRefreshPMproperties_clicked()
     ui->pbShowPDE->setEnabled(type->PDE_lambda.size());
     ui->pbShowPDEbinned->setEnabled(ui->cbWaveResolved->isChecked() && type->PDE_lambda.size());
     ui->pbDeletePDE->setEnabled(type->PDE_lambda.size());
-    MainWindow::RefreshAngularButtons();
-    MainWindow::RefreshAreaButtons();
+    RefreshAngularButtons();
+    RefreshAreaButtons();
     str.setNum(type->AngularN1, 'g', 4);
     ui->ledMediumRefrIndex->setText(str);
 
@@ -938,9 +935,6 @@ void MainWindow::on_pbUpdatePMproperties_clicked()
 
    ReconstructDetector();
    on_pbUpdateSimConfig_clicked();
-
-   //for indication, update PMs binned properties
-   //on_cbAngularSensitive_toggled(ui->cbAngularSensitive->isChecked());
 }
 
 void MainWindow::on_sbPMtype_valueChanged(int arg1)
@@ -949,7 +943,7 @@ void MainWindow::on_sbPMtype_valueChanged(int arg1)
 
   if (DoNotUpdateGeometry) return;
   if (arg1 > PMs->countPMtypes()-1) ui->sbPMtype->setValue(PMs->countPMtypes()-1);
-  MainWindow::on_pbRefreshPMproperties_clicked();
+  on_pbRefreshPMproperties_clicked();
 }
 
 void MainWindow::on_sbPMtypeForGroup_valueChanged(int arg1)
@@ -960,20 +954,19 @@ void MainWindow::on_sbPMtypeForGroup_valueChanged(int arg1)
       return;
     }
   ui->cobPMtypeInArrays->setCurrentIndex(arg1); //save for cross-call
-  //ui->leoPMtypeInArrayTab->setText(PMs->getTypeProperties(arg1)->name);
-  MainWindow::on_pbRefreshPMArrayData_clicked();
+  on_pbRefreshPMArrayData_clicked();
 }
 
 void MainWindow::on_cbXbyYarray_clicked()
 {
     ui->cbRingsArray->toggle();
-    MainWindow::on_pbRefreshPMArrayData_clicked();
+    on_pbRefreshPMArrayData_clicked();
 }
 
 void MainWindow::on_cbRingsArray_clicked()
 {
     ui->cbXbyYarray->toggle();
-    MainWindow::on_pbRefreshPMArrayData_clicked();
+    on_pbRefreshPMArrayData_clicked();
 }
 
 void MainWindow::on_cobUpperLowerPMs_currentIndexChanged(int index)
@@ -984,7 +977,7 @@ void MainWindow::on_cobUpperLowerPMs_currentIndexChanged(int index)
   if (index == 0) upper = true; else upper = false;
   ui->lineUpperPMs->setVisible(upper);
   ui->lineLowerPMs->setVisible(!upper);
-  if (Detector->PMarrays[index].fActive) MainWindow::on_pbShowPMsArrayRegularData_clicked();
+  if (Detector->PMarrays[index].fActive) on_pbShowPMsArrayRegularData_clicked();
 }
 
 void MainWindow::on_pbRemoveThisPMtype_clicked()
@@ -997,13 +990,12 @@ void MainWindow::on_pbRemoveThisPMtype_clicked()
 
 void MainWindow::on_pbAddNewPMtype_clicked()
 {
-  MainWindow::AddDefaultPMtype();
+  AddDefaultPMtype();
   ui->sbPMtype->setValue(PMs->countPMtypes()-1); //update of indication is in on_change
 }
 
 void MainWindow::AddDefaultPMtype()
 {
-  //creating a unique name
   QString name = "Type" + QString::number(PMs->countPMtypes());
   bool found;
   do
@@ -1021,8 +1013,7 @@ void MainWindow::AddDefaultPMtype()
   APmType *type = new APmType(name);
   PMs->appendNewPMtype(type);
 
-  //updating all comboboxes with PM type names
-  MainWindow::updateCOBsWithPMtypeNames();
+  updateCOBsWithPMtypeNames();
 }
 
 void MainWindow::updateCOBsWithPMtypeNames()
@@ -1081,11 +1072,6 @@ void MainWindow::on_cbWaveResolved_toggled(bool checked)
     if (checked) ui->twOption->setTabIcon(1, Rwindow->YellowIcon);
     else         ui->twOption->setTabIcon(1, QIcon());
 
-//    ui->fWaveTests->setEnabled(checked);
-//    ui->fWaveOptions->setEnabled(checked);
-//    ui->fPointSource_Wave->setEnabled(checked);
-//    ui->fDirectOrmat->setEnabled(checked || ui->cbTimeResolved->isChecked());
-
     const int itype = ui->sbPMtype->value();
     const bool bHavePDE = (itype < PMs->countPMtypes() && !PMs->getType(itype)->PDE_lambda.isEmpty());
     ui->pbShowPDEbinned->setEnabled(checked && bHavePDE);
@@ -1096,8 +1082,6 @@ void MainWindow::on_cbTimeResolved_toggled(bool checked)
     ui->fTime->setEnabled(checked);
     if (checked) ui->twOption->setTabIcon(0, Rwindow->YellowIcon);
     else         ui->twOption->setTabIcon(0, QIcon());
-//    ui->fPointSource_Time->setEnabled(checked);
-//    ui->fDirectOrmat->setEnabled(ui->cbWaveResolved->isChecked() || ui->cbTimeResolved->isChecked());
 }
 
 void MainWindow::on_pbPMtypeShowCurrent_clicked()
@@ -1141,10 +1125,9 @@ void MainWindow::on_ledWaveFrom_editingFinished()
       message("Error in the starting wavelength value, resetted", this);
       return;
     }
-  MainWindow::CorrectWaveTo();
-  //MainWindow::on_cbWaveResolved_toggled(ui->cbWaveResolved->isChecked());
+  CorrectWaveTo();
 
-  MainWindow::on_pbUpdateSimConfig_clicked();
+  on_pbUpdateSimConfig_clicked();
 }
 
 void MainWindow::on_ledWaveTo_editingFinished()
@@ -1158,9 +1141,8 @@ void MainWindow::on_ledWaveTo_editingFinished()
       message("Error in the ending wavelength value, resetted", this);
       return;
     }
-   MainWindow::CorrectWaveTo();
-   //MainWindow::on_cbWaveResolved_toggled(ui->cbWaveResolved->isChecked());
-   MainWindow::on_pbUpdateSimConfig_clicked();
+   CorrectWaveTo();
+   on_pbUpdateSimConfig_clicked();
 }
 
 void MainWindow::on_ledWaveStep_editingFinished()
@@ -1174,9 +1156,8 @@ void MainWindow::on_ledWaveStep_editingFinished()
       message("Error in the step value, resetted", this);
       return;
     }
-   MainWindow::CorrectWaveTo();
-   //MainWindow::on_cbWaveResolved_toggled(ui->cbWaveResolved->isChecked());
-   MainWindow::on_pbUpdateSimConfig_clicked();
+   CorrectWaveTo();
+   on_pbUpdateSimConfig_clicked();
 }
 
 void MainWindow::CorrectWaveTo()
@@ -1578,18 +1559,6 @@ void MainWindow::on_cobPMarrayRegularity_currentIndexChanged(int index)
     }
 }
 
-int MainWindow::PMArrayType(int ul)
-{
-  //return ui->cobPMarrayRegularity->currentIndex();
-  return Detector->PMarrays[ul].Regularity;
-}
-
-void MainWindow::SetPMarrayType(int ul, int itype)
-{
-  //ui->cobPMarrayRegularity->setCurrentIndex(itype);
-  Detector->PMarrays[ul].Regularity = itype;
-}
-
 void MainWindow::on_sbIndPMnumber_valueChanged(int arg1)
 {
   if (arg1 == 0   &&   PMs->count() ==0) return;
@@ -1654,8 +1623,6 @@ void MainWindow::on_pbIndPMshowInfo_clicked()
         ui->labIndDEStatus->setText("<b>Override</b>");
     }
     ui->ledIndEffectiveDE->setText(str);
-    //ui->lePDEfactorInExplorer->setText( QString::number(PMs->at(ipm).relQE_PDE, 'g', 4) );
-    //ui->leActualPDE_Scalar->setText( QString::number(PMs->getActualPDE(ipm, -1), 'g', 4) );
 
     //Wave-resolved PDE
     if (PMs->isPDEwaveOverriden(ipm))

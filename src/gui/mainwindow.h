@@ -163,11 +163,6 @@ public:
     void recallGeometryOfLocalScriptWindow();
     void extractGeometryOfLocalScriptWindow();
 
-    int PMArrayType(int ul);
-    void SetPMarrayType(int ul, int itype);
-
-    void LoadDummyPMs(QString DFile);
-
     void ShowGeoMarkers(); //Show dots on ALREADY PREPARED geometry window!
 
     //void CheckPresenseOfSecScintillator();

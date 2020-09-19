@@ -199,9 +199,15 @@ void DetectorAddOnsWindow::on_pbConvertToDummies_clicked()
 
     //updating array type
     if (SawUpper)
-        if (MW->PMArrayType(0) == 0) MW->SetPMarrayType(0, 1);
-    if (SawLower)
-        if (MW->PMArrayType(1) == 0) MW->SetPMarrayType(1, 1);
+    {
+        if (Detector->PMarrays[0].Regularity == 0)
+            Detector->PMarrays[0].Regularity = 1;
+    }
+    else if (SawLower)
+    {
+        if (Detector->PMarrays[1].Regularity == 0)
+            Detector->PMarrays[1].Regularity = 1;
+    }
 
     MW->updatePMArrayDataIndication();
     MW->NumberOfPMsHaveChanged();
@@ -372,16 +378,46 @@ void DetectorAddOnsWindow::on_sbDummyType_valueChanged(int arg1)
 
 void DetectorAddOnsWindow::on_pbLoadDummyPMs_clicked()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, "Load file with dummy PMs", MW->GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);; All files (*.*)");
+    QString fileName = QFileDialog::getOpenFileName(this, "Load file with dummy PMs", MW->GlobSet.LastOpenDir, "Text files (*.dat *.txt);;All files (*.*)");
     if (fileName.isEmpty()) return;
     MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
     Detector->PMdummies.resize(0);
-    MW->LoadDummyPMs(fileName);
+    loadDummyPMs(fileName);
     ui->sbDummyPMindex->setValue(0);
     UpdateDummyPMindication();
     MW->ReconstructDetector();
 }
 
+void DetectorAddOnsWindow::loadDummyPMs(const QString & DFile)
+{
+    QFile file(DFile);
+    if(!file.open(QIODevice::ReadOnly | QFile::Text))
+        message("Cannot open file with dummy PMs:\n"+file.fileName()+"\n"+file.errorString(), this);
+    else
+    {
+        QTextStream in(&file);
+        QRegExp rx("(\\ |\\,|\\:|\\t)"); //separators: ' ' or ',' or ':' or '\t'
+        while(!in.atEnd())
+        {
+            QString line = in.readLine();
+            QStringList fields = line.split(rx, QString::SkipEmptyParts);
+            if (fields.size() == 8)
+            {
+                APMdummyStructure dpm;
+                dpm.PMtype = fields[0].toInt();
+                dpm.UpperLower = fields[1].toInt();
+                dpm.r[0] = fields[2].toDouble();
+                dpm.r[1] = fields[3].toDouble();
+                dpm.r[2] = fields[4].toDouble();
+                dpm.Angle[0] = fields[5].toDouble();
+                dpm.Angle[1] = fields[6].toDouble();
+                dpm.Angle[2] = fields[7].toDouble();
+                Detector->PMdummies.append(dpm);
+            }
+        }
+        file.close();
+    }
+}
 
 //------------//-----------------//----------------------------//
 

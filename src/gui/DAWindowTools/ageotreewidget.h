@@ -30,7 +30,7 @@ public:
   ASandwich * Sandwich;
 
   void SelectObjects(QStringList ObjectNames);
-  void SetLineAttributes(QString ObjectName);
+  void SetLineAttributes(AGeoObject * obj);
 
 public slots:
   void UpdateGui(QString selected = "");
@@ -78,23 +78,23 @@ private:
   void markAsStackRefVolume(AGeoObject * obj);
   void addLightguide(bool upper);
 
-  void menuActionAddNewObject(QString ContainerName, AGeoShape * shape);
-  void menuActionCopyObject(QString ObjToCopyName);
-  void ShowObject(QString ObjectName);   // !*!  str to obj
-  void ShowObjectRecursive(QString ObjectName);
-  void ShowObjectOnly(QString ObjectName);
-  void menuActionEnableDisable(QString ObjectName);
+  void menuActionAddNewObject(AGeoObject * ContObj, AGeoShape * shape);
+  void menuActionCopyObject(AGeoObject * ObjToCopy);
+  void ShowObject(AGeoObject * obj);
+  void ShowObjectRecursive(AGeoObject * obj);
+  void ShowObjectOnly(AGeoObject * obj);
+  void menuActionEnableDisable(AGeoObject * obj);
   void menuActionLock();
   void menuActionUnlock();
-  void menuActionLockAllInside(QString ObjectName);
-  void menuActionUnlockAllInside(QString ObjectName);
+  void menuActionLockAllInside(AGeoObject * obj);
+  void menuActionUnlockAllInside(AGeoObject * obj);
   void menuActionRemove();
-  void menuActionRemoveHostedObjects(QString ObjectName);
-  void menuActionRemoveRecursively(QString ObjectName);
-  void menuActionAddNewComposite(QString ContainerName);
-  void menuActionAddNewArray(QString ContainerName);
-  void menuActionAddNewGrid(QString ContainerName);
-  void menuActionAddNewMonitor(QString ContainerName);
+  void menuActionRemoveHostedObjects(AGeoObject * obj);
+  void menuActionRemoveRecursively(AGeoObject * obj);
+  void menuActionAddNewComposite(AGeoObject * ContObj);
+  void menuActionAddNewArray(AGeoObject * ContObj);
+  void menuActionAddNewGrid(AGeoObject * ContObj);
+  void menuActionAddNewMonitor(AGeoObject * ContObj);
 
   const QString makeScriptString_basicObject(AGeoObject *obj, bool bExpandMaterials, bool usePython) const;
   const QString makeScriptString_slab(AGeoObject *obj, bool bExpandMaterials, int ident) const;

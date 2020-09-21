@@ -1230,7 +1230,7 @@ bool AGeoObject::getPositionInWorld(double * Pos) const
     return false;
 }
 
-bool AGeoObject::isContainerValid(QString & errorStr) const
+bool AGeoObject::isContainerValidForDrop(QString & errorStr) const
 {
     if (ObjectType->isGrid())
     {

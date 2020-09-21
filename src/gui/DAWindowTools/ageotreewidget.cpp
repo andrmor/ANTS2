@@ -288,30 +288,33 @@ void AGeoTreeWidget::dropEvent(QDropEvent* event)
 
     QStringList selNames;
 
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     AGeoObject * ContainerTo = nullptr;
-    qDebug() <<"start of drop";
-    if (!showDropIndicator()) {ContainerTo = objTo; qDebug() <<"ON ITEM";}
+    //qDebug() <<"start of drop";
+    if (!showDropIndicator())
+    {
+        ContainerTo = objTo;
+        //qDebug() <<"ON ITEM";
+    }
     else
     {
         if (objTo->Container)
-            ContainerTo = objTo->Container;
+             ContainerTo = objTo->Container;
         else ContainerTo = objTo;
-        qDebug() <<"NOT ON ITEM";
+        //qDebug() <<"NOT ON ITEM";
     }
     QString containerErrorStr;
     bool containerOk = true;
-    if (!ContainerTo->isWorld()) containerOk = ContainerTo->isContainerValid(containerErrorStr);
+    if (!ContainerTo->isWorld()) containerOk = ContainerTo->isContainerValidForDrop(containerErrorStr);
 
     for (int i=0; i<selected.size(); i++) //error catching
     {
         QTreeWidgetItem* DraggedItem = this->selectedItems().at(i);
         if (!DraggedItem)
-          {
-            qDebug() << "Drag source item invalid, ignore";
+        {
+            //qDebug() << "Drag source item invalid, ignore";
             event->ignore();
             return;
-          }
+        }
 
         QString DraggedName = DraggedItem->text(0);
         AGeoObject* obj = World->findObjectByName(DraggedName);
@@ -523,7 +526,7 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
 {  
   QMenu menu;
 
-  QAction* showAplus = Action(menu, "Show - focus geometry view");
+  QAction* focusObjectA = Action(menu, "Show - focus geometry view");
   QAction* showA     = Action(menu, "Show - highlight in geometry");
   QAction* showAdown = Action(menu, "Show - this object with content");
   QAction* showAonly = Action(menu, "Show - only this object");
@@ -604,9 +607,15 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
 
   QString objName;
   AGeoObject * obj = nullptr;
-  if      (selected.size() == 0) objName = "World"; // no object selected
+  if      (selected.size() == 0)
+  {
+      // no object selected
+      objName = "World";
+      obj = World;
+  }
   else if (selected.size() == 1)
-  { //menu triggered with only one selected item
+  {
+      // only one selected item
       objName = selected.first()->text(0);
       obj = World->findObjectByName(objName);
       if (!obj) return;
@@ -633,14 +642,16 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
       lockallA->setEnabled(true);
       unlockallA->setEnabled(true);
       lineA->setEnabled(true);
-      showAplus->setEnabled(true);
+      focusObjectA->setEnabled(true);
       showA->setEnabled(true);
       showAonly->setEnabled(true);
       showAdown->setEnabled(true);
       stackRefA->setEnabled(obj->isStackMember());
   }
   else if (!selected.first()->font(0).bold())
-  { //menu triggered with several items selected, and they are not slabs
+  {
+      // several items selected, and they are not slabs
+      addObjMenu->setEnabled(false);
       removeA->setEnabled(true); //world cannot be in selection with anything else anyway
       lockA->setEnabled(true);
       unlockA->setEnabled(true);
@@ -651,70 +662,51 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
   if (!SelectedAction) return; //nothing was selected
 
   // -- EXECUTE SELECTED ACTION --
-  if (SelectedAction == showAplus)  // FOCUS OBJECT
+  if (SelectedAction == focusObjectA)  // FOCUS OBJECT
   {
       emit RequestFocusObject(objName);
       UpdateGui(objName);
   }
-  if (SelectedAction == showA)      // SHOW OBJECT
-     ShowObject(objName);
-  else if (SelectedAction == showAonly)
-     ShowObjectOnly(objName);
-  else if (SelectedAction == showAdown)
-     ShowObjectRecursive(objName);
-  else if (SelectedAction == lineA) // SET LINE ATTRIBUTES
-     SetLineAttributes(objName);
-  else if (SelectedAction == enableDisableA)
-     menuActionEnableDisable(objName);
+  if (SelectedAction == showA)               ShowObject(obj);
+  else if (SelectedAction == showAonly)      ShowObjectOnly(obj);
+  else if (SelectedAction == showAdown)      ShowObjectRecursive(obj);
+  else if (SelectedAction == lineA)          SetLineAttributes(obj);
+  else if (SelectedAction == enableDisableA) menuActionEnableDisable(obj);
   // ADD NEW OBJECT
-  else if (SelectedAction == newBox)         menuActionAddNewObject(objName, new AGeoBox());
-  else if (SelectedAction == newTube)        menuActionAddNewObject(objName, new AGeoTube());
-  else if (SelectedAction == newTubeSegment) menuActionAddNewObject(objName, new AGeoTubeSeg());
-  else if (SelectedAction == newTubeSegCut)  menuActionAddNewObject(objName, new AGeoCtub());
-  else if (SelectedAction == newTubeElli)    menuActionAddNewObject(objName, new AGeoEltu());
-  else if (SelectedAction == newTrapSim)     menuActionAddNewObject(objName, new AGeoTrd1());
-  else if (SelectedAction == newTrap)        menuActionAddNewObject(objName, new AGeoTrd2());
-  else if (SelectedAction == newPcon)        menuActionAddNewObject(objName, new AGeoPcon());
-  else if (SelectedAction == newPgonSim)     menuActionAddNewObject(objName, new AGeoPolygon());
-  else if (SelectedAction == newPgon)        menuActionAddNewObject(objName, new AGeoPgon());
-  else if (SelectedAction == newPara)        menuActionAddNewObject(objName, new AGeoPara());
-  else if (SelectedAction == newSphere)      menuActionAddNewObject(objName, new AGeoSphere());
-  else if (SelectedAction == newCone)        menuActionAddNewObject(objName, new AGeoCone());
-  else if (SelectedAction == newConeSeg)     menuActionAddNewObject(objName, new AGeoConeSeg());
-  else if (SelectedAction == newTor)         menuActionAddNewObject(objName, new AGeoTorus());
-  else if (SelectedAction == newParabol)     menuActionAddNewObject(objName, new AGeoParaboloid());
-  else if (SelectedAction == newArb8)        menuActionAddNewObject(objName, new AGeoArb8());
-  //ADD NEW COMPOSITE
-  else if (SelectedAction == newCompositeA)
-     menuActionAddNewComposite(objName);
-  else if (SelectedAction == newArrayA) //ADD NEW COMPOSITE
-     menuActionAddNewArray(objName);
-  else if (SelectedAction == newGridA) //ADD NEW GRID
-     menuActionAddNewGrid(objName);
-  else if (SelectedAction == newMonitorA) //ADD NEW MONITOR
-     menuActionAddNewMonitor(objName);
+  else if (SelectedAction == newBox)         menuActionAddNewObject(obj, new AGeoBox());
+  else if (SelectedAction == newTube)        menuActionAddNewObject(obj, new AGeoTube());
+  else if (SelectedAction == newTubeSegment) menuActionAddNewObject(obj, new AGeoTubeSeg());
+  else if (SelectedAction == newTubeSegCut)  menuActionAddNewObject(obj, new AGeoCtub());
+  else if (SelectedAction == newTubeElli)    menuActionAddNewObject(obj, new AGeoEltu());
+  else if (SelectedAction == newTrapSim)     menuActionAddNewObject(obj, new AGeoTrd1());
+  else if (SelectedAction == newTrap)        menuActionAddNewObject(obj, new AGeoTrd2());
+  else if (SelectedAction == newPcon)        menuActionAddNewObject(obj, new AGeoPcon());
+  else if (SelectedAction == newPgonSim)     menuActionAddNewObject(obj, new AGeoPolygon());
+  else if (SelectedAction == newPgon)        menuActionAddNewObject(obj, new AGeoPgon());
+  else if (SelectedAction == newPara)        menuActionAddNewObject(obj, new AGeoPara());
+  else if (SelectedAction == newSphere)      menuActionAddNewObject(obj, new AGeoSphere());
+  else if (SelectedAction == newCone)        menuActionAddNewObject(obj, new AGeoCone());
+  else if (SelectedAction == newConeSeg)     menuActionAddNewObject(obj, new AGeoConeSeg());
+  else if (SelectedAction == newTor)         menuActionAddNewObject(obj, new AGeoTorus());
+  else if (SelectedAction == newParabol)     menuActionAddNewObject(obj, new AGeoParaboloid());
+  else if (SelectedAction == newArb8)        menuActionAddNewObject(obj, new AGeoArb8());
+  else if (SelectedAction == newCompositeA)  menuActionAddNewComposite(obj);
+  else if (SelectedAction == newArrayA)      menuActionAddNewArray(obj);
+  else if (SelectedAction == newGridA)       menuActionAddNewGrid(obj);
+  else if (SelectedAction == newMonitorA)    menuActionAddNewMonitor(obj);
   else if (SelectedAction == addUpperLGA || SelectedAction == addLoweLGA) // ADD LIGHTGUIDE
      addLightguide(SelectedAction == addUpperLGA);
-  else if (SelectedAction == copyA) // COPY OBJECT
-     menuActionCopyObject(objName);
-  else if (SelectedAction == stackA) // Form STACK
-      formStack(selected);
-  else if (SelectedAction == stackRefA) // Make STACK ref volume
-      markAsStackRefVolume(obj);
-  else if (SelectedAction == lockA) // LOCK
-     menuActionLock();
-  else if (SelectedAction == unlockA) // UNLOCK
-     menuActionUnlock();
-  else if (SelectedAction == lockallA) // LOCK OBJECTS INSIDE
-     menuActionLockAllInside(objName);
-  else if (SelectedAction == unlockallA)
-     menuActionUnlockAllInside(objName);
-  else if (SelectedAction == removeA) // REMOVE
-     menuActionRemove();
-  else if (SelectedAction == removeThisAndHostedA) // REMOVE RECURSIVLY
-     menuActionRemoveRecursively(objName);
-  else if (SelectedAction == removeHostedA) // REMOVE HOSTED
-      menuActionRemoveHostedObjects(objName);
+  else if (SelectedAction == copyA)          menuActionCopyObject(obj);   // COPY
+  else if (SelectedAction == stackA)         formStack(selected);         // Form STACK
+  else if (SelectedAction == stackRefA)      markAsStackRefVolume(obj);
+  else if (SelectedAction == lockA)          menuActionLock();            // LOCK
+  else if (SelectedAction == unlockA)        menuActionUnlock();          // UNLOCK
+  else if (SelectedAction == lockallA)       menuActionLockAllInside(obj);
+  else if (SelectedAction == unlockallA)     menuActionUnlockAllInside(obj);
+
+  else if (SelectedAction == removeA)        menuActionRemove();                     // REMOVE
+  else if (SelectedAction == removeThisAndHostedA) menuActionRemoveRecursively(obj); // REMOVE RECURSIVLY
+  else if (SelectedAction == removeHostedA)  menuActionRemoveHostedObjects(obj);     // REMOVE HOSTED
 }
 
 void AGeoTreeWidget::onItemClicked()
@@ -754,7 +746,8 @@ void AGeoTreeWidget::onRemoveRecursiveTriggered()
         return;
     }
 
-    menuActionRemoveRecursively(selected.first()->text(0));
+    AGeoObject * obj = World->findObjectByName(selected.first()->text(0));
+    menuActionRemoveRecursively(obj);
 }
 
 void AGeoTreeWidget::menuActionRemove()
@@ -794,14 +787,9 @@ void AGeoTreeWidget::menuActionRemove()
     }
 }
 
-void AGeoTreeWidget::menuActionRemoveRecursively(QString ObjectName)
+void AGeoTreeWidget::menuActionRemoveRecursively(AGeoObject * obj)
 {
-    AGeoObject * obj = World->findObjectByName(ObjectName);
-    if (!obj)
-    {
-        qWarning() << "Error: object" << ObjectName << "not found in the geometry!";
-        return;
-    }
+    if (!obj) return;
 
     QMessageBox msgBox;
     msgBox.setIcon(QMessageBox::Question);
@@ -809,11 +797,11 @@ void AGeoTreeWidget::menuActionRemoveRecursively(QString ObjectName)
 
     QString str;
     if (obj->ObjectType->isSlab())
-        str = "Remove all objects hosted inside " + ObjectName + " slab?";
+        str = "Remove all objects hosted inside " + obj->Name + " slab?";
     else if (obj->ObjectType->isWorld())
         str = "Remove all non-slab objects from the geometry?";
     else
-        str = "Remove " + ObjectName + " and all objects hosted inside?";
+        str = "Remove " + obj->Name + " and all objects hosted inside?";
 
     msgBox.setText(str);
     QPushButton *remove = msgBox.addButton(QMessageBox::Yes);
@@ -824,68 +812,62 @@ void AGeoTreeWidget::menuActionRemoveRecursively(QString ObjectName)
 
     if (msgBox.clickedButton() == remove)
     {
-        //emit ObjectSelectionChanged("");
         obj->recursiveSuicide();
-        //UpdateGui();
         emit RequestRebuildDetector();
     }
 }
 
-void AGeoTreeWidget::menuActionRemoveHostedObjects(QString ObjectName)
+void AGeoTreeWidget::menuActionRemoveHostedObjects(AGeoObject * obj)
 {
-  QMessageBox msgBox;
-  msgBox.setIcon(QMessageBox::Question);
-  msgBox.setWindowTitle("Locked objects will NOT be deleted!");
-  msgBox.setText("Delete objects hosted inside " + ObjectName + "?\nSlabs and lightguides are NOT removed.");
-  QPushButton *remove = msgBox.addButton(QMessageBox::Yes);
-  QPushButton *cancel = msgBox.addButton(QMessageBox::Cancel);
-  msgBox.setDefaultButton(cancel);
+    if (!obj) return;
 
-  msgBox.exec();
+    QMessageBox msgBox;
+    msgBox.setIcon(QMessageBox::Question);
+    msgBox.setWindowTitle("Locked objects will NOT be deleted!");
+    msgBox.setText("Delete objects hosted inside " + obj->Name + "?\nSlabs and lightguides are NOT removed.");
+    QPushButton *remove = msgBox.addButton(QMessageBox::Yes);
+    QPushButton *cancel = msgBox.addButton(QMessageBox::Cancel);
+    msgBox.setDefaultButton(cancel);
 
-  if (msgBox.clickedButton() == remove)
+    msgBox.exec();
+
+    if (msgBox.clickedButton() == remove)
     {
-      //emit ObjectSelectionChanged("");
-      AGeoObject* obj = World->findObjectByName(ObjectName);
-      if (obj)
-        for (int i=obj->HostedObjects.size()-1; i>-1; i--)
-          obj->HostedObjects[i]->recursiveSuicide();
-      UpdateGui();
-      emit RequestRebuildDetector();
+        for (int i = obj->HostedObjects.size()-1; i > -1; i--)
+            obj->HostedObjects[i]->recursiveSuicide();
+        obj->HostedObjects.clear();
+        const QString name = obj->Name;
+        emit RequestRebuildDetector();
+        UpdateGui(name);
     }
 }
 
-void AGeoTreeWidget::menuActionUnlockAllInside(QString ObjectName)
+void AGeoTreeWidget::menuActionUnlockAllInside(AGeoObject * obj)
 {
-  int ret = QMessageBox::question(this, "",
-                                 "Unlock all objects inside "+ObjectName+"?",
+    if (!obj) return;
+    int ret = QMessageBox::question(this, "",
+                                 "Unlock all objects inside " + obj->Name + "?",
                                  QMessageBox::Yes | QMessageBox::Cancel, QMessageBox::Cancel);
-  if (ret == QMessageBox::Yes)
+    if (ret == QMessageBox::Yes)
     {
-      AGeoObject* obj = World->findObjectByName(ObjectName);
-      if (obj)
-        {
-          for (int i=0; i<obj->HostedObjects.size(); i++)
+        for (int i = 0; i < obj->HostedObjects.size(); i++)
             obj->HostedObjects[i]->unlockAllInside();
-          UpdateGui();
-        }
+        UpdateGui(obj->Name);
     }
 }
 
-void AGeoTreeWidget::menuActionLockAllInside(QString ObjectName)
+void AGeoTreeWidget::menuActionLockAllInside(AGeoObject * obj)
 {
-  int ret = QMessageBox::question(this, "",
-                                 "Lock all objects inside "+ObjectName+"?",
+    if (!obj) return;
+
+    int ret = QMessageBox::question(this, "",
+                                 "Lock all objects inside " + obj->Name + "?",
                                  QMessageBox::Yes | QMessageBox::Cancel, QMessageBox::Cancel);
-  if (ret == QMessageBox::Yes)
+    if (ret == QMessageBox::Yes)
     {
-      AGeoObject* obj = World->findObjectByName(ObjectName);
-      if (obj)
-        {
-          obj->lockRecursively();
-          obj->lockUpTheChain();
-          UpdateGui();
-        }
+        obj->lockRecursively();
+        obj->lockUpTheChain();
+        UpdateGui(obj->Name);
     }
 }
 
@@ -910,8 +892,7 @@ void AGeoTreeWidget::menuActionUnlock()
           AGeoObject* obj = World->findObjectByName(Object);
           if (obj) obj->fLocked = false;
         }
-      if (selected.size() == 1)
-          UpdateGui(selected.first()->text(0));
+      if (selected.size() == 1) UpdateGui(selected.first()->text(0));
       else UpdateGui();
     }
 }
@@ -929,28 +910,29 @@ void AGeoTreeWidget::menuActionLock()
   else UpdateGui();
 }
 
-void AGeoTreeWidget::menuActionCopyObject(QString ObjToCopyName)
+void AGeoTreeWidget::menuActionCopyObject(AGeoObject * ObjToCopy)
 {
-  AGeoObject* ObjToCopy = World->findObjectByName(ObjToCopyName);
-  if (!ObjToCopy || ObjToCopy->ObjectType->isWorld()) return;
+  if (!ObjToCopy) return;
+  if (ObjToCopy->ObjectType->isWorld()) return;
 
   if ( !(ObjToCopy->ObjectType->isSingle() || ObjToCopy->ObjectType->isSlab() || ObjToCopy->ObjectType->isMonitor()) ) return; //supported so far only Single and Slab
 
-  if (ObjToCopy->ObjectType->isSlab())
+  if (ObjToCopy->ObjectType->isSlab())  // obsolete?
   {
     ATypeSlabObject* slab = static_cast<ATypeSlabObject*>(ObjToCopy->ObjectType);
     ObjToCopy->UpdateFromSlabModel(slab->SlabModel);
   }
 
-  AGeoObject* newObj = new AGeoObject(ObjToCopy);
+  AGeoObject * newObj = new AGeoObject(ObjToCopy);
+
   if (ObjToCopy->ObjectType->isMonitor())
   {
-      while (World->isNameExists(newObj->Name))
-        newObj->Name = AGeoObject::GenerateRandomMonitorName();
-      delete newObj->ObjectType;
-      ATypeMonitorObject* mt = new ATypeMonitorObject();
+      do newObj->Name = AGeoObject::GenerateRandomMonitorName();
+      while (World->isNameExists(newObj->Name));
+
+      ATypeMonitorObject * mt = new ATypeMonitorObject();
+      delete newObj->ObjectType; newObj->ObjectType = mt;
       mt->config = static_cast<ATypeMonitorObject*>(ObjToCopy->ObjectType)->config;
-      newObj->ObjectType = mt;
   }
   else
   {
@@ -958,47 +940,41 @@ void AGeoTreeWidget::menuActionCopyObject(QString ObjToCopyName)
         newObj->Name = AGeoObject::GenerateRandomObjectName();
   }
 
-  AGeoObject* container = ObjToCopy->Container;
+  AGeoObject * container = ObjToCopy->Container;
   if (!container) container = World;
   container->addObjectFirst(newObj);  //inserts to the first position in the list of HostedObjects!
 
-  QString name = newObj->Name;
-  UpdateGui(name);
+  const QString name = newObj->Name;
   emit RequestRebuildDetector();
   emit RequestHighlightObject(name);
   UpdateGui(name);
 }
 
-void AGeoTreeWidget::menuActionAddNewObject(QString ContainerName, AGeoShape * shape)
+void AGeoTreeWidget::menuActionAddNewObject(AGeoObject * ContObj, AGeoShape * shape)
 {
-  AGeoObject* ContObj = World->findObjectByName(ContainerName);
-  if (!ContObj) return;
+    if (!ContObj) return;
 
-  AGeoObject* newObj = new AGeoObject();
-  while (World->isNameExists(newObj->Name))
-    newObj->Name = AGeoObject::GenerateRandomObjectName();
+    AGeoObject * newObj = new AGeoObject();
+    while (World->isNameExists(newObj->Name))
+        newObj->Name = AGeoObject::GenerateRandomObjectName();
 
-  delete newObj->Shape;
-  newObj->Shape = shape;
+    delete newObj->Shape;
+    newObj->Shape = shape;
 
-  newObj->color = 1;
-  ContObj->addObjectFirst(newObj);  //inserts to the first position in the list of HostedObjects!
-  QString name = newObj->Name;
-  UpdateGui(name);
-  emit RequestRebuildDetector();
-  UpdateGui(name);
+    newObj->color = 1;
+    ContObj->addObjectFirst(newObj);  //inserts to the first position in the list of HostedObjects!
+
+    const QString name = newObj->Name;
+    emit RequestRebuildDetector();
+    UpdateGui(name);
 }
 
-void AGeoTreeWidget::menuActionAddNewArray(QString ContainerName)
+void AGeoTreeWidget::menuActionAddNewArray(AGeoObject * ContObj)
 {
-  AGeoObject* ContObj = World->findObjectByName(ContainerName);
   if (!ContObj) return;
 
   AGeoObject* newObj = new AGeoObject();
-  do
-    {
-      newObj->Name = AGeoObject::GenerateRandomArrayName();
-    }
+  do newObj->Name = AGeoObject::GenerateRandomArrayName();
   while (World->isNameExists(newObj->Name));
 
   delete newObj->ObjectType;
@@ -1006,7 +982,6 @@ void AGeoTreeWidget::menuActionAddNewArray(QString ContainerName)
 
   newObj->color = 1;
   ContObj->addObjectFirst(newObj);  //inserts to the first position in the list of HostedObjects!
-  QString name = newObj->Name;
 
   //element inside
   AGeoObject* elObj = new AGeoObject();
@@ -1015,14 +990,13 @@ void AGeoTreeWidget::menuActionAddNewArray(QString ContainerName)
   elObj->color = 1;
   newObj->addObjectFirst(elObj);
 
-  UpdateGui(name);
+  const QString name = newObj->Name;
   emit RequestRebuildDetector();
   UpdateGui(name);
 }
 
-void AGeoTreeWidget::menuActionAddNewGrid(QString ContainerName)
+void AGeoTreeWidget::menuActionAddNewGrid(AGeoObject * ContObj)
 {
-  AGeoObject* ContObj = World->findObjectByName(ContainerName);
   if (!ContObj) return;
 
   AGeoObject* newObj = new AGeoObject();
@@ -1036,15 +1010,13 @@ void AGeoTreeWidget::menuActionAddNewGrid(QString ContainerName)
   ContObj->addObjectFirst(newObj);
   Sandwich->convertObjToGrid(newObj);
 
-  QString name = newObj->Name;
-  UpdateGui(name);
+  const QString name = newObj->Name;
   emit RequestRebuildDetector();
   UpdateGui(name);
 }
 
-void AGeoTreeWidget::menuActionAddNewMonitor(QString ContainerName)
+void AGeoTreeWidget::menuActionAddNewMonitor(AGeoObject * ContObj)
 {
-    AGeoObject* ContObj = World->findObjectByName(ContainerName);
     if (!ContObj) return;
 
     AGeoObject* newObj = new AGeoObject();
@@ -1061,15 +1033,13 @@ void AGeoTreeWidget::menuActionAddNewMonitor(QString ContainerName)
     newObj->color = 1;
     ContObj->addObjectFirst(newObj);
 
-    QString name = newObj->Name;
-    //UpdateGui(name);
+    const QString name = newObj->Name;
     emit RequestRebuildDetector();
     UpdateGui(name);
 }
 
-void AGeoTreeWidget::menuActionAddNewComposite(QString ContainerName)
+void AGeoTreeWidget::menuActionAddNewComposite(AGeoObject * ContObj)
 {
-  AGeoObject* ContObj = World->findObjectByName(ContainerName);
   if (!ContObj) return;
 
   AGeoObject* newObj = new AGeoObject();
@@ -1081,15 +1051,13 @@ void AGeoTreeWidget::menuActionAddNewComposite(QString ContainerName)
 
   Sandwich->convertObjToComposite(newObj);
 
-  QString name = newObj->Name;
-  //UpdateGui(name);
+  const QString name = newObj->Name;
   emit RequestRebuildDetector();
   UpdateGui(name);
 }
 
-void AGeoTreeWidget::SetLineAttributes(QString ObjectName)
+void AGeoTreeWidget::SetLineAttributes(AGeoObject * obj)
 {
-    AGeoObject* obj = World->findObjectByName(ObjectName);
     if (!obj) return;
 
     ARootLineConfigurator* rlc = new ARootLineConfigurator(&obj->color, &obj->width, &obj->style, this);
@@ -1113,59 +1081,58 @@ void AGeoTreeWidget::SetLineAttributes(QString ObjectName)
                 co->style = obj->style;
             }
         }
-        emit RequestRebuildDetector();
-        //UpdateGui(ObjectName);
-    }
-}
-
-void AGeoTreeWidget::ShowObject(QString ObjectName)
-{
-  AGeoObject* obj = World->findObjectByName(ObjectName);
-  if (obj)
-  {
-      fSpecialGeoViewMode = true;
-      emit RequestHighlightObject(ObjectName);
-      UpdateGui(ObjectName);
-  }
-}
-
-void AGeoTreeWidget::ShowObjectRecursive(QString ObjectName)
-{
-    AGeoObject* obj = World->findObjectByName(ObjectName);
-    if (obj)
-    {
-        fSpecialGeoViewMode = true;
-        emit RequestShowObjectRecursive(ObjectName);
-        UpdateGui(ObjectName);
-    }
-}
-
-void AGeoTreeWidget::ShowObjectOnly(QString ObjectName)
-{
-    fSpecialGeoViewMode = true;
-    AGeoObject* obj = World->findObjectByName(ObjectName);
-    TGeoShape* sh = obj->Shape->createGeoShape();
-    sh->Draw();
-}
-
-void AGeoTreeWidget::menuActionEnableDisable(QString ObjectName)
-{
-    AGeoObject* obj = World->findObjectByName(ObjectName);
-    if (obj)
-    {
-        if (obj->isDisabled()) obj->enableUp();
-        else
-        {
-            obj->fActive = false;
-            if (obj->ObjectType->isSlab()) obj->getSlabModel()->fActive = false;
-        }
-
-        obj->fExpanded = obj->fActive;
-
-        QString name = obj->Name;
+        const QString name = obj->Name;
         emit RequestRebuildDetector();
         UpdateGui(name);
     }
+}
+
+void AGeoTreeWidget::ShowObject(AGeoObject * obj)
+{
+    if (obj)
+    {
+        fSpecialGeoViewMode = true;
+        emit RequestHighlightObject(obj->Name);
+        UpdateGui(obj->Name);
+    }
+}
+
+void AGeoTreeWidget::ShowObjectRecursive(AGeoObject * obj)
+{
+    if (obj)
+    {
+        fSpecialGeoViewMode = true;
+        emit RequestShowObjectRecursive(obj->Name);
+        UpdateGui(obj->Name);
+    }
+}
+
+void AGeoTreeWidget::ShowObjectOnly(AGeoObject * obj)
+{
+    if (obj)
+    {
+        fSpecialGeoViewMode = true;
+        TGeoShape * sh = obj->Shape->createGeoShape();  // make window member?
+        sh->Draw();
+    }
+}
+
+void AGeoTreeWidget::menuActionEnableDisable(AGeoObject * obj)
+{
+    if (!obj) return;
+
+    if (obj->isDisabled()) obj->enableUp();
+    else
+    {
+        obj->fActive = false;
+        if (obj->ObjectType->isSlab()) obj->getSlabModel()->fActive = false;
+    }
+
+    obj->fExpanded = obj->fActive;
+
+    const QString name = obj->Name;
+    emit RequestRebuildDetector();
+    UpdateGui(name);
 }
 
 void AGeoTreeWidget::formStack(QList<QTreeWidgetItem*> selected) //option 0->group, option 1->stack
@@ -1938,8 +1905,7 @@ void AGeoWidget::onRequestScriptRecursiveToClipboard()
 void AGeoWidget::onRequestSetVisAttributes()
 {
     if (!CurrentObject) return;
-
-    tw->SetLineAttributes(CurrentObject->Name);
+    tw->SetLineAttributes(CurrentObject);
 }
 
 void AGeoWidget::onMonitorRequestsShowSensitiveDirection()

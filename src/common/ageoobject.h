@@ -133,7 +133,7 @@ public:
 
   bool getPositionInWorld(double * worldPos) const;
 
-  bool isContainerValid(QString &errorStr) const;
+  bool isContainerValidForDrop(QString &errorStr) const;
 
   //service propertie
   QString tmpContName;   //used only during load

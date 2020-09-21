@@ -119,7 +119,11 @@ void AGeoTreeWidget::UpdateGui(QString selected)
     if (!World) return;
 
     //qDebug() << "==> Update tree triggered, selected = "<<selected;
-
+    if (selected.isEmpty() && currentItem())
+    {
+        //qDebug() << currentItem()->text(0);
+        selected = currentItem()->text(0);
+    }
     clear(); // also emits "itemSelectionChanged" with no selection -> clears delegate
 
     //World

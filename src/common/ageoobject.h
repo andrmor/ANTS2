@@ -44,8 +44,8 @@ public:
   void writeAllToJarr(QJsonArray & jarr);
   QString readAllFromJarr(AGeoObject * World, const QJsonArray & jarr);  // returns "" if no errors
 
-  ATypeGeoObject * ObjectType = nullptr;
-  AGeoShape * Shape = nullptr;
+  ATypeGeoObject * ObjectType = nullptr;  // always created in the constructor!
+  AGeoShape * Shape = nullptr;            // allowed to remain nullptr after construction!
 
   QString Name;
   int Material = 0;

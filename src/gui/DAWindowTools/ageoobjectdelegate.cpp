@@ -331,9 +331,14 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
         }
         */
 
-        //for stack:
+        //for stack members:
         if (obj->Container && obj->Container->ObjectType->isStack())
+        {
+            ATypeStackContainerObject * StackTypeObj = static_cast<ATypeStackContainerObject*>(obj->Container->ObjectType);
+            if (oldName == StackTypeObj->ReferenceVolume)
+                StackTypeObj->ReferenceVolume = newName;
             obj->updateStack();
+        }
     }
 
     //additional post-processing

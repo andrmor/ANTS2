@@ -15,7 +15,7 @@ void AGeoObject::constructorInit()
   Name = AGeoObject::GenerateRandomObjectName();
 
   Position[0] = Position[1] = Position[2] = 0;
-  Orientation[0] = Orientation[1] =Orientation[2] = 0;
+  Orientation[0] = Orientation[1] = Orientation[2] = 0;
 }
 
 AGeoObject::AGeoObject(QString name, QString ShapeGenerationString)
@@ -134,8 +134,7 @@ bool AGeoObject::readShapeFromString(const QString & GenerationString, bool Only
       return true;
     }
 
-  if (Shape) delete Shape;
-  Shape = newShape;
+  delete Shape; Shape = newShape;
   return true;
 }
 
@@ -655,33 +654,31 @@ bool AGeoObject::isStackReference() const
 
 AGeoObject * AGeoObject::getOrMakeStackReferenceVolume()
 {
-    if (!ObjectType) return nullptr;
-
     AGeoObject * Stack;
-    ATypeStackContainerObject * StackTO = dynamic_cast<ATypeStackContainerObject*>(ObjectType);
-    if (StackTO) Stack = this;
+    ATypeStackContainerObject * StackTypeObj = dynamic_cast<ATypeStackContainerObject*>(ObjectType);
+    if (StackTypeObj) Stack = this;
     else
     {
         if (Container)
         {
-            StackTO = dynamic_cast<ATypeStackContainerObject*>(Container->ObjectType);
-            if (StackTO) Stack = Container;
+            StackTypeObj = dynamic_cast<ATypeStackContainerObject*>(Container->ObjectType);
+            if (StackTypeObj) Stack = Container;
         }
     }
-    if (!StackTO) return nullptr;
+    if (!StackTypeObj) return nullptr;
     if (Stack->HostedObjects.isEmpty()) return nullptr;
 
-    AGeoObject * RefVolume;
-    if (StackTO->ReferenceVolume.isEmpty())
+    AGeoObject * RefVolume = nullptr;
+    if (StackTypeObj->ReferenceVolume.isEmpty())
     {
         RefVolume = Stack->HostedObjects.first();
-        StackTO->ReferenceVolume = RefVolume->Name;
+        StackTypeObj->ReferenceVolume = RefVolume->Name;
     }
     else
     {
         for (AGeoObject * obj : Stack->HostedObjects)
         {
-            if (obj->Name == StackTO->ReferenceVolume)
+            if (obj->Name == StackTypeObj->ReferenceVolume)
             {
                 RefVolume = obj;
                 break;
@@ -691,7 +688,7 @@ AGeoObject * AGeoObject::getOrMakeStackReferenceVolume()
         {
             qWarning() << "Declared reference volume of the stack not found, setting first volume as the reference!";
             RefVolume = Stack->HostedObjects.first();
-            StackTO->ReferenceVolume = RefVolume->Name;
+            StackTypeObj->ReferenceVolume = RefVolume->Name;
         }
     }
     return RefVolume;

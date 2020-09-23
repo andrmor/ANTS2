@@ -100,8 +100,12 @@ void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, 
                 }
 
                 bool bEntranceValidated;
-                const bool bCheckingEnter = (opt.bToMat || opt.bToVolume || opt.bToVolIndex) && (thisStep->Process != "O");
-                if (bCheckingEnter)
+                const bool bCheckingEnter = (opt.bToMat || opt.bToVolume || opt.bToVolIndex);
+                if (thisStep->Process == "O")
+                {
+                    bEntranceValidated = !bCheckingEnter; // if any check selected -> entrance is not valid
+                }
+                else if (bCheckingEnter)
                 {
                     const ATransportationStepData * trStep = static_cast<const ATransportationStepData*>(thisStep); // "O" should not see this line!
                     {

@@ -94,7 +94,7 @@
        </palette>
       </property>
       <property name="currentIndex">
-       <number>6</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="tabText">
        <attribute name="title">
@@ -1614,6 +1614,13 @@ over all events</string>
               </item>
               <item>
                <widget class="QComboBox" name="cobPTHistVolPlus"/>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="cbPTHistVolVsTime">
+                <property name="text">
+                 <string>vs time</string>
+                </property>
+               </widget>
               </item>
               <item>
                <spacer name="horizontalSpacer_15">

@@ -256,7 +256,7 @@ AHistorySearchProcessor_findDepositedEnergy::~AHistorySearchProcessor_findDeposi
 
 void AHistorySearchProcessor_findDepositedEnergy::onNewEvent()
 {
-    if (Mode == OverEvent) Depo = 0;
+    if (Mode == OverEvent) clearData();
 }
 
 bool AHistorySearchProcessor_findDepositedEnergy::onNewTrack(const AParticleTrackingRecord & )
@@ -264,14 +264,14 @@ bool AHistorySearchProcessor_findDepositedEnergy::onNewTrack(const AParticleTrac
     switch (Mode)
     {
     case Individual:
-        Depo = 0;
+        clearData();
         return false;
     case WithSecondaries:
         if (bSecondaryTrackingStarted)
             return false;
         else
         {
-            Depo = 0;
+            clearData();
             bSecondaryTrackingStarted  = true;
             bInlineSecondaryProcessing = true; // change to inline secondaries mode
             bIgnoreParticleSelectors   = true; // to allow secondaries even not allowed by the selection
@@ -281,18 +281,17 @@ bool AHistorySearchProcessor_findDepositedEnergy::onNewTrack(const AParticleTrac
         // no need to do anything - Depo is reset on new event
         return false;
     }
-
     return false;
 }
 
 void AHistorySearchProcessor_findDepositedEnergy::onLocalStep(const ATrackingStepData & tr)
 {
-    Depo += tr.DepositedEnergy;
+    fillDeposition(tr);
 }
 
 void AHistorySearchProcessor_findDepositedEnergy::onTransitionOut(const ATrackingStepData & tr)
 {
-    Depo += tr.DepositedEnergy;
+    fillDeposition(tr);
 }
 
 void AHistorySearchProcessor_findDepositedEnergy::onTrackEnd(bool bMaster)
@@ -300,14 +299,12 @@ void AHistorySearchProcessor_findDepositedEnergy::onTrackEnd(bool bMaster)
     switch (Mode)
     {
     case Individual:
-        if (Depo > 0) Hist->Fill(Depo);
-        Depo = 0;
+        fillHistogram();
         break;
     case WithSecondaries:
         if (bMaster)
         {
-            if (Depo > 0) Hist->Fill(Depo);
-            Depo = 0;
+            fillHistogram();
             bSecondaryTrackingStarted  = false;
             bInlineSecondaryProcessing = false; // back to default non-inline mode!
             bIgnoreParticleSelectors   = false; // back to normal mode
@@ -321,12 +318,66 @@ void AHistorySearchProcessor_findDepositedEnergy::onTrackEnd(bool bMaster)
 
 void AHistorySearchProcessor_findDepositedEnergy::onEventEnd()
 {
-    if (Mode == OverEvent)
-    {
-        if (Depo > 0) Hist->Fill(Depo);
-        Depo = 0;
-    }
+    if (Mode == OverEvent) fillHistogram();
 }
+
+void AHistorySearchProcessor_findDepositedEnergy::clearData()
+{
+    Depo = 0;
+}
+
+void AHistorySearchProcessor_findDepositedEnergy::fillDeposition(const ATrackingStepData &tr)
+{
+    Depo += tr.DepositedEnergy;
+}
+
+void AHistorySearchProcessor_findDepositedEnergy::fillHistogram()
+{
+    if (Depo > 0) Hist->Fill(Depo);
+    clearData();
+}
+
+
+AHistorySearchProcessor_findDepositedEnergyTimed::AHistorySearchProcessor_findDepositedEnergyTimed(AHistorySearchProcessor_findDepositedEnergy::CollectionMode mode,
+                                                                                                   int binsE, double fromE, double toE,
+                                                                                                   int binsT, double fromT, double toT)
+{
+    Mode = mode;
+    Hist2D = new TH2D("", "Deposited energy vs weighted time", binsE, fromE, toE,  binsT, fromT, toT);
+    Hist2D->GetXaxis()->SetTitle("Deposited energy, keV");
+    Hist2D->GetYaxis()->SetTitle("Mean deposition time (weighted by energy), ns");
+
+    bInlineSecondaryProcessing = false; // on start it is default non-inline mode even in WithSecondaries mode
+}
+
+AHistorySearchProcessor_findDepositedEnergyTimed::~AHistorySearchProcessor_findDepositedEnergyTimed()
+{
+    delete Hist2D;
+}
+
+void AHistorySearchProcessor_findDepositedEnergyTimed::clearData()
+{
+    Depo = 0;
+    Time = 0;
+}
+
+void AHistorySearchProcessor_findDepositedEnergyTimed::fillDeposition(const ATrackingStepData &tr)
+{
+    Depo += tr.DepositedEnergy;
+    Time += tr.Time * tr.DepositedEnergy;
+}
+
+void AHistorySearchProcessor_findDepositedEnergyTimed::fillHistogram()
+{
+    if (Depo > 0)
+    {
+        Time /= Depo;
+        Hist2D->Fill(Depo, Time);
+    }
+    clearData();
+}
+
+
 
 AHistorySearchProcessor_findTravelledDistances::AHistorySearchProcessor_findTravelledDistances(int bins, double from, double to)
 {

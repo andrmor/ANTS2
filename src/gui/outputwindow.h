@@ -112,6 +112,8 @@ private slots:
 
     void on_pbShowMonitorTimeOverall_clicked();
 
+    void on_cbPTHistVolVsTime_clicked();
+
 private:
     Ui::OutputWindow *ui;
     MainWindow* MW;

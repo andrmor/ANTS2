@@ -66,7 +66,7 @@ OutputWindow::OutputWindow(QWidget *parent, MainWindow *mw, EventsDataClass *eve
     for (QWidget * w : vecDis) w->setEnabled(false);
 
     QVector<QWidget*> vecInv;
-    vecInv << ui->cobPTHistVolPlus << ui->pbRefreshViz << ui->frPTHistX << ui->frPTHistY
+    vecInv << ui->cobPTHistVolPlus << ui->pbRefreshViz << ui->frPTHistX << ui->frPTHistY << ui->cbPTHistVolVsTime
            << ui->pbEventView_ShowTree << ui->pbEVgeo << ui->frEventFilters << ui->frTimeAware;
     for (QWidget * w : vecInv) w->setVisible(false);
 
@@ -1421,9 +1421,13 @@ void OutputWindow::on_pbPTHistRequest_clicked()
     Opt.bSecondary = ui->cbPTHistOnlySec->isChecked();
     Opt.bLimitToFirstInteractionOfPrimary = ui->cbPTHistLimitToFirst->isChecked();
 
-    int bins = ui->sbPTHistBinsX->value();
+    int    bins = ui->sbPTHistBinsX->value();
     double from = ui->ledPTHistFromX->text().toDouble();
     double to   = ui->ledPTHistToX  ->text().toDouble();
+
+    int    bins2 = ui->sbPTHistBinsY->value();
+    double from2 = ui->ledPTHistFromY->text().toDouble();
+    double to2   = ui->ledPTHistToY  ->text().toDouble();
 
     int Selector = ui->twPTHistType->currentIndex(); // 0 - Vol, 1 - Boundary
     if (Selector == 0)
@@ -1488,26 +1492,45 @@ void OutputWindow::on_pbPTHistRequest_clicked()
         case 3:
           {
             int mode = ui->cobPTHistVolPlus->currentIndex();
-            if (mode <0 || mode >2)
+            if (mode < 0 || mode > 2)
             {
                 message("Unknown energy deposition collection mode", this);
                 return;
             }
             AHistorySearchProcessor_findDepositedEnergy::CollectionMode edm = static_cast<AHistorySearchProcessor_findDepositedEnergy::CollectionMode>(mode);
 
-            AHistorySearchProcessor_findDepositedEnergy p(edm, bins, from, to);
-            Crawler.find(Opt, p);
+            if (ui->cbPTHistVolVsTime->isChecked())
+            {
+                AHistorySearchProcessor_findDepositedEnergyTimed p(edm, bins, from, to, bins2, from2, to2);
+                Crawler.find(Opt, p);
 
-            if (p.Hist->GetEntries() == 0)
-                message("No deposition detected", this);
+                if (p.Hist2D->GetEntries() == 0)
+                    message("No deposition detected", this);
+                else
+                {
+                    MW->GraphWindow->Draw(p.Hist2D, "colz");
+                    p.Hist2D = nullptr;
+                }
+                binsEnergy = bins;
+                fromEnergy = from;
+                toEnergy = to;
+            }
             else
             {
-                MW->GraphWindow->Draw(p.Hist);
-                p.Hist = nullptr;
+                AHistorySearchProcessor_findDepositedEnergy p(edm, bins, from, to);
+                Crawler.find(Opt, p);
+
+                if (p.Hist->GetEntries() == 0)
+                    message("No deposition detected", this);
+                else
+                {
+                    MW->GraphWindow->Draw(p.Hist);
+                    p.Hist = nullptr;
+                }
+                binsEnergy = bins;
+                fromEnergy = from;
+                toEnergy = to;
             }
-            binsEnergy = bins;
-            fromEnergy = from;
-            toEnergy = to;
             selectedModeForEnergyDepo = mode;
 
             break;
@@ -1588,10 +1611,6 @@ void OutputWindow::on_pbPTHistRequest_clicked()
         bool bVs = ui->cbPTHistBordVs->isChecked();
         bool bVsVs = ui->cbPTHistBordAndVs->isChecked();
         bool bAveraged = ui->cbPTHistBordAsStat->isChecked();
-
-        int bins2 = ui->sbPTHistBinsY->value();
-        double from2 = ui->ledPTHistFromY->text().toDouble();
-        double to2   = ui->ledPTHistToY  ->text().toDouble();
 
         if (!bVs)
         {
@@ -1699,6 +1718,8 @@ void OutputWindow::on_cobPTHistVolRequestWhat_currentIndexChanged(int index)
     ui->cobPTHistVolPlus->setVisible(index == 3);
 
     ui->frTimeAware->setVisible(index == 4);
+
+    ui->cbPTHistVolVsTime->setVisible(index == 3);
 }
 
 void OutputWindow::on_twPTHistType_currentChanged(int index)
@@ -1724,7 +1745,7 @@ void OutputWindow::updatePTHistoryBinControl()
     {
         //Volume
         ui->frPTHistX->setVisible( ui->cobPTHistVolRequestWhat->currentIndex() > 1  && ui->cobPTHistVolRequestWhat->currentIndex() != 4);
-        ui->frPTHistY->setVisible(false);
+        ui->frPTHistY->setVisible( ui->cobPTHistVolRequestWhat->currentIndex() == 3 && ui->cbPTHistVolVsTime->isChecked() );
     }
     else
     {
@@ -2298,4 +2319,9 @@ void OutputWindow::on_pbShowMonitorTimeOverall_clicked()
     time->GetXaxis()->SetTitle("Time, ns");
     time->GetYaxis()->SetTitle("Hits");
     MW->GraphWindow->Draw(time, "hist");
+}
+
+void OutputWindow::on_cbPTHistVolVsTime_clicked()
+{
+    updatePTHistoryBinControl();
 }

@@ -48,11 +48,9 @@ protected:
 class AHistorySearchProcessor_findParticles : public AHistorySearchProcessor
 {
 public:
-    virtual ~AHistorySearchProcessor_findParticles(){}
-
-    virtual bool onNewTrack(const AParticleTrackingRecord & pr) override;
-    virtual void onLocalStep(const ATrackingStepData & tr) override;
-    virtual void onTrackEnd(bool) override;
+    bool onNewTrack(const AParticleTrackingRecord & pr) override;
+    void onLocalStep(const ATrackingStepData & tr) override;
+    void onTrackEnd(bool) override;
 
     QString Candidate;
     bool bConfirmed = false;
@@ -62,11 +60,9 @@ public:
 class AHistorySearchProcessor_findProcesses : public AHistorySearchProcessor
 {
 public:
-    virtual ~AHistorySearchProcessor_findProcesses(){}
-
-    virtual void onLocalStep(const ATrackingStepData & tr) override;
-    virtual void onTransitionOut(const ATrackingStepData & ) override;
-    virtual void onTransitionIn (const ATrackingStepData & ) override;
+    void onLocalStep(const ATrackingStepData & tr) override;
+    void onTransitionOut(const ATrackingStepData & ) override;
+    void onTransitionIn (const ATrackingStepData & ) override;
 
     QMap<QString, int> FoundProcesses;
 };
@@ -77,19 +73,42 @@ public:
     enum CollectionMode {Individual, WithSecondaries, OverEvent};
 
     AHistorySearchProcessor_findDepositedEnergy(CollectionMode mode, int bins, double from = 0, double to = 0);
-    virtual ~AHistorySearchProcessor_findDepositedEnergy();
+    AHistorySearchProcessor_findDepositedEnergy(){}
+    ~AHistorySearchProcessor_findDepositedEnergy();
 
-    virtual void onNewEvent() override;
-    virtual bool onNewTrack(const AParticleTrackingRecord & pr) override;
-    virtual void onLocalStep(const ATrackingStepData & tr) override;
-    virtual void onTransitionOut(const ATrackingStepData & tr) override; // in Geant4 energy loss can happen on transition
-    virtual void onTrackEnd(bool bMaster) override;
-    virtual void onEventEnd() override;
+    void onNewEvent() override;
+    bool onNewTrack(const AParticleTrackingRecord & pr) override;
+    void onLocalStep(const ATrackingStepData & tr) override;
+    void onTransitionOut(const ATrackingStepData & tr) override; // in Geant4 energy loss can happen on transition
+    void onTrackEnd(bool bMaster) override;
+    void onEventEnd() override;
 
-    CollectionMode Mode;
+    CollectionMode Mode = Individual;
     double Depo = 0;
     TH1D * Hist = nullptr;
     bool bSecondaryTrackingStarted = false;
+
+protected:
+    virtual void clearData();
+    virtual void fillDeposition(const ATrackingStepData & tr);
+    virtual void fillHistogram();
+};
+
+class AHistorySearchProcessor_findDepositedEnergyTimed : public AHistorySearchProcessor_findDepositedEnergy
+{
+public:
+    AHistorySearchProcessor_findDepositedEnergyTimed(CollectionMode mode,
+                                                     int binsE, double fromE, double toE,
+                                                     int binsT, double fromT, double toT);
+    ~AHistorySearchProcessor_findDepositedEnergyTimed();
+
+    double Time = 0; // used by AHistorySearchProcessor_findDepositedEnergyTimed
+    TH2D * Hist2D = nullptr;
+
+protected:
+    void clearData() override;
+    void fillDeposition(const ATrackingStepData & tr) override;
+    void fillHistogram() override;
 };
 
 struct AParticleDepoStat
@@ -107,9 +126,9 @@ struct AParticleDepoStat
 class AHistorySearchProcessor_getDepositionStats : public AHistorySearchProcessor
 {
 public:
-    virtual bool onNewTrack(const AParticleTrackingRecord & pr) override;
-    virtual void onLocalStep(const ATrackingStepData & tr) override;
-    virtual void onTransitionOut(const ATrackingStepData & tr) override; // in Geant4 energy loss can happen on transition
+    bool onNewTrack(const AParticleTrackingRecord & pr) override;
+    void onLocalStep(const ATrackingStepData & tr) override;
+    void onTransitionOut(const ATrackingStepData & tr) override; // in Geant4 energy loss can happen on transition
 
     const QString Dummy = "___error___";
     const QString * ParticleName = &Dummy;
@@ -124,8 +143,8 @@ class AHistorySearchProcessor_getDepositionStatsTimeAware : public AHistorySearc
 public:
     AHistorySearchProcessor_getDepositionStatsTimeAware(float timeFrom, float timeTo);
 
-    virtual void onLocalStep(const ATrackingStepData & tr) override;
-    virtual void onTransitionOut(const ATrackingStepData & tr) override; // in Geant4 energy loss can happen on transition
+    void onLocalStep(const ATrackingStepData & tr) override;
+    void onTransitionOut(const ATrackingStepData & tr) override; // in Geant4 energy loss can happen on transition
 
 private:
     float timeFrom;
@@ -136,13 +155,13 @@ class AHistorySearchProcessor_findTravelledDistances : public AHistorySearchProc
 {
 public:
     AHistorySearchProcessor_findTravelledDistances(int bins, double from = 0, double to = 0);
-    virtual ~AHistorySearchProcessor_findTravelledDistances();
+    ~AHistorySearchProcessor_findTravelledDistances();
 
-    virtual bool onNewTrack(const AParticleTrackingRecord & pr) override;
-    virtual void onLocalStep(const ATrackingStepData & tr) override;
-    virtual void onTransitionOut(const ATrackingStepData & tr) override; // "from" step
-    virtual void onTransitionIn (const ATrackingStepData & tr) override; // "from" step
-    virtual void onTrackEnd(bool) override;
+    bool onNewTrack(const AParticleTrackingRecord & pr) override;
+    void onLocalStep(const ATrackingStepData & tr) override;
+    void onTransitionOut(const ATrackingStepData & tr) override; // "from" step
+    void onTransitionIn (const ATrackingStepData & tr) override; // "from" step
+    void onTrackEnd(bool) override;
 
     float Distance = 0;
     float LastPosition[3];
@@ -167,12 +186,12 @@ public:
                                    const QString & cuts,
                                    int bins1, double from1, double to1,
                                    int bins2, double from2, double to2);
-    virtual ~AHistorySearchProcessor_Border();
+    ~AHistorySearchProcessor_Border();
 
-    virtual void afterSearch() override;
+    void afterSearch() override;
 
     // direction info can be [0,0,0] !!!
-    virtual void onTransition(const ATrackingStepData & fromfromTr, const ATrackingStepData & fromTr) override; // "from" step
+    void onTransition(const ATrackingStepData & fromfromTr, const ATrackingStepData & fromTr) override; // "from" step
 
     QString ErrorString;  // after constructor, valid if ErrorString is empty
     bool bRequiresDirections = false;

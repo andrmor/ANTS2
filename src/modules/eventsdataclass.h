@@ -125,6 +125,9 @@ public:
     int loadSimulatedEventsFromTree(QString fileName, const APmHub &PMs, int maxEvents = -1); //returns -1 if failed, otherwise number of events added
     bool overlayAsciiFile(QString fileName, bool fAddMulti, APmHub *PMs); //true = success, if not, see ErrorString
 
+    // for load particle tracking history
+    void addEmptyEvents(int numEmptyEvents, int numPMs, int numTimeBins);
+
     //Misc
     QString ErrorString;
 

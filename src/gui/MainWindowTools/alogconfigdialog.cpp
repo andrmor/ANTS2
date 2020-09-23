@@ -40,3 +40,14 @@ void ALogConfigDialog::on_pbDirSettings_clicked()
     bRequestShowSettings = true;
     accept();
 }
+
+#include "aglobalsettings.h"
+#include <QFileDialog>
+void ALogConfigDialog::on_pbLoadLog_clicked()
+{
+    AGlobalSettings & GS = AGlobalSettings::getInstance();
+
+    sRequestOpenFile = QFileDialog::getOpenFileName(this, "Open log file", GS.LibLogs);
+    if (sRequestOpenFile.isEmpty()) return;
+    accept();
+}

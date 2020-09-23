@@ -4459,6 +4459,7 @@ void MainWindow::on_pbHelpDetectionEfficiency_clicked()
 }
 
 #include "alogconfigdialog.h"
+#include "atrackingdataimporter.h"
 void MainWindow::on_pbOpenLogOptions_clicked()
 {
     ALogConfigDialog* d = new ALogConfigDialog(SimulationManager->LogsStatOptions, this);
@@ -4468,8 +4469,42 @@ void MainWindow::on_pbOpenLogOptions_clicked()
         GlobSetWindow->SetTab(0);
         GlobSetWindow->show();
     }
-    on_pbUpdateSimConfig_clicked();
+    else if (!d->sRequestOpenFile.isEmpty())
+    {
+        SimulationManager->clearTracks();
+        SimulationManager->clearTrackingHistory();
+        EventsDataHub->clear();
 
+        AGeneralSimSettings & GenSimSet = SimulationManager->Settings.genSimSet;
+        ATrackingDataImporter ti(GenSimSet.TrackBuildOptions,
+                                 Detector->MpCollection->getListOfParticleNames(), // check it is safe if in current config there are less particles than in the history
+                                 &SimulationManager->TrackingHistory,
+                                 &SimulationManager->Tracks,
+                                 10000); // !*!
+
+        QFile file(d->sRequestOpenFile);
+        if (!file.open(QIODevice::ReadOnly | QFile::Text))
+        {
+            message("Cannot open file " + d->sRequestOpenFile, this);
+            return;
+        }
+        QTextStream stream(&file);
+        QString firstLine = stream.readLine();
+        const bool bBinary = (!firstLine.startsWith("#0"));
+
+        qDebug() << d->sRequestOpenFile << "  binary?" << bBinary;
+
+        QString ErrorStr = ti.processFile(d->sRequestOpenFile, 0, bBinary);
+        if (!ErrorStr.isEmpty())
+        {
+            message(ErrorStr, this);
+            return;
+        }
+
+        EventsDataHub->addEmptyEvents(SimulationManager->TrackingHistory.size(), PMs->count(), SimulationManager->Settings.genSimSet.TimeBins);
+    }
+
+    on_pbUpdateSimConfig_clicked();
     delete d;
 }
 

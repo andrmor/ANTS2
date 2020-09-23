@@ -1572,6 +1572,18 @@ bool EventsDataClass::overlayAsciiFile(QString fileName, bool fAddMulti, APmHub*
   return true;
 }
 
+void EventsDataClass::addEmptyEvents(int numEmptyEvents, int numPMs, int numTimeBins)
+{
+    QVector<float> event(numPMs, 0);
+    Events = QVector<QVector<float>>(numEmptyEvents, event); // event pm
+
+    if (numTimeBins != 1)
+    {
+        QVector<QVector<float>> timeEvent(numTimeBins, event);
+        TimedEvents = QVector<QVector<QVector<float>>>(numEmptyEvents, timeEvent); //event timebin pm
+    }
+}
+
 int EventsDataClass::loadSimulatedEventsFromTree(QString fileName, const APmHub &PMs, int maxEvents)
 {
   ErrorString = "";

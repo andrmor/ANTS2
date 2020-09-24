@@ -38,24 +38,17 @@
 #include <QFileDialog>
 #include <QTimer>
 
-OutputWindow::OutputWindow(QWidget *parent, MainWindow *mw, EventsDataClass *eventsDataHub) :
-    AGuiWindow("out", parent),
+OutputWindow::OutputWindow(QWidget *parent, MainWindow *MW, EventsDataClass *EventsDataHub) :
+    AGuiWindow("out", parent), MW(MW), EventsDataHub(EventsDataHub),
     ui(new Ui::OutputWindow)
 {
-    MW = mw;
-    EventsDataHub = eventsDataHub;
-    GVscale = 10.0;
     ui->setupUi(this);
-    bForbidUpdate = false;
-
-    this->setWindowTitle("Results/Output");
+    setWindowTitle("Results/Output");
 
     Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
     windowFlags |= Qt::WindowCloseButtonHint;
     //windowFlags |= Qt::Tool;
     this->setWindowFlags( windowFlags );
-
-    modelPMhits = 0;
 
     QVector<QWidget*> vecDis;
     vecDis << ui->pbSiPMpixels << ui->sbTimeBin
@@ -73,7 +66,8 @@ OutputWindow::OutputWindow(QWidget *parent, MainWindow *mw, EventsDataClass *eve
     QDoubleValidator* dv = new QDoubleValidator(this);
     dv->setNotation(QDoubleValidator::ScientificNotation);
     QList<QLineEdit*> list = this->findChildren<QLineEdit *>();
-    foreach(QLineEdit *w, list) if (w->objectName().startsWith("led")) w->setValidator(dv);
+    for (QLineEdit * w : list)
+        if (w->objectName().startsWith("led")) w->setValidator(dv);
 
     //Graphics view
     scaleScene = new QGraphicsScene(this);
@@ -334,14 +328,16 @@ void OutputWindow::on_sbTimeBin_valueChanged(int arg1)
    if (EventsDataHub->TimedEvents.isEmpty()) return;
    if (arg1 > EventsDataHub->TimedEvents[0].size()-1) ui->sbTimeBin->setValue(0);
 
-   OutputWindow::on_pbSiPMpixels_clicked();
+   on_pbSiPMpixels_clicked();
 }
 
+/*
 void OutputWindow::addParticleHistoryLogLine(int iRec, int level)
 {
     for (int i=0; i<secs.at(iRec).size(); i++)
         addParticleHistoryLogLine(secs.at(iRec).at(i), level+1);
 }
+*/
 
 void OutputWindow::updateSignalTableWidth()
 {
@@ -1228,6 +1224,9 @@ void OutputWindow::saveEventViewerSettings(QJsonObject & json) const
     json["ExclProcActive"] = ui->cbEVexcludeProc->isChecked();
     json["ExclToProc"] = ui->leEVexcludeProc->text();
     json["ExclToProcPrim"] = ui->cbEVexcludeProcPrim->isChecked();
+
+    json["LimitToVolumesActive"] = ui->cbLimitToVolumes->isChecked();
+    json["LimitToVolumes"] = ui->leLimitToVolumes->text();
 }
 
 void OutputWindow::loadEventViewerSettings(const QJsonObject & json)
@@ -1257,6 +1256,9 @@ void OutputWindow::loadEventViewerSettings(const QJsonObject & json)
     JsonToCheckbox    (json, "ExclProcActive", ui->cbEVexcludeProc);
     JsonToLineEditText(json, "ExclToProc", ui->leEVexcludeProc);
     JsonToCheckbox    (json, "ExclToProcPrim", ui->cbEVexcludeProcPrim);
+
+    JsonToCheckbox    (json, "LimitToVolumesActive", ui->cbLimitToVolumes);
+    JsonToLineEditText(json, "LimitToVolumes", ui->leLimitToVolumes);
 }
 
 void OutputWindow::on_tabwinDiagnose_tabBarClicked(int index)
@@ -1511,9 +1513,9 @@ void OutputWindow::on_pbPTHistRequest_clicked()
                     MW->GraphWindow->Draw(p.Hist2D, "colz");
                     p.Hist2D = nullptr;
                 }
-                binsEnergy = bins;
-                fromEnergy = from;
-                toEnergy = to;
+                binsTime = bins2;
+                fromTime = from2;
+                toTime   = to2;
             }
             else
             {
@@ -1527,12 +1529,11 @@ void OutputWindow::on_pbPTHistRequest_clicked()
                     MW->GraphWindow->Draw(p.Hist);
                     p.Hist = nullptr;
                 }
-                binsEnergy = bins;
-                fromEnergy = from;
-                toEnergy = to;
             }
             selectedModeForEnergyDepo = mode;
-
+            binsEnergy = bins;
+            fromEnergy = from;
+            toEnergy = to;
             break;
           }
         case 4:
@@ -1710,6 +1711,10 @@ void OutputWindow::on_cobPTHistVolRequestWhat_currentIndexChanged(int index)
         ui->sbPTHistBinsX->setValue(binsEnergy);
         ui->ledPTHistFromX->setText(QString::number(fromEnergy));
         ui->ledPTHistToX->setText(QString::number(toEnergy));
+
+        ui->sbPTHistBinsY->setValue(binsTime);
+        ui->ledPTHistFromY->setText(QString::number(fromTime));
+        ui->ledPTHistToY->setText(QString::number(toTime));
 
         ui->cobPTHistVolPlus->clear();
         ui->cobPTHistVolPlus->addItems(QStringList() << "Individual"<<"With secondaries"<<"Over event");

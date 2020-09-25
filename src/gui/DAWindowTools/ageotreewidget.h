@@ -24,13 +24,11 @@ class AGeoTreeWidget : public QTreeWidget
   Q_OBJECT
 
 public:
-  AGeoTreeWidget(ASandwich* Sandwich);
-  AGeoWidget* GetEditWidget() {return EditWidget;}
+  AGeoTreeWidget(ASandwich * Sandwich);
 
-  ASandwich * Sandwich;
-
-  void SelectObjects(QStringList ObjectNames);
-  void SetLineAttributes(AGeoObject * obj);
+  AGeoWidget * GetEditWidget() {return EditWidget;}
+  void         SetLineAttributes(AGeoObject * obj);
+  void         SelectObjects(QStringList ObjectNames);
 
 public slots:
   void UpdateGui(QString selected = "");
@@ -41,9 +39,9 @@ public slots:
   void rebuildDetectorAndRestoreCurrentDelegate();  // used by geoConst widget
 
 private slots:
-  void onItemSelectionChanged();   // !*! bold is also used now for stack reference volume
-  void customMenuRequested(const QPoint &pos);  // CONTEXT MENU
-  void onItemClicked(); //only to return to normal geo view mode!
+  void onItemSelectionChanged();                    // !*! bold is also used now for stack reference volume
+  void customMenuRequested(const QPoint &pos);      // ---- CONTEXT MENU ----
+  void onItemClicked();                             // only to return to normal geo view mode!
 
   void onItemExpanded(QTreeWidgetItem* item);
   void onItemCollapsed(QTreeWidgetItem* item);
@@ -57,12 +55,13 @@ protected:
   void dragMoveEvent(QDragMoveEvent* event);
 
 private:
+  ASandwich  * Sandwich   = nullptr;
   AGeoObject * World      = nullptr;
   AGeoWidget * EditWidget = nullptr;
 
   //base images for icons
   QImage Lock;
-  QImage GroupStart, GroupMid, GroupEnd;
+  //QImage GroupStart, GroupMid, GroupEnd;
   QImage StackStart, StackMid, StackEnd;
 
   QColor BackgroundColor;
@@ -96,17 +95,17 @@ private:
   void menuActionAddNewGrid(AGeoObject * ContObj);
   void menuActionAddNewMonitor(AGeoObject * ContObj);
 
-  const QString makeScriptString_basicObject(AGeoObject *obj, bool bExpandMaterials, bool usePython) const;
-  const QString makeScriptString_slab(AGeoObject *obj, bool bExpandMaterials, int ident) const;
-  const QString makeScriptString_setCenterSlab(AGeoObject *obj) const;
-  QString makeScriptString_arrayObject(AGeoObject *obj);
-  const QString makeScriptString_monitorBaseObject(const AGeoObject *obj) const;
-  const QString makeScriptString_monitorConfig(const AGeoObject *obj) const;
-  QString makeScriptString_stackObjectStart(AGeoObject *obj);
-  QString makeScriptString_groupObjectStart(AGeoObject *obj);
-  QString makeScriptString_stackObjectEnd(AGeoObject *obj);
-  QString makeLinePropertiesString(AGeoObject *obj);
-  const QString makeScriptString_DisabledObject(AGeoObject *obj);
+  QString makeScriptString_basicObject(AGeoObject *obj, bool bExpandMaterials, bool usePython) const;
+  QString makeScriptString_slab(AGeoObject *obj, bool bExpandMaterials, int ident) const;
+  QString makeScriptString_setCenterSlab(AGeoObject *obj) const;
+  QString makeScriptString_arrayObject(AGeoObject *obj) const;
+  QString makeScriptString_monitorBaseObject(const AGeoObject *obj) const;
+  QString makeScriptString_monitorConfig(const AGeoObject *obj) const;
+  QString makeScriptString_stackObjectStart(AGeoObject *obj) const;
+  QString makeScriptString_groupObjectStart(AGeoObject *obj) const;
+  QString makeScriptString_stackObjectEnd(AGeoObject *obj) const;
+  QString makeLinePropertiesString(AGeoObject *obj) const;
+  QString makeScriptString_DisabledObject(AGeoObject *obj) const;
 
 signals:
   void ObjectSelectionChanged(QString); // should be fired with empty string if selection does not contain a single item
@@ -119,29 +118,30 @@ signals:
   void RequestShowMonitor(const AGeoObject* mon);
 };
 
+
 class AGeoWidget : public QWidget
 {
   Q_OBJECT
 
 public:
-  AGeoWidget(AGeoObject* World, AGeoTreeWidget* tw);
+  AGeoWidget(ASandwich * Sandwich, AGeoTreeWidget * tw);
   //destructor does not delete Widget - it is handled by the layout
 
 private:
-  AGeoObject* World;
-  AGeoTreeWidget* tw;
+  ASandwich        * Sandwich = nullptr;
+  AGeoTreeWidget   * tw       = nullptr;
 
-  AGeoObject* CurrentObject = nullptr;
+  AGeoObject       * CurrentObject = nullptr;
+  AGeoBaseDelegate * GeoDelegate = nullptr;
 
-  AGeoBaseDelegate* GeoDelegate = nullptr;
-
-  QVBoxLayout *lMain;
-  QVBoxLayout *ObjectLayout;
-  QFrame      *frBottom;
-  QPushButton *pbConfirm, *pbCancel;
+  QVBoxLayout * lMain;
+  QVBoxLayout * ObjectLayout;
+  QFrame      * frBottom;
+  QPushButton * pbConfirm;
+  QPushButton * pbCancel;
 
   bool fIgnoreSignals = true;
-  bool fEditingMode = false;
+  bool fEditingMode   = false;
 
   void ClearGui();
   void UpdateGui();

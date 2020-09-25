@@ -54,9 +54,9 @@ AGeoTreeWidget::AGeoTreeWidget(ASandwich *Sandwich) : Sandwich(Sandwich)
 
   QString dir = ":/images/";
   Lock.load(dir+"lock.png");
-  GroupStart.load(dir+"TopGr.png");
-  GroupMid.load(dir+"MidGr.png");
-  GroupEnd.load(dir+"BotGr.png");
+  //GroupStart.load(dir+"TopGr.png");
+  //GroupMid.load(dir+"MidGr.png");
+  //GroupEnd.load(dir+"BotGr.png");
   StackStart.load(dir+"TopSt.png");
   StackMid.load(dir+"MidSt.png");
   StackEnd.load(dir+"BotSt.png");
@@ -67,7 +67,7 @@ AGeoTreeWidget::AGeoTreeWidget(ASandwich *Sandwich) : Sandwich(Sandwich)
   BackgroundColor = QColor(240,240,240);
   fSpecialGeoViewMode = false;
 
-  EditWidget = new AGeoWidget(Sandwich->World, this);
+  EditWidget = new AGeoWidget(Sandwich, this);
   connect(this, &AGeoTreeWidget::itemSelectionChanged, this, &AGeoTreeWidget::onItemSelectionChanged);
   connect(this, &AGeoTreeWidget::ObjectSelectionChanged, EditWidget, &AGeoWidget::onObjectSelectionChanged);
   connect(this, SIGNAL(itemClicked(QTreeWidgetItem*,int)), this, SLOT(onItemClicked()));
@@ -1387,7 +1387,7 @@ void AGeoTreeWidget::rebuildDetectorAndRestoreCurrentDelegate()
     UpdateGui(CurrentObjName);
 }
 
-const QString AGeoTreeWidget::makeScriptString_basicObject(AGeoObject* obj, bool bExpandMaterials, bool usePython) const
+QString AGeoTreeWidget::makeScriptString_basicObject(AGeoObject* obj, bool bExpandMaterials, bool usePython) const
 {
     QVector<QString> posStrs; posStrs.reserve(3);
     QVector<QString> oriStrs; oriStrs.reserve(3);
@@ -1418,7 +1418,7 @@ const QString AGeoTreeWidget::makeScriptString_basicObject(AGeoObject* obj, bool
     return str;
 }
 
-const QString AGeoTreeWidget::makeScriptString_slab(AGeoObject *obj, bool bExpandMaterials, int ident) const
+QString AGeoTreeWidget::makeScriptString_slab(AGeoObject *obj, bool bExpandMaterials, int ident) const
 {
     ATypeSlabObject *slab = static_cast<ATypeSlabObject*>(obj->ObjectType);
     ASlabModel *m = static_cast<ASlabModel*>(slab->SlabModel);
@@ -1436,7 +1436,7 @@ const QString AGeoTreeWidget::makeScriptString_slab(AGeoObject *obj, bool bExpan
 
 }
 
-const QString AGeoTreeWidget::makeScriptString_setCenterSlab(AGeoObject *obj) const
+QString AGeoTreeWidget::makeScriptString_setCenterSlab(AGeoObject *obj) const
 {
     ATypeSlabObject *slab = static_cast<ATypeSlabObject*>(obj->ObjectType);
     ASlabModel *m = static_cast<ASlabModel*>(slab->SlabModel);
@@ -1450,7 +1450,7 @@ const QString AGeoTreeWidget::makeScriptString_setCenterSlab(AGeoObject *obj) co
     return "";
 }
 
-QString AGeoTreeWidget::makeScriptString_arrayObject(AGeoObject *obj)
+QString AGeoTreeWidget::makeScriptString_arrayObject(AGeoObject *obj) const
 {
     ATypeArrayObject* a = dynamic_cast<ATypeArrayObject*>(obj->ObjectType);
     if (!a)
@@ -1487,7 +1487,7 @@ QString AGeoTreeWidget::makeScriptString_arrayObject(AGeoObject *obj)
     return str;
 }
 
-const QString AGeoTreeWidget::makeScriptString_monitorBaseObject(const AGeoObject * obj) const
+QString AGeoTreeWidget::makeScriptString_monitorBaseObject(const AGeoObject * obj) const
 {
     ATypeMonitorObject * m = dynamic_cast<ATypeMonitorObject*>(obj->ObjectType);
     if (!m)
@@ -1515,7 +1515,7 @@ const QString AGeoTreeWidget::makeScriptString_monitorBaseObject(const AGeoObjec
             .arg(c.bStopTracking ? "true" : "false");
 }
 
-const QString AGeoTreeWidget::makeScriptString_monitorConfig(const AGeoObject *obj) const
+QString AGeoTreeWidget::makeScriptString_monitorConfig(const AGeoObject *obj) const
 {
     ATypeMonitorObject * m = dynamic_cast<ATypeMonitorObject*>(obj->ObjectType);
     if (!m)
@@ -1565,28 +1565,28 @@ const QString AGeoTreeWidget::makeScriptString_monitorConfig(const AGeoObject *o
     }
 }
 
-QString AGeoTreeWidget::makeScriptString_stackObjectStart(AGeoObject *obj)
+QString AGeoTreeWidget::makeScriptString_stackObjectStart(AGeoObject *obj) const
 {
     return  QString("geo.MakeStack(") +
             "'" + obj->Name + "', " +
             "'" + obj->Container->Name + "' )";
 }
 
-QString AGeoTreeWidget::makeScriptString_groupObjectStart(AGeoObject *obj)
+QString AGeoTreeWidget::makeScriptString_groupObjectStart(AGeoObject *obj) const
 {
     return  QString("geo.MakeGroup(") +
             "'" + obj->Name + "', " +
             "'" + obj->Container->Name + "' )";
 }
 
-QString AGeoTreeWidget::makeScriptString_stackObjectEnd(AGeoObject *obj)
+QString AGeoTreeWidget::makeScriptString_stackObjectEnd(AGeoObject *obj) const
 {
     return QString("geo.InitializeStack( ") +
            "'" + obj->Name + "',  " +
            "'" + obj->getOrMakeStackReferenceVolume()->Name + "' )";  //obj->HostedObjects.first()->Name
 }
 
-QString AGeoTreeWidget::makeLinePropertiesString(AGeoObject *obj)
+QString AGeoTreeWidget::makeLinePropertiesString(AGeoObject *obj) const
 {
     return "geo.SetLine( '" +
             obj->Name +
@@ -1596,15 +1596,15 @@ QString AGeoTreeWidget::makeLinePropertiesString(AGeoObject *obj)
             QString::number(obj->style) + " )";
 }
 
-const QString AGeoTreeWidget::makeScriptString_DisabledObject(AGeoObject *obj)
+QString AGeoTreeWidget::makeScriptString_DisabledObject(AGeoObject *obj) const
 {
     return QString("geo.DisableObject( '%1')").arg(obj->Name);
 }
 
 // ================== EDIT WIDGET ===================
 
-AGeoWidget::AGeoWidget(AGeoObject *World, AGeoTreeWidget *tw) :
-  World(World), tw(tw)
+AGeoWidget::AGeoWidget(ASandwich * Sandwich, AGeoTreeWidget * tw) :
+  Sandwich(Sandwich), tw(tw)
 {
   lMain = new QVBoxLayout(this);
   lMain->setContentsMargins(2,2,2,5);
@@ -1688,7 +1688,7 @@ void AGeoWidget::UpdateGui()
     pbCancel->setEnabled(true);
 
     if (CurrentObject->ObjectType->isWorld())
-        GeoDelegate = new AWorldDelegate(tw->Sandwich->Materials, this);
+        GeoDelegate = new AWorldDelegate(Sandwich->Materials, this);
     else if (CurrentObject->ObjectType->isSlab())        // SLAB or LIGHTGUIDE
         GeoDelegate = createAndAddSlabDelegate();
     else if (CurrentObject->ObjectType->isGridElement())
@@ -1720,49 +1720,49 @@ AGeoBaseDelegate * AGeoWidget::createAndAddGeoObjectDelegate()
     const QString shape = (scaled ? scaled->getBaseShapeType() : CurrentObject->Shape->getShapeType());
 
     if (CurrentObject->ObjectType->isArray())
-        Del = new AGeoArrayDelegate(tw->Sandwich->Materials, this);
+        Del = new AGeoArrayDelegate(Sandwich->Materials, this);
     else if (CurrentObject->ObjectType->isHandlingSet())
-        Del = new AGeoSetDelegate(tw->Sandwich->Materials, this);
+        Del = new AGeoSetDelegate(Sandwich->Materials, this);
     else if (shape == "TGeoBBox")
-        Del = new AGeoBoxDelegate(tw->Sandwich->Materials, this);
+        Del = new AGeoBoxDelegate(Sandwich->Materials, this);
     else if (shape == "TGeoTube")
-        Del = new AGeoTubeDelegate(tw->Sandwich->Materials, this);
+        Del = new AGeoTubeDelegate(Sandwich->Materials, this);
     else if (shape == "TGeoTubeSeg")
-        Del = new AGeoTubeSegDelegate(tw->Sandwich->Materials, this);
+        Del = new AGeoTubeSegDelegate(Sandwich->Materials, this);
     else if (shape == "TGeoCtub")
-        Del = new AGeoTubeSegCutDelegate(tw->Sandwich->Materials, this);
+        Del = new AGeoTubeSegCutDelegate(Sandwich->Materials, this);
     else if (shape == "TGeoEltu")
-        Del = new AGeoElTubeDelegate(tw->Sandwich->Materials, this);
+        Del = new AGeoElTubeDelegate(Sandwich->Materials, this);
     else if (shape == "TGeoPara")
-        Del = new AGeoParaDelegate(tw->Sandwich->Materials, this);
+        Del = new AGeoParaDelegate(Sandwich->Materials, this);
     else if (shape == "TGeoSphere")
-        Del = new AGeoSphereDelegate(tw->Sandwich->Materials, this);
+        Del = new AGeoSphereDelegate(Sandwich->Materials, this);
     else if (shape == "TGeoTrd1")
-        Del = new AGeoTrapXDelegate(tw->Sandwich->Materials, this);
+        Del = new AGeoTrapXDelegate(Sandwich->Materials, this);
     else if (shape == "TGeoTrd2")
-        Del = new AGeoTrapXYDelegate(tw->Sandwich->Materials, this);
+        Del = new AGeoTrapXYDelegate(Sandwich->Materials, this);
     else if (shape == "TGeoCone")
-        Del = new AGeoConeDelegate(tw->Sandwich->Materials, this);
+        Del = new AGeoConeDelegate(Sandwich->Materials, this);
     else if (shape == "TGeoConeSeg")
-        Del = new AGeoConeSegDelegate(tw->Sandwich->Materials, this);
+        Del = new AGeoConeSegDelegate(Sandwich->Materials, this);
     else if (shape == "TGeoParaboloid")
-        Del = new AGeoParaboloidDelegate(tw->Sandwich->Materials, this);
+        Del = new AGeoParaboloidDelegate(Sandwich->Materials, this);
     else if (shape == "TGeoTorus")
-        Del = new AGeoTorusDelegate(tw->Sandwich->Materials, this);
+        Del = new AGeoTorusDelegate(Sandwich->Materials, this);
     else if (shape == "TGeoPolygon")
-        Del = new AGeoPolygonDelegate(tw->Sandwich->Materials, this);
+        Del = new AGeoPolygonDelegate(Sandwich->Materials, this);
     else if (shape == "TGeoPcon")
-        Del = new AGeoPconDelegate(tw->Sandwich->Materials, this);
+        Del = new AGeoPconDelegate(Sandwich->Materials, this);
     else if (shape == "TGeoPgon")
-        Del = new AGeoPgonDelegate(tw->Sandwich->Materials, this);
+        Del = new AGeoPgonDelegate(Sandwich->Materials, this);
     else if (shape == "TGeoCompositeShape")
-        Del = new AGeoCompositeDelegate(tw->Sandwich->Materials, this);
+        Del = new AGeoCompositeDelegate(Sandwich->Materials, this);
     else if (shape == "TGeoArb8")
-        Del = new AGeoArb8Delegate(tw->Sandwich->Materials, this);
+        Del = new AGeoArb8Delegate(Sandwich->Materials, this);
     else
-        Del = new AGeoObjectDelegate(tw->Sandwich->Materials, this);
+        Del = new AGeoObjectDelegate(Sandwich->Materials, this);
 
-    connect(Del, &AGeoObjectDelegate::RequestChangeShape,     this, &AGeoWidget::onRequestChangeShape);
+    connect(Del, &AGeoObjectDelegate::RequestChangeShape, this, &AGeoWidget::onRequestChangeShape);
 
     return Del;
 }
@@ -1775,11 +1775,11 @@ AGeoBaseDelegate * AGeoWidget::createAndAddSlabDelegate()
     {
     default: qWarning() << "Unknown slab shape, assuming rectangular";
     case 0:
-        Del = new AGeoSlabDelegate_Box(tw->Sandwich->Materials, static_cast<int>(tw->Sandwich->SandwichState), this); break;
+        Del = new AGeoSlabDelegate_Box(Sandwich->Materials, static_cast<int>(Sandwich->SandwichState), this); break;
     case 1:
-        Del = new AGeoSlabDelegate_Tube(tw->Sandwich->Materials, static_cast<int>(tw->Sandwich->SandwichState), this); break;
+        Del = new AGeoSlabDelegate_Tube(Sandwich->Materials, static_cast<int>(Sandwich->SandwichState), this); break;
     case 2:
-        Del = new AGeoSlabDelegate_Poly(tw->Sandwich->Materials, static_cast<int>(tw->Sandwich->SandwichState), this); break;
+        Del = new AGeoSlabDelegate_Poly(Sandwich->Materials, static_cast<int>(Sandwich->SandwichState), this); break;
     }
     connect(Del, &AGeoObjectDelegate::RequestChangeSlabShape, this, &AGeoWidget::onRequestChangeSlabShape);
 
@@ -1811,7 +1811,7 @@ void AGeoWidget::onObjectSelectionChanged(QString SelectedObject)
     //qDebug() << "Object selection changed! ->" << SelectedObject;
     ClearGui();
 
-    AGeoObject* obj = World->findObjectByName(SelectedObject);
+    AGeoObject* obj = Sandwich->World->findObjectByName(SelectedObject);
     if (!obj) return;
 
     CurrentObject = obj;
@@ -1940,7 +1940,7 @@ void AGeoWidget::onConfirmPressed()
 
     const QString newName = GeoDelegate->getName();
     QString errorStr;
-    if (newName != CurrentObject->Name && World->isNameExists(newName)) errorStr = QString("%1 name already exists").arg(newName);
+    if (newName != CurrentObject->Name && Sandwich->World->isNameExists(newName)) errorStr = QString("%1 name already exists").arg(newName);
     else if (newName.isEmpty()) errorStr = "Name cannot be empty";
     else if (newName.contains(QRegExp("\\s"))) errorStr = "Name cannot contain spaces";
     if (!errorStr.isEmpty())

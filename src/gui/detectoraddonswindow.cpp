@@ -1539,7 +1539,7 @@ void DetectorAddOnsWindow::on_tabwConstants_cellChanged(int row, int column)
         //qDebug() << "Attempting to change name of a geometry constant";
         QString newName = ui->tabwConstants->item(row, 0)->text().simplified();
         QString errorStr;
-        bool ok = GC.rename(row, newName, twGeo->Sandwich->World, errorStr);
+        bool ok = GC.rename(row, newName, Detector->Sandwich->World, errorStr);
         if (!ok)
         {
             if (!errorStr.isEmpty()) message(errorStr, this);
@@ -1584,7 +1584,7 @@ void DetectorAddOnsWindow::on_tabwConstants_customContextMenuRequested(const QPo
                 message(QString("\"%1\" cannot be removed.\nThe first geometric constant using it:\n\n%2").arg(name).arg(constUsingIt), this);
                 return;
             }
-            const AGeoObject * obj = twGeo->Sandwich->World->isGeoConstInUseRecursive(QRegExp("\\b"+name+"\\b"));
+            const AGeoObject * obj = Detector->Sandwich->World->isGeoConstInUseRecursive(QRegExp("\\b"+name+"\\b"));
             if (obj)
             {
                 message(QString("\"%1\" cannot be removed.\nThe first object using it:\n\n%2").arg(name).arg(obj->Name), this);

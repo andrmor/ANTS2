@@ -515,7 +515,7 @@ const AGeoObject *AGeoObject::getContainerWithLogical() const
 bool AGeoObject::isCompositeMemeber() const
 {
     if (Container)
-      return Container->ObjectType->isCompositeContainer();
+        return Container->ObjectType->isCompositeContainer();
     return false;
 }
 
@@ -574,6 +574,23 @@ void AGeoObject::removeCompositeStructure()
             delete obj;
             HostedObjects.removeAt(i);
             return;
+        }
+    }
+}
+
+void AGeoObject::updateNameOfLogicalMember(const QString & oldName, const QString & newName)
+{
+    if (Container && Container->ObjectType->isCompositeContainer())
+    {
+        AGeoObject * Composite = Container->Container;
+        if (Composite)
+        {
+            AGeoComposite * cs = dynamic_cast<AGeoComposite*>(Composite->Shape);
+            if (cs)
+            {
+                cs->members.replaceInStrings(oldName, newName);
+                cs->GenerationString.replace(oldName, newName);
+            }
         }
     }
 }
@@ -1262,6 +1279,9 @@ void AGeoObject::enforceUniqueNameForCloneRecursive(AGeoObject * World, AGeoObje
             Stack->ReferenceVolume = newName;
     }
 
+    if (isCompositeMemeber())
+        updateNameOfLogicalMember(Name, newName);
+
     Name = newName;
     tmpContainer.HostedObjects << this;
 
@@ -1392,17 +1412,17 @@ QString AGeoObject::GenerateRandomMonitorName()
 QString AGeoObject::generateCloneObjName(const QString & initialName)
 {
     QString newName;
-    const QStringList sl = initialName.split("_c:");
+    const QStringList sl = initialName.split("_c");
     if (sl.size() > 1)
     {
         for (int i = 0; i < sl.size()-1; i++)  // in case the name was clone of clone with broken indexes (e.g. aaa_c:Xbbb_c:0)
-            newName += sl.at(i) + "_c:";
+            newName += sl.at(i) + "_c";
         bool ok;
         int oldIndex = sl.last().toInt(&ok);
         if (ok) newName += QString::number(oldIndex + 1);
         else    newName.clear();
     }
     if (newName.isEmpty())
-        return initialName + "_c:0";
+        return initialName + "_c0";
     return newName;
 }

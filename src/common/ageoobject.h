@@ -80,6 +80,7 @@ public:
   bool isInUseByComposite(); //safe to use on any AGeoObject
   void clearCompositeMembers();
   void removeCompositeStructure();
+  void updateNameOfLogicalMember(const QString & oldName, const QString & newName);
 
   //for grid
   AGeoObject* getGridElement();

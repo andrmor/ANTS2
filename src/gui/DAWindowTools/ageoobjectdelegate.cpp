@@ -357,25 +357,8 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
         }
     }
     else if (obj->isCompositeMemeber())
-    {
-        AGeoObject * cont = obj->Container;
-        if (cont)
-        {
-            if (cont->ObjectType->isCompositeContainer())
-            {
-                AGeoObject * Composite = cont->Container;
-                if (Composite)
-                {   //updating Shape
-                    AGeoComposite * cs = dynamic_cast<AGeoComposite*>(Composite->Shape);
-                    if (cs)
-                    {
-                        cs->members.replaceInStrings(oldName, newName);
-                        cs->GenerationString.replace(oldName, newName);
-                    }
-                }
-            }
-        }
-    }
+        obj->updateNameOfLogicalMember(oldName, newName);
+
     return true;
 }
 

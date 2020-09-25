@@ -74,7 +74,8 @@ void MainWindow::on_actionGeometry_triggered()
   GeometryWindow->raise();
   GeometryWindow->activateWindow();
 
-  GeometryWindow->on_pbShowGeometry_clicked();
+  GeometryWindow->ShowGeometry(true, false);
+  GeometryWindow->ShowTracksAndMarkers();
 }
 
 void MainWindow::on_actionGraph_triggered()

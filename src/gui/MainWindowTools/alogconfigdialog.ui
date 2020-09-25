@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>492</width>
+    <width>560</width>
     <height>244</height>
    </rect>
   </property>
@@ -97,6 +97,13 @@
           </size>
          </property>
         </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pbLoadLog">
+         <property name="text">
+          <string>Load log</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </item>

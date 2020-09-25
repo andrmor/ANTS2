@@ -7,14 +7,10 @@
 
 #include <QMainWindow>
 #include <QVector>
-#include <QThread>
-#include <QTimer>
 #include <QJsonObject>
 
-// forward declarations
 class AConfiguration;
 class AGlobalSettings;
-class GeoMarkerClass;
 class AMaterialParticleCollection;
 class EventsDataClass;
 class GeometryWindowClass;
@@ -34,14 +30,12 @@ class WindowNavigatorClass;
 class GlobalSettingsWindowClass;
 class GainEvaluatorWindowClass;
 class TApplication;
-class Viewer2DarrayObject;
 class DetectorClass;
 class TmpObjHubClass;
 class ASlabListWidget;
 class InterfaceToPMscript;
 class QMessageBox;
 class QListWidgetItem;
-class QFile;
 class ASimulationManager;
 class AScriptWindow;
 class ALrfWindow;
@@ -50,11 +44,11 @@ struct AParticleSourceRecord;
 class ARemoteWindow;
 class AWebSocketServerDialog;
 class AParticleGun;
+class QTimer;
 
 #ifdef ANTS_FANN
 class NeuralNetworksWindow;
 #endif
-
 
 namespace Ui {
 class MainWindow;
@@ -112,12 +106,9 @@ public:
 #endif
 
     // custom gui elements
-    ASlabListWidget* lw = 0;
+    ASlabListWidget * lw = nullptr;
 
-    //local data, just for GUI
-    QVector<GeoMarkerClass*> GeoMarkers;
-
-    InterfaceToPMscript* PMscriptInterface = 0;       // if created -> managed by the script manager
+    InterfaceToPMscript * PMscriptInterface = nullptr;       // if created -> managed by the script manager
 
     //critical - updates
     void NumberOfPMsHaveChanged();
@@ -137,13 +128,9 @@ public:
 
     void ListActiveParticles();
 
-    void ShowGraphWindow();
-    void UpdateMaterialListEdit();
-
     void UpdateTestWavelengthProperties(); //if material properties were updated, need to update indication in the Test tab
 
     void writeDetectorToJson(QJsonObject &json); //GDML is NOT here
-    bool readDetectorFromJson(QJsonObject &json);
     void writeSimSettingsToJson(QJsonObject &json);
     bool readSimSettingsFromJson(QJsonObject &json);
 
@@ -161,7 +148,6 @@ public:
 
     //public flags
     bool DoNotUpdateGeometry;  //if GUI is in bulk-update, we do not detector geometry be updated on each line
-    bool GeometryDrawDisabled = false; //no drawing of the geometry or tracks
     bool fStartedFromGUI = false;          //flag indicating that an action was run from GUI, e.g. simulation
 
     bool isWavelengthResolved() const;
@@ -172,14 +158,6 @@ public:
     void recallGeometryOfLocalScriptWindow();
     void extractGeometryOfLocalScriptWindow();
 
-    int PMArrayType(int ul);
-    void SetPMarrayType(int ul, int itype);
-
-    void LoadDummyPMs(QString DFile);
-
-    void ShowGeoMarkers(); //Show dots on ALREADY PREPARED geometry window!
-
-    //void CheckPresenseOfSecScintillator();
     void DeleteLoadedEvents(bool KeepFileList = false);       
     void SavePreprocessingAddMulti(QString fileName);
     void LoadPreprocessingAddMulti(QString filename);
@@ -195,6 +173,7 @@ public slots:
     void updateLoaded(int events, int progress);
     void on_pbSingleSourceShow_clicked();
     void ShowGeometrySlot();
+    void UpdateMaterialListEdit();
     void onGridSimulationFinished();
 
 private slots:
@@ -319,9 +298,9 @@ protected:
     bool event(QEvent *event);
 
 private:
-    Ui::MainWindow *ui;
-    QTimer *RootUpdateTimer = 0; //root update timer
-    QMessageBox *msBox = 0; //box to be used to confirm discard or save sim data on data clear; 0 if not activated
+    Ui::MainWindow * ui = nullptr;
+    QTimer * RootUpdateTimer = nullptr; //root update timer
+    QMessageBox * msBox = nullptr;      //box to be used to confirm discard or save sim data on data clear; 0 if not activated
 
     //flags
     bool TriggerForbidden = false;
@@ -344,7 +323,6 @@ public:
     void updatePMArrayDataIndication();
     void writeLoadExpDataConfigToJson(QJsonObject &json);
     bool readLoadExpDataConfigFromJson(QJsonObject &json);
-    void clearGeoMarkers(int All_Rec_True = 0);
     void setFontSizeAllWindows(int size);
     void writeExtraGuiToJson(QJsonObject &json);
     void readExtraGuiFromJson(QJsonObject &json);
@@ -356,9 +334,7 @@ public:
 
 private:
     bool startupDetector();  //on ANTS start load/create detector
-    void CheckSetMaterial(const QString name, QComboBox* cob, QVector<QString>* vec);
     void ToggleUpperLowerPMs();
-    void PopulatePMarray(int ul, double z, int istart);
     void AddDefaultPMtype();
     void CorrectWaveTo();
     void RefreshAngularButtons();
@@ -371,12 +347,9 @@ private:
     int LoadSPePHSfile(QString fileName, QVector<double>* SPePHS_x, QVector<double>* SPePHS);                   ///see MainWindowDiskIO.cpp    
     QStringList LoadedEventFiles, LoadedTreeFiles;
 
-//    QString CheckerScript; //obsolete?
     QString PreprocessingFileName;
 
-    int PreviousNumberPMs = 0;
     bool fConfigGuiLocked = false;
-    int timesTriedToExit = 0;
 
     bool populateTable; //for SimLoadConfig - compatability check
 
@@ -622,6 +595,12 @@ private slots:
     void on_pbCND_LoadSpline_clicked();
 
     void on_pbCND_help_clicked();
+
+    void on_cbFixedTopSize_clicked(bool checked);
+
+    void on_ledTopSizeXY_editingFinished();
+
+    void on_ledTopSizeZ_editingFinished();
 
 public slots:
     void on_pbRebuildDetector_clicked();

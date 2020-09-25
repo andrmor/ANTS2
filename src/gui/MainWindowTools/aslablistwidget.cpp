@@ -4,6 +4,7 @@
 #include "asandwich.h"
 #include "arootlineconfigurator.h"
 #include "ageoobject.h"
+#include "atypegeoobject.h"
 
 #include <QDropEvent>
 #include <QDebug>
@@ -17,10 +18,6 @@
 ASlabListWidget::ASlabListWidget(ASandwich* Sandwich, QWidget *parent)
   : QListWidget(parent), Sandwich(Sandwich)
 {
-  tmpXY = 0;
-  DefaultXYdelegate = 0;
-  fIgnoreModelUpdateRequests = false;
-
   setViewMode(QListView::ListMode);
   //setMovement(QListView::Snap);
   setAcceptDrops(true);
@@ -36,7 +33,7 @@ ASlabListWidget::ASlabListWidget(ASandwich* Sandwich, QWidget *parent)
   DefaultXYdelegate = new ASlabXYDelegate();
   DefaultXYdelegate->SetShowState(ASlabXYDelegate::ShowAll);
   DefaultXYdelegate->UpdateGui(*Sandwich->DefaultXY);
-  connect(DefaultXYdelegate, SIGNAL(RequestModelUpdate()), this, SLOT(onDefaultXYpropertiesUpdateRequested()));
+  connect(DefaultXYdelegate, &ASlabXYDelegate::RequestModelUpdate, this, &ASlabListWidget::onDefaultXYpropertiesUpdateRequested);
 
   setToolTip("Use context menu (Right mouse button) to add/remove/modify slabs!");
 
@@ -45,7 +42,7 @@ ASlabListWidget::ASlabListWidget(ASandwich* Sandwich, QWidget *parent)
 
 ASlabListWidget::~ASlabListWidget()
 {
-  if (tmpXY) delete tmpXY;
+    delete tmpXY;
 }
 
 void ASlabListWidget::UpdateGui()
@@ -207,7 +204,7 @@ ASlabDelegate *ASlabListWidget::AddNewSlabDelegate()
   QListWidgetItem* item = ASlabDelegate::CreateNewWidgetItem();
   addItem(item);
   setItemWidget(item, ld);
-  connect(ld, SIGNAL(RequestModelUpdate(QWidget*)), this, SLOT(ItemRequestsModelUpdate(QWidget*)));
+  connect(ld, &ASlabDelegate::RequestModelUpdate, this, &ASlabListWidget::ItemRequestsModelUpdate);
   return ld;
 }
 

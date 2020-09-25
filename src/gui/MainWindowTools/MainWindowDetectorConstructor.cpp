@@ -16,6 +16,7 @@
 #include "slabdelegate.h"
 #include "aslablistwidget.h"
 #include "ageoobject.h"
+#include "atypegeoobject.h"
 #include "ageotreewidget.h"
 #include "localscriptinterfaces.h"
 #include "aconfiguration.h"
@@ -33,23 +34,23 @@
 
 void MainWindow::ReconstructDetector(bool fKeepData)
 {
-  //qDebug() << ">>>> ReconstructDetector (GUI method) triggered <<<<";
-  int numPMs = Detector->pmCount();
+    //qDebug() << ">>>> ReconstructDetector (GUI method) triggered <<<<";
 
-  writeDetectorToJson(Config->JSON);
-  Detector->BuildDetector();
+    Config->createUndo();
 
-  //gui update will be triggered automatically
+    int oldNumPMs = Detector->pmCount();
 
-  if (!fKeepData) MainWindow::ClearData();
-  if (numPMs != Detector->pmCount())
+    writeDetectorToJson(Config->JSON);
+    Detector->BuildDetector(); //gui update will be triggered automatically
+
+    if (!fKeepData) ClearData();
+
+    if (oldNumPMs != Detector->pmCount())  // !*! obsolete?
     {
-      //qDebug() << "Number of PMs changed!";
-      MainWindow::NumberOfPMsHaveChanged();
+        //qDebug() << "Number of PMs changed!";
+        NumberOfPMsHaveChanged();
     }
 }
-
-// GUI update in mainwindowjson.cpp
 
 bool MainWindow::startupDetector()
 {
@@ -71,8 +72,6 @@ bool MainWindow::startupDetector()
       //Generate MaterialCollection
       MpCollection->AddNewMaterial();
       AddDefaultPMtype();
-      //MainWindow::on_pbRefreshMaterials_clicked();
-      //MainWindow::on_pbRefreshOverrides_clicked();
       //create detector geometry and visualize
       qDebug()<<"-> Pre-building make-shift detector";
       Detector->PMarrays[0].fActive = ui->cbUPM->isChecked();
@@ -86,7 +85,7 @@ bool MainWindow::startupDetector()
       MIwindow->SetMaterial(0);
       MIwindow->SetParticleSelection(0);
 
-      MainWindow::on_pbShowPMsArrayRegularData_clicked();
+      on_pbShowPMsArrayRegularData_clicked();
       return false;
     }
 }
@@ -175,8 +174,8 @@ void MainWindow::UpdateSandwichGui()
 
 void MainWindow::on_cobTOP_activated(int index)
 {
-  Detector->Sandwich->World->Material = index;
-  ReconstructDetector(true);
+    Detector->Sandwich->World->Material = index;
+    ReconstructDetector(true);
 }
 
 void MainWindow::OnWarningMessage(QString text)

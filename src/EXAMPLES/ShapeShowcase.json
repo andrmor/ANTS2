@@ -1,0 +1,1902 @@
+{
+    "DetectorConfig": {
+        "DummyPMs": [
+        ],
+        "Electronics": {
+            "ADC": {
+                "ADCbits": [
+                ],
+                "ADCmax": [
+                ],
+                "Active": false
+            },
+            "DarkCounts": {
+                "Active": false,
+                "Data": [
+                ]
+            },
+            "MCcrosstalk": {
+                "Active": false,
+                "Model": [
+                ],
+                "ProbDistr": [
+                ],
+                "TrigProb": [
+                ]
+            },
+            "Noise": {
+                "Active": false,
+                "NoiseSigma": [
+                ],
+                "NoiseSigmaStat": [
+                ]
+            },
+            "PHS": {
+                "Active": false,
+                "Data": [
+                ]
+            }
+        },
+        "IndividualPMoverrides": {
+            "Angular": {
+                "AngularResponse": [
+                ],
+                "RefrIndex": [
+                ]
+            },
+            "Area": {
+                "AreaResponse": [
+                ],
+                "Step": [
+                ]
+            },
+            "PDEeffective": [
+            ],
+            "PDEwave": [
+            ],
+            "RelQEandElStr": [
+            ]
+        },
+        "LoadExpDataConfig": {
+            "AddMulti": [
+            ],
+            "IgnoreThresholds": {
+                "Activated": false,
+                "Max": 10000000000,
+                "Min": 1
+            },
+            "LoadFirst": -1,
+            "LoadedEnergy": {
+                "Activated": false,
+                "Add": 0,
+                "Channel": 0,
+                "Multi": 1
+            },
+            "LoadedPosition": {
+                "Activated": false,
+                "Channel": 0
+            },
+            "LoadedZPosition": {
+                "Activated": false,
+                "Channel": 0
+            },
+            "ManifestFile": "",
+            "Preprocessing": true
+        },
+        "MaterialCollection": {
+            "LogLog": false,
+            "Materials": [
+                {
+                    "*MaterialName": "Air",
+                    "*Tags": [
+                    ],
+                    "BulkAbsorption": 0,
+                    "BulkAbsorptionWave": [
+                    ],
+                    "ChemicalComposition": {
+                        "ElementComposition": [
+                        ],
+                        "ElementCompositionString": "",
+                        "MeanAtomMass": 4.450334455169617e-308
+                    },
+                    "Comments": "",
+                    "Density": 0.0012041,
+                    "ElDiffusionL": 0,
+                    "ElDiffusionT": 0,
+                    "ElDriftVelo": 1,
+                    "IntrEnergyResDefault": 0,
+                    "MatParticles": [
+                        {
+                            "*Particle": {
+                                "A": -1,
+                                "Name": "gamma",
+                                "Type": 0,
+                                "Z": -1
+                            },
+                            "DataSource": "",
+                            "DataString": "",
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "Terminators": [
+                            ],
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        }
+                    ],
+                    "PhotonYieldDefault": 0,
+                    "PrimScintDecay": [
+                        [
+                            5,
+                            1
+                        ]
+                    ],
+                    "PrimScintRaise": [
+                        [
+                            0,
+                            1
+                        ]
+                    ],
+                    "PrimScintSpectrum": [
+                    ],
+                    "RayleighMFP": 0,
+                    "RayleighWave": 500,
+                    "ReemissionProb": 0,
+                    "ReemissionProbabilityWave": [
+                    ],
+                    "RefractiveIndex": 1,
+                    "RefractiveIndexWave": [
+                    ],
+                    "SecScintSpectrum": [
+                    ],
+                    "SecScint_PhYield": 2,
+                    "SecScint_Tau": 5,
+                    "TGeoP1": 0,
+                    "TGeoP2": 0,
+                    "TGeoP3": 0,
+                    "Temperature": 298,
+                    "W": 100
+                },
+                {
+                    "*MaterialName": "Glass",
+                    "*Tags": [
+                    ],
+                    "BulkAbsorption": 0,
+                    "BulkAbsorptionWave": [
+                    ],
+                    "ChemicalComposition": {
+                        "ElementComposition": [
+                        ],
+                        "ElementCompositionString": "",
+                        "MeanAtomMass": 0
+                    },
+                    "Comments": "",
+                    "Density": 2.5,
+                    "ElDiffusionL": 0,
+                    "ElDiffusionT": 0,
+                    "ElDriftVelo": 0,
+                    "IntrEnergyResDefault": 0,
+                    "MatParticles": [
+                        {
+                            "*Particle": {
+                                "A": -1,
+                                "Name": "gamma",
+                                "Type": 0,
+                                "Z": -1
+                            },
+                            "DataSource": "",
+                            "DataString": "",
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "Terminators": [
+                            ],
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        }
+                    ],
+                    "PhotonYieldDefault": 0,
+                    "PrimScintDecay": [
+                        [
+                            5,
+                            1
+                        ]
+                    ],
+                    "PrimScintRaise": [
+                        [
+                            0,
+                            1
+                        ]
+                    ],
+                    "PrimScintSpectrum": [
+                    ],
+                    "RayleighMFP": 0,
+                    "RayleighWave": 500,
+                    "ReemissionProb": 0,
+                    "ReemissionProbabilityWave": [
+                    ],
+                    "RefractiveIndex": 1.45,
+                    "RefractiveIndexWave": [
+                    ],
+                    "SecScintSpectrum": [
+                    ],
+                    "SecScint_PhYield": 0,
+                    "SecScint_Tau": 0,
+                    "TGeoP1": 0,
+                    "TGeoP2": 0,
+                    "TGeoP3": 0,
+                    "Temperature": 298,
+                    "W": 0
+                }
+            ]
+        },
+        "PMarrays": [
+            {
+                "PMarrayData": {
+                    "Activated": false,
+                    "CenterToCenter": 79,
+                    "NumRings": 2,
+                    "PMtype": 0,
+                    "Packing": 1,
+                    "PositioningScript": "var Pi = 3.1415926;\nvar d = 30.;\n\nvar basex = [-3., -4., -5., -6.,\n             -2., -3., -4.,\n             -1., -2.,\n             0.];\nvar basey = [3.,  2.,  1.,  0., \t\n             2.,  1.,  0.,\n             1.,  0.,\n             0.];\n\nPM(0., 0., 0, 0);        \nfor (var i=0; i<6; i++) {\n  // rotation matrix\n  var R11 = Math.cos(i*Pi/3.);\n  var R12 = -Math.sin(i*Pi/3.);\n  var R21 = Math.sin(i*Pi/3.);\n  var R22 = Math.cos(i*Pi/3.);\n\n  for (var j=0; j<10; j++) { \n    var x = basex[j] - 1.;\n    var y = Math.sqrt(3.) * (basey[j] + 1.);\n\n    var xx = R11*x + R12*y;\n    var yy = R21*x + R22*y;\n    PM(xx*d, yy*d, 0, 0);\n  }\n}",
+                    "Regularity": 0,
+                    "UseRings": true
+                }
+            },
+            {
+                "PMarrayData": {
+                    "Activated": false,
+                    "CenterToCenter": 80,
+                    "NumX": 2,
+                    "NumY": 2,
+                    "PMtype": 0,
+                    "Packing": 0,
+                    "PositioningScript": "var Pi = 3.1415926;\nvar d = 30.;\n\nvar basex = [-3., -4., -5., -6.,\n             -2., -3., -4.,\n             -1., -2.,\n             0.];\nvar basey = [3.,  2.,  1.,  0., \t\n             2.,  1.,  0.,\n             1.,  0.,\n             0.];\n   \nfor (var i=0; i<6; i++) {\n  // rotation matrix\n  var R11 = Math.cos(i*Pi/3.);\n  var R12 = -Math.sin(i*Pi/3.);\n  var R21 = Math.sin(i*Pi/3.);\n  var R22 = Math.cos(i*Pi/3.);\n\n  for (var j=0; j<10; j++) { \n    var x = basex[j] - 1.;\n    var y = Math.sqrt(3.) * (basey[j] + 1.);\n\n    var xx = R11*x + R12*y;\n    var yy = R21*x + R22*y;\n    PM(xx*d, yy*d, 0, 0);\n  }\n}\nPM(0., 0., 0, 0);     ",
+                    "Regularity": 0,
+                    "UseRings": false
+                }
+            }
+        ],
+        "PMtypes": [
+            {
+                "AngularResponse": {
+                    "RefrIndexMeasure": 1,
+                    "ResponseVsAngle": [
+                    ]
+                },
+                "AreaResponse": {
+                    "AreaStepX": 1,
+                    "AreaStepY": 1,
+                    "ResponseVsXY": [
+                    ]
+                },
+                "General": {
+                    "AngleSphere": 35,
+                    "MaterialIndex": 1,
+                    "Name": "Hex",
+                    "Shape": 1,
+                    "SiPM": false,
+                    "SizeX": 70,
+                    "SizeY": 25,
+                    "SizeZ": 0.01
+                },
+                "PDEproperties": {
+                    "PDE": 0.29,
+                    "PDEwave": [
+                    ]
+                },
+                "SiPMproperties": {
+                    "DarkCountRate": 10000000,
+                    "PixelsX": 50,
+                    "PixelsY": 50,
+                    "RecoveryTime": 50
+                }
+            }
+        ],
+        "ParticleCollection": [
+            {
+                "A": -1,
+                "Name": "gamma",
+                "Type": 0,
+                "Z": -1
+            }
+        ],
+        "Sandwich": {
+            "DefaultXY": {
+                "angle": 0,
+                "shape": 2,
+                "sides": 6,
+                "size1": 400,
+                "size2": 60
+            },
+            "GeoConsts": [
+                [
+                    "Diameter",
+                    50,
+                    ""
+                ],
+                [
+                    "SizeX",
+                    40,
+                    ""
+                ],
+                [
+                    "SizeY",
+                    60,
+                    ""
+                ],
+                [
+                    "Offset",
+                    50,
+                    ""
+                ],
+                [
+                    "Angle",
+                    45,
+                    ""
+                ]
+            ],
+            "Slabs": [
+                {
+                    "XY": {
+                        "angle": 0,
+                        "shape": 1,
+                        "sides": 6,
+                        "size1": 50,
+                        "size2": 100,
+                        "strSize1": "Diameter"
+                    },
+                    "color": 3,
+                    "fActive": true,
+                    "fCenter": false,
+                    "height": 10,
+                    "material": 0,
+                    "name": "Round_slab",
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "XY": {
+                        "angle": 0,
+                        "shape": 2,
+                        "sides": 6,
+                        "size1": 50,
+                        "size2": 100,
+                        "strSize1": "Diameter"
+                    },
+                    "color": 859,
+                    "fActive": true,
+                    "fCenter": false,
+                    "height": 15,
+                    "material": 0,
+                    "name": "Polygon_slab",
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "XY": {
+                        "angle": 0,
+                        "shape": 0,
+                        "sides": 6,
+                        "size1": 50,
+                        "size2": 50,
+                        "strSize1": "Diameter"
+                    },
+                    "color": 2,
+                    "fActive": true,
+                    "fCenter": true,
+                    "height": 10,
+                    "material": 0,
+                    "name": "Rectangular_slab",
+                    "style": 1,
+                    "width": 1
+                }
+            ],
+            "State": "Individual",
+            "WorldTree": [
+                {
+                    "Container": "",
+                    "Locked": false,
+                    "Material": 0,
+                    "Name": "World",
+                    "ObjectType": {
+                        "FixedSize": false,
+                        "Type": "World"
+                    },
+                    "Shape": "TGeoBBox",
+                    "ShapeSpecific": {
+                        "dx": 153.34920673956736,
+                        "dy": 153.34920673956736,
+                        "dz": 131.25
+                    },
+                    "color": -1,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Material": 0,
+                    "Name": "Arb8",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoArb8",
+                    "ShapeSpecific": {
+                        "StrVertices": [
+                            [
+                                "",
+                                ""
+                            ],
+                            [
+                                "",
+                                ""
+                            ],
+                            [
+                                "",
+                                ""
+                            ],
+                            [
+                                "",
+                                ""
+                            ],
+                            [
+                                "-SizeX*0.5",
+                                ""
+                            ],
+                            [
+                                "",
+                                "SizeX*0.5"
+                            ],
+                            [
+                                "SizeX*0.5",
+                                ""
+                            ],
+                            [
+                                "",
+                                "-SizeX*0.5"
+                            ]
+                        ],
+                        "Vertices": [
+                            [
+                                -20,
+                                20
+                            ],
+                            [
+                                20,
+                                20
+                            ],
+                            [
+                                20,
+                                -20
+                            ],
+                            [
+                                -20,
+                                -20
+                            ],
+                            [
+                                -20,
+                                1
+                            ],
+                            [
+                                1,
+                                20
+                            ],
+                            [
+                                20,
+                                -1
+                            ],
+                            [
+                                1,
+                                -20
+                            ]
+                        ],
+                        "dz": 10
+                    },
+                    "Theta": 0,
+                    "X": -50,
+                    "Y": -50,
+                    "Z": 0,
+                    "color": 883,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "strX": "-Offset",
+                    "strY": "-Offset",
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Material": 0,
+                    "Name": "Tube_Segment_Cut",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoCtub",
+                    "ShapeSpecific": {
+                        "dz": 15,
+                        "nxhi": 0.2,
+                        "nxlow": 0.2,
+                        "nyhi": 0.2,
+                        "nylow": 0.64,
+                        "nzhi": 0.87,
+                        "nzlow": -0.77,
+                        "phi1": 0,
+                        "phi2": 180,
+                        "rmax": 12.5,
+                        "rmin": 7.5,
+                        "str2rmax": "Diameter*0.5",
+                        "str2rmin": "Diameter*0.3"
+                    },
+                    "Theta": 0,
+                    "X": 0,
+                    "Y": 0,
+                    "Z": -50,
+                    "color": 904,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "strZ": "-Offset",
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Material": 0,
+                    "Name": "Cone_Segment",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoConeSeg",
+                    "ShapeSpecific": {
+                        "dz": 10,
+                        "phi1": 0,
+                        "phi2": 270,
+                        "rmaxL": 5,
+                        "rmaxU": 17.5,
+                        "rminL": 0,
+                        "rminU": 7.5,
+                        "str2rmaxL": "Diameter*0.2",
+                        "str2rmaxU": "Diameter*0.7",
+                        "str2rminU": "Diameter*0.3",
+                        "strPhi2": "Angle*6"
+                    },
+                    "Theta": 0,
+                    "X": 0,
+                    "Y": 0,
+                    "Z": 50,
+                    "color": 8,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "strZ": "Offset",
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Material": 0,
+                    "Name": "Polygon_Simplified",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": -90,
+                    "Psi": 0,
+                    "Shape": "TGeoPolygon",
+                    "ShapeSpecific": {
+                        "dphi": 225,
+                        "dz": 10,
+                        "nedges": 5,
+                        "rmaxL": 15,
+                        "rmaxU": 7.5,
+                        "rminL": 2.5,
+                        "rminU": 5,
+                        "str2rmaxL": "Diameter*0.6",
+                        "str2rmaxU": "Diameter*0.3",
+                        "str2rminL": "Diameter*0.1",
+                        "str2rminU": "Diameter*0.2",
+                        "strdPhi": "Angle*5"
+                    },
+                    "Theta": 0,
+                    "X": 0,
+                    "Y": -50,
+                    "Z": 50,
+                    "color": 797,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "strPhi": "-Angle*2",
+                    "strY": "-Offset",
+                    "strZ": "Offset",
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Material": 0,
+                    "Name": "Trapezoid",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoTrd2",
+                    "ShapeSpecific": {
+                        "dx1": 10,
+                        "dx2": 21,
+                        "dy1": 21,
+                        "dy2": 10,
+                        "dz": 10,
+                        "str2dx1": "SizeX*0.5",
+                        "str2dx2": "SizeY*0.7",
+                        "str2dy1": "SizeY*0.7",
+                        "str2dy2": "SizeX*0.5"
+                    },
+                    "Theta": 0,
+                    "X": 50,
+                    "Y": 0,
+                    "Z": 50,
+                    "color": 1,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "strX": "Offset",
+                    "strZ": "Offset",
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Material": 0,
+                    "Name": "Cone",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoCone",
+                    "ShapeSpecific": {
+                        "dz": 10,
+                        "rmaxL": 20,
+                        "rmaxU": 12.5,
+                        "rminL": 0,
+                        "rminU": 7.5,
+                        "str2dz": "SizeX*0.5",
+                        "str2rmaxL": "Diameter*0.8",
+                        "str2rmaxU": "Diameter*0.5",
+                        "str2rminU": "Diameter*0.3"
+                    },
+                    "Theta": 0,
+                    "X": 0,
+                    "Y": -50,
+                    "Z": -50,
+                    "color": 900,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "strY": "-Offset",
+                    "strZ": "-Offset",
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Material": 0,
+                    "Name": "Torus",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoTorus",
+                    "ShapeSpecific": {
+                        "Dphi": 315,
+                        "Phi1": -90,
+                        "R": 12.5,
+                        "Rmax": 5,
+                        "Rmin": 0,
+                        "str2R": "Diameter*.5",
+                        "str2Rmax": "Diameter*0.2",
+                        "strDphi": "Angle*7"
+                    },
+                    "Theta": 0,
+                    "X": 0,
+                    "Y": 50,
+                    "Z": -50,
+                    "color": 804,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "strY": "Offset",
+                    "strZ": "-Offset",
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Material": 0,
+                    "Name": "Polygon",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoPgon",
+                    "ShapeSpecific": {
+                        "Sections": [
+                            {
+                                "rmax": 9,
+                                "rmin": 6,
+                                "str2rmax": "SizeY*0.3",
+                                "z": -5
+                            },
+                            {
+                                "rmax": 2.5,
+                                "rmin": 0,
+                                "str2rmax": "Diameter*0.1",
+                                "z": 5
+                            },
+                            {
+                                "rmax": 5,
+                                "rmin": 0,
+                                "str2rmax": "Diameter*0.2",
+                                "z": 15
+                            },
+                            {
+                                "rmax": 0.5,
+                                "rmin": 0,
+                                "z": 25
+                            }
+                        ],
+                        "dphi": 360,
+                        "nedges": 3,
+                        "phi": 0
+                    },
+                    "Theta": 0,
+                    "X": -50,
+                    "Y": 0,
+                    "Z": 50,
+                    "color": 6,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "strX": "-Offset",
+                    "strZ": "Offset",
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Material": 0,
+                    "Name": "Polycone",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoPcon",
+                    "ShapeSpecific": {
+                        "Sections": [
+                            {
+                                "rmax": 12.5,
+                                "rmin": 10,
+                                "str2rmax": "Diameter*0.5",
+                                "strZ": "-Offset*0.5",
+                                "z": -25
+                            },
+                            {
+                                "rmax": 7.5,
+                                "rmin": 5,
+                                "str2rmax": "Diameter*0.3",
+                                "strZ": "-Offset+SizeX",
+                                "z": -10
+                            },
+                            {
+                                "rmax": 25,
+                                "rmin": 20,
+                                "str2rmax": "Diameter",
+                                "strZ": "-Offset+SizeY",
+                                "z": 10
+                            }
+                        ],
+                        "dphi": 360,
+                        "phi": 0
+                    },
+                    "Theta": 0,
+                    "X": 50,
+                    "Y": 0,
+                    "Z": -50,
+                    "color": 867,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "strX": "Offset",
+                    "strZ": "-Offset",
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Material": 0,
+                    "Name": "Trapezoid_Simplified",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 45,
+                    "Psi": 90,
+                    "Shape": "TGeoTrd1",
+                    "ShapeSpecific": {
+                        "dx1": 10,
+                        "dx2": 15,
+                        "dy": 10,
+                        "dz": 10,
+                        "str2dx1": "SizeX*0.5",
+                        "str2dx2": "SizeY*0.5"
+                    },
+                    "Theta": 0,
+                    "X": 0,
+                    "Y": 50,
+                    "Z": 50,
+                    "color": 1,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "strPhi": "Angle",
+                    "strPsi": "Angle*2",
+                    "strY": "Offset",
+                    "strZ": "Offset",
+                    "style": 9,
+                    "width": 1
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Name": "Array",
+                    "ObjectType": {
+                        "Type": "Array",
+                        "numX": 2,
+                        "numY": 2,
+                        "numZ": 2,
+                        "stepX": 20,
+                        "stepY": 25,
+                        "stepZ": 25,
+                        "strStepX": "SizeX*0.5"
+                    },
+                    "Phi": 0,
+                    "Psi": 22.5,
+                    "Theta": 0,
+                    "X": -50,
+                    "Y": 0,
+                    "Z": -50,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "strPsi": "Angle*0.5",
+                    "strX": "-Offset",
+                    "strZ": "-Offset"
+                },
+                {
+                    "Container": "Array",
+                    "Locked": false,
+                    "Material": 0,
+                    "Name": "Bb",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoBBox",
+                    "ShapeSpecific": {
+                        "dx": 5,
+                        "dy": 5,
+                        "dz": 5
+                    },
+                    "Theta": 0,
+                    "X": 0,
+                    "Y": 0,
+                    "Z": 0,
+                    "color": 797,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Material": 0,
+                    "Name": "Para",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoPara",
+                    "ShapeSpecific": {
+                        "alpha": 10,
+                        "dx": 10,
+                        "dy": 6,
+                        "dz": 10,
+                        "phi": 45,
+                        "str2dx": "SizeX*0.5",
+                        "str2dy": "SizeY*0.2",
+                        "theta": 25
+                    },
+                    "Theta": 0,
+                    "X": 50,
+                    "Y": 50,
+                    "Z": -50,
+                    "color": 797,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "strX": "Offset",
+                    "strY": "Offset",
+                    "strZ": "-Offset",
+                    "style": 2,
+                    "width": 2
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Material": 0,
+                    "Name": "ElTube",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoEltu",
+                    "ShapeSpecific": {
+                        "a": 10,
+                        "b": 15,
+                        "dz": 5,
+                        "str2a": "SizeX*0.5",
+                        "str2b": "SizeY*0.5"
+                    },
+                    "Theta": 0,
+                    "X": 50,
+                    "Y": -50,
+                    "Z": 50,
+                    "color": 892,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "strX": "Offset",
+                    "strY": "-Offset",
+                    "strZ": "Offset",
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Material": 1,
+                    "Name": "Box",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoBBox",
+                    "ShapeSpecific": {
+                        "dx": 10,
+                        "dy": 12.24744871391589,
+                        "dz": 10,
+                        "str2dx": "SizeX*0.5",
+                        "str2dy": "sqrt(SizeY*10)"
+                    },
+                    "Theta": 0,
+                    "X": 50,
+                    "Y": 50,
+                    "Z": 50,
+                    "color": 4,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "strX": "Offset",
+                    "strY": "Offset",
+                    "strZ": "Offset",
+                    "style": 1,
+                    "width": 2
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Material": 1,
+                    "Name": "Tube",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 45,
+                    "Psi": 0,
+                    "Shape": "TGeoTube",
+                    "ShapeSpecific": {
+                        "dz": 5,
+                        "rmax": 12.5,
+                        "rmin": 5,
+                        "str2rmax": "Diameter*0.5"
+                    },
+                    "Theta": 45,
+                    "X": -50,
+                    "Y": 50,
+                    "Z": 50,
+                    "color": 2,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "strX": "-Offset",
+                    "strY": "Offset",
+                    "strZ": "Offset",
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Material": 1,
+                    "Name": "TubeSeg",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoTubeSeg",
+                    "ShapeSpecific": {
+                        "dz": 5,
+                        "phi1": 0,
+                        "phi2": 90,
+                        "rmax": 30,
+                        "rmin": 12.5,
+                        "str2rmax": "Diameter + 10",
+                        "str2rmin": "Diameter * 0.5",
+                        "strPhi2": "2*Angle"
+                    },
+                    "Theta": 0,
+                    "X": -50,
+                    "Y": -50,
+                    "Z": 50,
+                    "color": 9,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "strX": "-Offset",
+                    "strY": "-Offset",
+                    "strZ": "Offset",
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Material": 1,
+                    "Name": "Paraboloid",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoParaboloid",
+                    "ShapeSpecific": {
+                        "dz": 10,
+                        "rhi": 25,
+                        "rlo": 2.5,
+                        "str2rlo": "0.1*Diameter"
+                    },
+                    "Theta": 0,
+                    "X": -50,
+                    "Y": -50,
+                    "Z": -50,
+                    "color": 3,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "strX": "-Offset",
+                    "strY": "-Offset",
+                    "strZ": "-Offset",
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Material": 1,
+                    "Name": "Sphere",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoSphere",
+                    "ShapeSpecific": {
+                        "phi1": 0,
+                        "phi2": 270,
+                        "rmax": 25,
+                        "rmin": 12.5,
+                        "str2rmax": "Diameter",
+                        "str2rmin": "0.5*Diameter",
+                        "theta1": 0,
+                        "theta2": 180
+                    },
+                    "Theta": 0,
+                    "X": -50,
+                    "Y": 50,
+                    "Z": -50,
+                    "color": 1,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "strX": "-Offset",
+                    "strY": "Offset",
+                    "strZ": "-Offset",
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Material": 1,
+                    "Name": "Composite",
+                    "ObjectType": {
+                        "Type": "Composite"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoCompositeShape",
+                    "ShapeSpecific": {
+                        "GenerationString": "TGeoCompositeShape( bb - aa )"
+                    },
+                    "Theta": 0,
+                    "X": 50,
+                    "Y": -50,
+                    "Z": -50,
+                    "color": 1,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "strX": "Offset",
+                    "strY": "-Offset",
+                    "strZ": "-Offset",
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "Composite",
+                    "Locked": false,
+                    "Name": "CompositeSet_Composite",
+                    "ObjectType": {
+                        "Type": "CompositeContainer"
+                    },
+                    "fActive": true,
+                    "fExpanded": true
+                },
+                {
+                    "Container": "CompositeSet_Composite",
+                    "Locked": false,
+                    "Material": 1,
+                    "Name": "aa",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoScaledShape",
+                    "ShapeSpecific": {
+                        "dx": 10,
+                        "dy": 10,
+                        "dz": 10,
+                        "scaleX": 0.1,
+                        "scaleY": 1,
+                        "scaleZ": 1,
+                        "shape": "TGeoBBox"
+                    },
+                    "Theta": 0,
+                    "X": 0,
+                    "Y": 0,
+                    "Z": 0,
+                    "color": -1,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "CompositeSet_Composite",
+                    "Locked": false,
+                    "Material": 0,
+                    "Name": "bb",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoBBox",
+                    "ShapeSpecific": {
+                        "dx": 10,
+                        "dy": 10,
+                        "dz": 10
+                    },
+                    "Theta": 0,
+                    "X": 0,
+                    "Y": 0,
+                    "Z": 0,
+                    "color": -1,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Name": "Round_slab",
+                    "ObjectType": {
+                        "Type": "Slab"
+                    },
+                    "fActive": true,
+                    "fExpanded": true
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Name": "Polygon_slab",
+                    "ObjectType": {
+                        "Type": "Slab"
+                    },
+                    "fActive": true,
+                    "fExpanded": true
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Name": "Rectangular_slab",
+                    "ObjectType": {
+                        "Type": "Slab"
+                    },
+                    "fActive": true,
+                    "fExpanded": true
+                }
+            ],
+            "ZeroZ": "Center"
+        }
+    },
+    "GUI": {
+        "GeometryWindow": {
+            "ZoomLevel": 2
+        },
+        "MW": {
+            "ConfigGuiLocked": false
+        },
+        "OutputWindow": {
+            "EventViewer": {
+                "DepoEn": true,
+                "ExclProcActive": false,
+                "ExclToProc": "",
+                "ExclToProcPrim": false,
+                "Expansion": 4,
+                "HideAllTransport": true,
+                "HidePrimTransport": false,
+                "KinEn": false,
+                "LimToProc": "",
+                "LimToProcActive": false,
+                "LimToProcPrim": false,
+                "Material": true,
+                "Position": true,
+                "Precision": 4,
+                "ShowFilters": false,
+                "ShowPMsig": false,
+                "ShowTracks": true,
+                "Step": true,
+                "SuppressSec": false,
+                "Time": true,
+                "VolIndex": true,
+                "Volume": true
+            }
+        },
+        "ReconstructionWindow": {
+            "Blur": {
+                "BlurSigma": 1,
+                "BlurSigmaZ": 1,
+                "BlurType": 0,
+                "BlurWidth": 1,
+                "BlurWidthZ": 1
+            },
+            "ChPerPhePeaks": {
+                "Bins": 300,
+                "From": -50,
+                "MaxPeaks": 30,
+                "Sigma": 8,
+                "Threshold": 0.02,
+                "To": 250
+            },
+            "ChPerPheStat": {
+                "Bins": 100,
+                "ENF": 1,
+                "Lower": 3,
+                "MaxRange": 1000,
+                "MinRange": 0,
+                "Upper": 500
+            },
+            "PlotXYsettings": {
+                "PlotXYbinsX": 50,
+                "PlotXYbinsY": 50,
+                "PlotXYfromX": -180,
+                "PlotXYfromY": -180,
+                "PlotXYfromZ": -5,
+                "PlotXYoptionZ": 0,
+                "PlotXYtoX": 180,
+                "PlotXYtoY": 180,
+                "PlotXYtoZ": 5
+            }
+        }
+    },
+    "ReconstructionConfig": {
+        "ANTS2build": 1710,
+        "FilterOptions": [
+            {
+                "Chi2": {
+                    "Active": false,
+                    "Max": 10000000000,
+                    "Min": 0
+                },
+                "Correlation": {
+                    "Active": false,
+                    "Set": [
+                        {
+                            "Active": true,
+                            "AutoSize": true,
+                            "BinX": 100,
+                            "BinY": 100,
+                            "Cut": {
+                                "CutOption": 0,
+                                "Data": [
+                                    0,
+                                    1,
+                                    300
+                                ],
+                                "Type": "line"
+                            },
+                            "XY": [
+                                {
+                                    "Array": [
+                                        0
+                                    ],
+                                    "Type": "SingleChannel"
+                                },
+                                {
+                                    "Array": [
+                                        0
+                                    ],
+                                    "Type": "SingleChannel"
+                                }
+                            ],
+                            "maxX": 20,
+                            "maxY": 20,
+                            "minX": -20,
+                            "minY": -20
+                        }
+                    ]
+                },
+                "EventNumber": {
+                    "Active": false,
+                    "Max": 0,
+                    "Min": 0
+                },
+                "IndividualPMSignal": {
+                    "Active": false,
+                    "UsePassives": true
+                },
+                "LoadedEnergy": {
+                    "Active": false,
+                    "Max": 10000000000,
+                    "Min": 0
+                },
+                "MultipleScanEvents": false,
+                "ReconstructedEnergy": {
+                    "Active": false,
+                    "Max": 10000000000,
+                    "Min": 0
+                },
+                "SpatialCustom": {
+                    "Active": false,
+                    "AllZ": true,
+                    "Angle": 0,
+                    "CutOutsideInside": 0,
+                    "Diameter": 30,
+                    "Polygon": [
+                    ],
+                    "RecOrScan": 0,
+                    "Shape": 0,
+                    "Side": 15,
+                    "SizeX": 30,
+                    "SizeY": 30,
+                    "X0": 0,
+                    "Y0": 0,
+                    "Zfrom": -5,
+                    "Zto": 5
+                },
+                "SpatialToObject": {
+                    "Active": false,
+                    "LimitObject": "PrScint",
+                    "RecOrScan": 0
+                },
+                "SumSignal": {
+                    "Active": false,
+                    "Max": 10000000000,
+                    "Min": 0,
+                    "UseGains": false,
+                    "UsePassives": true
+                },
+                "kNN": {
+                    "Active": false,
+                    "AverageOver": 10,
+                    "Max": 10000000000,
+                    "Min": 0
+                }
+            }
+        ],
+        "LRFmakeJson": {
+            "AdjustGains": true,
+            "Compression_k": 5,
+            "Compression_lam": 50,
+            "Compression_r0": 150,
+            "DataSelector": 0,
+            "EnergyNormalization": 1,
+            "FitOnlyLast": false,
+            "ForceInZ": 0,
+            "ForceNonIncreasingInR": false,
+            "ForceNonNegative": false,
+            "ForceZeroDeriv": true,
+            "GroupToMake": 0,
+            "GroupingOption": "Individual",
+            "GrouppingType": 0,
+            "LRF_3D": false,
+            "LRF_compress": true,
+            "LRF_type": 0,
+            "LimitGroup": false,
+            "Nodes_x": 10,
+            "Nodes_y": 10,
+            "StoreError": false,
+            "UseEnergy": true,
+            "UseGrid": true,
+            "UseGroupping": false
+        },
+        "LRFmoduleSelected": 0,
+        "LRFv3makeJson": {
+            "fit error": true,
+            "instruction list vpos": 0,
+            "instructions": [
+                {
+                    "current instruction": 0,
+                    "expanded": true,
+                    "instructions": [
+                        {
+                            "EffectOnPrevious": 0,
+                            "Groupping": {
+                                "AdjustGains": true,
+                                "Enabled": false,
+                                "Type": 0
+                            },
+                            "Lrf": {
+                                "Category": "Bspline",
+                                "Settings": {
+                                    "flat top": true,
+                                    "nint": 10
+                                },
+                                "Type": "Axial"
+                            },
+                            "SensorComposition": 0,
+                            "SensorGroup": 0,
+                            "SensorList": "0, 2-5"
+                        },
+                        {
+                            "recipe": 0,
+                            "sensors": "",
+                            "version": -1
+                        }
+                    ],
+                    "name": "Name"
+                },
+                {
+                    "current instruction": 0,
+                    "expanded": true,
+                    "instructions": [
+                        {
+                            "EffectOnPrevious": 0,
+                            "Groupping": {
+                                "AdjustGains": true,
+                                "Enabled": false,
+                                "Type": 0
+                            },
+                            "Lrf": {
+                                "Category": "Bspline",
+                                "Settings": {
+                                    "flat top": true,
+                                    "nint": 10
+                                },
+                                "Type": "Axial"
+                            },
+                            "SensorComposition": 0,
+                            "SensorGroup": 0,
+                            "SensorList": "0, 2-5"
+                        },
+                        {
+                            "recipe": 0,
+                            "sensors": "",
+                            "version": -1
+                        }
+                    ],
+                    "name": "Name"
+                },
+                {
+                    "current instruction": 0,
+                    "expanded": true,
+                    "instructions": [
+                        {
+                            "EffectOnPrevious": 0,
+                            "Groupping": {
+                                "AdjustGains": true,
+                                "Enabled": false,
+                                "Type": 0
+                            },
+                            "Lrf": {
+                                "Category": "Bspline",
+                                "Settings": {
+                                    "flat top": true,
+                                    "nint": 10
+                                },
+                                "Type": "Axial"
+                            },
+                            "SensorComposition": 0,
+                            "SensorGroup": 0,
+                            "SensorList": "0, 2-5"
+                        },
+                        {
+                            "recipe": 0,
+                            "sensors": "",
+                            "version": -1
+                        }
+                    ],
+                    "name": "Name"
+                }
+            ],
+            "name": "Recipe's name",
+            "scale by energy": true,
+            "use true data": true
+        },
+        "ReconstructionOptions": [
+            {
+                "AlgorithmOptions": {
+                    "Algorithm": 0,
+                    "CGonCUDAsettings": {
+                        "Buffer": 500,
+                        "Iterations": 3,
+                        "OptimizeMLChi2": 0,
+                        "ScaleReduction": 8,
+                        "StartOption": 0,
+                        "StartStep": 10,
+                        "StartX": 0,
+                        "StartY": 0,
+                        "StarterZ": 0,
+                        "ThreadBlockXY": 8
+                    },
+                    "CPUgridsOptions": {
+                        "InitialStep": 10,
+                        "Iterations": 3,
+                        "NodesXY": 8,
+                        "OptimizeWhat": 0,
+                        "Reduction": 8,
+                        "StartOption": 0,
+                        "StartX": 0,
+                        "StartY": 0
+                    },
+                    "CoGoptions": {
+                        "DoStretch": false,
+                        "ForceFixedZ": true,
+                        "IgnoreBySignal": true,
+                        "IgnoreDistance": 100,
+                        "IgnoreFar": false,
+                        "IgnoreThresholdHigh": 10000000000,
+                        "IgnoreThresholdLow": 5,
+                        "StretchX": 1,
+                        "StretchY": 1,
+                        "StretchZ": 1
+                    },
+                    "RootMinimizerOptions": {
+                        "Formula": "-Signal * log(LRF) + LRF",
+                        "LSorLikelihood": 0,
+                        "LSsuppressConsole": true,
+                        "MaxCalls": 500,
+                        "Minuit2Option": 0,
+                        "StartOption": 0,
+                        "StartStepEnergy": 0.1,
+                        "StartStepX": 1,
+                        "StartStepY": 1,
+                        "StartStepZ": 1
+                    }
+                },
+                "DynamicPassives": {
+                    "DistanceLimit": 120,
+                    "IgnoreByDistance": true,
+                    "IgnoreBySignal": false,
+                    "SignalLimitHigh": 10000000000,
+                    "SignalLimitLow": 0
+                },
+                "General": {
+                    "IncludePassives": false,
+                    "InitialEnergy": 1,
+                    "InitialZ": 0,
+                    "ReconstructEnergy": true,
+                    "ReconstructZ": false,
+                    "WeightedChi2": true,
+                    "Zstrategy": 0
+                },
+                "MultipleEvents": {
+                    "Option": 0
+                }
+            }
+        ],
+        "SensorGroups": [
+            {
+                "CutOffs": [
+                ],
+                "Gains": [
+                ],
+                "Name": "Default group",
+                "PmIndexes": [
+                ]
+            }
+        ],
+        "StaticPassives": [
+        ]
+    },
+    "SimulationConfig": {
+        "DoGuiUpdate": true,
+        "GeneralSimConfig": {
+            "AcceleratorConfig": {
+                "CheckBeforeTrack": true,
+                "MaxNumTransitions": 500
+            },
+            "AngleConfig": {
+                "AngResolved": false,
+                "NumBins": 1000
+            },
+            "AreaConfig": {
+                "AreaResolved": false
+            },
+            "DetStatNumBins": 100,
+            "ExitParticleSettings": {
+                "FileName": "",
+                "SaveParticles": false,
+                "StopTrack": true,
+                "TimeFrom": 0,
+                "TimeTo": 1000000,
+                "UseBinary": false,
+                "UseTimeWindow": false,
+                "VolumeName": ""
+            },
+            "Geant4SimulationSettings": {
+                "BinaryOutput": false,
+                "Commands": [
+                    "/process/em/fluo true",
+                    "/process/em/auger true",
+                    "/process/em/augerCascade true",
+                    "/process/em/pixe true",
+                    "/run/setCut 0.01 mm"
+                ],
+                "PhysicsList": "QGSP_BERT_HP",
+                "Precision": 6,
+                "SensitiveVolumes": [
+                    "PrScint"
+                ],
+                "StepLimits": [
+                ],
+                "TrackParticles": false
+            },
+            "LogStatOptions": {
+                "ParticleTransportLog": false,
+                "PhotonDetectionStat": false,
+                "PhotonGenerationLog": false,
+                "bSaveDepositionLog": false,
+                "bSaveParticleLog": false
+            },
+            "LrfBasedSim": {
+                "NumPhotElLRFunity": 1,
+                "NumPhotsLRFunity": 20000,
+                "UseLRFs": false
+            },
+            "SecScintConfig": {
+            },
+            "TimeConfig": {
+                "TimeBins": 5,
+                "TimeFrom": 0,
+                "TimeResolved": false,
+                "TimeTo": 1000
+            },
+            "TrackBuildingOptions": {
+                "BuildParticleTracks": false,
+                "BuildPhotonTracks": false,
+                "GeneralPhoton_Attributes": {
+                    "color": 7,
+                    "style": 1,
+                    "width": 1
+                },
+                "MaxParticleTracks": 1000,
+                "MaxPhotonTracks": 1000,
+                "Particle_CustomAttribtes": [
+                ],
+                "Particle_DefaultAttributes": {
+                    "color": 15,
+                    "style": 1,
+                    "width": 2
+                },
+                "Particle_DefaultColors": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    6,
+                    7,
+                    8,
+                    9,
+                    28,
+                    30,
+                    36,
+                    38,
+                    39,
+                    40,
+                    46,
+                    49
+                ],
+                "PhotonHittingPM_Attributes": {
+                    "color": 2,
+                    "style": 1,
+                    "width": 1
+                },
+                "PhotonSecScint_Attributes": {
+                    "color": 6,
+                    "style": 1,
+                    "width": 1
+                },
+                "PhotonSpecialRule_HittingPMs": true,
+                "PhotonSpecialRule_SecScint": true,
+                "SkipParticles_Primary": false,
+                "SkipParticles_PrimaryNoInteraction": false,
+                "SkipParticles_Secondary": false,
+                "SkipPhotonsMissingPMs": false
+            },
+            "TrackingConfig": {
+                "MaxStep": 0.1,
+                "MinEnergy": 0.01,
+                "MinEnergyNeutrons": 0.01,
+                "MinStep": 5e-05,
+                "Safety": 1e-10,
+                "dE": 0.05
+            },
+            "WaveConfig": {
+                "WaveFrom": 200,
+                "WaveNodes": 121,
+                "WaveResolved": false,
+                "WaveStep": 5,
+                "WaveTo": 800
+            }
+        },
+        "Mode": "PointSim",
+        "ParticleSourcesConfig": {
+            "GenerationFromFile": {
+                "FileFormat": 0,
+                "FileLastModified": 0,
+                "FileName": "",
+                "LastValidation": 0,
+                "NumEventsInFile": 0,
+                "ValidatedWithParticles": [
+                ]
+            },
+            "GenerationFromScript": {
+                "Script": ""
+            },
+            "ParticleSources": [
+            ],
+            "SourceControlOptions": {
+                "AllowMultipleParticles": false,
+                "AverageParticlesPerEvent": 1,
+                "ClusterMerge": false,
+                "ClusterMergeRadius": 0.1,
+                "ClusterMergeTime": 1,
+                "DoS1": true,
+                "DoS2": false,
+                "EventsToDo": 1,
+                "IgnoreNoDepoEvents": false,
+                "IgnoreNoHitsEvents": false,
+                "ParticleGenerationMode": "Sources",
+                "TypeParticlesPerEvent": 0
+            }
+        },
+        "PointSourcesConfig": {
+            "ControlOptions": {
+                "LimitNodes": false,
+                "LimitNodesTo": "",
+                "MultipleRuns": false,
+                "MultipleRunsNumber": 100,
+                "Primary_Secondary": 0,
+                "Single_Scan_Flood": 0
+            },
+            "CustomNodesOptions": {
+                "FileWithNodes": ""
+            },
+            "FloodOptions": {
+                "CenterX": 0,
+                "CenterY": 0,
+                "DiameterIn": 0,
+                "DiameterOut": 450,
+                "Nodes": 1000,
+                "Shape": 1,
+                "Xfrom": -15,
+                "Xto": 15,
+                "Yfrom": -15,
+                "Yto": 15,
+                "Zfixed": 0,
+                "Zfrom": -2.49,
+                "Zoption": 0,
+                "Zto": 2.49
+            },
+            "PhotPerNodeOptions": {
+                "PhotPerNodeConstant": 4000,
+                "PhotPerNodeCustom": [
+                ],
+                "PhotPerNodeGaussMean": 10,
+                "PhotPerNodeGaussSigma": 2.5,
+                "PhotPerNodeMode": 0,
+                "PhotPerNodePoissonMean": 10,
+                "PhotPerNodeUniMax": 12,
+                "PhotPerNodeUniMin": 10
+            },
+            "PhotonDirectionOptions": {
+                "Cone": 45,
+                "FixedX": 0,
+                "FixedY": 0,
+                "FixedZ": 1,
+                "Fixed_or_Cone": 0,
+                "Random": true
+            },
+            "RegularScanOptions": {
+                "AxesData": [
+                    {
+                        "Nodes": 10,
+                        "Option": 1,
+                        "dX": 15,
+                        "dY": 15,
+                        "dZ": 0
+                    }
+                ],
+                "ScanX0": 0,
+                "ScanY0": 0,
+                "ScanZ0": 0
+            },
+            "SinglePositionOptions": {
+                "SingleX": 0,
+                "SingleY": 0,
+                "SingleZ": 0
+            },
+            "SpatialDistOptions": {
+                "BinsX": 1,
+                "BinsY": 1,
+                "BinsZ": 1,
+                "Enabled": false,
+                "Formula": "",
+                "Matrix": [
+                ],
+                "Mode": 0,
+                "RangeX": 100,
+                "RangeY": 100,
+                "RangeZ": 100,
+                "Spline": ""
+            },
+            "WaveTimeOptions": {
+                "UseFixedWavelength": false,
+                "WaveIndex": 0
+            }
+        }
+    }
+}

@@ -636,7 +636,7 @@ void GainEvaluatorWindowClass::on_pbEvaluateGains_clicked()
     {
       DoVisualization = true;
       //MW->DotsTGeo.clear();
-      MW->clearGeoMarkers();
+      MW->GeometryWindow->ClearGeoMarkers();
       marks = new GeoMarkerClass();
     }
 
@@ -1207,15 +1207,14 @@ void GainEvaluatorWindowClass::on_pbEvaluateGains_clicked()
   MW->Rwindow->onUpdateGainsIndication();
 
   if (DoVisualization)
-    {      
+  {
       if (!EventsDataHub->isScanEmpty()) marks->SetMarkerColor(kBlue);
       else marks->SetMarkerColor(kRed);
       marks->SetMarkerSize(2);
       marks->SetMarkerStyle(2);
-      MW->GeoMarkers.append(marks);     
+      MW->GeometryWindow->GeoMarkers.append(marks);
       MW->GeometryWindow->ShowGeometry();
-      //MW->ShowGeoMarkers();
-    }
+  }
 
   MW->Owindow->OutText("  done!");
   MW->WindowNavigator->BusyOff();

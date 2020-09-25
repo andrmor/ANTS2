@@ -144,7 +144,10 @@ MainWindow::MainWindow(DetectorClass *Detector,
     GraphWindow->move(25,25);
     qDebug()<<">Creating geometry window";
     w = new QWidget();
-    GeometryWindow = new GeometryWindowClass(w, this);
+    GeometryWindow = new GeometryWindowClass(w, *Detector, *SimulationManager);
+    connect(GeometryWindow, &GeometryWindowClass::requestUpdateRegisteredGeoManager, NetModule,     &ANetworkModule::onNewGeoManagerCreated);
+    connect(GeometryWindow, &GeometryWindowClass::requestUpdateMaterialListWidget,   this,          &MainWindow::UpdateMaterialListEdit);
+    connect(GeometryWindow, &GeometryWindowClass::requestShowNetSettings,            GlobSetWindow, &GlobalSettingsWindowClass::ShowNetSettings);
     GeometryWindow->move(25,25);
     qDebug()<<">Creating JavaScript window";
     createScriptWindow();
@@ -214,6 +217,28 @@ MainWindow::MainWindow(DetectorClass *Detector,
 
     DoNotUpdateGeometry = false; //control
 
+    //pixmaps
+    ui->labReloadRequired->setPixmap(Rwindow->RedIcon.pixmap(16,16));
+    ui->labAdvancedOn->setPixmap(Rwindow->YellowIcon.pixmap(16,16));
+    ui->labAdvancedOn->setVisible(false);
+    ui->labIgnoreNoHitEvents->setPixmap(Rwindow->YellowIcon.pixmap(16,16));
+    ui->labIgnoreNoHitEvents->setVisible(false);
+    ui->labIgnoreNoDepoEvents->setPixmap(Rwindow->YellowIcon.pixmap(16,16));
+    ui->labIgnoreNoDepoEvents->setVisible(false);
+    ui->labPhTracksOn->setPixmap(Rwindow->YellowIcon.pixmap(8,8));
+    ui->labPhTracksOn->setVisible(false);
+    ui->labPhTracksOn_1->setPixmap(Rwindow->YellowIcon.pixmap(8,8));
+    ui->labPhTracksOn_1->setVisible(false);
+    ui->labPartTracksOn->setPixmap(Rwindow->YellowIcon.pixmap(8,8));
+    ui->labPartTracksOn->setVisible(false);
+    ui->labPDEfactors_notAllUnity->setPixmap(Rwindow->YellowIcon.pixmap(16,16));
+    ui->labSPEfactors_ActiveAndNotAllUnity->setPixmap(Rwindow->YellowIcon.pixmap(16,16));
+    ui->labSPEfactorNotUnity->setPixmap(Rwindow->YellowIcon.pixmap(16,16));
+    ui->labPartLogOn->setPixmap(Rwindow->YellowIcon.pixmap(8,8));
+    ui->labPartLogOn->setVisible(false);
+    ui->labParticlesToFile->setPixmap(Rwindow->YellowIcon.pixmap(8,8));
+    ui->labParticlesToFile->setVisible(false);
+
     qDebug() << ">Intitializing slab gui...";
     initDetectorSandwich(); //create detector sandwich control and link GUI signals/slots
     qDebug()<<">Loading default detector...";
@@ -252,29 +277,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
       //fonts
     QFont ff = ui->tabwidMain->tabBar()->font();
     ff.setBold(true);
-    ui->tabwidMain->tabBar()->setFont(ff);
-      //pixmaps
-    ui->labReloadRequired->setPixmap(Rwindow->RedIcon.pixmap(16,16));
-    ui->labAdvancedOn->setPixmap(Rwindow->YellowIcon.pixmap(16,16));
-    ui->labAdvancedOn->setVisible(false);
-    ui->labIgnoreNoHitEvents->setPixmap(Rwindow->YellowIcon.pixmap(16,16));
-    ui->labIgnoreNoHitEvents->setVisible(false);
-    ui->labIgnoreNoDepoEvents->setPixmap(Rwindow->YellowIcon.pixmap(16,16));
-    ui->labIgnoreNoDepoEvents->setVisible(false);
-    ui->labPhTracksOn->setPixmap(Rwindow->YellowIcon.pixmap(8,8));
-    ui->labPhTracksOn->setVisible(false);
-    ui->labPhTracksOn_1->setPixmap(Rwindow->YellowIcon.pixmap(8,8));
-    ui->labPhTracksOn_1->setVisible(false);
-    ui->labPartTracksOn->setPixmap(Rwindow->YellowIcon.pixmap(8,8));
-    ui->labPartTracksOn->setVisible(false);
-    ui->labPDEfactors_notAllUnity->setPixmap(Rwindow->YellowIcon.pixmap(16,16));
-    ui->labSPEfactors_ActiveAndNotAllUnity->setPixmap(Rwindow->YellowIcon.pixmap(16,16));
-    ui->labSPEfactorNotUnity->setPixmap(Rwindow->YellowIcon.pixmap(16,16));
-    ui->labPartLogOn->setPixmap(Rwindow->YellowIcon.pixmap(8,8));
-    ui->labPartLogOn->setVisible(false);
-    ui->labParticlesToFile->setPixmap(Rwindow->YellowIcon.pixmap(8,8));
-    ui->labParticlesToFile->setVisible(false);
-
+    ui->tabwidMain->tabBar()->setFont(ff);    
       //misc gui inits
     ui->swPMTvsSiPM->setCurrentIndex(ui->cobPMdeviceType->currentIndex());
     MainWindow::on_pbRefreshPMproperties_clicked(); //indication of PM properties

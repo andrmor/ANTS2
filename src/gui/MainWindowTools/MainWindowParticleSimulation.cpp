@@ -12,6 +12,7 @@
 #include "ascriptparticlegenerator.h"
 #include "graphwindowclass.h"
 #include "detectorclass.h"
+#include "asandwich.h"
 #include "checkupwindowclass.h"
 #include "aglobalsettings.h"
 #include "amaterialparticlecolection.h"
@@ -119,13 +120,13 @@ void MainWindow::ShowSource(const AParticleSourceRecord * p, bool clear)
      {
       Detector->GeoManager->SetCurrentPoint(X0,Y0,Z0);
       Detector->GeoManager->DrawCurrentPoint(9);
-      clearGeoMarkers();
+      GeometryWindow->ClearGeoMarkers();
       GeoMarkerClass* marks = new GeoMarkerClass("Source", 3, 10, kBlack);
       marks->SetNextPoint(X0, Y0, Z0);
-      GeoMarkers.append(marks);
+      GeometryWindow->GeoMarkers.append(marks);
       GeoMarkerClass* marks1 = new GeoMarkerClass("Source", 4, 3, kBlack);
       marks1->SetNextPoint(X0, Y0, Z0);
-      GeoMarkers.append(marks1);
+      GeometryWindow->GeoMarkers.append(marks1);
       GeometryWindow->ShowGeometry(false);
       break;
      }
@@ -238,7 +239,9 @@ void MainWindow::ShowSource(const AParticleSourceRecord * p, bool clear)
   TVector3 K(sin(CollTheta)*sin(CollPhi), sin(CollTheta)*cos(CollPhi), cos(CollTheta)); //collimation direction
   Int_t track_index = Detector->GeoManager->AddTrack(1,22);
   TVirtualGeoTrack *track = Detector->GeoManager->GetTrack(track_index);
-  double Klength = std::max(Detector->WorldSizeXY, Detector->WorldSizeZ)*0.5; //20 before
+  const double WorldSizeXY = Detector->Sandwich->getWorldSizeXY();
+  const double WorldSizeZ  = Detector->Sandwich->getWorldSizeZ();
+  double Klength = std::max(WorldSizeXY, WorldSizeZ)*0.5; //20 before
 
   track->AddPoint(X0, Y0, Z0, 0);
   track->AddPoint(X0+K[0]*Klength, Y0+K[1]*Klength, Z0+K[2]*Klength, 0);
@@ -318,7 +321,7 @@ void MainWindow::on_pbGunTest_clicked()
 
 void MainWindow::TestParticleGun(AParticleGun* Gun, int numParticles)
 {
-    clearGeoMarkers();
+    GeometryWindow->ClearGeoMarkers();
     bool bOK = Gun->Init();
     if (!bOK)
     {
@@ -328,7 +331,9 @@ void MainWindow::TestParticleGun(AParticleGun* Gun, int numParticles)
     Gun->SetStartEvent(0);
     if (ui->cobParticleGenerationMode->currentIndex() == 1) updateFileParticleGeneratorGui();
 
-    double Length = std::max(Detector->WorldSizeXY, Detector->WorldSizeZ)*0.4;
+    const double WorldSizeXY = Detector->Sandwich->getWorldSizeXY();
+    const double WorldSizeZ  = Detector->Sandwich->getWorldSizeZ();
+    double Length = std::max(WorldSizeXY, WorldSizeZ)*0.4;
     double R[3], K[3];
     QVector<AParticleRecord*> GP;
     int numTracks = 0;
@@ -355,7 +360,7 @@ void MainWindow::TestParticleGun(AParticleGun* Gun, int numParticles)
 
                 GeoMarkerClass* marks = new GeoMarkerClass("t", 7, 1, SimulationManager->TrackBuildOptions.getParticleColor(p->Id));
                 marks->SetNextPoint(R[0], R[1], R[2]);
-                GeoMarkers.append(marks);
+                GeometryWindow->GeoMarkers.append(marks);
 
                 ++numTracks;
                 if (numTracks > 1000) break;
@@ -505,7 +510,7 @@ void MainWindow::on_pbGunShowSource_toggled(bool checked)
     }
     else
     {
-        clearGeoMarkers();
+        GeometryWindow->ClearGeoMarkers();
         Detector->GeoManager->ClearTracks();
         GeometryWindow->ShowGeometry();
     }
@@ -657,14 +662,14 @@ void MainWindow::on_pbEditParticleSource_clicked()
             UpdateMax(Zm,  fabs(ps->Z0)+msize);
         }
 
-        double currXYm = Detector->WorldSizeXY;
-        double  currZm = Detector->WorldSizeZ;
-        if (XYm>currXYm || Zm>currZm)
+        double currXYm = Detector->Sandwich->getWorldSizeXY();
+        double  currZm = Detector->Sandwich->getWorldSizeZ();
+        if (XYm > currXYm || Zm > currZm)
           {
             //need to override
-            Detector->fWorldSizeFixed = true;
-            Detector->WorldSizeXY = std::max(XYm,currXYm);
-            Detector->WorldSizeZ =  std::max(Zm,currZm);
+            Detector->Sandwich->setWorldSizeFixed(true);
+            Detector->Sandwich->setWorldSizeXY( std::max(XYm, currXYm) );
+            Detector->Sandwich->setWorldSizeZ ( std::max(Zm,  currZm) );
             MainWindow::ReconstructDetector();
           }
     }
@@ -674,6 +679,7 @@ void MainWindow::on_pbEditParticleSource_clicked()
 }
 
 #include "ageoobject.h"
+#include "atypegeoobject.h"
 void containsMonsGrids(const AGeoObject * obj, bool & bGrid, bool & bMon)
 {
     if (obj->isDisabled()) return;

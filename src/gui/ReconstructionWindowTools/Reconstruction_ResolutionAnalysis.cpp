@@ -176,7 +176,7 @@ void ReconstructionWindow::AnalyzeScanNode()
         return;
       }
 
-    MW->clearGeoMarkers();
+    MW->GeometryWindow->ClearGeoMarkers();
     MW->Detector->GeoManager->ClearTracks();
     int ithis = node*EventsDataHub->ScanNumberOfRuns;
     double rActual[3];
@@ -259,12 +259,12 @@ void ReconstructionWindow::AnalyzeScanNode()
         //MW->DotsTGeo.append(DotsTGeoStruct(EventsDataHub->ReconstructionData[iev]->Points[0].r, kRed));
         marks->SetNextPoint(EventsDataHub->ReconstructionData[CurrentGroup][iev]->Points[0].r[0], EventsDataHub->ReconstructionData[CurrentGroup][iev]->Points[0].r[1], EventsDataHub->ReconstructionData[CurrentGroup][iev]->Points[0].r[2]);
       }
-    MW->GeoMarkers.append(marks);
+    MW->GeometryWindow->GeoMarkers.append(marks);
 
     GeoMarkerClass* marks1 = new GeoMarkerClass("Scan", 6, 2, kBlue);
     //MW->DotsTGeo.append(DotsTGeoStruct( EventsDataHub->SimulatedScan[iev]->Points[0].r, kBlue));
     marks1->SetNextPoint(EventsDataHub->Scan[iev]->Points[0].r[0], EventsDataHub->Scan[iev]->Points[0].r[1], EventsDataHub->Scan[iev]->Points[0].r[2]);  
-    MW->GeoMarkers.append(marks1);
+    MW->GeometryWindow->GeoMarkers.append(marks1);
 
     MW->GeometryWindow->ShowGeometry(false);
 }

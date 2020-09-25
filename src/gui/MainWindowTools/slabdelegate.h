@@ -37,6 +37,7 @@ public:
 
   void CopyFrom(const ASlabXYDelegate& Another);
   const ASlabXYModel GetData();
+  void UpdateModel(ASlabXYModel & slabModel) const;
   void SetShowState(ASlabXYDelegate::ShowStates State);
 
 private:

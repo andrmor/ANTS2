@@ -28,8 +28,17 @@ public:
   void SaveConfig(QJsonObject &json, bool DetConstructor, bool SimSettings, bool ReconstrSettings);
 
   // save/load to file
-  bool LoadConfig(QString fileName, bool DetConstructor = true, bool SimSettings = true, bool ReconstrSettings = true, QJsonObject *jsout = 0);
+  bool LoadConfig(QString fileName, bool DetConstructor = true, bool SimSettings = true, bool ReconstrSettings = true);//, QJsonObject *jsout = 0);
   bool SaveConfig(QString fileName, bool DetConstructor = true, bool SimSettings = true, bool ReconstrSettings = true);
+
+  // undo / redo
+  void createUndo();
+  bool isUndoAvailable() const;
+  bool isRedoAvailable() const;
+  void invalidateUndo();
+  void invalidateRedo();
+  QString doUndo();
+  QString doRedo();
 
   //remove particle
   const QString RemoveParticle(int particleId);  //returns "" on sucess, otherwise gives error string

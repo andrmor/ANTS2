@@ -1,6 +1,8 @@
 #include "asandwich.h"
 #include "aslab.h"
 #include "ageoobject.h"
+#include "ageoshape.h"
+#include "atypegeoobject.h"
 #include "amaterialparticlecolection.h"
 #include "ajsontools.h"
 #include "agridelementrecord.h"
@@ -12,14 +14,11 @@
 
 ASandwich::ASandwich()
 {  
-  SandwichState = CommonShapeSize;
-  ZOriginType = 0;
-  DefaultXY = new ASlabXYModel();
+    DefaultXY = new ASlabXYModel();
 
-  World = new AGeoObject("World");
-  World->Material = 0;
-  World->makeItWorld();
-  //qDebug() << "--World object in GeoTree created";
+    World = new AGeoObject("World");
+    World->Material = 0;
+    World->makeItWorld();
 }
 
 ASandwich::~ASandwich()
@@ -265,7 +264,7 @@ void ASandwich::shapeGrid(AGeoObject *obj, int shape, double p0, double p1, doub
     }
     GEobj->HostedObjects.clear();
 
-    obj->Shape->setHeight(0.5*p2 + 0.001);
+    obj->Shape->  setHeight(0.5*p2 + 0.001);
     GE->shape = shape;
     GE->dz = 0.5*p2 + 0.001;
     GE->size1 = 0.5*p0;
@@ -511,8 +510,12 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
             AGeoComposite* cs = dynamic_cast<AGeoComposite*>(obj->Shape);
             if (!cs)
             {
-                qWarning()<< "Composite: Shape object is not composite!!";
-                return;
+                AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(obj->Shape);
+                if (!scaled)
+                {
+                    qWarning()<< "Composite: Shape object is not composite nor scaled composite!!";
+                    return;
+                }
             }
             obj->refreshShapeCompositeMembers();
 
@@ -535,8 +538,7 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
                         lRot);
                 lTrans->RegisterYourself();
                 //qDebug() << "  member name:"<<name<<"  trans name:"<<TransName;
-            }           
-
+            }
 
             vol = new TGeoVolume(obj->Name.toLatin1().data(), obj->Shape->createGeoShape(), med);
         }
@@ -672,7 +674,7 @@ void ASandwich::clearGridRecords()
 
 void ASandwich::clearMonitorRecords()
 {
-    MonitorsRecords.clear(); //dont delete - it is just pointers to world tree objects
+    MonitorsRecords.clear(); //do not delete - it contains pointers to world tree objects
     MonitorIdNames.clear();
     MonitorNodes.clear();
 }
@@ -687,7 +689,6 @@ void ASandwich::positionArrayElement(int ix, int iy, int iz, AGeoObject* el, AGe
     double tmpX = el->Position[0];
     double tmpY = el->Position[1];
     double tmpZ = el->Position[2];
-    //double tmpA = el->Orientation[2];
 
     TVector3 v(arrayObj->Position[0] + el->Position[0] + ix*array->stepX,
                arrayObj->Position[1] + el->Position[1] + iy*array->stepY,
@@ -700,11 +701,10 @@ void ASandwich::positionArrayElement(int ix, int iy, int iz, AGeoObject* el, AGe
 
     addTGeoVolumeRecursively(el, parent, GeoManager, MaterialCollection, PMsAndDumPMs, arrayIndex);
 
-    //recovering original position/orientation
+    //recovering original positions
     el->Position[0] = tmpX;
     el->Position[1] = tmpY;
     el->Position[2] = tmpZ;
-    //el->Orientation[2] = tmpA;
 }
 
 void ASandwich::clearModel()
@@ -788,25 +788,26 @@ void ASandwich::ChangeState(ASandwich::SlabState State)
 
 void ASandwich::enforceCommonProperties()
 {
-  // for common states, ensure XY shape or sizes are proper
-  if (SandwichState != ASandwich::Individual)
-    for (int i=0; i<World->HostedObjects.size(); i++)
-      {
-        AGeoObject* obj = World->HostedObjects[i];
-        if (!obj->ObjectType->isSlab()) continue;
+    // for common states, ensure XY shape or sizes are proper
+    if (SandwichState != ASandwich::Individual)
+        for (AGeoObject * obj : World->HostedObjects)
+        {
+            if (!obj->ObjectType->isSlab()) continue;
 
-        obj->getSlabModel()->XYrecord.shape = DefaultXY->shape;
-        obj->getSlabModel()->XYrecord.sides = DefaultXY->sides;
-        obj->getSlabModel()->XYrecord.angle = DefaultXY->angle;
+            ASlabXYModel & m = obj->getSlabModel()->XYrecord;
 
-        if (SandwichState == ASandwich::CommonShapeSize)
-          {
-            obj->getSlabModel()->XYrecord.size1 = DefaultXY->size1;
-            obj->getSlabModel()->XYrecord.size2 = DefaultXY->size2;
-          }
+            m.shape = DefaultXY->shape;
+            m.sides = DefaultXY->sides; m.strSides.clear();
+            m.angle = DefaultXY->angle; m.strAngle.clear();
 
-        obj->UpdateFromSlabModel(obj->getSlabModel());
-      }
+            if (SandwichState == ASandwich::CommonShapeSize)
+            {
+                m.size1 = DefaultXY->size1; m.strSize1.clear();
+                m.size2 = DefaultXY->size2; m.strSize2.clear();
+            }
+
+            obj->UpdateFromSlabModel(obj->getSlabModel());
+        }
 }
 
 bool ASandwich::CalculateZofSlabs()
@@ -908,9 +909,12 @@ void ASandwich::DeleteMaterial(int imat)
     World->DeleteMaterialIndex(imat);
 }
 
-bool ASandwich::isVolumeExist(QString name)
+bool ASandwich::isVolumeExistAndActive(const QString & name) const
 {
-    return (World->findObjectByName(name) != 0);
+    AGeoObject * obj = World->findObjectByName(name);
+    if (!obj) return false;
+
+    return obj->fActive;
 }
 
 void ASandwich::changeLineWidthOfVolumes(int delta)
@@ -918,6 +922,7 @@ void ASandwich::changeLineWidthOfVolumes(int delta)
     World->changeLineWidthRecursive(delta);
 }
 
+#include "ageoconsts.h"
 void ASandwich::writeToJson(QJsonObject &json)
 {
   QJsonObject js;
@@ -957,105 +962,112 @@ void ASandwich::writeToJson(QJsonObject &json)
     }
   js["Slabs"] = arr;
 
-  js["WorldMaterial"] = World->Material;
+  //js["WorldMaterial"] = World->Material;
 
   QJsonArray arrTree;
   World->writeAllToJarr(arrTree);
   js["WorldTree"] = arrTree;
 
+  AGeoConsts::getConstInstance().writeToJson(js);
+
   json["Sandwich"] = js;
 }
 
-void ASandwich::readFromJson(QJsonObject &json)
+QString ASandwich::readFromJson(QJsonObject & json)
 {
-  if (!json.contains("Sandwich"))
+    QString ErrorString;
+    QJsonObject js;
+    bool ok = parseJson(json, "Sandwich", js);
+    if (ok)
     {
-      if (json.contains("SandwichSettings"))
-        {
-          //it is old standard
-          QJsonObject js = json["SandwichSettings"].toObject();
-          bool PrScintCont = json.contains("PrScintCont") && json["PrScintCont"].toBool();
-          importFromOldStandardJson(js, PrScintCont);
-        }
-      else
-        {
-          //critical error - missing Sandwich settings (new or old standard) in the config file!
-          qCritical() << "Critical error: Sandwich (or SandwichSettings) object is missing in the config file!";
-          exit(666);
-        }
-    }
-  else
-  {
-      clearModel();
-      DefaultXY = new ASlabXYModel();
-      ZOriginType = 0;
-      World->Material = 0;
-      SandwichState = ASandwich::CommonShapeSize;
+        clearModel();
+        DefaultXY = new ASlabXYModel();
+        ZOriginType = 0;
+        World->Material = 0;
+        SandwichState = ASandwich::CommonShapeSize;
 
-      QJsonObject js = json["Sandwich"].toObject();
-      if (js.contains("State"))
-        {
-          QString state = js["State"].toString();
-          if (state == "CommonShapeSize") SandwichState = ASandwich::CommonShapeSize;
-          else if (state == "CommonShape") SandwichState = ASandwich::CommonShape;
-          else if (state == "Individual") SandwichState = ASandwich::Individual;
-          else qWarning() << "Unknown Sandwich state in json object!";
-        }
-      if (js.contains("ZeroZ"))
-        {
-          QString ZeroZ = js["ZeroZ"].toString();
-          if (ZeroZ == "Top") ZOriginType = -1;
-          else if (ZeroZ == "Center") ZOriginType = 0;
-          else if (ZeroZ == "Bottom") ZOriginType = 1;
-          else qWarning() << "Unknown Zero plane type in json object!";
-        }
-      if (js.contains("DefaultXY"))
-        {
-          QJsonObject XYjson = js["DefaultXY"].toObject();
-          DefaultXY->readFromJson(XYjson);
-        }
-      if (js.contains("WorldTree"))
-        {
-          //qDebug() << "...Loading WorldTree";
-          QJsonArray arrTree = js["WorldTree"].toArray();
-          World->readAllFromJarr(World, arrTree);
-          //qDebug() << "...done!";
-        }
-      else
-          qDebug() << "...Json does not contain WordTree";
+        QJsonObject js = json["Sandwich"].toObject();
 
+        if (js.contains("GeoConsts"))
+          AGeoConsts::getInstance().readFromJson(js);
 
-      //slabs properties are written in a separate container:
-      //qDebug() << "Loading slab properties";
-      if (js.contains("Slabs"))
+        if (js.contains("State"))
         {
-          QJsonArray arr = js["Slabs"].toArray();
-          //qDebug() << "Slabs found:"<<arr.size();
-          for (int i=0; i<arr.size(); i++)
+            QString state = js["State"].toString();
+            if (state == "CommonShapeSize")  SandwichState = ASandwich::CommonShapeSize;
+            else if (state == "CommonShape") SandwichState = ASandwich::CommonShape;
+            else if (state == "Individual")  SandwichState = ASandwich::Individual;
+            else qWarning() << "Unknown Sandwich state in json object!";
+        }
+        if (js.contains("ZeroZ"))
+        {
+            QString ZeroZ = js["ZeroZ"].toString();
+            if      (ZeroZ == "Top")    ZOriginType = -1;
+            else if (ZeroZ == "Center") ZOriginType = 0;
+            else if (ZeroZ == "Bottom") ZOriginType = 1;
+            else qWarning() << "Unknown Zero plane type in json object!";
+        }
+        if (js.contains("DefaultXY"))
+        {
+            QJsonObject XYjson = js["DefaultXY"].toObject();
+            DefaultXY->readFromJson(XYjson);
+        }
+
+        if (js.contains("WorldTree"))
+        {
+            //qDebug() << "...Loading WorldTree";
+            QJsonArray arrTree = js["WorldTree"].toArray();
+            ErrorString = World->readAllFromJarr(World, arrTree);
+            //qDebug() << "...done!";
+        }
+        else qWarning() << "...Json does not contain WordTree!"; // !*! is itr a critical error?
+
+        //slabs properties are written in a separate container:
+        //qDebug() << "Loading slab properties";
+        if (js.contains("Slabs"))
+        {
+            QJsonArray arr = js["Slabs"].toArray();
+            //qDebug() << "Slabs found:"<<arr.size();
+            for (int i=0; i<arr.size(); i++)
             {
-              QJsonObject j = arr[i].toObject();
-              ASlabModel* r = new ASlabModel();
-              r->readFromJson(j);
+                QJsonObject j = arr[i].toObject();
+                ASlabModel* r = new ASlabModel();
+                r->readFromJson(j);
 
-              AGeoObject* obj = World->findObjectByName(r->name);
-              if (!obj)
-              {
-                  qWarning() << "Slab"<<r->name<<"object not found! Creating new slab!";
-                  appendSlab(r);
-              }
-              else
-              {
-                  //qDebug() << "Updating slab:"<<obj->Name;
-                  delete obj->getSlabModel();
-                  obj->setSlabModel(r);
-                  obj->UpdateFromSlabModel(r);
-              }
+                AGeoObject* obj = World->findObjectByName(r->name);
+                if (!obj)
+                {
+                    qWarning() << "Slab"<<r->name<<"object not found! Creating new slab!";
+                    appendSlab(r);
+                }
+                else
+                {
+                    //qDebug() << "Updating slab:"<<obj->Name;
+                    delete obj->getSlabModel();
+                    obj->setSlabModel(r);
+                    obj->UpdateFromSlabModel(r);
+                }
             }
         }
+        if (js.contains("WorldMaterial")) World->Material = js["WorldMaterial"].toInt();
 
-      if (js.contains("WorldMaterial")) World->Material = js["WorldMaterial"].toInt();
-  }
+    }
+    else if (json.contains("SandwichSettings"))
+    {
+        //old system
+        qDebug() << "==Config uses deprecated system of saving detector settings!==";
+        QJsonObject js = json["SandwichSettings"].toObject();
+        bool PrScintCont = json.contains("PrScintCont") && json["PrScintCont"].toBool();
+        importFromOldStandardJson(js, PrScintCont);
+    }
+    else
+    {
+        //critical error - missing Sandwich settings (new or old standard) in the config file!
+        qCritical() << "Critical error: Sandwich (or SandwichSettings) object is missing in the config file!";
+        exit(666);
+    }
 
+  // Compatibility with some old standards
   if (json.contains("AddGeoObjects"))
   {
       qDebug() << "==Found old system of GeoObjects (replaced now by GeoTree)";
@@ -1180,9 +1192,12 @@ void ASandwich::readFromJson(QJsonObject &json)
         }
   }
 
+  // stacks can be updated only now, when values using geoConsts have been evaluated
+  World->updateAllStacks();
+
   //qDebug() << "Finished, requesting GUI update";
-  emit RequestGuiUpdate(); // DOES NOT updates the detector!
-  //UpdateDetector();
+  emit RequestGuiUpdate(); // DOES NOT update the detector!
+  return ErrorString;
 }
 
 void ASandwich::importOldMask(QJsonObject &json)
@@ -1520,5 +1535,51 @@ void ASandwich::RemoveParticle(int particleId)
       ATypeMonitorObject* mon = static_cast<ATypeMonitorObject*>(monObj->ObjectType);
 
       if ( mon->config.ParticleIndex > particleId ) mon->config.ParticleIndex--;
+  }
+}
+
+bool ASandwich::isWorldSizeFixed() const
+{
+    ATypeWorldObject * wt = static_cast<ATypeWorldObject*>(World->ObjectType);
+    return wt->bFixedSize;
+}
+
+void ASandwich::setWorldSizeFixed(bool bFlag)
+{
+    ATypeWorldObject * wt = static_cast<ATypeWorldObject*>(World->ObjectType);
+    wt->bFixedSize = bFlag;
+}
+
+double ASandwich::getWorldSizeXY() const
+{
+    AGeoBox * box = dynamic_cast<AGeoBox*>(World->Shape);
+    return ( box ? box->dx : 0 );
+}
+
+void ASandwich::setWorldSizeXY(double size)
+{
+    AGeoBox * box = dynamic_cast<AGeoBox*>(World->Shape);
+    if (box)
+    {
+        box->dx = size;
+        box->dy = size;
+        box->str2dx.clear();
+        box->str2dy.clear();
+    }
+}
+
+double ASandwich::getWorldSizeZ() const
+{
+    AGeoBox * box = dynamic_cast<AGeoBox*>(World->Shape);
+    return ( box ? box->dz : 0 );
+}
+
+void ASandwich::setWorldSizeZ(double size)
+{
+    AGeoBox * box = dynamic_cast<AGeoBox*>(World->Shape);
+    if (box)
+    {
+        box->dz = size;
+        box->str2dz.clear();
     }
 }

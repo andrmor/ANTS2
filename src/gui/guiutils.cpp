@@ -15,11 +15,12 @@ void GuiUtils::SetWindowFont(QMainWindow *w, int ptsize)
     w->setFont(font);
 }
 
-void GuiUtils::AssureWidgetIsWithinVisibleArea(QWidget *w)
+bool GuiUtils::AssureWidgetIsWithinVisibleArea(QWidget *w)
 {
     QList<QScreen *> listScr = qApp->screens();
+
     bool bVis = false;
-    for (QScreen* scr : listScr)
+    for (QScreen * scr : listScr)
     {
         QRect ts = scr->geometry();
         if (ts.contains(w->x(), w->y()))
@@ -29,6 +30,8 @@ void GuiUtils::AssureWidgetIsWithinVisibleArea(QWidget *w)
         }
     }
     if (!bVis) w->move(50,50);
+
+    return bVis;
 }
 
 QIcon GuiUtils::createColorCircleIcon(QSize size, Qt::GlobalColor color)

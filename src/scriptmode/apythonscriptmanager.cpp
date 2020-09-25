@@ -91,6 +91,20 @@ QString APythonScriptManager::Evaluate(const QString & Script)
 
   emit onStart();
 
+  //running InitOnRun method (if defined) for all defined interfaces
+  for (int i=0; i<interfaces.size(); i++)
+  {
+        AScriptInterface* bi = dynamic_cast<AScriptInterface*>(interfaces[i]);
+        if (bi)
+        {
+            if (!bi->InitOnRun())
+            {
+                LastError = "Init failed for unit: "+interfaces.at(i)->objectName();
+                return LastError;
+            }
+        }
+  }
+
   fEngineIsRunning = true;
 
   PythonQtObjectPtr mainModule = PythonQt::self()->getMainModule();

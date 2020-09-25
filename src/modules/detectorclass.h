@@ -47,16 +47,11 @@ public:
 
   bool fSecScintPresent = false;
 
-  double WorldSizeXY   = 500.0;
-  double WorldSizeZ    = 500.0;
-  bool fWorldSizeFixed = false;  //fixed and defined by GUI
-
   QString ErrorString;
 
   DetectorClass(AConfiguration* config);
   ~DetectorClass();
 
-  bool MakeDetectorFromJson(QJsonObject &json);
   bool BuildDetector(bool SkipSimGuiUpdate = false, bool bSkipAllUpdates = false);   // build detector from JSON //on load config, set SkipSimGuiUpdate = true since json is still old!
   bool BuildDetector_CallFromScript(); // save current detector to JSON, then call BuildDetector()
 
@@ -68,16 +63,16 @@ public:
   void clearGDML();
   int  checkGeoOverlaps();   // checks for overlaps in the geometry (GeoManager) and returns the number of overlaps
   void checkSecScintPresent();
-  void colorVolumes(int scheme, int id = 0);
+  void colorVolumes(int scheme, int id = 0);  // !*! can be very slow for large detectors!
   int  pmCount() const;
   void findPM(int ipm, int &ul, int &index);
-  const QString removePMtype(int itype);
+  QString removePMtype(int itype);
   void assignSaveOnExitFlag(const QString & VolumeName);
   void clearTracks();
   void assureNavigatorPresent();
 
   //write to Json - can be used from outside
-  void writeWorldFixedToJson(QJsonObject &json);
+  //void writeWorldFixedToJson(QJsonObject &json);
   void writePMarraysToJson(QJsonObject &json);
   void writeDummyPMsToJson(QJsonObject &json);  
   void writeGDMLtoJson(QJsonObject &json);
@@ -95,7 +90,7 @@ public slots:
 
 private:
   //reads
-  void readWorldFixedFromJson(QJsonObject &json);
+  bool readWorldFixedFromJson(const QJsonObject & json);
   bool readPMarraysFromJson(QJsonObject &json);
   bool readDummyPMsFromJson(QJsonObject &json);
 

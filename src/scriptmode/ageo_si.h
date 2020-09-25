@@ -40,10 +40,18 @@ public slots:
 
   void TGeo(QString name, QString generationString, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi);
 
+  //void Slab(QString name, int imat, double height, double size1, double size2, int shape, double angle, int sides);
+  void SlabRectangular(QString name, int imat, double height, double size1, double size2, double angle);
+  void SlabRound(QString name, int imat, double height, double diameter);
+  void SlabPolygon(QString name, int imat, double height, double outsideDiamater, double angle, int sides);
+  void SetCenterSlab(QString name, int iType);
+  void SetCommonSlabMode(int iMode);
+  void SetCommonSlabProperties(int shape, double size1, double size2, double angle, int sides);
+
   void RecalculateStack(QString name);
 
   void MakeStack(QString name, QString container);
-  void InitializeStack(QString StackName, QString Origin_MemberName);
+  void InitializeStack(QString StackName, QString MemberName_StackReference);
 
   void MakeGroup(QString name, QString container);
 
@@ -74,6 +82,10 @@ signals:
 private:
   DetectorClass* Detector;
   void clearGeoObjects();
+
+  QString ZeroSlabName;
+  int     ZeroSlabType = 0;
+  int     SlabMode = -1;
 };
 
 #endif // AINTERFACETOADDOBJSCRIPT_H

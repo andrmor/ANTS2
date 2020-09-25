@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>812</width>
-    <height>473</height>
+    <width>1048</width>
+    <height>543</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -65,7 +65,7 @@
                <x>0</x>
                <y>0</y>
                <width>346</width>
-               <height>362</height>
+               <height>407</height>
               </rect>
              </property>
             </widget>
@@ -151,13 +151,13 @@
            <widget class="QFrame" name="frObjectEditor">
             <property name="minimumSize">
              <size>
-              <width>450</width>
+              <width>475</width>
               <height>344</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>450</width>
+              <width>475</width>
               <height>17700</height>
              </size>
             </property>
@@ -268,6 +268,62 @@
           </item>
          </layout>
         </item>
+        <item>
+         <widget class="QTableWidget" name="tabwConstants">
+          <property name="minimumSize">
+           <size>
+            <width>120</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="contextMenuPolicy">
+           <enum>Qt::CustomContextMenu</enum>
+          </property>
+          <property name="rowCount">
+           <number>10</number>
+          </property>
+          <attribute name="horizontalHeaderStretchLastSection">
+           <bool>true</bool>
+          </attribute>
+          <attribute name="verticalHeaderVisible">
+           <bool>false</bool>
+          </attribute>
+          <attribute name="verticalHeaderDefaultSectionSize">
+           <number>23</number>
+          </attribute>
+          <attribute name="verticalHeaderMinimumSectionSize">
+           <number>21</number>
+          </attribute>
+          <attribute name="verticalHeaderStretchLastSection">
+           <bool>false</bool>
+          </attribute>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <column>
+           <property name="text">
+            <string>Constant</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Value</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Expression</string>
+           </property>
+          </column>
+         </widget>
+        </item>
        </layout>
       </widget>
       <widget class="QWidget" name="tabDummyPMs">
@@ -313,6 +369,11 @@
             </item>
             <item>
              <widget class="QPushButton" name="pbLoadDummyPMs">
+              <property name="toolTip">
+               <string>Format:
+One line per dummy PM,
+Type Upper_0/lower_1 x y z phi theta psi</string>
+              </property>
               <property name="text">
                <string>Load dummy PMs from file</string>
               </property>
@@ -1295,6 +1356,42 @@
     </item>
    </layout>
   </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1048</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuUndo_redo">
+    <property name="title">
+     <string>Undo</string>
+    </property>
+    <addaction name="actionUndo"/>
+    <addaction name="separator"/>
+    <addaction name="actionRedo"/>
+    <addaction name="separator"/>
+    <addaction name="actionExperimental_feature"/>
+   </widget>
+   <addaction name="menuUndo_redo"/>
+  </widget>
+  <action name="actionUndo">
+   <property name="text">
+    <string>Undo</string>
+   </property>
+  </action>
+  <action name="actionRedo">
+   <property name="text">
+    <string>Redo (back from Undo)</string>
+   </property>
+  </action>
+  <action name="actionExperimental_feature">
+   <property name="text">
+    <string>Undo/redo is an experimental feature!</string>
+   </property>
+  </action>
  </widget>
  <tabstops>
   <tabstop>lePMlist</tabstop>

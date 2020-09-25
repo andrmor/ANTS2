@@ -4,7 +4,6 @@
 #include <QObject>
 #include <QStringList>
 #include <QVector>
-
 #include "apmanddummy.h"
 
 class ASlabModel;
@@ -33,6 +32,7 @@ public:
   void insertSlab(int index, ASlabModel* slab);
   int countSlabs();
   AGeoObject* findSlabByIndex(int index);
+  void enforceCommonProperties();
 
   //lightguide handling
   AGeoObject* getUpperLightguide();  // 0 if not defined
@@ -62,25 +62,33 @@ public:
   void UpdateDetector(); //trigger this to update the detector
   void ChangeState(ASandwich::SlabState State); //triggered by GUI
   bool CalculateZofSlabs();
-  QStringList GetMaterials() const {return Materials;}   // to const QStringList &
+  QStringList GetMaterials() const {return Materials;}
   bool isMaterialsEmpty() {return Materials.isEmpty();}
   bool isMaterialInUse(int imat);
   void DeleteMaterial(int imat);
-  bool isVolumeExist(QString name);
+  bool isVolumeExistAndActive(const QString & name) const;
   void changeLineWidthOfVolumes(int delta);
 
   // JSON
   void writeToJson(QJsonObject& json);
-  void readFromJson(QJsonObject& json);
+  QString readFromJson(QJsonObject& json);  // returnd "" if no errors, else error description
 
   // for particle remove - handled by AConfiguration!
   void IsParticleInUse(int particleId, bool &bInUse, QString& MonitorNames);
   void RemoveParticle(int particleId); //should NOT be used to remove one of particles in use! use onIsPareticleInUse first
 
-  ASandwich::SlabState SandwichState;
+  //World size-related
+  bool   isWorldSizeFixed() const;
+  void   setWorldSizeFixed(bool bFlag);
+  double getWorldSizeXY() const;
+  void   setWorldSizeXY(double size);
+  double getWorldSizeZ() const;
+  void   setWorldSizeZ(double size);
+
+  ASandwich::SlabState SandwichState = CommonShapeSize;
   QStringList Materials;  // list of currently defined materials
-  ASlabXYModel* DefaultXY;
-  int ZOriginType; //-1 top, 0 mid, 1 bottom (of the slab with fCenter = true)
+  ASlabXYModel * DefaultXY = nullptr;
+  int ZOriginType = 0; //-1 top, 0 mid, 1 bottom (of the slab with fCenter = true)
   QVector<AGridElementRecord*> GridRecords;
 
   // pointers to monitors
@@ -94,16 +102,15 @@ public:
   QString LastError;  
 
 signals:
-  void RequestGuiUpdate();       //does NOT trigger remake detector in GUI mode
-  void RequestRebuildDetector(); //triggers remake detector in GUI mode
+  void RequestGuiUpdate();       //   !*! obsolete?
+  void RequestRebuildDetector();
   void WarningMessage(QString);
 
 public slots:
-  void onMaterialsChanged(const QStringList MaterialList);
+  void onMaterialsChanged(const QStringList MaterialList);  // !*! obsolete?
 
 private:
   void clearModel();
-  void enforceCommonProperties();
   void importFromOldStandardJson(QJsonObject& json, bool fPrScintCont);
   void importOldLightguide(QJsonObject& json, bool upper);
   void importOldMask(QJsonObject &json);

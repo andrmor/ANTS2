@@ -137,8 +137,8 @@ public:
     bool Extraction();
 
     void ClearBasket();
-    TObject *GetMainPlottedObject();
-    void SaveGraph(QString fileName);    
+    TObject * GetMainPlottedObject();
+    void SaveGraph(const QString & fileName);
     void EnforceOverlayOff();    
     void ClearDrawObjects_OnShutDown(); //precvents crash on shut down
     void RegisterTObject(TObject* obj);

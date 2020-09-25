@@ -1301,6 +1301,18 @@ AGeoObject * AGeoObject::makeClone(AGeoObject * World)
         return nullptr;
     }
 
+    //there could be only one slab
+    if (clone->ObjectType->isSlab())
+    {
+        ATypeSlabObject * slabCloned = static_cast<ATypeSlabObject*>(clone->ObjectType);
+        ATypeSlabObject * slabOriginal = static_cast<ATypeSlabObject*>(ObjectType);
+        *slabCloned = *slabOriginal;
+        slabCloned->SlabModel->name = clone->Name;          // name is updated only in the object
+        slabCloned->SlabModel->fCenter = false;             // in case center slab was cloned
+        qDebug() << slabCloned->SlabModel->material << slabOriginal->SlabModel->material;
+        clone->UpdateFromSlabModel(slabCloned->SlabModel);  // need to update material index
+    }
+
     //updating names to make them unique
     if (World)
     {

@@ -919,8 +919,11 @@ void AGeoTreeWidget::menuActionCloneObject(AGeoObject * obj)
 {
     if (!obj) return;
     if (obj->ObjectType->isWorld()) return;
-
-    //if ( !(obj->ObjectType->isSingle() || obj->ObjectType->isSlab() || obj->ObjectType->isMonitor()) ) return; //supported so far only Single and Slab
+    if (obj->ObjectType->isSlab())
+    {
+        message("Cannot clone slabs in this way, use widget at the main window", this);
+        return;
+    }
 
     AGeoObject * clone = obj->makeClone(World);
     if (!clone)
@@ -932,63 +935,14 @@ void AGeoTreeWidget::menuActionCloneObject(AGeoObject * obj)
     if (clone->PositionStr[2].isEmpty()) clone->Position[2] += 10.0;
     else clone->PositionStr[2] += " + 10";
 
-    if (clone->ObjectType->isSlab())
-    {
-        qDebug() << "aaaaaaaaaaaaaaaa";
-        /*
-        ATypeSlabObject * slab      = static_cast<ATypeSlabObject*>(obj->ObjectType);
-        ATypeSlabObject * slabClone = static_cast<ATypeSlabObject*>(clone->ObjectType);
-        *slabClone = *slab;
-        slabClone->SlabModel->name = clone->Name;
-        slabClone->SlabModel->fCenter = false;
-        clone->UpdateFromSlabModel(slabClone->SlabModel);
-        */
-    }
-
-    // adding cloned object to the World
     AGeoObject * container = obj->Container;
     if (!container) container = World;
     container->addObjectFirst(clone);  //inserts to the first position in the list of HostedObjects!
     clone->repositionInHosted(obj, true);
 
-    // rebuild detector and pop-up delegate with the clone
     const QString name = clone->Name;
     emit RequestRebuildDetector();
     emit RequestHighlightObject(name);
-
-  /*
-  if (obj->ObjectType->isSlab())  // obsolete?
-  {
-    ATypeSlabObject* slab = static_cast<ATypeSlabObject*>(obj->ObjectType);
-    obj->UpdateFromSlabModel(slab->SlabModel);
-  }
-
-  AGeoObject * newObj = new AGeoObject(obj);
-
-  if (obj->ObjectType->isMonitor())
-  {
-      do newObj->Name = AGeoObject::GenerateRandomMonitorName();
-      while (World->isNameExists(newObj->Name));
-
-      ATypeMonitorObject * mt = new ATypeMonitorObject();
-      delete newObj->ObjectType; newObj->ObjectType = mt;
-      mt->config = static_cast<ATypeMonitorObject*>(obj->ObjectType)->config;
-  }
-  else
-  {
-      while (World->isNameExists(newObj->Name))
-        newObj->Name = AGeoObject::GenerateRandomObjectName();
-  }
-
-  AGeoObject * container = obj->Container;
-  if (!container) container = World;
-  container->addObjectFirst(newObj);  //inserts to the first position in the list of HostedObjects!
-
-  const QString name = newObj->Name;
-  emit RequestRebuildDetector();
-  emit RequestHighlightObject(name);
-  UpdateGui(name);
-  */
 }
 
 void AGeoTreeWidget::menuActionAddNewObject(AGeoObject * ContObj, AGeoShape * shape)

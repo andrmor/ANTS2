@@ -62,6 +62,7 @@ protected:
 public:
     //for multithread-in-scripting
     QScriptValue    EvaluationResult;
+    int             MaxThreads = -1;
 
 private:
     QScriptEngine * engine = nullptr;

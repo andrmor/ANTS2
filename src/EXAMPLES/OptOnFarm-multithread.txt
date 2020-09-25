@@ -1,0 +1,102 @@
+//Contributed by Kira Morozova
+
+var NumPoints = 100
+
+var Servers = farm.getServers() //all servers, including unavailable ones
+var AvailableServers = 0 
+for (var i = 0; i<Servers.length; i++) 
+       if (Servers[i][0] != 0) AvailableServers++
+if (AvailableServers == 0) core.abort("No remote servers found")
+
+var DataArray = []
+var PointsDone = 0
+var NumPointsPerServer = Math.floor(NumPoints / AvailableServers)
+for (var i = 0; i < AvailableServers; i++)
+{
+       var ar = []
+       var offset = NumPointsPerServer * i
+
+       if (i == (AvailableServers - 1)) 
+              NumPointsPerServer = NumPoints - PointsDone   //the last server gets all the remaining points
+       PointsDone += NumPointsPerServer
+
+       for (var j = 0; j < NumPointsPerServer; j++) ar.push(j + offset)
+       DataArray.push(ar)
+}
+
+function threadWorker(from, to)
+{
+       var RealFrequency = 2.5
+       var RealPhase = 1.0
+       var d2 = 0
+       for (var k = from; k < to; k++)
+       {
+              var trueVal = Math.sin(RealFrequency * Data[k]*3.1415926/50 + RealPhase)
+              var testVal = Math.sin(Freq          * Data[k]*3.1415926/50 + Phase)
+              d2 += (trueVal - testVal) * (trueVal - testVal)
+       }
+       return d2
+}
+
+function sf() // script to be used on servers
+{
+       threads.deleteAll()
+
+       var numThreads = threads.getMaxNumThreads()
+       var blockSize = Math.floor( Data.length / numThreads )
+       if  (Data.length % numThreads != 0) blockSize++
+       
+       var from = 0
+       while (from < Data.length)
+       {
+              var to = from + blockSize
+              if (to > Data.length) to = Data.length
+              threads.evaluateFunction(threadWorker, [from, to])
+              from = to
+       }
+       threads.waitForAll()
+       
+       var Result = 0
+       for (var j = 0; j < numThreads; j++) Result += threads.getResult(j)
+       threads.deleteAll()
+       
+       return Result
+}
+
+var StaticScript = threadWorker.toString() + ";\n" + sf.toString() + ";\nsf()"
+
+msg.Clear()
+msg.Show()
+msg.Resize(700, 600)
+var bestDelta = 1e30
+
+mini.Clear()
+mini.SetFunctorName("Functor")
+mini.AddVariable("Freq", 2.0,  0.5, 0, 4)
+mini.AddVariable("Phas", 0.5,  0.5, 0, 3.1415926)
+mini.Run()
+
+function Functor()
+{
+  var freq =  arguments[0]
+  var phase = arguments[1]
+
+  var Script = "var Freq = " + freq + "; " + "var Phase = " + phase + ";\n" + StaticScript
+
+  var Result = farm.evaluateScript(Script, DataArray, [])
+  core.print(Result)
+  
+  var delta = 0
+  for (var i = 0; i < Result.length; i++) delta += Result[i];
+
+  var s = ""
+  if (delta < bestDelta)
+  {
+         bestDelta = delta
+         s += "+++ "
+  }
+  s += " Frequency: " + freq + "   Phase: " + phase +" Delta: " + delta
+  msg.Append(s)
+
+  return delta
+}

@@ -7380,9 +7380,9 @@ Second click will trigger strong abort mode, which will result in loss of all si
            <widget class="QLabel" name="label_65">
             <property name="geometry">
              <rect>
-              <x>214</x>
+              <x>212</x>
               <y>75</y>
-              <width>21</width>
+              <width>30</width>
               <height>16</height>
              </rect>
             </property>
@@ -7441,9 +7441,9 @@ Second click will trigger strong abort mode, which will result in loss of all si
            <widget class="QLabel" name="label_66">
             <property name="geometry">
              <rect>
-              <x>311</x>
+              <x>309</x>
               <y>75</y>
-              <width>21</width>
+              <width>30</width>
               <height>16</height>
              </rect>
             </property>
@@ -13762,8 +13762,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>201</x>
-     <y>540</y>
+     <x>203</x>
+     <y>571</y>
     </hint>
     <hint type="destinationlabel">
      <x>280</x>
@@ -14290,8 +14290,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>179</x>
-     <y>467</y>
+     <x>181</x>
+     <y>498</y>
     </hint>
     <hint type="destinationlabel">
      <x>464</x>
@@ -14354,8 +14354,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>293</x>
-     <y>382</y>
+     <x>295</x>
+     <y>413</y>
     </hint>
     <hint type="destinationlabel">
      <x>468</x>
@@ -14386,8 +14386,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>317</x>
-     <y>442</y>
+     <x>319</x>
+     <y>473</y>
     </hint>
     <hint type="destinationlabel">
      <x>514</x>
@@ -15298,8 +15298,8 @@ multiply to loaded data</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>179</x>
-     <y>467</y>
+     <x>181</x>
+     <y>498</y>
     </hint>
     <hint type="destinationlabel">
      <x>350</x>
@@ -15330,8 +15330,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>249</x>
-     <y>472</y>
+     <x>251</x>
+     <y>503</y>
     </hint>
     <hint type="destinationlabel">
      <x>502</x>
@@ -15346,8 +15346,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>233</x>
-     <y>458</y>
+     <x>235</x>
+     <y>489</y>
     </hint>
     <hint type="destinationlabel">
      <x>489</x>
@@ -15362,8 +15362,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>233</x>
-     <y>496</y>
+     <x>235</x>
+     <y>527</y>
     </hint>
     <hint type="destinationlabel">
      <x>503</x>
@@ -15394,8 +15394,8 @@ multiply to loaded data</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>239</x>
-     <y>442</y>
+     <x>241</x>
+     <y>473</y>
     </hint>
     <hint type="destinationlabel">
      <x>437</x>
@@ -15410,8 +15410,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>390</x>
-     <y>479</y>
+     <x>392</x>
+     <y>510</y>
     </hint>
     <hint type="destinationlabel">
      <x>490</x>
@@ -15426,8 +15426,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>239</x>
-     <y>442</y>
+     <x>241</x>
+     <y>473</y>
     </hint>
     <hint type="destinationlabel">
      <x>447</x>
@@ -15522,8 +15522,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>249</x>
-     <y>495</y>
+     <x>251</x>
+     <y>526</y>
     </hint>
     <hint type="destinationlabel">
      <x>416</x>
@@ -15554,8 +15554,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>318</x>
-     <y>474</y>
+     <x>320</x>
+     <y>505</y>
     </hint>
     <hint type="destinationlabel">
      <x>438</x>

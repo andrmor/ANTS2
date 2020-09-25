@@ -10,6 +10,11 @@ class ARootHttpServer;
 class TObject;
 class AJavaScriptManager;
 
+class AGridRunner;
+class EventsDataClass;
+class APmHub;
+class ASimulationManager;
+
 class ANetworkModule : public QObject
 {
     Q_OBJECT
@@ -32,11 +37,14 @@ public:
 
     AWebSocketSessionServer* WebSocketServer = 0;
 #ifdef USE_ROOT_HTML
-public: ARootHttpServer* RootHttpServer = 0;
+    ARootHttpServer* RootHttpServer = 0;
 #endif
 
     void StartWebSocketServer(QHostAddress ip, quint16 port);
     void StopWebSocketServer();
+
+    AGridRunner * GridRunner = nullptr;
+    void initGridRunner(EventsDataClass &EventsDataHub, const APmHub &PMs, ASimulationManager &simMan);
 
 public slots:
   bool StartRootHttpServer();
@@ -45,6 +53,7 @@ public slots:
   void onNewGeoManagerCreated();
   void OnWebSocketTextMessageReceived(QString message);
   void OnClientDisconnected();
+  void RestartIdleTimer();
 
 signals:
   void StatusChanged();

@@ -981,6 +981,16 @@ QVariant ACore_SI::GetNewFiles()
     return newFiles;
 }
 
+QVariantList ACore_SI::GetDirectories(const QString dir, const QString dirNamePattern)
+{
+    QDir d(dir);
+    QStringList dl = d.entryList( QStringList(dirNamePattern), QDir::Dirs);
+
+    QVariantList Dirs;
+    for (const QString & s : dl) Dirs << s;
+    return Dirs;
+}
+
 void ACore_SI::processEvents()
 {
     qApp->processEvents();

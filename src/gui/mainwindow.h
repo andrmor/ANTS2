@@ -174,10 +174,12 @@ public slots:
     void on_pbSingleSourceShow_clicked();
     void ShowGeometrySlot();
     void UpdateMaterialListEdit();
+    void onGridSimulationFinished();
 
 private slots:
     void updateFileParticleGeneratorGui();
     void updateScriptParticleGeneratorGui();
+    void updateConfig();
 
     void on_pbRefreshMaterials_clicked();
     void on_cbXbyYarray_stateChanged(int arg1);

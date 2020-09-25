@@ -10,7 +10,7 @@ ANTS2_MINOR = 32
 #CONFIG += ants2_fann        #enables FANN (fast neural network) library: see https://github.com/libfann/fann
 CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra - highly recommended! Installation requires only to copy files!
 #CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
-CONFIG += ants2_Python      #enable Python scripting
+#CONFIG += ants2_Python      #enable Python scripting
 #CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering): see https://github.com/mctools/ncrystal
 #CONFIG += ants2_jsroot       #enables JSROOT visualisation at GeometryWindow. Automatically enables ants2_RootServer
 
@@ -422,7 +422,8 @@ SOURCES += main.cpp \
     gui/DAWindowTools/agridelementdelegate.cpp \
     gui/DAWindowTools/ageoobjectdelegate.cpp \
     gui/DAWindowTools/aonelinetextedit.cpp \
-    gui/RasterWindow/acameracontroldialog.cpp
+    gui/RasterWindow/acameracontroldialog.cpp \
+    scriptmode/afarm_si.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -591,7 +592,8 @@ HEADERS  += common/CorrelationFilters.h \
     gui/DAWindowTools/agridelementdelegate.h \
     gui/DAWindowTools/ageoobjectdelegate.h \
     gui/DAWindowTools/aonelinetextedit.h \
-    gui/RasterWindow/acameracontroldialog.h
+    gui/RasterWindow/acameracontroldialog.h \
+    scriptmode/afarm_si.h
 
 # --- SIM ---
 ants2_SIM {

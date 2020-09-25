@@ -783,7 +783,7 @@ void MainWindow::on_pbGenerateFromFile_Help_clicked()
                 "Each new entry starts either with a (char)EE or a (char)FF\n"
                 "0xEE is followed by the event number (int),\n"
                 "0xFF is followed by the particle record, which is\n"
-                "ParticleName X Y Z DirX DirY DirZ Time\n"
+                "ParticleName Energy X Y Z DirX DirY DirZ Time\n"
                 "where ParticleName is 0-terminated string and the rest are doubles\n"
                 "\n"
                 "Energy is in keV, Position is in mm,\n"

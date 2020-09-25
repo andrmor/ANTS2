@@ -135,6 +135,8 @@ public:
 
   bool isContainerValidForDrop(QString &errorStr) const;
 
+  AGeoObject * makeClone(AGeoObject * World); // returns nullptr if failed; garantees unique names if World is not nullptr; Slabs are not properly cloned while there is a special container with them!
+
   //service propertie
   QString tmpContName;   //used only during load
   bool fExpanded = true; //gui only - is this object expanded in tree view
@@ -143,6 +145,8 @@ private:
   AGeoObject * findContainerUp(const QString & name);
 
   void constructorInit();
+
+  void enforceUniqueNameForCloneRecursive(AGeoObject * World, AGeoObject & tmpContainer);
 
 public:
   static QString GenerateRandomName();
@@ -156,6 +160,8 @@ public:
   static QString GenerateRandomGroupName();
   static QString GenerateRandomStackName();
   static QString GenerateRandomMonitorName();
+
+  static QString generateCloneObjName(const QString & initialName);
 
 };
 

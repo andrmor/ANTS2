@@ -31,6 +31,7 @@
 #include <QPainter>
 #include <QClipboard>
 #include <QShortcut>
+#include <QStringList>
 
 #include "TMath.h"
 #include "TGeoShape.h"
@@ -530,7 +531,7 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
 {  
   QMenu menu;
 
-  QAction* focusObjectA = Action(menu, "Show - focus geometry view");
+  QAction* focusObjA = Action(menu, "Show - focus geometry view");
   QAction* showA     = Action(menu, "Show - highlight in geometry");
   QAction* showAdown = Action(menu, "Show - this object with content");
   QAction* showAonly = Action(menu, "Show - only this object");
@@ -572,7 +573,7 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
 
   menu.addSeparator();
 
-  QAction* copyA = Action(menu, "Duplicate this object");
+  QAction* cloneA = Action(menu, "Clone this object");
 
   menu.addSeparator();
 
@@ -637,7 +638,7 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
       newArrayA->setEnabled(fNotGridNotMonitor && !ObjectType.isArray());
       newMonitorA->setEnabled(fNotGridNotMonitor && !ObjectType.isArray());
       newGridA->setEnabled(fNotGridNotMonitor);
-      copyA->setEnabled( ObjectType.isSingle() || ObjectType.isSlab() || ObjectType.isMonitor());  //supported so far only Single, Slab and Monitor
+      cloneA->setEnabled(true);  // ObjectType.isSingle() || ObjectType.isSlab() || ObjectType.isMonitor());  //supported so far only Single, Slab and Monitor
       removeHostedA->setEnabled(fNotGridNotMonitor);
       removeThisAndHostedA->setEnabled(!ObjectType.isWorld());
       removeA->setEnabled(!ObjectType.isWorld());
@@ -646,7 +647,7 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
       lockallA->setEnabled(true);
       unlockallA->setEnabled(true);
       lineA->setEnabled(true);
-      focusObjectA->setEnabled(true);
+      focusObjA->setEnabled(true);
       showA->setEnabled(true);
       showAonly->setEnabled(true);
       showAdown->setEnabled(true);
@@ -666,7 +667,7 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
   if (!SelectedAction) return; //nothing was selected
 
   // -- EXECUTE SELECTED ACTION --
-  if (SelectedAction == focusObjectA)  // FOCUS OBJECT
+  if (SelectedAction == focusObjA)  // FOCUS OBJECT
   {
       emit RequestFocusObject(objName);
       UpdateGui(objName);
@@ -700,7 +701,7 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
   else if (SelectedAction == newMonitorA)    menuActionAddNewMonitor(obj);
   else if (SelectedAction == addUpperLGA || SelectedAction == addLoweLGA) // ADD LIGHTGUIDE
      addLightguide(SelectedAction == addUpperLGA);
-  else if (SelectedAction == copyA)          menuActionCopyObject(obj);   // COPY
+  else if (SelectedAction == cloneA)         menuActionCloneObject(obj);  // CLONE
   else if (SelectedAction == stackA)         formStack(selected);         // Form STACK
   else if (SelectedAction == stackRefA)      markAsStackRefVolume(obj);
   else if (SelectedAction == lockA)          menuActionLock();            // LOCK
@@ -914,29 +915,64 @@ void AGeoTreeWidget::menuActionLock()
   else UpdateGui();
 }
 
-void AGeoTreeWidget::menuActionCopyObject(AGeoObject * ObjToCopy)
+void AGeoTreeWidget::menuActionCloneObject(AGeoObject * obj)
 {
-  if (!ObjToCopy) return;
-  if (ObjToCopy->ObjectType->isWorld()) return;
+    if (!obj) return;
+    if (obj->ObjectType->isWorld()) return;
 
-  if ( !(ObjToCopy->ObjectType->isSingle() || ObjToCopy->ObjectType->isSlab() || ObjToCopy->ObjectType->isMonitor()) ) return; //supported so far only Single and Slab
+    //if ( !(obj->ObjectType->isSingle() || obj->ObjectType->isSlab() || obj->ObjectType->isMonitor()) ) return; //supported so far only Single and Slab
 
-  if (ObjToCopy->ObjectType->isSlab())  // obsolete?
+    AGeoObject * clone = obj->makeClone(World);
+    if (!clone)
+    {
+        message("Failed to clone object " + obj->Name);
+        return;
+    }
+
+    if (clone->PositionStr[2].isEmpty()) clone->Position[2] += 10.0;
+    else clone->PositionStr[2] += " + 10";
+
+    if (clone->ObjectType->isSlab())
+    {
+        qDebug() << "aaaaaaaaaaaaaaaa";
+        /*
+        ATypeSlabObject * slab      = static_cast<ATypeSlabObject*>(obj->ObjectType);
+        ATypeSlabObject * slabClone = static_cast<ATypeSlabObject*>(clone->ObjectType);
+        *slabClone = *slab;
+        slabClone->SlabModel->name = clone->Name;
+        slabClone->SlabModel->fCenter = false;
+        clone->UpdateFromSlabModel(slabClone->SlabModel);
+        */
+    }
+
+    // adding cloned object to the World
+    AGeoObject * container = obj->Container;
+    if (!container) container = World;
+    container->addObjectFirst(clone);  //inserts to the first position in the list of HostedObjects!
+    clone->repositionInHosted(obj, true);
+
+    // rebuild detector and pop-up delegate with the clone
+    const QString name = clone->Name;
+    emit RequestRebuildDetector();
+    emit RequestHighlightObject(name);
+
+  /*
+  if (obj->ObjectType->isSlab())  // obsolete?
   {
-    ATypeSlabObject* slab = static_cast<ATypeSlabObject*>(ObjToCopy->ObjectType);
-    ObjToCopy->UpdateFromSlabModel(slab->SlabModel);
+    ATypeSlabObject* slab = static_cast<ATypeSlabObject*>(obj->ObjectType);
+    obj->UpdateFromSlabModel(slab->SlabModel);
   }
 
-  AGeoObject * newObj = new AGeoObject(ObjToCopy);
+  AGeoObject * newObj = new AGeoObject(obj);
 
-  if (ObjToCopy->ObjectType->isMonitor())
+  if (obj->ObjectType->isMonitor())
   {
       do newObj->Name = AGeoObject::GenerateRandomMonitorName();
       while (World->isNameExists(newObj->Name));
 
       ATypeMonitorObject * mt = new ATypeMonitorObject();
       delete newObj->ObjectType; newObj->ObjectType = mt;
-      mt->config = static_cast<ATypeMonitorObject*>(ObjToCopy->ObjectType)->config;
+      mt->config = static_cast<ATypeMonitorObject*>(obj->ObjectType)->config;
   }
   else
   {
@@ -944,7 +980,7 @@ void AGeoTreeWidget::menuActionCopyObject(AGeoObject * ObjToCopy)
         newObj->Name = AGeoObject::GenerateRandomObjectName();
   }
 
-  AGeoObject * container = ObjToCopy->Container;
+  AGeoObject * container = obj->Container;
   if (!container) container = World;
   container->addObjectFirst(newObj);  //inserts to the first position in the list of HostedObjects!
 
@@ -952,6 +988,7 @@ void AGeoTreeWidget::menuActionCopyObject(AGeoObject * ObjToCopy)
   emit RequestRebuildDetector();
   emit RequestHighlightObject(name);
   UpdateGui(name);
+  */
 }
 
 void AGeoTreeWidget::menuActionAddNewObject(AGeoObject * ContObj, AGeoShape * shape)

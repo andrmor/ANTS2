@@ -77,8 +77,9 @@ private:
   void markAsStackRefVolume(AGeoObject * obj);
   void addLightguide(bool upper);
 
+
   void menuActionAddNewObject(AGeoObject * ContObj, AGeoShape * shape);
-  void menuActionCopyObject(AGeoObject * ObjToCopy);
+  void menuActionCloneObject(AGeoObject * obj);
   void ShowObject(AGeoObject * obj);
   void ShowObjectRecursive(AGeoObject * obj);
   void ShowObjectOnly(AGeoObject * obj);

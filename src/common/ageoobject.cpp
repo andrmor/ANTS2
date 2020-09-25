@@ -1247,6 +1247,49 @@ bool AGeoObject::isContainerValidForDrop(QString & errorStr) const
     return true;
 }
 
+void AGeoObject::enforceUniqueNameForCloneRecursive(AGeoObject * World, AGeoObject & tmpContainer)
+{
+    if (!World) return;
+
+    QString newName = generateCloneObjName(Name);
+    while (World->isNameExists(newName) || tmpContainer.isNameExists(newName))
+        newName = generateCloneObjName(newName);
+
+    if (Container && Container->ObjectType->isStack())
+    {
+        ATypeStackContainerObject * Stack = static_cast<ATypeStackContainerObject*>(Container->ObjectType);
+        if (Stack->ReferenceVolume == Name)
+            Stack->ReferenceVolume = newName;
+    }
+
+    Name = newName;
+    tmpContainer.HostedObjects << this;
+
+    for (AGeoObject * hostedObj : HostedObjects)
+        hostedObj->enforceUniqueNameForCloneRecursive(World, tmpContainer);
+}
+
+AGeoObject * AGeoObject::makeClone(AGeoObject * World)
+{
+    QJsonArray ar;
+    writeAllToJarr(ar);
+    AGeoObject * clone = new AGeoObject();
+    QString errStr = clone->readAllFromJarr(clone, ar);
+    if (!errStr.isEmpty())
+    {
+        clone->clearAll();
+        return nullptr;
+    }
+
+    //updating names to make them unique
+    if (World)
+    {
+        AGeoObject tmpContainer;
+        clone->enforceUniqueNameForCloneRecursive(World, tmpContainer);
+        tmpContainer.HostedObjects.clear();  // not deleting the objects inside!
+    }
+    return clone;
+}
 
 QString randomString(int lettLength, int numLength)
 {
@@ -1344,4 +1387,22 @@ QString AGeoObject::GenerateRandomMonitorName()
   QString str = randomString(2, 1);
   str = "Monitor_" + str;
   return str;
+}
+
+QString AGeoObject::generateCloneObjName(const QString & initialName)
+{
+    QString newName;
+    const QStringList sl = initialName.split("_c:");
+    if (sl.size() > 1)
+    {
+        for (int i = 0; i < sl.size()-1; i++)  // in case the name was clone of clone with broken indexes (e.g. aaa_c:Xbbb_c:0)
+            newName += sl.at(i) + "_c:";
+        bool ok;
+        int oldIndex = sl.last().toInt(&ok);
+        if (ok) newName += QString::number(oldIndex + 1);
+        else    newName.clear();
+    }
+    if (newName.isEmpty())
+        return initialName + "_c:0";
+    return newName;
 }

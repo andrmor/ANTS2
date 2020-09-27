@@ -1132,28 +1132,46 @@ void AGeoTreeWidget::menuActionEnableDisable(AGeoObject * obj)
 
 void AGeoTreeWidget::formStack(QList<QTreeWidgetItem*> selected) //option 0->group, option 1->stack
 {
-    //creating a set - note that selected objects always have the same container!
-    const QString firstName = selected.first()->text(0);
-    AGeoObject *  firstObj  = World->findObjectByName(firstName);
-    if (!firstObj) return;
+    if (selected.isEmpty()) return;
+    QVector<AGeoObject*> objs;
+    for (QTreeWidgetItem * item : selected)
+    {
+        AGeoObject * obj  = World->findObjectByName(item->text(0));
+        if (!obj)
+        {
+            message("Something went wrong: object with name " + item->text(0) + " not found!", this);
+            return;
+        }
+        if (obj->ObjectType->isArray())
+        {
+            message("Array cannot be a member of a stack", this);
+            return;
+        }
+        if (obj->ObjectType->isComposite() || obj->ObjectType->isGrid())
+        {
+            message("Composite objects (and optical grids) cannot be a member of a stack", this);
+            return;
+        }
+        if (obj->ObjectType->isHandlingSet() || obj->ObjectType->isLogical() || obj->ObjectType->isSlab())
+        {
+            message("Stacks/groups/slabs cannot be a member of a stack", this);
+            return;
+        }
+        objs << obj;
+    }
 
     AGeoObject * stackObj = new AGeoObject();
-
-    delete stackObj->ObjectType;
-    stackObj->ObjectType = new ATypeStackContainerObject();
-    static_cast<ATypeStackContainerObject*>(stackObj->ObjectType)->ReferenceVolume = firstName;
+    delete stackObj->ObjectType; stackObj->ObjectType = new ATypeStackContainerObject();
+    static_cast<ATypeStackContainerObject*>(stackObj->ObjectType)->ReferenceVolume = objs.first()->Name;
 
     do stackObj->Name = AGeoObject::GenerateRandomStackName();
     while (World->isNameExists(stackObj->Name));
 
-    AGeoObject * contObj = firstObj->Container;
+    AGeoObject * contObj = objs.first()->Container; // All selected objects always have the same container!
     stackObj->Container = contObj;
 
-    for (int i = 0; i < selected.size(); i++)
+    for (AGeoObject * obj : objs)
     {
-        const QString name = selected.at(i)->text(0);
-        AGeoObject * obj = World->findObjectByName(name);
-        if (!obj) continue;
         contObj->HostedObjects.removeOne(obj);
         obj->Container = stackObj;
         stackObj->HostedObjects.append(obj);
@@ -1161,8 +1179,7 @@ void AGeoTreeWidget::formStack(QList<QTreeWidgetItem*> selected) //option 0->gro
     contObj->HostedObjects.insert(0, stackObj);
 
     const QString name = stackObj->Name;
-    firstObj->updateStack();
-    emit RequestRebuildDetector();
+    emit RequestRebuildDetector();  // automatically calculates stack positions there
     UpdateGui(name);
 }
 

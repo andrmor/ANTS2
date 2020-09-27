@@ -605,6 +605,8 @@ private slots:
 
     void on_ledTopSizeZ_editingFinished();
 
+    void on_pbAddSource_customContextMenuRequested(const QPoint &pos);
+
 public slots:
     void on_pbRebuildDetector_clicked();
     void onRequestDetectorGuiUpdate();     // called to update GUI related to Detector

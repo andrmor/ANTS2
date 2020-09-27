@@ -430,8 +430,26 @@ void MainWindow::on_pbAddSource_clicked()
     s->GunParticles << new GunParticleStruct();
     SimulationManager->Settings.partSimSet.SourceGenSettings.append(s);
 
-    on_pbUpdateSourcesIndication_clicked();
+    on_pbUpdateSimConfig_clicked();
+    //on_pbUpdateSourcesIndication_clicked();
     ui->lwDefinedParticleSources->setCurrentRow( SimulationManager->Settings.partSimSet.SourceGenSettings.getNumSources() - 1 );
+}
+
+void MainWindow::on_pbAddSource_customContextMenuRequested(const QPoint &)
+{
+    int index = ui->lwDefinedParticleSources->currentRow();
+    if (index == -1)
+    {
+        message("Select a source to clone", this);
+        return;
+    }
+
+    bool ok = SimulationManager->Settings.partSimSet.SourceGenSettings.clone(index);
+    if (!ok) return;
+
+    on_pbUpdateSimConfig_clicked();
+    //on_pbUpdateSourcesIndication_clicked();
+    ui->lwDefinedParticleSources->setCurrentRow(index+1);
 }
 
 void MainWindow::on_pbUpdateSourcesIndication_clicked()

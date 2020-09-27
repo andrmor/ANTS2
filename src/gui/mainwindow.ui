@@ -10901,8 +10901,14 @@ Right click: toggle save on/off</string>
                   <bold>false</bold>
                  </font>
                 </property>
+                <property name="contextMenuPolicy">
+                 <enum>Qt::CustomContextMenu</enum>
+                </property>
+                <property name="toolTip">
+                 <string>Right-click to clone the selected source</string>
+                </property>
                 <property name="text">
-                 <string>New</string>
+                 <string>New/clone</string>
                 </property>
                </widget>
               </item>

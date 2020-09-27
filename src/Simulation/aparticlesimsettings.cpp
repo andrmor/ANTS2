@@ -378,6 +378,16 @@ void ASourceGenSettings::append(AParticleSourceRecord * gunParticle)
     calculateTotalActivity();
 }
 
+bool ASourceGenSettings::clone(int iSource)
+{
+    if (iSource < 0 || iSource >= ParticleSourcesData.size()) return false;
+
+    AParticleSourceRecord * r = ParticleSourcesData.at(iSource)->clone();
+    r->name += "_c";
+    ParticleSourcesData.insert(iSource + 1, r);
+    return true;
+}
+
 void ASourceGenSettings::forget(AParticleSourceRecord *gunParticle)
 {
     ParticleSourcesData.removeAll(gunParticle);

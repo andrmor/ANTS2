@@ -638,11 +638,17 @@ void MainWindow::on_pbEditParticleSource_clicked()
         return;
     }
 
-    AParticleSourceDialog d(*this, SourceGenSettings.getSourceRecord(isource));
-    int res = d.exec();
-    if (res == QDialog::Rejected) return;
+    ParticleSourceDialog = new AParticleSourceDialog(*this, SourceGenSettings.getSourceRecord(isource));
 
-    SourceGenSettings.replace(isource, d.getResult());
+    int res = ParticleSourceDialog->exec(); // if detector is rebuild (this->readSimSettingsFromJson() is triggered), ParticleSourceDialog is signal-blocked and rejected
+    if (res == QDialog::Rejected)
+    {
+        delete ParticleSourceDialog; ParticleSourceDialog = nullptr;
+        return;
+    }
+
+    SourceGenSettings.replace(isource, ParticleSourceDialog->getResult());
+    delete ParticleSourceDialog; ParticleSourceDialog = nullptr;
 
     AParticleSourceRecord * ps = SourceGenSettings.getSourceRecord(isource);
     ps->updateLimitedToMat(*Detector->MpCollection);
@@ -670,7 +676,7 @@ void MainWindow::on_pbEditParticleSource_clicked()
             Detector->Sandwich->setWorldSizeFixed(true);
             Detector->Sandwich->setWorldSizeXY( std::max(XYm, currXYm) );
             Detector->Sandwich->setWorldSizeZ ( std::max(Zm,  currZm) );
-            MainWindow::ReconstructDetector();
+            ReconstructDetector();
           }
     }
 

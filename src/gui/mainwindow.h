@@ -45,6 +45,7 @@ class ARemoteWindow;
 class AWebSocketServerDialog;
 class AParticleGun;
 class QTimer;
+class AParticleSourceDialog;
 
 #ifdef ANTS_FANN
 class NeuralNetworksWindow;
@@ -361,6 +362,8 @@ private:
 
     AG4SimulationSettings G4SimSet;                     // temporary, will be removed after hub with settings is implemented
     ASaveParticlesToFileSettings ExitParticleSettings; // temporary, will be removed after hub with settings is implemented
+
+    AParticleSourceDialog * ParticleSourceDialog = nullptr;
 
     void clearPreprocessingData();
     void updateCOBsWithPMtypeNames();

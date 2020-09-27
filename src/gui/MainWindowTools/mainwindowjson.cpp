@@ -224,12 +224,20 @@ void MainWindow::writeSimSettingsToJson(QJsonObject &json)
 void MainWindow::onRequestSimulationGuiUpdate()
 {
     //      qDebug() << "SimJson->SimGUI";
-    MainWindow::readSimSettingsFromJson(Config->JSON);
+    readSimSettingsFromJson(Config->JSON);
 }
 
+#include "aparticlesourcedialog.h"
 bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
 {
   //qDebug() << "Read sim from json and update sim gui";
+
+  if (ParticleSourceDialog)
+  {
+      ParticleSourceDialog->blockSignals(true);
+      ParticleSourceDialog->reject();
+  }
+
   if (!json.contains("SimulationConfig"))
   {
       qWarning() << "Json does not contain sim settings!";

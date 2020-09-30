@@ -915,6 +915,7 @@ ants2_GUI {
 QT += widgets
 QT += websockets
 QT += script #scripts support
+#QT += qml
 win32:QT += winextras  #used in windownavigator only
 
 CONFIG += c++11

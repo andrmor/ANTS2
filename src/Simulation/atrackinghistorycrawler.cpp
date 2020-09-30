@@ -436,29 +436,49 @@ void AHistorySearchProcessor_findTravelledDistances::onTrackEnd(bool)
     Distance = 0;
 }
 
-void AHistorySearchProcessor_findProcesses::onLocalStep(const ATrackingStepData &tr)
+void AHistorySearchProcessor_findProcesses::onLocalStep(const ATrackingStepData & tr)
 {
-    const QString & Proc = tr.Process;
-    QMap<QString, int>::iterator it = FoundProcesses.find(Proc);
-    if (it == FoundProcesses.end())
-        FoundProcesses.insert(Proc, 1);
-    else it.value()++;
+    if (validateStep(tr))
+    {
+        const QString & Proc = tr.Process;
+        QMap<QString, int>::iterator it = FoundProcesses.find(Proc);
+        if (it == FoundProcesses.end())
+            FoundProcesses.insert(Proc, 1);
+        else it.value()++;
+    }
 }
 
-void AHistorySearchProcessor_findProcesses::onTransitionOut(const ATrackingStepData &)
+void AHistorySearchProcessor_findProcesses::onTransitionOut(const ATrackingStepData & tr)
 {
-    QMap<QString, int>::iterator it = FoundProcesses.find("Out");
-    if (it == FoundProcesses.end())
-        FoundProcesses.insert("Out", 1);
-    else it.value()++;
+    if (validateStep(tr))
+    {
+        QMap<QString, int>::iterator it = FoundProcesses.find("Out");
+        if (it == FoundProcesses.end())
+            FoundProcesses.insert("Out", 1);
+        else it.value()++;
+    }
 }
 
-void AHistorySearchProcessor_findProcesses::onTransitionIn(const ATrackingStepData &)
+void AHistorySearchProcessor_findProcesses::onTransitionIn(const ATrackingStepData & tr)
 {
-    QMap<QString, int>::iterator it = FoundProcesses.find("In");
-    if (it == FoundProcesses.end())
-        FoundProcesses.insert("In", 1);
-    else it.value()++;
+    if (validateStep(tr))
+    {
+        QMap<QString, int>::iterator it = FoundProcesses.find("In");
+        if (it == FoundProcesses.end())
+            FoundProcesses.insert("In", 1);
+        else it.value()++;
+    }
+}
+
+bool AHistorySearchProcessor_findProcesses::validateStep(const ATrackingStepData & tr) const
+{
+    switch (Mode)
+    {
+    case All :                  return true;
+    case WithEnergyDeposition : return (tr.DepositedEnergy != 0);
+    case TrackEnd :             return (tr.Energy == 0 || tr.Process == "O");
+    }
+    return false; // just to avoid warning
 }
 
 AHistorySearchProcessor_Border::AHistorySearchProcessor_Border(const QString &what,

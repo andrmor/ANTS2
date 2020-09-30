@@ -60,11 +60,19 @@ public:
 class AHistorySearchProcessor_findProcesses : public AHistorySearchProcessor
 {
 public:
-    void onLocalStep(const ATrackingStepData & tr) override;
-    void onTransitionOut(const ATrackingStepData & ) override;
-    void onTransitionIn (const ATrackingStepData & ) override;
+    enum SelectionMode {All, WithEnergyDeposition, TrackEnd};
 
+    AHistorySearchProcessor_findProcesses(SelectionMode Mode) : Mode(Mode) {}
+    AHistorySearchProcessor_findProcesses(){}
+
+    void onLocalStep(const ATrackingStepData & tr) override;
+    void onTransitionOut(const ATrackingStepData & tr) override;
+    void onTransitionIn (const ATrackingStepData & tr) override;
+
+    SelectionMode Mode = All;
     QMap<QString, int> FoundProcesses;
+
+    bool validateStep(const ATrackingStepData & tr) const;
 };
 
 class AHistorySearchProcessor_findDepositedEnergy : public AHistorySearchProcessor

@@ -1460,7 +1460,15 @@ void OutputWindow::on_pbPTHistRequest_clicked()
           }
         case 1:
           {
-            AHistorySearchProcessor_findProcesses p;
+            int mode = ui->cobPTHistVolPlus->currentIndex();
+            if (mode < 0 || mode > 2)
+            {
+                message("Unknown process selection mode", this);
+                return;
+            }
+
+            AHistorySearchProcessor_findProcesses::SelectionMode sm = static_cast<AHistorySearchProcessor_findProcesses::SelectionMode>(mode);
+            AHistorySearchProcessor_findProcesses p(sm);
             Crawler.find(Opt, p);
 
             QMap<QString, int>::const_iterator it = p.FoundProcesses.constBegin();
@@ -1471,8 +1479,10 @@ void OutputWindow::on_pbPTHistRequest_clicked()
                 ui->ptePTHist->appendPlainText(QString("%1   %2 times").arg(it.key()).arg(it.value()));
                 ++it;
             }
-          }
+
+            selectedModeForProcess = mode;
             break;
+          }
         case 2:
           {
             AHistorySearchProcessor_findTravelledDistances p(bins, from, to);
@@ -1700,7 +1710,13 @@ void OutputWindow::on_cobPTHistVolRequestWhat_currentIndexChanged(int index)
 {
     updatePTHistoryBinControl();
 
-    if (index == 2)
+    if (index == 1)
+    {
+        ui->cobPTHistVolPlus->clear();
+        ui->cobPTHistVolPlus->addItems(QStringList() << "All"<<"With energy deposition"<<"Track end");
+        ui->cobPTHistVolPlus->setCurrentIndex(selectedModeForProcess);
+    }
+    else if (index == 2)
     {
         ui->sbPTHistBinsX->setValue(binsDistance);
         ui->ledPTHistFromX->setText(QString::number(fromDistance));
@@ -1720,7 +1736,7 @@ void OutputWindow::on_cobPTHistVolRequestWhat_currentIndexChanged(int index)
         ui->cobPTHistVolPlus->addItems(QStringList() << "Individual"<<"With secondaries"<<"Over event");
         ui->cobPTHistVolPlus->setCurrentIndex(selectedModeForEnergyDepo);
     }
-    ui->cobPTHistVolPlus->setVisible(index == 3);
+    ui->cobPTHistVolPlus->setVisible(index == 1 || index == 3);
 
     ui->frTimeAware->setVisible(index == 4);
 

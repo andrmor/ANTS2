@@ -915,7 +915,6 @@ ants2_GUI {
 QT += widgets
 QT += websockets
 QT += script #scripts support
-#QT += qml
 win32:QT += winextras  #used in windownavigator only
 
 CONFIG += c++11
@@ -925,6 +924,15 @@ TEMPLATE = app
 
 RC_FILE = myapp.rc
 #------------
+
+#---test of QJSEngine---
+QJS{
+    #DEFINES += USE_QJSEngine
+    QT += qml
+    SOURCES += ajavascriptmanager_qml.cpp
+    HEADERS += ajavascriptmanager_qml.h
+}
+#----------
 
 # The next define allows the core script interface to launch external processes. Enable only if you know what are you doing
 #DEFINES += _ALLOW_LAUNCH_EXTERNAL_PROCESS_

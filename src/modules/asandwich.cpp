@@ -470,8 +470,8 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
     //qDebug() << "Processing TGeo creation for object"<<obj->Name<<" which must be in"<<parent->GetName();
     if (!obj->fActive) return;
 
-    TGeoVolume* vol = 0;
-    TGeoCombiTrans *lTrans = 0;
+    TGeoVolume     * vol = nullptr;
+    TGeoCombiTrans * lTrans = nullptr;
 
     if (obj->ObjectType->isWorld())
     {   // just a shortcut, to resuse the cycle by HostedVolumes below
@@ -489,25 +489,22 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
     {
         int iMat = obj->Material;
         if (obj->ObjectType->isMonitor())
-          {
-            if (obj->Container)
-              iMat = obj->Container->getMaterial();
+        {
+            if (obj->Container) iMat = obj->Container->getMaterial();
             else qWarning() << "Monitor without container detected!";
-            //qDebug() << "Monitor:"<<obj->Name<<"mat:"<<iMat;
-          }
-        TGeoMedium* med = (*MaterialCollection)[iMat]->GeoMed;
+        }
+        TGeoMedium * med = (*MaterialCollection)[iMat]->GeoMed;
 
         //creating volume
         if (obj->ObjectType->isComposite())
         {
-            //qDebug() << "Composite:"<<obj->Name;
-            AGeoObject* logicals = obj->getContainerWithLogical();
+            AGeoObject * logicals = obj->getContainerWithLogical();
             if (!logicals)
             {
                 qWarning()<< "Composite object: Not found container with logical objects!";
                 return;
             }
-            AGeoComposite* cs = dynamic_cast<AGeoComposite*>(obj->Shape);
+            AGeoComposite * cs = dynamic_cast<AGeoComposite*>(obj->Shape);
             if (!cs)
             {
                 AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(obj->Shape);
@@ -519,50 +516,39 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
             }
             obj->refreshShapeCompositeMembers();
 
-            for (int i=0; i<logicals->HostedObjects.size(); i++)
+            for (AGeoObject * lobj : logicals->HostedObjects)
             {
                 //registering building blocks
-                QString name = logicals->HostedObjects[i]->Name;
-                logicals->HostedObjects[i]->Shape->createGeoShape(name);
-                QString RotName = "_r"+name;
-                TGeoRotation *lRot = new TGeoRotation(RotName.toLatin1().data(),
-                                                      logicals->HostedObjects.at(i)->Orientation[0],
-                        logicals->HostedObjects.at(i)->Orientation[1],
-                        logicals->HostedObjects.at(i)->Orientation[2]);
+                const QString & name = lobj->Name;
+                lobj->Shape->createGeoShape(name);
+                const QString RotName = "_r" + name;
+                TGeoRotation * lRot = new TGeoRotation(RotName.toLatin1().data(), lobj->Orientation[0], lobj->Orientation[1], lobj->Orientation[2]);
                 lRot->RegisterYourself();
-                QString TransName = "_m"+name;
-                TGeoCombiTrans *lTrans = new TGeoCombiTrans(TransName.toLatin1().data(),
-                                                            logicals->HostedObjects.at(i)->Position[0],
-                        logicals->HostedObjects.at(i)->Position[1],
-                        logicals->HostedObjects.at(i)->Position[2],
-                        lRot);
+                const QString TransName = "_m" + name;
+                TGeoCombiTrans * lTrans = new TGeoCombiTrans(TransName.toLatin1().data(), lobj->Position[0], lobj->Position[1], lobj->Position[2], lRot);
                 lTrans->RegisterYourself();
-                //qDebug() << "  member name:"<<name<<"  trans name:"<<TransName;
             }
-
             vol = new TGeoVolume(obj->Name.toLatin1().data(), obj->Shape->createGeoShape(), med);
         }
         else
         {
-            //qDebug() << obj->Name << obj->Shape->getGenerationString();
             vol = new TGeoVolume(obj->Name.toLocal8Bit().data(), obj->Shape->createGeoShape(), med);
         }
 
         //creating positioning/rotation transformation
-        TGeoRotation *lRot = new TGeoRotation("lRot", obj->Orientation[0], obj->Orientation[1], obj->Orientation[2]);
+        TGeoRotation * lRot = new TGeoRotation("lRot", obj->Orientation[0], obj->Orientation[1], obj->Orientation[2]);
         lRot->RegisterYourself();
         lTrans = new TGeoCombiTrans("lTrans", obj->Position[0], obj->Position[1], obj->Position[2], lRot);
 
         //positioning node
         if (obj->ObjectType->isGrid())
         {
-            int GridCounter = GridRecords.size();
             GridRecords.append(obj->createGridRecord());
-            parent->AddNode(vol, GridCounter, lTrans);            
+            parent->AddNode(vol, GridRecords.size() - 1, lTrans);
         }
         else if (obj->ObjectType->isMonitor())
         {
-            int MonitorCounter = MonitorsRecords.size();
+            const int MonitorCounter = MonitorsRecords.size();
 
             TString fixedName = vol->GetName();
             fixedName += "_-_";
@@ -576,7 +562,7 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
             MonitorIdNames.append(QString("%1_%2").arg(vol->GetName()).arg(MonitorCounter));
 
             TObjArray * nList = parent->GetNodes();
-            int numNodes = nList->GetEntries();
+            const int numNodes = nList->GetEntries();
             TGeoNode * node = (TGeoNode*)nList->At(numNodes-1);
             //qDebug() << nList << numNodes;
             //qDebug() << "      " <<node;//->GetUniqueID();
@@ -631,8 +617,8 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
         return;
     }
     if (obj->ObjectType->isArray())
-      {
-        ATypeArrayObject* array = static_cast<ATypeArrayObject*>(obj->ObjectType);
+    {
+        ATypeArrayObject * array = static_cast<ATypeArrayObject*>(obj->ObjectType);
 
         for (int i=0; i<obj->HostedObjects.size(); i++)
           {
@@ -650,7 +636,7 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
                   iCounter++;
                 }
           }
-      }
+    }
     else
     {
         for (int i=0; i<obj->HostedObjects.size(); i++)

@@ -339,12 +339,12 @@ void AGeoTreeWidget::dropEvent(QDropEvent* event)
                 return;
             }
 
-            if (ContainerTo->ObjectType->isArray() && obj->ObjectType->isArray())
-            {
-                event->ignore();
-                QMessageBox::information(this, "", "Cannot move array directly inside another array!");
-                return;
-            }
+//            if (ContainerTo->ObjectType->isArray() && obj->ObjectType->isArray())
+//            {
+//                event->ignore();
+//                QMessageBox::information(this, "", "Cannot move array directly inside another array!");
+//                return;
+//            }
             if (obj->isInUseByComposite())
             {
                 event->ignore();
@@ -635,8 +635,8 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
           if (obj->getSlabModel()->fCenter) enableDisableA->setEnabled(false);
 
       newCompositeA->setEnabled(fNotGridNotMonitor);
-      newArrayA->setEnabled(fNotGridNotMonitor && !ObjectType.isArray());
-      newMonitorA->setEnabled(fNotGridNotMonitor && !ObjectType.isArray());
+      newArrayA->setEnabled(fNotGridNotMonitor);// && !ObjectType.isArray());
+      newMonitorA->setEnabled(fNotGridNotMonitor);// && !ObjectType.isArray());
       newGridA->setEnabled(fNotGridNotMonitor);
       cloneA->setEnabled(true);  // ObjectType.isSingle() || ObjectType.isSlab() || ObjectType.isMonitor());  //supported so far only Single, Slab and Monitor
       removeHostedA->setEnabled(fNotGridNotMonitor);

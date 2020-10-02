@@ -24,7 +24,8 @@ public:
   ASandwich();
   ~ASandwich();
 
-  AGeoObject * World = nullptr;     //world with tree structure, slabs are on the first level!
+  AGeoObject * World = nullptr;       //world with tree structure, slabs are on the first level!
+  AGeoObject * Prototypes = nullptr;  //hosts prototypes; prototype is an objects (can be with content) which can be placed multiple times in the geometry
   void clearWorld();
 
   //slab handling

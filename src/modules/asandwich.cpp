@@ -19,6 +19,8 @@ ASandwich::ASandwich()
     World = new AGeoObject("World");
     World->Material = 0;
     World->makeItWorld();
+
+    Prototypes = new AGeoObject("_#_PrototypeContainer_#_");
 }
 
 ASandwich::~ASandwich()
@@ -28,6 +30,7 @@ ASandwich::~ASandwich()
 
     clearWorld();
     delete World;
+    delete Prototypes;
 }
 
 void ASandwich::clearWorld()
@@ -36,6 +39,10 @@ void ASandwich::clearWorld()
     for (int i=0; i<World->HostedObjects.size(); i++)
         World->HostedObjects[i]->clearAll();
     World->HostedObjects.clear();
+
+    for (int i=0; i<Prototypes->HostedObjects.size(); i++)
+        Prototypes->HostedObjects[i]->clearAll();
+    Prototypes->HostedObjects.clear();
 
     clearGridRecords();
     clearMonitorRecords();
@@ -954,6 +961,10 @@ void ASandwich::writeToJson(QJsonObject &json)
   World->writeAllToJarr(arrTree);
   js["WorldTree"] = arrTree;
 
+  QJsonArray arrPrototypes;
+  Prototypes->writeAllToJarr(arrPrototypes);
+  js["Prototypes"] = arrPrototypes;
+
   AGeoConsts::getConstInstance().writeToJson(js);
 
   json["Sandwich"] = js;
@@ -997,6 +1008,14 @@ QString ASandwich::readFromJson(QJsonObject & json)
         {
             QJsonObject XYjson = js["DefaultXY"].toObject();
             DefaultXY->readFromJson(XYjson);
+        }
+
+        if (js.contains("Prototypes"))
+        {
+            qDebug() << "...Loading Prorotypes...";
+            QJsonArray arrTree = js["Prototypes"].toArray();
+            ErrorString = Prototypes->readAllFromJarr(Prototypes, arrTree);
+            qDebug() << "...done!" << "ErrorString:"<<ErrorString << "Number of prototypes:" << Prototypes->HostedObjects.size();
         }
 
         if (js.contains("WorldTree"))

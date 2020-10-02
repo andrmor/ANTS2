@@ -736,7 +736,7 @@ void AGeo_SI::ReconfigureArray(QString name, int numX, int numY, int numZ, doubl
 void AGeo_SI::DeclarePrototype(QString name)
 {
     AGeoObject * proto = nullptr;
-    for (const AGeoObject * obj : GeoObjects)
+    for (AGeoObject * obj : GeoObjects)
         if (obj->Name == name)
         {
             proto = obj;
@@ -907,6 +907,12 @@ void AGeo_SI::UpdateGeometry(bool CheckOverlaps)
           clearGeoObjects();
           return;
       }
+      if (Detector->Sandwich->Prototypes->isNameExists(name))
+      {
+          abort(QString("Name already exists in the detector prototypes: %1").arg(name));
+          clearGeoObjects();
+          return;
+      }
       for (int j = 0; j < GeoObjects.size(); j++)
       {
           if (i == j) continue;
@@ -927,24 +933,26 @@ void AGeo_SI::UpdateGeometry(bool CheckOverlaps)
       }
 
       const QString & cont = GeoObjects.at(i)->tmpContName;
-      if (cont == Prot)
-      bool fFound = Detector->Sandwich->World->isNameExists(cont);
-      if (!fFound)
+      if (cont != ProrotypeContainerName)
       {
-          //maybe it will be inside one of the GeoObjects defined ABOVE this one?
-          for (int j = 0; j < i; j++)
-          {
-              if (cont == GeoObjects.at(j)->Name)
-              {
-                  fFound = true;
-                  break;
-              }
-          }
+          bool fFound = Detector->Sandwich->World->isNameExists(cont);
           if (!fFound)
           {
-              abort(QString("Container does not exist: %1").arg(cont));
-              clearGeoObjects();
-              return;
+              //maybe it will be inside one of the GeoObjects defined ABOVE this one?
+              for (int j = 0; j < i; j++)
+              {
+                  if (cont == GeoObjects.at(j)->Name)
+                  {
+                      fFound = true;
+                      break;
+                  }
+              }
+              if (!fFound)
+              {
+                  abort(QString("Container does not exist: %1").arg(cont));
+                  clearGeoObjects();
+                  return;
+              }
           }
       }
   }
@@ -955,14 +963,20 @@ void AGeo_SI::UpdateGeometry(bool CheckOverlaps)
      AGeoObject * obj = GeoObjects[i];
      const QString & name     = obj->Name;
      const QString & contName = obj->tmpContName;
-     AGeoObject* contObj = Detector->Sandwich->World->findObjectByName(contName);
-     if (!contObj)
+
+     if (contName == ProrotypeContainerName)
+         Detector->Sandwich->Prototypes->addObjectLast(obj);
+     else
      {
-         abort(QString("Failed to add object %1 to container %2").arg(name).arg(contName));
-         clearGeoObjects();
-         return;
+         AGeoObject * contObj = Detector->Sandwich->World->findObjectByName(contName);
+         if (!contObj)
+         {
+             abort(QString("Failed to add object %1 to container %2").arg(name).arg(contName));
+             clearGeoObjects();
+             return;
+         }
+         contObj->addObjectLast(obj);
      }
-     contObj->addObjectLast(obj);
      GeoObjects[i] = nullptr;
   }
 

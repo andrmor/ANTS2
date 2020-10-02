@@ -25,8 +25,8 @@ public:
     APTHistory_SI(ASimulationManager & SimulationManager);
     ~APTHistory_SI();
 
-    //virtual bool InitOnRun() override;
-    //virtual void ForceStop() override;
+    //bool InitOnRun() override;
+    //void ForceStop() override;
 
 public slots:
     int countEvents();
@@ -45,11 +45,12 @@ public slots:
     bool cd_firstNonTransportationStep();
     void cd_lastStep();
     QVariantList cd_getStepRecord();
+    QVariantList cd_getDirections();
     int  cd_countSteps();
     int  cd_countSecondaries();
     bool cd_hadPriorInteraction();
-    void cd_in(int indexOfSecondary); // TODO - keep Step in a "Stack"
-    bool cd_out(); // TODO - keep Step in a "Stack"
+    void cd_in(int indexOfSecondary);
+    bool cd_out();                      // sets Step to 0   TODO: add QVector with Step before "in" and restore on "out"
 
     void clearCriteria();
     void setParticle(QString particleName);
@@ -68,7 +69,7 @@ public slots:
     void setToIndex(int volumeIndex);
 
     QVariantList findParticles();
-    QVariantList findProcesses();
+    QVariantList findProcesses(int All0_WithDepo1_TrackEnd2 = 0);
     QVariantList findDepositedEnergies(int bins, double from, double to);
     QVariantList findDepositedEnergiesWithSecondaries(int bins, double from, double to);
     QVariantList findDepositedEnergiesOverEvent(int bins, double from, double to);
@@ -85,11 +86,11 @@ private:
     const ASimulationManager & SM;
     std::vector<AEventTrackingRecord *> & TH;
 
-    ATrackingHistoryCrawler * Crawler;
+    ATrackingHistoryCrawler * Crawler = nullptr;
     AFindRecordSelector * Criteria = nullptr;
 
-    const AParticleTrackingRecord * Rec = nullptr; //current record for cd
-    int Step = 0;  //current step for cd
+    const AParticleTrackingRecord * Rec = nullptr; // current record for cd
+    int Step = 0;                                  // current step for cd
 
     QVariantList findDepE(AHistorySearchProcessor_findDepositedEnergy & p);
     const QVariantList findOB_1D(AHistorySearchProcessor_Border & p);

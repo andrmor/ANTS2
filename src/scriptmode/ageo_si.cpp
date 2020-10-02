@@ -53,7 +53,7 @@ AGeo_SI::AGeo_SI(DetectorClass* Detector)
   H["InitializeStack"] = "Call this function after the last element has been added to the stack."
                    "It will automatically calculate x,y and z positions of all elements, keeping user-configured xyz position of the Origin element.";
 
-  H["RecalculateStack"] = "Recalculates xyz positions of the stack elements. Has to be called if config.Replace() was used to change thickness of the elements.";
+  //H["RecalculateStack"] = "Recalculates xyz positions of the stack elements. Has to be called if config.Replace() was used to change thickness of the elements.";
 
   H["setEnable"] = "Enable or disable the volume with the providfed name, or, if the name ends with '*', all volumes with the name starting with the provided string.)";
   H["getPassedVoulumes"] = "Go through the defined geometry in a straight line from startXYZ in the direction startVxVyVz\n"
@@ -63,14 +63,13 @@ AGeo_SI::AGeo_SI(DetectorClass* Detector)
 
 AGeo_SI::~AGeo_SI()
 {
-  clearGeoObjects();
+    clearGeoObjects();
 }
 
 bool AGeo_SI::InitOnRun()
 {
-  //qDebug() << "Init on start for Geo script unit";
-  clearGeoObjects();
-  return true;
+    clearGeoObjects();
+    return true;
 }
 
 void AGeo_SI::Box(QString name, double Lx, double Ly, double Lz, int iMat, QString container,
@@ -670,6 +669,7 @@ void AGeo_SI::InitializeStack(QString StackName, QString MemberName_StackReferen
    StackObj->HostedObjects.clear();
 }
 
+/*
 void AGeo_SI::MakeGroup(QString name, QString container)
 {
     AGeoObject* o = new AGeoObject(name, container, 0, 0, 0,0,0, 0,0,0);
@@ -677,7 +677,9 @@ void AGeo_SI::MakeGroup(QString name, QString container)
     o->ObjectType = new ATypeGroupContainerObject();
     GeoObjects.append(o);
 }
+*/
 
+/*
 void AGeo_SI::RecalculateStack(QString name)
 {
   AGeoObject* obj = Detector->Sandwich->World->findObjectByName(name);
@@ -701,6 +703,7 @@ void AGeo_SI::RecalculateStack(QString name)
   obj->updateStack();
   Detector->BuildDetector_CallFromScript();
 }
+*/
 
 void AGeo_SI::Array(QString name, int numX, int numY, int numZ, double stepX, double stepY, double stepZ, QString container, double x, double y, double z, double psi)
 {
@@ -728,6 +731,25 @@ void AGeo_SI::ReconfigureArray(QString name, int numX, int numY, int numZ, doubl
 
     ATypeArrayObject* a = static_cast<ATypeArrayObject*>(obj->ObjectType);
     a->Reconfigure(numX, numY, numZ, stepX, stepY, stepZ);
+}
+
+void AGeo_SI::DeclarePrototype(QString name)
+{
+    AGeoObject * proto = nullptr;
+    for (const AGeoObject * obj : GeoObjects)
+        if (obj->Name == name)
+        {
+            proto = obj;
+            break;
+        }
+
+    if (!proto)
+    {
+        abort("Object with name " + name + " not found!");
+        return;
+    }
+
+    proto->tmpContName = ProrotypeContainerName;
 }
 
 void AGeo_SI::SetLine(QString name, int color, int width, int style)
@@ -905,6 +927,7 @@ void AGeo_SI::UpdateGeometry(bool CheckOverlaps)
       }
 
       const QString & cont = GeoObjects.at(i)->tmpContName;
+      if (cont == Prot)
       bool fFound = Detector->Sandwich->World->isNameExists(cont);
       if (!fFound)
       {

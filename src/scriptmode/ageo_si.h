@@ -48,15 +48,16 @@ public slots:
   void SetCommonSlabMode(int iMode);
   void SetCommonSlabProperties(int shape, double size1, double size2, double angle, int sides);
 
-  void RecalculateStack(QString name);
-
   void MakeStack(QString name, QString container);
   void InitializeStack(QString StackName, QString MemberName_StackReference);
+  //void RecalculateStack(QString name);
 
-  void MakeGroup(QString name, QString container);
+  //void MakeGroup(QString name, QString container);
 
   void Array(QString name, int numX, int numY, int numZ, double stepX, double stepY, double stepZ, QString container, double x, double y, double z, double psi);
   void ReconfigureArray(QString name, int numX, int numY, int numZ, double stepX, double stepY, double stepZ);
+
+  void DeclarePrototype(QString name);
 
   void SetLine(QString name, int color, int width, int style);
   void ClearAll();
@@ -69,7 +70,7 @@ public slots:
 
   void setEnable(QString ObjectOrWildcard, bool flag);
 
-  void UpdateGeometry(bool CheckOverlaps = true);
+  void UpdateGeometry(bool CheckOverlaps = true);  // -------------------------
 
   QString printOverrides();
 
@@ -80,12 +81,14 @@ signals:
   void requestShowCheckUpWindow();
 
 private:
-  DetectorClass* Detector;
+  DetectorClass * Detector = nullptr;
   void clearGeoObjects();
 
   QString ZeroSlabName;
   int     ZeroSlabType = 0;
   int     SlabMode = -1;
+
+  const QString ProrotypeContainerName = "_#_Prototype_#_";
 };
 
 #endif // AINTERFACETOADDOBJSCRIPT_H

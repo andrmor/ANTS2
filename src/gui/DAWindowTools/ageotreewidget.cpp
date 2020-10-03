@@ -1758,7 +1758,7 @@ AGeoBaseDelegate * AGeoWidget::createAndAddGeoObjectDelegate()
 
     if (CurrentObject->ObjectType->isArray())
         Del = new AGeoArrayDelegate(Sandwich->Materials, this);
-    if (CurrentObject->ObjectType->isInstance())
+    else if (CurrentObject->ObjectType->isInstance())
         Del = new AGeoInstanceDelegate(Sandwich->Materials, this);
     else if (CurrentObject->ObjectType->isHandlingSet())
         Del = new AGeoSetDelegate(Sandwich->Materials, this);

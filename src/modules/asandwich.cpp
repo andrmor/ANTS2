@@ -495,6 +495,13 @@ void ASandwich::expandPrototypeInstances()
         }
 
         AGeoObject * clone = prototypeObj->makeClone(World);
+
+        for (int i=0; i<3; i++)
+        {
+            clone->Position[i]    = instanceObj->Position[i];
+            clone->Orientation[i] = instanceObj->Orientation[i];
+        }
+
         instanceObj->addObjectFirst(clone);
         clone->lockRecursively();
     }
@@ -519,7 +526,7 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
     {
         return; //do nothing with logicals, they also do not host anything real
     }
-    else if (obj->ObjectType->isHandlingSet() || obj->ObjectType->isArray())
+    else if (obj->ObjectType->isHandlingSet() || obj->ObjectType->isArray() || obj->ObjectType->isInstance())
     {   // group objects are pure virtual, just pass the volume of the parent
         vol = parent;
     }

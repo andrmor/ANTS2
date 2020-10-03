@@ -571,6 +571,11 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
   QAction* newGridA = Action(menu, "Add optical grid");
   QAction* newMonitorA = Action(menu, "Add monitor");
 
+  QMenu * addInstanceMenu = menu.addMenu("Add instance of");
+    QVector< QPair<QAction*, QString> > addInstanceA;
+    for (AGeoObject * protoObj : Sandwich->Prototypes->HostedObjects)
+        addInstanceA << QPair<QAction*, QString>(addInstanceMenu->addAction(protoObj->Name), protoObj->Name);
+
   menu.addSeparator();
 
   QAction* cloneA = Action(menu, "Clone this object");
@@ -712,6 +717,12 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
   else if (SelectedAction == removeA)        menuActionRemove();                     // REMOVE
   else if (SelectedAction == removeThisAndHostedA) menuActionRemoveRecursively(obj); // REMOVE RECURSIVLY
   else if (SelectedAction == removeHostedA)  menuActionRemoveHostedObjects(obj);     // REMOVE HOSTED
+
+  else
+  {
+      for (auto & pair : addInstanceA)
+          if (SelectedAction == pair.first)  menuActionAddInstance(obj, pair.second);
+  }
 }
 
 void AGeoTreeWidget::onItemClicked()
@@ -1026,6 +1037,24 @@ void AGeoTreeWidget::menuActionAddNewMonitor(AGeoObject * ContObj)
     newObj->updateMonitorShape();
 
     newObj->color = 1;
+    ContObj->addObjectFirst(newObj);
+
+    const QString name = newObj->Name;
+    emit RequestRebuildDetector();
+    UpdateGui(name);
+}
+
+void AGeoTreeWidget::menuActionAddInstance(AGeoObject * ContObj, const QString & PrototypeName)
+{
+    if (!ContObj) return;
+
+    AGeoObject * newObj = new AGeoObject();
+    do newObj->Name = AGeoObject::GenerateRandomName();
+    while (World->isNameExists(newObj->Name));
+
+    delete newObj->ObjectType;
+    newObj->ObjectType = new ATypeInstanceObject(PrototypeName);
+
     ContObj->addObjectFirst(newObj);
 
     const QString name = newObj->Name;

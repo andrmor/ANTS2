@@ -94,6 +94,7 @@ private:
   void menuActionAddNewArray(AGeoObject * ContObj);
   void menuActionAddNewGrid(AGeoObject * ContObj);
   void menuActionAddNewMonitor(AGeoObject * ContObj);
+  void menuActionAddInstance(AGeoObject * ContObj, const QString & PrototypeName);
 
   QString makeScriptString_basicObject(AGeoObject *obj, bool bExpandMaterials, bool usePython) const;
   QString makeScriptString_slab(AGeoObject *obj, bool bExpandMaterials, int ident) const;

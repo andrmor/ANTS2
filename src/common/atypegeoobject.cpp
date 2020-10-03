@@ -217,37 +217,25 @@ bool ATypeGeoObject::isLowerLightguide() const
     return obj->UpperLower == ATypeLightguideObject::Lower;
 }
 
-ATypeGeoObject *ATypeGeoObject::TypeObjectFactory(const QString &Type)
+ATypeGeoObject *ATypeGeoObject::TypeObjectFactory(const QString & Type)
 {
-    if (Type == "World")
-        return new ATypeWorldObject(); //is not used to create World, only to check file with WorldTree starts with World and reads positioning script
-    if (Type == "Slab")
-        return new ATypeSlabObject();
-    if (Type == "Lightguide")
-        return new ATypeLightguideObject();
-    else if (Type == "Group")
-        return new ATypeGroupContainerObject();
-    else if (Type == "Stack")
-        return new ATypeStackContainerObject();
-    else if (Type == "CompositeContainer")
-        return new ATypeCompositeContainerObject();
-    else if (Type == "Single")
-        return new ATypeSingleObject();
-    else if (Type == "Composite")
-        return new ATypeCompositeObject();
-    else if (Type == "Array" || Type == "XYArray")
-        return new ATypeArrayObject();
-    else if (Type == "Grid")
-        return new ATypeGridObject();
-    else if (Type == "GridElement")
-        return new ATypeGridElementObject();
-    else if (Type == "Monitor")
-        return new ATypeMonitorObject();
-    else
-    {
-        qCritical() << "Unknown opject type in TypeObjectFactory:"<<Type;
-        return 0;
-    }
+    if (Type == "Single")             return new ATypeSingleObject();
+    if (Type == "Slab")               return new ATypeSlabObject();
+    if (Type == "Array" ||
+        Type == "XYArray")            return new ATypeArrayObject();
+    if (Type == "Monitor")            return new ATypeMonitorObject();
+    if (Type == "Stack")              return new ATypeStackContainerObject();
+    if (Type == "Instance")           return new ATypeInstanceObject();
+    if (Type == "Composite")          return new ATypeCompositeObject();
+    if (Type == "CompositeContainer") return new ATypeCompositeContainerObject();
+    if (Type == "GridElement")        return new ATypeGridElementObject();
+    if (Type == "Grid")               return new ATypeGridObject();
+    if (Type == "Lightguide")         return new ATypeLightguideObject();
+    if (Type == "Group")              return new ATypeGroupContainerObject();
+    if (Type == "World")              return new ATypeWorldObject(); //is not used to create World, only to check file with WorldTree starts with World and reads positioning script
+
+    qCritical() << "Unknown opject type in TypeObjectFactory:"<<Type;
+    return nullptr;
 }
 
 void ATypeWorldObject::writeToJson(QJsonObject & json) const

@@ -200,7 +200,7 @@ public:
 class ATypeInstanceObject : public ATypeGeoObject
 {
 public:
-    ATypeInstanceObject(const QString & PrototypeName) : PrototypeName(PrototypeName) {Type = "Instance"; Handling = "Standard";}
+    ATypeInstanceObject(QString PrototypeName = "") : PrototypeName(PrototypeName) {Type = "Instance"; Handling = "Standard";}
 
     void writeToJson(QJsonObject & json) const override;
     void readFromJson(const QJsonObject & json) override;

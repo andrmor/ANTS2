@@ -13,6 +13,7 @@ class ATypeGeoObject
 public:
     virtual ~ATypeGeoObject() {}
 
+    // TODO String -> enum
     bool isHandlingStatic() const   {return Handling == "Static";}      //World
     bool isHandlingStandard() const {return Handling == "Standard";}
     bool isHandlingSet() const      {return Handling == "Set";}         //Group, Stack, Composite container
@@ -30,6 +31,7 @@ public:
     bool isCompositeContainer() const {return Type == "CompositeContainer";}
     bool isComposite() const        {return Type == "Composite";}
     bool isArray() const            {return Type == "Array";}
+    bool isInstance() const         {return Type == "Instance";}
     bool isGrid() const             {return Type == "Grid";}
     bool isGridElement() const      {return Type == "GridElement";}
     bool isMonitor() const          {return Type == "Monitor";}
@@ -193,6 +195,17 @@ public:
 
     //runtime, not saved
     int index;  //index of this monitor to access statistics
+};
+
+class ATypeInstanceObject : public ATypeGeoObject
+{
+public:
+    ATypeInstanceObject(const QString & PrototypeName) : PrototypeName(PrototypeName) {Type = "Instance"; Handling = "Standard";}
+
+    void writeToJson(QJsonObject & json) const override;
+    void readFromJson(const QJsonObject & json) override;
+
+    QString PrototypeName;
 };
 
 #endif // ATYPEGEOOBJECT_H

@@ -2524,8 +2524,8 @@ AGeoArrayDelegate::AGeoArrayDelegate(const QStringList &materials, QWidget *pare
 {
     DelegateTypeName = "Array";
 
-    QVBoxLayout * v = new QVBoxLayout();
-    v->setContentsMargins(50, 0, 50, 0);
+    //QVBoxLayout * v = new QVBoxLayout();
+    //v->setContentsMargins(50, 0, 50, 0);
 
     QGridLayout *grAW = new QGridLayout();
     grAW->setContentsMargins(5, 3, 5, 3);
@@ -2821,4 +2821,42 @@ void AWorldDelegate::Update(const AGeoObject *obj)
     const AGeoBox * box = static_cast<const AGeoBox*>(obj->Shape);
     ledSizeXY->setText(box->str2dx.isEmpty() ? QString::number(box->dx*2.0) : box->str2dx);
     ledSizeZ ->setText(box->str2dz.isEmpty() ? QString::number(box->dz*2.0) : box->str2dz);
+}
+
+AGeoInstanceDelegate::AGeoInstanceDelegate(const QStringList &materials, QWidget *parent)
+   : AGeoObjectDelegate(materials, parent)
+{
+    DelegateTypeName = "Instance";
+
+    QHBoxLayout * hl = new QHBoxLayout();
+    hl->setContentsMargins(50, 0, 50, 0);
+
+    QLabel * la  = new QLabel("Instance of:");        hl->addWidget(la);
+    leInstanceOf = new QLineEdit();                   hl->addWidget(leInstanceOf);
+    pbToProto    = new QPushButton("Show prototype"); hl->addWidget(pbToProto);
+
+    addLocalLayout(hl);
+
+    leInstanceOf->setEnabled(false);
+
+    cbScale->setChecked(false);
+    cbScale->setVisible(false);
+
+    lMat->setVisible(false);
+    cobMat->setVisible(false);
+
+    pbTransform->setVisible(false);
+    pbShapeInfo->setVisible(false);
+}
+
+void AGeoInstanceDelegate::Update(const AGeoObject * obj)
+{
+    AGeoObjectDelegate::Update(obj);
+
+    ATypeInstanceObject * inst = dynamic_cast<ATypeInstanceObject*>(obj->ObjectType);
+
+    if (inst)
+    {
+        leInstanceOf->setText(inst->PrototypeName);
+    }
 }

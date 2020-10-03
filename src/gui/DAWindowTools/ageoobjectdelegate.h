@@ -504,4 +504,18 @@ public:
     void Update(const AGeoObject * obj) override;
 };
 
+class AGeoInstanceDelegate : public AGeoObjectDelegate
+{
+    Q_OBJECT
+
+public:
+    AGeoInstanceDelegate(const QStringList & materials, QWidget * parent);
+
+    void Update(const AGeoObject * obj) override;
+
+protected:
+    QLineEdit   * leInstanceOf = nullptr;
+    QPushButton * pbToProto    = nullptr;
+};
+
 #endif // AGEOOBJECTDELEGATE_H

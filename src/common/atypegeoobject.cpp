@@ -273,3 +273,15 @@ void ATypeStackContainerObject::readFromJson(const QJsonObject & json)
     ReferenceVolume.clear();
     parseJson(json, "ReferenceVolume", ReferenceVolume);
 }
+
+void ATypeInstanceObject::writeToJson(QJsonObject & json) const
+{
+    ATypeGeoObject::writeToJson(json);
+    json["PrototypeName"] = PrototypeName;
+}
+
+void ATypeInstanceObject::readFromJson(const QJsonObject & json)
+{
+    PrototypeName.clear();
+    parseJson(json, "PrototypeName", PrototypeName);
+}

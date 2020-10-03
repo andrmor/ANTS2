@@ -469,6 +469,37 @@ void ASandwich::shapeGrid(AGeoObject *obj, int shape, double p0, double p1, doub
     GEobj->updateGridElementShape();
 }
 
+void ASandwich::expandPrototypeInstances()
+{
+    if (Prototypes->HostedObjects.isEmpty()) return;
+
+    QVector<AGeoObject*> Instances;
+    World->findAllInstancesRecursive(Instances);
+
+    for (AGeoObject * instanceObj : Instances)
+    {
+        instanceObj->clearContent();
+
+        ATypeInstanceObject * insType = dynamic_cast<ATypeInstanceObject*>(instanceObj->ObjectType);
+        if (!insType)
+        {
+            qWarning() << "Instance" << instanceObj->Name << "has a wrong type!";
+            return;
+        }
+
+        AGeoObject * prototypeObj = Prototypes->findObjectByName(insType->PrototypeName);
+        if (!prototypeObj)
+        {
+            qWarning() << "Prototype" << insType->PrototypeName << "not found for instance" << instanceObj->Name;
+            return;
+        }
+
+        AGeoObject * clone = prototypeObj->makeClone(World);
+        instanceObj->addObjectFirst(clone);
+        clone->lockRecursively();
+    }
+}
+
 void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TGeoManager* GeoManager,
                                          AMaterialParticleCollection* MaterialCollection,
                                          QVector<APMandDummy> *PMsAndDumPMs,

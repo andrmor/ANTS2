@@ -1103,10 +1103,18 @@ AGeoObject * AGeoObject::findContainerUp(const QString & name)
 
 void AGeoObject::clearAll()
 {
-    for (int i=0; i<HostedObjects.size(); i++)
-      HostedObjects[i]->clearAll();
+    for (AGeoObject * obj : HostedObjects)
+        obj->clearAll();
+    HostedObjects.clear();
 
     delete this;
+}
+
+void AGeoObject::clearContent()
+{
+    for (AGeoObject * obj : HostedObjects)
+        obj->clearAll();
+    HostedObjects.clear();
 }
 
 void AGeoObject::updateWorldSize(double &XYm, double &Zm)
@@ -1321,6 +1329,14 @@ AGeoObject * AGeoObject::makeClone(AGeoObject * World)
         tmpContainer.HostedObjects.clear();  // not deleting the objects inside!
     }
     return clone;
+}
+
+void AGeoObject::findAllInstancesRecursive(QVector<AGeoObject *> & Instances)
+{
+    if (ObjectType->isInstance()) Instances << this;
+
+    for (AGeoObject * obj : HostedObjects)
+        obj->findAllInstancesRecursive(Instances);
 }
 
 QString randomString(int lettLength, int numLength)

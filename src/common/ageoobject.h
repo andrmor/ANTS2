@@ -125,7 +125,8 @@ public:
   void lockBuddies();
   void lockRecursively();
   void unlockAllInside();
-  void clearAll();
+  void clearAll();    // bad name!
+  void clearContent();
   void updateWorldSize(double& XYm, double& Zm);
   bool isMaterialInUse(int imat) const;  //including disabled objects
   bool isMaterialInActiveUse(int imat) const;  //excluding disabled objects
@@ -137,6 +138,8 @@ public:
   bool isContainerValidForDrop(QString &errorStr) const;
 
   AGeoObject * makeClone(AGeoObject * World); // returns nullptr if failed; garantees unique names if World is not nullptr; Slabs are not properly cloned while there is a special container with them!
+
+  void findAllInstancesRecursive(QVector<AGeoObject*> & Instances);
 
   //service propertie
   QString tmpContName;   //used only during load

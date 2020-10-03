@@ -353,6 +353,9 @@ void DetectorClass::populateGeoManager()
   for (int i=0; i<PMdummies.size(); i++) PMsAndDumPms << APMandDummy(PMdummies.at(i).r[0], PMdummies.at(i).r[1], PMdummies.at(i).UpperLower);
   Sandwich->clearGridRecords();
   Sandwich->clearMonitorRecords();
+
+  Sandwich->expandPrototypeInstances();
+
   Sandwich->addTGeoVolumeRecursively(Sandwich->World, top, GeoManager, MpCollection, &PMsAndDumPms);
 
   positionPMs();

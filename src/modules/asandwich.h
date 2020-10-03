@@ -24,37 +24,39 @@ public:
   ASandwich();
   ~ASandwich();
 
-  AGeoObject * World = nullptr;       //world with tree structure, slabs are on the first level!
-  AGeoObject * Prototypes = nullptr;  //hosts prototypes; prototype is an objects (can be with content) which can be placed multiple times in the geometry
+  AGeoObject * World = nullptr;       // world tree structure, slabs are on the first level!
+  AGeoObject * Prototypes = nullptr;  // hosts prototypes; a prototype is an objects (can be a tree of objects) which can be placed multiple times in the geometry
+
   void clearWorld();
 
   //slab handling
-  void appendSlab(ASlabModel* slab);
-  void insertSlab(int index, ASlabModel* slab);
-  int countSlabs();
+  void appendSlab(ASlabModel * slab);
+  void insertSlab(int index, ASlabModel * slab);
+  int  countSlabs();
   AGeoObject* findSlabByIndex(int index);
   void enforceCommonProperties();
 
   //lightguide handling
-  AGeoObject* getUpperLightguide();  // 0 if not defined
-  AGeoObject* getLowerLightguide();  // 0 if not defined
-  AGeoObject *addLightguide(bool upper); // new object (lightguide) is added to the WorldTree
-  bool convertObjToLightguide(AGeoObject *obj, bool upper);
+  AGeoObject * getUpperLightguide();  // 0 if not defined
+  AGeoObject * getLowerLightguide();  // 0 if not defined
+  AGeoObject * addLightguide(bool upper); // new object (lightguide) is added to the WorldTree
+  bool convertObjToLightguide(AGeoObject * obj, bool upper);
 
   //composite
-  void convertObjToComposite(AGeoObject *obj);
+  void convertObjToComposite(AGeoObject * obj);
 
   //grid
-  void convertObjToGrid(AGeoObject *obj);
-  void shapeGrid(AGeoObject* obj, int shape, double p0, double p1, double p2, int wireMat);
+  void convertObjToGrid(AGeoObject * obj);
+  void shapeGrid(AGeoObject * obj, int shape, double p0, double p1, double p2, int wireMat);
   //parallel - 0, pitch, length, wireDiameter
   //mesh - 1, pitchX, pitchY, wireDiameter
   //hexa - 2, outer circle diameter, inner circle diameter, full height
 
   // populate TGeoManager
-  void addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent,
-                                TGeoManager* GeoManager, AMaterialParticleCollection* MaterialCollection,
-                                QVector<APMandDummy> *PMsAndDumPMs,
+  void expandPrototypeInstances();
+  void addTGeoVolumeRecursively(AGeoObject * obj, TGeoVolume * parent,
+                                TGeoManager * GeoManager, AMaterialParticleCollection * MaterialCollection,
+                                QVector<APMandDummy> * PMsAndDumPMs,
                                 int forcedNodeNumber = 0);
 
   void clearGridRecords();
@@ -71,8 +73,8 @@ public:
   void changeLineWidthOfVolumes(int delta);
 
   // JSON
-  void writeToJson(QJsonObject& json);
-  QString readFromJson(QJsonObject& json);  // returnd "" if no errors, else error description
+  void writeToJson(QJsonObject & json);
+  QString readFromJson(QJsonObject & json);  // returnd "" if no errors, else error description
 
   // for particle remove - handled by AConfiguration!
   void IsParticleInUse(int particleId, bool &bInUse, QString& MonitorNames);

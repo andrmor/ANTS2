@@ -95,10 +95,13 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(QWidget * parent, MainWindow * MW, De
   QDoubleValidator* dv = new QDoubleValidator(this);
   dv->setNotation(QDoubleValidator::ScientificNotation);
   QList<QLineEdit*> list = this->findChildren<QLineEdit *>();
-  foreach(QLineEdit *w, list) if (w->objectName().startsWith("led")) w->setValidator(dv);
+  for (QLineEdit * w : list) if (w->objectName().startsWith("led")) w->setValidator(dv);
 
   ui->cbAutoCheck->setChecked( MW->GlobSet.PerformAutomaticGeometryCheck );
   on_cbAutoCheck_stateChanged(111);
+
+  if (!MW->PythonScriptWindow) ui->actionTo_Python->setEnabled(false);
+  ui->saPrototypes->setVisible(false);
 
   connect(ui->menuUndo_redo, &QMenu::aboutToShow, this, &DetectorAddOnsWindow::updateMenuIndication);
 }
@@ -594,6 +597,7 @@ void DetectorAddOnsWindow::HighlightVolume(const QString & VolName)
     }
 }
 
+/*
 void DetectorAddOnsWindow::on_pbUseScriptToAddObj_clicked()
 {
     QList<QTreeWidgetItem*> list = twGeo->selectedItems();
@@ -632,46 +636,8 @@ void DetectorAddOnsWindow::on_pbUseScriptToAddObj_clicked()
     MW->recallGeometryOfLocalScriptWindow();
     MW->GenScriptWindow->UpdateGui();
     MW->GenScriptWindow->show();
-
-//  MW->extractGeometryOfLocalScriptWindow();
-//  if (MW->GenScriptWindow) delete MW->GenScriptWindow;
-//  MW->GenScriptWindow = new GenericScriptWindowClass(MW->Detector->RandGen);
-//  MW->recallGeometryOfLocalScriptWindow();
-//
-//  QList<QTreeWidgetItem*> list = twGeo->selectedItems();
-//  if (list.size() == 1) ObjectScriptTarget = list.first()->text(0);
-//  else ObjectScriptTarget = "World";
-
-//  AGeoObject* obj = Detector->Sandwich->World->findObjectByName(ObjectScriptTarget);
-//  if (!obj)
-//    {
-//      ObjectScriptTarget = "World";
-//      obj = Detector->Sandwich->World;
-//    }
-//  if (obj->LastScript.isEmpty())
-//    Detector->AddObjPositioningScript = Detector->Sandwich->World->LastScript;
-//  else
-//    Detector->AddObjPositioningScript = obj->LastScript;
-//
-//  AddObjScriptInterface = new InterfaceToAddObjScript(Detector); //deleted by the GenScriptWindow
-//  MW->GenScriptWindow->SetInterfaceObject(AddObjScriptInterface);
-//  MW->GenScriptWindow->SetShowEvaluationResult(false); //do not show "undefined"
-//  MW->GenScriptWindow->SetExample("ClearAll()\nfor (var i=0; i<3; i++)\n Box('Test'+i, 10,5,2, 0, 'PrScint', (i-1)*20,i*2,-i*5,  0,0,0)");
-//  QObject::connect(AddObjScriptInterface, SIGNAL(AbortScriptEvaluation(QString)), this, SLOT(ReportScriptError(QString)));
-//  QObject::connect(AddObjScriptInterface, SIGNAL(requestShowCheckUpWindow()), MW->CheckUpWindow, SLOT(showNormal()));
-//
-//  if (ObjectScriptTarget.isEmpty())
-//    MW->GenScriptWindow->SetTitle("Add objects script");
-//  else
-//    MW->GenScriptWindow->SetTitle("Add objects script. Script will be stored in object "+ObjectScriptTarget);
-
-//  MW->GenScriptWindow->SetScript(&Detector->AddObjPositioningScript);
-//  MW->GenScriptWindow->SetStarterDir(MW->GlobSet.LibScripts);
-//  connect(MW->GenScriptWindow, SIGNAL(success(QString)), this, SLOT(AddObjScriptSuccess()));
-//
-//  AddObjScriptInterface->GeoObjects.clear();
-//  MW->GenScriptWindow->show();
 }
+*/
 
 void DetectorAddOnsWindow::AddObjScriptSuccess()
 {
@@ -1317,40 +1283,6 @@ void DetectorAddOnsWindow::on_cbAutoCheck_stateChanged(int)
   ui->cbAutoCheck->setPalette(p);
 }
 
-void DetectorAddOnsWindow::on_pbConvertToScript_clicked()
-{
-    QString script;
-    if (MW->ScriptWindow->isVisible() || !MW->PythonScriptWindow->isVisible())
-    {
-        createScript(script, false);
-        MW->ScriptWindow->onLoadRequested(script);
-        MW->ScriptWindow->showNormal();
-        MW->ScriptWindow->raise();
-        MW->ScriptWindow->activateWindow();
-    }
-
-    if (MW->PythonScriptWindow && MW->PythonScriptWindow->isVisible())
-    {
-        createScript(script, true);
-        MW->PythonScriptWindow->onLoadRequested(script);
-        MW->PythonScriptWindow->showNormal();
-        MW->PythonScriptWindow->raise();
-        MW->PythonScriptWindow->activateWindow();
-    }
-}
-
-void DetectorAddOnsWindow::on_pbWorldTreeHelp_clicked()
-{
-    QString s = "Use context menu to manipulate objects\n"
-                "\n"
-                "Drag & drop can be used to move items\n"
-                "  from one container to another\n"
-                "\n"
-                "Drop when Alt or Shift or Control is pressed\n"
-                "  changes the item order (can be used to move too)";
-    message(s, this);
-}
-
 #include "aonelinetextedit.h"
 #include "ageobasedelegate.h"
 #include <QTabWidget>
@@ -1644,4 +1576,50 @@ void DetectorAddOnsWindow::on_actionRedo_triggered()
         QString err = MW->Config->doRedo();
         if (!err.isEmpty()) message(err, this);
     }
+}
+
+void DetectorAddOnsWindow::on_actionHow_to_use_drag_and_drop_triggered()
+{
+    QString s = "Drag & drop can be used to move items\n"
+                "  from one container to another\n"
+                "\n"
+                "Drop when Alt or Shift or Control is pressed\n"
+                "  changes the item order:\n"
+                "  the dragged item is inserted between two object\n"
+                "  according to the drop indicator";
+    message(s, this);
+}
+
+void DetectorAddOnsWindow::on_actionTo_JavaScript_triggered()
+{
+    QString script;
+    createScript(script, false);
+    MW->ScriptWindow->onLoadRequested(script);
+    MW->ScriptWindow->showNormal();
+    MW->ScriptWindow->raise();
+    MW->ScriptWindow->activateWindow();
+}
+
+void DetectorAddOnsWindow::on_actionTo_Python_triggered()
+{
+    if (!MW->PythonScriptWindow)
+    {
+        message("ANTS2 was compiled without Python support. Enable it in ants2.pro");
+        return;
+    }
+
+    QString script;
+    createScript(script, true);
+    MW->PythonScriptWindow->onLoadRequested(script);
+    MW->PythonScriptWindow->showNormal();
+    MW->PythonScriptWindow->raise();
+    MW->PythonScriptWindow->activateWindow();
+}
+
+void DetectorAddOnsWindow::on_checkBox_toggled(bool checked)
+{
+    ui->saPrototypes->setVisible(checked);
+
+    if (!checked) ui->spTreeAndPrototypes->setSizes({3, 1});
+    ui->spTreeAndPrototypes->adjustSize();
 }

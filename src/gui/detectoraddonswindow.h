@@ -46,7 +46,7 @@ private slots:
   void on_sbDummyType_valueChanged(int arg1);
   void on_pbLoadDummyPMs_clicked();
   void on_pbConvertAllToPMs_clicked();
-  void on_pbUseScriptToAddObj_clicked();
+//void on_pbUseScriptToAddObj_clicked();
   void on_pbSaveTGeo_clicked();
   void on_pbLoadTGeo_clicked();
   void on_pbBackToSandwich_clicked();
@@ -56,11 +56,17 @@ private slots:
   void on_pbRunTestParticle_clicked();
   void on_cbAutoCheck_stateChanged(int arg1);
   void on_pmParseInGeometryFromGDML_clicked();
-  void on_pbConvertToScript_clicked();
-  void on_pbWorldTreeHelp_clicked();
   void on_tabwConstants_cellChanged(int row, int column);
   void on_actionUndo_triggered();
   void on_actionRedo_triggered();
+
+  void on_actionHow_to_use_drag_and_drop_triggered();
+
+  void on_actionTo_JavaScript_triggered();
+
+  void on_actionTo_Python_triggered();
+
+  void on_checkBox_toggled(bool checked);
 
 private:
   Ui::DetectorAddOnsWindow *ui;

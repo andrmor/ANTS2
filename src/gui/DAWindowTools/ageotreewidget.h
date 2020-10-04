@@ -30,6 +30,8 @@ public:
   void         SetLineAttributes(AGeoObject * obj);
   void         SelectObjects(QStringList ObjectNames);
 
+  QTreeWidget * twPrototypes = nullptr;
+
 public slots:
   void UpdateGui(QString selected = "");
   void onGridReshapeRequested(QString objName);
@@ -64,18 +66,21 @@ private:
   //QImage GroupStart, GroupMid, GroupEnd;
   QImage StackStart, StackMid, StackEnd;
 
-  QColor BackgroundColor;
-  bool   fSpecialGeoViewMode;
+  //QColor BackgroundColor = QColor(240,240,240);
+  bool   fSpecialGeoViewMode = false;
 
   QTreeWidgetItem * previousHoverItem = nullptr;
   const QTreeWidgetItem * movingItem  = nullptr;  // used only to prevent highlight of item under the moving one if it is the same as target
 
+  void configureStyle(QTreeWidget * wid);
   void populateTreeWidget(QTreeWidgetItem *parent, AGeoObject *Container, bool fDisabled = false);
   void updateExpandState(QTreeWidgetItem* item); //recursive!
   void updateIcon(QTreeWidgetItem *item, AGeoObject *obj);
   void formStack(QList<QTreeWidgetItem *> selected);
   void markAsStackRefVolume(AGeoObject * obj);
   void addLightguide(bool upper);
+  void createPrototypeTreeWidget();
+  void updatePrototypeTreeGui();
 
   void menuActionAddNewObject(AGeoObject * ContObj, AGeoShape * shape);
   void menuActionCloneObject(AGeoObject * obj);

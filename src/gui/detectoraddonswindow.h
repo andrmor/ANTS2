@@ -27,7 +27,7 @@ public:
   void HighlightVolume(const QString & VolName);
 
   AGeo_SI        * AddObjScriptInterface = nullptr;  // if created -> owned by the script manager
-  AGeoTreeWidget * twGeo = nullptr;                  // WorldTree widget
+  AGeoTreeWidget * twGeo   = nullptr;                  // WorldTree widget
 
 private slots:
   void onReconstructDetectorRequest();

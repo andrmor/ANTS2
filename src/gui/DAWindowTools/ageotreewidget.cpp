@@ -40,9 +40,7 @@ AGeoTreeWidget::AGeoTreeWidget(ASandwich *Sandwich) : Sandwich(Sandwich)
 {
   World = Sandwich->World;
 
-  //setHeaderLabels(QStringList() << "Tree of geometry objects: use context menu and drag-and-drop");
   setHeaderHidden(true);
-
   setAcceptDrops(true);
   setDragEnabled(true);
   setDragDropMode(QAbstractItemView::InternalMove);
@@ -65,9 +63,6 @@ AGeoTreeWidget::AGeoTreeWidget(ASandwich *Sandwich) : Sandwich(Sandwich)
   setContextMenuPolicy(Qt::CustomContextMenu);
   connect(this, &AGeoTreeWidget::customContextMenuRequested, this, &AGeoTreeWidget::customMenuRequested);
 
-  BackgroundColor = QColor(240,240,240);
-  fSpecialGeoViewMode = false;
-
   EditWidget = new AGeoWidget(Sandwich, this);
   connect(this, &AGeoTreeWidget::itemSelectionChanged, this, &AGeoTreeWidget::onItemSelectionChanged);
   connect(this, &AGeoTreeWidget::ObjectSelectionChanged, EditWidget, &AGeoWidget::onObjectSelectionChanged);
@@ -75,28 +70,46 @@ AGeoTreeWidget::AGeoTreeWidget(ASandwich *Sandwich) : Sandwich(Sandwich)
   connect(EditWidget, &AGeoWidget::showMonitor, this, &AGeoTreeWidget::RequestShowMonitor);
   connect(EditWidget, &AGeoWidget::requestBuildScript, this, &AGeoTreeWidget::objectToScript);
 
-  QString style;
-  style = "QTreeView::branch:has-siblings:!adjoins-item {"
-          "border-image: url(:/images/tw-vline.png) 0; }"
-  "QTreeView::branch:has-siblings:adjoins-item {"
-      "border-image: url(:/images/tw-branch-more.png) 0; }"
-  "QTreeView::branch:!has-children:!has-siblings:adjoins-item {"
-      "border-image: url(:/images/tw-branch-end.png) 0; }"
-  "QTreeView::branch:has-children:!has-siblings:closed,"
-  "QTreeView::branch:closed:has-children:has-siblings {"
-          "border-image: none;"
-          "image: url(:/images/tw-branch-closed.png);}"
-  "QTreeView::branch:open:has-children:!has-siblings,"
-  "QTreeView::branch:open:has-children:has-siblings  {"
-          "border-image: none;"
-          "image: url(:/images/tw-branch-open.png);}";
-  setStyleSheet(style);
+  connect(this, SIGNAL(itemExpanded(QTreeWidgetItem*)),  this, SLOT(onItemExpanded(QTreeWidgetItem*)));
+  connect(this, SIGNAL(itemCollapsed(QTreeWidgetItem*)), this, SLOT(onItemCollapsed(QTreeWidgetItem*)));
+
+  createPrototypeTreeWidget();
+
+  configureStyle(this);
+  configureStyle(twPrototypes);
 
   QShortcut* Del = new QShortcut(Qt::Key_Backspace, this);
   connect(Del, &QShortcut::activated, this, &AGeoTreeWidget::onRemoveTriggered);
 
   QShortcut* DelRec = new QShortcut(QKeySequence(QKeySequence::Delete), this);
   connect(DelRec, &QShortcut::activated, this, &AGeoTreeWidget::onRemoveRecursiveTriggered);
+}
+
+void AGeoTreeWidget::createPrototypeTreeWidget()
+{
+    twPrototypes = new QTreeWidget();
+
+    twPrototypes->setHeaderHidden(true);
+    //twPrototypes->setAcceptDrops(true);
+    //twPrototypes->setDragEnabled(true);
+    //twPrototypes->setDragDropMode(QAbstractItemView::InternalMove);
+    twPrototypes->setSelectionMode(QAbstractItemView::SingleSelection);//  ExtendedSelection);
+    //twPrototypes->setDropIndicatorShown(false);
+        //twPrototypes->setIndentation(20);
+    twPrototypes->setContentsMargins(0,0,0,0);
+    twPrototypes->setFrameStyle(QFrame::NoFrame);
+    twPrototypes->setIconSize(QSize(20,20));
+
+    setContextMenuPolicy(Qt::CustomContextMenu);
+    //connect(this, &AGeoTreeWidget::customContextMenuRequested, this, &AGeoTreeWidget::customMenuRequested);
+
+    //connect(twPrototypes, &QTreeWidget::itemSelectionChanged, this, &AGeoTreeWidget::onItemSelectionChanged);
+    //connect(twPrototypes, &QTreeWidget::ObjectSelectionChanged, EditWidget, &AGeoWidget::onObjectSelectionChanged);
+    //connect(twPrototypes, SIGNAL(itemClicked(QTreeWidgetItem*,int)), this, SLOT(onItemClicked()));
+
+    //connect(twPrototypes, SIGNAL(itemExpanded(QTreeWidgetItem*)),  this, SLOT(onItemExpanded(QTreeWidgetItem*)));
+    //connect(twPrototypes, SIGNAL(itemCollapsed(QTreeWidgetItem*)), this, SLOT(onItemCollapsed(QTreeWidgetItem*)));
+
 }
 
 void AGeoTreeWidget::SelectObjects(QStringList ObjectNames)
@@ -154,7 +167,50 @@ void AGeoTreeWidget::UpdateGui(QString selected)
             setCurrentItem(list.first());
         }
     }
+
+    updatePrototypeTreeGui();
+    //if (twPrototypes->topLevelItemCount() > 0) updateExpandState(twPrototypes->topLevelItem(0));
+
     //qDebug() << "<==";
+}
+
+void AGeoTreeWidget::updatePrototypeTreeGui()
+{
+    if (!Sandwich->Prototypes) return;
+
+    //qDebug() << "==> Update tree triggered, selected = "<<selected;
+//    if (selected.isEmpty() && currentItem())
+//    {
+//        //qDebug() << currentItem()->text(0);
+//        selected = currentItem()->text(0);
+//    }
+    twPrototypes->clear(); // *** also emits "itemSelectionChanged" with no selection -> clears delegate
+
+    //World
+    QTreeWidgetItem * w = new QTreeWidgetItem(twPrototypes);
+    w->setText(0, "Defined prototypes:");
+    QFont f = w->font(0); f.setBold(true); w->setFont(0, f);
+    w->setSizeHint(0, QSize(50, 20));
+    w->setFlags(w->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsSelectable);
+    //w->setBackgroundColor(0, BackgroundColor);
+
+    populateTreeWidget(w, Sandwich->Prototypes);
+    if (topLevelItemCount() > 0)
+        updateExpandState(this->topLevelItem(0));
+
+//    if (selected.isEmpty())
+//    {
+//        if (topLevelItemCount() > 0) setCurrentItem(topLevelItem(0));
+//    }
+//    else
+//    {
+//        QList<QTreeWidgetItem*> list = findItems(selected, Qt::MatchExactly | Qt::MatchRecursive);
+//        if (!list.isEmpty())
+//        {
+//            list.first()->setSelected(true);
+//            setCurrentItem(list.first());
+//        }
+//    }
 }
 
 void AGeoTreeWidget::onGridReshapeRequested(QString objName)
@@ -234,7 +290,7 @@ void AGeoTreeWidget::populateTreeWidget(QTreeWidgetItem* parent, AGeoObject *Con
         { //group or stack or array or gridElement
           QFont f = item->font(0); f.setItalic(true); item->setFont(0, f);
           updateIcon(item, obj);
-          item->setBackgroundColor(0, BackgroundColor);
+          //item->setBackgroundColor(0, BackgroundColor);
         }      
       else
         {
@@ -244,7 +300,7 @@ void AGeoTreeWidget::populateTreeWidget(QTreeWidgetItem* parent, AGeoObject *Con
               item->setFlags(item->flags() & ~Qt::ItemIsDragEnabled);
               QFont f = item->font(0); f.setBold(true); item->setFont(0, f);
           }
-          item->setBackgroundColor(0, BackgroundColor);
+          //item->setBackgroundColor(0, BackgroundColor);
         }      
 
       populateTreeWidget(item, obj, fDisabledLocal);
@@ -476,6 +532,26 @@ void AGeoTreeWidget::dragMoveEvent(QDragMoveEvent *event)
             previousHoverItem = itemOver;
         }
     }
+}
+
+void AGeoTreeWidget::configureStyle(QTreeWidget *wid)
+{
+    QString style;
+    style = "QTreeView::branch:has-siblings:!adjoins-item {"
+            "border-image: url(:/images/tw-vline.png) 0; }"
+    "QTreeView::branch:has-siblings:adjoins-item {"
+        "border-image: url(:/images/tw-branch-more.png) 0; }"
+    "QTreeView::branch:!has-children:!has-siblings:adjoins-item {"
+        "border-image: url(:/images/tw-branch-end.png) 0; }"
+    "QTreeView::branch:has-children:!has-siblings:closed,"
+    "QTreeView::branch:closed:has-children:has-siblings {"
+            "border-image: none;"
+            "image: url(:/images/tw-branch-closed.png);}"
+    "QTreeView::branch:open:has-children:!has-siblings,"
+    "QTreeView::branch:open:has-children:has-siblings  {"
+            "border-image: none;"
+            "image: url(:/images/tw-branch-open.png);}";
+    wid->setStyleSheet(style);
 }
 
 void AGeoTreeWidget::onItemSelectionChanged()

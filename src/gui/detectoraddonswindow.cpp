@@ -57,13 +57,16 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(QWidget * parent, MainWindow * MW, De
 
   ui->pbBackToSandwich->setEnabled(false);
 
-  // tree widget
+  // world tree widget
   twGeo = new AGeoTreeWidget(Detector->Sandwich);
   ui->saGeo->setWidget(twGeo);
-  connect(twGeo, SIGNAL(itemExpanded(QTreeWidgetItem*)), twGeo, SLOT(onItemExpanded(QTreeWidgetItem*)));
-  connect(twGeo, SIGNAL(itemCollapsed(QTreeWidgetItem*)), twGeo, SLOT(onItemCollapsed(QTreeWidgetItem*)));
+  //connect(twGeo, SIGNAL(itemExpanded(QTreeWidgetItem*)), twGeo, SLOT(onItemExpanded(QTreeWidgetItem*)));
+  //connect(twGeo, SIGNAL(itemCollapsed(QTreeWidgetItem*)), twGeo, SLOT(onItemCollapsed(QTreeWidgetItem*)));
   connect(twGeo, SIGNAL(RequestListOfParticles(QStringList&)), Detector->MpCollection, SLOT(OnRequestListOfParticles(QStringList&)));
   connect(twGeo, &AGeoTreeWidget::RequestShowMonitor, this, &DetectorAddOnsWindow::OnrequestShowMonitor);
+
+  // prototype tree widget
+  ui->saPrototypes->setWidget(twGeo->twPrototypes);
 
   // Object editor
   QVBoxLayout* l = new QVBoxLayout();

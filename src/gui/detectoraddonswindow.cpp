@@ -1623,6 +1623,6 @@ void DetectorAddOnsWindow::on_checkBox_toggled(bool checked)
 {
     ui->saPrototypes->setVisible(checked);
 
-    if (!checked) ui->spTreeAndPrototypes->setSizes({3, 1});
-    ui->spTreeAndPrototypes->adjustSize();
+    //if (!checked) ui->spTreeAndPrototypes->setSizes({3, 1});
+    //ui->spTreeAndPrototypes->adjustSize();
 }

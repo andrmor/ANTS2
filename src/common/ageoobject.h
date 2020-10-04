@@ -138,6 +138,7 @@ public:
   bool isContainerValidForDrop(QString &errorStr) const;
 
   AGeoObject * makeClone(AGeoObject * World); // returns nullptr if failed; garantees unique names if World is not nullptr; Slabs are not properly cloned while there is a special container with them!
+  AGeoObject * makeCloneForInstance(const QString & suffix);
 
   void findAllInstancesRecursive(QVector<AGeoObject*> & Instances);
 
@@ -151,6 +152,7 @@ private:
   void constructorInit();
 
   void enforceUniqueNameForCloneRecursive(AGeoObject * World, AGeoObject & tmpContainer);
+  void addSuffixToNameRecursive(const QString & suffix);
 
 public:
   static QString GenerateRandomName();

@@ -1297,6 +1297,24 @@ void AGeoObject::enforceUniqueNameForCloneRecursive(AGeoObject * World, AGeoObje
         hostedObj->enforceUniqueNameForCloneRecursive(World, tmpContainer);
 }
 
+void AGeoObject::addSuffixToNameRecursive(const QString & suffix)
+{
+    const QString newName = Name + "@" + suffix;
+
+    if (Container && Container->ObjectType->isStack())
+    {
+        ATypeStackContainerObject * Stack = static_cast<ATypeStackContainerObject*>(Container->ObjectType);
+        if (Stack->ReferenceVolume == Name)
+            Stack->ReferenceVolume = newName;
+    }
+    if (isCompositeMemeber())
+        updateNameOfLogicalMember(Name, newName);
+    Name = newName;
+
+    for (AGeoObject * obj : HostedObjects)
+        obj->addSuffixToNameRecursive(suffix);
+}
+
 AGeoObject * AGeoObject::makeClone(AGeoObject * World)
 {
     QJsonArray ar;
@@ -1328,6 +1346,23 @@ AGeoObject * AGeoObject::makeClone(AGeoObject * World)
         clone->enforceUniqueNameForCloneRecursive(World, tmpContainer);
         tmpContainer.HostedObjects.clear();  // not deleting the objects inside!
     }
+    return clone;
+}
+
+AGeoObject * AGeoObject::makeCloneForInstance(const QString & suffix)
+{
+    QJsonArray ar;
+    writeAllToJarr(ar);
+    AGeoObject * clone = new AGeoObject();
+    QString errStr = clone->readAllFromJarr(clone, ar);
+    if (!errStr.isEmpty())
+    {
+        clone->clearAll();
+        return nullptr;
+    }
+    //note that slab cannot be an instance!
+
+    clone->addSuffixToNameRecursive(suffix);
     return clone;
 }
 

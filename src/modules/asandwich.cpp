@@ -494,7 +494,7 @@ void ASandwich::expandPrototypeInstances()
             return;
         }
 
-        AGeoObject * clone = prototypeObj->makeClone(World);
+        AGeoObject * clone = prototypeObj->makeCloneForInstance(instanceObj->Name);
 
         for (int i=0; i<3; i++)
         {

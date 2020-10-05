@@ -888,33 +888,34 @@ void AGeoObject::addObjectLast(AGeoObject * Object)
   else HostedObjects.append(Object);
 }
 
-bool AGeoObject::migrateTo(AGeoObject *objTo, bool fAfter, AGeoObject *reorderObj)
-{   
-  if (objTo == this->Container) return true;
+bool AGeoObject::migrateTo(AGeoObject * objTo, bool fAfter, AGeoObject *reorderObj)
+{
+    if (ObjectType->isWorld()) return false;
 
-  //check: cannot migrate down the chain (including to itself)
-  //assuming nobody asks to migrate slabs and world
-  if ( !objTo->ObjectType->isSlab() && !objTo->ObjectType->isWorld())
+    if (Container)
     {
-      AGeoObject* obj = objTo;
-      do
+        if (objTo != Container)
         {
-          if (obj == this) return false;
-          obj = obj->Container;
+            //check: cannot migrate down the chain (including to itself)
+            //assuming nobody asks to migrate slabs and world
+            if (Container && !objTo->ObjectType->isSlab() && !objTo->ObjectType->isWorld())
+            {
+                AGeoObject * obj = objTo;
+                do
+                {
+                    if (obj == this) return false;
+                    obj = obj->Container;
+                }
+                //while ( !obj->ObjectType->isSlab() && !obj->ObjectType->isWorld());
+                while (obj);
+            }
         }
-      while ( !obj->ObjectType->isSlab() && !obj->ObjectType->isWorld());
+        Container->HostedObjects.removeOne(this);
     }
+    objTo->addObjectFirst(this);
 
-  Container->HostedObjects.removeOne(this);  
-
-  //Container = objTo;
-  //objTo->HostedObjects.insert(0, this);
-  objTo->addObjectFirst(this);
-
-  if (reorderObj) this->repositionInHosted(reorderObj, fAfter);
-  return true;
-
-
+    if (reorderObj) return repositionInHosted(reorderObj, fAfter);
+    else            return true;
 }
 
 bool AGeoObject::repositionInHosted(AGeoObject *objTo, bool fAfter)
@@ -1374,12 +1375,20 @@ void AGeoObject::findAllInstancesRecursive(QVector<AGeoObject *> & Instances)
         obj->findAllInstancesRecursive(Instances);
 }
 
+QString AGeoObject::makeItPrototype(AGeoObject * Prototypes)
+{
+    qDebug() << Name << Prototypes->Name;
+
+    migrateTo(Prototypes);
+
+    return "";
+}
+
 QString randomString(int lettLength, int numLength)
 {
   //const QString possibleLett("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
   const QString possibleLett("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
   const QString possibleNum("0123456789");
-
 
   QString randomString;
   for(int i=0; i<lettLength; i++)

@@ -687,7 +687,11 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
   menu.addSeparator();
 
   QAction* stackA = Action(menu, "Form a stack");
-  QAction* stackRefA = Action(menu, "Mark as the stack reference volume"); stackRefA->setEnabled(false);
+  QAction* stackRefA = Action(menu, "Mark as the stack reference volume");
+
+  menu.addSeparator();
+
+  QAction* prototypeA = Action(menu, "Declare prototype");
 
   menu.addSeparator();
 
@@ -743,6 +747,7 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
       showAonly->setEnabled(true);
       showAdown->setEnabled(true);
       stackRefA->setEnabled(obj->isStackMember());
+      prototypeA->setEnabled(true); // ***
   }
   else if (!selected.first()->font(0).bold())
   {
@@ -803,6 +808,8 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
   else if (SelectedAction == removeA)        menuActionRemove();                     // REMOVE
   else if (SelectedAction == removeThisAndHostedA) menuActionRemoveRecursively(obj); // REMOVE RECURSIVLY
   else if (SelectedAction == removeHostedA)  menuActionRemoveHostedObjects(obj);     // REMOVE HOSTED
+
+  else if (SelectedAction == prototypeA)     menuActionDeclarePrototype(obj); // PROTOTYPE
 
   else
   {
@@ -1158,6 +1165,21 @@ void AGeoTreeWidget::menuActionAddInstance(AGeoObject * ContObj, const QString &
     ContObj->addObjectFirst(newObj);
 
     const QString name = newObj->Name;
+    emit RequestRebuildDetector();
+    UpdateGui(name);
+}
+
+void AGeoTreeWidget::menuActionDeclarePrototype(AGeoObject * obj)
+{
+    QString err = obj->makeItPrototype(Prototypes);
+
+    if (!err.isEmpty())
+    {
+        message("Cannot make this object a prototype:\n" + err, this);
+        return;
+    }
+
+    const QString name = obj->Name;
     emit RequestRebuildDetector();
     UpdateGui(name);
 }

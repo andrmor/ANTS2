@@ -142,6 +142,8 @@ public:
 
   void findAllInstancesRecursive(QVector<AGeoObject*> & Instances);
 
+  QString makeItPrototype(AGeoObject * Prototypes);
+
   //service propertie
   QString tmpContName;   //used only during load
   bool fExpanded = true; //gui only - is this object expanded in tree view

@@ -107,6 +107,7 @@ private:
   void menuActionAddNewGrid(AGeoObject * ContObj);
   void menuActionAddNewMonitor(AGeoObject * ContObj);
   void menuActionAddInstance(AGeoObject * ContObj, const QString & PrototypeName);
+  void menuActionDeclarePrototype(AGeoObject * obj);
 
   QString makeScriptString_basicObject(AGeoObject *obj, bool bExpandMaterials, bool usePython) const;
   QString makeScriptString_slab(AGeoObject *obj, bool bExpandMaterials, int ident) const;

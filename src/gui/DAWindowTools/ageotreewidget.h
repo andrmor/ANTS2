@@ -42,7 +42,8 @@ public slots:
 
 private slots:
   void onItemSelectionChanged();                    // !*! bold is also used now for stack reference volume
-  void customMenuRequested(const QPoint &pos);      // ---- CONTEXT MENU ----
+  void customMenuRequested(const QPoint &pos);      // ==== World tree CONTEXT MENU ====
+  void customProtoMenuRequested(const QPoint &pos); // ---- Proto tree CONTEXT MENU ----
   void onItemClicked();                             // only to return to normal geo view mode!
 
   void onItemExpanded(QTreeWidgetItem * item);

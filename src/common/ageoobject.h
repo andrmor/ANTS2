@@ -141,8 +141,12 @@ public:
   AGeoObject * makeCloneForInstance(const QString & suffix);
 
   void findAllInstancesRecursive(QVector<AGeoObject*> & Instances);
+  bool isContainInstanceRecursive() const;
+  bool isInstanceMember() const;
 
+  bool    isPossiblePrototype(QString * sReason = nullptr) const;
   QString makeItPrototype(AGeoObject * Prototypes);
+  bool    isPrototypeInUseRecursive(const QString & PrototypeName, QStringList * Users = nullptr) const;
 
   //service propertie
   QString tmpContName;   //used only during load

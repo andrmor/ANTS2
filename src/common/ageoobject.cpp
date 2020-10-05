@@ -1375,13 +1375,91 @@ void AGeoObject::findAllInstancesRecursive(QVector<AGeoObject *> & Instances)
         obj->findAllInstancesRecursive(Instances);
 }
 
+bool AGeoObject::isContainInstanceRecursive() const
+{
+    if (ObjectType->isInstance()) return true;
+
+    for (AGeoObject * obj : HostedObjects)
+        if (obj->isContainInstanceRecursive()) return true;
+
+    return false;
+}
+
+bool AGeoObject::isInstanceMember() const
+{
+    const AGeoObject * obj = this;
+
+    while (obj)
+    {
+        if (ObjectType->isInstance()) return true;
+        obj = obj->Container;
+    }
+    return false;
+}
+
+bool AGeoObject::isPossiblePrototype(QString * sReason) const
+{
+    if (isWorld())
+    {
+        if (sReason) *sReason = "World cannot be a prototype";
+        return false;
+    }
+    if (ObjectType->isSlab())
+    {
+        if (sReason) *sReason = "Slab cannot be a prototype";
+        return false;
+    }
+
+    if (isContainInstanceRecursive())
+    {
+        if (sReason) *sReason = "Prototype cannot contain instances of other prototypes";
+        return false;
+    }
+    if (isInstanceMember())
+    {
+        if (sReason) *sReason = "Cannot make a prototype form an object which is a part of an instance";
+        return false;
+    }
+
+    if (ObjectType->isLogical())
+    {
+        if (sReason) *sReason = "Logical volume cannot be a prototype";
+        return false;
+    }
+    if (ObjectType->isCompositeContainer())
+    {
+        if (sReason) *sReason = "Composite container cannot be a prototype";
+        return false;
+    }
+    return true;
+}
+
 QString AGeoObject::makeItPrototype(AGeoObject * Prototypes)
 {
-    qDebug() << Name << Prototypes->Name;
+    QString errStr;
 
-    migrateTo(Prototypes);
+    isPossiblePrototype(&errStr);
+    if (errStr.isEmpty()) migrateTo(Prototypes);
 
-    return "";
+    return errStr;
+}
+
+bool AGeoObject::isPrototypeInUseRecursive(const QString & PrototypeName, QStringList * Users) const
+{
+    if (ObjectType->isInstance())
+    {
+        ATypeInstanceObject * instance = static_cast<ATypeInstanceObject*>(ObjectType);
+        if (PrototypeName == instance->PrototypeName)
+        {
+            if (Users) *Users << Name;
+            return true;
+        }
+        return false; // instance cannot contain other instances
+    }
+
+    for (AGeoObject * obj : HostedObjects)
+        if (obj->isPrototypeInUseRecursive(PrototypeName, Users))
+            return true;
 }
 
 QString randomString(int lettLength, int numLength)

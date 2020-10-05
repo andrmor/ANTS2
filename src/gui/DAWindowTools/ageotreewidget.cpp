@@ -91,17 +91,14 @@ void AGeoTreeWidget::createPrototypeTreeWidget()
     twPrototypes->setContentsMargins(0,0,0,0);
     twPrototypes->setFrameStyle(QFrame::NoFrame);
     twPrototypes->setIconSize(QSize(20,20));
-
-    setContextMenuPolicy(Qt::CustomContextMenu);
-    //connect(this, &AGeoTreeWidget::customContextMenuRequested, this, &AGeoTreeWidget::customMenuRequested);
+    twPrototypes->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(twPrototypes, &QTreeWidget::customContextMenuRequested, this, &AGeoTreeWidget::customProtoMenuRequested);
+    connect(twPrototypes, &QTreeWidget::itemExpanded,  this, &AGeoTreeWidget::onPrototypeItemExpanded);
+    connect(twPrototypes, &QTreeWidget::itemCollapsed, this, &AGeoTreeWidget::onPrototypeItemCollapsed);
 
     //connect(twPrototypes, &QTreeWidget::itemSelectionChanged, this, &AGeoTreeWidget::onItemSelectionChanged);
     //connect(twPrototypes, &QTreeWidget::ObjectSelectionChanged, EditWidget, &AGeoWidget::onObjectSelectionChanged);
     //connect(twPrototypes, SIGNAL(itemClicked(QTreeWidgetItem*,int)), this, SLOT(onItemClicked()));
-
-    connect(twPrototypes, &QTreeWidget::itemExpanded,  this, &AGeoTreeWidget::onPrototypeItemExpanded);
-    connect(twPrototypes, &QTreeWidget::itemCollapsed, this, &AGeoTreeWidget::onPrototypeItemCollapsed);
-
 }
 
 void AGeoTreeWidget::loadImages()
@@ -747,7 +744,7 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
       showAonly->setEnabled(true);
       showAdown->setEnabled(true);
       stackRefA->setEnabled(obj->isStackMember());
-      prototypeA->setEnabled(true); // ***
+      prototypeA->setEnabled(obj->isPossiblePrototype());
   }
   else if (!selected.first()->font(0).bold())
   {
@@ -816,6 +813,151 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
       for (auto & pair : addInstanceA)
           if (SelectedAction == pair.first)  menuActionAddInstance(obj, pair.second);
   }
+}
+
+void AGeoTreeWidget::customProtoMenuRequested(const QPoint &pos)
+{
+    // top level (Prototypes) can have only single selection (see onProtoSelectionChanged())
+    QList<QTreeWidgetItem*> selected = twPrototypes->selectedItems();
+    if (selected.isEmpty()) return;
+
+
+    QMenu menu;
+
+    //QAction* showA     = Action(menu, "Show - highlight in geometry");
+    QAction* showAdown = Action(menu, "Show - this object with content");
+    QAction* showAonly = Action(menu, "Show - only this object");
+    QAction* lineA     = Action(menu, "Change line color/width/style");
+
+    menu.addSeparator();
+
+    QAction* enableDisableA = Action(menu, "Enable/Disable");
+
+    menu.addSeparator();
+
+    QMenu * addObjMenu = menu.addMenu("Add object");
+      QAction* newBox  = addObjMenu->addAction("Box");
+      QMenu * addTubeMenu = addObjMenu->addMenu("Tube");
+          QAction* newTube =        addTubeMenu->addAction("Tube");
+          QAction* newTubeSegment = addTubeMenu->addAction("Tube segment");
+          QAction* newTubeSegCut =  addTubeMenu->addAction("Tube segment cut");
+          QAction* newTubeElli =    addTubeMenu->addAction("Elliptical tube");
+      QMenu * addTrapMenu = addObjMenu->addMenu("Trapezoid");
+          QAction* newTrapSim =     addTrapMenu->addAction("Trapezoid simplified");
+          QAction* newTrap    =     addTrapMenu->addAction("Trapezoid");
+      QAction* newPcon = addObjMenu->addAction("Polycone");
+      QMenu * addPgonMenu = addObjMenu->addMenu("Polygon");
+          QAction* newPgonSim =     addPgonMenu->addAction("Polygon simplified");
+          QAction* newPgon    =     addPgonMenu->addAction("Polygon");
+      QAction* newPara = addObjMenu->addAction("Parallelepiped");
+      QAction* newSphere = addObjMenu->addAction("Sphere");
+      QMenu * addConeMenu = addObjMenu->addMenu("Cone");
+          QAction* newCone =        addConeMenu->addAction("Cone");
+          QAction* newConeSeg =     addConeMenu->addAction("Cone segment");
+      QAction* newTor = addObjMenu->addAction("Torus");
+      QAction* newParabol = addObjMenu->addAction("Paraboloid");
+      QAction* newArb8 = addObjMenu->addAction("Arb8");
+
+    QAction* newArrayA  = Action(menu, "Add array");
+    QAction* newCompositeA  = Action(menu, "Add composite object");
+    //QAction* newGridA = Action(menu, "Add optical grid");
+    QAction* newMonitorA = Action(menu, "Add monitor");
+
+    menu.addSeparator();
+
+    QAction* cloneA = Action(menu, "Clone this object");
+
+    menu.addSeparator();
+
+    QAction* removeThisAndHostedA = Action(menu, "Remove object and content");
+    removeThisAndHostedA->setShortcut(QKeySequence(QKeySequence::Delete));
+    QAction* removeA = Action(menu, "Remove object, keep its content");
+    removeA->setShortcut(Qt::Key_Backspace);
+    QAction* removeHostedA = Action(menu, "Remove all objects inside");
+
+    menu.addSeparator();
+
+    QAction* stackA = Action(menu, "Form a stack");
+    QAction* stackRefA = Action(menu, "Mark as the stack reference volume");
+
+
+
+    QString objName;
+    AGeoObject * obj = nullptr;
+
+    if (selected.size() == 1)
+    {
+        objName = selected.first()->text(0);
+        obj = Prototypes->findObjectByName(objName);
+        if (!obj) return;
+        const ATypeGeoObject & ObjectType = *obj->ObjectType;
+
+        bool fNotGridNotMonitor = !ObjectType.isGrid() && !ObjectType.isMonitor();
+
+        addObjMenu->setEnabled(fNotGridNotMonitor);
+        enableDisableA->setEnabled( !obj->isWorld() );
+        enableDisableA->setText( (obj->isDisabled() ? "Enable object" : "Disable object" ) );
+
+        newCompositeA->setEnabled(fNotGridNotMonitor);
+        newArrayA->setEnabled(fNotGridNotMonitor);
+        newMonitorA->setEnabled(fNotGridNotMonitor);
+        cloneA->setEnabled(true);
+        removeHostedA->setEnabled(fNotGridNotMonitor);
+        removeThisAndHostedA->setEnabled(!ObjectType.isWorld());
+        removeA->setEnabled(!ObjectType.isWorld());
+        lineA->setEnabled(true);
+        //showA->setEnabled(true);
+        showAonly->setEnabled(true);
+        showAdown->setEnabled(true);
+        stackRefA->setEnabled(obj->isStackMember());
+    }
+    else
+    {
+        // several items selected, and they are not slabs
+        addObjMenu->setEnabled(false);
+        removeA->setEnabled(true); //world cannot be in selection with anything else anyway
+        stackA->setEnabled(true);
+    }
+
+    QAction * SelectedAction = menu.exec(twPrototypes->mapToGlobal(pos));
+    if (!SelectedAction) return; //nothing was selected
+
+    // -- EXECUTE SELECTED ACTION --
+    //if (SelectedAction == showA)               ShowObject(obj); else
+    if (SelectedAction == showAonly)      ShowObjectOnly(obj);
+    else if (SelectedAction == showAdown)      ShowObjectRecursive(obj);
+    else if (SelectedAction == lineA)          SetLineAttributes(obj);
+    else if (SelectedAction == enableDisableA) menuActionEnableDisable(obj);
+    // ADD NEW OBJECT
+    else if (SelectedAction == newBox)         menuActionAddNewObject(obj, new AGeoBox());
+    else if (SelectedAction == newTube)        menuActionAddNewObject(obj, new AGeoTube());
+    else if (SelectedAction == newTubeSegment) menuActionAddNewObject(obj, new AGeoTubeSeg());
+    else if (SelectedAction == newTubeSegCut)  menuActionAddNewObject(obj, new AGeoCtub());
+    else if (SelectedAction == newTubeElli)    menuActionAddNewObject(obj, new AGeoEltu());
+    else if (SelectedAction == newTrapSim)     menuActionAddNewObject(obj, new AGeoTrd1());
+    else if (SelectedAction == newTrap)        menuActionAddNewObject(obj, new AGeoTrd2());
+    else if (SelectedAction == newPcon)        menuActionAddNewObject(obj, new AGeoPcon());
+    else if (SelectedAction == newPgonSim)     menuActionAddNewObject(obj, new AGeoPolygon());
+    else if (SelectedAction == newPgon)        menuActionAddNewObject(obj, new AGeoPgon());
+    else if (SelectedAction == newPara)        menuActionAddNewObject(obj, new AGeoPara());
+    else if (SelectedAction == newSphere)      menuActionAddNewObject(obj, new AGeoSphere());
+    else if (SelectedAction == newCone)        menuActionAddNewObject(obj, new AGeoCone());
+    else if (SelectedAction == newConeSeg)     menuActionAddNewObject(obj, new AGeoConeSeg());
+    else if (SelectedAction == newTor)         menuActionAddNewObject(obj, new AGeoTorus());
+    else if (SelectedAction == newParabol)     menuActionAddNewObject(obj, new AGeoParaboloid());
+    else if (SelectedAction == newArb8)        menuActionAddNewObject(obj, new AGeoArb8());
+    else if (SelectedAction == newCompositeA)  menuActionAddNewComposite(obj);
+    else if (SelectedAction == newArrayA)      menuActionAddNewArray(obj);
+    //else if (SelectedAction == newGridA)       menuActionAddNewGrid(obj);
+    else if (SelectedAction == newMonitorA)    menuActionAddNewMonitor(obj);
+
+    else if (SelectedAction == cloneA)         menuActionCloneObject(obj);  // CLONE
+    else if (SelectedAction == stackA)         formStack(selected);         // Form STACK
+    else if (SelectedAction == stackRefA)      markAsStackRefVolume(obj);
+
+    else if (SelectedAction == removeA)        menuActionRemove();                     // REMOVE
+    else if (SelectedAction == removeThisAndHostedA) menuActionRemoveRecursively(obj); // REMOVE RECURSIVLY
+    else if (SelectedAction == removeHostedA)  menuActionRemoveHostedObjects(obj);     // REMOVE HOSTED
 }
 
 void AGeoTreeWidget::onItemClicked()
@@ -1175,11 +1317,11 @@ void AGeoTreeWidget::menuActionDeclarePrototype(AGeoObject * obj)
 
     if (!err.isEmpty())
     {
-        message("Cannot make this object a prototype:\n" + err, this);
+        message(err, this);
         return;
     }
 
-    const QString name = obj->Name;
+    const QString name = "";//obj->Name;
     emit RequestRebuildDetector();
     UpdateGui(name);
 }

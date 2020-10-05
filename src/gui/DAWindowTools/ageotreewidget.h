@@ -45,8 +45,10 @@ private slots:
   void customMenuRequested(const QPoint &pos);      // ---- CONTEXT MENU ----
   void onItemClicked();                             // only to return to normal geo view mode!
 
-  void onItemExpanded(QTreeWidgetItem* item);
-  void onItemCollapsed(QTreeWidgetItem* item);
+  void onItemExpanded(QTreeWidgetItem * item);
+  void onItemCollapsed(QTreeWidgetItem * item);
+  void onPrototypeItemExpanded(QTreeWidgetItem * item);
+  void onPrototypeItemCollapsed(QTreeWidgetItem * item);
 
   void onRemoveTriggered();
   void onRemoveRecursiveTriggered();
@@ -59,7 +61,11 @@ protected:
 private:
   ASandwich  * Sandwich   = nullptr;
   AGeoObject * World      = nullptr;
+  AGeoObject * Prototypes = nullptr;
+
   AGeoWidget * EditWidget = nullptr;
+
+  QTreeWidgetItem * topItemPrototypes = nullptr;
 
   //base images for icons
   QImage Lock;
@@ -72,9 +78,10 @@ private:
   QTreeWidgetItem * previousHoverItem = nullptr;
   const QTreeWidgetItem * movingItem  = nullptr;  // used only to prevent highlight of item under the moving one if it is the same as target
 
+  void loadImages();
   void configureStyle(QTreeWidget * wid);
   void populateTreeWidget(QTreeWidgetItem *parent, AGeoObject *Container, bool fDisabled = false);
-  void updateExpandState(QTreeWidgetItem* item); //recursive!
+  void updateExpandState(QTreeWidgetItem * item, bool bPrototypes); //recursive!
   void updateIcon(QTreeWidgetItem *item, AGeoObject *obj);
   void formStack(QList<QTreeWidgetItem *> selected);
   void markAsStackRefVolume(AGeoObject * obj);

@@ -36,53 +36,45 @@
 #include "TMath.h"
 #include "TGeoShape.h"
 
-AGeoTreeWidget::AGeoTreeWidget(ASandwich *Sandwich) : Sandwich(Sandwich)
+AGeoTreeWidget::AGeoTreeWidget(ASandwich *Sandwich)
+    : Sandwich(Sandwich), World(Sandwich->World), Prototypes(Sandwich->Prototypes)
 {
-  World = Sandwich->World;
+    loadImages();
 
-  setHeaderHidden(true);
-  setAcceptDrops(true);
-  setDragEnabled(true);
-  setDragDropMode(QAbstractItemView::InternalMove);
-  setSelectionMode(QAbstractItemView::ExtendedSelection);
-  setDropIndicatorShown(false);
-  //setIndentation(20);
-  setContentsMargins(0,0,0,0);
-  setFrameStyle(QFrame::NoFrame);
-  setIconSize(QSize(20,20));
+    // main tree widget
+    setHeaderHidden(true);
+    setAcceptDrops(true);
+    setDragEnabled(true);
+    setDragDropMode(QAbstractItemView::InternalMove);
+    setSelectionMode(QAbstractItemView::ExtendedSelection);
+    setDropIndicatorShown(false);
+    //setIndentation(20);
+    setContentsMargins(0, 0, 0, 0);
+    setFrameStyle(QFrame::NoFrame);
+    setIconSize(QSize(20, 20));
+    configureStyle(this);
+    setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(this, &AGeoTreeWidget::customContextMenuRequested, this, &AGeoTreeWidget::customMenuRequested);
+    connect(this, &AGeoTreeWidget::itemSelectionChanged,       this, &AGeoTreeWidget::onItemSelectionChanged);
+    connect(this, &AGeoTreeWidget::itemExpanded,               this, &AGeoTreeWidget::onItemExpanded);
+    connect(this, &AGeoTreeWidget::itemCollapsed,              this, &AGeoTreeWidget::onItemCollapsed);
+    connect(this, &AGeoTreeWidget::itemClicked,                this, &AGeoTreeWidget::onItemClicked);
 
-  QString dir = ":/images/";
-  Lock.load(dir+"lock.png");
-  //GroupStart.load(dir+"TopGr.png");
-  //GroupMid.load(dir+"MidGr.png");
-  //GroupEnd.load(dir+"BotGr.png");
-  StackStart.load(dir+"TopSt.png");
-  StackMid.load(dir+"MidSt.png");
-  StackEnd.load(dir+"BotSt.png");
+    // widget for delegates
+    EditWidget = new AGeoWidget(Sandwich, this);
+    connect(EditWidget, &AGeoWidget::showMonitor,                this, &AGeoTreeWidget::RequestShowMonitor);
+    connect(EditWidget, &AGeoWidget::requestBuildScript,         this, &AGeoTreeWidget::objectToScript);
+    connect(this,       &AGeoTreeWidget::ObjectSelectionChanged, EditWidget, &AGeoWidget::onObjectSelectionChanged);
 
-  setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(this, &AGeoTreeWidget::customContextMenuRequested, this, &AGeoTreeWidget::customMenuRequested);
+    // tree for prototypes
+    createPrototypeTreeWidget();
+    configureStyle(twPrototypes);
 
-  EditWidget = new AGeoWidget(Sandwich, this);
-  connect(this, &AGeoTreeWidget::itemSelectionChanged, this, &AGeoTreeWidget::onItemSelectionChanged);
-  connect(this, &AGeoTreeWidget::ObjectSelectionChanged, EditWidget, &AGeoWidget::onObjectSelectionChanged);
-  connect(this, SIGNAL(itemClicked(QTreeWidgetItem*,int)), this, SLOT(onItemClicked()));
-  connect(EditWidget, &AGeoWidget::showMonitor, this, &AGeoTreeWidget::RequestShowMonitor);
-  connect(EditWidget, &AGeoWidget::requestBuildScript, this, &AGeoTreeWidget::objectToScript);
-
-  connect(this, SIGNAL(itemExpanded(QTreeWidgetItem*)),  this, SLOT(onItemExpanded(QTreeWidgetItem*)));
-  connect(this, SIGNAL(itemCollapsed(QTreeWidgetItem*)), this, SLOT(onItemCollapsed(QTreeWidgetItem*)));
-
-  createPrototypeTreeWidget();
-
-  configureStyle(this);
-  configureStyle(twPrototypes);
-
-  QShortcut* Del = new QShortcut(Qt::Key_Backspace, this);
-  connect(Del, &QShortcut::activated, this, &AGeoTreeWidget::onRemoveTriggered);
-
-  QShortcut* DelRec = new QShortcut(QKeySequence(QKeySequence::Delete), this);
-  connect(DelRec, &QShortcut::activated, this, &AGeoTreeWidget::onRemoveRecursiveTriggered);
+    // shortcuts
+    QShortcut * Del = new QShortcut(Qt::Key_Backspace, this);
+    connect(Del, &QShortcut::activated, this, &AGeoTreeWidget::onRemoveTriggered);
+    QShortcut * DelRec = new QShortcut(QKeySequence(QKeySequence::Delete), this);
+    connect(DelRec, &QShortcut::activated, this, &AGeoTreeWidget::onRemoveRecursiveTriggered);
 }
 
 void AGeoTreeWidget::createPrototypeTreeWidget()
@@ -107,9 +99,22 @@ void AGeoTreeWidget::createPrototypeTreeWidget()
     //connect(twPrototypes, &QTreeWidget::ObjectSelectionChanged, EditWidget, &AGeoWidget::onObjectSelectionChanged);
     //connect(twPrototypes, SIGNAL(itemClicked(QTreeWidgetItem*,int)), this, SLOT(onItemClicked()));
 
-    //connect(twPrototypes, SIGNAL(itemExpanded(QTreeWidgetItem*)),  this, SLOT(onItemExpanded(QTreeWidgetItem*)));
-    //connect(twPrototypes, SIGNAL(itemCollapsed(QTreeWidgetItem*)), this, SLOT(onItemCollapsed(QTreeWidgetItem*)));
+    connect(twPrototypes, &QTreeWidget::itemExpanded,  this, &AGeoTreeWidget::onPrototypeItemExpanded);
+    connect(twPrototypes, &QTreeWidget::itemCollapsed, this, &AGeoTreeWidget::onPrototypeItemCollapsed);
 
+}
+
+void AGeoTreeWidget::loadImages()
+{
+    QString dir = ":/images/";
+
+    Lock.load(dir+"lock.png");
+    //GroupStart.load(dir+"TopGr.png");
+    //GroupMid.load(dir+"MidGr.png");
+    //GroupEnd.load(dir+"BotGr.png");
+    StackStart.load(dir+"TopSt.png");
+    StackMid.load(dir+"MidSt.png");
+    StackEnd.load(dir+"BotSt.png");
 }
 
 void AGeoTreeWidget::SelectObjects(QStringList ObjectNames)
@@ -141,18 +146,17 @@ void AGeoTreeWidget::UpdateGui(QString selected)
     clear(); // also emits "itemSelectionChanged" with no selection -> clears delegate
 
     //World
-    QTreeWidgetItem * w = new QTreeWidgetItem(this);
-    w->setText(0, "World");
-    QFont f = w->font(0);
+    QTreeWidgetItem * topItem = new QTreeWidgetItem(this);
+    topItem->setText(0, "World");
+    QFont f = topItem->font(0);
     f.setBold(true);
-    w->setFont(0, f);
-    w->setSizeHint(0, QSize(50, 20));
-    w->setFlags(w->flags() & ~Qt::ItemIsDragEnabled);// & ~Qt::ItemIsSelectable);
+    topItem->setFont(0, f);
+    topItem->setSizeHint(0, QSize(50, 20));
+    topItem->setFlags(topItem->flags() & ~Qt::ItemIsDragEnabled);// & ~Qt::ItemIsSelectable);
     //w->setBackgroundColor(0, BackgroundColor);
 
-    populateTreeWidget(w, World);
-    if (topLevelItemCount() > 0)
-        updateExpandState(this->topLevelItem(0));
+    populateTreeWidget(topItem, World);
+    updateExpandState(topItem, false);
 
     if (selected.isEmpty())
     {
@@ -169,14 +173,13 @@ void AGeoTreeWidget::UpdateGui(QString selected)
     }
 
     updatePrototypeTreeGui();
-    //if (twPrototypes->topLevelItemCount() > 0) updateExpandState(twPrototypes->topLevelItem(0));
 
     //qDebug() << "<==";
 }
 
 void AGeoTreeWidget::updatePrototypeTreeGui()
 {
-    if (!Sandwich->Prototypes) return;
+    if (!Prototypes) return;
 
     //qDebug() << "==> Update tree triggered, selected = "<<selected;
 //    if (selected.isEmpty() && currentItem())
@@ -184,19 +187,18 @@ void AGeoTreeWidget::updatePrototypeTreeGui()
 //        //qDebug() << currentItem()->text(0);
 //        selected = currentItem()->text(0);
 //    }
-    twPrototypes->clear(); // *** also emits "itemSelectionChanged" with no selection -> clears delegate
+    twPrototypes->clear(); // also emits "itemSelectionChanged" with no selection
 
-    //World
-    QTreeWidgetItem * w = new QTreeWidgetItem(twPrototypes);
-    w->setText(0, "Defined prototypes:");
-    QFont f = w->font(0); f.setBold(true); w->setFont(0, f);
-    w->setSizeHint(0, QSize(50, 20));
-    w->setFlags(w->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsSelectable);
-    //w->setBackgroundColor(0, BackgroundColor);
+    topItemPrototypes = new QTreeWidgetItem(twPrototypes);
+    topItemPrototypes->setText(0, "Defined prototypes:");
+    QFont f = topItemPrototypes->font(0); f.setBold(true); topItemPrototypes->setFont(0, f);
+    topItemPrototypes->setSizeHint(0, QSize(50, 20));
+    topItemPrototypes->setFlags(topItemPrototypes->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsSelectable);
+    //topItem->setBackgroundColor(0, BackgroundColor);
+    Prototypes->fExpanded = true;  // force-expand top!
 
-    populateTreeWidget(w, Sandwich->Prototypes);
-    if (topLevelItemCount() > 0)
-        updateExpandState(this->topLevelItem(0));
+    populateTreeWidget(topItemPrototypes, Prototypes);
+    updateExpandState(topItemPrototypes, true);
 
 //    if (selected.isEmpty())
 //    {
@@ -267,57 +269,65 @@ void AGeoTreeWidget::onGridReshapeRequested(QString objName)
     delete d;
 }
 
-void AGeoTreeWidget::populateTreeWidget(QTreeWidgetItem* parent, AGeoObject *Container, bool fDisabled)
+void AGeoTreeWidget::populateTreeWidget(QTreeWidgetItem * parent, AGeoObject * Container, bool fDisabled)
 {  
-  for (int i=0; i<Container->HostedObjects.size(); i++)
+    for (AGeoObject * obj : Container->HostedObjects)
     {
-      AGeoObject *obj = Container->HostedObjects[i];
-      QString SubName = obj->Name;      
-      QTreeWidgetItem *item = new QTreeWidgetItem(parent);
+        QTreeWidgetItem *item = new QTreeWidgetItem(parent);
 
-      bool fDisabledLocal = fDisabled || !obj->fActive;
-      if (fDisabledLocal) item->setForeground(0, QBrush(Qt::red));
+        bool fDisabledLocal = fDisabled || !obj->fActive;
+        if (fDisabledLocal) item->setForeground(0, QBrush(Qt::red));
 
-      item->setText(0, SubName);
-      item->setSizeHint(0, QSize(50, 20));
+        item->setText(0, obj->Name);
+        item->setSizeHint(0, QSize(50, 20));  // ?
 
-      if (obj->ObjectType->isHandlingStatic())
+        if (obj->ObjectType->isHandlingStatic())
         { //this is one of the slabs or World
-          item->setFlags(item->flags() & ~Qt::ItemIsDragEnabled);// & ~Qt::ItemIsSelectable);
-          QFont f = item->font(0); f.setBold(true); item->setFont(0, f);
+            item->setFlags(item->flags() & ~Qt::ItemIsDragEnabled);// & ~Qt::ItemIsSelectable);
+            QFont f = item->font(0); f.setBold(true); item->setFont(0, f);
         }
-      else if (obj->ObjectType->isHandlingSet() || obj->ObjectType->isArray() || obj->ObjectType->isGridElement())
+        else if (obj->ObjectType->isHandlingSet() || obj->ObjectType->isArray() || obj->ObjectType->isGridElement())
         { //group or stack or array or gridElement
-          QFont f = item->font(0); f.setItalic(true); item->setFont(0, f);
-          updateIcon(item, obj);
-          //item->setBackgroundColor(0, BackgroundColor);
+            QFont f = item->font(0); f.setItalic(true); item->setFont(0, f);
+            updateIcon(item, obj);
+            //item->setBackgroundColor(0, BackgroundColor);
         }      
-      else
+        else
         {
-          updateIcon(item, obj);
-          if (obj->isStackReference())
-          {
-              item->setFlags(item->flags() & ~Qt::ItemIsDragEnabled);
-              QFont f = item->font(0); f.setBold(true); item->setFont(0, f);
-          }
-          //item->setBackgroundColor(0, BackgroundColor);
+            updateIcon(item, obj);
+            if (obj->isStackReference())
+            {
+                item->setFlags(item->flags() & ~Qt::ItemIsDragEnabled);
+                QFont f = item->font(0); f.setBold(true); item->setFont(0, f);
+            }
+            //item->setBackgroundColor(0, BackgroundColor);
         }      
 
-      populateTreeWidget(item, obj, fDisabledLocal);
-  }
+        populateTreeWidget(item, obj, fDisabledLocal);
+    }
 }
 
-void AGeoTreeWidget::updateExpandState(QTreeWidgetItem *item)
+void AGeoTreeWidget::updateExpandState(QTreeWidgetItem * item, bool bPrototypes)
 {
-    AGeoObject* obj = World->findObjectByName(item->text(0));
-    if (obj)
+    QTreeWidget * treeWidget = nullptr;
+    AGeoObject  * obj        = nullptr;
+
+    if (bPrototypes)
     {
-        if (obj->fExpanded)
-        {
-            expandItem(item);
-            for (int i=0; i<item->childCount(); i++)
-                updateExpandState(item->child(i));
-        }
+        treeWidget = twPrototypes;
+        obj        = ( item == topItemPrototypes ? Prototypes : Prototypes->findObjectByName(item->text(0)) );
+    }
+    else
+    {
+        treeWidget = this;
+        obj        = World->findObjectByName(item->text(0));
+    }
+
+    if (obj && obj->fExpanded)
+    {
+        treeWidget->expandItem(item);
+        for (int i = 0; i < item->childCount(); i++)
+            updateExpandState(item->child(i), bPrototypes);
     }
 }
 
@@ -534,7 +544,7 @@ void AGeoTreeWidget::dragMoveEvent(QDragMoveEvent *event)
     }
 }
 
-void AGeoTreeWidget::configureStyle(QTreeWidget *wid)
+void AGeoTreeWidget::configureStyle(QTreeWidget * wid)
 {
     QString style;
     style = "QTreeView::branch:has-siblings:!adjoins-item {"
@@ -812,13 +822,27 @@ void AGeoTreeWidget::onItemClicked()
 
 void AGeoTreeWidget::onItemExpanded(QTreeWidgetItem *item)
 {
-    AGeoObject* obj = World->findObjectByName(item->text(0));
+    AGeoObject * obj = World->findObjectByName(item->text(0));
     if (obj) obj->fExpanded = true;
 }
 
 void AGeoTreeWidget::onItemCollapsed(QTreeWidgetItem *item)
 {
-    AGeoObject* obj = World->findObjectByName(item->text(0));
+    AGeoObject * obj = World->findObjectByName(item->text(0));
+    if (obj) obj->fExpanded = false;
+}
+
+void AGeoTreeWidget::onPrototypeItemExpanded(QTreeWidgetItem * item)
+{
+    AGeoObject * obj = ( item == twPrototypes->topLevelItem(0) ? Prototypes
+                                                               : Prototypes->findObjectByName(item->text(0)) );
+    if (obj) obj->fExpanded = true;
+}
+
+void AGeoTreeWidget::onPrototypeItemCollapsed(QTreeWidgetItem * item)
+{
+    AGeoObject * obj = ( item == twPrototypes->topLevelItem(0) ? Prototypes
+                                                               : Prototypes->findObjectByName(item->text(0)) );
     if (obj) obj->fExpanded = false;
 }
 

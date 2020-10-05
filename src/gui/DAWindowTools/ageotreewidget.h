@@ -42,6 +42,7 @@ public slots:
 
 private slots:
   void onItemSelectionChanged();                    // !*! bold is also used now for stack reference volume
+  void onProtoItemSelectionChanged();
   void customMenuRequested(const QPoint &pos);      // ==== World tree CONTEXT MENU ====
   void customProtoMenuRequested(const QPoint &pos); // ---- Proto tree CONTEXT MENU ----
   void onItemClicked();                             // only to return to normal geo view mode!
@@ -123,7 +124,8 @@ private:
   QString makeScriptString_DisabledObject(AGeoObject *obj) const;
 
 signals:
-  void ObjectSelectionChanged(QString); // should be fired with empty string if selection does not contain a single item
+  void ObjectSelectionChanged(QString);      // should be fired with empty string if selection does not contain a single item
+  void ProtoObjectSelectionChanged(QString); // should be fired with empty string if selection does not contain a single item
   void RequestRebuildDetector();
   void RequestHighlightObject(QString name);
   void RequestFocusObject(QString name);

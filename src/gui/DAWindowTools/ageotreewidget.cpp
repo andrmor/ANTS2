@@ -92,13 +92,12 @@ void AGeoTreeWidget::createPrototypeTreeWidget()
     twPrototypes->setFrameStyle(QFrame::NoFrame);
     twPrototypes->setIconSize(QSize(20,20));
     twPrototypes->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(twPrototypes, &QTreeWidget::customContextMenuRequested, this, &AGeoTreeWidget::customProtoMenuRequested);
-    connect(twPrototypes, &QTreeWidget::itemExpanded,  this, &AGeoTreeWidget::onPrototypeItemExpanded);
-    connect(twPrototypes, &QTreeWidget::itemCollapsed, this, &AGeoTreeWidget::onPrototypeItemCollapsed);
-
-    //connect(twPrototypes, &QTreeWidget::itemSelectionChanged, this, &AGeoTreeWidget::onItemSelectionChanged);
-    //connect(twPrototypes, &QTreeWidget::ObjectSelectionChanged, EditWidget, &AGeoWidget::onObjectSelectionChanged);
-    //connect(twPrototypes, SIGNAL(itemClicked(QTreeWidgetItem*,int)), this, SLOT(onItemClicked()));
+    connect(twPrototypes, &QTreeWidget::customContextMenuRequested,     this, &AGeoTreeWidget::customProtoMenuRequested);
+    connect(twPrototypes, &QTreeWidget::itemExpanded,                   this, &AGeoTreeWidget::onPrototypeItemExpanded);
+    connect(twPrototypes, &QTreeWidget::itemCollapsed,                  this, &AGeoTreeWidget::onPrototypeItemCollapsed);
+    connect(twPrototypes, &QTreeWidget::itemSelectionChanged,           this, &AGeoTreeWidget::onProtoItemSelectionChanged);
+    connect(twPrototypes, &QTreeWidget::itemClicked,                    this, &AGeoTreeWidget::onItemClicked); // same as the main tree
+    connect(this,         &AGeoTreeWidget::ProtoObjectSelectionChanged, EditWidget, &AGeoWidget::onObjectSelectionChanged);
 }
 
 void AGeoTreeWidget::loadImages()
@@ -140,7 +139,9 @@ void AGeoTreeWidget::UpdateGui(QString selected)
         //qDebug() << currentItem()->text(0);
         selected = currentItem()->text(0);
     }
+
     clear(); // also emits "itemSelectionChanged" with no selection -> clears delegate
+    twPrototypes->clear(); // also emits "itemSelectionChanged" with no selection
 
     //World
     QTreeWidgetItem * topItem = new QTreeWidgetItem(this);
@@ -184,7 +185,7 @@ void AGeoTreeWidget::updatePrototypeTreeGui()
 //        //qDebug() << currentItem()->text(0);
 //        selected = currentItem()->text(0);
 //    }
-    twPrototypes->clear(); // also emits "itemSelectionChanged" with no selection
+    //twPrototypes->clear(); // also emits "itemSelectionChanged" with no selection
 
     topItemPrototypes = new QTreeWidgetItem(twPrototypes);
     topItemPrototypes->setText(0, "Defined prototypes:");
@@ -579,19 +580,9 @@ void AGeoTreeWidget::onItemSelectionChanged()
   }
 
   //multiple selected
-
-  //allow only selection of objects of the same container!
-  //static objects cannot be mixed with others
-  //QTreeWidgetItem * FirstParent = sel.first()->parent();
   for (int i = 1; i < sel.size(); i++)
   {
-      /*if (sel.at(i)->parent() != FirstParent)
-      {
-          //qDebug() << "Cannot select together items from different containers!";
-          sel.at(i)->setSelected(false);
-          return; // will retrigger anyway
-      }*/
-      if (sel.at(i)->font(0).bold())
+      if (sel.at(i)->font(0).bold()) //static objects cannot be mixed with others
       {
           //qDebug() << "Cannot select together different slabs or    world and slab(s)";
           sel.at(i)->setSelected(false);
@@ -601,6 +592,47 @@ void AGeoTreeWidget::onItemSelectionChanged()
 
   //with multiple selected do not show EditWidget
   emit ObjectSelectionChanged("");
+}
+
+void AGeoTreeWidget::onProtoItemSelectionChanged()
+{
+    QList<QTreeWidgetItem*> sel = twPrototypes->selectedItems();
+
+    if (sel.size() == 0)
+    {
+        emit ProtoObjectSelectionChanged("");
+        return;
+    }
+    if (sel.size() == 1)
+    {
+        QString name = sel.first()->text(0);
+        emit ObjectSelectionChanged(name);
+        return;
+    }
+
+    //multiple selected
+
+    //allow to select only one prototype object
+    //allow only selection of objects of the same container
+    QTreeWidgetItem * FirstParent = sel.first()->parent();
+    for (int i = 1; i < sel.size(); i++)
+    {
+        if (sel.at(i)->parent() != FirstParent)
+        {
+            qDebug() << "Cannot select together items from different containers!";
+            sel.at(i)->setSelected(false);
+            return; // will retrigger anyway
+        }
+        /*
+        if (sel.at(i)->font(0).bold())
+        {
+            //qDebug() << "Cannot select together different slabs or    world and slab(s)";
+            sel.at(i)->setSelected(false);
+            return; // will retrigger anyway
+        }
+        */
+    }
+    emit ProtoObjectSelectionChanged(""); //with multiple selected do not show EditWidget
 }
 
 QAction* Action(QMenu& Menu, QString Text)
@@ -1962,9 +1994,9 @@ void AGeoWidget::ClearGui()
     //qDebug() << "AGeoWidget clear triggered!";
     fIgnoreSignals = true;
 
-    while(ObjectLayout->count() > 0)
+    while (ObjectLayout->count() > 0)
     {
-        QLayoutItem* item = ObjectLayout->takeAt(0);
+        QLayoutItem * item = ObjectLayout->takeAt(0);
         if (item->widget())
             delete item->widget();
         delete item;
@@ -2114,7 +2146,10 @@ void AGeoWidget::onObjectSelectionChanged(QString SelectedObject)
     //qDebug() << "Object selection changed! ->" << SelectedObject;
     ClearGui();
 
-    AGeoObject* obj = Sandwich->World->findObjectByName(SelectedObject);
+    if (SelectedObject.isEmpty()) return;
+
+    AGeoObject * obj = Sandwich->World->findObjectByName(SelectedObject);
+    if (!obj)    obj = Sandwich->Prototypes->findObjectByName(SelectedObject);
     if (!obj) return;
 
     CurrentObject = obj;
@@ -2134,9 +2169,8 @@ void AGeoWidget::onStartEditing()
   {
       fEditingMode = true;
       tw->setEnabled(false);
-      QFont f = pbConfirm->font();
-      f.setBold(true);
-      pbConfirm->setFont(f);
+      tw->twPrototypes->setEnabled(false);
+      QFont f = pbConfirm->font(); f.setBold(true); pbConfirm->setFont(f);
       pbConfirm->setStyleSheet("QPushButton {color: red;}");
       emit requestEnableGeoConstWidget(false);
   }
@@ -2224,6 +2258,7 @@ void AGeoWidget::exitEditingMode()
 {
     fEditingMode = false;
     tw->setEnabled(true);
+    tw->twPrototypes->setEnabled(true);
     QFont f = pbConfirm->font(); f.setBold(false); pbConfirm->setFont(f);
     pbConfirm->setStyleSheet("QPushButton {color: black;}");
     pbConfirm->setEnabled(false);

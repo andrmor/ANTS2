@@ -271,6 +271,8 @@ void AGeoTreeWidget::populateTreeWidget(QTreeWidgetItem * parent, AGeoObject * C
 {  
     for (AGeoObject * obj : Container->HostedObjects)
     {
+        if (obj->ObjectType->isPrototypes()) continue;
+
         QTreeWidgetItem *item = new QTreeWidgetItem(parent);
 
         bool fDisabledLocal = fDisabled || !obj->fActive;
@@ -2149,7 +2151,6 @@ void AGeoWidget::onObjectSelectionChanged(QString SelectedObject)
     if (SelectedObject.isEmpty()) return;
 
     AGeoObject * obj = Sandwich->World->findObjectByName(SelectedObject);
-    if (!obj)    obj = Sandwich->Prototypes->findObjectByName(SelectedObject);
     if (!obj) return;
 
     CurrentObject = obj;

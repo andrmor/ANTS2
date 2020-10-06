@@ -21,6 +21,8 @@ ASandwich::ASandwich()
     World->makeItWorld();
 
     Prototypes = new AGeoObject("_#_PrototypeContainer_#_");
+    delete Prototypes->ObjectType; Prototypes->ObjectType = new ATypePrototypesObject();
+    Prototypes->migrateTo(World);
 }
 
 ASandwich::~ASandwich()
@@ -30,19 +32,19 @@ ASandwich::~ASandwich()
 
     clearWorld();
     delete World;
-    delete Prototypes;
 }
 
 void ASandwich::clearWorld()
 {    
-    //deletes all but World object
+    //deletes all but World object. Keep Prototypes object - it should have the same pointer!
+    World->HostedObjects.removeOne(Prototypes);
+
     for (int i=0; i<World->HostedObjects.size(); i++)
         World->HostedObjects[i]->clearAll();
     World->HostedObjects.clear();
 
-    for (int i=0; i<Prototypes->HostedObjects.size(); i++)
-        Prototypes->HostedObjects[i]->clearAll();
-    Prototypes->HostedObjects.clear();
+    Prototypes->clearContent();
+    World->HostedObjects << Prototypes;
 
     clearGridRecords();
     clearMonitorRecords();
@@ -522,7 +524,7 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
     {   // just a shortcut, to resuse the cycle by HostedVolumes below
         vol = parent;
     }
-    else if (obj->isCompositeMemeber() || obj->ObjectType->isCompositeContainer())
+    else if (obj->ObjectType->isPrototypes() || obj->isCompositeMemeber() || obj->ObjectType->isCompositeContainer())
     {
         return; //do nothing with logicals, they also do not host anything real
     }
@@ -999,10 +1001,6 @@ void ASandwich::writeToJson(QJsonObject &json)
   World->writeAllToJarr(arrTree);
   js["WorldTree"] = arrTree;
 
-  QJsonArray arrPrototypes;
-  Prototypes->writeAllToJarr(arrPrototypes);
-  js["Prototypes"] = arrPrototypes;
-
   AGeoConsts::getConstInstance().writeToJson(js);
 
   json["Sandwich"] = js;
@@ -1048,19 +1046,24 @@ QString ASandwich::readFromJson(QJsonObject & json)
             DefaultXY->readFromJson(XYjson);
         }
 
-        if (js.contains("Prototypes"))
-        {
-            qDebug() << "...Loading Prorotypes...";
-            QJsonArray arrTree = js["Prototypes"].toArray();
-            ErrorString = Prototypes->readAllFromJarr(Prototypes, arrTree);
-            qDebug() << "...done!" << "ErrorString:"<<ErrorString << "Number of prototypes:" << Prototypes->HostedObjects.size();
-        }
-
         if (js.contains("WorldTree"))
         {
             //qDebug() << "...Loading WorldTree";
             QJsonArray arrTree = js["WorldTree"].toArray();
             ErrorString = World->readAllFromJarr(World, arrTree);
+            //if config contained Prototypes, there are two protoypes objects in the geometry now!
+            for (AGeoObject * obj : World->HostedObjects)
+            {
+                if (!obj->ObjectType->isPrototypes()) continue;
+                if (obj == Prototypes) continue;
+                //found another Prototypes object  - it was loaded from json
+                for (AGeoObject * proto : obj->HostedObjects)
+                    Prototypes->addObjectLast(proto);
+                obj->HostedObjects.clear();
+                World->HostedObjects.removeOne(obj);
+                delete obj;
+                break;
+            }
             //qDebug() << "...done!";
         }
         else qWarning() << "...Json does not contain WordTree!"; // !*! is itr a critical error?

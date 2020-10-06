@@ -232,6 +232,7 @@ ATypeGeoObject *ATypeGeoObject::TypeObjectFactory(const QString & Type)
     if (Type == "Grid")               return new ATypeGridObject();
     if (Type == "Lightguide")         return new ATypeLightguideObject();
     if (Type == "Group")              return new ATypeGroupContainerObject();
+    if (Type == "Prototypes")         return new ATypePrototypesObject();
     if (Type == "World")              return new ATypeWorldObject(); //is not used to create World, only to check file with WorldTree starts with World and reads positioning script
 
     qCritical() << "Unknown opject type in TypeObjectFactory:"<<Type;

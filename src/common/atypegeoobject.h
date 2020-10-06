@@ -20,6 +20,7 @@ public:
     bool isHandlingArray() const    {return Handling == "Array";}       //Array
 
     bool isWorld() const            {return Type == "World";}
+    bool isPrototypes() const       {return Type == "Prototypes";}
     bool isSlab() const             {return Type == "Slab" || Type == "Lightguide";}  //lightguide is also Slab!
     bool isLightguide() const       {return Type == "Lightguide";}  //lightguide is also Slab!
     bool isUpperLightguide() const;
@@ -63,6 +64,12 @@ public:
     void readFromJson(const QJsonObject & json) override;
 };
 
+class ATypePrototypesObject : public ATypeGeoObject
+{
+public:
+    ATypePrototypesObject() {Type = "Prototypes"; Handling = "Logical";}
+};
+
 class ATypeSlabObject : public ATypeGeoObject
 {
 public:
@@ -71,9 +78,6 @@ public:
 
     bool isGeoConstInUse(const QRegExp & nameRegExp) const;
     void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName);
-
-    //void writeToJson(QJsonObject & json) const override { ATypeGeoObject::writeToJson(json); } //no need to save slab, it will be assigned from outside
-    //void readFromJson(const QJsonObject & json) override;
 
     ASlabModel * SlabModel = nullptr;
 };

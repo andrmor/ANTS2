@@ -345,12 +345,15 @@ void AGeoObject::readFromJson(const QJsonObject & json)
 
 void AGeoObject::writeAllToJarr(QJsonArray &jarr)
 {
-  QJsonObject js;
-  writeToJson(js);
-  jarr << js;
+    QJsonObject js;
+    writeToJson(js);
+    jarr << js;
 
-  for (int i=0; i<HostedObjects.size(); i++)
-    HostedObjects[i]->writeAllToJarr(jarr);
+    if (!ObjectType->isInstance())
+    {
+        for (int i=0; i<HostedObjects.size(); i++)
+            HostedObjects[i]->writeAllToJarr(jarr);
+    }
 }
 
 QString AGeoObject::readAllFromJarr(AGeoObject * World, const QJsonArray & jarr)

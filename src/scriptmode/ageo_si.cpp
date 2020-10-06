@@ -903,13 +903,7 @@ void AGeo_SI::UpdateGeometry(bool CheckOverlaps)
       const QString & name = GeoObjects.at(i)->Name;
       if (Detector->Sandwich->World->isNameExists(name))
       {
-          abort(QString("Name already exists in the detector geometry: %1").arg(name));
-          clearGeoObjects();
-          return;
-      }
-      if (Detector->Sandwich->Prototypes->isNameExists(name))
-      {
-          abort(QString("Name already exists in the detector prototypes: %1").arg(name));
+          abort(QString("Name already exists: %1").arg(name));
           clearGeoObjects();
           return;
       }

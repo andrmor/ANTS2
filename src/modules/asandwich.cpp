@@ -21,7 +21,7 @@ ASandwich::ASandwich()
     World->makeItWorld();
 
     Prototypes = new AGeoObject("_#_PrototypeContainer_#_");
-    delete Prototypes->ObjectType; Prototypes->ObjectType = new ATypePrototypesObject();
+    delete Prototypes->ObjectType; Prototypes->ObjectType = new ATypePrototypeCollectionObject();
     Prototypes->migrateTo(World);
 }
 
@@ -234,6 +234,31 @@ void ASandwich::convertObjToComposite(AGeoObject *obj)
     sl << first->Name << second->Name;
     QString str = "TGeoCompositeShape( " + first->Name + " + " + second->Name + " )";
     obj->Shape = new AGeoComposite(sl, str);
+}
+
+QString ASandwich::convertToNewPrototype(QVector<AGeoObject*> members)
+{
+    QString errStr;
+
+    for (AGeoObject * obj : members)
+    {
+        bool ok = obj->isPossiblePrototype(&errStr);
+        if (!ok) return errStr;
+    }
+
+    int index = 0;
+    QString name;
+    do name = QString("Prototype_%1").arg(index++);
+    while (World->isNameExists(name));
+
+    AGeoObject * proto = new AGeoObject(name);
+    delete proto->ObjectType; proto->ObjectType = new ATypePrototypeObject();
+    proto->migrateTo(Prototypes);
+
+    for (AGeoObject * obj : members)
+        obj->migrateTo(proto);
+
+    return "";
 }
 
 void ASandwich::convertObjToGrid(AGeoObject *obj)
@@ -496,16 +521,21 @@ void ASandwich::expandPrototypeInstances()
             return;
         }
 
-        AGeoObject * clone = prototypeObj->makeCloneForInstance(instanceObj->Name);
+        for (AGeoObject * obj : prototypeObj->HostedObjects)
+        {
+            AGeoObject * clone = obj->makeCloneForInstance(instanceObj->Name);
+            clone->lockRecursively();
+            instanceObj->addObjectLast(clone);
+        }
+        instanceObj->fExpanded = false;
 
+        /*
         for (int i=0; i<3; i++)
         {
             clone->Position[i]    = instanceObj->Position[i];
             clone->Orientation[i] = instanceObj->Orientation[i];
         }
-
-        instanceObj->addObjectFirst(clone);
-        clone->lockRecursively();
+        */
     }
 }
 

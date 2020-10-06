@@ -2860,3 +2860,18 @@ void AGeoInstanceDelegate::Update(const AGeoObject * obj)
         leInstanceOf->setText(inst->PrototypeName);
     }
 }
+
+AGeoPrototypeDelegate::AGeoPrototypeDelegate(const QStringList & materials, QWidget * parent)
+    : AGeoObjectDelegate(materials, parent)
+{
+    DelegateTypeName = "Prototype";
+
+    cbScale->setChecked(false);
+    cbScale->setVisible(false);
+
+    lMat->setVisible(false);
+    cobMat->setVisible(false);
+
+    pbTransform->setVisible(false);
+    pbShapeInfo->setVisible(false);
+}

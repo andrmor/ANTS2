@@ -1361,7 +1361,10 @@ void AGeoTreeWidget::menuActionAddInstance(AGeoObject * ContObj, const QString &
 
 void AGeoTreeWidget::menuActionDeclarePrototype(AGeoObject * obj)
 {
-    QString err = obj->makeItPrototype(Prototypes);
+    QVector<AGeoObject*> vec;
+    vec << obj;
+    QString err = Sandwich->convertToNewPrototype(vec);
+    //err = obj->makeItPrototype(Prototypes);
 
     if (!err.isEmpty())
     {
@@ -2072,6 +2075,8 @@ AGeoBaseDelegate * AGeoWidget::createAndAddGeoObjectDelegate()
         Del = new AGeoArrayDelegate(Sandwich->Materials, this);
     else if (CurrentObject->ObjectType->isInstance())
         Del = new AGeoInstanceDelegate(Sandwich->Materials, this);
+    else if (CurrentObject->ObjectType->isPrototype())
+        Del = new AGeoPrototypeDelegate(Sandwich->Materials, this);
     else if (CurrentObject->ObjectType->isHandlingSet())
         Del = new AGeoSetDelegate(Sandwich->Materials, this);
     else if (shape == "TGeoBBox")

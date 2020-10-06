@@ -518,4 +518,12 @@ protected:
     QPushButton * pbToProto    = nullptr;
 };
 
+class AGeoPrototypeDelegate : public AGeoObjectDelegate
+{
+    Q_OBJECT
+
+public:
+    AGeoPrototypeDelegate(const QStringList & materials, QWidget * parent);
+};
+
 #endif // AGEOOBJECTDELEGATE_H

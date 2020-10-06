@@ -20,7 +20,7 @@ public:
     bool isHandlingArray() const    {return Handling == "Array";}       //Array
 
     bool isWorld() const            {return Type == "World";}
-    bool isPrototypes() const       {return Type == "Prototypes";}
+    bool isPrototypes() const       {return Type == "PrototypeCollection";}
     bool isSlab() const             {return Type == "Slab" || Type == "Lightguide";}  //lightguide is also Slab!
     bool isLightguide() const       {return Type == "Lightguide";}  //lightguide is also Slab!
     bool isUpperLightguide() const;
@@ -33,6 +33,7 @@ public:
     bool isComposite() const        {return Type == "Composite";}
     bool isArray() const            {return Type == "Array";}
     bool isInstance() const         {return Type == "Instance";}
+    bool isPrototype() const        {return Type == "Prototype";}
     bool isGrid() const             {return Type == "Grid";}
     bool isGridElement() const      {return Type == "GridElement";}
     bool isMonitor() const          {return Type == "Monitor";}
@@ -64,10 +65,10 @@ public:
     void readFromJson(const QJsonObject & json) override;
 };
 
-class ATypePrototypesObject : public ATypeGeoObject
+class ATypePrototypeCollectionObject : public ATypeGeoObject
 {
 public:
-    ATypePrototypesObject() {Type = "Prototypes"; Handling = "Logical";}
+    ATypePrototypeCollectionObject() {Type = "PrototypeCollection"; Handling = "Logical";}
 };
 
 class ATypeSlabObject : public ATypeGeoObject
@@ -199,6 +200,12 @@ public:
 
     //runtime, not saved
     int index;  //index of this monitor to access statistics
+};
+
+class ATypePrototypeObject : public ATypeGeoObject
+{
+public:
+    ATypePrototypeObject() {Type = "Prototype"; Handling = "Set";}
 };
 
 class ATypeInstanceObject : public ATypeGeoObject

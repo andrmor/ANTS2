@@ -45,6 +45,9 @@ public:
   //composite
   void convertObjToComposite(AGeoObject * obj);
 
+  //ptototype/instances
+  QString convertToNewPrototype(QVector<AGeoObject*> members);
+
   //grid
   void convertObjToGrid(AGeoObject * obj);
   void shapeGrid(AGeoObject * obj, int shape, double p0, double p1, double p2, int wireMat);

@@ -528,14 +528,6 @@ void ASandwich::expandPrototypeInstances()
             instanceObj->addObjectLast(clone);
         }
         instanceObj->fExpanded = false;
-
-        /*
-        for (int i=0; i<3; i++)
-        {
-            clone->Position[i]    = instanceObj->Position[i];
-            clone->Orientation[i] = instanceObj->Orientation[i];
-        }
-        */
     }
 }
 

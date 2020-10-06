@@ -690,8 +690,11 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
 
   QMenu * addInstanceMenu = menu.addMenu("Add instance of");
     QVector< QPair<QAction*, QString> > addInstanceA;
-    for (AGeoObject * protoObj : Sandwich->Prototypes->HostedObjects)
-        addInstanceA << QPair<QAction*, QString>(addInstanceMenu->addAction(protoObj->Name), protoObj->Name);
+    if (Sandwich->Prototypes->HostedObjects.isEmpty())
+        Action(*addInstanceMenu, "There are no defined prototypes");
+    else
+        for (AGeoObject * protoObj : Sandwich->Prototypes->HostedObjects)
+            addInstanceA << QPair<QAction*, QString>(addInstanceMenu->addAction(protoObj->Name), protoObj->Name);
 
   menu.addSeparator();
 
@@ -704,16 +707,6 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
   QAction* removeA = Action(menu, "Remove object, keep its content");
   removeA->setShortcut(Qt::Key_Backspace);
   QAction* removeHostedA = Action(menu, "Remove all objects inside");
-
-  menu.addSeparator();
-
-  QAction* lockA = Action(menu, "Lock");
-  QAction* lockallA = Action(menu, "Lock objects inside");
-
-  menu.addSeparator();
-
-  QAction* unlockA = Action(menu, "Unlock");
-  QAction* unlockallA = Action(menu, "Unlock objects inside");
 
   menu.addSeparator();
 
@@ -768,10 +761,6 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
       removeHostedA->setEnabled(fNotGridNotMonitor);
       removeThisAndHostedA->setEnabled(!ObjectType.isWorld());
       removeA->setEnabled(!ObjectType.isWorld());
-      lockA->setEnabled(!ObjectType.isHandlingStatic() || ObjectType.isLightguide());
-      unlockA->setEnabled(true);
-      lockallA->setEnabled(true);
-      unlockallA->setEnabled(true);
       lineA->setEnabled(true);
       focusObjA->setEnabled(true);
       showA->setEnabled(true);
@@ -785,8 +774,6 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
       // several items selected, and they are not slabs
       addObjMenu->setEnabled(false);
       removeA->setEnabled(true); //world cannot be in selection with anything else anyway
-      lockA->setEnabled(true);
-      unlockA->setEnabled(true);
       stackA->setEnabled(true);      
   }
 
@@ -831,10 +818,6 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
   else if (SelectedAction == cloneA)         menuActionCloneObject(obj);  // CLONE
   else if (SelectedAction == stackA)         formStack(selected);         // Form STACK
   else if (SelectedAction == stackRefA)      markAsStackRefVolume(obj);
-  else if (SelectedAction == lockA)          menuActionLock();            // LOCK
-  else if (SelectedAction == unlockA)        menuActionUnlock();          // UNLOCK
-  else if (SelectedAction == lockallA)       menuActionLockAllInside(obj);
-  else if (SelectedAction == unlockallA)     menuActionUnlockAllInside(obj);
 
   else if (SelectedAction == removeA)        menuActionRemove();                     // REMOVE
   else if (SelectedAction == removeThisAndHostedA) menuActionRemoveRecursively(obj); // REMOVE RECURSIVLY
@@ -1141,74 +1124,6 @@ void AGeoTreeWidget::menuActionRemoveHostedObjects(AGeoObject * obj)
     }
 }
 
-void AGeoTreeWidget::menuActionUnlockAllInside(AGeoObject * obj)
-{
-    if (!obj) return;
-    int ret = QMessageBox::question(this, "",
-                                 "Unlock all objects inside " + obj->Name + "?",
-                                 QMessageBox::Yes | QMessageBox::Cancel, QMessageBox::Cancel);
-    if (ret == QMessageBox::Yes)
-    {
-        for (int i = 0; i < obj->HostedObjects.size(); i++)
-            obj->HostedObjects[i]->unlockAllInside();
-        UpdateGui(obj->Name);
-    }
-}
-
-void AGeoTreeWidget::menuActionLockAllInside(AGeoObject * obj)
-{
-    if (!obj) return;
-
-    int ret = QMessageBox::question(this, "",
-                                 "Lock all objects inside " + obj->Name + "?",
-                                 QMessageBox::Yes | QMessageBox::Cancel, QMessageBox::Cancel);
-    if (ret == QMessageBox::Yes)
-    {
-        obj->lockRecursively();
-        obj->lockUpTheChain();
-        UpdateGui(obj->Name);
-    }
-}
-
-void AGeoTreeWidget::menuActionUnlock()
-{
-  bool fContainsLocked = false;
-  QList<QTreeWidgetItem*> selected = selectedItems();
-  for (int i=0; i<selected.size(); i++)
-    {
-      QString Object = selected.at(i)->text(0);
-      AGeoObject* obj = World->findObjectByName(Object);
-      fContainsLocked = obj->isContainsLocked();
-      if (fContainsLocked) break;
-    }
-
-  if (fContainsLocked) QMessageBox::information(this, "", "Cannot unlock selected object(s): some of the objects inside are locked!");
-  else
-    {
-      for (int i=0; i<selected.size(); i++)
-        {
-          QString Object = selected.at(i)->text(0);
-          AGeoObject* obj = World->findObjectByName(Object);
-          if (obj) obj->fLocked = false;
-        }
-      if (selected.size() == 1) UpdateGui(selected.first()->text(0));
-      else UpdateGui();
-    }
-}
-
-void AGeoTreeWidget::menuActionLock()
-{
-  QList<QTreeWidgetItem*> selected = selectedItems();
-  for (int i=0; i<selected.size(); i++)
-    {
-      QString Object = selected.at(i)->text(0);
-      AGeoObject* obj = World->findObjectByName(Object);
-      if (obj) obj->lockUpTheChain();
-    }
-  if (selected.size() == 1) UpdateGui(selected.first()->text(0));
-  else UpdateGui();
-}
-
 void AGeoTreeWidget::menuActionCloneObject(AGeoObject * obj)
 {
     if (!obj) return;
@@ -1375,6 +1290,7 @@ void AGeoTreeWidget::menuActionDeclarePrototype(AGeoObject * obj)
     const QString name = "";//obj->Name;
     emit RequestRebuildDetector();
     UpdateGui(name);
+    emit RequestShowPrototypeList();
 }
 
 void AGeoTreeWidget::menuActionAddNewComposite(AGeoObject * ContObj)

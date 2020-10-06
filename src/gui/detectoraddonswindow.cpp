@@ -79,6 +79,7 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(QWidget * parent, MainWindow * MW, De
   connect(twGeo, &AGeoTreeWidget::RequestShowObjectRecursive, this, &DetectorAddOnsWindow::ShowObjectRecursive);
   connect(twGeo->GetEditWidget(), &AGeoWidget::requestEnableGeoConstWidget, this, &DetectorAddOnsWindow::onRequestEnableGeoConstWidget);
   connect(twGeo, &AGeoTreeWidget::RequestNormalDetectorDraw, MW, &MainWindow::ShowGeometrySlot);
+  connect(twGeo, &AGeoTreeWidget::RequestShowPrototypeList, this, &DetectorAddOnsWindow::onRequestShowPrototypeList);
   //connect(Detector->Sandwich, &ASandwich::RequestGuiUpdate, twGeo, &AGeoTreeWidget::UpdateGui);
   QPalette palette = ui->frObjectEditor->palette();
   palette.setColor( backgroundRole(), QColor( 240, 240, 240 ) );
@@ -1429,6 +1430,11 @@ void DetectorAddOnsWindow::onGeoConstEscapePressed(int /*index*/)
     updateGeoConstsIndication();
 }
 
+void DetectorAddOnsWindow::onRequestShowPrototypeList()
+{
+    ui->cbShowPrototypes->setChecked(true);
+}
+
 void DetectorAddOnsWindow::updateMenuIndication()
 {
     ui->actionUndo->setEnabled(MW->Config->isUndoAvailable());
@@ -1619,10 +1625,7 @@ void DetectorAddOnsWindow::on_actionTo_Python_triggered()
     MW->PythonScriptWindow->activateWindow();
 }
 
-void DetectorAddOnsWindow::on_checkBox_toggled(bool checked)
+void DetectorAddOnsWindow::on_cbShowPrototypes_toggled(bool checked)
 {
     ui->saPrototypes->setVisible(checked);
-
-    //if (!checked) ui->spTreeAndPrototypes->setSizes({3, 1});
-    //ui->spTreeAndPrototypes->adjustSize();
 }

@@ -97,10 +97,6 @@ private:
   void ShowObjectRecursive(AGeoObject * obj);
   void ShowObjectOnly(AGeoObject * obj);
   void menuActionEnableDisable(AGeoObject * obj);
-  void menuActionLock();
-  void menuActionUnlock();
-  void menuActionLockAllInside(AGeoObject * obj);
-  void menuActionUnlockAllInside(AGeoObject * obj);
   void menuActionRemove();
   void menuActionRemoveHostedObjects(AGeoObject * obj);
   void menuActionRemoveRecursively(AGeoObject * obj);
@@ -133,6 +129,7 @@ signals:
   void RequestNormalDetectorDraw();
   void RequestListOfParticles(QStringList &definedParticles);
   void RequestShowMonitor(const AGeoObject* mon);
+  void RequestShowPrototypeList();
 };
 
 

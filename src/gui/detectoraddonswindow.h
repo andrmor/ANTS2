@@ -34,6 +34,7 @@ private slots:
   void onGeoConstEditingFinished(int index, QString newValue);
   void onGeoConstExpressionEditingFinished(int index, QString newValue);
   void onGeoConstEscapePressed(int index);
+  void onRequestShowPrototypeList();
   void updateMenuIndication();
 
   void on_tabwConstants_customContextMenuRequested(const QPoint &pos);
@@ -59,14 +60,10 @@ private slots:
   void on_tabwConstants_cellChanged(int row, int column);
   void on_actionUndo_triggered();
   void on_actionRedo_triggered();
-
   void on_actionHow_to_use_drag_and_drop_triggered();
-
   void on_actionTo_JavaScript_triggered();
-
   void on_actionTo_Python_triggered();
-
-  void on_checkBox_toggled(bool checked);
+  void on_cbShowPrototypes_toggled(bool checked);
 
 private:
   Ui::DetectorAddOnsWindow *ui;

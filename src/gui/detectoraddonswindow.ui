@@ -112,7 +112,7 @@
                     <x>0</x>
                     <y>0</y>
                     <width>146</width>
-                    <height>146</height>
+                    <height>328</height>
                    </rect>
                   </property>
                  </widget>
@@ -136,7 +136,7 @@
                     <x>0</x>
                     <y>0</y>
                     <width>146</width>
-                    <height>288</height>
+                    <height>106</height>
                    </rect>
                   </property>
                  </widget>
@@ -144,7 +144,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QCheckBox" name="checkBox">
+               <widget class="QCheckBox" name="cbShowPrototypes">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                   <horstretch>0</horstretch>

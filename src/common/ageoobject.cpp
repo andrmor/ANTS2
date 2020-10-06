@@ -224,7 +224,7 @@ void AGeoObject::writeToJson(QJsonObject &json)
   ObjectType->writeToJson(jj);
   json["ObjectType"] = jj;
   json["Container"] = Container ? Container->Name : "";
-  json["Locked"] = fLocked;
+  //json["Locked"] = fLocked;
   json["fActive"] = fActive;
   json["fExpanded"] = fExpanded;
 
@@ -274,7 +274,7 @@ void AGeoObject::readFromJson(const QJsonObject & json)
     parseJson(json, "style", style);
     parseJson(json, "width", width);
 
-    parseJson(json, "Locked", fLocked);
+    //parseJson(json, "Locked", fLocked);
     parseJson(json, "fActive", fActive);
     parseJson(json, "fExpanded", fExpanded);
 

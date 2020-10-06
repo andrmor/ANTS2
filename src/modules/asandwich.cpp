@@ -667,27 +667,27 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
     {
         ATypeArrayObject * array = static_cast<ATypeArrayObject*>(obj->ObjectType);
 
-        for (int i=0; i<obj->HostedObjects.size(); i++)
-          {
-            AGeoObject* el = obj->HostedObjects[i];
+        for (AGeoObject * el : obj->HostedObjects)
+        {
             int iCounter = 0;
-            for (int ix = 0; ix<array->numX; ix++)
-             for (int iy = 0; iy<array->numY; iy++)
-               for (int iz = 0; iz<array->numZ; iz++)
+            for (int ix = 0; ix < array->numX; ix++)
+              for (int iy = 0; iy < array->numY; iy++)
+                for (int iz = 0; iz < array->numZ; iz++)
                 {
-                  if ( !el->ObjectType->isHandlingSet() )
-                      positionArrayElement(ix, iy, iz, el, obj, vol, GeoManager, MaterialCollection, PMsAndDumPMs, iCounter);
-                  else
-                      for (int i=0; i<el->HostedObjects.size(); i++)
-                          positionArrayElement(ix, iy, iz, el->HostedObjects[i], obj, vol, GeoManager, MaterialCollection, PMsAndDumPMs, iCounter);
-                  iCounter++;
+                    if (el->ObjectType->isHandlingSet() || el->ObjectType->isInstance())
+                    {
+                        for (AGeoObject * elHO : el->HostedObjects)
+                            positionArrayElement(ix, iy, iz, elHO, obj, vol, GeoManager, MaterialCollection, PMsAndDumPMs, iCounter);
+                    }
+                    else positionArrayElement(ix, iy, iz, el, obj, vol, GeoManager, MaterialCollection, PMsAndDumPMs, iCounter);
+                    iCounter++;
                 }
-          }
+        }
     }
     else
     {
-        for (int i=0; i<obj->HostedObjects.size(); i++)
-            addTGeoVolumeRecursively(obj->HostedObjects[i], vol, GeoManager, MaterialCollection, PMsAndDumPMs, forcedNodeNumber);
+        for (AGeoObject * el : obj->HostedObjects)
+            addTGeoVolumeRecursively(el, vol, GeoManager, MaterialCollection, PMsAndDumPMs, forcedNodeNumber);
     }
 
     //  Trackers use volume title for identification of special rules

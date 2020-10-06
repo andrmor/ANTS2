@@ -1338,6 +1338,20 @@ void AGeoTreeWidget::menuActionAddInstance(AGeoObject * ContObj, const QString &
     delete newObj->ObjectType;
     newObj->ObjectType = new ATypeInstanceObject(PrototypeName);
 
+    AGeoObject * protoObj = Prototypes->findObjectByName(PrototypeName);
+    if (!protoObj)
+    {
+        message("Something went very wrong: prototype not found", this);
+        return;
+    }
+    for (int i = 0; i < 3; i++)
+    {
+        newObj->Position[i]       = protoObj->Position[i];
+        newObj->PositionStr[i]    = protoObj->PositionStr[i];
+        newObj->Orientation[i]    = protoObj->Orientation[i];
+        newObj->OrientationStr[i] = protoObj->OrientationStr[i];
+    }
+
     ContObj->addObjectFirst(newObj);
 
     const QString name = newObj->Name;

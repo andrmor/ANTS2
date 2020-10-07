@@ -97,7 +97,7 @@ void AGeoTreeWidget::createPrototypeTreeWidget()
     connect(twPrototypes, &QTreeWidget::itemCollapsed,                  this, &AGeoTreeWidget::onPrototypeItemCollapsed);
     connect(twPrototypes, &QTreeWidget::itemSelectionChanged,           this, &AGeoTreeWidget::onProtoItemSelectionChanged);
     connect(twPrototypes, &QTreeWidget::itemClicked,                    this, &AGeoTreeWidget::onItemClicked); // same as the main tree
-    //connect(this,         &AGeoTreeWidget::ProtoObjectSelectionChanged, EditWidget, &AGeoWidget::onObjectSelectionChanged);
+    connect(this,         &AGeoTreeWidget::ProtoObjectSelectionChanged, EditWidget, &AGeoWidget::onObjectSelectionChanged);
 }
 
 void AGeoTreeWidget::loadImages()

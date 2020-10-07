@@ -26,7 +26,7 @@ class AGeoTreeWidget : public QTreeWidget
 public:
   AGeoTreeWidget(ASandwich * Sandwich);
 
-  AGeoWidget * GetEditWidget() {return EditWidget;}
+  AGeoWidget * GetEditWidget() {return EditWidget;}  // !*! return const widget?
   void         SetLineAttributes(AGeoObject * obj);
   void         SelectObjects(QStringList ObjectNames);
 

@@ -70,8 +70,6 @@ protected:
     QComboBox* cobMat;
     QWidget* PosOrient;
     QLabel* lMat;
-    AOneLineTextEdit *ledNumX, *ledNumY, *ledNumZ;
-    AOneLineTextEdit *ledStepX, *ledStepY, *ledStepZ;
     AOneLineTextEdit *ledX,   *ledY,     *ledZ;
     AOneLineTextEdit *ledPhi, *ledTheta, *ledPsi;
 
@@ -492,6 +490,11 @@ public:
     bool updateObject(AGeoObject * obj) const override;
 
     void Update(const AGeoObject * obj) override;
+
+protected:
+    AOneLineTextEdit *ledNumX, *ledNumY, *ledNumZ;
+    AOneLineTextEdit *ledStepX, *ledStepY, *ledStepZ;
+    AOneLineTextEdit *ledStartIndex;
 };
 
 class AGeoSetDelegate : public AGeoObjectDelegate

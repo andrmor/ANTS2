@@ -2524,11 +2524,12 @@ AGeoArrayDelegate::AGeoArrayDelegate(const QStringList &materials, QWidget *pare
 {
     DelegateTypeName = "Array";
 
-    //QVBoxLayout * v = new QVBoxLayout();
-    //v->setContentsMargins(50, 0, 50, 0);
+    QVBoxLayout * lVer = new QVBoxLayout();
+    lVer->setContentsMargins(5, 3, 5, 3);
+    lVer->setSpacing(3);
 
-    QGridLayout *grAW = new QGridLayout();
-    grAW->setContentsMargins(5, 3, 5, 3);
+    QGridLayout * grAW = new QGridLayout();
+    grAW->setContentsMargins(0,0,0,0);
     grAW->setVerticalSpacing(0);
 
     QLabel *la = new QLabel;
@@ -2559,7 +2560,20 @@ AGeoArrayDelegate::AGeoArrayDelegate(const QStringList &materials, QWidget *pare
     ledStepY = new AOneLineTextEdit(Widget); grAW->addWidget(ledStepY, 1, 3);
     ledStepZ = new AOneLineTextEdit(Widget); grAW->addWidget(ledStepZ, 2, 3);
 
-    QVector<AOneLineTextEdit*> l = {ledNumX, ledNumY, ledNumZ, ledStepX, ledStepY, ledStepZ};
+    lVer->addLayout(grAW);
+
+    QHBoxLayout * lHor = new QHBoxLayout();
+    lHor->addStretch();
+    lHor->addWidget(new QLabel("Index of the first node:"));
+    ledStartIndex = new AOneLineTextEdit(Widget);
+    lHor->addWidget(ledStartIndex);
+    lHor->addStretch();
+
+    lVer->addLayout(lHor);
+
+    addLocalLayout(lVer);
+
+    QVector<AOneLineTextEdit*> l = {ledNumX, ledNumY, ledNumZ, ledStepX, ledStepY, ledStepZ, ledStartIndex};
     for (AOneLineTextEdit * le : l)
     {
         //le->setMaximumWidth(75);
@@ -2567,8 +2581,6 @@ AGeoArrayDelegate::AGeoArrayDelegate(const QStringList &materials, QWidget *pare
         configureHighligherAndCompleter(le);
         QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoBaseDelegate::ContentChanged);
     }
-
-    addLocalLayout(grAW);
 
     cbScale->setChecked(false);
     cbScale->setVisible(false);
@@ -2586,7 +2598,7 @@ AGeoArrayDelegate::AGeoArrayDelegate(const QStringList &materials, QWidget *pare
 
 bool AGeoArrayDelegate::updateObject(AGeoObject * obj) const
 {
-    QVector<AOneLineTextEdit*> v = {ledNumX, ledNumY, ledNumZ, ledStepX, ledStepY, ledStepZ};
+    QVector<AOneLineTextEdit*> v = {ledNumX, ledNumY, ledNumZ, ledStepX, ledStepY, ledStepZ, ledStartIndex};
     if (isLeEmpty(v))
     {
         QMessageBox::warning(this->ParentWidget, "", "Empty line!");
@@ -2602,6 +2614,7 @@ bool AGeoArrayDelegate::updateObject(AGeoObject * obj) const
     a.strStepX = ledStepX->text();
     a.strStepY = ledStepY->text();
     a.strStepZ = ledStepZ->text();
+    a.strStartIndex = ledStartIndex->text();
 
     QString errorStr = ATypeArrayObject::evaluateStringValues(a);
     if (!errorStr.isEmpty())
@@ -2631,6 +2644,7 @@ void AGeoArrayDelegate::Update(const AGeoObject * obj)
         ledStepX->setText(array->strStepX.isEmpty() ? QString::number(array->stepX) : array->strStepX);
         ledStepY->setText(array->strStepY.isEmpty() ? QString::number(array->stepY) : array->strStepY);
         ledStepZ->setText(array->strStepZ.isEmpty() ? QString::number(array->stepZ) : array->strStepZ);
+        ledStartIndex->setText(array->strStartIndex.isEmpty() ? QString::number(array->startIndex) : array->strStartIndex);
     }
 }
 

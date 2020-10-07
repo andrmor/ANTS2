@@ -90,6 +90,8 @@ QString ATypeArrayObject::evaluateStringValues(ATypeArrayObject & A)
     ok = GC.updateParameter(errorStr, A.strStepY, A.stepY, true, false, false) ; if (!ok) return errorStr;
     ok = GC.updateParameter(errorStr, A.strStepZ, A.stepZ, true, false, false) ; if (!ok) return errorStr;
 
+    ok = GC.updateParameter(errorStr, A.strStartIndex, A.startIndex, false, true) ; if (!ok) return errorStr;
+
     return "";
 }
 
@@ -101,6 +103,7 @@ bool ATypeArrayObject::isGeoConstInUse(const QRegExp &nameRegExp) const
     if (strStepX.contains(nameRegExp)) return true;
     if (strStepY.contains(nameRegExp)) return true;
     if (strStepZ.contains(nameRegExp)) return true;
+    if (strStartIndex.contains(nameRegExp)) return true;
     return false;
 }
 
@@ -112,6 +115,7 @@ void ATypeArrayObject::replaceGeoConstName(const QRegExp &nameRegExp, const QStr
     strStepX.replace(nameRegExp, newName);
     strStepY.replace(nameRegExp, newName);
     strStepZ.replace(nameRegExp, newName);
+    strStartIndex.replace(nameRegExp, newName);
 }
 
 void ATypeArrayObject::writeToJson(QJsonObject &json) const
@@ -124,6 +128,7 @@ void ATypeArrayObject::writeToJson(QJsonObject &json) const
     json["stepX"] = stepX;
     json["stepY"] = stepY;
     json["stepZ"] = stepZ;
+    json["startIndex"] = startIndex;
 
     if (!strNumX .isEmpty()) json["strNumX"]  = strNumX;
     if (!strNumY .isEmpty()) json["strNumY"]  = strNumY;
@@ -131,6 +136,7 @@ void ATypeArrayObject::writeToJson(QJsonObject &json) const
     if (!strStepX.isEmpty()) json["strStepX"] = strStepX;
     if (!strStepY.isEmpty()) json["strStepY"] = strStepY;
     if (!strStepZ.isEmpty()) json["strStepZ"] = strStepZ;
+    if (!strStartIndex.isEmpty()) json["strStartIndex"] = strStartIndex;
 }
 
 void ATypeArrayObject::readFromJson(const QJsonObject &json)
@@ -141,6 +147,7 @@ void ATypeArrayObject::readFromJson(const QJsonObject &json)
     parseJson(json, "stepX", stepX);
     parseJson(json, "stepY", stepY);
     parseJson(json, "stepZ", stepZ);
+    parseJson(json, "startIndex", startIndex);
 
     if (!parseJson(json, "strNumX",  strNumX))  strNumX .clear();
     if (!parseJson(json, "strNumY",  strNumY))  strNumY .clear();
@@ -148,6 +155,7 @@ void ATypeArrayObject::readFromJson(const QJsonObject &json)
     if (!parseJson(json, "strStepX", strStepX)) strStepX.clear();
     if (!parseJson(json, "strStepY", strStepY)) strStepY.clear();
     if (!parseJson(json, "strStepZ", strStepZ)) strStepZ.clear();
+    if (!parseJson(json, "strStartIndex", strStartIndex)) strStartIndex.clear();
 
     ATypeArrayObject::evaluateStringValues(*this);
 }

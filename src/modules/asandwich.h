@@ -108,12 +108,12 @@ public:
   QString LastError;  
 
 signals:
-  void RequestGuiUpdate();       //   !*! obsolete?
+  void RequestGuiUpdate();
   void RequestRebuildDetector();
   void WarningMessage(QString);
 
 public slots:
-  void onMaterialsChanged(const QStringList MaterialList);  // !*! obsolete?
+  void onMaterialsChanged(const QStringList MaterialList);  // !*! obsolete?  //October2020: disabled signal emitting to request gui update
 
 private:
   void clearModel();

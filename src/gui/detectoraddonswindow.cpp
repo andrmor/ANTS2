@@ -80,7 +80,7 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(QWidget * parent, MainWindow * MW, De
   connect(twGeo->GetEditWidget(), &AGeoWidget::requestEnableGeoConstWidget, this, &DetectorAddOnsWindow::onRequestEnableGeoConstWidget);
   connect(twGeo, &AGeoTreeWidget::RequestNormalDetectorDraw, MW, &MainWindow::ShowGeometrySlot);
   connect(twGeo, &AGeoTreeWidget::RequestShowPrototypeList, this, &DetectorAddOnsWindow::onRequestShowPrototypeList);
-  //connect(Detector->Sandwich, &ASandwich::RequestGuiUpdate, twGeo, &AGeoTreeWidget::UpdateGui);
+  connect(Detector->Sandwich, &ASandwich::RequestGuiUpdate, this, &DetectorAddOnsWindow::onSandwichRebuild);
   QPalette palette = ui->frObjectEditor->palette();
   palette.setColor( backgroundRole(), QColor( 240, 240, 240 ) );
   ui->frObjectEditor->setPalette( palette );
@@ -135,9 +135,10 @@ void DetectorAddOnsWindow::onReconstructDetectorRequest()
 
 void DetectorAddOnsWindow::UpdateGUI()
 {
-  UpdateGeoTree();
-  UpdateDummyPMindication();
-  ui->pbBackToSandwich->setEnabled(!Detector->isGDMLempty());
+    qDebug() << "---------------->";
+    UpdateGeoTree();
+    UpdateDummyPMindication();
+    ui->pbBackToSandwich->setEnabled(!Detector->isGDMLempty());
 }
 
 void DetectorAddOnsWindow::SetTab(int tab)
@@ -1439,6 +1440,12 @@ void DetectorAddOnsWindow::updateMenuIndication()
 {
     ui->actionUndo->setEnabled(MW->Config->isUndoAvailable());
     ui->actionRedo->setEnabled(MW->Config->isRedoAvailable());
+}
+
+void DetectorAddOnsWindow::onSandwichRebuild()
+{
+    qDebug() << "=================================";
+    twGeo->UpdateGui("");
 }
 
 void DetectorAddOnsWindow::on_tabwConstants_cellChanged(int row, int column)

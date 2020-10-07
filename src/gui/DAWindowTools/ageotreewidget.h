@@ -172,7 +172,7 @@ public slots:
   void onRequestScriptRecursiveToClipboard();
   void onRequestSetVisAttributes();
 
-  AGeoObject * getCurrentObject() {return CurrentObject;}
+  AGeoObject * getCurrentObject() {return CurrentObject;}   // !*! change to getName
 
   void onConfirmPressed();                                        // CONFIRM BUTTON PRESSED: performing copy from delegate to object
   void onCancelPressed();

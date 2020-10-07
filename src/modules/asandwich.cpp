@@ -691,7 +691,9 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
 
         for (AGeoObject * el : obj->HostedObjects)
         {
-            int iCounter = 0;
+            int iCounter = array->startIndex;
+            if (iCounter < 0) iCounter = 0;
+
             for (int ix = 0; ix < array->numX; ix++)
               for (int iy = 0; iy < array->numY; iy++)
                 for (int iz = 0; iz < array->numZ; iz++)
@@ -824,12 +826,11 @@ void ASandwich::UpdateDetector()
         }
     }
 
-  emit RequestGuiUpdate();
+  //emit RequestGuiUpdate();  // why before rebuild detector?
 
   //Claculating Z positions of layers
   CalculateZofSlabs();
 
-  //in GUI mode triggers RebuildDetector in MainWindow
   emit RequestRebuildDetector();
 }
 
@@ -1562,7 +1563,7 @@ void ASandwich::importFromOldStandardJson(QJsonObject &json, bool fPrScintCont)
 void ASandwich::onMaterialsChanged(const QStringList MaterialList)
 {
   Materials = MaterialList;  
-  emit RequestGuiUpdate();  
+  //emit RequestGuiUpdate();
 }
 
 void ASandwich::IsParticleInUse(int particleId, bool &bInUse, QString &MonitorNames)

@@ -159,6 +159,7 @@ public:
     double stepY = 25.0;
     double stepZ = 25.0;
     QString strNumX, strNumY, strNumZ, strStepX, strStepY, strStepZ;
+    int startIndex = 0; QString strStartIndex;
 
     static QString evaluateStringValues(ATypeArrayObject & ArrayType);
 };

@@ -97,7 +97,7 @@ void AGeoTreeWidget::createPrototypeTreeWidget()
     connect(twPrototypes, &QTreeWidget::itemCollapsed,                  this, &AGeoTreeWidget::onPrototypeItemCollapsed);
     connect(twPrototypes, &QTreeWidget::itemSelectionChanged,           this, &AGeoTreeWidget::onProtoItemSelectionChanged);
     connect(twPrototypes, &QTreeWidget::itemClicked,                    this, &AGeoTreeWidget::onItemClicked); // same as the main tree
-    connect(this,         &AGeoTreeWidget::ProtoObjectSelectionChanged, EditWidget, &AGeoWidget::onObjectSelectionChanged);
+    //connect(this,         &AGeoTreeWidget::ProtoObjectSelectionChanged, EditWidget, &AGeoWidget::onObjectSelectionChanged);
 }
 
 void AGeoTreeWidget::loadImages()
@@ -133,7 +133,7 @@ void AGeoTreeWidget::UpdateGui(QString selected)
 {
     if (!World) return;
 
-    //qDebug() << "==> Update tree triggered, selected = "<<selected;
+    qDebug() << "==> Update tree triggered, selected = "<<selected;
     if (selected.isEmpty() && currentItem())
     {
         //qDebug() << currentItem()->text(0);
@@ -608,7 +608,7 @@ void AGeoTreeWidget::onProtoItemSelectionChanged()
     if (sel.size() == 1)
     {
         QString name = sel.first()->text(0);
-        emit ObjectSelectionChanged(name);
+        emit ProtoObjectSelectionChanged(name);
         return;
     }
 
@@ -2079,17 +2079,19 @@ void AGeoWidget::onObjectSelectionChanged(QString SelectedObject)
 {  
     if (fIgnoreSignals) return;
 
-    CurrentObject = nullptr;
-    //qDebug() << "Object selection changed! ->" << SelectedObject;
-    ClearGui();
+    qDebug() << "Object selection changed! ->" << SelectedObject;
 
+    qDebug() << "CurrentObject to nullptr!";
+    CurrentObject = nullptr;
+    ClearGui();
     if (SelectedObject.isEmpty()) return;
 
     AGeoObject * obj = Sandwich->World->findObjectByName(SelectedObject);
+    qDebug() << "Object for this name:" << obj;
     if (!obj) return;
 
     CurrentObject = obj;
-    //qDebug() << "New current object:"<<CurrentObject->Name;
+    qDebug() << "New current object:"<<CurrentObject->Name;
     UpdateGui();
     fEditingMode = false;
     //qDebug() << "OnObjectSelection procedure completed";
@@ -2234,7 +2236,7 @@ void AGeoWidget::onConfirmPressed()
 
 void AGeoWidget::onCancelPressed()
 {
-  exitEditingMode();
-  tw->UpdateGui( (CurrentObject) ? CurrentObject->Name : "" );
+    exitEditingMode();
+    tw->UpdateGui( (CurrentObject) ? CurrentObject->Name : "" );
 }
 

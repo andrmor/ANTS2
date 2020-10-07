@@ -854,9 +854,7 @@ void AGeoTreeWidget::customProtoMenuRequested(const QPoint &pos)
 
     QMenu menu;
 
-    //QAction* showA     = Action(menu, "Show - highlight in geometry");
-    QAction* showAdown = Action(menu, "Show - this object with content");
-    QAction* showAonly = Action(menu, "Show - only this object");
+    QAction* showAllA  = Action(menu, "Show all instances");
     QAction* lineA     = Action(menu, "Change line color/width/style");
 
     menu.addSeparator();
@@ -936,9 +934,7 @@ void AGeoTreeWidget::customProtoMenuRequested(const QPoint &pos)
         removeThisAndHostedA->setEnabled(!ObjectType.isWorld());
         removeA->setEnabled(!ObjectType.isWorld());
         lineA->setEnabled(true);
-        //showA->setEnabled(true);
-        showAonly->setEnabled(true);
-        showAdown->setEnabled(true);
+        showAllA->setEnabled(true);
         stackRefA->setEnabled(obj->isStackMember());
     }
     else
@@ -954,8 +950,7 @@ void AGeoTreeWidget::customProtoMenuRequested(const QPoint &pos)
 
     // -- EXECUTE SELECTED ACTION --
     //if (SelectedAction == showA)               ShowObject(obj); else
-    if (SelectedAction == showAonly)      ShowObjectOnly(obj);
-    else if (SelectedAction == showAdown)      ShowObjectRecursive(obj);
+    if (SelectedAction == showAllA)            ShowAllInstances(obj);
     else if (SelectedAction == lineA)          SetLineAttributes(obj);
     else if (SelectedAction == enableDisableA) menuActionEnableDisable(obj);
     // ADD NEW OBJECT
@@ -1394,6 +1389,16 @@ void AGeoTreeWidget::ShowObjectOnly(AGeoObject * obj)
         fSpecialGeoViewMode = true;
         TGeoShape * sh = obj->Shape->createGeoShape();  // make window member?
         sh->Draw();
+    }
+}
+
+void AGeoTreeWidget::ShowAllInstances(AGeoObject * obj)
+{
+    if (obj)
+    {
+        fSpecialGeoViewMode = true;
+        emit RequestShowAllInstances(obj->Name);
+        UpdateGui(obj->Name);
     }
 }
 

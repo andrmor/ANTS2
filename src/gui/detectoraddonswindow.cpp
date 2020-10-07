@@ -77,6 +77,7 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(QWidget * parent, MainWindow * MW, De
   connect(twGeo, &AGeoTreeWidget::RequestFocusObject,     this, &DetectorAddOnsWindow::FocusVolume);
   connect(twGeo, &AGeoTreeWidget::RequestHighlightObject, this, &DetectorAddOnsWindow::ShowObject);
   connect(twGeo, &AGeoTreeWidget::RequestShowObjectRecursive, this, &DetectorAddOnsWindow::ShowObjectRecursive);
+  connect(twGeo, &AGeoTreeWidget::RequestShowAllInstances, this, &DetectorAddOnsWindow::ShowAllInstances);
   connect(twGeo->GetEditWidget(), &AGeoWidget::requestEnableGeoConstWidget, this, &DetectorAddOnsWindow::onRequestEnableGeoConstWidget);
   connect(twGeo, &AGeoTreeWidget::RequestNormalDetectorDraw, MW, &MainWindow::ShowGeometrySlot);
   connect(twGeo, &AGeoTreeWidget::RequestShowPrototypeList, this, &DetectorAddOnsWindow::onRequestShowPrototypeList);
@@ -485,8 +486,65 @@ void DetectorAddOnsWindow::ShowObjectRecursive(QString name)
         drawIfFound(Detector->GeoManager->GetTopNode(), tname);
     }
     MW->GeometryWindow->UpdateRootCanvas();
+}
 
-    //gGeoManager->SetTopVisible(MW->GeometryWindow->IsWorldVisible());
+void DetectorAddOnsWindow::ShowAllInstances(QString name)
+{
+    QVector<AGeoObject*> InstancesNotDiscriminated;
+    Detector->Sandwich->World->findAllInstancesRecursive(InstancesNotDiscriminated);
+
+    MW->GeometryWindow->ShowAndFocus();
+
+    TObjArray * list = Detector->GeoManager->GetListOfVolumes();
+    const int size = list->GetEntries();
+    QSet<QString> set;
+
+    //select those which have the same prototype
+    for (AGeoObject * inst : InstancesNotDiscriminated)
+    {
+        const ATypeInstanceObject * insType = static_cast<const ATypeInstanceObject*>(inst->ObjectType);
+        if (insType->PrototypeName == name)
+            for (AGeoObject * obj : inst->HostedObjects)
+            {
+                /*
+                TString tname = obj->Name.toLatin1().data();
+                tname += "_0";
+                qDebug() << "Looking for" << tname;
+                bool found = drawIfFound(Detector->GeoManager->GetTopNode(), tname);
+                if (!found)
+                {
+                    tname = name.toLatin1().data();
+                    tname += "_1";
+                    drawIfFound(Detector->GeoManager->GetTopNode(), tname);
+                }*/
+
+                //HighlightVolume(obj->Name);
+
+                if (obj->ObjectType->isArray() || obj->ObjectType->isHandlingSet())
+                {
+                    QVector<AGeoObject*> vec;
+                    obj->collectContainingObjects(vec);
+                    for (AGeoObject * obj1 : vec)
+                        set << obj1->Name;
+                }
+                else    set << obj->Name;
+            }
+
+        for (int iVol = 0; iVol < size; iVol++)
+        {
+            TGeoVolume* vol = (TGeoVolume*)list->At(iVol);
+            if (!vol) break;
+            const QString name = vol->GetName();
+            if (set.contains(name))
+            {
+                vol->SetLineColor(kRed);
+                vol->SetLineWidth(3);
+            }
+            else vol->SetLineColor(kGray);
+        }
+    }
+
+    MW->GeometryWindow->UpdateRootCanvas();
 }
 
 void DetectorAddOnsWindow::OnrequestShowMonitor(const AGeoObject * mon)
@@ -582,8 +640,7 @@ void DetectorAddOnsWindow::HighlightVolume(const QString & VolName)
         for (AGeoObject * obj : vec)
             set << obj->Name;
     }
-    else
-        set << VolName;
+    else    set << VolName;
 
     TObjArray* list = Detector->GeoManager->GetListOfVolumes();
     int size = list->GetEntries();

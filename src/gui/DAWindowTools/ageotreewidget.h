@@ -97,6 +97,7 @@ private:
   void ShowObject(AGeoObject * obj);
   void ShowObjectRecursive(AGeoObject * obj);
   void ShowObjectOnly(AGeoObject * obj);
+  void ShowAllInstances(AGeoObject * obj);
   void menuActionEnableDisable(AGeoObject * obj);
   void menuActionRemove();
   void menuActionRemoveHostedObjects(AGeoObject * obj);
@@ -127,6 +128,7 @@ signals:
   void RequestHighlightObject(QString name);
   void RequestFocusObject(QString name);
   void RequestShowObjectRecursive(QString name);
+  void RequestShowAllInstances(QString name);
   void RequestNormalDetectorDraw();
   void RequestListOfParticles(QStringList &definedParticles);
   void RequestShowMonitor(const AGeoObject* mon);

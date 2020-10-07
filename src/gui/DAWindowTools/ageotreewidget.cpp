@@ -362,6 +362,13 @@ void AGeoTreeWidget::dropEvent(QDropEvent* event)
         return;
     }
 
+    if (objTo->fLocked || objTo->ObjectType->isInstance())
+    {
+        qWarning() << "Cannot drop to a locked object or a prototype instance";
+        event->ignore();
+        return;
+    }
+
     QStringList selNames;
 
     AGeoObject * ContainerTo = nullptr;
@@ -508,7 +515,8 @@ void AGeoTreeWidget::dragEnterEvent(QDragEnterEvent *event)
         QString DraggedName = DraggedItem->text(0);
         //qDebug() << "Draggin item:"<< DraggedName;
         AGeoObject * obj = World->findObjectByName(DraggedName);
-        if (obj->fLocked || obj->isContainsLocked() || obj->ObjectType->isGridElement() || obj->ObjectType->isCompositeContainer())
+        //if (obj->fLocked || obj->isContainsLocked() || obj->ObjectType->isGridElement() || obj->ObjectType->isCompositeContainer())
+        if (obj->fLocked || obj->ObjectType->isGridElement() || obj->ObjectType->isCompositeContainer())
         {
             qDebug() << "Drag forbidden for one of the items!";
             event->ignore();

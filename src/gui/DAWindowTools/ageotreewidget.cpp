@@ -286,6 +286,11 @@ void AGeoTreeWidget::populateTreeWidget(QTreeWidgetItem * parent, AGeoObject * C
             item->setFlags(item->flags() & ~Qt::ItemIsDragEnabled);// & ~Qt::ItemIsSelectable);
             QFont f = item->font(0); f.setBold(true); item->setFont(0, f);
         }
+        else if (obj->ObjectType->isInstance())
+        {
+            item->setForeground(0, Qt::blue);
+            updateIcon(item, obj);
+        }
         else if (obj->ObjectType->isHandlingSet() || obj->ObjectType->isArray() || obj->ObjectType->isGridElement())
         { //group or stack or array or gridElement
             QFont f = item->font(0); f.setItalic(true); item->setFont(0, f);
@@ -1030,6 +1035,18 @@ void AGeoTreeWidget::onRemoveRecursiveTriggered()
 
     AGeoObject * obj = World->findObjectByName(selected.first()->text(0));
     menuActionRemoveRecursively(obj);
+}
+
+void AGeoTreeWidget::onRequestShowPrototype(QString ProtoName)
+{
+    emit RequestShowPrototypeList();
+
+    QList<QTreeWidgetItem*> list = twPrototypes->findItems(ProtoName, Qt::MatchExactly | Qt::MatchRecursive);
+    if (!list.isEmpty())
+    {
+        list.first()->setSelected(true);
+        twPrototypes->setCurrentItem(list.first());
+    }
 }
 
 void AGeoTreeWidget::menuActionRemove()
@@ -1990,7 +2007,10 @@ AGeoBaseDelegate * AGeoWidget::createAndAddGeoObjectDelegate()
     if (CurrentObject->ObjectType->isArray())
         Del = new AGeoArrayDelegate(Sandwich->Materials, this);
     else if (CurrentObject->ObjectType->isInstance())
+    {
         Del = new AGeoInstanceDelegate(Sandwich->Materials, this);
+        connect((AGeoInstanceDelegate*)Del, &AGeoInstanceDelegate::RequestShowPrototype, tw, &AGeoTreeWidget::onRequestShowPrototype);
+    }
     else if (CurrentObject->ObjectType->isPrototype())
         Del = new AGeoPrototypeDelegate(Sandwich->Materials, this);
     else if (CurrentObject->ObjectType->isHandlingSet())

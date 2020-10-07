@@ -517,8 +517,10 @@ public:
     void Update(const AGeoObject * obj) override;
 
 protected:
-    QLineEdit   * leInstanceOf = nullptr;
-    QPushButton * pbToProto    = nullptr;
+    QLineEdit * leInstanceOf = nullptr;
+
+signals:
+    void RequestShowPrototype(QString ProtoName);
 };
 
 class AGeoPrototypeDelegate : public AGeoObjectDelegate

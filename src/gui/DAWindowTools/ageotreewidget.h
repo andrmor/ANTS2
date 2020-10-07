@@ -39,6 +39,7 @@ public slots:
   void objectToScript(AGeoObject *obj, QString &script, int ident, bool bExpandMaterial, bool bRecursive, bool usePython);
   void commonSlabToScript(QString &script, const QString &identStr);
   void rebuildDetectorAndRestoreCurrentDelegate();  // used by geoConst widget
+  void onRequestShowPrototype(QString ProtoName);
 
 private slots:
   void onItemSelectionChanged();                    // !*! bold is also used now for stack reference volume

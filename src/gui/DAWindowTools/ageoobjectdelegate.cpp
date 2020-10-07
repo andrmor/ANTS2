@@ -2845,9 +2845,13 @@ AGeoInstanceDelegate::AGeoInstanceDelegate(const QStringList &materials, QWidget
     QHBoxLayout * hl = new QHBoxLayout();
     hl->setContentsMargins(50, 0, 50, 0);
 
-    QLabel * la  = new QLabel("Instance of:");        hl->addWidget(la);
-    leInstanceOf = new QLineEdit();                   hl->addWidget(leInstanceOf);
-    pbToProto    = new QPushButton("Show prototype"); hl->addWidget(pbToProto);
+    QLabel * la  = new QLabel("Instance of:");                   hl->addWidget(la);
+    leInstanceOf = new QLineEdit();                              hl->addWidget(leInstanceOf);
+    QPushButton * pbToProto = new QPushButton("Show prototype"); hl->addWidget(pbToProto);
+
+    QObject::connect(pbToProto, &QPushButton::clicked, [this](){
+        emit RequestShowPrototype(leInstanceOf->text());
+    });
 
     addLocalLayout(hl);
 
@@ -2868,11 +2872,7 @@ void AGeoInstanceDelegate::Update(const AGeoObject * obj)
     AGeoObjectDelegate::Update(obj);
 
     ATypeInstanceObject * inst = dynamic_cast<ATypeInstanceObject*>(obj->ObjectType);
-
-    if (inst)
-    {
-        leInstanceOf->setText(inst->PrototypeName);
-    }
+    if (inst) leInstanceOf->setText(inst->PrototypeName);
 }
 
 AGeoPrototypeDelegate::AGeoPrototypeDelegate(const QStringList & materials, QWidget * parent)

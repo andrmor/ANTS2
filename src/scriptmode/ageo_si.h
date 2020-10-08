@@ -29,6 +29,7 @@ public slots:
   void Polygone(QString name, int edges, double Dtop, double Dbot, double h, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi);
   void Cone(QString name, double Dtop, double Dbot, double h, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi);
   void Sphere(QString name, double D, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi);
+  void SphereLayer(QString name, double Dout, double Din, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi);
   void Arb8(QString name, QVariant NodesX, QVariant NodesY, double h, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi);
 
   void Monitor(QString name, int shape, double size1, double size2,

@@ -90,7 +90,7 @@ protected:
     void initSlabDelegate(int SlabModelState);
 
 private:
-    void rotate(TVector3 & v, double dPhi, double dTheta, double dPsi) const;
+    //void rotate(TVector3 & v, double dPhi, double dTheta, double dPsi) const;  // not needed here
     void onShapeDialogActivated(QDialog * d, QListWidget * w);
 
 signals:

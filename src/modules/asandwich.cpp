@@ -496,6 +496,19 @@ void ASandwich::shapeGrid(AGeoObject *obj, int shape, double p0, double p1, doub
     GEobj->updateGridElementShape();
 }
 
+void rotate(TVector3 & v, double dPhi, double dTheta, double dPsi)
+{
+    v.RotateZ(TMath::Pi() / 180.0 * dPhi);
+    TVector3 X(1.0, 0, 0);
+    X.RotateZ(TMath::Pi() / 180.0 * dPhi);
+    //v.RotateX( TMath::Pi()/180.0* Theta);
+    v.Rotate(TMath::Pi() / 180.0 * dTheta, X);
+    TVector3 Z(0, 0, 1.0);
+    Z.Rotate(TMath::Pi() / 180.0 * dTheta, X);
+    // v.RotateZ( TMath::Pi()/180.0* Psi );
+    v.Rotate(TMath::Pi() / 180.0 * dPsi, Z);
+}
+
 void ASandwich::expandPrototypeInstances()
 {
     if (Prototypes->HostedObjects.isEmpty()) return;
@@ -528,6 +541,54 @@ void ASandwich::expandPrototypeInstances()
             instanceObj->addObjectLast(clone);
         }
         instanceObj->fExpanded = false;
+
+        //apply rotation and shift
+        for (AGeoObject * obj : instanceObj->HostedObjects)
+        {
+            TVector3 v(obj->Position[0], obj->Position[1], obj->Position[2]); // vector from the center of the instance to the object center
+            rotate(v, instanceObj->Orientation[0], instanceObj->Orientation[1], instanceObj->Orientation[2]);
+            for (int i = 0; i < 3; i++)
+            {
+                obj->Position[i]     = v[i] + instanceObj->Position[i];
+                obj->Orientation[i] += instanceObj->Orientation[i];
+            }
+        }
+
+        /*
+        //-----//
+        for (int iObj = 0; iObj < obj->Container->HostedObjects.size(); iObj++)
+        {
+            AGeoObject* hostedObj = obj->Container->HostedObjects[iObj];
+            if (hostedObj == obj) continue;
+
+            //center vector for rotation
+            //in TGeoRotation, first rotation iz around Z, then new X(manual is wrong!) and finally around new Z
+            TVector3 v(hostedObj->Position[0]-old[0], hostedObj->Position[1]-old[1], hostedObj->Position[2]-old[2]);
+
+            //first rotate back to origin in rotation
+            rotate(v, -old[3+0], 0, 0);
+            rotate(v, 0, -old[3+1], 0);
+            rotate(v, 0, 0, -old[3+2]);
+            rotate(v, obj->Orientation[0], obj->Orientation[1], obj->Orientation[2]);
+
+            for (int i=0; i<3; i++)
+            {
+                double delta = obj->Position[i] - old[i]; //shift in position
+
+                if (fWasRotated)
+                {
+                    //shift due to rotation  +  global shift
+                    hostedObj->Position[i] = old[i]+v[i] + delta;
+                    //rotation of the object
+                    double deltaAng = obj->Orientation[i] - old[3+i];
+                    hostedObj->Orientation[i] += deltaAng;
+                }
+                else
+                    hostedObj->Position[i] += delta;
+            }
+        }
+        //-----//
+        */
     }
 }
 

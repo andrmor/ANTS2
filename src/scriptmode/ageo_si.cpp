@@ -115,6 +115,14 @@ void AGeo_SI::Sphere(QString name, double D, int iMat, QString container, double
   GeoObjects.append(o);
 }
 
+void AGeo_SI::SphereLayer(QString name, double Dout, double Din, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi)
+{
+    AGeoObject* o = new AGeoObject(name, container, iMat,
+                                   new AGeoSphere(0.5*Dout, 0.5*Din),
+                                   x,y,z, phi,theta,psi);
+    GeoObjects.append(o);
+}
+
 void AGeo_SI::Arb8(QString name, QVariant NodesX, QVariant NodesY, double h, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi)
 {
   //qDebug() << NodesX << NodesY;

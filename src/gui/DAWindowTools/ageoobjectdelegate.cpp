@@ -531,6 +531,7 @@ void AGeoObjectDelegate::initSlabDelegate(int SlabModelState)
     else pbTransform->setEnabled(false);
 }
 
+/*
 void AGeoObjectDelegate::rotate(TVector3 & v, double dPhi, double dTheta, double dPsi) const
 {
     v.RotateZ( TMath::Pi()/180.0* dPhi );
@@ -543,6 +544,7 @@ void AGeoObjectDelegate::rotate(TVector3 & v, double dPhi, double dTheta, double
     // v.RotateZ( TMath::Pi()/180.0* Psi );
     v.Rotate( TMath::Pi()/180.0* dPsi, Z );
 }
+*/
 
 void AGeoObjectDelegate::onShapeDialogActivated(QDialog * d, QListWidget * w)
 {

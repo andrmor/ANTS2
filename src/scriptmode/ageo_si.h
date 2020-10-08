@@ -49,6 +49,7 @@ public slots:
   void SetCommonSlabProperties(int shape, double size1, double size2, double angle, int sides);
 
   void MakeStack(QString name, QString container);
+  void Stack(QString name, QString container);
   void InitializeStack(QString StackName, QString MemberName_StackReference);
   //void RecalculateStack(QString name);
 
@@ -57,7 +58,8 @@ public slots:
   void Array(QString name, int numX, int numY, int numZ, double stepX, double stepY, double stepZ, QString container, double x, double y, double z, double psi);
   void ReconfigureArray(QString name, int numX, int numY, int numZ, double stepX, double stepY, double stepZ);
 
-  void DeclarePrototype(QString name);
+  void Prototype(QString name);
+  void Instance(QString name, QString prototype, QString container, double x, double y, double z, double phi, double theta, double psi);
 
   void SetLine(QString name, int color, int width, int style);
   void ClearAll();

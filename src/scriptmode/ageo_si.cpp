@@ -47,7 +47,7 @@ AGeo_SI::AGeo_SI(DetectorClass* Detector)
   H["UpdateGeometry"] = "Updates geometry and do optional check for geometry definition errors.\n"
                         "It is performed automatically for the script called from Advanced Settings window.";
 
-  H["MakeStack"] = "Adds empty stack object. Volumes can be added normally to this object, stating its name as the container.\n"
+  H["Stack"] = "Adds empty stack object. Volumes can be added normally to this object, stating its name as the container.\n"
                    "After the last element is added, call InitializeStack(StackName, Origin) function. "
                    "It will automatically calculate x,y and z positions of all elements, keeping user-configured xyz position of the Origin element.";
   H["InitializeStack"] = "Call this function after the last element has been added to the stack."
@@ -59,6 +59,8 @@ AGeo_SI::AGeo_SI(DetectorClass* Detector)
   H["getPassedVoulumes"] = "Go through the defined geometry in a straight line from startXYZ in the direction startVxVyVz\n"
           "and return array of [X Y Z MaterualIndex VolumeName NodeIndex] for all volumes on the way until final exit to the World\n"
           "the X Y Z are coordinates of the entrance points";
+
+  DepRem["MakeStack"] = "Use Stack() method";
 }
 
 AGeo_SI::~AGeo_SI()
@@ -619,6 +621,11 @@ void AGeo_SI::SetCommonSlabProperties(int shape, double size1, double size2, dou
 
 void AGeo_SI::MakeStack(QString name, QString container)
 {
+    Stack(name, container);
+}
+
+void AGeo_SI::Stack(QString name, QString container)
+{
     AGeoObject* o = new AGeoObject(name, container, 0, 0, 0,0,0, 0,0,0);
     delete o->ObjectType;
     o->ObjectType = new ATypeStackContainerObject();
@@ -733,23 +740,26 @@ void AGeo_SI::ReconfigureArray(QString name, int numX, int numY, int numZ, doubl
     a->Reconfigure(numX, numY, numZ, stepX, stepY, stepZ);
 }
 
-void AGeo_SI::DeclarePrototype(QString name)
+void AGeo_SI::Prototype(QString name)
 {
-    AGeoObject * proto = nullptr;
-    for (AGeoObject * obj : GeoObjects)
-        if (obj->Name == name)
-        {
-            proto = obj;
-            break;
-        }
-
-    if (!proto)
-    {
-        abort("Object with name " + name + " not found!");
-        return;
-    }
-
+    AGeoObject * proto = new AGeoObject(name);
+    delete proto->ObjectType; proto->ObjectType = new ATypePrototypeObject();
     proto->tmpContName = ProrotypeContainerName;
+    GeoObjects.append(proto);
+}
+
+void AGeo_SI::Instance(QString name, QString prototype, QString container, double x, double y, double z, double phi, double theta, double psi)
+{
+    AGeoObject * instance = new AGeoObject(name);
+    delete instance->ObjectType; instance->ObjectType = new ATypeInstanceObject(prototype);
+    instance->tmpContName = container;
+    instance->Position[0] = x;
+    instance->Position[1] = y;
+    instance->Position[2] = z;
+    instance->Orientation[0] = phi;
+    instance->Orientation[1] = theta;
+    instance->Orientation[2] = psi;
+    GeoObjects.append(instance);
 }
 
 void AGeo_SI::SetLine(QString name, int color, int width, int style)

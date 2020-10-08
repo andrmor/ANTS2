@@ -1865,7 +1865,7 @@ QString AGeoTreeWidget::makeScriptString_monitorConfig(const AGeoObject *obj) co
 
 QString AGeoTreeWidget::makeScriptString_stackObjectStart(AGeoObject *obj) const
 {
-    return  QString("geo.MakeStack(") +
+    return  QString("geo.Stack(") +
             "'" + obj->Name + "', " +
             "'" + obj->Container->Name + "' )";
 }

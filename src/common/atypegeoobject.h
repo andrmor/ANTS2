@@ -14,6 +14,7 @@ public:
     virtual ~ATypeGeoObject() {}
 
     // TODO String -> enum
+    // or even better: Handling -> a system of flags; isX use dynamic_cast
     bool isHandlingStatic() const   {return Handling == "Static";}      //World
     bool isHandlingStandard() const {return Handling == "Standard";}
     bool isHandlingSet() const      {return Handling == "Set";}         //Group, Stack, Composite container

@@ -1684,7 +1684,7 @@ void AGeoTreeWidget::commonSlabToScript(QString &script, const QString &identStr
 
 void AGeoTreeWidget::rebuildDetectorAndRestoreCurrentDelegate()
 {
-    const QString CurrentObjName = ( EditWidget->getCurrentObject() ? EditWidget->getCurrentObject()->Name : "" );
+    const QString CurrentObjName = EditWidget->getCurrentObjectName();
     emit RequestRebuildDetector();
     UpdateGui(CurrentObjName);
 }
@@ -2071,7 +2071,7 @@ AGeoBaseDelegate * AGeoWidget::createAndAddGeoObjectDelegate()
     else
         Del = new AGeoObjectDelegate(Sandwich->Materials, this);
 
-    connect(Del, &AGeoObjectDelegate::RequestChangeShape, this, &AGeoWidget::onRequestChangeShape);
+    connect(Del, &AGeoObjectDelegate::RequestChangeShape,   this, &AGeoWidget::onRequestChangeShape);
 
     return Del;
 }
@@ -2164,6 +2164,19 @@ void AGeoWidget::onRequestChangeShape(AGeoShape * NewShape)
     onConfirmPressed();
 }
 
+void AGeoWidget::updateInstancesOnProtoNameChange(QString oldName, QString newName)
+{
+    QVector<AGeoObject*> vec;
+    Sandwich->World->findAllInstancesRecursive(vec);
+
+    for (AGeoObject * inst : vec)
+    {
+        ATypeInstanceObject * insType = static_cast<ATypeInstanceObject*>(inst->ObjectType);
+        if (insType->PrototypeName == oldName)
+            insType->PrototypeName = newName;
+    }
+}
+
 void AGeoWidget::onRequestChangeSlabShape(int NewShape)
 {
     if (!GeoDelegate) return;
@@ -2224,6 +2237,12 @@ void AGeoWidget::onRequestSetVisAttributes()
     tw->SetLineAttributes(CurrentObject);
 }
 
+QString AGeoWidget::getCurrentObjectName() const
+{
+    if (CurrentObject) return CurrentObject->Name;
+    else return "";
+}
+
 void AGeoWidget::onMonitorRequestsShowSensitiveDirection()
 {
     emit showMonitor(CurrentObject);
@@ -2262,8 +2281,12 @@ void AGeoWidget::onConfirmPressed()
         return;
     }
 
+    const QString oldName = CurrentObject->Name;
     bool ok = GeoDelegate->updateObject(CurrentObject);
     if (!ok) return;
+
+    if (CurrentObject->ObjectType->isPrototype() && oldName != newName)
+        updateInstancesOnProtoNameChange(oldName, newName);
 
     exitEditingMode();
     QString name = CurrentObject->Name;

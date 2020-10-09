@@ -3,18 +3,13 @@
 
 #include "ageobasedelegate.h"
 
-#include <QObject>
 #include <QString>
 #include <QVector>
 #include <QStringList>
 
 class AGeoObject;
 class AGeoShape;
-
-class TVector3;
-
 class QWidget;
-class QStringList;
 class QVBoxLayout;
 class QGridLayout;
 class QLineEdit;
@@ -22,7 +17,6 @@ class QLabel;
 class QCheckBox;
 class QComboBox;
 class QPlainTextEdit;
-class QSpinBox;
 class QPushButton;
 class QLayout;
 class QDialog;
@@ -90,7 +84,6 @@ protected:
     void initSlabDelegate(int SlabModelState);
 
 private:
-    //void rotate(TVector3 & v, double dPhi, double dTheta, double dPsi) const;  // not needed here
     void onShapeDialogActivated(QDialog * d, QListWidget * w);
 
 signals:
@@ -394,7 +387,6 @@ protected:
     QLabel * labAu  = nullptr;
 };
 
-class QTableWidget;
 class AGeoPcon;
 class AGeoPconDelegate : public AGeoObjectDelegate
 {

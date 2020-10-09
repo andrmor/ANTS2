@@ -195,7 +195,12 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
     const QString oldName = obj->Name;
     const QString newName = leName->text();
 
-    if ( !obj->ObjectType->isHandlingSet() ) //set container object does not have updateable properties except name
+    if (obj->ObjectType->isHandlingSet())
+    {
+        //set container object does not have updateable properties except name
+        obj->Name = newName;
+    }
+    else
     {
         // doing tests, if failed, return before assigning anything to the object!
         AGeoShape * shape = ShapeCopy;

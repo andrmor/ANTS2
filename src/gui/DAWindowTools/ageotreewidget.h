@@ -144,6 +144,8 @@ public:
   AGeoWidget(ASandwich * Sandwich, AGeoTreeWidget * tw);
   //destructor does not delete Widget - it is handled by the layout
 
+  QString getCurrentObjectName() const;
+
 private:
   ASandwich        * Sandwich = nullptr;
   AGeoTreeWidget   * tw       = nullptr;
@@ -175,13 +177,12 @@ public slots:
   void onRequestScriptRecursiveToClipboard();
   void onRequestSetVisAttributes();
 
-  AGeoObject * getCurrentObject() {return CurrentObject;}   // !*! change to getName
-
-  void onConfirmPressed();                                        // CONFIRM BUTTON PRESSED: performing copy from delegate to object
+  void onConfirmPressed();                                  // CONFIRM BUTTON PRESSED: performing copy from delegate to object
   void onCancelPressed();
 
 private:
   void exitEditingMode();
+  void updateInstancesOnProtoNameChange(QString oldName, QString newName);
   AGeoBaseDelegate * createAndAddSlabDelegate();
   AGeoBaseDelegate * createAndAddGeoObjectDelegate();
   AGeoBaseDelegate * createAndAddGridElementDelegate();

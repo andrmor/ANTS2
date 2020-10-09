@@ -60,7 +60,8 @@ OutputWindow::OutputWindow(QWidget *parent, MainWindow *MW, EventsDataClass *Eve
 
     QVector<QWidget*> vecInv;
     vecInv << ui->cobPTHistVolPlus << ui->pbRefreshViz << ui->frPTHistX << ui->frPTHistY << ui->cbPTHistVolVsTime
-           << ui->pbEventView_ShowTree << ui->pbEVgeo << ui->frEventFilters << ui->frTimeAware;
+           << ui->pbEventView_ShowTree << ui->pbEVgeo << ui->frEventFilters << ui->frTimeAware
+           << ui->leDummyCreated << ui->leDummyEscaping;
     for (QWidget * w : vecInv) w->setVisible(false);
 
     QDoubleValidator* dv = new QDoubleValidator(this);
@@ -1603,6 +1604,7 @@ void OutputWindow::on_pbPTHistRequest_clicked()
         Opt.bFromMat = ui->cbPTHistVolMatFrom->isChecked();
         Opt.FromMat = ui->cobPTHistVolMatFrom->currentIndex();
         Opt.bFromVolume = ui->cbPTHistVolVolumeFrom->isChecked();
+        Opt.bEscaping = ui->cbPTHistEscaping->isChecked();
         Opt.FromVolume = ui->lePTHistVolVolumeFrom->text().toLocal8Bit().data();
         Opt.bFromVolIndex = ui->cbPTHistVolIndexFrom->isChecked();
         Opt.FromVolIndex = ui->sbPTHistVolIndexFrom->value();
@@ -1610,6 +1612,7 @@ void OutputWindow::on_pbPTHistRequest_clicked()
         Opt.bToMat = ui->cbPTHistVolMatTo->isChecked();
         Opt.ToMat = ui->cobPTHistVolMatTo->currentIndex();
         Opt.bToVolume = ui->cbPTHistVolVolumeTo->isChecked();
+        Opt.bCreated = ui->cbPTHistCreated->isChecked();
         Opt.ToVolume = ui->lePTHistVolVolumeTo->text().toLocal8Bit().data();
         Opt.bToVolIndex = ui->cbPTHistVolIndexTo->isChecked();
         Opt.ToVolIndex = ui->sbPTHistVolIndexTo->value();

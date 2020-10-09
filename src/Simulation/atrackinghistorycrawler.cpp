@@ -117,10 +117,24 @@ void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, 
                 }
                 else bEntranceValidated = true;
 
+                if (opt.bEscaping && ProcType != ExitingWorld) bExitValidated = false;
+                if (opt.bCreated  && ProcType != Creation)     bEntranceValidated = false;
+
                 // if transition validated, calling onTransition (+paranoic test on existence of the prevStep - for Creation exit is always not validated
                 const ATrackingStepData * prevStep = (iStep == 0 ? nullptr : steps[iStep-1]);
                 if (bExitValidated && bEntranceValidated && prevStep)
                     processor.onTransition(*prevStep, *thisStep); // not the "next" step here! this is just to extract direction information
+
+                if (opt.bCreated && ProcType == Creation && bEntranceValidated) //special treatment for creation
+                {
+                    if (iStep == 0 && steps.size() > 1)
+                    {
+                        ATrackingStepData prevStep = *thisStep;
+                        for (int i=0; i<3; i++)
+                            prevStep.Position[i] = 2.0 * thisStep->Position[i] - steps[1]->Position[i];
+                        processor.onTransition(prevStep, *thisStep);
+                    }
+                }
 
                 //checking for specific material/volume/index for enter/exit
                 //out

@@ -1548,7 +1548,7 @@ over all events</string>
            </size>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="tab_3">
            <attribute name="title">
@@ -1828,7 +1828,7 @@ over all events</string>
           </widget>
           <widget class="QWidget" name="tab_4">
            <attribute name="title">
-            <string>On the borders</string>
+            <string>Transitions</string>
            </attribute>
            <layout class="QVBoxLayout" name="verticalLayout_28">
             <property name="spacing">
@@ -1991,6 +1991,13 @@ See ROOT TFormula description</string>
                   </property>
                  </widget>
                 </item>
+                <item>
+                 <widget class="QCheckBox" name="cbPTHistEscaping">
+                  <property name="text">
+                   <string>Limit to escaping</string>
+                  </property>
+                 </widget>
+                </item>
                </layout>
               </item>
               <item>
@@ -2006,6 +2013,13 @@ See ROOT TFormula description</string>
                 </item>
                 <item>
                  <widget class="QSpinBox" name="sbPTHistVolIndexFrom"/>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="leDummyEscaping">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
                 </item>
                </layout>
               </item>
@@ -2087,6 +2101,13 @@ See ROOT TFormula description</string>
                   </property>
                  </widget>
                 </item>
+                <item>
+                 <widget class="QCheckBox" name="cbPTHistCreated">
+                  <property name="text">
+                   <string>Limit to created</string>
+                  </property>
+                 </widget>
+                </item>
                </layout>
               </item>
               <item>
@@ -2102,6 +2123,13 @@ See ROOT TFormula description</string>
                 </item>
                 <item>
                  <widget class="QSpinBox" name="sbPTHistVolIndexTo"/>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="leDummyCreated">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
                 </item>
                </layout>
               </item>

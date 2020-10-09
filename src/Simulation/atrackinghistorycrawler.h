@@ -239,6 +239,7 @@ public:
     bool bFromMat = false;
     bool bFromVolume = false;
     bool bFromVolIndex = false;
+    bool bEscaping = false;
     int  FromMat = 0;
     TString FromVolume;
     int  FromVolIndex = 0;
@@ -246,6 +247,7 @@ public:
     bool bToMat = false;
     bool bToVolume = false;
     bool bToVolIndex = false;
+    bool bCreated = false;
     int  ToMat = 0;
     TString ToVolume;
     int  ToVolIndex = 0;

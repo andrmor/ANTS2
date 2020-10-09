@@ -1966,58 +1966,44 @@ See ROOT TFormula description</string>
                </spacer>
               </item>
               <item>
-               <layout class="QVBoxLayout" name="verticalLayout_24">
-                <property name="spacing">
-                 <number>3</number>
-                </property>
-                <item>
+               <layout class="QGridLayout" name="gridLayout_2">
+                <item row="0" column="0">
                  <widget class="QCheckBox" name="cbPTHistVolMatFrom">
                   <property name="text">
                    <string>Limit material from:</string>
                   </property>
                  </widget>
                 </item>
-                <item>
+                <item row="0" column="1">
+                 <widget class="QComboBox" name="cobPTHistVolMatFrom"/>
+                </item>
+                <item row="1" column="0">
                  <widget class="QCheckBox" name="cbPTHistVolVolumeFrom">
                   <property name="text">
                    <string>Limit volume from:</string>
                   </property>
                  </widget>
                 </item>
-                <item>
+                <item row="1" column="1">
+                 <widget class="QLineEdit" name="lePTHistVolVolumeFrom"/>
+                </item>
+                <item row="2" column="0">
                  <widget class="QCheckBox" name="cbPTHistVolIndexFrom">
                   <property name="text">
                    <string>Limit vol index from:</string>
                   </property>
                  </widget>
                 </item>
-                <item>
-                 <widget class="QCheckBox" name="cbPTHistEscaping">
-                  <property name="text">
-                   <string>Limit to escaping</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item>
-               <layout class="QVBoxLayout" name="verticalLayout_25">
-                <property name="spacing">
-                 <number>3</number>
-                </property>
-                <item>
-                 <widget class="QComboBox" name="cobPTHistVolMatFrom"/>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="lePTHistVolVolumeFrom"/>
-                </item>
-                <item>
+                <item row="2" column="1">
                  <widget class="QSpinBox" name="sbPTHistVolIndexFrom"/>
                 </item>
-                <item>
-                 <widget class="QLineEdit" name="leDummyEscaping">
-                  <property name="enabled">
-                   <bool>false</bool>
+                <item row="3" column="0">
+                 <widget class="QCheckBox" name="cbPTHistEscaping">
+                  <property name="toolTip">
+                   <string>Only particles exiting world</string>
+                  </property>
+                  <property name="text">
+                   <string>Limit to escaping</string>
                   </property>
                  </widget>
                 </item>
@@ -2030,104 +2016,52 @@ See ROOT TFormula description</string>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
-                  <width>40</width>
+                  <width>120</width>
                   <height>20</height>
                  </size>
                 </property>
                </spacer>
               </item>
               <item>
-               <spacer name="horizontalSpacer_28">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item>
-               <spacer name="horizontalSpacer_29">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item>
-               <spacer name="horizontalSpacer_26">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item>
-               <layout class="QVBoxLayout" name="verticalLayout_26">
-                <property name="spacing">
-                 <number>3</number>
-                </property>
-                <item>
+               <layout class="QGridLayout" name="gridLayout">
+                <item row="0" column="0">
                  <widget class="QCheckBox" name="cbPTHistVolMatTo">
                   <property name="text">
                    <string>Limit material to:</string>
                   </property>
                  </widget>
                 </item>
-                <item>
+                <item row="0" column="1">
+                 <widget class="QComboBox" name="cobPTHistVolMatTo"/>
+                </item>
+                <item row="1" column="0">
                  <widget class="QCheckBox" name="cbPTHistVolVolumeTo">
                   <property name="text">
                    <string>Limit volume to:</string>
                   </property>
                  </widget>
                 </item>
-                <item>
+                <item row="1" column="1">
+                 <widget class="QLineEdit" name="lePTHistVolVolumeTo"/>
+                </item>
+                <item row="2" column="0">
                  <widget class="QCheckBox" name="cbPTHistVolIndexTo">
                   <property name="text">
                    <string>Limit vol index to:</string>
                   </property>
                  </widget>
                 </item>
-                <item>
-                 <widget class="QCheckBox" name="cbPTHistCreated">
-                  <property name="text">
-                   <string>Limit to created</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item>
-               <layout class="QVBoxLayout" name="verticalLayout_27">
-                <property name="spacing">
-                 <number>3</number>
-                </property>
-                <item>
-                 <widget class="QComboBox" name="cobPTHistVolMatTo"/>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="lePTHistVolVolumeTo"/>
-                </item>
-                <item>
+                <item row="2" column="1">
                  <widget class="QSpinBox" name="sbPTHistVolIndexTo"/>
                 </item>
-                <item>
-                 <widget class="QLineEdit" name="leDummyCreated">
-                  <property name="enabled">
-                   <bool>false</bool>
+                <item row="3" column="0">
+                 <widget class="QCheckBox" name="cbPTHistCreated">
+                  <property name="toolTip">
+                   <string>If not checked, &quot;creation&quot; of particle is not contributing to shown distributions
+If checked, only &quot;creation&quot; is considered!</string>
+                  </property>
+                  <property name="text">
+                   <string>Only created</string>
                   </property>
                  </widget>
                 </item>

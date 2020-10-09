@@ -60,8 +60,7 @@ OutputWindow::OutputWindow(QWidget *parent, MainWindow *MW, EventsDataClass *Eve
 
     QVector<QWidget*> vecInv;
     vecInv << ui->cobPTHistVolPlus << ui->pbRefreshViz << ui->frPTHistX << ui->frPTHistY << ui->cbPTHistVolVsTime
-           << ui->pbEventView_ShowTree << ui->pbEVgeo << ui->frEventFilters << ui->frTimeAware
-           << ui->leDummyCreated << ui->leDummyEscaping;
+           << ui->pbEventView_ShowTree << ui->pbEVgeo << ui->frEventFilters << ui->frTimeAware;
     for (QWidget * w : vecInv) w->setVisible(false);
 
     QDoubleValidator* dv = new QDoubleValidator(this);
@@ -2348,4 +2347,32 @@ void OutputWindow::on_pbShowMonitorTimeOverall_clicked()
 void OutputWindow::on_cbPTHistVolVsTime_clicked()
 {
     updatePTHistoryBinControl();
+}
+
+void OutputWindow::on_cbPTHistEscaping_toggled(bool checked)
+{
+    QVector<QCheckBox*> vec = {ui->cbPTHistVolMatTo, ui->cbPTHistVolVolumeTo, ui->cbPTHistVolIndexTo, ui->cbPTHistCreated};
+    for (QCheckBox * cb : vec)
+    {
+        if (checked)
+        {
+            cb->setChecked(false);
+            cb->setEnabled(false);
+        }
+        else cb->setEnabled(true);
+    }
+}
+
+void OutputWindow::on_cbPTHistCreated_toggled(bool checked)
+{
+    QVector<QCheckBox*> vec = {ui->cbPTHistVolMatFrom, ui->cbPTHistVolVolumeFrom, ui->cbPTHistVolIndexFrom, ui->cbPTHistEscaping};
+    for (QCheckBox * cb : vec)
+    {
+        if (checked)
+        {
+            cb->setChecked(false);
+            cb->setEnabled(false);
+        }
+        else cb->setEnabled(true);
+    }
 }

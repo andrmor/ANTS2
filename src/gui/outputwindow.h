@@ -109,6 +109,10 @@ private slots:
     void on_pbShowMonitorTimeOverall_clicked();
     void on_cbPTHistVolVsTime_clicked();
 
+    void on_cbPTHistEscaping_toggled(bool checked);
+
+    void on_cbPTHistCreated_toggled(bool checked);
+
 private:
     MainWindow * MW = nullptr;
     EventsDataClass * EventsDataHub = nullptr;

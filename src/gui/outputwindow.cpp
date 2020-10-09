@@ -1629,14 +1629,16 @@ void OutputWindow::on_pbPTHistRequest_clicked()
         {
             //1D stat
             AHistorySearchProcessor_Border p(what, cuts, bins, from, to);
-            Crawler.find(Opt, p);
-
-            if (p.Hist1D->GetEntries() == 0)
-                message("No data", this);
+            if (!p.ErrorString.isEmpty()) message(p.ErrorString, this);
             else
             {
-                MW->GraphWindow->Draw(p.Hist1D, "hist");
-                p.Hist1D = nullptr;
+                Crawler.find(Opt, p);
+                if (p.Hist1D->GetEntries() == 0) message("No data", this);
+                else
+                {
+                    MW->GraphWindow->Draw(p.Hist1D, "hist");
+                    p.Hist1D = nullptr;
+                }
             }
         }
         else
@@ -1646,28 +1648,32 @@ void OutputWindow::on_pbPTHistRequest_clicked()
             {
                 //1D vs
                 AHistorySearchProcessor_Border p(what, vsWhat, cuts, bins, from, to);
-                Crawler.find(Opt, p);
-
-                if (p.Hist1D->GetEntries() == 0)
-                    message("No data", this);
+                if (!p.ErrorString.isEmpty()) message(p.ErrorString, this);
                 else
                 {
-                    MW->GraphWindow->Draw(p.Hist1D, "hist");
-                    p.Hist1D = nullptr;
+                    Crawler.find(Opt, p);
+                    if (p.Hist1D->GetEntries() == 0) message("No data", this);
+                    else
+                    {
+                        MW->GraphWindow->Draw(p.Hist1D, "hist");
+                        p.Hist1D = nullptr;
+                    }
                 }
             }
             else if (!bVsVs && !bAveraged)
             {
                 //2D stat
                 AHistorySearchProcessor_Border p(what, vsWhat, cuts, bins, from, to, bins2, from2, to2);
-                Crawler.find(Opt, p);
-
-                if (p.Hist2D->GetEntries() == 0)
-                    message("No data", this);
+                if (!p.ErrorString.isEmpty()) message(p.ErrorString, this);
                 else
                 {
-                    MW->GraphWindow->Draw(p.Hist2D, "colz");
-                    p.Hist2D = nullptr;
+                    Crawler.find(Opt, p);
+                    if (p.Hist2D->GetEntries() == 0) message("No data", this);
+                    else
+                    {
+                        MW->GraphWindow->Draw(p.Hist2D, "colz");
+                        p.Hist2D = nullptr;
+                    }
                 }
                 binsB2 = bins2;
                 fromB2 = from2;
@@ -1677,14 +1683,16 @@ void OutputWindow::on_pbPTHistRequest_clicked()
             {
                 //2D vsvs
                 AHistorySearchProcessor_Border p(what, vsWhat, andVsWhat, cuts, bins, from, to, bins2, from2, to2);
-                Crawler.find(Opt, p);
-
-                if (p.Hist2D->GetEntries() == 0)
-                    message("No data", this);
+                if (!p.ErrorString.isEmpty()) message(p.ErrorString, this);
                 else
                 {
-                    MW->GraphWindow->Draw(p.Hist2D, "colz");
-                    p.Hist2D = nullptr;
+                    Crawler.find(Opt, p);
+                    if (p.Hist2D->GetEntries() == 0) message("No data", this);
+                    else
+                    {
+                        MW->GraphWindow->Draw(p.Hist2D, "colz");
+                        p.Hist2D = nullptr;
+                    }
                 }
                 binsB2 = bins2;
                 fromB2 = from2;

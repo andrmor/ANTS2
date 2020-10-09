@@ -67,6 +67,8 @@ public slots:
     void setToVolume(QString volumeName);
     void setFromIndex(int volumeIndex);
     void setToIndex(int volumeIndex);
+    void setOnlyCreated();
+    void setOnlyEscaping();
 
     QVariantList findParticles();
     QVariantList findProcesses(int All0_WithDepo1_TrackEnd2 = 0);

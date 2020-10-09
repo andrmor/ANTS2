@@ -435,6 +435,18 @@ void APTHistory_SI::setToIndex(int volumeIndex)
     Criteria->ToVolIndex = volumeIndex;
 }
 
+void APTHistory_SI::setOnlyCreated()
+{
+    Criteria->bCreated = true;
+    Criteria->bEscaping = false;
+}
+
+void APTHistory_SI::setOnlyEscaping()
+{
+    Criteria->bEscaping = true;
+    Criteria->bCreated = false;
+}
+
 QVariantList APTHistory_SI::findParticles()
 {
     AHistorySearchProcessor_findParticles p;

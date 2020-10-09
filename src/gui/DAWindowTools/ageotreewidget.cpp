@@ -660,6 +660,7 @@ QAction* Action(QMenu& Menu, QString Text)
 void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
 {  
   QMenu menu;
+  QList<QTreeWidgetItem*> selected = selectedItems();
 
   QAction* focusObjA = Action(menu, "Show - focus geometry view");
   QAction* showA     = Action(menu, "Show - highlight in geometry");
@@ -701,6 +702,8 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
   QAction* newGridA = Action(menu, "Add optical grid");
   QAction* newMonitorA = Action(menu, "Add monitor");
 
+  menu.addSeparator();
+
   QMenu * addInstanceMenu = menu.addMenu("Add instance of");
     QVector< QPair<QAction*, QString> > addInstanceA;
     if (Sandwich->Prototypes->HostedObjects.isEmpty())
@@ -715,11 +718,11 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
 
   menu.addSeparator();
 
-  QAction* removeThisAndHostedA = Action(menu, "Remove object and content");
+  QAction* removeThisAndHostedA = Action(menu, "Remove object AND hosted");
   removeThisAndHostedA->setShortcut(QKeySequence(QKeySequence::Delete));
-  QAction* removeA = Action(menu, "Remove object, keep its content");
+  QAction* removeA = Action(menu, "Remove object, KEEP hosted");
   removeA->setShortcut(Qt::Key_Backspace);
-  QAction* removeHostedA = Action(menu, "Remove all objects inside");
+  QAction* removeHostedA = Action(menu, "Remove all hosted objects");
 
   menu.addSeparator();
 
@@ -728,31 +731,24 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
 
   menu.addSeparator();
 
-  QAction* prototypeA = Action(menu, "Declare prototype");
+  QAction* prototypeA = Action(menu, QString("Make prototype (move object%1)").arg(selected.size()>1 ? "s" : ""));
 
   menu.addSeparator();
 
-  QAction* addUpperLGA = Action(menu, "Define compound lightguide (top)");
-  QAction* addLoweLGA = Action(menu, "Define compound lightguide (bottom)");
+  QAction* addUpperLGA = Action(menu, "Define compound lightguide (top)");   addUpperLGA->setEnabled(!World->containsUpperLightGuide());
+  QAction* addLoweLGA = Action(menu, "Define compound lightguide (bottom)"); addLoweLGA->setEnabled(!World->containsLowerLightGuide());
 
 
   // enable actions according to selection
-  QList<QTreeWidgetItem*> selected = selectedItems();
-
-  addUpperLGA->setEnabled(!World->containsUpperLightGuide());
-  addLoweLGA->setEnabled(!World->containsLowerLightGuide());
-
   QString objName;
   AGeoObject * obj = nullptr;
   if      (selected.size() == 0)
   {
-      // no object selected
       objName = "World";
       obj = World;
   }
   else if (selected.size() == 1)
   {
-      // only one selected item
       objName = selected.first()->text(0);
       obj = World->findObjectByName(objName);
       if (!obj) return;
@@ -787,11 +783,12 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
       // several items selected, and they are not slabs
       addObjMenu->setEnabled(false);
       removeA->setEnabled(true); //world cannot be in selection with anything else anyway
-      stackA->setEnabled(true);      
+      stackA->setEnabled(true);
+      prototypeA->setEnabled(true);
   }
 
   QAction* SelectedAction = menu.exec(mapToGlobal(pos));
-  if (!SelectedAction) return; //nothing was selected
+  if (!SelectedAction) return;
 
   // -- EXECUTE SELECTED ACTION --
   if (SelectedAction == focusObjA)  // FOCUS OBJECT
@@ -836,7 +833,7 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
   else if (SelectedAction == removeThisAndHostedA) menuActionRemoveRecursively(obj); // REMOVE RECURSIVLY
   else if (SelectedAction == removeHostedA)  menuActionRemoveHostedObjects(obj);     // REMOVE HOSTED
 
-  else if (SelectedAction == prototypeA)     menuActionDeclarePrototype(obj); // PROTOTYPE
+  else if (SelectedAction == prototypeA)     menuActionMakeItPrototype(selected); // PROTOTYPE
 
   else
   {
@@ -1294,13 +1291,20 @@ void AGeoTreeWidget::menuActionAddInstance(AGeoObject * ContObj, const QString &
     UpdateGui(name);
 }
 
-void AGeoTreeWidget::menuActionDeclarePrototype(AGeoObject * obj)
+void AGeoTreeWidget::menuActionMakeItPrototype(const QList<QTreeWidgetItem*> & selected)
 {
     QVector<AGeoObject*> vec;
-    vec << obj;
+    for (const QTreeWidgetItem * item : selected)
+    {
+        AGeoObject * obj = World->findObjectByName(item->text(0));
+        if (!obj)
+        {
+            message("Something went wrong: object not found", this);
+            return;
+        }
+        vec << obj;
+    }
     QString err = Sandwich->convertToNewPrototype(vec);
-    //err = obj->makeItPrototype(Prototypes);
-
     if (!err.isEmpty())
     {
         message(err, this);
@@ -1420,7 +1424,7 @@ void AGeoTreeWidget::menuActionEnableDisable(AGeoObject * obj)
     UpdateGui(name);
 }
 
-void AGeoTreeWidget::formStack(QList<QTreeWidgetItem*> selected) //option 0->group, option 1->stack
+void AGeoTreeWidget::formStack(QList<QTreeWidgetItem*> selected)
 {
     if (selected.isEmpty()) return;
     QVector<AGeoObject*> objs;

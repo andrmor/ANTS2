@@ -939,7 +939,7 @@ bool AGeoObject::repositionInHosted(AGeoObject *objTo, bool fAfter)
 
 bool AGeoObject::suicide(bool SlabsToo)
 {
-  if (fLocked) return false;
+  //if (fLocked) return false;
   if (ObjectType->isWorld()) return false; //cannot delete world
   if (ObjectType->isHandlingStatic() && !SlabsToo) return false;
   if (ObjectType->isSlab() && getSlabModel()->fCenter) return false; //cannot kill center slab

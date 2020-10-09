@@ -61,7 +61,7 @@ public:
   QList<AGeoObject*> HostedObjects;
 
   //visualization properties
-  int color = 1; // initializaed as -1, updated when first time shown by SlabListWidget
+  int color = 1; // !*! initialized as -1, updated when first time shown by SlabListWidget
   int style = 1;
   int width = 1;
 

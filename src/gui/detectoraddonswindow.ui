@@ -1421,9 +1421,17 @@ Type Upper_0/lower_1 x y z phi theta psi</string>
     <addaction name="actionTo_JavaScript"/>
     <addaction name="actionTo_Python"/>
    </widget>
+   <widget class="QMenu" name="menuMisc">
+    <property name="title">
+     <string>Misc</string>
+    </property>
+    <addaction name="actionAdd_top_lightguide"/>
+    <addaction name="actionAdd_bottom_lightguide"/>
+   </widget>
    <addaction name="menuUndo_redo"/>
-   <addaction name="menuHelp"/>
    <addaction name="menuGeometryToScript"/>
+   <addaction name="menuMisc"/>
+   <addaction name="menuHelp"/>
   </widget>
   <action name="actionUndo">
    <property name="text">
@@ -1458,6 +1466,16 @@ Type Upper_0/lower_1 x y z phi theta psi</string>
   <action name="actionTo_Python">
    <property name="text">
     <string>To Python</string>
+   </property>
+  </action>
+  <action name="actionAdd_top_lightguide">
+   <property name="text">
+    <string>Add top lightguide</string>
+   </property>
+  </action>
+  <action name="actionAdd_bottom_lightguide">
+   <property name="text">
+    <string>Add bottom lightguide</string>
    </property>
   </action>
  </widget>

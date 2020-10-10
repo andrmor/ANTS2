@@ -38,7 +38,7 @@ public:
   bool    fActive = true;
   QString name;
   double  height = 10.0;
-  int     material = -1;
+  int     material = 0;
   bool    fCenter = false;
 
   QString strHeight;

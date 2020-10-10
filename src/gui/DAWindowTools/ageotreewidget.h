@@ -30,6 +30,9 @@ public:
   void         SetLineAttributes(AGeoObject * obj);
   void         SelectObjects(QStringList ObjectNames);
 
+  void         AddLightguide(bool bUpper);
+
+
   QTreeWidget * twPrototypes = nullptr;
   QString LastShownObjectName;
 
@@ -91,7 +94,6 @@ private:
   void updateIcon(QTreeWidgetItem *item, AGeoObject *obj);
   void formStack(QList<QTreeWidgetItem *> selected);
   void markAsStackRefVolume(AGeoObject * obj);
-  void addLightguide(bool upper);
   void createPrototypeTreeWidget();
   void updatePrototypeTreeGui();
 

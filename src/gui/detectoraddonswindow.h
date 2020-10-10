@@ -66,6 +66,9 @@ private slots:
   void on_actionTo_Python_triggered();
   void on_cbShowPrototypes_toggled(bool checked);
 
+  void on_actionAdd_top_lightguide_triggered();
+  void on_actionAdd_bottom_lightguide_triggered();
+
 private:
   Ui::DetectorAddOnsWindow *ui;
   MainWindow * MW;

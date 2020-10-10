@@ -725,11 +725,6 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
 
   QAction* prototypeA = Action(menu, QString("Make prototype (move object%1)").arg(selected.size()>1 ? "s" : ""));
 
-  menu.addSeparator();
-
-  QAction* addUpperLGA = Action(menu, "Define compound lightguide (top)");   addUpperLGA->setEnabled(!World->containsUpperLightGuide());
-  QAction* addLoweLGA = Action(menu, "Define compound lightguide (bottom)"); addLoweLGA->setEnabled(!World->containsLowerLightGuide());
-
 
   // enable actions according to selection
   QString objName;
@@ -815,17 +810,14 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
   else if (SelectedAction == newArrayA)      menuActionAddNewArray(obj);
   else if (SelectedAction == newGridA)       menuActionAddNewGrid(obj);
   else if (SelectedAction == newMonitorA)    menuActionAddNewMonitor(obj);
-  else if (SelectedAction == addUpperLGA || SelectedAction == addLoweLGA) // ADD LIGHTGUIDE
-     addLightguide(SelectedAction == addUpperLGA);
-  else if (SelectedAction == cloneA)         menuActionCloneObject(obj);  // CLONE
-  else if (SelectedAction == stackA)         formStack(selected);         // Form STACK
+  else if (SelectedAction == cloneA)         menuActionCloneObject(obj);             // CLONE
+  else if (SelectedAction == stackA)         formStack(selected);                    // Form STACK
   else if (SelectedAction == stackRefA)      markAsStackRefVolume(obj);
-
   else if (SelectedAction == removeA)        menuActionRemove();                     // REMOVE
   else if (SelectedAction == removeThisAndHostedA) menuActionRemoveRecursively(obj); // REMOVE RECURSIVLY
   else if (SelectedAction == removeHostedA)  menuActionRemoveHostedObjects(obj);     // REMOVE HOSTED
 
-  else if (SelectedAction == prototypeA)     menuActionMakeItPrototype(selected); // PROTOTYPE
+  else if (SelectedAction == prototypeA)     menuActionMakeItPrototype(selected);    // PROTOTYPE
 
   else
   {
@@ -1495,14 +1487,18 @@ void AGeoTreeWidget::markAsStackRefVolume(AGeoObject * obj)
     UpdateGui(name);
 }
 
-void AGeoTreeWidget::addLightguide(bool upper)
+void AGeoTreeWidget::AddLightguide(bool bUpper)
 {
-    AGeoObject* obj = Sandwich->addLightguide(upper);
+    if (Sandwich->GetMaterials().isEmpty())
+    {
+        message("Cannot create lightguide: there are no materials defined");
+        return;
+    }
 
-    //qDebug() << "Done, rebuidling detector and refreshing gui";
-    QString name = obj->Name;
-    UpdateGui(name);
-    qApp->processEvents();
+    AGeoObject * obj = Sandwich->addLightguide(bUpper);
+    if (!obj) return;
+
+    const QString name = obj->Name;
     emit RequestRebuildDetector();
     UpdateGui(name);
 }

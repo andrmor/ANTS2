@@ -121,29 +121,21 @@ AGeoObject *ASandwich::getLowerLightguide()
 AGeoObject* ASandwich::addLightguide(bool upper)
 {
     //qDebug() << "Add lightguide triggered. Upper?"<<upper;
-    AGeoObject* obj = 0;
-    AGeoObject* copyFromObj = (upper ?  World->getFirstSlab() : World->getLastSlab());
+    AGeoObject * obj = nullptr;
+    AGeoObject * copyFromObj = (upper ?  World->getFirstSlab() : World->getLastSlab());
     //qDebug() << "Copy from object:" << copyFromObj;
     if (copyFromObj)
     {
-        //copying properties
         obj = new AGeoObject(copyFromObj);
-        //qDebug() << "--object properties copied from"<<copyFromObj->Name;
-        //converting to slab
-        delete obj->ObjectType;
-        obj->ObjectType = new ATypeSlabObject();
+        delete obj->ObjectType; obj->ObjectType = new ATypeSlabObject();
         *obj->getSlabModel() = *copyFromObj->getSlabModel();
         obj->getSlabModel()->fCenter = false;
-        //qDebug() << "--slab properties copied";
     }
     else
     {
-        //creating new
-        //qDebug() << "Creating new slab";
         obj = new AGeoObject();
-        //converting to slab
-        delete obj->ObjectType;
-        obj->ObjectType = new ATypeSlabObject();
+        delete obj->ObjectType; obj->ObjectType = new ATypeSlabObject();
+        obj->getSlabModel()->fCenter = true;
     }
     //qDebug() << "Base slab crated:" << obj->Name << obj->ObjectType->isSlab();
     //new name

@@ -829,22 +829,19 @@ bool AGeoObject::containsLowerLightGuide()
 
 AGeoObject *AGeoObject::getFirstSlab()
 {
-    for (int i=0; i<HostedObjects.size(); i++)
-    {
-        if (HostedObjects[i]->ObjectType->isSlab())
-            return HostedObjects[i];
-    }
-    return 0;
+    for (AGeoObject * obj : HostedObjects)
+        if (obj->ObjectType->isSlab()) return obj;
+    return nullptr;
 }
 
 AGeoObject *AGeoObject::getLastSlab()
 {
-    for (int i=HostedObjects.size()-1; i>-1; i--)
+    for (int i = HostedObjects.size() - 1; i > -1; i--)
     {
         if (HostedObjects[i]->ObjectType->isSlab())
             return HostedObjects[i];
     }
-    return 0;
+    return nullptr;
 }
 
 int AGeoObject::getIndexOfFirstSlab()

@@ -1691,3 +1691,15 @@ void DetectorAddOnsWindow::on_cbShowPrototypes_toggled(bool checked)
 {
     ui->saPrototypes->setVisible(checked);
 }
+
+void DetectorAddOnsWindow::on_actionAdd_top_lightguide_triggered()
+{
+    if (!Detector->Sandwich->World->containsUpperLightGuide())
+        twGeo->AddLightguide(true);
+}
+
+void DetectorAddOnsWindow::on_actionAdd_bottom_lightguide_triggered()
+{
+    if (!Detector->Sandwich->World->containsLowerLightGuide())
+        twGeo->AddLightguide(false);
+}

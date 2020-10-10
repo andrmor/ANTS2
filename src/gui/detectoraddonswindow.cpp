@@ -134,7 +134,7 @@ void DetectorAddOnsWindow::onReconstructDetectorRequest()
 
 void DetectorAddOnsWindow::UpdateGUI()
 {
-    qDebug() << "---------------->";
+    qDebug() << ">DAwindow: updateGui";
     UpdateGeoTree();
     UpdateDummyPMindication();
     ui->pbBackToSandwich->setEnabled(!Detector->isGDMLempty());
@@ -1499,7 +1499,7 @@ void DetectorAddOnsWindow::updateMenuIndication()
 
 void DetectorAddOnsWindow::onSandwichRebuild()
 {
-    qDebug() << "=================================";
+    qDebug() << "--onSandwichRebuild";
     twGeo->UpdateGui("");
 }
 

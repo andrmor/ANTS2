@@ -31,9 +31,10 @@ public:
   void         SelectObjects(QStringList ObjectNames);
 
   QTreeWidget * twPrototypes = nullptr;
+  QString LastShownObjectName;
 
 public slots:
-  void UpdateGui(QString selected = "");
+  void UpdateGui(QString ObjectName = "");
   void onGridReshapeRequested(QString objName);
   void objectMembersToScript(AGeoObject *Master, QString &script, int ident, bool bExpandMaterial, bool bRecursive, bool usePython);
   void objectToScript(AGeoObject *obj, QString &script, int ident, bool bExpandMaterial, bool bRecursive, bool usePython);
@@ -42,7 +43,7 @@ public slots:
   void onRequestShowPrototype(QString ProtoName);
 
 private slots:
-  void onItemSelectionChanged();                    // !*! bold is also used now for stack reference volume
+  void onItemSelectionChanged();                    // note: bold is also used now for stack reference volume
   void onProtoItemSelectionChanged();
   void customMenuRequested(const QPoint &pos);      // ==== World tree CONTEXT MENU ====
   void customProtoMenuRequested(const QPoint &pos); // ---- Proto tree CONTEXT MENU ----
@@ -146,6 +147,9 @@ public:
   AGeoWidget(ASandwich * Sandwich, AGeoTreeWidget * tw);
   //destructor does not delete Widget - it is handled by the layout
 
+  void ClearGui();
+  void UpdateGui();
+
   QString getCurrentObjectName() const;
 
 private:
@@ -164,9 +168,6 @@ private:
   bool fIgnoreSignals = true;
   bool fEditingMode   = false;
 
-  void ClearGui();
-  void UpdateGui();
-
 public slots:
   void onObjectSelectionChanged(QString SelectedObject); //starts GUI update
   void onStartEditing();
@@ -179,7 +180,7 @@ public slots:
   void onRequestScriptRecursiveToClipboard();
   void onRequestSetVisAttributes();
 
-  void onConfirmPressed();                                  // CONFIRM BUTTON PRESSED: performing copy from delegate to object
+  void onConfirmPressed(); // CONFIRM BUTTON PRESSED: performing copy from delegate to object
   void onCancelPressed();
 
 private:

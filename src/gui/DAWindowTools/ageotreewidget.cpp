@@ -129,19 +129,21 @@ void AGeoTreeWidget::SelectObjects(QStringList ObjectNames)
      }
 }
 
-void AGeoTreeWidget::UpdateGui(QString selected)
+void AGeoTreeWidget::UpdateGui(QString ObjectName)
 {
     if (!World) return;
 
-    qDebug() << "==> Update tree triggered, selected = "<<selected;
-    if (selected.isEmpty() && currentItem())
-    {
-        //qDebug() << currentItem()->text(0);
-        selected = currentItem()->text(0);
-    }
+    //qDebug() << "==> Update tree triggered, ObjectName = "<<ObjectName;
 
-    clear(); // also emits "itemSelectionChanged" with no selection -> clears delegate
-    twPrototypes->clear(); // also emits "itemSelectionChanged" with no selection
+    EditWidget->ClearGui();
+
+    blockSignals(true);
+    clear();
+    blockSignals(false);
+
+    twPrototypes->blockSignals(true);
+    twPrototypes->clear();
+    twPrototypes->blockSignals(false);
 
     //World
     QTreeWidgetItem * topItem = new QTreeWidgetItem(this);
@@ -155,23 +157,36 @@ void AGeoTreeWidget::UpdateGui(QString selected)
 
     populateTreeWidget(topItem, World);
     updateExpandState(topItem, false);
+    updatePrototypeTreeGui();
 
-    if (selected.isEmpty())
+
+    // restoring delegate for the last shown obeject if possible, otherwise showing delegate for the World
+    if (ObjectName.isEmpty())
+    {
+        if (LastShownObjectName.isEmpty())
+        {
+            ObjectName = "World";
+            LastShownObjectName = "World";
+        }
+        else ObjectName = LastShownObjectName;
+    }
+    QList<QTreeWidgetItem*> list = twPrototypes->findItems(ObjectName, Qt::MatchExactly | Qt::MatchRecursive);
+    if (list.isEmpty())
+    {
+        bWorldTreeSelected = true;
+        list = findItems(ObjectName, Qt::MatchExactly | Qt::MatchRecursive);
+    }
+    else bWorldTreeSelected = false;
+
+    if (list.isEmpty())
     {
         if (topLevelItemCount() > 0) setCurrentItem(topLevelItem(0));
     }
     else
     {
-        QList<QTreeWidgetItem*> list = findItems(selected, Qt::MatchExactly | Qt::MatchRecursive);
-        if (!list.isEmpty())
-        {
-            list.first()->setSelected(true);
-            setCurrentItem(list.first());
-        }
+        //list.first()->setSelected(true);
+        setCurrentItem(list.first());
     }
-
-    updatePrototypeTreeGui();
-
     //qDebug() << "<==";
 }
 
@@ -179,38 +194,15 @@ void AGeoTreeWidget::updatePrototypeTreeGui()
 {
     if (!Prototypes) return;
 
-    //qDebug() << "==> Update tree triggered, selected = "<<selected;
-//    if (selected.isEmpty() && currentItem())
-//    {
-//        //qDebug() << currentItem()->text(0);
-//        selected = currentItem()->text(0);
-//    }
-    //twPrototypes->clear(); // also emits "itemSelectionChanged" with no selection
-
     topItemPrototypes = new QTreeWidgetItem(twPrototypes);
     topItemPrototypes->setText(0, "Defined prototypes:");
     QFont f = topItemPrototypes->font(0); f.setBold(true); topItemPrototypes->setFont(0, f);
     topItemPrototypes->setSizeHint(0, QSize(50, 20));
     topItemPrototypes->setFlags(topItemPrototypes->flags() & ~Qt::ItemIsDragEnabled & ~Qt::ItemIsSelectable);
-    //topItem->setBackgroundColor(0, BackgroundColor);
     Prototypes->fExpanded = true;  // force-expand top!
 
     populateTreeWidget(topItemPrototypes, Prototypes);
     updateExpandState(topItemPrototypes, true);
-
-//    if (selected.isEmpty())
-//    {
-//        if (topLevelItemCount() > 0) setCurrentItem(topLevelItem(0));
-//    }
-//    else
-//    {
-//        QList<QTreeWidgetItem*> list = findItems(selected, Qt::MatchExactly | Qt::MatchRecursive);
-//        if (!list.isEmpty())
-//        {
-//            list.first()->setSelected(true);
-//            setCurrentItem(list.first());
-//        }
-//    }
 }
 
 void AGeoTreeWidget::onGridReshapeRequested(QString objName)
@@ -1973,7 +1965,7 @@ AGeoWidget::AGeoWidget(ASandwich * Sandwich, AGeoTreeWidget * tw) :
 
 void AGeoWidget::ClearGui()
 {
-    //qDebug() << "AGeoWidget clear triggered!";
+    //qDebug() << "AGeoWidget clear triggered (Delegate will be deleted)";
     fIgnoreSignals = true;
 
     while (ObjectLayout->count() > 0)
@@ -2025,6 +2017,8 @@ void AGeoWidget::UpdateGui()
     ObjectLayout->addStretch();
     ObjectLayout->addWidget(GeoDelegate->Widget);
     ObjectLayout->addStretch();
+
+    tw->LastShownObjectName = CurrentObject->Name;
 }
 
 AGeoBaseDelegate * AGeoWidget::createAndAddGeoObjectDelegate()
@@ -2129,19 +2123,18 @@ void AGeoWidget::onObjectSelectionChanged(QString SelectedObject)
 {  
     if (fIgnoreSignals) return;
 
-    qDebug() << "Object selection changed! ->" << SelectedObject;
+    //qDebug() << "Object selection changed! ->" << SelectedObject;
 
-    qDebug() << "CurrentObject to nullptr!";
     CurrentObject = nullptr;
     ClearGui();
     if (SelectedObject.isEmpty()) return;
 
     AGeoObject * obj = Sandwich->World->findObjectByName(SelectedObject);
-    qDebug() << "Object for this name:" << obj;
+    //qDebug() << "Object for this name:" << obj;
     if (!obj) return;
 
     CurrentObject = obj;
-    qDebug() << "New current object:"<<CurrentObject->Name;
+    //qDebug() << "New current object:"<<CurrentObject->Name;
     UpdateGui();
     fEditingMode = false;
     //qDebug() << "OnObjectSelection procedure completed";

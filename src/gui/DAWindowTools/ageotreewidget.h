@@ -46,7 +46,8 @@ private slots:
   void onProtoItemSelectionChanged();
   void customMenuRequested(const QPoint &pos);      // ==== World tree CONTEXT MENU ====
   void customProtoMenuRequested(const QPoint &pos); // ---- Proto tree CONTEXT MENU ----
-  void onItemClicked();                             // only to return to normal geo view mode!
+  void onItemClicked();
+  void onProtoItemClicked();
 
   void onItemExpanded(QTreeWidgetItem * item);
   void onItemCollapsed(QTreeWidgetItem * item);
@@ -69,6 +70,7 @@ private:
   AGeoWidget * EditWidget = nullptr;
 
   QTreeWidgetItem * topItemPrototypes = nullptr;
+  bool bWorldTreeSelected = true;
 
   //base images for icons
   QImage Lock;

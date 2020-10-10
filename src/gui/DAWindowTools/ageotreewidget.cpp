@@ -96,7 +96,7 @@ void AGeoTreeWidget::createPrototypeTreeWidget()
     connect(twPrototypes, &QTreeWidget::itemExpanded,                   this, &AGeoTreeWidget::onPrototypeItemExpanded);
     connect(twPrototypes, &QTreeWidget::itemCollapsed,                  this, &AGeoTreeWidget::onPrototypeItemCollapsed);
     connect(twPrototypes, &QTreeWidget::itemSelectionChanged,           this, &AGeoTreeWidget::onProtoItemSelectionChanged);
-    connect(twPrototypes, &QTreeWidget::itemClicked,                    this, &AGeoTreeWidget::onItemClicked); // same as the main tree
+    connect(twPrototypes, &QTreeWidget::itemClicked,                    this, &AGeoTreeWidget::onProtoItemClicked);
     connect(this,         &AGeoTreeWidget::ProtoObjectSelectionChanged, EditWidget, &AGeoWidget::onObjectSelectionChanged);
 }
 
@@ -985,10 +985,23 @@ void AGeoTreeWidget::customProtoMenuRequested(const QPoint &pos)
 void AGeoTreeWidget::onItemClicked()
 {
     if (fSpecialGeoViewMode)
-      {
+    {
           fSpecialGeoViewMode = false;
           emit RequestNormalDetectorDraw();
-      }
+    }
+    if (!bWorldTreeSelected) onItemSelectionChanged();
+    bWorldTreeSelected = true;
+}
+
+void AGeoTreeWidget::onProtoItemClicked()
+{
+    if (fSpecialGeoViewMode)
+    {
+          fSpecialGeoViewMode = false;
+          emit RequestNormalDetectorDraw();
+    }
+    if (bWorldTreeSelected) onProtoItemSelectionChanged();
+    bWorldTreeSelected = false;
 }
 
 void AGeoTreeWidget::onItemExpanded(QTreeWidgetItem *item)

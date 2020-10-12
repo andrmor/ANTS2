@@ -65,9 +65,11 @@ public slots:
   void SaveImage(QString fileName);
 
   // VS
-  int AddTrack();
+  int  AddTrack();
   void AddNodeToTrack(int trk, float x, float y, float z);
   void DeleteAllTracks();
+
+  void AddMarkers(QVariantList XYZs, int color);
 
 private:
   MainWindow* MW;

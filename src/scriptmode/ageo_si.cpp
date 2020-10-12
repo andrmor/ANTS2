@@ -817,6 +817,17 @@ void AGeo_SI::ClearAll()
   Detector->BuildDetector_CallFromScript();
 }
 
+void AGeo_SI::Clear(QString Object)
+{
+    AGeoObject* obj = Detector->Sandwich->World->findObjectByName(Object);
+    if (!obj)
+    {
+        abort("Cannot find object "+Object);
+        return;
+    }
+    obj->clearContent();
+}
+
 void AGeo_SI::Remove(QString Object)
 {
     AGeoObject* obj = Detector->Sandwich->World->findObjectByName(Object);

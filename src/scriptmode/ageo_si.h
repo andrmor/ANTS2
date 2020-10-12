@@ -63,7 +63,9 @@ public slots:
   void Instance(QString name, QString prototype, QString container, double x, double y, double z, double phi, double theta, double psi);
 
   void SetLine(QString name, int color, int width, int style);
+
   void ClearAll();
+  void Clear(QString Object);
   void Remove(QString Object);
   void RemoveRecursive(QString Object);
   void RemoveAllExceptWorld();

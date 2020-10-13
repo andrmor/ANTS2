@@ -138,6 +138,12 @@ void DetectorAddOnsWindow::UpdateGUI()
     UpdateGeoTree();
     UpdateDummyPMindication();
     ui->pbBackToSandwich->setEnabled(!Detector->isGDMLempty());
+
+    QString str = "Show prototypes";
+    int numProto = Detector->Sandwich->Prototypes->HostedObjects.size();
+    if (numProto > 0) str += QString(" (%1)").arg(numProto);
+    ui->cbShowPrototypes->setText(str);
+    QFont font = ui->cbShowPrototypes->font(); font.setBold(numProto > 0); ui->cbShowPrototypes->setFont(font);
 }
 
 void DetectorAddOnsWindow::SetTab(int tab)

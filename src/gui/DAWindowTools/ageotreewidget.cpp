@@ -1310,6 +1310,8 @@ void AGeoTreeWidget::menuActionMoveProtoToWorld(AGeoObject * obj)
 
     for (AGeoObject * hosted : obj->HostedObjects)
         hosted->migrateTo(World, true);
+    Sandwich->Prototypes->HostedObjects.removeOne(obj);
+    delete obj;
 
     emit RequestRebuildDetector();
 }

@@ -1233,7 +1233,7 @@ void AGeoTreeWidget::menuActionAddInstance(AGeoObject * ContObj, const QString &
     if (!ContObj) return;
 
     AGeoObject * newObj = new AGeoObject();
-    do newObj->Name = AGeoObject::GenerateRandomName();
+    do newObj->Name = "Instance_" + AGeoObject::GenerateRandomName();
     while (World->isNameExists(newObj->Name));
 
     delete newObj->ObjectType;

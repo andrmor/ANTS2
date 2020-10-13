@@ -265,6 +265,14 @@ QString ASandwich::convertToNewPrototype(QVector<AGeoObject*> members)
     return "";
 }
 
+bool ASandwich::isValidPrototypeName(const QString & ProtoName) const
+{
+    if (!Prototypes) return false;
+    for (AGeoObject * proto : Prototypes->HostedObjects)
+        if (ProtoName == proto->Name) return true;
+    return false;
+}
+
 void ASandwich::convertObjToGrid(AGeoObject *obj)
 {
   delete obj->ObjectType;

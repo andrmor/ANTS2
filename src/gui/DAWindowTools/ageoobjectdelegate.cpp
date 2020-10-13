@@ -2856,13 +2856,12 @@ AGeoInstanceDelegate::AGeoInstanceDelegate(const QStringList &materials, QWidget
     leInstanceOf = new QLineEdit();                              hl->addWidget(leInstanceOf);
     QPushButton * pbToProto = new QPushButton("Show prototype"); hl->addWidget(pbToProto);
 
+    QObject::connect(leInstanceOf, &QLineEdit::textChanged, this, &AGeoBaseDelegate::ContentChanged);
     QObject::connect(pbToProto, &QPushButton::clicked, [this](){
         emit RequestShowPrototype(leInstanceOf->text());
     });
 
     addLocalLayout(hl);
-
-    leInstanceOf->setEnabled(false);
 
     cbScale->setChecked(false);
     cbScale->setVisible(false);
@@ -2872,6 +2871,29 @@ AGeoInstanceDelegate::AGeoInstanceDelegate(const QStringList &materials, QWidget
 
     pbTransform->setVisible(false);
     pbShapeInfo->setVisible(false);
+}
+
+bool AGeoInstanceDelegate::updateObject(AGeoObject * obj) const
+{
+    const QString ProtoName = leInstanceOf->text();
+
+    ATypeInstanceObject * instance = dynamic_cast<ATypeInstanceObject*>(obj->ObjectType);
+    if (instance)
+    {
+        if (ProtoName != instance->PrototypeName)
+        {
+            bool bValid;
+            emit RequestIsValidPrototypeName(ProtoName, bValid);
+            if (bValid) instance->PrototypeName = ProtoName;
+            else
+            {
+                QMessageBox::warning(this->ParentWidget, "", "This is not a valid prototype name: " + ProtoName);
+                return false;
+            }
+        }
+    }
+
+    return AGeoObjectDelegate::updateObject(obj);
 }
 
 void AGeoInstanceDelegate::Update(const AGeoObject * obj)

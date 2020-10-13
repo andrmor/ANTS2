@@ -506,6 +506,8 @@ class AGeoInstanceDelegate : public AGeoObjectDelegate
 public:
     AGeoInstanceDelegate(const QStringList & materials, QWidget * parent);
 
+    bool updateObject(AGeoObject * obj) const override;
+
     void Update(const AGeoObject * obj) override;
 
 protected:
@@ -513,6 +515,7 @@ protected:
 
 signals:
     void RequestShowPrototype(QString ProtoName);
+    void RequestIsValidPrototypeName(const QString & ProtoName, bool & bResult) const;
 };
 
 class AGeoPrototypeDelegate : public AGeoObjectDelegate

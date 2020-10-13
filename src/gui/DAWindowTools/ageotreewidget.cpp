@@ -1006,6 +1006,11 @@ void AGeoTreeWidget::onRequestShowPrototype(QString ProtoName)
     }
 }
 
+void AGeoTreeWidget::onRequestIsValidPrototypeName(const QString &ProtoName, bool &bResult) const
+{
+    bResult = Sandwich->isValidPrototypeName(ProtoName);
+}
+
 void AGeoTreeWidget::menuActionRemoveKeepContent()
 {
   QList<QTreeWidgetItem*> selected = selectedItems();
@@ -2020,7 +2025,8 @@ AGeoBaseDelegate * AGeoWidget::createAndAddGeoObjectDelegate()
     else if (CurrentObject->ObjectType->isInstance())
     {
         Del = new AGeoInstanceDelegate(Sandwich->Materials, this);
-        connect((AGeoInstanceDelegate*)Del, &AGeoInstanceDelegate::RequestShowPrototype, tw, &AGeoTreeWidget::onRequestShowPrototype);
+        connect((AGeoInstanceDelegate*)Del, &AGeoInstanceDelegate::RequestShowPrototype,        tw, &AGeoTreeWidget::onRequestShowPrototype);
+        connect((AGeoInstanceDelegate*)Del, &AGeoInstanceDelegate::RequestIsValidPrototypeName, tw, &AGeoTreeWidget::onRequestIsValidPrototypeName);
     }
     else if (CurrentObject->ObjectType->isPrototype())
         Del = new AGeoPrototypeDelegate(Sandwich->Materials, this);

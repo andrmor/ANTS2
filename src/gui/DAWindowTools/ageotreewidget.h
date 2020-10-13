@@ -42,6 +42,7 @@ public slots:
   void commonSlabToScript(QString &script, const QString &identStr);
   void rebuildDetectorAndRestoreCurrentDelegate();  // used by geoConst widget
   void onRequestShowPrototype(QString ProtoName);
+  void onRequestIsValidPrototypeName(const QString & ProtoName, bool & bResult) const;
 
 private slots:
   void onItemSelectionChanged();

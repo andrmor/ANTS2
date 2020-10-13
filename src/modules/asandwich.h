@@ -48,6 +48,7 @@ public:
 
   //ptototype/instances
   QString convertToNewPrototype(QVector<AGeoObject*> members);
+  bool isValidPrototypeName(const QString & ProtoName) const;
 
   //grid
   void convertObjToGrid(AGeoObject * obj);

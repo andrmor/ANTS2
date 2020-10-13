@@ -112,6 +112,7 @@ private:
   void menuActionAddNewMonitor(AGeoObject * ContObj);
   void menuActionAddInstance(AGeoObject * ContObj, const QString & PrototypeName);
   void menuActionMakeItPrototype(const QList<QTreeWidgetItem *> & selected);
+  void menuActionMoveProtoToWorld(AGeoObject * obj);
 
   QString makeScriptString_basicObject(AGeoObject *obj, bool bExpandMaterials, bool usePython) const;
   QString makeScriptString_slab(AGeoObject *obj, bool bExpandMaterials, int ident) const;

@@ -863,8 +863,11 @@ void AGeoTreeWidget::customProtoMenuRequested(const QPoint &pos)
     QAction* stackA = Action(menu, "Form a stack");
     QAction* stackRefA = Action(menu, "Mark as the stack reference volume");
 
-    // selection is not empty!
+    menu.addSeparator();
 
+    QAction* moveToWorldA = Action(menu, "Move to World");
+
+    // selection is not empty!
     QString objName = selected.first()->text(0);
     AGeoObject * obj = Prototypes->findObjectByName(objName);
     if (!obj) return;
@@ -887,10 +890,10 @@ void AGeoTreeWidget::customProtoMenuRequested(const QPoint &pos)
         removeWithContA->setEnabled(true);
         removeKeepContA->setEnabled(!bIsPrototype);
         stackRefA->setEnabled(obj->isStackMember());
+        moveToWorldA->setEnabled(bIsPrototype);
     }
     else
     {
-        // several items selected, and they are not slabs
         addObjMenu->setEnabled(false);
         removeWithContA->setEnabled(true);
         stackA->setEnabled(!bIsPrototype);
@@ -934,6 +937,8 @@ void AGeoTreeWidget::customProtoMenuRequested(const QPoint &pos)
     else if (SelectedAction == removeKeepContA)menuActionRemoveKeepContent();
     else if (SelectedAction == removeWithContA)menuActionRemoveWithContent(twPrototypes);
     else if (SelectedAction == removeHostedA)  menuActionRemoveHostedObjects(obj);
+
+    else if (SelectedAction == moveToWorldA)   menuActionMoveProtoToWorld(obj);
 }
 
 void AGeoTreeWidget::onItemClicked()
@@ -1289,6 +1294,24 @@ void AGeoTreeWidget::menuActionMakeItPrototype(const QList<QTreeWidgetItem*> & s
     emit RequestRebuildDetector();
     UpdateGui(name);
     emit RequestShowPrototypeList();
+}
+
+void AGeoTreeWidget::menuActionMoveProtoToWorld(AGeoObject * obj)
+{
+    if (!obj || !obj->ObjectType->isPrototype()) return;
+
+    QStringList users;
+    bool bIsUsed = Sandwich->World->isPrototypeInUseRecursive(obj->Name, &users);
+    if (bIsUsed)
+    {
+        message("This prototype is in used by these instances(s):\n   " + users.join("\n   "), this);
+        return;
+    }
+
+    for (AGeoObject * hosted : obj->HostedObjects)
+        hosted->migrateTo(World, true);
+
+    emit RequestRebuildDetector();
 }
 
 void AGeoTreeWidget::menuActionAddNewComposite(AGeoObject * ContObj)

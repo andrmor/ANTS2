@@ -912,7 +912,9 @@ bool AGeoObject::migrateTo(AGeoObject * objTo, bool fAfter, AGeoObject *reorderO
         }
         Container->HostedObjects.removeOne(this);
     }
-    objTo->addObjectFirst(this);
+
+    if (fAfter) objTo->addObjectLast(this);
+    else        objTo->addObjectFirst(this);
 
     if (reorderObj) return repositionInHosted(reorderObj, fAfter);
     else            return true;
@@ -1458,9 +1460,12 @@ bool AGeoObject::isPrototypeInUseRecursive(const QString & PrototypeName, QStrin
         return false; // instance cannot contain other instances
     }
 
+    bool bFoundInUse = false;
     for (AGeoObject * obj : HostedObjects)
         if (obj->isPrototypeInUseRecursive(PrototypeName, Users))
-            return true;
+            bFoundInUse = true;
+
+    return bFoundInUse;
 }
 
 QString randomString(int lettLength, int numLength)

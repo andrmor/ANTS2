@@ -85,18 +85,17 @@ void AGeoTreeWidget::createPrototypeTreeWidget()
     //twPrototypes->setAcceptDrops(true);
     //twPrototypes->setDragEnabled(true);
     //twPrototypes->setDragDropMode(QAbstractItemView::InternalMove);
-    twPrototypes->setSelectionMode(QAbstractItemView::SingleSelection);//  ExtendedSelection);
+    twPrototypes->setSelectionMode(QAbstractItemView::ExtendedSelection);
     //twPrototypes->setDropIndicatorShown(false);
-        //twPrototypes->setIndentation(20);
     twPrototypes->setContentsMargins(0,0,0,0);
     twPrototypes->setFrameStyle(QFrame::NoFrame);
     twPrototypes->setIconSize(QSize(20,20));
     twPrototypes->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(twPrototypes, &QTreeWidget::customContextMenuRequested,     this, &AGeoTreeWidget::customProtoMenuRequested);
-    connect(twPrototypes, &QTreeWidget::itemExpanded,                   this, &AGeoTreeWidget::onPrototypeItemExpanded);
-    connect(twPrototypes, &QTreeWidget::itemCollapsed,                  this, &AGeoTreeWidget::onPrototypeItemCollapsed);
-    connect(twPrototypes, &QTreeWidget::itemSelectionChanged,           this, &AGeoTreeWidget::onProtoItemSelectionChanged);
-    connect(twPrototypes, &QTreeWidget::itemClicked,                    this, &AGeoTreeWidget::onProtoItemClicked);
+    connect(twPrototypes, &QTreeWidget::customContextMenuRequested,     this,       &AGeoTreeWidget::customProtoMenuRequested);
+    connect(twPrototypes, &QTreeWidget::itemExpanded,                   this,       &AGeoTreeWidget::onPrototypeItemExpanded);
+    connect(twPrototypes, &QTreeWidget::itemCollapsed,                  this,       &AGeoTreeWidget::onPrototypeItemCollapsed);
+    connect(twPrototypes, &QTreeWidget::itemSelectionChanged,           this,       &AGeoTreeWidget::onProtoItemSelectionChanged);
+    connect(twPrototypes, &QTreeWidget::itemClicked,                    this,       &AGeoTreeWidget::onProtoItemClicked);
     connect(this,         &AGeoTreeWidget::ProtoObjectSelectionChanged, EditWidget, &AGeoWidget::onObjectSelectionChanged);
 }
 
@@ -710,10 +709,10 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
 
   menu.addSeparator();
 
-  QAction* removeThisAndHostedA = Action(menu, "Remove object AND hosted");
-  removeThisAndHostedA->setShortcut(QKeySequence(QKeySequence::Delete));
-  QAction* removeA = Action(menu, "Remove object, KEEP hosted");
-  removeA->setShortcut(Qt::Key_Backspace);
+  QAction* removeWithContA = Action(menu, "Remove object AND hosted");
+  removeWithContA->setShortcut(QKeySequence(QKeySequence::Delete));
+  QAction* removeKeepContA = Action(menu, "Remove object, KEEP hosted");
+  removeKeepContA->setShortcut(Qt::Key_Backspace);
   QAction* removeHostedA = Action(menu, "Remove all hosted objects");
 
   menu.addSeparator();
@@ -750,13 +749,13 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
           if (obj->getSlabModel()->fCenter) enableDisableA->setEnabled(false);
 
       newCompositeA->setEnabled(fNotGridNotMonitor);
-      newArrayA->setEnabled(fNotGridNotMonitor);// && !ObjectType.isArray());
-      newMonitorA->setEnabled(fNotGridNotMonitor);// && !ObjectType.isArray());
+      newArrayA->setEnabled(fNotGridNotMonitor);
+      newMonitorA->setEnabled(fNotGridNotMonitor);
       newGridA->setEnabled(fNotGridNotMonitor);
-      cloneA->setEnabled(true);  // ObjectType.isSingle() || ObjectType.isSlab() || ObjectType.isMonitor());  //supported so far only Single, Slab and Monitor
+      cloneA->setEnabled(true);
       removeHostedA->setEnabled(fNotGridNotMonitor);
-      removeThisAndHostedA->setEnabled(!ObjectType.isWorld());
-      removeA->setEnabled(!ObjectType.isWorld());
+      removeWithContA->setEnabled(!ObjectType.isWorld());
+      removeKeepContA->setEnabled(!ObjectType.isWorld());
       lineA->setEnabled(true);
       focusObjA->setEnabled(true);
       showA->setEnabled(true);
@@ -769,7 +768,7 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
   {
       // several items selected, and they are not slabs
       addObjMenu->setEnabled(false);
-      removeA->setEnabled(true); //world cannot be in selection with anything else anyway
+      removeWithContA->setEnabled(true); //world cannot be in selection with anything else anyway
       stackA->setEnabled(true);
       prototypeA->setEnabled(true);
   }
@@ -813,9 +812,9 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
   else if (SelectedAction == cloneA)         menuActionCloneObject(obj);             // CLONE
   else if (SelectedAction == stackA)         formStack(selected);                    // Form STACK
   else if (SelectedAction == stackRefA)      markAsStackRefVolume(obj);
-  else if (SelectedAction == removeA)        menuActionRemove();                     // REMOVE
-  else if (SelectedAction == removeThisAndHostedA) menuActionRemoveRecursively(obj); // REMOVE RECURSIVLY
-  else if (SelectedAction == removeHostedA)  menuActionRemoveHostedObjects(obj);     // REMOVE HOSTED
+  else if (SelectedAction == removeKeepContA)menuActionRemove();                     // REMOVE and keep hosted
+  else if (SelectedAction == removeWithContA)menuActionRemoveRecursively(obj);       // REMOVE with all content
+  else if (SelectedAction == removeHostedA)  menuActionRemoveHostedObjects(obj);     // REMOVE only hosted
 
   else if (SelectedAction == prototypeA)     menuActionMakeItPrototype(selected);    // PROTOTYPE
 
@@ -830,8 +829,7 @@ void AGeoTreeWidget::customProtoMenuRequested(const QPoint &pos)
 {
     // top level (Prototypes) can have only single selection (see onProtoSelectionChanged())
     QList<QTreeWidgetItem*> selected = twPrototypes->selectedItems();
-    if (selected.isEmpty()) return;
-
+    if (selected.isEmpty()) return; // non-empty selection is assumed below!
 
     QMenu menu;
 
@@ -880,8 +878,8 @@ void AGeoTreeWidget::customProtoMenuRequested(const QPoint &pos)
 
     QAction* removeThisAndHostedA = Action(menu, "Remove object and content");
     removeThisAndHostedA->setShortcut(QKeySequence(QKeySequence::Delete));
-    QAction* removeA = Action(menu, "Remove object, keep its content");
-    removeA->setShortcut(Qt::Key_Backspace);
+    QAction* removeKeepContA = Action(menu, "Remove object, keep its content");
+    removeKeepContA->setShortcut(Qt::Key_Backspace);
     QAction* removeHostedA = Action(menu, "Remove all objects inside");
 
     menu.addSeparator();
@@ -889,41 +887,37 @@ void AGeoTreeWidget::customProtoMenuRequested(const QPoint &pos)
     QAction* stackA = Action(menu, "Form a stack");
     QAction* stackRefA = Action(menu, "Mark as the stack reference volume");
 
+    // selection is not empty!
 
-
-    QString objName;
-    AGeoObject * obj = nullptr;
+    QString objName = selected.first()->text(0);
+    AGeoObject * obj = Prototypes->findObjectByName(objName);
+    if (!obj) return;
+    const ATypeGeoObject & ObjectType = *obj->ObjectType;
+    const bool bNotGridNotMonitor = !ObjectType.isGrid() && !ObjectType.isMonitor();
+    const bool bIsPrototype = ObjectType.isPrototype();
 
     if (selected.size() == 1)
     {
-        objName = selected.first()->text(0);
-        obj = Prototypes->findObjectByName(objName);
-        if (!obj) return;
-        const ATypeGeoObject & ObjectType = *obj->ObjectType;
-
-        bool fNotGridNotMonitor = !ObjectType.isGrid() && !ObjectType.isMonitor();
-
-        addObjMenu->setEnabled(fNotGridNotMonitor);
-        enableDisableA->setEnabled( !obj->isWorld() );
+        showAllA->setEnabled(bIsPrototype);
+        lineA->setEnabled(!bIsPrototype);
+        enableDisableA->setEnabled(!obj->isWorld() && !bIsPrototype);
         enableDisableA->setText( (obj->isDisabled() ? "Enable object" : "Disable object" ) );
-
-        newCompositeA->setEnabled(fNotGridNotMonitor);
-        newArrayA->setEnabled(fNotGridNotMonitor);
-        newMonitorA->setEnabled(fNotGridNotMonitor);
+        addObjMenu->setEnabled(bNotGridNotMonitor);
+        newCompositeA->setEnabled(bNotGridNotMonitor);
+        newArrayA->setEnabled(bNotGridNotMonitor);
+        newMonitorA->setEnabled(bNotGridNotMonitor);
         cloneA->setEnabled(true);
-        removeHostedA->setEnabled(fNotGridNotMonitor);
-        removeThisAndHostedA->setEnabled(!ObjectType.isWorld());
-        removeA->setEnabled(!ObjectType.isWorld());
-        lineA->setEnabled(true);
-        showAllA->setEnabled(true);
+        removeHostedA->setEnabled(bNotGridNotMonitor);
+        removeThisAndHostedA->setEnabled(true);
+        removeKeepContA->setEnabled(!bIsPrototype);
         stackRefA->setEnabled(obj->isStackMember());
     }
     else
     {
         // several items selected, and they are not slabs
         addObjMenu->setEnabled(false);
-        removeA->setEnabled(true); //world cannot be in selection with anything else anyway
-        stackA->setEnabled(true);
+        removeThisAndHostedA->setEnabled(true);
+        stackA->setEnabled(!bIsPrototype);
     }
 
     QAction * SelectedAction = menu.exec(twPrototypes->mapToGlobal(pos));
@@ -961,7 +955,7 @@ void AGeoTreeWidget::customProtoMenuRequested(const QPoint &pos)
     else if (SelectedAction == stackA)         formStack(selected);         // Form STACK
     else if (SelectedAction == stackRefA)      markAsStackRefVolume(obj);
 
-    else if (SelectedAction == removeA)        menuActionRemove();                     // REMOVE
+    else if (SelectedAction == removeKeepContA)        menuActionRemove();                     // REMOVE
     else if (SelectedAction == removeThisAndHostedA) menuActionRemoveRecursively(obj); // REMOVE RECURSIVLY
     else if (SelectedAction == removeHostedA)  menuActionRemoveHostedObjects(obj);     // REMOVE HOSTED
 }

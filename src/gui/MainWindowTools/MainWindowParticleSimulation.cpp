@@ -499,7 +499,7 @@ void MainWindow::on_pbUpdateSourcesIndication_clicked()
 
             double totAct = SourceGenSettings.getTotalActivity();
             double per = ( totAct == 0 ? 0 : 100.0 * pr->Activity / totAct );
-            QString t = QString("%1%").arg(per, 3, 'g', 3);
+            QString t = (per == 0 ? "-Off-" : QString("%1%").arg(per, 3, 'g', 3) );
             lab = new QLabel(t);
             lab->setMinimumWidth(45);
         l->addWidget(lab);

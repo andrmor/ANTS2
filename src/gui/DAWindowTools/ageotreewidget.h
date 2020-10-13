@@ -26,12 +26,10 @@ class AGeoTreeWidget : public QTreeWidget
 public:
   AGeoTreeWidget(ASandwich * Sandwich);
 
-  AGeoWidget * GetEditWidget() {return EditWidget;}  // !*! return const widget?
+  AGeoWidget * GetEditWidget() {return EditWidget;}
   void         SetLineAttributes(AGeoObject * obj);
   void         SelectObjects(QStringList ObjectNames);
-
   void         AddLightguide(bool bUpper);
-
 
   QTreeWidget * twPrototypes = nullptr;
   QString LastShownObjectName;

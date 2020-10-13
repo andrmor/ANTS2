@@ -956,14 +956,14 @@ bool AGeoObject::suicide(bool SlabsToo)
 
   //for composite, clear all unused logicals then kill the composite container
   if (ObjectType->isComposite())
-    {
+  {
       AGeoObject* cl = this->getContainerWithLogical();
       for (int i=0; i<cl->HostedObjects.size(); i++)
         delete cl->HostedObjects[i];
       delete cl;
       HostedObjects.removeAll(cl);
-    }
-  if (ObjectType->isGrid())
+  }
+  else if (ObjectType->isGrid())
   {
       AGeoObject* ge = getGridElement();
       if (ge)
@@ -990,6 +990,8 @@ bool AGeoObject::suicide(bool SlabsToo)
 
 void AGeoObject::recursiveSuicide()
 {
+    if (ObjectType->isPrototypes()) return;
+
     for (int i=HostedObjects.size()-1; i>-1; i--)
         HostedObjects[i]->recursiveSuicide();
 

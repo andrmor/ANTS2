@@ -1093,23 +1093,21 @@ void AGeoTreeWidget::menuActionRemoveHostedObjects(AGeoObject * obj)
 
     QMessageBox msgBox;
     msgBox.setIcon(QMessageBox::Question);
-    msgBox.setWindowTitle("Locked objects will NOT be deleted!");
-    msgBox.setText("Delete objects hosted inside " + obj->Name + "?\nSlabs and lightguides are NOT removed.");
-    QPushButton *remove = msgBox.addButton(QMessageBox::Yes);
-    QPushButton *cancel = msgBox.addButton(QMessageBox::Cancel);
+    msgBox.setWindowTitle("");
+    msgBox.setText("Delete objects hosted inside " + obj->Name + "?");
+    msgBox.addButton(QMessageBox::Yes);
+    QPushButton * cancel = msgBox.addButton(QMessageBox::Cancel);
     msgBox.setDefaultButton(cancel);
 
     msgBox.exec();
+    if (msgBox.clickedButton() == cancel) return;
 
-    if (msgBox.clickedButton() == remove)
-    {
-        for (int i = obj->HostedObjects.size()-1; i > -1; i--)
-            obj->HostedObjects[i]->recursiveSuicide();
-        obj->HostedObjects.clear();
-        const QString name = obj->Name;
-        emit RequestRebuildDetector();
-        UpdateGui(name);
-    }
+    for (int i = obj->HostedObjects.size()-1; i > -1; i--)
+        obj->HostedObjects[i]->recursiveSuicide();
+
+    const QString name = obj->Name;
+    emit RequestRebuildDetector();
+    UpdateGui(name);
 }
 
 void AGeoTreeWidget::menuActionCloneObject(AGeoObject * obj)

@@ -44,7 +44,7 @@ public slots:
   void onRequestShowPrototype(QString ProtoName);
 
 private slots:
-  void onItemSelectionChanged();                    // note: bold is also used now for stack reference volume
+  void onItemSelectionChanged();
   void onProtoItemSelectionChanged();
   void customMenuRequested(const QPoint &pos);      // ==== World tree CONTEXT MENU ====
   void customProtoMenuRequested(const QPoint &pos); // ---- Proto tree CONTEXT MENU ----
@@ -90,7 +90,7 @@ private:
   void populateTreeWidget(QTreeWidgetItem *parent, AGeoObject *Container, bool fDisabled = false);
   void updateExpandState(QTreeWidgetItem * item, bool bPrototypes); //recursive!
   void updateIcon(QTreeWidgetItem *item, AGeoObject *obj);
-  void formStack(QList<QTreeWidgetItem *> selected);
+  void menuActionFormStack(QList<QTreeWidgetItem *> selected);
   void markAsStackRefVolume(AGeoObject * obj);
   void createPrototypeTreeWidget();
   void updatePrototypeTreeGui();
@@ -102,9 +102,9 @@ private:
   void ShowObjectOnly(AGeoObject * obj);
   void ShowAllInstances(AGeoObject * obj);
   void menuActionEnableDisable(AGeoObject * obj);
-  void menuActionRemove();
+  void menuActionRemoveKeepContent();
   void menuActionRemoveHostedObjects(AGeoObject * obj);
-  void menuActionRemoveRecursively(AGeoObject * obj);
+  void menuActionRemoveWithContent(QTreeWidget * treeWidget);
   void menuActionAddNewComposite(AGeoObject * ContObj);
   void menuActionAddNewArray(AGeoObject * ContObj);
   void menuActionAddNewGrid(AGeoObject * ContObj);
@@ -125,16 +125,16 @@ private:
   QString makeScriptString_DisabledObject(AGeoObject *obj) const;
 
 signals:
-  void ObjectSelectionChanged(QString);      // should be fired with empty string if selection does not contain a single item
-  void ProtoObjectSelectionChanged(QString); // should be fired with empty string if selection does not contain a single item
+  void ObjectSelectionChanged(QString);
+  void ProtoObjectSelectionChanged(QString);
   void RequestRebuildDetector();
   void RequestHighlightObject(QString name);
   void RequestFocusObject(QString name);
   void RequestShowObjectRecursive(QString name);
   void RequestShowAllInstances(QString name);
   void RequestNormalDetectorDraw();
-  void RequestListOfParticles(QStringList &definedParticles);
-  void RequestShowMonitor(const AGeoObject* mon);
+  void RequestListOfParticles(QStringList & definedParticles);
+  void RequestShowMonitor(const AGeoObject * mon);
   void RequestShowPrototypeList();
 };
 

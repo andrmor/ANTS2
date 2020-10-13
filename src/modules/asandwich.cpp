@@ -50,6 +50,18 @@ void ASandwich::clearWorld()
     clearMonitorRecords();
 }
 
+bool ASandwich::canBeDeleted(AGeoObject * obj) const
+{
+    if (obj == World) return false;
+    if (obj == Prototypes) return false;
+
+    if (obj->isInUseByComposite()) return false;
+    if (obj->ObjectType->isPrototype() && World->isPrototypeInUseRecursive(obj->Name, nullptr)) return false;
+    if (obj->ObjectType->isSlab() && obj->getSlabModel()->fCenter) return false;
+
+    return true;
+}
+
 void ASandwich::appendSlab(ASlabModel *slab)
 {
     AGeoObject* slabObj = new AGeoObject(slab->name);    

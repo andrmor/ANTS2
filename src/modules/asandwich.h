@@ -28,6 +28,7 @@ public:
   AGeoObject * Prototypes = nullptr;  // hosts prototypes; a prototype is an objects (can be a tree of objects) which can be placed multiple times in the geometry
 
   void clearWorld();
+  bool canBeDeleted(AGeoObject * obj) const;
 
   //slab handling
   void appendSlab(ASlabModel * slab);

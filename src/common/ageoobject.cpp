@@ -990,11 +990,10 @@ bool AGeoObject::suicide(bool SlabsToo)
 
 void AGeoObject::recursiveSuicide()
 {
-  for (int i=HostedObjects.size()-1; i>-1; i--)
-    HostedObjects[i]->recursiveSuicide();
+    for (int i=HostedObjects.size()-1; i>-1; i--)
+        HostedObjects[i]->recursiveSuicide();
 
-  //note that the current paradigm is that an unlocked object cannot have locked objects inside
-  suicide();
+    suicide(true);
 }
 
 void AGeoObject::lockUpTheChain()

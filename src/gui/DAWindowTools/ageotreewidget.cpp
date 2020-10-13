@@ -573,72 +573,50 @@ void AGeoTreeWidget::onItemSelectionChanged()
   //  qDebug() << "---Widget selection cghanged";
   QList<QTreeWidgetItem*> sel = selectedItems();
 
-  if (sel.size() == 0)
+  if      (sel.size() == 0) emit ObjectSelectionChanged("");
+  else if (sel.size() == 1)
   {
-      emit ObjectSelectionChanged("");
-      return;
-  }
-  if (sel.size() == 1)
-  {
-      QString name = sel.first()->text(0);
+      const QString name = sel.first()->text(0);
       emit ObjectSelectionChanged(name);
-      return;
   }
-
-  //multiple selected
-  for (int i = 1; i < sel.size(); i++)
-  {
-      if (sel.at(i)->font(0).bold()) //static objects cannot be mixed with others
-      {
-          //qDebug() << "Cannot select together different slabs or    world and slab(s)";
-          sel.at(i)->setSelected(false);
-          return; // will retrigger anyway
-      }
-  }
-
-  //with multiple selected do not show EditWidget
-  emit ObjectSelectionChanged("");
+  else emit ObjectSelectionChanged(""); //with multiple selected do not show EditWidget
 }
 
 void AGeoTreeWidget::onProtoItemSelectionChanged()
 {
     QList<QTreeWidgetItem*> sel = twPrototypes->selectedItems();
 
-    if (sel.size() == 0)
+    if      (sel.size() == 0) emit ProtoObjectSelectionChanged("");
+    else if (sel.size() == 1)
     {
-        emit ProtoObjectSelectionChanged("");
-        return;
-    }
-    if (sel.size() == 1)
-    {
-        QString name = sel.first()->text(0);
+        const QString name = sel.first()->text(0);
         emit ProtoObjectSelectionChanged(name);
         return;
     }
-
-    //multiple selected
-
-    //allow to select only one prototype object
-    //allow only selection of objects of the same container
-    QTreeWidgetItem * FirstParent = sel.first()->parent();
-    for (int i = 1; i < sel.size(); i++)
+    else
     {
-        if (sel.at(i)->parent() != FirstParent)
+        //allow to select only one prototype object
+        //allow only selection of objects of the same container
+        QTreeWidgetItem * FirstParent = sel.first()->parent();
+        for (int i = 1; i < sel.size(); i++)
         {
-            qDebug() << "Cannot select together items from different containers!";
-            sel.at(i)->setSelected(false);
-            return; // will retrigger anyway
+            if (sel.at(i)->parent() != FirstParent)
+            {
+                qDebug() << "Cannot select together items from different containers!";
+                sel.at(i)->setSelected(false);
+                return; // will retrigger anyway
+            }
+            /*
+            if (sel.at(i)->font(0).bold())
+            {
+                //qDebug() << "Cannot select together different slabs or    world and slab(s)";
+                sel.at(i)->setSelected(false);
+                return; // will retrigger anyway
+            }
+            */
         }
-        /*
-        if (sel.at(i)->font(0).bold())
-        {
-            //qDebug() << "Cannot select together different slabs or    world and slab(s)";
-            sel.at(i)->setSelected(false);
-            return; // will retrigger anyway
-        }
-        */
+        emit ProtoObjectSelectionChanged(""); //with multiple selected do not show EditWidget
     }
-    emit ProtoObjectSelectionChanged(""); //with multiple selected do not show EditWidget
 }
 
 QAction* Action(QMenu& Menu, QString Text)
@@ -764,11 +742,11 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
       stackRefA->setEnabled(obj->isStackMember());
       prototypeA->setEnabled(obj->isPossiblePrototype());
   }
-  else if (!selected.first()->font(0).bold())
+  else
   {
-      // several items selected, and they are not slabs
       addObjMenu->setEnabled(false);
-      removeWithContA->setEnabled(true); //world cannot be in selection with anything else anyway
+      addInstanceMenu->setEnabled(false);
+      removeWithContA->setEnabled(true);
       stackA->setEnabled(true);
       prototypeA->setEnabled(true);
   }
@@ -809,14 +787,14 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
   else if (SelectedAction == newArrayA)      menuActionAddNewArray(obj);
   else if (SelectedAction == newGridA)       menuActionAddNewGrid(obj);
   else if (SelectedAction == newMonitorA)    menuActionAddNewMonitor(obj);
-  else if (SelectedAction == cloneA)         menuActionCloneObject(obj);             // CLONE
-  else if (SelectedAction == stackA)         formStack(selected);                    // Form STACK
+  else if (SelectedAction == cloneA)         menuActionCloneObject(obj);
+  else if (SelectedAction == stackA)         menuActionFormStack(selected);
   else if (SelectedAction == stackRefA)      markAsStackRefVolume(obj);
-  else if (SelectedAction == removeKeepContA)menuActionRemove();                     // REMOVE and keep hosted
-  else if (SelectedAction == removeWithContA)menuActionRemoveRecursively(obj);       // REMOVE with all content
-  else if (SelectedAction == removeHostedA)  menuActionRemoveHostedObjects(obj);     // REMOVE only hosted
+  else if (SelectedAction == removeKeepContA)menuActionRemoveKeepContent();
+  else if (SelectedAction == removeWithContA)menuActionRemoveWithContent(this);
+  else if (SelectedAction == removeHostedA)  menuActionRemoveHostedObjects(obj);
 
-  else if (SelectedAction == prototypeA)     menuActionMakeItPrototype(selected);    // PROTOTYPE
+  else if (SelectedAction == prototypeA)     menuActionMakeItPrototype(selected);
 
   else
   {
@@ -876,10 +854,8 @@ void AGeoTreeWidget::customProtoMenuRequested(const QPoint &pos)
 
     menu.addSeparator();
 
-    QAction* removeThisAndHostedA = Action(menu, "Remove object and content");
-    removeThisAndHostedA->setShortcut(QKeySequence(QKeySequence::Delete));
+    QAction* removeWithContA = Action(menu, "Remove object and content");
     QAction* removeKeepContA = Action(menu, "Remove object, keep its content");
-    removeKeepContA->setShortcut(Qt::Key_Backspace);
     QAction* removeHostedA = Action(menu, "Remove all objects inside");
 
     menu.addSeparator();
@@ -908,7 +884,7 @@ void AGeoTreeWidget::customProtoMenuRequested(const QPoint &pos)
         newMonitorA->setEnabled(bNotGridNotMonitor);
         cloneA->setEnabled(true);
         removeHostedA->setEnabled(bNotGridNotMonitor);
-        removeThisAndHostedA->setEnabled(true);
+        removeWithContA->setEnabled(true);
         removeKeepContA->setEnabled(!bIsPrototype);
         stackRefA->setEnabled(obj->isStackMember());
     }
@@ -916,7 +892,7 @@ void AGeoTreeWidget::customProtoMenuRequested(const QPoint &pos)
     {
         // several items selected, and they are not slabs
         addObjMenu->setEnabled(false);
-        removeThisAndHostedA->setEnabled(true);
+        removeWithContA->setEnabled(true);
         stackA->setEnabled(!bIsPrototype);
     }
 
@@ -951,13 +927,13 @@ void AGeoTreeWidget::customProtoMenuRequested(const QPoint &pos)
     //else if (SelectedAction == newGridA)       menuActionAddNewGrid(obj);
     else if (SelectedAction == newMonitorA)    menuActionAddNewMonitor(obj);
 
-    else if (SelectedAction == cloneA)         menuActionCloneObject(obj);  // CLONE
-    else if (SelectedAction == stackA)         formStack(selected);         // Form STACK
+    else if (SelectedAction == cloneA)         menuActionCloneObject(obj);
+    else if (SelectedAction == stackA)         menuActionFormStack(selected);
     else if (SelectedAction == stackRefA)      markAsStackRefVolume(obj);
 
-    else if (SelectedAction == removeKeepContA)        menuActionRemove();                     // REMOVE
-    else if (SelectedAction == removeThisAndHostedA) menuActionRemoveRecursively(obj); // REMOVE RECURSIVLY
-    else if (SelectedAction == removeHostedA)  menuActionRemoveHostedObjects(obj);     // REMOVE HOSTED
+    else if (SelectedAction == removeKeepContA)menuActionRemoveKeepContent();
+    else if (SelectedAction == removeWithContA)menuActionRemoveWithContent(twPrototypes);
+    else if (SelectedAction == removeHostedA)  menuActionRemoveHostedObjects(obj);
 }
 
 void AGeoTreeWidget::onItemClicked()
@@ -1010,22 +986,12 @@ void AGeoTreeWidget::onPrototypeItemCollapsed(QTreeWidgetItem * item)
 
 void AGeoTreeWidget::onRemoveTriggered()
 {
-    menuActionRemove();
+    menuActionRemoveKeepContent();
 }
 
 void AGeoTreeWidget::onRemoveRecursiveTriggered()
 {
-    QList<QTreeWidgetItem*> selected = selectedItems();
-    if (selected.isEmpty()) return;
-
-    if (selected.size() > 1)
-    {
-        message("This action can be used when only ONE volume is selected", this);
-        return;
-    }
-
-    AGeoObject * obj = World->findObjectByName(selected.first()->text(0));
-    menuActionRemoveRecursively(obj);
+    menuActionRemoveWithContent(this);
 }
 
 void AGeoTreeWidget::onRequestShowPrototype(QString ProtoName)
@@ -1040,18 +1006,17 @@ void AGeoTreeWidget::onRequestShowPrototype(QString ProtoName)
     }
 }
 
-void AGeoTreeWidget::menuActionRemove()
+void AGeoTreeWidget::menuActionRemoveKeepContent()
 {
   QList<QTreeWidgetItem*> selected = selectedItems();
   if (selected.isEmpty()) return;
 
   QMessageBox msgBox;
   msgBox.setIcon(QMessageBox::Question);
-  msgBox.setWindowTitle("Locked objects are NOT removed!");
-  QString str;// = "\nThis command, executed on a slab or lightguide removes it too!";
-  if (selected.size() == 1)  str = "Remove "+selected.first()->text(0)+"?";
-  else str = "Remove selected objects?";
-  str += "                                             ";
+  msgBox.setWindowTitle("");
+  QString str = ( selected.size() == 1 ? "Remove "+selected.first()->text(0)+"?"
+                                       : "Remove selected objects?" );
+  //str += "                                             ";
   msgBox.setText(str);
   QPushButton *remove = msgBox.addButton(QMessageBox::Yes);
   QPushButton *cancel = msgBox.addButton(QMessageBox::Cancel);
@@ -1059,40 +1024,42 @@ void AGeoTreeWidget::menuActionRemove()
 
   msgBox.exec();
 
+  QString failedDeletes;
   if (msgBox.clickedButton() == remove)
-    {
-      //emit ObjectSelectionChanged("");
+  {
       for (int i=0; i<selected.size(); i++)
-        {
+      {
           QString ObjectName = selected.at(i)->text(0);
           AGeoObject* obj = World->findObjectByName(ObjectName);
           if (obj)
           {
-              if (obj->isInUseByComposite()) continue;
+              if (  obj->isInUseByComposite() ||
+                   (obj->ObjectType->isPrototype() && Sandwich->World->isPrototypeInUseRecursive(obj->Name, nullptr)) )
+              {
+                  failedDeletes += "  " + obj->Name;
+                  continue;
+              }
               obj->suicide(true);
           }
-        }
-      UpdateGui();
+      }
+
+      if (!failedDeletes.isEmpty())
+          message("The following objects are in use and could not be deleted:\n" + failedDeletes);
+
       emit RequestRebuildDetector();
-    }
+  }
 }
 
-void AGeoTreeWidget::menuActionRemoveRecursively(AGeoObject * obj)
+void AGeoTreeWidget::menuActionRemoveWithContent(QTreeWidget * treeWidget)
 {
-    if (!obj) return;
+    QList<QTreeWidgetItem*> selected = treeWidget->selectedItems();
+    if (selected.isEmpty()) return;
 
     QMessageBox msgBox;
     msgBox.setIcon(QMessageBox::Question);
-    msgBox.setWindowTitle("Locked objects are NOT removed!");
-
-    QString str;
-    if (obj->ObjectType->isSlab())
-        str = "Remove all objects hosted inside " + obj->Name + " slab?";
-    else if (obj->ObjectType->isWorld())
-        str = "Remove all non-slab objects from the geometry?";
-    else
-        str = "Remove " + obj->Name + " and all objects hosted inside?";
-
+    msgBox.setWindowTitle("");
+    QString str = ( selected.size() == 1 ? "Remove " + selected.first()->text(0) + "?"
+                                         : "Remove selected objects?" );
     msgBox.setText(str);
     QPushButton *remove = msgBox.addButton(QMessageBox::Yes);
     QPushButton *cancel = msgBox.addButton(QMessageBox::Cancel);
@@ -1100,11 +1067,24 @@ void AGeoTreeWidget::menuActionRemoveRecursively(AGeoObject * obj)
 
     msgBox.exec();
 
+    QString failedDeletes;
     if (msgBox.clickedButton() == remove)
     {
-        obj->recursiveSuicide();
-        emit RequestRebuildDetector();
+        for (QTreeWidgetItem * item : selected)
+        {
+            AGeoObject * obj = World->findObjectByName(item->text(0));
+            if (obj)
+            {
+                if (Sandwich->canBeDeleted(obj)) obj->recursiveSuicide();
+                else failedDeletes += obj->Name + "\n";
+            }
+        }
     }
+
+    emit RequestRebuildDetector();
+
+    if (!failedDeletes.isEmpty())
+        message("The following objects are in use and could not be deleted:\n\n" + failedDeletes, treeWidget);
 }
 
 void AGeoTreeWidget::menuActionRemoveHostedObjects(AGeoObject * obj)
@@ -1415,16 +1395,23 @@ void AGeoTreeWidget::menuActionEnableDisable(AGeoObject * obj)
     UpdateGui(name);
 }
 
-void AGeoTreeWidget::formStack(QList<QTreeWidgetItem*> selected)
+void AGeoTreeWidget::menuActionFormStack(QList<QTreeWidgetItem*> selected)
 {
     if (selected.isEmpty()) return;
+
     QVector<AGeoObject*> objs;
+    AGeoObject * ContObj = nullptr;
     for (QTreeWidgetItem * item : selected)
     {
         AGeoObject * obj  = World->findObjectByName(item->text(0));
         if (!obj)
         {
             message("Something went wrong: object with name " + item->text(0) + " not found!", this);
+            return;
+        }
+        if (obj->ObjectType->isWorld() || obj->ObjectType->isSlab())
+        {
+            message("World or slabs/lightguides cannot be a member of a stack", this);
             return;
         }
         if (obj->ObjectType->isArray())
@@ -1437,11 +1424,23 @@ void AGeoTreeWidget::formStack(QList<QTreeWidgetItem*> selected)
             message("Composite objects (and optical grids) cannot be a member of a stack", this);
             return;
         }
-        if (obj->ObjectType->isHandlingSet() || obj->ObjectType->isLogical() || obj->ObjectType->isSlab())
+        if (obj->ObjectType->isHandlingSet() || obj->ObjectType->isLogical())
         {
-            message("Stacks/groups/slabs cannot be a member of a stack", this);
+            message("Stacks/groups cannot be a member of a stack", this);
             return;
         }
+        if (obj->ObjectType->isPrototype() || obj->ObjectType->isInstance())
+        {
+            message("Prototypes and instances cannot be a member of a stack", this);
+            return;
+        }
+        if (!ContObj) ContObj = obj->Container;
+        if (ContObj != obj->Container)
+        {
+            message("To form a stack all objects have to have the same container", this);
+            return;
+        }
+
         objs << obj;
     }
 

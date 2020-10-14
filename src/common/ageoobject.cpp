@@ -1152,6 +1152,9 @@ bool AGeoObject::isMaterialInUse(int imat) const
     //qDebug() << Name << "--->"<<Material;
 
     if (ObjectType->isMonitor()) return false; //monitors are always made of Container's material and cannot host objects
+    if (ObjectType->isPrototypes()) return false;
+    if (ObjectType->isPrototype()) return false;
+    if (ObjectType->isInstance()) return false;
 
     //if (ObjectType->isGridElement()) qDebug() << "----Grid element!";
     //if (ObjectType->isCompositeContainer()) qDebug() << "----Composite container!";

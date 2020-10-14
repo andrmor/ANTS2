@@ -1396,41 +1396,57 @@ void DetectorAddOnsWindow::updateGeoConstsIndication()
 QString DetectorAddOnsWindow::createScript(QString &script, bool usePython)
 {
     QString CommentStr = "//";
-    int indent = 2;
+    int indent = 0;
     QString VarStr;
     QString indentStr;
 
-    script += "Auto-generated script\n\n";
+    script += "== Auto-generated script ==\n\n";
 
     if (!usePython)
     {
         VarStr = "var ";
-        indentStr = "  ";
+        indentStr = ""; //"  ";
     }
     else
     {
         CommentStr = "#";
         indent = 0;
-        script += "true = True\n\nfalse = False\n\n";     // for now                   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        script += "true = True\n\nfalse = False\n\n";     // for now
     }
     script.insert(0, CommentStr);
 
-    AGeoObject* World = Detector->Sandwich->World;
-    script += CommentStr + " GeoConsts\n";
-    script += AGeoConsts::getConstInstance().exportToScript(World, CommentStr, VarStr);
-
-    script += indentStr + CommentStr + "Set all PM arrays to fully custom regularity, so PM Z-positions will not be affected by slabs\n";
-    script += indentStr + "pms.SetAllArraysFullyCustom()\n";
-    script += indentStr + CommentStr + "Remove all slabs and objects\n";
-    script += indentStr + "geo.RemoveAllExceptWorld()\n";
-
-    script += "\n";
     script += indentStr + CommentStr + "Defined materials:\n";
     for (int i=0; i<Detector->MpCollection->countMaterials(); i++)
         script += indentStr + VarStr + Detector->MpCollection->getMaterialName(i) + "_mat = " + QString::number(i) + "\n";
-    script += "  \n";
-    twGeo->commonSlabToScript(script, indentStr);
+    script += "\n";
 
+    AGeoObject * World = Detector->Sandwich->World;
+    QString geoScr = AGeoConsts::getConstInstance().exportToScript(World, CommentStr, VarStr);
+    if (!geoScr.simplified().isEmpty())
+    {
+        script += indentStr + CommentStr + "Geometry constants:\n";
+        script += geoScr;
+    }
+
+    //script += indentStr + CommentStr + "Set all PM arrays to fully custom regularity, so PM Z-positions will not be affected by slabs\n";
+    //script += indentStr + "pms.SetAllArraysFullyCustom()\n";
+    //script += indentStr + CommentStr + "Remove all slabs and objects\n";
+    script += indentStr + "geo.RemoveAllExceptWorld()\n";
+    script += "\n";
+
+    twGeo->commonSlabToScript(script, indentStr);
+    script += "\n";
+
+    QString protoString;
+    twGeo->objectMembersToScript(Detector->Sandwich->Prototypes, protoString, indent, true, true, usePython);
+    if (!protoString.simplified().isEmpty())
+    {
+        script += indentStr + CommentStr + "Prototypes:";
+        script += protoString;
+        script += "\n\n";
+    }
+
+    script += indentStr + CommentStr + "Geometry:";
     twGeo->objectMembersToScript(World, script, indent, true, true, usePython);
 
     script += "\n\n" + indentStr + "geo.UpdateGeometry(true)";

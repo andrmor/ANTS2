@@ -1684,6 +1684,16 @@ void AGeoTreeWidget::objectToScript(AGeoObject *obj, QString &script, int ident,
         script += "\n" + QString(" ").repeated(ident)+ CommentStr + "=== Optical grid object is not supported! Make a request to the developers ===";
         script += "\n";
     }
+    else if (obj->ObjectType->isInstance())
+    {
+        script += "\n" + QString(" ").repeated(ident)+ makeScriptString_instanceObject(obj, usePython);
+    }
+    else if (obj->ObjectType->isPrototype())
+    {
+        script += "\n" + QString(" ").repeated(ident)+ makeScriptString_prototypeObject(obj);
+        if (bRecursive) objectMembersToScript(obj, script, medIdent, bExpandMaterial, bRecursive, usePython);
+    }
+
     if (obj->isDisabled())
     {
         script += "\n" + QString(" ").repeated(ident)+ makeScriptString_DisabledObject(obj);
@@ -1807,7 +1817,53 @@ QString AGeoTreeWidget::makeScriptString_arrayObject(AGeoObject *obj) const
             sPos1 + ", " +
             sPos2 + ",   " +
             sOri2 + " )";
-    qDebug() <<"strrr" << str;
+    //qDebug() <<"strrr" << str;
+    return str;
+}
+
+QString AGeoTreeWidget::makeScriptString_instanceObject(AGeoObject *obj, bool usePython) const
+{
+    ATypeInstanceObject * ins = dynamic_cast<ATypeInstanceObject*>(obj->ObjectType);
+    if (!ins)
+    {
+        qWarning() << "It is not an instance!";
+        return "Error accessing object as instance!";
+    }
+
+    QVector<QString> posStrs(3);
+    QVector<QString> oriStrs(3);
+    for (int i = 0; i < 3; i++)
+    {
+        posStrs[i] = ( obj->PositionStr[i].isEmpty()    ? QString::number(obj->Position[i])    : obj->PositionStr[i] );
+        oriStrs[i] = ( obj->OrientationStr[i].isEmpty() ? QString::number(obj->Orientation[i]) : obj->OrientationStr[i] );
+    }
+
+    QString str =  QString("geo.Instance( ") +
+            "'" + obj->Name +            "', " +
+            "'" + ins->PrototypeName +   "', " +
+            "'" + obj->Container->Name + "',   " +
+            posStrs[0] + ", " +
+            posStrs[1] + ", " +
+            posStrs[2] + ",   " +
+            oriStrs[0] + ", " +
+            oriStrs[1] + ", " +
+            oriStrs[2] + " )";
+
+    AGeoConsts::getConstInstance().formulaToScript(str, usePython);
+    return str;
+}
+
+QString AGeoTreeWidget::makeScriptString_prototypeObject(AGeoObject * obj) const
+{
+    ATypePrototypeObject * pro = dynamic_cast<ATypePrototypeObject*>(obj->ObjectType);
+    if (!pro)
+    {
+        qWarning() << "It is not a prototype!";
+        return "Error accessing object as prototype!";
+    }
+
+    QString str =  QString("geo.Prototype( ") +
+            "'" + obj->Name +            "' )";
     return str;
 }
 

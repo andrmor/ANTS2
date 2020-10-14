@@ -118,6 +118,8 @@ private:
   QString makeScriptString_slab(AGeoObject *obj, bool bExpandMaterials, int ident) const;
   QString makeScriptString_setCenterSlab(AGeoObject *obj) const;
   QString makeScriptString_arrayObject(AGeoObject *obj) const;
+  QString makeScriptString_instanceObject(AGeoObject *obj, bool usePython) const;
+  QString makeScriptString_prototypeObject(AGeoObject *obj) const;
   QString makeScriptString_monitorBaseObject(const AGeoObject *obj) const;
   QString makeScriptString_monitorConfig(const AGeoObject *obj) const;
   QString makeScriptString_stackObjectStart(AGeoObject *obj) const;

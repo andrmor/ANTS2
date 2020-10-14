@@ -10500,7 +10500,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
              </font>
             </property>
             <property name="text">
-             <string>Pathes</string>
+             <string>Paths</string>
             </property>
            </widget>
           </widget>

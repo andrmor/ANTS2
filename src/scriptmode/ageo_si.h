@@ -24,6 +24,8 @@ public:
   QList<AGeoObject*> GeoObjects;
 
 public slots:
+  void UpdateGeometry(bool CheckOverlaps = true);  // -------------------------
+
   void Box(QString name, double Lx, double Ly, double Lz, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi);
   void Cylinder(QString name, double D, double h, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi);
   void Polygone(QString name, int edges, double Dtop, double Dbot, double h, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi);
@@ -74,7 +76,7 @@ public slots:
 
   void setEnable(QString ObjectOrWildcard, bool flag);
 
-  void UpdateGeometry(bool CheckOverlaps = true);  // -------------------------
+  QString getMaterialName(int materialIndex);
 
   QString printOverrides();
 

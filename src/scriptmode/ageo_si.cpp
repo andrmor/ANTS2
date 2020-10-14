@@ -924,6 +924,14 @@ void AGeo_SI::setEnable(QString ObjectOrWildcard, bool flag)
     }
 }
 
+QString AGeo_SI::getMaterialName(int materialIndex)
+{
+    QStringList DefMats = Detector->Sandwich->GetMaterials();
+    if (materialIndex < 0 || materialIndex >= DefMats.size()) return "Not defined";
+
+    return DefMats[materialIndex];
+}
+
 void AGeo_SI::UpdateGeometry(bool CheckOverlaps)
 {
   //checkup
@@ -1002,6 +1010,7 @@ void AGeo_SI::UpdateGeometry(bool CheckOverlaps)
      }
      GeoObjects[i] = nullptr;
   }
+  clearGeoObjects();
 
   if (!ZeroSlabName.isEmpty())
   {

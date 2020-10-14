@@ -74,7 +74,12 @@ double AMath_SI::floor(double val)
 
 double AMath_SI::log(double val)
 {
-  return std::log(val);
+    return std::log(val);
+}
+
+double AMath_SI::log10(double val)
+{
+    return std::log10(val);
 }
 
 double AMath_SI::max(double val1, double val2)

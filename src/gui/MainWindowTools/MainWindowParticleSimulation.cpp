@@ -739,7 +739,7 @@ void MainWindow::on_pbParticleSourcesSimulate_clicked()
     {
         QString Errors, Warnings, txt;
 
-        if (G4SimSet.SensitiveVolumes.isEmpty())
+        if ( G4SimSet.SensitiveVolumes.isEmpty() && (ui->cbGunDoS1->isChecked() || ui->cbGunDoS2->isChecked()) )
             txt += "Sensitive volumes are not set!\n"
                        "Geant4 simulation will not collect any deposition information\n"
                        "There will be no photon generation in Ants2\n\n";

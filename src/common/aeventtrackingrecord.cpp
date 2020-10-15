@@ -156,6 +156,16 @@ bool AParticleTrackingRecord::isTouchedVolumes(const QStringList & Vols, const Q
     return false;
 }
 
+bool AParticleTrackingRecord::isContainParticle(const QString & PartName) const
+{
+    if (ParticleName == PartName) return true;
+
+    for (AParticleTrackingRecord * sec : Secondaries)
+        if (sec->isContainParticle(PartName)) return true;
+
+    return false;
+}
+
 void AParticleTrackingRecord::logToString(QString & str, int offset, bool bExpandSecondaries) const
 {
     str += QString(' ').repeated(offset) + '>';
@@ -272,6 +282,14 @@ bool AEventTrackingRecord::isTouchedVolumes(const QStringList & Vols, const QStr
 {
     for (AParticleTrackingRecord * pr : PrimaryParticleRecords)
         if (pr->isTouchedVolumes(Vols, VolsStartsWith)) return true;
+
+    return false;
+}
+
+bool AEventTrackingRecord::isContainParticle(const QString & PartName) const
+{
+    for (AParticleTrackingRecord * pr : PrimaryParticleRecords)
+        if (pr->isContainParticle(PartName)) return true;
 
     return false;
 }

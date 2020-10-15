@@ -94,7 +94,7 @@
        </palette>
       </property>
       <property name="currentIndex">
-       <number>4</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="tabText">
        <attribute name="title">
@@ -890,6 +890,23 @@ over all events</string>
                 </item>
                </layout>
               </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_32">
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QCheckBox" name="cbLimitToParticle">
+                  <property name="text">
+                   <string>Must contain particle:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="leLimitToParticle"/>
+                </item>
+               </layout>
+              </item>
              </layout>
             </widget>
            </item>
@@ -1548,7 +1565,7 @@ over all events</string>
            </size>
           </property>
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="tab_3">
            <attribute name="title">

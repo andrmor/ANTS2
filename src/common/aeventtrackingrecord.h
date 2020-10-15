@@ -68,6 +68,7 @@ public:
 
     bool isHaveProcesses(const QStringList & Proc, bool bOnlyPrimary);
     bool isTouchedVolumes(const QStringList & Vols, const QStringList &VolsStartsWith) const;
+    bool isContainParticle(const QString & PartName) const;
 
     void logToString(QString & str, int offset, bool bExpandSecondaries) const;
     void makeTrack(std::vector<TrackHolderClass *> & Tracks, const QStringList & ParticleNames, const ATrackBuildOptions & TrackBuildOptions, bool bWithSecondaries) const;
@@ -106,6 +107,7 @@ public:
 
     bool   isHaveProcesses(const QStringList & Proc, bool bOnlyPrimary) const;
     bool   isTouchedVolumes(const QStringList & Vols, const QStringList & VolsStartsWith) const;
+    bool   isContainParticle(const QString & PartName) const;
 
     void   makeTracks(std::vector<TrackHolderClass *> & Tracks, const QStringList & ParticleNames, const ATrackBuildOptions & TrackBuildOptions, bool bWithSecondaries) const;
 

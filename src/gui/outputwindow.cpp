@@ -2001,6 +2001,14 @@ int OutputWindow::findEventWithFilters(int currentEv, bool bUp)
 
     bool bLimVols = ui->cbLimitToVolumes->isChecked();
 
+    bool bLimParticle = ui->cbLimitToParticle->isChecked();
+
+    QStringList LimProc = ui->leEVlimitToProc->text().split(rx, QString::SkipEmptyParts);
+    QStringList ExclProc = ui->leEVexcludeProc->text().split(rx, QString::SkipEmptyParts);
+    QStringList LimVols = ui->leLimitToVolumes->text().split(rx, QString::SkipEmptyParts);
+
+    QString MustContainParticle = ui->leLimitToParticle->text();
+
     if (currentEv > (int)TH.size()) currentEv = (int)TH.size();
 
     bUp ? currentEv++ : currentEv--;
@@ -2011,17 +2019,14 @@ int OutputWindow::findEventWithFilters(int currentEv, bool bUp)
         bool bGood = true;
         if (bLimProc)
         {
-            QStringList LimProc = ui->leEVlimitToProc->text().split(rx, QString::SkipEmptyParts);
             bGood = er->isHaveProcesses(LimProc, bLimProc_prim);
         }
         if (bGood && bExclProc)
         {
-            QStringList ExclProc = ui->leEVexcludeProc->text().split(rx, QString::SkipEmptyParts);
             bGood = !er->isHaveProcesses(ExclProc, bExclProc_prim);
         }
         if (bGood && bLimVols)
         {
-            QStringList LimVols = ui->leLimitToVolumes->text().split(rx, QString::SkipEmptyParts);
             QStringList LimVolStartWith;
             for (int i=LimVols.size()-1; i >= 0; i--)
             {
@@ -2033,6 +2038,10 @@ int OutputWindow::findEventWithFilters(int currentEv, bool bUp)
                 }
             }
             bGood = er->isTouchedVolumes(LimVols, LimVolStartWith);
+        }
+        if (bGood && bLimParticle)
+        {
+            bGood = er->isContainParticle(MustContainParticle);
         }
 
         if (bGood) return currentEv;

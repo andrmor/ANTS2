@@ -1835,6 +1835,8 @@ void OutputWindow::fillEvTabViewRecord(QTreeWidgetItem * item, const AParticleTr
     case 0: break;
     case 1: timeUnits *= 0.001; break;
     case 2: timeUnits *= 1.0e-6; break;
+    case 3: timeUnits *= 1.0e-9; break;
+    case 4: timeUnits *= 1.666666666666666e-11; break;
     }
     bool bVolume = ui->cbEVvol->isChecked();
     bool bKin = ui->cbEVkin->isChecked();

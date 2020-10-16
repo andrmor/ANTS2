@@ -1204,6 +1204,16 @@ over all events</string>
                      <string>ms</string>
                     </property>
                    </item>
+                   <item>
+                    <property name="text">
+                     <string>s</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>min</string>
+                    </property>
+                   </item>
                   </widget>
                  </item>
                 </layout>

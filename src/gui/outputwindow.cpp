@@ -2001,13 +2001,15 @@ int OutputWindow::findEventWithFilters(int currentEv, bool bUp)
 
     bool bLimVols = ui->cbLimitToVolumes->isChecked();
 
-    bool bLimParticle = ui->cbLimitToParticle->isChecked();
+    bool bLimParticles = ui->cbLimitToParticles->isChecked();
+    bool bExcludeParticles = ui->cbExcludeParticles->isChecked();
 
     QStringList LimProc = ui->leEVlimitToProc->text().split(rx, QString::SkipEmptyParts);
     QStringList ExclProc = ui->leEVexcludeProc->text().split(rx, QString::SkipEmptyParts);
     QStringList LimVols = ui->leLimitToVolumes->text().split(rx, QString::SkipEmptyParts);
 
-    QString MustContainParticle = ui->leLimitToParticle->text();
+    QStringList MustContainParticles = ui->leLimitToParticles->text().split(rx, QString::SkipEmptyParts);
+    QStringList ExcludeParticles = ui->leExcludeParticles->text().split(rx, QString::SkipEmptyParts);
 
     if (currentEv > (int)TH.size()) currentEv = (int)TH.size();
 
@@ -2017,14 +2019,8 @@ int OutputWindow::findEventWithFilters(int currentEv, bool bUp)
         const AEventTrackingRecord * er = TH.at(currentEv);
 
         bool bGood = true;
-        if (bLimProc)
-        {
-            bGood = er->isHaveProcesses(LimProc, bLimProc_prim);
-        }
-        if (bGood && bExclProc)
-        {
-            bGood = !er->isHaveProcesses(ExclProc, bExclProc_prim);
-        }
+        if (bLimProc)           bGood = er->isHaveProcesses(LimProc, bLimProc_prim);
+        if (bGood && bExclProc) bGood = !er->isHaveProcesses(ExclProc, bExclProc_prim);
         if (bGood && bLimVols)
         {
             QStringList LimVolStartWith;
@@ -2039,10 +2035,8 @@ int OutputWindow::findEventWithFilters(int currentEv, bool bUp)
             }
             bGood = er->isTouchedVolumes(LimVols, LimVolStartWith);
         }
-        if (bGood && bLimParticle)
-        {
-            bGood = er->isContainParticle(MustContainParticle);
-        }
+        if (bGood && bLimParticles)     bGood = er->isContainParticle(MustContainParticles);
+        if (bGood && bExcludeParticles) bGood = !er->isContainParticle(ExcludeParticles);
 
         if (bGood) return currentEv;
 

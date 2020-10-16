@@ -869,7 +869,7 @@ over all events</string>
               <item>
                <widget class="QLabel" name="label_32">
                 <property name="text">
-                 <string>Limit events to those where particles entered these volumes (use '*' at the end to indicate 'start from'):</string>
+                 <string>Limit events to those where particles entered these volumes (use '*' at the end to indicate 'starts from'):</string>
                 </property>
                </widget>
               </item>
@@ -891,19 +891,44 @@ over all events</string>
                </layout>
               </item>
               <item>
+               <widget class="QLabel" name="label_33">
+                <property name="text">
+                 <string>Event should contain (or should not contain) these particles (primary and secondary, can use '*' at the end):</string>
+                </property>
+               </widget>
+              </item>
+              <item>
                <layout class="QHBoxLayout" name="horizontalLayout_32">
                 <property name="topMargin">
                  <number>0</number>
                 </property>
                 <item>
-                 <widget class="QCheckBox" name="cbLimitToParticle">
+                 <widget class="QCheckBox" name="cbLimitToParticles">
                   <property name="text">
-                   <string>Must contain particle:</string>
+                   <string>Limit to:</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="leLimitToParticle"/>
+                 <widget class="QLineEdit" name="leLimitToParticles">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="cbExcludeParticles">
+                  <property name="text">
+                   <string>Exclude:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="leExcludeParticles">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
                 </item>
                </layout>
               </item>
@@ -3070,11 +3095,11 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <hints>
     <hint type="sourcelabel">
      <x>360</x>
-     <y>360</y>
+     <y>391</y>
     </hint>
     <hint type="destinationlabel">
      <x>525</x>
-     <y>362</y>
+     <y>393</y>
     </hint>
    </hints>
   </connection>
@@ -3086,11 +3111,11 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <hints>
     <hint type="sourcelabel">
      <x>360</x>
-     <y>388</y>
+     <y>419</y>
     </hint>
     <hint type="destinationlabel">
      <x>525</x>
-     <y>392</y>
+     <y>423</y>
     </hint>
    </hints>
   </connection>
@@ -3102,11 +3127,11 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <hints>
     <hint type="sourcelabel">
      <x>360</x>
-     <y>416</y>
+     <y>447</y>
     </hint>
     <hint type="destinationlabel">
      <x>525</x>
-     <y>422</y>
+     <y>453</y>
     </hint>
    </hints>
   </connection>
@@ -3149,12 +3174,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>35</x>
-     <y>254</y>
+     <x>40</x>
+     <y>248</y>
     </hint>
     <hint type="destinationlabel">
-     <x>49</x>
-     <y>254</y>
+     <x>58</x>
+     <y>248</y>
     </hint>
    </hints>
   </connection>
@@ -3165,12 +3190,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>35</x>
-     <y>255</y>
+     <x>40</x>
+     <y>250</y>
     </hint>
     <hint type="destinationlabel">
-     <x>49</x>
-     <y>255</y>
+     <x>58</x>
+     <y>250</y>
     </hint>
    </hints>
   </connection>
@@ -3181,12 +3206,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>35</x>
-     <y>256</y>
+     <x>40</x>
+     <y>252</y>
     </hint>
     <hint type="destinationlabel">
-     <x>49</x>
-     <y>256</y>
+     <x>58</x>
+     <y>252</y>
     </hint>
    </hints>
   </connection>
@@ -3197,12 +3222,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>87</x>
-     <y>254</y>
+     <x>83</x>
+     <y>248</y>
     </hint>
     <hint type="destinationlabel">
      <x>101</x>
-     <y>254</y>
+     <y>248</y>
     </hint>
    </hints>
   </connection>
@@ -3213,12 +3238,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>87</x>
-     <y>255</y>
+     <x>83</x>
+     <y>250</y>
     </hint>
     <hint type="destinationlabel">
      <x>101</x>
-     <y>255</y>
+     <y>250</y>
     </hint>
    </hints>
   </connection>
@@ -3229,12 +3254,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>87</x>
-     <y>256</y>
+     <x>83</x>
+     <y>252</y>
     </hint>
     <hint type="destinationlabel">
      <x>101</x>
-     <y>256</y>
+     <y>252</y>
     </hint>
    </hints>
   </connection>
@@ -3249,8 +3274,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>541</y>
     </hint>
     <hint type="destinationlabel">
-     <x>51</x>
-     <y>239</y>
+     <x>60</x>
+     <y>291</y>
     </hint>
    </hints>
   </connection>
@@ -3265,8 +3290,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>556</y>
     </hint>
     <hint type="destinationlabel">
-     <x>117</x>
-     <y>239</y>
+     <x>126</x>
+     <y>291</y>
     </hint>
    </hints>
   </connection>
@@ -3281,8 +3306,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>495</y>
     </hint>
     <hint type="destinationlabel">
-     <x>69</x>
-     <y>239</y>
+     <x>78</x>
+     <y>291</y>
     </hint>
    </hints>
   </connection>
@@ -3297,8 +3322,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>560</y>
     </hint>
     <hint type="destinationlabel">
-     <x>98</x>
-     <y>239</y>
+     <x>107</x>
+     <y>291</y>
     </hint>
    </hints>
   </connection>
@@ -3313,8 +3338,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>591</y>
     </hint>
     <hint type="destinationlabel">
-     <x>74</x>
-     <y>239</y>
+     <x>83</x>
+     <y>291</y>
     </hint>
    </hints>
   </connection>
@@ -3329,8 +3354,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>545</y>
     </hint>
     <hint type="destinationlabel">
-     <x>116</x>
-     <y>239</y>
+     <x>125</x>
+     <y>291</y>
     </hint>
    </hints>
   </connection>
@@ -3345,8 +3370,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>590</y>
     </hint>
     <hint type="destinationlabel">
-     <x>84</x>
-     <y>239</y>
+     <x>93</x>
+     <y>291</y>
     </hint>
    </hints>
   </connection>
@@ -3361,8 +3386,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>587</y>
     </hint>
     <hint type="destinationlabel">
-     <x>48</x>
-     <y>239</y>
+     <x>57</x>
+     <y>291</y>
     </hint>
    </hints>
   </connection>
@@ -3377,8 +3402,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>572</y>
     </hint>
     <hint type="destinationlabel">
-     <x>119</x>
-     <y>239</y>
+     <x>128</x>
+     <y>291</y>
     </hint>
    </hints>
   </connection>
@@ -3393,8 +3418,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>525</y>
     </hint>
     <hint type="destinationlabel">
-     <x>107</x>
-     <y>239</y>
+     <x>116</x>
+     <y>291</y>
     </hint>
    </hints>
   </connection>
@@ -3409,8 +3434,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>521</y>
     </hint>
     <hint type="destinationlabel">
-     <x>97</x>
-     <y>239</y>
+     <x>106</x>
+     <y>291</y>
     </hint>
    </hints>
   </connection>
@@ -3425,8 +3450,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>628</y>
     </hint>
     <hint type="destinationlabel">
-     <x>71</x>
-     <y>269</y>
+     <x>80</x>
+     <y>321</y>
     </hint>
    </hints>
   </connection>
@@ -3441,8 +3466,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>642</y>
     </hint>
     <hint type="destinationlabel">
-     <x>47</x>
-     <y>269</y>
+     <x>56</x>
+     <y>321</y>
     </hint>
    </hints>
   </connection>
@@ -3457,8 +3482,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>639</y>
     </hint>
     <hint type="destinationlabel">
-     <x>56</x>
-     <y>269</y>
+     <x>65</x>
+     <y>321</y>
     </hint>
    </hints>
   </connection>
@@ -3553,8 +3578,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>525</y>
     </hint>
     <hint type="destinationlabel">
-     <x>145</x>
-     <y>239</y>
+     <x>154</x>
+     <y>291</y>
     </hint>
    </hints>
   </connection>
@@ -3581,12 +3606,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>184</x>
-     <y>310</y>
+     <x>276</x>
+     <y>339</y>
     </hint>
     <hint type="destinationlabel">
-     <x>335</x>
-     <y>310</y>
+     <x>419</x>
+     <y>342</y>
     </hint>
    </hints>
   </connection>
@@ -3597,12 +3622,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>157</x>
-     <y>312</y>
+     <x>271</x>
+     <y>339</y>
     </hint>
     <hint type="destinationlabel">
-     <x>497</x>
-     <y>313</y>
+     <x>565</x>
+     <y>342</y>
     </hint>
    </hints>
   </connection>
@@ -3619,6 +3644,38 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
     <hint type="destinationlabel">
      <x>151</x>
      <y>185</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbLimitToParticles</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>leLimitToParticles</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>75</x>
+     <y>239</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>184</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbExcludeParticles</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>leExcludeParticles</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>402</x>
+     <y>241</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>509</x>
+     <y>243</y>
     </hint>
    </hints>
   </connection>

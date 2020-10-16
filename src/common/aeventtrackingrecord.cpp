@@ -156,12 +156,21 @@ bool AParticleTrackingRecord::isTouchedVolumes(const QStringList & Vols, const Q
     return false;
 }
 
-bool AParticleTrackingRecord::isContainParticle(const QString & PartName) const
+bool AParticleTrackingRecord::isContainParticle(const QStringList & PartNames) const
 {
-    if (ParticleName == PartName) return true;
+    for (const QString & name : PartNames)
+    {
+        if (name.endsWith('*'))
+        {
+            QString wild = name;
+            wild.chop(1);
+            if (ParticleName.startsWith(wild)) return true;
+        }
+        else if (ParticleName == name) return true;
+    }
 
     for (AParticleTrackingRecord * sec : Secondaries)
-        if (sec->isContainParticle(PartName)) return true;
+        if (sec->isContainParticle(PartNames)) return true;
 
     return false;
 }
@@ -286,10 +295,10 @@ bool AEventTrackingRecord::isTouchedVolumes(const QStringList & Vols, const QStr
     return false;
 }
 
-bool AEventTrackingRecord::isContainParticle(const QString & PartName) const
+bool AEventTrackingRecord::isContainParticle(const QStringList & PartNames) const
 {
     for (AParticleTrackingRecord * pr : PrimaryParticleRecords)
-        if (pr->isContainParticle(PartName)) return true;
+        if (pr->isContainParticle(PartNames)) return true;
 
     return false;
 }

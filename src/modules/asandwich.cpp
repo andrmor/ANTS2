@@ -756,9 +756,8 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
                     }
                 }
             }
-        return;
     }
-    if (obj->ObjectType->isArray())
+    else if (obj->ObjectType->isArray())
     {
         ATypeArrayObject * array = static_cast<ATypeArrayObject*>(obj->ObjectType);
 
@@ -780,6 +779,25 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
                     iCounter++;
                 }
         }
+    }
+    else if (obj->ObjectType->isStack())
+    {
+        const ATypeStackContainerObject * stack = static_cast<const ATypeStackContainerObject*>(obj->ObjectType);
+        const QString & RefObjName = stack->ReferenceVolume;
+        const AGeoObject * RefObj = nullptr;
+        for (const AGeoObject * el : obj->HostedObjects)
+            if (el->Name == RefObjName)
+            {
+                RefObj = el;
+                break;
+            }
+
+        if (RefObj)
+        {
+            for (AGeoObject * el : obj->HostedObjects)
+                positionStackObject(el, RefObj, vol, GeoManager, MaterialCollection, PMsAndDumPMs, forcedNodeNumber);
+        }
+        else qWarning() << "Error: Reference object not found for stack" << obj->Name;
     }
     else
     {
@@ -815,7 +833,7 @@ void ASandwich::positionArrayElement(int ix, int iy, int iz, AGeoObject* el, AGe
 {
     ATypeArrayObject* array = static_cast<ATypeArrayObject*>(arrayObj->ObjectType);
 
-    //remembering original values
+    //storing original values
     double tmpX = el->Position[0];
     double tmpY = el->Position[1];
     double tmpZ = el->Position[2];
@@ -835,6 +853,37 @@ void ASandwich::positionArrayElement(int ix, int iy, int iz, AGeoObject* el, AGe
     el->Position[0] = tmpX;
     el->Position[1] = tmpY;
     el->Position[2] = tmpZ;
+}
+
+void ASandwich::positionStackObject(AGeoObject *obj, const AGeoObject * RefObj, TGeoVolume *parent, TGeoManager *GeoManager, AMaterialParticleCollection *MaterialCollection, QVector<APMandDummy> *PMsAndDumPMs, int forcedNodeNumber)
+{
+    //storing original position/orientation
+    double posrot[6];
+    for (int i=0; i<3; i++)
+    {
+        posrot[i]   = obj->Position[i];
+        posrot[i+3] = obj->Orientation[i];
+    }
+
+    //the origin of rotation is the center of the reference object
+    TVector3 v(obj->Position[0] - RefObj->Position[0],
+               obj->Position[1] - RefObj->Position[1],
+               obj->Position[2] - RefObj->Position[2]); // vector from the origin to the center of this object (first two should be 0)
+    rotate(v, obj->Container->Orientation[0], obj->Container->Orientation[1], obj->Container->Orientation[2]);
+    for (int i = 0; i < 3; i++)
+    {
+        obj->Position[i]     = RefObj->Position[i] + v[i] + obj->Container->Position[i];
+        obj->Orientation[i] += obj->Container->Orientation[i];
+    }
+
+    addTGeoVolumeRecursively(obj, parent, GeoManager, MaterialCollection, PMsAndDumPMs, forcedNodeNumber);
+
+    //recovering original positions
+    for (int i=0; i<3; i++)
+    {
+        obj->Position[i]    = posrot[i];
+        obj->Orientation[i] = posrot[i+3];
+    }
 }
 
 void ASandwich::clearModel()

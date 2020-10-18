@@ -125,8 +125,11 @@ private:
   void importOldGrid(QJsonObject &json);
   void positionArrayElement(int ix, int iy, int iz,
                             AGeoObject *el, AGeoObject *arrayObj, TGeoVolume *parent,
-                            TGeoManager *GeoManager, AMaterialParticleCollection *MaterialCollection, QVector<APMandDummy> *PMsAndDumPMs,
-                            int arrayIndex = 0);
+                            TGeoManager *GeoManager, AMaterialParticleCollection *MaterialCollection,
+                            QVector<APMandDummy> *PMsAndDumPMs,int arrayIndex);
+  void positionStackObject(AGeoObject * obj, const AGeoObject * RefObj, TGeoVolume * parent,
+                           TGeoManager * GeoManager, AMaterialParticleCollection * MaterialCollection,
+                           QVector<APMandDummy> * PMsAndDumPMs, int forcedNodeNumber);
 };
 
 #endif // ASANDWICH_H

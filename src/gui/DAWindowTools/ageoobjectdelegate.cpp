@@ -195,7 +195,7 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
     const QString oldName = obj->Name;
     const QString newName = leName->text();
 
-    if (obj->ObjectType->isHandlingSet())
+    if (obj->ObjectType->isHandlingSet() && !obj->ObjectType->isStack())
     {
         //set container object does not have updateable properties except name
         obj->Name = newName;
@@ -488,7 +488,7 @@ void AGeoObjectDelegate::updateControlUI()
     {
         lMat->setVisible(false);
         cobMat->setVisible(false);
-        PosOrient->setVisible(false);
+        PosOrient->setVisible(CurrentObject->ObjectType->isStack());
     }
 
     if (CurrentObject->Container && CurrentObject->Container->ObjectType->isStack())
@@ -595,8 +595,7 @@ void AGeoObjectDelegate::Update(const AGeoObject *obj)
     CurrentObject = obj;
     leName->setText(obj->Name);
 
-    delete ShapeCopy;
-    ShapeCopy = obj->Shape->clone();
+    delete ShapeCopy; ShapeCopy = obj->Shape->clone();
 
     //qDebug() << "--genstring:original/copy->"<<obj->Shape->getGenerationString() << ShapeCopy->getGenerationString();
 
@@ -2674,25 +2673,33 @@ void AGeoSetDelegate::Update(const AGeoObject *obj)
         pbChangeAtt->setVisible(false);
         pbScriptLine->setVisible(false);
     }
-    else
+    else if (obj->ObjectType->isStack())
     {
-        DelegateTypeName = ( obj->ObjectType->isStack() ? "Stack" : "Group" );
+        DelegateTypeName = "Stack";
 
-        if (obj->ObjectType->isGroup())
-        {
-            QVBoxLayout * lay = new QVBoxLayout();
-            lay->setAlignment(Qt::AlignHCenter);
-            lay->addWidget(new QLabel(" "));
-            lay->addWidget(new QLabel("Deprecated"));
-            lay->addWidget(new QLabel("Group does nothing!"));
-            lay->addWidget(new QLabel(" "));
-            addLocalLayout(lay);
-
-            pbShow->setVisible(false);
-            pbChangeAtt->setVisible(false);
-            pbScriptLine->setVisible(false);
-        }
+        QVBoxLayout * lay = new QVBoxLayout();
+        lay->setAlignment(Qt::AlignHCenter);
+        lay->addWidget(new QLabel(" "));
+        lay->addWidget(new QLabel("Rotation in respect to the center of the stack reference object"));
+        addLocalLayout(lay);
     }
+    else if (obj->ObjectType->isGroup())
+    {
+        DelegateTypeName = "Group";
+
+        QVBoxLayout * lay = new QVBoxLayout();
+        lay->setAlignment(Qt::AlignHCenter);
+        lay->addWidget(new QLabel(" "));
+        lay->addWidget(new QLabel("Deprecated"));
+        lay->addWidget(new QLabel("Group does nothing!"));
+        lay->addWidget(new QLabel(" "));
+        addLocalLayout(lay);
+
+        pbShow->setVisible(false);
+        pbChangeAtt->setVisible(false);
+        pbScriptLine->setVisible(false);
+    }
+    else qWarning() << "Unexpected object type in AGeoSetDelegate::Update()";
 
     AGeoObjectDelegate::Update(obj);
 }

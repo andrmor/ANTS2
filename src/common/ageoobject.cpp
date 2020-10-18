@@ -244,7 +244,7 @@ void AGeoObject::writeToJson(QJsonObject &json)
       }
   }
 
-  if ( ObjectType->isHandlingStandard() || ObjectType->isArray() )
+  if ( ObjectType->isHandlingStandard() || ObjectType->isArray() || ObjectType->isStack())
   {
       json["X"] = Position[0];
       json["Y"] = Position[1];

@@ -1,7 +1,7 @@
 #include "ageoslabdelegate.h"
 #include "ageoobject.h"
 #include "ageoshape.h"
-#include "atypegeoobject.h"
+#include "ageotype.h"
 #include "aslab.h"
 #include "amessage.h"
 #include "aonelinetextedit.h"

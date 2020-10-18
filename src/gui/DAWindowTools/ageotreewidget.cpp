@@ -6,7 +6,7 @@
 #include "ageoslabdelegate.h"
 #include "ageoobject.h"
 #include "ageoshape.h"
-#include "atypegeoobject.h"
+#include "ageotype.h"
 #include "ashapehelpdialog.h"
 #include "arootlineconfigurator.h"
 #include "aslablistwidget.h"
@@ -716,7 +716,7 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
       objName = selected.first()->text(0);
       obj = World->findObjectByName(objName);
       if (!obj) return;
-      const ATypeGeoObject & ObjectType = *obj->ObjectType;
+      const AGeoType & ObjectType = *obj->ObjectType;
 
       bool fNotGridNotMonitor = !ObjectType.isGrid() && !ObjectType.isMonitor();
 
@@ -871,7 +871,7 @@ void AGeoTreeWidget::customProtoMenuRequested(const QPoint &pos)
     QString objName = selected.first()->text(0);
     AGeoObject * obj = Prototypes->findObjectByName(objName);
     if (!obj) return;
-    const ATypeGeoObject & ObjectType = *obj->ObjectType;
+    const AGeoType & ObjectType = *obj->ObjectType;
     const bool bNotGridNotMonitor = !ObjectType.isGrid() && !ObjectType.isMonitor();
     const bool bIsPrototype = ObjectType.isPrototype();
 

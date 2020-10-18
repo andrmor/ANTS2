@@ -16,7 +16,7 @@
 #include "ageotreewidget.h"
 #include "ageoobject.h"
 #include "ageoshape.h"
-#include "atypegeoobject.h"
+#include "ageotype.h"
 #include "amessage.h"
 #include "acommonfunctions.h"
 #include "ageometrytester.h"

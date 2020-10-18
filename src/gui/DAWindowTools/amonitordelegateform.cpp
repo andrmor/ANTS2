@@ -1,7 +1,7 @@
 #include "amonitordelegateform.h"
 #include "ui_amonitordelegateform.h"
 #include "ageoobject.h"
-#include "atypegeoobject.h"
+#include "ageotype.h"
 #include "aonelinetextedit.h"
 #include "ageobasedelegate.h"
 #include "ageoconsts.h"

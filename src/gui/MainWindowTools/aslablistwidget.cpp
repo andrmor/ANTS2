@@ -4,7 +4,7 @@
 #include "asandwich.h"
 #include "arootlineconfigurator.h"
 #include "ageoobject.h"
-#include "atypegeoobject.h"
+#include "ageotype.h"
 
 #include <QDropEvent>
 #include <QDebug>

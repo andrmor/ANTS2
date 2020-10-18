@@ -1,11 +1,11 @@
-#include "atypegeoobject.h"
+#include "ageotype.h"
 #include "aslab.h"
 #include "ajsontools.h"
 #include "ageoconsts.h"
 
 #include <QDebug>
 
-void ATypeGeoObject::writeToJson(QJsonObject & json) const
+void AGeoType::writeToJson(QJsonObject & json) const
 {
     json["Type"] = Type;
 }
@@ -58,7 +58,7 @@ ATypeLightguideObject::ATypeLightguideObject()
 
 void ATypeLightguideObject::writeToJson(QJsonObject &json) const
 {
-    ATypeGeoObject::writeToJson(json);
+    AGeoType::writeToJson(json);
 
     json["UpperLower"] = ( UpperLower == Lower ? "Lower" : "Upper" );
 }
@@ -120,7 +120,7 @@ void ATypeArrayObject::replaceGeoConstName(const QRegExp &nameRegExp, const QStr
 
 void ATypeArrayObject::writeToJson(QJsonObject &json) const
 {
-    ATypeGeoObject::writeToJson(json);
+    AGeoType::writeToJson(json);
 
     json["numX"]  = numX;
     json["numY"]  = numY;
@@ -162,7 +162,7 @@ void ATypeArrayObject::readFromJson(const QJsonObject &json)
 
 void ATypeGridElementObject::writeToJson(QJsonObject &json) const
 {
-    ATypeGeoObject::writeToJson(json);
+    AGeoType::writeToJson(json);
 
     json["size1"] = size1;
     json["size2"] = size2;
@@ -180,7 +180,7 @@ void ATypeGridElementObject::readFromJson(const QJsonObject &json)
 
 void ATypeMonitorObject::writeToJson(QJsonObject &json) const
 {
-    ATypeGeoObject::writeToJson(json);
+    AGeoType::writeToJson(json);
 
     config.writeToJson(json);
 }
@@ -209,7 +209,7 @@ bool ATypeMonitorObject::isParticleInUse(int partId) const
     return (config.ParticleIndex == partId);
 }
 
-bool ATypeGeoObject::isUpperLightguide() const
+bool AGeoType::isUpperLightguide() const
 {
     if ( Type != "Lightguide") return false;
 
@@ -217,7 +217,7 @@ bool ATypeGeoObject::isUpperLightguide() const
     return obj->UpperLower == ATypeLightguideObject::Upper;
 }
 
-bool ATypeGeoObject::isLowerLightguide() const
+bool AGeoType::isLowerLightguide() const
 {
     if ( Type != "Lightguide") return false;
 
@@ -225,7 +225,7 @@ bool ATypeGeoObject::isLowerLightguide() const
     return obj->UpperLower == ATypeLightguideObject::Lower;
 }
 
-ATypeGeoObject *ATypeGeoObject::TypeObjectFactory(const QString & Type)
+AGeoType *AGeoType::TypeObjectFactory(const QString & Type)
 {
     if (Type == "Single")             return new ATypeSingleObject();
     if (Type == "Slab")               return new ATypeSlabObject();
@@ -250,7 +250,7 @@ ATypeGeoObject *ATypeGeoObject::TypeObjectFactory(const QString & Type)
 
 void ATypeWorldObject::writeToJson(QJsonObject & json) const
 {
-    ATypeGeoObject::writeToJson(json);
+    AGeoType::writeToJson(json);
     json["FixedSize"] = bFixedSize;
 }
 
@@ -262,7 +262,7 @@ void ATypeWorldObject::readFromJson(const QJsonObject &json)
 
 void ATypeStackContainerObject::writeToJson(QJsonObject & json) const
 {
-    ATypeGeoObject::writeToJson(json);
+    AGeoType::writeToJson(json);
     json["ReferenceVolume"] = ReferenceVolume;
 }
 
@@ -274,7 +274,7 @@ void ATypeStackContainerObject::readFromJson(const QJsonObject & json)
 
 void ATypeInstanceObject::writeToJson(QJsonObject & json) const
 {
-    ATypeGeoObject::writeToJson(json);
+    AGeoType::writeToJson(json);
     json["PrototypeName"] = PrototypeName;
 }
 

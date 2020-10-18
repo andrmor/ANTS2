@@ -1,6 +1,6 @@
 #include "agridelementdelegate.h"
 #include "ageoobject.h"
-#include "atypegeoobject.h"
+#include "ageotype.h"
 
 #include <QDebug>
 #include <QWidget>

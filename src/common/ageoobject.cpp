@@ -1,6 +1,6 @@
 #include "ageoobject.h"
 #include "ageoshape.h"
-#include "atypegeoobject.h"
+#include "ageotype.h"
 #include "aslab.h"
 #include "ajsontools.h"
 #include "agridelementrecord.h"
@@ -75,7 +75,7 @@ AGeoObject::AGeoObject(const QString & name, const QString & container, int iMat
     Shape = shape;
 }
 
-AGeoObject::AGeoObject(ATypeGeoObject *objType, AGeoShape* shape)
+AGeoObject::AGeoObject(AGeoType *objType, AGeoShape* shape)
 {
     constructorInit();
 
@@ -328,7 +328,7 @@ void AGeoObject::readFromJson(const QJsonObject & json)
     {
         QString tmpType;
         parseJson(jj, "Type", tmpType);
-        ATypeGeoObject * newType = ATypeGeoObject::TypeObjectFactory(tmpType);
+        AGeoType * newType = AGeoType::TypeObjectFactory(tmpType);
         if (newType)
         {
             delete ObjectType;

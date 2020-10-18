@@ -2,7 +2,7 @@
 #include "aslab.h"
 #include "ageoobject.h"
 #include "ageoshape.h"
-#include "atypegeoobject.h"
+#include "ageotype.h"
 #include "amaterialparticlecolection.h"
 #include "ajsontools.h"
 #include "agridelementrecord.h"

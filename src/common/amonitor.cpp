@@ -1,6 +1,6 @@
 #include "amonitor.h"
 #include "ageoobject.h"
-#include "atypegeoobject.h"
+#include "ageotype.h"
 #include "aroothistappenders.h"
 #include "ahistogram.h"
 

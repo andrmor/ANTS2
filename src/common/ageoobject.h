@@ -9,7 +9,7 @@
 #include <QVector>
 
 class QJsonObject;
-class ATypeGeoObject;
+class AGeoType;
 class TGeoShape;
 class AGeoShape;
 class ASlabModel;
@@ -22,7 +22,7 @@ public:
   AGeoObject(const AGeoObject * objToCopy);  //normal object is created
   AGeoObject(const QString & name, const QString & container, int iMat, AGeoShape * shape,
              double x, double y, double z,   double phi, double theta, double psi); // for tmp only, needs positioning in the container and name uniqueness check!
-  AGeoObject(ATypeGeoObject * objType, AGeoShape * shape = nullptr);  // pointers are assigned to the object properties! if no shape, default cube is formed
+  AGeoObject(AGeoType * objType, AGeoShape * shape = nullptr);  // pointers are assigned to the object properties! if no shape, default cube is formed
   ~AGeoObject();
 
   bool readShapeFromString(const QString & GenerationString, bool OnlyCheck = false); // using parameter values taken from gui generation string
@@ -44,7 +44,7 @@ public:
   void writeAllToJarr(QJsonArray & jarr);
   QString readAllFromJarr(AGeoObject * World, const QJsonArray & jarr);  // returns "" if no errors
 
-  ATypeGeoObject * ObjectType = nullptr;  // always created in the constructor!
+  AGeoType * ObjectType = nullptr;  // always created in the constructor!
   AGeoShape * Shape = nullptr;            // allowed to remain nullptr after construction!
 
   QString Name;

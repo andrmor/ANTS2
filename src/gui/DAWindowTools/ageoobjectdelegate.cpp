@@ -1,6 +1,6 @@
 #include "ageoobjectdelegate.h"
 #include "ageoobject.h"
-#include "atypegeoobject.h"
+#include "ageotype.h"
 #include "ageoshape.h"
 #include "ageoconsts.h"
 #include "amessage.h"

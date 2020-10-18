@@ -130,6 +130,10 @@ private:
   void positionStackObject(AGeoObject * obj, const AGeoObject * RefObj, TGeoVolume * parent,
                            TGeoManager * GeoManager, AMaterialParticleCollection * MaterialCollection,
                            QVector<APMandDummy> * PMsAndDumPMs, int forcedNodeNumber);
+  void positionArrayElement_StackObject(int ix, int iy, int iz,
+                            AGeoObject *obj, const AGeoObject *RefObj, AGeoObject *arrayObj, TGeoVolume *parent,
+                            TGeoManager *GeoManager, AMaterialParticleCollection *MaterialCollection,
+                            QVector<APMandDummy> *PMsAndDumPMs, int arrayIndex);
 };
 
 #endif // ASANDWICH_H

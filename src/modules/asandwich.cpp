@@ -766,11 +766,30 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
             int iCounter = array->startIndex;
             if (iCounter < 0) iCounter = 0;
 
+            const AGeoObject * StackRefObj = nullptr;
+            if (el->ObjectType->isStack())
+            {
+                const ATypeStackContainerObject * stack = static_cast<const ATypeStackContainerObject*>(el->ObjectType);
+                const QString & RefObjName = stack->ReferenceVolume;
+                for (const AGeoObject * stObj : el->HostedObjects)
+                    if (stObj->Name == RefObjName)
+                    {
+                        StackRefObj = stObj;
+                        break;
+                    }
+                if (!StackRefObj) qWarning() << "Error: Reference object not found for stack" << el->Name;
+            }
+
             for (int ix = 0; ix < array->numX; ix++)
               for (int iy = 0; iy < array->numY; iy++)
                 for (int iz = 0; iz < array->numZ; iz++)
                 {
-                    if (el->ObjectType->isHandlingSet() || el->ObjectType->isInstance())
+                    if (StackRefObj)
+                    {
+                        for (AGeoObject * StackObj : el->HostedObjects)
+                            positionArrayElement_StackObject(ix, iy, iz, StackObj, StackRefObj, obj, vol, GeoManager, MaterialCollection, PMsAndDumPMs, iCounter);
+                    }
+                    else if (el->ObjectType->isHandlingSet() || el->ObjectType->isInstance())
                     {
                         for (AGeoObject * elHO : el->HostedObjects)
                             positionArrayElement(ix, iy, iz, elHO, obj, vol, GeoManager, MaterialCollection, PMsAndDumPMs, iCounter);
@@ -877,6 +896,37 @@ void ASandwich::positionStackObject(AGeoObject *obj, const AGeoObject * RefObj, 
     }
 
     addTGeoVolumeRecursively(obj, parent, GeoManager, MaterialCollection, PMsAndDumPMs, forcedNodeNumber);
+
+    //recovering original positions
+    for (int i=0; i<3; i++)
+    {
+        obj->Position[i]    = posrot[i];
+        obj->Orientation[i] = posrot[i+3];
+    }
+}
+
+void ASandwich::positionArrayElement_StackObject(int ix, int iy, int iz, AGeoObject *obj, const AGeoObject *RefObj, AGeoObject *arrayObj, TGeoVolume *parent, TGeoManager *GeoManager, AMaterialParticleCollection *MaterialCollection, QVector<APMandDummy> *PMsAndDumPMs, int arrayIndex)
+{
+    //storing original position/orientation
+    double posrot[6];
+    for (int i=0; i<3; i++)
+    {
+        posrot[i]   = obj->Position[i];
+        posrot[i+3] = obj->Orientation[i];
+    }
+
+    //the origin of rotation is the center of the reference object
+    TVector3 v(obj->Position[0] - RefObj->Position[0],
+               obj->Position[1] - RefObj->Position[1],
+               obj->Position[2] - RefObj->Position[2]); // vector from the origin to the center of this object (first two should be 0)
+    rotate(v, obj->Container->Orientation[0], obj->Container->Orientation[1], obj->Container->Orientation[2]);
+    for (int i = 0; i < 3; i++)
+    {
+        obj->Position[i]     = RefObj->Position[i] + v[i] + obj->Container->Position[i];
+        obj->Orientation[i] += obj->Container->Orientation[i];
+    }
+
+    positionArrayElement(ix, iy, iz, obj, arrayObj, parent, GeoManager, MaterialCollection, PMsAndDumPMs, arrayIndex);
 
     //recovering original positions
     for (int i=0; i<3; i++)

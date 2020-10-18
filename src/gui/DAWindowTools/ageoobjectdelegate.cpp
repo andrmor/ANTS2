@@ -2878,6 +2878,8 @@ AGeoInstanceDelegate::AGeoInstanceDelegate(const QStringList &materials, QWidget
 
     pbTransform->setVisible(false);
     pbShapeInfo->setVisible(false);
+
+    pbChangeAtt->setEnabled(false);
 }
 
 bool AGeoInstanceDelegate::updateObject(AGeoObject * obj) const

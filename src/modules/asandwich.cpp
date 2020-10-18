@@ -551,6 +551,7 @@ void ASandwich::expandPrototypeInstances()
             AGeoObject * clone = obj->makeCloneForInstance(instanceObj->Name);
             clone->lockRecursively();
             instanceObj->addObjectLast(clone);
+            clone->fActive = instanceObj->fActive;
         }
         instanceObj->fExpanded = false;
 

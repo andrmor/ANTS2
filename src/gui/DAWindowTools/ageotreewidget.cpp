@@ -277,7 +277,7 @@ void AGeoTreeWidget::populateTreeWidget(QTreeWidgetItem * parent, AGeoObject * C
             item->setFlags(item->flags() & ~Qt::ItemIsDragEnabled);// & ~Qt::ItemIsSelectable);
             QFont f = item->font(0); f.setBold(true); item->setFont(0, f);
         }
-        else if (obj->ObjectType->isInstance())
+        else if (obj->ObjectType->isInstance() && obj->fActive)
         {
             item->setForeground(0, Qt::blue);
             updateIcon(item, obj);

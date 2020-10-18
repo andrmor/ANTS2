@@ -503,11 +503,11 @@ void DetectorAddOnsWindow::ShowAllInstances(QString name)
     const int size = list->GetEntries();
     QSet<QString> set;
 
-    //select those which have the same prototype
+    //select those active ones which have the same prototype
     for (AGeoObject * inst : InstancesNotDiscriminated)
     {
         const ATypeInstanceObject * insType = static_cast<const ATypeInstanceObject*>(inst->ObjectType);
-        if (insType->PrototypeName == name)
+        if (insType->PrototypeName == name && inst->fActive)
             for (AGeoObject * obj : inst->HostedObjects)
             {
                 /*

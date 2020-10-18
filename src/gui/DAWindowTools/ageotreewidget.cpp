@@ -1947,9 +1947,15 @@ QString AGeoTreeWidget::makeScriptString_monitorConfig(const AGeoObject *obj) co
 
 QString AGeoTreeWidget::makeScriptString_stackObjectStart(AGeoObject *obj) const
 {
-    return  QString("geo.Stack(") +
-            "'" + obj->Name + "', " +
-            "'" + obj->Container->Name + "' )";
+    return  QString("geo.Stack( '%1', '%2',   %3, %4, %5,   %6, %7, %8 )")
+            .arg(obj->Name)
+            .arg(obj->Container->Name)
+            .arg(obj->PositionStr[0].isEmpty() ? QString::number(obj->Position[0]) : obj->PositionStr[0])
+            .arg(obj->PositionStr[1].isEmpty() ? QString::number(obj->Position[1]) : obj->PositionStr[1])
+            .arg(obj->PositionStr[2].isEmpty() ? QString::number(obj->Position[2]) : obj->PositionStr[2])
+            .arg(obj->OrientationStr[0].isEmpty() ? QString::number(obj->Orientation[0]) : obj->OrientationStr[0])
+            .arg(obj->OrientationStr[1].isEmpty() ? QString::number(obj->Orientation[1]) : obj->OrientationStr[1])
+            .arg(obj->OrientationStr[2].isEmpty() ? QString::number(obj->Orientation[2]) : obj->OrientationStr[2]);
 }
 
 QString AGeoTreeWidget::makeScriptString_groupObjectStart(AGeoObject *obj) const

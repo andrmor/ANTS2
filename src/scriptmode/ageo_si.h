@@ -50,8 +50,9 @@ public slots:
   void SetCommonSlabMode(int iMode);
   void SetCommonSlabProperties(int shape, double size1, double size2, double angle, int sides);
 
-  void MakeStack(QString name, QString container);
-  void Stack(QString name, QString container);
+  void MakeStack(QString name, QString container);  // deprecated!!!
+  //void Stack(QString name, QString container);
+  void Stack(QString name, QString container, double x, double y, double z, double phi, double theta, double psi);
   void InitializeStack(QString StackName, QString MemberName_StackReference);
   //void RecalculateStack(QString name);
 

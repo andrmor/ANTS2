@@ -629,12 +629,22 @@ void AGeo_SI::SetCommonSlabProperties(int shape, double size1, double size2, dou
 
 void AGeo_SI::MakeStack(QString name, QString container)
 {
-    Stack(name, container);
+    Stack(name, container, 0,0,0,  0,0,0);
 }
 
+/*
 void AGeo_SI::Stack(QString name, QString container)
 {
-    AGeoObject* o = new AGeoObject(name, container, 0, 0, 0,0,0, 0,0,0);
+    AGeoObject * o = new AGeoObject(name, container, 0, 0, 0,0,0, 0,0,0);
+    delete o->ObjectType;
+    o->ObjectType = new ATypeStackContainerObject();
+    GeoObjects.append(o);
+}
+*/
+
+void AGeo_SI::Stack(QString name, QString container, double x, double y, double z, double phi, double theta, double psi)
+{
+    AGeoObject * o = new AGeoObject(name, container, 0, 0, x,y,z, phi,theta,psi);
     delete o->ObjectType;
     o->ObjectType = new ATypeStackContainerObject();
     GeoObjects.append(o);

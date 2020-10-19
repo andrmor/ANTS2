@@ -2055,9 +2055,19 @@ void GraphWindowClass::on_pbAddToBasket_clicked()
 void GraphWindowClass::AddCurrentToBasket(const QString & name)
 {
     if (DrawObjects.isEmpty()) return;
+    updateLogScaleFlags(DrawObjects);
     Basket->add(name.simplified(), DrawObjects);
     ui->actionToggle_Explorer_Basket->setChecked(true);
     UpdateBasketGUI();
+}
+
+void GraphWindowClass::updateLogScaleFlags(QVector<ADrawObject> & drawObjects) const
+{
+    for (ADrawObject & drObj : drawObjects)
+    {
+        drObj.bLogScaleX = RasterWindow->isLogX();
+        drObj.bLogScaleY = RasterWindow->isLogY();
+    }
 }
 
 void GraphWindowClass::AddLegend(double x1, double y1, double x2, double y2, QString title)
@@ -2733,6 +2743,12 @@ void GraphWindowClass::switchToBasket(int index)
     DrawObjects = Basket->getCopy(index);
     RedrawAll();
 
+    if (!DrawObjects.isEmpty())
+    {
+        ui->cbLogX->setChecked(DrawObjects.first().bLogScaleX);
+        ui->cbLogY->setChecked(DrawObjects.first().bLogScaleY);
+    }
+
     ActiveBasketItem = index;
     ClearCopyOfActiveBasketId();
     ClearCopyOfDrawObjects();
@@ -2745,6 +2761,7 @@ void GraphWindowClass::on_pbUpdateInBasket_clicked()
     HighlightUpdateBasketButton(false);
 
     if (ActiveBasketItem < 0 || ActiveBasketItem >= Basket->size()) return;
+    updateLogScaleFlags(DrawObjects);
     Basket->update(ActiveBasketItem, DrawObjects);
 }
 

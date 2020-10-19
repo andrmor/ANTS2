@@ -311,6 +311,7 @@ private:
     void showHintInStatus();
     void setShowCursorPosition(bool flag);
     void fixGraphFrame();
+    void updateLogScaleFlags(QVector<ADrawObject> & drawObjects) const;
 };
 
 #endif // GRAPHWINDOWCLASS_H

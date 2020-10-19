@@ -2347,7 +2347,7 @@ void MaterialInspectorWindow::FillNeutronTable()
     MpCollection->tmpMaterial.updateRuntimeProperties(MpCollection->fLogLogInterpolation, Detector->RandGen); //need to be here? counter-intuitive in indication!
 }
 
-int MaterialInspectorWindow::autoloadMissingCrossSectionData()
+int MaterialInspectorWindow::autoloadMissingCrossSectionData(bool bForceReload)
 {
     AMaterial& tmpMaterial = MpCollection->tmpMaterial;
 
@@ -2376,7 +2376,7 @@ int MaterialInspectorWindow::autoloadMissingCrossSectionData()
         if (bCapture)
         {
             for (int iEl = 0; iEl<termAbs.IsotopeRecords.size(); iEl++)
-                if (termAbs.IsotopeRecords.at(iEl).Energy.isEmpty())
+                if (termAbs.IsotopeRecords.at(iEl).Energy.isEmpty() || bForceReload)
                 {
                     autoLoadCrossSection(&termAbs.IsotopeRecords[iEl], "absorption");
                     newParticlesDefined += autoLoadReaction(termAbs.IsotopeRecords[iEl]);
@@ -2385,7 +2385,7 @@ int MaterialInspectorWindow::autoloadMissingCrossSectionData()
         if (bElastic)
         {
             for (int iEl = 0; iEl<termScat.IsotopeRecords.size(); iEl++)
-                if (termScat.IsotopeRecords.at(iEl).Energy.isEmpty())
+                if (termScat.IsotopeRecords.at(iEl).Energy.isEmpty() || bForceReload)
                     autoLoadCrossSection(&termScat.IsotopeRecords[iEl], "elastic scattering");
         }
     }
@@ -2565,6 +2565,14 @@ void MaterialInspectorWindow::on_cbAllowAbsentCsData_clicked()
 void MaterialInspectorWindow::on_pbAutoLoadMissingNeutronCrossSections_clicked()
 {
     autoloadMissingCrossSectionData();
+
+    FillNeutronTable();
+    setWasModified(true);
+}
+
+void MaterialInspectorWindow::on_pbReloadAllNeutronCSs_clicked()
+{
+    autoloadMissingCrossSectionData(true);
 
     FillNeutronTable();
     setWasModified(true);

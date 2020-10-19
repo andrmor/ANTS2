@@ -1423,6 +1423,7 @@ QString DetectorAddOnsWindow::createScript(QString &script, bool usePython)
     {
         script += indentStr + CommentStr + "Geometry constants:\n";
         script += geoScr;
+        script += "\n";
     }
 
     //script += indentStr + CommentStr + "Set all PM arrays to fully custom regularity, so PM Z-positions will not be affected by slabs\n";

@@ -435,12 +435,9 @@ void DetectorAddOnsWindow::loadDummyPMs(const QString & DFile)
     }
 }
 
-//------------//-----------------//----------------------------//
-
 void DetectorAddOnsWindow::ShowObject(QString name)
 {
-    DetectorAddOnsWindow::HighlightVolume(name);
-    MW->GeometryWindow->SetAsActiveRootWindow();
+    HighlightVolume(name);
     Detector->GeoManager->ClearTracks();
     MW->GeometryWindow->ShowGeometry(true, false, false);
 }
@@ -637,7 +634,7 @@ void DetectorAddOnsWindow::HighlightVolume(const QString & VolName)
     if (!obj) return;
 
     QSet<QString> set;
-    if (obj->ObjectType->isArray() || obj->ObjectType->isHandlingSet())
+    if (obj->ObjectType->isArray() || obj->ObjectType->isInstance() || obj->ObjectType->isHandlingSet())
     {
         QVector<AGeoObject*> vec;
         obj->collectContainingObjects(vec);

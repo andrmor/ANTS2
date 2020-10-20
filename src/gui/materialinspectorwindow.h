@@ -169,7 +169,7 @@ private:
     void updateActionButtons();
     void updateWaveButtons();
 
-    void showProcessIntCoefficient(int particleId, int TermScenario);
+    void showProcessIntCoefficient(int particleId, int iTermScenario);
     TGraph* constructInterpolationGraph(const QVector<double> & X, const QVector<double> & Y) const;
     bool importXCOM(QTextStream &in, int particleId);
 

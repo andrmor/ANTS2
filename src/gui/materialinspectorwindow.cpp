@@ -1609,37 +1609,42 @@ void MaterialInspectorWindow::on_pbShowPairProduction_clicked()
     showProcessIntCoefficient(particleId, 2);
 }
 
-void MaterialInspectorWindow::showProcessIntCoefficient(int particleId, int TermScenario)
+void MaterialInspectorWindow::showProcessIntCoefficient(int particleId, int iTermScenario)
 {
-  AMaterial& tmpMaterial = MpCollection->tmpMaterial;
-  if (TermScenario > tmpMaterial.MatParticle[particleId].Terminators.size()-1)
+  AMaterial & tmpMaterial = MpCollection->tmpMaterial;
+  QVector<NeutralTerminatorStructure> & Terminators = tmpMaterial.MatParticle[particleId].Terminators;
+
+  if (iTermScenario >= Terminators.size())
   {
       message("Not defined in the current configuration!", this);
       return;
   }
+  NeutralTerminatorStructure & Scenario = Terminators[iTermScenario];
 
-  int elements = tmpMaterial.MatParticle[particleId].Terminators[TermScenario].PartialCrossSection.size();
-  if (elements<1) return;
+  if (Scenario.PartialCrossSection.size() < 1) return;
 
-  Color_t color;
-  TString title;
-  switch (TermScenario)
+  int color;
+  QString title;
+  switch (iTermScenario)
   {
-  case 0: color = kGreen; title = "Photoelectric"; break;
-  case 1: color = kBlue; title = "Compton scattering"; break;
-  case 2: color = kMagenta; title = "Pair production"; break;
+  case 0: color = kGreen;   title = "Photoelectric";      break;
+  case 1: color = kBlue;    title = "Compton scattering"; break;
+  case 2: color = kMagenta; title = "Pair production";    break;
   }
-  MW->GraphWindow->SetLog(true, true);
-  QVector<double> &X = tmpMaterial.MatParticle[particleId].Terminators[TermScenario].PartialCrossSectionEnergy;
-  QVector<double> &Y = tmpMaterial.MatParticle[particleId].Terminators[TermScenario].PartialCrossSection;
-  TGraph* gr = MW->GraphWindow->MakeGraph(&X, &Y, color, "Energy, keV", "Interaction coefficient, cm2/g", 2, 1, 1, 0, "", true);
-  gr->SetTitle( title );
-  MW->GraphWindow->Draw(gr, "AP");
 
-  TGraph* graphOver = constructInterpolationGraph(X, Y);
+  TGraph * gr = MW->GraphWindow->ConstructTGraph(Scenario.PartialCrossSectionEnergy, Scenario.PartialCrossSection);
+  MW->GraphWindow->configureGraph(gr, title,
+                                  "Energy, keV", "Interaction coefficient, cm2/g",
+                                  color,  2, 1,
+                                  color,  2, 1);
+  MW->GraphWindow->Draw(gr, "AP", false);
+
+  TGraph * graphOver = constructInterpolationGraph(Scenario.PartialCrossSectionEnergy, Scenario.PartialCrossSection);
   graphOver->SetLineColor(color);
   graphOver->SetLineWidth(1);
-  MW->GraphWindow->Draw(graphOver, "SAME L");
+  MW->GraphWindow->Draw(graphOver, "LSAME");
+
+  MW->GraphWindow->SetLog(true, true);
 }
 
 #include <limits>
@@ -1659,7 +1664,7 @@ void MaterialInspectorWindow::on_pbShowAllForGamma_clicked()
     for (int i = 0; i < mp.Terminators.size(); i++)
     {
         TString opt, title;
-        Color_t color;
+        int color;
         int Lwidth = 1;
         switch (i)
         {
@@ -1780,26 +1785,24 @@ void MaterialInspectorWindow::showTotalInteraction()
     MW->GraphWindow->Draw(graphOver, "L same");
 }
 
-TGraph *MaterialInspectorWindow::constructInterpolationGraph(const QVector<double> &X, const QVector<double> &Y) const
+TGraph * MaterialInspectorWindow::constructInterpolationGraph(const QVector<double> & X, const QVector<double> & Y) const
 {
-  int entries = X.size();
+    const int entries = X.size();
 
-  QVector<double> xx;
-  QVector<double> yy;
-  int LogLogInterpolation = MpCollection->fLogLogInterpolation;
-  for (int i=1; i<entries; i++)
-    for (int j=1; j<50; j++)
-      {
-        double previousOne = X[i-1];
-        double thisOne = X[i];
-        double XX = previousOne + 0.02* j * (thisOne-previousOne);
-        xx << XX;
-        double YY;
-        if (XX < X.last()) YY = GetInterpolatedValue(XX, &X, &Y, LogLogInterpolation);
-        else YY = Y.last();
-        yy << YY;
-      }
-  return MW->GraphWindow->ConstructTGraph(xx, yy);
+    QVector<double> xx, yy;
+    for (int i = 1; i < entries; i++)
+        for (int j = 1; j < 50; j++)
+        {
+            const double & previousOne = X[i-1];
+            const double & thisOne     = X[i];
+            double XX = previousOne + 0.02 * j * (thisOne - previousOne);
+            xx << XX;
+            double YY;
+            if (XX < X.last()) YY = GetInterpolatedValue(XX, &X, &Y, MpCollection->fLogLogInterpolation);
+            else YY = Y.last();
+            yy << YY;
+        }
+    return MW->GraphWindow->ConstructTGraph(xx, yy);
 }
 
 void MaterialInspectorWindow::on_pbXCOMauto_clicked()

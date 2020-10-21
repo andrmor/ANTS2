@@ -1769,6 +1769,9 @@ void MaterialInspectorWindow::showTotalInteraction()
     int entries = MpCollection->tmpMaterial.MatParticle[particleId].InteractionDataX.size();
     if (entries < 1) return;
 
+    //if draw is empty, root will "swallow" the axis titles when converting to log log
+    TGraph * gr = MW->GraphWindow->ConstructTGraph(QVector<double>{1,2,3}, QVector<double>{1,2,3});
+    MW->GraphWindow->Draw(gr, "AP");
     MW->GraphWindow->SetLog(true, true);
 
     const AParticle::ParticleType type = MpCollection->getParticleType(particleId);
@@ -1804,7 +1807,7 @@ void MaterialInspectorWindow::showTotalInteraction()
         return;
     }
 
-    TGraph * gr = MW->GraphWindow->ConstructTGraph(X, Y, Title, Xtitle, Ytitle, kRed, 2, 1, kRed, 0, 1);
+    gr = MW->GraphWindow->ConstructTGraph(X, Y, Title, Xtitle, Ytitle, kRed, 2, 1, kRed, 0, 1);
     MW->GraphWindow->Draw(gr, "AP");
 
     TGraph* graphOver = constructInterpolationGraph(X, Y);

@@ -1045,7 +1045,12 @@ void MaterialInspectorWindow::on_pbLoadPrimSpectrum_clicked()
 void MaterialInspectorWindow::on_pbShowPrimSpectrum_clicked()
 {
     AMaterial & tmpMaterial = MpCollection->tmpMaterial;
-    MW->GraphWindow->MakeGraph(&tmpMaterial.PrimarySpectrum_lambda, &tmpMaterial.PrimarySpectrum, kRed, "Wavelength, nm", "Photon flux, a.u.");
+    TGraph * g = MW->GraphWindow->ConstructTGraph(tmpMaterial.PrimarySpectrum_lambda, tmpMaterial.PrimarySpectrum);
+    MW->GraphWindow->configureGraph(g, "Emission spectrum",
+                                    "Wavelength, nm", "Emission probability, a.u.",
+                                    2, 20, 1,
+                                    2, 1,  1);
+    MW->GraphWindow->Draw(g, "APL");
 }
 
 void MaterialInspectorWindow::on_pbDeletePrimSpectrum_clicked()
@@ -1077,7 +1082,12 @@ void MaterialInspectorWindow::on_pbLoadSecSpectrum_clicked()
 void MaterialInspectorWindow::on_pbShowSecSpectrum_clicked()
 {
     AMaterial & tmpMaterial = MpCollection->tmpMaterial;
-    MW->GraphWindow->MakeGraph(&tmpMaterial.SecondarySpectrum_lambda, &tmpMaterial.SecondarySpectrum, kRed, "Wavelength, nm", "Photon flux, a.u.");
+    TGraph * g = MW->GraphWindow->ConstructTGraph(tmpMaterial.SecondarySpectrum_lambda, tmpMaterial.SecondarySpectrum);
+    MW->GraphWindow->configureGraph(g, "Emission spectrum",
+                                    "Wavelength, nm", "Emission probability, a.u.",
+                                    2, 20, 1,
+                                    2, 1,  1);
+    MW->GraphWindow->Draw(g, "APL");
 }
 
 void MaterialInspectorWindow::on_pbDeleteSecSpectrum_clicked()
@@ -1109,7 +1119,12 @@ void MaterialInspectorWindow::on_pbLoadNlambda_clicked()
 void MaterialInspectorWindow::on_pbShowNlambda_clicked()
 {
     AMaterial & tmpMaterial = MpCollection->tmpMaterial;
-    MW->GraphWindow->MakeGraph(&tmpMaterial.nWave_lambda, &tmpMaterial.nWave, kRed, "Wavelength, nm", "Refractive index");
+    TGraph * g = MW->GraphWindow->ConstructTGraph(tmpMaterial.nWave_lambda, tmpMaterial.nWave);
+    MW->GraphWindow->configureGraph(g, "Refractive index",
+                                    "Wavelength, nm", "Refractive index",
+                                    2, 20, 1,
+                                    2, 1,  1);
+    MW->GraphWindow->Draw(g, "APL");
 }
 
 void MaterialInspectorWindow::on_pbDeleteNlambda_clicked()
@@ -1142,7 +1157,12 @@ void MaterialInspectorWindow::on_pbLoadABSlambda_clicked()
 void MaterialInspectorWindow::on_pbShowABSlambda_clicked()
 {
     AMaterial & tmpMaterial = MpCollection->tmpMaterial;
-    MW->GraphWindow->MakeGraph(&tmpMaterial.absWave_lambda, &tmpMaterial.absWave, kRed, "Wavelength, nm", "Attenuation coefficient, mm-1");
+    TGraph * g = MW->GraphWindow->ConstructTGraph(tmpMaterial.absWave_lambda, tmpMaterial.absWave);
+    MW->GraphWindow->configureGraph(g, "Attenuation coefficient",
+                                    "Wavelength, nm", "Attenuation coefficient, mm^{-1}",
+                                    2, 20, 1,
+                                    2, 1,  1);
+    MW->GraphWindow->Draw(g, "APL");
 }
 
 void MaterialInspectorWindow::on_pbDeleteABSlambda_clicked()
@@ -1159,7 +1179,12 @@ void MaterialInspectorWindow::on_pbDeleteABSlambda_clicked()
 void MaterialInspectorWindow::on_pbShowReemProbLambda_clicked()
 {
     AMaterial & tmpMaterial = MpCollection->tmpMaterial;
-    MW->GraphWindow->MakeGraph(&tmpMaterial.reemisProbWave_lambda, &tmpMaterial.reemisProbWave, kRed, "Wavelength, nm", "Reemission probability");
+    TGraph * g = MW->GraphWindow->ConstructTGraph(tmpMaterial.reemisProbWave_lambda, tmpMaterial.reemisProbWave);
+    MW->GraphWindow->configureGraph(g, "Reemission probability",
+                                    "Wavelength, nm", "Reemission probability",
+                                    2, 20, 1,
+                                    2, 1,  1);
+    MW->GraphWindow->Draw(g, "APL");
 }
 
 void MaterialInspectorWindow::on_pbLoadReemisProbLambda_clicked()
@@ -1593,58 +1618,61 @@ void MaterialInspectorWindow::on_actionUse_log_log_interpolation_triggered()
 
 void MaterialInspectorWindow::on_pbShowPhotoelectric_clicked()
 {
-  int particleId = ui->cobParticle->currentIndex();
-  showProcessIntCoefficient(particleId, 0);
+    showProcessIntCoefficient(0);
 }
 
 void MaterialInspectorWindow::on_pbShowCompton_clicked()
 {
-  int particleId = ui->cobParticle->currentIndex();
-  showProcessIntCoefficient(particleId, 1);
+    showProcessIntCoefficient(1);
 }
 
 void MaterialInspectorWindow::on_pbShowPairProduction_clicked()
 {
-    int particleId = ui->cobParticle->currentIndex();
-    showProcessIntCoefficient(particleId, 2);
+    showProcessIntCoefficient(2);
 }
 
-void MaterialInspectorWindow::showProcessIntCoefficient(int particleId, int iTermScenario)
+void MaterialInspectorWindow::showProcessIntCoefficient(int iTermScenario)
 {
-  AMaterial & tmpMaterial = MpCollection->tmpMaterial;
-  QVector<NeutralTerminatorStructure> & Terminators = tmpMaterial.MatParticle[particleId].Terminators;
+    AMaterial & tmpMaterial = MpCollection->tmpMaterial;
 
-  if (iTermScenario >= Terminators.size())
-  {
-      message("Not defined in the current configuration!", this);
-      return;
-  }
-  NeutralTerminatorStructure & Scenario = Terminators[iTermScenario];
+    const int particleId = ui->cobParticle->currentIndex();
+    if (particleId < 0 || particleId >= tmpMaterial.MatParticle.size()) return;
 
-  if (Scenario.PartialCrossSection.size() < 1) return;
+    QVector<NeutralTerminatorStructure> & Terminators = tmpMaterial.MatParticle[particleId].Terminators;
+    if (iTermScenario >= Terminators.size())
+    {
+        message("Not defined in the current configuration!", this);
+        return;
+    }
+    NeutralTerminatorStructure & Scenario = Terminators[iTermScenario];
 
-  int color;
-  QString title;
-  switch (iTermScenario)
-  {
-  case 0: color = kGreen;   title = "Photoelectric";      break;
-  case 1: color = kBlue;    title = "Compton scattering"; break;
-  case 2: color = kMagenta; title = "Pair production";    break;
-  }
+    if (Scenario.PartialCrossSection.size() < 1) return;
 
-  TGraph * gr = MW->GraphWindow->ConstructTGraph(Scenario.PartialCrossSectionEnergy, Scenario.PartialCrossSection);
-  MW->GraphWindow->configureGraph(gr, title,
-                                  "Energy, keV", "Interaction coefficient, cm2/g",
-                                  color,  2, 1,
-                                  color,  2, 1);
-  MW->GraphWindow->Draw(gr, "AP", false);
+    int color;
+    QString title;
+    switch (iTermScenario)
+    {
+    case 0: color = kGreen;   title = "Photoelectric";      break;
+    case 1: color = kBlue;    title = "Compton scattering"; break;
+    case 2: color = kMagenta; title = "Pair production";    break;
+    }
 
-  TGraph * graphOver = constructInterpolationGraph(Scenario.PartialCrossSectionEnergy, Scenario.PartialCrossSection);
-  graphOver->SetLineColor(color);
-  graphOver->SetLineWidth(1);
-  MW->GraphWindow->Draw(graphOver, "LSAME");
+    //if draw is empty, root will "swallow" the axis titles when converting to log log
+    TGraph * gr = MW->GraphWindow->ConstructTGraph(QVector<double>{1,2,3}, QVector<double>{1,2,3});
+    MW->GraphWindow->Draw(gr, "AP");
+    MW->GraphWindow->SetLog(true, true);
 
-  MW->GraphWindow->SetLog(true, true);
+    gr = MW->GraphWindow->ConstructTGraph(Scenario.PartialCrossSectionEnergy, Scenario.PartialCrossSection);
+    MW->GraphWindow->configureGraph(gr, title,
+                                    "Energy, keV", "Interaction coefficient, cm^{2}/g",
+                                    color,  2, 1,
+                                    color,  2, 1);
+    MW->GraphWindow->Draw(gr, "AP");
+
+    gr = constructInterpolationGraph(Scenario.PartialCrossSectionEnergy, Scenario.PartialCrossSection);
+    gr->SetLineColor(color);
+    gr->SetLineWidth(1);
+    MW->GraphWindow->Draw(gr, "LSAME");
 }
 
 #include <limits>
@@ -1714,8 +1742,8 @@ void MaterialInspectorWindow::on_pbShowAllForGamma_clicked()
         gr->SetTitle(title);
         gr->SetLineColor(color);
         gr->SetLineWidth(Lwidth);
-        gr->GetXaxis()->SetTitle("Energy, keV"); //axis titles can be drawn only after graph was shown...
-        gr->GetYaxis()->SetTitle("Mass interaction coefficient, cm2/g");
+        gr->GetXaxis()->SetTitle("Energy, keV");
+        gr->GetYaxis()->SetTitle("Mass interaction coefficient, cm^{2}/g");
         gr->GetXaxis()->SetTitleOffset(1.1);
         gr->GetYaxis()->SetTitleOffset(1.3);
         if (i == 0) mainGr = gr;

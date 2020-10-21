@@ -54,7 +54,7 @@ void ARootGraphRecord::SetTitles(const QString &titleX, const QString &titleY, c
 
     QMutexLocker locker(&Mutex);
 
-    if (Type == "TGraph" && !graphTitle.isEmpty())
+    if (!graphTitle.isEmpty())
     {
         TGraph* g = dynamic_cast<TGraph*>(Object);
         if (g)

@@ -15,7 +15,7 @@ class ATrackingStepData
 {
 public:
     ATrackingStepData(float * position, float time, float energy, float depositedEnergy, const QString & process);
-    ATrackingStepData(double * position, double time, double energy, double depositedEnergy, const QString & process);
+    ATrackingStepData(const double * position, double time, double energy, double depositedEnergy, const QString & process);
     ATrackingStepData(float x, float y, float z, float time, float energy, float depositedEnergy, const QString & process);
 
     virtual ~ATrackingStepData();
@@ -35,7 +35,7 @@ class ATransportationStepData : public ATrackingStepData
 {
 public:
     ATransportationStepData(float x, float y, float z, float time, float energy, float depositedEnergy, const QString & process);
-    ATransportationStepData(double * position, double time, double energy, double depositedEnergy, const QString & process);
+    ATransportationStepData(const double * position, double time, double energy, double depositedEnergy, const QString & process);
 
     void setVolumeInfo(const QString & volName, int volIndex, int matIndex);
 
@@ -68,6 +68,7 @@ public:
 
     bool isHaveProcesses(const QStringList & Proc, bool bOnlyPrimary);
     bool isTouchedVolumes(const QStringList & Vols, const QStringList &VolsStartsWith) const;
+    bool isContainParticle(const QStringList & PartNames) const;
 
     void logToString(QString & str, int offset, bool bExpandSecondaries) const;
     void makeTrack(std::vector<TrackHolderClass *> & Tracks, const QStringList & ParticleNames, const ATrackBuildOptions & TrackBuildOptions, bool bWithSecondaries) const;
@@ -106,6 +107,7 @@ public:
 
     bool   isHaveProcesses(const QStringList & Proc, bool bOnlyPrimary) const;
     bool   isTouchedVolumes(const QStringList & Vols, const QStringList & VolsStartsWith) const;
+    bool   isContainParticle(const QStringList & PartNames) const;
 
     void   makeTracks(std::vector<TrackHolderClass *> & Tracks, const QStringList & ParticleNames, const ATrackBuildOptions & TrackBuildOptions, bool bWithSecondaries) const;
 

@@ -11,7 +11,7 @@ class AParticleRecord;
 class AEventTrackingRecord;
 struct AEnergyDepositionCell;
 class AMaterialParticleCollection;
-class GeneralSimSettings;
+class AGeneralSimSettings;
 class TrackHolderClass;
 class ASimulationStatistics;
 class AEventTrackingRecord;
@@ -30,17 +30,21 @@ public:
                               std::vector<AEventTrackingRecord *> & TrackingHistory,
                               ASimulationStatistics & simStat,
                               int ThreadIndex);
+    ~AParticleTracker();
 
     bool TrackParticlesOnStack(int eventId = 0);
 
-    void configure(const GeneralSimSettings *simSet,
+    void configure(const AGeneralSimSettings *simSet,
                    bool fbuildTrackes,
                    std::vector<TrackHolderClass *> * tracks,
-                   bool fRemoveEmptyTracks = true);
+                   bool fRemoveEmptyTracks,
+                   int  threadID);
 
 
     void resetCounter() {counter = -1;}
     void setMaxTracks(int maxTracks) {MaxTracks = maxTracks;}
+
+    void releaseResources();
 
 private:
     TRandom2 & RandGen;
@@ -51,7 +55,7 @@ private:
     ASimulationStatistics & SimStat;
     int ThreadIndex = 0;
 
-    const GeneralSimSettings* SimSet;
+    const AGeneralSimSettings* SimSet;
     bool BuildTracks = false;
     int MaxTracks = 10;
     int ParticleTracksAdded = 0;
@@ -78,6 +82,8 @@ private:
 
     bool bBuildThisTrack = false;
 
+    std::ofstream * outStreamExit = nullptr;
+
     void generateRandomDirection(double* vv);
     void initLog();
     void initTrack();
@@ -92,6 +98,10 @@ private:
     bool processNeutronAbsorption_isKilled(const NeutralTerminatorStructure & term);
     bool processPairProduction_isKilled();
     bool processNeutronElastic_isKilled(const NeutralTerminatorStructure & term);
+
+    bool prepareOutputExitStream(const QString & FileName);
+    void writeNewEventMarker();
+    void saveParticle(AParticleRecord * p);
 };
 
 #endif // APARTICLETRACKER_H

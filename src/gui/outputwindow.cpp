@@ -18,6 +18,7 @@
 #include "amonitor.h"
 #include "asandwich.h"
 #include "ageoobject.h"
+#include "ageotype.h"
 #include "detectoraddonswindow.h"
 #include "ajsontools.h"
 
@@ -35,25 +36,19 @@
 #include <QBitArray>
 #include <QStandardItemModel>
 #include <QFileDialog>
+#include <QTimer>
 
-OutputWindow::OutputWindow(QWidget *parent, MainWindow *mw, EventsDataClass *eventsDataHub) :
-    AGuiWindow("out", parent),
+OutputWindow::OutputWindow(QWidget *parent, MainWindow *MW, EventsDataClass *EventsDataHub) :
+    AGuiWindow("out", parent), MW(MW), EventsDataHub(EventsDataHub),
     ui(new Ui::OutputWindow)
 {
-    MW = mw;
-    EventsDataHub = eventsDataHub;
-    GVscale = 10.0;
     ui->setupUi(this);
-    bForbidUpdate = false;
-
-    this->setWindowTitle("Results/Output");
+    setWindowTitle("Results/Output");
 
     Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
     windowFlags |= Qt::WindowCloseButtonHint;
     //windowFlags |= Qt::Tool;
     this->setWindowFlags( windowFlags );
-
-    modelPMhits = 0;
 
     QVector<QWidget*> vecDis;
     vecDis << ui->pbSiPMpixels << ui->sbTimeBin
@@ -64,14 +59,15 @@ OutputWindow::OutputWindow(QWidget *parent, MainWindow *mw, EventsDataClass *eve
     for (QWidget * w : vecDis) w->setEnabled(false);
 
     QVector<QWidget*> vecInv;
-    vecInv << ui->cobPTHistVolPlus << ui->pbRefreshViz << ui->frPTHistX << ui->frPTHistY
+    vecInv << ui->cobPTHistVolPlus << ui->pbRefreshViz << ui->frPTHistX << ui->frPTHistY << ui->cbPTHistVolVsTime
            << ui->pbEventView_ShowTree << ui->pbEVgeo << ui->frEventFilters << ui->frTimeAware;
     for (QWidget * w : vecInv) w->setVisible(false);
 
     QDoubleValidator* dv = new QDoubleValidator(this);
     dv->setNotation(QDoubleValidator::ScientificNotation);
     QList<QLineEdit*> list = this->findChildren<QLineEdit *>();
-    foreach(QLineEdit *w, list) if (w->objectName().startsWith("led")) w->setValidator(dv);
+    for (QLineEdit * w : list)
+        if (w->objectName().startsWith("led")) w->setValidator(dv);
 
     //Graphics view
     scaleScene = new QGraphicsScene(this);
@@ -332,14 +328,16 @@ void OutputWindow::on_sbTimeBin_valueChanged(int arg1)
    if (EventsDataHub->TimedEvents.isEmpty()) return;
    if (arg1 > EventsDataHub->TimedEvents[0].size()-1) ui->sbTimeBin->setValue(0);
 
-   OutputWindow::on_pbSiPMpixels_clicked();
+   on_pbSiPMpixels_clicked();
 }
 
+/*
 void OutputWindow::addParticleHistoryLogLine(int iRec, int level)
 {
     for (int i=0; i<secs.at(iRec).size(); i++)
         addParticleHistoryLogLine(secs.at(iRec).at(i), level+1);
 }
+*/
 
 void OutputWindow::updateSignalTableWidth()
 {
@@ -714,21 +712,22 @@ void OutputWindow::on_pbWaveSpectrum_clicked()
       return;
   }
 
-  TH1D* spec = d->getWaveSpectrum();
+  TH1D * spec = d->getWaveSpectrum();
   if (!spec || spec->GetEntries() == 0 || spec->Integral()==0)
-    {
+  {
       message("Wavelength data are empty!\n\n"
               "Before starting a simulation check that\n"
               "'Statistics on detected photons' is activated:\n"
-              "use the 'logs' button on the right side of the 'Simulate' button.", this);
+              "use the 'logs' button on the right side of the 'Simulate' button.\n"
+              "There is also a possibility that no photons were detected.", this);
       return;
-    }
+  }
 
   //converting to wavelength
-  int nBins = spec->GetNbinsX();
-  //qDebug() << nBins << MW->WaveNodes;
   if (MW->EventsDataHub->LastSimSet.fWaveResolved)
-    {
+  {
+      int nBins = spec->GetNbinsX();
+      /*
       auto WavelengthSpectrum = new TH1D("","Wavelength of detected photons", nBins, MW->WaveFrom, MW->WaveTo);
       for (int i=1; i<nBins+1; i++) //0 - underflow, n+1 - overflow
       {
@@ -737,13 +736,34 @@ void OutputWindow::on_pbWaveSpectrum_clicked()
       }
       WavelengthSpectrum->GetXaxis()->SetTitle("Wavelength, nm");
       MW->GraphWindow->Draw(WavelengthSpectrum);
-    }
+      */
+
+      double gsWaveFrom = MW->EventsDataHub->LastSimSet.WaveFrom;
+      double gsWaveTo = MW->EventsDataHub->LastSimSet.WaveTo;
+      double gsWaveBins = MW->EventsDataHub->LastSimSet.WaveNodes;
+      if (gsWaveBins > 1) gsWaveBins--;
+      double wavePerBin = (gsWaveTo - gsWaveFrom) / gsWaveBins;
+
+      double binFrom = spec->GetBinLowEdge(1);
+      double waveFrom = gsWaveFrom + (binFrom - 0.5) * wavePerBin;
+      double binTo = spec->GetBinLowEdge(nBins+1);
+      double waveTo = gsWaveFrom + (binTo - 0.5) * wavePerBin;
+
+      TH1D * hnew = new TH1D("", "Wavelength", nBins, waveFrom, waveTo);
+      for (int i = 1; i <= nBins; i++)
+      {
+          double y = spec->GetBinContent(i);
+          hnew->SetBinContent(i, y);
+      }
+      hnew->SetXTitle("Wavelength, nm");
+      MW->GraphWindow->Draw(hnew, "hist", true, true);
+  }
   else
-    {
+  {
       spec->GetXaxis()->SetTitle("Wave index");
       spec->SetTitle("Wave index of detected photons");
       MW->GraphWindow->Draw(spec, "", true, false);
-    }
+  }
 }
 
 void OutputWindow::on_pbTimeSpectrum_clicked()
@@ -838,19 +858,22 @@ void OutputWindow::ShowOneEventLog(int iev)
     {
       int iPoints = EventsDataHub->Scan[iev]->Points.size();
       for (int iP=0; iP<iPoints; iP++)
-        {
-          str2.setNum(EventsDataHub->Scan[iev]->Points[iP].r[0], 'g', precision);
-          str = "->   ";
-          str +="<font color=\"blue\">True position:</font>  X = "+str2+" mm  Y = ";
-          str2.setNum(EventsDataHub->Scan[iev]->Points[iP].r[1], 'g', precision);
-          str +=str2+" mm   Z = ";
-          str2.setNum(EventsDataHub->Scan[iev]->Points[iP].r[2], 'g', precision);
-          str +=str2+" mm";
-          str2.setNum(EventsDataHub->Scan[iev]->Points[iP].energy);
-              str += "   photons/energy = "+str2;
+      {
+          const APositionEnergyRecord & p = EventsDataHub->Scan[iev]->Points[iP];
+          str = "->   <font color=\"blue\">True XYZ position:</font> (";
+          str2.setNum(p.r[0], 'g', precision);
+          str += str2 + " ";
+          str2.setNum(p.r[1], 'g', precision);
+          str += str2 + " ";
+          str2.setNum(p.r[2], 'g', precision);
+          str += str2 + "); ";
+          str2.setNum(p.time, 'g', precision);
+          str += "  time = " + str2 +" ns;";
+          str2.setNum(p.energy);
+          str += "  photons/energy: "+str2 + " #/keV";
 
           OutText(str);
-        }
+      }
       if (iPoints==0) OutText("No energy was deposited.");
       OutText("   -----");
     }
@@ -1201,6 +1224,9 @@ void OutputWindow::saveEventViewerSettings(QJsonObject & json) const
     json["ExclProcActive"] = ui->cbEVexcludeProc->isChecked();
     json["ExclToProc"] = ui->leEVexcludeProc->text();
     json["ExclToProcPrim"] = ui->cbEVexcludeProcPrim->isChecked();
+
+    json["LimitToVolumesActive"] = ui->cbLimitToVolumes->isChecked();
+    json["LimitToVolumes"] = ui->leLimitToVolumes->text();
 }
 
 void OutputWindow::loadEventViewerSettings(const QJsonObject & json)
@@ -1230,6 +1256,9 @@ void OutputWindow::loadEventViewerSettings(const QJsonObject & json)
     JsonToCheckbox    (json, "ExclProcActive", ui->cbEVexcludeProc);
     JsonToLineEditText(json, "ExclToProc", ui->leEVexcludeProc);
     JsonToCheckbox    (json, "ExclToProcPrim", ui->cbEVexcludeProcPrim);
+
+    JsonToCheckbox    (json, "LimitToVolumesActive", ui->cbLimitToVolumes);
+    JsonToLineEditText(json, "LimitToVolumes", ui->leLimitToVolumes);
 }
 
 void OutputWindow::on_tabwinDiagnose_tabBarClicked(int index)
@@ -1293,37 +1322,28 @@ void OutputWindow::on_pbShowWavelength_clicked()
 
     MW->GraphWindow->ShowAndFocus();
 
-        TH1D* h = EventsDataHub->SimStat->Monitors[imon]->getWave();
-        int nbins = h->GetXaxis()->GetNbins();
+    TH1D* h = EventsDataHub->SimStat->Monitors[imon]->getWave();
+    int nbins = h->GetXaxis()->GetNbins();
 
-        double gsWaveFrom = MW->EventsDataHub->LastSimSet.WaveFrom;
-        double gsWaveTo = MW->EventsDataHub->LastSimSet.WaveTo;
-        double gsWaveBins = MW->EventsDataHub->LastSimSet.WaveNodes;
-        if (gsWaveBins > 1) gsWaveBins--;
-        double wavePerBin = (gsWaveTo - gsWaveFrom) / gsWaveBins;
+    double gsWaveFrom = MW->EventsDataHub->LastSimSet.WaveFrom;
+    double gsWaveTo = MW->EventsDataHub->LastSimSet.WaveTo;
+    double gsWaveBins = MW->EventsDataHub->LastSimSet.WaveNodes;
+    if (gsWaveBins > 1) gsWaveBins--;
+    double wavePerBin = (gsWaveTo - gsWaveFrom) / gsWaveBins;
 
-        double binFrom = h->GetBinLowEdge(1);
-        double waveFrom = gsWaveFrom + (binFrom - 0.5) * wavePerBin;
-        double binTo = h->GetBinLowEdge(nbins+1);
-        double waveTo = gsWaveFrom + (binTo - 0.5) * wavePerBin;
+    double binFrom = h->GetBinLowEdge(1);
+    double waveFrom = gsWaveFrom + (binFrom - 0.5) * wavePerBin;
+    double binTo = h->GetBinLowEdge(nbins+1);
+    double waveTo = gsWaveFrom + (binTo - 0.5) * wavePerBin;
 
-//        TH1D *hnew = new TH1D(*h);
-//        double* new_bins = new double[nbins+1];
-//        for (int i=0; i <= nbins; i++)
-//            new_bins[i] = WaveFrom + wavePerBin * h->GetBinLowEdge(i+1);
-//        hnew->SetBins(nbins, new_bins);
-
-        TH1D *hnew = new TH1D("", "", nbins, waveFrom, waveTo);
-        for (int i=1; i <= nbins; i++)
-        {
-            double y = h->GetBinContent(i);
-            //double index = h->GetXaxis()->GetBinCenter(i);
-            //double x = (WaveTo-WaveFrom)*index/(WaveBins-1) + WaveFrom;
-            //hnew->Fill(x, y);
-            hnew->SetBinContent(i, y);
-        }
-        hnew->SetXTitle("Wavelength, nm");
-        MW->GraphWindow->Draw(hnew, "hist", true, true);
+    TH1D *hnew = new TH1D("", "", nbins, waveFrom, waveTo);
+    for (int i=1; i <= nbins; i++)
+    {
+        double y = h->GetBinContent(i);
+        hnew->SetBinContent(i, y);
+    }
+    hnew->SetXTitle("Wavelength, nm");
+    MW->GraphWindow->Draw(hnew, "hist", true, true);
 }
 
 void OutputWindow::on_pbMonitorShowEnergy_clicked()
@@ -1340,8 +1360,15 @@ void OutputWindow::on_pbShowProperties_clicked()
 {
     MW->DAwindow->showNormal();
     MW->DAwindow->ShowTab(0);
-    //MW->DAwindow->raise();
-    MW->DAwindow->UpdateGeoTree(ui->cobMonitor->currentText());
+    MW->DAwindow->raise();
+
+    int index = ui->sbMonitorIndex->value();
+    QVector<const AGeoObject*> mr = MW->Detector->Sandwich->MonitorsRecords;
+    if (index >= 0 && index < mr.size())
+    {
+        const AGeoObject* obj = mr.at(index);
+        MW->DAwindow->UpdateGeoTree(obj->Name);
+    }
 }
 
 void OutputWindow::on_cobMonitor_activated(int)
@@ -1396,9 +1423,13 @@ void OutputWindow::on_pbPTHistRequest_clicked()
     Opt.bSecondary = ui->cbPTHistOnlySec->isChecked();
     Opt.bLimitToFirstInteractionOfPrimary = ui->cbPTHistLimitToFirst->isChecked();
 
-    int bins = ui->sbPTHistBinsX->value();
+    int    bins = ui->sbPTHistBinsX->value();
     double from = ui->ledPTHistFromX->text().toDouble();
     double to   = ui->ledPTHistToX  ->text().toDouble();
+
+    int    bins2 = ui->sbPTHistBinsY->value();
+    double from2 = ui->ledPTHistFromY->text().toDouble();
+    double to2   = ui->ledPTHistToY  ->text().toDouble();
 
     int Selector = ui->twPTHistType->currentIndex(); // 0 - Vol, 1 - Boundary
     if (Selector == 0)
@@ -1429,7 +1460,15 @@ void OutputWindow::on_pbPTHistRequest_clicked()
           }
         case 1:
           {
-            AHistorySearchProcessor_findProcesses p;
+            int mode = ui->cobPTHistVolPlus->currentIndex();
+            if (mode < 0 || mode > 2)
+            {
+                message("Unknown process selection mode", this);
+                return;
+            }
+
+            AHistorySearchProcessor_findProcesses::SelectionMode sm = static_cast<AHistorySearchProcessor_findProcesses::SelectionMode>(mode);
+            AHistorySearchProcessor_findProcesses p(sm);
             Crawler.find(Opt, p);
 
             QMap<QString, int>::const_iterator it = p.FoundProcesses.constBegin();
@@ -1440,8 +1479,10 @@ void OutputWindow::on_pbPTHistRequest_clicked()
                 ui->ptePTHist->appendPlainText(QString("%1   %2 times").arg(it.key()).arg(it.value()));
                 ++it;
             }
-          }
+
+            selectedModeForProcess = mode;
             break;
+          }
         case 2:
           {
             AHistorySearchProcessor_findTravelledDistances p(bins, from, to);
@@ -1463,28 +1504,46 @@ void OutputWindow::on_pbPTHistRequest_clicked()
         case 3:
           {
             int mode = ui->cobPTHistVolPlus->currentIndex();
-            if (mode <0 || mode >2)
+            if (mode < 0 || mode > 2)
             {
                 message("Unknown energy deposition collection mode", this);
                 return;
             }
             AHistorySearchProcessor_findDepositedEnergy::CollectionMode edm = static_cast<AHistorySearchProcessor_findDepositedEnergy::CollectionMode>(mode);
 
-            AHistorySearchProcessor_findDepositedEnergy p(edm, bins, from, to);
-            Crawler.find(Opt, p);
+            if (ui->cbPTHistVolVsTime->isChecked())
+            {
+                AHistorySearchProcessor_findDepositedEnergyTimed p(edm, bins, from, to, bins2, from2, to2);
+                Crawler.find(Opt, p);
 
-            if (p.Hist->GetEntries() == 0)
-                message("No deposition detected", this);
+                if (p.Hist2D->GetEntries() == 0)
+                    message("No deposition detected", this);
+                else
+                {
+                    MW->GraphWindow->Draw(p.Hist2D, "colz");
+                    p.Hist2D = nullptr;
+                }
+                binsTime = bins2;
+                fromTime = from2;
+                toTime   = to2;
+            }
             else
             {
-                MW->GraphWindow->Draw(p.Hist);
-                p.Hist = nullptr;
+                AHistorySearchProcessor_findDepositedEnergy p(edm, bins, from, to);
+                Crawler.find(Opt, p);
+
+                if (p.Hist->GetEntries() == 0)
+                    message("No deposition detected", this);
+                else
+                {
+                    MW->GraphWindow->Draw(p.Hist);
+                    p.Hist = nullptr;
+                }
             }
+            selectedModeForEnergyDepo = mode;
             binsEnergy = bins;
             fromEnergy = from;
             toEnergy = to;
-            selectedModeForEnergyDepo = mode;
-
             break;
           }
         case 4:
@@ -1544,6 +1603,7 @@ void OutputWindow::on_pbPTHistRequest_clicked()
         Opt.bFromMat = ui->cbPTHistVolMatFrom->isChecked();
         Opt.FromMat = ui->cobPTHistVolMatFrom->currentIndex();
         Opt.bFromVolume = ui->cbPTHistVolVolumeFrom->isChecked();
+        Opt.bEscaping = ui->cbPTHistEscaping->isChecked();
         Opt.FromVolume = ui->lePTHistVolVolumeFrom->text().toLocal8Bit().data();
         Opt.bFromVolIndex = ui->cbPTHistVolIndexFrom->isChecked();
         Opt.FromVolIndex = ui->sbPTHistVolIndexFrom->value();
@@ -1551,6 +1611,7 @@ void OutputWindow::on_pbPTHistRequest_clicked()
         Opt.bToMat = ui->cbPTHistVolMatTo->isChecked();
         Opt.ToMat = ui->cobPTHistVolMatTo->currentIndex();
         Opt.bToVolume = ui->cbPTHistVolVolumeTo->isChecked();
+        Opt.bCreated = ui->cbPTHistCreated->isChecked();
         Opt.ToVolume = ui->lePTHistVolVolumeTo->text().toLocal8Bit().data();
         Opt.bToVolIndex = ui->cbPTHistVolIndexTo->isChecked();
         Opt.ToVolIndex = ui->sbPTHistVolIndexTo->value();
@@ -1564,22 +1625,20 @@ void OutputWindow::on_pbPTHistRequest_clicked()
         bool bVsVs = ui->cbPTHistBordAndVs->isChecked();
         bool bAveraged = ui->cbPTHistBordAsStat->isChecked();
 
-        int bins2 = ui->sbPTHistBinsY->value();
-        double from2 = ui->ledPTHistFromY->text().toDouble();
-        double to2   = ui->ledPTHistToY  ->text().toDouble();
-
         if (!bVs)
         {
             //1D stat
             AHistorySearchProcessor_Border p(what, cuts, bins, from, to);
-            Crawler.find(Opt, p);
-
-            if (p.Hist1D->GetEntries() == 0)
-                message("No data", this);
+            if (!p.ErrorString.isEmpty()) message(p.ErrorString, this);
             else
             {
-                MW->GraphWindow->Draw(p.Hist1D, "hist");
-                p.Hist1D = nullptr;
+                Crawler.find(Opt, p);
+                if (p.Hist1D->GetEntries() == 0) message("No data", this);
+                else
+                {
+                    MW->GraphWindow->Draw(p.Hist1D, "hist");
+                    p.Hist1D = nullptr;
+                }
             }
         }
         else
@@ -1589,28 +1648,32 @@ void OutputWindow::on_pbPTHistRequest_clicked()
             {
                 //1D vs
                 AHistorySearchProcessor_Border p(what, vsWhat, cuts, bins, from, to);
-                Crawler.find(Opt, p);
-
-                if (p.Hist1D->GetEntries() == 0)
-                    message("No data", this);
+                if (!p.ErrorString.isEmpty()) message(p.ErrorString, this);
                 else
                 {
-                    MW->GraphWindow->Draw(p.Hist1D, "hist");
-                    p.Hist1D = nullptr;
+                    Crawler.find(Opt, p);
+                    if (p.Hist1D->GetEntries() == 0) message("No data", this);
+                    else
+                    {
+                        MW->GraphWindow->Draw(p.Hist1D, "hist");
+                        p.Hist1D = nullptr;
+                    }
                 }
             }
             else if (!bVsVs && !bAveraged)
             {
                 //2D stat
                 AHistorySearchProcessor_Border p(what, vsWhat, cuts, bins, from, to, bins2, from2, to2);
-                Crawler.find(Opt, p);
-
-                if (p.Hist2D->GetEntries() == 0)
-                    message("No data", this);
+                if (!p.ErrorString.isEmpty()) message(p.ErrorString, this);
                 else
                 {
-                    MW->GraphWindow->Draw(p.Hist2D, "colz");
-                    p.Hist2D = nullptr;
+                    Crawler.find(Opt, p);
+                    if (p.Hist2D->GetEntries() == 0) message("No data", this);
+                    else
+                    {
+                        MW->GraphWindow->Draw(p.Hist2D, "colz");
+                        p.Hist2D = nullptr;
+                    }
                 }
                 binsB2 = bins2;
                 fromB2 = from2;
@@ -1620,14 +1683,16 @@ void OutputWindow::on_pbPTHistRequest_clicked()
             {
                 //2D vsvs
                 AHistorySearchProcessor_Border p(what, vsWhat, andVsWhat, cuts, bins, from, to, bins2, from2, to2);
-                Crawler.find(Opt, p);
-
-                if (p.Hist2D->GetEntries() == 0)
-                    message("No data", this);
+                if (!p.ErrorString.isEmpty()) message(p.ErrorString, this);
                 else
                 {
-                    MW->GraphWindow->Draw(p.Hist2D, "colz");
-                    p.Hist2D = nullptr;
+                    Crawler.find(Opt, p);
+                    if (p.Hist2D->GetEntries() == 0) message("No data", this);
+                    else
+                    {
+                        MW->GraphWindow->Draw(p.Hist2D, "colz");
+                        p.Hist2D = nullptr;
+                    }
                 }
                 binsB2 = bins2;
                 fromB2 = from2;
@@ -1655,7 +1720,13 @@ void OutputWindow::on_cobPTHistVolRequestWhat_currentIndexChanged(int index)
 {
     updatePTHistoryBinControl();
 
-    if (index == 2)
+    if (index == 1)
+    {
+        ui->cobPTHistVolPlus->clear();
+        ui->cobPTHistVolPlus->addItems(QStringList() << "All"<<"With energy deposition"<<"Track end");
+        ui->cobPTHistVolPlus->setCurrentIndex(selectedModeForProcess);
+    }
+    else if (index == 2)
     {
         ui->sbPTHistBinsX->setValue(binsDistance);
         ui->ledPTHistFromX->setText(QString::number(fromDistance));
@@ -1667,13 +1738,19 @@ void OutputWindow::on_cobPTHistVolRequestWhat_currentIndexChanged(int index)
         ui->ledPTHistFromX->setText(QString::number(fromEnergy));
         ui->ledPTHistToX->setText(QString::number(toEnergy));
 
+        ui->sbPTHistBinsY->setValue(binsTime);
+        ui->ledPTHistFromY->setText(QString::number(fromTime));
+        ui->ledPTHistToY->setText(QString::number(toTime));
+
         ui->cobPTHistVolPlus->clear();
         ui->cobPTHistVolPlus->addItems(QStringList() << "Individual"<<"With secondaries"<<"Over event");
         ui->cobPTHistVolPlus->setCurrentIndex(selectedModeForEnergyDepo);
     }
-    ui->cobPTHistVolPlus->setVisible(index == 3);
+    ui->cobPTHistVolPlus->setVisible(index == 1 || index == 3);
 
     ui->frTimeAware->setVisible(index == 4);
+
+    ui->cbPTHistVolVsTime->setVisible(index == 3);
 }
 
 void OutputWindow::on_twPTHistType_currentChanged(int index)
@@ -1699,7 +1776,7 @@ void OutputWindow::updatePTHistoryBinControl()
     {
         //Volume
         ui->frPTHistX->setVisible( ui->cobPTHistVolRequestWhat->currentIndex() > 1  && ui->cobPTHistVolRequestWhat->currentIndex() != 4);
-        ui->frPTHistY->setVisible(false);
+        ui->frPTHistY->setVisible( ui->cobPTHistVolRequestWhat->currentIndex() == 3 && ui->cbPTHistVolVsTime->isChecked() );
     }
     else
     {
@@ -1758,6 +1835,8 @@ void OutputWindow::fillEvTabViewRecord(QTreeWidgetItem * item, const AParticleTr
     case 0: break;
     case 1: timeUnits *= 0.001; break;
     case 2: timeUnits *= 1.0e-6; break;
+    case 3: timeUnits *= 1.0e-9; break;
+    case 4: timeUnits *= 1.666666666666666e-11; break;
     }
     bool bVolume = ui->cbEVvol->isChecked();
     bool bKin = ui->cbEVkin->isChecked();
@@ -1898,10 +1977,11 @@ void OutputWindow::EV_showGeo()
     MW->SimulationManager->clearTracks();
     MW->GeometryWindow->ClearTracks(false);
 
-    int iEv = ui->sbEvent->value();
-    if (ui->cbEVtracks->isChecked()) MW->GeometryWindow->ShowEvent_Particles(iEv, !ui->cbEVsupressSec->isChecked());
+    const int iEv = ui->sbEvent->value();
+    if (iEv < 0 || iEv >= MW->EventsDataHub->countEvents()) return;
 
-    if (ui->cbEVpmSig->isChecked()) MW->GeometryWindow->ShowPMsignals(iEv, false);
+    if (ui->cbEVtracks->isChecked()) MW->GeometryWindow->ShowEvent_Particles(iEv, !ui->cbEVsupressSec->isChecked());
+    if (ui->cbEVpmSig->isChecked())  MW->GeometryWindow->ShowPMsignals(MW->EventsDataHub->Events.at(iEv), false);
 
     MW->GeometryWindow->DrawTracks();
 }
@@ -1923,6 +2003,16 @@ int OutputWindow::findEventWithFilters(int currentEv, bool bUp)
 
     bool bLimVols = ui->cbLimitToVolumes->isChecked();
 
+    bool bLimParticles = ui->cbLimitToParticles->isChecked();
+    bool bExcludeParticles = ui->cbExcludeParticles->isChecked();
+
+    QStringList LimProc = ui->leEVlimitToProc->text().split(rx, QString::SkipEmptyParts);
+    QStringList ExclProc = ui->leEVexcludeProc->text().split(rx, QString::SkipEmptyParts);
+    QStringList LimVols = ui->leLimitToVolumes->text().split(rx, QString::SkipEmptyParts);
+
+    QStringList MustContainParticles = ui->leLimitToParticles->text().split(rx, QString::SkipEmptyParts);
+    QStringList ExcludeParticles = ui->leExcludeParticles->text().split(rx, QString::SkipEmptyParts);
+
     if (currentEv > (int)TH.size()) currentEv = (int)TH.size();
 
     bUp ? currentEv++ : currentEv--;
@@ -1931,19 +2021,10 @@ int OutputWindow::findEventWithFilters(int currentEv, bool bUp)
         const AEventTrackingRecord * er = TH.at(currentEv);
 
         bool bGood = true;
-        if (bLimProc)
-        {
-            QStringList LimProc = ui->leEVlimitToProc->text().split(rx, QString::SkipEmptyParts);
-            bGood = er->isHaveProcesses(LimProc, bLimProc_prim);
-        }
-        if (bGood && bExclProc)
-        {
-            QStringList ExclProc = ui->leEVexcludeProc->text().split(rx, QString::SkipEmptyParts);
-            bGood = !er->isHaveProcesses(ExclProc, bExclProc_prim);
-        }
+        if (bLimProc)           bGood = er->isHaveProcesses(LimProc, bLimProc_prim);
+        if (bGood && bExclProc) bGood = !er->isHaveProcesses(ExclProc, bExclProc_prim);
         if (bGood && bLimVols)
         {
-            QStringList LimVols = ui->leLimitToVolumes->text().split(rx, QString::SkipEmptyParts);
             QStringList LimVolStartWith;
             for (int i=LimVols.size()-1; i >= 0; i--)
             {
@@ -1956,6 +2037,8 @@ int OutputWindow::findEventWithFilters(int currentEv, bool bUp)
             }
             bGood = er->isTouchedVolumes(LimVols, LimVolStartWith);
         }
+        if (bGood && bLimParticles)     bGood = er->isContainParticle(MustContainParticles);
+        if (bGood && bExcludeParticles) bGood = !er->isContainParticle(ExcludeParticles);
 
         if (bGood) return currentEv;
 
@@ -2272,4 +2355,37 @@ void OutputWindow::on_pbShowMonitorTimeOverall_clicked()
     time->GetXaxis()->SetTitle("Time, ns");
     time->GetYaxis()->SetTitle("Hits");
     MW->GraphWindow->Draw(time, "hist");
+}
+
+void OutputWindow::on_cbPTHistVolVsTime_clicked()
+{
+    updatePTHistoryBinControl();
+}
+
+void OutputWindow::on_cbPTHistEscaping_toggled(bool checked)
+{
+    QVector<QCheckBox*> vec = {ui->cbPTHistVolMatTo, ui->cbPTHistVolVolumeTo, ui->cbPTHistVolIndexTo, ui->cbPTHistCreated};
+    for (QCheckBox * cb : vec)
+    {
+        if (checked)
+        {
+            cb->setChecked(false);
+            cb->setEnabled(false);
+        }
+        else cb->setEnabled(true);
+    }
+}
+
+void OutputWindow::on_cbPTHistCreated_toggled(bool checked)
+{
+    QVector<QCheckBox*> vec = {ui->cbPTHistVolMatFrom, ui->cbPTHistVolVolumeFrom, ui->cbPTHistVolIndexFrom, ui->cbPTHistEscaping};
+    for (QCheckBox * cb : vec)
+    {
+        if (checked)
+        {
+            cb->setChecked(false);
+            cb->setEnabled(false);
+        }
+        else cb->setEnabled(true);
+    }
 }

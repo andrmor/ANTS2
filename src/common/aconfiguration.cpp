@@ -1,13 +1,15 @@
 #include "aconfiguration.h"
 #include "detectorclass.h"
+#include "asimsettings.h"
+#include "aparticlesimsettings.h"
 #include "ajsontools.h"
 #include "sensorlrfs.h"
 #include "apmgroupsmanager.h"
 #include "amaterialparticlecolection.h"
-#include "asourceparticlegenerator.h"
 #include "asandwich.h"
-#include "generalsimsettings.h"
+#include "ageneralsimsettings.h"
 #include "apmhub.h"
+#include "ageoconsts.h"
 
 #include <QDebug>
 #include <QFile>
@@ -15,11 +17,12 @@
 #include <QtWidgets/QApplication>
 
 AConfiguration::AConfiguration(QObject *parent) :
-  QObject(parent), Detector(0), ParticleSources(0) {}
+  QObject(parent) {}
 
 //to do: //add messenger for warnings
 bool AConfiguration::LoadConfig(QJsonObject &json, bool DetConstructor, bool SimSettings, bool ReconstrSettings)
 {
+  AGeoConsts::getInstance().clearConstants();
   ErrorString.clear();
   if (json.isEmpty())
     {
@@ -148,29 +151,34 @@ void AConfiguration::SaveConfig(QJsonObject &json, bool DetConstructor, bool Sim
   if (!ReconstrSettings) json["ReconstructionConfig"] = QJsonObject();
 }
 
-bool AConfiguration::LoadConfig(QString fileName, bool DetConstructor, bool SimSettings, bool ReconstrSettings, QJsonObject *jsout)
+bool AConfiguration::LoadConfig(QString fileName, bool DetConstructor, bool SimSettings, bool ReconstrSettings)//, QJsonObject *jsout)
 {
     ErrorString.clear();
 
     QFile loadFile(fileName);
     if (!loadFile.open(QIODevice::ReadOnly))
-      {
+    {
         ErrorString = "Cannot open file " + fileName;
         qWarning() << ErrorString;
         return false;
-      }
+    }
 
     QByteArray saveData = loadFile.readAll();
     QJsonDocument loadDoc(QJsonDocument::fromJson(saveData));
     QJsonObject json = loadDoc.object();
 
     if (json.isEmpty())
-      {
+    {
         ErrorString = fileName + " is not valid configuration file";
         qWarning() << ErrorString;
         return false;
-      }
-    if (jsout) *jsout = json; //for global script mode
+    }
+
+    //if (jsout) *jsout = json; //for global script mode
+
+    invalidateUndo();
+    invalidateRedo();
+
     return LoadConfig(json, DetConstructor, SimSettings, ReconstrSettings);
 }
 
@@ -188,6 +196,61 @@ bool AConfiguration::SaveConfig(QString fileName, bool DetConstructor, bool SimS
         qWarning() <<ErrorString;
     }
     return fOk;
+}
+
+#include "aglobalsettings.h"
+void AConfiguration::createUndo()
+{
+    AGlobalSettings & GS = AGlobalSettings::getInstance();
+    SaveConfig(GS.QuicksaveDir + "/undo.json");
+}
+
+bool AConfiguration::isUndoAvailable() const
+{
+    AGlobalSettings & GS = AGlobalSettings::getInstance();
+    QFile qf(GS.QuicksaveDir + "/undo.json");
+    return qf.exists();
+}
+
+bool AConfiguration::isRedoAvailable() const
+{
+    AGlobalSettings & GS = AGlobalSettings::getInstance();
+    QFile qf(GS.QuicksaveDir + "/redo.json");
+    return qf.exists();
+}
+
+void AConfiguration::invalidateUndo()
+{
+    AGlobalSettings & GS = AGlobalSettings::getInstance();
+    QFile qf(GS.QuicksaveDir + "/undo.json");
+    qf.remove();
+}
+
+void AConfiguration::invalidateRedo()
+{
+    AGlobalSettings & GS = AGlobalSettings::getInstance();
+    QFile qf(GS.QuicksaveDir + "/redo.json");
+    qf.remove();
+}
+
+QString AConfiguration::doUndo()
+{
+    AGlobalSettings & GS = AGlobalSettings::getInstance();
+    SaveConfig(GS.QuicksaveDir + "/redoTmp.json");
+    LoadConfig(GS.QuicksaveDir + "/undo.json");
+    //invalidateUndo();  //automatic now
+    QFile qf(GS.QuicksaveDir + "/redoTmp.json");
+    qf.rename(GS.QuicksaveDir + "/redo.json");
+    return ErrorString;
+}
+
+QString AConfiguration::doRedo()
+{
+    AGlobalSettings & GS = AGlobalSettings::getInstance();
+    LoadConfig(GS.QuicksaveDir + "/redo.json");
+    //invalidateRedo();  //automatic now
+    //invalidateUndo();  //automatic now
+    return ErrorString;
 }
 
 void AConfiguration::UpdateLRFmakeJson()
@@ -289,15 +352,15 @@ const QString AConfiguration::RemoveParticle(int particleId)
   Detector->MpCollection->IsParticleInUse(particleId, bInUse, s);
   if (bInUse) return "This particle is a secondary particle defined in neutron capture.\nIt appears in the following material(s):\n"+s;
 
-  if ( ParticleSources->IsParticleInUse(particleId, s) )
-      return "This particle is in use by the particle source(s):\n" + s;
+  s = SimSettings->partSimSet.isParticleInUse(particleId);
+  if (!s.isEmpty()) return s;
 
   Detector->Sandwich->IsParticleInUse(particleId, bInUse, s);
   if (bInUse) return "This particle is currently in use by the monitor(s):\n" + s;
 
   //this particle is not in use, so can be removed
   Detector->MpCollection->RemoveParticle(particleId);
-  ParticleSources->RemoveParticle(particleId);
+  SimSettings->partSimSet.removeParticle(particleId);
   Detector->Sandwich->RemoveParticle(particleId);
 
   //updating JSON config
@@ -306,7 +369,7 @@ const QString AConfiguration::RemoveParticle(int particleId)
     //particle sources
   QJsonObject sj = JSON["SimulationConfig"].toObject();
     QJsonObject pj = sj["ParticleSourcesConfig"].toObject();
-       ParticleSources->writeToJson(pj);
+       SimSettings->partSimSet.writeToJson(pj);   // !*! to be changed when SimSettings will be the main line
     sj["ParticleSourcesConfig"] = pj;
   JSON["SimulationConfig"] = sj;
 
@@ -323,7 +386,7 @@ void AConfiguration::UpdateSimSettingsOfDetector()
     {
         QJsonObject SimJson = JSON["SimulationConfig"].toObject();
 
-        GeneralSimSettings simSettings;
+        AGeneralSimSettings simSettings;
         simSettings.readFromJson(SimJson);
         Detector->PMs->configure(&simSettings); //wave, angle properties + rebin, prepare crosstalk
         Detector->MpCollection->UpdateRuntimePropertiesAndWavelengthBinning(&simSettings, Detector->RandGen);

@@ -6,7 +6,7 @@
 #include <QJsonArray>
 
 class DetectorClass;
-class ASourceParticleGenerator;
+class ASimSettings;
 
 class AConfiguration : public QObject
 {
@@ -19,7 +19,8 @@ public:
   QString ErrorString;      // Last detected error (load config)
 
   void SetDetector(DetectorClass* detector) {Detector = detector;}
-  void SetParticleSources(ASourceParticleGenerator* particleSources) {ParticleSources = particleSources;}
+  void setSimSettings(ASimSettings * simSettings) {SimSettings = simSettings;}
+
   DetectorClass* GetDetector() {return Detector;}
 
   // save/load to json
@@ -27,8 +28,17 @@ public:
   void SaveConfig(QJsonObject &json, bool DetConstructor, bool SimSettings, bool ReconstrSettings);
 
   // save/load to file
-  bool LoadConfig(QString fileName, bool DetConstructor = true, bool SimSettings = true, bool ReconstrSettings = true, QJsonObject *jsout = 0);
+  bool LoadConfig(QString fileName, bool DetConstructor = true, bool SimSettings = true, bool ReconstrSettings = true);//, QJsonObject *jsout = 0);
   bool SaveConfig(QString fileName, bool DetConstructor = true, bool SimSettings = true, bool ReconstrSettings = true);
+
+  // undo / redo
+  void createUndo();
+  bool isUndoAvailable() const;
+  bool isRedoAvailable() const;
+  void invalidateUndo();
+  void invalidateRedo();
+  QString doUndo();
+  QString doRedo();
 
   //remove particle
   const QString RemoveParticle(int particleId);  //returns "" on sucess, otherwise gives error string
@@ -70,9 +80,8 @@ signals:
 public slots:
 
 private:
-  DetectorClass* Detector;                  // Link to the Detector object
-  ASourceParticleGenerator* ParticleSources;    // Link to the ParticleSources object of SimulationManager
-
+  DetectorClass * Detector    = nullptr;           // Link to the Detector object
+  ASimSettings  * SimSettings = nullptr;
 };
 
 #endif // ACONFIGURATION_H

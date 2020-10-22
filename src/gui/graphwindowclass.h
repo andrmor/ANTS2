@@ -128,7 +128,13 @@ public:
                               Color_t MarkerColor=2, int MarkerStyle=20, int MarkerSize=1,
                               Color_t LineColor=2,   int LineStyle=1,    int LineWidth=2);
 
+    void configureGraph(TGraph * graph, const QString & GraphTitle,
+                        const QString & XTitle, const QString & YTitle,
+                        int MarkerColor=2, int MarkerStyle=20, int MarkerSize=1,
+                        int LineColor=2,   int LineStyle=1,    int LineWidth=2) const;
+
     void AddLine(double x1, double y1, double x2, double y2, int color, int width, int style);
+    void AddArrow(double x1, double y1, double x2, double y2, int color, int width, int style);
 
     void OnBusyOn();
     void OnBusyOff();
@@ -136,12 +142,11 @@ public:
     bool Extraction();
 
     void ClearBasket();
-    TObject *GetMainPlottedObject();
-    void SaveGraph(QString fileName);    
+    TObject * GetMainPlottedObject();
+    void SaveGraph(const QString & fileName);
     void EnforceOverlayOff();    
     void ClearDrawObjects_OnShutDown(); //precvents crash on shut down
     void RegisterTObject(TObject* obj);
-    void ShowTextPanel(const QString Text, bool bShowFrame=true, int AlignLeftCenterRight=0);
 
     void SetStatPanelVisible(bool flag);
     void TriggerGlobalBusy(bool flag);
@@ -168,8 +173,9 @@ public slots:
     void DoSaveGraph(QString name);
     void AddCurrentToBasket(const QString &name);
     void AddLegend(double x1, double y1, double x2, double y2, QString title);
+    void ShowTextPanel(const QString Text, bool bShowFrame=true, int AlignLeftCenterRight=0,
+                       double x1=0.15, double y1=0.75, double x2=0.5, double y2=0.85, const QString opt = "NDC");
     void SetLegendBorder(int color, int style, int size);
-    void AddText(QString text, bool bShowFrame, int Alignment_0Left1Center2Right);
     void on_pbAddLegend_clicked();
     void ExportTH2AsText(QString fileName); //for temporary script command
 
@@ -262,6 +268,8 @@ private slots:
 
     void on_pbManipulate_clicked();
 
+    void on_cbShowCross_toggled(bool checked);
+
 private:
     MainWindow *MW;
     Ui::GraphWindowClass *ui;
@@ -307,6 +315,8 @@ private:
     void updateSecondaryAxis(TGaxis *gaxis, const char *opt);
     void showHintInStatus();
     void setShowCursorPosition(bool flag);
+    void fixGraphFrame();
+    void updateLogScaleFlags(QVector<ADrawObject> & drawObjects) const;
 };
 
 #endif // GRAPHWINDOWCLASS_H

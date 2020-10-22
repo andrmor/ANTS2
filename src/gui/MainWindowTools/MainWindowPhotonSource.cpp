@@ -89,6 +89,12 @@ void MainWindow::SimGeneralConfigToJson(QJsonObject &jsonMaster)
     G4SimSet.writeToJson(g4js);
   json["Geant4SimulationSettings"] = g4js;
 
+  {
+      QJsonObject js;
+        ExitParticleSettings.writeToJson(js);
+      json["ExitParticleSettings"] = js;
+  }
+
   //adding to master json
   jsonMaster["GeneralSimConfig"] = json;
 }
@@ -109,7 +115,7 @@ void MainWindow::SimPointSourcesConfigToJson(QJsonObject &jsonMaster)
 
   //main control options
   QJsonObject cjson;
-  int SimMode = ui->twSingleScan->currentIndex();
+  int SimMode = ui->cobNodeGenerationMode->currentIndex();
     cjson["Single_Scan_Flood"] = SimMode;    
     cjson["Primary_Secondary"] = ui->cobScintTypePointSource->currentIndex();
     cjson["MultipleRuns"] = ui->cbNumberOfRuns->isChecked();
@@ -127,10 +133,11 @@ void MainWindow::SimPointSourcesConfigToJson(QJsonObject &jsonMaster)
   ppnjson["PhotPerNodeUniMax"] = ui->sbScanNumMax->value();
   ppnjson["PhotPerNodeGaussMean"] = ui->ledScanGaussMean->text().toDouble();
   ppnjson["PhotPerNodeGaussSigma"] = ui->ledScanGaussSigma->text().toDouble();
+  ppnjson["PhotPerNodePoissonMean"] = ui->ledScanPoissonMean->text().toDouble();
   if (histScan)
   {
       QJsonArray ja;
-      writeTH1ItoJsonArr(histScan, ja);
+      writeTH1DtoJsonArr(histScan, ja);
       ppnjson["PhotPerNodeCustom"] = ja;
   }
   else ppnjson["PhotPerNodeCustom"] = QJsonArray();
@@ -151,6 +158,13 @@ void MainWindow::SimPointSourcesConfigToJson(QJsonObject &jsonMaster)
   pdjson["Fixed_or_Cone"] = ui->cobFixedDirOrCone->currentIndex();
   pdjson["Cone"] = ui->ledConeAngle->text().toDouble();
   json["PhotonDirectionOptions"] = pdjson;
+
+  //testing new system, to be updated later!
+  {
+      QJsonObject js;
+      SimulationManager->Settings.photSimSet.SpatialDistSettings.writeToJson(js);
+      json["SpatialDistOptions"] = js;
+  }
 
   QJsonObject spjson;
       spjson["SingleX"] = ui->ledSingleX->text().toDouble();

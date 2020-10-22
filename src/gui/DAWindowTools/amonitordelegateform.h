@@ -8,6 +8,7 @@ class AMonitorDelegateForm;
 }
 
 class AGeoObject;
+class AOneLineTextEdit;
 
 class AMonitorDelegateForm : public QWidget
 {
@@ -20,8 +21,20 @@ public:
     Ui::AMonitorDelegateForm *ui;
 
     bool updateGUI(const AGeoObject *obj);
-    const QString getName() const;
-    void updateObject(AGeoObject* obj) const;
+    QString getName() const;
+    bool updateObject(AGeoObject* obj);
+
+private:
+    AOneLineTextEdit * leSize1 = nullptr;
+    AOneLineTextEdit * leSize2 = nullptr;
+
+    AOneLineTextEdit * leX = nullptr;
+    AOneLineTextEdit * leY = nullptr;
+    AOneLineTextEdit * leZ = nullptr;
+
+    AOneLineTextEdit * lePhi   = nullptr;
+    AOneLineTextEdit * leTheta = nullptr;
+    AOneLineTextEdit * lePsi   = nullptr;
 
 public slots:
     void UpdateVisibility();

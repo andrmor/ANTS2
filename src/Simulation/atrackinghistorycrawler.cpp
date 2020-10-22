@@ -100,8 +100,12 @@ void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, 
                 }
 
                 bool bEntranceValidated;
-                const bool bCheckingEnter = (opt.bToMat || opt.bToVolume || opt.bToVolIndex) && (thisStep->Process != "O");
-                if (bCheckingEnter)
+                const bool bCheckingEnter = (opt.bToMat || opt.bToVolume || opt.bToVolIndex);
+                if (thisStep->Process == "O")
+                {
+                    bEntranceValidated = !bCheckingEnter; // if any check selected -> entrance is not valid
+                }
+                else if (bCheckingEnter)
                 {
                     const ATransportationStepData * trStep = static_cast<const ATransportationStepData*>(thisStep); // "O" should not see this line!
                     {
@@ -113,10 +117,24 @@ void ATrackingHistoryCrawler::findRecursive(const AParticleTrackingRecord & pr, 
                 }
                 else bEntranceValidated = true;
 
+                if (opt.bEscaping && ProcType != ExitingWorld) bExitValidated = false;
+                if (opt.bCreated  && ProcType != Creation)     bEntranceValidated = false;
+
                 // if transition validated, calling onTransition (+paranoic test on existence of the prevStep - for Creation exit is always not validated
                 const ATrackingStepData * prevStep = (iStep == 0 ? nullptr : steps[iStep-1]);
                 if (bExitValidated && bEntranceValidated && prevStep)
                     processor.onTransition(*prevStep, *thisStep); // not the "next" step here! this is just to extract direction information
+
+                if (opt.bCreated && ProcType == Creation && bEntranceValidated) //special treatment for creation
+                {
+                    if (iStep == 0 && steps.size() > 1)
+                    {
+                        ATrackingStepData prevStep = *thisStep;
+                        for (int i=0; i<3; i++)
+                            prevStep.Position[i] = 2.0 * thisStep->Position[i] - steps[1]->Position[i];
+                        processor.onTransition(prevStep, *thisStep);
+                    }
+                }
 
                 //checking for specific material/volume/index for enter/exit
                 //out
@@ -252,7 +270,7 @@ AHistorySearchProcessor_findDepositedEnergy::~AHistorySearchProcessor_findDeposi
 
 void AHistorySearchProcessor_findDepositedEnergy::onNewEvent()
 {
-    if (Mode == OverEvent) Depo = 0;
+    if (Mode == OverEvent) clearData();
 }
 
 bool AHistorySearchProcessor_findDepositedEnergy::onNewTrack(const AParticleTrackingRecord & )
@@ -260,14 +278,14 @@ bool AHistorySearchProcessor_findDepositedEnergy::onNewTrack(const AParticleTrac
     switch (Mode)
     {
     case Individual:
-        Depo = 0;
+        clearData();
         return false;
     case WithSecondaries:
         if (bSecondaryTrackingStarted)
             return false;
         else
         {
-            Depo = 0;
+            clearData();
             bSecondaryTrackingStarted  = true;
             bInlineSecondaryProcessing = true; // change to inline secondaries mode
             bIgnoreParticleSelectors   = true; // to allow secondaries even not allowed by the selection
@@ -277,18 +295,17 @@ bool AHistorySearchProcessor_findDepositedEnergy::onNewTrack(const AParticleTrac
         // no need to do anything - Depo is reset on new event
         return false;
     }
-
     return false;
 }
 
 void AHistorySearchProcessor_findDepositedEnergy::onLocalStep(const ATrackingStepData & tr)
 {
-    Depo += tr.DepositedEnergy;
+    fillDeposition(tr);
 }
 
 void AHistorySearchProcessor_findDepositedEnergy::onTransitionOut(const ATrackingStepData & tr)
 {
-    Depo += tr.DepositedEnergy;
+    fillDeposition(tr);
 }
 
 void AHistorySearchProcessor_findDepositedEnergy::onTrackEnd(bool bMaster)
@@ -296,14 +313,12 @@ void AHistorySearchProcessor_findDepositedEnergy::onTrackEnd(bool bMaster)
     switch (Mode)
     {
     case Individual:
-        if (Depo > 0) Hist->Fill(Depo);
-        Depo = 0;
+        fillHistogram();
         break;
     case WithSecondaries:
         if (bMaster)
         {
-            if (Depo > 0) Hist->Fill(Depo);
-            Depo = 0;
+            fillHistogram();
             bSecondaryTrackingStarted  = false;
             bInlineSecondaryProcessing = false; // back to default non-inline mode!
             bIgnoreParticleSelectors   = false; // back to normal mode
@@ -317,12 +332,66 @@ void AHistorySearchProcessor_findDepositedEnergy::onTrackEnd(bool bMaster)
 
 void AHistorySearchProcessor_findDepositedEnergy::onEventEnd()
 {
-    if (Mode == OverEvent)
-    {
-        if (Depo > 0) Hist->Fill(Depo);
-        Depo = 0;
-    }
+    if (Mode == OverEvent) fillHistogram();
 }
+
+void AHistorySearchProcessor_findDepositedEnergy::clearData()
+{
+    Depo = 0;
+}
+
+void AHistorySearchProcessor_findDepositedEnergy::fillDeposition(const ATrackingStepData &tr)
+{
+    Depo += tr.DepositedEnergy;
+}
+
+void AHistorySearchProcessor_findDepositedEnergy::fillHistogram()
+{
+    if (Depo > 0) Hist->Fill(Depo);
+    clearData();
+}
+
+
+AHistorySearchProcessor_findDepositedEnergyTimed::AHistorySearchProcessor_findDepositedEnergyTimed(AHistorySearchProcessor_findDepositedEnergy::CollectionMode mode,
+                                                                                                   int binsE, double fromE, double toE,
+                                                                                                   int binsT, double fromT, double toT)
+{
+    Mode = mode;
+    Hist2D = new TH2D("", "Deposited energy vs weighted time", binsE, fromE, toE,  binsT, fromT, toT);
+    Hist2D->GetXaxis()->SetTitle("Deposited energy, keV");
+    Hist2D->GetYaxis()->SetTitle("Mean deposition time (weighted by energy), ns");
+
+    bInlineSecondaryProcessing = false; // on start it is default non-inline mode even in WithSecondaries mode
+}
+
+AHistorySearchProcessor_findDepositedEnergyTimed::~AHistorySearchProcessor_findDepositedEnergyTimed()
+{
+    delete Hist2D;
+}
+
+void AHistorySearchProcessor_findDepositedEnergyTimed::clearData()
+{
+    Depo = 0;
+    Time = 0;
+}
+
+void AHistorySearchProcessor_findDepositedEnergyTimed::fillDeposition(const ATrackingStepData &tr)
+{
+    Depo += tr.DepositedEnergy;
+    Time += tr.Time * tr.DepositedEnergy;
+}
+
+void AHistorySearchProcessor_findDepositedEnergyTimed::fillHistogram()
+{
+    if (Depo > 0)
+    {
+        Time /= Depo;
+        Hist2D->Fill(Depo, Time);
+    }
+    clearData();
+}
+
+
 
 AHistorySearchProcessor_findTravelledDistances::AHistorySearchProcessor_findTravelledDistances(int bins, double from, double to)
 {
@@ -381,29 +450,49 @@ void AHistorySearchProcessor_findTravelledDistances::onTrackEnd(bool)
     Distance = 0;
 }
 
-void AHistorySearchProcessor_findProcesses::onLocalStep(const ATrackingStepData &tr)
+void AHistorySearchProcessor_findProcesses::onLocalStep(const ATrackingStepData & tr)
 {
-    const QString & Proc = tr.Process;
-    QMap<QString, int>::iterator it = FoundProcesses.find(Proc);
-    if (it == FoundProcesses.end())
-        FoundProcesses.insert(Proc, 1);
-    else it.value()++;
+    if (validateStep(tr))
+    {
+        const QString & Proc = tr.Process;
+        QMap<QString, int>::iterator it = FoundProcesses.find(Proc);
+        if (it == FoundProcesses.end())
+            FoundProcesses.insert(Proc, 1);
+        else it.value()++;
+    }
 }
 
-void AHistorySearchProcessor_findProcesses::onTransitionOut(const ATrackingStepData &)
+void AHistorySearchProcessor_findProcesses::onTransitionOut(const ATrackingStepData & tr)
 {
-    QMap<QString, int>::iterator it = FoundProcesses.find("Out");
-    if (it == FoundProcesses.end())
-        FoundProcesses.insert("Out", 1);
-    else it.value()++;
+    if (validateStep(tr))
+    {
+        QMap<QString, int>::iterator it = FoundProcesses.find("Out");
+        if (it == FoundProcesses.end())
+            FoundProcesses.insert("Out", 1);
+        else it.value()++;
+    }
 }
 
-void AHistorySearchProcessor_findProcesses::onTransitionIn(const ATrackingStepData &)
+void AHistorySearchProcessor_findProcesses::onTransitionIn(const ATrackingStepData & tr)
 {
-    QMap<QString, int>::iterator it = FoundProcesses.find("In");
-    if (it == FoundProcesses.end())
-        FoundProcesses.insert("In", 1);
-    else it.value()++;
+    if (validateStep(tr))
+    {
+        QMap<QString, int>::iterator it = FoundProcesses.find("In");
+        if (it == FoundProcesses.end())
+            FoundProcesses.insert("In", 1);
+        else it.value()++;
+    }
+}
+
+bool AHistorySearchProcessor_findProcesses::validateStep(const ATrackingStepData & tr) const
+{
+    switch (Mode)
+    {
+    case All :                  return true;
+    case WithEnergyDeposition : return (tr.DepositedEnergy != 0);
+    case TrackEnd :             return (tr.Energy == 0 || tr.Process == "O");
+    }
+    return false; // just to avoid warning
 }
 
 AHistorySearchProcessor_Border::AHistorySearchProcessor_Border(const QString &what,
@@ -412,16 +501,14 @@ AHistorySearchProcessor_Border::AHistorySearchProcessor_Border(const QString &wh
 {
     QString s = what;
     formulaWhat1 = parse(s);
-    if (!formulaWhat1->IsValid())
-        ErrorString = "Invalid formula for 'what'";
+    if (!formulaWhat1) ErrorString = "Invalid formula for 'what'";
     else
     {
         if (!cuts.isEmpty())
         {
             QString s = cuts;
             formulaCuts = parse(s);
-            if (!formulaCuts)
-                ErrorString = "Invalid formula for cuts";
+            if (!formulaCuts) ErrorString = "Invalid formula for cuts";
         }
 
         if (formulaCuts || cuts.isEmpty())
@@ -442,22 +529,19 @@ AHistorySearchProcessor_Border::AHistorySearchProcessor_Border(const QString &wh
 {
     QString s = what;
     formulaWhat1 = parse(s);
-    if (!formulaWhat1->IsValid())
-        ErrorString = "Invalid formula for 'what'";
+    if (!formulaWhat1->IsValid()) ErrorString = "Invalid formula for 'what'";
     else
     {
         s = vsWhat;
         formulaWhat2 = parse(s);
-        if (!formulaWhat2)
-            ErrorString = "Invalid formula for 'vsWhat'";
+        if (!formulaWhat2) ErrorString = "Invalid formula for 'vsWhat'";
         else
         {
             if (!cuts.isEmpty())
             {
                 QString s = cuts;
                 formulaCuts = parse(s);
-                if (!formulaCuts)
-                    ErrorString = "Invalid formula for cuts";
+                if (!formulaCuts) ErrorString = "Invalid formula for cuts";
             }
 
             if (formulaCuts || cuts.isEmpty())
@@ -485,22 +569,19 @@ AHistorySearchProcessor_Border::AHistorySearchProcessor_Border(const QString &wh
 {
     QString s = what;
     formulaWhat1 = parse(s);
-    if (!formulaWhat1)
-        ErrorString = "Invalid formula for 'what'";
+    if (!formulaWhat1) ErrorString = "Invalid formula for 'what'";
     else
     {
         s = vsWhat;
         formulaWhat2 = parse(s);
-        if (!formulaWhat2)
-            ErrorString = "Invalid formula for 'vsWhat'";
+        if (!formulaWhat2) ErrorString = "Invalid formula for 'vsWhat'";
         else
         {
             if (!cuts.isEmpty())
             {
                 s = cuts;
                 formulaCuts = parse(s);
-                if (!formulaCuts)
-                    ErrorString = "Invalid formula for cuts";
+                if (!formulaCuts) ErrorString = "Invalid formula for cuts";
             }
 
             if (formulaCuts || cuts.isEmpty())
@@ -529,28 +610,24 @@ AHistorySearchProcessor_Border::AHistorySearchProcessor_Border(const QString &wh
 {
     QString s = what;
     formulaWhat1 = parse(s);
-    if (!formulaWhat1)
-        ErrorString = "Invalid formula for 'what'";
+    if (!formulaWhat1) ErrorString = "Invalid formula for 'what'";
     else
     {
         s = vsWhat;
         formulaWhat2 = parse(s);
-        if (!formulaWhat2)
-            ErrorString = "Invalid formula for 'vsWhat'";
+        if (!formulaWhat2) ErrorString = "Invalid formula for 'vsWhat'";
         else
         {
             s = andVsWhat;
             formulaWhat3 = parse(s);
-            if (!formulaWhat3)
-                ErrorString = "Invalid formula for 'andVsWhat'";
+            if (!formulaWhat3) ErrorString = "Invalid formula for 'andVsWhat'";
             else
             {
                 if (!cuts.isEmpty())
                 {
                     s = cuts;
                     formulaCuts = parse(s);
-                    if (!formulaCuts)
-                        ErrorString = "Invalid formula for cuts";
+                    if (!formulaCuts) ErrorString = "Invalid formula for cuts";
                 }
 
                 if (formulaCuts || cuts.isEmpty())

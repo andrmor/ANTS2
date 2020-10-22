@@ -71,6 +71,8 @@
 #include "TVectorD.h"
 #include "TTree.h"
 #include "TPavesText.h"
+#include "TGaxis.h"
+#include "TFrame.h"
 
 GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
   AGuiWindow("graph", parent), MW(mw),
@@ -86,11 +88,8 @@ GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
     ui->sProjBins->setEnabled(false);
     showHintInStatus();
 
-    QString str = "Cursor coordinates ";
-    str += QChar(8596);
-    str += QChar(8597);
-    str += " :";
-    ui->labCurCoorLab->setText(str);
+    ui->labX->setText(QChar(8596));
+    ui->labY->setText(QChar(8597));
 
     //window flags
     Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
@@ -205,14 +204,15 @@ TGraph* GraphWindowClass::MakeGraph(const QVector<double> *x, const QVector<doub
     QString opts = options;
     if (opts.contains("same",Qt::CaseInsensitive))
     {
-        if (LineWidth == 0) GraphWindowClass::Draw(gr, "P");
-        else GraphWindowClass::Draw(gr, "PL");
+        if (LineWidth == 0) Draw(gr, "P");
+        else Draw(gr, "PL");
     }
     else
     {
-        if (LineWidth == 0) GraphWindowClass::Draw(gr, "AP");
-        else GraphWindowClass::Draw(gr, "APL");
+        if (LineWidth == 0) Draw(gr, "AP");
+        else Draw(gr, "APL");
     }
+    RasterWindow->fCanvas->Update();
 
     return 0;
 }
@@ -254,7 +254,7 @@ TGraph *GraphWindowClass::ConstructTGraph(const std::vector<float> &x, const std
 TGraph *GraphWindowClass::ConstructTGraph(const QVector<double> &x, const QVector<double> &y,
                                           const char *Title, const char *XTitle, const char *YTitle,
                                           Color_t MarkerColor, int MarkerStyle, int MarkerSize,
-                                          Color_t LineColor, int LineStyle, int LineWidth) const
+                                          Color_t LineColor,   int LineStyle,   int LineWidth) const
 {
     TGraph* gr = ConstructTGraph(x,y);
     gr->SetTitle(Title); gr->GetXaxis()->SetTitle(XTitle); gr->GetYaxis()->SetTitle(YTitle);
@@ -264,7 +264,10 @@ TGraph *GraphWindowClass::ConstructTGraph(const QVector<double> &x, const QVecto
     return gr;
 }
 
-TGraph *GraphWindowClass::ConstructTGraph(const QVector<double> &x, const QVector<double> &y, const QString &Title, const QString &XTitle, const QString &YTitle, Color_t MarkerColor, int MarkerStyle, int MarkerSize, Color_t LineColor, int LineStyle, int LineWidth) const
+TGraph *GraphWindowClass::ConstructTGraph(const QVector<double> &x, const QVector<double> &y,
+                                          const QString &Title, const QString &XTitle, const QString &YTitle,
+                                          Color_t MarkerColor, int MarkerStyle, int MarkerSize,
+                                          Color_t LineColor,   int LineStyle,   int LineWidth) const
 {
     TGraph* gr = ConstructTGraph(x,y);
     gr->SetTitle(Title.toLatin1().data()); gr->GetXaxis()->SetTitle(XTitle.toLatin1().data()); gr->GetYaxis()->SetTitle(YTitle.toLatin1().data());
@@ -274,12 +277,15 @@ TGraph *GraphWindowClass::ConstructTGraph(const QVector<double> &x, const QVecto
     return gr;
 }
 
-TGraph *GraphWindowClass::ConstructTGraph(const std::vector<float> &x, const std::vector<float> &y, const char *Title, const char *XTitle, const char *YTitle, Color_t MarkerColor, int MarkerStyle, int MarkerSize, Color_t LineColor, int LineStyle, int LineWidth) const
+TGraph *GraphWindowClass::ConstructTGraph(const std::vector<float> &x, const std::vector<float> &y,
+                                          const char *Title, const char *XTitle, const char *YTitle,
+                                          Color_t MarkerColor, int MarkerStyle, int MarkerSize,
+                                          Color_t LineColor,   int LineStyle,   int LineWidth) const
 {
     TGraph* gr = ConstructTGraph(x,y);
     gr->SetTitle(Title); gr->GetXaxis()->SetTitle(XTitle); gr->GetYaxis()->SetTitle(YTitle);
     gr->SetMarkerStyle(MarkerStyle); gr->SetMarkerColor(MarkerColor); gr->SetMarkerSize(MarkerSize);
-    gr->SetEditable(false); gr->GetYaxis()->SetTitleOffset((Float_t)1.30);
+    gr->SetEditable(false); gr->GetYaxis()->SetTitleOffset(1.30f);
     gr->SetLineWidth(LineWidth); gr->SetLineColor(LineColor); gr->SetLineStyle(LineStyle);
     return gr;
 }
@@ -306,14 +312,42 @@ TGraph2D *GraphWindowClass::ConstructTGraph2D(const QVector<double>& x, const QV
     return gr;
 }
 
+void GraphWindowClass::configureGraph(TGraph * graph, const QString & GraphTitle,
+                                      const QString & XTitle, const QString & YTitle,
+                                      int MarkerColor, int MarkerStyle, int MarkerSize,
+                                      int LineColor,   int LineStyle, int LineWidth) const
+{
+    graph->SetTitle(GraphTitle.toLatin1().data());
+
+    graph->GetXaxis()->SetTitle(XTitle.toLatin1().data());
+    graph->GetYaxis()->SetTitle(YTitle.toLatin1().data());
+
+    graph->SetMarkerColor(MarkerColor); graph->SetMarkerStyle(MarkerStyle); graph->SetMarkerSize(MarkerSize);
+    graph->SetLineColor(LineColor);     graph->SetLineStyle(LineStyle);     graph->SetLineWidth(LineWidth);
+
+    graph->SetEditable(false);
+    graph->GetYaxis()->SetTitleOffset(1.30f);
+}
+
 void GraphWindowClass::AddLine(double x1, double y1, double x2, double y2, int color, int width, int style)
 {
-        TLine* l = new TLine(x1, y1, x2, y2);
-        l->SetLineColor(color);
-        l->SetLineWidth(width);
-        l->SetLineStyle(style);
+    TLine* l = new TLine(x1, y1, x2, y2);
+    l->SetLineColor(color);
+    l->SetLineWidth(width);
+    l->SetLineStyle(style);
 
-        DrawWithoutFocus(l, "SAME");
+    DrawWithoutFocus(l, "SAME");
+}
+
+#include "TArrow.h"
+void GraphWindowClass::AddArrow(double x1, double y1, double x2, double y2, int color, int width, int style)
+{
+    TArrow * l = new TArrow(x1, y1, x2, y2);
+    l->SetLineColor(color);
+    l->SetLineWidth(width);
+    l->SetLineStyle(style);
+
+    DrawWithoutFocus(l, ">SAME");
 }
 
 void GraphWindowClass::ShowAndFocus()
@@ -607,7 +641,6 @@ void GraphWindowClass::RegisterTObject(TObject *obj)
     tmpTObjects.append(obj);
 }
 
-#include "TGaxis.h"
 void GraphWindowClass::doDraw(TObject *obj, const char *opt, bool DoUpdate)
 {
     SetAsActiveRootWindow();
@@ -627,6 +660,18 @@ void GraphWindowClass::doDraw(TObject *obj, const char *opt, bool DoUpdate)
     QString options(opt);
     if (!options.contains("same", Qt::CaseInsensitive))
         UpdateGuiControlsForMainObject(obj->ClassName(), options);
+
+    fixGraphFrame();
+}
+
+void GraphWindowClass::fixGraphFrame()
+{
+    TVirtualPad * pad = RasterWindow->fCanvas->GetPad(0);
+    if (pad)
+    {
+        TFrame * frame = pad->GetFrame();
+        if (frame) frame->SetBit(TBox::kCannotMove);
+    }
 }
 
 void GraphWindowClass::updateSecondaryAxis(TGaxis * gaxis, const char *opt)
@@ -676,9 +721,16 @@ void GraphWindowClass::showHintInStatus()
 void GraphWindowClass::setShowCursorPosition(bool flag)
 {
     if (RasterWindow) RasterWindow->ShowCursorPosition = flag;
+    ui->frCursor->setVisible(flag);
 
-    ui->labCursor->setVisible(flag);
-    ui->labCurCoorLab->setVisible(flag);
+    if (!flag && ui->cbShowCross->isChecked()) ui->cbShowCross->setChecked(false);
+}
+
+void GraphWindowClass::on_cbShowCross_toggled(bool checked)
+{
+    RasterWindow->fCanvas->SetCrosshair(checked);
+
+    if (!checked) RedrawAll();
 }
 
 void GraphWindowClass::OnBusyOn()
@@ -695,23 +747,6 @@ void GraphWindowClass::OnBusyOff()
 
 void GraphWindowClass::mouseMoveEvent(QMouseEvent *event)
 {
-    if(RasterWindow->isVisible())
-    {
-        QMainWindow::mouseMoveEvent(event);
-        return;
-    }
-
-    /*
-    double x, y;
-    QPoint mouseInGV = event->pos() - gvOver->pos();
-    RasterWindow->PixelToXY(mouseInGV.x(), mouseInGV.y(), x, y);
-    //QString str = "Cursor coordinates: " + QString::number(x, 'g', 4);
-    QString str = QString::number(x, 'g', 4);
-    str += " : " + QString::number(y, 'g', 4);
-    //setWindowTitle(str);
-    ui->labCursor->setText(str);
-    */
-
     QMainWindow::mouseMoveEvent(event);
 }
 
@@ -987,6 +1022,8 @@ void GraphWindowClass::RedrawAll()
     qApp->processEvents();
     RasterWindow->fCanvas->Update();
     UpdateControls();
+
+    fixGraphFrame();
 }
 
 void GraphWindowClass::clearTmpTObjects()
@@ -1161,7 +1198,7 @@ void GraphWindowClass::on_leOptions_editingFinished()
     }
 }
 
-void GraphWindowClass::SaveGraph(QString fileName)
+void GraphWindowClass::SaveGraph(const QString & fileName)
 {
     RasterWindow->SaveAs(fileName);
 }
@@ -1369,7 +1406,7 @@ void GraphWindowClass::UpdateControls()
 
 void GraphWindowClass::DoSaveGraph(QString name)
 {  
-  GraphWindowClass::SaveGraph(MW->GlobSet.LastOpenDir + "/" + name);
+  GraphWindowClass::SaveGraph(AGlobalSettings::getInstance().LastOpenDir + "/" + name);
 }
 
 void GraphWindowClass::DrawStrOpt(TObject *obj, QString options, bool DoUpdate)
@@ -1520,7 +1557,7 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
     // --------------DRAW--------------
     qDebug() << "TreeDraw -> what:" << What << "cuts:" << Cond << "opt:"<<HowAdj;
 
-    GraphWindowClass* tmpWin = 0;
+    GraphWindowClass * tmpWin = nullptr;
     if (bHistToGraph)
     {
         tmpWin = new GraphWindowClass(this, MW);
@@ -1688,13 +1725,6 @@ void GraphWindowClass::on_pbExitToolMode_clicked()
 {
     changeOverlayMode(false);
 }
-
-//ui->pbToolboxDragMode->setEnabled(checked);
-//ui->fRange->setEnabled(!checked);
-//ui->fGrid->setEnabled(!checked);
-//ui->fLog->setEnabled(!checked);
-//ui->cbShowLegend->setEnabled(!checked);
-//ui->leOptions->setEnabled(!checked);
 
 void GraphWindowClass::on_pbToolboxDragMode_clicked()
 {
@@ -2028,7 +2058,7 @@ void GraphWindowClass::EnforceOverlayOff()
 
 QString & GraphWindowClass::getLastOpendDir()
 {
-    return MW->GlobSet.LastOpenDir;
+    return AGlobalSettings::getInstance().LastOpenDir;
 }
 
 void GraphWindowClass::on_pbAddToBasket_clicked()
@@ -2049,9 +2079,19 @@ void GraphWindowClass::on_pbAddToBasket_clicked()
 void GraphWindowClass::AddCurrentToBasket(const QString & name)
 {
     if (DrawObjects.isEmpty()) return;
+    updateLogScaleFlags(DrawObjects);
     Basket->add(name.simplified(), DrawObjects);
     ui->actionToggle_Explorer_Basket->setChecked(true);
     UpdateBasketGUI();
+}
+
+void GraphWindowClass::updateLogScaleFlags(QVector<ADrawObject> & drawObjects) const
+{
+    for (ADrawObject & drObj : drawObjects)
+    {
+        drObj.bLogScaleX = RasterWindow->isLogX();
+        drObj.bLogScaleY = RasterWindow->isLogY();
+    }
 }
 
 void GraphWindowClass::AddLegend(double x1, double y1, double x2, double y2, QString title)
@@ -2082,11 +2122,6 @@ void GraphWindowClass::SetLegendBorder(int color, int style, int size)
         }
     }
     qDebug() << "Legend object was not found!";
-}
-
-void GraphWindowClass::AddText(QString text, bool bShowFrame, int Alignment_0Left1Center2Right)
-{
-  if (!text.isEmpty()) ShowTextPanel(text, bShowFrame, Alignment_0Left1Center2Right);
 }
 
 void GraphWindowClass::ExportTH2AsText(QString fileName)
@@ -2180,23 +2215,8 @@ void GraphWindowClass::deletePressed()
 
 void GraphWindowClass::onCursorPositionReceived(double x, double y, bool bOn)
 {
-    QString str;
-
-    if (bOn)
-    {
-        /*
-        str = QChar(8596);
-        str += " " + QString::number(x, 'g', 4);
-        str += "  ";
-        str += QChar(8597);
-        str += " " + QString::number(y, 'g', 4);
-        */
-        str += QString::number(x, 'g', 4) + "  "  + QString::number(y, 'g', 4);
-    }
-    else
-        str = "--";
-
-    ui->labCursor->setText(str);
+    ui->labCursorX->setText(bOn ? QString::number(x, 'g', 4) : "--");
+    ui->labCursorY->setText(bOn ? QString::number(y, 'g', 4) : "--");
 }
 
 void GraphWindowClass::MakeCopyOfDrawObjects()
@@ -2298,10 +2318,10 @@ void GraphWindowClass::BasketCustomContextMenuRequested(const QPoint &pos)
     }
     else if (selectedItem == save)
     {
-        QString fileName = QFileDialog::getSaveFileName(this, "Save basket to a file", MW->GlobSet.LastOpenDir, "Root files (*.root)");
+        QString fileName = QFileDialog::getSaveFileName(this, "Save basket to a file", AGlobalSettings::getInstance().LastOpenDir, "Root files (*.root)");
         if (!fileName.isEmpty())
         {
-            MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+            AGlobalSettings::getInstance().LastOpenDir = QFileInfo(fileName).absolutePath();
             if (QFileInfo(fileName).suffix().isEmpty()) fileName += ".root";
             Basket->saveAll(fileName);
         }
@@ -2309,10 +2329,10 @@ void GraphWindowClass::BasketCustomContextMenuRequested(const QPoint &pos)
     else if (selectedItem == append)
     {
         bool bDrawEmpty = DrawObjects.isEmpty();
-        const QString fileName = QFileDialog::getOpenFileName(this, "Append all from a basket file", MW->GlobSet.LastOpenDir, "Root files (*.root)");
+        const QString fileName = QFileDialog::getOpenFileName(this, "Append all from a basket file", AGlobalSettings::getInstance().LastOpenDir, "Root files (*.root)");
         if (!fileName.isEmpty())
         {
-            MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+            AGlobalSettings::getInstance().LastOpenDir = QFileInfo(fileName).absolutePath();
             QString err = Basket->appendBasket(fileName);
             if (!err.isEmpty()) message(err, this);
             UpdateBasketGUI();
@@ -2321,19 +2341,19 @@ void GraphWindowClass::BasketCustomContextMenuRequested(const QPoint &pos)
     }
     else if (selectedItem == appendRootHistsAndGraphs)
     {
-        const QString fileName = QFileDialog::getOpenFileName(this, "Append hist and graph objects from ROOT file", MW->GlobSet.LastOpenDir, "Root files (*.root)");
+        const QString fileName = QFileDialog::getOpenFileName(this, "Append hist and graph objects from ROOT file", AGlobalSettings::getInstance().LastOpenDir, "Root files (*.root)");
         if (!fileName.isEmpty())
         {
-            MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+            AGlobalSettings::getInstance().LastOpenDir = QFileInfo(fileName).absolutePath();
             Basket->appendRootHistGraphs(fileName);
             UpdateBasketGUI();
         }
     }
     else if (selectedItem == appendTxt)
     {
-        QString fileName = QFileDialog::getOpenFileName(this, "Append graph from ascii file to basket", MW->GlobSet.LastOpenDir, "Data files (*.txt *.dat); All files (*.*)");
+        QString fileName = QFileDialog::getOpenFileName(this, "Append graph from ascii file to basket", AGlobalSettings::getInstance().LastOpenDir, "Data files (*.txt *.dat); All files (*.*)");
         if (fileName.isEmpty()) return;
-        MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+        AGlobalSettings::getInstance().LastOpenDir = QFileInfo(fileName).absolutePath();
         const QString res = Basket->appendTxtAsGraph(fileName);
         if (!res.isEmpty()) message(res, this);
         else
@@ -2341,9 +2361,9 @@ void GraphWindowClass::BasketCustomContextMenuRequested(const QPoint &pos)
     }
     else if (selectedItem == appendTxtEr)
     {
-        QString fileName = QFileDialog::getOpenFileName(this, "Append graph with errors from ascii file to basket", MW->GlobSet.LastOpenDir, "Data files (*.txt *.dat); All files (*.*)");
+        QString fileName = QFileDialog::getOpenFileName(this, "Append graph with errors from ascii file to basket", AGlobalSettings::getInstance().LastOpenDir, "Data files (*.txt *.dat); All files (*.*)");
         if (fileName.isEmpty()) return;
-        MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+        AGlobalSettings::getInstance().LastOpenDir = QFileInfo(fileName).absolutePath();
         const QString res = Basket->appendTxtAsGraphErrors(fileName);
         if (!res.isEmpty()) message(res, this);
         else
@@ -2427,15 +2447,15 @@ void GraphWindowClass::on_actionSave_image_triggered()
 {
   QFileDialog *fileDialog = new QFileDialog;
   fileDialog->setDefaultSuffix("png");
-  QString fileName = fileDialog->getSaveFileName(this, "Save image as file", MW->GlobSet.LastOpenDir, "png (*.png);;gif (*.gif);;Jpg (*.jpg)");
+  QString fileName = fileDialog->getSaveFileName(this, "Save image as file", AGlobalSettings::getInstance().LastOpenDir, "png (*.png);;gif (*.gif);;Jpg (*.jpg)");
   if (fileName.isEmpty()) return;
-  MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+  AGlobalSettings::getInstance().LastOpenDir = QFileInfo(fileName).absolutePath();
 
   QFileInfo file(fileName);
   if (file.suffix().isEmpty()) fileName += ".png";
 
   GraphWindowClass::SaveGraph(fileName);
-  if (MW->GlobSet.fOpenImageExternalEditor) QDesktopServices::openUrl(QUrl("file:"+fileName, QUrl::TolerantMode));
+  if (AGlobalSettings::getInstance().fOpenImageExternalEditor) QDesktopServices::openUrl(QUrl("file:"+fileName, QUrl::TolerantMode));
 }
 
 void GraphWindowClass::on_actionBasic_ROOT_triggered()
@@ -2656,9 +2676,10 @@ void GraphWindowClass::on_pbAddText_clicked()
     Explorer->activateCustomGuiForItem(DrawObjects.size()-1);
 }
 
-void GraphWindowClass::ShowTextPanel(const QString Text, bool bShowFrame, int AlignLeftCenterRight)
+void GraphWindowClass::ShowTextPanel(const QString Text, bool bShowFrame, int AlignLeftCenterRight,
+                                     double x1, double y1, double x2, double y2, const QString opt)
 {
-  TPaveText* la = new TPaveText(0.15, 0.75, 0.5, 0.85, "NDC");
+  TPaveText* la = new TPaveText(x1, y1, x2, y2, opt.toLatin1().data());
   la->SetFillColor(0);
   la->SetBorderSize(bShowFrame ? 1 : 0);
   la->SetLineColor(1);
@@ -2746,6 +2767,12 @@ void GraphWindowClass::switchToBasket(int index)
     DrawObjects = Basket->getCopy(index);
     RedrawAll();
 
+    if (!DrawObjects.isEmpty())
+    {
+        ui->cbLogX->setChecked(DrawObjects.first().bLogScaleX);
+        ui->cbLogY->setChecked(DrawObjects.first().bLogScaleY);
+    }
+
     ActiveBasketItem = index;
     ClearCopyOfActiveBasketId();
     ClearCopyOfDrawObjects();
@@ -2758,6 +2785,7 @@ void GraphWindowClass::on_pbUpdateInBasket_clicked()
     HighlightUpdateBasketButton(false);
 
     if (ActiveBasketItem < 0 || ActiveBasketItem >= Basket->size()) return;
+    updateLogScaleFlags(DrawObjects);
     Basket->update(ActiveBasketItem, DrawObjects);
 }
 

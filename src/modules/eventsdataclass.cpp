@@ -591,22 +591,24 @@ void EventsDataClass::copyTrueToReconstructed(int igroup)
   }
 
   clearReconstruction(igroup);
-  for (int iEvent=0; iEvent<Scan.size(); iEvent++)
-    {
-      AReconRecord* rec = new AReconRecord();
-      rec->Points.Reinitialize(0);
+  for (int iEvent = 0; iEvent < Scan.size(); iEvent++)
+  {
+      AReconRecord * rec = new AReconRecord();
+      rec->Points.Reinitialize(0);  // TODO reinitialize to the proper size!
 
       for (int i=0; i<Scan.at(iEvent)->Points.size(); i++)
-         rec->Points.AddPoint(Scan.at(iEvent)->Points[i].r, Scan.at(iEvent)->Points[i].energy);
+         rec->Points.AddPoint(Scan.at(iEvent)->Points[i].r,
+                              Scan.at(iEvent)->Points[i].energy,
+                              Scan.at(iEvent)->Points[i].time);
 
-      rec->chi2 = 1;
+      rec->chi2 = 1.0;
       rec->EventId = iEvent;
       rec->GoodEvent = true;
       rec->ReconstructionOK = true;
 
       ReconstructionData[igroup].append(rec);
       //rec->report();
-    }
+  }
   fReconstructionDataReady = true;
 }
 
@@ -623,7 +625,9 @@ void EventsDataClass::copyReconstructedToTrue(int igroup)
 
         rec->Points.Reinitialize(0);
         for (int i=0; i<ReconstructionData.at(igroup).at(iEvent)->Points.size(); i++)
-           rec->Points.AddPoint(ReconstructionData.at(igroup).at(iEvent)->Points[i].r, ReconstructionData.at(igroup).at(iEvent)->Points[i].energy);
+           rec->Points.AddPoint(ReconstructionData.at(igroup).at(iEvent)->Points[i].r,
+                                ReconstructionData.at(igroup).at(iEvent)->Points[i].energy,
+                                ReconstructionData.at(igroup).at(iEvent)->Points[i].time);
 
         Scan.append(rec);
       }
@@ -678,8 +682,8 @@ bool EventsDataClass::createReconstructionTree(APmHub* PMs, bool fIncludePMsigna
   //Pm signals and rho
   int numPMs = PMs->count();
   char buf[32];
-  float* signal = 0;
-  float* rho = 0;
+  float * signal = nullptr;
+  float * rho    = nullptr;
   if (fIncludePMsignals)
      {
        signal = new float[numPMs];
@@ -703,26 +707,28 @@ bool EventsDataClass::createReconstructionTree(APmHub* PMs, bool fIncludePMsigna
   std::vector <double> xScan;
   std::vector <double> yScan;
   std::vector <double> zScan;
-  std::vector <int> numPhotons;
+  std::vector <double> eScan;
+  std::vector <double> tScan;
   double zStop;
-  int ScintType, GoodEvent, EventType;
+  int ScintType, GoodEvent;
 
   if (!isScanEmpty() && fIncludeTrue)
-    {
+  {
       ReconstructionTree->Branch("xScan", &xScan);
       ReconstructionTree->Branch("yScan", &yScan);
       ReconstructionTree->Branch("zScan", &zScan);
-      ReconstructionTree->Branch("numPhotons", &numPhotons);
+      ReconstructionTree->Branch("eScan", &eScan);
+      ReconstructionTree->Branch("tScan", &tScan);
 
       ReconstructionTree->Branch("zStop",&zStop, "zStop/D");
       ReconstructionTree->Branch("ScintType",&ScintType, "ScintType/I");
       ReconstructionTree->Branch("GoodEvent",&GoodEvent, "GoodEvent/I");
-      ReconstructionTree->Branch("EventType",&EventType, "EventType/I");
-    }
+      //ReconstructionTree->Branch("EventType",&EventType, "EventType/I");
+  }
 
   //========= building tree =========
   for (int iev=0; iev<size; iev++)
-    {
+  {
       ievent = ReconstructionData[igroup][iev]->EventId;
 
       if (fRecReady)
@@ -766,31 +772,33 @@ bool EventsDataClass::createReconstructionTree(APmHub* PMs, bool fIncludePMsigna
       //frac1 = maxSig/ssum;
 
       if (!isScanEmpty() && fIncludeTrue)
-        {
+      {
           int Points = Scan[iev]->Points.size();
           xScan.resize(Points);
           yScan.resize(Points);
           zScan.resize(Points);
-          numPhotons.resize(Points);
+          eScan.resize(Points);
+          tScan.resize(Points);
           for (int iP=0; iP<Points; iP++)
             {
               xScan[iP] = Scan[iev]->Points[iP].r[0];
               yScan[iP] = Scan[iev]->Points[iP].r[1];
               zScan[iP] = Scan[iev]->Points[iP].r[2];
-              numPhotons[iP] = Scan[iev]->Points[iP].energy;
+              eScan[iP] = Scan[iev]->Points[iP].energy;
+              tScan[iP] = Scan[iev]->Points[iP].time;
             }
           zStop = Scan[iev]->zStop;
           ScintType = Scan[iev]->ScintType;
           GoodEvent = Scan[iev]->GoodEvent;
-          EventType = Scan[iev]->EventType;
-        }
+          //EventType = Scan[iev]->EventType;
+      }
 
       ReconstructionTree->Fill();
-    }
+  }
 
   ReconstructionTree->ResetBranchAddresses();
-  if (signal) delete [] signal;
-  if (rho) delete [] rho;
+  delete [] signal;
+  delete [] rho;
     qDebug()<<"   Tree created with "<<ReconstructionTree->GetEntries()<<" entries";
   return true;
 }
@@ -957,22 +965,26 @@ bool EventsDataClass::saveSimulationAsTree(QString fileName)
   std::vector <double> y;
   std::vector <double> z;
   double zStop;
-  std::vector <int> numPhotons; //int numPhots;
-  int ScintType, GoodEvent, EventType;
+  //std::vector <int> numPhotons; //int numPhots;
+  std::vector <double> energy;
+  std::vector <double> time;
+  int ScintType, GoodEvent;//, EventType;
   int iev;
 
   tree->Branch("i",&iev, "i/I");
   if (!Scan.isEmpty())
-    {
+  {
       tree->Branch("x", &x);
       tree->Branch("y", &y);
       tree->Branch("z", &z);
       tree->Branch("zStop",&zStop, "zStop/D");
-      tree->Branch("numPhotons", &numPhotons);
+      //tree->Branch("numPhotons", &numPhotons);
+      tree->Branch("energy", &energy);
+      tree->Branch("time", &time);
       tree->Branch("ScintType",&ScintType, "ScintType/I");
       tree->Branch("GoodEvent",&GoodEvent, "GoodEvent/I");
-      tree->Branch("EventType",&EventType, "EventType/I");
-    }
+      //tree->Branch("EventType",&EventType, "EventType/I");
+  }
   float* signal;
   signal = new float[numPMs];
   char buf[32];
@@ -998,18 +1010,23 @@ bool EventsDataClass::saveSimulationAsTree(QString fileName)
           x.resize(Points);
           y.resize(Points);
           z.resize(Points);
-          numPhotons.resize(Points);
+          //numPhotons.resize(Points);
+          energy.resize(Points);
+          time.resize(Points);
           for (int iP=0; iP<Points; iP++)
-            {
-              x[iP] = Scan[iev]->Points[iP].r[0];
-              y[iP] = Scan[iev]->Points[iP].r[1];
-              z[iP] = Scan[iev]->Points[iP].r[2];
-              numPhotons[iP] = Scan[iev]->Points[iP].energy;
-            }
+          {
+              const APositionEnergyRecord & p = Scan[iev]->Points[iP];
+              x[iP] = p.r[0];
+              y[iP] = p.r[1];
+              z[iP] = p.r[2];
+              //numPhotons[iP] = Scan[iev]->Points[iP].energy;
+              energy[iP] = p.energy;
+              time[iP]   = p.time;
+          }
           zStop = Scan[iev]->zStop;
           ScintType = Scan[iev]->ScintType;
           GoodEvent = Scan[iev]->GoodEvent;
-          EventType = Scan[iev]->EventType;
+          //EventType = Scan[iev]->EventType;
         }
       tree->Fill();
     }
@@ -1555,6 +1572,18 @@ bool EventsDataClass::overlayAsciiFile(QString fileName, bool fAddMulti, APmHub*
   return true;
 }
 
+void EventsDataClass::addEmptyEvents(int numEmptyEvents, int numPMs, int numTimeBins)
+{
+    QVector<float> event(numPMs, 0);
+    Events = QVector<QVector<float>>(numEmptyEvents, event); // event pm
+
+    if (numTimeBins != 1)
+    {
+        QVector<QVector<float>> timeEvent(numTimeBins, event);
+        TimedEvents = QVector<QVector<QVector<float>>>(numEmptyEvents, timeEvent); //event timebin pm
+    }
+}
+
 int EventsDataClass::loadSimulatedEventsFromTree(QString fileName, const APmHub &PMs, int maxEvents)
 {
   ErrorString = "";
@@ -1609,7 +1638,9 @@ int EventsDataClass::loadSimulatedEventsFromTree(QString fileName, const APmHub 
   //num of PMs in the Tree data?
   TBranch* signalBranch = T->FindBranch("signal");
   TString title = signalBranch->GetTitle();  //  "signal[%d]/D"    or "signal[%d]/F"
-  bool fDoubleSignals = (title.Contains("D")) ? true : false;  //(title.Contains("F"))
+  //bool fDoubleSignals = (title.Contains("D")) ? true : false;  //(title.Contains("F"))
+  bool fDoubleSignals = title.Contains("D");
+  bool bOldEnergy = (bool)T->FindBranch("numPhotons");  // new system: numPhotons was replaced with "energy" and "time" was added
 
   title.ReplaceAll("signal[","");
   title.ReplaceAll("]/D","");
@@ -1638,21 +1669,30 @@ int EventsDataClass::loadSimulatedEventsFromTree(QString fileName, const APmHub 
   double zStop;
   std::vector <double> *x = 0, *y = 0, *z = 0;
   std::vector <int> *numPhotons = 0;
-  int ScintType, GoodEvent, EventType;
+  std::vector <double> * energy = 0;
+  std::vector <double> * time = 0;
+  int ScintType, GoodEvent; //, EventType;
   TBranch *bx = 0;
 
   if (ScanDataPresent)
-    {
+  {
       T->SetBranchAddress("x", &x, &bx);
       T->SetBranchAddress("y", &y);
       T->SetBranchAddress("z", &z);
-      T->SetBranchAddress("numPhotons", &numPhotons);
+
+      if (bOldEnergy)
+          T->SetBranchAddress("numPhotons", &numPhotons);
+      else
+      {
+          T->SetBranchAddress("energy", &energy);
+          T->SetBranchAddress("time",   &time);
+      }
 
       T->SetBranchAddress("zStop", &zStop);
       T->SetBranchAddress("ScintType", &ScintType);
       T->SetBranchAddress("GoodEvent", &GoodEvent);
-      T->SetBranchAddress("EventType", &EventType);
-    }
+      //T->SetBranchAddress("EventType", &EventType);
+  }
 
   float *signalF = new float[numPMs];
   std::vector< std::vector <float> > *signalTimedF = 0;  //  [timebin][ipm]
@@ -1671,32 +1711,41 @@ int EventsDataClass::loadSimulatedEventsFromTree(QString fileName, const APmHub 
     }
 
   for (int iev=0; iev<numEv; iev++)
-    {
+  {
       if (limitNumEvents && iev==maxEvents) break;
 
       Long64_t tentry = T->LoadTree(iev);
       T->GetEntry(tentry);
 
       if (ScanDataPresent)
-        {
+      {
           AScanRecord* scs = new AScanRecord();
           int Points = x->size();
           //                        qDebug()<<"Points this event:"<<Points;
           if (Points != 1) scs->Points.Reinitialize(Points);
           for (int iP = 0; iP<Points; iP++)
-            {
+          {
               scs->Points[iP].r[0] = x->at(iP);
               scs->Points[iP].r[1] = y->at(iP);
               scs->Points[iP].r[2] = z->at(iP);
-              scs->Points[iP].energy = numPhotons->at(iP);
-            }
+              if (bOldEnergy)
+              {
+                  scs->Points[iP].energy = numPhotons->at(iP);
+                  scs->Points[iP].time   = 0;
+              }
+              else
+              {
+                  scs->Points[iP].energy = energy->at(iP);
+                  scs->Points[iP].time   = time->at(iP);
+              }
+          }
           scs->zStop = zStop;
           scs->GoodEvent = GoodEvent;
-          scs->EventType = EventType;
+          //scs->EventType = EventType;
           scs->ScintType = ScintType;
 
           Scan.append(scs);          
-        }
+      }
 
       QVector<float> PMsignals(numPMs);
       if (fDoubleSignals)

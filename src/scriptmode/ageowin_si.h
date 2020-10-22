@@ -24,11 +24,13 @@ public slots:
   void BlockUpdates(bool on); //forbids updates
 
   //orientation of TView3D
+  /*
   double GetPhi();
   double GetTheta();
   void SetPhi(double phi);
   void SetTheta(double theta);
   void Rotate(double Theta, double Phi, int Steps, int msPause = 50);
+  */
 
   //view manipulation
   void SetZoom(int level);
@@ -63,9 +65,11 @@ public slots:
   void SaveImage(QString fileName);
 
   // VS
-  int AddTrack();
+  int  AddTrack();
   void AddNodeToTrack(int trk, float x, float y, float z);
   void DeleteAllTracks();
+
+  void AddMarkers(QVariantList XYZs, int color);
 
 private:
   MainWindow* MW;

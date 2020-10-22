@@ -3,6 +3,7 @@
 #include "aglobalsettings.h"
 #include "ui_mainwindow.h"
 #include "detectorclass.h"
+#include "asandwich.h"
 #include "materialinspectorwindow.h"
 #include "amaterialparticlecolection.h"
 #include "detectoraddonswindow.h"
@@ -36,21 +37,6 @@ void MainWindow::writeDetectorToJson(QJsonObject &json)
   Detector->writeToJson(json);
 }
 
-// will be obsolete after conversion!
-bool MainWindow::readDetectorFromJson(QJsonObject &json)
-{
-  GeometryWindow->fRecallWindow = false;
-  bool fOK = Detector->MakeDetectorFromJson(json);
-  if (!fOK)
-    {
-      qCritical() << "Error while loading detector config";
-      return false;
-    }
-
-  //gui update is automatically triggered
-  return true;
-}
-
 void MainWindow::onRequestDetectorGuiUpdate()
 {
     //qDebug() << "DetJson->DetGUI";
@@ -73,15 +59,16 @@ void MainWindow::onRequestDetectorGuiUpdate()
   ui->cbLPM->setChecked(Detector->PMarrays[1].fActive);
   on_pbShowPMsArrayRegularData_clicked(); //update regular array fields
   //Detector addon window updates
-  DAwindow->UpdateGUI();
-  if (Detector->PMdummies.size()>0) DAwindow->UpdateDummyPMindication();
+  DAwindow->UpdateGUI();  
   //Output window
   Owindow->RefreshData();
 //  Owindow->ResetViewport();  // *** !!! extend to other windows too!
   //world
-  ui->ledTopSizeXY->setText( QString::number(2.0*Detector->WorldSizeXY, 'g', 4) );
-  ui->ledTopSizeZ->setText( QString::number(2.0*Detector->WorldSizeZ, 'g', 4) );
-  ui->cbFixedTopSize->setChecked( Detector->fWorldSizeFixed );
+  const double WorldSizeXY = Detector->Sandwich->getWorldSizeXY();
+  const double WorldSizeZ  = Detector->Sandwich->getWorldSizeZ();
+  ui->ledTopSizeXY->setText( QString::number(2.0 * WorldSizeXY, 'g', 4) );
+  ui->ledTopSizeZ-> setText( QString::number(2.0 * WorldSizeZ,  'g', 4) );
+  ui->cbFixedTopSize->setChecked( Detector->Sandwich->isWorldSizeFixed() );
   //misc
   ShowPMcount();
   //CheckPresenseOfSecScintillator(); //checks if SecScint present, and update selectors of primary/secondary scintillation  //***!!! potentially slow on large geometries!!!
@@ -95,13 +82,7 @@ void MainWindow::onRequestDetectorGuiUpdate()
   //GDML?
   onGDMLstatusChage(!Detector->isGDMLempty());
 
-  //Detector->checkSecScintPresent();
-  //ui->fSecondaryLightGenType->setEnabled(Detector->fSecScintPresent);
-
-  //readExtraGuiFromJson(Config->JSON); //new!
-  //qDebug() << "Before:\n"<<Config->JSON["DetectorConfig"].toObject()["LoadExpDataConfig"].toObject();
   UpdatePreprocessingSettingsIndication();
-  //qDebug() << "AFTER:\n"<<Config->JSON["DetectorConfig"].toObject()["LoadExpDataConfig"].toObject();
 
   DoNotUpdateGeometry = false;
 
@@ -141,7 +122,7 @@ void MainWindow::writeExtraGuiToJson(QJsonObject &json)
         jmain["MW"] = jsMW;
 
         QJsonObject jeom;
-        jeom["ZoomLevel"] = GeometryWindow->ZoomLevel;
+            GeometryWindow->writeToJson(jeom);
         jmain["GeometryWindow"] = jeom;
 
         Rwindow->writeMiscGUIsettingsToJson(jmain);  //Misc setting (PlotXY, blur)
@@ -166,12 +147,9 @@ void MainWindow::readExtraGuiFromJson(QJsonObject &json)
     }
     onGuiEnableStatus(fConfigGuiLocked);
 
-    QJsonObject js = jmain["GeometryWindow"].toObject();
-    if (js.contains("ZoomLevel"))
-    {
-        GeometryWindow->ZoomLevel = js["ZoomLevel"].toInt();
-        GeometryWindow->Zoom(true);
-    }
+    QJsonObject js;
+    if ( parseJson(jmain, "GeometryWindow", js) ) GeometryWindow->readFromJson(js);
+
     if (jmain.contains("ReconstructionWindow"))
         Rwindow->readMiscGUIsettingsFromJson(jmain);
 
@@ -246,21 +224,28 @@ void MainWindow::writeSimSettingsToJson(QJsonObject &json)
 void MainWindow::onRequestSimulationGuiUpdate()
 {
     //      qDebug() << "SimJson->SimGUI";
-    MainWindow::readSimSettingsFromJson(Config->JSON);
+    readSimSettingsFromJson(Config->JSON);
 }
 
+#include "aparticlesourcedialog.h"
 bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
 {
-  //        qDebug() << "Read sim from json and update sim gui";
+  //qDebug() << "Read sim from json and update sim gui";
+
+  if (ParticleSourceDialog)
+  {
+      ParticleSourceDialog->blockSignals(true);
+      ParticleSourceDialog->reject();
+  }
+
   if (!json.contains("SimulationConfig"))
-    {
-      //qWarning() << "Json does not contain sim settings!";
+  {
+      qWarning() << "Json does not contain sim settings!";
       return false;
-    }
+  }
 
   //cleanup  
-  if (histScan) delete histScan;
-  histScan = nullptr;
+  delete histScan; histScan = nullptr;
   ui->pbScanDistrShow->setEnabled(false);
   ui->pbScanDistrDelete->setEnabled(false);
   populateTable = true;
@@ -330,16 +315,24 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
       G4SimSet.readFromJson(g4js);
   ui->cbGeant4ParticleTracking->setChecked(G4SimSet.bTrackParticles);
 
+  ExitParticleSettings.SaveParticles = false;
+  {
+      QJsonObject js;
+        bool bOK = parseJson(gjs, "ExitParticleSettings", js);
+      if (bOK) ExitParticleSettings.readFromJson(js);
+  }
+  ui->labParticlesToFile->setVisible(ExitParticleSettings.SaveParticles);
+
   //POINT SOURCES
   QJsonObject pojs = js["PointSourcesConfig"].toObject();
   //control
   QJsonObject pcj = pojs["ControlOptions"].toObject();
   int SimMode = pcj["Single_Scan_Flood"].toInt();
-  if (SimMode>-1 && SimMode<ui->twSingleScan->count())
+  if (SimMode > -1 && SimMode < ui->cobNodeGenerationMode->count())
   {
-      ui->twSingleScan->blockSignals(true);
-      ui->twSingleScan->setCurrentIndex(SimMode);
-      ui->twSingleScan->blockSignals(false);
+      //ui->cobNodeGenerationMode->blockSignals(true);
+      ui->cobNodeGenerationMode->setCurrentIndex(SimMode);
+      //ui->cobNodeGenerationMode->blockSignals(false);
   }  
   JsonToComboBox(pcj, "Primary_Secondary", ui->cobScintTypePointSource);
   //JsonToCheckbox(pcj, "BuildTracks", ui->cbPointSourceBuildTracks);
@@ -367,30 +360,31 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
   JsonToSpinBox(ppj, "PhotPerNodeUniMax", ui->sbScanNumMax);
   JsonToLineEditDouble(ppj, "PhotPerNodeGaussMean", ui->ledScanGaussMean);
   JsonToLineEditDouble(ppj, "PhotPerNodeGaussSigma", ui->ledScanGaussSigma);
+  JsonToLineEditDouble(ppj, "PhotPerNodePoissonMean", ui->ledScanPoissonMean);
   if (ppj.contains("PhotPerNodeCustom"))
-    {
+  {
       QJsonArray ja = ppj["PhotPerNodeCustom"].toArray();
       int size = ja.size();
       if (size > 0)
-        {
-          double* xx = new double[size];
-          int* yy    = new int[size];
+      {
+          double * xx = new double[size];
+          double * yy = new double[size];
           for (int i=0; i<size; i++)
-            {
+          {
               xx[i] = ja[i].toArray()[0].toDouble();
-              yy[i] = ja[i].toArray()[1].toInt();
-            }
-          histScan = new TH1I("histPhotDistr","Photon distribution", size-1, xx);          
+              yy[i] = ja[i].toArray()[1].toDouble();
+          }
+          histScan = new TH1D("","CustomNumPhotDist", size-1, xx);
           histScan->SetXTitle("Number of generated photons");
-          histScan->SetYTitle("Relative probability");
-          for (int i = 1; i<size+1; i++) histScan->SetBinContent(i, yy[i-1]);
+          histScan->SetYTitle("Relative probability, a.u.");
+          for (int i = 1; i < size + 1; i++) histScan->SetBinContent(i, yy[i-1]);
           histScan->GetIntegral();
           delete[] xx;
           delete[] yy;
           ui->pbScanDistrShow->setEnabled(true);
           ui->pbScanDistrDelete->setEnabled(true);
-        }
-    }  
+      }
+  }
   //Wavelength/decay options
   QJsonObject wdj = pojs["WaveTimeOptions"].toObject();
   ui->cbFixWavelengthPointSource->setChecked(false);  //compatibility
@@ -405,6 +399,13 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
   ui->cobFixedDirOrCone->setCurrentIndex(0); //compatibility
   JsonToComboBox(pdj, "Fixed_or_Cone", ui->cobFixedDirOrCone);
   JsonToCheckbox(pdj, "Random", ui->cbRandomDir);
+
+  //testing new system, to be updated later!
+  QJsonObject sdsJson;
+  if (parseJson(pojs, "SpatialDistOptions", sdsJson))
+    SimulationManager->Settings.photSimSet.SpatialDistSettings.readFromJson(sdsJson);
+  else SimulationManager->Settings.photSimSet.SpatialDistSettings.clearSettings();
+  updateCNDgui();
 
   //Single position options
   QJsonObject spj = pojs["SinglePositionOptions"].toObject();
@@ -484,7 +485,7 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
             else if (PartGenMode == "File")    PGMindex = 1;
             else if (PartGenMode == "Script")  PGMindex = 2;
             else qWarning() << "Load sim settings: Unknown particle generation mode!";
-            ui->twParticleGenerationMode->setCurrentIndex(PGMindex);
+            ui->cobParticleGenerationMode->setCurrentIndex(PGMindex);
             JsonToSpinBox (csjs, "EventsToDo", ui->sbGunEvents);
             JsonToCheckbox(csjs, "AllowMultipleParticles", ui->cbGunAllowMultipleEvents);
             JsonToLineEditDouble(csjs, "AverageParticlesPerEvent", ui->ledGunAverageNumPartperEvent);
@@ -497,22 +498,23 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
             ui->cbIgnoreEventsWithNoEnergyDepo->setChecked(false);
             JsonToCheckbox(csjs, "IgnoreNoDepoEvents", ui->cbIgnoreEventsWithNoEnergyDepo);
             JsonToLineEditDouble(csjs, "ClusterMergeRadius", ui->ledClusterRadius);
+            JsonToCheckbox(csjs, "ClusterMerge", ui->cbMergeClusters);
+            JsonToLineEditDouble(csjs, "ClusterMergeTime", ui->ledClusterTimeDif);
 
         //particle sources
-        SimulationManager->ParticleSources->readFromJson(psjs);
+        SimulationManager->Settings.partSimSet.SourceGenSettings.readFromJson(psjs);
+        //SimulationManager->ParticleSources->readFromJson(psjs);
         on_pbUpdateSourcesIndication_clicked();
 
         //generation from file
         QJsonObject fjs;
         parseJson(psjs, "GenerationFromFile", fjs);
-            if (!fjs.isEmpty())
-                SimulationManager->FileParticleGenerator->readFromJson(fjs);
+            if (!fjs.isEmpty()) SimulationManager->Settings.partSimSet.FileGenSettings.readFromJson(fjs);
         updateFileParticleGeneratorGui();
 
         QJsonObject sjs;
         parseJson(psjs, "GenerationFromScript", sjs);
-            if (!sjs.isEmpty())
-                SimulationManager->ScriptParticleGenerator->readFromJson(sjs);
+            if (!sjs.isEmpty()) SimulationManager->Settings.partSimSet.ScriptGenSettings.readFromJson(sjs);
         updateScriptParticleGeneratorGui();
 
         ui->labPhTracksOn_1->setVisible(SimulationManager->TrackBuildOptions.bBuildPhotonTracks);
@@ -520,57 +522,46 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
         ui->labPartLogOn->setVisible(SimulationManager->LogsStatOptions.bParticleTransportLog);
 
 
-  //Window CONTROL
+  //mode control
   if (js.contains("Mode"))
-    {
+  {
       ui->twSourcePhotonsParticles->blockSignals(true);
       QString Mode = js["Mode"].toString();
       if (Mode == "PointSim") ui->twSourcePhotonsParticles->setCurrentIndex(0);
       else if (Mode =="StackSim" || Mode =="SourceSim") ui->twSourcePhotonsParticles->setCurrentIndex(1);
       ui->twSourcePhotonsParticles->blockSignals(false);
-    }
+  }
 
   DoNotUpdateGeometry = false;
   BulkUpdate = false;
 
   //updating global parameters
-  //MainWindow::on_cbWaveResolved_toggled(ui->cbWaveResolved->isChecked()); //update on toggle
   WaveFrom = ui->ledWaveFrom->text().toDouble(); //***!!!
   WaveStep = ui->ledWaveStep->text().toDouble();
-  MainWindow::CorrectWaveTo(); //WaveTo and WaveNode are set here
-  //update materialCollection info -rebinning, hists
-  //bool bWaveRes = ui->cbWaveResolved->isChecked();
-  //MpCollection->SetWave(bWaveRes, WaveFrom, WaveTo, WaveStep, WaveNodes); //***!!! move!!!
-  //for (int i=0; i<MpCollection->countMaterials(); i++)
-  //    MpCollection->UpdateWaveResolvedProperties(i); //***!!! move
-  //PMs->SetWave(bWaveRes, WaveFrom, WaveStep, WaveNodes);
-  //PMs->RebinPDEs(); //update PMs info -rebinning, hists
+  CorrectWaveTo(); //WaveTo and WaveNode are set here
   on_pbIndPMshowInfo_clicked(); //to refresh the binned button
-  //MainWindow::on_cbAngularSensitive_toggled(ui->cbAngularSensitive->isChecked());
-  //MainWindow::on_cbTimeResolved_toggled(ui->cbTimeResolved->isChecked());
 
   //update indication
   on_pbYellow_clicked(); //yellow marker for activated advanced options in point source sim
-
+  updateG4ProgressBarVisibility();
   UpdateTestWavelengthProperties();
 
   bool bWaveRes = ui->cbWaveResolved->isChecked();
   ui->fWaveTests->setEnabled(bWaveRes);
   ui->fWaveOptions->setEnabled(bWaveRes);
   ui->cbFixWavelengthPointSource->setEnabled(bWaveRes);
-  //bool bTimeRes = ui->cbTimeResolved->isChecked();
 
   return true;
 }
 
 void MainWindow::selectFirstActiveParticleSource()
 {
-    if (SimulationManager->ParticleSources->getTotalActivity() > 0)
+    if (SimulationManager->Settings.partSimSet.SourceGenSettings.getTotalActivity() > 0)
     {
         //show the first source with non-zero activity
         int i = 0;
-        for (; i<SimulationManager->ParticleSources->countSources(); i++)
-          if (SimulationManager->ParticleSources->getSource(i)->Activity > 0) break;
+        for (; i < SimulationManager->Settings.partSimSet.SourceGenSettings.getNumSources(); i++)
+            if (SimulationManager->Settings.partSimSet.SourceGenSettings.getSourceRecord(i)->Activity > 0) break;
 
         if (i < ui->lwDefinedParticleSources->count())
             ui->lwDefinedParticleSources->setCurrentRow(i);

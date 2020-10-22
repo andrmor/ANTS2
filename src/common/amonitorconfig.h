@@ -1,6 +1,8 @@
 #ifndef AMONITORCONFIG_H
 #define AMONITORCONFIG_H
 
+#include <QString>
+
 class QJsonObject;
 
 class AMonitorConfig
@@ -8,8 +10,11 @@ class AMonitorConfig
 public:
     int    shape = 0;             // 0 - rectangular; 1 - round
     double size1 = 100.0;
-    double size2 = 100.0;         //xy sizes or radius
+    double size2 = 100.0;         //xy half-sizes or radius
     double dz = 0.001;            // constant! - half-thickness
+
+    QString str2size1;            // full size!
+    QString str2size2;            // full size!
 
     int    PhotonOrParticle = 0;  //0 - photon, 1 - particle
     bool   bUpper = true;         // direction: z>0 is upper, z<0 is lower
@@ -42,6 +47,8 @@ public:
 
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);
+
+    void updateFromGeoConstants();
 };
 
 #endif // AMONITORCONFIG_H

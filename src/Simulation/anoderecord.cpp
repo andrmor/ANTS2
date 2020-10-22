@@ -38,10 +38,10 @@ void ANodeRecord::addLinkedNode(ANodeRecord * node)
     n->LinkedNode = node;
 }
 
-int ANodeRecord::getNumberOfLinkedNodes()
+int ANodeRecord::getNumberOfLinkedNodes() const
 {
     int counter = 0;
-    ANodeRecord * node = this;
+    const ANodeRecord * node = this;
     while (node->LinkedNode)
     {
         counter++;

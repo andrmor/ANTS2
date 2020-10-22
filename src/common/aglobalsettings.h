@@ -6,6 +6,7 @@
 
 class AIsotopeAbundanceHandler;
 class ANetworkModule;
+class AMaterialParticleCollection;
 
 class AGlobalSettings final
 {
@@ -32,6 +33,10 @@ public:
 
     void setNetworkModule(ANetworkModule* NetworkModule) {NetModule = NetworkModule;}
     ANetworkModule* getNetworkModule() const {return NetModule;}
+
+    //the next 2 lines are here until AConfiguration becomes singleton
+    void setMpCollection(AMaterialParticleCollection * MPCollection) {MpCollection = MPCollection;}
+    AMaterialParticleCollection * getMpCollection() {return MpCollection;}
 
     QString AntsBaseDir;  // QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation)+"/ants2";
     QString ConfigDir;    // AntsbaseDir + "/Config"
@@ -101,8 +106,9 @@ public:
     QString G4ExchangeFolder;
 
 private:
-    AIsotopeAbundanceHandler* IsotopeAbundanceHandler = 0; //owns
-    ANetworkModule* NetModule = 0; //external
+    AIsotopeAbundanceHandler    * IsotopeAbundanceHandler = nullptr; //owns
+    ANetworkModule              * NetModule               = nullptr; //external
+    AMaterialParticleCollection * MpCollection            = nullptr; //external
 };
 
 #endif // AGLOBALSETTINGS_H

@@ -5,21 +5,23 @@
 #include "TMath.h"
 #include "TRandom2.h"
 
-AParticleGenerator_SI::AParticleGenerator_SI(const AMaterialParticleCollection & MpCollection, TRandom2 *RandGen, int ThreadId, const int *NumRunningThreads) :
-    MpCollection(MpCollection), RandGen(RandGen), ThreadId(ThreadId), NumRunningThreads(NumRunningThreads)
+AParticleGenerator_SI::AParticleGenerator_SI(const AMaterialParticleCollection & MpCollection, TRandom2 *RandGen) ://, int ThreadId, const int *NumRunningThreads) :
+    MpCollection(MpCollection), RandGen(RandGen)//, ThreadId(ThreadId), NumRunningThreads(NumRunningThreads)
 {
     H["AddParticle"] = "Adds particle to track to this event";
     H["AddParticleIsotropic"] = "Adds particle to track to this event. The particle's direction is randomly generated (isotropic)";
 
     H["StoreVariables"] = "Store array of variables: allows to have 'static' variables over the whole simulation";
     H["StoreVariables"] = "Retrive array of variables: allows to have 'static' variables over the whole simulation\nOn simulation start retrive will produce an empty array";
-    H["GetThreadId"] = "Returns thread index: it is 0 in single thread simulation, and will be thread index (0 .. N) when simulation is perfromed in N threads.\nWarning: starting a simulation of 3 events when max threads is set to 7 will still have thread indexes only from 1 to 3!";
-    H["GetNumThreads"] = "Returns number of threads used in this simulation";
+    //H["GetThreadId"] = "Returns thread index: it is 0 in single thread simulation, and will be thread index (0 .. N) when simulation is perfromed in N threads.\nWarning: starting a simulation of 3 events when max threads is set to 7 will still have thread indexes only from 1 to 3!";
+    //H["GetNumThreads"] = "Returns number of threads used in this simulation";
+    H["GetCurrentEvent"] = "Returns index of the curent event";
 }
 
-void AParticleGenerator_SI::configure(QVector<AParticleRecord*> * GeneratedParticles)
+void AParticleGenerator_SI::configure(QVector<AParticleRecord*> * GeneratedParticles, int iEvent)
 {
     GP = GeneratedParticles;
+    currentEvent = iEvent;
 }
 
 void AParticleGenerator_SI::AddParticle(int type, double energy, double x, double y, double z, double i, double k, double j, double time)

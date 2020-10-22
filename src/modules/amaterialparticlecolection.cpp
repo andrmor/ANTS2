@@ -1,6 +1,6 @@
 #include "amaterialparticlecolection.h"
 #include "jsonparser.h"
-#include "generalsimsettings.h"
+#include "ageneralsimsettings.h"
 #include "aopticaloverride.h"
 #include "ajsontools.h"
 #include "acommonfunctions.h"
@@ -91,7 +91,7 @@ double AMaterialParticleCollection::getDiffusionSigmaTransverse(int iMat, int le
     return sqrt(2.0 * d * length_mm / v); // in mm
 }
 
-void AMaterialParticleCollection::UpdateRuntimePropertiesAndWavelengthBinning(GeneralSimSettings *SimSet, TRandom2* RandGen, int numThreads)
+void AMaterialParticleCollection::UpdateRuntimePropertiesAndWavelengthBinning(AGeneralSimSettings *SimSet, TRandom2* RandGen, int numThreads)
 {
   AMaterialParticleCollection::SetWave(SimSet->fWaveResolved, SimSet->WaveFrom, SimSet->WaveTo, SimSet->WaveStep, SimSet->WaveNodes);
   for (int imat = 0; imat < MaterialCollectionData.size(); imat++)
@@ -155,11 +155,11 @@ const QStringList AMaterialParticleCollection::getListOfMaterialNames() const
     return l;
 }
 
-int AMaterialParticleCollection::getParticleId(QString name) const
+int AMaterialParticleCollection::getParticleId(const QString & name) const
 {
-  for (int i=0; i<ParticleCollection.size(); i++)
-    if (ParticleCollection.at(i)->ParticleName == name) return i;
-  return -1;
+    for (int i = 0; i < ParticleCollection.size(); i++)
+        if (ParticleCollection.at(i)->ParticleName == name) return i;
+    return -1;
 }
 
 const QString AMaterialParticleCollection::getParticleName(int particleIndex) const

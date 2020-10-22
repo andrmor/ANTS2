@@ -282,52 +282,21 @@ void MainWindow::LoadScanPhotonDistribution(QString fileName)
 {
   QVector<double> x, y;
   int error = LoadDoubleVectorsFromFile(fileName, &x, &y);
-  if (error>0) return;
+  if (error > 0) return;
 
-  if (histScan) delete histScan;
+  delete histScan;
   int size = x.size();
   double* xx = new double [size];
   for (int i = 0; i<size; i++) xx[i]=x[i];
-  histScan = new TH1I("histPhotDistr","", size-1, xx);
+  histScan = new TH1D("","CustomNumPhotDist", size-1, xx);
   for (int j = 1; j<size+1; j++)  histScan->SetBinContent(j, y[j-1]);
   histScan->GetIntegral(); //to make thread safe
   histScan->SetXTitle("Number of generated photons");
-  histScan->SetYTitle("Probability");
+  histScan->SetYTitle("Relative probability, a.u.");
+  delete[] xx;
 
   ui->pbScanDistrShow->setEnabled(true);
   ui->pbScanDistrDelete->setEnabled(true);
-}
-
-void MainWindow::LoadDummyPMs(QString DFile)
-{
-  QFile file(DFile);
-
-  if(!file.open(QIODevice::ReadOnly | QFile::Text)) message("Error while opening Dummy PMs file!"+file.fileName()+"\n"+file.errorString(), this);
-  else
-    {
-      //loading
-       QTextStream in(&file);
-       QRegExp rx("(\\ |\\,|\\:|\\t)"); //separators: ' ' or ',' or ':' or '\t'
-       while(!in.atEnd())
-         {
-              QString line = in.readLine();
-              QStringList fields = line.split(rx, QString::SkipEmptyParts);            
-              if (fields.size() == 8)
-                {
-                  APMdummyStructure dpm;
-                  dpm.PMtype = fields[0].toInt();
-                  dpm.UpperLower = fields[1].toInt();
-                  dpm.r[0] = fields[2].toDouble();
-                  dpm.r[1] = fields[3].toDouble();
-                  dpm.r[2] = fields[4].toDouble();
-                  dpm.Angle[0] = fields[5].toDouble();
-                  dpm.Angle[1] = fields[6].toDouble();
-                  dpm.Angle[2] = fields[7].toDouble();
-                  Detector->PMdummies.append(dpm);
-                }
-         }
-       file.close();      
-    }
 }
 
 void MainWindow::on_pbLoadPMcenters_clicked()
@@ -362,11 +331,8 @@ void MainWindow::on_pbLoadPMcenters_clicked()
       for (int i=0; i<x.size(); i++)
         PMar->PositionsAnglesTypes.append(APmPosAngTypeRecord(x[i], y[i], z[i], 0,0,0, 0));
     }
-  MainWindow::ReconstructDetector();
+  ReconstructDetector();
   GeometryWindow->ShowGeometry(false, false);
-  //MainWindow::ShowPMcount();
-  //MainWindow::ClearData();
-  //Owindow->RefreshData();
 }
 
 void MainWindow::on_pbSavePMcenters_clicked()

@@ -251,7 +251,7 @@ void ReconstructionWindow::on_sbEventNumberInspect_valueChanged(int arg1)
 
   if (MW->GeometryWindow->isVisible())
     {
-      MW->clearGeoMarkers();
+      MW->GeometryWindow->ClearGeoMarkers();
       MW->Detector->GeoManager->ClearTracks();
 
       if (!EventsDataHub->isScanEmpty()) ReconstructionWindow::UpdateSimVizData(arg1);
@@ -260,7 +260,7 @@ void ReconstructionWindow::on_sbEventNumberInspect_valueChanged(int arg1)
           GeoMarkerClass* marks = new GeoMarkerClass("Recon", 6, 2, kRed);
           for (int i=0; i<result->Points.size(); i++)
             marks->SetNextPoint(result->Points[i].r[0], result->Points[i].r[1], result->Points[i].r[2]);         
-          MW->GeoMarkers.append(marks);
+          MW->GeometryWindow->GeoMarkers.append(marks);
         }
       MW->GeometryWindow->ShowGeometry(false);  //to clear view
       MW->GeometryWindow->DrawTracks(); //has to use ShowTracks since if there is continuos energy deposition - tracks are used for inidication
@@ -277,14 +277,14 @@ void ReconstructionWindow::VisualizeScan(int iev)
 {
   GeoMarkerClass* marks;
   bool fAppend;
-  if (MW->GeoMarkers.isEmpty() || MW->GeoMarkers.last()->Type != "Scan")
+  if (MW->GeometryWindow->GeoMarkers.isEmpty() || MW->GeometryWindow->GeoMarkers.last()->Type != "Scan")
     { //previous marker was not scan, so making new one
       marks = new GeoMarkerClass("Scan", 6, 2, kBlue);
       fAppend = true;
     }
   else
     { //reusing old scan marker, just add the new point. This way its is MUCH faster to remove markers if one has ~100k o them.
-      marks = MW->GeoMarkers.last();
+      marks = MW->GeometryWindow->GeoMarkers.last();
       fAppend = false;
     }
 
@@ -308,12 +308,12 @@ void ReconstructionWindow::VisualizeScan(int iev)
         marks->SetNextPoint(EventsDataHub->Scan[iev]->Points[j].r[0], EventsDataHub->Scan[iev]->Points[j].r[1], EventsDataHub->Scan[iev]->Points[j].r[2]);
     }  
 
-  if (fAppend) MW->GeoMarkers.append(marks);
+  if (fAppend) MW->GeometryWindow->GeoMarkers.append(marks);
 }
 
 void ReconstructionWindow::on_pbClearPositions_clicked()
 {
-    MW->clearGeoMarkers();
+    MW->GeometryWindow->ClearGeoMarkers();
     MW->GeometryWindow->ShowGeometry(false);
 }
 
@@ -360,7 +360,7 @@ const QString ReconstructionWindow::ShowPositions(int Rec_True, bool fOnlyIfWind
     }
 
     MW->Detector->GeoManager->ClearTracks(); //tracks could be used for indication (if continuous deposition)
-    MW->clearGeoMarkers(Rec_True+1);
+    MW->GeometryWindow->ClearGeoMarkers(Rec_True + 1);
 
     int goodCounter = 0;
     int everyPeriod = ui->sbShowEventsEvery->value();
@@ -414,7 +414,7 @@ const QString ReconstructionWindow::ShowPositions(int Rec_True, bool fOnlyIfWind
                 if (goodCounter > UpperLimit) break;
             }
       }
-    MW->GeoMarkers.append(marks);
+    MW->GeometryWindow->GeoMarkers.append(marks);
 
     MW->GeometryWindow->show();
     MW->GeometryWindow->raise();
@@ -557,7 +557,7 @@ void ReconstructionWindow::VisualizeEnergyVector(int eventId)
 //     qDebug()<<EV.last()->r[0]<< EV.last()->r[1]<< EV.last()->r[2];
     }
 
-  MW->GeoMarkers.append(marks);
+  MW->GeometryWindow->GeoMarkers.append(marks);
 }
 
 void ReconstructionWindow::VisualizeScan()
@@ -1781,48 +1781,6 @@ void ReconstructionWindow::TableToPolygon()
       //qDebug()<<valX<<valY;
     }
   polygon<<polygon.first();
-}
-
-
-void ReconstructionWindow::on_pbGoToNextNoise_clicked()
-{
-  if (EventsDataHub->isEmpty()) return;
-  if (EventsDataHub->isScanEmpty()) return;
-
-  for (int iev = ui->sbEventNumberInspect->value()+1; iev < EventsDataHub->Events.size(); iev++)
-    {
-      if ( !EventsDataHub->Scan[iev]->GoodEvent)
-        {
-          ui->sbEventNumberInspect->setValue(iev);
-          return;
-        }
-    }
-  MW->Owindow->OutText("There are no more noise events after this index!");
-}
-
-void ReconstructionWindow::on_pbGoToNextNoiseFoundGood_clicked()
-{
-  if (EventsDataHub->isEmpty()) return;
-  if (EventsDataHub->isScanEmpty()) return;
-  int CurrentGroup = PMgroups->getCurrentGroup();
-  if (EventsDataHub->isReconstructionReady(CurrentGroup))
-    {
-      message("Run reconstruction of all events first!", this);
-      return;
-    }
-
-  for (int iev = ui->sbEventNumberInspect->value()+1; iev < EventsDataHub->Events.size(); iev++)
-    {
-      if ( !EventsDataHub->Scan[iev]->GoodEvent)
-        {
-          if (EventsDataHub->ReconstructionData[CurrentGroup][iev]->GoodEvent)
-            {
-              ui->sbEventNumberInspect->setValue(iev);
-              return;
-            }
-        }
-    }
-  MW->Owindow->OutText("There are no more noise events which pass all filters after this index!");
 }
 
 void ReconstructionWindow::on_pbStopReconstruction_toggled(bool checked)
@@ -3881,38 +3839,32 @@ void ReconstructionWindow::on_pbTreeViewHelpWhat_clicked()
 {
    QString str;
 
-   str = "\tValid entries:\n\n "
-
-         "\t Event data\n"
-         " i\t\t event number\n"
-         " signal[ipm]\t signal of ipm's PM\n"
-         " ssum \t\t sum signal of all PMS (weighted by gains) \n"
-
-         "\t Reconstruction results\n"
-         "\t (for double event use [index] to select one point\n"
-         " x[], y[], z[]\t reconstructed coordinates\n"
-         " energy[] \t reconstruted energy\n"
-         " rho[ipm] \t distance from xyz to the center of ipm's PM\n"
-         " chi2 \t\t chi2 of the reconstruction\n"
-         " recOK \t\t reconstruction event successful = true \n"
-         " good \t\t true is recOK and all filters true\n"
-
-         " \t Event filters\n"
-         " fcut \t\t cut-off for individual signals for each PM \n"
-         " fsumcut \t sum signal \n"
-         " fen \t\t event energy \n"
-         " fchi \t\t reduced chi-square \n"
-         " fsp \t\t spatial filter\n"
-
-         " \tTrue data (only for simulations or loaded calibration data)\n"
-         " xScan[] \ttrue coordinates \n"
-         " yScan[]\n"
-         " zScan[]\n"
-         " zStop     \t For secondary scint, light is emitted in range zScan->zStop\n"
-         " numPhotons[] number of photons this event \n"
-         " ScintType  \t 0 - unknown, 1 - primary, 2 - secondary \n"
-         " GoodEvent  \t false for noise events \n"
-         " EventType  \t type of noise event \n"
+   str = "Valid entries:\n"
+         "\n"
+         "i\t event number\n"
+         "signal[ipm]\t signal of PM with index ipm\n"
+         "ssum \t sum signal of all PMs (weighted by gains) \n"
+         "\n"
+         "Reconstruction results\n"
+         " (for multy-vertex events [index] selects a specific point):\n"
+         "\n"
+         "x[], y[], z[]\t reconstructed coordinates\n"
+         "energy[] \t reconstruted energy\n"
+         "rho[ipm] \t distance from xyz to the center of ipm's PM\n"
+         "chi2 \t chi2 of the reconstruction\n"
+         "recOK \t reconstruction event successful = true \n"
+         "good \t true if recOK=true and pass all filters\n"
+         "\n"
+         "True / scan data (only for simulations or loaded calibration data):\n"
+         "\n"
+         "xScan[] \t true x \n"
+         "yScan[] \t true y \n"
+         "zScan[] \t true z \n"
+         "eScan[] \t number of photons for photon sim,\n"
+         "        \t or deposited energy (keV) for particle sim\n"
+         "tScan[] \t time\n"
+         "zStop  \t For secondary scint, light is emitted in range zScan->zStop\n"
+         "ScintType\t Scintillation: 1 - primary, 2 - secondary, 3 - unknown\n"
 /*
               "\n\n"
               "   The item to be plotted can contain up to three entries, one for each dimension, <br>"
@@ -3921,13 +3873,12 @@ void ReconstructionWindow::on_pbTreeViewHelpWhat_clicked()
               "   'Options' configurations. <br>"
               "    \n"
 */
-              "\n\tExamples:\n"
-              "          x - This entry will draw an histogram of all x\n"
-              "        x:y - This will draw x vs. y in a 2D plot. \n"
-              "      x:y:z - To draw x vs. y vs. z in a 3D plot. ";
+         "\n"
+         "Examples:\n"
+         "x\t Draw a histogram of all x\n"
+         "x:y\t Draw x vs y in a 2D plot. \n"
+         "x:y:z\t Draw x vs y vs z in a 3D plot. ";
 
-   MW->Owindow->OutText(str);
-   MW->Owindow->SetTab(0);
    message(str, this);
 }
 
@@ -6239,7 +6190,7 @@ void ReconstructionWindow::showSensorGroup(int igroup)
 void ReconstructionWindow::on_leSpF_LimitToObject_textChanged(const QString &/*arg1*/)
 {
     bool fFound = (ui->cbSpF_LimitToObject->isChecked()) ?
-         Detector->Sandwich->isVolumeExist(ui->leSpF_LimitToObject->text()) : true;
+         Detector->Sandwich->isVolumeExistAndActive(ui->leSpF_LimitToObject->text()) : true;
 
     QPalette palette = ui->leSpF_LimitToObject->palette();
     palette.setColor(QPalette::Text, (fFound ? Qt::black : Qt::red) );

@@ -14,7 +14,7 @@ class AMaterial;
 class APmHub;
 class AMaterialParticleCollection;
 class AOneEvent;
-class GeneralSimSettings;
+class AGeneralSimSettings;
 class TGeoNavigator;
 class TrackHolderClass;
 class TRandom2;
@@ -33,7 +33,7 @@ public:
     ~APhotonTracer();
 
     void UpdateGeoManager(TGeoManager* NewGeoManager) {GeoManager = NewGeoManager;}//will be obsolete with new simulation system soon
-    void configure(const GeneralSimSettings *simSet, AOneEvent* oneEvent, bool fBuildTracks, std::vector<TrackHolderClass *> * tracks);
+    void configure(const AGeneralSimSettings *simSet, AOneEvent* oneEvent, bool fBuildTracks, std::vector<TrackHolderClass *> * tracks);
 
     void TracePhoton(const APhoton* Photon);
 
@@ -73,7 +73,7 @@ private:
     double RefrIndexFrom, RefrIndexTo; //refractive indexes n1 and n2
     bool fDoFresnel; //flag - to perform or not the fresnel calculation on the interface
     bool fBuildTracks;
-    const GeneralSimSettings* SimSet;
+    const AGeneralSimSettings* SimSet;
     bool fGridShiftOn;
     Double_t FromGridCorrection[3]; //add to xyz of the current point in glob coordinates of the grid element to obtain true global point coordinates
     Double_t FromGridElementToGridBulk[3]; //add to xyz of current point for gridnavigator to obtain normal navigator current point coordinates

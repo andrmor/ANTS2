@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>638</width>
-    <height>831</height>
+    <height>723</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -259,7 +259,7 @@
     <item>
      <widget class="QTabWidget" name="twProperties">
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tab_6">
        <attribute name="title">
@@ -1493,7 +1493,7 @@ Wavelengths shoul be given in increasing order</string>
             <item>
              <widget class="QLabel" name="label_73">
               <property name="text">
-               <string>   </string>
+               <string/>
               </property>
              </widget>
             </item>
@@ -3364,6 +3364,13 @@ Wavelengths shoul be given in increasing order</string>
                       <widget class="QPushButton" name="pbAutoLoadMissingNeutronCrossSections">
                        <property name="text">
                         <string>   Auto-load missing data   </string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="pbReloadAllNeutronCSs">
+                       <property name="text">
+                        <string>Reload all</string>
                        </property>
                       </widget>
                      </item>

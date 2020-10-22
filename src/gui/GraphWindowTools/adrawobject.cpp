@@ -17,6 +17,12 @@ ADrawObject::ADrawObject(TObject *pointer, const QString &options, bool enabled)
     extractName();
 }
 
+ADrawObject::ADrawObject(TObject *pointer, const QString &options, bool enabled, bool bLogScaleX, bool bLogScaleY) :
+    Pointer(pointer), Options(options), bEnabled(enabled), bLogScaleX(bLogScaleX), bLogScaleY(bLogScaleY)
+{
+    extractName();
+}
+
 void ADrawObject::extractName()
 {
     if (!Pointer) return;

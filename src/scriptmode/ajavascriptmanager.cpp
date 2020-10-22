@@ -14,6 +14,7 @@
 #include <QDebug>
 #include <QScriptValueIterator>
 #include <QElapsedTimer>
+#include <QFile>
 
 AJavaScriptManager::AJavaScriptManager(TRandom2* RandGen) :
     AScriptManager(RandGen)
@@ -73,44 +74,61 @@ void AJavaScriptManager::addQVariantToString(const QVariant & var, QString & str
     }
 }
 
-QString AJavaScriptManager::Evaluate(const QString& Script)
+#include <QJsonDocument>
+QString AJavaScriptManager::Evaluate(const QString & Script)
 {
     LastError.clear();
+    LastErrorLineNumber = -1;
     fAborted = false;
+
+    bScriptExpanded = false;
+    QString ExpandedScript;
+    bool bOK = expandScript(Script, ExpandedScript);
+    if (!bOK) return LastError;
 
     emit onStart();
 
     //running InitOnRun method (if defined) for all defined interfaces
     for (int i=0; i<interfaces.size(); i++)
-      {
+    {
           AScriptInterface* bi = dynamic_cast<AScriptInterface*>(interfaces[i]);
           if (bi)
-            {
+          {
               if (!bi->InitOnRun())
-                {
+              {
                   LastError = "Init failed for unit: "+interfaces.at(i)->objectName();
                   return LastError;
-                }
-            }
-      }
+              }
+          }
+    }
 
     timer = new QElapsedTimer;
     timeOfStart = timer->restart();
 
     fEngineIsRunning = true;
-    EvaluationResult = engine->evaluate(Script);
+    EvaluationResult = engine->evaluate(ExpandedScript);
     fEngineIsRunning = false;
 
     timerEvalTookMs = timer->elapsed();
-    delete timer; timer = 0;
+    delete timer; timer = nullptr;
 
     QString result;
+    /*
     if (EvaluationResult.isArray() || EvaluationResult.isObject())
     {
         QVariant resVar = EvaluationResult.toVariant();
         addQVariantToString(resVar, result);
     }
     else result = EvaluationResult.toString();
+    */
+    QVariant var = EvaluationResult.toVariant();
+    if (var.type() == QVariant::Map || var.type() == QVariant::List)
+    {
+        QJsonDocument doc = QJsonDocument::fromVariant(var);
+        result = doc.toJson(QJsonDocument::Compact);
+    }
+    else if (var.type() == QVariant::String) result = "\"" + var.toString() + "\"";
+    else result = var.toString();
 
     emit onFinish(result);
     return result;
@@ -136,10 +154,14 @@ bool AJavaScriptManager::isUncaughtException() const
 
 int AJavaScriptManager::getUncaughtExceptionLineNumber() const
 {
-    return engine->uncaughtExceptionLineNumber();
+    int iLineNumber = engine->uncaughtExceptionLineNumber();
+    //qDebug() << "->-"<<iLineNumber;
+    correctLineNumber(iLineNumber);
+    //qDebug() << "-<-"<<iLineNumber;
+    return iLineNumber;
 }
 
-const QString AJavaScriptManager::getUncaughtExceptionString() const
+QString AJavaScriptManager::getUncaughtExceptionString() const
 {
     return engine->uncaughtException().toString();
 }
@@ -291,18 +313,20 @@ void AJavaScriptManager::doRegister(AScriptInterface *interface, const QString &
     QObject::connect(interface, &AScriptInterface::AbortScriptEvaluation, this, &AJavaScriptManager::AbortEvaluation);
 }
 
-int AJavaScriptManager::FindSyntaxError(const QString& script)
+int AJavaScriptManager::FindSyntaxError(const QString & script)
 {
-    QScriptSyntaxCheckResult check = QScriptEngine::checkSyntax(script);
+    QString txt = script;
+    txt.replace("#include", "//#include");
+
+    QScriptSyntaxCheckResult check = QScriptEngine::checkSyntax(txt);
     if (check.state() == QScriptSyntaxCheckResult::Valid) return -1;
     else
-      {
+    {
         int lineNumber = check.errorLineNumber();
         qDebug()<<"Syntax error at line"<<lineNumber;
         return lineNumber;
-      }
+    }
 }
-
 
 // ------------ multithreading -------------
 //https://stackoverflow.com/questions/5020459/deep-copy-of-a-qscriptvalue-as-global-object
@@ -639,4 +663,27 @@ QScriptValue AJavaScriptManager::getProperty(const QString &properyName) const
 QScriptValue AJavaScriptManager::registerNewVariant(const QVariant& Variant)
 {
     return engine->toScriptValue(Variant);
+}
+
+void AJavaScriptManager::updateBlockCommentStatus(const QString & Line, bool & bInsideBlockComments) const
+{
+    const int len = Line.length();
+    if (len > 1)
+    {
+        for (int iChar = 0; iChar < len - 1; iChar++)
+        {
+            if (Line.at(iChar) == '/' && Line.at(iChar+1) == '/') break; // line comment started
+
+            if (Line.at(iChar) == '/' && Line.at(iChar+1) == '*')
+            {
+                bInsideBlockComments = true;
+                iChar++;
+            }
+            else if (Line.at(iChar) == '*' && Line.at(iChar+1) == '/')
+            {
+                bInsideBlockComments = false;
+                iChar++;
+            }
+        }
+    }
 }

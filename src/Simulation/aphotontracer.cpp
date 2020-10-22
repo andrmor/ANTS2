@@ -1,7 +1,7 @@
 #include "aphotontracer.h"
 #include "apmhub.h"
 #include "amaterialparticlecolection.h"
-#include "generalsimsettings.h"
+#include "ageneralsimsettings.h"
 #include "aopticaloverride.h"
 #include "asimulationstatistics.h"
 #include "aoneevent.h"
@@ -44,7 +44,7 @@ APhotonTracer::~APhotonTracer()
     delete p;
 }
 
-void APhotonTracer::configure(const GeneralSimSettings *simSet, AOneEvent* oneEvent, bool fBuildTracks, std::vector<TrackHolderClass *> * tracks)//bool fWave, bool fAngle,  bool fArea, int MaxTrans, bool fTracks, bool fFastTracks, bool fAccelQE, double maxQE, QVector<double> *MaxQEwave)
+void APhotonTracer::configure(const AGeneralSimSettings *simSet, AOneEvent* oneEvent, bool fBuildTracks, std::vector<TrackHolderClass *> * tracks)//bool fWave, bool fAngle,  bool fArea, int MaxTrans, bool fTracks, bool fFastTracks, bool fAccelQE, double maxQE, QVector<double> *MaxQEwave)
 {
    SimSet = simSet;
    OneEvent = oneEvent;

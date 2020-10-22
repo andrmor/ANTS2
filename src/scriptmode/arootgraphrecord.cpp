@@ -51,12 +51,18 @@ void ARootGraphRecord::SetLineProperties(int lineColor, int lineStyle, int lineW
 void ARootGraphRecord::SetTitles(const QString &titleX, const QString &titleY, const QString graphTitle)
 {
     TitleX = titleX; TitleY = titleY;
+
     QMutexLocker locker(&Mutex);
 
-    if (Type == "TGraph" && !graphTitle.isEmpty())
+    if (!graphTitle.isEmpty())
     {
         TGraph* g = dynamic_cast<TGraph*>(Object);
-        if (g) g->SetTitle(graphTitle.toLatin1().data());
+        if (g)
+        {
+            Title = graphTitle;
+            g->SetTitle(graphTitle.toLatin1().data());
+            g->SetName(graphTitle.toLatin1().data());
+        }
     }
 }
 
@@ -164,11 +170,14 @@ void ARootGraphRecord::SetMinimum(double min)
 {
     QMutexLocker locker(&Mutex);
 
-    if (Type == "TGraph")
+    TGraph * g = dynamic_cast<TGraph*>(Object);
+    //if (Type == "TGraph" || Type == "TGraphErrors")
+    if (g)
     {
-        TGraph* g = dynamic_cast<TGraph*>(Object);
-        if (g)
+        //TGraph* g = dynamic_cast<TGraph*>(Object);
+        //if (g)
             g->SetMinimum(min);
+        //    g->GetYaxis()->SetRangeUser(min, g->GetMaximum());
     }
 }
 

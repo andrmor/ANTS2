@@ -10,7 +10,7 @@
 
 class TRandom2;
 class AMaterialParticleCollection;
-class GeneralSimSettings;
+class AGeneralSimSettings;
 class APmPosAngTypeRecord;
 class AGammaRandomGenerator;
 class QJsonObject;
@@ -21,7 +21,7 @@ public:
     APmHub(AMaterialParticleCollection* materialCollection, TRandom2* randGen);
     ~APmHub();
 
-    void configure(GeneralSimSettings* SimSet); // must do before simulation
+    void configure(AGeneralSimSettings* SimSet); // must do before simulation
 
     const QString checkBeforeSimulation() const; //returns error - empty if all is OK
 

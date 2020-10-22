@@ -55,8 +55,11 @@ AGlobalSettings::AGlobalSettings()
     if (!QDir(AntsBaseDir).exists()) QDir().mkdir(AntsBaseDir);
     QuicksaveDir = AntsBaseDir + "/Quicksave"; //dir for quicksave
     if (!QDir(QuicksaveDir).exists()) QDir().mkdir(QuicksaveDir);
-    ExamplesDir = QDir::current().absolutePath() + "/EXAMPLES"; //dir where examples will be copied
-    ResourcesDir = QDir::current().absolutePath() + "/DATA";//dir where data will be copied
+
+    QString TargetDir(TARGET_DIR);
+    //qDebug() <<  "From DEFINES: " << TargetDir;
+    ExamplesDir  = TargetDir + "/EXAMPLES"; //dir where examples are copied
+    ResourcesDir = TargetDir + "/DATA";     //dir where data are copied
 
     IsotopeAbundanceHandler = new AIsotopeAbundanceHandler( ResourcesDir + "/Neutrons/IsotopeNaturalAbundances.txt" );
 

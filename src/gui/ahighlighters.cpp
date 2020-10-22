@@ -10,7 +10,7 @@ AHighlighterScriptWindow::AHighlighterScriptWindow(QTextDocument *parent)
     //keywordFormat.setFontWeight(QFont::Bold);
     QStringList keywordPatterns;
     keywordPatterns << "\\bbreak\\b" << "\\bcatch\\b" << "\\bcontinue\\b" << "\\b.length\\b" << "\\barguments\\b"
-                    << "\\bdo\\b" << "\\bwhile\\b" << "\\bfor\\b"
+                    << "\\bdo\\b" << "\\bwhile\\b" << "\\bfor\\b" << "\\bwith\\b" << "\\bdelete\\b"
                     << "\\bin\\b" << "\\bfunction\\b" << "\\bif\\b"
                     << "\\belse\\b" << "\\breturn\\b" << "\\bswitch\\b"
                     << "\\bthrow\\b" << "\\btry\\b" << "\\bvar\\b"
@@ -24,6 +24,12 @@ AHighlighterScriptWindow::AHighlighterScriptWindow(QTextDocument *parent)
         rule.format = keywordFormat;
         highlightingRules.append(rule);
     }
+
+    QTextCharFormat includeFormat;
+    includeFormat.setForeground(QColor(227, 146, 48));
+    rule.pattern = QRegularExpression("#include\\b");
+    rule.format = includeFormat;
+    highlightingRules.append(rule);
 
 /*
     classFormat.setFontWeight(QFont::Bold);
@@ -186,7 +192,7 @@ void AHighlighterLrfScript::setFixedVariables()
   highlightingRules = hr + highlightingRules; //so e.g. comments and quatation rule have higher priority
 }
 
-AHighlighterPythonScriptWindow::AHighlighterPythonScriptWindow(QTextDocument *parent) :
+APythonHighlighter::APythonHighlighter(QTextDocument *parent) :
     AHighlighterScriptWindow(parent)
 {
     bMultilineCommentAllowed = false;
@@ -245,5 +251,11 @@ AHighlighterPythonScriptWindow::AHighlighterPythonScriptWindow(QTextDocument *pa
     rule.format = functionFormat;
     highlightingRules.append(rule);
 */
+
+    QTextCharFormat includeFormat;
+    includeFormat.setForeground(QColor(227, 146, 48));
+    rule.pattern = QRegularExpression("^[ \t]*#include\\b");
+    rule.format = includeFormat;
+    highlightingRules.append(rule);
 
 }

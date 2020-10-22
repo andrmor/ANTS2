@@ -634,37 +634,120 @@
           <enum>Qt::Horizontal</enum>
          </property>
         </widget>
-        <widget class="QLabel" name="labCurCoorLab">
+        <widget class="QFrame" name="frCursor">
          <property name="geometry">
           <rect>
            <x>0</x>
-           <y>360</y>
-           <width>151</width>
-           <height>17</height>
+           <y>357</y>
+           <width>141</width>
+           <height>81</height>
           </rect>
          </property>
-         <property name="text">
-          <string>Cursor coordinates:</string>
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
          </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
          </property>
-        </widget>
-        <widget class="QLabel" name="labCursor">
-         <property name="geometry">
-          <rect>
-           <x>0</x>
-           <y>380</y>
-           <width>151</width>
-           <height>20</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>--</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
+         <widget class="QLabel" name="labCurCoor">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>141</width>
+            <height>17</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Cursor coordinates:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+         <widget class="QLabel" name="labCursorY">
+          <property name="geometry">
+           <rect>
+            <x>30</x>
+            <y>40</y>
+            <width>101</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>--</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+         <widget class="QLabel" name="labX">
+          <property name="geometry">
+           <rect>
+            <x>13</x>
+            <y>20</y>
+            <width>16</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>X</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="labY">
+          <property name="geometry">
+           <rect>
+            <x>13</x>
+            <y>40</y>
+            <width>16</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Y</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="labCursorX">
+          <property name="geometry">
+           <rect>
+            <x>30</x>
+            <y>20</y>
+            <width>101</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>--</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+         <widget class="QCheckBox" name="cbShowCross">
+          <property name="geometry">
+           <rect>
+            <x>12</x>
+            <y>58</y>
+            <width>131</width>
+            <height>22</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Show crosshair</string>
+          </property>
+         </widget>
         </widget>
         <zorder>line</zorder>
         <zorder>fLog</zorder>
@@ -684,8 +767,7 @@
         <zorder>line_11</zorder>
         <zorder>pbShowRuler</zorder>
         <zorder>line_10</zorder>
-        <zorder>labCurCoorLab</zorder>
-        <zorder>labCursor</zorder>
+        <zorder>frCursor</zorder>
        </widget>
        <widget class="QWidget" name="page_2">
         <widget class="QFrame" name="fToolBox">

@@ -59,6 +59,8 @@ ACore_SI::ACore_SI(AScriptManager* ScriptManager) :
           "'d'-double, 'i'-integer, 's'-string, ''-skip field: e.g. loadArrayExtended('fn.txt', ['d', 'd'])\n"
           "bSkipComments parameters signals to skip lines starting with '#' or '//'"
           "you can specify lin numbers to start from and to: by default it is set to 0 and 1e6";
+  H["loadArrayBinary"] = "Load array of arrays (binary data), with second argument providing the format\n"
+          "This parameter should be an array of 's', 'i', 'd', 'f' or 'c' markers (zero-terminating string, int, double, float and char, respectively)";
 
   //DepRem["isFileExists"] = "Deprecated. Use file.isFileExists method";
   DepRem["str"] = "Deprecated. Use .toFixed(n) javaScript method. E.g.: 'var i=123.456; i.toFixed(2)'";
@@ -145,6 +147,7 @@ void ACore_SI::print(QVariant message)
 {
     QString s;
     addQVariantToString(message, s);
+    qDebug() << s;
     emit ScriptManager->showPlainTextMessage(s);
 }
 
@@ -152,6 +155,7 @@ void ACore_SI::printHTML(QVariant message)
 {
     QString s;
     addQVariantToString(message, s);
+    qDebug() << s;
     emit ScriptManager->showMessage(s);
 }
 
@@ -469,10 +473,10 @@ QVariant ACore_SI::loadArray(QString fileName)
 
 enum AArrayFormatEnum {StringFormat, IntFormat, DoubleFormat, FloatFormat, CharFormat, SkipFormat};
 
-bool readFormat(const QVariantList & format, QVector<AArrayFormatEnum> & FormatSelector)
+bool readFormat(const QVariantList & format, QVector<AArrayFormatEnum> & FormatSelector, bool AllowSkip = true, bool AllowEmptyFormatArray = false)
 {
     const int numEl = format.size();
-    if (numEl == 0) return false;
+    if (numEl == 0 && !AllowEmptyFormatArray) return false;
 
     for (int i=0; i<format.size(); i++)
     {
@@ -483,7 +487,11 @@ bool readFormat(const QVariantList & format, QVector<AArrayFormatEnum> & FormatS
         else if (f == "d") Option = DoubleFormat;
         else if (f == "f") Option = FloatFormat;
         else if (f == "c") Option = CharFormat;
-        else if (f == "")  Option = SkipFormat;
+        else if (f == "")
+        {
+            if (AllowSkip) Option = SkipFormat;
+            else return false;
+        }
         else return false;
         FormatSelector << Option;
     }
@@ -661,7 +669,7 @@ QVariantList ACore_SI::loadArrayExtended3D(const QString &fileName, const QStrin
 
 #include <iostream>
 #include <fstream>
-void readFormattedBinaryLine(std::ifstream & inStream, const QVector<AArrayFormatEnum> & FormatSelector, QVariantList & el)
+bool readFormattedBinaryLine(std::ifstream & inStream, const QVector<AArrayFormatEnum> & FormatSelector, QVariantList & el)
 {
     for (int i=0; i<FormatSelector.size(); i++)
     {
@@ -716,6 +724,48 @@ void readFormattedBinaryLine(std::ifstream & inStream, const QVector<AArrayForma
             continue;
         }
     }
+
+    return !inStream.fail();
+}
+
+QVariantList ACore_SI::loadArrayBinary(const QString &fileName, const QVariantList &format)
+{
+    QVariantList vl1;
+
+    QVector<AArrayFormatEnum> FormatSelector;
+    bool bFormatOK = readFormat(format, FormatSelector, false);
+    if (!bFormatOK)
+    {
+        abort("'format' parameter should be an array of 's', 'i', 'd', 'f' or 'c' markers (string, int, double, float and char, respectively)");
+        return vl1;
+    }
+
+    if (!QFileInfo(fileName).exists())
+    {
+        abort("File does not exist: " + fileName);
+        return vl1;
+    }
+
+    std::ifstream inStream(fileName.toLatin1().data(), std::ios::in | std::ios::binary);
+    if (!inStream.is_open())
+    {
+        abort("Cannot open input file: " + fileName);
+        return vl1;
+    }
+
+    do
+    {
+        QVariantList el2;
+        bool bOK = readFormattedBinaryLine(inStream, FormatSelector, el2);
+        if (bOK) vl1.push_back(el2);
+    }
+    while (!inStream.fail());
+
+    inStream.close();
+
+    if (!inStream.eof()) abort("Format error!");
+
+    return vl1;
 }
 
 QVariantList ACore_SI::loadArrayExtended3Dbinary(const QString &fileName, char dataId, const QVariantList &dataFormat, char separatorId, const QVariantList &separatorFormat, int recordsFrom, int recordsUntil)
@@ -723,17 +773,17 @@ QVariantList ACore_SI::loadArrayExtended3Dbinary(const QString &fileName, char d
     QVariantList vl1;
 
     QVector<AArrayFormatEnum> DataFormatSelector;
-    bool bFormatOK = readFormat(dataFormat, DataFormatSelector);
+    bool bFormatOK = readFormat(dataFormat, DataFormatSelector, false);
     if (!bFormatOK)
     {
-        abort("'dataFormat' parameter should be an array of 's', 'i', 'd', 'f', 'c' or '' markers (string, int, double, float, char and skip_field, respectively)");
+        abort("'dataFormat' parameter should be an array of 's', 'i', 'd', 'f' or 'c' markers (string, int, double, float and char, respectively)");
         return vl1;
     }
     QVector<AArrayFormatEnum> SeparatorFormatSelector;
-    bFormatOK = readFormat(separatorFormat, SeparatorFormatSelector);
+    bFormatOK = readFormat(separatorFormat, SeparatorFormatSelector, false, true);
     if (!bFormatOK)
     {
-        abort("'separatorFormat' parameter should be an array of 's', 'i', 'd', 'f', 'c' or '' markers (string, int, double, float, char and skip_field, respectively)");
+        abort("'separatorFormat' parameter should be an array of 's', 'i', 'd', 'f' or 'c' markers (string, int, double, float and char, respectively)");
         return vl1;
     }
 
@@ -929,6 +979,16 @@ QVariant ACore_SI::GetNewFiles()
         Finder_FileNames << n;
     }
     return newFiles;
+}
+
+QVariantList ACore_SI::GetDirectories(const QString dir, const QString dirNamePattern)
+{
+    QDir d(dir);
+    QStringList dl = d.entryList( QStringList(dirNamePattern), QDir::Dirs);
+
+    QVariantList Dirs;
+    for (const QString & s : dl) Dirs << s;
+    return Dirs;
 }
 
 void ACore_SI::processEvents()

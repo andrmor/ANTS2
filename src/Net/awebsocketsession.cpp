@@ -155,6 +155,7 @@ bool AWebSocketSession::waitForReply()
         }
         if (timer.elapsed() > timeout)
         {
+            qDebug() << "||| Timeout on waiting for reply";
             socket->abort();
             State = Idle;
             Error = "Timeout!";
@@ -211,7 +212,7 @@ bool AWebSocketSession::SendFile(const QString &fileName)
     QByteArray ba = file.readAll();
 
     socket->sendBinaryMessage(ba);
-
+    qDebug() << "File buffer has been sent, listening for the reply";
     return waitForReply();
 }
 

@@ -7,7 +7,7 @@
 class APmHub;
 class TRandom2;
 class ASimulationStatistics;
-class GeneralSimSettings;
+class AGeneralSimSettings;
 class AGammaRandomGenerator;
 
 class AOneEvent
@@ -25,7 +25,7 @@ public:
   ASimulationStatistics*   SimStat;
 
   //configure
-  void configure(const GeneralSimSettings *SimSet);
+  void configure(const AGeneralSimSettings *SimSet);
 
   //hits processing
   void clearHits();
@@ -45,7 +45,7 @@ private:
   AGammaRandomGenerator* GammaRandomGen; // cannot use one in the APmHub module - thread conflict?
 
   //settings
-  const GeneralSimSettings *SimSet;
+  const AGeneralSimSettings *SimSet;
   int numPMs;
 
   void  registerSiPMhit(int ipm, int iTime, int binX, int binY, float numHits = 1.0f); // numHits != 1 for two cases: 1) simplistic model of microcell cross-talk  2) advanced model of dark counts

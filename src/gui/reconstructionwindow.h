@@ -223,10 +223,6 @@ private slots:
 
   void on_pbSpF_AddLineAfter_clicked();
 
-  void on_pbGoToNextNoise_clicked();
-
-  void on_pbGoToNextNoiseFoundGood_clicked();
-
   void on_pbStopReconstruction_toggled(bool checked);
 
   void on_pbCutOffApplyToAll_clicked();

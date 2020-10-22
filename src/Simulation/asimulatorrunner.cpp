@@ -66,7 +66,6 @@ ASimulatorRunner::~ASimulatorRunner()
 bool ASimulatorRunner::setup(int threadCount, bool bPhotonSourceSim)
 {
     totalEventCount = 0;
-    lastProgress = 0;
     lastEventsDone = 0;
     lastRefreshTime = 0;
     usPerEvent = 0;
@@ -84,10 +83,11 @@ bool ASimulatorRunner::setup(int threadCount, bool bPhotonSourceSim)
     for (int iWorker = 0; iWorker < threadCount; iWorker++)
     {
         ASimulator *worker;
-        if (bPhotonSourceSim) worker = new APointSourceSimulator(simMan, iWorker);
-        else                  worker = new AParticleSourceSimulator(simMan, iWorker);
+        int seed = detector.RandGen->Rndm() * 10000000;
+        if (bPhotonSourceSim) worker = new APointSourceSimulator(simMan.Settings, detector, simMan.Nodes, simMan.InNodeDistributor, iWorker, seed);
+        else                  worker = new AParticleSourceSimulator(simMan.Settings, detector, iWorker, seed);
 
-        bool bOK = worker->setup(simMan.jsSimSet);
+        bool bOK = worker->setup();
         if (!bOK)
         {
             simMan.setErrorString( worker->getErrorString() );
@@ -104,7 +104,7 @@ bool ASimulatorRunner::setup(int threadCount, bool bPhotonSourceSim)
             delete worker;
             break;
         }
-        totalEventCount += worker->getEventCount();
+        totalEventCount += workerEventCount;
 
         bOK = worker->finalizeConfig();
         if (!bOK)
@@ -117,8 +117,6 @@ bool ASimulatorRunner::setup(int threadCount, bool bPhotonSourceSim)
 
         workers.append(worker);
     }
-
-    simMan.NumberOfWorkers = workers.size();  //used by particle sources - script gen
 
     if (threadCount > 1)
     {
@@ -142,15 +140,17 @@ void ASimulatorRunner::updateStats()
 {
     int refreshTimeElapsed = startTime.elapsed();
     progress = 0;
+    progressG4 = 0;
     int eventsDone = 0;
     for(int i = 0; i < workers.count(); i++)
     {
-        int progressThread = workers[i]->progress;
+        progress   += workers[i]->progress;
+        progressG4 += workers[i]->progressG4;
         int events = workers[i]->getEventsDone();
         eventsDone += events;
-        progress += progressThread;
     }
-    progress /= workers.count();
+    progress   /= workers.count();
+    progressG4 /= workers.count();
 
     int deltaEventsDone = eventsDone - lastEventsDone;
     double deltaRefreshTime = refreshTimeElapsed - lastRefreshTime;
@@ -160,7 +160,7 @@ void ASimulatorRunner::updateStats()
         usPerEvent = deltaRefreshTime / (double)deltaEventsDone;
         lastRefreshTime = refreshTimeElapsed;
         lastEventsDone = eventsDone;
-        lastProgress = progress;
+        //lastProgress = progress;
     }
 }
 
@@ -206,7 +206,7 @@ void ASimulatorRunner::simulate()
     progress = 0;
     usPerEvent = 0;
     simState = SRunning;
-    emit simMan.updateReady(0, 0); // set progress to 0 in GUI
+    emit simMan.updateReady(0, 0, 0); // set progress to 0 in GUI
 
     startTime.restart();
 
@@ -246,7 +246,7 @@ void ASimulatorRunner::simulate()
     simState = SFinished;
     progress = 100.0;
     usPerEvent = startTime.elapsed() / (double)totalEventCount;
-    emit simMan.updateReady(100.0, usPerEvent);
+    emit simMan.updateReady(100.0, usPerEvent, 100.0);
 
     emit simulationFinished();
 }

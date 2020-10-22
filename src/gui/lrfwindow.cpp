@@ -1390,7 +1390,7 @@ void LRFwindow::on_pbShowSensorGroups_clicked()
         tmp[(*sensors)[j].GetIndex()].append(QString::number(igrp,'g', 4));
     }
 
-  MW->clearGeoMarkers();
+  MW->GeometryWindow->ClearGeoMarkers();
   MW->GeometryWindow->on_pbTop_clicked();
   MW->GeometryWindow->ShowGeometry();
   MW->GeometryWindow->ShowText(tmp, kBlue);
@@ -1406,7 +1406,7 @@ void LRFwindow::on_pbShowSensorGains_clicked()
         tmp.append(QString::number(gain, 'g', 4));
     }
 
-    MW->clearGeoMarkers();
+    MW->GeometryWindow->ClearGeoMarkers();
     MW->GeometryWindow->on_pbTop_clicked();
     MW->GeometryWindow->ShowGeometry();
     MW->GeometryWindow->ShowText(tmp, kBlue);

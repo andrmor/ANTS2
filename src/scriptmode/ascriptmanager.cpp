@@ -9,60 +9,53 @@
 #include <QDebug>
 #include <QElapsedTimer>
 #include <QMetaMethod>
+#include <QFile>
 
 #include "TRandom2.h"
 
-AScriptManager::AScriptManager(TRandom2 *RandGen) : RandGen(RandGen)
-{
-  fEngineIsRunning = false;
-  fAborted = false;
-  MiniBestResult = 1e30;
-  MiniNumVariables = 0;
-
-  timer = 0;
-  timerEvalTookMs = 0;
-}
+AScriptManager::AScriptManager(TRandom2 *RandGen)
+    : RandGen(RandGen) {}
 
 AScriptManager::~AScriptManager()
 {
-  for (int i=0; i<interfaces.size(); i++) delete interfaces[i];
-  interfaces.clear();
+    for (int i = 0; i < interfaces.size(); i++) delete interfaces[i];
+    interfaces.clear();
 
-  delete timer;
+    delete timer;
 
-  if (bOwnRandomGen) delete RandGen;
+    if (bOwnRandomGen) delete RandGen;
 }
 
 #ifdef GUI
 void AScriptManager::hideMsgDialogs()
 {
-  for (int i=0; i<interfaces.size(); i++)
-  {
-      AMsg_SI* t = dynamic_cast<AMsg_SI*>(interfaces[i]);
-      if (t)  t->HideWidget();
+    for (int i=0; i<interfaces.size(); i++)
+    {
+        AMsg_SI* t = dynamic_cast<AMsg_SI*>(interfaces[i]);
+        if (t) t->HideWidget();
     }
 }
 
 void AScriptManager::restoreMsgDialogs()
 {
-  for (int i=0; i<interfaces.size(); i++)
-  {
-      AMsg_SI* t = dynamic_cast<AMsg_SI*>(interfaces[i]);
-      if (t) t->RestorelWidget();
-  }
+    for (int i=0; i<interfaces.size(); i++)
+    {
+        AMsg_SI* t = dynamic_cast<AMsg_SI*>(interfaces[i]);
+        if (t) t->RestorelWidget();
+    }
 }
 
 void AScriptManager::deleteMsgDialogs()
 {
-  for (int i=0; i<interfaces.size(); i++)
-  {
-      AMsg_SI* t = dynamic_cast<AMsg_SI*>(interfaces[i]);
-      if (t)
-      {
-          // *** !!! t->deleteDialog(); //need by GenScriptWindow ?
-          return;
-      }
-  }
+    for (int i=0; i<interfaces.size(); i++)
+    {
+        AMsg_SI* t = dynamic_cast<AMsg_SI*>(interfaces[i]);
+        if (t)
+        {
+            // *** !!! t->deleteDialog(); //need by GenScriptWindow ?
+            return;
+        }
+    }
 }
 #endif
 
@@ -72,7 +65,7 @@ qint64 AScriptManager::getElapsedTime()
   return timerEvalTookMs;
 }
 
-const QString AScriptManager::getFunctionReturnType(const QString &UnitFunction)
+QString AScriptManager::getFunctionReturnType(const QString &UnitFunction)
 {
   QStringList f = UnitFunction.split(".");
   if (f.size() != 2) return "";
@@ -162,3 +155,112 @@ void AScriptManager::AbortEvaluation(QString message)
   }
   emit onAbort();
 }
+
+bool AScriptManager::expandScript(const QString & OriginalScript, QString & ExpandedScript)
+{
+    ExpandedScript = OriginalScript;
+    const int OriginalSize = OriginalScript.count('\n') + 1;
+
+    LineNumberMapper.resize(OriginalSize + 1);
+    LineNumberMapper[0] = -1;    // just paranoic, line number 0 will never be requested
+    for (int i = 1; i <= OriginalSize; i++)
+        LineNumberMapper[i] = i; // line numbers start from 1
+
+    bool bWasExpanded;
+    bool bInsideBlockComments;
+    int iCycleCounter = 0;
+    do
+    {
+        if ( !ExpandedScript.contains("#include") ) break;
+
+        bWasExpanded = false;
+        bInsideBlockComments = false;
+        QVector<int> LineNumberMapperCopy = LineNumberMapper;
+        int iInsertLine = 0;
+
+        QString WorkScript;
+
+        const QStringList SL = ExpandedScript.split('\n', QString::KeepEmptyParts);
+        for (int iLine = 0; iLine < SL.size(); iLine++)
+        {
+            const QString Line = SL.at(iLine);
+
+            if ( bInsideBlockComments || !Line.simplified().startsWith("#include") )
+            {
+                WorkScript += Line + '\n';
+                iInsertLine++;
+                updateBlockCommentStatus(Line, bInsideBlockComments);
+            }
+            else
+            {
+                const QStringList tmp = Line.split('\"', QString::KeepEmptyParts);
+                if (tmp.size() < 3)
+                {
+                    LastError = "Format error in #include (could be in #include of included file)";
+                    LastErrorLineNumber = LineNumberMapperCopy[iLine + 1];
+                    return false;
+                }
+                const QString FileName = tmp.at(1);
+
+                QFile file(FileName);
+                if (!file.exists() || !file.open(QIODevice::ReadOnly | QFile::Text))
+                {
+                    LastError = "Cannot find or open file in #include (could be in #include of included file)";
+                    LastErrorLineNumber = LineNumberMapperCopy[iLine + 1];
+                    return false;
+                }
+
+                QTextStream in(&file);
+
+                int LineCounter = 0;
+                while(!in.atEnd())
+                {
+                    in.readLine();
+                    LineCounter++;
+                }
+                in.seek(0);
+                QString IncludedScript = in.readAll();
+                file.close();
+                WorkScript += IncludedScript + "\n";
+                if (LineCounter == 0) LineCounter = 1;
+
+                int old = LineNumberMapperCopy[iLine + 1];
+                LineNumberMapper.insert(iInsertLine+1, LineCounter-1, old);
+                //qDebug() << old << LineNumberMapperCopy << iLine << LineCounter;
+
+                iInsertLine += LineCounter;
+                bWasExpanded = true;
+                bScriptExpanded = true;
+            }
+        }
+        ExpandedScript = WorkScript;
+
+        iCycleCounter++;
+        //qDebug() << iCycleCounter;
+        if (iCycleCounter > 100)
+        {
+            LastError = "Suspect infinite loop in #includes";
+            return false;
+        }
+    }
+    while (bWasExpanded);
+
+    /*
+    const QStringList SL = ExpandedScript.split('\n', QString::KeepEmptyParts);
+    for (int iLine = 0; iLine < SL.size(); iLine++)
+        qDebug() << iLine + 1 << " "<< SL.at(iLine);
+    qDebug() << "-----\n"<< LineNumberMapper;
+    */
+
+    return true;
+}
+
+void AScriptManager::correctLineNumber(int & iLineNumber) const
+{
+    if (!bScriptExpanded) return;
+
+    if (iLineNumber < 0 || iLineNumber >= LineNumberMapper.size()) return;
+
+    iLineNumber = LineNumberMapper[iLineNumber]; // line numbers start from 1 !
+}
+

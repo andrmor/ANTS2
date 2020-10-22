@@ -49,12 +49,17 @@ private:
     void showPanel(ADrawObject &obj);
     void fitPanel(ADrawObject &obj);
     void scale(ADrawObject &obj);
+    void scaleIntegralToUnity(ADrawObject &obj);
     void scaleCDR(ADrawObject &obj);
     void scaleAllSameMax();
     void shift(ADrawObject &obj);
     void drawIntegral(ADrawObject &obj);
     void fraction(ADrawObject &obj);
     void fwhm(int index);
+    void linDraw(int index);
+    void boxDraw(int index);
+    void ellipseDraw(int index);
+
     void linFit(int index);
     void expFit(int index);
     void interpolate(ADrawObject &obj);

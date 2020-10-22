@@ -35,6 +35,8 @@
   #include "aann_si.h"
 #endif
 
+#include <memory>
+
 // SIM
 #ifdef SIM
 #include "asimulationmanager.h"
@@ -101,11 +103,17 @@ int main(int argc, char *argv[])
     qDebug() << ">TThread initialized";
 #endif
 
+    std::unique_ptr<QCoreApplication> app;
 #ifdef GUI
-    QApplication a(argc, argv);
-    a.setStyle(new AProxyStyle);
+    if (argc == 1)
+    {
+        QApplication * qa = new QApplication(argc, argv);
+        qa->setStyle(new AProxyStyle);
+        app.reset(qa);
+    }
+    else app.reset(new QCoreApplication(argc, argv));
 #else
-    QCoreApplication a(argc, argv);
+    app.reset(new QCoreApplication(argc, argv));
 #endif
     qDebug() << "Qt application created";
 
@@ -113,6 +121,9 @@ int main(int argc, char *argv[])
     FilterRules += "\nqt.network.ssl.warning=false"; //to suppress warnings about ssl
     //QLoggingCategory::setFilterRules("qt.network.ssl.warning=false");
     QLoggingCategory::setFilterRules(FilterRules);
+
+    AGlobalSettings & GlobSet = AGlobalSettings::getInstance();
+    qDebug() << "Global settings object created";
 
     AConfiguration Config;
     qDebug() << "Config hub created";
@@ -126,7 +137,7 @@ int main(int argc, char *argv[])
 
 #ifdef SIM
     ASimulationManager SimulationManager(EventsDataHub, Detector);
-    Config.SetParticleSources(SimulationManager.ParticleSources);
+    Config.setSimSettings(&SimulationManager.Settings);
     QObject::connect(&EventsDataHub, &EventsDataClass::cleared, &SimulationManager, &ASimulationManager::clearTrackingHistory);
     QObject::connect(&Detector, &DetectorClass::newGeoManager, &SimulationManager, &ASimulationManager::onNewGeoManager);
     qDebug() << "Simulation manager created";
@@ -141,16 +152,15 @@ int main(int argc, char *argv[])
     qDebug() << "Reconstruction manager created";
 
     ANetworkModule Network;
+    Network.initGridRunner(EventsDataHub, *Detector.PMs, SimulationManager);
     QObject::connect(&Detector, &DetectorClass::newGeoManager, &Network, &ANetworkModule::onNewGeoManagerCreated);
     QObject::connect(&Network, &ANetworkModule::RootServerStarted, &Detector, &DetectorClass::onRequestRegisterGeoManager);
     QObject::connect(&SimulationManager, &ASimulationManager::ProgressReport, &Network, &ANetworkModule::ProgressReport );
     QObject::connect(&ReconstructionManager, &AReconstructionManager::UpdateReady, &Network, &ANetworkModule::ProgressReport );
-    qDebug() << "Network module created";
-
-    AGlobalSettings& GlobSet = AGlobalSettings::getInstance();
     GlobSet.setNetworkModule(&Network);
     if (GlobSet.NumThreads == -1) GlobSet.NumThreads = GlobSet.RecNumTreads;
-    qDebug() << "Global settings object created";
+    GlobSet.setMpCollection(Detector.MpCollection);
+    qDebug() << "Network module created";
 
     Config.UpdateLRFmakeJson(); //compatibility    
     TH1::AddDirectory(false);  //a histograms objects will not be automatically created in root directory (TDirectory); special case is in TreeView and ResolutionVsArea
@@ -171,12 +181,14 @@ int main(int argc, char *argv[])
         {
             w.ELwindow->show();
             w.ELwindow->raise();//making sure examples window is on top
+            qDebug() << "Example window shown";
         }
         else w.ELwindow->hide();
-        qDebug() << "Examples window shown/hidden";
 
         qDebug() << "Starting QApplication";
-        return a.exec();
+        int res = app->exec();
+        qDebug() << "Exiting QApplication";
+        return res;
     }
     else
 #else // GUI
@@ -193,6 +205,7 @@ int main(int argc, char *argv[])
         parser.addPositionalArgument("port", QCoreApplication::translate("main", "Web socket server port"));
         parser.addPositionalArgument("ticket", QCoreApplication::translate("main", "Id for accessing ANTS2 server"));
         parser.addPositionalArgument("maxThreads", QCoreApplication::translate("main", "Maximum number of threads in sim and rec"));
+        parser.addPositionalArgument("directory", QCoreApplication::translate("main", "Working directory"));
 
         QCommandLineOption serverOption(QStringList() << "s" << "server",
                 QCoreApplication::translate("main", "Run ANTS2 in server mode."));
@@ -228,7 +241,24 @@ int main(int argc, char *argv[])
                 QCoreApplication::translate("main", "maxThreads"));
         parser.addOption(maxThreadsOption);
 
-        parser.process(a);
+        QCommandLineOption workDirOption(QStringList() << "w" << "workdir",
+                QCoreApplication::translate("main", "Sets max sim and rec threads."),
+                QCoreApplication::translate("main", "directory"));
+        parser.addOption(workDirOption);
+
+        parser.process(*app);
+
+        if ( parser.isSet(workDirOption) )
+        {
+            QString WorkDir = parser.value(workDirOption);
+            if (QDir(WorkDir).exists())
+            {
+                qDebug() << "Setting the working directory to:" << WorkDir;
+                QDir::setCurrent(WorkDir);
+                GlobSet.TmpDir = WorkDir;
+            }
+            else qDebug() << "Ignoring the provided working directory (" << WorkDir << ") - it does not exist!";
+        }
 
         if ( parser.isSet(outputOption) )
         {
@@ -244,6 +274,7 @@ int main(int argc, char *argv[])
 
         AJavaScriptManager SM(Detector.RandGen);
         Network.SetScriptManager(&SM);
+        QObject::connect(&SM, &AScriptManager::reportProgress, &Network, &ANetworkModule::ProgressReport);
         SM.RegisterCoreInterfaces();
         AConfig_SI* conf = new AConfig_SI(&Config);
         SM.RegisterInterface(conf, "config");
@@ -271,7 +302,7 @@ int main(int argc, char *argv[])
         SM.RegisterInterface(hist, "hist");
         ATree_SI* tree = new ATree_SI(&TmpHub);
         SM.RegisterInterface(tree, "tree");
-        APhoton_SI* photon = new APhoton_SI(&Config, &EventsDataHub);
+        APhoton_SI* photon = new APhoton_SI(&Config, &EventsDataHub, SimulationManager);
         SM.RegisterInterface(photon, "photon");
         AThreads_SI* threads = new AThreads_SI(&SM);
         SM.RegisterInterface(threads, "threads");
@@ -324,6 +355,7 @@ int main(int argc, char *argv[])
                 int max = parser.value(maxThreadsOption).toInt();
                 SimulationManager.setMaxThreads(max);
                 ReconstructionManager.setMaxThread(max);
+                SM.MaxThreads = max;
             }
             QHostAddress ip = QHostAddress::Null;
             if (parser.isSet(ipOption))
@@ -343,7 +375,7 @@ int main(int argc, char *argv[])
             Network.SetExitOnDisconnect(true);
             Network.StartWebSocketServer(ip, Port);
             qDebug() << "To connect, use "<< Network.getWebSocketServerURL();
-            a.exec();
+            app->exec();
             qDebug() << "Finished!"<<QTime::currentTime().toString();
         }
         else
@@ -355,5 +387,6 @@ int main(int argc, char *argv[])
 
     Network.StopRootHttpServer();
     Network.StopWebSocketServer();
+    return 0;
 }
 

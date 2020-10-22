@@ -22,7 +22,7 @@ class OutputWindow : public AGuiWindow
     Q_OBJECT
     
 public:
-    explicit OutputWindow(QWidget* parent, MainWindow *mw, EventsDataClass *eventsDataHub);
+    explicit OutputWindow(QWidget * parent, MainWindow * MW, EventsDataClass * EventsDataHub);
     ~OutputWindow();
 
     QVector< QBitArray > SiPMpixels; //[PM#] [time] [pixY] [pixX] - to report only!
@@ -103,43 +103,48 @@ private slots:
 
     void on_cbEVhideTrans_clicked();
     void on_cbEVhideTransPrim_clicked();
-
     void on_sbMonitorIndex_editingFinished();
-
     void on_pbNextMonitor_clicked();
-
     void on_pbShowMonitorHitDistribution_clicked();
-
     void on_pbShowMonitorTimeOverall_clicked();
+    void on_cbPTHistVolVsTime_clicked();
+
+    void on_cbPTHistEscaping_toggled(bool checked);
+
+    void on_cbPTHistCreated_toggled(bool checked);
 
 private:
-    Ui::OutputWindow *ui;
-    MainWindow* MW;
-    EventsDataClass *EventsDataHub;
+    MainWindow * MW = nullptr;
+    EventsDataClass * EventsDataHub = nullptr;
+    Ui::OutputWindow * ui = nullptr;
 
-    QGraphicsScene *scene;
-    QGraphicsScene *scaleScene;
-    myQGraphicsView *gvOut;
-    QStandardItemModel *modelPMhits;
-    double GVscale;
+    QGraphicsScene * scene = nullptr;
+    QGraphicsScene * scaleScene = nullptr;
+    myQGraphicsView * gvOut = nullptr;
+    QStandardItemModel * modelPMhits = nullptr;
+    double GVscale = 10.0;
     QList<QGraphicsItem*> grItems;
 
-    QVector< QVector<int> > secs;
-    double TotalEnergyDeposited;
+    //QVector< QVector<int> > secs;
+    //double TotalEnergyDeposited;
 
-    bool bForbidUpdate;
+    bool bForbidUpdate = false;
 
-    int binsEnergy = 100;
+    int    binsEnergy = 100;
     double fromEnergy = 0;
     double toEnergy = 0;
-    int selectedModeForEnergyDepo = 0;
-    int binsDistance = 100;
+    int    selectedModeForEnergyDepo = 0;
+    int    selectedModeForProcess = 0;
+    int    binsDistance = 100;
     double fromDistance = 0;
     double toDistance = 0;
-    int binsB1 = 100;
+    int    binsTime = 100;
+    double fromTime = 0;
+    double toTime = 0;
+    int    binsB1 = 100;
     double fromB1 = 0;
     double toB1 = 0;
-    int binsB2 = 100;
+    int    binsB2 = 100;
     double fromB2 = 0;
     double toB2 = 0;
 
@@ -151,7 +156,7 @@ private:
     void addTextitems(const QVector<float>* vector, float MaxSignal, DynamicPassivesHandler *Passives);
     void updateSignalScale();    
     void updateSignalTableWidth();
-    void addParticleHistoryLogLine(int iRec, int level);
+    //void addParticleHistoryLogLine(int iRec, int level);
     void updateMonitors();
     void updatePTHistoryBinControl();
     void fillEvTabViewRecord(QTreeWidgetItem *item, const AParticleTrackingRecord *pr, int ExpansionLevel) const;

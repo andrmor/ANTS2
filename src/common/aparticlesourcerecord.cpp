@@ -83,13 +83,6 @@ bool GunParticleStruct::readFromJson(const QJsonObject &json, AMaterialParticleC
     }
     AParticle part;
     part.readFromJson(jparticle);
-    /*
-    QString name = jparticle["name"].toString();
-    int type = jparticle["type"].toInt();
-    int charge = jparticle["charge"].toInt();
-    double mass = jparticle["mass"].toDouble();
-    AParticle::ParticleType Type = static_cast<AParticle::ParticleType>(type);
-    */
     //looking for this particle in the collection and create if necessary
     ParticleId = MpCollection.findOrAddParticle(part);
     //qDebug()<<"Added gun particle with particle Id"<<ParticleId<<ParticleCollection->at(ParticleId)->ParticleName;
@@ -125,7 +118,7 @@ bool GunParticleStruct::readFromJson(const QJsonObject &json, AMaterialParticleC
 
 GunParticleStruct::~GunParticleStruct()
 {
-  if (spectrum) delete spectrum;
+    delete spectrum; spectrum = nullptr;
 }
 
 // ---------------------- AParticleSourceRecord ----------------------
@@ -177,6 +170,14 @@ void AParticleSourceRecord::writeToJson(QJsonObject & json, const AMaterialParti
     json["DoMaterialLimited"] = DoMaterialLimited;
     json["LimitedToMaterial"] = LimtedToMatName;
 
+    json["TimeAverageMode"] = TimeAverageMode;
+    json["TimeAverage"] = TimeAverage;
+    json["TimeAverageStart"] = TimeAverageStart;
+    json["TimeAveragePeriod"] = TimeAveragePeriod;
+    json["TimeSpreadMode"] = TimeSpreadMode;
+    json["TimeSpreadSigma"] = TimeSpreadSigma;
+    json["TimeSpreadWidth"] = TimeSpreadWidth;
+
     //particles
     int GunParticleSize = GunParticles.size();
     json["Particles"] = GunParticleSize;
@@ -190,7 +191,7 @@ void AParticleSourceRecord::writeToJson(QJsonObject & json, const AMaterialParti
     json["GunParticles"] = jParticleEntries;
 }
 
-bool AParticleSourceRecord::readFromJson(const QJsonObject &json, AMaterialParticleCollection &MpCollection)
+bool AParticleSourceRecord::readFromJson(const QJsonObject & json, AMaterialParticleCollection & MpCollection)
 {
     parseJson(json, "Name", name);
     parseJson(json, "Type", shape);
@@ -208,30 +209,29 @@ bool AParticleSourceRecord::readFromJson(const QJsonObject &json, AMaterialParti
     parseJson(json, "CollTheta", CollTheta);
     parseJson(json, "Spread", Spread);
 
-    DoMaterialLimited = fLimit = false;
+    TimeAverageMode = 0;
+    parseJson(json, "TimeAverageMode", TimeAverageMode);
+    TimeAverage = 0;
+    parseJson(json, "TimeAverage", TimeAverage);
+    TimeAverageStart = 0;
+    parseJson(json, "TimeAverageStart", TimeAverageStart);
+    TimeAveragePeriod = 10.0;
+    parseJson(json, "TimeAveragePeriod", TimeAveragePeriod);
+    TimeSpreadMode = 0;
+    parseJson(json, "TimeSpreadMode", TimeSpreadMode);
+    TimeSpreadSigma = 50.0;
+    parseJson(json, "TimeSpreadSigma", TimeSpreadSigma);
+    TimeSpreadWidth = 100.0;
+    parseJson(json, "TimeSpreadWidth", TimeSpreadWidth);
+
+    DoMaterialLimited = bLimitToMat = false;
     LimtedToMatName = "";
     if (json.contains("DoMaterialLimited"))
     {
         parseJson(json, "DoMaterialLimited", DoMaterialLimited);
         parseJson(json, "LimitedToMaterial", LimtedToMatName);
 
-        if (DoMaterialLimited)
-        {
-            bool fFound = false;
-            int iMat;
-            for (iMat = 0; iMat < MpCollection.countMaterials(); iMat++)  //TODO make a method in MpCol
-                if (LimtedToMatName == MpCollection[iMat]->name)
-                {
-                    fFound = true;
-                    break;
-                }
-
-            if (fFound) //only in this case limit to material will be used!
-            {
-                fLimit = true;
-                LimitedToMat = iMat;
-            }
-        }
+        if (DoMaterialLimited) updateLimitedToMat(MpCollection);
     }
 
     //GunParticles
@@ -270,7 +270,7 @@ const QString AParticleSourceRecord::getShapeString() const
     return "-error-";
 }
 
-const QString AParticleSourceRecord::CheckSource(const AMaterialParticleCollection & MpCollection) const
+const QString AParticleSourceRecord::checkSource(const AMaterialParticleCollection & MpCollection) const
 {
     if (shape < 0 || shape > 5) return "unknown source shape";
 
@@ -310,4 +310,23 @@ const QString AParticleSourceRecord::CheckSource(const AMaterialParticleCollecti
     if (TotPartWeight == 0) return "total statistical weight of individual particles is zero";
 
     return "";
+}
+
+void AParticleSourceRecord::updateLimitedToMat(const AMaterialParticleCollection & MpCollection)
+{
+    bool bFound = false;
+    int iMat = 0;
+    for (; iMat < MpCollection.countMaterials(); iMat++)
+        if (LimtedToMatName == MpCollection[iMat]->name)
+        {
+            bFound = true;
+            break;
+        }
+
+    if (bFound)
+    {
+        bLimitToMat = true;
+        LimitedToMat = iMat;
+    }
+    else bLimitToMat = false;
 }

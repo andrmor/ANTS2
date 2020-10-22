@@ -1,4 +1,4 @@
-#ifndef AFILEPARTICLEGENERATOR_H
+﻿#ifndef AFILEPARTICLEGENERATOR_H
 #define AFILEPARTICLEGENERATOR_H
 
 #include "aparticlegun.h"
@@ -7,58 +7,109 @@
 #include <QFile>
 #include <QRegularExpression>
 #include <QVector>
-#include <QJsonObject>
-#include <QDateTime>
 
+#include <string>
+#include <vector>
+
+class AFileGenSettings;
 class AMaterialParticleCollection;
 class QTextStream;
+class AFilePGEngine;
 
 class AFileParticleGenerator : public AParticleGun
 {
 public:
-    AFileParticleGenerator(const AMaterialParticleCollection& MpCollection);
-    virtual ~AFileParticleGenerator();
+    AFileParticleGenerator(const AFileGenSettings &Settings, const AMaterialParticleCollection & MpCollection);
+    virtual         ~AFileParticleGenerator();
 
-    void          SetFileName(const QString &fileName);
-    const QString GetFileName() const {return FileName;}
+    bool            Init() override;  // cannot modify settings, so validation is not possible with this method
+    bool            InitWithCheck(AFileGenSettings & settings, bool bExpanded);  // need to be called if validation is needed!
 
-    virtual bool Init() override;               //has to be called before first use of GenerateEvent()
-    virtual void ReleaseResources() override;
-    virtual bool GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles) override;
+    void            ReleaseResources() override;
+    bool            GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles, int iEvent) override;
 
-    virtual void RemoveParticle(int) override {} //cannot be used for this class
-    virtual bool IsParticleInUse(int particleId, QString& SourceNames) const override;
+    void            SetStartEvent(int startEvent) override;
 
-    virtual void writeToJson(QJsonObject& json) const override;
-    virtual bool readFromJson(const QJsonObject& json) override;
+    bool            generateG4File(int eventBegin, int eventEnd, const QString & FileName);
 
-    virtual void SetStartEvent(int startEvent) override;
-
-    void InvalidateFile();    //forces the file to be inspected again during next call of Init()
-    bool IsValidated() const;
-
-    const QString GetEventRecords(int fromEvent, int toEvent) const;
-
-    //public file inspect results
-    int NumEventsInFile = 0;          //saved
-    int statNumMultipleEvents = 0;
-    QVector<int> statParticleQuantity;
-
-private:
+public:
+    const AFileGenSettings & ConstSettings;
     const AMaterialParticleCollection & MpCollection;
-    QString FileName;
-    QFile File;
-    QTextStream* Stream = 0;
-
-    const QRegularExpression rx = QRegularExpression("(\\ |\\,|\\:|\\t)"); //separators: ' ' or ',' or ':' or '\t'
-
-    int RegisteredParticleCount = -1; //saved - used in validity check
-    QDateTime FileLastModified;       //saved - used in validity check
-
 
 private:
-    void clearFileStat();
+    AFilePGEngine * Engine = nullptr;
 
+    bool determineFileFormat(AFileGenSettings & settings);
+    bool isFileG4Binary(AFileGenSettings & settings);
+    bool isFileG4Ascii(AFileGenSettings & settings);
+    bool isFileSimpleAscii(AFileGenSettings & settings);
+};
+
+class AFilePGEngine
+{
+public:
+    AFilePGEngine(AFileParticleGenerator * fpg) : FPG(fpg) {}
+    virtual ~AFilePGEngine(){}
+
+    virtual bool doInit() = 0;
+    virtual bool doInitAndInspect(AFileGenSettings & settings, bool bDetailedInspection) = 0;
+    virtual bool doGenerateEvent(QVector<AParticleRecord*> & GeneratedParticles) = 0;
+    virtual bool doSetStartEvent(int startEvent) = 0;
+    virtual bool doGenerateG4File(int eventBegin, int eventEnd, const QString & FileName) = 0;
+
+protected:
+    AFileParticleGenerator * FPG = nullptr;
+
+    const QRegularExpression rx = QRegularExpression("(\\ |\\,|\\:|\\t)");  // separators are: ' ' or ',' or ':' or '\t'
+};
+
+class AFilePGEngineSimplistic : public AFilePGEngine
+{
+public:
+    AFilePGEngineSimplistic(AFileParticleGenerator * fpg) : AFilePGEngine(fpg) {}
+    ~AFilePGEngineSimplistic();
+
+    bool doInit() override;
+    bool doInitAndInspect(AFileGenSettings & settings, bool bDetailedInspection) override;
+    bool doGenerateEvent(QVector<AParticleRecord*> & GeneratedParticles) override;
+    bool doSetStartEvent(int startEvent) override;
+    bool doGenerateG4File(int eventBegin, int eventEnd, const QString & FileName) override; // not in use! SimManager uses mainstream approach to generate events
+
+private:
+    QFile File;
+    QTextStream * Stream = nullptr;
+};
+
+class AFilePGEngineG4antsTxt : public AFilePGEngine
+{
+public:
+    AFilePGEngineG4antsTxt(AFileParticleGenerator * fpg) : AFilePGEngine(fpg) {}
+    ~AFilePGEngineG4antsTxt();
+
+    bool doInit() override;
+    bool doInitAndInspect(AFileGenSettings & settings, bool bDetailedInspection) override;
+    bool doGenerateEvent(QVector<AParticleRecord*> & GeneratedParticles) override;
+    bool doSetStartEvent(int startEvent) override;
+    bool doGenerateG4File(int eventBegin, int eventEnd, const QString & FileName) override;
+
+private:
+    std::ifstream * inStream = nullptr;
+};
+
+class AFilePGEngineG4antsBin : public AFilePGEngine
+{
+public:
+    AFilePGEngineG4antsBin(AFileParticleGenerator * fpg) : AFilePGEngine(fpg) {}
+    ~AFilePGEngineG4antsBin();
+
+    bool doInit() override;
+    bool doInitAndInspect(AFileGenSettings & settings, bool bDetailedInspection) override;
+    bool doGenerateEvent(QVector<AParticleRecord*> & GeneratedParticles) override;
+    bool doSetStartEvent(int startEvent) override;
+    bool doGenerateG4File(int eventBegin, int eventEnd, const QString & FileName) override;
+
+private:
+    std::ifstream * inStream = nullptr;
 };
 
 #endif // AFILEPARTICLEGENERATOR_H

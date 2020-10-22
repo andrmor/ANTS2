@@ -15,7 +15,7 @@ ATrackingStepData::ATrackingStepData(float *position, float time, float energy, 
     for (int i=0; i<3; i++) Position[i] = position[i];
 }
 
-ATrackingStepData::ATrackingStepData(double *position, double time, double energy, double depositedEnergy, const QString &process) :
+ATrackingStepData::ATrackingStepData(const double *position, double time, double energy, double depositedEnergy, const QString &process) :
     Time(time), Energy(energy), DepositedEnergy(depositedEnergy), Process(process)
 {
     for (int i=0; i<3; i++) Position[i] = position[i];
@@ -43,7 +43,7 @@ void ATrackingStepData::logToString(QString & str, int offset) const
 ATransportationStepData::ATransportationStepData(float x, float y, float z, float time, float energy, float depositedEnergy, const QString &process) :
     ATrackingStepData(x,y,z, time, energy, depositedEnergy, process) {}
 
-ATransportationStepData::ATransportationStepData(double *position, double time, double energy, double depositedEnergy, const QString &process) :
+ATransportationStepData::ATransportationStepData(const double *position, double time, double energy, double depositedEnergy, const QString &process) :
     ATrackingStepData(position, time, energy, depositedEnergy, process) {}
 
 void ATransportationStepData::setVolumeInfo(const QString & volName, int volIndex, int matIndex)
@@ -152,6 +152,25 @@ bool AParticleTrackingRecord::isTouchedVolumes(const QStringList & Vols, const Q
     for (AParticleTrackingRecord * sec : Secondaries)
         if (sec->isTouchedVolumes(Vols, VolsStartsWith))
             return true;
+
+    return false;
+}
+
+bool AParticleTrackingRecord::isContainParticle(const QStringList & PartNames) const
+{
+    for (const QString & name : PartNames)
+    {
+        if (name.endsWith('*'))
+        {
+            QString wild = name;
+            wild.chop(1);
+            if (ParticleName.startsWith(wild)) return true;
+        }
+        else if (ParticleName == name) return true;
+    }
+
+    for (AParticleTrackingRecord * sec : Secondaries)
+        if (sec->isContainParticle(PartNames)) return true;
 
     return false;
 }
@@ -272,6 +291,14 @@ bool AEventTrackingRecord::isTouchedVolumes(const QStringList & Vols, const QStr
 {
     for (AParticleTrackingRecord * pr : PrimaryParticleRecords)
         if (pr->isTouchedVolumes(Vols, VolsStartsWith)) return true;
+
+    return false;
+}
+
+bool AEventTrackingRecord::isContainParticle(const QStringList & PartNames) const
+{
+    for (AParticleTrackingRecord * pr : PrimaryParticleRecords)
+        if (pr->isContainParticle(PartNames)) return true;
 
     return false;
 }

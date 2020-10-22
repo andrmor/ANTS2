@@ -277,13 +277,13 @@ bool isContainAllKeys(QJsonObject json, QStringList keys)
     return true;
 }
 
-const QJsonObject strToObject(const QString &s)
+QJsonObject strToObject(const QString &s)
 {
     QJsonDocument doc = QJsonDocument::fromJson(s.toUtf8());
     return doc.object();
 }
 
-const QString jsonToString(const QJsonObject &json)
+QString jsonToString(const QJsonObject &json)
 {
     QJsonDocument doc(json);
     QString s( doc.toJson(QJsonDocument::Compact) );
@@ -303,4 +303,11 @@ bool LoadJsonArrayFromFile(QJsonArray &ar, const QString &fileName)
     }
     else
         return false;
+}
+
+QString jsonArrayToString(const QJsonArray & ar)
+{
+    QJsonDocument doc;
+    doc.setArray(ar);
+    return doc.toJson().simplified();
 }

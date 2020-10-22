@@ -139,6 +139,8 @@ private slots:
 
     void on_pbCopyIntrEnResToAll_clicked();
 
+    void on_pbReloadAllNeutronCSs_clicked();
+
 private:
     Ui::MaterialInspectorWindow * ui = nullptr;
     MainWindow                  * MW = nullptr;
@@ -167,7 +169,7 @@ private:
     void updateActionButtons();
     void updateWaveButtons();
 
-    void showProcessIntCoefficient(int particleId, int TermScenario);
+    void showProcessIntCoefficient(int iTermScenario);
     TGraph* constructInterpolationGraph(const QVector<double> & X, const QVector<double> & Y) const;
     bool importXCOM(QTextStream &in, int particleId);
 
@@ -175,7 +177,7 @@ private:
     bool doLoadCrossSection(ANeutronInteractionElement *element, QString fileName);
     void ShowTreeWithChemicalComposition();
     void FillNeutronTable();
-    int  autoloadMissingCrossSectionData(); //returns number of particles added to the collection
+    int  autoloadMissingCrossSectionData(bool bForceReload = false); //returns number of particles added to the collection
 
     bool parseDecayOrRaiseTime(bool doParseDecay);
     void updateWarningIcons();

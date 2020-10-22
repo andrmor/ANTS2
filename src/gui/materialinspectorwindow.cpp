@@ -34,6 +34,7 @@
 #include <QVBoxLayout>
 #include <QPlainTextEdit>
 #include <QPushButton>
+#include <QThread>
 
 //Root
 #include "TGraph.h"
@@ -1044,7 +1045,12 @@ void MaterialInspectorWindow::on_pbLoadPrimSpectrum_clicked()
 void MaterialInspectorWindow::on_pbShowPrimSpectrum_clicked()
 {
     AMaterial & tmpMaterial = MpCollection->tmpMaterial;
-    MW->GraphWindow->MakeGraph(&tmpMaterial.PrimarySpectrum_lambda, &tmpMaterial.PrimarySpectrum, kRed, "Wavelength, nm", "Photon flux, a.u.");
+    TGraph * g = MW->GraphWindow->ConstructTGraph(tmpMaterial.PrimarySpectrum_lambda, tmpMaterial.PrimarySpectrum);
+    MW->GraphWindow->configureGraph(g, "Emission spectrum",
+                                    "Wavelength, nm", "Emission probability, a.u.",
+                                    2, 20, 1,
+                                    2, 1,  1);
+    MW->GraphWindow->Draw(g, "APL");
 }
 
 void MaterialInspectorWindow::on_pbDeletePrimSpectrum_clicked()
@@ -1076,7 +1082,12 @@ void MaterialInspectorWindow::on_pbLoadSecSpectrum_clicked()
 void MaterialInspectorWindow::on_pbShowSecSpectrum_clicked()
 {
     AMaterial & tmpMaterial = MpCollection->tmpMaterial;
-    MW->GraphWindow->MakeGraph(&tmpMaterial.SecondarySpectrum_lambda, &tmpMaterial.SecondarySpectrum, kRed, "Wavelength, nm", "Photon flux, a.u.");
+    TGraph * g = MW->GraphWindow->ConstructTGraph(tmpMaterial.SecondarySpectrum_lambda, tmpMaterial.SecondarySpectrum);
+    MW->GraphWindow->configureGraph(g, "Emission spectrum",
+                                    "Wavelength, nm", "Emission probability, a.u.",
+                                    2, 20, 1,
+                                    2, 1,  1);
+    MW->GraphWindow->Draw(g, "APL");
 }
 
 void MaterialInspectorWindow::on_pbDeleteSecSpectrum_clicked()
@@ -1108,7 +1119,12 @@ void MaterialInspectorWindow::on_pbLoadNlambda_clicked()
 void MaterialInspectorWindow::on_pbShowNlambda_clicked()
 {
     AMaterial & tmpMaterial = MpCollection->tmpMaterial;
-    MW->GraphWindow->MakeGraph(&tmpMaterial.nWave_lambda, &tmpMaterial.nWave, kRed, "Wavelength, nm", "Refractive index");
+    TGraph * g = MW->GraphWindow->ConstructTGraph(tmpMaterial.nWave_lambda, tmpMaterial.nWave);
+    MW->GraphWindow->configureGraph(g, "Refractive index",
+                                    "Wavelength, nm", "Refractive index",
+                                    2, 20, 1,
+                                    2, 1,  1);
+    MW->GraphWindow->Draw(g, "APL");
 }
 
 void MaterialInspectorWindow::on_pbDeleteNlambda_clicked()
@@ -1141,7 +1157,12 @@ void MaterialInspectorWindow::on_pbLoadABSlambda_clicked()
 void MaterialInspectorWindow::on_pbShowABSlambda_clicked()
 {
     AMaterial & tmpMaterial = MpCollection->tmpMaterial;
-    MW->GraphWindow->MakeGraph(&tmpMaterial.absWave_lambda, &tmpMaterial.absWave, kRed, "Wavelength, nm", "Attenuation coefficient, mm-1");
+    TGraph * g = MW->GraphWindow->ConstructTGraph(tmpMaterial.absWave_lambda, tmpMaterial.absWave);
+    MW->GraphWindow->configureGraph(g, "Attenuation coefficient",
+                                    "Wavelength, nm", "Attenuation coefficient, mm^{-1}",
+                                    2, 20, 1,
+                                    2, 1,  1);
+    MW->GraphWindow->Draw(g, "APL");
 }
 
 void MaterialInspectorWindow::on_pbDeleteABSlambda_clicked()
@@ -1158,7 +1179,12 @@ void MaterialInspectorWindow::on_pbDeleteABSlambda_clicked()
 void MaterialInspectorWindow::on_pbShowReemProbLambda_clicked()
 {
     AMaterial & tmpMaterial = MpCollection->tmpMaterial;
-    MW->GraphWindow->MakeGraph(&tmpMaterial.reemisProbWave_lambda, &tmpMaterial.reemisProbWave, kRed, "Wavelength, nm", "Reemission probability");
+    TGraph * g = MW->GraphWindow->ConstructTGraph(tmpMaterial.reemisProbWave_lambda, tmpMaterial.reemisProbWave);
+    MW->GraphWindow->configureGraph(g, "Reemission probability",
+                                    "Wavelength, nm", "Reemission probability",
+                                    2, 20, 1,
+                                    2, 1,  1);
+    MW->GraphWindow->Draw(g, "APL");
 }
 
 void MaterialInspectorWindow::on_pbLoadReemisProbLambda_clicked()
@@ -1376,7 +1402,7 @@ void MaterialInspectorWindow::on_pbShowUsage_clicked()
     }
 
   MW->Detector->GeoManager->ClearTracks();
-  MW->clearGeoMarkers();
+  MW->GeometryWindow->ClearGeoMarkers();
   if (flagFound)
     {
       Detector->colorVolumes(2, index);
@@ -1592,53 +1618,61 @@ void MaterialInspectorWindow::on_actionUse_log_log_interpolation_triggered()
 
 void MaterialInspectorWindow::on_pbShowPhotoelectric_clicked()
 {
-  int particleId = ui->cobParticle->currentIndex();
-  showProcessIntCoefficient(particleId, 0);
+    showProcessIntCoefficient(0);
 }
 
 void MaterialInspectorWindow::on_pbShowCompton_clicked()
 {
-  int particleId = ui->cobParticle->currentIndex();
-  showProcessIntCoefficient(particleId, 1);
+    showProcessIntCoefficient(1);
 }
 
 void MaterialInspectorWindow::on_pbShowPairProduction_clicked()
 {
-    int particleId = ui->cobParticle->currentIndex();
-    showProcessIntCoefficient(particleId, 2);
+    showProcessIntCoefficient(2);
 }
 
-void MaterialInspectorWindow::showProcessIntCoefficient(int particleId, int TermScenario)
+void MaterialInspectorWindow::showProcessIntCoefficient(int iTermScenario)
 {
-  AMaterial& tmpMaterial = MpCollection->tmpMaterial;
-  if (TermScenario > tmpMaterial.MatParticle[particleId].Terminators.size()-1)
-  {
-      message("Not defined in the current configuration!", this);
-      return;
-  }
+    AMaterial & tmpMaterial = MpCollection->tmpMaterial;
 
-  int elements = tmpMaterial.MatParticle[particleId].Terminators[TermScenario].PartialCrossSection.size();
-  if (elements<1) return;
+    const int particleId = ui->cobParticle->currentIndex();
+    if (particleId < 0 || particleId >= tmpMaterial.MatParticle.size()) return;
 
-  Color_t color;
-  TString title;
-  switch (TermScenario)
-  {
-  case 0: color = kGreen; title = "Photoelectric"; break;
-  case 1: color = kBlue; title = "Compton scattering"; break;
-  case 2: color = kMagenta; title = "Pair production"; break;
-  }
-  MW->GraphWindow->SetLog(true, true);
-  QVector<double> &X = tmpMaterial.MatParticle[particleId].Terminators[TermScenario].PartialCrossSectionEnergy;
-  QVector<double> &Y = tmpMaterial.MatParticle[particleId].Terminators[TermScenario].PartialCrossSection;
-  TGraph* gr = MW->GraphWindow->MakeGraph(&X, &Y, color, "Energy, keV", "Interaction coefficient, cm2/g", 2, 1, 1, 0, "", true);
-  gr->SetTitle( title );
-  MW->GraphWindow->Draw(gr, "AP");
+    QVector<NeutralTerminatorStructure> & Terminators = tmpMaterial.MatParticle[particleId].Terminators;
+    if (iTermScenario >= Terminators.size())
+    {
+        message("Not defined in the current configuration!", this);
+        return;
+    }
+    NeutralTerminatorStructure & Scenario = Terminators[iTermScenario];
 
-  TGraph* graphOver = constructInterpolationGraph(X, Y);
-  graphOver->SetLineColor(color);
-  graphOver->SetLineWidth(1);
-  MW->GraphWindow->Draw(graphOver, "SAME L");
+    if (Scenario.PartialCrossSection.size() < 1) return;
+
+    int color;
+    QString title;
+    switch (iTermScenario)
+    {
+    case 0: color = kGreen;   title = "Photoelectric";      break;
+    case 1: color = kBlue;    title = "Compton scattering"; break;
+    case 2: color = kMagenta; title = "Pair production";    break;
+    }
+
+    //if draw is empty, root will "swallow" the axis titles when converting to log log
+    TGraph * gr = MW->GraphWindow->ConstructTGraph(QVector<double>{1,2,3}, QVector<double>{1,2,3});
+    MW->GraphWindow->Draw(gr, "AP");
+    MW->GraphWindow->SetLog(true, true);
+
+    gr = MW->GraphWindow->ConstructTGraph(Scenario.PartialCrossSectionEnergy, Scenario.PartialCrossSection);
+    MW->GraphWindow->configureGraph(gr, title,
+                                    "Energy, keV", "Interaction coefficient, cm^{2}/g",
+                                    color,  2, 1,
+                                    color,  2, 1);
+    MW->GraphWindow->Draw(gr, "AP");
+
+    gr = constructInterpolationGraph(Scenario.PartialCrossSectionEnergy, Scenario.PartialCrossSection);
+    gr->SetLineColor(color);
+    gr->SetLineWidth(1);
+    MW->GraphWindow->Draw(gr, "LSAME");
 }
 
 #include <limits>
@@ -1658,7 +1692,7 @@ void MaterialInspectorWindow::on_pbShowAllForGamma_clicked()
     for (int i = 0; i < mp.Terminators.size(); i++)
     {
         TString opt, title;
-        Color_t color;
+        int color;
         int Lwidth = 1;
         switch (i)
         {
@@ -1708,8 +1742,8 @@ void MaterialInspectorWindow::on_pbShowAllForGamma_clicked()
         gr->SetTitle(title);
         gr->SetLineColor(color);
         gr->SetLineWidth(Lwidth);
-        gr->GetXaxis()->SetTitle("Energy, keV"); //axis titles can be drawn only after graph was shown...
-        gr->GetYaxis()->SetTitle("Mass interaction coefficient, cm2/g");
+        gr->GetXaxis()->SetTitle("Energy, keV");
+        gr->GetYaxis()->SetTitle("Mass interaction coefficient, cm^{2}/g");
         gr->GetXaxis()->SetTitleOffset(1.1);
         gr->GetYaxis()->SetTitleOffset(1.3);
         if (i == 0) mainGr = gr;
@@ -1735,6 +1769,9 @@ void MaterialInspectorWindow::showTotalInteraction()
     int entries = MpCollection->tmpMaterial.MatParticle[particleId].InteractionDataX.size();
     if (entries < 1) return;
 
+    //if draw is empty, root will "swallow" the axis titles when converting to log log
+    TGraph * gr = MW->GraphWindow->ConstructTGraph(QVector<double>{1,2,3}, QVector<double>{1,2,3});
+    MW->GraphWindow->Draw(gr, "AP");
     MW->GraphWindow->SetLog(true, true);
 
     const AParticle::ParticleType type = MpCollection->getParticleType(particleId);
@@ -1770,7 +1807,7 @@ void MaterialInspectorWindow::showTotalInteraction()
         return;
     }
 
-    TGraph * gr = MW->GraphWindow->ConstructTGraph(X, Y, Title, Xtitle, Ytitle, kRed, 2, 1, kRed, 0, 1);
+    gr = MW->GraphWindow->ConstructTGraph(X, Y, Title, Xtitle, Ytitle, kRed, 2, 1, kRed, 0, 1);
     MW->GraphWindow->Draw(gr, "AP");
 
     TGraph* graphOver = constructInterpolationGraph(X, Y);
@@ -1779,26 +1816,24 @@ void MaterialInspectorWindow::showTotalInteraction()
     MW->GraphWindow->Draw(graphOver, "L same");
 }
 
-TGraph *MaterialInspectorWindow::constructInterpolationGraph(const QVector<double> &X, const QVector<double> &Y) const
+TGraph * MaterialInspectorWindow::constructInterpolationGraph(const QVector<double> & X, const QVector<double> & Y) const
 {
-  int entries = X.size();
+    const int entries = X.size();
 
-  QVector<double> xx;
-  QVector<double> yy;
-  int LogLogInterpolation = MpCollection->fLogLogInterpolation;
-  for (int i=1; i<entries; i++)
-    for (int j=1; j<50; j++)
-      {
-        double previousOne = X[i-1];
-        double thisOne = X[i];
-        double XX = previousOne + 0.02* j * (thisOne-previousOne);
-        xx << XX;
-        double YY;
-        if (XX < X.last()) YY = GetInterpolatedValue(XX, &X, &Y, LogLogInterpolation);
-        else YY = Y.last();
-        yy << YY;
-      }
-  return MW->GraphWindow->ConstructTGraph(xx, yy);
+    QVector<double> xx, yy;
+    for (int i = 1; i < entries; i++)
+        for (int j = 1; j < 50; j++)
+        {
+            const double & previousOne = X[i-1];
+            const double & thisOne     = X[i];
+            double XX = previousOne + 0.02 * j * (thisOne - previousOne);
+            xx << XX;
+            double YY;
+            if (XX < X.last()) YY = GetInterpolatedValue(XX, &X, &Y, MpCollection->fLogLogInterpolation);
+            else YY = Y.last();
+            yy << YY;
+        }
+    return MW->GraphWindow->ConstructTGraph(xx, yy);
 }
 
 void MaterialInspectorWindow::on_pbXCOMauto_clicked()
@@ -2346,7 +2381,7 @@ void MaterialInspectorWindow::FillNeutronTable()
     MpCollection->tmpMaterial.updateRuntimeProperties(MpCollection->fLogLogInterpolation, Detector->RandGen); //need to be here? counter-intuitive in indication!
 }
 
-int MaterialInspectorWindow::autoloadMissingCrossSectionData()
+int MaterialInspectorWindow::autoloadMissingCrossSectionData(bool bForceReload)
 {
     AMaterial& tmpMaterial = MpCollection->tmpMaterial;
 
@@ -2375,7 +2410,7 @@ int MaterialInspectorWindow::autoloadMissingCrossSectionData()
         if (bCapture)
         {
             for (int iEl = 0; iEl<termAbs.IsotopeRecords.size(); iEl++)
-                if (termAbs.IsotopeRecords.at(iEl).Energy.isEmpty())
+                if (termAbs.IsotopeRecords.at(iEl).Energy.isEmpty() || bForceReload)
                 {
                     autoLoadCrossSection(&termAbs.IsotopeRecords[iEl], "absorption");
                     newParticlesDefined += autoLoadReaction(termAbs.IsotopeRecords[iEl]);
@@ -2384,7 +2419,7 @@ int MaterialInspectorWindow::autoloadMissingCrossSectionData()
         if (bElastic)
         {
             for (int iEl = 0; iEl<termScat.IsotopeRecords.size(); iEl++)
-                if (termScat.IsotopeRecords.at(iEl).Energy.isEmpty())
+                if (termScat.IsotopeRecords.at(iEl).Energy.isEmpty() || bForceReload)
                     autoLoadCrossSection(&termScat.IsotopeRecords[iEl], "elastic scattering");
         }
     }
@@ -2493,7 +2528,7 @@ void MaterialInspectorWindow::onTabwNeutronsActionRequest(int iEl, int iIso, con
         MW->GraphWindow->Draw(graphOver, "L same");
 
         if (!element->CSfileHeader.isEmpty())
-            MW->GraphWindow->AddText(element->CSfileHeader, true, 0);
+            MW->GraphWindow->ShowTextPanel(element->CSfileHeader, true, 0);
     }
     // -- Load --
     else if (Action.contains("Load"))
@@ -2564,6 +2599,14 @@ void MaterialInspectorWindow::on_cbAllowAbsentCsData_clicked()
 void MaterialInspectorWindow::on_pbAutoLoadMissingNeutronCrossSections_clicked()
 {
     autoloadMissingCrossSectionData();
+
+    FillNeutronTable();
+    setWasModified(true);
+}
+
+void MaterialInspectorWindow::on_pbReloadAllNeutronCSs_clicked()
+{
+    autoloadMissingCrossSectionData(true);
 
     FillNeutronTable();
     setWasModified(true);

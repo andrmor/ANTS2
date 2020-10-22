@@ -5,6 +5,7 @@
 
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QDebug>
 
 AGraphWin_SI::AGraphWin_SI(MainWindow *MW)
   : MW(MW)
@@ -78,12 +79,27 @@ void AGraphWin_SI::SetLegendBorder(int color, int style, int size)
 
 void AGraphWin_SI::AddText(QString text, bool Showframe, int Alignment_0Left1Center2Right)
 {
-    MW->GraphWindow->AddText(text, Showframe, Alignment_0Left1Center2Right);
+    MW->GraphWindow->ShowTextPanel(text, Showframe, Alignment_0Left1Center2Right);
+}
+
+void AGraphWin_SI::AddTextScreenXY(QString text, bool Showframe, int Alignment_0Left1Center2Right, double x1, double y1, double x2, double y2)
+{
+    MW->GraphWindow->ShowTextPanel(text, Showframe, Alignment_0Left1Center2Right, x1, y1, x2, y2, "NDC");
+}
+
+void AGraphWin_SI::AddTextTrueXY(QString text, bool Showframe, int Alignment_0Left1Center2Right, double x1, double y1, double x2, double y2)
+{
+    MW->GraphWindow->ShowTextPanel(text, Showframe, Alignment_0Left1Center2Right, x1, y1, x2, y2, "BR");
 }
 
 void AGraphWin_SI::AddLine(double x1, double y1, double x2, double y2, int color, int width, int style)
 {
     MW->GraphWindow->AddLine(x1, y1, x2, y2, color, width, style);
+}
+
+void AGraphWin_SI::AddArrow(double x1, double y1, double x2, double y2, int color, int width, int style)
+{
+    MW->GraphWindow->AddArrow(x1, y1, x2, y2, color, width, style);
 }
 
 void AGraphWin_SI::AddToBasket(QString Title)
@@ -137,4 +153,50 @@ QVariant AGraphWin_SI::GetAxis()
   if (!ok) result["maxZ"] = QJsonValue();
 
   return QJsonValue(result).toVariant();
+}
+
+#include "TObject.h"
+#include "TGraphErrors.h"
+#include "TH1.h"
+QVariantList AGraphWin_SI::GetContent()
+{
+    QVariantList vl;
+
+    TObject * obj = MW->GraphWindow->GetMainPlottedObject();
+    if (obj)
+    {
+        QString ClName = obj->ClassName();
+        if (ClName == "TH1D")
+        {
+            TH1 * h = dynamic_cast<TH1*>(obj);
+            if (h)
+            {
+                int bins = h->GetNbinsX();
+                for (int i=1; i<=bins; i++)
+                {
+                    QVariantList el;
+                    el << h->GetBinLowEdge(i) << h->GetBinContent(i);
+                    vl.push_back(el);
+                }
+            }
+        }
+        else if (ClName == "TGraph" || ClName == "TGraphErrors")
+        {
+            TGraph * g = dynamic_cast<TGraph*>(obj);
+            if (g)
+            {
+                int bins = g->GetN();
+                for (int i=0; i<bins; i++)
+                {
+                    QVariantList el;
+                    double x, y;
+                    g->GetPoint(i, x, y);
+                    el << x << y;
+                    vl.push_back(el);
+                }
+            }
+        }
+    }
+
+    return vl;
 }

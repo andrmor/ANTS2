@@ -67,7 +67,7 @@ void ReconstructionWindow::on_pbNNshowSpectrum_clicked()
   Int_t MyPalette[100];
   if (ShowDots)
     {
-      MW->clearGeoMarkers();
+      MW->GeometryWindow->ClearGeoMarkers();
       MW->GeometryWindow->ShowGeometry();
 
       Double_t r[]    = {0., 0.0, 1.0, 1.0, 1.0};
@@ -103,7 +103,7 @@ void ReconstructionWindow::on_pbNNshowSpectrum_clicked()
                marks->SetNextPoint(EventsDataHub->Scan.at(iev)->Points[i].r[0], EventsDataHub->Scan.at(iev)->Points[i].r[1], EventsDataHub->Scan.at(iev)->Points[i].r[2]);
              else
                marks->SetNextPoint(EventsDataHub->ReconstructionData[0][iev]->Points[i].r[0], EventsDataHub->ReconstructionData[0][iev]->Points[i].r[1], EventsDataHub->ReconstructionData[0][iev]->Points[i].r[2]);
-           MW->GeoMarkers.append(marks);
+           MW->GeometryWindow->GeoMarkers.append(marks);
          }
     }
 
@@ -119,7 +119,7 @@ void ReconstructionWindow::on_pbNNshowSpectrum_clicked()
         {          
           GeoMarkerClass* marks = new GeoMarkerClass("kNN", 7, 1, MyPalette[i]);
           marks->SetNextPoint(0,0,-10.0 + 0.2*i);
-          MW->GeoMarkers.append(marks);
+          MW->GeometryWindow->GeoMarkers.append(marks);
         }
 
       MW->GeometryWindow->ShowGeometry(false);

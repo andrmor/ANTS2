@@ -79,7 +79,7 @@ void AWebSocketSessionServer::ReplyWithTextFromObject(const QVariant &object)
 
     qDebug() << "Reply with object as text";
 
-    if (object.type() == QMetaType::QVariantMap)
+    if (object.type() == QVariant::Map)
     {
         QVariantMap vm = object.toMap();
         QJsonObject js = QJsonObject::fromVariantMap(vm);
@@ -125,7 +125,7 @@ void AWebSocketSessionServer::ReplyWithBinaryObject(const QVariant &object)
 
     qDebug() << "Binary reply from object";
 
-    if (object.type() == QMetaType::QVariantMap)
+    if (object.type() == QVariant::Map)
     {
         QVariantMap vm = object.toMap();
         QJsonObject js = QJsonObject::fromVariantMap(vm);
@@ -148,7 +148,7 @@ void AWebSocketSessionServer::ReplyWithBinaryObject_asJSON(const QVariant &objec
 
     qDebug() << "Binary reply from object as JSON";
 
-    if (object.type() == QMetaType::QVariantMap)
+    if (object.type() == QVariant::Map)
     {
         QVariantMap vm = object.toMap();
         QJsonObject js = QJsonObject::fromVariantMap(vm);
@@ -205,11 +205,17 @@ void AWebSocketSessionServer::onNewConnection()
         if (bDebug) qDebug() << "Connection established with" << pSocket->peerAddress().toString();
         client = pSocket;
 
+        pSocket->setReadBufferSize(1000000);
+
         emit reportToGUI("--> Connection established");
 
-        connect(pSocket, &QWebSocket::textMessageReceived, this, &AWebSocketSessionServer::onTextMessageReceived);
+        connect(pSocket, &QWebSocket::textMessageReceived,   this, &AWebSocketSessionServer::onTextMessageReceived);
         connect(pSocket, &QWebSocket::binaryMessageReceived, this, &AWebSocketSessionServer::onBinaryMessageReceived);
-        connect(pSocket, &QWebSocket::disconnected, this, &AWebSocketSessionServer::onSocketDisconnected);
+        connect(pSocket, &QWebSocket::binaryFrameReceived,   this, &AWebSocketSessionServer::onBinaryFrameReceived);
+        connect(pSocket, &QWebSocket::disconnected,          this, &AWebSocketSessionServer::onSocketDisconnected);
+
+        //connect(pSocket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(onError(QAbstractSocket::SocketError)));
+        //connect(pSocket, &QWebSocket::stateChanged, this, &AWebSocketSessionServer::onStateChanged);
 
         sendOK();
     }
@@ -219,6 +225,7 @@ void AWebSocketSessionServer::onTextMessageReceived(const QString &message)
 {    
     bReplied = false;
 
+    NumFrames = 0; Progress = 0;
     if (bDebug) qDebug() << "Text message received:\n--->\n"<<message << "\n<---";
 
     //emit reportToGUI("    Text message received");
@@ -235,13 +242,39 @@ void AWebSocketSessionServer::onTextMessageReceived(const QString &message)
 void AWebSocketSessionServer::onBinaryMessageReceived(const QByteArray &message)
 {
     ReceivedBinary = message;
+    NumFrames = 0; Progress = 0;
 
     //emit reportToGUI("    Binary message received");
+    emit restartIdleTimer();
 
     if (bDebug) qDebug() << "Binary message received. Length =" << message.length();
 
     sendOK();
 }
+
+void AWebSocketSessionServer::onBinaryFrameReceived(const QByteArray &frame, bool isLastFrame)
+{
+    //qDebug() << "Binary frame received. last?" << frame.size()<< isLastFrame;
+    emit restartIdleTimer();
+    NumFrames++;
+    if (NumFrames % 10 == 0)
+    {
+        ReplyProgress(Progress);
+        Progress += 25;
+        if (Progress > 100) Progress = 0;
+    }
+}
+
+/*
+void AWebSocketSessionServer::onError(QAbstractSocket::SocketError error)
+{
+    qDebug() << "ERROR!!!!";
+}
+void AWebSocketSessionServer::onStateChanged(QAbstractSocket::SocketState state)
+{
+    qDebug() << "STATECHANGE -   " << state;
+}
+*/
 
 void AWebSocketSessionServer::onSocketDisconnected()
 {

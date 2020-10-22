@@ -8,24 +8,31 @@
 #include "anoderecord.h"
 #include "apositionenergyrecords.h"
 #include "asandwich.h"
-#include "generalsimsettings.h"
+#include "ageneralsimsettings.h"
 #include "ajsontools.h"
 #include "acommonfunctions.h"
 #include "photon_generator.h"
 #include "aphotontracer.h"
 #include "apmhub.h"
 #include "sensorlrfs.h"
+#include "alrfmoduleselector.h"
+#include "aphotonsimsettings.h"
+#include "aphotonnodedistributor.h"
 
 #include <QDebug>
 #include <QJsonObject>
+#include <QFile>
 
-#include "TH1I.h" //to change
+#include "TH1D.h"
 #include "TRandom2.h"
 #include "TGeoManager.h"
 #include "TGeoNavigator.h"
 
-APointSourceSimulator::APointSourceSimulator(ASimulationManager & simMan, int ID) :
-    ASimulator(simMan, ID) {}
+APointSourceSimulator::APointSourceSimulator(const ASimSettings & SimSet, const DetectorClass &detector, const std::vector<ANodeRecord*> & Nodes, const APhotonNodeDistributor & InNodeDistributor, int threadID, int startSeed) :
+    ASimulator(SimSet, detector, threadID, startSeed),
+    PhotSimSettings(SimSet.photSimSet),
+    Nodes(Nodes),
+    InNodeDistributor(InNodeDistributor) {}
 
 APointSourceSimulator::~APointSourceSimulator()
 {
@@ -34,169 +41,97 @@ APointSourceSimulator::~APointSourceSimulator()
 
 int APointSourceSimulator::getEventCount() const
 {
-    if (PointSimMode == 0) return eventEnd - eventBegin;
-    else return (eventEnd - eventBegin)*NumRuns;
+    if (PhotSimSettings.GenMode == APhotonSimSettings::Single)
+        return eventEnd - eventBegin;
+    else
+        return (eventEnd - eventBegin) * NumRuns;
 }
 
-bool APointSourceSimulator::setup(QJsonObject &json)
+bool APointSourceSimulator::setup()
 {
-    if (!json.contains("PointSourcesConfig"))
+    ASimulator::setup();
+
+    NumRuns = PhotSimSettings.getActiveRuns();
+
+    bLimitToVolume = PhotSimSettings.bLimitToVol;
+    if (bLimitToVolume)
     {
-        ErrorString = "Json sent to simulator does not contain generation config data!";
-        return false;
+        const QString & Vol = PhotSimSettings.LimitVolume;
+        if ( !Vol.isEmpty() && detector.Sandwich->World->findObjectByName(Vol) )
+            LimitToVolume = PhotSimSettings.LimitVolume.toLocal8Bit().data();
+        else bLimitToVolume = false;
     }
-    if(!ASimulator::setup(json)) return false;
 
-    QJsonObject js = json["PointSourcesConfig"].toObject();
-    //reading main control options
-    QJsonObject cjson = js["ControlOptions"].toObject();
-    PointSimMode = cjson["Single_Scan_Flood"].toInt();
-    ScintType = 1 + cjson["Primary_Secondary"].toInt(); //0 - primary(1), 1 - secondary(2)
-    NumRuns = cjson["MultipleRunsNumber"].toInt();
-    if (!cjson["MultipleRuns"].toBool()) NumRuns = 1;
-
-    fLimitNodesToObject = false;
-    if (cjson.contains("GenerateOnlyInPrimary"))  //just in case it is an old config file run directly
+    if (PhotSimSettings.PerNodeSettings.Mode == APhotonSim_PerNodeSettings::Custom)
     {
-        if (detector.Sandwich->World->findObjectByName("PrScint"))
+        delete CustomHist; CustomHist = nullptr;
+
+        const QVector<ADPair> Dist = PhotSimSettings.PerNodeSettings.CustomDist;
+        const int size = Dist.size();
+        if (size == 0)
         {
-            fLimitNodesToObject = true;
-            LimitNodesToObject = "PrScint";
-        }
-    }
-    if (cjson.contains("LimitNodesTo"))
-    {
-        if (cjson.contains("LimitNodes")) //new system
-            fLimitNodesToObject = cjson["LimitNodes"].toBool();
-        else
-            fLimitNodesToObject = true;  //semi-old
-        QString Obj = cjson["LimitNodesTo"].toString();
-
-        if (fLimitNodesToObject && !Obj.isEmpty() && detector.Sandwich->World->findObjectByName(Obj))
-        {
-            fLimitNodesToObject = true;
-            LimitNodesToObject = Obj.toLocal8Bit().data();
-        }
-    }
-
-    //reading photons per node info
-    QJsonObject ppnjson = js["PhotPerNodeOptions"].toObject();
-    numPhotMode = ppnjson["PhotPerNodeMode"].toInt();
-    if (numPhotMode < 0 || numPhotMode > 3)
-    {
-        ErrorString = "Unknown photons per node mode!";
-        return false;
-    }
-    //numPhotsConst = ppnjson["PhotPerNodeConstant"].toInt();
-    parseJson(ppnjson, "PhotPerNodeConstant", numPhotsConst);
-    //numPhotUniMin = ppnjson["PhotPerNodeUniMin"].toInt();
-    parseJson(ppnjson, "PhotPerNodeUniMin", numPhotUniMin);
-    //numPhotUniMax = ppnjson["PhotPerNodeUniMax"].toInt();
-    parseJson(ppnjson, "PhotPerNodeUniMax", numPhotUniMax);
-    parseJson(ppnjson, "PhotPerNodeGaussMean", numPhotGaussMean);
-    parseJson(ppnjson, "PhotPerNodeGaussSigma", numPhotGaussSigma);
-
-    if (numPhotMode == 3)
-    {
-        if (!ppnjson.contains("PhotPerNodeCustom"))
-        {
-            ErrorString = "Generation config does not contain custom photon distribution data!";
+            ErrorString = "Config does not contain per-node photon distribution";
             return false;
         }
-        QJsonArray ja = ppnjson["PhotPerNodeCustom"].toArray();
-        int size = ja.size();
-        double* xx = new double[size];
-        int* yy    = new int[size];
-        for (int i=0; i<size; i++)
-        {
-            xx[i] = ja[i].toArray()[0].toDouble();
-            yy[i] = ja[i].toArray()[1].toInt();
-        }
-        TString hName = "hPhotDistr";
-        hName += ID;
-        CustomHist = new TH1I(hName, "Photon distribution", size-1, xx);
-        for (int i = 1; i<size+1; i++)  CustomHist->SetBinContent(i, yy[i-1]);
+
+        double X[size];
+        for (int i = 0; i < size; i++) X[i] = Dist.at(i).first;
+
+        CustomHist = new TH1D("", "NumPhotDist", size-1, X);
+        for (int i = 1; i < size + 1; i++) CustomHist->SetBinContent(i, Dist.at(i-1).second);
         CustomHist->GetIntegral(); //will be thread safe after this
-        delete[] xx;
-        delete[] yy;
     }
 
-    //reading wavelength/decay options
-    QJsonObject wdjson = js["WaveTimeOptions"].toObject();
-    fUseGivenWaveIndex = false; //compatibility
-    parseJson(wdjson, "UseFixedWavelength", fUseGivenWaveIndex);
-    PhotonOnStart.waveIndex = wdjson["WaveIndex"].toInt();
-    if (!simSettings.fWaveResolved) PhotonOnStart.waveIndex = -1;
-
-    //reading direction info
-    QJsonObject pdjson = js["PhotonDirectionOptions"].toObject();
-    fRandomDirection =  pdjson["Random"].toBool();
-    if (!fRandomDirection)
+    const APhotonSim_FixedPhotSettings & FS = PhotSimSettings.FixedPhotSettings;
+    Photon.waveIndex = FS.FixWaveIndex;
+    if (!GenSimSettings.fWaveResolved) Photon.waveIndex = -1;
+    bIsotropic = FS.bIsotropic;
+    if (!bIsotropic)
     {
-        PhotonOnStart.v[0] = pdjson["FixedX"].toDouble();
-        PhotonOnStart.v[1] = pdjson["FixedY"].toDouble();
-        PhotonOnStart.v[2] = pdjson["FixedZ"].toDouble();
-        NormalizeVector(PhotonOnStart.v);
-        //qDebug() << "  ph dir:"<<PhotonOnStart.v[0]<<PhotonOnStart.v[1]<<PhotonOnStart.v[2];
-    }
-    fCone = false;
-    if (pdjson.contains("Fixed_or_Cone"))
-    {
-        int i = pdjson["Fixed_or_Cone"].toInt();
-        fCone = (i==1);
-        if (fCone)
+        if (FS.DirectionMode == APhotonSim_FixedPhotSettings::Vector)
         {
+            bCone = false;
+            Photon.v[0] = FS.FixDX;
+            Photon.v[1] = FS.FixDY;
+            Photon.v[2] = FS.FixDZ;
+            NormalizeVectorSilent(Photon.v);
+        }
+        else //Cone
+        {
+            bCone = true;
             double v[3];
-            v[0] = pdjson["FixedX"].toDouble();
-            v[1] = pdjson["FixedY"].toDouble();
-            v[2] = pdjson["FixedZ"].toDouble();
-            NormalizeVector(v);
+            v[0] = FS.FixDX;
+            v[1] = FS.FixDY;
+            v[2] = FS.FixDZ;
+            NormalizeVectorSilent(v);
             ConeDir = TVector3(v[0], v[1], v[2]);
-            double ConeAngle = pdjson["Cone"].toDouble()*3.1415926535/180.0;
-            CosConeAngle = cos(ConeAngle);
+            CosConeAngle = cos(FS.FixConeAngle * TMath::Pi() / 180.0);
         }
     }
 
-    //calculating eventCount and storing settings specific to each simulation mode
-    switch (PointSimMode)
+    switch (PhotSimSettings.GenMode)
     {
-    case 0:
-        //fOK = SimulateSingle(json);
-        simOptions = js["SinglePositionOptions"].toObject();
-        totalEventCount = NumRuns; //the only case when we can split runs between threads
+    case APhotonSimSettings::Single :
+        TotalEvents = NumRuns; //the only case when we can split runs between threads
         break;
-    case 1:
+    case APhotonSimSettings::Scan :
     {
-        //fOK = SimulateRegularGrid(json);
-        simOptions = js["RegularScanOptions"].toObject();
-        int RegGridNodes[3]; //number of nodes along the 3 axes
-        QJsonArray rsdataArr = simOptions["AxesData"].toArray();
-        for (int ic=0; ic<3; ic++)
-        {
-            if (ic >= rsdataArr.size())
-                RegGridNodes[ic] = 1; //disabled axis
-            else
-                RegGridNodes[ic] = rsdataArr[ic].toObject()["Nodes"].toInt();
-        }
-        totalEventCount = 1;
-        for (int i=0; i<3; i++) totalEventCount *= RegGridNodes[i]; //progress reporting knows we do NumRuns per each node
+        TotalEvents = PhotSimSettings.ScanSettings.countEvents();
         break;
     }
-    case 2:
-        //fOK = SimulateFlood(json);
-        simOptions = js["FloodOptions"].toObject();
-        totalEventCount = simOptions["Nodes"].toInt();//progress reporting knows we do NumRuns per each node
+    case APhotonSimSettings::Flood :
+        TotalEvents = PhotSimSettings.FloodSettings.Nodes;
         break;
-    case 3:
-        simOptions = js["CustomNodesOptions"].toObject();
-        //totalEventCount = simOptions["Nodes"].toArray().size();//progress reporting knows we do NumRuns per each node
-        totalEventCount = simMan.Nodes.size();
+    case APhotonSimSettings::File :
+        if (PhotSimSettings.CustomNodeSettings.Mode == APhotonSim_CustomNodeSettings::CustomNodes)
+             TotalEvents = Nodes.size();
+        else TotalEvents = PhotSimSettings.CustomNodeSettings.NumEventsInFile;
         break;
-    case 4:
-        totalEventCount = simMan.Nodes.size();
+    case APhotonSimSettings::Script :
+        TotalEvents = Nodes.size();
         break;
     default:
-        ErrorString = "Unknown or not implemented simulation mode: "+QString().number(PointSimMode);
+        ErrorString = "Unknown or not implemented photon simulation mode";
         return false;
     }
     return true;
@@ -204,21 +139,40 @@ bool APointSourceSimulator::setup(QJsonObject &json)
 
 void APointSourceSimulator::simulate()
 {
-    checkNavigatorPresent();
+    assureNavigatorPresent();  // here navigator for this thread is created
 
     fStopRequested = false;
     fHardAbortWasTriggered = false;
 
     ReserveSpace(getEventCount());
-    switch (PointSimMode)
+
+    switch (PhotSimSettings.GenMode)
     {
-    case 0: fSuccess = SimulateSingle(); break;
-    case 1: fSuccess = SimulateRegularGrid(); break;
-    case 2: fSuccess = SimulateFlood(); break;
-    case 3: fSuccess = SimulateCustomNodes(); break;
-    case 4: fSuccess = SimulateCustomNodes(); break;
-    default: fSuccess = false; break;
+    case APhotonSimSettings::Single :
+        fSuccess = simulateSingle();
+        break;
+    case APhotonSimSettings::Scan :
+        fSuccess = simulateRegularGrid();
+        break;
+    case APhotonSimSettings::Flood :
+        fSuccess = simulateFlood();
+        break;
+    case APhotonSimSettings::File :
+    {
+        if (PhotSimSettings.CustomNodeSettings.Mode == APhotonSim_CustomNodeSettings::CustomNodes)
+             fSuccess = simulateCustomNodes();
+        else
+             fSuccess = simulatePhotonsFromFile();
+        break;
     }
+    case APhotonSimSettings::Script :
+        fSuccess = simulateCustomNodes();
+        break;
+    default:
+        fSuccess = false;
+        break;
+    }
+
     if (fHardAbortWasTriggered) fSuccess = false;
 }
 
@@ -229,20 +183,18 @@ void APointSourceSimulator::appendToDataHub(EventsDataClass *dataHub)
     dataHub->ScanNumberOfRuns = this->NumRuns;
 }
 
-bool APointSourceSimulator::SimulateSingle()
+bool APointSourceSimulator::simulateSingle()
 {
-    double x = simOptions["SingleX"].toDouble();
-    double y = simOptions["SingleY"].toDouble();
-    double z = simOptions["SingleZ"].toDouble();
-    std::unique_ptr<ANodeRecord> node(ANodeRecord::createS(x, y, z));
+    const APhotonSim_SingleSettings & SingSet = PhotSimSettings.SingleSettings;
+    std::unique_ptr<ANodeRecord> node(ANodeRecord::createS(SingSet.X, SingSet.Y, SingSet.Z));
 
     int eventsToDo = eventEnd - eventBegin; //runs are split between the threads, since node position is fixed for all
-    double updateFactor = (eventsToDo<1) ? 100.0 : 100.0/eventsToDo;
+    double updateFactor = (eventsToDo < 1) ? 100.0 : 100.0/eventsToDo;
     progress = 0;
     eventCurrent = 0;
-    for (int irun = 0; irun<eventsToDo; ++irun)
+    for (int irun = 0; irun < eventsToDo; ++irun)
     {
-        OneNode(*node);
+        simulateOneNode(*node);
         eventCurrent = irun;
         progress = irun * updateFactor;
         if (fStopRequested) return false;
@@ -250,29 +202,30 @@ bool APointSourceSimulator::SimulateSingle()
     return true;
 }
 
-bool APointSourceSimulator::SimulateRegularGrid()
+bool APointSourceSimulator::simulateRegularGrid()
 {
+    const APhotonSim_ScanSettings & ScanSet = PhotSimSettings.ScanSettings;
+
     //extracting grid parameters
     double RegGridOrigin[3]; //grid origin
-    RegGridOrigin[0] = simOptions["ScanX0"].toDouble();
-    RegGridOrigin[1] = simOptions["ScanY0"].toDouble();
-    RegGridOrigin[2] = simOptions["ScanZ0"].toDouble();
+    RegGridOrigin[0] = ScanSet.X0;
+    RegGridOrigin[1] = ScanSet.Y0;
+    RegGridOrigin[2] = ScanSet.Z0;
     //
     double RegGridStep[3][3]; //vector [axis] [step]
     int RegGridNodes[3]; //number of nodes along the 3 axes
     bool RegGridFlagPositive[3]; //Axes option
     //
-    QJsonArray rsdataArr = simOptions["AxesData"].toArray();
-    for (int ic=0; ic<3; ic++)
+    for (int ic = 0; ic < 3; ic++)
     {
-        if(ic < rsdataArr.count())
+        const APhScanRecord & rec = ScanSet.ScanRecords.at(ic);
+        if (rec.bEnabled)
         {
-            QJsonObject adjson = rsdataArr[ic].toObject();
-            RegGridStep[ic][0] = adjson["dX"].toDouble();
-            RegGridStep[ic][1] = adjson["dY"].toDouble();
-            RegGridStep[ic][2] = adjson["dZ"].toDouble();
-            RegGridNodes[ic] = adjson["Nodes"].toInt(); //1 is disabled axis
-            RegGridFlagPositive[ic] = adjson["Option"].toInt();
+            RegGridStep[ic][0] = rec.DX;
+            RegGridStep[ic][1] = rec.DY;
+            RegGridStep[ic][2] = rec.DZ;
+            RegGridNodes[ic]   = rec.Nodes;
+            RegGridFlagPositive[ic] = rec.bBiDirect;
         }
         else
         {
@@ -287,7 +240,7 @@ bool APointSourceSimulator::SimulateRegularGrid()
     std::unique_ptr<ANodeRecord> node(ANodeRecord::createS(0, 0, 0));
     int currentNode = 0;
     eventCurrent = 0;
-    double updateFactor = 100.0/( NumRuns*(eventEnd - eventBegin) );
+    double updateFactor = 100.0 / ( NumRuns * (eventEnd - eventBegin) );
     //Do the scan
     int iAxis[3];
     for (iAxis[0]=0; iAxis[0]<RegGridNodes[0]; iAxis[0]++)
@@ -311,56 +264,56 @@ bool APointSourceSimulator::SimulateRegularGrid()
                 }
 
                 //running this node
-                for (int irun = 0; irun<NumRuns; irun++)
+                for (int irun = 0; irun < NumRuns; irun++)
                 {
-                    OneNode(*node);
+                    simulateOneNode(*node);
                     eventCurrent++;
                     progress = eventCurrent * updateFactor;
-                    if(fStopRequested) return false;
+                    if (fStopRequested) return false;
                 }
                 currentNode++;
-                if(currentNode >= eventEnd) return true;
+                if (currentNode >= eventEnd) return true;
             }
     return true;
 }
 
-bool APointSourceSimulator::SimulateFlood()
+bool APointSourceSimulator::simulateFlood()
 {
+    const APhotonSim_FloodSettings & FloodSet = PhotSimSettings.FloodSettings;
+
     //extracting flood parameters
-    int Shape = simOptions["Shape"].toInt(); //0-square, 1-ring/circle
     double Xfrom, Xto, Yfrom, Yto, CenterX, CenterY, RadiusIn, RadiusOut;
     double Rad2in, Rad2out;
-    if (Shape == 0)
+    if (FloodSet.Shape == APhotonSim_FloodSettings::Rectangular)
     {
-        Xfrom = simOptions["Xfrom"].toDouble();
-        Xto =   simOptions["Xto"].toDouble();
-        Yfrom = simOptions["Yfrom"].toDouble();
-        Yto =   simOptions["Yto"].toDouble();
+        Xfrom = FloodSet.Xfrom;
+        Xto =   FloodSet.Xto;
+        Yfrom = FloodSet.Yfrom;
+        Yto =   FloodSet.Yto;
     }
     else
     {
-        CenterX = simOptions["CenterX"].toDouble();
-        CenterY = simOptions["CenterY"].toDouble();
-        RadiusIn = 0.5*simOptions["DiameterIn"].toDouble();
-        RadiusOut = 0.5*simOptions["DiameterOut"].toDouble();
+        CenterX = FloodSet.X0;
+        CenterY = FloodSet.Y0;
+        RadiusIn = 0.5 * FloodSet.InnerD;
+        RadiusOut = 0.5 * FloodSet.OuterD;
 
-        Rad2in = RadiusIn*RadiusIn;
-        Rad2out = RadiusOut*RadiusOut;
-        Xfrom = CenterX - RadiusOut;
-        Xto =   CenterX + RadiusOut;
-        Yfrom = CenterY - RadiusOut;
-        Yto =   CenterY + RadiusOut;
+        Rad2in  = RadiusIn  * RadiusIn;
+        Rad2out = RadiusOut * RadiusOut;
+        Xfrom   = CenterX - RadiusOut;
+        Xto     = CenterX + RadiusOut;
+        Yfrom   = CenterY - RadiusOut;
+        Yto     = CenterY + RadiusOut;
     }
-    int Zoption = simOptions["Zoption"].toInt(); //0-fixed, 1-range
     double Zfixed, Zfrom, Zto;
-    if (Zoption == 0)
+    if (FloodSet.ZMode == APhotonSim_FloodSettings::Fixed)
     {
-        Zfixed = simOptions["Zfixed"].toDouble();
+        Zfixed = FloodSet.Zfixed;
     }
     else
     {
-        Zfrom = simOptions["Zfrom"].toDouble();
-        Zto =   simOptions["Zto"].toDouble();
+        Zfrom = FloodSet.Zfrom;
+        Zto =   FloodSet.Zto;
     }
 
     //Do flood
@@ -374,11 +327,11 @@ bool APointSourceSimulator::SimulateFlood()
         if(fStopRequested) return false;
 
         //choosing node coordinates
-        //double r[3];
-        node->R[0] = Xfrom + (Xto-Xfrom)*RandGen->Rndm();
-        node->R[1] = Yfrom + (Yto-Yfrom)*RandGen->Rndm();
+        node->R[0] = Xfrom + (Xto - Xfrom) * RandGen->Rndm();
+        node->R[1] = Yfrom + (Yto - Yfrom) * RandGen->Rndm();
+
         //running this node
-        if (Shape == 1)
+        if (FloodSet.Shape == APhotonSim_FloodSettings::Ring)
         {
             double r2  = (node->R[0] - CenterX)*(node->R[0] - CenterX) + (node->R[1] - CenterY)*(node->R[1] - CenterY);
             if ( r2 > Rad2out || r2 < Rad2in )
@@ -387,9 +340,13 @@ bool APointSourceSimulator::SimulateFlood()
                 continue;
             }
         }
-        if (Zoption == 0) node->R[2] = Zfixed;
-        else node->R[2] = Zfrom + (Zto-Zfrom)*RandGen->Rndm();
-        if (fLimitNodesToObject && !isInsideLimitingObject(node->R))
+
+        if (FloodSet.ZMode == APhotonSim_FloodSettings::Fixed)
+            node->R[2] = Zfixed;
+        else
+            node->R[2] = Zfrom + (Zto - Zfrom) * RandGen->Rndm();
+
+        if (bLimitToVolume && !isInsideLimitingObject(node->R))
         {
             WatchdogThreshold--;
             if (WatchdogThreshold < 0 && inode == 0)
@@ -402,31 +359,31 @@ bool APointSourceSimulator::SimulateFlood()
             continue;
         }
 
-        for (int irun = 0; irun<NumRuns; irun++)
+        for (int irun = 0; irun < NumRuns; irun++)
         {
-            OneNode(*node);
+            simulateOneNode(*node);
             eventCurrent++;
             progress = eventCurrent * updateFactor;
-            if(fStopRequested) return false;
+            if (fStopRequested) return false;
         }
     }
     return true;
 }
 
-bool APointSourceSimulator::SimulateCustomNodes()
+bool APointSourceSimulator::simulateCustomNodes()
 {
     int nodeCount = (eventEnd - eventBegin);
     int currentNode = eventBegin;
     eventCurrent = 0;
-    double updateFactor = 100.0 / ( NumRuns*nodeCount );
+    double updateFactor = 100.0 / ( NumRuns * nodeCount );
 
     for (int inode = 0; inode < nodeCount; inode++)
     {
-        ANodeRecord * thisNode = simMan.Nodes.at(currentNode);
+        ANodeRecord * thisNode = Nodes.at(currentNode);
 
         for (int irun = 0; irun<NumRuns; irun++)
         {
-            OneNode(*thisNode);
+            simulateOneNode(*thisNode);
             eventCurrent++;
             progress = eventCurrent * updateFactor;
             if(fStopRequested) return false;
@@ -436,56 +393,141 @@ bool APointSourceSimulator::SimulateCustomNodes()
     return true;
 }
 
-int APointSourceSimulator::PhotonsToRun()
+bool APointSourceSimulator::simulatePhotonsFromFile()
 {
-    int numPhotons = 0; //protection
-    switch (numPhotMode)
+    eventCurrent = 0;
+    double updateFactor = 100.0 / (eventEnd - eventBegin);
+
+    const QString FileName = PhotSimSettings.CustomNodeSettings.FileName;
+    QFile file(FileName);
+    if (!file.open(QIODevice::ReadOnly | QFile::Text))
     {
-    case 0: //constant
-        numPhotons = numPhotsConst;
+        ErrorString = "Cannot open file " + FileName;
+        return false;
+    }
+    QTextStream in(&file);
+
+    OneEvent->clearHits();
+
+    for (int iEvent = -1; iEvent < eventEnd; iEvent++)
+    {
+        while (!in.atEnd())
+        {
+            if (fStopRequested)
+            {
+                in.flush();
+                file.close();
+                return false;
+            }
+
+            QString line = in.readLine().simplified();
+            if (line.startsWith('#')) break; //next event in the next line of the file
+
+            if (iEvent < eventBegin) continue;
+
+            QStringList sl = line.split(' ', QString::SkipEmptyParts);
+            if (sl.size() < 8)
+            {
+                ErrorString = "Format error in the file with photon records";
+                file.close();
+                return false;
+            }
+
+            APhoton p;
+            p.r[0]      = sl.at(0).toDouble();
+            p.r[1]      = sl.at(1).toDouble();
+            p.r[2]      = sl.at(2).toDouble();
+            p.v[0]      = sl.at(3).toDouble();
+            p.v[1]      = sl.at(4).toDouble();
+            p.v[2]      = sl.at(5).toDouble();
+            p.waveIndex = sl.at(6).toInt();
+            p.time      = sl.at(7).toDouble();
+
+            p.scint_type = 0;
+            p.SimStat    = OneEvent->SimStat;
+
+            if (p.waveIndex < -1 || p.waveIndex >= GenSimSettings.WaveNodes) p.waveIndex = -1;
+
+            photonTracker->TracePhoton(&p);
+        }
+
+        if (iEvent < eventBegin) continue;
+
+        OneEvent->HitsToSignal();
+        dataHub->Events.append(OneEvent->PMsignals);
+        if (GenSimSettings.fTimeResolved)
+            dataHub->TimedEvents.append(OneEvent->TimedPMsignals);
+
+        AScanRecord * sr = new AScanRecord();
+        sr->Points.Reinitialize(0);
+        sr->ScintType = 0;
+        dataHub->Scan.append(sr);
+
+        OneEvent->clearHits();
+        progress = eventCurrent * updateFactor;
+        eventCurrent++;
+    }
+    return true;
+}
+
+int APointSourceSimulator::getNumPhotToRun()
+{
+    int num = 0;
+
+    switch (PhotSimSettings.PerNodeSettings.Mode)
+    {
+    case APhotonSim_PerNodeSettings::Constant :
+        num = PhotSimSettings.PerNodeSettings.Number;
         break;
-    case 1:  //uniform
-        numPhotons = RandGen->Rndm()*(numPhotUniMax-numPhotUniMin+1) + numPhotUniMin;
+    case APhotonSim_PerNodeSettings::Uniform :
+        num = RandGen->Rndm() * (PhotSimSettings.PerNodeSettings.Max - PhotSimSettings.PerNodeSettings.Min + 1) + PhotSimSettings.PerNodeSettings.Min;
         break;
-    case 2: //gauss
-        numPhotons = RandGen->Gaus(numPhotGaussMean, numPhotGaussSigma);
+    case APhotonSim_PerNodeSettings::Gauss :
+        num = std::round( RandGen->Gaus(PhotSimSettings.PerNodeSettings.Mean, PhotSimSettings.PerNodeSettings.Sigma) );
         break;
-    case 3: //custom
-        numPhotons = CustomHist->GetRandom();
+    case APhotonSim_PerNodeSettings::Custom :
+        num = CustomHist->GetRandom();
+        break;
+    case APhotonSim_PerNodeSettings::Poisson :
+        num = RandGen->Poisson(PhotSimSettings.PerNodeSettings.PoisMean);
         break;
     }
 
-    return numPhotons;
+    if (num < 0) num = 0;
+    return num;
 }
 
-void APointSourceSimulator::GenerateTraceNphotons(AScanRecord *scs, double time0, int iPoint)
-//scs contains coordinates and number of photons to run
-//iPoint - number of this scintillation center (can be not zero when e.g. double events are simulated)
+void APointSourceSimulator::generateAndTracePhotons(AScanRecord *scs, double time0, int iPoint)
 {
+    TGeoNavigator * navigator = detector.GeoManager->GetCurrentNavigator();
+    if (!navigator)
+    {
+        qWarning() << "UNEXPECTED - report this issue please: Navigator not found, adding new one";
+        detector.GeoManager->AddNavigator();
+    }
+
     //if secondary scintillation, finding the secscint boundaries
     double z1, z2, timeOfDrift, driftSpeedSecScint;
     if (scs->ScintType == 2)
     {
-        if (!FindSecScintBounds(scs->Points[iPoint].r, z1, z2, timeOfDrift, driftSpeedSecScint))
+        if (!findSecScintBounds(scs->Points[iPoint].r, z1, z2, timeOfDrift, driftSpeedSecScint))
         {
             scs->zStop = scs->Points[iPoint].r[2];
             return; //no sec_scintillator for these XY, so no photon generation
         }
     }
 
-    PhotonOnStart.r[0] = scs->Points[iPoint].r[0];
-    PhotonOnStart.r[1] = scs->Points[iPoint].r[1];
-    PhotonOnStart.r[2] = scs->Points[iPoint].r[2];
-    PhotonOnStart.scint_type = scs->ScintType;
-    PhotonOnStart.time = time0;
+    Photon.r[0] = scs->Points[iPoint].r[0];
+    Photon.r[1] = scs->Points[iPoint].r[1];
+    Photon.r[2] = scs->Points[iPoint].r[2];
+    Photon.scint_type = scs->ScintType;
+    Photon.time = time0;
 
-    //================================
     for (int i=0; i<scs->Points[iPoint].energy; i++)
     {
         //photon direction
-        if (fRandomDirection)
-            photonGenerator->GenerateDirection(&PhotonOnStart);
-        else if (fCone)
+        if (bIsotropic) photonGenerator->GenerateDirection(&Photon);
+        else if (bCone)
         {
             double z = CosConeAngle + RandGen->Rndm() * (1.0 - CosConeAngle);
             double tmp = sqrt(1.0 - z*z);
@@ -493,47 +535,60 @@ void APointSourceSimulator::GenerateTraceNphotons(AScanRecord *scs, double time0
             TVector3 K1(tmp*cos(phi), tmp*sin(phi), z);
             TVector3 Coll(ConeDir);
             K1.RotateUz(Coll);
-            PhotonOnStart.v[0] = K1[0];
-            PhotonOnStart.v[1] = K1[1];
-            PhotonOnStart.v[2] = K1[2];
-
+            Photon.v[0] = K1[0];
+            Photon.v[1] = K1[1];
+            Photon.v[2] = K1[2];
         }
         //else it is already set
 
-        //configure  wavelength index and emission time
-        PhotonOnStart.time = time0;   //reset time offset
-        TGeoNavigator *navigator = detector.GeoManager->GetCurrentNavigator();
+        Photon.time = time0;
 
         int thisMatIndex;
-        TGeoNode* node = navigator->FindNode(PhotonOnStart.r[0], PhotonOnStart.r[1], PhotonOnStart.r[2]);
-        if (!node)
-        {
-            //PhotonOnStart.waveIndex = -1;
-            thisMatIndex = detector.top->GetMaterial()->GetIndex(); //get material of the world
-            //qWarning() << "Node not found when generating photons (photon sources) - assuming material of the world!"<<thisMatIndex;
-        }
+        TGeoNode* node = navigator->FindNode(Photon.r[0], Photon.r[1], Photon.r[2]);
+        if (node) thisMatIndex = node->GetVolume()->GetMaterial()->GetIndex();
         else
-            thisMatIndex = node->GetVolume()->GetMaterial()->GetIndex();
-
-        if (!fUseGivenWaveIndex) photonGenerator->GenerateWave(&PhotonOnStart, thisMatIndex);//if directly given wavelength -> waveindex is already set in PhotonOnStart
-        photonGenerator->GenerateTime(&PhotonOnStart, thisMatIndex);
-
-        if (scs->ScintType == 2)
         {
-            const double dist = (z2 - z1) * RandGen->Rndm();
-            PhotonOnStart.r[2] = z1 + dist;
-            PhotonOnStart.time = time0 + timeOfDrift;
-            if (driftSpeedSecScint != 0)
-                PhotonOnStart.time += dist / driftSpeedSecScint;
+            thisMatIndex = detector.top->GetMaterial()->GetIndex(); //get material of the world
+            qWarning() << "Node not found when generating photons, using material of the world";
         }
 
-        PhotonOnStart.SimStat = OneEvent->SimStat;
+        if (!PhotSimSettings.FixedPhotSettings.bFixWave)
+            photonGenerator->GenerateWave(&Photon, thisMatIndex);//if directly given wavelength -> waveindex is already set in PhotonOnStart
 
-        photonTracker->TracePhoton(&PhotonOnStart);
+        photonGenerator->GenerateTime(&Photon, thisMatIndex);
+
+        if (scs->ScintType == 2) //secondary scintillation
+        {
+            if (PhotSimSettings.SpatialDistSettings.bEnabled)
+            {
+                double r0[3];
+                r0[0] = scs->Points[iPoint].r[0];
+                r0[1] = scs->Points[iPoint].r[1];
+                r0[2] = 0.5 * (z2 + z1);
+                InNodeDistributor.apply(Photon, r0, RandGen->Rndm());
+                if (driftSpeedSecScint != 0)
+                    Photon.time += (Photon.r[2] - z1) / driftSpeedSecScint;
+            }
+            else
+            {
+                const double dist = (z2 - z1) * RandGen->Rndm();
+                Photon.r[2] = z1 + dist;
+                Photon.time = time0 + timeOfDrift;
+                if (driftSpeedSecScint != 0)
+                    Photon.time += dist / driftSpeedSecScint;
+            }
+        }
+        else  // primary scintillation
+        {
+            if (PhotSimSettings.SpatialDistSettings.bEnabled)
+                InNodeDistributor.apply(Photon, scs->Points[iPoint].r, RandGen->Rndm());
+        }
+
+        Photon.SimStat = OneEvent->SimStat;
+
+        photonTracker->TracePhoton(&Photon);
     }
-    //================================
 
-    //filling scs for secondary
     if (scs->ScintType == 2)
     {
         scs->Points[iPoint].r[2] = z1;
@@ -541,9 +596,15 @@ void APointSourceSimulator::GenerateTraceNphotons(AScanRecord *scs, double time0
     }
 }
 
-bool APointSourceSimulator::FindSecScintBounds(double *r, double & z1, double & z2, double & timeOfDrift, double & driftSpeedInSecScint)
+bool APointSourceSimulator::findSecScintBounds(double *r, double & z1, double & z2, double & timeOfDrift, double & driftSpeedInSecScint)
 {
     TGeoNavigator *navigator = detector.GeoManager->GetCurrentNavigator();
+    if (!navigator)
+    {
+        qWarning() << "UNEXPECTED - report this issue please! Navigator not found, adding new one";
+        detector.GeoManager->AddNavigator();
+    }
+
     navigator->SetCurrentPoint(r);
     navigator->SetCurrentDirection(0, 0, 1.0);
     TGeoNode * node = navigator->FindNode();
@@ -575,24 +636,24 @@ bool APointSourceSimulator::FindSecScintBounds(double *r, double & z1, double & 
     return true;
 }
 
-void APointSourceSimulator::OneNode(ANodeRecord & node)
+void APointSourceSimulator::simulateOneNode(const ANodeRecord & node)
 {
-    ANodeRecord * thisNode = &node;
+    const ANodeRecord * thisNode = &node;
     std::unique_ptr<ANodeRecord> outNode(ANodeRecord::createS(1e10, 1e10, 1e10)); // if outside will use this instead of thisNode
 
     const int numPoints = 1 + thisNode->getNumberOfLinkedNodes();
     OneEvent->clearHits();
-    AScanRecord* sr = new AScanRecord();
+    AScanRecord * sr = new AScanRecord();
     sr->Points.Reinitialize(numPoints);
-    sr->ScintType = ScintType;
+    sr->ScintType = ( PhotSimSettings.ScintType == APhotonSimSettings::Primary ? 1 : 2 );
 
     for (int iPoint = 0; iPoint < numPoints; iPoint++)
     {
-        const bool bInside = !(fLimitNodesToObject && !isInsideLimitingObject(thisNode->R));
+        const bool bInside = !(bLimitToVolume && !isInsideLimitingObject(thisNode->R));
         if (bInside)
         {
             for (int i=0; i<3; i++) sr->Points[iPoint].r[i] = thisNode->R[i];
-            sr->Points[iPoint].energy = (thisNode->NumPhot == -1 ? PhotonsToRun() : thisNode->NumPhot);
+            sr->Points[iPoint].energy = (thisNode->NumPhot == -1 ? getNumPhotToRun() : thisNode->NumPhot);
         }
         else
         {
@@ -600,9 +661,9 @@ void APointSourceSimulator::OneNode(ANodeRecord & node)
             sr->Points[iPoint].energy = 0;
         }
 
-        if (!simSettings.fLRFsim)
+        if (!GenSimSettings.fLRFsim)
         {
-            GenerateTraceNphotons(sr, thisNode->Time, iPoint);
+            generateAndTracePhotons(sr, thisNode->Time, iPoint);
         }
         else
         {
@@ -610,16 +671,16 @@ void APointSourceSimulator::OneNode(ANodeRecord & node)
             {
                 // NumPhotElPerLrfUnity - scaling: LRF of 1.0 corresponds to NumPhotElPerLrfUnity photo-electrons
                 int numPhots = sr->Points[iPoint].energy;  // photons (before scaling) to generate at this node
-                double energy = 1.0 * numPhots / simSettings.NumPhotsForLrfUnity; // NumPhotsForLRFunity corresponds to the total number of photons per event for unitary LRF
+                double energy = 1.0 * numPhots / GenSimSettings.NumPhotsForLrfUnity; // NumPhotsForLRFunity corresponds to the total number of photons per event for unitary LRF
 
                 //Generating events
                 for (int ipm = 0; ipm < detector.PMs->count(); ipm++)
                 {
                     double avSignal = detector.LRFs->getLRF(ipm, thisNode->R) * energy;
-                    double avPhotEl = avSignal * simSettings.NumPhotElPerLrfUnity;
+                    double avPhotEl = avSignal * GenSimSettings.NumPhotElPerLrfUnity;
                     double numPhotEl = RandGen->Poisson(avPhotEl);
 
-                    double signal = numPhotEl / simSettings.NumPhotElPerLrfUnity;  // back to LRF units
+                    double signal = numPhotEl / GenSimSettings.NumPhotElPerLrfUnity;  // back to LRF units
                     OneEvent->PMsignals[ipm] += signal;
                 }
             }
@@ -631,32 +692,25 @@ void APointSourceSimulator::OneNode(ANodeRecord & node)
         if (!thisNode) break; //paranoic
     }
 
-    if (!simSettings.fLRFsim) OneEvent->HitsToSignal();
+    if (!GenSimSettings.fLRFsim) OneEvent->HitsToSignal();
 
     dataHub->Events.append(OneEvent->PMsignals);
-    if (simSettings.fTimeResolved)
+    if (GenSimSettings.fTimeResolved)
         dataHub->TimedEvents.append(OneEvent->TimedPMsignals);  //LRF sim for time-resolved will give all zeroes!
 
     dataHub->Scan.append(sr);
 }
 
-bool APointSourceSimulator::isInsideLimitingObject(const double *r)
+bool APointSourceSimulator::isInsideLimitingObject(const double * r)
 {
-    TGeoNavigator *navigator = detector.GeoManager->GetCurrentNavigator();
-
+    TGeoNavigator * navigator = detector.GeoManager->GetCurrentNavigator();
     if (!navigator)
     {
-        qWarning() << "Navigator not found!";
+        qWarning() << "UNEXPECTED - report this issue please!! Navigator not found, adding new one";
         detector.GeoManager->AddNavigator();
     }
 
     TGeoNode* node = navigator->FindNode(r[0], r[1], r[2]);
     if (!node) return false;
-    return (node->GetVolume() && node->GetVolume()->GetName()==LimitNodesToObject);
+    return (node->GetVolume() && node->GetVolume()->GetName() == LimitToVolume);
 }
-
-void APointSourceSimulator::ReserveSpace(int expectedNumEvents)
-{
-    ASimulator::ReserveSpace(expectedNumEvents);
-}
-

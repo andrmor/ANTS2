@@ -4,6 +4,7 @@
 #include "ascriptinterface.h"
 
 #include <QVariant>
+#include <QVariantList>
 #include <QVector>
 #include <QList>
 #include <QString>
@@ -23,11 +24,14 @@ public:
   QList<AGeoObject*> GeoObjects;
 
 public slots:
+  void UpdateGeometry(bool CheckOverlaps = true);  // -------------------------
+
   void Box(QString name, double Lx, double Ly, double Lz, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi);
   void Cylinder(QString name, double D, double h, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi);
   void Polygone(QString name, int edges, double Dtop, double Dbot, double h, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi);
   void Cone(QString name, double Dtop, double Dbot, double h, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi);
   void Sphere(QString name, double D, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi);
+  void SphereLayer(QString name, double Dout, double Din, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi);
   void Arb8(QString name, QVariant NodesX, QVariant NodesY, double h, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi);
 
   void Monitor(QString name, int shape, double size1, double size2,
@@ -39,18 +43,31 @@ public slots:
 
   void TGeo(QString name, QString generationString, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi);
 
-  void RecalculateStack(QString name);
+  void SlabRectangular(QString name, int imat, double height, double size1, double size2, double angle);
+  void SlabRound(QString name, int imat, double height, double diameter);
+  void SlabPolygon(QString name, int imat, double height, double outsideDiamater, double angle, int sides);
+  void SetCenterSlab(QString name, int iType);
+  void SetCommonSlabMode(int iMode);
+  void SetCommonSlabProperties(int shape, double size1, double size2, double angle, int sides);
 
-  void MakeStack(QString name, QString container);
-  void InitializeStack(QString StackName, QString Origin_MemberName);
+  void MakeStack(QString name, QString container);  // deprecated!!!
+  //void Stack(QString name, QString container);
+  void Stack(QString name, QString container, double x, double y, double z, double phi, double theta, double psi);
+  void InitializeStack(QString StackName, QString MemberName_StackReference);
+  //void RecalculateStack(QString name);
 
-  void MakeGroup(QString name, QString container);
+  //void MakeGroup(QString name, QString container);
 
   void Array(QString name, int numX, int numY, int numZ, double stepX, double stepY, double stepZ, QString container, double x, double y, double z, double psi);
   void ReconfigureArray(QString name, int numX, int numY, int numZ, double stepX, double stepY, double stepZ);
 
+  void Prototype(QString name);
+  void Instance(QString name, QString prototype, QString container, double x, double y, double z, double phi, double theta, double psi);
+
   void SetLine(QString name, int color, int width, int style);
+
   void ClearAll();
+  void Clear(QString Object);
   void Remove(QString Object);
   void RemoveRecursive(QString Object);
   void RemoveAllExceptWorld();
@@ -60,17 +77,25 @@ public slots:
 
   void setEnable(QString ObjectOrWildcard, bool flag);
 
-  void UpdateGeometry(bool CheckOverlaps = true);
+  QString getMaterialName(int materialIndex);
 
   QString printOverrides();
+
+  QVariantList getPassedVoulumes(QVariantList startXYZ, QVariantList startVxVyVz);
 
 signals:
   void clearRequested();
   void requestShowCheckUpWindow();
 
 private:
-  DetectorClass* Detector;
+  DetectorClass * Detector = nullptr;
   void clearGeoObjects();
+
+  QString ZeroSlabName;
+  int     ZeroSlabType = 0;
+  int     SlabMode = -1;
+
+  const QString ProrotypeContainerName = "_#_Prototype_#_";
 };
 
 #endif // AINTERFACETOADDOBJSCRIPT_H

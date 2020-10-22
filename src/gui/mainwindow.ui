@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>550</width>
+    <width>549</width>
     <height>652</height>
    </rect>
   </property>
@@ -946,7 +946,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
            <rect>
             <x>151</x>
             <y>34</y>
-            <width>94</width>
+            <width>100</width>
             <height>24</height>
            </rect>
           </property>
@@ -1112,9 +1112,9 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
          <widget class="QLabel" name="labSizeDiameterPM_3">
           <property name="geometry">
            <rect>
-            <x>381</x>
+            <x>379</x>
             <y>39</y>
-            <width>70</width>
+            <width>31</width>
             <height>13</height>
            </rect>
           </property>
@@ -1205,7 +1205,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
          <widget class="QPushButton" name="pbPMtypeHelp">
           <property name="geometry">
            <rect>
-            <x>410</x>
+            <x>411</x>
             <y>34</y>
             <width>29</width>
             <height>23</height>
@@ -1221,7 +1221,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <rect>
            <x>90</x>
            <y>95</y>
-           <width>141</width>
+           <width>140</width>
            <height>22</height>
           </rect>
          </property>
@@ -1239,10 +1239,10 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
         <widget class="QLabel" name="label_78">
          <property name="geometry">
           <rect>
-           <x>6</x>
-           <y>96</y>
-           <width>82</width>
-           <height>16</height>
+           <x>1</x>
+           <y>95</y>
+           <width>88</width>
+           <height>20</height>
           </rect>
          </property>
          <property name="text">
@@ -1260,7 +1260,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <rect>
            <x>90</x>
            <y>125</y>
-           <width>112</width>
+           <width>120</width>
            <height>22</height>
           </rect>
          </property>
@@ -1268,20 +1268,23 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
         <widget class="QLabel" name="label_114">
          <property name="geometry">
           <rect>
-           <x>2</x>
-           <y>127</y>
-           <width>91</width>
-           <height>16</height>
+           <x>-1</x>
+           <y>125</y>
+           <width>90</width>
+           <height>20</height>
           </rect>
          </property>
          <property name="text">
-          <string>Optical interface:</string>
+          <string>Interface:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
         <widget class="QPushButton" name="pbShowMaterialInPMtypes">
          <property name="geometry">
           <rect>
-           <x>210</x>
+           <x>214</x>
            <y>124</y>
            <width>21</width>
            <height>23</height>
@@ -1294,7 +1297,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
         <widget class="Line" name="line_73">
          <property name="geometry">
           <rect>
-           <x>200</x>
+           <x>206</x>
            <y>135</y>
            <width>14</width>
            <height>3</height>
@@ -1425,9 +1428,9 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
            <property name="geometry">
             <rect>
              <x>224</x>
-             <y>5</y>
+             <y>4</y>
              <width>61</width>
-             <height>16</height>
+             <height>20</height>
             </rect>
            </property>
            <property name="text">
@@ -1475,10 +1478,10 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QLabel" name="label_99">
            <property name="geometry">
             <rect>
-             <x>130</x>
-             <y>5</y>
-             <width>27</width>
-             <height>16</height>
+             <x>128</x>
+             <y>4</y>
+             <width>38</width>
+             <height>20</height>
             </rect>
            </property>
            <property name="text">
@@ -6843,7 +6846,7 @@ thermal neutrons:</string>
          <string>Do not use if PMs register light after wavelength shifting!</string>
         </property>
         <property name="text">
-         <string>!</string>
+         <string>?</string>
         </property>
        </widget>
        <widget class="QLabel" name="label_511">
@@ -7090,79 +7093,101 @@ thermal neutrons:</string>
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
       </property>
-      <widget class="QProgressBar" name="prScan">
+      <widget class="QWidget" name="layoutWidget">
        <property name="geometry">
         <rect>
-         <x>4</x>
-         <y>13</y>
-         <width>307</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="maximum">
-        <number>100</number>
-       </property>
-       <property name="value">
-        <number>0</number>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pbStopScan">
-       <property name="geometry">
-        <rect>
-         <x>316</x>
+         <x>1</x>
          <y>10</y>
-         <width>81</width>
-         <height>21</height>
+         <width>535</width>
+         <height>23</height>
         </rect>
        </property>
-       <property name="toolTip">
-        <string>First click attempts to stop simulation in soft mode: the already simulated events will be available for analysis.
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <item>
+         <widget class="QProgressBar" name="prGeant">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>15</height>
+           </size>
+          </property>
+          <property name="value">
+           <number>0</number>
+          </property>
+          <property name="format">
+           <string>G4: %p%</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProgressBar" name="prScan">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>15</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>100</number>
+          </property>
+          <property name="value">
+           <number>0</number>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pbStopScan">
+          <property name="maximumSize">
+           <size>
+            <width>65</width>
+            <height>21</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>First click attempts to stop simulation in soft mode: the already simulated events will be available for analysis.
 Second click will trigger strong abort mode, which will result in loss of all simulated data.</string>
-       </property>
-       <property name="layoutDirection">
-        <enum>Qt::LeftToRight</enum>
-       </property>
-       <property name="text">
-        <string>stop</string>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-       <property name="checked">
-        <bool>false</bool>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="leEventsPerSec">
-       <property name="geometry">
-        <rect>
-         <x>468</x>
-         <y>10</y>
-         <width>61</width>
-         <height>20</height>
-        </rect>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_147">
-       <property name="geometry">
-        <rect>
-         <x>404</x>
-         <y>13</y>
-         <width>61</width>
-         <height>13</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>ms/event:</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
+          </property>
+          <property name="layoutDirection">
+           <enum>Qt::LeftToRight</enum>
+          </property>
+          <property name="text">
+           <string>stop</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="checked">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_147">
+          <property name="text">
+           <string>ms/event:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="leEventsPerSec">
+          <property name="maximumSize">
+           <size>
+            <width>60</width>
+            <height>21</height>
+           </size>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </widget>
      <widget class="QLabel" name="label_26">
@@ -7222,278 +7247,12 @@ Second click will trigger strong abort mode, which will result in loss of all si
        <attribute name="title">
         <string>      Only photons      </string>
        </attribute>
-       <widget class="QLabel" name="labPerNode">
-        <property name="geometry">
-         <rect>
-          <x>34</x>
-          <y>30</y>
-          <width>89</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="font">
-         <font>
-          <weight>50</weight>
-          <bold>false</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>(per node)</string>
-        </property>
-       </widget>
-       <widget class="QStackedWidget" name="swScan3">
-        <property name="geometry">
-         <rect>
-          <x>277</x>
-          <y>12</y>
-          <width>231</width>
-          <height>42</height>
-         </rect>
-        </property>
-        <property name="font">
-         <font>
-          <weight>50</weight>
-          <bold>false</bold>
-         </font>
-        </property>
-        <property name="currentIndex">
-         <number>0</number>
-        </property>
-        <widget class="QWidget" name="pageScanConst">
-         <widget class="QSpinBox" name="sbScanNumPhotons">
-          <property name="geometry">
-           <rect>
-            <x>17</x>
-            <y>11</y>
-            <width>111</width>
-            <height>22</height>
-           </rect>
-          </property>
-          <property name="font">
-           <font>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="minimum">
-           <number>0</number>
-          </property>
-          <property name="maximum">
-           <number>2147483647</number>
-          </property>
-          <property name="value">
-           <number>10</number>
-          </property>
-         </widget>
-        </widget>
-        <widget class="QWidget" name="pageScanUniform">
-         <widget class="QLabel" name="label_81">
-          <property name="geometry">
-           <rect>
-            <x>34</x>
-            <y>1</y>
-            <width>46</width>
-            <height>13</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Min:</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-         <widget class="QLabel" name="label_88">
-          <property name="geometry">
-           <rect>
-            <x>126</x>
-            <y>1</y>
-            <width>46</width>
-            <height>13</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Max:</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-         <widget class="QSpinBox" name="sbScanNumMax">
-          <property name="geometry">
-           <rect>
-            <x>109</x>
-            <y>16</y>
-            <width>81</width>
-            <height>22</height>
-           </rect>
-          </property>
-          <property name="minimum">
-           <number>1</number>
-          </property>
-          <property name="maximum">
-           <number>2100000000</number>
-          </property>
-          <property name="value">
-           <number>12</number>
-          </property>
-         </widget>
-         <widget class="QSpinBox" name="sbScanNumMin">
-          <property name="geometry">
-           <rect>
-            <x>17</x>
-            <y>16</y>
-            <width>81</width>
-            <height>22</height>
-           </rect>
-          </property>
-          <property name="minimum">
-           <number>1</number>
-          </property>
-          <property name="maximum">
-           <number>2100000000</number>
-          </property>
-          <property name="value">
-           <number>10</number>
-          </property>
-         </widget>
-        </widget>
-        <widget class="QWidget" name="pageScanGauss">
-         <widget class="QLabel" name="label_89">
-          <property name="geometry">
-           <rect>
-            <x>126</x>
-            <y>1</y>
-            <width>46</width>
-            <height>13</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Sigma:</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-         <widget class="QLabel" name="label_87">
-          <property name="geometry">
-           <rect>
-            <x>34</x>
-            <y>1</y>
-            <width>46</width>
-            <height>13</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Mean:</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-         <widget class="QLineEdit" name="ledScanGaussMean">
-          <property name="geometry">
-           <rect>
-            <x>18</x>
-            <y>16</y>
-            <width>71</width>
-            <height>20</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>10</string>
-          </property>
-         </widget>
-         <widget class="QLineEdit" name="ledScanGaussSigma">
-          <property name="geometry">
-           <rect>
-            <x>119</x>
-            <y>16</y>
-            <width>71</width>
-            <height>20</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>2.5</string>
-          </property>
-         </widget>
-        </widget>
-        <widget class="QWidget" name="pageScanCustom">
-         <widget class="QPushButton" name="pbScanDistrShow">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="geometry">
-           <rect>
-            <x>22</x>
-            <y>15</y>
-            <width>75</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Show</string>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="pbScanDistrDelete">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="geometry">
-           <rect>
-            <x>182</x>
-            <y>15</y>
-            <width>20</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>X</string>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="pbScanDistrLoad">
-          <property name="geometry">
-           <rect>
-            <x>102</x>
-            <y>15</y>
-            <width>75</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="font">
-           <font>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Load</string>
-          </property>
-         </widget>
-         <widget class="QLabel" name="label_91">
-          <property name="geometry">
-           <rect>
-            <x>63</x>
-            <y>-1</y>
-            <width>101</width>
-            <height>16</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Distribution:</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </widget>
-       </widget>
        <widget class="QLabel" name="label_80">
         <property name="geometry">
          <rect>
-          <x>7</x>
-          <y>18</y>
-          <width>119</width>
+          <x>120</x>
+          <y>14</y>
+          <width>146</width>
           <height>16</height>
          </rect>
         </property>
@@ -7504,16 +7263,19 @@ Second click will trigger strong abort mode, which will result in loss of all si
          </font>
         </property>
         <property name="text">
-         <string>Number of photons:</string>
+         <string>Photons per node</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
         </property>
        </widget>
        <widget class="QComboBox" name="cobScanNumPhotonsMode">
         <property name="geometry">
          <rect>
-          <x>129</x>
-          <y>23</y>
-          <width>131</width>
-          <height>22</height>
+          <x>119</x>
+          <y>33</y>
+          <width>153</width>
+          <height>27</height>
          </rect>
         </property>
         <property name="font">
@@ -7542,14 +7304,19 @@ Second click will trigger strong abort mode, which will result in loss of all si
           <string>custom distribution</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>poisson</string>
+         </property>
+        </item>
        </widget>
        <widget class="QStackedWidget" name="swAdVancedSim">
         <property name="geometry">
          <rect>
           <x>1</x>
-          <y>130</y>
+          <y>110</y>
           <width>532</width>
-          <height>241</height>
+          <height>256</height>
          </rect>
         </property>
         <property name="frameShape">
@@ -7559,13 +7326,13 @@ Second click will trigger strong abort mode, which will result in loss of all si
          <number>0</number>
         </property>
         <widget class="QWidget" name="page_5">
-         <widget class="QTabWidget" name="twSingleScan">
+         <widget class="QStackedWidget" name="twSingleScan1">
           <property name="geometry">
            <rect>
             <x>10</x>
-            <y>11</y>
+            <y>10</y>
             <width>512</width>
-            <height>155</height>
+            <height>190</height>
            </rect>
           </property>
           <property name="font">
@@ -7574,18 +7341,21 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <bold>false</bold>
            </font>
           </property>
+          <property name="frameShape">
+           <enum>QFrame::Box</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Sunken</enum>
+          </property>
           <property name="currentIndex">
            <number>0</number>
           </property>
-          <widget class="QWidget" name="tabSinglePoint">
-           <attribute name="title">
-            <string>Single point</string>
-           </attribute>
+          <widget class="QWidget" name="twSingleScan1Page1">
            <widget class="QLineEdit" name="ledSingleZ">
             <property name="geometry">
              <rect>
-              <x>328</x>
-              <y>38</y>
+              <x>347</x>
+              <y>74</y>
               <width>61</width>
               <height>20</height>
              </rect>
@@ -7597,8 +7367,8 @@ Second click will trigger strong abort mode, which will result in loss of all si
            <widget class="QLabel" name="label_67">
             <property name="geometry">
              <rect>
-              <x>394</x>
-              <y>39</y>
+              <x>413</x>
+              <y>75</y>
               <width>30</width>
               <height>16</height>
              </rect>
@@ -7610,9 +7380,9 @@ Second click will trigger strong abort mode, which will result in loss of all si
            <widget class="QLabel" name="label_65">
             <property name="geometry">
              <rect>
-              <x>214</x>
-              <y>39</y>
-              <width>21</width>
+              <x>212</x>
+              <y>75</y>
+              <width>30</width>
               <height>16</height>
              </rect>
             </property>
@@ -7623,8 +7393,8 @@ Second click will trigger strong abort mode, which will result in loss of all si
            <widget class="QLabel" name="label_11">
             <property name="geometry">
              <rect>
-              <x>266</x>
-              <y>20</y>
+              <x>273</x>
+              <y>56</y>
               <width>21</width>
               <height>16</height>
              </rect>
@@ -7643,7 +7413,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>148</x>
-              <y>38</y>
+              <y>74</y>
               <width>61</width>
               <height>20</height>
              </rect>
@@ -7655,8 +7425,8 @@ Second click will trigger strong abort mode, which will result in loss of all si
            <widget class="QLabel" name="label_68">
             <property name="geometry">
              <rect>
-              <x>30</x>
-              <y>37</y>
+              <x>10</x>
+              <y>73</y>
               <width>113</width>
               <height>21</height>
              </rect>
@@ -7671,9 +7441,9 @@ Second click will trigger strong abort mode, which will result in loss of all si
            <widget class="QLabel" name="label_66">
             <property name="geometry">
              <rect>
-              <x>304</x>
-              <y>39</y>
-              <width>21</width>
+              <x>309</x>
+              <y>75</y>
+              <width>30</width>
               <height>16</height>
              </rect>
             </property>
@@ -7684,8 +7454,8 @@ Second click will trigger strong abort mode, which will result in loss of all si
            <widget class="QLineEdit" name="ledSingleY">
             <property name="geometry">
              <rect>
-              <x>238</x>
-              <y>38</y>
+              <x>245</x>
+              <y>74</y>
               <width>61</width>
               <height>20</height>
              </rect>
@@ -7698,7 +7468,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>169</x>
-              <y>21</y>
+              <y>57</y>
               <width>21</width>
               <height>16</height>
              </rect>
@@ -7716,8 +7486,8 @@ Second click will trigger strong abort mode, which will result in loss of all si
            <widget class="QLabel" name="label_13">
             <property name="geometry">
              <rect>
-              <x>351</x>
-              <y>21</y>
+              <x>370</x>
+              <y>57</y>
               <width>21</width>
               <height>16</height>
              </rect>
@@ -7736,7 +7506,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>165</x>
-              <y>80</y>
+              <y>105</y>
               <width>161</width>
               <height>27</height>
              </rect>
@@ -7757,15 +7527,12 @@ Second click will trigger strong abort mode, which will result in loss of all si
            <zorder>ledSingleX</zorder>
            <zorder>ledSingleZ</zorder>
           </widget>
-          <widget class="QWidget" name="tabScan">
-           <attribute name="title">
-            <string>Regular scan</string>
-           </attribute>
+          <widget class="QWidget" name="twSingleScan1Page2">
            <widget class="QLabel" name="label_74">
             <property name="geometry">
              <rect>
               <x>292</x>
-              <y>0</y>
+              <y>37</y>
               <width>21</width>
               <height>16</height>
              </rect>
@@ -7784,7 +7551,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>133</x>
-              <y>17</y>
+              <y>54</y>
               <width>41</width>
               <height>20</height>
              </rect>
@@ -7797,7 +7564,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>276</x>
-              <y>17</y>
+              <y>54</y>
               <width>41</width>
               <height>20</height>
              </rect>
@@ -7813,7 +7580,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>173</x>
-              <y>59</y>
+              <y>96</y>
               <width>41</width>
               <height>20</height>
              </rect>
@@ -7826,7 +7593,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>227</x>
-              <y>43</y>
+              <y>80</y>
               <width>21</width>
               <height>16</height>
              </rect>
@@ -7842,7 +7609,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>131</x>
-              <y>59</y>
+              <y>96</y>
               <width>41</width>
               <height>20</height>
              </rect>
@@ -7855,7 +7622,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>320</x>
-              <y>18</y>
+              <y>55</y>
               <width>27</width>
               <height>16</height>
              </rect>
@@ -7868,7 +7635,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>205</x>
-              <y>17</y>
+              <y>54</y>
               <width>41</width>
               <height>20</height>
              </rect>
@@ -7881,7 +7648,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>277</x>
-              <y>42</y>
+              <y>79</y>
               <width>41</width>
               <height>16</height>
              </rect>
@@ -7897,8 +7664,8 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>130</x>
-              <y>78</y>
-              <width>330</width>
+              <y>115</y>
+              <width>350</width>
               <height>23</height>
              </rect>
             </property>
@@ -7916,7 +7683,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
               <rect>
                <x>210</x>
                <y>0</y>
-               <width>111</width>
+               <width>135</width>
                <height>22</height>
               </rect>
              </property>
@@ -8003,7 +7770,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>144</x>
-              <y>43</y>
+              <y>80</y>
               <width>21</width>
               <height>16</height>
              </rect>
@@ -8016,7 +7783,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>265</x>
-              <y>58</y>
+              <y>95</y>
               <width>60</width>
               <height>22</height>
              </rect>
@@ -8032,7 +7799,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>177</x>
-              <y>18</y>
+              <y>55</y>
               <width>24</width>
               <height>16</height>
              </rect>
@@ -8045,7 +7812,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>47</x>
-              <y>60</y>
+              <y>97</y>
               <width>61</width>
               <height>16</height>
              </rect>
@@ -8061,7 +7828,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>215</x>
-              <y>59</y>
+              <y>96</y>
               <width>41</width>
               <height>20</height>
              </rect>
@@ -8074,7 +7841,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>28</x>
-              <y>81</y>
+              <y>118</y>
               <width>90</width>
               <height>17</height>
              </rect>
@@ -8087,7 +7854,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>55</x>
-              <y>16</y>
+              <y>53</y>
               <width>71</width>
               <height>21</height>
              </rect>
@@ -8103,7 +7870,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>145</x>
-              <y>0</y>
+              <y>37</y>
               <width>21</width>
               <height>16</height>
              </rect>
@@ -8122,7 +7889,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>249</x>
-              <y>18</y>
+              <y>55</y>
               <width>23</width>
               <height>16</height>
              </rect>
@@ -8135,7 +7902,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>220</x>
-              <y>-1</y>
+              <y>36</y>
               <width>21</width>
               <height>16</height>
              </rect>
@@ -8157,8 +7924,8 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>130</x>
-              <y>99</y>
-              <width>330</width>
+              <y>136</y>
+              <width>350</width>
               <height>24</height>
              </rect>
             </property>
@@ -8176,7 +7943,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
               <rect>
                <x>210</x>
                <y>0</y>
-               <width>111</width>
+               <width>135</width>
                <height>22</height>
               </rect>
              </property>
@@ -8263,7 +8030,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>28</x>
-              <y>102</y>
+              <y>139</y>
               <width>90</width>
               <height>17</height>
              </rect>
@@ -8276,8 +8043,8 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>340</x>
-              <y>57</y>
-              <width>111</width>
+              <y>94</y>
+              <width>135</width>
               <height>22</height>
              </rect>
             </property>
@@ -8296,7 +8063,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>188</x>
-              <y>43</y>
+              <y>80</y>
               <width>21</width>
               <height>16</height>
              </rect>
@@ -8306,15 +8073,12 @@ Second click will trigger strong abort mode, which will result in loss of all si
             </property>
            </widget>
           </widget>
-          <widget class="QWidget" name="tabScanFloodField">
-           <attribute name="title">
-            <string>Flood field</string>
-           </attribute>
+          <widget class="QWidget" name="twSingleScan1Page3">
            <widget class="QLabel" name="label_90">
             <property name="geometry">
              <rect>
               <x>18</x>
-              <y>27</y>
+              <y>68</y>
               <width>46</width>
               <height>13</height>
              </rect>
@@ -8327,7 +8091,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>70</x>
-              <y>23</y>
+              <y>64</y>
               <width>80</width>
               <height>22</height>
              </rect>
@@ -8346,7 +8110,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>280</x>
-              <y>50</y>
+              <y>91</y>
               <width>72</width>
               <height>22</height>
              </rect>
@@ -8365,9 +8129,9 @@ Second click will trigger strong abort mode, which will result in loss of all si
            <widget class="QLabel" name="label_247">
             <property name="geometry">
              <rect>
-              <x>260</x>
-              <y>54</y>
-              <width>46</width>
+              <x>257</x>
+              <y>95</y>
+              <width>21</width>
               <height>13</height>
              </rect>
             </property>
@@ -8379,7 +8143,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>262</x>
-              <y>72</y>
+              <y>113</y>
               <width>241</width>
               <height>25</height>
              </rect>
@@ -8432,7 +8196,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
              <widget class="QLineEdit" name="ledScanFloodZto">
               <property name="geometry">
                <rect>
-                <x>135</x>
+                <x>136</x>
                 <y>3</y>
                 <width>51</width>
                 <height>20</height>
@@ -8458,27 +8222,33 @@ Second click will trigger strong abort mode, which will result in loss of all si
              <widget class="QLabel" name="label_249">
               <property name="geometry">
                <rect>
-                <x>12</x>
+                <x>0</x>
                 <y>6</y>
-                <width>30</width>
+                <width>37</width>
                 <height>13</height>
                </rect>
               </property>
               <property name="text">
                <string>from</string>
               </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
              </widget>
              <widget class="QLabel" name="label_251">
               <property name="geometry">
                <rect>
-                <x>94</x>
+                <x>92</x>
                 <y>6</y>
-                <width>46</width>
+                <width>41</width>
                 <height>13</height>
                </rect>
               </property>
               <property name="text">
-               <string>mm   to</string>
+               <string>mm  to</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </widget>
@@ -8487,7 +8257,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>233</x>
-              <y>57</y>
+              <y>98</y>
               <width>20</width>
               <height>38</height>
              </rect>
@@ -8516,7 +8286,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>210</x>
-              <y>23</y>
+              <y>64</y>
               <width>91</width>
               <height>22</height>
              </rect>
@@ -8536,7 +8306,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>144</x>
-              <y>27</y>
+              <y>68</y>
               <width>54</width>
               <height>15</height>
              </rect>
@@ -8552,13 +8322,13 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>10</x>
-              <y>47</y>
+              <y>88</y>
               <width>231</width>
               <height>51</height>
              </rect>
             </property>
             <property name="currentIndex">
-             <number>1</number>
+             <number>0</number>
             </property>
             <widget class="QWidget" name="page_6">
              <widget class="QLabel" name="label_214">
@@ -8816,15 +8586,12 @@ Second click will trigger strong abort mode, which will result in loss of all si
             </widget>
            </widget>
           </widget>
-          <widget class="QWidget" name="tabSourceScript">
-           <attribute name="title">
-            <string>File</string>
-           </attribute>
+          <widget class="QWidget" name="twSingleScan1Page4">
            <widget class="QPushButton" name="pbNodesFromFileChange">
             <property name="geometry">
              <rect>
               <x>420</x>
-              <y>50</y>
+              <y>80</y>
               <width>81</width>
               <height>22</height>
              </rect>
@@ -8837,7 +8604,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>10</x>
-              <y>50</y>
+              <y>80</y>
               <width>400</width>
               <height>22</height>
              </rect>
@@ -8847,7 +8614,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>10</x>
-              <y>30</y>
+              <y>60</y>
               <width>181</width>
               <height>17</height>
              </rect>
@@ -8860,7 +8627,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>422</x>
-              <y>4</y>
+              <y>56</y>
               <width>80</width>
               <height>22</height>
              </rect>
@@ -8872,9 +8639,9 @@ Second click will trigger strong abort mode, which will result in loss of all si
            <widget class="QPushButton" name="pbNodesFromFileCheckShow">
             <property name="geometry">
              <rect>
-              <x>112</x>
-              <y>80</y>
-              <width>291</width>
+              <x>182</x>
+              <y>110</y>
+              <width>161</width>
               <height>24</height>
              </rect>
             </property>
@@ -8882,19 +8649,16 @@ Second click will trigger strong abort mode, which will result in loss of all si
              <string>Shows on geometry window only first 10000 nodes</string>
             </property>
             <property name="text">
-             <string>Check file and show nodes</string>
+             <string>Check file</string>
             </property>
            </widget>
           </widget>
-          <widget class="QWidget" name="tab_10">
-           <attribute name="title">
-            <string>Script</string>
-           </attribute>
+          <widget class="QWidget" name="twSingleScan1Page5">
            <widget class="QLabel" name="label_150">
             <property name="geometry">
              <rect>
               <x>50</x>
-              <y>20</y>
+              <y>66</y>
               <width>391</width>
               <height>71</height>
              </rect>
@@ -8914,8 +8678,8 @@ Multi-vertex events can be simulated using AddSubNode(x,y,z)</string>
          <widget class="QPushButton" name="pbSimulate">
           <property name="geometry">
            <rect>
-            <x>187</x>
-            <y>203</y>
+            <x>196</x>
+            <y>218</y>
             <width>141</width>
             <height>31</height>
            </rect>
@@ -8927,10 +8691,10 @@ Multi-vertex events can be simulated using AddSubNode(x,y,z)</string>
          <widget class="QFrame" name="frLimitNodesTo">
           <property name="geometry">
            <rect>
-            <x>10</x>
-            <y>167</y>
+            <x>91</x>
+            <y>175</y>
             <width>351</width>
-            <height>29</height>
+            <height>23</height>
            </rect>
           </property>
           <property name="frameShape">
@@ -8991,7 +8755,7 @@ Multi-vertex events can be simulated using AddSubNode(x,y,z)</string>
           <property name="geometry">
            <rect>
             <x>395</x>
-            <y>198</y>
+            <y>212</y>
             <width>80</width>
             <height>21</height>
            </rect>
@@ -9017,7 +8781,7 @@ Right click: toggle build photon tracks. Also switches of building particle trac
           <property name="geometry">
            <rect>
             <x>384</x>
-            <y>200</y>
+            <y>214</y>
             <width>21</width>
             <height>16</height>
            </rect>
@@ -9030,7 +8794,7 @@ Right click: toggle build photon tracks. Also switches of building particle trac
           <property name="geometry">
            <rect>
             <x>395</x>
-            <y>218</y>
+            <y>232</y>
             <width>80</width>
             <height>21</height>
            </rect>
@@ -9052,12 +8816,102 @@ Right click: toggle build photon tracks. Also switches of building particle trac
            <string>logs</string>
           </property>
          </widget>
-         <zorder>twSingleScan</zorder>
+         <widget class="QLabel" name="label_20">
+          <property name="geometry">
+           <rect>
+            <x>33</x>
+            <y>16</y>
+            <width>211</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Generation mode:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+         <widget class="QComboBox" name="cobNodeGenerationMode">
+          <property name="geometry">
+           <rect>
+            <x>247</x>
+            <y>14</y>
+            <width>210</width>
+            <height>27</height>
+           </rect>
+          </property>
+          <property name="contextMenuPolicy">
+           <enum>Qt::CustomContextMenu</enum>
+          </property>
+          <item>
+           <property name="text">
+            <string>Single node</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Regular scan</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Flood</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>From file</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Script</string>
+           </property>
+          </item>
+         </widget>
+         <widget class="Line" name="line_9">
+          <property name="geometry">
+           <rect>
+            <x>20</x>
+            <y>43</y>
+            <width>490</width>
+            <height>4</height>
+           </rect>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+         <widget class="Line" name="line_11">
+          <property name="geometry">
+           <rect>
+            <x>18</x>
+            <y>171</y>
+            <width>490</width>
+            <height>4</height>
+           </rect>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+         <zorder>twSingleScan1</zorder>
          <zorder>pbSimulate</zorder>
          <zorder>frLimitNodesTo</zorder>
          <zorder>labPhTracksOn</zorder>
          <zorder>pbOpenTrackProperties_Phot</zorder>
          <zorder>pbOpenLogOptions</zorder>
+         <zorder>label_20</zorder>
+         <zorder>cobNodeGenerationMode</zorder>
+         <zorder>line_9</zorder>
+         <zorder>line_11</zorder>
         </widget>
         <widget class="QWidget" name="page_7">
          <widget class="QFrame" name="fAdvOptionsSim">
@@ -9066,7 +8920,7 @@ Right click: toggle build photon tracks. Also switches of building particle trac
             <x>2</x>
             <y>0</y>
             <width>523</width>
-            <height>230</height>
+            <height>255</height>
            </rect>
           </property>
           <property name="frameShape">
@@ -9081,7 +8935,7 @@ Right click: toggle build photon tracks. Also switches of building particle trac
              <x>7</x>
              <y>10</y>
              <width>512</width>
-             <height>200</height>
+             <height>240</height>
             </rect>
            </property>
            <property name="font">
@@ -9107,7 +8961,7 @@ Right click: toggle build photon tracks. Also switches of building particle trac
              <property name="geometry">
               <rect>
                <x>70</x>
-               <y>17</y>
+               <y>21</y>
                <width>400</width>
                <height>17</height>
               </rect>
@@ -9126,7 +8980,7 @@ Right click: toggle build photon tracks. Also switches of building particle trac
              <property name="geometry">
               <rect>
                <x>83</x>
-               <y>41</y>
+               <y>50</y>
                <width>340</width>
                <height>121</height>
               </rect>
@@ -9334,8 +9188,8 @@ Right click: toggle build photon tracks. Also switches of building particle trac
              </property>
              <property name="geometry">
               <rect>
-               <x>40</x>
-               <y>40</y>
+               <x>50</x>
+               <y>13</y>
                <width>451</width>
                <height>80</height>
               </rect>
@@ -9447,8 +9301,8 @@ Right click: toggle build photon tracks. Also switches of building particle trac
             <widget class="QCheckBox" name="cbNumberOfRuns">
              <property name="geometry">
               <rect>
-               <x>100</x>
-               <y>50</y>
+               <x>76</x>
+               <y>20</y>
                <width>230</width>
                <height>17</height>
               </rect>
@@ -9472,8 +9326,8 @@ Right click: toggle build photon tracks. Also switches of building particle trac
              </property>
              <property name="geometry">
               <rect>
-               <x>107</x>
-               <y>73</y>
+               <x>83</x>
+               <y>43</y>
                <width>331</width>
                <height>31</height>
               </rect>
@@ -9550,8 +9404,8 @@ Right click: toggle build photon tracks. Also switches of building particle trac
              </property>
              <property name="geometry">
               <rect>
-               <x>222</x>
-               <y>68</y>
+               <x>224</x>
+               <y>20</y>
                <width>191</width>
                <height>24</height>
               </rect>
@@ -9579,8 +9433,8 @@ Right click: toggle build photon tracks. Also switches of building particle trac
             <widget class="QLabel" name="label_133">
              <property name="geometry">
               <rect>
-               <x>74</x>
-               <y>69</y>
+               <x>76</x>
+               <y>21</y>
                <width>141</width>
                <height>20</height>
               </rect>
@@ -9595,6 +9449,322 @@ Right click: toggle build photon tracks. Also switches of building particle trac
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
              </property>
             </widget>
+           </widget>
+           <widget class="QWidget" name="tab_3">
+            <attribute name="title">
+             <string>Distributed</string>
+            </attribute>
+            <widget class="QCheckBox" name="cbCND_Enable">
+             <property name="geometry">
+              <rect>
+               <x>9</x>
+               <y>7</y>
+               <width>391</width>
+               <height>22</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Distribute photon emission positions for each node using</string>
+             </property>
+            </widget>
+            <widget class="QComboBox" name="cobCND_Mode">
+             <property name="geometry">
+              <rect>
+               <x>408</x>
+               <y>4</y>
+               <width>91</width>
+               <height>27</height>
+              </rect>
+             </property>
+             <property name="font">
+              <font>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <item>
+              <property name="text">
+               <string>Matrix</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>TFormula</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Spline</string>
+              </property>
+             </item>
+            </widget>
+            <widget class="QStackedWidget" name="swCND_Mode">
+             <property name="geometry">
+              <rect>
+               <x>3</x>
+               <y>32</y>
+               <width>500</width>
+               <height>71</height>
+              </rect>
+             </property>
+             <property name="currentIndex">
+              <number>0</number>
+             </property>
+             <widget class="QWidget" name="page_16">
+              <widget class="QPushButton" name="pbCND_ShowMatrix">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="geometry">
+                <rect>
+                 <x>140</x>
+                 <y>20</y>
+                 <width>102</width>
+                 <height>27</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Show matrix</string>
+               </property>
+              </widget>
+              <widget class="QPushButton" name="pbCND_LoadMatrix">
+               <property name="geometry">
+                <rect>
+                 <x>250</x>
+                 <y>20</y>
+                 <width>102</width>
+                 <height>27</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Load matrix</string>
+               </property>
+              </widget>
+             </widget>
+             <widget class="QWidget" name="page_17">
+              <widget class="QLineEdit" name="leCND_Formula">
+               <property name="geometry">
+                <rect>
+                 <x>0</x>
+                 <y>30</y>
+                 <width>501</width>
+                 <height>27</height>
+                </rect>
+               </property>
+              </widget>
+              <widget class="QLabel" name="label_110">
+               <property name="geometry">
+                <rect>
+                 <x>11</x>
+                 <y>10</y>
+                 <width>491</width>
+                 <height>17</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>TFormula for emission probability, use x,y and z for local coordinates</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </widget>
+             <widget class="QWidget" name="page_18">
+              <widget class="QPushButton" name="pbCND_LoadSpline">
+               <property name="geometry">
+                <rect>
+                 <x>250</x>
+                 <y>20</y>
+                 <width>102</width>
+                 <height>27</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Load spline</string>
+               </property>
+              </widget>
+              <widget class="QPushButton" name="pbCND_ShowSpline">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="geometry">
+                <rect>
+                 <x>140</x>
+                 <y>20</y>
+                 <width>102</width>
+                 <height>27</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Show spline</string>
+               </property>
+              </widget>
+             </widget>
+            </widget>
+            <widget class="QFrame" name="fCND_RangeAndBins">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="geometry">
+              <rect>
+               <x>137</x>
+               <y>104</y>
+               <width>221</width>
+               <height>100</height>
+              </rect>
+             </property>
+             <property name="frameShape">
+              <enum>QFrame::NoFrame</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Raised</enum>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_6">
+              <property name="leftMargin">
+               <number>2</number>
+              </property>
+              <property name="topMargin">
+               <number>2</number>
+              </property>
+              <property name="rightMargin">
+               <number>2</number>
+              </property>
+              <property name="bottomMargin">
+               <number>2</number>
+              </property>
+              <property name="horizontalSpacing">
+               <number>10</number>
+              </property>
+              <property name="verticalSpacing">
+               <number>2</number>
+              </property>
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_143">
+                <property name="text">
+                 <string>Y:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="2">
+               <widget class="QSpinBox" name="sbCND_BinsZ">
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>10000</number>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="2">
+               <widget class="QSpinBox" name="sbCND_BinsX">
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>10000</number>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QLineEdit" name="ledCND_RangeY">
+                <property name="text">
+                 <string>10</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="2">
+               <widget class="QSpinBox" name="sbCND_BinsY">
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>10000</number>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QLineEdit" name="ledCND_RangeX">
+                <property name="text">
+                 <string>10</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_113">
+                <property name="text">
+                 <string>X:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QLabel" name="label_144">
+                <property name="text">
+                 <string>Z:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QLineEdit" name="ledCND_RangeZ">
+                <property name="text">
+                 <string>10</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="2">
+               <widget class="QLabel" name="label_112">
+                <property name="text">
+                 <string>Bins:</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLabel" name="label_111">
+                <property name="text">
+                 <string>Range:</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QPushButton" name="pbCND_applyChanges">
+             <property name="geometry">
+              <rect>
+               <x>400</x>
+               <y>106</y>
+               <width>94</width>
+               <height>51</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>...apply
+Changes</string>
+             </property>
+            </widget>
+            <widget class="QPushButton" name="pbCND_help">
+             <property name="geometry">
+              <rect>
+               <x>25</x>
+               <y>150</y>
+               <width>61</width>
+               <height>27</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Help</string>
+             </property>
+            </widget>
+            <zorder>cbCND_Enable</zorder>
+            <zorder>swCND_Mode</zorder>
+            <zorder>fCND_RangeAndBins</zorder>
+            <zorder>cobCND_Mode</zorder>
+            <zorder>pbCND_applyChanges</zorder>
+            <zorder>pbCND_help</zorder>
            </widget>
           </widget>
           <widget class="QPushButton" name="pbYellow">
@@ -9622,9 +9792,9 @@ Right click: toggle build photon tracks. Also switches of building particle trac
        <widget class="QPushButton" name="pnShowHideAdvanced">
         <property name="geometry">
          <rect>
-          <x>111</x>
-          <y>95</y>
-          <width>330</width>
+          <x>148</x>
+          <y>77</y>
+          <width>231</width>
           <height>27</height>
          </rect>
         </property>
@@ -9644,8 +9814,8 @@ Right click: toggle build photon tracks. Also switches of building particle trac
        <widget class="QLabel" name="labAdvancedOn">
         <property name="geometry">
          <rect>
-          <x>87</x>
-          <y>98</y>
+          <x>127</x>
+          <y>80</y>
           <width>19</width>
           <height>21</height>
          </rect>
@@ -9654,526 +9824,377 @@ Right click: toggle build photon tracks. Also switches of building particle trac
          <string>--</string>
         </property>
        </widget>
+       <widget class="QStackedWidget" name="swScan3">
+        <property name="geometry">
+         <rect>
+          <x>283</x>
+          <y>11</y>
+          <width>210</width>
+          <height>50</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <weight>50</weight>
+          <bold>false</bold>
+         </font>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::NoFrame</enum>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="pageScanConst">
+         <layout class="QGridLayout" name="gridLayout_4">
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
+          <property name="verticalSpacing">
+           <number>2</number>
+          </property>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_60">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QSpinBox" name="sbScanNumPhotons">
+            <property name="maximumSize">
+             <size>
+              <width>110</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="minimum">
+             <number>0</number>
+            </property>
+            <property name="maximum">
+             <number>2147483647</number>
+            </property>
+            <property name="value">
+             <number>10</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <spacer name="horizontalSpacer_11">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="pageScanUniform">
+         <layout class="QGridLayout" name="gridLayout">
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
+          <property name="verticalSpacing">
+           <number>1</number>
+          </property>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_81">
+            <property name="text">
+             <string>Min:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLabel" name="label_88">
+            <property name="text">
+             <string>Max:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QSpinBox" name="sbScanNumMin">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>2100000000</number>
+            </property>
+            <property name="value">
+             <number>10</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QSpinBox" name="sbScanNumMax">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>2100000000</number>
+            </property>
+            <property name="value">
+             <number>12</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="pageScanGauss">
+         <layout class="QGridLayout" name="gridLayout_2">
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
+          <property name="verticalSpacing">
+           <number>1</number>
+          </property>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_87">
+            <property name="text">
+             <string>Mean:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLabel" name="label_89">
+            <property name="text">
+             <string>Sigma:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLineEdit" name="ledScanGaussMean">
+            <property name="text">
+             <string>10</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="ledScanGaussSigma">
+            <property name="text">
+             <string>2.5</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="pageScanCustom">
+         <layout class="QGridLayout" name="gridLayout_3">
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
+          <property name="verticalSpacing">
+           <number>1</number>
+          </property>
+          <item row="0" column="0" colspan="2">
+           <widget class="QLabel" name="label_91">
+            <property name="text">
+             <string>Distribution:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QPushButton" name="pbScanDistrShow">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>90</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string/>
+            </property>
+            <property name="text">
+             <string>Show</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QPushButton" name="pbScanDistrLoad">
+            <property name="maximumSize">
+             <size>
+              <width>90</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string>Note that the probability value for the last point is ignored!
+The last point is only used to define the range of the semi-ultimate bin.</string>
+            </property>
+            <property name="text">
+             <string>Load</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QPushButton" name="pbScanDistrDelete">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>20</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>X</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="page_15">
+         <layout class="QGridLayout" name="gridLayout_5">
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
+          <property name="verticalSpacing">
+           <number>1</number>
+          </property>
+          <item row="0" column="1">
+           <widget class="QLabel" name="label_109">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_103">
+            <property name="text">
+             <string>Mean:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="ledScanPoissonMean">
+            <property name="maximumSize">
+             <size>
+              <width>110</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>10</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <spacer name="horizontalSpacer_12">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>44</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </widget>
       </widget>
       <widget class="QWidget" name="tabParticleSources">
        <attribute name="title">
         <string>      Particles + photons      </string>
        </attribute>
-       <widget class="QTabWidget" name="twParticleGenerationMode">
-        <property name="geometry">
-         <rect>
-          <x>8</x>
-          <y>21</y>
-          <width>514</width>
-          <height>226</height>
-         </rect>
-        </property>
-        <property name="font">
-         <font>
-          <weight>50</weight>
-          <bold>false</bold>
-         </font>
-        </property>
-        <property name="currentIndex">
-         <number>0</number>
-        </property>
-        <widget class="QWidget" name="tab_3">
-         <attribute name="title">
-          <string>Sources</string>
-         </attribute>
-         <widget class="QPushButton" name="pbUpdateSourcesIndication">
-          <property name="geometry">
-           <rect>
-            <x>360</x>
-            <y>0</y>
-            <width>142</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="font">
-           <font>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>...update source indication</string>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="pbAddSource">
-          <property name="geometry">
-           <rect>
-            <x>430</x>
-            <y>47</y>
-            <width>70</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="font">
-           <font>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>New</string>
-          </property>
-         </widget>
-         <widget class="QLabel" name="label_76">
-          <property name="geometry">
-           <rect>
-            <x>10</x>
-            <y>2</y>
-            <width>149</width>
-            <height>16</height>
-           </rect>
-          </property>
-          <property name="font">
-           <font>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Defined sources:</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-         <widget class="QFrame" name="fGunMultipleEvents">
-          <property name="geometry">
-           <rect>
-            <x>180</x>
-            <y>174</y>
-            <width>320</width>
-            <height>21</height>
-           </rect>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::NoFrame</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
-          </property>
-          <widget class="QLabel" name="labPartPerEvent">
-           <property name="geometry">
-            <rect>
-             <x>130</x>
-             <y>-1</y>
-             <width>141</width>
-             <height>20</height>
-            </rect>
-           </property>
-           <property name="font">
-            <font>
-             <weight>50</weight>
-             <bold>false</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string> # of particles per event:</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
-          </widget>
-          <widget class="QLineEdit" name="ledGunAverageNumPartperEvent">
-           <property name="geometry">
-            <rect>
-             <x>276</x>
-             <y>0</y>
-             <width>41</width>
-             <height>20</height>
-            </rect>
-           </property>
-           <property name="font">
-            <font>
-             <weight>50</weight>
-             <bold>false</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string>2</string>
-           </property>
-          </widget>
-          <widget class="QComboBox" name="cobPartPerEvent">
-           <property name="geometry">
-            <rect>
-             <x>24</x>
-             <y>0</y>
-             <width>80</width>
-             <height>19</height>
-            </rect>
-           </property>
-           <property name="font">
-            <font>
-             <weight>50</weight>
-             <bold>false</bold>
-            </font>
-           </property>
-           <item>
-            <property name="text">
-             <string>Constant</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Poisson</string>
-            </property>
-           </item>
-          </widget>
-         </widget>
-         <widget class="QCheckBox" name="cbGunAllowMultipleEvents">
-          <property name="geometry">
-           <rect>
-            <x>7</x>
-            <y>174</y>
-            <width>198</width>
-            <height>18</height>
-           </rect>
-          </property>
-          <property name="font">
-           <font>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Multiple particles per event</string>
-          </property>
-         </widget>
-         <widget class="QListWidget" name="lwDefinedParticleSources">
-          <property name="geometry">
-           <rect>
-            <x>7</x>
-            <y>22</y>
-            <width>417</width>
-            <height>148</height>
-           </rect>
-          </property>
-          <property name="spacing">
-           <number>1</number>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="pbRemoveSource">
-          <property name="geometry">
-           <rect>
-            <x>430</x>
-            <y>71</y>
-            <width>70</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="font">
-           <font>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Remove</string>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="pbSaveParticleSource">
-          <property name="geometry">
-           <rect>
-            <x>430</x>
-            <y>98</y>
-            <width>70</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="font">
-           <font>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Save</string>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="pbLoadParticleSource">
-          <property name="geometry">
-           <rect>
-            <x>430</x>
-            <y>120</y>
-            <width>70</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="font">
-           <font>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Import</string>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="pbEditParticleSource">
-          <property name="geometry">
-           <rect>
-            <x>430</x>
-            <y>23</y>
-            <width>70</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Edit</string>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="pbGunShowSource">
-          <property name="geometry">
-           <rect>
-            <x>430</x>
-            <y>147</y>
-            <width>70</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="font">
-           <font>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Show</string>
-          </property>
-          <property name="checkable">
-           <bool>true</bool>
-          </property>
-         </widget>
-         <zorder>cbGunAllowMultipleEvents</zorder>
-         <zorder>pbUpdateSourcesIndication</zorder>
-         <zorder>pbAddSource</zorder>
-         <zorder>label_76</zorder>
-         <zorder>fGunMultipleEvents</zorder>
-         <zorder>lwDefinedParticleSources</zorder>
-         <zorder>pbRemoveSource</zorder>
-         <zorder>pbSaveParticleSource</zorder>
-         <zorder>pbLoadParticleSource</zorder>
-         <zorder>pbEditParticleSource</zorder>
-         <zorder>pbGunShowSource</zorder>
-        </widget>
-        <widget class="QWidget" name="tab_6">
-         <attribute name="title">
-          <string>From file</string>
-         </attribute>
-         <widget class="QLabel" name="label_29">
-          <property name="geometry">
-           <rect>
-            <x>20</x>
-            <y>20</y>
-            <width>281</width>
-            <height>16</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Generate events from file:</string>
-          </property>
-         </widget>
-         <widget class="QLineEdit" name="leGenerateFromFile_FileName">
-          <property name="geometry">
-           <rect>
-            <x>10</x>
-            <y>40</y>
-            <width>421</width>
-            <height>20</height>
-           </rect>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="pbGenerateFromFile_Change">
-          <property name="geometry">
-           <rect>
-            <x>431</x>
-            <y>38</y>
-            <width>71</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Change</string>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="pbGenerateFromFile_Help">
-          <property name="geometry">
-           <rect>
-            <x>431</x>
-            <y>0</y>
-            <width>75</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>?</string>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="pbGenerateFromFile_Check">
-          <property name="geometry">
-           <rect>
-            <x>10</x>
-            <y>70</y>
-            <width>101</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Analyse file</string>
-          </property>
-         </widget>
-         <widget class="QLabel" name="labGenerateFromFile_info">
-          <property name="geometry">
-           <rect>
-            <x>50</x>
-            <y>100</y>
-            <width>451</width>
-            <height>108</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="pbLoadExampleFileFromFileGen">
-          <property name="geometry">
-           <rect>
-            <x>431</x>
-            <y>61</y>
-            <width>71</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Example</string>
-          </property>
-         </widget>
-        </widget>
-        <widget class="QWidget" name="tab_5">
-         <attribute name="title">
-          <string>From script</string>
-         </attribute>
-         <widget class="QPushButton" name="pbParticleGenerationScript">
-          <property name="geometry">
-           <rect>
-            <x>178</x>
-            <y>173</y>
-            <width>160</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Edit script</string>
-          </property>
-         </widget>
-         <widget class="QPlainTextEdit" name="pteParticleGenerationScript">
-          <property name="geometry">
-           <rect>
-            <x>10</x>
-            <y>30</y>
-            <width>491</width>
-            <height>140</height>
-           </rect>
-          </property>
-          <property name="contextMenuPolicy">
-           <enum>Qt::CustomContextMenu</enum>
-          </property>
-          <property name="readOnly">
-           <bool>true</bool>
-          </property>
-         </widget>
-         <widget class="QLabel" name="label_37">
-          <property name="geometry">
-           <rect>
-            <x>20</x>
-            <y>10</y>
-            <width>471</width>
-            <height>16</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Particle generation script (called for each event):</string>
-          </property>
-         </widget>
-        </widget>
-       </widget>
-       <widget class="QSpinBox" name="sbGunTestEvents">
-        <property name="geometry">
-         <rect>
-          <x>144</x>
-          <y>252</y>
-          <width>81</width>
-          <height>22</height>
-         </rect>
-        </property>
-        <property name="font">
-         <font>
-          <weight>50</weight>
-          <bold>false</bold>
-         </font>
-        </property>
-        <property name="minimum">
-         <number>1</number>
-        </property>
-        <property name="maximum">
-         <number>1000000</number>
-        </property>
-        <property name="value">
-         <number>100</number>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="pbGunTest">
-        <property name="geometry">
-         <rect>
-          <x>7</x>
-          <y>251</y>
-          <width>131</width>
-          <height>24</height>
-         </rect>
-        </property>
-        <property name="font">
-         <font>
-          <weight>50</weight>
-          <bold>false</bold>
-         </font>
-        </property>
-        <property name="toolTip">
-         <string>Particle are generated and their directions are shown. No interaction is simulated!</string>
-        </property>
-        <property name="text">
-         <string>Test generator</string>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_45">
-        <property name="geometry">
-         <rect>
-          <x>22</x>
-          <y>2</y>
-          <width>501</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="font">
-         <font>
-          <weight>50</weight>
-          <bold>false</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Particle generation mode:</string>
-        </property>
-       </widget>
        <widget class="QStackedWidget" name="swAdvancedSim_Particle">
         <property name="geometry">
          <rect>
           <x>-1</x>
-          <y>283</y>
+          <y>265</y>
           <width>534</width>
-          <height>87</height>
+          <height>102</height>
          </rect>
         </property>
         <property name="currentIndex">
@@ -10187,8 +10208,8 @@ Right click: toggle build photon tracks. Also switches of building particle trac
           <property name="geometry">
            <rect>
             <x>255</x>
-            <y>66</y>
-            <width>159</width>
+            <y>73</y>
+            <width>175</width>
             <height>17</height>
            </rect>
           </property>
@@ -10209,7 +10230,7 @@ Right click: toggle build photon tracks. Also switches of building particle trac
           <property name="geometry">
            <rect>
             <x>9</x>
-            <y>54</y>
+            <y>61</y>
             <width>90</width>
             <height>22</height>
            </rect>
@@ -10227,8 +10248,8 @@ Right click: toggle build photon tracks. Also switches of building particle trac
          <widget class="QPushButton" name="pbTrackOptionsGun">
           <property name="geometry">
            <rect>
-            <x>439</x>
-            <y>44</y>
+            <x>450</x>
+            <y>40</y>
             <width>80</width>
             <height>21</height>
            </rect>
@@ -10254,8 +10275,8 @@ Right click: toggle build particle tracks. Also switch off building photon track
           <property name="geometry">
            <rect>
             <x>255</x>
-            <y>46</y>
-            <width>158</width>
+            <y>53</y>
+            <width>174</width>
             <height>17</height>
            </rect>
           </property>
@@ -10275,11 +10296,17 @@ Right click: toggle build particle tracks. Also switch off building photon track
          <widget class="QLabel" name="labPhTracksOn_1">
           <property name="geometry">
            <rect>
-            <x>429</x>
-            <y>42</y>
+            <x>440</x>
+            <y>38</y>
             <width>21</width>
             <height>16</height>
            </rect>
+          </property>
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
           </property>
           <property name="text">
            <string>--</string>
@@ -10289,7 +10316,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
           <property name="geometry">
            <rect>
             <x>48</x>
-            <y>64</y>
+            <y>71</y>
             <width>118</width>
             <height>3</height>
            </rect>
@@ -10302,7 +10329,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
           <property name="geometry">
            <rect>
             <x>107</x>
-            <y>49</y>
+            <y>56</y>
             <width>141</width>
             <height>31</height>
            </rect>
@@ -10314,11 +10341,17 @@ Right click: toggle build particle tracks. Also switch off building photon track
          <widget class="QLabel" name="labPartTracksOn">
           <property name="geometry">
            <rect>
-            <x>429</x>
-            <y>51</y>
+            <x>440</x>
+            <y>47</y>
             <width>21</width>
             <height>16</height>
            </rect>
+          </property>
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
           </property>
           <property name="text">
            <string>--</string>
@@ -10328,7 +10361,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
           <property name="geometry">
            <rect>
             <x>28</x>
-            <y>36</y>
+            <y>43</y>
             <width>56</width>
             <height>15</height>
            </rect>
@@ -10347,7 +10380,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
           <property name="geometry">
            <rect>
             <x>0</x>
-            <y>2</y>
+            <y>-1</y>
             <width>525</width>
             <height>36</height>
            </rect>
@@ -10362,7 +10395,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
             </property>
             <property name="geometry">
              <rect>
-              <x>260</x>
+              <x>257</x>
               <y>10</y>
               <width>271</width>
               <height>17</height>
@@ -10397,7 +10430,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
            <widget class="QCheckBox" name="cbIgnoreEventsWithNoHits">
             <property name="geometry">
              <rect>
-              <x>27</x>
+              <x>24</x>
               <y>10</y>
               <width>207</width>
               <height>17</height>
@@ -10432,13 +10465,13 @@ Right click: toggle build particle tracks. Also switch off building photon track
            <zorder>cbIgnoreEventsWithNoEnergyDepo</zorder>
           </widget>
           <widget class="QWidget" name="page_12">
-           <widget class="QLabel" name="label_60">
+           <widget class="QPushButton" name="pbG4Settings">
             <property name="geometry">
              <rect>
-              <x>19</x>
-              <y>9</y>
-              <width>501</width>
-              <height>17</height>
+              <x>50</x>
+              <y>10</y>
+              <width>131</width>
+              <height>23</height>
              </rect>
             </property>
             <property name="font">
@@ -10448,10 +10481,26 @@ Right click: toggle build particle tracks. Also switch off building photon track
              </font>
             </property>
             <property name="text">
-             <string>Particle tracking will be delegated to Geant4</string>
+             <string>Geant4 settings</string>
             </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
+           </widget>
+           <widget class="QPushButton" name="pbGoToConfigueG4ants">
+            <property name="geometry">
+             <rect>
+              <x>200</x>
+              <y>10</y>
+              <width>90</width>
+              <height>23</height>
+             </rect>
+            </property>
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Paths</string>
             </property>
            </widget>
           </widget>
@@ -10459,11 +10508,17 @@ Right click: toggle build particle tracks. Also switch off building photon track
          <widget class="QLabel" name="labPartLogOn">
           <property name="geometry">
            <rect>
-            <x>429</x>
-            <y>65</y>
+            <x>440</x>
+            <y>61</y>
             <width>19</width>
             <height>16</height>
            </rect>
+          </property>
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
           </property>
           <property name="text">
            <string>--</string>
@@ -10472,8 +10527,8 @@ Right click: toggle build particle tracks. Also switch off building photon track
          <widget class="QPushButton" name="pbOpenLogOptions2">
           <property name="geometry">
            <rect>
-            <x>439</x>
-            <y>64</y>
+            <x>450</x>
+            <y>60</y>
             <width>80</width>
             <height>21</height>
            </rect>
@@ -10495,6 +10550,51 @@ Right click: toggle build particle tracks. Also switch off building photon track
            <string>logs</string>
           </property>
          </widget>
+         <widget class="QPushButton" name="pbParticlesToFile">
+          <property name="geometry">
+           <rect>
+            <x>450</x>
+            <y>80</y>
+            <width>80</width>
+            <height>21</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="contextMenuPolicy">
+           <enum>Qt::CustomContextMenu</enum>
+          </property>
+          <property name="toolTip">
+           <string>Click: Show / edit options for saving particles to file
+Right click: toggle save on/off</string>
+          </property>
+          <property name="text">
+           <string>to file</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="labParticlesToFile">
+          <property name="geometry">
+           <rect>
+            <x>440</x>
+            <y>81</y>
+            <width>19</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>--</string>
+          </property>
+         </widget>
          <zorder>linePS</zorder>
          <zorder>cbGunDoS2</zorder>
          <zorder>sbGunEvents</zorder>
@@ -10507,13 +10607,15 @@ Right click: toggle build particle tracks. Also switch off building photon track
          <zorder>swNormalOrGeant4</zorder>
          <zorder>labPartLogOn</zorder>
          <zorder>pbOpenLogOptions2</zorder>
+         <zorder>labParticlesToFile</zorder>
+         <zorder>pbParticlesToFile</zorder>
         </widget>
         <widget class="QWidget" name="page_4">
          <widget class="QLineEdit" name="ledClusterRadius">
           <property name="geometry">
            <rect>
-            <x>203</x>
-            <y>43</y>
+            <x>111</x>
+            <y>56</y>
             <width>51</width>
             <height>20</height>
            </rect>
@@ -10534,9 +10636,9 @@ Right click: toggle build particle tracks. Also switch off building photon track
          <widget class="QLabel" name="label_46">
           <property name="geometry">
            <rect>
-            <x>29</x>
-            <y>43</y>
-            <width>171</width>
+            <x>35</x>
+            <y>55</y>
+            <width>70</width>
             <height>20</height>
            </rect>
           </property>
@@ -10547,7 +10649,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
            </font>
           </property>
           <property name="text">
-           <string>Cluster merge radius:</string>
+           <string>Radius:</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -10556,10 +10658,10 @@ Right click: toggle build particle tracks. Also switch off building photon track
          <widget class="QLabel" name="label_59">
           <property name="geometry">
            <rect>
-            <x>260</x>
-            <y>46</y>
-            <width>47</width>
-            <height>13</height>
+            <x>164</x>
+            <y>57</y>
+            <width>31</width>
+            <height>16</height>
            </rect>
           </property>
           <property name="font">
@@ -10571,36 +10673,86 @@ Right click: toggle build particle tracks. Also switch off building photon track
           <property name="text">
            <string>mm</string>
           </property>
+          <property name="alignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+          </property>
          </widget>
-         <widget class="QCheckBox" name="cbGeant4ParticleTracking">
+         <widget class="QCheckBox" name="cbMergeClusters">
           <property name="enabled">
            <bool>true</bool>
           </property>
           <property name="geometry">
            <rect>
             <x>30</x>
-            <y>10</y>
-            <width>220</width>
+            <y>34</y>
+            <width>411</width>
+            <height>22</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string>Does not affect photon generation!</string>
+          </property>
+          <property name="text">
+           <string>Merge deposition clusters when populating &quot;True events&quot;</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="ledClusterTimeDif">
+          <property name="geometry">
+           <rect>
+            <x>366</x>
+            <y>56</y>
+            <width>51</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string>After simulation, used to reduce the number of energy deposition points to be shown as true event points</string>
+          </property>
+          <property name="text">
+           <string>1.0</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_40">
+          <property name="geometry">
+           <rect>
+            <x>420</x>
+            <y>57</y>
+            <width>63</width>
             <height>17</height>
            </rect>
           </property>
           <property name="font">
            <font>
-            <weight>75</weight>
-            <bold>true</bold>
+            <weight>50</weight>
+            <bold>false</bold>
            </font>
           </property>
           <property name="text">
-           <string>Track particles in Geant4</string>
+           <string>ns</string>
           </property>
          </widget>
-         <widget class="QPushButton" name="pbGoToConfigueG4ants">
+         <widget class="QLabel" name="label_102">
           <property name="geometry">
            <rect>
-            <x>370</x>
-            <y>8</y>
-            <width>101</width>
-            <height>23</height>
+            <x>223</x>
+            <y>57</y>
+            <width>141</width>
+            <height>17</height>
            </rect>
           </property>
           <property name="font">
@@ -10610,26 +10762,10 @@ Right click: toggle build particle tracks. Also switch off building photon track
            </font>
           </property>
           <property name="text">
-           <string>Pathes</string>
+           <string>Max time difference:</string>
           </property>
-         </widget>
-         <widget class="QPushButton" name="pbG4Settings">
-          <property name="geometry">
-           <rect>
-            <x>260</x>
-            <y>8</y>
-            <width>99</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="font">
-           <font>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Options</string>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
          </widget>
         </widget>
@@ -10637,9 +10773,9 @@ Right click: toggle build particle tracks. Also switch off building photon track
        <widget class="QPushButton" name="pnShowHideAdvanced_Particle">
         <property name="geometry">
          <rect>
-          <x>297</x>
-          <y>252</y>
-          <width>221</width>
+          <x>397</x>
+          <y>240</y>
+          <width>131</width>
           <height>23</height>
          </rect>
         </property>
@@ -10650,10 +10786,780 @@ Right click: toggle build particle tracks. Also switch off building photon track
          </font>
         </property>
         <property name="text">
-         <string>Show / hide advanced options</string>
+         <string>Advanced options</string>
         </property>
         <property name="checkable">
          <bool>true</bool>
+        </property>
+       </widget>
+       <widget class="QStackedWidget" name="swParticleGenerationMode">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>30</y>
+          <width>521</width>
+          <height>201</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <weight>50</weight>
+          <bold>false</bold>
+         </font>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::NoFrame</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Sunken</enum>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="twParticleGenerationModePage1">
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <property name="spacing">
+           <number>1</number>
+          </property>
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_10">
+            <item>
+             <widget class="QLabel" name="label_76">
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>  Defined sources:</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pbUpdateSourcesIndication">
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>21</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>...update source indication</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_9">
+            <item>
+             <widget class="QListWidget" name="lwDefinedParticleSources">
+              <property name="spacing">
+               <number>1</number>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_3">
+              <property name="spacing">
+               <number>1</number>
+              </property>
+              <item>
+               <widget class="QPushButton" name="pbEditParticleSource">
+                <property name="text">
+                 <string>Edit</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pbAddSource">
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="contextMenuPolicy">
+                 <enum>Qt::CustomContextMenu</enum>
+                </property>
+                <property name="toolTip">
+                 <string>Right-click to clone the selected source</string>
+                </property>
+                <property name="text">
+                 <string>New/clone</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pbRemoveSource">
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Remove</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_2">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Fixed</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>2</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pbSaveParticleSource">
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Save</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pbLoadParticleSource">
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Import</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_3">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Fixed</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>2</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pbGunShowSource">
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Show</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_7">
+            <property name="spacing">
+             <number>2</number>
+            </property>
+            <item>
+             <widget class="QCheckBox" name="cbGunAllowMultipleEvents">
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Multiple particles per event</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QFrame" name="fGunMultipleEvents">
+              <property name="frameShape">
+               <enum>QFrame::NoFrame</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+              <property name="lineWidth">
+               <number>5</number>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_8">
+               <property name="spacing">
+                <number>2</number>
+               </property>
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QComboBox" name="cobPartPerEvent">
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>21</height>
+                  </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
+                 <item>
+                  <property name="text">
+                   <string>Constant</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Poisson</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="labPartPerEvent">
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string> # of particles per event:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="ledGunAverageNumPartperEvent">
+                 <property name="maximumSize">
+                  <size>
+                   <width>75</width>
+                   <height>21</height>
+                  </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>2</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_9">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_6">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+         </layout>
+         <zorder></zorder>
+        </widget>
+        <widget class="QWidget" name="twParticleGenerationModePage2">
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <property name="spacing">
+           <number>2</number>
+          </property>
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="label_29">
+            <property name="text">
+             <string>Generate events from file:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_11">
+            <item>
+             <widget class="QLineEdit" name="leGenerateFromFile_FileName"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pbGenerateFromFile_Change">
+              <property name="text">
+               <string>Change</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_12">
+            <item>
+             <widget class="QLabel" name="labGenerateFromFile_info">
+              <property name="text">
+               <string>Not yet analyzed</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_10">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pbLoadExampleFileFromFileGen">
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>21</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Example</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QListWidget" name="lwFileStatistics">
+            <property name="contextMenuPolicy">
+             <enum>Qt::CustomContextMenu</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_13">
+            <item>
+             <spacer name="horizontalSpacer_7">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pbGenerateFromFile_Check">
+              <property name="maximumSize">
+               <size>
+                <width>100</width>
+                <height>21</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Analyse file</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="cbFileCollectStatistics">
+              <property name="text">
+               <string>Collect statistics</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_8">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pbFilePreview">
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>21</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>View</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pbGenerateFromFile_Help">
+              <property name="maximumSize">
+               <size>
+                <width>50</width>
+                <height>21</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>?</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_4">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="twParticleGenerationModePage3">
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <property name="spacing">
+           <number>2</number>
+          </property>
+          <property name="leftMargin">
+           <number>3</number>
+          </property>
+          <property name="topMargin">
+           <number>3</number>
+          </property>
+          <property name="rightMargin">
+           <number>3</number>
+          </property>
+          <property name="bottomMargin">
+           <number>3</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="label_37">
+            <property name="text">
+             <string>Particle generation script (called for each event):</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPlainTextEdit" name="pteParticleGenerationScript">
+            <property name="contextMenuPolicy">
+             <enum>Qt::CustomContextMenu</enum>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_6">
+            <item>
+             <spacer name="horizontalSpacer_4">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pbParticleGenerationScript">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>150</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>21</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Edit script</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_5">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+       <widget class="Line" name="line_5">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>234</y>
+          <width>532</width>
+          <height>3</height>
+         </rect>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+       <widget class="QWidget" name="layoutWidget">
+        <property name="geometry">
+         <rect>
+          <x>2</x>
+          <y>2</y>
+          <width>527</width>
+          <height>29</height>
+         </rect>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <property name="leftMargin">
+          <number>5</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label_45">
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Particle generation mode:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="cobParticleGenerationMode">
+           <property name="minimumSize">
+            <size>
+             <width>150</width>
+             <height>0</height>
+            </size>
+           </property>
+           <item>
+            <property name="text">
+             <string>Sources</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>From file</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Script</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pbGunTest">
+           <property name="maximumSize">
+            <size>
+             <width>60</width>
+             <height>21</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="toolTip">
+            <string>Particle are generated and their directions are shown. No interaction is simulated!</string>
+           </property>
+           <property name="text">
+            <string>Test</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="sbGunTestEvents">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>21</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="minimum">
+            <number>1</number>
+           </property>
+           <property name="maximum">
+            <number>1000000</number>
+           </property>
+           <property name="value">
+            <number>100</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QCheckBox" name="cbGeant4ParticleTracking">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>23</x>
+          <y>247</y>
+          <width>291</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Track particles using Geant4</string>
         </property>
        </widget>
       </widget>
@@ -10771,7 +11677,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
       <property name="geometry">
        <rect>
         <x>-10</x>
-        <y>478</y>
+        <y>0</y>
         <width>130</width>
         <height>50</height>
        </rect>
@@ -11971,7 +12877,7 @@ multiply to loaded data</string>
         <rect>
          <x>399</x>
          <y>24</y>
-         <width>61</width>
+         <width>79</width>
          <height>20</height>
         </rect>
        </property>
@@ -12501,7 +13407,7 @@ multiply to loaded data</string>
     <property name="geometry">
      <rect>
       <x>484</x>
-      <y>587</y>
+      <y>595</y>
       <width>51</width>
       <height>23</height>
      </rect>
@@ -12516,7 +13422,7 @@ multiply to loaded data</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>550</width>
+     <width>549</width>
      <height>25</height>
     </rect>
    </property>
@@ -12862,8 +13768,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>201</x>
-     <y>540</y>
+     <x>203</x>
+     <y>571</y>
     </hint>
     <hint type="destinationlabel">
      <x>280</x>
@@ -13016,38 +13922,6 @@ multiply to loaded data</string>
    </hints>
   </connection>
   <connection>
-   <sender>cobScanFloodZtype</sender>
-   <signal>currentIndexChanged(int)</signal>
-   <receiver>swScanFloodZ</receiver>
-   <slot>setCurrentIndex(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>370</x>
-     <y>464</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>521</x>
-     <y>489</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cobScanFloodShape</sender>
-   <signal>currentIndexChanged(int)</signal>
-   <receiver>stackedWidget</receiver>
-   <slot>setCurrentIndex(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>319</x>
-     <y>437</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>259</x>
-     <y>490</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>ledCtC</sender>
    <signal>editingFinished()</signal>
    <receiver>pbRefreshPMArrayData</receiver>
@@ -13134,12 +14008,12 @@ multiply to loaded data</string>
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>302</x>
-     <y>394</y>
+     <x>326</x>
+     <y>378</y>
     </hint>
     <hint type="destinationlabel">
-     <x>475</x>
-     <y>494</y>
+     <x>438</x>
+     <y>511</y>
     </hint>
    </hints>
   </connection>
@@ -13150,12 +14024,12 @@ multiply to loaded data</string>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>168</x>
-     <y>394</y>
+     <x>191</x>
+     <y>377</y>
     </hint>
     <hint type="destinationlabel">
-     <x>486</x>
-     <y>431</y>
+     <x>429</x>
+     <y>414</y>
     </hint>
    </hints>
   </connection>
@@ -13182,8 +14056,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>302</x>
-     <y>394</y>
+     <x>326</x>
+     <y>378</y>
     </hint>
     <hint type="destinationlabel">
      <x>331</x>
@@ -13198,8 +14072,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>168</x>
-     <y>394</y>
+     <x>191</x>
+     <y>377</y>
     </hint>
     <hint type="destinationlabel">
      <x>328</x>
@@ -13236,54 +14110,6 @@ multiply to loaded data</string>
     <hint type="destinationlabel">
      <x>182</x>
      <y>345</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbFixedTopSize</sender>
-   <signal>clicked()</signal>
-   <receiver>pbRebuildDetector</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>327</x>
-     <y>614</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>488</x>
-     <y>294</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledTopSizeXY</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbRebuildDetector</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>397</x>
-     <y>616</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>474</x>
-     <y>294</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledTopSizeZ</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbRebuildDetector</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>500</x>
-     <y>616</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>525</x>
-     <y>294</y>
     </hint>
    </hints>
   </connection>
@@ -13454,7 +14280,7 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>305</x>
+     <x>335</x>
      <y>382</y>
     </hint>
     <hint type="destinationlabel">
@@ -13470,8 +14296,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>179</x>
-     <y>467</y>
+     <x>181</x>
+     <y>498</y>
     </hint>
     <hint type="destinationlabel">
      <x>464</x>
@@ -13486,7 +14312,7 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>447</x>
+     <x>477</x>
      <y>443</y>
     </hint>
     <hint type="destinationlabel">
@@ -13502,7 +14328,7 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>447</x>
+     <x>477</x>
      <y>472</y>
     </hint>
     <hint type="destinationlabel">
@@ -13518,7 +14344,7 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>447</x>
+     <x>477</x>
      <y>472</y>
     </hint>
     <hint type="destinationlabel">
@@ -13534,8 +14360,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>293</x>
-     <y>382</y>
+     <x>295</x>
+     <y>413</y>
     </hint>
     <hint type="destinationlabel">
      <x>468</x>
@@ -13550,7 +14376,7 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>175</x>
+     <x>205</x>
      <y>382</y>
     </hint>
     <hint type="destinationlabel">
@@ -13566,8 +14392,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>317</x>
-     <y>442</y>
+     <x>319</x>
+     <y>473</y>
     </hint>
     <hint type="destinationlabel">
      <x>514</x>
@@ -13907,7 +14733,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -13923,7 +14749,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -13939,7 +14765,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -13955,7 +14781,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -13971,7 +14797,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -13982,12 +14808,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>139</x>
-     <y>140</y>
+     <x>236</x>
+     <y>139</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14003,7 +14829,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14019,7 +14845,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14035,7 +14861,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14051,7 +14877,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14067,7 +14893,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14083,7 +14909,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14099,7 +14925,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14115,7 +14941,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14131,7 +14957,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14147,7 +14973,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14163,7 +14989,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14174,12 +15000,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>368</x>
-     <y>270</y>
+     <x>336</x>
+     <y>259</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14190,12 +15016,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>462</x>
-     <y>270</y>
+     <x>386</x>
+     <y>259</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14206,12 +15032,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>354</x>
-     <y>268</y>
+     <x>336</x>
+     <y>259</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14222,12 +15048,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>457</x>
-     <y>268</y>
+     <x>386</x>
+     <y>259</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14238,12 +15064,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>335</x>
-     <y>419</y>
+     <x>365</x>
+     <y>412</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14254,12 +15080,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>335</x>
-     <y>452</y>
+     <x>363</x>
+     <y>384</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14270,12 +15096,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>78</x>
-     <y>538</y>
+     <x>159</x>
+     <y>526</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14286,604 +15112,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>270</x>
-     <y>538</y>
+     <x>351</x>
+     <y>526</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledSingleX</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>227</x>
-     <y>450</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledSingleY</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>317</x>
-     <y>450</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledSingleZ</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>407</x>
-     <y>450</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledOriginX</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>192</x>
-     <y>429</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledOriginY</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>264</x>
-     <y>429</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledOriginZ</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>335</x>
-     <y>429</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>led0X</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>190</x>
-     <y>471</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>led0Y</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>232</x>
-     <y>471</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>led0Z</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>274</x>
-     <y>471</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>sb0nodes</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>343</x>
-     <y>472</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cob0dir</sender>
-   <signal>activated(int)</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>448</x>
-     <y>471</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbSecondAxis</sender>
-   <signal>clicked()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>132</x>
-     <y>490</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>led1X</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>190</x>
-     <y>492</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>led1Y</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>232</x>
-     <y>492</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>led1Z</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>274</x>
-     <y>492</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>sb1nodes</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>343</x>
-     <y>493</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cob1dir</sender>
-   <signal>activated(int)</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>415</x>
-     <y>492</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbThirdAxis</sender>
-   <signal>clicked()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>136</x>
-     <y>511</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>led2X</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>190</x>
-     <y>513</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>led2Y</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>232</x>
-     <y>513</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>led2Z</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>274</x>
-     <y>513</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>sb2nodes</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>343</x>
-     <y>514</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cob2dir</sender>
-   <signal>activated(int)</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>454</x>
-     <y>513</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>sbScanFloodNodes</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>168</x>
-     <y>437</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cobScanFloodShape</sender>
-   <signal>activated(int)</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>319</x>
-     <y>437</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledScanFloodXfrom</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>129</x>
-     <y>467</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledScanFloodYfrom</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>129</x>
-     <y>489</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledScanFloodXto</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>225</x>
-     <y>467</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledScanFloodYto</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>225</x>
-     <y>489</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cobScanFloodZtype</sender>
-   <signal>activated(int)</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>370</x>
-     <y>464</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledScanFloodZ</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>369</x>
-     <y>487</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledScanFlood_CenterX</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>159</x>
-     <y>469</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledScanFlood_Radius</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>159</x>
-     <y>490</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledScanFlood_CenterY</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>239</x>
-     <y>469</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledScanFlood_Radius0</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>239</x>
-     <y>490</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledScanFloodZfrom</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>370</x>
-     <y>487</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledScanFloodZto</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>466</x>
-     <y>487</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14894,12 +15128,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>279</x>
-     <y>394</y>
+     <x>303</x>
+     <y>378</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14910,12 +15144,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>128</x>
-     <y>470</y>
+     <x>198</x>
+     <y>420</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14926,12 +15160,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>218</x>
-     <y>470</y>
+     <x>198</x>
+     <y>420</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14942,12 +15176,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>308</x>
-     <y>470</y>
+     <x>198</x>
+     <y>420</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14958,12 +15192,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>137</x>
-     <y>394</y>
+     <x>160</x>
+     <y>377</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14974,12 +15208,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>246</x>
-     <y>426</y>
+     <x>332</x>
+     <y>409</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -14995,7 +15229,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15011,7 +15245,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15023,43 +15257,11 @@ multiply to loaded data</string>
    <hints>
     <hint type="sourcelabel">
      <x>152</x>
-     <y>530</y>
+     <y>509</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbGunAllowMultipleEvents</sender>
-   <signal>clicked()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>205</x>
-     <y>433</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledGunAverageNumPartperEvent</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>510</x>
-     <y>435</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15071,11 +15273,11 @@ multiply to loaded data</string>
    <hints>
     <hint type="sourcelabel">
      <x>325</x>
-     <y>566</y>
+     <y>555</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15087,11 +15289,11 @@ multiply to loaded data</string>
    <hints>
     <hint type="sourcelabel">
      <x>330</x>
-     <y>586</y>
+     <y>575</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15102,11 +15304,11 @@ multiply to loaded data</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>179</x>
-     <y>467</y>
+     <x>181</x>
+     <y>498</y>
     </hint>
     <hint type="destinationlabel">
-     <x>320</x>
+     <x>350</x>
      <y>475</y>
     </hint>
    </hints>
@@ -15134,8 +15336,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>249</x>
-     <y>472</y>
+     <x>251</x>
+     <y>503</y>
     </hint>
     <hint type="destinationlabel">
      <x>502</x>
@@ -15150,8 +15352,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>233</x>
-     <y>458</y>
+     <x>235</x>
+     <y>489</y>
     </hint>
     <hint type="destinationlabel">
      <x>489</x>
@@ -15166,8 +15368,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>233</x>
-     <y>496</y>
+     <x>235</x>
+     <y>527</y>
     </hint>
     <hint type="destinationlabel">
      <x>503</x>
@@ -15182,7 +15384,7 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>200</x>
+     <x>230</x>
      <y>382</y>
     </hint>
     <hint type="destinationlabel">
@@ -15198,8 +15400,8 @@ multiply to loaded data</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>239</x>
-     <y>442</y>
+     <x>241</x>
+     <y>473</y>
     </hint>
     <hint type="destinationlabel">
      <x>437</x>
@@ -15214,8 +15416,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>390</x>
-     <y>479</y>
+     <x>392</x>
+     <y>510</y>
     </hint>
     <hint type="destinationlabel">
      <x>490</x>
@@ -15230,8 +15432,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>239</x>
-     <y>442</y>
+     <x>241</x>
+     <y>473</y>
     </hint>
     <hint type="destinationlabel">
      <x>447</x>
@@ -15251,7 +15453,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15279,11 +15481,11 @@ multiply to loaded data</string>
    <hints>
     <hint type="sourcelabel">
      <x>53</x>
-     <y>579</y>
+     <y>568</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15299,23 +15501,7 @@ multiply to loaded data</string>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cobPartPerEvent</sender>
-   <signal>activated(int)</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>295</x>
-     <y>434</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15342,8 +15528,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>249</x>
-     <y>495</y>
+     <x>251</x>
+     <y>526</y>
     </hint>
     <hint type="destinationlabel">
      <x>416</x>
@@ -15358,7 +15544,7 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>156</x>
+     <x>186</x>
      <y>382</y>
     </hint>
     <hint type="destinationlabel">
@@ -15374,8 +15560,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>318</x>
-     <y>474</y>
+     <x>320</x>
+     <y>505</y>
     </hint>
     <hint type="destinationlabel">
      <x>438</x>
@@ -15390,12 +15576,12 @@ multiply to loaded data</string>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>132</x>
-     <y>384</y>
+     <x>162</x>
+     <y>377</y>
     </hint>
     <hint type="destinationlabel">
-     <x>168</x>
-     <y>430</y>
+     <x>176</x>
+     <y>423</y>
     </hint>
    </hints>
   </connection>
@@ -15406,12 +15592,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>238</x>
-     <y>384</y>
+     <x>268</x>
+     <y>377</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15426,8 +15612,8 @@ multiply to loaded data</string>
      <y>136</y>
     </hint>
     <hint type="destinationlabel">
-     <x>414</x>
-     <y>398</y>
+     <x>422</x>
+     <y>433</y>
     </hint>
    </hints>
   </connection>
@@ -15439,11 +15625,11 @@ multiply to loaded data</string>
    <hints>
     <hint type="sourcelabel">
      <x>119</x>
-     <y>530</y>
+     <y>509</y>
     </hint>
     <hint type="destinationlabel">
      <x>35</x>
-     <y>529</y>
+     <y>508</y>
     </hint>
    </hints>
   </connection>
@@ -15455,11 +15641,11 @@ multiply to loaded data</string>
    <hints>
     <hint type="sourcelabel">
      <x>299</x>
-     <y>530</y>
+     <y>509</y>
     </hint>
     <hint type="destinationlabel">
      <x>269</x>
-     <y>531</y>
+     <y>510</y>
     </hint>
    </hints>
   </connection>
@@ -15471,11 +15657,11 @@ multiply to loaded data</string>
    <hints>
     <hint type="sourcelabel">
      <x>367</x>
-     <y>530</y>
+     <y>509</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15486,12 +15672,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>240</x>
-     <y>566</y>
+     <x>166</x>
+     <y>561</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15502,28 +15688,12 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>221</x>
-     <y>530</y>
+     <x>225</x>
+     <y>484</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
-     <y>592</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>leNodesFromFile</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>75</x>
-     <y>464</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>62</x>
-     <y>582</y>
+     <y>114</y>
     </hint>
    </hints>
   </connection>
@@ -15540,6 +15710,262 @@ multiply to loaded data</string>
     <hint type="destinationlabel">
      <x>170</x>
      <y>547</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cobParticleGenerationMode</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>swParticleGenerationMode</receiver>
+   <slot>setCurrentIndex(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>157</x>
+     <y>252</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>227</x>
+     <y>252</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cobParticleGenerationMode</sender>
+   <signal>activated(int)</signal>
+   <receiver>pbUpdateSimConfig</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>157</x>
+     <y>252</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>41</x>
+     <y>71</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cobNodeGenerationMode</sender>
+   <signal>activated(int)</signal>
+   <receiver>pbUpdateSimConfig</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>261</x>
+     <y>369</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>31</x>
+     <y>95</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cobNodeGenerationMode</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>twSingleScan1</receiver>
+   <slot>setCurrentIndex(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>450</x>
+     <y>369</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>481</x>
+     <y>349</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cobScanFloodShape</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>stackedWidget</receiver>
+   <slot>setCurrentIndex(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>243</x>
+     <y>422</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>182</x>
+     <y>434</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cobScanFloodZtype</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>swScanFloodZ</receiver>
+   <slot>setCurrentIndex(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>357</x>
+     <y>444</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>432</x>
+     <y>464</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cobCND_Mode</sender>
+   <signal>activated(int)</signal>
+   <receiver>pbCND_applyChanges</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>455</x>
+     <y>371</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>458</x>
+     <y>492</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledCND_RangeX</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbCND_applyChanges</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>252</x>
+     <y>474</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>439</x>
+     <y>497</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledCND_RangeY</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbCND_applyChanges</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>252</x>
+     <y>474</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>460</x>
+     <y>497</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sbCND_BinsZ</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbCND_applyChanges</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>252</x>
+     <y>474</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>477</x>
+     <y>497</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledCND_RangeZ</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbCND_applyChanges</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>233</x>
+     <y>474</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>462</x>
+     <y>497</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sbCND_BinsY</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbCND_applyChanges</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>252</x>
+     <y>474</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>447</x>
+     <y>497</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sbCND_BinsX</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbCND_applyChanges</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>252</x>
+     <y>474</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>497</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbCND_Enable</sender>
+   <signal>clicked()</signal>
+   <receiver>pbCND_applyChanges</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>392</x>
+     <y>369</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>425</x>
+     <y>482</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>leCND_Formula</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbCND_applyChanges</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>498</x>
+     <y>429</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>497</x>
+     <y>491</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbCND_Enable</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>pbYellow</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>333</x>
+     <y>369</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>336</x>
+     <y>347</y>
     </hint>
    </hints>
   </connection>

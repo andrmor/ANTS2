@@ -1,7 +1,7 @@
 #include "photon_generator.h"
 #include "detectorclass.h"
 #include "amaterialparticlecolection.h"
-#include "generalsimsettings.h"
+#include "ageneralsimsettings.h"
 #include "aphoton.h"
 #include "aoneevent.h"
 #include "apmhub.h"

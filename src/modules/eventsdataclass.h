@@ -6,7 +6,7 @@
 #include "ahistoryrecords.h"
 #endif
 
-#include "generalsimsettings.h"
+#include "ageneralsimsettings.h"
 #include "reconstructionsettings.h"
 #include "manifesthandling.h"
 
@@ -88,7 +88,7 @@ public:
     void clearManifest();
 
     // simulation setting for events / scan
-    GeneralSimSettings LastSimSet;   
+    AGeneralSimSettings LastSimSet;   
     bool fSimulatedData; // true if events data were simulated (false if loaded data)
 
     // reconstruction settings used during last reconstruction
@@ -124,6 +124,9 @@ public:
     //data load - Tree
     int loadSimulatedEventsFromTree(QString fileName, const APmHub &PMs, int maxEvents = -1); //returns -1 if failed, otherwise number of events added
     bool overlayAsciiFile(QString fileName, bool fAddMulti, APmHub *PMs); //true = success, if not, see ErrorString
+
+    // for load particle tracking history
+    void addEmptyEvents(int numEmptyEvents, int numPMs, int numTimeBins);
 
     //Misc
     QString ErrorString;

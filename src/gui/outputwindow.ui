@@ -94,7 +94,7 @@
        </palette>
       </property>
       <property name="currentIndex">
-       <number>6</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="tabText">
        <attribute name="title">
@@ -869,7 +869,7 @@ over all events</string>
               <item>
                <widget class="QLabel" name="label_32">
                 <property name="text">
-                 <string>Limit events to those where particles entered these volumes (use '*' at the end to indicate 'start from'):</string>
+                 <string>Limit events to those where particles entered these volumes (use '*' at the end to indicate 'starts from'):</string>
                 </property>
                </widget>
               </item>
@@ -887,6 +887,48 @@ over all events</string>
                 </item>
                 <item>
                  <widget class="QLineEdit" name="leLimitToVolumes"/>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_33">
+                <property name="text">
+                 <string>Event should contain (or should not contain) these particles (primary and secondary, can use '*' at the end):</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_32">
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QCheckBox" name="cbLimitToParticles">
+                  <property name="text">
+                   <string>Limit to:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="leLimitToParticles">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="cbExcludeParticles">
+                  <property name="text">
+                   <string>Exclude:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="leExcludeParticles">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
                 </item>
                </layout>
               </item>
@@ -1160,6 +1202,16 @@ over all events</string>
                    <item>
                     <property name="text">
                      <string>ms</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>s</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>min</string>
                     </property>
                    </item>
                   </widget>
@@ -1616,6 +1668,13 @@ over all events</string>
                <widget class="QComboBox" name="cobPTHistVolPlus"/>
               </item>
               <item>
+               <widget class="QCheckBox" name="cbPTHistVolVsTime">
+                <property name="text">
+                 <string>vs time</string>
+                </property>
+               </widget>
+              </item>
+              <item>
                <spacer name="horizontalSpacer_15">
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
@@ -1821,7 +1880,7 @@ over all events</string>
           </widget>
           <widget class="QWidget" name="tab_4">
            <attribute name="title">
-            <string>On the borders</string>
+            <string>Transitions</string>
            </attribute>
            <layout class="QVBoxLayout" name="verticalLayout_28">
             <property name="spacing">
@@ -1959,46 +2018,46 @@ See ROOT TFormula description</string>
                </spacer>
               </item>
               <item>
-               <layout class="QVBoxLayout" name="verticalLayout_24">
-                <property name="spacing">
-                 <number>3</number>
-                </property>
-                <item>
+               <layout class="QGridLayout" name="gridLayout_2">
+                <item row="0" column="0">
                  <widget class="QCheckBox" name="cbPTHistVolMatFrom">
                   <property name="text">
                    <string>Limit material from:</string>
                   </property>
                  </widget>
                 </item>
-                <item>
+                <item row="0" column="1">
+                 <widget class="QComboBox" name="cobPTHistVolMatFrom"/>
+                </item>
+                <item row="1" column="0">
                  <widget class="QCheckBox" name="cbPTHistVolVolumeFrom">
                   <property name="text">
                    <string>Limit volume from:</string>
                   </property>
                  </widget>
                 </item>
-                <item>
+                <item row="1" column="1">
+                 <widget class="QLineEdit" name="lePTHistVolVolumeFrom"/>
+                </item>
+                <item row="2" column="0">
                  <widget class="QCheckBox" name="cbPTHistVolIndexFrom">
                   <property name="text">
                    <string>Limit vol index from:</string>
                   </property>
                  </widget>
                 </item>
-               </layout>
-              </item>
-              <item>
-               <layout class="QVBoxLayout" name="verticalLayout_25">
-                <property name="spacing">
-                 <number>3</number>
-                </property>
-                <item>
-                 <widget class="QComboBox" name="cobPTHistVolMatFrom"/>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="lePTHistVolVolumeFrom"/>
-                </item>
-                <item>
+                <item row="2" column="1">
                  <widget class="QSpinBox" name="sbPTHistVolIndexFrom"/>
+                </item>
+                <item row="3" column="0">
+                 <widget class="QCheckBox" name="cbPTHistEscaping">
+                  <property name="toolTip">
+                   <string>Only particles exiting world</string>
+                  </property>
+                  <property name="text">
+                   <string>Limit to escaping</string>
+                  </property>
+                 </widget>
                 </item>
                </layout>
               </item>
@@ -2009,92 +2068,54 @@ See ROOT TFormula description</string>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
-                  <width>40</width>
+                  <width>120</width>
                   <height>20</height>
                  </size>
                 </property>
                </spacer>
               </item>
               <item>
-               <spacer name="horizontalSpacer_28">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item>
-               <spacer name="horizontalSpacer_29">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item>
-               <spacer name="horizontalSpacer_26">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item>
-               <layout class="QVBoxLayout" name="verticalLayout_26">
-                <property name="spacing">
-                 <number>3</number>
-                </property>
-                <item>
+               <layout class="QGridLayout" name="gridLayout">
+                <item row="0" column="0">
                  <widget class="QCheckBox" name="cbPTHistVolMatTo">
                   <property name="text">
                    <string>Limit material to:</string>
                   </property>
                  </widget>
                 </item>
-                <item>
+                <item row="0" column="1">
+                 <widget class="QComboBox" name="cobPTHistVolMatTo"/>
+                </item>
+                <item row="1" column="0">
                  <widget class="QCheckBox" name="cbPTHistVolVolumeTo">
                   <property name="text">
                    <string>Limit volume to:</string>
                   </property>
                  </widget>
                 </item>
-                <item>
+                <item row="1" column="1">
+                 <widget class="QLineEdit" name="lePTHistVolVolumeTo"/>
+                </item>
+                <item row="2" column="0">
                  <widget class="QCheckBox" name="cbPTHistVolIndexTo">
                   <property name="text">
                    <string>Limit vol index to:</string>
                   </property>
                  </widget>
                 </item>
-               </layout>
-              </item>
-              <item>
-               <layout class="QVBoxLayout" name="verticalLayout_27">
-                <property name="spacing">
-                 <number>3</number>
-                </property>
-                <item>
-                 <widget class="QComboBox" name="cobPTHistVolMatTo"/>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="lePTHistVolVolumeTo"/>
-                </item>
-                <item>
+                <item row="2" column="1">
                  <widget class="QSpinBox" name="sbPTHistVolIndexTo"/>
+                </item>
+                <item row="3" column="0">
+                 <widget class="QCheckBox" name="cbPTHistCreated">
+                  <property name="toolTip">
+                   <string>If not checked, &quot;creation&quot; of particle is not contributing to shown distributions
+If checked, only &quot;creation&quot; is considered!</string>
+                  </property>
+                  <property name="text">
+                   <string>Only created</string>
+                  </property>
+                 </widget>
                 </item>
                </layout>
               </item>
@@ -3084,11 +3105,11 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <hints>
     <hint type="sourcelabel">
      <x>360</x>
-     <y>360</y>
+     <y>391</y>
     </hint>
     <hint type="destinationlabel">
      <x>525</x>
-     <y>362</y>
+     <y>393</y>
     </hint>
    </hints>
   </connection>
@@ -3100,11 +3121,11 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <hints>
     <hint type="sourcelabel">
      <x>360</x>
-     <y>388</y>
+     <y>419</y>
     </hint>
     <hint type="destinationlabel">
      <x>525</x>
-     <y>392</y>
+     <y>423</y>
     </hint>
    </hints>
   </connection>
@@ -3116,11 +3137,11 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <hints>
     <hint type="sourcelabel">
      <x>360</x>
-     <y>416</y>
+     <y>447</y>
     </hint>
     <hint type="destinationlabel">
      <x>525</x>
-     <y>422</y>
+     <y>453</y>
     </hint>
    </hints>
   </connection>
@@ -3163,12 +3184,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>35</x>
-     <y>254</y>
+     <x>40</x>
+     <y>248</y>
     </hint>
     <hint type="destinationlabel">
-     <x>49</x>
-     <y>254</y>
+     <x>58</x>
+     <y>248</y>
     </hint>
    </hints>
   </connection>
@@ -3179,12 +3200,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>35</x>
-     <y>255</y>
+     <x>40</x>
+     <y>250</y>
     </hint>
     <hint type="destinationlabel">
-     <x>49</x>
-     <y>255</y>
+     <x>58</x>
+     <y>250</y>
     </hint>
    </hints>
   </connection>
@@ -3195,12 +3216,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>35</x>
-     <y>256</y>
+     <x>40</x>
+     <y>252</y>
     </hint>
     <hint type="destinationlabel">
-     <x>49</x>
-     <y>256</y>
+     <x>58</x>
+     <y>252</y>
     </hint>
    </hints>
   </connection>
@@ -3211,12 +3232,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>87</x>
-     <y>254</y>
+     <x>83</x>
+     <y>248</y>
     </hint>
     <hint type="destinationlabel">
      <x>101</x>
-     <y>254</y>
+     <y>248</y>
     </hint>
    </hints>
   </connection>
@@ -3227,12 +3248,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>87</x>
-     <y>255</y>
+     <x>83</x>
+     <y>250</y>
     </hint>
     <hint type="destinationlabel">
      <x>101</x>
-     <y>255</y>
+     <y>250</y>
     </hint>
    </hints>
   </connection>
@@ -3243,12 +3264,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>87</x>
-     <y>256</y>
+     <x>83</x>
+     <y>252</y>
     </hint>
     <hint type="destinationlabel">
      <x>101</x>
-     <y>256</y>
+     <y>252</y>
     </hint>
    </hints>
   </connection>
@@ -3263,8 +3284,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>541</y>
     </hint>
     <hint type="destinationlabel">
-     <x>51</x>
-     <y>239</y>
+     <x>60</x>
+     <y>291</y>
     </hint>
    </hints>
   </connection>
@@ -3279,8 +3300,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>556</y>
     </hint>
     <hint type="destinationlabel">
-     <x>117</x>
-     <y>239</y>
+     <x>126</x>
+     <y>291</y>
     </hint>
    </hints>
   </connection>
@@ -3295,8 +3316,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>495</y>
     </hint>
     <hint type="destinationlabel">
-     <x>69</x>
-     <y>239</y>
+     <x>78</x>
+     <y>291</y>
     </hint>
    </hints>
   </connection>
@@ -3311,8 +3332,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>560</y>
     </hint>
     <hint type="destinationlabel">
-     <x>98</x>
-     <y>239</y>
+     <x>107</x>
+     <y>291</y>
     </hint>
    </hints>
   </connection>
@@ -3327,8 +3348,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>591</y>
     </hint>
     <hint type="destinationlabel">
-     <x>74</x>
-     <y>239</y>
+     <x>83</x>
+     <y>291</y>
     </hint>
    </hints>
   </connection>
@@ -3343,8 +3364,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>545</y>
     </hint>
     <hint type="destinationlabel">
-     <x>116</x>
-     <y>239</y>
+     <x>125</x>
+     <y>291</y>
     </hint>
    </hints>
   </connection>
@@ -3359,8 +3380,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>590</y>
     </hint>
     <hint type="destinationlabel">
-     <x>84</x>
-     <y>239</y>
+     <x>93</x>
+     <y>291</y>
     </hint>
    </hints>
   </connection>
@@ -3375,8 +3396,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>587</y>
     </hint>
     <hint type="destinationlabel">
-     <x>48</x>
-     <y>239</y>
+     <x>57</x>
+     <y>291</y>
     </hint>
    </hints>
   </connection>
@@ -3391,8 +3412,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>572</y>
     </hint>
     <hint type="destinationlabel">
-     <x>119</x>
-     <y>239</y>
+     <x>128</x>
+     <y>291</y>
     </hint>
    </hints>
   </connection>
@@ -3407,8 +3428,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>525</y>
     </hint>
     <hint type="destinationlabel">
-     <x>107</x>
-     <y>239</y>
+     <x>116</x>
+     <y>291</y>
     </hint>
    </hints>
   </connection>
@@ -3423,8 +3444,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>521</y>
     </hint>
     <hint type="destinationlabel">
-     <x>97</x>
-     <y>239</y>
+     <x>106</x>
+     <y>291</y>
     </hint>
    </hints>
   </connection>
@@ -3439,8 +3460,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>628</y>
     </hint>
     <hint type="destinationlabel">
-     <x>71</x>
-     <y>269</y>
+     <x>80</x>
+     <y>321</y>
     </hint>
    </hints>
   </connection>
@@ -3455,8 +3476,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>642</y>
     </hint>
     <hint type="destinationlabel">
-     <x>47</x>
-     <y>269</y>
+     <x>56</x>
+     <y>321</y>
     </hint>
    </hints>
   </connection>
@@ -3471,8 +3492,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>639</y>
     </hint>
     <hint type="destinationlabel">
-     <x>56</x>
-     <y>269</y>
+     <x>65</x>
+     <y>321</y>
     </hint>
    </hints>
   </connection>
@@ -3567,8 +3588,8 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
      <y>525</y>
     </hint>
     <hint type="destinationlabel">
-     <x>145</x>
-     <y>239</y>
+     <x>154</x>
+     <y>291</y>
     </hint>
    </hints>
   </connection>
@@ -3595,12 +3616,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>184</x>
-     <y>310</y>
+     <x>276</x>
+     <y>339</y>
     </hint>
     <hint type="destinationlabel">
-     <x>335</x>
-     <y>310</y>
+     <x>419</x>
+     <y>342</y>
     </hint>
    </hints>
   </connection>
@@ -3611,12 +3632,12 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>157</x>
-     <y>312</y>
+     <x>271</x>
+     <y>339</y>
     </hint>
     <hint type="destinationlabel">
-     <x>497</x>
-     <y>313</y>
+     <x>565</x>
+     <y>342</y>
     </hint>
    </hints>
   </connection>
@@ -3633,6 +3654,38 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
     <hint type="destinationlabel">
      <x>151</x>
      <y>185</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbLimitToParticles</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>leLimitToParticles</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>75</x>
+     <y>239</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>184</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbExcludeParticles</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>leExcludeParticles</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>402</x>
+     <y>241</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>509</x>
+     <y>243</y>
     </hint>
    </hints>
   </connection>

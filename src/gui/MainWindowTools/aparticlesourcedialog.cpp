@@ -14,8 +14,6 @@
 #include <QDebug>
 #include <QDoubleValidator>
 #include <QFileDialog>
-//#include <QMenuBar>
-//#include <QMenu>
 #include <QMessageBox>
 #include <QCloseEvent>
 #include <QApplication>
@@ -29,6 +27,8 @@ AParticleSourceDialog::AParticleSourceDialog(MainWindow & MW, const AParticleSou
     ui(new Ui::AParticleSourceDialog)
 {
     ui->setupUi(this);
+
+    resize(width(), 700);
 
     setWindowModality(Qt::WindowModal);
     setWindowTitle("Particle source configurator");
@@ -64,6 +64,14 @@ AParticleSourceDialog::AParticleSourceDialog(MainWindow & MW, const AParticleSou
 
     ui->cbSourceLimitmat->setChecked(Rec->DoMaterialLimited);
     ui->leSourceLimitMaterial->setText(Rec->LimtedToMatName);
+
+    ui->cobTimeAverageMode->setCurrentIndex(Rec->TimeAverageMode);
+    ui->ledTimeAverageFixed->setText( QString::number(Rec->TimeAverage) );
+    ui->ledTimeAverageStart->setText( QString::number(Rec->TimeAverageStart) );
+    ui->ledTimeAveragePeriod->setText( QString::number(Rec->TimeAveragePeriod) );
+    ui->cobTimeSpreadMode->setCurrentIndex(Rec->TimeSpreadMode);
+    ui->ledTimeSpreadSigma->setText( QString::number(Rec->TimeSpreadSigma) );
+    ui->ledTimeSpreadWidth->setText( QString::number(Rec->TimeSpreadWidth) );
 
     ui->frSecondary->setVisible(false);
     UpdateListWidget();
@@ -130,16 +138,18 @@ void AParticleSourceDialog::on_pbReject_clicked()
     reject();
 }
 
+#include "aparticlesimsettings.h"
 void AParticleSourceDialog::on_pbGunTest_clicked()
 {
-    ASourceParticleGenerator ps(MW.Detector, MW.Detector->RandGen);
-    ps.append(Rec);
+    ASourceGenSettings SourceGenSettings;
+    SourceGenSettings.append(Rec);
+    ASourceParticleGenerator ps(SourceGenSettings, *MW.Detector, *MW.Detector->RandGen);
 
     MW.GeometryWindow->ShowAndFocus();
     MW.ShowSource(Rec, true);
     MW.TestParticleGun(&ps, ui->sbGunTestEvents->value());
 
-    ps.forget(Rec); //so Rec is not deleted
+    SourceGenSettings.forget(Rec); //so Rec is not deleted
 }
 
 void AParticleSourceDialog::on_cobGunSourceType_currentIndexChanged(int index)
@@ -382,6 +392,14 @@ void AParticleSourceDialog::on_pbUpdateRecord_clicked()
     Rec->CollPhi = ui->ledGunCollPhi->text().toDouble();
     Rec->CollTheta = ui->ledGunCollTheta->text().toDouble();
     Rec->Spread = ui->ledGunSpread->text().toDouble();
+
+    Rec->TimeAverageMode = ui->cobTimeAverageMode->currentIndex();
+    Rec->TimeAverage = ui->ledTimeAverageFixed->text().toDouble();
+    Rec->TimeAverageStart = ui->ledTimeAverageStart->text().toDouble();
+    Rec->TimeAveragePeriod = ui->ledTimeAveragePeriod->text().toDouble();
+    Rec->TimeSpreadMode = ui->cobTimeSpreadMode->currentIndex();
+    Rec->TimeSpreadSigma = ui->ledTimeSpreadSigma->text().toDouble();
+    Rec->TimeSpreadWidth = ui->ledTimeSpreadWidth->text().toDouble();
 
     int iPart = ui->lwGunParticles->currentRow();
     if (iPart >= 0)

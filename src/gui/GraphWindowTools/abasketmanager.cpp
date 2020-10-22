@@ -121,7 +121,7 @@ void ABasketManager::add(const QString & name, const QVector<ADrawObject> & draw
         }
         OldToNew[drObj.Pointer] = clone;
 
-        item.DrawObjects.append( ADrawObject(clone, options, drObj.bEnabled) );
+        item.DrawObjects.append( ADrawObject(clone, options, drObj.bEnabled, drObj.bLogScaleX, drObj.bLogScaleY) );
     }
 
     if (Legend)
@@ -135,6 +135,21 @@ void ABasketManager::add(const QString & name, const QVector<ADrawObject> & draw
             //qDebug() << "Old entry obj:"<< en->GetObject() << " found?" << OldToNew[ en->GetObject() ];
             en->SetObject( OldToNew[ en->GetObject() ] ); // will override the label
             en->SetLabel(text.toLatin1().data());
+        }
+    }
+
+    // it is convinient if title-less objects will be named the same as their basket entry - less problems with a TLegend
+    if (item.DrawObjects.size() > 0)
+    {
+        TNamed * named = dynamic_cast<TNamed*>(item.DrawObjects.first().Pointer);
+        if (named)
+        {
+            const TString title = named->GetTitle();
+            if (title == "")
+            {
+                named->SetTitle(name.toLatin1().data());
+                if (item.Name.isEmpty()) item.Name = name;
+            }
         }
     }
 
@@ -176,7 +191,7 @@ const QVector<ADrawObject> ABasketManager::getCopy(int index) const
                 //qDebug() << "From basket, old-->cloned" << obj.Pointer << "-->" << clone;
             }
 
-            res << ADrawObject(clone, obj.Options, obj.bEnabled);
+            res << ADrawObject(clone, obj.Options, obj.bEnabled, obj.bLogScaleX, obj.bLogScaleY);
         }
 
         if (Legend)
@@ -243,6 +258,19 @@ const QString ABasketManager::getName(int index) const
 void ABasketManager::rename(int index, const QString & newName)
 {
     if (index < 0 || index >= Basket.size()) return;
+
+    // it is convinient if title-less objects are named the same as their basket entry - less problems with a TLegend
+    if (Basket[index].DrawObjects.size() > 0)
+    {
+        TNamed * named = dynamic_cast<TNamed*>(Basket[index].DrawObjects.first().Pointer);
+        if (named)
+        {
+            const TString title = named->GetTitle();
+            if (title == Basket[index].Name)
+                named->SetTitle(newName.toLatin1().data());
+        }
+    }
+
     Basket[index].Name = newName;
 }
 
@@ -279,6 +307,8 @@ void ABasketManager::saveAll(const QString & fileName)
             js["Name"] = obj.Name;
             js["Options"] = obj.Options;
             js["Enabled"] = obj.bEnabled;
+            js["LogX"] = obj.bLogScaleX;
+            js["LogY"] = obj.bLogScaleY;
             TLegend * Legend = dynamic_cast<TLegend*>(obj.Pointer);
             if (Legend)
             {
@@ -414,6 +444,8 @@ const QString ABasketManager::appendBasket(const QString & fileName)
                 QString Name     = js["Name"].toString();
                 QString Options  = js["Options"].toString();
                 bool    bEnabled = js["Enabled"].toBool();
+                bool    bLogX    = false; parseJson(js, "LogX", bLogX);
+                bool    bLogY    = false; parseJson(js, "LogY", bLogY);
 
                 TKey *key = (TKey*)f.GetListOfKeys()->At(KeyIndex);
                 KeyIndex++;
@@ -424,6 +456,8 @@ const QString ABasketManager::appendBasket(const QString & fileName)
                     ADrawObject Obj(p, Options);
                     Obj.Name = Name;
                     Obj.bEnabled = bEnabled;
+                    Obj.bLogScaleX = bLogX;
+                    Obj.bLogScaleY = bLogY;
                     drawObjects << Obj;
 
                     TLegend * Legend = dynamic_cast<TLegend*>(p);

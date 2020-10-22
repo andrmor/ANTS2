@@ -1,6 +1,6 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 4
-ANTS2_MINOR = 27
+ANTS2_MINOR = 32
 
 # !!! You may need to modify path for CERN ROOT, see #---CERN ROOT--- section below
 
@@ -202,8 +202,8 @@ ants2_NCrystal{
                 LIBS += -lNCrystal
 
             } else {
-                INCLUDEPATH += /home/andr/Work/NCrystal/include
-                LIBS += -L/home/andr/Work/NCrystal/lib/
+                INCLUDEPATH += /usr/local/include/NCrystal
+                LIBS += -L/usr/local/lib/
                 LIBS += -lNCrystal
             }
     }
@@ -251,7 +251,6 @@ SOURCES += main.cpp \
     common/jsonparser.cpp \
     common/CorrelationFilters.cpp \
     common/reconstructionsettings.cpp \
-    common/generalsimsettings.cpp \
     common/tmpobjhubclass.cpp \
     common/ajsontools.cpp \
     common/afiletools.cpp \
@@ -360,7 +359,6 @@ SOURCES += main.cpp \
     common/aisotope.cpp \
     common/achemicalelement.cpp \
     Simulation/ag4simulationsettings.cpp \
-    gui/ageant4configdialog.cpp \
     scriptmode/asim_si.cpp \
     scriptmode/amath_si.cpp \
     scriptmode/atree_si.cpp \
@@ -382,34 +380,29 @@ SOURCES += main.cpp \
     Simulation/atrackinghistorycrawler.cpp \
     Simulation/aparticletracker.cpp \
     common/aexternalprocesshandler.cpp \
-    gui/MainWindowTools/alogconfigdialog.cpp \
     Simulation/alogsandstatisticsoptions.cpp \
     Reconstruction/areconstructionworker.cpp \
     common/ahistogram.cpp \
-    gui/GraphWindowTools/abasketitem.cpp \
-    gui/GraphWindowTools/abasketmanager.cpp \
-    gui/GraphWindowTools/adrawexplorerwidget.cpp \
-    gui/GraphWindowTools/adrawobject.cpp \
-    gui/GraphWindowTools/abasketlistwidget.cpp \
-    gui/GraphWindowTools/alegenddialog.cpp \
-    gui/MainWindowTools/aroottextconfigurator.cpp \
-    gui/aproxystyle.cpp \
-    gui/GraphWindowTools/aaxesdialog.cpp \
-    gui/GraphWindowTools/atextpavedialog.cpp \
-    gui/GraphWindowTools/alinemarkerfilldialog.cpp \
-    gui/GraphWindowTools/arootcolorselectordialog.cpp \
-    gui/GraphWindowTools/adrawtemplate.cpp \
-    gui/GraphWindowTools/atemplateselectiondialog.cpp \
-    gui/GraphWindowTools/atemplateselectionrecord.cpp \
     modules/apmdummystructure.cpp \
-    gui/amateriallibrarybrowser.cpp \
-    Simulation/amaterialloader.cpp \
-    gui/DAWindowTools/amaterialloaderdialog.cpp
+    SplineLibrary/Spline123/profileHist.cpp \
+    SplineLibrary/Spline123/json11.cpp \
+    SplineLibrary/Spline123/bspline123d.cpp \
+    SplineLibrary/Spline123/bsfit123.cpp \
+    modules/ageoconsts.cpp \
+    common/ageoshape.cpp \
+    gui/DAWindowTools/amonitordelegate.cpp \
+    gui/DAWindowTools/ageobasedelegate.cpp \
+    gui/DAWindowTools/ageoslabdelegate.cpp \
+    gui/DAWindowTools/agridelementdelegate.cpp \
+    gui/DAWindowTools/ageoobjectdelegate.cpp \
+    gui/DAWindowTools/aonelinetextedit.cpp \
+    gui/RasterWindow/acameracontroldialog.cpp \
+    scriptmode/afarm_si.cpp \
+    common/ageotype.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
     common/reconstructionsettings.h \
-    common/generalsimsettings.h \
     common/tmpobjhubclass.h \
     common/agammarandomgenerator.h \
     common/apositionenergyrecords.h \
@@ -534,7 +527,6 @@ HEADERS  += common/CorrelationFilters.h \
     common/aisotope.h \
     common/achemicalelement.h \
     Simulation/ag4simulationsettings.h \
-    gui/ageant4configdialog.h \
     scriptmode/asim_si.h \
     scriptmode/amath_si.h \
     scriptmode/atree_si.h \
@@ -556,31 +548,28 @@ HEADERS  += common/CorrelationFilters.h \
     Simulation/atrackinghistorycrawler.h \
     Simulation/aparticletracker.h \
     common/aexternalprocesshandler.h \
-    gui/MainWindowTools/alogconfigdialog.h \
     Simulation/alogsandstatisticsoptions.h \
     Reconstruction/afunctorbase.h \
     Reconstruction/areconstructionworker.h \
     common/ahistogram.h \
-    gui/GraphWindowTools/adrawobject.h \
-    gui/GraphWindowTools/abasketitem.h \
-    gui/GraphWindowTools/abasketmanager.h \
-    gui/GraphWindowTools/adrawexplorerwidget.h \
-    gui/GraphWindowTools/abasketlistwidget.h \
-    gui/GraphWindowTools/alegenddialog.h \
-    gui/MainWindowTools/aroottextconfigurator.h \
-    gui/aproxystyle.h \
-    gui/GraphWindowTools/aaxesdialog.h \
-    gui/GraphWindowTools/atextpavedialog.h \
-    gui/GraphWindowTools/alinemarkerfilldialog.h \
-    gui/GraphWindowTools/arootcolorselectordialog.h \
-    gui/GraphWindowTools/adrawtemplate.h \
-    gui/GraphWindowTools/atemplateselectiondialog.h \
-    gui/GraphWindowTools/atemplateselectionrecord.h \
     modules/apmanddummy.h \
     modules/apmdummystructure.h \
-    gui/amateriallibrarybrowser.h \
-    Simulation/amaterialloader.h \
-    gui/DAWindowTools/amaterialloaderdialog.h
+    SplineLibrary/Spline123/profileHist.h \
+    SplineLibrary/Spline123/json11.hpp \
+    SplineLibrary/Spline123/eiquadprog.hpp \
+    SplineLibrary/Spline123/bspline123d.h \
+    SplineLibrary/Spline123/bsfit123.h \
+    modules/ageoconsts.h \
+    common/ageoshape.h \
+    gui/DAWindowTools/amonitordelegate.h \
+    gui/DAWindowTools/ageobasedelegate.h \
+    gui/DAWindowTools/ageoslabdelegate.h \
+    gui/DAWindowTools/agridelementdelegate.h \
+    gui/DAWindowTools/ageoobjectdelegate.h \
+    gui/DAWindowTools/aonelinetextedit.h \
+    gui/RasterWindow/acameracontroldialog.h \
+    scriptmode/afarm_si.h \
+    common/ageotype.h
 
 # --- SIM ---
 ants2_SIM {
@@ -602,7 +591,15 @@ ants2_SIM {
     Simulation/asimulatorrunner.cpp \
     Simulation/asimulator.cpp \
     Simulation/apointsourcesimulator.cpp \
-    Simulation/aparticlesourcesimulator.cpp
+    Simulation/amaterialloader.cpp \
+    Simulation/aparticlesourcesimulator.cpp \
+    Simulation/asaveparticlestofilesettings.cpp \
+    Simulation/aphotonsimsettings.cpp \
+    Simulation/ageneralsimsettings.cpp \
+    Simulation/asimsettings.cpp \
+    Simulation/aparticlesimsettings.cpp \
+    Simulation/aphotonnodedistributor.cpp \
+    Simulation/a3dposprob.cpp
 
     HEADERS  += Simulation/aphoton.h \
     Simulation/asimulationstatistics.h \
@@ -626,7 +623,15 @@ ants2_SIM {
     Simulation/asimulatorrunner.h \
     Simulation/asimulator.h \
     Simulation/apointsourcesimulator.h \
-    Simulation/aparticlesourcesimulator.h
+    Simulation/amaterialloader.h \
+    Simulation/aparticlesourcesimulator.h \
+    Simulation/asaveparticlestofilesettings.h \
+    Simulation/aphotonsimsettings.h \
+    Simulation/ageneralsimsettings.h \
+    Simulation/asimsettings.h \
+    Simulation/aparticlesimsettings.h \
+    Simulation/aphotonnodedistributor.h \
+    Simulation/a3dposprob.h
 }
 
 # --- GUI ---
@@ -669,9 +674,9 @@ ants2_GUI {
     gui/MainWindowTools/globalscript.cpp \
     gui/MainWindowTools/aslablistwidget.cpp \
     gui/MainWindowTools/arootlineconfigurator.cpp \
-    gui/MainWindowTools/ageotreewidget.cpp \
+    gui/DAWindowTools/ageotreewidget.cpp \
     gui/MainWindowTools/ashapehelpdialog.cpp \
-    gui/MainWindowTools/agridelementdialog.cpp \
+    gui/DAWindowTools/agridelementdialog.cpp \
     gui/ascriptexampleexplorer.cpp \
     gui/MainWindowTools/mainwindowjson.cpp \
     gui/ReconstructionWindowTools/reconstructionwindowguiupdates.cpp \
@@ -687,7 +692,7 @@ ants2_GUI {
     gui/ahighlighters.cpp \
 #    modules/lrf_v3/gui/atpspline3widget.cpp \
 #    modules/lrf_v3/gui/avladimircompressionwidget.cpp \
-    gui/MainWindowTools/amonitordelegateform.cpp \
+    gui/DAWindowTools/amonitordelegateform.cpp \
     gui/aelementandisotopedelegates.cpp \
     gui/amatparticleconfigurator.cpp \
     gui/aneutronreactionsconfigurator.cpp \
@@ -711,6 +716,26 @@ ants2_GUI {
     scriptmode/agraphwin_si.cpp \
     scriptmode/aoutwin_si.cpp \
     gui/MainWindowTools/aparticlesourcedialog.cpp \
+    gui/MainWindowTools/alogconfigdialog.cpp \
+    gui/GraphWindowTools/abasketitem.cpp \
+    gui/GraphWindowTools/abasketmanager.cpp \
+    gui/GraphWindowTools/adrawexplorerwidget.cpp \
+    gui/GraphWindowTools/adrawobject.cpp \
+    gui/GraphWindowTools/abasketlistwidget.cpp \
+    gui/GraphWindowTools/alegenddialog.cpp \
+    gui/MainWindowTools/aroottextconfigurator.cpp \
+    gui/aproxystyle.cpp \
+    gui/GraphWindowTools/aaxesdialog.cpp \
+    gui/GraphWindowTools/atextpavedialog.cpp \
+    gui/GraphWindowTools/alinemarkerfilldialog.cpp \
+    gui/GraphWindowTools/arootcolorselectordialog.cpp \
+    gui/GraphWindowTools/adrawtemplate.cpp \
+    gui/GraphWindowTools/atemplateselectiondialog.cpp \
+    gui/GraphWindowTools/atemplateselectionrecord.cpp \
+    gui/amateriallibrarybrowser.cpp \
+    gui/DAWindowTools/amaterialloaderdialog.cpp \
+    gui/ageant4configdialog.cpp \
+    gui/MainWindowTools/asaveparticlestofiledialog.cpp \
     gui/aguiwindow.cpp
 
 HEADERS  += gui/mainwindow.h \
@@ -735,9 +760,9 @@ HEADERS  += gui/mainwindow.h \
     gui/globalsettingswindowclass.h \
     gui/MainWindowTools/aslablistwidget.h \
     gui/MainWindowTools/arootlineconfigurator.h \
-    gui/MainWindowTools/ageotreewidget.h \
+    gui/DAWindowTools/ageotreewidget.h \
     gui/MainWindowTools/ashapehelpdialog.h \
-    gui/MainWindowTools/agridelementdialog.h \
+    gui/DAWindowTools/agridelementdialog.h \
     gui/ascriptexampleexplorer.h \
     gui/ascriptwindow.h \
     gui/alrfmouseexplorer.h \
@@ -751,7 +776,7 @@ HEADERS  += gui/mainwindow.h \
     gui/ahighlighters.h \
 #    modules/lrf_v3/gui/atpspline3widget.h \
 #    modules/lrf_v3/gui/avladimircompressionwidget.h \
-    gui/MainWindowTools/amonitordelegateform.h \
+    gui/DAWindowTools/amonitordelegateform.h \
     gui/aelementandisotopedelegates.h \
     gui/amatparticleconfigurator.h \
     gui/aneutronreactionsconfigurator.h \
@@ -775,6 +800,26 @@ HEADERS  += gui/mainwindow.h \
     scriptmode/agraphwin_si.h \
     scriptmode/aoutwin_si.h \
     gui/MainWindowTools/aparticlesourcedialog.h \
+    gui/MainWindowTools/alogconfigdialog.h \
+    gui/GraphWindowTools/adrawobject.h \
+    gui/GraphWindowTools/abasketitem.h \
+    gui/GraphWindowTools/abasketmanager.h \
+    gui/GraphWindowTools/adrawexplorerwidget.h \
+    gui/GraphWindowTools/abasketlistwidget.h \
+    gui/GraphWindowTools/alegenddialog.h \
+    gui/MainWindowTools/aroottextconfigurator.h \
+    gui/aproxystyle.h \
+    gui/GraphWindowTools/aaxesdialog.h \
+    gui/GraphWindowTools/atextpavedialog.h \
+    gui/GraphWindowTools/alinemarkerfilldialog.h \
+    gui/GraphWindowTools/arootcolorselectordialog.h \
+    gui/GraphWindowTools/adrawtemplate.h \
+    gui/GraphWindowTools/atemplateselectiondialog.h \
+    gui/GraphWindowTools/atemplateselectionrecord.h \
+    gui/amateriallibrarybrowser.h \
+    gui/DAWindowTools/amaterialloaderdialog.h \
+    gui/ageant4configdialog.h \
+    gui/MainWindowTools/asaveparticlestofiledialog.h \
     gui/aguiwindow.h
 
 FORMS += gui/mainwindow.ui \
@@ -794,11 +839,11 @@ FORMS += gui/mainwindow.ui \
     gui/credits.ui \
     gui/globalsettingswindowclass.ui \
     gui/MainWindowTools/ashapehelpdialog.ui \
-    gui/MainWindowTools/agridelementdialog.ui \
+    gui/DAWindowTools/agridelementdialog.ui \
     gui/ascriptexampleexplorer.ui \
     gui/ascriptwindow.ui \
 #    modules/lrf_v3/gui/alrfwindow.ui \
-    gui/MainWindowTools/amonitordelegateform.ui \
+    gui/DAWindowTools/amonitordelegateform.ui \
     gui/amatparticleconfigurator.ui \
     gui/aneutronreactionsconfigurator.ui \
     gui/aneutronreactionwidget.ui \
@@ -856,6 +901,15 @@ TEMPLATE = app
 RC_FILE = myapp.rc
 #------------
 
+#---test of QJSEngine---
+QJS{
+    #DEFINES += USE_QJSEngine
+    QT += qml
+    SOURCES += ajavascriptmanager_qml.cpp
+    HEADERS += ajavascriptmanager_qml.h
+}
+#----------
+
 # The next define allows the core script interface to launch external processes. Enable only if you know what are you doing
 #DEFINES += _ALLOW_LAUNCH_EXTERNAL_PROCESS_
 
@@ -883,6 +937,7 @@ win32 {
 DEFINES += ANTS2_MINOR=\"$$ANTS2_MINOR\"
 DEFINES += ANTS2_MAJOR=\"$$ANTS2_MAJOR\"
 DEFINES += DEBUG_VERBOSITY=\"$$DEBUG_VERBOSITY\"
+DEFINES += TARGET_DIR=\"\\\"$${OUT_PWD}\\\"\"
 
 win32 {
   DEFINES += BUILDTIME=\\\"$$system('echo %time%')\\\"
@@ -943,5 +998,7 @@ FORMS += \
     gui/GraphWindowTools/arootcolorselectordialog.ui \
     gui/GraphWindowTools/atemplateselectiondialog.ui \
     gui/amateriallibrarybrowser.ui \
-    gui/DAWindowTools/amaterialloaderdialog.ui
+    gui/DAWindowTools/amaterialloaderdialog.ui \
+    gui/MainWindowTools/asaveparticlestofiledialog.ui \
+    gui/RasterWindow/acameracontroldialog.ui
 

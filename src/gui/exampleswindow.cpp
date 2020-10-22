@@ -62,15 +62,19 @@ ExamplesWindow::~ExamplesWindow()
     delete ui;
 }
 
-void ExamplesWindow::SaveConfig(QString fileName, bool DetConstructor, bool SimSettings, bool ReconstrSettings)
+void ExamplesWindow::UpdateConfig()
 {
     MW->writeDetectorToJson(MW->Config->JSON);
-      MW->writeExtraGuiToJson(MW->Config->JSON);
+    MW->writeExtraGuiToJson(MW->Config->JSON);
     MW->writeSimSettingsToJson(MW->Config->JSON);
     MW->Rwindow->writeToJson(MW->Config->JSON);
     MW->Config->UpdateLRFmakeJson();
-//    MW->Config->UpdateLRFv3makeJson();
+    MW->Config->UpdateLRFv3makeJson();
+}
 
+void ExamplesWindow::SaveConfig(QString fileName, bool DetConstructor, bool SimSettings, bool ReconstrSettings)
+{
+    UpdateConfig();
     MW->Config->SaveConfig(fileName, DetConstructor, SimSettings, ReconstrSettings);
 }
 
@@ -257,7 +261,7 @@ void ExamplesWindow::on_pbLoadExample_clicked()
       return;
     }
   this->close();
-  MW->GeometryDrawDisabled = true;
+  MW->GeometryWindow->bDisableDraw = true;
 
   QString filename = MW->GlobSet.ExamplesDir + "/" + Examples[ListedExamples[ExamplePointer]].filename;
 
@@ -269,7 +273,7 @@ void ExamplesWindow::on_pbLoadExample_clicked()
   MW->GeometryWindow->show();
   MW->GeometryWindow->raise();
 
-  MW->GeometryDrawDisabled = false;
+  MW->GeometryWindow->bDisableDraw = false;
   MW->GeometryWindow->ShowGeometry();
 }
 
@@ -295,7 +299,7 @@ void ExamplesWindow::on_pbLoadSettings_clicked()
   if (fileName.isEmpty()) return;
   MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
-  MW->GeometryDrawDisabled = true; //->
+  MW->GeometryWindow->bDisableDraw = true; //->
   bool bOK = MW->Config->LoadConfig(fileName, !ui->cbSkipDetectorConstructor->isChecked(), !ui->cbSkipSimConfig->isChecked(), !ui->cbSkipRecConfig->isChecked());
   if (!bOK) message(MW->Config->ErrorString, this);
   else
@@ -304,7 +308,7 @@ void ExamplesWindow::on_pbLoadSettings_clicked()
       if (MW->GeometryWindow->isVisible()) MW->GeometryWindow->ShowGeometry();
       MW->show();
   }
-  MW->GeometryDrawDisabled = false; //<-
+  MW->GeometryWindow->bDisableDraw = false; //<-
 }
 
 void ExamplesWindow::on_pbLoadLast_clicked()
@@ -324,9 +328,9 @@ void ExamplesWindow::QuickLoad(int i, QWidget *parent)
       return;
   }
 
-  MW->GeometryDrawDisabled = true;
+  MW->GeometryWindow->bDisableDraw = true;
   bool bOK = MW->Config->LoadConfig(fileName);
-  MW->GeometryDrawDisabled = false;
+  MW->GeometryWindow->bDisableDraw = false;
 
   MW->showNormal();
 

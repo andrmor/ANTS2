@@ -15,7 +15,6 @@
 #include "aphotontracer.h"
 #include "apmhub.h"
 #include "sensorlrfs.h"
-#include "alrfmoduleselector.h"
 #include "aphotonsimsettings.h"
 #include "aphotonnodedistributor.h"
 

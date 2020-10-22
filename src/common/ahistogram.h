@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <utility>
+#include <cstdlib>
 
 class AHistogram1D
 {

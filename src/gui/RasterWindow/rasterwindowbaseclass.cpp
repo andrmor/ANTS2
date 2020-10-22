@@ -7,6 +7,7 @@
 #include "TCanvas.h"
 #include "TView.h"
 #include "TView3D.h"
+#include "TVirtualX.h"
 
 RasterWindowBaseClass::RasterWindowBaseClass(QMainWindow *MasterWindow) : QWidget(MasterWindow), MasterWindow(MasterWindow)
 {

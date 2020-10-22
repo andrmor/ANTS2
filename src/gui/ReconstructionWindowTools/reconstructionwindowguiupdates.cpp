@@ -5,8 +5,8 @@
 #include "mainwindow.h"
 #include "outputwindow.h"
 #include "detectorclass.h"
-#include "alrfmoduleselector.h"
 #include "apmgroupsmanager.h"
+#include "sensorlrfs.h"
 
 #include <QDebug>
 

@@ -19,7 +19,7 @@
 #include "ascriptwindow.h"
 #include "apmgroupsmanager.h"
 #include "guiutils.h"
-#include "alrfwindow.h"
+//#include "alrfwindow.h"
 #include "aremotewindow.h"
 
 //Qt
@@ -101,7 +101,7 @@ void MainWindow::on_actionGain_evaluation_triggered()
 void MainWindow::on_actionReset_position_of_windows_triggered()
 {
    QList<QMainWindow*> list;
-   list << this<<Rwindow<<Owindow<<lrfwindow<<MIwindow<<WindowNavigator<<ELwindow<<DAwindow<<ScriptWindow<<newLrfWindow;
+   list << this<<Rwindow<<Owindow<<lrfwindow<<MIwindow<<WindowNavigator<<ELwindow<<DAwindow<<ScriptWindow;
    foreach(QMainWindow *w, list)
      {
        w->move(20,20);
@@ -163,7 +163,7 @@ void MainWindow::on_actionSave_position_and_stratus_of_all_windows_triggered()
 
   QVector<AGuiWindow*> vec;
   vec << this << Rwindow << ELwindow << Owindow << DAwindow << GeometryWindow << GraphWindow
-      <<    lrfwindow << MIwindow << ScriptWindow << WindowNavigator << RemoteWindow << newLrfWindow;
+      <<    lrfwindow << MIwindow << ScriptWindow << WindowNavigator << RemoteWindow;
   if (PythonScriptWindow) vec << PythonScriptWindow;
   for (AGuiWindow * w : vec)
       w->writeGeomToJson(json);
@@ -211,7 +211,7 @@ void MainWindow::on_actionLoad_positions_and_status_of_all_windows_triggered()
 
       QVector<AGuiWindow*> vec;
       vec << this << Rwindow << ELwindow << Owindow << DAwindow << GeometryWindow << GraphWindow
-          <<    lrfwindow << MIwindow << ScriptWindow << WindowNavigator << RemoteWindow << newLrfWindow;
+          <<    lrfwindow << MIwindow << ScriptWindow << WindowNavigator << RemoteWindow;
       if (PythonScriptWindow) vec << PythonScriptWindow;
       for (AGuiWindow * w : vec)
           w->readGeomFromJson(json);

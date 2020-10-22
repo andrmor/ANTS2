@@ -1,5 +1,5 @@
 #include "alrfdraw.h"
-#include "alrfmoduleselector.h"
+#include "sensorlrfs.h"
 #include "eventsdataclass.h"
 #include "apmhub.h"
 #include "apositionenergyrecords.h"
@@ -55,7 +55,7 @@ bool ALrfDraw::extractOptionsAndVerify(int PMnumber, const QJsonObject &json)
         reportError("Wrong PM number");
         return false;
       }
-    if (!LRFs->isAllLRFsDefined(fUseOldModule))
+    if (!LRFs->isAllLRFsDefined())
       {
         reportError("LRFs are not defined");
         return false;
@@ -110,8 +110,8 @@ bool ALrfDraw::extractOptionsAndVerify(int PMnumber, const QJsonObject &json)
     return true;
 }
 
-ALrfDraw::ALrfDraw(ALrfModuleSelector *LRFs, bool fUseOldModule, EventsDataClass *EventsDataHub, APmHub *PMs, GraphWindowClass *GraphWindow) :
-  LRFs(LRFs), EventsDataHub(EventsDataHub), PMs(PMs), GraphWindow(GraphWindow), fUseOldModule(fUseOldModule) {}
+ALrfDraw::ALrfDraw(SensorLRFs *LRFs, EventsDataClass *EventsDataHub, APmHub *PMs, GraphWindowClass *GraphWindow) :
+  LRFs(LRFs), EventsDataHub(EventsDataHub), PMs(PMs), GraphWindow(GraphWindow) {}
 
 bool ALrfDraw::DrawRadial(int PMnumber, const QJsonObject &json)
 {
@@ -127,7 +127,7 @@ bool ALrfDraw::DrawRadial(int PMnumber, const QJsonObject &json)
   if (Options.plot_lrf)
       {
         QJsonObject module_js = json["ModuleSpecific"].toObject();
-        tf1 = LRFs->getRootFunctionMainRadial(fUseOldModule, PMnumber, Options.z0, module_js);
+        tf1 = LRFs->getRootFunctionMainRadial(PMnumber, Options.z0, module_js);
 
         tf1->SetNpx(Options.FunctionPointsX);
         tf1->SetFillColor(0);
@@ -144,7 +144,7 @@ bool ALrfDraw::DrawRadial(int PMnumber, const QJsonObject &json)
 
         if (Options.draw_second)
           {
-            tf1bis = LRFs->getRootFunctionSecondaryRadial(fUseOldModule, PMnumber, Options.z0, module_js);
+            tf1bis = LRFs->getRootFunctionSecondaryRadial(PMnumber, Options.z0, module_js);
             if (tf1bis)
               {
                 tf1bis->SetLineColor(1);
@@ -209,7 +209,7 @@ bool ALrfDraw::DrawRadial(int PMnumber, const QJsonObject &json)
             if (Options.scale_by_energy) fdata /= factor;            
             if (Options.plot_diff)
               {
-                double fdiff = fdata - LRFs->getLRF(fUseOldModule, PMnumber, pos);
+                double fdiff = fdata - LRFs->getLRF(PMnumber, pos);
                 hist2D->Fill(r, fdiff);
               }
             else hist2D->Fill(r, fdata);
@@ -237,7 +237,7 @@ bool ALrfDraw::DrawRadial(int PMnumber, const QJsonObject &json)
     if (Options.showNodePositions)
       {
          QVector <double> GrX;
-         bool fOk = LRFs->getNodes(fUseOldModule, PMnumber, GrX);
+         bool fOk = LRFs->getNodes(PMnumber, GrX);
          if (fOk)
            {
              //QVector <double> GrY(GrX.size(), 0);
@@ -305,7 +305,7 @@ bool ALrfDraw::DrawXY(int PMnumber, const QJsonObject &json)
 
             if (Options.plot_diff)
             {
-                fdiff = fdata - LRFs->getLRF(fUseOldModule, PMnumber, x, y, z);
+                fdiff = fdata - LRFs->getLRF(PMnumber, x, y, z);
                 ffdiff << fdiff;
             }
             else ffdata << fdata;
@@ -319,46 +319,46 @@ bool ALrfDraw::DrawXY(int PMnumber, const QJsonObject &json)
       }
 
     if (Options.plot_lrf)
-      {
+    {
         QJsonObject module_js = json["ModuleSpecific"].toObject();
-        tf2 = LRFs->getRootFunctionMainXY(fUseOldModule, PMnumber, Options.z0, module_js);
+        tf2 = LRFs->getRootFunctionMainXY(PMnumber, Options.z0, module_js);
 
         tf2->SetNpx(Options.FunctionPointsX);
         tf2->SetNpy(Options.FunctionPointsY);
         GraphWindow->DrawWithoutFocus(tf2, "surf");//, false);
 
         if (Options.draw_second)
+        {
+            //have to draw in the same range of coordnates - ROOT's "same" option does not work with "surf"
+            tf2bis = LRFs->getRootFunctionSecondaryXY(PMnumber, Options.z0, module_js);
+            if (tf2bis)
             {
-              //have to draw in the same range of coordnates - ROOT's "same" option does not work with "surf"
-              tf2bis = LRFs->getRootFunctionSecondaryXY(fUseOldModule, PMnumber, Options.z0, module_js);
-              if (tf2bis)
-              {
-                  double min = tf2bis->GetMinimum();
-                  double max = tf2bis->GetMaximum();
-                  tf2bis->GetZaxis()->SetRangeUser(min, max);
-                  tf2bis->SetLineColor(1);
-                  tf2bis->SetLineStyle(9);
-                  tf2bis->SetNpx(Options.FunctionPointsX);
-                  tf2bis->SetNpy(Options.FunctionPointsY);
-                  GraphWindow->DrawWithoutFocus(tf2bis, "surf same");//, false);
-              }
+                double min = tf2bis->GetMinimum();
+                double max = tf2bis->GetMaximum();
+                tf2bis->GetZaxis()->SetRangeUser(min, max);
+                tf2bis->SetLineColor(1);
+                tf2bis->SetLineStyle(9);
+                tf2bis->SetNpx(Options.FunctionPointsX);
+                tf2bis->SetNpy(Options.FunctionPointsY);
+                GraphWindow->DrawWithoutFocus(tf2bis, "surf same");//, false);
             }
-      }
+        }
+    }
 
     if (Options.plot_data)
-      {
+    {
         TGraph2D* tgraph2D = new TGraph2D(ffdata.size(), xx.data(), yy.data(), ffdata.data());
         tgraph2D->SetMarkerStyle(7);
         if (Options.plot_lrf) GraphWindow->DrawWithoutFocus(tgraph2D, "samepcol");//, false);
         else                  GraphWindow->DrawWithoutFocus(tgraph2D, "pcol");//, false);
-      }
+    }
     else if (Options.plot_diff)
-      {
+    {
         TGraph2D* tgraph2D = new TGraph2D(ffdiff.size(), xx.data(), yy.data(), ffdiff.data());
         tgraph2D->SetMarkerStyle(7);
         if (Options.plot_lrf || Options.plot_data) GraphWindow->DrawWithoutFocus(tgraph2D, "samepcol");//, false);
         else                                       GraphWindow->DrawWithoutFocus(tgraph2D, "pcol");//, false);
-      }
+    }
     GraphWindow->UpdateRootCanvas();
 
     return true;

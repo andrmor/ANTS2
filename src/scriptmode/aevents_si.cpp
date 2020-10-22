@@ -3,8 +3,8 @@
 #include "eventsdataclass.h"
 #include "apositionenergyrecords.h"
 #include "detectorclass.h"
-#include "alrfmoduleselector.h"
 #include "apmhub.h"
+#include "sensorlrfs.h"
 
 #include "TGeoNode.h"
 #include "TGeoManager.h"

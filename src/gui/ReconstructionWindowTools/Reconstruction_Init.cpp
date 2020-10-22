@@ -5,10 +5,9 @@
 #include "detectorclass.h"
 #include "apmgroupsmanager.h"
 #include "CorrelationFilters.h"
-#include "alrfmoduleselector.h"
-#include "arepository.h"
 #include "areconstructionmanager.h"
 #include "acalibratorsignalperphel.h"
+#include "sensorlrfs.h"
 
 #ifdef ANTS_FLANN
 #include "areconstructionmanager.h"
@@ -71,7 +70,7 @@ ReconstructionWindow::ReconstructionWindow(QWidget * parent, MainWindow * mw, Ev
 
   QList<QWidget*> invis;
   invis << ui->pbUpdateFilters << ui->pbSpF_UpdateTable << ui->pbUpdateGainsIndication << ui->pbCorrUpdateTMP
-        << ui->fShowXYPmnumber << ui->pbKNNupdate << ui->pbUpdateReconConfig << ui->labLRFmoduleWarning << ui->pbUpdateGuiSettingsInJSON
+        << ui->fShowXYPmnumber << ui->pbKNNupdate << ui->pbUpdateReconConfig << ui->pbUpdateGuiSettingsInJSON
         << ui->pbRootConfigureCustom;
   for (auto w: invis) w->setVisible(false);
 
@@ -123,15 +122,7 @@ ReconstructionWindow::ReconstructionWindow(QWidget * parent, MainWindow * mw, Ev
   QObject::connect(Detector, SIGNAL(requestGroupsGuiUpdate()), this, SLOT(onUpdatePMgroupIndication()));
 
   //connections - the slot function is aware of the currently active module and handles signal distribution to MW
-  //old module:
-  const SensorLRFs* SensLRF = Detector->LRFs->getOldModule();
-  QObject::connect(SensLRF, &SensorLRFs::SensorLRFsReadySignal, this, &ReconstructionWindow::LRF_ModuleReadySlot);
-  //new module:
-  const LRF::ARepository* NewModule = Detector->LRFs->getNewModule();
-  QObject::connect(NewModule, &LRF::ARepository::currentLrfsChangedReadyStatus, this, &ReconstructionWindow::LRF_ModuleReadySlot);
-
-  ui->cobLRFmodule->setCurrentIndex(0);
-  on_cobLRFmodule_currentIndexChanged(0);
+  QObject::connect(Detector->LRFs, &SensorLRFs::SensorLRFsReadySignal, this, &ReconstructionWindow::LRF_ModuleReadySlot);
 
   //handling of NN module reconstruction options
   connect(ui->cbReconstructEnergy,SIGNAL(clicked(bool)),this,SIGNAL(cbReconstructEnergyChanged(bool)));

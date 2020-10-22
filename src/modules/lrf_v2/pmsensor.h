@@ -18,10 +18,10 @@ public:
   void readOldJSON(QJsonObject &json, int *group, const double *lrfx, const double *lrfy);
   void readJSON(QJsonObject &json);
 
-  void SetShift(double dx_, double dy_) { dx = dx_; dy = dy_; }
+  //void SetShift(double dx_, double dy_) { dx = dx_; dy = dy_; }
   //void SetCenter(double x0, double y0) { dx = -x0; dy = -y0; }
-  void SetPhi(double phi);
-  void SetFlip(bool flip_) { flip = flip_; }
+  //void SetPhi(double phi);
+  //void SetFlip(bool flip_) { flip = flip_; }
   void NullTransform();
   void SetTransform(double dx_, double dy_, double phi_, bool flip_);
   void GetTransform(double *dx_, double *dy_, double *phi_, bool *flip_) const;
@@ -31,7 +31,7 @@ public:
   double GetGain() const {return gain;}
   int GetIndex() const { return index; }
   //int GetGroup() const {return group;}
-  bool GetFlip() const {return flip;}
+  //bool GetFlip() const {return flip;}
 
   void transform(const double *pos_world, double *pos_local) const;
   void transformBack(const double *pos_local, double *pos_world) const;
@@ -53,15 +53,15 @@ private:
   double gain;// relative gain (1 for root PMT)
 
   // transform
-  double dx;  // x shift
-  double dy;  // y shift
-  double phi; // rotation
-  double sinphi; // sin(phi);
-  double cosphi; // cos(phi);
-  bool flip;  // mirror
+  double dx = 0.;  // x shift
+  double dy = 0.;  // y shift
+  double phi = 0.; // rotation
+  double sinphi = 0.; // sin(phi);
+  double cosphi = 1.; // cos(phi);
+  bool flip = false;  // mirror
 
   //LRF - SensorGroup is the owner
-  LRF2* lrf;   // pointer to LRF
+  LRF2* lrf = 0;   // pointer to LRF
 };
 
 #endif // PMSENSOR_H

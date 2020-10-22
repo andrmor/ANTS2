@@ -131,8 +131,6 @@ public:
 
   bool readReconSettingsFromJson(QJsonObject &jsonMaster);
   bool readFilterSettingsFromJson(QJsonObject &jsonMaster);
-  void writeLrfModuleSelectionToJson(QJsonObject &json);
-  void readLrfModuleSelectionFromJson(QJsonObject &json);
   void writeMiscGUIsettingsToJson(QJsonObject &json);
   void readMiscGUIsettingsFromJson(QJsonObject &json);
   void updateFiltersGui();
@@ -484,8 +482,6 @@ private slots:
   void on_lwPMgroups_activated(const QModelIndex &index);
 
   void on_lwPMgroups_clicked(const QModelIndex &index);
-
-  void on_cobLRFmodule_currentIndexChanged(int index);
 
   void on_sbShowEventsEvery_valueChanged(int arg1);
 

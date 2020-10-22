@@ -10,7 +10,6 @@
 #include "amessage.h"
 
 #include "lrfaxial.h"
-#include "lrfcaxial.h"
 #include "lrfaxial3d.h"
 #include "lrfxy.h"
 #include "lrfxyz.h"
@@ -92,25 +91,17 @@ void SensorLRFs::clear(int numPMs)
 
 bool SensorLRFs::isAllLRFsDefined() const
 {
-  //current iteration is not set
-  if (!currentIter) return false;
+  if (!currentIter) return false;  //current iteration is not set
 
   return currentIter->isIterationValid();
-/*
-  if (!currentIter->isAllLRFsDefined())
-    {
-      //qDebug is in the function
-      return false;
-    }
+}
 
-   if (!currentIter->isAllGainsDefined())
-     {
-       //qDebug is in the function
-       return false;
-     }
+bool SensorLRFs::isAllSlice3D() const
+{
+    for (int ipm = 0; ipm < nPMs; ipm++)
+        if ( currentIter->sensors[ipm]->GetLRF()->type() != QString("Sliced3D") ) return false;
 
-   return true;
-*/
+    return true;
 }
 
 // =========================================================
@@ -1021,14 +1012,7 @@ bool SensorLRFs::makeGroupLRF(int igrp, ALrfFitSettings &LRFsettings, QVector<PM
     case 3: newLRF = lrfmaker->mkLRFcomposite(LRFsettings.nodesx, LRFsettings.nodesy, LRFsettings.compr); break;
     case 4: newLRF = lrfmaker->mkLRFaxial3d(LRFsettings.nodesx, LRFsettings.nodesy, LRFsettings.compr); break;
     case 5: newLRF = lrfmaker->mkLRFsliced3D(LRFsettings.nodesx, LRFsettings.nodesy); break;
-#ifdef TPS3M
     case 6: newLRF = lrfmaker->mkLRFxyz(LRFsettings.nodesx, LRFsettings.nodesy); break;
-#else
-    case 6:
-      qWarning() << "XYZ LRFs need Eigen library. Falling back to Sliced3D";
-      newLRF = lrfmaker->mkLRFsliced3D(LRFsettings.nodesx, LRFsettings.nodesy);
-      break;
-#endif
     }  
   if (!newLRF)
     {
@@ -1040,4 +1024,95 @@ bool SensorLRFs::makeGroupLRF(int igrp, ALrfFitSettings &LRFsettings, QVector<PM
   //qDebug() << "makeGroupLRF done!";
 
   return true;
+}
+
+//---------------from selector-----------------
+
+#include "TF1.h"
+TF1 * SensorLRFs::getRootFunctionMainRadial(int ipm, double z, QJsonObject & json)
+{
+    const LRF2 *lrf = (*this)[ipm];
+    TF1* f = new TF1("f1d", this, &SensorLRFs::getRadial, 0, lrf->getRmax()*1.01, 2, "SensorLRFs", "getRadial");
+    f->SetParameter(0, ipm);
+    f->SetParameter(1, z);
+    return f;
+}
+
+TF1 * SensorLRFs::getRootFunctionSecondaryRadial(int ipm, double z, QJsonObject & json)
+{
+    int secondIter = -1;
+    parseJson(json, "SecondIteration", secondIter);
+    if (secondIter == -1) return 0;
+
+    const LRF2 *lrf = getIteration(secondIter)->sensor(ipm)->GetLRF();
+    TF1* f = new TF1("ff1d", this, &SensorLRFs::getRadialPlus, 0, lrf->getRmax(), 3, "SensorLRFs", "getRadial");
+    f->SetParameter(0, ipm);
+    f->SetParameter(1, z);
+    f->SetParameter(2, secondIter);
+    return f;
+}
+
+bool SensorLRFs::getNodes(int ipm, QVector<double> & GrX)
+{
+    const LRF2 *lrfGen = (*this)[ipm];
+    QString type = lrfGen->type();
+    if (type != "ComprAxial" && type != "Axial")
+        return false;
+
+    LRFaxial* lrf = (LRFaxial*)lrfGen;
+    int nodes = lrf->getNint();
+    double rmax = lrf->getRmax();
+
+    double Rmin = lrf->Rho(0);
+    double Rmax = lrf->Rho(rmax);
+    double DX = Rmax-Rmin;
+
+    int lastnode = -1;
+    for (int ix=0; ix<102; ix++)
+    {
+        double x = rmax*ix/100.0;
+        double X = lrf->Rho(x);
+        int node = X * nodes/DX;
+        if (node>lastnode)
+        {
+            GrX << x;
+            lastnode = node;
+        }
+    }
+
+    return true;
+}
+
+#include "TF2.h"
+TF2 * SensorLRFs::getRootFunctionMainXY(int ipm, double z, QJsonObject & json)
+{
+    const PMsensor *sensor = getIteration()->sensor(ipm);
+    if (!sensor) return 0;
+    double minmax[4];
+    sensor->getGlobalMinMax(minmax);
+    TF2* f2 = new TF2("f2", this, &SensorLRFs::getFunction2D,
+                      minmax[0], minmax[1], minmax[2], minmax[3], 2,
+                      "SensLRF", "getFunction2D");
+    f2->SetParameter(0, ipm);
+    f2->SetParameter(1, z);
+    return f2;
+}
+
+TF2 * SensorLRFs::getRootFunctionSecondaryXY(int ipm, double z, QJsonObject & json)
+{
+    int secondIter = -1;
+    parseJson(json, "SecondIteration", secondIter);
+    if (secondIter == -1) return 0;
+
+    const PMsensor *sensor = getIteration()->sensor(ipm);
+    if (!sensor) return 0;
+    double minmax[4];
+    sensor->getGlobalMinMax(minmax);
+    TF2* f2 = new TF2("f2bis", this, &SensorLRFs::getFunction2Dplus,
+                      minmax[0], minmax[1], minmax[2], minmax[3], 3,
+                      "SensLRF", "getFunction2D");
+    f2->SetParameter(0, ipm);
+    f2->SetParameter(1, z);
+    f2->SetParameter(2, secondIter);
+    return f2;
 }

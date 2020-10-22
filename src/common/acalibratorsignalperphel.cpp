@@ -2,7 +2,7 @@
 #include "eventsdataclass.h"
 #include "apeakfinder.h"
 #include "detectorclass.h"
-#include "alrfmoduleselector.h"
+#include "sensorlrfs.h"
 #include "apmgroupsmanager.h"
 #include "apmhub.h"
 #include "apositionenergyrecords.h"

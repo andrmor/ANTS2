@@ -2,13 +2,12 @@
 #define PROCESSORCLASS_H
 
 #include <QObject>
-#include "alrfmoduleselector.h"
 #include "afunctorbase.h"
 
 class ReconstructionSettings;
 class APmHub;
 class APmGroupsManager;
-class ALrfModuleSelector;
+class SensorLRFs;
 class DynamicPassivesHandler;
 class EventsDataClass;
 struct AReconRecord;
@@ -22,7 +21,7 @@ class AReconstructionWorker : public QObject
 public:
     AReconstructionWorker(APmHub* PMs,
                           APmGroupsManager* PMgroups,
-                          ALrfModuleSelector* LRFs,
+                          SensorLRFs *LRFs,
                           EventsDataClass *EventsDataHub,
                           ReconstructionSettings *RecSet,
                           int ThisPmGroup,
@@ -42,7 +41,7 @@ public:
     // external objects used by minimizer
     APmHub                 * PMs = nullptr;
     APmGroupsManager       * PMgroups = nullptr;
-    ALrfModuleSelector       LRFs;  // copy(!) <- need if use Raimumdo's module with script LRFs
+    SensorLRFs             * LRFs;
     EventsDataClass        * EventsDataHub = nullptr;
     ReconstructionSettings * RecSet = nullptr;
 
@@ -51,11 +50,9 @@ public:
 
 public slots:
     virtual void execute() = 0;
-    virtual void copyLrfsAndExecute();
 
 signals:
     void finished();
-    void lrfsCopied();
 
 protected:
     int EventsFrom;
@@ -73,7 +70,7 @@ class CoGReconstructorClass : public AReconstructionWorker
 public:
   CoGReconstructorClass(APmHub* PMs,
                         APmGroupsManager* PMgroups,
-                        ALrfModuleSelector* LRFs,
+                        SensorLRFs * LRFs,
                         EventsDataClass *EventsDataHub,
                         ReconstructionSettings *RecSet,
                         int CurrentGroup,
@@ -91,7 +88,7 @@ class CGonCPUreconstructorClass : public AReconstructionWorker
 public:
   CGonCPUreconstructorClass(APmHub* PMs,
                             APmGroupsManager* PMgroups,
-                            ALrfModuleSelector* LRFs,
+                            SensorLRFs * LRFs,
                             EventsDataClass *EventsDataHub,
                             ReconstructionSettings *RecSet,
                             int CurrentGroup,
@@ -117,7 +114,7 @@ class RootMinReconstructorClass : public AReconstructionWorker
 public:
     RootMinReconstructorClass(APmHub* PMs,
                               APmGroupsManager* PMgroups,
-                              ALrfModuleSelector* LRFs,
+                              SensorLRFs *LRFs,
                               EventsDataClass *EventsDataHub,
                               ReconstructionSettings *RecSet,
                               int ThisPmGroup,
@@ -144,7 +141,7 @@ class RootMinDoubleReconstructorClass : public AReconstructionWorker
 public:
     RootMinDoubleReconstructorClass(APmHub* PMs,
                                     APmGroupsManager* PMgroups,
-                                    ALrfModuleSelector* LRFs,
+                                    SensorLRFs *LRFs,
                                     EventsDataClass *EventsDataHub,
                                     ReconstructionSettings *RecSet,
                                     int ThisPmGroup,
@@ -173,7 +170,7 @@ class Chi2calculatorClass : public AReconstructionWorker
 public:
   Chi2calculatorClass(APmHub* PMs,
                       APmGroupsManager* PMgroups,
-                      ALrfModuleSelector* LRFs,
+                      SensorLRFs* LRFs,
                       EventsDataClass *EventsDataHub,
                       ReconstructionSettings *RecSet,
                       int CurrentGroup,
@@ -191,7 +188,7 @@ class EventFilterClass : public AReconstructionWorker
 public:
     EventFilterClass(APmHub* PMs,
                      APmGroupsManager* PMgroups,
-                     ALrfModuleSelector* LRFs,
+                     SensorLRFs* LRFs,
                      EventsDataClass *EventsDataHub,
                      ReconstructionSettings *RecSet,
                      AEventFilteringSettings *FiltSet,

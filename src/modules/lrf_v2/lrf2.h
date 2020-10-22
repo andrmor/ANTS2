@@ -15,12 +15,15 @@ public:
     double evalDrvY(double *pos) const {return evalDrvY(pos[0], pos[1], pos[2]);}
     double eval(double *pos, double *err) const {return eval(pos[0], pos[1], pos[2], err);}
     virtual bool inDomain(double x, double y, double z=0.) const = 0;
+//    virtual bool isReady () const;
     virtual bool errorDefined() const = 0;
     virtual double getRmax() const = 0;
-    virtual double getXmin() const = 0;
-    virtual double getXmax() const = 0;
-    virtual double getYmin() const = 0;
-    virtual double getYmax() const = 0;
+    virtual double getXmin() const {return xmin;}
+    virtual double getXmax() const {return xmax;}
+    virtual double getYmin() const {return ymin;}
+    virtual double getYmax() const {return ymax;}
+    virtual double getZmin() const {return zmin;}
+    virtual double getZmax() const {return zmax;}
     virtual double eval(double x, double y, double z=0.) const = 0;
     virtual double evalErr(double x, double y, double z=0.) const = 0;
     virtual double evalDrvX(double x, double y, double z=0.) const = 0;
@@ -33,12 +36,12 @@ public:
     virtual QJsonObject reportSettings() const = 0;
 //        virtual int ReadJSON(QJsonObject &json) = 0;
     virtual bool isValid() const { return valid; }
-    virtual void setValid(bool valid) { this->valid = valid; }
-
-    static LRF2 *loadJson(const char *type, QJsonObject &lrf_json);
 
 protected:
     bool valid; // indicates if the LRF can be used for reconstruction
+    double xmin, xmax; 	// xrange
+    double ymin, ymax; 	// yrange
+    double zmin, zmax; 	// zrange
 };
 
 #endif // LRF2_H

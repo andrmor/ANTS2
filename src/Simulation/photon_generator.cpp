@@ -5,7 +5,7 @@
 #include "aphoton.h"
 #include "aoneevent.h"
 #include "apmhub.h"
-#include "alrfmoduleselector.h"
+#include "sensorlrfs.h"
 
 #include <QDebug>
 

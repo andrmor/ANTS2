@@ -12,7 +12,7 @@
 
 class AParticle;
 class TGeoManager;
-class ALrfModuleSelector;
+class SensorLRFs;
 class APmHub;
 class AMaterialParticleCollection;
 class TGeoVolume;
@@ -34,7 +34,7 @@ public:
   AMaterialParticleCollection* MpCollection = nullptr;
   ASandwich          * Sandwich     = nullptr;
   APmHub             * PMs          = nullptr;
-  ALrfModuleSelector * LRFs         = nullptr;
+  SensorLRFs         * LRFs         = nullptr;
   APmGroupsManager   * PMgroups     = nullptr;
   TGeoManager        * GeoManager   = nullptr;
   TGeoVolume         * top          = nullptr;         // world in GeoManager

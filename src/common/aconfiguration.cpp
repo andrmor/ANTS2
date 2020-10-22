@@ -3,7 +3,7 @@
 #include "asimsettings.h"
 #include "aparticlesimsettings.h"
 #include "ajsontools.h"
-#include "alrfmoduleselector.h"
+#include "sensorlrfs.h"
 #include "apmgroupsmanager.h"
 #include "amaterialparticlecolection.h"
 #include "asandwich.h"
@@ -79,15 +79,11 @@ bool AConfiguration::LoadConfig(QJsonObject &json, bool DetConstructor, bool Sim
           JSON["ReconstructionConfig"] = ReconJson;
 
           if (ReconJson.contains("ActiveLRF"))
-            {
+          {
               QJsonObject lj = ReconJson["ActiveLRF"].toObject();
-              Detector->LRFs->loadAll_v2(lj);
-            }
-          if (ReconJson.contains("ActiveLRFv3"))
-            {
-              QJsonObject lj = ReconJson["ActiveLRFv3"].toObject();
-              Detector->LRFs->loadAll_v3(lj);
-            }
+              Detector->LRFs->clear(Detector->PMs->count());
+              Detector->LRFs->loadAll(lj);
+          }
 
           emit requestReconstructionGuiUpdate();
           AskForLRFGuiUpdate();
@@ -260,15 +256,8 @@ QString AConfiguration::doRedo()
 void AConfiguration::UpdateLRFmakeJson()
 {
     QJsonObject obj = JSON["ReconstructionConfig"].toObject();
-    obj["LRFmakeJson"] = Detector->LRFs->getLRFmakeJson();
+    obj["LRFmakeJson"] = Detector->LRFs->LRFmakeJson;
     //qDebug() << Detector->SensLRF->LRFmakeJson;
-    JSON["ReconstructionConfig"] = obj;
-}
-
-void AConfiguration::UpdateLRFv3makeJson()
-{
-    QJsonObject obj = JSON["ReconstructionConfig"].toObject();
-    obj["LRFv3makeJson"] = Detector->LRFs->getLRFv3makeJson();
     JSON["ReconstructionConfig"] = obj;
 }
 
@@ -337,16 +326,16 @@ void AConfiguration::AskForReconstructionGuiUpdate()
   emit requestReconstructionGuiUpdate();
 }
 
-#include "arepository.h"
+//#include "arepository.h"
 void AConfiguration::AskForLRFGuiUpdate()
 {
     //qDebug() << "Emitting signal to update lrf gui of the old module";
     emit requestLRFGuiUpdate();
 
     QJsonObject jrec = JSON["ReconstructionConfig"].toObject();
-    QJsonObject js = jrec["LRFv3makeJson"].toObject();
+//    QJsonObject js = jrec["LRFv3makeJson"].toObject();
     //qDebug() << js;
-    if (!js.isEmpty()) Detector->LRFs->getNewModule()->setNextUpdateConfig(js);
+//    if (!js.isEmpty()) Detector->LRFs->getNewModule()->setNextUpdateConfig(js);
 }
 
 void AConfiguration::AskChangeGuiBusy(bool flag)

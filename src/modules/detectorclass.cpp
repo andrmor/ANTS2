@@ -1,7 +1,7 @@
 #include "detectorclass.h"
 #include "apmhub.h"
 #include "apmtype.h"
-#include "alrfmoduleselector.h"
+#include "sensorlrfs.h"
 #include "amaterialparticlecolection.h"
 #include "ajsontools.h"
 #include "acommonfunctions.h"
@@ -14,9 +14,6 @@
 #include "ageoshape.h"
 #include "ageotype.h"
 #include "afiletools.h"
-#include "modules/lrf_v3/corelrfstypes.h"
-#include "modules/lrf_v3/alrftypemanager.h"
-#include "modules/lrf_v3/alrftypemanagerinterface.h"
 #include "apmanddummy.h"
 
 #ifdef SIM
@@ -37,35 +34,6 @@
 #include "TGeoCompositeShape.h"
 #include "TNamed.h"
 
-static void autoLoadPlugins() {
-  typedef void (*LrfPluginSetupFn)(LRF::ALrfTypeManagerInterface &manager);
-
-  //qDebug() << "Loading plugins from 'plugins' directory";
-  QDir plugins_dir(qApp->applicationDirPath());
-  if(!plugins_dir.cd("plugins")) {
-    qInfo()<<"LRF_v3 plugin loader: Plugin search not performed since '/plugins' directory not found";
-    return;
-  }
-
-  for(const QString &file_name : plugins_dir.entryList(QDir::Files)) {
-    QString full_path = plugins_dir.absoluteFilePath(file_name);
-    QLibrary plugin(full_path);
-    if(!plugin.load()) {
-      qDebug()<<"LRF_v3 plugin loader: failed to open"<<file_name<<"\n";
-      qDebug()<<plugin.errorString();
-    }
-    else {
-      auto plugin_setup = (LrfPluginSetupFn)plugin.resolve("Setup");
-      if(plugin_setup) {
-        plugin_setup(LRF::ALrfTypeManager::instance());
-        qDebug()<<"LRF_v3 plugin loader: loaded and configured"<<file_name<<"plugin";
-      }
-      else
-        qDebug()<<"LRF_v3 plugin loader: failed to configure"<<file_name<<"plugin";
-    }
-  }
-}
-
 DetectorClass::DetectorClass(AConfiguration *config) : Config(config)
 {
   //qDebug() << "--> Detector constructor";  
@@ -80,12 +48,12 @@ DetectorClass::DetectorClass(AConfiguration *config) : Config(config)
   PMs = new APmHub(MpCollection, RandGen);
   PMs->clearPMtypes();
 
-  LRF::CoreLrfs::Setup(LRF::ALrfTypeManager::instance());
+  //LRF::CoreLrfs::Setup(LRF::ALrfTypeManager::instance());
   //qDebug() << "    Initialized new LRF module";
-  autoLoadPlugins();
+  //autoLoadPlugins();
 
   //qDebug() << "    Photomultipliers manager created";  
-  LRFs = new ALrfModuleSelector(PMs);
+  LRFs = new SensorLRFs(PMs->count());
   //qDebug() << "    LRF selector module created";
   PMgroups = new APmGroupsManager(PMs, &Config->JSON);
 

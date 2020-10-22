@@ -1,15 +1,8 @@
 #include "lrfxy.h"
 #include "jsonparser.h"
 #include "spline.h"
-#ifdef TPS3M
-#include "tpspline3m.h"
-#else
-#include "tpspline3.h"
-#endif
-
-#ifdef NEWFIT
-#include "tps3fit.h"
-#endif
+#include "bspline123d.h"
+#include "bsfit123.h"
 
 #include <QJsonObject>
 
@@ -17,14 +10,15 @@
 
 
 LRFxy::LRFxy(double x_min, double x_max, int n_intx, double y_min,
-            double y_max, int n_inty, bool log) : LRF2(), xmin(x_min), xmax(x_max),
-            ymin(y_min), ymax(y_max), nintx(n_intx), ninty(n_inty), bsr(NULL), bse(NULL), logscale(log)
+            double y_max, int n_inty) : LRF2(),
+//            xmin(x_min), xmax(x_max), ymin(y_min), ymax(y_max),
+            nintx(n_intx), ninty(n_inty), bsr(NULL), bse(NULL)
 {
-    non_negative = false;
-    top_down = false;
+    xmin = x_min; xmax = x_max;
+    ymin = y_min; ymax = y_max;
 }
 
-LRFxy::LRFxy(QJsonObject &json) : LRF2(), bsr(NULL), bse(NULL), logscale(false)
+LRFxy::LRFxy(QJsonObject &json) : LRF2(), bsr(NULL), bse(NULL)
 {
     JsonParser parser(json);
     QJsonObject jsobj, splineobj;
@@ -65,11 +59,22 @@ LRFxy::~LRFxy()
         delete bse;
 }
 
+bool LRFxy::errorDefined() const
+{
+    return (bse != 0) && bse->IsReady();
+}
+
+bool LRFxy::isReady() const
+{
+    return (bsr != 0) && bsr->IsReady();
+}
+
 bool LRFxy::inDomain(double x, double y, double /*z*/) const
 {
     return x>xmin && x<xmax && y>ymin && y<ymax;
 }
 
+// TODO: Check WTF is Rmax for
 double LRFxy::getRmax() const
 {
     return std::max(std::max(fabs(xmin), fabs(ymin)), std::max(fabs(xmax), fabs(ymax)));
@@ -77,48 +82,30 @@ double LRFxy::getRmax() const
 
 double LRFxy::eval(double x, double y, double /*z*/) const
 {
-    // TODO: insert check for bsr with popup on failure
-    if (!inDomain(x, y)) {
-//        qDebug() << x << "," << y << "Not in Domain";
-        return 0.;
-    }
-    return logscale ? exp(bsr->Eval(x, y)) : bsr->Eval(x, y);
+    return isReady() ? bsr->Eval(x, y) : 0.;
 }
 
-double LRFxy::evalErr(double /*x*/, double /*y*/, double /*z*/) const
+double LRFxy::evalErr(double x, double y, double /*z*/) const
 {
-    return 0;
+    return errorDefined() ? bse->Eval(x, y) : 0.;
 }
 
 double LRFxy::evalDrvX(double x, double y, double /*z*/) const
 {
-    // TODO: insert check for bsr with popup on failure
-    if (!inDomain(x, y))
-        return 0.;
-// TODO: handle logscale if possible
-    return bsr->EvalDrvX(x, y);
+    return isReady() ? bsr->EvalDrvX(x, y) : 0.;
 }
 
 double LRFxy::evalDrvY(double x, double y, double /*z*/) const
 {
-// TODO: insert check for bsr with popup on failure
-    if (!inDomain(x, y))
-        return 0.;
-// TODO: handle logscale if possible
-    return bsr->EvalDrvY(x, y);
+    return isReady() ? bsr->EvalDrvY(x, y) : 0.;
 }
 
 double LRFxy::eval(double x, double y, double /*z*/, double *err) const
 {
-    if (!inDomain(x, y)) {
-        *err = 0.;
-        return 0.;
-    }
-    *err = bse ? bse->Eval(x, y) : 0.;
-    return logscale ? exp(bsr->Eval(x, y)) : bsr->Eval(x, y);
+    *err = errorDefined() ? bse->Eval(x, y) : 0.;
+    return isReady() ? bsr->Eval(x, y) : 0.;
 }
 
-#ifdef NEWFIT
 double LRFxy::fit(int npts, const double *x, const double *y, const double * /*z*/, const double *data, bool grid)
 {
     std::vector <double> vx;
@@ -132,10 +119,10 @@ double LRFxy::fit(int npts, const double *x, const double *y, const double * /*z
         va.push_back(data[i]);
     }
 
-    bsr = new TPspline3(xmin, xmax, nintx, ymin, ymax, ninty);
-    valid = true;
+    bsr = new Bspline2d(xmin, xmax, nintx, ymin, ymax, ninty);
+//    valid = true;
 
-    TPS3fit F(bsr);
+    BSfit2D F(bsr);
     if (non_negative)
         F.SetConstraintNonNegative();
 
@@ -152,8 +139,7 @@ double LRFxy::fit(int npts, const double *x, const double *y, const double * /*z
     }
 }
 
-#else
-double LRFxy::fit(int npts, const double *x, const double *y, const double * /*z*/, const double *data, bool grid)
+double LRFxy::fitError(int npts, const double *x, const double *y, const double * /*z*/, const double *data, bool grid)
 {
     std::vector <double> vx;
     std::vector <double> vy;
@@ -163,25 +149,30 @@ double LRFxy::fit(int npts, const double *x, const double *y, const double * /*z
             continue;
         vx.push_back(x[i]);
         vy.push_back(y[i]);
-        va.push_back(data[i]);
+        double err = data[i] - bsr->Eval(x[i], y[i]);
+//        va.push_back(fabs(err));
+        va.push_back(err*err);
     }
 
-    bsr = new TPspline3(xmin, xmax, nintx, ymin, ymax, ninty);
-    valid = true;
+    bse = new Bspline2d(xmin, xmax, nintx, ymin, ymax, ninty);
 
-    if (!grid)
-        return fit_tpspline3(bsr, va.size(), &vx[0], &vy[0], &va[0]);
-    else
-        return fit_tpspline3_grid(bsr, va.size(), &vx[0], &vy[0], &va[0]);
+    BSfit2D F(bse);
+
+    if (!grid) {
+        F.Fit(va.size(), &vx[0], &vy[0], &va[0]);
+        return F.GetResidual();
+    } else {
+        F.AddData(va.size(), &vx[0], &vy[0], &va[0]);
+        F.Fit();
+        return F.GetResidual();
+    }
 }
-#endif
 
-void LRFxy::setSpline(TPspline3 *bs, bool log)
+void LRFxy::setSpline(Bspline2d *bs)
 {
     bsr = bs;
     bsr->GetRangeX(&xmin, &xmax);
     bsr->GetRangeY(&ymin, &ymax);
-    logscale = log;
 }
 
 void LRFxy::writeJSON(QJsonObject &json) const
@@ -212,7 +203,6 @@ QJsonObject LRFxy::reportSettings() const
   json["type"] = QString(type());
   json["n1"] = nintx;
   json["n2"] = ninty;
-  json["logscale"] = logscale;
 
   return json;
 }

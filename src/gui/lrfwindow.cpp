@@ -5,7 +5,6 @@
 #include "detectorclass.h"
 #include "graphwindowclass.h"
 #include "sensorlrfs.h"
-#include "alrfmoduleselector.h"
 #include "geometrywindowclass.h"
 #include "outputwindow.h"
 #include "eventsdataclass.h"
@@ -45,7 +44,7 @@ LRFwindow::LRFwindow(QWidget *parent, MainWindow *mw, EventsDataClass *eventsDat
 {
   MW = mw;
   EventsDataHub = eventsDataHub;
-  SensLRF = MW->Detector->LRFs->getOldModule();
+  SensLRF = MW->Detector->LRFs;
   PMs = MW->Detector->PMs;
 
   tmpIgnore = false;
@@ -72,15 +71,6 @@ LRFwindow::LRFwindow(QWidget *parent, MainWindow *mw, EventsDataClass *eventsDat
 
   QObject::connect(SensLRF, SIGNAL(SensorLRFsReadySignal(bool)), this, SLOT(LRF_ModuleReadySlot(bool)));
   QObject::connect(SensLRF, SIGNAL(ProgressReport(int)), this, SLOT(onProgressReportReceived(int)));
-
-#ifndef NEWFIT
-  ui->frAdvancedLrfConstrains->setEnabled(false);
-
-  ui->cbForceNonNegative->setChecked(false);
-  ui->cbForceNonIncreasingInR->setChecked(false);
-  ui->cobForceInZ->setCurrentIndex(0);
-  ui->cbForceTopDown->setChecked(false);
-#endif
 
   LRFwindow::on_pbUpdateGUI_clicked(); //update GUI to set enable/visible/index status
   LRFwindow::on_pbShrink_clicked();
@@ -110,7 +100,7 @@ void LRFwindow::onBusyOff()
 
 void LRFwindow::showLRF()
 {
-    ALrfDraw lrfd(MW->Detector->LRFs, true, EventsDataHub, PMs, MW->GraphWindow);
+    ALrfDraw lrfd(MW->Detector->LRFs, EventsDataHub, PMs, MW->GraphWindow);
 
     QJsonObject json;
     json["DataSource"] =  ui->cb_data_selector->currentIndex(); //0 - sim, 1 - loaded
@@ -723,7 +713,7 @@ void LRFwindow::DoMakeGroupLRF(int igroup)
 
 void LRFwindow::drawRadial()
 {
-   ALrfDraw lrfd(MW->Detector->LRFs, true, EventsDataHub, PMs, MW->GraphWindow);
+   ALrfDraw lrfd(MW->Detector->LRFs, EventsDataHub, PMs, MW->GraphWindow);
 
    QJsonObject json;
    json["DataSource"] =  ui->cb_data_selector->currentIndex(); //0 - sim, 1 - loaded

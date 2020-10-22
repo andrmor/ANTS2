@@ -99,8 +99,6 @@ void MainWindow::createScriptWindow()
 
     ALrf_SI* lrf = new ALrf_SI(Config, EventsDataHub);
     ScriptWindow->RegisterInterface(lrf, "lrf");
-    ALrfRaim_SI* newLrf = new ALrfRaim_SI(Detector, EventsDataHub);
-    ScriptWindow->RegisterInterface(newLrf, "newLrf");
 
     APms_SI* pmS = new APms_SI(Config);
     ScriptWindow->RegisterInterface(pmS, "pms");

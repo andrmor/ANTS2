@@ -20,20 +20,6 @@
 #include "TFile.h"
 #include "TH2D.h"
 
-void ReconstructionWindow::writeLrfModuleSelectionToJson(QJsonObject &json)
-{
-  json["LRFmoduleSelected"] = ui->cobLRFmodule->currentIndex();
-}
-
-void ReconstructionWindow::readLrfModuleSelectionFromJson(QJsonObject &json)
-{
-  int selection = 0;
-  parseJson(json, "LRFmoduleSelected", selection);
-
-  if (selection>-1 && selection<ui->cobLRFmodule->count())
-    ui->cobLRFmodule->setCurrentIndex(selection);
-}
-
 void ReconstructionWindow::writeMiscGUIsettingsToJson(QJsonObject &json)
 {
   QJsonObject js;

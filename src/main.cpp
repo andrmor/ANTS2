@@ -294,8 +294,6 @@ int main(int argc, char *argv[])
         SM.RegisterInterface(rec, "rec");
         ALrf_SI* lrf = new ALrf_SI(&Config, &EventsDataHub);
         SM.RegisterInterface(lrf, "lrf");
-        ALrfRaim_SI* newLrf = new ALrfRaim_SI(&Detector, &EventsDataHub);
-        SM.RegisterInterface(newLrf, "newLrf");
         APms_SI* pmS = new APms_SI(&Config);
         SM.RegisterInterface(pmS, "pms");
         AInterfaceToGraph* graph = new AInterfaceToGraph(&TmpHub);

@@ -20,13 +20,14 @@ PMsensor::PMsensor() : gain(1.), lrf(0)
 //{
 //    readJSON(json);
 //}
-
+#if 0
 void PMsensor::SetPhi(double phi)
 {
     this->phi = phi;
     sinphi = sin(phi);
     cosphi = cos(phi);
 }
+#endif
 
 void PMsensor::writeJSON(QJsonObject &json) const
 {
@@ -192,7 +193,12 @@ double PMsensor::eval(const double *pos_world) const
   ///return lrf->eval(transform(pos_world))*gain;
   double pos_local[3];
   transform(pos_world, pos_local);
-  return lrf->eval(pos_local)*gain;
+// VS(8/12/2018) -- a hack to fix the problem with negative lrfs
+// problem stems from the fact that we return 0 to signal
+// out of domain situation and then test for <= 0
+// so I convert negatives to small positive values here
+  double val = lrf->eval(pos_local)*gain;
+  return val < 0 ? 1e-6 : val;
 }
 
 double PMsensor::evalErr(const double *pos_world) const

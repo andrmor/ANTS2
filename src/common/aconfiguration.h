@@ -56,7 +56,7 @@ public:
 public slots:
   //module-specific
   void UpdateLRFmakeJson();
-  void UpdateLRFv3makeJson();
+//  void UpdateLRFv3makeJson();
   void UpdateReconstructionSettings(QJsonObject& jsonRec, int iGroup);
   void UpdateFilterSettings(QJsonObject& jsonFilt, int iGroup);
   void UpdateParticlesJson();  //does not trigger gui update anymore!

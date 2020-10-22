@@ -13,13 +13,13 @@
 
 #include <QObject>
 #include <QVector>
-#include <atomic>
+//#include <atomic>
 
 class EventsDataClass;
 class DetectorClass;
 class APmHub;
 class APmGroupsManager;
-class ALrfModuleSelector;
+class SensorLRFs;
 class TmpObjHubClass;
 class DynamicPassivesHandler;
 class AReconstructionWorker;
@@ -69,7 +69,7 @@ public:
   DetectorClass* Detector;
   APmHub* PMs;
   APmGroupsManager* PMgroups;
-  ALrfModuleSelector* LRFs;
+  SensorLRFs* LRFs;
 
   //Calibrators for signal per photo electron
   ACalibratorSignalPerPhEl_Stat* Calibrator_Stat; //based on statistics
@@ -85,8 +85,6 @@ private:
 
   bool bBusy;
 
-  std::atomic<bool> fDoingCopyLRFs;
- 
   bool run(QList<AReconstructionWorker*> reconstructorList);
 
   //misc
@@ -105,7 +103,6 @@ private:
 public slots:
   void requestStop() {fStopRequested = true;}
   void onRequestClearKNNfilter();
-  void onLRFsCopied();
   void onRequestFilterAndAskToUpdateGui(); //for gui remote, triggered by EventsDataHub
 
 signals:

@@ -5,7 +5,7 @@
 #include "reconstructionwindow.h"
 #include "materialinspectorwindow.h"
 #include "lrfwindow.h"
-#include "alrfwindow.h"
+//#include "alrfwindow.h"
 #include "graphwindowclass.h"
 #include "geometrywindowclass.h"
 #include "exampleswindow.h"
@@ -227,11 +227,6 @@ void WindowNavigatorClass::on_pbMaxAll_clicked()
       MW->lrfwindow->showNormal();
       MW->lrfwindow->raise();
     }
-  if (NewLRFon)
-    {
-      MW->newLrfWindow->showNormal();
-      MW->newLrfWindow->raise();
-    }
   if (GeometryOn)
     {
       MW->GeometryWindow->showNormal();
@@ -274,7 +269,7 @@ void WindowNavigatorClass::on_pbMinAll_clicked()
 
   QVector<QMainWindow*> vec;
 
-  vec << MW->DAwindow<<MW->Owindow<<MW->Rwindow<<MW->lrfwindow<<MW->newLrfWindow<<MW->MIwindow<<MW->ELwindow<<MW->GraphWindow<<MW->GeometryWindow<<MW->ScriptWindow;
+  vec << MW->DAwindow<<MW->Owindow<<MW->Rwindow<<MW->lrfwindow<<MW->MIwindow<<MW->ELwindow<<MW->GraphWindow<<MW->GeometryWindow<<MW->ScriptWindow;
   if (MW->PythonScriptWindow) vec << MW->PythonScriptWindow;
   if (MW->GenScriptWindow) vec <<MW->GenScriptWindow;
   if (MW->GainWindow) vec << MW->GainWindow;
@@ -340,12 +335,7 @@ void WindowNavigatorClass::on_pbLRF_clicked()
 
 void WindowNavigatorClass::on_pbNewLRF_clicked()
 {
-  if ( MW->newLrfWindow->isHidden() || MW->newLrfWindow->isMinimized() || (!NewLRFon) )
-    {
-        MW->newLrfWindow->showNormal();
-        MW->newLrfWindow->raise();
-    }
-  else MW->newLrfWindow->hide();
+
 }
 
 void WindowNavigatorClass::on_pbGeometry_clicked()

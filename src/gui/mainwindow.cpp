@@ -48,7 +48,7 @@
 #include "apreprocessingsettings.h"
 #include "aconfiguration.h"
 #include "ascriptwindow.h"
-#include "gui/alrfwindow.h"
+//#include "gui/alrfwindow.h"
 #include "acustomrandomsampling.h"
 #include "asourceparticlegenerator.h"
 #include "ajavascriptmanager.h"
@@ -3653,9 +3653,7 @@ void MainWindow::on_pbUnlockGui_clicked()
 
 void MainWindow::on_actionNewLRFModule_triggered()
 {
-  newLrfWindow->showNormal();
-  newLrfWindow->raise();
-  newLrfWindow->activateWindow();
+
 }
 
 void MainWindow::onGuiEnableStatus(bool fLocked)

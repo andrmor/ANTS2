@@ -571,15 +571,15 @@ bool DetectorClass::processGDML()   //if failed, caller have to do: GeoManager =
   int totNodes = top->GetNdaughters();
   // qDebug()<<totNodes;
   bool flagFound = false;
-  int offsetNumber;
+  //int offsetNumber;
   for (int i=0; i<totNodes; i++)
     {
-      TGeoNode* thisNode = (TGeoNode*)top->GetNodes()->At(i);
+      //TGeoNode* thisNode = (TGeoNode*)top->GetNodes()->At(i);
       QString nodename = top->GetNodes()->At(i)->GetName();
       if (nodename.startsWith("PM"))
         {
           flagFound = true;
-          offsetNumber =  thisNode->GetNumber();
+          //offsetNumber =  thisNode->GetNumber();
           break;
         }      
     }

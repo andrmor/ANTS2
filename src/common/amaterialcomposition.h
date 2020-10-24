@@ -21,7 +21,7 @@ public:
     QString setCompositionString(const QString composition, bool KeepIsotopComposition = false);  // return error string if invalid composition, else returns ""
     QString setCompositionByWeightString(const QString composition);  // return error string if invalid composition, else returns ""
 
-    void updateMassRelatedpPoperties();
+    void updateMassRelatedPoperties();
 
     void clear();
     bool isDefined() const {return !ElementComposition.isEmpty();}
@@ -54,8 +54,10 @@ private:
 
     QString ComputedCompositionByMass;
 
-    void computeCompositionByMass();
+    void    computeCompositionByMass();
 
+    QString compositionToRecords(const QString &Composition, QVector<QPair<QString, double> > &Records);
+    QString fillNaturalAbundances(const QMap<QString, double> & map, QVector<AChemicalElement> &tmpElements, bool KeepIsotopComposition);
 };
 
 #endif // AMATERIALCOMPOSITION_H

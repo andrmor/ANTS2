@@ -2030,7 +2030,7 @@ void MaterialInspectorWindow::onAddIsotope(AChemicalElement *element)
 
     AMaterial& tmpMaterial = MpCollection->tmpMaterial;
     //tmpMaterial.ChemicalComposition.CalculateMeanAtomMass();
-    tmpMaterial.ChemicalComposition.updateMassRelatedpPoperties();
+    tmpMaterial.ChemicalComposition.updateMassRelatedPoperties();
     tmpMaterial.updateNeutronDataOnCompositionChange(MpCollection);
 
     FillNeutronTable();
@@ -2051,7 +2051,7 @@ void MaterialInspectorWindow::onRemoveIsotope(AChemicalElement *element, int iso
 
     AMaterial& tmpMaterial = MpCollection->tmpMaterial;
     //tmpMaterial.ChemicalComposition.CalculateMeanAtomMass();
-    tmpMaterial.ChemicalComposition.updateMassRelatedpPoperties();
+    tmpMaterial.ChemicalComposition.updateMassRelatedPoperties();
     tmpMaterial.updateNeutronDataOnCompositionChange(MpCollection);
 
     //ShowTreeWithChemicalComposition();
@@ -2064,7 +2064,7 @@ void MaterialInspectorWindow::IsotopePropertiesChanged(const AChemicalElement * 
 {
     AMaterial& tmpMaterial = MpCollection->tmpMaterial;
     //tmpMaterial.ChemicalComposition.CalculateMeanAtomMass();
-    tmpMaterial.ChemicalComposition.updateMassRelatedpPoperties();
+    tmpMaterial.ChemicalComposition.updateMassRelatedPoperties();
     tmpMaterial.updateNeutronDataOnCompositionChange(MpCollection);
 
     //ShowTreeWithChemicalComposition();
@@ -2180,8 +2180,9 @@ void MaterialInspectorWindow::on_pbModifyByWeight_clicked()
         connect(pb, SIGNAL(clicked(bool)), d, SLOT(accept()));
     L->addLayout(l);
     L->addWidget(new QLabel("Give weight factors for each element separately, e.g.:\n"));
-    L->addWidget(new QLabel("C:15.0 + H:25.0"));
-    L->addWidget(new QLabel("\nNote that Ants will recalculate this composition to molar one.\n"
+    L->addWidget(new QLabel("H:0.1112 + O:0.8889"));
+    L->addWidget(new QLabel("\nNote that Ants will recalculate this composition to molar one,\n"
+                            "and then show re-calculated weight factors with the sum of unity!\n\n"
                             "Any subsequent changes to isotope composition of involved elements\n"
                             "will modify the composition!"));
     d->setLayout(L);

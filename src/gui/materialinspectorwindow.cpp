@@ -2113,18 +2113,18 @@ void MaterialInspectorWindow::on_pbModifyChemicalComposition_clicked()
     AMaterial& tmpMaterial = MpCollection->tmpMaterial;
 
     QDialog* d = new QDialog(this);
-    d->setWindowTitle("Enter chemical composition");
+    d->setWindowTitle("Enter element composition (molar fractions!)");
 
     QVBoxLayout* L = new QVBoxLayout();
         QHBoxLayout* l = new QHBoxLayout();
-        QLineEdit* le = new QLineEdit(ui->leChemicalComposition->text(), this);
+        QLineEdit* le = new QLineEdit(tmpMaterial.ChemicalComposition.getCompositionString(), this);
         le->setMinimumSize(400,25);
         QPushButton* pb = new QPushButton("Confirm", this);
         l->addWidget(le);
         l->addWidget(pb);
         connect(pb, SIGNAL(clicked(bool)), d, SLOT(accept()));
     L->addLayout(l);
-    L->addWidget(new QLabel("Examples of valid formatting:"));
+    L->addWidget(new QLabel("Format examples:\n"));
     L->addWidget(new QLabel("C2H5OH   - use only integer values!"));
     L->addWidget(new QLabel("C:0.3333 + H:0.6667  -> molar fractions of 1/3 of carbon and 2/3 of hydrogen"));
     L->addWidget(new QLabel("H2O:9.0 + NaCl:0.2 -> 9.0 parts of H2O and 0.2 parts of NaCl"));
@@ -2134,6 +2134,62 @@ void MaterialInspectorWindow::on_pbModifyChemicalComposition_clicked()
     {
         AMaterialComposition& mc = tmpMaterial.ChemicalComposition;
         QString error = mc.setCompositionString(le->text(), true);
+        if (!error.isEmpty())
+        {
+            message(error, d);
+            continue;
+        }
+
+        UpdateGui();
+        //ui->leChemicalComposition->setText(mc.getCompositionString());
+        //ShowTreeWithChemicalComposition();
+        break;
+    }
+
+    if (d->result() == 0) return;
+
+    tmpMaterial.updateNeutronDataOnCompositionChange(MpCollection);
+
+    int numNewPart = 0;
+    if (OptionsConfigurator->isAutoloadEnabled())
+        numNewPart += autoloadMissingCrossSectionData();
+
+    FillNeutronTable(); //fill table if neutron is selected
+
+    if (numNewPart > 0)
+        updateTmpMatOnPartCollChange(numNewPart);
+
+    setWasModified(true);
+    updateWarningIcons();
+}
+
+void MaterialInspectorWindow::on_pbModifyByWeight_clicked()
+{
+    AMaterial& tmpMaterial = MpCollection->tmpMaterial;
+
+    QDialog* d = new QDialog(this);
+    d->setWindowTitle("Enter element composition (fractions by weight!)");
+
+    QVBoxLayout* L = new QVBoxLayout();
+        QHBoxLayout* l = new QHBoxLayout();
+        QLineEdit* le = new QLineEdit(tmpMaterial.ChemicalComposition.getCompositionByWeightString(), this);
+        le->setMinimumSize(400,25);
+        QPushButton* pb = new QPushButton("Confirm", this);
+        l->addWidget(le);
+        l->addWidget(pb);
+        connect(pb, SIGNAL(clicked(bool)), d, SLOT(accept()));
+    L->addLayout(l);
+    L->addWidget(new QLabel("Give weight factors for each element separately, e.g.:\n"));
+    L->addWidget(new QLabel("C:15.0 + H:25.0"));
+    L->addWidget(new QLabel("\nNote that Ants will recalculate this composition to molar one.\n"
+                            "Any subsequent changes to isotope composition of involved elements\n"
+                            "will modify the composition!"));
+    d->setLayout(L);
+
+    while (d->exec() != 0)
+    {
+        AMaterialComposition& mc = tmpMaterial.ChemicalComposition;
+        QString error = mc.setCompositionByWeightString(le->text());
         if (!error.isEmpty())
         {
             message(error, d);

@@ -141,6 +141,8 @@ private slots:
 
     void on_pbReloadAllNeutronCSs_clicked();
 
+    void on_pbModifyByWeight_clicked();
+
 private:
     Ui::MaterialInspectorWindow * ui = nullptr;
     MainWindow                  * MW = nullptr;

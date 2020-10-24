@@ -19,6 +19,7 @@ class AMaterialComposition
 {
 public:
     QString setCompositionString(const QString composition, bool KeepIsotopComposition = false);  // return error string if invalid composition, else returns ""
+    QString setCompositionByWeightString(const QString composition);  // return error string if invalid composition, else returns ""
 
     void updateMassRelatedpPoperties();
 

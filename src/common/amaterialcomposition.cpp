@@ -164,6 +164,11 @@ QString AMaterialComposition::setCompositionString(const QString composition, bo
     return "";
 }
 
+QString AMaterialComposition::setCompositionByWeightString(const QString composition)
+{
+
+}
+
 void AMaterialComposition::updateMassRelatedpPoperties()
 {
     MeanAtomMass = 0;

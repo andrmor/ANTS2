@@ -547,7 +547,7 @@ Can be used to automatically configure gamma interaction cross-sections and neut
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton">
+           <widget class="QPushButton" name="pbModifyByWeight">
             <property name="maximumSize">
              <size>
               <width>75</width>

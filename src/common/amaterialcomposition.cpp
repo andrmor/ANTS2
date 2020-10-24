@@ -167,6 +167,7 @@ QString AMaterialComposition::setCompositionString(const QString composition, bo
 QString AMaterialComposition::setCompositionByWeightString(const QString composition)
 {
 
+    return "";
 }
 
 void AMaterialComposition::updateMassRelatedpPoperties()

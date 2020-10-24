@@ -269,6 +269,7 @@ void MaterialInspectorWindow::UpdateGui()
     ui->ledT->setText( QString::number(tmpMaterial.temperature) );
 
     ui->leChemicalComposition->setText( tmpMaterial.ChemicalComposition.getCompositionString() );
+    ui->leCompositionByWeight->setText( tmpMaterial.ChemicalComposition.getCompositionByWeightString() );
     ShowTreeWithChemicalComposition();
     tmpMaterial.updateNeutronDataOnCompositionChange(MpCollection);
 
@@ -2028,11 +2029,14 @@ void MaterialInspectorWindow::onAddIsotope(AChemicalElement *element)
     element->Isotopes << AIsotope(element->Symbol, 777, 0);
 
     AMaterial& tmpMaterial = MpCollection->tmpMaterial;
-    tmpMaterial.ChemicalComposition.CalculateMeanAtomMass();
+    //tmpMaterial.ChemicalComposition.CalculateMeanAtomMass();
+    tmpMaterial.ChemicalComposition.updateMassRelatedpPoperties();
     tmpMaterial.updateNeutronDataOnCompositionChange(MpCollection);
 
-    ShowTreeWithChemicalComposition();
     FillNeutronTable();
+    UpdateGui();
+
+    //ShowTreeWithChemicalComposition();
     setWasModified(true);
 }
 
@@ -2046,22 +2050,26 @@ void MaterialInspectorWindow::onRemoveIsotope(AChemicalElement *element, int iso
     element->Isotopes.removeAt(isotopeIndexInElement);
 
     AMaterial& tmpMaterial = MpCollection->tmpMaterial;
-    tmpMaterial.ChemicalComposition.CalculateMeanAtomMass();
+    //tmpMaterial.ChemicalComposition.CalculateMeanAtomMass();
+    tmpMaterial.ChemicalComposition.updateMassRelatedpPoperties();
     tmpMaterial.updateNeutronDataOnCompositionChange(MpCollection);
 
-    ShowTreeWithChemicalComposition();
+    //ShowTreeWithChemicalComposition();
     FillNeutronTable();
+    UpdateGui();
     setWasModified(true);
 }
 
 void MaterialInspectorWindow::IsotopePropertiesChanged(const AChemicalElement * /*element*/, int /*isotopeIndexInElement*/)
 {
     AMaterial& tmpMaterial = MpCollection->tmpMaterial;
-    tmpMaterial.ChemicalComposition.CalculateMeanAtomMass();
+    //tmpMaterial.ChemicalComposition.CalculateMeanAtomMass();
+    tmpMaterial.ChemicalComposition.updateMassRelatedpPoperties();
     tmpMaterial.updateNeutronDataOnCompositionChange(MpCollection);
 
-    ShowTreeWithChemicalComposition();
+    //ShowTreeWithChemicalComposition();
     FillNeutronTable();
+    UpdateGui();
     setWasModified(true);
 }
 
@@ -2117,20 +2125,14 @@ void MaterialInspectorWindow::on_pbModifyChemicalComposition_clicked()
         connect(pb, SIGNAL(clicked(bool)), d, SLOT(accept()));
     L->addLayout(l);
     L->addWidget(new QLabel("Examples of valid formatting:"));
-    L->addWidget(new QLabel("H2O:9 + NaCl:0.2 - means 9 parts of H2O and 0.2 parts of NaCl"));
-    L->addWidget(new QLabel("C2 H5 OH"));
-    L->addWidget(new QLabel("C22H10N205"));
+    L->addWidget(new QLabel("C2H5OH   - use only integer values!"));
+    L->addWidget(new QLabel("C:0.3333 + H:0.6667  -> molar fractions of 1/3 of carbon and 2/3 of hydrogen"));
+    L->addWidget(new QLabel("H2O:9.0 + NaCl:0.2 -> 9.0 parts of H2O and 0.2 parts of NaCl"));
     d->setLayout(L);
 
     while (d->exec() != 0)
     {
-        //QString newComp = le->text();
-        //      qDebug() << newComp;
-
         AMaterialComposition& mc = tmpMaterial.ChemicalComposition;
-
-        //future: if want to update isotope abundance, re-read file here
-
         QString error = mc.setCompositionString(le->text(), true);
         if (!error.isEmpty())
         {
@@ -2138,11 +2140,13 @@ void MaterialInspectorWindow::on_pbModifyChemicalComposition_clicked()
             continue;
         }
 
-        ui->leChemicalComposition->setText(mc.getCompositionString());
-        //message(mc.print(), this);
-        ShowTreeWithChemicalComposition();
+        UpdateGui();
+        //ui->leChemicalComposition->setText(mc.getCompositionString());
+        //ShowTreeWithChemicalComposition();
         break;
     }
+
+    if (d->result() == 0) return;
 
     tmpMaterial.updateNeutronDataOnCompositionChange(MpCollection);
 

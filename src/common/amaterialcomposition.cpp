@@ -159,22 +159,23 @@ QString AMaterialComposition::setCompositionString(const QString composition, bo
     ElementComposition = tmpElements;
     ElementCompositionString = composition.simplified();
 
-    //calculating mean atom mass
-    CalculateMeanAtomMass();
+    updateMassRelatedpPoperties();
 
     return "";
 }
 
-void AMaterialComposition::CalculateMeanAtomMass()
+void AMaterialComposition::updateMassRelatedpPoperties()
 {
     MeanAtomMass = 0;
     for (const AChemicalElement& el : ElementComposition)
         for (const AIsotope& iso : el.Isotopes)
         {
-            qDebug() << iso.Symbol << iso.Mass <<" fract:" <<el.MolarFraction <<"aband:"<< iso.Abundancy;
+            //qDebug() << iso.Symbol << iso.Mass <<" fract:" <<el.MolarFraction <<"aband:"<< iso.Abundancy;
             MeanAtomMass += iso.Mass * el.MolarFraction * 0.01*iso.Abundancy;
         }
-    qDebug() << "Mean atom mass is"<< MeanAtomMass;
+    //qDebug() << "Mean atom mass is"<< MeanAtomMass;
+
+    computeCompositionByMass();
 }
 
 const QString AMaterialComposition::checkForErrors() const
@@ -223,6 +224,22 @@ TGeoMaterial *AMaterialComposition::generateTGeoMaterial(const QString &MatName,
     }
 }
 
+void AMaterialComposition::computeCompositionByMass()
+{
+    ComputedCompositionByMass.clear();
+
+    for (const AChemicalElement & el : ElementComposition)
+    {
+        double thisElementAverageMass = 0;
+        for (const AIsotope& iso : el.Isotopes)
+            thisElementAverageMass += iso.Mass * 0.01*iso.Abundancy;
+        double thisElementWeightFraction = thisElementAverageMass * el.MolarFraction / MeanAtomMass;
+
+        if (!ComputedCompositionByMass.isEmpty()) ComputedCompositionByMass += " + ";
+        ComputedCompositionByMass += QString("%1:%2").arg(el.Symbol).arg(thisElementWeightFraction, 0, 'g', 4);
+    }
+}
+
 int AMaterialComposition::countIsotopes() const
 {
     int count = 0;
@@ -253,8 +270,10 @@ const QString AMaterialComposition::print() const
 
 void AMaterialComposition::clear()
 {
-    ElementCompositionString = "";
+    ElementCompositionString.clear();
     ElementComposition.clear();
+
+    ComputedCompositionByMass.clear();
 }
 
 void AMaterialComposition::writeToJson(QJsonObject &json) const
@@ -270,7 +289,7 @@ void AMaterialComposition::writeToJson(QJsonObject &json) const
     }
     json["ElementComposition"] = ar;
 
-    json["MeanAtomMass"] = MeanAtomMass;
+    //json["MeanAtomMass"] = MeanAtomMass;
 }
 
 const QJsonObject AMaterialComposition::writeToJson() const
@@ -295,5 +314,7 @@ void AMaterialComposition::readFromJson(const QJsonObject &json)
         ElementComposition << el;
     }
 
-    parseJson(json, "MeanAtomMass", MeanAtomMass);
+    //parseJson(json, "MeanAtomMass", MeanAtomMass);
+    updateMassRelatedpPoperties();
+    //computeCompositionByMass();
 }

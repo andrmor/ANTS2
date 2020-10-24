@@ -19,7 +19,14 @@ class AMaterialComposition
 {
 public:
     QString setCompositionString(const QString composition, bool KeepIsotopComposition = false);  // return error string if invalid composition, else returns ""
+
+    void updateMassRelatedpPoperties();
+
+    void clear();
+    bool isDefined() const {return !ElementComposition.isEmpty();}
+
     QString getCompositionString() const {return ElementCompositionString;}
+    QString getCompositionByWeightString() const {return ComputedCompositionByMass;}
 
     int countElements() const {return ElementComposition.size();}
     int countIsotopes() const;
@@ -30,14 +37,10 @@ public:
 
     const QString print() const;
 
-    void clear();
-    bool isDefined() const {return !ElementComposition.isEmpty();}
-
     void writeToJson(QJsonObject& json) const;
     const QJsonObject writeToJson() const;
     void readFromJson(const QJsonObject& json);
 
-    void CalculateMeanAtomMass();
 
     const QString checkForErrors() const; //returns empty string if OK
 
@@ -47,6 +50,10 @@ private:
     QString ElementCompositionString;
     QVector<AChemicalElement> ElementComposition;
     double MeanAtomMass; //mean atom mass of the material (in au)
+
+    QString ComputedCompositionByMass;
+
+    void computeCompositionByMass();
 
 };
 

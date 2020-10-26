@@ -201,14 +201,18 @@ QString AMaterialComposition::setCompositionByWeightString(const QString composi
 
     //recalculating fractions
     double sumMass = 0;
-    for (const AChemicalElement & el : ElementComposition)
-        sumMass += el.getFractionWeight() * map[el.Symbol];
-    QString NewMolarComposition;
-    for (AChemicalElement & el : ElementComposition)
+    for (const AChemicalElement & el : tmpElements) sumMass += el.getFractionWeight() * map[el.Symbol];
+    double sumMolar = 0;
+    for (AChemicalElement & el : tmpElements)
     {
         el.MolarFraction = map[el.Symbol] * sumMass / el.getFractionWeight();   // F1W1 + .. + FnWn = W    ->   f1 = F1*W1/W   ->   F1 = f1*W/W1
+        sumMolar += el.MolarFraction;
+    }
+    QString NewMolarComposition;
+    for (AChemicalElement & el : tmpElements)
+    {
         if (!NewMolarComposition.isEmpty()) NewMolarComposition += " + ";
-        NewMolarComposition += QString("%1:%2").arg(el.Symbol).arg(el.MolarFraction);
+        NewMolarComposition += QString("%1:%2").arg(el.Symbol).arg(el.MolarFraction/sumMolar);
     }
 
     return setCompositionString(NewMolarComposition, true);

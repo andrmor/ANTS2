@@ -671,8 +671,10 @@ void MainWindow::on_pbEditParticleSource_clicked()
     AParticleSourceRecord * ps = SourceGenSettings.getSourceRecord(isource);
     ps->updateLimitedToMat(*Detector->MpCollection);
 
+    on_pbUpdateSimConfig_clicked();
+
     if (Detector->isGDMLempty())
-    { //check world size
+    {
         double XYm = 0;
         double  Zm = 0;
         for (int isource = 0; isource < numSources; isource++)
@@ -689,16 +691,15 @@ void MainWindow::on_pbEditParticleSource_clicked()
         double currXYm = Detector->Sandwich->getWorldSizeXY();
         double  currZm = Detector->Sandwich->getWorldSizeZ();
         if (XYm > currXYm || Zm > currZm)
-          {
+        {
             //need to override
             Detector->Sandwich->setWorldSizeFixed(true);
-            Detector->Sandwich->setWorldSizeXY( std::max(XYm, currXYm) );
-            Detector->Sandwich->setWorldSizeZ ( std::max(Zm,  currZm) );
+            Detector->Sandwich->setWorldSizeXY( std::max(1.05*XYm, currXYm) );
+            Detector->Sandwich->setWorldSizeZ ( std::max(1.05*Zm,  currZm) );
             ReconstructDetector();
-          }
+        }
     }
 
-    on_pbUpdateSimConfig_clicked();
     if (ui->pbGunShowSource->isChecked()) ShowParticleSource_noFocus();
 }
 

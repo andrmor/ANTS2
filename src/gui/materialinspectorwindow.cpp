@@ -273,6 +273,9 @@ void MaterialInspectorWindow::UpdateGui()
     ShowTreeWithChemicalComposition();
     tmpMaterial.updateNeutronDataOnCompositionChange(MpCollection);
 
+    ui->cbG4Material->setChecked(tmpMaterial.bG4UseNistMaterial);
+    ui->leG4Material->setText(tmpMaterial.G4NistMaterial);
+
     ui->ledN->setText( QString::number(tmpMaterial.n) );
     ui->ledAbs->setText( QString::number(tmpMaterial.abs) );
     ui->ledReemissionProbability->setText( QString::number(tmpMaterial.reemissionProb) );
@@ -509,6 +512,9 @@ void MaterialInspectorWindow::on_pbUpdateTmpMaterial_clicked()
     tmpMaterial.Tags.clear();
     for (const QString & s : slTags)
         tmpMaterial.Tags << s.simplified();
+
+    tmpMaterial.bG4UseNistMaterial = ui->cbG4Material->isChecked();
+    tmpMaterial.G4NistMaterial = ui->leG4Material->text();
 
     on_ledGammaDiagnosticsEnergy_editingFinished(); //gamma - update MFP
 }

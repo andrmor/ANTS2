@@ -836,6 +836,20 @@ void AParticleSourceSimulator::generateG4antsConfigCommon(QJsonObject & json)
     for (auto & mname : Materials ) Marr << mname;
     json["Materials"] = Marr;
 
+    QJsonArray OverrideMats;
+    for (int iMat = 0; iMat < MpCollection.countMaterials(); iMat++)
+    {
+        const AMaterial * mat = MpCollection[iMat];
+        if (mat->bG4UseNistMaterial)
+        {
+            QJsonArray el; el << mat->name << mat->G4NistMaterial;
+            OverrideMats << el;
+        }
+    }
+    if (!OverrideMats.isEmpty()) json["MaterialsToRebuild"] = OverrideMats;
+
+    json["ActivateThermalScattering"] = G4SimSet.UseTSphys;
+
     QJsonArray SVarr;
     for (auto & v : G4SimSet.SensitiveVolumes ) SVarr << v;
     json["SensitiveVolumes"] = SVarr;

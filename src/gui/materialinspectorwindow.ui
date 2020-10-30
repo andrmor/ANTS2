@@ -267,6 +267,23 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_47">
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QCheckBox" name="cbG4Material">
+            <property name="text">
+             <string>In Geant4, use data from material database for material:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="leG4Material"/>
+          </item>
+         </layout>
+        </item>
+        <item>
          <widget class="QLabel" name="label_12">
           <property name="text">
            <string/>

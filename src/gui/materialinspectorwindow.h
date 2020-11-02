@@ -15,6 +15,7 @@ class AChemicalElement;
 class ANeutronInteractionElement;
 class ANeutronInfoDialog;
 class AMaterialParticleCollection;
+class AMaterial;
 
 namespace Ui {
 class MaterialInspectorWindow;
@@ -116,11 +117,15 @@ private slots:
     void on_ledNcmatPacking_editingFinished();
     void on_cbUseNCrystal_clicked(bool checked);
     void on_pbSecScintHelp_clicked();
+    void on_pbCopyIntrEnResToAll_clicked();
+    void on_pbReloadAllNeutronCSs_clicked();
+    void on_pbModifyByWeight_clicked();
 
     //user or code controlled change - safe or only GUI
     void on_ledRayleigh_textChanged(const QString &arg1);
     void on_cbUseNCrystal_toggled(bool checked);
     void on_pteComments_textChanged();
+    void on_cbG4Material_toggled(bool checked);
 
     //menu actions
     void on_actionSave_material_triggered();
@@ -133,17 +138,9 @@ private slots:
     void on_actionNeutrons_triggered();
     void on_actionLoad_from_material_library_triggered();
     void on_actionAdd_default_material_triggered();
+    void on_actionReload_neutron_cross_sections_for_all_materials_triggered();
 
     //new auto-generated, not cathegorized
-
-
-    void on_pbCopyIntrEnResToAll_clicked();
-
-    void on_pbReloadAllNeutronCSs_clicked();
-
-    void on_pbModifyByWeight_clicked();
-
-    void on_cbG4Material_toggled(bool checked);
 
 private:
     Ui::MaterialInspectorWindow * ui = nullptr;
@@ -189,6 +186,7 @@ private:
     void updateTmpMatOnPartCollChange(int newPartAdded);
     void updateEnableStatus();  // gui update for tracking allow / transparent
     void updateG4RelatedGui();
+    int  doAutoloadMissingCrossSectionData(AMaterial & material, bool bForceReload);
 };
 
 #endif // MATERIALINSPECTORWINDOW_H

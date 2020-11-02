@@ -2466,15 +2466,17 @@ void MaterialInspectorWindow::FillNeutronTable()
 
 int MaterialInspectorWindow::autoloadMissingCrossSectionData(bool bForceReload)
 {
-    AMaterial& tmpMaterial = MpCollection->tmpMaterial;
+    return doAutoloadMissingCrossSectionData(MpCollection->tmpMaterial, bForceReload);
+}
 
+int MaterialInspectorWindow::doAutoloadMissingCrossSectionData(AMaterial & material, bool bForceReload)
+{
     int newParticlesDefined = 0;
 
-    //for neutron
     int neutronId = MpCollection->getNeutronIndex();
     if (neutronId != -1) //otherwise not defined in this configuration
     {
-        MatParticleStructure& mp = tmpMaterial.MatParticle[neutronId];
+        MatParticleStructure& mp = material.MatParticle[neutronId];
 
         bool bCapture = mp.bCaptureEnabled;
         bool bElastic = mp.bElasticEnabled;
@@ -3044,4 +3046,17 @@ void MaterialInspectorWindow::on_actionAdd_default_material_triggered()
 void MaterialInspectorWindow::on_cbG4Material_toggled(bool)
 {
     updateG4RelatedGui();
+}
+
+void MaterialInspectorWindow::on_actionReload_neutron_cross_sections_for_all_materials_triggered()
+{
+    int iMat = ui->cobActiveMaterials->currentIndex();
+
+    for (int iMat = 0; iMat < MpCollection->countMaterials(); iMat++)
+        doAutoloadMissingCrossSectionData( *((*MpCollection)[iMat]), true);
+
+    MW->ReconstructDetector(true);
+    MW->UpdateMaterialListEdit(); //need?
+
+    showMaterial(iMat);
 }

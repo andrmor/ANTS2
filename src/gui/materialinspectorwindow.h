@@ -143,6 +143,8 @@ private slots:
 
     void on_pbModifyByWeight_clicked();
 
+    void on_cbG4Material_toggled(bool checked);
+
 private:
     Ui::MaterialInspectorWindow * ui = nullptr;
     MainWindow                  * MW = nullptr;
@@ -186,6 +188,7 @@ private:
     int  autoLoadReaction(ANeutronInteractionElement &element); //returns number of particles added to the collection
     void updateTmpMatOnPartCollChange(int newPartAdded);
     void updateEnableStatus();  // gui update for tracking allow / transparent
+    void updateG4RelatedGui();
 };
 
 #endif // MATERIALINSPECTORWINDOW_H

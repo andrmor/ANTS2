@@ -279,7 +279,13 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="leG4Material"/>
+           <widget class="QLineEdit" name="leG4Material">
+            <property name="toolTip">
+             <string>e.g. G4_POLYETHYLENE
+See Geant4 material database and class G4NistManager
+</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>

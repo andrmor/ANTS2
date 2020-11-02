@@ -259,6 +259,18 @@ void MaterialInspectorWindow::updateWaveButtons()
     ui->pbDeleteReemisProbLambda->setEnabled( !tmpMaterial.reemisProbWave_lambda.isEmpty() );
 }
 
+void MaterialInspectorWindow::updateG4RelatedGui()
+{
+    bool bG4sim = MW->isGeant4SimActivated();
+    ui->tabInteraction->setEnabled(!bG4sim);
+
+    bool bDisable = bG4sim && ui->cbG4Material->isChecked();
+    QVector<QWidget*> widgs = {ui->ledDensity, ui->pbMaterialInfo, ui->ledT, ui->leChemicalComposition,
+                            ui->pbModifyChemicalComposition, ui->leCompositionByWeight, ui->pbModifyByWeight,
+                            ui->trwChemicalComposition, ui->cbShowIsotopes};
+    for (QWidget * w : widgs) w->setDisabled(bDisable);
+}
+
 void MaterialInspectorWindow::UpdateGui()
 {
     AMaterial & tmpMaterial = MpCollection->tmpMaterial;
@@ -275,6 +287,7 @@ void MaterialInspectorWindow::UpdateGui()
 
     ui->cbG4Material->setChecked(tmpMaterial.bG4UseNistMaterial);
     ui->leG4Material->setText(tmpMaterial.G4NistMaterial);
+    updateG4RelatedGui();
 
     ui->ledN->setText( QString::number(tmpMaterial.n) );
     ui->ledAbs->setText( QString::number(tmpMaterial.abs) );
@@ -413,6 +426,9 @@ void MaterialInspectorWindow::updateInteractionGui()
     ui->tabInteraction->setEnabled(particleId != -1);
     if (particleId == -1) return;
     ui->cobParticle->setCurrentIndex(particleId);
+
+    bool bG4sim = MW->isGeant4SimActivated();
+    ui->tabInteraction->setEnabled(!bG4sim);
 
     flagDisreguardChange = true; // -->
 
@@ -3023,4 +3039,9 @@ void MaterialInspectorWindow::on_actionAdd_default_material_triggered()
     int index = ui->cobActiveMaterials->count() - 1;
     if (index > -1)
         showMaterial(index);
+}
+
+void MaterialInspectorWindow::on_cbG4Material_toggled(bool)
+{
+    updateG4RelatedGui();
 }

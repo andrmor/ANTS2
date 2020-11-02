@@ -941,7 +941,12 @@ void MainWindow::extractGeometryOfLocalScriptWindow()
       ScriptWinY = GenScriptWindow->y();
       ScriptWinW = GenScriptWindow->width();
       ScriptWinH = GenScriptWindow->height();
-    }
+  }
+}
+
+bool MainWindow::isGeant4SimActivated() const
+{
+    return ui->cbGeant4ParticleTracking->isChecked();
 }
 
 void MainWindow::on_ledWaveFrom_editingFinished()
@@ -4204,6 +4209,7 @@ void MainWindow::on_cbGeant4ParticleTracking_toggled(bool checked)
 {
     ui->swNormalOrGeant4->setCurrentIndex((int)checked);
     updateG4ProgressBarVisibility();
+    MIwindow->UpdateGui();
 }
 
 #include "ageant4configdialog.h"

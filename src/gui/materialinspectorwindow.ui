@@ -283,7 +283,8 @@
             <property name="toolTip">
              <string>e.g. G4_POLYETHYLENE
 See Geant4 material database and class G4NistManager
-</string>
+
+To use Al with termal scattering, use G4_Al_TS</string>
             </property>
            </widget>
           </item>

@@ -548,7 +548,7 @@ void OutputWindow::addPMitems(const QVector<float> *vector, float MaxSignal, Dyn
     {
       //pen
       QPen pen(Qt::black);
-      int size = 6.0 * MW->PMs->SizeX(ipm) / 30.0;
+      int size = 6.0 * std::min(MW->PMs->SizeX(ipm), MW->PMs->SizeY(ipm)) / 30.0;
       pen.setWidth(size);
 
       //brush

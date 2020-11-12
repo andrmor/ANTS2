@@ -95,6 +95,39 @@ QVariantList APTHistory_SI::cd_getTrackRecord()
     return vl;
 }
 
+QString APTHistory_SI::cd_getProductionProcess()
+{
+    if (Rec)
+    {
+        const AParticleTrackingRecord * parent = Rec->getSecondaryOf();
+        if (!parent) return "";
+
+        const std::vector<AParticleTrackingRecord *> & vecSec = parent->getSecondaries();
+        const int size = (int)vecSec.size();
+        int index = 0;
+        for (;index < size; index++)
+            if (vecSec[index] == Rec) break;
+        if (index == size)
+        {
+            abort("Corruption in secondary record detected: this record not found in parent record");
+            return "";
+        }
+
+        const std::vector<ATrackingStepData *> & vecSteps = parent->getSteps();
+        const int numSteps = (int)vecSteps.size();
+        for (int iS = numSteps - 1; iS > -1; iS--)
+        {
+            const std::vector<int> & thisStepSecs = vecSteps.at(iS)->Secondaries;
+            for (const int & iSec : thisStepSecs)
+                if (iSec == index)
+                    return vecSteps.at(iS)->Process;
+        }
+        abort("Corruption in secondary record detected: secondary not found in the parent record");
+    }
+    else abort("Record not set: use cd_set command");
+    return "";
+}
+
 bool APTHistory_SI::cd_step()
 {
     if (Rec)

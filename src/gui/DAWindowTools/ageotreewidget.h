@@ -103,7 +103,7 @@ private:
   void ShowObjectOnly(AGeoObject * obj);
   void ShowAllInstances(AGeoObject * obj);
   void menuActionEnableDisable(AGeoObject * obj);
-  void menuActionRemoveKeepContent();
+  void menuActionRemoveKeepContent(QTreeWidget * treeWidget);
   void menuActionRemoveHostedObjects(AGeoObject * obj);
   void menuActionRemoveWithContent(QTreeWidget * treeWidget);
   void menuActionAddNewComposite(AGeoObject * ContObj);

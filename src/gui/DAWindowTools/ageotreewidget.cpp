@@ -790,7 +790,7 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
   else if (SelectedAction == cloneA)         menuActionCloneObject(obj);
   else if (SelectedAction == stackA)         menuActionFormStack(selected);
   else if (SelectedAction == stackRefA)      markAsStackRefVolume(obj);
-  else if (SelectedAction == removeKeepContA)menuActionRemoveKeepContent();
+  else if (SelectedAction == removeKeepContA)menuActionRemoveKeepContent(this);
   else if (SelectedAction == removeWithContA)menuActionRemoveWithContent(this);
   else if (SelectedAction == removeHostedA)  menuActionRemoveHostedObjects(obj);
 
@@ -934,7 +934,7 @@ void AGeoTreeWidget::customProtoMenuRequested(const QPoint &pos)
     else if (SelectedAction == stackA)         menuActionFormStack(selected);
     else if (SelectedAction == stackRefA)      markAsStackRefVolume(obj);
 
-    else if (SelectedAction == removeKeepContA)menuActionRemoveKeepContent();
+    else if (SelectedAction == removeKeepContA)menuActionRemoveKeepContent(twPrototypes);
     else if (SelectedAction == removeWithContA)menuActionRemoveWithContent(twPrototypes);
     else if (SelectedAction == removeHostedA)  menuActionRemoveHostedObjects(obj);
 
@@ -991,7 +991,7 @@ void AGeoTreeWidget::onPrototypeItemCollapsed(QTreeWidgetItem * item)
 
 void AGeoTreeWidget::onRemoveTriggered()
 {
-    menuActionRemoveKeepContent();
+    menuActionRemoveKeepContent(this);
 }
 
 void AGeoTreeWidget::onRemoveRecursiveTriggered()
@@ -1016,9 +1016,9 @@ void AGeoTreeWidget::onRequestIsValidPrototypeName(const QString &ProtoName, boo
     bResult = Sandwich->isValidPrototypeName(ProtoName);
 }
 
-void AGeoTreeWidget::menuActionRemoveKeepContent()
+void AGeoTreeWidget::menuActionRemoveKeepContent(QTreeWidget * treeWidget)
 {
-  QList<QTreeWidgetItem*> selected = selectedItems();
+  QList<QTreeWidgetItem*> selected = treeWidget->selectedItems();
   if (selected.isEmpty()) return;
 
   QMessageBox msgBox;

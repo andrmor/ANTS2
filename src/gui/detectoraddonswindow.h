@@ -6,7 +6,7 @@
 class MainWindow;
 class DetectorClass;
 class AGeo_SI;
-class AGeoTreeWidget;
+class AGeoTree;
 class AGeoObject;
 
 namespace Ui {
@@ -27,7 +27,7 @@ public:
   void HighlightVolume(const QString & VolName);
 
   AGeo_SI        * AddObjScriptInterface = nullptr;  // if created -> owned by the script manager
-  AGeoTreeWidget * twGeo   = nullptr;                  // WorldTree widget
+  AGeoTree * twGeo   = nullptr;                  // WorldTree widget
 
 private slots:
   void onReconstructDetectorRequest();

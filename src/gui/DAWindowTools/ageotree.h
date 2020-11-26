@@ -10,7 +10,7 @@
 
 class AGeoObject;
 class AGeoShape;
-class AGeoWidget;
+class AGeoDelegateWidget;
 class ASandwich;
 class QVBoxLayout;
 class QPushButton;
@@ -19,14 +19,14 @@ class QPoint;
 class QTreeWidgetItem;
 class QStringList;
 
-class AGeoTreeWidget : public QTreeWidget
+class AGeoTree : public QTreeWidget
 {
   Q_OBJECT
 
 public:
-  AGeoTreeWidget(ASandwich * Sandwich);
+  AGeoTree(ASandwich * Sandwich);
 
-  AGeoWidget * GetEditWidget() {return EditWidget;}
+  AGeoDelegateWidget * GetEditWidget() {return EditWidget;}
   void         SetLineAttributes(AGeoObject * obj);
   void         SelectObjects(QStringList ObjectNames);
   void         AddLightguide(bool bUpper);
@@ -70,7 +70,7 @@ private:
   AGeoObject * World      = nullptr;
   AGeoObject * Prototypes = nullptr;
 
-  AGeoWidget * EditWidget = nullptr;
+  AGeoDelegateWidget * EditWidget = nullptr;
 
   QTreeWidgetItem * topItemPrototypes = nullptr;
   bool bWorldTreeSelected = true;
@@ -140,65 +140,6 @@ signals:
   void RequestListOfParticles(QStringList & definedParticles);
   void RequestShowMonitor(const AGeoObject * mon);
   void RequestShowPrototypeList();
-};
-
-
-class AGeoWidget : public QWidget
-{
-  Q_OBJECT
-
-public:
-  AGeoWidget(ASandwich * Sandwich, AGeoTreeWidget * tw);
-  //destructor does not delete Widget - it is handled by the layout
-
-  void ClearGui();
-  void UpdateGui();
-
-  QString getCurrentObjectName() const;
-
-private:
-  ASandwich        * Sandwich = nullptr;
-  AGeoTreeWidget   * tw       = nullptr;
-
-  AGeoObject       * CurrentObject = nullptr;
-  AGeoBaseDelegate * GeoDelegate = nullptr;
-
-  QVBoxLayout * lMain;
-  QVBoxLayout * ObjectLayout;
-  QFrame      * frBottom;
-  QPushButton * pbConfirm;
-  QPushButton * pbCancel;
-
-  bool fIgnoreSignals = true;
-  bool fEditingMode   = false;
-
-public slots:
-  void onObjectSelectionChanged(QString SelectedObject); //starts GUI update
-  void onStartEditing();
-  void onRequestChangeShape(AGeoShape * NewShape);
-  void onRequestChangeSlabShape(int NewShape);
-  void onMonitorRequestsShowSensitiveDirection();
-
-  void onRequestShowCurrentObject();
-  void onRequestScriptLineToClipboard();
-  void onRequestScriptRecursiveToClipboard();
-  void onRequestSetVisAttributes();
-
-  void onConfirmPressed(); // CONFIRM BUTTON PRESSED: performing copy from delegate to object
-  void onCancelPressed();
-
-private:
-  void exitEditingMode();
-  void updateInstancesOnProtoNameChange(QString oldName, QString newName);
-  AGeoBaseDelegate * createAndAddSlabDelegate();
-  AGeoBaseDelegate * createAndAddGeoObjectDelegate();
-  AGeoBaseDelegate * createAndAddGridElementDelegate();
-  AGeoBaseDelegate * createAndAddMonitorDelegate();
-
-signals:
-  void showMonitor(const AGeoObject* mon);
-  void requestBuildScript(AGeoObject *obj, QString &script, int ident, bool bExpandMaterial, bool bRecursive, bool usePython);
-  void requestEnableGeoConstWidget(bool);
 };
 
 #endif // AGEOTREEWIDGET_H

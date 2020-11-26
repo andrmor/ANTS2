@@ -13,7 +13,8 @@
 #include "asandwich.h"
 #include "aslab.h"
 #include "slabdelegate.h"
-#include "ageotreewidget.h"
+#include "ageotree.h"
+#include "ageodelegatewidget.h"
 #include "ageoobject.h"
 #include "ageoshape.h"
 #include "ageotype.h"
@@ -58,10 +59,10 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(QWidget * parent, MainWindow * MW, De
   ui->pbBackToSandwich->setEnabled(false);
 
   // world tree widget
-  twGeo = new AGeoTreeWidget(Detector->Sandwich);
+  twGeo = new AGeoTree(Detector->Sandwich);
   ui->saGeo->setWidget(twGeo);
   connect(twGeo, SIGNAL(RequestListOfParticles(QStringList&)), Detector->MpCollection, SLOT(OnRequestListOfParticles(QStringList&)));
-  connect(twGeo, &AGeoTreeWidget::RequestShowMonitor, this, &DetectorAddOnsWindow::OnrequestShowMonitor);
+  connect(twGeo, &AGeoTree::RequestShowMonitor, this, &DetectorAddOnsWindow::OnrequestShowMonitor);
 
   // prototype tree widget
   ui->saPrototypes->setWidget(twGeo->twPrototypes);
@@ -71,21 +72,21 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(QWidget * parent, MainWindow * MW, De
   l->setContentsMargins(0,0,0,0);
   ui->frObjectEditor->setLayout(l);
   l->addWidget(twGeo->GetEditWidget());
-  connect(twGeo, &AGeoTreeWidget::RequestRebuildDetector, this, &DetectorAddOnsWindow::onReconstructDetectorRequest);
-  connect(twGeo, &AGeoTreeWidget::RequestFocusObject,     this, &DetectorAddOnsWindow::FocusVolume);
-  connect(twGeo, &AGeoTreeWidget::RequestHighlightObject, this, &DetectorAddOnsWindow::ShowObject);
-  connect(twGeo, &AGeoTreeWidget::RequestShowObjectRecursive, this, &DetectorAddOnsWindow::ShowObjectRecursive);
-  connect(twGeo, &AGeoTreeWidget::RequestShowAllInstances, this, &DetectorAddOnsWindow::ShowAllInstances);
-  connect(twGeo->GetEditWidget(), &AGeoWidget::requestEnableGeoConstWidget, this, &DetectorAddOnsWindow::onRequestEnableGeoConstWidget);
-  connect(twGeo, &AGeoTreeWidget::RequestNormalDetectorDraw, MW, &MainWindow::ShowGeometrySlot);
-  connect(twGeo, &AGeoTreeWidget::RequestShowPrototypeList, this, &DetectorAddOnsWindow::onRequestShowPrototypeList);
+  connect(twGeo, &AGeoTree::RequestRebuildDetector, this, &DetectorAddOnsWindow::onReconstructDetectorRequest);
+  connect(twGeo, &AGeoTree::RequestFocusObject,     this, &DetectorAddOnsWindow::FocusVolume);
+  connect(twGeo, &AGeoTree::RequestHighlightObject, this, &DetectorAddOnsWindow::ShowObject);
+  connect(twGeo, &AGeoTree::RequestShowObjectRecursive, this, &DetectorAddOnsWindow::ShowObjectRecursive);
+  connect(twGeo, &AGeoTree::RequestShowAllInstances, this, &DetectorAddOnsWindow::ShowAllInstances);
+  connect(twGeo->GetEditWidget(), &AGeoDelegateWidget::requestEnableGeoConstWidget, this, &DetectorAddOnsWindow::onRequestEnableGeoConstWidget);
+  connect(twGeo, &AGeoTree::RequestNormalDetectorDraw, MW, &MainWindow::ShowGeometrySlot);
+  connect(twGeo, &AGeoTree::RequestShowPrototypeList, this, &DetectorAddOnsWindow::onRequestShowPrototypeList);
   connect(Detector->Sandwich, &ASandwich::RequestGuiUpdate, this, &DetectorAddOnsWindow::onSandwichRebuild);
   QPalette palette = ui->frObjectEditor->palette();
   palette.setColor( backgroundRole(), QColor( 240, 240, 240 ) );
   ui->frObjectEditor->setPalette( palette );
   ui->frObjectEditor->setAutoFillBackground( true );
 
-  connect(this, &DetectorAddOnsWindow::requestDelayedRebuildAndRestoreDelegate, twGeo, &AGeoTreeWidget::rebuildDetectorAndRestoreCurrentDelegate, Qt::QueuedConnection);
+  connect(this, &DetectorAddOnsWindow::requestDelayedRebuildAndRestoreDelegate, twGeo, &AGeoTree::rebuildDetectorAndRestoreCurrentDelegate, Qt::QueuedConnection);
 
   QPalette p = ui->pteTP->palette();
   p.setColor(QPalette::Active, QPalette::Base, QColor(220,220,220));

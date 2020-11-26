@@ -1,4 +1,5 @@
-#include "ageotreewidget.h"
+#include "ageotree.h"
+#include "ageodelegatewidget.h"
 #include "ageobasedelegate.h"
 #include "ageoobjectdelegate.h"
 #include "amonitordelegate.h"
@@ -36,7 +37,7 @@
 #include "TMath.h"
 #include "TGeoShape.h"
 
-AGeoTreeWidget::AGeoTreeWidget(ASandwich *Sandwich)
+AGeoTree::AGeoTree(ASandwich *Sandwich)
     : Sandwich(Sandwich), World(Sandwich->World), Prototypes(Sandwich->Prototypes)
 {
     loadImages();
@@ -54,17 +55,17 @@ AGeoTreeWidget::AGeoTreeWidget(ASandwich *Sandwich)
     setIconSize(QSize(20, 20));
     configureStyle(this);
     setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(this, &AGeoTreeWidget::customContextMenuRequested, this, &AGeoTreeWidget::customMenuRequested);
-    connect(this, &AGeoTreeWidget::itemSelectionChanged,       this, &AGeoTreeWidget::onItemSelectionChanged);
-    connect(this, &AGeoTreeWidget::itemExpanded,               this, &AGeoTreeWidget::onItemExpanded);
-    connect(this, &AGeoTreeWidget::itemCollapsed,              this, &AGeoTreeWidget::onItemCollapsed);
-    connect(this, &AGeoTreeWidget::itemClicked,                this, &AGeoTreeWidget::onItemClicked);
+    connect(this, &AGeoTree::customContextMenuRequested, this, &AGeoTree::customMenuRequested);
+    connect(this, &AGeoTree::itemSelectionChanged,       this, &AGeoTree::onItemSelectionChanged);
+    connect(this, &AGeoTree::itemExpanded,               this, &AGeoTree::onItemExpanded);
+    connect(this, &AGeoTree::itemCollapsed,              this, &AGeoTree::onItemCollapsed);
+    connect(this, &AGeoTree::itemClicked,                this, &AGeoTree::onItemClicked);
 
     // widget for delegates
-    EditWidget = new AGeoWidget(Sandwich, this);
-    connect(EditWidget, &AGeoWidget::showMonitor,                this, &AGeoTreeWidget::RequestShowMonitor);
-    connect(EditWidget, &AGeoWidget::requestBuildScript,         this, &AGeoTreeWidget::objectToScript);
-    connect(this,       &AGeoTreeWidget::ObjectSelectionChanged, EditWidget, &AGeoWidget::onObjectSelectionChanged);
+    EditWidget = new AGeoDelegateWidget(Sandwich, this);
+    connect(EditWidget, &AGeoDelegateWidget::showMonitor,                this, &AGeoTree::RequestShowMonitor);
+    connect(EditWidget, &AGeoDelegateWidget::requestBuildScript,         this, &AGeoTree::objectToScript);
+    connect(this,       &AGeoTree::ObjectSelectionChanged, EditWidget, &AGeoDelegateWidget::onObjectSelectionChanged);
 
     // tree for prototypes
     createPrototypeTreeWidget();
@@ -72,34 +73,34 @@ AGeoTreeWidget::AGeoTreeWidget(ASandwich *Sandwich)
 
     // shortcuts
     QShortcut * Del = new QShortcut(Qt::Key_Backspace, this);
-    connect(Del, &QShortcut::activated, this, &AGeoTreeWidget::onRemoveTriggered);
+    connect(Del, &QShortcut::activated, this, &AGeoTree::onRemoveTriggered);
     QShortcut * DelRec = new QShortcut(QKeySequence(QKeySequence::Delete), this);
-    connect(DelRec, &QShortcut::activated, this, &AGeoTreeWidget::onRemoveRecursiveTriggered);
+    connect(DelRec, &QShortcut::activated, this, &AGeoTree::onRemoveRecursiveTriggered);
 }
 
-void AGeoTreeWidget::createPrototypeTreeWidget()
+void AGeoTree::createPrototypeTreeWidget()
 {
     twPrototypes = new QTreeWidget();
 
     twPrototypes->setHeaderHidden(true);
-    //twPrototypes->setAcceptDrops(true);
-    //twPrototypes->setDragEnabled(true);
-    //twPrototypes->setDragDropMode(QAbstractItemView::InternalMove);
+    twPrototypes->setAcceptDrops(true);
+    twPrototypes->setDragEnabled(true);
+    twPrototypes->setDragDropMode(QAbstractItemView::InternalMove);
     twPrototypes->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    //twPrototypes->setDropIndicatorShown(false);
+    twPrototypes->setDropIndicatorShown(false);
     twPrototypes->setContentsMargins(0,0,0,0);
     twPrototypes->setFrameStyle(QFrame::NoFrame);
     twPrototypes->setIconSize(QSize(20,20));
     twPrototypes->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(twPrototypes, &QTreeWidget::customContextMenuRequested,     this,       &AGeoTreeWidget::customProtoMenuRequested);
-    connect(twPrototypes, &QTreeWidget::itemExpanded,                   this,       &AGeoTreeWidget::onPrototypeItemExpanded);
-    connect(twPrototypes, &QTreeWidget::itemCollapsed,                  this,       &AGeoTreeWidget::onPrototypeItemCollapsed);
-    connect(twPrototypes, &QTreeWidget::itemSelectionChanged,           this,       &AGeoTreeWidget::onProtoItemSelectionChanged);
-    connect(twPrototypes, &QTreeWidget::itemClicked,                    this,       &AGeoTreeWidget::onProtoItemClicked);
-    connect(this,         &AGeoTreeWidget::ProtoObjectSelectionChanged, EditWidget, &AGeoWidget::onObjectSelectionChanged);
+    connect(twPrototypes, &QTreeWidget::customContextMenuRequested,     this,       &AGeoTree::customProtoMenuRequested);
+    connect(twPrototypes, &QTreeWidget::itemExpanded,                   this,       &AGeoTree::onPrototypeItemExpanded);
+    connect(twPrototypes, &QTreeWidget::itemCollapsed,                  this,       &AGeoTree::onPrototypeItemCollapsed);
+    connect(twPrototypes, &QTreeWidget::itemSelectionChanged,           this,       &AGeoTree::onProtoItemSelectionChanged);
+    connect(twPrototypes, &QTreeWidget::itemClicked,                    this,       &AGeoTree::onProtoItemClicked);
+    connect(this,         &AGeoTree::ProtoObjectSelectionChanged, EditWidget, &AGeoDelegateWidget::onObjectSelectionChanged);
 }
 
-void AGeoTreeWidget::loadImages()
+void AGeoTree::loadImages()
 {
     QString dir = ":/images/";
 
@@ -112,7 +113,7 @@ void AGeoTreeWidget::loadImages()
     StackEnd.load(dir+"BotSt.png");
 }
 
-void AGeoTreeWidget::SelectObjects(QStringList ObjectNames)
+void AGeoTree::SelectObjects(QStringList ObjectNames)
 {
    clearSelection();
    //qDebug() << "Request select the following objects:"<<ObjectNames;
@@ -128,7 +129,7 @@ void AGeoTreeWidget::SelectObjects(QStringList ObjectNames)
      }
 }
 
-void AGeoTreeWidget::UpdateGui(QString ObjectName)
+void AGeoTree::UpdateGui(QString ObjectName)
 {
     if (!World) return;
 
@@ -189,7 +190,7 @@ void AGeoTreeWidget::UpdateGui(QString ObjectName)
     //qDebug() << "<==";
 }
 
-void AGeoTreeWidget::updatePrototypeTreeGui()
+void AGeoTree::updatePrototypeTreeGui()
 {
     if (!Prototypes) return;
 
@@ -204,7 +205,7 @@ void AGeoTreeWidget::updatePrototypeTreeGui()
     updateExpandState(topItemPrototypes, true);
 }
 
-void AGeoTreeWidget::onGridReshapeRequested(QString objName)
+void AGeoTree::onGridReshapeRequested(QString objName)
 {
     AGeoObject* obj = World->findObjectByName(objName);
     if (!obj) return;
@@ -258,7 +259,7 @@ void AGeoTreeWidget::onGridReshapeRequested(QString objName)
     delete d;
 }
 
-void AGeoTreeWidget::populateTreeWidget(QTreeWidgetItem * parent, AGeoObject * Container, bool fDisabled)
+void AGeoTree::populateTreeWidget(QTreeWidgetItem * parent, AGeoObject * Container, bool fDisabled)
 {  
     for (AGeoObject * obj : Container->HostedObjects)
     {
@@ -303,7 +304,7 @@ void AGeoTreeWidget::populateTreeWidget(QTreeWidgetItem * parent, AGeoObject * C
     }
 }
 
-void AGeoTreeWidget::updateExpandState(QTreeWidgetItem * item, bool bPrototypes)
+void AGeoTree::updateExpandState(QTreeWidgetItem * item, bool bPrototypes)
 {
     QTreeWidget * treeWidget = nullptr;
     AGeoObject  * obj        = nullptr;
@@ -327,7 +328,7 @@ void AGeoTreeWidget::updateExpandState(QTreeWidgetItem * item, bool bPrototypes)
     }
 }
 
-void AGeoTreeWidget::dropEvent(QDropEvent* event)
+void AGeoTree::dropEvent(QDropEvent* event)
 {
     if (previousHoverItem)
     {
@@ -493,7 +494,7 @@ void AGeoTreeWidget::dropEvent(QDropEvent* event)
     return;
 }
 
-void AGeoTreeWidget::dragEnterEvent(QDragEnterEvent *event)
+void AGeoTree::dragEnterEvent(QDragEnterEvent *event)
 {
     previousHoverItem = nullptr;
     //qDebug() << "Drag enter. Selection size:"<< selectedItems().size();
@@ -523,7 +524,7 @@ void AGeoTreeWidget::dragEnterEvent(QDragEnterEvent *event)
     event->accept();
 }
 
-void AGeoTreeWidget::dragMoveEvent(QDragMoveEvent *event)
+void AGeoTree::dragMoveEvent(QDragMoveEvent *event)
 {
     QTreeWidget::dragMoveEvent(event);
 
@@ -548,7 +549,7 @@ void AGeoTreeWidget::dragMoveEvent(QDragMoveEvent *event)
     }
 }
 
-void AGeoTreeWidget::configureStyle(QTreeWidget * wid)
+void AGeoTree::configureStyle(QTreeWidget * wid)
 {
     QString style;
     style = "QTreeView::branch:has-siblings:!adjoins-item {"
@@ -568,7 +569,7 @@ void AGeoTreeWidget::configureStyle(QTreeWidget * wid)
     wid->setStyleSheet(style);
 }
 
-void AGeoTreeWidget::onItemSelectionChanged()
+void AGeoTree::onItemSelectionChanged()
 {
   //  qDebug() << "---Widget selection cghanged";
   QList<QTreeWidgetItem*> sel = selectedItems();
@@ -582,7 +583,7 @@ void AGeoTreeWidget::onItemSelectionChanged()
   else emit ObjectSelectionChanged(""); //with multiple selected do not show EditWidget
 }
 
-void AGeoTreeWidget::onProtoItemSelectionChanged()
+void AGeoTree::onProtoItemSelectionChanged()
 {
     QList<QTreeWidgetItem*> sel = twPrototypes->selectedItems();
 
@@ -626,7 +627,7 @@ QAction* Action(QMenu& Menu, QString Text)
   return s;
 }
 
-void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
+void AGeoTree::customMenuRequested(const QPoint &pos)
 {  
   QMenu menu;
   QList<QTreeWidgetItem*> selected = selectedItems();
@@ -803,7 +804,7 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
   }
 }
 
-void AGeoTreeWidget::customProtoMenuRequested(const QPoint &pos)
+void AGeoTree::customProtoMenuRequested(const QPoint &pos)
 {
     // top level (Prototypes) can have only single selection (see onProtoSelectionChanged())
     QList<QTreeWidgetItem*> selected = twPrototypes->selectedItems();
@@ -941,7 +942,7 @@ void AGeoTreeWidget::customProtoMenuRequested(const QPoint &pos)
     else if (SelectedAction == moveToWorldA)   menuActionMoveProtoToWorld(obj);
 }
 
-void AGeoTreeWidget::onItemClicked()
+void AGeoTree::onItemClicked()
 {
     if (fSpecialGeoViewMode)
     {
@@ -952,7 +953,7 @@ void AGeoTreeWidget::onItemClicked()
     bWorldTreeSelected = true;
 }
 
-void AGeoTreeWidget::onProtoItemClicked()
+void AGeoTree::onProtoItemClicked()
 {
     if (fSpecialGeoViewMode)
     {
@@ -963,43 +964,43 @@ void AGeoTreeWidget::onProtoItemClicked()
     bWorldTreeSelected = false;
 }
 
-void AGeoTreeWidget::onItemExpanded(QTreeWidgetItem *item)
+void AGeoTree::onItemExpanded(QTreeWidgetItem *item)
 {
     AGeoObject * obj = World->findObjectByName(item->text(0));
     if (obj) obj->fExpanded = true;
 }
 
-void AGeoTreeWidget::onItemCollapsed(QTreeWidgetItem *item)
+void AGeoTree::onItemCollapsed(QTreeWidgetItem *item)
 {
     AGeoObject * obj = World->findObjectByName(item->text(0));
     if (obj) obj->fExpanded = false;
 }
 
-void AGeoTreeWidget::onPrototypeItemExpanded(QTreeWidgetItem * item)
+void AGeoTree::onPrototypeItemExpanded(QTreeWidgetItem * item)
 {
     AGeoObject * obj = ( item == twPrototypes->topLevelItem(0) ? Prototypes
                                                                : Prototypes->findObjectByName(item->text(0)) );
     if (obj) obj->fExpanded = true;
 }
 
-void AGeoTreeWidget::onPrototypeItemCollapsed(QTreeWidgetItem * item)
+void AGeoTree::onPrototypeItemCollapsed(QTreeWidgetItem * item)
 {
     AGeoObject * obj = ( item == twPrototypes->topLevelItem(0) ? Prototypes
                                                                : Prototypes->findObjectByName(item->text(0)) );
     if (obj) obj->fExpanded = false;
 }
 
-void AGeoTreeWidget::onRemoveTriggered()
+void AGeoTree::onRemoveTriggered()
 {
     menuActionRemoveKeepContent(this);
 }
 
-void AGeoTreeWidget::onRemoveRecursiveTriggered()
+void AGeoTree::onRemoveRecursiveTriggered()
 {
     menuActionRemoveWithContent(this);
 }
 
-void AGeoTreeWidget::onRequestShowPrototype(QString ProtoName)
+void AGeoTree::onRequestShowPrototype(QString ProtoName)
 {
     emit RequestShowPrototypeList();
 
@@ -1011,12 +1012,12 @@ void AGeoTreeWidget::onRequestShowPrototype(QString ProtoName)
     }
 }
 
-void AGeoTreeWidget::onRequestIsValidPrototypeName(const QString &ProtoName, bool &bResult) const
+void AGeoTree::onRequestIsValidPrototypeName(const QString &ProtoName, bool &bResult) const
 {
     bResult = Sandwich->isValidPrototypeName(ProtoName);
 }
 
-void AGeoTreeWidget::menuActionRemoveKeepContent(QTreeWidget * treeWidget)
+void AGeoTree::menuActionRemoveKeepContent(QTreeWidget * treeWidget)
 {
   QList<QTreeWidgetItem*> selected = treeWidget->selectedItems();
   if (selected.isEmpty()) return;
@@ -1060,7 +1061,7 @@ void AGeoTreeWidget::menuActionRemoveKeepContent(QTreeWidget * treeWidget)
   }
 }
 
-void AGeoTreeWidget::menuActionRemoveWithContent(QTreeWidget * treeWidget)
+void AGeoTree::menuActionRemoveWithContent(QTreeWidget * treeWidget)
 {
     QList<QTreeWidgetItem*> selected = treeWidget->selectedItems();
     if (selected.isEmpty()) return;
@@ -1097,7 +1098,7 @@ void AGeoTreeWidget::menuActionRemoveWithContent(QTreeWidget * treeWidget)
         message("The following objects are in use and could not be deleted:\n\n" + failedDeletes, treeWidget);
 }
 
-void AGeoTreeWidget::menuActionRemoveHostedObjects(AGeoObject * obj)
+void AGeoTree::menuActionRemoveHostedObjects(AGeoObject * obj)
 {
     if (!obj) return;
 
@@ -1120,7 +1121,7 @@ void AGeoTreeWidget::menuActionRemoveHostedObjects(AGeoObject * obj)
     UpdateGui(name);
 }
 
-void AGeoTreeWidget::menuActionCloneObject(AGeoObject * obj)
+void AGeoTree::menuActionCloneObject(AGeoObject * obj)
 {
     if (!obj) return;
     if (obj->ObjectType->isWorld()) return;
@@ -1150,7 +1151,7 @@ void AGeoTreeWidget::menuActionCloneObject(AGeoObject * obj)
     emit RequestHighlightObject(name);
 }
 
-void AGeoTreeWidget::menuActionAddNewObject(AGeoObject * ContObj, AGeoShape * shape)
+void AGeoTree::menuActionAddNewObject(AGeoObject * ContObj, AGeoShape * shape)
 {
     if (!ContObj) return;
 
@@ -1169,7 +1170,7 @@ void AGeoTreeWidget::menuActionAddNewObject(AGeoObject * ContObj, AGeoShape * sh
     UpdateGui(name);
 }
 
-void AGeoTreeWidget::menuActionAddNewArray(AGeoObject * ContObj)
+void AGeoTree::menuActionAddNewArray(AGeoObject * ContObj)
 {
   if (!ContObj) return;
 
@@ -1195,7 +1196,7 @@ void AGeoTreeWidget::menuActionAddNewArray(AGeoObject * ContObj)
   UpdateGui(name);
 }
 
-void AGeoTreeWidget::menuActionAddNewGrid(AGeoObject * ContObj)
+void AGeoTree::menuActionAddNewGrid(AGeoObject * ContObj)
 {
   if (!ContObj) return;
 
@@ -1215,7 +1216,7 @@ void AGeoTreeWidget::menuActionAddNewGrid(AGeoObject * ContObj)
   UpdateGui(name);
 }
 
-void AGeoTreeWidget::menuActionAddNewMonitor(AGeoObject * ContObj)
+void AGeoTree::menuActionAddNewMonitor(AGeoObject * ContObj)
 {
     if (!ContObj) return;
 
@@ -1238,7 +1239,7 @@ void AGeoTreeWidget::menuActionAddNewMonitor(AGeoObject * ContObj)
     UpdateGui(name);
 }
 
-void AGeoTreeWidget::menuActionAddInstance(AGeoObject * ContObj, const QString & PrototypeName)
+void AGeoTree::menuActionAddInstance(AGeoObject * ContObj, const QString & PrototypeName)
 {
     if (!ContObj) return;
 
@@ -1270,7 +1271,7 @@ void AGeoTreeWidget::menuActionAddInstance(AGeoObject * ContObj, const QString &
     UpdateGui(name);
 }
 
-void AGeoTreeWidget::menuActionMakeItPrototype(const QList<QTreeWidgetItem*> & selected)
+void AGeoTree::menuActionMakeItPrototype(const QList<QTreeWidgetItem*> & selected)
 {
     QVector<AGeoObject*> vec;
     for (const QTreeWidgetItem * item : selected)
@@ -1296,7 +1297,7 @@ void AGeoTreeWidget::menuActionMakeItPrototype(const QList<QTreeWidgetItem*> & s
     emit RequestShowPrototypeList();
 }
 
-void AGeoTreeWidget::menuActionMoveProtoToWorld(AGeoObject * obj)
+void AGeoTree::menuActionMoveProtoToWorld(AGeoObject * obj)
 {
     if (!obj || !obj->ObjectType->isPrototype()) return;
 
@@ -1316,7 +1317,7 @@ void AGeoTreeWidget::menuActionMoveProtoToWorld(AGeoObject * obj)
     emit RequestRebuildDetector();
 }
 
-void AGeoTreeWidget::menuActionAddNewComposite(AGeoObject * ContObj)
+void AGeoTree::menuActionAddNewComposite(AGeoObject * ContObj)
 {
   if (!ContObj) return;
 
@@ -1334,7 +1335,7 @@ void AGeoTreeWidget::menuActionAddNewComposite(AGeoObject * ContObj)
   UpdateGui(name);
 }
 
-void AGeoTreeWidget::SetLineAttributes(AGeoObject * obj)
+void AGeoTree::SetLineAttributes(AGeoObject * obj)
 {
     if (!obj) return;
 
@@ -1365,7 +1366,7 @@ void AGeoTreeWidget::SetLineAttributes(AGeoObject * obj)
     }
 }
 
-void AGeoTreeWidget::ShowObject(AGeoObject * obj)
+void AGeoTree::ShowObject(AGeoObject * obj)
 {
     if (obj)
     {
@@ -1375,7 +1376,7 @@ void AGeoTreeWidget::ShowObject(AGeoObject * obj)
     }
 }
 
-void AGeoTreeWidget::ShowObjectRecursive(AGeoObject * obj)
+void AGeoTree::ShowObjectRecursive(AGeoObject * obj)
 {
     if (obj)
     {
@@ -1385,7 +1386,7 @@ void AGeoTreeWidget::ShowObjectRecursive(AGeoObject * obj)
     }
 }
 
-void AGeoTreeWidget::ShowObjectOnly(AGeoObject * obj)
+void AGeoTree::ShowObjectOnly(AGeoObject * obj)
 {
     if (obj)
     {
@@ -1395,7 +1396,7 @@ void AGeoTreeWidget::ShowObjectOnly(AGeoObject * obj)
     }
 }
 
-void AGeoTreeWidget::ShowAllInstances(AGeoObject * obj)
+void AGeoTree::ShowAllInstances(AGeoObject * obj)
 {
     if (obj)
     {
@@ -1405,7 +1406,7 @@ void AGeoTreeWidget::ShowAllInstances(AGeoObject * obj)
     }
 }
 
-void AGeoTreeWidget::menuActionEnableDisable(AGeoObject * obj)
+void AGeoTree::menuActionEnableDisable(AGeoObject * obj)
 {
     if (!obj) return;
 
@@ -1423,7 +1424,7 @@ void AGeoTreeWidget::menuActionEnableDisable(AGeoObject * obj)
     UpdateGui(name);
 }
 
-void AGeoTreeWidget::menuActionFormStack(QList<QTreeWidgetItem*> selected)
+void AGeoTree::menuActionFormStack(QList<QTreeWidgetItem*> selected)
 {
     if (selected.isEmpty()) return;
 
@@ -1495,7 +1496,7 @@ void AGeoTreeWidget::menuActionFormStack(QList<QTreeWidgetItem*> selected)
     UpdateGui(name);
 }
 
-void AGeoTreeWidget::markAsStackRefVolume(AGeoObject * obj)
+void AGeoTree::markAsStackRefVolume(AGeoObject * obj)
 {
     if (!obj->Container) return;
     if (!obj->Container->ObjectType) return;
@@ -1508,7 +1509,7 @@ void AGeoTreeWidget::markAsStackRefVolume(AGeoObject * obj)
     UpdateGui(name);
 }
 
-void AGeoTreeWidget::AddLightguide(bool bUpper)
+void AGeoTree::AddLightguide(bool bUpper)
 {
     if (Sandwich->GetMaterials().isEmpty())
     {
@@ -1543,7 +1544,7 @@ QImage createImageWithOverlay(const QImage& base, const QImage& overlay)
     return imageWithOverlay;
 }
 
-void AGeoTreeWidget::updateIcon(QTreeWidgetItem* item, AGeoObject *obj)
+void AGeoTree::updateIcon(QTreeWidgetItem* item, AGeoObject *obj)
 {  
   if (!obj || !item) return;
 
@@ -1587,13 +1588,13 @@ void AGeoTreeWidget::updateIcon(QTreeWidgetItem* item, AGeoObject *obj)
   item->setIcon(0, icon); 
 }
 
-void AGeoTreeWidget::objectMembersToScript(AGeoObject* Master, QString &script, int ident, bool bExpandMaterial, bool bRecursive, bool usePython)
+void AGeoTree::objectMembersToScript(AGeoObject* Master, QString &script, int ident, bool bExpandMaterial, bool bRecursive, bool usePython)
 {
     for (AGeoObject* obj : Master->HostedObjects)
         objectToScript(obj, script, ident, bExpandMaterial, bRecursive, usePython);
 }
 
-void AGeoTreeWidget::objectToScript(AGeoObject *obj, QString &script, int ident, bool bExpandMaterial, bool bRecursive, bool usePython)
+void AGeoTree::objectToScript(AGeoObject *obj, QString &script, int ident, bool bExpandMaterial, bool bRecursive, bool usePython)
 {
     int bigIdent = ident + 4;
     int medIdent = ident + 2;
@@ -1700,7 +1701,7 @@ void AGeoTreeWidget::objectToScript(AGeoObject *obj, QString &script, int ident,
     }
 }
 
-void AGeoTreeWidget::commonSlabToScript(QString &script, const QString &identStr)
+void AGeoTree::commonSlabToScript(QString &script, const QString &identStr)
 {
     script += identStr + QString ("geo.SetCommonSlabMode(") +
                       QString::number(Sandwich->SandwichState) + ")\n";
@@ -1714,14 +1715,14 @@ void AGeoTreeWidget::commonSlabToScript(QString &script, const QString &identStr
             QString::number(xy->sides) + ")\n";
 }
 
-void AGeoTreeWidget::rebuildDetectorAndRestoreCurrentDelegate()
+void AGeoTree::rebuildDetectorAndRestoreCurrentDelegate()
 {
     const QString CurrentObjName = EditWidget->getCurrentObjectName();
     emit RequestRebuildDetector();
     UpdateGui(CurrentObjName);
 }
 
-QString AGeoTreeWidget::makeScriptString_basicObject(AGeoObject* obj, bool bExpandMaterials, bool usePython) const
+QString AGeoTree::makeScriptString_basicObject(AGeoObject* obj, bool bExpandMaterials, bool usePython) const
 {
     QVector<QString> posStrs; posStrs.reserve(3);
     QVector<QString> oriStrs; oriStrs.reserve(3);
@@ -1752,7 +1753,7 @@ QString AGeoTreeWidget::makeScriptString_basicObject(AGeoObject* obj, bool bExpa
     return str;
 }
 
-QString AGeoTreeWidget::makeScriptString_slab(AGeoObject *obj, bool bExpandMaterials, int ident) const
+QString AGeoTree::makeScriptString_slab(AGeoObject *obj, bool bExpandMaterials, int ident) const
 {
     ATypeSlabObject *slab = static_cast<ATypeSlabObject*>(obj->ObjectType);
     ASlabModel *m = static_cast<ASlabModel*>(slab->SlabModel);
@@ -1770,7 +1771,7 @@ QString AGeoTreeWidget::makeScriptString_slab(AGeoObject *obj, bool bExpandMater
 
 }
 
-QString AGeoTreeWidget::makeScriptString_setCenterSlab(AGeoObject *obj) const
+QString AGeoTree::makeScriptString_setCenterSlab(AGeoObject *obj) const
 {
     ATypeSlabObject *slab = static_cast<ATypeSlabObject*>(obj->ObjectType);
     ASlabModel *m = static_cast<ASlabModel*>(slab->SlabModel);
@@ -1784,7 +1785,7 @@ QString AGeoTreeWidget::makeScriptString_setCenterSlab(AGeoObject *obj) const
     return "";
 }
 
-QString AGeoTreeWidget::makeScriptString_arrayObject(AGeoObject *obj) const
+QString AGeoTree::makeScriptString_arrayObject(AGeoObject *obj) const
 {
     ATypeArrayObject* a = dynamic_cast<ATypeArrayObject*>(obj->ObjectType);
     if (!a)
@@ -1821,7 +1822,7 @@ QString AGeoTreeWidget::makeScriptString_arrayObject(AGeoObject *obj) const
     return str;
 }
 
-QString AGeoTreeWidget::makeScriptString_instanceObject(AGeoObject *obj, bool usePython) const
+QString AGeoTree::makeScriptString_instanceObject(AGeoObject *obj, bool usePython) const
 {
     ATypeInstanceObject * ins = dynamic_cast<ATypeInstanceObject*>(obj->ObjectType);
     if (!ins)
@@ -1853,7 +1854,7 @@ QString AGeoTreeWidget::makeScriptString_instanceObject(AGeoObject *obj, bool us
     return str;
 }
 
-QString AGeoTreeWidget::makeScriptString_prototypeObject(AGeoObject * obj) const
+QString AGeoTree::makeScriptString_prototypeObject(AGeoObject * obj) const
 {
     ATypePrototypeObject * pro = dynamic_cast<ATypePrototypeObject*>(obj->ObjectType);
     if (!pro)
@@ -1867,7 +1868,7 @@ QString AGeoTreeWidget::makeScriptString_prototypeObject(AGeoObject * obj) const
     return str;
 }
 
-QString AGeoTreeWidget::makeScriptString_monitorBaseObject(const AGeoObject * obj) const
+QString AGeoTree::makeScriptString_monitorBaseObject(const AGeoObject * obj) const
 {
     ATypeMonitorObject * m = dynamic_cast<ATypeMonitorObject*>(obj->ObjectType);
     if (!m)
@@ -1895,7 +1896,7 @@ QString AGeoTreeWidget::makeScriptString_monitorBaseObject(const AGeoObject * ob
             .arg(c.bStopTracking ? "true" : "false");
 }
 
-QString AGeoTreeWidget::makeScriptString_monitorConfig(const AGeoObject *obj) const
+QString AGeoTree::makeScriptString_monitorConfig(const AGeoObject *obj) const
 {
     ATypeMonitorObject * m = dynamic_cast<ATypeMonitorObject*>(obj->ObjectType);
     if (!m)
@@ -1945,7 +1946,7 @@ QString AGeoTreeWidget::makeScriptString_monitorConfig(const AGeoObject *obj) co
     }
 }
 
-QString AGeoTreeWidget::makeScriptString_stackObjectStart(AGeoObject *obj) const
+QString AGeoTree::makeScriptString_stackObjectStart(AGeoObject *obj) const
 {
     return  QString("geo.Stack( '%1', '%2',   %3, %4, %5,   %6, %7, %8 )")
             .arg(obj->Name)
@@ -1958,21 +1959,21 @@ QString AGeoTreeWidget::makeScriptString_stackObjectStart(AGeoObject *obj) const
             .arg(obj->OrientationStr[2].isEmpty() ? QString::number(obj->Orientation[2]) : obj->OrientationStr[2]);
 }
 
-QString AGeoTreeWidget::makeScriptString_groupObjectStart(AGeoObject *obj) const
+QString AGeoTree::makeScriptString_groupObjectStart(AGeoObject *obj) const
 {
     return  QString("geo.MakeGroup(") +
             "'" + obj->Name + "', " +
             "'" + obj->Container->Name + "' )";
 }
 
-QString AGeoTreeWidget::makeScriptString_stackObjectEnd(AGeoObject *obj) const
+QString AGeoTree::makeScriptString_stackObjectEnd(AGeoObject *obj) const
 {
     return QString("geo.InitializeStack( ") +
            "'" + obj->Name + "',  " +
            "'" + obj->getOrMakeStackReferenceVolume()->Name + "' )";  //obj->HostedObjects.first()->Name
 }
 
-QString AGeoTreeWidget::makeLinePropertiesString(AGeoObject *obj) const
+QString AGeoTree::makeLinePropertiesString(AGeoObject *obj) const
 {
     return "geo.SetLine( '" +
             obj->Name +
@@ -1982,407 +1983,8 @@ QString AGeoTreeWidget::makeLinePropertiesString(AGeoObject *obj) const
             QString::number(obj->style) + " )";
 }
 
-QString AGeoTreeWidget::makeScriptString_DisabledObject(AGeoObject *obj) const
+QString AGeoTree::makeScriptString_DisabledObject(AGeoObject *obj) const
 {
     return QString("geo.DisableObject( '%1')").arg(obj->Name);
-}
-
-// ================== EDIT WIDGET ===================
-
-AGeoWidget::AGeoWidget(ASandwich * Sandwich, AGeoTreeWidget * tw) :
-  Sandwich(Sandwich), tw(tw)
-{
-  lMain = new QVBoxLayout(this);
-  lMain->setContentsMargins(2,2,2,5);
-  this->setLayout(lMain);
-
-  //Scroll area in middle
-  QScrollArea* sa = new QScrollArea(this);
-  sa->setFrameShape(QFrame::Box);//NoFrame);
-  sa->setContentsMargins(2,2,2,2);
-  sa->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
-  sa->setWidgetResizable(true);
-  sa->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
-  QWidget* scrollAreaWidgetContents = new QWidget();
-  scrollAreaWidgetContents->setGeometry(QRect(0, 0, 350, 200));
-
-  ObjectLayout = new QVBoxLayout(scrollAreaWidgetContents);
-  ObjectLayout->setContentsMargins(0,0,0,0);
-
-  sa->setWidget(scrollAreaWidgetContents);
-  lMain->addWidget(sa);
-
-  frBottom = new QFrame();
-  frBottom->setFrameShape(QFrame::StyledPanel);
-  frBottom->setMinimumHeight(38);
-  frBottom->setMaximumHeight(38);
-  QPalette palette = frBottom->palette();
-  palette.setColor( backgroundRole(), QColor( 255, 255, 255 ) );
-  frBottom->setPalette( palette );
-  frBottom->setAutoFillBackground( true );
-  QHBoxLayout* lb = new QHBoxLayout();
-  lb->setContentsMargins(0,0,0,0);
-  frBottom->setLayout(lb);
-    pbConfirm = new QPushButton("Confirm changes");    
-    pbConfirm->setMinimumHeight(25);
-    connect(pbConfirm, SIGNAL(clicked()), this, SLOT(onConfirmPressed()));
-    pbConfirm->setMaximumWidth(150);
-    lb->addWidget(pbConfirm);
-    pbCancel = new QPushButton("Cancel changes");
-    connect(pbCancel, SIGNAL(clicked()), this, SLOT(onCancelPressed()));
-    pbCancel->setMaximumWidth(150);
-    pbCancel->setMinimumHeight(25);
-    lb->addWidget(pbCancel);
-  lMain->addWidget(frBottom);
-
-  pbConfirm->setEnabled(false);
-  pbCancel->setEnabled(false);
-
-  fIgnoreSignals = false;
-}
-
-void AGeoWidget::ClearGui()
-{
-    //qDebug() << "AGeoWidget clear triggered (Delegate will be deleted)";
-    fIgnoreSignals = true;
-
-    while (ObjectLayout->count() > 0)
-    {
-        QLayoutItem * item = ObjectLayout->takeAt(0);
-        if (item->widget())
-            delete item->widget();
-        delete item;
-    }
-
-    delete GeoDelegate; GeoDelegate = nullptr;
-
-    fIgnoreSignals = false;
-
-    //if update triggered during editing
-    exitEditingMode();
-}
-
-void AGeoWidget::UpdateGui()
-{  
-    //qDebug() << "UpdateGui triggered for AGeoWidget--->->->->";
-    ClearGui(); //deletes Delegate!
-
-    if (!CurrentObject) return;
-
-    pbConfirm->setEnabled(true);
-    pbCancel->setEnabled(true);
-
-    if (CurrentObject->ObjectType->isWorld())
-        GeoDelegate = new AWorldDelegate(Sandwich->Materials, this);
-    else if (CurrentObject->ObjectType->isSlab())        // SLAB or LIGHTGUIDE
-        GeoDelegate = createAndAddSlabDelegate();
-    else if (CurrentObject->ObjectType->isGridElement())
-        GeoDelegate = createAndAddGridElementDelegate();
-    else if (CurrentObject->ObjectType->isMonitor())
-        GeoDelegate = createAndAddMonitorDelegate();
-    else
-        GeoDelegate = createAndAddGeoObjectDelegate();
-
-    GeoDelegate->Update(CurrentObject);
-
-    GeoDelegate->Widget->setEnabled(!CurrentObject->fLocked);
-    connect(GeoDelegate, &AGeoBaseDelegate::ContentChanged,             this, &AGeoWidget::onStartEditing);
-    connect(GeoDelegate, &AGeoBaseDelegate::RequestChangeVisAttributes, this, &AGeoWidget::onRequestSetVisAttributes);
-    connect(GeoDelegate, &AGeoBaseDelegate::RequestShow,                this, &AGeoWidget::onRequestShowCurrentObject);
-    connect(GeoDelegate, &AGeoBaseDelegate::RequestScriptToClipboard,   this, &AGeoWidget::onRequestScriptLineToClipboard);
-    connect(GeoDelegate, &AGeoBaseDelegate::RequestScriptRecursiveToClipboard,   this, &AGeoWidget::onRequestScriptRecursiveToClipboard);
-
-    ObjectLayout->addStretch();
-    ObjectLayout->addWidget(GeoDelegate->Widget);
-    ObjectLayout->addStretch();
-
-    tw->LastShownObjectName = CurrentObject->Name;
-}
-
-AGeoBaseDelegate * AGeoWidget::createAndAddGeoObjectDelegate()
-{
-    AGeoObjectDelegate * Del;
-
-    AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(CurrentObject->Shape);
-    const QString shape = (scaled ? scaled->getBaseShapeType() : CurrentObject->Shape->getShapeType());
-
-    if (CurrentObject->ObjectType->isArray())
-        Del = new AGeoArrayDelegate(Sandwich->Materials, this);
-    else if (CurrentObject->ObjectType->isInstance())
-    {
-        Del = new AGeoInstanceDelegate(Sandwich->Materials, this);
-        connect((AGeoInstanceDelegate*)Del, &AGeoInstanceDelegate::RequestShowPrototype,        tw, &AGeoTreeWidget::onRequestShowPrototype);
-        connect((AGeoInstanceDelegate*)Del, &AGeoInstanceDelegate::RequestIsValidPrototypeName, tw, &AGeoTreeWidget::onRequestIsValidPrototypeName);
-    }
-    else if (CurrentObject->ObjectType->isPrototype())
-        Del = new AGeoPrototypeDelegate(Sandwich->Materials, this);
-    else if (CurrentObject->ObjectType->isHandlingSet())
-        Del = new AGeoSetDelegate(Sandwich->Materials, this);
-    else if (shape == "TGeoBBox")
-        Del = new AGeoBoxDelegate(Sandwich->Materials, this);
-    else if (shape == "TGeoTube")
-        Del = new AGeoTubeDelegate(Sandwich->Materials, this);
-    else if (shape == "TGeoTubeSeg")
-        Del = new AGeoTubeSegDelegate(Sandwich->Materials, this);
-    else if (shape == "TGeoCtub")
-        Del = new AGeoTubeSegCutDelegate(Sandwich->Materials, this);
-    else if (shape == "TGeoEltu")
-        Del = new AGeoElTubeDelegate(Sandwich->Materials, this);
-    else if (shape == "TGeoPara")
-        Del = new AGeoParaDelegate(Sandwich->Materials, this);
-    else if (shape == "TGeoSphere")
-        Del = new AGeoSphereDelegate(Sandwich->Materials, this);
-    else if (shape == "TGeoTrd1")
-        Del = new AGeoTrapXDelegate(Sandwich->Materials, this);
-    else if (shape == "TGeoTrd2")
-        Del = new AGeoTrapXYDelegate(Sandwich->Materials, this);
-    else if (shape == "TGeoCone")
-        Del = new AGeoConeDelegate(Sandwich->Materials, this);
-    else if (shape == "TGeoConeSeg")
-        Del = new AGeoConeSegDelegate(Sandwich->Materials, this);
-    else if (shape == "TGeoParaboloid")
-        Del = new AGeoParaboloidDelegate(Sandwich->Materials, this);
-    else if (shape == "TGeoTorus")
-        Del = new AGeoTorusDelegate(Sandwich->Materials, this);
-    else if (shape == "TGeoPolygon")
-        Del = new AGeoPolygonDelegate(Sandwich->Materials, this);
-    else if (shape == "TGeoPcon")
-        Del = new AGeoPconDelegate(Sandwich->Materials, this);
-    else if (shape == "TGeoPgon")
-        Del = new AGeoPgonDelegate(Sandwich->Materials, this);
-    else if (shape == "TGeoCompositeShape")
-        Del = new AGeoCompositeDelegate(Sandwich->Materials, this);
-    else if (shape == "TGeoArb8")
-        Del = new AGeoArb8Delegate(Sandwich->Materials, this);
-    else
-        Del = new AGeoObjectDelegate(Sandwich->Materials, this);
-
-    connect(Del, &AGeoObjectDelegate::RequestChangeShape,   this, &AGeoWidget::onRequestChangeShape);
-
-    return Del;
-}
-
-AGeoBaseDelegate * AGeoWidget::createAndAddSlabDelegate()
-{
-    AGeoObjectDelegate * Del;
-    ASlabModel * SlabModel = (static_cast<ATypeSlabObject*>(CurrentObject->ObjectType))->SlabModel;
-    switch (SlabModel->XYrecord.shape)
-    {
-    default: qWarning() << "Unknown slab shape, assuming rectangular";
-    case 0:
-        Del = new AGeoSlabDelegate_Box(Sandwich->Materials, static_cast<int>(Sandwich->SandwichState), this); break;
-    case 1:
-        Del = new AGeoSlabDelegate_Tube(Sandwich->Materials, static_cast<int>(Sandwich->SandwichState), this); break;
-    case 2:
-        Del = new AGeoSlabDelegate_Poly(Sandwich->Materials, static_cast<int>(Sandwich->SandwichState), this); break;
-    }
-    connect(Del, &AGeoObjectDelegate::RequestChangeSlabShape, this, &AGeoWidget::onRequestChangeSlabShape);
-
-    //Del = new AGeoSlabDelegate(tw->Sandwich->Materials, static_cast<int>(tw->Sandwich->SandwichState), this);
-    return Del;
-}
-
-AGeoBaseDelegate * AGeoWidget::createAndAddGridElementDelegate()
-{
-    AGridElementDelegate * Del = new AGridElementDelegate(this);
-    connect(Del, &AGridElementDelegate::RequestReshapeGrid, tw, &AGeoTreeWidget::onGridReshapeRequested);
-    return Del;
-}
-
-AGeoBaseDelegate *AGeoWidget::createAndAddMonitorDelegate()
-{
-    QStringList particles;
-    emit tw->RequestListOfParticles(particles);
-    AMonitorDelegate* Del = new AMonitorDelegate(particles, this);
-    connect(Del, &AMonitorDelegate::requestShowSensitiveFaces, this, &AGeoWidget::onMonitorRequestsShowSensitiveDirection);
-    return Del;
-}
-
-void AGeoWidget::onObjectSelectionChanged(QString SelectedObject)
-{  
-    if (fIgnoreSignals) return;
-
-    //qDebug() << "Object selection changed! ->" << SelectedObject;
-
-    CurrentObject = nullptr;
-    ClearGui();
-    if (SelectedObject.isEmpty()) return;
-
-    AGeoObject * obj = Sandwich->World->findObjectByName(SelectedObject);
-    //qDebug() << "Object for this name:" << obj;
-    if (!obj) return;
-
-    CurrentObject = obj;
-    //qDebug() << "New current object:"<<CurrentObject->Name;
-    UpdateGui();
-    fEditingMode = false;
-    //qDebug() << "OnObjectSelection procedure completed";
-}
-
-void AGeoWidget::onStartEditing()
-{
-  //qDebug() << "Start editing";
-  if (fIgnoreSignals) return;
-  if (!CurrentObject) return;
-
-  if (!fEditingMode)
-  {
-      fEditingMode = true;
-      tw->setEnabled(false);
-      tw->twPrototypes->setEnabled(false);
-      QFont f = pbConfirm->font(); f.setBold(true); pbConfirm->setFont(f);
-      pbConfirm->setStyleSheet("QPushButton {color: red;}");
-      emit requestEnableGeoConstWidget(false);
-  }
-}
-
-void AGeoWidget::onRequestChangeShape(AGeoShape * NewShape)
-{
-    if (!GeoDelegate) return;
-    if (!CurrentObject) return;
-    if (!NewShape) return;
-
-    delete CurrentObject->Shape;
-    CurrentObject->Shape = NewShape;
-    if (!CurrentObject->ObjectType->isGrid()) CurrentObject->removeCompositeStructure();
-    UpdateGui();
-    onConfirmPressed();
-}
-
-void AGeoWidget::updateInstancesOnProtoNameChange(QString oldName, QString newName)
-{
-    QVector<AGeoObject*> vec;
-    Sandwich->World->findAllInstancesRecursive(vec);
-
-    for (AGeoObject * inst : vec)
-    {
-        ATypeInstanceObject * insType = static_cast<ATypeInstanceObject*>(inst->ObjectType);
-        if (insType->PrototypeName == oldName)
-            insType->PrototypeName = newName;
-    }
-}
-
-void AGeoWidget::onRequestChangeSlabShape(int NewShape)
-{
-    if (!GeoDelegate) return;
-    if (!CurrentObject) return;
-    if (NewShape < 0 || NewShape > 2) return;
-    if (!CurrentObject->ObjectType->isSlab()) return;
-
-    ASlabModel * SlabModel = CurrentObject->getSlabModel();
-    SlabModel->XYrecord.shape = NewShape;
-    CurrentObject->UpdateFromSlabModel(SlabModel);
-
-    exitEditingMode();
-    QString name = CurrentObject->Name;
-    emit tw->RequestRebuildDetector();
-    tw->UpdateGui(name);
-}
-
-void AGeoWidget::onRequestShowCurrentObject()
-{
-    if (!CurrentObject) return;
-
-    QString name = CurrentObject->Name;
-    emit tw->RequestHighlightObject(name);
-    tw->UpdateGui(name);
-}
-
-void AGeoWidget::onRequestScriptLineToClipboard()
-{
-    if (!CurrentObject) return;
-
-    QString script;
-    bool bNotRecursive = (CurrentObject->ObjectType->isSlab() || CurrentObject->ObjectType->isSingle() || CurrentObject->ObjectType->isComposite());
-    emit requestBuildScript(CurrentObject, script, 0, false, !bNotRecursive, false);     // !*! the false may be temporary
-
-    qDebug() << script;
-
-    QClipboard *clipboard = QApplication::clipboard();
-    clipboard->setText(script);
-}
-
-void AGeoWidget::onRequestScriptRecursiveToClipboard()
-{
-    if (!CurrentObject) return;
-
-    QString script;
-    emit requestBuildScript(CurrentObject, script, 0, false, true, false);            // !*! the false may be temporary
-
-
-    qDebug() << script;
-
-    QClipboard *clipboard = QApplication::clipboard();
-    clipboard->setText(script);
-}
-
-void AGeoWidget::onRequestSetVisAttributes()
-{
-    if (!CurrentObject) return;
-    tw->SetLineAttributes(CurrentObject);
-}
-
-QString AGeoWidget::getCurrentObjectName() const
-{
-    if (CurrentObject) return CurrentObject->Name;
-    else return "";
-}
-
-void AGeoWidget::onMonitorRequestsShowSensitiveDirection()
-{
-    emit showMonitor(CurrentObject);
-}
-
-void AGeoWidget::exitEditingMode()
-{
-    fEditingMode = false;
-    tw->setEnabled(true);
-    tw->twPrototypes->setEnabled(true);
-    QFont f = pbConfirm->font(); f.setBold(false); pbConfirm->setFont(f);
-    pbConfirm->setStyleSheet("QPushButton {color: black;}");
-    pbConfirm->setEnabled(false);
-    pbCancel->setEnabled(false);
-    emit requestEnableGeoConstWidget(true);
-}
-
-void AGeoWidget::onConfirmPressed()
-{
-    if (!GeoDelegate)
-    {
-        qWarning() << "|||---Confirm triggered without active Delegate!";
-        exitEditingMode();
-        tw->UpdateGui();
-        return;
-    }
-
-    const QString newName = GeoDelegate->getName();
-    QString errorStr;
-    if (newName != CurrentObject->Name && Sandwich->World->isNameExists(newName)) errorStr = QString("%1 name already exists").arg(newName);
-    else if (newName.isEmpty()) errorStr = "Name cannot be empty";
-    else if (newName.contains(QRegExp("\\s"))) errorStr = "Name cannot contain spaces";
-    if (!errorStr.isEmpty())
-    {
-        QMessageBox::warning(this, "", errorStr);
-        return;
-    }
-
-    const QString oldName = CurrentObject->Name;
-    bool ok = GeoDelegate->updateObject(CurrentObject);
-    if (!ok) return;
-
-    if (CurrentObject->ObjectType->isPrototype() && oldName != newName)
-        updateInstancesOnProtoNameChange(oldName, newName);
-
-    exitEditingMode();
-    QString name = CurrentObject->Name;
-    emit tw->RequestRebuildDetector();
-    tw->UpdateGui(name);
-}
-
-void AGeoWidget::onCancelPressed()
-{
-    exitEditingMode();
-    tw->UpdateGui( (CurrentObject) ? CurrentObject->Name : "" );
 }
 

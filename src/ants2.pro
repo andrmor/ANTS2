@@ -423,7 +423,9 @@ SOURCES += main.cpp \
     gui/DAWindowTools/aonelinetextedit.cpp \
     gui/RasterWindow/acameracontroldialog.cpp \
     scriptmode/afarm_si.cpp \
-    common/ageotype.cpp
+    common/ageotype.cpp \
+    gui/DAWindowTools/ageotree.cpp \
+    gui/DAWindowTools/ageodelegatewidget.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -593,7 +595,9 @@ HEADERS  += common/CorrelationFilters.h \
     gui/DAWindowTools/aonelinetextedit.h \
     gui/RasterWindow/acameracontroldialog.h \
     scriptmode/afarm_si.h \
-    common/ageotype.h
+    common/ageotype.h \
+    gui/DAWindowTools/ageotree.h \
+    gui/DAWindowTools/ageodelegatewidget.h
 
 # --- SIM ---
 ants2_SIM {
@@ -698,7 +702,6 @@ ants2_GUI {
     gui/MainWindowTools/globalscript.cpp \
     gui/MainWindowTools/aslablistwidget.cpp \
     gui/MainWindowTools/arootlineconfigurator.cpp \
-    gui/DAWindowTools/ageotreewidget.cpp \
     gui/MainWindowTools/ashapehelpdialog.cpp \
     gui/DAWindowTools/agridelementdialog.cpp \
     gui/ascriptexampleexplorer.cpp \
@@ -784,7 +787,6 @@ HEADERS  += gui/mainwindow.h \
     gui/globalsettingswindowclass.h \
     gui/MainWindowTools/aslablistwidget.h \
     gui/MainWindowTools/arootlineconfigurator.h \
-    gui/DAWindowTools/ageotreewidget.h \
     gui/MainWindowTools/ashapehelpdialog.h \
     gui/DAWindowTools/agridelementdialog.h \
     gui/ascriptexampleexplorer.h \

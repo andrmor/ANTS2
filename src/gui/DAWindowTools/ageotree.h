@@ -1,5 +1,5 @@
-#ifndef AGEOTREEWIDGET_H
-#define AGEOTREEWIDGET_H
+#ifndef AGEOTREE_H
+#define AGEOTREE_H
 
 #include <QObject>
 #include <QString>
@@ -8,6 +8,7 @@
 #include <QColor>
 #include <QList>
 
+class AGeoBaseTreeWidget;
 class AGeoObject;
 class AGeoShape;
 class AGeoDelegateWidget;
@@ -16,7 +17,7 @@ class QPoint;
 class QTreeWidgetItem;
 class QStringList;
 
-class AGeoTree : public QTreeWidget
+class AGeoTree : public QObject
 {
   Q_OBJECT
 
@@ -28,7 +29,8 @@ public:
   void         SelectObjects(QStringList ObjectNames);
   void         AddLightguide(bool bUpper);
 
-  QTreeWidget * twPrototypes = nullptr;
+  AGeoBaseTreeWidget * twGeoTree    = nullptr;
+  AGeoBaseTreeWidget * twPrototypes = nullptr;
   QString LastShownObjectName;
 
 public slots:
@@ -57,11 +59,6 @@ private slots:
   void onRemoveTriggered();
   void onRemoveRecursiveTriggered();
 
-protected:
-  void dropEvent(QDropEvent *event);
-  void dragEnterEvent(QDragEnterEvent* event);
-  void dragMoveEvent(QDragMoveEvent* event);
-
 private:
   ASandwich  * Sandwich   = nullptr;
   AGeoObject * World      = nullptr;
@@ -80,17 +77,12 @@ private:
   //QColor BackgroundColor = QColor(240,240,240);
   bool   fSpecialGeoViewMode = false;
 
-  QTreeWidgetItem * previousHoverItem = nullptr;
-  const QTreeWidgetItem * movingItem  = nullptr;  // used only to prevent highlight of item under the moving one if it is the same as target
-
   void loadImages();
-  void configureStyle(QTreeWidget * wid);
   void populateTreeWidget(QTreeWidgetItem *parent, AGeoObject *Container, bool fDisabled = false);
   void updateExpandState(QTreeWidgetItem * item, bool bPrototypes); //recursive!
   void updateIcon(QTreeWidgetItem *item, AGeoObject *obj);
   void menuActionFormStack(QList<QTreeWidgetItem *> selected);
   void markAsStackRefVolume(AGeoObject * obj);
-  void createPrototypeTreeWidget();
   void updatePrototypeTreeGui();
 
   void menuActionAddNewObject(AGeoObject * ContObj, AGeoShape * shape);
@@ -139,4 +131,4 @@ signals:
   void RequestShowPrototypeList();
 };
 
-#endif // AGEOTREEWIDGET_H
+#endif // AGEOTREE_H

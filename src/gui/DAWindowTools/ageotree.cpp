@@ -1,4 +1,5 @@
 #include "ageotree.h"
+#include "ageobasetreewidget.h"
 #include "ageodelegatewidget.h"
 #include "ageobasedelegate.h"
 #include "ageoobjectdelegate.h"
@@ -37,67 +38,41 @@
 #include "TMath.h"
 #include "TGeoShape.h"
 
-AGeoTree::AGeoTree(ASandwich *Sandwich)
-    : Sandwich(Sandwich), World(Sandwich->World), Prototypes(Sandwich->Prototypes)
+AGeoTree::AGeoTree(ASandwich * Sandwich) :
+    QObject(), Sandwich(Sandwich), World(Sandwich->World), Prototypes(Sandwich->Prototypes)
 {
     loadImages();
 
-    // main tree widget
-    setHeaderHidden(true);
-    setAcceptDrops(true);
-    setDragEnabled(true);
-    setDragDropMode(QAbstractItemView::InternalMove);
-    setSelectionMode(QAbstractItemView::ExtendedSelection);
-    setDropIndicatorShown(false);
-    //setIndentation(20);
-    setContentsMargins(0, 0, 0, 0);
-    setFrameStyle(QFrame::NoFrame);
-    setIconSize(QSize(20, 20));
-    configureStyle(this);
-    setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(this, &AGeoTree::customContextMenuRequested, this, &AGeoTree::customMenuRequested);
-    connect(this, &AGeoTree::itemSelectionChanged,       this, &AGeoTree::onItemSelectionChanged);
-    connect(this, &AGeoTree::itemExpanded,               this, &AGeoTree::onItemExpanded);
-    connect(this, &AGeoTree::itemCollapsed,              this, &AGeoTree::onItemCollapsed);
-    connect(this, &AGeoTree::itemClicked,                this, &AGeoTree::onItemClicked);
+    // main geo tree widget
+    twGeoTree = new AGeoBaseTreeWidget(World);
+    connect(twGeoTree,    &AGeoBaseTreeWidget::customContextMenuRequested, this,       &AGeoTree::customMenuRequested);
+    connect(twGeoTree,    &AGeoBaseTreeWidget::itemSelectionChanged,       this,       &AGeoTree::onItemSelectionChanged);
+    connect(twGeoTree,    &AGeoBaseTreeWidget::itemExpanded,               this,       &AGeoTree::onItemExpanded);
+    connect(twGeoTree,    &AGeoBaseTreeWidget::itemCollapsed,              this,       &AGeoTree::onItemCollapsed);
+    connect(twGeoTree,    &AGeoBaseTreeWidget::itemClicked,                this,       &AGeoTree::onItemClicked);
+    connect(twGeoTree,    &AGeoBaseTreeWidget::RequestRebuildDetector,     this,       &AGeoTree::RequestRebuildDetector);
 
     // widget for delegates
     EditWidget = new AGeoDelegateWidget(Sandwich, this);
-    connect(EditWidget, &AGeoDelegateWidget::showMonitor,                this, &AGeoTree::RequestShowMonitor);
-    connect(EditWidget, &AGeoDelegateWidget::requestBuildScript,         this, &AGeoTree::objectToScript);
-    connect(this,       &AGeoTree::ObjectSelectionChanged, EditWidget, &AGeoDelegateWidget::onObjectSelectionChanged);
+    connect(EditWidget,   &AGeoDelegateWidget::showMonitor,                this,       &AGeoTree::RequestShowMonitor);
+    connect(EditWidget,   &AGeoDelegateWidget::requestBuildScript,         this,       &AGeoTree::objectToScript);
+    connect(this,         &AGeoTree::ObjectSelectionChanged,               EditWidget, &AGeoDelegateWidget::onObjectSelectionChanged);
 
     // tree for prototypes
-    createPrototypeTreeWidget();
-    configureStyle(twPrototypes);
+    twPrototypes = new AGeoBaseTreeWidget(World);
+    connect(twPrototypes, &AGeoBaseTreeWidget::customContextMenuRequested, this,       &AGeoTree::customProtoMenuRequested);
+    connect(twPrototypes, &AGeoBaseTreeWidget::itemExpanded,               this,       &AGeoTree::onPrototypeItemExpanded);
+    connect(twPrototypes, &AGeoBaseTreeWidget::itemCollapsed,              this,       &AGeoTree::onPrototypeItemCollapsed);
+    connect(twPrototypes, &AGeoBaseTreeWidget::itemSelectionChanged,       this,       &AGeoTree::onProtoItemSelectionChanged);
+    connect(twPrototypes, &AGeoBaseTreeWidget::itemClicked,                this,       &AGeoTree::onProtoItemClicked);
+    connect(twPrototypes, &AGeoBaseTreeWidget::RequestRebuildDetector,     this,       &AGeoTree::RequestRebuildDetector);
+    connect(this,         &AGeoTree::ProtoObjectSelectionChanged,          EditWidget, &AGeoDelegateWidget::onObjectSelectionChanged);
 
     // shortcuts
-    QShortcut * Del = new QShortcut(Qt::Key_Backspace, this);
+    QShortcut * Del = new QShortcut(Qt::Key_Backspace, twGeoTree);
     connect(Del, &QShortcut::activated, this, &AGeoTree::onRemoveTriggered);
-    QShortcut * DelRec = new QShortcut(QKeySequence(QKeySequence::Delete), this);
+    QShortcut * DelRec = new QShortcut(QKeySequence(QKeySequence::Delete), twGeoTree);
     connect(DelRec, &QShortcut::activated, this, &AGeoTree::onRemoveRecursiveTriggered);
-}
-
-void AGeoTree::createPrototypeTreeWidget()
-{
-    twPrototypes = new QTreeWidget();
-
-    twPrototypes->setHeaderHidden(true);
-    twPrototypes->setAcceptDrops(true);
-    twPrototypes->setDragEnabled(true);
-    twPrototypes->setDragDropMode(QAbstractItemView::InternalMove);
-    twPrototypes->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    twPrototypes->setDropIndicatorShown(false);
-    twPrototypes->setContentsMargins(0,0,0,0);
-    twPrototypes->setFrameStyle(QFrame::NoFrame);
-    twPrototypes->setIconSize(QSize(20,20));
-    twPrototypes->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(twPrototypes, &QTreeWidget::customContextMenuRequested,     this,       &AGeoTree::customProtoMenuRequested);
-    connect(twPrototypes, &QTreeWidget::itemExpanded,                   this,       &AGeoTree::onPrototypeItemExpanded);
-    connect(twPrototypes, &QTreeWidget::itemCollapsed,                  this,       &AGeoTree::onPrototypeItemCollapsed);
-    connect(twPrototypes, &QTreeWidget::itemSelectionChanged,           this,       &AGeoTree::onProtoItemSelectionChanged);
-    connect(twPrototypes, &QTreeWidget::itemClicked,                    this,       &AGeoTree::onProtoItemClicked);
-    connect(this,         &AGeoTree::ProtoObjectSelectionChanged, EditWidget, &AGeoDelegateWidget::onObjectSelectionChanged);
 }
 
 void AGeoTree::loadImages()
@@ -115,12 +90,12 @@ void AGeoTree::loadImages()
 
 void AGeoTree::SelectObjects(QStringList ObjectNames)
 {
-   clearSelection();
+   twGeoTree->clearSelection();
    //qDebug() << "Request select the following objects:"<<ObjectNames;
 
    for (int i=0; i<ObjectNames.size(); i++)
      {
-       QList<QTreeWidgetItem*> list = findItems(ObjectNames.at(i), Qt::MatchExactly | Qt::MatchRecursive);
+       QList<QTreeWidgetItem*> list = twGeoTree->findItems(ObjectNames.at(i), Qt::MatchExactly | Qt::MatchRecursive);
        if (!list.isEmpty())
          {
             //qDebug() << "Attempting to focus:"<<list.first()->text(0);
@@ -138,7 +113,7 @@ void AGeoTree::UpdateGui(QString ObjectName)
     EditWidget->ClearGui();
 
     blockSignals(true);
-    clear();
+    twGeoTree->clear();
     blockSignals(false);
 
     twPrototypes->blockSignals(true);
@@ -146,7 +121,7 @@ void AGeoTree::UpdateGui(QString ObjectName)
     twPrototypes->blockSignals(false);
 
     //World
-    QTreeWidgetItem * topItem = new QTreeWidgetItem(this);
+    QTreeWidgetItem * topItem = new QTreeWidgetItem(twGeoTree);
     topItem->setText(0, "World");
     QFont f = topItem->font(0);
     f.setBold(true);
@@ -174,18 +149,18 @@ void AGeoTree::UpdateGui(QString ObjectName)
     if (list.isEmpty())
     {
         bWorldTreeSelected = true;
-        list = findItems(ObjectName, Qt::MatchExactly | Qt::MatchRecursive);
+        list = twGeoTree->findItems(ObjectName, Qt::MatchExactly | Qt::MatchRecursive);
     }
     else bWorldTreeSelected = false;
 
     if (list.isEmpty())
     {
-        if (topLevelItemCount() > 0) setCurrentItem(topLevelItem(0));
+        if (twGeoTree->topLevelItemCount() > 0) twGeoTree->setCurrentItem(twGeoTree->topLevelItem(0));
     }
     else
     {
         //list.first()->setSelected(true);
-        setCurrentItem(list.first());
+        twGeoTree->setCurrentItem(list.first());
     }
     //qDebug() << "<==";
 }
@@ -213,7 +188,7 @@ void AGeoTree::onGridReshapeRequested(QString objName)
     if (!obj->getGridElement()) return;
     ATypeGridElementObject* GE = static_cast<ATypeGridElementObject*>(obj->getGridElement()->ObjectType);
 
-    AGridElementDialog* d = new AGridElementDialog(Sandwich->Materials, this);
+    AGridElementDialog* d = new AGridElementDialog(Sandwich->Materials, EditWidget);
     switch (GE->shape)
      {
       case 0: d->setValues(0, GE->size1, GE->size2, obj->getGridElement()->Shape->getHeight()-0.001); break;
@@ -316,7 +291,7 @@ void AGeoTree::updateExpandState(QTreeWidgetItem * item, bool bPrototypes)
     }
     else
     {
-        treeWidget = this;
+        treeWidget = twGeoTree;
         obj        = World->findObjectByName(item->text(0));
     }
 
@@ -328,251 +303,10 @@ void AGeoTree::updateExpandState(QTreeWidgetItem * item, bool bPrototypes)
     }
 }
 
-void AGeoTree::dropEvent(QDropEvent* event)
-{
-    if (previousHoverItem)
-    {
-        previousHoverItem->setBackgroundColor(0, Qt::white);
-        previousHoverItem = nullptr;
-    }
-
-    QList<QTreeWidgetItem*> selected = selectedItems();
-
-    QTreeWidgetItem * itemTo = this->itemAt(event->pos());
-    if (!itemTo)
-    {
-        qDebug() << "No item on drop position - rejected!";
-        event->ignore();
-        return;
-    }
-    QString DraggedTo = itemTo->text(0);
-    AGeoObject * objTo = World->findObjectByName(DraggedTo);
-    if (!objTo)
-    {
-        qWarning() << "Error: objTo not found!";
-        event->ignore();
-        return;
-    }
-
-    if (objTo->fLocked || objTo->ObjectType->isInstance())
-    {
-        qWarning() << "Cannot drop to a locked object or a prototype instance";
-        event->ignore();
-        return;
-    }
-
-    QStringList selNames;
-
-    AGeoObject * ContainerTo = nullptr;
-    //qDebug() <<"start of drop";
-    if (!showDropIndicator())
-    {
-        ContainerTo = objTo;
-        //qDebug() <<"ON ITEM";
-    }
-    else
-    {
-        if (objTo->Container)
-             ContainerTo = objTo->Container;
-        else ContainerTo = objTo;
-        //qDebug() <<"NOT ON ITEM";
-    }
-    QString containerErrorStr;
-    bool containerOk = true;
-    if (!ContainerTo->isWorld()) containerOk = ContainerTo->isContainerValidForDrop(containerErrorStr);
-
-    for (int i=0; i<selected.size(); i++) //error catching
-    {
-        QTreeWidgetItem* DraggedItem = this->selectedItems().at(i);
-        if (!DraggedItem)
-        {
-            //qDebug() << "Drag source item invalid, ignore";
-            event->ignore();
-            return;
-        }
-
-        QString DraggedName = DraggedItem->text(0);
-        AGeoObject* obj = World->findObjectByName(DraggedName);
-        if (!obj)
-        {
-            qWarning() << "Error: obj not found!";
-            event->ignore();
-            return;
-        }
-
-        if (ContainerTo != obj->Container)
-        {
-            if (!containerOk)
-            {
-                event->ignore();
-                QMessageBox::information(this, "", containerErrorStr);
-                return;
-            }
-
-//            if (ContainerTo->ObjectType->isArray() && obj->ObjectType->isArray())
-//            {
-//                event->ignore();
-//                QMessageBox::information(this, "", "Cannot move array directly inside another array!");
-//                return;
-//            }
-            if (obj->isInUseByComposite())
-            {
-                event->ignore();
-                QMessageBox::information(this, "", "Cannot move objects: Contains object(s) used in a composite object generation");
-                return;
-            }
-            if (ContainerTo->ObjectType->isCompositeContainer() && !obj->ObjectType->isSingle())
-            {
-                event->ignore();
-                QMessageBox::information(this, "", "Can insert only elementary objects to the list of composite members!");
-                return;
-            }
-            if (ContainerTo->ObjectType->isHandlingSet() && !obj->ObjectType->isSingle())
-            {
-                event->ignore();
-                QMessageBox::information(this, "", "Can insert only elementary objects to sets!");
-                return;
-            }
-        }
-    }
-
-    for (int i=selected.size()-1; i>-1; i--) //actual move and reorder
-    {
-        QTreeWidgetItem* DraggedItem = this->selectedItems().at(i);
-
-        QString DraggedName = DraggedItem->text(0);
-        AGeoObject* obj = World->findObjectByName(DraggedName);
-
-        if (ContainerTo != obj->Container)
-        {
-            AGeoObject* objFormerContainer = obj->Container;
-
-            bool ok = obj->migrateTo(ContainerTo);
-            if (!ok)
-            {
-                qWarning() << "Object migration failed: cannot migrate down the chain (or to itself)!";
-                event->ignore();
-                return;
-            }
-
-            if (ContainerTo->ObjectType->isStack())
-            {
-                //qDebug() << "updating stack of this object";
-                obj->updateStack();
-            }
-            if (objFormerContainer && objFormerContainer->ObjectType->isStack())
-            {
-                //qDebug() << "updating stack of the former container";
-                if (objFormerContainer->HostedObjects.size()>0)
-                    objFormerContainer->HostedObjects.first()->updateStack();
-            }
-        }
-
-        if (ContainerTo != objTo)
-        {
-            bool fAfter = (dropIndicatorPosition() == QAbstractItemView::BelowItem);
-            obj->repositionInHosted(objTo, fAfter);
-
-            if (obj && obj->Container && obj->Container->ObjectType->isStack())
-                obj->updateStack();
-
-        }
-
-    }
-    //qDebug() << "Drag completed, updating gui";
-    UpdateGui();
-    emit RequestRebuildDetector();
-
-    // Restore selection
-    for (int i=0; i<selNames.size(); i++)
-    {
-        QList<QTreeWidgetItem*> list = findItems(selNames.at(i), Qt::MatchExactly | Qt::MatchRecursive);
-        if (!list.isEmpty()) list.first()->setSelected(true);
-    }
-
-    event->ignore();
-    return;
-}
-
-void AGeoTree::dragEnterEvent(QDragEnterEvent *event)
-{
-    previousHoverItem = nullptr;
-    //qDebug() << "Drag enter. Selection size:"<< selectedItems().size();
-    //attempt to drag items contaning locked objects should be canceled!
-
-    const int numItems = selectedItems().size();
-    for (int iItem = 0; iItem < numItems; iItem++)
-    {
-        QTreeWidgetItem * DraggedItem = selectedItems().at(iItem);
-        QString DraggedName = DraggedItem->text(0);
-        //qDebug() << "Draggin item:"<< DraggedName;
-        AGeoObject * obj = World->findObjectByName(DraggedName);
-        //if (obj->fLocked || obj->isContainsLocked() || obj->ObjectType->isGridElement() || obj->ObjectType->isCompositeContainer())
-        if (obj->fLocked || obj->ObjectType->isGridElement() || obj->ObjectType->isCompositeContainer())
-        {
-            qDebug() << "Drag forbidden for one of the items!";
-            event->ignore();
-            return;
-        }
-    }
-
-    // Drop and mouseRelease are not fired if drop on the same item as started -> teal highlight is not removed
-    // Clumsy fix - do not show teal highlight if the item is the same
-    movingItem = ( numItems > 0 ? selectedItems().at(0)
-                                : nullptr);
-
-    event->accept();
-}
-
-void AGeoTree::dragMoveEvent(QDragMoveEvent *event)
-{
-    QTreeWidget::dragMoveEvent(event);
-
-    const Qt::KeyboardModifiers mod = event->keyboardModifiers();
-    bool bRearrange = (mod == Qt::ALT || mod == Qt::CTRL || mod == Qt::SHIFT);
-
-    setDropIndicatorShown(bRearrange);
-
-    if (previousHoverItem)
-    {
-        previousHoverItem->setBackgroundColor(0, Qt::white);
-        previousHoverItem = nullptr;
-    }
-    if (!bRearrange)
-    {
-        QTreeWidgetItem * itemOver = this->itemAt(event->pos());
-        if (itemOver && itemOver != movingItem)
-        {
-            itemOver->setBackgroundColor(0, Qt::cyan);
-            previousHoverItem = itemOver;
-        }
-    }
-}
-
-void AGeoTree::configureStyle(QTreeWidget * wid)
-{
-    QString style;
-    style = "QTreeView::branch:has-siblings:!adjoins-item {"
-            "border-image: url(:/images/tw-vline.png) 0; }"
-    "QTreeView::branch:has-siblings:adjoins-item {"
-        "border-image: url(:/images/tw-branch-more.png) 0; }"
-    "QTreeView::branch:!has-children:!has-siblings:adjoins-item {"
-        "border-image: url(:/images/tw-branch-end.png) 0; }"
-    "QTreeView::branch:has-children:!has-siblings:closed,"
-    "QTreeView::branch:closed:has-children:has-siblings {"
-            "border-image: none;"
-            "image: url(:/images/tw-branch-closed.png);}"
-    "QTreeView::branch:open:has-children:!has-siblings,"
-    "QTreeView::branch:open:has-children:has-siblings  {"
-            "border-image: none;"
-            "image: url(:/images/tw-branch-open.png);}";
-    wid->setStyleSheet(style);
-}
-
 void AGeoTree::onItemSelectionChanged()
 {
   //  qDebug() << "---Widget selection cghanged";
-  QList<QTreeWidgetItem*> sel = selectedItems();
+  QList<QTreeWidgetItem*> sel = twGeoTree->selectedItems();
 
   if      (sel.size() == 0) emit ObjectSelectionChanged("");
   else if (sel.size() == 1)
@@ -630,7 +364,7 @@ QAction* Action(QMenu& Menu, QString Text)
 void AGeoTree::customMenuRequested(const QPoint &pos)
 {  
   QMenu menu;
-  QList<QTreeWidgetItem*> selected = selectedItems();
+  QList<QTreeWidgetItem*> selected = twGeoTree->selectedItems();
 
   QAction* focusObjA = Action(menu, "Show - focus geometry view");
   QAction* showA     = Action(menu, "Show - highlight in geometry");
@@ -752,7 +486,7 @@ void AGeoTree::customMenuRequested(const QPoint &pos)
       prototypeA->setEnabled(true);
   }
 
-  QAction* SelectedAction = menu.exec(mapToGlobal(pos));
+  QAction* SelectedAction = menu.exec(twGeoTree->mapToGlobal(pos));
   if (!SelectedAction) return;
 
   // -- EXECUTE SELECTED ACTION --
@@ -791,8 +525,8 @@ void AGeoTree::customMenuRequested(const QPoint &pos)
   else if (SelectedAction == cloneA)         menuActionCloneObject(obj);
   else if (SelectedAction == stackA)         menuActionFormStack(selected);
   else if (SelectedAction == stackRefA)      markAsStackRefVolume(obj);
-  else if (SelectedAction == removeKeepContA)menuActionRemoveKeepContent(this);
-  else if (SelectedAction == removeWithContA)menuActionRemoveWithContent(this);
+  else if (SelectedAction == removeKeepContA)menuActionRemoveKeepContent(twGeoTree);
+  else if (SelectedAction == removeWithContA)menuActionRemoveWithContent(twGeoTree);
   else if (SelectedAction == removeHostedA)  menuActionRemoveHostedObjects(obj);
 
   else if (SelectedAction == prototypeA)     menuActionMakeItPrototype(selected);
@@ -992,12 +726,12 @@ void AGeoTree::onPrototypeItemCollapsed(QTreeWidgetItem * item)
 
 void AGeoTree::onRemoveTriggered()
 {
-    menuActionRemoveKeepContent(this);
+    menuActionRemoveKeepContent(twGeoTree);
 }
 
 void AGeoTree::onRemoveRecursiveTriggered()
 {
-    menuActionRemoveWithContent(this);
+    menuActionRemoveWithContent(twGeoTree);
 }
 
 void AGeoTree::onRequestShowPrototype(QString ProtoName)
@@ -1127,7 +861,7 @@ void AGeoTree::menuActionCloneObject(AGeoObject * obj)
     if (obj->ObjectType->isWorld()) return;
     if (obj->ObjectType->isSlab())
     {
-        message("Cannot clone slabs in this way, use widget at the main window", this);
+        message("Cannot clone slabs in this way, use widget at the main window", twGeoTree);
         return;
     }
 
@@ -1253,7 +987,7 @@ void AGeoTree::menuActionAddInstance(AGeoObject * ContObj, const QString & Proto
     AGeoObject * protoObj = Prototypes->findObjectByName(PrototypeName);
     if (!protoObj)
     {
-        message("Something went very wrong: prototype not found", this);
+        message("Something went very wrong: prototype not found", twGeoTree);
         return;
     }
     for (int i = 0; i < 3; i++)
@@ -1279,7 +1013,7 @@ void AGeoTree::menuActionMakeItPrototype(const QList<QTreeWidgetItem*> & selecte
         AGeoObject * obj = World->findObjectByName(item->text(0));
         if (!obj)
         {
-            message("Something went wrong: object not found", this);
+            message("Something went wrong: object not found", twGeoTree);
             return;
         }
         vec << obj;
@@ -1287,7 +1021,7 @@ void AGeoTree::menuActionMakeItPrototype(const QList<QTreeWidgetItem*> & selecte
     QString err = Sandwich->convertToNewPrototype(vec);
     if (!err.isEmpty())
     {
-        message(err, this);
+        message(err, twGeoTree);
         return;
     }
 
@@ -1305,7 +1039,7 @@ void AGeoTree::menuActionMoveProtoToWorld(AGeoObject * obj)
     bool bIsUsed = Sandwich->World->isPrototypeInUseRecursive(obj->Name, &users);
     if (bIsUsed)
     {
-        message("This prototype is in used by these instances(s):\n   " + users.join("\n   "), this);
+        message("The prototype is in used by these instances(s):\n   " + users.join("\n   "), twGeoTree);
         return;
     }
 
@@ -1339,7 +1073,7 @@ void AGeoTree::SetLineAttributes(AGeoObject * obj)
 {
     if (!obj) return;
 
-    ARootLineConfigurator* rlc = new ARootLineConfigurator(&obj->color, &obj->width, &obj->style, this);
+    ARootLineConfigurator* rlc = new ARootLineConfigurator(&obj->color, &obj->width, &obj->style, twGeoTree);
     int res = rlc->exec();
     if (res != 0)
     {
@@ -1435,38 +1169,38 @@ void AGeoTree::menuActionFormStack(QList<QTreeWidgetItem*> selected)
         AGeoObject * obj  = World->findObjectByName(item->text(0));
         if (!obj)
         {
-            message("Something went wrong: object with name " + item->text(0) + " not found!", this);
+            message("Something went wrong: object with name " + item->text(0) + " not found!", twGeoTree);
             return;
         }
         if (obj->ObjectType->isWorld() || obj->ObjectType->isSlab())
         {
-            message("World or slabs/lightguides cannot be a member of a stack", this);
+            message("World or slabs/lightguides cannot be a member of a stack", twGeoTree);
             return;
         }
         if (obj->ObjectType->isArray())
         {
-            message("Array cannot be a member of a stack", this);
+            message("Array cannot be a member of a stack", twGeoTree);
             return;
         }
         if (obj->ObjectType->isComposite() || obj->ObjectType->isGrid())
         {
-            message("Composite objects (and optical grids) cannot be a member of a stack", this);
+            message("Composite objects (and optical grids) cannot be a member of a stack", twGeoTree);
             return;
         }
         if (obj->ObjectType->isHandlingSet() || obj->ObjectType->isLogical())
         {
-            message("Stacks/groups cannot be a member of a stack", this);
+            message("Stacks/groups cannot be a member of a stack", twGeoTree);
             return;
         }
         if (obj->ObjectType->isPrototype() || obj->ObjectType->isInstance())
         {
-            message("Prototypes and instances cannot be a member of a stack", this);
+            message("Prototypes and instances cannot be a member of a stack", twGeoTree);
             return;
         }
         if (!ContObj) ContObj = obj->Container;
         if (ContObj != obj->Container)
         {
-            message("To form a stack all objects have to have the same container", this);
+            message("To form a stack all objects have to have the same container", twGeoTree);
             return;
         }
 

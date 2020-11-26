@@ -425,7 +425,8 @@ SOURCES += main.cpp \
     scriptmode/afarm_si.cpp \
     common/ageotype.cpp \
     gui/DAWindowTools/ageotree.cpp \
-    gui/DAWindowTools/ageodelegatewidget.cpp
+    gui/DAWindowTools/ageodelegatewidget.cpp \
+    gui/DAWindowTools/ageobasetreewidget.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -597,7 +598,8 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/afarm_si.h \
     common/ageotype.h \
     gui/DAWindowTools/ageotree.h \
-    gui/DAWindowTools/ageodelegatewidget.h
+    gui/DAWindowTools/ageodelegatewidget.h \
+    gui/DAWindowTools/ageobasetreewidget.h
 
 # --- SIM ---
 ants2_SIM {

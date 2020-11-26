@@ -27,6 +27,7 @@
 #include "afiletools.h"
 #include "ascriptwindow.h"
 #include "ageoconsts.h"
+#include "ageobasetreewidget.h"
 
 #include <QDebug>
 #include <QFileDialog>
@@ -60,7 +61,7 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(QWidget * parent, MainWindow * MW, De
 
   // world tree widget
   twGeo = new AGeoTree(Detector->Sandwich);
-  ui->saGeo->setWidget(twGeo);
+  ui->saGeo->setWidget(twGeo->twGeoTree);
   connect(twGeo, SIGNAL(RequestListOfParticles(QStringList&)), Detector->MpCollection, SLOT(OnRequestListOfParticles(QStringList&)));
   connect(twGeo, &AGeoTree::RequestShowMonitor, this, &DetectorAddOnsWindow::OnrequestShowMonitor);
 

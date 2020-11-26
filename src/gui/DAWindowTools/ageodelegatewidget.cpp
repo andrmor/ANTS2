@@ -1,6 +1,7 @@
 #include "ageodelegatewidget.h"
-#include "asandwich.h";
+#include "asandwich.h"
 #include "ageotree.h"
+#include "ageobasetreewidget.h"
 #include "ageoobject.h"
 #include "ageoshape.h"
 #include "ageotype.h"
@@ -261,7 +262,7 @@ void AGeoDelegateWidget::onStartEditing()
   if (!fEditingMode)
   {
       fEditingMode = true;
-      tw->setEnabled(false);
+      tw->twGeoTree->setEnabled(false);
       tw->twPrototypes->setEnabled(false);
       QFont f = pbConfirm->font(); f.setBold(true); pbConfirm->setFont(f);
       pbConfirm->setStyleSheet("QPushButton {color: red;}");
@@ -369,7 +370,7 @@ void AGeoDelegateWidget::onMonitorRequestsShowSensitiveDirection()
 void AGeoDelegateWidget::exitEditingMode()
 {
     fEditingMode = false;
-    tw->setEnabled(true);
+    tw->twGeoTree->setEnabled(true);
     tw->twPrototypes->setEnabled(true);
     QFont f = pbConfirm->font(); f.setBold(false); pbConfirm->setFont(f);
     pbConfirm->setStyleSheet("QPushButton {color: black;}");

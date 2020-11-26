@@ -1306,7 +1306,7 @@ void AGeoObject::enforceUniqueNameForCloneRecursive(AGeoObject * World, AGeoObje
 
 void AGeoObject::addSuffixToNameRecursive(const QString & suffix)
 {
-    const QString newName = Name + "@" + suffix;
+    const QString newName = Name + "_at_" + suffix;
 
     if (Container && Container->ObjectType->isStack())
     {

@@ -473,8 +473,8 @@ void AGeoObjectDelegate::updateTypeLabel()
         if (CurrentObject->Container->ObjectType->isHandlingSet())
         {
             if (CurrentObject->Container->ObjectType->isGroup())
-                DelegateTypeName += ",   groupped";
-            else
+                DelegateTypeName += ",   grouped";
+            else if (CurrentObject->Container->ObjectType->isStack())
                 DelegateTypeName += ",   stacked";
         }
     }

@@ -224,6 +224,12 @@ void AGeoBaseTreeWidget::dragEnterEvent(QDragEnterEvent *event)
         QString DraggedName = DraggedItem->text(0);
         //qDebug() << "Draggin item:"<< DraggedName;
         AGeoObject * obj = World->findObjectByName(DraggedName);
+        if (!obj)
+        {
+            qDebug() << "Drag item not found!!";
+            event->ignore();
+            return;
+        }
         //if (obj->fLocked || obj->isContainsLocked() || obj->ObjectType->isGridElement() || obj->ObjectType->isCompositeContainer())
         if (obj->fLocked || obj->ObjectType->isGridElement() || obj->ObjectType->isCompositeContainer())
         {
@@ -231,6 +237,7 @@ void AGeoBaseTreeWidget::dragEnterEvent(QDragEnterEvent *event)
             event->ignore();
             return;
         }
+
     }
 
     // Drop and mouseRelease are not fired if drop on the same item as started -> teal highlight is not removed
@@ -243,6 +250,12 @@ void AGeoBaseTreeWidget::dragEnterEvent(QDragEnterEvent *event)
 
 void AGeoBaseTreeWidget::dragMoveEvent(QDragMoveEvent *event)
 {
+    if (event->source() != this)
+    {
+        event->ignore();
+        return;
+    }
+
     QTreeWidget::dragMoveEvent(event);
 
     const Qt::KeyboardModifiers mod = event->keyboardModifiers();
@@ -263,6 +276,15 @@ void AGeoBaseTreeWidget::dragMoveEvent(QDragMoveEvent *event)
             itemOver->setBackgroundColor(0, Qt::cyan);
             previousHoverItem = itemOver;
         }
+    }
+}
+
+void AGeoBaseTreeWidget::dragLeaveEvent(QDragLeaveEvent *)
+{
+    if (previousHoverItem)
+    {
+        previousHoverItem->setBackgroundColor(0, Qt::white);
+        previousHoverItem = nullptr;
     }
 }
 

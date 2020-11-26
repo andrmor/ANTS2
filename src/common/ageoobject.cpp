@@ -1505,6 +1505,13 @@ QString AGeoObject::GenerateRandomObjectName()
   return str;
 }
 
+QString AGeoObject::GenerateRandomPrototypeName()
+{
+    QString str = randomString(2, 1);
+    str = "Prototype_" + str;
+    return str;
+}
+
 QString AGeoObject::GenerateRandomLightguideName()
 {
   QString str = randomString(0, 1);

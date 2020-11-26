@@ -16,6 +16,7 @@ protected:
     void dropEvent(QDropEvent * event);
     void dragEnterEvent(QDragEnterEvent * event);
     void dragMoveEvent(QDragMoveEvent * event);
+    void dragLeaveEvent(QDragLeaveEvent *);
 
 private:
     AGeoObject * World;

@@ -538,12 +538,17 @@ void AGeoTree::customMenuRequested(const QPoint &pos)
   }
 }
 
-void AGeoTree::customProtoMenuRequested(const QPoint &pos)
+void AGeoTree::customProtoMenuRequested(const QPoint & pos)
 {
     // top level (Prototypes) can have only single selection (see onProtoSelectionChanged())
     QList<QTreeWidgetItem*> selected = twPrototypes->selectedItems();
-    if (selected.isEmpty()) return; // non-empty selection is assumed below!
+    if (selected.isEmpty())
+    {
+        protoMenuEmptySelection(pos);
+        return;
+    }
 
+    // non-empty selection is assumed below!
     QMenu menu;
 
     QAction* showAllA  = Action(menu, "Show all instances");
@@ -674,6 +679,25 @@ void AGeoTree::customProtoMenuRequested(const QPoint &pos)
     else if (SelectedAction == removeHostedA)  menuActionRemoveHostedObjects(obj);
 
     else if (SelectedAction == moveToWorldA)   menuActionMoveProtoToWorld(obj);
+}
+
+void AGeoTree::protoMenuEmptySelection(const QPoint & pos)
+{
+    QMenu menu;
+    menu.addAction("Create new prototype");
+
+    QAction * SelectedAction = menu.exec(twPrototypes->mapToGlobal(pos));
+    if (!SelectedAction) return;
+
+    AGeoObject * proto = new AGeoObject();
+    do proto->Name = AGeoObject::GenerateRandomPrototypeName();
+    while (World->isNameExists(proto->Name));
+    delete proto->ObjectType; proto->ObjectType = new ATypePrototypeObject();
+    proto->migrateTo(Prototypes);
+
+    const QString name = proto->Name;
+    emit RequestRebuildDetector();
+    UpdateGui(name);
 }
 
 void AGeoTree::onItemClicked()

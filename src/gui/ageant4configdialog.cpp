@@ -31,6 +31,8 @@ AGeant4ConfigDialog::AGeant4ConfigDialog(AG4SimulationSettings & G4SimSet, QWidg
 
     ui->cbBinaryOutput->setChecked(G4SimSet.BinaryOutput);
     ui->sbPrecision->setValue(G4SimSet.Precision);
+
+    ui->cbUseTSphys->setChecked(G4SimSet.UseTSphys);
 }
 
 AGeant4ConfigDialog::~AGeant4ConfigDialog()
@@ -76,6 +78,8 @@ void AGeant4ConfigDialog::on_pbAccept_clicked()
 
     G4SimSet.BinaryOutput = ui->cbBinaryOutput->isChecked();
     G4SimSet.Precision    = ui->sbPrecision->value();
+
+    G4SimSet.UseTSphys    = ui->cbUseTSphys->isChecked();
 
     accept();
 }

@@ -2571,7 +2571,7 @@ void AScriptWindow::on_pbFileName_customContextMenuRequested(const QPoint & pos)
 
     QMenu menu;
     QAction * copy   = menu.addAction("Copy file name to clipboard");
-    QAction * copyIn = menu.addAction("Copy file name fro #include to clipboard");
+    QAction * copyIn = menu.addAction("Copy file name for #include to clipboard");
 
     QAction * sel = menu.exec(ui->pbFileName->mapToGlobal(pos));
 

@@ -9,7 +9,7 @@
 #include <QVector>
 
 class QJsonObject;
-class ATypeGeoObject;
+class AGeoType;
 class TGeoShape;
 class AGeoShape;
 class ASlabModel;
@@ -22,7 +22,7 @@ public:
   AGeoObject(const AGeoObject * objToCopy);  //normal object is created
   AGeoObject(const QString & name, const QString & container, int iMat, AGeoShape * shape,
              double x, double y, double z,   double phi, double theta, double psi); // for tmp only, needs positioning in the container and name uniqueness check!
-  AGeoObject(ATypeGeoObject * objType, AGeoShape * shape = nullptr);  // pointers are assigned to the object properties! if no shape, default cube is formed
+  AGeoObject(AGeoType * objType, AGeoShape * shape = nullptr);  // pointers are assigned to the object properties! if no shape, default cube is formed
   ~AGeoObject();
 
   bool readShapeFromString(const QString & GenerationString, bool OnlyCheck = false); // using parameter values taken from gui generation string
@@ -44,7 +44,7 @@ public:
   void writeAllToJarr(QJsonArray & jarr);
   QString readAllFromJarr(AGeoObject * World, const QJsonArray & jarr);  // returns "" if no errors
 
-  ATypeGeoObject * ObjectType = nullptr;  // always created in the constructor!
+  AGeoType * ObjectType = nullptr;  // always created in the constructor!
   AGeoShape * Shape = nullptr;            // allowed to remain nullptr after construction!
 
   QString Name;
@@ -61,7 +61,7 @@ public:
   QList<AGeoObject*> HostedObjects;
 
   //visualization properties
-  int color = 1; // initializaed as -1, updated when first time shown by SlabListWidget
+  int color = 1; // !*! initialized as -1, updated when first time shown by SlabListWidget
   int style = 1;
   int width = 1;
 
@@ -125,7 +125,8 @@ public:
   void lockBuddies();
   void lockRecursively();
   void unlockAllInside();
-  void clearAll();
+  void clearAll();    // bad name!
+  void clearContent();
   void updateWorldSize(double& XYm, double& Zm);
   bool isMaterialInUse(int imat) const;  //including disabled objects
   bool isMaterialInActiveUse(int imat) const;  //excluding disabled objects
@@ -137,6 +138,15 @@ public:
   bool isContainerValidForDrop(QString &errorStr) const;
 
   AGeoObject * makeClone(AGeoObject * World); // returns nullptr if failed; garantees unique names if World is not nullptr; Slabs are not properly cloned while there is a special container with them!
+  AGeoObject * makeCloneForInstance(const QString & suffix);
+
+  void findAllInstancesRecursive(QVector<AGeoObject*> & Instances);
+  bool isContainInstanceRecursive() const;
+  bool isInstanceMember() const;
+
+  bool    isPossiblePrototype(QString * sReason = nullptr) const;
+  QString makeItPrototype(AGeoObject * Prototypes);
+  bool    isPrototypeInUseRecursive(const QString & PrototypeName, QStringList * Users = nullptr) const;
 
   //service propertie
   QString tmpContName;   //used only during load
@@ -148,10 +158,12 @@ private:
   void constructorInit();
 
   void enforceUniqueNameForCloneRecursive(AGeoObject * World, AGeoObject & tmpContainer);
+  void addSuffixToNameRecursive(const QString & suffix);
 
 public:
   static QString GenerateRandomName();
   static QString GenerateRandomObjectName();
+  static QString GenerateRandomPrototypeName();
   static QString GenerateRandomLightguideName();
   static QString GenerateRandomCompositeName();
   static QString GenerateRandomArrayName();

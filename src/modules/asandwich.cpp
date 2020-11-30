@@ -2,7 +2,7 @@
 #include "aslab.h"
 #include "ageoobject.h"
 #include "ageoshape.h"
-#include "atypegeoobject.h"
+#include "ageotype.h"
 #include "amaterialparticlecolection.h"
 #include "ajsontools.h"
 #include "agridelementrecord.h"
@@ -19,6 +19,10 @@ ASandwich::ASandwich()
     World = new AGeoObject("World");
     World->Material = 0;
     World->makeItWorld();
+
+    Prototypes = new AGeoObject("_#_PrototypeContainer_#_");
+    delete Prototypes->ObjectType; Prototypes->ObjectType = new ATypePrototypeCollectionObject();
+    Prototypes->migrateTo(World);
 }
 
 ASandwich::~ASandwich()
@@ -32,13 +36,30 @@ ASandwich::~ASandwich()
 
 void ASandwich::clearWorld()
 {    
-    //deletes all but World object
+    //deletes all but World object. Keep Prototypes object - it should have the same pointer!
+    World->HostedObjects.removeOne(Prototypes);
+
     for (int i=0; i<World->HostedObjects.size(); i++)
         World->HostedObjects[i]->clearAll();
     World->HostedObjects.clear();
 
+    Prototypes->clearContent();
+    World->HostedObjects << Prototypes;
+
     clearGridRecords();
     clearMonitorRecords();
+}
+
+bool ASandwich::canBeDeleted(AGeoObject * obj) const
+{
+    if (obj == World) return false;
+    if (obj == Prototypes) return false;
+
+    if (obj->isInUseByComposite()) return false;
+    if (obj->ObjectType->isPrototype() && World->isPrototypeInUseRecursive(obj->Name, nullptr)) return false;
+    if (obj->ObjectType->isSlab() && obj->getSlabModel()->fCenter) return false;
+
+    return true;
 }
 
 void ASandwich::appendSlab(ASlabModel *slab)
@@ -112,29 +133,21 @@ AGeoObject *ASandwich::getLowerLightguide()
 AGeoObject* ASandwich::addLightguide(bool upper)
 {
     //qDebug() << "Add lightguide triggered. Upper?"<<upper;
-    AGeoObject* obj = 0;
-    AGeoObject* copyFromObj = (upper ?  World->getFirstSlab() : World->getLastSlab());
+    AGeoObject * obj = nullptr;
+    AGeoObject * copyFromObj = (upper ?  World->getFirstSlab() : World->getLastSlab());
     //qDebug() << "Copy from object:" << copyFromObj;
     if (copyFromObj)
     {
-        //copying properties
         obj = new AGeoObject(copyFromObj);
-        //qDebug() << "--object properties copied from"<<copyFromObj->Name;
-        //converting to slab
-        delete obj->ObjectType;
-        obj->ObjectType = new ATypeSlabObject();
+        delete obj->ObjectType; obj->ObjectType = new ATypeSlabObject();
         *obj->getSlabModel() = *copyFromObj->getSlabModel();
         obj->getSlabModel()->fCenter = false;
-        //qDebug() << "--slab properties copied";
     }
     else
     {
-        //creating new
-        //qDebug() << "Creating new slab";
         obj = new AGeoObject();
-        //converting to slab
-        delete obj->ObjectType;
-        obj->ObjectType = new ATypeSlabObject();
+        delete obj->ObjectType; obj->ObjectType = new ATypeSlabObject();
+        obj->getSlabModel()->fCenter = true;
     }
     //qDebug() << "Base slab crated:" << obj->Name << obj->ObjectType->isSlab();
     //new name
@@ -225,6 +238,39 @@ void ASandwich::convertObjToComposite(AGeoObject *obj)
     sl << first->Name << second->Name;
     QString str = "TGeoCompositeShape( " + first->Name + " + " + second->Name + " )";
     obj->Shape = new AGeoComposite(sl, str);
+}
+
+QString ASandwich::convertToNewPrototype(QVector<AGeoObject*> members)
+{
+    QString errStr;
+
+    for (AGeoObject * obj : members)
+    {
+        bool ok = obj->isPossiblePrototype(&errStr);
+        if (!ok) return errStr;
+    }
+
+    int index = 0;
+    QString name;
+    do name = QString("Prototype_%1").arg(index++);
+    while (World->isNameExists(name));
+
+    AGeoObject * proto = new AGeoObject(name);
+    delete proto->ObjectType; proto->ObjectType = new ATypePrototypeObject();
+    proto->migrateTo(Prototypes);
+
+    for (AGeoObject * obj : members)
+        obj->migrateTo(proto);
+
+    return "";
+}
+
+bool ASandwich::isValidPrototypeName(const QString & ProtoName) const
+{
+    if (!Prototypes) return false;
+    for (AGeoObject * proto : Prototypes->HostedObjects)
+        if (ProtoName == proto->Name) return true;
+    return false;
 }
 
 void ASandwich::convertObjToGrid(AGeoObject *obj)
@@ -462,6 +508,103 @@ void ASandwich::shapeGrid(AGeoObject *obj, int shape, double p0, double p1, doub
     GEobj->updateGridElementShape();
 }
 
+void rotate(TVector3 & v, double dPhi, double dTheta, double dPsi)
+{
+    v.RotateZ(TMath::Pi() / 180.0 * dPhi);
+    TVector3 X(1.0, 0, 0);
+    X.RotateZ(TMath::Pi() / 180.0 * dPhi);
+    //v.RotateX( TMath::Pi()/180.0* Theta);
+    v.Rotate(TMath::Pi() / 180.0 * dTheta, X);
+    TVector3 Z(0, 0, 1.0);
+    Z.Rotate(TMath::Pi() / 180.0 * dTheta, X);
+    // v.RotateZ( TMath::Pi()/180.0* Psi );
+    v.Rotate(TMath::Pi() / 180.0 * dPsi, Z);
+}
+
+void ASandwich::expandPrototypeInstances()
+{
+    if (Prototypes->HostedObjects.isEmpty()) return;
+
+    QVector<AGeoObject*> Instances;
+    World->findAllInstancesRecursive(Instances);
+
+    for (AGeoObject * instanceObj : Instances)
+    {
+        instanceObj->clearContent();
+
+        ATypeInstanceObject * insType = dynamic_cast<ATypeInstanceObject*>(instanceObj->ObjectType);
+        if (!insType)
+        {
+            qWarning() << "Instance" << instanceObj->Name << "has a wrong type!";
+            return;
+        }
+
+        AGeoObject * prototypeObj = Prototypes->findObjectByName(insType->PrototypeName);
+        if (!prototypeObj)
+        {
+            qWarning() << "Prototype" << insType->PrototypeName << "not found for instance" << instanceObj->Name;
+            return;
+        }
+
+        for (AGeoObject * obj : prototypeObj->HostedObjects)
+        {
+            AGeoObject * clone = obj->makeCloneForInstance(instanceObj->Name);
+            clone->lockRecursively();
+            instanceObj->addObjectLast(clone);
+            clone->fActive = instanceObj->fActive;
+        }
+        instanceObj->fExpanded = false;
+
+        //apply rotation and shift
+        for (AGeoObject * obj : instanceObj->HostedObjects)
+        {
+            TVector3 v(obj->Position[0], obj->Position[1], obj->Position[2]); // vector from the center of the instance to the object center
+            rotate(v, instanceObj->Orientation[0], instanceObj->Orientation[1], instanceObj->Orientation[2]);
+            for (int i = 0; i < 3; i++)
+            {
+                obj->Position[i]     = v[i] + instanceObj->Position[i];
+                obj->Orientation[i] += instanceObj->Orientation[i];
+            }
+        }
+
+        /*
+        //-----//
+        for (int iObj = 0; iObj < obj->Container->HostedObjects.size(); iObj++)
+        {
+            AGeoObject* hostedObj = obj->Container->HostedObjects[iObj];
+            if (hostedObj == obj) continue;
+
+            //center vector for rotation
+            //in TGeoRotation, first rotation iz around Z, then new X(manual is wrong!) and finally around new Z
+            TVector3 v(hostedObj->Position[0]-old[0], hostedObj->Position[1]-old[1], hostedObj->Position[2]-old[2]);
+
+            //first rotate back to origin in rotation
+            rotate(v, -old[3+0], 0, 0);
+            rotate(v, 0, -old[3+1], 0);
+            rotate(v, 0, 0, -old[3+2]);
+            rotate(v, obj->Orientation[0], obj->Orientation[1], obj->Orientation[2]);
+
+            for (int i=0; i<3; i++)
+            {
+                double delta = obj->Position[i] - old[i]; //shift in position
+
+                if (fWasRotated)
+                {
+                    //shift due to rotation  +  global shift
+                    hostedObj->Position[i] = old[i]+v[i] + delta;
+                    //rotation of the object
+                    double deltaAng = obj->Orientation[i] - old[3+i];
+                    hostedObj->Orientation[i] += deltaAng;
+                }
+                else
+                    hostedObj->Position[i] += delta;
+            }
+        }
+        //-----//
+        */
+    }
+}
+
 void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TGeoManager* GeoManager,
                                          AMaterialParticleCollection* MaterialCollection,
                                          QVector<APMandDummy> *PMsAndDumPMs,
@@ -477,11 +620,11 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
     {   // just a shortcut, to resuse the cycle by HostedVolumes below
         vol = parent;
     }
-    else if (obj->isCompositeMemeber() || obj->ObjectType->isCompositeContainer())
+    else if (obj->ObjectType->isPrototypes() || obj->isCompositeMemeber() || obj->ObjectType->isCompositeContainer())
     {
         return; //do nothing with logicals, they also do not host anything real
     }
-    else if (obj->ObjectType->isHandlingSet() || obj->ObjectType->isArray())
+    else if (obj->ObjectType->isHandlingSet() || obj->ObjectType->isArray() || obj->ObjectType->isInstance())
     {   // group objects are pure virtual, just pass the volume of the parent
         vol = parent;
     }
@@ -614,33 +757,72 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
                     }
                 }
             }
-        return;
     }
-    if (obj->ObjectType->isArray())
+    else if (obj->ObjectType->isArray())
     {
         ATypeArrayObject * array = static_cast<ATypeArrayObject*>(obj->ObjectType);
 
-        for (int i=0; i<obj->HostedObjects.size(); i++)
-          {
-            AGeoObject* el = obj->HostedObjects[i];
-            int iCounter = 0;
-            for (int ix = 0; ix<array->numX; ix++)
-             for (int iy = 0; iy<array->numY; iy++)
-               for (int iz = 0; iz<array->numZ; iz++)
+        for (AGeoObject * el : obj->HostedObjects)
+        {
+            int iCounter = array->startIndex;
+            if (iCounter < 0) iCounter = 0;
+
+            const AGeoObject * StackRefObj = nullptr;
+            if (el->ObjectType->isStack())
+            {
+                const ATypeStackContainerObject * stack = static_cast<const ATypeStackContainerObject*>(el->ObjectType);
+                const QString & RefObjName = stack->ReferenceVolume;
+                for (const AGeoObject * stObj : el->HostedObjects)
+                    if (stObj->Name == RefObjName)
+                    {
+                        StackRefObj = stObj;
+                        break;
+                    }
+                if (!StackRefObj) qWarning() << "Error: Reference object not found for stack" << el->Name;
+            }
+
+            for (int ix = 0; ix < array->numX; ix++)
+              for (int iy = 0; iy < array->numY; iy++)
+                for (int iz = 0; iz < array->numZ; iz++)
                 {
-                  if ( !el->ObjectType->isHandlingSet() )
-                      positionArrayElement(ix, iy, iz, el, obj, vol, GeoManager, MaterialCollection, PMsAndDumPMs, iCounter);
-                  else
-                      for (int i=0; i<el->HostedObjects.size(); i++)
-                          positionArrayElement(ix, iy, iz, el->HostedObjects[i], obj, vol, GeoManager, MaterialCollection, PMsAndDumPMs, iCounter);
-                  iCounter++;
+                    if (StackRefObj)
+                    {
+                        for (AGeoObject * StackObj : el->HostedObjects)
+                            positionArrayElement_StackObject(ix, iy, iz, StackObj, StackRefObj, obj, vol, GeoManager, MaterialCollection, PMsAndDumPMs, iCounter);
+                    }
+                    else if (el->ObjectType->isHandlingSet() || el->ObjectType->isInstance())
+                    {
+                        for (AGeoObject * elHO : el->HostedObjects)
+                            positionArrayElement(ix, iy, iz, elHO, obj, vol, GeoManager, MaterialCollection, PMsAndDumPMs, iCounter);
+                    }
+                    else positionArrayElement(ix, iy, iz, el, obj, vol, GeoManager, MaterialCollection, PMsAndDumPMs, iCounter);
+                    iCounter++;
                 }
-          }
+        }
+    }
+    else if (obj->ObjectType->isStack())
+    {
+        const ATypeStackContainerObject * stack = static_cast<const ATypeStackContainerObject*>(obj->ObjectType);
+        const QString & RefObjName = stack->ReferenceVolume;
+        const AGeoObject * RefObj = nullptr;
+        for (const AGeoObject * el : obj->HostedObjects)
+            if (el->Name == RefObjName)
+            {
+                RefObj = el;
+                break;
+            }
+
+        if (RefObj)
+        {
+            for (AGeoObject * el : obj->HostedObjects)
+                positionStackObject(el, RefObj, vol, GeoManager, MaterialCollection, PMsAndDumPMs, forcedNodeNumber);
+        }
+        else qWarning() << "Error: Reference object not found for stack" << obj->Name;
     }
     else
     {
-        for (int i=0; i<obj->HostedObjects.size(); i++)
-            addTGeoVolumeRecursively(obj->HostedObjects[i], vol, GeoManager, MaterialCollection, PMsAndDumPMs, forcedNodeNumber);
+        for (AGeoObject * el : obj->HostedObjects)
+            addTGeoVolumeRecursively(el, vol, GeoManager, MaterialCollection, PMsAndDumPMs, forcedNodeNumber);
     }
 
     //  Trackers use volume title for identification of special rules
@@ -671,7 +853,7 @@ void ASandwich::positionArrayElement(int ix, int iy, int iz, AGeoObject* el, AGe
 {
     ATypeArrayObject* array = static_cast<ATypeArrayObject*>(arrayObj->ObjectType);
 
-    //remembering original values
+    //storing original values
     double tmpX = el->Position[0];
     double tmpY = el->Position[1];
     double tmpZ = el->Position[2];
@@ -691,6 +873,68 @@ void ASandwich::positionArrayElement(int ix, int iy, int iz, AGeoObject* el, AGe
     el->Position[0] = tmpX;
     el->Position[1] = tmpY;
     el->Position[2] = tmpZ;
+}
+
+void ASandwich::positionStackObject(AGeoObject *obj, const AGeoObject * RefObj, TGeoVolume *parent, TGeoManager *GeoManager, AMaterialParticleCollection *MaterialCollection, QVector<APMandDummy> *PMsAndDumPMs, int forcedNodeNumber)
+{
+    //storing original position/orientation
+    double posrot[6];
+    for (int i=0; i<3; i++)
+    {
+        posrot[i]   = obj->Position[i];
+        posrot[i+3] = obj->Orientation[i];
+    }
+
+    //the origin of rotation is the center of the reference object
+    TVector3 v(obj->Position[0] - RefObj->Position[0],
+               obj->Position[1] - RefObj->Position[1],
+               obj->Position[2] - RefObj->Position[2]); // vector from the origin to the center of this object (first two should be 0)
+    rotate(v, obj->Container->Orientation[0], obj->Container->Orientation[1], obj->Container->Orientation[2]);
+    for (int i = 0; i < 3; i++)
+    {
+        obj->Position[i]     = RefObj->Position[i] + v[i] + obj->Container->Position[i];
+        obj->Orientation[i] += obj->Container->Orientation[i];
+    }
+
+    addTGeoVolumeRecursively(obj, parent, GeoManager, MaterialCollection, PMsAndDumPMs, forcedNodeNumber);
+
+    //recovering original positions
+    for (int i=0; i<3; i++)
+    {
+        obj->Position[i]    = posrot[i];
+        obj->Orientation[i] = posrot[i+3];
+    }
+}
+
+void ASandwich::positionArrayElement_StackObject(int ix, int iy, int iz, AGeoObject *obj, const AGeoObject *RefObj, AGeoObject *arrayObj, TGeoVolume *parent, TGeoManager *GeoManager, AMaterialParticleCollection *MaterialCollection, QVector<APMandDummy> *PMsAndDumPMs, int arrayIndex)
+{
+    //storing original position/orientation
+    double posrot[6];
+    for (int i=0; i<3; i++)
+    {
+        posrot[i]   = obj->Position[i];
+        posrot[i+3] = obj->Orientation[i];
+    }
+
+    //the origin of rotation is the center of the reference object
+    TVector3 v(obj->Position[0] - RefObj->Position[0],
+               obj->Position[1] - RefObj->Position[1],
+               obj->Position[2] - RefObj->Position[2]); // vector from the origin to the center of this object (first two should be 0)
+    rotate(v, obj->Container->Orientation[0], obj->Container->Orientation[1], obj->Container->Orientation[2]);
+    for (int i = 0; i < 3; i++)
+    {
+        obj->Position[i]     = RefObj->Position[i] + v[i] + obj->Container->Position[i];
+        obj->Orientation[i] += obj->Container->Orientation[i];
+    }
+
+    positionArrayElement(ix, iy, iz, obj, arrayObj, parent, GeoManager, MaterialCollection, PMsAndDumPMs, arrayIndex);
+
+    //recovering original positions
+    for (int i=0; i<3; i++)
+    {
+        obj->Position[i]    = posrot[i];
+        obj->Orientation[i] = posrot[i+3];
+    }
 }
 
 void ASandwich::clearModel()
@@ -755,12 +999,11 @@ void ASandwich::UpdateDetector()
         }
     }
 
-  emit RequestGuiUpdate();
+  //emit RequestGuiUpdate();  // why before rebuild detector?
 
   //Claculating Z positions of layers
   CalculateZofSlabs();
 
-  //in GUI mode triggers RebuildDetector in MainWindow
   emit RequestRebuildDetector();
 }
 
@@ -1004,6 +1247,19 @@ QString ASandwich::readFromJson(QJsonObject & json)
             //qDebug() << "...Loading WorldTree";
             QJsonArray arrTree = js["WorldTree"].toArray();
             ErrorString = World->readAllFromJarr(World, arrTree);
+            //if config contained Prototypes, there are two protoypes objects in the geometry now!
+            for (AGeoObject * obj : World->HostedObjects)
+            {
+                if (!obj->ObjectType->isPrototypes()) continue;
+                if (obj == Prototypes) continue;
+                //found another Prototypes object  - it was loaded from json
+                for (AGeoObject * proto : obj->HostedObjects)
+                    Prototypes->addObjectLast(proto);
+                obj->HostedObjects.clear();
+                World->HostedObjects.removeOne(obj);
+                delete obj;
+                break;
+            }
             //qDebug() << "...done!";
         }
         else qWarning() << "...Json does not contain WordTree!"; // !*! is itr a critical error?
@@ -1480,7 +1736,7 @@ void ASandwich::importFromOldStandardJson(QJsonObject &json, bool fPrScintCont)
 void ASandwich::onMaterialsChanged(const QStringList MaterialList)
 {
   Materials = MaterialList;  
-  emit RequestGuiUpdate();  
+  //emit RequestGuiUpdate();
 }
 
 void ASandwich::IsParticleInUse(int particleId, bool &bInUse, QString &MonitorNames)

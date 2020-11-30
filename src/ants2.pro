@@ -1,6 +1,6 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 4
-ANTS2_MINOR = 32
+ANTS2_MINOR = 33
 
 # !!! You may need to modify path for CERN ROOT, see #---CERN ROOT--- section below
 
@@ -414,16 +414,9 @@ SOURCES += main.cpp \
     SplineLibrary/Spline123/bspline123d.cpp \
     SplineLibrary/Spline123/bsfit123.cpp \
     modules/ageoconsts.cpp \
-    common/atypegeoobject.cpp \
     common/ageoshape.cpp \
-    gui/DAWindowTools/amonitordelegate.cpp \
-    gui/DAWindowTools/ageobasedelegate.cpp \
-    gui/DAWindowTools/ageoslabdelegate.cpp \
-    gui/DAWindowTools/agridelementdelegate.cpp \
-    gui/DAWindowTools/ageoobjectdelegate.cpp \
-    gui/DAWindowTools/aonelinetextedit.cpp \
-    gui/RasterWindow/acameracontroldialog.cpp \
-    scriptmode/afarm_si.cpp
+    scriptmode/afarm_si.cpp \
+    common/ageotype.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -584,16 +577,9 @@ HEADERS  += common/CorrelationFilters.h \
     SplineLibrary/Spline123/bspline123d.h \
     SplineLibrary/Spline123/bsfit123.h \
     modules/ageoconsts.h \
-    common/atypegeoobject.h \
     common/ageoshape.h \
-    gui/DAWindowTools/amonitordelegate.h \
-    gui/DAWindowTools/ageobasedelegate.h \
-    gui/DAWindowTools/ageoslabdelegate.h \
-    gui/DAWindowTools/agridelementdelegate.h \
-    gui/DAWindowTools/ageoobjectdelegate.h \
-    gui/DAWindowTools/aonelinetextedit.h \
-    gui/RasterWindow/acameracontroldialog.h \
-    scriptmode/afarm_si.h
+    scriptmode/afarm_si.h \
+    common/ageotype.h
 
 # --- SIM ---
 ants2_SIM {
@@ -698,7 +684,6 @@ ants2_GUI {
     gui/MainWindowTools/globalscript.cpp \
     gui/MainWindowTools/aslablistwidget.cpp \
     gui/MainWindowTools/arootlineconfigurator.cpp \
-    gui/DAWindowTools/ageotreewidget.cpp \
     gui/MainWindowTools/ashapehelpdialog.cpp \
     gui/DAWindowTools/agridelementdialog.cpp \
     gui/ascriptexampleexplorer.cpp \
@@ -760,7 +745,17 @@ ants2_GUI {
     gui/DAWindowTools/amaterialloaderdialog.cpp \
     gui/ageant4configdialog.cpp \
     gui/MainWindowTools/asaveparticlestofiledialog.cpp \
-    gui/aguiwindow.cpp
+    gui/aguiwindow.cpp \
+    gui/DAWindowTools/amonitordelegate.cpp \
+    gui/DAWindowTools/ageobasedelegate.cpp \
+    gui/DAWindowTools/ageoslabdelegate.cpp \
+    gui/DAWindowTools/agridelementdelegate.cpp \
+    gui/DAWindowTools/ageoobjectdelegate.cpp \
+    gui/DAWindowTools/aonelinetextedit.cpp \
+    gui/RasterWindow/acameracontroldialog.cpp \
+    gui/DAWindowTools/ageotree.cpp \
+    gui/DAWindowTools/ageodelegatewidget.cpp \
+    gui/DAWindowTools/ageobasetreewidget.cpp
 
 HEADERS  += gui/mainwindow.h \
     gui/materialinspectorwindow.h \
@@ -784,7 +779,6 @@ HEADERS  += gui/mainwindow.h \
     gui/globalsettingswindowclass.h \
     gui/MainWindowTools/aslablistwidget.h \
     gui/MainWindowTools/arootlineconfigurator.h \
-    gui/DAWindowTools/ageotreewidget.h \
     gui/MainWindowTools/ashapehelpdialog.h \
     gui/DAWindowTools/agridelementdialog.h \
     gui/ascriptexampleexplorer.h \
@@ -844,7 +838,17 @@ HEADERS  += gui/mainwindow.h \
     gui/DAWindowTools/amaterialloaderdialog.h \
     gui/ageant4configdialog.h \
     gui/MainWindowTools/asaveparticlestofiledialog.h \
-    gui/aguiwindow.h
+    gui/aguiwindow.h \
+    gui/DAWindowTools/amonitordelegate.h \
+    gui/DAWindowTools/ageobasedelegate.h \
+    gui/DAWindowTools/ageoslabdelegate.h \
+    gui/DAWindowTools/agridelementdelegate.h \
+    gui/DAWindowTools/ageoobjectdelegate.h \
+    gui/DAWindowTools/aonelinetextedit.h \
+    gui/RasterWindow/acameracontroldialog.h \
+    gui/DAWindowTools/ageotree.h \
+    gui/DAWindowTools/ageodelegatewidget.h \
+    gui/DAWindowTools/ageobasetreewidget.h
 
 FORMS += gui/mainwindow.ui \
     gui/materialinspectorwindow.ui \

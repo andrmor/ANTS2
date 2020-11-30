@@ -12,7 +12,7 @@
 #include "aslab.h"
 #include "ageoobject.h"
 #include "ageoshape.h"
-#include "atypegeoobject.h"
+#include "ageotype.h"
 #include "afiletools.h"
 #include "modules/lrf_v3/corelrfstypes.h"
 #include "modules/lrf_v3/alrftypemanager.h"
@@ -353,6 +353,9 @@ void DetectorClass::populateGeoManager()
   for (int i=0; i<PMdummies.size(); i++) PMsAndDumPms << APMandDummy(PMdummies.at(i).r[0], PMdummies.at(i).r[1], PMdummies.at(i).UpperLower);
   Sandwich->clearGridRecords();
   Sandwich->clearMonitorRecords();
+
+  Sandwich->expandPrototypeInstances();
+
   Sandwich->addTGeoVolumeRecursively(Sandwich->World, top, GeoManager, MpCollection, &PMsAndDumPms);
 
   positionPMs();
@@ -568,15 +571,15 @@ bool DetectorClass::processGDML()   //if failed, caller have to do: GeoManager =
   int totNodes = top->GetNdaughters();
   // qDebug()<<totNodes;
   bool flagFound = false;
-  int offsetNumber;
+  //int offsetNumber;
   for (int i=0; i<totNodes; i++)
     {
-      TGeoNode* thisNode = (TGeoNode*)top->GetNodes()->At(i);
+      //TGeoNode* thisNode = (TGeoNode*)top->GetNodes()->At(i);
       QString nodename = top->GetNodes()->At(i)->GetName();
       if (nodename.startsWith("PM"))
         {
           flagFound = true;
-          offsetNumber =  thisNode->GetNumber();
+          //offsetNumber =  thisNode->GetNumber();
           break;
         }      
     }

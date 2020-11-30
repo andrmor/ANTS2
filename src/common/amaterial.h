@@ -57,6 +57,9 @@ public:
 
   AMaterialComposition ChemicalComposition;
 
+  bool bG4UseNistMaterial = false;
+  QString G4NistMaterial;
+
   QVector<MatParticleStructure> MatParticle; //material properties related to individual particles
 
   QVector<AOpticalOverride*> OpticalOverrides; //NULL - override not defined

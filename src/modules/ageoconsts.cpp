@@ -47,18 +47,19 @@ QString AGeoConsts::exportToScript(const AGeoObject * obj, const QString &Commen
             const AGeoConstRecord & r = Records.at(i);
             QRegExp nameRegExp("\\b" + r.Name + "\\b");
             if (isGeoConstInUseGlobal(nameRegExp, obj))
+            {
                 GCScript += QString("%1%2 = %3")
                              .arg(VarStr)
                              .arg(r.Name)
                              .arg(r.Expression.isEmpty() ? QString::number(GeoConstValues[i]) : r.Expression);
-            if (!r.Comment.isEmpty())
-                GCScript += QString("   %1 %2").arg(CommentStr).arg(r.Comment);
-            GCScript += "\n";
+                if (!r.Comment.isEmpty())
+                    GCScript += QString("   %1 %2").arg(CommentStr).arg(r.Comment);
+                GCScript += "\n";
+            }
         }
         formulaToScript(GCScript, VarStr.isEmpty());    //VarStr is only empty for python
     }
 
-    GCScript += "\n";
     return GCScript;
 }
 

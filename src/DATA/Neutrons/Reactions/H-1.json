@@ -1,0 +1,26 @@
+{
+"DecayScenarios": [
+                                                {
+                                                    "Branching": 1,
+                                                    "DirectAverage": 1000,
+                                                    "DirectConst": 1000,
+                                                    "DirectCustom": [
+                                                    ],
+                                                    "DirectModel": 0,
+                                                    "DirectSigma": 10,
+                                                    "GeneratedParticles": [
+                                                        {
+                                                            "Energy": 2200,
+                                                            "OpositeDirectionWithPrevious": false,
+                                                            "Particle": {
+                                                                "A": -1,
+                                                                "Name": "gamma",
+                                                                "Type": 0,
+                                                                "Z": -1
+                                                            }
+                                                        }
+                                                    ],
+                                                    "InteractionModel": 1
+                                                }
+]
+}

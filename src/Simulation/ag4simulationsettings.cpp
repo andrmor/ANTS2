@@ -45,6 +45,8 @@ void AG4SimulationSettings::writeToJson(QJsonObject &json) const
 
     json["BinaryOutput"]  = BinaryOutput;
     json["Precision"]     = Precision;
+
+    json["UseTSphys"]     = UseTSphys;
 }
 
 void AG4SimulationSettings::readFromJson(const QJsonObject &json)
@@ -81,6 +83,8 @@ void AG4SimulationSettings::readFromJson(const QJsonObject &json)
 
     parseJson(json, "BinaryOutput", BinaryOutput);
     parseJson(json, "Precision",    Precision);
+
+    parseJson(json, "UseTSphys", UseTSphys);
 }
 
 const QString AG4SimulationSettings::getPrimariesFileName(int iThreadNum) const

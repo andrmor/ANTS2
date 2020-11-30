@@ -1,6 +1,6 @@
 #include "ageoobjectdelegate.h"
 #include "ageoobject.h"
-#include "atypegeoobject.h"
+#include "ageotype.h"
 #include "ageoshape.h"
 #include "ageoconsts.h"
 #include "amessage.h"
@@ -195,7 +195,12 @@ bool AGeoObjectDelegate::updateObject(AGeoObject * obj) const  //react to false 
     const QString oldName = obj->Name;
     const QString newName = leName->text();
 
-    if ( !obj->ObjectType->isHandlingSet() ) //set container object does not have updateable properties except name
+    if (obj->ObjectType->isHandlingSet() && !obj->ObjectType->isStack())
+    {
+        //set container object does not have updateable properties except name
+        obj->Name = newName;
+    }
+    else
     {
         // doing tests, if failed, return before assigning anything to the object!
         AGeoShape * shape = ShapeCopy;
@@ -468,8 +473,8 @@ void AGeoObjectDelegate::updateTypeLabel()
         if (CurrentObject->Container->ObjectType->isHandlingSet())
         {
             if (CurrentObject->Container->ObjectType->isGroup())
-                DelegateTypeName += ",   groupped";
-            else
+                DelegateTypeName += ",   grouped";
+            else if (CurrentObject->Container->ObjectType->isStack())
                 DelegateTypeName += ",   stacked";
         }
     }
@@ -483,7 +488,7 @@ void AGeoObjectDelegate::updateControlUI()
     {
         lMat->setVisible(false);
         cobMat->setVisible(false);
-        PosOrient->setVisible(false);
+        PosOrient->setVisible(CurrentObject->ObjectType->isStack());
     }
 
     if (CurrentObject->Container && CurrentObject->Container->ObjectType->isStack())
@@ -531,6 +536,7 @@ void AGeoObjectDelegate::initSlabDelegate(int SlabModelState)
     else pbTransform->setEnabled(false);
 }
 
+/*
 void AGeoObjectDelegate::rotate(TVector3 & v, double dPhi, double dTheta, double dPsi) const
 {
     v.RotateZ( TMath::Pi()/180.0* dPhi );
@@ -543,6 +549,7 @@ void AGeoObjectDelegate::rotate(TVector3 & v, double dPhi, double dTheta, double
     // v.RotateZ( TMath::Pi()/180.0* Psi );
     v.Rotate( TMath::Pi()/180.0* dPsi, Z );
 }
+*/
 
 void AGeoObjectDelegate::onShapeDialogActivated(QDialog * d, QListWidget * w)
 {
@@ -588,8 +595,7 @@ void AGeoObjectDelegate::Update(const AGeoObject *obj)
     CurrentObject = obj;
     leName->setText(obj->Name);
 
-    delete ShapeCopy;
-    ShapeCopy = obj->Shape->clone();
+    delete ShapeCopy; ShapeCopy = obj->Shape->clone();
 
     //qDebug() << "--genstring:original/copy->"<<obj->Shape->getGenerationString() << ShapeCopy->getGenerationString();
 
@@ -2524,11 +2530,12 @@ AGeoArrayDelegate::AGeoArrayDelegate(const QStringList &materials, QWidget *pare
 {
     DelegateTypeName = "Array";
 
-    QVBoxLayout * v = new QVBoxLayout();
-    v->setContentsMargins(50, 0, 50, 0);
+    QVBoxLayout * lVer = new QVBoxLayout();
+    lVer->setContentsMargins(5, 3, 5, 3);
+    lVer->setSpacing(3);
 
-    QGridLayout *grAW = new QGridLayout();
-    grAW->setContentsMargins(5, 3, 5, 3);
+    QGridLayout * grAW = new QGridLayout();
+    grAW->setContentsMargins(0,0,0,0);
     grAW->setVerticalSpacing(0);
 
     QLabel *la = new QLabel;
@@ -2559,7 +2566,20 @@ AGeoArrayDelegate::AGeoArrayDelegate(const QStringList &materials, QWidget *pare
     ledStepY = new AOneLineTextEdit(Widget); grAW->addWidget(ledStepY, 1, 3);
     ledStepZ = new AOneLineTextEdit(Widget); grAW->addWidget(ledStepZ, 2, 3);
 
-    QVector<AOneLineTextEdit*> l = {ledNumX, ledNumY, ledNumZ, ledStepX, ledStepY, ledStepZ};
+    lVer->addLayout(grAW);
+
+    QHBoxLayout * lHor = new QHBoxLayout();
+    lHor->addStretch();
+    lHor->addWidget(new QLabel("Index of the first node:"));
+    ledStartIndex = new AOneLineTextEdit(Widget);
+    lHor->addWidget(ledStartIndex);
+    lHor->addStretch();
+
+    lVer->addLayout(lHor);
+
+    addLocalLayout(lVer);
+
+    QVector<AOneLineTextEdit*> l = {ledNumX, ledNumY, ledNumZ, ledStepX, ledStepY, ledStepZ, ledStartIndex};
     for (AOneLineTextEdit * le : l)
     {
         //le->setMaximumWidth(75);
@@ -2567,8 +2587,6 @@ AGeoArrayDelegate::AGeoArrayDelegate(const QStringList &materials, QWidget *pare
         configureHighligherAndCompleter(le);
         QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoBaseDelegate::ContentChanged);
     }
-
-    addLocalLayout(grAW);
 
     cbScale->setChecked(false);
     cbScale->setVisible(false);
@@ -2586,7 +2604,7 @@ AGeoArrayDelegate::AGeoArrayDelegate(const QStringList &materials, QWidget *pare
 
 bool AGeoArrayDelegate::updateObject(AGeoObject * obj) const
 {
-    QVector<AOneLineTextEdit*> v = {ledNumX, ledNumY, ledNumZ, ledStepX, ledStepY, ledStepZ};
+    QVector<AOneLineTextEdit*> v = {ledNumX, ledNumY, ledNumZ, ledStepX, ledStepY, ledStepZ, ledStartIndex};
     if (isLeEmpty(v))
     {
         QMessageBox::warning(this->ParentWidget, "", "Empty line!");
@@ -2602,6 +2620,7 @@ bool AGeoArrayDelegate::updateObject(AGeoObject * obj) const
     a.strStepX = ledStepX->text();
     a.strStepY = ledStepY->text();
     a.strStepZ = ledStepZ->text();
+    a.strStartIndex = ledStartIndex->text();
 
     QString errorStr = ATypeArrayObject::evaluateStringValues(a);
     if (!errorStr.isEmpty())
@@ -2631,6 +2650,7 @@ void AGeoArrayDelegate::Update(const AGeoObject * obj)
         ledStepX->setText(array->strStepX.isEmpty() ? QString::number(array->stepX) : array->strStepX);
         ledStepY->setText(array->strStepY.isEmpty() ? QString::number(array->stepY) : array->strStepY);
         ledStepZ->setText(array->strStepZ.isEmpty() ? QString::number(array->stepZ) : array->strStepZ);
+        ledStartIndex->setText(array->strStartIndex.isEmpty() ? QString::number(array->startIndex) : array->strStartIndex);
     }
 }
 
@@ -2653,25 +2673,33 @@ void AGeoSetDelegate::Update(const AGeoObject *obj)
         pbChangeAtt->setVisible(false);
         pbScriptLine->setVisible(false);
     }
-    else
+    else if (obj->ObjectType->isStack())
     {
-        DelegateTypeName = ( obj->ObjectType->isStack() ? "Stack" : "Group" );
+        DelegateTypeName = "Stack";
 
-        if (obj->ObjectType->isGroup())
-        {
-            QVBoxLayout * lay = new QVBoxLayout();
-            lay->setAlignment(Qt::AlignHCenter);
-            lay->addWidget(new QLabel(" "));
-            lay->addWidget(new QLabel("Deprecated"));
-            lay->addWidget(new QLabel("Group does nothing!"));
-            lay->addWidget(new QLabel(" "));
-            addLocalLayout(lay);
-
-            pbShow->setVisible(false);
-            pbChangeAtt->setVisible(false);
-            pbScriptLine->setVisible(false);
-        }
+        QVBoxLayout * lay = new QVBoxLayout();
+        lay->setAlignment(Qt::AlignHCenter);
+        lay->addWidget(new QLabel(" "));
+        lay->addWidget(new QLabel("Rotation in respect to the center of the stack reference object"));
+        addLocalLayout(lay);
     }
+    else if (obj->ObjectType->isGroup())
+    {
+        DelegateTypeName = "Group";
+
+        QVBoxLayout * lay = new QVBoxLayout();
+        lay->setAlignment(Qt::AlignHCenter);
+        lay->addWidget(new QLabel(" "));
+        lay->addWidget(new QLabel("Deprecated"));
+        lay->addWidget(new QLabel("Group does nothing!"));
+        lay->addWidget(new QLabel(" "));
+        addLocalLayout(lay);
+
+        pbShow->setVisible(false);
+        pbChangeAtt->setVisible(false);
+        pbScriptLine->setVisible(false);
+    }
+    else qWarning() << "Unexpected object type in AGeoSetDelegate::Update()";
 
     AGeoObjectDelegate::Update(obj);
 }
@@ -2821,4 +2849,81 @@ void AWorldDelegate::Update(const AGeoObject *obj)
     const AGeoBox * box = static_cast<const AGeoBox*>(obj->Shape);
     ledSizeXY->setText(box->str2dx.isEmpty() ? QString::number(box->dx*2.0) : box->str2dx);
     ledSizeZ ->setText(box->str2dz.isEmpty() ? QString::number(box->dz*2.0) : box->str2dz);
+}
+
+AGeoInstanceDelegate::AGeoInstanceDelegate(const QStringList &materials, QWidget *parent)
+   : AGeoObjectDelegate(materials, parent)
+{
+    DelegateTypeName = "Instance";
+
+    QHBoxLayout * hl = new QHBoxLayout();
+    hl->setContentsMargins(50, 0, 50, 0);
+
+    QLabel * la  = new QLabel("Instance of:");                   hl->addWidget(la);
+    leInstanceOf = new QLineEdit();                              hl->addWidget(leInstanceOf);
+    QPushButton * pbToProto = new QPushButton("Show prototype"); hl->addWidget(pbToProto);
+
+    QObject::connect(leInstanceOf, &QLineEdit::textChanged, this, &AGeoBaseDelegate::ContentChanged);
+    QObject::connect(pbToProto, &QPushButton::clicked, [this](){
+        emit RequestShowPrototype(leInstanceOf->text());
+    });
+
+    addLocalLayout(hl);
+
+    cbScale->setChecked(false);
+    cbScale->setVisible(false);
+
+    lMat->setVisible(false);
+    cobMat->setVisible(false);
+
+    pbTransform->setVisible(false);
+    pbShapeInfo->setVisible(false);
+
+    pbChangeAtt->setEnabled(false);
+}
+
+bool AGeoInstanceDelegate::updateObject(AGeoObject * obj) const
+{
+    const QString ProtoName = leInstanceOf->text();
+
+    ATypeInstanceObject * instance = dynamic_cast<ATypeInstanceObject*>(obj->ObjectType);
+    if (instance)
+    {
+        if (ProtoName != instance->PrototypeName)
+        {
+            bool bValid;
+            emit RequestIsValidPrototypeName(ProtoName, bValid);
+            if (bValid) instance->PrototypeName = ProtoName;
+            else
+            {
+                QMessageBox::warning(this->ParentWidget, "", "This is not a valid prototype name: " + ProtoName);
+                return false;
+            }
+        }
+    }
+
+    return AGeoObjectDelegate::updateObject(obj);
+}
+
+void AGeoInstanceDelegate::Update(const AGeoObject * obj)
+{
+    AGeoObjectDelegate::Update(obj);
+
+    ATypeInstanceObject * inst = dynamic_cast<ATypeInstanceObject*>(obj->ObjectType);
+    if (inst) leInstanceOf->setText(inst->PrototypeName);
+}
+
+AGeoPrototypeDelegate::AGeoPrototypeDelegate(const QStringList & materials, QWidget * parent)
+    : AGeoObjectDelegate(materials, parent)
+{
+    DelegateTypeName = "Prototype";
+
+    cbScale->setChecked(false);
+    cbScale->setVisible(false);
+
+    lMat->setVisible(false);
+    cobMat->setVisible(false);
+
+    pbTransform->setVisible(false);
+    pbShapeInfo->setVisible(false);
 }

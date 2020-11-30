@@ -1,11 +1,11 @@
-#include "atypegeoobject.h"
+#include "ageotype.h"
 #include "aslab.h"
 #include "ajsontools.h"
 #include "ageoconsts.h"
 
 #include <QDebug>
 
-void ATypeGeoObject::writeToJson(QJsonObject & json) const
+void AGeoType::writeToJson(QJsonObject & json) const
 {
     json["Type"] = Type;
 }
@@ -58,7 +58,7 @@ ATypeLightguideObject::ATypeLightguideObject()
 
 void ATypeLightguideObject::writeToJson(QJsonObject &json) const
 {
-    ATypeGeoObject::writeToJson(json);
+    AGeoType::writeToJson(json);
 
     json["UpperLower"] = ( UpperLower == Lower ? "Lower" : "Upper" );
 }
@@ -90,6 +90,8 @@ QString ATypeArrayObject::evaluateStringValues(ATypeArrayObject & A)
     ok = GC.updateParameter(errorStr, A.strStepY, A.stepY, true, false, false) ; if (!ok) return errorStr;
     ok = GC.updateParameter(errorStr, A.strStepZ, A.stepZ, true, false, false) ; if (!ok) return errorStr;
 
+    ok = GC.updateParameter(errorStr, A.strStartIndex, A.startIndex, false, true) ; if (!ok) return errorStr;
+
     return "";
 }
 
@@ -101,6 +103,7 @@ bool ATypeArrayObject::isGeoConstInUse(const QRegExp &nameRegExp) const
     if (strStepX.contains(nameRegExp)) return true;
     if (strStepY.contains(nameRegExp)) return true;
     if (strStepZ.contains(nameRegExp)) return true;
+    if (strStartIndex.contains(nameRegExp)) return true;
     return false;
 }
 
@@ -112,11 +115,12 @@ void ATypeArrayObject::replaceGeoConstName(const QRegExp &nameRegExp, const QStr
     strStepX.replace(nameRegExp, newName);
     strStepY.replace(nameRegExp, newName);
     strStepZ.replace(nameRegExp, newName);
+    strStartIndex.replace(nameRegExp, newName);
 }
 
 void ATypeArrayObject::writeToJson(QJsonObject &json) const
 {
-    ATypeGeoObject::writeToJson(json);
+    AGeoType::writeToJson(json);
 
     json["numX"]  = numX;
     json["numY"]  = numY;
@@ -124,6 +128,7 @@ void ATypeArrayObject::writeToJson(QJsonObject &json) const
     json["stepX"] = stepX;
     json["stepY"] = stepY;
     json["stepZ"] = stepZ;
+    json["startIndex"] = startIndex;
 
     if (!strNumX .isEmpty()) json["strNumX"]  = strNumX;
     if (!strNumY .isEmpty()) json["strNumY"]  = strNumY;
@@ -131,6 +136,7 @@ void ATypeArrayObject::writeToJson(QJsonObject &json) const
     if (!strStepX.isEmpty()) json["strStepX"] = strStepX;
     if (!strStepY.isEmpty()) json["strStepY"] = strStepY;
     if (!strStepZ.isEmpty()) json["strStepZ"] = strStepZ;
+    if (!strStartIndex.isEmpty()) json["strStartIndex"] = strStartIndex;
 }
 
 void ATypeArrayObject::readFromJson(const QJsonObject &json)
@@ -141,6 +147,7 @@ void ATypeArrayObject::readFromJson(const QJsonObject &json)
     parseJson(json, "stepX", stepX);
     parseJson(json, "stepY", stepY);
     parseJson(json, "stepZ", stepZ);
+    parseJson(json, "startIndex", startIndex);
 
     if (!parseJson(json, "strNumX",  strNumX))  strNumX .clear();
     if (!parseJson(json, "strNumY",  strNumY))  strNumY .clear();
@@ -148,13 +155,14 @@ void ATypeArrayObject::readFromJson(const QJsonObject &json)
     if (!parseJson(json, "strStepX", strStepX)) strStepX.clear();
     if (!parseJson(json, "strStepY", strStepY)) strStepY.clear();
     if (!parseJson(json, "strStepZ", strStepZ)) strStepZ.clear();
+    if (!parseJson(json, "strStartIndex", strStartIndex)) strStartIndex.clear();
 
     ATypeArrayObject::evaluateStringValues(*this);
 }
 
 void ATypeGridElementObject::writeToJson(QJsonObject &json) const
 {
-    ATypeGeoObject::writeToJson(json);
+    AGeoType::writeToJson(json);
 
     json["size1"] = size1;
     json["size2"] = size2;
@@ -172,7 +180,7 @@ void ATypeGridElementObject::readFromJson(const QJsonObject &json)
 
 void ATypeMonitorObject::writeToJson(QJsonObject &json) const
 {
-    ATypeGeoObject::writeToJson(json);
+    AGeoType::writeToJson(json);
 
     config.writeToJson(json);
 }
@@ -201,7 +209,7 @@ bool ATypeMonitorObject::isParticleInUse(int partId) const
     return (config.ParticleIndex == partId);
 }
 
-bool ATypeGeoObject::isUpperLightguide() const
+bool AGeoType::isUpperLightguide() const
 {
     if ( Type != "Lightguide") return false;
 
@@ -209,7 +217,7 @@ bool ATypeGeoObject::isUpperLightguide() const
     return obj->UpperLower == ATypeLightguideObject::Upper;
 }
 
-bool ATypeGeoObject::isLowerLightguide() const
+bool AGeoType::isLowerLightguide() const
 {
     if ( Type != "Lightguide") return false;
 
@@ -217,42 +225,32 @@ bool ATypeGeoObject::isLowerLightguide() const
     return obj->UpperLower == ATypeLightguideObject::Lower;
 }
 
-ATypeGeoObject *ATypeGeoObject::TypeObjectFactory(const QString &Type)
+AGeoType *AGeoType::TypeObjectFactory(const QString & Type)
 {
-    if (Type == "World")
-        return new ATypeWorldObject(); //is not used to create World, only to check file with WorldTree starts with World and reads positioning script
-    if (Type == "Slab")
-        return new ATypeSlabObject();
-    if (Type == "Lightguide")
-        return new ATypeLightguideObject();
-    else if (Type == "Group")
-        return new ATypeGroupContainerObject();
-    else if (Type == "Stack")
-        return new ATypeStackContainerObject();
-    else if (Type == "CompositeContainer")
-        return new ATypeCompositeContainerObject();
-    else if (Type == "Single")
-        return new ATypeSingleObject();
-    else if (Type == "Composite")
-        return new ATypeCompositeObject();
-    else if (Type == "Array" || Type == "XYArray")
-        return new ATypeArrayObject();
-    else if (Type == "Grid")
-        return new ATypeGridObject();
-    else if (Type == "GridElement")
-        return new ATypeGridElementObject();
-    else if (Type == "Monitor")
-        return new ATypeMonitorObject();
-    else
-    {
-        qCritical() << "Unknown opject type in TypeObjectFactory:"<<Type;
-        return 0;
-    }
+    if (Type == "Single")             return new ATypeSingleObject();
+    if (Type == "Slab")               return new ATypeSlabObject();
+    if (Type == "Array" ||
+        Type == "XYArray")            return new ATypeArrayObject();
+    if (Type == "Monitor")            return new ATypeMonitorObject();
+    if (Type == "Stack")              return new ATypeStackContainerObject();
+    if (Type == "Instance")           return new ATypeInstanceObject();
+    if (Type == "Prototype")          return new ATypePrototypeObject();
+    if (Type == "Composite")          return new ATypeCompositeObject();
+    if (Type == "CompositeContainer") return new ATypeCompositeContainerObject();
+    if (Type == "GridElement")        return new ATypeGridElementObject();
+    if (Type == "Grid")               return new ATypeGridObject();
+    if (Type == "Lightguide")         return new ATypeLightguideObject();
+    if (Type == "Group")              return new ATypeGroupContainerObject();
+    if (Type == "PrototypeCollection")return new ATypePrototypeCollectionObject();
+    if (Type == "World")              return new ATypeWorldObject(); //is not used to create World, only to check file with WorldTree starts with World and reads positioning script
+
+    qCritical() << "Unknown opject type in TypeObjectFactory:"<<Type;
+    return nullptr;
 }
 
 void ATypeWorldObject::writeToJson(QJsonObject & json) const
 {
-    ATypeGeoObject::writeToJson(json);
+    AGeoType::writeToJson(json);
     json["FixedSize"] = bFixedSize;
 }
 
@@ -264,7 +262,7 @@ void ATypeWorldObject::readFromJson(const QJsonObject &json)
 
 void ATypeStackContainerObject::writeToJson(QJsonObject & json) const
 {
-    ATypeGeoObject::writeToJson(json);
+    AGeoType::writeToJson(json);
     json["ReferenceVolume"] = ReferenceVolume;
 }
 
@@ -272,4 +270,16 @@ void ATypeStackContainerObject::readFromJson(const QJsonObject & json)
 {
     ReferenceVolume.clear();
     parseJson(json, "ReferenceVolume", ReferenceVolume);
+}
+
+void ATypeInstanceObject::writeToJson(QJsonObject & json) const
+{
+    AGeoType::writeToJson(json);
+    json["PrototypeName"] = PrototypeName;
+}
+
+void ATypeInstanceObject::readFromJson(const QJsonObject & json)
+{
+    PrototypeName.clear();
+    parseJson(json, "PrototypeName", PrototypeName);
 }

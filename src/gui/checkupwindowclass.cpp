@@ -261,7 +261,7 @@ TriState CheckUpWindowClass::CheckInteractions()
             if( error >= 0 )
             {
                 AMaterial *mat = (*(MW->MpCollection))[error];
-                const QString &msg = QString("  [%1] -> %2 particle lacks interaction description on %3 for %4 energy").arg(i).arg(partname, mat->name).arg(part->energy);
+                const QString msg = QString("  [%1] -> %2 lacks interaction description for %3 at %4 keV").arg(i).arg(partname, mat->name).arg(part->energy);
                 ui->listInteraction->addItem(msg);
             }
 

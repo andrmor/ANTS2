@@ -8,17 +8,20 @@
 class QJsonObject;
 class ASlabModel;
 
-class ATypeGeoObject
+class AGeoType
 {
 public:
-    virtual ~ATypeGeoObject() {}
+    virtual ~AGeoType() {}
 
+    // TODO String -> enum
+    // or even better: Handling -> a system of flags; isX use dynamic_cast
     bool isHandlingStatic() const   {return Handling == "Static";}      //World
     bool isHandlingStandard() const {return Handling == "Standard";}
     bool isHandlingSet() const      {return Handling == "Set";}         //Group, Stack, Composite container
     bool isHandlingArray() const    {return Handling == "Array";}       //Array
 
     bool isWorld() const            {return Type == "World";}
+    bool isPrototypes() const       {return Type == "PrototypeCollection";}
     bool isSlab() const             {return Type == "Slab" || Type == "Lightguide";}  //lightguide is also Slab!
     bool isLightguide() const       {return Type == "Lightguide";}  //lightguide is also Slab!
     bool isUpperLightguide() const;
@@ -30,6 +33,8 @@ public:
     bool isCompositeContainer() const {return Type == "CompositeContainer";}
     bool isComposite() const        {return Type == "Composite";}
     bool isArray() const            {return Type == "Array";}
+    bool isInstance() const         {return Type == "Instance";}
+    bool isPrototype() const        {return Type == "Prototype";}
     bool isGrid() const             {return Type == "Grid";}
     bool isGridElement() const      {return Type == "GridElement";}
     bool isMonitor() const          {return Type == "Monitor";}
@@ -40,7 +45,7 @@ public:
     virtual void writeToJson(QJsonObject & json) const;         // CALL THIS, then save additional properties of the concrete type
     virtual void readFromJson(const QJsonObject & /*json*/) {}  // if present, read properties of the concrete type
 
-    static ATypeGeoObject * TypeObjectFactory(const QString & Type);  // TYPE FACTORY !!!
+    static AGeoType * TypeObjectFactory(const QString & Type);  // TYPE FACTORY !!!
 
 protected:
     QString Type;
@@ -50,7 +55,7 @@ protected:
 
 // -- static objects --
 
-class ATypeWorldObject : public ATypeGeoObject
+class ATypeWorldObject : public AGeoType
 {
 public:
     ATypeWorldObject() {Type = "World"; Handling = "Static";}
@@ -61,7 +66,13 @@ public:
     void readFromJson(const QJsonObject & json) override;
 };
 
-class ATypeSlabObject : public ATypeGeoObject
+class ATypePrototypeCollectionObject : public AGeoType
+{
+public:
+    ATypePrototypeCollectionObject() {Type = "PrototypeCollection"; Handling = "Logical";}
+};
+
+class ATypeSlabObject : public AGeoType
 {
 public:
     ATypeSlabObject();
@@ -69,9 +80,6 @@ public:
 
     bool isGeoConstInUse(const QRegExp & nameRegExp) const;
     void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName);
-
-    //void writeToJson(QJsonObject & json) const override { ATypeGeoObject::writeToJson(json); } //no need to save slab, it will be assigned from outside
-    //void readFromJson(const QJsonObject & json) override;
 
     ASlabModel * SlabModel = nullptr;
 };
@@ -92,13 +100,13 @@ public:
 
 // -- Set objects --
 
-class ATypeGroupContainerObject : public ATypeGeoObject
+class ATypeGroupContainerObject : public AGeoType // deprecated
 {
 public:
     ATypeGroupContainerObject() {Type = "Group"; Handling = "Set";}
 };
 
-class ATypeStackContainerObject : public ATypeGeoObject
+class ATypeStackContainerObject : public AGeoType
 {
 public:
     ATypeStackContainerObject() {Type = "Stack"; Handling = "Set";}
@@ -109,7 +117,7 @@ public:
     void readFromJson(const QJsonObject & json) override;
 };
 
-class ATypeCompositeContainerObject : public ATypeGeoObject
+class ATypeCompositeContainerObject : public AGeoType
 {
 public:
     ATypeCompositeContainerObject() {Type = "CompositeContainer"; Handling = "Set";}
@@ -118,19 +126,19 @@ public:
 
 // -- Objects --
 
-class ATypeSingleObject : public ATypeGeoObject
+class ATypeSingleObject : public AGeoType
 {
 public:
     ATypeSingleObject() {Type = "Single"; Handling = "Standard";}
 };
 
-class ATypeCompositeObject : public ATypeGeoObject
+class ATypeCompositeObject : public AGeoType
 {
 public:
     ATypeCompositeObject() {Type = "Composite"; Handling = "Standard";}
 };
 
-class ATypeArrayObject : public ATypeGeoObject
+class ATypeArrayObject : public AGeoType
 {
 public:
     ATypeArrayObject() {Type = "Array"; Handling = "Array";}
@@ -152,17 +160,18 @@ public:
     double stepY = 25.0;
     double stepZ = 25.0;
     QString strNumX, strNumY, strNumZ, strStepX, strStepY, strStepZ;
+    int startIndex = 0; QString strStartIndex;
 
     static QString evaluateStringValues(ATypeArrayObject & ArrayType);
 };
 
-class ATypeGridObject : public ATypeGeoObject
+class ATypeGridObject : public AGeoType
 {
 public:
     ATypeGridObject() {Type = "Grid"; Handling = "Standard";}
 };
 
-class ATypeGridElementObject : public ATypeGeoObject
+class ATypeGridElementObject : public AGeoType
 {
 public:
     ATypeGridElementObject() {Type = "GridElement"; Handling = "Standard";}
@@ -176,7 +185,7 @@ public:
     double dz    = 5.0;     //half size in z
 };
 
-class ATypeMonitorObject : public ATypeGeoObject
+class ATypeMonitorObject : public AGeoType
 {
 public:
     ATypeMonitorObject() {Type = "Monitor"; Handling = "Standard";}
@@ -193,6 +202,23 @@ public:
 
     //runtime, not saved
     int index;  //index of this monitor to access statistics
+};
+
+class ATypePrototypeObject : public AGeoType
+{
+public:
+    ATypePrototypeObject() {Type = "Prototype"; Handling = "Set";}
+};
+
+class ATypeInstanceObject : public AGeoType
+{
+public:
+    ATypeInstanceObject(QString PrototypeName = "") : PrototypeName(PrototypeName) {Type = "Instance"; Handling = "Standard";}
+
+    void writeToJson(QJsonObject & json) const override;
+    void readFromJson(const QJsonObject & json) override;
+
+    QString PrototypeName;
 };
 
 #endif // ATYPEGEOOBJECT_H

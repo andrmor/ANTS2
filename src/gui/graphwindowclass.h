@@ -128,6 +128,11 @@ public:
                               Color_t MarkerColor=2, int MarkerStyle=20, int MarkerSize=1,
                               Color_t LineColor=2,   int LineStyle=1,    int LineWidth=2);
 
+    void configureGraph(TGraph * graph, const QString & GraphTitle,
+                        const QString & XTitle, const QString & YTitle,
+                        int MarkerColor=2, int MarkerStyle=20, int MarkerSize=1,
+                        int LineColor=2,   int LineStyle=1,    int LineWidth=2) const;
+
     void AddLine(double x1, double y1, double x2, double y2, int color, int width, int style);
     void AddArrow(double x1, double y1, double x2, double y2, int color, int width, int style);
 
@@ -311,6 +316,7 @@ private:
     void showHintInStatus();
     void setShowCursorPosition(bool flag);
     void fixGraphFrame();
+    void updateLogScaleFlags(QVector<ADrawObject> & drawObjects) const;
 };
 
 #endif // GRAPHWINDOWCLASS_H

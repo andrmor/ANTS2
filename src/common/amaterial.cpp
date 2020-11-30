@@ -356,6 +356,9 @@ void AMaterial::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCo
       json["*Tags"] = ar;
   }
 
+  json["bG4UseNistMaterial"] = bG4UseNistMaterial;
+  json["G4NistMaterial"] = G4NistMaterial;
+
   //MatParticle properties
   //if a particle has default configuration (TrackingAllowed and MatIsTransparent), skip its record
   QJsonArray jParticleEntries;
@@ -529,6 +532,11 @@ bool AMaterial::readFromJson(const QJsonObject &json, AMaterialParticleCollectio
   parseJson(json, "TGeoP2", p2);
   parseJson(json, "TGeoP3", p3);
   parseJson(json, "Comments", Comments);
+
+  bG4UseNistMaterial = false;
+  parseJson(json, "bG4UseNistMaterial", bG4UseNistMaterial);
+  G4NistMaterial.clear();
+  parseJson(json, "G4NistMaterial", G4NistMaterial);
 
   //wavelength-resolved data
   if (json.contains("RefractiveIndexWave"))

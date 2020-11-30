@@ -159,6 +159,8 @@ public:
     void recallGeometryOfLocalScriptWindow();
     void extractGeometryOfLocalScriptWindow();
 
+    bool isGeant4SimActivated() const;
+
     void DeleteLoadedEvents(bool KeepFileList = false);       
     void SavePreprocessingAddMulti(QString fileName);
     void LoadPreprocessingAddMulti(QString filename);

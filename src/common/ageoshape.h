@@ -565,8 +565,8 @@ class AGeoSphere : public AGeoShape
 public:
   AGeoSphere(double rmin, double rmax, double theta1, double theta2, double phi1, double phi2) :
     rmin(rmin), rmax(rmax), theta1(theta1), theta2(theta2), phi1(phi1), phi2(phi2) {}
-  AGeoSphere(double r) :
-    rmin(0), rmax(r), theta1(0), theta2(180), phi1(0), phi2(360) {}
+  AGeoSphere(double r) : rmin(0), rmax(r), theta1(0), theta2(180), phi1(0), phi2(360) {}
+  AGeoSphere(double rmax, double rmin) : rmin(rmin), rmax(rmax), theta1(0), theta2(180), phi1(0), phi2(360) {}
   AGeoSphere() : rmin(0), rmax(10), theta1(0), theta2(180), phi1(0), phi2(360) {}
 
   QString getShapeType() const override {return "TGeoSphere";}

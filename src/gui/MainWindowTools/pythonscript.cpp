@@ -76,7 +76,7 @@ void MainWindow::createPythonScriptWindow()
   PythonScriptWindow->RegisterInterface(sim, "sim");
 
   APTHistory_SI * ptHistory = new APTHistory_SI(*SimulationManager);
-  ScriptWindow->RegisterInterface(ptHistory, "ptHistory");
+  PythonScriptWindow->RegisterInterface(ptHistory, "ptHistory");
 
   ARec_SI* rec = new ARec_SI(ReconstructionManager, Config, EventsDataHub, TmpHub);
   QObject::connect(rec, SIGNAL(RequestStopReconstruction()), ReconstructionManager, SLOT(requestStop()));

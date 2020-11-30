@@ -3,18 +3,13 @@
 
 #include "ageobasedelegate.h"
 
-#include <QObject>
 #include <QString>
 #include <QVector>
 #include <QStringList>
 
 class AGeoObject;
 class AGeoShape;
-
-class TVector3;
-
 class QWidget;
-class QStringList;
 class QVBoxLayout;
 class QGridLayout;
 class QLineEdit;
@@ -22,7 +17,6 @@ class QLabel;
 class QCheckBox;
 class QComboBox;
 class QPlainTextEdit;
-class QSpinBox;
 class QPushButton;
 class QLayout;
 class QDialog;
@@ -70,8 +64,6 @@ protected:
     QComboBox* cobMat;
     QWidget* PosOrient;
     QLabel* lMat;
-    AOneLineTextEdit *ledNumX, *ledNumY, *ledNumZ;
-    AOneLineTextEdit *ledStepX, *ledStepY, *ledStepZ;
     AOneLineTextEdit *ledX,   *ledY,     *ledZ;
     AOneLineTextEdit *ledPhi, *ledTheta, *ledPsi;
 
@@ -92,7 +84,6 @@ protected:
     void initSlabDelegate(int SlabModelState);
 
 private:
-    void rotate(TVector3 & v, double dPhi, double dTheta, double dPsi) const;
     void onShapeDialogActivated(QDialog * d, QListWidget * w);
 
 signals:
@@ -396,7 +387,6 @@ protected:
     QLabel * labAu  = nullptr;
 };
 
-class QTableWidget;
 class AGeoPcon;
 class AGeoPconDelegate : public AGeoObjectDelegate
 {
@@ -492,6 +482,11 @@ public:
     bool updateObject(AGeoObject * obj) const override;
 
     void Update(const AGeoObject * obj) override;
+
+protected:
+    AOneLineTextEdit *ledNumX, *ledNumY, *ledNumZ;
+    AOneLineTextEdit *ledStepX, *ledStepY, *ledStepZ;
+    AOneLineTextEdit *ledStartIndex;
 };
 
 class AGeoSetDelegate : public AGeoObjectDelegate
@@ -502,6 +497,33 @@ public:
     AGeoSetDelegate(const QStringList & materials, QWidget * parent);
 
     void Update(const AGeoObject * obj) override;
+};
+
+class AGeoInstanceDelegate : public AGeoObjectDelegate
+{
+    Q_OBJECT
+
+public:
+    AGeoInstanceDelegate(const QStringList & materials, QWidget * parent);
+
+    bool updateObject(AGeoObject * obj) const override;
+
+    void Update(const AGeoObject * obj) override;
+
+protected:
+    QLineEdit * leInstanceOf = nullptr;
+
+signals:
+    void RequestShowPrototype(QString ProtoName);
+    void RequestIsValidPrototypeName(const QString & ProtoName, bool & bResult) const;
+};
+
+class AGeoPrototypeDelegate : public AGeoObjectDelegate
+{
+    Q_OBJECT
+
+public:
+    AGeoPrototypeDelegate(const QStringList & materials, QWidget * parent);
 };
 
 #endif // AGEOOBJECTDELEGATE_H

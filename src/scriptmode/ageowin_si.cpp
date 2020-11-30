@@ -230,6 +230,30 @@ void AGeoWin_SI::DeleteAllTracks()
     SimManager->Tracks.erase(SimManager->Tracks.begin(), SimManager->Tracks.end());
 }
 
+#include "ageomarkerclass.h"
+void AGeoWin_SI::AddMarkers(QVariantList XYZs, int color)
+{
+    if (XYZs.isEmpty())
+    {
+        abort("XYZs should contain non-empty array of coordinates: [[x0,y0,z0], [x1,y1,z1], ... ]");
+        return;
+    }
+
+    GeoMarkerClass * M = new GeoMarkerClass("Scan", 2, 6, color);
+    for (int i=0; i<XYZs.size(); i++)
+    {
+        QVariantList el = XYZs[i].toList();
+        if (el.size() < 3)
+        {
+            abort("Bad format for coordinates in XYZs");
+            delete M;
+            return;
+        }
+        M->SetNextPoint(el[0].toDouble(), el[1].toDouble(), el[2].toDouble());
+    }
+    MW->GeometryWindow->GeoMarkers << M;
+}
+
 void AGeoWin_SI::ShowCustomNodes(int firstN)
 {
     MW->GeometryWindow->ShowCustomNodes(firstN);

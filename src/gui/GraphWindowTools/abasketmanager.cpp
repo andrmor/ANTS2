@@ -121,7 +121,7 @@ void ABasketManager::add(const QString & name, const QVector<ADrawObject> & draw
         }
         OldToNew[drObj.Pointer] = clone;
 
-        item.DrawObjects.append( ADrawObject(clone, options, drObj.bEnabled) );
+        item.DrawObjects.append( ADrawObject(clone, options, drObj.bEnabled, drObj.bLogScaleX, drObj.bLogScaleY) );
     }
 
     if (Legend)
@@ -191,7 +191,7 @@ const QVector<ADrawObject> ABasketManager::getCopy(int index) const
                 //qDebug() << "From basket, old-->cloned" << obj.Pointer << "-->" << clone;
             }
 
-            res << ADrawObject(clone, obj.Options, obj.bEnabled);
+            res << ADrawObject(clone, obj.Options, obj.bEnabled, obj.bLogScaleX, obj.bLogScaleY);
         }
 
         if (Legend)
@@ -307,6 +307,8 @@ void ABasketManager::saveAll(const QString & fileName)
             js["Name"] = obj.Name;
             js["Options"] = obj.Options;
             js["Enabled"] = obj.bEnabled;
+            js["LogX"] = obj.bLogScaleX;
+            js["LogY"] = obj.bLogScaleY;
             TLegend * Legend = dynamic_cast<TLegend*>(obj.Pointer);
             if (Legend)
             {
@@ -442,6 +444,8 @@ const QString ABasketManager::appendBasket(const QString & fileName)
                 QString Name     = js["Name"].toString();
                 QString Options  = js["Options"].toString();
                 bool    bEnabled = js["Enabled"].toBool();
+                bool    bLogX    = false; parseJson(js, "LogX", bLogX);
+                bool    bLogY    = false; parseJson(js, "LogY", bLogY);
 
                 TKey *key = (TKey*)f.GetListOfKeys()->At(KeyIndex);
                 KeyIndex++;
@@ -452,6 +456,8 @@ const QString ABasketManager::appendBasket(const QString & fileName)
                     ADrawObject Obj(p, Options);
                     Obj.Name = Name;
                     Obj.bEnabled = bEnabled;
+                    Obj.bLogScaleX = bLogX;
+                    Obj.bLogScaleY = bLogY;
                     drawObjects << Obj;
 
                     TLegend * Legend = dynamic_cast<TLegend*>(p);

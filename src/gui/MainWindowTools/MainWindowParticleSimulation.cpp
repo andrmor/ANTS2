@@ -499,7 +499,7 @@ void MainWindow::on_pbUpdateSourcesIndication_clicked()
 
             double totAct = SourceGenSettings.getTotalActivity();
             double per = ( totAct == 0 ? 0 : 100.0 * pr->Activity / totAct );
-            QString t = QString("%1%").arg(per, 3, 'g', 3);
+            QString t = (per == 0 ? "-Off-" : QString("%1%").arg(per, 3, 'g', 3) );
             lab = new QLabel(t);
             lab->setMinimumWidth(45);
         l->addWidget(lab);
@@ -671,8 +671,10 @@ void MainWindow::on_pbEditParticleSource_clicked()
     AParticleSourceRecord * ps = SourceGenSettings.getSourceRecord(isource);
     ps->updateLimitedToMat(*Detector->MpCollection);
 
+    on_pbUpdateSimConfig_clicked();
+
     if (Detector->isGDMLempty())
-    { //check world size
+    {
         double XYm = 0;
         double  Zm = 0;
         for (int isource = 0; isource < numSources; isource++)
@@ -689,21 +691,20 @@ void MainWindow::on_pbEditParticleSource_clicked()
         double currXYm = Detector->Sandwich->getWorldSizeXY();
         double  currZm = Detector->Sandwich->getWorldSizeZ();
         if (XYm > currXYm || Zm > currZm)
-          {
+        {
             //need to override
             Detector->Sandwich->setWorldSizeFixed(true);
-            Detector->Sandwich->setWorldSizeXY( std::max(XYm, currXYm) );
-            Detector->Sandwich->setWorldSizeZ ( std::max(Zm,  currZm) );
+            Detector->Sandwich->setWorldSizeXY( std::max(1.05*XYm, currXYm) );
+            Detector->Sandwich->setWorldSizeZ ( std::max(1.05*Zm,  currZm) );
             ReconstructDetector();
-          }
+        }
     }
 
-    on_pbUpdateSimConfig_clicked();
     if (ui->pbGunShowSource->isChecked()) ShowParticleSource_noFocus();
 }
 
 #include "ageoobject.h"
-#include "atypegeoobject.h"
+#include "ageotype.h"
 void containsMonsGrids(const AGeoObject * obj, bool & bGrid, bool & bMon)
 {
     if (obj->isDisabled()) return;
@@ -739,7 +740,7 @@ void MainWindow::on_pbParticleSourcesSimulate_clicked()
     {
         QString Errors, Warnings, txt;
 
-        if (G4SimSet.SensitiveVolumes.isEmpty())
+        if ( G4SimSet.SensitiveVolumes.isEmpty() && (ui->cbGunDoS1->isChecked() || ui->cbGunDoS2->isChecked()) )
             txt += "Sensitive volumes are not set!\n"
                        "Geant4 simulation will not collect any deposition information\n"
                        "There will be no photon generation in Ants2\n\n";

@@ -18,7 +18,7 @@
 #include "amonitor.h"
 #include "asandwich.h"
 #include "ageoobject.h"
-#include "atypegeoobject.h"
+#include "ageotype.h"
 #include "detectoraddonswindow.h"
 #include "ajsontools.h"
 
@@ -548,7 +548,7 @@ void OutputWindow::addPMitems(const QVector<float> *vector, float MaxSignal, Dyn
     {
       //pen
       QPen pen(Qt::black);
-      int size = 6.0 * MW->PMs->SizeX(ipm) / 30.0;
+      int size = 6.0 * std::min(MW->PMs->SizeX(ipm), MW->PMs->SizeY(ipm)) / 30.0;
       pen.setWidth(size);
 
       //brush
@@ -1603,6 +1603,7 @@ void OutputWindow::on_pbPTHistRequest_clicked()
         Opt.bFromMat = ui->cbPTHistVolMatFrom->isChecked();
         Opt.FromMat = ui->cobPTHistVolMatFrom->currentIndex();
         Opt.bFromVolume = ui->cbPTHistVolVolumeFrom->isChecked();
+        Opt.bEscaping = ui->cbPTHistEscaping->isChecked();
         Opt.FromVolume = ui->lePTHistVolVolumeFrom->text().toLocal8Bit().data();
         Opt.bFromVolIndex = ui->cbPTHistVolIndexFrom->isChecked();
         Opt.FromVolIndex = ui->sbPTHistVolIndexFrom->value();
@@ -1610,6 +1611,7 @@ void OutputWindow::on_pbPTHistRequest_clicked()
         Opt.bToMat = ui->cbPTHistVolMatTo->isChecked();
         Opt.ToMat = ui->cobPTHistVolMatTo->currentIndex();
         Opt.bToVolume = ui->cbPTHistVolVolumeTo->isChecked();
+        Opt.bCreated = ui->cbPTHistCreated->isChecked();
         Opt.ToVolume = ui->lePTHistVolVolumeTo->text().toLocal8Bit().data();
         Opt.bToVolIndex = ui->cbPTHistVolIndexTo->isChecked();
         Opt.ToVolIndex = ui->sbPTHistVolIndexTo->value();
@@ -1627,14 +1629,16 @@ void OutputWindow::on_pbPTHistRequest_clicked()
         {
             //1D stat
             AHistorySearchProcessor_Border p(what, cuts, bins, from, to);
-            Crawler.find(Opt, p);
-
-            if (p.Hist1D->GetEntries() == 0)
-                message("No data", this);
+            if (!p.ErrorString.isEmpty()) message(p.ErrorString, this);
             else
             {
-                MW->GraphWindow->Draw(p.Hist1D, "hist");
-                p.Hist1D = nullptr;
+                Crawler.find(Opt, p);
+                if (p.Hist1D->GetEntries() == 0) message("No data", this);
+                else
+                {
+                    MW->GraphWindow->Draw(p.Hist1D, "hist");
+                    p.Hist1D = nullptr;
+                }
             }
         }
         else
@@ -1644,28 +1648,32 @@ void OutputWindow::on_pbPTHistRequest_clicked()
             {
                 //1D vs
                 AHistorySearchProcessor_Border p(what, vsWhat, cuts, bins, from, to);
-                Crawler.find(Opt, p);
-
-                if (p.Hist1D->GetEntries() == 0)
-                    message("No data", this);
+                if (!p.ErrorString.isEmpty()) message(p.ErrorString, this);
                 else
                 {
-                    MW->GraphWindow->Draw(p.Hist1D, "hist");
-                    p.Hist1D = nullptr;
+                    Crawler.find(Opt, p);
+                    if (p.Hist1D->GetEntries() == 0) message("No data", this);
+                    else
+                    {
+                        MW->GraphWindow->Draw(p.Hist1D, "hist");
+                        p.Hist1D = nullptr;
+                    }
                 }
             }
             else if (!bVsVs && !bAveraged)
             {
                 //2D stat
                 AHistorySearchProcessor_Border p(what, vsWhat, cuts, bins, from, to, bins2, from2, to2);
-                Crawler.find(Opt, p);
-
-                if (p.Hist2D->GetEntries() == 0)
-                    message("No data", this);
+                if (!p.ErrorString.isEmpty()) message(p.ErrorString, this);
                 else
                 {
-                    MW->GraphWindow->Draw(p.Hist2D, "colz");
-                    p.Hist2D = nullptr;
+                    Crawler.find(Opt, p);
+                    if (p.Hist2D->GetEntries() == 0) message("No data", this);
+                    else
+                    {
+                        MW->GraphWindow->Draw(p.Hist2D, "colz");
+                        p.Hist2D = nullptr;
+                    }
                 }
                 binsB2 = bins2;
                 fromB2 = from2;
@@ -1675,14 +1683,16 @@ void OutputWindow::on_pbPTHistRequest_clicked()
             {
                 //2D vsvs
                 AHistorySearchProcessor_Border p(what, vsWhat, andVsWhat, cuts, bins, from, to, bins2, from2, to2);
-                Crawler.find(Opt, p);
-
-                if (p.Hist2D->GetEntries() == 0)
-                    message("No data", this);
+                if (!p.ErrorString.isEmpty()) message(p.ErrorString, this);
                 else
                 {
-                    MW->GraphWindow->Draw(p.Hist2D, "colz");
-                    p.Hist2D = nullptr;
+                    Crawler.find(Opt, p);
+                    if (p.Hist2D->GetEntries() == 0) message("No data", this);
+                    else
+                    {
+                        MW->GraphWindow->Draw(p.Hist2D, "colz");
+                        p.Hist2D = nullptr;
+                    }
                 }
                 binsB2 = bins2;
                 fromB2 = from2;
@@ -1825,6 +1835,8 @@ void OutputWindow::fillEvTabViewRecord(QTreeWidgetItem * item, const AParticleTr
     case 0: break;
     case 1: timeUnits *= 0.001; break;
     case 2: timeUnits *= 1.0e-6; break;
+    case 3: timeUnits *= 1.0e-9; break;
+    case 4: timeUnits *= 1.666666666666666e-11; break;
     }
     bool bVolume = ui->cbEVvol->isChecked();
     bool bKin = ui->cbEVkin->isChecked();
@@ -1991,6 +2003,16 @@ int OutputWindow::findEventWithFilters(int currentEv, bool bUp)
 
     bool bLimVols = ui->cbLimitToVolumes->isChecked();
 
+    bool bLimParticles = ui->cbLimitToParticles->isChecked();
+    bool bExcludeParticles = ui->cbExcludeParticles->isChecked();
+
+    QStringList LimProc = ui->leEVlimitToProc->text().split(rx, QString::SkipEmptyParts);
+    QStringList ExclProc = ui->leEVexcludeProc->text().split(rx, QString::SkipEmptyParts);
+    QStringList LimVols = ui->leLimitToVolumes->text().split(rx, QString::SkipEmptyParts);
+
+    QStringList MustContainParticles = ui->leLimitToParticles->text().split(rx, QString::SkipEmptyParts);
+    QStringList ExcludeParticles = ui->leExcludeParticles->text().split(rx, QString::SkipEmptyParts);
+
     if (currentEv > (int)TH.size()) currentEv = (int)TH.size();
 
     bUp ? currentEv++ : currentEv--;
@@ -1999,19 +2021,10 @@ int OutputWindow::findEventWithFilters(int currentEv, bool bUp)
         const AEventTrackingRecord * er = TH.at(currentEv);
 
         bool bGood = true;
-        if (bLimProc)
-        {
-            QStringList LimProc = ui->leEVlimitToProc->text().split(rx, QString::SkipEmptyParts);
-            bGood = er->isHaveProcesses(LimProc, bLimProc_prim);
-        }
-        if (bGood && bExclProc)
-        {
-            QStringList ExclProc = ui->leEVexcludeProc->text().split(rx, QString::SkipEmptyParts);
-            bGood = !er->isHaveProcesses(ExclProc, bExclProc_prim);
-        }
+        if (bLimProc)           bGood = er->isHaveProcesses(LimProc, bLimProc_prim);
+        if (bGood && bExclProc) bGood = !er->isHaveProcesses(ExclProc, bExclProc_prim);
         if (bGood && bLimVols)
         {
-            QStringList LimVols = ui->leLimitToVolumes->text().split(rx, QString::SkipEmptyParts);
             QStringList LimVolStartWith;
             for (int i=LimVols.size()-1; i >= 0; i--)
             {
@@ -2024,6 +2037,8 @@ int OutputWindow::findEventWithFilters(int currentEv, bool bUp)
             }
             bGood = er->isTouchedVolumes(LimVols, LimVolStartWith);
         }
+        if (bGood && bLimParticles)     bGood = er->isContainParticle(MustContainParticles);
+        if (bGood && bExcludeParticles) bGood = !er->isContainParticle(ExcludeParticles);
 
         if (bGood) return currentEv;
 
@@ -2345,4 +2360,32 @@ void OutputWindow::on_pbShowMonitorTimeOverall_clicked()
 void OutputWindow::on_cbPTHistVolVsTime_clicked()
 {
     updatePTHistoryBinControl();
+}
+
+void OutputWindow::on_cbPTHistEscaping_toggled(bool checked)
+{
+    QVector<QCheckBox*> vec = {ui->cbPTHistVolMatTo, ui->cbPTHistVolVolumeTo, ui->cbPTHistVolIndexTo, ui->cbPTHistCreated};
+    for (QCheckBox * cb : vec)
+    {
+        if (checked)
+        {
+            cb->setChecked(false);
+            cb->setEnabled(false);
+        }
+        else cb->setEnabled(true);
+    }
+}
+
+void OutputWindow::on_cbPTHistCreated_toggled(bool checked)
+{
+    QVector<QCheckBox*> vec = {ui->cbPTHistVolMatFrom, ui->cbPTHistVolVolumeFrom, ui->cbPTHistVolIndexFrom, ui->cbPTHistEscaping};
+    for (QCheckBox * cb : vec)
+    {
+        if (checked)
+        {
+            cb->setChecked(false);
+            cb->setEnabled(false);
+        }
+        else cb->setEnabled(true);
+    }
 }

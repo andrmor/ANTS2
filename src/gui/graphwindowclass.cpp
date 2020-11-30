@@ -204,14 +204,15 @@ TGraph* GraphWindowClass::MakeGraph(const QVector<double> *x, const QVector<doub
     QString opts = options;
     if (opts.contains("same",Qt::CaseInsensitive))
     {
-        if (LineWidth == 0) GraphWindowClass::Draw(gr, "P");
-        else GraphWindowClass::Draw(gr, "PL");
+        if (LineWidth == 0) Draw(gr, "P");
+        else Draw(gr, "PL");
     }
     else
     {
-        if (LineWidth == 0) GraphWindowClass::Draw(gr, "AP");
-        else GraphWindowClass::Draw(gr, "APL");
+        if (LineWidth == 0) Draw(gr, "AP");
+        else Draw(gr, "APL");
     }
+    RasterWindow->fCanvas->Update();
 
     return 0;
 }
@@ -253,7 +254,7 @@ TGraph *GraphWindowClass::ConstructTGraph(const std::vector<float> &x, const std
 TGraph *GraphWindowClass::ConstructTGraph(const QVector<double> &x, const QVector<double> &y,
                                           const char *Title, const char *XTitle, const char *YTitle,
                                           Color_t MarkerColor, int MarkerStyle, int MarkerSize,
-                                          Color_t LineColor, int LineStyle, int LineWidth) const
+                                          Color_t LineColor,   int LineStyle,   int LineWidth) const
 {
     TGraph* gr = ConstructTGraph(x,y);
     gr->SetTitle(Title); gr->GetXaxis()->SetTitle(XTitle); gr->GetYaxis()->SetTitle(YTitle);
@@ -263,7 +264,10 @@ TGraph *GraphWindowClass::ConstructTGraph(const QVector<double> &x, const QVecto
     return gr;
 }
 
-TGraph *GraphWindowClass::ConstructTGraph(const QVector<double> &x, const QVector<double> &y, const QString &Title, const QString &XTitle, const QString &YTitle, Color_t MarkerColor, int MarkerStyle, int MarkerSize, Color_t LineColor, int LineStyle, int LineWidth) const
+TGraph *GraphWindowClass::ConstructTGraph(const QVector<double> &x, const QVector<double> &y,
+                                          const QString &Title, const QString &XTitle, const QString &YTitle,
+                                          Color_t MarkerColor, int MarkerStyle, int MarkerSize,
+                                          Color_t LineColor,   int LineStyle,   int LineWidth) const
 {
     TGraph* gr = ConstructTGraph(x,y);
     gr->SetTitle(Title.toLatin1().data()); gr->GetXaxis()->SetTitle(XTitle.toLatin1().data()); gr->GetYaxis()->SetTitle(YTitle.toLatin1().data());
@@ -273,12 +277,15 @@ TGraph *GraphWindowClass::ConstructTGraph(const QVector<double> &x, const QVecto
     return gr;
 }
 
-TGraph *GraphWindowClass::ConstructTGraph(const std::vector<float> &x, const std::vector<float> &y, const char *Title, const char *XTitle, const char *YTitle, Color_t MarkerColor, int MarkerStyle, int MarkerSize, Color_t LineColor, int LineStyle, int LineWidth) const
+TGraph *GraphWindowClass::ConstructTGraph(const std::vector<float> &x, const std::vector<float> &y,
+                                          const char *Title, const char *XTitle, const char *YTitle,
+                                          Color_t MarkerColor, int MarkerStyle, int MarkerSize,
+                                          Color_t LineColor,   int LineStyle,   int LineWidth) const
 {
     TGraph* gr = ConstructTGraph(x,y);
     gr->SetTitle(Title); gr->GetXaxis()->SetTitle(XTitle); gr->GetYaxis()->SetTitle(YTitle);
     gr->SetMarkerStyle(MarkerStyle); gr->SetMarkerColor(MarkerColor); gr->SetMarkerSize(MarkerSize);
-    gr->SetEditable(false); gr->GetYaxis()->SetTitleOffset((Float_t)1.30);
+    gr->SetEditable(false); gr->GetYaxis()->SetTitleOffset(1.30f);
     gr->SetLineWidth(LineWidth); gr->SetLineColor(LineColor); gr->SetLineStyle(LineStyle);
     return gr;
 }
@@ -303,6 +310,23 @@ TGraph2D *GraphWindowClass::ConstructTGraph2D(const QVector<double>& x, const QV
     gr->GetYaxis()->SetTitleOffset((Float_t)1.30);
     gr->SetLineWidth(LineWidth); gr->SetLineColor(LineColor); gr->SetLineStyle(LineStyle);
     return gr;
+}
+
+void GraphWindowClass::configureGraph(TGraph * graph, const QString & GraphTitle,
+                                      const QString & XTitle, const QString & YTitle,
+                                      int MarkerColor, int MarkerStyle, int MarkerSize,
+                                      int LineColor,   int LineStyle, int LineWidth) const
+{
+    graph->SetTitle(GraphTitle.toLatin1().data());
+
+    graph->GetXaxis()->SetTitle(XTitle.toLatin1().data());
+    graph->GetYaxis()->SetTitle(YTitle.toLatin1().data());
+
+    graph->SetMarkerColor(MarkerColor); graph->SetMarkerStyle(MarkerStyle); graph->SetMarkerSize(MarkerSize);
+    graph->SetLineColor(LineColor);     graph->SetLineStyle(LineStyle);     graph->SetLineWidth(LineWidth);
+
+    graph->SetEditable(false);
+    graph->GetYaxis()->SetTitleOffset(1.30f);
 }
 
 void GraphWindowClass::AddLine(double x1, double y1, double x2, double y2, int color, int width, int style)
@@ -2055,9 +2079,19 @@ void GraphWindowClass::on_pbAddToBasket_clicked()
 void GraphWindowClass::AddCurrentToBasket(const QString & name)
 {
     if (DrawObjects.isEmpty()) return;
+    updateLogScaleFlags(DrawObjects);
     Basket->add(name.simplified(), DrawObjects);
     ui->actionToggle_Explorer_Basket->setChecked(true);
     UpdateBasketGUI();
+}
+
+void GraphWindowClass::updateLogScaleFlags(QVector<ADrawObject> & drawObjects) const
+{
+    for (ADrawObject & drObj : drawObjects)
+    {
+        drObj.bLogScaleX = RasterWindow->isLogX();
+        drObj.bLogScaleY = RasterWindow->isLogY();
+    }
 }
 
 void GraphWindowClass::AddLegend(double x1, double y1, double x2, double y2, QString title)
@@ -2733,6 +2767,12 @@ void GraphWindowClass::switchToBasket(int index)
     DrawObjects = Basket->getCopy(index);
     RedrawAll();
 
+    if (!DrawObjects.isEmpty())
+    {
+        ui->cbLogX->setChecked(DrawObjects.first().bLogScaleX);
+        ui->cbLogY->setChecked(DrawObjects.first().bLogScaleY);
+    }
+
     ActiveBasketItem = index;
     ClearCopyOfActiveBasketId();
     ClearCopyOfDrawObjects();
@@ -2745,6 +2785,7 @@ void GraphWindowClass::on_pbUpdateInBasket_clicked()
     HighlightUpdateBasketButton(false);
 
     if (ActiveBasketItem < 0 || ActiveBasketItem >= Basket->size()) return;
+    updateLogScaleFlags(DrawObjects);
     Basket->update(ActiveBasketItem, DrawObjects);
 }
 

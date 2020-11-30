@@ -37,6 +37,7 @@ public slots:
 
     void cd_set(int iEvent, int iPrimary);
     QVariantList cd_getTrackRecord();
+    QString cd_getProductionProcess();  // returns empty string if it is primary particle
     bool cd_step();
     bool cd_step(int iStep);
     bool cd_stepToProcess(QString processName);
@@ -67,6 +68,8 @@ public slots:
     void setToVolume(QString volumeName);
     void setFromIndex(int volumeIndex);
     void setToIndex(int volumeIndex);
+    void setOnlyCreated();
+    void setOnlyEscaping();
 
     QVariantList findParticles();
     QVariantList findProcesses(int All0_WithDepo1_TrackEnd2 = 0);

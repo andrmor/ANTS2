@@ -21,6 +21,8 @@ public:
     bool                  BinaryOutput = false;
     int                   Precision = 6;
 
+    bool                  UseTSphys = false;
+
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);
 

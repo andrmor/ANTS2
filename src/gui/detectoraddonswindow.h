@@ -6,7 +6,7 @@
 class MainWindow;
 class DetectorClass;
 class AGeo_SI;
-class AGeoTreeWidget;
+class AGeoTree;
 class AGeoObject;
 
 namespace Ui {
@@ -27,14 +27,16 @@ public:
   void HighlightVolume(const QString & VolName);
 
   AGeo_SI        * AddObjScriptInterface = nullptr;  // if created -> owned by the script manager
-  AGeoTreeWidget * twGeo = nullptr;                  // WorldTree widget
+  AGeoTree * twGeo   = nullptr;                  // WorldTree widget
 
 private slots:
   void onReconstructDetectorRequest();
   void onGeoConstEditingFinished(int index, QString newValue);
   void onGeoConstExpressionEditingFinished(int index, QString newValue);
   void onGeoConstEscapePressed(int index);
+  void onRequestShowPrototypeList();
   void updateMenuIndication();
+  void onSandwichRebuild();
 
   void on_tabwConstants_customContextMenuRequested(const QPoint &pos);
   void on_pbConvertToDummies_clicked();
@@ -46,7 +48,7 @@ private slots:
   void on_sbDummyType_valueChanged(int arg1);
   void on_pbLoadDummyPMs_clicked();
   void on_pbConvertAllToPMs_clicked();
-  void on_pbUseScriptToAddObj_clicked();
+//void on_pbUseScriptToAddObj_clicked();
   void on_pbSaveTGeo_clicked();
   void on_pbLoadTGeo_clicked();
   void on_pbBackToSandwich_clicked();
@@ -56,11 +58,16 @@ private slots:
   void on_pbRunTestParticle_clicked();
   void on_cbAutoCheck_stateChanged(int arg1);
   void on_pmParseInGeometryFromGDML_clicked();
-  void on_pbConvertToScript_clicked();
-  void on_pbWorldTreeHelp_clicked();
   void on_tabwConstants_cellChanged(int row, int column);
   void on_actionUndo_triggered();
   void on_actionRedo_triggered();
+  void on_actionHow_to_use_drag_and_drop_triggered();
+  void on_actionTo_JavaScript_triggered();
+  void on_actionTo_Python_triggered();
+  void on_cbShowPrototypes_toggled(bool checked);
+
+  void on_actionAdd_top_lightguide_triggered();
+  void on_actionAdd_bottom_lightguide_triggered();
 
 private:
   Ui::DetectorAddOnsWindow *ui;
@@ -89,6 +96,7 @@ public slots:
   void ShowObject(QString name = "");
   void FocusVolume(QString name);
   void ShowObjectRecursive(QString name);
+  void ShowAllInstances(QString name);
   void OnrequestShowMonitor(const AGeoObject* mon);
   void onRequestEnableGeoConstWidget(bool flag);
 

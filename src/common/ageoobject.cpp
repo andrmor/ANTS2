@@ -1,6 +1,6 @@
 #include "ageoobject.h"
 #include "ageoshape.h"
-#include "atypegeoobject.h"
+#include "ageotype.h"
 #include "aslab.h"
 #include "ajsontools.h"
 #include "agridelementrecord.h"
@@ -75,7 +75,7 @@ AGeoObject::AGeoObject(const QString & name, const QString & container, int iMat
     Shape = shape;
 }
 
-AGeoObject::AGeoObject(ATypeGeoObject *objType, AGeoShape* shape)
+AGeoObject::AGeoObject(AGeoType *objType, AGeoShape* shape)
 {
     constructorInit();
 
@@ -224,7 +224,7 @@ void AGeoObject::writeToJson(QJsonObject &json)
   ObjectType->writeToJson(jj);
   json["ObjectType"] = jj;
   json["Container"] = Container ? Container->Name : "";
-  json["Locked"] = fLocked;
+  //json["Locked"] = fLocked;
   json["fActive"] = fActive;
   json["fExpanded"] = fExpanded;
 
@@ -244,7 +244,7 @@ void AGeoObject::writeToJson(QJsonObject &json)
       }
   }
 
-  if ( ObjectType->isHandlingStandard() || ObjectType->isArray() )
+  if ( ObjectType->isHandlingStandard() || ObjectType->isArray() || ObjectType->isStack())
   {
       json["X"] = Position[0];
       json["Y"] = Position[1];
@@ -274,7 +274,7 @@ void AGeoObject::readFromJson(const QJsonObject & json)
     parseJson(json, "style", style);
     parseJson(json, "width", width);
 
-    parseJson(json, "Locked", fLocked);
+    //parseJson(json, "Locked", fLocked);
     parseJson(json, "fActive", fActive);
     parseJson(json, "fExpanded", fExpanded);
 
@@ -328,7 +328,7 @@ void AGeoObject::readFromJson(const QJsonObject & json)
     {
         QString tmpType;
         parseJson(jj, "Type", tmpType);
-        ATypeGeoObject * newType = ATypeGeoObject::TypeObjectFactory(tmpType);
+        AGeoType * newType = AGeoType::TypeObjectFactory(tmpType);
         if (newType)
         {
             delete ObjectType;
@@ -345,12 +345,15 @@ void AGeoObject::readFromJson(const QJsonObject & json)
 
 void AGeoObject::writeAllToJarr(QJsonArray &jarr)
 {
-  QJsonObject js;
-  writeToJson(js);
-  jarr << js;
+    QJsonObject js;
+    writeToJson(js);
+    jarr << js;
 
-  for (int i=0; i<HostedObjects.size(); i++)
-    HostedObjects[i]->writeAllToJarr(jarr);
+    if (!ObjectType->isInstance())
+    {
+        for (int i=0; i<HostedObjects.size(); i++)
+            HostedObjects[i]->writeAllToJarr(jarr);
+    }
 }
 
 QString AGeoObject::readAllFromJarr(AGeoObject * World, const QJsonArray & jarr)
@@ -826,22 +829,19 @@ bool AGeoObject::containsLowerLightGuide()
 
 AGeoObject *AGeoObject::getFirstSlab()
 {
-    for (int i=0; i<HostedObjects.size(); i++)
-    {
-        if (HostedObjects[i]->ObjectType->isSlab())
-            return HostedObjects[i];
-    }
-    return 0;
+    for (AGeoObject * obj : HostedObjects)
+        if (obj->ObjectType->isSlab()) return obj;
+    return nullptr;
 }
 
 AGeoObject *AGeoObject::getLastSlab()
 {
-    for (int i=HostedObjects.size()-1; i>-1; i--)
+    for (int i = HostedObjects.size() - 1; i > -1; i--)
     {
         if (HostedObjects[i]->ObjectType->isSlab())
             return HostedObjects[i];
     }
-    return 0;
+    return nullptr;
 }
 
 int AGeoObject::getIndexOfFirstSlab()
@@ -888,33 +888,36 @@ void AGeoObject::addObjectLast(AGeoObject * Object)
   else HostedObjects.append(Object);
 }
 
-bool AGeoObject::migrateTo(AGeoObject *objTo, bool fAfter, AGeoObject *reorderObj)
-{   
-  if (objTo == this->Container) return true;
+bool AGeoObject::migrateTo(AGeoObject * objTo, bool fAfter, AGeoObject *reorderObj)
+{
+    if (ObjectType->isWorld()) return false;
 
-  //check: cannot migrate down the chain (including to itself)
-  //assuming nobody asks to migrate slabs and world
-  if ( !objTo->ObjectType->isSlab() && !objTo->ObjectType->isWorld())
+    if (Container)
     {
-      AGeoObject* obj = objTo;
-      do
+        if (objTo != Container)
         {
-          if (obj == this) return false;
-          obj = obj->Container;
+            //check: cannot migrate down the chain (including to itself)
+            //assuming nobody asks to migrate slabs and world
+            if (Container && !objTo->ObjectType->isSlab() && !objTo->ObjectType->isWorld())
+            {
+                AGeoObject * obj = objTo;
+                do
+                {
+                    if (obj == this) return false;
+                    obj = obj->Container;
+                }
+                //while ( !obj->ObjectType->isSlab() && !obj->ObjectType->isWorld());
+                while (obj);
+            }
         }
-      while ( !obj->ObjectType->isSlab() && !obj->ObjectType->isWorld());
+        Container->HostedObjects.removeOne(this);
     }
 
-  Container->HostedObjects.removeOne(this);  
+    if (fAfter) objTo->addObjectLast(this);
+    else        objTo->addObjectFirst(this);
 
-  //Container = objTo;
-  //objTo->HostedObjects.insert(0, this);
-  objTo->addObjectFirst(this);
-
-  if (reorderObj) this->repositionInHosted(reorderObj, fAfter);
-  return true;
-
-
+    if (reorderObj) return repositionInHosted(reorderObj, fAfter);
+    else            return true;
 }
 
 bool AGeoObject::repositionInHosted(AGeoObject *objTo, bool fAfter)
@@ -935,7 +938,7 @@ bool AGeoObject::repositionInHosted(AGeoObject *objTo, bool fAfter)
 
 bool AGeoObject::suicide(bool SlabsToo)
 {
-  if (fLocked) return false;
+  //if (fLocked) return false;
   if (ObjectType->isWorld()) return false; //cannot delete world
   if (ObjectType->isHandlingStatic() && !SlabsToo) return false;
   if (ObjectType->isSlab() && getSlabModel()->fCenter) return false; //cannot kill center slab
@@ -955,14 +958,14 @@ bool AGeoObject::suicide(bool SlabsToo)
 
   //for composite, clear all unused logicals then kill the composite container
   if (ObjectType->isComposite())
-    {
+  {
       AGeoObject* cl = this->getContainerWithLogical();
       for (int i=0; i<cl->HostedObjects.size(); i++)
         delete cl->HostedObjects[i];
       delete cl;
       HostedObjects.removeAll(cl);
-    }
-  if (ObjectType->isGrid())
+  }
+  else if (ObjectType->isGrid())
   {
       AGeoObject* ge = getGridElement();
       if (ge)
@@ -989,11 +992,12 @@ bool AGeoObject::suicide(bool SlabsToo)
 
 void AGeoObject::recursiveSuicide()
 {
-  for (int i=HostedObjects.size()-1; i>-1; i--)
-    HostedObjects[i]->recursiveSuicide();
+    if (ObjectType->isPrototypes()) return;
 
-  //note that the current paradigm is that an unlocked object cannot have locked objects inside
-  suicide();
+    for (int i=HostedObjects.size()-1; i>-1; i--)
+        HostedObjects[i]->recursiveSuicide();
+
+    suicide(true);
 }
 
 void AGeoObject::lockUpTheChain()
@@ -1103,10 +1107,18 @@ AGeoObject * AGeoObject::findContainerUp(const QString & name)
 
 void AGeoObject::clearAll()
 {
-    for (int i=0; i<HostedObjects.size(); i++)
-      HostedObjects[i]->clearAll();
+    for (AGeoObject * obj : HostedObjects)
+        obj->clearAll();
+    HostedObjects.clear();
 
     delete this;
+}
+
+void AGeoObject::clearContent()
+{
+    for (AGeoObject * obj : HostedObjects)
+        obj->clearAll();
+    HostedObjects.clear();
 }
 
 void AGeoObject::updateWorldSize(double &XYm, double &Zm)
@@ -1140,6 +1152,9 @@ bool AGeoObject::isMaterialInUse(int imat) const
     //qDebug() << Name << "--->"<<Material;
 
     if (ObjectType->isMonitor()) return false; //monitors are always made of Container's material and cannot host objects
+    if (ObjectType->isPrototypes()) return false;
+    if (ObjectType->isPrototype()) return false;
+    if (ObjectType->isInstance()) return false;
 
     //if (ObjectType->isGridElement()) qDebug() << "----Grid element!";
     //if (ObjectType->isCompositeContainer()) qDebug() << "----Composite container!";
@@ -1289,6 +1304,24 @@ void AGeoObject::enforceUniqueNameForCloneRecursive(AGeoObject * World, AGeoObje
         hostedObj->enforceUniqueNameForCloneRecursive(World, tmpContainer);
 }
 
+void AGeoObject::addSuffixToNameRecursive(const QString & suffix)
+{
+    const QString newName = Name + "_at_" + suffix;
+
+    if (Container && Container->ObjectType->isStack())
+    {
+        ATypeStackContainerObject * Stack = static_cast<ATypeStackContainerObject*>(Container->ObjectType);
+        if (Stack->ReferenceVolume == Name)
+            Stack->ReferenceVolume = newName;
+    }
+    if (isCompositeMemeber())
+        updateNameOfLogicalMember(Name, newName);
+    Name = newName;
+
+    for (AGeoObject * obj : HostedObjects)
+        obj->addSuffixToNameRecursive(suffix);
+}
+
 AGeoObject * AGeoObject::makeClone(AGeoObject * World)
 {
     QJsonArray ar;
@@ -1323,12 +1356,126 @@ AGeoObject * AGeoObject::makeClone(AGeoObject * World)
     return clone;
 }
 
+AGeoObject * AGeoObject::makeCloneForInstance(const QString & suffix)
+{
+    QJsonArray ar;
+    writeAllToJarr(ar);
+    AGeoObject * clone = new AGeoObject();
+    QString errStr = clone->readAllFromJarr(clone, ar);
+    if (!errStr.isEmpty())
+    {
+        clone->clearAll();
+        return nullptr;
+    }
+    //note that slab cannot be an instance!
+
+    clone->addSuffixToNameRecursive(suffix);
+    return clone;
+}
+
+void AGeoObject::findAllInstancesRecursive(QVector<AGeoObject *> & Instances)
+{
+    if (ObjectType->isInstance()) Instances << this;
+
+    for (AGeoObject * obj : HostedObjects)
+        obj->findAllInstancesRecursive(Instances);
+}
+
+bool AGeoObject::isContainInstanceRecursive() const
+{
+    if (ObjectType->isInstance()) return true;
+
+    for (AGeoObject * obj : HostedObjects)
+        if (obj->isContainInstanceRecursive()) return true;
+
+    return false;
+}
+
+bool AGeoObject::isInstanceMember() const
+{
+    const AGeoObject * obj = this;
+
+    while (obj)
+    {
+        if (ObjectType->isInstance()) return true;
+        obj = obj->Container;
+    }
+    return false;
+}
+
+bool AGeoObject::isPossiblePrototype(QString * sReason) const
+{
+    if (isWorld())
+    {
+        if (sReason) *sReason = "World cannot be a prototype";
+        return false;
+    }
+    if (ObjectType->isSlab())
+    {
+        if (sReason) *sReason = "Slab cannot be a prototype";
+        return false;
+    }
+
+    if (isContainInstanceRecursive())
+    {
+        if (sReason) *sReason = "Prototype cannot contain instances of other prototypes";
+        return false;
+    }
+    if (isInstanceMember())
+    {
+        if (sReason) *sReason = "Cannot make a prototype form an object which is a part of an instance";
+        return false;
+    }
+
+    if (ObjectType->isLogical())
+    {
+        if (sReason) *sReason = "Logical volume cannot be a prototype";
+        return false;
+    }
+    if (ObjectType->isCompositeContainer())
+    {
+        if (sReason) *sReason = "Composite container cannot be a prototype";
+        return false;
+    }
+    return true;
+}
+
+QString AGeoObject::makeItPrototype(AGeoObject * Prototypes)
+{
+    QString errStr;
+
+    isPossiblePrototype(&errStr);
+    if (errStr.isEmpty()) migrateTo(Prototypes);
+
+    return errStr;
+}
+
+bool AGeoObject::isPrototypeInUseRecursive(const QString & PrototypeName, QStringList * Users) const
+{
+    if (ObjectType->isInstance())
+    {
+        ATypeInstanceObject * instance = static_cast<ATypeInstanceObject*>(ObjectType);
+        if (PrototypeName == instance->PrototypeName)
+        {
+            if (Users) *Users << Name;
+            return true;
+        }
+        return false; // instance cannot contain other instances
+    }
+
+    bool bFoundInUse = false;
+    for (AGeoObject * obj : HostedObjects)
+        if (obj->isPrototypeInUseRecursive(PrototypeName, Users))
+            bFoundInUse = true;
+
+    return bFoundInUse;
+}
+
 QString randomString(int lettLength, int numLength)
 {
   //const QString possibleLett("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
   const QString possibleLett("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
   const QString possibleNum("0123456789");
-
 
   QString randomString;
   for(int i=0; i<lettLength; i++)
@@ -1356,6 +1503,13 @@ QString AGeoObject::GenerateRandomObjectName()
   QString str = randomString(2, 1);
   str = "New_" + str;
   return str;
+}
+
+QString AGeoObject::GenerateRandomPrototypeName()
+{
+    QString str = randomString(2, 1);
+    str = "Prototype_" + str;
+    return str;
 }
 
 QString AGeoObject::GenerateRandomLightguideName()

@@ -13,10 +13,11 @@
 #include "asandwich.h"
 #include "aslab.h"
 #include "slabdelegate.h"
-#include "ageotreewidget.h"
+#include "ageotree.h"
+#include "ageodelegatewidget.h"
 #include "ageoobject.h"
 #include "ageoshape.h"
-#include "atypegeoobject.h"
+#include "ageotype.h"
 #include "amessage.h"
 #include "acommonfunctions.h"
 #include "ageometrytester.h"
@@ -26,6 +27,7 @@
 #include "afiletools.h"
 #include "ascriptwindow.h"
 #include "ageoconsts.h"
+#include "ageobasetreewidget.h"
 
 #include <QDebug>
 #include <QFileDialog>
@@ -57,32 +59,35 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(QWidget * parent, MainWindow * MW, De
 
   ui->pbBackToSandwich->setEnabled(false);
 
-  // tree widget
-  twGeo = new AGeoTreeWidget(Detector->Sandwich);
-  ui->saGeo->setWidget(twGeo);
-  connect(twGeo, SIGNAL(itemExpanded(QTreeWidgetItem*)), twGeo, SLOT(onItemExpanded(QTreeWidgetItem*)));
-  connect(twGeo, SIGNAL(itemCollapsed(QTreeWidgetItem*)), twGeo, SLOT(onItemCollapsed(QTreeWidgetItem*)));
+  // world tree widget
+  twGeo = new AGeoTree(Detector->Sandwich);
+  ui->saGeo->setWidget(twGeo->twGeoTree);
   connect(twGeo, SIGNAL(RequestListOfParticles(QStringList&)), Detector->MpCollection, SLOT(OnRequestListOfParticles(QStringList&)));
-  connect(twGeo, &AGeoTreeWidget::RequestShowMonitor, this, &DetectorAddOnsWindow::OnrequestShowMonitor);
+  connect(twGeo, &AGeoTree::RequestShowMonitor, this, &DetectorAddOnsWindow::OnrequestShowMonitor);
+
+  // prototype tree widget
+  ui->saPrototypes->setWidget(twGeo->twPrototypes);
 
   // Object editor
   QVBoxLayout* l = new QVBoxLayout();
   l->setContentsMargins(0,0,0,0);
   ui->frObjectEditor->setLayout(l);
   l->addWidget(twGeo->GetEditWidget());
-  connect(twGeo, &AGeoTreeWidget::RequestRebuildDetector, this, &DetectorAddOnsWindow::onReconstructDetectorRequest);
-  connect(twGeo, &AGeoTreeWidget::RequestFocusObject,     this, &DetectorAddOnsWindow::FocusVolume);
-  connect(twGeo, &AGeoTreeWidget::RequestHighlightObject, this, &DetectorAddOnsWindow::ShowObject);
-  connect(twGeo, &AGeoTreeWidget::RequestShowObjectRecursive, this, &DetectorAddOnsWindow::ShowObjectRecursive);
-  connect(twGeo->GetEditWidget(), &AGeoWidget::requestEnableGeoConstWidget, this, &DetectorAddOnsWindow::onRequestEnableGeoConstWidget);
-  connect(twGeo, &AGeoTreeWidget::RequestNormalDetectorDraw, MW, &MainWindow::ShowGeometrySlot);
-  //connect(Detector->Sandwich, &ASandwich::RequestGuiUpdate, twGeo, &AGeoTreeWidget::UpdateGui);
+  connect(twGeo, &AGeoTree::RequestRebuildDetector, this, &DetectorAddOnsWindow::onReconstructDetectorRequest);
+  connect(twGeo, &AGeoTree::RequestFocusObject,     this, &DetectorAddOnsWindow::FocusVolume);
+  connect(twGeo, &AGeoTree::RequestHighlightObject, this, &DetectorAddOnsWindow::ShowObject);
+  connect(twGeo, &AGeoTree::RequestShowObjectRecursive, this, &DetectorAddOnsWindow::ShowObjectRecursive);
+  connect(twGeo, &AGeoTree::RequestShowAllInstances, this, &DetectorAddOnsWindow::ShowAllInstances);
+  connect(twGeo->GetEditWidget(), &AGeoDelegateWidget::requestEnableGeoConstWidget, this, &DetectorAddOnsWindow::onRequestEnableGeoConstWidget);
+  connect(twGeo, &AGeoTree::RequestNormalDetectorDraw, MW, &MainWindow::ShowGeometrySlot);
+  connect(twGeo, &AGeoTree::RequestShowPrototypeList, this, &DetectorAddOnsWindow::onRequestShowPrototypeList);
+  connect(Detector->Sandwich, &ASandwich::RequestGuiUpdate, this, &DetectorAddOnsWindow::onSandwichRebuild);
   QPalette palette = ui->frObjectEditor->palette();
   palette.setColor( backgroundRole(), QColor( 240, 240, 240 ) );
   ui->frObjectEditor->setPalette( palette );
   ui->frObjectEditor->setAutoFillBackground( true );
 
-  connect(this, &DetectorAddOnsWindow::requestDelayedRebuildAndRestoreDelegate, twGeo, &AGeoTreeWidget::rebuildDetectorAndRestoreCurrentDelegate, Qt::QueuedConnection);
+  connect(this, &DetectorAddOnsWindow::requestDelayedRebuildAndRestoreDelegate, twGeo, &AGeoTree::rebuildDetectorAndRestoreCurrentDelegate, Qt::QueuedConnection);
 
   QPalette p = ui->pteTP->palette();
   p.setColor(QPalette::Active, QPalette::Base, QColor(220,220,220));
@@ -95,10 +100,13 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(QWidget * parent, MainWindow * MW, De
   QDoubleValidator* dv = new QDoubleValidator(this);
   dv->setNotation(QDoubleValidator::ScientificNotation);
   QList<QLineEdit*> list = this->findChildren<QLineEdit *>();
-  foreach(QLineEdit *w, list) if (w->objectName().startsWith("led")) w->setValidator(dv);
+  for (QLineEdit * w : list) if (w->objectName().startsWith("led")) w->setValidator(dv);
 
   ui->cbAutoCheck->setChecked( MW->GlobSet.PerformAutomaticGeometryCheck );
   on_cbAutoCheck_stateChanged(111);
+
+  if (!MW->PythonScriptWindow) ui->actionTo_Python->setEnabled(false);
+  ui->saPrototypes->setVisible(false);
 
   connect(ui->menuUndo_redo, &QMenu::aboutToShow, this, &DetectorAddOnsWindow::updateMenuIndication);
 }
@@ -128,9 +136,16 @@ void DetectorAddOnsWindow::onReconstructDetectorRequest()
 
 void DetectorAddOnsWindow::UpdateGUI()
 {
-  UpdateGeoTree();
-  UpdateDummyPMindication();
-  ui->pbBackToSandwich->setEnabled(!Detector->isGDMLempty());
+    qDebug() << ">DAwindow: updateGui";
+    UpdateGeoTree();
+    UpdateDummyPMindication();
+    ui->pbBackToSandwich->setEnabled(!Detector->isGDMLempty());
+
+    QString str = "Show prototypes";
+    int numProto = Detector->Sandwich->Prototypes->HostedObjects.size();
+    if (numProto > 0) str += QString(" (%1)").arg(numProto);
+    ui->cbShowPrototypes->setText(str);
+    QFont font = ui->cbShowPrototypes->font(); font.setBold(numProto > 0); ui->cbShowPrototypes->setFont(font);
 }
 
 void DetectorAddOnsWindow::SetTab(int tab)
@@ -422,12 +437,9 @@ void DetectorAddOnsWindow::loadDummyPMs(const QString & DFile)
     }
 }
 
-//------------//-----------------//----------------------------//
-
 void DetectorAddOnsWindow::ShowObject(QString name)
 {
-    DetectorAddOnsWindow::HighlightVolume(name);
-    MW->GeometryWindow->SetAsActiveRootWindow();
+    HighlightVolume(name);
     Detector->GeoManager->ClearTracks();
     MW->GeometryWindow->ShowGeometry(true, false, false);
 }
@@ -477,8 +489,65 @@ void DetectorAddOnsWindow::ShowObjectRecursive(QString name)
         drawIfFound(Detector->GeoManager->GetTopNode(), tname);
     }
     MW->GeometryWindow->UpdateRootCanvas();
+}
 
-    //gGeoManager->SetTopVisible(MW->GeometryWindow->IsWorldVisible());
+void DetectorAddOnsWindow::ShowAllInstances(QString name)
+{
+    QVector<AGeoObject*> InstancesNotDiscriminated;
+    Detector->Sandwich->World->findAllInstancesRecursive(InstancesNotDiscriminated);
+
+    MW->GeometryWindow->ShowAndFocus();
+
+    TObjArray * list = Detector->GeoManager->GetListOfVolumes();
+    const int size = list->GetEntries();
+    QSet<QString> set;
+
+    //select those active ones which have the same prototype
+    for (AGeoObject * inst : InstancesNotDiscriminated)
+    {
+        const ATypeInstanceObject * insType = static_cast<const ATypeInstanceObject*>(inst->ObjectType);
+        if (insType->PrototypeName == name && inst->fActive)
+            for (AGeoObject * obj : inst->HostedObjects)
+            {
+                /*
+                TString tname = obj->Name.toLatin1().data();
+                tname += "_0";
+                qDebug() << "Looking for" << tname;
+                bool found = drawIfFound(Detector->GeoManager->GetTopNode(), tname);
+                if (!found)
+                {
+                    tname = name.toLatin1().data();
+                    tname += "_1";
+                    drawIfFound(Detector->GeoManager->GetTopNode(), tname);
+                }*/
+
+                //HighlightVolume(obj->Name);
+
+                if (obj->ObjectType->isArray() || obj->ObjectType->isHandlingSet())
+                {
+                    QVector<AGeoObject*> vec;
+                    obj->collectContainingObjects(vec);
+                    for (AGeoObject * obj1 : vec)
+                        set << obj1->Name;
+                }
+                else    set << obj->Name;
+            }
+
+        for (int iVol = 0; iVol < size; iVol++)
+        {
+            TGeoVolume* vol = (TGeoVolume*)list->At(iVol);
+            if (!vol) break;
+            const QString name = vol->GetName();
+            if (set.contains(name))
+            {
+                vol->SetLineColor(kRed);
+                vol->SetLineWidth(3);
+            }
+            else vol->SetLineColor(kGray);
+        }
+    }
+
+    MW->GeometryWindow->UpdateRootCanvas();
 }
 
 void DetectorAddOnsWindow::OnrequestShowMonitor(const AGeoObject * mon)
@@ -567,15 +636,14 @@ void DetectorAddOnsWindow::HighlightVolume(const QString & VolName)
     if (!obj) return;
 
     QSet<QString> set;
-    if (obj->ObjectType->isArray() || obj->ObjectType->isHandlingSet())
+    if (obj->ObjectType->isArray() || obj->ObjectType->isInstance() || obj->ObjectType->isHandlingSet())
     {
         QVector<AGeoObject*> vec;
         obj->collectContainingObjects(vec);
         for (AGeoObject * obj : vec)
             set << obj->Name;
     }
-    else
-        set << VolName;
+    else    set << VolName;
 
     TObjArray* list = Detector->GeoManager->GetListOfVolumes();
     int size = list->GetEntries();
@@ -594,6 +662,7 @@ void DetectorAddOnsWindow::HighlightVolume(const QString & VolName)
     }
 }
 
+/*
 void DetectorAddOnsWindow::on_pbUseScriptToAddObj_clicked()
 {
     QList<QTreeWidgetItem*> list = twGeo->selectedItems();
@@ -632,46 +701,8 @@ void DetectorAddOnsWindow::on_pbUseScriptToAddObj_clicked()
     MW->recallGeometryOfLocalScriptWindow();
     MW->GenScriptWindow->UpdateGui();
     MW->GenScriptWindow->show();
-
-//  MW->extractGeometryOfLocalScriptWindow();
-//  if (MW->GenScriptWindow) delete MW->GenScriptWindow;
-//  MW->GenScriptWindow = new GenericScriptWindowClass(MW->Detector->RandGen);
-//  MW->recallGeometryOfLocalScriptWindow();
-//
-//  QList<QTreeWidgetItem*> list = twGeo->selectedItems();
-//  if (list.size() == 1) ObjectScriptTarget = list.first()->text(0);
-//  else ObjectScriptTarget = "World";
-
-//  AGeoObject* obj = Detector->Sandwich->World->findObjectByName(ObjectScriptTarget);
-//  if (!obj)
-//    {
-//      ObjectScriptTarget = "World";
-//      obj = Detector->Sandwich->World;
-//    }
-//  if (obj->LastScript.isEmpty())
-//    Detector->AddObjPositioningScript = Detector->Sandwich->World->LastScript;
-//  else
-//    Detector->AddObjPositioningScript = obj->LastScript;
-//
-//  AddObjScriptInterface = new InterfaceToAddObjScript(Detector); //deleted by the GenScriptWindow
-//  MW->GenScriptWindow->SetInterfaceObject(AddObjScriptInterface);
-//  MW->GenScriptWindow->SetShowEvaluationResult(false); //do not show "undefined"
-//  MW->GenScriptWindow->SetExample("ClearAll()\nfor (var i=0; i<3; i++)\n Box('Test'+i, 10,5,2, 0, 'PrScint', (i-1)*20,i*2,-i*5,  0,0,0)");
-//  QObject::connect(AddObjScriptInterface, SIGNAL(AbortScriptEvaluation(QString)), this, SLOT(ReportScriptError(QString)));
-//  QObject::connect(AddObjScriptInterface, SIGNAL(requestShowCheckUpWindow()), MW->CheckUpWindow, SLOT(showNormal()));
-//
-//  if (ObjectScriptTarget.isEmpty())
-//    MW->GenScriptWindow->SetTitle("Add objects script");
-//  else
-//    MW->GenScriptWindow->SetTitle("Add objects script. Script will be stored in object "+ObjectScriptTarget);
-
-//  MW->GenScriptWindow->SetScript(&Detector->AddObjPositioningScript);
-//  MW->GenScriptWindow->SetStarterDir(MW->GlobSet.LibScripts);
-//  connect(MW->GenScriptWindow, SIGNAL(success(QString)), this, SLOT(AddObjScriptSuccess()));
-//
-//  AddObjScriptInterface->GeoObjects.clear();
-//  MW->GenScriptWindow->show();
 }
+*/
 
 void DetectorAddOnsWindow::AddObjScriptSuccess()
 {
@@ -1317,40 +1348,6 @@ void DetectorAddOnsWindow::on_cbAutoCheck_stateChanged(int)
   ui->cbAutoCheck->setPalette(p);
 }
 
-void DetectorAddOnsWindow::on_pbConvertToScript_clicked()
-{
-    QString script;
-    if (MW->ScriptWindow->isVisible() || !MW->PythonScriptWindow->isVisible())
-    {
-        createScript(script, false);
-        MW->ScriptWindow->onLoadRequested(script);
-        MW->ScriptWindow->showNormal();
-        MW->ScriptWindow->raise();
-        MW->ScriptWindow->activateWindow();
-    }
-
-    if (MW->PythonScriptWindow && MW->PythonScriptWindow->isVisible())
-    {
-        createScript(script, true);
-        MW->PythonScriptWindow->onLoadRequested(script);
-        MW->PythonScriptWindow->showNormal();
-        MW->PythonScriptWindow->raise();
-        MW->PythonScriptWindow->activateWindow();
-    }
-}
-
-void DetectorAddOnsWindow::on_pbWorldTreeHelp_clicked()
-{
-    QString s = "Use context menu to manipulate objects\n"
-                "\n"
-                "Drag & drop can be used to move items\n"
-                "  from one container to another\n"
-                "\n"
-                "Drop when Alt or Shift or Control is pressed\n"
-                "  changes the item order (can be used to move too)";
-    message(s, this);
-}
-
 #include "aonelinetextedit.h"
 #include "ageobasedelegate.h"
 #include <QTabWidget>
@@ -1398,41 +1395,58 @@ void DetectorAddOnsWindow::updateGeoConstsIndication()
 QString DetectorAddOnsWindow::createScript(QString &script, bool usePython)
 {
     QString CommentStr = "//";
-    int indent = 2;
+    int indent = 0;
     QString VarStr;
     QString indentStr;
 
-    script += "Auto-generated script\n\n";
+    script += "== Auto-generated script ==\n\n";
 
     if (!usePython)
     {
         VarStr = "var ";
-        indentStr = "  ";
+        indentStr = ""; //"  ";
     }
     else
     {
         CommentStr = "#";
         indent = 0;
-        script += "true = True\n\nfalse = False\n\n";     // for now                   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        script += "true = True\n\nfalse = False\n\n";     // for now
     }
     script.insert(0, CommentStr);
 
-    AGeoObject* World = Detector->Sandwich->World;
-    script += CommentStr + " GeoConsts\n";
-    script += AGeoConsts::getConstInstance().exportToScript(World, CommentStr, VarStr);
-
-    script += indentStr + CommentStr + "Set all PM arrays to fully custom regularity, so PM Z-positions will not be affected by slabs\n";
-    script += indentStr + "pms.SetAllArraysFullyCustom()\n";
-    script += indentStr + CommentStr + "Remove all slabs and objects\n";
-    script += indentStr + "geo.RemoveAllExceptWorld()\n";
-
-    script += "\n";
     script += indentStr + CommentStr + "Defined materials:\n";
     for (int i=0; i<Detector->MpCollection->countMaterials(); i++)
         script += indentStr + VarStr + Detector->MpCollection->getMaterialName(i) + "_mat = " + QString::number(i) + "\n";
-    script += "  \n";
-    twGeo->commonSlabToScript(script, indentStr);
+    script += "\n";
 
+    AGeoObject * World = Detector->Sandwich->World;
+    QString geoScr = AGeoConsts::getConstInstance().exportToScript(World, CommentStr, VarStr);
+    if (!geoScr.simplified().isEmpty())
+    {
+        script += indentStr + CommentStr + "Geometry constants:\n";
+        script += geoScr;
+        script += "\n";
+    }
+
+    //script += indentStr + CommentStr + "Set all PM arrays to fully custom regularity, so PM Z-positions will not be affected by slabs\n";
+    //script += indentStr + "pms.SetAllArraysFullyCustom()\n";
+    //script += indentStr + CommentStr + "Remove all slabs and objects\n";
+    script += indentStr + "geo.RemoveAllExceptWorld()\n";
+    script += "\n";
+
+    twGeo->commonSlabToScript(script, indentStr);
+    script += "\n";
+
+    QString protoString;
+    twGeo->objectMembersToScript(Detector->Sandwich->Prototypes, protoString, indent, true, true, usePython);
+    if (!protoString.simplified().isEmpty())
+    {
+        script += indentStr + CommentStr + "Prototypes:";
+        script += protoString;
+        script += "\n\n";
+    }
+
+    script += indentStr + CommentStr + "Geometry:";
     twGeo->objectMembersToScript(World, script, indent, true, true, usePython);
 
     script += "\n\n" + indentStr + "geo.UpdateGeometry(true)";
@@ -1494,10 +1508,21 @@ void DetectorAddOnsWindow::onGeoConstEscapePressed(int /*index*/)
     updateGeoConstsIndication();
 }
 
+void DetectorAddOnsWindow::onRequestShowPrototypeList()
+{
+    ui->cbShowPrototypes->setChecked(true);
+}
+
 void DetectorAddOnsWindow::updateMenuIndication()
 {
     ui->actionUndo->setEnabled(MW->Config->isUndoAvailable());
     ui->actionRedo->setEnabled(MW->Config->isRedoAvailable());
+}
+
+void DetectorAddOnsWindow::onSandwichRebuild()
+{
+    qDebug() << "--onSandwichRebuild";
+    twGeo->UpdateGui("");
 }
 
 void DetectorAddOnsWindow::on_tabwConstants_cellChanged(int row, int column)
@@ -1644,4 +1669,59 @@ void DetectorAddOnsWindow::on_actionRedo_triggered()
         QString err = MW->Config->doRedo();
         if (!err.isEmpty()) message(err, this);
     }
+}
+
+void DetectorAddOnsWindow::on_actionHow_to_use_drag_and_drop_triggered()
+{
+    QString s = "Drag & drop can be used to move items\n"
+                "  from one container to another\n"
+                "\n"
+                "Drop when Alt or Shift or Control is pressed\n"
+                "  changes the item order:\n"
+                "  the dragged item is inserted between two object\n"
+                "  according to the drop indicator";
+    message(s, this);
+}
+
+void DetectorAddOnsWindow::on_actionTo_JavaScript_triggered()
+{
+    QString script;
+    createScript(script, false);
+    MW->ScriptWindow->onLoadRequested(script);
+    MW->ScriptWindow->showNormal();
+    MW->ScriptWindow->raise();
+    MW->ScriptWindow->activateWindow();
+}
+
+void DetectorAddOnsWindow::on_actionTo_Python_triggered()
+{
+    if (!MW->PythonScriptWindow)
+    {
+        message("ANTS2 was compiled without Python support. Enable it in ants2.pro");
+        return;
+    }
+
+    QString script;
+    createScript(script, true);
+    MW->PythonScriptWindow->onLoadRequested(script);
+    MW->PythonScriptWindow->showNormal();
+    MW->PythonScriptWindow->raise();
+    MW->PythonScriptWindow->activateWindow();
+}
+
+void DetectorAddOnsWindow::on_cbShowPrototypes_toggled(bool checked)
+{
+    ui->saPrototypes->setVisible(checked);
+}
+
+void DetectorAddOnsWindow::on_actionAdd_top_lightguide_triggered()
+{
+    if (!Detector->Sandwich->World->containsUpperLightGuide())
+        twGeo->AddLightguide(true);
+}
+
+void DetectorAddOnsWindow::on_actionAdd_bottom_lightguide_triggered()
+{
+    if (!Detector->Sandwich->World->containsLowerLightGuide())
+        twGeo->AddLightguide(false);
 }

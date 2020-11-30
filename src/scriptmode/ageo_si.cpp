@@ -2,7 +2,7 @@
 #include "amaterialparticlecolection.h"
 #include "ageoobject.h"
 #include "ageoshape.h"
-#include "atypegeoobject.h"
+#include "ageotype.h"
 #include "aslab.h"
 #include "asandwich.h"
 #include "detectorclass.h"
@@ -47,30 +47,31 @@ AGeo_SI::AGeo_SI(DetectorClass* Detector)
   H["UpdateGeometry"] = "Updates geometry and do optional check for geometry definition errors.\n"
                         "It is performed automatically for the script called from Advanced Settings window.";
 
-  H["MakeStack"] = "Adds empty stack object. Volumes can be added normally to this object, stating its name as the container.\n"
+  H["Stack"] = "Adds empty stack object. Volumes can be added normally to this object, stating its name as the container.\n"
                    "After the last element is added, call InitializeStack(StackName, Origin) function. "
                    "It will automatically calculate x,y and z positions of all elements, keeping user-configured xyz position of the Origin element.";
   H["InitializeStack"] = "Call this function after the last element has been added to the stack."
                    "It will automatically calculate x,y and z positions of all elements, keeping user-configured xyz position of the Origin element.";
 
-  H["RecalculateStack"] = "Recalculates xyz positions of the stack elements. Has to be called if config.Replace() was used to change thickness of the elements.";
+  //H["RecalculateStack"] = "Recalculates xyz positions of the stack elements. Has to be called if config.Replace() was used to change thickness of the elements.";
 
   H["setEnable"] = "Enable or disable the volume with the providfed name, or, if the name ends with '*', all volumes with the name starting with the provided string.)";
   H["getPassedVoulumes"] = "Go through the defined geometry in a straight line from startXYZ in the direction startVxVyVz\n"
           "and return array of [X Y Z MaterualIndex VolumeName NodeIndex] for all volumes on the way until final exit to the World\n"
           "the X Y Z are coordinates of the entrance points";
+
+  DepRem["MakeStack"] = "Use Stack() method";
 }
 
 AGeo_SI::~AGeo_SI()
 {
-  clearGeoObjects();
+    clearGeoObjects();
 }
 
 bool AGeo_SI::InitOnRun()
 {
-  //qDebug() << "Init on start for Geo script unit";
-  clearGeoObjects();
-  return true;
+    clearGeoObjects();
+    return true;
 }
 
 void AGeo_SI::Box(QString name, double Lx, double Ly, double Lz, int iMat, QString container,
@@ -112,6 +113,14 @@ void AGeo_SI::Sphere(QString name, double D, int iMat, QString container, double
                                  new AGeoSphere(0.5*D),
                                  x,y,z, phi,theta,psi);
   GeoObjects.append(o);
+}
+
+void AGeo_SI::SphereLayer(QString name, double Dout, double Din, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi)
+{
+    AGeoObject* o = new AGeoObject(name, container, iMat,
+                                   new AGeoSphere(0.5*Dout, 0.5*Din),
+                                   x,y,z, phi,theta,psi);
+    GeoObjects.append(o);
 }
 
 void AGeo_SI::Arb8(QString name, QVariant NodesX, QVariant NodesY, double h, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi)
@@ -620,7 +629,22 @@ void AGeo_SI::SetCommonSlabProperties(int shape, double size1, double size2, dou
 
 void AGeo_SI::MakeStack(QString name, QString container)
 {
-    AGeoObject* o = new AGeoObject(name, container, 0, 0, 0,0,0, 0,0,0);
+    Stack(name, container, 0,0,0,  0,0,0);
+}
+
+/*
+void AGeo_SI::Stack(QString name, QString container)
+{
+    AGeoObject * o = new AGeoObject(name, container, 0, 0, 0,0,0, 0,0,0);
+    delete o->ObjectType;
+    o->ObjectType = new ATypeStackContainerObject();
+    GeoObjects.append(o);
+}
+*/
+
+void AGeo_SI::Stack(QString name, QString container, double x, double y, double z, double phi, double theta, double psi)
+{
+    AGeoObject * o = new AGeoObject(name, container, 0, 0, x,y,z, phi,theta,psi);
     delete o->ObjectType;
     o->ObjectType = new ATypeStackContainerObject();
     GeoObjects.append(o);
@@ -670,6 +694,7 @@ void AGeo_SI::InitializeStack(QString StackName, QString MemberName_StackReferen
    StackObj->HostedObjects.clear();
 }
 
+/*
 void AGeo_SI::MakeGroup(QString name, QString container)
 {
     AGeoObject* o = new AGeoObject(name, container, 0, 0, 0,0,0, 0,0,0);
@@ -677,7 +702,9 @@ void AGeo_SI::MakeGroup(QString name, QString container)
     o->ObjectType = new ATypeGroupContainerObject();
     GeoObjects.append(o);
 }
+*/
 
+/*
 void AGeo_SI::RecalculateStack(QString name)
 {
   AGeoObject* obj = Detector->Sandwich->World->findObjectByName(name);
@@ -701,6 +728,7 @@ void AGeo_SI::RecalculateStack(QString name)
   obj->updateStack();
   Detector->BuildDetector_CallFromScript();
 }
+*/
 
 void AGeo_SI::Array(QString name, int numX, int numY, int numZ, double stepX, double stepY, double stepZ, QString container, double x, double y, double z, double psi)
 {
@@ -728,6 +756,28 @@ void AGeo_SI::ReconfigureArray(QString name, int numX, int numY, int numZ, doubl
 
     ATypeArrayObject* a = static_cast<ATypeArrayObject*>(obj->ObjectType);
     a->Reconfigure(numX, numY, numZ, stepX, stepY, stepZ);
+}
+
+void AGeo_SI::Prototype(QString name)
+{
+    AGeoObject * proto = new AGeoObject(name);
+    delete proto->ObjectType; proto->ObjectType = new ATypePrototypeObject();
+    proto->tmpContName = ProrotypeContainerName;
+    GeoObjects.append(proto);
+}
+
+void AGeo_SI::Instance(QString name, QString prototype, QString container, double x, double y, double z, double phi, double theta, double psi)
+{
+    AGeoObject * instance = new AGeoObject(name);
+    delete instance->ObjectType; instance->ObjectType = new ATypeInstanceObject(prototype);
+    instance->tmpContName = container;
+    instance->Position[0] = x;
+    instance->Position[1] = y;
+    instance->Position[2] = z;
+    instance->Orientation[0] = phi;
+    instance->Orientation[1] = theta;
+    instance->Orientation[2] = psi;
+    GeoObjects.append(instance);
 }
 
 void AGeo_SI::SetLine(QString name, int color, int width, int style)
@@ -775,6 +825,17 @@ void AGeo_SI::ClearAll()
 
   Detector->Sandwich->World->recursiveSuicide();  // locked objects are not deleted!
   Detector->BuildDetector_CallFromScript();
+}
+
+void AGeo_SI::Clear(QString Object)
+{
+    AGeoObject* obj = Detector->Sandwich->World->findObjectByName(Object);
+    if (!obj)
+    {
+        abort("Cannot find object "+Object);
+        return;
+    }
+    obj->clearContent();
 }
 
 void AGeo_SI::Remove(QString Object)
@@ -873,6 +934,14 @@ void AGeo_SI::setEnable(QString ObjectOrWildcard, bool flag)
     }
 }
 
+QString AGeo_SI::getMaterialName(int materialIndex)
+{
+    QStringList DefMats = Detector->Sandwich->GetMaterials();
+    if (materialIndex < 0 || materialIndex >= DefMats.size()) return "Not defined";
+
+    return DefMats[materialIndex];
+}
+
 void AGeo_SI::UpdateGeometry(bool CheckOverlaps)
 {
   //checkup
@@ -881,7 +950,7 @@ void AGeo_SI::UpdateGeometry(bool CheckOverlaps)
       const QString & name = GeoObjects.at(i)->Name;
       if (Detector->Sandwich->World->isNameExists(name))
       {
-          abort(QString("Name already exists in the detector geometry: %1").arg(name));
+          abort(QString("Name already exists: %1").arg(name));
           clearGeoObjects();
           return;
       }
@@ -905,23 +974,26 @@ void AGeo_SI::UpdateGeometry(bool CheckOverlaps)
       }
 
       const QString & cont = GeoObjects.at(i)->tmpContName;
-      bool fFound = Detector->Sandwich->World->isNameExists(cont);
-      if (!fFound)
+      if (cont != ProrotypeContainerName)
       {
-          //maybe it will be inside one of the GeoObjects defined ABOVE this one?
-          for (int j = 0; j < i; j++)
-          {
-              if (cont == GeoObjects.at(j)->Name)
-              {
-                  fFound = true;
-                  break;
-              }
-          }
+          bool fFound = Detector->Sandwich->World->isNameExists(cont);
           if (!fFound)
           {
-              abort(QString("Container does not exist: %1").arg(cont));
-              clearGeoObjects();
-              return;
+              //maybe it will be inside one of the GeoObjects defined ABOVE this one?
+              for (int j = 0; j < i; j++)
+              {
+                  if (cont == GeoObjects.at(j)->Name)
+                  {
+                      fFound = true;
+                      break;
+                  }
+              }
+              if (!fFound)
+              {
+                  abort(QString("Container does not exist: %1").arg(cont));
+                  clearGeoObjects();
+                  return;
+              }
           }
       }
   }
@@ -932,16 +1004,23 @@ void AGeo_SI::UpdateGeometry(bool CheckOverlaps)
      AGeoObject * obj = GeoObjects[i];
      const QString & name     = obj->Name;
      const QString & contName = obj->tmpContName;
-     AGeoObject* contObj = Detector->Sandwich->World->findObjectByName(contName);
-     if (!contObj)
+
+     if (contName == ProrotypeContainerName)
+         Detector->Sandwich->Prototypes->addObjectLast(obj);
+     else
      {
-         abort(QString("Failed to add object %1 to container %2").arg(name).arg(contName));
-         clearGeoObjects();
-         return;
+         AGeoObject * contObj = Detector->Sandwich->World->findObjectByName(contName);
+         if (!contObj)
+         {
+             abort(QString("Failed to add object %1 to container %2").arg(name).arg(contName));
+             clearGeoObjects();
+             return;
+         }
+         contObj->addObjectLast(obj);
      }
-     contObj->addObjectLast(obj);
      GeoObjects[i] = nullptr;
   }
+  clearGeoObjects();
 
   if (!ZeroSlabName.isEmpty())
   {

@@ -78,6 +78,7 @@ protected:
 public slots:
     void DrawTracks();
     void ShowPoint(double * r, bool keepTracks = false);
+    void CenterView(double * r);
     void ShowPMnumbers();
     void ShowMonitorIndexes();
     void ShowText(const QVector<QString> & strData, Color_t color, bool onPMs = true, bool bFullCycle = true); //onPMs=false -> srawing on monitors

@@ -865,6 +865,30 @@ void GeometryWindowClass::ShowPoint(double * r, bool keepTracks)
     if (keepTracks) DrawTracks();
 }
 
+void GeometryWindowClass::CenterView(double *r)
+{
+    if (!RasterWindow->fCanvas->HasViewer3D()) return;
+
+    AGeoViewParameters & p = RasterWindow->ViewParameters;
+    p.read(RasterWindow->fCanvas);
+
+    const double size = 100.0;
+
+    for (int i=0; i<3; i++)
+    {
+        p.RangeLL[i] = r[i] - size;
+        p.RangeUR[i] = r[i] + size;
+    }
+    p.WinX = 0;
+    p.WinY = 0;
+
+    RasterWindow->setVisible(false);
+        p.apply(RasterWindow->fCanvas);
+    RasterWindow->setVisible(true);
+    TView3D * v = static_cast<TView3D*>(RasterWindow->fCanvas->GetView());
+    v->Zoom();
+}
+
 void GeometryWindowClass::on_pbClearTracks_clicked()
 {
     Detector.GeoManager->ClearTracks();

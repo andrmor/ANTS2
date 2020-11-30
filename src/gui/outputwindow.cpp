@@ -1,4 +1,3 @@
-//ANTS2
 #include "outputwindow.h"
 #include "ui_outputwindow.h"
 #include "mainwindow.h"
@@ -22,14 +21,12 @@
 #include "detectoraddonswindow.h"
 #include "ajsontools.h"
 
-//ROOT
 #include "TGraph2D.h"
 #include "TH2C.h"
 #include "TH1D.h"
 #include "TMath.h"
 #include "TH1.h"
 
-//Qt
 #include <QDebug>
 #include <QGraphicsItem>
 #include <QString>
@@ -2216,8 +2213,8 @@ void OutputWindow::on_trwEventView_customContextMenuRequested(const QPoint &pos)
     if (!pr) return;
 
     QMenu Menu;
-    QAction * showPosition;
-    if (st) showPosition = Menu.addAction("Show position");
+    QAction * showPosition = nullptr;  if (st) showPosition = Menu.addAction("Show position");
+    QAction * centerA       = nullptr; if (st) centerA = Menu.addAction("Center view at this position");
     Menu.addSeparator();
     QAction * showELDD = Menu.addAction("Show energy linear deposition density");
     QAction* selectedItem = Menu.exec(ui->trwEventView->mapToGlobal(pos));
@@ -2240,6 +2237,12 @@ void OutputWindow::on_trwEventView_customContextMenuRequested(const QPoint &pos)
         double pos[3];
         for (int i=0; i<3; i++) pos[i] = st->Position[i];
         MW->GeometryWindow->ShowPoint(pos, true);
+    }
+    else if (selectedItem == centerA)
+    {
+        double pos[3];
+        for (int i=0; i<3; i++) pos[i] = st->Position[i];
+        MW->GeometryWindow->CenterView(pos);
     }
 }
 

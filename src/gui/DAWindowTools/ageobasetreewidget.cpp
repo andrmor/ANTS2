@@ -126,12 +126,6 @@ void AGeoBaseTreeWidget::dropEvent(QDropEvent * event)
                 return;
             }
 
-//            if (ContainerTo->ObjectType->isArray() && obj->ObjectType->isArray())
-//            {
-//                event->ignore();
-//                QMessageBox::information(this, "", "Cannot move array directly inside another array!");
-//                return;
-//            }
             if (obj->isInUseByComposite())
             {
                 event->ignore();
@@ -144,7 +138,9 @@ void AGeoBaseTreeWidget::dropEvent(QDropEvent * event)
                 QMessageBox::information(this, "", "Can insert only elementary objects to the list of composite members!");
                 return;
             }
-            if (ContainerTo->ObjectType->isHandlingSet() && !obj->ObjectType->isSingle())
+            if (!ContainerTo->ObjectType->isPrototype() &&
+                ContainerTo->ObjectType->isHandlingSet() &&
+                !obj->ObjectType->isSingle())
             {
                 event->ignore();
                 QMessageBox::information(this, "", "Can insert only elementary objects to sets!");

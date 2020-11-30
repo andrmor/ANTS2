@@ -56,6 +56,7 @@ add:Gamma cameras:PMT-based:Med37.json:Medical gamma camera GE MaxiCamera 400T; 
 add:Neutrons:Gas:AngerGSPC19.json:GSPC19 detector
 add:Neutrons:Converter:B10RPC-1hd.json:Boron-10 hybrid double-gap RPC
 add:Neutrons:Converter:B10RPC-10hd.json:Boron-10 hybrid double-gap RPC with 20 converter layers (10 double gaps)
+add:Neutrons:Converter:FastNeutronDetector.json:10B-RPC based detector for fast neutrons. Requires configured interface to Geant4!
 add:Neutrons:Anger:dSiPMcam.json:Prototype of a neutron Anger camera with GS20 scintillator and digital SiPMs
 
 add:Dark matter:LUX:LUX.json:A model of LUX - a dual-phase detector for dark matter search 

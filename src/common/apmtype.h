@@ -14,7 +14,7 @@ public:
 
   QString Name;
   int     MaterialIndex = 0;
-  int     Shape = 1;  //0-square, 1-round, 2-hexa, 3-spherical
+  int     Shape = 1;  //0-rectangular, 1-round, 2-hexa, 3-spherical
   double  SizeX = 25.0;
   double  SizeY = 25.0;
   double  SizeZ = 0.01;

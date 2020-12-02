@@ -482,7 +482,7 @@ void OutputWindow::RefreshData()
   updateSignalLabels(MaxSignal);
   addPMitems( (fHaveData ? &EventsDataHub->Events.at(CurrentEvent) : 0), MaxSignal, Passives); //add icons with PMs to the scene
   if (ui->cbShowPMsignals->isChecked())
-    addTextitems( (fHaveData ? &EventsDataHub->Events.at(CurrentEvent) : 0), MaxSignal, Passives); //add icons with signal text to the scene
+    addTextItems( (fHaveData ? &EventsDataHub->Events.at(CurrentEvent) : 0), MaxSignal, Passives); //add icons with signal text to the scene
   updateSignalScale();
 
   //Monitors
@@ -545,7 +545,8 @@ void OutputWindow::addPMitems(const QVector<float> *vector, float MaxSignal, Dyn
     {
       //pen
       QPen pen(Qt::black);
-      int size = 6.0 * std::min(MW->PMs->SizeX(ipm), MW->PMs->SizeY(ipm)) / 30.0;
+      //int size = 6.0 * std::min(MW->PMs->SizeX(ipm), MW->PMs->SizeY(ipm)) / 30.0;
+      int size = 6.0 * MW->PMs->getXYMinimumSize(ipm) / 30.0;
       pen.setWidth(size);
 
       //brush
@@ -613,13 +614,15 @@ void OutputWindow::addPMitems(const QVector<float> *vector, float MaxSignal, Dyn
     }
 }
 
-void OutputWindow::addTextitems(const QVector<float> *vector, float MaxSignal, DynamicPassivesHandler *Passives)
+void OutputWindow::addTextItems(const QVector<float> *vector, float MaxSignal, DynamicPassivesHandler *Passives)
 {
     const int prec = ui->sbDecimalPrecision->value();
-  for (int ipm=0; ipm<MW->PMs->count(); ipm++)
+    for (int ipm=0; ipm<MW->PMs->count(); ipm++)
     {
       const APm &PM = MW->PMs->at(ipm);
-      double size = 0.5*MW->PMs->getType( PM.type )->SizeX;
+
+      //double size = 0.5*MW->PMs->getType( PM.type )->SizeX;
+      double size = 0.5 * MW->PMs->getXYMinimumSize(ipm);
       //io->setTextWidth(40);
 
       float sig = ( vector ? vector->at(ipm) : 0 );
@@ -1393,7 +1396,7 @@ void OutputWindow::on_pbShowAverageOverAll_clicked()
     updateSignalLabels(MaxSignal);
     addPMitems(&sums, MaxSignal, 0); //add icons with PMs to the scene
     if (ui->cbShowPMsignals->isChecked())
-      addTextitems(&sums, MaxSignal, 0); //add icons with signal text to the scene
+      addTextItems(&sums, MaxSignal, 0); //add icons with signal text to the scene
     updateSignalScale();
 }
 

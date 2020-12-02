@@ -946,6 +946,16 @@ bool APmHub::saveUpperLower(const QString &filename)
     return true;
 }
 
+double APmHub::getXYMinimumSize(int ipm) const
+{
+    const APmType * pType = PMtypes.at(PMs.at(ipm).type);
+
+    const double sizeX = pType->SizeX;
+    const double sizeY = ( pType->Shape == 0 ? pType->SizeY : pType->SizeX );
+
+    return std::min(sizeX, sizeY);
+}
+
 bool APmHub::isPDEwaveOverriden(int ipm) const
 {
     return (!PMs.at(ipm).PDE.isEmpty());

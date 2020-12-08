@@ -104,6 +104,7 @@ public slots:
 
   void NewGraph(const QString& GraphName);
   void NewGraphErrors(const QString& GraphName);
+  void NewGraph2D(const QString& GraphName);
 
   void SetMarkerProperties(QString GraphName, int MarkerColor, int MarkerStyle, double MarkerSize);
   void SetLineProperties(QString GraphName, int LineColor, int LineStyle, int LineWidth);
@@ -116,6 +117,8 @@ public slots:
   void AddPoints(QString GraphName, QVariantList xArray, QVariantList yArray, QVariantList yErrArray);
   void AddPoints(QString GraphName, QVariantList xArray, QVariantList yArray, QVariantList xErrArray, QVariantList yErrArray);
   void AddPoints(QString GraphName, QVariantList xyArray);
+
+  void AddPoint2D(QString GraphName, double x, double y, double z);
 
   void SetYRange(const QString& GraphName, double min, double max);
   void SetMinimum(const QString& GraphName, double min);

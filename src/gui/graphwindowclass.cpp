@@ -969,11 +969,13 @@ void GraphWindowClass::Reshape()
             //gr->GetYaxis()->SetLimits(ymin, ymax);
         gr->GetYaxis()->SetRangeUser(ymin, ymax);
 
-        //gr->GetZaxis()->SetLimits(zmin, zmax);
-        //gr->GetZaxis()->SetRangeUser(zmin, zmax);
-        //gr->GetHistogram()->SetRange(xmin, ymin, xmax, ymax);
-        gr->SetMinimum(zmin);
-        gr->SetMaximum(zmax);
+            //gr->GetZaxis()->SetLimits(zmin, zmax);
+            //gr->GetZaxis()->SetRangeUser(zmin, zmax);
+            //gr->GetHistogram()->SetRange(xmin, ymin, xmax, ymax);
+
+        // setting min or max; then to basket -> load from basket -> empty screen
+        //gr->SetMinimum(zmin);
+        //gr->SetMaximum(zmax);
 
         /*
         TCanvas* c = RasterWindow->fCanvas;

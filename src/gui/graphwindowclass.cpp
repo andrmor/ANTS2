@@ -873,6 +873,7 @@ TObject* GraphWindowClass::GetMainPlottedObject()
   return DrawObjects.first().Pointer;
 }
 
+#include "TView3D.h"
 void GraphWindowClass::Reshape()
 {    
     //qDebug() << "Reshape triggered";
@@ -903,8 +904,6 @@ void GraphWindowClass::Reshape()
 
     if (PlotType.startsWith("TH1"))
       {
-        //its 1D hist!
-        //TH1* h = (TH1*) DrawObjects.first().Pointer;
         TH1* h = (TH1*)tobj;
         h->GetXaxis()->SetRangeUser(xmin, xmax);
         h->SetMinimum(ymin);
@@ -912,8 +911,6 @@ void GraphWindowClass::Reshape()
       }
     else if (PlotType == "TProfile")
       {
-        //its 1d profile
-        //TProfile* h = (TProfile*) DrawObjects.first().Pointer;
         TProfile* h = (TProfile*)tobj;
         h->GetXaxis()->SetRangeUser(xmin, xmax);
         h->SetMinimum(ymin);
@@ -921,8 +918,6 @@ void GraphWindowClass::Reshape()
       }
     else if (PlotType.startsWith("TH2"))
       {
-        //its 2D hist!
-        //TH2* h = (TH2*) DrawObjects.first().Pointer;
         TH2* h = (TH2*)tobj;
         h->GetXaxis()->SetRangeUser(xmin, xmax);
         h->GetYaxis()->SetRangeUser(ymin, ymax);
@@ -932,8 +927,6 @@ void GraphWindowClass::Reshape()
       }
     else if (PlotType == "TProfile2D")
       {
-        //its 2D profile!
-        //TProfile2D* h = (TProfile2D*) DrawObjects.first().Pointer;
         TProfile2D* h = (TProfile2D*)tobj;
         h->GetXaxis()->SetRangeUser(xmin, xmax);
         h->GetYaxis()->SetRangeUser(ymin, ymax);
@@ -942,8 +935,6 @@ void GraphWindowClass::Reshape()
       }
     else if (PlotType.startsWith("TF1"))
       {
-        //its 1D function!
-        //TF1* f = (TF1*) DrawObjects.first().Pointer;
         TF1* f = (TF1*)tobj;
         f->SetRange(xmin, xmax);
         f->SetMinimum(ymin);
@@ -951,17 +942,13 @@ void GraphWindowClass::Reshape()
       }
     else if (PlotType.startsWith("TF2"))
       {
-        //its 2D function!
-        //TF2* f = (TF2*) DrawObjects.first().Pointer;
         TF2* f = (TF2*)tobj;
         f->SetRange(xmin, ymin, xmax, ymax);
-        //f->SetRange(xmin, ymin, zmin, xmax, ymax, zmax);
         f->SetMaximum(zmax/1.05);
         f->SetMinimum(zmin);
       }
     else if (PlotType == "TGraph" || PlotType == "TGraphErrors")
       {
-        //its 1D graph!
         TGraph* gr = (TGraph*)tobj;
         gr->GetXaxis()->SetLimits(xmin, xmax);
         gr->SetMinimum(ymin);
@@ -969,31 +956,41 @@ void GraphWindowClass::Reshape()
       }
     else if (PlotType == "TMultiGraph")
       {
-        //its a collection of (here) 1D graphs
         TMultiGraph* gr = (TMultiGraph*)tobj;
-
         gr->GetXaxis()->SetLimits(xmin, xmax);
         gr->SetMinimum(ymin);
         gr->SetMaximum(ymax);
       }
     else if (PlotType == "TGraph2D")
-      {
-        //its 2D graph!        
-        TGraph2D* gr = (TGraph2D*)tobj;
-        //gr->GetXaxis()->SetLimits(xmin, xmax);
-        gr->GetHistogram()->GetXaxis()->SetRangeUser(xmin, xmax);
-        //gr->GetYaxis()->SetLimits(ymin, ymax);
-        gr->GetHistogram()->GetYaxis()->SetRangeUser(ymin, ymax);
-        //gr->GetZaxis()->SetLimits(zmin, zmax);//SetRangeUser(zmin, zmax);
-        //gr->GetHistogram()->SetRange(xmin, ymin, xmax, ymax);
+    {
+        TGraph2D * gr = static_cast<TGraph2D*>(tobj);
+            //gr->GetXaxis()->SetLimits(xmin, xmax);
+        gr->GetXaxis()->SetRangeUser(xmin, xmax);
+            //gr->GetYaxis()->SetLimits(ymin, ymax);
+        gr->GetYaxis()->SetRangeUser(ymin, ymax);
 
+        //gr->GetZaxis()->SetLimits(zmin, zmax);
+        //gr->GetZaxis()->SetRangeUser(zmin, zmax);
+        //gr->GetHistogram()->SetRange(xmin, ymin, xmax, ymax);
         gr->SetMinimum(zmin);
         gr->SetMaximum(zmax);
-      }
 
-  qApp->processEvents();
-  GraphWindowClass::RedrawAll(); 
-  //qDebug() << "reshape done";
+        /*
+        TCanvas* c = RasterWindow->fCanvas;
+        double min[3], max[3];
+        min[0] = xmin; max[0] = xmax;
+        min[1] = ymin; max[1] = ymax;
+        min[2] = zmin; max[2] = zmax;
+
+        TView3D * v = dynamic_cast<TView3D*>(c->GetView());
+        qDebug() << "aaaaaaaaaa" << v;
+        if (v) v->SetRange(min, max);
+        */
+    }
+
+    qApp->processEvents();
+    RedrawAll();
+    //qDebug() << "reshape done";
 }
 
 void GraphWindowClass::RedrawAll()
@@ -1313,7 +1310,6 @@ void GraphWindowClass::UpdateControls()
           ymin = TMath::Power(10.0, ymin);
           ymax = TMath::Power(10.0, ymax);
         }
-
   }
   else if (PlotType.startsWith("TF2"))
   {
@@ -1351,34 +1347,19 @@ void GraphWindowClass::UpdateControls()
   }
   else if (PlotType == "TGraph2D")
   {
-      //xmin = ((TGraph2D*) obj)->GetHistogram()->GetXaxis()->GetXmin();
-      //xmax = ((TGraph2D*) obj)->GetHistogram()->GetXaxis()->GetXmax();
-       //xmin = ((TGraph2D*) obj)->GetXmin();
-       //xmax = ((TGraph2D*) obj)->GetXmax();
-       //ymin = ((TGraph2D*) obj)->GetYmin();
-       //ymax = ((TGraph2D*) obj)->GetYmax();
-       //zmin = ((TGraph2D*) obj)->GetZmin();
-       //zmax = ((TGraph2D*) obj)->GetZmax();
-
        float min[3], max[3];
        TView* v = c->GetView();
        if (v)// && !MW->ShutDown)
-         {
+       {
            v->GetRange(min, max);
            xmin = min[0]; xmax = max[0];
            ymin = min[1]; ymax = max[1];
            zmin = min[2]; zmax = max[2];
            //qDebug() << "minmax XYZ"<<xmin<<xmax<<ymin<<ymax<<zmin<<zmax;
-         }
-
+       }
        ui->ledZfrom->setText( QString::number(zmin, 'g', 4) );
        ui->ledZto->setText( QString::number(zmax, 'g', 4) );
-
-//      qDebug()<<"from object:"<<xmin<<xmax<<ymin<<ymax<<zmin<<zmax;
-      //ui->leOptions->setEnabled(false);
   }
-
-  //else ui->leOptions->setEnabled(true);
 
   ui->ledXfrom->setText( QString::number(xmin, 'g', 4) );
   xmin = ui->ledXfrom->text().toDouble();  //to have consistent rounding

@@ -45,6 +45,7 @@ TGraph * HistToGraph(TH1 * h)
     return new TGraph(x.size(), x.data(), f.data());
 }
 
+#include "TGraph2D.h"
 void ABasketManager::add(const QString & name, const QVector<ADrawObject> & drawObjects)
 {
     ABasketItem item;
@@ -114,6 +115,10 @@ void ABasketManager::add(const QString & name, const QVector<ADrawObject> & draw
             else if (type == "TH2C") clone = new TH2C(*static_cast<TH2C*>(tobj));
             else clone = tobj->Clone(); //paranoic
         }
+        else if (type == "TGraph2D")
+        {
+            clone = new TGraph2D(*static_cast<TGraph2D*>(tobj));  // clone unzooms to full range
+        }
         else
         {
             clone = tobj->Clone();
@@ -177,7 +182,7 @@ const QVector<ADrawObject> ABasketManager::getCopy(int index) const
     {
         for (const ADrawObject & obj : Basket.at(index).DrawObjects)
         {
-            TObject * clone;
+            TObject * clone = nullptr;
             TLegend * OldLegend = dynamic_cast<TLegend*>(obj.Pointer);
             if (OldLegend)
             {
@@ -186,7 +191,9 @@ const QVector<ADrawObject> ABasketManager::getCopy(int index) const
             }
             else
             {
-                clone = obj.Pointer->Clone();
+                TGraph2D * g2 = dynamic_cast<TGraph2D*>(obj.Pointer);
+                if (g2) clone = new TGraph2D(*g2); //clone unzooms to full range
+                else    clone = obj.Pointer->Clone();
                 OldToNew[obj.Pointer] = clone;
                 //qDebug() << "From basket, old-->cloned" << obj.Pointer << "-->" << clone;
             }

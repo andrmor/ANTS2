@@ -1384,7 +1384,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
             <rect>
              <x>228</x>
              <y>34</y>
-             <width>31</width>
+             <width>40</width>
              <height>20</height>
             </rect>
            </property>
@@ -1494,7 +1494,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QLabel" name="label_135">
            <property name="geometry">
             <rect>
-             <x>263</x>
+             <x>267</x>
              <y>35</y>
              <width>24</width>
              <height>16</height>
@@ -14280,8 +14280,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>335</x>
-     <y>382</y>
+     <x>341</x>
+     <y>413</y>
     </hint>
     <hint type="destinationlabel">
      <x>471</x>
@@ -14312,8 +14312,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>477</x>
-     <y>443</y>
+     <x>483</x>
+     <y>474</y>
     </hint>
     <hint type="destinationlabel">
      <x>451</x>
@@ -14328,8 +14328,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>477</x>
-     <y>472</y>
+     <x>483</x>
+     <y>503</y>
     </hint>
     <hint type="destinationlabel">
      <x>504</x>
@@ -14344,8 +14344,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>477</x>
-     <y>472</y>
+     <x>483</x>
+     <y>503</y>
     </hint>
     <hint type="destinationlabel">
      <x>506</x>
@@ -14376,8 +14376,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>205</x>
-     <y>382</y>
+     <x>211</x>
+     <y>413</y>
     </hint>
     <hint type="destinationlabel">
      <x>468</x>
@@ -15308,8 +15308,8 @@ multiply to loaded data</string>
      <y>498</y>
     </hint>
     <hint type="destinationlabel">
-     <x>350</x>
-     <y>475</y>
+     <x>356</x>
+     <y>506</y>
     </hint>
    </hints>
   </connection>
@@ -15384,8 +15384,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>230</x>
-     <y>382</y>
+     <x>236</x>
+     <y>413</y>
     </hint>
     <hint type="destinationlabel">
      <x>428</x>
@@ -15544,8 +15544,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>186</x>
-     <y>382</y>
+     <x>192</x>
+     <y>413</y>
     </hint>
     <hint type="destinationlabel">
      <x>403</x>
@@ -15966,6 +15966,22 @@ multiply to loaded data</string>
     <hint type="destinationlabel">
      <x>336</x>
      <y>347</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledSiPMrecoveryTime</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdatePMproperties</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>491</x>
+     <y>489</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>332</x>
+     <y>357</y>
     </hint>
    </hints>
   </connection>

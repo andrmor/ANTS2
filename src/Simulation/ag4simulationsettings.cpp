@@ -130,6 +130,7 @@ const QString AG4SimulationSettings::getGdmlFileName() const
 bool AG4SimulationSettings::checkPathValid() const
 {
     const QString & path = AGlobalSettings::getInstance().G4ExchangeFolder;
+    if (path.isEmpty()) return false;
     return QDir(path).exists();
 }
 

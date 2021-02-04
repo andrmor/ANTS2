@@ -4,6 +4,7 @@
 #include "amessage.h"
 #include "abasketlistwidget.h"
 #include "abasketmanager.h"
+#include "amultigraphconfigurator.h"
 
 #include <QHBoxLayout>
 #include <QListWidget>
@@ -25,6 +26,8 @@ AMultiGraphDesigner::AMultiGraphDesigner(ABasketManager & Basket, QWidget *paren
     //connect(lwBasket, &ABasketListWidget::itemDoubleClicked, this, &AMultiGraphDesigner::onBasketItemDoubleClicked);
     //connect(lwBasket, &ABasketListWidget::requestReorder, this, &AMultiGraphDesigner::BasketReorderRequested);
 
+    Configurator = new AMultiGraphConfigurator();
+    ui->lConfigurator->insertWidget(1, Configurator);
 
     updateBasketGUI();
 }
@@ -45,4 +48,24 @@ void AMultiGraphDesigner::updateBasketGUI()
         item->setForeground(QBrush(Qt::black));
         item->setBackground(QBrush(Qt::white));
     }
+}
+
+void AMultiGraphDesigner::on_action1_x_2_triggered()
+{
+
+}
+
+void AMultiGraphDesigner::on_action2_x_1_triggered()
+{
+
+}
+
+void AMultiGraphDesigner::on_actionAs_pdf_triggered()
+{
+
+}
+
+void AMultiGraphDesigner::on_actionSave_triggered()
+{
+
 }

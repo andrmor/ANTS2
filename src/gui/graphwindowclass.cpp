@@ -2156,6 +2156,7 @@ QVector<double> GraphWindowClass::Get2DArray()
     return arr;
 }
 
+#include "amultigraphdesigner.h"
 void GraphWindowClass::UpdateBasketGUI()
 {
     lwBasket->clear();
@@ -2180,6 +2181,8 @@ void GraphWindowClass::UpdateBasketGUI()
     ui->pbUpdateInBasket->setEnabled(ActiveBasketItem >= 0);
 
     if (ActiveBasketItem < 0) HighlightUpdateBasketButton(false);
+
+    if (MGDesigner) MGDesigner->updateBasketGUI();
 }
 
 void GraphWindowClass::onBasketItemDoubleClicked(QListWidgetItem *)

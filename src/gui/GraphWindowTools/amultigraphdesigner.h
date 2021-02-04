@@ -3,6 +3,10 @@
 
 #include <QMainWindow>
 
+class ABasketManager;
+class RasterWindowBaseClass;
+class ABasketListWidget;
+
 namespace Ui {
 class AMultiGraphDesigner;
 }
@@ -12,11 +16,17 @@ class AMultiGraphDesigner : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit AMultiGraphDesigner(QWidget *parent = 0);
+    explicit AMultiGraphDesigner(ABasketManager & Basket, QWidget * parent = nullptr);
     ~AMultiGraphDesigner();
 
 private:
-    Ui::AMultiGraphDesigner *ui;
+    ABasketManager & Basket;
+
+    Ui::AMultiGraphDesigner * ui;
+    RasterWindowBaseClass   * RasterWindow = nullptr;
+    ABasketListWidget       * lwBasket = nullptr;
+
+    void updateBasketGUI();
 };
 
 #endif // AMULTIGRAPHDESIGNER_H

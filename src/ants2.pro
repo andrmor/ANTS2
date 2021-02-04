@@ -416,7 +416,8 @@ SOURCES += main.cpp \
     modules/ageoconsts.cpp \
     common/ageoshape.cpp \
     scriptmode/afarm_si.cpp \
-    common/ageotype.cpp
+    common/ageotype.cpp \
+    gui/GraphWindowTools/amultigraphdesigner.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -579,7 +580,8 @@ HEADERS  += common/CorrelationFilters.h \
     modules/ageoconsts.h \
     common/ageoshape.h \
     scriptmode/afarm_si.h \
-    common/ageotype.h
+    common/ageotype.h \
+    gui/GraphWindowTools/amultigraphdesigner.h
 
 # --- SIM ---
 ants2_SIM {
@@ -1028,5 +1030,6 @@ FORMS += \
     gui/amateriallibrarybrowser.ui \
     gui/DAWindowTools/amaterialloaderdialog.ui \
     gui/MainWindowTools/asaveparticlestofiledialog.ui \
-    gui/RasterWindow/acameracontroldialog.ui
+    gui/RasterWindow/acameracontroldialog.ui \
+    gui/GraphWindowTools/amultigraphdesigner.ui
 

@@ -2918,3 +2918,10 @@ void GraphWindowClass::on_pbManipulate_clicked()
 {
     Explorer->manipulateTriggered();
 }
+
+#include "amultigraphdesigner.h"
+void GraphWindowClass::on_actionOpen_MultiGraphDesigner_triggered()
+{
+    if (!MGDesigner) MGDesigner = new AMultiGraphDesigner(this);
+    MGDesigner->showNormal();
+}

@@ -1,13 +1,16 @@
 #ifndef AMULTIGRAPHDESIGNER_H
 #define AMULTIGRAPHDESIGNER_H
 
+#include "apadgeometry.h"
 #include <QMainWindow>
+#include <TPad.h>
 
 class ABasketManager;
 class RasterWindowBaseClass;
 class ABasketListWidget;
 class AMultiGraphConfigurator;
 class ADrawObject;
+class QJsonObject;
 
 namespace Ui {
 class AMultiGraphDesigner;
@@ -47,10 +50,14 @@ private:
 
     void drawGraph(const QVector<ADrawObject> DrawObjects);
     void drawBasicLayout(int x, int y);
-    void writeToJson(QJsonObject & json);
-    void readFromJson(const QJsonObject & json);
+    //void writePadToJason(TPad* pad, QJsonObject jj);
+    //void readPadFromJason(TPad* pad, QJsonObject json);
+    APadGeometry* getPadGeometry(const TPad *pad);
+    void applyPadGeometry(const APadGeometry* padGeo, TPad *pad);
+    void writeAllPadGeometryToJson(QJsonObject &json);
+    //void readAllPadsFromJson(const QJsonArray &jarr);
 
-    int numPad;
+    QVector<TPad*> pads;
 
 };
 

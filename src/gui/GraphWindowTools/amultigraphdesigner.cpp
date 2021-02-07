@@ -5,6 +5,7 @@
 #include "abasketlistwidget.h"
 #include "abasketmanager.h"
 #include "amultigraphconfigurator.h"
+#include "ajsontools.h"
 
 #include <QHBoxLayout>
 #include <QListWidget>
@@ -78,7 +79,9 @@ void AMultiGraphDesigner::on_actionAs_pdf_triggered()
 
 void AMultiGraphDesigner::on_actionSave_triggered()
 {
-
+    QJsonObject js;
+    writeAllPadGeometryToJson(js);
+    SaveJsonToFile(js, "/home/kiram/Documents/jsonTesting/json1.json");
 }
 
 void AMultiGraphDesigner::on_drawgraphtriggered()
@@ -107,14 +110,14 @@ void AMultiGraphDesigner::drawBasicLayout(int x, int y)
 
     qDebug() <<"w" <<padWidth<< "h" << padHeight;
 
-    QVector<TPad*> pads;
+
     for (int iy = 0; iy < y; iy++)
     {
-        double y1 = iy * padHeight;
-        double y2 = y1 + padHeight;
+        double y2 = 1-(iy * padHeight); //y normally is counted from bottom to top so for easier basket use I inverted order it goes (0.95->0.05)
+        double y1 = y2 - padHeight;
 
-        if (iy == 0)     y1 = margin;
-        if (iy == y - 1) y2 = 1-margin;
+        if (iy == 0)     y2 = 1-margin;
+        if (iy == y - 1) y1 = margin;
 
         for (int ix = 0; ix < x; ix++)
         {
@@ -150,10 +153,72 @@ void AMultiGraphDesigner::drawBasicLayout(int x, int y)
     c1->Update();
 }
 
-void AMultiGraphDesigner::writeToJson(QJsonObject &json)
+APadGeometry *AMultiGraphDesigner::getPadGeometry(const TPad *pad)
 {
+    APadGeometry *padGeo = new APadGeometry();
 
+    padGeo->xLow = pad->GetAbsXlowNDC();
+    padGeo->yLow = pad->GetAbsYlowNDC();
+
+    double w = pad->GetAbsWNDC();
+    double h = pad->GetAbsHNDC();
+    padGeo->xHigh = padGeo->xLow + w;
+    padGeo->yHigh = padGeo->yLow + h;
+
+    return padGeo;
 }
+
+void AMultiGraphDesigner::applyPadGeometry(const APadGeometry *padGeo, TPad *pad)
+{
+    pad->SetBBoxX1(padGeo->xLow);
+    pad->SetBBoxX2(padGeo->xHigh);
+    pad->SetBBoxY1(padGeo->yLow);
+    pad->SetBBoxY2(padGeo->yHigh);
+}
+
+//void AMultiGraphDesigner::writePadToJason(TPad *pad, QJsonObject json)
+//{
+//    double h      = pad->GetAbsHNDC();
+//    double w      = pad->GetAbsWNDC();
+//    double xLow   = pad->GetAbsXlowNDC();
+//    double yLow   = pad->GetAbsYlowNDC();
+
+//    json["h"]     = h;
+//    json["w"]     = w;
+//    json["xLow"]  = xLow;
+//    json["yLow"]  = yLow;
+//}
+
+//void AMultiGraphDesigner::readPadFromJason(TPad *pad, QJsonObject json)
+//{
+//}
+
+void AMultiGraphDesigner::writeAllPadGeometryToJson(QJsonObject &json)
+{
+    QJsonArray ar;
+    for (const TPad* pad: pads)
+    {
+        QJsonObject js;
+        APadGeometry* padGeo = getPadGeometry(pad);
+        padGeo->writeToJson(js);
+        ar << js;
+    }
+    json["AllPadGeometry"] = ar;
+}
+
+//void AMultiGraphDesigner::readAllPadsFromJson(const QJsonArray &jarr)
+//{
+//    for (int iObj = 0; iObj < jarr.size(); iObj ++)
+//    {
+//        APadGeometry *padGeo = new APadGeometry;
+//        TPad         *pad    = new TPad;
+
+//        QJsonObject js = jarr[iObj].toObject();
+
+//        padGeo->readFromJson(js);
+//        applyPadGeometry(padGeo, pad);
+//    }
+//}
 
 void AMultiGraphDesigner::on_pushButton_clicked()
 {

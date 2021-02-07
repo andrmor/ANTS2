@@ -418,7 +418,8 @@ SOURCES += main.cpp \
     scriptmode/afarm_si.cpp \
     common/ageotype.cpp \
     gui/GraphWindowTools/amultigraphdesigner.cpp \
-    gui/GraphWindowTools/amultigraphconfigurator.cpp
+    gui/GraphWindowTools/amultigraphconfigurator.cpp \
+    gui/GraphWindowTools/apadgeometry.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -583,7 +584,8 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/afarm_si.h \
     common/ageotype.h \
     gui/GraphWindowTools/amultigraphdesigner.h \
-    gui/GraphWindowTools/amultigraphconfigurator.h
+    gui/GraphWindowTools/amultigraphconfigurator.h \
+    gui/GraphWindowTools/apadgeometry.h
 
 # --- SIM ---
 ants2_SIM {

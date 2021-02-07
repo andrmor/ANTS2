@@ -12,6 +12,7 @@
 #include <QDebug>
 #include <TObject.h>
 #include <TCanvas.h>
+#include <QJsonArray>
 
 AMultiGraphDesigner::AMultiGraphDesigner(ABasketManager & Basket, QWidget *parent) :
     QMainWindow(parent), Basket(Basket),
@@ -80,14 +81,34 @@ void AMultiGraphDesigner::on_actionAs_pdf_triggered()
 void AMultiGraphDesigner::on_actionSave_triggered()
 {
     QJsonObject js;
-    writeAllPadGeometryToJson(js);
+    writeAPadsToJson(js);
     SaveJsonToFile(js, "/home/kiram/Documents/jsonTesting/json1.json");
+}
+
+void AMultiGraphDesigner::on_actionLoad_triggered()
+{
+    qDebug() <<"aaaaaaa" <<Pads.length();
+    clearGraphs();
+    qDebug() <<"bbbbbbbbbbbbbbb" <<Pads.length();
+    QJsonObject js;
+    LoadJsonFromFile(js, "/home/kiram/Documents/jsonTesting/json1.json");
+    QString err = readAPadsFromJson(js);
+    qDebug() <<err;
+    qDebug() <<"cccccccccccccccccc" <<Pads.length();
+    updateCanvas();
 }
 
 void AMultiGraphDesigner::on_drawgraphtriggered()
 {
     const QVector<ADrawObject> DrawObjects = Basket.getCopy(0);
     drawGraph(DrawObjects);
+}
+
+void AMultiGraphDesigner::clearGraphs()
+{
+    TCanvas *c1 = RasterWindow->fCanvas;
+    c1->Clear();
+    Pads.clear();
 }
 
 void AMultiGraphDesigner::drawGraph(const QVector<ADrawObject> DrawObjects)
@@ -100,6 +121,21 @@ void AMultiGraphDesigner::drawGraph(const QVector<ADrawObject> DrawObjects)
         tObj->Draw(drObj.Options.toLatin1().data());
 
     }
+}
+
+void AMultiGraphDesigner::updateCanvas()
+{
+    TCanvas *c1 = RasterWindow->fCanvas;
+
+    for (const APadProperties& aPad: Pads)
+    {
+        c1->cd();
+        aPad.tPad->Draw();
+        const QVector<ADrawObject> DrawObjects = Basket.getCopy(aPad.basketIndex);
+        aPad.tPad->cd();
+        drawGraph(DrawObjects);
+    }
+    c1->Update();
 }
 
 void AMultiGraphDesigner::drawBasicLayout(int x, int y)
@@ -134,47 +170,40 @@ void AMultiGraphDesigner::drawBasicLayout(int x, int y)
             TString padnameT(padname.toLatin1().data());
 
             TPad* ipad = new TPad(padnameT, padnameT, x1, y1, x2, y2);
+            APadProperties apad(ipad);
 
-            pads << ipad;
-            ipad->Draw();
+            Pads << apad;
+            apad.tPad->Draw();
 
         }
 
     }
-
-    TCanvas *c1 = RasterWindow->fCanvas;
-    const QVector<ADrawObject> DrawObjects1 = Basket.getCopy(0);
-
-    for (int n =0; n< pads.length() ; n++)
-    {
-        pads.at(n)->cd();
-        drawGraph(DrawObjects1);
-    }
-    c1->Update();
+    Pads[1].basketIndex = 1;
+    updateCanvas();
 }
 
-APadGeometry *AMultiGraphDesigner::getPadGeometry(const TPad *pad)
-{
-    APadGeometry *padGeo = new APadGeometry();
+//APadGeometry *AMultiGraphDesigner::getPadGeometry(const TPad *pad)
+//{
+//    APadGeometry *padGeo = new APadGeometry();
 
-    padGeo->xLow = pad->GetAbsXlowNDC();
-    padGeo->yLow = pad->GetAbsYlowNDC();
+//    padGeo->xLow = pad->GetAbsXlowNDC();
+//    padGeo->yLow = pad->GetAbsYlowNDC();
 
-    double w = pad->GetAbsWNDC();
-    double h = pad->GetAbsHNDC();
-    padGeo->xHigh = padGeo->xLow + w;
-    padGeo->yHigh = padGeo->yLow + h;
+//    double w = pad->GetAbsWNDC();
+//    double h = pad->GetAbsHNDC();
+//    padGeo->xHigh = padGeo->xLow + w;
+//    padGeo->yHigh = padGeo->yLow + h;
 
-    return padGeo;
-}
+//    return padGeo;
+//}
 
-void AMultiGraphDesigner::applyPadGeometry(const APadGeometry *padGeo, TPad *pad)
-{
-    pad->SetBBoxX1(padGeo->xLow);
-    pad->SetBBoxX2(padGeo->xHigh);
-    pad->SetBBoxY1(padGeo->yLow);
-    pad->SetBBoxY2(padGeo->yHigh);
-}
+//void AMultiGraphDesigner::applyPadGeometry(const APadGeometry *padGeo, TPad *pad)
+//{
+//    pad->SetBBoxX1(padGeo->xLow);
+//    pad->SetBBoxX2(padGeo->xHigh);
+//    pad->SetBBoxY1(padGeo->yLow);
+//    pad->SetBBoxY2(padGeo->yHigh);
+//}
 
 //void AMultiGraphDesigner::writePadToJason(TPad *pad, QJsonObject json)
 //{
@@ -193,17 +222,38 @@ void AMultiGraphDesigner::applyPadGeometry(const APadGeometry *padGeo, TPad *pad
 //{
 //}
 
-void AMultiGraphDesigner::writeAllPadGeometryToJson(QJsonObject &json)
+void AMultiGraphDesigner::writeAPadsToJson(QJsonObject &json)
 {
     QJsonArray ar;
-    for (const TPad* pad: pads)
+    for (const APadProperties& aPad: Pads)
     {
         QJsonObject js;
-        APadGeometry* padGeo = getPadGeometry(pad);
-        padGeo->writeToJson(js);
+        //aPad.updatePadGeometry(); //    EXTREMELY TEMPORARY!!!
+        aPad.writeToJson(js);
         ar << js;
     }
-    json["AllPadGeometry"] = ar;
+    json["Pads"] = ar;
+}
+
+QString AMultiGraphDesigner::readAPadsFromJson(const QJsonObject &json)
+{
+    QJsonArray ar;
+    if (!parseJson(json, "Pads", ar))
+        return "error in converting object to array";
+
+    int size = ar.size();
+    if (size == 0)
+        return "error nothing to load";
+
+    for (int i = 0; i < size; i++)
+    {
+        const QJsonObject &js = ar.at(i).toObject();
+
+        APadProperties newPad;
+        newPad.readFromJson(js);
+        Pads << newPad;
+    }
+    return "";
 }
 
 //void AMultiGraphDesigner::readAllPadsFromJson(const QJsonArray &jarr)
@@ -237,6 +287,7 @@ void AMultiGraphDesigner::on_pushButton_clicked()
 //    lowerPad->cd();
 //    drawGraph(DrawObjects1);
 //    c1->Update();
+    clearGraphs();
     drawBasicLayout(2,2);
 
 

@@ -1,12 +1,13 @@
 #include "apadgeometry.h"
 #include "ajsontools.h"
+#include <QDebug>
 
 APadGeometry::APadGeometry()
 {
 
 }
 
-void APadGeometry::writeToJson(QJsonObject &json)
+void APadGeometry::writeToJson(QJsonObject &json) const
 {
     json["xLow"]  = xLow;
     json["yLow"]  = yLow;
@@ -14,11 +15,13 @@ void APadGeometry::writeToJson(QJsonObject &json)
     json["yHigh"] = yHigh;
 }
 
-void APadGeometry::readFromJson(QJsonObject &json)
+void APadGeometry::readFromJson(const QJsonObject &json)
 {
     parseJson(json, "xLow",  xLow);
     parseJson(json, "yLow",  yLow);
     parseJson(json, "xHigh", xHigh);
     parseJson(json, "yHigh", yHigh);
+
+    qDebug() <<"padGEometry" <<xLow <<yLow <<xHigh <<yHigh;
 
 }

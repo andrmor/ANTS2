@@ -419,7 +419,8 @@ SOURCES += main.cpp \
     common/ageotype.cpp \
     gui/GraphWindowTools/amultigraphdesigner.cpp \
     gui/GraphWindowTools/amultigraphconfigurator.cpp \
-    gui/GraphWindowTools/apadgeometry.cpp
+    gui/GraphWindowTools/apadgeometry.cpp \
+    gui/GraphWindowTools/apadproperties.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -585,7 +586,8 @@ HEADERS  += common/CorrelationFilters.h \
     common/ageotype.h \
     gui/GraphWindowTools/amultigraphdesigner.h \
     gui/GraphWindowTools/amultigraphconfigurator.h \
-    gui/GraphWindowTools/apadgeometry.h
+    gui/GraphWindowTools/apadgeometry.h \
+    gui/GraphWindowTools/apadproperties.h
 
 # --- SIM ---
 ants2_SIM {

@@ -13,8 +13,8 @@ public:
     double yLow;
     double xHigh;
     double yHigh;
-    void writeToJson(QJsonObject &json);
-    void readFromJson(QJsonObject &json);
+    void writeToJson(QJsonObject &json) const;
+    void readFromJson(const QJsonObject &json);
 };
 
 #endif // APADGEOMETRY_H

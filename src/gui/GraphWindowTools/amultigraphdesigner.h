@@ -2,6 +2,7 @@
 #define AMULTIGRAPHDESIGNER_H
 
 #include "apadgeometry.h"
+#include "apadproperties.h"
 #include <QMainWindow>
 #include <TPad.h>
 
@@ -34,6 +35,7 @@ private slots:
 
     void on_actionAs_pdf_triggered();
     void on_actionSave_triggered();
+    void on_actionLoad_triggered();
 
     void on_pushButton_clicked();
 
@@ -48,16 +50,19 @@ private:
     ABasketListWidget       * lwBasket     = nullptr;
     AMultiGraphConfigurator * Configurator = nullptr;
 
+    void clearGraphs();
+
     void drawGraph(const QVector<ADrawObject> DrawObjects);
+    void updateCanvas();
     void drawBasicLayout(int x, int y);
     //void writePadToJason(TPad* pad, QJsonObject jj);
     //void readPadFromJason(TPad* pad, QJsonObject json);
-    APadGeometry* getPadGeometry(const TPad *pad);
-    void applyPadGeometry(const APadGeometry* padGeo, TPad *pad);
-    void writeAllPadGeometryToJson(QJsonObject &json);
-    //void readAllPadsFromJson(const QJsonArray &jarr);
+    //APadGeometry* getPadGeometry(const TPad *pad);
+    //void applyPadGeometry(const APadGeometry* padGeo, TPad *pad);
+    void writeAPadsToJson(QJsonObject &json);
+    QString readAPadsFromJson(const QJsonObject &json);
 
-    QVector<TPad*> pads;
+    QVector<APadProperties> Pads;
 
 };
 

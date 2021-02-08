@@ -225,10 +225,10 @@ void AMultiGraphDesigner::drawBasicLayout(int x, int y)
 void AMultiGraphDesigner::writeAPadsToJson(QJsonObject &json)
 {
     QJsonArray ar;
-    for (const APadProperties& aPad: Pads)
+    for (APadProperties& aPad: Pads)
     {
         QJsonObject js;
-        //aPad.updatePadGeometry(); //    EXTREMELY TEMPORARY!!!
+        aPad.updatePadGeometry(); //    EXTREMELY TEMPORARY!!!
         aPad.writeToJson(js);
         ar << js;
     }

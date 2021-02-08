@@ -26,12 +26,17 @@ void APadProperties::updatePadGeometry() //actually should I keep "const TPad *p
 
 void APadProperties::applyPadGeometry()
 {
-    tPad->SetBBoxX1(tPad->XtoAbsPixel(padGeo.xLow));
-    tPad->SetBBoxX2(tPad->XtoAbsPixel(padGeo.xHigh));
-    tPad->SetBBoxY1(tPad->XtoAbsPixel(padGeo.yLow));
-    tPad->SetBBoxY2(tPad->XtoAbsPixel(padGeo.yHigh));
-
-    qDebug() <<"tpad geometry" <<tPad->GetAbsXlowNDC() <<tPad->GetAbsYlowNDC() <<tPad->GetAbsXlowNDC() + tPad->GetAbsWNDC() <<tPad->GetAbsYlowNDC() +tPad->GetAbsHNDC();
+//    double x1 = tPad->XtoAbsPixel(padGeo.xLow);
+//    double x2 = tPad->XtoAbsPixel(padGeo.xHigh);
+//    double y1 = tPad->YtoAbsPixel(padGeo.yLow);
+//    double y2 = tPad->YtoAbsPixel(padGeo.yHigh);
+//    tPad->SetBBoxX1(x1);
+//    tPad->SetBBoxX2(x2);
+//    tPad->SetBBoxY1(y1);
+//    tPad->SetBBoxY2(y2);
+    tPad->SetPad(padGeo.xLow, padGeo.yLow, padGeo.xHigh, padGeo.yHigh);
+    qDebug() <<"tpad geometry" <<tPad->GetAbsXlowNDC() <<tPad->GetAbsYlowNDC() <<tPad->GetAbsWNDC() <<tPad->GetAbsHNDC();
+//    qDebug() <<"tpad geometry" <<x1 <<y1 <<x2 <<y2;
 }
 
 void APadProperties::writeToJson(QJsonObject &json) const

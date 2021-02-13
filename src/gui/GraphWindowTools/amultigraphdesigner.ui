@@ -58,6 +58,9 @@
         <item>
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
+           <widget class="QListView" name="GraphLayoutlw"/>
+          </item>
+          <item>
            <widget class="QPushButton" name="pushButton">
             <property name="text">
              <string>PushButton</string>

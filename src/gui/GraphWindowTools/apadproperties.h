@@ -22,6 +22,7 @@ public:
     void applyPadGeometry();
     void writeToJson(QJsonObject &json) const;
     void readFromJson(const QJsonObject &json);
+    QString toString();
 };
 
 #endif // APADPROPERTIES_H

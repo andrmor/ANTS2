@@ -51,10 +51,12 @@ private:
     AMultiGraphConfigurator * Configurator = nullptr;
 
     void clearGraphs();
+    QVector<QVector<double>> bSizes;
 
     void drawGraph(const QVector<ADrawObject> DrawObjects);
     void updateCanvas();
-    void drawBasicLayout(int x, int y);
+    void fillOutBasicLayout(int M, int m, bool horizontal = true);
+    //void FillOutBasicLayout(int numA, int numB);
     //void writePadToJason(TPad* pad, QJsonObject jj);
     //void readPadFromJason(TPad* pad, QJsonObject json);
     //APadGeometry* getPadGeometry(const TPad *pad);
@@ -62,6 +64,8 @@ private:
     void writeAPadsToJson(QJsonObject &json);
     QString readAPadsFromJson(const QJsonObject &json);
 
+    QVector <QVector<APadProperties>> APads;
+    QString APadsToString();
     QVector<APadProperties> Pads;
 
 };

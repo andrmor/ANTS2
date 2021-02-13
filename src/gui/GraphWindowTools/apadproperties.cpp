@@ -51,3 +51,11 @@ void APadProperties::readFromJson(const QJsonObject &json)
     padGeo.readFromJson(json);
     applyPadGeometry();
 }
+
+QString APadProperties::toString()
+{
+    QString output;
+    output = QString::number(padGeo.xLow) + ", " + QString::number(padGeo.yLow) + ", "
+            + QString::number(padGeo.xHigh) + ", "  + QString::number(padGeo.yHigh);
+    return output;
+}

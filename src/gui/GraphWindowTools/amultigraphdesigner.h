@@ -56,11 +56,6 @@ private:
     void drawGraph(const QVector<ADrawObject> DrawObjects);
     void updateCanvas();
     void fillOutBasicLayout(int M, int m, bool horizontal = true);
-    //void FillOutBasicLayout(int numA, int numB);
-    //void writePadToJason(TPad* pad, QJsonObject jj);
-    //void readPadFromJason(TPad* pad, QJsonObject json);
-    //APadGeometry* getPadGeometry(const TPad *pad);
-    //void applyPadGeometry(const APadGeometry* padGeo, TPad *pad);
     void writeAPadsToJson(QJsonObject &json);
     QString readAPadsFromJson(const QJsonObject &json);
 

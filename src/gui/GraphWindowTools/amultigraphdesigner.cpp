@@ -159,11 +159,7 @@ void AMultiGraphDesigner::fillOutBasicLayout(int M, int m, bool horizontal)
     double padM  = 1.0/M;
     double padm = 1.0/m;
 
-//    if (vertical)
-//    double *x = nullptr;
-//    double *y = nullptr;
-
-    qDebug() <<"M" <<padM<< "m" << padm;
+    //qDebug() <<"M" <<padM<< "m" << padm;
 
 
     for (int iM = 0; iM < M; iM++)
@@ -189,8 +185,8 @@ void AMultiGraphDesigner::fillOutBasicLayout(int M, int m, bool horizontal)
             if (iM == M - 1) M2 = 1-margin;
         }
 
-        qDebug() << "M1" << M1;
-        qDebug() << "M2" << M2;
+        //qDebug() << "M1" << M1;
+        //qDebug() << "M2" << M2;
 
         for (int im = 0; im < m; im++)
         {
@@ -200,8 +196,8 @@ void AMultiGraphDesigner::fillOutBasicLayout(int M, int m, bool horizontal)
             if (im == 0) m1 = margin;
             if (im == m - 1) m2 = 1-margin;
 
-            qDebug() << "m1" << m1;
-            qDebug() << "m2" << m2;
+            //qDebug() << "m1" << m1;
+            //qDebug() << "m2" << m2;
 
             QString padname = "pad" + QString::number(iM) + "_" + QString::number(im);
             TString padnameT(padname.toLatin1().data());
@@ -230,7 +226,6 @@ void AMultiGraphDesigner::fillOutBasicLayout(int M, int m, bool horizontal)
             APadProperties apad(ipad);
 
             aPadGroup << apad;
-            //apad.tPad->Draw();
 
         }
         APads << aPadGroup;
@@ -262,45 +257,6 @@ void AMultiGraphDesigner::fillOutBasicLayout(int M, int m, bool horizontal)
 //    qDebug() << "bSizes"<<bSizes;
 //}
 
-//APadGeometry *AMultiGraphDesigner::getPadGeometry(const TPad *pad)
-//{
-//    APadGeometry *padGeo = new APadGeometry();
-
-//    padGeo->xLow = pad->GetAbsXlowNDC();
-//    padGeo->yLow = pad->GetAbsYlowNDC();
-
-//    double w = pad->GetAbsWNDC();
-//    double h = pad->GetAbsHNDC();
-//    padGeo->xHigh = padGeo->xLow + w;
-//    padGeo->yHigh = padGeo->yLow + h;
-
-//    return padGeo;
-//}
-
-//void AMultiGraphDesigner::applyPadGeometry(const APadGeometry *padGeo, TPad *pad)
-//{
-//    pad->SetBBoxX1(padGeo->xLow);
-//    pad->SetBBoxX2(padGeo->xHigh);
-//    pad->SetBBoxY1(padGeo->yLow);
-//    pad->SetBBoxY2(padGeo->yHigh);
-//}
-
-//void AMultiGraphDesigner::writePadToJason(TPad *pad, QJsonObject json)
-//{
-//    double h      = pad->GetAbsHNDC();
-//    double w      = pad->GetAbsWNDC();
-//    double xLow   = pad->GetAbsXlowNDC();
-//    double yLow   = pad->GetAbsYlowNDC();
-
-//    json["h"]     = h;
-//    json["w"]     = w;
-//    json["xLow"]  = xLow;
-//    json["yLow"]  = yLow;
-//}
-
-//void AMultiGraphDesigner::readPadFromJason(TPad *pad, QJsonObject json)
-//{
-//}
 
 void AMultiGraphDesigner::writeAPadsToJson(QJsonObject &json)
 {
@@ -356,19 +312,6 @@ QString AMultiGraphDesigner::APadsToString()
     return str;
 }
 
-//void AMultiGraphDesigner::readAllPadsFromJson(const QJsonArray &jarr)
-//{
-//    for (int iObj = 0; iObj < jarr.size(); iObj ++)
-//    {
-//        APadGeometry *padGeo = new APadGeometry;
-//        TPad         *pad    = new TPad;
-
-//        QJsonObject js = jarr[iObj].toObject();
-
-//        padGeo->readFromJson(js);
-//        applyPadGeometry(padGeo, pad);
-//    }
-//}
 
 void AMultiGraphDesigner::on_pushButton_clicked()
 {

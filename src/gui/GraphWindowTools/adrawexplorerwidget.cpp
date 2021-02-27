@@ -1727,7 +1727,7 @@ void ADrawExplorerWidget::saveAsTxt(ADrawObject &obj, bool fUseBinCenters)
     {
         QVector<double> x, y, f;
         for (int iX=1; iX<h2->GetNbinsX()+1; iX++)
-            for (int iY=1; iY<h2->GetNbinsX()+1; iY++)
+            for (int iY=1; iY<h2->GetNbinsY()+1; iY++)
             {
                 const double X = (fUseBinCenters ? h2->GetXaxis()->GetBinCenter(iX) : h2->GetXaxis()->GetBinLowEdge(iX));
                 const double Y = (fUseBinCenters ? h2->GetYaxis()->GetBinCenter(iY) : h2->GetYaxis()->GetBinLowEdge(iY));

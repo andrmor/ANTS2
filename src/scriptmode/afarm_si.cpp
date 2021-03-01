@@ -19,7 +19,8 @@ AFarm_si::AFarm_si(const QJsonObject & Config, AGridRunner & GridRunner) :
 
 void AFarm_si::ForceStop()
 {
-    GridRunner.Abort();
+    if (&GridRunner == nullptr) qDebug() << "!-- Grid runner is absent!";
+    else GridRunner.Abort();
 }
 
 void AFarm_si::setTimeout(double Timeout_ms)

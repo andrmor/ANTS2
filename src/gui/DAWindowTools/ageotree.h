@@ -97,6 +97,7 @@ private:
   void menuActionRemoveWithContent(QTreeWidget * treeWidget);
   void menuActionAddNewComposite(AGeoObject * ContObj);
   void menuActionAddNewArray(AGeoObject * ContObj);
+  void menuActionAddNewCircularArray(AGeoObject * ContObj);
   void menuActionAddNewGrid(AGeoObject * ContObj);
   void menuActionAddNewMonitor(AGeoObject * ContObj);
   void menuActionAddInstance(AGeoObject * ContObj, const QString & PrototypeName);

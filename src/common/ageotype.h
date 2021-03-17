@@ -18,7 +18,7 @@ public:
     bool isHandlingStatic() const   {return Handling == "Static";}      //World
     bool isHandlingStandard() const {return Handling == "Standard";}
     bool isHandlingSet() const      {return Handling == "Set";}         //Group, Stack, Composite container
-    bool isHandlingArray() const    {return Handling == "Array";}       //Array
+    bool isHandlingArray() const    {return Handling == "Array";}       //Array and CircularArray
 
     bool isWorld() const            {return Type == "World";}
     bool isPrototypes() const       {return Type == "PrototypeCollection";}
@@ -33,6 +33,7 @@ public:
     bool isCompositeContainer() const {return Type == "CompositeContainer";}
     bool isComposite() const        {return Type == "Composite";}
     bool isArray() const            {return Type == "Array";}
+    bool isCircularArray() const    {return Type == "CircularArray";}
     bool isInstance() const         {return Type == "Instance";}
     bool isPrototype() const        {return Type == "Prototype";}
     bool isGrid() const             {return Type == "Grid";}
@@ -163,6 +164,29 @@ public:
     int startIndex = 0; QString strStartIndex;
 
     static QString evaluateStringValues(ATypeArrayObject & ArrayType);
+};
+
+class ATypeCircularArrayObject : public ATypeArrayObject
+{
+public:
+    ATypeCircularArrayObject() {Type = "CircularArray"; Handling = "Array";}
+    ATypeCircularArrayObject(int num, double angularStep, double radius)
+        : num(num), angularStep(angularStep), radius(radius) {Type = "CircularArray"; Handling = "Array";}
+
+    void Reconfigure(int Num, double AngularStep, double Radius);
+
+    bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
+    void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
+
+    void writeToJson(QJsonObject & json) const override;
+    void readFromJson(const QJsonObject & json) override;
+
+    int    num         = 6;
+    double angularStep = 30.0; //in degrees
+    double radius      = 100.0;
+    QString strNum, strAngularStep, strRadius;
+
+    static QString evaluateStringValues(ATypeCircularArrayObject & A);
 };
 
 class ATypeGridObject : public AGeoType

@@ -127,6 +127,10 @@ private:
                             AGeoObject *el, AGeoObject *arrayObj, TGeoVolume *parent,
                             TGeoManager *GeoManager, AMaterialParticleCollection *MaterialCollection,
                             QVector<APMandDummy> *PMsAndDumPMs,int arrayIndex);
+  void positionCircularArrayElement(int ia,
+                            AGeoObject *el, AGeoObject *arrayObj, TGeoVolume *parent,
+                            TGeoManager *GeoManager, AMaterialParticleCollection *MaterialCollection,
+                            QVector<APMandDummy> *PMsAndDumPMs,int arrayIndex);
   void positionStackObject(AGeoObject * obj, const AGeoObject * RefObj, TGeoVolume * parent,
                            TGeoManager * GeoManager, AMaterialParticleCollection * MaterialCollection,
                            QVector<APMandDummy> * PMsAndDumPMs, int forcedNodeNumber);

@@ -489,6 +489,24 @@ protected:
     AOneLineTextEdit *ledStartIndex;
 };
 
+class AGeoCircularArrayDelegate : public AGeoObjectDelegate
+{
+    Q_OBJECT
+
+public:
+    AGeoCircularArrayDelegate(const QStringList & materials, QWidget * parent);
+
+    bool updateObject(AGeoObject * obj) const override;
+
+    void Update(const AGeoObject * obj) override;
+
+protected:
+    AOneLineTextEdit *ledNum;
+    AOneLineTextEdit *ledAngularStep;
+    AOneLineTextEdit *ledRadius;
+    AOneLineTextEdit *ledStartIndex;
+};
+
 class AGeoSetDelegate : public AGeoObjectDelegate
 {
     Q_OBJECT

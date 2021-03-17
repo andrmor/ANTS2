@@ -624,7 +624,8 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
     {
         return; //do nothing with logicals, they also do not host anything real
     }
-    else if (obj->ObjectType->isHandlingSet() || obj->ObjectType->isArray() || obj->ObjectType->isInstance())
+    //else if (obj->ObjectType->isHandlingSet() || obj->ObjectType->isArray() || obj->ObjectType->isInstance())
+    else if (obj->ObjectType->isHandlingSet() || obj->ObjectType->isHandlingArray() || obj->ObjectType->isInstance())
     {   // group objects are pure virtual, just pass the volume of the parent
         vol = parent;
     }
@@ -758,7 +759,8 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
                 }
             }
     }
-    else if (obj->ObjectType->isArray())
+    //else if (obj->ObjectType->isArray())
+    else if (obj->ObjectType->isHandlingArray())
     {
         ATypeArrayObject * array = static_cast<ATypeArrayObject*>(obj->ObjectType);
 
@@ -781,10 +783,32 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
                 if (!StackRefObj) qWarning() << "Error: Reference object not found for stack" << el->Name;
             }
 
-            for (int ix = 0; ix < array->numX; ix++)
-              for (int iy = 0; iy < array->numY; iy++)
-                for (int iz = 0; iz < array->numZ; iz++)
+            ATypeCircularArrayObject * circArray = dynamic_cast<ATypeCircularArrayObject*>(obj->ObjectType);
+            if (!circArray)
+            {
+                for (int ix = 0; ix < array->numX; ix++)
+                  for (int iy = 0; iy < array->numY; iy++)
+                    for (int iz = 0; iz < array->numZ; iz++)
+                    {
+                        if (StackRefObj)
+                        {
+                            for (AGeoObject * StackObj : el->HostedObjects)
+                                positionArrayElement_StackObject(ix, iy, iz, StackObj, StackRefObj, obj, vol, GeoManager, MaterialCollection, PMsAndDumPMs, iCounter);
+                        }
+                        else if (el->ObjectType->isHandlingSet() || el->ObjectType->isInstance())
+                        {
+                            for (AGeoObject * elHO : el->HostedObjects)
+                                positionArrayElement(ix, iy, iz, elHO, obj, vol, GeoManager, MaterialCollection, PMsAndDumPMs, iCounter);
+                        }
+                        else positionArrayElement(ix, iy, iz, el, obj, vol, GeoManager, MaterialCollection, PMsAndDumPMs, iCounter);
+                        iCounter++;
+                    }
+            }
+            else
+            {
+                for (int ia = 0; ia < circArray->num; ia++)
                 {
+                    /*
                     if (StackRefObj)
                     {
                         for (AGeoObject * StackObj : el->HostedObjects)
@@ -795,9 +819,12 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
                         for (AGeoObject * elHO : el->HostedObjects)
                             positionArrayElement(ix, iy, iz, elHO, obj, vol, GeoManager, MaterialCollection, PMsAndDumPMs, iCounter);
                     }
-                    else positionArrayElement(ix, iy, iz, el, obj, vol, GeoManager, MaterialCollection, PMsAndDumPMs, iCounter);
+                    else
+                    */
+                    positionCircularArrayElement(ia, el, obj, vol, GeoManager, MaterialCollection, PMsAndDumPMs, iCounter);
                     iCounter++;
                 }
+            }
         }
     }
     else if (obj->ObjectType->isStack())
@@ -873,6 +900,41 @@ void ASandwich::positionArrayElement(int ix, int iy, int iz, AGeoObject* el, AGe
     el->Position[0] = tmpX;
     el->Position[1] = tmpY;
     el->Position[2] = tmpZ;
+}
+
+void ASandwich::positionCircularArrayElement(int ia, AGeoObject *el, AGeoObject *arrayObj, TGeoVolume *parent, TGeoManager *GeoManager, AMaterialParticleCollection *MaterialCollection, QVector<APMandDummy> *PMsAndDumPMs, int arrayIndex)
+{
+    ATypeCircularArrayObject * array = static_cast<ATypeCircularArrayObject*>(arrayObj->ObjectType);
+
+    //storing original position/orientation
+    double posrot[6];
+    for (int i=0; i<3; i++)
+    {
+        posrot[i]   = el->Position[i];
+        posrot[i+3] = el->Orientation[i];
+    }
+
+    TVector3 v(el->Position[0] + array->radius,
+               el->Position[1],
+               el->Position[2]);
+    if (ia != 0 || arrayObj->Orientation[2] != 0) v.RotateZ( TMath::Pi()/180.0 * (array->angularStep * ia + arrayObj->Orientation[2]) );
+
+    v += TVector3(arrayObj->Position[0], arrayObj->Position[1], arrayObj->Position[2]);
+
+    el->Position[0] = v[0];
+    el->Position[1] = v[1];
+    el->Position[2] = v[2];
+
+    el->Orientation[2] += (array->angularStep * ia + arrayObj->Orientation[2]);
+
+    addTGeoVolumeRecursively(el, parent, GeoManager, MaterialCollection, PMsAndDumPMs, arrayIndex);
+
+    //recovering original positions
+    for (int i=0; i<3; i++)
+    {
+        el->Position[i]    = posrot[i];
+        el->Orientation[i] = posrot[i+3];
+    }
 }
 
 void ASandwich::positionStackObject(AGeoObject *obj, const AGeoObject * RefObj, TGeoVolume *parent, TGeoManager *GeoManager, AMaterialParticleCollection *MaterialCollection, QVector<APMandDummy> *PMsAndDumPMs, int forcedNodeNumber)

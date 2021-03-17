@@ -258,7 +258,7 @@ void AGeoTree::populateTreeWidget(QTreeWidgetItem * parent, AGeoObject * Contain
             item->setForeground(0, Qt::blue);
             updateIcon(item, obj);
         }
-        else if (obj->ObjectType->isHandlingSet() || obj->ObjectType->isArray() || obj->ObjectType->isGridElement())
+        else if (obj->ObjectType->isHandlingSet() || obj->ObjectType->isHandlingArray() || obj->ObjectType->isGridElement())
         { //group or stack or array or gridElement
             QFont f = item->font(0); f.setItalic(true); item->setFont(0, f);
             updateIcon(item, obj);
@@ -402,6 +402,7 @@ void AGeoTree::customMenuRequested(const QPoint &pos)
     QAction* newArb8 = addObjMenu->addAction("Arb8");
 
   QAction* newArrayA  = Action(menu, "Add array");
+  QAction* newCircArrayA  = Action(menu, "Add circular array");
   QAction* newCompositeA  = Action(menu, "Add composite object");
   QAction* newGridA = Action(menu, "Add optical grid");
   QAction* newMonitorA = Action(menu, "Add monitor");
@@ -463,6 +464,7 @@ void AGeoTree::customMenuRequested(const QPoint &pos)
 
       newCompositeA->setEnabled(fNotGridNotMonitor);
       newArrayA->setEnabled(fNotGridNotMonitor);
+      newCircArrayA->setEnabled(fNotGridNotMonitor);
       newMonitorA->setEnabled(fNotGridNotMonitor);
       newGridA->setEnabled(fNotGridNotMonitor);
       cloneA->setEnabled(true);
@@ -520,6 +522,7 @@ void AGeoTree::customMenuRequested(const QPoint &pos)
   else if (SelectedAction == newArb8)        menuActionAddNewObject(obj, new AGeoArb8());
   else if (SelectedAction == newCompositeA)  menuActionAddNewComposite(obj);
   else if (SelectedAction == newArrayA)      menuActionAddNewArray(obj);
+  else if (SelectedAction == newCircArrayA)  menuActionAddNewCircularArray(obj);
   else if (SelectedAction == newGridA)       menuActionAddNewGrid(obj);
   else if (SelectedAction == newMonitorA)    menuActionAddNewMonitor(obj);
   else if (SelectedAction == cloneA)         menuActionCloneObject(obj);
@@ -954,6 +957,32 @@ void AGeoTree::menuActionAddNewArray(AGeoObject * ContObj)
   UpdateGui(name);
 }
 
+void AGeoTree::menuActionAddNewCircularArray(AGeoObject *ContObj)
+{
+    if (!ContObj) return;
+
+    AGeoObject* newObj = new AGeoObject();
+    do newObj->Name = AGeoObject::GenerateRandomArrayName();
+    while (World->isNameExists(newObj->Name));
+
+    delete newObj->ObjectType;
+    newObj->ObjectType = new ATypeCircularArrayObject();
+
+    newObj->color = 1;
+    ContObj->addObjectFirst(newObj);  //inserts to the first position in the list of HostedObjects!
+
+    //element inside
+    AGeoObject* elObj = new AGeoObject();
+    while (World->isNameExists(elObj->Name))
+      elObj->Name = AGeoObject::GenerateRandomObjectName();
+    elObj->color = 1;
+    newObj->addObjectFirst(elObj);
+
+    const QString name = newObj->Name;
+    emit RequestRebuildDetector();
+    UpdateGui(name);
+}
+
 void AGeoTree::menuActionAddNewGrid(AGeoObject * ContObj)
 {
   if (!ContObj) return;
@@ -1107,7 +1136,7 @@ void AGeoTree::SetLineAttributes(AGeoObject * obj)
             obj->getSlabModel()->width = obj->width;
             obj->getSlabModel()->style = obj->style;
         }
-        if (obj->ObjectType->isArray() || obj->ObjectType->isHandlingSet())
+        if (obj->ObjectType->isHandlingArray() || obj->ObjectType->isHandlingSet())
         {
             QVector<AGeoObject*> vec;
             obj->collectContainingObjects(vec);
@@ -1201,7 +1230,7 @@ void AGeoTree::menuActionFormStack(QList<QTreeWidgetItem*> selected)
             message("World or slabs/lightguides cannot be a member of a stack", twGeoTree);
             return;
         }
-        if (obj->ObjectType->isArray())
+        if (obj->ObjectType->isHandlingArray())
         {
             message("Array cannot be a member of a stack", twGeoTree);
             return;

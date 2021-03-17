@@ -917,7 +917,9 @@ void ASandwich::positionCircularArrayElement(int ia, AGeoObject *el, AGeoObject 
     TVector3 v(el->Position[0] + array->radius,
                el->Position[1],
                el->Position[2]);
-    if (ia != 0 || arrayObj->Orientation[2] != 0) v.RotateZ( TMath::Pi()/180.0 * (array->angularStep * ia + arrayObj->Orientation[2]) );
+
+    double angle = array->angularStep * ia + arrayObj->Orientation[2];
+    if (angle != 0) v.RotateZ( TMath::Pi()/180.0 * angle );
 
     v += TVector3(arrayObj->Position[0], arrayObj->Position[1], arrayObj->Position[2]);
 
@@ -925,7 +927,7 @@ void ASandwich::positionCircularArrayElement(int ia, AGeoObject *el, AGeoObject 
     el->Position[1] = v[1];
     el->Position[2] = v[2];
 
-    el->Orientation[2] += (array->angularStep * ia + arrayObj->Orientation[2]);
+    el->Orientation[0] += angle;
 
     addTGeoVolumeRecursively(el, parent, GeoManager, MaterialCollection, PMsAndDumPMs, arrayIndex);
 

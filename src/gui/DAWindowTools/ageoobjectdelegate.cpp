@@ -2707,10 +2707,10 @@ AGeoCircularArrayDelegate::AGeoCircularArrayDelegate(const QStringList &material
 
     lMat->setVisible(false);
     cobMat->setVisible(false);
-    ledPhi->setText("0");
-    ledPhi->setEnabled(false);
-    ledTheta->setText("0");
-    ledTheta->setEnabled(false);
+    //ledPhi->setText("0");
+    //ledPhi->setEnabled(false);
+    //ledTheta->setText("0");
+    //ledTheta->setEnabled(false);
 
     pbTransform->setVisible(false);
     pbShapeInfo->setVisible(false);

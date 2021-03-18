@@ -902,11 +902,14 @@ void ASandwich::positionArrayElement(int ix, int iy, int iz, AGeoObject* el, AGe
     el->Position[2] = tmpZ;
 }
 
+#include "TRotation.h"
 void ASandwich::positionCircularArrayElement(int ia, AGeoObject *el, AGeoObject *arrayObj, TGeoVolume *parent, TGeoManager *GeoManager, AMaterialParticleCollection *MaterialCollection, QVector<APMandDummy> *PMsAndDumPMs, int arrayIndex)
 {
     ATypeCircularArrayObject * array = static_cast<ATypeCircularArrayObject*>(arrayObj->ObjectType);
 
-    //storing original position/orientation
+    double angle = array->angularStep * ia;
+
+//Storing original positions/orientations
     double posrot[6];
     for (int i=0; i<3; i++)
     {
@@ -914,24 +917,48 @@ void ASandwich::positionCircularArrayElement(int ia, AGeoObject *el, AGeoObject 
         posrot[i+3] = el->Orientation[i];
     }
 
+//Position?
+    /*
     TVector3 v(el->Position[0] + array->radius,
                el->Position[1],
                el->Position[2]);
+    rotate(v, arrayObj->Orientation[0], arrayObj->Orientation[1], arrayObj->Orientation[2] + angle);
+    for (int i = 0; i < 3; i++) el->Position[i] = arrayObj->Position[i] + v[i];
+    */
+    TGeoRotation ArRot("", arrayObj->Orientation[0], arrayObj->Orientation[1], arrayObj->Orientation[2] + angle);
+    double local[3], master[3];
+    local[0] = el->Position[0] + array->radius;
+    local[1] = el->Position[1];
+    local[2] = el->Position[2];
+    ArRot.LocalToMaster(local, master);
+    for (int i = 0; i < 3; i++) el->Position[i] = arrayObj->Position[i] + master[i];
 
-    double angle = array->angularStep * ia + arrayObj->Orientation[2];
-    if (angle != 0) v.RotateZ( TMath::Pi()/180.0 * angle );
+//Orientation?
+    /*
+    qDebug() << "->"<<arrayObj->Orientation[0]<<arrayObj->Orientation[1]<<arrayObj->Orientation[2] + angle;
+    //https://en.wikipedia.org/wiki/Euler_angles
+    local[0] = 0; local[1] = 0; local[2] = 1.0;
+    ArRot.LocalToMaster(local, master);
+    double Z3 = master[2];
+    double Z2 = master[1];
+    local[0] = 0; local[1] = 1.0; local[2] = 0;
+    ArRot.LocalToMaster(local, master);
+    double Y3 = master[2];
+    double A = sqrt(1 - Z3*Z3);
+    el->Orientation[0] = acos(-Z2 / A)*180.0/TMath::Pi();
+    el->Orientation[1] = acos(Z3)*180.0/TMath::Pi();
+    el->Orientation[2] = acos(Y3 / A)*180.0/TMath::Pi();
+    qDebug() << "<-"<<el->Orientation[0]<<el->Orientation[1]<<el->Orientation[2];
+    */
 
-    v += TVector3(arrayObj->Position[0], arrayObj->Position[1], arrayObj->Position[2]);
+    TGeoRotation elRot("1", el->Orientation[0], el->Orientation[1], el->Orientation[2]);
+    elRot *= ArRot;   //    ArRot.MultiplyBy(&elRot, true);
+    elRot.GetAngles(el->Orientation[0], el->Orientation[1], el->Orientation[2]);
 
-    el->Position[0] = v[0];
-    el->Position[1] = v[1];
-    el->Position[2] = v[2];
-
-    el->Orientation[0] += angle;
-
+//Add geo volume
     addTGeoVolumeRecursively(el, parent, GeoManager, MaterialCollection, PMsAndDumPMs, arrayIndex);
 
-    //recovering original positions
+//Recovering original positions/orientation
     for (int i=0; i<3; i++)
     {
         el->Position[i]    = posrot[i];

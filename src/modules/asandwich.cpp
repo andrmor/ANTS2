@@ -605,6 +605,91 @@ void ASandwich::expandPrototypeInstances()
     }
 }
 
+bool ASandwich::processCompositeObject(AGeoObject * obj)
+{
+    AGeoObject * logicals = obj->getContainerWithLogical();
+    if (!logicals)
+    {
+        qWarning()<< "Composite object: Not found container with logical objects!";
+        return false;
+    }
+    AGeoComposite * cs = dynamic_cast<AGeoComposite*>(obj->Shape);
+    if (!cs)
+    {
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(obj->Shape);
+        if (!scaled)
+        {
+            qWarning()<< "Composite: Shape object is not composite nor scaled composite!!";
+            return false;
+        }
+    }
+
+    obj->refreshShapeCompositeMembers();
+
+    for (AGeoObject * lobj : logicals->HostedObjects)
+    {
+        //registering building blocks
+        const QString & name = lobj->Name;
+        lobj->Shape->createGeoShape(name);
+        const QString RotName = "_r" + name;
+        TGeoRotation * lRot = new TGeoRotation(RotName.toLatin1().data(), lobj->Orientation[0], lobj->Orientation[1], lobj->Orientation[2]);
+        lRot->RegisterYourself();
+        const QString TransName = "_m" + name;
+        TGeoCombiTrans * lTrans = new TGeoCombiTrans(TransName.toLatin1().data(), lobj->Position[0], lobj->Position[1], lobj->Position[2], lRot);
+        lTrans->RegisterYourself();
+    }
+
+    return true;
+}
+
+void ASandwich::positionHostedForLightguide(AGeoObject * obj, TGeoVolume * vol, TGeoCombiTrans * lTrans,
+                                            TGeoManager * GeoManager,
+                                            AMaterialParticleCollection * MaterialCollection,
+                                            QVector<APMandDummy> * PMsAndDumPMs)
+{
+    const int ul = ( obj->ObjectType->isUpperLightguide() ? 0 : 1);
+
+    for (int ipm = 0; ipm < PMsAndDumPMs->size(); ipm++)
+        if (ul == PMsAndDumPMs->at(ipm).UpperLower)
+        {
+            Double_t master[3]; //PM positions are in global coordinates! - there could be rotation of the slab
+            master[0] = PMsAndDumPMs->at(ipm).X;
+            master[1] = PMsAndDumPMs->at(ipm).Y;
+            master[2] = 0;
+            Double_t local[3];
+            lTrans->MasterToLocal(master, local);
+
+            for (int i = 0; i < obj->HostedObjects.size(); i++)
+            {
+                AGeoObject * GO = obj->HostedObjects[i];
+                if ( !GO->ObjectType->isHandlingSet() )
+                {
+                    double tmpX = GO->Position[0];
+                    double tmpY = GO->Position[1];
+                    GO->Position[0] += local[0];
+                    GO->Position[1] += local[1];
+                    addTGeoVolumeRecursively(GO, vol, GeoManager, MaterialCollection, PMsAndDumPMs);
+                    GO->Position[0] = tmpX; //recovering original positions
+                    GO->Position[1] = tmpY;
+                }
+                else
+                {
+                    for (int i=0; i<GO->HostedObjects.size(); i++)
+                    {
+                        AGeoObject* GObis = GO->HostedObjects[i];
+                        double tmpX = GObis->Position[0];
+                        double tmpY = GObis->Position[1];
+                        GObis->Position[0] += local[0];
+                        GObis->Position[1] += local[1];
+                        addTGeoVolumeRecursively(GObis, vol, GeoManager, MaterialCollection, PMsAndDumPMs);
+                        GObis->Position[0] = tmpX; //recovering original positions
+                        GObis->Position[1] = tmpY;
+                    }
+                }
+            }
+        }
+}
+
 void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TGeoManager* GeoManager,
                                          AMaterialParticleCollection* MaterialCollection,
                                          QVector<APMandDummy> *PMsAndDumPMs,
@@ -630,48 +715,18 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
             if (obj->Container) iMat = obj->Container->getMaterial();
             else qWarning() << "Monitor without container detected!";
         }
-        TGeoMedium * med = (*MaterialCollection)[iMat]->GeoMed;
+        else if (obj->ObjectType->isComposite())
+        {
+            bool ok = processCompositeObject(obj);
+            if (!ok) return;
+        }
 
         //creating volume
-        if (obj->ObjectType->isComposite())
-        {
-            AGeoObject * logicals = obj->getContainerWithLogical();
-            if (!logicals)
-            {
-                qWarning()<< "Composite object: Not found container with logical objects!";
-                return;
-            }
-            AGeoComposite * cs = dynamic_cast<AGeoComposite*>(obj->Shape);
-            if (!cs)
-            {
-                AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(obj->Shape);
-                if (!scaled)
-                {
-                    qWarning()<< "Composite: Shape object is not composite nor scaled composite!!";
-                    return;
-                }
-            }
-            obj->refreshShapeCompositeMembers();
-
-            for (AGeoObject * lobj : logicals->HostedObjects)
-            {
-                //registering building blocks
-                const QString & name = lobj->Name;
-                lobj->Shape->createGeoShape(name);
-                const QString RotName = "_r" + name;
-                TGeoRotation * lRot = new TGeoRotation(RotName.toLatin1().data(), lobj->Orientation[0], lobj->Orientation[1], lobj->Orientation[2]);
-                lRot->RegisterYourself();
-                const QString TransName = "_m" + name;
-                TGeoCombiTrans * lTrans = new TGeoCombiTrans(TransName.toLatin1().data(), lobj->Position[0], lobj->Position[1], lobj->Position[2], lRot);
-                lTrans->RegisterYourself();
-            }
-            vol = new TGeoVolume(obj->Name.toLatin1().data(), obj->Shape->createGeoShape(), med);
-        }
-        else
-            vol = new TGeoVolume(obj->Name.toLocal8Bit().data(), obj->Shape->createGeoShape(), med);
+        TGeoMedium * med = (*MaterialCollection)[iMat]->GeoMed;
+        vol = new TGeoVolume(obj->Name.toLocal8Bit().data(), obj->Shape->createGeoShape(), med);
 
         //creating positioning/rotation transformation
-        TGeoRotation * lRot;
+        TGeoRotation * lRot = nullptr;
         if (obj->lRot) lRot = obj->lRot;
         else
         {
@@ -680,7 +735,7 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
         }
         lTrans = new TGeoCombiTrans("lTrans", obj->Position[0], obj->Position[1], obj->Position[2], lRot);
 
-        //positioning node
+        //positioning this object
         if (obj->ObjectType->isGrid())
         {
             GridRecords.append(obj->createGridRecord());
@@ -704,58 +759,14 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
             TObjArray * nList = parent->GetNodes();
             const int numNodes = nList->GetEntries();
             TGeoNode * node = (TGeoNode*)nList->At(numNodes-1);
-            //qDebug() << nList << numNodes;
-            //qDebug() << "      " <<node;//->GetUniqueID();
             MonitorNodes.append(node);
         }
         else parent->AddNode(vol, forcedNodeNumber, lTrans);
-    }    
-
-    //positioning of hosted items is different for lightguides, arrays and normal items!
-    if (obj->ObjectType->isLightguide())
-    {
-        int ul = ( obj->ObjectType->isUpperLightguide() ? 0 : 1);
-        for (int ipm=0; ipm<PMsAndDumPMs->size(); ipm++)
-          if (PMsAndDumPMs->at(ipm).UpperLower == ul)
-            {
-              Double_t master[3]; //PM positions are in global coordinates! - there could be rotation of the slab
-              master[0] = PMsAndDumPMs->at(ipm).X;
-              master[1] = PMsAndDumPMs->at(ipm).Y;
-              master[2] = 0;
-              Double_t local[3];
-              lTrans->MasterToLocal(master, local);
-
-              for (int i=0; i<obj->HostedObjects.size(); i++)
-                {
-                  AGeoObject* GO = obj->HostedObjects[i];
-                  if ( !GO->ObjectType->isHandlingSet() )
-                    {
-                      double tmpX = GO->Position[0];
-                      double tmpY = GO->Position[1];
-                      GO->Position[0] += local[0];
-                      GO->Position[1] += local[1];
-                      addTGeoVolumeRecursively(GO, vol, GeoManager, MaterialCollection, PMsAndDumPMs);
-                      GO->Position[0] = tmpX; //recovering original positions
-                      GO->Position[1] = tmpY;
-                    }
-                  else
-                    {
-                      for (int i=0; i<GO->HostedObjects.size(); i++)
-                        {
-                          AGeoObject* GObis = GO->HostedObjects[i];
-                          double tmpX = GObis->Position[0];
-                          double tmpY = GObis->Position[1];
-                          GObis->Position[0] += local[0];
-                          GObis->Position[1] += local[1];
-                          addTGeoVolumeRecursively(GObis, vol, GeoManager, MaterialCollection, PMsAndDumPMs);
-                          GObis->Position[0] = tmpX; //recovering original positions
-                          GObis->Position[1] = tmpY;
-                        }
-                    }
-                }
-            }
     }
-    //else if (obj->ObjectType->isArray())
+
+    //positioning hosted objects
+    if      (obj->ObjectType->isLightguide())
+        positionHostedForLightguide(obj, vol, lTrans, GeoManager, MaterialCollection, PMsAndDumPMs);
     else if (obj->ObjectType->isHandlingArray())
     {
         ATypeArrayObject * array = static_cast<ATypeArrayObject*>(obj->ObjectType);
@@ -852,7 +863,7 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
     //  First character can be 'G' for optical grid, 'M' for monitor, 'P' for PMT, 'p' for dummy PM
     //  PMs and DummyPMs receive title in detector class, see PositionPMs and PositionDummis methods
     //  Second character is used by the ParticleTracker to indicate that particles leaving the volume have to be saved to file
-    if (obj->ObjectType->isGrid())         vol->SetTitle("G---");
+    if      (obj->ObjectType->isGrid())    vol->SetTitle("G---");
     else if (obj->ObjectType->isMonitor()) vol->SetTitle("M---");
     else                                   vol->SetTitle("----");
 }

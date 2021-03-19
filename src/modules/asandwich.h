@@ -14,6 +14,7 @@ class TGeoVolume;
 class AMaterialParticleCollection;
 class AGridElementRecord;
 class TGeoNode;
+class TGeoCombiTrans;
 
 class ASandwich : public QObject
 {  
@@ -137,7 +138,11 @@ private:
   void positionArrayElement_StackObject(int ix, int iy, int iz,
                             AGeoObject *obj, const AGeoObject *RefObj, AGeoObject *arrayObj, TGeoVolume *parent,
                             TGeoManager *GeoManager, AMaterialParticleCollection *MaterialCollection,
-                            QVector<APMandDummy> *PMsAndDumPMs, int arrayIndex);
+                                        QVector<APMandDummy> *PMsAndDumPMs, int arrayIndex);
+
+  bool processCompositeObject(AGeoObject *obj);
+  void positionHostedForLightguide(AGeoObject *obj, TGeoVolume *vol, TGeoCombiTrans *lTrans,
+                                   TGeoManager *GeoManager, AMaterialParticleCollection *MaterialCollection, QVector<APMandDummy> *PMsAndDumPMs);
 };
 
 #endif // ASANDWICH_H

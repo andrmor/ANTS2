@@ -86,7 +86,7 @@ void ASandwich::insertSlab(int index, ASlabModel *slab)
       World->HostedObjects.append(slabObj);
 }
 
-int ASandwich::countSlabs()
+int ASandwich::countSlabs() const
 {
     int counter = 0;
     for (int i=0; i<World->HostedObjects.size(); i++)
@@ -642,10 +642,7 @@ bool ASandwich::processCompositeObject(AGeoObject * obj)
     return true;
 }
 
-void ASandwich::positionHostedForLightguide(AGeoObject * obj, TGeoVolume * vol, TGeoCombiTrans * lTrans,
-                                            TGeoManager * GeoManager,
-                                            AMaterialParticleCollection * MaterialCollection,
-                                            QVector<APMandDummy> * PMsAndDumPMs)
+void ASandwich::positionHostedForLightguide(AGeoObject * obj, TGeoVolume * vol, TGeoCombiTrans * lTrans)
 {
     const int ul = ( obj->ObjectType->isUpperLightguide() ? 0 : 1);
 
@@ -668,7 +665,7 @@ void ASandwich::positionHostedForLightguide(AGeoObject * obj, TGeoVolume * vol, 
                     double tmpY = GO->Position[1];
                     GO->Position[0] += local[0];
                     GO->Position[1] += local[1];
-                    addTGeoVolumeRecursively(GO, vol, GeoManager, MaterialCollection, PMsAndDumPMs);
+                    addTGeoVolumeRecursively(GO, vol);
                     GO->Position[0] = tmpX; //recovering original positions
                     GO->Position[1] = tmpY;
                 }
@@ -681,7 +678,7 @@ void ASandwich::positionHostedForLightguide(AGeoObject * obj, TGeoVolume * vol, 
                         double tmpY = GObis->Position[1];
                         GObis->Position[0] += local[0];
                         GObis->Position[1] += local[1];
-                        addTGeoVolumeRecursively(GObis, vol, GeoManager, MaterialCollection, PMsAndDumPMs);
+                        addTGeoVolumeRecursively(GObis, vol);
                         GObis->Position[0] = tmpX; //recovering original positions
                         GObis->Position[1] = tmpY;
                     }
@@ -690,10 +687,21 @@ void ASandwich::positionHostedForLightguide(AGeoObject * obj, TGeoVolume * vol, 
         }
 }
 
-void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TGeoManager* GeoManager,
-                                         AMaterialParticleCollection* MaterialCollection,
-                                         QVector<APMandDummy> *PMsAndDumPMs,
-                                         int forcedNodeNumber)
+void ASandwich::populateGeoManager(TGeoVolume * top, TGeoManager * geoManager, AMaterialParticleCollection * materialCollection, QVector<APMandDummy> * vPMsAndDumPMs)
+{
+    GeoManager = geoManager;
+    MaterialCollection = materialCollection;
+    PMsAndDumPMs = vPMsAndDumPMs;
+
+    clearGridRecords();
+    clearMonitorRecords();
+
+    expandPrototypeInstances();
+
+    addTGeoVolumeRecursively(World, top);
+}
+
+void ASandwich::addTGeoVolumeRecursively(AGeoObject * obj, TGeoVolume * parent, int forcedNodeNumber)
 {
     //qDebug() << "Processing TGeo creation for object"<<obj->Name<<" which must be in"<<parent->GetName();
     if (!obj->fActive) return;
@@ -765,8 +773,7 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
     }
 
     //positioning hosted objects
-    if      (obj->ObjectType->isLightguide())
-        positionHostedForLightguide(obj, vol, lTrans, GeoManager, MaterialCollection, PMsAndDumPMs);
+    if      (obj->ObjectType->isLightguide()) positionHostedForLightguide(obj, vol, lTrans);
     else if (obj->ObjectType->isHandlingArray())
     {
         ATypeArrayObject * array = static_cast<ATypeArrayObject*>(obj->ObjectType);
@@ -800,14 +807,14 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
                         if (StackRefObj)
                         {
                             for (AGeoObject * StackObj : el->HostedObjects)
-                                positionArrayElement_StackObject(ix, iy, iz, StackObj, StackRefObj, obj, vol, GeoManager, MaterialCollection, PMsAndDumPMs, iCounter);
+                                positionArrayElement_StackObject(ix, iy, iz, StackObj, StackRefObj, obj, vol, iCounter);
                         }
                         else if (el->ObjectType->isHandlingSet() || el->ObjectType->isInstance())
                         {
                             for (AGeoObject * elHO : el->HostedObjects)
-                                positionArrayElement(ix, iy, iz, elHO, obj, vol, GeoManager, MaterialCollection, PMsAndDumPMs, iCounter);
+                                positionArrayElement(ix, iy, iz, elHO, obj, vol, iCounter);
                         }
-                        else positionArrayElement(ix, iy, iz, el, obj, vol, GeoManager, MaterialCollection, PMsAndDumPMs, iCounter);
+                        else positionArrayElement(ix, iy, iz, el, obj, vol, iCounter);
                         iCounter++;
                     }
             }
@@ -828,7 +835,7 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
                     }
                     else
                     */
-                    positionCircularArrayElement(ia, el, obj, vol, GeoManager, MaterialCollection, PMsAndDumPMs, iCounter);
+                    positionCircularArrayElement(ia, el, obj, vol, iCounter);
                     iCounter++;
                 }
             }
@@ -849,14 +856,14 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
         if (RefObj)
         {
             for (AGeoObject * el : obj->HostedObjects)
-                positionStackObject(el, RefObj, vol, GeoManager, MaterialCollection, PMsAndDumPMs, forcedNodeNumber);
+                positionStackObject(el, RefObj, vol, forcedNodeNumber);
         }
         else qWarning() << "Error: Reference object not found for stack" << obj->Name;
     }
     else
     {
         for (AGeoObject * el : obj->HostedObjects)
-            addTGeoVolumeRecursively(el, vol, GeoManager, MaterialCollection, PMsAndDumPMs, forcedNodeNumber);
+            addTGeoVolumeRecursively(el, vol, forcedNodeNumber);
     }
 
     //  Trackers use volume title for identification of special rules
@@ -881,9 +888,7 @@ void ASandwich::clearMonitorRecords()
     MonitorNodes.clear();
 }
 
-void ASandwich::positionArrayElement(int ix, int iy, int iz, AGeoObject* el, AGeoObject* arrayObj,
-                                     TGeoVolume* parent, TGeoManager* GeoManager, AMaterialParticleCollection* MaterialCollection, QVector<APMandDummy> *PMsAndDumPMs,
-                                     int arrayIndex)
+void ASandwich::positionArrayElement(int ix, int iy, int iz, AGeoObject * el, AGeoObject * arrayObj, TGeoVolume * parent, int arrayIndex)
 {
     ATypeArrayObject* array = static_cast<ATypeArrayObject*>(arrayObj->ObjectType);
 
@@ -901,7 +906,7 @@ void ASandwich::positionArrayElement(int ix, int iy, int iz, AGeoObject* el, AGe
     el->Position[1] = v[1];
     el->Position[2] = v[2];
 
-    addTGeoVolumeRecursively(el, parent, GeoManager, MaterialCollection, PMsAndDumPMs, arrayIndex);
+    addTGeoVolumeRecursively(el, parent, arrayIndex);
 
     //recovering original positions
     el->Position[0] = tmpX;
@@ -909,8 +914,7 @@ void ASandwich::positionArrayElement(int ix, int iy, int iz, AGeoObject* el, AGe
     el->Position[2] = tmpZ;
 }
 
-#include "TRotation.h"
-void ASandwich::positionCircularArrayElement(int ia, AGeoObject *el, AGeoObject *arrayObj, TGeoVolume *parent, TGeoManager *GeoManager, AMaterialParticleCollection *MaterialCollection, QVector<APMandDummy> *PMsAndDumPMs, int arrayIndex)
+void ASandwich::positionCircularArrayElement(int ia, AGeoObject * el, AGeoObject * arrayObj, TGeoVolume * parent, int arrayIndex)
 {
     ATypeCircularArrayObject * array = static_cast<ATypeCircularArrayObject*>(arrayObj->ObjectType);
 
@@ -1007,7 +1011,7 @@ void ASandwich::positionCircularArrayElement(int ia, AGeoObject *el, AGeoObject 
     */
 
 //Add geo volume
-    addTGeoVolumeRecursively(el, parent, GeoManager, MaterialCollection, PMsAndDumPMs, arrayIndex);
+    addTGeoVolumeRecursively(el, parent, arrayIndex);
 
 //Recovering original positions/orientation
     for (int i=0; i<3; i++)
@@ -1017,7 +1021,7 @@ void ASandwich::positionCircularArrayElement(int ia, AGeoObject *el, AGeoObject 
     }
 }
 
-void ASandwich::positionStackObject(AGeoObject *obj, const AGeoObject * RefObj, TGeoVolume *parent, TGeoManager *GeoManager, AMaterialParticleCollection *MaterialCollection, QVector<APMandDummy> *PMsAndDumPMs, int forcedNodeNumber)
+void ASandwich::positionStackObject(AGeoObject *obj, const AGeoObject * RefObj, TGeoVolume *parent, int forcedNodeNumber)
 {
     //storing original position/orientation
     double posrot[6];
@@ -1038,7 +1042,7 @@ void ASandwich::positionStackObject(AGeoObject *obj, const AGeoObject * RefObj, 
         obj->Orientation[i] += obj->Container->Orientation[i];
     }
 
-    addTGeoVolumeRecursively(obj, parent, GeoManager, MaterialCollection, PMsAndDumPMs, forcedNodeNumber);
+    addTGeoVolumeRecursively(obj, parent, forcedNodeNumber);
 
     //recovering original positions
     for (int i=0; i<3; i++)
@@ -1048,7 +1052,7 @@ void ASandwich::positionStackObject(AGeoObject *obj, const AGeoObject * RefObj, 
     }
 }
 
-void ASandwich::positionArrayElement_StackObject(int ix, int iy, int iz, AGeoObject *obj, const AGeoObject *RefObj, AGeoObject *arrayObj, TGeoVolume *parent, TGeoManager *GeoManager, AMaterialParticleCollection *MaterialCollection, QVector<APMandDummy> *PMsAndDumPMs, int arrayIndex)
+void ASandwich::positionArrayElement_StackObject(int ix, int iy, int iz, AGeoObject *obj, const AGeoObject *RefObj, AGeoObject *arrayObj, TGeoVolume *parent, int arrayIndex)
 {
     //storing original position/orientation
     double posrot[6];
@@ -1069,7 +1073,7 @@ void ASandwich::positionArrayElement_StackObject(int ix, int iy, int iz, AGeoObj
         obj->Orientation[i] += obj->Container->Orientation[i];
     }
 
-    positionArrayElement(ix, iy, iz, obj, arrayObj, parent, GeoManager, MaterialCollection, PMsAndDumPMs, arrayIndex);
+    positionArrayElement(ix, iy, iz, obj, arrayObj, parent, arrayIndex);
 
     //recovering original positions
     for (int i=0; i<3; i++)
@@ -1270,7 +1274,7 @@ bool ASandwich::CalculateZofSlabs()
   return true;
 }
 
-bool ASandwich::isMaterialInUse(int imat)
+bool ASandwich::isMaterialInUse(int imat) const
 {
    return World->isMaterialInUse(imat);
 }
@@ -1881,7 +1885,7 @@ void ASandwich::onMaterialsChanged(const QStringList MaterialList)
   //emit RequestGuiUpdate();
 }
 
-void ASandwich::IsParticleInUse(int particleId, bool &bInUse, QString &MonitorNames)
+void ASandwich::IsParticleInUse(int particleId, bool &bInUse, QString &MonitorNames) const
 {
   bInUse = false;
   MonitorNames.clear();

@@ -312,6 +312,8 @@ void DetectorClass::populateGeoManager()
       char *cname = ba.data();
       (*MpCollection)[i]->generateTGeoMat();
       (*MpCollection)[i]->GeoMed = new TGeoMedium (cname, i, (*MpCollection)[i]->GeoMat);
+
+      //***!!! need parameters?
       (*MpCollection)[i]->GeoMed->SetParam(0, (*MpCollection)[i]->n ); // refractive index
       // param[1] reserved for k
       (*MpCollection)[i]->GeoMed->SetParam(2, (*MpCollection)[i]->abs ); // abcorption coefficient (mm^-1)
@@ -345,23 +347,21 @@ void DetectorClass::populateGeoManager()
   top = GeoManager->MakeBox("WorldBox", (*MpCollection)[Sandwich->World->Material]->GeoMed, WorldSizeXY, WorldSizeXY, WorldSizeZ);
   GeoManager->SetTopVolume(top);
   GeoManager->SetTopVisible(true);
-  //qDebug() << "--> Positioning sandwich layers";
 
-  //Position WorldTree objects
+  //qDebug() << "--> Populating GeoManager";
   QVector<APMandDummy> PMsAndDumPms;
-  for (int i=0; i<PMs->count(); i++)     PMsAndDumPms << APMandDummy(PMs->X(i), PMs->Y(i), PMs->at(i).upperLower);
-  for (int i=0; i<PMdummies.size(); i++) PMsAndDumPms << APMandDummy(PMdummies.at(i).r[0], PMdummies.at(i).r[1], PMdummies.at(i).UpperLower);
-  Sandwich->clearGridRecords();
-  Sandwich->clearMonitorRecords();
+  for (int i = 0; i < PMs->count(); i++)
+      PMsAndDumPms << APMandDummy(PMs->X(i), PMs->Y(i), PMs->at(i).upperLower);
+  for (int i = 0; i < PMdummies.size(); i++)
+      PMsAndDumPms << APMandDummy(PMdummies.at(i).r[0], PMdummies.at(i).r[1], PMdummies.at(i).UpperLower);
 
-  Sandwich->expandPrototypeInstances();
-
-  Sandwich->addTGeoVolumeRecursively(Sandwich->World, top, GeoManager, MpCollection, &PMsAndDumPms);
+  Sandwich->populateGeoManager(top, GeoManager, MpCollection, &PMsAndDumPms);
 
   positionPMs();
   if (PMdummies.size() > 0) positionDummies();
 
-  top->SetName("World");
+  top->SetName("World");   // ***!!! move to MakeBox?
+
   //qDebug() << "--> Closing geometry";
   GeoManager->CloseGeometry();
   emit newGeoManager();

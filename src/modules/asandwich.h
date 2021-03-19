@@ -137,6 +137,7 @@ private:
   void expandPrototypeInstances();
   bool processCompositeObject(AGeoObject *obj);
   void positionHostedForLightguide(AGeoObject *obj, TGeoVolume *vol, TGeoCombiTrans *lTrans);
+  void addMonitorNode(AGeoObject *obj, TGeoVolume *vol, TGeoVolume *parent, TGeoCombiTrans *lTrans);
 };
 
 #endif // ASANDWICH_H

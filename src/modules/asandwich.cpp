@@ -701,18 +701,38 @@ void ASandwich::populateGeoManager(TGeoVolume * top, TGeoManager * geoManager, A
     addTGeoVolumeRecursively(World, top);
 }
 
+void ASandwich::addMonitorNode(AGeoObject * obj, TGeoVolume * vol, TGeoVolume * parent, TGeoCombiTrans * lTrans)
+{
+    const int MonitorCounter = MonitorsRecords.size();
+
+    TString fixedName = vol->GetName();
+    fixedName += "_-_";
+    fixedName += MonitorCounter;
+    vol->SetName(fixedName);
+
+    MonitorsRecords.append(obj);
+    (static_cast<ATypeMonitorObject*>(obj->ObjectType))->index = MonitorCounter;
+    parent->AddNode(vol, MonitorCounter, lTrans);
+
+    MonitorIdNames.append(QString("%1_%2").arg(vol->GetName()).arg(MonitorCounter));
+
+    TObjArray * nList = parent->GetNodes();
+    const int numNodes = nList->GetEntries();
+    TGeoNode * node = (TGeoNode*)nList->At(numNodes-1);
+    MonitorNodes.append(node);
+}
+
 void ASandwich::addTGeoVolumeRecursively(AGeoObject * obj, TGeoVolume * parent, int forcedNodeNumber)
 {
-    //qDebug() << "Processing TGeo creation for object"<<obj->Name<<" which must be in"<<parent->GetName();
     if (!obj->fActive) return;
 
-    TGeoVolume     * vol = nullptr;
+    TGeoVolume     * vol    = nullptr;
     TGeoCombiTrans * lTrans = nullptr;
 
     if      (obj->ObjectType->isWorld())
         vol = parent; // just a shortcut, to resuse the cycle by HostedVolumes below
     else if (obj->ObjectType->isPrototypes() || obj->isCompositeMemeber() || obj->ObjectType->isCompositeContainer())
-        return;       //do nothing with logicals, they also do not host anything real
+        return;       //do nothing with logicals, they also do not host anything to be added to the geometry
     else if (obj->ObjectType->isHandlingSet() || obj->ObjectType->isHandlingArray() || obj->ObjectType->isInstance())
         vol = parent; // group objects are pure virtual, just pass the volume of the parent
     else
@@ -723,17 +743,17 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject * obj, TGeoVolume * parent, 
             if (obj->Container) iMat = obj->Container->getMaterial();
             else qWarning() << "Monitor without container detected!";
         }
-        else if (obj->ObjectType->isComposite())
+
+        if (obj->ObjectType->isComposite())
         {
             bool ok = processCompositeObject(obj);
             if (!ok) return;
         }
 
-        //creating volume
-        TGeoMedium * med = (*MaterialCollection)[iMat]->GeoMed;
-        vol = new TGeoVolume(obj->Name.toLocal8Bit().data(), obj->Shape->createGeoShape(), med);
+        //create new volume
+        vol = new TGeoVolume(obj->Name.toLocal8Bit().data(), obj->Shape->createGeoShape(), (*MaterialCollection)[iMat]->GeoMed);
 
-        //creating positioning/rotation transformation
+        //creating otation/translation transformations
         TGeoRotation * lRot = nullptr;
         if (obj->lRot) lRot = obj->lRot;
         else
@@ -750,30 +770,14 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject * obj, TGeoVolume * parent, 
             parent->AddNode(vol, GridRecords.size() - 1, lTrans);
         }
         else if (obj->ObjectType->isMonitor())
-        {
-            const int MonitorCounter = MonitorsRecords.size();
-
-            TString fixedName = vol->GetName();
-            fixedName += "_-_";
-            fixedName += MonitorCounter;
-            vol->SetName(fixedName);
-
-            MonitorsRecords.append(obj);
-            (static_cast<ATypeMonitorObject*>(obj->ObjectType))->index = MonitorCounter;
-            parent->AddNode(vol, MonitorCounter, lTrans);
-
-            MonitorIdNames.append(QString("%1_%2").arg(vol->GetName()).arg(MonitorCounter));
-
-            TObjArray * nList = parent->GetNodes();
-            const int numNodes = nList->GetEntries();
-            TGeoNode * node = (TGeoNode*)nList->At(numNodes-1);
-            MonitorNodes.append(node);
-        }
-        else parent->AddNode(vol, forcedNodeNumber, lTrans);
+            addMonitorNode(obj, vol, parent, lTrans);
+        else
+            parent->AddNode(vol, forcedNodeNumber, lTrans);
     }
 
     //positioning hosted objects
-    if      (obj->ObjectType->isLightguide()) positionHostedForLightguide(obj, vol, lTrans);
+    if      (obj->ObjectType->isLightguide())
+        positionHostedForLightguide(obj, vol, lTrans);
     else if (obj->ObjectType->isHandlingArray())
     {
         ATypeArrayObject * array = static_cast<ATypeArrayObject*>(obj->ObjectType);
@@ -866,7 +870,7 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject * obj, TGeoVolume * parent, 
             addTGeoVolumeRecursively(el, vol, forcedNodeNumber);
     }
 
-    //  Trackers use volume title for identification of special rules
+    //  Particle/Photon trackers use volume title for identification of volumes with special rules
     //  First character can be 'G' for optical grid, 'M' for monitor, 'P' for PMT, 'p' for dummy PM
     //  PMs and DummyPMs receive title in detector class, see PositionPMs and PositionDummis methods
     //  Second character is used by the ParticleTracker to indicate that particles leaving the volume have to be saved to file

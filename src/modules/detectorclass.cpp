@@ -307,18 +307,18 @@ void DetectorClass::populateGeoManager()
   //qDebug() << "--> Creating materials and media";
   for (int i=0; i<MpCollection->countMaterials(); i++)
     {
-      QString tmpStr = (*MpCollection)[i]->name;
-      QByteArray ba = tmpStr.toLocal8Bit();
-      char *cname = ba.data();
+//      QString tmpStr = (*MpCollection)[i]->name;
+//      QByteArray ba = tmpStr.toLocal8Bit();
+//      char *cname = ba.data();
       (*MpCollection)[i]->generateTGeoMat();
-      (*MpCollection)[i]->GeoMed = new TGeoMedium (cname, i, (*MpCollection)[i]->GeoMat);
+      (*MpCollection)[i]->GeoMed = new TGeoMedium( (*MpCollection)[i]->name.toLocal8Bit().data(), i, (*MpCollection)[i]->GeoMat);
 
       //***!!! need parameters?
-      (*MpCollection)[i]->GeoMed->SetParam(0, (*MpCollection)[i]->n ); // refractive index
-      // param[1] reserved for k
-      (*MpCollection)[i]->GeoMed->SetParam(2, (*MpCollection)[i]->abs ); // abcorption coefficient (mm^-1)
-      (*MpCollection)[i]->GeoMed->SetParam(3, (*MpCollection)[i]->reemissionProb ); // re-emission probability
-      (*MpCollection)[i]->GeoMed->SetParam(4, (*MpCollection)[i]->rayleighMFP ); // Rayleigh MFP (mm)
+//      (*MpCollection)[i]->GeoMed->SetParam(0, (*MpCollection)[i]->n ); // refractive index
+//      // param[1] reserved for k
+//      (*MpCollection)[i]->GeoMed->SetParam(2, (*MpCollection)[i]->abs ); // abcorption coefficient (mm^-1)
+//      (*MpCollection)[i]->GeoMed->SetParam(3, (*MpCollection)[i]->reemissionProb ); // re-emission probability
+//      (*MpCollection)[i]->GeoMed->SetParam(4, (*MpCollection)[i]->rayleighMFP ); // Rayleigh MFP (mm)
     }
 
   //calculate Z of slabs in ASandwich, copy Z edges
@@ -360,7 +360,7 @@ void DetectorClass::populateGeoManager()
   positionPMs();
   if (PMdummies.size() > 0) positionDummies();
 
-  top->SetName("World");   // ***!!! move to MakeBox?
+  top->SetName("World"); // "WorldBox" above is needed - JSROOT uses that name to avoid conflicts"
 
   //qDebug() << "--> Closing geometry";
   GeoManager->CloseGeometry();

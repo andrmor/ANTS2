@@ -14,6 +14,7 @@ class TGeoShape;
 class AGeoShape;
 class ASlabModel;
 class AGridElementRecord;
+class TGeoRotation;
 
 class AGeoObject
 {
@@ -151,6 +152,8 @@ public:
   //service propertie
   QString tmpContName;   //used only during load
   bool fExpanded = true; //gui only - is this object expanded in tree view
+
+  TGeoRotation * lRot = nullptr;  // only used during population of TGeoManager
 
 private:
   AGeoObject * findContainerUp(const QString & name);

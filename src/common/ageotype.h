@@ -143,8 +143,8 @@ class ATypeArrayObject : public AGeoType
 {
 public:
     ATypeArrayObject() {Type = "Array"; Handling = "Array";}
-    ATypeArrayObject(int numX, int numY, int numZ, double stepX, double stepY, double stepZ)
-        : numX(numX), numY(numY), numZ(numZ), stepX(stepX), stepY(stepY), stepZ(stepZ) {Type = "Array"; Handling = "Array";}
+    ATypeArrayObject(int numX, int numY, int numZ, double stepX, double stepY, double stepZ, int startIndex = 0)
+        : numX(numX), numY(numY), numZ(numZ), stepX(stepX), stepY(stepY), stepZ(stepZ), startIndex(startIndex) {Type = "Array"; Handling = "Array";}
 
     void Reconfigure(int NumX, int NumY, int NumZ, double StepX, double StepY, double StepZ);
 
@@ -161,7 +161,8 @@ public:
     double stepY = 25.0;
     double stepZ = 25.0;
     QString strNumX, strNumY, strNumZ, strStepX, strStepY, strStepZ;
-    int startIndex = 0; QString strStartIndex;
+    int startIndex = 0;
+    QString strStartIndex;
 
     static QString evaluateStringValues(ATypeArrayObject & ArrayType);
 };
@@ -170,8 +171,8 @@ class ATypeCircularArrayObject : public ATypeArrayObject
 {
 public:
     ATypeCircularArrayObject() {Type = "CircularArray"; Handling = "Array";}
-    ATypeCircularArrayObject(int num, double angularStep, double radius)
-        : num(num), angularStep(angularStep), radius(radius) {Type = "CircularArray"; Handling = "Array";}
+    ATypeCircularArrayObject(int num, double angularStep, double radius, int StartIndex = 0)
+        : num(num), angularStep(angularStep), radius(radius) {Type = "CircularArray"; Handling = "Array"; startIndex = StartIndex;}
 
     void Reconfigure(int Num, double AngularStep, double Radius);
 

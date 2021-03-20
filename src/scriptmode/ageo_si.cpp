@@ -732,10 +732,24 @@ void AGeo_SI::RecalculateStack(QString name)
 
 void AGeo_SI::Array(QString name, int numX, int numY, int numZ, double stepX, double stepY, double stepZ, QString container, double x, double y, double z, double psi)
 {
-    AGeoObject* o = new AGeoObject(name, container, 0, 0, x,y,z, 0,0,psi);
+    Array(name, numX,numY,numZ,  stepX,stepY,stepZ, container, x,y,z,  0,0,psi,  0);
+}
+
+void AGeo_SI::Array(QString name, int numX, int numY, int numZ, double stepX, double stepY, double stepZ, QString container, double x, double y, double z, double phi, double theta, double psi, int startIndex)
+{
+    AGeoObject * o = new AGeoObject(name, container, 0, 0, x,y,z, phi,theta,psi);
     delete o->Shape; o->Shape = new AGeoBox;
     delete o->ObjectType;
-    o->ObjectType = new ATypeArrayObject(numX, numY, numZ, stepX, stepY, stepZ);
+    o->ObjectType = new ATypeArrayObject(numX, numY, numZ, stepX, stepY, stepZ, startIndex);
+    GeoObjects.append(o);
+}
+
+void AGeo_SI::CircArray(QString name, int num, double angularStep, double radius, QString container, double x, double y, double z, double phi, double theta, double psi, int startIndex)
+{
+    AGeoObject * o = new AGeoObject(name, container, 0, 0, x,y,z, phi,theta,psi);
+    delete o->Shape; o->Shape = new AGeoBox;
+    delete o->ObjectType;
+    o->ObjectType = new ATypeCircularArrayObject(num, angularStep, radius, startIndex);
     GeoObjects.append(o);
 }
 

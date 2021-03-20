@@ -1435,7 +1435,7 @@ void AGeoTree::objectToScript(AGeoObject *obj, QString &script, int ident, bool 
         script += "\n" + QString(" ").repeated(ident)+ makeLinePropertiesString(obj);
         if (bRecursive) objectMembersToScript(obj, script, medIdent, bExpandMaterial, bRecursive, usePython);
     }
-    else if (obj->ObjectType->isArray())
+    else if (obj->ObjectType->isHandlingArray())
     {
         script += "\n" + QString(" ").repeated(ident)+ makeScriptString_arrayObject(obj);
         script += "\n" + QString(" ").repeated(ident)+ CommentStr + "-->-- array elements for " + obj->Name;
@@ -1574,37 +1574,77 @@ QString AGeoTree::makeScriptString_setCenterSlab(AGeoObject *obj) const
 
 QString AGeoTree::makeScriptString_arrayObject(AGeoObject *obj) const
 {
-    ATypeArrayObject* a = dynamic_cast<ATypeArrayObject*>(obj->ObjectType);
-    if (!a)
+    QString str;
+
+    ATypeCircularArrayObject * c = dynamic_cast<ATypeCircularArrayObject*>(obj->ObjectType);
+    if (c)
     {
-        qWarning() << "It is not an array!";
-        return "Error accessing object as array!";
+        QString snum   = (c  ->strNum           .isEmpty() ? QString::number(c  ->num)               : c->strNum);
+        QString sstep  = (c  ->strAngularStep   .isEmpty() ? QString::number(c  ->angularStep)       : c->strAngularStep);
+        QString srad   = (c  ->strRadius        .isEmpty() ? QString::number(c  ->radius)            : c->strRadius);
+        QString sPos0  = (obj->PositionStr[0]   .isEmpty() ? QString::number(obj->Position[0])       : obj->PositionStr[0]);
+        QString sPos1  = (obj->PositionStr[1]   .isEmpty() ? QString::number(obj->Position[1])       : obj->PositionStr[1]);
+        QString sPos2  = (obj->PositionStr[2]   .isEmpty() ? QString::number(obj->Position[2])       : obj->PositionStr[2]);
+        QString sOri0  = (obj->OrientationStr[0].isEmpty() ? QString::number(obj->Orientation[0])    : obj->OrientationStr[0]);
+        QString sOri1  = (obj->OrientationStr[1].isEmpty() ? QString::number(obj->Orientation[1])    : obj->OrientationStr[1]);
+        QString sOri2  = (obj->OrientationStr[2].isEmpty() ? QString::number(obj->Orientation[2])    : obj->OrientationStr[2]);
+        QString sIndex = (c->strStartIndex      .isEmpty() ? QString::number(c  ->startIndex)        : c->strStartIndex);
+
+        str +=  QString("geo.CircArray( ") +
+                "'" + obj->Name + "', " +
+                snum + ", " +
+                sstep + ", " +
+                srad + ",   " +
+                "'" + obj->Container->Name + "',   " +
+                sPos0 + ", " +
+                sPos1 + ", " +
+                sPos2 + ",   " +
+                sOri0 + ",   " +
+                sOri1 + ",   " +
+                sOri2 + ",   " +
+                sIndex + " )";
+    }
+    else
+    {
+        ATypeArrayObject* a = dynamic_cast<ATypeArrayObject*>(obj->ObjectType);
+        if (!a)
+        {
+            qWarning() << "It is not an array!";
+            return "Error accessing object as array!";
+        }
+
+        QString snumX  = (a  ->strNumX          .isEmpty() ? QString::number(a  ->numX)              : a->strNumX);
+        QString snumY  = (a  ->strNumY          .isEmpty() ? QString::number(a  ->numY)              : a->strNumY);
+        QString snumZ  = (a  ->strNumZ          .isEmpty() ? QString::number(a  ->numZ)              : a->strNumZ);
+        QString sstepX = (a  ->strStepX         .isEmpty() ? QString::number(a  ->stepX)             : a->strStepX);
+        QString sstepY = (a  ->strStepY         .isEmpty() ? QString::number(a  ->stepY)             : a->strStepY);
+        QString sstepZ = (a  ->strStepZ         .isEmpty() ? QString::number(a  ->stepZ)             : a->strStepZ);
+        QString sPos0  = (obj->PositionStr[0]   .isEmpty() ? QString::number(obj->Position[0])       : obj->PositionStr[0]);
+        QString sPos1  = (obj->PositionStr[1]   .isEmpty() ? QString::number(obj->Position[1])       : obj->PositionStr[1]);
+        QString sPos2  = (obj->PositionStr[2]   .isEmpty() ? QString::number(obj->Position[2])       : obj->PositionStr[2]);
+        QString sOri0  = (obj->OrientationStr[0].isEmpty() ? QString::number(obj->Orientation[0])    : obj->OrientationStr[0]);
+        QString sOri1  = (obj->OrientationStr[1].isEmpty() ? QString::number(obj->Orientation[1])    : obj->OrientationStr[1]);
+        QString sOri2  = (obj->OrientationStr[2].isEmpty() ? QString::number(obj->Orientation[2])    : obj->OrientationStr[2]);
+        QString sIndex = (a->strStartIndex      .isEmpty() ? QString::number(a  ->startIndex)        : a->strStartIndex);
+
+        str +=  QString("geo.Array( ") +
+                "'" + obj->Name + "', " +
+                snumX + ", " +
+                snumY + ", " +
+                snumZ + ",   " +
+                sstepX + ", " +
+                sstepY + ", " +
+                sstepZ + ", " +
+                "'" + obj->Container->Name + "',   " +
+                sPos0 + ", " +
+                sPos1 + ", " +
+                sPos2 + ",   " +
+                sOri0 + ",   " +
+                sOri1 + ",   " +
+                sOri2 + ",   " +
+                sIndex + " )";
     }
 
-    QString snumX  = (a  ->strNumX          .isEmpty() ? QString::number(a  ->numX)              : a->strNumX);
-    QString snumY  = (a  ->strNumY          .isEmpty() ? QString::number(a  ->numY)              : a->strNumY);
-    QString snumZ  = (a  ->strNumZ          .isEmpty() ? QString::number(a  ->numZ)              : a->strNumZ);
-    QString sstepX = (a  ->strStepX         .isEmpty() ? QString::number(a  ->stepX)             : a->strStepX);
-    QString sstepY = (a  ->strStepY         .isEmpty() ? QString::number(a  ->stepY)             : a->strStepY);
-    QString sstepZ = (a  ->strStepZ         .isEmpty() ? QString::number(a  ->stepZ)             : a->strStepZ);
-    QString sPos0  = (obj->PositionStr[0]   .isEmpty() ? QString::number(obj->Position[0])       : obj->PositionStr[0]);
-    QString sPos1  = (obj->PositionStr[1]   .isEmpty() ? QString::number(obj->Position[1])       : obj->PositionStr[1]);
-    QString sPos2  = (obj->PositionStr[2]   .isEmpty() ? QString::number(obj->Position[2])       : obj->PositionStr[2]);
-    QString sOri2  = (obj->OrientationStr[2].isEmpty() ? QString::number(obj->Orientation[2])    : obj->OrientationStr[2]);
-
-    QString str =  QString("geo.Array( ") +
-            "'" + obj->Name + "', " +
-            snumX + ", " +
-            snumY + ", " +
-            snumZ + ",   " +
-            sstepX + ", " +
-            sstepY + ", " +
-            sstepZ + ", " +
-            "'" + obj->Container->Name + "',   " +
-            sPos0 + ", " +
-            sPos1 + ", " +
-            sPos2 + ",   " +
-            sOri2 + " )";
     //qDebug() <<"strrr" << str;
     return str;
 }

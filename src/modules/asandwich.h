@@ -117,6 +117,17 @@ public slots:
   void onMaterialsChanged(const QStringList MaterialList);  // !*! obsolete?  //October2020: disabled signal emitting to request gui update
 
 private:
+  void addTGeoVolumeRecursively(AGeoObject * obj, TGeoVolume * parent, int forcedNodeNumber = 0);
+
+  void positionArray(AGeoObject * obj, TGeoVolume * vol);
+  void positionStack(AGeoObject * obj, TGeoVolume * vol, int forcedNodeNumber);
+  void positionLightguide(AGeoObject * obj, TGeoVolume * vol, TGeoCombiTrans *lTrans);
+
+  void positionArrayElement(int ix, int iy, int iz, AGeoObject * el, AGeoObject * arrayObj, TGeoVolume * parent, int arrayIndex);
+  void positionCircularArrayElement(int ia, AGeoObject * el, AGeoObject * arrayObj, TGeoVolume * parent, int arrayIndex);
+  void positionStackElement(AGeoObject * el, const AGeoObject * RefObj, TGeoVolume * parent, int forcedNodeNumber);
+  //void positionArrayElement_StackObject(int ix, int iy, int iz, AGeoObject *obj, const AGeoObject *RefObj, AGeoObject *arrayObj, TGeoVolume *parent, int arrayIndex);
+
   void clearModel();
   void clearGridRecords();
   void clearMonitorRecords();
@@ -126,16 +137,10 @@ private:
   void importOldMask(QJsonObject &json);
   void importOldGrid(QJsonObject &json);
 
-  void addTGeoVolumeRecursively(AGeoObject * obj, TGeoVolume * parent, int forcedNodeNumber = 0);
 
-  void positionArrayElement(int ix, int iy, int iz, AGeoObject * el, AGeoObject * arrayObj, TGeoVolume * parent, int arrayIndex);
-  void positionCircularArrayElement(int ia, AGeoObject * el, AGeoObject * arrayObj, TGeoVolume * parent, int arrayIndex);
-  void positionStackObject(AGeoObject * obj, const AGeoObject * RefObj, TGeoVolume * parent, int forcedNodeNumber);
-  void positionArrayElement_StackObject(int ix, int iy, int iz, AGeoObject *obj, const AGeoObject *RefObj, AGeoObject *arrayObj, TGeoVolume *parent, int arrayIndex);
 
   void expandPrototypeInstances();
   bool processCompositeObject(AGeoObject *obj);
-  void positionHostedForLightguide(AGeoObject *obj, TGeoVolume *vol, TGeoCombiTrans *lTrans);
   void addMonitorNode(AGeoObject *obj, TGeoVolume *vol, TGeoVolume *parent, TGeoCombiTrans *lTrans);
   TGeoRotation * createCombinedRotation(TGeoRotation * firstRot, TGeoRotation * secondRot, TGeoRotation * thirdRot = nullptr);
 };

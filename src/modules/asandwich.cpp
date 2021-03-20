@@ -655,7 +655,7 @@ bool ASandwich::processCompositeObject(AGeoObject * obj)
     return true;
 }
 
-void ASandwich::positionHostedForLightguide(AGeoObject * obj, TGeoVolume * vol, TGeoCombiTrans * lTrans)
+void ASandwich::positionLightguide(AGeoObject * obj, TGeoVolume * vol, TGeoCombiTrans * lTrans)
 {
     const int ul = ( obj->ObjectType->isUpperLightguide() ? 0 : 1);
 
@@ -784,7 +784,7 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject * obj, TGeoVolume * parent, 
             lTrans = new TGeoCombiTrans("lTrans", obj->Position[0], obj->Position[1], obj->Position[2], lRot);
         }
 
-        //positioning this object
+        //positioning this object, if it is physical
         if (obj->ObjectType->isGrid())
         {
             GridRecords.append(obj->createGridRecord());
@@ -798,82 +798,11 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject * obj, TGeoVolume * parent, 
 
     //positioning hosted objects
     if (obj->ObjectType->isHandlingArray())
-    {
-        ATypeArrayObject * array = static_cast<ATypeArrayObject*>(obj->ObjectType);
-
-        for (AGeoObject * el : obj->HostedObjects)
-        {
-            int iCounter = array->startIndex;
-            if (iCounter < 0) iCounter = 0;
-
-            const AGeoObject * StackRefObj = nullptr;
-            if (el->ObjectType->isStack())
-            {
-                const ATypeStackContainerObject * stack = static_cast<const ATypeStackContainerObject*>(el->ObjectType);
-                const QString & RefObjName = stack->ReferenceVolume;
-                for (const AGeoObject * stObj : el->HostedObjects)
-                    if (stObj->Name == RefObjName)
-                    {
-                        StackRefObj = stObj;
-                        break;
-                    }
-                if (!StackRefObj) qWarning() << "Error: Reference object not found for stack" << el->Name;
-            }
-
-            ATypeCircularArrayObject * circArray = dynamic_cast<ATypeCircularArrayObject*>(obj->ObjectType);
-            if (!circArray)
-            {
-                for (int ix = 0; ix < array->numX; ix++)
-                  for (int iy = 0; iy < array->numY; iy++)
-                    for (int iz = 0; iz < array->numZ; iz++)
-                    {
-                        if (StackRefObj)
-                        {
-                            for (AGeoObject * StackObj : el->HostedObjects)
-                                positionArrayElement_StackObject(ix, iy, iz, StackObj, StackRefObj, obj, vol, iCounter);
-                        }
-                        else positionArrayElement(ix, iy, iz, el, obj, vol, iCounter);
-                        iCounter++;
-                    }
-            }
-            else
-            {
-                for (int ia = 0; ia < circArray->num; ia++)
-                {
-                    /*
-                    if (StackRefObj)
-                    {
-                        for (AGeoObject * StackObj : el->HostedObjects)
-                            positionArrayElement_StackObject(ix, iy, iz, StackObj, StackRefObj, obj, vol, GeoManager, MaterialCollection, PMsAndDumPMs, iCounter);
-                    }
-                    */
-                    positionCircularArrayElement(ia, el, obj, vol, iCounter);
-                    iCounter++;
-                }
-            }
-        }
-    }
+        positionArray(obj, vol);
     else if (obj->ObjectType->isStack())
-    {
-        const ATypeStackContainerObject * stack = static_cast<const ATypeStackContainerObject*>(obj->ObjectType);
-        const QString & RefObjName = stack->ReferenceVolume;
-        const AGeoObject * RefObj = nullptr;
-        for (const AGeoObject * el : obj->HostedObjects)
-            if (el->Name == RefObjName)
-            {
-                RefObj = el;
-                break;
-            }
-
-        if (RefObj)
-        {
-            for (AGeoObject * el : obj->HostedObjects)
-                positionStackObject(el, RefObj, vol, forcedNodeNumber);
-        }
-        else qWarning() << "Error: Reference object not found for stack" << obj->Name;
-    }
+        positionStack(obj, vol, forcedNodeNumber);
     else if (obj->ObjectType->isLightguide())
-        positionHostedForLightguide(obj, vol, lTrans);
+        positionLightguide(obj, vol, lTrans);
     else
         for (AGeoObject * el : obj->HostedObjects)
             addTGeoVolumeRecursively(el, vol, forcedNodeNumber);
@@ -885,6 +814,51 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject * obj, TGeoVolume * parent, 
     if      (obj->ObjectType->isGrid())    vol->SetTitle("G---");
     else if (obj->ObjectType->isMonitor()) vol->SetTitle("M---");
     else                                   vol->SetTitle("----");
+}
+
+void ASandwich::positionArray(AGeoObject * obj, TGeoVolume * vol)
+{
+    ATypeArrayObject * array = static_cast<ATypeArrayObject*>(obj->ObjectType);
+
+    for (AGeoObject * el : obj->HostedObjects)
+    {
+        int iCounter = array->startIndex;
+        if (iCounter < 0) iCounter = 0;
+
+        ATypeCircularArrayObject * circArray = dynamic_cast<ATypeCircularArrayObject*>(obj->ObjectType);
+        if (!circArray)
+        {
+            for (int ix = 0; ix < array->numX; ix++)
+              for (int iy = 0; iy < array->numY; iy++)
+                for (int iz = 0; iz < array->numZ; iz++)
+                    positionArrayElement(ix, iy, iz, el, obj, vol, iCounter++);
+        }
+        else
+        {
+            for (int ia = 0; ia < circArray->num; ia++)
+                positionCircularArrayElement(ia, el, obj, vol, iCounter++);
+        }
+    }
+}
+
+void ASandwich::positionStack(AGeoObject * obj, TGeoVolume * vol, int forcedNodeNumber)
+{
+    const ATypeStackContainerObject * stack = static_cast<const ATypeStackContainerObject*>(obj->ObjectType);
+    const QString & RefObjName = stack->ReferenceVolume;
+    const AGeoObject * RefObj = nullptr;
+    for (const AGeoObject * el : obj->HostedObjects)
+        if (el->Name == RefObjName)
+        {
+            RefObj = el;
+            break;
+        }
+
+    if (RefObj)
+    {
+        for (AGeoObject * el : obj->HostedObjects)
+            positionStackElement(el, RefObj, vol, forcedNodeNumber);
+    }
+    else qWarning() << "Error: Reference object not found for stack" << obj->Name;
 }
 
 void ASandwich::positionArrayElement(int ix, int iy, int iz, AGeoObject * el, AGeoObject * arrayObj, TGeoVolume * parent, int arrayIndex)
@@ -957,6 +931,73 @@ void ASandwich::positionCircularArrayElement(int ia, AGeoObject * el, AGeoObject
     addTGeoVolumeRecursively(el, parent, arrayIndex);
 }
 
+void ASandwich::positionStackElement(AGeoObject * el, const AGeoObject * RefObj, TGeoVolume *parent, int forcedNodeNumber)
+{
+    AGeoObject * Stack = el->Container;
+
+    //Position
+    double local[3], master[3];
+    local[0] = el->Position[0] - RefObj->Position[0];
+    local[1] = el->Position[1] - RefObj->Position[1];
+    local[2] = el->Position[2] - RefObj->Position[2];
+    TGeoRotation StackRot("0", Stack->Orientation[0], Stack->Orientation[1], Stack->Orientation[2]);
+    if (Stack->TrueRot)
+    {
+        Stack->TrueRot->LocalToMaster(local, master);
+        for (int i = 0; i < 3; i++)
+            el->TruePos[i] = master[i] + RefObj->Position[i] + Stack->TruePos[i];
+    }
+    else
+    {
+        StackRot.LocalToMaster(local, master);
+        for (int i = 0; i < 3; i++)
+            el->TruePos[i] = master[i] + RefObj->Position[i];
+    }
+
+    //Orientation
+    TGeoRotation elRot("1", el->Orientation[0], el->Orientation[1], el->Orientation[2]);
+    if (Stack->TrueRot)
+        el->TrueRot = createCombinedRotation(&elRot, Stack->TrueRot);
+    else
+        el->TrueRot = createCombinedRotation(&elRot, &StackRot);
+    el->TrueRot->RegisterYourself();
+
+    addTGeoVolumeRecursively(el, parent, forcedNodeNumber);
+}
+
+/*
+void ASandwich::positionArrayElement_StackObject(int ix, int iy, int iz, AGeoObject *obj, const AGeoObject *RefObj, AGeoObject *arrayObj, TGeoVolume *parent, int arrayIndex)
+{
+    //storing original position/orientation
+    double posrot[6];
+    for (int i=0; i<3; i++)
+    {
+        posrot[i]   = obj->Position[i];
+        posrot[i+3] = obj->Orientation[i];
+    }
+
+    //the origin of rotation is the center of the reference object
+    TVector3 v(obj->Position[0] - RefObj->Position[0],
+               obj->Position[1] - RefObj->Position[1],
+               obj->Position[2] - RefObj->Position[2]); // vector from the origin to the center of this object (first two should be 0)
+    rotate(v, obj->Container->Orientation[0], obj->Container->Orientation[1], obj->Container->Orientation[2]);
+    for (int i = 0; i < 3; i++)
+    {
+        obj->Position[i]     = RefObj->Position[i] + v[i] + obj->Container->Position[i];
+        obj->Orientation[i] += obj->Container->Orientation[i];
+    }
+
+    positionArrayElement(ix, iy, iz, obj, arrayObj, parent, arrayIndex);
+
+    //recovering original positions
+    for (int i=0; i<3; i++)
+    {
+        obj->Position[i]    = posrot[i];
+        obj->Orientation[i] = posrot[i+3];
+    }
+}
+*/
+
 TGeoRotation * ASandwich::createCombinedRotation(TGeoRotation * firstRot, TGeoRotation * secondRot, TGeoRotation * thirdRot)
 {
     double local[3], master[3];
@@ -1005,68 +1046,6 @@ TGeoRotation * ASandwich::createCombinedRotation(TGeoRotation * firstRot, TGeoRo
     Rot->SetMatrix(rotMat);
 
     return Rot;
-}
-
-void ASandwich::positionStackObject(AGeoObject *obj, const AGeoObject * RefObj, TGeoVolume *parent, int forcedNodeNumber)
-{
-    //storing original position/orientation
-    double posrot[6];
-    for (int i=0; i<3; i++)
-    {
-        posrot[i]   = obj->Position[i];
-        posrot[i+3] = obj->Orientation[i];
-    }
-
-    //the origin of rotation is the center of the reference object
-    TVector3 v(obj->Position[0] - RefObj->Position[0],
-               obj->Position[1] - RefObj->Position[1],
-               obj->Position[2] - RefObj->Position[2]); // vector from the origin to the center of this object (first two should be 0)
-    rotate(v, obj->Container->Orientation[0], obj->Container->Orientation[1], obj->Container->Orientation[2]);
-    for (int i = 0; i < 3; i++)
-    {
-        obj->Position[i]     = RefObj->Position[i] + v[i] + obj->Container->Position[i];
-        obj->Orientation[i] += obj->Container->Orientation[i];
-    }
-
-    addTGeoVolumeRecursively(obj, parent, forcedNodeNumber);
-
-    //recovering original positions
-    for (int i=0; i<3; i++)
-    {
-        obj->Position[i]    = posrot[i];
-        obj->Orientation[i] = posrot[i+3];
-    }
-}
-
-void ASandwich::positionArrayElement_StackObject(int ix, int iy, int iz, AGeoObject *obj, const AGeoObject *RefObj, AGeoObject *arrayObj, TGeoVolume *parent, int arrayIndex)
-{
-    //storing original position/orientation
-    double posrot[6];
-    for (int i=0; i<3; i++)
-    {
-        posrot[i]   = obj->Position[i];
-        posrot[i+3] = obj->Orientation[i];
-    }
-
-    //the origin of rotation is the center of the reference object
-    TVector3 v(obj->Position[0] - RefObj->Position[0],
-               obj->Position[1] - RefObj->Position[1],
-               obj->Position[2] - RefObj->Position[2]); // vector from the origin to the center of this object (first two should be 0)
-    rotate(v, obj->Container->Orientation[0], obj->Container->Orientation[1], obj->Container->Orientation[2]);
-    for (int i = 0; i < 3; i++)
-    {
-        obj->Position[i]     = RefObj->Position[i] + v[i] + obj->Container->Position[i];
-        obj->Orientation[i] += obj->Container->Orientation[i];
-    }
-
-    positionArrayElement(ix, iy, iz, obj, arrayObj, parent, arrayIndex);
-
-    //recovering original positions
-    for (int i=0; i<3; i++)
-    {
-        obj->Position[i]    = posrot[i];
-        obj->Orientation[i] = posrot[i+3];
-    }
 }
 
 void ASandwich::clearModel()

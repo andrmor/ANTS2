@@ -730,11 +730,11 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject * obj, TGeoVolume * parent, 
     TGeoCombiTrans * lTrans = nullptr;
 
     if      (obj->ObjectType->isWorld())
-        vol = parent; // just a shortcut, to resuse the cycle by HostedVolumes below
+        vol = parent; // resuse the cycle by HostedVolumes below
     else if (obj->ObjectType->isPrototypes() || obj->isCompositeMemeber() || obj->ObjectType->isCompositeContainer())
-        return;       //do nothing with logicals, they also do not host anything to be added to the geometry
+        return;       // logicals do not host anything to be added to the geometry
     else if (obj->ObjectType->isHandlingSet() || obj->ObjectType->isHandlingArray() || obj->ObjectType->isInstance())
-        vol = parent; // group objects are pure virtual, just pass the volume of the parent
+        vol = parent; // group objects are pure virtual, pass the volume of the parent
     else
     {
         int iMat = obj->Material;
@@ -929,6 +929,7 @@ void ASandwich::positionCircularArrayElement(int ia, AGeoObject * el, AGeoObject
     ATypeCircularArrayObject * array = static_cast<ATypeCircularArrayObject*>(arrayObj->ObjectType);
 
     double angle = array->angularStep * ia;
+    bool bParentIsVirtual = arrayObj->TrueRot;
 
 //Position?
     TGeoRotation ArRot("0", arrayObj->Orientation[0] , arrayObj->Orientation[1], arrayObj->Orientation[2] + angle);
@@ -937,9 +938,10 @@ void ASandwich::positionCircularArrayElement(int ia, AGeoObject * el, AGeoObject
     local[1] = el->Position[1];
     local[2] = el->Position[2];
     ArRot.LocalToMaster(local, master);
-    for (int i = 0; i < 3; i++) el->TruePos[i] = arrayObj->Position[i] + master[i];
+    for (int i = 0; i < 3; i++)
+        el->TruePos[i] = master[i] + (bParentIsVirtual ? arrayObj->TruePos[i] : arrayObj->Position[i]);
 
-//orientation?
+//Orientation?
     TGeoRotation elRot("1", el->Orientation[0], el->Orientation[1], el->Orientation[2]);
 
     local[0] = 1.0; local[1] = 0; local[2] = 0;
@@ -969,8 +971,8 @@ void ASandwich::positionCircularArrayElement(int ia, AGeoObject * el, AGeoObject
     el->TrueRot = new TGeoRotation();
     double rotMat[9] = {X1,Y1,Z1,X2,Y2,Z2,X3,Y3,Z3};
     el->TrueRot->SetMatrix(rotMat);
+    el->TrueRot->RegisterYourself();
 
-//Add geo volume
     addTGeoVolumeRecursively(el, parent, arrayIndex);
 }
 

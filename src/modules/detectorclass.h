@@ -99,7 +99,6 @@ private:
   QString GDML;
   bool processGDML(); //check validity, discard if bad and return to sandwich  
 
-  double UpperEdge, LowerEdge; //used to calculate Z positions of detector elements
   TGeoVolume *generatePmVolume(TString Name, TGeoMedium *Medium, const APmType *tp);
   void populatePMs();
   void positionPMs();

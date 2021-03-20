@@ -650,7 +650,7 @@ void ASandwich::positionLightguide(AGeoObject * obj, TGeoVolume * vol, TGeoCombi
         }
 }
 
-void ASandwich::populateGeoManager(TGeoVolume * top, TGeoManager * geoManager, AMaterialParticleCollection * materialCollection, QVector<APMandDummy> * vPMsAndDumPMs)
+void ASandwich::populateGeoManager(TGeoVolume * top, TGeoManager * geoManager, const AMaterialParticleCollection * materialCollection, const QVector<APMandDummy> * vPMsAndDumPMs)
 {
     GeoManager = geoManager;
     MaterialCollection = materialCollection;

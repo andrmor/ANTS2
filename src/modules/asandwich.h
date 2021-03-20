@@ -61,7 +61,7 @@ public:
   //mesh - 1, pitchX, pitchY, wireDiameter
   //hexa - 2, outer circle diameter, inner circle diameter, full height
 
-  void         populateGeoManager(TGeoVolume * top, TGeoManager * geoManager, AMaterialParticleCollection * materialCollection, QVector<APMandDummy> * vPMsAndDumPMs);
+  void         populateGeoManager(TGeoVolume * top, TGeoManager * geoManager, const AMaterialParticleCollection * materialCollection, const QVector<APMandDummy> * vPMsAndDumPMs);
 
   void         UpdateDetector(); //trigger this to update the detector
   void         ChangeState(ASandwich::SlabState State); //triggered by GUI
@@ -105,8 +105,8 @@ public:
 
   //properties used during the call of populateGeoManager()
   TGeoManager * GeoManager = nullptr;
-  AMaterialParticleCollection * MaterialCollection = nullptr;
-  QVector<APMandDummy> * PMsAndDumPMs = nullptr;
+  const AMaterialParticleCollection * MaterialCollection = nullptr;
+  const QVector<APMandDummy> * PMsAndDumPMs = nullptr;
 
 signals:
   void RequestGuiUpdate();

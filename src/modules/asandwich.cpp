@@ -741,7 +741,11 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject * obj, TGeoVolume * parent, 
         if (obj->ObjectType->isMonitor())
         {
             if (obj->Container) iMat = obj->Container->getMaterial();
-            else qWarning() << "Monitor without container detected!";
+            else
+            {
+                qWarning() << "Monitor without container detected!";
+                return;
+            }
         }
 
         if (obj->ObjectType->isComposite())
@@ -750,18 +754,20 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject * obj, TGeoVolume * parent, 
             if (!ok) return;
         }
 
-        //create new volume
         vol = new TGeoVolume(obj->Name.toLocal8Bit().data(), obj->Shape->createGeoShape(), (*MaterialCollection)[iMat]->GeoMed);
 
-        //creating otation/translation transformations
         TGeoRotation * lRot = nullptr;
-        if (obj->lRot) lRot = obj->lRot;
+        if (obj->TrueRot)
+        {
+            lRot = obj->TrueRot;
+            lTrans = new TGeoCombiTrans("lTrans", obj->TruePos[0], obj->TruePos[1], obj->TruePos[2], lRot);
+        }
         else
         {
             lRot = new TGeoRotation("lRot", obj->Orientation[0], obj->Orientation[1], obj->Orientation[2]);
             lRot->RegisterYourself();
+            lTrans = new TGeoCombiTrans("lTrans", obj->Position[0], obj->Position[1], obj->Position[2], lRot);
         }
-        lTrans = new TGeoCombiTrans("lTrans", obj->Position[0], obj->Position[1], obj->Position[2], lRot);
 
         //positioning this object
         if (obj->ObjectType->isGrid())
@@ -924,14 +930,6 @@ void ASandwich::positionCircularArrayElement(int ia, AGeoObject * el, AGeoObject
 
     double angle = array->angularStep * ia;
 
-//Storing original positions/orientations
-    double posrot[6];
-    for (int i=0; i<3; i++)
-    {
-        posrot[i]   = el->Position[i];
-        posrot[i+3] = el->Orientation[i];
-    }
-
 //Position?
     TGeoRotation ArRot("0", arrayObj->Orientation[0] , arrayObj->Orientation[1], arrayObj->Orientation[2] + angle);
     double local[3], master[3];
@@ -939,7 +937,7 @@ void ASandwich::positionCircularArrayElement(int ia, AGeoObject * el, AGeoObject
     local[1] = el->Position[1];
     local[2] = el->Position[2];
     ArRot.LocalToMaster(local, master);
-    for (int i = 0; i < 3; i++) el->Position[i] = arrayObj->Position[i] + master[i];
+    for (int i = 0; i < 3; i++) el->TruePos[i] = arrayObj->Position[i] + master[i];
 
 //orientation?
     TGeoRotation elRot("1", el->Orientation[0], el->Orientation[1], el->Orientation[2]);
@@ -968,61 +966,12 @@ void ASandwich::positionCircularArrayElement(int ia, AGeoObject * el, AGeoObject
     double Z2 = master[1];
     double Z1 = master[0];
 
-/*
-    //https://en.wikipedia.org/wiki/Euler_angles - does not work: there is a problem for angles > 180 degrees (degeneracy!)
-    double A = sqrt(1.0 - Z3*Z3);
-    el->Orientation[0] = acos(-Z2 / A)*180.0/TMath::Pi();
-    el->Orientation[1] = acos(Z3)*180.0/TMath::Pi();
-    el->Orientation[2] = acos(Y3 / A)*180.0/TMath::Pi();
-*/
-
-    el->lRot = new TGeoRotation();
+    el->TrueRot = new TGeoRotation();
     double rotMat[9] = {X1,Y1,Z1,X2,Y2,Z2,X3,Y3,Z3};
-    el->lRot->SetMatrix(rotMat);
-
-
-    /*
-    local[0] = 1.0; local[1] = 0; local[2] = 0;
-    elRot.LocalToMaster(local, master);
-    local[0] = master[0]; local[1] = master[1]; local[2] = master[2];
-    ArRot.LocalToMaster(local, master);
-    double X3 = master[2];
-    el->Orientation[0] = atan2(Z1, Z2) * 180.0/TMath::Pi();
-    el->Orientation[1] = acos(Z3)*180.0/TMath::Pi();
-    el->Orientation[2] = -atan2(X3, Y3)*180.0/TMath::Pi();
-    */
-
-   // qDebug() << "<-"<<el->Orientation[0]<<el->Orientation[1]<<el->Orientation[2];
-
-    /*
-    qDebug() << "->"<<el->Orientation[0]<<el->Orientation[1]<<el->Orientation[2];
-    TGeoRotation elRot("1", el->Orientation[0], el->Orientation[1], el->Orientation[2]);
-    //elRot *= ArRot;   //    ArRot.MultiplyBy(&elRot, true);
-    elRot.GetAngles(el->Orientation[0], el->Orientation[1], el->Orientation[2]);
-    qDebug() << "<-"<<el->Orientation[0]<<el->Orientation[1]<<el->Orientation[2];
-    */
-
-    /*
-    qDebug() << "element ->"<<el->Orientation[0]<<el->Orientation[1]<<el->Orientation[2];
-    qDebug() << "     ar->"<<arrayObj->Orientation[0] + angle<<arrayObj->Orientation[1]<<arrayObj->Orientation[2];
-
-    el->lRot = new TGeoRotation("1", el->Orientation[0], el->Orientation[1], el->Orientation[2]);
-    //(*el->lRot) *= ArRot;
-    (*el->lRot) *= TGeoRotation("3", arrayObj->Orientation[0], arrayObj->Orientation[1], arrayObj->Orientation[2] + angle);
-
-    el->lRot->GetAngles(el->Orientation[0], el->Orientation[1], el->Orientation[2]);
-    qDebug() << "      ->"<<el->Orientation[0]<<el->Orientation[1]<<el->Orientation[2];
-    */
+    el->TrueRot->SetMatrix(rotMat);
 
 //Add geo volume
     addTGeoVolumeRecursively(el, parent, arrayIndex);
-
-//Recovering original positions/orientation
-    for (int i=0; i<3; i++)
-    {
-        el->Position[i]    = posrot[i];
-        el->Orientation[i] = posrot[i+3];
-    }
 }
 
 void ASandwich::positionStackObject(AGeoObject *obj, const AGeoObject * RefObj, TGeoVolume *parent, int forcedNodeNumber)

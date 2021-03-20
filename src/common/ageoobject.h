@@ -151,9 +151,9 @@ public:
 
   //service propertie
   QString tmpContName;   //used only during load
-  bool fExpanded = true; //gui only - is this object expanded in tree view
-
-  TGeoRotation * lRot = nullptr;  // only used during population of TGeoManager
+  bool fExpanded = true; //gui only: expand status in the tree view
+  TGeoRotation * TrueRot = nullptr;  // used only during population of TGeoManager
+  double TruePos[3];                 // used only during population of TGeoManager
 
 private:
   AGeoObject * findContainerUp(const QString & name);

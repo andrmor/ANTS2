@@ -88,19 +88,17 @@ public:
   double       getWorldSizeZ() const;
   void         setWorldSizeZ(double size);
 
-  ASandwich::SlabState SandwichState = CommonShapeSize;
+  SlabState SandwichState = CommonShapeSize;
   QStringList Materials;  // list of currently defined materials
   ASlabXYModel * DefaultXY = nullptr;
   int ZOriginType = 0; //-1 top, 0 mid, 1 bottom (of the slab with fCenter = true)
   QVector<AGridElementRecord*> GridRecords;
 
-  // pointers to monitors
   QVector<const AGeoObject*> MonitorsRecords;
   QVector<QString> MonitorIdNames; //runtime
   QVector<TGeoNode *> MonitorNodes; //runtime
 
-  // available after calculation of Z of layers
-  double Z_UpperBound, Z_LowerBound;
+  double Z_UpperBound, Z_LowerBound;   // slab Z bounds, available after CalculateZofSlabs()
 
   QString LastError;  
 

@@ -50,6 +50,19 @@ void ASandwich::clearWorld()
     clearMonitorRecords();
 }
 
+void ASandwich::clearGridRecords()
+{
+    for (int i=0; i<GridRecords.size(); i++) delete GridRecords[i];
+    GridRecords.clear();
+}
+
+void ASandwich::clearMonitorRecords()
+{
+    MonitorsRecords.clear(); //do not delete - it contains pointers to world tree objects
+    MonitorIdNames.clear();
+    MonitorNodes.clear();
+}
+
 bool ASandwich::canBeDeleted(AGeoObject * obj) const
 {
     if (obj == World) return false;
@@ -759,11 +772,13 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject * obj, TGeoVolume * parent, 
         TGeoRotation * lRot = nullptr;
         if (obj->TrueRot)
         {
+            //parent is a virtual object
             lRot = obj->TrueRot;
             lTrans = new TGeoCombiTrans("lTrans", obj->TruePos[0], obj->TruePos[1], obj->TruePos[2], lRot);
         }
         else
         {
+            //parent is a physical object
             lRot = new TGeoRotation("lRot", obj->Orientation[0], obj->Orientation[1], obj->Orientation[2]);
             lRot->RegisterYourself();
             lTrans = new TGeoCombiTrans("lTrans", obj->Position[0], obj->Position[1], obj->Position[2], lRot);
@@ -782,9 +797,7 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject * obj, TGeoVolume * parent, 
     }
 
     //positioning hosted objects
-    if      (obj->ObjectType->isLightguide())
-        positionHostedForLightguide(obj, vol, lTrans);
-    else if (obj->ObjectType->isHandlingArray())
+    if (obj->ObjectType->isHandlingArray())
     {
         ATypeArrayObject * array = static_cast<ATypeArrayObject*>(obj->ObjectType);
 
@@ -819,11 +832,6 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject * obj, TGeoVolume * parent, 
                             for (AGeoObject * StackObj : el->HostedObjects)
                                 positionArrayElement_StackObject(ix, iy, iz, StackObj, StackRefObj, obj, vol, iCounter);
                         }
-                        else if (el->ObjectType->isHandlingSet() || el->ObjectType->isInstance())
-                        {
-                            for (AGeoObject * elHO : el->HostedObjects)
-                                positionArrayElement(ix, iy, iz, elHO, obj, vol, iCounter);
-                        }
                         else positionArrayElement(ix, iy, iz, el, obj, vol, iCounter);
                         iCounter++;
                     }
@@ -838,12 +846,6 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject * obj, TGeoVolume * parent, 
                         for (AGeoObject * StackObj : el->HostedObjects)
                             positionArrayElement_StackObject(ix, iy, iz, StackObj, StackRefObj, obj, vol, GeoManager, MaterialCollection, PMsAndDumPMs, iCounter);
                     }
-                    else if (el->ObjectType->isHandlingSet() || el->ObjectType->isInstance())
-                    {
-                        for (AGeoObject * elHO : el->HostedObjects)
-                            positionArrayElement(ix, iy, iz, elHO, obj, vol, GeoManager, MaterialCollection, PMsAndDumPMs, iCounter);
-                    }
-                    else
                     */
                     positionCircularArrayElement(ia, el, obj, vol, iCounter);
                     iCounter++;
@@ -870,11 +872,11 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject * obj, TGeoVolume * parent, 
         }
         else qWarning() << "Error: Reference object not found for stack" << obj->Name;
     }
+    else if (obj->ObjectType->isLightguide())
+        positionHostedForLightguide(obj, vol, lTrans);
     else
-    {
         for (AGeoObject * el : obj->HostedObjects)
             addTGeoVolumeRecursively(el, vol, forcedNodeNumber);
-    }
 
     //  Particle/Photon trackers use volume title for identification of volumes with special rules
     //  First character can be 'G' for optical grid, 'M' for monitor, 'P' for PMT, 'p' for dummy PM
@@ -885,43 +887,38 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject * obj, TGeoVolume * parent, 
     else                                   vol->SetTitle("----");
 }
 
-void ASandwich::clearGridRecords()
-{
-    for (int i=0; i<GridRecords.size(); i++) delete GridRecords[i];
-    GridRecords.clear();
-}
-
-void ASandwich::clearMonitorRecords()
-{
-    MonitorsRecords.clear(); //do not delete - it contains pointers to world tree objects
-    MonitorIdNames.clear();
-    MonitorNodes.clear();
-}
-
 void ASandwich::positionArrayElement(int ix, int iy, int iz, AGeoObject * el, AGeoObject * arrayObj, TGeoVolume * parent, int arrayIndex)
 {
     ATypeArrayObject* array = static_cast<ATypeArrayObject*>(arrayObj->ObjectType);
 
-    //storing original values
-    double tmpX = el->Position[0];
-    double tmpY = el->Position[1];
-    double tmpZ = el->Position[2];
+    //Position
+    double local[3], master[3];
+    local[0] = el->Position[0] + ix * array->stepX;
+    local[1] = el->Position[1] + iy * array->stepY;
+    local[2] = el->Position[2] + iz * array->stepZ;
+    TGeoRotation ArRot("0", arrayObj->Orientation[0] , arrayObj->Orientation[1], arrayObj->Orientation[2]);
+    if (arrayObj->TrueRot)
+    {
+        arrayObj->TrueRot->LocalToMaster(local, master);
+        for (int i = 0; i < 3; i++)
+            el->TruePos[i] = master[i] + arrayObj->TruePos[i];
+    }
+    else
+    {
+        ArRot.LocalToMaster(local, master);
+        for (int i = 0; i < 3; i++)
+            el->TruePos[i] = master[i] + arrayObj->Position[i];
+    }
 
-    TVector3 v(arrayObj->Position[0] + el->Position[0] + ix*array->stepX,
-               arrayObj->Position[1] + el->Position[1] + iy*array->stepY,
-               arrayObj->Position[2] + el->Position[2] + iz*array->stepZ);
-    if (arrayObj->Orientation[2] != 0) v.RotateZ(3.1415926535*arrayObj->Orientation[2]/180.0);
-
-    el->Position[0] = v[0];
-    el->Position[1] = v[1];
-    el->Position[2] = v[2];
+    //Orientation
+    TGeoRotation elRot("1", el->Orientation[0], el->Orientation[1], el->Orientation[2]);
+    if (arrayObj->TrueRot)
+        el->TrueRot = createCombinedRotation(&elRot, arrayObj->TrueRot);
+    else
+        el->TrueRot = createCombinedRotation(&elRot, &ArRot);
+    el->TrueRot->RegisterYourself();
 
     addTGeoVolumeRecursively(el, parent, arrayIndex);
-
-    //recovering original positions
-    el->Position[0] = tmpX;
-    el->Position[1] = tmpY;
-    el->Position[2] = tmpZ;
 }
 
 void ASandwich::positionCircularArrayElement(int ia, AGeoObject * el, AGeoObject * arrayObj, TGeoVolume * parent, int arrayIndex)
@@ -929,51 +926,85 @@ void ASandwich::positionCircularArrayElement(int ia, AGeoObject * el, AGeoObject
     ATypeCircularArrayObject * array = static_cast<ATypeCircularArrayObject*>(arrayObj->ObjectType);
 
     double angle = array->angularStep * ia;
-    bool bParentIsVirtual = arrayObj->TrueRot;
 
-//Position?
-    TGeoRotation ArRot("0", arrayObj->Orientation[0] , arrayObj->Orientation[1], arrayObj->Orientation[2] + angle);
+    //Position
     double local[3], master[3];
     local[0] = el->Position[0] + array->radius;
     local[1] = el->Position[1];
     local[2] = el->Position[2];
-    ArRot.LocalToMaster(local, master);
-    for (int i = 0; i < 3; i++)
-        el->TruePos[i] = master[i] + (bParentIsVirtual ? arrayObj->TruePos[i] : arrayObj->Position[i]);
+    TGeoRotation ArRot = ( arrayObj->TrueRot ? TGeoRotation("0", 0, 0, angle)
+                                             : TGeoRotation("0", arrayObj->Orientation[0], arrayObj->Orientation[1], arrayObj->Orientation[2] + angle) );
+    if (arrayObj->TrueRot)
+    {
+        TGeoRotation * Rot = createCombinedRotation(&ArRot, arrayObj->TrueRot);
+        Rot->LocalToMaster(local, master);
+        delete Rot;
+        for (int i = 0; i < 3; i++)
+            el->TruePos[i] = master[i] + arrayObj->TruePos[i];
+    }
+    else
+    {
+        ArRot.LocalToMaster(local, master);
+        for (int i = 0; i < 3; i++)
+            el->TruePos[i] = master[i] + arrayObj->Position[i];
+    }
 
-//Orientation?
+    //Orientation
     TGeoRotation elRot("1", el->Orientation[0], el->Orientation[1], el->Orientation[2]);
+    el->TrueRot = createCombinedRotation(&elRot, &ArRot, arrayObj->TrueRot);
+    el->TrueRot->RegisterYourself();
+
+    addTGeoVolumeRecursively(el, parent, arrayIndex);
+}
+
+TGeoRotation * ASandwich::createCombinedRotation(TGeoRotation * firstRot, TGeoRotation * secondRot, TGeoRotation * thirdRot)
+{
+    double local[3], master[3];
 
     local[0] = 1.0; local[1] = 0; local[2] = 0;
-    elRot.LocalToMaster(local, master);
+    firstRot->LocalToMaster(local, master);
     local[0] = master[0]; local[1] = master[1]; local[2] = master[2];
-    ArRot.LocalToMaster(local, master);
+    secondRot->LocalToMaster(local, master);
+    if (thirdRot)
+    {
+        local[0] = master[0]; local[1] = master[1]; local[2] = master[2];
+        thirdRot->LocalToMaster(local, master);
+    }
     double X3 = master[2];
     double X2 = master[1];
     double X1 = master[0];
 
     local[0] = 0; local[1] = 1.0; local[2] = 0;
-    elRot.LocalToMaster(local, master);
+    firstRot->LocalToMaster(local, master);
     local[0] = master[0]; local[1] = master[1]; local[2] = master[2];
-    ArRot.LocalToMaster(local, master);
+    secondRot->LocalToMaster(local, master);
+    if (thirdRot)
+    {
+        local[0] = master[0]; local[1] = master[1]; local[2] = master[2];
+        thirdRot->LocalToMaster(local, master);
+    }
     double Y3 = master[2];
     double Y2 = master[1];
     double Y1 = master[0];
 
     local[0] = 0; local[1] = 0; local[2] = 1.0;
-    elRot.LocalToMaster(local, master);
+    firstRot->LocalToMaster(local, master);
     local[0] = master[0]; local[1] = master[1]; local[2] = master[2];
-    ArRot.LocalToMaster(local, master);
+    secondRot->LocalToMaster(local, master);
+    if (thirdRot)
+    {
+        local[0] = master[0]; local[1] = master[1]; local[2] = master[2];
+        thirdRot->LocalToMaster(local, master);
+    }
     double Z3 = master[2];
     double Z2 = master[1];
     double Z1 = master[0];
 
-    el->TrueRot = new TGeoRotation();
+    TGeoRotation * Rot = new TGeoRotation();
     double rotMat[9] = {X1,Y1,Z1,X2,Y2,Z2,X3,Y3,Z3};
-    el->TrueRot->SetMatrix(rotMat);
-    el->TrueRot->RegisterYourself();
+    Rot->SetMatrix(rotMat);
 
-    addTGeoVolumeRecursively(el, parent, arrayIndex);
+    return Rot;
 }
 
 void ASandwich::positionStackObject(AGeoObject *obj, const AGeoObject * RefObj, TGeoVolume *parent, int forcedNodeNumber)

@@ -16,6 +16,7 @@ class AMaterialParticleCollection;
 class AGridElementRecord;
 class TGeoNode;
 class TGeoCombiTrans;
+class TGeoRotation;
 
 class ASandwich : public QObject
 {  
@@ -136,6 +137,7 @@ private:
   bool processCompositeObject(AGeoObject *obj);
   void positionHostedForLightguide(AGeoObject *obj, TGeoVolume *vol, TGeoCombiTrans *lTrans);
   void addMonitorNode(AGeoObject *obj, TGeoVolume *vol, TGeoVolume *parent, TGeoCombiTrans *lTrans);
+  TGeoRotation * createCombinedRotation(TGeoRotation * firstRot, TGeoRotation * secondRot, TGeoRotation * thirdRot = nullptr);
 };
 
 #endif // ASANDWICH_H

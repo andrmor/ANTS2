@@ -121,6 +121,7 @@ private:
 
   void positionArray(AGeoObject * obj, TGeoVolume * vol);
   void positionStack(AGeoObject * obj, TGeoVolume * vol, int forcedNodeNumber);
+  void positionInstance(AGeoObject * obj, TGeoVolume * vol, int forcedNodeNumber);
   void positionLightguide(AGeoObject * obj, TGeoVolume * vol, TGeoCombiTrans *lTrans);
 
   void positionArrayElement(int ix, int iy, int iz, AGeoObject * el, AGeoObject * arrayObj, TGeoVolume * parent, int arrayIndex);

@@ -567,54 +567,6 @@ void ASandwich::expandPrototypeInstances()
             clone->fActive = instanceObj->fActive;
         }
         instanceObj->fExpanded = false;
-
-        //apply rotation and shift
-        for (AGeoObject * obj : instanceObj->HostedObjects)
-        {
-            TVector3 v(obj->Position[0], obj->Position[1], obj->Position[2]); // vector from the center of the instance to the object center
-            rotate(v, instanceObj->Orientation[0], instanceObj->Orientation[1], instanceObj->Orientation[2]);
-            for (int i = 0; i < 3; i++)
-            {
-                obj->Position[i]     = v[i] + instanceObj->Position[i];
-                obj->Orientation[i] += instanceObj->Orientation[i];
-            }
-        }
-
-        /*
-        //-----//
-        for (int iObj = 0; iObj < obj->Container->HostedObjects.size(); iObj++)
-        {
-            AGeoObject* hostedObj = obj->Container->HostedObjects[iObj];
-            if (hostedObj == obj) continue;
-
-            //center vector for rotation
-            //in TGeoRotation, first rotation iz around Z, then new X(manual is wrong!) and finally around new Z
-            TVector3 v(hostedObj->Position[0]-old[0], hostedObj->Position[1]-old[1], hostedObj->Position[2]-old[2]);
-
-            //first rotate back to origin in rotation
-            rotate(v, -old[3+0], 0, 0);
-            rotate(v, 0, -old[3+1], 0);
-            rotate(v, 0, 0, -old[3+2]);
-            rotate(v, obj->Orientation[0], obj->Orientation[1], obj->Orientation[2]);
-
-            for (int i=0; i<3; i++)
-            {
-                double delta = obj->Position[i] - old[i]; //shift in position
-
-                if (fWasRotated)
-                {
-                    //shift due to rotation  +  global shift
-                    hostedObj->Position[i] = old[i]+v[i] + delta;
-                    //rotation of the object
-                    double deltaAng = obj->Orientation[i] - old[3+i];
-                    hostedObj->Orientation[i] += deltaAng;
-                }
-                else
-                    hostedObj->Position[i] += delta;
-            }
-        }
-        //-----//
-        */
     }
 }
 
@@ -801,6 +753,8 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject * obj, TGeoVolume * parent, 
         positionArray(obj, vol);
     else if (obj->ObjectType->isStack())
         positionStack(obj, vol, forcedNodeNumber);
+    else if (obj->ObjectType->isInstance())
+        positionInstance(obj, vol, forcedNodeNumber);
     else if (obj->ObjectType->isLightguide())
         positionLightguide(obj, vol, lTrans);
     else
@@ -859,6 +813,41 @@ void ASandwich::positionStack(AGeoObject * obj, TGeoVolume * vol, int forcedNode
             positionStackElement(el, RefObj, vol, forcedNodeNumber);
     }
     else qWarning() << "Error: Reference object not found for stack" << obj->Name;
+}
+
+void ASandwich::positionInstance(AGeoObject * obj, TGeoVolume * vol, int forcedNodeNumber)
+{
+    for (AGeoObject * el : obj->HostedObjects)
+    {
+        //Position
+        double local[3], master[3];
+        local[0] = el->Position[0];
+        local[1] = el->Position[1];
+        local[2] = el->Position[2];
+        TGeoRotation ArRot("0", obj->Orientation[0] , obj->Orientation[1], obj->Orientation[2]);
+        if (obj->TrueRot)
+        {
+            obj->TrueRot->LocalToMaster(local, master);
+            for (int i = 0; i < 3; i++)
+                el->TruePos[i] = master[i] + obj->TruePos[i];
+        }
+        else
+        {
+            ArRot.LocalToMaster(local, master);
+            for (int i = 0; i < 3; i++)
+                el->TruePos[i] = master[i] + obj->Position[i];
+        }
+
+        //Orientation
+        TGeoRotation elRot("1", el->Orientation[0], el->Orientation[1], el->Orientation[2]);
+        if (obj->TrueRot)
+            el->TrueRot = createCombinedRotation(&elRot, obj->TrueRot);
+        else
+            el->TrueRot = createCombinedRotation(&elRot, &ArRot);
+        el->TrueRot->RegisterYourself();
+
+        addTGeoVolumeRecursively(el, vol, forcedNodeNumber);
+    }
 }
 
 void ASandwich::positionArrayElement(int ix, int iy, int iz, AGeoObject * el, AGeoObject * arrayObj, TGeoVolume * parent, int arrayIndex)

@@ -27,10 +27,8 @@ ASandwich::ASandwich()
 
 ASandwich::~ASandwich()
 {
-    clearModel();
-    clearGridRecords();
-
     clearWorld();
+    delete DefaultXY;
     delete World;
 }
 
@@ -1006,8 +1004,12 @@ TGeoRotation * ASandwich::createCombinedRotation(TGeoRotation * firstRot, TGeoRo
 
 void ASandwich::clearModel()
 {
-  delete DefaultXY;
-  clearWorld();
+    clearWorld();
+
+    delete DefaultXY; DefaultXY = new ASlabXYModel();
+    ZOriginType = 0;
+    World->Material = 0;
+    SandwichState = ASandwich::CommonShapeSize;
 }
 
 void ASandwich::UpdateDetector()
@@ -1016,61 +1018,56 @@ void ASandwich::UpdateDetector()
   enforceCommonProperties();
 
   //check that Z=0 layer is active unless it is the last active one
-  if (countSlabs()>0)
-    {
+  if (countSlabs() > 0)
+  {
       int iZ = -1, numActive = 0, iFirstActive = -1;
       for (int i=0; i<World->HostedObjects.size(); i++)  //slabIndex not needed, work with raw HostedObject indexes
-        {
-          AGeoObject* obj = World->HostedObjects[i];
+      {
+          AGeoObject * obj = World->HostedObjects[i];
           if (!obj->ObjectType->isSlab()) continue;
 
           if (obj->getSlabModel()->fCenter)
-            {
-              if (iZ!=-1)
-                { //already found center layer
+          {
+              if (iZ != -1)
+              { //already found center layer
                   QString s("Attempt to declare multiple center slabs!");
                   emit WarningMessage(s);
                   qWarning() << s;
                   obj->getSlabModel()->fCenter = false;
-                }
+              }
               else iZ = i;
-            }
+          }
           if (obj->getSlabModel()->fActive)
-            {
+          {
               numActive++;
               if (iFirstActive == -1) iFirstActive = i;
-            }
-        }      
+          }
+      }
       //qDebug() << "iZ, numAct, firstAct"<< iZ << numActive << iFirstActive;
 
       if (iZ == -1)
-        { //no center slab -> only allowed if number actives = 0
-          if (numActive>0)
-            {
-              //QString s("If there are enabled slabs, one of them has to be center!");
-              //emit WarningMessage(s);
-              //qWarning() << s;
+      {
+          //no center slab -> only allowed if number actives = 0
+          if (numActive > 0)
+          {
               World->HostedObjects[iFirstActive]->getSlabModel()->fCenter = true;
               iZ = iFirstActive;
-            }
-        }
+          }
+      }
       else if (!World->HostedObjects[iZ]->getSlabModel()->fActive)
-        { //center slab can be declared inactive only if there are no more axctive slabs
-          if (numActive>0)
-            {
+      {
+          //center slab can be declared inactive only if there are no more axctive slabs
+          if (numActive > 0)
+          {
               QString s("Slab defining Z=0 can be disabled/removed only if there are no other enabled slabs!");
               emit WarningMessage(s);
               qWarning() << s;
               World->HostedObjects[iZ]->getSlabModel()->fActive = true;
-            }
-        }
-    }
+          }
+      }
+  }
 
-  //emit RequestGuiUpdate();  // why before rebuild detector?
-
-  //Claculating Z positions of layers
   CalculateZofSlabs();
-
   emit RequestRebuildDetector();
 }
 
@@ -1277,10 +1274,6 @@ QString ASandwich::readFromJson(QJsonObject & json)
     if (ok)
     {
         clearModel();
-        DefaultXY = new ASlabXYModel();
-        ZOriginType = 0;
-        World->Material = 0;
-        SandwichState = ASandwich::CommonShapeSize;
 
         QJsonObject js = json["Sandwich"].toObject();
 
@@ -1713,18 +1706,10 @@ void ASandwich::importOldLightguide(QJsonObject &json, bool upper)
 
 void ASandwich::importFromOldStandardJson(QJsonObject &json, bool fPrScintCont)
 {
-  //clear phase
   clearModel();
-  DefaultXY = new ASlabXYModel();
-  ZOriginType = 0;
-  World->Material = 0;
-  SandwichState = ASandwich::CommonShapeSize;
 
   if (json.isEmpty()) return;
   if (!json.contains("UseDefaultSizes")) return; //means wrong file
-
-  //always MID
-  ZOriginType = 0;
 
   //Layers
   bool fLayersFound = false;
@@ -1803,7 +1788,6 @@ void ASandwich::importFromOldStandardJson(QJsonObject &json, bool fPrScintCont)
 void ASandwich::onMaterialsChanged(const QStringList MaterialList)
 {
   Materials = MaterialList;  
-  //emit RequestGuiUpdate();
 }
 
 void ASandwich::IsParticleInUse(int particleId, bool &bInUse, QString &MonitorNames) const

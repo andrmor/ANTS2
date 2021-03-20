@@ -96,14 +96,14 @@ public:
   QVector<AGridElementRecord*> GridRecords;
 
   QVector<const AGeoObject*> MonitorsRecords;
-  QVector<QString> MonitorIdNames; //runtime
+  QVector<QString> MonitorIdNames;  //runtime
   QVector<TGeoNode *> MonitorNodes; //runtime
 
   double Z_UpperBound, Z_LowerBound;   // slab Z bounds, available after CalculateZofSlabs()
 
   QString LastError;  
 
-  //temporary, used during the call of populateGeoManager()
+  //properties used during the call of populateGeoManager()
   TGeoManager * GeoManager = nullptr;
   AMaterialParticleCollection * MaterialCollection = nullptr;
   QVector<APMandDummy> * PMsAndDumPMs = nullptr;
@@ -126,7 +126,11 @@ private:
   void positionArrayElement(int ix, int iy, int iz, AGeoObject * el, AGeoObject * arrayObj, TGeoVolume * parent, int arrayIndex);
   void positionCircularArrayElement(int ia, AGeoObject * el, AGeoObject * arrayObj, TGeoVolume * parent, int arrayIndex);
   void positionStackElement(AGeoObject * el, const AGeoObject * RefObj, TGeoVolume * parent, int forcedNodeNumber);
-  //void positionArrayElement_StackObject(int ix, int iy, int iz, AGeoObject *obj, const AGeoObject *RefObj, AGeoObject *arrayObj, TGeoVolume *parent, int arrayIndex);
+
+  void expandPrototypeInstances();
+  bool processCompositeObject(AGeoObject *obj);
+  void addMonitorNode(AGeoObject *obj, TGeoVolume *vol, TGeoVolume *parent, TGeoCombiTrans *lTrans);
+  TGeoRotation * createCombinedRotation(TGeoRotation * firstRot, TGeoRotation * secondRot, TGeoRotation * thirdRot = nullptr);
 
   void clearModel();
   void clearGridRecords();
@@ -136,13 +140,6 @@ private:
   void importOldLightguide(QJsonObject& json, bool upper);
   void importOldMask(QJsonObject &json);
   void importOldGrid(QJsonObject &json);
-
-
-
-  void expandPrototypeInstances();
-  bool processCompositeObject(AGeoObject *obj);
-  void addMonitorNode(AGeoObject *obj, TGeoVolume *vol, TGeoVolume *parent, TGeoCombiTrans *lTrans);
-  TGeoRotation * createCombinedRotation(TGeoRotation * firstRot, TGeoRotation * secondRot, TGeoRotation * thirdRot = nullptr);
 };
 
 #endif // ASANDWICH_H

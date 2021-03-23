@@ -1159,33 +1159,34 @@ void DetectorClass::positionDummies()
     }
 }
 
-void DetectorClass::updateWorldSize(double &XYm, double &Zm)
+void DetectorClass::updateWorldSize(double & XYm, double & Zm)
 {
-  Sandwich->World->updateWorldSize(XYm, Zm);
+    Sandwich->World->updateWorldSize(XYm, Zm);
 
-  //PMs
-  for (int ipm=0; ipm<PMs->count(); ipm++)
+    for (int ipm = 0; ipm < PMs->count(); ipm++)
     {
-      double msize = 0.5*PMs->SizeZ(ipm);
-      UpdateMax(msize, 0.5*PMs->SizeX(ipm));
-      UpdateMax(msize, 0.5*PMs->SizeY(ipm));
+        double msize =   0.5 * PMs->SizeZ(ipm);
+        UpdateMax(msize, 0.5 * PMs->SizeX(ipm));
+        UpdateMax(msize, 0.5 * PMs->SizeY(ipm));
 
-      UpdateMax(XYm, fabs(PMs->X(ipm)) + msize);
-      UpdateMax(XYm, fabs(PMs->Y(ipm)) + msize);
-      UpdateMax(Zm,  fabs(PMs->Z(ipm)) + msize);
+        UpdateMax(XYm,   fabs(PMs->X(ipm)) + msize);
+        UpdateMax(XYm,   fabs(PMs->Y(ipm)) + msize);
+        UpdateMax(Zm,    fabs(PMs->Z(ipm)) + msize);
     }
 
-  //DummyPMs
-  for (int i=0; i<PMdummies.size(); i++)
+    for (int i = 0; i < PMdummies.size(); i++)
     {
-      double msize = 0.5*PMs->getType(PMdummies[i].PMtype)->SizeZ;
-      UpdateMax(msize, 0.5*PMs->getType(PMdummies[i].PMtype)->SizeX);
-      UpdateMax(msize, 0.5*PMs->getType(PMdummies[i].PMtype)->SizeY);
+        const APMdummyStructure & dum = PMdummies.at(i);
+        const APmType * typ = PMs->getType(dum.PMtype);
 
-      UpdateMax(XYm, fabs(PMdummies[i].r[0]) + msize);
-      UpdateMax(XYm, fabs(PMdummies[i].r[1]) + msize);
-      UpdateMax(Zm,  fabs(PMdummies[i].r[2]) + msize);
-  }
+        double msize =   0.5 * typ->SizeZ;
+        UpdateMax(msize, 0.5 * typ->SizeX);
+        UpdateMax(msize, 0.5 * typ->SizeY);
+
+        UpdateMax(XYm,   fabs(dum.r[0]) + msize);
+        UpdateMax(XYm,   fabs(dum.r[1]) + msize);
+        UpdateMax(Zm,    fabs(dum.r[2]) + msize);
+    }
 }
 
 void DetectorClass::updatePreprocessingAddMultySize()

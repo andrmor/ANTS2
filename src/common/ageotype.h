@@ -14,7 +14,7 @@ public:
     virtual ~AGeoType() {}
 
     // TODO String -> enum
-    // or even better: Handling -> a system of flags; isX use dynamic_cast
+    // or even better: Handling -> a system of flags; but do not use dynamic_cast (slow? ~100 ns per call)
     bool isHandlingStatic() const   {return Handling == "Static";}      //World
     bool isHandlingStandard() const {return Handling == "Standard";}
     bool isHandlingSet() const      {return Handling == "Set";}         //Group, Stack, Composite container

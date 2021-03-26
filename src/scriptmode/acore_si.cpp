@@ -208,54 +208,32 @@ bool ACore_SI::save(QString fileName, QString str)
   return true;
 }
 
-bool ACore_SI::saveArray(QString fileName, QVariant array)
+bool ACore_SI::saveArray(QString fileName, QVariantList array)
 {
-    QString type = array.typeName();
-    if (type != "QVariantList")
-    {
-        qDebug() << "Cannot extract array in saveColumns function";
-        //abort("Cannot extract array in saveColumns function");
-        return false;
-    }
-
     if (!QFileInfo(fileName).exists())
-      {
-        //abort("File does not exist: " + fileName);
+    {
         qDebug() << "File does not exist: " << fileName;
         return false;
-      }
-
+    }
     QFile file(fileName);
-    if ( !file.open(QIODevice::Append ) )
+    if (!file.open(QIODevice::Append))
     {
-        //abort("Cannot open file for appending:" + fileName);
         qDebug() << "Cannot open file for appending:" << fileName;
         return false;
     }
 
     QTextStream s(&file);
-
-    QVariantList vl = array.toList();
-    QJsonArray ar = QJsonArray::fromVariantList(vl);
-    //qDebug() << ar.size();
-
-    for (int i=0; i<ar.size(); i++)
+    for (int i = 0; i < array.size(); i++)
     {
-        //qDebug() << ar[i];
-        if (ar[i].isArray())
+        const QVariant & var = array[i];
+        if (var.type() == QVariant::List)
         {
-            QJsonArray el = ar[i].toArray();
-            //qDebug() << "   "<<el;
-            for (int j=0; j<el.size(); j++) s << el[j].toDouble(1e10) << " ";
+            QStringList sl = var.toStringList();
+            s << sl.join(" ");
         }
-        else
-        {
-            //qDebug() << "   "<< ar[i].toDouble();
-            s << ar[i].toDouble(1e10);
-        }
+        else s << var.toString();
         s << "\n";
     }
-
     return true;
 }
 

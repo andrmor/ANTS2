@@ -451,7 +451,7 @@ QString AGeoObjectDelegate::updateScalingFactors() const //not needed anymore ne
 
 const AGeoShape * AGeoObjectDelegate::getBaseShapeOfObject(const AGeoObject * obj)
 {
-    if (!obj && !obj->Shape) return nullptr;
+    if (!obj || !obj->Shape) return nullptr;
     AGeoScaledShape * scaledShape = dynamic_cast<AGeoScaledShape*>(obj->Shape);
     if (!scaledShape) return nullptr;
 
@@ -2667,14 +2667,13 @@ AGeoCircularArrayDelegate::AGeoCircularArrayDelegate(const QStringList &material
     grAW->setContentsMargins(0,0,0,0);
     grAW->setVerticalSpacing(0);
 
-    QLabel *la = new QLabel;
+    QLabel * la = nullptr;
     la = new QLabel("Number:");       grAW->addWidget(la, 0, 0);
     la = new QLabel("Angular step:"); grAW->addWidget(la, 1, 0);
     la = new QLabel("Radius:");       grAW->addWidget(la, 2, 0);
 
-    //la = new QLabel("mm"); grAW->addWidget(la, 0, 2);
-    la = new QLabel("deg"); grAW->addWidget(la, 1, 2);
-    la = new QLabel("mm");  grAW->addWidget(la, 2, 2);
+    la = new QLabel("deg");           grAW->addWidget(la, 1, 2);
+    la = new QLabel("mm");            grAW->addWidget(la, 2, 2);
 
     ledNum         = new AOneLineTextEdit(Widget); grAW->addWidget(ledNum, 0, 1);
     ledAngularStep = new AOneLineTextEdit(Widget); grAW->addWidget(ledAngularStep, 1, 1);

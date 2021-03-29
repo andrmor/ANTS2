@@ -3865,7 +3865,6 @@ void MainWindow::on_ledElNoiseSigma_Norm_editingFinished()
     double newVal = ui->ledElNoiseSigma_Norm->text().toDouble();
     if (newVal < 1.0e-10)
     {
-        newVal = 1.0;
         ui->ledElNoiseSigma_Norm->setText("1.0");
         message("Value has to be > 0", this);
     }

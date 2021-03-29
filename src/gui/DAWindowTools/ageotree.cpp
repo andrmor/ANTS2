@@ -1285,6 +1285,11 @@ void AGeoTree::menuActionFormStack(QList<QTreeWidgetItem*> selected)
 
 void AGeoTree::markAsStackRefVolume(AGeoObject * obj)
 {
+    if (!obj)
+    {
+        qWarning() << "Attempting to set nullptr as the stack reference!";
+        return;
+    }
     if (!obj->Container) return;
     if (!obj->Container->ObjectType) return;
     ATypeStackContainerObject * sc = dynamic_cast<ATypeStackContainerObject*>(obj->Container->ObjectType);

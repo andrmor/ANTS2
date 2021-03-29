@@ -2057,8 +2057,7 @@ void AGeoPconDelegate::readGui() const
             QVector<QString> edits;
             for (int ic = 0; ic < 3; ic++)
             {
-                AOneLineTextEdit * edit = new AOneLineTextEdit;
-                edit    = static_cast<AOneLineTextEdit *>(tab->cellWidget(ir, ic));
+                AOneLineTextEdit * edit = static_cast<AOneLineTextEdit *>(tab->cellWidget(ir, ic));
                 edits.append(edit->text());
             }
             //if (edits[0].isEmpty() || edits[1].isEmpty()|| edits[2].isEmpty() ) continue;

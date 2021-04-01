@@ -2893,6 +2893,28 @@ void GraphWindowClass::HighlightUpdateBasketButton(bool flag)
     ui->pbUpdateInBasket->setIcon(icon);
 }
 
+QString GraphWindowClass::UseProjectionTool(const QString & option)
+{
+    if (DrawObjects.isEmpty()) return "Graph window is empty";
+    TH2 * hist = dynamic_cast<TH2*>(DrawObjects[0].Pointer);
+    if (!hist) return "Currently drawn object has to be TH2";
+
+    Explorer->customProjection(DrawObjects[0]);
+    ShowProjection(option);
+    return "";
+}
+
+void GraphWindowClass::ConfigureProjectionTool(double x0, double y0, double dx, double dy, double angle)
+{
+    ui->ledXcenter->setText(QString::number(x0));
+    ui->ledYcenter->setText(QString::number(y0));
+    ui->ledWidth->  setText(QString::number(dx));
+    ui->ledHeight-> setText(QString::number(dy));
+    ui->ledAngle->  setText(QString::number(angle));
+
+    selBoxControlsUpdated();
+}
+
 #include "atemplateselectiondialog.h"
 void GraphWindowClass::on_actionApply_selective_triggered()
 {

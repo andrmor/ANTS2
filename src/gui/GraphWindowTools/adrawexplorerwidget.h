@@ -31,6 +31,8 @@ public:
     void showObjectContextMenu(const QPoint &pos, int index);
     void manipulateTriggered();
 
+    void customProjection(ADrawObject &obj);
+
 private slots:
     void onContextMenuRequested(const QPoint & pos);
     void onItemDoubleClicked(QTreeWidgetItem *item, int column);
@@ -65,7 +67,6 @@ private:
     void interpolate(ADrawObject &obj);
     void median(ADrawObject &obj);
     void projection(ADrawObject &obj, bool bX);
-    void customProjection(ADrawObject &obj);
     void splineFit(int index);
     void editAxis(ADrawObject &obj, int axisIndex);
     void addAxis(int axisIndex);

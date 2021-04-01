@@ -18,7 +18,23 @@ ANodeRecord::ANodeRecord(double * r, double time, int numPhot, ANodeRecord *rec)
 
 ANodeRecord::~ANodeRecord()
 {
-    delete LinkedNode;
+    //delete LinkedNode;  // recursive call of the destructor kills the stack if too many
+
+    const int numNodes = getNumberOfLinkedNodes();
+    QVector<ANodeRecord*> allLinkedNodes;
+    allLinkedNodes.reserve(numNodes);
+
+    ANodeRecord * node = this;
+    while (node->LinkedNode)
+    {
+        ANodeRecord * ln = node->LinkedNode;
+        allLinkedNodes << ln;
+        node->LinkedNode = nullptr;
+        node = ln;
+    }
+
+    for (ANodeRecord * node : allLinkedNodes)
+        delete node;
 }
 
 ANodeRecord *ANodeRecord::createS(double x, double y, double z, double time, int numPhot, ANodeRecord * rec)

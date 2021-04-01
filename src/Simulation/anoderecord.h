@@ -29,9 +29,6 @@ private:
     ANodeRecord & operator=(ANodeRecord &&) = delete;
 
 public:
-    //double X;
-    //double Y;
-    //double Z;
     double R[3];
     double Time = 0;
     int    NumPhot = -1; // -1 means no override

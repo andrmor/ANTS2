@@ -9,7 +9,6 @@
 class ABasketManager;
 class RasterWindowBaseClass;
 class ABasketListWidget;
-class AMultiGraphConfigurator;
 class ADrawObject;
 class QJsonObject;
 
@@ -26,21 +25,22 @@ public:
     ~AMultiGraphDesigner();
 
     void updateBasketGUI();  // triggered from GraphWindow::UpdatebasketGui()
+    void requestAutoconfigureAndDraw(const QVector<int> & basketItems);
 
 private slots:
-    // main MENU
-    void on_action1_x_2_triggered();
-    void on_action2_x_1_triggered();
-    void on_action2_x_2_triggered();
-
     void on_actionAs_pdf_triggered();
     void on_actionSave_triggered();
     void on_actionLoad_triggered();
 
-    void on_pushButton_clicked();
+    void on_pbRefactor_clicked();
 
-public slots:
-    void on_drawgraphtriggered();
+    void on_pbClear_clicked();
+
+//public slots:
+//    void on_drawgraphtriggered();
+
+protected:
+    bool event(QEvent * event) override;
 
 private:
     ABasketManager & Basket;
@@ -48,21 +48,21 @@ private:
     Ui::AMultiGraphDesigner * ui;
     RasterWindowBaseClass   * RasterWindow = nullptr;
     ABasketListWidget       * lwBasket     = nullptr;
-    AMultiGraphConfigurator * Configurator = nullptr;
 
     void clearGraphs();
     QVector<QVector<double>> bSizes;
 
     void drawGraph(const QVector<ADrawObject> DrawObjects);
     void updateCanvas();
-    void fillOutBasicLayout(int M, int m, bool horizontal = true);
+    void fillOutBasicLayout(int numX, int numY);
     void writeAPadsToJson(QJsonObject &json);
     QString readAPadsFromJson(const QJsonObject &json);
+    QString PadsToString();
 
-    QVector <QVector<APadProperties>> APads;
-    QString APadsToString();
     QVector<APadProperties> Pads;
+    QVector<int> DrawOrder;
 
+    bool bColdStart = true;
 };
 
 #endif // AMULTIGRAPHDESIGNER_H

@@ -7,22 +7,22 @@
 
 #include <QJsonObject>
 
-
-
 class APadProperties
 {
 public:
     APadProperties();
     APadProperties(TPad *pad);
-    TPad *tPad = nullptr;
-    APadGeometry padGeo;
-    int basketIndex = 0;
 
     void updatePadGeometry();
     void applyPadGeometry();
+
     void writeToJson(QJsonObject &json) const;
     void readFromJson(const QJsonObject &json);
-    QString toString();
+
+    QString toString() const;
+
+    TPad * tPad = nullptr;
+    APadGeometry padGeo;
 };
 
 #endif // APADPROPERTIES_H

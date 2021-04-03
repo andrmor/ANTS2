@@ -28,116 +28,158 @@
      <number>2</number>
     </property>
     <item>
-     <widget class="QTabWidget" name="tabWidget">
+     <widget class="QFrame" name="frame">
       <property name="maximumSize">
        <size>
-        <width>300</width>
+        <width>250</width>
         <height>16777215</height>
        </size>
       </property>
-      <property name="currentIndex">
-       <number>0</number>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
       </property>
-      <widget class="QWidget" name="tab">
-       <attribute name="title">
-        <string>Tab 1</string>
-       </attribute>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <property name="leftMargin">
-         <number>2</number>
-        </property>
-        <property name="topMargin">
-         <number>2</number>
-        </property>
-        <property name="rightMargin">
-         <number>2</number>
-        </property>
-        <property name="bottomMargin">
-         <number>2</number>
-        </property>
-        <item>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <layout class="QVBoxLayout" name="lay3">
+       <property name="leftMargin">
+        <number>2</number>
+       </property>
+       <property name="topMargin">
+        <number>2</number>
+       </property>
+       <property name="rightMargin">
+        <number>2</number>
+       </property>
+       <property name="bottomMargin">
+        <number>2</number>
+       </property>
+       <item>
+        <widget class="QFrame" name="frame_2">
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
          <layout class="QVBoxLayout" name="verticalLayout">
+          <property name="spacing">
+           <number>2</number>
+          </property>
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
           <item>
-           <widget class="QListView" name="GraphLayoutlw"/>
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+             <widget class="QLabel" name="label_2">
+              <property name="text">
+               <string>Composition:</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="sbNumX">
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>9</number>
+              </property>
+              <property name="value">
+               <number>2</number>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_3">
+              <property name="text">
+               <string>by</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="sbNumY">
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>9</number>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton">
+           <widget class="QPushButton" name="pbRefactor">
             <property name="text">
-             <string>PushButton</string>
+             <string>Refactor</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_3">
+           <widget class="QPushButton" name="pbClear">
             <property name="text">
-             <string>PushButton</string>
+             <string>Clear content</string>
             </property>
            </widget>
           </item>
          </layout>
-        </item>
-        <item>
-         <layout class="QVBoxLayout" name="lBasketLayout">
+        </widget>
+       </item>
+       <item>
+        <widget class="QFrame" name="frame_3">
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QHBoxLayout" name="lBasketLayout">
+          <property name="spacing">
+           <number>2</number>
+          </property>
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
           <item>
-           <widget class="QLabel" name="label">
-            <property name="text">
-             <string>Basket</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
+           <widget class="QListWidget" name="lwCoords">
+            <property name="maximumSize">
+             <size>
+              <width>40</width>
+              <height>16777215</height>
+             </size>
             </property>
            </widget>
           </item>
          </layout>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="tab_2">
-       <attribute name="title">
-        <string>Tab 2</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="lConfigurator">
-        <property name="leftMargin">
-         <number>2</number>
-        </property>
-        <property name="topMargin">
-         <number>2</number>
-        </property>
-        <property name="rightMargin">
-         <number>2</number>
-        </property>
-        <property name="bottomMargin">
-         <number>2</number>
-        </property>
-        <item>
-         <widget class="QPushButton" name="pushButton_2">
-          <property name="text">
-           <string>PushButton</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_4">
-          <property name="text">
-           <string>PushButton</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="verticalSpacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>454</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
-      </widget>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </item>
    </layout>
@@ -148,27 +190,9 @@
      <x>0</x>
      <y>0</y>
      <width>904</width>
-     <height>28</height>
+     <height>25</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuNew">
-    <property name="title">
-     <string>New</string>
-    </property>
-    <widget class="QMenu" name="menuNew_design">
-     <property name="title">
-      <string>New design</string>
-     </property>
-     <addaction name="action1_x_2"/>
-     <addaction name="action2_x_1"/>
-     <addaction name="action2_x_2"/>
-     <addaction name="action3_x_1"/>
-     <addaction name="action3_x_2"/>
-     <addaction name="action3_x3"/>
-     <addaction name="actionCustom"/>
-    </widget>
-    <addaction name="menuNew_design"/>
-   </widget>
    <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>File</string>
@@ -181,49 +205,10 @@
      <string>Export</string>
     </property>
     <addaction name="actionAs_pdf"/>
-    <addaction name="actionAs_png"/>
-    <addaction name="actionAs_ps"/>
-    <addaction name="actionAs_eps"/>
    </widget>
-   <addaction name="menuNew"/>
    <addaction name="menuFile"/>
    <addaction name="menuExport"/>
   </widget>
-  <action name="action2_x_1">
-   <property name="text">
-    <string>2 x 1</string>
-   </property>
-  </action>
-  <action name="action1_x_2">
-   <property name="text">
-    <string>1 x 2</string>
-   </property>
-  </action>
-  <action name="action2_x_2">
-   <property name="text">
-    <string>2 x 2</string>
-   </property>
-  </action>
-  <action name="action3_x_1">
-   <property name="text">
-    <string>3 x 1</string>
-   </property>
-  </action>
-  <action name="action3_x_2">
-   <property name="text">
-    <string>3 x 2</string>
-   </property>
-  </action>
-  <action name="action3_x3">
-   <property name="text">
-    <string>3 x3</string>
-   </property>
-  </action>
-  <action name="actionCustom">
-   <property name="text">
-    <string>Custom</string>
-   </property>
-  </action>
   <action name="actionSave">
    <property name="text">
     <string>Save</string>
@@ -236,22 +221,7 @@
   </action>
   <action name="actionAs_pdf">
    <property name="text">
-    <string>As pdf</string>
-   </property>
-  </action>
-  <action name="actionAs_png">
-   <property name="text">
-    <string>As png</string>
-   </property>
-  </action>
-  <action name="actionAs_ps">
-   <property name="text">
-    <string>As ps</string>
-   </property>
-  </action>
-  <action name="actionAs_eps">
-   <property name="text">
-    <string>As eps</string>
+    <string>As .pdf .ps .eps or .jpg</string>
    </property>
   </action>
  </widget>

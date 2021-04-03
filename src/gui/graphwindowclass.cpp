@@ -2388,14 +2388,15 @@ void GraphWindowClass::BasketReorderRequested(const QVector<int> &indexes, int t
 void GraphWindowClass::contextMenuForBasketMultipleSelection(const QPoint & pos)
 {
     QMenu Menu;
+    QAction * multidrawA = Menu.addAction("Make multidraw");
     QAction * removeAllSelected = Menu.addAction("Remove all selected");
     removeAllSelected->setShortcut(Qt::Key_Delete);
 
     QAction* selectedItem = Menu.exec(lwBasket->mapToGlobal(pos));
     if (!selectedItem) return;
 
-    if (selectedItem == removeAllSelected)
-        removeAllSelectedBasketItems();
+    if      (selectedItem == removeAllSelected) removeAllSelectedBasketItems();
+    else if (selectedItem == multidrawA)        requestMultidraw();
 }
 
 void GraphWindowClass::removeAllSelectedBasketItems()
@@ -2419,6 +2420,20 @@ void GraphWindowClass::removeAllSelectedBasketItems()
     ActiveBasketItem = -1;
     ClearCopyOfActiveBasketId();
     UpdateBasketGUI();
+}
+
+void GraphWindowClass::requestMultidraw()
+{
+    QList<QListWidgetItem*> selection = lwBasket->selectedItems();
+
+    QVector<int> indexes;
+    for (QListWidgetItem * item : selection)
+        indexes << lwBasket->row(item);
+
+    if (!MGDesigner) MGDesigner = new AMultiGraphDesigner(*Basket, this);
+    MGDesigner->showNormal();
+    MGDesigner->activateWindow();
+    MGDesigner->requestAutoconfigureAndDraw(indexes);
 }
 
 void GraphWindowClass::ClearBasket()

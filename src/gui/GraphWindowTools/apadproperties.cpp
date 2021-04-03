@@ -4,7 +4,7 @@
 
 APadProperties::APadProperties()
 {
-    tPad = new TPad("tPad", "tPad",0.05, 0.05, 0.95, 0.95);
+    tPad = new TPad("tPad", "tPad", 0.05, 0.05, 0.95, 0.95);
 }
 
 APadProperties::APadProperties(TPad *pad)
@@ -42,17 +42,15 @@ void APadProperties::applyPadGeometry()
 void APadProperties::writeToJson(QJsonObject &json) const
 {
     padGeo.writeToJson(json);
-    json["basketIndex"] = basketIndex;
 }
 
 void APadProperties::readFromJson(const QJsonObject &json)
 {
-    parseJson(json, "basketIndex", basketIndex);
     padGeo.readFromJson(json);
     applyPadGeometry();
 }
 
-QString APadProperties::toString()
+QString APadProperties::toString() const
 {
     QString output;
     output = QString::number(padGeo.xLow) + ", " + QString::number(padGeo.yLow) + ", "

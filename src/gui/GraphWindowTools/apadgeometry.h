@@ -1,20 +1,18 @@
 #ifndef APADGEOMETRY_H
 #define APADGEOMETRY_H
 
-
-#include <QJsonObject>
-
+class QJsonObject;
 
 class APadGeometry
 {
 public:
-    APadGeometry();
+    void writeToJson(QJsonObject & json) const;
+    void readFromJson(const QJsonObject & json);
+
     double xLow;
     double yLow;
     double xHigh;
     double yHigh;
-    void writeToJson(QJsonObject &json) const;
-    void readFromJson(const QJsonObject &json);
 };
 
 #endif // APADGEOMETRY_H

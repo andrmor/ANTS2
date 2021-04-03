@@ -315,6 +315,7 @@ private:
     void UpdateGuiControlsForMainObject(const QString &ClassName, const QString & options);
     void contextMenuForBasketMultipleSelection(const QPoint &pos);
     void removeAllSelectedBasketItems();
+    void requestMultidraw();
     void applyTemplate(bool bAll);
     void updateSecondaryAxis(TGaxis *gaxis, const char *opt);
     void showHintInStatus();

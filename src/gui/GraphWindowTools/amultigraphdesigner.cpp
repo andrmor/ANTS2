@@ -4,7 +4,6 @@
 #include "amessage.h"
 #include "abasketlistwidget.h"
 #include "abasketmanager.h"
-#include "amultigraphconfigurator.h"
 #include "ajsontools.h"
 
 #include <QHBoxLayout>
@@ -13,6 +12,7 @@
 #include <TObject.h>
 #include <TCanvas.h>
 #include <QJsonArray>
+#include <QFileDialog>
 
 AMultiGraphDesigner::AMultiGraphDesigner(ABasketManager & Basket, QWidget *parent) :
     QMainWindow(parent), Basket(Basket),
@@ -31,13 +31,7 @@ AMultiGraphDesigner::AMultiGraphDesigner(ABasketManager & Basket, QWidget *paren
     //connect(lwBasket, &ABasketListWidget::itemDoubleClicked, this, &AMultiGraphDesigner::onBasketItemDoubleClicked);
     //connect(lwBasket, &ABasketListWidget::requestReorder, this, &AMultiGraphDesigner::BasketReorderRequested);
 
-    Configurator = new AMultiGraphConfigurator();
-    ui->lConfigurator->insertWidget(1, Configurator);
-
     updateBasketGUI();
-
-    resize(width()+1, height());
-    resize(width()-1, height());
 }
 
 AMultiGraphDesigner::~AMultiGraphDesigner()
@@ -58,24 +52,25 @@ void AMultiGraphDesigner::updateBasketGUI()
     }
 }
 
-void AMultiGraphDesigner::on_action1_x_2_triggered()
+void AMultiGraphDesigner::requestAutoconfigureAndDraw(const QVector<int> & basketItems)
 {
-    fillOutBasicLayout(1,2);
-}
+    clearGraphs();
 
-void AMultiGraphDesigner::on_action2_x_1_triggered()
-{
-    fillOutBasicLayout(2,1);
-}
+    DrawOrder = basketItems;
 
-void AMultiGraphDesigner::on_action2_x_2_triggered()
-{
-    fillOutBasicLayout(2,2);
+    const int size = basketItems.size();
+    if      (size == 2) fillOutBasicLayout(2, 1);
+    else if (size == 3) fillOutBasicLayout(3, 1);
+    else if (size == 4) fillOutBasicLayout(2, 2);
+    else if (size == 5) fillOutBasicLayout(2, 3);
+    else if (size == 6) fillOutBasicLayout(2, 3);
+    else if (size >= 7) fillOutBasicLayout(3, 3);
 }
 
 void AMultiGraphDesigner::on_actionAs_pdf_triggered()
 {
-
+    QString fileName = QFileDialog::getSaveFileName();
+    RasterWindow->SaveAs(fileName);
 }
 
 void AMultiGraphDesigner::on_actionSave_triggered()
@@ -87,6 +82,7 @@ void AMultiGraphDesigner::on_actionSave_triggered()
 
 void AMultiGraphDesigner::on_actionLoad_triggered()
 {
+    /*
     qDebug() <<"aaaaaaa" <<Pads.length();
     clearGraphs();
     qDebug() <<"bbbbbbbbbbbbbbb" <<Pads.length();
@@ -96,13 +92,16 @@ void AMultiGraphDesigner::on_actionLoad_triggered()
     qDebug() <<err;
     qDebug() <<"cccccccccccccccccc" <<Pads.length();
     updateCanvas();
+    */
 }
 
+/*
 void AMultiGraphDesigner::on_drawgraphtriggered()
 {
     const QVector<ADrawObject> DrawObjects = Basket.getCopy(0);
     drawGraph(DrawObjects);
 }
+*/
 
 void AMultiGraphDesigner::clearGraphs()
 {
@@ -119,147 +118,77 @@ void AMultiGraphDesigner::drawGraph(const QVector<ADrawObject> DrawObjects)
         TObject * tObj = drObj.Pointer;
 
         tObj->Draw(drObj.Options.toLatin1().data());
-
     }
 }
 
 void AMultiGraphDesigner::updateCanvas()
 {
-//    TCanvas *c1 = RasterWindow->fCanvas;
+    TCanvas * canvas = RasterWindow->fCanvas;
 
-//    for (const APadProperties& aPad: Pads)
-//    {
-//        c1->cd();
-//        aPad.tPad->Draw();
-//        const QVector<ADrawObject> DrawObjects = Basket.getCopy(aPad.basketIndex);
-//        aPad.tPad->cd();
-//        drawGraph(DrawObjects);
-//    }
-//    c1->Update();
-
-    TCanvas *c1 = RasterWindow->fCanvas;
-
-    for (const QVector<APadProperties> aPadGroup : APads)
+    for (int iPad = 0; iPad < Pads.size(); iPad++)
     {
-        for (const APadProperties& aPad: aPadGroup)
+        const APadProperties & pad = Pads.at(iPad);
+        canvas->cd();
+        pad.tPad->Draw();
+
+        if (iPad < DrawOrder.size())
         {
-            c1->cd();
-            aPad.tPad->Draw();
-            const QVector<ADrawObject> DrawObjects = Basket.getCopy(aPad.basketIndex);
-            aPad.tPad->cd();
-            drawGraph(DrawObjects);
+            int iBasketIndex = DrawOrder.at(iPad);
+            if (iBasketIndex < Basket.size() && iBasketIndex >= 0)
+            {
+                const QVector<ADrawObject> DrawObjects = Basket.getCopy(iBasketIndex);
+                pad.tPad->cd();
+                drawGraph(DrawObjects);
+            }
         }
     }
-    c1->Update();
+    canvas->Update();
 }
 
-void AMultiGraphDesigner::fillOutBasicLayout(int M, int m, bool horizontal)
+void AMultiGraphDesigner::fillOutBasicLayout(int numX, int numY)
 {
-    double margin    = 0;
-    double padM  = 1.0/M;
-    double padm = 1.0/m;
+    if (numX < 1) numX = 1;
+    if (numY < 1) numY = 1;
 
-    //qDebug() <<"M" <<padM<< "m" << padm;
+    ui->sbNumX->setValue(numX);
+    ui->sbNumY->setValue(numY);
 
+    double margin = 0;
+    double padY   = 1.0 / numY;
+    double padX   = 1.0 / numX;
 
-    for (int iM = 0; iM < M; iM++)
+    for (int iY = 0; iY < numY; iY++)
     {
-        QVector <APadProperties> aPadGroup;
-        double M2;
-        double M1;
+        double y2 = 1.0 - (iY * padY);
+        double y1 = y2 - padY;
 
-        if (horizontal)   //y is counted from bottom to top so for easier basket use I inverted order it goes (1->0)
+        if (iY == 0)     y2 = 1 - margin;
+        if (iY == numY - 1) y1 = margin;
+
+        for (int iX = 0; iX < numX; iX++)
         {
-            M2 = 1-(iM * padM);
-            M1 = M2 - padM;
+            double x1 = iX * padX;
+            double x2 = x1 + padX;
 
-            if (iM == 0)     M2 = 1-margin;
-            if (iM == M - 1) M1 = margin;
-        }
-        else
-        {
-            M1 = iM * padM;
-            M2 = M1 + padM;
+            if (iX == 0)        x1 = margin;
+            if (iX == numX - 1) x2 = 1.0 - margin;
 
-            if (iM == 0) M1 = margin;
-            if (iM == M - 1) M2 = 1-margin;
-        }
+            QString padName = "pad" + QString::number(iX) + "_" + QString::number(iY);
 
-        //qDebug() << "M1" << M1;
-        //qDebug() << "M2" << M2;
-
-        for (int im = 0; im < m; im++)
-        {
-            double m1 = im * padm;
-            double m2 = m1 + padm;
-
-            if (im == 0) m1 = margin;
-            if (im == m - 1) m2 = 1-margin;
-
-            //qDebug() << "m1" << m1;
-            //qDebug() << "m2" << m2;
-
-            QString padname = "pad" + QString::number(iM) + "_" + QString::number(im);
-            TString padnameT(padname.toLatin1().data());
-
-            double y1;
-            double y2;
-            double x1;
-            double x2;
-
-            if (horizontal)
-            {
-                y1 = M1;
-                y2 = M2;
-                x1 = m1;
-                x2 = m2;
-            }
-            else
-            {
-                y1 = m1;
-                y2 = m2;
-                x1 = M1;
-                x2 = M2;
-            }
-
-            TPad* ipad = new TPad(padnameT, padnameT, x1, y1, x2, y2);
+            TPad * ipad = new TPad(padName.toLatin1().data(), "", x1, y1, x2, y2);
             APadProperties apad(ipad);
 
-            aPadGroup << apad;
-
+            Pads << apad;
         }
-        APads << aPadGroup;
-
     }
 
-    qDebug() << "pads" << APadsToString();
-    APads[2][1].basketIndex = 1;
+    qDebug() << "pads" << PadsToString();
     updateCanvas();
 }
 
-//void AMultiGraphDesigner::FillOutBasicLayout(int numA, int numB)
-//{
-//    bSizes.clear();
-//    double bIncrement = 1.0/numB;
-
-//    for (int ia = 0; ia < numA; ia++)
-//    {
-//        QVector<double> bSize;
-
-//        for (int ib = 0; ib < numB; ib++)
-//        {
-//            bSize << bIncrement;
-//        }
-
-//        bSizes << bSize;
-//    }
-
-//    qDebug() << "bSizes"<<bSizes;
-//}
-
-
 void AMultiGraphDesigner::writeAPadsToJson(QJsonObject &json)
 {
+    /*
     QJsonArray ar;
     for (APadProperties& aPad: Pads)
     {
@@ -269,10 +198,12 @@ void AMultiGraphDesigner::writeAPadsToJson(QJsonObject &json)
         ar << js;
     }
     json["Pads"] = ar;
+    */
 }
 
 QString AMultiGraphDesigner::readAPadsFromJson(const QJsonObject &json)
 {
+    /*
     QJsonArray ar;
     if (!parseJson(json, "Pads", ar))
         return "error in converting object to array";
@@ -290,49 +221,59 @@ QString AMultiGraphDesigner::readAPadsFromJson(const QJsonObject &json)
         Pads << newPad;
     }
     return "";
+    */
 }
 
-QString AMultiGraphDesigner::APadsToString()
+QString AMultiGraphDesigner::PadsToString()
 {
-    QString str = "";
-    for (QVector<APadProperties> prop : APads)
+    QString str;
+    for (const APadProperties & pad : Pads)
     {
-        str += "[";
-        for (APadProperties pad : prop)
-        {
-            str += "{";
-            str += pad.toString();
-            str += "}, ";
-        }
-        str.chop(2);
-        str += "] ; ";
-
+        str += "{";
+        str += pad.toString();
+        str += "}, ";
     }
-    str.chop(3);
+    str.chop(2);
     return str;
 }
 
-
-void AMultiGraphDesigner::on_pushButton_clicked()
+void AMultiGraphDesigner::on_pbRefactor_clicked()
 {
-//    const QVector<ADrawObject> DrawObjects1 = Basket.getCopy(0);
-//    TCanvas *c1 = RasterWindow->fCanvas;
-//    int margin = 0.05;
-
-//    TPad*    upperPad = new TPad("upperPad", "upperPad",
-//                       margin, .5, (1-margin), (1-margin));
-//    TPad*    lowerPad = new TPad("lowerPad", "lowerPad",
-//                       margin, margin, (1-margin), .5);
-//    upperPad->Draw();
-//    lowerPad->Draw();
-//    upperPad->cd();
-//    drawGraph(DrawObjects1);
-//    lowerPad->cd();
-//    drawGraph(DrawObjects1);
-//    c1->Update();
     clearGraphs();
-    fillOutBasicLayout(4,3, false);
-//   FillOutBasicLayout(4,5);
+    fillOutBasicLayout(ui->sbNumX->value(), ui->sbNumY->value());
+}
 
+#include <QTimer>
+bool AMultiGraphDesigner::event(QEvent *event)
+{
+    if (event->type() == QEvent::WindowActivate)
+    {
+        RasterWindow->UpdateRootCanvas();
+    }
 
+    if (event->type() == QEvent::Show)
+    {
+        if (bColdStart)
+        {
+            //first time this window is shown
+            bColdStart = false;
+            this->resize(width()+1, height());
+            this->resize(width()-1, height());
+        }
+        else
+        {
+            //qDebug() << "Graph win show event";
+            //RasterWindow->UpdateRootCanvas();
+            //QTimer::singleShot(100, [this](){RasterWindow->UpdateRootCanvas();}); // without delay canvas is not shown in Qt 5.9.5
+        }
+    }
+
+    return QMainWindow::event(event);
+}
+
+void AMultiGraphDesigner::on_pbClear_clicked()
+{
+    DrawOrder.clear();
+    clearGraphs();
+    updateCanvas();
 }

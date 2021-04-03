@@ -22,7 +22,6 @@ public:
     void                clear();
     void                remove(int index);
 
-    //QVector<ADrawObject> & getDrawObjects(int index); // return ref to NotValidItem is index is out of bounds
     const QString       getType(int index) const;
 
     int                 size() const;

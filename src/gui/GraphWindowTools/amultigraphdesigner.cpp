@@ -31,6 +31,8 @@ AMultiGraphDesigner::AMultiGraphDesigner(ABasketManager & Basket, QWidget *paren
     //connect(lwBasket, &ABasketListWidget::itemDoubleClicked, this, &AMultiGraphDesigner::onBasketItemDoubleClicked);
     //connect(lwBasket, &ABasketListWidget::requestReorder, this, &AMultiGraphDesigner::BasketReorderRequested);
 
+    connect(ui->lwCoords, &QListWidget::doubleClicked, this, &AMultiGraphDesigner::on_ItemDoubleClicked);
+
     updateBasketGUI();
 }
 
@@ -95,19 +97,24 @@ void AMultiGraphDesigner::on_actionLoad_triggered()
     */
 }
 
-/*
-void AMultiGraphDesigner::on_drawgraphtriggered()
+void AMultiGraphDesigner::on_ItemDoubleClicked(const QModelIndex &)
 {
-    const QVector<ADrawObject> DrawObjects = Basket.getCopy(0);
-    drawGraph(DrawObjects);
+    int currentRow = ui->lwCoords->currentRow();
+    DrawOrder << currentRow;
+    on_pbRefactor_clicked();
 }
-*/
 
 void AMultiGraphDesigner::clearGraphs()
 {
     TCanvas *c1 = RasterWindow->fCanvas;
     c1->Clear();
     Pads.clear();
+}
+
+void AMultiGraphDesigner::updateGUI()
+{
+    updateCanvas();
+    updateNumbers();
 }
 
 void AMultiGraphDesigner::drawGraph(const QVector<ADrawObject> DrawObjects)
@@ -136,13 +143,40 @@ void AMultiGraphDesigner::updateCanvas()
             int iBasketIndex = DrawOrder.at(iPad);
             if (iBasketIndex < Basket.size() && iBasketIndex >= 0)
             {
-                const QVector<ADrawObject> DrawObjects = Basket.getCopy(iBasketIndex);
+                const QVector<ADrawObject> DrawObjects = Basket.getCopy(iBasketIndex);  // ***!!! is it safe? The copy is deleted on exiting this {}
                 pad.tPad->cd();
                 drawGraph(DrawObjects);
             }
         }
     }
     canvas->Update();
+}
+
+void AMultiGraphDesigner::updateNumbers()
+{
+    ui->lwCoords->clear();
+
+    const int numX = ui->sbNumX->value();
+    const int numY = ui->sbNumY->value();
+
+    int max = std::min(DrawOrder.size(), numX * numY);
+
+    for (int iItem = 0; iItem < Basket.size(); iItem++)
+    {
+        QListWidgetItem * it = new QListWidgetItem("-");
+        it->setTextAlignment(Qt::AlignCenter);
+        ui->lwCoords->addItem(it);
+    }
+
+    int counter = 0;
+    for (int iy = 0; iy < numY; iy++)
+        for (int ix = 0; ix < numX; ix++)
+        {
+            if (counter >= max) break;
+            int iBasket = DrawOrder.at(counter);
+            ui->lwCoords->item(iBasket)->setText(QString("%1-%2").arg(ix).arg(iy));
+            counter++;
+        }
 }
 
 void AMultiGraphDesigner::fillOutBasicLayout(int numX, int numY)
@@ -183,7 +217,7 @@ void AMultiGraphDesigner::fillOutBasicLayout(int numX, int numY)
     }
 
     qDebug() << "pads" << PadsToString();
-    updateCanvas();
+    updateGUI();
 }
 
 void AMultiGraphDesigner::writeAPadsToJson(QJsonObject &json)
@@ -275,5 +309,5 @@ void AMultiGraphDesigner::on_pbClear_clicked()
 {
     DrawOrder.clear();
     clearGraphs();
-    updateCanvas();
+    updateGUI();
 }

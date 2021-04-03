@@ -233,18 +233,6 @@ void ABasketManager::remove(int index)
     Basket.remove(index);
 }
 
-/*
-QVector<ADrawObject> & ABasketManager::getDrawObjects(int index)
-{
-    if (index < 0 || index >= Basket.size())
-    {
-        qWarning() << "Basket manager: index" << index << "is out of bounds!";
-        return NotValidItem;
-    }
-    return Basket[index].DrawObjects;
-}
-*/
-
 const QString ABasketManager::getType(int index) const
 {
     if (index < 0 || index >= Basket.size()) return "";

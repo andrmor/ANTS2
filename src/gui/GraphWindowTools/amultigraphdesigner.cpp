@@ -109,12 +109,13 @@ void AMultiGraphDesigner::on_actionLoad_triggered()
     }
     Basket.clear();
     QString err = Basket.appendBasket(basketFileName);
+    emit basketChanged();
+    updateBasketGUI();
     if (!err.isEmpty())
     {
         message(err, this);
         return;
     }
-    updateBasketGUI();
 
     clearGraphs();
     DrawOrder.clear();
@@ -206,6 +207,7 @@ void AMultiGraphDesigner::updateNumbers()
     const int numY = ui->sbNumY->value();
 
     int max = std::min(DrawOrder.size(), numX * numY);
+    max     = std::min(max, Basket.size());  // paranoic
 
     for (int iItem = 0; iItem < Basket.size(); iItem++)
     {

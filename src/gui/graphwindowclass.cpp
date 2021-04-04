@@ -18,6 +18,7 @@
 #include "abasketmanager.h"
 #include "adrawexplorerwidget.h"
 #include "abasketlistwidget.h"
+#include "amultigraphdesigner.h"
 
 //Qt
 #include <QtGui>
@@ -2156,7 +2157,6 @@ QVector<double> GraphWindowClass::Get2DArray()
     return arr;
 }
 
-#include "amultigraphdesigner.h"
 void GraphWindowClass::UpdateBasketGUI()
 {
     lwBasket->clear();
@@ -2422,6 +2422,22 @@ void GraphWindowClass::removeAllSelectedBasketItems()
     UpdateBasketGUI();
 }
 
+void GraphWindowClass::onExternalBasketChange()
+{
+    ActiveBasketItem = -1;
+    ClearCopyOfActiveBasketId();
+    UpdateBasketGUI();
+}
+
+void GraphWindowClass::createMGDesigner()
+{
+    if (!MGDesigner)
+    {
+        MGDesigner = new AMultiGraphDesigner(*Basket, this);
+        connect(MGDesigner, &AMultiGraphDesigner::basketChanged, this, &GraphWindowClass::onExternalBasketChange);
+    }
+}
+
 void GraphWindowClass::requestMultidraw()
 {
     QList<QListWidgetItem*> selection = lwBasket->selectedItems();
@@ -2430,7 +2446,7 @@ void GraphWindowClass::requestMultidraw()
     for (QListWidgetItem * item : selection)
         indexes << lwBasket->row(item);
 
-    if (!MGDesigner) MGDesigner = new AMultiGraphDesigner(*Basket, this);
+    if (!MGDesigner) createMGDesigner();
     MGDesigner->showNormal();
     MGDesigner->activateWindow();
     MGDesigner->requestAutoconfigureAndDraw(indexes);
@@ -2937,9 +2953,9 @@ void GraphWindowClass::on_pbManipulate_clicked()
     Explorer->manipulateTriggered();
 }
 
-#include "amultigraphdesigner.h"
 void GraphWindowClass::on_actionOpen_MultiGraphDesigner_triggered()
 {
-    if (!MGDesigner) MGDesigner = new AMultiGraphDesigner(*Basket, this);
+    if (!MGDesigner) createMGDesigner();
     MGDesigner->showNormal();
+    MGDesigner->activateWindow();
 }

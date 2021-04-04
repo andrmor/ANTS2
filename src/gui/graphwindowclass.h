@@ -273,6 +273,7 @@ private slots:
 
     void on_actionOpen_MultiGraphDesigner_triggered();
 
+    void onExternalBasketChange();
 private:
     MainWindow *MW;
     Ui::GraphWindowClass *ui;
@@ -322,6 +323,7 @@ private:
     void setShowCursorPosition(bool flag);
     void fixGraphFrame();
     void updateLogScaleFlags(QVector<ADrawObject> & drawObjects) const;
+    void createMGDesigner();
 };
 
 #endif // GRAPHWINDOWCLASS_H

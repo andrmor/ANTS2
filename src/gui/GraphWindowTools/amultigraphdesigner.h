@@ -43,6 +43,9 @@ private slots:
 protected:
     bool event(QEvent * event) override;
 
+signals:
+    void basketChanged();
+
 private:
     ABasketManager & Basket;
 

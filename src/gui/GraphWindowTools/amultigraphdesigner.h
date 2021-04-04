@@ -32,6 +32,7 @@ public:
 private slots:
     void on_pbRefactor_clicked();
     void on_pbClear_clicked();
+
     void on_actionAs_pdf_triggered();
     void on_actionSave_triggered();
     void on_actionLoad_triggered();
@@ -61,8 +62,8 @@ private:
 
     void drawGraph(const QVector<ADrawObject> DrawObjects);
     void fillOutBasicLayout(int numX, int numY);
-    void writeAPadsToJson(QJsonObject &json);
-    QString readAPadsFromJson(const QJsonObject &json);
+    void writeToJson(QJsonObject &json);
+    QString readFromJson(const QJsonObject &json);
     QString PadsToString();
     void addDraw(QListWidget *lw);
 };

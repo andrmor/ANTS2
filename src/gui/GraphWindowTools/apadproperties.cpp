@@ -7,13 +7,13 @@ APadProperties::APadProperties()
     tPad = new TPad("tPad", "tPad", 0.05, 0.05, 0.95, 0.95);
 }
 
-APadProperties::APadProperties(TPad *pad)
+APadProperties::APadProperties(TPad * pad)
 {
     tPad = pad;
     updatePadGeometry();
 }
 
-void APadProperties::updatePadGeometry() //actually should I keep "const TPad *pad" as a parameter because it shoudnt be able to change it?
+void APadProperties::updatePadGeometry()
 {
     padGeo.xLow = tPad->GetAbsXlowNDC();
     padGeo.yLow = tPad->GetAbsYlowNDC();
@@ -26,17 +26,8 @@ void APadProperties::updatePadGeometry() //actually should I keep "const TPad *p
 
 void APadProperties::applyPadGeometry()
 {
-//    double x1 = tPad->XtoAbsPixel(padGeo.xLow);
-//    double x2 = tPad->XtoAbsPixel(padGeo.xHigh);
-//    double y1 = tPad->YtoAbsPixel(padGeo.yLow);
-//    double y2 = tPad->YtoAbsPixel(padGeo.yHigh);
-//    tPad->SetBBoxX1(x1);
-//    tPad->SetBBoxX2(x2);
-//    tPad->SetBBoxY1(y1);
-//    tPad->SetBBoxY2(y2);
     tPad->SetPad(padGeo.xLow, padGeo.yLow, padGeo.xHigh, padGeo.yHigh);
-    qDebug() <<"tpad geometry" <<tPad->GetAbsXlowNDC() <<tPad->GetAbsYlowNDC() <<tPad->GetAbsWNDC() <<tPad->GetAbsHNDC();
-//    qDebug() <<"tpad geometry" <<x1 <<y1 <<x2 <<y2;
+    //qDebug() <<"tpad geometry" <<tPad->GetAbsXlowNDC() <<tPad->GetAbsYlowNDC() <<tPad->GetAbsWNDC() <<tPad->GetAbsHNDC();
 }
 
 void APadProperties::writeToJson(QJsonObject &json) const

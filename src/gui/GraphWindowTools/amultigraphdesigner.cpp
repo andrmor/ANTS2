@@ -70,30 +70,61 @@ void AMultiGraphDesigner::requestAutoconfigureAndDraw(const QVector<int> & baske
 
 void AMultiGraphDesigner::on_actionAs_pdf_triggered()
 {
-    QString fileName = QFileDialog::getSaveFileName();
+    QString fileName = QFileDialog::getSaveFileName(this, "Export multigraph\nFile suffix defines the file type", "");
+    if (fileName.isEmpty()) return;
+
     RasterWindow->SaveAs(fileName);
 }
 
 void AMultiGraphDesigner::on_actionSave_triggered()
 {
+    QString fileName = QFileDialog::getSaveFileName(this, "Save this multigraph");
+    if (fileName.isEmpty()) return;
+
     QJsonObject js;
-    writeAPadsToJson(js);
-    SaveJsonToFile(js, "/home/kiram/Documents/jsonTesting/json1.json");
+    writeToJson(js);
+    SaveJsonToFile(js, fileName);
+
+    Basket.saveAll(fileName+".basket");
 }
 
+#include <QFileInfo>
+#include <QInputDialog>
 void AMultiGraphDesigner::on_actionLoad_triggered()
 {
-    /*
-    qDebug() <<"aaaaaaa" <<Pads.length();
+    if (Basket.size() != 0)
+    {
+        bool ok = confirm("The Basket is not empty. If you proceed, the content will be replaced!\nContinue?", this);
+        if (!ok) return;
+    }
+
+    QString fileName = QFileDialog::getOpenFileName(this, "Load multigraph");
+    if (fileName.isEmpty()) return;
+
+    QString basketFileName = fileName + ".basket";
+    if (!QFileInfo(basketFileName).exists())
+    {
+        message(QString("Not found corresponding basket file:\n%1").arg(basketFileName));
+        return;
+    }
+    Basket.clear();
+    QString err = Basket.appendBasket(basketFileName);
+    if (!err.isEmpty())
+    {
+        message(err, this);
+        return;
+    }
+    updateBasketGUI();
+
     clearGraphs();
-    qDebug() <<"bbbbbbbbbbbbbbb" <<Pads.length();
+    DrawOrder.clear();
+
     QJsonObject js;
-    LoadJsonFromFile(js, "/home/kiram/Documents/jsonTesting/json1.json");
-    QString err = readAPadsFromJson(js);
-    qDebug() <<err;
-    qDebug() <<"cccccccccccccccccc" <<Pads.length();
-    updateCanvas();
-    */
+    LoadJsonFromFile(js, fileName);
+    err = readFromJson(js);
+    if (!err.isEmpty()) message(err, this);
+
+    updateGUI();
 }
 
 void AMultiGraphDesigner::addDraw(QListWidget * lw)
@@ -101,7 +132,7 @@ void AMultiGraphDesigner::addDraw(QListWidget * lw)
     const int currentRow = lw->currentRow();
 
     if (DrawOrder.contains(currentRow))
-        message("Already drawn!", lw);
+        message("Already drawn!", lwBasket);
     else
     {
         DrawOrder << currentRow;
@@ -211,7 +242,7 @@ void AMultiGraphDesigner::fillOutBasicLayout(int numX, int numY)
         double y2 = 1.0 - (iY * padY);
         double y1 = y2 - padY;
 
-        if (iY == 0)     y2 = 1 - margin;
+        if (iY == 0)        y2 = 1 - margin;
         if (iY == numY - 1) y1 = margin;
 
         for (int iX = 0; iX < numX; iX++)
@@ -231,46 +262,65 @@ void AMultiGraphDesigner::fillOutBasicLayout(int numX, int numY)
         }
     }
 
-    qDebug() << "pads" << PadsToString();
     updateGUI();
 }
 
-void AMultiGraphDesigner::writeAPadsToJson(QJsonObject &json)
+void AMultiGraphDesigner::writeToJson(QJsonObject & json)
 {
-    /*
+    json["NumX"] = ui->sbNumX->value();
+    json["NumY"] = ui->sbNumY->value();
+
     QJsonArray ar;
-    for (APadProperties& aPad: Pads)
+    for (APadProperties & p : Pads)
     {
         QJsonObject js;
-        aPad.updatePadGeometry(); //    EXTREMELY TEMPORARY!!!
-        aPad.writeToJson(js);
+        p.updatePadGeometry();
+        p.writeToJson(js);
         ar << js;
     }
     json["Pads"] = ar;
-    */
+
+    QJsonArray arI;
+    for (int i : DrawOrder) arI << i;
+    json["DrawOrder"] = arI;
+
+    json["WinWidth"]  = width();
+    json["WinHeight"] = height();
 }
 
-QString AMultiGraphDesigner::readAPadsFromJson(const QJsonObject &json)
+QString AMultiGraphDesigner::readFromJson(const QJsonObject & json)
 {
-    /*
     QJsonArray ar;
-    if (!parseJson(json, "Pads", ar))
-        return "error in converting object to array";
+    if (!parseJson(json, "Pads", ar)) return "Wrong file format!";
 
-    int size = ar.size();
-    if (size == 0)
-        return "error nothing to load";
+    const int size = ar.size();
+    if (size == 0) return "No pads in the file!";
 
     for (int i = 0; i < size; i++)
     {
-        const QJsonObject &js = ar.at(i).toObject();
+        QJsonObject js = ar.at(i).toObject();
 
         APadProperties newPad;
         newPad.readFromJson(js);
         Pads << newPad;
     }
+
+    int numX = 2, numY = 1;
+    parseJson(json, "NumX", numX);
+    parseJson(json, "NumY", numY);
+    ui->sbNumX->setValue(numX);
+    ui->sbNumY->setValue(numY);
+
+    QJsonArray arI;
+    parseJson(json, "DrawOrder", arI);
+    for (int i = 0; i < arI.size(); i++) DrawOrder << arI.at(i).toInt();
+
+    int w = 600, h = 400;
+    parseJson(json, "WinWidth", w);
+    parseJson(json, "WinHeight", h);
+    resize(w, h);
+
     return "";
-    */
 }
 
 QString AMultiGraphDesigner::PadsToString()

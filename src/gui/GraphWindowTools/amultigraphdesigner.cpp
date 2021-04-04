@@ -28,10 +28,9 @@ AMultiGraphDesigner::AMultiGraphDesigner(ABasketManager & Basket, QWidget *paren
     lwBasket = new ABasketListWidget(this);
     ui->lBasketLayout->addWidget(lwBasket);
     //connect(lwBasket, &ABasketListWidget::customContextMenuRequested, this, &AMultiGraphDesigner::BasketCustomContextMenuRequested);
-    //connect(lwBasket, &ABasketListWidget::itemDoubleClicked, this, &AMultiGraphDesigner::onBasketItemDoubleClicked);
-    //connect(lwBasket, &ABasketListWidget::requestReorder, this, &AMultiGraphDesigner::BasketReorderRequested);
 
-    connect(ui->lwCoords, &QListWidget::doubleClicked, this, &AMultiGraphDesigner::on_ItemDoubleClicked);
+    connect(lwBasket,     &ABasketListWidget::itemDoubleClicked, this, &AMultiGraphDesigner::onBasketItemDoubleClicked);
+    connect(ui->lwCoords, &QListWidget::itemDoubleClicked,       this, &AMultiGraphDesigner::onCoordItemDoubleClicked);
 
     updateBasketGUI();
 }
@@ -97,11 +96,27 @@ void AMultiGraphDesigner::on_actionLoad_triggered()
     */
 }
 
-void AMultiGraphDesigner::on_ItemDoubleClicked(const QModelIndex &)
+void AMultiGraphDesigner::addDraw(QListWidget * lw)
 {
-    int currentRow = ui->lwCoords->currentRow();
-    DrawOrder << currentRow;
-    on_pbRefactor_clicked();
+    const int currentRow = lw->currentRow();
+
+    if (DrawOrder.contains(currentRow))
+        message("Already drawn!", lw);
+    else
+    {
+        DrawOrder << currentRow;
+        on_pbRefactor_clicked();
+    }
+}
+
+void AMultiGraphDesigner::onCoordItemDoubleClicked(QListWidgetItem *)
+{
+    addDraw(ui->lwCoords);
+}
+
+void AMultiGraphDesigner::onBasketItemDoubleClicked(QListWidgetItem *)
+{
+    addDraw(lwBasket);
 }
 
 void AMultiGraphDesigner::clearGraphs()

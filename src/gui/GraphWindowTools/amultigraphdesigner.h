@@ -11,7 +11,8 @@ class RasterWindowBaseClass;
 class ABasketListWidget;
 class ADrawObject;
 class QJsonObject;
-class QModelIndex;
+class QListWidget;
+class QListWidgetItem;
 
 namespace Ui {
 class AMultiGraphDesigner;
@@ -35,7 +36,8 @@ private slots:
     void on_actionSave_triggered();
     void on_actionLoad_triggered();
 
-    void on_ItemDoubleClicked(const QModelIndex &);
+    void onCoordItemDoubleClicked(QListWidgetItem *);
+    void onBasketItemDoubleClicked(QListWidgetItem *);
 
 protected:
     bool event(QEvent * event) override;
@@ -47,22 +49,22 @@ private:
     RasterWindowBaseClass   * RasterWindow = nullptr;
     ABasketListWidget       * lwBasket     = nullptr;
 
+    QVector<APadProperties> Pads;
+    QVector<int> DrawOrder;
+    bool bColdStart = true;
+
     void clearGraphs();
-    QVector<QVector<double>> bSizes;
 
     void updateGUI();
     void updateCanvas();
     void updateNumbers();
+
     void drawGraph(const QVector<ADrawObject> DrawObjects);
     void fillOutBasicLayout(int numX, int numY);
     void writeAPadsToJson(QJsonObject &json);
     QString readAPadsFromJson(const QJsonObject &json);
     QString PadsToString();
-
-    QVector<APadProperties> Pads;
-    QVector<int> DrawOrder;
-
-    bool bColdStart = true;
+    void addDraw(QListWidget *lw);
 };
 
 #endif // AMULTIGRAPHDESIGNER_H

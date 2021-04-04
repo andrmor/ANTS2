@@ -419,8 +419,7 @@ SOURCES += main.cpp \
     common/ageotype.cpp \
     gui/GraphWindowTools/amultigraphdesigner.cpp \
     gui/GraphWindowTools/apadgeometry.cpp \
-    gui/GraphWindowTools/apadproperties.cpp \
-    gui/GraphWindowTools/qmultigraphlayoutwidget.cpp
+    gui/GraphWindowTools/apadproperties.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -586,8 +585,7 @@ HEADERS  += common/CorrelationFilters.h \
     common/ageotype.h \
     gui/GraphWindowTools/amultigraphdesigner.h \
     gui/GraphWindowTools/apadgeometry.h \
-    gui/GraphWindowTools/apadproperties.h \
-    gui/GraphWindowTools/qmultigraphlayoutwidget.h
+    gui/GraphWindowTools/apadproperties.h
 
 # --- SIM ---
 ants2_SIM {
@@ -1037,6 +1035,5 @@ FORMS += \
     gui/DAWindowTools/amaterialloaderdialog.ui \
     gui/MainWindowTools/asaveparticlestofiledialog.ui \
     gui/RasterWindow/acameracontroldialog.ui \
-    gui/GraphWindowTools/amultigraphdesigner.ui \
-    gui/GraphWindowTools/qmultigraphlayoutwidget.ui
+    gui/GraphWindowTools/amultigraphdesigner.ui
 

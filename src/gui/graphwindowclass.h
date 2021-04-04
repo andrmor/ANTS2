@@ -26,6 +26,7 @@ class ADrawExplorerWidget;
 class ABasketListWidget;
 class TLegend;
 class TGaxis;
+class AMultiGraphDesigner;
 
 namespace Ui {
 class GraphWindowClass;
@@ -270,6 +271,9 @@ private slots:
 
     void on_cbShowCross_toggled(bool checked);
 
+    void on_actionOpen_MultiGraphDesigner_triggered();
+
+    void onExternalBasketChange();
 private:
     MainWindow *MW;
     Ui::GraphWindowClass *ui;
@@ -277,6 +281,7 @@ private:
     ADrawExplorerWidget * Explorer = nullptr; //owns
     bool ExtractionCanceled = false;
     int LastOptStat = 1111;
+    AMultiGraphDesigner * MGDesigner = nullptr;
 
     QVector<ADrawObject> DrawObjects;  //always local objects -> can have a copy from the Basket
     QVector<ADrawObject> PreviousDrawObjects; //last draw made from outside of the graph window
@@ -311,12 +316,14 @@ private:
     void UpdateGuiControlsForMainObject(const QString &ClassName, const QString & options);
     void contextMenuForBasketMultipleSelection(const QPoint &pos);
     void removeAllSelectedBasketItems();
+    void requestMultidraw();
     void applyTemplate(bool bAll);
     void updateSecondaryAxis(TGaxis *gaxis, const char *opt);
     void showHintInStatus();
     void setShowCursorPosition(bool flag);
     void fixGraphFrame();
     void updateLogScaleFlags(QVector<ADrawObject> & drawObjects) const;
+    void createMGDesigner();
 };
 
 #endif // GRAPHWINDOWCLASS_H

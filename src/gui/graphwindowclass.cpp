@@ -18,6 +18,7 @@
 #include "abasketmanager.h"
 #include "adrawexplorerwidget.h"
 #include "abasketlistwidget.h"
+#include "amultigraphdesigner.h"
 
 //Qt
 #include <QtGui>
@@ -2180,6 +2181,8 @@ void GraphWindowClass::UpdateBasketGUI()
     ui->pbUpdateInBasket->setEnabled(ActiveBasketItem >= 0);
 
     if (ActiveBasketItem < 0) HighlightUpdateBasketButton(false);
+
+    if (MGDesigner) MGDesigner->updateBasketGUI();
 }
 
 void GraphWindowClass::onBasketItemDoubleClicked(QListWidgetItem *)
@@ -2385,14 +2388,15 @@ void GraphWindowClass::BasketReorderRequested(const QVector<int> &indexes, int t
 void GraphWindowClass::contextMenuForBasketMultipleSelection(const QPoint & pos)
 {
     QMenu Menu;
+    QAction * multidrawA = Menu.addAction("Make multidraw");
     QAction * removeAllSelected = Menu.addAction("Remove all selected");
     removeAllSelected->setShortcut(Qt::Key_Delete);
 
     QAction* selectedItem = Menu.exec(lwBasket->mapToGlobal(pos));
     if (!selectedItem) return;
 
-    if (selectedItem == removeAllSelected)
-        removeAllSelectedBasketItems();
+    if      (selectedItem == removeAllSelected) removeAllSelectedBasketItems();
+    else if (selectedItem == multidrawA)        requestMultidraw();
 }
 
 void GraphWindowClass::removeAllSelectedBasketItems()
@@ -2416,6 +2420,36 @@ void GraphWindowClass::removeAllSelectedBasketItems()
     ActiveBasketItem = -1;
     ClearCopyOfActiveBasketId();
     UpdateBasketGUI();
+}
+
+void GraphWindowClass::onExternalBasketChange()
+{
+    ActiveBasketItem = -1;
+    ClearCopyOfActiveBasketId();
+    UpdateBasketGUI();
+}
+
+void GraphWindowClass::createMGDesigner()
+{
+    if (!MGDesigner)
+    {
+        MGDesigner = new AMultiGraphDesigner(*Basket, this);
+        connect(MGDesigner, &AMultiGraphDesigner::basketChanged, this, &GraphWindowClass::onExternalBasketChange);
+    }
+}
+
+void GraphWindowClass::requestMultidraw()
+{
+    QList<QListWidgetItem*> selection = lwBasket->selectedItems();
+
+    QVector<int> indexes;
+    for (QListWidgetItem * item : selection)
+        indexes << lwBasket->row(item);
+
+    if (!MGDesigner) createMGDesigner();
+    MGDesigner->showNormal();
+    MGDesigner->activateWindow();
+    MGDesigner->requestAutoconfigureAndDraw(indexes);
 }
 
 void GraphWindowClass::ClearBasket()
@@ -2917,4 +2951,11 @@ void GraphWindowClass::on_actionShow_first_drawn_object_context_menu_triggered()
 void GraphWindowClass::on_pbManipulate_clicked()
 {
     Explorer->manipulateTriggered();
+}
+
+void GraphWindowClass::on_actionOpen_MultiGraphDesigner_triggered()
+{
+    if (!MGDesigner) createMGDesigner();
+    MGDesigner->showNormal();
+    MGDesigner->activateWindow();
 }

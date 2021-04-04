@@ -9,10 +9,10 @@ ANTS2_MINOR = 33
 #CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library: see https://github.com/mariusmuja/flann
 #CONFIG += ants2_fann        #enables FANN (fast neural network) library: see https://github.com/libfann/fann
 CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra - highly recommended! Installation requires only to copy files!
-#CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
+CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 #CONFIG += ants2_Python      #enable Python scripting
 #CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering): see https://github.com/mctools/ncrystal
-#CONFIG += ants2_jsroot       #enables JSROOT visualisation at GeometryWindow. Automatically enables ants2_RootServer
+CONFIG += ants2_jsroot       #enables JSROOT visualisation at GeometryWindow. Automatically enables ants2_RootServer
 
 #In effect ONLY for the Docker version:
 ants2_docker {
@@ -416,7 +416,10 @@ SOURCES += main.cpp \
     modules/ageoconsts.cpp \
     common/ageoshape.cpp \
     scriptmode/afarm_si.cpp \
-    common/ageotype.cpp
+    common/ageotype.cpp \
+    gui/GraphWindowTools/amultigraphdesigner.cpp \
+    gui/GraphWindowTools/apadgeometry.cpp \
+    gui/GraphWindowTools/apadproperties.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -579,7 +582,10 @@ HEADERS  += common/CorrelationFilters.h \
     modules/ageoconsts.h \
     common/ageoshape.h \
     scriptmode/afarm_si.h \
-    common/ageotype.h
+    common/ageotype.h \
+    gui/GraphWindowTools/amultigraphdesigner.h \
+    gui/GraphWindowTools/apadgeometry.h \
+    gui/GraphWindowTools/apadproperties.h
 
 # --- SIM ---
 ants2_SIM {
@@ -1028,5 +1034,6 @@ FORMS += \
     gui/amateriallibrarybrowser.ui \
     gui/DAWindowTools/amaterialloaderdialog.ui \
     gui/MainWindowTools/asaveparticlestofiledialog.ui \
-    gui/RasterWindow/acameracontroldialog.ui
+    gui/RasterWindow/acameracontroldialog.ui \
+    gui/GraphWindowTools/amultigraphdesigner.ui
 

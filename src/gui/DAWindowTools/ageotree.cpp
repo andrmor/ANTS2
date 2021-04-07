@@ -258,7 +258,7 @@ void AGeoTree::populateTreeWidget(QTreeWidgetItem * parent, AGeoObject * Contain
             item->setForeground(0, Qt::blue);
             updateIcon(item, obj);
         }
-        else if (obj->ObjectType->isHandlingSet() || obj->ObjectType->isArray() || obj->ObjectType->isGridElement())
+        else if (obj->ObjectType->isHandlingSet() || obj->ObjectType->isHandlingArray() || obj->ObjectType->isGridElement())
         { //group or stack or array or gridElement
             QFont f = item->font(0); f.setItalic(true); item->setFont(0, f);
             updateIcon(item, obj);
@@ -402,6 +402,7 @@ void AGeoTree::customMenuRequested(const QPoint &pos)
     QAction* newArb8 = addObjMenu->addAction("Arb8");
 
   QAction* newArrayA  = Action(menu, "Add array");
+  QAction* newCircArrayA  = Action(menu, "Add circular array");
   QAction* newCompositeA  = Action(menu, "Add composite object");
   QAction* newGridA = Action(menu, "Add optical grid");
   QAction* newMonitorA = Action(menu, "Add monitor");
@@ -463,6 +464,7 @@ void AGeoTree::customMenuRequested(const QPoint &pos)
 
       newCompositeA->setEnabled(fNotGridNotMonitor);
       newArrayA->setEnabled(fNotGridNotMonitor);
+      newCircArrayA->setEnabled(fNotGridNotMonitor);
       newMonitorA->setEnabled(fNotGridNotMonitor);
       newGridA->setEnabled(fNotGridNotMonitor);
       cloneA->setEnabled(true);
@@ -520,6 +522,7 @@ void AGeoTree::customMenuRequested(const QPoint &pos)
   else if (SelectedAction == newArb8)        menuActionAddNewObject(obj, new AGeoArb8());
   else if (SelectedAction == newCompositeA)  menuActionAddNewComposite(obj);
   else if (SelectedAction == newArrayA)      menuActionAddNewArray(obj);
+  else if (SelectedAction == newCircArrayA)  menuActionAddNewCircularArray(obj);
   else if (SelectedAction == newGridA)       menuActionAddNewGrid(obj);
   else if (SelectedAction == newMonitorA)    menuActionAddNewMonitor(obj);
   else if (SelectedAction == cloneA)         menuActionCloneObject(obj);
@@ -954,6 +957,32 @@ void AGeoTree::menuActionAddNewArray(AGeoObject * ContObj)
   UpdateGui(name);
 }
 
+void AGeoTree::menuActionAddNewCircularArray(AGeoObject *ContObj)
+{
+    if (!ContObj) return;
+
+    AGeoObject* newObj = new AGeoObject();
+    do newObj->Name = AGeoObject::GenerateRandomArrayName();
+    while (World->isNameExists(newObj->Name));
+
+    delete newObj->ObjectType;
+    newObj->ObjectType = new ATypeCircularArrayObject();
+
+    newObj->color = 1;
+    ContObj->addObjectFirst(newObj);  //inserts to the first position in the list of HostedObjects!
+
+    //element inside
+    AGeoObject* elObj = new AGeoObject();
+    while (World->isNameExists(elObj->Name))
+      elObj->Name = AGeoObject::GenerateRandomObjectName();
+    elObj->color = 1;
+    newObj->addObjectFirst(elObj);
+
+    const QString name = newObj->Name;
+    emit RequestRebuildDetector();
+    UpdateGui(name);
+}
+
 void AGeoTree::menuActionAddNewGrid(AGeoObject * ContObj)
 {
   if (!ContObj) return;
@@ -1107,7 +1136,7 @@ void AGeoTree::SetLineAttributes(AGeoObject * obj)
             obj->getSlabModel()->width = obj->width;
             obj->getSlabModel()->style = obj->style;
         }
-        if (obj->ObjectType->isArray() || obj->ObjectType->isHandlingSet())
+        if (obj->ObjectType->isHandlingArray() || obj->ObjectType->isHandlingSet())
         {
             QVector<AGeoObject*> vec;
             obj->collectContainingObjects(vec);
@@ -1201,7 +1230,7 @@ void AGeoTree::menuActionFormStack(QList<QTreeWidgetItem*> selected)
             message("World or slabs/lightguides cannot be a member of a stack", twGeoTree);
             return;
         }
-        if (obj->ObjectType->isArray())
+        if (obj->ObjectType->isHandlingArray())
         {
             message("Array cannot be a member of a stack", twGeoTree);
             return;
@@ -1256,6 +1285,11 @@ void AGeoTree::menuActionFormStack(QList<QTreeWidgetItem*> selected)
 
 void AGeoTree::markAsStackRefVolume(AGeoObject * obj)
 {
+    if (!obj)
+    {
+        qWarning() << "Attempting to set nullptr as the stack reference!";
+        return;
+    }
     if (!obj->Container) return;
     if (!obj->Container->ObjectType) return;
     ATypeStackContainerObject * sc = dynamic_cast<ATypeStackContainerObject*>(obj->Container->ObjectType);
@@ -1406,7 +1440,7 @@ void AGeoTree::objectToScript(AGeoObject *obj, QString &script, int ident, bool 
         script += "\n" + QString(" ").repeated(ident)+ makeLinePropertiesString(obj);
         if (bRecursive) objectMembersToScript(obj, script, medIdent, bExpandMaterial, bRecursive, usePython);
     }
-    else if (obj->ObjectType->isArray())
+    else if (obj->ObjectType->isHandlingArray())
     {
         script += "\n" + QString(" ").repeated(ident)+ makeScriptString_arrayObject(obj);
         script += "\n" + QString(" ").repeated(ident)+ CommentStr + "-->-- array elements for " + obj->Name;
@@ -1545,37 +1579,77 @@ QString AGeoTree::makeScriptString_setCenterSlab(AGeoObject *obj) const
 
 QString AGeoTree::makeScriptString_arrayObject(AGeoObject *obj) const
 {
-    ATypeArrayObject* a = dynamic_cast<ATypeArrayObject*>(obj->ObjectType);
-    if (!a)
+    QString str;
+
+    ATypeCircularArrayObject * c = dynamic_cast<ATypeCircularArrayObject*>(obj->ObjectType);
+    if (c)
     {
-        qWarning() << "It is not an array!";
-        return "Error accessing object as array!";
+        QString snum   = (c  ->strNum           .isEmpty() ? QString::number(c  ->num)               : c->strNum);
+        QString sstep  = (c  ->strAngularStep   .isEmpty() ? QString::number(c  ->angularStep)       : c->strAngularStep);
+        QString srad   = (c  ->strRadius        .isEmpty() ? QString::number(c  ->radius)            : c->strRadius);
+        QString sPos0  = (obj->PositionStr[0]   .isEmpty() ? QString::number(obj->Position[0])       : obj->PositionStr[0]);
+        QString sPos1  = (obj->PositionStr[1]   .isEmpty() ? QString::number(obj->Position[1])       : obj->PositionStr[1]);
+        QString sPos2  = (obj->PositionStr[2]   .isEmpty() ? QString::number(obj->Position[2])       : obj->PositionStr[2]);
+        QString sOri0  = (obj->OrientationStr[0].isEmpty() ? QString::number(obj->Orientation[0])    : obj->OrientationStr[0]);
+        QString sOri1  = (obj->OrientationStr[1].isEmpty() ? QString::number(obj->Orientation[1])    : obj->OrientationStr[1]);
+        QString sOri2  = (obj->OrientationStr[2].isEmpty() ? QString::number(obj->Orientation[2])    : obj->OrientationStr[2]);
+        QString sIndex = (c->strStartIndex      .isEmpty() ? QString::number(c  ->startIndex)        : c->strStartIndex);
+
+        str +=  QString("geo.CircArray( ") +
+                "'" + obj->Name + "', " +
+                snum + ", " +
+                sstep + ", " +
+                srad + ",   " +
+                "'" + obj->Container->Name + "',   " +
+                sPos0 + ", " +
+                sPos1 + ", " +
+                sPos2 + ",   " +
+                sOri0 + ",   " +
+                sOri1 + ",   " +
+                sOri2 + ",   " +
+                sIndex + " )";
+    }
+    else
+    {
+        ATypeArrayObject* a = dynamic_cast<ATypeArrayObject*>(obj->ObjectType);
+        if (!a)
+        {
+            qWarning() << "It is not an array!";
+            return "Error accessing object as array!";
+        }
+
+        QString snumX  = (a  ->strNumX          .isEmpty() ? QString::number(a  ->numX)              : a->strNumX);
+        QString snumY  = (a  ->strNumY          .isEmpty() ? QString::number(a  ->numY)              : a->strNumY);
+        QString snumZ  = (a  ->strNumZ          .isEmpty() ? QString::number(a  ->numZ)              : a->strNumZ);
+        QString sstepX = (a  ->strStepX         .isEmpty() ? QString::number(a  ->stepX)             : a->strStepX);
+        QString sstepY = (a  ->strStepY         .isEmpty() ? QString::number(a  ->stepY)             : a->strStepY);
+        QString sstepZ = (a  ->strStepZ         .isEmpty() ? QString::number(a  ->stepZ)             : a->strStepZ);
+        QString sPos0  = (obj->PositionStr[0]   .isEmpty() ? QString::number(obj->Position[0])       : obj->PositionStr[0]);
+        QString sPos1  = (obj->PositionStr[1]   .isEmpty() ? QString::number(obj->Position[1])       : obj->PositionStr[1]);
+        QString sPos2  = (obj->PositionStr[2]   .isEmpty() ? QString::number(obj->Position[2])       : obj->PositionStr[2]);
+        QString sOri0  = (obj->OrientationStr[0].isEmpty() ? QString::number(obj->Orientation[0])    : obj->OrientationStr[0]);
+        QString sOri1  = (obj->OrientationStr[1].isEmpty() ? QString::number(obj->Orientation[1])    : obj->OrientationStr[1]);
+        QString sOri2  = (obj->OrientationStr[2].isEmpty() ? QString::number(obj->Orientation[2])    : obj->OrientationStr[2]);
+        QString sIndex = (a->strStartIndex      .isEmpty() ? QString::number(a  ->startIndex)        : a->strStartIndex);
+
+        str +=  QString("geo.Array( ") +
+                "'" + obj->Name + "', " +
+                snumX + ", " +
+                snumY + ", " +
+                snumZ + ",   " +
+                sstepX + ", " +
+                sstepY + ", " +
+                sstepZ + ", " +
+                "'" + obj->Container->Name + "',   " +
+                sPos0 + ", " +
+                sPos1 + ", " +
+                sPos2 + ",   " +
+                sOri0 + ",   " +
+                sOri1 + ",   " +
+                sOri2 + ",   " +
+                sIndex + " )";
     }
 
-    QString snumX  = (a  ->strNumX          .isEmpty() ? QString::number(a  ->numX)              : a->strNumX);
-    QString snumY  = (a  ->strNumY          .isEmpty() ? QString::number(a  ->numY)              : a->strNumY);
-    QString snumZ  = (a  ->strNumZ          .isEmpty() ? QString::number(a  ->numZ)              : a->strNumZ);
-    QString sstepX = (a  ->strStepX         .isEmpty() ? QString::number(a  ->stepX)             : a->strStepX);
-    QString sstepY = (a  ->strStepY         .isEmpty() ? QString::number(a  ->stepY)             : a->strStepY);
-    QString sstepZ = (a  ->strStepZ         .isEmpty() ? QString::number(a  ->stepZ)             : a->strStepZ);
-    QString sPos0  = (obj->PositionStr[0]   .isEmpty() ? QString::number(obj->Position[0])       : obj->PositionStr[0]);
-    QString sPos1  = (obj->PositionStr[1]   .isEmpty() ? QString::number(obj->Position[1])       : obj->PositionStr[1]);
-    QString sPos2  = (obj->PositionStr[2]   .isEmpty() ? QString::number(obj->Position[2])       : obj->PositionStr[2]);
-    QString sOri2  = (obj->OrientationStr[2].isEmpty() ? QString::number(obj->Orientation[2])    : obj->OrientationStr[2]);
-
-    QString str =  QString("geo.Array( ") +
-            "'" + obj->Name + "', " +
-            snumX + ", " +
-            snumY + ", " +
-            snumZ + ",   " +
-            sstepX + ", " +
-            sstepY + ", " +
-            sstepZ + ", " +
-            "'" + obj->Container->Name + "',   " +
-            sPos0 + ", " +
-            sPos1 + ", " +
-            sPos2 + ",   " +
-            sOri2 + " )";
     //qDebug() <<"strrr" << str;
     return str;
 }

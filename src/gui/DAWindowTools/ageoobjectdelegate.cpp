@@ -451,7 +451,7 @@ QString AGeoObjectDelegate::updateScalingFactors() const //not needed anymore ne
 
 const AGeoShape * AGeoObjectDelegate::getBaseShapeOfObject(const AGeoObject * obj)
 {
-    if (!obj && !obj->Shape) return nullptr;
+    if (!obj || !obj->Shape) return nullptr;
     AGeoScaledShape * scaledShape = dynamic_cast<AGeoScaledShape*>(obj->Shape);
     if (!scaledShape) return nullptr;
 
@@ -2057,8 +2057,7 @@ void AGeoPconDelegate::readGui() const
             QVector<QString> edits;
             for (int ic = 0; ic < 3; ic++)
             {
-                AOneLineTextEdit * edit = new AOneLineTextEdit;
-                edit    = static_cast<AOneLineTextEdit *>(tab->cellWidget(ir, ic));
+                AOneLineTextEdit * edit = static_cast<AOneLineTextEdit *>(tab->cellWidget(ir, ic));
                 edits.append(edit->text());
             }
             //if (edits[0].isEmpty() || edits[1].isEmpty()|| edits[2].isEmpty() ) continue;
@@ -2593,10 +2592,10 @@ AGeoArrayDelegate::AGeoArrayDelegate(const QStringList &materials, QWidget *pare
 
     lMat->setVisible(false);
     cobMat->setVisible(false);
-    ledPhi->setText("0");
-    ledPhi->setEnabled(false);
-    ledTheta->setText("0");
-    ledTheta->setEnabled(false);
+    //ledPhi->setText("0");
+    //ledPhi->setEnabled(false);
+    //ledTheta->setText("0");
+    //ledTheta->setEnabled(false);
 
     pbTransform->setVisible(false);
     pbShapeInfo->setVisible(false);
@@ -2650,6 +2649,113 @@ void AGeoArrayDelegate::Update(const AGeoObject * obj)
         ledStepX->setText(array->strStepX.isEmpty() ? QString::number(array->stepX) : array->strStepX);
         ledStepY->setText(array->strStepY.isEmpty() ? QString::number(array->stepY) : array->strStepY);
         ledStepZ->setText(array->strStepZ.isEmpty() ? QString::number(array->stepZ) : array->strStepZ);
+        ledStartIndex->setText(array->strStartIndex.isEmpty() ? QString::number(array->startIndex) : array->strStartIndex);
+    }
+}
+
+AGeoCircularArrayDelegate::AGeoCircularArrayDelegate(const QStringList &materials, QWidget *parent)
+    : AGeoObjectDelegate(materials, parent)
+{
+    DelegateTypeName = "Circular array";
+
+    QVBoxLayout * lVer = new QVBoxLayout();
+    lVer->setContentsMargins(5, 3, 5, 3);
+    lVer->setSpacing(3);
+
+    QGridLayout * grAW = new QGridLayout();
+    grAW->setContentsMargins(0,0,0,0);
+    grAW->setVerticalSpacing(0);
+
+    QLabel * la = nullptr;
+    la = new QLabel("Number:");       grAW->addWidget(la, 0, 0);
+    la = new QLabel("Angular step:"); grAW->addWidget(la, 1, 0);
+    la = new QLabel("Radius:");       grAW->addWidget(la, 2, 0);
+
+    la = new QLabel("deg");           grAW->addWidget(la, 1, 2);
+    la = new QLabel("mm");            grAW->addWidget(la, 2, 2);
+
+    ledNum         = new AOneLineTextEdit(Widget); grAW->addWidget(ledNum, 0, 1);
+    ledAngularStep = new AOneLineTextEdit(Widget); grAW->addWidget(ledAngularStep, 1, 1);
+    ledRadius      = new AOneLineTextEdit(Widget); grAW->addWidget(ledRadius, 2, 1);
+
+    lVer->addLayout(grAW);
+
+    QHBoxLayout * lHor = new QHBoxLayout();
+    lHor->addStretch();
+    lHor->addWidget(new QLabel("Index of the first node:"));
+    ledStartIndex = new AOneLineTextEdit(Widget);
+    lHor->addWidget(ledStartIndex);
+    lHor->addStretch();
+
+    lVer->addLayout(lHor);
+
+    addLocalLayout(lVer);
+
+    QVector<AOneLineTextEdit*> l = {ledNum, ledAngularStep, ledRadius, ledStartIndex};
+    for (AOneLineTextEdit * le : l)
+    {
+        //le->setMaximumWidth(75);
+        le->setContextMenuPolicy(Qt::NoContextMenu);
+        configureHighligherAndCompleter(le);
+        QObject::connect(le, &AOneLineTextEdit::textChanged, this, &AGeoBaseDelegate::ContentChanged);
+    }
+
+    cbScale->setChecked(false);
+    cbScale->setVisible(false);
+
+    lMat->setVisible(false);
+    cobMat->setVisible(false);
+    //ledPhi->setText("0");
+    //ledPhi->setEnabled(false);
+    //ledTheta->setText("0");
+    //ledTheta->setEnabled(false);
+
+    pbTransform->setVisible(false);
+    pbShapeInfo->setVisible(false);
+}
+
+bool AGeoCircularArrayDelegate::updateObject(AGeoObject *obj) const
+{
+    QVector<AOneLineTextEdit*> v = {ledNum, ledAngularStep, ledRadius, ledStartIndex};
+    if (isLeEmpty(v))
+    {
+        QMessageBox::warning(this->ParentWidget, "", "Empty line!");
+        return false;
+    }
+
+    if (!CurrentObject->ObjectType->isCircularArray()) return false;
+
+    ATypeCircularArrayObject a;
+    a.strNum         = ledNum->text();
+    a.strAngularStep = ledAngularStep->text();
+    a.strRadius      = ledRadius->text();
+    a.strStartIndex = ledStartIndex->text();
+
+    QString errorStr = ATypeCircularArrayObject::evaluateStringValues(a);
+    if (!errorStr.isEmpty())
+    {
+        qDebug() << errorStr;
+        QMessageBox::warning(this->ParentWidget, "", errorStr);
+        return false;
+    }
+
+    ATypeCircularArrayObject * array = static_cast<ATypeCircularArrayObject*>(obj->ObjectType);
+    *array = a;
+
+    return AGeoObjectDelegate::updateObject(obj);
+}
+
+void AGeoCircularArrayDelegate::Update(const AGeoObject *obj)
+{
+    AGeoObjectDelegate::Update(obj);
+
+    ATypeCircularArrayObject * array = dynamic_cast<ATypeCircularArrayObject*>(obj->ObjectType);
+
+    if (array)
+    {
+        ledNum->setText(array->strNum.isEmpty() ? QString::number(array->num) : array->strNum);
+        ledAngularStep->setText(array->strAngularStep.isEmpty() ? QString::number(array->angularStep) : array->strAngularStep);
+        ledRadius->setText(array->strRadius.isEmpty() ? QString::number(array->radius) : array->strRadius);
         ledStartIndex->setText(array->strStartIndex.isEmpty() ? QString::number(array->startIndex) : array->strStartIndex);
     }
 }

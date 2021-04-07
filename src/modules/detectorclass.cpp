@@ -18,6 +18,7 @@
 #include "modules/lrf_v3/alrftypemanager.h"
 #include "modules/lrf_v3/alrftypemanagerinterface.h"
 #include "apmanddummy.h"
+#include "ageoconsts.h"
 
 #ifdef SIM
 #include "agridelementrecord.h"
@@ -37,32 +38,37 @@
 #include "TGeoCompositeShape.h"
 #include "TNamed.h"
 
-static void autoLoadPlugins() {
-  typedef void (*LrfPluginSetupFn)(LRF::ALrfTypeManagerInterface &manager);
+static void autoLoadPlugins()
+{
+    typedef void (*LrfPluginSetupFn)(LRF::ALrfTypeManagerInterface &manager);
 
-  //qDebug() << "Loading plugins from 'plugins' directory";
-  QDir plugins_dir(qApp->applicationDirPath());
-  if(!plugins_dir.cd("plugins")) {
-    qInfo()<<"LRF_v3 plugin loader: Plugin search not performed since '/plugins' directory not found";
-    return;
-  }
+    //qDebug() << "Loading plugins from 'plugins' directory";
+    QDir plugins_dir(qApp->applicationDirPath());
+    if (!plugins_dir.cd("plugins"))
+    {
+        qInfo()<<"LRF_v3 plugin loader: Plugin search not performed since '/plugins' directory not found";
+        return;
+    }
 
-  for(const QString &file_name : plugins_dir.entryList(QDir::Files)) {
-    QString full_path = plugins_dir.absoluteFilePath(file_name);
-    QLibrary plugin(full_path);
-    if(!plugin.load()) {
-      qDebug()<<"LRF_v3 plugin loader: failed to open"<<file_name<<"\n";
-      qDebug()<<plugin.errorString();
-    }
-    else {
-      auto plugin_setup = (LrfPluginSetupFn)plugin.resolve("Setup");
-      if(plugin_setup) {
-        plugin_setup(LRF::ALrfTypeManager::instance());
-        qDebug()<<"LRF_v3 plugin loader: loaded and configured"<<file_name<<"plugin";
-      }
-      else
-        qDebug()<<"LRF_v3 plugin loader: failed to configure"<<file_name<<"plugin";
-    }
+    for(const QString &file_name : plugins_dir.entryList(QDir::Files))
+    {
+        QString full_path = plugins_dir.absoluteFilePath(file_name);
+        QLibrary plugin(full_path);
+        if (!plugin.load())
+        {
+            qDebug()<<"LRF_v3 plugin loader: failed to open"<<file_name<<"\n";
+            qDebug()<<plugin.errorString();
+        }
+        else
+        {
+            auto plugin_setup = (LrfPluginSetupFn)plugin.resolve("Setup");
+            if (plugin_setup)
+            {
+                plugin_setup(LRF::ALrfTypeManager::instance());
+                qDebug()<<"LRF_v3 plugin loader: loaded and configured"<<file_name<<"plugin";
+            }
+            else qDebug()<<"LRF_v3 plugin loader: failed to configure"<<file_name<<"plugin";
+        }
   }
 }
 
@@ -94,20 +100,20 @@ DetectorClass::DetectorClass(AConfiguration *config) : Config(config)
 
 DetectorClass::~DetectorClass()
 {
-  if (PMgroups) delete PMgroups;
-  if (LRFs) delete LRFs;
+  delete PMgroups;
+  delete LRFs;
   //qDebug() << "  --LRFs module deleted";
 
-  if (PMs) delete PMs;
+  delete PMs;
   //qDebug() << "  --Photomultiplier manager deleted";
 
-  if (Sandwich) delete Sandwich;
+  delete Sandwich;
   //qDebug() << "  --Sandwich deleted";
 
-  if (GeoManager) delete GeoManager;
+  delete GeoManager;
   //qDebug()<<"  --GeoManager deleted";
 
-  if (MpCollection) delete MpCollection;
+  delete MpCollection;
   //qDebug() << "  --Material collection deleted";
 
   delete RandGen;
@@ -307,22 +313,16 @@ void DetectorClass::populateGeoManager()
   //qDebug() << "--> Creating materials and media";
   for (int i=0; i<MpCollection->countMaterials(); i++)
     {
-      QString tmpStr = (*MpCollection)[i]->name;
-      QByteArray ba = tmpStr.toLocal8Bit();
-      char *cname = ba.data();
       (*MpCollection)[i]->generateTGeoMat();
-      (*MpCollection)[i]->GeoMed = new TGeoMedium (cname, i, (*MpCollection)[i]->GeoMat);
-      (*MpCollection)[i]->GeoMed->SetParam(0, (*MpCollection)[i]->n ); // refractive index
-      // param[1] reserved for k
-      (*MpCollection)[i]->GeoMed->SetParam(2, (*MpCollection)[i]->abs ); // abcorption coefficient (mm^-1)
-      (*MpCollection)[i]->GeoMed->SetParam(3, (*MpCollection)[i]->reemissionProb ); // re-emission probability
-      (*MpCollection)[i]->GeoMed->SetParam(4, (*MpCollection)[i]->rayleighMFP ); // Rayleigh MFP (mm)
-    }
+      (*MpCollection)[i]->GeoMed = new TGeoMedium( (*MpCollection)[i]->name.toLocal8Bit().data(), i, (*MpCollection)[i]->GeoMat);
 
-  //calculate Z of slabs in ASandwich, copy Z edges
-  Sandwich->CalculateZofSlabs();
-  UpperEdge = Sandwich->Z_UpperBound;
-  LowerEdge = Sandwich->Z_LowerBound;
+      //***!!! who needs these parameters?
+//      (*MpCollection)[i]->GeoMed->SetParam(0, (*MpCollection)[i]->n ); // refractive index
+//      // param[1] reserved for k
+//      (*MpCollection)[i]->GeoMed->SetParam(2, (*MpCollection)[i]->abs ); // abcorption coefficient (mm^-1)
+//      (*MpCollection)[i]->GeoMed->SetParam(3, (*MpCollection)[i]->reemissionProb ); // re-emission probability
+//      (*MpCollection)[i]->GeoMed->SetParam(4, (*MpCollection)[i]->rayleighMFP ); // Rayleigh MFP (mm)
+    }
 
   //qDebug() << "--> Populating PMs module with individual PMs";
   populatePMs();
@@ -345,23 +345,21 @@ void DetectorClass::populateGeoManager()
   top = GeoManager->MakeBox("WorldBox", (*MpCollection)[Sandwich->World->Material]->GeoMed, WorldSizeXY, WorldSizeXY, WorldSizeZ);
   GeoManager->SetTopVolume(top);
   GeoManager->SetTopVisible(true);
-  //qDebug() << "--> Positioning sandwich layers";
 
-  //Position WorldTree objects
+  //qDebug() << "--> Populating GeoManager";
   QVector<APMandDummy> PMsAndDumPms;
-  for (int i=0; i<PMs->count(); i++)     PMsAndDumPms << APMandDummy(PMs->X(i), PMs->Y(i), PMs->at(i).upperLower);
-  for (int i=0; i<PMdummies.size(); i++) PMsAndDumPms << APMandDummy(PMdummies.at(i).r[0], PMdummies.at(i).r[1], PMdummies.at(i).UpperLower);
-  Sandwich->clearGridRecords();
-  Sandwich->clearMonitorRecords();
+  for (int i = 0; i < PMs->count(); i++)
+      PMsAndDumPms << APMandDummy(PMs->X(i), PMs->Y(i), PMs->at(i).upperLower);
+  for (int i = 0; i < PMdummies.size(); i++)
+      PMsAndDumPms << APMandDummy(PMdummies.at(i).r[0], PMdummies.at(i).r[1], PMdummies.at(i).UpperLower);
 
-  Sandwich->expandPrototypeInstances();
-
-  Sandwich->addTGeoVolumeRecursively(Sandwich->World, top, GeoManager, MpCollection, &PMsAndDumPms);
+  Sandwich->populateGeoManager(top, GeoManager, MpCollection, &PMsAndDumPms);
 
   positionPMs();
   if (PMdummies.size() > 0) positionDummies();
 
-  top->SetName("World");
+  top->SetName("World"); // "WorldBox" above is needed - JSROOT uses that name to avoid conflicts"
+
   //qDebug() << "--> Closing geometry";
   GeoManager->CloseGeometry();
   emit newGeoManager();
@@ -370,11 +368,9 @@ void DetectorClass::populateGeoManager()
 
 void DetectorClass::onRequestRegisterGeoManager()
 {
-    if (GeoManager)
-      emit newGeoManager();
+    if (GeoManager) emit newGeoManager();
 }
 
-#include "ageoconsts.h"
 bool DetectorClass::readDummyPMsFromJson(QJsonObject &json)
 {
   if (!json.contains("DummyPMs"))
@@ -893,8 +889,13 @@ TGeoVolume *DetectorClass::generatePmVolume(TString Name, TGeoMedium *Medium, co
 
 void DetectorClass::populatePMs()
 {
+    Sandwich->CalculateZofSlabs();
+    const double & UpperEdge = Sandwich->Z_UpperBound;
+    const double & LowerEdge = Sandwich->Z_LowerBound;
+
     PMs->clear();
-    for (int ul=0; ul<2; ul++)
+
+    for (int ul = 0; ul < 2; ul++)
     {
         if (PMarrays[ul].fActive)
         {
@@ -1158,33 +1159,34 @@ void DetectorClass::positionDummies()
     }
 }
 
-void DetectorClass::updateWorldSize(double &XYm, double &Zm)
+void DetectorClass::updateWorldSize(double & XYm, double & Zm)
 {
-  Sandwich->World->updateWorldSize(XYm, Zm);
+    Sandwich->World->updateWorldSize(XYm, Zm);
 
-  //PMs
-  for (int ipm=0; ipm<PMs->count(); ipm++)
+    for (int ipm = 0; ipm < PMs->count(); ipm++)
     {
-      double msize = 0.5*PMs->SizeZ(ipm);
-      UpdateMax(msize, 0.5*PMs->SizeX(ipm));
-      UpdateMax(msize, 0.5*PMs->SizeY(ipm));
+        double msize =   0.5 * PMs->SizeZ(ipm);
+        UpdateMax(msize, 0.5 * PMs->SizeX(ipm));
+        UpdateMax(msize, 0.5 * PMs->SizeY(ipm));
 
-      UpdateMax(XYm, fabs(PMs->X(ipm)) + msize);
-      UpdateMax(XYm, fabs(PMs->Y(ipm)) + msize);
-      UpdateMax(Zm,  fabs(PMs->Z(ipm)) + msize);
+        UpdateMax(XYm,   fabs(PMs->X(ipm)) + msize);
+        UpdateMax(XYm,   fabs(PMs->Y(ipm)) + msize);
+        UpdateMax(Zm,    fabs(PMs->Z(ipm)) + msize);
     }
 
-  //DummyPMs
-  for (int i=0; i<PMdummies.size(); i++)
+    for (int i = 0; i < PMdummies.size(); i++)
     {
-      double msize = 0.5*PMs->getType(PMdummies[i].PMtype)->SizeZ;
-      UpdateMax(msize, 0.5*PMs->getType(PMdummies[i].PMtype)->SizeX);
-      UpdateMax(msize, 0.5*PMs->getType(PMdummies[i].PMtype)->SizeY);
+        const APMdummyStructure & dum = PMdummies.at(i);
+        const APmType * typ = PMs->getType(dum.PMtype);
 
-      UpdateMax(XYm, fabs(PMdummies[i].r[0]) + msize);
-      UpdateMax(XYm, fabs(PMdummies[i].r[1]) + msize);
-      UpdateMax(Zm,  fabs(PMdummies[i].r[2]) + msize);
-  }
+        double msize =   0.5 * typ->SizeZ;
+        UpdateMax(msize, 0.5 * typ->SizeX);
+        UpdateMax(msize, 0.5 * typ->SizeY);
+
+        UpdateMax(XYm,   fabs(dum.r[0]) + msize);
+        UpdateMax(XYm,   fabs(dum.r[1]) + msize);
+        UpdateMax(Zm,    fabs(dum.r[2]) + msize);
+    }
 }
 
 void DetectorClass::updatePreprocessingAddMultySize()

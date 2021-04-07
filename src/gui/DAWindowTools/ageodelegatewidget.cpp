@@ -140,7 +140,9 @@ AGeoBaseDelegate * AGeoDelegateWidget::createAndAddGeoObjectDelegate()
     AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(CurrentObject->Shape);
     const QString shape = (scaled ? scaled->getBaseShapeType() : CurrentObject->Shape->getShapeType());
 
-    if (CurrentObject->ObjectType->isArray())
+    if (CurrentObject->ObjectType->isCircularArray())
+        Del = new AGeoCircularArrayDelegate(Sandwich->Materials, this);
+    else if (CurrentObject->ObjectType->isArray())
         Del = new AGeoArrayDelegate(Sandwich->Materials, this);
     else if (CurrentObject->ObjectType->isInstance())
     {

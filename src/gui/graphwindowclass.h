@@ -145,7 +145,7 @@ public:
     void ClearBasket();
     TObject * GetMainPlottedObject();
     void SaveGraph(const QString & fileName);
-    void EnforceOverlayOff();    
+    void EnforceOverlayOff();
     void ClearDrawObjects_OnShutDown(); //precvents crash on shut down
     void RegisterTObject(TObject* obj);
 
@@ -159,10 +159,13 @@ public:
     void MakeCopyOfActiveBasketId();
     void RestoreBasketActiveId();
     void ClearCopyOfActiveBasketId();
-    QString & getLastOpendDir();    
+    QString & getLastOpendDir();
     void ShowProjectionTool();
     TLegend * AddLegend();
     void HighlightUpdateBasketButton(bool flag);
+
+    QString UseProjectionTool(const QString & option);
+    void    ConfigureProjectionTool(double x0, double y0, double dx, double dy, double angle);
 
 protected:
     void mouseMoveEvent(QMouseEvent *event);
@@ -247,7 +250,7 @@ private slots:
     void on_ledRulerDY_editingFinished();
     void on_cbShowFitParameters_toggled(bool checked);
     void on_pbXaveraged_clicked();
-    void on_pbYaveraged_clicked();    
+    void on_pbYaveraged_clicked();
     void on_pbAddText_clicked();
     void on_pbRemoveLegend_clicked();
     void on_ledAngle_customContextMenuRequested(const QPoint &pos);
@@ -309,7 +312,7 @@ private:
     void changeOverlayMode(bool bOn);
 
     void switchToBasket(int index);
-    void UpdateBasketGUI();    
+    void UpdateBasketGUI();
     void Basket_DrawOnTop(int row);
 
     void ShowProjection(QString type);

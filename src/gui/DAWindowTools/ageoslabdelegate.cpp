@@ -177,16 +177,19 @@ bool AGeoSlabDelegate_Poly::updateObject(AGeoObject *obj) const
     default: qWarning() << "Unknown slab shape, assuming rectangular";
     case 2: //update psi
         SlabModel.XYrecord.strAngle = ledPsi->text();
-        ok =       GC.updateParameter(ErrorStr, SlabModel.XYrecord.strAngle, SlabModel.XYrecord.angle, false, false, false);
-        SlabModel.XYrecord.strSides = en->text();
-        double sides;
-        ok = ok && GC.updateParameter(ErrorStr, SlabModel.XYrecord.strSides, sides, true, true, false);
-        if (sides < 3)
+        ok = GC.updateParameter(ErrorStr, SlabModel.XYrecord.strAngle, SlabModel.XYrecord.angle, false, false, false);
+        if (ok)
         {
-            ErrorStr = "Number of sides should be at least 3";
-            ok = false;
+            SlabModel.XYrecord.strSides = en->text();
+            double sides;
+            ok = GC.updateParameter(ErrorStr, SlabModel.XYrecord.strSides, sides, true, true, false);
+            if (sides < 3)
+            {
+                ErrorStr = "Number of sides should be at least 3";
+                ok = false;
+            }
+            else SlabModel.XYrecord.sides = sides;
         }
-        else SlabModel.XYrecord.sides = sides;
         //[[fallthrough]];
     case 1: //update dx dy
         SlabModel.XYrecord.strSize1 = elo->text();

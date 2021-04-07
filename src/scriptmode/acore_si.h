@@ -52,7 +52,7 @@ public slots:
   QString getCurrentDir();
   bool setCirrentDir(QString path);
   bool save(QString fileName, QString str);
-  bool saveArray(QString fileName, QVariant array);
+  bool saveArray(QString fileName, QVariantList array);
   bool saveObject(QString FileName, QVariant Object, bool CanOverride);
 
   //load from file

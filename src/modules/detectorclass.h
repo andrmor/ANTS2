@@ -70,14 +70,6 @@ public:
   void assignSaveOnExitFlag(const QString & VolumeName);
   void clearTracks();
   void assureNavigatorPresent();
-
-  //write to Json - can be used from outside
-  //void writeWorldFixedToJson(QJsonObject &json);
-  void writePMarraysToJson(QJsonObject &json);
-  void writeDummyPMsToJson(QJsonObject &json);  
-  void writeGDMLtoJson(QJsonObject &json);
-  void writePreprocessingToJson(QJsonObject &json);
-
   void changeLineWidthOfVolumes(int delta);
 
   const QString exportToGDML(const QString & fileName) const; //returns error string, empty if all is fine
@@ -89,7 +81,11 @@ public slots:
   void onRequestRegisterGeoManager();
 
 private:
-  //reads
+  void writePMarraysToJson(QJsonObject &json);
+  void writeDummyPMsToJson(QJsonObject &json);
+  void writeGDMLtoJson(QJsonObject &json);
+  void writePreprocessingToJson(QJsonObject &json);
+
   bool readWorldFixedFromJson(const QJsonObject & json);
   bool readPMarraysFromJson(QJsonObject &json);
   bool readDummyPMsFromJson(QJsonObject &json);
@@ -99,18 +95,17 @@ private:
   QString GDML;
   bool processGDML(); //check validity, discard if bad and return to sandwich  
 
-  double UpperEdge, LowerEdge; //used to calculate Z positions of detector elements
-  TGeoVolume *generatePmVolume(TString Name, TGeoMedium *Medium, const APmType *tp);
+  TGeoVolume * generatePmVolume(TString Name, TGeoMedium *Medium, const APmType *tp);
   void populatePMs();
   void positionPMs();
   void calculatePmsXY(int ul);
   void positionDummies();
+
   void updateWorldSize(double &XYm, double &Zm);
   void updatePreprocessingAddMultySize();
 
 signals:
-  void ColorSchemeChanged(int scheme, int matId); //in case GUI wants to update coloring
-                                                  //0-normal, 1-by mat, 2-highlight mat (matId)
+  void ColorSchemeChanged(int scheme, int matId); //GUI request to update color scheme: 0-normal, 1-by mat, 2-highlight mat (matId)
   void requestClearEventsData();
   void requestGroupsGuiUpdate();
   void newGeoManager();

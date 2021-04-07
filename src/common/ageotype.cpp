@@ -5,6 +5,30 @@
 
 #include <QDebug>
 
+AGeoType *AGeoType::TypeObjectFactory(const QString & Type)
+{
+    if (Type == "Single")             return new ATypeSingleObject();
+    if (Type == "Slab")               return new ATypeSlabObject();
+    if (Type == "Array" ||
+        Type == "XYArray")            return new ATypeArrayObject();
+    if (Type == "CircularArray")      return new ATypeCircularArrayObject();
+    if (Type == "Monitor")            return new ATypeMonitorObject();
+    if (Type == "Stack")              return new ATypeStackContainerObject();
+    if (Type == "Instance")           return new ATypeInstanceObject();
+    if (Type == "Prototype")          return new ATypePrototypeObject();
+    if (Type == "Composite")          return new ATypeCompositeObject();
+    if (Type == "CompositeContainer") return new ATypeCompositeContainerObject();
+    if (Type == "GridElement")        return new ATypeGridElementObject();
+    if (Type == "Grid")               return new ATypeGridObject();
+    if (Type == "Lightguide")         return new ATypeLightguideObject();
+    if (Type == "Group")              return new ATypeGroupContainerObject();
+    if (Type == "PrototypeCollection")return new ATypePrototypeCollectionObject();
+    if (Type == "World")              return new ATypeWorldObject(); //is not used to create World, only to check file with WorldTree starts with World and reads positioning script
+
+    qCritical() << "Unknown opject type in TypeObjectFactory:"<<Type;
+    return nullptr;
+}
+
 void AGeoType::writeToJson(QJsonObject & json) const
 {
     json["Type"] = Type;
@@ -225,29 +249,6 @@ bool AGeoType::isLowerLightguide() const
     return obj->UpperLower == ATypeLightguideObject::Lower;
 }
 
-AGeoType *AGeoType::TypeObjectFactory(const QString & Type)
-{
-    if (Type == "Single")             return new ATypeSingleObject();
-    if (Type == "Slab")               return new ATypeSlabObject();
-    if (Type == "Array" ||
-        Type == "XYArray")            return new ATypeArrayObject();
-    if (Type == "Monitor")            return new ATypeMonitorObject();
-    if (Type == "Stack")              return new ATypeStackContainerObject();
-    if (Type == "Instance")           return new ATypeInstanceObject();
-    if (Type == "Prototype")          return new ATypePrototypeObject();
-    if (Type == "Composite")          return new ATypeCompositeObject();
-    if (Type == "CompositeContainer") return new ATypeCompositeContainerObject();
-    if (Type == "GridElement")        return new ATypeGridElementObject();
-    if (Type == "Grid")               return new ATypeGridObject();
-    if (Type == "Lightguide")         return new ATypeLightguideObject();
-    if (Type == "Group")              return new ATypeGroupContainerObject();
-    if (Type == "PrototypeCollection")return new ATypePrototypeCollectionObject();
-    if (Type == "World")              return new ATypeWorldObject(); //is not used to create World, only to check file with WorldTree starts with World and reads positioning script
-
-    qCritical() << "Unknown opject type in TypeObjectFactory:"<<Type;
-    return nullptr;
-}
-
 void ATypeWorldObject::writeToJson(QJsonObject & json) const
 {
     AGeoType::writeToJson(json);
@@ -282,4 +283,73 @@ void ATypeInstanceObject::readFromJson(const QJsonObject & json)
 {
     PrototypeName.clear();
     parseJson(json, "PrototypeName", PrototypeName);
+}
+
+void ATypeCircularArrayObject::Reconfigure(int Num, double AngularStep, double Radius)
+{
+    num = Num;
+    angularStep = AngularStep;
+    radius = Radius;
+}
+
+bool ATypeCircularArrayObject::isGeoConstInUse(const QRegExp & nameRegExp) const
+{
+    if (strNum.contains(nameRegExp))         return true;
+    if (strAngularStep.contains(nameRegExp)) return true;
+    if (strRadius.contains(nameRegExp))      return true;
+    if (strStartIndex.contains(nameRegExp))  return true;
+    return false;
+}
+
+void ATypeCircularArrayObject::replaceGeoConstName(const QRegExp &nameRegExp, const QString &newName)
+{
+    strNum.replace(nameRegExp, newName);
+    strAngularStep.replace(nameRegExp, newName);
+    strRadius.replace(nameRegExp, newName);
+    strStartIndex.replace(nameRegExp, newName);
+}
+
+void ATypeCircularArrayObject::writeToJson(QJsonObject &json) const
+{
+    AGeoType::writeToJson(json);
+
+    json["num"]         = num;
+    json["angularStep"] = angularStep;
+    json["radius"]      = radius;
+    json["startIndex"]  = startIndex;
+
+    if (!strNum.isEmpty())         json["strNum"]         = strNum;
+    if (!strAngularStep.isEmpty()) json["strAngularStep"] = strAngularStep;
+    if (!strRadius.isEmpty())      json["strRadius"]      = strRadius;
+    if (!strStartIndex.isEmpty())  json["strStartIndex"]  = strStartIndex;
+}
+
+void ATypeCircularArrayObject::readFromJson(const QJsonObject &json)
+{
+    parseJson(json, "num",  num);
+    parseJson(json, "angularStep", angularStep);
+    parseJson(json, "radius", radius);
+    parseJson(json, "startIndex", startIndex);
+
+    if (!parseJson(json, "strNum",         strNum))         strNum.clear();
+    if (!parseJson(json, "strAngularStep", strAngularStep)) strAngularStep.clear();
+    if (!parseJson(json, "strRadius",      strRadius))      strRadius.clear();
+    if (!parseJson(json, "strStartIndex",  strStartIndex))  strStartIndex.clear();
+
+    ATypeCircularArrayObject::evaluateStringValues(*this);
+}
+
+QString ATypeCircularArrayObject::evaluateStringValues(ATypeCircularArrayObject &A)
+{
+    const AGeoConsts & GC = AGeoConsts::getConstInstance();
+
+    QString errorStr;
+    bool ok;
+
+    ok = GC.updateParameter(errorStr, A.strNum,         A.num,         true,  true) ;        if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, A.strAngularStep, A.angularStep, true,  false, false); if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, A.strRadius,      A.radius,      true,  true,  false); if (!ok) return errorStr;
+    ok = GC.updateParameter(errorStr, A.strStartIndex,  A.startIndex,  false, true) ;        if (!ok) return errorStr;
+
+    return "";
 }

@@ -244,7 +244,7 @@ void AGeoObject::writeToJson(QJsonObject &json)
       }
   }
 
-  if ( ObjectType->isHandlingStandard() || ObjectType->isArray() || ObjectType->isStack())
+  if ( ObjectType->isHandlingStandard() || ObjectType->isHandlingArray() || ObjectType->isStack())
   {
       json["X"] = Position[0];
       json["Y"] = Position[1];
@@ -1121,30 +1121,19 @@ void AGeoObject::clearContent()
     HostedObjects.clear();
 }
 
-void AGeoObject::updateWorldSize(double &XYm, double &Zm)
+void AGeoObject::updateWorldSize(double & XYm, double & Zm)
 {    
     if (!isWorld())
     {
-        double mp = std::max(fabs(Position[0]),fabs(Position[1]));
-        mp = std::max(fabs(mp), fabs(Position[2]));
-        mp += Shape->maxSize();
-        XYm = std::max(mp, XYm);
-        Zm = std::max(mp, Zm);
+        const double msize = getMaxSize();
+        const double mxy = std::max(fabs(Position[0]), fabs(Position[1]));
+        const double mz  = fabs(Position[2]);
+        XYm = std::max(XYm, mxy + msize);
+        Zm  = std::max(Zm,  mz  + msize);
     }
 
-    if (ObjectType->isArray())
-      {
-        ATypeArrayObject* a = static_cast<ATypeArrayObject*>(this->ObjectType);
-        Zm = std::max(Zm, fabs(Position[2]) +  a->stepZ * (a->numZ + 1));
-
-        double X = a->stepX * (1 + a->numX);
-        double Y = a->stepY * (1 + a->numY);
-        double XY = std::sqrt(X*X + Y*Y);
-        XYm = std::max(XYm, std::max(fabs(Position[0]), fabs(Position[1])) + XY);
-      }
-
-    for (int i=0; i<HostedObjects.size(); i++)
-        HostedObjects[i]->updateWorldSize(XYm, Zm);
+    for (AGeoObject * obj : HostedObjects)
+        obj->updateWorldSize(XYm, Zm);
 }
 
 bool AGeoObject::isMaterialInUse(int imat) const
@@ -1199,21 +1188,33 @@ void AGeoObject::collectContainingObjects(QVector<AGeoObject *> & vec) const
 
 double AGeoObject::getMaxSize() const
 {
-    if (!ObjectType) return 100.0;
-
-    if (ObjectType->isArray())
+    if (!ObjectType)
     {
-        const ATypeArrayObject * a = static_cast<const ATypeArrayObject*>(ObjectType);
-        double X = a->stepX * (2.0 + a->numX);
-        double Y = a->stepY * (2.0 + a->numY);
-        double Z = a->stepZ * (2.0 + a->numZ);
-        return std::cbrt(X*X + Y*Y + Z*Z);
+        qWarning() << "||| GeoObject without type:" << Name;
+        return 100.0;
     }
 
-    if (ObjectType->isComposite())
+    if      (ObjectType->isArray())
+    {
+        const ATypeArrayObject * a = static_cast<const ATypeArrayObject*>(ObjectType);
+        double X = a->stepX * (2.0 + a->numX);   // assuming non-overlapping, so one extra step on each side
+        double Y = a->stepY * (2.0 + a->numY);
+        double Z = a->stepZ * (2.0 + a->numZ);
+        return std::sqrt(X*X + Y*Y + Z*Z);
+    }
+    else if (ObjectType->isCircularArray())
+    {
+        const ATypeCircularArrayObject * a = static_cast<const ATypeCircularArrayObject*>(ObjectType);
+        return 2.0 * a->radius;
+    }
+    else if (ObjectType->isComposite())
     {
         const AGeoObject * cont = getContainerWithLogical();
-        if (!cont) return 100.0;
+        if (!cont)
+        {
+            qWarning() << "||| Composite GeoObject without composite container:" << Name;
+            return 100.0;
+        }
 
         double msize = 0;
         for (AGeoObject * lo : cont->HostedObjects)
@@ -1228,7 +1229,12 @@ double AGeoObject::getMaxSize() const
         return msize;
     }
 
-    if (!Shape) return 100.0;
+    if (!Shape)
+    {
+        qWarning() << "GeoObject without Shape detected:" << Name;
+        return 100.0;
+    }
+
     return Shape->maxSize();
 }
 

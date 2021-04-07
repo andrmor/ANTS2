@@ -14,11 +14,11 @@ public:
     virtual ~AGeoType() {}
 
     // TODO String -> enum
-    // or even better: Handling -> a system of flags; isX use dynamic_cast
+    // or even better: Handling -> a system of flags; but do not use dynamic_cast (slow? ~100 ns per call)
     bool isHandlingStatic() const   {return Handling == "Static";}      //World
     bool isHandlingStandard() const {return Handling == "Standard";}
     bool isHandlingSet() const      {return Handling == "Set";}         //Group, Stack, Composite container
-    bool isHandlingArray() const    {return Handling == "Array";}       //Array
+    bool isHandlingArray() const    {return Handling == "Array";}       //Array and CircularArray
 
     bool isWorld() const            {return Type == "World";}
     bool isPrototypes() const       {return Type == "PrototypeCollection";}
@@ -33,6 +33,7 @@ public:
     bool isCompositeContainer() const {return Type == "CompositeContainer";}
     bool isComposite() const        {return Type == "Composite";}
     bool isArray() const            {return Type == "Array";}
+    bool isCircularArray() const    {return Type == "CircularArray";}
     bool isInstance() const         {return Type == "Instance";}
     bool isPrototype() const        {return Type == "Prototype";}
     bool isGrid() const             {return Type == "Grid";}
@@ -142,8 +143,8 @@ class ATypeArrayObject : public AGeoType
 {
 public:
     ATypeArrayObject() {Type = "Array"; Handling = "Array";}
-    ATypeArrayObject(int numX, int numY, int numZ, double stepX, double stepY, double stepZ)
-        : numX(numX), numY(numY), numZ(numZ), stepX(stepX), stepY(stepY), stepZ(stepZ) {Type = "Array"; Handling = "Array";}
+    ATypeArrayObject(int numX, int numY, int numZ, double stepX, double stepY, double stepZ, int startIndex = 0)
+        : numX(numX), numY(numY), numZ(numZ), stepX(stepX), stepY(stepY), stepZ(stepZ), startIndex(startIndex) {Type = "Array"; Handling = "Array";}
 
     void Reconfigure(int NumX, int NumY, int NumZ, double StepX, double StepY, double StepZ);
 
@@ -160,9 +161,33 @@ public:
     double stepY = 25.0;
     double stepZ = 25.0;
     QString strNumX, strNumY, strNumZ, strStepX, strStepY, strStepZ;
-    int startIndex = 0; QString strStartIndex;
+    int startIndex = 0;
+    QString strStartIndex;
 
     static QString evaluateStringValues(ATypeArrayObject & ArrayType);
+};
+
+class ATypeCircularArrayObject : public ATypeArrayObject
+{
+public:
+    ATypeCircularArrayObject() {Type = "CircularArray"; Handling = "Array";}
+    ATypeCircularArrayObject(int num, double angularStep, double radius, int StartIndex = 0)
+        : num(num), angularStep(angularStep), radius(radius) {Type = "CircularArray"; Handling = "Array"; startIndex = StartIndex;}
+
+    void Reconfigure(int Num, double AngularStep, double Radius);
+
+    bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
+    void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
+
+    void writeToJson(QJsonObject & json) const override;
+    void readFromJson(const QJsonObject & json) override;
+
+    int    num         = 6;
+    double angularStep = 30.0; //in degrees
+    double radius      = 100.0;
+    QString strNum, strAngularStep, strRadius;
+
+    static QString evaluateStringValues(ATypeCircularArrayObject & A);
 };
 
 class ATypeGridObject : public AGeoType

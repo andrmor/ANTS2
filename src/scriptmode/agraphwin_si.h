@@ -21,6 +21,10 @@ public slots:
   void Show();
   void Hide();
 
+  int  GetWidth();
+  int  GetHeight();
+  int  Resize(int w, int h);
+
   void PlotDensityXY();
   void PlotEnergyXY();
   void PlotChi2XY();
@@ -48,6 +52,9 @@ public slots:
   void SaveImage(QString fileName);
   void ExportTH2AsText(QString fileName);
   QVariant GetProjection();
+
+  void UseProjectionTool(QString option);
+  void ConfigureProjectionTool(double x0, double y0, double dx, double dy, double angle);
 
   QVariant GetAxis();
 

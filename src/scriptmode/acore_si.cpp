@@ -242,7 +242,7 @@ bool ACore_SI::saveArray(QString fileName, QVariantList array)
     return true;
 }
 
-void ACore_SI::saveArrayBinary(const QString &fileName, const QVariantList &array, const QVariantList &format)
+void ACore_SI::saveArrayBinary(const QString &fileName, const QVariantList &array, const QVariantList &format, bool append)
 {
     QVector<AArrayFormatEnum> FormatSelector;
     bool bFormatOK = readFormat(format, FormatSelector, true);
@@ -251,13 +251,19 @@ void ACore_SI::saveArrayBinary(const QString &fileName, const QVariantList &arra
         abort("'format' parameter should be an array of 's', 'i', 'd', 'f', 'c' or '' markers (string, int, double, float, char or skip, respectively)");
         return;
     }
-    if (FormatSelector.size() > array.size())
+
+    if (append)
     {
-        abort("Format array is longer than the data array!");
-        return;
+        if (!QFileInfo(fileName).exists())
+        {
+            abort("File does not exist: " + fileName);
+            return;
+        }
     }
 
-    std::ofstream outStream(fileName.toLatin1().data(), std::ios::out | std::ios::binary);
+    std::ofstream outStream(fileName.toLatin1().data(),
+                            append ? std::ios_base::app | std::ios::binary
+                                   : std::ios::out | std::ios::binary );
     if (!outStream.is_open())
     {
         abort("Cannot open file for writing: " + fileName);
@@ -267,6 +273,12 @@ void ACore_SI::saveArrayBinary(const QString &fileName, const QVariantList &arra
     if (FormatSelector.size() == 1)
     {
         //array
+        if (FormatSelector.size() > array.size())
+        {
+            abort("Format array is longer than the data array!");
+            return;
+        }
+
         for (int iar = 0; iar < array.size(); iar++)
         {
             QVariantList vl;
@@ -285,6 +297,11 @@ void ACore_SI::saveArrayBinary(const QString &fileName, const QVariantList &arra
         for (int iar = 0; iar < array.size(); iar++)
         {
             QVariantList vl = array[iar].toList();
+            if (FormatSelector.size() > vl.size())
+            {
+                abort("Format array is longer than the data array!");
+                return;
+            }
             QString err = writeFormattedBinaryLine(outStream, FormatSelector, vl);
             if (!err.isEmpty())
             {
@@ -293,7 +310,6 @@ void ACore_SI::saveArrayBinary(const QString &fileName, const QVariantList &arra
             }
         }
     }
-
     outStream.close();
 }
 

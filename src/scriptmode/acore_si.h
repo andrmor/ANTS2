@@ -55,7 +55,7 @@ public slots:
   bool setCirrentDir(QString path);
   bool save(QString fileName, QString str);
   bool saveArray(QString fileName, QVariantList array);
-  void saveArrayBinary(const QString & fileName, const QVariantList & array, const QVariantList & format);
+  void saveArrayBinary(const QString & fileName, const QVariantList & array, const QVariantList & format, bool append = false);
   bool saveObject(QString FileName, QVariant Object, bool CanOverride);
 
   //load from file

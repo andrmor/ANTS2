@@ -10,6 +10,8 @@
 class AScriptManager;
 class CurveFit;
 
+enum class AArrayFormatEnum {StringFormat, IntFormat, DoubleFormat, FloatFormat, CharFormat, SkipFormat};
+
 class ACore_SI : public AScriptInterface
 {
   Q_OBJECT
@@ -53,6 +55,7 @@ public slots:
   bool setCirrentDir(QString path);
   bool save(QString fileName, QString str);
   bool saveArray(QString fileName, QVariantList array);
+  void saveArrayBinary(const QString & fileName, const QVariantList & array, const QVariantList & format);
   bool saveObject(QString FileName, QVariant Object, bool CanOverride);
 
   //load from file
@@ -100,7 +103,10 @@ private:
   CurveFit* CurF = 0;
 
   void addQVariantToString(const QVariant & var, QString & string) const;
-
+  void readFormattedLine(const QStringList &fields, const QVector<AArrayFormatEnum> &FormatSelector, QVariantList &el);
+  bool readFormat(const QVariantList &format, QVector<AArrayFormatEnum> &FormatSelector, bool AllowSkip = true, bool AllowEmptyFormatArray = false);
+  bool readFormattedBinaryLine(std::ifstream &inStream, const QVector<AArrayFormatEnum> &FormatSelector, QVariantList &el);
+  QString writeFormattedBinaryLine(std::ofstream &outStream, const QVector<AArrayFormatEnum> &FormatSelector, QVariantList &el);
 };
 
 #endif // ACORESCRIPTINTERFACE_H

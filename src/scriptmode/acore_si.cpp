@@ -23,6 +23,11 @@
 #include <QThread>
 #include <QRegularExpression>
 
+#include <iostream>
+#include <fstream>
+#include <ostream>
+#include <ios>
+
 ACore_SI::ACore_SI(AScriptManager* ScriptManager) :
     ScriptManager(ScriptManager)
 {
@@ -237,6 +242,61 @@ bool ACore_SI::saveArray(QString fileName, QVariantList array)
     return true;
 }
 
+void ACore_SI::saveArrayBinary(const QString &fileName, const QVariantList &array, const QVariantList &format)
+{
+    QVector<AArrayFormatEnum> FormatSelector;
+    bool bFormatOK = readFormat(format, FormatSelector, true);
+    if (!bFormatOK)
+    {
+        abort("'format' parameter should be an array of 's', 'i', 'd', 'f', 'c' or '' markers (string, int, double, float, char or skip, respectively)");
+        return;
+    }
+    if (FormatSelector.size() > array.size())
+    {
+        abort("Format array is longer than the data array!");
+        return;
+    }
+
+    std::ofstream outStream(fileName.toLatin1().data(), std::ios::out | std::ios::binary);
+    if (!outStream.is_open())
+    {
+        abort("Cannot open file for writing: " + fileName);
+        return;
+    }
+
+    if (FormatSelector.size() == 1)
+    {
+        //array
+        for (int iar = 0; iar < array.size(); iar++)
+        {
+            QVariantList vl;
+            vl << array[iar];
+            QString err = writeFormattedBinaryLine(outStream, FormatSelector, vl);
+            if (!err.isEmpty())
+            {
+                abort(err);
+                return;
+            }
+        }
+    }
+    else
+    {
+        //array of arrays
+        for (int iar = 0; iar < array.size(); iar++)
+        {
+            QVariantList vl = array[iar].toList();
+            QString err = writeFormattedBinaryLine(outStream, FormatSelector, vl);
+            if (!err.isEmpty())
+            {
+                abort(err);
+                return;
+            }
+        }
+    }
+
+    outStream.close();
+}
+
 bool ACore_SI::saveObject(QString FileName, QVariant Object, bool CanOverride)
 {
     QString type = Object.typeName();
@@ -449,9 +509,7 @@ QVariant ACore_SI::loadArray(QString fileName)
     return vl;
 }
 
-enum AArrayFormatEnum {StringFormat, IntFormat, DoubleFormat, FloatFormat, CharFormat, SkipFormat};
-
-bool readFormat(const QVariantList & format, QVector<AArrayFormatEnum> & FormatSelector, bool AllowSkip = true, bool AllowEmptyFormatArray = false)
+bool ACore_SI::readFormat(const QVariantList & format, QVector<AArrayFormatEnum> & FormatSelector, bool AllowSkip, bool AllowEmptyFormatArray)
 {
     const int numEl = format.size();
     if (numEl == 0 && !AllowEmptyFormatArray) return false;
@@ -460,14 +518,14 @@ bool readFormat(const QVariantList & format, QVector<AArrayFormatEnum> & FormatS
     {
         const QString f = format.at(i).toString();
         AArrayFormatEnum   Option;
-        if      (f == "s") Option = StringFormat;
-        else if (f == "i") Option = IntFormat;
-        else if (f == "d") Option = DoubleFormat;
-        else if (f == "f") Option = FloatFormat;
-        else if (f == "c") Option = CharFormat;
+        if      (f == "s") Option = AArrayFormatEnum::StringFormat;
+        else if (f == "i") Option = AArrayFormatEnum::IntFormat;
+        else if (f == "d") Option = AArrayFormatEnum::DoubleFormat;
+        else if (f == "f") Option = AArrayFormatEnum::FloatFormat;
+        else if (f == "c") Option = AArrayFormatEnum::CharFormat;
         else if (f == "")
         {
-            if (AllowSkip) Option = SkipFormat;
+            if (AllowSkip) Option = AArrayFormatEnum::SkipFormat;
             else return false;
         }
         else return false;
@@ -476,7 +534,7 @@ bool readFormat(const QVariantList & format, QVector<AArrayFormatEnum> & FormatS
     return true;
 }
 
-void readFormattedLine(const QStringList & fields, const QVector<AArrayFormatEnum> & FormatSelector, QVariantList & el)
+void ACore_SI::readFormattedLine(const QStringList & fields, const QVector<AArrayFormatEnum> & FormatSelector, QVariantList & el)
 {
     for (int i=0; i<FormatSelector.size(); i++)
     {
@@ -484,22 +542,22 @@ void readFormattedLine(const QStringList & fields, const QVector<AArrayFormatEnu
 
         switch (FormatSelector.at(i))
         {
-        case StringFormat:
+        case AArrayFormatEnum::StringFormat:
             el.push_back(txt);
             break;
-        case IntFormat:
+        case AArrayFormatEnum::IntFormat:
             el.push_back(txt.toInt());
             break;
-        case DoubleFormat:
+        case AArrayFormatEnum::DoubleFormat:
             el.push_back(txt.toDouble());
             break;
-        case FloatFormat:
+        case AArrayFormatEnum::FloatFormat:
             el.push_back(txt.toFloat());
             break;
-        case CharFormat:
+        case AArrayFormatEnum::CharFormat:
             el.push_back(txt.toLatin1().at(0));
             break;
-        case SkipFormat:
+        case AArrayFormatEnum::SkipFormat:
             continue;
         }
     }
@@ -645,15 +703,13 @@ QVariantList ACore_SI::loadArrayExtended3D(const QString &fileName, const QStrin
     return vl1;
 }
 
-#include <iostream>
-#include <fstream>
-bool readFormattedBinaryLine(std::ifstream & inStream, const QVector<AArrayFormatEnum> & FormatSelector, QVariantList & el)
+bool ACore_SI::readFormattedBinaryLine(std::ifstream & inStream, const QVector<AArrayFormatEnum> & FormatSelector, QVariantList & el)
 {
     for (int i=0; i<FormatSelector.size(); i++)
     {
         switch (FormatSelector.at(i))
         {
-        case StringFormat:
+        case AArrayFormatEnum::StringFormat:
         {
             QString str;
             char ch;
@@ -666,7 +722,7 @@ bool readFormattedBinaryLine(std::ifstream & inStream, const QVector<AArrayForma
             el.push_back(str);
             break;
         }
-        case IntFormat:
+        case AArrayFormatEnum::IntFormat:
         {
             int v;
             inStream.read((char*)&v, sizeof(int));
@@ -674,7 +730,7 @@ bool readFormattedBinaryLine(std::ifstream & inStream, const QVector<AArrayForma
             el.push_back(v);
             break;
         }
-        case DoubleFormat:
+        case AArrayFormatEnum::DoubleFormat:
         {
             double v;
             inStream.read((char*)&v, sizeof(double));
@@ -682,7 +738,7 @@ bool readFormattedBinaryLine(std::ifstream & inStream, const QVector<AArrayForma
             el.push_back(v);
             break;
         }
-        case FloatFormat:
+        case AArrayFormatEnum::FloatFormat:
         {
             float v;
             inStream.read((char*)&v, sizeof(float));
@@ -690,7 +746,7 @@ bool readFormattedBinaryLine(std::ifstream & inStream, const QVector<AArrayForma
             el.push_back(v);
             break;
         }
-        case CharFormat:
+        case AArrayFormatEnum::CharFormat:
         {
             char v;
             inStream >> v;
@@ -698,12 +754,63 @@ bool readFormattedBinaryLine(std::ifstream & inStream, const QVector<AArrayForma
             el.push_back(v);
             break;
         }
-        case SkipFormat:
+        case AArrayFormatEnum::SkipFormat:
             continue;
         }
     }
 
     return !inStream.fail();
+}
+
+QString ACore_SI::writeFormattedBinaryLine(std::ofstream & outStream, const QVector<AArrayFormatEnum> & FormatSelector, QVariantList & el)
+{
+    bool ok;
+    for (int i=0; i<FormatSelector.size(); i++)
+    {
+        switch (FormatSelector.at(i))
+        {
+        case AArrayFormatEnum::StringFormat:
+        {
+            QString str = el[i].toString();
+
+            for (int iStr = 0; iStr < str.length(); iStr++)
+                outStream << str[iStr].toLatin1();
+            outStream << '\0';
+            break;
+        }
+        case AArrayFormatEnum::IntFormat:
+        {
+            int v = el[i].toInt(&ok);
+            if (!ok) return "Write binary line to file: error in convesion to int";
+            outStream.write((char*)&v, sizeof(int));
+            break;
+        }
+        case AArrayFormatEnum::DoubleFormat:
+        {
+            double v = el[i].toDouble(&ok);
+            if (!ok) return "Write binary line to file: error in convesion to double";
+            outStream.write((char*)&v, sizeof(double));
+            break;
+        }
+        case AArrayFormatEnum::FloatFormat:
+        {
+            float v = el[i].toFloat(&ok);
+            if (!ok) return "Write binary line to file: error in convesion to float";
+            outStream.write((char*)&v, sizeof(float));
+            break;
+        }
+        case AArrayFormatEnum::CharFormat:
+        {
+            char v = el[i].toChar().toLatin1();
+            outStream << v;
+            break;
+        }
+        case AArrayFormatEnum::SkipFormat:
+            continue;
+        }
+    }
+
+    return "";
 }
 
 QVariantList ACore_SI::loadArrayBinary(const QString &fileName, const QVariantList &format)
@@ -735,7 +842,13 @@ QVariantList ACore_SI::loadArrayBinary(const QString &fileName, const QVariantLi
     {
         QVariantList el2;
         bool bOK = readFormattedBinaryLine(inStream, FormatSelector, el2);
-        if (bOK) vl1.push_back(el2);
+        if (bOK)
+        {
+            if (FormatSelector.size() == 1)
+                vl1.push_back(el2.at(0));
+            else
+                vl1.push_back(el2);
+        }
     }
     while (!inStream.fail());
 

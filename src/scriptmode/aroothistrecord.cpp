@@ -396,6 +396,27 @@ bool ARootHistRecord::GetOverflow(double & overflow) const
     return true;
 }
 
+double ARootHistRecord::GetRandom()
+{
+    TH1 * h = dynamic_cast<TH1*>(Object);
+    if (!h) return 0;
+
+    return h->GetRandom();
+}
+
+QVector<double> ARootHistRecord::GetRandomMultiple(int numRandoms)
+{
+    QVector<double> res;
+    TH1 * h = dynamic_cast<TH1*>(Object);
+    if (!h) return res;
+
+    res.reserve(numRandoms);
+    for (int i=0; i<numRandoms; i++)
+        res << h->GetRandom();
+
+    return res;
+}
+
 bool ARootHistRecord::is1D() const
 {
     return Type.startsWith("TH1");
@@ -406,7 +427,7 @@ bool ARootHistRecord::is2D() const
     return Type.startsWith("TH2");
 }
 
-const QVector<double> ARootHistRecord::FitGaussWithInit(const QVector<double> &InitialParValues, const QString options)
+QVector<double> ARootHistRecord::FitGaussWithInit(const QVector<double> &InitialParValues, const QString options)
 {
     QMutexLocker locker(&Mutex);
 
@@ -430,7 +451,7 @@ const QVector<double> ARootHistRecord::FitGaussWithInit(const QVector<double> &I
     return res;
 }
 
-const QVector<double> ARootHistRecord::FindPeaks(double sigma, double threshold)
+QVector<double> ARootHistRecord::FindPeaks(double sigma, double threshold)
 {
     QMutexLocker locker(&Mutex);
 
@@ -445,7 +466,7 @@ const QVector<double> ARootHistRecord::FindPeaks(double sigma, double threshold)
     return res;
 }
 
-const QVector<double> ARootHistRecord::FitGauss(const QString &options)
+QVector<double> ARootHistRecord::FitGauss(const QString &options)
 {
     QMutexLocker locker(&Mutex);
 

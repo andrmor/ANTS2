@@ -32,6 +32,7 @@ public slots:
 
   void           SetTitle(const QString& HistName, const QString& Title);
   void           SetTitles(const QString& HistName, QString X_Title, QString Y_Title, QString Z_Title = "");
+  void           SetNumberOfEntries(const QString& HistName, int numEntries);
   void           SetLineProperties(const QString& HistName, int LineColor, int LineStyle, int LineWidth);
   void           SetMarkerProperties(const QString& HistName, int MarkerColor, int MarkerStyle, double MarkerSize);
   void           SetFillColor(const QString& HistName, int Color);
@@ -53,9 +54,14 @@ public slots:
 
   void           Draw(const QString& HistName, const QString options = "");
 
+  int            GetNumberOfEntries(const QString& HistName);
   QVariantList   GetContent(const QString& HistName);
   double         GetUnderflowBin(const QString& HistName);
   double         GetOverflowBin(const QString& HistName);
+  double         GetIntegral(const QString& HistName, bool MultiplyByBinWidth = false);
+  double         GetMaximum(const QString& HistName);
+  double         GetRandom(const QString& HistName);
+  QVariantList   GetRandomMultiple(const QString& HistName, int numRandoms);
 
   void           Smooth(const QString& HistName, int times);
   void           ApplyMedianFilter(const QString& HistName, int span);
@@ -64,10 +70,6 @@ public slots:
   const QVariant FitGaussWithInit(const QString& HistName, const QVariant InitialParValues, const QString options = "");
   const QVariant FindPeaks(const QString& HistName, double sigma, double threshold);
 
-  int            GetNumberOfEntries(const QString& HistName);
-  void           SetNumberOfEntries(const QString& HistName, int numEntries);
-  double         GetIntegral(const QString& HistName, bool MultiplyByBinWidth = false);
-  double         GetMaximum(const QString& HistName);
   void           Scale(const QString& HistName, double ScaleIntegralTo, bool DividedByBinWidth = false);
 
   void           Save(const QString& HistName, const QString &fileName);

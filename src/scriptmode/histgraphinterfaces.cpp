@@ -545,10 +545,37 @@ double AInterfaceToHist::GetMaximum(const QString &HistName)
     if (!r)
     {
         abort("Histogram " + HistName + " not found!");
+        return 0;
+    }
+
+    return r->GetMaximum();
+}
+
+double AInterfaceToHist::GetRandom(const QString &HistName)
+{
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    if (!r)
+    {
+        abort("Histogram " + HistName + " not found!");
         return 1.0;
     }
-    else
-        return r->GetMaximum();
+
+    return r->GetRandom();
+}
+
+QVariantList AInterfaceToHist::GetRandomMultiple(const QString &HistName, int numRandoms)
+{
+    QVariantList vl;
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    if (!r)
+    {
+        abort("Histogram " + HistName + " not found!");
+        return vl;
+    }
+
+    QVector<double> vec = r->GetRandomMultiple(numRandoms);
+    for (const double & d : vec) vl.append(d);
+    return vl;
 }
 
 void AInterfaceToHist::Scale(const QString& HistName, double ScaleIntegralTo, bool DividedByBinWidth)

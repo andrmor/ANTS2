@@ -956,6 +956,23 @@ QString AGeo_SI::getMaterialName(int materialIndex)
     return DefMats[materialIndex];
 }
 
+double AGeo_SI::getMaterialDensity(int materialIndex)
+{
+    const AMaterialParticleCollection & mc = *Detector->Sandwich->MaterialCollection;
+    if (materialIndex < 0 || materialIndex >= mc.countMaterials()) return -1.0;
+
+    return mc[materialIndex]->density;
+}
+
+QString AGeo_SI::getMaterialComposition(int materialIndex, bool byWeight)
+{
+    const AMaterialParticleCollection & mc = *Detector->Sandwich->MaterialCollection;
+    if (materialIndex < 0 || materialIndex >= mc.countMaterials()) return "Not defined material";
+
+    return ( byWeight ? mc[materialIndex]->ChemicalComposition.getCompositionByWeightString()
+                      : mc[materialIndex]->ChemicalComposition.getCompositionString() );
+}
+
 void AGeo_SI::UpdateGeometry(bool CheckOverlaps)
 {
   //checkup

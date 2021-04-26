@@ -26,7 +26,11 @@ public slots:
   void           SetAbortIfAlreadyExists(bool flag) {bAbortIfExists = flag;}
 
   void           NewHist(const QString& HistName, int bins, double start, double stop);
-  void           NewHist2D(const QString &HistName, int binsX, double startX, double stopX, int binsY, double startY, double stopY);
+  void           NewHist2D(const QString &HistName, int binsX, double startX, double stopX, int binsY, double startY, double stopY); //deprecate!
+  void           NewHist(const QString& HistName, int binsX, double startX, double stopX, int binsY, double startY, double stopY);
+  void           NewHist(const QString &HistName, int binsX, double startX, double stopX,
+                                                  int binsY, double startY, double stopY,
+                                                  int binsZ, double startZ, double stopZ);
 
   void           SetXCustomLabels(const QString &HistName, QVariantList Labels);
 
@@ -44,7 +48,9 @@ public slots:
   void           SetYLabelProperties(const QString& HistName, double size, double offset);
 
   void           Fill(const QString& HistName, double val, double weight);
-  void           Fill2D(const QString& HistName, double x, double y, double weight);
+  void           Fill2D(const QString& HistName, double x, double y, double weight);  // to deprecate
+  void           Fill(const QString& HistName, double x, double y, double weight);
+  void           Fill(const QString& HistName, double x, double y, double z, double weight);
 
   void           FillArr(const QString& HistName, const QVariant XY_Array);
   void           FillArr(const QString& HistName, const QVariantList X_Array, const QVariantList Y_Array);

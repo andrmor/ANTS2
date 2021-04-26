@@ -66,7 +66,7 @@ private:
     void expFit(int index);
     void interpolate(ADrawObject &obj);
     void median(ADrawObject &obj);
-    void projection(ADrawObject &obj, bool bX);
+    void projection(ADrawObject &obj, int axis);
     void splineFit(int index);
     void editAxis(ADrawObject &obj, int axisIndex);
     void addAxis(int axisIndex);

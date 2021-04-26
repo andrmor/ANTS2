@@ -80,6 +80,8 @@ public slots:
   void setEnable(QString ObjectOrWildcard, bool flag);
 
   QString getMaterialName(int materialIndex);
+  double  getMaterialDensity(int materialIndex);
+  QString getMaterialComposition(int materialIndex, bool byWeight);
 
   QString printOverrides();
 

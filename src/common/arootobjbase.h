@@ -22,7 +22,7 @@ public:
 protected:
     TObject* Object = 0;
     QString  Title;
-    QString  Type;                    // object type according to ROOT (e.g. "TH1D")
+    QString  Type;                    // object type according to ROOT (e.g. "TH1D")     // !!!*** change to enum
 
     mutable QMutex   Mutex;
 };

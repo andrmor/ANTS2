@@ -1149,7 +1149,7 @@ void ADrawExplorerWidget::expFit(int index)
     GraphWindow.RegisterTObject(f);
 
     f->SetParameter(0, startY);
-    f->SetParameter(1, 1);
+    f->SetParameter(1, stopX - startX);
     f->SetParameter(2, startX);
     f->SetParLimits(2, startX, startX);
 

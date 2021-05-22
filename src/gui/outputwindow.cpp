@@ -1189,6 +1189,10 @@ void OutputWindow::SaveGuiToJson(QJsonObject &json) const
     QJsonObject js;
     saveEventViewerSettings(js);
     json["EventViewer"] = js;
+
+    QJsonObject jsc;
+        jsc["ShowPMtable"] = ui->cbShowPMsig->isChecked();
+    json["GuiControls"] = jsc;
 }
 
 void OutputWindow::LoadGuiFromJson(const QJsonObject &json)
@@ -1196,6 +1200,13 @@ void OutputWindow::LoadGuiFromJson(const QJsonObject &json)
     QJsonObject js;
     parseJson(json, "EventViewer", js);
     if (!js.isEmpty()) loadEventViewerSettings(js);
+
+    QJsonObject jsc;
+    bool ok = parseJson(json, "GuiControls", jsc);
+    if (ok)
+    {
+        JsonToCheckbox(jsc, "ShowPMtable", ui->cbShowPMsig);
+    }
 }
 
 void OutputWindow::saveEventViewerSettings(QJsonObject & json) const

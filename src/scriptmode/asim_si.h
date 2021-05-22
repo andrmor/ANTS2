@@ -9,6 +9,7 @@
 class ASimulationManager;
 class EventsDataClass;
 class AConfiguration;
+class ANodeRecord;
 
 class ASim_SI : public AScriptInterface
 {
@@ -32,10 +33,10 @@ public slots:
   int  CountNodes(bool onlyTop);
 
   void AddNode(double X, double Y, double Z, double Time = 0, int numPhotons = -1);
-  void AddSubNode(double X, double Y, double Z, double Time = 0, int numPhotons = -1);
-
+  void AddSubNode(double X, double Y, double Z, double Time = 0, int numPhotons = -1, bool bFast = false);
   void AddNodes(QVariantList nodes);
   void AddNodesAndSubnodes(QVariantList nodes);
+  void ReserveNodeContainer(int numNodes);
 
   bool SaveAsTree(QString fileName);
   bool SaveAsText(QString fileName, bool IncludeTruePositionAndNumPhotons = true);
@@ -69,6 +70,8 @@ private:
   AConfiguration* Config;
 
   bool fGuiPresent;
+
+  ANodeRecord * LastNodeForFastSubnode = nullptr;
 
   enum dataType {dat_time, dat_angle, dat_wave, dat_energy};
   QVariant getMonitorData1D(const QString & monitor, dataType type) const;

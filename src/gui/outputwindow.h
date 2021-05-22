@@ -113,6 +113,8 @@ private slots:
 
     void on_cbPTHistCreated_toggled(bool checked);
 
+    void on_cbShowPMsig_clicked(bool checked);
+
 private:
     MainWindow * MW = nullptr;
     EventsDataClass * EventsDataHub = nullptr;

@@ -149,6 +149,13 @@ void OutputWindow::on_pbShowPMtime_clicked()
 
 void OutputWindow::RefreshPMhitsTable()
 {
+    if (modelPMhits)
+    {
+        ui->tvPMhits->setModel(0);
+        delete modelPMhits; modelPMhits = nullptr;
+    }
+    if (!ui->cbShowPMsig->isChecked()) return;
+
     bool fHaveData = !EventsDataHub->isEmpty();    
     int CurrentEvent = ui->sbEvent->value();
     if (fHaveData && CurrentEvent>EventsDataHub->Events.size()-1) fHaveData = false; //protection
@@ -157,12 +164,6 @@ void OutputWindow::RefreshPMhitsTable()
     int rows = 0;    
     if (fHaveData && EventsDataHub->isTimed())
         rows = EventsDataHub->TimedEvents[0].size();
-
-    if (modelPMhits)
-      {
-        ui->tvPMhits->setModel(0);
-        delete modelPMhits;
-      }
 
     modelPMhits = new QStandardItemModel(rows+1,columns,this);
 
@@ -344,7 +345,7 @@ void OutputWindow::updateSignalTableWidth()
   for (int i=0; i<ui->tvPMhits->horizontalHeader()->count(); i++)
     w += ui->tvPMhits->columnWidth(i);
 
-  int max = ui->labPMsig->width();
+  int max = ui->labPMsigTop->width();
 //  qDebug() << "counting:"<<w<<"max:"<<max;
   if (w > max) w = max;
 
@@ -460,7 +461,7 @@ void OutputWindow::RefreshData()
           Passives->calculateDynamicPassives(CurrentEvent, EventsDataHub->ReconstructionData.at(CurrentGroup).at(CurrentEvent));
     }
 
-  OutputWindow::RefreshPMhitsTable();
+  RefreshPMhitsTable();
   //qDebug()<<"table updated";
 
   //updating viz
@@ -2394,4 +2395,9 @@ void OutputWindow::on_cbPTHistCreated_toggled(bool checked)
         }
         else cb->setEnabled(true);
     }
+}
+
+void OutputWindow::on_cbShowPMsig_clicked(bool checked)
+{
+    RefreshPMhitsTable();
 }

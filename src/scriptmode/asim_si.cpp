@@ -48,6 +48,8 @@ ASim_SI::ASim_SI(ASimulationManager* SimulationManager, EventsDataClass *EventsD
   H["AddSubNode"] = "Adds a sub-node to the set of nodes of the previously defined top level node.\n"
           "Main purpose is to generate events with multiple energy deposition positions.\n"
           "Format: X, Y, Z, Time(optional, default=0), NumberPhotonsOverride(optional)";
+  H["AddNodes"] = "Adds an array of top level nodes. Format: array of [x,y,z, (optional)time, (optionsl)numPhotons]";
+  H["AddNodesAndSubnodes"] = "Adds an array of nodes with subnodes. Format: array of arrays of [[x,y,z, (optional)time, (optionsl)numPhotons], [...], ...]";
 
   H["GetMonitorEnergyStats"] = "Return array [sumw, sumw2, sumwx, sumwx2]";
 }

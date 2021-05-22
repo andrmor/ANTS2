@@ -76,7 +76,7 @@ private slots:
     void on_pbPreviousEvent_clicked();
 
     void on_tabwinDiagnose_tabBarClicked(int index);
-    void RefreshPMhitsTable();
+    void updatePMhitsTable();
 
     void on_pbMonitorShowXY_clicked();
     void on_pbMonitorShowTime_clicked();
@@ -158,8 +158,8 @@ private:
     void addTextItems(const QVector<float>* vector, float MaxSignal, DynamicPassivesHandler *Passives);
     void updateSignalScale();    
     void updateSignalTableWidth();
-    //void addParticleHistoryLogLine(int iRec, int level);
     void updateMonitors();
+    void updateGraphScene(int CurrentEvent);
     void updatePTHistoryBinControl();
     void fillEvTabViewRecord(QTreeWidgetItem *item, const AParticleTrackingRecord *pr, int ExpansionLevel) const;
     void EV_show();

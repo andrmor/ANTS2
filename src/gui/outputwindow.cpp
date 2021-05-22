@@ -147,7 +147,7 @@ void OutputWindow::on_pbShowPMtime_clicked()
     MW->GraphWindow->Draw(hist1D);
 }
 
-void OutputWindow::RefreshPMhitsTable()
+void OutputWindow::updatePMhitsTable()
 {
     if (modelPMhits)
     {
@@ -432,7 +432,6 @@ void OutputWindow::RefreshData()
 
   //check current event
   int CurrentEvent = ui->sbEvent->value();
-  int CurrentGroup = MW->Detector->PMgroups->getCurrentGroup();
   if (CurrentEvent > EventsDataHub->Events.size()-1)
     {
       CurrentEvent = EventsDataHub->Events.size()-1;
@@ -449,49 +448,54 @@ void OutputWindow::RefreshData()
   ui->sbTimeBin->setEnabled(fTimeResolved);
   ui->pbShowPMtime->setEnabled(fTimeResolved);
 
-  //dynamic passives for indication
-  DynamicPassivesHandler *Passives = new DynamicPassivesHandler(MW->Detector->PMs, MW->Detector->PMgroups, EventsDataHub);
-  if (EventsDataHub->isEmpty() || CurrentGroup>EventsDataHub->RecSettings.size()-1)
-    Passives->init(0, CurrentGroup);
-  else
-    {
-      Passives->init(&EventsDataHub->RecSettings[CurrentGroup], CurrentGroup); //just to copy static passives
-      if (EventsDataHub->fReconstructionDataReady)
-        if (EventsDataHub->RecSettings.at(CurrentGroup).fUseDynamicPassives)
-          Passives->calculateDynamicPassives(CurrentEvent, EventsDataHub->ReconstructionData.at(CurrentGroup).at(CurrentEvent));
-    }
+  updatePMhitsTable();
 
-  RefreshPMhitsTable();
-  //qDebug()<<"table updated";
+  updateGraphScene(CurrentEvent);
 
-  //updating viz
-  scene->clear();
-  float MaxSignal = 0.0;
-  if (!fHaveData) MaxSignal = 1.0;
-  else
-    {
-      for (int i=0; i<MW->PMs->count(); i++)
-        if (Passives->isActive(i))
-        {
-          if ( EventsDataHub->Events[CurrentEvent][i] > MaxSignal)
-              MaxSignal = EventsDataHub->Events[CurrentEvent][i];
-        }
-    }
-  if (MaxSignal<=1.0e-25) MaxSignal = 1.0;
-  //qDebug()<<"MaxSignal="<<MaxSignal<<"  selector="<<selector;
-
-  updateSignalLabels(MaxSignal);
-  addPMitems( (fHaveData ? &EventsDataHub->Events.at(CurrentEvent) : 0), MaxSignal, Passives); //add icons with PMs to the scene
-  if (ui->cbShowPMsignals->isChecked())
-    addTextItems( (fHaveData ? &EventsDataHub->Events.at(CurrentEvent) : 0), MaxSignal, Passives); //add icons with signal text to the scene
-  updateSignalScale();
-
-  //Monitors
   updateMonitors();
 
   EV_showTree();
+}
 
-  delete Passives;
+void OutputWindow::updateGraphScene(int CurrentEvent)
+{
+    int CurrentGroup = MW->Detector->PMgroups->getCurrentGroup();
+    bool fHaveData = !EventsDataHub->isEmpty();
+
+    //dynamic passives for indication
+    DynamicPassivesHandler * Passives = new DynamicPassivesHandler(MW->Detector->PMs, MW->Detector->PMgroups, EventsDataHub);
+    if (EventsDataHub->isEmpty() || CurrentGroup > EventsDataHub->RecSettings.size()-1)
+        Passives->init(0, CurrentGroup);
+    else
+    {
+        Passives->init(&EventsDataHub->RecSettings[CurrentGroup], CurrentGroup); //just to copy static passives
+        if (EventsDataHub->fReconstructionDataReady)
+          if (EventsDataHub->RecSettings.at(CurrentGroup).fUseDynamicPassives)
+            Passives->calculateDynamicPassives(CurrentEvent, EventsDataHub->ReconstructionData.at(CurrentGroup).at(CurrentEvent));
+    }
+
+    scene->clear();
+    float MaxSignal = 0.0;
+    if (!fHaveData) MaxSignal = 1.0;
+    else
+    {
+        for (int i=0; i<MW->PMs->count(); i++)
+            if (Passives->isActive(i))
+            {
+                if (EventsDataHub->Events[CurrentEvent][i] > MaxSignal)
+                    MaxSignal = EventsDataHub->Events[CurrentEvent][i];
+            }
+    }
+    if (MaxSignal<=1.0e-25) MaxSignal = 1.0;
+    //qDebug()<<"MaxSignal="<<MaxSignal<<"  selector="<<selector;
+
+    updateSignalLabels(MaxSignal);
+    addPMitems( (fHaveData ? &EventsDataHub->Events.at(CurrentEvent) : 0), MaxSignal, Passives); //add icons with PMs to the scene
+    if (ui->cbShowPMsignals->isChecked())
+        addTextItems( (fHaveData ? &EventsDataHub->Events.at(CurrentEvent) : 0), MaxSignal, Passives); //add icons with signal text to the scene
+    updateSignalScale();
+
+    delete Passives;
 }
 
 void OutputWindow::updateMonitors()
@@ -1277,7 +1281,7 @@ void OutputWindow::on_tabwinDiagnose_tabBarClicked(int index)
 {
     if (index==1)
     {
-        QTimer::singleShot(50, this, SLOT(RefreshPMhitsTable()));
+        QTimer::singleShot(50, this, SLOT(updatePMhitsTable()));
     }
 }
 
@@ -2410,5 +2414,5 @@ void OutputWindow::on_cbPTHistCreated_toggled(bool checked)
 
 void OutputWindow::on_cbShowPMsig_clicked(bool checked)
 {
-    RefreshPMhitsTable();
+    updatePMhitsTable();
 }

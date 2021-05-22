@@ -433,11 +433,11 @@ void OutputWindow::RefreshData()
   //check current event
   int CurrentEvent = ui->sbEvent->value();
   if (CurrentEvent > EventsDataHub->Events.size()-1)
-    {
+  {
       CurrentEvent = EventsDataHub->Events.size()-1;
       if (CurrentEvent < 0) CurrentEvent = 0;
       ui->sbEvent->setValue(CurrentEvent);
-    }
+  }
   if (ui->sbPMnumberToShowTime->value() > MW->PMs->count()-1)
     ui->sbPMnumberToShowTime->setValue(0);
 
@@ -450,15 +450,24 @@ void OutputWindow::RefreshData()
 
   updatePMhitsTable();
 
-  updateGraphScene(CurrentEvent);
+  updateGraphScene();
 
   updateMonitors();
 
   EV_showTree();
 }
 
-void OutputWindow::updateGraphScene(int CurrentEvent)
+void OutputWindow::updateGraphScene()
 {
+    scene->clear();
+    if (ui->cbSuppressGraphScene->isChecked())
+    {
+        scaleScene->clear();
+        updateSignalLabels(0);
+        return;
+    }
+
+    int CurrentEvent = ui->sbEvent->value();
     int CurrentGroup = MW->Detector->PMgroups->getCurrentGroup();
     bool fHaveData = !EventsDataHub->isEmpty();
 
@@ -474,7 +483,6 @@ void OutputWindow::updateGraphScene(int CurrentEvent)
             Passives->calculateDynamicPassives(CurrentEvent, EventsDataHub->ReconstructionData.at(CurrentGroup).at(CurrentEvent));
     }
 
-    scene->clear();
     float MaxSignal = 0.0;
     if (!fHaveData) MaxSignal = 1.0;
     else
@@ -1196,6 +1204,7 @@ void OutputWindow::SaveGuiToJson(QJsonObject &json) const
 
     QJsonObject jsc;
         jsc["ShowPMtable"] = ui->cbShowPMsig->isChecked();
+        jsc["HidePMscene"] = ui->cbSuppressGraphScene->isChecked();
     json["GuiControls"] = jsc;
 }
 
@@ -1210,6 +1219,7 @@ void OutputWindow::LoadGuiFromJson(const QJsonObject &json)
     if (ok)
     {
         JsonToCheckbox(jsc, "ShowPMtable", ui->cbShowPMsig);
+        JsonToCheckbox(jsc, "HidePMscene", ui->cbSuppressGraphScene);
     }
 }
 
@@ -2415,4 +2425,9 @@ void OutputWindow::on_cbPTHistCreated_toggled(bool checked)
 void OutputWindow::on_cbShowPMsig_clicked(bool checked)
 {
     updatePMhitsTable();
+}
+
+void OutputWindow::on_cbSuppressGraphScene_clicked(bool checked)
+{
+    updateGraphScene();
 }

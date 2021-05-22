@@ -115,6 +115,8 @@ private slots:
 
     void on_cbShowPMsig_clicked(bool checked);
 
+    void on_cbSuppressGraphScene_clicked(bool checked);
+
 private:
     MainWindow * MW = nullptr;
     EventsDataClass * EventsDataHub = nullptr;
@@ -159,7 +161,7 @@ private:
     void updateSignalScale();    
     void updateSignalTableWidth();
     void updateMonitors();
-    void updateGraphScene(int CurrentEvent);
+    void updateGraphScene();
     void updatePTHistoryBinControl();
     void fillEvTabViewRecord(QTreeWidgetItem *item, const AParticleTrackingRecord *pr, int ExpansionLevel) const;
     void EV_show();

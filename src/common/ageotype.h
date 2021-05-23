@@ -43,6 +43,8 @@ public:
     virtual bool isGeoConstInUse(const QRegExp & /*nameRegExp*/) const {return false;}
     virtual void replaceGeoConstName(const QRegExp & /*nameRegExp*/, const QString & /*newName*/) {}
 
+    virtual void applyScalingFactor(double factor){}
+
     virtual void writeToJson(QJsonObject & json) const;         // CALL THIS, then save additional properties of the concrete type
     virtual void readFromJson(const QJsonObject & /*json*/) {}  // if present, read properties of the concrete type
 
@@ -81,6 +83,8 @@ public:
 
     bool isGeoConstInUse(const QRegExp & nameRegExp) const;
     void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName);
+
+    void applyScalingFactor(double factor) override;
 
     ASlabModel * SlabModel = nullptr;
 };
@@ -151,6 +155,8 @@ public:
     bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
     void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
 
+    void applyScalingFactor(double factor) override;
+
     void writeToJson(QJsonObject & json) const override;
     void readFromJson(const QJsonObject & json) override;
 
@@ -179,6 +185,8 @@ public:
     bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
     void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
 
+    void applyScalingFactor(double factor) override;
+
     void writeToJson(QJsonObject & json) const override;
     void readFromJson(const QJsonObject & json) override;
 
@@ -204,6 +212,8 @@ public:
     void writeToJson(QJsonObject & json) const override;
     void readFromJson(const QJsonObject & json) override;
 
+    void applyScalingFactor(double factor) override;
+
     int    shape = 1;       //0 : rectanglar-2wires, 1 : rectangular-crossed,  2 : hexagonal
     double size1 = 10.0;    //half sizes for rectangular, size1 is size of hexagon
     double size2 = 10.0;
@@ -220,6 +230,8 @@ public:
 
     bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
     void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
+
+    void applyScalingFactor(double factor) override;
 
     AMonitorConfig config;
 

@@ -87,6 +87,8 @@ public slots:
 
   QVariantList getPassedVoulumes(QVariantList startXYZ, QVariantList startVxVyVz);
 
+  void testScaleGeometry(double factor);
+
 signals:
   void clearRequested();
   void requestShowCheckUpWindow();

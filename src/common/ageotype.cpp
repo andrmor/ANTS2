@@ -74,6 +74,17 @@ void ATypeSlabObject::replaceGeoConstName(const QRegExp & nameRegExp, const QStr
     XY.strAngle.replace(nameRegExp, newName);
 }
 
+void ATypeSlabObject::applyScalingFactor(double factor)
+{
+    if (SlabModel)
+    {
+        SlabModel->height *= factor;
+        ASlabXYModel & XY = SlabModel->XYrecord;
+        XY.size1 *= factor;
+        XY.size2 *= factor;
+    }
+}
+
 ATypeLightguideObject::ATypeLightguideObject()
 {
     Type = "Lightguide";
@@ -142,6 +153,13 @@ void ATypeArrayObject::replaceGeoConstName(const QRegExp &nameRegExp, const QStr
     strStartIndex.replace(nameRegExp, newName);
 }
 
+void ATypeArrayObject::applyScalingFactor(double factor)
+{
+    stepX *= factor;
+    stepY *= factor;
+    stepZ *= factor;
+}
+
 void ATypeArrayObject::writeToJson(QJsonObject &json) const
 {
     AGeoType::writeToJson(json);
@@ -202,6 +220,13 @@ void ATypeGridElementObject::readFromJson(const QJsonObject &json)
     parseJson(json, "dz",    dz);
 }
 
+void ATypeGridElementObject::applyScalingFactor(double factor)
+{
+    size1 *= factor;
+    size2 *= factor;
+    dz    *= factor;
+}
+
 void ATypeMonitorObject::writeToJson(QJsonObject &json) const
 {
     AGeoType::writeToJson(json);
@@ -225,6 +250,13 @@ void ATypeMonitorObject::replaceGeoConstName(const QRegExp & nameRegExp, const Q
 {
     config.str2size1.replace(nameRegExp, newName);
     config.str2size2.replace(nameRegExp, newName);
+}
+
+void ATypeMonitorObject::applyScalingFactor(double factor)
+{
+    config.size1 *= factor;
+    config.size2 *= factor;
+    config.dz    *= factor;
 }
 
 bool ATypeMonitorObject::isParticleInUse(int partId) const
@@ -307,6 +339,11 @@ void ATypeCircularArrayObject::replaceGeoConstName(const QRegExp &nameRegExp, co
     strAngularStep.replace(nameRegExp, newName);
     strRadius.replace(nameRegExp, newName);
     strStartIndex.replace(nameRegExp, newName);
+}
+
+void ATypeCircularArrayObject::applyScalingFactor(double factor)
+{
+    radius *= factor;
 }
 
 void ATypeCircularArrayObject::writeToJson(QJsonObject &json) const

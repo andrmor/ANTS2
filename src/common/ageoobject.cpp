@@ -175,7 +175,8 @@ int AGeoObject::getMaterial() const
 void AGeoObject::applyScalingFactor(double factor)
 {
     for (int i=0; i<3; i++) Position[i] *= factor;
-    if (Shape) Shape->applyScalingFactor(factor);
+    if (Shape)      Shape->applyScalingFactor(factor);
+    if (ObjectType) ObjectType->applyScalingFactor(factor);
 }
 
 void AGeoObject::scaleWorld(double factor)

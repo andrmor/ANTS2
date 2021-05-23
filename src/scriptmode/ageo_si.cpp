@@ -1179,3 +1179,9 @@ QVariantList AGeo_SI::getPassedVoulumes(QVariantList startXYZ, QVariantList star
     return vl;
 }
 
+void AGeo_SI::testScaleGeometry(double factor)
+{
+    Detector->Sandwich->World->scaleWorld(factor);
+    Detector->BuildDetector_CallFromScript();
+}
+

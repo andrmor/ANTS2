@@ -35,6 +35,8 @@ public:
   virtual bool isGeoConstInUse(const QRegExp & /*nameRegExp*/) const = 0;
   virtual void replaceGeoConstName(const QRegExp & /*nameRegExp*/, const QString & /*newName*/) {}
 
+  virtual void applyScalingFactor(double factor) = 0;
+
   //json
   virtual void writeToJson(QJsonObject &/*json*/) const = 0;
   virtual void readFromJson(const QJsonObject &/*json*/) = 0;
@@ -72,6 +74,8 @@ public:
   bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
   void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
 
+  void applyScalingFactor(double factor) override;
+
   TGeoShape* createGeoShape(const QString shapeName = "") override;
 
   double getHeight() const override {return dz;}
@@ -107,6 +111,8 @@ public:
   bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
   void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
 
+  void applyScalingFactor(double factor) override;
+
   bool readFromString(QString GenerationString) override;
   TGeoShape* createGeoShape(const QString shapeName = "") override;
 
@@ -139,6 +145,8 @@ public:
 
   bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
   void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
+
+  void applyScalingFactor(double factor) override;
 
   bool readFromString(QString GenerationString) override;
   TGeoShape* createGeoShape(const QString shapeName = "") override;
@@ -181,6 +189,8 @@ public:
   bool isGeoConstInUse (const QRegExp & nameRegExp) const override;
   void replaceGeoConstName (const QRegExp & nameRegExp, const QString & newName) override;
 
+  void applyScalingFactor(double factor) override;
+
   bool readFromString(QString GenerationString) override;
   TGeoShape* createGeoShape(const QString shapeName = "") override;
 
@@ -217,6 +227,8 @@ public:
   bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
   void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
 
+  void applyScalingFactor(double factor) override;
+
   bool readFromString(QString GenerationString) override;
   TGeoShape* createGeoShape(const QString shapeName = "") override;
 
@@ -250,6 +262,8 @@ public:
 
   bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
   void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
+
+  //void applyScalingFactor(double factor) override; // no need - uses AGeoCone::applyScalingFactor
 
   bool readFromString(QString GenerationString) override;
   TGeoShape* createGeoShape(const QString shapeName = "") override;
@@ -286,6 +300,8 @@ public:
 
   bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
   void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
+
+  void applyScalingFactor(double factor) override;
 
   bool readFromString(QString GenerationString) override;
   TGeoShape* createGeoShape(const QString shapeName = "") override;
@@ -324,6 +340,8 @@ struct APolyCGsection
   void writeToJson(QJsonObject& json) const;
   void readFromJson(const QJsonObject& json);
   bool operator ==( const APolyCGsection &section1) const;
+
+  void applyScalingFactor(double factor);
 };
 
 class AGeoPcon : public AGeoShape
@@ -339,6 +357,8 @@ public:
 
   bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
   void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
+
+  void applyScalingFactor(double factor) override;
 
   bool readFromString(QString GenerationString) override;
   TGeoShape* createGeoShape(const QString shapeName = "") override;
@@ -372,6 +392,8 @@ public:
   bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
   void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
 
+  //void applyScalingFactor(double factor) override; //no need: uses AGeoPcon::applyScalingFactor
+
   bool readFromString(QString GenerationString) override;
   TGeoShape* createGeoShape(const QString shapeName = "") override;
 
@@ -402,6 +424,8 @@ public:
 
   bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
   void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
+
+  void applyScalingFactor(double factor) override;
 
   bool readFromString(QString GenerationString) override;
   TGeoShape* createGeoShape(const QString shapeName = "") override;
@@ -437,6 +461,8 @@ public:
   bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
   void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
 
+  void applyScalingFactor(double factor) override;
+
   bool readFromString(QString GenerationString) override;
   TGeoShape* createGeoShape(const QString shapeName = "") override;
 
@@ -469,6 +495,8 @@ public:
 
   bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
   void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
+
+  void applyScalingFactor(double factor) override;
 
   bool readFromString(QString GenerationString) override;
   TGeoShape* createGeoShape(const QString shapeName = "") override;
@@ -510,6 +538,8 @@ public:
   bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
   void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
 
+  //void applyScalingFactor(double factor) override; //not needed: uses AGeoTubeSeg::applyScalingFactor
+
   bool readFromString(QString GenerationString) override;
   TGeoShape* createGeoShape(const QString shapeName = "") override;
 
@@ -542,6 +572,8 @@ public:
 
   bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
   void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
+
+  void applyScalingFactor(double factor) override;
 
   bool readFromString(QString GenerationString) override;
   TGeoShape* createGeoShape(const QString shapeName = "") override;
@@ -578,6 +610,8 @@ public:
   bool isGeoConstInUse (const QRegExp & nameRegExp) const override;
   void replaceGeoConstName (const QRegExp & nameRegExp, const QString & newName) override;
 
+  void applyScalingFactor(double factor) override;
+
   virtual bool readFromString(QString GenerationString);
   virtual TGeoShape* createGeoShape(const QString shapeName = "");
 
@@ -611,6 +645,8 @@ public:
   bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
   void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
 
+  void applyScalingFactor(double factor) override;
+
   bool readFromString(QString GenerationString) override;
   TGeoShape* createGeoShape(const QString shapeName = "") override;
 
@@ -643,6 +679,8 @@ public:
 
   bool isGeoConstInUse(const QRegExp & nameRegExp) const override;
   void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName) override;
+
+  void applyScalingFactor(double factor) override;
 
   bool readFromString(QString GenerationString) override;
   TGeoShape* createGeoShape(const QString shapeName = "") override;
@@ -681,6 +719,8 @@ public:
 
   bool isGeoConstInUse(const QRegExp & /*nameRegExp*/) const override {return false;}
 
+  void applyScalingFactor(double /*factor*/) override {;} //nothing to do, AGeoObject handles the composite members
+
   QString getGenerationString(bool /*useStrings*/) const override {return GenerationString;}
   double maxSize() const {return 0;} // have to ask AGeoObject
 
@@ -708,6 +748,8 @@ public:
 
   bool isGeoConstInUse (const QRegExp & nameRegExp) const override;
   void replaceGeoConstName (const QRegExp & nameRegExp, const QString & newName) override;
+
+  void applyScalingFactor(double factor) override;
 
   bool readFromString(QString GenerationString) override;
   TGeoShape* createGeoShape(const QString shapeName = "") override;

@@ -31,6 +31,7 @@ public:
   void makeItWorld();
   bool isWorld() const;
   int  getMaterial() const;
+  void applyScalingFactor(double factor);
 
   const AGeoObject * isGeoConstInUse(const QRegExp & nameRegExp) const;
   void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName);
@@ -62,7 +63,7 @@ public:
   QList<AGeoObject*> HostedObjects;
 
   //visualization properties
-  int color = 1; // !*! initialized as -1, updated when first time shown by SlabListWidget
+  int color = 1;
   int style = 1;
   int width = 1;
 

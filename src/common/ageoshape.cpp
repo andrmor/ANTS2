@@ -130,6 +130,13 @@ void AGeoBox::replaceGeoConstName(const QRegExp & nameRegExp, const QString & ne
     str2dz.replace(nameRegExp, newName);
 }
 
+void AGeoBox::applyScalingFactor(double factor)
+{
+    dx *= factor;
+    dy *= factor;
+    dz *= factor;
+}
+
 QString AGeoBox::getGenerationString(bool useStrings) const
 {
     QString str;
@@ -262,6 +269,13 @@ void AGeoPara::replaceGeoConstName(const QRegExp &nameRegExp, const QString &new
     strAlpha.replace(nameRegExp, newName);
     strTheta.replace(nameRegExp, newName);
     strPhi  .replace(nameRegExp, newName);
+}
+
+void AGeoPara::applyScalingFactor(double factor)
+{
+    dx *= factor;
+    dy *= factor;
+    dz *= factor;
 }
 
 bool AGeoPara::readFromString(QString GenerationString)
@@ -515,6 +529,12 @@ void AGeoSphere::replaceGeoConstName(const QRegExp &nameRegExp, const QString &n
     strPhi2  .replace(nameRegExp, newName);
 }
 
+void AGeoSphere::applyScalingFactor(double factor)
+{
+    rmin *= factor;
+    rmax *= factor;
+}
+
 bool AGeoSphere::readFromString(QString GenerationString)
 {
     QStringList params;
@@ -673,6 +693,13 @@ void AGeoTubeSeg::replaceGeoConstName(const QRegExp &nameRegExp, const QString &
     str2dz  .replace(nameRegExp, newName);
     strPhi1.replace(nameRegExp, newName);
     strPhi2.replace(nameRegExp, newName);
+}
+
+void AGeoTubeSeg::applyScalingFactor(double factor)
+{
+    rmin *= factor;
+    rmax *= factor;
+    dz   *= factor;
 }
 
 bool AGeoTubeSeg::readFromString(QString GenerationString)
@@ -1018,6 +1045,13 @@ void AGeoTube::replaceGeoConstName(const QRegExp & nameRegExp, const QString & n
     str2dz  .replace(nameRegExp, newName);
 }
 
+void AGeoTube::applyScalingFactor(double factor)
+{
+    rmin *= factor;
+    rmax *= factor;
+    dz   *= factor;
+}
+
 bool AGeoTube::readFromString(QString GenerationString)
 {
     QStringList params;
@@ -1156,6 +1190,14 @@ void AGeoTrd1::replaceGeoConstName(const QRegExp &nameRegExp, const QString &new
     str2dx2.replace(nameRegExp, newName);
     str2dy .replace(nameRegExp, newName);
     str2dz .replace(nameRegExp, newName);
+}
+
+void AGeoTrd1::applyScalingFactor(double factor)
+{
+    dx1 *= factor;
+    dx2 *= factor;
+    dy  *= factor;
+    dz  *= factor;
 }
 
 bool AGeoTrd1::readFromString(QString GenerationString)
@@ -1307,6 +1349,15 @@ void AGeoTrd2::replaceGeoConstName(const QRegExp &nameRegExp, const QString &new
     str2dy1.replace(nameRegExp, newName);
     str2dy2.replace(nameRegExp, newName);
     str2dz .replace(nameRegExp, newName);
+}
+
+void AGeoTrd2::applyScalingFactor(double factor)
+{
+    dx1 *= factor;
+    dx2 *= factor;
+    dy1 *= factor;
+    dy2 *= factor;
+    dz  *= factor;
 }
 
 bool AGeoTrd2::readFromString(QString GenerationString)
@@ -1810,6 +1861,13 @@ void AGeoParaboloid::replaceGeoConstName(const QRegExp &nameRegExp, const QStrin
     str2dz .replace(nameRegExp, newName);
 }
 
+void AGeoParaboloid::applyScalingFactor(double factor)
+{
+    rlo *= factor;
+    rhi *= factor;
+    dz  *= factor;
+}
+
 bool AGeoParaboloid::readFromString(QString GenerationString)
 {
     QStringList params;
@@ -1955,6 +2013,15 @@ void AGeoCone::replaceGeoConstName(const QRegExp &nameRegExp, const QString &new
     str2rmaxL.replace(nameRegExp, newName);
     str2rminU.replace(nameRegExp, newName);
     str2rmaxU.replace(nameRegExp, newName);
+}
+
+void AGeoCone::applyScalingFactor(double factor)
+{
+    dz    *= factor;
+    rminL *= factor;
+    rmaxL *= factor;
+    rminU *= factor;
+    rmaxU *= factor;
 }
 
 bool AGeoCone::readFromString(QString GenerationString)
@@ -2106,6 +2173,13 @@ void AGeoEltu::replaceGeoConstName(const QRegExp &nameRegExp, const QString &new
     str2a .replace(nameRegExp, newName);
     str2b .replace(nameRegExp, newName);
     str2dz.replace(nameRegExp, newName);
+}
+
+void AGeoEltu::applyScalingFactor(double factor)
+{
+    a  *= factor;
+    b  *= factor;
+    dz *= factor;
 }
 
 bool AGeoEltu::readFromString(QString GenerationString)
@@ -2288,6 +2362,16 @@ void AGeoArb8::replaceGeoConstName(const QRegExp &nameRegExp, const QString &new
     {
         strVertices[i][0].replace(nameRegExp, newName);
         strVertices[i][1].replace(nameRegExp, newName);
+    }
+}
+
+void AGeoArb8::applyScalingFactor(double factor)
+{
+    dz *= factor;
+    for (QPair<double, double> & p : Vertices)
+    {
+        p.first  *= factor;
+        p.second *= factor;
     }
 }
 
@@ -2528,6 +2612,11 @@ void AGeoPcon::replaceGeoConstName(const QRegExp &nameRegExp, const QString &new
     {
         s.replaceGeoConstName(nameRegExp, newName);
     }
+}
+
+void AGeoPcon::applyScalingFactor(double factor)
+{
+    for (APolyCGsection & sec : Sections) sec.applyScalingFactor(factor);
 }
 
 bool AGeoPcon::readFromString(QString GenerationString)
@@ -2818,6 +2907,13 @@ bool APolyCGsection::operator ==(const APolyCGsection &section) const
     return false;
 }
 
+void APolyCGsection::applyScalingFactor(double factor)
+{
+    z    *= factor;
+    rmin *= factor;
+    rmax *= factor;
+}
+
 // --- GeoPolygon ---
 QString AGeoPolygon::getHelp() const
 {
@@ -2873,6 +2969,15 @@ void AGeoPolygon::replaceGeoConstName(const QRegExp &nameRegExp, const QString &
     str2rmaxL.replace(nameRegExp, newName);
     str2rminU.replace(nameRegExp, newName);
     str2rmaxU.replace(nameRegExp, newName);
+}
+
+void AGeoPolygon::applyScalingFactor(double factor)
+{
+    dz    *= factor;
+    rminL *= factor;
+    rmaxL *= factor;
+    rminU *= factor;
+    rmaxU *= factor;
 }
 
 bool AGeoPolygon::readFromString(QString GenerationString)
@@ -3039,6 +3144,11 @@ void AGeoScaledShape::replaceGeoConstName(const QRegExp & nameRegExp, const QStr
     strScaleZ.replace(nameRegExp, newName);
 
     if (BaseShape) BaseShape->replaceGeoConstName(nameRegExp, newName);
+}
+
+void AGeoScaledShape::applyScalingFactor(double factor)
+{
+    if (BaseShape) BaseShape->applyScalingFactor(factor);
 }
 
 bool AGeoScaledShape::readFromString(QString GenerationString)
@@ -3402,6 +3512,13 @@ void AGeoTorus::replaceGeoConstName(const QRegExp & nameRegExp, const QString & 
     str2Rmax.replace(nameRegExp, newName);
     strPhi1 .replace(nameRegExp, newName);
     strDphi .replace(nameRegExp, newName);
+}
+
+void AGeoTorus::applyScalingFactor(double factor)
+{
+    R    *= factor;
+    Rmin *= factor;
+    Rmax *= factor;
 }
 
 bool AGeoTorus::readFromString(QString GenerationString)

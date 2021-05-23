@@ -172,6 +172,12 @@ int AGeoObject::getMaterial() const
     return Material;
 }
 
+void AGeoObject::applyScalingFactor(double factor)
+{
+    for (int i=0; i<3; i++) Position[i] *= factor;
+    if (Shape) Shape->applyScalingFactor(factor);
+}
+
 const AGeoObject * AGeoObject::isGeoConstInUse(const QRegExp & nameRegExp) const
 {
     for (int i = 0; i < 3; i++)

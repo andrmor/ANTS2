@@ -31,7 +31,9 @@ public:
   void makeItWorld();
   bool isWorld() const;
   int  getMaterial() const;
-  void applyScalingFactor(double factor);
+
+  void scaleWorld(double factor);         // needed to convert mm to cm before saving to GDML and after loading GDML cm->mm
+  void applyScalingFactor(double factor); // does not update strProperties!
 
   const AGeoObject * isGeoConstInUse(const QRegExp & nameRegExp) const;
   void replaceGeoConstName(const QRegExp & nameRegExp, const QString & newName);

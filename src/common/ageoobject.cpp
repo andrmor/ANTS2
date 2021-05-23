@@ -178,6 +178,29 @@ void AGeoObject::applyScalingFactor(double factor)
     if (Shape) Shape->applyScalingFactor(factor);
 }
 
+void AGeoObject::scaleWorld(double factor)
+{
+    if (!isWorld()) return;
+
+    //do not want to make a recursive method: there could be huge configurations which might lead to stack overflow
+
+    QList<AGeoObject*> these, next;
+    these.reserve(1000); next .reserve(1000);
+
+    these << this;
+
+    while (!these.isEmpty())
+    {
+        for (AGeoObject * obj : these)
+        {
+            obj->applyScalingFactor(factor);
+            next << obj->HostedObjects;
+        }
+        these = next;
+        next.clear();
+    }
+}
+
 const AGeoObject * AGeoObject::isGeoConstInUse(const QRegExp & nameRegExp) const
 {
     for (int i = 0; i < 3; i++)

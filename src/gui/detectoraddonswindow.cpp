@@ -652,7 +652,11 @@ void DetectorAddOnsWindow::HighlightVolume(const QString & VolName)
     {
         TGeoVolume* vol = (TGeoVolume*)list->At(iVol);
         if (!vol) break;
-        const QString name = vol->GetName();
+
+        QString name = vol->GetName();
+        int ind = name.indexOf("_-_");   //reserved for monitors: after "_-_" comes monitor index
+        if (ind != -1) name.truncate(ind);
+
         if (set.contains(name))
         {
             vol->SetLineColor(kRed);
@@ -661,48 +665,6 @@ void DetectorAddOnsWindow::HighlightVolume(const QString & VolName)
         else vol->SetLineColor(kGray);
     }
 }
-
-/*
-void DetectorAddOnsWindow::on_pbUseScriptToAddObj_clicked()
-{
-    QList<QTreeWidgetItem*> list = twGeo->selectedItems();
-    if (list.size() == 1) ObjectScriptTarget = list.first()->text(0);
-    else ObjectScriptTarget = "World";
-
-    AGeoObject* obj = Detector->Sandwich->World->findObjectByName(ObjectScriptTarget);
-    if (!obj)
-      {
-        ObjectScriptTarget = "World";
-        obj = Detector->Sandwich->World;
-      }
-    if (obj->LastScript.isEmpty())
-      Detector->AddObjPositioningScript = Detector->Sandwich->World->LastScript;
-    else
-      Detector->AddObjPositioningScript = obj->LastScript;
-
-    MW->extractGeometryOfLocalScriptWindow();
-    delete MW->GenScriptWindow; MW->GenScriptWindow = 0;
-
-    AJavaScriptManager* jsm = new AJavaScriptManager(MW->Detector->RandGen);
-    MW->GenScriptWindow = new AScriptWindow(jsm, true, this);
-
-    QString example = "ClearAll()\nfor (var i=0; i<3; i++)\n Box('Test'+i, 10,5,2, 0, 'PrScint', (i-1)*20,i*2,-i*5,  0,0,0)";
-    QString title = ( ObjectScriptTarget.isEmpty() ? "Add objects script" : QString("Add objects script. Script will be stored in object ") + ObjectScriptTarget );
-    MW->GenScriptWindow->ConfigureForLightMode(&Detector->AddObjPositioningScript, title, example);
-
-    AddObjScriptInterface = new AGeo_SI(Detector);
-    MW->GenScriptWindow->RegisterInterfaceAsGlobal(AddObjScriptInterface);
-    MW->GenScriptWindow->RegisterCoreInterfaces();
-
-    connect(AddObjScriptInterface, &AGeo_SI::AbortScriptEvaluation, this, &DetectorAddOnsWindow::ReportScriptError);
-    connect(AddObjScriptInterface, &AGeo_SI::requestShowCheckUpWindow, MW->CheckUpWindow, &CheckUpWindowClass::showNormal);
-    connect(MW->GenScriptWindow, &AScriptWindow::success, this, &DetectorAddOnsWindow::AddObjScriptSuccess);
-
-    MW->recallGeometryOfLocalScriptWindow();
-    MW->GenScriptWindow->UpdateGui();
-    MW->GenScriptWindow->show();
-}
-*/
 
 void DetectorAddOnsWindow::AddObjScriptSuccess()
 {

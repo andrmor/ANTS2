@@ -48,7 +48,6 @@ private slots:
   void on_sbDummyType_valueChanged(int arg1);
   void on_pbLoadDummyPMs_clicked();
   void on_pbConvertAllToPMs_clicked();
-//void on_pbUseScriptToAddObj_clicked();
   void on_pbSaveTGeo_clicked();
   void on_pbLoadTGeo_clicked();
   void on_pbBackToSandwich_clicked();

@@ -14,6 +14,7 @@ define:Gamma cameras:PMT-based
 define:Neutrons:Gas
 define:Neutrons:Converter
 define:Neutrons:Anger
+define:Neutrons:FastNeutrons
 
 define:Dark matter:LUX
 
@@ -32,6 +33,9 @@ define:ANTS2 tests:Shapes
 define:Startup:Startup
 
 -------
+
+add:Neutrons:FastNeutrons:FastNeutronCube.json:RPC-based fast neutron detector
+add:Neutrons:FastNeutrons:FastNeutronTube.json:RPC-based fast neutron detector
 
 add:Proton therapy:O-PGI:opgi.json:Range monitoring using prompt gammas. Requires Geant4 interface
 add:Proton therapy:O-PGI:opgi-yap.json:Range monitoring using prompt gammas. Requires Geant4 interface. Example on using Geo Constants.

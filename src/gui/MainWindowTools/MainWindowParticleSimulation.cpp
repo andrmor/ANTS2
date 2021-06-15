@@ -12,6 +12,7 @@
 #include "ascriptparticlegenerator.h"
 #include "graphwindowclass.h"
 #include "detectorclass.h"
+#include "asandwich.h"
 #include "checkupwindowclass.h"
 #include "aglobalsettings.h"
 #include "amaterialparticlecolection.h"
@@ -119,13 +120,13 @@ void MainWindow::ShowSource(const AParticleSourceRecord * p, bool clear)
      {
       Detector->GeoManager->SetCurrentPoint(X0,Y0,Z0);
       Detector->GeoManager->DrawCurrentPoint(9);
-      clearGeoMarkers();
+      GeometryWindow->ClearGeoMarkers();
       GeoMarkerClass* marks = new GeoMarkerClass("Source", 3, 10, kBlack);
       marks->SetNextPoint(X0, Y0, Z0);
-      GeoMarkers.append(marks);
+      GeometryWindow->GeoMarkers.append(marks);
       GeoMarkerClass* marks1 = new GeoMarkerClass("Source", 4, 3, kBlack);
       marks1->SetNextPoint(X0, Y0, Z0);
-      GeoMarkers.append(marks1);
+      GeometryWindow->GeoMarkers.append(marks1);
       GeometryWindow->ShowGeometry(false);
       break;
      }
@@ -238,7 +239,9 @@ void MainWindow::ShowSource(const AParticleSourceRecord * p, bool clear)
   TVector3 K(sin(CollTheta)*sin(CollPhi), sin(CollTheta)*cos(CollPhi), cos(CollTheta)); //collimation direction
   Int_t track_index = Detector->GeoManager->AddTrack(1,22);
   TVirtualGeoTrack *track = Detector->GeoManager->GetTrack(track_index);
-  double Klength = std::max(Detector->WorldSizeXY, Detector->WorldSizeZ)*0.5; //20 before
+  const double WorldSizeXY = Detector->Sandwich->getWorldSizeXY();
+  const double WorldSizeZ  = Detector->Sandwich->getWorldSizeZ();
+  double Klength = std::max(WorldSizeXY, WorldSizeZ)*0.5; //20 before
 
   track->AddPoint(X0, Y0, Z0, 0);
   track->AddPoint(X0+K[0]*Klength, Y0+K[1]*Klength, Z0+K[2]*Klength, 0);
@@ -318,7 +321,7 @@ void MainWindow::on_pbGunTest_clicked()
 
 void MainWindow::TestParticleGun(AParticleGun* Gun, int numParticles)
 {
-    clearGeoMarkers();
+    GeometryWindow->ClearGeoMarkers();
     bool bOK = Gun->Init();
     if (!bOK)
     {
@@ -328,7 +331,9 @@ void MainWindow::TestParticleGun(AParticleGun* Gun, int numParticles)
     Gun->SetStartEvent(0);
     if (ui->cobParticleGenerationMode->currentIndex() == 1) updateFileParticleGeneratorGui();
 
-    double Length = std::max(Detector->WorldSizeXY, Detector->WorldSizeZ)*0.4;
+    const double WorldSizeXY = Detector->Sandwich->getWorldSizeXY();
+    const double WorldSizeZ  = Detector->Sandwich->getWorldSizeZ();
+    double Length = std::max(WorldSizeXY, WorldSizeZ)*0.4;
     double R[3], K[3];
     QVector<AParticleRecord*> GP;
     int numTracks = 0;
@@ -355,7 +360,7 @@ void MainWindow::TestParticleGun(AParticleGun* Gun, int numParticles)
 
                 GeoMarkerClass* marks = new GeoMarkerClass("t", 7, 1, SimulationManager->TrackBuildOptions.getParticleColor(p->Id));
                 marks->SetNextPoint(R[0], R[1], R[2]);
-                GeoMarkers.append(marks);
+                GeometryWindow->GeoMarkers.append(marks);
 
                 ++numTracks;
                 if (numTracks > 1000) break;
@@ -425,8 +430,26 @@ void MainWindow::on_pbAddSource_clicked()
     s->GunParticles << new GunParticleStruct();
     SimulationManager->Settings.partSimSet.SourceGenSettings.append(s);
 
-    on_pbUpdateSourcesIndication_clicked();
+    on_pbUpdateSimConfig_clicked();
+    //on_pbUpdateSourcesIndication_clicked();
     ui->lwDefinedParticleSources->setCurrentRow( SimulationManager->Settings.partSimSet.SourceGenSettings.getNumSources() - 1 );
+}
+
+void MainWindow::on_pbAddSource_customContextMenuRequested(const QPoint &)
+{
+    int index = ui->lwDefinedParticleSources->currentRow();
+    if (index == -1)
+    {
+        message("Select a source to clone", this);
+        return;
+    }
+
+    bool ok = SimulationManager->Settings.partSimSet.SourceGenSettings.clone(index);
+    if (!ok) return;
+
+    on_pbUpdateSimConfig_clicked();
+    //on_pbUpdateSourcesIndication_clicked();
+    ui->lwDefinedParticleSources->setCurrentRow(index+1);
 }
 
 void MainWindow::on_pbUpdateSourcesIndication_clicked()
@@ -476,7 +499,7 @@ void MainWindow::on_pbUpdateSourcesIndication_clicked()
 
             double totAct = SourceGenSettings.getTotalActivity();
             double per = ( totAct == 0 ? 0 : 100.0 * pr->Activity / totAct );
-            QString t = QString("%1%").arg(per, 3, 'g', 3);
+            QString t = (per == 0 ? "-Off-" : QString("%1%").arg(per, 3, 'g', 3) );
             lab = new QLabel(t);
             lab->setMinimumWidth(45);
         l->addWidget(lab);
@@ -505,7 +528,7 @@ void MainWindow::on_pbGunShowSource_toggled(bool checked)
     }
     else
     {
-        clearGeoMarkers();
+        GeometryWindow->ClearGeoMarkers();
         Detector->GeoManager->ClearTracks();
         GeometryWindow->ShowGeometry();
     }
@@ -633,17 +656,25 @@ void MainWindow::on_pbEditParticleSource_clicked()
         return;
     }
 
-    AParticleSourceDialog d(*this, SourceGenSettings.getSourceRecord(isource));
-    int res = d.exec();
-    if (res == QDialog::Rejected) return;
+    ParticleSourceDialog = new AParticleSourceDialog(*this, SourceGenSettings.getSourceRecord(isource));
 
-    SourceGenSettings.replace(isource, d.getResult());
+    int res = ParticleSourceDialog->exec(); // if detector is rebuild (this->readSimSettingsFromJson() is triggered), ParticleSourceDialog is signal-blocked and rejected
+    if (res == QDialog::Rejected)
+    {
+        delete ParticleSourceDialog; ParticleSourceDialog = nullptr;
+        return;
+    }
+
+    SourceGenSettings.replace(isource, ParticleSourceDialog->getResult());
+    delete ParticleSourceDialog; ParticleSourceDialog = nullptr;
 
     AParticleSourceRecord * ps = SourceGenSettings.getSourceRecord(isource);
     ps->updateLimitedToMat(*Detector->MpCollection);
 
+    on_pbUpdateSimConfig_clicked();
+
     if (Detector->isGDMLempty())
-    { //check world size
+    {
         double XYm = 0;
         double  Zm = 0;
         for (int isource = 0; isource < numSources; isource++)
@@ -657,23 +688,23 @@ void MainWindow::on_pbEditParticleSource_clicked()
             UpdateMax(Zm,  fabs(ps->Z0)+msize);
         }
 
-        double currXYm = Detector->WorldSizeXY;
-        double  currZm = Detector->WorldSizeZ;
-        if (XYm>currXYm || Zm>currZm)
-          {
+        double currXYm = Detector->Sandwich->getWorldSizeXY();
+        double  currZm = Detector->Sandwich->getWorldSizeZ();
+        if (XYm > currXYm || Zm > currZm)
+        {
             //need to override
-            Detector->fWorldSizeFixed = true;
-            Detector->WorldSizeXY = std::max(XYm,currXYm);
-            Detector->WorldSizeZ =  std::max(Zm,currZm);
-            MainWindow::ReconstructDetector();
-          }
+            Detector->Sandwich->setWorldSizeFixed(true);
+            Detector->Sandwich->setWorldSizeXY( std::max(1.05*XYm, currXYm) );
+            Detector->Sandwich->setWorldSizeZ ( std::max(1.05*Zm,  currZm) );
+            ReconstructDetector();
+        }
     }
 
-    on_pbUpdateSimConfig_clicked();
     if (ui->pbGunShowSource->isChecked()) ShowParticleSource_noFocus();
 }
 
 #include "ageoobject.h"
+#include "ageotype.h"
 void containsMonsGrids(const AGeoObject * obj, bool & bGrid, bool & bMon)
 {
     if (obj->isDisabled()) return;
@@ -709,7 +740,7 @@ void MainWindow::on_pbParticleSourcesSimulate_clicked()
     {
         QString Errors, Warnings, txt;
 
-        if (G4SimSet.SensitiveVolumes.isEmpty())
+        if ( G4SimSet.SensitiveVolumes.isEmpty() && (ui->cbGunDoS1->isChecked() || ui->cbGunDoS2->isChecked()) )
             txt += "Sensitive volumes are not set!\n"
                        "Geant4 simulation will not collect any deposition information\n"
                        "There will be no photon generation in Ants2\n\n";

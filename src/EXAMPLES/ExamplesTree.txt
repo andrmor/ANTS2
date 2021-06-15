@@ -14,6 +14,7 @@ define:Gamma cameras:PMT-based
 define:Neutrons:Gas
 define:Neutrons:Converter
 define:Neutrons:Anger
+define:Neutrons:FastNeutrons
 
 define:Dark matter:LUX
 
@@ -27,12 +28,17 @@ define:ANTS2 tests:Optical grids
 define:ANTS2 tests:WavelengthShifters
 define:ANTS2 tests:NCrystal
 define:ANTS2 tests:SecScintDiffusion
+define:ANTS2 tests:Shapes
 
 define:Startup:Startup
 
 -------
 
+add:Neutrons:FastNeutrons:FastNeutronCube.json:RPC-based fast neutron detector
+add:Neutrons:FastNeutrons:FastNeutronTube.json:RPC-based fast neutron detector
+
 add:Proton therapy:O-PGI:opgi.json:Range monitoring using prompt gammas. Requires Geant4 interface
+add:Proton therapy:O-PGI:opgi-yap.json:Range monitoring using prompt gammas. Requires Geant4 interface. Example on using Geo Constants.
 
 add:ANTS2 tests:Fresnel test:FresnelTester.json:Wherever the point emission inside crysal is, the photon flux from all sides to outside (air) should be the same. Each side of the crystal is covered with a PMT (air).
 add:ANTS2 tests:Scatter model:naus.json:Detector example for fitting of scattering model parameters
@@ -42,6 +48,7 @@ add:ANTS2 tests:WavelengthShifters:SurfaceWavelengthShifter.json:Detector with a
 add:ANTS2 tests:WavelengthShifters:WavelengthShiftingFibers.json:A detector concept based on Wavelength Shifting Fibers. Simplest possible way to configure - just two wavelengths.
 add:ANTS2 tests:NCrystal:NCrystal_AlPlate.json:Al plate and two monitors. ANTS2 has to be compiled with NCrystal support!
 add:ANTS2 tests:SecScintDiffusion:SecScintDiffusion.json:Secondary scintillation with activated electron diffusion
+add:ANTS2 tests:Shapes:ShapeShowcase.json:ROOT shapes and geo constants
 
 add:Gamma cameras:SiPM-based:NewGenSiPM64.json:30x30x2 mm3 LYSO crystal with 8 x 8 SiPMs; NaturalLYSO, Co-57 and Na-22 sources
 add:Gamma cameras:SiPM-based:SiPM_64cross.json:30x30x5 mm3 LYSO crystal with 4 x 16-elements SensL SiPMs, ceramic holders; NaturalLYSO, Co-57 and Na-22 sources
@@ -53,6 +60,7 @@ add:Gamma cameras:PMT-based:Med37.json:Medical gamma camera GE MaxiCamera 400T; 
 add:Neutrons:Gas:AngerGSPC19.json:GSPC19 detector
 add:Neutrons:Converter:B10RPC-1hd.json:Boron-10 hybrid double-gap RPC
 add:Neutrons:Converter:B10RPC-10hd.json:Boron-10 hybrid double-gap RPC with 20 converter layers (10 double gaps)
+add:Neutrons:Converter:FastNeutronDetector.json:10B-RPC based detector for fast neutrons. Requires configured interface to Geant4!
 add:Neutrons:Anger:dSiPMcam.json:Prototype of a neutron Anger camera with GS20 scintillator and digital SiPMs
 
 add:Dark matter:LUX:LUX.json:A model of LUX - a dual-phase detector for dark matter search 

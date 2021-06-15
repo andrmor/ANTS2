@@ -26,12 +26,17 @@ public slots:
   void           SetAbortIfAlreadyExists(bool flag) {bAbortIfExists = flag;}
 
   void           NewHist(const QString& HistName, int bins, double start, double stop);
-  void           NewHist2D(const QString &HistName, int binsX, double startX, double stopX, int binsY, double startY, double stopY);
+  void           NewHist2D(const QString &HistName, int binsX, double startX, double stopX, int binsY, double startY, double stopY); //deprecate!
+  void           NewHist(const QString& HistName, int binsX, double startX, double stopX, int binsY, double startY, double stopY);
+  void           NewHist(const QString &HistName, int binsX, double startX, double stopX,
+                                                  int binsY, double startY, double stopY,
+                                                  int binsZ, double startZ, double stopZ);
 
   void           SetXCustomLabels(const QString &HistName, QVariantList Labels);
 
   void           SetTitle(const QString& HistName, const QString& Title);
   void           SetTitles(const QString& HistName, QString X_Title, QString Y_Title, QString Z_Title = "");
+  void           SetNumberOfEntries(const QString& HistName, int numEntries);
   void           SetLineProperties(const QString& HistName, int LineColor, int LineStyle, int LineWidth);
   void           SetMarkerProperties(const QString& HistName, int MarkerColor, int MarkerStyle, double MarkerSize);
   void           SetFillColor(const QString& HistName, int Color);
@@ -43,7 +48,9 @@ public slots:
   void           SetYLabelProperties(const QString& HistName, double size, double offset);
 
   void           Fill(const QString& HistName, double val, double weight);
-  void           Fill2D(const QString& HistName, double x, double y, double weight);
+  void           Fill2D(const QString& HistName, double x, double y, double weight);  // to deprecate
+  void           Fill(const QString& HistName, double x, double y, double weight);
+  void           Fill(const QString& HistName, double x, double y, double z, double weight);
 
   void           FillArr(const QString& HistName, const QVariant XY_Array);
   void           FillArr(const QString& HistName, const QVariantList X_Array, const QVariantList Y_Array);
@@ -53,9 +60,14 @@ public slots:
 
   void           Draw(const QString& HistName, const QString options = "");
 
+  int            GetNumberOfEntries(const QString& HistName);
   QVariantList   GetContent(const QString& HistName);
   double         GetUnderflowBin(const QString& HistName);
   double         GetOverflowBin(const QString& HistName);
+  double         GetIntegral(const QString& HistName, bool MultiplyByBinWidth = false);
+  double         GetMaximum(const QString& HistName);
+  double         GetRandom(const QString& HistName);
+  QVariantList   GetRandomMultiple(const QString& HistName, int numRandoms);
 
   void           Smooth(const QString& HistName, int times);
   void           ApplyMedianFilter(const QString& HistName, int span);
@@ -64,10 +76,6 @@ public slots:
   const QVariant FitGaussWithInit(const QString& HistName, const QVariant InitialParValues, const QString options = "");
   const QVariant FindPeaks(const QString& HistName, double sigma, double threshold);
 
-  int            GetNumberOfEntries(const QString& HistName);
-  void           SetNumberOfEntries(const QString& HistName, int numEntries);
-  double         GetIntegral(const QString& HistName, bool MultiplyByBinWidth = false);
-  double         GetMaximum(const QString& HistName);
   void           Scale(const QString& HistName, double ScaleIntegralTo, bool DividedByBinWidth = false);
 
   void           Save(const QString& HistName, const QString &fileName);
@@ -104,6 +112,7 @@ public slots:
 
   void NewGraph(const QString& GraphName);
   void NewGraphErrors(const QString& GraphName);
+  void NewGraph2D(const QString& GraphName);
 
   void SetMarkerProperties(QString GraphName, int MarkerColor, int MarkerStyle, double MarkerSize);
   void SetLineProperties(QString GraphName, int LineColor, int LineStyle, int LineWidth);
@@ -116,6 +125,8 @@ public slots:
   void AddPoints(QString GraphName, QVariantList xArray, QVariantList yArray, QVariantList yErrArray);
   void AddPoints(QString GraphName, QVariantList xArray, QVariantList yArray, QVariantList xErrArray, QVariantList yErrArray);
   void AddPoints(QString GraphName, QVariantList xyArray);
+
+  void AddPoint2D(QString GraphName, double x, double y, double z);
 
   void SetYRange(const QString& GraphName, double min, double max);
   void SetMinimum(const QString& GraphName, double min);

@@ -163,7 +163,7 @@ void AGlobalSettings::writeToJson(QJsonObject &json) const
     js["DefaultWebSocketIP"] = DefaultWebSocketIP;
     js["RootServerPort"] = RootServerPort;
     js["RunRootServerOnStart"] = fRunRootServerOnStart;
-    js["ExternalJSROOT"] = ExternalJSROOT;
+    //js["ExternalJSROOT"] = ExternalJSROOT;  // temporary!
 
     js["RemoteServers"] = RemoteServers;
 
@@ -236,7 +236,7 @@ void AGlobalSettings::readFromJson(const QJsonObject &json)
 
     QString tmp;
     parseJson(js, "ExternalJSROOT", tmp);
-    if (!tmp.isEmpty()) ExternalJSROOT = tmp;
+    //if (!tmp.isEmpty()) ExternalJSROOT = tmp;  //temporary!
 }
 
 void AGlobalSettings::saveANTSconfiguration() const

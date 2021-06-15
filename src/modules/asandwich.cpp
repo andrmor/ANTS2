@@ -1,6 +1,8 @@
 #include "asandwich.h"
 #include "aslab.h"
 #include "ageoobject.h"
+#include "ageoshape.h"
+#include "ageotype.h"
 #include "amaterialparticlecolection.h"
 #include "ajsontools.h"
 #include "agridelementrecord.h"
@@ -12,34 +14,63 @@
 
 ASandwich::ASandwich()
 {  
-  SandwichState = CommonShapeSize;
-  ZOriginType = 0;
-  DefaultXY = new ASlabXYModel();
+    DefaultXY = new ASlabXYModel();
 
-  World = new AGeoObject("World");
-  World->Material = 0;
-  World->makeItWorld();
-  //qDebug() << "--World object in GeoTree created";
+    World = new AGeoObject("World");
+    World->Material = 0;
+    World->makeItWorld();
+
+    Prototypes = new AGeoObject("_#_PrototypeContainer_#_");
+    delete Prototypes->ObjectType; Prototypes->ObjectType = new ATypePrototypeCollectionObject();
+    Prototypes->migrateTo(World);
 }
 
 ASandwich::~ASandwich()
 {
-    clearModel();
-    clearGridRecords();
-
     clearWorld();
+    delete DefaultXY;
     delete World;
 }
 
 void ASandwich::clearWorld()
 {    
-    //deletes all but World object
+    //deletes all but World object. Keep Prototypes object - it should have the same pointer!
+    World->HostedObjects.removeOne(Prototypes);
+
     for (int i=0; i<World->HostedObjects.size(); i++)
         World->HostedObjects[i]->clearAll();
     World->HostedObjects.clear();
 
+    Prototypes->clearContent();
+    World->HostedObjects << Prototypes;
+
     clearGridRecords();
     clearMonitorRecords();
+}
+
+void ASandwich::clearGridRecords()
+{
+    for (int i=0; i<GridRecords.size(); i++) delete GridRecords[i];
+    GridRecords.clear();
+}
+
+void ASandwich::clearMonitorRecords()
+{
+    MonitorsRecords.clear(); //do not delete - it contains pointers to world tree objects
+    MonitorIdNames.clear();
+    MonitorNodes.clear();
+}
+
+bool ASandwich::canBeDeleted(AGeoObject * obj) const
+{
+    if (obj == World) return false;
+    if (obj == Prototypes) return false;
+
+    if (obj->isInUseByComposite()) return false;
+    if (obj->ObjectType->isPrototype() && World->isPrototypeInUseRecursive(obj->Name, nullptr)) return false;
+    if (obj->ObjectType->isSlab() && obj->getSlabModel()->fCenter) return false;
+
+    return true;
 }
 
 void ASandwich::appendSlab(ASlabModel *slab)
@@ -66,7 +97,7 @@ void ASandwich::insertSlab(int index, ASlabModel *slab)
       World->HostedObjects.append(slabObj);
 }
 
-int ASandwich::countSlabs()
+int ASandwich::countSlabs() const
 {
     int counter = 0;
     for (int i=0; i<World->HostedObjects.size(); i++)
@@ -113,29 +144,21 @@ AGeoObject *ASandwich::getLowerLightguide()
 AGeoObject* ASandwich::addLightguide(bool upper)
 {
     //qDebug() << "Add lightguide triggered. Upper?"<<upper;
-    AGeoObject* obj = 0;
-    AGeoObject* copyFromObj = (upper ?  World->getFirstSlab() : World->getLastSlab());
+    AGeoObject * obj = nullptr;
+    AGeoObject * copyFromObj = (upper ?  World->getFirstSlab() : World->getLastSlab());
     //qDebug() << "Copy from object:" << copyFromObj;
     if (copyFromObj)
     {
-        //copying properties
         obj = new AGeoObject(copyFromObj);
-        //qDebug() << "--object properties copied from"<<copyFromObj->Name;
-        //converting to slab
-        delete obj->ObjectType;
-        obj->ObjectType = new ATypeSlabObject();
+        delete obj->ObjectType; obj->ObjectType = new ATypeSlabObject();
         *obj->getSlabModel() = *copyFromObj->getSlabModel();
         obj->getSlabModel()->fCenter = false;
-        //qDebug() << "--slab properties copied";
     }
     else
     {
-        //creating new
-        //qDebug() << "Creating new slab";
         obj = new AGeoObject();
-        //converting to slab
-        delete obj->ObjectType;
-        obj->ObjectType = new ATypeSlabObject();
+        delete obj->ObjectType; obj->ObjectType = new ATypeSlabObject();
+        obj->getSlabModel()->fCenter = true;
     }
     //qDebug() << "Base slab crated:" << obj->Name << obj->ObjectType->isSlab();
     //new name
@@ -228,6 +251,39 @@ void ASandwich::convertObjToComposite(AGeoObject *obj)
     obj->Shape = new AGeoComposite(sl, str);
 }
 
+QString ASandwich::convertToNewPrototype(QVector<AGeoObject*> members)
+{
+    QString errStr;
+
+    for (AGeoObject * obj : members)
+    {
+        bool ok = obj->isPossiblePrototype(&errStr);
+        if (!ok) return errStr;
+    }
+
+    int index = 0;
+    QString name;
+    do name = QString("Prototype_%1").arg(index++);
+    while (World->isNameExists(name));
+
+    AGeoObject * proto = new AGeoObject(name);
+    delete proto->ObjectType; proto->ObjectType = new ATypePrototypeObject();
+    proto->migrateTo(Prototypes);
+
+    for (AGeoObject * obj : members)
+        obj->migrateTo(proto);
+
+    return "";
+}
+
+bool ASandwich::isValidPrototypeName(const QString & ProtoName) const
+{
+    if (!Prototypes) return false;
+    for (AGeoObject * proto : Prototypes->HostedObjects)
+        if (ProtoName == proto->Name) return true;
+    return false;
+}
+
 void ASandwich::convertObjToGrid(AGeoObject *obj)
 {
   delete obj->ObjectType;
@@ -265,7 +321,7 @@ void ASandwich::shapeGrid(AGeoObject *obj, int shape, double p0, double p1, doub
     }
     GEobj->HostedObjects.clear();
 
-    obj->Shape->setHeight(0.5*p2 + 0.001);
+    obj->Shape->  setHeight(0.5*p2 + 0.001);
     GE->shape = shape;
     GE->dz = 0.5*p2 + 0.001;
     GE->size1 = 0.5*p0;
@@ -463,254 +519,497 @@ void ASandwich::shapeGrid(AGeoObject *obj, int shape, double p0, double p1, doub
     GEobj->updateGridElementShape();
 }
 
-void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TGeoManager* GeoManager,
-                                         AMaterialParticleCollection* MaterialCollection,
-                                         QVector<APMandDummy> *PMsAndDumPMs,
-                                         int forcedNodeNumber)
+void rotate(TVector3 & v, double dPhi, double dTheta, double dPsi)
 {
-    //qDebug() << "Processing TGeo creation for object"<<obj->Name<<" which must be in"<<parent->GetName();
+    v.RotateZ(TMath::Pi() / 180.0 * dPhi);
+    TVector3 X(1.0, 0, 0);
+    X.RotateZ(TMath::Pi() / 180.0 * dPhi);
+    //v.RotateX( TMath::Pi()/180.0* Theta);
+    v.Rotate(TMath::Pi() / 180.0 * dTheta, X);
+    TVector3 Z(0, 0, 1.0);
+    Z.Rotate(TMath::Pi() / 180.0 * dTheta, X);
+    // v.RotateZ( TMath::Pi()/180.0* Psi );
+    v.Rotate(TMath::Pi() / 180.0 * dPsi, Z);
+}
+
+void ASandwich::expandPrototypeInstances()
+{
+    if (Prototypes->HostedObjects.isEmpty()) return;
+
+    QVector<AGeoObject*> Instances;
+    World->findAllInstancesRecursive(Instances);
+
+    for (AGeoObject * instanceObj : Instances)
+    {
+        instanceObj->clearContent();
+
+        ATypeInstanceObject * insType = dynamic_cast<ATypeInstanceObject*>(instanceObj->ObjectType);
+        if (!insType)
+        {
+            qWarning() << "Instance" << instanceObj->Name << "has a wrong type!";
+            return;
+        }
+
+        AGeoObject * prototypeObj = Prototypes->findObjectByName(insType->PrototypeName);
+        if (!prototypeObj)
+        {
+            qWarning() << "Prototype" << insType->PrototypeName << "not found for instance" << instanceObj->Name;
+            return;
+        }
+
+        for (AGeoObject * obj : prototypeObj->HostedObjects)
+        {
+            AGeoObject * clone = obj->makeCloneForInstance(instanceObj->Name);
+            clone->lockRecursively();
+            instanceObj->addObjectLast(clone);
+            clone->fActive = instanceObj->fActive;
+        }
+        instanceObj->fExpanded = false;
+    }
+}
+
+bool ASandwich::processCompositeObject(AGeoObject * obj)
+{
+    AGeoObject * logicals = obj->getContainerWithLogical();
+    if (!logicals)
+    {
+        qWarning()<< "Composite object: Not found container with logical objects!";
+        return false;
+    }
+    AGeoComposite * cs = dynamic_cast<AGeoComposite*>(obj->Shape);
+    if (!cs)
+    {
+        AGeoScaledShape * scaled = dynamic_cast<AGeoScaledShape*>(obj->Shape);
+        if (!scaled)
+        {
+            qWarning()<< "Composite: Shape object is not composite nor scaled composite!!";
+            return false;
+        }
+    }
+
+    obj->refreshShapeCompositeMembers();
+
+    for (AGeoObject * lobj : logicals->HostedObjects)
+    {
+        //registering building blocks
+        const QString & name = lobj->Name;
+        lobj->Shape->createGeoShape(name);
+        const QString RotName = "_r" + name;
+        TGeoRotation * lRot = new TGeoRotation(RotName.toLatin1().data(), lobj->Orientation[0], lobj->Orientation[1], lobj->Orientation[2]);
+        lRot->RegisterYourself();
+        const QString TransName = "_m" + name;
+        TGeoCombiTrans * lTrans = new TGeoCombiTrans(TransName.toLatin1().data(), lobj->Position[0], lobj->Position[1], lobj->Position[2], lRot);
+        lTrans->RegisterYourself();
+    }
+
+    return true;
+}
+
+void ASandwich::positionLightguide(AGeoObject * obj, TGeoVolume * vol, TGeoCombiTrans * lTrans)
+{
+    const int ul = ( obj->ObjectType->isUpperLightguide() ? 0 : 1);
+
+    for (int ipm = 0; ipm < PMsAndDumPMs->size(); ipm++)
+        if (ul == PMsAndDumPMs->at(ipm).UpperLower)
+        {
+            Double_t master[3]; //PM positions are in global coordinates! - there could be rotation of the slab
+            master[0] = PMsAndDumPMs->at(ipm).X;
+            master[1] = PMsAndDumPMs->at(ipm).Y;
+            master[2] = 0;
+            Double_t local[3];
+            lTrans->MasterToLocal(master, local);
+
+            for (int i = 0; i < obj->HostedObjects.size(); i++)
+            {
+                AGeoObject * GO = obj->HostedObjects[i];
+                if ( !GO->ObjectType->isHandlingSet() )
+                {
+                    double tmpX = GO->Position[0];
+                    double tmpY = GO->Position[1];
+                    GO->Position[0] += local[0];
+                    GO->Position[1] += local[1];
+                    addTGeoVolumeRecursively(GO, vol);
+                    GO->Position[0] = tmpX; //recovering original positions
+                    GO->Position[1] = tmpY;
+                }
+                else
+                {
+                    for (int i=0; i<GO->HostedObjects.size(); i++)
+                    {
+                        AGeoObject* GObis = GO->HostedObjects[i];
+                        double tmpX = GObis->Position[0];
+                        double tmpY = GObis->Position[1];
+                        GObis->Position[0] += local[0];
+                        GObis->Position[1] += local[1];
+                        addTGeoVolumeRecursively(GObis, vol);
+                        GObis->Position[0] = tmpX; //recovering original positions
+                        GObis->Position[1] = tmpY;
+                    }
+                }
+            }
+        }
+}
+
+void ASandwich::populateGeoManager(TGeoVolume * top, TGeoManager * geoManager, const AMaterialParticleCollection * materialCollection, const QVector<APMandDummy> * vPMsAndDumPMs)
+{
+    GeoManager = geoManager;
+    MaterialCollection = materialCollection;
+    PMsAndDumPMs = vPMsAndDumPMs;
+
+    clearGridRecords();
+    clearMonitorRecords();
+
+    expandPrototypeInstances();
+
+    addTGeoVolumeRecursively(World, top);
+}
+
+void ASandwich::addMonitorNode(AGeoObject * obj, TGeoVolume * vol, TGeoVolume * parent, TGeoCombiTrans * lTrans)
+{
+    const int MonitorCounter = MonitorsRecords.size();
+
+    TString fixedName = vol->GetName();
+    fixedName += "_-_";
+    fixedName += MonitorCounter;
+    vol->SetName(fixedName);
+
+    MonitorsRecords.append(obj);
+    (static_cast<ATypeMonitorObject*>(obj->ObjectType))->index = MonitorCounter;
+    parent->AddNode(vol, MonitorCounter, lTrans);
+
+    MonitorIdNames.append(QString("%1_%2").arg(vol->GetName()).arg(MonitorCounter));
+
+    TObjArray * nList = parent->GetNodes();
+    const int numNodes = nList->GetEntries();
+    TGeoNode * node = (TGeoNode*)nList->At(numNodes-1);
+    MonitorNodes.append(node);
+}
+
+void ASandwich::addTGeoVolumeRecursively(AGeoObject * obj, TGeoVolume * parent, int forcedNodeNumber)
+{
     if (!obj->fActive) return;
 
-    TGeoVolume* vol = 0;
-    TGeoCombiTrans *lTrans = 0;
+    TGeoVolume     * vol    = nullptr;
+    TGeoCombiTrans * lTrans = nullptr;
 
-    if (obj->ObjectType->isWorld())
-    {   // just a shortcut, to resuse the cycle by HostedVolumes below
-        vol = parent;
-    }
-    else if (obj->isCompositeMemeber() || obj->ObjectType->isCompositeContainer())
-    {
-        return; //do nothing with logicals, they also do not host anything real
-    }
-    else if (obj->ObjectType->isHandlingSet() || obj->ObjectType->isArray())
-    {   // group objects are pure virtual, just pass the volume of the parent
-        vol = parent;
-    }
+    if      (obj->ObjectType->isWorld())
+        vol = parent; // resuse the cycle by HostedVolumes below
+    else if (obj->ObjectType->isPrototypes() || obj->isCompositeMemeber() || obj->ObjectType->isCompositeContainer())
+        return;       // logicals do not host anything to be added to the geometry
+    else if (obj->ObjectType->isHandlingSet() || obj->ObjectType->isHandlingArray() || obj->ObjectType->isInstance())
+        vol = parent; // group objects are pure virtual, pass the volume of the parent
     else
     {
         int iMat = obj->Material;
         if (obj->ObjectType->isMonitor())
-          {
-            if (obj->Container)
-              iMat = obj->Container->getMaterial();
-            else qWarning() << "Monitor without container detected!";
-            //qDebug() << "Monitor:"<<obj->Name<<"mat:"<<iMat;
-          }
-        TGeoMedium* med = (*MaterialCollection)[iMat]->GeoMed;
+        {
+            if (obj->Container) iMat = obj->Container->getMaterial();
+            else
+            {
+                qWarning() << "Error: Monitor without container" << obj->Name;
+                return;
+            }
+        }
 
-        //creating volume
         if (obj->ObjectType->isComposite())
         {
-            //qDebug() << "Composite:"<<obj->Name;
-            AGeoObject* logicals = obj->getContainerWithLogical();
-            if (!logicals)
-            {
-                qWarning()<< "Composite object: Not found container with logical objects!";
-                return;
-            }
-            AGeoComposite* cs = dynamic_cast<AGeoComposite*>(obj->Shape);
-            if (!cs)
-            {
-                qWarning()<< "Composite: Shape object is not composite!!";
-                return;
-            }
-            obj->refreshShapeCompositeMembers();
+            bool ok = processCompositeObject(obj);
+            if (!ok) return;
+        }
 
-            for (int i=0; i<logicals->HostedObjects.size(); i++)
-            {
-                //registering building blocks
-                QString name = logicals->HostedObjects[i]->Name;
-                logicals->HostedObjects[i]->Shape->createGeoShape(name);
-                QString RotName = "_r"+name;
-                TGeoRotation *lRot = new TGeoRotation(RotName.toLatin1().data(),
-                                                      logicals->HostedObjects.at(i)->Orientation[0],
-                        logicals->HostedObjects.at(i)->Orientation[1],
-                        logicals->HostedObjects.at(i)->Orientation[2]);
-                lRot->RegisterYourself();
-                QString TransName = "_m"+name;
-                TGeoCombiTrans *lTrans = new TGeoCombiTrans(TransName.toLatin1().data(),
-                                                            logicals->HostedObjects.at(i)->Position[0],
-                        logicals->HostedObjects.at(i)->Position[1],
-                        logicals->HostedObjects.at(i)->Position[2],
-                        lRot);
-                lTrans->RegisterYourself();
-                //qDebug() << "  member name:"<<name<<"  trans name:"<<TransName;
-            }           
+        vol = new TGeoVolume(obj->Name.toLocal8Bit().data(), obj->Shape->createGeoShape(), (*MaterialCollection)[iMat]->GeoMed);
 
-
-            vol = new TGeoVolume(obj->Name.toLatin1().data(), obj->Shape->createGeoShape(), med);
+        TGeoRotation * lRot = nullptr;
+        if (obj->TrueRot)
+        {
+            //parent is a virtual object
+            lRot = obj->TrueRot;
+            lTrans = new TGeoCombiTrans("lTrans", obj->TruePos[0], obj->TruePos[1], obj->TruePos[2], lRot);
         }
         else
         {
-            //qDebug() << obj->Name << obj->Shape->getGenerationString();
-            vol = new TGeoVolume(obj->Name.toLocal8Bit().data(), obj->Shape->createGeoShape(), med);
+            //parent is a physical object
+            lRot = new TGeoRotation("lRot", obj->Orientation[0], obj->Orientation[1], obj->Orientation[2]);
+            lRot->RegisterYourself();
+            lTrans = new TGeoCombiTrans("lTrans", obj->Position[0], obj->Position[1], obj->Position[2], lRot);
         }
 
-        //creating positioning/rotation transformation
-        TGeoRotation *lRot = new TGeoRotation("lRot", obj->Orientation[0], obj->Orientation[1], obj->Orientation[2]);
-        lRot->RegisterYourself();
-        lTrans = new TGeoCombiTrans("lTrans", obj->Position[0], obj->Position[1], obj->Position[2], lRot);
-
-        //positioning node
+        // Positioning this object if it is physical
         if (obj->ObjectType->isGrid())
         {
-            int GridCounter = GridRecords.size();
             GridRecords.append(obj->createGridRecord());
-            parent->AddNode(vol, GridCounter, lTrans);            
+            parent->AddNode(vol, GridRecords.size() - 1, lTrans);
         }
         else if (obj->ObjectType->isMonitor())
-        {
-            int MonitorCounter = MonitorsRecords.size();
-
-            TString fixedName = vol->GetName();
-            fixedName += "_-_";
-            fixedName += MonitorCounter;
-            vol->SetName(fixedName);
-
-            MonitorsRecords.append(obj);
-            (static_cast<ATypeMonitorObject*>(obj->ObjectType))->index = MonitorCounter;
-            parent->AddNode(vol, MonitorCounter, lTrans);
-
-            MonitorIdNames.append(QString("%1_%2").arg(vol->GetName()).arg(MonitorCounter));
-
-            TObjArray * nList = parent->GetNodes();
-            int numNodes = nList->GetEntries();
-            TGeoNode * node = (TGeoNode*)nList->At(numNodes-1);
-            //qDebug() << nList << numNodes;
-            //qDebug() << "      " <<node;//->GetUniqueID();
-            MonitorNodes.append(node);
-        }
-        else parent->AddNode(vol, forcedNodeNumber, lTrans);
-    }    
-
-    //positioning of hosted items is different for lightguides, arrays and normal items!
-    if (obj->ObjectType->isLightguide())
-    {
-        int ul = ( obj->ObjectType->isUpperLightguide() ? 0 : 1);
-        for (int ipm=0; ipm<PMsAndDumPMs->size(); ipm++)
-          if (PMsAndDumPMs->at(ipm).UpperLower == ul)
-            {
-              Double_t master[3]; //PM positions are in global coordinates! - there could be rotation of the slab
-              master[0] = PMsAndDumPMs->at(ipm).X;
-              master[1] = PMsAndDumPMs->at(ipm).Y;
-              master[2] = 0;
-              Double_t local[3];
-              lTrans->MasterToLocal(master, local);
-
-              for (int i=0; i<obj->HostedObjects.size(); i++)
-                {
-                  AGeoObject* GO = obj->HostedObjects[i];
-                  if ( !GO->ObjectType->isHandlingSet() )
-                    {
-                      double tmpX = GO->Position[0];
-                      double tmpY = GO->Position[1];
-                      GO->Position[0] += local[0];
-                      GO->Position[1] += local[1];
-                      addTGeoVolumeRecursively(GO, vol, GeoManager, MaterialCollection, PMsAndDumPMs);
-                      GO->Position[0] = tmpX; //recovering original positions
-                      GO->Position[1] = tmpY;
-                    }
-                  else
-                    {
-                      for (int i=0; i<GO->HostedObjects.size(); i++)
-                        {
-                          AGeoObject* GObis = GO->HostedObjects[i];
-                          double tmpX = GObis->Position[0];
-                          double tmpY = GObis->Position[1];
-                          GObis->Position[0] += local[0];
-                          GObis->Position[1] += local[1];
-                          addTGeoVolumeRecursively(GObis, vol, GeoManager, MaterialCollection, PMsAndDumPMs);
-                          GObis->Position[0] = tmpX; //recovering original positions
-                          GObis->Position[1] = tmpY;
-                        }
-                    }
-                }
-            }
-        return;
+            addMonitorNode(obj, vol, parent, lTrans);
+        else
+            parent->AddNode(vol, forcedNodeNumber, lTrans);
     }
-    if (obj->ObjectType->isArray())
-      {
-        ATypeArrayObject* array = static_cast<ATypeArrayObject*>(obj->ObjectType);
 
-        for (int i=0; i<obj->HostedObjects.size(); i++)
-          {
-            AGeoObject* el = obj->HostedObjects[i];
-            int iCounter = 0;
-            for (int ix = 0; ix<array->numX; ix++)
-             for (int iy = 0; iy<array->numY; iy++)
-               for (int iz = 0; iz<array->numZ; iz++)
-                {
-                  if ( !el->ObjectType->isHandlingSet() )
-                      positionArrayElement(ix, iy, iz, el, obj, vol, GeoManager, MaterialCollection, PMsAndDumPMs, iCounter);
-                  else
-                      for (int i=0; i<el->HostedObjects.size(); i++)
-                          positionArrayElement(ix, iy, iz, el->HostedObjects[i], obj, vol, GeoManager, MaterialCollection, PMsAndDumPMs, iCounter);
-                  iCounter++;
-                }
-          }
-      }
+    // Position hosted objects
+    if      (obj->ObjectType->isHandlingArray())
+        positionArray(obj, vol);
+    else if (obj->ObjectType->isStack())
+        positionStack(obj, vol, forcedNodeNumber);
+    else if (obj->ObjectType->isInstance())
+        positionInstance(obj, vol, forcedNodeNumber);
+    else if (obj->ObjectType->isLightguide())
+        positionLightguide(obj, vol, lTrans);
     else
-    {
-        for (int i=0; i<obj->HostedObjects.size(); i++)
-            addTGeoVolumeRecursively(obj->HostedObjects[i], vol, GeoManager, MaterialCollection, PMsAndDumPMs, forcedNodeNumber);
-    }
+        for (AGeoObject * el : obj->HostedObjects)
+            addTGeoVolumeRecursively(el, vol, forcedNodeNumber);
 
-    //  Trackers use volume title for identification of special rules
+    //  Particle/Photon trackers use volume title for identification of volumes with special rules
     //  First character can be 'G' for optical grid, 'M' for monitor, 'P' for PMT, 'p' for dummy PM
     //  PMs and DummyPMs receive title in detector class, see PositionPMs and PositionDummis methods
     //  Second character is used by the ParticleTracker to indicate that particles leaving the volume have to be saved to file
-    if (obj->ObjectType->isGrid())         vol->SetTitle("G---");
+    if      (obj->ObjectType->isGrid())    vol->SetTitle("G---");
     else if (obj->ObjectType->isMonitor()) vol->SetTitle("M---");
     else                                   vol->SetTitle("----");
 }
 
-void ASandwich::clearGridRecords()
+void ASandwich::positionArray(AGeoObject * obj, TGeoVolume * vol)
 {
-    for (int i=0; i<GridRecords.size(); i++) delete GridRecords[i];
-    GridRecords.clear();
+    ATypeArrayObject * array = static_cast<ATypeArrayObject*>(obj->ObjectType);
+
+    for (AGeoObject * el : obj->HostedObjects)
+    {
+        int iCounter = array->startIndex;
+        if (iCounter < 0) iCounter = 0;
+
+        ATypeCircularArrayObject * circArray = dynamic_cast<ATypeCircularArrayObject*>(obj->ObjectType);
+        if (!circArray)
+        {
+            for (int ix = 0; ix < array->numX; ix++)
+              for (int iy = 0; iy < array->numY; iy++)
+                for (int iz = 0; iz < array->numZ; iz++)
+                    positionArrayElement(ix, iy, iz, el, obj, vol, iCounter++);
+        }
+        else
+        {
+            for (int ia = 0; ia < circArray->num; ia++)
+                positionCircularArrayElement(ia, el, obj, vol, iCounter++);
+        }
+    }
 }
 
-void ASandwich::clearMonitorRecords()
+void ASandwich::positionStack(AGeoObject * obj, TGeoVolume * vol, int forcedNodeNumber)
 {
-    MonitorsRecords.clear(); //dont delete - it is just pointers to world tree objects
-    MonitorIdNames.clear();
-    MonitorNodes.clear();
+    const ATypeStackContainerObject * stack = static_cast<const ATypeStackContainerObject*>(obj->ObjectType);
+    const QString & RefObjName = stack->ReferenceVolume;
+    const AGeoObject * RefObj = nullptr;
+    for (const AGeoObject * el : obj->HostedObjects)
+        if (el->Name == RefObjName)
+        {
+            RefObj = el;
+            break;
+        }
+
+    if (RefObj)
+    {
+        for (AGeoObject * el : obj->HostedObjects)
+            positionStackElement(el, RefObj, vol, forcedNodeNumber);
+    }
+    else qWarning() << "Error: Reference object not found for stack" << obj->Name;
 }
 
-void ASandwich::positionArrayElement(int ix, int iy, int iz, AGeoObject* el, AGeoObject* arrayObj,
-                                     TGeoVolume* parent, TGeoManager* GeoManager, AMaterialParticleCollection* MaterialCollection, QVector<APMandDummy> *PMsAndDumPMs,
-                                     int arrayIndex)
+void ASandwich::positionInstance(AGeoObject * obj, TGeoVolume * vol, int forcedNodeNumber)
+{
+    for (AGeoObject * el : obj->HostedObjects)
+    {
+        //Position
+        double local[3], master[3];
+        local[0] = el->Position[0];
+        local[1] = el->Position[1];
+        local[2] = el->Position[2];
+        TGeoRotation ArRot("0", obj->Orientation[0] , obj->Orientation[1], obj->Orientation[2]);
+        if (obj->TrueRot)
+        {
+            obj->TrueRot->LocalToMaster(local, master);
+            for (int i = 0; i < 3; i++)
+                el->TruePos[i] = master[i] + obj->TruePos[i];
+        }
+        else
+        {
+            ArRot.LocalToMaster(local, master);
+            for (int i = 0; i < 3; i++)
+                el->TruePos[i] = master[i] + obj->Position[i];
+        }
+
+        //Orientation
+        TGeoRotation elRot("1", el->Orientation[0], el->Orientation[1], el->Orientation[2]);
+        if (obj->TrueRot)
+            el->TrueRot = createCombinedRotation(&elRot, obj->TrueRot);
+        else
+            el->TrueRot = createCombinedRotation(&elRot, &ArRot);
+        el->TrueRot->RegisterYourself();
+
+        addTGeoVolumeRecursively(el, vol, forcedNodeNumber);
+    }
+}
+
+void ASandwich::positionArrayElement(int ix, int iy, int iz, AGeoObject * el, AGeoObject * arrayObj, TGeoVolume * parent, int arrayIndex)
 {
     ATypeArrayObject* array = static_cast<ATypeArrayObject*>(arrayObj->ObjectType);
 
-    //remembering original values
-    double tmpX = el->Position[0];
-    double tmpY = el->Position[1];
-    double tmpZ = el->Position[2];
-    //double tmpA = el->Orientation[2];
+    //Position
+    double local[3], master[3];
+    local[0] = el->Position[0] + ix * array->stepX;
+    local[1] = el->Position[1] + iy * array->stepY;
+    local[2] = el->Position[2] + iz * array->stepZ;
+    TGeoRotation ArRot("0", arrayObj->Orientation[0] , arrayObj->Orientation[1], arrayObj->Orientation[2]);
+    if (arrayObj->TrueRot)
+    {
+        arrayObj->TrueRot->LocalToMaster(local, master);
+        for (int i = 0; i < 3; i++)
+            el->TruePos[i] = master[i] + arrayObj->TruePos[i];
+    }
+    else
+    {
+        ArRot.LocalToMaster(local, master);
+        for (int i = 0; i < 3; i++)
+            el->TruePos[i] = master[i] + arrayObj->Position[i];
+    }
 
-    TVector3 v(arrayObj->Position[0] + el->Position[0] + ix*array->stepX,
-               arrayObj->Position[1] + el->Position[1] + iy*array->stepY,
-               arrayObj->Position[2] + el->Position[2] + iz*array->stepZ);
-    if (arrayObj->Orientation[2] != 0) v.RotateZ(3.1415926535*arrayObj->Orientation[2]/180.0);
+    //Orientation
+    TGeoRotation elRot("1", el->Orientation[0], el->Orientation[1], el->Orientation[2]);
+    if (arrayObj->TrueRot)
+        el->TrueRot = createCombinedRotation(&elRot, arrayObj->TrueRot);
+    else
+        el->TrueRot = createCombinedRotation(&elRot, &ArRot);
+    el->TrueRot->RegisterYourself();
 
-    el->Position[0] = v[0];
-    el->Position[1] = v[1];
-    el->Position[2] = v[2];
+    addTGeoVolumeRecursively(el, parent, arrayIndex);
+}
 
-    addTGeoVolumeRecursively(el, parent, GeoManager, MaterialCollection, PMsAndDumPMs, arrayIndex);
+void ASandwich::positionCircularArrayElement(int ia, AGeoObject * el, AGeoObject * arrayObj, TGeoVolume * parent, int arrayIndex)
+{
+    ATypeCircularArrayObject * array = static_cast<ATypeCircularArrayObject*>(arrayObj->ObjectType);
 
-    //recovering original position/orientation
-    el->Position[0] = tmpX;
-    el->Position[1] = tmpY;
-    el->Position[2] = tmpZ;
-    //el->Orientation[2] = tmpA;
+    double angle = array->angularStep * ia;
+
+    //Position
+    double local[3], master[3];
+    local[0] = el->Position[0] + array->radius;
+    local[1] = el->Position[1];
+    local[2] = el->Position[2];
+    TGeoRotation ArRot = ( arrayObj->TrueRot ? TGeoRotation("0", 0, 0, angle)
+                                             : TGeoRotation("0", arrayObj->Orientation[0], arrayObj->Orientation[1], arrayObj->Orientation[2] + angle) );
+    if (arrayObj->TrueRot)
+    {
+        TGeoRotation * Rot = createCombinedRotation(&ArRot, arrayObj->TrueRot);
+        Rot->LocalToMaster(local, master);
+        delete Rot;
+        for (int i = 0; i < 3; i++)
+            el->TruePos[i] = master[i] + arrayObj->TruePos[i];
+    }
+    else
+    {
+        ArRot.LocalToMaster(local, master);
+        for (int i = 0; i < 3; i++)
+            el->TruePos[i] = master[i] + arrayObj->Position[i];
+    }
+
+    //Orientation
+    TGeoRotation elRot("1", el->Orientation[0], el->Orientation[1], el->Orientation[2]);
+    el->TrueRot = createCombinedRotation(&elRot, &ArRot, arrayObj->TrueRot);
+    el->TrueRot->RegisterYourself();
+
+    addTGeoVolumeRecursively(el, parent, arrayIndex);
+}
+
+void ASandwich::positionStackElement(AGeoObject * el, const AGeoObject * RefObj, TGeoVolume *parent, int forcedNodeNumber)
+{
+    AGeoObject * Stack = el->Container;
+
+    //Position
+    double local[3], master[3];
+    local[0] = el->Position[0] - RefObj->Position[0];
+    local[1] = el->Position[1] - RefObj->Position[1];
+    local[2] = el->Position[2] - RefObj->Position[2];
+    TGeoRotation StackRot("0", Stack->Orientation[0], Stack->Orientation[1], Stack->Orientation[2]);
+    if (Stack->TrueRot)
+    {
+        Stack->TrueRot->LocalToMaster(local, master);
+        for (int i = 0; i < 3; i++)
+            el->TruePos[i] = master[i] + RefObj->Position[i] + Stack->TruePos[i];
+    }
+    else
+    {
+        StackRot.LocalToMaster(local, master);
+        for (int i = 0; i < 3; i++)
+            el->TruePos[i] = master[i] + RefObj->Position[i];
+    }
+
+    //Orientation
+    TGeoRotation elRot("1", el->Orientation[0], el->Orientation[1], el->Orientation[2]);
+    if (Stack->TrueRot)
+        el->TrueRot = createCombinedRotation(&elRot, Stack->TrueRot);
+    else
+        el->TrueRot = createCombinedRotation(&elRot, &StackRot);
+    el->TrueRot->RegisterYourself();
+
+    addTGeoVolumeRecursively(el, parent, forcedNodeNumber);
+}
+
+TGeoRotation * ASandwich::createCombinedRotation(TGeoRotation * firstRot, TGeoRotation * secondRot, TGeoRotation * thirdRot)
+{
+    double local[3], master[3];
+
+    local[0] = 1.0; local[1] = 0; local[2] = 0;
+    firstRot->LocalToMaster(local, master);
+    local[0] = master[0]; local[1] = master[1]; local[2] = master[2];
+    secondRot->LocalToMaster(local, master);
+    if (thirdRot)
+    {
+        local[0] = master[0]; local[1] = master[1]; local[2] = master[2];
+        thirdRot->LocalToMaster(local, master);
+    }
+    double X3 = master[2];
+    double X2 = master[1];
+    double X1 = master[0];
+
+    local[0] = 0; local[1] = 1.0; local[2] = 0;
+    firstRot->LocalToMaster(local, master);
+    local[0] = master[0]; local[1] = master[1]; local[2] = master[2];
+    secondRot->LocalToMaster(local, master);
+    if (thirdRot)
+    {
+        local[0] = master[0]; local[1] = master[1]; local[2] = master[2];
+        thirdRot->LocalToMaster(local, master);
+    }
+    double Y3 = master[2];
+    double Y2 = master[1];
+    double Y1 = master[0];
+
+    local[0] = 0; local[1] = 0; local[2] = 1.0;
+    firstRot->LocalToMaster(local, master);
+    local[0] = master[0]; local[1] = master[1]; local[2] = master[2];
+    secondRot->LocalToMaster(local, master);
+    if (thirdRot)
+    {
+        local[0] = master[0]; local[1] = master[1]; local[2] = master[2];
+        thirdRot->LocalToMaster(local, master);
+    }
+    double Z3 = master[2];
+    double Z2 = master[1];
+    double Z1 = master[0];
+
+    TGeoRotation * Rot = new TGeoRotation();
+    double rotMat[9] = {X1,Y1,Z1,X2,Y2,Z2,X3,Y3,Z3};
+    Rot->SetMatrix(rotMat);
+
+    return Rot;
 }
 
 void ASandwich::clearModel()
 {
-  delete DefaultXY;
-  clearWorld();
+    clearWorld();
+
+    delete DefaultXY; DefaultXY = new ASlabXYModel();
+    ZOriginType = 0;
+    World->Material = 0;
+    SandwichState = ASandwich::CommonShapeSize;
 }
 
 void ASandwich::UpdateDetector()
@@ -719,62 +1018,56 @@ void ASandwich::UpdateDetector()
   enforceCommonProperties();
 
   //check that Z=0 layer is active unless it is the last active one
-  if (countSlabs()>0)
-    {
+  if (countSlabs() > 0)
+  {
       int iZ = -1, numActive = 0, iFirstActive = -1;
       for (int i=0; i<World->HostedObjects.size(); i++)  //slabIndex not needed, work with raw HostedObject indexes
-        {
-          AGeoObject* obj = World->HostedObjects[i];
+      {
+          AGeoObject * obj = World->HostedObjects[i];
           if (!obj->ObjectType->isSlab()) continue;
 
           if (obj->getSlabModel()->fCenter)
-            {
-              if (iZ!=-1)
-                { //already found center layer
+          {
+              if (iZ != -1)
+              { //already found center layer
                   QString s("Attempt to declare multiple center slabs!");
                   emit WarningMessage(s);
                   qWarning() << s;
                   obj->getSlabModel()->fCenter = false;
-                }
+              }
               else iZ = i;
-            }
+          }
           if (obj->getSlabModel()->fActive)
-            {
+          {
               numActive++;
               if (iFirstActive == -1) iFirstActive = i;
-            }
-        }      
+          }
+      }
       //qDebug() << "iZ, numAct, firstAct"<< iZ << numActive << iFirstActive;
 
       if (iZ == -1)
-        { //no center slab -> only allowed if number actives = 0
-          if (numActive>0)
-            {
-              //QString s("If there are enabled slabs, one of them has to be center!");
-              //emit WarningMessage(s);
-              //qWarning() << s;
+      {
+          //no center slab -> only allowed if number actives = 0
+          if (numActive > 0)
+          {
               World->HostedObjects[iFirstActive]->getSlabModel()->fCenter = true;
               iZ = iFirstActive;
-            }
-        }
+          }
+      }
       else if (!World->HostedObjects[iZ]->getSlabModel()->fActive)
-        { //center slab can be declared inactive only if there are no more axctive slabs
-          if (numActive>0)
-            {
+      {
+          //center slab can be declared inactive only if there are no more axctive slabs
+          if (numActive > 0)
+          {
               QString s("Slab defining Z=0 can be disabled/removed only if there are no other enabled slabs!");
               emit WarningMessage(s);
               qWarning() << s;
               World->HostedObjects[iZ]->getSlabModel()->fActive = true;
-            }
-        }
-    }
+          }
+      }
+  }
 
-  emit RequestGuiUpdate();
-
-  //Claculating Z positions of layers
   CalculateZofSlabs();
-
-  //in GUI mode triggers RebuildDetector in MainWindow
   emit RequestRebuildDetector();
 }
 
@@ -788,25 +1081,26 @@ void ASandwich::ChangeState(ASandwich::SlabState State)
 
 void ASandwich::enforceCommonProperties()
 {
-  // for common states, ensure XY shape or sizes are proper
-  if (SandwichState != ASandwich::Individual)
-    for (int i=0; i<World->HostedObjects.size(); i++)
-      {
-        AGeoObject* obj = World->HostedObjects[i];
-        if (!obj->ObjectType->isSlab()) continue;
+    // for common states, ensure XY shape or sizes are proper
+    if (SandwichState != ASandwich::Individual)
+        for (AGeoObject * obj : World->HostedObjects)
+        {
+            if (!obj->ObjectType->isSlab()) continue;
 
-        obj->getSlabModel()->XYrecord.shape = DefaultXY->shape;
-        obj->getSlabModel()->XYrecord.sides = DefaultXY->sides;
-        obj->getSlabModel()->XYrecord.angle = DefaultXY->angle;
+            ASlabXYModel & m = obj->getSlabModel()->XYrecord;
 
-        if (SandwichState == ASandwich::CommonShapeSize)
-          {
-            obj->getSlabModel()->XYrecord.size1 = DefaultXY->size1;
-            obj->getSlabModel()->XYrecord.size2 = DefaultXY->size2;
-          }
+            m.shape = DefaultXY->shape;
+            m.sides = DefaultXY->sides; m.strSides.clear();
+            m.angle = DefaultXY->angle; m.strAngle.clear();
 
-        obj->UpdateFromSlabModel(obj->getSlabModel());
-      }
+            if (SandwichState == ASandwich::CommonShapeSize)
+            {
+                m.size1 = DefaultXY->size1; m.strSize1.clear();
+                m.size2 = DefaultXY->size2; m.strSize2.clear();
+            }
+
+            obj->UpdateFromSlabModel(obj->getSlabModel());
+        }
 }
 
 bool ASandwich::CalculateZofSlabs()
@@ -898,7 +1192,7 @@ bool ASandwich::CalculateZofSlabs()
   return true;
 }
 
-bool ASandwich::isMaterialInUse(int imat)
+bool ASandwich::isMaterialInUse(int imat) const
 {
    return World->isMaterialInUse(imat);
 }
@@ -908,9 +1202,12 @@ void ASandwich::DeleteMaterial(int imat)
     World->DeleteMaterialIndex(imat);
 }
 
-bool ASandwich::isVolumeExist(QString name)
+bool ASandwich::isVolumeExistAndActive(const QString & name) const
 {
-    return (World->findObjectByName(name) != 0);
+    AGeoObject * obj = World->findObjectByName(name);
+    if (!obj) return false;
+
+    return obj->fActive;
 }
 
 void ASandwich::changeLineWidthOfVolumes(int delta)
@@ -918,6 +1215,7 @@ void ASandwich::changeLineWidthOfVolumes(int delta)
     World->changeLineWidthRecursive(delta);
 }
 
+#include "ageoconsts.h"
 void ASandwich::writeToJson(QJsonObject &json)
 {
   QJsonObject js;
@@ -957,105 +1255,121 @@ void ASandwich::writeToJson(QJsonObject &json)
     }
   js["Slabs"] = arr;
 
-  js["WorldMaterial"] = World->Material;
+  //js["WorldMaterial"] = World->Material;
 
   QJsonArray arrTree;
   World->writeAllToJarr(arrTree);
   js["WorldTree"] = arrTree;
 
+  AGeoConsts::getConstInstance().writeToJson(js);
+
   json["Sandwich"] = js;
 }
 
-void ASandwich::readFromJson(QJsonObject &json)
+QString ASandwich::readFromJson(QJsonObject & json)
 {
-  if (!json.contains("Sandwich"))
+    QString ErrorString;
+    QJsonObject js;
+    bool ok = parseJson(json, "Sandwich", js);
+    if (ok)
     {
-      if (json.contains("SandwichSettings"))
-        {
-          //it is old standard
-          QJsonObject js = json["SandwichSettings"].toObject();
-          bool PrScintCont = json.contains("PrScintCont") && json["PrScintCont"].toBool();
-          importFromOldStandardJson(js, PrScintCont);
-        }
-      else
-        {
-          //critical error - missing Sandwich settings (new or old standard) in the config file!
-          qCritical() << "Critical error: Sandwich (or SandwichSettings) object is missing in the config file!";
-          exit(666);
-        }
-    }
-  else
-  {
-      clearModel();
-      DefaultXY = new ASlabXYModel();
-      ZOriginType = 0;
-      World->Material = 0;
-      SandwichState = ASandwich::CommonShapeSize;
+        clearModel();
 
-      QJsonObject js = json["Sandwich"].toObject();
-      if (js.contains("State"))
-        {
-          QString state = js["State"].toString();
-          if (state == "CommonShapeSize") SandwichState = ASandwich::CommonShapeSize;
-          else if (state == "CommonShape") SandwichState = ASandwich::CommonShape;
-          else if (state == "Individual") SandwichState = ASandwich::Individual;
-          else qWarning() << "Unknown Sandwich state in json object!";
-        }
-      if (js.contains("ZeroZ"))
-        {
-          QString ZeroZ = js["ZeroZ"].toString();
-          if (ZeroZ == "Top") ZOriginType = -1;
-          else if (ZeroZ == "Center") ZOriginType = 0;
-          else if (ZeroZ == "Bottom") ZOriginType = 1;
-          else qWarning() << "Unknown Zero plane type in json object!";
-        }
-      if (js.contains("DefaultXY"))
-        {
-          QJsonObject XYjson = js["DefaultXY"].toObject();
-          DefaultXY->readFromJson(XYjson);
-        }
-      if (js.contains("WorldTree"))
-        {
-          //qDebug() << "...Loading WorldTree";
-          QJsonArray arrTree = js["WorldTree"].toArray();
-          World->readAllFromJarr(World, arrTree);
-          //qDebug() << "...done!";
-        }
-      else
-          qDebug() << "...Json does not contain WordTree";
+        QJsonObject js = json["Sandwich"].toObject();
 
+        if (js.contains("GeoConsts"))
+          AGeoConsts::getInstance().readFromJson(js);
 
-      //slabs properties are written in a separate container:
-      //qDebug() << "Loading slab properties";
-      if (js.contains("Slabs"))
+        if (js.contains("State"))
         {
-          QJsonArray arr = js["Slabs"].toArray();
-          //qDebug() << "Slabs found:"<<arr.size();
-          for (int i=0; i<arr.size(); i++)
+            QString state = js["State"].toString();
+            if (state == "CommonShapeSize")  SandwichState = ASandwich::CommonShapeSize;
+            else if (state == "CommonShape") SandwichState = ASandwich::CommonShape;
+            else if (state == "Individual")  SandwichState = ASandwich::Individual;
+            else qWarning() << "Unknown Sandwich state in json object!";
+        }
+        if (js.contains("ZeroZ"))
+        {
+            QString ZeroZ = js["ZeroZ"].toString();
+            if      (ZeroZ == "Top")    ZOriginType = -1;
+            else if (ZeroZ == "Center") ZOriginType = 0;
+            else if (ZeroZ == "Bottom") ZOriginType = 1;
+            else qWarning() << "Unknown Zero plane type in json object!";
+        }
+        if (js.contains("DefaultXY"))
+        {
+            QJsonObject XYjson = js["DefaultXY"].toObject();
+            DefaultXY->readFromJson(XYjson);
+        }
+
+        if (js.contains("WorldTree"))
+        {
+            //qDebug() << "...Loading WorldTree";
+            QJsonArray arrTree = js["WorldTree"].toArray();
+            ErrorString = World->readAllFromJarr(World, arrTree);
+            //if config contained Prototypes, there are two protoypes objects in the geometry now!
+            for (AGeoObject * obj : World->HostedObjects)
             {
-              QJsonObject j = arr[i].toObject();
-              ASlabModel* r = new ASlabModel();
-              r->readFromJson(j);
+                if (!obj->ObjectType->isPrototypes()) continue;
+                if (obj == Prototypes) continue;
+                //found another Prototypes object  - it was loaded from json
+                for (AGeoObject * proto : obj->HostedObjects)
+                    Prototypes->addObjectLast(proto);
+                obj->HostedObjects.clear();
+                World->HostedObjects.removeOne(obj);
+                delete obj;
+                break;
+            }
+            //qDebug() << "...done!";
+        }
+        else qWarning() << "...Json does not contain WordTree!"; // !*! is itr a critical error?
 
-              AGeoObject* obj = World->findObjectByName(r->name);
-              if (!obj)
-              {
-                  qWarning() << "Slab"<<r->name<<"object not found! Creating new slab!";
-                  appendSlab(r);
-              }
-              else
-              {
-                  //qDebug() << "Updating slab:"<<obj->Name;
-                  delete obj->getSlabModel();
-                  obj->setSlabModel(r);
-                  obj->UpdateFromSlabModel(r);
-              }
+        //slabs properties are written in a separate container:
+        //qDebug() << "Loading slab properties";
+        if (js.contains("Slabs"))
+        {
+            QJsonArray arr = js["Slabs"].toArray();
+            //qDebug() << "Slabs found:"<<arr.size();
+            for (int i=0; i<arr.size(); i++)
+            {
+                QJsonObject j = arr[i].toObject();
+                ASlabModel* r = new ASlabModel();
+                r->readFromJson(j);
+
+                AGeoObject* obj = World->findObjectByName(r->name);
+                if (!obj)
+                {
+                    qWarning() << "Slab"<<r->name<<"object not found! Creating new slab!";
+                    appendSlab(r);
+                }
+                else
+                {
+                    //qDebug() << "Updating slab:"<<obj->Name;
+                    delete obj->getSlabModel();
+                    obj->setSlabModel(r);
+                    obj->UpdateFromSlabModel(r);
+                }
             }
         }
+        if (js.contains("WorldMaterial")) World->Material = js["WorldMaterial"].toInt();
 
-      if (js.contains("WorldMaterial")) World->Material = js["WorldMaterial"].toInt();
-  }
+    }
+    else if (json.contains("SandwichSettings"))
+    {
+        //old system
+        qDebug() << "==Config uses deprecated system of saving detector settings!==";
+        QJsonObject js = json["SandwichSettings"].toObject();
+        bool PrScintCont = json.contains("PrScintCont") && json["PrScintCont"].toBool();
+        importFromOldStandardJson(js, PrScintCont);
+    }
+    else
+    {
+        //critical error - missing Sandwich settings (new or old standard) in the config file!
+        qCritical() << "Critical error: Sandwich (or SandwichSettings) object is missing in the config file!";
+        exit(666);
+    }
 
+  // Compatibility with some old standards
   if (json.contains("AddGeoObjects"))
   {
       qDebug() << "==Found old system of GeoObjects (replaced now by GeoTree)";
@@ -1180,9 +1494,12 @@ void ASandwich::readFromJson(QJsonObject &json)
         }
   }
 
+  // stacks can be updated only now, when values using geoConsts have been evaluated
+  World->updateAllStacks();
+
   //qDebug() << "Finished, requesting GUI update";
-  emit RequestGuiUpdate(); // DOES NOT updates the detector!
-  //UpdateDetector();
+  emit RequestGuiUpdate(); // DOES NOT update the detector!
+  return ErrorString;
 }
 
 void ASandwich::importOldMask(QJsonObject &json)
@@ -1389,18 +1706,10 @@ void ASandwich::importOldLightguide(QJsonObject &json, bool upper)
 
 void ASandwich::importFromOldStandardJson(QJsonObject &json, bool fPrScintCont)
 {
-  //clear phase
   clearModel();
-  DefaultXY = new ASlabXYModel();
-  ZOriginType = 0;
-  World->Material = 0;
-  SandwichState = ASandwich::CommonShapeSize;
 
   if (json.isEmpty()) return;
   if (!json.contains("UseDefaultSizes")) return; //means wrong file
-
-  //always MID
-  ZOriginType = 0;
 
   //Layers
   bool fLayersFound = false;
@@ -1479,10 +1788,9 @@ void ASandwich::importFromOldStandardJson(QJsonObject &json, bool fPrScintCont)
 void ASandwich::onMaterialsChanged(const QStringList MaterialList)
 {
   Materials = MaterialList;  
-  emit RequestGuiUpdate();  
 }
 
-void ASandwich::IsParticleInUse(int particleId, bool &bInUse, QString &MonitorNames)
+void ASandwich::IsParticleInUse(int particleId, bool &bInUse, QString &MonitorNames) const
 {
   bInUse = false;
   MonitorNames.clear();
@@ -1520,5 +1828,51 @@ void ASandwich::RemoveParticle(int particleId)
       ATypeMonitorObject* mon = static_cast<ATypeMonitorObject*>(monObj->ObjectType);
 
       if ( mon->config.ParticleIndex > particleId ) mon->config.ParticleIndex--;
+  }
+}
+
+bool ASandwich::isWorldSizeFixed() const
+{
+    ATypeWorldObject * wt = static_cast<ATypeWorldObject*>(World->ObjectType);
+    return wt->bFixedSize;
+}
+
+void ASandwich::setWorldSizeFixed(bool bFlag)
+{
+    ATypeWorldObject * wt = static_cast<ATypeWorldObject*>(World->ObjectType);
+    wt->bFixedSize = bFlag;
+}
+
+double ASandwich::getWorldSizeXY() const
+{
+    AGeoBox * box = dynamic_cast<AGeoBox*>(World->Shape);
+    return ( box ? box->dx : 0 );
+}
+
+void ASandwich::setWorldSizeXY(double size)
+{
+    AGeoBox * box = dynamic_cast<AGeoBox*>(World->Shape);
+    if (box)
+    {
+        box->dx = size;
+        box->dy = size;
+        box->str2dx.clear();
+        box->str2dy.clear();
+    }
+}
+
+double ASandwich::getWorldSizeZ() const
+{
+    AGeoBox * box = dynamic_cast<AGeoBox*>(World->Shape);
+    return ( box ? box->dz : 0 );
+}
+
+void ASandwich::setWorldSizeZ(double size)
+{
+    AGeoBox * box = dynamic_cast<AGeoBox*>(World->Shape);
+    if (box)
+    {
+        box->dz = size;
+        box->str2dz.clear();
     }
 }

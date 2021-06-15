@@ -1,8 +1,10 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 4
-ANTS2_MINOR = 31
+ANTS2_MINOR = 35
 
 # !!! You may need to modify path for CERN ROOT, see #---CERN ROOT--- section below
+
+# win32 is deprecated!
 
 #Optional libraries
 #CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
@@ -413,7 +415,13 @@ SOURCES += main.cpp \
     SplineLibrary/Spline123/json11.cpp \
     SplineLibrary/Spline123/bspline123d.cpp \
     SplineLibrary/Spline123/bsfit123.cpp \
-    scriptmode/afarm_si.cpp
+    modules/ageoconsts.cpp \
+    common/ageoshape.cpp \
+    scriptmode/afarm_si.cpp \
+    common/ageotype.cpp \
+    gui/GraphWindowTools/amultigraphdesigner.cpp \
+    gui/GraphWindowTools/apadgeometry.cpp \
+    gui/GraphWindowTools/apadproperties.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -573,7 +581,13 @@ HEADERS  += common/CorrelationFilters.h \
     SplineLibrary/Spline123/eiquadprog.hpp \
     SplineLibrary/Spline123/bspline123d.h \
     SplineLibrary/Spline123/bsfit123.h \
-    scriptmode/afarm_si.h
+    modules/ageoconsts.h \
+    common/ageoshape.h \
+    scriptmode/afarm_si.h \
+    common/ageotype.h \
+    gui/GraphWindowTools/amultigraphdesigner.h \
+    gui/GraphWindowTools/apadgeometry.h \
+    gui/GraphWindowTools/apadproperties.h
 
 # --- SIM ---
 ants2_SIM {
@@ -678,9 +692,8 @@ ants2_GUI {
     gui/MainWindowTools/globalscript.cpp \
     gui/MainWindowTools/aslablistwidget.cpp \
     gui/MainWindowTools/arootlineconfigurator.cpp \
-    gui/MainWindowTools/ageotreewidget.cpp \
     gui/MainWindowTools/ashapehelpdialog.cpp \
-    gui/MainWindowTools/agridelementdialog.cpp \
+    gui/DAWindowTools/agridelementdialog.cpp \
     gui/ascriptexampleexplorer.cpp \
     gui/MainWindowTools/mainwindowjson.cpp \
     gui/ReconstructionWindowTools/reconstructionwindowguiupdates.cpp \
@@ -696,7 +709,7 @@ ants2_GUI {
     gui/ahighlighters.cpp \
     modules/lrf_v3/gui/atpspline3widget.cpp \
     modules/lrf_v3/gui/avladimircompressionwidget.cpp \
-    gui/MainWindowTools/amonitordelegateform.cpp \
+    gui/DAWindowTools/amonitordelegateform.cpp \
     gui/aelementandisotopedelegates.cpp \
     gui/amatparticleconfigurator.cpp \
     gui/aneutronreactionsconfigurator.cpp \
@@ -740,7 +753,17 @@ ants2_GUI {
     gui/DAWindowTools/amaterialloaderdialog.cpp \
     gui/ageant4configdialog.cpp \
     gui/MainWindowTools/asaveparticlestofiledialog.cpp \
-    gui/aguiwindow.cpp
+    gui/aguiwindow.cpp \
+    gui/DAWindowTools/amonitordelegate.cpp \
+    gui/DAWindowTools/ageobasedelegate.cpp \
+    gui/DAWindowTools/ageoslabdelegate.cpp \
+    gui/DAWindowTools/agridelementdelegate.cpp \
+    gui/DAWindowTools/ageoobjectdelegate.cpp \
+    gui/DAWindowTools/aonelinetextedit.cpp \
+    gui/RasterWindow/acameracontroldialog.cpp \
+    gui/DAWindowTools/ageotree.cpp \
+    gui/DAWindowTools/ageodelegatewidget.cpp \
+    gui/DAWindowTools/ageobasetreewidget.cpp
 
 HEADERS  += gui/mainwindow.h \
     gui/materialinspectorwindow.h \
@@ -764,9 +787,8 @@ HEADERS  += gui/mainwindow.h \
     gui/globalsettingswindowclass.h \
     gui/MainWindowTools/aslablistwidget.h \
     gui/MainWindowTools/arootlineconfigurator.h \
-    gui/MainWindowTools/ageotreewidget.h \
     gui/MainWindowTools/ashapehelpdialog.h \
-    gui/MainWindowTools/agridelementdialog.h \
+    gui/DAWindowTools/agridelementdialog.h \
     gui/ascriptexampleexplorer.h \
     gui/ascriptwindow.h \
     gui/alrfmouseexplorer.h \
@@ -780,7 +802,7 @@ HEADERS  += gui/mainwindow.h \
     gui/ahighlighters.h \
     modules/lrf_v3/gui/atpspline3widget.h \
     modules/lrf_v3/gui/avladimircompressionwidget.h \
-    gui/MainWindowTools/amonitordelegateform.h \
+    gui/DAWindowTools/amonitordelegateform.h \
     gui/aelementandisotopedelegates.h \
     gui/amatparticleconfigurator.h \
     gui/aneutronreactionsconfigurator.h \
@@ -824,7 +846,17 @@ HEADERS  += gui/mainwindow.h \
     gui/DAWindowTools/amaterialloaderdialog.h \
     gui/ageant4configdialog.h \
     gui/MainWindowTools/asaveparticlestofiledialog.h \
-    gui/aguiwindow.h
+    gui/aguiwindow.h \
+    gui/DAWindowTools/amonitordelegate.h \
+    gui/DAWindowTools/ageobasedelegate.h \
+    gui/DAWindowTools/ageoslabdelegate.h \
+    gui/DAWindowTools/agridelementdelegate.h \
+    gui/DAWindowTools/ageoobjectdelegate.h \
+    gui/DAWindowTools/aonelinetextedit.h \
+    gui/RasterWindow/acameracontroldialog.h \
+    gui/DAWindowTools/ageotree.h \
+    gui/DAWindowTools/ageodelegatewidget.h \
+    gui/DAWindowTools/ageobasetreewidget.h
 
 FORMS += gui/mainwindow.ui \
     gui/materialinspectorwindow.ui \
@@ -843,11 +875,11 @@ FORMS += gui/mainwindow.ui \
     gui/credits.ui \
     gui/globalsettingswindowclass.ui \
     gui/MainWindowTools/ashapehelpdialog.ui \
-    gui/MainWindowTools/agridelementdialog.ui \
+    gui/DAWindowTools/agridelementdialog.ui \
     gui/ascriptexampleexplorer.ui \
     gui/ascriptwindow.ui \
     modules/lrf_v3/gui/alrfwindow.ui \
-    gui/MainWindowTools/amonitordelegateform.ui \
+    gui/DAWindowTools/amonitordelegateform.ui \
     gui/amatparticleconfigurator.ui \
     gui/aneutronreactionsconfigurator.ui \
     gui/aneutronreactionwidget.ui \
@@ -904,6 +936,15 @@ TEMPLATE = app
 
 RC_FILE = myapp.rc
 #------------
+
+#---test of QJSEngine---
+QJS{
+    #DEFINES += USE_QJSEngine
+    QT += qml
+    SOURCES += ajavascriptmanager_qml.cpp
+    HEADERS += ajavascriptmanager_qml.h
+}
+#----------
 
 # The next define allows the core script interface to launch external processes. Enable only if you know what are you doing
 #DEFINES += _ALLOW_LAUNCH_EXTERNAL_PROCESS_
@@ -994,5 +1035,7 @@ FORMS += \
     gui/GraphWindowTools/atemplateselectiondialog.ui \
     gui/amateriallibrarybrowser.ui \
     gui/DAWindowTools/amaterialloaderdialog.ui \
-    gui/MainWindowTools/asaveparticlestofiledialog.ui
+    gui/MainWindowTools/asaveparticlestofiledialog.ui \
+    gui/RasterWindow/acameracontroldialog.ui \
+    gui/GraphWindowTools/amultigraphdesigner.ui
 

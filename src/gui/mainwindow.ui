@@ -1384,7 +1384,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
             <rect>
              <x>228</x>
              <y>34</y>
-             <width>31</width>
+             <width>40</width>
              <height>20</height>
             </rect>
            </property>
@@ -1494,7 +1494,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QLabel" name="label_135">
            <property name="geometry">
             <rect>
-             <x>263</x>
+             <x>267</x>
              <y>35</y>
              <width>24</width>
              <height>16</height>
@@ -10500,7 +10500,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
              </font>
             </property>
             <property name="text">
-             <string>Pathes</string>
+             <string>Paths</string>
             </property>
            </widget>
           </widget>
@@ -10901,8 +10901,14 @@ Right click: toggle save on/off</string>
                   <bold>false</bold>
                  </font>
                 </property>
+                <property name="contextMenuPolicy">
+                 <enum>Qt::CustomContextMenu</enum>
+                </property>
+                <property name="toolTip">
+                 <string>Right-click to clone the selected source</string>
+                </property>
                 <property name="text">
-                 <string>New</string>
+                 <string>New/clone</string>
                 </property>
                </widget>
               </item>
@@ -14108,54 +14114,6 @@ multiply to loaded data</string>
    </hints>
   </connection>
   <connection>
-   <sender>cbFixedTopSize</sender>
-   <signal>clicked()</signal>
-   <receiver>pbRebuildDetector</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>327</x>
-     <y>614</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>488</x>
-     <y>294</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledTopSizeXY</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbRebuildDetector</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>397</x>
-     <y>616</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>474</x>
-     <y>294</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledTopSizeZ</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbRebuildDetector</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>500</x>
-     <y>616</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>525</x>
-     <y>294</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>sbPMrings</sender>
    <signal>editingFinished()</signal>
    <receiver>pbRefreshPMArrayData</receiver>
@@ -14322,7 +14280,7 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>331</x>
+     <x>341</x>
      <y>413</y>
     </hint>
     <hint type="destinationlabel">
@@ -14354,7 +14312,7 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>473</x>
+     <x>483</x>
      <y>474</y>
     </hint>
     <hint type="destinationlabel">
@@ -14370,7 +14328,7 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>473</x>
+     <x>483</x>
      <y>503</y>
     </hint>
     <hint type="destinationlabel">
@@ -14386,7 +14344,7 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>473</x>
+     <x>483</x>
      <y>503</y>
     </hint>
     <hint type="destinationlabel">
@@ -14418,7 +14376,7 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>201</x>
+     <x>211</x>
      <y>413</y>
     </hint>
     <hint type="destinationlabel">
@@ -15186,8 +15144,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>210</x>
-     <y>452</y>
+     <x>198</x>
+     <y>420</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -15202,8 +15160,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>322</x>
-     <y>452</y>
+     <x>198</x>
+     <y>420</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -15218,8 +15176,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>434</x>
-     <y>452</y>
+     <x>198</x>
+     <y>420</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -15350,7 +15308,7 @@ multiply to loaded data</string>
      <y>498</y>
     </hint>
     <hint type="destinationlabel">
-     <x>346</x>
+     <x>356</x>
      <y>506</y>
     </hint>
    </hints>
@@ -15426,7 +15384,7 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>226</x>
+     <x>236</x>
      <y>413</y>
     </hint>
     <hint type="destinationlabel">
@@ -15586,7 +15544,7 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>182</x>
+     <x>192</x>
      <y>413</y>
     </hint>
     <hint type="destinationlabel">
@@ -15762,8 +15720,8 @@ multiply to loaded data</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>332</x>
-     <y>250</y>
+     <x>157</x>
+     <y>252</y>
     </hint>
     <hint type="destinationlabel">
      <x>227</x>
@@ -15778,8 +15736,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>332</x>
-     <y>250</y>
+     <x>157</x>
+     <y>252</y>
     </hint>
     <hint type="destinationlabel">
      <x>41</x>
@@ -15874,8 +15832,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>284</x>
-     <y>489</y>
+     <x>252</x>
+     <y>474</y>
     </hint>
     <hint type="destinationlabel">
      <x>439</x>
@@ -15890,8 +15848,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>290</x>
-     <y>515</y>
+     <x>252</x>
+     <y>474</y>
     </hint>
     <hint type="destinationlabel">
      <x>460</x>
@@ -15906,8 +15864,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>371</x>
-     <y>542</y>
+     <x>252</x>
+     <y>474</y>
     </hint>
     <hint type="destinationlabel">
      <x>477</x>
@@ -15922,8 +15880,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>258</x>
-     <y>542</y>
+     <x>233</x>
+     <y>474</y>
     </hint>
     <hint type="destinationlabel">
      <x>462</x>
@@ -15938,8 +15896,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>371</x>
-     <y>515</y>
+     <x>252</x>
+     <y>474</y>
     </hint>
     <hint type="destinationlabel">
      <x>447</x>
@@ -15954,8 +15912,8 @@ multiply to loaded data</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>371</x>
-     <y>489</y>
+     <x>252</x>
+     <y>474</y>
     </hint>
     <hint type="destinationlabel">
      <x>434</x>
@@ -16008,6 +15966,22 @@ multiply to loaded data</string>
     <hint type="destinationlabel">
      <x>336</x>
      <y>347</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledSiPMrecoveryTime</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdatePMproperties</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>491</x>
+     <y>489</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>332</x>
+     <y>357</y>
     </hint>
    </hints>
   </connection>

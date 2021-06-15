@@ -1,6 +1,7 @@
 #include "ashapehelpdialog.h"
 #include "ui_ashapehelpdialog.h"
 #include "ageoobject.h"
+#include "ageoshape.h"
 
 AShapeHelpDialog::AShapeHelpDialog(AGeoShape *thisShape, QList<AGeoShape *> shapes, QWidget *parent) :
   QDialog(parent),

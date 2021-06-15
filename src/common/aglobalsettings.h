@@ -95,7 +95,8 @@ public:
     int DefaultWebSocketPort = 1234;
     QString DefaultWebSocketIP = "127.0.0.1";
     int RootServerPort = 8080;
-    QString ExternalJSROOT = "https://root.cern/js/latest/";
+    //QString ExternalJSROOT = "https://root.cern/js/latest/";
+    QString ExternalJSROOT = "https://root.cern/js/5.9.0/";
     bool fRunRootServerOnStart = false;
 
     //RemoteServers

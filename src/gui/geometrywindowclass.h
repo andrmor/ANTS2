@@ -1,15 +1,19 @@
 #ifndef GEOMETRYWINDOWCLASS_H
 #define GEOMETRYWINDOWCLASS_H
 
+#include <QVector>
+
 #include "aguiwindow.h"
 #include "TMathBase.h"
 
-class MainWindow;
+class DetectorClass;
+class ASimulationManager;
 class RasterWindowBaseClass;
 class QWebEngineView;
-class QVariant;
 class QWebEngineDownloadItem;
 class TGeoVolume;
+class ACameraControlDialog;
+class GeoMarkerClass;
 
 namespace Ui {
   class GeometryWindowClass;
@@ -20,24 +24,28 @@ class GeometryWindowClass : public AGuiWindow
   Q_OBJECT
 
 public:
-  explicit GeometryWindowClass(QWidget *parent, MainWindow *mw);
+  explicit GeometryWindowClass(QWidget *parent, DetectorClass & Detector, ASimulationManager & SimulationManager);
   ~GeometryWindowClass();
 
   bool ModePerspective = true;
-  int  ZoomLevel = 0; //0 is fastest, +2 is typically the most "natural"
-  bool fNeedZoom = true; //set to true by "ShowGeometry", which force-resets the view
+  int  ZoomLevel       = 0;
+  bool fRecallWindow   = false;
+  bool bDisableDraw    = false;
+
+  QVector<GeoMarkerClass*> GeoMarkers;
 
   void ShowAndFocus();
-  void SetAsActiveRootWindow(); //focus root on this Raster Window
-  void ClearRootCanvas(); //clear root canvas
+  void FocusVolume(const QString & name);
+  void SetAsActiveRootWindow();
+  void ClearRootCanvas();
   void UpdateRootCanvas();
 
-  void SaveAs(const QString filename);
-  void OpenGLview();   //show current geometry using OpenGL viewer
+  void SaveAs(const QString & filename);
+  void OpenGLview();
 
   void ResetView();
   void setHideUpdate(bool flag);
-  void PostDraw(); //change view properties according to UI
+  void PostDraw();
   void Zoom(bool update = false);
 
   void AddLineToGeometry(QPointF &start, QPointF &end, Color_t color = 1, int width = 1);
@@ -48,40 +56,36 @@ public:
 
   bool isColorByMaterial() {return ColorByMaterial;}
 
-  bool fRecallWindow = false;
-  Double_t CenterX, CenterY, HWidth, HHeight, Phi, Theta;
-
-  void writeWindowPropsToJson(QJsonObject &json);
-  void readWindowPropsFromJson(QJsonObject &json);
-
-  int GeoMarkerSize = 2;
-  int GeoMarkerStyle = 6;
+  void writeToJson(QJsonObject & json) const;
+  void readFromJson(const QJsonObject & json);
 
   bool IsWorldVisible();
 
   void ShowGeometry(bool ActivateWindow = true, bool SAME = true, bool ColorUpdateAllowed = true);
   void ShowEvent_Particles(size_t iEvent, bool withSecondaries);
-  void ShowPMsignals(int iEvent, bool bFullCycle = true);
+  void ShowPMsignals(const QVector<float> &Event, bool bFullCycle = true);
   void ShowGeoMarkers();
   void ShowTracksAndMarkers();
+  void ShowCustomNodes(int firstN);
 
   void ClearTracks(bool bRefreshWindow = true);
+  void ClearGeoMarkers(int All_Rec_True = 0);
 
 protected:
     bool event(QEvent *event);
     void closeEvent(QCloseEvent * event) override;
 
 public slots:
-    void on_pbShowGeometry_clicked();
     void DrawTracks();
     void ShowPoint(double * r, bool keepTracks = false);
+    void CenterView(double * r);
     void ShowPMnumbers();
     void ShowMonitorIndexes();
     void ShowText(const QVector<QString> & strData, Color_t color, bool onPMs = true, bool bFullCycle = true); //onPMs=false -> srawing on monitors
     void on_pbTop_clicked();
     void on_pbFront_clicked();
-    void onRasterWindowChange(double centerX, double centerY, double hWidth, double hHeight, double phi, double theta);
-    void readRasterWindowProperties();
+    void onRasterWindowChange();
+    void readRasterWindowProperties();   // !*!
 
     void on_pbShowPMnumbers_clicked();
     void on_pbShowTracks_clicked();
@@ -92,6 +96,7 @@ private slots:
     void onDownloadPngRequested(QWebEngineDownloadItem *item);
 
 private slots:
+    void on_pbShowGeometry_clicked();
     void on_cbShowTop_toggled(bool checked);
     void on_cbColor_toggled(bool checked);
     void on_pbSaveAs_clicked();
@@ -116,24 +121,30 @@ private slots:
     void on_cbWireFrame_toggled(bool checked);
     void on_cbLimitVisibility_clicked();
     void on_sbLimitVisibility_editingFinished();
+    void on_pbCameraDialog_clicked();
 
 private:
-  MainWindow* MW;
-  Ui::GeometryWindowClass *ui;
-  RasterWindowBaseClass *RasterWindow = 0;
+  DetectorClass      & Detector;
+  ASimulationManager & SimulationManager;
+
+  Ui::GeometryWindowClass * ui;
+  RasterWindowBaseClass * RasterWindow = nullptr;
+
+  ACameraControlDialog * CameraControl = nullptr;
 
 #ifdef __USE_ANTS_JSROOT__
     QWebEngineView * WebView = nullptr;
 #endif
 
-  bool TMPignore = false;
+  int GeoMarkerSize  = 2;
+  int GeoMarkerStyle = 6;
 
-  //flags
+  bool TMPignore = false;
   bool BarShown = true;
   bool ShowTop = false;
   bool ColorByMaterial = false;
 
-  //draw on PMs related
+  //draw on PMs/Monitors related
   QVector<QString> SymbolMap;
   QVector< QVector < double > > numbersX;
   QVector< QVector < double > > numbersY;
@@ -142,8 +153,13 @@ private:
   void doChangeLineWidth(int deltaWidth);
   void showWebView();
   void prepareGeoManager(bool ColorUpdateAllowed = true);
-  void adjustGeoAttributes(TGeoVolume *vol, int Mode, int transp, bool adjustVis, int visLevel, int currentLevel);
+  void adjustGeoAttributes(TGeoVolume * vol, int Mode, int transp, bool adjustVis, int visLevel, int currentLevel);
   void generateSymbolMap();
+
+signals:
+  void requestUpdateRegisteredGeoManager();
+  void requestUpdateMaterialListWidget();
+  void requestShowNetSettings();
 };
 
 #endif // GEOMETRYWINDOWCLASS_H

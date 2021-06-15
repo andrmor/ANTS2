@@ -1,6 +1,11 @@
 #include "amonitordelegateform.h"
 #include "ui_amonitordelegateform.h"
 #include "ageoobject.h"
+#include "ageotype.h"
+#include "aonelinetextedit.h"
+#include "ageobasedelegate.h"
+#include "ageoconsts.h"
+#include "amessage.h"
 
 #include <QDebug>
 
@@ -16,13 +21,29 @@ AMonitorDelegateForm::AMonitorDelegateForm(QStringList particles, QWidget *paren
 
     ui->cobEnergyUnits->setCurrentIndex(2);
 
+    leSize1 = new AOneLineTextEdit(); ui->laySize->insertWidget(1, leSize1);
+    leSize2 = new AOneLineTextEdit(); ui->laySize->insertWidget(4, leSize2);
+
+    leX     = new AOneLineTextEdit(); ui->layX->insertWidget(1, leX);
+    leY     = new AOneLineTextEdit(); ui->layY->insertWidget(1, leY);
+    leZ     = new AOneLineTextEdit(); ui->layZ->insertWidget(1, leZ);
+
+    lePhi   = new AOneLineTextEdit(); ui->layOrientation->addWidget(lePhi);
+    leTheta = new AOneLineTextEdit(); ui->layOrientation->addWidget(leTheta);
+    lePsi   = new AOneLineTextEdit(); ui->layOrientation->addWidget(lePsi);
+
+    for (AOneLineTextEdit * le : {leSize1, leSize2, leX, leY, leZ, lePhi, leTheta, lePsi})
+    {
+        AGeoBaseDelegate::configureHighligherAndCompleter(le);
+        connect(le, &AOneLineTextEdit::textChanged, this, &AMonitorDelegateForm::contentChanged);
+    }
+
     //installing double validators for edit boxes
     QDoubleValidator* dv = new QDoubleValidator(this);
     dv->setNotation(QDoubleValidator::ScientificNotation);
-    QList<QLineEdit*> list = this->findChildren<QLineEdit *>();
-    foreach(QLineEdit *w, list)
-        if (w->objectName().startsWith("led"))
-            w->setValidator(dv);
+    QList<QLineEdit*> list = findChildren<QLineEdit*>();
+    for (QLineEdit * w : list)
+        if (w->objectName().startsWith("led")) w->setValidator(dv);
 }
 
 AMonitorDelegateForm::~AMonitorDelegateForm()
@@ -43,15 +64,17 @@ bool AMonitorDelegateForm::updateGUI(const AGeoObject *obj)
     ui->leName->setText(obj->Name);
     if (config.shape == 0) ui->cobShape->setCurrentIndex(0);
     else ui->cobShape->setCurrentIndex(1);
-    ui->ledSize1->setText( QString::number(2.0*config.size1));
-    ui->ledSize2->setText( QString::number(2.0*config.size2));
 
-    ui->ledX->setText(QString::number(obj->Position[0]));
-    ui->ledY->setText(QString::number(obj->Position[1]));
-    ui->ledZ->setText(QString::number(obj->Position[2]));
-    ui->ledPhi->setText(QString::number(obj->Orientation[0]));
-    ui->ledTheta->setText(QString::number(obj->Orientation[1]));
-    ui->ledPsi->setText(QString::number(obj->Orientation[2]));
+    leSize1->setText( config.str2size1.isEmpty() ? QString::number(2.0*config.size1) : config.str2size1);
+    leSize2->setText( config.str2size2.isEmpty() ? QString::number(2.0*config.size2) : config.str2size2);
+
+    leX->    setText( obj->PositionStr[0].isEmpty() ? QString::number(obj->Position[0]) : obj->PositionStr[0]);
+    leY->    setText( obj->PositionStr[1].isEmpty() ? QString::number(obj->Position[1]) : obj->PositionStr[1]);
+    leZ->    setText( obj->PositionStr[2].isEmpty() ? QString::number(obj->Position[2]) : obj->PositionStr[2]);
+
+    lePhi->  setText( obj->OrientationStr[0].isEmpty() ? QString::number(obj->Orientation[0]) : obj->OrientationStr[0]);
+    leTheta->setText( obj->OrientationStr[1].isEmpty() ? QString::number(obj->Orientation[1]) : obj->OrientationStr[1]);
+    lePsi->  setText( obj->OrientationStr[2].isEmpty() ? QString::number(obj->Orientation[2]) : obj->OrientationStr[2]);
 
     int sens = 0;
     if (config.bLower && !config.bUpper) sens = 1;
@@ -97,35 +120,73 @@ bool AMonitorDelegateForm::updateGUI(const AGeoObject *obj)
     return true;
 }
 
-const QString AMonitorDelegateForm::getName() const
+QString AMonitorDelegateForm::getName() const
 {
     return ui->leName->text();
 }
 
-void AMonitorDelegateForm::updateObject(AGeoObject *obj) const
+bool AMonitorDelegateForm::updateObject(AGeoObject * obj)
 {
-    obj->Name = ui->leName->text();
-
     ATypeMonitorObject* mon = dynamic_cast<ATypeMonitorObject*>(obj->ObjectType);
-    AMonitorConfig& config = mon->config;
+    AMonitorConfig & config = mon->config;
+
+    const AGeoConsts & GC = AGeoConsts::getConstInstance();
+    QString ErrorStr;
+
+    QString strSize1 = leSize1->text();
+    double Size1;
+    bool ok = GC.updateParameter(ErrorStr, strSize1, Size1);
+    if (!ok)
+    {
+        message(ErrorStr, this);
+        return false;
+    }
+
+    QString strSize2 = leSize2->text();
+    double Size2;
+    ok = GC.updateParameter(ErrorStr, strSize2, Size2);
+    if (!ok)
+    {
+        message(ErrorStr, this);
+        return false;
+    }
+
+    QVector<QString> tempStrs(6);
+    QVector<double>  tempDoubles(6);
+    ok = true;
+    ok = ok && AGeoBaseDelegate::processEditBox(leX,     tempDoubles[0], tempStrs[0], this->parentWidget());
+    ok = ok && AGeoBaseDelegate::processEditBox(leY,     tempDoubles[1], tempStrs[1], this->parentWidget());
+    ok = ok && AGeoBaseDelegate::processEditBox(leZ,     tempDoubles[2], tempStrs[2], this->parentWidget());
+    ok = ok && AGeoBaseDelegate::processEditBox(lePhi,   tempDoubles[3], tempStrs[3], this->parentWidget());
+    ok = ok && AGeoBaseDelegate::processEditBox(leTheta, tempDoubles[4], tempStrs[4], this->parentWidget());
+    ok = ok && AGeoBaseDelegate::processEditBox(lePsi,   tempDoubles[5], tempStrs[5], this->parentWidget());
+    if (!ok) return false;
+
+
+    // ---- all checks are passed, can assign values now ----
+
+    obj->Name = getName();
+
     config.shape = ui->cobShape->currentIndex();
-    config.size1 = 0.5*ui->ledSize1->text().toDouble();
-    config.size2 = 0.5*ui->ledSize2->text().toDouble();
+    config.size1 = Size1; config.str2size1 = strSize1;
+    config.size2 = Size2; config.str2size2 = strSize2;
     obj->updateMonitorShape();
 
-    obj->Position[0] = ui->ledX->text().toDouble();
-    obj->Position[1] = ui->ledY->text().toDouble();
-    obj->Position[2] = ui->ledZ->text().toDouble();
-    obj->Orientation[0] = ui->ledPhi->text().toDouble();
-    obj->Orientation[1] = ui->ledTheta->text().toDouble();
-    obj->Orientation[2] = ui->ledPsi->text().toDouble();
+    for (int i = 0; i < 3; i++)
+    {
+        obj->PositionStr[i]    = tempStrs[i];
+        obj->OrientationStr[i] = tempStrs[i+3];
+
+        obj->Position[i]       = tempDoubles[i];
+        obj->Orientation[i]    = tempDoubles[i+3];
+    }
 
     int sens = ui->cobSensitiveDirection->currentIndex();
     switch (sens)
     {
-      case 0: config.bUpper = true; config.bLower = false; break;
-      case 1: config.bUpper = false; config.bLower = true; break;
-      case 2: config.bUpper = true; config.bLower = true; break;
+      case 0: config.bUpper = true;  config.bLower = false; break;
+      case 1: config.bUpper = false; config.bLower = true;  break;
+      case 2: config.bUpper = true;  config.bLower = true;  break;
       default: qWarning() << "Bad sensitive directions!";
     }
 
@@ -140,9 +201,9 @@ void AMonitorDelegateForm::updateObject(AGeoObject *obj) const
         int prsec =  ui->cobPrimarySecondary->currentIndex();
         switch (prsec)
         {
-        case 0: config.bPrimary = true; config.bSecondary = false; break;
-        case 1: config.bPrimary = false; config.bSecondary = true; break;
-        case 2: config.bPrimary = true; config.bSecondary = true; break;
+        case 0: config.bPrimary = true;  config.bSecondary = false; break;
+        case 1: config.bPrimary = false; config.bSecondary = true;  break;
+        case 2: config.bPrimary = true;  config.bSecondary = true;  break;
         default: qWarning() << "Bad primary/secondary selector";
         }
 
@@ -173,6 +234,8 @@ void AMonitorDelegateForm::updateObject(AGeoObject *obj) const
     config.waveTo = ui->ledWaveTo->text().toDouble();
     config.energyTo = ui->ledEnergyTo->text().toDouble();
     config.energyUnitsInHist = ui->cobEnergyUnits->currentIndex();
+
+    return true;
 }
 
 void AMonitorDelegateForm::UpdateVisibility()
@@ -187,7 +250,7 @@ void AMonitorDelegateForm::on_cobShape_currentIndexChanged(int index)
 
     ui->labSize2->setVisible(bRectangular);
     ui->labSize2mm->setVisible(bRectangular);
-    ui->ledSize2->setVisible(bRectangular);
+    leSize2->setVisible(bRectangular);
     ui->labSizeX->setText( (bRectangular ? "Size X:" : "Diameter:") );
 }
 

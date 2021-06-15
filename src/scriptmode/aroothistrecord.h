@@ -29,6 +29,7 @@ public:
 
     void Fill(double val, double weight);
     void Fill2D(double x, double y, double weight);
+    void Fill3D(double x, double y, double z, double weight);
 
     void FillArr(const QVector<double>& val, const QVector<double>& weight);
     void Fill2DArr(const QVector<double>& x, const QVector<double>& y, const QVector<double>& weight);
@@ -50,15 +51,19 @@ public:
     double GetMaximum();
     bool   GetContent(QVector<double> & x, QVector<double> & y) const;
     bool   GetContent2D(QVector<double> & x, QVector<double> & y, QVector<double> & z) const;
+    bool   GetContent3D(QVector<double> & x, QVector<double> & y, QVector<double> & z, QVector<double> & val) const;
     bool   GetUnderflow(double & undeflow) const;
     bool   GetOverflow (double & overflow) const;
+    double GetRandom();
+    QVector<double> GetRandomMultiple(int numRandoms);
 
     bool   is1D() const;
     bool   is2D() const;
+    bool   is3D() const;
 
-    const QVector<double> FitGauss(const QString& options = "");
-    const QVector<double> FitGaussWithInit(const QVector<double>& InitialParValues, const QString options = "");
-    const QVector<double> FindPeaks(double sigma, double threshold);
+    QVector<double> FitGauss(const QString& options = "");
+    QVector<double> FitGaussWithInit(const QVector<double>& InitialParValues, const QString options = "");
+    QVector<double> FindPeaks(double sigma, double threshold);
 
 };
 

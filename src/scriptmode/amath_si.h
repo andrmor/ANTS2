@@ -31,6 +31,7 @@ public slots:
   double exp(double val);
   double floor(double val);
   double log(double val);
+  double log10(double val);
   double max(double val1, double val2);
   double min(double val1, double val2);
   double pow(double val, double power);

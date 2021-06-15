@@ -5,6 +5,7 @@
 
 #include "TH1D.h"
 #include "TH2D.h"
+#include "TH3D.h"
 #include "TF1.h"
 #include "TAxis.h"
 
@@ -143,7 +144,7 @@ void ARootHistRecord::Fill(double val, double weight)
     QMutexLocker locker(&Mutex);
 
     if (Type == "TH1D")
-      {
+    {
         TH1D* h = static_cast<TH1D*>(Object);
         h->Fill(val, weight);
     }
@@ -154,9 +155,20 @@ void ARootHistRecord::Fill2D(double x, double y, double weight)
     QMutexLocker locker(&Mutex);
 
     if (Type == "TH2D")
-      {
+    {
         TH2D* h = static_cast<TH2D*>(Object);
         h->Fill(x, y, weight);
+    }
+}
+
+void ARootHistRecord::Fill3D(double x, double y, double z, double weight)
+{
+    QMutexLocker locker(&Mutex);
+
+    if (Type == "TH3D")
+    {
+        TH3D * h = static_cast<TH3D*>(Object);
+        h->Fill(x, y, z, weight);
     }
 }
 
@@ -375,6 +387,29 @@ bool ARootHistRecord::GetContent2D(QVector<double> & x, QVector<double> & y, QVe
     return true;
 }
 
+bool ARootHistRecord::GetContent3D(QVector<double> &x, QVector<double> &y, QVector<double> &z, QVector<double> &val) const
+{
+    QMutexLocker locker(&Mutex);
+
+    if (!Type.startsWith("TH3")) return false;
+    TH3* h = dynamic_cast<TH3*>(Object);
+    if (!h) return false;
+
+    int numX = h->GetNbinsX();
+    int numY = h->GetNbinsY();
+    int numZ = h->GetNbinsZ();
+    for (int iz = 1; iz <= numZ; iz++)
+        for (int iy = 1; iy <= numY; iy++)
+            for (int ix = 1; ix <= numX; ix++)
+            {
+                x.append(h->GetXaxis()->GetBinCenter(ix));
+                y.append(h->GetYaxis()->GetBinCenter(iy));
+                z.append(h->GetZaxis()->GetBinCenter(iz));
+                val.append(h->GetBinContent(ix, iy, iz));
+            }
+    return true;
+}
+
 bool ARootHistRecord::GetUnderflow(double & undeflow) const
 {
     if (!Type.startsWith("TH1")) return false;
@@ -396,6 +431,27 @@ bool ARootHistRecord::GetOverflow(double & overflow) const
     return true;
 }
 
+double ARootHistRecord::GetRandom()
+{
+    TH1 * h = dynamic_cast<TH1*>(Object);
+    if (!h) return 0;
+
+    return h->GetRandom();
+}
+
+QVector<double> ARootHistRecord::GetRandomMultiple(int numRandoms)
+{
+    QVector<double> res;
+    TH1 * h = dynamic_cast<TH1*>(Object);
+    if (!h) return res;
+
+    res.reserve(numRandoms);
+    for (int i=0; i<numRandoms; i++)
+        res << h->GetRandom();
+
+    return res;
+}
+
 bool ARootHistRecord::is1D() const
 {
     return Type.startsWith("TH1");
@@ -406,7 +462,12 @@ bool ARootHistRecord::is2D() const
     return Type.startsWith("TH2");
 }
 
-const QVector<double> ARootHistRecord::FitGaussWithInit(const QVector<double> &InitialParValues, const QString options)
+bool ARootHistRecord::is3D() const
+{
+    return Type.startsWith("TH3");
+}
+
+QVector<double> ARootHistRecord::FitGaussWithInit(const QVector<double> &InitialParValues, const QString options)
 {
     QMutexLocker locker(&Mutex);
 
@@ -430,7 +491,7 @@ const QVector<double> ARootHistRecord::FitGaussWithInit(const QVector<double> &I
     return res;
 }
 
-const QVector<double> ARootHistRecord::FindPeaks(double sigma, double threshold)
+QVector<double> ARootHistRecord::FindPeaks(double sigma, double threshold)
 {
     QMutexLocker locker(&Mutex);
 
@@ -445,7 +506,7 @@ const QVector<double> ARootHistRecord::FindPeaks(double sigma, double threshold)
     return res;
 }
 
-const QVector<double> ARootHistRecord::FitGauss(const QString &options)
+QVector<double> ARootHistRecord::FitGauss(const QString &options)
 {
     QMutexLocker locker(&Mutex);
 

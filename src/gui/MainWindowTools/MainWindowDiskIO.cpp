@@ -299,38 +299,6 @@ void MainWindow::LoadScanPhotonDistribution(QString fileName)
   ui->pbScanDistrDelete->setEnabled(true);
 }
 
-void MainWindow::LoadDummyPMs(QString DFile)
-{
-  QFile file(DFile);
-
-  if(!file.open(QIODevice::ReadOnly | QFile::Text)) message("Error while opening Dummy PMs file!"+file.fileName()+"\n"+file.errorString(), this);
-  else
-    {
-      //loading
-       QTextStream in(&file);
-       QRegExp rx("(\\ |\\,|\\:|\\t)"); //separators: ' ' or ',' or ':' or '\t'
-       while(!in.atEnd())
-         {
-              QString line = in.readLine();
-              QStringList fields = line.split(rx, QString::SkipEmptyParts);            
-              if (fields.size() == 8)
-                {
-                  APMdummyStructure dpm;
-                  dpm.PMtype = fields[0].toInt();
-                  dpm.UpperLower = fields[1].toInt();
-                  dpm.r[0] = fields[2].toDouble();
-                  dpm.r[1] = fields[3].toDouble();
-                  dpm.r[2] = fields[4].toDouble();
-                  dpm.Angle[0] = fields[5].toDouble();
-                  dpm.Angle[1] = fields[6].toDouble();
-                  dpm.Angle[2] = fields[7].toDouble();
-                  Detector->PMdummies.append(dpm);
-                }
-         }
-       file.close();      
-    }
-}
-
 void MainWindow::on_pbLoadPMcenters_clicked()
 {
   int reg = ui->cobPMarrayRegularity->currentIndex();
@@ -363,11 +331,8 @@ void MainWindow::on_pbLoadPMcenters_clicked()
       for (int i=0; i<x.size(); i++)
         PMar->PositionsAnglesTypes.append(APmPosAngTypeRecord(x[i], y[i], z[i], 0,0,0, 0));
     }
-  MainWindow::ReconstructDetector();
+  ReconstructDetector();
   GeometryWindow->ShowGeometry(false, false);
-  //MainWindow::ShowPMcount();
-  //MainWindow::ClearData();
-  //Owindow->RefreshData();
 }
 
 void MainWindow::on_pbSavePMcenters_clicked()

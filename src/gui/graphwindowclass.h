@@ -26,6 +26,7 @@ class ADrawExplorerWidget;
 class ABasketListWidget;
 class TLegend;
 class TGaxis;
+class AMultiGraphDesigner;
 
 namespace Ui {
 class GraphWindowClass;
@@ -128,6 +129,11 @@ public:
                               Color_t MarkerColor=2, int MarkerStyle=20, int MarkerSize=1,
                               Color_t LineColor=2,   int LineStyle=1,    int LineWidth=2);
 
+    void configureGraph(TGraph * graph, const QString & GraphTitle,
+                        const QString & XTitle, const QString & YTitle,
+                        int MarkerColor=2, int MarkerStyle=20, int MarkerSize=1,
+                        int LineColor=2,   int LineStyle=1,    int LineWidth=2) const;
+
     void AddLine(double x1, double y1, double x2, double y2, int color, int width, int style);
     void AddArrow(double x1, double y1, double x2, double y2, int color, int width, int style);
 
@@ -137,9 +143,9 @@ public:
     bool Extraction();
 
     void ClearBasket();
-    TObject *GetMainPlottedObject();
-    void SaveGraph(QString fileName);    
-    void EnforceOverlayOff();    
+    TObject * GetMainPlottedObject();
+    void SaveGraph(const QString & fileName);
+    void EnforceOverlayOff();
     void ClearDrawObjects_OnShutDown(); //precvents crash on shut down
     void RegisterTObject(TObject* obj);
 
@@ -153,10 +159,13 @@ public:
     void MakeCopyOfActiveBasketId();
     void RestoreBasketActiveId();
     void ClearCopyOfActiveBasketId();
-    QString & getLastOpendDir();    
+    QString & getLastOpendDir();
     void ShowProjectionTool();
     TLegend * AddLegend();
     void HighlightUpdateBasketButton(bool flag);
+
+    QString UseProjectionTool(const QString & option);
+    void    ConfigureProjectionTool(double x0, double y0, double dx, double dy, double angle);
 
 protected:
     void mouseMoveEvent(QMouseEvent *event);
@@ -241,7 +250,7 @@ private slots:
     void on_ledRulerDY_editingFinished();
     void on_cbShowFitParameters_toggled(bool checked);
     void on_pbXaveraged_clicked();
-    void on_pbYaveraged_clicked();    
+    void on_pbYaveraged_clicked();
     void on_pbAddText_clicked();
     void on_pbRemoveLegend_clicked();
     void on_ledAngle_customContextMenuRequested(const QPoint &pos);
@@ -265,6 +274,9 @@ private slots:
 
     void on_cbShowCross_toggled(bool checked);
 
+    void on_actionOpen_MultiGraphDesigner_triggered();
+
+    void onExternalBasketChange();
 private:
     MainWindow *MW;
     Ui::GraphWindowClass *ui;
@@ -272,6 +284,7 @@ private:
     ADrawExplorerWidget * Explorer = nullptr; //owns
     bool ExtractionCanceled = false;
     int LastOptStat = 1111;
+    AMultiGraphDesigner * MGDesigner = nullptr;
 
     QVector<ADrawObject> DrawObjects;  //always local objects -> can have a copy from the Basket
     QVector<ADrawObject> PreviousDrawObjects; //last draw made from outside of the graph window
@@ -299,18 +312,21 @@ private:
     void changeOverlayMode(bool bOn);
 
     void switchToBasket(int index);
-    void UpdateBasketGUI();    
+    void UpdateBasketGUI();
     void Basket_DrawOnTop(int row);
 
     void ShowProjection(QString type);
     void UpdateGuiControlsForMainObject(const QString &ClassName, const QString & options);
     void contextMenuForBasketMultipleSelection(const QPoint &pos);
     void removeAllSelectedBasketItems();
+    void requestMultidraw();
     void applyTemplate(bool bAll);
     void updateSecondaryAxis(TGaxis *gaxis, const char *opt);
     void showHintInStatus();
     void setShowCursorPosition(bool flag);
     void fixGraphFrame();
+    void updateLogScaleFlags(QVector<ADrawObject> & drawObjects) const;
+    void createMGDesigner();
 };
 
 #endif // GRAPHWINDOWCLASS_H

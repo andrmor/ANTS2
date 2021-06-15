@@ -12,10 +12,12 @@
 #include "TH1D.h"
 #include "TH1.h"
 #include "TH2D.h"
+#include "TH3D.h"
 #include "TH2.h"
 #include "TF2.h"
 #include "TGraph.h"
 #include "TGraphErrors.h"
+#include "TGraph2D.h"
 #include "TF1.h"
 #include "TFile.h"
 #include "TKey.h"
@@ -70,6 +72,34 @@ void AInterfaceToHist::NewHist2D(const QString& HistName, int binsX, double star
 
     TH2D* hist = new TH2D("", HistName.toLatin1().data(), binsX, startX, stopX, binsY, startY, stopY);
     ARootHistRecord* rec = new ARootHistRecord(hist, HistName, "TH2D");
+
+    bool bOK = TmpHub->Hists.append(HistName, rec, bAbortIfExists);
+    if (!bOK)
+    {
+        delete rec;
+        abort("Histogram " + HistName+" already exists!");
+    }
+    else
+    {
+        hist->GetYaxis()->SetTitleOffset(1.30f);
+    }
+}
+
+void AInterfaceToHist::NewHist(const QString &HistName, int binsX, double startX, double stopX, int binsY, double startY, double stopY)
+{
+    NewHist2D(HistName, binsX, startX, stopX, binsY, startY, stopY);
+}
+
+void AInterfaceToHist::NewHist(const QString &HistName, int binsX, double startX, double stopX, int binsY, double startY, double stopY, int binsZ, double startZ, double stopZ)
+{
+    if (!bGuiThread)
+    {
+        abort("Threads cannot create/delete/draw histograms!");
+        return;
+    }
+
+    TH3D * hist = new TH3D("", HistName.toLatin1().data(), binsX, startX, stopX, binsY, startY, stopY, binsZ, startZ, stopZ);
+    ARootHistRecord* rec = new ARootHistRecord(hist, HistName, "TH3D");
 
     bool bOK = TmpHub->Hists.append(HistName, rec, bAbortIfExists);
     if (!bOK)
@@ -190,8 +220,8 @@ void AInterfaceToHist::SetYLabelProperties(const QString &HistName, double size,
 void AInterfaceToHist::Fill(const QString &HistName, double val, double weight)
 {
     ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
-    if (!r)
-        abort("Histogram " + HistName + " not found!");
+    if (!r || r->getType() != "TH1D")
+        abort("1D histogram " + HistName + " not found!");
     else
         r->Fill(val, weight);
 }
@@ -199,10 +229,24 @@ void AInterfaceToHist::Fill(const QString &HistName, double val, double weight)
 void AInterfaceToHist::Fill2D(const QString &HistName, double x, double y, double weight)
 {
     ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
-    if (!r)
-        abort("Histogram " + HistName + " not found!");
+    if (!r || r->getType() != "TH2D")
+        abort("2D histogram " + HistName + " not found!");
     else
         r->Fill2D(x, y, weight);
+}
+
+void AInterfaceToHist::Fill(const QString &HistName, double x, double y, double weight)
+{
+    Fill2D(HistName, x, y, weight);
+}
+
+void AInterfaceToHist::Fill(const QString &HistName, double x, double y, double z, double weight)
+{
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    if (!r || r->getType() != "TH3D")
+        abort("3D histogram " + HistName + " not found!");
+    else
+        r->Fill3D(x, y, z, weight);
 }
 
 void AInterfaceToHist::Smooth(const QString &HistName, int times)
@@ -544,10 +588,37 @@ double AInterfaceToHist::GetMaximum(const QString &HistName)
     if (!r)
     {
         abort("Histogram " + HistName + " not found!");
+        return 0;
+    }
+
+    return r->GetMaximum();
+}
+
+double AInterfaceToHist::GetRandom(const QString &HistName)
+{
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    if (!r)
+    {
+        abort("Histogram " + HistName + " not found!");
         return 1.0;
     }
-    else
-        return r->GetMaximum();
+
+    return r->GetRandom();
+}
+
+QVariantList AInterfaceToHist::GetRandomMultiple(const QString &HistName, int numRandoms)
+{
+    QVariantList vl;
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    if (!r)
+    {
+        abort("Histogram " + HistName + " not found!");
+        return vl;
+    }
+
+    QVector<double> vec = r->GetRandomMultiple(numRandoms);
+    for (const double & d : vec) vl.append(d);
+    return vl;
 }
 
 void AInterfaceToHist::Scale(const QString& HistName, double ScaleIntegralTo, bool DividedByBinWidth)
@@ -713,7 +784,21 @@ QVariantList AInterfaceToHist::GetContent(const QString& HistName)
                 }
             }
         }
-        else abort("GetContent method is currently implemented only for TH1D and TH2D histograms");
+        else if (r->is3D())
+        {
+            QVector<double> x, y, z, val;
+            const bool bOK = r->GetContent3D(x, y, z, val);
+            if (bOK)
+            {
+                for (int i=0; i<x.size(); i++)
+                {
+                    QVariantList el;
+                    el << x.at(i) << y.at(i) << z.at(i) << val.at(i);
+                    vl.push_back(el);
+                }
+            }
+        }
+        else abort("GetContent method is currently implemented only for TH1D, TH2D and TH3D histograms");
     }
     return vl;
 }
@@ -798,6 +883,30 @@ void AInterfaceToGraph::NewGraphErrors(const QString &GraphName)
 
     TGraphErrors * gr = new TGraphErrors();
     ARootGraphRecord* rec = new ARootGraphRecord(gr, GraphName, "TGraphErrors");
+    bool bOK = TmpHub->Graphs.append(GraphName, rec, bAbortIfExists);
+    if (!bOK)
+    {
+        delete gr;
+        delete rec;
+        abort("Graph "+GraphName+" already exists!");
+    }
+    else
+    {
+        gr->SetFillColor(0);
+        gr->SetFillStyle(0);
+    }
+}
+
+void AInterfaceToGraph::NewGraph2D(const QString &GraphName)
+{
+    if (!bGuiThread)
+    {
+        abort("Threads cannot create/delete/draw graphs!");
+        return;
+    }
+
+    TGraph2D * gr = new TGraph2D();
+    ARootGraphRecord* rec = new ARootGraphRecord(gr, GraphName, "TGraph2D");
     bool bOK = TmpHub->Graphs.append(GraphName, rec, bAbortIfExists);
     if (!bOK)
     {
@@ -1061,6 +1170,15 @@ void AInterfaceToGraph::AddPoints(QString GraphName, QVariantList v)
         abort("Graph "+GraphName+" not found!");
     else
         r->AddPoints(xArr, yArr, xErrArr, yErrArr);
+}
+
+void AInterfaceToGraph::AddPoint2D(QString GraphName, double x, double y, double z)
+{
+    ARootGraphRecord* r = dynamic_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
+    if (!r)
+        abort("Graph "+GraphName+" not found!");
+    else
+        r->AddPoint2D(x, y, z);
 }
 
 void AInterfaceToGraph::SetYRange(const QString &GraphName, double min, double max)

@@ -12,7 +12,7 @@ namespace GuiUtils
 {
     void SetWindowFont(QMainWindow *w, int ptsize);
     QIcon createColorCircleIcon(QSize size, Qt::GlobalColor color);
-    void AssureWidgetIsWithinVisibleArea(QWidget* w);
+    bool AssureWidgetIsWithinVisibleArea(QWidget* w);
 }
 
 class myQGraphicsView : public QGraphicsView

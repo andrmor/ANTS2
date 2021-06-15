@@ -1,4 +1,3 @@
-//ANTS2
 #include "reconstructionwindow.h"
 #include "ui_reconstructionwindow.h"
 #include "mainwindow.h"
@@ -47,7 +46,6 @@
 #include "neuralnetworkswindow.h"
 #endif
 
-//Qt
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QVBoxLayout>
@@ -58,7 +56,6 @@
 #include <QMenu>
 #include <QInputDialog>
 
-//Root
 #include "TMath.h"
 #include "TGeoManager.h"
 #include "TVirtualGeoTrack.h"
@@ -81,19 +78,17 @@
 
 ReconstructionWindow::~ReconstructionWindow()
 {
-  if (vo) delete vo;
-  vo = 0;
   if (dialog)
-    {
+  {
       disconnect(vo, SIGNAL(PMselectionChanged(QVector<int>)), this, SLOT(onSelectionChange(QVector<int>)));
-      delete dialog;
-      dialog = 0;
-    }
+      delete dialog; dialog = nullptr;
+  }
+  delete vo; vo = nullptr;
 
   delete ui;
-  if (CorrCutLine) delete CorrCutLine;
-  if (CorrCutEllipse) delete CorrCutEllipse;
-  if (CorrCutPolygon) delete CorrCutPolygon;
+  delete CorrCutLine;
+  delete CorrCutEllipse;
+  delete CorrCutPolygon;
 
   for (int i=0; i<CorrelationFilters.size(); i++)
       delete CorrelationFilters[i];
@@ -101,54 +96,47 @@ ReconstructionWindow::~ReconstructionWindow()
   delete tmpCorrFilter;
 
   if (MW->GainWindow)
-    {
+  {
       //qDebug()<<"  -<Deleting gain evaluation window";
       MW->GainWindow->hide();
-      delete MW->GainWindow->parent();     
-      MW->GainWindow = 0;
+      delete MW->GainWindow->parent(); MW->GainWindow = nullptr;
       //qDebug() << "  --<Deleted";
-    }
+  }
   //qDebug() << " -<Destructor of Reconstruction window finished";
 }
 
-void ReconstructionWindow::writeToJson(QJsonObject &json) //fVerbose - saving as config including LRFs, gui info and info on all algorithms
+void ReconstructionWindow::writeToJson(QJsonObject & json)
 {
-  ReconstructionWindow::updateReconSettings();
-  ReconstructionWindow::updateFilterSettings();
+  updateReconSettings();
+  updateFilterSettings();
 
   QJsonObject js = MW->Config->JSON["ReconstructionConfig"].toObject();
 
-  //ReconstructionWindow::writePMrelatedInfoToJson(js);
   MW->Detector->PMgroups->writeSensorGroupsToJson(js);
 
   QJsonObject jsLRF;
   MW->lrfwindow->writeToJson(jsLRF);  //LRF make settings
   js["LRFmakeJson"] = jsLRF;
 
-  //QJsonObject js1;
-  //js1["ReconstructionConfig"] = js;
-  //SaveJsonToFile(js, "ReconstructionConfig.json");
-
   writeLrfModuleSelectionToJson(js);
 
   //old module LRFs
   if (Detector->LRFs->isAllLRFsDefined(true))
-    {
+  {
       QJsonObject LRFjson;
       Detector->LRFs->saveActiveLRFs_v2(LRFjson);
       js["ActiveLRF"] = LRFjson;
-    }
-  else
-    if (js.contains("ActiveLRF")) js.remove("ActiveLRF");
+  }
+  else if (js.contains("ActiveLRF")) js.remove("ActiveLRF");
+
   //new module LRFs
   if (Detector->LRFs->isAllLRFsDefined(false))
-    {
+  {
       QJsonObject LRFjson;
       Detector->LRFs->saveActiveLRFs_v3(LRFjson);
       js["ActiveLRFv3"] = LRFjson;
-    }
-  else
-    if (js.contains("ActiveLRFv3")) js.remove("ActiveLRFv3");
+  }
+  else if (js.contains("ActiveLRFv3")) js.remove("ActiveLRFv3");
 
   json["ReconstructionConfig"] = js;
 }
@@ -216,9 +204,9 @@ void ReconstructionWindow::UpdateStatusAllEvents()
 
 void ReconstructionWindow::InitWindow()
 {  
-  ReconstructionWindow::on_pbUpdateFilters_clicked();
-  ReconstructionWindow::on_pbUpdateGainsIndication_clicked();
-  ReconstructionWindow::on_pbCorrUpdateTMP_clicked(); //update correlation filter designer
+  on_pbUpdateFilters_clicked();
+  on_pbUpdateGainsIndication_clicked();
+  on_pbCorrUpdateTMP_clicked(); //update correlation filter designer
   tmpCorrFilter->Active = true;
   CorrelationFilterStructure* NewFilter = new CorrelationFilterStructure(tmpCorrFilter);
   NewFilter->Active = true;
@@ -263,7 +251,7 @@ void ReconstructionWindow::on_sbEventNumberInspect_valueChanged(int arg1)
 
   if (MW->GeometryWindow->isVisible())
     {
-      MW->clearGeoMarkers();
+      MW->GeometryWindow->ClearGeoMarkers();
       MW->Detector->GeoManager->ClearTracks();
 
       if (!EventsDataHub->isScanEmpty()) ReconstructionWindow::UpdateSimVizData(arg1);
@@ -272,7 +260,7 @@ void ReconstructionWindow::on_sbEventNumberInspect_valueChanged(int arg1)
           GeoMarkerClass* marks = new GeoMarkerClass("Recon", 6, 2, kRed);
           for (int i=0; i<result->Points.size(); i++)
             marks->SetNextPoint(result->Points[i].r[0], result->Points[i].r[1], result->Points[i].r[2]);         
-          MW->GeoMarkers.append(marks);
+          MW->GeometryWindow->GeoMarkers.append(marks);
         }
       MW->GeometryWindow->ShowGeometry(false);  //to clear view
       MW->GeometryWindow->DrawTracks(); //has to use ShowTracks since if there is continuos energy deposition - tracks are used for inidication
@@ -289,14 +277,14 @@ void ReconstructionWindow::VisualizeScan(int iev)
 {
   GeoMarkerClass* marks;
   bool fAppend;
-  if (MW->GeoMarkers.isEmpty() || MW->GeoMarkers.last()->Type != "Scan")
+  if (MW->GeometryWindow->GeoMarkers.isEmpty() || MW->GeometryWindow->GeoMarkers.last()->Type != "Scan")
     { //previous marker was not scan, so making new one
       marks = new GeoMarkerClass("Scan", 6, 2, kBlue);
       fAppend = true;
     }
   else
     { //reusing old scan marker, just add the new point. This way its is MUCH faster to remove markers if one has ~100k o them.
-      marks = MW->GeoMarkers.last();
+      marks = MW->GeometryWindow->GeoMarkers.last();
       fAppend = false;
     }
 
@@ -320,12 +308,12 @@ void ReconstructionWindow::VisualizeScan(int iev)
         marks->SetNextPoint(EventsDataHub->Scan[iev]->Points[j].r[0], EventsDataHub->Scan[iev]->Points[j].r[1], EventsDataHub->Scan[iev]->Points[j].r[2]);
     }  
 
-  if (fAppend) MW->GeoMarkers.append(marks);
+  if (fAppend) MW->GeometryWindow->GeoMarkers.append(marks);
 }
 
 void ReconstructionWindow::on_pbClearPositions_clicked()
 {
-    MW->clearGeoMarkers();
+    MW->GeometryWindow->ClearGeoMarkers();
     MW->GeometryWindow->ShowGeometry(false);
 }
 
@@ -372,7 +360,7 @@ const QString ReconstructionWindow::ShowPositions(int Rec_True, bool fOnlyIfWind
     }
 
     MW->Detector->GeoManager->ClearTracks(); //tracks could be used for indication (if continuous deposition)
-    MW->clearGeoMarkers(Rec_True+1);
+    MW->GeometryWindow->ClearGeoMarkers(Rec_True + 1);
 
     int goodCounter = 0;
     int everyPeriod = ui->sbShowEventsEvery->value();
@@ -426,7 +414,7 @@ const QString ReconstructionWindow::ShowPositions(int Rec_True, bool fOnlyIfWind
                 if (goodCounter > UpperLimit) break;
             }
       }
-    MW->GeoMarkers.append(marks);
+    MW->GeometryWindow->GeoMarkers.append(marks);
 
     MW->GeometryWindow->show();
     MW->GeometryWindow->raise();
@@ -569,7 +557,7 @@ void ReconstructionWindow::VisualizeEnergyVector(int eventId)
 //     qDebug()<<EV.last()->r[0]<< EV.last()->r[1]<< EV.last()->r[2];
     }
 
-  MW->GeoMarkers.append(marks);
+  MW->GeometryWindow->GeoMarkers.append(marks);
 }
 
 void ReconstructionWindow::VisualizeScan()
@@ -6248,7 +6236,7 @@ void ReconstructionWindow::showSensorGroup(int igroup)
 void ReconstructionWindow::on_leSpF_LimitToObject_textChanged(const QString &/*arg1*/)
 {
     bool fFound = (ui->cbSpF_LimitToObject->isChecked()) ?
-         Detector->Sandwich->isVolumeExist(ui->leSpF_LimitToObject->text()) : true;
+         Detector->Sandwich->isVolumeExistAndActive(ui->leSpF_LimitToObject->text()) : true;
 
     QPalette palette = ui->leSpF_LimitToObject->palette();
     palette.setColor(QPalette::Text, (fFound ? Qt::black : Qt::red) );

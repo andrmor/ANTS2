@@ -160,7 +160,7 @@ double LRFcomposite::fit(int npts, const double *x, const double *y, const doubl
 // Fitting can work in two modes (selected by fit_all private variable):
 //    I - fit all, i.e. fitting each LRF in turn
 //    II - fit only last
-    int residual;
+    int residual = 0;
     for (int i=0; i<(int)lrfdeck.size(); i++) {
         if (fit_all || i == lrfdeck.size()-1)
             residual = lrfdeck[i]->fit(va.size(), &vx[0], &vy[0], &vz[0], &va[0], grid);

@@ -9,11 +9,18 @@ AFarm_si::AFarm_si(const QJsonObject & Config, AGridRunner & GridRunner) :
     AScriptInterface(), Config(Config), GridRunner(GridRunner)
 {
     H["getServers"] = "Returns the list of all configured servers\nFormat: [ [NumThreads1, SpeedFactor1], [NumThreads2, SpeedFactor2], ... ])";
+    H["evaluateScript"] = "Evaluate the script on the ants2 farm. The user has to provide one or both (in this case mathing length) of:\n"
+                          "1) an array of per-worker resources\n"
+                          "2) an array of per-worker file names (the files will be automatically sent to the remote servers)\n"
+                          "Each remote worker will be attributed with one element of the resources and a file (matching indexes in the arrays)\n"
+                          "On the remote server, the resource is accessed as 'Data' variable\n"
+                          "On the remote server, the uploaded file is saved with the name 'File.dat'";
 }
 
 void AFarm_si::ForceStop()
 {
-    GridRunner.Abort();
+    if (&GridRunner == nullptr) qDebug() << "!-- Grid runner is absent!";
+    else GridRunner.Abort();
 }
 
 void AFarm_si::setTimeout(double Timeout_ms)

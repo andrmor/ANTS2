@@ -1957,6 +1957,7 @@ in basket</string>
     <addaction name="actionSide"/>
     <addaction name="actionFront"/>
     <addaction name="separator"/>
+    <addaction name="actionOpen_MultiGraphDesigner"/>
    </widget>
    <widget class="QMenu" name="menuSize">
     <property name="title">
@@ -2114,6 +2115,11 @@ in basket</string>
   <action name="actionShow_first_drawn_object_context_menu">
    <property name="text">
     <string>Show context menu of the first drawn object</string>
+   </property>
+  </action>
+  <action name="actionOpen_MultiGraphDesigner">
+   <property name="text">
+    <string>Open MultiGraphDesigner</string>
    </property>
   </action>
  </widget>

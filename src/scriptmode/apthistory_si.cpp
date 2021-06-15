@@ -95,6 +95,39 @@ QVariantList APTHistory_SI::cd_getTrackRecord()
     return vl;
 }
 
+QString APTHistory_SI::cd_getProductionProcess()
+{
+    if (Rec)
+    {
+        const AParticleTrackingRecord * parent = Rec->getSecondaryOf();
+        if (!parent) return "";
+
+        const std::vector<AParticleTrackingRecord *> & vecSec = parent->getSecondaries();
+        const int size = (int)vecSec.size();
+        int index = 0;
+        for (;index < size; index++)
+            if (vecSec[index] == Rec) break;
+        if (index == size)
+        {
+            abort("Corruption in secondary record detected: this record not found in parent record");
+            return "";
+        }
+
+        const std::vector<ATrackingStepData *> & vecSteps = parent->getSteps();
+        const int numSteps = (int)vecSteps.size();
+        for (int iS = numSteps - 1; iS > -1; iS--)
+        {
+            const std::vector<int> & thisStepSecs = vecSteps.at(iS)->Secondaries;
+            for (const int & iSec : thisStepSecs)
+                if (iSec == index)
+                    return vecSteps.at(iS)->Process;
+        }
+        abort("Corruption in secondary record detected: secondary not found in the parent record");
+    }
+    else abort("Record not set: use cd_set command");
+    return "";
+}
+
 bool APTHistory_SI::cd_step()
 {
     if (Rec)
@@ -246,6 +279,52 @@ QVariantList APTHistory_SI::cd_getStepRecord()
     return vl;
 }
 
+bool normVector(double * arr)
+{
+    double Norm = 0;
+    for (int i=0 ;i<3; i++) Norm += arr[i] * arr[i];
+    Norm = sqrt(Norm);
+    if (Norm != 0)
+    {
+        for (int i=0; i<3; i++) arr[i] = arr[i]/Norm;
+        return true;
+    }
+    return false;
+}
+
+QVariantList APTHistory_SI::cd_getDirections()
+{
+    QVariantList vl;
+    if (Rec)
+    {
+        if (Step < 0) Step = 0; //forced first step
+
+        QVariantList inDir;
+        QVariantList outDir;
+        double delta[3];
+        const ATrackingStepData * thisStep = Rec->getSteps().at(Step);
+        if (Step != 0)
+        {
+            const ATrackingStepData * lastStep = Rec->getSteps().at(Step-1);
+            for (int i=0; i<3; i++) delta[i] = thisStep->Position[i] - lastStep->Position[i];
+            bool ok = normVector(delta);
+            if (ok) inDir << delta[0] << delta[1] << delta[2];
+        }
+        if (Step != (int)Rec->getSteps().size())
+        {
+            const ATrackingStepData * nextStep = Rec->getSteps().at(Step+1);
+            for (int i=0; i<3; i++) delta[i] = nextStep->Position[i] - thisStep->Position[i];
+            bool ok = normVector(delta);
+            if (ok) outDir << delta[0] << delta[1] << delta[2];
+        }
+        vl.push_back(inDir);
+        vl.push_back(outDir);
+    }
+    else abort("Record not set: use cd_set command");
+
+    return vl;
+}
+
 int APTHistory_SI::cd_countSteps()
 {
     if (Rec) return Rec->getSteps().size();
@@ -389,6 +468,18 @@ void APTHistory_SI::setToIndex(int volumeIndex)
     Criteria->ToVolIndex = volumeIndex;
 }
 
+void APTHistory_SI::setOnlyCreated()
+{
+    Criteria->bCreated = true;
+    Criteria->bEscaping = false;
+}
+
+void APTHistory_SI::setOnlyEscaping()
+{
+    Criteria->bEscaping = true;
+    Criteria->bCreated = false;
+}
+
 QVariantList APTHistory_SI::findParticles()
 {
     AHistorySearchProcessor_findParticles p;
@@ -406,9 +497,16 @@ QVariantList APTHistory_SI::findParticles()
     return vl;
 }
 
-QVariantList APTHistory_SI::findProcesses()
+QVariantList APTHistory_SI::findProcesses(int All0_WithDepo1_TrackEnd2)
 {
-    AHistorySearchProcessor_findProcesses p;
+    if (All0_WithDepo1_TrackEnd2 < 0 || All0_WithDepo1_TrackEnd2 > 2)
+    {
+        abort("Bad selector for findProcess method");
+        return QVariantList();
+    }
+    AHistorySearchProcessor_findProcesses::SelectionMode mode = static_cast<AHistorySearchProcessor_findProcesses::SelectionMode>(All0_WithDepo1_TrackEnd2);
+
+    AHistorySearchProcessor_findProcesses p(mode);
     Crawler->find(*Criteria, p);
 
     QVariantList vl;

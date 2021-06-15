@@ -5,6 +5,7 @@
 
 #include "TGraph.h"
 #include "TGraphErrors.h"
+#include "TGraph2D.h"
 #include "TAxis.h"
 #include "TAttLine.h"
 #include "TAttMarker.h"
@@ -34,6 +35,26 @@ TObject *ARootGraphRecord::GetObject()
         gr->GetXaxis()->SetTitle(TitleX.toLatin1().data());
         gr->GetYaxis()->SetTitle(TitleY.toLatin1().data());
     }
+    else
+    {
+        TGraph2D * gr = dynamic_cast<TGraph2D*>(Object);
+        if (gr)
+        {
+            gr->SetFillColor(0);
+            gr->SetFillStyle(0);
+
+            gr->SetLineColor(LineColor);
+            gr->SetLineWidth(LineWidth);
+            gr->SetLineStyle(LineStyle);
+            gr->SetMarkerColor(MarkerColor);
+            gr->SetMarkerSize(MarkerSize);
+            gr->SetMarkerStyle(MarkerStyle);
+
+            gr->GetYaxis()->SetTitleOffset(1.30f);
+            gr->GetXaxis()->SetTitle(TitleX.toLatin1().data());
+            gr->GetYaxis()->SetTitle(TitleY.toLatin1().data());
+        }
+    }
 
     return Object;
 }
@@ -51,12 +72,18 @@ void ARootGraphRecord::SetLineProperties(int lineColor, int lineStyle, int lineW
 void ARootGraphRecord::SetTitles(const QString &titleX, const QString &titleY, const QString graphTitle)
 {
     TitleX = titleX; TitleY = titleY;
+
     QMutexLocker locker(&Mutex);
 
-    if (Type == "TGraph" && !graphTitle.isEmpty())
+    if (!graphTitle.isEmpty())
     {
         TGraph* g = dynamic_cast<TGraph*>(Object);
-        if (g) g->SetTitle(graphTitle.toLatin1().data());
+        if (g)
+        {
+            Title = graphTitle;
+            g->SetTitle(graphTitle.toLatin1().data());
+            g->SetName(graphTitle.toLatin1().data());
+        }
     }
 }
 
@@ -223,6 +250,17 @@ void ARootGraphRecord::SetYDivisions(int numDiv)
     {
         TAxis* ax = g->GetYaxis();
         if (ax) ax->SetNdivisions(numDiv);
+    }
+}
+
+void ARootGraphRecord::AddPoint2D(double x, double y, double z)
+{
+    QMutexLocker locker(&Mutex);
+
+    if (Type == "TGraph2D")
+    {
+        TGraph2D * g = dynamic_cast<TGraph2D*>(Object);
+        g->SetPoint(g->GetN(), x, y, z);
     }
 }
 

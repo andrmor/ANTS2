@@ -96,10 +96,7 @@
 MainWindow::~MainWindow()
 {
     qDebug()<<"<Staring destructor for MainWindow";
-    delete histScan;
-
-    qDebug() << "<-Clearing containers with dynamic objects";
-    clearGeoMarkers();
+    delete histScan; histScan = nullptr;
 
     qDebug() << "<-Deleting ui";
     delete ui;
@@ -177,7 +174,7 @@ void MainWindow::ClearData(bool bKeepEnergyVector)
 void MainWindow::onRequestUpdateGuiForClearData()
 {
     //  qDebug() << ">>> Main window: OnClear signal received";
-    clearGeoMarkers();
+    GeometryWindow->ClearGeoMarkers();
     //SimulationManager->clearEnergyVector();
     ui->leoLoadedEvents->setText("");
     ui->leoTotalLoadedEvents->setText("");
@@ -197,22 +194,6 @@ void MainWindow::closeEvent(QCloseEvent *)
 {
    qDebug() << "\n<MainWindow shutdown initiated";
    ShutDown = true;
-
-   /*
-   if (ReconstructionManager->isBusy() || !SimulationManager->fFinished)
-       if (timesTriedToExit < 6)
-       {
-           //qDebug() << "<-Reconstruction manager is busy, terminating and trying again in 100us";
-           ReconstructionManager->requestStop();
-           SimulationManager->StopSimulation();
-           qApp->processEvents();
-           QThread::usleep(100);
-           QTimer::singleShot(100, this, SLOT(close()));
-           timesTriedToExit++;
-           event->ignore();
-           return;
-       }
-   */
 
    ui->pbShowColorCoding->setFocus(); //to finish editing whatever QLineEdit the user can be in - they call on_editing_finish
 
@@ -412,56 +393,10 @@ bool MainWindow::event(QEvent *event)
    return QMainWindow::event(event);
 }
 
-void MainWindow::clearGeoMarkers(int All_Rec_True)
-{    
-  for (int i=GeoMarkers.size()-1; i>-1; i--)
-  {
-      switch (All_Rec_True)
-      {
-        case 1:
-          if (GeoMarkers.at(i)->Type == "Recon")
-          {
-              delete GeoMarkers[i];
-              GeoMarkers.remove(i);
-          }
-          break;
-        case 2:
-          if (GeoMarkers.at(i)->Type == "Scan")
-          {
-              delete GeoMarkers[i];
-              GeoMarkers.remove(i);
-          }
-          break;
-        case 0:
-        default:
-          delete GeoMarkers[i];
-      }
-  }
-
-  if (All_Rec_True == 0) GeoMarkers.clear();
-}
-
-void MainWindow::ShowGeoMarkers()
-{
-    GeometryWindow->ShowGeoMarkers();
-}
-
-void MainWindow::ShowGraphWindow()
-{
-  GraphWindow->ShowAndFocus();  
-}
-
 void MainWindow::on_pbRebuildDetector_clicked()
 {   
-  if (DoNotUpdateGeometry) return; //if bulk update in progress
-  //world size
-  Detector->fWorldSizeFixed = ui->cbFixedTopSize->isChecked();
-  if (Detector->fWorldSizeFixed)
-  {
-    Detector->WorldSizeXY = 0.5*ui->ledTopSizeXY->text().toDouble();
-    Detector->WorldSizeZ = 0.5*ui->ledTopSizeZ->text().toDouble();
-  }
-  MainWindow::ReconstructDetector();
+    if (DoNotUpdateGeometry) return; //if bulk update in progress
+    ReconstructDetector();
 }
 
 // -------materials: visualization--------------
@@ -549,145 +484,15 @@ void MainWindow::ShowPMcount()
   ui->labTotPMs->setText(str);
 }
 
-void MainWindow::PopulatePMarray(int ul, double z, int istart) // ul= 0 upper, 1 = lower; z - z coordinate; istart - first PM fill be added at this index
-{  
-  bool hexagonal;
-  if (Detector->PMarrays[ul].Packing == 0) hexagonal = false; else hexagonal = true;
-  int iX = Detector->PMarrays[ul].NumX;
-  int iY = Detector->PMarrays[ul].NumY;
-  double CtC = Detector->PMarrays[ul].CenterToCenter;
-  double CtCbis = CtC*cos(30.*3.14159/180.);
-  int rings = Detector->PMarrays[ul].NumRings;
-  bool XbyYarray = !Detector->PMarrays[ul].fUseRings;
-  double Psi = 0;
-
-  double x, y;
-  double typ = Detector->PMarrays[ul].PMtype;
-
-  int ipos = istart; //where (ipm) insert the next PM
-
-  //populating PM array
-  if (XbyYarray)
-  { //X by Y type of array  
-    if (hexagonal)
-     {
-      for (int j=iY-1; j>-1; j--)
-          for (int i=0; i<iX; i++)
-            {
-              x = CtC*( -0.5*(iX-1) +i  + 0.5*(j%2));
-              y = CtCbis*(-0.5*(iY-1) +j);
-              PMs->insert(ipos, ul,x,y,z,Psi,typ);
-              ipos++;
-            }
-     }
-    else
-     {
-       for (int j=iY-1; j>-1; j--)
-           for (int i=0; i<iX; i++)
-             {
-               x = CtC*(-0.5*(iX-1) +i);
-               y = CtC*(-0.5*(iY-1) +j);
-               PMs->insert(ipos, ul,x,y,z,Psi,typ);
-               ipos++;
-             }
-      }
-  }
-  else
-    { //rings array
-      if (hexagonal) {
-     //   int nPMs = 1; //0 rings = 1 PM
-     //   for (int i=1; i<rings+1; i++) nPMs += 6*i; //every new ring adds 6i PMs
-
-        //qDebug()<<nPMs<<"for rings:"<<rings;
-        PMs->insert(ipos, ul,0,0,z, Psi, typ);
-        ipos++;
-
-        ///int index=PMs->count();
-        //int index = ipos;
-        for (int i=1; i<rings+1; i++)
-          {
-            x = i*CtC;
-            y = 0;
-            PMs->insert(ipos, ul,x,y,z,Psi,typ);
-            ipos++;
-            //qDebug()<<"-*"<<PMx[index]<<PMy[index];
-            //index++;
-
-            for (int j=1; j<i+1; j++) {  //   /
-                x = PMs->X(ipos-1) - 0.5*CtC; //was index
-                y = PMs->Y(ipos-1) - CtCbis;
-                PMs->insert(ipos, ul,x,y,z,Psi,typ);
-                ipos++;
-                // qDebug()<<"/"<<PMx[index]<<PMy[index];
-                //index++;
-            }
-            for (int j=1; j<i+1; j++) {   // -
-                x = PMs->X(ipos-1) - CtC;
-                y = PMs->Y(ipos-1);
-                PMs->insert(ipos, ul,x,y,z,Psi,typ);
-                ipos++;
-                // qDebug()<<"-"<<PMx[index]<<PMy[index];
-                //index++;
-            }
-            for (int j=1; j<i+1; j++) {  // right-down
-                x = PMs->X(ipos-1) - 0.5*CtC;
-                y = PMs->Y(ipos-1) + CtCbis;
-                PMs->insert(ipos, ul,x,y,z,Psi,typ);
-                ipos++;
-                // qDebug()<<"\\"<<PMx[index]<<PMy[index];
-                //index++;
-            }
-            for (int j=1; j<i+1; j++) {  // /
-                x = PMs->X(ipos-1) + 0.5*CtC;
-                y = PMs->Y(ipos-1) + CtCbis;
-                PMs->insert(ipos, ul,x,y,z,Psi,typ);
-                ipos++;
-                //qDebug()<<"/"<<PMx[index]<<PMy[index];
-                //index++;
-            }
-            for (int j=1; j<i+1; j++) {   // -
-                x = PMs->X(ipos-1) + CtC;
-                y = PMs->Y(ipos-1);
-                PMs->insert(ipos, ul,x,y,z,Psi,typ);
-                ipos++;
-                //qDebug()<<"-"<<PMx[index]<<PMy[index];
-                //index++;
-            }
-            for (int j=1; j<i; j++) {  // left-up       //dont do the last step - already positioned PM
-                x = PMs->X(ipos-1) + 0.5*CtC;
-                y = PMs->Y(ipos-1) - CtCbis;
-                PMs->insert(ipos, ul,x,y,z,Psi,typ);
-                ipos++;
-                //qDebug()<<"\\"<<PMx[index]<<PMy[index];
-                //index++;
-            }
-        }
-      }
-      else {
-         //using the same algorithm as X * Y
-         iX = rings*2 + 1;
-         iY = rings*2 + 1;
-
-         for (int j=0; j<iY; j++)
-             for (int i=0; i<iX; i++) {
-                 x = CtC*(-0.5*(iX-1) +i);
-                 y = CtC*(-0.5*(iY-1) +j);
-                 PMs->insert(ipos, ul,x,y,z,Psi,typ);
-                 ipos++;
-             }
-      }
-    }
-}
-
 void MainWindow::on_cbXbyYarray_stateChanged(int arg1)
 {
-        ui->sbNumX->setEnabled(arg1);
-        ui->sbNumY->setEnabled(arg1);
+    ui->sbNumX->setEnabled(arg1);
+    ui->sbNumY->setEnabled(arg1);
 }
 
 void MainWindow::on_cbRingsArray_stateChanged(int arg1)
 {
-     ui->sbPMrings->setEnabled(arg1);
+    ui->sbPMrings->setEnabled(arg1);
 }
 
 void MainWindow::on_pbEditOverride_clicked()
@@ -775,21 +580,7 @@ void MainWindow::on_cobPMdeviceType_currentIndexChanged(int index)
 
 void MainWindow::on_cobPMdeviceType_activated(const QString &/*arg1*/)
 {  //see also method on_cobPMdeviceType_currentIndexChanged(int index)
-    MainWindow::on_pbUpdatePMproperties_clicked();
-}
-
-void MainWindow::CheckSetMaterial(const QString name, QComboBox* cob, QVector<QString>* vec)
-{
-    for (int i=0; i<MpCollection->countMaterials(); i++)
-    {
-        if (!(*MpCollection)[i]->name.compare(name,Qt::CaseSensitive))
-        {
-            cob->setCurrentIndex(i);
-            return;
-        }
-    }
-    //not found
-   vec->append(name);
+    on_pbUpdatePMproperties_clicked();
 }
 
 void MainWindow::on_cbUPM_toggled(bool checked)
@@ -817,10 +608,10 @@ void MainWindow::ToggleUpperLowerPMs()
   else if (!ui->cbUPM->isChecked() && ui->cbLPM->isChecked()) ui->cobUpperLowerPMs->setCurrentIndex(1);
 
   //force-trigger visualization  ***!!!
-  MainWindow::on_cobUpperLowerPMs_currentIndexChanged(ui->cobUpperLowerPMs->currentIndex());
+  on_cobUpperLowerPMs_currentIndexChanged(ui->cobUpperLowerPMs->currentIndex());
 
   if (DoNotUpdateGeometry) return; //if it is triggered during load/init hase
-  MainWindow::on_pbRebuildDetector_clicked();  //rebuild detector
+  on_pbRebuildDetector_clicked();  //rebuild detector
 }
 
 void MainWindow::on_pbRefreshPMArrayData_clicked()
@@ -842,7 +633,6 @@ void MainWindow::on_pbRefreshPMArrayData_clicked()
     }  
   Detector->PMarrays[ul].Regularity = ui->cobPMarrayRegularity->currentIndex();
 
-  //if (ui->cobPMarrayRegularity->currentIndex() < 2) MainWindow::RebuildPmArray();
   if (ui->cobPMarrayRegularity->currentIndex() == 1)
     {
       //there will be no automatic update of the base type in the array, have to do it:
@@ -850,10 +640,8 @@ void MainWindow::on_pbRefreshPMArrayData_clicked()
         if (PMs->at(i).upperLower == ul) PMs->at(i).type = ui->sbPMtypeForGroup->value();
     }
 
-  //if (geometryRW) MainWindow::on_pbCreateCustomConfiguration_clicked();
-  MainWindow::on_pbRebuildDetector_clicked();
+  on_pbRebuildDetector_clicked();
 
-  //MainWindow::ClearData();
   Owindow->RefreshData();
 }
 
@@ -872,7 +660,7 @@ void MainWindow::updatePMArrayDataIndication()
   ui->sbPMtypeForGroup->setValue(Detector->PMarrays[i].PMtype);
   ui->cobPMtypeInArrays->setCurrentIndex(Detector->PMarrays[i].PMtype);
   ui->cobPMarrayRegularity->setCurrentIndex(Detector->PMarrays[i].Regularity);
-  if (!BulkUpdate) MainWindow::on_cobPMarrayRegularity_currentIndexChanged(Detector->PMarrays[i].Regularity); //force update
+  if (!BulkUpdate) on_cobPMarrayRegularity_currentIndexChanged(Detector->PMarrays[i].Regularity); //force update
   ui->cobPacking->setCurrentIndex(Detector->PMarrays[i].Packing);
   QString str;
   str.setNum(Detector->PMarrays[i].CenterToCenter, 'g', 4);
@@ -884,7 +672,7 @@ void MainWindow::updatePMArrayDataIndication()
   ui->cbXbyYarray->setChecked(!Detector->PMarrays[i].fUseRings);
 
   DoNotUpdateGeometry = tmpBool;
-  MainWindow::ShowPMcount();
+  ShowPMcount();
 }
 
 void MainWindow::on_pbRefreshPMproperties_clicked()
@@ -926,8 +714,8 @@ void MainWindow::on_pbRefreshPMproperties_clicked()
     ui->pbShowPDE->setEnabled(type->PDE_lambda.size());
     ui->pbShowPDEbinned->setEnabled(ui->cbWaveResolved->isChecked() && type->PDE_lambda.size());
     ui->pbDeletePDE->setEnabled(type->PDE_lambda.size());
-    MainWindow::RefreshAngularButtons();
-    MainWindow::RefreshAreaButtons();
+    RefreshAngularButtons();
+    RefreshAreaButtons();
     str.setNum(type->AngularN1, 'g', 4);
     ui->ledMediumRefrIndex->setText(str);
 
@@ -977,9 +765,6 @@ void MainWindow::on_pbUpdatePMproperties_clicked()
 
    ReconstructDetector();
    on_pbUpdateSimConfig_clicked();
-
-   //for indication, update PMs binned properties
-   //on_cbAngularSensitive_toggled(ui->cbAngularSensitive->isChecked());
 }
 
 void MainWindow::on_sbPMtype_valueChanged(int arg1)
@@ -988,7 +773,7 @@ void MainWindow::on_sbPMtype_valueChanged(int arg1)
 
   if (DoNotUpdateGeometry) return;
   if (arg1 > PMs->countPMtypes()-1) ui->sbPMtype->setValue(PMs->countPMtypes()-1);
-  MainWindow::on_pbRefreshPMproperties_clicked();
+  on_pbRefreshPMproperties_clicked();
 }
 
 void MainWindow::on_sbPMtypeForGroup_valueChanged(int arg1)
@@ -999,20 +784,19 @@ void MainWindow::on_sbPMtypeForGroup_valueChanged(int arg1)
       return;
     }
   ui->cobPMtypeInArrays->setCurrentIndex(arg1); //save for cross-call
-  //ui->leoPMtypeInArrayTab->setText(PMs->getTypeProperties(arg1)->name);
-  MainWindow::on_pbRefreshPMArrayData_clicked();
+  on_pbRefreshPMArrayData_clicked();
 }
 
 void MainWindow::on_cbXbyYarray_clicked()
 {
     ui->cbRingsArray->toggle();
-    MainWindow::on_pbRefreshPMArrayData_clicked();
+    on_pbRefreshPMArrayData_clicked();
 }
 
 void MainWindow::on_cbRingsArray_clicked()
 {
     ui->cbXbyYarray->toggle();
-    MainWindow::on_pbRefreshPMArrayData_clicked();
+    on_pbRefreshPMArrayData_clicked();
 }
 
 void MainWindow::on_cobUpperLowerPMs_currentIndexChanged(int index)
@@ -1023,7 +807,7 @@ void MainWindow::on_cobUpperLowerPMs_currentIndexChanged(int index)
   if (index == 0) upper = true; else upper = false;
   ui->lineUpperPMs->setVisible(upper);
   ui->lineLowerPMs->setVisible(!upper);
-  if (Detector->PMarrays[index].fActive) MainWindow::on_pbShowPMsArrayRegularData_clicked();
+  if (Detector->PMarrays[index].fActive) on_pbShowPMsArrayRegularData_clicked();
 }
 
 void MainWindow::on_pbRemoveThisPMtype_clicked()
@@ -1036,13 +820,12 @@ void MainWindow::on_pbRemoveThisPMtype_clicked()
 
 void MainWindow::on_pbAddNewPMtype_clicked()
 {
-  MainWindow::AddDefaultPMtype();
+  AddDefaultPMtype();
   ui->sbPMtype->setValue(PMs->countPMtypes()-1); //update of indication is in on_change
 }
 
 void MainWindow::AddDefaultPMtype()
 {
-  //creating a unique name
   QString name = "Type" + QString::number(PMs->countPMtypes());
   bool found;
   do
@@ -1060,8 +843,7 @@ void MainWindow::AddDefaultPMtype()
   APmType *type = new APmType(name);
   PMs->appendNewPMtype(type);
 
-  //updating all comboboxes with PM type names
-  MainWindow::updateCOBsWithPMtypeNames();
+  updateCOBsWithPMtypeNames();
 }
 
 void MainWindow::updateCOBsWithPMtypeNames()
@@ -1120,11 +902,6 @@ void MainWindow::on_cbWaveResolved_toggled(bool checked)
     if (checked) ui->twOption->setTabIcon(1, Rwindow->YellowIcon);
     else         ui->twOption->setTabIcon(1, QIcon());
 
-//    ui->fWaveTests->setEnabled(checked);
-//    ui->fWaveOptions->setEnabled(checked);
-//    ui->fPointSource_Wave->setEnabled(checked);
-//    ui->fDirectOrmat->setEnabled(checked || ui->cbTimeResolved->isChecked());
-
     const int itype = ui->sbPMtype->value();
     const bool bHavePDE = (itype < PMs->countPMtypes() && !PMs->getType(itype)->PDE_lambda.isEmpty());
     ui->pbShowPDEbinned->setEnabled(checked && bHavePDE);
@@ -1135,8 +912,6 @@ void MainWindow::on_cbTimeResolved_toggled(bool checked)
     ui->fTime->setEnabled(checked);
     if (checked) ui->twOption->setTabIcon(0, Rwindow->YellowIcon);
     else         ui->twOption->setTabIcon(0, QIcon());
-//    ui->fPointSource_Time->setEnabled(checked);
-//    ui->fDirectOrmat->setEnabled(ui->cbWaveResolved->isChecked() || ui->cbTimeResolved->isChecked());
 }
 
 void MainWindow::on_pbPMtypeShowCurrent_clicked()
@@ -1166,7 +941,12 @@ void MainWindow::extractGeometryOfLocalScriptWindow()
       ScriptWinY = GenScriptWindow->y();
       ScriptWinW = GenScriptWindow->width();
       ScriptWinH = GenScriptWindow->height();
-    }
+  }
+}
+
+bool MainWindow::isGeant4SimActivated() const
+{
+    return ui->cbGeant4ParticleTracking->isChecked();
 }
 
 void MainWindow::on_ledWaveFrom_editingFinished()
@@ -1180,10 +960,9 @@ void MainWindow::on_ledWaveFrom_editingFinished()
       message("Error in the starting wavelength value, resetted", this);
       return;
     }
-  MainWindow::CorrectWaveTo();
-  //MainWindow::on_cbWaveResolved_toggled(ui->cbWaveResolved->isChecked());
+  CorrectWaveTo();
 
-  MainWindow::on_pbUpdateSimConfig_clicked();
+  on_pbUpdateSimConfig_clicked();
 }
 
 void MainWindow::on_ledWaveTo_editingFinished()
@@ -1197,9 +976,8 @@ void MainWindow::on_ledWaveTo_editingFinished()
       message("Error in the ending wavelength value, resetted", this);
       return;
     }
-   MainWindow::CorrectWaveTo();
-   //MainWindow::on_cbWaveResolved_toggled(ui->cbWaveResolved->isChecked());
-   MainWindow::on_pbUpdateSimConfig_clicked();
+   CorrectWaveTo();
+   on_pbUpdateSimConfig_clicked();
 }
 
 void MainWindow::on_ledWaveStep_editingFinished()
@@ -1213,9 +991,8 @@ void MainWindow::on_ledWaveStep_editingFinished()
       message("Error in the step value, resetted", this);
       return;
     }
-   MainWindow::CorrectWaveTo();
-   //MainWindow::on_cbWaveResolved_toggled(ui->cbWaveResolved->isChecked());
-   MainWindow::on_pbUpdateSimConfig_clicked();
+   CorrectWaveTo();
+   on_pbUpdateSimConfig_clicked();
 }
 
 void MainWindow::CorrectWaveTo()
@@ -1617,18 +1394,6 @@ void MainWindow::on_cobPMarrayRegularity_currentIndexChanged(int index)
     }
 }
 
-int MainWindow::PMArrayType(int ul)
-{
-  //return ui->cobPMarrayRegularity->currentIndex();
-  return Detector->PMarrays[ul].Regularity;
-}
-
-void MainWindow::SetPMarrayType(int ul, int itype)
-{
-  //ui->cobPMarrayRegularity->setCurrentIndex(itype);
-  Detector->PMarrays[ul].Regularity = itype;
-}
-
 void MainWindow::on_sbIndPMnumber_valueChanged(int arg1)
 {
   if (arg1 == 0   &&   PMs->count() ==0) return;
@@ -1693,8 +1458,6 @@ void MainWindow::on_pbIndPMshowInfo_clicked()
         ui->labIndDEStatus->setText("<b>Override</b>");
     }
     ui->ledIndEffectiveDE->setText(str);
-    //ui->lePDEfactorInExplorer->setText( QString::number(PMs->at(ipm).relQE_PDE, 'g', 4) );
-    //ui->leActualPDE_Scalar->setText( QString::number(PMs->getActualPDE(ipm, -1), 'g', 4) );
 
     //Wave-resolved PDE
     if (PMs->isPDEwaveOverriden(ipm))
@@ -2338,7 +2101,7 @@ void MainWindow::DeleteLoadedEvents(bool KeepFileList)
       }
 
     if (Detector->GeoManager) Detector->GeoManager->ClearTracks();    
-    clearGeoMarkers();    
+    GeometryWindow->ClearGeoMarkers();
     Owindow->RefreshData();    
 }
 
@@ -3437,7 +3200,7 @@ void MainWindow::simulationFinished()
         if (SimulationManager->Settings.bOnlyPhotons)
         {
             showTracks = SimulationManager->TrackBuildOptions.bBuildPhotonTracks;
-            clearGeoMarkers();
+            GeometryWindow->ClearGeoMarkers();
             Rwindow->ShowPositions(1, true);
 
             if (ui->cobNodeGenerationMode->currentIndex() == 0 && SimulationManager->isSimulationSuccess())
@@ -4052,7 +3815,7 @@ void MainWindow::on_tabMCcrosstalk_cellChanged(int row, int column)
 void MainWindow::on_leLimitNodesObject_textChanged(const QString &/*arg1*/)
 {
     bool fFound = (ui->cbLimitNodesOutsideObject->isChecked()) ?
-         Detector->Sandwich->isVolumeExist(ui->leLimitNodesObject->text()) : true;
+         Detector->Sandwich->isVolumeExistAndActive(ui->leLimitNodesObject->text()) : true;
 
     QPalette palette = ui->leLimitNodesObject->palette();
     palette.setColor(QPalette::Text, (fFound ? Qt::black : Qt::red) );
@@ -4102,7 +3865,6 @@ void MainWindow::on_ledElNoiseSigma_Norm_editingFinished()
     double newVal = ui->ledElNoiseSigma_Norm->text().toDouble();
     if (newVal < 1.0e-10)
     {
-        newVal = 1.0;
         ui->ledElNoiseSigma_Norm->setText("1.0");
         message("Value has to be > 0", this);
     }
@@ -4446,6 +4208,7 @@ void MainWindow::on_cbGeant4ParticleTracking_toggled(bool checked)
 {
     ui->swNormalOrGeant4->setCurrentIndex((int)checked);
     updateG4ProgressBarVisibility();
+    MIwindow->UpdateGui();
 }
 
 #include "ageant4configdialog.h"
@@ -4522,7 +4285,7 @@ void MainWindow::on_pbNodesFromFileCheckShow_clicked()
         if (SimulationManager->Settings.photSimSet.CustomNodeSettings.Mode == APhotonSim_CustomNodeSettings::CustomNodes)
         {
             Detector->GeoManager->ClearTracks();
-            clearGeoMarkers();
+            GeometryWindow->ClearGeoMarkers();
             GeoMarkerClass* marks = new GeoMarkerClass("Nodes", 6, 2, kBlack);
             int numTop = 0;
             int numTotal = 0;
@@ -4537,7 +4300,7 @@ void MainWindow::on_pbNodesFromFileCheckShow_clicked()
                     node = node->getLinkedNode();
                 }
             }
-            GeoMarkers.append(marks);
+            GeometryWindow->GeoMarkers.append(marks);
             GeometryWindow->ShowGeometry();
             s = QString("First line does not contain '#' -> this is a file with nodes\n\nFound %1 top nodes\n(%2 nodes counting subnodes)").arg(numTop).arg(numTotal);
         }
@@ -4713,6 +4476,7 @@ void MainWindow::on_pbHelpDetectionEfficiency_clicked()
 }
 
 #include "alogconfigdialog.h"
+#include "atrackingdataimporter.h"
 void MainWindow::on_pbOpenLogOptions_clicked()
 {
     ALogConfigDialog* d = new ALogConfigDialog(SimulationManager->LogsStatOptions, this);
@@ -4722,8 +4486,42 @@ void MainWindow::on_pbOpenLogOptions_clicked()
         GlobSetWindow->SetTab(0);
         GlobSetWindow->show();
     }
-    on_pbUpdateSimConfig_clicked();
+    else if (!d->sRequestOpenFile.isEmpty())
+    {
+        SimulationManager->clearTracks();
+        SimulationManager->clearTrackingHistory();
+        EventsDataHub->clear();
 
+        AGeneralSimSettings & GenSimSet = SimulationManager->Settings.genSimSet;
+        ATrackingDataImporter ti(GenSimSet.TrackBuildOptions,
+                                 Detector->MpCollection->getListOfParticleNames(), // check it is safe if in current config there are less particles than in the history
+                                 &SimulationManager->TrackingHistory,
+                                 &SimulationManager->Tracks,
+                                 10000); // !*!
+
+        QFile file(d->sRequestOpenFile);
+        if (!file.open(QIODevice::ReadOnly | QFile::Text))
+        {
+            message("Cannot open file " + d->sRequestOpenFile, this);
+            return;
+        }
+        QTextStream stream(&file);
+        QString firstLine = stream.readLine();
+        const bool bBinary = (!firstLine.startsWith("#0"));
+
+        qDebug() << d->sRequestOpenFile << "  binary?" << bBinary;
+
+        QString ErrorStr = ti.processFile(d->sRequestOpenFile, 0, bBinary);
+        if (!ErrorStr.isEmpty())
+        {
+            message(ErrorStr, this);
+            return;
+        }
+
+        EventsDataHub->addEmptyEvents(SimulationManager->TrackingHistory.size(), PMs->count(), SimulationManager->Settings.genSimSet.TimeBins);
+    }
+
+    on_pbUpdateSimConfig_clicked();
     delete d;
 }
 
@@ -4989,4 +4787,30 @@ void MainWindow::on_pbCND_help_clicked()
             "Photons are generated from the defined bin centers, no 'blurring' is applied.";
 
     message1(s, "Help on spatial in-node distribution tools", this);
+}
+
+void MainWindow::on_cbFixedTopSize_clicked(bool checked)
+{
+    Detector->Sandwich->setWorldSizeFixed(checked);
+    ReconstructDetector();
+}
+
+void MainWindow::on_ledTopSizeXY_editingFinished()
+{
+    double val = 0.5 * ui->ledTopSizeXY->text().toDouble();
+    if (val != Detector->Sandwich->getWorldSizeXY())
+    {
+        Detector->Sandwich->setWorldSizeXY(val);
+        ReconstructDetector();
+    }
+}
+
+void MainWindow::on_ledTopSizeZ_editingFinished()
+{
+    double val = 0.5 * ui->ledTopSizeZ->text().toDouble();
+    if (val != Detector->Sandwich->getWorldSizeZ())
+    {
+        Detector->Sandwich->setWorldSizeZ(val);
+        ReconstructDetector();
+    }
 }

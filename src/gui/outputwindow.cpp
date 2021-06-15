@@ -1,4 +1,3 @@
-//ANTS2
 #include "outputwindow.h"
 #include "ui_outputwindow.h"
 #include "mainwindow.h"
@@ -18,42 +17,35 @@
 #include "amonitor.h"
 #include "asandwich.h"
 #include "ageoobject.h"
+#include "ageotype.h"
 #include "detectoraddonswindow.h"
 #include "ajsontools.h"
 
-//ROOT
 #include "TGraph2D.h"
 #include "TH2C.h"
 #include "TH1D.h"
 #include "TMath.h"
 #include "TH1.h"
 
-//Qt
 #include <QDebug>
 #include <QGraphicsItem>
 #include <QString>
 #include <QBitArray>
 #include <QStandardItemModel>
 #include <QFileDialog>
+#include <QTimer>
 
-OutputWindow::OutputWindow(QWidget *parent, MainWindow *mw, EventsDataClass *eventsDataHub) :
-    AGuiWindow("out", parent),
+OutputWindow::OutputWindow(QWidget *parent, MainWindow *MW, EventsDataClass *EventsDataHub) :
+    AGuiWindow("out", parent), MW(MW), EventsDataHub(EventsDataHub),
     ui(new Ui::OutputWindow)
 {
-    MW = mw;
-    EventsDataHub = eventsDataHub;
-    GVscale = 10.0;
     ui->setupUi(this);
-    bForbidUpdate = false;
-
-    this->setWindowTitle("Results/Output");
+    setWindowTitle("Results/Output");
 
     Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
     windowFlags |= Qt::WindowCloseButtonHint;
     //windowFlags |= Qt::Tool;
     this->setWindowFlags( windowFlags );
-
-    modelPMhits = 0;
 
     QVector<QWidget*> vecDis;
     vecDis << ui->pbSiPMpixels << ui->sbTimeBin
@@ -64,14 +56,15 @@ OutputWindow::OutputWindow(QWidget *parent, MainWindow *mw, EventsDataClass *eve
     for (QWidget * w : vecDis) w->setEnabled(false);
 
     QVector<QWidget*> vecInv;
-    vecInv << ui->cobPTHistVolPlus << ui->pbRefreshViz << ui->frPTHistX << ui->frPTHistY
+    vecInv << ui->cobPTHistVolPlus << ui->pbRefreshViz << ui->frPTHistX << ui->frPTHistY << ui->cbPTHistVolVsTime
            << ui->pbEventView_ShowTree << ui->pbEVgeo << ui->frEventFilters << ui->frTimeAware;
     for (QWidget * w : vecInv) w->setVisible(false);
 
     QDoubleValidator* dv = new QDoubleValidator(this);
     dv->setNotation(QDoubleValidator::ScientificNotation);
     QList<QLineEdit*> list = this->findChildren<QLineEdit *>();
-    foreach(QLineEdit *w, list) if (w->objectName().startsWith("led")) w->setValidator(dv);
+    for (QLineEdit * w : list)
+        if (w->objectName().startsWith("led")) w->setValidator(dv);
 
     //Graphics view
     scaleScene = new QGraphicsScene(this);
@@ -154,8 +147,15 @@ void OutputWindow::on_pbShowPMtime_clicked()
     MW->GraphWindow->Draw(hist1D);
 }
 
-void OutputWindow::RefreshPMhitsTable()
+void OutputWindow::updatePMhitsTable()
 {
+    if (modelPMhits)
+    {
+        ui->tvPMhits->setModel(0);
+        delete modelPMhits; modelPMhits = nullptr;
+    }
+    if (!ui->cbShowPMsig->isChecked()) return;
+
     bool fHaveData = !EventsDataHub->isEmpty();    
     int CurrentEvent = ui->sbEvent->value();
     if (fHaveData && CurrentEvent>EventsDataHub->Events.size()-1) fHaveData = false; //protection
@@ -164,12 +164,6 @@ void OutputWindow::RefreshPMhitsTable()
     int rows = 0;    
     if (fHaveData && EventsDataHub->isTimed())
         rows = EventsDataHub->TimedEvents[0].size();
-
-    if (modelPMhits)
-      {
-        ui->tvPMhits->setModel(0);
-        delete modelPMhits;
-      }
 
     modelPMhits = new QStandardItemModel(rows+1,columns,this);
 
@@ -332,14 +326,16 @@ void OutputWindow::on_sbTimeBin_valueChanged(int arg1)
    if (EventsDataHub->TimedEvents.isEmpty()) return;
    if (arg1 > EventsDataHub->TimedEvents[0].size()-1) ui->sbTimeBin->setValue(0);
 
-   OutputWindow::on_pbSiPMpixels_clicked();
+   on_pbSiPMpixels_clicked();
 }
 
+/*
 void OutputWindow::addParticleHistoryLogLine(int iRec, int level)
 {
     for (int i=0; i<secs.at(iRec).size(); i++)
         addParticleHistoryLogLine(secs.at(iRec).at(i), level+1);
 }
+*/
 
 void OutputWindow::updateSignalTableWidth()
 {
@@ -349,7 +345,7 @@ void OutputWindow::updateSignalTableWidth()
   for (int i=0; i<ui->tvPMhits->horizontalHeader()->count(); i++)
     w += ui->tvPMhits->columnWidth(i);
 
-  int max = ui->labPMsig->width();
+  int max = ui->labPMsigTop->width();
 //  qDebug() << "counting:"<<w<<"max:"<<max;
   if (w > max) w = max;
 
@@ -436,13 +432,12 @@ void OutputWindow::RefreshData()
 
   //check current event
   int CurrentEvent = ui->sbEvent->value();
-  int CurrentGroup = MW->Detector->PMgroups->getCurrentGroup();
   if (CurrentEvent > EventsDataHub->Events.size()-1)
-    {
+  {
       CurrentEvent = EventsDataHub->Events.size()-1;
       if (CurrentEvent < 0) CurrentEvent = 0;
       ui->sbEvent->setValue(CurrentEvent);
-    }
+  }
   if (ui->sbPMnumberToShowTime->value() > MW->PMs->count()-1)
     ui->sbPMnumberToShowTime->setValue(0);
 
@@ -453,49 +448,62 @@ void OutputWindow::RefreshData()
   ui->sbTimeBin->setEnabled(fTimeResolved);
   ui->pbShowPMtime->setEnabled(fTimeResolved);
 
-  //dynamic passives for indication
-  DynamicPassivesHandler *Passives = new DynamicPassivesHandler(MW->Detector->PMs, MW->Detector->PMgroups, EventsDataHub);
-  if (EventsDataHub->isEmpty() || CurrentGroup>EventsDataHub->RecSettings.size()-1)
-    Passives->init(0, CurrentGroup);
-  else
-    {
-      Passives->init(&EventsDataHub->RecSettings[CurrentGroup], CurrentGroup); //just to copy static passives
-      if (EventsDataHub->fReconstructionDataReady)
-        if (EventsDataHub->RecSettings.at(CurrentGroup).fUseDynamicPassives)
-          Passives->calculateDynamicPassives(CurrentEvent, EventsDataHub->ReconstructionData.at(CurrentGroup).at(CurrentEvent));
-    }
+  updatePMhitsTable();
 
-  OutputWindow::RefreshPMhitsTable();
-  //qDebug()<<"table updated";
+  updateGraphScene();
 
-  //updating viz
-  scene->clear();
-  float MaxSignal = 0.0;
-  if (!fHaveData) MaxSignal = 1.0;
-  else
-    {
-      for (int i=0; i<MW->PMs->count(); i++)
-        if (Passives->isActive(i))
-        {
-          if ( EventsDataHub->Events[CurrentEvent][i] > MaxSignal)
-              MaxSignal = EventsDataHub->Events[CurrentEvent][i];
-        }
-    }
-  if (MaxSignal<=1.0e-25) MaxSignal = 1.0;
-  //qDebug()<<"MaxSignal="<<MaxSignal<<"  selector="<<selector;
-
-  updateSignalLabels(MaxSignal);
-  addPMitems( (fHaveData ? &EventsDataHub->Events.at(CurrentEvent) : 0), MaxSignal, Passives); //add icons with PMs to the scene
-  if (ui->cbShowPMsignals->isChecked())
-    addTextitems( (fHaveData ? &EventsDataHub->Events.at(CurrentEvent) : 0), MaxSignal, Passives); //add icons with signal text to the scene
-  updateSignalScale();
-
-  //Monitors
   updateMonitors();
 
   EV_showTree();
+}
 
-  delete Passives;
+void OutputWindow::updateGraphScene()
+{
+    scene->clear();
+    if (ui->cbSuppressGraphScene->isChecked())
+    {
+        scaleScene->clear();
+        updateSignalLabels(0);
+        return;
+    }
+
+    int CurrentEvent = ui->sbEvent->value();
+    int CurrentGroup = MW->Detector->PMgroups->getCurrentGroup();
+    bool fHaveData = !EventsDataHub->isEmpty();
+
+    //dynamic passives for indication
+    DynamicPassivesHandler * Passives = new DynamicPassivesHandler(MW->Detector->PMs, MW->Detector->PMgroups, EventsDataHub);
+    if (EventsDataHub->isEmpty() || CurrentGroup > EventsDataHub->RecSettings.size()-1)
+        Passives->init(0, CurrentGroup);
+    else
+    {
+        Passives->init(&EventsDataHub->RecSettings[CurrentGroup], CurrentGroup); //just to copy static passives
+        if (EventsDataHub->fReconstructionDataReady)
+          if (EventsDataHub->RecSettings.at(CurrentGroup).fUseDynamicPassives)
+            Passives->calculateDynamicPassives(CurrentEvent, EventsDataHub->ReconstructionData.at(CurrentGroup).at(CurrentEvent));
+    }
+
+    float MaxSignal = 0.0;
+    if (!fHaveData) MaxSignal = 1.0;
+    else
+    {
+        for (int i=0; i<MW->PMs->count(); i++)
+            if (Passives->isActive(i))
+            {
+                if (EventsDataHub->Events[CurrentEvent][i] > MaxSignal)
+                    MaxSignal = EventsDataHub->Events[CurrentEvent][i];
+            }
+    }
+    if (MaxSignal<=1.0e-25) MaxSignal = 1.0;
+    //qDebug()<<"MaxSignal="<<MaxSignal<<"  selector="<<selector;
+
+    updateSignalLabels(MaxSignal);
+    addPMitems( (fHaveData ? &EventsDataHub->Events.at(CurrentEvent) : 0), MaxSignal, Passives); //add icons with PMs to the scene
+    if (ui->cbShowPMsignals->isChecked())
+        addTextItems( (fHaveData ? &EventsDataHub->Events.at(CurrentEvent) : 0), MaxSignal, Passives); //add icons with signal text to the scene
+    updateSignalScale();
+
+    delete Passives;
 }
 
 void OutputWindow::updateMonitors()
@@ -550,7 +558,8 @@ void OutputWindow::addPMitems(const QVector<float> *vector, float MaxSignal, Dyn
     {
       //pen
       QPen pen(Qt::black);
-      int size = 6.0 * MW->PMs->SizeX(ipm) / 30.0;
+      //int size = 6.0 * std::min(MW->PMs->SizeX(ipm), MW->PMs->SizeY(ipm)) / 30.0;
+      int size = 6.0 * MW->PMs->getXYMinimumSize(ipm) / 30.0;
       pen.setWidth(size);
 
       //brush
@@ -618,13 +627,15 @@ void OutputWindow::addPMitems(const QVector<float> *vector, float MaxSignal, Dyn
     }
 }
 
-void OutputWindow::addTextitems(const QVector<float> *vector, float MaxSignal, DynamicPassivesHandler *Passives)
+void OutputWindow::addTextItems(const QVector<float> *vector, float MaxSignal, DynamicPassivesHandler *Passives)
 {
     const int prec = ui->sbDecimalPrecision->value();
-  for (int ipm=0; ipm<MW->PMs->count(); ipm++)
+    for (int ipm=0; ipm<MW->PMs->count(); ipm++)
     {
       const APm &PM = MW->PMs->at(ipm);
-      double size = 0.5*MW->PMs->getType( PM.type )->SizeX;
+
+      //double size = 0.5*MW->PMs->getType( PM.type )->SizeX;
+      double size = 0.5 * MW->PMs->getXYMinimumSize(ipm);
       //io->setTextWidth(40);
 
       float sig = ( vector ? vector->at(ipm) : 0 );
@@ -1190,6 +1201,11 @@ void OutputWindow::SaveGuiToJson(QJsonObject &json) const
     QJsonObject js;
     saveEventViewerSettings(js);
     json["EventViewer"] = js;
+
+    QJsonObject jsc;
+        jsc["ShowPMtable"] = ui->cbShowPMsig->isChecked();
+        jsc["HidePMscene"] = ui->cbSuppressGraphScene->isChecked();
+    json["GuiControls"] = jsc;
 }
 
 void OutputWindow::LoadGuiFromJson(const QJsonObject &json)
@@ -1197,6 +1213,14 @@ void OutputWindow::LoadGuiFromJson(const QJsonObject &json)
     QJsonObject js;
     parseJson(json, "EventViewer", js);
     if (!js.isEmpty()) loadEventViewerSettings(js);
+
+    QJsonObject jsc;
+    bool ok = parseJson(json, "GuiControls", jsc);
+    if (ok)
+    {
+        JsonToCheckbox(jsc, "ShowPMtable", ui->cbShowPMsig);
+        JsonToCheckbox(jsc, "HidePMscene", ui->cbSuppressGraphScene);
+    }
 }
 
 void OutputWindow::saveEventViewerSettings(QJsonObject & json) const
@@ -1226,6 +1250,9 @@ void OutputWindow::saveEventViewerSettings(QJsonObject & json) const
     json["ExclProcActive"] = ui->cbEVexcludeProc->isChecked();
     json["ExclToProc"] = ui->leEVexcludeProc->text();
     json["ExclToProcPrim"] = ui->cbEVexcludeProcPrim->isChecked();
+
+    json["LimitToVolumesActive"] = ui->cbLimitToVolumes->isChecked();
+    json["LimitToVolumes"] = ui->leLimitToVolumes->text();
 }
 
 void OutputWindow::loadEventViewerSettings(const QJsonObject & json)
@@ -1255,13 +1282,16 @@ void OutputWindow::loadEventViewerSettings(const QJsonObject & json)
     JsonToCheckbox    (json, "ExclProcActive", ui->cbEVexcludeProc);
     JsonToLineEditText(json, "ExclToProc", ui->leEVexcludeProc);
     JsonToCheckbox    (json, "ExclToProcPrim", ui->cbEVexcludeProcPrim);
+
+    JsonToCheckbox    (json, "LimitToVolumesActive", ui->cbLimitToVolumes);
+    JsonToLineEditText(json, "LimitToVolumes", ui->leLimitToVolumes);
 }
 
 void OutputWindow::on_tabwinDiagnose_tabBarClicked(int index)
 {
     if (index==1)
     {
-        QTimer::singleShot(50, this, SLOT(RefreshPMhitsTable()));
+        QTimer::singleShot(50, this, SLOT(updatePMhitsTable()));
     }
 }
 
@@ -1392,7 +1422,7 @@ void OutputWindow::on_pbShowAverageOverAll_clicked()
     updateSignalLabels(MaxSignal);
     addPMitems(&sums, MaxSignal, 0); //add icons with PMs to the scene
     if (ui->cbShowPMsignals->isChecked())
-      addTextitems(&sums, MaxSignal, 0); //add icons with signal text to the scene
+      addTextItems(&sums, MaxSignal, 0); //add icons with signal text to the scene
     updateSignalScale();
 }
 
@@ -1419,9 +1449,13 @@ void OutputWindow::on_pbPTHistRequest_clicked()
     Opt.bSecondary = ui->cbPTHistOnlySec->isChecked();
     Opt.bLimitToFirstInteractionOfPrimary = ui->cbPTHistLimitToFirst->isChecked();
 
-    int bins = ui->sbPTHistBinsX->value();
+    int    bins = ui->sbPTHistBinsX->value();
     double from = ui->ledPTHistFromX->text().toDouble();
     double to   = ui->ledPTHistToX  ->text().toDouble();
+
+    int    bins2 = ui->sbPTHistBinsY->value();
+    double from2 = ui->ledPTHistFromY->text().toDouble();
+    double to2   = ui->ledPTHistToY  ->text().toDouble();
 
     int Selector = ui->twPTHistType->currentIndex(); // 0 - Vol, 1 - Boundary
     if (Selector == 0)
@@ -1452,7 +1486,15 @@ void OutputWindow::on_pbPTHistRequest_clicked()
           }
         case 1:
           {
-            AHistorySearchProcessor_findProcesses p;
+            int mode = ui->cobPTHistVolPlus->currentIndex();
+            if (mode < 0 || mode > 2)
+            {
+                message("Unknown process selection mode", this);
+                return;
+            }
+
+            AHistorySearchProcessor_findProcesses::SelectionMode sm = static_cast<AHistorySearchProcessor_findProcesses::SelectionMode>(mode);
+            AHistorySearchProcessor_findProcesses p(sm);
             Crawler.find(Opt, p);
 
             QMap<QString, int>::const_iterator it = p.FoundProcesses.constBegin();
@@ -1463,8 +1505,10 @@ void OutputWindow::on_pbPTHistRequest_clicked()
                 ui->ptePTHist->appendPlainText(QString("%1   %2 times").arg(it.key()).arg(it.value()));
                 ++it;
             }
-          }
+
+            selectedModeForProcess = mode;
             break;
+          }
         case 2:
           {
             AHistorySearchProcessor_findTravelledDistances p(bins, from, to);
@@ -1486,28 +1530,46 @@ void OutputWindow::on_pbPTHistRequest_clicked()
         case 3:
           {
             int mode = ui->cobPTHistVolPlus->currentIndex();
-            if (mode <0 || mode >2)
+            if (mode < 0 || mode > 2)
             {
                 message("Unknown energy deposition collection mode", this);
                 return;
             }
             AHistorySearchProcessor_findDepositedEnergy::CollectionMode edm = static_cast<AHistorySearchProcessor_findDepositedEnergy::CollectionMode>(mode);
 
-            AHistorySearchProcessor_findDepositedEnergy p(edm, bins, from, to);
-            Crawler.find(Opt, p);
+            if (ui->cbPTHistVolVsTime->isChecked())
+            {
+                AHistorySearchProcessor_findDepositedEnergyTimed p(edm, bins, from, to, bins2, from2, to2);
+                Crawler.find(Opt, p);
 
-            if (p.Hist->GetEntries() == 0)
-                message("No deposition detected", this);
+                if (p.Hist2D->GetEntries() == 0)
+                    message("No deposition detected", this);
+                else
+                {
+                    MW->GraphWindow->Draw(p.Hist2D, "colz");
+                    p.Hist2D = nullptr;
+                }
+                binsTime = bins2;
+                fromTime = from2;
+                toTime   = to2;
+            }
             else
             {
-                MW->GraphWindow->Draw(p.Hist);
-                p.Hist = nullptr;
+                AHistorySearchProcessor_findDepositedEnergy p(edm, bins, from, to);
+                Crawler.find(Opt, p);
+
+                if (p.Hist->GetEntries() == 0)
+                    message("No deposition detected", this);
+                else
+                {
+                    MW->GraphWindow->Draw(p.Hist);
+                    p.Hist = nullptr;
+                }
             }
+            selectedModeForEnergyDepo = mode;
             binsEnergy = bins;
             fromEnergy = from;
             toEnergy = to;
-            selectedModeForEnergyDepo = mode;
-
             break;
           }
         case 4:
@@ -1567,6 +1629,7 @@ void OutputWindow::on_pbPTHistRequest_clicked()
         Opt.bFromMat = ui->cbPTHistVolMatFrom->isChecked();
         Opt.FromMat = ui->cobPTHistVolMatFrom->currentIndex();
         Opt.bFromVolume = ui->cbPTHistVolVolumeFrom->isChecked();
+        Opt.bEscaping = ui->cbPTHistEscaping->isChecked();
         Opt.FromVolume = ui->lePTHistVolVolumeFrom->text().toLocal8Bit().data();
         Opt.bFromVolIndex = ui->cbPTHistVolIndexFrom->isChecked();
         Opt.FromVolIndex = ui->sbPTHistVolIndexFrom->value();
@@ -1574,6 +1637,7 @@ void OutputWindow::on_pbPTHistRequest_clicked()
         Opt.bToMat = ui->cbPTHistVolMatTo->isChecked();
         Opt.ToMat = ui->cobPTHistVolMatTo->currentIndex();
         Opt.bToVolume = ui->cbPTHistVolVolumeTo->isChecked();
+        Opt.bCreated = ui->cbPTHistCreated->isChecked();
         Opt.ToVolume = ui->lePTHistVolVolumeTo->text().toLocal8Bit().data();
         Opt.bToVolIndex = ui->cbPTHistVolIndexTo->isChecked();
         Opt.ToVolIndex = ui->sbPTHistVolIndexTo->value();
@@ -1587,22 +1651,20 @@ void OutputWindow::on_pbPTHistRequest_clicked()
         bool bVsVs = ui->cbPTHistBordAndVs->isChecked();
         bool bAveraged = ui->cbPTHistBordAsStat->isChecked();
 
-        int bins2 = ui->sbPTHistBinsY->value();
-        double from2 = ui->ledPTHistFromY->text().toDouble();
-        double to2   = ui->ledPTHistToY  ->text().toDouble();
-
         if (!bVs)
         {
             //1D stat
             AHistorySearchProcessor_Border p(what, cuts, bins, from, to);
-            Crawler.find(Opt, p);
-
-            if (p.Hist1D->GetEntries() == 0)
-                message("No data", this);
+            if (!p.ErrorString.isEmpty()) message(p.ErrorString, this);
             else
             {
-                MW->GraphWindow->Draw(p.Hist1D, "hist");
-                p.Hist1D = nullptr;
+                Crawler.find(Opt, p);
+                if (p.Hist1D->GetEntries() == 0) message("No data", this);
+                else
+                {
+                    MW->GraphWindow->Draw(p.Hist1D, "hist");
+                    p.Hist1D = nullptr;
+                }
             }
         }
         else
@@ -1612,28 +1674,32 @@ void OutputWindow::on_pbPTHistRequest_clicked()
             {
                 //1D vs
                 AHistorySearchProcessor_Border p(what, vsWhat, cuts, bins, from, to);
-                Crawler.find(Opt, p);
-
-                if (p.Hist1D->GetEntries() == 0)
-                    message("No data", this);
+                if (!p.ErrorString.isEmpty()) message(p.ErrorString, this);
                 else
                 {
-                    MW->GraphWindow->Draw(p.Hist1D, "hist");
-                    p.Hist1D = nullptr;
+                    Crawler.find(Opt, p);
+                    if (p.Hist1D->GetEntries() == 0) message("No data", this);
+                    else
+                    {
+                        MW->GraphWindow->Draw(p.Hist1D, "hist");
+                        p.Hist1D = nullptr;
+                    }
                 }
             }
             else if (!bVsVs && !bAveraged)
             {
                 //2D stat
                 AHistorySearchProcessor_Border p(what, vsWhat, cuts, bins, from, to, bins2, from2, to2);
-                Crawler.find(Opt, p);
-
-                if (p.Hist2D->GetEntries() == 0)
-                    message("No data", this);
+                if (!p.ErrorString.isEmpty()) message(p.ErrorString, this);
                 else
                 {
-                    MW->GraphWindow->Draw(p.Hist2D, "colz");
-                    p.Hist2D = nullptr;
+                    Crawler.find(Opt, p);
+                    if (p.Hist2D->GetEntries() == 0) message("No data", this);
+                    else
+                    {
+                        MW->GraphWindow->Draw(p.Hist2D, "colz");
+                        p.Hist2D = nullptr;
+                    }
                 }
                 binsB2 = bins2;
                 fromB2 = from2;
@@ -1643,14 +1709,16 @@ void OutputWindow::on_pbPTHistRequest_clicked()
             {
                 //2D vsvs
                 AHistorySearchProcessor_Border p(what, vsWhat, andVsWhat, cuts, bins, from, to, bins2, from2, to2);
-                Crawler.find(Opt, p);
-
-                if (p.Hist2D->GetEntries() == 0)
-                    message("No data", this);
+                if (!p.ErrorString.isEmpty()) message(p.ErrorString, this);
                 else
                 {
-                    MW->GraphWindow->Draw(p.Hist2D, "colz");
-                    p.Hist2D = nullptr;
+                    Crawler.find(Opt, p);
+                    if (p.Hist2D->GetEntries() == 0) message("No data", this);
+                    else
+                    {
+                        MW->GraphWindow->Draw(p.Hist2D, "colz");
+                        p.Hist2D = nullptr;
+                    }
                 }
                 binsB2 = bins2;
                 fromB2 = from2;
@@ -1678,7 +1746,13 @@ void OutputWindow::on_cobPTHistVolRequestWhat_currentIndexChanged(int index)
 {
     updatePTHistoryBinControl();
 
-    if (index == 2)
+    if (index == 1)
+    {
+        ui->cobPTHistVolPlus->clear();
+        ui->cobPTHistVolPlus->addItems(QStringList() << "All"<<"With energy deposition"<<"Track end");
+        ui->cobPTHistVolPlus->setCurrentIndex(selectedModeForProcess);
+    }
+    else if (index == 2)
     {
         ui->sbPTHistBinsX->setValue(binsDistance);
         ui->ledPTHistFromX->setText(QString::number(fromDistance));
@@ -1690,13 +1764,19 @@ void OutputWindow::on_cobPTHistVolRequestWhat_currentIndexChanged(int index)
         ui->ledPTHistFromX->setText(QString::number(fromEnergy));
         ui->ledPTHistToX->setText(QString::number(toEnergy));
 
+        ui->sbPTHistBinsY->setValue(binsTime);
+        ui->ledPTHistFromY->setText(QString::number(fromTime));
+        ui->ledPTHistToY->setText(QString::number(toTime));
+
         ui->cobPTHistVolPlus->clear();
         ui->cobPTHistVolPlus->addItems(QStringList() << "Individual"<<"With secondaries"<<"Over event");
         ui->cobPTHistVolPlus->setCurrentIndex(selectedModeForEnergyDepo);
     }
-    ui->cobPTHistVolPlus->setVisible(index == 3);
+    ui->cobPTHistVolPlus->setVisible(index == 1 || index == 3);
 
     ui->frTimeAware->setVisible(index == 4);
+
+    ui->cbPTHistVolVsTime->setVisible(index == 3);
 }
 
 void OutputWindow::on_twPTHistType_currentChanged(int index)
@@ -1722,7 +1802,7 @@ void OutputWindow::updatePTHistoryBinControl()
     {
         //Volume
         ui->frPTHistX->setVisible( ui->cobPTHistVolRequestWhat->currentIndex() > 1  && ui->cobPTHistVolRequestWhat->currentIndex() != 4);
-        ui->frPTHistY->setVisible(false);
+        ui->frPTHistY->setVisible( ui->cobPTHistVolRequestWhat->currentIndex() == 3 && ui->cbPTHistVolVsTime->isChecked() );
     }
     else
     {
@@ -1781,6 +1861,8 @@ void OutputWindow::fillEvTabViewRecord(QTreeWidgetItem * item, const AParticleTr
     case 0: break;
     case 1: timeUnits *= 0.001; break;
     case 2: timeUnits *= 1.0e-6; break;
+    case 3: timeUnits *= 1.0e-9; break;
+    case 4: timeUnits *= 1.666666666666666e-11; break;
     }
     bool bVolume = ui->cbEVvol->isChecked();
     bool bKin = ui->cbEVkin->isChecked();
@@ -1921,10 +2003,11 @@ void OutputWindow::EV_showGeo()
     MW->SimulationManager->clearTracks();
     MW->GeometryWindow->ClearTracks(false);
 
-    int iEv = ui->sbEvent->value();
-    if (ui->cbEVtracks->isChecked()) MW->GeometryWindow->ShowEvent_Particles(iEv, !ui->cbEVsupressSec->isChecked());
+    const int iEv = ui->sbEvent->value();
+    if (iEv < 0 || iEv >= MW->EventsDataHub->countEvents()) return;
 
-    if (ui->cbEVpmSig->isChecked()) MW->GeometryWindow->ShowPMsignals(iEv, false);
+    if (ui->cbEVtracks->isChecked()) MW->GeometryWindow->ShowEvent_Particles(iEv, !ui->cbEVsupressSec->isChecked());
+    if (ui->cbEVpmSig->isChecked())  MW->GeometryWindow->ShowPMsignals(MW->EventsDataHub->Events.at(iEv), false);
 
     MW->GeometryWindow->DrawTracks();
 }
@@ -1946,6 +2029,16 @@ int OutputWindow::findEventWithFilters(int currentEv, bool bUp)
 
     bool bLimVols = ui->cbLimitToVolumes->isChecked();
 
+    bool bLimParticles = ui->cbLimitToParticles->isChecked();
+    bool bExcludeParticles = ui->cbExcludeParticles->isChecked();
+
+    QStringList LimProc = ui->leEVlimitToProc->text().split(rx, QString::SkipEmptyParts);
+    QStringList ExclProc = ui->leEVexcludeProc->text().split(rx, QString::SkipEmptyParts);
+    QStringList LimVols = ui->leLimitToVolumes->text().split(rx, QString::SkipEmptyParts);
+
+    QStringList MustContainParticles = ui->leLimitToParticles->text().split(rx, QString::SkipEmptyParts);
+    QStringList ExcludeParticles = ui->leExcludeParticles->text().split(rx, QString::SkipEmptyParts);
+
     if (currentEv > (int)TH.size()) currentEv = (int)TH.size();
 
     bUp ? currentEv++ : currentEv--;
@@ -1954,19 +2047,10 @@ int OutputWindow::findEventWithFilters(int currentEv, bool bUp)
         const AEventTrackingRecord * er = TH.at(currentEv);
 
         bool bGood = true;
-        if (bLimProc)
-        {
-            QStringList LimProc = ui->leEVlimitToProc->text().split(rx, QString::SkipEmptyParts);
-            bGood = er->isHaveProcesses(LimProc, bLimProc_prim);
-        }
-        if (bGood && bExclProc)
-        {
-            QStringList ExclProc = ui->leEVexcludeProc->text().split(rx, QString::SkipEmptyParts);
-            bGood = !er->isHaveProcesses(ExclProc, bExclProc_prim);
-        }
+        if (bLimProc)           bGood = er->isHaveProcesses(LimProc, bLimProc_prim);
+        if (bGood && bExclProc) bGood = !er->isHaveProcesses(ExclProc, bExclProc_prim);
         if (bGood && bLimVols)
         {
-            QStringList LimVols = ui->leLimitToVolumes->text().split(rx, QString::SkipEmptyParts);
             QStringList LimVolStartWith;
             for (int i=LimVols.size()-1; i >= 0; i--)
             {
@@ -1979,6 +2063,8 @@ int OutputWindow::findEventWithFilters(int currentEv, bool bUp)
             }
             bGood = er->isTouchedVolumes(LimVols, LimVolStartWith);
         }
+        if (bGood && bLimParticles)     bGood = er->isContainParticle(MustContainParticles);
+        if (bGood && bExcludeParticles) bGood = !er->isContainParticle(ExcludeParticles);
 
         if (bGood) return currentEv;
 
@@ -2156,8 +2242,8 @@ void OutputWindow::on_trwEventView_customContextMenuRequested(const QPoint &pos)
     if (!pr) return;
 
     QMenu Menu;
-    QAction * showPosition;
-    if (st) showPosition = Menu.addAction("Show position");
+    QAction * showPosition = nullptr;  if (st) showPosition = Menu.addAction("Show position");
+    QAction * centerA       = nullptr; if (st) centerA = Menu.addAction("Center view at this position");
     Menu.addSeparator();
     QAction * showELDD = Menu.addAction("Show energy linear deposition density");
     QAction* selectedItem = Menu.exec(ui->trwEventView->mapToGlobal(pos));
@@ -2180,6 +2266,12 @@ void OutputWindow::on_trwEventView_customContextMenuRequested(const QPoint &pos)
         double pos[3];
         for (int i=0; i<3; i++) pos[i] = st->Position[i];
         MW->GeometryWindow->ShowPoint(pos, true);
+    }
+    else if (selectedItem == centerA)
+    {
+        double pos[3];
+        for (int i=0; i<3; i++) pos[i] = st->Position[i];
+        MW->GeometryWindow->CenterView(pos);
     }
 }
 
@@ -2295,4 +2387,47 @@ void OutputWindow::on_pbShowMonitorTimeOverall_clicked()
     time->GetXaxis()->SetTitle("Time, ns");
     time->GetYaxis()->SetTitle("Hits");
     MW->GraphWindow->Draw(time, "hist");
+}
+
+void OutputWindow::on_cbPTHistVolVsTime_clicked()
+{
+    updatePTHistoryBinControl();
+}
+
+void OutputWindow::on_cbPTHistEscaping_toggled(bool checked)
+{
+    QVector<QCheckBox*> vec = {ui->cbPTHistVolMatTo, ui->cbPTHistVolVolumeTo, ui->cbPTHistVolIndexTo, ui->cbPTHistCreated};
+    for (QCheckBox * cb : vec)
+    {
+        if (checked)
+        {
+            cb->setChecked(false);
+            cb->setEnabled(false);
+        }
+        else cb->setEnabled(true);
+    }
+}
+
+void OutputWindow::on_cbPTHistCreated_toggled(bool checked)
+{
+    QVector<QCheckBox*> vec = {ui->cbPTHistVolMatFrom, ui->cbPTHistVolVolumeFrom, ui->cbPTHistVolIndexFrom, ui->cbPTHistEscaping};
+    for (QCheckBox * cb : vec)
+    {
+        if (checked)
+        {
+            cb->setChecked(false);
+            cb->setEnabled(false);
+        }
+        else cb->setEnabled(true);
+    }
+}
+
+void OutputWindow::on_cbShowPMsig_clicked(bool checked)
+{
+    updatePMhitsTable();
+}
+
+void OutputWindow::on_cbSuppressGraphScene_clicked(bool checked)
+{
+    updateGraphScene();
 }

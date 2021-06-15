@@ -49,8 +49,31 @@ double bi_exp(double t, double tau1,double tau2)
 }
 */
 
+//#include <QJSEngine>
+//static QJSEngine * myEngine = nullptr;
 void MainWindow::on_pobTest_clicked()
 {
+    /*
+    if (!myEngine) myEngine = new QJSEngine();
+
+    QString scr = "var a = 1.0\n"
+            "var b = 2.0\n"
+            "var sum = 1\n"
+            "for (var i=0; i<10000000; i++)\n"
+            "{\n"
+                   "b = (a*a*a*a + b*b*b*b) % 10\n"
+                   "a = b * 0.5\n"
+                   "sum += a+b\n"
+            "}\n"
+            "sum\n";
+
+    QJSValue res = myEngine->evaluate(scr);
+
+    if (res.isError())
+        qDebug() << res.toString() << res.property("message").toString() << res.property("lineNumber").toString() << res.property("stack").toString();
+    else qDebug() << res.toNumber();
+    */
+
     /*
     TH1D* h = new TH1D("t", "", 1000, 0, 0);
 

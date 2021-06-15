@@ -165,6 +165,17 @@
       </widget>
      </item>
      <item>
+      <widget class="QCheckBox" name="cbUseTSphys">
+       <property name="toolTip">
+        <string>Replaced neutron physics with HP + TS( &lt; 5 ev)
+To benefit from TS, materials like TS_POLYETHYLENE have to be used</string>
+       </property>
+       <property name="text">
+        <string>Use TS neutron physics</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer_8">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>

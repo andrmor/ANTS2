@@ -79,7 +79,7 @@ void AWebSocketSessionServer::ReplyWithTextFromObject(const QVariant &object)
 
     qDebug() << "Reply with object as text";
 
-    if (object.type() == QMetaType::QVariantMap)
+    if (object.type() == QVariant::Map)
     {
         QVariantMap vm = object.toMap();
         QJsonObject js = QJsonObject::fromVariantMap(vm);
@@ -125,7 +125,7 @@ void AWebSocketSessionServer::ReplyWithBinaryObject(const QVariant &object)
 
     qDebug() << "Binary reply from object";
 
-    if (object.type() == QVariant::Map)     //   QMetaType::QVariantMap)
+    if (object.type() == QVariant::Map)
     {
         QVariantMap vm = object.toMap();
         QJsonObject js = QJsonObject::fromVariantMap(vm);
@@ -148,7 +148,7 @@ void AWebSocketSessionServer::ReplyWithBinaryObject_asJSON(const QVariant &objec
 
     qDebug() << "Binary reply from object as JSON";
 
-    if (object.type() == QVariant::Map)   //QMetaType::QVariantMap)
+    if (object.type() == QVariant::Map)
     {
         QVariantMap vm = object.toMap();
         QJsonObject js = QJsonObject::fromVariantMap(vm);

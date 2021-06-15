@@ -11,11 +11,14 @@
 #include "asandwich.h"
 #include "aslab.h"
 #include "ageoobject.h"
+#include "ageoshape.h"
+#include "ageotype.h"
 #include "afiletools.h"
 #include "modules/lrf_v3/corelrfstypes.h"
 #include "modules/lrf_v3/alrftypemanager.h"
 #include "modules/lrf_v3/alrftypemanagerinterface.h"
 #include "apmanddummy.h"
+#include "ageoconsts.h"
 
 #ifdef SIM
 #include "agridelementrecord.h"
@@ -35,32 +38,37 @@
 #include "TGeoCompositeShape.h"
 #include "TNamed.h"
 
-static void autoLoadPlugins() {
-  typedef void (*LrfPluginSetupFn)(LRF::ALrfTypeManagerInterface &manager);
+static void autoLoadPlugins()
+{
+    typedef void (*LrfPluginSetupFn)(LRF::ALrfTypeManagerInterface &manager);
 
-  //qDebug() << "Loading plugins from 'plugins' directory";
-  QDir plugins_dir(qApp->applicationDirPath());
-  if(!plugins_dir.cd("plugins")) {
-    qInfo()<<"LRF_v3 plugin loader: Plugin search not performed since '/plugins' directory not found";
-    return;
-  }
+    //qDebug() << "Loading plugins from 'plugins' directory";
+    QDir plugins_dir(qApp->applicationDirPath());
+    if (!plugins_dir.cd("plugins"))
+    {
+        qInfo()<<"LRF_v3 plugin loader: Plugin search not performed since '/plugins' directory not found";
+        return;
+    }
 
-  for(const QString &file_name : plugins_dir.entryList(QDir::Files)) {
-    QString full_path = plugins_dir.absoluteFilePath(file_name);
-    QLibrary plugin(full_path);
-    if(!plugin.load()) {
-      qDebug()<<"LRF_v3 plugin loader: failed to open"<<file_name<<"\n";
-      qDebug()<<plugin.errorString();
-    }
-    else {
-      auto plugin_setup = (LrfPluginSetupFn)plugin.resolve("Setup");
-      if(plugin_setup) {
-        plugin_setup(LRF::ALrfTypeManager::instance());
-        qDebug()<<"LRF_v3 plugin loader: loaded and configured"<<file_name<<"plugin";
-      }
-      else
-        qDebug()<<"LRF_v3 plugin loader: failed to configure"<<file_name<<"plugin";
-    }
+    for(const QString &file_name : plugins_dir.entryList(QDir::Files))
+    {
+        QString full_path = plugins_dir.absoluteFilePath(file_name);
+        QLibrary plugin(full_path);
+        if (!plugin.load())
+        {
+            qDebug()<<"LRF_v3 plugin loader: failed to open"<<file_name<<"\n";
+            qDebug()<<plugin.errorString();
+        }
+        else
+        {
+            auto plugin_setup = (LrfPluginSetupFn)plugin.resolve("Setup");
+            if (plugin_setup)
+            {
+                plugin_setup(LRF::ALrfTypeManager::instance());
+                qDebug()<<"LRF_v3 plugin loader: loaded and configured"<<file_name<<"plugin";
+            }
+            else qDebug()<<"LRF_v3 plugin loader: failed to configure"<<file_name<<"plugin";
+        }
   }
 }
 
@@ -92,82 +100,67 @@ DetectorClass::DetectorClass(AConfiguration *config) : Config(config)
 
 DetectorClass::~DetectorClass()
 {
-  if (PMgroups) delete PMgroups;
-  if (LRFs) delete LRFs;
+  delete PMgroups;
+  delete LRFs;
   //qDebug() << "  --LRFs module deleted";
 
-  if (PMs) delete PMs;
+  delete PMs;
   //qDebug() << "  --Photomultiplier manager deleted";
 
-  if (Sandwich) delete Sandwich;
+  delete Sandwich;
   //qDebug() << "  --Sandwich deleted";
 
-  if (GeoManager) delete GeoManager;
+  delete GeoManager;
   //qDebug()<<"  --GeoManager deleted";
 
-  if (MpCollection) delete MpCollection;
+  delete MpCollection;
   //qDebug() << "  --Material collection deleted";
 
   delete RandGen;
 }
 
-void DetectorClass::writeWorldFixedToJson(QJsonObject &json)
-{
-  QJsonObject js;
-  js["WorldSizeFixed"] = fWorldSizeFixed;
-  js["XY"] = WorldSizeXY;
-  js["Z"] = WorldSizeZ;
-  json["FixedWorldSizes"] = js;
-}
-
-bool DetectorClass::MakeDetectorFromJson(QJsonObject &json)
-{
-  Config->JSON = json;
-  return BuildDetector();
-}
-
 bool DetectorClass::BuildDetector(bool SkipSimGuiUpdate, bool bSkipAllUpdates)
 {
-  if (bSkipAllUpdates) SkipSimGuiUpdate = true;
+    // qDebug() << "Remake detector triggered";
+    ErrorString.clear();
+    if (bSkipAllUpdates) SkipSimGuiUpdate = true;
 
-  // qDebug() << "Remake detector triggered"  ;
-  if (Config->JSON.isEmpty())
-  {
-      qCritical() << "!!!Cannot construct detector: Config is empty";
-      return false;
-  }
+    if (Config->JSON.isEmpty())
+    {
+        ErrorString = "Cannot construct detector: Config is empty";
+        qCritical() << ErrorString;
+        return false;
+    }
 
-  int numPMs = pmCount(); //number of PMs before new detector is constructed
+    const int oldNumPMs = pmCount(); //number of PMs before new detector is constructed
 
-  //qDebug() << "-->Constructing detector using Config json object";
-  bool fOK = makeSandwichDetector();
-  if (!fOK) return false;
+    //qDebug() << "-->Constructing detector using Config->JSON";
+    bool fOK = makeSandwichDetector();
+    if (!fOK) return false;
 
-  //handling GDML if present
-  QJsonObject js = Config->JSON["DetectorConfig"].toObject();
-  if (js.contains("GDML"))
-  {
-      QString gdml = js["GDML"].toString();
-      fOK = importGDML(gdml);  //if failed, it is reported and sandwich is rebuilt
-  }
+    //handling GDML if present
+    QJsonObject js = Config->JSON["DetectorConfig"].toObject();
+    if (js.contains("GDML"))
+    {
+        QString gdml = js["GDML"].toString();
+        fOK = importGDML(gdml);  //if failed, it is reported and sandwich is rebuilt
+    }
 
-  Config->UpdateSimSettingsOfDetector(); //otherwise some sim data will be lost due to remake of PMs and MPcollection
+    Config->UpdateSimSettingsOfDetector(); //otherwise some sim data will be lost due to remake of PMs and MPcollection
 
-  if (numPMs != pmCount())
-  {
-      LRFs->clear(PMs->count()); // clear LRFs if number of PMs changed
-      updatePreprocessingAddMultySize();
-      PMgroups->onNumberOfPMsChanged();
-      if (!bSkipAllUpdates) emit requestGroupsGuiUpdate();
-      //emit requestClearPreprocessingSettings();
-  }
+    if (oldNumPMs != pmCount())
+    {
+        LRFs->clear(PMs->count());
+        updatePreprocessingAddMultySize();
+        PMgroups->onNumberOfPMsChanged();
+        if (!bSkipAllUpdates) emit requestGroupsGuiUpdate();
+    }
 
-  //request GUI update
-  if (!bSkipAllUpdates)  Config->AskForDetectorGuiUpdate(); //save in batch mode too, just emits a signal
-  if (!SkipSimGuiUpdate) Config->AskForSimulationGuiUpdate();
-  //emit requestClearEventsData();
+    //request GUI updates
+    if (!bSkipAllUpdates)  Config->AskForDetectorGuiUpdate(); //save in no_Gui mode too, just emits a signal
+    if (!SkipSimGuiUpdate) Config->AskForSimulationGuiUpdate();
 
-  return fOK;
+    return fOK;
 }
 
 bool DetectorClass::BuildDetector_CallFromScript()
@@ -182,7 +175,7 @@ void DetectorClass::writeToJson(QJsonObject &json)
     QJsonObject js;
 
     MpCollection->writeToJson(js);          //Particles+Material (including overrides)
-    writeWorldFixedToJson(js);              //Fixed world size - if activated
+    //writeWorldFixedToJson(js);              //Fixed world size - if activated
     Sandwich->writeToJson(js);
     PMs->writePMtypesToJson(js);            //PM array types
     writePMarraysToJson(js);                //PM arrays    
@@ -194,15 +187,6 @@ void DetectorClass::writeToJson(QJsonObject &json)
     writePreprocessingToJson(js);           //Preprocessing for load ascii data
 
     json["DetectorConfig"] = js;
-
-      //just for control
-    //QJsonObject js1;
-    //js1["DetectorConfig"] = js;
-    //SaveJsonToFile(js1, "DetectorConfig.json");
-
-      //should not be here:
-    //Config->AskForDetectorGuiUpdate();
-    //Config->AskForSimulationGuiUpdate();
 }
 
 void DetectorClass::writePreprocessingToJson(QJsonObject &json)
@@ -329,54 +313,53 @@ void DetectorClass::populateGeoManager()
   //qDebug() << "--> Creating materials and media";
   for (int i=0; i<MpCollection->countMaterials(); i++)
     {
-      QString tmpStr = (*MpCollection)[i]->name;
-      QByteArray ba = tmpStr.toLocal8Bit();
-      char *cname = ba.data();
       (*MpCollection)[i]->generateTGeoMat();
-      (*MpCollection)[i]->GeoMed = new TGeoMedium (cname, i, (*MpCollection)[i]->GeoMat);
-      (*MpCollection)[i]->GeoMed->SetParam(0, (*MpCollection)[i]->n ); // refractive index
-      // param[1] reserved for k
-      (*MpCollection)[i]->GeoMed->SetParam(2, (*MpCollection)[i]->abs ); // abcorption coefficient (mm^-1)
-      (*MpCollection)[i]->GeoMed->SetParam(3, (*MpCollection)[i]->reemissionProb ); // re-emission probability
-      (*MpCollection)[i]->GeoMed->SetParam(4, (*MpCollection)[i]->rayleighMFP ); // Rayleigh MFP (mm)
-    }
+      (*MpCollection)[i]->GeoMed = new TGeoMedium( (*MpCollection)[i]->name.toLocal8Bit().data(), i, (*MpCollection)[i]->GeoMat);
 
-  //calculate Z of slabs in ASandwich, copy Z edges
-  Sandwich->CalculateZofSlabs();
-  UpperEdge = Sandwich->Z_UpperBound;
-  LowerEdge = Sandwich->Z_LowerBound;
+      //***!!! who needs these parameters?
+//      (*MpCollection)[i]->GeoMed->SetParam(0, (*MpCollection)[i]->n ); // refractive index
+//      // param[1] reserved for k
+//      (*MpCollection)[i]->GeoMed->SetParam(2, (*MpCollection)[i]->abs ); // abcorption coefficient (mm^-1)
+//      (*MpCollection)[i]->GeoMed->SetParam(3, (*MpCollection)[i]->reemissionProb ); // re-emission probability
+//      (*MpCollection)[i]->GeoMed->SetParam(4, (*MpCollection)[i]->rayleighMFP ); // Rayleigh MFP (mm)
+    }
 
   //qDebug() << "--> Populating PMs module with individual PMs";
   populatePMs();
 
-  if (!fWorldSizeFixed)
-    {
+  double WorldSizeXY = Sandwich->getWorldSizeXY();
+  double WorldSizeZ  = Sandwich->getWorldSizeZ();
+  if (!Sandwich->isWorldSizeFixed())
+  {
       //qDebug() << "--> Calculating world size";
       WorldSizeXY = 0;
-      WorldSizeZ = 0;
+      WorldSizeZ  = 0;
       updateWorldSize(WorldSizeXY, WorldSizeZ);
       WorldSizeXY *= 1.05; WorldSizeZ *= 1.05; //adding margings
-    }
-  //qDebug() << "    World size XYmax:"<<WorldSizeXY<<"Zmax:"<<WorldSizeZ;
+      Sandwich->setWorldSizeXY(WorldSizeXY);
+      Sandwich->setWorldSizeZ(WorldSizeZ);
+  }
+  //qDebug() << "-<-<->->- World size XY:" << WorldSizeXY << " Z:" << WorldSizeZ;
 
   //qDebug() << "--> Creating top volume";
   top = GeoManager->MakeBox("WorldBox", (*MpCollection)[Sandwich->World->Material]->GeoMed, WorldSizeXY, WorldSizeXY, WorldSizeZ);
   GeoManager->SetTopVolume(top);
   GeoManager->SetTopVisible(true);
-  //qDebug() << "--> Positioning sandwich layers";
 
-  //Position WorldTree objects
+  //qDebug() << "--> Populating GeoManager";
   QVector<APMandDummy> PMsAndDumPms;
-  for (int i=0; i<PMs->count(); i++)     PMsAndDumPms << APMandDummy(PMs->X(i), PMs->Y(i), PMs->at(i).upperLower);
-  for (int i=0; i<PMdummies.size(); i++) PMsAndDumPms << APMandDummy(PMdummies.at(i).r[0], PMdummies.at(i).r[1], PMdummies.at(i).UpperLower);
-  Sandwich->clearGridRecords();
-  Sandwich->clearMonitorRecords();
-  Sandwich->addTGeoVolumeRecursively(Sandwich->World, top, GeoManager, MpCollection, &PMsAndDumPms);
+  for (int i = 0; i < PMs->count(); i++)
+      PMsAndDumPms << APMandDummy(PMs->X(i), PMs->Y(i), PMs->at(i).upperLower);
+  for (int i = 0; i < PMdummies.size(); i++)
+      PMsAndDumPms << APMandDummy(PMdummies.at(i).r[0], PMdummies.at(i).r[1], PMdummies.at(i).UpperLower);
+
+  Sandwich->populateGeoManager(top, GeoManager, MpCollection, &PMsAndDumPms);
 
   positionPMs();
   if (PMdummies.size() > 0) positionDummies();
 
-  top->SetName("World");
+  top->SetName("World"); // "WorldBox" above is needed - JSROOT uses that name to avoid conflicts"
+
   //qDebug() << "--> Closing geometry";
   GeoManager->CloseGeometry();
   emit newGeoManager();
@@ -385,8 +368,7 @@ void DetectorClass::populateGeoManager()
 
 void DetectorClass::onRequestRegisterGeoManager()
 {
-    if (GeoManager)
-      emit newGeoManager();
+    if (GeoManager) emit newGeoManager();
 }
 
 bool DetectorClass::readDummyPMsFromJson(QJsonObject &json)
@@ -409,54 +391,91 @@ bool DetectorClass::readDummyPMsFromJson(QJsonObject &json)
 
 bool DetectorClass::makeSandwichDetector()
 {
-  //qDebug() << "--->MakeSandwichDetector triggered";
-  if (!Config->JSON.contains("DetectorConfig"))
+    //qDebug() << "--->MakeSandwichDetector triggered";
+    QJsonObject js;
+    bool ok = parseJson(Config->JSON, "DetectorConfig", js);
+    if (!ok)
     {
-      qCritical() << "Config does NOT contain detector properties!";
-      return false;
+        ErrorString = "Config->JSON does not contain detector properties!";
+        qCritical() << ErrorString;
+        return false;
     }
-  QJsonObject js = Config->JSON["DetectorConfig"].toObject();
 
-  MpCollection->readFromJson(js);
-  PMs->readPMtypesFromJson(js);
-  readPMarraysFromJson(js);  
-  PMdummies.clear();
-  readDummyPMsFromJson(js);  
-  Sandwich->readFromJson(js);
-  readWorldFixedFromJson(js);
+    MpCollection->readFromJson(js); // !*! add error to string and return only if critical
 
-  //making detector  
-  populateGeoManager();
+    PMs->readPMtypesFromJson(js);   // !*! add error to string and return only if critical
 
-  //update world AGeoObject properties to be used in GUI (AGeoTreeWidget -> AWorldDelegate)
-  AGeoBox * box = static_cast<AGeoBox*>(Sandwich->World->Shape);
-  box->dx = WorldSizeXY;
-  box->dz = WorldSizeZ;
-  ATypeWorldObject * typeWorld = static_cast<ATypeWorldObject *>(Sandwich->World->ObjectType);
-  typeWorld->bFixedSize = fWorldSizeFixed;
+    readPMarraysFromJson(js);       // !*! add error to string and return only if critical
 
-  //post-construction load
-  PMs->readInividualOverridesFromJson(js);
-  PMs->readElectronicsFromJson(js);
+    PMdummies.clear();
+    readDummyPMsFromJson(js);       // !*! add error to string and return only if critical
 
-  top->SetVisContainers(true); //making contaners visible
-  return true;
+    const QString err = Sandwich->readFromJson(js);
+    if (!err.isEmpty()) ErrorString += "\n" + err;
+
+    //World size
+    if (!readWorldFixedFromJson(js))  //if can read, json is made using the old system
+    {
+        //qDebug() << "-==- Using NEW system for world size";
+        if (!Sandwich->isWorldSizeFixed())
+        {
+            AGeoBox * box = static_cast<AGeoBox*>(Sandwich->World->Shape);
+            const AGeoConsts & GC = AGeoConsts::getConstInstance();
+
+            bool ok =  GC.updateParameter(ErrorString, box->str2dx, box->dx);
+            box->dy = box->dx; box->str2dy.clear();
+            ok = ok && GC.updateParameter(ErrorString, box->str2dz, box->dz);
+            if (!ok)
+            {
+                qWarning() << "Failed to evaluate str expressions in world size, switching to not_fixed world size";
+                ErrorString += "\nFailed to evaluate str expressions in world size";
+                Sandwich->setWorldSizeFixed(false); //retrun false
+            }
+        }
+    }
+
+    populateGeoManager();  // !*! add error to string and return only if critical
+
+    //post-construction load
+    PMs->readInividualOverridesFromJson(js);
+    PMs->readElectronicsFromJson(js);
+
+    top->SetVisContainers(true); //making contaners visible
+    return true;
 }
 
-void DetectorClass::readWorldFixedFromJson(QJsonObject& json)
+bool DetectorClass::readWorldFixedFromJson(const QJsonObject &json)
 {
-  QJsonObject jws = json["FixedWorldSizes"].toObject();
-  fWorldSizeFixed = false;
-  parseJson(jws, "WorldSizeFixed", fWorldSizeFixed);
-  if (fWorldSizeFixed)
+    if (!json.contains("FixedWorldSizes")) return false; //already new system is in effect
+
+    //qDebug() << "-==- Using OLD system for world size";
+
+    bool   bWorldSizeFixed = false;
+    double WorldSizeXY;
+    double WorldSizeZ;
+
+    QJsonObject jws = json["FixedWorldSizes"].toObject();
+    bool ok = parseJson(jws, "WorldSizeFixed", bWorldSizeFixed);
+    if (!ok)
     {
-      parseJson(jws, "XY", WorldSizeXY);
-      parseJson(jws, "Z", WorldSizeZ);
+        Sandwich->setWorldSizeFixed(false);
+        return true;
     }
+    Sandwich->setWorldSizeFixed(bWorldSizeFixed);
+
+    if (bWorldSizeFixed)
+    {
+        parseJson(jws, "XY", WorldSizeXY);
+        parseJson(jws, "Z",  WorldSizeZ);
+        Sandwich->setWorldSizeXY(WorldSizeXY);
+        Sandwich->setWorldSizeZ (WorldSizeZ);
+    }
+    return true;
 }
 
 bool DetectorClass::importGDML(const QString & gdml)
 {
+  ErrorString.clear();
   GDML = gdml;
 
   bool fOK = processGDML();
@@ -517,20 +536,16 @@ int DetectorClass::checkGeoOverlaps()
 bool DetectorClass::processGDML()   //if failed, caller have to do: GeoManager = new TGeoManager();GDML = ""; then reconstruct Sandwich Detector
 {
   ErrorString = "";
-  //have to delete old GeoManager
-  if (GeoManager)
-    {
-      delete GeoManager;
-      GeoManager = 0;
-    }
+  delete GeoManager; GeoManager = nullptr;
+
   //making tmp file to be used by root
   QFile file("tmpGDML.gdml");
   file.open(QIODevice::WriteOnly);
-  if(!file.isOpen())
-    {
+  if (!file.isOpen())
+  {
       ErrorString = "Cannot open file for writing";
       return false;
-    }
+  }
   QTextStream out(&file);
   out << GDML;
   file.close();
@@ -538,10 +553,10 @@ bool DetectorClass::processGDML()   //if failed, caller have to do: GeoManager =
   GeoManager = TGeoManager::Import("tmpGDML.gdml");
   //checking for the result
   if (!GeoManager)
-    {
+  {
       ErrorString = "Failed to import GDML file!";
       return false;
-    }
+  }
   qDebug() << "--> GeoManager loaded from GDML file";
   //GeoManager->AddNavigator(); /// *** !!!
 
@@ -552,15 +567,15 @@ bool DetectorClass::processGDML()   //if failed, caller have to do: GeoManager =
   int totNodes = top->GetNdaughters();
   // qDebug()<<totNodes;
   bool flagFound = false;
-  int offsetNumber;
+  //int offsetNumber;
   for (int i=0; i<totNodes; i++)
     {
-      TGeoNode* thisNode = (TGeoNode*)top->GetNodes()->At(i);
+      //TGeoNode* thisNode = (TGeoNode*)top->GetNodes()->At(i);
       QString nodename = top->GetNodes()->At(i)->GetName();
       if (nodename.startsWith("PM"))
         {
           flagFound = true;
-          offsetNumber =  thisNode->GetNumber();
+          //offsetNumber =  thisNode->GetNumber();
           break;
         }      
     }
@@ -651,9 +666,6 @@ bool DetectorClass::processGDML()   //if failed, caller have to do: GeoManager =
           return false;
         }
     }
-  //all is fine!
-
-  //checkSecScintPresent();
 
   return true;
 }
@@ -681,65 +693,49 @@ void DetectorClass::checkSecScintPresent()
 
 void DetectorClass::colorVolumes(int scheme, int id)
 {
-  //scheme = 0 - default, according to the name
+  //scheme = 0 - default
   //scheme = 1 - by material
   //scheme = 2 - medium with id will be red, the rest - black
-  TObjArray* list = GeoManager->GetListOfVolumes();
-  int size = list->GetEntries();
-  for (int i=0; i<size; i++)
-    {
-      TGeoVolume* vol = (TGeoVolume*)list->At(i);
-      if (!vol) break;
-      QString name = vol->GetName();
-      //      qDebug()<<"name: "<<name<<" medium name: "<<vol->GetMedium()->GetName()<<" med index: "<<vol->GetMedium()->GetId();
-      switch (scheme)
-        { //default color volumes using name
-        case 0:
-          {
-            vol->SetLineColor(kGray);
-            if (name.startsWith("World")) vol->SetLineColor(kGreen);
-            if (name.startsWith("PM")) vol->SetLineColor(kGreen);
-            if (name.startsWith("dPM")) vol->SetLineColor(30);
-            //          if (name.startsWith("Sp")) vol->SetLineColor(28);
-            //          if (name.startsWith("PrScint")) vol->SetLineColor(kRed);
-            //          if (name.startsWith("SecScint")) vol->SetLineColor(kMagenta);
-            //          if (name.startsWith("UpWin")) vol->SetLineColor(kBlue);
-            //          if (name.startsWith("LowWin")) vol->SetLineColor(kBlue);
-            if (name.startsWith("Mask")) vol->SetLineColor(40);
-            if (name.startsWith("MaskHole")) vol->SetLineColor(40);
-            if (name.startsWith("LGu")) vol->SetLineColor(38);
-            if (name.startsWith("LGl")) vol->SetLineColor(38);
-            if (name.startsWith("UOp")) vol->SetLineColor(38);
-            if (name.startsWith("LOp")) vol->SetLineColor(38);
 
-//            int slabIndex = Sandwich->FindSlabByName(name);
-//            if (slabIndex != -1)
-//              {
-//                //qDebug() << Sandwich->Slabs.at(slabIndex)->name << Sandwich->Slabs.at(slabIndex)->color;
-//                vol->SetLineColor(Sandwich->Slabs.at(slabIndex)->color);
-//                vol->SetLineWidth(Sandwich->Slabs.at(slabIndex)->width);
-//                vol->SetLineStyle(Sandwich->Slabs.at(slabIndex)->style);
-//              }
-            const AGeoObject* obj = Sandwich->World->findObjectByName(name);
-            if (obj)
+  TObjArray * list = GeoManager->GetListOfVolumes();
+  int size = list->GetEntries();
+  for (int iVol = 0; iVol < size; iVol++)
+  {
+      TGeoVolume* vol = (TGeoVolume*)list->At(iVol);
+      if (!vol) break;
+
+      QString name = vol->GetName();
+      switch (scheme)
+      {
+        case 0:  //default color volumes for PMs and dPMs otherwise color from AGeoObject
+            if      (name.startsWith("PM"))  vol->SetLineColor(kGreen);
+            else if (name.startsWith("dPM")) vol->SetLineColor(30);
+            else
             {
-                //qDebug() << obj->Name << obj->color;
-                vol->SetLineColor(obj->color);
-                vol->SetLineWidth(obj->width);
-                vol->SetLineStyle(obj->style);
+                const AGeoObject * obj = Sandwich->World->findObjectByName(name); // !*! can be very slow for large detectors!
+                if (!obj && !name.isEmpty())
+                {
+                    //special for monitors
+                    QString mName = name.split("_-_").at(0);
+                    obj = Sandwich->World->findObjectByName(mName);
+                }
+                if (obj)
+                {
+                    vol->SetLineColor(obj->color);
+                    vol->SetLineWidth(obj->width);
+                    vol->SetLineStyle(obj->style);
+                }
+                else vol->SetLineColor(kGray);
+                //qDebug() << name << obj << vol->GetTitle();
             }
-          }
-          break;
-        case 1:
-          { //color by material
-            int MatId = vol->GetMaterial()->GetIndex();
-            vol->SetLineColor(MatId+1);
             break;
-          }
+        case 1:  //color by material
+            vol->SetLineColor(vol->GetMaterial()->GetIndex() + 1);
+            break;
         case 2:  //highlight a given material
-          if (vol->GetMaterial()->GetIndex() == id) vol->SetLineColor(kRed);
-          else vol->SetLineColor(kBlack);
-        }
+            vol->SetLineColor( vol->GetMaterial()->GetIndex() == id ? kRed : kBlack );
+            break;
+      }
   }
   emit ColorSchemeChanged(scheme, id);
 }
@@ -785,7 +781,7 @@ void DetectorClass::findPM(int ipm, int &ul, int &index)
     return;
 }
 
-const QString DetectorClass::removePMtype(int itype)
+QString DetectorClass::removePMtype(int itype)
 {
     if (PMs->countPMtypes() < 2) return "Cannot remove the last type";
 
@@ -893,8 +889,13 @@ TGeoVolume *DetectorClass::generatePmVolume(TString Name, TGeoMedium *Medium, co
 
 void DetectorClass::populatePMs()
 {
+    Sandwich->CalculateZofSlabs();
+    const double & UpperEdge = Sandwich->Z_UpperBound;
+    const double & LowerEdge = Sandwich->Z_LowerBound;
+
     PMs->clear();
-    for (int ul=0; ul<2; ul++)
+
+    for (int ul = 0; ul < 2; ul++)
     {
         if (PMarrays[ul].fActive)
         {
@@ -1158,33 +1159,34 @@ void DetectorClass::positionDummies()
     }
 }
 
-void DetectorClass::updateWorldSize(double &XYm, double &Zm)
+void DetectorClass::updateWorldSize(double & XYm, double & Zm)
 {
-  Sandwich->World->updateWorldSize(XYm, Zm);
+    Sandwich->World->updateWorldSize(XYm, Zm);
 
-  //PMs
-  for (int ipm=0; ipm<PMs->count(); ipm++)
+    for (int ipm = 0; ipm < PMs->count(); ipm++)
     {
-      double msize = 0.5*PMs->SizeZ(ipm);
-      UpdateMax(msize, 0.5*PMs->SizeX(ipm));
-      UpdateMax(msize, 0.5*PMs->SizeY(ipm));
+        double msize =   0.5 * PMs->SizeZ(ipm);
+        UpdateMax(msize, 0.5 * PMs->SizeX(ipm));
+        UpdateMax(msize, 0.5 * PMs->SizeY(ipm));
 
-      UpdateMax(XYm, fabs(PMs->X(ipm)) + msize);
-      UpdateMax(XYm, fabs(PMs->Y(ipm)) + msize);
-      UpdateMax(Zm,  fabs(PMs->Z(ipm)) + msize);
+        UpdateMax(XYm,   fabs(PMs->X(ipm)) + msize);
+        UpdateMax(XYm,   fabs(PMs->Y(ipm)) + msize);
+        UpdateMax(Zm,    fabs(PMs->Z(ipm)) + msize);
     }
 
-  //DummyPMs
-  for (int i=0; i<PMdummies.size(); i++)
+    for (int i = 0; i < PMdummies.size(); i++)
     {
-      double msize = 0.5*PMs->getType(PMdummies[i].PMtype)->SizeZ;
-      UpdateMax(msize, 0.5*PMs->getType(PMdummies[i].PMtype)->SizeX);
-      UpdateMax(msize, 0.5*PMs->getType(PMdummies[i].PMtype)->SizeY);
+        const APMdummyStructure & dum = PMdummies.at(i);
+        const APmType * typ = PMs->getType(dum.PMtype);
 
-      UpdateMax(XYm, fabs(PMdummies[i].r[0]) + msize);
-      UpdateMax(XYm, fabs(PMdummies[i].r[1]) + msize);
-      UpdateMax(Zm,  fabs(PMdummies[i].r[2]) + msize);
-  }
+        double msize =   0.5 * typ->SizeZ;
+        UpdateMax(msize, 0.5 * typ->SizeX);
+        UpdateMax(msize, 0.5 * typ->SizeY);
+
+        UpdateMax(XYm,   fabs(dum.r[0]) + msize);
+        UpdateMax(XYm,   fabs(dum.r[1]) + msize);
+        UpdateMax(Zm,    fabs(dum.r[2]) + msize);
+    }
 }
 
 void DetectorClass::updatePreprocessingAddMultySize()

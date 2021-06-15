@@ -196,7 +196,7 @@ bool ASimulationManager::prepareParticleMode()
     {
         if (!G4SimSet.checkPathValid())
         {
-            ErrorString = "Exchange path does not exist.\nCheck 'Geant4' options tab in ANTS2 global settings!";
+            ErrorString = "Exchange path was not configured or does not exist.\nCheck 'Geant4' options tab in ANTS2 global settings!";
             return false;
         }
 

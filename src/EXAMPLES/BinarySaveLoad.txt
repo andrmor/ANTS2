@@ -1,0 +1,43 @@
+var fn = "/home/andr/a/a.bin"
+
+// 1D
+var arr = [1.1,2.2,3.3]
+core.print("1D array to save:")
+core.print(arr)
+core.print("Saving it to a binary file...")
+core.saveArrayBinary(fn, arr, ['d'])
+core.print("   saving it once more to demonstrate how to append...")
+core.saveArrayBinary(fn, arr, ['d'], true)  //append
+var rar = core.loadArrayBinary(fn, ['d'])
+core.print("Loaded array:")
+core.print(rar)
+
+// 2D
+var arr = []
+for (var i = 0; i < 5; i++) arr.push([i, 50.5*i, 0x33, 123456, "Text"+i])
+core.print("\n2D array to save (skip one-before-last field):")
+core.print(arr)
+core.saveArrayBinary(fn, arr, ['i', 'd', 'c', '', 's'])
+var rar = core.loadArrayBinary(fn, ['i', 'd', 'c', 's'])
+core.print("Loaded array:")
+core.print(rar)
+
+//3D
+core.print("\nGenerating 3D array: 3 events, each having 5 data records")
+core.createFile(fn, false)
+var dataSeparator   = 0xEE
+var eventSeparartor = 0xFF
+for (var iEvent = 0; iEvent < 3; iEvent++)
+{
+       var arr = [[eventSeparartor, iEvent]]   // has to be array of arrays!
+       core.saveArrayBinary(fn, arr, ['c', 'i'], true)
+
+       var data = []
+       for (var iRec = 0; iRec < 5; iRec++)
+              data.push([dataSeparator, iRec, iEvent*100+iRec+0.1])
+       core.saveArrayBinary(fn, data, ['c', 'i', 'd'], true)
+}
+var rar = core.loadArrayExtended3Dbinary(fn, dataSeparator, ['i', 'd'], eventSeparartor, ['i'])
+core.print("Loaded array:")
+core.print(rar)
+

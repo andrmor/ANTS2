@@ -1012,7 +1012,7 @@ bool SensorLRFs::makeGroupLRF(int igrp, ALrfFitSettings &LRFsettings, QVector<PM
   //If we want, we can make multiple different lrfs for the same group
   //this is the right place, now that local data is cached for this group
   //we would of course need to manage the multiple group containers  
-  LRF2 *newLRF;
+  LRF2 *newLRF = nullptr;
   switch(LRFsettings.LRFtype)
     {
     case 0: newLRF = lrfmaker->mkLRFaxial(LRFsettings.nodesx, LRFsettings.compr); break;

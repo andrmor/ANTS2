@@ -30,6 +30,7 @@ public:
     double getTotalActivity() const {return TotalActivity;}
 
     void   append(AParticleSourceRecord * gunParticle);
+    bool   clone(int iSource);
     void   forget(AParticleSourceRecord * gunParticle);
     bool   replace(int iSource, AParticleSourceRecord * gunParticle);
     void   remove(int iSource);

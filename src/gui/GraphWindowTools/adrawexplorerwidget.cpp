@@ -165,9 +165,10 @@ void ADrawExplorerWidget::showObjectContextMenu(const QPoint &pos, int index)
 
     Menu.addSeparator();
 
-    QMenu * projectMenu =   Menu.addMenu("Projection"); projectMenu->setEnabled(Type.startsWith("TH2"));
+    QMenu * projectMenu =   Menu.addMenu("Projection"); projectMenu->setEnabled(Type.startsWith("TH2") || Type.startsWith("TH3"));
         QAction* projX =        projectMenu->addAction("X projection");
         QAction* projY =        projectMenu->addAction("Y projection");
+        QAction* projZ =        projectMenu->addAction("Z projection"); projZ->setVisible(Type.startsWith("TH3"));
         projectMenu->addSeparator();
         QAction* projCustom =   projectMenu->addAction("Show projection tool");
 
@@ -240,8 +241,9 @@ void ADrawExplorerWidget::showObjectContextMenu(const QPoint &pos, int index)
    else if (si == shiftA)       shift(obj);
    else if (si == medianA)      median(obj);
    else if (si == splineFitA)   splineFit(index);
-   else if (si == projX)        projection(obj, true);
-   else if (si == projY)        projection(obj, false);
+   else if (si == projX)        projection(obj, 0);
+   else if (si == projY)        projection(obj, 1);
+   else if (si == projZ)        projection(obj, 2);
    else if (si == saveRootA)    saveRoot(obj);
    else if (si == saveTxtA)     saveAsTxt(obj, true);
    else if (si == saveEdgeA)    saveAsTxt(obj, false);
@@ -1147,7 +1149,7 @@ void ADrawExplorerWidget::expFit(int index)
     GraphWindow.RegisterTObject(f);
 
     f->SetParameter(0, startY);
-    f->SetParameter(1, 1);
+    f->SetParameter(1, stopX - startX);
     f->SetParameter(2, startX);
     f->SetParLimits(2, startX, startX);
 
@@ -1325,17 +1327,46 @@ void ADrawExplorerWidget::median(ADrawObject &obj)
     d.exec();
 }
 
-void ADrawExplorerWidget::projection(ADrawObject &obj, bool bX)
+#include "TH3D.h"
+void ADrawExplorerWidget::projection(ADrawObject &obj, int axis)
 {
+    TH3 * h3 = dynamic_cast<TH3*>(obj.Pointer);
+    if (h3)
+    {
+        TProfile2D * proj;
+
+        if (axis == 0)
+            proj = h3->Project3DProfile("yzo");
+        else if (axis == 1)
+            proj = h3->Project3DProfile("xzo");
+        else
+            proj = h3->Project3DProfile("xyo");
+
+        qDebug() << "Projection:" << proj;
+
+        if (proj)
+        {
+            GraphWindow.MakeCopyOfDrawObjects();
+            GraphWindow.MakeCopyOfActiveBasketId();
+            GraphWindow.ClearBasketActiveId();
+
+            DrawObjects.clear();
+            addToDrawObjectsAndRegister((TH2D*)proj, "colz");
+
+            GraphWindow.RedrawAll();
+        }
+        return;
+    }
+
     TH2* h = dynamic_cast<TH2*>(obj.Pointer);
     if (!h)
     {
-        message("This operation requires TH2 ROOT object", &GraphWindow);
+        message("This operation requires TH2 or TH2 ROOT object", &GraphWindow);
         return;
     }
 
     TH1D* proj;
-    if (bX)
+    if (axis == 0)
         proj = h->ProjectionX();
     else
         proj = h->ProjectionY();
@@ -1727,7 +1758,7 @@ void ADrawExplorerWidget::saveAsTxt(ADrawObject &obj, bool fUseBinCenters)
     {
         QVector<double> x, y, f;
         for (int iX=1; iX<h2->GetNbinsX()+1; iX++)
-            for (int iY=1; iY<h2->GetNbinsX()+1; iY++)
+            for (int iY=1; iY<h2->GetNbinsY()+1; iY++)
             {
                 const double X = (fUseBinCenters ? h2->GetXaxis()->GetBinCenter(iX) : h2->GetXaxis()->GetBinLowEdge(iX));
                 const double Y = (fUseBinCenters ? h2->GetYaxis()->GetBinCenter(iY) : h2->GetYaxis()->GetBinLowEdge(iY));

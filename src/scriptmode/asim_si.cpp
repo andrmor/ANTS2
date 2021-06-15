@@ -48,6 +48,8 @@ ASim_SI::ASim_SI(ASimulationManager* SimulationManager, EventsDataClass *EventsD
   H["AddSubNode"] = "Adds a sub-node to the set of nodes of the previously defined top level node.\n"
           "Main purpose is to generate events with multiple energy deposition positions.\n"
           "Format: X, Y, Z, Time(optional, default=0), NumberPhotonsOverride(optional)";
+  H["AddNodes"] = "Adds an array of top level nodes. Format: array of [x,y,z, (optional)time, (optionsl)numPhotons]";
+  H["AddNodesAndSubnodes"] = "Adds an array of nodes with subnodes. Format: array of arrays of [[x,y,z, (optional)time, (optionsl)numPhotons], [...], ...]";
 
   H["GetMonitorEnergyStats"] = "Return array [sumw, sumw2, sumwx, sumwx2]";
 }
@@ -55,6 +57,7 @@ ASim_SI::ASim_SI(ASimulationManager* SimulationManager, EventsDataClass *EventsD
 bool ASim_SI::InitOnRun()
 {
     SimulationManager->clearNodes();
+    LastNodeForFastSubnode = nullptr;
     return true;
 }
 
@@ -121,6 +124,7 @@ long ASim_SI::GetSeed() const
 void ASim_SI::ClearNodes()
 {
     SimulationManager->clearNodes();
+    LastNodeForFastSubnode = nullptr;
 }
 
 int ASim_SI::CountNodes(bool onlyTop)
@@ -137,6 +141,7 @@ void ASim_SI::AddNode(double X, double Y, double Z, double Time, int numPhotons)
 {
     ANodeRecord * n = ANodeRecord::createS(X, Y, Z, Time, numPhotons);
     SimulationManager->Nodes.push_back(n);
+    LastNodeForFastSubnode = n;
 }
 
 void ASim_SI::AddNodes(QVariantList nodes)
@@ -181,6 +186,7 @@ void ASim_SI::AddNodes(QVariantList nodes)
         }
         ANodeRecord * n = ANodeRecord::createS(x, y, z, time, numPhots);
         SimulationManager->Nodes.push_back(n);
+        LastNodeForFastSubnode = n;
     }
 }
 
@@ -236,11 +242,17 @@ void ASim_SI::AddNodesAndSubnodes(QVariantList nodes) //  [ [ [xyztn], [xyztn], 
                 SimulationManager->Nodes.push_back(n);
 
             previousNode = n;
+            LastNodeForFastSubnode = n;
         }
     }
 }
 
-void ASim_SI::AddSubNode(double X, double Y, double Z, double Time, int numPhotons)
+void ASim_SI::ReserveNodeContainer(int numNodes)
+{
+    SimulationManager->Nodes.reserve(numNodes);
+}
+
+void ASim_SI::AddSubNode(double X, double Y, double Z, double Time, int numPhotons, bool bFast)
 {
     int nodes = SimulationManager->Nodes.size();
     if (nodes == 0)
@@ -248,7 +260,12 @@ void ASim_SI::AddSubNode(double X, double Y, double Z, double Time, int numPhoto
     else
     {
         ANodeRecord * n = ANodeRecord::createS(X, Y, Z, Time, numPhotons);
-        SimulationManager->Nodes[nodes-1]->addLinkedNode(n);
+        if (bFast && LastNodeForFastSubnode)
+            LastNodeForFastSubnode->addLinkedNode(n);
+        else
+            SimulationManager->Nodes[nodes-1]->addLinkedNode(n);
+
+        LastNodeForFastSubnode = n;
     }
 }
 

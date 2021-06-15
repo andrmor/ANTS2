@@ -45,6 +45,7 @@ TGraph * HistToGraph(TH1 * h)
     return new TGraph(x.size(), x.data(), f.data());
 }
 
+#include "TGraph2D.h"
 void ABasketManager::add(const QString & name, const QVector<ADrawObject> & drawObjects)
 {
     ABasketItem item;
@@ -114,6 +115,10 @@ void ABasketManager::add(const QString & name, const QVector<ADrawObject> & draw
             else if (type == "TH2C") clone = new TH2C(*static_cast<TH2C*>(tobj));
             else clone = tobj->Clone(); //paranoic
         }
+        else if (type == "TGraph2D")
+        {
+            clone = new TGraph2D(*static_cast<TGraph2D*>(tobj));  // clone unzooms to full range
+        }
         else
         {
             clone = tobj->Clone();
@@ -121,7 +126,7 @@ void ABasketManager::add(const QString & name, const QVector<ADrawObject> & draw
         }
         OldToNew[drObj.Pointer] = clone;
 
-        item.DrawObjects.append( ADrawObject(clone, options, drObj.bEnabled) );
+        item.DrawObjects.append( ADrawObject(clone, options, drObj.bEnabled, drObj.bLogScaleX, drObj.bLogScaleY) );
     }
 
     if (Legend)
@@ -177,7 +182,7 @@ const QVector<ADrawObject> ABasketManager::getCopy(int index) const
     {
         for (const ADrawObject & obj : Basket.at(index).DrawObjects)
         {
-            TObject * clone;
+            TObject * clone = nullptr;
             TLegend * OldLegend = dynamic_cast<TLegend*>(obj.Pointer);
             if (OldLegend)
             {
@@ -186,12 +191,14 @@ const QVector<ADrawObject> ABasketManager::getCopy(int index) const
             }
             else
             {
-                clone = obj.Pointer->Clone();
+                TGraph2D * g2 = dynamic_cast<TGraph2D*>(obj.Pointer);
+                if (g2) clone = new TGraph2D(*g2); //clone unzooms to full range
+                else    clone = obj.Pointer->Clone();
                 OldToNew[obj.Pointer] = clone;
                 //qDebug() << "From basket, old-->cloned" << obj.Pointer << "-->" << clone;
             }
 
-            res << ADrawObject(clone, obj.Options, obj.bEnabled);
+            res << ADrawObject(clone, obj.Options, obj.bEnabled, obj.bLogScaleX, obj.bLogScaleY);
         }
 
         if (Legend)
@@ -225,18 +232,6 @@ void ABasketManager::remove(int index)
     Basket[index].clearObjects();
     Basket.remove(index);
 }
-
-/*
-QVector<ADrawObject> & ABasketManager::getDrawObjects(int index)
-{
-    if (index < 0 || index >= Basket.size())
-    {
-        qWarning() << "Basket manager: index" << index << "is out of bounds!";
-        return NotValidItem;
-    }
-    return Basket[index].DrawObjects;
-}
-*/
 
 const QString ABasketManager::getType(int index) const
 {
@@ -307,6 +302,8 @@ void ABasketManager::saveAll(const QString & fileName)
             js["Name"] = obj.Name;
             js["Options"] = obj.Options;
             js["Enabled"] = obj.bEnabled;
+            js["LogX"] = obj.bLogScaleX;
+            js["LogY"] = obj.bLogScaleY;
             TLegend * Legend = dynamic_cast<TLegend*>(obj.Pointer);
             if (Legend)
             {
@@ -442,6 +439,8 @@ const QString ABasketManager::appendBasket(const QString & fileName)
                 QString Name     = js["Name"].toString();
                 QString Options  = js["Options"].toString();
                 bool    bEnabled = js["Enabled"].toBool();
+                bool    bLogX    = false; parseJson(js, "LogX", bLogX);
+                bool    bLogY    = false; parseJson(js, "LogY", bLogY);
 
                 TKey *key = (TKey*)f.GetListOfKeys()->At(KeyIndex);
                 KeyIndex++;
@@ -452,6 +451,8 @@ const QString ABasketManager::appendBasket(const QString & fileName)
                     ADrawObject Obj(p, Options);
                     Obj.Name = Name;
                     Obj.bEnabled = bEnabled;
+                    Obj.bLogScaleX = bLogX;
+                    Obj.bLogScaleY = bLogY;
                     drawObjects << Obj;
 
                     TLegend * Legend = dynamic_cast<TLegend*>(p);

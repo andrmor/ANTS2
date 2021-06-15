@@ -27,7 +27,22 @@ void AGraphWin_SI::Show()
 
 void AGraphWin_SI::Hide()
 {
-  MW->GraphWindow->hide();
+    MW->GraphWindow->hide();
+}
+
+int AGraphWin_SI::GetWidth()
+{
+    return MW->GraphWindow->width();
+}
+
+int AGraphWin_SI::GetHeight()
+{
+    return MW->GraphWindow->height();
+}
+
+int AGraphWin_SI::Resize(int w, int h)
+{
+    MW->GraphWindow->resize(w, h);
 }
 
 void AGraphWin_SI::PlotDensityXY()
@@ -130,6 +145,17 @@ QVariant AGraphWin_SI::GetProjection()
     QJsonValue jv = arr;
     QVariant res = jv.toVariant();
     return res;
+}
+
+void AGraphWin_SI::UseProjectionTool(QString option)
+{
+    QString res = MW->GraphWindow->UseProjectionTool(option);
+    if (!res.isEmpty()) abort(res);
+}
+
+void AGraphWin_SI::ConfigureProjectionTool(double x0, double y0, double dx, double dy, double angle)
+{
+    MW->GraphWindow->ConfigureProjectionTool(x0, y0, dx, dy, angle);
 }
 
 QVariant AGraphWin_SI::GetAxis()

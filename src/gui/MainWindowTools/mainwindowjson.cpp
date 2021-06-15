@@ -3,6 +3,7 @@
 #include "aglobalsettings.h"
 #include "ui_mainwindow.h"
 #include "detectorclass.h"
+#include "asandwich.h"
 #include "materialinspectorwindow.h"
 #include "amaterialparticlecolection.h"
 #include "detectoraddonswindow.h"
@@ -36,21 +37,6 @@ void MainWindow::writeDetectorToJson(QJsonObject &json)
   Detector->writeToJson(json);
 }
 
-// will be obsolete after conversion!
-bool MainWindow::readDetectorFromJson(QJsonObject &json)
-{
-  GeometryWindow->fRecallWindow = false;
-  bool fOK = Detector->MakeDetectorFromJson(json);
-  if (!fOK)
-    {
-      qCritical() << "Error while loading detector config";
-      return false;
-    }
-
-  //gui update is automatically triggered
-  return true;
-}
-
 void MainWindow::onRequestDetectorGuiUpdate()
 {
     //qDebug() << "DetJson->DetGUI";
@@ -73,15 +59,16 @@ void MainWindow::onRequestDetectorGuiUpdate()
   ui->cbLPM->setChecked(Detector->PMarrays[1].fActive);
   on_pbShowPMsArrayRegularData_clicked(); //update regular array fields
   //Detector addon window updates
-  DAwindow->UpdateGUI();
-  if (Detector->PMdummies.size()>0) DAwindow->UpdateDummyPMindication();
+  DAwindow->UpdateGUI();  
   //Output window
   Owindow->RefreshData();
 //  Owindow->ResetViewport();  // *** !!! extend to other windows too!
   //world
-  ui->ledTopSizeXY->setText( QString::number(2.0*Detector->WorldSizeXY, 'g', 4) );
-  ui->ledTopSizeZ->setText( QString::number(2.0*Detector->WorldSizeZ, 'g', 4) );
-  ui->cbFixedTopSize->setChecked( Detector->fWorldSizeFixed );
+  const double WorldSizeXY = Detector->Sandwich->getWorldSizeXY();
+  const double WorldSizeZ  = Detector->Sandwich->getWorldSizeZ();
+  ui->ledTopSizeXY->setText( QString::number(2.0 * WorldSizeXY, 'g', 4) );
+  ui->ledTopSizeZ-> setText( QString::number(2.0 * WorldSizeZ,  'g', 4) );
+  ui->cbFixedTopSize->setChecked( Detector->Sandwich->isWorldSizeFixed() );
   //misc
   ShowPMcount();
   //CheckPresenseOfSecScintillator(); //checks if SecScint present, and update selectors of primary/secondary scintillation  //***!!! potentially slow on large geometries!!!
@@ -95,13 +82,7 @@ void MainWindow::onRequestDetectorGuiUpdate()
   //GDML?
   onGDMLstatusChage(!Detector->isGDMLempty());
 
-  //Detector->checkSecScintPresent();
-  //ui->fSecondaryLightGenType->setEnabled(Detector->fSecScintPresent);
-
-  //readExtraGuiFromJson(Config->JSON); //new!
-  //qDebug() << "Before:\n"<<Config->JSON["DetectorConfig"].toObject()["LoadExpDataConfig"].toObject();
   UpdatePreprocessingSettingsIndication();
-  //qDebug() << "AFTER:\n"<<Config->JSON["DetectorConfig"].toObject()["LoadExpDataConfig"].toObject();
 
   DoNotUpdateGeometry = false;
 
@@ -141,7 +122,7 @@ void MainWindow::writeExtraGuiToJson(QJsonObject &json)
         jmain["MW"] = jsMW;
 
         QJsonObject jeom;
-        jeom["ZoomLevel"] = GeometryWindow->ZoomLevel;
+            GeometryWindow->writeToJson(jeom);
         jmain["GeometryWindow"] = jeom;
 
         Rwindow->writeMiscGUIsettingsToJson(jmain);  //Misc setting (PlotXY, blur)
@@ -166,12 +147,9 @@ void MainWindow::readExtraGuiFromJson(QJsonObject &json)
     }
     onGuiEnableStatus(fConfigGuiLocked);
 
-    QJsonObject js = jmain["GeometryWindow"].toObject();
-    if (js.contains("ZoomLevel"))
-    {
-        GeometryWindow->ZoomLevel = js["ZoomLevel"].toInt();
-        GeometryWindow->Zoom(true);
-    }
+    QJsonObject js;
+    if ( parseJson(jmain, "GeometryWindow", js) ) GeometryWindow->readFromJson(js);
+
     if (jmain.contains("ReconstructionWindow"))
         Rwindow->readMiscGUIsettingsFromJson(jmain);
 
@@ -246,17 +224,25 @@ void MainWindow::writeSimSettingsToJson(QJsonObject &json)
 void MainWindow::onRequestSimulationGuiUpdate()
 {
     //      qDebug() << "SimJson->SimGUI";
-    MainWindow::readSimSettingsFromJson(Config->JSON);
+    readSimSettingsFromJson(Config->JSON);
 }
 
+#include "aparticlesourcedialog.h"
 bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
 {
-  //        qDebug() << "Read sim from json and update sim gui";
+  //qDebug() << "Read sim from json and update sim gui";
+
+  if (ParticleSourceDialog)
+  {
+      ParticleSourceDialog->blockSignals(true);
+      ParticleSourceDialog->reject();
+  }
+
   if (!json.contains("SimulationConfig"))
-    {
-      //qWarning() << "Json does not contain sim settings!";
+  {
+      qWarning() << "Json does not contain sim settings!";
       return false;
-    }
+  }
 
   //cleanup  
   delete histScan; histScan = nullptr;

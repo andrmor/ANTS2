@@ -23,11 +23,11 @@ public slots:
   void ItemRequestsModelUpdate(QWidget* source);
 
 private:
-  ASandwich* Sandwich;
-  ASlabXYModel* tmpXY; //used to copy-paste XY properties
-  ASlabXYDelegate* DefaultXYdelegate; //this is the widget that controls default XY properties
-                                      //it is created during construction of the listwidget. Get it using GetDefaultXYdelegate()
-  bool fIgnoreModelUpdateRequests;
+  ASandwich * Sandwich = nullptr;
+  ASlabXYModel * tmpXY = nullptr;                //used to copy-paste XY properties
+  ASlabXYDelegate * DefaultXYdelegate = nullptr; //this is the widget that controls default XY properties
+                                                 //it is created during construction of the listwidget. Get it using GetDefaultXYdelegate()
+  bool fIgnoreModelUpdateRequests = false;
 
   ASlabDelegate* AddNewSlabDelegate();
   void ReshapeDelegate(int row);  

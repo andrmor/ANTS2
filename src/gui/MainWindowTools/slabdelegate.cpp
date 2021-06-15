@@ -106,6 +106,15 @@ const ASlabXYModel ASlabXYDelegate::GetData()
   return Rec;
 }
 
+void ASlabXYDelegate::UpdateModel(ASlabXYModel & slabModel) const
+{
+    slabModel.shape = comShape->currentIndex();
+    if (slabModel.strSides.isEmpty()) slabModel.sides = sbSides->value();
+    if (slabModel.strSize1.isEmpty()) slabModel.size1 = ledSize1->text().toDouble();
+    if (slabModel.strSize2.isEmpty()) slabModel.size2 = ledSize2->text().toDouble();
+    if (slabModel.strAngle.isEmpty()) slabModel.angle = ledAngle->text().toDouble();
+}
+
 void ASlabXYDelegate::SetShowState(ASlabXYDelegate::ShowStates State)
 {
   ShowState = State;
@@ -145,10 +154,19 @@ void ASlabXYDelegate::UpdateGui(const ASlabXYModel &ModelRecord)
 {
   if (ModelRecord.shape<0 || ModelRecord.shape>comShape->count()-1) comShape->setCurrentIndex(-1);
   else comShape->setCurrentIndex(ModelRecord.shape);
+
   sbSides->setValue(ModelRecord.sides);
+  sbSides->setEnabled(ModelRecord.strSides.isEmpty());
+
   ledSize1->setText( QString::number(ModelRecord.size1) );
+  ledSize1->setEnabled(ModelRecord.strSize1.isEmpty());
+
   ledSize2->setText( QString::number(ModelRecord.size2) );
+  ledSize2->setEnabled(ModelRecord.strSize2.isEmpty());
+
   ledAngle->setText( QString::number(ModelRecord.angle) );
+  ledAngle->setEnabled(ModelRecord.strAngle.isEmpty());
+
   switch (comShape->currentIndex())
     {
     case 0:
@@ -247,9 +265,9 @@ ASlabDelegate::ASlabDelegate(QWidget *parent) : QWidget(parent)
   // reactions to user actions
   connect(cbOnOff, SIGNAL(clicked(bool)), this, SLOT(onUserAction()));
   connect(leName, SIGNAL(editingFinished()), this, SLOT(onUserAction()));
-  connect(ledHeight, SIGNAL(editingFinished()), this, SLOT(onUserAction()));
+  connect(ledHeight, &QLineEdit::editingFinished, this, &ASlabDelegate::onUserAction);
   connect(comMaterial, SIGNAL(activated(int)), this, SLOT(onUserAction()));
-  connect(XYdelegate, SIGNAL(RequestModelUpdate()), this, SLOT(onUserAction()));
+  connect(XYdelegate, &ASlabXYDelegate::RequestModelUpdate, this, &ASlabDelegate::onUserAction);
 
   connect(cbOnOff, SIGNAL(clicked(bool)), this, SLOT(onContentChanged()));
   connect(leName, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
@@ -272,11 +290,11 @@ void ASlabDelegate::UpdateModel(ASlabModel *record)
 {
   record->fActive = cbOnOff->isChecked();
   record->name = leName->text();
-  record->height = ledHeight->text().toDouble();
+  if (record->strHeight.isEmpty()) record->height = ledHeight->text().toDouble();  // enabled in this case only
   record->material = comMaterial->currentIndex();
-  //record->fCenter = frCenterZ->isVisible();
   record->fCenter = fCenter;
-  record->XYrecord = XYdelegate->GetData();
+
+  XYdelegate->UpdateModel(record->XYrecord);
 }
 
 const ASlabModel ASlabDelegate::GetData()
@@ -316,11 +334,11 @@ void ASlabDelegate::UpdateGui(const ASlabModel &ModelRecord)
   leName->setText(ModelRecord.name);
   ledHeight->setText(QString::number(ModelRecord.height));
 
+  ledHeight->setEnabled(ModelRecord.strHeight.isEmpty()); // use world tree delegate in this case
+
   if (ModelRecord.material<0 || ModelRecord.material>comMaterial->count()-1) comMaterial->setCurrentIndex(-1);
   else comMaterial->setCurrentIndex(ModelRecord.material);
 
-  //if (ModelRecord.fCenter) frCenterZ->setVisible(true);
-  //else frCenterZ->setVisible(false);
   fCenter = ModelRecord.fCenter;
   frCenterZ->setVisible(fCenter);
 

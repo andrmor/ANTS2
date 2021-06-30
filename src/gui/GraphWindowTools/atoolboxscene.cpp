@@ -106,7 +106,7 @@ void AToolboxScene::activateItemDrag()
     toolDrag = ToolDragActivated;
 }
 
-void AToolboxScene::resetTool(AToolboxScene::Tool tool)
+void AToolboxScene::resetTool(Tool tool)
 {
     switch(tool)
     {
@@ -139,7 +139,7 @@ void AToolboxScene::resetTool(AToolboxScene::Tool tool)
     toolGeometryChanged(tool);
 }
 
-void AToolboxScene::moveToolToVisible(AToolboxScene::Tool tool)
+void AToolboxScene::moveToolToVisible(Tool tool)
 {
     QRectF s = sceneRect();
     QGraphicsItem *item = getTool(tool);

@@ -20,7 +20,7 @@ void ABasketListWidget::dropEvent(QDropEvent * event)
 
     QList<QListWidgetItem*> sel = selectedItems();
     QVector<int> indexes;
-    for (QListWidgetItem* item : sel)
+    for (QListWidgetItem* item : qAsConst(sel))
         indexes << row(item);
     //qDebug() << "   Indexes to be moved:" << indexes;
 

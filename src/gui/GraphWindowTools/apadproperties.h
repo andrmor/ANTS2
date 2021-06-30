@@ -3,9 +3,12 @@
 
 #include "apadgeometry.h"
 
-#include <TPad.h>
-
+#include <QVector>
 #include <QJsonObject>
+
+#include "TPad.h"
+
+class TObject;
 
 class APadProperties
 {
@@ -23,6 +26,8 @@ public:
 
     TPad * tPad = nullptr;
     APadGeometry padGeo;
+
+    QVector<TObject*> tmpObjects;
 };
 
 #endif // APADPROPERTIES_H

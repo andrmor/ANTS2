@@ -43,7 +43,7 @@ public:
     void ForceResize();
 
     void SaveAs(const QString & filename);
-    void SetWindowTitle(const QString & title);
+    //void SetWindowTitle(const QString & title);
 
     void setWindowProperties();
 
@@ -54,14 +54,13 @@ signals:
     void userChangedWindow();
 
 protected:
-    //void exposeEvent(QExposeEvent * event);
-    void mouseMoveEvent(QMouseEvent * event);
-    void mousePressEvent(QMouseEvent * event);
-    void mouseReleaseEvent(QMouseEvent * event);
-    void wheelEvent(QWheelEvent * event);
+    void mouseMoveEvent(QMouseEvent * event) override;
+    void mousePressEvent(QMouseEvent * event) override;
+    void mouseReleaseEvent(QMouseEvent * event) override;
+    void wheelEvent(QWheelEvent * event) override;
 
-    virtual void paintEvent(QPaintEvent * event ) override;
-    virtual void resizeEvent(QResizeEvent * event ) override;
+    void paintEvent(QPaintEvent * event ) override;
+    void resizeEvent(QResizeEvent * event ) override;
 
 protected:
     QMainWindow * MasterWindow = nullptr;

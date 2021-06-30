@@ -231,10 +231,12 @@ void RasterWindowBaseClass::SaveAs(const QString & filename)
     fCanvas->SaveAs(filename.toLocal8Bit().data());
 }
 
+/*
 void RasterWindowBaseClass::SetWindowTitle(const QString &title)
 {
     MasterWindow->setWindowTitle(title);
 }
+*/
 
 void RasterWindowBaseClass::setWindowProperties()
 {

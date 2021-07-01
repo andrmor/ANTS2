@@ -1351,6 +1351,7 @@ void DetectorAddOnsWindow::updateGeoConstsIndication()
 
             if (!Expression.isEmpty()) edit->setEnabled(false);
         }
+        ui->tabwConstants->resizeRowsToContents();
     bGeoConstsWidgetUpdateInProgress = false; // <--
 }
 

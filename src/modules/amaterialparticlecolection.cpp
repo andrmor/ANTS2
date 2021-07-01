@@ -1004,8 +1004,8 @@ void AMaterialParticleCollection::CheckReadyForGeant4Sim(QString & Errors, QStri
             const MatParticleStructure & mp = mat->MatParticle.at(iP);
             if (!mp.TrackingAllowed)
             {
-                //Warnings += QString("\n%1: Tracking disabled for %2 - not yet implemented in G4ants\n").arg(mat->name).arg(getParticleName(iP));
-                qDebug() << QString("\n%1: Tracking disabled for %2 - not yet implemented in G4ants\n").arg(mat->name).arg(getParticleName(iP));
+                //Warnings += QString("\n%1: Tracking is disabled for %2, however Geant4 simulation will ignore this flag.\n").arg(mat->name).arg(getParticleName(iP));
+                qDebug() << QString("\n%1: Tracking is disabled for %2, however Geant4 simulation will ignore this flag.\n").arg(mat->name).arg(getParticleName(iP));
             }
 
             if (!mp.MaterialIsTransparent && !bCompoDefined)

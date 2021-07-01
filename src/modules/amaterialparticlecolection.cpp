@@ -1005,7 +1005,7 @@ void AMaterialParticleCollection::CheckReadyForGeant4Sim(QString & Errors, QStri
             if (!mp.TrackingAllowed)
             {
                 //Warnings += QString("\n%1: Tracking is disabled for %2, however Geant4 simulation will ignore this flag.\n").arg(mat->name).arg(getParticleName(iP));
-                qDebug() << QString("\n%1: Tracking is disabled for %2, however Geant4 simulation will ignore this flag.\n").arg(mat->name).arg(getParticleName(iP));
+                qDebug() << QString("\n%1: Tracking is disabled for %2, however Geant4 simulation will ignore this flag.\n").arg(mat->name, getParticleName(iP));
             }
 
             if (!mp.MaterialIsTransparent && !bCompoDefined)

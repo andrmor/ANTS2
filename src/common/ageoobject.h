@@ -9,6 +9,7 @@
 #include <QVector>
 
 class QJsonObject;
+class QJsonArray;
 class AGeoType;
 class TGeoShape;
 class AGeoShape;

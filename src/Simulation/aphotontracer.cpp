@@ -683,7 +683,7 @@ APhotonTracer::AbsRayEnum APhotonTracer::AbsorptionAndRayleigh()
                 RandomDir();
                 dotProduct = p->v[0]*v_old[0] + p->v[1]*v_old[1] + p->v[2]*v_old[2];
               }
-            while ( (dotProduct*dotProduct + 1.0) < RandGen->Rndm(2.0));
+            while ( (dotProduct*dotProduct + 1.0) < 2.0*RandGen->Rndm());
             navigator->SetCurrentDirection(p->v);            
 
             double refIndex = MaterialFrom->getRefractiveIndex(p->waveIndex);

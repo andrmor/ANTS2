@@ -929,7 +929,7 @@ QT += websockets
 QT += script #scripts support
 win32:QT += winextras  #used in windownavigator only
 
-CONFIG += c++11
+CONFIG += c++14
 
 TARGET = ants2
 TEMPLATE = app

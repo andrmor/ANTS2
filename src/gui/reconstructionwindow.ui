@@ -580,10 +580,10 @@
        <widget class="QLabel" name="label_18">
         <property name="geometry">
          <rect>
-          <x>0</x>
+          <x>3</x>
           <y>91</y>
-          <width>147</width>
-          <height>18</height>
+          <width>142</width>
+          <height>20</height>
          </rect>
         </property>
         <property name="text">
@@ -910,8 +910,8 @@
          <rect>
           <x>163</x>
           <y>29</y>
-          <width>350</width>
-          <height>24</height>
+          <width>359</width>
+          <height>28</height>
          </rect>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout">
@@ -973,13 +973,13 @@
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="">
+       <widget class="QWidget" name="layoutWidget">
         <property name="geometry">
          <rect>
           <x>155</x>
           <y>4</y>
-          <width>359</width>
-          <height>24</height>
+          <width>378</width>
+          <height>27</height>
          </rect>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_6">
@@ -1032,6 +1032,7 @@
         </layout>
        </widget>
        <zorder>layoutWidget</zorder>
+       <zorder>layoutWidget</zorder>
        <zorder>line_40</zorder>
        <zorder>label_16</zorder>
        <zorder>leoEventsPassingAllFilters</zorder>
@@ -1067,14 +1068,10 @@
        <zorder>ledXfrom</zorder>
        <zorder>ledYfrom</zorder>
        <zorder>cobHowToAverageZ</zorder>
-       <zorder>pbShowReconstructionPositions</zorder>
        <zorder>ledXto</zorder>
        <zorder>ledYto</zorder>
        <zorder>pbPMTcol</zorder>
        <zorder>pbUpdateGuiSettingsInJSON</zorder>
-       <zorder>label_135</zorder>
-       <zorder>pbShowTruePositions</zorder>
-       <zorder>pbClearPositions</zorder>
        <zorder>cbInvertX</zorder>
        <zorder>cbInvertY</zorder>
       </widget>
@@ -8389,7 +8386,7 @@ Individual sensors can belong to multiple groups!</string>
                <rect>
                 <x>185</x>
                 <y>28</y>
-                <width>282</width>
+                <width>283</width>
                 <height>31</height>
                </rect>
               </property>

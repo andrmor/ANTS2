@@ -436,8 +436,16 @@ void AInterfaceToHist::Divide(const QString &HistName, const QString &HistToDivi
 {
     ARootHistRecord* r1 = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
     ARootHistRecord* r2 = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistToDivideWith));
-    if (!r1) abort("Histogram " + HistName + " not found!");
-    if (!r2) abort("Histogram " + HistToDivideWith + " not found!");
+    if (!r1)
+    {
+        abort("Histogram " + HistName + " not found!");
+        return;
+    }
+    if (!r2)
+    {
+        abort("Histogram " + HistToDivideWith + " not found!");
+        return;
+    }
     else
     {
         bool bOK = r1->Divide(r2);

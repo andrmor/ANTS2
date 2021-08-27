@@ -3,8 +3,11 @@
 
 #include "apadgeometry.h"
 #include "apadproperties.h"
+
 #include <QMainWindow>
-#include <TPad.h>
+#include <QVector>
+
+#include "TPad.h"
 
 class ABasketManager;
 class RasterWindowBaseClass;
@@ -29,6 +32,8 @@ public:
     void updateBasketGUI();  // triggered from GraphWindow::UpdatebasketGui()
     void requestAutoconfigureAndDraw(const QVector<int> & basketItems);
 
+    void updateGUI();
+
 private slots:
     void on_pbRefactor_clicked();
     void on_pbClear_clicked();
@@ -42,6 +47,7 @@ private slots:
 
 protected:
     bool event(QEvent * event) override;
+    void closeEvent(QCloseEvent *event);
 
 signals:
     void basketChanged();
@@ -59,11 +65,10 @@ private:
 
     void clearGraphs();
 
-    void updateGUI();
     void updateCanvas();
     void updateNumbers();
 
-    void drawGraph(const QVector<ADrawObject> DrawObjects);
+    void drawGraph(const QVector<ADrawObject> DrawObjects, APadProperties & pad);
     void fillOutBasicLayout(int numX, int numY);
     void writeToJson(QJsonObject &json);
     QString readFromJson(const QJsonObject &json);

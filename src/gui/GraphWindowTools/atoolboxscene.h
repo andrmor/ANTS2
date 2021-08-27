@@ -30,8 +30,8 @@ public:
 
 public slots:
   void activateItemDrag();
-  void resetTool(Tool tool = ToolActive);
-  void moveToolToVisible(Tool tool = ToolActive);
+  void resetTool(AToolboxScene::Tool tool = ToolActive);
+  void moveToolToVisible(AToolboxScene::Tool tool = ToolActive);
 
 private:
   void toolGeometryChanged(Tool tool = ToolActive);

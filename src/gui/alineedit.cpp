@@ -24,16 +24,16 @@ void ALineEdit::keyPressEvent(QKeyEvent *e)
 
 QString ALineEdit::cursorWord(const QString &sentence) const
 {
-    return sentence.mid(sentence.left(cursorPosition()).lastIndexOf(" ") + 1,
+    return sentence.mid(sentence.leftRef(cursorPosition()).lastIndexOf(" ") + 1,
                         cursorPosition() -
-                        sentence.left(cursorPosition()).lastIndexOf(" ") - 1);
+                        sentence.leftRef(cursorPosition()).lastIndexOf(" ") - 1);
 }
 
 void ALineEdit::insertCompletion(QString arg)
 {
-    setText(text().replace(text().left(cursorPosition()).lastIndexOf(" ") + 1,
+    setText(text().replace(text().leftRef(cursorPosition()).lastIndexOf(" ") + 1,
                            cursorPosition() -
-                           text().left(cursorPosition()).lastIndexOf(" ") - 1,
+                           text().leftRef(cursorPosition()).lastIndexOf(" ") - 1,
                            arg));
 }
 

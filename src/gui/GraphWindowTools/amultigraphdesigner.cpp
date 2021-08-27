@@ -9,10 +9,13 @@
 #include <QHBoxLayout>
 #include <QListWidget>
 #include <QDebug>
-#include <TObject.h>
-#include <TCanvas.h>
 #include <QJsonArray>
 #include <QFileDialog>
+#include <QFileInfo>
+#include <QInputDialog>
+
+#include "TObject.h"
+#include "TCanvas.h"
 
 AMultiGraphDesigner::AMultiGraphDesigner(ABasketManager & Basket, QWidget *parent) :
     QMainWindow(parent), Basket(Basket),
@@ -20,12 +23,12 @@ AMultiGraphDesigner::AMultiGraphDesigner(ABasketManager & Basket, QWidget *paren
 {
     ui->setupUi(this);
 
-    RasterWindow = new RasterWindowBaseClass(this);
+    RasterWindow = new RasterWindowBaseClass(0);
     RasterWindow->resize(400, 400);
     RasterWindow->ForceResize();
     ui->lMainLayout->insertWidget(0, RasterWindow);
 
-    lwBasket = new ABasketListWidget(this);
+    lwBasket = new ABasketListWidget();
     ui->lBasketLayout->addWidget(lwBasket);
     //connect(lwBasket, &ABasketListWidget::customContextMenuRequested, this, &AMultiGraphDesigner::BasketCustomContextMenuRequested);
 
@@ -37,6 +40,8 @@ AMultiGraphDesigner::AMultiGraphDesigner(ABasketManager & Basket, QWidget *paren
 
 AMultiGraphDesigner::~AMultiGraphDesigner()
 {
+    //qDebug() << "Destr for multigraph window";
+    clearGraphs();
     delete ui;
 }
 
@@ -44,6 +49,8 @@ void AMultiGraphDesigner::updateBasketGUI()
 {
     lwBasket->clear();
     lwBasket->addItems(Basket.getItemNames());
+
+    //qDebug() << "---Basket items:"<< Basket.getItemNames();
 
     for (int i=0; i < lwBasket->count(); i++)
     {
@@ -88,8 +95,6 @@ void AMultiGraphDesigner::on_actionSave_triggered()
     Basket.saveAll(fileName+".basket");
 }
 
-#include <QFileInfo>
-#include <QInputDialog>
 void AMultiGraphDesigner::on_actionLoad_triggered()
 {
     if (Basket.size() != 0)
@@ -102,7 +107,7 @@ void AMultiGraphDesigner::on_actionLoad_triggered()
     if (fileName.isEmpty()) return;
 
     QString basketFileName = fileName + ".basket";
-    if (!QFileInfo(basketFileName).exists())
+    if (!QFileInfo::exists(basketFileName))
     {
         message(QString("Not found corresponding basket file:\n%1").arg(basketFileName));
         return;
@@ -155,16 +160,22 @@ void AMultiGraphDesigner::clearGraphs()
 {
     TCanvas *c1 = RasterWindow->fCanvas;
     c1->Clear();
+
+    for (const APadProperties & pad : qAsConst(Pads))
+        for (const TObject * obj : pad.tmpObjects)
+            delete obj;
+
     Pads.clear();
 }
 
 void AMultiGraphDesigner::updateGUI()
 {
     updateCanvas();
+    updateBasketGUI();
     updateNumbers();
 }
 
-void AMultiGraphDesigner::drawGraph(const QVector<ADrawObject> DrawObjects)
+void AMultiGraphDesigner::drawGraph(const QVector<ADrawObject> DrawObjects, APadProperties & pad)
 {
     for (int i=0; i<DrawObjects.length(); i++)
     {
@@ -172,6 +183,7 @@ void AMultiGraphDesigner::drawGraph(const QVector<ADrawObject> DrawObjects)
         TObject * tObj = drObj.Pointer;
 
         tObj->Draw(drObj.Options.toLatin1().data());
+        pad.tmpObjects.append(tObj);
     }
 }
 
@@ -181,7 +193,7 @@ void AMultiGraphDesigner::updateCanvas()
 
     for (int iPad = 0; iPad < Pads.size(); iPad++)
     {
-        const APadProperties & pad = Pads.at(iPad);
+        APadProperties & pad = Pads[iPad];
         canvas->cd();
         pad.tPad->Draw();
 
@@ -190,12 +202,13 @@ void AMultiGraphDesigner::updateCanvas()
             int iBasketIndex = DrawOrder.at(iPad);
             if (iBasketIndex < Basket.size() && iBasketIndex >= 0)
             {
-                const QVector<ADrawObject> DrawObjects = Basket.getCopy(iBasketIndex);  // ***!!! is it safe? The copy is deleted on exiting this {}
+                const QVector<ADrawObject> DrawObjects = Basket.getCopy(iBasketIndex);
                 pad.tPad->cd();
-                drawGraph(DrawObjects);
+                drawGraph(DrawObjects, pad);
             }
         }
     }
+    //canvas->Modified();
     canvas->Update();
 }
 
@@ -223,6 +236,7 @@ void AMultiGraphDesigner::updateNumbers()
             if (counter >= max) break;
             int iBasket = DrawOrder.at(counter);
             ui->lwCoords->item(iBasket)->setText(QString("%1-%2").arg(ix).arg(iy));
+            //qDebug() << "---->" << ui->lwCoords->item(iBasket) << QString("%1-%2").arg(ix).arg(iy);
             counter++;
         }
 }
@@ -283,7 +297,7 @@ void AMultiGraphDesigner::writeToJson(QJsonObject & json)
     json["Pads"] = ar;
 
     QJsonArray arI;
-    for (int i : DrawOrder) arI << i;
+    for (int i : qAsConst(DrawOrder)) arI << i;
     json["DrawOrder"] = arI;
 
     json["WinWidth"]  = width();
@@ -328,7 +342,7 @@ QString AMultiGraphDesigner::readFromJson(const QJsonObject & json)
 QString AMultiGraphDesigner::PadsToString()
 {
     QString str;
-    for (const APadProperties & pad : Pads)
+    for (const APadProperties & pad : qAsConst(Pads))
     {
         str += "{";
         str += pad.toString();
@@ -364,12 +378,20 @@ bool AMultiGraphDesigner::event(QEvent *event)
         else
         {
             //qDebug() << "Graph win show event";
+            //updateGUI();
             //RasterWindow->UpdateRootCanvas();
-            //QTimer::singleShot(100, [this](){RasterWindow->UpdateRootCanvas();}); // without delay canvas is not shown in Qt 5.9.5
+            QTimer::singleShot(100, RasterWindow, [this](){RasterWindow->UpdateRootCanvas();}); // without delay canvas is not shown in Qt 5.9.5
         }
     }
 
     return QMainWindow::event(event);
+}
+
+#include <QCloseEvent>
+void AMultiGraphDesigner::closeEvent(QCloseEvent *event)
+{
+    event->ignore();
+    hide();
 }
 
 void AMultiGraphDesigner::on_pbClear_clicked()

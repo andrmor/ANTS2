@@ -798,7 +798,7 @@ void ASandwich::positionStack(AGeoObject * obj, TGeoVolume * vol, int forcedNode
     const ATypeStackContainerObject * stack = static_cast<const ATypeStackContainerObject*>(obj->ObjectType);
     const QString & RefObjName = stack->ReferenceVolume;
     const AGeoObject * RefObj = nullptr;
-    for (const AGeoObject * el : obj->HostedObjects)
+    for (const AGeoObject * el : qAsConst(obj->HostedObjects))
         if (el->Name == RefObjName)
         {
             RefObj = el;
@@ -938,7 +938,7 @@ void ASandwich::positionStackElement(AGeoObject * el, const AGeoObject * RefObj,
     {
         StackRot.LocalToMaster(local, master);
         for (int i = 0; i < 3; i++)
-            el->TruePos[i] = master[i] + RefObj->Position[i];
+            el->TruePos[i] = master[i] + RefObj->Position[i] + Stack->Position[i];
     }
 
     //Orientation

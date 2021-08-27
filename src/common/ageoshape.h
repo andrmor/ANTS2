@@ -3,6 +3,8 @@
 
 #include <QString>
 #include <QVector>
+#include <QList>
+#include <QStringList>
 
 class TGeoShape;
 class QJsonObject;

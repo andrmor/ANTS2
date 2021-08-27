@@ -8,7 +8,7 @@ class ABasketListWidget : public QListWidget
     Q_OBJECT
 
 public:
-    ABasketListWidget(QWidget * parent);
+    ABasketListWidget(QWidget * parent = nullptr);
 
 protected:
     void dropEvent(QDropEvent * event) override;

@@ -1,6 +1,6 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 4
-ANTS2_MINOR = 35
+ANTS2_MINOR = 36
 
 # !!! You may need to modify path for CERN ROOT, see #---CERN ROOT--- section below
 
@@ -929,7 +929,7 @@ QT += websockets
 QT += script #scripts support
 win32:QT += winextras  #used in windownavigator only
 
-CONFIG += c++11
+CONFIG += c++14
 
 TARGET = ants2
 TEMPLATE = app

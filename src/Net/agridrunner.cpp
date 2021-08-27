@@ -317,7 +317,7 @@ QString AGridRunner::Simulate(const QJsonObject* config)
                 ServerRecords[i]->Error = s;
                 bError = true;
             }
-            requestTextLog(i, s);
+            emit requestTextLog(i, s);
         }
     else
         {
@@ -334,7 +334,7 @@ QString AGridRunner::Simulate(const QJsonObject* config)
     {
         emit requestStatusLog("Done!");
     }
-    requestDelegateGuiUpdate();
+    emit requestDelegateGuiUpdate();
 
     emit notifySimulationFinished();
 
@@ -458,8 +458,8 @@ QString AGridRunner::RateServers(const QJsonObject *config)
         if ( ServerRecords.at(i)->TimeElapsed > 0 )
         {
             ServerRecords[i]->SpeedFactor = 7000.0 / ServerRecords.at(i)->TimeElapsed; //factor of 1 corresponds to 7s sim
-            requestTextLog(i, QString("Elapsed time %1 ms").arg(ServerRecords.at(i)->TimeElapsed));
-            requestTextLog(i, QString("Attributed performance factor of %1").arg(ServerRecords.at(i)->SpeedFactor));
+            emit requestTextLog(i, QString("Elapsed time %1 ms").arg(ServerRecords.at(i)->TimeElapsed));
+            emit requestTextLog(i, QString("Attributed performance factor of %1").arg(ServerRecords.at(i)->SpeedFactor));
         }
 
     emit requestStatusLog("Done!");

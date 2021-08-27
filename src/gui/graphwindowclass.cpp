@@ -644,6 +644,12 @@ void GraphWindowClass::RegisterTObject(TObject *obj)
 
 void GraphWindowClass::doDraw(TObject *obj, const char *opt, bool DoUpdate)
 {
+    if (!obj)
+    {
+        qWarning() << "Object does not exist in doDraw";
+        return;
+    }
+
     SetAsActiveRootWindow();
 
     TH1* h = dynamic_cast<TH1*>(obj);
@@ -772,7 +778,7 @@ bool GraphWindowClass::event(QEvent *event)
       {
           //qDebug() << "Graph win show event";
           //RasterWindow->UpdateRootCanvas();
-          QTimer::singleShot(100, [this](){RasterWindow->UpdateRootCanvas();}); // without delay canvas is not shown in Qt 5.9.5
+          QTimer::singleShot(100, RasterWindow, [this](){RasterWindow->UpdateRootCanvas();}); // without delay canvas is not shown in Qt 5.9.5
       }
   }
 
@@ -1446,7 +1452,7 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
     QString howProc = how;
     QVector<QString> vDisreguard;
     vDisreguard << "func" << "same" << "pfc" << "plc" << "pmc" << "lego" << "col" << "candle" << "violin" << "cont" << "list" << "cyl" << "pol" << "scat";
-    for (const QString& s : vDisreguard) howProc.remove(s, Qt::CaseInsensitive);
+    for (const QString& s : qAsConst(vDisreguard)) howProc.remove(s, Qt::CaseInsensitive);
     bool bHistToGraph = ( num == 2 && ( howProc.contains("L") || howProc.contains("C") ) );
     qDebug() << "Graph instead of hist?"<< bHistToGraph;
 
@@ -2411,7 +2417,7 @@ void GraphWindowClass::removeAllSelectedBasketItems()
     if (!bConfirm) return;
 
     QVector<int> indexes;
-    for (QListWidgetItem * item : selection)
+    for (QListWidgetItem * item : qAsConst(selection))
         indexes << lwBasket->row(item);
     std::sort(indexes.begin(), indexes.end());
     for (int i = indexes.size() - 1; i >= 0; i--)
@@ -2443,7 +2449,7 @@ void GraphWindowClass::requestMultidraw()
     QList<QListWidgetItem*> selection = lwBasket->selectedItems();
 
     QVector<int> indexes;
-    for (QListWidgetItem * item : selection)
+    for (const QListWidgetItem * const item : qAsConst(selection))
         indexes << lwBasket->row(item);
 
     if (!MGDesigner) createMGDesigner();
@@ -2703,7 +2709,7 @@ void GraphWindowClass::ShowTextPanel(const QString Text, bool bShowFrame, int Al
   la->SetTextAlign( (AlignLeftCenterRight + 1) * 10 + 2);
 
   QStringList sl = Text.split("\n");
-  for (QString s : sl) la->AddText(s.toLatin1());
+  for (const QString & s : qAsConst(sl)) la->AddText(s.toLatin1());
 
   DrawWithoutFocus(la, "same", true, false); //it seems the Paveltext is owned by drawn object - registration causes crash if used with non-registered object (e.g. script)
 }
@@ -2980,4 +2986,5 @@ void GraphWindowClass::on_actionOpen_MultiGraphDesigner_triggered()
     if (!MGDesigner) createMGDesigner();
     MGDesigner->showNormal();
     MGDesigner->activateWindow();
+    //MGDesigner->updateGUI();
 }

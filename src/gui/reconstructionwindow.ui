@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>526</width>
+    <width>532</width>
     <height>648</height>
    </rect>
   </property>
@@ -116,67 +116,6 @@
        <attribute name="title">
         <string>Reconstruction_results</string>
        </attribute>
-       <widget class="QLabel" name="label_16">
-        <property name="geometry">
-         <rect>
-          <x>-1</x>
-          <y>3</y>
-          <width>149</width>
-          <height>18</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Good events:</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-       <widget class="QLineEdit" name="leoEventsPassingAllFilters">
-        <property name="geometry">
-         <rect>
-          <x>16</x>
-          <y>22</y>
-          <width>113</width>
-          <height>21</height>
-         </rect>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_17">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>45</y>
-          <width>147</width>
-          <height>18</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Average chi-2:</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-       <widget class="QLineEdit" name="leoAverageChi2">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="geometry">
-         <rect>
-          <x>16</x>
-          <y>63</y>
-          <width>113</width>
-          <height>21</height>
-         </rect>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
        <widget class="Line" name="line_7">
         <property name="geometry">
          <rect>
@@ -188,45 +127,6 @@
         </property>
         <property name="orientation">
          <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="pbEnergySpectrum2">
-        <property name="geometry">
-         <rect>
-          <x>16</x>
-          <y>151</y>
-          <width>120</width>
-          <height>23</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Energy spectrum</string>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="pbChi2Spectrum2">
-        <property name="geometry">
-         <rect>
-          <x>16</x>
-          <y>178</y>
-          <width>120</width>
-          <height>23</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Chi-2 distribution</string>
-        </property>
-       </widget>
-       <widget class="Line" name="line_17">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>130</y>
-          <width>148</width>
-          <height>21</height>
-         </rect>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
         </property>
        </widget>
        <widget class="Line" name="line_20">
@@ -577,38 +477,6 @@
          <string>Plot vs true</string>
         </property>
        </widget>
-       <widget class="QLabel" name="label_18">
-        <property name="geometry">
-         <rect>
-          <x>3</x>
-          <y>91</y>
-          <width>142</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Average XY deviation:</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-       <widget class="QLineEdit" name="leoAverageDeviation">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="geometry">
-         <rect>
-          <x>16</x>
-          <y>111</y>
-          <width>113</width>
-          <height>21</height>
-         </rect>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
        <widget class="QComboBox" name="cobShowWhat">
         <property name="geometry">
          <rect>
@@ -908,8 +776,66 @@
        <widget class="QWidget" name="layoutWidget">
         <property name="geometry">
          <rect>
-          <x>163</x>
-          <y>29</y>
+          <x>150</x>
+          <y>0</y>
+          <width>361</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_6">
+         <item>
+          <widget class="QLabel" name="label_135">
+           <property name="text">
+            <string>Show event positions:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pbShowReconstructionPositions">
+           <property name="maximumSize">
+            <size>
+             <width>110</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>reconstructed</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pbShowTruePositions">
+           <property name="maximumSize">
+            <size>
+             <width>110</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>true</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pbClearPositions">
+           <property name="maximumSize">
+            <size>
+             <width>25</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>X</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="layoutWidget">
+        <property name="geometry">
+         <rect>
+          <x>159</x>
+          <y>28</y>
           <width>359</width>
           <height>28</height>
          </rect>
@@ -973,75 +899,140 @@
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="layoutWidget">
+       <widget class="QLineEdit" name="leoAverageDeviation">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="geometry">
          <rect>
-          <x>155</x>
-          <y>4</y>
-          <width>378</width>
-          <height>27</height>
+          <x>4</x>
+          <y>110</y>
+          <width>139</width>
+          <height>21</height>
          </rect>
         </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_6">
-         <item>
-          <widget class="QLabel" name="label_135">
-           <property name="text">
-            <string>Show event positions:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pbShowReconstructionPositions">
-           <property name="maximumSize">
-            <size>
-             <width>110</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>reconstructed</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pbShowTruePositions">
-           <property name="maximumSize">
-            <size>
-             <width>110</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>true</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pbClearPositions">
-           <property name="maximumSize">
-            <size>
-             <width>25</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>X</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
        </widget>
-       <zorder>layoutWidget</zorder>
-       <zorder>layoutWidget</zorder>
+       <widget class="QLabel" name="label_16">
+        <property name="geometry">
+         <rect>
+          <x>37</x>
+          <y>2</y>
+          <width>90</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Good events:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_18">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>90</y>
+          <width>139</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Average XY deviation:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="leoEventsPassingAllFilters">
+        <property name="geometry">
+         <rect>
+          <x>4</x>
+          <y>22</y>
+          <width>139</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_17">
+        <property name="geometry">
+         <rect>
+          <x>37</x>
+          <y>46</y>
+          <width>96</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Average chi-2:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="leoAverageChi2">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>4</x>
+          <y>66</y>
+          <width>139</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+       <widget class="Line" name="line_17">
+        <property name="geometry">
+         <rect>
+          <x>-1</x>
+          <y>130</y>
+          <width>149</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pbChi2Spectrum2">
+        <property name="geometry">
+         <rect>
+          <x>15</x>
+          <y>175</y>
+          <width>120</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Chi-2 distribution</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pbEnergySpectrum2">
+        <property name="geometry">
+         <rect>
+          <x>15</x>
+          <y>148</y>
+          <width>120</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Energy spectrum</string>
+        </property>
+       </widget>
        <zorder>line_40</zorder>
-       <zorder>label_16</zorder>
-       <zorder>leoEventsPassingAllFilters</zorder>
-       <zorder>label_17</zorder>
-       <zorder>leoAverageChi2</zorder>
        <zorder>line_7</zorder>
-       <zorder>pbEnergySpectrum2</zorder>
-       <zorder>pbChi2Spectrum2</zorder>
-       <zorder>line_17</zorder>
        <zorder>line_20</zorder>
        <zorder>fAverageZ</zorder>
        <zorder>label_60</zorder>
@@ -1051,8 +1042,6 @@
        <zorder>label_64</zorder>
        <zorder>label_66</zorder>
        <zorder>cbPlotVsActualPosition</zorder>
-       <zorder>label_18</zorder>
-       <zorder>leoAverageDeviation</zorder>
        <zorder>cobShowWhat</zorder>
        <zorder>pbShowVsXY</zorder>
        <zorder>label</zorder>
@@ -1074,6 +1063,17 @@
        <zorder>pbUpdateGuiSettingsInJSON</zorder>
        <zorder>cbInvertX</zorder>
        <zorder>cbInvertY</zorder>
+       <zorder>layoutWidget</zorder>
+       <zorder>layoutWidget</zorder>
+       <zorder>leoAverageDeviation</zorder>
+       <zorder>label_16</zorder>
+       <zorder>label_18</zorder>
+       <zorder>leoEventsPassingAllFilters</zorder>
+       <zorder>label_17</zorder>
+       <zorder>leoAverageChi2</zorder>
+       <zorder>line_17</zorder>
+       <zorder>pbChi2Spectrum2</zorder>
+       <zorder>pbEnergySpectrum2</zorder>
       </widget>
       <widget class="QWidget" name="tabPointSingle">
        <attribute name="title">
@@ -3257,25 +3257,6 @@
       <string> Tracks - Secondary scintillation</string>
      </property>
     </item>
-   </widget>
-   <widget class="QLabel" name="label_3">
-    <property name="geometry">
-     <rect>
-      <x>617</x>
-      <y>112</y>
-      <width>141</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <weight>50</weight>
-      <bold>false</bold>
-     </font>
-    </property>
-    <property name="text">
-     <string>Reconstruction type:</string>
-    </property>
    </widget>
    <widget class="QPushButton" name="pbUpdateReconConfig">
     <property name="geometry">
@@ -12294,7 +12275,7 @@ Beware of bugs!</string>
      <rect>
       <x>620</x>
       <y>170</y>
-      <width>151</width>
+      <width>191</width>
       <height>23</height>
      </rect>
     </property>
@@ -12897,7 +12878,6 @@ Beware of bugs!</string>
    <zorder>leoMsPerEv</zorder>
    <zorder>label_4</zorder>
    <zorder>cbRecType</zorder>
-   <zorder>label_3</zorder>
    <zorder>cobCurrentGroup</zorder>
    <zorder>label_48</zorder>
    <zorder>pbConfigureGroups</zorder>

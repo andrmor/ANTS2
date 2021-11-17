@@ -70,6 +70,7 @@ public slots:
   QVariantList   GetRandomMultiple(const QString& HistName, int numRandoms);
 
   void           Smooth(const QString& HistName, int times);
+  void           Smear(const QString& HistName, double sigma);
   void           ApplyMedianFilter(const QString& HistName, int span);
   void           ApplyMedianFilter(const QString& HistName, int spanLeft, int spanRight);
   const QVariant FitGauss(const QString& HistName, const QString options = "");

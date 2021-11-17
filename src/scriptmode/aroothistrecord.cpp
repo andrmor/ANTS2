@@ -264,6 +264,50 @@ void ARootHistRecord::Smooth(int times)
     }
 }
 
+void ARootHistRecord::Smear(double sigma)
+{
+    QMutexLocker locker(&Mutex);
+
+    if (Type != "TH1D") return;
+
+    TH1D * h = static_cast<TH1D*>(Object);
+
+    int bins = h->GetXaxis()->GetNbins();
+    double start = h->GetBinCenter(1);
+    double end   = h->GetBinCenter(bins);
+
+    double dx = (end - start) / (bins - 1);
+
+    int span = 4.0 * sigma / dx;
+    qDebug() << bins << start << end << dx << span;
+    if (span == 0) return;
+
+    // G(y) = 1/(sigma*sqrt(2*Pi)) * exp( - y*y / (2*sigma*sigma)) where y = x - mju
+
+    double Original[bins+1];
+    double Convoluted[bins+1];
+    for (int iBin = 1; iBin < bins+1; iBin++)
+    {
+        Original[iBin] = h->GetBinContent(iBin);
+        Convoluted[iBin] = 0;
+    }
+
+    double factor = 1.0 / (sigma * sqrt(2 * M_PI));
+
+    for (int iBin = 1; iBin < bins+1; iBin++)
+        for (int iG = -span; iG < span+1; iG++)
+        {
+            int iThis = iBin + iG;
+            if (iThis < 1) continue;
+            if (iThis > bins) continue;
+
+            double delta = dx * iG;
+            Convoluted[iThis] += Original[iBin]   * factor * exp( - delta * delta / (2*sigma*sigma));
+        }
+
+    for (int iBin = 1; iBin < bins+1; iBin++) h->SetBinContent(iBin, Convoluted[iBin]);
+}
+
 void ARootHistRecord::Scale(double ScaleIntegralTo, bool bDividedByBinWidth)
 {
     QMutexLocker locker(&Mutex);

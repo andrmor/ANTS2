@@ -42,6 +42,7 @@ public:
     bool Divide(ARootHistRecord* other);
 
     void   Smooth(int times);
+    void   Smear(double sigma);
     void   Scale(double ScaleIntegralTo, bool bDividedByBinWidth = false);
     bool   MedianFilter(int span, int spanRight = -1);
 

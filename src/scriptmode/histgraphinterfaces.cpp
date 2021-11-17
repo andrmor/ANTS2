@@ -261,6 +261,23 @@ void AInterfaceToHist::Smooth(const QString &HistName, int times)
     }
 }
 
+void AInterfaceToHist::Smear(const QString &HistName, double sigma)
+{
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    if (!r)
+        abort("Histogram " + HistName + " not found!");
+    else
+    {
+        if (r->getType() != "TH1D")
+        {
+            abort("Smear is implemented only for TH1D");
+            return;
+        }
+        r->Smear(sigma);
+        if (bGuiThread) emit RequestDraw(0, "", true); //to update
+    }
+}
+
 void AInterfaceToHist::ApplyMedianFilter(const QString &HistName, int span)
 {
     ApplyMedianFilter(HistName, span, -1);

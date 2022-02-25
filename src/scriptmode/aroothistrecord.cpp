@@ -378,6 +378,26 @@ int ARootHistRecord::GetEntries()
     return h->GetEntries();
 }
 
+void ARootHistRecord::GetStatistics(int &num, std::vector<double> &mean, std::vector<double> &std)
+{
+    TH2 * h2 = dynamic_cast<TH2*>(Object);
+    if (h2)
+    {
+        num     = h2->GetEntries();
+        mean[0] = h2->GetMean(1);
+        mean[1] = h2->GetMean(2);
+        std[0]  = h2->GetStdDev(1);
+        std[1]  = h2->GetStdDev(2);
+    }
+    TH1 * h1 = dynamic_cast<TH1*>(Object);
+    if (h1)
+    {
+        num     = h1->GetEntries();
+        mean[0] = h1->GetMean(1);
+        std[0]  = h1->GetStdDev(1);
+    }
+}
+
 void ARootHistRecord::SetEntries(int num)
 {
     TH1* h = dynamic_cast<TH1*>(Object);

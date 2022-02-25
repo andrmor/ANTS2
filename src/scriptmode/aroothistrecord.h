@@ -48,6 +48,7 @@ public:
 
     double GetIntegral(bool bMultipliedByBinWidth = false);
     int    GetEntries();
+    void   GetStatistics(int & num, std::vector<double> & mean, std::vector<double> & std);
     void   SetEntries(int num);
     double GetMaximum();
     bool   GetContent(QVector<double> & x, QVector<double> & y) const;

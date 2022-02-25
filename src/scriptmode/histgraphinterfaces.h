@@ -68,6 +68,7 @@ public slots:
   double         GetMaximum(const QString& HistName);
   double         GetRandom(const QString& HistName);
   QVariantList   GetRandomMultiple(const QString& HistName, int numRandoms);
+  QVariantList   GetStatistics(const QString & HistName); // num mean std, for 2D mean and std are vectors of [x,y]
 
   void           Smooth(const QString& HistName, int times);
   void           Smear(const QString& HistName, double sigma);

@@ -646,6 +646,30 @@ QVariantList AInterfaceToHist::GetRandomMultiple(const QString &HistName, int nu
     return vl;
 }
 
+QVariantList AInterfaceToHist::GetStatistics(const QString & HistName)
+{
+    QVariantList vl;
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    if (!r)
+        abort("Histogram " + HistName + " not found!");
+    else
+    {
+        int num;
+        std::vector<double> mean = {0, 0};
+        std::vector<double> std = {0, 0};
+        r->GetStatistics(num, mean, std);
+        if (r->getType() == "TH1D")
+            vl << num << mean[0] << std[0];
+        else
+        {
+            vl << num;
+            QVariantList m; m << mean[0] << mean[1]; vl.push_back(m);
+            QVariantList s; s << std[0]  << std[1];  vl.push_back(s);
+        }
+    }
+    return vl;
+}
+
 void AInterfaceToHist::Scale(const QString& HistName, double ScaleIntegralTo, bool DividedByBinWidth)
 {
     ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));

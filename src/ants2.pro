@@ -1,6 +1,6 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 4
-ANTS2_MINOR = 36
+ANTS2_MINOR = 37
 
 # !!! You may need to modify path for CERN ROOT, see #---CERN ROOT--- section below
 
@@ -15,6 +15,9 @@ CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algeb
 #CONFIG += ants2_Python      #enable Python scripting
 #CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering): see https://github.com/mctools/ncrystal
 #CONFIG += ants2_jsroot       #enables JSROOT visualisation at GeometryWindow. Automatically enables ants2_RootServer
+
+#new ROOT versions on ubuntu 22.04+ have c++17 binaries; older versions can be c++11 or c++14
+CONFIG += c++17
 
 #In effect ONLY for the Docker version:
 ants2_docker {
@@ -196,11 +199,15 @@ ants2_Python{
                 INCLUDEPATH += /usr/include/PythonQt5/
                 LIBS += -lPythonQt-Qt5-Python3.6
             } else {
-                LIBS += $$system(python3-config --libs)
+                LIBS += $$system(python3-config --embed --libs)
                 QMAKE_CXXFLAGS += $$system(python3-config --includes)
 
-                INCLUDEPATH += /usr/include/PythonQt5/
-                LIBS += -lPythonQt-Qt5-Python3.6
+                #QMAKE_CXXFLAGS += -D _POSIX_THREADS
+
+                #INCLUDEPATH += /usr/include/PythonQt5/
+                INCLUDEPATH += /media/andr/CCFC9347FC932B2A/LINUX/QtProjects/PythonQt/src/
+                #LIBS += -lPythonQt-Qt5-Python3.6
+                LIBS += -L/media/andr/CCFC9347FC932B2A/LINUX/QtProjects/lib -lPythonQt
             }
     }
     win32:{
@@ -928,8 +935,6 @@ QT += widgets
 QT += websockets
 QT += script #scripts support
 win32:QT += winextras  #used in windownavigator only
-
-CONFIG += c++14
 
 TARGET = ants2
 TEMPLATE = app

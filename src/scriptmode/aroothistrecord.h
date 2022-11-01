@@ -42,11 +42,13 @@ public:
     bool Divide(ARootHistRecord* other);
 
     void   Smooth(int times);
+    void   Smear(double sigma);
     void   Scale(double ScaleIntegralTo, bool bDividedByBinWidth = false);
     bool   MedianFilter(int span, int spanRight = -1);
 
     double GetIntegral(bool bMultipliedByBinWidth = false);
     int    GetEntries();
+    void   GetStatistics(int & num, std::vector<double> & mean, std::vector<double> & std);
     void   SetEntries(int num);
     double GetMaximum();
     bool   GetContent(QVector<double> & x, QVector<double> & y) const;

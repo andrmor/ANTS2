@@ -319,6 +319,35 @@ int ASim_SI::getMonitorHits(int index)
     return mon->getHits();
 }
 
+QVariantList ASim_SI::getMonitorXYStats(int index)
+{
+    QVariantList vl;
+
+    if (!EventsDataHub->SimStat)
+    {
+        abort("Collect simulation statistics is OFF");
+        return vl;
+    }
+    if (index < 0 || index >= EventsDataHub->SimStat->Monitors.size())
+    {
+        abort("Bad monitor index");
+        return vl;
+    }
+
+    const AMonitor * mon = EventsDataHub->SimStat->Monitors.at(index);
+    TH2D * h = mon->getXY();
+    if (!h)
+    {
+        abort("No XY histogram found for the monitor!");
+        return vl;
+    }
+
+    QVariantList m; m << h->GetMean(1)   << h->GetMean(2);   vl.push_back(m);
+    QVariantList s; s << h->GetStdDev(1) << h->GetStdDev(2); vl.push_back(s);
+
+    return vl;
+}
+
 QVariantList ASim_SI::getMonitorHitsAll()
 {
     QVariantList vl;

@@ -548,7 +548,6 @@
         </property>
         <property name="font">
          <font>
-          <weight>75</weight>
           <bold>true</bold>
          </font>
         </property>
@@ -773,132 +772,6 @@
          <string>Invert Y</string>
         </property>
        </widget>
-       <widget class="QWidget" name="layoutWidget">
-        <property name="geometry">
-         <rect>
-          <x>150</x>
-          <y>0</y>
-          <width>361</width>
-          <height>27</height>
-         </rect>
-        </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_6">
-         <item>
-          <widget class="QLabel" name="label_135">
-           <property name="text">
-            <string>Show event positions:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pbShowReconstructionPositions">
-           <property name="maximumSize">
-            <size>
-             <width>110</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>reconstructed</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pbShowTruePositions">
-           <property name="maximumSize">
-            <size>
-             <width>110</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>true</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pbClearPositions">
-           <property name="maximumSize">
-            <size>
-             <width>25</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>X</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-       <widget class="QWidget" name="layoutWidget">
-        <property name="geometry">
-         <rect>
-          <x>159</x>
-          <y>28</y>
-          <width>359</width>
-          <height>28</height>
-         </rect>
-        </property>
-        <layout class="QHBoxLayout" name="horizontalLayout">
-         <property name="spacing">
-          <number>2</number>
-         </property>
-         <item>
-          <widget class="QCheckBox" name="cbLimitNumberEvents">
-           <property name="text">
-            <string>Only</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="lShowFirst">
-           <property name="text">
-            <string>first</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QSpinBox" name="sbLimitNumberEvents">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="maximum">
-            <number>1000000</number>
-           </property>
-           <property name="value">
-            <number>1000</number>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_80">
-           <property name="text">
-            <string>events, one per</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QSpinBox" name="sbShowEventsEvery">
-           <property name="toolTip">
-            <string>1 - every good event is shown; 2 - only every second; 3 - every third, etc</string>
-           </property>
-           <property name="minimum">
-            <number>1</number>
-           </property>
-           <property name="maximum">
-            <number>10000</number>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
        <widget class="QLineEdit" name="leoAverageDeviation">
         <property name="enabled">
          <bool>true</bool>
@@ -1031,6 +904,149 @@
          <string>Energy spectrum</string>
         </property>
        </widget>
+       <widget class="QFrame" name="frame_10">
+        <property name="geometry">
+         <rect>
+          <x>155</x>
+          <y>3</y>
+          <width>360</width>
+          <height>50</height>
+         </rect>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <property name="spacing">
+          <number>2</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_6">
+           <item>
+            <widget class="QLabel" name="label_135">
+             <property name="text">
+              <string>Show event positions:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pbShowReconstructionPositions">
+             <property name="maximumSize">
+              <size>
+               <width>110</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>reconstructed</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pbShowTruePositions">
+             <property name="maximumSize">
+              <size>
+               <width>110</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>true</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pbClearPositions">
+             <property name="maximumSize">
+              <size>
+               <width>25</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>X</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout">
+           <property name="spacing">
+            <number>2</number>
+           </property>
+           <item>
+            <widget class="QCheckBox" name="cbLimitNumberEvents">
+             <property name="text">
+              <string>Only</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="lShowFirst">
+             <property name="text">
+              <string>first</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="sbLimitNumberEvents">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="maximum">
+              <number>1000000</number>
+             </property>
+             <property name="value">
+              <number>1000</number>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_80">
+             <property name="text">
+              <string>events, one per</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="sbShowEventsEvery">
+             <property name="toolTip">
+              <string>1 - every good event is shown; 2 - only every second; 3 - every third, etc</string>
+             </property>
+             <property name="minimum">
+              <number>1</number>
+             </property>
+             <property name="maximum">
+              <number>10000</number>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
        <zorder>line_40</zorder>
        <zorder>line_7</zorder>
        <zorder>line_20</zorder>
@@ -1063,8 +1079,6 @@
        <zorder>pbUpdateGuiSettingsInJSON</zorder>
        <zorder>cbInvertX</zorder>
        <zorder>cbInvertY</zorder>
-       <zorder>layoutWidget</zorder>
-       <zorder>layoutWidget</zorder>
        <zorder>leoAverageDeviation</zorder>
        <zorder>label_16</zorder>
        <zorder>label_18</zorder>
@@ -1074,6 +1088,7 @@
        <zorder>line_17</zorder>
        <zorder>pbChi2Spectrum2</zorder>
        <zorder>pbEnergySpectrum2</zorder>
+       <zorder>frame_10</zorder>
       </widget>
       <widget class="QWidget" name="tabPointSingle">
        <attribute name="title">
@@ -1131,7 +1146,6 @@
         </property>
         <property name="font">
          <font>
-          <weight>50</weight>
           <bold>false</bold>
          </font>
         </property>
@@ -1182,7 +1196,6 @@
         </property>
         <property name="font">
          <font>
-          <weight>50</weight>
           <bold>false</bold>
          </font>
         </property>
@@ -1478,7 +1491,6 @@
         </property>
         <property name="font">
          <font>
-          <weight>75</weight>
           <bold>true</bold>
          </font>
         </property>
@@ -1570,7 +1582,6 @@
         </property>
         <property name="font">
          <font>
-          <weight>75</weight>
           <bold>true</bold>
          </font>
         </property>
@@ -2632,7 +2643,6 @@
          </property>
          <property name="font">
           <font>
-           <weight>75</weight>
            <bold>true</bold>
           </font>
          </property>
@@ -2654,7 +2664,6 @@
          </property>
          <property name="font">
           <font>
-           <weight>75</weight>
            <bold>true</bold>
           </font>
          </property>
@@ -2910,7 +2919,6 @@
          </property>
          <property name="font">
           <font>
-           <weight>75</weight>
            <bold>true</bold>
           </font>
          </property>
@@ -3191,7 +3199,6 @@
      </property>
      <property name="font">
       <font>
-       <weight>75</weight>
        <bold>true</bold>
       </font>
      </property>
@@ -3240,7 +3247,6 @@
     </property>
     <property name="font">
      <font>
-      <weight>50</weight>
       <bold>false</bold>
      </font>
     </property>
@@ -3360,7 +3366,6 @@ Individual sensors can belong to multiple groups!</string>
       </property>
       <property name="font">
        <font>
-        <weight>75</weight>
         <bold>true</bold>
        </font>
       </property>
@@ -3385,7 +3390,6 @@ Individual sensors can belong to multiple groups!</string>
         </property>
         <property name="font">
          <font>
-          <weight>50</weight>
           <bold>false</bold>
          </font>
         </property>
@@ -3407,7 +3411,6 @@ Individual sensors can belong to multiple groups!</string>
           </property>
           <property name="font">
            <font>
-            <weight>75</weight>
             <bold>true</bold>
            </font>
           </property>
@@ -3562,7 +3565,6 @@ Individual sensors can belong to multiple groups!</string>
           </property>
           <property name="font">
            <font>
-            <weight>75</weight>
             <bold>true</bold>
            </font>
           </property>
@@ -3688,7 +3690,6 @@ Individual sensors can belong to multiple groups!</string>
           </property>
           <property name="font">
            <font>
-            <weight>75</weight>
             <bold>true</bold>
            </font>
           </property>
@@ -3749,7 +3750,6 @@ Individual sensors can belong to multiple groups!</string>
           </property>
           <property name="font">
            <font>
-            <weight>75</weight>
             <bold>true</bold>
            </font>
           </property>
@@ -4224,7 +4224,6 @@ Individual sensors can belong to multiple groups!</string>
           </property>
           <property name="font">
            <font>
-            <weight>75</weight>
             <bold>true</bold>
            </font>
           </property>
@@ -4410,7 +4409,6 @@ Individual sensors can belong to multiple groups!</string>
            </property>
            <property name="font">
             <font>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -4651,7 +4649,6 @@ Individual sensors can belong to multiple groups!</string>
           </property>
           <property name="font">
            <font>
-            <weight>75</weight>
             <bold>true</bold>
            </font>
           </property>
@@ -4753,7 +4750,6 @@ Individual sensors can belong to multiple groups!</string>
           </property>
           <property name="font">
            <font>
-            <weight>75</weight>
             <bold>true</bold>
            </font>
           </property>
@@ -4772,7 +4768,6 @@ Individual sensors can belong to multiple groups!</string>
           </property>
           <property name="font">
            <font>
-            <weight>75</weight>
             <bold>true</bold>
            </font>
           </property>
@@ -4822,7 +4817,6 @@ Individual sensors can belong to multiple groups!</string>
            </property>
            <property name="font">
             <font>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -5146,7 +5140,6 @@ Individual sensors can belong to multiple groups!</string>
            </property>
            <property name="font">
             <font>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -5474,7 +5467,6 @@ Individual sensors can belong to multiple groups!</string>
           </property>
           <property name="font">
            <font>
-            <weight>75</weight>
             <bold>true</bold>
            </font>
           </property>
@@ -5635,7 +5627,6 @@ Individual sensors can belong to multiple groups!</string>
           </property>
           <property name="font">
            <font>
-            <weight>75</weight>
             <bold>true</bold>
            </font>
           </property>
@@ -5861,7 +5852,6 @@ Individual sensors can belong to multiple groups!</string>
            </property>
            <property name="font">
             <font>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -6563,7 +6553,6 @@ Individual sensors can belong to multiple groups!</string>
            </property>
            <property name="font">
             <font>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -6637,7 +6626,6 @@ Individual sensors can belong to multiple groups!</string>
            </property>
            <property name="font">
             <font>
-             <weight>75</weight>
              <italic>true</italic>
              <bold>true</bold>
             </font>
@@ -6712,7 +6700,6 @@ Individual sensors can belong to multiple groups!</string>
            </property>
            <property name="font">
             <font>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -6808,7 +6795,6 @@ Individual sensors can belong to multiple groups!</string>
           </property>
           <property name="font">
            <font>
-            <weight>75</weight>
             <bold>true</bold>
            </font>
           </property>
@@ -6928,7 +6914,6 @@ Individual sensors can belong to multiple groups!</string>
            </property>
            <property name="font">
             <font>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -7140,7 +7125,6 @@ Individual sensors can belong to multiple groups!</string>
            </property>
            <property name="font">
             <font>
-             <weight>50</weight>
              <bold>false</bold>
             </font>
            </property>
@@ -7197,7 +7181,6 @@ Individual sensors can belong to multiple groups!</string>
         </property>
         <property name="font">
          <font>
-          <weight>50</weight>
           <bold>false</bold>
          </font>
         </property>
@@ -7221,7 +7204,6 @@ Individual sensors can belong to multiple groups!</string>
         </property>
         <property name="font">
          <font>
-          <weight>75</weight>
           <bold>true</bold>
          </font>
         </property>
@@ -7243,7 +7225,6 @@ Individual sensors can belong to multiple groups!</string>
         </property>
         <property name="font">
          <font>
-          <weight>50</weight>
           <bold>false</bold>
          </font>
         </property>
@@ -7265,7 +7246,6 @@ Individual sensors can belong to multiple groups!</string>
         </property>
         <property name="font">
          <font>
-          <weight>50</weight>
           <bold>false</bold>
          </font>
         </property>
@@ -7287,7 +7267,6 @@ Individual sensors can belong to multiple groups!</string>
         </property>
         <property name="font">
          <font>
-          <weight>75</weight>
           <bold>true</bold>
          </font>
         </property>
@@ -7306,7 +7285,6 @@ Individual sensors can belong to multiple groups!</string>
         </property>
         <property name="font">
          <font>
-          <weight>50</weight>
           <bold>false</bold>
          </font>
         </property>
@@ -7325,7 +7303,6 @@ Individual sensors can belong to multiple groups!</string>
         </property>
         <property name="font">
          <font>
-          <weight>50</weight>
           <bold>false</bold>
          </font>
         </property>
@@ -7344,7 +7321,6 @@ Individual sensors can belong to multiple groups!</string>
         </property>
         <property name="font">
          <font>
-          <weight>50</weight>
           <bold>false</bold>
          </font>
         </property>
@@ -7370,7 +7346,6 @@ Individual sensors can belong to multiple groups!</string>
         </property>
         <property name="font">
          <font>
-          <weight>50</weight>
           <bold>false</bold>
          </font>
         </property>
@@ -7447,7 +7422,6 @@ Individual sensors can belong to multiple groups!</string>
               </property>
               <property name="font">
                <font>
-                <weight>75</weight>
                 <bold>true</bold>
                </font>
               </property>
@@ -9393,7 +9367,6 @@ Individual sensors can belong to multiple groups!</string>
           </property>
           <property name="font">
            <font>
-            <weight>75</weight>
             <bold>true</bold>
            </font>
           </property>
@@ -9441,7 +9414,6 @@ Individual sensors can belong to multiple groups!</string>
           </property>
           <property name="font">
            <font>
-            <weight>75</weight>
             <bold>true</bold>
            </font>
           </property>
@@ -9466,7 +9438,6 @@ Individual sensors can belong to multiple groups!</string>
           </property>
           <property name="font">
            <font>
-            <weight>50</weight>
             <bold>false</bold>
            </font>
           </property>
@@ -9657,7 +9628,6 @@ Individual sensors can belong to multiple groups!</string>
           </property>
           <property name="font">
            <font>
-            <weight>75</weight>
             <bold>true</bold>
            </font>
           </property>
@@ -9704,7 +9674,6 @@ Individual sensors can belong to multiple groups!</string>
            </property>
            <property name="font">
             <font>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -9814,7 +9783,6 @@ Individual sensors can belong to multiple groups!</string>
           </property>
           <property name="font">
            <font>
-            <weight>75</weight>
             <bold>true</bold>
            </font>
           </property>
@@ -9840,7 +9808,6 @@ Individual sensors can belong to multiple groups!</string>
           </property>
           <property name="font">
            <font>
-            <weight>75</weight>
             <bold>true</bold>
            </font>
           </property>
@@ -9902,7 +9869,6 @@ Beware of bugs!</string>
           </property>
           <property name="font">
            <font>
-            <weight>75</weight>
             <bold>true</bold>
            </font>
           </property>
@@ -9921,7 +9887,6 @@ Beware of bugs!</string>
           </property>
           <property name="font">
            <font>
-            <weight>50</weight>
             <bold>false</bold>
            </font>
           </property>
@@ -9956,7 +9921,6 @@ Beware of bugs!</string>
           </property>
           <property name="font">
            <font>
-            <weight>75</weight>
             <bold>true</bold>
            </font>
           </property>
@@ -10479,7 +10443,6 @@ Beware of bugs!</string>
         </property>
         <property name="font">
          <font>
-          <weight>50</weight>
           <bold>false</bold>
          </font>
         </property>
@@ -10501,7 +10464,6 @@ Beware of bugs!</string>
           </property>
           <property name="font">
            <font>
-            <weight>75</weight>
             <bold>true</bold>
            </font>
           </property>
@@ -10520,7 +10482,6 @@ Beware of bugs!</string>
           </property>
           <property name="font">
            <font>
-            <weight>50</weight>
             <bold>false</bold>
            </font>
           </property>
@@ -10635,7 +10596,6 @@ Beware of bugs!</string>
           </property>
           <property name="font">
            <font>
-            <weight>75</weight>
             <bold>true</bold>
            </font>
           </property>
@@ -10789,7 +10749,6 @@ Beware of bugs!</string>
           </property>
           <property name="font">
            <font>
-            <weight>50</weight>
             <bold>false</bold>
            </font>
           </property>
@@ -10870,7 +10829,6 @@ Beware of bugs!</string>
            </property>
            <property name="font">
             <font>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -10892,7 +10850,6 @@ Beware of bugs!</string>
            </property>
            <property name="font">
             <font>
-             <weight>50</weight>
              <bold>false</bold>
             </font>
            </property>
@@ -10911,7 +10868,6 @@ Beware of bugs!</string>
            </property>
            <property name="font">
             <font>
-             <weight>50</weight>
              <bold>false</bold>
             </font>
            </property>
@@ -10946,7 +10902,6 @@ Beware of bugs!</string>
            </property>
            <property name="font">
             <font>
-             <weight>50</weight>
              <bold>false</bold>
             </font>
            </property>
@@ -10971,7 +10926,6 @@ Beware of bugs!</string>
            </property>
            <property name="font">
             <font>
-             <weight>75</weight>
              <bold>true</bold>
             </font>
            </property>
@@ -10993,7 +10947,6 @@ Beware of bugs!</string>
            </property>
            <property name="font">
             <font>
-             <weight>50</weight>
              <bold>false</bold>
             </font>
            </property>
@@ -11012,7 +10965,6 @@ Beware of bugs!</string>
            </property>
            <property name="font">
             <font>
-             <weight>50</weight>
              <bold>false</bold>
             </font>
            </property>
@@ -11034,7 +10986,6 @@ Beware of bugs!</string>
            </property>
            <property name="font">
             <font>
-             <weight>50</weight>
              <bold>false</bold>
             </font>
            </property>
@@ -11069,7 +11020,6 @@ Beware of bugs!</string>
            </property>
            <property name="font">
             <font>
-             <weight>50</weight>
              <bold>false</bold>
             </font>
            </property>
@@ -11091,7 +11041,6 @@ Beware of bugs!</string>
            </property>
            <property name="font">
             <font>
-             <weight>50</weight>
              <bold>false</bold>
             </font>
            </property>
@@ -11129,7 +11078,6 @@ Beware of bugs!</string>
            </property>
            <property name="font">
             <font>
-             <weight>50</weight>
              <bold>false</bold>
             </font>
            </property>
@@ -11154,7 +11102,6 @@ Beware of bugs!</string>
            </property>
            <property name="font">
             <font>
-             <weight>50</weight>
              <bold>false</bold>
             </font>
            </property>
@@ -11173,7 +11120,6 @@ Beware of bugs!</string>
            </property>
            <property name="font">
             <font>
-             <weight>50</weight>
              <bold>false</bold>
             </font>
            </property>
@@ -11208,7 +11154,6 @@ Beware of bugs!</string>
            </property>
            <property name="font">
             <font>
-             <weight>50</weight>
              <bold>false</bold>
             </font>
            </property>
@@ -11236,7 +11181,6 @@ Beware of bugs!</string>
            </property>
            <property name="font">
             <font>
-             <weight>50</weight>
              <bold>false</bold>
             </font>
            </property>
@@ -11271,7 +11215,6 @@ Beware of bugs!</string>
            </property>
            <property name="font">
             <font>
-             <weight>50</weight>
              <bold>false</bold>
             </font>
            </property>
@@ -11290,7 +11233,6 @@ Beware of bugs!</string>
            </property>
            <property name="font">
             <font>
-             <weight>50</weight>
              <bold>false</bold>
             </font>
            </property>
@@ -11360,7 +11302,6 @@ Beware of bugs!</string>
            </property>
            <property name="font">
             <font>
-             <weight>50</weight>
              <bold>false</bold>
             </font>
            </property>
@@ -11382,7 +11323,6 @@ Beware of bugs!</string>
            </property>
            <property name="font">
             <font>
-             <weight>50</weight>
              <bold>false</bold>
             </font>
            </property>
@@ -11449,7 +11389,6 @@ Beware of bugs!</string>
            </property>
            <property name="font">
             <font>
-             <weight>50</weight>
              <bold>false</bold>
             </font>
            </property>
@@ -11471,7 +11410,6 @@ Beware of bugs!</string>
            </property>
            <property name="font">
             <font>
-             <weight>50</weight>
              <bold>false</bold>
             </font>
            </property>
@@ -11528,7 +11466,6 @@ Beware of bugs!</string>
           </property>
           <property name="font">
            <font>
-            <weight>50</weight>
             <bold>false</bold>
            </font>
           </property>
@@ -11547,7 +11484,6 @@ Beware of bugs!</string>
           </property>
           <property name="font">
            <font>
-            <weight>50</weight>
             <bold>false</bold>
            </font>
           </property>
@@ -11566,7 +11502,6 @@ Beware of bugs!</string>
           </property>
           <property name="font">
            <font>
-            <weight>50</weight>
             <bold>false</bold>
            </font>
           </property>
@@ -11588,7 +11523,6 @@ Beware of bugs!</string>
           </property>
           <property name="font">
            <font>
-            <weight>50</weight>
             <bold>false</bold>
            </font>
           </property>
@@ -11764,7 +11698,6 @@ Beware of bugs!</string>
           </property>
           <property name="font">
            <font>
-            <weight>50</weight>
             <bold>false</bold>
            </font>
           </property>
@@ -11844,7 +11777,6 @@ Beware of bugs!</string>
           </property>
           <property name="font">
            <font>
-            <weight>50</weight>
             <bold>false</bold>
            </font>
           </property>
@@ -11955,7 +11887,6 @@ Beware of bugs!</string>
        </property>
        <property name="font">
         <font>
-         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
@@ -12003,7 +11934,6 @@ Beware of bugs!</string>
        </property>
        <property name="font">
         <font>
-         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
@@ -12077,7 +12007,6 @@ Beware of bugs!</string>
        </property>
        <property name="font">
         <font>
-         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
@@ -12096,7 +12025,6 @@ Beware of bugs!</string>
        </property>
        <property name="font">
         <font>
-         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
@@ -12118,7 +12046,6 @@ Beware of bugs!</string>
        </property>
        <property name="font">
         <font>
-         <weight>75</weight>
          <bold>true</bold>
         </font>
        </property>
@@ -12150,7 +12077,6 @@ Beware of bugs!</string>
        </property>
        <property name="font">
         <font>
-         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
@@ -12217,7 +12143,6 @@ Beware of bugs!</string>
        </property>
        <property name="font">
         <font>
-         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
@@ -12236,7 +12161,6 @@ Beware of bugs!</string>
        </property>
        <property name="font">
         <font>
-         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
@@ -12325,7 +12249,6 @@ Beware of bugs!</string>
      </property>
      <property name="font">
       <font>
-       <weight>75</weight>
        <bold>true</bold>
       </font>
      </property>
@@ -12392,7 +12315,6 @@ Beware of bugs!</string>
      </property>
      <property name="font">
       <font>
-       <weight>75</weight>
        <bold>true</bold>
       </font>
      </property>
@@ -12443,7 +12365,6 @@ Beware of bugs!</string>
      </property>
      <property name="font">
       <font>
-       <weight>75</weight>
        <bold>true</bold>
       </font>
      </property>
@@ -12774,7 +12695,6 @@ Beware of bugs!</string>
     </property>
     <property name="font">
      <font>
-      <weight>75</weight>
       <bold>true</bold>
      </font>
     </property>
@@ -12812,7 +12732,6 @@ Beware of bugs!</string>
     </property>
     <property name="font">
      <font>
-      <weight>50</weight>
       <bold>false</bold>
      </font>
     </property>
@@ -12850,7 +12769,6 @@ Beware of bugs!</string>
     </property>
     <property name="font">
      <font>
-      <weight>50</weight>
       <bold>false</bold>
      </font>
     </property>

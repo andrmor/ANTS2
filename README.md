@@ -1,5 +1,6 @@
-ANTS2 development is stopped now to focus on ANTS3:
-https://github.com/andrmor/ANTS3bundle
+***
+ANTS2 development is stopped now to focus on ANTS3: https://github.com/andrmor/ANTS3bundle
+***
 
 
 ANTS2 is a simulation and experimental data processing package for Anger camera-type detectors. The package is intended for:
